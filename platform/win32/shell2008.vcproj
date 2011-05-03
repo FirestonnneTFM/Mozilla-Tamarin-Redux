@@ -1727,75 +1727,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\extensions\SelftestExec.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\extensions\SelftestInit.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\shell\ShellCore.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_avmplus_basics.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_avmplus_builtins.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_avmplus_peephole.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_mmgc_543560.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_mmgc_575631.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_mmgc_580603.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_mmgc_basics.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_mmgc_dependent.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_mmgc_finalize_uninit.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_mmgc_gcheap.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_mmgc_mmfx_array.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_mmgc_threads.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_mmgc_weakref.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_vmbase_concurrency.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_vmbase_safepoints.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\ST_vmpi_threads.cpp"
 				>
 			</File>
 			<File

@@ -38,63 +38,95 @@
 #include "avmshell.h"
 namespace avmplus {
 #ifdef VMCFG_SELFTEST
+namespace ST_avmplus_basics {
 extern void create_avmplus_basics(AvmCore* core);
+}
+namespace ST_avmplus_builtins {
 extern void create_avmplus_builtins(AvmCore* core);
+}
 #if defined AVMPLUS_PEEPHOLE_OPTIMIZER
+namespace ST_avmplus_peephole {
 extern void create_avmplus_peephole(AvmCore* core);
+}
 #endif
 #if defined AVMPLUS_WIN32
 #if !defined VMCFG_ARM
+namespace ST_mmgc_bugzilla_543560 {
 extern void create_mmgc_bugzilla_543560(AvmCore* core);
+}
 #endif
 #endif
+namespace ST_mmgc_bugzilla_575631 {
 extern void create_mmgc_bugzilla_575631(AvmCore* core);
+}
 #if defined AVMPLUS_64BIT && defined DEBUG
+namespace ST_mmgc_bugzilla_580603 {
 extern void create_mmgc_bugzilla_580603(AvmCore* core);
+}
 #endif
+namespace ST_mmgc_basics {
 extern void create_mmgc_basics(AvmCore* core);
+}
+namespace ST_mmgc_dependent {
 extern void create_mmgc_dependent(AvmCore* core);
+}
+namespace ST_mmgc_finalize_uninit {
 extern void create_mmgc_finalize_uninit(AvmCore* core);
+}
+namespace ST_mmgc_gcheap {
 extern void create_mmgc_gcheap(AvmCore* core);
+}
+namespace ST_mmgc_mmfx_array {
 extern void create_mmgc_mmfx_array(AvmCore* core);
+}
 #if defined VMCFG_WORKERTHREADS
+namespace ST_mmgc_threads {
 extern void create_mmgc_threads(AvmCore* core);
+}
 #endif
+namespace ST_mmgc_weakref {
 extern void create_mmgc_weakref(AvmCore* core);
+}
+namespace ST_vmbase_concurrency {
 extern void create_vmbase_concurrency(AvmCore* core);
+}
 #if defined VMCFG_SAFEPOINTS
+namespace ST_vmbase_safepoints {
 extern void create_vmbase_safepoints(AvmCore* core);
+}
 #endif
+namespace ST_vmpi_threads {
 extern void create_vmpi_threads(AvmCore* core);
+}
 void SelftestRunner::createGeneratedSelftestClasses() {
-create_avmplus_basics(core);
-create_avmplus_builtins(core);
+ST_avmplus_basics::create_avmplus_basics(core);
+ST_avmplus_builtins::create_avmplus_builtins(core);
 #if defined AVMPLUS_PEEPHOLE_OPTIMIZER
-create_avmplus_peephole(core);
+ST_avmplus_peephole::create_avmplus_peephole(core);
 #endif
 #if defined AVMPLUS_WIN32
 #if !defined VMCFG_ARM
-create_mmgc_bugzilla_543560(core);
+ST_mmgc_bugzilla_543560::create_mmgc_bugzilla_543560(core);
 #endif
 #endif
-create_mmgc_bugzilla_575631(core);
+ST_mmgc_bugzilla_575631::create_mmgc_bugzilla_575631(core);
 #if defined AVMPLUS_64BIT && defined DEBUG
-create_mmgc_bugzilla_580603(core);
+ST_mmgc_bugzilla_580603::create_mmgc_bugzilla_580603(core);
 #endif
-create_mmgc_basics(core);
-create_mmgc_dependent(core);
-create_mmgc_finalize_uninit(core);
-create_mmgc_gcheap(core);
-create_mmgc_mmfx_array(core);
+ST_mmgc_basics::create_mmgc_basics(core);
+ST_mmgc_dependent::create_mmgc_dependent(core);
+ST_mmgc_finalize_uninit::create_mmgc_finalize_uninit(core);
+ST_mmgc_gcheap::create_mmgc_gcheap(core);
+ST_mmgc_mmfx_array::create_mmgc_mmfx_array(core);
 #if defined VMCFG_WORKERTHREADS
-create_mmgc_threads(core);
+ST_mmgc_threads::create_mmgc_threads(core);
 #endif
-create_mmgc_weakref(core);
-create_vmbase_concurrency(core);
+ST_mmgc_weakref::create_mmgc_weakref(core);
+ST_vmbase_concurrency::create_vmbase_concurrency(core);
 #if defined VMCFG_SAFEPOINTS
-create_vmbase_safepoints(core);
+ST_vmbase_safepoints::create_vmbase_safepoints(core);
 #endif
-create_vmpi_threads(core);
+ST_vmpi_threads::create_vmpi_threads(core);
 }
 #endif // VMCFG_SELFTEST
 }

@@ -23,8 +23,6 @@
 
 /* Begin PBXBuildFile section */
 		0715396D0F507325004E398F /* eval-avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0715396B0F507325004E398F /* eval-avmplus.cpp */; };
-		0721CA0C111A1F2A00E96DF8 /* ST_mmgc_543560.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */; };
-		07246FE411CBBC2F005D3F1F /* ST_mmgc_weakref.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07246FE211CBBC2F005D3F1F /* ST_mmgc_weakref.cpp */; };
 		072EA0EA0F4C1CE9009F11E6 /* eval-abc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0D20F4C1CE9009F11E6 /* eval-abc.cpp */; };
 		072EA0EB0F4C1CE9009F11E6 /* eval-cogen-expr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0D50F4C1CE9009F11E6 /* eval-cogen-expr.cpp */; };
 		072EA0EC0F4C1CE9009F11E6 /* eval-cogen-stmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0D70F4C1CE9009F11E6 /* eval-cogen-stmt.cpp */; };
@@ -38,7 +36,6 @@
 		072EA0F40F4C1CE9009F11E6 /* eval-parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E30F4C1CE9009F11E6 /* eval-parse.cpp */; };
 		072EA0F50F4C1CE9009F11E6 /* eval-unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E50F4C1CE9009F11E6 /* eval-unicode.cpp */; };
 		072EA0F60F4C1CE9009F11E6 /* eval-util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E70F4C1CE9009F11E6 /* eval-util.cpp */; };
-		073AC652116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */; };
 		07591FBE122BEA8F00D60F63 /* GCPolicyManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07591FBD122BEA8F00D60F63 /* GCPolicyManager.cpp */; };
 		075920A7122E51EF00D60F63 /* GCPolicyManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07591FBD122BEA8F00D60F63 /* GCPolicyManager.cpp */; };
 		07689AA0101DC28000BC72AA /* ZCT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07689A9E101DC28000BC72AA /* ZCT.cpp */; };
@@ -140,9 +137,6 @@
 		079DF9950F3A8A320031D1B4 /* SamplerScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9910F3A8A320031D1B4 /* SamplerScript.cpp */; };
 		079DF9A40F3A8AAB0031D1B4 /* Selftest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF99D0F3A8AAB0031D1B4 /* Selftest.cpp */; };
 		079DF9A50F3A8AAB0031D1B4 /* SelftestInit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9A00F3A8AAB0031D1B4 /* SelftestInit.cpp */; };
-		079DF9A60F3A8AAB0031D1B4 /* ST_avmplus_basics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9A10F3A8AAB0031D1B4 /* ST_avmplus_basics.cpp */; };
-		079DF9A70F3A8AAB0031D1B4 /* ST_avmplus_peephole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9A20F3A8AAB0031D1B4 /* ST_avmplus_peephole.cpp */; };
-		079DF9A80F3A8AAB0031D1B4 /* ST_mmgc_basics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9A30F3A8AAB0031D1B4 /* ST_mmgc_basics.cpp */; };
 		079DFAB10F3A96BE0031D1B4 /* FixedAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA890F3A96BD0031D1B4 /* FixedAlloc.cpp */; };
 		079DFAB20F3A96BE0031D1B4 /* FixedMalloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA8B0F3A96BD0031D1B4 /* FixedMalloc.cpp */; };
 		079DFAB30F3A96BE0031D1B4 /* GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA8D0F3A96BD0031D1B4 /* GC.cpp */; };
@@ -178,11 +172,12 @@
 		07D95AE51254C39000DD872D /* atom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07D95AE31254C39000DD872D /* atom.cpp */; };
 		07D95AE61254C39000DD872D /* atom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07D95AE31254C39000DD872D /* atom.cpp */; };
 		07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
-		07E2E7AF114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07E2E7AC114EE67C00B3AFCD /* ST_mmgc_dependent.cpp */; };
 		07ED27F00FBD78C4007E3950 /* GCStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07ED27EF0FBD78C4007E3950 /* GCStack.cpp */; };
 		07F01C5112E1AD880002760B /* eval-parse-config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F01C5012E1AD880002760B /* eval-parse-config.cpp */; };
 		07F01C5212E1AD880002760B /* eval-parse-config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F01C5012E1AD880002760B /* eval-parse-config.cpp */; };
 		191659980FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */; };
+		193B2134136EE3CB001CA302 /* SelftestExec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 193B2133136EE3C1001CA302 /* SelftestExec.cpp */; };
+		193B2135136EE3CC001CA302 /* SelftestExec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 193B2133136EE3C1001CA302 /* SelftestExec.cpp */; };
 		19487E261362250800586A91 /* JSONClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19487E24136224BF00586A91 /* JSONClass.cpp */; };
 		19487E271362250900586A91 /* JSONClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19487E24136224BF00586A91 /* JSONClass.cpp */; };
 		1969AE2B1250E705002F7F01 /* PageMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A21B381213443300CB55E0 /* PageMap.cpp */; };
@@ -195,8 +190,6 @@
 		19A1174C133A2266003B9C38 /* LirHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A11749133A2266003B9C38 /* LirHelper.cpp */; };
 		19BB29A00F8119E100C5F1F7 /* swf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BB299F0F8119E100C5F1F7 /* swf.cpp */; };
 		19BDA443100CC20200172A70 /* Allocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BDA441100CC20200172A70 /* Allocator.cpp */; };
-		19F9614F1277300D0079C6E9 /* ST_mmgc_580603.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19F9614E1277300D0079C6E9 /* ST_mmgc_580603.cpp */; };
-		19F961501277300D0079C6E9 /* ST_mmgc_580603.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19F9614E1277300D0079C6E9 /* ST_mmgc_580603.cpp */; };
 		3F5B2BCC0F54B223009A93FE /* PosixFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BC80F54B223009A93FE /* PosixFile.cpp */; };
 		3F5B2BCD0F54B223009A93FE /* PosixPartialPlatform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */; };
 		3F5B2BD40F54B271009A93FE /* avmshellMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */; };
@@ -298,9 +291,6 @@
 		7E87D0B7122C5B980005FEAF /* SamplerScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9910F3A8A320031D1B4 /* SamplerScript.cpp */; };
 		7E87D0B8122C5B980005FEAF /* Selftest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF99D0F3A8AAB0031D1B4 /* Selftest.cpp */; };
 		7E87D0B9122C5B980005FEAF /* SelftestInit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9A00F3A8AAB0031D1B4 /* SelftestInit.cpp */; };
-		7E87D0BA122C5B980005FEAF /* ST_avmplus_basics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9A10F3A8AAB0031D1B4 /* ST_avmplus_basics.cpp */; };
-		7E87D0BB122C5B980005FEAF /* ST_avmplus_peephole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9A20F3A8AAB0031D1B4 /* ST_avmplus_peephole.cpp */; };
-		7E87D0BC122C5B980005FEAF /* ST_mmgc_basics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9A30F3A8AAB0031D1B4 /* ST_mmgc_basics.cpp */; };
 		7E87D0BD122C5B980005FEAF /* FixedAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA890F3A96BD0031D1B4 /* FixedAlloc.cpp */; };
 		7E87D0BE122C5B980005FEAF /* FixedMalloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA8B0F3A96BD0031D1B4 /* FixedMalloc.cpp */; };
 		7E87D0BF122C5B980005FEAF /* GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA8D0F3A96BD0031D1B4 /* GC.cpp */; };
@@ -368,34 +358,18 @@
 		7E87D0FD122C5B980005FEAF /* ZCT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07689A9E101DC28000BC72AA /* ZCT.cpp */; };
 		7E87D0FE122C5B980005FEAF /* Containers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1992FDA1102869D10032FBBF /* Containers.cpp */; };
 		7E87D0FF122C5B980005FEAF /* GCGlobalNew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */; };
-		7E87D100122C5B980005FEAF /* ST_mmgc_threads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */; };
 		7E87D101122C5B980005FEAF /* instr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B532041069A1DE00ED299A /* instr.cpp */; };
-		7E87D102122C5B980005FEAF /* ST_mmgc_543560.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */; };
 		7E87D103122C5B980005FEAF /* njconfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D92373DC11222458006D8AA3 /* njconfig.cpp */; };
-		7E87D104122C5B980005FEAF /* ST_mmgc_dependent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07E2E7AC114EE67C00B3AFCD /* ST_mmgc_dependent.cpp */; };
-		7E87D105122C5B980005FEAF /* ST_mmgc_gcheap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */; };
 		7E87D106122C5B980005FEAF /* DomainMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D987E32011C19E5700474022 /* DomainMgr.cpp */; };
 		7E87D108122C5B980005FEAF /* exec-jit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91811B973BD00A939C7 /* exec-jit.cpp */; };
 		7E87D109122C5B980005FEAF /* exec-verifyall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91911B973BD00A939C7 /* exec-verifyall.cpp */; };
 		7E87D10A122C5B980005FEAF /* exec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91A11B973BD00A939C7 /* exec.cpp */; };
-		7E87D10B122C5B980005FEAF /* ST_mmgc_weakref.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07246FE211CBBC2F005D3F1F /* ST_mmgc_weakref.cpp */; };
-		7E87D10C122C5B980005FEAF /* ST_mmgc_finalize_uninit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D95B635511FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp */; };
 		7E87D10E122C5B980005FEAF /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFB670F3A9C350031D1B4 /* libz.dylib */; };
 		7E87D10F122C5B980005FEAF /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
-		8133F064128A768800C732B7 /* ST_vmpi_threads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8133F063128A768800C732B7 /* ST_vmpi_threads.cpp */; };
-		8133F065128A768800C732B7 /* ST_vmpi_threads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8133F063128A768800C732B7 /* ST_vmpi_threads.cpp */; };
-		815846DD129AFA630083D9B0 /* ST_vmbase_concurrency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 815846DC129AFA630083D9B0 /* ST_vmbase_concurrency.cpp */; };
-		815846DE129AFA630083D9B0 /* ST_vmbase_concurrency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 815846DC129AFA630083D9B0 /* ST_vmbase_concurrency.cpp */; };
 		817CEE7B12E511C40019E8DF /* Safepoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 817CEE7912E511C40019E8DF /* Safepoint.cpp */; };
 		817CEE7C12E511C40019E8DF /* Safepoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 817CEE7912E511C40019E8DF /* Safepoint.cpp */; };
-		817CEE9212E512180019E8DF /* ST_vmbase_safepoints.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 817CEE9112E512180019E8DF /* ST_vmbase_safepoints.cpp */; };
-		817CEE9312E512180019E8DF /* ST_vmbase_safepoints.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 817CEE9112E512180019E8DF /* ST_vmbase_safepoints.cpp */; };
 		81EB4B00129A55C200D1B0BB /* VMThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81EB4AFE129A55C200D1B0BB /* VMThread.cpp */; };
 		81EB4B01129A55C200D1B0BB /* VMThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81EB4AFE129A55C200D1B0BB /* VMThread.cpp */; };
-		CB13ECD31358E07E00A09CBE /* ST_avmplus_builtins.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB13ECD21358E07E00A09CBE /* ST_avmplus_builtins.cpp */; };
-		CB13ECD41358E07E00A09CBE /* ST_avmplus_builtins.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB13ECD21358E07E00A09CBE /* ST_avmplus_builtins.cpp */; };
-		CBB55F66134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CBB55F65134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp */; };
-		CBB55F67134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CBB55F65134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp */; };
 		D5AD1DAD0F979A4A002B2FE2 /* SpyUtilsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */; };
 		D5AD1E2B0F97D7C7002B2FE2 /* ThreadsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */; };
 		D90A301A125CF47E0039348E /* avmplusList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D944CADA123EF76600EA0342 /* avmplusList.cpp */; };
@@ -411,12 +385,8 @@
 		D94236990F8ACAE400F97706 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */; };
 		D942369A0F8ACAE400F97706 /* MMgcPortMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236940F8ACAE400F97706 /* MMgcPortMac.cpp */; };
 		D942369B0F8ACAE400F97706 /* PosixPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */; };
-		D95B635711FE4602004ED0D5 /* ST_mmgc_finalize_uninit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D95B635511FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp */; };
 		D987E32311C19E5700474022 /* DomainMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D987E32011C19E5700474022 /* DomainMgr.cpp */; };
-		D9909EB5125BBC79007EBE1E /* ST_mmgc_575631.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9909EB4125BBC79007EBE1E /* ST_mmgc_575631.cpp */; };
-		D9909EB6125BBC79007EBE1E /* ST_mmgc_575631.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9909EB4125BBC79007EBE1E /* ST_mmgc_575631.cpp */; };
 		D9AA880A103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */; };
-		D9FDA5B81045C32D00C96421 /* ST_mmgc_threads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */; };
 		E8B532061069A1DE00ED299A /* instr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B532041069A1DE00ED299A /* instr.cpp */; };
 		FF89C9231290C6910059CA78 /* exec-osr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF89C9221290C6910059CA78 /* exec-osr.cpp */; };
 		FF89C9241290C6910059CA78 /* exec-osr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF89C9221290C6910059CA78 /* exec-osr.cpp */; };
@@ -475,8 +445,6 @@
 		0715396B0F507325004E398F /* eval-avmplus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "eval-avmplus.cpp"; path = "../../../eval/eval-avmplus.cpp"; sourceTree = SOURCE_ROOT; };
 		0715396C0F507325004E398F /* eval-avmplus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-avmplus.h"; path = "../../../eval/eval-avmplus.h"; sourceTree = SOURCE_ROOT; };
 		0721CA09111A1F1500E96DF8 /* ST_mmgc_543560.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_543560.st; path = ../../../extensions/ST_mmgc_543560.st; sourceTree = SOURCE_ROOT; };
-		0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_543560.cpp; path = ../../../extensions/ST_mmgc_543560.cpp; sourceTree = SOURCE_ROOT; };
-		07246FE211CBBC2F005D3F1F /* ST_mmgc_weakref.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_weakref.cpp; path = ../../../extensions/ST_mmgc_weakref.cpp; sourceTree = SOURCE_ROOT; };
 		07246FE311CBBC2F005D3F1F /* ST_mmgc_weakref.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_weakref.st; path = ../../../extensions/ST_mmgc_weakref.st; sourceTree = SOURCE_ROOT; };
 		07275CE6120C4F0A00037C3D /* opcodes.tbl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = opcodes.tbl; path = ../../../core/opcodes.tbl; sourceTree = SOURCE_ROOT; };
 		072EA0D10F4C1CE9009F11E6 /* eval-abc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-abc-inlines.h"; path = "../../../eval/eval-abc-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -511,7 +479,6 @@
 		072EA1090F4C1D1B009F11E6 /* smoketest2.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest2.as; path = ../../../eval/smoketest2.as; sourceTree = SOURCE_ROOT; };
 		072EA10A0F4C1D1B009F11E6 /* smoketest3.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest3.as; path = ../../../eval/smoketest3.as; sourceTree = SOURCE_ROOT; };
 		073739F112A65F5F00F888F6 /* MultinameHashtable-impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MultinameHashtable-impl.h"; path = "../../../core/MultinameHashtable-impl.h"; sourceTree = SOURCE_ROOT; };
-		073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_gcheap.cpp; path = ../../../extensions/ST_mmgc_gcheap.cpp; sourceTree = SOURCE_ROOT; };
 		073AC650116A5DC000215772 /* ST_mmgc_gcheap.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_gcheap.st; path = ../../../extensions/ST_mmgc_gcheap.st; sourceTree = SOURCE_ROOT; };
 		075300A510C55E0700D67DA9 /* pcre_avmplus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pcre_avmplus.h; path = ../../../pcre/pcre_avmplus.h; sourceTree = SOURCE_ROOT; };
 		07553E0D1099FB2800F72FB0 /* AbcEnv-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AbcEnv-inlines.h"; path = "../../../core/AbcEnv-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -789,9 +756,6 @@
 		079DF99E0F3A8AAB0031D1B4 /* Selftest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Selftest.h; path = ../../../extensions/Selftest.h; sourceTree = SOURCE_ROOT; };
 		079DF99F0F3A8AAB0031D1B4 /* SelftestClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SelftestClasses.h; path = ../../../extensions/SelftestClasses.h; sourceTree = SOURCE_ROOT; };
 		079DF9A00F3A8AAB0031D1B4 /* SelftestInit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SelftestInit.cpp; path = ../../../extensions/SelftestInit.cpp; sourceTree = SOURCE_ROOT; };
-		079DF9A10F3A8AAB0031D1B4 /* ST_avmplus_basics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_avmplus_basics.cpp; path = ../../../extensions/ST_avmplus_basics.cpp; sourceTree = SOURCE_ROOT; };
-		079DF9A20F3A8AAB0031D1B4 /* ST_avmplus_peephole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_avmplus_peephole.cpp; path = ../../../extensions/ST_avmplus_peephole.cpp; sourceTree = SOURCE_ROOT; };
-		079DF9A30F3A8AAB0031D1B4 /* ST_mmgc_basics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_basics.cpp; path = ../../../extensions/ST_mmgc_basics.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9C40F3A8BD90031D1B4 /* VMPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VMPI.h; path = ../../../VMPI/VMPI.h; sourceTree = SOURCE_ROOT; };
 		079DFA890F3A96BD0031D1B4 /* FixedAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FixedAlloc.cpp; path = ../../../MMgc/FixedAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		079DFA8A0F3A96BD0031D1B4 /* FixedAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FixedAlloc.h; path = ../../../MMgc/FixedAlloc.h; sourceTree = SOURCE_ROOT; };
@@ -869,7 +833,6 @@
 		07DA49E70F80C906007939FD /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../MMgc/manifest.mk; sourceTree = SOURCE_ROOT; };
 		07DA81A00F40335500288C8F /* vprof.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vprof.h; path = ../../../vprof/vprof.h; sourceTree = SOURCE_ROOT; };
 		07DC69640F4032F200E3CC37 /* vprof.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vprof.cpp; path = ../../../vprof/vprof.cpp; sourceTree = SOURCE_ROOT; };
-		07E2E7AC114EE67C00B3AFCD /* ST_mmgc_dependent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_dependent.cpp; path = ../../../extensions/ST_mmgc_dependent.cpp; sourceTree = SOURCE_ROOT; };
 		07E2E7AD114EE67C00B3AFCD /* ST_mmgc_dependent.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_dependent.st; path = ../../../extensions/ST_mmgc_dependent.st; sourceTree = SOURCE_ROOT; };
 		07E65EDF10BC19A7000D1EB6 /* AbcParser-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AbcParser-inlines.h"; path = "../../../core/AbcParser-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07E65EE010BC19A7000D1EB6 /* Coder-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Coder-inlines.h"; path = "../../../core/Coder-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -884,6 +847,7 @@
 		07FBECBD1291529500F51879 /* avmplusContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmplusContainer.h; path = ../../../core/avmplusContainer.h; sourceTree = SOURCE_ROOT; };
 		191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodeAlloc.cpp; path = ../../../nanojit/CodeAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		191659970FB88A1400F3DCD3 /* CodeAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeAlloc.h; path = ../../../nanojit/CodeAlloc.h; sourceTree = SOURCE_ROOT; };
+		193B2133136EE3C1001CA302 /* SelftestExec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SelftestExec.cpp; path = ../../../extensions/SelftestExec.cpp; sourceTree = SOURCE_ROOT; };
 		19487E231362248E00586A91 /* JSON.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = JSON.as; path = ../../../core/JSON.as; sourceTree = SOURCE_ROOT; };
 		19487E24136224BF00586A91 /* JSONClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JSONClass.cpp; path = ../../../core/JSONClass.cpp; sourceTree = SOURCE_ROOT; };
 		19487E25136224BF00586A91 /* JSONClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JSONClass.h; path = ../../../core/JSONClass.h; sourceTree = SOURCE_ROOT; };
@@ -908,7 +872,6 @@
 		19C97B9D1097822700AE4BEE /* VTable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "VTable-inlines.h"; path = "../../../core/VTable-inlines.h"; sourceTree = SOURCE_ROOT; };
 		19D4054F109610FF00BD696E /* Traits-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Traits-inlines.h"; path = "../../../core/Traits-inlines.h"; sourceTree = SOURCE_ROOT; };
 		19DA6B8B119CA42700688989 /* GCHeap-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCHeap-inlines.h"; path = "../../../MMgc/GCHeap-inlines.h"; sourceTree = SOURCE_ROOT; };
-		19F9614E1277300D0079C6E9 /* ST_mmgc_580603.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_580603.cpp; path = ../../../extensions/ST_mmgc_580603.cpp; sourceTree = SOURCE_ROOT; };
 		19F9615E127730530079C6E9 /* ST_mmgc_580603.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_580603.st; path = ../../../extensions/ST_mmgc_580603.st; sourceTree = SOURCE_ROOT; };
 		3F5B2BC70F54B223009A93FE /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../../../shell/Platform.h; sourceTree = SOURCE_ROOT; };
 		3F5B2BC80F54B223009A93FE /* PosixFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixFile.cpp; path = ../../../shell/PosixFile.cpp; sourceTree = SOURCE_ROOT; };
@@ -925,13 +888,10 @@
 		3FFDEC6C0F69A54F00E510AB /* GCSpinLock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCSpinLock.h; path = ../../../MMgc/GCSpinLock.h; sourceTree = SOURCE_ROOT; };
 		7E87D11A122C5B980005FEAF /* avm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = avm; sourceTree = BUILT_PRODUCTS_DIR; };
 		8133F062128A767500C732B7 /* ST_vmpi_threads.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_vmpi_threads.st; path = ../../../extensions/ST_vmpi_threads.st; sourceTree = SOURCE_ROOT; };
-		8133F063128A768800C732B7 /* ST_vmpi_threads.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_vmpi_threads.cpp; path = ../../../extensions/ST_vmpi_threads.cpp; sourceTree = SOURCE_ROOT; };
-		815846DC129AFA630083D9B0 /* ST_vmbase_concurrency.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_vmbase_concurrency.cpp; path = ../../../extensions/ST_vmbase_concurrency.cpp; sourceTree = SOURCE_ROOT; };
 		815846DF129AFA740083D9B0 /* ST_vmbase_concurrency.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_vmbase_concurrency.st; path = ../../../extensions/ST_vmbase_concurrency.st; sourceTree = SOURCE_ROOT; };
 		817CEE7812E511C40019E8DF /* Safepoint-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Safepoint-inlines.h"; path = "../../../vmbase/Safepoint-inlines.h"; sourceTree = SOURCE_ROOT; };
 		817CEE7912E511C40019E8DF /* Safepoint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Safepoint.cpp; path = ../../../vmbase/Safepoint.cpp; sourceTree = SOURCE_ROOT; };
 		817CEE7A12E511C40019E8DF /* Safepoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Safepoint.h; path = ../../../vmbase/Safepoint.h; sourceTree = SOURCE_ROOT; };
-		817CEE9112E512180019E8DF /* ST_vmbase_safepoints.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_vmbase_safepoints.cpp; path = ../../../extensions/ST_vmbase_safepoints.cpp; sourceTree = SOURCE_ROOT; };
 		817CEE9412E5122B0019E8DF /* ST_vmbase_safepoints.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_vmbase_safepoints.st; path = ../../../extensions/ST_vmbase_safepoints.st; sourceTree = SOURCE_ROOT; };
 		81B69B1E123848B200B9DF4F /* vmbase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vmbase.h; path = ../../../vmbase/vmbase.h; sourceTree = SOURCE_ROOT; };
 		81B69B2812384D1D00B9DF4F /* AvmAssert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmAssert.cpp; path = ../../../vmbase/AvmAssert.cpp; sourceTree = SOURCE_ROOT; };
@@ -950,8 +910,6 @@
 		85DEE0E6130977F300C5A33D /* extensions-tracers.hh */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = "extensions-tracers.hh"; path = "../../../generated/extensions-tracers.hh"; sourceTree = SOURCE_ROOT; };
 		8DD76F6C0486A84900D96B5E /* avm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = avm; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB13ECD11358E06B00A09CBE /* ST_avmplus_builtins.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_avmplus_builtins.st; path = ../../../extensions/ST_avmplus_builtins.st; sourceTree = SOURCE_ROOT; };
-		CB13ECD21358E07E00A09CBE /* ST_avmplus_builtins.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_avmplus_builtins.cpp; path = ../../../extensions/ST_avmplus_builtins.cpp; sourceTree = SOURCE_ROOT; };
-		CBB55F65134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_mmfx_array.cpp; path = ../../../extensions/ST_mmgc_mmfx_array.cpp; sourceTree = SOURCE_ROOT; };
 		CBB55F68134B488E00A4D8A7 /* ST_mmgc_mmfx_array.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_mmfx_array.st; path = ../../../extensions/ST_mmgc_mmfx_array.st; sourceTree = SOURCE_ROOT; };
 		D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpyUtilsPosix.cpp; path = ../../../VMPI/SpyUtilsPosix.cpp; sourceTree = SOURCE_ROOT; };
 		D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadsPosix.cpp; path = ../../../VMPI/ThreadsPosix.cpp; sourceTree = SOURCE_ROOT; };
@@ -984,13 +942,11 @@
 		D94236A30F8ACB0600F97706 /* WinDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinDebugUtils.cpp; path = ../../../VMPI/WinDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinPortUtils.cpp; path = ../../../VMPI/WinPortUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D944CADA123EF76600EA0342 /* avmplusList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmplusList.cpp; path = ../../../core/avmplusList.cpp; sourceTree = SOURCE_ROOT; };
-		D95B635511FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_finalize_uninit.cpp; path = ../../../extensions/ST_mmgc_finalize_uninit.cpp; sourceTree = SOURCE_ROOT; };
 		D96013A70FE03CC5002DBDCF /* NativeSparc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeSparc.cpp; path = ../../../nanojit/NativeSparc.cpp; sourceTree = SOURCE_ROOT; };
 		D96013A80FE03CC5002DBDCF /* NativeSparc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeSparc.h; path = ../../../nanojit/NativeSparc.h; sourceTree = SOURCE_ROOT; };
 		D9854B961090D05700F30404 /* AvmCore-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AvmCore-inlines.h"; path = "../../../core/AvmCore-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D987E32011C19E5700474022 /* DomainMgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DomainMgr.cpp; path = ../../../core/DomainMgr.cpp; sourceTree = SOURCE_ROOT; };
 		D987E32111C19E5700474022 /* DomainMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DomainMgr.h; path = ../../../core/DomainMgr.h; sourceTree = SOURCE_ROOT; };
-		D9909EB4125BBC79007EBE1E /* ST_mmgc_575631.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_575631.cpp; path = ../../../extensions/ST_mmgc_575631.cpp; sourceTree = SOURCE_ROOT; };
 		D9909EB7125BBC96007EBE1E /* ST_mmgc_575631.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_575631.st; path = ../../../extensions/ST_mmgc_575631.st; sourceTree = SOURCE_ROOT; };
 		D9909EB8125BBC96007EBE1E /* ST_mmgc_finalize_uninit.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_finalize_uninit.st; path = ../../../extensions/ST_mmgc_finalize_uninit.st; sourceTree = SOURCE_ROOT; };
 		D9A4F1C710B3362F00D0408C /* Multiname-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Multiname-inlines.h"; path = "../../../core/Multiname-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -1001,7 +957,6 @@
 		D9BBBE25134E556A000A440B /* GCMember-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCMember-inlines.h"; path = "../../../MMgc/GCMember-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D9BBBE26134E556A000A440B /* GCMemberBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCMemberBase.h; path = ../../../MMgc/GCMemberBase.h; sourceTree = SOURCE_ROOT; };
 		D9C30D8F12F77CEC0054356E /* ScriptObject-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ScriptObject-inlines.h"; path = "../../../core/ScriptObject-inlines.h"; sourceTree = SOURCE_ROOT; };
-		D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_threads.cpp; path = ../../../extensions/ST_mmgc_threads.cpp; sourceTree = SOURCE_ROOT; };
 		D9FDA5DB1045C5F200C96421 /* ST_mmgc_threads.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_threads.st; path = ../../../extensions/ST_mmgc_threads.st; sourceTree = SOURCE_ROOT; };
 		E8B532031069A1DE00ED299A /* instr-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "instr-inlines.h"; path = "../../../core/instr-inlines.h"; sourceTree = SOURCE_ROOT; };
 		E8B532041069A1DE00ED299A /* instr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = instr.cpp; path = ../../../core/instr.cpp; sourceTree = SOURCE_ROOT; };
@@ -1529,22 +1484,7 @@
 				079DF99E0F3A8AAB0031D1B4 /* Selftest.h */,
 				079DF99F0F3A8AAB0031D1B4 /* SelftestClasses.h */,
 				079DF9A00F3A8AAB0031D1B4 /* SelftestInit.cpp */,
-				079DF9A10F3A8AAB0031D1B4 /* ST_avmplus_basics.cpp */,
-				CB13ECD21358E07E00A09CBE /* ST_avmplus_builtins.cpp */,
-				079DF9A20F3A8AAB0031D1B4 /* ST_avmplus_peephole.cpp */,
-				D9909EB4125BBC79007EBE1E /* ST_mmgc_575631.cpp */,
-				19F9614E1277300D0079C6E9 /* ST_mmgc_580603.cpp */,
-				079DF9A30F3A8AAB0031D1B4 /* ST_mmgc_basics.cpp */,
-				07E2E7AC114EE67C00B3AFCD /* ST_mmgc_dependent.cpp */,
-				073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */,
-				CBB55F65134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp */,
-				D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */,
-				07246FE211CBBC2F005D3F1F /* ST_mmgc_weakref.cpp */,
-				0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */,
-				D95B635511FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp */,
-				8133F063128A768800C732B7 /* ST_vmpi_threads.cpp */,
-				815846DC129AFA630083D9B0 /* ST_vmbase_concurrency.cpp */,
-				817CEE9112E512180019E8DF /* ST_vmbase_safepoints.cpp */,
+				193B2133136EE3C1001CA302 /* SelftestExec.cpp */,
 			);
 			name = selftest;
 			sourceTree = "<group>";
@@ -1970,9 +1910,6 @@
 				7E87D0B7122C5B980005FEAF /* SamplerScript.cpp in Sources */,
 				7E87D0B8122C5B980005FEAF /* Selftest.cpp in Sources */,
 				7E87D0B9122C5B980005FEAF /* SelftestInit.cpp in Sources */,
-				7E87D0BA122C5B980005FEAF /* ST_avmplus_basics.cpp in Sources */,
-				7E87D0BB122C5B980005FEAF /* ST_avmplus_peephole.cpp in Sources */,
-				7E87D0BC122C5B980005FEAF /* ST_mmgc_basics.cpp in Sources */,
 				7E87D0BD122C5B980005FEAF /* FixedAlloc.cpp in Sources */,
 				7E87D0BE122C5B980005FEAF /* FixedMalloc.cpp in Sources */,
 				7E87D0BF122C5B980005FEAF /* GC.cpp in Sources */,
@@ -2040,39 +1977,27 @@
 				7E87D0FD122C5B980005FEAF /* ZCT.cpp in Sources */,
 				7E87D0FE122C5B980005FEAF /* Containers.cpp in Sources */,
 				7E87D0FF122C5B980005FEAF /* GCGlobalNew.cpp in Sources */,
-				7E87D100122C5B980005FEAF /* ST_mmgc_threads.cpp in Sources */,
 				7E87D101122C5B980005FEAF /* instr.cpp in Sources */,
-				7E87D102122C5B980005FEAF /* ST_mmgc_543560.cpp in Sources */,
 				7E87D103122C5B980005FEAF /* njconfig.cpp in Sources */,
-				7E87D104122C5B980005FEAF /* ST_mmgc_dependent.cpp in Sources */,
-				7E87D105122C5B980005FEAF /* ST_mmgc_gcheap.cpp in Sources */,
 				7E87D106122C5B980005FEAF /* DomainMgr.cpp in Sources */,
 				7E87D108122C5B980005FEAF /* exec-jit.cpp in Sources */,
 				7E87D109122C5B980005FEAF /* exec-verifyall.cpp in Sources */,
 				7E87D10A122C5B980005FEAF /* exec.cpp in Sources */,
-				7E87D10B122C5B980005FEAF /* ST_mmgc_weakref.cpp in Sources */,
-				7E87D10C122C5B980005FEAF /* ST_mmgc_finalize_uninit.cpp in Sources */,
 				075920A7122E51EF00D60F63 /* GCPolicyManager.cpp in Sources */,
 				1969AE2C1250E706002F7F01 /* PageMap.cpp in Sources */,
 				078B1B281250F2770004F9F4 /* AvmAssert.cpp in Sources */,
 				07D95AE61254C39000DD872D /* atom.cpp in Sources */,
-				D9909EB5125BBC79007EBE1E /* ST_mmgc_575631.cpp in Sources */,
 				D90A301B125CF47F0039348E /* avmplusList.cpp in Sources */,
 				D939B113126E358400522895 /* ByteArrayGlue.cpp in Sources */,
 				D939B114126E358400522895 /* DataIO.cpp in Sources */,
 				FF89C9241290C6910059CA78 /* exec-osr.cpp in Sources */,
-				19F9614F1277300D0079C6E9 /* ST_mmgc_580603.cpp in Sources */,
-				8133F065128A768800C732B7 /* ST_vmpi_threads.cpp in Sources */,
 				81EB4B01129A55C200D1B0BB /* VMThread.cpp in Sources */,
-				815846DE129AFA630083D9B0 /* ST_vmbase_concurrency.cpp in Sources */,
 				07F01C5212E1AD880002760B /* eval-parse-config.cpp in Sources */,
 				817CEE7C12E511C40019E8DF /* Safepoint.cpp in Sources */,
-				817CEE9312E512180019E8DF /* ST_vmbase_safepoints.cpp in Sources */,
 				19A1174C133A2266003B9C38 /* LirHelper.cpp in Sources */,
-				CBB55F67134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp in Sources */,
-				CB13ECD41358E07E00A09CBE /* ST_avmplus_builtins.cpp in Sources */,
 				19487E271362250900586A91 /* JSONClass.cpp in Sources */,
 				D914C1EF1367956F00CD302D /* ProxyGlue.cpp in Sources */,
+				193B2135136EE3CC001CA302 /* SelftestExec.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2174,9 +2099,6 @@
 				079DF9950F3A8A320031D1B4 /* SamplerScript.cpp in Sources */,
 				079DF9A40F3A8AAB0031D1B4 /* Selftest.cpp in Sources */,
 				079DF9A50F3A8AAB0031D1B4 /* SelftestInit.cpp in Sources */,
-				079DF9A60F3A8AAB0031D1B4 /* ST_avmplus_basics.cpp in Sources */,
-				079DF9A70F3A8AAB0031D1B4 /* ST_avmplus_peephole.cpp in Sources */,
-				079DF9A80F3A8AAB0031D1B4 /* ST_mmgc_basics.cpp in Sources */,
 				079DFAB10F3A96BE0031D1B4 /* FixedAlloc.cpp in Sources */,
 				079DFAB20F3A96BE0031D1B4 /* FixedMalloc.cpp in Sources */,
 				079DFAB30F3A96BE0031D1B4 /* GC.cpp in Sources */,
@@ -2244,39 +2166,27 @@
 				07689AA0101DC28000BC72AA /* ZCT.cpp in Sources */,
 				1992FDA3102869D10032FBBF /* Containers.cpp in Sources */,
 				D9AA880A103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */,
-				D9FDA5B81045C32D00C96421 /* ST_mmgc_threads.cpp in Sources */,
 				E8B532061069A1DE00ED299A /* instr.cpp in Sources */,
-				0721CA0C111A1F2A00E96DF8 /* ST_mmgc_543560.cpp in Sources */,
 				D92373DF11222458006D8AA3 /* njconfig.cpp in Sources */,
-				07E2E7AF114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */,
-				073AC652116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */,
 				D987E32311C19E5700474022 /* DomainMgr.cpp in Sources */,
 				198CF91C11B973BD00A939C7 /* exec-jit.cpp in Sources */,
 				198CF91D11B973BD00A939C7 /* exec-verifyall.cpp in Sources */,
 				198CF91E11B973BD00A939C7 /* exec.cpp in Sources */,
-				07246FE411CBBC2F005D3F1F /* ST_mmgc_weakref.cpp in Sources */,
-				D95B635711FE4602004ED0D5 /* ST_mmgc_finalize_uninit.cpp in Sources */,
 				07591FBE122BEA8F00D60F63 /* GCPolicyManager.cpp in Sources */,
 				1969AE2B1250E705002F7F01 /* PageMap.cpp in Sources */,
 				078B1B271250F2710004F9F4 /* AvmAssert.cpp in Sources */,
 				07D95AE51254C39000DD872D /* atom.cpp in Sources */,
-				D9909EB6125BBC79007EBE1E /* ST_mmgc_575631.cpp in Sources */,
 				D90A301A125CF47E0039348E /* avmplusList.cpp in Sources */,
 				D939B111126E358400522895 /* ByteArrayGlue.cpp in Sources */,
 				D939B112126E358400522895 /* DataIO.cpp in Sources */,
 				FF89C9231290C6910059CA78 /* exec-osr.cpp in Sources */,
-				19F961501277300D0079C6E9 /* ST_mmgc_580603.cpp in Sources */,
-				8133F064128A768800C732B7 /* ST_vmpi_threads.cpp in Sources */,
 				81EB4B00129A55C200D1B0BB /* VMThread.cpp in Sources */,
-				815846DD129AFA630083D9B0 /* ST_vmbase_concurrency.cpp in Sources */,
 				07F01C5112E1AD880002760B /* eval-parse-config.cpp in Sources */,
 				817CEE7B12E511C40019E8DF /* Safepoint.cpp in Sources */,
-				817CEE9212E512180019E8DF /* ST_vmbase_safepoints.cpp in Sources */,
 				19A1174B133A2266003B9C38 /* LirHelper.cpp in Sources */,
-				CBB55F66134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp in Sources */,
-				CB13ECD31358E07E00A09CBE /* ST_avmplus_builtins.cpp in Sources */,
 				19487E261362250800586A91 /* JSONClass.cpp in Sources */,
 				D914C1EE1367956F00CD302D /* ProxyGlue.cpp in Sources */,
+				193B2134136EE3CB001CA302 /* SelftestExec.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
