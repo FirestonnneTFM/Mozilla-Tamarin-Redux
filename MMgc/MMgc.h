@@ -219,10 +219,6 @@
 #define MMGC_LOCK_ALLOW_RECURSION(_x, _t)
 #endif
 
-// This keeps a graph of the edges the marker finds which are printed out in Sweep
-// for all objects added with GC::AddToBlacklist
-//#define MMGC_HEAP_GRAPH
-
 // This reverts back to the original pagemap representation.
 // https://bugzilla.mozilla.org/show_bug.cgi?id=581070
 //#define MMGC_USE_UNIFORM_PAGEMAP

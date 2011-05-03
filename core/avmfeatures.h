@@ -132,6 +132,7 @@
 #undef VMCFG_EPOC_EMULATOR
 #undef VMCFG_EXACT_TRACING
 #undef VMCFG_SELECTABLE_EXACT_TRACING
+#undef MMGC_HEAP_GRAPH
 
 
 
@@ -740,6 +741,18 @@
 #  error "AVMTWEAK_SELECTABLE_EXACT_TRACING must be defined and 0 or 1 (only)."
 #endif
 
+
+/* AVMTWEAK_HEAP_GRAPH
+ *
+ * Heap graph, enables blacklist feature for inspecting object reachability
+ */
+#if !defined AVMTWEAK_HEAP_GRAPH
+#  define AVMTWEAK_HEAP_GRAPH 0
+#endif
+#if AVMTWEAK_HEAP_GRAPH != 0 && AVMTWEAK_HEAP_GRAPH != 1
+#  error "AVMTWEAK_HEAP_GRAPH must be defined and 0 or 1 (only)."
+#endif
+
 #if AVMSYSTEM_32BIT
 #  if AVMSYSTEM_64BIT
 #    error "AVMSYSTEM_64BIT is precluded for AVMSYSTEM_32BIT"
@@ -898,6 +911,7 @@
 #    error "AVMFEATURE_SWF19 is required for AVMFEATURE_SWF20"
 #  endif
 #endif
+
 
 
 
@@ -1198,6 +1212,9 @@
 #endif
 #if AVMTWEAK_SELECTABLE_EXACT_TRACING
 #  define VMCFG_SELECTABLE_EXACT_TRACING
+#endif
+#if AVMTWEAK_HEAP_GRAPH
+#  define MMGC_HEAP_GRAPH
 #endif
 
 #ifdef AVMSHELL_BUILD

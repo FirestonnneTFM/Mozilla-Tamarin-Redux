@@ -218,6 +218,9 @@ const char * const avmfeatures = ""
   #if AVMTWEAK_SELECTABLE_EXACT_TRACING
     "AVMTWEAK_SELECTABLE_EXACT_TRACING;"
   #endif
+  #if AVMTWEAK_HEAP_GRAPH
+    "AVMTWEAK_HEAP_GRAPH;"
+  #endif
 ;
 
 #endif // AVMSHELL_BUILD

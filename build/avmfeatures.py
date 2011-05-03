@@ -217,4 +217,9 @@ def featureSettings(o):
         args += "-DAVMTWEAK_EXACT_TRACING=1 -DAVMTWEAK_SELECTABLE_EXACT_TRACING=0 "
     if o.getBoolArg("selectable-exact-tracing"):
         args += "-DAVMTWEAK_SELECTABLE_EXACT_TRACING=1 -DAVMTWEAK_EXACT_TRACING=0 "
+    arg = o.getBoolArg("heap-graph")
+    if (arg == True):
+        args += "-DAVMTWEAK_HEAP_GRAPH=1 "
+    if (arg == False):
+        args += "-DAVMTWEAK_HEAP_GRAPH=0 "
     return args
