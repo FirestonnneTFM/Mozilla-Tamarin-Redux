@@ -149,9 +149,9 @@ const uint32_t abcclass___AS3___vec_Vector_object = 11;
 const uint32_t abcclass___AS3___vec_Vector_int = 12;
 const uint32_t abcclass___AS3___vec_Vector_uint = 13;
 const uint32_t abcclass___AS3___vec_Vector_double = 14;
-const uint32_t abcclass_Math = 15;
-const uint32_t abcclass_Error = 16;
-const uint32_t abcclass_private_MethodClosure = 17;
+const uint32_t abcclass_private_MethodClosure = 15;
+const uint32_t abcclass_Math = 16;
+const uint32_t abcclass_Error = 17;
 const uint32_t abcclass_DefinitionError = 18;
 const uint32_t abcclass_EvalError = 19;
 const uint32_t abcclass_RangeError = 20;
@@ -322,209 +322,231 @@ const uint32_t __AS3___vec_Vector_double_private__filter = 437;
 const uint32_t __AS3___vec_Vector_double_private__map = 438;
 const uint32_t __AS3___vec_Vector_double_AS3_pop = 442;
 const uint32_t __AS3___vec_Vector_double_AS3_shift = 444;
-const uint32_t Math_private__min = 451;
-const uint32_t Math_private__max = 452;
-const uint32_t Math_abs = 453;
-const uint32_t Math_acos = 454;
-const uint32_t Math_asin = 455;
-const uint32_t Math_atan = 456;
-const uint32_t Math_ceil = 457;
-const uint32_t Math_cos = 458;
-const uint32_t Math_exp = 459;
-const uint32_t Math_floor = 460;
-const uint32_t Math_log = 461;
-const uint32_t Math_round = 462;
-const uint32_t Math_sin = 463;
-const uint32_t Math_sqrt = 464;
-const uint32_t Math_tan = 465;
-const uint32_t Math_atan2 = 466;
-const uint32_t Math_pow = 467;
-const uint32_t Math_max = 468;
-const uint32_t Math_min = 469;
-const uint32_t Math_random = 470;
-const uint32_t Error_getErrorMessage = 474;
-const uint32_t Error_getStackTrace = 478;
-const uint32_t Date_parse = 558;
-const uint32_t Date_UTC = 559;
-const uint32_t Date_AS3_valueOf = 560;
-const uint32_t Date_private__toString = 561;
-const uint32_t Date_private__setTime = 562;
-const uint32_t Date_private__get = 563;
-const uint32_t Date_AS3_getUTCFullYear = 572;
-const uint32_t Date_AS3_getUTCMonth = 573;
-const uint32_t Date_AS3_getUTCDate = 574;
-const uint32_t Date_AS3_getUTCDay = 575;
-const uint32_t Date_AS3_getUTCHours = 576;
-const uint32_t Date_AS3_getUTCMinutes = 577;
-const uint32_t Date_AS3_getUTCSeconds = 578;
-const uint32_t Date_AS3_getUTCMilliseconds = 579;
-const uint32_t Date_AS3_getFullYear = 580;
-const uint32_t Date_AS3_getMonth = 581;
-const uint32_t Date_AS3_getDate = 582;
-const uint32_t Date_AS3_getDay = 583;
-const uint32_t Date_AS3_getHours = 584;
-const uint32_t Date_AS3_getMinutes = 585;
-const uint32_t Date_AS3_getSeconds = 586;
-const uint32_t Date_AS3_getMilliseconds = 587;
-const uint32_t Date_AS3_getTimezoneOffset = 588;
-const uint32_t Date_AS3_getTime = 589;
-const uint32_t Date_private__setFullYear = 590;
-const uint32_t Date_private__setMonth = 591;
-const uint32_t Date_private__setDate = 592;
-const uint32_t Date_private__setHours = 593;
-const uint32_t Date_private__setMinutes = 594;
-const uint32_t Date_private__setSeconds = 595;
-const uint32_t Date_private__setMilliseconds = 596;
-const uint32_t Date_private__setUTCFullYear = 597;
-const uint32_t Date_private__setUTCMonth = 598;
-const uint32_t Date_private__setUTCDate = 599;
-const uint32_t Date_private__setUTCHours = 600;
-const uint32_t Date_private__setUTCMinutes = 601;
-const uint32_t Date_private__setUTCSeconds = 602;
-const uint32_t Date_private__setUTCMilliseconds = 603;
-const uint32_t RegExp_source_get = 657;
-const uint32_t RegExp_global_get = 658;
-const uint32_t RegExp_ignoreCase_get = 659;
-const uint32_t RegExp_multiline_get = 660;
-const uint32_t RegExp_lastIndex_get = 661;
-const uint32_t RegExp_lastIndex_set = 662;
-const uint32_t RegExp_dotall_get = 663;
-const uint32_t RegExp_extended_get = 664;
-const uint32_t RegExp_AS3_exec = 665;
-const uint32_t JSON_private_parseCore = 670;
-const uint32_t JSON_private_stringifySpecializedToString = 671;
-const uint32_t XML_ignoreComments_get = 722;
-const uint32_t XML_ignoreComments_set = 723;
-const uint32_t XML_ignoreProcessingInstructions_get = 724;
-const uint32_t XML_ignoreProcessingInstructions_set = 725;
-const uint32_t XML_ignoreWhitespace_get = 726;
-const uint32_t XML_ignoreWhitespace_set = 727;
-const uint32_t XML_prettyPrinting_get = 728;
-const uint32_t XML_prettyPrinting_set = 729;
-const uint32_t XML_prettyIndent_get = 730;
-const uint32_t XML_prettyIndent_set = 731;
-const uint32_t XML_AS3_toString = 735;
-const uint32_t XML_AS3_hasOwnProperty = 736;
-const uint32_t XML_AS3_propertyIsEnumerable = 737;
-const uint32_t XML_AS3_addNamespace = 738;
-const uint32_t XML_AS3_appendChild = 739;
-const uint32_t XML_AS3_attribute = 740;
-const uint32_t XML_AS3_attributes = 741;
-const uint32_t XML_AS3_child = 742;
-const uint32_t XML_AS3_childIndex = 743;
-const uint32_t XML_AS3_children = 744;
-const uint32_t XML_AS3_comments = 745;
-const uint32_t XML_AS3_contains = 746;
-const uint32_t XML_AS3_copy = 747;
-const uint32_t XML_AS3_descendants = 748;
-const uint32_t XML_AS3_elements = 749;
-const uint32_t XML_AS3_hasComplexContent = 750;
-const uint32_t XML_AS3_hasSimpleContent = 751;
-const uint32_t XML_AS3_inScopeNamespaces = 752;
-const uint32_t XML_AS3_insertChildAfter = 753;
-const uint32_t XML_AS3_insertChildBefore = 754;
-const uint32_t XML_AS3_localName = 756;
-const uint32_t XML_AS3_name = 757;
-const uint32_t XML_private__namespace = 758;
-const uint32_t XML_AS3_namespaceDeclarations = 760;
-const uint32_t XML_AS3_nodeKind = 761;
-const uint32_t XML_AS3_normalize = 762;
-const uint32_t XML_AS3_parent = 763;
-const uint32_t XML_AS3_processingInstructions = 764;
-const uint32_t XML_AS3_prependChild = 765;
-const uint32_t XML_AS3_removeNamespace = 766;
-const uint32_t XML_AS3_replace = 767;
-const uint32_t XML_AS3_setChildren = 768;
-const uint32_t XML_AS3_setLocalName = 769;
-const uint32_t XML_AS3_setName = 770;
-const uint32_t XML_AS3_setNamespace = 771;
-const uint32_t XML_AS3_text = 772;
-const uint32_t XML_AS3_toXMLString = 773;
-const uint32_t XML_AS3_notification = 774;
-const uint32_t XML_AS3_setNotification = 775;
-const uint32_t XMLList_AS3_toString = 819;
-const uint32_t XMLList_AS3_hasOwnProperty = 821;
-const uint32_t XMLList_AS3_propertyIsEnumerable = 822;
-const uint32_t XMLList_AS3_attribute = 823;
-const uint32_t XMLList_AS3_attributes = 824;
-const uint32_t XMLList_AS3_child = 825;
-const uint32_t XMLList_AS3_children = 826;
-const uint32_t XMLList_AS3_comments = 827;
-const uint32_t XMLList_AS3_contains = 828;
-const uint32_t XMLList_AS3_copy = 829;
-const uint32_t XMLList_AS3_descendants = 830;
-const uint32_t XMLList_AS3_elements = 831;
-const uint32_t XMLList_AS3_hasComplexContent = 832;
-const uint32_t XMLList_AS3_hasSimpleContent = 833;
-const uint32_t XMLList_AS3_length = 834;
-const uint32_t XMLList_AS3_name = 835;
-const uint32_t XMLList_AS3_normalize = 836;
-const uint32_t XMLList_AS3_parent = 837;
-const uint32_t XMLList_AS3_processingInstructions = 838;
-const uint32_t XMLList_AS3_text = 839;
-const uint32_t XMLList_AS3_toXMLString = 840;
-const uint32_t XMLList_AS3_addNamespace = 841;
-const uint32_t XMLList_AS3_appendChild = 842;
-const uint32_t XMLList_AS3_childIndex = 843;
-const uint32_t XMLList_AS3_inScopeNamespaces = 844;
-const uint32_t XMLList_AS3_insertChildAfter = 845;
-const uint32_t XMLList_AS3_insertChildBefore = 846;
-const uint32_t XMLList_AS3_nodeKind = 847;
-const uint32_t XMLList_private__namespace = 848;
-const uint32_t XMLList_AS3_localName = 850;
-const uint32_t XMLList_AS3_namespaceDeclarations = 851;
-const uint32_t XMLList_AS3_prependChild = 852;
-const uint32_t XMLList_AS3_removeNamespace = 853;
-const uint32_t XMLList_AS3_replace = 854;
-const uint32_t XMLList_AS3_setChildren = 855;
-const uint32_t XMLList_AS3_setLocalName = 856;
-const uint32_t XMLList_AS3_setName = 857;
-const uint32_t XMLList_AS3_setNamespace = 858;
-const uint32_t QName_localName_get = 863;
-const uint32_t QName_uri_get = 864;
-const uint32_t flash_utils_Proxy_flash_proxy_isAttribute = 920;
-const uint32_t flash_utils_ByteArray_defaultObjectEncoding_get = 927;
-const uint32_t flash_utils_ByteArray_defaultObjectEncoding_set = 928;
-const uint32_t flash_utils_ByteArray_readBytes = 930;
-const uint32_t flash_utils_ByteArray_writeBytes = 931;
-const uint32_t flash_utils_ByteArray_writeBoolean = 932;
-const uint32_t flash_utils_ByteArray_writeByte = 933;
-const uint32_t flash_utils_ByteArray_writeShort = 934;
-const uint32_t flash_utils_ByteArray_writeInt = 935;
-const uint32_t flash_utils_ByteArray_writeUnsignedInt = 936;
-const uint32_t flash_utils_ByteArray_writeFloat = 937;
-const uint32_t flash_utils_ByteArray_writeDouble = 938;
-const uint32_t flash_utils_ByteArray_writeMultiByte = 939;
-const uint32_t flash_utils_ByteArray_writeUTF = 940;
-const uint32_t flash_utils_ByteArray_writeUTFBytes = 941;
-const uint32_t flash_utils_ByteArray_readBoolean = 942;
-const uint32_t flash_utils_ByteArray_readByte = 943;
-const uint32_t flash_utils_ByteArray_readUnsignedByte = 944;
-const uint32_t flash_utils_ByteArray_readShort = 945;
-const uint32_t flash_utils_ByteArray_readUnsignedShort = 946;
-const uint32_t flash_utils_ByteArray_readInt = 947;
-const uint32_t flash_utils_ByteArray_readUnsignedInt = 948;
-const uint32_t flash_utils_ByteArray_readFloat = 949;
-const uint32_t flash_utils_ByteArray_readDouble = 950;
-const uint32_t flash_utils_ByteArray_readMultiByte = 951;
-const uint32_t flash_utils_ByteArray_readUTF = 952;
-const uint32_t flash_utils_ByteArray_readUTFBytes = 953;
-const uint32_t flash_utils_ByteArray_length_get = 954;
-const uint32_t flash_utils_ByteArray_length_set = 955;
-const uint32_t flash_utils_ByteArray_writeObject = 956;
-const uint32_t flash_utils_ByteArray_readObject = 957;
-const uint32_t flash_utils_ByteArray_private__compress = 959;
-const uint32_t flash_utils_ByteArray_private__uncompress = 962;
-const uint32_t flash_utils_ByteArray_private__toString = 965;
-const uint32_t flash_utils_ByteArray_bytesAvailable_get = 966;
-const uint32_t flash_utils_ByteArray_position_get = 967;
-const uint32_t flash_utils_ByteArray_position_set = 968;
-const uint32_t flash_utils_ByteArray_objectEncoding_get = 969;
-const uint32_t flash_utils_ByteArray_objectEncoding_set = 970;
-const uint32_t flash_utils_ByteArray_endian_get = 971;
-const uint32_t flash_utils_ByteArray_endian_set = 972;
-const uint32_t flash_utils_ByteArray_clear = 973;
+const uint32_t Math_private__min = 456;
+const uint32_t Math_private__max = 457;
+const uint32_t Math_abs = 458;
+const uint32_t Math_acos = 459;
+const uint32_t Math_asin = 460;
+const uint32_t Math_atan = 461;
+const uint32_t Math_ceil = 462;
+const uint32_t Math_cos = 463;
+const uint32_t Math_exp = 464;
+const uint32_t Math_floor = 465;
+const uint32_t Math_log = 466;
+const uint32_t Math_round = 467;
+const uint32_t Math_sin = 468;
+const uint32_t Math_sqrt = 469;
+const uint32_t Math_tan = 470;
+const uint32_t Math_atan2 = 471;
+const uint32_t Math_pow = 472;
+const uint32_t Math_max = 473;
+const uint32_t Math_min = 474;
+const uint32_t Math_random = 475;
+const uint32_t Error_getErrorMessage = 480;
+const uint32_t Error_getStackTrace = 484;
+const uint32_t Date_parse = 560;
+const uint32_t Date_UTC = 561;
+const uint32_t Date_AS3_valueOf = 562;
+const uint32_t Date_private__toString = 563;
+const uint32_t Date_private__setTime = 564;
+const uint32_t Date_private__get = 565;
+const uint32_t Date_AS3_getUTCFullYear = 574;
+const uint32_t Date_AS3_getUTCMonth = 575;
+const uint32_t Date_AS3_getUTCDate = 576;
+const uint32_t Date_AS3_getUTCDay = 577;
+const uint32_t Date_AS3_getUTCHours = 578;
+const uint32_t Date_AS3_getUTCMinutes = 579;
+const uint32_t Date_AS3_getUTCSeconds = 580;
+const uint32_t Date_AS3_getUTCMilliseconds = 581;
+const uint32_t Date_AS3_getFullYear = 582;
+const uint32_t Date_AS3_getMonth = 583;
+const uint32_t Date_AS3_getDate = 584;
+const uint32_t Date_AS3_getDay = 585;
+const uint32_t Date_AS3_getHours = 586;
+const uint32_t Date_AS3_getMinutes = 587;
+const uint32_t Date_AS3_getSeconds = 588;
+const uint32_t Date_AS3_getMilliseconds = 589;
+const uint32_t Date_AS3_getTimezoneOffset = 590;
+const uint32_t Date_AS3_getTime = 591;
+const uint32_t Date_private__setFullYear = 592;
+const uint32_t Date_private__setMonth = 593;
+const uint32_t Date_private__setDate = 594;
+const uint32_t Date_private__setHours = 595;
+const uint32_t Date_private__setMinutes = 596;
+const uint32_t Date_private__setSeconds = 597;
+const uint32_t Date_private__setMilliseconds = 598;
+const uint32_t Date_private__setUTCFullYear = 599;
+const uint32_t Date_private__setUTCMonth = 600;
+const uint32_t Date_private__setUTCDate = 601;
+const uint32_t Date_private__setUTCHours = 602;
+const uint32_t Date_private__setUTCMinutes = 603;
+const uint32_t Date_private__setUTCSeconds = 604;
+const uint32_t Date_private__setUTCMilliseconds = 605;
+const uint32_t RegExp_source_get = 659;
+const uint32_t RegExp_global_get = 660;
+const uint32_t RegExp_ignoreCase_get = 661;
+const uint32_t RegExp_multiline_get = 662;
+const uint32_t RegExp_lastIndex_get = 663;
+const uint32_t RegExp_lastIndex_set = 664;
+const uint32_t RegExp_dotall_get = 665;
+const uint32_t RegExp_extended_get = 666;
+const uint32_t RegExp_AS3_exec = 667;
+const uint32_t JSON_private_parseCore = 672;
+const uint32_t JSON_private_stringifySpecializedToString = 673;
+const uint32_t XML_ignoreComments_get = 724;
+const uint32_t XML_ignoreComments_set = 725;
+const uint32_t XML_ignoreProcessingInstructions_get = 726;
+const uint32_t XML_ignoreProcessingInstructions_set = 727;
+const uint32_t XML_ignoreWhitespace_get = 728;
+const uint32_t XML_ignoreWhitespace_set = 729;
+const uint32_t XML_prettyPrinting_get = 730;
+const uint32_t XML_prettyPrinting_set = 731;
+const uint32_t XML_prettyIndent_get = 732;
+const uint32_t XML_prettyIndent_set = 733;
+const uint32_t XML_AS3_toString = 737;
+const uint32_t XML_AS3_hasOwnProperty = 738;
+const uint32_t XML_AS3_propertyIsEnumerable = 739;
+const uint32_t XML_AS3_addNamespace = 740;
+const uint32_t XML_AS3_appendChild = 741;
+const uint32_t XML_AS3_attribute = 742;
+const uint32_t XML_AS3_attributes = 743;
+const uint32_t XML_AS3_child = 744;
+const uint32_t XML_AS3_childIndex = 745;
+const uint32_t XML_AS3_children = 746;
+const uint32_t XML_AS3_comments = 747;
+const uint32_t XML_AS3_contains = 748;
+const uint32_t XML_AS3_copy = 749;
+const uint32_t XML_AS3_descendants = 750;
+const uint32_t XML_AS3_elements = 751;
+const uint32_t XML_AS3_hasComplexContent = 752;
+const uint32_t XML_AS3_hasSimpleContent = 753;
+const uint32_t XML_AS3_inScopeNamespaces = 754;
+const uint32_t XML_AS3_insertChildAfter = 755;
+const uint32_t XML_AS3_insertChildBefore = 756;
+const uint32_t XML_AS3_localName = 758;
+const uint32_t XML_AS3_name = 759;
+const uint32_t XML_private__namespace = 760;
+const uint32_t XML_AS3_namespaceDeclarations = 762;
+const uint32_t XML_AS3_nodeKind = 763;
+const uint32_t XML_AS3_normalize = 764;
+const uint32_t XML_AS3_parent = 765;
+const uint32_t XML_AS3_processingInstructions = 766;
+const uint32_t XML_AS3_prependChild = 767;
+const uint32_t XML_AS3_removeNamespace = 768;
+const uint32_t XML_AS3_replace = 769;
+const uint32_t XML_AS3_setChildren = 770;
+const uint32_t XML_AS3_setLocalName = 771;
+const uint32_t XML_AS3_setName = 772;
+const uint32_t XML_AS3_setNamespace = 773;
+const uint32_t XML_AS3_text = 774;
+const uint32_t XML_AS3_toXMLString = 775;
+const uint32_t XML_AS3_notification = 776;
+const uint32_t XML_AS3_setNotification = 777;
+const uint32_t XMLList_AS3_toString = 821;
+const uint32_t XMLList_AS3_hasOwnProperty = 823;
+const uint32_t XMLList_AS3_propertyIsEnumerable = 824;
+const uint32_t XMLList_AS3_attribute = 825;
+const uint32_t XMLList_AS3_attributes = 826;
+const uint32_t XMLList_AS3_child = 827;
+const uint32_t XMLList_AS3_children = 828;
+const uint32_t XMLList_AS3_comments = 829;
+const uint32_t XMLList_AS3_contains = 830;
+const uint32_t XMLList_AS3_copy = 831;
+const uint32_t XMLList_AS3_descendants = 832;
+const uint32_t XMLList_AS3_elements = 833;
+const uint32_t XMLList_AS3_hasComplexContent = 834;
+const uint32_t XMLList_AS3_hasSimpleContent = 835;
+const uint32_t XMLList_AS3_length = 836;
+const uint32_t XMLList_AS3_name = 837;
+const uint32_t XMLList_AS3_normalize = 838;
+const uint32_t XMLList_AS3_parent = 839;
+const uint32_t XMLList_AS3_processingInstructions = 840;
+const uint32_t XMLList_AS3_text = 841;
+const uint32_t XMLList_AS3_toXMLString = 842;
+const uint32_t XMLList_AS3_addNamespace = 843;
+const uint32_t XMLList_AS3_appendChild = 844;
+const uint32_t XMLList_AS3_childIndex = 845;
+const uint32_t XMLList_AS3_inScopeNamespaces = 846;
+const uint32_t XMLList_AS3_insertChildAfter = 847;
+const uint32_t XMLList_AS3_insertChildBefore = 848;
+const uint32_t XMLList_AS3_nodeKind = 849;
+const uint32_t XMLList_private__namespace = 850;
+const uint32_t XMLList_AS3_localName = 852;
+const uint32_t XMLList_AS3_namespaceDeclarations = 853;
+const uint32_t XMLList_AS3_prependChild = 854;
+const uint32_t XMLList_AS3_removeNamespace = 855;
+const uint32_t XMLList_AS3_replace = 856;
+const uint32_t XMLList_AS3_setChildren = 857;
+const uint32_t XMLList_AS3_setLocalName = 858;
+const uint32_t XMLList_AS3_setName = 859;
+const uint32_t XMLList_AS3_setNamespace = 860;
+const uint32_t QName_localName_get = 865;
+const uint32_t QName_uri_get = 866;
+const uint32_t flash_utils_Proxy_flash_proxy_isAttribute = 922;
+const uint32_t flash_utils_ByteArray_defaultObjectEncoding_get = 929;
+const uint32_t flash_utils_ByteArray_defaultObjectEncoding_set = 930;
+const uint32_t flash_utils_ByteArray_readBytes = 932;
+const uint32_t flash_utils_ByteArray_writeBytes = 933;
+const uint32_t flash_utils_ByteArray_writeBoolean = 934;
+const uint32_t flash_utils_ByteArray_writeByte = 935;
+const uint32_t flash_utils_ByteArray_writeShort = 936;
+const uint32_t flash_utils_ByteArray_writeInt = 937;
+const uint32_t flash_utils_ByteArray_writeUnsignedInt = 938;
+const uint32_t flash_utils_ByteArray_writeFloat = 939;
+const uint32_t flash_utils_ByteArray_writeDouble = 940;
+const uint32_t flash_utils_ByteArray_writeMultiByte = 941;
+const uint32_t flash_utils_ByteArray_writeUTF = 942;
+const uint32_t flash_utils_ByteArray_writeUTFBytes = 943;
+const uint32_t flash_utils_ByteArray_readBoolean = 944;
+const uint32_t flash_utils_ByteArray_readByte = 945;
+const uint32_t flash_utils_ByteArray_readUnsignedByte = 946;
+const uint32_t flash_utils_ByteArray_readShort = 947;
+const uint32_t flash_utils_ByteArray_readUnsignedShort = 948;
+const uint32_t flash_utils_ByteArray_readInt = 949;
+const uint32_t flash_utils_ByteArray_readUnsignedInt = 950;
+const uint32_t flash_utils_ByteArray_readFloat = 951;
+const uint32_t flash_utils_ByteArray_readDouble = 952;
+const uint32_t flash_utils_ByteArray_readMultiByte = 953;
+const uint32_t flash_utils_ByteArray_readUTF = 954;
+const uint32_t flash_utils_ByteArray_readUTFBytes = 955;
+const uint32_t flash_utils_ByteArray_length_get = 956;
+const uint32_t flash_utils_ByteArray_length_set = 957;
+const uint32_t flash_utils_ByteArray_writeObject = 958;
+const uint32_t flash_utils_ByteArray_readObject = 959;
+const uint32_t flash_utils_ByteArray_private__compress = 961;
+const uint32_t flash_utils_ByteArray_private__uncompress = 964;
+const uint32_t flash_utils_ByteArray_private__toString = 967;
+const uint32_t flash_utils_ByteArray_bytesAvailable_get = 968;
+const uint32_t flash_utils_ByteArray_position_get = 969;
+const uint32_t flash_utils_ByteArray_position_set = 970;
+const uint32_t flash_utils_ByteArray_objectEncoding_get = 971;
+const uint32_t flash_utils_ByteArray_objectEncoding_set = 972;
+const uint32_t flash_utils_ByteArray_endian_get = 973;
+const uint32_t flash_utils_ByteArray_endian_set = 974;
+const uint32_t flash_utils_ByteArray_clear = 975;
 
+extern double Math_private__min_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_private__max_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_abs_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_acos_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_asin_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_atan_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_ceil_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_cos_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_exp_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_floor_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_log_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_round_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_sin_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_sqrt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_tan_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_atan2_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_pow_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_max_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_min_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_random_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom Error_getErrorMessage_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom Error_getStackTrace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double Date_parse_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double Date_UTC_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double Date_AS3_valueOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -846,28 +868,6 @@ extern double __AS3___vec_Vector_double_AS3_shift_thunk(MethodEnv* env, uint32_t
 extern avmplus::Atom native_script_function_avmplus_describeTypeJSON_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom native_script_function_avmplus_getQualifiedClassName_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom native_script_function_avmplus_getQualifiedSuperclassName_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_private__min_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_private__max_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_abs_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_acos_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_asin_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_atan_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_ceil_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_cos_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_exp_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_floor_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_log_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_round_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_sin_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_sqrt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_tan_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_atan2_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_pow_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_max_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_min_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double Math_random_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom Error_getErrorMessage_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom Error_getStackTrace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 class SlotOffsetsAndAsserts;
 //-----------------------------------------------------------
 // Object$
@@ -2041,6 +2041,82 @@ class avmplus_DoubleVectorObjectSlots
 //-----------------------------------------------------------
 
 //-----------------------------------------------------------
+// private::MethodClosure$
+//-----------------------------------------------------------
+class avmplus_MethodClosureClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::MethodClosureClass;
+#define GC_TRIVIAL_TRACER_MethodClosureClass
+};
+#define DECLARE_SLOTS_MethodClosureClass \
+    public: \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
+    public: \
+        virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::MethodClosure> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmplus::MethodClosure>((avmplus::MethodClosure*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+    public: \
+        REALLY_INLINE bool isType(avmplus::Atom value) \
+        { \
+            return isTypeImpl(value); \
+        } \
+        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            return isTypeImpl(value->atom()); \
+        } \
+        REALLY_INLINE GCRef<avmplus::MethodClosure> asType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value); \
+            return GCRef<avmplus::MethodClosure>((avmplus::MethodClosure*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::MethodClosure> asType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value->atom()); \
+            return GCRef<avmplus::MethodClosure>((avmplus::MethodClosure*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::MethodClosure> coerceToType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value); \
+            return GCRef<avmplus::MethodClosure>((avmplus::MethodClosure*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::MethodClosure> coerceToType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
+            return GCRef<avmplus::MethodClosure>((avmplus::MethodClosure*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// private::MethodClosure
+//-----------------------------------------------------------
+class avmplus_MethodClosureSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::MethodClosure;
+#define GC_TRIVIAL_TRACER_MethodClosure
+};
+#define DECLARE_SLOTS_MethodClosure \
+    public: \
+        virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
 // Math$
 //-----------------------------------------------------------
 class avmplus_MathClassSlots
@@ -2056,7 +2132,6 @@ private:
     double m_PI;
     double m_SQRT1_2;
     double m_SQRT2;
-    double m_private_PosInfinity;
     double m_private_NegInfinity;
 #define GC_TRIVIAL_TRACER_MathClass
 };
@@ -2122,9 +2197,6 @@ private:
     public: \
         REALLY_INLINE double get_SQRT2() const { return m_slots_MathClass.m_SQRT2; } \
         REALLY_INLINE void setconst_SQRT2(double newVal) { m_slots_MathClass.m_SQRT2 = newVal; } \
-    protected: \
-        REALLY_INLINE double get_PosInfinity() const { return m_slots_MathClass.m_private_PosInfinity; } \
-        REALLY_INLINE void setconst_PosInfinity(double newVal) { m_slots_MathClass.m_private_PosInfinity = newVal; } \
     protected: \
         REALLY_INLINE double get_NegInfinity() const { return m_slots_MathClass.m_private_NegInfinity; } \
         REALLY_INLINE void setconst_NegInfinity(double newVal) { m_slots_MathClass.m_private_NegInfinity = newVal; } \
@@ -2247,82 +2319,6 @@ public:
         REALLY_INLINE void set_name(avmplus::Atom newVal) { m_slots_ErrorObject.m_name = newVal; } \
     private: \
         avmplus::NativeID::avmplus_ErrorObjectSlots m_slots_ErrorObject \
-
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
-// private::MethodClosure$
-//-----------------------------------------------------------
-class avmplus_MethodClosureClassSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmplus::MethodClosureClass;
-#define GC_TRIVIAL_TRACER_MethodClosureClass
-};
-#define DECLARE_SLOTS_MethodClosureClass \
-    public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
-    public: \
-        virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
-    private: \
-        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
-    public: \
-        REALLY_INLINE GCRef<avmplus::MethodClosure> constructObject() \
-        { \
-            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
-            avmplus::Atom const result = this->construct(0, args); \
-            return GCRef<avmplus::MethodClosure>((avmplus::MethodClosure*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-    public: \
-        REALLY_INLINE bool isType(avmplus::Atom value) \
-        { \
-            return isTypeImpl(value); \
-        } \
-        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            return isTypeImpl(value->atom()); \
-        } \
-        REALLY_INLINE GCRef<avmplus::MethodClosure> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmplus::MethodClosure>((avmplus::MethodClosure*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::MethodClosure> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmplus::MethodClosure>((avmplus::MethodClosure*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::MethodClosure> coerceToType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value); \
-            return GCRef<avmplus::MethodClosure>((avmplus::MethodClosure*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::MethodClosure> coerceToType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
-            return GCRef<avmplus::MethodClosure>((avmplus::MethodClosure*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-    private: \
-        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
-// private::MethodClosure
-//-----------------------------------------------------------
-class avmplus_MethodClosureSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmplus::MethodClosure;
-#define GC_TRIVIAL_TRACER_MethodClosure
-};
-#define DECLARE_SLOTS_MethodClosure \
-    public: \
-        virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
-    private: \
-        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
-    private: \
-        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
