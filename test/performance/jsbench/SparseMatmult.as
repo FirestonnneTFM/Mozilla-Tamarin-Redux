@@ -46,7 +46,11 @@
         JGFrun(3);
         var elapsed = getTimer() - start;
     }
-	print("metric time "+elapsed);
+    if (JGFvalidate())
+        print("metric time "+elapsed);
+    else
+        print("validation failed");
+    
 	function _randomInt()
 	{
 		lastRandom = (lastRandom * 214013 + 2531011) % 16777216;
@@ -105,13 +109,14 @@
 		if (dev > 1.0e-12) {
 			print("Validation failed");
 			print("ytotal = " + ytotal + "  " + dev + "  " + size);
+            		return false;
 		}else
 		{
 			print("Validation passed");
 			print("ytotal = " + ytotal + "  " + dev + "  " + size);
 		}
 		print("Y total: " + ytotal + " Dev: " + dev );
-
+        	return true;
 	}
 
 	function JGFtidyup() {

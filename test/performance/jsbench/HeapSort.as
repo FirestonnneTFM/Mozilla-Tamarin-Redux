@@ -15,7 +15,10 @@ else { // mobile
     JGFrun(3);
     var elapsed = getTimer() - start;
 }
-print("metric time "+elapsed);
+if (JGFvalidate())
+    print("metric time "+elapsed);
+else
+    print("validation failed");
 
 /**
  * @author ayermolo
@@ -47,6 +50,7 @@ function JGFvalidate() {
 			break;
 		}
 	}
+   	return !error;
 }
 
 function JGFsetsize(sizelocal)

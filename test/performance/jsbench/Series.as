@@ -22,7 +22,11 @@ var size;
         JGFrun(3);
         var elapsed = getTimer() - start;
     }
-	print("metric time "+elapsed);
+    if (JGFvalidate())
+        print("metric time "+elapsed);
+    else
+        print("validation failed");
+  
 	function JGFsetsize(sizel) {
 		size = sizel;
 	}
@@ -64,11 +68,13 @@ var size;
 					print("Validation failed for coefficient " + j + "," + i);
 					print("Computed value = " + TestArray[j][i]);
 					print("Reference value = " + ref[i][j]);
+                    			return false;
 				}
 				
 				print( TestArray[j][i] );
 			}
 		}
+        	return true;
 	}
 
 	function JGFtidyup() {

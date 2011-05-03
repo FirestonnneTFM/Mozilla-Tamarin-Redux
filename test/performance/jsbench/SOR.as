@@ -31,7 +31,11 @@ var size;
         JGFrun(3);
         var elapsed = getTimer() - start;
     }
-	print("metric time "+elapsed);
+    if (JGFvalidate())
+        print("metric time "+elapsed);
+    else
+        print("validation failed");
+    
 	function JGFsetsize(sizel) {
 		size = sizel;
 	}
@@ -59,9 +63,11 @@ var size;
 		if (dev > 1.0e-12) {
 			print("Validation failed");
 			print("Gtotal = " + Gtotal + "  " + dev + "  " + size);
+            		return false;
 		}
 		print("Gtotal is: " + Gtotal);
 		print("Dev is: " + dev);
+        	return true;
 	}
 
 	function JGFtidyup() {

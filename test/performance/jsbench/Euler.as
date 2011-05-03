@@ -79,17 +79,20 @@
 	}
 
 	function JGFvalidate() {
-		var refval = new Array(2);
-		refval[0] = 0.0033831416599344965;
-		refval[1] = 0.006812543658280322;
+		var refval = new Array(3);
+		refval[0] = 0.0006404115803224407;
+        	refval[1] = 0.0033831416599344965;
+		refval[2] = 0.006812543658280322;
 		var dev = Math.abs(error - refval[size]);
 		if (dev > 1.0e-12) {
 			print("Validation failed");
 			print("Computed RMS pressure error = " + error);
 			print("Reference value = " + refval[size]);
+            		return false;
 		}else
 		{
 			print("Validation passed");
+            		return true;
 		}
 	}
 
@@ -609,27 +612,39 @@
 		// throw away temporary arrays
 		oldval = newval = null;
 	}
-	function printTG()
+	function printTG(localtg)
 	{
-		print("entering printTG");
+        print("entering printTG");
 		for(var loop1=0;loop1<imax+2;loop1++)
 				{
 					for(var loop2=0;loop2<jmax+2;loop2++)
 					{
-						//print("tg["+loop1+"]["+loop2+"]: "+tg[loop1][loop2]);
-						if(tg[loop1][loop2]<0&&false)
+						print("localtg["+loop1+"]["+loop2+"]: "+localtg[loop1][loop2]);
+						if(localtg[loop1][loop2]<0&&false)
 						{
-							print("tg["+loop1+"]["+loop2+"] is negative loop1:loop2 ="+loop1+":"+loop2+":"+tg[loop1][loop2]);
+							print("localtg["+loop1+"]["+loop2+"] is negative loop1:loop2 ="+loop1+":"+loop2+":"+localtg[loop1][loop2]);
 							//errorCheck=true;
 							//return;
 						}
-						if(isNaN(tg[loop1][loop2]) || tg[loop1][loop2]=="NaN")
+						if(isNaN(localtg[loop1][loop2]) || localtg[loop1][loop2]=="NaN")
 						{
-							print("tg is NaN loop1:loop2 ="+loop1+":"+loop2+":"+tg[loop1][loop2]);
+							print("tglocaltgis NaN loop1:loop2 ="+loop1+":"+loop2+":"+localtg[loop1][loop2]);
 							errorCheck=true;
 							return;
 						}
 						
+					}
+				}
+	}
+    
+    function printUG(localug)
+	{
+
+		for(var loop1=0;loop1<imax+2;loop1++)
+				{
+					for(var loop2=0;loop2<jmax+2;loop2++)
+					{
+						print("localug["+loop1+"]["+loop2+"]: "+localug[loop1][loop2].a+":"+localug[loop1][loop2].b+":"+localug[loop1][loop2].c+":"+localug[loop1][loop2].d);
 					}
 				}
 	}
@@ -1595,5 +1610,8 @@ class Vector2 {
         // unable to trim this test down further
         var elapsed = 0;
     }
-	print("metric time "+elapsed);
+    if (JGFvalidate())
+        print("metric time "+elapsed);
+    else
+        print("validation failed");
 	

@@ -37,7 +37,10 @@ datasizes[3] = 100000;
       JGFrun(3);
       var elapsed = getTimer() - start;
   }
-  print("metric time "+elapsed);
+  if (JGFvalidate())
+    print("metric time "+elapsed);
+  else
+    print("validation failed");
   
   function _randomInt():int
   {
@@ -56,7 +59,7 @@ datasizes[3] = 100000;
     Do();
   }
 
-  function JGFvalidate():void {
+  function JGFvalidate():Boolean {
     var error:Boolean;
 
     error = false;
@@ -67,9 +70,10 @@ datasizes[3] = 100000;
         print("Original Byte " + i + " = " + plain1[i]);
         print("Encrypted Byte " + i + " = " + crypt1[i]);
         print("Decrypted Byte " + i + " = " + plain2[i]);
-        // break;
+        break;
       }
     }
+    return !error;
   }
 
 

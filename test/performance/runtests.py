@@ -527,6 +527,10 @@ class PerformanceRuntest(RuntestBase):
 
         # get all other metrics displayed
         for line in output:
+            # If the testcase failed validation then stop parsing
+            if 'validation failed' in line.lower():
+                break
+
             # results must have the form of 'metric metric_name value'
             if 'metric' in line:
                 rl=line.rsplit()

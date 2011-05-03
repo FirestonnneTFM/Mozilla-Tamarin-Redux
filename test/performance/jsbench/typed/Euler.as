@@ -78,18 +78,21 @@
     runiters();
   }
 
-  function JGFvalidate():void {
-    var refval:Vector.<Number> = new Vector.<Number>(2,true);
-    refval[0] = 0.0033831416599344965;
-    refval[1] = 0.006812543658280322;
+  function JGFvalidate():Boolean {
+    var refval:Vector.<Number> = new Vector.<Number>(3,true);
+    refval[0] = 0.0006404115803224407; // 0.0013717684673271995
+    refval[1] = 0.0033831416599344965;
+    refval[2] = 0.006812543658280322;
     var dev:Number = Math.abs(error - refval[size]);
     if (dev > 1.0e-12) {
       print("Validation failed");
       print("Computed RMS pressure error = " + error);
-      print("Reference value = " + refval[size]);
+      print("Reference value             = " + refval[size]);
+      return false;
     }else
     {
       print("Validation passed");
+      return true;
     }
   }
 
@@ -633,23 +636,23 @@
     // throw away temporary arrays
     oldval = newval = null;
   }
-  function printTG():void
+  function printTG(localtg:Vector.<Vector.<Number>>):void
   {
     print("entering printTG");
-    for(var loop1:int=0;loop1<imax+2;loop1++)
+    for(var loop1:int=0;loop1<max+2;loop1++)
         {
           for(var loop2:int=0;loop2<jmax+2;loop2++)
           {
-            //print("tg["+loop1+"]["+loop2+"]: "+tg[loop1][loop2]);
-            if(tg[loop1][loop2]<0&&false)
+            print("localtg["+loop1+"]["+loop2+"]: "+localtg[loop1][loop2]);
+            if(localtg[loop1][loop2]<0&&false)
             {
-              print("tg["+loop1+"]["+loop2+"] is negative loop1:loop2 ="+loop1+":"+loop2+":"+tg[loop1][loop2]);
+              print("localtg["+loop1+"]["+loop2+"] is negative loop1:loop2 ="+loop1+":"+loop2+":"+localtg[loop1][loop2]);
               //errorCheck=true;
               //return;
             }
-            if(isNaN(tg[loop1][loop2]) || tg[loop1][loop2]=="NaN")
+            if(isNaN(localtg[loop1][loop2]) || localtg[loop1][loop2]=="NaN")
             {
-              print("tg is NaN loop1:loop2 ="+loop1+":"+loop2+":"+tg[loop1][loop2]);
+              print("localtg is NaN loop1:loop2 ="+loop1+":"+loop2+":"+localtg[loop1][loop2]);
               errorCheck=true;
               return;
             }
@@ -657,6 +660,19 @@
           }
         }
   }
+  
+  function printUG(localug:Vector.<Vector.<Statevector>>):void
+  {
+    
+    for(var loop1:int=0;loop1<localug.length;loop1++)
+        {
+          for(var loop2:int=0;loop2<localug[loop1].length;loop2++)
+          {
+            print("localug["+loop1+"]["+loop2+"]: "+localug[loop1][loop2].a+":"+localug[loop1][loop2].b+":"+localug[loop1][loop2].c+":"+localug[loop1][loop2].d);
+          }
+        }
+  }
+  
   function doIteration():void {
     var scrap:Number;
     var i:int, j:int;
@@ -891,11 +907,11 @@
     }
   }
 
-  function calculateG( localpg:Vector.<Vector.<Number>>,  localtg:Vector.<Vector.<Number>>, localug:Vector.<Vector.<Statevector>>) {
+  function calculateG( localpg:Vector.<Vector.<Number>>,  localtg:Vector.<Vector.<Number>>, localug:Vector.<Vector.<Statevector>>):void {
   //  print("Entering calculateG");
     /* Works for default values 4/10: 5:15 pm */
     var temp:Number, temp2:Number, temp3:Number;
-    var v:int;
+    var v:Number;
     var i:int, j:int;
 
     for (i = 0; i < imax + 1; ++i) {
@@ -1616,5 +1632,8 @@ class Vector2 {
       // unable to trim this test down further
       var elapsed = 0;
   }
-  print("metric time "+elapsed);
+      if (JGFvalidate())
+        print("metric time "+elapsed);
+    else
+        print("validation failed");
   

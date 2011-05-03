@@ -197,9 +197,21 @@ for (var i:uint=0; i<cycles; i++){
 	FFT.transform(x); // forward transform
 	FFT.inverse(x); // backward transform
 }
+
+
+
 if (CONFIG::desktop)
-    print("metric time "+(new Date()-starttime));
+    var endtime:Number = new Date()-starttime;
 else // mobile
-    print("metric time "+(getTimer()-starttime));
+    var endtime:int = getTimer()-starttime;
+
+
+// Validate that the code ran correctly
+const EPS:Number = 1.0e-10;
+if ( FFT.test(x) / N > EPS )
+    print("FAILED verification.");
+else
+    print("metric time "+endtime);
+
 
 }

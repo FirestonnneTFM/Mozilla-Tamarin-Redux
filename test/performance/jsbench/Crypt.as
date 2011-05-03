@@ -39,7 +39,10 @@
     }
 	
 	
-	print("metric time "+elapsed);
+    if (JGFvalidate())
+        print("metric time "+elapsed);
+    else
+        print("validation failed");
 	
 	function _randomInt()
 	{
@@ -69,9 +72,10 @@
 				print("Original Byte " + i + " = " + plain1[i]);
 				print("Encrypted Byte " + i + " = " + crypt1[i]);
 				print("Decrypted Byte " + i + " = " + plain2[i]);
-				// break;
+				break;
 			}
 		}
+        return !error;
 	}
 
 
