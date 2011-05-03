@@ -64,22 +64,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/../extensions/SamplerScript.cpp \
   $(curdir)/../extensions/Selftest.cpp \
   $(curdir)/../extensions/SelftestInit.cpp \
-  $(curdir)/../extensions/ST_avmplus_basics.cpp \
-  $(curdir)/../extensions/ST_avmplus_builtins.cpp \
-  $(curdir)/../extensions/ST_avmplus_peephole.cpp \
-  $(curdir)/../extensions/ST_mmgc_basics.cpp \
-  $(curdir)/../extensions/ST_mmgc_dependent.cpp \
-  $(curdir)/../extensions/ST_mmgc_finalize_uninit.cpp \
-  $(curdir)/../extensions/ST_mmgc_mmfx_array.cpp \
-  $(curdir)/../extensions/ST_mmgc_threads.cpp \
-  $(curdir)/../extensions/ST_mmgc_weakref.cpp \
-  $(curdir)/../extensions/ST_mmgc_543560.cpp \
-  $(curdir)/../extensions/ST_mmgc_575631.cpp \
-  $(curdir)/../extensions/ST_mmgc_580603.cpp \
-  $(curdir)/../extensions/ST_mmgc_gcheap.cpp \
-  $(curdir)/../extensions/ST_vmbase_concurrency.cpp \
-  $(curdir)/../extensions/ST_vmbase_safepoints.cpp \
-  $(curdir)/../extensions/ST_vmpi_threads.cpp \
+  $(curdir)/../extensions/SelftestExec.cpp \
   $(NULL)
 
 ifeq (windows,$(TARGET_OS))

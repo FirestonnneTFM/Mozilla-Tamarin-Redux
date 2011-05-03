@@ -167,7 +167,7 @@ namespace avmplus
     class AvmCore;
     class Traits;
 #ifdef VMCFG_SELFTEST
-    class ST_mmgc_basics;
+    namespace ST_mmgc_basics { class ST_mmgc_basics; }
 #endif
 }
 
@@ -187,7 +187,7 @@ namespace MMgc
     {
         friend class GC;
 #ifdef VMCFG_SELFTEST
-        friend class avmplus::ST_mmgc_basics;
+        friend class avmplus::ST_mmgc_basics::ST_mmgc_basics;
 #endif
         GCRoot();
         void init(GC*gc, const void *object, size_t size, bool isStackMemory, bool isExactlyTraced);
@@ -467,7 +467,7 @@ namespace MMgc
         friend class GCObject;
         friend class GCTraceableBase;
 #ifdef VMCFG_SELFTEST
-        friend class avmplus::ST_mmgc_basics;
+        friend class avmplus::ST_mmgc_basics::ST_mmgc_basics;
 #endif
         friend class avmplus::Traits;    // We may be able to throttle back on this by making TracePointer visible, but OK for now
     public:

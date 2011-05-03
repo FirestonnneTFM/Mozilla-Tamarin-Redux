@@ -152,6 +152,7 @@ package selftest
         var ifdef_text = null;
         var ifndef_text = null;
         var classname = null;
+        var namespace_name = null;
     }
 
     function parse(lines, filename) {
@@ -233,6 +234,7 @@ package selftest
                         break;
                     vs++;
                     i++;
+                    t.push("// line " + i + " \"" + filename + "\"");
                     t.push("verifyPass(" + res[1] + ", \"" + quote(res[1]) + "\", __FILE__, __LINE__);");
                 }
                 if (vs == 0)
@@ -283,7 +285,9 @@ package selftest
     function formatSelftest(input, st) {
         var s = [];
         var classname = "ST_" + st.component + "_" + st.category;
+        var namespace_name = classname;
         st.classname = classname;
+        st.namespace_name = namespace_name;
         s.push("// Generated from " + input);
         pushMultiple(s, st.comments);
         s.push("#include \"avmshell.h\"");
@@ -298,7 +302,7 @@ package selftest
         if (st.ifndef_text != null)
             s.push(st.ifndef_text);
         s.push("namespace avmplus {");
-
+        s.push("namespace "+namespace_name+" {");
         for ( var i=0 ; i < st.prefix.length ; i++ )
             s.push(st.prefix[i]);
 
@@ -359,6 +363,7 @@ package selftest
 
         s.push("void create_" + st.component + "_" + st.category + "(AvmCore* core) { new " + classname + "(core); }");
 
+        s.push("}");
         s.push("}");
         if (st.ifndef_text != null)
             s.push("#endif");
@@ -425,7 +430,9 @@ package selftest
                 s.push(st.ifdef_text);
             if (st.ifndef_text != null)
                 s.push(st.ifndef_text);
+            s.push("namespace "+st.namespace_name+" {");
             s.push("extern void create_" + st.component + "_" + st.category + "(AvmCore* core);");
+            s.push("}");
             if (st.ifndef_text != null)
                 s.push("#endif");
             if (st.ifdef_text != null)
@@ -438,7 +445,7 @@ package selftest
                 s.push(st.ifdef_text);
             if (st.ifndef_text != null)
                 s.push(st.ifndef_text);
-            s.push("create_" + st.component + "_" + st.category + "(core);");
+            s.push(""+st.namespace_name+"::create_" + st.component + "_" + st.category + "(core);");
             if (st.ifndef_text != null)
                 s.push("#endif");
             if (st.ifdef_text != null)
@@ -452,17 +459,28 @@ package selftest
 
     var selftests = [];
 
-    function process(input, output) {
+    function process(input) {
         var st = parse(File.read(input).split("\n"), input);
         selftests.push(st);
-        File.write(output, formatSelftest(input, st));
+        return formatSelftest(input, st);
     }
 
-    for ( var i=0 ; i < System.argv.length ; i++ ) {
-        if (!System.argv[i].match(/\.st$/))
-            print("WARNING: ignoring non-selftes file " + System.argv[i]);
-        process(System.argv[i], System.argv[i].replace(/\.st$/, ".cpp"));
+    var args = System.argv;
+    args = args.sort();
+
+    var processed = [];
+    for ( var i=0 ; i < args.length ; i++ ) {
+        if (!args[i].match(/\.st$/)) {
+            print("WARNING: ignoring non-selftest file " + args[i]);
+            processed[i] = "";
+        } else {
+            processed[i] = process(args[i]);
+        }
     }
+
+    var prefix_note = "// Generated from " + args.join(", ") + "\n";
+    File.write("SelftestExec.cpp", prefix_note + processed.join("\n") + "\n");
+
     File.write("SelftestInit.cpp", formatGeneratedInitializer());
 }
 
