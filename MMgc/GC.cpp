@@ -3017,8 +3017,25 @@ namespace MMgc
 
     void GC::FlushBarrierWork()
     {
+        uint32_t iwork_count_old = m_incrementalWork.Count();
+        uint32_t bwork_count_old = m_barrierWork.Count();
+
         if (!m_incrementalWork.TransferEverythingFrom(m_barrierWork))
             SignalMarkStackOverflow_NonGCObject();
+
+        if (bwork_count_old != 0 &&
+            (m_incrementalWork.Count() == iwork_count_old)) {
+            m_incrementalWork.TransferSomethingFrom(m_barrierWork);
+        }
+
+        // Bug 642792: must ensure that some progress was made
+        // (i.e. some items transferred from non-empty barrier stack);
+        // otherwise we are likely to infinite loop.
+        //
+        // FIXME, Bug 654727: This should yield a Release mode OOM
+        // rather than a Debug mode assert.
+        GCAssert(bwork_count_old == 0 ||
+                 m_incrementalWork.Count() > iwork_count_old);
     }
 
     void GC::WriteBarrierTrap(const void *container)
