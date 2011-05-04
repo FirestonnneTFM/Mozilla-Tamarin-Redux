@@ -465,6 +465,36 @@ namespace MMgc
         return true;
     }
 
+    REALLY_INLINE const void* GCMarkStack::Peek_GCObject()
+    {
+        GCAssert(!IsEmpty());
+        uintptr_t w = m_top[-1];
+        GCAssert(!(w & 1));
+        if ((w & 3) == 0) {
+            return (void*)w;
+        }
+        return NULL;
+    }
+
+    bool GCMarkStack::TransferSomethingFrom(GCMarkStack& other)
+    {
+        if (other.IsEmpty())
+            return true;
+
+        const void* peek = other.Peek_GCObject();
+        GCAssert(peek != NULL);
+        bool pushed = this->Push_GCObject(peek);
+        if (pushed) {
+            const void* popped = other.Pop_GCObject();
+            (void)popped;
+            GCAssert(peek == popped);
+        }
+
+        GCAssert(Invariants());
+        GCAssert(other.Invariants());
+        return pushed;
+    }
+
     uintptr_t* GCMarkStack::GetNextItemAbove(uintptr_t* item)
     {
         if (item == m_top-1)

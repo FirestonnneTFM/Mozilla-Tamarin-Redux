@@ -198,10 +198,30 @@ namespace MMgc
          */
         bool TransferEverythingFrom(GCMarkStack& other);
 
+        /**
+         * Move at least one item from "other" and insert into this
+         * stack.  The same conditions apply here as for
+         * GCMarkStack::TransferEverythingFrom: the stack "other" must
+         * not have any protector items or split items.  Return true
+         * if the transfer was successful (or if other was empty);
+         * returns false if an out-of-memory condition prevented
+         * reestablishing invariants in this or "other" following the
+         * transfer, in which case the item transfer is rolled back.
+         */
+        bool TransferSomethingFrom(GCMarkStack& other);
+
 #ifdef MMGC_MARKSTACK_DEPTH
         /** Return the number of elements on the stack when its depth was the greatest. */
         uint32_t MaxCount();
 #endif
+    private:
+        /**
+         * If the top item is a GC item then return it without popping,
+         * otherwise return null.
+         * @see Pop_GCObject
+         */
+        const void* Peek_GCObject();
+
     private:
         // No implementation of copy constructors and assignment operators
 
