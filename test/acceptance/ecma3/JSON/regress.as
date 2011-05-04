@@ -62,7 +62,6 @@ for (var i = 0; i < 1e3; i++) {
     y.next = deep;
     deep = y;
 }
-// print(new Date());
 
 function drop(x) { return "okay"; }
 exception1 = 'no exception';

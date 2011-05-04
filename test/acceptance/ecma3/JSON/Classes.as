@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 package {
+    import avmplus.*;
     import flash.utils.*;
 
     var SECTION = "15.2";
@@ -131,16 +132,6 @@ package {
     var testobj4:Object=new Object();
     testobj4.toJSON=true;
     AddTestCase("stringify an AS3 object with non-function toJSON",'{"toJSON":true}',JSON.stringify(testobj4));
-
-    var obj1:Object=new Object();
-    var obj2:Object=new Object();
-    obj2.prop1=10;
-    var d:Dictionary=new Dictionary();
-    d["key"]="value";
-    d[5]=10;
-    d[-10.111]=false;
-    d[obj1]=obj1;
-    AddTestCase("stringify a Dictionary",'"Dictionary"',JSON.stringify(d));
 
     test();
 

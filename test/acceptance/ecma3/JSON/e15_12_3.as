@@ -81,25 +81,25 @@ package {
     try {
         AddTestCase("15.12.3-8-a-2: JSON.stringify treats an Boolean space argument the same as a missing space argument.", true, JSON.stringify(obj)=== JSON.stringify(obj,null, true));
     } catch (e) {
-        print("15.12.3-8-a-2: JSON.stringify should treat Boolean space argument same as missing space argument, threw exception '"+e.toString()+"', FAILED!");
+        AddTestCase("15.12.3-8-a-2: JSON.stringify should treat Boolean space argument same as missing space argument", 'no exception', e.toString());
     }
 
     try {
         AddTestCase("15.12.3-8-a-3: JSON.stringify treats an null space argument the same as a missing space argument.", true, JSON.stringify(obj)=== JSON.stringify(obj,null, null));
     } catch (e) {
-        print("15.12.3-8-a-3: JSON.stringify treats an null space argument the same as a missing space argument. '"+e.toString()+"',FAILED!");
+        AddTestCase("15.12.3-8-a-3: JSON.stringify treats an null space argument the same as a missing space argument. '",'no exception',e.toString());
     }  
 
     try {
         AddTestCase("15.12.3-8-a-4: JSON.stringify treats an Boolean wrapper space argument the same as a missing space argument.", true, JSON.stringify(obj)=== JSON.stringify(obj,null, new Boolean(true)));
     } catch (e) {
-        print("15.12.3-8-a-4: JSON.stringify treats an Boolean wrapper space argument the same as a missing space argument. '"+e.toString()+"' FAILED!");
+        AddTestCase("15.12.3-8-a-4: JSON.stringify treats an Boolean wrapper space argument the same as a missing space argument. '",'no exception',e.toString());
     }
 
     try {
         AddTestCase("15.12.3-8-a-5: JSON.stringify treats non-Number or String object space arguments the same as a missing space argument.", true, JSON.stringify(obj)=== JSON.stringify(obj,null, new Boolean(true)));
     } catch (e) {
-        print("15.12.3-8-a-5: JSON.stringify treats non-Number or String object space arguments the same as a missing space argument. '"+e.toString()+"' FAILED!");
+        AddTestCase("15.12.3-8-a-5: JSON.stringify treats non-Number or String object space arguments the same as a missing space argument. '", 'no exception',e.toString());
     }
 
     var obj2 = {
