@@ -182,7 +182,7 @@ class CodeCoverageRunner:
             env["PATH"]=self.bullseye_dir+":"+env["PATH"]
 
         # Setup the covfile based on the shellname being built
-        env["COVFILE"]="%s/%s.cov" % (self.builds_dir, shellname)
+        env["COVFILE"]="%s/%s-%s.cov" % (self.builds_dir, self.platform, shellname)
         if os.path.exists(env["COVFILE"]):
             os.unlink(env["COVFILE"])
 
@@ -272,7 +272,7 @@ class CodeCoverageRunner:
             env["PATH"]=self.bullseye_dir+":"+env["PATH"]
 
         # Setup the covfile based on the shellname being built
-        env["COVFILE"]="%s/%s.cov" % (self.builds_dir, shellname)
+        env["COVFILE"]="%s/%s-%s.cov" % (self.builds_dir, self.platform, shellname)
 
         if suite=="acceptance":
             print "running acceptance"
@@ -348,7 +348,7 @@ class CodeCoverageRunner:
             env["PATH"]=self.bullseye_dir+":"+env["PATH"]
 
         # Setup the covfile based on the shellname being built
-        env["COVFILE"]="%s/avmshell_%s.cov" % (self.builds_dir, self.platform)
+        env["COVFILE"]="%s/%s-avmshell.cov" % (self.platform,self.builds_dir)
         if os.path.exists(env["COVFILE"]):
             os.unlink(env["COVFILE"])
         
