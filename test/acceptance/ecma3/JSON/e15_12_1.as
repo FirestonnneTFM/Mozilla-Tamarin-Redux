@@ -291,7 +291,7 @@ package {
     try {
         AddTestCase("15.12.1.1-g5-1: The JSON lexical grammar allows Unicode escape sequences in a JSONString","X",JSON.parse('"\\u0058"'));
     } catch (e) {
-        print("FAILED: unicode did not parse");
+        AddTestCase("15.12.1.1-g5-1: The JSON lexical grammar allows Unicode escape sequences in a JSONString","no exception",e.toString());
     }
 
     illegalunicode5Exception="no exception";

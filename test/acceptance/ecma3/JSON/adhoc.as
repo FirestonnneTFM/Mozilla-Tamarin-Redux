@@ -183,3 +183,6 @@ AddTestCase("test Quote on escaped characters: JSON.stringify(\\b,\\t,\\f,\\r)",
 AddTestCase("test Quote on double quote",'"\\""',JSON.stringify('\"'));
 
 test();
+
+Object.prototype.toString=oldObject;
+Array.prototype.toString=oldArray;
