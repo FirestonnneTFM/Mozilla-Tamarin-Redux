@@ -51,6 +51,7 @@ public:
     }
 
     virtual bool gcTrace(MMgc::GC* gc, size_t cursor) {
+        (void)gc;
         // Incorrectly say that there's more to do even when the object is small
         if (cursor == 0)
             return true;
