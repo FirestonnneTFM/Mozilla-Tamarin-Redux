@@ -336,7 +336,6 @@ namespace avmplus
         void committedToEmitFor(Atom key, String* pending,
                                 bool pendingPropnameColon);
 
-        bool isXMLInstance(Atom atom);
         bool isVectorInstance(ScriptObject* obj);
 
         // if value is parent of object in current traversal then
@@ -974,6 +973,7 @@ namespace avmplus
         , m_proplist(proplist)
         , m_replacerFunction(replacer)
         , m_gap(gap)
+        , m_exception(NULL)
         , m_fixedmalloc(MMgc::FixedMalloc::GetFixedMalloc())
         , m_rope(m_fixedmalloc)
     {
@@ -1082,12 +1082,6 @@ namespace avmplus
         Atom atom = value->atom();
         AvmAssert(m_activeValues->contains(atom));
         m_activeValues->remove(atom);
-    }
-
-    bool JSONSerializer::isXMLInstance(Atom atom)
-    {
-        return m_toplevel->builtinClasses()->get_XMLClass()->isType(atom) ||
-            m_toplevel->builtinClasses()->get_XMLListClass()->isType(atom);
     }
 
     bool JSONSerializer::isVectorInstance(ScriptObject* o)
