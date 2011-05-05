@@ -3018,7 +3018,9 @@ namespace MMgc
 
     void GC::FlushBarrierWork()
     {
+#ifdef _DEBUG
         uint32_t bwork_count_old = m_barrierWork.Count();
+#endif
 
         if (!m_incrementalWork.TransferEverythingFrom(m_barrierWork)) {
             SignalMarkStackOverflow_NonGCObject();
