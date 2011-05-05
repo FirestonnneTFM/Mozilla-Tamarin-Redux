@@ -405,3 +405,18 @@ delete gc;
         }
         delete testGC;
     }
+
+
+%%test blacklisting
+#ifdef MMGC_HEAP_GRAPH
+    GC *gc = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
+    MMGC_GCENTER(gc);
+    MyGCObject *mygcobject;
+    mygcobject = (MyGCObject *)new (gc) MyGCObject();
+    gc->addToBlacklist(mygcobject);
+    gc->Collect();
+    gc->removeFromBlacklist(mygcobject);
+    delete gc;
+#endif
+    %%verify true
+
