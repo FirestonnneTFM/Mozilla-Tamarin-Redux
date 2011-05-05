@@ -890,6 +890,8 @@ class tamarinredux:
     windows_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
     windows_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     windows_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    windows_deep_factory.addStep(compile_generic(name="ReleaseHeapGraph", shellname="avmshell_heapgraph", args="--enable-heap-graph", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMTWEAK_HEAP_GRAPH"))
+    windows_deep_factory.addStep(test_selftest(name="ReleaseHeapGraph", shellname="avmshell_heapgraph"))
     windows_deep_factory.addStep(BuildShellCommand(
                 command=['./build-vtune.sh', WithProperties('%s','revision')],
                 env={'branch': WithProperties('%s','branch')},
@@ -939,6 +941,8 @@ class tamarinredux:
     windows_64_deep_factory.addStep(test_generic(name="DebugDebugger-Dverifyall", shellname="avmshell_sd_64", vmargs="-Dverifyall", config="", scriptargs=""))
     windows_64_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     windows_64_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    windows_64_deep_factory.addStep(compile_generic(name="ReleaseHeapGraph", shellname="avmshell_heapgraph_64", args="--enable-heap-graph --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMTWEAK_HEAP_GRAPH"))
+    windows_64_deep_factory.addStep(test_selftest(name="ReleaseHeapGraph", shellname="avmshell_heapgraph_64"))
     windows_64_deep_factory.addStep( TestSuiteShellCommand(
                 command=['../all/run-acceptance-avmdiff-3264.sh', WithProperties('%s','revision')],
                 env={'branch': WithProperties('%s','branch')},
@@ -997,6 +1001,8 @@ class tamarinredux:
     mac_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
     mac_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     mac_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    mac_deep_factory.addStep(compile_generic(name="ReleaseHeapGraph", shellname="avmshell_heapgraph", args="--enable-heap-graph --target=i686-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMTWEAK_HEAP_GRAPH"))
+    mac_deep_factory.addStep(test_selftest(name="ReleaseHeapGraph", shellname="avmshell_heapgraph"))
     mac_deep_factory.addStep(deep_run_brightspot(name='ReleaseDebugger', shell='avmshell_s', testargs='--quiet'))
     mac_deep_factory.addStep(deep_codecoverage(compilecsv="../all/codecoverage-compile.csv", testcsv="../all/codecoverage-test.csv"))
     mac_deep_factory.addStep(deep_codecoverage_process)
@@ -1053,6 +1059,8 @@ class tamarinredux:
     mac64_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
     mac64_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     mac64_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    mac64_deep_factory.addStep(compile_generic(name="ReleaseHeapGraph", shellname="avmshell_heapgraph_64", args="--enable-heap-graph --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMTWEAK_HEAP_GRAPH"))
+    mac64_deep_factory.addStep(test_selftest(name="ReleaseHeapGraph", shellname="avmshell_heapgraph_64"))
     mac64_deep_factory.addStep(deep_run_brightspot(name='ReleaseDebugger', shell='avmshell_s_64', testargs='--quiet'))
     mac64_deep_factory.addStep(compile_generic(name="ReleaseDebugger-Valgrind", shellname="avmshell_s_valgrind_64", args="--enable-debugger --enable-valgrind --mac-sdk=105 --target=x86_64-darwin", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER +AVMFEATURE_VALGRIND"))
     mac64_deep_factory.addStep(test_generic(name="ReleaseDebugger-Valgrind", shellname="avmshell_s_valgrind_64", vmargs="", config="", scriptargs="--valgrind"))
@@ -1098,6 +1106,8 @@ class tamarinredux:
     linux_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
     linux_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     linux_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    linux_deep_factory.addStep(compile_generic(name="ReleaseHeapGraph", shellname="avmshell_heapgraph_64", args="--enable-heap-graph", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMTWEAK_HEAP_GRAPH"))
+    linux_deep_factory.addStep(test_selftest(name="ReleaseHeapGraph", shellname="avmshell_heapgraph_64"))
     linux_deep_factory.addStep(compile_generic(name="ReleaseDebugger-Valgrind", shellname="avmshell_s_valgrind_64", args="--enable-debugger --enable-valgrind", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER +AVMFEATURE_VALGRIND"))
     linux_deep_factory.addStep(test_generic(name="ReleaseDebugger-Valgrind", shellname="avmshell_s_valgrind_64", vmargs="", config="", scriptargs="--valgrind"))
     linux_deep_factory.addStep(deep_codecoverage(compilecsv="../all/codecoverage-compile.csv", testcsv="../all/codecoverage-test.csv"))
