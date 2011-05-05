@@ -1804,6 +1804,7 @@ public:
     }
 
     virtual bool gcTrace(MMgc::GC* gc, size_t cursor) {
+        (void)gc;
         // Incorrectly say that there's more to do even when the object is small
         if (cursor == 0)
             return true;
@@ -1843,7 +1844,7 @@ void ST_mmgc_exact::test0() {
     core->gc->Collect();
     core->gc->UnlockObject(lock);
 
-// line 74 "ST_mmgc_exact.st"
+// line 75 "ST_mmgc_exact.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 
