@@ -70,6 +70,9 @@ extern void create_mmgc_basics(AvmCore* core);
 namespace ST_mmgc_dependent {
 extern void create_mmgc_dependent(AvmCore* core);
 }
+namespace ST_mmgc_exact {
+extern void create_mmgc_exact(AvmCore* core);
+}
 namespace ST_mmgc_finalize_uninit {
 extern void create_mmgc_finalize_uninit(AvmCore* core);
 }
@@ -115,6 +118,7 @@ ST_mmgc_bugzilla_580603::create_mmgc_bugzilla_580603(core);
 #endif
 ST_mmgc_basics::create_mmgc_basics(core);
 ST_mmgc_dependent::create_mmgc_dependent(core);
+ST_mmgc_exact::create_mmgc_exact(core);
 ST_mmgc_finalize_uninit::create_mmgc_finalize_uninit(core);
 ST_mmgc_gcheap::create_mmgc_gcheap(core);
 ST_mmgc_mmfx_array::create_mmgc_mmfx_array(core);

@@ -2359,7 +2359,8 @@ namespace MMgc
         GCAssert((GetGCBits(GetRealPointer(userptr)) & (kVirtualGCTrace|kMark)) == (kVirtualGCTrace|kMark));
 
         // If it's not a large object then mark it until we're done.
-        
+        // extensions/ST_mmgc_exact.st has a test that hits this case.
+
         if (!GCLargeAlloc::IsLargeBlock(userptr))
         {
             size_t cursor = 1;
