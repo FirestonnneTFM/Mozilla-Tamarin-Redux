@@ -314,5 +314,4 @@ as3/sampling/FunctionEntry , .* ,, skip,  Bugzilla 614529
 
 as3/Definitions/Function/OneOptArgFunction, mips-lnx-tvm-release,, skip, Intermittent Failure: Bugzilla 638533
 
-mmgc/outofmemory, .* , , skip , Intermittent Failure:  https://bugzilla.mozilla.org/show_bug.cgi?id=642792
 
