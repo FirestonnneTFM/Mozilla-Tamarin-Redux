@@ -96,14 +96,16 @@ def _setSDKParams(sdk_version,os_ver):
     else:
         return os_ver,sdk_number
 
-# Used to set GCC flags for the android build
 def _setGCCVersionedFlags(FLAGS, MAJOR_VERSION, MINOR_VERSION, current_cpu):
-    #  can't enable -Werror for gcc prior to 4.3 due to unavoidable "clobbered" warnings in Interpreter.cpp
     # warnings have been updated to try to include all those enabled by current Flash/AIR builds -- disable with caution, or risk integration pain
     if MAJOR_VERSION >= 4:
         FLAGS += "-Wstrict-null-sentinel "
-        if (MAJOR_VERSION == 4 and MINOR_VERSION <= 2) or current_cpu == 'mips': # 4.0 - 4.2
+        if current_cpu == 'mips':
             FLAGS += "-Wstrict-aliasing=0 "
+        elif (MAJOR_VERSION == 4 and MINOR_VERSION <= 2): # 4.0 - 4.2
+            # Bugzilla 654996: -Werror for gcc prior to 4.3 can _usually_ be
+            # turned on; see core/manifest.mk for Interpreter.cpp workaround.
+            FLAGS += "-Wstrict-aliasing=0 -Werror "
         else: # gcc 4.3 or later
             FLAGS += "-Werror -Wempty-body -Wno-logical-op -Wmissing-field-initializers -Wstrict-aliasing=3 -Wno-array-bounds -Wno-clobbered -Wstrict-overflow=0 -funit-at-a-time  "
 
