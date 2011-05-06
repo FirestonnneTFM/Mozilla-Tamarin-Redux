@@ -63,7 +63,7 @@ COMMON_PREPROCESSOR_DEFINITIONS=AVMSHELL_BUILD _MAC SOFT_ASSERTS TARGET_API_MAC_
 
 // warnings
 OTHER_CPLUSPLUSFLAGS = -Wextra -Wunused -Wno-invalid-offsetof -Wreorder -Wcast-align -Wdisabled-optimization -Winit-self -Winvalid-pch -Wpointer-arith -Wwrite-strings -Woverloaded-virtual -Wsign-promo -Wno-char-subscripts -Wstrict-aliasing=0 -Wstrict-null-sentinel
-GCC_TREAT_WARNINGS_AS_ERRORS = NO				// can't be "YES" given -Wextra
+GCC_TREAT_WARNINGS_AS_ERRORS = YES
 GCC_WARN_ABOUT_MISSING_NEWLINE = YES
 GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES
 GCC_WARN_ABOUT_RETURN_TYPE = YES

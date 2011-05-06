@@ -62,7 +62,7 @@
 		079DF84B0F3A882D0031D1B4 /* E4XNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7EB0F3A882D0031D1B4 /* E4XNode.cpp */; };
 		079DF84C0F3A882D0031D1B4 /* Exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7ED0F3A882D0031D1B4 /* Exception.cpp */; };
 		079DF84D0F3A882D0031D1B4 /* FrameState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7EF0F3A882D0031D1B4 /* FrameState.cpp */; };
-		079DF84F0F3A882D0031D1B4 /* Interpreter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7F30F3A882D0031D1B4 /* Interpreter.cpp */; };
+		079DF84F0F3A882D0031D1B4 /* Interpreter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7F30F3A882D0031D1B4 /* Interpreter.cpp */; settings = {COMPILER_FLAGS = "-Wno-error"; }; };
 		079DF8500F3A882D0031D1B4 /* MathUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7F50F3A882D0031D1B4 /* MathUtils.cpp */; };
 		079DF8510F3A882D0031D1B4 /* MethodClosure.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7F70F3A882D0031D1B4 /* MethodClosure.cpp */; };
 		079DF8520F3A882D0031D1B4 /* MethodEnv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7F90F3A882D0031D1B4 /* MethodEnv.cpp */; };
