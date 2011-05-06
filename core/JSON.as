@@ -109,10 +109,31 @@ package
             if (replacer === null) {
                 return stringifySpecializedToString(value, null, null, gap);
             } else if (replacer is Array) {
-                return stringifySpecializedToString(value, replacer, null, gap);
+                return stringifySpecializedToString(value, computePropertyList(replacer), null, gap);
             } else { // replacer is Function
                 return stringifySpecializedToString(value, null, replacer, gap);
             }
+        }
+
+        // ECMA-262 5th ed, section 15.12.3 stringify, step 4.b
+        private static function computePropertyList(r:Array):Array {
+            var propertyList = [];
+            var alreadyAdded = {};
+            for (var i:uint=0, ilim:uint = r.length; i < ilim; i++) {
+                if (!r.AS3::hasOwnProperty(i))
+                    continue;
+                var v = r[i];
+                var item: String = null;
+                if (v is String)
+                    item = v;
+                else if (v is Number)
+                    item = String(v);
+                if (item !== null && !alreadyAdded[item]) {
+                    alreadyAdded[item] = true;
+                    propertyList[propertyList.length] = item;
+                }
+            }
+            return propertyList;
         }
     }
 
