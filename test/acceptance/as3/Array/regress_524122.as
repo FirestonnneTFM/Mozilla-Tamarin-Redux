@@ -34,6 +34,8 @@
  *
  * ***** END LICENSE BLOCK *****/
 
+import avmplus.System;
+
     var SECTION = "regress_524122";
     var VERSION = "AS3";
     var TITLE   = "Array.prototype.sort() on integer properties";
@@ -46,7 +48,6 @@
 
 function getTestCases()
 {
-    import avmplus.*;
 
     var array = [];
     var item = 0;

@@ -44,8 +44,6 @@ var bug = "551587";
 startTest();
 writeHeaderToLog(SECTION + " " + TITLE);
 
-import avmplus.System;
-
 AddTestCase("1.0/Math.min(0.0, 0.0)",
             Infinity,
             1.0/Math.min(0.0, 0.0));

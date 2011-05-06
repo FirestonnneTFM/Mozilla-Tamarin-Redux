@@ -69,7 +69,9 @@ from . import runtestUtils
 from .runtestUtils import walk,parseArgStringToList,TimeOutException,join, \
 convertToCsv,detectCPUs,dict_match,formatMemoryList,formatMemory,list_match, \
 parseArgStringToList,pPrint,splitList,genAtsArgs,moveAtsSwf,conf95,mean, \
-rel_std_dev,standard_deviation,tDist,variance,getSignalName,signalNames
+rel_std_dev,standard_deviation,tDist,variance,getSignalName,signalNames, \
+search_file, create_ats_swfversion_copy
+
 
 # For Python 2.6 and above, use native subprocess.Popen
 if sys.version_info[0] >= 3 \
@@ -984,7 +986,6 @@ class RuntestBase(object):
 
     def compile_test(self, as_file, extraArgs=[], outputCalls = None):
         self.checkExecutable(self.java, 'java must be on system path or --java must be set to java executable')
-
         asc, builtinabc, shellabc, ascargs = self.asc, self.builtinabc, self.shellabc, self.ascargs
         # if there is a .build file available (which is an executable script)
         # run that file instead of compiling with asc
@@ -1003,13 +1004,6 @@ class RuntestBase(object):
             exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as_file)
 
         (dir, file) = split(as_file)
-
-
-        if self.genAtsSwfs:
-            # get settings as ats excluded files are defined there
-            settings = self.get_test_settings(as_file)
-            if self.skipAtsTest(file, settings):
-                return
 
         # additional .as file compiler args
         if as_file.endswith(self.sourceExt):
@@ -1040,10 +1034,7 @@ class RuntestBase(object):
             ascArgList = self.loadArgsFile(ascArgList, dir, as_file, 'asc_args')
             
             (testdir, ext) = splitext(as_file)
-            
-            if self.genAtsSwfs:
-                ascArgList.extend(genAtsArgs(dir,file,self.atstemplate))
-
+                
             cmd += ' -import %s' % builtinabc
             for arg in ascArgList:
                 cmd += ' %s' % arg
@@ -1071,10 +1062,8 @@ class RuntestBase(object):
             return
         
         try:
-            (f,err,exitcode) = self.run_pipe('%s %s' % (cmd,as_file), outputCalls=outputCalls)
-            if self.genAtsSwfs:
-                moveAtsSwf(dir,file, self.atsDir)
-            
+            (f,err,exitcode) = self.run_pipe('%s %s' % (cmd,as_file),
+                                             outputCalls=outputCalls)
             return f+err
         except:
             raise
@@ -1082,9 +1071,11 @@ class RuntestBase(object):
     def compileWithAsh(self, tests):
         self.checkExecutable(self.java, 'java must be on system path or --java must be set to java executable')
         if not isfile(self.asc):
-            exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as_file)
+            exit('ERROR: cannot build, ASC environment variable or --asc must be set to asc.jar')
         if not isfile(self.builtinabc):
-            exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, BUILTINABC environment variable or --builtinabc must be set to builtin.abc' % builtinabc)
+            exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, '
+                 'BUILTINABC environment variable or --builtinabc must be set '
+                 'to builtin.abc' % self.builtinabc)
 
         start_time = datetime.today()
         #print("starting compile of %d tests at %s" % (len(tests),start_time))
@@ -1178,23 +1169,46 @@ class RuntestBase(object):
                         deps.sort()
                         for util in deps + glob(join(dir,"*Util.as")):
                             cmd += " -in %s" % util #no need to prepend \ to $ when using ash
-                        cmd += " %s" % test
-
-                        self.verbose_print('Compiling %s' % test)
-                        self.debug_print(cmd)
-
+                        
                         if exists(testdir+".abc"):
                             os.unlink(testdir+".abc")
-                        child.sendline(cmd)
-                        child.expect("\(ash\)")
+                        
+                        if self.genAtsSwfs:
+                            if search_file(test+'.avm_args', 'USES_SWFVERSION'):
+                                create_ats_swfversion_copy(test)
+                                as_file = test + '.swfversion'
+                                for swfversion in self.swfversions:
+                                    new_cmd = cmd + ' -swf 200,200,version=%s' % swfversion
+                                    self.debug_print('%s %s.swfversion' % (new_cmd,test))
+                                    child.sendline('%s %s.swfversion' % (new_cmd,test))
+                                    child.expect("\(ash\)")
+                                    # rename the file to indicate which version it was compiled to
+                                    # compiled filename is test.as.swfversion.abc
+                                    file_noext, ext = splitext(file)
+                                    new_filename = file_noext+'_v%s' % swfversion + '.swf'
+                                    shutil.move(join(dir,file)+'.swfversion.swf', join(dir, new_filename))
+                                    moveAtsSwf(dir,new_filename, self.atsDir)
+                                try:
+                                    os.remove(join(dir,file)+'.swfversion')
+                                    os.remove(join(dir,file)+'.swfversion.abc')
+                                except:
+                                    pass
+                            else:
+                                cmd += " -swf 200,200 %s" % test
+                                self.debug_print(cmd)
+                                child.sendline(cmd)
+                                child.expect("\(ash\)")
+                                moveAtsSwf(dir,file, self.atsDir)
+                        else:
+                            cmd += " %s" % test
+                            self.debug_print(cmd)
+                            child.sendline(cmd)
+                            child.expect("\(ash\)")
 
-                    if not exists(testdir+".abc"):
-                        print("ERROR: abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
-                        self.ashErrors.append("abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
+                            if not exists(testdir+".abc"):
+                                print("ERROR: abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
+                                self.ashErrors.append("abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
                     total -= 1
-
-                    if self.genAtsSwfs:
-                        moveAtsSwf(dir,file, self.atsDir)
 
                     #print("%d remaining, %s" % (total,cmd))
         end_time = datetime.today()
@@ -1809,3 +1823,4 @@ class RuntestBase(object):
                 os.unlink(cwd+"/version.abc")
         except:
             print('exception deleting %s/version.as or %s/version.abc' % (cwd,cwd))
+    

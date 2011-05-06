@@ -227,16 +227,6 @@ ecma3/Unicode/u7000_CJKUnifiedIdeographs,.*,, ats_skip, bug 499685 skip slow tes
 ecma3/Unicode/u9000_CJKUnifiedIdeographs,.*,, ats_skip, bug 499685 skip slow tests
 ecma3/Unicode/uE000_PrivateUseArea, .*,, ats_skip, bug 499685 skip slow tests
 ecma3/Unicode/uAC00_HangulSyllables, .*,, ats_skip, bug 499685 skip slow tests
-# Skip Versioned test in ATS - see https://bugzilla.mozilla.org/show_bug.cgi?id=608760
-as3/Array/regress_524122,               .*,, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
-as3/Vector/bug504525/bug504525,         .*,, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
-e4x/XML/e13_4_4_29,                     .*,, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
-e4x/XML/e13_4_4_3,                      .*,, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
-e4x/XML/e13_4_4_32,                     .*,, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
-as3/GlobalObject/parseFloat_513018,     .*,, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
-as3/String/localeCompare_585791,        .*,, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
-misc/bug_526662,                        .*,, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
-regress/bug_558863,                     .*,, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
 
 ####################
 #  --verify skips
