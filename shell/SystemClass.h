@@ -197,6 +197,7 @@ namespace avmshell
     public:
         NativeBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : avmplus::ScriptObject(vtable, prototype) {}
 
+        char nine_bytes[9]; // deliberately ending on a misaligned boundary
         DECLARE_SLOTS_NativeBaseObject;
     };
 

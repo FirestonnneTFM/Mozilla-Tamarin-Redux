@@ -62,6 +62,10 @@ namespace avmplus {
     class JObjectClass; // avmplus::JObject$
     class NativeBaseAS3Class; // avmshell::NativeBaseAS3$
     class NativeBaseAS3Object; // avmshell::NativeBaseAS3
+    class NativeBaseExtender1Class; // avmshell::NativeBaseExtender1$
+    class NativeBaseExtender1Object; // avmshell::NativeBaseExtender1
+    class NativeBaseExtender2Class; // avmshell::NativeBaseExtender2$
+    class NativeBaseExtender2Object; // avmshell::NativeBaseExtender2
     class NewObjectSampleClass; // flash.sampler::NewObjectSample$
     class NewObjectSampleObject; // flash.sampler::NewObjectSample
     class SampleClass; // flash.sampler::Sample$
@@ -178,16 +182,18 @@ const uint32_t abcclass_avmshell_NativeSubclassOfRestrictedBase = 36;
 const uint32_t abcclass_avmshell_SubclassOfRestrictedBase = 37;
 const uint32_t abcclass_avmshell_NativeSubclassOfAbstractRestrictedBase = 38;
 const uint32_t abcclass_avmshell_SubclassOfAbstractRestrictedBase = 39;
-const uint32_t abcclass_avmplus_Domain = 40;
-const uint32_t abcclass_flash_sampler_StackFrame = 41;
-const uint32_t abcclass_flash_sampler_Sample = 42;
-const uint32_t abcclass_flash_sampler_ClassFactory = 43;
-const uint32_t abcclass_flash_sampler_NewObjectSample = 44;
-const uint32_t abcclass_flash_sampler_DeleteObjectSample = 45;
-const uint32_t abcclass_flash_trace_Trace = 46;
-const uint32_t abcclass_flash_utils_Dictionary = 47;
-const uint32_t abcclass_flash_utils_Endian = 48;
-const uint32_t abcclass_avmplus_JObject = 49;
+const uint32_t abcclass_avmshell_NativeBaseExtender1 = 40;
+const uint32_t abcclass_avmshell_NativeBaseExtender2 = 41;
+const uint32_t abcclass_avmplus_Domain = 42;
+const uint32_t abcclass_flash_sampler_StackFrame = 43;
+const uint32_t abcclass_flash_sampler_Sample = 44;
+const uint32_t abcclass_flash_sampler_ClassFactory = 45;
+const uint32_t abcclass_flash_sampler_NewObjectSample = 46;
+const uint32_t abcclass_flash_sampler_DeleteObjectSample = 47;
+const uint32_t abcclass_flash_trace_Trace = 48;
+const uint32_t abcclass_flash_utils_Dictionary = 49;
+const uint32_t abcclass_flash_utils_Endian = 50;
+const uint32_t abcclass_avmplus_JObject = 51;
 
 /* methods */
 const uint32_t avmplus_MI_plus = 43;
@@ -219,41 +225,41 @@ const uint32_t avmplus_File_read = 72;
 const uint32_t avmplus_File_write = 73;
 const uint32_t avmplus_File_readByteArray = 74;
 const uint32_t avmplus_File_writeByteArray = 75;
-const uint32_t avmplus_Domain_currentDomain_get = 181;
-const uint32_t avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get = 182;
-const uint32_t avmplus_Domain_private_init = 183;
-const uint32_t avmplus_Domain_loadBytes = 185;
-const uint32_t avmplus_Domain_getClass = 186;
-const uint32_t avmplus_Domain_domainMemory_get = 188;
-const uint32_t avmplus_Domain_domainMemory_set = 189;
-const uint32_t native_script_function_flash_sampler_getMasterString = 191;
-const uint32_t native_script_function_flash_sampler_getSavedThis = 192;
-const uint32_t native_script_function_flash_sampler_getLexicalScopes = 193;
-const uint32_t native_script_function_flash_sampler_isGetterSetter = 194;
-const uint32_t native_script_function_flash_sampler__getInvocationCount = 195;
-const uint32_t native_script_function_flash_sampler_getSampleCount = 199;
-const uint32_t native_script_function_flash_sampler__getSamples = 200;
-const uint32_t native_script_function_flash_sampler_getMemberNames = 202;
-const uint32_t native_script_function_flash_sampler_getSize = 203;
-const uint32_t native_script_function_flash_sampler__setSamplerCallback = 204;
-const uint32_t native_script_function_flash_sampler_sampleInternalAllocs = 207;
-const uint32_t native_script_function_flash_sampler_pauseSampling = 208;
-const uint32_t native_script_function_flash_sampler_stopSampling = 209;
-const uint32_t native_script_function_flash_sampler_startSampling = 210;
-const uint32_t native_script_function_flash_sampler_clearSamples = 211;
-const uint32_t flash_sampler_NewObjectSample_object_get = 220;
-const uint32_t flash_sampler_NewObjectSample_size_get = 221;
-const uint32_t flash_trace_Trace_setLevel = 227;
-const uint32_t flash_trace_Trace_getLevel = 228;
-const uint32_t flash_trace_Trace_setListener = 229;
-const uint32_t flash_trace_Trace_getListener = 230;
-const uint32_t flash_utils_Dictionary_private_init = 235;
-const uint32_t avmplus_JObject_create = 242;
-const uint32_t avmplus_JObject_createArray = 243;
-const uint32_t avmplus_JObject_toArray = 244;
-const uint32_t avmplus_JObject_constructorSignature = 245;
-const uint32_t avmplus_JObject_methodSignature = 246;
-const uint32_t avmplus_JObject_fieldSignature = 247;
+const uint32_t avmplus_Domain_currentDomain_get = 185;
+const uint32_t avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get = 186;
+const uint32_t avmplus_Domain_private_init = 187;
+const uint32_t avmplus_Domain_loadBytes = 189;
+const uint32_t avmplus_Domain_getClass = 190;
+const uint32_t avmplus_Domain_domainMemory_get = 192;
+const uint32_t avmplus_Domain_domainMemory_set = 193;
+const uint32_t native_script_function_flash_sampler_getMasterString = 195;
+const uint32_t native_script_function_flash_sampler_getSavedThis = 196;
+const uint32_t native_script_function_flash_sampler_getLexicalScopes = 197;
+const uint32_t native_script_function_flash_sampler_isGetterSetter = 198;
+const uint32_t native_script_function_flash_sampler__getInvocationCount = 199;
+const uint32_t native_script_function_flash_sampler_getSampleCount = 203;
+const uint32_t native_script_function_flash_sampler__getSamples = 204;
+const uint32_t native_script_function_flash_sampler_getMemberNames = 206;
+const uint32_t native_script_function_flash_sampler_getSize = 207;
+const uint32_t native_script_function_flash_sampler__setSamplerCallback = 208;
+const uint32_t native_script_function_flash_sampler_sampleInternalAllocs = 211;
+const uint32_t native_script_function_flash_sampler_pauseSampling = 212;
+const uint32_t native_script_function_flash_sampler_stopSampling = 213;
+const uint32_t native_script_function_flash_sampler_startSampling = 214;
+const uint32_t native_script_function_flash_sampler_clearSamples = 215;
+const uint32_t flash_sampler_NewObjectSample_object_get = 224;
+const uint32_t flash_sampler_NewObjectSample_size_get = 225;
+const uint32_t flash_trace_Trace_setLevel = 231;
+const uint32_t flash_trace_Trace_getLevel = 232;
+const uint32_t flash_trace_Trace_setListener = 233;
+const uint32_t flash_trace_Trace_getListener = 234;
+const uint32_t flash_utils_Dictionary_private_init = 239;
+const uint32_t avmplus_JObject_create = 246;
+const uint32_t avmplus_JObject_createArray = 247;
+const uint32_t avmplus_JObject_toArray = 248;
+const uint32_t avmplus_JObject_constructorSignature = 249;
+const uint32_t avmplus_JObject_methodSignature = 250;
+const uint32_t avmplus_JObject_fieldSignature = 251;
 
 extern avmplus::Atom avmplus_Domain_currentDomain_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -1503,6 +1509,52 @@ class avmplus_SubclassOfAbstractRestrictedBaseObjectSlots
 //-----------------------------------------------------------
 
 //-----------------------------------------------------------
+// avmshell::NativeBaseExtender1$
+//-----------------------------------------------------------
+class avmplus_NativeBaseExtender1ClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::NativeBaseExtender1Class;
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// avmshell::NativeBaseExtender1
+//-----------------------------------------------------------
+class avmplus_NativeBaseExtender1ObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::NativeBaseExtender1Object;
+private:
+    int32_t m_private_foo;
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// avmshell::NativeBaseExtender2$
+//-----------------------------------------------------------
+class avmplus_NativeBaseExtender2ClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::NativeBaseExtender2Class;
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// avmshell::NativeBaseExtender2
+//-----------------------------------------------------------
+class avmplus_NativeBaseExtender2ObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::NativeBaseExtender2Object;
+private:
+    int32_t m_private_foo;
+    int32_t m_private_foo1;
+    int32_t m_private_foo2;
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
 // avmplus::Domain$
 //-----------------------------------------------------------
 class avmplus_DomainClassSlots
@@ -2047,8 +2099,8 @@ class shell_toplevelClassManifest : public avmplus::ClassManifestBase
     friend class avmplus::DoubleVectorClass;
     friend class avmplus::ObjectVectorClass;
 private:
-    REALLY_INLINE shell_toplevelClassManifest(avmplus::ScriptEnv* e) : ClassManifestBase(50, e) { }
-    REALLY_INLINE static shell_toplevelClassManifest* create(avmplus::ScriptEnv* e) { return new (MMgc::GC::GetGC(e), MMgc::kExact, sizeof(ClassClosure*)*49) shell_toplevelClassManifest(e); }
+    REALLY_INLINE shell_toplevelClassManifest(avmplus::ScriptEnv* e) : ClassManifestBase(52, e) { }
+    REALLY_INLINE static shell_toplevelClassManifest* create(avmplus::ScriptEnv* e) { return new (MMgc::GC::GetGC(e), MMgc::kExact, sizeof(ClassClosure*)*51) shell_toplevelClassManifest(e); }
 public:
     REALLY_INLINE GCRef<avmshell::AbstractBaseClass> get_AbstractBaseClass() { return (avmshell::AbstractBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_AbstractBase)); }
     REALLY_INLINE GCRef<avmshell::AbstractRestrictedBaseClass> get_AbstractRestrictedBaseClass() { return (avmshell::AbstractRestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_AbstractRestrictedBase)); }
@@ -2066,6 +2118,8 @@ public:
     REALLY_INLINE GCRef<avmshell::MIClass> get_MIClass() { return (avmshell::MIClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_MI)); }
     REALLY_INLINE GCRef<avmplus::NativeBaseAS3Class> get_NativeBaseAS3Class() { return (avmplus::NativeBaseAS3Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_NativeBaseAS3)); }
     REALLY_INLINE GCRef<avmshell::NativeBaseClass> get_NativeBaseClass() { return (avmshell::NativeBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_NativeBase)); }
+    REALLY_INLINE GCRef<avmplus::NativeBaseExtender1Class> get_NativeBaseExtender1Class() { return (avmplus::NativeBaseExtender1Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_NativeBaseExtender1)); }
+    REALLY_INLINE GCRef<avmplus::NativeBaseExtender2Class> get_NativeBaseExtender2Class() { return (avmplus::NativeBaseExtender2Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_NativeBaseExtender2)); }
     REALLY_INLINE GCRef<avmshell::NativeSubclassOfAbstractBaseClass> get_NativeSubclassOfAbstractBaseClass() { return (avmshell::NativeSubclassOfAbstractBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_NativeSubclassOfAbstractBase)); }
     REALLY_INLINE GCRef<avmshell::NativeSubclassOfAbstractRestrictedBaseClass> get_NativeSubclassOfAbstractRestrictedBaseClass() { return (avmshell::NativeSubclassOfAbstractRestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_NativeSubclassOfAbstractRestrictedBase)); }
     REALLY_INLINE GCRef<avmshell::NativeSubclassOfRestrictedBaseClass> get_NativeSubclassOfRestrictedBaseClass() { return (avmshell::NativeSubclassOfRestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_NativeSubclassOfRestrictedBase)); }

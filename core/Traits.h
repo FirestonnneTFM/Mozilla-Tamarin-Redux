@@ -313,8 +313,6 @@ namespace avmplus
             SlotSizeInfo() : pointerSlotCount(0), nonPointer32BitSlotCount(0), nonPointer64BitSlotCount(0) { }
         };
 
-        uint32_t computeSlotAreaStart(const SlotSizeInfo& slotSizeInfo) const;
-
         void buildBindings(TraitsBindingsp basetb,
                             MultinameBindingHashtable* bindings,
                             uint32_t& slotCount,
@@ -607,7 +605,7 @@ namespace avmplus
     private:    GCMember<String>        GC_POINTER(_fullname);           // _fullname is the value returned by formatClassName
 #endif
     private:    uint16_t                m_sizeofInstance;   // sizeof implementation class, e.g. ScriptObject, etc. < 64k. Not counting extra room for slots.
-    private:    uint16_t                m_offsetofSlots;    // offset of first slot.
+    private:    uint16_t                m_offsetofSlots;    // offset of first slot; 0 means "put the slots at the end of my immediate parent"
     private:    uint32_t                m_hashTableOffset;  // offset to our hashtable (or 0 if none)
     private:    uint32_t                m_totalSize;        // total size, including sizeofInstance + slots + hashtable
     public:     uint8_t                 builtinType;                // BuiltinType enumeration -- only need 5 bits but stored in uint8_t for faster access

@@ -138,7 +138,6 @@ namespace avmplus
         Stringp resolveUtf8(uint32_t index) const;
         Stringp parseName(const uint8_t* &pc) const;
         uint32_t resolveBindingName(const uint8_t*& pc, Multiname& m) const;
-        void computeInstanceSizeAndSlotsOffset(int class_id, Traits* base, uint16_t& sizeofInstance, uint16_t& offsetofSlots) const;
         void parseMethodInfos();
         void parseMetadataInfos();
         bool parseInstanceInfos();

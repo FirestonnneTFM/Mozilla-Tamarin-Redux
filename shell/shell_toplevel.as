@@ -209,10 +209,28 @@ package avmshell
     {
     }
 
-    // this class exists solely to test construct="native" with a C++ class
+    // this class exists test construct="native" with a C++ class,
+    // and also to test for correct calculation of slot offsets for
+    // native classes with padding at the end (bugzilla 655300)
     [native(cls="::avmshell::NativeBaseClass", instance="::avmshell::NativeBaseObject", methods="auto", construct="native")]
     public class NativeBase
     {
+    }
+
+    // this class exists solely to test for correct calculation of slot offsets for
+    // native classes with padding at the end (bugzilla 655300)
+    public class NativeBaseExtender1 extends NativeBase
+    {
+        private var foo:int;
+    }
+
+    // this class exists solely to test for correct calculation of slot offsets for
+    // native classes with padding at the end (bugzilla 655300)
+    public class NativeBaseExtender2 extends NativeBase
+    {
+        private var foo:int;
+        private var foo1:int;
+        private var foo2:int;
     }
 
     // this class exists solely to test construct="native" with a pure-AS3 class
