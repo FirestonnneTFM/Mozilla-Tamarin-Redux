@@ -127,8 +127,30 @@ package {
 
     AddTestCase("15.12.3-2-3-a-3: JSON.stringify converts Boolean wrapper objects returned from replacer functions to literal numbers.", '[false]' ,JSON.stringify([42], function(k,v) {return v===42? new Boolean(false):v}));
 
+
+    // See Bugzilla 654574 for info on tests 15.12.3-4-b-1 through 15.12.3-4-b-10
+
+    AddTestCase("15.12.3-4-b-1: JSON.stringify replacer array has negative integer already converted to string.", '{"-1":18}', JSON.stringify({ "-0": 17, "-1": 18, 0: 19 }, ["-1"]));
+    AddTestCase("15.12.3-4-b-2: JSON.stringify replacer array has negative integer not yet converted to string.", '{"-1":18}', JSON.stringify({ "-0": 17, "-1": 18, 0: 19 }, [-1]));
+    AddTestCase("15.12.3-4-b-3: JSON.stringify replacer array has negative zero already converted to string.", '{"-0":17}', JSON.stringify({ "-0": 17, "-1": 18 , 0: 19 }, ["-0"]));
+    AddTestCase("15.12.3-4-b-4: JSON.stringify replacer array has negative zero not yet converted to string.", '{"0":19}', JSON.stringify({ "-0": 17, "-1": 18 , 0: 19 }, [-0]));
+
+
+    AddTestCase("15.12.3-4-b-5: JSON.stringify replacer array has double already converted to string.", '{"1.2":19}', JSON.stringify({ 1.2: 19 }, ["1.2"]));
+    AddTestCase("15.12.3-4-b-6: JSON.stringify replacer array has double not yet converted to string.", '{"1.2":19}', JSON.stringify({ 1.2: 19 }, [1.2]));
+
+    AddTestCase("15.12.3-4-b-7: JSON.stringify replacer array has repeated entries.", '{"a":1,"b":2}', JSON.stringify({ a: 1, b: 2, c: 3 }, ["a", "b", "b", "a"]));
+
+    var objkey = {"key":3};
+    AddTestCase("15.12.3-4-b-8: JSON.stringify replacer array has non-string non-numberentries.", '{"a":1,"b":2}', JSON.stringify({ a: 1, b: 2, c: 3 }, ["a", "b", objkey]));
+
+    var gappy_array = [];
+    gappy_array[0]   = 'a';
+    gappy_array[100] = 'b';
+    AddTestCase("15.12.3-4-b-9: JSON.stringify replacer array has gaps.", '{"a":1,"b":2}', JSON.stringify({ a: 1, b: 2, c: 3 }, gappy_array));
+
+    AddTestCase("15.12.3-4-b-10: JSON.stringify replacer array nesting of keys.", '{"a":1,"b":{"b":3,"d":2}}', JSON.stringify({ a: 1, b: { d: 2, b: 3 }, c: 4 }, ["a", "b", "d"]));
+
     test();
-
-
 
 }
