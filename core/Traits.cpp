@@ -1026,54 +1026,6 @@ namespace avmplus
         }
     }
 
-    inline uint32_t Traits::computeSlotAreaStart(const SlotSizeInfo& slotSizeInfo) const
-    {
-        // Actual size of slots can be larger because of padding inserted at beginning of slot area and between 4 byte slots and 8 byte slots.
-        uint32_t minSizeOfSlots = (slotSizeInfo.pointerSlotCount * sizeof(void*)) +
-                                    (slotSizeInfo.nonPointer32BitSlotCount * 4) +
-                                    (slotSizeInfo.nonPointer64BitSlotCount * 8);
-        uint32_t result = 0;
-        if (base && minSizeOfSlots)
-        {
-            if (getSizeOfInstance() == base->getSizeOfInstance())
-            {
-                // we are not a native subclass or if we are, we don't have any slots.
-                // Our slots start right after our base class slots.
-                // The end of our base class slots is the same offset at which
-                // our base class put its hash table.
-
-                if (base->m_hashTableOffset)
-                    result = base->m_hashTableOffset;
-                else
-                    result = base->getTotalSize();
-            }
-            else
-            {
-                // We are a native subclass
-                // We should be bigger than our base class
-                // Our slots are at the end of our instance class.
-                AvmAssert(base->getSizeOfInstance() < getSizeOfInstance());
-                AvmAssert((getSizeOfInstance() - base->getSizeOfInstance()) >= static_cast<intptr_t>(minSizeOfSlots));
-                result = m_offsetofSlots;
-
-                // result is an offset to a C++ class instance embedded in a glue class instance
-                // If the C++ class instance containing the slot values contains 8 byte types that
-                // are supposed to be 8 byte aligned, then result should also be 8 byte aligned.
-                //
-                // If either of these asserts fail, the slot offset calculation code in finishSlotsAndMethods
-                // will most likely produce incorrect slot offsets for 8 byte slots.
-                AvmAssert(((result % 8) == 0) || (!align8ByteSlots) || (slotSizeInfo.nonPointer64BitSlotCount == 0));
-                AvmAssert(((result % 8) == 0) || (!alignPointersTo8Bytes) || (slotSizeInfo.pointerSlotCount == 0));
-            }
-        }
-        else
-        {
-            AvmAssert((getSizeOfInstance() == sizeof(ScriptObject)) || (minSizeOfSlots == 0));
-            result = getSizeOfInstance();
-        }
-        return result;
-    }
-
     uint32_t Traits::finishSlotsAndMethods(TraitsBindingsp basetb,
                                     TraitsBindings* tb,
                                     const Toplevel* toplevel,
@@ -1083,7 +1035,59 @@ namespace avmplus
 
         SlotIdCalcer sic(basetb ? basetb->slotCount : 0, this->allowEarlyBinding());
 
-        int32_t slotAreaStart = computeSlotAreaStart(sizeInfo);
+        /*
+            A word of caution about calculating slot layout:
+
+            Say you have two classes like so:
+
+                class A { ... };
+                class B : public A { int32 foo; };
+
+            You might assume that sizeof(B) > sizeof(A).
+
+            However... if the contents of A are
+
+                class A { char foo[9]; };
+                class B : public A { int32 bar; };
+
+            The compiler may decide that sizeof(A) should be rounded 
+            up to the nearest pointer-sized boundary (e.g. if it 
+            contains virtual methods)... so for a 64-bit build, 
+            sizeof(A) could be 16. So sizeof(B) is 20, right?
+
+            Nope! Not necesssarily. Apparently GCC is clever enough to 
+            realize that there is enough unused (and appropriately aligned) 
+            space at the end of A to fit the extra fields in B... 
+            so sizeof(A) == sizeof(B) == 16.
+            
+            Similarly, we could have
+
+                class A { char foo[9]; };
+                class B : public A { int32 bar[3]; };
+                
+            which could yield sizeof(A) == 16, sizeof(B) == 24, which violates
+            the previously-assumed invariant of (sizeof(B)-sizeof(A)>=slotsize(B)).
+            
+            (Note that this behavior is theoretically possible on 32-bit builds as well,
+            but since the slots only contain 32-bit-or-larger fields, there can't ever be
+            enough properly-aligned padding for this to happen.)
+            
+            Anyway, the point of this digression is to point out that you can't ever assume
+            that our slotArea starts "after" our parent; there might be overlap. m_offsetofSlots
+            is computed for all native classes using C++ offsetof(), and thus correctly
+            accounts for any overlap of this sort. See bugzilla 655300 for more info.
+            
+        */
+
+        int32_t slotAreaStart = m_offsetofSlots;
+        if (slotAreaStart == 0 && base != NULL)
+        {
+            // 0 means "put the slots at the end of my immediate parent"
+            slotAreaStart = base->getHashtableOffset() ? 
+                            base->getHashtableOffset() : 
+                            base->getTotalSize();
+        }
+
 
         int32_t next32BitSlotOffset = slotAreaStart;
         int32_t endOf32BitSlots = next32BitSlotOffset + (sizeInfo.nonPointer32BitSlotCount * 4);

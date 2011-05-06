@@ -299,39 +299,6 @@ namespace avmplus
         }
     }
 
-    REALLY_INLINE void AbcParser::computeInstanceSizeAndSlotsOffset(int class_id,
-                                                                    Traits* base,
-                                                                    uint16_t& sizeofInstance,
-                                                                    uint16_t& offsetofSlots) const
-    {
-        // If this is a native class, use the stated instance size and offset to slot area.
-        const NativeClassInfo* nativeEntry;
-        if (natives && (nativeEntry = natives->get_class(class_id)) != NULL && nativeEntry->sizeofInstance)
-        {
-            sizeofInstance = nativeEntry->sizeofInstance;
-            offsetofSlots = nativeEntry->offsetofSlotsInstance;
-            return;
-        }
-
-        // Search the inheritance chain for any native classes.
-        while (base)
-        {
-            if (base->getSizeOfInstance() > sizeof(ScriptObject))
-            {
-                // non-Object base class uses a subclass of ScriptObject, so use that size.
-                sizeofInstance = base->getSizeOfInstance();
-                // non-native class so slots start after end of C++ data.
-                offsetofSlots = sizeofInstance;
-                return;
-            }
-            base = base->base;
-        }
-
-        // no derived native classes found
-        sizeofInstance = uint16_t(sizeof(ScriptObject));
-        offsetofSlots = uint16_t(sizeof(ScriptObject));
-    }
-
     Namespacep AbcParser::parseNsRef(const uint8_t* &pc) const
     {
         uint32_t index = readU30(pc);
@@ -1931,9 +1898,45 @@ namespace avmplus
             }
 #endif
             TraitsPosType postype = (flags & 4) ? TRAITSTYPE_INTERFACE : TRAITSTYPE_INSTANCE;
-            uint16_t sizeofInstance = 0;
-            uint16_t offsetofSlots = 0;
-            computeInstanceSizeAndSlotsOffset(i, baseTraits, sizeofInstance, offsetofSlots);
+            uint16_t sizeofInstance, offsetofSlots;
+
+            // If this is a native class, use the stated instance size and offset to slot area.
+            const NativeClassInfo* nativeEntry;
+            if (natives && (nativeEntry = natives->get_class(i)) != NULL && nativeEntry->sizeofInstance)
+            {
+                sizeofInstance = nativeEntry->sizeofInstance;
+                offsetofSlots = nativeEntry->offsetofSlotsInstance;
+                // note that 0 means "put the slots at the end of my immediate parent", 
+                // but don't assert here: builtin classes without any slots (e.g., Object)
+                // emit a 0 here for simplicity. Since we won't be generating any slot
+                // offsets for the class anyway, it doesn't matter...
+                // AvmAssert(offsetofSlots > 0);
+            }
+            else
+            {
+                // Since nativegen.py emits "synthetic" C++ classes for all builtin classes (except interfaces),
+                // only non-builtin classes should hit this code; since they don't have C++ representations,
+                // "overlap" of fields between parent and child isn't possibly so we can safely declare the 
+                // offsetOfSlots to be an the end of the base.
+
+                AvmAssert(postype == TRAITSTYPE_INTERFACE || !pool->isBuiltin);
+                
+                // 0 means "put the slots at the end of my immediate parent"
+                offsetofSlots = 0;
+                // Assume ScriptObject for now
+                sizeofInstance = uint16_t(sizeof(ScriptObject));
+                // Search the inheritance chain for any native classes.
+                for (Traits* b = baseTraits; b != NULL; b = b->base)
+                {
+                    if (b->getSizeOfInstance() > sizeof(ScriptObject))
+                    {
+                        // non-Object base class uses a subclass of ScriptObject, so use that size.
+                        sizeofInstance = b->getSizeOfInstance();
+                        break;
+                    }
+                }
+            }
+
             Traits* itraits = parseTraits(sizeofInstance,
                                           offsetofSlots,
                                           baseTraits,
