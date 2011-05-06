@@ -35,8 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package {
-    import avmplus.System
+    import avmplus.System;
 
     var SECTION = "Vector";
     var VERSION = "as3";
@@ -45,7 +44,7 @@ package {
 
     writeHeaderToLog( SECTION + " "+ TITLE );
 
-    public function vtest()
+    function vtest()
     {
         var v1 = new Vector.<int>(); v1.push( 1 );
         var v2 = new Vector.<int>(); v2.push( 2 );
@@ -68,5 +67,3 @@ package {
     }
 
     test();
-
-}

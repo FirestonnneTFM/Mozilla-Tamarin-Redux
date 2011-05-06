@@ -35,25 +35,23 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package {
-    import avmplus.System
+import avmplus.System;
 
-    var SECTION = "GlobalObject";
-    var VERSION = "as3";
-    startTest();
-    var TITLE   = "bug 513018";
+var SECTION = "GlobalObject";
+var VERSION = "as3";
+startTest();
+var TITLE   = "bug 513018";
 
-    writeHeaderToLog( SECTION + " "+ TITLE );
+writeHeaderToLog( SECTION + " "+ TITLE );
 
-    if (System.swfVersion < 11) {
-        AddTestCase('SWF9: 12..34..56',
-            parseFloat("12..34..56"),
-            1234.56);
-    } else {
-        AddTestCase('SWF11+: 12..34..56',
-            parseFloat("12..34..56"),
-            12);
-    }
-    
-    test();
+if (System.swfVersion < 11) {
+    AddTestCase('SWF9: 12..34..56',
+        parseFloat("12..34..56"),
+        1234.56);
+} else {
+    AddTestCase('SWF11+: 12..34..56',
+        parseFloat("12..34..56"),
+        12);
 }
+
+test();

@@ -45,6 +45,7 @@ from math import sqrt
 import subprocess
 import shutil
 import sys
+import textwrap
 
 class TimeOutException(Exception):
     def __init__(self):
@@ -137,6 +138,19 @@ def pythonVersion26():
     return sys.version_info[0] == 2 and sys.version_info[1] >= 6
                     
     
+def search_file(filename, search_text):
+    '''Return a boolean indicating whether or not text is present in file.
+        (If file exists).'''
+    if not os.path.exists(filename):
+        return False
+    f = open(filename, 'r')
+    for line in f:
+        if search_text in line:
+            f.close()
+            return True
+    f.close()
+    return False
+    
 
 def splitList(_list, _groups):
     groups = []
@@ -151,6 +165,41 @@ def splitList(_list, _groups):
 
 ### ATS Support Functions ###
 
+def create_ats_swfversion_copy(file):
+    '''Create a copy of the given .as file to use the ATS compatible swfVersion
+        instead of avmplus.System.swfversion.  Also wrap the test with code
+        to not run the test until fully loaded.
+        (Tamarin tests run in the unnamed package and therefore the code runs
+        before the tests INIT handler has fired.  However, the swfVersion of the
+        test is not available until after the INIT event.)
+        '''
+    header = '''
+        import flash.events.*;
+        var clInfo = ATS.client.swfLoader.contentLoaderInfo;
+        clInfo.addEventListener(Event.INIT, swfVersionInitHandler);
+        
+        function swfVersionInitHandler(event):void {
+            swfVersion = clInfo.swfVersion
+            run_swfversion_test();
+        }
+        
+        function run_swfversion_test():void {
+        '''
+    footer = '\n}\n'
+    
+    orig_file = open(file, 'r')
+    swfversion_file = open(file+'.swfversion', 'w')
+    
+    swfversion_file.write(textwrap.dedent(header))
+    for line in orig_file.readlines():
+        swfversion_file.write(line.replace('System.swfVersion', 'swfVersion')+'\n')
+    swfversion_file.write(footer)
+    
+    orig_file.close()
+    swfversion_file.close()
+    
+    
+
 def genAtsArgs(dir, file, atstemplate):
     args = []
     (name, ext) = splitext(file)
@@ -162,7 +211,7 @@ def genAtsArgs(dir, file, atstemplate):
     ats_inc.close()
     if not 'ecma' in dir:
         args.append('-AS3')
-    args.extend(['-swf 200,200','-in ./ats_temp.as'])
+    args.append('-in ./ats_temp.as')
     return args
     
 def moveAtsSwf(dir, file, atsDir):

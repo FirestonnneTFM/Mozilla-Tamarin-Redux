@@ -57,8 +57,9 @@ if (System.swfVersion >= 11) {
         1.0/Math.max(0.0, -0.0));
 } else {
     // Bug only happens in wordcode and jit builds
-    if (System.getRunmode().indexOf('jit') != -1 ||
-        System.getFeatures().indexOf('AVMFEATURE_WORDCODE_INTERP') != -1)
+    if (playerType == 'AVMPlus' &&
+        (System.getRunmode().indexOf('jit') != -1 ||
+         System.getFeatures().indexOf('AVMFEATURE_WORDCODE_INTERP') != -1))
     {
         AddTestCase(
         "SWF < 11, jit or wordcode build 1.0/Math.min(-0.0, 0.0)",

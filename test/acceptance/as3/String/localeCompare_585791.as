@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package {
     import avmplus.System
 
     var SECTION = "String";
@@ -139,5 +138,3 @@ package {
     }
 
     test();
-
-}

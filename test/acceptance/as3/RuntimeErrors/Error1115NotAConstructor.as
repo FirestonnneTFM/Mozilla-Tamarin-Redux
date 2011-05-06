@@ -45,7 +45,7 @@ var CODE;
 if (System.swfVersion >= 11) {
      CODE = CODE_NEW;
 } else {
-    if (System.getRunmode().indexOf('jit') != -1) {
+    if ((playerType == 'AVMPlus') && (System.getRunmode().indexOf('jit') != -1)) {
         CODE = CODE_NEW;
     } else {
         CODE = CODE_OLD;
