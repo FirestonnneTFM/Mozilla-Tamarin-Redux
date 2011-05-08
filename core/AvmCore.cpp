@@ -239,6 +239,12 @@ namespace avmplus
 #ifdef VMCFG_NANOJIT
             else if (substrMatches("jit", p, e))
                  r |= VB_jit | LC_AfterDCE | LC_Native;
+            else if (substrMatches("lircfg-bb", p, e))
+                r |= VB_jit | VB_lircfg | VB_lircfg_bb;
+            else if (substrMatches("lircfg-ins", p, e))
+                r |= VB_jit | VB_lircfg | VB_lircfg_ins;
+            else if (substrMatches("lircfg", p, e))
+                r |= VB_jit | VB_lircfg;  // unfortunately we have to turn on VB_jit to get names @todo fix that!
             else if (substrMatches("opt", p, e))
                 r |= VB_jit | LC_Liveness | LC_ReadLIR | LC_AfterSF;
             else if (substrMatches("lir", p, e))
@@ -2491,7 +2497,7 @@ return the result of the comparison ToPrimitive(x) == y.
     {
         console.setOutputStream(stream);
     }
-    
+
     /*static*/ bool AvmCore::isBuiltinType(Atom atm, BuiltinType bt)
     {
         return isObject(atm) && Traits::getBuiltinType(atomToScriptObject(atm)->traits()) == bt;
@@ -4565,7 +4571,7 @@ return the result of the comparison ToPrimitive(x) == y.
         AvmAssert(isValidApiVersion(apiVersion));
         return apiVersion;
     }
-    
+
     bool AvmCore::isNamespaceVisibleToApiVersionFromCallStack(Namespace* ns)
     {
         return ns->getApiVersion() <= getApiVersionFromCallStack();

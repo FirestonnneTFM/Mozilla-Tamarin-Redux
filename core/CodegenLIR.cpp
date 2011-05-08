@@ -881,7 +881,7 @@ namespace avmplus
             varTracker = new (alloc) LIns*[nvar];
             tagTracker = new (alloc) LIns*[nvar];
             // allocate a large value until https://bugzilla.mozilla.org/show_bug.cgi?id=565489 is resolved
-            checked = new (alloc) HashMap<LIns*,bool>(alloc, code_len < 16700 ? code_len : 16700);
+            checked = new (alloc) InsSet(alloc, code_len < 16700 ? code_len : 16700);
             notnull = new (alloc) nanojit::BitSet(alloc, nvar);
             clearState();
         }
@@ -7220,6 +7220,39 @@ namespace avmplus
         {}
         lister.finish();
     }
+
+    // build a filename based on path/title
+    static const char* filenameFor(const char* path, const char* name, const char* ext, Allocator& alloc)
+    {
+        char* filename = new (alloc) char[1+VMPI_strlen(name)+VMPI_strlen(path)+VMPI_strlen(ext)];
+        VMPI_strcpy(filename, path);
+        VMPI_strcat(filename, "/");  // sorry windows
+        char* dst = &filename[VMPI_strlen(filename)];
+        for(const char* s = name; *s; s++) {
+            char c = *s;
+            c = VMPI_isalnum(*s) ? c : '.';  // convert non-alpha to dots
+            c = ( c == '.' && dst[-1] == '.' ) ? 0 : c;  // dont print multiple dots
+            if (c)
+                *dst++ = c;
+        }
+        dst = dst[-1] == '.' ? dst-1 : dst; // rm trailing dot
+        VMPI_strcpy(dst, ext);
+        return filename;
+    }
+
+    // write out a control flow graph of LIR instructions
+    static void lircfg(FILE* f, const Fragment* frag, InsSet* ignore, Allocator& alloc, CfgLister::CfgMode mode)
+    {
+        LirReader  reader(frag->lastIns);
+        CfgLister  cfg(&reader, alloc, mode);
+
+        for (LIns* ins = cfg.read(); !ins->isop(LIR_start); ins = cfg.read())
+        {}
+
+        cfg.printGmlCfg(f, frag->lirbuf->printer, ignore);
+        fclose(f);
+    }
+
 #endif
 
     // return pointer to generated code on success, NULL on failure (frame size too large)
@@ -7251,6 +7284,34 @@ namespace avmplus
             StringBuffer sb(core);
             sb << info;
             mgr->log.printf("jit-assembler %s\n", sb.c_str());
+        }
+        if (pool->isVerbose(VB_lircfg)) {
+            // For the control-flow graph :
+            //   The list of instructions that we don't want to show explicit
+            //   edges for are added to the 'ignore' set.
+            Allocator alloc;
+            bool hideCommonEdges = true;
+            InsSet ignore(alloc);
+            if (hideCommonEdges)
+            {
+                ignore.put(npe_label.labelIns, true);
+                ignore.put(upe_label.labelIns, true);
+                ignore.put(interrupt_label.labelIns, true);
+                ignore.put(mop_rangeCheckFailed_label.labelIns, true);
+                ignore.put(catch_label.labelIns, true);
+            }
+
+            // type of cfg graph to produce
+            CfgLister::CfgMode mode = pool->isVerbose(VB_lircfg_ins) ? CfgLister::CFG_INS
+                                    : pool->isVerbose(VB_lircfg_bb)  ? CfgLister::CFG_BB
+                                    : CfgLister::CFG_EBB;
+
+            StringBuffer sb(core);
+            sb << info;  // method name
+            const char* filename = filenameFor(".", sb.c_str(), ".gml", alloc);
+            FILE* f = fopen(filename, "w");
+            lircfg(f, frag, &ignore, alloc, mode);
+            fclose(f);
         }
         #endif
 

@@ -1224,7 +1224,7 @@ namespace avmshell
 #ifdef AVMPLUS_VERBOSE
         avmplus::AvmLog("          [-Dverbose[=[parse,verify,interp,traits,builtins,minaddr,memstats,sweep,occupancy,execpolicy"
 #  ifdef VMCFG_NANOJIT
-               ",jit,opt,regs,raw,bytes"
+               ",jit,opt,regs,raw,bytes,lir,lircfg[-bb|-ins]"
 #  endif
                "]]\n");
         avmplus::AvmLog("                        With no options, enables extreme! output mode.  Otherwise the\n");
@@ -1236,10 +1236,14 @@ namespace avmshell
         avmplus::AvmLog("                           execpolicy - shows which execution method (interpretation, compilation) was chosen and why \n");
 #  ifdef VMCFG_NANOJIT
         avmplus::AvmLog("                           jit - output LIR as it is generated, and final assembly code\n");
+        avmplus::AvmLog("                           lir - [jit] only write out the LIR instructions\n");
         avmplus::AvmLog("                           opt - [jit] show details about each optimization pass\n");
         avmplus::AvmLog("                           regs - [jit] show register allocation state after each assembly instruction\n");
         avmplus::AvmLog("                           raw - [jit] assembly code is displayed in raw (i.e unbuffered bottom-up) fashion. \n");
         avmplus::AvmLog("                           bytes - [jit] display the byte values of the assembly code. \n");
+        avmplus::AvmLog("                           lircfg - [jit] write a gml representation of the LIR control-flow graph to a file.\n");
+        avmplus::AvmLog("                           lircfg-bb - [jit] same as above, but each vertex is a basic blocks rather than an EBBs.\n");
+        avmplus::AvmLog("                           lircfg-ins - [jit] same as above, but each vertex is an instruction.\n");
 #  endif
 
         avmplus::AvmLog("                        Note that ordering matters for options with dependencies.  Dependencies \n");

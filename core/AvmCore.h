@@ -72,6 +72,9 @@ const int kBufferPadding = 16;
         ,VB_traits       = 1<<26 // traits creation information
         ,VB_execpolicy   = 1<<25  // traits creation information
         ,VB_raw          = 1<<24  // native code (via nanojit) is displayed in raw (i.e unbuffered bottom-up) fashion.
+        ,VB_lircfg       = 1<<23  // produce a control-flow graph of any resultant lir (gml format) in extended basic blocks
+        ,VB_lircfg_bb    = 1<<22  // same as above, except each vertex is a basic block
+        ,VB_lircfg_ins   = 1<<21  // same as above, except each vertex is an instruction
         // @warning make sure these don't collide with LC_xxx bits
     };
 
@@ -378,10 +381,10 @@ const int kBufferPadding = 16;
         LivePoolNode* next;
         MMgc::GCWeakRef* GC_POINTER(pool);
         GC_DATA_END(LivePoolNode)
-        
+
         LivePoolNode(MMgc::GC* gc) : GCRoot(gc, MMgc::kExact) {}
     };
-    
+
     /**
      * The main class of the AVM+ virtual machine.  This is the
      * main entry point to the VM for running ActionScript code.
@@ -423,10 +426,10 @@ const int kBufferPadding = 16;
         {
             // normal state.  must be 0 to allow efficient code for interrupt checks
             NotInterrupted = 0,
-            
+
             // script is running too long
             ScriptTimeout = 1,
-            
+
             // host-defined external interrupt, other than a script timeout.
             ExternalInterrupt = 2
         };
@@ -640,34 +643,34 @@ const int kBufferPadding = 16;
 #ifdef _DEBUG
         HeapHashtable*          m_unversionedURIs;
 #endif
-        
+
         Traits** _emptySupertypeList; // empty supertype list shared by many Traits
-        
+
         // END traced private fields
         ////////////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////////////
         // BEGIN traced public fields
 
     public:
         RegexCache      m_regexCache;   // Substructure with traceable data
-        
+
         /**
          * This method will be invoked when the first exception
          * frame is set up.  This will be a good point to set
          * minstack by calling setStackLimit().
          */
         virtual void setStackBase();
-        
+
         /** Internal table of strings for boolean type ("true", "false") */
         GCMember<String> booleanStrings[2];
-        
+
         /** Container object for traits of built-in classes */
         BuiltinTraits traits;
-        
+
         /** PoolObject for built-in classes */
         PoolObject* builtinPool;
-        
+
         /** Domain for built-in classes */
         Domain* builtinDomain;
 
@@ -683,7 +686,7 @@ const int kBufferPadding = 16;
          * The unnamed public namespaces
          */
         NamespaceSet* publicNamespaces;
-        
+
         /**
          * @name interned constants
          * Constants used frequently in the VM; these are typically
@@ -692,7 +695,7 @@ const int kBufferPadding = 16;
          * up front and held in AvmCore for easy reference.
          */
         /*@{*/
-        
+
         GCMember<String> kconstructor;
         GCMember<String> kEmptyString;
         GCMember<String> ktrue;
@@ -742,7 +745,7 @@ const int kBufferPadding = 16;
         GCMember<String> kindex;
         GCMember<String> kinput;
         GCMember<String> kemptyCtor;
-        
+
         GCMember<String> kAsterisk;     // '*'
         GCMember<String> kColon;        // ':'
         GCMember<String> kUnderscore;   // '_'
@@ -753,20 +756,20 @@ const int kBufferPadding = 16;
         GCMember<String> kVectorint;    // 'Vector.<int>'
         GCMember<String> kVectoruint;   // 'Vector.<uint>'
         GCMember<String> kVectorAny;    // 'Vector.<*>'
-        
+
         Atom kNaN;
-        
+
         GCMember<String> cachedChars[128];
         /*@}*/
-        
+
         Exception *exceptionAddr;
-        
+
         /** The XML entities table, used by E4X */
         HeapHashtable* xmlEntities;
 
         // END traced public fields
         ////////////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////////////
         // BEGIN methods (private/public intermixed)
 
@@ -1189,7 +1192,7 @@ const int kBufferPadding = 16;
         /**
          * Support for API versioning
          */
-        
+
         /**
          * Add to the list of URIs that must be versioned for namespaces.
          *
@@ -1756,7 +1759,7 @@ const int kBufferPadding = 16;
 
         /** search the namespace intern table */
         int findNamespace(Namespacep ns, bool canRehash = true);
-        
+
         Namespacep gotNamespace(uintptr_t uriAndType, ApiVersion apiVersion);
 
     public:
