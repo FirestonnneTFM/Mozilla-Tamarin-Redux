@@ -4075,7 +4075,7 @@ namespace avmplus
             }
         }
     }
- 
+
     bool CodegenLIR::inlineBuiltinFunction(AbcOpcode, intptr_t, int argc, Traits* result, MethodInfo* mi)
     {
         if (haveDebugger)
@@ -7480,6 +7480,48 @@ namespace nanojit
     }
 
 #ifdef DEBUG
+    // Note this method should only be called during debug builds.
+    bool CodeAlloc::checkChunkMark(void* addr, size_t nbytes, bool isExec) {
+        bool b = true;
+
+        // iterate over each page checking permission bits
+        size_t psize = VMPI_getVMPageSize();
+        uintptr_t last = alignTo((uintptr_t)addr + nbytes-1, psize);
+        uintptr_t start = (uintptr_t)addr;
+        for( uintptr_t n=start; b && n<=last; n += psize) {
+#ifdef AVMPLUS_WIN32
+            /* windows */
+            MEMORY_BASIC_INFORMATION buf;
+            VMPI_memset(&buf, 0, sizeof(MEMORY_BASIC_INFORMATION));
+            SIZE_T sz = VirtualQuery((LPCVOID)n, &buf, sizeof(buf));
+            NanoAssert(sz > 0);
+            b = isExec ? buf.Protect == PAGE_EXECUTE_READ
+                       : buf.Protect == PAGE_READWRITE;
+            NanoAssert(b);
+#elif defined(__MACH30__)
+            /* mach / osx */
+            vm_address_t vmaddr = (vm_address_t)addr;
+            vm_size_t vmsize = psize;
+            vm_region_basic_info_data_64_t inf;
+            mach_msg_type_number_t infoCnt = sizeof(vm_region_basic_info_data_64_t);
+            mach_port_t	port;
+            VMPI_memset(&inf, 0, infoCnt);
+            kern_return_t err = vm_region_64(mach_task_self(), &vmaddr, &vmsize, VM_REGION_BASIC_INFO_64, (vm_region_info_t)&inf, &infoCnt, &port);
+            NanoAssert(err == KERN_SUCCESS);
+            b = isExec ? inf.protection == (VM_PROT_READ | VM_PROT_EXECUTE)
+                       : inf.protection == (VM_PROT_READ | VM_PROT_WRITE);
+            NanoAssert(b);
+#else
+            (void)psize;
+            (void)last;
+            (void)start;
+            (void)n;
+            (void)isExec;
+#endif
+        }
+        return b;
+    }
+
     void ValidateWriter::checkAccSet(LOpcode op, LIns* base, int32_t disp, AccSet accSet)
     {
         (void)disp;
