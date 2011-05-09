@@ -91,7 +91,7 @@ package DynamicClass {
     }
 
     // ***************************************
-    // access public property from 
+    // access public property from
     // default method of sub class
     // ***************************************
 
@@ -125,7 +125,7 @@ package DynamicClass {
     }
     
     // ***************************************
-    // access public property from 
+    // access public property from
     // final method of sub class
     // ***************************************
 
@@ -137,6 +137,6 @@ package DynamicClass {
         return this.finSubGetDPArray();
     }
     
-  } 
+  }
   public class DynExtDynamicClassPub extends DynExtDynamicClassPubInner {}
 }

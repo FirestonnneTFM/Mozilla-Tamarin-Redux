@@ -35,17 +35,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 /*
- *  Default Interface DefaultInterface 
- * Interface methods 
- *  
+ *  Default Interface DefaultInterface
+ * Interface methods
+ *
  */
 
 
-package PublicClassImpDefIntIntname{ 
+package PublicClassImpDefIntIntname{
 
-	interface DefaultInt_S{
-	
-		function deffunc():String;  		
+    interface DefaultInt_S{
+    
+        function deffunc():String;
 
-	}
+    }
 }

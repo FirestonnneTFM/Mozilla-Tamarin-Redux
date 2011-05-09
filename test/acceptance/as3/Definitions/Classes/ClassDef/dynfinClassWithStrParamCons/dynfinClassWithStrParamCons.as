@@ -48,7 +48,7 @@ package testdynfinalClassWithStringParamCons{
                                                                      x=a;
                                                                      mybool=b;
                                                                      myarr=c;
-                                                                     myObj=d;              
+                                                                     myObj=d;
                                                                             
                                                                                 }
                                         
@@ -68,7 +68,7 @@ package testdynfinalClassWithStringParamCons{
                                         
                                         public function myAdd():Number{
                                                               return myObj.Add();
-                                                                      }                               
+                                                                      }
 
 
                                           }
@@ -76,7 +76,7 @@ package testdynfinalClassWithStringParamCons{
 
 
 
-var x = "test"; 
+var x = "test";
 var y:Boolean = true;
 var myArray:Array = new Array(4,6,5);
 
@@ -97,5 +97,5 @@ public class publicClassCons{
       }
 }
 
-public class DefaultClass{}                         
+public class DefaultClass{}
                                                         }

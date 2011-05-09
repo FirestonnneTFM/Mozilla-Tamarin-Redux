@@ -85,28 +85,28 @@ function getTestCases() {
                                     TestFunction() + '' );
 
 
-	function TestObject() {
-	    // cn:  __proto__ not ecma3 compliant
-	    //this.__proto__ = new Prototype();
-	    this.constructor.prototype.arguments = ARG_STRING;
-	    return arguments;
-	}
-	function AnotherTestObject() {
-	    // cn:  __proto__ not ecma3 compliant
-	    //this.__proto__ = new Prototype();
-	    this.constructor.prototype.arguments = ARG_STRING;
-	    return this;
-	}
-	function TestFunction() {
-	    arguments[0] = ARG_STRING;
-	    return arguments;
-	}
-	function AnotherTestFunction() {
-	    // cn:  __proto__ not ecma3 compliant
-		//this.__proto__ = new Prototype();
-	    this.constructor.prototype.arguments = ARG_STRING;
-	    return this;
-	}
+    function TestObject() {
+        // cn:  __proto__ not ecma3 compliant
+        //this.__proto__ = new Prototype();
+        this.constructor.prototype.arguments = ARG_STRING;
+        return arguments;
+    }
+    function AnotherTestObject() {
+        // cn:  __proto__ not ecma3 compliant
+        //this.__proto__ = new Prototype();
+        this.constructor.prototype.arguments = ARG_STRING;
+        return this;
+    }
+    function TestFunction() {
+        arguments[0] = ARG_STRING;
+        return arguments;
+    }
+    function AnotherTestFunction() {
+        // cn:  __proto__ not ecma3 compliant
+        //this.__proto__ = new Prototype();
+        this.constructor.prototype.arguments = ARG_STRING;
+        return this;
+    }
 
     return ( array );
 }

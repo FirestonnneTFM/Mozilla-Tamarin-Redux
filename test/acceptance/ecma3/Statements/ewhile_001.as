@@ -66,5 +66,5 @@ function getTestCases() {
             result );
 
     }
-    return array;   
-}    
+    return array;
+}

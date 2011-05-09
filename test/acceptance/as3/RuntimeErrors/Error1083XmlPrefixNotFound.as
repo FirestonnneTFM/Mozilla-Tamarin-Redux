@@ -34,19 +34,19 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1083; //	The prefix "_" for element "_" is not bound.
+var CODE = 1083; // The prefix "_" for element "_" is not bound.
 
 //-----------------------------------------------------------
 startTest();
 //-----------------------------------------------------------
 
 try {
-	var result = "no error";
-	x1 = <foo:x xmlns:test="test"/>;
+    var result = "no error";
+    x1 = <foo:x xmlns:test="test"/>;
 } catch (err) {
-	result = err.toString();
+    result = err.toString();
 } finally {
-	AddTestCase("Runtime Error", TYPEERROR + CODE, typeError(result));
+    AddTestCase("Runtime Error", TYPEERROR + CODE, typeError(result));
 }
 
 //-----------------------------------------------------------

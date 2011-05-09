@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package MyPackage {
-	public class OverrideNoParamType extends BaseClass {
-		override public function echo(s) : String {
-			return "[override] " + super.echo(s);
-		}
-	}
+    public class OverrideNoParamType extends BaseClass {
+        override public function echo(s) : String {
+            return "[override] " + super.echo(s);
+        }
+    }
 }

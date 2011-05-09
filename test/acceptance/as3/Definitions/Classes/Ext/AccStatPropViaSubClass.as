@@ -66,49 +66,49 @@ startTest();                // leave this alone
 var obj:AccStatPropViaSubClass = new AccStatPropViaSubClass();
 
 // ********************************************
-// Try to access a static property (in a namespace) 
-// of the base class via a reference to the subclass 
+// Try to access a static property (in a namespace)
+// of the base class via a reference to the subclass
 // ********************************************
 var thisError = "no exception thrown";
 try{
-	var date = obj.ns1::date;
+    var date = obj.ns1::date;
 } catch (e1) {
-	thisError = e1.toString();
+    thisError = e1.toString();
 } finally {
-	AddTestCase( "access static property in namespace of base class using subclass",
-				REFERENCEERROR+1069,
-				referenceError( thisError) );
+    AddTestCase( "access static property in namespace of base class using subclass",
+                REFERENCEERROR+1069,
+                referenceError( thisError) );
 }
 
 // ********************************************
-// Try to access a static property of the base 
+// Try to access a static property of the base
 // class via a reference to the subclass
 // ********************************************
 thisError = "no exception thrown";
 try{
-	var str = obj.string;
+    var str = obj.string;
 } catch (e2) {
-	thisError = e2.toString();
+    thisError = e2.toString();
 } finally {
-	AddTestCase( "access static property of base class using subclass",
-				REFERENCEERROR+1069,
-				referenceError( thisError) );
+    AddTestCase( "access static property of base class using subclass",
+                REFERENCEERROR+1069,
+                referenceError( thisError) );
 }
 
 // ********************************************
-// Try to access the static property of the base 
-// class from an instance method in the subclass 
-// using "this.foo" 
+// Try to access the static property of the base
+// class from an instance method in the subclass
+// using "this.foo"
 // ********************************************
 var thisError = "no exception thrown";
 try{
-	var str = obj.getString();
+    var str = obj.getString();
 } catch (e3) {
-	thisError = e3.toString();
+    thisError = e3.toString();
 } finally {
-	AddTestCase( "access static property of base class in subclass with this.foo",
-				REFERENCEERROR+1069,
-				referenceError( thisError) );
+    AddTestCase( "access static property of base class in subclass with this.foo",
+                REFERENCEERROR+1069,
+                referenceError( thisError) );
 }
 
 test();       // leave this alone.  this executes the test cases and

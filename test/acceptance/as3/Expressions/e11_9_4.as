@@ -44,7 +44,7 @@
     test();
     
 class AObj {
-	function AObj() {}
+    function AObj() {}
 }
 
 function MyObject( value ) {
@@ -69,7 +69,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "Infinity === NaN",        false,  Number.POSITIVE_INFINITY === Number.NaN );
 
     // if x is the same number value as y, return true
-	var bn = (12345.6789 === 12345.678900);
+    var bn = (12345.6789 === 12345.678900);
     array[item++] = new TestCase( SECTION,    "12345.6789 === 12345.678900",   true,   bn);
     array[item++] = new TestCase( SECTION,    "Number.MAX_VALUE === Number.MAX_VALUE",   true,   Number.MAX_VALUE === Number.MAX_VALUE );
     array[item++] = new TestCase( SECTION,    "Number.MIN_VALUE === Number.MIN_VALUE",   true,   Number.MIN_VALUE === Number.MIN_VALUE );
@@ -80,7 +80,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "0 === 0",                 true,   0 === 0 );
     array[item++] = new TestCase( SECTION,    "0 === -0",                true,   0 === -0 );
     array[item++] = new TestCase( SECTION,    "-0 === 0",                true,   -0 === 0 );
-	var b0 = (-0 === -0);
+    var b0 = (-0 === -0);
     array[item++] = new TestCase( SECTION,    "-0 === -0",               true,   b0);
 
     // return false.
@@ -102,8 +102,8 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "false === true",              false,  false === true );
 
     // return true if x and y refer to the same object.  otherwise return false
-	var myobj1 = new MyObject(true);
-	var myobj2 = myobj1;
+    var myobj1 = new MyObject(true);
+    var myobj2 = myobj1;
     array[item++] = new TestCase( SECTION,    "var myobj1 = new MyObject(true); var myobj2 = myobj1; myobj1 === myobj2",  true,  myobj1 === myobj2 );
     array[item++] = new TestCase( SECTION,    "new MyObject(true) === new MyObject(true)",   false,  new MyObject(true) === new MyObject(true) );
     array[item++] = new TestCase( SECTION,    "new Boolean(true) === new Boolean(true)",     true,  new Boolean(true) === new Boolean(true) );
@@ -111,9 +111,9 @@ function getTestCases() {
 
     x = new MyObject(true); y = x; z = x;
     array[item++] = new TestCase( SECTION,    "x = new MyObject(true); y = x; z = x; z === y",   true,   z === y );
-    x = new MyObject(false); y = x; z = x; 
+    x = new MyObject(false); y = x; z = x;
     array[item++] = new TestCase( SECTION,    "x = new MyObject(false); y = x; z = x; z === y",  true,  z === y );
-    x = new Boolean(true); y = x; z = x; 
+    x = new Boolean(true); y = x; z = x;
     array[item++] = new TestCase( SECTION,    "x = new Boolean(true); y = x; z = x; z === y",   true,  z === y );
     x = new Boolean(false); y = x; z = x;
     array[item++] = new TestCase( SECTION,   "x = new Boolean(false); y = x; z = x; z === y",   true,  z === y );
@@ -121,24 +121,24 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "new String(\"string\") === new String(\"string\")",     true,  new String("string") === new String("string") );
     array[item++] = new TestCase( SECTION,    "new String(\"string\") === \"string\"",   true,  new String("string") === "string" );
 
-	// if Type(x) is different from Type(y), return false
+    // if Type(x) is different from Type(y), return false
     array[item++] = new TestCase( SECTION,    "null === void 0",             false,   null === void 0 );
     array[item++] = new TestCase( SECTION,    "void 0 === null",             false,   void 0 === null );
     array[item++] = new TestCase( SECTION,    "undefined === 5.44",          false,   undefined === 5.44 );
     array[item++] = new TestCase( SECTION,    "null === \"fdsee3f\" ",       false,   null === "fdsee3f" );
-	
-	// if Type(x) is Undefined, return true
-	var an_undefined_var;
-	var obj:Object;
+    
+    // if Type(x) is Undefined, return true
+    var an_undefined_var;
+    var obj:Object;
     array[item++] = new TestCase( SECTION,    "undefined === an_undefined_var",  true,   undefined === an_undefined_var );
     array[item++] = new TestCase( SECTION,    "var obj:Object; obj === an_undefined_var",  false,   obj === an_undefined_var );
-	
-	// if Type(x) is Null, return true
-	var nullobj:AObj;
-	var b = (nullobj === null);
-	//trace("nullobj = "+nullobj);
+    
+    // if Type(x) is Null, return true
+    var nullobj:AObj;
+    var b = (nullobj === null);
+    //trace("nullobj = "+nullobj);
     array[item++] = new TestCase( SECTION,    "var nullobj:AObj; nullobj === null ",     true,   b );
-	
+    
     // if type(x) is Number and type(y) is string, return false
     array[item++] = new TestCase( SECTION,    "1 === '1'",                   false,   1 === '1' );
     array[item++] = new TestCase( SECTION,    "255 === '0xff'",              false,  255 === '0xff' );

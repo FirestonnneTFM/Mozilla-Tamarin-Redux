@@ -53,7 +53,7 @@ try{
    }catch(eo1:TypeError){
        thisError1="This is outer TypeError:"+eo1.toString();
        //print(thisError1);
-        try { 
+        try {
              throw new TypeError();
              }catch(ei:TypeError){
                  thisError="This is Inner Type Error:"+ei.toString();

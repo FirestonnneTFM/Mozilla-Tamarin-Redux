@@ -37,35 +37,35 @@
 
 package DefaultClass {
 
-	import DefaultClass.*;
+    import DefaultClass.*;
 
-	class ExtDefaultOverRideDefaultInner extends DefaultClass {
+    class ExtDefaultOverRideDefaultInner extends DefaultClass {
 
-		// *********************************
-		// override a default method
-		// with a default method in subclass
-		// *********************************
+        // *********************************
+        // override a default method
+        // with a default method in subclass
+        // *********************************
 
-		override function setArray( newArray:Array) {
-			a = ["override","worked"];
-			a.push(newArray);
-		}
+        override function setArray( newArray:Array) {
+            a = ["override","worked"];
+            a.push(newArray);
+        }
 
-		override function getArray() : Array{
-			return a;
-		}
+        override function getArray() : Array{
+            return a;
+        }
 
-		// public accessor to work outside of package
-		public function setGetArray(arr:Array) : Array {
-			setArray(arr);
-			return getArray();
-		}
+        // public accessor to work outside of package
+        public function setGetArray(arr:Array) : Array {
+            setArray(arr);
+            return getArray();
+        }
 
-		
+        
 
-	}
+    }
 
-	public class ExtDefaultOverRideDefault extends ExtDefaultOverRideDefaultInner {}
+    public class ExtDefaultOverRideDefault extends ExtDefaultOverRideDefaultInner {}
 
-	
+    
 }

@@ -67,17 +67,17 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	var actual = '';
-	var expect = '';
-	var n = 0;
-	var obj = {toLocaleString: function() {n++}};
-	var myArray = [obj, obj, obj];
+    var actual = '';
+    var expect = '';
+    var n = 0;
+    var obj = {toLocaleString: function() {n++}};
+    var myArray = [obj, obj, obj];
 
-	myArray.toLocaleString();
-	actual = n;
-	expect = 3; // (see explanation above)
+    myArray.toLocaleString();
+    actual = n;
+    expect = 3; // (see explanation above)
 
-	array[item++] = new TestCase(SECTION, TITLE, 3, n);
+    array[item++] = new TestCase(SECTION, TITLE, 3, n);
 
     return ( array );
 }

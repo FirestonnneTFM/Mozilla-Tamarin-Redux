@@ -38,28 +38,28 @@
 
 package P {
  
-     public namespace nsPublic1    	
-     public namespace nsPublic2    
-     internal namespace nsInternal1    	
-     internal namespace nsInternal2    
+     public namespace nsPublic1
+     public namespace nsPublic2
+     internal namespace nsInternal1
+     internal namespace nsInternal2
      
 
-	public class Game{
+    public class Game{
 
- protected namespace nsProtected1    	
-  protected namespace nsProtected2 
-  private namespace nsPrivate1    	
-     private namespace nsPrivate2  
+ protected namespace nsProtected1
+  protected namespace nsProtected2
+  private namespace nsPrivate1
+     private namespace nsPrivate2
         
-             nsPublic1 var x:int = 10; 
+             nsPublic1 var x:int = 10;
              nsPublic2 var x:String = "team1";
-             nsInternal1 var y:int = 10; 
+             nsInternal1 var y:int = 10;
              nsInternal2 var y:String = "team1";
-	     nsPrivate1 var z:int = 10; 
+         nsPrivate1 var z:int = 10;
              nsPrivate2 var z:String = "team1";
-             nsProtected1 var a:int = 10; 
+             nsProtected1 var a:int = 10;
              nsProtected2 var a:String = "team1";
-	    
+        
              public function accintvar1(){return nsInternal1::y} //public function to access internal variable
              public function accintvar2(){return nsInternal2::y} //public function to access internal variable
              public function accprivvar1(){return nsPrivate1::z} //public function to access private variable
@@ -72,7 +72,7 @@ package P {
 
  
 var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "Public_Private_Internal_Protected_Namespace as variable attribute";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 

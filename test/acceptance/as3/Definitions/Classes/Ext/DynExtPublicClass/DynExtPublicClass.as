@@ -94,7 +94,7 @@ package PublicClass {
 
 
     // ***************************************
-    // access default property from 
+    // access default property from
     // default method of sub class
     // ***************************************
 
@@ -104,7 +104,7 @@ package PublicClass {
     public function testSubDPArray(a:Array) : Array {
         this.subSetDPArray(a);
         return this.subGetDPArray();
-    }  
+    }
     
     // ***************************************
     // access default property from
@@ -125,7 +125,7 @@ package PublicClass {
     public function testPrivSubDPArray(a:Array) : Array {
         this.privSubSetDPArray(a);
         return this.privSubGetDPArray();
-    } 
+    }
     
     // ***************************************
     // access default property from
@@ -138,7 +138,7 @@ package PublicClass {
     public function testFinSubDPArray(a:Array) : Array {
         this.finSubSetDPArray(a);
         return this.finSubGetDPArray();
-    } 
+    }
     
     
   }

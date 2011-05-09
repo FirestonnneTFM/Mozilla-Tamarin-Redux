@@ -44,44 +44,44 @@ writeHeaderToLog("Bug 420755: Expand Array Test Coverage");
 
 // check for subclassing of Array, both with and without "dynamic"
 
-dynamic class MyDynamicArray extends Array				// dynamic child
+dynamic class MyDynamicArray extends Array              // dynamic child
 {
 }
 
-class MyNonDynamicArray extends Array					// nondynamic child (dynamic isn't inherited in AS3)
+class MyNonDynamicArray extends Array                   // nondynamic child (dynamic isn't inherited in AS3)
 {
 }
 
-dynamic class MyDynamicArray2 extends MyDynamicArray	// dynamic grandchild
+dynamic class MyDynamicArray2 extends MyDynamicArray    // dynamic grandchild
 {
 }
 
-class MyNonDynamicArray2 extends MyDynamicArray			// nondynamic grandchild
+class MyNonDynamicArray2 extends MyDynamicArray         // nondynamic grandchild
 {
 }
 
 // Validate behaviour of "holes" in an array
 function testArray(a:Array)
 {
-	var len = 100;
+    var len = 100;
     a[0] = 0;
     for (var i:int = 1; i < len; ++i)
-	{
-		// test getprop & setprop (and .length)
+    {
+        // test getprop & setprop (and .length)
         a[i] = a[i-1]+1;
-	}
-	
-	// test delprop
-	delete a[20];
+    }
+    
+    // test delprop
+    delete a[20];
 
-	var tot = 0;
+    var tot = 0;
     for (var i:int = 1; i < a.length; ++i)
-	{
-		// test hasprop (should skip 20)
-		if (a.hasOwnProperty(i))
-			tot += a[i];
-	}
-	// print("tot "+tot);
+    {
+        // test hasprop (should skip 20)
+        if (a.hasOwnProperty(i))
+            tot += a[i];
+    }
+    // print("tot "+tot);
     return tot;
 }
 
@@ -102,7 +102,7 @@ AddTestCase("Validate behaviour of holes in subclassed grandchild of dynamic Arr
 
 var err = "no error";
 try {
-	testArray(new MyNonDynamicArray());	// expect ReferenceError: Error #1056
+    testArray(new MyNonDynamicArray()); // expect ReferenceError: Error #1056
 } catch (e) {
     err = grabError(e, e.toString());
 } finally {
@@ -113,9 +113,9 @@ try {
 
 err = "no error";
 try {
-	testArray(new MyNonDynamicArray2());	// expect ReferenceError: Error #1056
+    testArray(new MyNonDynamicArray2());    // expect ReferenceError: Error #1056
 } catch (e) {
-	err = grabError(e, e.toString());
+    err = grabError(e, e.toString());
 } finally {
     AddTestCase("Validate behaviour of holes in subclassed grandchild of non-dynamic Array",
                 "Error #1056",
@@ -131,10 +131,10 @@ AddTestCase("test array construct",
 
 err = "no error";
 try {
-	var a = new MyDynamicArray(1,2,3);
-	var temp = a.length;							// expect ArgumentError: Error #1063
+    var a = new MyDynamicArray(1,2,3);
+    var temp = a.length;                            // expect ArgumentError: Error #1063
 } catch (e) {
-	err = grabError(e, e.toString());
+    err = grabError(e, e.toString());
 } finally {
     AddTestCase("Test construct of subclassed dynamic Array",
                 "Error #1063",
@@ -143,10 +143,10 @@ try {
 
 err = "no error";
 try {
-	var a = new MyDynamicArray2(1,2,3);
-	var temp = a.length;							// expect ArgumentError: Error #1063
+    var a = new MyDynamicArray2(1,2,3);
+    var temp = a.length;                            // expect ArgumentError: Error #1063
 } catch (e) {
-	err = grabError(e, e.toString());
+    err = grabError(e, e.toString());
 } finally {
     AddTestCase("Test construct of grandchild of subclassed dynamic Array",
                 "Error #1063",
@@ -155,10 +155,10 @@ try {
 
 err = "no error";
 try {
-	var a = new MyNonDynamicArray(1,2,3);
-	var temp = a.length;							// expect ArgumentError: Error #1063
+    var a = new MyNonDynamicArray(1,2,3);
+    var temp = a.length;                            // expect ArgumentError: Error #1063
 } catch (e) {
-	err = grabError(e, e.toString());
+    err = grabError(e, e.toString());
 } finally {
     AddTestCase("Test construct in subclassed non-dynamic Array",
                 "Error #1063",
@@ -167,10 +167,10 @@ try {
 
 err = "no error";
 try {
-	var a = new MyNonDynamicArray2(1,2,3);
-	var temp = a.length;							// expect ArgumentError: Error #1063
+    var a = new MyNonDynamicArray2(1,2,3);
+    var temp = a.length;                            // expect ArgumentError: Error #1063
 } catch (e) {
-	err = grabError(e, e.toString());
+    err = grabError(e, e.toString());
 } finally {
     AddTestCase("Test construct in grandchild of subclassed non-dynamic Array",
                 "Error #1063",
@@ -183,10 +183,10 @@ AddTestCase("Test array call", 3, a.length);
 
 err = "no error";
 try {
-	var a = MyDynamicArray(1,2,3);
-	var temp = a.length;							// expect ArgumentError: Error #1112
+    var a = MyDynamicArray(1,2,3);
+    var temp = a.length;                            // expect ArgumentError: Error #1112
 } catch (e) {
-	err = grabError(e, e.toString());
+    err = grabError(e, e.toString());
 } finally {
     AddTestCase("Test call in subclassed dynamic Array",
                 "Error #1112",
@@ -195,10 +195,10 @@ try {
 
 err = "no error";
 try {
-	var a = MyDynamicArray2(1,2,3);
-	var temp = a.length;							// expect ArgumentError: Error #1112
+    var a = MyDynamicArray2(1,2,3);
+    var temp = a.length;                            // expect ArgumentError: Error #1112
 } catch (e) {
-	err = grabError(e, e.toString());
+    err = grabError(e, e.toString());
 } finally {
     AddTestCase("Test call in grandchild of subclassed dynamic Array",
                 "Error #1112",
@@ -207,10 +207,10 @@ try {
 
 err = "no error";
 try {
-	var a = MyNonDynamicArray(1,2,3);
-	var temp = a.length;							// expect ArgumentError: Error #1112
+    var a = MyNonDynamicArray(1,2,3);
+    var temp = a.length;                            // expect ArgumentError: Error #1112
 } catch (e) {
-	err = grabError(e, e.toString());
+    err = grabError(e, e.toString());
 } finally {
     AddTestCase("Test call in subclassed non-dynamic Array",
                 "Error #1112",
@@ -219,10 +219,10 @@ try {
 
 err = "no error";
 try {
-	var a = MyNonDynamicArray2(1,2,3);
-	var temp = a.length;							// expect ArgumentError: Error #1112
+    var a = MyNonDynamicArray2(1,2,3);
+    var temp = a.length;                            // expect ArgumentError: Error #1112
 } catch (e) {
-	err = grabError(e, e.toString());
+    err = grabError(e, e.toString());
 } finally {
     AddTestCase("Test call in grandchild of subclassed non-dynamic Array",
                 "Error #1112",

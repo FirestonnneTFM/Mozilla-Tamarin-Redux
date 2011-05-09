@@ -66,7 +66,7 @@ startTest();                // leave this alone
 
   
 //*******************************************
-//  access default method from 
+//  access default method from
 //  outside of class
 //*******************************************
 
@@ -85,7 +85,7 @@ AddTestCase( "Access default method from default method of sub class", arr, (DYN
 
 
 // ********************************************
-// access default method from a public 
+// access default method from a public
 // method of a sub class
 //
 // ********************************************
@@ -94,7 +94,7 @@ DYNEXTDCLASS = new DynExtPublicClass();
 AddTestCase( "Access default method from public method of sub class", arr, (DYNEXTDCLASS.pubSubSetArray(arr),DYNEXTDCLASS.pubSubGetArray()) );
 
 // ********************************************
-// access default method from a private 
+// access default method from a private
 // method of a sub class
 //
 // ********************************************
@@ -103,7 +103,7 @@ DYNEXTDCLASS = new DynExtPublicClass();
 AddTestCase( "Access default method from private method of sub class", arr, DYNEXTDCLASS.testPrivSubArray(arr) );
 
 // ********************************************
-// access default method from a final 
+// access default method from a final
 // method of a sub class
 //
 // ********************************************
@@ -114,7 +114,7 @@ AddTestCase( "Access default method from public method of sub class", arr, (DYNE
 
 
 // ********************************************
-// access default property from 
+// access default property from
 // default method in sub class
 // ********************************************
 
@@ -123,7 +123,7 @@ AddTestCase( "Access default prooperty from method in sub class", arr, (DYNEXTDC
 
 
 // ********************************************
-// access default property from 
+// access default property from
 // public method in sub class
 // ********************************************
 
@@ -131,7 +131,7 @@ DYNEXTDCLASS = new DynExtPublicClass();
 AddTestCase( "Access default property from public method in sub class", arr, (DYNEXTDCLASS.pubSubSetDPArray(arr), DYNEXTDCLASS.pubSubGetDPArray()) );
 
 // ********************************************
-// access default property from 
+// access default property from
 // private method in sub class
 // ********************************************
 
@@ -139,7 +139,7 @@ DYNEXTDCLASS = new DynExtPublicClass();
 AddTestCase( "Access default property from private method in sub class", arr, (DYNEXTDCLASS.testPrivSubDPArray(arr)) );
 
 // ********************************************
-// access default property from 
+// access default property from
 // final method in sub class
 // ********************************************
 

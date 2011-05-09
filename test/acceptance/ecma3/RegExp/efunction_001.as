@@ -38,14 +38,14 @@
     var VERSION = "ECMA_2";
     var TITLE   = "RegExp( pattern, flags )";
 
-	startTest();
-	writeHeaderToLog(SECTION + " " + TITLE);
-	var testcases = getTestCases();
-	test();
+    startTest();
+    writeHeaderToLog(SECTION + " " + TITLE);
+    var testcases = getTestCases();
+    test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
     /*
      * for each test case, verify:
@@ -101,5 +101,5 @@ function getTestCases() {
     //restore
     delete RegExp.prototype.getClassProperty;
     
-	return array;
+    return array;
 }

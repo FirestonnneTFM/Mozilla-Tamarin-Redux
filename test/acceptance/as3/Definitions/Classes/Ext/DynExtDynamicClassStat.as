@@ -79,7 +79,7 @@ AddTestCase( "EXTDCLASS.testSubArray(arr)", arr, (EXTDCLASS.testSubArray(arr)) )
 
 
 // ********************************************
-// access static method from a public 
+// access static method from a public
 // method of a sub class
 //
 // ********************************************
@@ -91,7 +91,7 @@ AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access static method from a private 
+// access static method from a private
 // method of a sub class
 //
 // ********************************************
@@ -102,7 +102,7 @@ AddTestCase( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(
 
 
 // ********************************************
-// access static method from a final 
+// access static method from a final
 // method of a sub class
 //
 // ********************************************
@@ -113,7 +113,7 @@ AddTestCase( "EXTDCLASS.testFinSubArray(arr)", arr, (EXTDCLASS.testFinSubArray(a
 
 
 // ********************************************
-// access static method from a private final 
+// access static method from a private final
 // method of a sub class
 //
 // ********************************************
@@ -123,7 +123,7 @@ AddTestCase( "*** Access static method from private final method of sub class **
 AddTestCase( "EXTDCLASS.testPrivFinSubArray(arr)", arr, (EXTDCLASS.testPrivFinSubArray(arr)) );
 
 // ********************************************
-// access static method from a virtual 
+// access static method from a virtual
 // method of a sub class
 //
 // ********************************************
@@ -134,41 +134,41 @@ AddTestCase( "EXTDCLASS.testVirSubArray(arr)", arr, (EXTDCLASS.testVirSubArray(a
 
 
 // ********************************************
-// access static method from a static 
+// access static method from a static
 // method of a sub class
 //
 // ********************************************
 /*
 AddTestCase( "*** Access static method from static method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testStatSubArray(arr)", arr, 
+AddTestCase( "EXTDCLASS.testStatSubArray(arr)", arr,
              (EXTDCLASS.testStatSubArray(arr)) );
 
 
 // ********************************************
-// access static method from a public static 
+// access static method from a public static
 // method of a sub class
 //
 // ********************************************
 
 AddTestCase( "*** Access static method from public static method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testPubStatSubArray(arr)", arr, 
+AddTestCase( "EXTDCLASS.testPubStatSubArray(arr)", arr,
              (EXTDCLASS.testPubStatSubArray(arr)) );
 
 
 // ********************************************
-// access static method from a private static 
+// access static method from a private static
 // method of a sub class
 //
 // ********************************************
 
 var EXTDEFAULTCLASS = new DynExtDynamicClassStat();
 AddTestCase( "*** Access static method from private static method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testPrivStatSubArray(arr)", arr, 
+AddTestCase( "EXTDCLASS.testPrivStatSubArray(arr)", arr,
               EXTDCLASS.testPrivStatSubArray(arr) );
 */
 
 // ********************************************
-// access static property from 
+// access static property from
 // default method in sub class
 // ********************************************
 
@@ -179,7 +179,7 @@ AddTestCase( "EXTDCLASS.testSubDPArray(arr)", arr, (EXTDCLASS.testSubDPArray(arr
 
 
 // ********************************************
-// access static property from 
+// access static property from
 // public method in sub class
 // ********************************************
 
@@ -189,7 +189,7 @@ AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", ar
 
 
 // ********************************************
-// access static property from 
+// access static property from
 // private method in sub class
 // ********************************************
 
@@ -200,7 +200,7 @@ AddTestCase( "EXTDCLASS.testPrivSubDPArray(arr)", arr, (EXTDCLASS.testSubDPArray
 
 // ********************************************
 // access static property from
-// static method in sub class 
+// static method in sub class
 // ********************************************
 /*
 AddTestCase( "*** Access static property from static method in sub class ***", 1, 1 );
@@ -209,7 +209,7 @@ AddTestCase( "EXTDCLASS.statSubSetSPArray(arr), EXTDCLASS.statSubGetSPArray()", 
 
 // ********************************************
 // access static property from
-// public static method in sub class 
+// public static method in sub class
 // ********************************************
 
 AddTestCase( "*** Access static property from public static method in sub class ***", 1, 1 );
@@ -217,18 +217,18 @@ AddTestCase( "EXTDCLASS.pubStatSubSetSPArray(arr), EXTDCLASS.pubStatSubGetSPArra
              (EXTDCLASS.pubStatSubSetSPArray(arr), EXTDCLASS.pubStatSubGetSPArray()) );
 
 // ********************************************
-// access static property from 
+// access static property from
 // private static method in sub class
 // ********************************************
 
 EXTDCLASS = new DynExtDynamicClassStat();
 AddTestCase( "*** Access static property from private static method in sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testPrivStatSubPArray(arr)", arr, 
+AddTestCase( "EXTDCLASS.testPrivStatSubPArray(arr)", arr,
               EXTDCLASS.testPrivStatSubPArray(arr));
 */
 
 // ********************************************
-// access static property from 
+// access static property from
 // final method in sub class
 // ********************************************
 
@@ -237,7 +237,7 @@ AddTestCase( "*** Access static property from final method in sub class ***", 1,
 AddTestCase( "EXTDCLASS.testFinSubDPArray(arr)", arr, (EXTDCLASS.testFinSubDPArray(arr)) );
 
 // ********************************************
-// access static property from 
+// access static property from
 // public virtual method in sub class
 // ********************************************
 

@@ -53,7 +53,7 @@ package testInternalClassNoParamCons{
                               
  
        public class wrapintClassNoParamCons{
-                        var intNoParamCons:intClassNoParamCons=new intClassNoParamCons(); 
+                        var intNoParamCons:intClassNoParamCons=new intClassNoParamCons();
                                   
 
                                  public function getAdd(){

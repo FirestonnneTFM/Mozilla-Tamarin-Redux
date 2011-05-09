@@ -36,8 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 package ImplTwoInterfacesSameMethod{
 
-	public interface A{
-		function sameName();
-	}
+    public interface A{
+        function sameName();
+    }
 
 }

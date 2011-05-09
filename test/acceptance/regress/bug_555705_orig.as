@@ -37,7 +37,7 @@
 
 
 /*
-    This file is the original source for bug_555705.abc_ 
+    This file is the original source for bug_555705.abc_
 
     bug_555705.abc_ was created by changing offset 18c from 00 to 01 in the
     generated abc for this file (asc.jar version 14710).
@@ -47,7 +47,7 @@
 
 
 package {
-    function f() { 
+    function f() {
         print("Hello, world!");
     }
     function g() {

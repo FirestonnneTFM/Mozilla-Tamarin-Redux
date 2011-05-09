@@ -41,8 +41,8 @@
 package {
 function wabbit(s)
 {
-	for (;;)
-	    s = s + s;
+    for (;;)
+        s = s + s;
 }
 
 // Need to print out passed so test harness is happy

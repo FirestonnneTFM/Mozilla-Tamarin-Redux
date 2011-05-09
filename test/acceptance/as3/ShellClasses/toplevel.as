@@ -124,10 +124,10 @@
         var count:int = 0;
         var sleeper:int = 2;
         for(var i:int = 0; i < 5; i++){
-            var t1:int = getTimer();  
+            var t1:int = getTimer();
             var t2:int;
             while ( (t2 = getTimer()) == t1 ) {
-                // Do some work in order to take up CPU time, keep doing this until the 
+                // Do some work in order to take up CPU time, keep doing this until the
                 // a call to getTimer() != what we have in t1
                 for(var j:int = 0; j < sleeper; j++){ var x:Array = [1,2,3,4,5,6,7,8,9,10]; }
                 if (sleeper == 2)

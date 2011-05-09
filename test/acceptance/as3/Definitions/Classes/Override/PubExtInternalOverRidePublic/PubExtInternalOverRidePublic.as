@@ -37,24 +37,24 @@
 
 package InternalClassPackage {
 
-	import InternalClassPackage.*;
+    import InternalClassPackage.*;
 
-	public class PubExtInternalOverRidePublic extends InternalClass {
+    public class PubExtInternalOverRidePublic extends InternalClass {
 
-		// *********************************
-		// override a internal method
-		// *********************************
-		override public function setArray( a:Array ) {
-			array = ["override","worked"];
-			array.push(a);
-		}
+        // *********************************
+        // override a internal method
+        // *********************************
+        override public function setArray( a:Array ) {
+            array = ["override","worked"];
+            array.push(a);
+        }
 
-		override public function getArray() : Array{
-			return array;
-		}
+        override public function getArray() : Array{
+            return array;
+        }
 
-		
+        
 
-	}
-	
+    }
+    
 }

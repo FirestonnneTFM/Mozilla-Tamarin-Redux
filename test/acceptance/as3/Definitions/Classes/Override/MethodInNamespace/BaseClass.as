@@ -35,19 +35,19 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package MethodInNamespace {
-	public namespace ns1;
-	public namespace ns2;
-	
-	public class BaseClass {
-		public var i:int;
+    public namespace ns1;
+    public namespace ns2;
+    
+    public class BaseClass {
+        public var i:int;
 
-		ns1 function getI() : int {
-			return i;
-		}
-		
-		ns2 function getI() : int {
-			return i + 2;
-		}
-	}
-	
+        ns1 function getI() : int {
+            return i;
+        }
+        
+        ns2 function getI() : int {
+            return i + 2;
+        }
+    }
+    
 }

@@ -46,8 +46,8 @@ package DefaultClass{
  */
 import DefaultClass.*;
 
-var SECTION = "Definitions";       			// provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";  				// Version of JavaScript or ECMA
+var SECTION = "Definitions";                // provide a document reference (ie, ECMA section)
+var VERSION = "AS 3.0";                 // Version of JavaScript or ECMA
 var TITLE   = "Dynamic Class Extends Default Class";    // Provide ECMA section title or a description
 //var BUGNUMBER = "";
 
@@ -120,13 +120,13 @@ AddTestCase( "access 'default' method from 'final' method of sub class", arr, (D
 DYNEXTDCLASS = new DynExtDefaultClass();
 var thisError10 = "no Exception thrown";
 try{
-	DYNEXTDCLASS.testStatSubArray(arr);
+    DYNEXTDCLASS.testStatSubArray(arr);
 } catch (e) {
-	thisError10 = e.toString();
+    thisError10 = e.toString();
 } finally {
-	AddTestCase( "access 'default' method from 'static' method of sub class",
-				 "ReferenceError: Error #1065",
-				 referenceError( thisError10 ) );
+    AddTestCase( "access 'default' method from 'static' method of sub class",
+                 "ReferenceError: Error #1065",
+                 referenceError( thisError10 ) );
 }
 // ********************************************
 // access default method from a static
@@ -148,7 +148,7 @@ AddTestCase( "DYNEXTDCLASS.testStatSubArray(arr)", arr, (DYNEXTDCLASS.testStatSu
 arr = new Array( 1, 2, 3 );
 DYNEXTDCLASS = new DynExtDefaultClass();
 AddTestCase( "access 'default' method from 'public final' method of sub class", arr,
-		     (DYNEXTDCLASS.pubFinSubSetArray(arr), DYNEXTDCLASS.pubFinSubGetArray()) );
+             (DYNEXTDCLASS.pubFinSubSetArray(arr), DYNEXTDCLASS.pubFinSubGetArray()) );
 
 // ********************************************
 // access default method from a final
@@ -174,7 +174,7 @@ AddTestCase( "access 'default' method from 'private' method of sub class", arr, 
 // ********************************************
 
 AddTestCase( "access 'default' method from 'virtual' method of sub class", arr,
-			  DYNEXTDCLASS.testVirtSubArray(arr) );
+              DYNEXTDCLASS.testVirtSubArray(arr) );
 
 // ********************************************
 // access default method from a virtual
@@ -182,7 +182,7 @@ AddTestCase( "access 'default' method from 'virtual' method of sub class", arr,
 // ********************************************
 
 AddTestCase( "access 'default' method from 'public virtual' method of sub class", arr,
-		     (DYNEXTDCLASS.pubVirtSubSetArray(arr), DYNEXTDCLASS.pubVirtSubGetArray()) );
+             (DYNEXTDCLASS.pubVirtSubSetArray(arr), DYNEXTDCLASS.pubVirtSubGetArray()) );
 
 // ********************************************
 // access default method from a virtual
@@ -190,7 +190,7 @@ AddTestCase( "access 'default' method from 'public virtual' method of sub class"
 // ********************************************
 
 AddTestCase( "access 'default' method from 'private virtual' method of sub class", arr,
-			  DYNEXTDCLASS.testPrivVirtSubArray(arr) );
+              DYNEXTDCLASS.testPrivVirtSubArray(arr) );
 
 
 
@@ -203,7 +203,7 @@ AddTestCase( "access 'default' method from 'private virtual' method of sub class
 
 DYNEXTDCLASS = new DynExtDefaultClass();
 AddTestCase( "access 'default' property from 'default' method of sub class", arr,
-				(DYNEXTDCLASS.testSubGetSetDPArray(arr)) );
+                (DYNEXTDCLASS.testSubGetSetDPArray(arr)) );
 
 // ********************************************
 // access default property from
@@ -212,7 +212,7 @@ AddTestCase( "access 'default' property from 'default' method of sub class", arr
 
 DYNEXTDCLASS = new DynExtDefaultClass();
 AddTestCase( "access 'default' property from 'final' method of sub class", arr,
-				(DYNEXTDCLASS.testFinSubDPArray(arr)) );
+                (DYNEXTDCLASS.testFinSubDPArray(arr)) );
 
 // ********************************************
 // access default property from
@@ -221,7 +221,7 @@ AddTestCase( "access 'default' property from 'final' method of sub class", arr,
 
 DYNEXTDCLASS = new DynExtDefaultClass();
 AddTestCase( "access 'default' property from 'virtual' method of sub class", arr,
-				(DYNEXTDCLASS.testVirtSubDPArray(arr)) );
+                (DYNEXTDCLASS.testVirtSubDPArray(arr)) );
 
 // ********************************************
 // access default property from
@@ -230,7 +230,7 @@ AddTestCase( "access 'default' property from 'virtual' method of sub class", arr
 
 DYNEXTDCLASS = new DynExtDefaultClass();
 AddTestCase( "access 'default' property from 'public' method of sub class", arr,
-				(DYNEXTDCLASS.pubSubSetDPArray(arr), DYNEXTDCLASS.pubSubGetDPArray()) );
+                (DYNEXTDCLASS.pubSubSetDPArray(arr), DYNEXTDCLASS.pubSubGetDPArray()) );
 
 // ********************************************
 // access default property from
@@ -239,7 +239,7 @@ AddTestCase( "access 'default' property from 'public' method of sub class", arr,
 
 DYNEXTDCLASS = new DynExtDefaultClass();
 AddTestCase( "access 'default' property from 'private' method of sub class", arr,
-			 (DYNEXTDCLASS.testPrivSubDPArray(arr)) );
+             (DYNEXTDCLASS.testPrivSubDPArray(arr)) );
 
 // ********************************************
 // access default property from
@@ -248,7 +248,7 @@ AddTestCase( "access 'default' property from 'private' method of sub class", arr
 
 DYNEXTDCLASS = new DynExtDefaultClass();
 AddTestCase( "access 'default' property from 'public final' method of sub class", arr,
-			 (DYNEXTDCLASS.pubFinSubSetDPArray(arr), DYNEXTDCLASS.pubFinSubGetDPArray()) );
+             (DYNEXTDCLASS.pubFinSubSetDPArray(arr), DYNEXTDCLASS.pubFinSubGetDPArray()) );
 
 // ********************************************
 // access default property from
@@ -257,7 +257,7 @@ AddTestCase( "access 'default' property from 'public final' method of sub class"
 
 DYNEXTDCLASS = new DynExtDefaultClass();
 AddTestCase( "access 'default' property from 'public virtual' method of sub class", arr,
-			 (DYNEXTDCLASS.pubVirtSubSetDPArray(arr), DYNEXTDCLASS.pubVirtSubGetDPArray()) );
+             (DYNEXTDCLASS.pubVirtSubSetDPArray(arr), DYNEXTDCLASS.pubVirtSubGetDPArray()) );
 
 // ********************************************
 // access default property from
@@ -266,7 +266,7 @@ AddTestCase( "access 'default' property from 'public virtual' method of sub clas
 
 DYNEXTDCLASS = new DynExtDefaultClass();
 AddTestCase( "access 'default' property from 'private final' method of sub class", arr,
-			 (DYNEXTDCLASS.testPrivFinSubDPArray(arr)) );
+             (DYNEXTDCLASS.testPrivFinSubDPArray(arr)) );
 
 // ********************************************
 // access default property from
@@ -275,7 +275,7 @@ AddTestCase( "access 'default' property from 'private final' method of sub class
 
 DYNEXTDCLASS = new DynExtDefaultClass();
 AddTestCase( "access 'default' property from 'private virtual' method of sub class", arr,
-			 (DYNEXTDCLASS.testPrivVirtSubDPArray(arr)) );
+             (DYNEXTDCLASS.testPrivVirtSubDPArray(arr)) );
 
 // ********************************************
 // Class Prototype Testing
@@ -291,7 +291,7 @@ DefaultClassInner.prototype.pObj = 2;
 child = new DynExtDefaultClass();
 AddTestCase("*** Try overriding parent property through prototype object, verify child object has correct value ***", 1, child.pObj);
 
-test();       		// Leave this function alone.
-			// This function is for executing the test case and then
-			// displaying the result on to the console or the LOG file.
-		}
+test();             // Leave this function alone.
+            // This function is for executing the test case and then
+            // displaying the result on to the console or the LOG file.
+        }

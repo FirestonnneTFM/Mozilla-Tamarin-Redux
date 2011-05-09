@@ -44,7 +44,7 @@ package {
 
     writeHeaderToLog( SECTION + " "+ TITLE);
 
-    // set the Object.toString and Array.toString to show each property value 
+    // set the Object.toString and Array.toString to show each property value
     // instead of [Object object] for testing
     var oldObject = Object.prototype.toString;
     var oldArray = Array.prototype.toString;
@@ -79,13 +79,13 @@ package {
             if (!this.hasOwnProperty(i))
                 continue;
             s += jformat(this[i]);
-        } 
+        }
         return s + "]";
     });
 
     startTest();
 
-    // 15.12.1-1-0-1: syntax error if multiple tokens 
+    // 15.12.1-1-0-1: syntax error if multiple tokens
     parseException="no exception";
     try {
         JSON.parse('12\t\r\n 34'); // should produce a syntax error as whitespace results in two tokens
@@ -142,8 +142,8 @@ package {
     // other category z spaces are not valid JSON whitespace as specified by the production JSONWhitespace.
     otherException="no exception";
     try {
-        // the following should produce a syntax error 
-        JSON.parse('\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u30001234'); 
+        // the following should produce a syntax error
+        JSON.parse('\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u30001234');
     } catch (e) {
         otherException=removeExceptionDetail(e.toString());
     }
@@ -153,7 +153,7 @@ package {
     // U+2028 and U+2029 are not valid JSON whitespace as specified by the production JSONWhitespace
     u2028Exception="no exception";
     try {
-        JSON.parse('\u2028\u20291234'); // should produce a syntax error 
+        JSON.parse('\u2028\u20291234'); // should produce a syntax error
     } catch (e) {
         u2028Exception=removeExceptionDetail(e.toString());
     }
@@ -312,7 +312,7 @@ package {
     AddTestCase("15.12.1-1-g5-3: A JSONStringCharacter UnicodeEscape may not include any non=hex characters",
                 "SyntaxError: Error #1132",nonhexunicodeException);
 
-    AddTestCase("15.12.1-1-g6-1: The JSON lexical grammer allows '/' as a JSONEscapeCharacter after '\\' in a JSONString",'/',JSON.parse('"\\/"')); 
+    AddTestCase("15.12.1-1-g6-1: The JSON lexical grammer allows '/' as a JSONEscapeCharacter after '\\' in a JSONString",'/',JSON.parse('"\\/"'));
     AddTestCase("15.12.1-1-g6-2: The JSON lexical grammer allows '\' as a JSONEscapeCharacter after '\\' in a JSONString",'\\',JSON.parse('"\\\\"'));
     AddTestCase("15.12.1-1-g6-3: The JSON lexical grammer allows 'b' as a JSONEscapeCharacter after '\\' in a JSONString",'\b',JSON.parse('"\\b"'));
     AddTestCase("15.12.1-1-g6-4: The JSON lexical grammer allows 'f' as a JSONEscapeCharacter after '\\' in a JSONString",true,JSON.parse('"\\f"')=='\f');

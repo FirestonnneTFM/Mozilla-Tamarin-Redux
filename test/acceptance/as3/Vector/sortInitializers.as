@@ -90,8 +90,8 @@ function Sort( a ) {
       var hi = a[j];
       var c = Compare( lo, hi );
       if ( c == 1 ) {
-	a[i] = hi;
-	a[j] = lo;
+    a[i] = hi;
+    a[j] = lo;
       }
     }
   }

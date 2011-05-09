@@ -45,12 +45,12 @@ var correct0:XMLList = new XMLList();
 correct0 += new XML("value1");
 correct0 += new XML("value2");
 
-var correct4:XML = 
+var correct4:XML =
 <bravo attr1="value1" ns:attr1="value3" xmlns:ns="http://someuri">
 <charlie attr1="value2" ns:attr1="value4"/>
 </bravo>
 
-var x1:XML = 
+var x1:XML =
 <MLB>
 <NationalLeague>
 <Team mascot='Giants' city='San Francisco'/>
@@ -61,9 +61,9 @@ var x1:XML =
 <Team mascot='Rangers' city='Arlington'/>
 </AmericanLeague>
 </MLB>
-					 
+                     
 
-var x2:XML = 
+var x2:XML =
 <alpha>
 <bravo attr1="value1" ns:attr1="value3" xmlns:ns="http://someuri">
 <charlie attr1="value2" ns:attr1="value4"/>
@@ -99,17 +99,17 @@ var qqq:XML =
 <dodo lll="10" ttt="555"/>
 </yoyo>
 
-var qqqProxy:XMLProxy = new XMLProxy(qqq); 
+var qqqProxy:XMLProxy = new XMLProxy(qqq);
 
 // test delete of descendants
 
 // delete existing element on proxy
-var proxyDeleteStatus:Boolean = delete qqqProxy.dodo;	
+var proxyDeleteStatus:Boolean = delete qqqProxy.dodo;
 
 // delete non-existing element on proxy
-var proxyDeleteStatus2:Boolean = delete qqqProxy.nonExist;	
+var proxyDeleteStatus2:Boolean = delete qqqProxy.nonExist;
 
-var correct10:XML = 
+var correct10:XML =
 <yoyo>
 <abc a="10" b="20" c="30" d="40"/>
 <def fff="567" ggg="888"/>
@@ -134,12 +134,12 @@ var qqq2:XML =
 <dodo lll="10" ttt="555"/>
 </yoyo>
 
-var qqqProxy2:XMLProxy = new XMLProxy(qqq2); 
+var qqqProxy2:XMLProxy = new XMLProxy(qqq2);
 
 // delete on original xml
-var origDeleteStatus:Boolean = delete qqq2.def;	
+var origDeleteStatus:Boolean = delete qqq2.def;
 
-var correct12:XML = 
+var correct12:XML =
 <yoyo>
 <abc a="10" b="20" c="30" d="40"/>
 <dodo lll="10" ttt="555"/>
@@ -156,17 +156,17 @@ var ppp:XML =
 var pppProxy:XMLProxy = new XMLProxy(ppp);
 
 // delete existing attribute on proxy
-var proxyDeleteAttrStatus:Boolean = delete pppProxy.@b;	
+var proxyDeleteAttrStatus:Boolean = delete pppProxy.@b;
 
 // delete non-existing attribute on proxy
-var proxyDeleteAttrStatus2:Boolean = delete pppProxy.@nonExist;	
+var proxyDeleteAttrStatus2:Boolean = delete pppProxy.@nonExist;
 
 AddTestCase("Test deleteProperty with attributes with existing element",
             true, proxyDeleteAttrStatus);
 AddTestCase("Test deleteProperty with attributes with non-existing element",
             true, proxyDeleteAttrStatus2);
 
-var correct16:XML = 
+var correct16:XML =
 <abc a="10" c="30" d="40"/>
 
 AddTestCase("Test getProperty on Proxy after deleting attribute on Proxy",
@@ -178,12 +178,12 @@ AddTestCase("Test getProperty on original XML after deleting attribute on Proxy"
 var ppp2:XML =
 <abc a="10" b="20" c="30" d="40"/>
 
-var pppProxy2:XMLProxy = new XMLProxy(ppp2); 
+var pppProxy2:XMLProxy = new XMLProxy(ppp2);
 
 // delete on original xml
-var origDeleteAttribStatus:Boolean = delete ppp2.@c;	
+var origDeleteAttribStatus:Boolean = delete ppp2.@c;
 
-var correct18:XML = 
+var correct18:XML =
 <abc a="10" b="20" d="40"/>
 
 AddTestCase("Test getProperty on Proxy after deleting attribute on original XML",
@@ -197,9 +197,9 @@ var xQ2:XML =
   <alpha2 xmlns="http://someuriNode/Default" xmlns:ns="http://someuriNode/NonDefault">
     <bravo attr1="value1" attr2="value11" ns:attr1="value3">
         <charlie attr1="value2" ns:attr1="value4" ns:attr2="value44"/>
-		<ns:album>
-			<ns:cd artist="Wilco" title="YankeeHotelFoxtrot"/>
-		</ns:album>
+        <ns:album>
+            <ns:cd artist="Wilco" title="YankeeHotelFoxtrot"/>
+        </ns:album>
     </bravo>
   </alpha2>
 </alpha>

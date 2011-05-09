@@ -56,7 +56,7 @@ function a()
 }
 
 function b()
-{    
+{
   var z = { t: function() { for (var i = 0; i < 5; i++) { a(); } } };
   z.t();
 }

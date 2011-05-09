@@ -38,18 +38,18 @@
 package StaticPropertyPackage {
 
         public class BaseClass {
-		static public var boolean:Boolean = true;
-		static public var date:Date = new Date(0);
-	}
+        static public var boolean:Boolean = true;
+        static public var date:Date = new Date(0);
+    }
 
-	public class AccStatPropSubClassMeth extends BaseClass {
-		
-		public function getBoolean() : Boolean {
-			return boolean;
-		}		
-		
-		public function getBaseDate() : Date {
-			return BaseClass.date;
-		}
-	}
+    public class AccStatPropSubClassMeth extends BaseClass {
+        
+        public function getBoolean() : Boolean {
+            return boolean;
+        }
+        
+        public function getBaseDate() : Date {
+            return BaseClass.date;
+        }
+    }
 }

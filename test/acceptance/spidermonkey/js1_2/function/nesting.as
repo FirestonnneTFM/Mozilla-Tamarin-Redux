@@ -59,23 +59,23 @@ function outer_func(x)
   var y = "outer";
 
   testcases[index++] = new TestCase( SECTION, "outer:x    ",
-		1111,  x);
+        1111,  x);
   testcases[index++] = new TestCase( SECTION, "outer:y    ",
-		'outer', y);
+        'outer', y);
   function inner_func(x)
   {
     var y = "inner";
     testcases[index++] = new TestCase( SECTION, "inner:x    ",
-		  2222,  x);
+          2222,  x);
     testcases[index++] = new TestCase( SECTION, "inner:y    ",
-		  'inner', y);
+          'inner', y);
   };
 
   inner_func(2222);
   testcases[index++] = new TestCase( SECTION, "outer:x    ",
-		1111,  x);
+        1111,  x);
   testcases[index++] = new TestCase( SECTION, "outer:y    ",
-		'outer', y);
+        'outer', y);
 }
 
 outer_func(1111);

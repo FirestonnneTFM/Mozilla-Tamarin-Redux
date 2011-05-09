@@ -53,9 +53,9 @@ function genGluck(str){
   var x = str;
   var rx=/end/i;
   x = x.replace(rx,function($1){
-		  $1.match(rx);
-		  return "";
-		});
+          $1.match(rx);
+          return "";
+        });
   x = x.replace(/^end/,"");
   return x;
 }

@@ -95,80 +95,80 @@ function Engineer ( name, projs, machine ) {
 Engineer.prototype = new WorkerBee();
 
 var pat = new Engineer( "Toonces, Pat",
-			["SpiderMonkey", "Rhino"],
-			"indy" );
+            ["SpiderMonkey", "Rhino"],
+            "indy" );
 
 var les = new WorkerBee( "Morris, Les",
-			 "Training",
-			 ["Hippo"] )
+             "Training",
+             ["Hippo"] )
 
   var terry = new Employee( "Boomberi, Terry",
-			    "Marketing" );
+                "Marketing" );
 
 // Pat, the Engineer
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.name",
-	      "Toonces, Pat",
-	      pat.name );
+          "pat.name",
+          "Toonces, Pat",
+          pat.name );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.dept",
-	      "engineering",
-	      pat.dept );
+          "pat.dept",
+          "engineering",
+          pat.dept );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.projects.length",
-	      2,
-	      pat.projects.length );
+          "pat.projects.length",
+          2,
+          pat.projects.length );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.projects[0]",
-	      "SpiderMonkey",
-	      pat.projects[0] );
+          "pat.projects[0]",
+          "SpiderMonkey",
+          pat.projects[0] );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.projects[1]",
-	      "Rhino",
-	      pat.projects[1] );
+          "pat.projects[1]",
+          "Rhino",
+          pat.projects[1] );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.machine",
-	      "indy",
-	      pat.machine );
+          "pat.machine",
+          "indy",
+          pat.machine );
 
 
 // Les, the WorkerBee
 
 testcases[index++] = new TestCase( SECTION,
-	      "les.name",
-	      "Morris, Les",
-	      les.name );
+          "les.name",
+          "Morris, Les",
+          les.name );
 
 testcases[index++] = new TestCase( SECTION,
-	      "les.dept",
-	      "Training",
-	      les.dept );
+          "les.dept",
+          "Training",
+          les.dept );
 
 testcases[index++] = new TestCase( SECTION,
-	      "les.projects.length",
-	      1,
-	      les.projects.length );
+          "les.projects.length",
+          1,
+          les.projects.length );
 
 testcases[index++] = new TestCase( SECTION,
-	      "les.projects[0]",
-	      "Hippo",
-	      les.projects[0] );
+          "les.projects[0]",
+          "Hippo",
+          les.projects[0] );
 
 // Terry, the Employee
 testcases[index++] = new TestCase( SECTION,
-	      "terry.name",
-	      "Boomberi, Terry",
-	      terry.name );
+          "terry.name",
+          "Boomberi, Terry",
+          terry.name );
 
 testcases[index++] = new TestCase( SECTION,
-	      "terry.dept",
-	      "Marketing",
-	      terry.dept );
+          "terry.dept",
+          "Marketing",
+          terry.dept );
 test();
 

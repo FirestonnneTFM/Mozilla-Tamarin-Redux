@@ -38,7 +38,7 @@
 
 package PublicClass {
 
-import 	PublicClass.*;
+import  PublicClass.*;
 
 final class FinExtPublicImplDefDefPub extends PublicClass implements DefaultIntDef, DefaultInt {
 
@@ -49,11 +49,11 @@ final class FinExtPublicImplDefDefPub extends PublicClass implements DefaultIntD
 
      public function iGetBoolean() : Boolean { return this.boolean; }
             public function iGetNumber1() : Number { return 5; }
-	public function testGetBoolean(flag:Boolean):Boolean {
+    public function testGetBoolean(flag:Boolean):Boolean {
 
-	  setBoolean(flag);
-	  return iGetBoolean();
-	}
+      setBoolean(flag);
+      return iGetBoolean();
+    }
 
 
     // ****************************************
@@ -71,11 +71,11 @@ final class FinExtPublicImplDefDefPub extends PublicClass implements DefaultIntD
 
     public function iGetNumber() : Number { return this.number; }
            
-	public function testGetSetNumber( num:Number ) : Number {
+    public function testGetSetNumber( num:Number ) : Number {
 
-	  setNumber(num);
-	  return iGetNumber();
-	}
+      setNumber(num);
+      return iGetNumber();
+    }
 
 
     // ****************************************
@@ -124,50 +124,50 @@ final class FinExtPublicImplDefDefPub extends PublicClass implements DefaultIntD
 
  }
 
- 	// Create an instance of the final class in the package.
-  	// This object will be used for accessing the methods created
-  	// within the sub class given above.
-  	var FINEXTDCLASS = new FinExtPublicImplDefDefPub();
+    // Create an instance of the final class in the package.
+    // This object will be used for accessing the methods created
+    // within the sub class given above.
+    var FINEXTDCLASS = new FinExtPublicImplDefDefPub();
 
-  	// Create a series of public functions that call the methods.
-  	// The same names can be used as used in the class; because we are now
-  	// outside of the class definition.
+    // Create a series of public functions that call the methods.
+    // The same names can be used as used in the class; because we are now
+    // outside of the class definition.
 
-  	// The default method of the sub class.
-  	public function setPubArray( a:Array )  { return FINEXTDCLASS.setPubArray( a ); }
-  	public function setPubBoolean( a:Boolean )  { return FINEXTDCLASS.setPubBoolean( a ); }
-  	public function setPubDate( a:Date )  { return FINEXTDCLASS.setPubDate( a ); }
-  	public function setPubFunction( a:Function )  { return FINEXTDCLASS.setPubFunction( a ); }
-  	public function setPubNumber( a:Number )  { return FINEXTDCLASS.setPubNumber( a ); }
-  	public function setPubString( a:String )  { return FINEXTDCLASS.setPubString( a ); }
-  	public function setPubObject( a:Object )  { return FINEXTDCLASS.setPubObject( a ); }
+    // The default method of the sub class.
+    public function setPubArray( a:Array )  { return FINEXTDCLASS.setPubArray( a ); }
+    public function setPubBoolean( a:Boolean )  { return FINEXTDCLASS.setPubBoolean( a ); }
+    public function setPubDate( a:Date )  { return FINEXTDCLASS.setPubDate( a ); }
+    public function setPubFunction( a:Function )  { return FINEXTDCLASS.setPubFunction( a ); }
+    public function setPubNumber( a:Number )  { return FINEXTDCLASS.setPubNumber( a ); }
+    public function setPubString( a:String )  { return FINEXTDCLASS.setPubString( a ); }
+    public function setPubObject( a:Object )  { return FINEXTDCLASS.setPubObject( a ); }
 
-  	// The dynamic method of the sub class.
-  	public function testGetSetBoolean( a:Array )  { FINEXTDCLASS.testGetSetBoolean( a ); }
-  	public function testPubGetSetBoolean( a:Array )  { FINEXTDCLASS.testPubGetSetBoolean( a ); }
-
-
-  	// The public method of the sub class.
-  	public function testGetSubArray( a:Array )  { return FINEXTDCLASS.testGetSubArray( a ); }
-  	public function pubSubSetArray( a:Array )  { return FINEXTDCLASS.pubSubSetArray( a ); }
-  	public function pubSubGetArray()  { return FINEXTDCLASS.pubSubGetArray(  ); }
-
-  	// The private method of the sub class. Only one is used as we need to call only the
-  	// test function, which in turn calls the actual private methods, as within the class
-  	// we can access the private methods; but not outside of the class.
-  	public function testPrivSubArray( a:Array ) : Array  { return FINEXTDCLASS.testPrivSubArray( a ); }
-
-  	// The default property being accessed by the different method attributes.
-  	// The default method attribute.
-  	public function pubSubSetDPArray( a:Array ) { return FINEXTDCLASS.pubSubSetDPArray(a); }
-  	public function testSubGetDPArray(a:Array) : Array { return FINEXTDCLASS.testSubGetDPArray(a); }
+    // The dynamic method of the sub class.
+    public function testGetSetBoolean( a:Array )  { FINEXTDCLASS.testGetSetBoolean( a ); }
+    public function testPubGetSetBoolean( a:Array )  { FINEXTDCLASS.testPubGetSetBoolean( a ); }
 
 
-  	// the private static method attribute
-  	public function testPrivSubGetDPArray(a:Array) : Array { return FINEXTDCLASS.testPrivSubGetDPArray(a); }
+    // The public method of the sub class.
+    public function testGetSubArray( a:Array )  { return FINEXTDCLASS.testGetSubArray( a ); }
+    public function pubSubSetArray( a:Array )  { return FINEXTDCLASS.pubSubSetArray( a ); }
+    public function pubSubGetArray()  { return FINEXTDCLASS.pubSubGetArray(  ); }
+
+    // The private method of the sub class. Only one is used as we need to call only the
+    // test function, which in turn calls the actual private methods, as within the class
+    // we can access the private methods; but not outside of the class.
+    public function testPrivSubArray( a:Array ) : Array  { return FINEXTDCLASS.testPrivSubArray( a ); }
+
+    // The default property being accessed by the different method attributes.
+    // The default method attribute.
+    public function pubSubSetDPArray( a:Array ) { return FINEXTDCLASS.pubSubSetDPArray(a); }
+    public function testSubGetDPArray(a:Array) : Array { return FINEXTDCLASS.testSubGetDPArray(a); }
+
+
+    // the private static method attribute
+    public function testPrivSubGetDPArray(a:Array) : Array { return FINEXTDCLASS.testPrivSubGetDPArray(a); }
 
 public class accFinExtPublicImplDefDefPub{
-	private var obj:FinExtPublicImplDefDefPub = new FinExtPublicImplDefDefPub();
+    private var obj:FinExtPublicImplDefDefPub = new FinExtPublicImplDefDefPub();
         var i:DefaultInt=obj;
         var j:DefaultIntDef=obj;
       public function acciGetPubBoolean() : Boolean {return obj.iGetPubBoolean();}

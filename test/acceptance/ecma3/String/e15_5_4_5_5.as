@@ -57,7 +57,7 @@ function getTestCases() {
     var item = 0;
 
     var origBooleanCharCodeAt = Boolean.prototype.charCodeAt;
-	Boolean.prototype.charCodeAt=String.prototype.charCodeAt;
+    Boolean.prototype.charCodeAt=String.prototype.charCodeAt;
 
     array[item++] = new TestCase( SECTION,     "x = new Boolean(true); x.charCodeAt=String.prototype.charCodeAt;x.charCodeAt(0)", 0x0074,    (x = new Boolean(true), x.charCodeAt(0)) );
     array[item++] = new TestCase( SECTION,     "x = new Boolean(true); x.charCodeAt=String.prototype.charCodeAt;x.charCodeAt(1)", 0x0072,    (x = new Boolean(true), x.charCodeAt(1)) );
@@ -81,7 +81,7 @@ function getTestCases() {
         array[item++] = new TestCase( SECTION,  "TEST_STRING.charCodeAt("+j+")",    j,     TEST_STRING.charCodeAt(j) );
     }
     
-	Boolean.prototype.charCodeAt = origBooleanCharCodeAt;
+    Boolean.prototype.charCodeAt = origBooleanCharCodeAt;
     
     return (array );
 }

@@ -38,23 +38,23 @@ import OverrideFunctionBody.*;
 
 // outside package, inside class
 class OverrideFunctionBodyBase {
-	function OverrideFunctionBodyBase() {}
+    function OverrideFunctionBodyBase() {}
     function noReturnNoParams() { return null; }
-	function noReturnParams(s:String, b:Boolean) { return null; }
-	function noReturnCustomParam(c:Custom) { return null; }
-	function returnNoParams():String { return null; }
-	function returnParams(s:String, b:Boolean):String { return null; }
-	function returnCustomNoParams():Custom { return null; }
+    function noReturnParams(s:String, b:Boolean) { return null; }
+    function noReturnCustomParam(c:Custom) { return null; }
+    function returnNoParams():String { return null; }
+    function returnParams(s:String, b:Boolean):String { return null; }
+    function returnCustomNoParams():Custom { return null; }
 }
 
 class OverrideFunctionBodyClass extends OverrideFunctionBodyBase {
-	function OverrideFunctionBodyClass() {}
+    function OverrideFunctionBodyClass() {}
     override function noReturnNoParams() { return "noReturnNoParams"; }
-	override function noReturnParams(s:String, b:Boolean) { return s; }
-	override function noReturnCustomParam(c:Custom) { return new Custom(); }
-	override function returnNoParams():String { return "returnNoParams"; }
-	override function returnParams(s:String, b:Boolean):String { return s; }
-	override function returnCustomNoParams():Custom { return new Custom(); }
+    override function noReturnParams(s:String, b:Boolean) { return s; }
+    override function noReturnCustomParam(c:Custom) { return new Custom(); }
+    override function returnNoParams():String { return "returnNoParams"; }
+    override function returnParams(s:String, b:Boolean):String { return s; }
+    override function returnCustomNoParams():Custom { return new Custom(); }
 }
 
 

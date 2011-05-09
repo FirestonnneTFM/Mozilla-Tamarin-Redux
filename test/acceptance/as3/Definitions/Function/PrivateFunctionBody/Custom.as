@@ -35,6 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package PrivateFunctionBody {
-	public class Custom {}
+    public class Custom {}
 }
 

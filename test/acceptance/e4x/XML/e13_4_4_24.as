@@ -66,10 +66,10 @@ var n4 = new Namespace('boo', 'http://hk.com');
 var xml1 = "<a><b s='1'><c>55</c><d>bird</d></b><b s='2'><c>5</c><d>dinosaur</d></b></a>";
 
 //AddTestCase( "Undefined declaration:", (''),
-//	   (  x1 = new XML(xml1), x1.addNamespace(), x1.namespaceDeclarations().toString()));
+//     (  x1 = new XML(xml1), x1.addNamespace(), x1.namespaceDeclarations().toString()));
 
 AddTestCase( "Undefined declaration, length:", 0,
-	   (  x1 = new XML(xml1), x1.addNamespace(null), x1.namespaceDeclarations().length));
+       (  x1 = new XML(xml1), x1.addNamespace(null), x1.namespaceDeclarations().length));
 
 AddTestCase( "Two declarations in toplevel scope:", ('http://hk.com'),
            (  x1 = new XML(xml1), x1.addNamespace(n1), x1.addNamespace(n4), x1.namespaceDeclarations()[1].toString()));
@@ -81,16 +81,16 @@ AddTestCase( "No declaration:", (''),
            (  x1 = new XML(xml1), x1.namespaceDeclarations().toString()));
            
 AddTestCase( "One declaration w/o prefix, length:", 0,
-	   (  x1 = new XML(xml1), x1.addNamespace(n2), x1.namespaceDeclarations().length));
+       (  x1 = new XML(xml1), x1.addNamespace(n2), x1.namespaceDeclarations().length));
 
 AddTestCase( "One declaration w/ prefix, length:", 1,
-	   (  x1 = new XML(xml1), x1.addNamespace(n1), x1.namespaceDeclarations().length));
+       (  x1 = new XML(xml1), x1.addNamespace(n1), x1.namespaceDeclarations().length));
 
 AddTestCase( "One declaration at toplevel, one at child, length at toplevel:", 1,
-	   (  x1 = new XML(xml1), x1.addNamespace(n3), x1.b[0].c.addNamespace(n4), x1.namespaceDeclarations().length));
+       (  x1 = new XML(xml1), x1.addNamespace(n3), x1.b[0].c.addNamespace(n4), x1.namespaceDeclarations().length));
 
 AddTestCase( "One declaration at toplevel, two at child, length at child:", 2,
-	   (  x1 = new XML(xml1), x1.addNamespace(n3), x1.b[1].c.addNamespace(n4), x1.b[1].c.addNamespace(n1), x1.b[1].c.namespaceDeclarations().length));
+       (  x1 = new XML(xml1), x1.addNamespace(n3), x1.b[1].c.addNamespace(n4), x1.b[1].c.addNamespace(n1), x1.b[1].c.namespaceDeclarations().length));
 
 AddTestCase( "namespaceDeclarations[1].typeof:", "object",
            (  x1 = new XML(xml1), x1.addNamespace(n1), x1.addNamespace(n4), typeof x1.namespaceDeclarations()[1]));
@@ -102,11 +102,11 @@ AddTestCase( "namespaceDeclarations[1].prefix:", "boo",
 var xml1Doc = "<?xml1 version=\"1.0\"?><xsl:stylesheet xmlns:xsl=\"http://www.w3.org/TR/xsl\"><b><c xmlns:foo=\"http://www.foo.org/\">hi</c></b></xsl:stylesheet>";
 
 AddTestCase( "Reading one toplevel declaration:", "http://www.w3.org/TR/xsl",
-	   (  x1 = new XML(xml1Doc), x1.namespaceDeclarations().toString()));
+       (  x1 = new XML(xml1Doc), x1.namespaceDeclarations().toString()));
 
 AddTestCase( "Another declaration up parent chain:", "http://www.foo.org/",
-	   (  x1 = new XML(xml1Doc), x1.b.c.namespaceDeclarations().toString()));
-	   
+       (  x1 = new XML(xml1Doc), x1.b.c.namespaceDeclarations().toString()));
+       
 // Adding because of Mozilla bug https://bugzilla.mozilla.org/show_bug.cgi?id=278112
 
 var xhtml1NS = new Namespace('http://www.w3.org/1999/xhtml');

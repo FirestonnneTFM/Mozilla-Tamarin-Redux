@@ -45,7 +45,7 @@ writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
 test();
 
-function getTestCases() 
+function getTestCases()
 {
     var array = new Array();
     var item = 0;
@@ -59,16 +59,16 @@ function getTestCases()
     pattern += '*';
 
     try {
-	var re = new RegExp(pattern);
+    var re = new RegExp(pattern);
     
-	var res = "aaaaa".search(re);
-	array[item++] = new TestCase(SECTION, "'aaaaa'.search(re)", 0, res);
+    var res = "aaaaa".search(re);
+    array[item++] = new TestCase(SECTION, "'aaaaa'.search(re)", 0, res);
     }
     catch (e: Error) {
-	if (e.message.match("#1023"))
-	    array[item++] = new TestCase(SECTION, "'aaaaa'.search(re)", 0, 0);
-	else
-	    throw(e);
+    if (e.message.match("#1023"))
+        array[item++] = new TestCase(SECTION, "'aaaaa'.search(re)", 0, 0);
+    else
+        throw(e);
     }
     return array;
 }

@@ -52,17 +52,17 @@ var myObjectProxy:ProxyAdvanced = new ProxyAdvanced(myObject);
 // simulate addProperty
 function getQuantity():Number
 {
-	return books;
+    return books;
 }
 
 function setQuantity(numBooks:Number):void
 {
-	books = numBooks;
+    books = numBooks;
 }
 
 function getTitle():String
 {
-	return "Catcher in the Rye";
+    return "Catcher in the Rye";
 }
 
 var myObjectProxy2:Book = new Book();
@@ -122,31 +122,31 @@ AddTestCase("Test myProxy.getter of a variable in a namespace with dot operator 
 // use namespace declaration is only scoped to the function.
 function doUseNameSpace()
 {
-	use namespace NameSpaceDef;
+    use namespace NameSpaceDef;
     answerArr = []
-	try {
+    try {
         eg.three = 3;
-		answerArr[0] = 'eg.NameSpaceDef::three = ' + eg.NameSpaceDef::three;
-		answerArr[1] = 'p.NameSpaceDef::three = ' + p.NameSpaceDef::three;
-		answerArr[2] = 'eg.three = ' + eg.three;
-		answerArr[3] = 'p.three = ' + p.three;
-	
-		p.three = 33;
-	
-		answerArr[4] = 'eg.NameSpaceDef::three = ' + eg.NameSpaceDef::three;
-		answerArr[5] = 'p.NameSpaceDef::three = ' + p.NameSpaceDef::three;
-		answerArr[6] = 'eg.three = ' + eg.three;
-		answerArr[7] = 'p.three = ' + p.three;
-	} catch (notUsingNameSpace) {
-		answerArr[0] = 'Bug 174012';
-		answerArr[1] = 'Bug 174012';
-		answerArr[2] = 'Bug 174012';
-		answerArr[3] = 'Bug 174012';
-		answerArr[4] = 'Bug 174012';
-		answerArr[5] = 'Bug 174012';
-		answerArr[6] = 'Bug 174012';
-		answerArr[7] = 'Bug 174012';
-	}
+        answerArr[0] = 'eg.NameSpaceDef::three = ' + eg.NameSpaceDef::three;
+        answerArr[1] = 'p.NameSpaceDef::three = ' + p.NameSpaceDef::three;
+        answerArr[2] = 'eg.three = ' + eg.three;
+        answerArr[3] = 'p.three = ' + p.three;
+    
+        p.three = 33;
+    
+        answerArr[4] = 'eg.NameSpaceDef::three = ' + eg.NameSpaceDef::three;
+        answerArr[5] = 'p.NameSpaceDef::three = ' + p.NameSpaceDef::three;
+        answerArr[6] = 'eg.three = ' + eg.three;
+        answerArr[7] = 'p.three = ' + p.three;
+    } catch (notUsingNameSpace) {
+        answerArr[0] = 'Bug 174012';
+        answerArr[1] = 'Bug 174012';
+        answerArr[2] = 'Bug 174012';
+        answerArr[3] = 'Bug 174012';
+        answerArr[4] = 'Bug 174012';
+        answerArr[5] = 'Bug 174012';
+        answerArr[6] = 'Bug 174012';
+        answerArr[7] = 'Bug 174012';
+    }
     AddTestCase("Test myObject.getter of a variable in a namespace with dot operator -- 'myClass.ns::myProp'",
                 "eg.NameSpaceDef::three = 3",
                 answerArr[0]);

@@ -60,15 +60,15 @@ var xmlDoc = "<MLB><Team>Giants</Team><City>San Francisco</City><Team>Padres</Te
 
 // valid test cases
 // MYXML.child(0) returns an XMLList with one node
-// The [0] returns the first element in the list which should be child 0 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(0)[0].childIndex()", 0, 
+// The [0] returns the first element in the list which should be child 0
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(0)[0].childIndex()", 0,
              (MYXML = new XML(xmlDoc), MYXML.child(0)[0].childIndex() ));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(1)[0].childIndex()", 1, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(1)[0].childIndex()", 1,
              (MYXML = new XML(xmlDoc), MYXML.child(1)[0].childIndex() ));
 
 // what does childIndex return if there is no parent
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.childIndex()", -1, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.childIndex()", -1,
              (MYXML = new XML(xmlDoc), MYXML.childIndex() ));
 
 END();

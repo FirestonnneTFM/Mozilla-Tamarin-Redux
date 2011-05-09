@@ -49,10 +49,10 @@ var TESTOBJ = new TestObj();
 
 var result = "exception";
 try {
-	TESTOBJ.g();
-	result = "no exception";
+    TESTOBJ.g();
+    result = "no exception";
 }  catch (e1) {
-	result = e1.toString();
+    result = e1.toString();
 }
 
 AddTestCase("Assign function that returns void", "no exception",  result);

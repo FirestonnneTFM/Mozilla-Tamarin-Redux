@@ -37,7 +37,7 @@
 
 package ExtError{
 
-	public class CustReferenceError extends ReferenceError{}
+    public class CustReferenceError extends ReferenceError{}
 
 }
 

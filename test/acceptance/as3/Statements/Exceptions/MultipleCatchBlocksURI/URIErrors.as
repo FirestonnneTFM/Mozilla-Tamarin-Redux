@@ -45,8 +45,8 @@ package MultipleCatchBlocksURI
            var k:String = decodeURI("!@#$%^&*()<>?");
            return 6;
                                                         
-        }                            
+        }
                                  
     }
-	                       
+                           
 }

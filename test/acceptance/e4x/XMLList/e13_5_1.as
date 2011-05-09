@@ -44,7 +44,7 @@ START("13.5.1 - XMLList Constructor as Function");
 
 x1 = XMLList();
 
-TEST(1, "xml", typeof(x1));   
+TEST(1, "xml", typeof(x1));
 TEST(2, true, x1 instanceof XMLList);
 
 // Make sure it's not copied if it's an XMLList
@@ -109,9 +109,9 @@ AddTestCase( "typeof XMLList()", "xml", typeof XMLList() );
 AddTestCase( "XMLList() instanceof XMLList", true, XMLList() instanceof XMLList);
 
 // value is supplied (string)
-AddTestCase( "XMLList(thisXML).toString()", 
-	"<TEAM>Giants</TEAM>" + NL() + "<CITY>San Francisco</CITY>", 
-	XMLList(thisXML).toString() );
+AddTestCase( "XMLList(thisXML).toString()",
+    "<TEAM>Giants</TEAM>" + NL() + "<CITY>San Francisco</CITY>",
+    XMLList(thisXML).toString() );
 AddTestCase( "typeof XMLList(thisXML)", "xml", typeof XMLList(thisXML) );
 
 // value is supplied (xmlList)

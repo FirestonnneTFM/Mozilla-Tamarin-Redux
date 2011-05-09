@@ -49,11 +49,11 @@ class ExtDefImplDefDefInner extends DefaultClass implements DefaultIntDef, Defau
 
     public function iGetBoolean() : Boolean { return boolean; }
         public function iGetNumber1() : Number { return 14; }
-	public function testGetSetBoolean( flag:Boolean ) : Boolean {
+    public function testGetSetBoolean( flag:Boolean ) : Boolean {
 
-	  setBoolean(flag);
-	  return iGetBoolean();
-	}
+      setBoolean(flag);
+      return iGetBoolean();
+    }
 
 
     // ****************************************
@@ -72,9 +72,9 @@ class ExtDefImplDefDefInner extends DefaultClass implements DefaultIntDef, Defau
     public function iGetNumber() : Number { return number; }
     public function testGetSetNumber( num:Number ) : Number {
 
-	  setNumber(num);
-	  return iGetNumber();
-	}
+      setNumber(num);
+      return iGetNumber();
+    }
 
 
     // ****************************************
@@ -84,7 +84,7 @@ class ExtDefImplDefDefInner extends DefaultClass implements DefaultIntDef, Defau
 
     public function iGetPubNumber() : Number { return pubNumber; }
 
-	
+    
     // ************************************
     // access default method of parent
     // from default method of sub class

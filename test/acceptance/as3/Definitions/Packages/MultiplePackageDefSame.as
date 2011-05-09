@@ -37,67 +37,67 @@
 
 
 package foo{
-	public var a = "This is var a";
+    public var a = "This is var a";
 
-	public function func1(){ return "This is func1"; }
+    public function func1(){ return "This is func1"; }
 
-	interface IntA{
-		function testInt();
-	}
+    interface IntA{
+        function testInt();
+    }
 
-	public class ClassA implements IntA {
-		
-		v1 var ns = "This is namespace v1";
-		v2 var ns = "This is namespace v2";
-		public function test(){ return "This is test in ClassA"; }
-		public function testInt() { return "This is testInt in ClassA"; }
-		public function testNS() {return v1::ns; }
-		public function testNS2() {return v2::ns; }
-	}
-	
-	
-	// Namespaces
-	public namespace v1;
-	public namespace v2;
+    public class ClassA implements IntA {
+        
+        v1 var ns = "This is namespace v1";
+        v2 var ns = "This is namespace v2";
+        public function test(){ return "This is test in ClassA"; }
+        public function testInt() { return "This is testInt in ClassA"; }
+        public function testNS() {return v1::ns; }
+        public function testNS2() {return v2::ns; }
+    }
+    
+    
+    // Namespaces
+    public namespace v1;
+    public namespace v2;
 
 }
 package foo{
-	public var b = "This is var b";
+    public var b = "This is var b";
 
-	public function func2(){ return "This is func2"; }
+    public function func2(){ return "This is func2"; }
 
-	interface IntB{
-		function testInt();
-	}
+    interface IntB{
+        function testInt();
+    }
 
-	public class ClassB implements IntB {
-		public function test(){ return "This is test in ClassB"; }
-		public function testInt() { return "This is testInt in ClassB"; }
-	}
+    public class ClassB implements IntB {
+        public function test(){ return "This is test in ClassB"; }
+        public function testInt() { return "This is testInt in ClassB"; }
+    }
 
-	// use the definitions from the first package foo
-	public var c = a;
-	public function func3(){ return func1(); }
+    // use the definitions from the first package foo
+    public var c = a;
+    public function func3(){ return func1(); }
 
-	public var classC = new ClassA();
+    public var classC = new ClassA();
 
-	public class ClassD implements IntA {
-		public function testInt() { return "This is testInt from ClassD"; }
-	}
+    public class ClassD implements IntA {
+        public function testInt() { return "This is testInt from ClassD"; }
+    }
 
-	public class ClassN {
-		use namespace v1;
-		v1 var ns2 = "This is namespace v1";
-		public function getNSVar() {
-			return v1::ns2;
-		}
-	}
+    public class ClassN {
+        use namespace v1;
+        v1 var ns2 = "This is namespace v1";
+        public function getNSVar() {
+            return v1::ns2;
+        }
+    }
 }
 
 import foo.*;
 
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 

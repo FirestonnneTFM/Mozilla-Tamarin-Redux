@@ -78,7 +78,7 @@ AddTestCase( "EXTDCLASS.testSubArray(arr)", arr, (EXTDCLASS.testSubArray(arr)) )
 
 
 // ********************************************
-// access public static method from a public 
+// access public static method from a public
 // method of a sub class
 //
 // ********************************************
@@ -89,7 +89,7 @@ AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (
 
 
 // ********************************************
-// access public static method from a private 
+// access public static method from a private
 // method of a sub class
 //
 // ********************************************
@@ -100,7 +100,7 @@ AddTestCase( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(
 
 
 // ********************************************
-// access public static method from a final 
+// access public static method from a final
 // method of a sub class
 //
 // ********************************************
@@ -110,41 +110,41 @@ AddTestCase( "*** Access public static method from final method of sub class ***
 AddTestCase( "EXTDCLASS.testFinSubArray(arr)", arr, (EXTDCLASS.testFinSubArray(arr)) );
 
 // ********************************************
-// access public static method from a static 
+// access public static method from a static
 // method of a sub class
 //
 // ********************************************
 /*
 AddTestCase( "*** Access public static method from static method of sub class ***", 1, 1 );
-AddTestCase( "PubExtDynamicClassPubStat.statSubSetArray(arr), PubExtDynamicClassPubStat.statSubGetArray()", arr, 
+AddTestCase( "PubExtDynamicClassPubStat.statSubSetArray(arr), PubExtDynamicClassPubStat.statSubGetArray()", arr,
              (PubExtDynamicClassPubStat.statSubSetArray(arr), PubExtDynamicClassPubStat.statSubGetArray()) );
 
 
 // ********************************************
-// access public static method from a public static 
+// access public static method from a public static
 // method of a sub class
 //
 // ********************************************
 
 AddTestCase( "*** Access public static method from public static method of sub class ***", 1, 1 );
-AddTestCase( "PubExtDynamicClassPubStat.pubStatSubSetArray(arr), PubExtDynamicClassPubStat.pubStatSubGetArray()", arr, 
+AddTestCase( "PubExtDynamicClassPubStat.pubStatSubSetArray(arr), PubExtDynamicClassPubStat.pubStatSubGetArray()", arr,
              (PubExtDynamicClassPubStat.pubStatSubSetArray(arr), PubExtDynamicClassPubStat.pubStatSubGetArray()) );
 
 
 // ********************************************
-// access public static method from a private static 
+// access public static method from a private static
 // method of a sub class
 //
 // ********************************************
 
 var EXTDEFAULTCLASS = new DynExtDynamicClassPubStat();
 AddTestCase( "*** Access public static method from private static method of sub class ***", 1, 1 );
-AddTestCase( "EXTDEFAULTCLASS.testPrivStatSubArray(arr)", arr, 
+AddTestCase( "EXTDEFAULTCLASS.testPrivStatSubArray(arr)", arr,
               EXTDEFAULTCLASS.testPrivStatSubArray(arr) );
 
 */
 // ********************************************
-// access public static property from 
+// access public static property from
 // default method in sub class
 // ********************************************
 
@@ -155,7 +155,7 @@ AddTestCase( "EXTDCLASS.testSubDPArray(arr)", arr, (EXTDCLASS.testSubDPArray(arr
 
 
 // ********************************************
-// access public static property from 
+// access public static property from
 // public method in sub class
 // ********************************************
 
@@ -165,7 +165,7 @@ AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", ar
 
 
 // ********************************************
-// access public static property from 
+// access public static property from
 // private method in sub class
 // ********************************************
 
@@ -177,7 +177,7 @@ AddTestCase( "EXTDCLASS.testPrivSubDPArray(arr)", arr, (EXTDCLASS.testPrivSubDPA
 
 
 // ********************************************
-// access public static property from 
+// access public static property from
 // final method in sub class
 // ********************************************
 

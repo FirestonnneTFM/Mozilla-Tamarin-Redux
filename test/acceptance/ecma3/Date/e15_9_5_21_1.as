@@ -47,7 +47,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     var TZ_ADJUST = TZ_DIFF * msPerHour;
 

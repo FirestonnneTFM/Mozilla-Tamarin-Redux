@@ -46,7 +46,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     ToObject_1();
 
@@ -63,8 +63,8 @@ function getTestCases() {
             array[item++] = new TestCase(
                 SECTION,
                 "foo[\"bar\"] ",
-				REFERENCEERROR+1065,
-				referenceError( exception ) );
+                REFERENCEERROR+1065,
+                referenceError( exception ) );
         }
     }
     return array;

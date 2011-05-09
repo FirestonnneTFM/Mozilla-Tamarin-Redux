@@ -45,8 +45,8 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
     /*
      * for each test case, verify:
@@ -64,7 +64,7 @@ function getTestCases() {
     // global property is false
     // test cases in which the exec returns null
 
-	array[item++] = new TestCase(SECTION, "NO TESTS EXIST", "PASSED", "PASSED");
+    array[item++] = new TestCase(SECTION, "NO TESTS EXIST", "PASSED", "PASSED");
 
-	return array;
+    return array;
 }

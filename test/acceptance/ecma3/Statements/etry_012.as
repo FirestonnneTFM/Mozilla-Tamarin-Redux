@@ -78,7 +78,7 @@ function getTestCases() {
                 throw 0;
             } finally {
                 innerFinally = "PASS";
-		x = hi;
+        x = hi;
             }
         } catch ( e  ) {
             if (throwing) {
@@ -127,7 +127,7 @@ function getTestCases() {
                 throw 0;
             } finally {
                 innerFinally = "PASS";
-		throw "boo";
+        throw "boo";
             }
         } catch ( e  ) {
             if (throwing) {
@@ -176,7 +176,7 @@ function getTestCases() {
                 throw 0;
             } finally {
                 innerFinally = "PASS";
-		throw 3;
+        throw 3;
             }
         } catch ( e  ) {
             if (throwing) {

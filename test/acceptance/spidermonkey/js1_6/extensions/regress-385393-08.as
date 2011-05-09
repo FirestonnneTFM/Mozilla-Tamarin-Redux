@@ -48,8 +48,8 @@ printBugNumber(BUGNUMBER);
 printStatus (summary);
 
 try
-{ 
-  this.__proto__ = []; 
+{
+  this.__proto__ = [];
   ([1,2,3,4]).map.call();
 }
 catch(ex)

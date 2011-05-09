@@ -34,21 +34,21 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1088; //	The markup in the document following the root element must be well-formed.
+var CODE = 1088; // The markup in the document following the root element must be well-formed.
 
 //-----------------------------------------------------------
 startTest();
 //-----------------------------------------------------------
 
 try {
-	var result = "no error";
-	var x = <a b="b" c="c"/>;
-	var y = x.attributes();
-	var z = new XML(y);
+    var result = "no error";
+    var x = <a b="b" c="c"/>;
+    var y = x.attributes();
+    var z = new XML(y);
 } catch (err) {
-	result = err.toString();
+    result = err.toString();
 } finally {
-	AddTestCase("Runtime Error", TYPEERROR + CODE, typeError(result));
+    AddTestCase("Runtime Error", TYPEERROR + CODE, typeError(result));
 }
 
 //-----------------------------------------------------------

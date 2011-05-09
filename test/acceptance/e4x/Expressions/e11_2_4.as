@@ -53,12 +53,12 @@ e = <employees>
 correct = <employee id="0"><fname>John</fname><age>20</age></employee>;
 
 john = e.employee.(fname == "John");
-TEST(1, correct, john);    
+TEST(1, correct, john);
 
 john = e.employee.(fname == "John");
-TEST(2, correct, john);    
+TEST(2, correct, john);
 
-correct = 
+correct =
 <employee id="0"><fname>John</fname><age>20</age></employee> +
 <employee id="1"><fname>Sue</fname><age>30</age></employee>;
 
@@ -96,7 +96,7 @@ e = <employees>
     <employee id="1"><fname>Sue</fname><age>30</age></employee>
     </employees>;
 
-correct = 
+correct =
 <employee id="0"><fname>John</fname><age>20</age></employee> +
 <employee id="1"><fname>Sue</fname><age>30</age></employee>;
 
@@ -133,11 +133,11 @@ AddTestCase("name of employee with id 1", "Joe", (emp = e.employee.(@id == 1).fn
 var i = 0;
 var twoEmployees = new XMLList();
 for each (p in e..employee) {
- 	with (p) {
-	 	if (@id == 1 || @id == 2) {
-			twoEmployees[i++] = p;
-	  	}
-	}
+    with (p) {
+        if (@id == 1 || @id == 2) {
+            twoEmployees[i++] = p;
+        }
+    }
 }
 
 var twoEmployees = e..employee.(@id == 1 || @id == 2);
@@ -170,7 +170,7 @@ for each (var id:XML in employees.employee.@id) {
 trace(id); // 123-123-1234
 }
 
-correct = 
+correct =
 <employee ssn="789-789-7890" id="2">
 <name first="Mary" last="Roe"/>
 <address>

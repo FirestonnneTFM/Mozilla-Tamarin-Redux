@@ -68,7 +68,7 @@ function getTestCases() {
     // Halfwidth and Fullwidth Forms
     // Range: U+FF00 to U+FFEF
     for ( var i = 0xFF00; i <= 0xFFEF; i++ ) {
-										
+                                        
         array[item++] = new TestCase(   SECTION,
                                         "var s = new String( String.fromCharCode("+i+") ); s.toUpperCase()",
                                         (u = new Unicode( i ), String.fromCharCode(u.upper) ),

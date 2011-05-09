@@ -36,11 +36,11 @@
  * ***** END LICENSE BLOCK ***** */
 package DiscontinuousPackage {
 
-	public var s:String = "hello";
-	public function publicFunc(i:int):String {
-		return "You passed " + i.toString();
-	}
-	
-	public namespace Kitty;
-	
+    public var s:String = "hello";
+    public function publicFunc(i:int):String {
+        return "You passed " + i.toString();
+    }
+    
+    public namespace Kitty;
+    
 }

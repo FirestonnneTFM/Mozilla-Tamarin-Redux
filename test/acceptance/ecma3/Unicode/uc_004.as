@@ -58,7 +58,7 @@ function getTestCases()
     var ary = ["\u001Cfoo", "\u001Dfoo", "\u001Efoo", "\u001Ffoo"];
     
     for (var i in ary)
-    {       
+    {
         array[item++] = new TestCase(SECTION, "Unicode characters 1C-1F in regexps, ary[" +
                        i + "] did not match \\S test (it should not.)", 0, ary[Number(i)].search(/^\Sfoo$/));
         array[item++] = new TestCase(SECTION, "Unicode characters 1C-1F in regexps, ary[" +

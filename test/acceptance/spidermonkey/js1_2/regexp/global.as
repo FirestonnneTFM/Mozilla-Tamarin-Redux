@@ -56,42 +56,42 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 // /xyz/g.global
 testcases[index++] = new TestCase ( SECTION, "/xyz/g.global",
-	       true, /xyz/g.global);
+           true, /xyz/g.global);
 
 // /xyz/.global
 testcases[index++] = new TestCase ( SECTION, "/xyz/.global",
-	       false, /xyz/.global);
+           false, /xyz/.global);
 
 // '123 456 789'.match(/\d+/g)
 testcases[index++] = new TestCase ( SECTION, "'123 456 789'.match(/\\d+/g)",
-	       String(["123","456","789"]), String('123 456 789'.match(/\d+/g)));
+           String(["123","456","789"]), String('123 456 789'.match(/\d+/g)));
 
 // '123 456 789'.match(/(\d+)/g)
 testcases[index++] = new TestCase ( SECTION, "'123 456 789'.match(/(\\d+)/g)",
-	       String(["123","456","789"]), String('123 456 789'.match(/(\d+)/g)));
+           String(["123","456","789"]), String('123 456 789'.match(/(\d+)/g)));
 
 // '123 456 789'.match(/\d+/)
 testcases[index++] = new TestCase ( SECTION, "'123 456 789'.match(/\\d+/)",
-	       String(["123"]), String('123 456 789'.match(/\d+/)));
+           String(["123"]), String('123 456 789'.match(/\d+/)));
 
 // (new RegExp('[a-z]','g')).global
 testcases[index++] = new TestCase ( SECTION, "(new RegExp('[a-z]','g')).global",
-	       true, (new RegExp('[a-z]','g')).global);
+           true, (new RegExp('[a-z]','g')).global);
 
 // (new RegExp('[a-z]','i')).global
 testcases[index++] = new TestCase ( SECTION, "(new RegExp('[a-z]','i')).global",
-	       false, (new RegExp('[a-z]','i')).global);
+           false, (new RegExp('[a-z]','i')).global);
 
 // '123 456 789'.match(new RegExp('\\d+','g'))
 testcases[index++] = new TestCase ( SECTION, "'123 456 789'.match(new RegExp('\\\\d+','g'))",
-	       String(["123","456","789"]), String('123 456 789'.match(new RegExp('\\d+','g'))));
+           String(["123","456","789"]), String('123 456 789'.match(new RegExp('\\d+','g'))));
 
 // '123 456 789'.match(new RegExp('(\\d+)','g'))
 testcases[index++] = new TestCase ( SECTION, "'123 456 789'.match(new RegExp('(\\\\d+)','g'))",
-	       String(["123","456","789"]), String('123 456 789'.match(new RegExp('(\\d+)','g'))));
+           String(["123","456","789"]), String('123 456 789'.match(new RegExp('(\\d+)','g'))));
 
 // '123 456 789'.match(new RegExp('\\d+','i'))
 testcases[index++] = new TestCase ( SECTION, "'123 456 789'.match(new RegExp('\\\\d+','i'))",
-	       String(["123"]), String('123 456 789'.match(new RegExp('\\d+','i'))));
+           String(["123"]), String('123 456 789'.match(new RegExp('\\d+','i'))));
 
 test();

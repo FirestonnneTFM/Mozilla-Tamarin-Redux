@@ -38,24 +38,24 @@ package P {
  
      
      public class C {
-     	namespace ns2 = "flowershop.com";
-     	ns2 var flower = "Gerbera Daisy";
-     	
-     	function defineNamespace() {
-     		namespace Flowershop = "flowershop.com";
-     		return Flowershop;
-     	}
-     	public function getFlower() {
-     		ns = defineNamespace();
-     		return ns::flower;
-     	}
+        namespace ns2 = "flowershop.com";
+        ns2 var flower = "Gerbera Daisy";
+        
+        function defineNamespace() {
+            namespace Flowershop = "flowershop.com";
+            return Flowershop;
+        }
+        public function getFlower() {
+            ns = defineNamespace();
+            return ns::flower;
+        }
      }
      
 }
 
  
 var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "use namespace from varying scopes";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 

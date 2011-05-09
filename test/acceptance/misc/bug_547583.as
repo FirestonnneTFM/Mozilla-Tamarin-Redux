@@ -38,13 +38,13 @@
 
 var results = []
 
-// there are two entry points to lastIndexOf from AS3, depending 
+// there are two entry points to lastIndexOf from AS3, depending
 // on whether we can early-bind the call or not; be sure to test both
 // (requires compiling with -AS3)
 function runTestTyped():void
 {
     var str:String = "Gero";
-    for (var i:int = 0; i < str.length; i++) {		
+    for (var i:int = 0; i < str.length; i++) {
         var val:int = str.lastIndexOf(str.charAt(i), -1);
         results.push({expected: -1, actual:val});
     }
@@ -53,7 +53,7 @@ function runTestUntyped()
 {
     var str = "Gero";
     var val;
-    for (var i = 0; i < str.length; i++) {		
+    for (var i = 0; i < str.length; i++) {
         var val:int = str.lastIndexOf(str.charAt(i), -1);
         results.push({expected: -1, actual:val});
     }

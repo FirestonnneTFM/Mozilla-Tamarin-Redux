@@ -38,14 +38,14 @@
  *  File Name:          e15_4_4_11.as
  *  ECMA Section:       15.4.4.11 Array.prototype.sort()
  *  Description:        Test Case for sort function of Array Class.
- *			The elements of the array are sorted.
- *			The sort is not necessary stable (this is, elements
- *			that compare equal do not necessarily remain in their
- *			original order.
+ *          The elements of the array are sorted.
+ *          The sort is not necessary stable (this is, elements
+ *          that compare equal do not necessarily remain in their
+ *          original order.
 
  *
- *  Author: 		Gagneet Singh (gasingh@macromedia.com)
- *  Date:   		01/09/2005
+ *  Author:         Gagneet Singh (gasingh@macromedia.com)
+ *  Date:           01/09/2005
  *
  */
 
@@ -64,45 +64,45 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	// Check for only numeric values.
-	var MYARR = new Array( 2, 1, 8, 6 );
-	var EXPARR = [1,2,6,8];
+    // Check for only numeric values.
+    var MYARR = new Array( 2, 1, 8, 6 );
+    var EXPARR = [1,2,6,8];
 
-	MYARR.sort()
+    MYARR.sort()
 
-	for (var MYVAR = 0; ( MYVAR < MYARR.length ); MYVAR++)
-	{
-		array[item++] = new TestCase( SECTION, "MYARR = [2,1,8,6]; MYARR.sort()", EXPARR[MYVAR], MYARR[MYVAR] );
-	}
-
-
-	// Check for only alpha-numeric values.
-	var MYARR = new Array( 'a', 'd', 'Z', 'f', 'M' );
-	var EXPARR = ['M', 'Z', 'a', 'd', 'f'];
-
-	MYARR.sort()
-
-	for (var MYVAR = 0; ( MYVAR < MYARR.length ); MYVAR++)
-	{
-		array[item++] = new TestCase( SECTION, "MYARR = ['a','d','Z','f','M']; MYARR.sort()", EXPARR[MYVAR], MYARR[MYVAR] );
-	}
+    for (var MYVAR = 0; ( MYVAR < MYARR.length ); MYVAR++)
+    {
+        array[item++] = new TestCase( SECTION, "MYARR = [2,1,8,6]; MYARR.sort()", EXPARR[MYVAR], MYARR[MYVAR] );
+    }
 
 
-	// Check for numeric and alpha-numeric values.
-	var MYARR = new Array( 2, 1, 'M', 'y', 'X', 66, 104 );
-	var EXPARR = [1, 104, 2, 66, 'M', 'X', 'y'];
+    // Check for only alpha-numeric values.
+    var MYARR = new Array( 'a', 'd', 'Z', 'f', 'M' );
+    var EXPARR = ['M', 'Z', 'a', 'd', 'f'];
 
-	MYARR.sort()
+    MYARR.sort()
 
-	for (var MYVAR = 0; ( MYVAR < MYARR.length ); MYVAR++)
-	{
-		array[item++] = new TestCase( SECTION, "MYARR = [2, 1, 'M', 'X', 'y', 66, 104]; MYARR.sort()", EXPARR[MYVAR], MYARR[MYVAR] );
-	}
+    for (var MYVAR = 0; ( MYVAR < MYARR.length ); MYVAR++)
+    {
+        array[item++] = new TestCase( SECTION, "MYARR = ['a','d','Z','f','M']; MYARR.sort()", EXPARR[MYVAR], MYARR[MYVAR] );
+    }
 
 
-	return ( array );
+    // Check for numeric and alpha-numeric values.
+    var MYARR = new Array( 2, 1, 'M', 'y', 'X', 66, 104 );
+    var EXPARR = [1, 104, 2, 66, 'M', 'X', 'y'];
+
+    MYARR.sort()
+
+    for (var MYVAR = 0; ( MYVAR < MYARR.length ); MYVAR++)
+    {
+        array[item++] = new TestCase( SECTION, "MYARR = [2, 1, 'M', 'X', 'y', 66, 104]; MYARR.sort()", EXPARR[MYVAR], MYARR[MYVAR] );
+    }
+
+
+    return ( array );
 
 }

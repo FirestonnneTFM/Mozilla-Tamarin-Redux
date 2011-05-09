@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 package MultipleExtraArgFunction1 {
 
-	public function returnRest(... rest):Number { return rest.length; }
+    public function returnRest(... rest):Number { return rest.length; }
 
 }
 

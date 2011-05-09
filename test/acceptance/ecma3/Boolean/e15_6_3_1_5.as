@@ -47,11 +47,11 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	array[item++] = new TestCase( SECTION,  "Class.constructor.prototype == Boolean.constructor.prototype", true, Class.constructor.prototype == Boolean.constructor.prototype );
+    array[item++] = new TestCase( SECTION,  "Class.constructor.prototype == Boolean.constructor.prototype", true, Class.constructor.prototype == Boolean.constructor.prototype );
 
-	return ( array );
+    return ( array );
 
 }

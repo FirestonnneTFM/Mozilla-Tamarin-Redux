@@ -47,7 +47,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     var args = "";
 
@@ -68,7 +68,7 @@ function getTestCases() {
     }
     var thisError="no error";
     try{
-        var MyFunc = Function( args, "var r=0; for (var i = 0; i < MyFunc.length; i++ ){ if ( eval('arg'+i) == void 0) break; else r += eval('arg'+i); }; return r"); 
+        var MyFunc = Function( args, "var r=0; for (var i = 0; i < MyFunc.length; i++ ){ if ( eval('arg'+i) == void 0) break; else r += eval('arg'+i); }; return r");
     }catch(e1:EvalError){
         thisError=(e1.toString()).substring(0,22);
     }finally{

@@ -42,9 +42,9 @@
  *
  * The getJSClass() function we use is in a utility file, e.g. "shell.js".
  *
- *    Modified:		28th October 2004 (gasingh@macromedia.com)
- *    			Removed the occurence of new Function('abc').
- *    			This is being changed to function() { abc }.
+ *    Modified:     28th October 2004 (gasingh@macromedia.com)
+ *              Removed the occurence of new Function('abc').
+ *              This is being changed to function() { abc }.
  *
  */
 //-------------------------------------------------------------------------------------------------
@@ -62,27 +62,27 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var status = '';
-	var actual = '';
-	var expect= '';
+    var status = '';
+    var actual = '';
+    var expect= '';
         var k = new Function();
         
         
-	
+    
 
-	// new Function() will be dropped in ecma4, will return undefined
-	// new Function() has been replaced by function() {}
-	status = 'new Function()';
-	actual = getJSClass(new Function());
-	expect = 'Function';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    // new Function() will be dropped in ecma4, will return undefined
+    // new Function() has been replaced by function() {}
+    status = 'new Function()';
+    actual = getJSClass(new Function());
+    expect = 'Function';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	
-	
-	return array;
+    
+    
+    return array;
 }
 var cnNoObject = 'Unexpected Error!!! Parameter to this function must be an object';
 var cnNoClass = 'Unexpected Error!!! Cannot find Class property';

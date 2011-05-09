@@ -46,7 +46,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     Construct_1();
 
@@ -62,8 +62,8 @@ function getTestCases() {
             array[item++] = new TestCase(
                 SECTION,
                 "new Math()",
-				TYPEERROR+1076,
-				typeError( result ) );
+                TYPEERROR+1076,
+                typeError( result ) );
         }
     }
     return array;

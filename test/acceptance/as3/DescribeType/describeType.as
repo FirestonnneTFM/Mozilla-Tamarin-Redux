@@ -38,83 +38,82 @@
 
 package {
 
-	import avmplus.*;
-    import flash.utils.*;
-	
-	public namespace ns = "some_ns"
-	public namespace ns2 = "another_ns"
-	
-	public interface IBar
-	{
-		function i0():*;
-	};
+    import avmplus.*;
+    
+    public namespace ns = "some_ns"
+    public namespace ns2 = "another_ns"
+    
+    public interface IBar
+    {
+        function i0():*;
+    };
 
-	public interface IFoo
-	{
-		function i1():*;
-		function get i2():*;
-	};
+    public interface IFoo
+    {
+        function i1():*;
+        function get i2():*;
+    };
 
-	public class FooBase extends Object implements IBar
-	{
-		public function i0():* {}
-	}
+    public class FooBase extends Object implements IBar
+    {
+        public function i0():* {}
+    }
 
-	public class Foo extends FooBase implements IFoo
-	{
-		public var z:int;
-		
-		[metahere(foo="vectorriffic")]
-		public var vec:Vector.<int>;
+    public class Foo extends FooBase implements IFoo
+    {
+        public var z:int;
+        
+        [metahere(foo="vectorriffic")]
+        public var vec:Vector.<int>;
 
-		[metahere(foo="vectorriffic_foo")]
-		public var vecfoo:Vector.<IFoo>;
+        [metahere(foo="vectorriffic_foo")]
+        public var vecfoo:Vector.<IFoo>;
 
-		[metahere(foo="Foo get w")]
-		public function get w():int { return 0; }
-		
-		function Foo(q:int, s:String = "") { z = q; }
-		
-		[metahere(foo="blah")]
-		public function yah(d:Number):String { return String(z+d); }
+        [metahere(foo="Foo get w")]
+        public function get w():int { return 0; }
+        
+        function Foo(q:int, s:String = "") { z = q; }
+        
+        [metahere(foo="blah")]
+        public function yah(d:Number):String { return String(z+d); }
 
-		ns function yah(d:Number):String { return String(z+d); }
+        ns function yah(d:Number):String { return String(z+d); }
 
-		public function i1():* {}
-		public function get i2():* {}
-	}
+        public function i1():* {}
+        public function get i2():* {}
+    }
 
-	[classmeta(a="b", c="d")]
-	public class Foo2 extends Foo implements IFoo
-	{
-		public var aa:int;
-		public const bb:IFoo = null;
-		ns2 const bb:IFoo = undefined;
-		
-		function Foo2(q:int) { super(q); }
-		override public function yah(d:Number):String { return String(z+d+1); }
+    [classmeta(a="b", c="d")]
+    public class Foo2 extends Foo implements IFoo
+    {
+        public var aa:int;
+        public const bb:IFoo = null;
+        ns2 const bb:IFoo = undefined;
+        
+        function Foo2(q:int) { super(q); }
+        override public function yah(d:Number):String { return String(z+d+1); }
 
-		public function whatever(a:*, b:int, c:String):* {}
-		ns2 function whatever(a:*, b:int, c:String = "hey"):* {}
+        public function whatever(a:*, b:int, c:String):* {}
+        ns2 function whatever(a:*, b:int, c:String = "hey"):* {}
 
-		[metahere]
-		override public function get w():int { return 1; }
+        [metahere]
+        override public function get w():int { return 1; }
 
-		[metahere(foo="Foo2 set w")]
-		public function set w(i:int):* {  }
+        [metahere(foo="Foo2 set w")]
+        public function set w(i:int):* {  }
 
-		ns function get w():int { return 1; }
+        ns function get w():int { return 1; }
 
-		public static function statfunc():void {}
-	}
+        public static function statfunc():void {}
+    }
 
-	var oi = describeType(new Foo2(2), FLASH10_FLAGS);
-	var oc = describeType(Foo2, FLASH10_FLAGS);
-	var ov = describeType(new Vector.<String>(), FLASH10_FLAGS);
+    var oi = describeType(new Foo2(2), FLASH10_FLAGS);
+    var oc = describeType(Foo2, FLASH10_FLAGS);
+    var ov = describeType(new Vector.<String>(), FLASH10_FLAGS);
     var oi2 = describeType(IBar, FLASH10_FLAGS);
 
-	var expected = []
-	var xc = 
+    var expected = []
+    var xc =
 <type name="Foo2" base="Class" isDynamic="true" isFinal="true" isStatic="true">
     <extendsClass type="Class"/>
     <extendsClass type="Object"/>
@@ -175,7 +174,7 @@ package {
     </factory>
 </type>
 
-	var xi = 
+    var xi =
 <type name="Foo2" base="Foo" isDynamic="false" isFinal="false" isStatic="false">
     <metadata name="classmeta">
         <arg key="a" value="b"/>
@@ -230,7 +229,7 @@ package {
     </variable>
 </type>
 
-	var xv = 
+    var xv =
 <type name="__AS3__.vec::Vector.&lt;String&gt;" base="__AS3__.vec::Vector.&lt;*&gt;" isDynamic="true" isFinal="false" isStatic="false">
     <extendsClass type="__AS3__.vec::Vector.&lt;*&gt;"/>
     <extendsClass type="Object"/>
@@ -247,51 +246,51 @@ package {
     <method name="i0" declaredBy="IBar" returnType="*" uri="IBar"/>
   </factory>
 </type>
-	
-	function sortXMLAttrs(x:XML):XML
-	{
-		var a:Array = [];
-		for each (var att:XML in x.@*)
-		{
-			a.push({name:att.name(), value:att.toString()});
-		}
-		a.sortOn('name');
-		for each (var o:* in a)
-			delete x['@'+o.name]
-		for each (o in a)
-			x['@'+o.name] = o.value;
-		return x;
-	}
+    
+    function sortXMLAttrs(x:XML):XML
+    {
+        var a:Array = [];
+        for each (var att:XML in x.@*)
+        {
+            a.push({name:att.name(), value:att.toString()});
+        }
+        a.sortOn('name');
+        for each (var o:* in a)
+            delete x['@'+o.name]
+        for each (o in a)
+            x['@'+o.name] = o.value;
+        return x;
+    }
 
-	function sortXML(x:XML):XML
-	{
-		// sort attrs first to normalize toXMLString compares
-		sortXMLAttrs(x);
+    function sortXML(x:XML):XML
+    {
+        // sort attrs first to normalize toXMLString compares
+        sortXMLAttrs(x);
 
-		XML.ignoreComments = true;
-		XML.ignoreProcessingInstructions = true;
-		XML.ignoreWhitespace = true;
-		XML.prettyIndent = 4;
-		XML.prettyPrinting = true;
+        XML.ignoreComments = true;
+        XML.ignoreProcessingInstructions = true;
+        XML.ignoreWhitespace = true;
+        XML.prettyIndent = 4;
+        XML.prettyPrinting = true;
 
-		var a:Array = [];
-		for each (var node:XML in x.children())
-		{
-			a.push(sortXML(node).toXMLString());
-		}
-		a.sort();
+        var a:Array = [];
+        for each (var node:XML in x.children())
+        {
+            a.push(sortXML(node).toXMLString());
+        }
+        a.sort();
 
-		x.setChildren(new XMLList);
-		for each (var s:String in a)
-		{
-			x.appendChild(sortXML(new XML(s)));
-		}
-		
-		
-		
-		return x;
-	}
-	
+        x.setChildren(new XMLList);
+        for each (var s:String in a)
+        {
+            x.appendChild(sortXML(new XML(s)));
+        }
+        
+        
+        
+        return x;
+    }
+    
     // save values to restore afterwards (for ATS)
     var ignoreComments = XML.ignoreComments ;
     var ignoreProcessingInstructions = XML.ignoreProcessingInstructions ;
@@ -301,24 +300,24 @@ package {
     
     startTest();
 
-	AddTestCase("sortXML(oc)", String(sortXML(xc)), String(sortXML(oc)));	// describeType doesn't return the children in a canonical order; sort for stability
-	AddTestCase("sortXML(oi)", String(sortXML(xi)), String(sortXML(oi)));	// describeType doesn't return the children in a canonical order; sort for stability
-	AddTestCase("sortXML(ov)", String(sortXML(xv)), String(sortXML(ov)));	// describeType doesn't return the children in a canonical order; sort for stability
-	AddTestCase("sortXML(oi2)", String(sortXML(xi2)), String(sortXML(oi2)));	// describeType doesn't return the children in a canonical order; sort for stability
-	AddTestCase("getQualifiedClassName(Object)", "Object", getQualifiedClassName(Object));
-	AddTestCase("getQualifiedClassName(Foo)", "Foo", getQualifiedClassName(Foo));
-	AddTestCase("getQualifiedClassName(Foo2)", "Foo2", getQualifiedClassName(Foo2));
-	AddTestCase("getQualifiedClassName(new Object)", "Object", getQualifiedClassName(new Object));
-	AddTestCase("getQualifiedClassName(new Foo(1))", "Foo", getQualifiedClassName(new Foo(1)));
-	AddTestCase("getQualifiedClassName(new Foo2(1))", "Foo2", getQualifiedClassName(new Foo2(1)));
-	AddTestCase("getQualifiedSuperclassName(Object)", null, getQualifiedSuperclassName(Object));
-	AddTestCase("getQualifiedSuperclassName(Foo)", "FooBase", getQualifiedSuperclassName(Foo));
-	AddTestCase("getQualifiedSuperclassName(Foo2)", "Foo", getQualifiedSuperclassName(Foo2));
-	AddTestCase("getQualifiedSuperclassName(new Object)", null, getQualifiedSuperclassName(new Object));
-	AddTestCase("getQualifiedSuperclassName(new Foo(1))", "FooBase", getQualifiedSuperclassName(new Foo(1)));
-	AddTestCase("getQualifiedSuperclassName(new Foo2(1))", "Foo", getQualifiedSuperclassName(new Foo2(1)));
-	AddTestCase("describeType(null, FLASH10_FLAGS).toXMLString()", '<type name="null" isDynamic="false" isFinal="true" isStatic="false"/>', describeType(null, FLASH10_FLAGS).toXMLString());
-	AddTestCase("describeType(void 0, FLASH10_FLAGS).toXMLString()", '<type name="void" isDynamic="false" isFinal="true" isStatic="false"/>', describeType(void 0, FLASH10_FLAGS).toXMLString());
+    AddTestCase("sortXML(oc)", String(sortXML(xc)), String(sortXML(oc)));   // describeType doesn't return the children in a canonical order; sort for stability
+    AddTestCase("sortXML(oi)", String(sortXML(xi)), String(sortXML(oi)));   // describeType doesn't return the children in a canonical order; sort for stability
+    AddTestCase("sortXML(ov)", String(sortXML(xv)), String(sortXML(ov)));   // describeType doesn't return the children in a canonical order; sort for stability
+    AddTestCase("sortXML(oi2)", String(sortXML(xi2)), String(sortXML(oi2)));    // describeType doesn't return the children in a canonical order; sort for stability
+    AddTestCase("getQualifiedClassName(Object)", "Object", getQualifiedClassName(Object));
+    AddTestCase("getQualifiedClassName(Foo)", "Foo", getQualifiedClassName(Foo));
+    AddTestCase("getQualifiedClassName(Foo2)", "Foo2", getQualifiedClassName(Foo2));
+    AddTestCase("getQualifiedClassName(new Object)", "Object", getQualifiedClassName(new Object));
+    AddTestCase("getQualifiedClassName(new Foo(1))", "Foo", getQualifiedClassName(new Foo(1)));
+    AddTestCase("getQualifiedClassName(new Foo2(1))", "Foo2", getQualifiedClassName(new Foo2(1)));
+    AddTestCase("getQualifiedSuperclassName(Object)", null, getQualifiedSuperclassName(Object));
+    AddTestCase("getQualifiedSuperclassName(Foo)", "FooBase", getQualifiedSuperclassName(Foo));
+    AddTestCase("getQualifiedSuperclassName(Foo2)", "Foo", getQualifiedSuperclassName(Foo2));
+    AddTestCase("getQualifiedSuperclassName(new Object)", null, getQualifiedSuperclassName(new Object));
+    AddTestCase("getQualifiedSuperclassName(new Foo(1))", "FooBase", getQualifiedSuperclassName(new Foo(1)));
+    AddTestCase("getQualifiedSuperclassName(new Foo2(1))", "Foo", getQualifiedSuperclassName(new Foo2(1)));
+    AddTestCase("describeType(null, FLASH10_FLAGS).toXMLString()", '<type name="null" isDynamic="false" isFinal="true" isStatic="false"/>', describeType(null, FLASH10_FLAGS).toXMLString());
+    AddTestCase("describeType(void 0, FLASH10_FLAGS).toXMLString()", '<type name="void" isDynamic="false" isFinal="true" isStatic="false"/>', describeType(void 0, FLASH10_FLAGS).toXMLString());
 
     // https://bugzilla.mozilla.org/show_bug.cgi?id=524810
     var untypedInt = 34;

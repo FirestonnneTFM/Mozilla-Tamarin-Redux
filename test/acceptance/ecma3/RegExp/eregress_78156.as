@@ -57,8 +57,8 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
 var status = '';
 var pattern = '';
@@ -97,5 +97,5 @@ string = 'aaa\n789\r\nccc\r\nddd';
     expectedmatch = ['9'];
     array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	return array;
+    return array;
 }

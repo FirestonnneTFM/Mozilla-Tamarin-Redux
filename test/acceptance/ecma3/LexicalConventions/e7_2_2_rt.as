@@ -50,7 +50,7 @@ function getTestCases() {
     var item = 0;
     var b=10;
     var a;
-        a = 
+        a =
 
 b;
     array[item++] = new TestCase( "7.2",    "<cr>a",     10,     a);

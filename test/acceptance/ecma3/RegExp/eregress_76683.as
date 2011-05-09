@@ -54,8 +54,8 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
 var status = '';
 var pattern = '';
@@ -88,5 +88,5 @@ string = 'abc';
     expectedmatch = null;
     array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
 
-	return array;
+    return array;
 }

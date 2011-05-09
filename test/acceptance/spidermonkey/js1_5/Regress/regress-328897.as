@@ -57,8 +57,8 @@ else
   expect = /(Script error.|uncaught exception: Permission denied to get property UnnamedClass.classes)/;
 
   window._onerror = window.onerror;
-  window.onerror = (function (msg, page, line) { 
-      actual = msg; 
+  window.onerror = (function (msg, page, line) {
+      actual = msg;
       gDelayTestDriverEnd = false;
       jsTestDriverEnd();
       reportMatch(expect, actual, summary);
@@ -70,7 +70,7 @@ else
   actual = 'No Error';
 }
 
-function onload() 
+function onload()
 {
   if (actual == 'No Error')
   {

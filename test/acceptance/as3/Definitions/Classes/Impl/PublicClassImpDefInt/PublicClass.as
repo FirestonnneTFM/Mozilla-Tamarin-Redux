@@ -37,16 +37,16 @@
 /*
  * Public Class PublicClass
  * Class methods
- *  
+ *
  */
 
 package PublicClassImpDefInt{
 
-	public class PublicClass implements DefaultInt{
-		
-		public function deffunc():String{  		
-			return"PASSED";
-		}
-		
-      } 	
-}  
+    public class PublicClass implements DefaultInt{
+        
+        public function deffunc():String{
+            return"PASSED";
+        }
+        
+      }
+}

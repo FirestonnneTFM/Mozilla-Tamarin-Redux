@@ -37,72 +37,72 @@
  
 
  package foo {
-	
-	public namespace Kitty;
-		
-	public interface IClickable {
-				function whoAmI():String; 
-	}
-	public class A {
-		public function whoAmI():String {
-			return "A";
-		}
-	
-	}
-	public var s:String = "hello";
-	
-	public function publicFunc(i:int):String {
-		return "You passed " + i.toString();
-	}
-	
+    
+    public namespace Kitty;
+        
+    public interface IClickable {
+                function whoAmI():String;
+    }
+    public class A {
+        public function whoAmI():String {
+            return "A";
+        }
+    
+    }
+    public var s:String = "hello";
+    
+    public function publicFunc(i:int):String {
+        return "You passed " + i.toString();
+    }
+    
 }
 
 package ImportIntoAnotherPackage {
-	import foo.*;
-	
-	public var newS:String = s;
-	public function newFunc() {
-		var f = publicFunc(5);
-		return f;
-	}
-	public class newA {
-		var a;
-		public function whoAmI():String {
-			a = new A();
-			var s = a.whoAmI();
-			return s;
-		}
-	}
-	public class newB implements IClickable {
-		public function whoAmI():String {
-			return "B";
-		}
-		
-	}
-	use namespace Kitty;
-		
-	public class newC {
-		Kitty var b:Boolean = true;
-		public function returnNSVar():Boolean {
-			return Kitty::b;
-		}
+    import foo.*;
+    
+    public var newS:String = s;
+    public function newFunc() {
+        var f = publicFunc(5);
+        return f;
+    }
+    public class newA {
+        var a;
+        public function whoAmI():String {
+            a = new A();
+            var s = a.whoAmI();
+            return s;
+        }
+    }
+    public class newB implements IClickable {
+        public function whoAmI():String {
+            return "B";
+        }
+        
+    }
+    use namespace Kitty;
+        
+    public class newC {
+        Kitty var b:Boolean = true;
+        public function returnNSVar():Boolean {
+            return Kitty::b;
+        }
 
-		Kitty function returnArray():Array {
-			return [1,2,3];
-		}
+        Kitty function returnArray():Array {
+            return [1,2,3];
+        }
 
-		public function callNSFunc() {
-			var k:Array = Kitty::returnArray();
-			return k;
-		}
-	}
+        public function callNSFunc() {
+            var k:Array = Kitty::returnArray();
+            return k;
+        }
+    }
 }
 
 
 import ImportIntoAnotherPackage.*;
 
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 

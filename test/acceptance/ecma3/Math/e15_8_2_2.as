@@ -34,8 +34,8 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-	
-	
+    
+    
     var SECTION = "15.8.2.2";
     var VERSION = "ECMA_1";
     startTest();
@@ -73,33 +73,33 @@ function getTestCases() {
 
     array[item++] = new TestCase( SECTION,  "Math.acos(1.00000001)",    Number.NaN,     Math.acos(1.00000001) );
     array[item++] = new TestCase( SECTION,  "Math.acos(11.00000001)",   Number.NaN,     Math.acos(-1.00000001) );
-    array[item++] = new TestCase( SECTION,  "Math.acos(1)",    	        0,              Math.acos(1)          );
+    array[item++] = new TestCase( SECTION,  "Math.acos(1)",             0,              Math.acos(1)          );
     array[item++] = new TestCase( SECTION,  "Math.acos(-1)",            Math.PI,        Math.acos(-1)         );
-    array[item++] = new TestCase( SECTION,  "Math.acos(0)",    	        Math.PI/2,      Math.acos(0)          );
-    array[item++] = new TestCase( SECTION,  "Math.acos(-0)",   	        Math.PI/2,      Math.acos(-0)         );
-    array[item++] = new TestCase( SECTION,  "Math.acos(Math.SQRT1_2)",	Math.PI/4,      Math.acos(Math.SQRT1_2));
+    array[item++] = new TestCase( SECTION,  "Math.acos(0)",             Math.PI/2,      Math.acos(0)          );
+    array[item++] = new TestCase( SECTION,  "Math.acos(-0)",            Math.PI/2,      Math.acos(-0)         );
+    array[item++] = new TestCase( SECTION,  "Math.acos(Math.SQRT1_2)",  Math.PI/4,      Math.acos(Math.SQRT1_2));
     array[item++] = new TestCase( SECTION,  "Math.acos(-Math.SQRT1_2)", Math.PI/4*3,    Math.acos(-Math.SQRT1_2));
-	
-	
-	
-	
-	// test order number 16
-	// [amemon 9/14/2006] This test case breaks on mac PPC and linux because of an OS precision error. Fixing... 
-	// Linux gives this: 0.008726646256686873
-	// Mac probably gives the same as linux
-	// Windows gives this: 0.008726646256688278
-	// changing from the following to that which follows the following... 
-	// array[item++] = new TestCase( SECTION,  "Math.acos(0.9999619230642)",	0.008726646256688278,    Math.acos(0.9999619230642));
-	
-	var maxAcceptable16:Number = 0.00872664625669;
-	var minAcceptable16:Number = 0.00872664625668;
-	
-	array[item++] = new TestCase( SECTION,  "Math.acos(0.9999619230642)", true, 
-									(
-										Math.acos(0.9999619230642) > minAcceptable16 && 
-										Math.acos(0.9999619230642) < maxAcceptable16
-									)
-								);
+    
+    
+    
+    
+    // test order number 16
+    // [amemon 9/14/2006] This test case breaks on mac PPC and linux because of an OS precision error. Fixing...
+    // Linux gives this: 0.008726646256686873
+    // Mac probably gives the same as linux
+    // Windows gives this: 0.008726646256688278
+    // changing from the following to that which follows the following...
+    // array[item++] = new TestCase( SECTION,  "Math.acos(0.9999619230642)",    0.008726646256688278,    Math.acos(0.9999619230642));
+    
+    var maxAcceptable16:Number = 0.00872664625669;
+    var minAcceptable16:Number = 0.00872664625668;
+    
+    array[item++] = new TestCase( SECTION,  "Math.acos(0.9999619230642)", true,
+                                    (
+                                        Math.acos(0.9999619230642) > minAcceptable16 &&
+                                        Math.acos(0.9999619230642) < maxAcceptable16
+                                    )
+                                );
     
     
     

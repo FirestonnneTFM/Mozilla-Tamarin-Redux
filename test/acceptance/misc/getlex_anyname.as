@@ -35,7 +35,7 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
-package 
+package
 {
     result = "";
     function run_test()

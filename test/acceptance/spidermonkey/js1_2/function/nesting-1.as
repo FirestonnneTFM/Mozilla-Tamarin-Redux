@@ -57,9 +57,9 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 function f(a) {function g(b) {return a+b;}; return g;}; f(7);
 
 testcases[index++] = new TestCase( SECTION,
-	      'function f(a) {function g(b) {return a+b;}; return g;}; typeof f(7)',
-	      "function",
-	      typeof f(7) );
+          'function f(a) {function g(b) {return a+b;}; return g;}; typeof f(7)',
+          "function",
+          typeof f(7) );
 
 test();
 

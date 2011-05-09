@@ -72,14 +72,14 @@ AddTestCase( "*** Access the static method via base class ***", 1, 1 );
 AddTestCase( "BaseClass.ns1::echo('hello')", "hello", BaseClass.ns1::echo("hello") );
 
 // ********************************************
-// Access the static method via sub class, 
+// Access the static method via sub class,
 // using unadorned "foo()"
 // ********************************************
 AddTestCase( "*** Access the static method via sub class using unadorned method name ***", 1, 1 );
 AddTestCase( "obj.callEcho('world')", "world", obj.callEcho("world") );
 
 // ********************************************
-// Access the static method via sub class, 
+// Access the static method via sub class,
 // using "BaseClass.foo()"
 // ********************************************
 AddTestCase( "*** Access the static method via sub class using adorned method name ***", 1, 1 );

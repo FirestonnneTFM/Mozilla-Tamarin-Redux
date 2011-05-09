@@ -47,7 +47,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
 
     var o = {};
@@ -56,15 +56,15 @@ function getTestCases() {
 
     for ( o.a in [1,2,3] ) { result += String( [1,2,3][o.a] ); }
 
-	// need to show that all all got called, not the oreder
-	var myArray = new Array( 1, 2, 3 );
-	var result2 = "PASSED"
-	for( var x = 0; x < myArray.length; x++ ){
-		if( result.indexOf( myArray[x] ) == -1 ){
-			result2="FAILED";
-			break;
-		}
-	}
+    // need to show that all all got called, not the oreder
+    var myArray = new Array( 1, 2, 3 );
+    var result2 = "PASSED"
+    for( var x = 0; x < myArray.length; x++ ){
+        if( result.indexOf( myArray[x] ) == -1 ){
+            result2="FAILED";
+            break;
+        }
+    }
     array[item++] = new TestCase( SECTION,
         "for ( o.a in [1,2,3] ) { result += String( [1,2,3][o.a] ); } result",
         "PASSED",

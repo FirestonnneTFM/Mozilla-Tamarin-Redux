@@ -53,67 +53,67 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var NO_BACKREFS = false;
-	var DO_BACKREFS = true;
+    var NO_BACKREFS = false;
+    var DO_BACKREFS = true;
 
 
-	//--------------------------------------------------
+    //--------------------------------------------------
 
-	testThis(500, NO_BACKREFS, 'hello', 'goodbye');
-	testThis(500, DO_BACKREFS, 'hello', 'goodbye');
+    testThis(500, NO_BACKREFS, 'hello', 'goodbye');
+    testThis(500, DO_BACKREFS, 'hello', 'goodbye');
 
-	//--------------------------------------------------
+    //--------------------------------------------------
 
-	/*
-	 * Creates a regexp pattern like (((((((((hello)))))))))
-	 * and tests str.search(), str.match(), str.replace()
-	 */
-	function testThis(numParens, doBackRefs, strOriginal, strReplace)
-	{
-	  var openParen = doBackRefs? '(' : '(?:';
-	  var closeParen = ')';
-	  var pattern = '';
+    /*
+     * Creates a regexp pattern like (((((((((hello)))))))))
+     * and tests str.search(), str.match(), str.replace()
+     */
+    function testThis(numParens, doBackRefs, strOriginal, strReplace)
+    {
+      var openParen = doBackRefs? '(' : '(?:';
+      var closeParen = ')';
+      var pattern = '';
 
-	  for (var i=0; i<numParens; i++) {pattern += openParen;}
-	  pattern += strOriginal;
-	  for (i=0; i<numParens; i++) {pattern += closeParen;}
+      for (var i=0; i<numParens; i++) {pattern += openParen;}
+      pattern += strOriginal;
+      for (i=0; i<numParens; i++) {pattern += closeParen;}
 
-	  try {
-	      var re = new RegExp(pattern);
-	
-	      if (doBackRefs) {
-		  var res = strOriginal.search(re);
-		  array[item++] = new TestCase(SECTION, "strOriginal.search(re)", -1, res);
+      try {
+          var re = new RegExp(pattern);
+    
+          if (doBackRefs) {
+          var res = strOriginal.search(re);
+          array[item++] = new TestCase(SECTION, "strOriginal.search(re)", -1, res);
 
-		  res = strOriginal.match(re);
-		  array[item++] = new TestCase(SECTION, "strOriginal.match(re)", null, res);
+          res = strOriginal.match(re);
+          array[item++] = new TestCase(SECTION, "strOriginal.match(re)", null, res);
 
-		  res = strOriginal.replace(re, strReplace);
-		  array[item++] = new TestCase(SECTION, "strOriginal.replace(re, strReplace)", "hello", res);
-	      } else {
-	  	  var res = strOriginal.search(re);
-		  array[item++] = new TestCase(SECTION, "strOriginal.search(re)", 0, res);
+          res = strOriginal.replace(re, strReplace);
+          array[item++] = new TestCase(SECTION, "strOriginal.replace(re, strReplace)", "hello", res);
+          } else {
+          var res = strOriginal.search(re);
+          array[item++] = new TestCase(SECTION, "strOriginal.search(re)", 0, res);
 
-		  res = strOriginal.match(re);
-		  //Get the first element to compare
-		  res = res[0];
-		  array[item++] = new TestCase(SECTION, "strOriginal.match(re)", 'hello', res);
+          res = strOriginal.match(re);
+          //Get the first element to compare
+          res = res[0];
+          array[item++] = new TestCase(SECTION, "strOriginal.match(re)", 'hello', res);
 
-		  res = strOriginal.replace(re, strReplace);
-		  array[item++] = new TestCase(SECTION, "strOriginal.replace(re, strReplace)", "goodbye", res);
-	
-	      }
-	  }
-	  catch (e: Error) {
-	      if (e.message.match("#1023"))
-		  array[item++] = new TestCase(SECTION, "str.search(re)", 0, 0);
-	      else
-		  throw(e);
-	  }
-	}
+          res = strOriginal.replace(re, strReplace);
+          array[item++] = new TestCase(SECTION, "strOriginal.replace(re, strReplace)", "goodbye", res);
+    
+          }
+      }
+      catch (e: Error) {
+          if (e.message.match("#1023"))
+          array[item++] = new TestCase(SECTION, "str.search(re)", 0, 0);
+          else
+          throw(e);
+      }
+    }
 
-	return array;
+    return array;
 }

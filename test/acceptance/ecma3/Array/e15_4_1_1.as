@@ -59,20 +59,20 @@ function getTestCases() {
     var array:Array = new Array();
     var item:Number = 0;
 
-	array[item++] = new TestCase( SECTION,	"typeof Array(1,2)",        "object",           typeof Array(1,2) );
-	array[item++] = new TestCase( SECTION,	"(Array(1,2)).toString",    "function Function() {}",    ((Array(1,2)).toString).toString() );
+    array[item++] = new TestCase( SECTION,  "typeof Array(1,2)",        "object",           typeof Array(1,2) );
+    array[item++] = new TestCase( SECTION,  "(Array(1,2)).toString",    "function Function() {}",    ((Array(1,2)).toString).toString() );
 
 
-   	var thisErr:String = "no error";
-	var arr:Array = Array(1,2,3);
+    var thisErr:String = "no error";
+    var arr:Array = Array(1,2,3);
     arr.toString = Object.prototype.toString;
     array[item++] = new TestCase( SECTION,
                                     "var arr = Array(1,2,3); arr.toString = Object.prototype.toString; arr.toString()","[object Array]",arr.toString());
 
-    array[item++] = new TestCase( SECTION,	"(Array(1,2)).length",      2,                  (Array(1,2)).length );
-    array[item++] = new TestCase( SECTION,	"var arr = (Array(1,2)), arr[0]",  1,           (arr = (Array(1,2)), arr[0] ) );
-    array[item++] = new TestCase( SECTION,	"var arr = (Array(1,2)), arr[1]",  2,           (arr = (Array(1,2)), arr[1] ) );
-    array[item++] = new TestCase( SECTION,	"var arr = (Array(1,2)), String(arr)",  "1,2",  (arr = (Array(1,2)), String(arr) ) );
+    array[item++] = new TestCase( SECTION,  "(Array(1,2)).length",      2,                  (Array(1,2)).length );
+    array[item++] = new TestCase( SECTION,  "var arr = (Array(1,2)), arr[0]",  1,           (arr = (Array(1,2)), arr[0] ) );
+    array[item++] = new TestCase( SECTION,  "var arr = (Array(1,2)), arr[1]",  2,           (arr = (Array(1,2)), arr[1] ) );
+    array[item++] = new TestCase( SECTION,  "var arr = (Array(1,2)), String(arr)",  "1,2",  (arr = (Array(1,2)), String(arr) ) );
 
     return ( array );
 }

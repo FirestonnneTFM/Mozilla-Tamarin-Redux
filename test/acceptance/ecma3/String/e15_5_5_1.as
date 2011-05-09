@@ -69,8 +69,8 @@ function getTestCases() {
 
     var s = new String();
     var props = '';
-    for ( var p in s ) 
-    {  
+    for ( var p in s )
+    {
         props += p;
     }
 

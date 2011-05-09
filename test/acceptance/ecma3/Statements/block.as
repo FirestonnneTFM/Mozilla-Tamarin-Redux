@@ -35,34 +35,34 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-	var SECTION = '12.1';
-	var VERSION = 'no version';
+    var SECTION = '12.1';
+    var VERSION = 'no version';
     startTest();
-	var TITLE = 'Statement:block';
+    var TITLE = 'Statement:block';
 
-	writeHeaderToLog('Executing script: block.as');
-	writeHeaderToLog( SECTION + " "+ TITLE);
+    writeHeaderToLog('Executing script: block.as');
+    writeHeaderToLog( SECTION + " "+ TITLE);
 
-	var testcases = getTestCases();
-	
-	test();
-	
+    var testcases = getTestCases();
+    
+    test();
+    
 function getTestCases() {
     var array = new Array();
-    var item = 0;	
-	
-	var t;
-	Block:
-	{
-			var x = 3;
-			var y= 5;
-			t = x + y;
-	
-	}
-	
-	array[item++] = new TestCase( SECTION, "Block:{t}", 8, t);
+    var item = 0;
+    
+    var t;
+    Block:
+    {
+            var x = 3;
+            var y= 5;
+            t = x + y;
+    
+    }
+    
+    array[item++] = new TestCase( SECTION, "Block:{t}", 8, t);
 
-    {   
+    {
         var k = 100;
         var l = 50;
         thisError ="no error";

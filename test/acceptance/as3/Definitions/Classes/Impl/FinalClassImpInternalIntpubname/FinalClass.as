@@ -37,24 +37,24 @@
 /*
  * Final Class FinalClass
  * Class methods
- *  
+ *
  */
 
 package FinalClassImpInternalIntpubname{
 
-	final class FinalClass implements InternalInt{
-		
-		public function deffunc():String{  			
-			return"PASSED";
-		}
+    final class FinalClass implements InternalInt{
+        
+        public function deffunc():String{
+            return"PASSED";
+        }
 
-	}
+    }
 
 public class ClassGet {
-	private var obj:FinalClass = new FinalClass();
+    private var obj:FinalClass = new FinalClass();
 
-		public function accdeffunc():String{return obj.deffunc();}
-		// access default function deffunc
-        	
-     } 	
-}  
+        public function accdeffunc():String{return obj.deffunc();}
+        // access default function deffunc
+            
+     }
+}

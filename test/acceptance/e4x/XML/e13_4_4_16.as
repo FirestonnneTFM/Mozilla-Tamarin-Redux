@@ -44,7 +44,7 @@ START("13.4.4.16 - XML hasSimpleContent()");
 
 //TEST(1, true, XML.prototype.hasOwnProperty("hasSimpleContent"));
     
-x1 = 
+x1 =
 <alpha attr1="value1">
     <bravo>one</bravo>
     <charlie>
@@ -76,43 +76,43 @@ TEST(11, false, x1.india.hasSimpleContent());
 var xmlDoc = "<employee id='1'><firstname>John</firstname><lastname>Walton</lastname><age dob='1/2/1978'>25</age></employee>"
 
 // propertyName as a string
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasSimpleContent()", false, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasSimpleContent()", false,
              (MYXML = new XML(xmlDoc), MYXML.hasSimpleContent()));
 
-xmlDoc = "<firstname>John</firstname>"  
-AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children().length()", 1,   
+xmlDoc = "<firstname>John</firstname>"
+AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children().length()", 1,
              (MYXML = new XML(xmlDoc), MYXML.children().length()));
-AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()", "text",   
+AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()", "text",
              (MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()));
-AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()", "text",   
+AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()", "text",
              (MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.children()[0].hasSimpleContent()", true, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.children()[0].hasSimpleContent()", true,
              (MYXML = new XML(xmlDoc), MYXML.children()[0].hasSimpleContent()));
 
 XML.ignoreComments = false;
 xmlDoc = "<XML><!-- firstname --></XML>"
-AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children().length()", 1,   
+AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children().length()", 1,
              (MYXML = new XML(xmlDoc), MYXML.children().length()));
-AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()", "comment",   
+AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()", "comment",
              (MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.children()[0].hasSimpleContent()", false, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.children()[0].hasSimpleContent()", false,
              (MYXML = new XML(xmlDoc), MYXML.children()[0].hasSimpleContent()));
 
 XML.ignoreProcessingInstructions = false;
-xmlDoc = "<XML><?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?></XML>"  
-AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children().length()", 1,   
+xmlDoc = "<XML><?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?></XML>"
+AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children().length()", 1,
              (MYXML = new XML(xmlDoc), MYXML.children().length()));
-AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()", "processing-instruction",   
+AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()", "processing-instruction",
              (MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.children()[0].hasSimpleContent()", false, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.children()[0].hasSimpleContent()", false,
              (MYXML = new XML(xmlDoc), MYXML.children()[0].hasSimpleContent()));
 
-xmlDoc = "<XML a='5' b='c'>foo</XML>"  
-AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children().length()", 1,   
+xmlDoc = "<XML a='5' b='c'>foo</XML>"
+AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children().length()", 1,
              (MYXML = new XML(xmlDoc), MYXML.children().length()));
-AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()", "text",   
+AddTestCase ("MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()", "text",
              (MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.children()[0].hasSimpleContent()", true, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.children()[0].hasSimpleContent()", true,
              (MYXML = new XML(xmlDoc), MYXML.children()[0].hasSimpleContent()));
 
 END();

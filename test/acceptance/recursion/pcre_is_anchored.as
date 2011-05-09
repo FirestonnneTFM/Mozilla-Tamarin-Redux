@@ -47,7 +47,7 @@ test();
 
 // The tests succeed either if they finish normally or if they exit by stack
 // overflow (on limited stack systems).
-function getTestCases() 
+function getTestCases()
 {
     var array = new Array();
     var item = 0;
@@ -68,31 +68,31 @@ function getTestCases()
      * */
     function testThis(numParens, doBackRefs, str)
     {
-	var openParen = doBackRefs? '(' : '(?:';
-	var closeParen = ')';
-	var pattern = '';
-	    
-	for (var i=0; i<numParens; i++) {pattern += openParen;}
-	pattern += str;
-	for (i=0; i<numParens; i++) {pattern += closeParen;}
+    var openParen = doBackRefs? '(' : '(?:';
+    var closeParen = ')';
+    var pattern = '';
+        
+    for (var i=0; i<numParens; i++) {pattern += openParen;}
+    pattern += str;
+    for (i=0; i<numParens; i++) {pattern += closeParen;}
 
-	try {
-	    var re = new RegExp(pattern);
-	    
-	    if (doBackRefs) {
-		var res = str.search(re);
-		array[item++] = new TestCase(SECTION, "str.search(re)", -1, res);
-	    } else {
-		var res = str.search(re);
-		array[item++] = new TestCase(SECTION, "str.search(re)", 0, res);
-	    }
-	}
-	catch (e: Error) {
-	    if (e.message.match("#1023"))
-		array[item++] = new TestCase(SECTION, "str.search(re)", 0, 0);
-	    else
-		throw(e);
-	}
+    try {
+        var re = new RegExp(pattern);
+        
+        if (doBackRefs) {
+        var res = str.search(re);
+        array[item++] = new TestCase(SECTION, "str.search(re)", -1, res);
+        } else {
+        var res = str.search(re);
+        array[item++] = new TestCase(SECTION, "str.search(re)", 0, res);
+        }
+    }
+    catch (e: Error) {
+        if (e.message.match("#1023"))
+        array[item++] = new TestCase(SECTION, "str.search(re)", 0, 0);
+        else
+        throw(e);
+    }
     }
     return array;
 }

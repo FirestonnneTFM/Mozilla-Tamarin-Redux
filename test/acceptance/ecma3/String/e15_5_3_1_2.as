@@ -49,16 +49,16 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	var thisError = "no exception thrown";
-	try{
-		String.prototype=null;
-	} catch(e) {
-		thisError=e.toString()
-	} finally {
-    	array[item++] = new TestCase( SECTION,
+    var thisError = "no exception thrown";
+    try{
+        String.prototype=null;
+    } catch(e) {
+        thisError=e.toString()
+    } finally {
+        array[item++] = new TestCase( SECTION,
                                 "String.prototype=null;String.prototype",
                                 "ReferenceError: Error #1074",
                                 referenceError( thisError) );
-	}
+    }
     return ( array );
 }

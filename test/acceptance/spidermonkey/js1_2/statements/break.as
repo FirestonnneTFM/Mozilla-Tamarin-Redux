@@ -63,7 +63,7 @@ for (i = 0; i < 1000; i++)
 
 // 'breaking out of "for" loop'
 testcases[index++] = new TestCase ( SECTION, 'breaking out of "for" loop',
-	       100, i);
+           100, i);
 
 j = 2000;
 
@@ -84,7 +84,7 @@ for (i = 0; i < 1000; i++)
 
 // 'breaking out of a "for" loop with a "label"'
 testcases[index++] = new TestCase ( SECTION, 'breaking out of a "for" loop with a "label"',
-	       500, j);
+           500, j);
 
 i = 0;
 
@@ -96,7 +96,7 @@ while (i < 1000)
 
 // 'breaking out of a "while" loop'
 testcases[index++] = new TestCase ( SECTION, 'breaking out of a "while" loop',
-	       100, i );
+           100, i );
 
 
 j = 2000;
@@ -122,7 +122,7 @@ while (i < 1000)
 
 // 'breaking out of a "while" loop with a "label"'
 testcases[index++] = new TestCase ( SECTION, 'breaking out of a "while" loop with a "label"',
-	       500, j);
+           500, j);
 
 i = 0;
 
@@ -134,7 +134,7 @@ do
 
 // 'breaking out of a "do" loop'
 testcases[index++] = new TestCase ( SECTION, 'breaking out of a "do" loop',
-	       100, i );
+           100, i );
 
 j = 2000;
 i = 0;
@@ -159,6 +159,6 @@ do
 
 // 'breaking out of a "do" loop with a "label"'
 testcases[index++] = new TestCase ( SECTION, 'breaking out of a "do" loop with a "label"',
-	       500, j);
+           500, j);
 
 test();

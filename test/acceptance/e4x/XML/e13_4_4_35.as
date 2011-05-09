@@ -89,37 +89,37 @@ TEST(4, correct, x1);
 XML.prettyPrinting = false;
 var xmlDoc = "<company><employee id='1'><name>John</name> <city>California</city> </employee></company>";
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setName('employees'),MYXML.name().toString()", 
-	"employees", 
-	(MYXML = new XML(xmlDoc),MYXML.setName('employees'), MYXML.name().toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setName('employees'),MYXML.name().toString()",
+    "employees",
+    (MYXML = new XML(xmlDoc),MYXML.setName('employees'), MYXML.name().toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setName(new QName('employees')),MYXML.name().toString()", 
-	"employees", 
-	(MYXML = new XML(xmlDoc),MYXML.setName(new QName('employees')), MYXML.name().toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setName(new QName('employees')),MYXML.name().toString()",
+    "employees",
+    (MYXML = new XML(xmlDoc),MYXML.setName(new QName('employees')), MYXML.name().toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setName(new QName('ns', 'employees')),MYXML.name().toString()", 
-	"ns::employees", 
-	(MYXML = new XML(xmlDoc),MYXML.setName(new QName('ns', 'employees')), MYXML.name().toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setName(new QName('ns', 'employees')),MYXML.name().toString()",
+    "ns::employees",
+    (MYXML = new XML(xmlDoc),MYXML.setName(new QName('ns', 'employees')), MYXML.name().toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setName('employees'),MYXML.toString()", 
-	"<employees><employee id=\"1\"><name>John</name><city>California</city></employee></employees>", 
-	(MYXML = new XML(xmlDoc),MYXML.setName('employees'), MYXML.toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setName('employees'),MYXML.toString()",
+    "<employees><employee id=\"1\"><name>John</name><city>California</city></employee></employees>",
+    (MYXML = new XML(xmlDoc),MYXML.setName('employees'), MYXML.toString()));
 
 // Calling setName() on an attribute
 AddTestCase("MYXML = new XML(xmlDoc), MYXML.employee.@id.setName('num')", "num", (MYXML = new XML(xmlDoc), MYXML.employee.@id.setName("num"), MYXML.employee.@num.name().toString()));
 
 var TYPEERROR = "TypeError: Error #";
 function typeError( str ){
-	return str.slice(0,TYPEERROR.length+4);
+    return str.slice(0,TYPEERROR.length+4);
 }
-MYXML = new XML(xmlDoc); 
-MYXML.employee.@id.setName("num"); 
+MYXML = new XML(xmlDoc);
+MYXML.employee.@id.setName("num");
 
 try {
-	MYXML.employee.@id.name();
-	result = "no error";
+    MYXML.employee.@id.name();
+    result = "no error";
 } catch (e1) {
-	result = typeError(e1.toString());
+    result = typeError(e1.toString());
 }
 
 AddTestCase("MYXML = new XML(xmlDoc), MYXML.employee.@id.setName(\"num\"),MYXML.employee.@id.name())", "TypeError: Error #1086", result);
@@ -138,51 +138,51 @@ AddTestCase("Calling setName() on an attribute with same name as namespace", cor
 // throws Rhino exception - bad name
 MYXML = new XML(xmlDoc);
 try {
-	MYXML.setName('@employees');
-	result = " no error";
+    MYXML.setName('@employees');
+    result = " no error";
 } catch (e2) {
-	result = typeError(e2.toString());
+    result = typeError(e2.toString());
 }
 AddTestCase("MYXML.setName('@employees')", "TypeError: Error #1117", result);
 
 try {
-	MYXML.setName('!hi');
-	result = " no error";
+    MYXML.setName('!hi');
+    result = " no error";
 } catch (e3) {
-	result = typeError(e3.toString());
+    result = typeError(e3.toString());
 }
 AddTestCase("MYXML.setName('!hi')", "TypeError: Error #1117", result);
 
 try {
-	MYXML.setName('1+1=5');
-	result = " no error";
+    MYXML.setName('1+1=5');
+    result = " no error";
 } catch (e4) {
-	result = typeError(e4.toString());
+    result = typeError(e4.toString());
 }
 AddTestCase("MYXML.setName('1+1=5')", "TypeError: Error #1117", result);
 
 try {
-	MYXML.setName('555');
-	result = " no error";
+    MYXML.setName('555');
+    result = " no error";
 } catch (e5) {
-	result = typeError(e5.toString());
+    result = typeError(e5.toString());
 }
 AddTestCase("MYXML.setName('555')", "TypeError: Error #1117", result);
 
 
 try {
-	MYXML.setName('1love');
-	result = " no error";
+    MYXML.setName('1love');
+    result = " no error";
 } catch (e6) {
-	result = typeError(e6.toString());
+    result = typeError(e6.toString());
 }
 AddTestCase("MYXML.setName('1love')", "TypeError: Error #1117", result);
 
 try {
-	MYXML.setName('*');
-	result = " no error";
+    MYXML.setName('*');
+    result = " no error";
 } catch (e7) {
-	result = typeError(e7.toString());
+    result = typeError(e7.toString());
 }
 AddTestCase("MYXML.setName('*')", "TypeError: Error #1117", result);
 

@@ -54,21 +54,21 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION, "delete Array.prototype.reverse.length; Array.prototype.reverse.length",    0, (delete Array.prototype.reverse.length, Array.prototype.reverse.length) );
 
     // length of array is 0
-	var A;
+    var A;
     array[item++] = new TestCase(   SECTION,
                                     "var A = new Array();   A.reverse(); A.length",
                                     0,
                                     (A = new Array(),   A.reverse(), A.length ) );
 
-	function CheckItems( R, A ) {
-	    for ( var i = 0; i < R.length; i++ ) {
-	        array[item++] = new TestCase(
-	                                            SECTION,
-	                                            "A["+i+ "]",
-	                                            R[i],
-	                                            A[i] );
-	    }
-	}
+    function CheckItems( R, A ) {
+        for ( var i = 0; i < R.length; i++ ) {
+            array[item++] = new TestCase(
+                                                SECTION,
+                                                "A["+i+ "]",
+                                                R[i],
+                                                A[i] );
+        }
+    }
 
     return ( array );
 }

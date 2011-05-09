@@ -50,20 +50,20 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	// MAX_VALUE
+    // MAX_VALUE
     array[item++] = new TestCase( SECTION, "int.MAX_VALUE",      2147483647,     int.MAX_VALUE );
 
-	// MAX_VALUE should be read-only
+    // MAX_VALUE should be read-only
     delete( int.MAX_VALUE );
     array[item++] = new TestCase( SECTION, "delete( int.MAX_VALUE ); int.MAX_VALUE",      2147483647, int.MAX_VALUE );
     array[item++] = new TestCase( SECTION, "delete( int.MAX_VALUE )",                        false,                  delete(int.MAX_VALUE) );
 
-	// moved to error folder
-	//int.MAX_VALUE=0;
-	//array[item++] = new TestCase( SECTION, "int.MAX_VALUE=0,int.MAX_VALUE", 2147483647, int.MAX_VALUE );
+    // moved to error folder
+    //int.MAX_VALUE=0;
+    //array[item++] = new TestCase( SECTION, "int.MAX_VALUE=0,int.MAX_VALUE", 2147483647, int.MAX_VALUE );
 
     var string:String = '';
-    for ( var prop in int ) { 
+    for ( var prop in int ) {
         string += ( prop == 'MAX_VALUE' ) ? prop : '';
     }
 
@@ -73,7 +73,7 @@ function getTestCases() {
                     "",
                     string
                     );
-	
+    
     return ( array );
 }
 

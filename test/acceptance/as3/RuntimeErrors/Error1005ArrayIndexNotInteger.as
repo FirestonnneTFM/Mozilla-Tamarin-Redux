@@ -34,19 +34,19 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1005; //	Array index is not a positive integer (_).
+var CODE = 1005; // Array index is not a positive integer (_).
 
 //-----------------------------------------------------------
 startTest();
 //-----------------------------------------------------------
 
 try {
-	var result = "no error";
-	new Array(1.2);
+    var result = "no error";
+    new Array(1.2);
 } catch (err) {
-	result = err.toString();
+    result = err.toString();
 } finally {
-	AddTestCase("Runtime Error", RANGEERROR + CODE, rangeError(result));
+    AddTestCase("Runtime Error", RANGEERROR + CODE, rangeError(result));
 }
 
 //-----------------------------------------------------------

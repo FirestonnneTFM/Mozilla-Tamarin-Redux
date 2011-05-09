@@ -44,7 +44,7 @@ START("13.4.4.20 - XML length()");
 
 //TEST(1, true, XML.prototype.hasOwnProperty("length"));
 
-x1 = 
+x1 =
 <alpha attr1="value1">
     <bravo>one</bravo>
     <charlie>
@@ -64,23 +64,23 @@ var xmlDoc = "<xml><employee id=\"1\"><firstname>John</firstname><lastname>Walto
 
 
 // propertyName as a string
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.length()", 1, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.length()", 1,
              (MYXML = new XML(xmlDoc), MYXML.length()));
 
-AddTestCase( "MYXML = new XML(), MYXML.length()", 1, 
+AddTestCase( "MYXML = new XML(), MYXML.length()", 1,
              (MYXML = new XML(), MYXML.length()));
 
-AddTestCase( "MYXML = new XML(null), MYXML.length()", 1, 
+AddTestCase( "MYXML = new XML(null), MYXML.length()", 1,
              (MYXML = new XML(null), MYXML.length()));
 
-AddTestCase( "MYXML = new XML(undefined), MYXML.length()", 1, 
+AddTestCase( "MYXML = new XML(undefined), MYXML.length()", 1,
              (MYXML = new XML(undefined), MYXML.length()));
 
-AddTestCase( "MYXML = new XML('foo'), MYXML.length()", 1, 
+AddTestCase( "MYXML = new XML('foo'), MYXML.length()", 1,
              (MYXML = new XML("foo"), MYXML.length()));
 
 XML.ignoreComments = false;
-AddTestCase( "MYXML = new XML('<XML><!-- comment --></XML>'), MYXML.length()", 1, 
+AddTestCase( "MYXML = new XML('<XML><!-- comment --></XML>'), MYXML.length()", 1,
              (MYXML = new XML("<XML><!-- comment --></XML>"), MYXML.length()));
 
 END();

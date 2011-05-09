@@ -79,7 +79,7 @@ correct =
 </employees>;
 
 emps.employee.(name == "Jim").appendChild(<hobby>snorkeling</hobby>);
-TEST(3, correct, emps);  
+TEST(3, correct, emps);
 
 XML.prettyPrinting = false;
 var xmlDoc = "<XML><TEAM>Giants</TEAM><TEAM>Padres</TEAM></XML>";
@@ -90,7 +90,7 @@ if (System.swfVersion < 10)
 else
     expectedResult = '<XML><TEAM>Giants</TEAM><TEAM>Padres</TEAM><TEAM>&lt;TEAM&gt;Red Sox&lt;/TEAM&gt;</TEAM></XML>';
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.appendChild('<TEAM>Red Sox</TEAM>'), MYXML.toXMLString()", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.appendChild('<TEAM>Red Sox</TEAM>'), MYXML.toXMLString()",
              expectedResult,
              (MYXML = new XML(xmlDoc), MYXML.appendChild('<TEAM>Red Sox</TEAM>'), MYXML.toXMLString()) );
 
@@ -98,7 +98,7 @@ if (System.swfVersion < 10)
     expectedResult = '<XML><TEAM>Giants<City>San Francisco</City></TEAM><TEAM>Padres</TEAM></XML>';
 else
     expectedResult = '<XML><TEAM>Giants&lt;City&gt;San Francisco&lt;/City&gt;</TEAM><TEAM>Padres</TEAM></XML>';
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.TEAM[0].appendChild ('<City>San Francisco</City>')), MYXML.toXMLString()", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.TEAM[0].appendChild ('<City>San Francisco</City>')), MYXML.toXMLString()",
              expectedResult,
              (MYXML = new XML(xmlDoc), MYXML.TEAM[0].appendChild ('<City>San Francisco</City>'), MYXML.toXMLString()) );
 
@@ -109,39 +109,39 @@ var child = new XML("<TEAM>Giants</TEAM>");
 var xml = new XML("foo");
 
 AddTestCase( "MYXML = new XML(null), MYXML.appendChild(new XML('<TEAM>Giants</TEAM>')), MYXML.nodeKind()",
-			"text",
-			(MYXML = new XML(null), MYXML.appendChild(new XML("<TEAM>Giants</TEAM>")), MYXML.nodeKind()) );
+            "text",
+            (MYXML = new XML(null), MYXML.appendChild(new XML("<TEAM>Giants</TEAM>")), MYXML.nodeKind()) );
 
 AddTestCase( "MYXML = new XML(null), MYXML.appendChild(new XML('<TEAM>Giants</TEAM>')), MYXML.toString()",
-			"",
-			(MYXML = new XML(null), MYXML.appendChild(new XML("<TEAM>Giants</TEAM>")), MYXML.toString()) );
+            "",
+            (MYXML = new XML(null), MYXML.appendChild(new XML("<TEAM>Giants</TEAM>")), MYXML.toString()) );
 
 // This has weird behavior of seemingly replacing the XML() node with the appended child.  It somehow
 // converts the "text" (really "empty") node into a element node
 // 03/07/05 [vfleisch] NOT ANYMORE. Updated test case to assert for text, instead of element.
 AddTestCase( "MYXML = new XML(), MYXML.appendChild(new XML('<TEAM>Giants</TEAM>')), MYXML.nodeKind()",
-			"text",
-			(MYXML = new XML(), MYXML.appendChild(new XML("<TEAM>Giants</TEAM>")), MYXML.nodeKind()) );
-			
-MYXML = new XML(); 
-MYXML.appendChild(new XML("<TEAM>Giants</TEAM>")); 
+            "text",
+            (MYXML = new XML(), MYXML.appendChild(new XML("<TEAM>Giants</TEAM>")), MYXML.nodeKind()) );
+            
+MYXML = new XML();
+MYXML.appendChild(new XML("<TEAM>Giants</TEAM>"));
 
 var MYXML = new XML('<LEAGUE></LEAGUE>');
 var x1 = new XML('<TEAM>Giants</TEAM>');
 MYXML.appendChild(x1);
-			
+            
 AddTestCase( "duplicate child node - MYXML.appendChild(new XML('<TEAM>Giants</TEAM>')), MYXML.toString()",
-			"<LEAGUE><TEAM>Giants</TEAM><TEAM>Giants</TEAM></LEAGUE>",
-			(MYXML.appendChild(x1), MYXML.toString()) );
+            "<LEAGUE><TEAM>Giants</TEAM><TEAM>Giants</TEAM></LEAGUE>",
+            (MYXML.appendChild(x1), MYXML.toString()) );
 
 MYXML = new XML('<LEAGUE></LEAGUE>');
 x1 = new XML('<TEAM>Giants</TEAM>');
 MYXML.appendChild(x1);
-			
+            
 AddTestCase( "true duplicate child node - MYXML.appendChild(MYXML.child(0)[0]), MYXML.toString()",
-			"<LEAGUE><TEAM>Giants</TEAM><TEAM>Giants</TEAM></LEAGUE>",
-			(MYXML.appendChild(MYXML.child(0)[0]), MYXML.toString()) );
-			
+            "<LEAGUE><TEAM>Giants</TEAM><TEAM>Giants</TEAM></LEAGUE>",
+            (MYXML.appendChild(MYXML.child(0)[0]), MYXML.toString()) );
+            
 if (System.swfVersion < 10)
     expectedResult = '<root><b>a</b></root>';
 else
@@ -149,54 +149,54 @@ else
 
 MYXML = new XML('<?xml version="1.0"?><root></root>');
 AddTestCase( "MYXML = new XML('<?xml version=\"1.0\"?><root></root>'); MYXML.appendChild(\"<b>a</b>\"), MYXML.toString()",
-			expectedResult,
-			(MYXML.appendChild("<b>a</b>"), MYXML.toString()));
-			
+            expectedResult,
+            (MYXML.appendChild("<b>a</b>"), MYXML.toString()));
+            
 MYXML = new XML('<LEAGUE></LEAGUE>');
 x1 = new XMLList('<TEAM t="a">Giants</TEAM><TEAM t="b">Robots</TEAM>');
 MYXML.appendChild(x1);
-			
+            
 AddTestCase( "Append XMLList",
-			'<LEAGUE><TEAM t="a">Giants</TEAM><TEAM t="b">Robots</TEAM></LEAGUE>',
-			(MYXML.toString()) );
-			
+            '<LEAGUE><TEAM t="a">Giants</TEAM><TEAM t="b">Robots</TEAM></LEAGUE>',
+            (MYXML.toString()) );
+            
 MYXML = new XML('<SCARY><MOVIE></MOVIE></SCARY>');
 x1 = "poltergeist";
 MYXML.MOVIE.appendChild(x1);
-			
+            
 AddTestCase( "Append a string to child node",
-			'<SCARY><MOVIE>poltergeist</MOVIE></SCARY>',
-			(MYXML.toString()) );
+            '<SCARY><MOVIE>poltergeist</MOVIE></SCARY>',
+            (MYXML.toString()) );
 
 
 MYXML = new XML('<SCARY><MOVIE></MOVIE></SCARY>');
 x1 = "poltergeist";
 MYXML.appendChild(x1);
-			
+            
 if (System.swfVersion < 10)
     expectedResult = '<SCARY><MOVIE/>poltergeist</SCARY>';
 else
     expectedResult = '<SCARY><MOVIE/><MOVIE>poltergeist</MOVIE></SCARY>';
 
 AddTestCase( "Append a string to top node",
-			expectedResult,
-			(MYXML.toString()) );
-			
+            expectedResult,
+            (MYXML.toString()) );
+            
 MYXML = new XML('<SCARY><MOVIE></MOVIE></SCARY>');
 x1 = new XML("<the>poltergeist</the>");
 MYXML.appendChild(x1);
-			
+            
 AddTestCase( "Append a node to child node",
-			'<SCARY><MOVIE/><the>poltergeist</the></SCARY>',
-			(MYXML.toString()) );
+            '<SCARY><MOVIE/><the>poltergeist</the></SCARY>',
+            (MYXML.toString()) );
 
 var a = <a><b><c/></b></a>;
 
 try {
-	a.appendChild (a);
-	result = a;
+    a.appendChild (a);
+    result = a;
 } catch (e1) {
-	result = typeError(e1.toString());
+    result = typeError(e1.toString());
 }
 
 AddTestCase("a = <a><b><c/></b></a>, a.appendChild(a)", "TypeError: Error #1118", result);

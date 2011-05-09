@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 /*
-1076	Math is not a constructor.
+1076    Math is not a constructor.
 */
 
 var CODE = 1076;
@@ -45,12 +45,12 @@ startTest();
 //-----------------------------------------------------------
 
 try {
-	var z = "no error";
-	new Math();
+    var z = "no error";
+    new Math();
 } catch (err) {
-	z = err.toString();
+    z = err.toString();
 } finally {
-	AddTestCase("Runtime Error", "TypeError: Error #" + CODE, typeError(z));
+    AddTestCase("Runtime Error", "TypeError: Error #" + CODE, typeError(z));
 }
 
 //-----------------------------------------------------------

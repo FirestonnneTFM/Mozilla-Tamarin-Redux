@@ -76,15 +76,15 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,   "Math.atan2(-0, 1)",        -0,             Math.atan2(-0, 1)        );
     array[item++] = new TestCase( SECTION,   "Infinity/Math.atan2(-0, 1)", -Infinity,   Infinity/Math.atan2(-0,1) );
 
-    array[item++] = new TestCase( SECTION,   "Math.atan2(-0,	0)",    	-0,             Math.atan2(-0,0)         );
-    array[item++] = new TestCase( SECTION,   "Math.atan2(-0,	-0)",   	-Math.PI,       Math.atan2(-0, -0)       );
-    array[item++] = new TestCase( SECTION,   "Math.atan2(-0,	-1)",   	-Math.PI,       Math.atan2(-0, -1)       );
-    array[item++] = new TestCase( SECTION,   "Math.atan2(-1,	0)",    	-Math.PI/2,     Math.atan2(-1, 0)        );
-    array[item++] = new TestCase( SECTION,   "Math.atan2(-1,	-0)",   	-Math.PI/2,     Math.atan2(-1, -0)       );
+    array[item++] = new TestCase( SECTION,   "Math.atan2(-0,    0)",        -0,             Math.atan2(-0,0)         );
+    array[item++] = new TestCase( SECTION,   "Math.atan2(-0,    -0)",       -Math.PI,       Math.atan2(-0, -0)       );
+    array[item++] = new TestCase( SECTION,   "Math.atan2(-0,    -1)",       -Math.PI,       Math.atan2(-0, -1)       );
+    array[item++] = new TestCase( SECTION,   "Math.atan2(-1,    0)",        -Math.PI/2,     Math.atan2(-1, 0)        );
+    array[item++] = new TestCase( SECTION,   "Math.atan2(-1,    -0)",       -Math.PI/2,     Math.atan2(-1, -0)       );
     array[item++] = new TestCase( SECTION,   "Math.atan2(1, Infinity)",  0,              Math.atan2(1, Number.POSITIVE_INFINITY) );
-    array[item++] = new TestCase( SECTION,   "Math.atan2(1,-Infinity)",  Math.PI,    	Math.atan2(1, Number.NEGATIVE_INFINITY) );
+    array[item++] = new TestCase( SECTION,   "Math.atan2(1,-Infinity)",  Math.PI,       Math.atan2(1, Number.NEGATIVE_INFINITY) );
 
-    array[item++] = new TestCase( SECTION,   "Math.atan2(-1, Infinity)", -0,         	Math.atan2(-1,Number.POSITIVE_INFINITY) );
+    array[item++] = new TestCase( SECTION,   "Math.atan2(-1, Infinity)", -0,            Math.atan2(-1,Number.POSITIVE_INFINITY) );
     array[item++] = new TestCase( SECTION,   "Infinity/Math.atan2(-1, Infinity)",   -Infinity,  Infinity/Math.atan2(-1,Infinity) );
 
     array[item++] = new TestCase( SECTION,   "Math.atan2(-1,-Infinity)", -Math.PI,       Math.atan2(-1,Number.NEGATIVE_INFINITY) );

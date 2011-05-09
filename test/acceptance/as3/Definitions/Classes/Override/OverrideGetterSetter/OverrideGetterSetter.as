@@ -36,22 +36,22 @@
  * ***** END LICENSE BLOCK ***** */
 package GetterSetter {
 
-	public class OverrideGetterSetter extends BaseClass {
-		public var orGet:Boolean = false;
-		public var orSet:Boolean = false;
-		
-		override public function get string() : String { 
-			orGet = true;
-			return _string;
-		}
-		
-		override public function set string( s:String ) { 
-			orSet = true;
-			_string=s;
-		}	
-		
-	
-	}
+    public class OverrideGetterSetter extends BaseClass {
+        public var orGet:Boolean = false;
+        public var orSet:Boolean = false;
+        
+        override public function get string() : String {
+            orGet = true;
+            return _string;
+        }
+        
+        override public function set string( s:String ) {
+            orSet = true;
+            _string=s;
+        }
+        
+    
+    }
 
 
 }

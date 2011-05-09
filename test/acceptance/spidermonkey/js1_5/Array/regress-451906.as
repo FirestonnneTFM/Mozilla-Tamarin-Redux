@@ -56,7 +56,7 @@ function addtestcases()
   printBugNumber(BUGNUMBER);
   printStatus (summary);
 
-  expect = 1; 
+  expect = 1;
   var s=[1,2,3];
   actual = s['0'];
 

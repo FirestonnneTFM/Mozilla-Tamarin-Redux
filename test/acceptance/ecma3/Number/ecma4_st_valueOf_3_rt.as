@@ -58,11 +58,11 @@ function getTestCases() {
     var item:Number = 0;
 
     var thisError:String = "no exception thrown";
-    var valof=Number.prototype.valueOf; 
-    var x:Number=4; 
+    var valof=Number.prototype.valueOf;
+    var x:Number=4;
     try{
         
-        x.valueOf=valof; 
+        x.valueOf=valof;
         x.valueOf();
     } catch (e:ReferenceError) {
         thisError = e.toString();

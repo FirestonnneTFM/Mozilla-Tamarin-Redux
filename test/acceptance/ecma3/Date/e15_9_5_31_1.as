@@ -133,22 +133,22 @@ function getTestCases() {
     
         array[item++] = new TestCase( SECTION, DateString+".getFullYear()",         LocalDate.year,       DateCase.getFullYear() );
         array[item++] = new TestCase( SECTION, DateString+".getMonth()",            LocalDate.month,      DateCase.getMonth() );
-	
-	//Allow for DST variation on different platforms (osx) - https://bugzilla.mozilla.org/show_bug.cgi?id=401898
-	var date = DateCase.getDate();
-	if (LocalDate.date == (date+1)) date++;
+    
+    //Allow for DST variation on different platforms (osx) - https://bugzilla.mozilla.org/show_bug.cgi?id=401898
+    var date = DateCase.getDate();
+    if (LocalDate.date == (date+1)) date++;
         array[item++] = new TestCase( SECTION, DateString+".getDate()",             LocalDate.date,       date);
 
-	var day = DateCase.getDay();
-	if (LocalDate.day == (day+1)) day++;
+    var day = DateCase.getDay();
+    if (LocalDate.day == (day+1)) day++;
         array[item++] = new TestCase( SECTION, DateString+".getDay()",              LocalDate.day,        day );
 
-	var hours = DateCase.getHours();
-	if (LocalDate.hours == (hours+1)) {
-		hours++;
-	} else if (hours == 23 && LocalDate.hours == 0) {
-		hours = 0;
-	}
+    var hours = DateCase.getHours();
+    if (LocalDate.hours == (hours+1)) {
+        hours++;
+    } else if (hours == 23 && LocalDate.hours == 0) {
+        hours = 0;
+    }
         array[item++] = new TestCase( SECTION, DateString+".getHours()",            LocalDate.hours,      hours );
         array[item++] = new TestCase( SECTION, DateString+".getMinutes()",          LocalDate.minutes,    DateCase.getMinutes() );
         array[item++] = new TestCase( SECTION, DateString+".getSeconds()",          LocalDate.seconds,    DateCase.getSeconds() );
@@ -165,7 +165,7 @@ function getTestCases() {
         }
     }
     return array;
-}    
+}
 function MyDate() {
     this.year = 0;
     this.month = 0;

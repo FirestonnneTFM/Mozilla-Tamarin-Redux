@@ -83,7 +83,7 @@ AddTestCase( "access 'protected' method from 'default' method of sub class", arr
 arr = new Array( 4, 5, 6 );
 EXTDCLASS = new ExtDefaultProtClass();
 AddTestCase( "access 'protected' method from 'public' method of sub class", arr,
-			 (EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()) );
+             (EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()) );
 
 // ********************************************
 // access protected method from a final
@@ -102,7 +102,7 @@ AddTestCase( "access 'protected' method from 'final' method of sub class", arr, 
 arr = new Array( 8, "two", 9 );
 EXTDCLASS = new ExtDefaultProtClass();
 AddTestCase( "access 'protected' method from 'public final' method of sub class", arr,
-		     (EXTDCLASS.pubFinSubSetArray(arr), EXTDCLASS.pubFinSubGetArray()) );
+             (EXTDCLASS.pubFinSubSetArray(arr), EXTDCLASS.pubFinSubGetArray()) );
 
 // ********************************************
 // access protected method from a final
@@ -128,7 +128,7 @@ AddTestCase( "access 'protected' method from 'private' method of sub class", arr
 // ********************************************
 
 AddTestCase( "access 'protected' method from 'virtual' method of sub class", arr,
-			  EXTDCLASS.testVirtSubArray(arr) );
+              EXTDCLASS.testVirtSubArray(arr) );
 
 // ********************************************
 // access protected method from a virtual
@@ -136,7 +136,7 @@ AddTestCase( "access 'protected' method from 'virtual' method of sub class", arr
 // ********************************************
 
 AddTestCase( "access 'protected' method from 'public virtual' method of sub class", arr,
-		     (EXTDCLASS.pubVirtSubSetArray(arr), EXTDCLASS.pubVirtSubGetArray()) );
+             (EXTDCLASS.pubVirtSubSetArray(arr), EXTDCLASS.pubVirtSubGetArray()) );
 
 // ********************************************
 // access protected method from a virtual
@@ -144,7 +144,7 @@ AddTestCase( "access 'protected' method from 'public virtual' method of sub clas
 // ********************************************
 
 AddTestCase( "access 'protected' method from 'private virtual' method of sub class", arr,
-			  EXTDCLASS.testPrivVirtSubArray(arr) );
+              EXTDCLASS.testPrivVirtSubArray(arr) );
 
 // ********************************************
 // access protected method from static
@@ -153,13 +153,13 @@ AddTestCase( "access 'protected' method from 'private virtual' method of sub cla
 
 var thisError = "no exception thrown";
 try{
-	ExtDefaultProtClass.pubStatSubGetArray();
+    ExtDefaultProtClass.pubStatSubGetArray();
 } catch (e1) {
-	thisError = e1.toString();
+    thisError = e1.toString();
 } finally {
-	AddTestCase( "access 'protected' method from 'static' method of the sub class",
-				TYPEERROR+1006,
-				typeError( thisError) );
+    AddTestCase( "access 'protected' method from 'static' method of the sub class",
+                TYPEERROR+1006,
+                typeError( thisError) );
 }
 
 // ********************************************
@@ -169,7 +169,7 @@ try{
 
 EXTDCLASS = new ExtDefaultProtClass();
 AddTestCase( "access 'protected' property from 'default' method of sub class", arr,
-				(EXTDCLASS.testSubGetSetDPArray(arr)) );
+                (EXTDCLASS.testSubGetSetDPArray(arr)) );
 
 // ********************************************
 // access protected property from
@@ -178,7 +178,7 @@ AddTestCase( "access 'protected' property from 'default' method of sub class", a
 
 EXTDCLASS = new ExtDefaultProtClass();
 AddTestCase( "access 'protected' property from 'final' method of sub class", arr,
-				(EXTDCLASS.testFinSubDPArray(arr)) );
+                (EXTDCLASS.testFinSubDPArray(arr)) );
 
 // ********************************************
 // access protected property from
@@ -187,7 +187,7 @@ AddTestCase( "access 'protected' property from 'final' method of sub class", arr
 
 EXTDCLASS = new ExtDefaultProtClass();
 AddTestCase( "access 'protected' property from 'virtual' method of sub class", arr,
-				(EXTDCLASS.testVirtSubDPArray(arr)) );
+                (EXTDCLASS.testVirtSubDPArray(arr)) );
 
 // ********************************************
 // access protected property from
@@ -196,7 +196,7 @@ AddTestCase( "access 'protected' property from 'virtual' method of sub class", a
 
 EXTDCLASS = new ExtDefaultProtClass();
 AddTestCase( "access 'protected' property from 'public' method of sub class", arr,
-				(EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()) );
+                (EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()) );
 
 // ********************************************
 // access protected property from
@@ -205,7 +205,7 @@ AddTestCase( "access 'protected' property from 'public' method of sub class", ar
 
 EXTDCLASS = new ExtDefaultProtClass();
 AddTestCase( "access 'protected' property from 'private' method of sub class", arr,
-			 (EXTDCLASS.testPrivSubDPArray(arr)) );
+             (EXTDCLASS.testPrivSubDPArray(arr)) );
 
 // ********************************************
 // access protected property from
@@ -214,7 +214,7 @@ AddTestCase( "access 'protected' property from 'private' method of sub class", a
 
 EXTDCLASS = new ExtDefaultProtClass();
 AddTestCase( "access 'protected' property from 'public final' method of sub class", arr,
-			 (EXTDCLASS.pubFinSubSetDPArray(arr), EXTDCLASS.pubFinSubGetDPArray()) );
+             (EXTDCLASS.pubFinSubSetDPArray(arr), EXTDCLASS.pubFinSubGetDPArray()) );
 
 // ********************************************
 // access protected property from
@@ -223,7 +223,7 @@ AddTestCase( "access 'protected' property from 'public final' method of sub clas
 
 EXTDCLASS = new ExtDefaultProtClass();
 AddTestCase( "access 'protected' property from 'public virtual' method of sub class", arr,
-			 (EXTDCLASS.pubVirtSubSetDPArray(arr), EXTDCLASS.pubVirtSubGetDPArray()) );
+             (EXTDCLASS.pubVirtSubSetDPArray(arr), EXTDCLASS.pubVirtSubGetDPArray()) );
 
 // ********************************************
 // access protected property from
@@ -232,7 +232,7 @@ AddTestCase( "access 'protected' property from 'public virtual' method of sub cl
 
 EXTDCLASS = new ExtDefaultProtClass();
 AddTestCase( "access 'protected' property from 'private final' method of sub class", arr,
-			 (EXTDCLASS.testPrivFinSubDPArray(arr)) );
+             (EXTDCLASS.testPrivFinSubDPArray(arr)) );
 
 // ********************************************
 // access protected property from
@@ -241,7 +241,7 @@ AddTestCase( "access 'protected' property from 'private final' method of sub cla
 
 EXTDCLASS = new ExtDefaultProtClass();
 AddTestCase( "access 'protected' property from 'private virtual' method of sub class", arr,
-			 (EXTDCLASS.testPrivVirtSubDPArray(arr)) );
+             (EXTDCLASS.testPrivVirtSubDPArray(arr)) );
 
 // ********************************************
 // access protected property from
@@ -250,13 +250,13 @@ AddTestCase( "access 'protected' property from 'private virtual' method of sub c
 
 thisError = "no error thrown";
 try{
-	ExtDefaultProtClass.pubStatSubGetDPArray();
+    ExtDefaultProtClass.pubStatSubGetDPArray();
 } catch(e3) {
-	thisError = e3.toString();
+    thisError = e3.toString();
 } finally {
-	AddTestCase( "access protected property from static public method of sub class",
-			TYPEERROR+1006,
-			typeError( thisError ) );
+    AddTestCase( "access protected property from static public method of sub class",
+            TYPEERROR+1006,
+            typeError( thisError ) );
 }
 
 test();       // leave this alone.  this executes the test cases and

@@ -67,7 +67,7 @@ a(1,2,3);
 if (typeof tracing == 'function')
 {
   tracing(false);
-} 
+}
 AddTestCase(summary, expect, actual);
 
 test();

@@ -771,7 +771,7 @@ function ls(a, b) {
       break;
   case "a, taken":
     switch(b) {
-    case "b, taken": 
+    case "b, taken":
       actual = 'PASSED';
     }
   }

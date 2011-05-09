@@ -110,7 +110,7 @@ package DynamicClass {
     private static var privStatString:String;
     //private static var privStatSimple:Simple;
 
-	//For class prototype testing
+    //For class prototype testing
     var pObj:Number = 1;
 
     // ****************

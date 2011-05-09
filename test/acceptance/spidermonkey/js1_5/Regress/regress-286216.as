@@ -61,7 +61,7 @@ for (ob[0] in dut) {
 if (typeof tracing == 'function')
 {
   tracing(false);
-} 
+}
 AddTestCase(summary, expect, actual);
 
 test();

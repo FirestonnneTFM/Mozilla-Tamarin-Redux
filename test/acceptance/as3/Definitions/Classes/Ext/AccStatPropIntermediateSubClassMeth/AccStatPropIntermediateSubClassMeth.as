@@ -37,23 +37,23 @@
 
 package StaticPropertyPackage {
         public class BaseClass {
-		public static var string:String = "static string";
-		
-	}
+        public static var string:String = "static string";
+        
+    }
 
         public class IntermediateClass extends BaseClass {
-		public var foo:String = "foo";
-	}
-	public class AccStatPropIntermediateSubClassMeth extends IntermediateClass {
-		
-		public function getString() : String {
-			return string;
-		}		
-		
-		public function getBaseString() : String {
-			return BaseClass.string;
-		}
+        public var foo:String = "foo";
+    }
+    public class AccStatPropIntermediateSubClassMeth extends IntermediateClass {
+        
+        public function getString() : String {
+            return string;
+        }
+        
+        public function getBaseString() : String {
+            return BaseClass.string;
+        }
 
 
-	}
+    }
 }

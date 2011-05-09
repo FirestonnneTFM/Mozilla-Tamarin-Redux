@@ -57,27 +57,27 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 // 'adddb'.replace(/ddd/,"XX")
 testcases[index++] = new TestCase ( SECTION, "'adddb'.replace(/ddd/,'XX')",
-	       "aXXb", 'adddb'.replace(/ddd/,'XX'));
+           "aXXb", 'adddb'.replace(/ddd/,'XX'));
 
 // 'adddb'.replace(/eee/,"XX")
 testcases[index++] = new TestCase ( SECTION, "'adddb'.replace(/eee/,'XX')",
-	       'adddb', 'adddb'.replace(/eee/,'XX'));
+           'adddb', 'adddb'.replace(/eee/,'XX'));
 
 // '34 56 78b 12'.replace(new RegExp('[0-9]+b'),'**')
 testcases[index++] = new TestCase ( SECTION, "'34 56 78b 12'.replace(new RegExp('[0-9]+b'),'**')",
-	       "34 56 ** 12", '34 56 78b 12'.replace(new RegExp('[0-9]+b'),'**'));
+           "34 56 ** 12", '34 56 78b 12'.replace(new RegExp('[0-9]+b'),'**'));
 
 // '34 56 78b 12'.replace(new RegExp('[0-9]+c'),'XX')
 testcases[index++] = new TestCase ( SECTION, "'34 56 78b 12'.replace(new RegExp('[0-9]+c'),'XX')",
-	       "34 56 78b 12", '34 56 78b 12'.replace(new RegExp('[0-9]+c'),'XX'));
+           "34 56 78b 12", '34 56 78b 12'.replace(new RegExp('[0-9]+c'),'XX'));
 
 // 'original'.replace(new RegExp(),'XX')
 testcases[index++] = new TestCase ( SECTION, "'original'.replace(new RegExp(),'XX')",
-	       "XXoriginal", 'original'.replace(new RegExp(),'XX'));
+           "XXoriginal", 'original'.replace(new RegExp(),'XX'));
 
 // 'qwe ert x\t\n 345654AB'.replace(new RegExp('x\s*\d+(..)$'),'****')
 testcases[index++] = new TestCase ( SECTION, "'qwe ert x\t\n 345654AB'.replace(new RegExp('x\\s*\\d+(..)$'),'****')",
-	       "qwe ert ****", 'qwe ert x\t\n 345654AB'.replace(new RegExp('x\\s*\\d+(..)$'),'****'));
+           "qwe ert ****", 'qwe ert x\t\n 345654AB'.replace(new RegExp('x\\s*\\d+(..)$'),'****'));
 
 
 test();

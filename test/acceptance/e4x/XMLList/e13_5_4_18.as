@@ -47,13 +47,13 @@ START("13.5.4.18 - XMLList propertyIsEnumerable()");
 var xmlDoc = "<xml><employee id='1'><firstname>John</firstname><lastname>Walton</lastname><age>25</age></employee><employee id='2'><firstname>Sue</firstname><lastname>Day</lastname><age>32</age></employee></xml><a>1</a>";
  
  // propertyName as a string
- AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.propertyIsEnumerable(0)", true, 
+ AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.propertyIsEnumerable(0)", true,
               (MYXML = new XMLList(xmlDoc), MYXML.propertyIsEnumerable('0')));
- AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.propertyIsEnumerable(1)", true, 
+ AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.propertyIsEnumerable(1)", true,
               (MYXML = new XMLList(xmlDoc), MYXML.propertyIsEnumerable('1')));
- AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.propertyIsEnumerable(2)", false, 
+ AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.propertyIsEnumerable(2)", false,
               (MYXML = new XMLList(xmlDoc), MYXML.propertyIsEnumerable('2')));
- AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.propertyIsEnumerable('employee')", false, 
+ AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.propertyIsEnumerable('employee')", false,
              (MYXML = new XMLList(xmlDoc), MYXML.propertyIsEnumerable('employee')));
 
 END();

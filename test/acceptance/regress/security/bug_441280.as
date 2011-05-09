@@ -47,11 +47,11 @@ writeHeaderToLog( SECTION + " "+ TITLE )
 /* asc will detect the error as a compiler error, so the testcase was generated
  *  with esc, here is the source:
  *
- class C { 
-    final function f() { print("in C") } 
+ class C {
+    final function f() { print("in C") }
  }
- class D extends C { 
-    override function f() { print("in D") } 
+ class D extends C {
+    override function f() { print("in D") }
  }
  (new D).f()
 

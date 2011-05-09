@@ -53,32 +53,32 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var status = '';
-	var pattern = '';
-	var sBody = '';
-	var sHTML = '';
-	var string = '';
-	var actualmatch = '';
-	var expectedmatch = '';
+    var status = '';
+    var pattern = '';
+    var sBody = '';
+    var sHTML = '';
+    var string = '';
+    var actualmatch = '';
+    var expectedmatch = '';
 
-	sBody += '<body onload="alert(event.type);">\n';
-	sBody += '<p>Kibology for all<\/p>\n';
-	sBody += '<p>All for Kibology<\/p>\n';
-	sBody += '<\/body>';
+    sBody += '<body onload="alert(event.type);">\n';
+    sBody += '<p>Kibology for all<\/p>\n';
+    sBody += '<p>All for Kibology<\/p>\n';
+    sBody += '<\/body>';
 
-	sHTML += '<html>\n';
-	sHTML += sBody;
-	sHTML += '\n<\/html>';
+    sHTML += '<html>\n';
+    sHTML += sBody;
+    sHTML += '\n<\/html>';
 
-	status = inSection(1);
-	string = sHTML;
-	pattern = /<body.*>((.*\n?)*?)<\/body>/i;
-	actualmatch = string.match(pattern);
-	expectedmatch = Array(sBody, '\n<p>Kibology for all</p>\n<p>All for Kibology</p>\n', '<p>All for Kibology</p>\n');
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    status = inSection(1);
+    string = sHTML;
+    pattern = /<body.*>((.*\n?)*?)<\/body>/i;
+    actualmatch = string.match(pattern);
+    expectedmatch = Array(sBody, '\n<p>Kibology for all</p>\n<p>All for Kibology</p>\n', '<p>All for Kibology</p>\n');
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	return array;
+    return array;
 }

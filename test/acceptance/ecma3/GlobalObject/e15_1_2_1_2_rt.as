@@ -51,7 +51,7 @@ function getTestCases() {
     d = new Date(0);
     with (d)
     {
-	x = getUTCMonth() +'/'+ getUTCDate() +'/'+ getUTCFullYear();
+    x = getUTCMonth() +'/'+ getUTCDate() +'/'+ getUTCFullYear();
     }
     array[0] = new TestCase( SECTION,
                              "d = new Date(0); with (d) { x = getUTCMonth() +'/'+ getUTCDate() +'/'+ getUTCFullYear(); } x",

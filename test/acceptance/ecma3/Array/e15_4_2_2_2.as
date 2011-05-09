@@ -47,22 +47,22 @@
 function getTestCases() {
     var array = new Array();
     var item = 0;
-	var arr;
+    var arr;
 
 /*  cn:  these tests are invalid for ES4, where there is no distinction between a number and a Number
-	   (i.e. 1000 === new Number(1000)
-    array[item++] = new TestCase( SECTION,	"(new Array(new Number(1073741823))).length",   1,      (new Array(new Number(1073741823))).length );
-    array[item++] = new TestCase( SECTION,	"(new Array(new Number(0))).length",            1,      (new Array(new Number(0))).length );
-    array[item++] = new TestCase( SECTION,	"(new Array(new Number(1000))).length",         1,      (new Array(new Number(1000))).length );
+       (i.e. 1000 === new Number(1000)
+    array[item++] = new TestCase( SECTION,  "(new Array(new Number(1073741823))).length",   1,      (new Array(new Number(1073741823))).length );
+    array[item++] = new TestCase( SECTION,  "(new Array(new Number(0))).length",            1,      (new Array(new Number(0))).length );
+    array[item++] = new TestCase( SECTION,  "(new Array(new Number(1000))).length",         1,      (new Array(new Number(1000))).length );
 */
-    array[item++] = new TestCase( SECTION,	"(new Array(new Number(1073741823))).length",   1073741823, (new Array(new Number(1073741823))).length );
-    array[item++] = new TestCase( SECTION,	"(new Array(new Number(0))).length",            0,			(new Array(new Number(0))).length );
-    array[item++] = new TestCase( SECTION,	"(new Array(new Number(1000))).length",         1000,		(new Array(new Number(1000))).length );
+    array[item++] = new TestCase( SECTION,  "(new Array(new Number(1073741823))).length",   1073741823, (new Array(new Number(1073741823))).length );
+    array[item++] = new TestCase( SECTION,  "(new Array(new Number(0))).length",            0,          (new Array(new Number(0))).length );
+    array[item++] = new TestCase( SECTION,  "(new Array(new Number(1000))).length",         1000,       (new Array(new Number(1000))).length );
 
-    array[item++] = new TestCase( SECTION,	"(new Array('mozilla, larryzilla, curlyzilla')).length", 1, (new Array('mozilla, larryzilla, curlyzilla')).length );
-    array[item++] = new TestCase( SECTION,	"(new Array(true)).length",                     1,      (new Array(true)).length );
-    array[item++] = new TestCase( SECTION,	"(new Array(false)).length",                    1,      (new Array(false)).length);
-    array[item++] = new TestCase( SECTION,	"(new Array(new Boolean(true)).length",         1,      (new Array(new Boolean(true))).length );
-    array[item++] = new TestCase( SECTION,	"(new Array(new Boolean(false)).length",        1,      (new Array(new Boolean(false))).length );
+    array[item++] = new TestCase( SECTION,  "(new Array('mozilla, larryzilla, curlyzilla')).length", 1, (new Array('mozilla, larryzilla, curlyzilla')).length );
+    array[item++] = new TestCase( SECTION,  "(new Array(true)).length",                     1,      (new Array(true)).length );
+    array[item++] = new TestCase( SECTION,  "(new Array(false)).length",                    1,      (new Array(false)).length);
+    array[item++] = new TestCase( SECTION,  "(new Array(new Boolean(true)).length",         1,      (new Array(new Boolean(true))).length );
+    array[item++] = new TestCase( SECTION,  "(new Array(new Boolean(false)).length",        1,      (new Array(new Boolean(false))).length );
     return ( array );
 }

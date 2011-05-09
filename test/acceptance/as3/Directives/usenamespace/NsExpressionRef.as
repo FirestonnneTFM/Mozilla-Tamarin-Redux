@@ -46,8 +46,8 @@ public namespace Football
 public namespace Baseball
 
 public class Game {
-	Football var n =  "Joe"
-	Baseball var n =  "Steve"
+    Football var n =  "Joe"
+    Baseball var n =  "Steve"
 }
 
 

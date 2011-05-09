@@ -36,8 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-var SECTION = "Directives\const";       			// provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";  				// Version of JavaScript or ECMA
+var SECTION = "Directives\const";                   // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";               // Version of JavaScript or ECMA
 var TITLE   = "using const inside a class without methods";     // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -51,8 +51,8 @@ startTest();                // leave this alone
 
 class MyConstClass {
 
-	// Using 'const' only in place of 'var' is not an error.
-	const myVar = 10;
+    // Using 'const' only in place of 'var' is not an error.
+    const myVar = 10;
 }
 
 var Obj = new MyConstClass();
@@ -60,6 +60,6 @@ var Obj = new MyConstClass();
 AddTestCase("class MyConstClass { const myVar = 10; }; var Obj = new MyConstClass(); Obj.myVar;", 10, Obj.myVar );
 
 
-test();       		// Leave this function alone.
-			// This function is for executing the test case and then
-			// displaying the result on to the console or the LOG file.
+test();             // Leave this function alone.
+            // This function is for executing the test case and then
+            // displaying the result on to the console or the LOG file.

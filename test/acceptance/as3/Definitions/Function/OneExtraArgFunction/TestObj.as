@@ -37,12 +37,12 @@
 package OneExtraArgFunction {
 
  class TestObjInner{
- 		
+        
   public function returnRest(... rest):Number { return rest.length; }
- 	 
+     
  }
  
  public class TestObj extends TestObjInner {}
-	
+    
 }
 

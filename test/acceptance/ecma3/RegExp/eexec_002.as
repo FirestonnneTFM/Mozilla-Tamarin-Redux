@@ -45,8 +45,8 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
     /*
      * for each test case, verify:
@@ -168,51 +168,51 @@ function getTestCases() {
         ["\"ma\"", "a"] );
 
 
-	function AddRegExpCases(
-	    regexp, pattern, index, matches_array ) {
+    function AddRegExpCases(
+        regexp, pattern, index, matches_array ) {
 
-	    // prevent a runtime error
+        // prevent a runtime error
 
-	    if ( regexp.exec(pattern) == null || matches_array == null ) {
-	        array[item++] = new TestCase(SECTION,
-	            regexp + ".exec(" + pattern +")",
-	            matches_array,
-	            regexp.exec(pattern) );
+        if ( regexp.exec(pattern) == null || matches_array == null ) {
+            array[item++] = new TestCase(SECTION,
+                regexp + ".exec(" + pattern +")",
+                matches_array,
+                regexp.exec(pattern) );
 
-	        return;
-	    }
-	    array[item++] = new TestCase(SECTION,
-	        regexp + ".exec(" + pattern +").length",
-	        matches_array.length,
-	        regexp.exec(pattern).length );
+            return;
+        }
+        array[item++] = new TestCase(SECTION,
+            regexp + ".exec(" + pattern +").length",
+            matches_array.length,
+            regexp.exec(pattern).length );
 
-	    array[item++] = new TestCase(SECTION,
-	        regexp + ".exec(" + pattern +").index",
-	        index,
-	        regexp.exec(pattern).index );
+        array[item++] = new TestCase(SECTION,
+            regexp + ".exec(" + pattern +").index",
+            index,
+            regexp.exec(pattern).index );
 
-	    array[item++] = new TestCase(SECTION,
-	        regexp + ".exec(" + pattern +").input",
-	        pattern,
-	        regexp.exec(pattern).input );
+        array[item++] = new TestCase(SECTION,
+            regexp + ".exec(" + pattern +").input",
+            pattern,
+            regexp.exec(pattern).input );
 
-	    array[item++] = new TestCase(SECTION,
-	        regexp + ".exec(" + pattern +").toString()",
-	        matches_array.toString(),
-	        regexp.exec(pattern).toString() );
-	/*
-	    var limit = matches_array.length > regexp.exec(pattern).length
-	                ? matches_array.length
-	                : regexp.exec(pattern).length;
+        array[item++] = new TestCase(SECTION,
+            regexp + ".exec(" + pattern +").toString()",
+            matches_array.toString(),
+            regexp.exec(pattern).toString() );
+    /*
+        var limit = matches_array.length > regexp.exec(pattern).length
+                    ? matches_array.length
+                    : regexp.exec(pattern).length;
 
-	    for ( var matches = 0; matches < limit; matches++ ) {
-	        array[item++] = new TestCase(SECTION,
-	            regexp + ".exec(" + pattern +")[" + matches +"]",
-	            matches_array[matches],
-	            regexp.exec(pattern)[matches] );
-	    }
-	*/
-	}
+        for ( var matches = 0; matches < limit; matches++ ) {
+            array[item++] = new TestCase(SECTION,
+                regexp + ".exec(" + pattern +")[" + matches +"]",
+                matches_array[matches],
+                regexp.exec(pattern)[matches] );
+        }
+    */
+    }
 
-	return array;
+    return array;
 }

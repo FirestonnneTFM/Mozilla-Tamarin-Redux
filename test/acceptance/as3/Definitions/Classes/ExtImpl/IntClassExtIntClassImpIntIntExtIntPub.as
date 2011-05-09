@@ -37,7 +37,7 @@
 
 import IntClassExtIntClassImpIntIntExtIntPub.*;
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS3";        // Version of ECMAScript or ActionScript
 var TITLE   = "Public class implements public interface";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -96,7 +96,7 @@ print(PubInt7.MyNegativeInteger());
 print(obj.PublicInt3::MyNegativeInteger());
 print(obj2.PublicInt3::MyNegativeInteger());*/
 //print(obj.MySuperBoolean());
-//Public Class extends Public class implements a public interface which extends two interfaces 
+//Public Class extends Public class implements a public interface which extends two interfaces
 AddTestCase("Calling a method in public namespace in the public interface implemented  by the subclass through the subclass","Hi!", PubInt.MyString());
 AddTestCase("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",-100, obj2.RetMyNegInteger2());
 AddTestCase("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",-100, obj2.RetMyNegInteger());

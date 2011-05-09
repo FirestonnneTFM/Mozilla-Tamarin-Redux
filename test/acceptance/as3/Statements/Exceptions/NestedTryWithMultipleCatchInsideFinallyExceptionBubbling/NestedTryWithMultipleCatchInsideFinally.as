@@ -59,7 +59,7 @@ package NestedTryWithMultipleCatchInsideFinallyExceptionBubbling
                 }catch(eo6:SecurityError){
                     thisError1="This is outer Security Error!!!"+eo6.toString();
                 }finally{
-                    try{ 
+                    try{
                        throw new TypeError();
                        }catch(ei:TypeError){
                            thisError="This is Inner Type Error:"+ei.toString();

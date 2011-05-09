@@ -37,29 +37,29 @@
 
 package DynamicClass {
 
-	import DynamicClass.*;
+    import DynamicClass.*;
 
-	dynamic class DynExtDynamicOverRidePublicInner extends DynamicClass {
+    dynamic class DynExtDynamicOverRidePublicInner extends DynamicClass {
 
-		public var orSet = false;
-		public var orGet = false;
+        public var orSet = false;
+        public var orGet = false;
 
-		// *******************************
-		// override a public method
-		// with a public method
-		// *******************************
+        // *******************************
+        // override a public method
+        // with a public method
+        // *******************************
 
-		override public function getPubBoolean(): Boolean {
-			orGet = true;
-			return this.boolean;
-		}
+        override public function getPubBoolean(): Boolean {
+            orGet = true;
+            return this.boolean;
+        }
 
-		override public function setPubBoolean( b:Boolean ) {
-			orSet = true;
-			this.boolean = b;
-		}
+        override public function setPubBoolean( b:Boolean ) {
+            orSet = true;
+            this.boolean = b;
+        }
 
-	}
-	public class DynExtDynamicOverRidePublic extends DynExtDynamicOverRidePublicInner {}
+    }
+    public class DynExtDynamicOverRidePublic extends DynExtDynamicOverRidePublicInner {}
 
 }

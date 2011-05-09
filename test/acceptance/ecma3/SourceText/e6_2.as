@@ -48,7 +48,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     // encoded quotes should not end a quote
 
@@ -58,34 +58,34 @@ function getTestCases() {
                                     "var s = 'PAS\\u0022SED'; s",
                                     "PAS\"SED",
                                     s);
-	var s = "PAS\u0022SED";
-	
+    var s = "PAS\u0022SED";
+    
     array[item++]= new TestCase(  SECTION,
                                     'var s = "PAS\\u0022SED"; s',
                                     "PAS\"SED",
                                      s );
 
-    var s = 'PAS\u0027SED'; 
+    var s = 'PAS\u0027SED';
     
     array[item++]= new TestCase(  SECTION,
                                     "var s = 'PAS\\u0027SED'; s",
                                     "PAS\'SED",
                                     s);
 
-	var s = "PAS\u0027SED";
-	
+    var s = "PAS\u0027SED";
+    
     array[item++]= new TestCase(  SECTION,
                                     'var s = "PAS\\u0027SED"; s',
                                     "PAS\'SED",
                                      s );
-	var s = "PAS\u0027SED";
-	
+    var s = "PAS\u0027SED";
+    
     array[item++] = new TestCase( SECTION,
                                     'var s = "PAS\\u0027SED"; s',
                                     "PAS\'SED",
                                     s )
    
-	var s = "PAS\u0022SED";
+    var s = "PAS\u0022SED";
     array[item++]= new TestCase(  SECTION,
                                     'var s = "PAS\\u0027SED"; s',
                                     "PAS\"SED",

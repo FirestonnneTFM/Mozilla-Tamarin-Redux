@@ -42,7 +42,7 @@
 START("Testing replacing an element with a list that contains a text node");
 BUG(263936);
 
-var x1 = 
+var x1 =
 <x>
   <a>one</a>
   <b>three</b>

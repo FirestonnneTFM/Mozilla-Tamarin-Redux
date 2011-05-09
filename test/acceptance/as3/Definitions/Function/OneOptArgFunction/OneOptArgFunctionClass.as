@@ -36,9 +36,9 @@
  * ***** END LICENSE BLOCK ***** */
 class OneOptArgFunctionClass{
 
-	function returnString(s:String = "outside package inside class",... rest):String { return s; }
-	function returnBoolean(b:Boolean = true,... rest):Boolean { return b; }
-	function returnNumber(n:Number = 10,... rest):Number { return n; }
+    function returnString(s:String = "outside package inside class",... rest):String { return s; }
+    function returnBoolean(b:Boolean = true,... rest):Boolean { return b; }
+    function returnNumber(n:Number = 10,... rest):Number { return n; }
 
 }
 

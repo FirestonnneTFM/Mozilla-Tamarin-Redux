@@ -36,12 +36,12 @@
  * ***** END LICENSE BLOCK ***** */
 package MultiOptArgFunction {
 
-	public function returnArguments(s:String = "Str2", b:Boolean = false, n:Number = 20) {
-		
-	 str = s;
-	 bool = b;
-	 num = n;
-	}
+    public function returnArguments(s:String = "Str2", b:Boolean = false, n:Number = 20) {
+        
+     str = s;
+     bool = b;
+     num = n;
+    }
 
 }
 

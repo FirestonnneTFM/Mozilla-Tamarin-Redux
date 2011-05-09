@@ -216,7 +216,7 @@ try
 {
   Array.prototype.forEach.call(value,
                                function (v, index, array)
-			       {actual += array[index].toUpperCase();});
+                   {actual += array[index].toUpperCase();});
 }
 catch(e)
 {
@@ -231,7 +231,7 @@ try
 {
   actual = Array.prototype.map.call(value,
                                     function (v, index, array)
-				    {return v.toUpperCase();}) + '';
+                    {return v.toUpperCase();}) + '';
 }
 catch(e)
 {
@@ -245,8 +245,8 @@ expect = '2,4,6,8,0';
 try
 {
   actual = Array.prototype.filter.call(value,
-				       function (v, index, array)
-				       {return array[index] % 2 == 0;}) + '';
+                       function (v, index, array)
+                       {return array[index] % 2 == 0;}) + '';
 }
 catch(e)
 {
@@ -260,8 +260,8 @@ expect = false;
 try
 {
   actual = Array.prototype.every.call(value,
-				      function (v, index, array)
-				      {return array[index] % 2 == 0;});
+                      function (v, index, array)
+                      {return array[index] % 2 == 0;});
 }
 catch(e)
 {

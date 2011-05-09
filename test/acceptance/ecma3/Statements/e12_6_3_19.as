@@ -46,7 +46,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     //  for ( LeftHandSideExpression in Expression )
     //  LeftHandSideExpression:NewExpression:MemberExpression
@@ -64,16 +64,16 @@ function getTestCases() {
         6,
         count );
 
-	// ecma does not gaurantee the order that for in will run... changed
+    // ecma does not gaurantee the order that for in will run... changed
     // to verify that all letters of hello are called
-	var myArray = new Array( "h", "e", "l", "l", "o" );
-	var result2 = "PASSED";
-	for( var x = 0; x<myArray.length; x++ ){
-		if( result.indexOf( myArray[x] ) == -1 ){
-			result2 = "FAILED";
-			break;
-		}
-	}
+    var myArray = new Array( "h", "e", "l", "l", "o" );
+    var result2 = "PASSED";
+    for( var x = 0; x<myArray.length; x++ ){
+        if( result.indexOf( myArray[x] ) == -1 ){
+            result2 = "FAILED";
+            break;
+        }
+    }
 
     array[item++] = new TestCase( SECTION,
         "Verify all letters of hello are found in result",

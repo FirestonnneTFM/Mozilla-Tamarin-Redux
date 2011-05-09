@@ -52,10 +52,10 @@ test();
 
 function getTestCases() {
 
-	var listOrig:XMLList = <><item>1</item></>;
-	var listCopy:XMLList = <></>;
-	listCopy += XMLList(listOrig[0]);
-	listCopy[0] += <item>2</item>;
+    var listOrig:XMLList = <><item>1</item></>;
+    var listCopy:XMLList = <></>;
+    listCopy += XMLList(listOrig[0]);
+    listCopy[0] += <item>2</item>;
 
 
     var array:Array = new Array();

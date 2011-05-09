@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "use namespace";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -52,13 +52,13 @@ namespace Hockey;
 
 Baseball function getTeam(){
     return "Giants";
-} 
+}
 Basketball function getTeam(){
     return "Kings";
-} 
+}
 Hockey function getTeam(){
     return "Sharks";
-} 
+}
 public function a1(){
   return Baseball::getTeam()
 }

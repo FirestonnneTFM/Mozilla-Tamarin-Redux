@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
  
-var SECTION = "Definitions\const";       			// provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";  			// Version of JavaScript or ECMA
+var SECTION = "Definitions\const";                  // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
 var TITLE   = "local const inside a class function";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 

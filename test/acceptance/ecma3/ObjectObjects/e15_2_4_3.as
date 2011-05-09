@@ -48,9 +48,9 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	// save
-	var origNumProto = Number.prototype.valueOf;
-	var origBoolProto = Boolean.prototype.valueOf;
+    // save
+    var origNumProto = Number.prototype.valueOf;
+    var origBoolProto = Boolean.prototype.valueOf;
 
     var myarray = new Array();
     myarray.valueOf = Object.prototype.valueOf;
@@ -66,7 +66,7 @@ function getTestCases() {
     //mydate.valueOf = Object.prototype.valueOf;
    Number.prototype.valueOf=Object.prototype.valueOf;
     var mynumber = new Number();
-	//String.prototype.valueOf=Object.prototype.valueOf;
+    //String.prototype.valueOf=Object.prototype.valueOf;
     var mystring = new String();
 
     array[item++] = new TestCase( SECTION,  "Object.prototype.valueOf.length",      0,      Object.prototype.valueOf.length );
@@ -170,9 +170,9 @@ function getTestCases() {
                                  mydate,
                                  mydate.valueOf());*/
 
-	// restore
-	Number.prototype.valueOf = origNumProto;
-	Boolean.prototype.valueOf = origBoolProto;
+    // restore
+    Number.prototype.valueOf = origNumProto;
+    Boolean.prototype.valueOf = origBoolProto;
 
     return ( array );
 }

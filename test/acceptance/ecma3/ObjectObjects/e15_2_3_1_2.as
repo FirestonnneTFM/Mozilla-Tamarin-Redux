@@ -52,7 +52,7 @@ function getTestCases() {
                                             false,
                                             "delete( Object.prototype )"
                                 );
-	*/
+    */
     array[item++] = new TestCase( SECTION,  "delete( Object.prototype )",
                                             false,
                                             (delete( Object.prototype ))

@@ -55,47 +55,47 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var cnUBOUND = 10;
-	var re;
-	var s;
+    var cnUBOUND = 10;
+    var re;
+    var s;
 
 
-	s = '"Hello".match(/[/]/)';
-	tryThis(s);
+    s = '"Hello".match(/[/]/)';
+    tryThis(s);
 
-	s = 're = /[/';
-	tryThis(s);
+    s = 're = /[/';
+    tryThis(s);
 
-	s = 're = /[/]/';
-	tryThis(s);
+    s = 're = /[/]/';
+    tryThis(s);
 
-	s = 're = /[//]/';
-	tryThis(s);
+    s = 're = /[//]/';
+    tryThis(s);
 
-	// Try to provoke a crash -
-	function tryThis(sCode)
-	{
-	  var thisError = "no error";
+    // Try to provoke a crash -
+    function tryThis(sCode)
+    {
+      var thisError = "no error";
 
-	  // sometimes more than one attempt is necessary -
-	  for (var i=0; i<cnUBOUND; i++)
-	  {
-	    try
-	    {
-	      sCode;
-	    }
-	    catch(e)
-	    {
-	      // do nothing; keep going -
-	      thisError = "error";
-	    }
-	  }
+      // sometimes more than one attempt is necessary -
+      for (var i=0; i<cnUBOUND; i++)
+      {
+        try
+        {
+          sCode;
+        }
+        catch(e)
+        {
+          // do nothing; keep going -
+          thisError = "error";
+        }
+      }
 
-	  array[item++] = new TestCase(SECTION, sCode, "no error", thisError);
-	}
+      array[item++] = new TestCase(SECTION, sCode, "no error", thisError);
+    }
 
-	return array;
+    return array;
 }

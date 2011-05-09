@@ -46,12 +46,12 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
 
     // 1. If Type(x) is different from Type(y) return false
 
-	// see bug 103471 for details
+    // see bug 103471 for details
     StrictEquality( true, new Boolean(true), true, array, item++);
     StrictEquality( new Boolean(), false, true, array, item++);
     StrictEquality( "", new String(),    true, array, item++);

@@ -43,4 +43,4 @@ package DefaultClass {
     function iGetNumber1():Number;
  }
 
-}  
+}

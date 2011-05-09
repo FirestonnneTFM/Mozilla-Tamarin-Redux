@@ -60,7 +60,7 @@ try{
        
    }catch(eo4:EvalError){
        thisError1="This is outer Eval Error:"+eo4.toString();
-       try { 
+       try {
            throw new TypeError();
            }catch(ei:TypeError){
                thisError="This is Inner Type Error:"+ei.toString();

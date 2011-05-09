@@ -42,8 +42,8 @@
 
     writeHeaderToLog( SECTION + " "+ TITLE);
 
-	var testcases = getTestCases();
-	test();
+    var testcases = getTestCases();
+    test();
 
 function getTestCases() {
     var array = new Array();
@@ -84,20 +84,20 @@ function getTestCases() {
                                     Date.prototype.getDay.length );
 */
 
-	function addTestCase( t ) {
-	    for ( var m = 0; m < 12; m++ ) {
-	        t += TimeInMonth(m);
+    function addTestCase( t ) {
+        for ( var m = 0; m < 12; m++ ) {
+            t += TimeInMonth(m);
 
-	        for ( d = 0; d < TimeInMonth(m); d+= msPerDay*6 ) {
-	            t += d;
+            for ( d = 0; d < TimeInMonth(m); d+= msPerDay*6 ) {
+                t += d;
 
-	            array[item++] = new TestCase( SECTION,
-	                                    "(new Date("+t+")).getDay()",
-	                                    WeekDay(LocalTime(t)),
-	                                    (new Date(t)).getDay() );
-	        }
-	    }
-	}
+                array[item++] = new TestCase( SECTION,
+                                        "(new Date("+t+")).getDay()",
+                                        WeekDay(LocalTime(t)),
+                                        (new Date(t)).getDay() );
+            }
+        }
+    }
 
     return ( array );
 }

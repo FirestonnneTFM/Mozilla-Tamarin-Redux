@@ -38,7 +38,7 @@
 import GetSetProtectedExtended.*;
 
 var SECTION = "FunctionAccessors";
-var VERSION = "AS3"; 
+var VERSION = "AS3";
 var TITLE   = "Function Accessors";
 var BUGNUMBER = "";
 
@@ -46,7 +46,7 @@ startTest();
 
 OBJ = new GetSetProtectedExtended();
 
-/* 
+/*
  *
  * These will all need to be changed when
  * the protected attribute is implemented.

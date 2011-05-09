@@ -50,16 +50,16 @@ var xmlDoc = "<XML><TEAM>Giants</TEAM><CITY>San Francisco</CITY><SPORT>Baseball<
 AddTestCase( "XML.prettyPrinting = false, XML.prettyPrinting", false, (XML.prettyPrinting = false, XML.prettyPrinting));
 AddTestCase( "XML.prettyPrinting = true, XML.prettyPrinting", true, (XML.prettyPrinting = true, XML.prettyPrinting));
 
-// b) pretty printing 
+// b) pretty printing
 
-AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyPrinting = false; MYOB.toString()", 
-			"<XML><TEAM>Giants</TEAM><CITY>San Francisco</CITY><SPORT>Baseball</SPORT></XML>", 
+AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyPrinting = false; MYOB.toString()",
+            "<XML><TEAM>Giants</TEAM><CITY>San Francisco</CITY><SPORT>Baseball</SPORT></XML>",
              (MYOB = new XML(xmlDoc), XML.prettyPrinting = false, MYOB.toString()));
 
 // !!@ very simple example of printing output
 
-AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyPrinting = true; MYOB.toString()", 
-			"<XML>" + NL() + "  <TEAM>Giants</TEAM>" + NL() + "  <CITY>San Francisco</CITY>" + NL() + "  <SPORT>Baseball</SPORT>" + NL() + "</XML>", 
+AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyPrinting = true; MYOB.toString()",
+            "<XML>" + NL() + "  <TEAM>Giants</TEAM>" + NL() + "  <CITY>San Francisco</CITY>" + NL() + "  <SPORT>Baseball</SPORT>" + NL() + "</XML>",
              (MYOB = new XML(xmlDoc), XML.prettyPrinting = true, MYOB.toString()));
 
 

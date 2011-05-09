@@ -38,15 +38,15 @@
 package StaticProperty {
 
         class BaseClass {
-		static var x:String = "BaseClass.x";
-	}
+        static var x:String = "BaseClass.x";
+    }
 
 
-	public class AccStatPropSubClassInit extends BaseClass {
-		public var aVar : String = BaseClass.x;
-		public static var aStat : String = BaseClass.x;
-		
-		public var aVar2 : String = x;
-		public static var aStat2 : String = x;
-	}
+    public class AccStatPropSubClassInit extends BaseClass {
+        public var aVar : String = BaseClass.x;
+        public static var aStat : String = BaseClass.x;
+        
+        public var aVar2 : String = x;
+        public static var aStat2 : String = x;
+    }
 }

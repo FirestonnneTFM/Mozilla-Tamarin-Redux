@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package SuperSameNamespace {
-	public namespace ns1;
-	
-	public class BaseClass {
-		ns1 function echo() : String { return "echo() from BaseClass"; }
-	}
+    public namespace ns1;
+    
+    public class BaseClass {
+        ns1 function echo() : String { return "echo() from BaseClass"; }
+    }
 }

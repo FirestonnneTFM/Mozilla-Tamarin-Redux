@@ -68,13 +68,13 @@ package VarDefPrivateStatic{
     private static var idA, idB:Boolean;
 
     // var Identifier, Identifier : TypeExpression = AssignmentExpression
-    private static var idAAssign = false, idBAssign:Boolean = true; 
-    private static var idAAssignB, idBAssignB:Boolean = true; 
+    private static var idAAssign = false, idBAssign:Boolean = true;
+    private static var idAAssignB, idBAssignB:Boolean = true;
 
     // var Identifier : TypeExpressionA, Identifier : TypeExpressionB = <empty>
-    private static var idTypeExprA:Array, idTypeExprB:Boolean; 
+    private static var idTypeExprA:Array, idTypeExprB:Boolean;
 
-    // var Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression 
+    // var Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression
     private static var idTypeExprAAssign : Array = new Array(1,2,3), idTypeExprBAssign : Boolean = true;
     private static var idTypeExprAAssignB : Array, idTypeExprBAssignB : Boolean = true;
 
@@ -104,11 +104,11 @@ package VarDefPrivateStatic{
     public function getid3() { return id3; }
     public function setid3(x) { id3 = x; }
     public function getid1TypeExpr():Boolean { return id1TypeExpr; }
-    public function setid1TypeExpr(x:Boolean) { id1TypeExpr = x; } 
+    public function setid1TypeExpr(x:Boolean) { id1TypeExpr = x; }
     public function getid2TypeExpr():Boolean { return id2TypeExpr; }
-    public function setid2TypeExpr(x:Boolean) { id2TypeExpr = x; } 
+    public function setid2TypeExpr(x:Boolean) { id2TypeExpr = x; }
     public function getid3TypeExpr():Boolean { return id3TypeExpr; }
-    public function setid3TypeExpr(x:Boolean) { id3TypeExpr = x; } 
+    public function setid3TypeExpr(x:Boolean) { id3TypeExpr = x; }
     public function getid1AssignExpr() { return id1AssignExpr; }
     public function getid2AssignExpr() { return id2AssignExpr; }
     public function getid3AssignExpr() { return id3AssignExpr; }

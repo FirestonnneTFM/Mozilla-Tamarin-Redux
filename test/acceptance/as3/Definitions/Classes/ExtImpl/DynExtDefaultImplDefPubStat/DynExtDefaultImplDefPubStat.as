@@ -147,7 +147,7 @@ dynamic class DynExtDefImplDefPubStatInner extends DefaultClass implements Defau
     }
 
     // ***************************************
-    // access public static property from 
+    // access public static property from
     // default method of sub class
     // ***************************************
 
@@ -158,7 +158,7 @@ dynamic class DynExtDefImplDefPubStatInner extends DefaultClass implements Defau
     public function testPubStatDefSubArray(a:Array) : Array {
         subSetDPArray(a);
         return subGetDPArray();
-    }    
+    }
 
     // ***************************************
     // access public static property from
@@ -183,7 +183,7 @@ dynamic class DynExtDefImplDefPubStatInner extends DefaultClass implements Defau
 
 
     // ***************************************
-    // access public static property from 
+    // access public static property from
     // final method of sub class
     // ***************************************
 
@@ -230,7 +230,7 @@ dynamic class DynExtDefImplDefPubStatInner extends DefaultClass implements Defau
         return privStatSubGetSPArray();
     }
 
-  }                   
+  }
         public class DynExtDefaultImplDefPubStat extends DynExtDefImplDefPubStatInner{
     // **************************
     // public static methods

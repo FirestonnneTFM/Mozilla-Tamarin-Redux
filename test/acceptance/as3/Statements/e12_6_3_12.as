@@ -48,21 +48,21 @@
 class A {
     var result = "PASSED";
 
-	public function doTest():String {
-	    for ( aVar in this ) {
-	        if (aVar == "aVar") {
-	            result = "FAILED"
-	        }
-	    };
-	    return result;
-	}
+    public function doTest():String {
+        for ( aVar in this ) {
+            if (aVar == "aVar") {
+                result = "FAILED"
+            }
+        };
+        return result;
+    }
 }
 
 function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	var actualResult = new A().doTest();
+    var actualResult = new A().doTest();
 
     array[item++] = new TestCase(
         SECTION,

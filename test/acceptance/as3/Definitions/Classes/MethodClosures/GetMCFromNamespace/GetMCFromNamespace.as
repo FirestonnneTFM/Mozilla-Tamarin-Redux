@@ -35,13 +35,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package MCPackage {
-	public namespace ns1;
-	
-	public class GetMCFromNamespace {
-		var x:int = 12;
-		
-		ns1 function getX() : int {
-			return this.x;
-		}
-	}
+    public namespace ns1;
+    
+    public class GetMCFromNamespace {
+        var x:int = 12;
+        
+        ns1 function getX() : int {
+            return this.x;
+        }
+    }
 }

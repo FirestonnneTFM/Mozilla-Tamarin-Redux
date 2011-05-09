@@ -39,55 +39,55 @@
 package InternalClassImpInternalInt{
 
         namespace ns;
-	
+    
 
-	internal interface InternalInt{
-	
-		
+    internal interface InternalInt{
+    
+        
 
-	 function pubFunc():Boolean;	       // attribute method
+     function pubFunc():Boolean;           // attribute method
 
-//		ns function nsFunc(a="test"):int;	       //Namespace attribute method
-	}
+//      ns function nsFunc(a="test"):int;          //Namespace attribute method
+    }
 
    
 
-	internal class InternalClass implements InternalInt{
-		
-		
+    internal class InternalClass implements InternalInt{
+        
+        
 
-		public function pubFunc():Boolean{	       //Public method
-				return true;
-		}	
-			
-		ns function nsFunc(a="test"):int{	       //Namespace method
-			return a.length;	
-		} 
-		
-	}
+        public function pubFunc():Boolean{         //Public method
+                return true;
+        }
+            
+        ns function nsFunc(a="test"):int{          //Namespace method
+            return a.length;
+        }
+        
+    }
 
       
       class InternalsubClass extends InternalClass{
-		
+        
 
-		
+        
 
 
-		
-			
-		ns override function nsFunc(a="test"):int{	       //Namespace method
-			return a.length;	
-		}
-		
-	}
+        
+            
+        ns override function nsFunc(a="test"):int{         //Namespace method
+            return a.length;
+        }
+        
+    }
 
-	public class IntsubExtIntClassImpIntInt extends InternalsubClass{
+    public class IntsubExtIntClassImpIntInt extends InternalsubClass{
 
                 public function accnsFunc(a="test"){return ns::nsFunc(a);}
-		// access default function nsFunc
-       } 	
+        // access default function nsFunc
+       }
       
                                                                       
-	
-	
-}  
+    
+    
+}

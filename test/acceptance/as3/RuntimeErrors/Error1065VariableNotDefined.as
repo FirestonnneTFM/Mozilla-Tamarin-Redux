@@ -34,19 +34,19 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1065; //	Variable _ is not defined.
+var CODE = 1065; // Variable _ is not defined.
 
 //-----------------------------------------------------------
 startTest();
 //-----------------------------------------------------------
 
 try {
-	var z = "no error";
-	new Date(x);
+    var z = "no error";
+    new Date(x);
 } catch (err) {
-	z = err.toString();
+    z = err.toString();
 } finally {
-	AddTestCase("Runtime Error", REFERENCEERROR + CODE, referenceError(z));
+    AddTestCase("Runtime Error", REFERENCEERROR + CODE, referenceError(z));
 }
 
 //-----------------------------------------------------------

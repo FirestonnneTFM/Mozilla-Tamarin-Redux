@@ -72,14 +72,14 @@ AddTestCase( "*** Access the static property via base class ***", 1, 1 );
 AddTestCase( "BaseClass.ns1::i = 12, BaseClass.ns1::i", 12, (BaseClass.ns1::i = 12, BaseClass.ns1::i) );
 
 // ********************************************
-// Access the static property via sub class, 
+// Access the static property via sub class,
 // using unadorned "x"
 // ********************************************
 AddTestCase( "*** Access the static property via sub class using unadorned property name ***", 1, 1 );
 AddTestCase( "obj.getInt()", BaseClass.ns1::i, obj.getInt() );
 
 // ********************************************
-// Access the static property via sub class, 
+// Access the static property via sub class,
 // using unadorned "BaseClass.x"
 // ********************************************
 AddTestCase( "*** Access the static property via sub class using unadorned property name ***", 1, 1 );

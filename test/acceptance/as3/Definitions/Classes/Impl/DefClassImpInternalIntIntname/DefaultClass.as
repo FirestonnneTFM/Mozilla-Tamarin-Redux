@@ -37,31 +37,31 @@
 /*
  * Default Class DefaultClass
  * Class methods
- *  
+ *
  */
 
 package DefClassImpInternalIntIntname{
 
-	class DefaultClass implements InternalInt, InternalInt_S{
-		
+    class DefaultClass implements InternalInt, InternalInt_S{
+        
 
-		public function deffunc():String{  			 
-			return"PASSED";
-		}
-		
-                /*InternalInt_S function deffunc():String{  			 
-			return"PASSED";
-		}*/
-	
-	}
+        public function deffunc():String{
+            return"PASSED";
+        }
+        
+                /*InternalInt_S function deffunc():String{
+            return"PASSED";
+        }*/
+    
+    }
 
-	public class DefaultClassAccesor{
+    public class DefaultClassAccesor{
 
-                var c:DefaultClass = new DefaultClass(); 
-		public function accdeffunc(){return c.InternalInt::deffunc();}
-		public function accdeffunc_s(){return c.InternalInt_S::deffunc();}
-        	
+                var c:DefaultClass = new DefaultClass();
+        public function accdeffunc(){return c.InternalInt::deffunc();}
+        public function accdeffunc_s(){return c.InternalInt_S::deffunc();}
+            
 
-       } 	
-	
-}  
+       }
+    
+}

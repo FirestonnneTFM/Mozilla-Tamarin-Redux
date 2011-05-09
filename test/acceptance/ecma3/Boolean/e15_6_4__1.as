@@ -36,39 +36,39 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-	var VERSION = "ECMA_1"
-	startTest();
-	var SECTION = "15.6.4-1";
+    var VERSION = "ECMA_1"
+    startTest();
+    var SECTION = "15.6.4-1";
 
-	writeHeaderToLog( SECTION + " Properties of the Boolean Prototype Object");
-	var testcases = getTestCases();
-	test();
+    writeHeaderToLog( SECTION + " Properties of the Boolean Prototype Object");
+    var testcases = getTestCases();
+    test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	array[item++] = new TestCase( SECTION, "typeof Boolean.prototype == typeof( new Object )",
-											true,
-											typeof Boolean.prototype == typeof( new Object ) );
-	array[item++] = new TestCase( SECTION, "typeof( Boolean.prototype )",
-											"object",
-											typeof(Boolean.prototype) );
+    array[item++] = new TestCase( SECTION, "typeof Boolean.prototype == typeof( new Object )",
+                                            true,
+                                            typeof Boolean.prototype == typeof( new Object ) );
+    array[item++] = new TestCase( SECTION, "typeof( Boolean.prototype )",
+                                            "object",
+                                            typeof(Boolean.prototype) );
 
-	//save original toString
+    //save original toString
     var origToString:Function = Boolean.prototype.toString;
 
-	Boolean.prototype.toString = Object.prototype.toString;
-	array[item++] = new TestCase( SECTION,
-									"Boolean.prototype.toString = Object.prototype.toString; Boolean.prototype.toString()",
-									"[object Object]",
-									Boolean.prototype.toString());
-	array[item++] = new TestCase( SECTION, "Boolean.prototype.valueOf()",
-											false,
-											Boolean.prototype.valueOf());
+    Boolean.prototype.toString = Object.prototype.toString;
+    array[item++] = new TestCase( SECTION,
+                                    "Boolean.prototype.toString = Object.prototype.toString; Boolean.prototype.toString()",
+                                    "[object Object]",
+                                    Boolean.prototype.toString());
+    array[item++] = new TestCase( SECTION, "Boolean.prototype.valueOf()",
+                                            false,
+                                            Boolean.prototype.valueOf());
 
     //restore original toString
     Boolean.prototype.toString = origToString;
 
-	return ( array );
+    return ( array );
 }

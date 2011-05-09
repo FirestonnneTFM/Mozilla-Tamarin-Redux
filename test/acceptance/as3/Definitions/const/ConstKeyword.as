@@ -36,8 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-var SECTION = "Directives\const";       		// provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";  			// Version of JavaScript or ECMA
+var SECTION = "Directives\const";               // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
 var TITLE   = "'const' as a subsitute for 'var'";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -54,6 +54,6 @@ const myConst = 10;
 AddTestCase( "Testing the 'const' keyword: const myConst = 10;", 10, myConst );
 
 
-test();       		// Leave this function alone.
-			// This function is for executing the test case and then
-			// displaying the result on to the console or the LOG file.
+test();             // Leave this function alone.
+            // This function is for executing the test case and then
+            // displaying the result on to the console or the LOG file.

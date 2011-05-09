@@ -57,61 +57,61 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var status = '';
-	var actual = '';
-	var expect= '';
+    var status = '';
+    var actual = '';
+    var expect= '';
 
-	/*
-	 * We set the expect variable each time only for readability.
-	 * We expect 'Function' every time; see discussion above -
-	 */
-	status = 'Object';
-	actual = getJSClass(Object);
-	expect = 'Object';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    /*
+     * We set the expect variable each time only for readability.
+     * We expect 'Function' every time; see discussion above -
+     */
+    status = 'Object';
+    actual = getJSClass(Object);
+    expect = 'Object';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'Function';
-	actual = getJSClass(Function);
-	expect = 'Function';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'Function';
+    actual = getJSClass(Function);
+    expect = 'Function';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'Array';
-	actual = getJSClass(Array);
-	expect = 'Array';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'Array';
+    actual = getJSClass(Array);
+    expect = 'Array';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'String';
-	actual = getJSClass(String);
-	expect = 'String';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'String';
+    actual = getJSClass(String);
+    expect = 'String';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'Boolean';
-	actual = getJSClass(Boolean);
-	expect = 'Boolean';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'Boolean';
+    actual = getJSClass(Boolean);
+    expect = 'Boolean';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'Number';
-	actual = getJSClass(Number);
-	expect = 'Number';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'Number';
+    actual = getJSClass(Number);
+    expect = 'Number';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'Date';
-	actual = getJSClass(Date);
-	expect = 'Date';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'Date';
+    actual = getJSClass(Date);
+    expect = 'Date';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'RegExp';
-	actual = getJSClass(RegExp);
-	expect = 'RegExp';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'RegExp';
+    actual = getJSClass(RegExp);
+    expect = 'RegExp';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'Error';
-	actual = getJSClass(Error);
-	expect = 'Error';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'Error';
+    actual = getJSClass(Error);
+    expect = 'Error';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	return array;
+    return array;
 }

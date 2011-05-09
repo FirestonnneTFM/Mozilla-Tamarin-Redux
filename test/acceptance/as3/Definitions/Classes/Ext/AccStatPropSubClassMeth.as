@@ -73,14 +73,14 @@ AddTestCase( "*** Access the static property via base class ***", 1, 1 );
 AddTestCase( "BaseClass.boolean", true, BaseClass.boolean );
 
 // ********************************************
-// Access the static property via sub class, 
+// Access the static property via sub class,
 // using unadorned "x"
 // ********************************************
 AddTestCase( "*** Access the static property via sub class using unadorned property name ***", 1, 1 );
 AddTestCase( "obj.getBoolean()", BaseClass.boolean, obj.getBoolean() );
 
 // ********************************************
-// Access the static property via sub class, 
+// Access the static property via sub class,
 // using unadorned "BaseClass.x"
 // ********************************************
 AddTestCase( "*** Access the static property via sub class using unadorned property name ***", 1, 1 );

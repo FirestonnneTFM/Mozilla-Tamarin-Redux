@@ -47,17 +47,17 @@ test();
 
 function InstanceOf( object_1, object_2, expect, array, item ) {
 
-	try{
-		result = object_1 instanceof object_2;
-	} catch (e:TypeError) {
-		result = e.toString();
-	} finally {
-		array[item] = new TestCase(
-			SECTION,
-			"(" + object_1 + ") instanceof " + object_2,
-			expect,
-			typeError(result));
-	}
+    try{
+        result = object_1 instanceof object_2;
+    } catch (e:TypeError) {
+        result = e.toString();
+    } finally {
+        array[item] = new TestCase(
+            SECTION,
+            "(" + object_1 + ") instanceof " + object_2,
+            expect,
+            typeError(result));
+    }
 
 }
 

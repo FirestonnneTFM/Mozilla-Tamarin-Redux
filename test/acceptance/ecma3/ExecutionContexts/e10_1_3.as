@@ -42,7 +42,7 @@
     var SECTION = "10.1.3";
     var VERSION = "";
     var TITLE   = "Variable Instantiation";
-	var bug     = "17290";
+    var bug     = "17290";
 
     startTest();
     writeHeaderToLog( SECTION + " "+ TITLE);
@@ -53,19 +53,19 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	function f()
-	{
-	    var x;
+    function f()
+    {
+        var x;
 
-	    return typeof x;
+        return typeof x;
 
-	    function x()
-	    {
-	        return 7;
-	    }
-	}
+        function x()
+        {
+            return 7;
+        }
+    }
 
-	array[item++] = new TestCase(SECTION, "Declaration precedence test", "function", f());
+    array[item++] = new TestCase(SECTION, "Declaration precedence test", "function", f());
 
     return ( array );
 }

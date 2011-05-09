@@ -42,48 +42,48 @@ var TITLE   = "implicit type conversions";
 startTest();
 
 
-// Value = null 
+// Value = null
 
 var string:String = null;
 AddTestCase( "var string:String =null", null, string );
 
 var thisError = "no exception thrown";
 try{
-	var mynumber:Number = null;
+    var mynumber:Number = null;
 } catch (e) {
-	thisError = e.toString();
+    thisError = e.toString();
 } finally {
-	AddTestCase("number:Number = null", "no exception thrown", typeError(thisError) );
+    AddTestCase("number:Number = null", "no exception thrown", typeError(thisError) );
         AddTestCase("number:Number = null", 0, mynumber);
 }
 
 thisError = "no exception thrown";
 try{
-	var myInt:int = null;
+    var myInt:int = null;
 } catch(e1) {
-	thisError = e1.toString();
+    thisError = e1.toString();
 } finally {
-	AddTestCase("myInt:int = null", "no exception thrown", typeError(thisError) );
+    AddTestCase("myInt:int = null", "no exception thrown", typeError(thisError) );
         AddTestCase("myInt:int = null", 0, myInt );
 }
 
 thisError = "no exception thrown";
 try{
-	var myUint:uint = null;
+    var myUint:uint = null;
 } catch(e2) {
-	thisError = e2.toString();
+    thisError = e2.toString();
 } finally {
-	AddTestCase("myUInt:uint = null", "no exception thrown", typeError(thisError) );
+    AddTestCase("myUInt:uint = null", "no exception thrown", typeError(thisError) );
         AddTestCase("myUInt:uint = null", 0, myUint );
 }
 
 thisError = "no exception thrown";
 try{
-	var myboolean:Boolean = null;
+    var myboolean:Boolean = null;
 } catch(e3) {
-	thisError = e3.toString();
+    thisError = e3.toString();
 } finally {
-	AddTestCase("boolean:Boolean = null", "no exception thrown", typeError(thisError) );
+    AddTestCase("boolean:Boolean = null", "no exception thrown", typeError(thisError) );
         AddTestCase("boolean:Boolean = null", false, myboolean);
 }
 

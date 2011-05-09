@@ -36,20 +36,20 @@
  * ***** END LICENSE BLOCK ***** */
 package MultipleExtraArgFunction3 {
 
-	class TestObjInner implements Inter{
-			
-	   public function returnRest(obj:Object, arr:Array, ... rest):Number {
-		 
-	   var count = rest.length;
-		    
+    class TestObjInner implements Inter{
+            
+       public function returnRest(obj:Object, arr:Array, ... rest):Number {
+         
+       var count = rest.length;
+            
            var a:int = 0;
-	
-	      return count;
-	          
-	      }
-		 
+    
+          return count;
+              
+          }
+         
          }
-	
-	public class TestObj extends TestObjInner {}
+    
+    public class TestObj extends TestObjInner {}
 }
 

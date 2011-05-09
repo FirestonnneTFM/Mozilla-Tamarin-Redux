@@ -69,11 +69,11 @@ function makeError ()
 f = function ()
 {
   var e = makeError (function c(){}, function  (){},
-		     {a: 1}, null, undefined,
-		     Number.MAX_VALUE, 0, new Number(1),
-		     "hello world", str, new String ("newstring"),
-		     true, new Boolean(0),
-		     new Date());
+             {a: 1}, null, undefined,
+             Number.MAX_VALUE, 0, new Number(1),
+             "hello world", str, new String ("newstring"),
+             true, new Boolean(0),
+             new Date());
 
     try {
         e.getStackTrace();

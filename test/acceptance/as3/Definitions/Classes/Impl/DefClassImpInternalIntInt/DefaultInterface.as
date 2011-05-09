@@ -35,17 +35,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 /*
- *  Default Interface DefaultInterface 
- * Interface methods 
- *  
+ *  Default Interface DefaultInterface
+ * Interface methods
+ *
  */
 
 
 package DefClassImpInternalIntInt{ //package name
 
-	internal interface InternalInt{
-	
-		function deffunc():String; 
+    internal interface InternalInt{
+    
+        function deffunc():String;
 
-	}
+    }
 }

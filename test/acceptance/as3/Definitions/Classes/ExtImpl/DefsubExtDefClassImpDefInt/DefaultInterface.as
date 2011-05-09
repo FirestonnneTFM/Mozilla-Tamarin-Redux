@@ -39,14 +39,14 @@
 
 package DefClassImpDefInt{ //package name
 
-	namespace ns;
-	//namespace
+    namespace ns;
+    //namespace
 
-	interface DefaultInt{
-	
-		function deffunc():String;  		//Default attribute method
+    interface DefaultInt{
+    
+        function deffunc():String;          //Default attribute method
                 function deffunc2():Number;
                 function deffunc3():int;
-	
-	}
+    
+    }
 }

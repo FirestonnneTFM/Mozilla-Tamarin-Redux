@@ -47,7 +47,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
 
     var TZ_ADJUST = TZ_DIFF * msPerHour;
@@ -125,7 +125,7 @@ function MyObject( value ) {
     this.value = value;
     this.valueOf = Date.prototype.valueOf;
 
-//  Changed new Function() to function() { }    
+//  Changed new Function() to function() { }
     this.toString = function() { "return this+\"\";" };
     return this;
 }

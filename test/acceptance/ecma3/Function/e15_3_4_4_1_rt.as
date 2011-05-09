@@ -57,7 +57,7 @@
 
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
     var UBound = 0;
     var status = '';
     var statusitems = [];
@@ -173,7 +173,7 @@ function getTestCases() {
     //addThis();
     array[item++] = new TestCase(SECTION, status, expect, actual);
     
-    return array;    
+    return array;
 }
 
 /*

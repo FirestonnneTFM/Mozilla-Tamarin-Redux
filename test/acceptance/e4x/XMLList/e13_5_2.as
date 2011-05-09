@@ -43,12 +43,12 @@
 START("13.5.2 - XMLList Constructor");
 
 x1 = new XMLList();
-TEST(1, "xml", typeof(x1));   
+TEST(1, "xml", typeof(x1));
 TEST(2, true, x1 instanceof XMLList);
 
 // Load from another XMLList
 // Make sure it is copied if it's an XMLList
-x1 = 
+x1 =
 <>
     <alpha>one</alpha>
     <bravo>two</bravo>
@@ -118,15 +118,15 @@ AddTestCase( "MYOB = new XMLList(5); MYOB.toString()", "5",
 AddTestCase( "MYOB = new XMLList(5); MYOB.toXMLString()", "5",
              (MYOB = new XMLList(5), MYOB.toXMLString(), MYOB.toXMLString()) );
 
-//value is 
+//value is
 
-// value is supplied 
+// value is supplied
 XML.prettyPrinting = false;
 AddTestCase( "typeof new XMLList(thisXML)", "xml", typeof new XMLList(thisXML) );
 AddTestCase( "new XMLList(thisXML) instanceof XMLList", true, new XMLList(thisXML) instanceof XMLList);
 AddTestCase( "(new XMLList(thisXML).length())", 2, (new XMLList(thisXML)).length());
-AddTestCase( "MYOB = new XMLList(thisXML); MYOB.toString()", 
-			"<TEAM>Giants</TEAM>" + NL() + "<CITY>San Francisco</CITY>",
+AddTestCase( "MYOB = new XMLList(thisXML); MYOB.toString()",
+            "<TEAM>Giants</TEAM>" + NL() + "<CITY>San Francisco</CITY>",
              (MYOB = new XMLList(thisXML), MYOB.toString(), MYOB.toString()) );
 
 // Strongly typed XMLList objects

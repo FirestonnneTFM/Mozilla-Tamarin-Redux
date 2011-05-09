@@ -49,6 +49,6 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    array[item++] = new TestCase( SECTION,	"delete( String.prototype )",   false,   (delete ( String.prototype )) );
+    array[item++] = new TestCase( SECTION,  "delete( String.prototype )",   false,   (delete ( String.prototype )) );
     return ( array );
 }

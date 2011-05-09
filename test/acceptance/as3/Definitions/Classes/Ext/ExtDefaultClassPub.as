@@ -69,7 +69,7 @@ var EXTDCLASS = new ExtDefaultClassPub();
 //*******************************************
 // public Methods and public properties
 //
-// call a public Method of an object that 
+// call a public Method of an object that
 // inherited it from it's parent class
 //*******************************************
 
@@ -105,7 +105,7 @@ AddTestCase( "EXTDCLASS.testSubArray(arr)", arr, EXTDCLASS.testSubArray(arr) );
 
 
 // ********************************************
-// access public method from a public 
+// access public method from a public
 // method of a sub class
 //
 // ********************************************
@@ -115,7 +115,7 @@ AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (
 
 
 // ********************************************
-// access public method from a private 
+// access public method from a private
 // method of a sub class
 //
 // ********************************************
@@ -133,7 +133,7 @@ AddTestCase( "EXTDCLASS.pubArray = arr", arr, (EXTDCLASS.pubArray = arr, EXTDCLA
 
 
 // ********************************************
-// access public property from 
+// access public property from
 // default method in sub class
 // ********************************************
 
@@ -142,7 +142,7 @@ AddTestCase( "EXTDCLASS.testSubDPArray(arr)", arr, EXTDCLASS.testSubDPArray(arr)
 
 
 // ********************************************
-// access public property from 
+// access public property from
 // public method in sub class
 // ********************************************
 
@@ -151,7 +151,7 @@ AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", ar
 
 
 // ********************************************
-// access public property from 
+// access public property from
 // private method in sub class
 // ********************************************
 

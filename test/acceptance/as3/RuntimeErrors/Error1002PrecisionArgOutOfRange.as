@@ -34,20 +34,20 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1002; //	The precision argument must be between 0 and 20; _ is invalid.
+var CODE = 1002; // The precision argument must be between 0 and 20; _ is invalid.
 
 //-----------------------------------------------------------
 startTest();
 //-----------------------------------------------------------
 
 try {
-	var result = "no error";
-	var n:Number = new Number(1);
-	n.toPrecision(0);
+    var result = "no error";
+    var n:Number = new Number(1);
+    n.toPrecision(0);
 } catch (err) {
-	result = err.toString();
+    result = err.toString();
 } finally {
-	AddTestCase("Runtime Error", RANGEERROR + CODE, rangeError(result));
+    AddTestCase("Runtime Error", RANGEERROR + CODE, rangeError(result));
 }
 
 //-----------------------------------------------------------

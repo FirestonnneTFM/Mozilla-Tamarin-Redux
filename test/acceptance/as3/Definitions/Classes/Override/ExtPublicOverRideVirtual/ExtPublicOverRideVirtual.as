@@ -37,38 +37,38 @@
 
 package PublicClass {
 
-	import PublicClass.*;
+    import PublicClass.*;
 
-	class ExtPublicOverRideVirtualInner extends PublicClass {
+    class ExtPublicOverRideVirtualInner extends PublicClass {
 
-		public var orSet = false;
-		public var orGet = false;
+        public var orSet = false;
+        public var orGet = false;
 
-		// *******************************
-		// override a public method
-		// with a public method
-		// *******************************
+        // *******************************
+        // override a public method
+        // with a public method
+        // *******************************
 
-		override virtual function getVirtualBoolean(): Boolean {
-			orGet = true;
-			return this.boolean;
-		}
+        override virtual function getVirtualBoolean(): Boolean {
+            orGet = true;
+            return this.boolean;
+        }
 
-		override virtual function setVirtualBoolean( b:Boolean ) {
-			orSet = true;
-			this.boolean = b;
-		}
-		
-		public function getSetVirtualBoolean( b:Boolean ) : Boolean {
-			setVirtualBoolean(b);
-			return getVirtualBoolean();
-		}
+        override virtual function setVirtualBoolean( b:Boolean ) {
+            orSet = true;
+            this.boolean = b;
+        }
+        
+        public function getSetVirtualBoolean( b:Boolean ) : Boolean {
+            setVirtualBoolean(b);
+            return getVirtualBoolean();
+        }
 
-		public function callSuper(b:Boolean):Boolean {
-			super.setVirtualBoolean(b);
-			return super.getVirtualBoolean();
-		}
-	}
+        public function callSuper(b:Boolean):Boolean {
+            super.setVirtualBoolean(b);
+            return super.getVirtualBoolean();
+        }
+    }
 
-	public class ExtPublicOverRideVirtual extends ExtPublicOverRideVirtualInner {} 
+    public class ExtPublicOverRideVirtual extends ExtPublicOverRideVirtualInner {}
 }

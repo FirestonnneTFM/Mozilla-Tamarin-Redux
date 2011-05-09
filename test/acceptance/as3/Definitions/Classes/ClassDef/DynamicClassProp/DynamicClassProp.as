@@ -72,23 +72,23 @@
        // wrapper function
        
        public function testGetSetArray(a:Array) : Array {
-       		setArray(a);
-       		return getArray();
+            setArray(a);
+            return getArray();
         }
         
         
         // *******************
-	// private methods
-	// *******************
-	   
+    // private methods
+    // *******************
+       
        private function getPrivDate() : Date { return privDate; }
        private function setPrivDate( d:Date ) { privDate = d; }
        
        // wrapper function
        
        public function testGetSetPrivDate(d:Date) : Date {
-       		setPrivDate(d);
-       		return getPrivDate();
+            setPrivDate(d);
+            return getPrivDate();
         }
        
        
@@ -112,8 +112,8 @@
        // wrapper function
        
        public function testGetSetStatFunction(f:Function) : Function {
-       		setStatFunction(f);
-       		return getStatFunction();
+            setStatFunction(f);
+            return getStatFunction();
         }
        
        
@@ -128,8 +128,8 @@
        // wrapper function
        
        public function testGetSetPrivStatString(s:String) : String {
-       		setPrivStatString(s);
-       		return getPrivStatString();
+            setPrivStatString(s);
+            return getPrivStatString();
         }
        
        
@@ -153,8 +153,8 @@
        // wrapper function
        
        public function testGetSetFinNumber(n:Number) : Number {
-       		setFinNumber(n);
-       		return getFinNumber();
+            setFinNumber(n);
+            return getFinNumber();
         }
        
        

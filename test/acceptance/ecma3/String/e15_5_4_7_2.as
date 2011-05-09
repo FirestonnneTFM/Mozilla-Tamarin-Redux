@@ -86,7 +86,7 @@ function getTestCases() {
     }
 
     var origBooleanLastIndexOf = Boolean.prototype.lastIndexOf;
-	Boolean.prototype.lastIndexOf = String.prototype.lastIndexOf;
+    Boolean.prototype.lastIndexOf = String.prototype.lastIndexOf;
     for ( var i = 0; i < 5; i ++ ) {
         array[item++] = new TestCase(   SECTION,
                                         "var b = new Boolean(); b.lastIndexOf = String.prototype.lastIndexOf; b.lastIndexOf('l', "+ i + ")",
@@ -95,7 +95,7 @@ function getTestCases() {
     }
 
     var origBooleanToString = Boolean.prototype.toString;
-	Boolean.prototype.toString=Object.prototype.toString;
+    Boolean.prototype.toString=Object.prototype.toString;
     for ( var i = 0; i < 5; i ++ ) {
         array[item++] = new TestCase(   SECTION,
                                         "var b = new Boolean(); b.toString = Object.prototype.toString; b.lastIndexOf = String.prototype.lastIndexOf; b.lastIndexOf('o', "+ i + ")",
@@ -104,7 +104,7 @@ function getTestCases() {
     }
 
     var origNumberLastIndexOf = Number.prototype.lastIndexOf;
-	Number.prototype.lastIndexOf=String.prototype.lastIndexOf;
+    Number.prototype.lastIndexOf=String.prototype.lastIndexOf;
     for ( var i = 0; i < 9; i++ ) {
         array[item++] = new TestCase(   SECTION,
                                         "var n = new Number(Infinity); n.lastIndexOf = String.prototype.lastIndexOf; n.lastIndexOf( 'i', " + i + " )",
@@ -145,9 +145,9 @@ function getTestCases() {
 */
 
     //restore
-	Boolean.prototype.lastIndexOf = origBooleanLastIndexOf;
-	Boolean.prototype.toString = origBooleanToString;
-	Number.prototype.lastIndexOf = origNumberLastIndexOf;
+    Boolean.prototype.lastIndexOf = origBooleanLastIndexOf;
+    Boolean.prototype.toString = origBooleanToString;
+    Number.prototype.lastIndexOf = origNumberLastIndexOf;
 
     return array;
 }

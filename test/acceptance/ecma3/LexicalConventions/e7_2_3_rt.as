@@ -52,7 +52,7 @@ function getTestCases() {
 
 
        
-       b = 
+       b =
 
 20;
 

@@ -49,21 +49,21 @@ function getTestCases() {
     // Dates around 1970
 
 //    addNewTestCase( "TDATE = new Date(0);(TDATE).setUTCFullYear(1970);TDATE",
-      var TDATE:Date = new Date(0);	 
+      var TDATE:Date = new Date(0);
       (TDATE).setUTCFullYear(1970);
       addNewTestCase(TDATE,
-		    UTCDateFromTime(SetUTCFullYear(0,1970)),
+            UTCDateFromTime(SetUTCFullYear(0,1970)),
                     LocalDateFromTime(SetUTCFullYear(0,1970)) );
-      var TDATE:Date = new Date(0);	 
+      var TDATE:Date = new Date(0);
       (TDATE).setUTCFullYear(1970,0,0);
       addNewTestCase(TDATE,
-		    UTCDateFromTime(SetUTCFullYear(0,1970,0,0)),
+            UTCDateFromTime(SetUTCFullYear(0,1970,0,0)),
                     LocalDateFromTime(SetUTCFullYear(0,1970,0,0)) );
 
-      var TDATE:Date = new Date(0);	 
+      var TDATE:Date = new Date(0);
       (TDATE).setUTCFullYear(1970,0,31);
       addNewTestCase(TDATE,
-		    UTCDateFromTime(SetUTCFullYear(0,1970,0,31)),
+            UTCDateFromTime(SetUTCFullYear(0,1970,0,31)),
                     LocalDateFromTime(SetUTCFullYear(0,1970,0,31)) );
 
 
@@ -85,7 +85,7 @@ function getTestCases() {
       TDATE = new Date(0);
       (TDATE).setUTCFullYear(1968);
       addNewTestCase(TDATE,
-		    UTCDateFromTime(SetUTCFullYear(0,1968)),
+            UTCDateFromTime(SetUTCFullYear(0,1968)),
                     LocalDateFromTime(SetUTCFullYear(0,1968)) );
 
 //    addNewTestCase( "TDATE = new Date(0);(TDATE).setUTCFullYear(1969);TDATE",
@@ -96,10 +96,10 @@ function getTestCases() {
                     LocalDateFromTime(SetUTCFullYear(0,1969)) );
 
 //    addNewTestCase( "TDATE = new Date(0);(TDATE).setUTCFullYear(1969);TDATE",
-      TDATE = new Date(0); 
+      TDATE = new Date(0);
       (TDATE).setUTCFullYear(1969);
-      addNewTestCase(TDATE, 
-		    UTCDateFromTime(SetUTCFullYear(0,1969)),
+      addNewTestCase(TDATE,
+            UTCDateFromTime(SetUTCFullYear(0,1969)),
                     LocalDateFromTime(SetUTCFullYear(0,1969)) );
 
     // Dates around 2000

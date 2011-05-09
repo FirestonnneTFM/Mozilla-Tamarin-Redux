@@ -49,8 +49,8 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
     /* CN:  Not true for ES4, Array.prototype is a vanilla Object, its constructor is Object. */
-    array[item++] = new TestCase( SECTION,	"Array.prototype.constructor == Array", true,   Array.prototype.constructor == Array);
-    //array[item++] = new TestCase( SECTION,	"Array.prototype.constructor == Object", true,   Array.prototype.constructor == Object);
+    array[item++] = new TestCase( SECTION,  "Array.prototype.constructor == Array", true,   Array.prototype.constructor == Array);
+    //array[item++] = new TestCase( SECTION,    "Array.prototype.constructor == Object", true,   Array.prototype.constructor == Object);
 
     return ( array );
 }

@@ -42,9 +42,9 @@ startTest();
 writeHeaderToLog( " Vector.slice()");
 
 AddTestCase(
-		"slice no args on empty vector",
-		"",
-		new<String>[].slice().toString());
+        "slice no args on empty vector",
+        "",
+        new<String>[].slice().toString());
 
 AddTestCase(
     "slice startIndex only",

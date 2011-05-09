@@ -54,7 +54,7 @@ printStatus (summary);
 
 status = inSection(1) + ' check for overflow in quantifier';
 
-actual = 'undefined'; 
+actual = 'undefined';
 expect = 'error';
 
 try

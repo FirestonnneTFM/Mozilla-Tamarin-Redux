@@ -36,11 +36,11 @@
  * ***** END LICENSE BLOCK ***** */
 //-----------------------------------------------------------------------------
 var SECTION = "15.9.5.7";
-var VERSION = "ECMA_3";  
-var TITLE   = "Date.prototype.toLocaleTimeString()"; 
+var VERSION = "ECMA_3";
+var TITLE   = "Date.prototype.toLocaleTimeString()";
 
 var status = '';
-var actual = '';  
+var actual = '';
 var expect = '';
 var givenDate;
 var year = '';
@@ -66,15 +66,15 @@ function getTestCases() {
     var item = 0;
     // first, a couple generic tests -
 
-    status = "typeof (now.toLocaleTimeString())";  
+    status = "typeof (now.toLocaleTimeString())";
     actual =   typeof (now.toLocaleTimeString());
     expect = "string";
     array[item++] = new TestCase(SECTION, status, expect, actual);
     
 
-    status = "Date.prototype.toLocaleTimeString.length";   
+    status = "Date.prototype.toLocaleTimeString.length";
     actual =  Date.prototype.toLocaleTimeString.length;
-    expect =  0;   
+    expect =  0;
     array[item++] = new TestCase(SECTION, status, expect, actual);
 
 
@@ -113,7 +113,7 @@ function getTestCases() {
     
     function addTestCase()
     {
-      array[item++] = new TestCase( SECTION, status, expect, actual); 
+      array[item++] = new TestCase( SECTION, status, expect, actual);
     }
 
 
@@ -121,7 +121,7 @@ function getTestCases() {
     {
        givenDate = new Date(date_given_in_milliseconds);
        
-       status = '().toLocaleTimeString()'; 
+       status = '().toLocaleTimeString()';
        
        
        actual = cnERR;
@@ -188,5 +188,5 @@ function trimL(s)
 function trimR(s)
 {
   for (var i = (s.length - 1); i!=-1; i--) {if (s[i] != ' ') {break;}}
-  return s.substring(0, i+1);  
+  return s.substring(0, i+1);
 }

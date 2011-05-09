@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package MCPackage {
-	public class GetMCFromOverRideMethod extends BaseClass {
-		override public function addition(i:int, x:int) : int {
-			return i + x - 1;
-		}
-	}
+    public class GetMCFromOverRideMethod extends BaseClass {
+        override public function addition(i:int, x:int) : int {
+            return i + x - 1;
+        }
+    }
 }

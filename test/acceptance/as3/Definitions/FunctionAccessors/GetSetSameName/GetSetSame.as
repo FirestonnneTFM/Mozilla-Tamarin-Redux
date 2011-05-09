@@ -37,18 +37,18 @@
 
 package GetSetSameName {
 
-	public class GetSetSame {
+    public class GetSetSame {
 
-		  
-		private var _x:Array = [1,2,3];
+          
+        private var _x:Array = [1,2,3];
 
-		public function get GetSetSameName():Array {
-			return _x;
-		}
-		public function set GetSetSameName( a:Array ) {
-			_x=a;
-		}
-		
-	}
+        public function get GetSetSameName():Array {
+            return _x;
+        }
+        public function set GetSetSameName( a:Array ) {
+            _x=a;
+        }
+        
+    }
 
 }

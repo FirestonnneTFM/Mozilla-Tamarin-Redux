@@ -35,6 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package OverrideFunctionBody {
-	public class Custom {}
+    public class Custom {}
 }
 

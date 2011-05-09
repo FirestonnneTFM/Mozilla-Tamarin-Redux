@@ -37,55 +37,55 @@
 
 package foo {
 
-	public namespace fletch;
-	
-	public class A {
+    public namespace fletch;
+    
+    public class A {
 
-		fletch var lives = 'PASSED';
-		public function getFletch() {
-			return fletch::lives;
-		}
-	}
-	
-	public function fletchFunc(){ return 'PASSED'; }
-	
-	public class fletch2{ 
-		public function lives(){return 'PASSED';}
-	}
-	
-	public interface fletch3 {
-		function lives();
-	}
+        fletch var lives = 'PASSED';
+        public function getFletch() {
+            return fletch::lives;
+        }
+    }
+    
+    public function fletchFunc(){ return 'PASSED'; }
+    
+    public class fletch2{
+        public function lives(){return 'PASSED';}
+    }
+    
+    public interface fletch3 {
+        function lives();
+    }
 
-	public class erwin implements fletch3 { 
-		public function lives(){return 'PASSED';}
-	}
+    public class erwin implements fletch3 {
+        public function lives(){return 'PASSED';}
+    }
 }
 
 package test{
-	public var a = 'PASSED';
+    public var a = 'PASSED';
 }
 
 package foo2{
-	import test.*;
-	public var b = a;
+    import test.*;
+    public var b = a;
 }
 
 package P
 {
-	class A
-	{
-		public function f() { return "original f"}
-	}
+    class A
+    {
+        public function f() { return "original f"}
+    }
 }
 
 
 package P
 {
-	public class B extends A
-	{
-		override public function f() { return "override f"}
-	}
+    public class B extends A
+    {
+        override public function f() { return "override f"}
+    }
 }
 
 
@@ -95,7 +95,7 @@ import foo.*;
 use namespace fletch;
 
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
@@ -107,10 +107,10 @@ AddTestCase( "namespace inside of package", "PASSED", (a = new A(), a.getFletch(
 AddTestCase( "import inside of package", "PASSED",b );
 AddTestCase( "function inside of package", "PASSED",fletchFunc() );
 
-var FLETCHCLASS = new fletch2(); 
+var FLETCHCLASS = new fletch2();
 AddTestCase( "class inside of package", "PASSED",FLETCHCLASS.lives() );
 
-var FLETCHCLASS2 = new erwin(); 
+var FLETCHCLASS2 = new erwin();
 AddTestCase( "interface inside of package", "PASSED",FLETCHCLASS2.lives() );
 
 b = new B();

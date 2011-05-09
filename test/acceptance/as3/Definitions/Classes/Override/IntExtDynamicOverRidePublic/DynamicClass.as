@@ -35,21 +35,21 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package DynamicClassPackage {
-	dynamic class DynamicClass {
-		
-		var date:Date;
-		
-		// ****************
-		// constructor
-		// ****************
-		function DynamicClass() {
-		}
-		
-		// *****************
-		// public methods
-		// *****************
-		public function getDate() : Date { return date; }
-		public function setDate( d:Date ) { date = d; }
-	}
+    dynamic class DynamicClass {
+        
+        var date:Date;
+        
+        // ****************
+        // constructor
+        // ****************
+        function DynamicClass() {
+        }
+        
+        // *****************
+        // public methods
+        // *****************
+        public function getDate() : Date { return date; }
+        public function setDate( d:Date ) { date = d; }
+    }
 
 }

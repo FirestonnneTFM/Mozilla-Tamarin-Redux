@@ -49,23 +49,23 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	var thisError="no exception thrown";
-	try{
-		// save
-	    var origPrototype = Object.prototype;
+    var thisError="no exception thrown";
+    try{
+        // save
+        var origPrototype = Object.prototype;
 
-		Object.prototype = null;
+        Object.prototype = null;
 
-		// restore
-		Object.prototype = origPrototype;
-	} catch (e:ReferenceError) {
-		thisError=e.toString();
-	} finally {
-    	array[item++] = new TestCase( SECTION,  "Object.prototype = null; Object.prototype",
+        // restore
+        Object.prototype = origPrototype;
+    } catch (e:ReferenceError) {
+        thisError=e.toString();
+    } finally {
+        array[item++] = new TestCase( SECTION,  "Object.prototype = null; Object.prototype",
                                             "ReferenceError: Error #1074",
-                                           	referenceError(thisError)
+                                            referenceError(thisError)
                                 );
-	}
+    }
 
     return ( array );
 }

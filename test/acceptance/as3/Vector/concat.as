@@ -53,11 +53,11 @@ var v2=new Vector.<uint>();
 v2[0]=3;v2[1]=4;v2[2]=5;
 var v3=v1.concat(v2)
 AddTestCase(    "concat uint vector, original vector is unchanged",
-		"0,1,2",
-		v1.toString());
-AddTestCase(	"concat uint vector, new vector concat worked",
-		"0,1,2,3,4,5",
-		v3.toString());
+        "0,1,2",
+        v1.toString());
+AddTestCase(    "concat uint vector, new vector concat worked",
+        "0,1,2,3,4,5",
+        v3.toString());
 
 var v1=new Vector.<String>();
 v1[0]="zero"; v1[1]="one"; v1[2]="two";

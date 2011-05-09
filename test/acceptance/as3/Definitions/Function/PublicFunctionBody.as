@@ -38,12 +38,12 @@
 import PublicFunctionBody.*;
 
 class PublicFunctionBodyClass {
-	public function noReturnNoParams() { return "noReturnNoParams"; }
-	public function noReturnParams(s:String, b:Boolean) { return s; }
-	public function noReturnCustomParam(c:Custom) { return new Custom(); }
-	public function returnNoParams():String { return "returnNoParams"; }
-	public function returnParams(s:String, b:Boolean):String { return s; }
-	public function returnCustomNoParams():Custom { return new Custom(); }
+    public function noReturnNoParams() { return "noReturnNoParams"; }
+    public function noReturnParams(s:String, b:Boolean) { return s; }
+    public function noReturnCustomParam(c:Custom) { return new Custom(); }
+    public function returnNoParams():String { return "returnNoParams"; }
+    public function returnParams(s:String, b:Boolean):String { return s; }
+    public function returnCustomNoParams():Custom { return new Custom(); }
 }
 
 function noReturnNoParamsNoPackage() { return "noReturnNoParams"; }

@@ -49,7 +49,7 @@ function getTestCases() {
     var item = 0;
 
     // some special cases
-	td = new Date(Number.NaN);
+    td = new Date(Number.NaN);
     array[item++] = new TestCase( SECTION,  "td = new Date(Number.NaN); td.valueOf()",  Number.NaN, td.valueOf());
     td = new Date(Number.POSITIVE_INFINITY);
     array[item++] = new TestCase( SECTION,  "td = new Date(Infinity); td.valueOf()",    Number.NaN, td.valueOf());
@@ -61,7 +61,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,  "td = new Date(0); td.valueOf()",           0,           td.valueOf());
 
     // value is not an integer
-	td = new Date(3.14159);
+    td = new Date(3.14159);
     array[item++] = new TestCase( SECTION,  "td = new Date(3.14159); td.valueOf()",     3,          td.valueOf() );
     td = new Date(Math.PI);
     array[item++] = new TestCase( SECTION,  "td = new Date(Math.PI); td.valueOf()",     3,          td.valueOf() );
@@ -69,17 +69,17 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,  "td = new Date(-Math.PI);td.valueOf()",     -3,         td.valueOf() );
     td = new Date(3.14159e2);
     array[item++] = new TestCase( SECTION,  "td = new Date(3.14159e2); td.valueOf()",   314,        td.valueOf() );
-	td = new Date(.692147e1);
+    td = new Date(.692147e1);
     array[item++] = new TestCase( SECTION,  "td = new Date(.692147e1); td.valueOf()",   6,          td.valueOf() );
     td = new Date(-.692147e1);
     array[item++] = new TestCase( SECTION,  "td = new Date(-.692147e1);td.valueOf()",   -6,         td.valueOf() );
 
     // value is not a number
-	td = new Date(true);
+    td = new Date(true);
     array[item++] = new TestCase( SECTION,  "td = new Date(true); td.valueOf()",        1,          td.valueOf() );
-    td = new Date(false); 
+    td = new Date(false);
     array[item++] = new TestCase( SECTION,  "td = new Date(false); td.valueOf()",       0,          td.valueOf() );
-	td = new Date(new Number(Math.PI));
+    td = new Date(new Number(Math.PI));
     array[item++] = new TestCase( SECTION,  "td = new Date(new Number(Math.PI)); td.valueOf()",  3, td.valueOf() );
     td = new Date(new Number(Math.PI));
     array[item++] = new TestCase( SECTION,  "td = new Date(new Number(Math.PI)); td.valueOf()",  3, td.valueOf() );
@@ -91,7 +91,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,  "td = new Date(-8.64e15); td.valueOf()",    -8.64e15,  td.valueOf() );
     td = new Date(8.64e-15);
     array[item++] = new TestCase( SECTION,  "td = new Date(8.64e-15); td.valueOf()",    0,         td.valueOf() );
-    td = new Date(-8.64e-15); 
+    td = new Date(-8.64e-15);
     array[item++] = new TestCase( SECTION,  "td = new Date(-8.64e-15); td.valueOf()",   0,         td.valueOf());
 
     return ( array );

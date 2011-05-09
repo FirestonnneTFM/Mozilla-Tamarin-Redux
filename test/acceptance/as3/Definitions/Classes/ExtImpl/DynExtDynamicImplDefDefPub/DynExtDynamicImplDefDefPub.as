@@ -49,11 +49,11 @@ dynamic class DynExtDynImplDefDefPubInner extends DynamicClass implements Defaul
 
      public function iGetBoolean() : Boolean { return this.boolean; }
 
-	public function testGetBoolean(flag:Boolean):Boolean {
+    public function testGetBoolean(flag:Boolean):Boolean {
 
-	  setBoolean(flag);
-	  return iGetBoolean();
-	}
+      setBoolean(flag);
+      return iGetBoolean();
+    }
 
 
     // ****************************************
@@ -63,11 +63,11 @@ dynamic class DynExtDynImplDefDefPubInner extends DynamicClass implements Defaul
 
     public function iGetPubBoolean() : Boolean { return this.pubBoolean; }
 
-	public function testGetPubBoolean(flag:Boolean):Boolean {
+    public function testGetPubBoolean(flag:Boolean):Boolean {
 
-	  setPubBoolean(flag);
-	  return iGetPubBoolean();
-	}
+      setPubBoolean(flag);
+      return iGetPubBoolean();
+    }
 
 
     // ****************************************
@@ -77,11 +77,11 @@ dynamic class DynExtDynImplDefDefPubInner extends DynamicClass implements Defaul
 
     public function iGetNumber() : Number { return this.number; }
 
-	public function testGetSetNumber( num:Number ) : Number {
+    public function testGetSetNumber( num:Number ) : Number {
 
-	  setNumber(num);
-	  return iGetNumber();
-	}
+      setNumber(num);
+      return iGetNumber();
+    }
 
 
     // ****************************************

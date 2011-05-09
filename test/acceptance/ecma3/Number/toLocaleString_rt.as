@@ -46,51 +46,51 @@ function getTestCases() {
     var array:Array = new Array();
     var item:Number= 0;
     var o:Number = new Number();
-	
+    
     array[item++] = new TestCase(SECTION, "Number.prototype.toLocaleString()",       "0",        Number.prototype.toLocaleString() );
     array[item++] = new TestCase(SECTION, "typeof(Number.prototype.toLocaleString())", "string",      typeof(Number.prototype.toLocaleString()) );
     var s:Number=new Number();
 
-	var thisError:String = "no exception thrown";
-	try{
-    	s = Number.prototype.toLocaleString; 
-    	 
-    	o.toLocaleString = s;
-	} catch (e:ReferenceError) {
-		thisError = e.toString();
-	} finally {
-    	array[item++] = new TestCase(SECTION,  "s = Number.prototype.toLocaleString; o = new Number(); o.toLocaleString = s; o.toLocaleString()",  
-												"ReferenceError: Error #1056",          
-												referenceError( thisError ) );
-	}
+    var thisError:String = "no exception thrown";
+    try{
+        s = Number.prototype.toLocaleString;
+         
+        o.toLocaleString = s;
+    } catch (e:ReferenceError) {
+        thisError = e.toString();
+    } finally {
+        array[item++] = new TestCase(SECTION,  "s = Number.prototype.toLocaleString; o = new Number(); o.toLocaleString = s; o.toLocaleString()",
+                                                "ReferenceError: Error #1056",
+                                                referenceError( thisError ) );
+    }
 
-	thisError = "no exception thrown";
+    thisError = "no exception thrown";
         var o:Number = new Number(1);
-	try{
-    	s = Number.prototype.toLocaleString; 
-    	 
-    	o.toLocaleString = s;
-	} catch(e1:ReferenceError) {
-		thisError = e1.toString();
-	} finally {
-    	array[item++] = new TestCase(SECTION,  "s = Number.prototype.toLocaleString; o = new Number(1); o.toLocaleString = s; o.toLocaleString()", 
-												"ReferenceError: Error #1056",          
-												referenceError( thisError) );
-	}
+    try{
+        s = Number.prototype.toLocaleString;
+         
+        o.toLocaleString = s;
+    } catch(e1:ReferenceError) {
+        thisError = e1.toString();
+    } finally {
+        array[item++] = new TestCase(SECTION,  "s = Number.prototype.toLocaleString; o = new Number(1); o.toLocaleString = s; o.toLocaleString()",
+                                                "ReferenceError: Error #1056",
+                                                referenceError( thisError) );
+    }
 
-	thisError = "no exception thrown";
+    thisError = "no exception thrown";
         var o:Number= new Number(-1);
-	try{
-    	s = Number.prototype.toLocaleString; 
-    	 
-    	o.toLocaleString = s; 
-	} catch (e2:ReferenceError) {
-		thisError = e2.toString();
-	} finally {
-    	array[item++] = new TestCase(SECTION,  "s = Number.prototype.toLocaleString; o = new Number(-1); o.toLocaleString = s; o.toLocaleString()", 
-												"ReferenceError: Error #1056",         
-												referenceError(thisError) );
-	}
+    try{
+        s = Number.prototype.toLocaleString;
+         
+        o.toLocaleString = s;
+    } catch (e2:ReferenceError) {
+        thisError = e2.toString();
+    } finally {
+        array[item++] = new TestCase(SECTION,  "s = Number.prototype.toLocaleString; o = new Number(-1); o.toLocaleString = s; o.toLocaleString()",
+                                                "ReferenceError: Error #1056",
+                                                referenceError(thisError) );
+    }
 
     var MYNUM = new Number(255);
     array[item++] = new TestCase(SECTION, "var MYNUM = new Number(255); MYNUM.toLocaleString()",          "255",      MYNUM.toLocaleString() );
@@ -106,12 +106,12 @@ function getTestCases() {
 
     var o=new Number(true);
 
-    array[item++] = new TestCase( SECTION,	"o=new Number(true);o.toLocaleString()",			    "1",o.toLocaleString() );
+    array[item++] = new TestCase( SECTION,  "o=new Number(true);o.toLocaleString()",                "1",o.toLocaleString() );
     
     o=new Number(false);
-    array[item++] = new TestCase( SECTION,	"o=new Number(false);o.toLocaleString()",		    "0",		o.toLocaleString() );
+    array[item++] = new TestCase( SECTION,  "o=new Number(false);o.toLocaleString()",           "0",        o.toLocaleString() );
     o=new Number(new Array());
-    array[item++] = new TestCase( SECTION,	"o=new Number(new Array());o.toLocaleString()",		"0",			    o.toLocaleString() );
+    array[item++] = new TestCase( SECTION,  "o=new Number(new Array());o.toLocaleString()",     "0",                o.toLocaleString() );
     o=new Number(Number.NaN);
     array[item++] = new TestCase( SECTION,    "o=Number.NaN;o.toLocaleString()",       "NaN",                  o.toLocaleString() );
     o=new Number(0)
@@ -157,7 +157,7 @@ function getTestCases() {
     o=new Number(-100 );
     array[item++] = new TestCase( SECTION,    "o=new Number(-100 );o.toLocaleString()", "-100",o.toLocaleString() );
     o=new Number(-1000 );
-    array[item++] = new TestCase( SECTION,    "o=new Number(-1000 );o.toLocaleString()", "-1000",o.toLocaleString() ); 
+    array[item++] = new TestCase( SECTION,    "o=new Number(-1000 );o.toLocaleString()", "-1000",o.toLocaleString() );
     o=new Number(-1000000000 );
     array[item++] = new TestCase( SECTION,    "o=new Number(-1000000000 );o.toLocaleString()", "-1000000000",o.toLocaleString() );
     o=new Number(-1000000000000000);

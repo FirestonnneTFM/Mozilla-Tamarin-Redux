@@ -61,7 +61,7 @@ startTest();                // leave this alone
  *
  */
 
-import 	PublicClass.*;
+import  PublicClass.*;
 
 var obj = new accFinExtPublicImplDefDefPub();
 

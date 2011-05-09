@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package SuperSameMethod {
-	public class SuperSameMethod extends BaseClass {
-		override public function echo() : String { 
-			return super.echo() + " override";
-		}
-	}
+    public class SuperSameMethod extends BaseClass {
+        override public function echo() : String {
+            return super.echo() + " override";
+        }
+    }
 }

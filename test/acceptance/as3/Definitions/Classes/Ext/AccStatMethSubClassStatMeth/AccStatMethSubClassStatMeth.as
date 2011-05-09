@@ -38,23 +38,23 @@
 package StaticPropertyPackage {
 
         class BaseClass {
-		
-		static function echo(s:String): String {
-			return s;
-		}
-	}
+        
+        static function echo(s:String): String {
+            return s;
+        }
+    }
 
 
-	public class AccStatMethSubClassStatMeth extends BaseClass {
-	
-		public static function callEcho(s:String): String {
-			return echo(s);
-		}
-		
-		public static function callBaseEcho(s:String): String {
-			return BaseClass.echo(s);
-		}
+    public class AccStatMethSubClassStatMeth extends BaseClass {
+    
+        public static function callEcho(s:String): String {
+            return echo(s);
+        }
+        
+        public static function callBaseEcho(s:String): String {
+            return BaseClass.echo(s);
+        }
 
 
-	}
+    }
 }

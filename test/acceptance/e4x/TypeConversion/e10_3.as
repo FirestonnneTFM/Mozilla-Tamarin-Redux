@@ -76,12 +76,12 @@ try {
 
 try
 {
-	ToXML(undefined);
-	AddTestCase( "ToXML(undefined) :", true, false );
+    ToXML(undefined);
+    AddTestCase( "ToXML(undefined) :", true, false );
 }
 catch (e)
 {
-	AddTestCase( "ToXML(undefined) :", true, true );
+    AddTestCase( "ToXML(undefined) :", true, true );
 }
 
 
@@ -89,12 +89,12 @@ catch (e)
 
 try
 {
-	ToXML(null);
-	AddTestCase( "ToXML(null)      :", true, false );
+    ToXML(null);
+    AddTestCase( "ToXML(null)      :", true, false );
 }
 catch (e)
 {
-	AddTestCase( "ToXML(null)      :", true, true );
+    AddTestCase( "ToXML(null)      :", true, true );
 }
 
 
@@ -131,17 +131,17 @@ AddTestCase( "ToXML(XMLList)   :", true, (ToXML(x1)=="A") );
 // XMLList - XMLList contains more than one property
 
 x1 = <a>A</a>
-	<b>B</b>
-	<c>C</c>;
+    <b>B</b>
+    <c>C</c>;
 
 try
 {
-	ToXML(x);
-	AddTestCase( "ToXML(XMLList)   :", true, false );
+    ToXML(x);
+    AddTestCase( "ToXML(XMLList)   :", true, false );
 }
 catch (e)
 {
-	AddTestCase( "ToXML(XMLList)   :", true, true );
+    AddTestCase( "ToXML(XMLList)   :", true, true );
 }
 
 
@@ -151,12 +151,12 @@ var a = new Array();
 
 try
 {
-	ToXML(a);
-	AddTestCase( "ToXML(Object)    :", true, false );
+    ToXML(a);
+    AddTestCase( "ToXML(Object)    :", true, false );
 }
 catch (e)
 {
-	AddTestCase( "ToXML(Object)    :", true, true );
+    AddTestCase( "ToXML(Object)    :", true, true );
 }
 */
 END();

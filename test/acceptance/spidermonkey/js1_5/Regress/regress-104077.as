@@ -282,7 +282,7 @@ captureThis();
 
 status = inSection(7);
 actual = testfunc();
-expect = 100; 
+expect = 100;
 captureThis();
 
 
@@ -335,9 +335,9 @@ function addValues_5(obj)
         {
           try
           {
-	    if (sum > 5)
-	      return sum;
-	    sum += 1;
+        if (sum > 5)
+          return sum;
+        sum += 1;
           }
           catch (e)
           {

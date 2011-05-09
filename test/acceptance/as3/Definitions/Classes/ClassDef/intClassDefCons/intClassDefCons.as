@@ -50,7 +50,7 @@ package testInternalClassDefCons{
                               
  
        public class wrapintClassDefCons{
-                                 var intDefCons:intClassDefCons=new intClassDefCons(); 
+                                 var intDefCons:intClassDefCons=new intClassDefCons();
                                   
 
                                  public function getAdd(){

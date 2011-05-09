@@ -54,7 +54,7 @@ y1 = x1.bravo.localName();
 x1.bravo.setNamespace("http://someuri");
 TEST(4, "bravo", y1);
 
-x1 = 
+x1 =
 <foo:alpha xmlns:foo="http://foo/">
     <foo:bravo name="bar" foo:value="one">one</foo:bravo>
 </foo:alpha>;
@@ -72,38 +72,38 @@ TEST(8, "value", y1);
 
 var xmlDoc = "<company xmlns:printer='http://colors.com/printer/'><printer:employee id='1'><name>John</name> <city>California</city> </printer:employee></company>";
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.localName()", 
-	"company", 
-	(MYXML = new XML(xmlDoc), MYXML.localName()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.localName()",
+    "company",
+    (MYXML = new XML(xmlDoc), MYXML.localName()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.localName() instanceof QName", 
-	false, 
-	(MYXML = new XML(xmlDoc), MYXML.localName() instanceof QName));
-
-// !!@ fails in Rhino??
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.localName() instanceof String", 
-	true, 
-	(MYXML = new XML(xmlDoc), MYXML.localName() instanceof String));
-
-AddTestCase( "MYXML = new XML(xmlDoc), typeof(MYXML.localName())", 
-	"string", 
-	(MYXML = new XML(xmlDoc), typeof(MYXML.localName())));
-
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.children()[0].localName()", 
-	"employee", 
-	(MYXML = new XML(xmlDoc), MYXML.children()[0].localName()));
-
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.children()[0].localName() instanceof QName", 
-	false, 
-	(MYXML = new XML(xmlDoc), MYXML.children()[0].localName() instanceof QName));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.localName() instanceof QName",
+    false,
+    (MYXML = new XML(xmlDoc), MYXML.localName() instanceof QName));
 
 // !!@ fails in Rhino??
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.children()[0].localName() instanceof String", 
-	true, 
-	(MYXML = new XML(xmlDoc), MYXML.children()[0].localName() instanceof String));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.localName() instanceof String",
+    true,
+    (MYXML = new XML(xmlDoc), MYXML.localName() instanceof String));
 
-AddTestCase( "MYXML = new XML(xmlDoc), typeof(MYXML.children()[0].localName())", 
-	"string", 
-	(MYXML = new XML(xmlDoc), typeof(MYXML.children()[0].localName())));
+AddTestCase( "MYXML = new XML(xmlDoc), typeof(MYXML.localName())",
+    "string",
+    (MYXML = new XML(xmlDoc), typeof(MYXML.localName())));
+
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.children()[0].localName()",
+    "employee",
+    (MYXML = new XML(xmlDoc), MYXML.children()[0].localName()));
+
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.children()[0].localName() instanceof QName",
+    false,
+    (MYXML = new XML(xmlDoc), MYXML.children()[0].localName() instanceof QName));
+
+// !!@ fails in Rhino??
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.children()[0].localName() instanceof String",
+    true,
+    (MYXML = new XML(xmlDoc), MYXML.children()[0].localName() instanceof String));
+
+AddTestCase( "MYXML = new XML(xmlDoc), typeof(MYXML.children()[0].localName())",
+    "string",
+    (MYXML = new XML(xmlDoc), typeof(MYXML.children()[0].localName())));
 
 END();

@@ -53,17 +53,17 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var status = '';
-	var actual = '';
-	var expect= '';
+    var status = '';
+    var actual = '';
+    var expect= '';
 
-	status = inSection(1);
-	actual = /abc/.test(undefined);
-	expect = false;
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = inSection(1);
+    actual = /abc/.test(undefined);
+    expect = false;
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	return array;
+    return array;
 }

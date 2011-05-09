@@ -35,30 +35,30 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package DynamicClassPackage {
-	internal class IntExtDynamicOverRidePublicInner extends DynamicClass {
-		public var orSet:Boolean = false;
-		public var orGet:Boolean = false;
+    internal class IntExtDynamicOverRidePublicInner extends DynamicClass {
+        public var orSet:Boolean = false;
+        public var orGet:Boolean = false;
 
 
-		// *****************
-		// public methods
-		// *****************
-		override public function getDate() : Date { 
-			orGet = true;
-			return date; 
-		}
-		override public function setDate( d:Date ) { 
-			orSet = true;
-			date = d; 
-		}
-		
-		public function setGetDate( d:Date ) : Date {
-			setDate(d);
-			return getDate();
-		}
+        // *****************
+        // public methods
+        // *****************
+        override public function getDate() : Date {
+            orGet = true;
+            return date;
+        }
+        override public function setDate( d:Date ) {
+            orSet = true;
+            date = d;
+        }
+        
+        public function setGetDate( d:Date ) : Date {
+            setDate(d);
+            return getDate();
+        }
 
-	}
-	
-	public class IntExtDynamicOverRidePublic extends IntExtDynamicOverRidePublicInner {}
+    }
+    
+    public class IntExtDynamicOverRidePublic extends IntExtDynamicOverRidePublicInner {}
 
 }

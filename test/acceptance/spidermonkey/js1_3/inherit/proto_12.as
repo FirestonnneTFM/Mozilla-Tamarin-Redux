@@ -107,40 +107,40 @@ var les = new Engineer( "Morris, Les",  new Array("JavaScript"), "indy" );
 Hobbyist.prototype.equipment = [ "horn", "mountain", "goat" ];
 
 testcases[index++] = new TestCase( SECTION,
-	      "les.name",
-	      "Morris, Les",
-	      les.name );
+          "les.name",
+          "Morris, Les",
+          les.name );
 
 testcases[index++] = new TestCase( SECTION,
-	      "les.dept",
-	      "engineering",
-	      les.dept );
+          "les.dept",
+          "engineering",
+          les.dept );
 
 Array.prototype.getClass = Object.prototype.toString;
 
 testcases[index++] = new TestCase( SECTION,
-	      "les.projects.getClass()",
-	      "[object Array]",
-	      les.projects.getClass() );
+          "les.projects.getClass()",
+          "[object Array]",
+          les.projects.getClass() );
 
 testcases[index++] = new TestCase( SECTION,
-	      "les.projects[0]",
-	      "JavaScript",
-	      les.projects[0] );
+          "les.projects[0]",
+          "JavaScript",
+          les.projects[0] );
 
 testcases[index++] = new TestCase( SECTION,
-	      "les.machine",
-	      "indy",
-	      les.machine );
+          "les.machine",
+          "indy",
+          les.machine );
 
 testcases[index++] = new TestCase( SECTION,
-	      "les.hobby",
-	      "yodeling",
-	      les.hobby );
+          "les.hobby",
+          "yodeling",
+          les.hobby );
 
 testcases[index++] = new TestCase( SECTION,
-	      "les.equpment",
-	      void 0,
-	      les.equipment );
+          "les.equpment",
+          void 0,
+          les.equipment );
 
 test();

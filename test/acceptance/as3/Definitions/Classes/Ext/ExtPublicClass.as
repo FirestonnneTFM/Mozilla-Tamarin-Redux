@@ -124,13 +124,13 @@ AddTestCase( "EXTDCLASS.testPrivSubDPArray(arr)", arr, EXTDCLASS.testPrivSubDPAr
 
 var thisError = "no Exception thrown!";
 try{
-	ExtPublicClass.pubStatSubGetDPArray();
+    ExtPublicClass.pubStatSubGetDPArray();
 } catch (e){
-	thisError = e.toString();
+    thisError = e.toString();
 } finally {
-	AddTestCase( "access default property from public static method of sub class",
-					TYPEERROR+1006,
-					typeError( thisError ) );
+    AddTestCase( "access default property from public static method of sub class",
+                    TYPEERROR+1006,
+                    typeError( thisError ) );
 }
 
 test();       // leave this alone.  this executes the test cases and

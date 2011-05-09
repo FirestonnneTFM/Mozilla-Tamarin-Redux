@@ -34,20 +34,20 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1100; //	Cannot supply flags when constructing one RegExp from another.
+var CODE = 1100; // Cannot supply flags when constructing one RegExp from another.
 
 //-----------------------------------------------------------
 startTest();
 //-----------------------------------------------------------
 
 try {
-	var result = "no error";
-	var re:RegExp = new RegExp("ali", "/s");
-	var re2:RegExp = new RegExp(re, "i");
+    var result = "no error";
+    var re:RegExp = new RegExp("ali", "/s");
+    var re2:RegExp = new RegExp(re, "i");
 } catch (err) {
-	result = err.toString();
+    result = err.toString();
 } finally {
-	AddTestCase("Runtime Error", TYPEERROR + CODE, typeError(result));
+    AddTestCase("Runtime Error", TYPEERROR + CODE, typeError(result));
 }
 
 //-----------------------------------------------------------

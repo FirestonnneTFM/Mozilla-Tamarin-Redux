@@ -49,7 +49,7 @@ printBugNumber(BUGNUMBER);
 printStatus (summary);
 
 expect = 'foo';
-actual = 'foo'; <!-- comment hack -->; actual = 'bar'; 
+actual = 'foo'; <!-- comment hack -->; actual = 'bar';
 AddTestCase(summary, expect, actual);
 
 test();

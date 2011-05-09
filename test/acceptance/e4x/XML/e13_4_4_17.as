@@ -77,29 +77,29 @@ AddTestCase( "No namespace:", (''),
            (  x1 = new XML(xml), x1.inScopeNamespaces().toString()));
            
 try {
-	x1 = new XML(xml);
-	x1.addNamespace();
-	result = "no exception";
+    x1 = new XML(xml);
+    x1.addNamespace();
+    result = "no exception";
 } catch (e1) {
-	result = "exception";
+    result = "exception";
 }
 
 AddTestCase( "Undefined namespace:", "exception", result);
 
 AddTestCase( "Undefined namespace, length:", 1,
-	   (  x1 = new XML(xml), x1.addNamespace(null), x1.inScopeNamespaces().length));
-	   
+       (  x1 = new XML(xml), x1.addNamespace(null), x1.inScopeNamespaces().length));
+       
 AddTestCase( "One namespace w/o prefix, length:", 1,
-	   (  x1 = new XML(xml), x1.addNamespace(n2), x1.inScopeNamespaces().length));
+       (  x1 = new XML(xml), x1.addNamespace(n2), x1.inScopeNamespaces().length));
 
 AddTestCase( "One namespace w/ prefix, length:", 1,
-	   (  x1 = new XML(xml), x1.addNamespace(n1), x1.inScopeNamespaces().length));
+       (  x1 = new XML(xml), x1.addNamespace(n1), x1.inScopeNamespaces().length));
 
 AddTestCase( "One namespace at toplevel, one at child, length at toplevel:", 1,
-	   (  x1 = new XML(xml), x1.addNamespace(n3), x1.b[0].c.addNamespace(n4), x1.inScopeNamespaces().length));
+       (  x1 = new XML(xml), x1.addNamespace(n3), x1.b[0].c.addNamespace(n4), x1.inScopeNamespaces().length));
 
 AddTestCase( "One namespace at toplevel, two at child, length at child:", 2,
-	   (  x1 = new XML(xml), x1.addNamespace(n3), x1.b[1].c.addNamespace(n4), x1.b[1].c.addNamespace(n1), x1.b[1].c.inScopeNamespaces().length));
+       (  x1 = new XML(xml), x1.addNamespace(n3), x1.b[1].c.addNamespace(n4), x1.b[1].c.addNamespace(n1), x1.b[1].c.inScopeNamespaces().length));
 
 AddTestCase( "inScopeNamespaces[0].typeof:", "object",
            (  x1 = new XML(xml), x1.addNamespace(n1), x1.addNamespace(n4), typeof x1.inScopeNamespaces()[0]));
@@ -111,9 +111,9 @@ AddTestCase( "inScopeNamespaces[1].prefix:", "boo",
 var xmlDoc = "<?xml version=\"1.0\"?><xsl:stylesheet xmlns:xsl=\"http://www.w3.org/TR/xsl\"><b><c xmlns:foo=\"http://www.foo.org/\">hi</c></b></xsl:stylesheet>";
 
 AddTestCase( "Reading one toplevel namespace:", (["http://www.w3.org/TR/xsl"]).toString(),
-	   (  x1 = new XML(xmlDoc), x1.inScopeNamespaces().toString()));
+       (  x1 = new XML(xmlDoc), x1.inScopeNamespaces().toString()));
 
 AddTestCase( "Reading two namespaces up parent chain:", (["http://www.foo.org/","http://www.w3.org/TR/xsl"]).toString(),
-	   (  x1 = new XML(xmlDoc), x1.b.c.inScopeNamespaces().toString()));
+       (  x1 = new XML(xmlDoc), x1.b.c.inScopeNamespaces().toString()));
 
 END();

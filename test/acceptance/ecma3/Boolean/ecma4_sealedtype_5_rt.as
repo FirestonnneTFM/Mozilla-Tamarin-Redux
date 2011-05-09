@@ -35,34 +35,34 @@
  *
  * ***** END LICENSE BLOCK ***** */
 /*
-	In Ecma4 there are three sealed types; Boolean, Number and String
-	You cannot set properties of an instance of a sealed type
+    In Ecma4 there are three sealed types; Boolean, Number and String
+    You cannot set properties of an instance of a sealed type
 
-	Should throw a ReferenceError
+    Should throw a ReferenceError
 
 */
-	var SECTION = "ECMA_4";
-	var VERSION = "ECMA_4";
-	startTest();
-	var TITLE   = "tostr=Boolean.prototype.toString;x=true;x.toString=tostr;";
-	writeHeaderToLog( TITLE );
+    var SECTION = "ECMA_4";
+    var VERSION = "ECMA_4";
+    startTest();
+    var TITLE   = "tostr=Boolean.prototype.toString;x=true;x.toString=tostr;";
+    writeHeaderToLog( TITLE );
 
-	var testcases = getTestCases();
-	test();
+    var testcases = getTestCases();
+    test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
-	var thisError:String="no error";
+    var array = new Array();
+    var item = 0;
+    var thisError:String="no error";
 
-	try{
-		var tostr=Boolean.prototype.toString;
-		var x:Boolean=true;
-		x.prototype=tostr;
-	} catch (e:ReferenceError) {
-		thisError = e.toString();
-	} finally {
-		array[item++] =new TestCase(SECTION,"Cannot set property on an instance of Boolean","ReferenceError: Error #1056",referenceError( thisError ) );
-	}
-	return ( array );
+    try{
+        var tostr=Boolean.prototype.toString;
+        var x:Boolean=true;
+        x.prototype=tostr;
+    } catch (e:ReferenceError) {
+        thisError = e.toString();
+    } finally {
+        array[item++] =new TestCase(SECTION,"Cannot set property on an instance of Boolean","ReferenceError: Error #1056",referenceError( thisError ) );
+    }
+    return ( array );
 }

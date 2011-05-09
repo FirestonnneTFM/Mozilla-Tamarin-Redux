@@ -37,18 +37,18 @@
 /*
  * Public Class PublicClass
  * Class methods
- *  
+ *
  */
 
 package PublicClassImpInternalInt{
 
 
-	public class PublicClass implements InternalInt{
-		
-		public function deffunc():String{  			
-			return"PASSED";
-		}
+    public class PublicClass implements InternalInt{
+        
+        public function deffunc():String{
+            return"PASSED";
+        }
 
 
-       } 	
-}  
+       }
+}

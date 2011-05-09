@@ -46,8 +46,8 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
     /*
      *  This test expects RegExp instances to have four enumerated properties:
@@ -61,7 +61,7 @@ function getTestCases() {
     var t = new TestRegExp();
 
     for ( p in r ) {
-    	e[e.length] = { property:p, value:r[p] }; t.addProperty( p, r[p])
+        e[e.length] = { property:p, value:r[p] }; t.addProperty( p, r[p])
     };
 
     array[item++] = new TestCase(SECTION,
@@ -70,29 +70,29 @@ function getTestCases() {
         0,
         e.length );
 
-	function TestRegExp() {
-	    this.addProperty = addProperty;
-	}
-	function addProperty(name, value) {
-	       var pass = false;
+    function TestRegExp() {
+        this.addProperty = addProperty;
+    }
+    function addProperty(name, value) {
+           var pass = false;
 
-	       if ( this.name != void 0 ) {
-	            pass = true;
-	       } else {
-	            this.name = false ;
-	       }
+           if ( this.name != void 0 ) {
+                pass = true;
+           } else {
+                this.name = false ;
+           }
 
-	       testcases[testcases.length] = new TestCase( SECTION,
-	            "Property: " + name +" already enumerated?",
-	            false,
-	            pass );
+           testcases[testcases.length] = new TestCase( SECTION,
+                "Property: " + name +" already enumerated?",
+                false,
+                pass );
 
-	        if ( testcases[ testcases.length-1].passed == false ) {
-	            testcases[testcases.length-1].reason = "property already enumerated";
+            if ( testcases[ testcases.length-1].passed == false ) {
+                testcases[testcases.length-1].reason = "property already enumerated";
 
-	        }
+            }
 
-	}
+    }
 
-	return array;
+    return array;
 }

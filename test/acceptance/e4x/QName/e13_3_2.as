@@ -103,26 +103,26 @@ AddTestCase( "ns = new QName()", "", (ns = new QName(), ns.localName) );
 AddTestCase( "typeof new QName('name')", 'object', typeof new QName('name') );
 AddTestCase( "new QName('name') instanceof QName", true, new QName('name') instanceof QName);
 AddTestCase( "new QName('name') == 'name'", true, new QName('name') == 'name');
-AddTestCase( "ns = new QName('name'), ns.uri == ''", true, 
-	(ns = new QName('name'), ns.uri == '') );
-AddTestCase( "ns = new QName('name'), ns.uri == null", false, 
-	(ns = new QName('name'), ns.uri == null) );
-AddTestCase( "ns = new QName('name'), ns.uri == undefined", false, 
-	(ns = new QName('name'), ns.uri == undefined) );
-AddTestCase( "ns = new QName('name'), typeof ns.uri", 'string', 
-	(ns = new QName('name'), typeof ns.uri) );
-AddTestCase( "ns = new QName('name'), ns.localName == 'name'", true, 
-	(ns = new QName('name'), ns.localName == 'name') );
+AddTestCase( "ns = new QName('name'), ns.uri == ''", true,
+    (ns = new QName('name'), ns.uri == '') );
+AddTestCase( "ns = new QName('name'), ns.uri == null", false,
+    (ns = new QName('name'), ns.uri == null) );
+AddTestCase( "ns = new QName('name'), ns.uri == undefined", false,
+    (ns = new QName('name'), ns.uri == undefined) );
+AddTestCase( "ns = new QName('name'), typeof ns.uri", 'string',
+    (ns = new QName('name'), typeof ns.uri) );
+AddTestCase( "ns = new QName('name'), ns.localName == 'name'", true,
+    (ns = new QName('name'), ns.localName == 'name') );
 AddTestCase( "ns = new QName(undefined)", "", (ns = new QName(undefined), ns.localName) );
 AddTestCase( "ns = new QName('')", "", (ns = new QName(""), ns.localName) );
-AddTestCase( "MYOB = new QName('nameofobj'),typeof new QName(MYOB)", 
-	'object', 
-	(MYOB = new QName('nameofobj'), typeof new QName(MYOB)) );
+AddTestCase( "MYOB = new QName('nameofobj'),typeof new QName(MYOB)",
+    'object',
+    (MYOB = new QName('nameofobj'), typeof new QName(MYOB)) );
 
 
 //two values are supplied
-AddTestCase( "MYOB = new QName(null, 'nameofobj'); MYOB.toString()", 
-			"*::nameofobj",
+AddTestCase( "MYOB = new QName(null, 'nameofobj'); MYOB.toString()",
+            "*::nameofobj",
              (MYOB = new QName(null, 'nameofobj'), MYOB.toString() ));
 
 AddTestCase( "MYOB = new QName(null, 'nameofobj'); MYOB.uri", null,

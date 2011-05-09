@@ -38,7 +38,7 @@
 
 
 var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "Namespace values";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -54,14 +54,14 @@ namespace N1="www.ecma-international.org"
 namespace N3="flowershop.com";
 
 var a=0;
-N3 var flower1:String = "Gerbera Daisy"; 
+N3 var flower1:String = "Gerbera Daisy";
 namespace N4 = "flowershop.com";
 N4 var flower2:String = "Rose";
 
 
 function a1(){
         if(a!=1) { return N1.toString()}
-	else {return null}
+    else {return null}
 }
 function a2(){
         return N3::flower1

@@ -64,7 +64,7 @@ try{
        thisError1="This is outer Range Error:"+eo5.toString();
    }catch(eo6:SecurityError){
        thisError1="This is outer Security Error!!!:"+eo6.toString();
-       try { 
+       try {
            throw new TypeError();
            }catch(ei:TypeError){
                thisError="This is Inner Type Error:"+ei.toString();

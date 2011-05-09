@@ -48,6 +48,6 @@
 function getTestCases() {
     var array = new Array();
     var item = 0;
-    array[item++] = new TestCase( SECTION,	"Array.length",      1,        Array.length );
+    array[item++] = new TestCase( SECTION,  "Array.length",      1,        Array.length );
     return ( array );
 }

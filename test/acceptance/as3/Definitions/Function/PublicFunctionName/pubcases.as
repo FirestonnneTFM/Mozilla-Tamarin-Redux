@@ -35,10 +35,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package PublicFunctionName {
-	public function cases () { return "cases"; }
-	public function Cases () { return "Cases"; }
+    public function cases () { return "cases"; }
+    public function Cases () { return "Cases"; }
 
-	public function pubcases () { return cases(); }
-	public function pubCases () { return Cases(); }
+    public function pubcases () { return cases(); }
+    public function pubCases () { return Cases(); }
 }
 

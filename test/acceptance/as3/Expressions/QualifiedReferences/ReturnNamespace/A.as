@@ -36,20 +36,20 @@
  * ***** END LICENSE BLOCK ***** */
 package ns {
 
-	public class A {
-	    private namespace Key
-	    private var friends = [ B ]
-	    function beMyFriend( suitor ) {
-		for each( friend in friends )
-		{
-		    if( suitor is friend ) return Key
-		}
-		return null
-	    }
-	    Key function makeMyDay() 
-	    { 
-		return "making my day"; 
-	    } 
-	}
+    public class A {
+        private namespace Key
+        private var friends = [ B ]
+        function beMyFriend( suitor ) {
+        for each( friend in friends )
+        {
+            if( suitor is friend ) return Key
+        }
+        return null
+        }
+        Key function makeMyDay()
+        {
+        return "making my day";
+        }
+    }
 
 }

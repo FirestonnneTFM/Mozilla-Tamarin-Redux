@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "use namespace";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -53,7 +53,7 @@ Baseball var teamName = "Giants";
 Football var teamName = "Chargers";
 
 public function a1(){
-return teamName 
+return teamName
 }
 
 use namespace Baseball;
@@ -61,14 +61,14 @@ use namespace Baseball;
 public function getTeam(){
     use namespace Football;
     return Football::teamName;
-} 
+}
 
 public function a2(){
-return teamName 
+return teamName
 }
 }
 
-var obj:A = new A(); 
+var obj:A = new A();
 // should be using Baseball
 
 AddTestCase( "variable ", "Giants", obj.a1());

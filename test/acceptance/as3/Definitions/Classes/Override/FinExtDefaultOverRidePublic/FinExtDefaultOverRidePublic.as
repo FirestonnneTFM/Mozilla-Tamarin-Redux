@@ -37,28 +37,28 @@
 
 package DefaultClass {
 
-	import DefaultClass.*;
+    import DefaultClass.*;
 
-	public final class FinExtDefaultOverRidePublic extends DefaultClass {
+    public final class FinExtDefaultOverRidePublic extends DefaultClass {
 
-		public var orSet = false;
-		public var orGet = false;
+        public var orSet = false;
+        public var orGet = false;
 
-		// *******************************
-		// override a public method
-		// with a public method
-		// *******************************
+        // *******************************
+        // override a public method
+        // with a public method
+        // *******************************
 
-		override public function getPubBoolean(): Boolean {
-			orGet = true;
-			return this.boolean;
-		}
+        override public function getPubBoolean(): Boolean {
+            orGet = true;
+            return this.boolean;
+        }
 
-		override public function setPubBoolean( b:Boolean ) {
-			orSet = true;
-			boolean = b;
-		}
+        override public function setPubBoolean( b:Boolean ) {
+            orSet = true;
+            boolean = b;
+        }
 
-	}
+    }
 
 }

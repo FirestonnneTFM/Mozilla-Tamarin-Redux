@@ -84,7 +84,7 @@ AddTestCase( "EXTDCLASS.testSubArray(arr)", arr, (EXTDCLASS.testSubArray(arr)) )
 
 
 // ********************************************
-// access default method from a public 
+// access default method from a public
 // method of a sub class
 //
 // ********************************************
@@ -95,7 +95,7 @@ AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (
 
 
 // ********************************************
-// access default method from a private 
+// access default method from a private
 // method of a sub class
 //
 // ********************************************
@@ -106,7 +106,7 @@ AddTestCase( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(
 
 
 // ********************************************
-// access default method from a final 
+// access default method from a final
 // method of a sub class
 //
 // ********************************************
@@ -117,7 +117,7 @@ AddTestCase( "EXTDCLASS.testFinSubArray(arr)", arr, (EXTDCLASS.testFinSubArray(a
 
 
 // ********************************************
-// access default property from 
+// access default property from
 // default method in sub class
 // ********************************************
 
@@ -127,7 +127,7 @@ AddTestCase( "EXTDCLASS.testSubGetDPArray(arr)", arr, (EXTDCLASS.testSubGetDPArr
 
 
 // ********************************************
-// access default property from 
+// access default property from
 // public method in sub class
 // ********************************************
 
@@ -137,7 +137,7 @@ AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", ar
 
 
 // ********************************************
-// access default property from 
+// access default property from
 // private method in sub class
 // ********************************************
 
@@ -147,7 +147,7 @@ AddTestCase( "EXTDCLASS.testPrivSubGetDPArray(arr)", arr, (EXTDCLASS.testPrivSub
 
 
 // ********************************************
-// access default property from 
+// access default property from
 // final method in sub class
 // ********************************************
 

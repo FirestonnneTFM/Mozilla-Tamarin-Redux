@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package NamespaceFunctionBody {
-	public namespace testns;
-	public class Custom {}
+    public namespace testns;
+    public class Custom {}
 }
 

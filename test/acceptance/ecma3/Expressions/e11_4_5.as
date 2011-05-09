@@ -53,7 +53,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,  "var MYVAR= void 0; --MYVAR",               NaN,                             --MYVAR );
     var MYVAR=null;
     array[item++] = new TestCase( SECTION,  "var MYVAR=null; --MYVAR",                  -1,                             --MYVAR );
-    var MYVAR=true; 
+    var MYVAR=true;
     array[item++] = new TestCase( SECTION,  "var MYVAR=true; --MYVAR",                  0,                            --MYVAR );
     var MYVAR=false;
     array[item++] = new TestCase( SECTION,  "var MYVAR=false; --MYVAR",                 -1,                             --MYVAR );

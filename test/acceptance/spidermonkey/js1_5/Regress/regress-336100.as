@@ -47,7 +47,7 @@ var expect;
 printBugNumber(BUGNUMBER);
 printStatus (summary);
 
-actual = (function(){return (arguments);})(); 
+actual = (function(){return (arguments);})();
 AddTestCase(summary, true, actual is Array);
 
 // see bug 336100 comment 29

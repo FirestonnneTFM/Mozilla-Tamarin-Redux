@@ -169,7 +169,7 @@ function CompareSplitWithLimit( string, separator, splitlimit ) {
 }
 
 function string_split ( __this, separator, limit ) {
-    var S = String(__this );					  // 1
+    var S = String(__this );                      // 1
 
     var A = new Array();                          // 2
 
@@ -179,108 +179,108 @@ function string_split ( __this, separator, limit ) {
         lim = ToUint32( limit );
     }
 
-	var s = S.length;                              // 4
+    var s = S.length;                              // 4
     var p = 0;                                     // 5
 
     if  ( separator == undefined ) {              // 8
         A[0] = S;
         return A;
     }
-	
+    
     if ( separator.constructor == RegExp )         // 6
         R = separator;
-	else
-		R = separator.toString();
+    else
+        R = separator.toString();
 
-	if (lim == 0) return A;                       // 7
+    if (lim == 0) return A;                       // 7
 
     if  ( separator == undefined ) {              // 8
         A[0] = S;
         return A;
     }
-	
-	if (s == 0) {		                          // 9
-		z = SplitMatch(R, S, 0);
-		if (z != false) return A;
+    
+    if (s == 0) {                                 // 9
+        z = SplitMatch(R, S, 0);
+        if (z != false) return A;
         A[0] = S;
         return A;
-	}
+    }
 
-	var q = p;									  // 10
+    var q = p;                                    // 10
 loop:
-    while (true ) { 
-		
-		if ( q == s ) break;					  // 11
-	
-		z = SplitMatch(R, S, q);                  // 12
+    while (true ) {
+        
+        if ( q == s ) break;                      // 11
+    
+        z = SplitMatch(R, S, q);                  // 12
 
 //print("Returned ", z);
 
-		if (z != false) {							// 13
-			e = z.endIndex;							// 14
-			cap = z.captures;						// 14
-			if (e != p) {							// 15
+        if (z != false) {                           // 13
+            e = z.endIndex;                         // 14
+            cap = z.captures;                       // 14
+            if (e != p) {                           // 15
 //print("S = ", S, ", p = ", p, ", q = ", q);
-				T = S.slice(p, q);					// 16
+                T = S.slice(p, q);                  // 16
 //print("T = ", T);
-				A[A.length] = T;					// 17
-				if (A.length == lim) return A;		// 18
-				p = e;								// 19
-				i = 0;								// 20
-				while (true) {						// 25
-					if (i == cap.length) {              // 21
-						q = p;                          // 10
-						continue loop;
-					}
-					i = i + 1;							// 22
-					A[A.length] = cap[i]				// 23
-					if (A.length == lim) return A;		// 24
-				} 
-			}
-		}
+                A[A.length] = T;                    // 17
+                if (A.length == lim) return A;      // 18
+                p = e;                              // 19
+                i = 0;                              // 20
+                while (true) {                      // 25
+                    if (i == cap.length) {              // 21
+                        q = p;                          // 10
+                        continue loop;
+                    }
+                    i = i + 1;                          // 22
+                    A[A.length] = cap[i]                // 23
+                    if (A.length == lim) return A;      // 24
+                }
+            }
+        }
 
-		q = q + 1;                               // 26
-	}
-	
-	T = S.slice(p, q);
-	A[A.length] = T;
-	return A;
+        q = q + 1;                               // 26
+    }
+    
+    T = S.slice(p, q);
+    A[A.length] = T;
+    return A;
 }
 
 function SplitMatch(R, S, q)
 {
-	if (R.constructor == RegExp) {			// 1
-		var reResult = R.match(S, q);		// 8
-		if (reResult == undefined)
-			return false;
-		else {
-			a = new Array(reResult.length - 1);
-			for (var i = 1; i < reResult.length; i++)
-				a[a.length] = reResult[i];
-			return { endIndex : reResult.index + reResult[0].length, captures : cap };
-		}
-	}
-	else {
-		var r = R.length;					// 2
-		s = S.length;						// 3
-		if ((q + r) > s) return false;		// 4
-		for (var i = 0; i < r; i++) {
+    if (R.constructor == RegExp) {          // 1
+        var reResult = R.match(S, q);       // 8
+        if (reResult == undefined)
+            return false;
+        else {
+            a = new Array(reResult.length - 1);
+            for (var i = 1; i < reResult.length; i++)
+                a[a.length] = reResult[i];
+            return { endIndex : reResult.index + reResult[0].length, captures : cap };
+        }
+    }
+    else {
+        var r = R.length;                   // 2
+        s = S.length;                       // 3
+        if ((q + r) > s) return false;      // 4
+        for (var i = 0; i < r; i++) {
 //print("S.charAt(", q + i, ") = ", S.charAt(q + i), ", R.charAt(", i, ") = ", R.charAt(i));
-			if (S.charAt(q + i) != R.charAt(i))			// 5
-				return false;
-		}
-		cap = new Array();								// 6
-		return { endIndex : q + r, captures : cap };	// 7
-	}
+            if (S.charAt(q + i) != R.charAt(i))         // 5
+                return false;
+        }
+        cap = new Array();                              // 6
+        return { endIndex : q + r, captures : cap };    // 7
+    }
 }
 
 function ToUint32( n ) {
     n = Number( n );
     var sign = ( n < 0 ) ? -1 : 1;
 
-    if ( Math.abs( n ) == 0 
-			|| Math.abs( n ) == Number.POSITIVE_INFINITY
-			|| n != n) {
+    if ( Math.abs( n ) == 0
+            || Math.abs( n ) == Number.POSITIVE_INFINITY
+            || n != n) {
         return 0;
     }
     n = sign * Math.floor( Math.abs(n) )

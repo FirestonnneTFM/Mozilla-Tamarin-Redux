@@ -42,11 +42,11 @@
     writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-	test();
+    test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
     var MYVAR = 0; while( MYVAR++ < 100) { if ( MYVAR < 100 ) break; }
     array[item++] = new TestCase( SECTION,
@@ -61,13 +61,13 @@ function getTestCases() {
                                     MYVAR);
 
 
-	function MYFUN( arg1 )
-	{ 
-        while ( arg1++ < 100 ) 
+    function MYFUN( arg1 )
+    {
+        while ( arg1++ < 100 )
         {
-            if ( arg1 < 100 ) return arg1; 
-        } 
-	}
+            if ( arg1 < 100 ) return arg1;
+        }
+    }
     array[item++] = new TestCase( SECTION,
                                     "function MYFUN( arg1 ) { while ( arg1++ < 100 ) { if ( arg1 < 100 ) return arg1; } }; MYFUN(1)",
                                     2,

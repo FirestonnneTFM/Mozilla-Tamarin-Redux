@@ -50,8 +50,8 @@ startTest();                // leave this alone
 namespace T1;
 class nsTest
 {
-	T1 function get x () { return 10;}
-	public function get x () {return 0;}
+    T1 function get x () { return 10;}
+    public function get x () {return 0;}
 }
 
 var myTest = new nsTest;
@@ -62,7 +62,7 @@ AddTestCase( "ns within a class", 10, someVar );
 namespace get;
 class Get
 {
-	get function get get () { return "get"; }
+    get function get get () { return "get"; }
 }
 
 var g = new Get;

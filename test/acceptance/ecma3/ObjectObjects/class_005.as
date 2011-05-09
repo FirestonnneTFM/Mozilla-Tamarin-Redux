@@ -57,40 +57,40 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var status = '';
-	var actual = '';
-	var expect= '';
+    var status = '';
+    var actual = '';
+    var expect= '';
 
-	Calf.prototype= new Cow();
+    Calf.prototype= new Cow();
 
-	/*
-	 * We set the expect variable each time only for readability.
-	 * We expect 'Object' every time; see discussion above -
-	 */
-	status = 'new Cow()';
-	actual = getJSClass(new Cow());
-	expect = 'Object';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    /*
+     * We set the expect variable each time only for readability.
+     * We expect 'Object' every time; see discussion above -
+     */
+    status = 'new Cow()';
+    actual = getJSClass(new Cow());
+    expect = 'Object';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'new Calf()';
-	actual = getJSClass(new Calf());
-	expect = 'Object';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
-
-
-	function Cow(name)
-	{
-	  this.name=name;
-	}
+    status = 'new Calf()';
+    actual = getJSClass(new Calf());
+    expect = 'Object';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
 
-	function Calf(name)
-	{
-	  this.name=name;
-	}
+    function Cow(name)
+    {
+      this.name=name;
+    }
 
-	return array;
+
+    function Calf(name)
+    {
+      this.name=name;
+    }
+
+    return array;
 }

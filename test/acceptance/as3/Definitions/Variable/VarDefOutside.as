@@ -62,12 +62,12 @@ startTest();                // leave this alone
     var id1TypeExpr:Boolean, id2TypeExpr:Boolean, id3TypeExpr:Boolean;
 
     // var VariableBindingList, Identifier = AssignmentExpression
-	// Bug 117477
+    // Bug 117477
     //var id1AssignExpr = true, id2AssignExpr = false, id3AssignExpr = true;
     var id1AssignExprB, id2AssignExprB, id3AssignExprB = true;
 
     // var VariableBindingList, Identifier : TypeExpression = AssignmentExpression
-	// Bug 117477
+    // Bug 117477
     //var id1TypeExprAssignExpr:Boolean = true, id2TypeExprAssignExpr:Boolean = false, id3TypeExprAssignExpr:Boolean = true;
     var id1TypeExprAssignExprB:Boolean, id2TypeExprAssignExprB:Boolean, id3TypeExprAssignExprB:Boolean = true;
 
@@ -75,15 +75,15 @@ startTest();                // leave this alone
     var idA, idB:Boolean;
 
     // var Identifier, Identifier : TypeExpression = AssignmentExpression
-	// Bug 117477
-    //var idAAssign = false, idBAssign:Boolean = true; 
-    //var idAAssignB, idBAssignB:Boolean = true; 
+    // Bug 117477
+    //var idAAssign = false, idBAssign:Boolean = true;
+    //var idAAssignB, idBAssignB:Boolean = true;
 
     // var Identifier : TypeExpressionA, Identifier : TypeExpressionB = <empty>
-    var idTypeExprA:Array, idTypeExprB:Boolean; 
+    var idTypeExprA:Array, idTypeExprB:Boolean;
 
-    // var Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression 
-	// Bug 117477
+    // var Identifier : TypeExpressionA, Identifier : TypeExpressionB = AssignmentExpression
+    // Bug 117477
     //var idTypeExprAAssign : Array = new Array(1,2,3), idTypeExprBAssign : Boolean = true;
     //var idTypeExprAAssignB : Array, idTypeExprBAssignB : Boolean = true;
 
@@ -91,7 +91,7 @@ startTest();                // leave this alone
     var idId, idIdTypeExprA:Array, idIdTypeExprB:Boolean;
 
     // var Identifier, Identifier:TypeExpressionA, Identifier:TypeExpressionB = AssignmentExpression
-	// Bug 117477
+    // Bug 117477
     //var idIdAssign = false, idIdTypeExprAAssign:Array = new Array(1,2,3), idIdTypeExprBAssign:Boolean = true;
     //var idIdAssignB, idIdTypeExprAAssignB:Array, idIdTypeExprBAssignB:Boolean = true;
 
@@ -99,32 +99,32 @@ AddTestCase( "Variable Definition <empty> defined inside class", 1, 1);
 
 AddTestCase( "var Identifier = <empty>", "id", (id = "id", id));
 AddTestCase( "var Identifier : TypeExpression = <empty>", true, (idTypeExpr = true, idTypeExpr ));
-AddTestCase( "var Identifier = AssignmentExpression", true, idAssignExpr); 
-AddTestCase( "var Identifier : TypeExpression = AssignmentExpression", true, idTypeExprAssignExpr); 
-AddTestCase( "var VariableBindingList, Identifier = <empty> [1]", true, (id1 = true, id1)); 
-AddTestCase( "var VariableBindingList, Identifier = <empty> [2]", true, (id2 = true, id2)); 
-AddTestCase( "var VariableBindingList, Identifier = <empty> [3]", true, (id3 = true, id3)); 
-//AddTestCase( "var VariableBindingList, Identifier : TypeExpression = <empty> [1]", true, (id1TypeExpr = true, 
+AddTestCase( "var Identifier = AssignmentExpression", true, idAssignExpr);
+AddTestCase( "var Identifier : TypeExpression = AssignmentExpression", true, idTypeExprAssignExpr);
+AddTestCase( "var VariableBindingList, Identifier = <empty> [1]", true, (id1 = true, id1));
+AddTestCase( "var VariableBindingList, Identifier = <empty> [2]", true, (id2 = true, id2));
+AddTestCase( "var VariableBindingList, Identifier = <empty> [3]", true, (id3 = true, id3));
+//AddTestCase( "var VariableBindingList, Identifier : TypeExpression = <empty> [1]", true, (id1TypeExpr = true,
 //                                                                                          id1TypeExpr));
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = <empty> [2]", true, (id2TypeExpr = true, 
+AddTestCase( "var VariableBindingList, Identifier : TypeExpression = <empty> [2]", true, (id2TypeExpr = true,
                                                                                           id2TypeExpr));
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = <empty> [3]", true, (id3TypeExpr = true, 
+AddTestCase( "var VariableBindingList, Identifier : TypeExpression = <empty> [3]", true, (id3TypeExpr = true,
                                                                                           id3TypeExpr));
-//AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [1]", true, id1AssignExpr); 
-//AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [2]", false, id2AssignExpr); 
-//AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [3]", true, id3AssignExpr); 
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [4]", undefined, id1AssignExprB); 
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [5]", undefined, id2AssignExprB); 
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [6]", true, id3AssignExprB); 
-//AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [1]", true, id1TypeExprAssignExpr); 
-//AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [2]", false, id2TypeExprAssignExpr); 
-//AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [3]", true, id3TypeExprAssignExpr); 
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [4]", false, id1TypeExprAssignExprB); 
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [5]", false, id2TypeExprAssignExprB); 
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [6]", true, id3TypeExprAssignExprB); 
-AddTestCase( "var Identifier, Identifier : TypeExpression = <empty> [1]", true, (idA = true, 
+//AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [1]", true, id1AssignExpr);
+//AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [2]", false, id2AssignExpr);
+//AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [3]", true, id3AssignExpr);
+AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [4]", undefined, id1AssignExprB);
+AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [5]", undefined, id2AssignExprB);
+AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [6]", true, id3AssignExprB);
+//AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [1]", true, id1TypeExprAssignExpr);
+//AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [2]", false, id2TypeExprAssignExpr);
+//AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [3]", true, id3TypeExprAssignExpr);
+AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [4]", false, id1TypeExprAssignExprB);
+AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [5]", false, id2TypeExprAssignExprB);
+AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [6]", true, id3TypeExprAssignExprB);
+AddTestCase( "var Identifier, Identifier : TypeExpression = <empty> [1]", true, (idA = true,
                                                                                  idA));
-AddTestCase( "var Identifier, Identifier : TypeExpression = <empty> [2]", true, (idB = true, 
+AddTestCase( "var Identifier, Identifier : TypeExpression = <empty> [2]", true, (idB = true,
                                                                                  idB));
 //AddTestCase( "var Identifier, Identifier : TypeExpression = AssignmentExpression [1]", false, idAAssign );
 //AddTestCase( "var Identifier, Identifier : TypeExpression = AssignmentExpression [2]", true, idBAssign );

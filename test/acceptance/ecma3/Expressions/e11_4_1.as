@@ -40,7 +40,7 @@
     var VERSION = "ECMA_1";
     startTest();
     var TITLE   = "The delete operator";
-	var obj = new Object();
+    var obj = new Object();
 
     writeHeaderToLog( SECTION + " "+ TITLE);
 
@@ -51,19 +51,19 @@
 function getTestCases() {
     var array = new Array();
     var item = 0;
-	var x;
+    var x;
 
-	x=[9,8,7]; delete x[2];
-	var len =  x.length;
+    x=[9,8,7]; delete x[2];
+    var len =  x.length;
     array[item++] = new TestCase( SECTION,   "x=[9,8,7];delete(x[2]);x.length",         3,            len );
-	var str =  x.toString();
+    var str =  x.toString();
     array[item++] = new TestCase( SECTION,   "x=[9,8,7];delete(x[2]);x.toString()",     "9,8,",        str );
         var obj = new Object();
-	obj.name="Jeffrey";
-	delete obj.name;
+    obj.name="Jeffrey";
+    delete obj.name;
     array[item++] = new TestCase( SECTION,   "obj=new Object();delete obj.name;",        undefined,    obj.name);
     // the object obj should be deletable but failed!
-	delete obj;
+    delete obj;
     array[item++] = new TestCase( SECTION,   "obj=new Object();delete obj;obj.toString()",        "[object Object]",    obj.toString());
 
     //array[item++] = new TestCase( SECTION,   "delete('string primitive')",   true,   delete("string primitive") );
@@ -79,12 +79,12 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,   "var abc; delete abc",        false,   delete abc );
     var OB = new MyObject();
     for ( p in OB ) {
-    	array[item++] = new TestCase(   SECTION,
+        array[item++] = new TestCase(   SECTION,
                                     "var OB = new MyObject(); for ( p in OB ) { delete OB[p] }",
                                     true, delete OB[p]  );
-		//trace("after delete: p = "+p+", OB[p] = "+OB[p]);
-	}
-	delete OB;
+        //trace("after delete: p = "+p+", OB[p] = "+OB[p]);
+    }
+    delete OB;
     array[item++] = new TestCase( SECTION,   "var OB = new MyObject();delete OB; OB.toString()",        "[object Object]",    OB.toString());
     return ( array );
 }

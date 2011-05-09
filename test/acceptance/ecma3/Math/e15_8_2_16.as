@@ -67,11 +67,11 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,  "Math.sin(0)",          0,              Math.sin(0) );
     array[item++] = new TestCase( SECTION,  "Math.sin(-0)",         -0,             Math.sin(-0));
     array[item++] = new TestCase( SECTION,  "Math.sin(Infinity)",   Number.NaN,     Math.sin(Number.POSITIVE_INFINITY));
-    array[item++] = new TestCase( SECTION,  "Math.sin(-Infinity)",  Number.NaN,	    Math.sin(Number.NEGATIVE_INFINITY));
-    array[item++] = new TestCase( SECTION,  "Math.sin(0.7853981633974)",	0.7071067811865134,    Math.sin(0.7853981633974));
-    array[item++] = new TestCase( SECTION,  "Math.sin(1.570796326795)",	    1,                  Math.sin(1.570796326795));
-    array[item++] = new TestCase( SECTION,  "Math.sin(2.356194490192)",	    0.7071067811867916,    Math.sin(2.356194490192));
-    array[item++] = new TestCase( SECTION,  "Math.sin(3.14159265359)",	    -2.0682311115474694e-13,                  Math.sin(3.14159265359));
+    array[item++] = new TestCase( SECTION,  "Math.sin(-Infinity)",  Number.NaN,     Math.sin(Number.NEGATIVE_INFINITY));
+    array[item++] = new TestCase( SECTION,  "Math.sin(0.7853981633974)",    0.7071067811865134,    Math.sin(0.7853981633974));
+    array[item++] = new TestCase( SECTION,  "Math.sin(1.570796326795)",     1,                  Math.sin(1.570796326795));
+    array[item++] = new TestCase( SECTION,  "Math.sin(2.356194490192)",     0.7071067811867916,    Math.sin(2.356194490192));
+    array[item++] = new TestCase( SECTION,  "Math.sin(3.14159265359)",      -2.0682311115474694e-13,                  Math.sin(3.14159265359));
 
     return ( array );
 }

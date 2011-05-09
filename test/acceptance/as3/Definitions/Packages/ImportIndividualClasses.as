@@ -37,63 +37,63 @@
  
 package ImportIndividualClasses {
 
-	public interface IClickable {
-		function whoAmI():String; 
-	}
+    public interface IClickable {
+        function whoAmI():String;
+    }
 }
 
 package ImportIndividualClasses {
 
-	public class A {
-		public function whoAmI():String {
-			return "A";
-		}
-	
-	}
+    public class A {
+        public function whoAmI():String {
+            return "A";
+        }
+    
+    }
 }
 
 package ImportIndividualClasses {
-	import kitty.Kitty;
-	use namespace Kitty;
-	
-	public class C {
-		Kitty var b:Boolean = true;
-		public function returnNSVar():Boolean {
-			return Kitty::b;
-		}
-		
-		Kitty function returnArray():Array {
-			return [1,2,3];
-		}
-		
-		public function callNSFunc() {
-			var k:Array = Kitty::returnArray();
-			return k;
-		}
-	}
+    import kitty.Kitty;
+    use namespace Kitty;
+    
+    public class C {
+        Kitty var b:Boolean = true;
+        public function returnNSVar():Boolean {
+            return Kitty::b;
+        }
+        
+        Kitty function returnArray():Array {
+            return [1,2,3];
+        }
+        
+        public function callNSFunc() {
+            var k:Array = Kitty::returnArray();
+            return k;
+        }
+    }
 }
 
 package AnotherPackage {
-	import ImportIndividualClasses.IClickable;
-	public class B implements IClickable {
-		public function whoAmI():String {
-			return "B";
-		}
-	
-	}
+    import ImportIndividualClasses.IClickable;
+    public class B implements IClickable {
+        public function whoAmI():String {
+            return "B";
+        }
+    
+    }
 
 }
 
 package ImportIndividualClasses {
 
-	public var s:String = "hello";
-	public function publicFunc(i:int):String {
-		return "You passed " + i.toString();
-	}
+    public var s:String = "hello";
+    public function publicFunc(i:int):String {
+        return "You passed " + i.toString();
+    }
 }
 
 package kitty {
-	public namespace Kitty;
+    public namespace Kitty;
 }
 
 import ImportIndividualClasses.A;
@@ -104,7 +104,7 @@ import ImportIndividualClasses.s;
 import ImportIndividualClasses.publicFunc;
 
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
@@ -125,7 +125,7 @@ AddTestCase("Namespace in class, imported individually,", "1,2,3", c.callNSFunc(
 class X{
 Kitty var num:Number = 5;
 Kitty function kittyFunc(s:String):String {
-	return "You said hi";
+    return "You said hi";
 }
 }
 

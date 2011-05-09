@@ -51,36 +51,36 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
         
-    var MYVAR; 
-    if ( true ) 
-        MYVAR='PASSED'; 
+    var MYVAR;
+    if ( true )
+        MYVAR='PASSED';
     else if(false)
         MYVAR= 'FAILED';
     array[item++] = new TestCase(   SECTION,
                                     "var MYVAR; if ( true ) MYVAR='PASSED'; else if (false) MYVAR= 'FAILED';",
                                     "PASSED",
                                      MYVAR);
-    var MYVAR; 
-    if ( false ) 
-        MYVAR='FAILED'; 
+    var MYVAR;
+    if ( false )
+        MYVAR='FAILED';
     else if (true)
         MYVAR= 'PASSED';
     array[item++] = new TestCase(  SECTION,
                                     "var MYVAR; if ( false ) MYVAR='FAILED'; else if (true) MYVAR= 'PASSED';",
                                     "PASSED",
                                      MYVAR);
-    var MYVAR; 
+    var MYVAR;
     if ( new Boolean(true) )
-        MYVAR='PASSED'; 
+        MYVAR='PASSED';
     else if (new Boolean(false))
         MYVAR= 'FAILED';
     array[item++] = new TestCase(   SECTION,
                                     "var MYVAR; if ( new Boolean(true) )  MYVAR='PASSED'; else if (new Boolean(false))MYVAR= 'FAILED';",
                                     "PASSED",
                                      MYVAR);
-    var MYVAR; 
-    if ( new Boolean(false) ) 
-        MYVAR='PASSED'; 
+    var MYVAR;
+    if ( new Boolean(false) )
+        MYVAR='PASSED';
     else if (new Boolean(true))
         MYVAR= 'FAILED';
     array[item++] = new TestCase(  SECTION,
@@ -88,7 +88,7 @@ function getTestCases() {
                                     "FAILED",
                                     MYVAR);
     var MYVAR;
-    if ( 1 ) 
+    if ( 1 )
         MYVAR='PASSED';
     else if (0)
         MYVAR= 'FAILED';
@@ -96,10 +96,10 @@ function getTestCases() {
                                     "var MYVAR; if ( 1 ) MYVAR='PASSED'; else if (0) MYVAR= 'FAILED';",
                                     "PASSED",
                                     MYVAR);
-	var MYVAR; 
-	if ( 0 ) 
-        MYVAR='FAILED'; 
-	else if (1)
+    var MYVAR;
+    if ( 0 )
+        MYVAR='FAILED';
+    else if (1)
         MYVAR= 'PASSED';
     array[item++] = new TestCase(  SECTION,
                                     "var MYVAR; if ( 0 ) MYVAR='FAILED'; else if (1) MYVAR= 'PASSED';","PASSED",MYVAR);
@@ -109,7 +109,7 @@ function getTestCases() {
 
     if (MyVar1>MyVar2)
         result="MyVar1 is greater than MyVar2";
-    else if (MyVar2==MyVar1) 
+    else if (MyVar2==MyVar1)
         result="MyVar2 equals MyVar1";
     else
         result="MyVar2 greater than MyVar1";
@@ -121,7 +121,7 @@ function getTestCases() {
 
     if (MyVar1>MyVar2)
         result="MyVar1 is greater than MyVar2";
-    else if (MyVar2==MyVar1) 
+    else if (MyVar2==MyVar1)
         result="MyVar2 equals MyVar1";
     else
         result="MyVar2 greater than MyVar1";
@@ -133,7 +133,7 @@ function getTestCases() {
 
     if (MyVar1>MyVar2)
         result="MyVar1 is greater than MyVar2";
-    else if (MyVar2==MyVar1) 
+    else if (MyVar2==MyVar1)
         result="MyVar2 equals MyVar1";
     else
         result="MyVar2 greater than MyVar1";
@@ -146,7 +146,7 @@ function getTestCases() {
 
     if (MyStringVar1>MyStringVar2)
         result="MyStringVar1 is greater than MyStringVar2";
-    else if (MyStringVar2==MyStringVar1) 
+    else if (MyStringVar2==MyStringVar1)
         result="MyStringVar2 equals MyStringVar1";
     else
         result="MyStringVar2 greater than MyStringVar1";
@@ -158,7 +158,7 @@ function getTestCases() {
 
     if (MyStringVar1>MyStringVar2)
         result="MyStringVar1 is greater than MyStringVar2";
-    else if (MyStringVar2==MyStringVar1) 
+    else if (MyStringVar2==MyStringVar1)
         result="MyStringVar2 equals MyStringVar1";
     else
         result="MyStringVar2 greater than MyStringVar1";
@@ -171,7 +171,7 @@ function getTestCases() {
 
     if (MyStringVar1>MyStringVar2)
         result="MyStringVar1 is greater than MyStringVar2";
-    else if (MyStringVar2==MyStringVar1) 
+    else if (MyStringVar2==MyStringVar1)
         result="MyStringVar2 equals MyStringVar1";
     else
         result="MyStringVar2 greater than MyStringVar1";

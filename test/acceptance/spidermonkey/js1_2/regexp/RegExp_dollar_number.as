@@ -59,27 +59,27 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 // 'abcdefghi'.match(/(a(b(c(d(e)f)g)h)i)/); RegExp.$1
 var result = 'abcdefghi'.match(/(a(b(c(d(e)f)g)h)i)/);
 testcases[index++] = new TestCase ( SECTION, "result = 'abcdefghi'.match(/(a(b(c(d(e)f)g)h)i)/); result[1]",
-	       'abcdefghi', result[1]);
+           'abcdefghi', result[1]);
 
 // 'abcdefghi'.match(/(a(b(c(d(e)f)g)h)i)/); RegExp.$2
 testcases[index++] = new TestCase ( SECTION, "result = 'abcdefghi'.match(/(a(b(c(d(e)f)g)h)i)/); result[2]",
-	       'bcdefgh', result[2]);
+           'bcdefgh', result[2]);
 
 // 'abcdefghi'.match(/(a(b(c(d(e)f)g)h)i)/); RegExp.$3
 testcases[index++] = new TestCase ( SECTION, "result = 'abcdefghi'.match(/(a(b(c(d(e)f)g)h)i)/); result[3]",
-	       'cdefg', result[3]);
+           'cdefg', result[3]);
 
 // 'abcdefghi'.match(/(a(b(c(d(e)f)g)h)i)/); RegExp.$4
 testcases[index++] = new TestCase ( SECTION, "result = 'abcdefghi'.match(/(a(b(c(d(e)f)g)h)i)/); result[4]",
-	       'def', result[4]);
+           'def', result[4]);
 
 // 'abcdefghi'.match(/(a(b(c(d(e)f)g)h)i)/); RegExp.$5
 testcases[index++] = new TestCase ( SECTION, "result = 'abcdefghi'.match(/(a(b(c(d(e)f)g)h)i)/); result[5]",
-	       'e', result[5]);
+           'e', result[5]);
 
 // 'abcdefghi'.match(/(a(b(c(d(e)f)g)h)i)/); RegExp.$6
 testcases[index++] = new TestCase ( SECTION, "result = 'abcdefghi'.match(/(a(b(c(d(e)f)g)h)i)/); result[6]",
-	       undefined, result[6]);
+           undefined, result[6]);
 
 var a_to_z = 'abcdefghijklmnopqrstuvwxyz';
 var regexp1 = /(a)b(c)d(e)f(g)h(i)j(k)l(m)n(o)p(q)r(s)t(u)v(w)x(y)z/
@@ -87,23 +87,23 @@ var regexp1 = /(a)b(c)d(e)f(g)h(i)j(k)l(m)n(o)p(q)r(s)t(u)v(w)x(y)z/
 var result = a_to_z.match(regexp1);
 
 testcases[index++] = new TestCase ( SECTION, "'" + a_to_z + "'.match((a)b(c)....(y)z); result[1]",
-	       'a', result[1]);
+           'a', result[1]);
 testcases[index++] = new TestCase ( SECTION, "'" + a_to_z + "'.match((a)b(c)....(y)z); result[2]",
-	       'c', result[2]);
+           'c', result[2]);
 testcases[index++] = new TestCase ( SECTION, "'" + a_to_z + "'.match((a)b(c)....(y)z); result[3]",
-	       'e', result[3]);
+           'e', result[3]);
 testcases[index++] = new TestCase ( SECTION, "'" + a_to_z + "'.match((a)b(c)....(y)z); result[4]",
-	       'g', result[4]);
+           'g', result[4]);
 testcases[index++] = new TestCase ( SECTION, "'" + a_to_z + "'.match((a)b(c)....(y)z); result[5]",
-	       'i', result[5]);
+           'i', result[5]);
 testcases[index++] = new TestCase ( SECTION, "'" + a_to_z + "'.match((a)b(c)....(y)z); result[6]",
-	       'k', result[6]);
+           'k', result[6]);
 testcases[index++] = new TestCase ( SECTION, "'" + a_to_z + "'.match((a)b(c)....(y)z); result[7]",
-	       'm', result[7]);
+           'm', result[7]);
 testcases[index++] = new TestCase ( SECTION, "'" + a_to_z + "'.match((a)b(c)....(y)z); result[8]",
-	       'o', result[8]);
+           'o', result[8]);
 testcases[index++] = new TestCase ( SECTION, "'" + a_to_z + "'.match((a)b(c)....(y)z); result[9]",
-	       'q', result[9]);
+           'q', result[9]);
 testcases[index++] = new TestCase ( SECTION, "'" + a_to_z + "'.match((a)b(c)....(y)z); result[10]",
            's', result[10]);
 

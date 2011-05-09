@@ -51,11 +51,11 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "VAR1 = NaN; VAR2=1; VAR1 += VAR2",       Number.NaN,  VAR1 += VAR2 );
     VAR1 = Number.NaN; VAR2=1; VAR1 += VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = NaN; VAR2=1; VAR1 += VAR2; VAR1", Number.NaN,  VAR1 );
-    VAR1 = Number.NaN; VAR2=0; 
+    VAR1 = Number.NaN; VAR2=0;
     array[item++] = new TestCase( SECTION,    "VAR1 = NaN; VAR2=0; VAR1 += VAR2",       Number.NaN, VAR1 += VAR2 );
     VAR1 = Number.NaN; VAR2=0; VAR1 += VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = NaN; VAR2=0; VAR1 += VAR2; VAR1", Number.NaN,  VAR1 );
-    VAR1 = 0; VAR2=Number.NaN; 
+    VAR1 = 0; VAR2=Number.NaN;
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2=NaN; VAR1 += VAR2",       Number.NaN, VAR1 += VAR2 );
     VAR1 = 0; VAR2=Number.NaN; VAR1 += VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2=NaN; VAR1 += VAR2; VAR1", Number.NaN,  VAR1 );
@@ -82,7 +82,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2= -Infinity; VAR1 += VAR2;VAR1",   Number.NEGATIVE_INFINITY,       VAR1 );
 
     // the sum of two negative zeros is -0. the sum of two positive zeros, or of two zeros of opposite sign, is +0
-    VAR1 = 0; VAR2 = 0; VAR1 += VAR2; 
+    VAR1 = 0; VAR2 = 0; VAR1 += VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2= 0; VAR1 += VAR2",    0,      VAR1 );
      VAR1 = 0; VAR2 = -0; VAR1 += VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2= -0; VAR1 += VAR2",   0,      VAR1 );
@@ -96,13 +96,13 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2= 1; VAR2 += VAR1; VAR2",    1,       VAR2 );
     VAR1 = -0; VAR2 = 1; VAR2 += VAR1;
     array[item++] = new TestCase( SECTION,    "VAR1 = -0; VAR2= 1; VAR2 += VAR1; VAR2",   1,       VAR2 );
-    VAR1 = -0; VAR2 = -1; VAR2 += VAR1; 
+    VAR1 = -0; VAR2 = -1; VAR2 += VAR1;
     array[item++] = new TestCase( SECTION,    "VAR1 = -0; VAR2= -1; VAR2 += VAR1; VAR2",  -1,      VAR2 );
     VAR1 = 0; VAR2 = -1; VAR2 += VAR1;
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2= -1; VAR2 += VAR1; VAR2",   -1,       VAR2 );
 
     // the sum of a zero and a nozero finite value is equal to the nonzero operand.
-     VAR1 = 0; VAR2=1; 
+     VAR1 = 0; VAR2=1;
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2=1; VAR1 += VAR2",         1,         VAR1 += VAR2 );
       VAR1 = 0; VAR2=1; VAR1 += VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2=1; VAR1 += VAR2;VAR1",    1,        VAR1 );
@@ -110,23 +110,23 @@ function getTestCases() {
     // the sum of two nonzero finite values of the same magnitude and opposite sign is +0
     VAR1 = Number.MAX_VALUE; VAR2= -Number.MAX_VALUE; VAR1 += VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = Number.MAX_VALUE; VAR2= -Number.MAX_VALUE; VAR1 += VAR2; VAR1",    0,   VAR1 );
-     VAR1 = Number.MIN_VALUE; VAR2= -Number.MIN_VALUE; VAR1 += VAR2; 
+     VAR1 = Number.MIN_VALUE; VAR2= -Number.MIN_VALUE; VAR1 += VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = Number.MIN_VALUE; VAR2= -Number.MIN_VALUE; VAR1 += VAR2; VAR1",   0, VAR1 );
 
 /*
     VAR1 = 10; VAR2 = '0XFF';
     array[item++] = new TestCase( SECTION,    "VAR1 = 10; VAR2 = '0XFF', VAR1 += VAR2", 2550,       VAR1 += VAR2 );
-    VAR1 = '0XFF'; VAR2 = 0XA; 
+    VAR1 = '0XFF'; VAR2 = 0XA;
     array[item++] = new TestCase( SECTION,    "VAR1 = '0xFF'; VAR2 = 0xA, VAR1 += VAR2", 2550,      VAR1 += VAR2 );
     VAR1 = '10'; VAR2 = '255';
     array[item++] = new TestCase( SECTION,    "VAR1 = '10'; VAR2 = '255', VAR1 += VAR2", 2550,      VAR1 += VAR2 );
-    VAR1 = '10'; VAR2 = '0XFF'; 
+    VAR1 = '10'; VAR2 = '0XFF';
     array[item++] = new TestCase( SECTION,    "VAR1 = '10'; VAR2 = '0XFF', VAR1 += VAR2", 2550,     VAR1 += VAR2 );
     VAR1 = '0XFF'; VAR2 = 0XA;
     array[item++] = new TestCase( SECTION,    "VAR1 = '0xFF'; VAR2 = 0xA, VAR1 += VAR2", 2550,      VAR1 += VAR2 );
 
     // boolean cases
-    VAR1 = true; VAR2 = false; 
+    VAR1 = true; VAR2 = false;
     array[item++] = new TestCase( SECTION,    "VAR1 = true; VAR2 = false; VAR1 += VAR2",    0,      VAR1 += VAR2 );
      VAR1 = true; VAR2 = true;
     array[item++] = new TestCase( SECTION,    "VAR1 = true; VAR2 = true; VAR1 += VAR2",    1,      VAR1 += VAR2 );

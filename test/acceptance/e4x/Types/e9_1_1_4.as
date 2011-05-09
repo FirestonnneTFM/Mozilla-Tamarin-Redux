@@ -40,7 +40,7 @@
 
 START("9.1.1.4 - XML [[DeleteByIndex]]");
 
-order = 
+order =
 <order id="123456">
 <customer id="123">
 <firstname>John</firstname>

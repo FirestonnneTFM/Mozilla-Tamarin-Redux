@@ -56,34 +56,34 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 // 'abcdefg'.search(/d/)
 testcases[index++] = new TestCase ( SECTION, "'abcdefg'.search(/d/)",
-	       3, 'abcdefg'.search(/d/));
+           3, 'abcdefg'.search(/d/));
 
 // 'abcdefg'.search(/x/)
 testcases[index++] = new TestCase ( SECTION, "'abcdefg'.search(/x/)",
-	       -1, 'abcdefg'.search(/x/));
+           -1, 'abcdefg'.search(/x/));
 
 // 'abcdefg123456hijklmn'.search(/\d+/)
 testcases[index++] = new TestCase ( SECTION, "'abcdefg123456hijklmn'.search(/\d+/)",
-	       7, 'abcdefg123456hijklmn'.search(/\d+/));
+           7, 'abcdefg123456hijklmn'.search(/\d+/));
 
 // 'abcdefg123456hijklmn'.search(new RegExp())
 testcases[index++] = new TestCase ( SECTION, "'abcdefg123456hijklmn'.search(new RegExp())",
-	       0, 'abcdefg123456hijklmn'.search(new RegExp()));
+           0, 'abcdefg123456hijklmn'.search(new RegExp()));
 
 // 'abc'.search(new RegExp('$'))
 testcases[index++] = new TestCase ( SECTION, "'abc'.search(new RegExp('$'))",
-	       3, 'abc'.search(new RegExp('$')));
+           3, 'abc'.search(new RegExp('$')));
 
 // 'abc'.search(new RegExp('^'))
 testcases[index++] = new TestCase ( SECTION, "'abc'.search(new RegExp('^'))",
-	       0, 'abc'.search(new RegExp('^')));
+           0, 'abc'.search(new RegExp('^')));
 
 // 'abc1'.search(/.\d/)
 testcases[index++] = new TestCase ( SECTION, "'abc1'.search(/.\d/)",
-	       2, 'abc1'.search(/.\d/));
+           2, 'abc1'.search(/.\d/));
 
 // 'abc1'.search(/\d{2}/)
 testcases[index++] = new TestCase ( SECTION, "'abc1'.search(/\d{2}/)",
-	       -1, 'abc1'.search(/\d{2}/));
+           -1, 'abc1'.search(/\d{2}/));
 
 test();

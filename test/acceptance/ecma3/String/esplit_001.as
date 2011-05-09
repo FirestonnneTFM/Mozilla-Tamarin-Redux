@@ -87,7 +87,7 @@ function getTestCases() {
     function AddSplitCases( string, separator, str_sep, split_array ) {
     
         // verify that the result of split is an object of type Array
-        array[item++] = new TestCase(SECTION, 
+        array[item++] = new TestCase(SECTION,
             "( " + string  + " ).split(" + str_sep +").constructor == Array",
             true,
             string.split(separator).constructor == Array );

@@ -42,7 +42,7 @@ package DefaultClass {
 
   // this is the test case so we can't alter it too much
   // change the name of the class to ExtDefaultClassTest
-  // we'll create a public class ExtDefaultClass that 
+  // we'll create a public class ExtDefaultClass that
   // extends it for testing runtime
   class ExtDefaultClassTest extends DefaultClass {
 
@@ -54,12 +54,12 @@ package DefaultClass {
     function subGetArray() : Array { return this.getArray(); }
     function subSetArray(a:Array) { this.setArray(a); }
 
-	// this is needed so that the test cases can access this from
-	// outside the class.  This way the test case itself preserved
-	public function testSubGetSetArray(a:Array) : Array {
-		this.subSetArray(a);
-		return this.subGetArray();
-	}
+    // this is needed so that the test cases can access this from
+    // outside the class.  This way the test case itself preserved
+    public function testSubGetSetArray(a:Array) : Array {
+        this.subSetArray(a);
+        return this.subGetArray();
+    }
 
     // ************************************
     // access default method of parent
@@ -72,17 +72,17 @@ package DefaultClass {
     // ************************************
     // access default method of parent
     // from final method of sub class
-	// 
-	// final will behave the same as default
+    //
+    // final will behave the same as default
     // ************************************
 
     final function finSubGetArray() : Array { return this.getArray(); }
     final function finSubSetArray(a:Array) { this.setArray(a); }
 
-	public function testFinSubArray(a:Array):Array{
-		this.finSubSetArray(a);
-		return this.finSubGetArray();
-	}
+    public function testFinSubArray(a:Array):Array{
+        this.finSubSetArray(a);
+        return this.finSubGetArray();
+    }
 
     // ************************************
     // access default method of parent
@@ -100,10 +100,10 @@ package DefaultClass {
     private final function privFinSubGetArray() : Array { return this.getArray(); }
     final private function privFinSubSetArray(a:Array) { this.setArray(a); }
 
-	public function testPrivFinSubArray(a:Array):Array {
-		this.privFinSubSetArray(a);
-		return this.privFinSubGetArray();
-	}
+    public function testPrivFinSubArray(a:Array):Array {
+        this.privFinSubSetArray(a);
+        return this.privFinSubGetArray();
+    }
 
 
     // ************************************
@@ -128,10 +128,10 @@ package DefaultClass {
     virtual function virtSubGetArray() : Array { return this.getArray(); }
     virtual function virtSubSetArray(a:Array) { this.setArray(a); }
 
-	public function testVirtSubArray(a:Array) : Array {
-		this.virtSubSetArray(a);
-		return this.virtSubGetArray();
-	}
+    public function testVirtSubArray(a:Array) : Array {
+        this.virtSubSetArray(a);
+        return this.virtSubGetArray();
+    }
 
     // ************************************
     // access default method of parent
@@ -149,59 +149,59 @@ package DefaultClass {
     virtual private function privVirtSubGetArray() : Array { return this.getArray(); }
     private virtual function privVirtSubSetArray(a:Array) { this.setArray(a); }
 
-	public function testPrivVirtSubArray(a:Array) : Array {
-		this.privVirtSubSetArray(a);
-		return this.privVirtSubGetArray();
-	}
+    public function testPrivVirtSubArray(a:Array) : Array {
+        this.privVirtSubSetArray(a);
+        return this.privVirtSubGetArray();
+    }
 
     // ***************************************
-	// access default property from
-	// static method of sub class
+    // access default property from
+    // static method of sub class
     // ***************************************
 
-	static function statSubGetArray():Array{ return getArray(); }
-	static public function pubStatSubGetArray():Array { return statSubGetArray(); }
+    static function statSubGetArray():Array{ return getArray(); }
+    static public function pubStatSubGetArray():Array { return statSubGetArray(); }
 
     // ***************************************
-    // access default property from 
+    // access default property from
     // default method of sub class
     // ***************************************
 
     function subGetDPArray() : Array { return array; }
     function subSetDPArray(a:Array) { array = a; }
 
-	// this is needed so that the test cases can access this from
-	// outside the class.  This way the test case itself preserved
-	public function testSubGetSetDPArray(a:Array) : Array {
-		this.subSetDPArray(a);
-		return this.subGetDPArray();
-	}
+    // this is needed so that the test cases can access this from
+    // outside the class.  This way the test case itself preserved
+    public function testSubGetSetDPArray(a:Array) : Array {
+        this.subSetDPArray(a);
+        return this.subGetDPArray();
+    }
    
     // ***************************************
-    // access default property from 
+    // access default property from
     // final method of sub class
     // ***************************************
 
     final function finSubGetDPArray() : Array { return array; }
     final function finSubSetDPArray(a:Array) { array = a; }
 
-	public function testFinSubDPArray(a:Array) : Array {
-		this.finSubSetDPArray(a);
-		return this.finSubGetDPArray();
-	}
+    public function testFinSubDPArray(a:Array) : Array {
+        this.finSubSetDPArray(a);
+        return this.finSubGetDPArray();
+    }
    
     // ***************************************
-    // access default property from 
+    // access default property from
     // virtual method of sub class
     // ***************************************
 
     virtual function virtSubGetDPArray() : Array { return array; }
     virtual function virtSubSetDPArray(a:Array) { array = a; }
 
-	public function testVirtSubDPArray(a:Array) : Array {
-		this.virtSubSetDPArray(a);
-		return this.virtSubGetDPArray();
-	}
+    public function testVirtSubDPArray(a:Array) : Array {
+        this.virtSubSetDPArray(a);
+        return this.virtSubGetDPArray();
+    }
    
     // ***************************************
     // access default property from
@@ -219,10 +219,10 @@ package DefaultClass {
     private function privSubGetDPArray() : Array { return this.array; }
     private function privSubSetDPArray(a:Array) { this.array = a; }
 
-	public function testPrivSubDPArray(a:Array) : Array {
-		this.privSubSetDPArray(a);
-		return this.privSubGetDPArray();
-	}
+    public function testPrivSubDPArray(a:Array) : Array {
+        this.privSubSetDPArray(a);
+        return this.privSubGetDPArray();
+    }
 
     // ***************************************
     // access default property from
@@ -248,10 +248,10 @@ package DefaultClass {
     private final function privFinSubGetDPArray() : Array { return this.array; }
     final private function privFinSubSetDPArray(a:Array) { this.array = a; }
 
-	public function testPrivFinSubDPArray(a:Array):Array {
-		this.privFinSubSetDPArray(a);
-		return this.privFinSubGetDPArray();
-	}
+    public function testPrivFinSubDPArray(a:Array):Array {
+        this.privFinSubSetDPArray(a);
+        return this.privFinSubGetDPArray();
+    }
 
     // ***************************************
     // access default property from
@@ -261,19 +261,19 @@ package DefaultClass {
     private virtual function privVirtSubGetDPArray() : Array { return this.array; }
     virtual private function privVirtSubSetDPArray(a:Array) { this.array = a; }
 
-	public function testPrivVirtSubDPArray(a:Array):Array {
-		this.privVirtSubSetDPArray(a);
-		return this.privVirtSubGetDPArray();
-	}
+    public function testPrivVirtSubDPArray(a:Array):Array {
+        this.privVirtSubSetDPArray(a);
+        return this.privVirtSubGetDPArray();
+    }
 
     // ***************************************
-	// access default property from
-	// public static method of sub class
+    // access default property from
+    // public static method of sub class
     // ***************************************
 
-	public static function pubStatSubGetDPArray(){
-		return array;
-	}
+    public static function pubStatSubGetDPArray(){
+        return array;
+    }
 
   }
 

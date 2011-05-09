@@ -56,11 +56,11 @@ function addtestcases()
   printStatus (summary);
  
   Array(10000).slice(1);
-  a = Array(1); 
-  a.length = 10000; 
+  a = Array(1);
+  a.length = 10000;
   a.slice(1);
-  a = Array(1); 
-  a.length = 10000; 
+  a = Array(1);
+  a.length = 10000;
   a.slice(-1);
 
   AddTestCase(summary, expect, actual);

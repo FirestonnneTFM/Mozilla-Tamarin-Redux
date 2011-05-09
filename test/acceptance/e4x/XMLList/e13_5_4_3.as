@@ -71,26 +71,26 @@ TEST(7, correct, x1.attributes());
 
 var xmlDoc = "<TEAM foo = 'bar' two='second'>Giants</TEAM><CITY two = 'third'>Giants</CITY>";
 
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes() instanceof XMLList", true, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes() instanceof XMLList", true,
              (MYXML = new XMLList(xmlDoc), MYXML.attributes() instanceof XMLList ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes() instanceof XML", false, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes() instanceof XML", false,
              (MYXML = new XMLList(xmlDoc), MYXML.attributes() instanceof XML ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes().length()", 3, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes().length()", 3,
              (MYXML = new XMLList(xmlDoc), MYXML.attributes().length() ));
 XML.prettyPrinting = false;
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes().toString()", "barsecondthird", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes().toString()", "barsecondthird",
              (MYXML = new XMLList(xmlDoc), MYXML.attributes().toString() ));
 XML.prettyPrinting = true;
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes().toString()", "barsecondthird", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes().toString()", "barsecondthird",
              (MYXML = new XMLList(xmlDoc), MYXML.attributes().toString() ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes()[0].nodeKind()", "attribute", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes()[0].nodeKind()", "attribute",
              (MYXML = new XMLList(xmlDoc), MYXML.attributes()[0].nodeKind() ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes()[1].nodeKind()", "attribute", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes()[1].nodeKind()", "attribute",
              (MYXML = new XMLList(xmlDoc), MYXML.attributes()[1].nodeKind() ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes()[2].nodeKind()", "attribute", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes()[2].nodeKind()", "attribute",
              (MYXML = new XMLList(xmlDoc), MYXML.attributes()[2].nodeKind() ));
 
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes().toXMLString()", "bar" + NL() + "second" + NL() + "third", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attributes().toXMLString()", "bar" + NL() + "second" + NL() + "third",
              (MYXML = new XMLList(xmlDoc), MYXML.attributes().toXMLString() ));
 
 END();

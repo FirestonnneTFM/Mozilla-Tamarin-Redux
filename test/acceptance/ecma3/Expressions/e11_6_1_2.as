@@ -79,12 +79,12 @@ function getTestCases() {
                                     "var EXP_1 = new MyObject(true); var EXP_2 = new MyObject('string'); EXP_1 + EXP_2",
                                      "truestring",
                                      EXP_1 + EXP_2 );
-    var EXP_1 = new MyObject(new String('string')); var EXP_2 = new MyObject(new Boolean(false)); 
+    var EXP_1 = new MyObject(new String('string')); var EXP_2 = new MyObject(new Boolean(false));
     array[item++] = new TestCase(   SECTION,
                                     "var EXP_1 = new MyObject(new String('string')); var EXP_2 = new MyObject(new Boolean(false)); EXP_1 + EXP_2",
                                     "stringfalse",
                                      EXP_1 + EXP_2 );
-    //var EXP_1 = new MyValuelessObject('string'); var EXP_2 = new MyValuelessObject(false); 
+    //var EXP_1 = new MyValuelessObject('string'); var EXP_2 = new MyValuelessObject(false);
     //array[item++] = new TestCase(   SECTION,
     //                                "var EXP_1 = new MyValuelessObject('string'); var EXP_2 = new MyValuelessObject(false); EXP_1 + EXP_2",
     //                                "stringfalse",
@@ -102,7 +102,7 @@ function getTestCases() {
                                     "var EXP_1 = 100; var EXP_2 = 'string'; EXP_1 + EXP_2",
                                     "100string",
                                      EXP_1 + EXP_2 );
-    var EXP_1 = new String('string'); var EXP_2 = new Number(-1); 
+    var EXP_1 = new String('string'); var EXP_2 = new Number(-1);
     array[item++] = new TestCase(   SECTION,
                                     "var EXP_1 = new String('string'); var EXP_2 = new Number(-1); EXP_1 + EXP_2",
                                     "string-1",

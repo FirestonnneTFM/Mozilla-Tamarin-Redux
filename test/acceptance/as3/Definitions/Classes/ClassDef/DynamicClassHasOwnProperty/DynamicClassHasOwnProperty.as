@@ -44,8 +44,8 @@
    
        public var bar:Number;
        public function testHasOwnProperty(p:String) {
-       	bar = 10;
-       	return this.hasOwnProperty(p);
+        bar = 10;
+        return this.hasOwnProperty(p);
        }
 
    }

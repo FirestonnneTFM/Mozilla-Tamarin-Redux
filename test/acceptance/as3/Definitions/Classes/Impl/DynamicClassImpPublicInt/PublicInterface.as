@@ -35,17 +35,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 /*
- * Public Interface InternalInterface 
- * Public methods 
- *  
+ * Public Interface InternalInterface
+ * Public methods
+ *
  */
 
 
 package DynamicClassImpPublicInt{
 
-	public interface PublicInt{
-	
-		function deffunc():String;
+    public interface PublicInt{
+    
+        function deffunc():String;
 
-	}
+    }
 }

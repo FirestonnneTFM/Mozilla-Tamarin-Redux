@@ -35,5 +35,5 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package functionReturnTypes {
-	public class TestClassA {}
+    public class TestClassA {}
 }

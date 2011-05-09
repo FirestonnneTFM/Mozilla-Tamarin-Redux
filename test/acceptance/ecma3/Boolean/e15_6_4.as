@@ -35,32 +35,32 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-	var SECTION = "15.6.4";
-	var VERSION = "ECMA_1";
-	startTest();
-	var TITLE   = "Properties of the Boolean Prototype Object";
+    var SECTION = "15.6.4";
+    var VERSION = "ECMA_1";
+    startTest();
+    var TITLE   = "Properties of the Boolean Prototype Object";
 
-	writeHeaderToLog( SECTION + " "+ TITLE);
+    writeHeaderToLog( SECTION + " "+ TITLE);
 
-	var testcases = new Array();
+    var testcases = new Array();
 
-	// false because prototype is now of type object
-	testcases[tc++] = new TestCase( SECTION,
-									"Boolean.prototype=([object Object])",
-									"false",
-									Boolean.prototype+"");
+    // false because prototype is now of type object
+    testcases[tc++] = new TestCase( SECTION,
+                                    "Boolean.prototype=([object Object])",
+                                    "false",
+                                    Boolean.prototype+"");
 
     //save original toString
     var origToString:Function = Boolean.prototype.toString;
 
-	Boolean.prototype.toString = Object.prototype.toString;
+    Boolean.prototype.toString = Object.prototype.toString;
 
-	testcases[tc++] = new TestCase( SECTION,
-									"Boolean.prototype.toString = Object.prototype.toString; Boolean.prototype.toString()",
-									"[object Object]", // because all prototypes are "Object" in es4
-								   Boolean.prototype.toString());
+    testcases[tc++] = new TestCase( SECTION,
+                                    "Boolean.prototype.toString = Object.prototype.toString; Boolean.prototype.toString()",
+                                    "[object Object]", // because all prototypes are "Object" in es4
+                                   Boolean.prototype.toString());
 
-	test();
+    test();
 
-	//restore original toString
-	Boolean.prototype.toString = origToString;
+    //restore original toString
+    Boolean.prototype.toString = origToString;

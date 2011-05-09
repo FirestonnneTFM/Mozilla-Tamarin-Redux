@@ -37,7 +37,7 @@
 /**
    Description:
    Runtime specialization
-   Specialization of the Vector type can be done at runtime 
+   Specialization of the Vector type can be done at runtime
    instead of at compile time.
 */
 
@@ -58,7 +58,7 @@ y.push(3);
 
 AddTestCase(    "Vector constructed via runtime specialization",
                 3,
-                y.length); 
+                y.length);
 
 AddTestCase(    "Vector constructed via runtime specialization",
                 2,

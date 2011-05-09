@@ -42,7 +42,7 @@
 START("Testing that replacing a list item with a new list that contains that item works");
 BUG(263934);
 
-var x1 = 
+var x1 =
 <x>
   <b>two</b>
   <b>three</b>
@@ -51,7 +51,7 @@ var x1 =
 // insert <a> element in from of first <b> element
 x1.b[0] = <a>one</a> + x1.b[0];
 
-var expected = 
+var expected =
 <x>
   <a>one</a>
   <b>two</b>

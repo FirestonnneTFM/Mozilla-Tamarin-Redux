@@ -37,27 +37,27 @@
 /*
  * Default Class DefaultClass
  * Class methods
- *  
+ *
  */
 
 package DefClassImpPublicIntIntname{
 
-	class DefaultClass implements PublicInt,PublicInt_S{
-		
+    class DefaultClass implements PublicInt,PublicInt_S{
+        
 
-		 public function deffunc():String{  			       
-			return"PASSED";
-		}
-                /*PublicInt_S function deffunc():String{  			       
-			return"PASSED";
-		}*/
-	}
+         public function deffunc():String{
+            return"PASSED";
+        }
+                /*PublicInt_S function deffunc():String{
+            return"PASSED";
+        }*/
+    }
 
-	public class DefaultClassAccesor{
-		var c:DefaultClass = new DefaultClass(); 
-		public function accdeffunc(){return c.PublicInt::deffunc();}
-		public function accdeffunc_s(){return c.PublicInt_S::deffunc();}
+    public class DefaultClassAccesor{
+        var c:DefaultClass = new DefaultClass();
+        public function accdeffunc(){return c.PublicInt::deffunc();}
+        public function accdeffunc_s(){return c.PublicInt_S::deffunc();}
 
-        } 	
-	
-}  
+        }
+    
+}

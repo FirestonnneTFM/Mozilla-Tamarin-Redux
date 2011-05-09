@@ -47,7 +47,7 @@ var expect = '';
 printBugNumber(BUGNUMBER);
 printStatus (summary);
 
-/* 
+/*
     E4X should be available regardless of script type
     <!-- and --> should begin comment to end of line
     unless type=text/javascript;e4x=1

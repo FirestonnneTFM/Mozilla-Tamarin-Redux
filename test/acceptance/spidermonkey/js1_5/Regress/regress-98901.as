@@ -48,7 +48,7 @@ var expect = 'No Crash';
 printBugNumber(BUGNUMBER);
 printStatus (summary);
 
-UNID=""; 
+UNID="";
 shrg="0";
 EMAL="";
 PASS="";

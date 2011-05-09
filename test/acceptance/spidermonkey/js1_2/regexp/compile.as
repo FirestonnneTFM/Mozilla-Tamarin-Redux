@@ -57,38 +57,38 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 var regularExpression = /[0-9]{3}x[0-9]{4}/i;
 
 testcases[index++] = new TestCase ( SECTION,
-	       "(compile '[0-9]{3}x[0-9]{4}','i')",
-	       String(["456X7890"]), String('234X456X7890'.match(regularExpression)));
+           "(compile '[0-9]{3}x[0-9]{4}','i')",
+           String(["456X7890"]), String('234X456X7890'.match(regularExpression)));
 
 testcases[index++] = new TestCase ( SECTION,
-	       "source of (compile '[0-9]{3}x[0-9]{4}','i')",
-	       "[0-9]{3}x[0-9]{4}", regularExpression.source);
+           "source of (compile '[0-9]{3}x[0-9]{4}','i')",
+           "[0-9]{3}x[0-9]{4}", regularExpression.source);
 
 testcases[index++] = new TestCase ( SECTION,
-	       "global of (compile '[0-9]{3}x[0-9]{4}','i')",
-	       false, regularExpression.global);
+           "global of (compile '[0-9]{3}x[0-9]{4}','i')",
+           false, regularExpression.global);
 
 testcases[index++] = new TestCase ( SECTION,
-	       "ignoreCase of (compile '[0-9]{3}x[0-9]{4}','i')",
-	       true, regularExpression.ignoreCase);
+           "ignoreCase of (compile '[0-9]{3}x[0-9]{4}','i')",
+           true, regularExpression.ignoreCase);
 
 regularExpression = /[0-9]{3}X[0-9]{3}/g;
 
 testcases[index++] = new TestCase ( SECTION,
-	       "(compile '[0-9]{3}X[0-9]{3}','g')",
-	       String(["234X456"]), String('234X456X7890'.match(regularExpression)));
+           "(compile '[0-9]{3}X[0-9]{3}','g')",
+           String(["234X456"]), String('234X456X7890'.match(regularExpression)));
 
 testcases[index++] = new TestCase ( SECTION,
-	       "source of (compile '[0-9]{3}X[0-9]{3}','g')",
-	       "[0-9]{3}X[0-9]{3}", regularExpression.source);
+           "source of (compile '[0-9]{3}X[0-9]{3}','g')",
+           "[0-9]{3}X[0-9]{3}", regularExpression.source);
 
 testcases[index++] = new TestCase ( SECTION,
-	       "global of (compile '[0-9]{3}X[0-9]{3}','g')",
-	       true, regularExpression.global);
+           "global of (compile '[0-9]{3}X[0-9]{3}','g')",
+           true, regularExpression.global);
 
 testcases[index++] = new TestCase ( SECTION,
-	       "ignoreCase of (compile '[0-9]{3}X[0-9]{3}','g')",
-	       false, regularExpression.ignoreCase);
+           "ignoreCase of (compile '[0-9]{3}X[0-9]{3}','g')",
+           false, regularExpression.ignoreCase);
 
 
 test();

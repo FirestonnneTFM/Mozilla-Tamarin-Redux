@@ -36,11 +36,11 @@
  * ***** END LICENSE BLOCK ***** */
 
    var SECTION = "15.9.5.3";
-   var VERSION = "ECMA_3";  
-   var TITLE   = "Date.prototype.toDateString()";  
+   var VERSION = "ECMA_3";
+   var TITLE   = "Date.prototype.toDateString()";
    
    var status = '';
-   var actual = '';  
+   var actual = '';
    var expect = '';
 
 
@@ -56,23 +56,23 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
    // first, some generic tests -
 
-   status = "typeof (now.toDateString())";  
+   status = "typeof (now.toDateString())";
    actual =   typeof (now.toDateString());
    expect = "string";
    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-   status = "Date.prototype.toDateString.length";   
+   status = "Date.prototype.toDateString.length";
    actual =  Date.prototype.toDateString.length;
-   expect =  0;   
+   expect =  0;
    array[item++] = new TestCase(SECTION, status, expect, actual);
 
    /* Date.parse is accurate to the second;  valueOf() to the millisecond.
         Here we expect them to coincide, as we expect a time of exactly midnight -  */
-   status = "(Date.parse(now.toDateString()) - (midnight(now)).valueOf()) == 0";   
+   status = "(Date.parse(now.toDateString()) - (midnight(now)).valueOf()) == 0";
    actual =   (Date.parse(now.toDateString()) - (midnight(now)).valueOf()) == 0;
    expect = true;
    array[item++] = new TestCase(SECTION, status, expect, actual);
@@ -81,11 +81,11 @@ function getTestCases() {
 
    // 1970
    addDateTestCase(0);
-   addDateTestCase(TZ_ADJUST);   
+   addDateTestCase(TZ_ADJUST);
 
    
    // 1900
-   addDateTestCase(TIME_1900); 
+   addDateTestCase(TIME_1900);
    addDateTestCase(TIME_1900 - TZ_ADJUST);
 
    
@@ -95,36 +95,36 @@ function getTestCases() {
 
     
    // 29 Feb 2000
-   //var UTC_29_FEB_2000=946684800000+31*86400000+28*86400000; 
+   //var UTC_29_FEB_2000=946684800000+31*86400000+28*86400000;
    addDateTestCase(UTC_29_FEB_2000);
 
-   addDateTestCase(UTC_29_FEB_2000 - 1000);    
+   addDateTestCase(UTC_29_FEB_2000 - 1000);
    addDateTestCase(UTC_29_FEB_2000 - TZ_ADJUST);
  
 
    // 2005
-   //var	msPerDay =86400000;
-   //var	TIME_2000	 = 946684800000;
+   //var    msPerDay =86400000;
+   //var    TIME_2000    = 946684800000;
    //UTC_1_JAN_2005 = TIME_2000 + TimeInYear(2000) + TimeInYear(2001) +
        //TimeInYear(2002) + TimeInYear(2003) + TimeInYear(2004);
    /*function DaysInYear( y ) {
-	if ( y % 4 != 0	) {
-		return 365;
-	}
-	if ( (y	% 4	== 0) && (y	% 100 != 0)	) {
-		return 366;
-	}
-	if ( (y	% 100 == 0)	&&	(y % 400 !=	0) ) {
-		return 365;
-	}
-	if ( (y	% 400 == 0)	){
-		return 366;
-	} else {
-		return "ERROR: DaysInYear("	+ y	+ ") case not covered";
-	}
+    if ( y % 4 != 0 ) {
+        return 365;
+    }
+    if ( (y % 4 == 0) && (y % 100 != 0) ) {
+        return 366;
+    }
+    if ( (y % 100 == 0) &&  (y % 400 != 0) ) {
+        return 365;
+    }
+    if ( (y % 400 == 0) ){
+        return 366;
+    } else {
+        return "ERROR: DaysInYear(" + y + ") case not covered";
+    }
 }
    function TimeInYear( y ) {
-	return ( DaysInYear(y) * msPerDay );
+    return ( DaysInYear(y) * msPerDay );
    }*/
     addDateTestCase(UTC_1_JAN_2005);
     addDateTestCase(UTC_1_JAN_2005 - 1000);
@@ -132,7 +132,7 @@ function getTestCases() {
    
     function addTestCase()
     {
-      array[item++] = new TestCase( SECTION, status, expect, actual); 
+      array[item++] = new TestCase( SECTION, status, expect, actual);
     }
     
     
@@ -140,7 +140,7 @@ function getTestCases() {
     {
       var givenDate = new Date(date_given_in_milliseconds);
     
-      status = 'Date.parse(   +   givenDate   +   ).toDateString())';   
+      status = 'Date.parse(   +   givenDate   +   ).toDateString())';
       actual =  Date.parse(givenDate.toDateString());
       expect = Date.parse(midnight(givenDate));
       addTestCase();
@@ -148,7 +148,7 @@ function getTestCases() {
     return array;
 }
 
-function midnight(givenDate) 
+function midnight(givenDate)
 {
   // midnight on the given date -
   return new Date(givenDate.getFullYear(), givenDate.getMonth(), givenDate.getDate());

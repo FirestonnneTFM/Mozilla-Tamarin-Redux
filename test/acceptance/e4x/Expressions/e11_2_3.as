@@ -42,11 +42,11 @@
 
 START("11.2.3 - XML Descendant Accessor");
 
-var e = 
+var e =
 <employees>
     <employee id="1"><name>Joe</name><age>20</age></employee>
     <employee id="2"><name>Sue</name><age>30</age></employee>
-</employees>    
+</employees>
 
 names = e..name;
 
@@ -70,11 +70,11 @@ AddTestCase("xmllist..invalidnode:", undefined, (x1 = new XMLList(e), names = x1
 
 AddTestCase("xmllist..invalidnode length:", 0, (x1 = new XMLList(e), names = x1..hood, names.length()));
 
-e = 
+e =
 <employees>
     <employee id="1"><first_name>Joe</first_name><age>20</age></employee>
     <employee id="2"><first_name>Sue</first_name><age>30</age></employee>
-</employees> 
+</employees>
 
 correct =
 <first_name>Joe</first_name> +
@@ -84,16 +84,16 @@ names = e..first_name;
 
 TEST(2, correct, names);
 
-e = 
+e =
 <employees>
     <employee id="1"><first-name>Joe</first-name><age>20</age></employee>
     <employee id="2"><first-name>Sue</first-name><age>30</age></employee>
-</employees> 
+</employees>
 
 e =
 <company><staff>
-	<bug attr='1'><coat><bug>heart</bug></coat></bug>
-	<bug attr='2'><dirt><bug>part</bug></dirt></bug>
+    <bug attr='1'><coat><bug>heart</bug></coat></bug>
+    <bug attr='2'><dirt><bug>part</bug></dirt></bug>
 </staff></company>
 
 es = <><bug attr='1'><coat><bug>heart</bug></coat></bug><bug>heart</bug><bug attr='2'><dirt><bug>part</bug></dirt></bug><bug>part</bug></>;

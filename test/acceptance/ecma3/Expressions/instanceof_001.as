@@ -61,7 +61,7 @@ function getTestCases() {
     function Gen3(value) {
         this.value = value;
         this.generation = 3;
-		this.toString = function (){return "Gen" + this.generation+ " instance"};
+        this.toString = function (){return "Gen" + this.generation+ " instance"};
     }
     Gen3.name = 3;
     var origPrototypeToString = Gen3.constructor.prototype.toString;
@@ -92,7 +92,7 @@ function getTestCases() {
     function GenA(value) {
         this.value = value;
         this.generation = "A";
-		this.toString = function (){return "instance of Gen" +this.generation};
+        this.toString = function (){return "instance of Gen" +this.generation};
 
     }
     GenA.prototype = new Gen0();
@@ -101,7 +101,7 @@ function getTestCases() {
     function GenB(value) {
         this.value = value;
         this.generation = "B";
-		this.toString = function (){ return "instance of Gen"+this.generation};
+        this.toString = function (){ return "instance of Gen"+this.generation};
     }
     GenB.name = "B"
     //GenB.prototype = void 0;

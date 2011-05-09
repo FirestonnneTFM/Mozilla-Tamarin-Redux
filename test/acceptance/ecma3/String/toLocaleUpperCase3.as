@@ -60,7 +60,7 @@ function getTestCases() {
                                         String.fromCharCode(U.upper),
                                         (s = new String( String.fromCharCode("+i+ ) ), s.toLocaleUpperCase()") );
 */
-	s = new String( String.fromCharCode(i) );
+    s = new String( String.fromCharCode(i) );
         array[item++] = new TestCase(   SECTION,
                                         "var s = new String( String.fromCharCode("+i+") ); s.toLocaleUpperCase().charCodeAt(0)",
                                         U.upper,
@@ -76,7 +76,7 @@ function getTestCases() {
                                         "var s = new String( String.fromCharCode('+i+') ); s.toLocaleUpperCase()",
                                         (u = new Unicode( i ), String.fromCharCode(u.upper) ),
                                         (s.toLocaleUpperCase()) );
-	s = new String( String.fromCharCode(i) ); 
+    s = new String( String.fromCharCode(i) );
         array[item++] = new TestCase(   SECTION,
                                         "var s = new String( String.fromCharCode('+i+') ); s.toLocaleUpperCase().charCodeAt(0)",
                                         (u = new Unicode( i ), u.upper ),
@@ -92,7 +92,7 @@ function getTestCases() {
                                         "var s = new String( String.fromCharCode("+i+") ); s.toLocaleUpperCase()",
                                         (u = new Unicode( i ), String.fromCharCode(u.upper) ),
                                         (s.toLocaleUpperCase()) );
-	s = new String( String.fromCharCode(i) );
+    s = new String( String.fromCharCode(i) );
         array[item++] = new TestCase(   SECTION,
                                         "var s = new String( String.fromCharCode("+i+") ); s.toLocaleUpperCase().charCodeAt(0)",
                                         (u = new Unicode( i ), u.upper ),

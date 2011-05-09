@@ -46,7 +46,7 @@ var expectedStr = "TypeError: Error #1050";
 var result = "error, exception not thrown";
 var expected = "Error #1050";
 
-var object1 = { toString: function() { return this; } }; 
+var object1 = { toString: function() { return this; } };
 
 try{
 
@@ -56,7 +56,7 @@ throw "TypeError not thrown";
 
 } catch( e1 ){
 
-	result = grabError(e1, e1.toString());
+    result = grabError(e1, e1.toString());
 }
 
 
@@ -74,7 +74,7 @@ throw "TypeError not thrown";
 
 } catch( e2 ){
 
-	grabError(e2, e2.toString());
+    grabError(e2, e2.toString());
 
 }
 

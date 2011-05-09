@@ -45,7 +45,7 @@ writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
 test();
 
-function getTestCases() 
+function getTestCases()
 {
     var array = new Array();
     var item = 0;
@@ -77,33 +77,33 @@ function getTestCases()
      * */
     function testThis(numParens, doBackRefs, strAlt1, strAlt2)
     {
-	var openParen = doBackRefs? '(' : '(?:';
-	var closeParen = ')';
-	var pattern = '';
+    var openParen = doBackRefs? '(' : '(?:';
+    var closeParen = ')';
+    var pattern = '';
 
-	for (var i=0; i<numParens; i++)
-	    pattern += openParen;
-	pattern += "(?=" + strAlt1 + ")" + strAlt1 + "|(?=" + strAlt1 + ")" + strAlt2;
-	for (i=0; i<numParens; i++)
-	    pattern += closeParen;
+    for (var i=0; i<numParens; i++)
+        pattern += openParen;
+    pattern += "(?=" + strAlt1 + ")" + strAlt1 + "|(?=" + strAlt1 + ")" + strAlt2;
+    for (i=0; i<numParens; i++)
+        pattern += closeParen;
 
-	try {
-	    var re = new RegExp(pattern);
+    try {
+        var re = new RegExp(pattern);
 
-	    if (doBackRefs) {
-		var res = strAlt1.search(re);
-		array[item++] = new TestCase(SECTION, "strAlt1.search(re)", -1, res);
-	    } else {
-		var res = strAlt1.search(re);
-		array[item++] = new TestCase(SECTION, "strAlt1.search(re)", 0, res);
-	    }
-	}
-	catch (e: Error) {
-	    if (e.message.match("#1023"))
-		array[item++] = new TestCase(SECTION, "strAlt1.search(re)", 0, 0);
-	    else
-		throw(e);
-	}
+        if (doBackRefs) {
+        var res = strAlt1.search(re);
+        array[item++] = new TestCase(SECTION, "strAlt1.search(re)", -1, res);
+        } else {
+        var res = strAlt1.search(re);
+        array[item++] = new TestCase(SECTION, "strAlt1.search(re)", 0, res);
+        }
+    }
+    catch (e: Error) {
+        if (e.message.match("#1023"))
+        array[item++] = new TestCase(SECTION, "strAlt1.search(re)", 0, 0);
+        else
+        throw(e);
+    }
     }
 
     return array;

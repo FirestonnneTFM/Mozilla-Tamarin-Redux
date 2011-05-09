@@ -64,23 +64,23 @@ function getTestCases() {
     S[item++] = A;
 
 
-	A = new Array();
-	A[3] = 'undefined';
-	A[6] = null;
-	A[8] = 'null';
-	A[0] = void 0;
+    A = new Array();
+    A[3] = 'undefined';
+    A[6] = null;
+    A[8] = 'null';
+    A[0] = void 0;
         S[item++] = A;
 
-	/*
-	    S[item] = "var A = new Array( ";
+    /*
+        S[item] = "var A = new Array( ";
 
-	    var limit = 0x0061;
-	    for ( var i = 0x007A; i >= limit; i-- ) {
-		S[item] += "\'"+ String.fromCharCode(i) +"\'" ;
-		if ( i > limit ) {
-		    S[item] += ",";
-		}
-	    }
+        var limit = 0x0061;
+        for ( var i = 0x007A; i >= limit; i-- ) {
+        S[item] += "\'"+ String.fromCharCode(i) +"\'" ;
+        if ( i > limit ) {
+            S[item] += ",";
+        }
+        }
     */
     A = new Array(( 0x007A - 0x0061) + 1);
     S[item] = A;
@@ -126,7 +126,7 @@ function Object_1( value ) {
     this.array = value.split(",");
     this.length = this.array.length;
     for ( var i = 0; i < this.length; i++ ) {
-	this[i] = this.array[i];
+    this[i] = this.array[i];
     }
     this.sort = Array.prototype.sort;
     this.getClass = Object.prototype.toString;

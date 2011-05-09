@@ -67,7 +67,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,  "Math.pow('2','32')",               4294967296,                 Math.pow('2','32') );
 
     array[item++] = new TestCase( SECTION,  "Math.pow(1,NaN)",                  Number.NaN,                 Math.pow(1,Number.NaN) );
-    array[item++] = new TestCase( SECTION,  "Math.pow(0,NaN)",	                Number.NaN,                 Math.pow(0,Number.NaN) );
+    array[item++] = new TestCase( SECTION,  "Math.pow(0,NaN)",                  Number.NaN,                 Math.pow(0,Number.NaN) );
     array[item++] = new TestCase( SECTION,  "Math.pow(NaN,0)",                  1,                          Math.pow(Number.NaN,0) );
     array[item++] = new TestCase( SECTION,  "Math.pow(NaN,-0)",                 1,                          Math.pow(Number.NaN,-0) );
     array[item++] = new TestCase( SECTION,  "Math.pow(NaN,1)",                  Number.NaN,                 Math.pow(Number.NaN, 1) );

@@ -38,21 +38,21 @@
 package StaticPropertyPackage {
 
         public namespace ns1;
-	
-	public class BaseClass {
-		ns1 static function echo( s:String ) : String {
-			return s;
-		}
-	}
+    
+    public class BaseClass {
+        ns1 static function echo( s:String ) : String {
+            return s;
+        }
+    }
 
-	public class AccNSStatPropSubClassMeth extends BaseClass {
-		public function callEcho( s:String ) : String {
-			return ns1::echo(s);
-		}
-		
-		public function callBaseEcho( s:String ) : String {
-			return BaseClass.ns1::echo(s);
-		}
+    public class AccNSStatPropSubClassMeth extends BaseClass {
+        public function callEcho( s:String ) : String {
+            return ns1::echo(s);
+        }
+        
+        public function callBaseEcho( s:String ) : String {
+            return BaseClass.ns1::echo(s);
+        }
 
-	}
+    }
 }

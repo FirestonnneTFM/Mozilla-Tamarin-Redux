@@ -55,10 +55,10 @@ function getTestCases() {
 
     var x;
     with( new Number() )
-    { 
+    {
         x = this +'';
     }
-	array[item++] = new TestCase( SECTION,
+    array[item++] = new TestCase( SECTION,
                                 "with( new Number() ) { this +'' }",
                                 "[object global]",
                                  x);
@@ -72,9 +72,9 @@ function getTestCases() {
                         true,
                         y );
 
-    var MYOB = new WithObject(false); 
+    var MYOB = new WithObject(false);
     with (MYOB)
-    { 
+    {
         z = NaN;
     }
     array[item++] = new TestCase(
@@ -83,7 +83,7 @@ function getTestCases() {
                         false,
                         z );
 
-    var MYOB = new WithObject(NaN); 
+    var MYOB = new WithObject(NaN);
     with (MYOB) { r = Infinity }
     array[item++] = new TestCase(
                         SECTION,
@@ -116,7 +116,7 @@ function getTestCases() {
                         false,
                         MYOB );
     
-    var MYOB = new WithObject(true); 
+    var MYOB = new WithObject(true);
     with (MYOB) { MYOB = Infinity;f(); }
     array[item++] = new TestCase(
                         SECTION,
@@ -138,7 +138,7 @@ function WithObject( value ) {
     // now we will override global functions
 
     //this.parseInt = new Function( "return this.value" );
-	this.parseInt = function(){return this.value;}	
+    this.parseInt = function(){return this.value;}
     this.NaN = value;
     this.Infinity = value;
     this.unescape = function(){return this.value;}

@@ -41,8 +41,8 @@ package TestPackage
     public const num2 = 2;
 }
 
-var SECTION = "Definitions\const";       			// provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";  			// Version of JavaScript or ECMA
+var SECTION = "Definitions\const";                  // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
 var TITLE   = "const in package";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 

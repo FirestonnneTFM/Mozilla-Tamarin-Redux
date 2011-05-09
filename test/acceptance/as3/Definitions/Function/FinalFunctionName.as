@@ -38,25 +38,25 @@
 import FinalFunctionName.*;
 
 class FinalFunctionNameClass {
-	// constructor
-	function TestNameObjNoPackage() { res = "EmptyName"; }
+    // constructor
+    function TestNameObjNoPackage() { res = "EmptyName"; }
 
-	// not the constructor but looks like it
-	function testNameObjNoPackage() { return "not the constructor" }
+    // not the constructor but looks like it
+    function testNameObjNoPackage() { return "not the constructor" }
 
-	final function a1 () { return "a1"; }
-	final function a_1 () { return "a_1"; }
-	final function _a1 () { return "_a1"; }
-	final function __a1 () { return "__a1"; }
-	final function _a1_ () { return "_a1_"; }
-	final function __a1__ () { return "__a1__"; }
-	final function $a1 () { return "$a1"; }
-	final function a$1 () { return "a$1"; }
-	final function a1$ () { return "a1$"; }
-	final function A1 () { return "A1"; }
-	final function cases () { return "cases"; }
-	final function Cases () { return "Cases"; }
-	final function abcdefghijklmnopqrstuvwxyz0123456789$_ () { return "all"; }
+    final function a1 () { return "a1"; }
+    final function a_1 () { return "a_1"; }
+    final function _a1 () { return "_a1"; }
+    final function __a1 () { return "__a1"; }
+    final function _a1_ () { return "_a1_"; }
+    final function __a1__ () { return "__a1__"; }
+    final function $a1 () { return "$a1"; }
+    final function a$1 () { return "a$1"; }
+    final function a1$ () { return "a1$"; }
+    final function A1 () { return "A1"; }
+    final function cases () { return "cases"; }
+    final function Cases () { return "Cases"; }
+    final function abcdefghijklmnopqrstuvwxyz0123456789$_ () { return "all"; }
 }
 
 var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)

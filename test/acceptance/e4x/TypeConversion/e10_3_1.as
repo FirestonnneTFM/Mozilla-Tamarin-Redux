@@ -47,7 +47,7 @@ sue = "<employee><name>Sue</name><age>32</age></employee>";
 tagName = "employees";
 employees = new XML("<" + tagName + ">" + john + sue + "</" + tagName + ">");
 
-correct = 
+correct =
 <employees>
     <employee><name>John</name><age>25</age></employee>
     <employee><name>Sue</name><age>32</age></employee>

@@ -34,20 +34,20 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1091; //	XML parser failure: Unterminated CDATA section.
+var CODE = 1091; // XML parser failure: Unterminated CDATA section.
 
 //-----------------------------------------------------------
 startTest();
 //-----------------------------------------------------------
 
 try {
-	var result = "no error";
-	var y = "<a><![CDATA[test</a>";
-	var z = new XML(y);
+    var result = "no error";
+    var y = "<a><![CDATA[test</a>";
+    var z = new XML(y);
 } catch (err) {
-	result = err.toString();
+    result = err.toString();
 } finally {
-	AddTestCase("Runtime Error", TYPEERROR + CODE, typeError(result));
+    AddTestCase("Runtime Error", TYPEERROR + CODE, typeError(result));
 }
 
 //-----------------------------------------------------------

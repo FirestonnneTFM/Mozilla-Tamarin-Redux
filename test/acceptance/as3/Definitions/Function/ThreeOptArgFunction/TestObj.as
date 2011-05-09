@@ -36,21 +36,21 @@
  * ***** END LICENSE BLOCK ***** */
 package ThreeOptArgFunction {
 
-	class TestObjInner{
-		
-	  function returnArgumentsInner(s:String = "Str1", b:Boolean = true, n:Number = 10, ... rest) {
-	  	str = s;
-	  	bool = b;
-	  	num = n;
-	  }
-		
-	}
+    class TestObjInner{
+        
+      function returnArgumentsInner(s:String = "Str1", b:Boolean = true, n:Number = 10, ... rest) {
+        str = s;
+        bool = b;
+        num = n;
+      }
+        
+    }
 
-	public class TestObj extends TestObjInner {
-		
-		public function returnArguments() { returnArgumentsInner("Str1", true, 10, 12); }
-		
-	}
+    public class TestObj extends TestObjInner {
+        
+        public function returnArguments() { returnArgumentsInner("Str1", true, 10, 12); }
+        
+    }
 
 }
 

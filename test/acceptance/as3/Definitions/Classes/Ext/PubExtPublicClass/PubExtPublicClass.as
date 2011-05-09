@@ -51,10 +51,10 @@ package PublicClass {
     function subGetArray() : Array { return this.getArray(); }
     function subSetArray(a:Array) { this.setArray(a); }
 
-	public function testSubGetSetArray(a:Array) : Array {
-		this.subSetArray(a);
-		return this.subGetArray();
-	}
+    public function testSubGetSetArray(a:Array) : Array {
+        this.subSetArray(a);
+        return this.subGetArray();
+    }
 
 
     // ************************************
@@ -80,17 +80,17 @@ package PublicClass {
     }
 
     // ***************************************
-    // access default property from 
+    // access default property from
     // default method of sub class
     // ***************************************
 
     function subGetDPArray() : Array { return array; }
     function subSetDPArray(a:Array) { array = a; }
 
-	public function testSubGetSetDPArray(a:Array) : Array {
-		this.subSetDPArray(a);
-		return this.subGetDPArray();
-	}
+    public function testSubGetSetDPArray(a:Array) : Array {
+        this.subSetDPArray(a);
+        return this.subGetDPArray();
+    }
 
    
     // ***************************************
@@ -109,10 +109,10 @@ package PublicClass {
     private function privSubGetDPArray() : Array { return this.array; }
     private function privSubSetDPArray(a:Array) { this.array = a; }
 
-	public function testPrivSubDPArray(a:Array) : Array {
-		this.privSubSetDPArray(a);
-		return this.privSubGetDPArray();
-	}
+    public function testPrivSubDPArray(a:Array) : Array {
+        this.privSubSetDPArray(a);
+        return this.privSubGetDPArray();
+    }
 
 
   }

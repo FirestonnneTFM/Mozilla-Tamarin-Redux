@@ -34,7 +34,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-/* 
+/*
  * Date: 2001-07-17
  *
  * SUMMARY: Regression test for Bugzilla bug 72964:
@@ -55,46 +55,46 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var cnSingleSpace = ' ';
-	var status = '';
-	var pattern = '';
-	var string = '';
-	var actualmatch = '';
-	var expectedmatch = '';
-
-
-	pattern = /[\S]+/;
-	    // 4 low Unicode chars = Latin1; whole string should match
-	    status = inSection(1);
-	    string = '\u00BF\u00CD\u00BB\u00A7';
-	    actualmatch = string.match(pattern);
-	    expectedmatch = Array(string);
-	    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
-
-	    // Now put a space in the middle; first half of string should match
-	    status = inSection(2);
-	    string = '\u00BF\u00CD \u00BB\u00A7';
-	    actualmatch = string.match(pattern);
-	    expectedmatch = Array('\u00BF\u00CD');
-	    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    var cnSingleSpace = ' ';
+    var status = '';
+    var pattern = '';
+    var string = '';
+    var actualmatch = '';
+    var expectedmatch = '';
 
 
-	    // 4 high Unicode chars = non-Latin1; whole string should match
-	    status = inSection(3);
-	    string = '\u4e00\uac00\u4e03\u4e00';
-	    actualmatch = string.match(pattern);
-	    expectedmatch = Array(string);
-	    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    pattern = /[\S]+/;
+        // 4 low Unicode chars = Latin1; whole string should match
+        status = inSection(1);
+        string = '\u00BF\u00CD\u00BB\u00A7';
+        actualmatch = string.match(pattern);
+        expectedmatch = Array(string);
+        array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	    // Now put a space in the middle; first half of string should match
-	    status = inSection(4);
-	    string = '\u4e00\uac00 \u4e03\u4e00';
-	    actualmatch = string.match(pattern);
-	    expectedmatch = Array('\u4e00\uac00');
-	    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+        // Now put a space in the middle; first half of string should match
+        status = inSection(2);
+        string = '\u00BF\u00CD \u00BB\u00A7';
+        actualmatch = string.match(pattern);
+        expectedmatch = Array('\u00BF\u00CD');
+        array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	return array;
+
+        // 4 high Unicode chars = non-Latin1; whole string should match
+        status = inSection(3);
+        string = '\u4e00\uac00\u4e03\u4e00';
+        actualmatch = string.match(pattern);
+        expectedmatch = Array(string);
+        array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+        // Now put a space in the middle; first half of string should match
+        status = inSection(4);
+        string = '\u4e00\uac00 \u4e03\u4e00';
+        actualmatch = string.match(pattern);
+        expectedmatch = Array('\u4e00\uac00');
+        array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+    return array;
 }

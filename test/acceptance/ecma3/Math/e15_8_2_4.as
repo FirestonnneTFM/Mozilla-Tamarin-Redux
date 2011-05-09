@@ -72,11 +72,11 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,   "Math.atan('-Infinity)",   -Math.PI/2,     Math.atan('-Infinity') );
 
     array[item++] = new TestCase( SECTION,   "Math.atan(0)",            0,              Math.atan(0)          );
-    array[item++] = new TestCase( SECTION,   "Math.atan(-0)",	        -0,             Math.atan(-0)         );
+    array[item++] = new TestCase( SECTION,   "Math.atan(-0)",           -0,             Math.atan(-0)         );
     array[item++] = new TestCase( SECTION,   "Infinity/Math.atan(-0)",  -Infinity,      Infinity/Math.atan(-0) );
     array[item++] = new TestCase( SECTION,   "Math.atan(Infinity)",     Math.PI/2,      Math.atan(Number.POSITIVE_INFINITY) );
     array[item++] = new TestCase( SECTION,   "Math.atan(-Infinity)",    -Math.PI/2,     Math.atan(Number.NEGATIVE_INFINITY) );
-    array[item++] = new TestCase( SECTION,   "Math.atan(1)",     	    Math.PI/4,      Math.atan(1)          );
+    array[item++] = new TestCase( SECTION,   "Math.atan(1)",            Math.PI/4,      Math.atan(1)          );
     array[item++] = new TestCase( SECTION,   "Math.atan(-1)",           -Math.PI/4,     Math.atan(-1)         );
     return array;
 }

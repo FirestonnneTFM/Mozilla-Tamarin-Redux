@@ -57,35 +57,35 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 // RegExp.input = "abcd12357efg"; /\d+/.exec('2345')
 RegExp.input = "abcd12357efg";
 testcases[index++] = new TestCase ( SECTION, "RegExp.input = 'abcd12357efg'; /\\d+/.exec('2345')",
-	       String(["2345"]), String(/\d+/.exec('2345')));
+           String(["2345"]), String(/\d+/.exec('2345')));
 
 // RegExp.input = "abcd12357efg"; /\d+/.exec()
 testcases[index++] = new TestCase ( SECTION, "RegExp.input = 'abcd12357efg'; /\\d+/.exec()",
-	       String(["12357"]), String(/\d+/.exec("abcd12357efg")));
+           String(["12357"]), String(/\d+/.exec("abcd12357efg")));
 
 // RegExp.input = "abcd12357efg"; /[h-z]+/.exec()
 testcases[index++] = new TestCase ( SECTION, "RegExp.input = 'abcd12357efg'; /[h-z]+/.exec()",
-	       null, /[h-z]+/.exec("abcd12357efg"));
+           null, /[h-z]+/.exec("abcd12357efg"));
 
 // RegExp.input = "abcd12357efg"; /\d+/.test('2345')
 RegExp.input = "abcd12357efg";
 testcases[index++] = new TestCase ( SECTION, "RegExp.input = 'abcd12357efg'; /\\d+/.test('2345')",
-	       true, /\d+/.test('2345'));
+           true, /\d+/.test('2345'));
 
 // RegExp.input = "abcd12357efg"; /\d+/.test()
 testcases[index++] = new TestCase ( SECTION, "RegExp.input = 'abcd12357efg'; /\\d+/.test()",
-	       true, /\d+/.test("abcd12357efg"));
+           true, /\d+/.test("abcd12357efg"));
 
 // RegExp.input = "abcd12357efg"; (new RegExp('d+')).test()
 testcases[index++] = new TestCase ( SECTION, "RegExp.input = 'abcd12357efg'; (new RegExp('d+')).test()",
-	       true, (new RegExp('d+')).test("abcd12357efg"));
+           true, (new RegExp('d+')).test("abcd12357efg"));
 
 // RegExp.input = "abcd12357efg"; /[h-z]+/.test()
 testcases[index++] = new TestCase ( SECTION, "RegExp.input = 'abcd12357efg'; /[h-z]+/.test()",
-	       false, /[h-z]+/.test("abcd12357efg"));
+           false, /[h-z]+/.test("abcd12357efg"));
 
 // RegExp.input = "abcd12357efg"; (new RegExp('[h-z]+')).test()
 testcases[index++] = new TestCase ( SECTION, "RegExp.input = 'abcd12357efg'; (new RegExp('[h-z]+')).test()",
-	       false, (new RegExp('[h-z]+')).test("abcd12357efg"));
+           false, (new RegExp('[h-z]+')).test("abcd12357efg"));
 
 test();

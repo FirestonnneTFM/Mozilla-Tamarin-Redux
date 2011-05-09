@@ -37,11 +37,11 @@
 
 package ExtError{
 
-	public dynamic class CustRangeError2 extends RangeError{
-		public function CustRangeError2(message=""){
-			this.message = message;
-		}
-	}
+    public dynamic class CustRangeError2 extends RangeError{
+        public function CustRangeError2(message=""){
+            this.message = message;
+        }
+    }
 
 }
 

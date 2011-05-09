@@ -48,7 +48,7 @@ try {
     {
     }
 } catch (err) {
-    result1 = parseError(err.toString(), expected.length); 
+    result1 = parseError(err.toString(), expected.length);
 } finally {
     AddTestCase('Script timeout test', expected, result1);
 }

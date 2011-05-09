@@ -106,36 +106,36 @@ AddTestCase( "typeof new CustRangeError2('test')", "object", typeof new CustRang
 
 
 AddTestCase( "(err = new CustError2(), err.getClass = Object.prototype.toString, err.getClass() )",
-			 "[object CustError2]",
-			 (err = new CustError2(), err.getClass = Object.prototype.toString, err.getClass() ) );
+             "[object CustError2]",
+             (err = new CustError2(), err.getClass = Object.prototype.toString, err.getClass() ) );
 AddTestCase( "(err = new CustEvalError2(), err.getClass = Object.prototype.toString, err.getClass() )",
-			 "[object CustEvalError2]",
-			 (err = new CustEvalError2(), err.getClass = Object.prototype.toString, err.getClass() ) );
+             "[object CustEvalError2]",
+             (err = new CustEvalError2(), err.getClass = Object.prototype.toString, err.getClass() ) );
 AddTestCase( "(err = new CustTypeError2(), err.getClass = Object.prototype.toString, err.getClass() )",
-			 "[object CustTypeError2]",
-			 (err = new CustTypeError2(), err.getClass = Object.prototype.toString, err.getClass() ) );
+             "[object CustTypeError2]",
+             (err = new CustTypeError2(), err.getClass = Object.prototype.toString, err.getClass() ) );
 AddTestCase( "(err = new CustReferenceError2(), err.getClass = Object.prototype.toString, err.getClass() )",
-			 "[object CustReferenceError2]",
-			 (err = new CustReferenceError2(), err.getClass = Object.prototype.toString, err.getClass() ) );
+             "[object CustReferenceError2]",
+             (err = new CustReferenceError2(), err.getClass = Object.prototype.toString, err.getClass() ) );
 AddTestCase( "(err = new CustRangeError2(), err.getClass = Object.prototype.toString, err.getClass() )",
-			 "[object CustRangeError2]",
-			 (err = new CustRangeError2(), err.getClass = Object.prototype.toString, err.getClass() ) );
+             "[object CustRangeError2]",
+             (err = new CustRangeError2(), err.getClass = Object.prototype.toString, err.getClass() ) );
 
 AddTestCase( "(err = new CustError2('test'), err.getClass = Object.prototype.toString, err.getClass() )",
-			 "[object CustError2]",
-			 (err = new CustError2('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
+             "[object CustError2]",
+             (err = new CustError2('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
 AddTestCase( "(err = new CustEvalError2('test'), err.getClass = Object.prototype.toString, err.getClass() )",
-			 "[object CustEvalError2]",
-			 (err = new CustEvalError2('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
+             "[object CustEvalError2]",
+             (err = new CustEvalError2('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
 AddTestCase( "(err = new CustTypeError2('test'), err.getClass = Object.prototype.toString, err.getClass() )",
-			 "[object CustTypeError2]",
-			 (err = new CustTypeError2('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
+             "[object CustTypeError2]",
+             (err = new CustTypeError2('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
 AddTestCase( "(err = new CustReferenceError2('test'), err.getClass = Object.prototype.toString, err.getClass() )",
-			 "[object CustReferenceError2]",
-			 (err = new CustReferenceError2('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
+             "[object CustReferenceError2]",
+             (err = new CustReferenceError2('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
 AddTestCase( "(err = new CustRangeError2('test'), err.getClass = Object.prototype.toString, err.getClass() )",
-			 "[object CustRangeError2]",
-			 (err = new CustRangeError2('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
+             "[object CustRangeError2]",
+             (err = new CustRangeError2('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
 
 
 

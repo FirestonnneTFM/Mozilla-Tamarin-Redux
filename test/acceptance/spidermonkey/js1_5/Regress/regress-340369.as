@@ -20,7 +20,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Ria Klaassen
- *                 Gavin Sharp 
+ *                 Gavin Sharp
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -49,7 +49,7 @@ printBugNumber(BUGNUMBER);
 printStatus (summary);
 
 try
-{ 
+{
   eval('return /;');
 }
 catch(ex)

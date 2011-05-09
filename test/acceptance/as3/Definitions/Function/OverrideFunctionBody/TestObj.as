@@ -36,22 +36,22 @@
  * ***** END LICENSE BLOCK ***** */
 package OverrideFunctionBody {
 
-	public class TestObjBase {
-		public function noReturnNoParams() { return null; }
-		public function noReturnParams(s:String, b:Boolean) { return null; }
-		public function noReturnCustomParam(c:Custom) { return null; }
-		public function returnNoParams():String { return null; }
-		public function returnParams(s:String, b:Boolean):String { return null; }
-		public function returnCustomNoParams():Custom { return null; }
-	}
+    public class TestObjBase {
+        public function noReturnNoParams() { return null; }
+        public function noReturnParams(s:String, b:Boolean) { return null; }
+        public function noReturnCustomParam(c:Custom) { return null; }
+        public function returnNoParams():String { return null; }
+        public function returnParams(s:String, b:Boolean):String { return null; }
+        public function returnCustomNoParams():Custom { return null; }
+    }
 
-	public class TestObj extends TestObjBase {
-		override public function noReturnNoParams() { return "noReturnNoParams"; }
-		override public function noReturnParams(s:String, b:Boolean) { return s; }
-		override public function noReturnCustomParam(c:Custom) { return new Custom(); }
-		override public function returnNoParams():String { return "returnNoParams"; }
-		override public function returnParams(s:String, b:Boolean):String { return s; }
-		override public function returnCustomNoParams():Custom { return new Custom(); }
-	}
+    public class TestObj extends TestObjBase {
+        override public function noReturnNoParams() { return "noReturnNoParams"; }
+        override public function noReturnParams(s:String, b:Boolean) { return s; }
+        override public function noReturnCustomParam(c:Custom) { return new Custom(); }
+        override public function returnNoParams():String { return "returnNoParams"; }
+        override public function returnParams(s:String, b:Boolean):String { return s; }
+        override public function returnCustomNoParams():Custom { return new Custom(); }
+    }
 
 }

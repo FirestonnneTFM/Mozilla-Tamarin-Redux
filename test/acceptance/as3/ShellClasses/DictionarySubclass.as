@@ -75,7 +75,7 @@
       dict_weak!=null
       );
 
-    // test get/set keys and values 
+    // test get/set keys and values
 
     AddTestCase(
       "empty SealedDictionary toString",
@@ -86,7 +86,7 @@
     var tmp;
     
     tmp = void 0;
-    try { tmp = dict_notweak['notfound']; } 
+    try { tmp = dict_notweak['notfound']; }
     catch(e) { tmp = grabError(e, e.toString()); }
 
     AddTestCase(
@@ -96,7 +96,7 @@
       );
 
     tmp = void 0;
-    try { tmp = dict_weak['notfound']; } 
+    try { tmp = dict_weak['notfound']; }
     catch(e) { tmp = grabError(e, e.toString()); }
 
     AddTestCase(
@@ -106,7 +106,7 @@
       );
 
     tmp = void 0;
-    try { dict_notweak["one"]="one_value"; tmp = dict_notweak["one"]; } 
+    try { dict_notweak["one"]="one_value"; tmp = dict_notweak["one"]; }
     catch(e) { tmp = grabError(e, e.toString()); }
     
     AddTestCase(
@@ -116,7 +116,7 @@
       );
 
     tmp = void 0;
-    try { dict_weak["one"]="one_value"; tmp = dict_weak["one"]; } 
+    try { dict_weak["one"]="one_value"; tmp = dict_weak["one"]; }
     catch(e) { tmp = grabError(e, e.toString()); }
     
     AddTestCase(
@@ -134,7 +134,7 @@
     // this is arguably a bug, but one that can't be fixed without
     // versioning
     tmp = void 0;
-    try { dict_notweak[obj1]="obj1_value"; tmp = dict_notweak[obj1]; } 
+    try { dict_notweak[obj1]="obj1_value"; tmp = dict_notweak[obj1]; }
     catch(e) { tmp = grabError(e, e.toString()); }
     
     AddTestCase(
@@ -144,7 +144,7 @@
       );
 
     tmp = void 0;
-    try { dict_weak[obj1]="obj1_value"; tmp = dict_weak[obj1]; } 
+    try { dict_weak[obj1]="obj1_value"; tmp = dict_weak[obj1]; }
     catch(e) { tmp = grabError(e, e.toString()); }
     
     AddTestCase(
@@ -206,7 +206,7 @@
     AddTestCase(
      "for each in SealedDictionary",
      "obj1_value",
-     out3.toString()); 
+     out3.toString());
 
     var out4=new Array();
     for each (a in dict_weak) {
@@ -216,7 +216,7 @@
     AddTestCase(
      "for each in weak SealedDictionary",
      "obj1_value",
-     out4.toString()); 
+     out4.toString());
 
 // test delete
 

@@ -54,19 +54,19 @@ function getTestCases() {
                                             GLOBAL,
                                             (myvar = this,  myvar.toLocaleString = Object.prototype.toLocaleString, myvar.toLocaleString()) );
 
-	// work around for bug 175820
+    // work around for bug 175820
     array[item++] = new TestCase( SECTION,  "myvar = MyObject; myvar.toLocaleString = Object.prototype.toLocaleString; myvar.toLocaleString()",
                                             true,
                                             (myvar = MyObject, myvar.toLocaleString = Object.prototype.toLocaleString, myvar.toLocaleString()).match(/\[object Function-[0-9]+\]/) != null ||
-                                            (myvar = MyObject, myvar.toLocaleString = Object.prototype.toLocaleString, myvar.toLocaleString())=="[object null]" 
+                                            (myvar = MyObject, myvar.toLocaleString = Object.prototype.toLocaleString, myvar.toLocaleString())=="[object null]"
                                              );
 
     array[item++] = new TestCase( SECTION,  "myvar = new MyObject( true ); myvar.toLocaleString = Object.prototype.toLocaleString; myvar.toLocaleString()",
                                             '[object Object]',
                                             (myvar = new MyObject( true ), myvar.toLocaleString = Object.prototype.toLocaleString, myvar.toLocaleString()) );
 
-	Number.prototype.toLocaleString;
-	//Object.prototpye.toLocaleString;
+    Number.prototype.toLocaleString;
+    //Object.prototpye.toLocaleString;
     array[item++] = new TestCase( SECTION,  "myvar = new Number(0); myvar.toLocaleString = Object.prototype.toLocaleString; myvar.toLocaleString()",
                                             "0",
                                             (myvar = new Number(0), myvar.toLocaleString()) );

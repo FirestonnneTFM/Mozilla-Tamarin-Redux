@@ -83,7 +83,7 @@ function getTestCases() {
                                     (A = new Array(1000), A[123] = 'hola', A.length ) );
 
 
-	/*
+    /*
     for ( var i = 0X0020, TEST_STRING = "var A = new Array( " ; i < 0x00ff; i++ ) {
         TEST_STRING += "\'\\"+ String.fromCharCode( i ) +"\'";
         if ( i < 0x00FF - 1   ) {
@@ -92,14 +92,14 @@ function getTestCases() {
             TEST_STRING += ");"
         }
     }
-	*/
-	var TEST_STRING;
+    */
+    var TEST_STRING;
     var LENGTH = 0x00ff - 0x0020;
     var A = new Array();
     var index = 0;
     for ( var i = 0X0020; i < 0x00ff; i++ ) {
-		A[index++] = String.fromCharCode( i );
-	}
+        A[index++] = String.fromCharCode( i );
+    }
 
     array[item++] = new TestCase(   SECTION,
                                     TEST_STRING +" A[150] = 'hello'; A[150]",
@@ -124,15 +124,15 @@ function getTestCases() {
                                     16,
                                     (A = new Array(0,1,2,3,4,5,6,7,8,9,10), A[15] ='15', A.length ) );
 
-	// !!@ As of 04jan05, the AVM+ does not like the (i <= 10) line (where '15' is a different type than void 0)
+    // !!@ As of 04jan05, the AVM+ does not like the (i <= 10) line (where '15' is a different type than void 0)
     for ( var i = 0; i < A.length; i++, item++ ) {
-		var temp;
-		if (i <= 10)
-			temp = i;
-		else if (i == 15)
-			temp = '15';
-		else
-			temp = void 0;
+        var temp;
+        if (i <= 10)
+            temp = i;
+        else if (i == 15)
+            temp = '15';
+        else
+            temp = void 0;
 
         array[item] = new TestCase( SECTION,
                                     "var A = new Array(0,1,2,3,4,5,6,7,8,9,10); A[15] ='15'; A[" +i +"]",
@@ -142,24 +142,24 @@ function getTestCases() {
     // P is not an array index, and P is not "length"
 
     try{
-    	thisErr = "no error";
-    	var A = new Array(); A.join.length = 4; A.join.length;
-	}catch(e:ReferenceError){
-		thisErr = e.toString();
-	} finally{
-    	array[item++] = new TestCase(SECTION,
+        thisErr = "no error";
+        var A = new Array(); A.join.length = 4; A.join.length;
+    }catch(e:ReferenceError){
+        thisErr = e.toString();
+    } finally{
+        array[item++] = new TestCase(SECTION,
                                     "var A = new Array(); A.join.length = 4; A.join.length",
                                     "ReferenceError: Error #1074",
                                     referenceError(thisErr));
     }
 
     try{
-    	thisErr = "no error";
-    	var A = new Array(); A.join.length = 4; A.length;
-	}catch(e:ReferenceError){
-		thisErr = e.toString();
-	} finally{
-    	array[item++] = new TestCase(SECTION,
+        thisErr = "no error";
+        var A = new Array(); A.join.length = 4; A.length;
+    }catch(e:ReferenceError){
+        thisErr = e.toString();
+    } finally{
+        array[item++] = new TestCase(SECTION,
                                     "var A = new Array(); A.join.length = 4; A.length",
                                     "ReferenceError: Error #1074",
                                     referenceError(thisErr));

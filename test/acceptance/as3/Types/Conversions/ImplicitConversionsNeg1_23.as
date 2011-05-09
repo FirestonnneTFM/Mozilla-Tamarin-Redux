@@ -42,16 +42,16 @@ var TITLE   = "implicit type conversions";
 startTest();
 
 
-// Value = -1.23 
+// Value = -1.23
 
 var thisError = "no exception thrown";
 try{
-	var string:String = -1.23;
+    var string:String = -1.23;
 } catch (e0) {
-	thisError = e0.toString();
+    thisError = e0.toString();
 } finally {
-	AddTestCase( "var string:String = -1.23", "no exception thrown", typeError(thisError));
-	AddTestCase( "var string:String = -1.23", "-1.23", string);
+    AddTestCase( "var string:String = -1.23", "no exception thrown", typeError(thisError));
+    AddTestCase( "var string:String = -1.23", "-1.23", string);
 }
 
 
@@ -61,22 +61,22 @@ AddTestCase("number:Number = undefined", -1.23, number );
 
 thisError = "no exception thrown";
 try{
-	var myInt:int = -1.23;
+    var myInt:int = -1.23;
 } catch(e1) {
-	thisError = e1.toString();
+    thisError = e1.toString();
 } finally {
-	AddTestCase("myInt:int = -1.23", "no exception thrown", rangeError(thisError) );
+    AddTestCase("myInt:int = -1.23", "no exception thrown", rangeError(thisError) );
         AddTestCase("myInt:int = -1.23", -1, myInt );
 }
 
 
 thisError = "no exception thrown";
 try{
-	var myUint:uint = -1.23;
+    var myUint:uint = -1.23;
 } catch(e2) {
-	thisError = e2.toString();
+    thisError = e2.toString();
 } finally {
-	AddTestCase("myUInt:uint = -1.23", "no exception thrown", rangeError(thisError) );
+    AddTestCase("myUInt:uint = -1.23", "no exception thrown", rangeError(thisError) );
         AddTestCase("myUInt:uint = -1.23", 4294967295, myUint);
 }
 
@@ -84,12 +84,12 @@ try{
 
 thisError = "no exception thrown";
 try{
-	var boolean:Boolean = -1.23;
+    var boolean:Boolean = -1.23;
 } catch(e3) {
-	thisError = e3.toString();
+    thisError = e3.toString();
 } finally {
-	AddTestCase("boolean:Boolean = -1.23", "no exception thrown", typeError(thisError) );
-	AddTestCase("boolean:Boolean = -1.23", true, boolean );
+    AddTestCase("boolean:Boolean = -1.23", "no exception thrown", typeError(thisError) );
+    AddTestCase("boolean:Boolean = -1.23", true, boolean );
 }
 
 var object:Object = -1.23;

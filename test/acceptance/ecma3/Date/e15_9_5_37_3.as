@@ -61,7 +61,7 @@ function getTestCases() {
                     LocalDateFromTime(SetUTCFullYear(UTC_FEB_29_1972,2000)) );
 
     //addNewTestCase( "TDATE = new Date("+PST_FEB_29_1972+"); "+"TDATE.setUTCFullYear(2000);TDATE",
-     TDATE = new Date(PST_FEB_29_1972); 
+     TDATE = new Date(PST_FEB_29_1972);
      TDATE.setUTCFullYear(2000);
     addNewTestCase(TDATE,
                     UTCDateFromTime(SetUTCFullYear(PST_FEB_29_1972,2000)),

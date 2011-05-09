@@ -41,16 +41,16 @@ var BrowserDetect = {
     {
       for(var i=0; i < a.length; i++)
       {
-	var b=a[i].string;
-	var c=a[i].prop;
-	this.versionSearchString=a[i].versionSearch||a[i].identity;
-	if(b)
-	{
-	  if(b.indexOf(a[i].subString)!=-1)
-	    return a[i].identity;
+    var b=a[i].string;
+    var c=a[i].prop;
+    this.versionSearchString=a[i].versionSearch||a[i].identity;
+    if(b)
+    {
+      if(b.indexOf(a[i].subString)!=-1)
+        return a[i].identity;
         }
-	else if(c)
-	return a[i].identity;
+    else if(c)
+    return a[i].identity;
       }
     },
 
@@ -58,54 +58,54 @@ var BrowserDetect = {
     {
       var b=a.indexOf(this.versionSearchString);
       if(b==-1)
-      	return;
+        return;
       return parseFloat(a.substring(b+this.versionSearchString.length+1));
     },
 
     dataBrowser:[
       {
-	string:navigator.userAgent,subString:"OmniWeb",versionSearch:"OmniWeb/",identity:"OmniWeb"
+    string:navigator.userAgent,subString:"OmniWeb",versionSearch:"OmniWeb/",identity:"OmniWeb"
       },
       {
-	string:navigator.vendor,subString:"Apple",identity:"Safari"
+    string:navigator.vendor,subString:"Apple",identity:"Safari"
       },
       {
-	prop:global.opera,identity:"Opera"
+    prop:global.opera,identity:"Opera"
       },
       {
-	string:navigator.vendor,subString:"iCab",identity:"iCab"
+    string:navigator.vendor,subString:"iCab",identity:"iCab"
       },
       {
-	string:navigator.vendor,subString:"KDE",identity:"Konqueror"
+    string:navigator.vendor,subString:"KDE",identity:"Konqueror"
       },
       {
-	string:navigator.userAgent,subString:"Firefox",identity:"Firefox"
+    string:navigator.userAgent,subString:"Firefox",identity:"Firefox"
       },
       {
-	string:navigator.vendor,subString:"Camino",identity:"Camino"
+    string:navigator.vendor,subString:"Camino",identity:"Camino"
       },
       {
-	string:navigator.userAgent,subString:"Netscape",identity:"Netscape"
+    string:navigator.userAgent,subString:"Netscape",identity:"Netscape"
       },
       {
-	string:navigator.userAgent,subString:"MSIE",identity:"Explorer",versionSearch:"MSIE"
+    string:navigator.userAgent,subString:"MSIE",identity:"Explorer",versionSearch:"MSIE"
       },
       {
-	string:navigator.userAgent,subString:"Gecko",identity:"Mozilla",versionSearch:"rv"
+    string:navigator.userAgent,subString:"Gecko",identity:"Mozilla",versionSearch:"rv"
       },
       {
-	string:navigator.userAgent,subString:"Mozilla",identity:"Netscape",versionSearch:"Mozilla"
+    string:navigator.userAgent,subString:"Mozilla",identity:"Netscape",versionSearch:"Mozilla"
       }
     ],
     dataOS:[
       {
-	string:navigator.platform,subString:"Win",identity:"Windows"
+    string:navigator.platform,subString:"Win",identity:"Windows"
       },
       {
-	string:navigator.platform,subString:"Mac",identity:"Mac"
+    string:navigator.platform,subString:"Mac",identity:"Mac"
       },
       {
-	string:navigator.platform,subString:"Linux",identity:"Linux"
+    string:navigator.platform,subString:"Linux",identity:"Linux"
       }
     ]
   };

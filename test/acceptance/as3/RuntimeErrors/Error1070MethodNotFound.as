@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 /*
-1070	Method _ not found on _
+1070    Method _ not found on _
 */
 
 var CODE = 1070;
@@ -51,12 +51,12 @@ class B extends A {
 }
 
 try {
-	var z = "no error";
-	new B().f();
+    var z = "no error";
+    new B().f();
 } catch (err) {
-	z = err.toString();
+    z = err.toString();
 } finally {
-	AddTestCase("Runtime Error", "ReferenceError: Error #" + CODE, referenceError(z));
+    AddTestCase("Runtime Error", "ReferenceError: Error #" + CODE, referenceError(z));
 }
 
 //-----------------------------------------------------------

@@ -46,28 +46,28 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var a;
+    var a;
 
-	if( !a ){
-		array[item++] = new TestCase(SECTION, "var a;!a", true, true);
-	} else {
-		array[item++] = new TestCase(SECTION, "var a;!a", false, true);
-	}
+    if( !a ){
+        array[item++] = new TestCase(SECTION, "var a;!a", true, true);
+    } else {
+        array[item++] = new TestCase(SECTION, "var a;!a", false, true);
+    }
 
-	if( a == null ){
-		array[item++] = new TestCase(SECTION, "var a;a == null", true, true);
-	} else {
-		array[item++] = new TestCase(SECTION, "var a;a == null", false, true);
-	}
+    if( a == null ){
+        array[item++] = new TestCase(SECTION, "var a;a == null", true, true);
+    } else {
+        array[item++] = new TestCase(SECTION, "var a;a == null", false, true);
+    }
 
-	if( a == undefined ){
-		array[item++] = new TestCase(SECTION, "var a;a == undefined", true, true);
-	} else {
-		array[item++] = new TestCase(SECTION, "var a;a == undefined", false, true);
-	}
+    if( a == undefined ){
+        array[item++] = new TestCase(SECTION, "var a;a == undefined", true, true);
+    } else {
+        array[item++] = new TestCase(SECTION, "var a;a == undefined", false, true);
+    }
 
-	return array;
+    return array;
 }

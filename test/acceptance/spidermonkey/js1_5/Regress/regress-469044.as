@@ -99,7 +99,7 @@ function addtestcases()
       print(actual += "" + c);
     }
     print(actual += c);
-  }  
+  }
   AddTestCase(summary + ': 3', expect, actual);
 
 

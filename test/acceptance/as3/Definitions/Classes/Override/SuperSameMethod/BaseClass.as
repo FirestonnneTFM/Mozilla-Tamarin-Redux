@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package SuperSameMethod {
-	public class BaseClass {
-		public function echo() : String { return "echo() from BaseClass"; }
-	}
+    public class BaseClass {
+        public function echo() : String { return "echo() from BaseClass"; }
+    }
 }

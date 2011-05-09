@@ -79,7 +79,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,  "myfunc1()",undefined,myfunc1() );
 
     MYPROPS = '';
-    for ( var p in myfunc1.prototype ) { 
+    for ( var p in myfunc1.prototype ) {
         MYPROPS += p;
     }
 

@@ -95,5 +95,5 @@ function getTestCases() {
         "true",
         ((regexp4 instanceof RegExp).toString()));
         
-    return array;   
+    return array;
 }

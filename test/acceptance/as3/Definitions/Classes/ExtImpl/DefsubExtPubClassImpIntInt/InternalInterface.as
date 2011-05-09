@@ -39,8 +39,8 @@
 
 package PubClassImpInternalInt{ //package name
 
-	namespace ns;
-	//namespace
+    namespace ns;
+    //namespace
 
-	
+    
 }

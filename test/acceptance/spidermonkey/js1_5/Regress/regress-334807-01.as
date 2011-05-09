@@ -49,7 +49,7 @@ printStatus (summary);
 
 try
 {
-  (function () { printStatus( arguments.join()); })( 1, 2, 3 ); 
+  (function () { printStatus( arguments.join()); })( 1, 2, 3 );
 }
 catch(ex)
 {

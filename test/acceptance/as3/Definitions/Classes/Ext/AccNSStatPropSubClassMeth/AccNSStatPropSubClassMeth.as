@@ -38,20 +38,20 @@
 package StaticPropertyPackage {
 
         public namespace ns1;
-	
-	public class BaseClass {
-		ns1 static var i:int;
-	}
+    
+    public class BaseClass {
+        ns1 static var i:int;
+    }
    
-	public class AccNSStatPropSubClassMeth extends BaseClass {
-	
-		public function getInt(): int {
-			return ns1::i;
-		}
-		
-		public function getBaseInt(): int {
-			return BaseClass.ns1::i;
-		}
+    public class AccNSStatPropSubClassMeth extends BaseClass {
+    
+        public function getInt(): int {
+            return ns1::i;
+        }
+        
+        public function getBaseInt(): int {
+            return BaseClass.ns1::i;
+        }
 
-	}
+    }
 }

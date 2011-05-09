@@ -39,15 +39,15 @@
 
 package PublicClassImpDefInt{ //package name
 
-	namespace ns;
-	//namespace
+    namespace ns;
+    //namespace
 
-	interface DefaultInt{
-	
-		function deffunc():String;  			//Default attribute method
+    interface DefaultInt{
+    
+        function deffunc():String;              //Default attribute method
 
-	//	public function pubFunc():Boolean;	       //Public attribute method
+    //  public function pubFunc():Boolean;         //Public attribute method
 
-	//	ns function nsFunc(a="test"):int;	       //Namespace attribute method
-	}
+    //  ns function nsFunc(a="test"):int;          //Namespace attribute method
+    }
 }

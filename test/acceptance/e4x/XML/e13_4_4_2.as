@@ -72,7 +72,7 @@ var n4 = new Namespace('boo', 'http://hk.com');
 var xml = "<a><b s='1'><c>55</c><d>bird</d></b><b s='2'><c>5</c><d>dinosaur</d></b></a>";
 var xmlwithns = "<a xmlns:pfx=\"http://w3.org\"><a><b s='1'><c>55</c><d>bird</d></b><b s='2'><c>5</c><d>dinosaur</d></b></a>";
 
-AddTestCase( "addNamespace with prefix:", "http://w3.org", 
+AddTestCase( "addNamespace with prefix:", "http://w3.org",
            (  x1 = new XML(xml), x1.addNamespace(n1), myGetNamespace(x1,'pfx').toString()));
 
 AddTestCase( "addNamespace without prefix:", undefined,
@@ -83,9 +83,9 @@ expected = "Error #1063";
 actual = "No error";
 
 try {
-	x1.addNamespace();
+    x1.addNamespace();
 } catch(e1) {
-	actual = grabError(e1, e1.toString());
+    actual = grabError(e1, e1.toString());
 }
 
 AddTestCase( "addNamespace(): Error. Needs 1 argument", expected, actual);
@@ -96,8 +96,8 @@ AddTestCase( "Does namespace w/o prefix change XML object:", true,
 AddTestCase( "Does namespace w/ prefix change XML object:", true,
            (  x1 = new XML(xml), y1 = new XML(xml), x1.addNamespace(n2), (x1 == y1)));
 
-AddTestCase( "Adding two different namespaces:", 'http://w3.org', 
-	   (  x1 = new XML(xml), x1.addNamespace(n1), x1.addNamespace(n3), myGetNamespace(x1, 'pfx').toString()));
+AddTestCase( "Adding two different namespaces:", 'http://w3.org',
+       (  x1 = new XML(xml), x1.addNamespace(n1), x1.addNamespace(n3), myGetNamespace(x1, 'pfx').toString()));
 
 AddTestCase( "Adding two different namespaces:", 'http://us.gov',
            (  x1 = new XML(xml), x1.addNamespace(n1), x1.addNamespace(n3), myGetNamespace(x1, 'boo').toString()));
@@ -129,13 +129,13 @@ x2s = x2.toString();
  
 correct = '<x xmlns:ns2="newuri" xmlns="foo">\n  <b>text</b>\n</x>';
 
-AddTestCase("Adding namespace that previously existed with a different prefix", correct, 
-	   x2s);
+AddTestCase("Adding namespace that previously existed with a different prefix", correct,
+       x2s);
 
 
 correct = <newprefix:x xmlns:newprefix="foo"><b>text</b></newprefix:x>;
 
-AddTestCase("Adding totally new namespace", correct, 
+AddTestCase("Adding totally new namespace", correct,
 (ns3 = new Namespace ("newprefix", "foo"), x2.addNamespace (ns3),x2));
 
 END();

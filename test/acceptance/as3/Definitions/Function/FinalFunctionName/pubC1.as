@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package FinalFunctionName {
-	function C1 () { return "C1"; }
-	public function pubC1 () { return C1(); }
+    function C1 () { return "C1"; }
+    public function pubC1 () { return C1(); }
 }
 

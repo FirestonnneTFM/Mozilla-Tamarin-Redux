@@ -67,8 +67,8 @@ function getTestCases() {
     A.length = 123;
     var PROPS = '';
     for ( var p in A ) {
-		if (p == 'length')
-			PROPS += p;
+        if (p == 'length')
+            PROPS += p;
     }
 
     array[item++] = new TestCase(   SECTION,

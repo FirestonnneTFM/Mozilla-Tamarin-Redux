@@ -37,7 +37,7 @@
 package UintVarAsClassProp{
 
 public class testuint {
-	public var num1:uint = 1;
+    public var num1:uint = 1;
 }
 
 }

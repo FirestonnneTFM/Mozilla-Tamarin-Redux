@@ -142,7 +142,7 @@ class TestClass {
     private var myVal:Object;
     
     static public function over100(item:TestClass, index:int, vector:Vector.<TestClass>):Boolean {
-        if (item.myVal > 100) 
+        if (item.myVal > 100)
             return true;
         return false;
     }

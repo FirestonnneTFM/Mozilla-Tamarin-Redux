@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 package DiscontinuousPackage {
 
-	public interface IClickable {
-		 function whoAmI():String; 
-	}
+    public interface IClickable {
+         function whoAmI():String;
+    }
 }

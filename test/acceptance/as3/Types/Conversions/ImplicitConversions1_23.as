@@ -46,12 +46,12 @@ startTest();
 
 /*var thisError = "no exception thrown";
 try{
-	var string:String = 1.23;
+    var string:String = 1.23;
 } catch (e0) {
-	thisError = e0.toString();
+    thisError = e0.toString();
 } finally {
-	AddTestCase( "var string:String = 1.23", "no exception thrown", typeError(thisError));
-	AddTestCase( "var string:String = 1.23", "1.23", string);
+    AddTestCase( "var string:String = 1.23", "no exception thrown", typeError(thisError));
+    AddTestCase( "var string:String = 1.23", "1.23", string);
 }*/
 var string:String = 1.23;
 AddTestCase( "var string:String = 1.23", "1.23", string);
@@ -62,12 +62,12 @@ AddTestCase("number:Number = 1.23", 1.23, number );
 
 /*thisError = "no exception thrown";
 try{
-	var myInt:int;
-	myInt = 1.23;
+    var myInt:int;
+    myInt = 1.23;
 } catch(e1) {
-	thisError = e1.toString();
+    thisError = e1.toString();
 } finally {
-	AddTestCase("myInt:int = 1.23", "RangeError: Error #1061", rangeError(thisError) );
+    AddTestCase("myInt:int = 1.23", "RangeError: Error #1061", rangeError(thisError) );
 }
 print(myInt);*/
 
@@ -76,26 +76,26 @@ AddTestCase("myint:int = 1.23", 1, myInt );
 
 /*thisError = "no exception thrown";
 try{
-	var myUint:uint;
-	myUint = 1.23;
+    var myUint:uint;
+    myUint = 1.23;
 } catch(e2) {
-	thisError = e2.toString();
+    thisError = e2.toString();
 } finally {
-	AddTestCase("myUInt:uint = 1.23", "RangeError: Error #1061", rangeError(thisError) );
+    AddTestCase("myUInt:uint = 1.23", "RangeError: Error #1061", rangeError(thisError) );
 }*/
 
 var myUint:uint;
-	myUint = 1.23;
+    myUint = 1.23;
 AddTestCase("myUInt:uint = 1.23", 1, myUint);
 
 /*thisError = "no exception thrown";
 try{
-	var boolean:Boolean = 1.23;
+    var boolean:Boolean = 1.23;
 } catch(e3) {
-	thisError = e3.toString();
+    thisError = e3.toString();
 } finally {
-	AddTestCase("boolean:Boolean = 1.23", "no exception thrown", typeError(thisError) );
-	AddTestCase("boolean:Boolean = 1.23", true, boolean);
+    AddTestCase("boolean:Boolean = 1.23", "no exception thrown", typeError(thisError) );
+    AddTestCase("boolean:Boolean = 1.23", true, boolean);
 }*/
 
 var boolean:Boolean = 1.23;

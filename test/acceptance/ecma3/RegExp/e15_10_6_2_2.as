@@ -105,251 +105,251 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var status = '';
-	var pattern = '';
-	var string = '';
-	var actualmatch = '';
-	var expectedmatch = '';
-
-
-	/******************************************************************************
-	 *
-	 * Case 1 : when the global flag is set -
-	 *
-	 *****************************************************************************/
-	pattern = /abc/gi;
-	string = 'AbcaBcabC';
-
-	status = inSection(1);
-	actualmatch = pattern.exec(string);
-	expectedmatch = Array('Abc');
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
-
-	status = inSection(2);
-	actualmatch = pattern.exec(string);
-	expectedmatch = Array('aBc');
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
-
-	status = inSection(3);
-	actualmatch = pattern.exec(string);
-	expectedmatch = Array('abC');
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
-
-	/*
-	* At this point |lastIndex| is > string.length, so the match should be null -
-	*/
-	status = inSection(4);
-	actualmatch = pattern.exec(string);
-	expectedmatch = null;
-	array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
-
-	/*
-	* Now let's set |lastIndex| to -1, so the match should again be null -
-	*/
-	status = inSection(5);
-	pattern.lastIndex = -1;
-	actualmatch = pattern.exec(string);
-	expectedmatch = null;
-	array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
-
-	/*
-	* Now try some edge-case values. Thanks to the work done in
-	* http://bugzilla.mozilla.org/show_bug.cgi?id=124339, |lastIndex|
-	* is now stored as a double instead of a uint32 (unsigned integer).
-	*
-	* Note 2^32 -1 is the upper bound for uint32's, but doubles can go
-	* all the way up to Number.MAX_VALUE. So that's why we need cases
-	* between those two numbers.
-	*/
-	/*
-	***** leave commmented out until we decide the size of lastIndex ******
-
-	status = inSection(6);
-	pattern.lastIndex = Math.pow(2,32);
-	actualmatch = pattern.exec(string);
-	expectedmatch = null;
-	array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
-
-	status = inSection(7);
-	pattern.lastIndex = -Math.pow(2,32);
-	actualmatch = pattern.exec(string);
-	expectedmatch = null;
-	array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
-
-	status = inSection(8);
-	pattern.lastIndex = Math.pow(2,32) + 1;
-	actualmatch = pattern.exec(string);
-	expectedmatch = null;
-	array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
-
-	status = inSection(9);
-	pattern.lastIndex = -(Math.pow(2,32) + 1);
-	actualmatch = pattern.exec(string);
-	expectedmatch = null;
-	array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
-
-	status = inSection(10);
-	pattern.lastIndex = Math.pow(2,32) * 2;
-	actualmatch = pattern.exec(string);
-	expectedmatch = null;
-	array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
-
-	status = inSection(11);
-	pattern.lastIndex = -Math.pow(2,32) * 2;
-	actualmatch = pattern.exec(string);
-	expectedmatch = null;
-	array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
-
-	status = inSection(12);
-	pattern.lastIndex = Math.pow(2,40);
-	actualmatch = pattern.exec(string);
-	expectedmatch = null;
-	array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
-
-	status = inSection(13);
-	pattern.lastIndex = -Math.pow(2,40);
-	actualmatch = pattern.exec(string);
-	expectedmatch = null;
-	array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
-
-	status = inSection(14);
-	pattern.lastIndex = Number.MAX_VALUE;
-	actualmatch = pattern.exec(string);
-	expectedmatch = null;
-	array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
-
-	status = inSection(15);
-	pattern.lastIndex = -Number.MAX_VALUE;
-	actualmatch = pattern.exec(string);
-	expectedmatch = null;
-	array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
-	*/
+    var status = '';
+    var pattern = '';
+    var string = '';
+    var actualmatch = '';
+    var expectedmatch = '';
 
 
-	/******************************************************************************
-	 *
-	 * Case 2: repeat all the above cases WITHOUT the global flag set.
-	 * According to EMCA. |lastIndex| should get set to 0 before the match.
-	 *
-	 * Therefore re.exec(str) should be unaffected; thus our expected values
-	 * below are now DIFFERENT when |lastIndex| is < 0 or > str.length
-	 *
-	 *****************************************************************************/
+    /******************************************************************************
+     *
+     * Case 1 : when the global flag is set -
+     *
+     *****************************************************************************/
+    pattern = /abc/gi;
+    string = 'AbcaBcabC';
 
-	pattern = /abc/i;
-	string = 'AbcaBcabC';
+    status = inSection(1);
+    actualmatch = pattern.exec(string);
+    expectedmatch = Array('Abc');
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	/*  status = inSection(16);
-	  actualmatch = pattern.exec(string);
-	  expectedmatch = Array('Abc');
-	  array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    status = inSection(2);
+    actualmatch = pattern.exec(string);
+    expectedmatch = Array('aBc');
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	  status = inSection(17);
-	  actualmatch = pattern.exec(string);
-	  expectedmatch = Array('Abc'); // NOT Array('aBc') as before -
-	  array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    status = inSection(3);
+    actualmatch = pattern.exec(string);
+    expectedmatch = Array('abC');
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	  status = inSection(18);
-	  actualmatch = pattern.exec(string);
-	  expectedmatch = Array('Abc'); // NOT Array('abC') as before -
-	  array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
-	*/
-	  /*
-	   * At this point above, |lastIndex| WAS > string.length, but not here -
-	   */
-	/*  status = inSection(19);
-	  actualmatch = pattern.exec(string);
-	  expectedmatch = Array('Abc') // NOT null as before -
-	  array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
-	*/
-	  /*
-	   * Now let's set |lastIndex| to -1
-	   */
-	/*  status = inSection(20);
-	  pattern.lastIndex = -1;
-	  actualmatch = pattern.exec(string);
-	  expectedmatch = Array('Abc') // NOT null as before -
-	  array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
-	*/
-	  /*
-	   * Now try some edge-case values. Thanks to the work done in
-	   * http://bugzilla.mozilla.org/show_bug.cgi?id=124339, |lastIndex|
-	   * is now stored as a double instead of a uint32 (unsigned integer).
-	   *
-	   * Note 2^32 -1 is the upper bound for uint32's, but doubles can go
-	   * all the way up to Number.MAX_VALUE. So that's why we need cases
-	   * between those two numbers.
-	   */
-	/*  status = inSection(21);
-	  pattern.lastIndex = Math.pow(2,32);
-	  actualmatch = pattern.exec(string);
-	  expectedmatch = Array('Abc') // NOT null as before -
-	  array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    /*
+    * At this point |lastIndex| is > string.length, so the match should be null -
+    */
+    status = inSection(4);
+    actualmatch = pattern.exec(string);
+    expectedmatch = null;
+    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
 
-	  status = inSection(22);
-	  pattern.lastIndex = -Math.pow(2,32);
-	  actualmatch = pattern.exec(string);
-	  expectedmatch = Array('Abc') // NOT null as before -
-	  array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    /*
+    * Now let's set |lastIndex| to -1, so the match should again be null -
+    */
+    status = inSection(5);
+    pattern.lastIndex = -1;
+    actualmatch = pattern.exec(string);
+    expectedmatch = null;
+    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
 
-	  status = inSection(23);
-	  pattern.lastIndex = Math.pow(2,32) + 1;
-	  actualmatch = pattern.exec(string);
-	  expectedmatch = Array('Abc') // NOT null as before -
-	  array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    /*
+    * Now try some edge-case values. Thanks to the work done in
+    * http://bugzilla.mozilla.org/show_bug.cgi?id=124339, |lastIndex|
+    * is now stored as a double instead of a uint32 (unsigned integer).
+    *
+    * Note 2^32 -1 is the upper bound for uint32's, but doubles can go
+    * all the way up to Number.MAX_VALUE. So that's why we need cases
+    * between those two numbers.
+    */
+    /*
+    ***** leave commmented out until we decide the size of lastIndex ******
 
-	  status = inSection(24);
-	  pattern.lastIndex = -(Math.pow(2,32) + 1);
-	  actualmatch = pattern.exec(string);
-	  expectedmatch = Array('Abc') // NOT null as before -
-	  array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    status = inSection(6);
+    pattern.lastIndex = Math.pow(2,32);
+    actualmatch = pattern.exec(string);
+    expectedmatch = null;
+    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
 
-	  status = inSection(25);
-	  pattern.lastIndex = Math.pow(2,32) * 2;
-	  actualmatch = pattern.exec(string);
-	  expectedmatch = Array('Abc') // NOT null as before -
-	  array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    status = inSection(7);
+    pattern.lastIndex = -Math.pow(2,32);
+    actualmatch = pattern.exec(string);
+    expectedmatch = null;
+    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
 
-	  status = inSection(26);
-	  pattern.lastIndex = -Math.pow(2,32) * 2;
-	  actualmatch = pattern.exec(string);
-	  expectedmatch = Array('Abc') // NOT null as before -
-	  array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    status = inSection(8);
+    pattern.lastIndex = Math.pow(2,32) + 1;
+    actualmatch = pattern.exec(string);
+    expectedmatch = null;
+    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
 
-	  status = inSection(27);
-	  pattern.lastIndex = Math.pow(2,40);
-	  actualmatch = pattern.exec(string);
-	  expectedmatch = Array('Abc') // NOT null as before -;
-	  array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    status = inSection(9);
+    pattern.lastIndex = -(Math.pow(2,32) + 1);
+    actualmatch = pattern.exec(string);
+    expectedmatch = null;
+    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
 
-	  status = inSection(28);
-	  pattern.lastIndex = -Math.pow(2,40);
-	  actualmatch = pattern.exec(string);
-	  expectedmatch = Array('Abc') // NOT null as before -
-	  array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    status = inSection(10);
+    pattern.lastIndex = Math.pow(2,32) * 2;
+    actualmatch = pattern.exec(string);
+    expectedmatch = null;
+    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
 
-	  status = inSection(29);
-	  pattern.lastIndex = Number.MAX_VALUE;
-	  actualmatch = pattern.exec(string);
-	  expectedmatch = Array('Abc') // NOT null as before -
-	  array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    status = inSection(11);
+    pattern.lastIndex = -Math.pow(2,32) * 2;
+    actualmatch = pattern.exec(string);
+    expectedmatch = null;
+    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
 
-	  status = inSection(30);
-	  pattern.lastIndex = -Number.MAX_VALUE;
-	  actualmatch = pattern.exec(string);
-	  expectedmatch = Array('Abc') // NOT null as before -
-	  array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
-	*/
+    status = inSection(12);
+    pattern.lastIndex = Math.pow(2,40);
+    actualmatch = pattern.exec(string);
+    expectedmatch = null;
+    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
 
-	// added from regress_24712
-	status = inSection(31);
-	pattern = /([\S]+([ \t]+[\S]+)*)[ \t]*=[ \t]*[\S]+/;
-	actualmatch = pattern.exec("Course_Creator = Test");
-	expectedmatch = ["Course_Creator = Test", "Course_Creator", undefined];
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    status = inSection(13);
+    pattern.lastIndex = -Math.pow(2,40);
+    actualmatch = pattern.exec(string);
+    expectedmatch = null;
+    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
 
-	return array;
+    status = inSection(14);
+    pattern.lastIndex = Number.MAX_VALUE;
+    actualmatch = pattern.exec(string);
+    expectedmatch = null;
+    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+
+    status = inSection(15);
+    pattern.lastIndex = -Number.MAX_VALUE;
+    actualmatch = pattern.exec(string);
+    expectedmatch = null;
+    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+    */
+
+
+    /******************************************************************************
+     *
+     * Case 2: repeat all the above cases WITHOUT the global flag set.
+     * According to EMCA. |lastIndex| should get set to 0 before the match.
+     *
+     * Therefore re.exec(str) should be unaffected; thus our expected values
+     * below are now DIFFERENT when |lastIndex| is < 0 or > str.length
+     *
+     *****************************************************************************/
+
+    pattern = /abc/i;
+    string = 'AbcaBcabC';
+
+    /*  status = inSection(16);
+      actualmatch = pattern.exec(string);
+      expectedmatch = Array('Abc');
+      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+      status = inSection(17);
+      actualmatch = pattern.exec(string);
+      expectedmatch = Array('Abc'); // NOT Array('aBc') as before -
+      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+      status = inSection(18);
+      actualmatch = pattern.exec(string);
+      expectedmatch = Array('Abc'); // NOT Array('abC') as before -
+      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    */
+      /*
+       * At this point above, |lastIndex| WAS > string.length, but not here -
+       */
+    /*  status = inSection(19);
+      actualmatch = pattern.exec(string);
+      expectedmatch = Array('Abc') // NOT null as before -
+      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    */
+      /*
+       * Now let's set |lastIndex| to -1
+       */
+    /*  status = inSection(20);
+      pattern.lastIndex = -1;
+      actualmatch = pattern.exec(string);
+      expectedmatch = Array('Abc') // NOT null as before -
+      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    */
+      /*
+       * Now try some edge-case values. Thanks to the work done in
+       * http://bugzilla.mozilla.org/show_bug.cgi?id=124339, |lastIndex|
+       * is now stored as a double instead of a uint32 (unsigned integer).
+       *
+       * Note 2^32 -1 is the upper bound for uint32's, but doubles can go
+       * all the way up to Number.MAX_VALUE. So that's why we need cases
+       * between those two numbers.
+       */
+    /*  status = inSection(21);
+      pattern.lastIndex = Math.pow(2,32);
+      actualmatch = pattern.exec(string);
+      expectedmatch = Array('Abc') // NOT null as before -
+      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+      status = inSection(22);
+      pattern.lastIndex = -Math.pow(2,32);
+      actualmatch = pattern.exec(string);
+      expectedmatch = Array('Abc') // NOT null as before -
+      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+      status = inSection(23);
+      pattern.lastIndex = Math.pow(2,32) + 1;
+      actualmatch = pattern.exec(string);
+      expectedmatch = Array('Abc') // NOT null as before -
+      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+      status = inSection(24);
+      pattern.lastIndex = -(Math.pow(2,32) + 1);
+      actualmatch = pattern.exec(string);
+      expectedmatch = Array('Abc') // NOT null as before -
+      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+      status = inSection(25);
+      pattern.lastIndex = Math.pow(2,32) * 2;
+      actualmatch = pattern.exec(string);
+      expectedmatch = Array('Abc') // NOT null as before -
+      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+      status = inSection(26);
+      pattern.lastIndex = -Math.pow(2,32) * 2;
+      actualmatch = pattern.exec(string);
+      expectedmatch = Array('Abc') // NOT null as before -
+      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+      status = inSection(27);
+      pattern.lastIndex = Math.pow(2,40);
+      actualmatch = pattern.exec(string);
+      expectedmatch = Array('Abc') // NOT null as before -;
+      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+      status = inSection(28);
+      pattern.lastIndex = -Math.pow(2,40);
+      actualmatch = pattern.exec(string);
+      expectedmatch = Array('Abc') // NOT null as before -
+      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+      status = inSection(29);
+      pattern.lastIndex = Number.MAX_VALUE;
+      actualmatch = pattern.exec(string);
+      expectedmatch = Array('Abc') // NOT null as before -
+      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+      status = inSection(30);
+      pattern.lastIndex = -Number.MAX_VALUE;
+      actualmatch = pattern.exec(string);
+      expectedmatch = Array('Abc') // NOT null as before -
+      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    */
+
+    // added from regress_24712
+    status = inSection(31);
+    pattern = /([\S]+([ \t]+[\S]+)*)[ \t]*=[ \t]*[\S]+/;
+    actualmatch = pattern.exec("Course_Creator = Test");
+    expectedmatch = ["Course_Creator = Test", "Course_Creator", undefined];
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+    return array;
 }

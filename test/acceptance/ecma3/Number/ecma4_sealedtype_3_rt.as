@@ -55,11 +55,11 @@ function getTestCases() {
     var item:Number= 0;
 
     var thisError = "no exception thrown";
-    var tostr=Number.prototype.toString; 
-    var x:Number=4; 
+    var tostr=Number.prototype.toString;
+    var x:Number=4;
     try{
         
-        x.toString=tostr; 
+        x.toString=tostr;
         x.toString();
     } catch (e:ReferenceError) {
         thisError = e.toString();

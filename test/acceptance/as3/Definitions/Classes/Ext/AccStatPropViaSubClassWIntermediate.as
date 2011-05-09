@@ -66,26 +66,26 @@ startTest();                // leave this alone
 var obj:AccStatPropViaSubClassWIntermediate = new AccStatPropViaSubClassWIntermediate();
 
 // ********************************************
-// Try to access a static property of the base 
-// class via a reference to the subclass that 
+// Try to access a static property of the base
+// class via a reference to the subclass that
 // extends an intermediary class
 // ********************************************
 var thisError = "no exception thrown";
 try{
-	var str = obj.string;
+    var str = obj.string;
 } catch (e1) {
-	thisError = e1.toString();
+    thisError = e1.toString();
 } finally {
-	AddTestCase( "access static property of base class using sub and intermediate",
-				REFERENCEERROR+1069,
-				referenceError( thisError) );
+    AddTestCase( "access static property of base class using sub and intermediate",
+                REFERENCEERROR+1069,
+                referenceError( thisError) );
 }
 
 
 // ********************************************
-// Try to access a static property in an instance 
-// method using an intermeidate base class 
-// ( C -> B -> A, in C.foo( return B.x)) 
+// Try to access a static property in an instance
+// method using an intermeidate base class
+// ( C -> B -> A, in C.foo( return B.x))
 // ********************************************
 AddTestCase("*** access static property of base class using  sub and intermediate ***", 1, 1);
 AddTestCase("obj.getString()", "baseclass", obj.getString());

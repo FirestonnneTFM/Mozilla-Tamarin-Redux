@@ -36,15 +36,15 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-		/****  inner class Node  ***/
-		class Node 
-		{
-			var left:Node, right:Node;
-			var i:int, j:int;
-			function Node(l:Node = null, r:Node = null) { left = l; right = r; }
-			
-		}
-		/**** end Node *******/
+        /****  inner class Node  ***/
+        class Node
+        {
+            var left:Node, right:Node;
+            var i:int, j:int;
+            function Node(l:Node = null, r:Node = null) { left = l; right = r; }
+            
+        }
+        /**** end Node *******/
 
 trace("starting memlimit test");
 var data:Array=new Array();

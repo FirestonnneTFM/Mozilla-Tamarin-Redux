@@ -38,7 +38,7 @@
 
 package DynamicClass {
 
- import DynamicClass.*; 
+ import DynamicClass.*;
 
  class ExtDynamicClassPubStatInner extends DynamicClass {
 
@@ -115,7 +115,7 @@ package DynamicClass {
     }
 
     // ***************************************
-    // access public static property from 
+    // access public static property from
     // default method of sub class
     // ***************************************
 

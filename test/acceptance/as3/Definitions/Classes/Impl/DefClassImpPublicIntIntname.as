@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 import DefClassImpPublicIntIntname.*;
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS3";        // Version of ECMAScript or ActionScript
 var TITLE   = "Default class implements two default interfaces";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -47,7 +47,7 @@ startTest();                // leave this alone
 // add your tests here
   
 
-var obj:DefaultClassAccesor = new DefaultClassAccesor(); 
+var obj:DefaultClassAccesor = new DefaultClassAccesor();
 //Default class implements the first public interface with an interface name method
 AddTestCase("Default class implements the first public interface with an interface name method", "PASSED", obj.accdeffunc());
 //Default class implements the second public interface with an interface name method

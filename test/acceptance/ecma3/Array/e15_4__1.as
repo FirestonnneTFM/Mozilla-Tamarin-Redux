@@ -47,7 +47,7 @@
 function getTestCases() {
     var array = new Array();
     var item = 0;
-	var myarr;
+    var myarr;
 
     array[item++] = new TestCase(   SECTION,
                                     "var myarr = new Array(); myarr[Math.pow(2,32)-2]='hi'; myarr[Math.pow(2,32)-2]",

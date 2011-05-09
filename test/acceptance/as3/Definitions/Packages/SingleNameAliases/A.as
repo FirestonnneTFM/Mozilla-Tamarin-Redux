@@ -36,10 +36,10 @@
  * ***** END LICENSE BLOCK ***** */
 package SingleNameAliases {
 
-	public class A {
-		public function whoAmI():String {
-			return "A";
-		}
-	
-	}
+    public class A {
+        public function whoAmI():String {
+            return "A";
+        }
+    
+    }
 }

@@ -38,16 +38,16 @@
 package StaticPropertyPackage {
 
         class BaseClass {
-		static var date:Date = new Date(0);
-		
-		public static function getDate() : Date {
-			return date;
-		}
-	}
-	public class AccStatMethSubClassMethSuper extends BaseClass {
-	
-		public function getBaseDate() : Date {
-			return super.getDate();
-		}
-	}
+        static var date:Date = new Date(0);
+        
+        public static function getDate() : Date {
+            return date;
+        }
+    }
+    public class AccStatMethSubClassMethSuper extends BaseClass {
+    
+        public function getBaseDate() : Date {
+            return super.getDate();
+        }
+    }
 }

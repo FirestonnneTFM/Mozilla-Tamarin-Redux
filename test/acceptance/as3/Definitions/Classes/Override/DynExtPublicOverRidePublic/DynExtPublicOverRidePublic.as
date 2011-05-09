@@ -37,33 +37,33 @@
 
 package PublicClass {
 
-	import PublicClass.*;
+    import PublicClass.*;
 
-	dynamic class DynExtPublicOverRidePublicInner extends PublicClass {
+    dynamic class DynExtPublicOverRidePublicInner extends PublicClass {
 
-		public var orSet = false;
-		public var orGet = false;
+        public var orSet = false;
+        public var orGet = false;
 
-		// *******************************
-		// override a public method
-		// with a public method
-		// *******************************
+        // *******************************
+        // override a public method
+        // with a public method
+        // *******************************
 
-		override public function getPubBoolean(): Boolean {
-			orGet = true;
-			return this.boolean;
-		}
+        override public function getPubBoolean(): Boolean {
+            orGet = true;
+            return this.boolean;
+        }
 
-		override public function setPubBoolean( b:Boolean ) {
-			orSet = true;
-			this.boolean = b;
-		}
+        override public function setPubBoolean( b:Boolean ) {
+            orSet = true;
+            this.boolean = b;
+        }
 
-		public function callSuper(b:Boolean):Boolean {
-			super.setPubBoolean(b);
-			return super.getPubBoolean();
-		}
-	}
+        public function callSuper(b:Boolean):Boolean {
+            super.setPubBoolean(b);
+            return super.getPubBoolean();
+        }
+    }
 
-	public class DynExtPublicOverRidePublic extends DynExtPublicOverRidePublicInner {} 
+    public class DynExtPublicOverRidePublic extends DynExtPublicOverRidePublicInner {}
 }

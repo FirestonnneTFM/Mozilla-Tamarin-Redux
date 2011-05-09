@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package EmptyFunctionBody {
-		
-	function returnCustomNoParamsInner():Custom { return new Custom(); }
-	public function returnCustomNoParams():Custom { return returnCustomNoParamsInner(); }
+        
+    function returnCustomNoParamsInner():Custom { return new Custom(); }
+    public function returnCustomNoParams():Custom { return returnCustomNoParamsInner(); }
 }
 

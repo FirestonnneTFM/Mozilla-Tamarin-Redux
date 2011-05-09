@@ -90,7 +90,7 @@ AddTestCase( "EXTDCLASS.testSubGetSetArray(arr)", arr, EXTDCLASS.testSubGetSetAr
 
 
 // ********************************************
-// access default method from a public 
+// access default method from a public
 // method of a sub class
 //
 // ********************************************
@@ -102,7 +102,7 @@ AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access default method from a private 
+// access default method from a private
 // method of a sub class
 //
 // ********************************************
@@ -114,7 +114,7 @@ AddTestCase( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access default method from a final 
+// access default method from a final
 // method of a sub class
 //
 // ********************************************
@@ -135,7 +135,7 @@ AddTestCase( "*** Access default property from outside the class ***", 1, 1 );
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access default property from 
+// access default property from
 // default method in sub class
 // ********************************************
 
@@ -146,7 +146,7 @@ AddTestCase( "EXTDCLASS.subSetDPArray(arr), EXTDCLASS.subGetDPArray()", arr, EXT
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access default property from 
+// access default property from
 // public method in sub class
 // ********************************************
 
@@ -157,7 +157,7 @@ AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", ar
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access default property from 
+// access default property from
 // private method in sub class
 // ********************************************
 
@@ -168,7 +168,7 @@ AddTestCase( "EXTDCLASS.testPrivSubDPArray(arr)", arr, EXTDCLASS.testPrivSubDPAr
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access default property from 
+// access default property from
 // final method in sub class
 // ********************************************
 

@@ -35,20 +35,20 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package DefaultClassPackage {
-	class DefaultClass {
-		var date:Date;
+    class DefaultClass {
+        var date:Date;
 
-		// ****************
-		// constructor
-		// ****************
-		function DefaultClass() {}
+        // ****************
+        // constructor
+        // ****************
+        function DefaultClass() {}
 
-		// *****************
-		// protected methods
-		// *****************
-		protected function getDate() : Date { return date; }
-		protected function setDate( d:Date ) { date = d; }
+        // *****************
+        // protected methods
+        // *****************
+        protected function getDate() : Date { return date; }
+        protected function setDate( d:Date ) { date = d; }
 
-	}
+    }
 
 }

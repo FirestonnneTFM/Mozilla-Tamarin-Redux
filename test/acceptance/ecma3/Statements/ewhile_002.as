@@ -46,7 +46,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     DoWhile( new DoWhileObject(
                 "while expression is null",
@@ -83,7 +83,7 @@ function getTestCases() {
         result = "pass";
 
         while ( expression = object.whileExpression ) {
-	     object.statements ;
+         object.statements ;
         }
 
         // verify that the while expression was evaluated
@@ -103,5 +103,5 @@ function getTestCases() {
             "pass",
             result );
     }
-    return array;    
+    return array;
 }

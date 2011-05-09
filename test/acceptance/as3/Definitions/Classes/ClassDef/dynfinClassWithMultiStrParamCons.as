@@ -48,7 +48,7 @@ startTest();                // leave this alone
 
 
 var x = "test";
-var y = "hello"+"world"; 
+var y = "hello"+"world";
 var dynWithStrParamCons= new dynfinClassWithMultiStrParamCons(x);
 var g2=new dynfinClassWithMultiStrParamCons(x+y);
 //print(dynWithStrParamCons.myString());

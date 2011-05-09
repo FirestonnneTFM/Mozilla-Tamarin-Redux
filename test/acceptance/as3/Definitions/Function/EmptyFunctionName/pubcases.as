@@ -35,11 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package EmptyFunctionName {
-	function cases () { return "cases"; }
-	function Cases () { return "Cases"; }
+    function cases () { return "cases"; }
+    function Cases () { return "Cases"; }
 
-	public function pubcases () { 
-		return cases(); 
-	}
+    public function pubcases () {
+        return cases();
+    }
 }
 

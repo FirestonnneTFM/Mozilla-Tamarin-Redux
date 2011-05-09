@@ -101,19 +101,19 @@ var pat = new Employee( "Toonces, Pat", "Tech Pubs" )
 var les = new Engineer( "Morris, Les",  new Array("JavaScript"), "indy" );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.id",
-	      5,
-	      pat.id );
+          "pat.id",
+          5,
+          pat.id );
 
 testcases[index++] = new TestCase( SECTION,
-	      "terry.id",
-	      6,
-	      terry.id );
+          "terry.id",
+          6,
+          terry.id );
 
 testcases[index++] = new TestCase( SECTION,
-	      "les.id",
-	      7,
-	      les.id );
+          "les.id",
+          7,
+          les.id );
 
 
 test();

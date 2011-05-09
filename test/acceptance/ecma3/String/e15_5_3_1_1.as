@@ -50,7 +50,7 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	// bug 104702 NAB - since we decided String.prototype is a vanilla object
+    // bug 104702 NAB - since we decided String.prototype is a vanilla object
     array[item++] = new TestCase( SECTION, "String.prototype.length",   undefined,  String.prototype.length );
 
     var str = '';

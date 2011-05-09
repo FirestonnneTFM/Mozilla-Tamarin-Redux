@@ -117,7 +117,7 @@ package PublicClass {
 
     // ***************************************
     // access static method of parent
-    // from final method of sub class 
+    // from final method of sub class
     // ***************************************
 
     final function finStatSubGetArray() : Array { return getStatArray(); }
@@ -130,7 +130,7 @@ package PublicClass {
 
 
     // ***************************************
-    // access static property from 
+    // access static property from
     // default method of sub class
     // ***************************************
 

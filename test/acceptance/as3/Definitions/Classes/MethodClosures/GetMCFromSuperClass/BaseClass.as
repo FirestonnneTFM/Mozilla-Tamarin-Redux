@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package MCPackage {
-	public class BaseClass {
-		public function echo( s:String ) : String {
-			return s;
-		}
-	}
+    public class BaseClass {
+        public function echo( s:String ) : String {
+            return s;
+        }
+    }
 }

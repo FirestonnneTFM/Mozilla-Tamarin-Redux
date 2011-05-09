@@ -41,7 +41,7 @@ package testpublicClassWithParamCons{
                 private const y:Number;
                 public function publicClassWithParamCons(a:Number,b:Number){
                                                                            x = a;
-                                                                           this.y=b;           
+                                                                           this.y=b;
                                                                            }
                                               
 

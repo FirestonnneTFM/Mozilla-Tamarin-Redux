@@ -50,9 +50,9 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	var tostr=String.prototype.toString;
-	String.prototype.toString=tostr;
-	var astring;
+    var tostr=String.prototype.toString;
+    String.prototype.toString=tostr;
+    var astring;
     array[item++] = new TestCase( SECTION,
                                   "var tostr=String.prototype.toString, String.prototype.toString=tostr,astring=new String(), astring.toString()",
                                  "",

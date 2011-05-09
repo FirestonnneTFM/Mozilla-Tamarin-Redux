@@ -106,15 +106,15 @@ function exhaustiveStringSliceTest(testname, a)
 
       if (String(b) != String(c))
       {
-	errorMessage =
-	  "ERROR: 'TEST FAILED' ERROR: 'TEST FAILED' ERROR: 'TEST FAILED'\n" +
-	  "            test: " + "a.slice(" + x + "," + y + ")\n" +
-	  "               a: " + String(a) + "\n" +
-	  "   actual result: " + String(b) + "\n" +
-	  " expected result: " + String(c) + "\n";
-	writeHeaderToLog(errorMessage);
-	reason = reason + errorMessage;
-	passed = false;
+    errorMessage =
+      "ERROR: 'TEST FAILED' ERROR: 'TEST FAILED' ERROR: 'TEST FAILED'\n" +
+      "            test: " + "a.slice(" + x + "," + y + ")\n" +
+      "               a: " + String(a) + "\n" +
+      "   actual result: " + String(b) + "\n" +
+      " expected result: " + String(c) + "\n";
+    writeHeaderToLog(errorMessage);
+    reason = reason + errorMessage;
+    passed = false;
       }
     }
   var testCase = testcases[index++] = new TestCase(SECTION, testname, true, passed);

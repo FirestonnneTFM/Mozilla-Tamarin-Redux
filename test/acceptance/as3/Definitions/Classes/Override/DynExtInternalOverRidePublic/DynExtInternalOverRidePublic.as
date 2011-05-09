@@ -37,29 +37,29 @@
 
 package InternalClassPackage {
 
-	import InternalClassPackage.*;
+    import InternalClassPackage.*;
 
-	dynamic class DynExtInternalOverRidePublicInner extends InternalClass {
+    dynamic class DynExtInternalOverRidePublicInner extends InternalClass {
 
-		public var orSet = false;
-		public var orGet = false;
+        public var orSet = false;
+        public var orGet = false;
 
-		// *******************************
-		// override a public method
-		// with a public method
-		// *******************************
+        // *******************************
+        // override a public method
+        // with a public method
+        // *******************************
 
-		override public function getBoolean(): Boolean {
-			orGet = true;
-			return this.boolean;
-		}
+        override public function getBoolean(): Boolean {
+            orGet = true;
+            return this.boolean;
+        }
 
-		override public function setBoolean( b:Boolean ) {
-			orSet = true;
-			this.boolean = b;
-		}
+        override public function setBoolean( b:Boolean ) {
+            orSet = true;
+            this.boolean = b;
+        }
 
-	}
-	public class DynExtInternalOverRidePublic extends DynExtInternalOverRidePublicInner {}
+    }
+    public class DynExtInternalOverRidePublic extends DynExtInternalOverRidePublicInner {}
 
 }

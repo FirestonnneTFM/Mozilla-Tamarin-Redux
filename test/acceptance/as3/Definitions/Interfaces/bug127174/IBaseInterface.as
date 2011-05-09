@@ -36,8 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 package bug127174{
 
-	interface IBaseInterface
-	{
-    	    function method1():void;
-	}
+    interface IBaseInterface
+    {
+            function method1():void;
+    }
 }

@@ -35,13 +35,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package MethodInNamespace {
-	
-	public class MethodInNamespace extends BaseClass {
+    
+    public class MethodInNamespace extends BaseClass {
 
-		override ns1 function getI() : int {
-			return i + 5;
-		}
+        override ns1 function getI() : int {
+            return i + 5;
+        }
 
-	}
-	
+    }
+    
 }

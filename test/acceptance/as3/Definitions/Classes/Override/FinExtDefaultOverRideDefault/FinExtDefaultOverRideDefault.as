@@ -37,34 +37,34 @@
 
 package DefaultClass {
 
-	import DefaultClass.*;
+    import DefaultClass.*;
 
-	public final class FinExtDefaultOverRideDefault extends DefaultClass {
+    public final class FinExtDefaultOverRideDefault extends DefaultClass {
 
-		public var orSet = "FAILED";
-		public var orGet = "FAILED";
+        public var orSet = "FAILED";
+        public var orGet = "FAILED";
 
-		// *********************************
-		// override a default method
-		// with a default method in subclass
-		// *********************************
+        // *********************************
+        // override a default method
+        // with a default method in subclass
+        // *********************************
 
-		override function setNumber(n:Number) {
-			orSet = "PASSED";
-			this.number = n+10;
-		}
+        override function setNumber(n:Number) {
+            orSet = "PASSED";
+            this.number = n+10;
+        }
 
-		override function getNumber() : Number {
-			orGet = "PASSED";
-			return number+10;
-		}
+        override function getNumber() : Number {
+            orGet = "PASSED";
+            return number+10;
+        }
 
-		// public access method
-		public function setGetNumber(n:Number):Number {
-			this.setNumber(n);
-			return getNumber();
-		}
+        // public access method
+        public function setGetNumber(n:Number):Number {
+            this.setNumber(n);
+            return getNumber();
+        }
 
-	}
+    }
 
 }

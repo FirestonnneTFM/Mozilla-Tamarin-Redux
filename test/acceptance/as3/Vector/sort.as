@@ -151,9 +151,9 @@ test();
 
 function CheckItems( A, E, desc) {
   AddTestCase(
-		  desc+" after sort, compare lengths",
-		  E.length,
-		  A.length);
+          desc+" after sort, compare lengths",
+          E.length,
+          A.length);
   AddTestCase(
       desc+ " after sort, compare items",
       E.toString(),
@@ -167,8 +167,8 @@ function Sort( a ) {
       var hi = a[j];
       var c = Compare( lo, hi );
       if ( c == 1 ) {
-	a[i] = hi;
-	a[j] = lo;
+    a[i] = hi;
+    a[j] = lo;
       }
     }
   }

@@ -104,7 +104,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,   "'4294967296' << 0",   ToInt32(4294967296),    '4294967296' << 0 );
     array[item++] = new TestCase( SECTION,   "'4294967297' << 0",   ToInt32(4294967297),    '4294967297' << 0 );
 
-    array[item++] = new TestCase( SECTION,   "-2147483647 << 0",    ToInt32(-2147483647),   -2147483647	<< 0 );
+    array[item++] = new TestCase( SECTION,   "-2147483647 << 0",    ToInt32(-2147483647),   -2147483647 << 0 );
     array[item++] = new TestCase( SECTION,   "-2147483648 << 0",    ToInt32(-2147483648),   -2147483648 << 0 );
     array[item++] = new TestCase( SECTION,   "-2147483649 << 0",    ToInt32(-2147483649),   -2147483649 << 0 );
 
@@ -127,7 +127,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,   "3000000000.75 << 0",  ToInt32(3000000000.75),   3000000000.75 << 0 );
 
     /*
-     * Numbers between - 2^31 and - 2^32 
+     * Numbers between - 2^31 and - 2^32
      */
     array[item++] = new TestCase( SECTION,   "-2147483648.25 << 0",  ToInt32(-2147483648.25),   -2147483648.25 << 0 );
     array[item++] = new TestCase( SECTION,   "-2147483648.5 << 0",   ToInt32(-2147483648.5),    -2147483648.5 << 0 );

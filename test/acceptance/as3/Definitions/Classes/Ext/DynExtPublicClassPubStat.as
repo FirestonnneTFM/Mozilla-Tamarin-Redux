@@ -37,17 +37,17 @@
 
 
 /**
- *  All 'import' statements  should be the first 
+ *  All 'import' statements  should be the first
  *  in a file.
  */
 import PublicClass.*;
 
-var SECTION = "Definitions";       			// provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";  				// Version of JavaScript or ECMA
+var SECTION = "Definitions";                // provide a document reference (ie, ECMA section)
+var VERSION = "AS 3.0";                 // Version of JavaScript or ECMA
 var TITLE   = "dynamic Class Extends Public Class";      // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                				// leave this alone
+startTest();                                // leave this alone
 
 /**
  * Calls to AddTestCase here. AddTestCase is a function that is defined
@@ -82,7 +82,7 @@ AddTestCase( "DYNEXTDCLASS.testSubArray(arr)", arr, (DYNEXTDCLASS.testSubArray(a
 
 
 // ********************************************
-// access public static method from a public 
+// access public static method from a public
 // method of a sub class
 //
 // ********************************************
@@ -93,7 +93,7 @@ AddTestCase( "DYNEXTDCLASS.pubSubSetArray(arr), DYNEXTDCLASS.pubSubGetArray()", 
 
 
 // ********************************************
-// access public static method from a private 
+// access public static method from a private
 // method of a sub class
 //
 // ********************************************
@@ -104,7 +104,7 @@ AddTestCase( "DYNEXTDCLASS.testPrivSubArray(arr)", arr, DYNEXTDCLASS.testPrivSub
 
 
 // ********************************************
-// access public static method from a final 
+// access public static method from a final
 // method of a sub class
 //
 // ********************************************
@@ -114,41 +114,41 @@ AddTestCase( "*** Access public static method from final method of sub class ***
 AddTestCase( "DYNEXTDCLASS.testFinSubArray(arr)", arr, (DYNEXTDCLASS.testFinSubArray(arr)) );
 
 // ********************************************
-// access public static method from a static 
+// access public static method from a static
 // method of a sub class
 //
 // ********************************************
 /*
 AddTestCase( "*** Access public static method from static method of sub class ***", 1, 1 );
-AddTestCase( "DynExtPublicClassPubStat.statSubSetArray(arr), DynExtPublicClassPubStat.statSubGetArray()", arr, 
+AddTestCase( "DynExtPublicClassPubStat.statSubSetArray(arr), DynExtPublicClassPubStat.statSubGetArray()", arr,
              (DynExtPublicClassPubStat.statSubSetArray(arr), DynExtPublicClassPubStat.statSubGetArray()) );
 */
 
 // ********************************************
-// access public static method from a public static 
+// access public static method from a public static
 // method of a sub class
 //
 // ********************************************
 
 //AddTestCase( "*** Access public static method from public static method of sub class ***", 1, 1 );
-//AddTestCase( "DynExtPublicClassPubStat.pubStatSubSetArray(arr), DynExtPublicClassPubStat.pubStatSubGetArray()", arr, 
+//AddTestCase( "DynExtPublicClassPubStat.pubStatSubSetArray(arr), DynExtPublicClassPubStat.pubStatSubGetArray()", arr,
  //            (DynExtPublicClassPubStat.pubStatSubSetArray(arr), DynExtPublicClassPubStat.pubStatSubGetArray()) );
 
 
 // ********************************************
-// access public static method from a private static 
+// access public static method from a private static
 // method of a sub class
 //
 // ********************************************
 
 var EXTDEFAULTCLASS = new DynExtPublicClassPubStat();
 //AddTestCase( "*** Access public static method from private static method of sub class ***", 1, 1 );
-//AddTestCase( "DynExtPublicClassPubStat.testPrivStatSubArray(arr)", arr, 
+//AddTestCase( "DynExtPublicClassPubStat.testPrivStatSubArray(arr)", arr,
 //              DynExtPublicClassPubStat.testPrivStatSubArray(arr) );
 
 
 // ********************************************
-// access public static property from 
+// access public static property from
 // default method in sub class
 // ********************************************
 
@@ -159,7 +159,7 @@ DYNEXTDCLASS = new DynExtPublicClassPubStat();
 
 
 // ********************************************
-// access public static property from 
+// access public static property from
 // public method in sub class
 // ********************************************
 
@@ -169,7 +169,7 @@ AddTestCase( "DYNEXTDCLASS.pubSubSetDPArray(arr), DYNEXTDCLASS.pubSubGetDPArray(
 
 
 // ********************************************
-// access public static property from 
+// access public static property from
 // private method in sub class
 // ********************************************
 
@@ -179,7 +179,7 @@ DYNEXTDCLASS = new DynExtPublicClassPubStat();
 
 
 // ********************************************
-// access public static property from 
+// access public static property from
 // final method in sub class
 // ********************************************
 
@@ -189,7 +189,7 @@ DYNEXTDCLASS = new DynExtPublicClassPubStat();
 
 // ********************************************
 // access public static property from
-// static method in sub class 
+// static method in sub class
 // ********************************************
 
 /*
@@ -200,7 +200,7 @@ AddTestCase( "DynExtPublicClassPubStat.statSubSetSPArray(arr), DynExtPublicClass
 
 // ********************************************
 // access public static property from
-// public static method in sub class 
+// public static method in sub class
 // ********************************************
 
 AddTestCase( "*** Access public static property from public static method in sub class ***", 1, 1 );
@@ -208,17 +208,17 @@ AddTestCase( "DynExtPublicClassPubStat.pubStatSubSetSPArray(arr), DynExtPublicCl
              (DynExtPublicClassPubStat.pubStatSubSetSPArray(arr), DynExtPublicClassPubStat.pubStatSubGetSPArray()) );
 
 // ********************************************
-// access public static property from 
+// access public static property from
 // private static method in sub class
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClassPubStat();
 AddTestCase( "*** Access public static property from private static method in sub class ***", 1, 1 );
-AddTestCase( "DYNEXTDCLASS.testPrivStatSubPArray(arr)", arr, 
+AddTestCase( "DYNEXTDCLASS.testPrivStatSubPArray(arr)", arr,
               DYNEXTDCLASS.testPrivStatSubPArray(arr));
 
 
 
-test();       		// Leave this function alone.
-			// This function is for executing the test case and then 
-			// displaying the result on to the console or the LOG file.
+test();             // Leave this function alone.
+            // This function is for executing the test case and then
+            // displaying the result on to the console or the LOG file.

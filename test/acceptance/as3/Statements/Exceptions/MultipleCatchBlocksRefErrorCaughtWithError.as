@@ -45,7 +45,7 @@ startTest();                // leave this alone
 
 thisError = "no error";
        
-try { 
+try {
      throw new ReferenceError();
     }catch(e1:ArgumentError){
        thisError="This is Argument Error";

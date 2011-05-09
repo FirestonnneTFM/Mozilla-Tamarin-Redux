@@ -39,36 +39,36 @@
 package InternalClassImpDefInt{
 use namespace ns;
 
-	class InternalsubClass extends InternalClass{
-		
+    class InternalsubClass extends InternalClass{
+        
 
-		// function deffunc():String{ //Default method
-		//	return "really"+"PASSED";
-		//}
+        // function deffunc():String{ //Default method
+        //  return "really"+"PASSED";
+        //}
 
 
-		override public function pubFunc():Boolean{//Public method
+        override public function pubFunc():Boolean{//Public method
                   
 
-				return !true;
-		}	
-			
-		ns override function nsFunc(a="test"):int{	       //Namespace method
-			return a.length;	
-		}
-		
-	}
+                return !true;
+        }
+            
+        ns override function nsFunc(a="test"):int{         //Namespace method
+            return a.length;
+        }
+        
+    }
 
-	public class InternalsubClassAccessor extends InternalsubClass{
+    public class InternalsubClassAccessor extends InternalsubClass{
 
                 var IntSubClass = new InternalsubClass();
                 var IntSupClass = new InternalClass();
-		//public function accdeffunc(){return IntSubClass.deffunc();}
-		// access default function deffunc
+        //public function accdeffunc(){return IntSubClass.deffunc();}
+        // access default function deffunc
                 //public function accsupdeffunc(){return IntSupClass.deffunc();}
-        	
-		public function accnsFunc(a="test"){return ns::nsFunc(a);}
-		// access default function nsFunc
-       } 	
-	
-}  
+            
+        public function accnsFunc(a="test"){return ns::nsFunc(a);}
+        // access default function nsFunc
+       }
+    
+}

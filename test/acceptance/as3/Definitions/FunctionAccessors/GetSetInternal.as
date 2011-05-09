@@ -38,7 +38,7 @@
 import GetSetInternal.*;
 
 var SECTION = "FunctionAccessors";
-var VERSION = "AS3"; 
+var VERSION = "AS3";
 var TITLE   = "Function Accessors";
 var BUGNUMBER = "";
 
@@ -58,10 +58,10 @@ AddTestCase("Internal getter, no type", "no type", OBJ.getNoType());
 AddTestCase("Internal setter, no type", 2012, OBJ.setNoType(2012));
 
 try {
-	internObj = new GetSetInternalInternal();
-	res = "no exception";
+    internObj = new GetSetInternalInternal();
+    res = "no exception";
 } catch (e1) {
-	res = "exception";
+    res = "exception";
 }
 AddTestCase("Try to instantiate internal class from outside package", "exception", res);
 

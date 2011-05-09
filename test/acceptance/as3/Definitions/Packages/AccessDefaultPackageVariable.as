@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package 
+package
 {
     public var num1 = 3;
 }
@@ -45,8 +45,8 @@ package A
     public var num2 = num1;
 }
 
-var SECTION = "Definitions\Packages";       			// provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";  			// Version of JavaScript or ECMA
+var SECTION = "Definitions\Packages";                   // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
 var TITLE   = "access default package variable in other package";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 

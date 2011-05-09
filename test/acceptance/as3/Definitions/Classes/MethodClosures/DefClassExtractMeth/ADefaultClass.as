@@ -35,18 +35,18 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package ExtractMethPackage {
-	class DefaultClass {
-		var x:String = "here";
-		static var xStat = "i'm here";
-		
-		public function pubGetX():String {
-			return this.x;
-		}
-		
-		public static function statGetX():String {
-			return xStat;
-		}
-		
+    class DefaultClass {
+        var x:String = "here";
+        static var xStat = "i'm here";
+        
+        public function pubGetX():String {
+            return this.x;
+        }
+        
+        public static function statGetX():String {
+            return xStat;
+        }
+        
 
-	}
+    }
 }

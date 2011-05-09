@@ -37,37 +37,37 @@
  
 
  package NestedImports {
-	
+    
 
-	public namespace Kitty;
-		
-		public interface IClickable {
-			function whoAmI():String; 
-	}
-	public class A {
-		public function whoAmI():String {
-			return "A";
-		}
-	
-	}
-	
-	
+    public namespace Kitty;
+        
+        public interface IClickable {
+            function whoAmI():String;
+    }
+    public class A {
+        public function whoAmI():String {
+            return "A";
+        }
+    
+    }
+    
+    
 }
 
 package pA {
-	import NestedImports.*;
-	
-	
+    import NestedImports.*;
+    
+    
 }
 
 package pB {
-	import pA.*;
+    import pA.*;
 }
 
 import pB.*;
 
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
@@ -75,10 +75,10 @@ startTest();                // leave this alone
 
 
 try {
-	var a = new A();
-	result = "no exception";
+    var a = new A();
+    result = "no exception";
 } catch (e1) {
-	result = "exception";
+    result = "exception";
 }
 
 

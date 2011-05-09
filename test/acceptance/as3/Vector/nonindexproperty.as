@@ -37,7 +37,7 @@
 /**
    File Name:    nonindexproperty.es
    Description:  Vector properties not uint will throw a runtime error.
-   		 the exception is a current issue with properties defined in the prototype.
+         the exception is a current issue with properties defined in the prototype.
    *
    * Coverage is rather poor, and this test has been superseded by vectorIndexRangeExceptions.as for
    * SWF version 11 and above.  It is retained to preserve existing tests applicable to prior versions.
@@ -59,17 +59,17 @@ v1[2.0]="two";
 v1["3.0"]="three";
 
 AddTestCase(    "standard 0 uint index",
-		"zero",
-		v1[0]);
+        "zero",
+        v1[0]);
 AddTestCase(    "uint 1 as string index",
-		"one",
-		v1[1]);
+        "one",
+        v1[1]);
 AddTestCase(    "number 3.0 as string index",
-		"two",
-		v1[2]);
+        "two",
+        v1[2]);
 AddTestCase(    "number 2.0 index",
-		"three",
-		v1["3.0"]);
+        "three",
+        v1["3.0"]);
 
 
 var NONE      = "exception not thrown";

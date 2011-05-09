@@ -54,7 +54,7 @@ try{
        thisError1="This is outer TypeError:"+eo1.toString();//print(thisError1);
    }catch(eo2:ArgumentError){
        thisError1="This is outer Argument Error:"+eo2.toString();//print(thisError1);
-       try { 
+       try {
                     throw new TypeError();
                     }catch(ei:TypeError){
                          thisError="This is Inner Type Error:"+ei.toString();

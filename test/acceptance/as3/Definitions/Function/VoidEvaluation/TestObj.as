@@ -36,21 +36,21 @@
  * ***** END LICENSE BLOCK ***** */
 package voidEvaluation {
 
-	public class TestObj
-	{
-		public var varF:String = "not set";
-		public var varG:String = "not set";
+    public class TestObj
+    {
+        public var varF:String = "not set";
+        public var varG:String = "not set";
 
-		public function f():void
-		{
-			varF = "hello from f";
-		}
+        public function f():void
+        {
+            varF = "hello from f";
+        }
 
-		public function g():void
-		{
-			varG = "hello from g";
-			return f();
-		}
-	}
+        public function g():void
+        {
+            varG = "hello from g";
+            return f();
+        }
+    }
 
 }

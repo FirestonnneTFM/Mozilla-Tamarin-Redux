@@ -60,51 +60,51 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var status = '';
-	var actual = '';
-	var expect= '';
+    var status = '';
+    var actual = '';
+    var expect= '';
 
-	/*
-	 * We set the expect variable each time only for readability.
-	 * We expect 'Function' every time; see discussion above -
-	 */
-	status = 'Error';
-	actual = getJSClass(Error);
-	expect = 'Error';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    /*
+     * We set the expect variable each time only for readability.
+     * We expect 'Function' every time; see discussion above -
+     */
+    status = 'Error';
+    actual = getJSClass(Error);
+    expect = 'Error';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'EvalError';
-	actual = getJSClass(EvalError);
-	expect = 'EvalError';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'EvalError';
+    actual = getJSClass(EvalError);
+    expect = 'EvalError';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'RangeError';
-	actual = getJSClass(RangeError);
-	expect = 'RangeError';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'RangeError';
+    actual = getJSClass(RangeError);
+    expect = 'RangeError';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'ReferenceError';
-	actual = getJSClass(ReferenceError);
-	expect = 'ReferenceError';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'ReferenceError';
+    actual = getJSClass(ReferenceError);
+    expect = 'ReferenceError';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'SyntaxError';
-	actual = getJSClass(SyntaxError);
-	expect = 'SyntaxError';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'SyntaxError';
+    actual = getJSClass(SyntaxError);
+    expect = 'SyntaxError';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'TypeError';
-	actual = getJSClass(TypeError);
-	expect = 'TypeError';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'TypeError';
+    actual = getJSClass(TypeError);
+    expect = 'TypeError';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'URIError';
-	actual = getJSClass(TypeError);
-	expect = 'TypeError';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'URIError';
+    actual = getJSClass(TypeError);
+    expect = 'TypeError';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	return array;
+    return array;
 }

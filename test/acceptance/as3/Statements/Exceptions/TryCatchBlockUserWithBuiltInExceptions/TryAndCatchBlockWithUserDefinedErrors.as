@@ -144,17 +144,17 @@ package TryCatchBlockUserWithBuiltInExceptions
                      //print(e11.toString());
                      thisError11=e11.toString();
                 }finally{//print("This Error is:"+thisError);
-                     AddTestCase( "Testing try block and multiple catch blocks with       custom error classes", "no error",thisError ); 
-                     AddTestCase( "Testing catch block with type error", 
+                     AddTestCase( "Testing try block and multiple catch blocks with       custom error classes", "no error",thisError );
+                     AddTestCase( "Testing catch block with type error",
                            "no error",typeError(thisError4) );
                      AddTestCase( "Testing catch block with Argument Error",                                        "no error" ,thisError5);
-                     AddTestCase( "Testing catch block with URIError", 
-                           "URIError: Error #1052",uriError(thisError6));    
-                     AddTestCase( "Testing catch block with Eval Error", 
-                           "no error" ,thisError9);                                       AddTestCase( "Testing catch block with Range Error", 
+                     AddTestCase( "Testing catch block with URIError",
+                           "URIError: Error #1052",uriError(thisError6));
+                     AddTestCase( "Testing catch block with Eval Error",
+                           "no error" ,thisError9);                                       AddTestCase( "Testing catch block with Range Error",
                            "no error",thisError10);
-                     AddTestCase( "Testing catch block with Error", "no error"                                          ,thisError11);     
+                     AddTestCase( "Testing catch block with Error", "no error"                                          ,thisError11);
                  }
           }
      }
-}         
+}

@@ -49,7 +49,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
     var thisError="no error";
     try{
         var f = new Function( "a","b", "c", "return f.length");

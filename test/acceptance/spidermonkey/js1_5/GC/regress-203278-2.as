@@ -89,7 +89,7 @@ while (i-- != 0) {
   case 10:
     a[i] = new Boolean();
     break;
-  }	   
+  }
 }
 
 printStatus("DSF is prepared");

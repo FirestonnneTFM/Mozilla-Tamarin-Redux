@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SECTION = "Definitions\const";       				// provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";  					// Version of JavaScript or ECMA
+var SECTION = "Definitions\const";                      // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";                   // Version of JavaScript or ECMA
 var TITLE   = "Initialize const inside a class function after its initializer";     // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -48,17 +48,17 @@ startTest();                // leave this alone
 
 class myTestConst {
 
-	const arg1, arg2;
+    const arg1, arg2;
 
- 	function myConstArgs( arg1, arg2 ) {
+    function myConstArgs( arg1, arg2 ) {
  
-  		const arg3;
- 		arg3 = arg1 + arg2;
-  		arg3 = arg3 - 10;
-  		arg3 = arg3 * 10;
-  		arg3 = arg3 / 10;
-  		return arg3;
- 	}
+        const arg3;
+        arg3 = arg1 + arg2;
+        arg3 = arg3 - 10;
+        arg3 = arg3 * 10;
+        arg3 = arg3 / 10;
+        return arg3;
+    }
 }
 
 
@@ -78,6 +78,6 @@ finally
     AddTestCase("Initialize local const inside a class function after its initializer", "Illegal write to local const arg3", thisError);
 }
 
-test();       		// Leave this function alone.
-			// This function is for executing the test case and then
-			// displaying the result on to the console or the LOG file.
+test();             // Leave this function alone.
+            // This function is for executing the test case and then
+            // displaying the result on to the console or the LOG file.

@@ -45,7 +45,7 @@ package MultipleCatchBlocksArgument
                       
             return 6;
                                                         
-        }                            
+        }
                                  
     }
 }

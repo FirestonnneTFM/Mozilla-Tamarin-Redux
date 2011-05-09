@@ -65,58 +65,58 @@
             
         }
 
-		tcCompany = tc+0;
-		tcLength = tc+1;
-		tcZero = tc+2;
-		tcYear = tc+3;
+        tcCompany = tc+0;
+        tcLength = tc+1;
+        tcZero = tc+2;
+        tcYear = tc+3;
 
-		// need a hack to make sure that the order of test cases
-		// is constant... ecma stats that the order that for-in
-		// is run does not have to be constant 
+        // need a hack to make sure that the order of test cases
+        // is constant... ecma stats that the order that for-in
+        // is run does not have to be constant
         for ( var i = 0; i < PropertyArray.length; i++ ) {
                         
-			switch( PropertyArray[i] ) {
-				case "company":
-            		testcases[tcCompany] = new TestCase(
-                		SECTION,
-                		"object[" + PropertyArray[i] +"]",
-                		object[PropertyArray[i]],
-                		ValueArray[i]
-            		);
-					tc++;
-					break;
+            switch( PropertyArray[i] ) {
+                case "company":
+                    testcases[tcCompany] = new TestCase(
+                        SECTION,
+                        "object[" + PropertyArray[i] +"]",
+                        object[PropertyArray[i]],
+                        ValueArray[i]
+                    );
+                    tc++;
+                    break;
 
-				case "length":
-            		testcases[tcLength] = new TestCase(
-                		SECTION,
-                		"object[" + PropertyArray[i] +"]",
-                		object[PropertyArray[i]],
-                		ValueArray[i]
-            		);
-					tc++;
-					break;
+                case "length":
+                    testcases[tcLength] = new TestCase(
+                        SECTION,
+                        "object[" + PropertyArray[i] +"]",
+                        object[PropertyArray[i]],
+                        ValueArray[i]
+                    );
+                    tc++;
+                    break;
 
-				case "year":
-            		testcases[tcYear] = new TestCase(
-                		SECTION,
-                		"object[" + PropertyArray[i] +"]",
-                		object[PropertyArray[i]],
-                		ValueArray[i]
-            		);
-					tc++;
-					break;
+                case "year":
+                    testcases[tcYear] = new TestCase(
+                        SECTION,
+                        "object[" + PropertyArray[i] +"]",
+                        object[PropertyArray[i]],
+                        ValueArray[i]
+                    );
+                    tc++;
+                    break;
 
-				case 0:
-            		testcases[tcZero] = new TestCase(
-                		SECTION,
-                		"object[" + PropertyArray[i] +"]",
-                		object[PropertyArray[i]],
-                		ValueArray[i]
-            		);
-					tc++;
-					break;
+                case 0:
+                    testcases[tcZero] = new TestCase(
+                        SECTION,
+                        "object[" + PropertyArray[i] +"]",
+                        object[PropertyArray[i]],
+                        ValueArray[i]
+                    );
+                    tc++;
+                    break;
 
-			}
+            }
         }
 
         testcases[tc++] = new TestCase(
@@ -136,57 +136,57 @@
                 object[PropertyArray[PropertyArray.length-1]];
         }
 
-		tcCompany = tc+0;
-		tcLength = tc+1;
-		tcZero = tc+2;
-		tcYear = tc+3;
+        tcCompany = tc+0;
+        tcLength = tc+1;
+        tcZero = tc+2;
+        tcYear = tc+3;
 
-		// need a hack to make sure that the order of test cases
-		// is constant... ecma stats that the order that for-in
-		// is run does not have to be constant 
+        // need a hack to make sure that the order of test cases
+        // is constant... ecma stats that the order that for-in
+        // is run does not have to be constant
         for ( var i = 0; i < PropertyArray.length; i++ ) {
-			switch( PropertyArray[i] ) {
-				case "company":
-            		testcases[tcCompany] = new TestCase(
-                		SECTION,
-                		"object[" + PropertyArray[i] +"]",
-                		object[PropertyArray[i]],
-                		ValueArray[i]
-            		);
-					tc++
-					break;
+            switch( PropertyArray[i] ) {
+                case "company":
+                    testcases[tcCompany] = new TestCase(
+                        SECTION,
+                        "object[" + PropertyArray[i] +"]",
+                        object[PropertyArray[i]],
+                        ValueArray[i]
+                    );
+                    tc++
+                    break;
 
-				case "length":
-            		testcases[tcLength] = new TestCase(
-                		SECTION,
-                		"object[" + PropertyArray[i] +"]",
-                		object[PropertyArray[i]],
-                		ValueArray[i]
-            		);
-					tc++
-					break;
+                case "length":
+                    testcases[tcLength] = new TestCase(
+                        SECTION,
+                        "object[" + PropertyArray[i] +"]",
+                        object[PropertyArray[i]],
+                        ValueArray[i]
+                    );
+                    tc++
+                    break;
 
-				case "year":
-            		testcases[tcYear] = new TestCase(
-                		SECTION,
-                		"object[" + PropertyArray[i] +"]",
-                		object[PropertyArray[i]],
-                		ValueArray[i]
-            		);
-					tc++
-					break;
+                case "year":
+                    testcases[tcYear] = new TestCase(
+                        SECTION,
+                        "object[" + PropertyArray[i] +"]",
+                        object[PropertyArray[i]],
+                        ValueArray[i]
+                    );
+                    tc++
+                    break;
 
-				case 0:
-            		testcases[tcZero] = new TestCase(
-                		SECTION,
-                		"object[" + PropertyArray[i] +"]",
-                		object[PropertyArray[i]],
-                		ValueArray[i]
-            		);
-					tc++
-					break;
+                case 0:
+                    testcases[tcZero] = new TestCase(
+                        SECTION,
+                        "object[" + PropertyArray[i] +"]",
+                        object[PropertyArray[i]],
+                        ValueArray[i]
+                    );
+                    tc++
+                    break;
 
-			}
+            }
         }
 
         testcases[tc++] = new TestCase(
@@ -219,11 +219,11 @@
             1,
             properties.length );
 
-		// we don't know which one of the properties
-		// because we can't predict order
-		var myTest = "PASSED";
-		if( values[0] != object[properties[0]] ) 
-			myTest = "FAILED";
+        // we don't know which one of the properties
+        // because we can't predict order
+        var myTest = "PASSED";
+        if( values[0] != object[properties[0]] )
+            myTest = "FAILED";
 
         testcases[tc++] = new TestCase(
             SECTION,
@@ -343,11 +343,11 @@
             1,
             properties.length );
 
-		// we don't know which one of the properties
-		// because we can't predict order
-		var myTest = "PASSED";
-		if( values[0] != object[properties[0]] ) 
-			myTest = "FAILED";
+        // we don't know which one of the properties
+        // because we can't predict order
+        var myTest = "PASSED";
+        if( values[0] != object[properties[0]] )
+            myTest = "FAILED";
 
 
         testcases[tc++] = new TestCase(

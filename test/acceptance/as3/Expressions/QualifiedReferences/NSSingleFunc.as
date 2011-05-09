@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "Expressions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "qualified references";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 

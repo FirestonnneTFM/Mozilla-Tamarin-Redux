@@ -57,21 +57,21 @@ function createXML(depth)
     var closeTagList = new Vector.<String>();
 
     for (var i = 0; i < depth; ++i) {
-	var tagContent = "";
-	var tagNameLength = i / ABCLENGTH;
+    var tagContent = "";
+    var tagNameLength = i / ABCLENGTH;
 
-	for (var j = 0; j <= tagNameLength; ++j) {
-	    tagContent += String.fromCharCode(FIRSTCHARCODE + i % ABCLENGTH);
-	}
+    for (var j = 0; j <= tagNameLength; ++j) {
+        tagContent += String.fromCharCode(FIRSTCHARCODE + i % ABCLENGTH);
+    }
 
-	openTagList += "<" + tagContent + ">";
-	closeTagList.push("</" + tagContent + ">");
+    openTagList += "<" + tagContent + ">";
+    closeTagList.push("</" + tagContent + ">");
     }
 
     var xmlstring = openTagList + "sample";
 
     for each (var closeTag in closeTagList.reverse()) {
-	xmlstring += closeTag;
+    xmlstring += closeTag;
     }
 
     return new XML(xmlstring);
@@ -82,7 +82,7 @@ function createXML(depth)
  * Upon checking the result against the expected value, _equals is also called.
  * */
 
-function getTestCases() 
+function getTestCases()
 {
     var array = new Array();
     var item = 0;
@@ -90,41 +90,41 @@ function getTestCases()
     var xml = createXML(1000);
 
     try {
-	var copied = xml.copy();
-	var res = xml == copied;
-	array[item++] = new TestCase(SECTION, "new XML(...).copy()", true, res);
+    var copied = xml.copy();
+    var res = xml == copied;
+    array[item++] = new TestCase(SECTION, "new XML(...).copy()", true, res);
     }
     catch (e: Error) {
-	if (e.message.match("#1023"))
-	    array[item++] = new TestCase(SECTION, "new XML(...).copy()", 0, 0);
-	else
-	    throw(e);
+    if (e.message.match("#1023"))
+        array[item++] = new TestCase(SECTION, "new XML(...).copy()", 0, 0);
+    else
+        throw(e);
     }
 
     try {
-	//dummy test, execution of toXMLString is the goal here
-	res = xml.toXMLString().indexOf("sample") > 0;
+    //dummy test, execution of toXMLString is the goal here
+    res = xml.toXMLString().indexOf("sample") > 0;
 
-	array[item++] = new TestCase(SECTION, "new XML(...).toXMLString()", true, res);
+    array[item++] = new TestCase(SECTION, "new XML(...).toXMLString()", true, res);
     }
     catch (e: Error) {
-	if (e.message.match("#1023"))
-	    array[item++] = new TestCase(SECTION, "new XML(...).toXMLString()", 0, 0);
-	else
-	    throw(e);
+    if (e.message.match("#1023"))
+        array[item++] = new TestCase(SECTION, "new XML(...).toXMLString()", 0, 0);
+    else
+        throw(e);
     }
 
     try {
-	//dummy test, execution of descendants is the goal here
-	res = xml.descendants().length() > 0;
+    //dummy test, execution of descendants is the goal here
+    res = xml.descendants().length() > 0;
 
-	array[item++] = new TestCase(SECTION, "new XML(...).descendants()", true, res);
+    array[item++] = new TestCase(SECTION, "new XML(...).descendants()", true, res);
     }
     catch (e: Error) {
-	if (e.message.match("#1023"))
-	    array[item++] = new TestCase(SECTION, "new XML(...).descendants()", 0, 0);
-	else
-	    throw(e);
+    if (e.message.match("#1023"))
+        array[item++] = new TestCase(SECTION, "new XML(...).descendants()", 0, 0);
+    else
+        throw(e);
     }
 
     return array;

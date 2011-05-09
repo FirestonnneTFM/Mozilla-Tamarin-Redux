@@ -55,7 +55,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,  "var MYVAR=null; ++MYVAR",                  1,                             ++MYVAR );
     var MYVAR=true;
     array[item++] = new TestCase( SECTION,  "var MYVAR=true; ++MYVAR",                  2,                             ++MYVAR );
-    var MYVAR=false; 
+    var MYVAR=false;
     array[item++] = new TestCase( SECTION,  "var MYVAR=false; ++MYVAR",                 1,                            ++MYVAR );
 
     // special numbers
@@ -117,7 +117,7 @@ function getTestCases() {
     var MYVAR=false;
     array[item++] = new TestCase( SECTION,    "var MYVAR=new Boolean(false);++MYVAR",        1,     ++MYVAR );
     // verify value of variable
-    var MYVAR=new Boolean(true);++MYVAR; 
+    var MYVAR=new Boolean(true);++MYVAR;
     array[item++] = new TestCase( SECTION,    "var MYVAR=new Boolean(true);++MYVAR;MYVAR",   2,     MYVAR );
     var MYVAR=new Boolean(false);++MYVAR;
     array[item++] = new TestCase( SECTION,    "var MYVAR=new Boolean(false);++MYVAR;MYVAR",  1,     MYVAR );

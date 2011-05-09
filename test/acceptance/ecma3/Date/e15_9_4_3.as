@@ -48,63 +48,63 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	function MyDate() {
-	    this.year = 0;
-	    this.month = 0;
-	    this.date = 0;
-	    this.hours = 0;
-	    this.minutes = 0;
-	    this.seconds = 0;
-	    this.ms = 0;
-	}
+    function MyDate() {
+        this.year = 0;
+        this.month = 0;
+        this.date = 0;
+        this.hours = 0;
+        this.minutes = 0;
+        this.seconds = 0;
+        this.ms = 0;
+    }
 
-	function utc( year, month, date, hours, minutes, seconds, ms ) {
-	    d = new MyDate();
-	    d.year      = Number(year);
+    function utc( year, month, date, hours, minutes, seconds, ms ) {
+        d = new MyDate();
+        d.year      = Number(year);
 
-	    if (month)
-	        d.month     = Number(month);
-	    if (date)
-	        d.date      = Number(date);
-	    if (hours)
-	        d.hours     = Number(hours);
-	    if (minutes)
-	        d.minutes   = Number(minutes);
-	    if (seconds)
-	        d.seconds   = Number(seconds);
-	    if (ms)
-	        d.ms        = Number(ms);
+        if (month)
+            d.month     = Number(month);
+        if (date)
+            d.date      = Number(date);
+        if (hours)
+            d.hours     = Number(hours);
+        if (minutes)
+            d.minutes   = Number(minutes);
+        if (seconds)
+            d.seconds   = Number(seconds);
+        if (ms)
+            d.ms        = Number(ms);
 
-	    if ( isNaN(d.year) && 0 <= ToInteger(d.year) && d.year <= 99 ) {
-	        d.year = 1900 + ToInteger(d.year);
-	    }
+        if ( isNaN(d.year) && 0 <= ToInteger(d.year) && d.year <= 99 ) {
+            d.year = 1900 + ToInteger(d.year);
+        }
 
-	    if (isNaN(month) || isNaN(year) || isNaN(date) || isNaN(hours) ||
-	        isNaN(minutes) || isNaN(seconds) || isNaN(ms) ) {
-	            d.year = Number.NaN;
-	            d.month = Number.NaN;
-	            d.date = Number.NaN;
-	            d.hours = Number.NaN;
-	            d.minutes = Number.NaN;
-	            d.seconds = Number.NaN;
-	            d.ms = Number.NaN;
-	            d.value = Number.NaN;
-	            d.time = Number.NaN;
-	            d.day =Number.NaN;
-	            return d;
-	        }
+        if (isNaN(month) || isNaN(year) || isNaN(date) || isNaN(hours) ||
+            isNaN(minutes) || isNaN(seconds) || isNaN(ms) ) {
+                d.year = Number.NaN;
+                d.month = Number.NaN;
+                d.date = Number.NaN;
+                d.hours = Number.NaN;
+                d.minutes = Number.NaN;
+                d.seconds = Number.NaN;
+                d.ms = Number.NaN;
+                d.value = Number.NaN;
+                d.time = Number.NaN;
+                d.day =Number.NaN;
+                return d;
+            }
 
-	    d.day = MakeDay( d.year, d.month, d.date );
-	    d.time = MakeTime( d.hours, d.minutes, d.seconds, d.ms );
-	    d.value = (TimeClip( MakeDate(d.day,d.time)));
+        d.day = MakeDay( d.year, d.month, d.date );
+        d.time = MakeTime( d.hours, d.minutes, d.seconds, d.ms );
+        d.value = (TimeClip( MakeDate(d.day,d.time)));
 
-	    return d;
-	}
+        return d;
+    }
 
-	function UTCTime( t ) {
-	    sign = ( t < 0 ) ? -1 : 1;
-	    return ( (t +(TZ_DIFF*msPerHour)) );
-	}
+    function UTCTime( t ) {
+        sign = ( t < 0 ) ? -1 : 1;
+        return ( (t +(TZ_DIFF*msPerHour)) );
+    }
 
     // Dates around 1970
 
@@ -181,36 +181,36 @@ function getTestCases() {
                     "Date.UTC( 2004,11,31,16,0,0,0 )",
                     utc(2004,11,31,16,0,0,0) );
 
-	function addNewTestCase( DateCase, DateString, ExpectDate) {
-	    DateCase = DateCase;
+    function addNewTestCase( DateCase, DateString, ExpectDate) {
+        DateCase = DateCase;
 
-	    item = array.length;
+        item = array.length;
 
-	//    fixed_year = ( ExpectDate.year >=1900 || ExpectDate.year < 2000 ) ? ExpectDate.year - 1900 : ExpectDate.year;
+    //    fixed_year = ( ExpectDate.year >=1900 || ExpectDate.year < 2000 ) ? ExpectDate.year - 1900 : ExpectDate.year;
 
-	    array[item++] = new TestCase( SECTION, DateString,         ExpectDate.value,       DateCase );
-	    array[item++] = new TestCase( SECTION, DateString,         ExpectDate.value,       DateCase );
-	/*
+        array[item++] = new TestCase( SECTION, DateString,         ExpectDate.value,       DateCase );
+        array[item++] = new TestCase( SECTION, DateString,         ExpectDate.value,       DateCase );
+    /*
 
-	    array[item++] = new TestCase( SECTION, DateString+".getUTCFullYear()",        ExpectDate.year,   DateCase.getUTCFullYear() );
-	    array[item++] = new TestCase( SECTION, DateString+".getUTCMonth()",         ExpectDate.month,  DateCase.getUTCMonth() );
-	    array[item++] = new TestCase( SECTION, DateString+".getUTCDate()",          ExpectDate.date,   DateCase.getUTCDate() );
-	    array[item++] = new TestCase( SECTION, DateString+".getUTCDay()",           ExpectDate.day,    DateCase.getUTCDay() );
-	    array[item++] = new TestCase( SECTION, DateString+".getUTCHours()",         ExpectDate.hours,  DateCase.getUTCHours() );
-	    array[item++] = new TestCase( SECTION, DateString+".getUTCMinutes()",       ExpectDate.minutes,DateCase.getUTCMinutes() );
-	    array[item++] = new TestCase( SECTION, DateString+".getUTCSeconds()",       ExpectDate.seconds,DateCase.getUTCSeconds() );
-	    array[item++] = new TestCase( SECTION, DateString+".getUTCMilliseconds()",  ExpectDate.ms,     DateCase.getUTCMilliseconds() );
+        array[item++] = new TestCase( SECTION, DateString+".getUTCFullYear()",        ExpectDate.year,   DateCase.getUTCFullYear() );
+        array[item++] = new TestCase( SECTION, DateString+".getUTCMonth()",         ExpectDate.month,  DateCase.getUTCMonth() );
+        array[item++] = new TestCase( SECTION, DateString+".getUTCDate()",          ExpectDate.date,   DateCase.getUTCDate() );
+        array[item++] = new TestCase( SECTION, DateString+".getUTCDay()",           ExpectDate.day,    DateCase.getUTCDay() );
+        array[item++] = new TestCase( SECTION, DateString+".getUTCHours()",         ExpectDate.hours,  DateCase.getUTCHours() );
+        array[item++] = new TestCase( SECTION, DateString+".getUTCMinutes()",       ExpectDate.minutes,DateCase.getUTCMinutes() );
+        array[item++] = new TestCase( SECTION, DateString+".getUTCSeconds()",       ExpectDate.seconds,DateCase.getUTCSeconds() );
+        array[item++] = new TestCase( SECTION, DateString+".getUTCMilliseconds()",  ExpectDate.ms,     DateCase.getUTCMilliseconds() );
 
-	    array[item++] = new TestCase( SECTION, DateString+".getFullYear()",             ExpectDate.year,            DateCase.getFullYear() );
-	    array[item++] = new TestCase( SECTION, DateString+".getMonth()",            ExpectDate.month,      DateCase.getMonth() );
-	    array[item++] = new TestCase( SECTION, DateString+".getDate()",             ExpectDate.date,       DateCase.getDate() );
-	//    array[item++] = new TestCase( SECTION, DateString+".getDay()",              ExpectDate.day,        DateCase.getDay() );
-	    array[item++] = new TestCase( SECTION, DateString+".getHours()",            ExpectDate.hours,      DateCase.getHours() );
-	    array[item++] = new TestCase( SECTION, DateString+".getMinutes()",          ExpectDate.minutes,    DateCase.getMinutes() );
-	    array[item++] = new TestCase( SECTION, DateString+".getSeconds()",          ExpectDate.seconds,    DateCase.getSeconds() );
-	    array[item++] = new TestCase( SECTION, DateString+".getMilliseconds()",     ExpectDate.ms,         DateCase.getMilliseconds() );
-	*/
-	}
+        array[item++] = new TestCase( SECTION, DateString+".getFullYear()",             ExpectDate.year,            DateCase.getFullYear() );
+        array[item++] = new TestCase( SECTION, DateString+".getMonth()",            ExpectDate.month,      DateCase.getMonth() );
+        array[item++] = new TestCase( SECTION, DateString+".getDate()",             ExpectDate.date,       DateCase.getDate() );
+    //    array[item++] = new TestCase( SECTION, DateString+".getDay()",              ExpectDate.day,        DateCase.getDay() );
+        array[item++] = new TestCase( SECTION, DateString+".getHours()",            ExpectDate.hours,      DateCase.getHours() );
+        array[item++] = new TestCase( SECTION, DateString+".getMinutes()",          ExpectDate.minutes,    DateCase.getMinutes() );
+        array[item++] = new TestCase( SECTION, DateString+".getSeconds()",          ExpectDate.seconds,    DateCase.getSeconds() );
+        array[item++] = new TestCase( SECTION, DateString+".getMilliseconds()",     ExpectDate.ms,         DateCase.getMilliseconds() );
+    */
+    }
 
     return ( array );
 }

@@ -54,7 +54,7 @@ package DefaultClass {
     public function testSubArray(a:Array) : Array {
         this.subSetArray(a);
         return this.subGetArray();
-    }    
+    }
     
 
     // ************************************
@@ -134,7 +134,7 @@ package DefaultClass {
     }
 
     // ***************************************
-    // access static property from 
+    // access static property from
     // default method of sub class
     // ***************************************
 
@@ -168,7 +168,7 @@ package DefaultClass {
     }
 
     // ***************************************
-    // access static property from 
+    // access static property from
     // final method of sub class
     // ***************************************
 

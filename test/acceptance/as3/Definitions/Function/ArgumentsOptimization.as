@@ -54,7 +54,7 @@
 */
 
 var SECTION = "Function";           // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";                // Version of ECMAScript or ActionScript 
+var VERSION = "AS3";                // Version of ECMAScript or ActionScript
 var TITLE   = "arguments optimiztation"; // Provide ECMA section title or a description
 var BUGNUMBER = "571469";           // bugzilla.mozilla.org
 
@@ -63,7 +63,7 @@ startTest();
 class C {
     function push():void {
         y = arguments.length;
-	x = arguments[0];
+    x = arguments[0];
     }
     function get length(): uint { return 0 }
     function set length(n: uint): void { }
@@ -74,25 +74,25 @@ class C {
 function pushloopC():uint {
     var a:C = new C;
     for ( var i:int=0 ; i < 100000 ; i+=10 ) {
-	a.length = 0;
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
+    a.length = 0;
+    a.push(i);
+    a.push(i);
+    a.push(i);
+    a.push(i);
+    a.push(i);
+    a.push(i);
+    a.push(i);
+    a.push(i);
+    a.push(i);
+    a.push(i);
     }
     return a.length;
 }
 
 class D {
     function push():void {
-    	w = arguments;
-	x = w[0];
+        w = arguments;
+    x = w[0];
     }
     function get length(): uint { return 0 }
     function set length(n: uint): void { }
@@ -103,17 +103,17 @@ class D {
 function pushloopD():uint {
     var a:D = new D;
     for ( var i:int=0 ; i < 100000 ; i+=10 ) {
-	a.length = 0;
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
+    a.length = 0;
+    a.push(i);
+    a.push(i);
+    a.push(i);
+    a.push(i);
+    a.push(i);
+    a.push(i);
+    a.push(i);
+    a.push(i);
+    a.push(i);
+    a.push(i);
     }
     return a.length;
 }
@@ -122,11 +122,11 @@ function TEST(run:Function): Number {
     var then:Date = new Date();
     var iterations:int = 0;
     for (;;) {
-	var now:Date = new Date();
-	if (now.getTime() - then.getTime() > 1000.0)
-	    break;
-	iterations++;
-	run();
+    var now:Date = new Date();
+    if (now.getTime() - then.getTime() > 1000.0)
+        break;
+    iterations++;
+    run();
     }
     return iterations*(now.getTime()-then.getTime());
 }

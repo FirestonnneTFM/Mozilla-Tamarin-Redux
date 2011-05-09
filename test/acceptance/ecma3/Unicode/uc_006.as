@@ -51,21 +51,21 @@ var SECTION = "";
 function getTestCases() {
     var array = new Array();
     var item = 0;
-	
-	var throwÜ = 100;
+    
+    var throwÜ = 100;
     array[item++] = new TestCase( SECTION,  "var throwÜ = 100",        100,
     (throwÜ));
     
-	var classÜ = "string"
+    var classÜ = "string"
     array[item++] = new TestCase( SECTION,  "var classÜ = 'string'",        "string",
     (classÜ));
     
-	var namespaceÜ = false;
+    var namespaceÜ = false;
     array[item++] = new TestCase( SECTION,  "var namespaceÜ = false",        false,
     (namespaceÜ));
     
     var asÜ = 1;
-	array[item++] = new TestCase( SECTION,  "var asÜ = 1",        1,
+    array[item++] = new TestCase( SECTION,  "var asÜ = 1",        1,
     (asÜ));
 
     var breakÜ =2;
@@ -246,15 +246,15 @@ function getTestCases() {
 
      var setÜ = 4;
          array[item++] = new TestCase( SECTION,  "var setÜ = 4",        4,
-    (setÜ)); 
+    (setÜ));
 
      var namespaceÜ = 4;
          array[item++] = new TestCase( SECTION,  "var namespaceÜ = 4",        4,
-    (namespaceÜ)); 
+    (namespaceÜ));
 
      var includeÜ = 4;
          array[item++] = new TestCase( SECTION,  "var includeÜ = 4",        4,
-    (includeÜ)); 
+    (includeÜ));
 
      var dynamicÜ = 4;
          array[item++] = new TestCase( SECTION,  "var dynamicÜ = 4",        4,

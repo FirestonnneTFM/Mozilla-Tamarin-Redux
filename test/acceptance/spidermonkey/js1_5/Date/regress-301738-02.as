@@ -47,7 +47,7 @@ var expect = '';
 printBugNumber(BUGNUMBER);
 printStatus (summary);
 
-/* 
+/*
     Case 2. The input string is of the form "f/m/l" where f, m and l are
     integers, e.g. 7/16/45.
     Adjust the mon, mday and year values to achieve 100% MSIE

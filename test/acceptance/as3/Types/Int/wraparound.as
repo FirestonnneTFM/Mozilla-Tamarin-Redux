@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "Wraparound_Conversion";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS3";        // Version of ECMAScript or ActionScript
 var TITLE   = "Wraparound_Conversion";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -46,14 +46,14 @@ startTest();                // leave this alone
 ///////////////////////////////////////////////////////////////
 // add your tests here
 
-/* 
-	Reference max / min vals:
-	int.MAX_VALUE: 2147483647
-	int.MIN_VALUE: -2147483648
-	uint.MAX_VALUE: 4294967295
-	uint.MIN_VALUE: 0
-	Number.MAX_VALUE: 1.79769313486231e+308
-	Number.MIN_VALUE: 4.9406564584124654e-324
+/*
+    Reference max / min vals:
+    int.MAX_VALUE: 2147483647
+    int.MIN_VALUE: -2147483648
+    uint.MAX_VALUE: 4294967295
+    uint.MIN_VALUE: 0
+    Number.MAX_VALUE: 1.79769313486231e+308
+    Number.MIN_VALUE: 4.9406564584124654e-324
 */
 
 //simple wraparound tests
@@ -133,9 +133,9 @@ AddTestCase( "uint.MAX_VALUE << 1", 4294967294, uintNum );
 
 test();       // leave this alone.  this executes the test cases and
               // displays results.
-			  
-			  
-			  
-			  
-			  
-			  
+              
+              
+              
+              
+              
+              

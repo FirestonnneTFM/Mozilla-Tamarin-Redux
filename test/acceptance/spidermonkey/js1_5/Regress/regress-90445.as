@@ -252,77 +252,77 @@ function compte() {
    
   for (i=0; i<nbVillages; i++) {
     if ((((mois   == 0) && (1==V[i][0])) || ((mois >= V[i][1]) && (mois <= V[i][2]))) &&
-	((region  == 0)                  || (region  == V[i][3]                    )) &&
-	((confort == 0)                  || (confort == V[i][4]                    )) &&
-	((encadrement == 0)                                               ||
-	 ((encadrement==3)&&((V[i][5]==1)||(V[i][5]==2)||(V[i][5] == 3))) ||
-	 ((encadrement==2)&&((V[i][5]==1)||(V[i][5]==2)                )) ||
-	 ((encadrement==1)&&(encadrement==V[i][5])                      ) ||
-	 ((encadrement>3)&&(encadrement==V[i][5])                       )) &&
-	((typeVillage == 0) || (typeVillage == V[i][6]                ))   &&
-	((budget == 0)      || (budget      == V[i][7]                ))) {
+    ((region  == 0)                  || (region  == V[i][3]                    )) &&
+    ((confort == 0)                  || (confort == V[i][4]                    )) &&
+    ((encadrement == 0)                                               ||
+     ((encadrement==3)&&((V[i][5]==1)||(V[i][5]==2)||(V[i][5] == 3))) ||
+     ((encadrement==2)&&((V[i][5]==1)||(V[i][5]==2)                )) ||
+     ((encadrement==1)&&(encadrement==V[i][5])                      ) ||
+     ((encadrement>3)&&(encadrement==V[i][5])                       )) &&
+    ((typeVillage == 0) || (typeVillage == V[i][6]                ))   &&
+    ((budget == 0)      || (budget      == V[i][7]                ))) {
            
       bl = 1;
       if ((sport1 != 0) || (sport2 != 0) || (sport3 != 0)) {
-	bl = 0;
-	liste  = V[i][8];
-	taille = liste.length;
-	for (j=0; j<taille; j++) {
-	  if ((sport1 == 0) || ((sport1 != 0) && (sport1 == liste[j]))) {
-	    bl = 1;
-	    break;
-	  }
-	}
-	if (bl == 1) {
-	  bl = 0;
-	  for (j=0; j<taille; j++) {
-	    if ((sport2 == 0) || ((sport2 != 0) && (sport2 == liste[j]))) {
-	      bl = 1;
-	      break;
-	    }
-	  }
-	}
-	if (bl == 1) {
-	  bl = 0;
-	  for (j=0; j<taille; j++) {
-	    if ((sport3 == 0) || ((sport3 != 0) && (sport3 == liste[j]))) {
-	      bl = 1;
-	      break;
-	    }
-	  }
-	}
+    bl = 0;
+    liste  = V[i][8];
+    taille = liste.length;
+    for (j=0; j<taille; j++) {
+      if ((sport1 == 0) || ((sport1 != 0) && (sport1 == liste[j]))) {
+        bl = 1;
+        break;
+      }
+    }
+    if (bl == 1) {
+      bl = 0;
+      for (j=0; j<taille; j++) {
+        if ((sport2 == 0) || ((sport2 != 0) && (sport2 == liste[j]))) {
+          bl = 1;
+          break;
+        }
+      }
+    }
+    if (bl == 1) {
+      bl = 0;
+      for (j=0; j<taille; j++) {
+        if ((sport3 == 0) || ((sport3 != 0) && (sport3 == liste[j]))) {
+          bl = 1;
+          break;
+        }
+      }
+    }
       }
       if ((bl==1) && ((activite1 != 0) || (activite2 != 0) || (activite3 != 0))) {
-	bl = 0;
-	liste  = V[i][9];
-	taille = liste.length;
-	for (j=0; j<taille; j++) {
-	  if ((activite1 == 0) || ((activite1 != 0) && (activite1 == liste[j]))) {
-	    bl = 1;
-	    break;
-	  }
-	}
-	if (bl == 1) {
-	  bl = 0;
-	  for (j=0; j<taille; j++) {
-	    if ((activite2 == 0) || ((activite2 != 0) && (activite2 == liste[j]))) {
-	      bl = 1;
-	      break;
-	    }
-	  }
-	}
-	if (bl == 1) {
-	  bl = 0;
-	  for (j=0; j<taille; j++) {
-	    if ((activite3 == 0) || ((activite3 != 0) && (activite3 == liste[j]))) {
-	      bl = 1;
-	      break;
-	    }
-	  }
-	}
+    bl = 0;
+    liste  = V[i][9];
+    taille = liste.length;
+    for (j=0; j<taille; j++) {
+      if ((activite1 == 0) || ((activite1 != 0) && (activite1 == liste[j]))) {
+        bl = 1;
+        break;
+      }
+    }
+    if (bl == 1) {
+      bl = 0;
+      for (j=0; j<taille; j++) {
+        if ((activite2 == 0) || ((activite2 != 0) && (activite2 == liste[j]))) {
+          bl = 1;
+          break;
+        }
+      }
+    }
+    if (bl == 1) {
+      bl = 0;
+      for (j=0; j<taille; j++) {
+        if ((activite3 == 0) || ((activite3 != 0) && (activite3 == liste[j]))) {
+          bl = 1;
+          break;
+        }
+      }
+    }
       }
       if (1 == bl) {
-	ret++;
+    ret++;
       }
     }
   }

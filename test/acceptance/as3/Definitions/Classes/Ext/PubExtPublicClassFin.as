@@ -80,7 +80,7 @@ AddTestCase( "PUBEXTDCLASS.testSubSetArray(arr)", arr, PUBEXTDCLASS.testSubSetAr
 
 
 // ********************************************
-// access final method from a public 
+// access final method from a public
 // method of a sub class
 //
 // ********************************************
@@ -92,7 +92,7 @@ AddTestCase( "PUBEXTDCLASS.pubSubSetArray(arr), PUBEXTDCLASS.pubSubGetArray()", 
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access final method from a private 
+// access final method from a private
 // method of a sub class
 //
 // ********************************************
@@ -104,7 +104,7 @@ AddTestCase( "PUBEXTDCLASS.testPrivSubArray(arr)", arr, PUBEXTDCLASS.testPrivSub
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access final method from a final 
+// access final method from a final
 // method of a sub class
 //
 // ********************************************
@@ -116,7 +116,7 @@ AddTestCase( "PUBEXTDCLASS.testFinSubSetArray(arr)", arr, PUBEXTDCLASS.testFinSu
 
 
 // ********************************************
-// access final property from 
+// access final property from
 // default method in sub class
 // ********************************************
 
@@ -127,7 +127,7 @@ AddTestCase( "PUBEXTDCLASS.testSubSetDPArray(arr)", arr, PUBEXTDCLASS.testSubSet
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access final property from 
+// access final property from
 // public method in sub class
 // ********************************************
 
@@ -138,7 +138,7 @@ AddTestCase( "PUBEXTDCLASS.pubSubSetDPArray(arr), PUBEXTDCLASS.pubSubGetDPArray(
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access final property from 
+// access final property from
 // private method in sub class
 // ********************************************
 
@@ -149,7 +149,7 @@ AddTestCase( "PUBEXTDCLASS.testPrivSubSetDPArray(arr)", arr, PUBEXTDCLASS.testPr
 
 
 // ********************************************
-// access final property from 
+// access final property from
 // final method in sub class
 // ********************************************
 

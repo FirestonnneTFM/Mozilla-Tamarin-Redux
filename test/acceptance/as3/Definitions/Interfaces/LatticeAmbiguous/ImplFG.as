@@ -36,12 +36,12 @@
  * ***** END LICENSE BLOCK ***** */
 // ActionScript file
 package LatticeAmbiguous {
-	public class ImplFG implements IFuncF, IFuncG {
-		public function f() : String {
-			return "IFuncF::f"
-		}
-		public function g() : String {
-			return "IFuncG::g"
-		}
-	}
+    public class ImplFG implements IFuncF, IFuncG {
+        public function f() : String {
+            return "IFuncF::f"
+        }
+        public function g() : String {
+            return "IFuncG::g"
+        }
+    }
 }

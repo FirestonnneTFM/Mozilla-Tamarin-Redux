@@ -131,10 +131,10 @@ function getTestCases() {
 
   array[item++] = new TestCase( SECTION,  "Grouping operator used in passing parameters to a function",4,myfunction(2));
 
-  var a:Number = 1; 
-  var b:Number = 2; 
-  function foo() { a += b; } 
-  function bar() { b *= 10; } 
+  var a:Number = 1;
+  var b:Number = 2;
+  function foo() { a += b; }
+  function bar() { b *= 10; }
 
   array[item++] = new TestCase( SECTION,  "Grouping operator used in evaluating functions and returning the results of an expression",23,(foo(), bar(), a + b));
 

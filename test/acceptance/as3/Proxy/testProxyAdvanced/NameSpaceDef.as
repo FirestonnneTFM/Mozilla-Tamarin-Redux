@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 package NameSpacePackage{
-	
-	public namespace NameSpaceDef = "http://www.adobe.com/go";
-	
+    
+    public namespace NameSpaceDef = "http://www.adobe.com/go";
+    
 }

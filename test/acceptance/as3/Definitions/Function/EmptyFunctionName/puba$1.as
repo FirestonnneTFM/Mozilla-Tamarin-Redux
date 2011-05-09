@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package EmptyFunctionName {
-	function a$1 () { return "a$1"; }
-	public function puba$1 () { return a$1(); }
+    function a$1 () { return "a$1"; }
+    public function puba$1 () { return a$1(); }
 }
 

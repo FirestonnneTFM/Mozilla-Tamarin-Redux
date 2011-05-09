@@ -69,20 +69,20 @@ var xmlDoc = "<employees><employee id=\"1\"><firstname>John</firstname><lastname
 
 // propertyName as a string
 var MYXML = new XML(xmlDoc);
-AddTestCase( "MYXML = new XML(xmlDoc),MYXML.valueOf() === MYXML", 
-	true, 
-	(MYXML.valueOf() === MYXML));
+AddTestCase( "MYXML = new XML(xmlDoc),MYXML.valueOf() === MYXML",
+    true,
+    (MYXML.valueOf() === MYXML));
 MYXML = new XML();
-AddTestCase( "MYXML = new XML(),MYXML.valueOf() === MYXML", 
-	true, 
-	(MYXML.valueOf() === MYXML));
+AddTestCase( "MYXML = new XML(),MYXML.valueOf() === MYXML",
+    true,
+    (MYXML.valueOf() === MYXML));
 MYXML = new XML('');
-AddTestCase( "MYXML = new XML(''),MYXML.valueOf() === MYXML", 
-	true, 
-	(MYXML.valueOf() === MYXML));
+AddTestCase( "MYXML = new XML(''),MYXML.valueOf() === MYXML",
+    true,
+    (MYXML.valueOf() === MYXML));
 MYXML = new XML('foo');
-AddTestCase( "MYXML = new XML('foo'),MYXML.valueOf() === MYXML", 
-	true, 
-	(MYXML.valueOf() === MYXML));
+AddTestCase( "MYXML = new XML('foo'),MYXML.valueOf() === MYXML",
+    true,
+    (MYXML.valueOf() === MYXML));
 
 END();

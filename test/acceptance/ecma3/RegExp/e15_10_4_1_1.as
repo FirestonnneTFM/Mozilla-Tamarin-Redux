@@ -77,76 +77,76 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var statprefix = 'Applying RegExp() twice to pattern ';
-	var statsuffix =  '; testing property ';
-	var singlequote = "'";
-	var i = -1; var s = '';
-	var obj1 = null; var obj2 = null;
-	var status = ''; var actual = ''; var expect = ''; var msg = '';
-	var patterns = new Array();
-
-
-	// various regular expressions to try -
-	patterns[0] = '';
-	patterns[1] = 'abc';
-	patterns[2] = '(.*)(3-1)\s\w';
-	patterns[3] = '(.*)(...)\\s\\w';
-	patterns[4] = '[^A-Za-z0-9_]';
-	patterns[5] = '[^\f\n\r\t\v](123.5)([4 - 8]$)';
+    var statprefix = 'Applying RegExp() twice to pattern ';
+    var statsuffix =  '; testing property ';
+    var singlequote = "'";
+    var i = -1; var s = '';
+    var obj1 = null; var obj2 = null;
+    var status = ''; var actual = ''; var expect = ''; var msg = '';
+    var patterns = new Array();
 
 
-	for (i in patterns)
-	{
-	  s = patterns[i];
-	  status = getStatus(s);
-	  obj1 = new RegExp(s);
-	  obj2 = new RegExp(obj1);
-
-	  msg  = status + quote("dotall");
-	  actual = obj2.dotall;
-	  expect = obj1.dotall;
-	  array[item++] = new TestCase(SECTION, msg, expect, actual);
-
-	  msg  = status + quote("extended");
-	  actual = obj2.extended;
-	  expect = obj1.extended;
-	  array[item++] = new TestCase(SECTION, msg, expect, actual);
-
-	  msg  = status + quote("ignoreCase");
-	  actual = obj2.ignoreCase;
-	  expect = obj1.ignoreCase;
-	  array[item++] = new TestCase(SECTION, msg, expect, actual);
-
-	  msg  = status + quote("lastIndex");
-	  actual = obj2.lastIndex;
-	  expect = obj1.lastIndex;
-	  array[item++] = new TestCase(SECTION, msg, expect, actual);
-
-	  msg  = status + quote("multiline");
-	  actual = obj2.multiline;
-	  expect = obj1.multiline;
-	  array[item++] = new TestCase(SECTION, msg, expect, actual);
-
-	  msg  = status + quote("source");
-	  actual = obj2.source;
-	  expect = obj1.source;
-	  array[item++] = new TestCase(SECTION, msg, expect, actual);
-	}
+    // various regular expressions to try -
+    patterns[0] = '';
+    patterns[1] = 'abc';
+    patterns[2] = '(.*)(3-1)\s\w';
+    patterns[3] = '(.*)(...)\\s\\w';
+    patterns[4] = '[^A-Za-z0-9_]';
+    patterns[5] = '[^\f\n\r\t\v](123.5)([4 - 8]$)';
 
 
-	function getStatus(regexp)
-	{
-	  return (statprefix  +  quote(regexp) +  statsuffix);
-	}
+    for (i in patterns)
+    {
+      s = patterns[i];
+      status = getStatus(s);
+      obj1 = new RegExp(s);
+      obj2 = new RegExp(obj1);
+
+      msg  = status + quote("dotall");
+      actual = obj2.dotall;
+      expect = obj1.dotall;
+      array[item++] = new TestCase(SECTION, msg, expect, actual);
+
+      msg  = status + quote("extended");
+      actual = obj2.extended;
+      expect = obj1.extended;
+      array[item++] = new TestCase(SECTION, msg, expect, actual);
+
+      msg  = status + quote("ignoreCase");
+      actual = obj2.ignoreCase;
+      expect = obj1.ignoreCase;
+      array[item++] = new TestCase(SECTION, msg, expect, actual);
+
+      msg  = status + quote("lastIndex");
+      actual = obj2.lastIndex;
+      expect = obj1.lastIndex;
+      array[item++] = new TestCase(SECTION, msg, expect, actual);
+
+      msg  = status + quote("multiline");
+      actual = obj2.multiline;
+      expect = obj1.multiline;
+      array[item++] = new TestCase(SECTION, msg, expect, actual);
+
+      msg  = status + quote("source");
+      actual = obj2.source;
+      expect = obj1.source;
+      array[item++] = new TestCase(SECTION, msg, expect, actual);
+    }
 
 
-	function quote(text)
-	{
-	  return (singlequote  +  text  + singlequote);
-	}
+    function getStatus(regexp)
+    {
+      return (statprefix  +  quote(regexp) +  statsuffix);
+    }
 
-	return array;
+
+    function quote(text)
+    {
+      return (singlequote  +  text  + singlequote);
+    }
+
+    return array;
 }

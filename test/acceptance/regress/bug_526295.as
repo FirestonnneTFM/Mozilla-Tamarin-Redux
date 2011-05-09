@@ -46,14 +46,14 @@ package {
         public var state:Object;
         
         public function BadCode() {
-            state = new Object();        
+            state = new Object();
             state.x = 1;
         }
 
         // Calling this code will throw the Error object thrown in the throwAnError() method
         public final function goodCode():void {
-            try {              
-                throwAnError();                        
+            try {
+                throwAnError();
                 state.x = state.x - 1;
             }
             finally {
@@ -62,9 +62,9 @@ package {
         
         // Call this code will not throw the Error, instead a "undefined" exception is thrown from this
         // method directly.
-        public final function badCode():void {          
-            try {              
-                throwAnError();                        
+        public final function badCode():void {
+            try {
+                throwAnError();
                 state.x--;
             }
             finally {

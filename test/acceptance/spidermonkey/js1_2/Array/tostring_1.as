@@ -59,43 +59,43 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 var a = new Array();
 
 testcases[index++] = new TestCase ( SECTION,
-	       "var a = new Array(); a.toString()",
-	        "",
-	       a.toString() );
+           "var a = new Array(); a.toString()",
+            "",
+           a.toString() );
 
 a[0] = void 0;
 
 testcases[index++] = new TestCase ( SECTION,
-	       "a[0] = void 0; a.toString()",
-	       "",
-	       a.toString() );
+           "a[0] = void 0; a.toString()",
+           "",
+           a.toString() );
 
 
 testcases[index++] = new TestCase( SECTION,
-	      "a.length",
-	      1,
-	      a.length );
+          "a.length",
+          1,
+          a.length );
 
 a[1] = void 0;
 
 testcases[index++] = new TestCase( SECTION,
-	      "a[1] = void 0; a.toString()",
-	      ",",
-	      a.toString() );
+          "a[1] = void 0; a.toString()",
+          ",",
+          a.toString() );
 
 a[1] = "hi";
 
 testcases[index++] = new TestCase( SECTION,
-	      "a[1] = \"hi\"; a.toString()",
-	      ",hi",
-	      a.toString() );
+          "a[1] = \"hi\"; a.toString()",
+          ",hi",
+          a.toString() );
 
 a[2] = void 0;
 
 testcases[index++] = new TestCase( SECTION,
-	      "a[2] = void 0; a.toString()",
-	      ",hi,",
-	      a.toString() );
+          "a[2] = void 0; a.toString()",
+          ",hi,",
+          a.toString() );
 
 var b = new Array(1000);
 var bstring = "";
@@ -105,14 +105,14 @@ for ( blen=0; blen<999; blen++) {
 
 
 testcases[index++] = new TestCase ( SECTION,
-	       "var b = new Array(1000); b.toString()",
-	       bstring,
-	       b.toString() );
+           "var b = new Array(1000); b.toString()",
+           bstring,
+           b.toString() );
 
 
 testcases[index++] = new TestCase( SECTION,
-	      "b.length",
-	      1000,
-	      b.length );
+          "b.length",
+          1000,
+          b.length );
 
 test();

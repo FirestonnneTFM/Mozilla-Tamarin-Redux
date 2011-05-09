@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "Expressions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "Descendant operator on non-XML object - runtime error";       // Provide ECMA section title or a description
 var BUGNUMBER = "144371";
 
@@ -46,10 +46,10 @@ startTest();                // leave this alone
  
 var employees = [{fname:"John",age:20},{fname:"Sue",age:30}]
 try {
-	var names = employees..fname;
-	result = "no exception";
+    var names = employees..fname;
+    result = "no exception";
 } catch(e1) {
-	result = typeError(e1.toString());
+    result = typeError(e1.toString());
 }
 
 expected = "TypeError: Error #1016";
@@ -59,10 +59,10 @@ AddTestCase("Use descendant operator on an array", expected, result);
 var object = {a:1, b:2, c:3};
 
 try {
-	var names = object..a;
-	result = "no exception";
+    var names = object..a;
+    result = "no exception";
 } catch(e2) {
-	result = typeError(e2.toString());
+    result = typeError(e2.toString());
 }
 
 expected = "TypeError: Error #1016";
@@ -72,10 +72,10 @@ AddTestCase("Use descendant operator on an object", expected, result);
 var string = "this is a string";
 
 try {
-	var names = string..s;
-	result = "no exception";
+    var names = string..s;
+    result = "no exception";
 } catch(e3) {
-	result = typeError(e3.toString());
+    result = typeError(e3.toString());
 }
 
 expected = "TypeError: Error #1016";

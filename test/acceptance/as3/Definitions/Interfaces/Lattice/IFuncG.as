@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 // ActionScript file
 package Lattice {
-	public interface IFuncG {
-		function g() : String
-	}
+    public interface IFuncG {
+        function g() : String
+    }
 }

@@ -110,7 +110,7 @@ AddTestCase( "Obj.setPrivStatString(s), Obj.getPrivStatString", str, Obj.testGet
 
 AddTestCase( "*** Access public static method of a class ***", 1, 1 );
 AddTestCase( "AccPubStatFinDynClassMAndP.setPubStatObject(ob), AccPubStatFinDynClassMAndP.getPubStatObject()", ob,
-	(AccPubStatFinDynClassMAndP.setPubStatObject(ob), AccPubStatFinDynClassMAndP.getPubStatObject()) );
+    (AccPubStatFinDynClassMAndP.setPubStatObject(ob), AccPubStatFinDynClassMAndP.getPubStatObject()) );
 
 
 // ********************************************

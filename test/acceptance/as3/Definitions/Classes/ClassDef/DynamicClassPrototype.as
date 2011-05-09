@@ -58,7 +58,7 @@ AddTestCase( "Try overriding default property through a dynamic class' prototype
 DynamicClass.prototype.intNumber = 500;
 AddTestCase( "Try overriding internal property through a dynamic class' prototype object", "100", dynamicObj.intNumber.toString() );
 
-DynamicClass.prototype.protInt = 0;	// Note: this works because the protected property is not visible!
+DynamicClass.prototype.protInt = 0; // Note: this works because the protected property is not visible!
 AddTestCase( "Try overriding protected property through a dynamic class' prototype object", "0", dynamicObj.protInt.toString() );
 
 DynamicClass.prototype.pubUint = 0;
@@ -111,12 +111,12 @@ AddTestCase("Verify prototype constructor is equivalent to class object", true, 
 var thisError10 = "no error thrown";
 var temp:Object = new Object();
 try{
-	DynamicClass.prototype = temp;
+    DynamicClass.prototype = temp;
 } catch (e) {
-	thisError10 = e.toString();
+    thisError10 = e.toString();
 } finally {
-	AddTestCase( "Try to write to FinalClass' prototype object", "ReferenceError: Error #1074",
-				referenceError( thisError10 ) );
+    AddTestCase( "Try to write to FinalClass' prototype object", "ReferenceError: Error #1074",
+                referenceError( thisError10 ) );
 }
 
 test();       // leave this alone.  this executes the test cases and

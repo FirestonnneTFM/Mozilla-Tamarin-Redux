@@ -37,22 +37,22 @@
 /*
  * Dynamic Class DynamicClass
  * Class methods
- *  
+ *
  */
 
 package DynamicClassImpInternalIntpubname{
-	dynamic class DynamicClass implements InternalInt{
-		
-		public function deffunc():String{ 
- 			return"PASSED";
-		}
-		
-	}
+    dynamic class DynamicClass implements InternalInt{
+        
+        public function deffunc():String{
+            return"PASSED";
+        }
+        
+    }
 
-	public class DynamicClassAccessor{
+    public class DynamicClassAccessor{
 
            var acc:DynamicClass = new DynamicClass();
 
-		public function accdeffunc():String{return acc.deffunc();}
-       } 	
-}  
+        public function accdeffunc():String{return acc.deffunc();}
+       }
+}

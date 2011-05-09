@@ -42,7 +42,7 @@ package DefaultProtClass {
 
   // this is the test case so we can't alter it too much
   // change the name of the class to ExtDefaultProtClassTest
-  // we'll create a public class ExtDefaultProtClass that 
+  // we'll create a public class ExtDefaultProtClass that
   // extends it for testing runtime
   class ExtDefaultProtClassTest extends DefaultProtClass {
 
@@ -54,12 +54,12 @@ package DefaultProtClass {
     function subGetArray() : Array { return this.getProtArray(); }
     function subSetArray(a:Array) { this.setProtArray(a); }
 
-	// this is needed so that the test cases can access this from
-	// outside the class.  This way the test case itself preserved
-	public function testSubGetSetArray(a:Array) : Array {
-		this.subSetArray(a);
-		return this.subGetArray();
-	}
+    // this is needed so that the test cases can access this from
+    // outside the class.  This way the test case itself preserved
+    public function testSubGetSetArray(a:Array) : Array {
+        this.subSetArray(a);
+        return this.subGetArray();
+    }
 
     // ************************************
     // access protected method of parent
@@ -72,17 +72,17 @@ package DefaultProtClass {
     // ************************************
     // access protected method of parent
     // from final method of sub class
-	// 
-	// final will behave the same as default
+    //
+    // final will behave the same as default
     // ************************************
 
     final function finSubGetArray() : Array { return this.getProtArray(); }
     final function finSubSetArray(a:Array) { this.setProtArray(a); }
 
-	public function testFinSubArray(a:Array):Array{
-		this.finSubSetArray(a);
-		return this.finSubGetArray();
-	}
+    public function testFinSubArray(a:Array):Array{
+        this.finSubSetArray(a);
+        return this.finSubGetArray();
+    }
 
     // ************************************
     // access protected method of parent
@@ -100,10 +100,10 @@ package DefaultProtClass {
     private final function privFinSubGetArray() : Array { return this.getProtArray(); }
     final private function privFinSubSetArray(a:Array) { this.setProtArray(a); }
 
-	public function testPrivFinSubArray(a:Array):Array {
-		this.privFinSubSetArray(a);
-		return this.privFinSubGetArray();
-	}
+    public function testPrivFinSubArray(a:Array):Array {
+        this.privFinSubSetArray(a);
+        return this.privFinSubGetArray();
+    }
 
 
     // ************************************
@@ -128,10 +128,10 @@ package DefaultProtClass {
     virtual function virtSubGetArray() : Array { return this.getProtArray(); }
     virtual function virtSubSetArray(a:Array) { this.setProtArray(a); }
 
-	public function testVirtSubArray(a:Array) : Array {
-		this.virtSubSetArray(a);
-		return this.virtSubGetArray();
-	}
+    public function testVirtSubArray(a:Array) : Array {
+        this.virtSubSetArray(a);
+        return this.virtSubGetArray();
+    }
 
     // ************************************
     // access protected method of parent
@@ -149,59 +149,59 @@ package DefaultProtClass {
     virtual private function privVirtSubGetArray() : Array { return this.getProtArray(); }
     private virtual function privVirtSubSetArray(a:Array) { this.setProtArray(a); }
 
-	public function testPrivVirtSubArray(a:Array) : Array {
-		this.privVirtSubSetArray(a);
-		return this.privVirtSubGetArray();
-	}
+    public function testPrivVirtSubArray(a:Array) : Array {
+        this.privVirtSubSetArray(a);
+        return this.privVirtSubGetArray();
+    }
 
     // ***************************************
-	// access protected property from
-	// static method of sub class
+    // access protected property from
+    // static method of sub class
     // ***************************************
 
-	static function statSubGetArray():Array{ return getProtArray(); }
-	static public function pubStatSubGetArray():Array { return statSubGetArray(); }
+    static function statSubGetArray():Array{ return getProtArray(); }
+    static public function pubStatSubGetArray():Array { return statSubGetArray(); }
 
     // ***************************************
-    // access protected property from 
+    // access protected property from
     // default method of sub class
     // ***************************************
 
     function subGetDPArray() : Array { return protArray; }
     function subSetDPArray(a:Array) { protArray = a; }
 
-	// this is needed so that the test cases can access this from
-	// outside the class.  This way the test case itself preserved
-	public function testSubGetSetDPArray(a:Array) : Array {
-		this.subSetDPArray(a);
-		return this.subGetDPArray();
-	}
+    // this is needed so that the test cases can access this from
+    // outside the class.  This way the test case itself preserved
+    public function testSubGetSetDPArray(a:Array) : Array {
+        this.subSetDPArray(a);
+        return this.subGetDPArray();
+    }
    
     // ***************************************
-    // access protected property from 
+    // access protected property from
     // final method of sub class
     // ***************************************
 
     final function finSubGetDPArray() : Array { return protArray; }
     final function finSubSetDPArray(a:Array) { protArray = a; }
 
-	public function testFinSubDPArray(a:Array) : Array {
-		this.finSubSetDPArray(a);
-		return this.finSubGetDPArray();
-	}
+    public function testFinSubDPArray(a:Array) : Array {
+        this.finSubSetDPArray(a);
+        return this.finSubGetDPArray();
+    }
    
     // ***************************************
-    // access protected property from 
+    // access protected property from
     // virtual method of sub class
     // ***************************************
 
     virtual function virtSubGetDPArray() : Array { return protArray; }
     virtual function virtSubSetDPArray(a:Array) { protArray = a; }
 
-	public function testVirtSubDPArray(a:Array) : Array {
-		this.virtSubSetDPArray(a);
-		return this.virtSubGetDPArray();
-	}
+    public function testVirtSubDPArray(a:Array) : Array {
+        this.virtSubSetDPArray(a);
+        return this.virtSubGetDPArray();
+    }
    
     // ***************************************
     // access protected property from
@@ -219,10 +219,10 @@ package DefaultProtClass {
     private function privSubGetDPArray() : Array { return this.protArray; }
     private function privSubSetDPArray(a:Array) { this.protArray = a; }
 
-	public function testPrivSubDPArray(a:Array) : Array {
-		this.privSubSetDPArray(a);
-		return this.privSubGetDPArray();
-	}
+    public function testPrivSubDPArray(a:Array) : Array {
+        this.privSubSetDPArray(a);
+        return this.privSubGetDPArray();
+    }
 
     // ***************************************
     // access protected property from
@@ -248,10 +248,10 @@ package DefaultProtClass {
     private final function privFinSubGetDPArray() : Array { return this.protArray; }
     final private function privFinSubSetDPArray(a:Array) { this.protArray = a; }
 
-	public function testPrivFinSubDPArray(a:Array):Array {
-		this.privFinSubSetDPArray(a);
-		return this.privFinSubGetDPArray();
-	}
+    public function testPrivFinSubDPArray(a:Array):Array {
+        this.privFinSubSetDPArray(a);
+        return this.privFinSubGetDPArray();
+    }
 
     // ***************************************
     // access protected property from
@@ -261,19 +261,19 @@ package DefaultProtClass {
     private virtual function privVirtSubGetDPArray() : Array { return this.protArray; }
     virtual private function privVirtSubSetDPArray(a:Array) { this.protArray = a; }
 
-	public function testPrivVirtSubDPArray(a:Array):Array {
-		this.privVirtSubSetDPArray(a);
-		return this.privVirtSubGetDPArray();
-	}
+    public function testPrivVirtSubDPArray(a:Array):Array {
+        this.privVirtSubSetDPArray(a);
+        return this.privVirtSubGetDPArray();
+    }
 
     // ***************************************
-	// access protected property from
-	// public static method of sub class
+    // access protected property from
+    // public static method of sub class
     // ***************************************
 
-	public static function pubStatSubGetDPArray(){
-		return protArray;
-	}
+    public static function pubStatSubGetDPArray(){
+        return protArray;
+    }
 
   }
 

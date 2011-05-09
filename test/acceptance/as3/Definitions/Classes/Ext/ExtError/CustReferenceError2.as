@@ -37,11 +37,11 @@
 
 package ExtError{
 
-	public dynamic class CustReferenceError2 extends ReferenceError{
-		public function CustReferenceError2(message=""){
-			this.message = message;
-		}
-	}
+    public dynamic class CustReferenceError2 extends ReferenceError{
+        public function CustReferenceError2(message=""){
+            this.message = message;
+        }
+    }
 
 }
 

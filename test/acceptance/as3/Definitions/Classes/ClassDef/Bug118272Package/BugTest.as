@@ -38,13 +38,13 @@
 
 // more elaborate variants:
 package Bug118272Package {
-	public class pubClass { }
-	class defClass { }
-	internal class intClass { }
-	dynamic class dynClass { }
-	
-	final class finClass { }
-	public class BugTest {
+    public class pubClass { }
+    class defClass { }
+    internal class intClass { }
+    dynamic class dynClass { }
+    
+    final class finClass { }
+    public class BugTest {
             public var thisError="no error";
             public var thisError1="no error";
             public var thisError2="no error";
@@ -52,41 +52,41 @@ package Bug118272Package {
             public var thisError4="no error";
             public function BugTest(){
               try{
-		 pubClass = 0;
+         pubClass = 0;
                  }catch(e:ReferenceError){
                       thisError=e.toString();
                  }
                 
               try{
-		 defClass = 0;
+         defClass = 0;
                  }catch(e1:ReferenceError){
                       thisError1=e1.toString();
                  }
 
               try{
-		 intClass = 0;
+         intClass = 0;
                  }catch(e2:ReferenceError){
                       thisError2=e2.toString();
                  }
 
               try{
-		 dynClass = 0;
+         dynClass = 0;
                  }catch(e3:ReferenceError){
                       thisError3=e3.toString();
                  }
               
               try{
-		 finClass = 0;
+         finClass = 0;
                  }catch(e4:ReferenceError){
                       thisError4=e4.toString();
                  }
         }
-	/*defClass = 1;
-		intClass = 2;
-		dynClass = 3;
-		//expClass = 4;
-		finClass = 5;*/
-	}
+    /*defClass = 1;
+        intClass = 2;
+        dynClass = 3;
+        //expClass = 4;
+        finClass = 5;*/
+    }
 }
 
 

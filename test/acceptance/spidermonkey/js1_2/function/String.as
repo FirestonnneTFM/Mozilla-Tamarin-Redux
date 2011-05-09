@@ -55,19 +55,19 @@ writeHeaderToLog('Executing script: String.js');
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 testcases[index++] = new TestCase( SECTION, "String(true)            ",
-	      'true',  (String(true)));
+          'true',  (String(true)));
 testcases[index++] = new TestCase( SECTION, "String(false)           ",
-	      'false',  (String(false)));
+          'false',  (String(false)));
 testcases[index++] = new TestCase( SECTION, "String(-124)           ",
-	      '-124',  (String(-124)));
+          '-124',  (String(-124)));
 testcases[index++] = new TestCase( SECTION, "String(1.23)          ",
-	      '1.23',  (String(1.23)));
+          '1.23',  (String(1.23)));
 testcases[index++] = new TestCase( SECTION, "String({p:1})           ",
-	      '[object Object]',  (String({p:1})));
+          '[object Object]',  (String({p:1})));
 testcases[index++] = new TestCase( SECTION, "String(null)            ",
-	      'null',  (String(null)));
+          'null',  (String(null)));
 testcases[index++] = new TestCase( SECTION, "String([1,2,3])            ",
-	      '1,2,3',  (String([1,2,3])));
+          '1,2,3',  (String([1,2,3])));
 
 test();
 

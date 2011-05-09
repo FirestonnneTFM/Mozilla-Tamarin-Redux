@@ -46,7 +46,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
 //    5.  Get the name of the next property of Result(3) that doesn't have the
 //        DontEnum attribute. If there is no such property, go to step 14.

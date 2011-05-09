@@ -50,6 +50,6 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    array[item++] = new TestCase( SECTION,	"delete( String.prototype );String.prototype",   String.prototype,   (delete ( String.prototype ),String.prototype) );
+    array[item++] = new TestCase( SECTION,  "delete( String.prototype );String.prototype",   String.prototype,   (delete ( String.prototype ),String.prototype) );
     return ( array );
 }

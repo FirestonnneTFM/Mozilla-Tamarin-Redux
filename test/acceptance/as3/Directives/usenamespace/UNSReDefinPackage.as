@@ -40,7 +40,7 @@ package P {
  
     public class Game{
          Baseball var teamName = "Giants";
-         use namespace Baseball; 
+         use namespace Baseball;
      }
   }
 
@@ -49,7 +49,7 @@ package P {
 
 
 var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "namespace inside package";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 

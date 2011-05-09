@@ -95,13 +95,13 @@ var pat = new Employee();
 jim.bonus = 300;
 
 testcases[index++] = new TestCase( SECTION,
-	      "jim = new Employee(); jim.bonus = 300; jim.bonus",
-	      300,
-	      jim.bonus );
+          "jim = new Employee(); jim.bonus = 300; jim.bonus",
+          300,
+          jim.bonus );
 
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat = new Employee(); pat.bonus",
-	      void 0,
-	      pat.bonus );
+          "pat = new Employee(); pat.bonus",
+          void 0,
+          pat.bonus );
 test();

@@ -103,7 +103,7 @@ package DefaultClass {
     public function testPubFinSubArray(a:Array) : Array {
         this.pubFinSubSetArray(a);
         return this.pubFinSubGetArray();
-    }    
+    }
     
     // ************************************
     // access public method of parent
@@ -116,7 +116,7 @@ package DefaultClass {
     public function testPrivFinSubArray(a:Array) : Array {
         this.privFinSubSetArray(a);
         return this.privFinSubGetArray();
-    }       
+    }
     
     // ************************************
     // access public method of parent
@@ -142,7 +142,7 @@ package DefaultClass {
     public function testPubVirSubArray(a:Array) : Array {
         this.pubVirSubSetArray(a);
         return this.pubVirSubGetArray();
-    }  
+    }
     
      // ************************************
     // access public method of parent
@@ -155,10 +155,10 @@ package DefaultClass {
     public function testPrivVirSubArray(a:Array) : Array {
         this.pubVirSubSetArray(a);
         return this.pubVirSubGetArray();
-    }  
+    }
     
     // ***************************************
-    // access public property from 
+    // access public property from
     // default method of sub class
     // ***************************************
 
@@ -168,7 +168,7 @@ package DefaultClass {
     public function testSubDPArray(a:Array) : Array {
         this.subSetDPArray(a);
         return this.subGetDPArray();
-    }    
+    }
    
     // ***************************************
     // access public property from
@@ -189,10 +189,10 @@ package DefaultClass {
     public function testPrivDPArray(a:Array) : Array {
         this.privSubSetDPArray(a);
         return this.privSubGetDPArray();
-    }  
+    }
     
     // ***************************************
-    // access public property from 
+    // access public property from
     // final method of sub class
     // ***************************************
 
@@ -202,10 +202,10 @@ package DefaultClass {
     public function testFinDPArray(a:Array) : Array {
         this.finSubSetDPArray(a);
         return this.finSubGetDPArray();
-    } 	
+    }
 
     // ***************************************
-    // access public property from 
+    // access public property from
     // public final method of sub class
     // ***************************************
 
@@ -215,10 +215,10 @@ package DefaultClass {
     public function testPubFinDPArray(a:Array) : Array {
         this.pubFinSubSetDPArray(a);
         return this.pubFinSubGetDPArray();
-    } 
+    }
     
     // ***************************************
-    // access public property from 
+    // access public property from
     // private final method of sub class
     // ***************************************
 
@@ -228,10 +228,10 @@ package DefaultClass {
     public function testPrivFinDPArray(a:Array) : Array {
         this.privFinSubSetDPArray(a);
         return this.pubFinSubGetDPArray();
-    } 	
+    }
     
         // ***************************************
-        // access public property from 
+        // access public property from
         // virtual method of sub class
         // ***************************************
     
@@ -241,10 +241,10 @@ package DefaultClass {
         public function testVirDPArray(a:Array) : Array {
             this.virSubSetDPArray(a);
             return this.virSubGetDPArray();
-        } 	
+        }
     
         // ***************************************
-        // access public property from 
+        // access public property from
         // public final method of sub class
         // ***************************************
     
@@ -254,10 +254,10 @@ package DefaultClass {
         public function testPubVirDPArray(a:Array) : Array {
             this.pubFinSubSetDPArray(a);
             return this.pubFinSubGetDPArray();
-        } 
+        }
         
         // ***************************************
-        // access public property from 
+        // access public property from
         // private final method of sub class
         // ***************************************
     
@@ -268,12 +268,12 @@ package DefaultClass {
             this.privFinSubSetDPArray(a);
             return this.pubFinSubGetDPArray();
     }
-	
-	}
-	// PUBLIC wrapper function for the dynamic class to be accessed;
-	// otherwise it will give the error:
-	// ReferenceError: DynExtDefaultClass is not defined
-	//	at global$init()
-	public class DynExtDefaultClassPub extends DynExtDefaultClassPubInner  {}
+    
+    }
+    // PUBLIC wrapper function for the dynamic class to be accessed;
+    // otherwise it will give the error:
+    // ReferenceError: DynExtDefaultClass is not defined
+    //  at global$init()
+    public class DynExtDefaultClassPub extends DynExtDefaultClassPubInner  {}
 
 }

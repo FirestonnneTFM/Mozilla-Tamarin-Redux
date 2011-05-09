@@ -35,30 +35,30 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package InternalClassPackage {
-	internal class IntExtInternalOverRidePublicInner extends InternalClass {
-		public var orSet:Boolean = false;
-		public var orGet:Boolean = false;
+    internal class IntExtInternalOverRidePublicInner extends InternalClass {
+        public var orSet:Boolean = false;
+        public var orGet:Boolean = false;
 
 
-		// *****************
-		// public methods
-		// *****************
-		override public function getDate() : Date { 
-			orGet = true;
-			return date; 
-		}
-		override public function setDate( d:Date ) { 
-			orSet = true;
-			date = d; 
-		}
-		
-		public function setGetDate( d:Date ) : Date {
-			setDate(d);
-			return getDate();
-		}
+        // *****************
+        // public methods
+        // *****************
+        override public function getDate() : Date {
+            orGet = true;
+            return date;
+        }
+        override public function setDate( d:Date ) {
+            orSet = true;
+            date = d;
+        }
+        
+        public function setGetDate( d:Date ) : Date {
+            setDate(d);
+            return getDate();
+        }
 
-	}
-	
-	public class IntExtInternalOverRidePublic extends IntExtInternalOverRidePublicInner {}
+    }
+    
+    public class IntExtInternalOverRidePublic extends IntExtInternalOverRidePublicInner {}
 
 }

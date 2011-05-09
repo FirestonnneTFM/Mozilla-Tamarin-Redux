@@ -170,7 +170,7 @@ package DefaultClass {
     virtual function getVirtualFunction() : Function { return myFunction; }
     virtual function getVirtualMath() : Math { return math; }
     virtual function getVirtualNumber() : Number { return number; }
-   	virtual function getVirtualObject() : Object { return object; }
+    virtual function getVirtualObject() : Object { return object; }
     virtual function getVirtualString() : String { return string; }
     virtual function setVirtualArray( a:Array ) { array = a; }
     virtual function setVirtualBoolean( b:Boolean ) { boolean = b; }

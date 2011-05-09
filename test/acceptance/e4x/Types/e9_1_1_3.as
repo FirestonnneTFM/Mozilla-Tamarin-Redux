@@ -42,7 +42,7 @@
 START("9.1.1.3 - XML [[Delete]]");
 
 // .@
-x1 = 
+x1 =
 <alpha attr1="value1">one</alpha>;
 
 delete x1.@attr1;
@@ -59,7 +59,7 @@ x1 =
     </bravo>
 </alpha>;
 
-xref = 
+xref =
 <alpha attr1="value1">
     one
     <bravo attr2="value2">
@@ -96,7 +96,7 @@ x1 =
     </bravo>
 </alpha>;
 
-xref = 
+xref =
 <alpha attr1="value1">
     one
     <bravo attr2="value2">

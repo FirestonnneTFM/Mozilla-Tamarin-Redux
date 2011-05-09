@@ -97,11 +97,11 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION, "'string' >= 'astring'",          true,      'string' >= 'astring' );
     array[item++] = new TestCase( SECTION, "'string' >= 'strings'",          false,       'string' >= 'strings' );
     array[item++] = new TestCase( SECTION, "'string' >= 'str'",              true,       'string' >= 'str' );
-	
+    
     array[item++] = new TestCase( SECTION, "'string' >= undefined",          false,       'string' >= undefined );
     array[item++] = new TestCase( SECTION, "undefined  >= 'string'",          false,       undefined  >= 'string' );
-    array[item++] = new TestCase( SECTION, "6.9 >= undefined",          	 false,       6.9 >= undefined );
-    array[item++] = new TestCase( SECTION, "undefined >= 343",          	 false,       undefined >= 343);
+    array[item++] = new TestCase( SECTION, "6.9 >= undefined",               false,       6.9 >= undefined );
+    array[item++] = new TestCase( SECTION, "undefined >= 343",               false,       undefined >= 343);
 
     array[item++] = new TestCase( SECTION, "44 >= 55",          false,       44 >= 55 );
     array[item++] = new TestCase( SECTION, "55 >= 44",          true,       55 >= 44 );

@@ -54,7 +54,7 @@ if (typeof document == 'undefined')
   AddTestCase(summary, expect, actual);
 }
 else
-{ 
+{
   // delay test driver end
   gDelayTestDriverEnd = true;
 

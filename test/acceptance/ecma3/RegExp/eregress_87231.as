@@ -67,8 +67,8 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
 var cnEmptyString = '';
 var status = '';
@@ -120,5 +120,5 @@ var strR = 'aaAAaaaf;lrlrzs';
     expectedmatch = Array('A' + strR, undefined, 'A' + strR); // 'altruistic' case: see above
     array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	return array;
+    return array;
 }

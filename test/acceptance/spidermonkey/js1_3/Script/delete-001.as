@@ -74,9 +74,9 @@ for ( p in this ) {
 // not too picky here... just want to make sure we didn't crash or something
 
 testcases[index++] = new TestCase( SECTION,
-	      "delete all properties of the global object",
-	      "PASSED",
-	      result == "" ? "FAILED" : "PASSED" );
+          "delete all properties of the global object",
+          "PASSED",
+          result == "" ? "FAILED" : "PASSED" );
 
 
 test();

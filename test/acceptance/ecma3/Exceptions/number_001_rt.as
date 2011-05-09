@@ -46,7 +46,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;  
+    var item = 0;
 
 
     var result = "Failed";

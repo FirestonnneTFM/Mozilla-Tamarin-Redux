@@ -55,7 +55,7 @@ function getTestCases() {
         thisError=e.toString();
     }finally{
         array[item++]=new TestCase(SECTION,"Trying to verify the ReadOnly attribute of Math.PI","ReferenceError: Error #1074",referenceError(thisError));
-    } 
+    }
     array[item++] = new TestCase( SECTION, "Math.PI=0; Math.PI",       3.141592653589793,  Math.PI );
     return ( array );
 }

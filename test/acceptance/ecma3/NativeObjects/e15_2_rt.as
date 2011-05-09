@@ -53,9 +53,9 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION, "Boolean.constructor.prototype", Object.prototype+"",   Boolean.constructor.prototype+"");
     array[item++] = new TestCase( SECTION,  "Number.constructor.prototype", Object.prototype+"",   Number.constructor.prototype+"");
     array[item++] = new TestCase( SECTION,  "Date.constructor.prototype",   Object.prototype+"",   Date.constructor.prototype+"");
-    array[item++] = new TestCase( SECTION, "TestCase.constructor.prototype", Function.prototype+"", TestCase.constructor.prototype+""); 
+    array[item++] = new TestCase( SECTION, "TestCase.constructor.prototype", Function.prototype+"", TestCase.constructor.prototype+"");
     array[item++] = new TestCase( SECTION, "Math.pow.constructor.prototype", Function.prototype+"", Math.pow.constructor.prototype+"");
-    array[item++] = new TestCase( SECTION, "String.prototype.indexOf.constructor.prototype", Function.prototype+"",   String.prototype.indexOf.constructor.prototype+""); 
+    array[item++] = new TestCase( SECTION, "String.prototype.indexOf.constructor.prototype", Function.prototype+"",   String.prototype.indexOf.constructor.prototype+"");
 
     return ( array );
 }

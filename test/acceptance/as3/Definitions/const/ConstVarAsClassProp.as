@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SECTION = "Definitions\const";       				// provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";  					// Version of JavaScript or ECMA
-var TITLE   = "Operations on const variable inside a class";       	// Provide ECMA section title or a description
+var SECTION = "Definitions\const";                      // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";                   // Version of JavaScript or ECMA
+var TITLE   = "Operations on const variable inside a class";        // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
 
@@ -48,14 +48,14 @@ startTest();                // leave this alone
 
 class myTestConst {
 
-	public const num1 = 1;
-	private const num2 = 2;
+    public const num1 = 1;
+    private const num2 = 2;
 
 
-	function privatenum2() {
-		
-	 	return num2;
-	}
+    function privatenum2() {
+        
+        return num2;
+    }
 }
 
 
@@ -67,6 +67,6 @@ AddTestCase( "const public property", 1, myConstObj.num1 );
 AddTestCase( "const private property", 2, myConstObj.privatenum2() );
 
 
-test();       		// Leave this function alone.
-			// This function is for executing the test case and then
-			// displaying the result on to the console or the LOG file.
+test();             // Leave this function alone.
+            // This function is for executing the test case and then
+            // displaying the result on to the console or the LOG file.

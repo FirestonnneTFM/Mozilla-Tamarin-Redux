@@ -62,9 +62,9 @@ function f(x) {return x;}
 x = f(/abc/);
 
 testcases[index++] = new TestCase( SECTION,
-	      "function f(x) {return x;}; x = f(/abc/); x",
-	      /abc/.toString(),
-	      x.toString() );
+          "function f(x) {return x;}; x = f(/abc/); x",
+          /abc/.toString(),
+          x.toString() );
 
 test();
 

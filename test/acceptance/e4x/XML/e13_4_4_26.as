@@ -56,7 +56,7 @@ TEST_XML(3, "<alpha><bravo> one </bravo></alpha>", x1);
 
 x1 =
 <alpha>
-	<bravo> one </bravo>
+    <bravo> one </bravo>
 </alpha>;
 
 x1.normalize();
@@ -74,9 +74,9 @@ xml.appendChild (b);
 xml.appendChild (c);
 xml.appendChild (d);
 
-AddTestCase( "xml has multiple text nodes, xml.normalize(), xml.toString()", 
-	"<XML>" + NL() + "  zeroonetwo" + NL() + "  <foo>two</foo>" + NL() + "</XML>", 
-	(xml.normalize(), xml.toString()));
+AddTestCase( "xml has multiple text nodes, xml.normalize(), xml.toString()",
+    "<XML>" + NL() + "  zeroonetwo" + NL() + "  <foo>two</foo>" + NL() + "</XML>",
+    (xml.normalize(), xml.toString()));
 
 xml = new XMLList("<XML>b</XML>");
 a = new XMLList("one");
@@ -89,8 +89,8 @@ xml.appendChild (b);
 xml.appendChild (c);
 xml.appendChild (d);
 
-AddTestCase( "xml has multiple text nodes, xml.normalize(), xml.toString()", 
-	"<XML>" + NL() + "  bonetwo" + NL() + "  <c/>" + NL() + "  <foo>three</foo>" + NL() + "</XML>", 
+AddTestCase( "xml has multiple text nodes, xml.normalize(), xml.toString()",
+    "<XML>" + NL() + "  bonetwo" + NL() + "  <c/>" + NL() + "  <foo>three</foo>" + NL() + "</XML>",
 (xml.normalize(), xml.toString()));
 
 END();

@@ -53,7 +53,7 @@ function getTestCases()
     array[item++] = new TestCase(SECTION, "Number.MAX_VALUE", 1024, Number.MAX_VALUE.toString(2).length );
     array[item++] = new TestCase(SECTION, "-Number.MAX_VALUE", 1025, (-Number.MAX_VALUE).toString(2).length );
 
-	//  Both these are rounded towards zero.
+    //  Both these are rounded towards zero.
     array[item++] = new TestCase(SECTION, "Number.MIN_VALUE", 1, Number.MIN_VALUE.toString(2).length );
     array[item++] = new TestCase(SECTION, "-Number.MIN_VALUE", 1, (-Number.MIN_VALUE).toString(2).length );
     

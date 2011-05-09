@@ -47,7 +47,7 @@
 function getTestCases() {
     var array = new Array();
     var item = 0;
-     var _0abc = 5; 
+     var _0abc = 5;
     array[item++] = new TestCase( SECTION,    "var _0abc = 5",   5,    _0abc );
     return ( array );
 }

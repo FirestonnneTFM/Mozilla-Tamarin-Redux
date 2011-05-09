@@ -67,7 +67,7 @@ try{
    }catch(eo7:Error){
        thisError1="This is outer Error:"+eo7.toString();
        //print("This is outer error:"+eo7.toString());
-       try { 
+       try {
            throw new TypeError();
            }catch(ei:TypeError){
                thisError="This is Inner Type Error:"+ei.toString();
@@ -85,7 +85,7 @@ try{
            }catch(ei6:ArgumentError){
                thisError="This is inner Argument Error"+ei6.toString();
            }finally{
-               AddTestCase( "Testing Nested try block with multiple catch block inside the eighth catch block of the outer try block","This is inner finally:This is Inner Type Error:TypeError","This is inner finally:"+thisError ); 
+               AddTestCase( "Testing Nested try block with multiple catch block inside the eighth catch block of the outer try block","This is inner finally:This is Inner Type Error:TypeError","This is inner finally:"+thisError );
             }
    }finally{
            AddTestCase( "Testing Nested try block with multiple catch block inside the eighth catch block of the outer try block", "This is outer finally:This is outer Error:Error: This is an error","This is outer finally:"+ thisError1 );

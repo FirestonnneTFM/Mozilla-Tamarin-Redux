@@ -35,30 +35,30 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package DefaultClassPackage {
-	internal class IntExtDefaultOverRideProtectedInner extends DefaultClass {
-		public var orSet:Boolean = false;
-		public var orGet:Boolean = false;
+    internal class IntExtDefaultOverRideProtectedInner extends DefaultClass {
+        public var orSet:Boolean = false;
+        public var orGet:Boolean = false;
 
 
-		// *****************
-		// protected methods
-		// *****************
-		override protected function getDate() : Date { 
-			orGet = true;
-			return date; 
-		}
-		override protected function setDate( d:Date ) { 
-			orSet = true;
-			date = d; 
-		}
-		
-		public function setGetDate( d:Date ) : Date {
-			setDate(d);
-			return getDate();
-		}
+        // *****************
+        // protected methods
+        // *****************
+        override protected function getDate() : Date {
+            orGet = true;
+            return date;
+        }
+        override protected function setDate( d:Date ) {
+            orSet = true;
+            date = d;
+        }
+        
+        public function setGetDate( d:Date ) : Date {
+            setDate(d);
+            return getDate();
+        }
 
-	}
-	
-	public class IntExtDefaultOverRideProtected extends IntExtDefaultOverRideProtectedInner {}
+    }
+    
+    public class IntExtDefaultOverRideProtected extends IntExtDefaultOverRideProtectedInner {}
 
 }

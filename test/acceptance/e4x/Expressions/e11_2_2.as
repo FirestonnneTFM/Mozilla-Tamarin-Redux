@@ -47,7 +47,7 @@ rectangle = <rectangle>
             <y>75</y>
             <length>20</length>
             <width>30</width>
-            </rectangle>;    
+            </rectangle>;
 
 
 TEST(1, 1, rectangle.length());
@@ -89,7 +89,7 @@ TEST(10, <apple>moi</apple>, var1);
 
 // Test method name/element name conflicts
 
-x1 = 
+x1 =
 <alpha>
     <name>Foo</name>
     <length>Bar</length>

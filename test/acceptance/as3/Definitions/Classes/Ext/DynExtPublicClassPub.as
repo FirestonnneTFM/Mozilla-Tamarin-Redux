@@ -37,17 +37,17 @@
 
 
 /**
- *  All 'import' statements  should be the first 
+ *  All 'import' statements  should be the first
  *  in a file.
  */
 import PublicClass.*;
 
-var SECTION = "Definitions";       				// provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";  					// Version of JavaScript or ECMA
-var TITLE   = "dynamic Class Extends Public Class";       	// Provide ECMA section title or a description
+var SECTION = "Definitions";                    // provide a document reference (ie, ECMA section)
+var VERSION = "AS 3.0";                     // Version of JavaScript or ECMA
+var TITLE   = "dynamic Class Extends Public Class";         // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                					// leave this alone
+startTest();                                    // leave this alone
 
 /**
  * Calls to AddTestCase here. AddTestCase is a function that is defined
@@ -85,7 +85,7 @@ AddTestCase( "DYNEXTDCLASS.testSubArray(arr)", arr, (DYNEXTDCLASS.testSubArray(a
 
 
 // ********************************************
-// access public method from a public 
+// access public method from a public
 // method of a sub class
 //
 // ********************************************
@@ -96,7 +96,7 @@ AddTestCase( "DYNEXTDCLASS.pubSubSetArray(arr), DYNEXTDCLASS.pubSubGetArray()", 
 
 
 // ********************************************
-// access public method from a private 
+// access public method from a private
 // method of a sub class
 //
 // ********************************************
@@ -107,7 +107,7 @@ AddTestCase( "DYNEXTDCLASS.testPrivSubArray(arr)", arr, DYNEXTDCLASS.testPrivSub
 
 
 // ********************************************
-// access public method from a final 
+// access public method from a final
 // method of a sub class
 //
 // ********************************************
@@ -118,7 +118,7 @@ AddTestCase( "DYNEXTDCLASS.testFinSubArray(arr)", arr, (DYNEXTDCLASS.testFinSubA
 
 
 // ********************************************
-// access public property from 
+// access public property from
 // default method in sub class
 // ********************************************
 
@@ -128,7 +128,7 @@ AddTestCase( "DYNEXTDCLASS.testSubDPArray(arr)", arr, (DYNEXTDCLASS.testSubDPArr
 
 
 // ********************************************
-// access public property from 
+// access public property from
 // public method in sub class
 // ********************************************
 
@@ -138,7 +138,7 @@ AddTestCase( "DYNEXTDCLASS.pubSubSetDPArray(arr), DYNEXTDCLASS.pubSubGetDPArray(
 
 
 // ********************************************
-// access public property from 
+// access public property from
 // private method in sub class
 // ********************************************
 
@@ -148,7 +148,7 @@ AddTestCase( "DYNEXTDCLASS.testPrivSubDPArray(arr)", arr, (DYNEXTDCLASS.testPriv
 
 
 // ********************************************
-// access public property from 
+// access public property from
 // final method in sub class
 // ********************************************
 
@@ -157,6 +157,6 @@ AddTestCase( "*** Access public property from final method in sub class ***", 1,
 AddTestCase( "DYNEXTDCLASS.testFinSubDPArray(arr)", arr, (DYNEXTDCLASS.testFinSubDPArray(arr)) );
 
 
-test();       		// Leave this function alone.
-			// This function is for executing the test case and then 
-			// displaying the result on to the console or the LOG file.
+test();             // Leave this function alone.
+            // This function is for executing the test case and then
+            // displaying the result on to the console or the LOG file.

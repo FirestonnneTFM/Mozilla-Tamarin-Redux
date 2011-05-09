@@ -34,7 +34,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-	//print( String( 10000000000000000000 ) )
+    //print( String( 10000000000000000000 ) )
     var SECTION = "15.5.4.1";
     var VERSION = "ECMA_1";
     startTest();

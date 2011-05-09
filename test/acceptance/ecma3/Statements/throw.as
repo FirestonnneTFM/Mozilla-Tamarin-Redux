@@ -35,41 +35,41 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-	var SECTION = '12.13';
-	var VERSION = 'no version';
+    var SECTION = '12.13';
+    var VERSION = 'no version';
     startTest();
-	var TITLE = 'Statement:throw';
+    var TITLE = 'Statement:throw';
 
-	writeHeaderToLog('Executing script: throw.as');
-	writeHeaderToLog( SECTION + " "+ TITLE);
+    writeHeaderToLog('Executing script: throw.as');
+    writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-	var testcases = getTestCases();
-	test();
-	
+    var testcases = getTestCases();
+    test();
+    
 function getTestCases() {
     var array = new Array();
-    var item = 0;	
-	
-	var t;
-	var z = 1;
-	
+    var item = 0;
+    
+    var t;
+    var z = 1;
+    
 
-	try { 
-		 if(z == 1) 
-			throw "Error 1" 
-		 else if(z == 2)
-			throw "Error 2"
-	    } 
-	catch(er) {
-	    if(er == "Error 1") 
-		t = "Error 1"
-	    if(er == "Error 2") 
-		t = "Error 2"
-} 
-			
-	
-	array[item++] = new TestCase( SECTION, "throw t", "Error 1", t);
+    try {
+         if(z == 1)
+            throw "Error 1"
+         else if(z == 2)
+            throw "Error 2"
+        }
+    catch(er) {
+        if(er == "Error 1")
+        t = "Error 1"
+        if(er == "Error 2")
+        t = "Error 2"
+}
+            
+    
+    array[item++] = new TestCase( SECTION, "throw t", "Error 1", t);
 
        var z = 2;
        var Exception_Value = "no error";
@@ -82,7 +82,7 @@ function getTestCases() {
            throw Exception_Value;
            }else{
                 return Exception_Value
-           } 
+           }
 
        }
        thisError='No Error'

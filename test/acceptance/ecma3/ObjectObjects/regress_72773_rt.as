@@ -59,35 +59,35 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var status = '';
-	var actual = '';
-	var expect = '';
-	var sToEval = '';
+    var status = '';
+    var actual = '';
+    var expect = '';
+    var sToEval = '';
 
-	/*
-	 * This code should produce an error, but not a crash.
-	 *  'TypeError: Function.prototype.toString called on incompatible object'
-	 */
-	sToEval += 'function Cow(name){this.name = name;}'
-	sToEval += 'function Calf(str){this.name = str;}'
-	sToEval += 'Calf.prototype = Cow;'
-	sToEval += 'new Calf().toString();'
+    /*
+     * This code should produce an error, but not a crash.
+     *  'TypeError: Function.prototype.toString called on incompatible object'
+     */
+    sToEval += 'function Cow(name){this.name = name;}'
+    sToEval += 'function Calf(str){this.name = str;}'
+    sToEval += 'Calf.prototype = Cow;'
+    sToEval += 'new Calf().toString();'
 
-	status = 'Trying to catch an expected error';
-	try
-	{
-	  eval(sToEval);
-	}
-	catch(e)
-	{
-	  actual = getJSClass(e);
-	  expect = 'ReferenceError';
-	}
+    status = 'Trying to catch an expected error';
+    try
+    {
+      eval(sToEval);
+    }
+    catch(e)
+    {
+      actual = getJSClass(e);
+      expect = 'ReferenceError';
+    }
 
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	return array;
+    return array;
 }

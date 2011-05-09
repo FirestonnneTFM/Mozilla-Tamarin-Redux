@@ -49,7 +49,7 @@ x1 =
     <bravo>one</bravo>
 </alpha>;
 
-correct = 
+correct =
 <alpha>
     <charlie>two</charlie>
 </alpha>;
@@ -80,16 +80,16 @@ var xmlDoc = "<employee id='1'><firstname>John</firstname><lastname>Walton</last
 var xmlList = new XMLList ("<firstname>Paul</firstname><lastname>Betlem</lastname><age>35</age>");
 
 // propertyName as a string
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setChildren(xmlList)", 
-	"<employee id=\"1\"><firstname>Paul</firstname><lastname>Betlem</lastname><age>35</age></employee>", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setChildren(xmlList)",
+    "<employee id=\"1\"><firstname>Paul</firstname><lastname>Betlem</lastname><age>35</age></employee>",
             (MYXML = new XML(xmlDoc), MYXML.setChildren(xmlList).toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setChildren(new XML (\"<firstname>Fred</firstname>\"))", 
-	"<employee id=\"1\"><firstname>Fred</firstname></employee>", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setChildren(new XML (\"<firstname>Fred</firstname>\"))",
+    "<employee id=\"1\"><firstname>Fred</firstname></employee>",
             (MYXML = new XML(xmlDoc), MYXML.setChildren(new XML ("<firstname>Fred</firstname>")).toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setChildren('simple string')", 
-	"simple string", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setChildren('simple string')",
+    "simple string",
              (MYXML = new XML(xmlDoc), MYXML.setChildren("simple string").toString()));
 
 

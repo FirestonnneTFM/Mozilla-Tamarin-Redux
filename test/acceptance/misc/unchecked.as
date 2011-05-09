@@ -37,27 +37,27 @@
 
 class Foo
 {
-	public function Foo():void;
+    public function Foo():void;
 };
 
 function runtest()
 {
-	var e = "failure";
-	try
-	{
-		var f = new Foo("bad");
-	}
-	catch (exception:ArgumentError)
-	{
-		e = "success";
-	}
-	catch (exception:*)
-	{
-		e = "failure";
-	}
+    var e = "failure";
+    try
+    {
+        var f = new Foo("bad");
+    }
+    catch (exception:ArgumentError)
+    {
+        e = "success";
+    }
+    catch (exception:*)
+    {
+        e = "failure";
+    }
 
 
-	AddTestCase("unchecked", "success", e);
+    AddTestCase("unchecked", "success", e);
 
 }
 

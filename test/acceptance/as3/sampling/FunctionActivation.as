@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/* testcases: 
+/* testcases:
  *   function activation exposed to heap graph
  */
 
@@ -57,21 +57,21 @@ package {
     var activation
     var arg = "ARG!";
 
-    function f(a) 
+    function f(a)
     {
         function g() { return a }
-	return g
+    return g
     }
 
     var func = f(arg);
     print(func is Function);
     var scopes=getLexicalScopes(func);
     for each (var scope in scopes) {
-    	if(scope.a == arg) {
-	   activationWasInScopes = true;
-	   activation = scope
-	   break;
- 	}
+        if(scope.a == arg) {
+       activationWasInScopes = true;
+       activation = scope
+       break;
+    }
    }
 
     AddTestCase("assert the activation object was in getLexicalScopes",

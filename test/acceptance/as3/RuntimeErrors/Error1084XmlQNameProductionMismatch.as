@@ -34,20 +34,20 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1084; //	Element or attribute ("_") does not match QName production: QName::=(NCName':')?NCName.
+var CODE = 1084; // Element or attribute ("_") does not match QName production: QName::=(NCName':')?NCName.
 
 //-----------------------------------------------------------
 startTest();
 //-----------------------------------------------------------
 
 try {
-	var result = "no error";
-	var x = "<::/>";
-	var y = new XML(x);
+    var result = "no error";
+    var x = "<::/>";
+    var y = new XML(x);
 } catch (err) {
-	result = err.toString();
+    result = err.toString();
 } finally {
-	AddTestCase("Runtime Error", TYPEERROR + CODE, typeError(result));
+    AddTestCase("Runtime Error", TYPEERROR + CODE, typeError(result));
 }
 
 //-----------------------------------------------------------

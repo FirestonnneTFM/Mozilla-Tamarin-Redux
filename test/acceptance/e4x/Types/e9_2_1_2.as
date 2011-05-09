@@ -47,7 +47,7 @@ START("9.2.1.2 - XMLList [[Put]]");
 
 var x1 = new XMLList("<alpha>one</alpha><bravo>two</bravo>");
 
-TEST(1, "<alpha>one</alpha>" + NL() + "<bravo>two</bravo>", 
+TEST(1, "<alpha>one</alpha>" + NL() + "<bravo>two</bravo>",
   x1.toXMLString());
 
 x1[0] = <charlie>three</charlie>;
@@ -55,13 +55,13 @@ TEST(2, "<charlie>three</charlie>" + NL() + "<bravo>two</bravo>",
   x1.toXMLString());
 
 x1[0] = <delta>four</delta> + <echo>five</echo>;
-TEST(3, "<delta>four</delta>" + NL() + "<echo>five</echo>" + NL() + "<bravo>two</bravo>", 
+TEST(3, "<delta>four</delta>" + NL() + "<echo>five</echo>" + NL() + "<bravo>two</bravo>",
   x1.toXMLString());
   
 var y1 = new XMLList("<alpha>one</alpha><bravo>two</bravo>");
 y1[0] = "five";
 
-TEST(4, "<alpha>five</alpha>" + NL() + "<bravo>two</bravo>", 
+TEST(4, "<alpha>five</alpha>" + NL() + "<bravo>two</bravo>",
   y1.toXMLString());
   
 

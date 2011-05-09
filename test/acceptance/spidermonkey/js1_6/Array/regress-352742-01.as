@@ -53,7 +53,7 @@ function starttest()
   printBugNumber(BUGNUMBER);
   printStatus (summary);
 
-  expect = 4; 
+  expect = 4;
   z = {valueOf: Function};
   actual = 2;
   try {

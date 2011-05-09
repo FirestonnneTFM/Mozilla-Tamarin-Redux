@@ -61,8 +61,8 @@ var reserved =
    'interface', 'static',   'byte',       'extends',
    'long',         'super',     'char',     'final',      'native',
    'synchronized', 'class',     'float',    'package',    'throws',
-   'goto',      'private',  'transient',             
-   'implements',   'protected', 'volatile', 'double',               
+   'goto',      'private',  'transient',
+   'implements',   'protected', 'volatile', 'double',
    'public'];
 
 testvar(reserved);

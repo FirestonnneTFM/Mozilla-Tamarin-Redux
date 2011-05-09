@@ -75,7 +75,7 @@ else
 {
   expect = 5;
   actual = ReferenceError;
-} 
+}
 AddTestCase(summary, expect, actual);
 
 test();

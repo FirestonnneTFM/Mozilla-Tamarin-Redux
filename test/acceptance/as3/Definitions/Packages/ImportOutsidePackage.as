@@ -36,32 +36,32 @@
  * ***** END LICENSE BLOCK ***** */
 
 package test{
-	public var a = 'PASSED';
-	public function f() {
-		var g = "g";
-		return g;
-	}
+    public var a = 'PASSED';
+    public function f() {
+        var g = "g";
+        return g;
+    }
 }
 
 package test2{
-	public function g() {
-		var h = "h";
-		return h;
-	}
-	public var b = "hello";
+    public function g() {
+        var h = "h";
+        return h;
+    }
+    public var b = "hello";
 }
 
 class C {
-	import test2.*;
-	public function returnB() {
-		return b;
-	}
+    import test2.*;
+    public function returnB() {
+        return b;
+    }
 }
 
 import test.*;
 
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 

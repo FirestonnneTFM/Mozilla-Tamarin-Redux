@@ -46,11 +46,11 @@ startTest();
 var thisError = "Exited with uncaught exception";
 
 try {
-	throw (void 0);
+    throw (void 0);
 } catch(e:Error) {
-	thisError = e.toString();
-	trace("FAILED!: Should have exited with uncaught exception.");
+    thisError = e.toString();
+    trace("FAILED!: Should have exited with uncaught exception.");
 } finally {
-	AddTestCase("Thrown undefined should be uncaught.", "Exited with uncaught exception", thisError);
-	test();
+    AddTestCase("Thrown undefined should be uncaught.", "Exited with uncaught exception", thisError);
+    test();
 }

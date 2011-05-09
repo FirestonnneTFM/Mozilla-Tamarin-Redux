@@ -38,7 +38,7 @@
 
 class DefaultClass {
   public static function baseClass() {
-	 // print("base is invoked");
+     // print("base is invoked");
   }
 }
 
@@ -60,9 +60,9 @@ try {
 }
 
 AddTestCase("accessing public static method outside of the class, RTE #1069",
-	"ReferenceError: Error #1069",
-	error.substr(0,27));
-	// print( "FAILED, should give run time error : accessing public static method outside of the class" );
+    "ReferenceError: Error #1069",
+    error.substr(0,27));
+    // print( "FAILED, should give run time error : accessing public static method outside of the class" );
 
 test();
 

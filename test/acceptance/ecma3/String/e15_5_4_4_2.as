@@ -83,7 +83,7 @@ function getTestCases() {
 
     // MyOtherObject.toString will return "[object Object]
 
-    var MYOB = new MyOtherObject(1234567890); 
+    var MYOB = new MyOtherObject(1234567890);
     array[item++] = new TestCase( SECTION,      "var MYOB = new MyOtherObject(1234567890), MYOB.charAt(0)",  "[",        (MYOB.charAt(0) ) );
     array[item++] = new TestCase( SECTION,      "var MYOB = new MyOtherObject(1234567890), MYOB.charAt(1)",  "o",        (MYOB.charAt(1) ) );
     array[item++] = new TestCase( SECTION,      "var MYOB = new MyOtherObject(1234567890), MYOB.charAt(2)",  "b",        (MYOB.charAt(2) ) );

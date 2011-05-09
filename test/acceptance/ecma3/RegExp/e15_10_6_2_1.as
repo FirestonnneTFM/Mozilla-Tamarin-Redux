@@ -90,30 +90,30 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var status = '';
-	var pattern = '';
-	var string = '';
-	var actualmatch = '';
-	var expectedmatch = '';
-
-
-	status = inSection(1);
-	string = 'a b c d e';
-	pattern = /\w\s\w/g;
-	actualmatch = string.match(pattern);
-	expectedmatch = ['a b','c d']; // see above explanation -
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    var status = '';
+    var pattern = '';
+    var string = '';
+    var actualmatch = '';
+    var expectedmatch = '';
 
 
-	status = inSection(2);
-	string = '12345678';
-	pattern = /\d\d\d/g;
-	actualmatch = string.match(pattern);
-	expectedmatch = ['123', '456'];
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    status = inSection(1);
+    string = 'a b c d e';
+    pattern = /\w\s\w/g;
+    actualmatch = string.match(pattern);
+    expectedmatch = ['a b','c d']; // see above explanation -
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	return array;
+
+    status = inSection(2);
+    string = '12345678';
+    pattern = /\d\d\d/g;
+    actualmatch = string.match(pattern);
+    expectedmatch = ['123', '456'];
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+    return array;
 }

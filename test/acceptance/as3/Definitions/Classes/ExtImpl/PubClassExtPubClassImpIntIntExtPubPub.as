@@ -37,7 +37,7 @@
 
 import PubClassExtPubClassImpIntIntExtPubPub.*;
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS3";        // Version of ECMAScript or ActionScript
 var TITLE   = "Public class implements public interface";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -105,7 +105,7 @@ try{
               thisError=e2.toString();
              }finally{
                       AddTestCase("Calling a method in interface namespace through an instance of a class should throw an error","ReferenceError: Error #1069", referenceError(thisError));
-                     } 
+                     }
 AddTestCase("Calling a method in public namespace in the public interface implemented  by the subclass through the subclass","Hi!", PubInt.MyString());
 AddTestCase("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",-100, obj2.RetMyNegInteger2());
 AddTestCase("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",-100, obj2.RetMyNegInteger());

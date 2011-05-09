@@ -77,28 +77,28 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,   "Math.exp(-Infinity)",  0,              Math.exp(Number.NEGATIVE_INFINITY) );
     array[item++] = new TestCase( SECTION,   "Math.exp(2)",  7.38905609893065,              Math.exp(2) );
 
-	
-	// test order number 15
-	// [amemon 9/14/2006] This test case breaks on mac PPC and linux because of an OS precision error. Fixing... 
-	// array[item++] = new TestCase( SECTION,   "Math.exp(10)",  22026.465794806725,              Math.exp(10) );
-	var maxCorrect15:Number = 22026.4657948068;
-	var minCorrect15:Number = 22026.4657948067;
-	
-	array[item++] = new TestCase( SECTION,   "Math.exp(10)",  true, 
-									(Math.exp(10) > minCorrect15 && Math.exp(10) < maxCorrect15) );
-	
-	
-	
-	
-	// test order number 16
-	// [amemon 9/14/2006] This test case breaks on mac PPC and linux because of an OS precision error. Fixing... 
-	// array[item++] = new TestCase( SECTION,   "Math.exp(100)","2.68811714181616e+43",              Math.exp(100)+"" );
-	array[item++] = new TestCase( SECTION,   "Math.exp(100)", true, 
-									( 
-										(String(Math.exp(100)+"").indexOf("2.6881171418161") != -1) && 
-										(String(Math.exp(100)+"").indexOf("e+43") != -1)
-									)    
-								);
+    
+    // test order number 15
+    // [amemon 9/14/2006] This test case breaks on mac PPC and linux because of an OS precision error. Fixing...
+    // array[item++] = new TestCase( SECTION,   "Math.exp(10)",  22026.465794806725,              Math.exp(10) );
+    var maxCorrect15:Number = 22026.4657948068;
+    var minCorrect15:Number = 22026.4657948067;
+    
+    array[item++] = new TestCase( SECTION,   "Math.exp(10)",  true,
+                                    (Math.exp(10) > minCorrect15 && Math.exp(10) < maxCorrect15) );
+    
+    
+    
+    
+    // test order number 16
+    // [amemon 9/14/2006] This test case breaks on mac PPC and linux because of an OS precision error. Fixing...
+    // array[item++] = new TestCase( SECTION,   "Math.exp(100)","2.68811714181616e+43",              Math.exp(100)+"" );
+    array[item++] = new TestCase( SECTION,   "Math.exp(100)", true,
+                                    (
+                                        (String(Math.exp(100)+"").indexOf("2.6881171418161") != -1) &&
+                                        (String(Math.exp(100)+"").indexOf("e+43") != -1)
+                                    )
+                                );
     
     
     
@@ -106,7 +106,7 @@ function getTestCases() {
     
     
     array[item++] = new TestCase( SECTION,   "Math.exp(1000)",Infinity,              Math.exp(1000));
-    array[item++] = new TestCase( SECTION,   "Math.exp(-1000)",0,              Math.exp(-1000));  
+    array[item++] = new TestCase( SECTION,   "Math.exp(-1000)",0,              Math.exp(-1000));
     array[item++] = new TestCase( SECTION,   "Math.exp(100000)",Infinity,              Math.exp(100000));
     array[item++] = new TestCase( SECTION,   "Math.exp(Number.MAX_VALUE)",Infinity,              Math.exp(Number.MAX_VALUE));
     array[item++] = new TestCase( SECTION,   "Math.exp(Number.MIN_VALUE)",1,              Math.exp(Number.MIN_VALUE));

@@ -99,42 +99,42 @@ var ns1 = Namespace ("xsl", "http://www.w3.org/TR/xsl");
 var ns2 = Namespace ("foo", "http://www.foo.org");
 
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.getNamespace()", 
-	"http://www.w3.org/TR/xsl", 
-	(MYXML = new XML(xmlDoc), myGetNamespace(MYXML).toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.getNamespace()",
+    "http://www.w3.org/TR/xsl",
+    (MYXML = new XML(xmlDoc), myGetNamespace(MYXML).toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.getNamespace()", 
-	new Namespace("http://www.w3.org/TR/xsl"), 
-	(MYXML = new XML(xmlDoc), myGetNamespace(MYXML)));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.getNamespace()",
+    new Namespace("http://www.w3.org/TR/xsl"),
+    (MYXML = new XML(xmlDoc), myGetNamespace(MYXML)));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.getNamespace('stylesheet')", 
-	new Namespace ("http://www.w3.org/TR/xsl"), 
-	(MYXML = new XML(xmlDoc), myGetNamespace(MYXML, 'xsl')));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.getNamespace('stylesheet')",
+    new Namespace ("http://www.w3.org/TR/xsl"),
+    (MYXML = new XML(xmlDoc), myGetNamespace(MYXML, 'xsl')));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.getNamespace('xsl')", 
-	"http://www.w3.org/TR/xsl", (MYXML = new XML(xmlDoc), 
-	myGetNamespace(MYXML, 'xsl').toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.getNamespace('xsl')",
+    "http://www.w3.org/TR/xsl", (MYXML = new XML(xmlDoc),
+    myGetNamespace(MYXML, 'xsl').toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.getNamespace('foo')", 
-	undefined, (MYXML = new XML(xmlDoc), 
-	myGetNamespace(MYXML, 'foo')));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.getNamespace('foo')",
+    undefined, (MYXML = new XML(xmlDoc),
+    myGetNamespace(MYXML, 'foo')));
 
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.b.c.getNamespace('foo')", 
-	"http://www.foo.org/", (MYXML = new XML(xmlDoc), 
-	myGetNamespace(MYXML.b.c, 'foo').toString()));
-	
-	
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.b.c.getNamespace('foo')",
+    "http://www.foo.org/", (MYXML = new XML(xmlDoc),
+    myGetNamespace(MYXML.b.c, 'foo').toString()));
+    
+    
 x1 =
 <><foo:alpha xmlns:foo="http://foo/" xmlns:bar="http://bar/">
 <foo:bravo>one</foo:bravo>
 </foo:alpha><a>b</a></>;
 
 try {
-	ns = x1.namespace();
-	result = ns;
+    ns = x1.namespace();
+    result = ns;
 } catch (e1) {
-	result = typeError(e1.toString());
+    result = typeError(e1.toString());
 }
 
 AddTestCase("Calling namespace on list with two items", "TypeError: Error #1086", result);

@@ -83,8 +83,8 @@ try
   {
     if (!(ex instanceof TypeError))
       throw "Wrong value thrown!\n" +
-	"  expected: a TypeError ('32.9' doesn't match the regexp)\n" +
-	"  actual: " + ex;
+    "  expected: a TypeError ('32.9' doesn't match the regexp)\n" +
+    "  actual: " + ex;
   }
 }
 catch (e)

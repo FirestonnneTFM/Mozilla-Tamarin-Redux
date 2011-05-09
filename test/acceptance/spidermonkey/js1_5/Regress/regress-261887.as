@@ -37,8 +37,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 /*
- 12.6.4 of ECMA-262 which defines the for-in Statement states that "If a 
-property that has not yet been visited during enumeration is deleted, then it 
+ 12.6.4 of ECMA-262 which defines the for-in Statement states that "If a
+property that has not yet been visited during enumeration is deleted, then it
 will not be visited"
 */
 
@@ -70,7 +70,7 @@ var deletedFive = false;
 // need to store in an array and sort as order of for ... in is not guarenteed
 for (var prop in t) {
     // since order is not guarenteed, sometimes we iterate through four first, so delete five in that case
-    if (count == 0) {   
+    if (count == 0) {
         if (prop != 'four') {
             delete(t.four);
         } else {

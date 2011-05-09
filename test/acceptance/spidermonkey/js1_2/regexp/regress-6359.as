@@ -70,16 +70,16 @@ startTest();  var testscases=[]; var index=0;               // leave this alone
  */
 
 AddTestCase( '/(a*)b\1+/("baaac").length',
-	     2,
-	     /(a*)b\1+/("baaac").length );
+         2,
+         /(a*)b\1+/("baaac").length );
 
 AddTestCase( '/(a*)b\1+/("baaac")[0]',
-	     "b",
-	     /(a*)b\1+/("baaac")[0]);
+         "b",
+         /(a*)b\1+/("baaac")[0]);
 
 AddTestCase( '/(a*)b\1+/("baaac")[1]',
-	     "",
-	     /(a*)b\1+/("baaac")[1]);
+         "",
+         /(a*)b\1+/("baaac")[1]);
 
 
 test();       // leave this alone.  this executes the test cases and

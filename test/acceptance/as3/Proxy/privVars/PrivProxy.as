@@ -49,16 +49,16 @@ package{
             target = obj;
         }
         
-        override flash_proxy function getProperty(name:*):* 
+        override flash_proxy function getProperty(name:*):*
         {
-            return target[name]; 
+            return target[name];
         }
         
         override flash_proxy function setProperty(name:*, value:*):void
         {
             target[name] = value;
         }
-        override flash_proxy function deleteProperty(name:*):Boolean 
+        override flash_proxy function deleteProperty(name:*):Boolean
         {
             delete target[name] ;
         };
@@ -69,13 +69,13 @@ package{
             return ("Method " + name+ " was called. With args: " + arg);
         }
         
-        override flash_proxy function callProperty(name:*, ...rest):* 
+        override flash_proxy function callProperty(name:*, ...rest):*
         {
             trace("call property called");
             return this.myFunction(name, rest);
         }
         
-        override flash_proxy function hasProperty(name:*):Boolean 
+        override flash_proxy function hasProperty(name:*):Boolean
         {
             //trace("hasProperty called with " + name);
             return target.hasOwnProperty(name);

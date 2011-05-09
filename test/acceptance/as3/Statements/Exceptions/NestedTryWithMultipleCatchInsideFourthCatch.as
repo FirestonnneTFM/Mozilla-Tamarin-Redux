@@ -58,7 +58,7 @@ try{
        //print(thisError1);
    }catch(eo3:URIError){
        thisError1="This is outer URI Error:"+eo3.toString();
-       try { 
+       try {
            throw new TypeError();
            }catch(ei:TypeError){
                thisError="This is Inner Type Error:"+ei.toString();

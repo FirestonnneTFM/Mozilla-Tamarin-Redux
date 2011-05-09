@@ -67,55 +67,55 @@ AddTestCase( "Diving uint by a Number variable", 2, (num3 = (num1 / 10)) );
 // RangeError precision test cases
 var pResult = null;
 try{
-	var temp:uint;
-	temp = num1 + num5;
-	pResult = "exception NOT caught";
+    var temp:uint;
+    temp = num1 + num5;
+    pResult = "exception NOT caught";
 } catch(e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "var temp:uint; num1(+20) + num5(-100)", "exception NOT caught", pResult );
 
 pResult = null;
 
 try{
-	var temp:uint;
-	temp = -100;
-	pResult = "exception NOT caught";
+    var temp:uint;
+    temp = -100;
+    pResult = "exception NOT caught";
 } catch(e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "var temp:uint; temp = -100", "exception NOT caught", pResult );
 
 //divide
 pResult = null;
 try{
-	var temp:uint;
-	temp = -100/2;
-	pResult = "exception NOT caught";
+    var temp:uint;
+    temp = -100/2;
+    pResult = "exception NOT caught";
 } catch(e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "var temp:uint; temp = -100/2", "exception NOT caught", pResult );
 
 // multiply
 pResult = null;
 try{
-	var temp:uint;
-	temp = -100*2;
-	pResult = "exception NOT caught";
+    var temp:uint;
+    temp = -100*2;
+    pResult = "exception NOT caught";
 } catch(e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "var temp:uint; temp = -100*2", "exception NOT caught", pResult );
 
 // subtract
 pResult = null;
 try{
-	var temp:uint;
-	temp = 1-100;
-	pResult = "exception NOT caught";
+    var temp:uint;
+    temp = 1-100;
+    pResult = "exception NOT caught";
 } catch(e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "var temp:uint; temp = 1-100", "exception NOT caught", pResult );
 

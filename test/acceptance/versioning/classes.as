@@ -54,7 +54,7 @@ var apiVersion:int = System.apiVersion;
 
 // expected answers
 var apiExpectedAns:Array = [];
-re = re1069;        
+re = re1069;
 apiExpectedAns[API_AIR_1_0] = [true, true, true,   re,   re,   re,   re,   re,   re, true, true,   re, true];
 apiExpectedAns[API_FP_10_0] = [true, true,   re, true,   re,   re,   re,   re,   re, true, true, true, true];
 apiExpectedAns[API_AIR_1_5] = [true, true, true, true, true,   re,   re,   re,   re, true, true, true, true];
@@ -74,7 +74,7 @@ apiExpectedSetAns[API_AIR_1_5_2] = [true, true, true, true, true, true, true, tr
 
 var classExpectedAns:Array = [];
 o = 'object'
-u = 'undefined';        
+u = 'undefined';
 classExpectedAns[API_AIR_1_0] = [o, o,   o,   u,   u,   u,   u,   u,   u, o, o,   u, o];
 classExpectedAns[API_FP_10_0] = [o, o,   u, o,   u,   u,   u,   u,   u, o, o, o, o];
 classExpectedAns[API_AIR_1_5] = [o, o, o, o, o,   u,   u,   u,   u, o, o, o, o];
@@ -82,7 +82,7 @@ classExpectedAns[API_AIR_1_5_1] = [o, o, o, o, o, o,   u,   u,   u, o, o, o, o];
 classExpectedAns[API_FP_10_0_32] = [o, o,   u, o,   u,   u, o,   u,   u, o, o, o, o];
 classExpectedAns[API_AIR_1_5_2] = [o, o, o, o, o, o, o, o,   u, o, o, o, o];
 
-// set expected answers to specified api version 
+// set expected answers to specified api version
 var ea:Array = apiExpectedAns[apiVersion]
 var ea_set:Array = apiExpectedSetAns[apiVersion]
 var cea:Array = classExpectedAns[apiVersion]

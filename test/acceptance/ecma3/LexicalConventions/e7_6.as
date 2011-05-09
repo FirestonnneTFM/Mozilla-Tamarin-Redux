@@ -93,7 +93,7 @@ var a=true;
     // <=
     var a=0xFFFF;
     var b=0X0FFF;
- 	array[item++] = new TestCase( SECTION,
+    array[item++] = new TestCase( SECTION,
                                     "var a=0xFFFF,b=0X0FFF;a<=b",
                                     false,
                                     a<=b );
@@ -106,7 +106,7 @@ var a=true;
                                     true,
                                     a>=b);
     //!=
-    var a=true; 
+    var a=true;
     var b=false;
     array[item++] = new TestCase( SECTION,
                                     "var a=true,b=false;a!=b",
@@ -121,7 +121,7 @@ var b=false;
                                     (a!=b) );
 
        //!==
-    var a=true; 
+    var a=true;
     var b=false;
     array[item++] = new TestCase( SECTION,
                                     "var a=true,b=false;a!==b",
@@ -200,13 +200,13 @@ var a=Number;
                                         (a.NaN) );
 
     // &&
-   	 
+     
         var a=true;
         var b=true;
-		var mResult;
-		if(a&&b){
-		 mResult = 'PASS' 
-		} else { mResult = 'FAIL'; }
+        var mResult;
+        if(a&&b){
+         mResult = 'PASS'
+        } else { mResult = 'FAIL'; }
         array[item++] = new TestCase( SECTION,
                                         "var a=true,b=true;if(a&&b)'PASS';else'FAIL'",
                                         "PASS",
@@ -215,10 +215,10 @@ var a=Number;
     // ||
         var a=true;
         var b=true;
-		var mResult;
-		if(a||b){
-		 mResult = 'PASS' 
-		} else { mResult = 'FAIL'; }
+        var mResult;
+        if(a||b){
+         mResult = 'PASS'
+        } else { mResult = 'FAIL'; }
         array[item++] = new TestCase( SECTION,
                                         "var a=false,b=false;if(a||b)'FAIL';else'PASS'",
                                         "PASS",
@@ -238,7 +238,7 @@ var a=Number;
                                         0,
                                         (--a) );
     // +
-	var a=true;
+    var a=true;
         var b=true;
         array[item++] = new TestCase( SECTION,
                                         "var a=true,b=true;a+b",
@@ -268,7 +268,7 @@ var a=Number;
     // &
 var a1=3;
 var b1=2;
-	array[item++] = new TestCase( SECTION,
+    array[item++] = new TestCase( SECTION,
                                         "var a1=3,b1=2;a1&b1",
                                         2,
                                         ((a1)&(b1)) );
@@ -446,6 +446,6 @@ var b1=2;
         array[item++] = new TestCase( SECTION,
                                         ";",
                                         void 0,
-	                                 	void 0 );
+                                        void 0 );
     return array;
 }

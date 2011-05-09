@@ -49,7 +49,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     array[item++] = new TestCase( SECTION,     "typeof(void(0))",              "undefined",        typeof(void(0)) );
     array[item++] = new TestCase( SECTION,     "typeof(null)",                 "object",           typeof(null) );
@@ -94,35 +94,35 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,     "typeof(test)",                          "function",     typeof( test ) );
     array[item++] = new TestCase( SECTION,     "typeof(String.fromCharCode)",           "function",     typeof( String.fromCharCode )  );
 
-	var notype;
-	array[item++] = new TestCase( SECTION,     "typeof var notype; ",              "undefined",        typeof notype );
-	var hnumber = 0x464d34;
-	array[item++] = new TestCase( SECTION,     "typeof hnumber = 0x464d34; ",              "number",        typeof hnumber );
-	var obj:Object;
-	array[item++] = new TestCase( SECTION,     "typeof var obj:Object; ",              "object",        typeof obj );
-	obj = new Object();
-	array[item++] = new TestCase( SECTION,     "typeof obj = new Object()",              "object",        typeof obj );
-	var dt:Date;
-	array[item++] = new TestCase( SECTION,     "typeof var dt:Date; ",              "object",        typeof dt );
-	dt = new Date();
-	array[item++] = new TestCase( SECTION,     "typeof dt = new Date()",              "object",        typeof dt );
-	var localClass:LocalClass;
-	array[item++] = new TestCase( SECTION,     "typeof localClass:LocalClass; ",              "object",        typeof localClass );
-	localClass = new LocalClass();
-	array[item++] = new TestCase( SECTION,     "typeof localClass = new LocalClass(); ",              "object",        typeof localClass );
+    var notype;
+    array[item++] = new TestCase( SECTION,     "typeof var notype; ",              "undefined",        typeof notype );
+    var hnumber = 0x464d34;
+    array[item++] = new TestCase( SECTION,     "typeof hnumber = 0x464d34; ",              "number",        typeof hnumber );
+    var obj:Object;
+    array[item++] = new TestCase( SECTION,     "typeof var obj:Object; ",              "object",        typeof obj );
+    obj = new Object();
+    array[item++] = new TestCase( SECTION,     "typeof obj = new Object()",              "object",        typeof obj );
+    var dt:Date;
+    array[item++] = new TestCase( SECTION,     "typeof var dt:Date; ",              "object",        typeof dt );
+    dt = new Date();
+    array[item++] = new TestCase( SECTION,     "typeof dt = new Date()",              "object",        typeof dt );
+    var localClass:LocalClass;
+    array[item++] = new TestCase( SECTION,     "typeof localClass:LocalClass; ",              "object",        typeof localClass );
+    localClass = new LocalClass();
+    array[item++] = new TestCase( SECTION,     "typeof localClass = new LocalClass(); ",              "object",        typeof localClass );
     array[item++] = new TestCase( SECTION,     "typeof undefined",              "undefined",        typeof undefined );
     array[item++] = new TestCase( SECTION,     "typeof void(0)",              "undefined",        typeof void(0) );
     array[item++] = new TestCase( SECTION,     "typeof null",                 "object",           typeof null );
     array[item++] = new TestCase( SECTION,     "typeof true",                 "boolean",          typeof true );
     array[item++] = new TestCase( SECTION,     "typeof false",                "boolean",          typeof false );
-	array[item++] = new TestCase( SECTION,     "typeof new Boolean()",        "boolean",           typeof new Boolean() );
+    array[item++] = new TestCase( SECTION,     "typeof new Boolean()",        "boolean",           typeof new Boolean() );
     array[item++] = new TestCase( SECTION,     "typeof new Boolean(true)",    "boolean",           typeof new Boolean(true) );
     array[item++] = new TestCase( SECTION,     "typeof Boolean()",            "boolean",          typeof Boolean() );
     array[item++] = new TestCase( SECTION,     "typeof Boolean(false)",       "boolean",          typeof Boolean(false) );
     array[item++] = new TestCase( SECTION,     "typeof Boolean(true)",        "boolean",          typeof Boolean(true) );
-    array[item++] = new TestCase( SECTION,     "typeof Number.NaN",                  			"number",           typeof Number.NaN );
+    array[item++] = new TestCase( SECTION,     "typeof Number.NaN",                             "number",           typeof Number.NaN );
     array[item++] = new TestCase( SECTION,     "typeof Number.POSITIVE_INFINITY",             "number",           typeof Number.POSITIVE_INFINITY );
-    array[item++] = new TestCase( SECTION,     "typeof Number.NEGATIVE_INFINITY",            	"number",           typeof Number.NEGATIVE_INFINITY );
+    array[item++] = new TestCase( SECTION,     "typeof Number.NEGATIVE_INFINITY",               "number",           typeof Number.NEGATIVE_INFINITY );
     array[item++] = new TestCase( SECTION,     "typeof Math.PI",              "number",           typeof Math.PI );
     array[item++] = new TestCase( SECTION,     "typeof 0",                    "number",           typeof 0 );
     array[item++] = new TestCase( SECTION,     "typeof 1",                    "number",           typeof 1 );
@@ -155,7 +155,7 @@ function getTestCases() {
 }
 
 class LocalClass {
-	function LocalClass() {
-		trace("Constructor of LocalClass");
-	}
+    function LocalClass() {
+        trace("Constructor of LocalClass");
+    }
 }

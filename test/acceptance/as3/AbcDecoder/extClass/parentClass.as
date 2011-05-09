@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package extClass{
-	public class parentClass{
-		public function test(){
-			return true;
-		}
-	}
+    public class parentClass{
+        public function test(){
+            return true;
+        }
+    }
 }

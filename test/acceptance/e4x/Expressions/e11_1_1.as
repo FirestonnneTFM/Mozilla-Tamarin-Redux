@@ -101,16 +101,16 @@ var xml3 = "<flowers><flower type='tulip' attr-with-hyphen='got it'><color>yello
 var xml4 = "<ns1:a xmlns:ns1=\"http://yo-raps.tv\"><ns1:b attr=\"something\">rainbow</ns1:b></ns1:a>";
 
 try {
-	var xml5 = <x><myTag myAttrib="has an apostrophe' in it"/></x>;
-	var res = "no exception";
-	AddTestCase("Attribute with apostrophe in it", "has an apostrophe' in it", xml5.myTag.@myAttrib.toString());
+    var xml5 = <x><myTag myAttrib="has an apostrophe' in it"/></x>;
+    var res = "no exception";
+    AddTestCase("Attribute with apostrophe in it", "has an apostrophe' in it", xml5.myTag.@myAttrib.toString());
 } catch (e1) {
-	var res = "exception";
+    var res = "exception";
 } finally {
-	// Needs to be fixed when bug 133471 is fixed
-	AddTestCase("Attribute with apostrophe in it", "no exception", res);
+    // Needs to be fixed when bug 133471 is fixed
+    AddTestCase("Attribute with apostrophe in it", "no exception", res);
 }
-	
+    
 
 var placeHolder = "c";
 
@@ -173,10 +173,10 @@ var xmlObj = new XML ();
 xmlObj = XML ('<elem attr1="firstAttribute"></elem>');
 
 try {
-	e = xmlObj.(@nonExistentAttribute == "nonExistent");
-	result = e;
+    e = xmlObj.(@nonExistentAttribute == "nonExistent");
+    result = e;
 } catch (e2) {
-	result = referenceError(e2.toString());
+    result = referenceError(e2.toString());
 }
 AddTestCase("Access non-existent attribute", "ReferenceError: Error #1065", result);
 

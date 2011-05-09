@@ -44,8 +44,8 @@ package MultipleCatchBlocks2{
             var k:String = decodeURI("!@#$%^&*()<>?");
             eval(m);
             var arr:Array=new Array(-10);
-            return 6;                         
-         }                            
+            return 6;
+         }
                                  
     }
 }

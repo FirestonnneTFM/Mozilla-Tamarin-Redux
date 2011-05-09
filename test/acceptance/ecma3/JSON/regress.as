@@ -91,7 +91,7 @@ try {
 } catch (e) {
     exception2 = removeExceptionDetail(e.toString());
     if (exception2 == "Error: Error #1023")
-	result = "okay";
+    result = "okay";
 }
 AddTestCase("JSON.parse(deep2)", "okay", result);
 

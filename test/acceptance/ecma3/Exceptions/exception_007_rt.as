@@ -47,7 +47,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     DefaultValue_1();
 
@@ -70,8 +70,8 @@ function getTestCases() {
             array[item++] = new TestCase(
                 SECTION,
                 "new MyObject() + new MyObject()",
-				TYPEERROR+1006,
-				typeError( exception ) );
+                TYPEERROR+1006,
+                typeError( exception ) );
         }
     }
     return array;

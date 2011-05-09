@@ -85,47 +85,47 @@ try {
 var xmlDoc = "<TEAM foo = 'bar' two='second'>Giants</TEAM><CITY two = 'third'>Giants</CITY>";
 
 // verify that attribute correct finds one attribute node
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('foo') instanceof XMLList", true, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('foo') instanceof XMLList", true,
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('foo') instanceof XMLList ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('foo') instanceof XML", false, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('foo') instanceof XML", false,
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('foo') instanceof XML ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('foo').length()", 1, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('foo').length()", 1,
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('foo').length() ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('foo').toString()", "bar", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('foo').toString()", "bar",
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('foo').toString() ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('foo')[0].nodeKind()", "attribute", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('foo')[0].nodeKind()", "attribute",
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('foo')[0].nodeKind() ));
 
 // verify that attribute correct finds attribute nodes across children
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('two') instanceof XMLList", true, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('two') instanceof XMLList", true,
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('two') instanceof XMLList ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('two') instanceof XML", false, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('two') instanceof XML", false,
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('two') instanceof XML ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('two').length()", 2, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('two').length()", 2,
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('two').length() ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('two').toString()", "secondthird", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('two').toString()", "secondthird",
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('two').toString() ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('two')[0].nodeKind()", "attribute", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('two')[0].nodeKind()", "attribute",
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('two')[0].nodeKind() ));
 
 // verify that attribute doesn't find non-existent names
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('DOESNOTEXIST') instanceof XMLList", true, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('DOESNOTEXIST') instanceof XMLList", true,
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('DOESNOTEXIST') instanceof XMLList ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('DOESNOTEXIST') instanceof XML", false, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('DOESNOTEXIST') instanceof XML", false,
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('DOESNOTEXIST') instanceof XML ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('DOESNOTEXIST').length()", 0, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('DOESNOTEXIST').length()", 0,
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('DOESNOTEXIST').length() ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('DOESNOTEXIST').toString()", "", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('DOESNOTEXIST').toString()", "",
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('DOESNOTEXIST').toString() ));
              
-// verify that attribute doesn't find child node names             
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('TEAM') instanceof XMLList", true, 
+// verify that attribute doesn't find child node names
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('TEAM') instanceof XMLList", true,
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('TEAM') instanceof XMLList ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('TEAM') instanceof XML", false, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('TEAM') instanceof XML", false,
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('TEAM') instanceof XML ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('TEAM').toString()", "", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('TEAM').toString()", "",
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('TEAM').toString() ));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('TEAM').length()", 0, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.attribute('TEAM').length()", 0,
              (MYXML = new XMLList(xmlDoc), MYXML.attribute('TEAM').length() ));
 
 END();

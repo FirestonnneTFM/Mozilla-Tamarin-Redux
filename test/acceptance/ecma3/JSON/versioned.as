@@ -54,7 +54,7 @@ var TITLE   = "JSON versioning tests";
 startTest();
 
 // versioned_defjson_helper.as_ and versioned_useoldjson_helper.as_ were
-// both compiled with builtins _before_ JSON was added.  
+// both compiled with builtins _before_ JSON was added.
 // to recompile the helper files sync to tr 6199
 // rename the abc files to
 // versioned_defjson_helper.abc_bin and versioned_useoldjson_helper.abc_bin

@@ -35,22 +35,22 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package OptionalParams {
-	
-	public class OverrideWithOptionalParams extends BaseClass {
+    
+    public class OverrideWithOptionalParams extends BaseClass {
 
-		override public function setInt( input:int = 1 ) {
-			i = input;
-		}
-		
-		override public function setString( string:String = "override" ) {
-			s = string;
-		}
-		
-		override public function setAll( input:int = 1, string:String = "override" ) {
-			i = input;
-			s = string;
-		}
-		
-	}
-	
+        override public function setInt( input:int = 1 ) {
+            i = input;
+        }
+        
+        override public function setString( string:String = "override" ) {
+            s = string;
+        }
+        
+        override public function setAll( input:int = 1, string:String = "override" ) {
+            i = input;
+            s = string;
+        }
+        
+    }
+    
 }

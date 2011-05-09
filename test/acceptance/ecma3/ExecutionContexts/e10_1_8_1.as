@@ -58,13 +58,13 @@ function getTestCases() {
                                     GetCallee() );
 
 
-	var LENGTH = GetLength ( 0,1,2,3,4 );
+    var LENGTH = GetLength ( 0,1,2,3,4 );
     array[item++] = new TestCase( SECTION,
                                     "GetLength(0,1,2,3,4)",
                                     5,
                                     LENGTH );
 
-	var ARGUMENTS = GetArguments( 0,1,2,3,4,5 );
+    var ARGUMENTS = GetArguments( 0,1,2,3,4,5 );
     for ( var i = 0; i < 5; i++ ) {
         array[item++] = new TestCase( SECTION,
                                         "GetArguments()",
@@ -72,26 +72,26 @@ function getTestCases() {
                                         ARGUMENTS[i] );
     }
 
-	function TestFunction() {
-	    var arg_proto = arguments.constructor.prototype;
-	}
-	function GetCallee() {
-	    var c = arguments.callee;
-	    return c;
-	}
-	function GetArguments() {
-	    var a = arguments;
-	    return a;
-	}
-	function GetLength() {
-	    var l = arguments.length;
-	    return l;
-	}
+    function TestFunction() {
+        var arg_proto = arguments.constructor.prototype;
+    }
+    function GetCallee() {
+        var c = arguments.callee;
+        return c;
+    }
+    function GetArguments() {
+        var a = arguments;
+        return a;
+    }
+    function GetLength() {
+        var l = arguments.length;
+        return l;
+    }
 
-	function AnotherTestFunction() {
-	    this.constructor.prototype.arg_proto = arguments.constructor.prototype;
-	    return this;
-	}
+    function AnotherTestFunction() {
+        this.constructor.prototype.arg_proto = arguments.constructor.prototype;
+        return this;
+    }
 
     return ( array );
 }

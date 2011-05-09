@@ -85,13 +85,13 @@ var ns2 = Namespace ("foo", "http://www.foo.org");
 
 
 // Namespace that is referenced by QName should not be removed
-AddTestCase( "MYXML.removeNamespace(QName reference)", "http://www.w3.org/TR/xsl", 
-	   (  MYXML = new XML(xmlDoc), MYXML.removeNamespace('xsl'), myGetNamespace(MYXML, 'xsl').toString()));
+AddTestCase( "MYXML.removeNamespace(QName reference)", "http://www.w3.org/TR/xsl",
+       (  MYXML = new XML(xmlDoc), MYXML.removeNamespace('xsl'), myGetNamespace(MYXML, 'xsl').toString()));
 
 
 // Other namespaces should be removed
-AddTestCase( "MYXML.removeNamespace(no Qname reference)", undefined, 
-	   (  MYXML = new XML(xmlDoc), MYXML.b.c.removeNamespace('foo'), myGetNamespace(MYXML, 'foo')) );
+AddTestCase( "MYXML.removeNamespace(no Qname reference)", undefined,
+       (  MYXML = new XML(xmlDoc), MYXML.b.c.removeNamespace('foo'), myGetNamespace(MYXML, 'foo')) );
 
 var n1 = new Namespace('pfx', 'http://w3.org');
 var n2 = new Namespace('http://us.gov');

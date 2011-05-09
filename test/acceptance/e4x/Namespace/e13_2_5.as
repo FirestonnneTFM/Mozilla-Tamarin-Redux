@@ -173,7 +173,7 @@ xn = new Namespace ("p", "y");
 var for_in_values = [];
 for (var nn in foot)
 {
-	for_in_values.push(nn);
+    for_in_values.push(nn);
 }
 
 AddTestCase("Prefix in for-in loop", "prefix", for_in_values[1]);
@@ -184,7 +184,7 @@ AddTestCase("URI in for-in loop", "uri", for_in_values[0]);
 var for_each_values = [];
 for each (nn in foot)
 {
-	for_each_values.push(nn);
+    for_each_values.push(nn);
 }
 
 AddTestCase("Prefix in for-each loop", "bar", for_each_values[0]);
@@ -194,7 +194,7 @@ AddTestCase("URI in for-each loop", undefined, for_each_values[1]);
 for_each_values = [];
 for each (nn in xn)
 {
-	for_each_values.push(nn);
+    for_each_values.push(nn);
 }
 
 AddTestCase("Prefix in for-each loop", "y", for_each_values[0]);

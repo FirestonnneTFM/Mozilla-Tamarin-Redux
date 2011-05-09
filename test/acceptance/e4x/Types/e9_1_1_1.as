@@ -42,7 +42,7 @@
 
 START('9.1.1.1 XML [[Get]]');
 
-var x1 = 
+var x1 =
 <alpha attr1="value1" attr2="value2">
     <bravo>
         one
@@ -75,7 +75,7 @@ correct += new XML("value1");
 correct += new XML("value2");
 TEST(11, correct, x1.@*);
 
-x1 = 
+x1 =
 <alpha attr1="value1" attr2="value2">
     <bravo>
         one
@@ -89,7 +89,7 @@ correct = new XMLList("<bravo>one<charlie>two</charlie></bravo>one<charlie>two</
 TEST(12, correct, x1..*);
 XML.prettyPrinting = true;
 
-x1 = 
+x1 =
 <alpha attr1="value1" attr2="value2">
     <bravo attr3="value3">
         one
@@ -138,7 +138,7 @@ x1 =
     <bravo>one</bravo>
 </alpha>;
 
-correct = 
+correct =
 <alpha>
     <bravo>
         one
@@ -156,7 +156,7 @@ x1 =
     <bravo>one</bravo>
 </alpha>;
 
-correct = 
+correct =
 <alpha>
     <bravo>
         one
@@ -174,7 +174,7 @@ x1 =
     <bravo>one</bravo>
 </alpha>;
 
-correct = 
+correct =
 <alpha>
     <bravo>
         one
@@ -193,7 +193,7 @@ x1 =
     <bravo>one</bravo>
 </alpha>;
 
-correct = 
+correct =
 <alpha>
     <bravo>
         one
@@ -211,7 +211,7 @@ x1 =
     <bravo>one</bravo>
 </alpha>;
 
-correct = 
+correct =
 <alpha>
     <bravo>
         one
@@ -229,7 +229,7 @@ x1 =
     <bravo>one</bravo>
 </alpha>;
 
-correct = 
+correct =
 <alpha>
     <bravo>
         one
@@ -247,7 +247,7 @@ x1 =
     <bravo>one</bravo>
 </alpha>;
 
-correct = 
+correct =
 <alpha>
     <bravo>one</bravo>
     <newChild>
@@ -261,7 +261,7 @@ x1.child("newChild").charlie.delta = <delta>two</delta>;
 TEST(26, correct, x1);
 
 // These should fail because the XMLList is size > 1
-x1 = 
+x1 =
 <alpha>
     <bravo>one</bravo>
     <bravo>two</bravo>
@@ -274,7 +274,7 @@ try {
     TEST(27, "TypeError", ex1.name);
 }
 
-x1 = 
+x1 =
 <alpha>
     <bravo>one</bravo>
     <bravo>two</bravo>
@@ -287,7 +287,7 @@ try {
     TEST(28, "TypeError", ex2.name);
 }
 
-x1 = 
+x1 =
 <alpha>
     <bravo>one</bravo>
     <bravo>two</bravo>

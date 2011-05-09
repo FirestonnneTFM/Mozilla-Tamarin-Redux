@@ -44,8 +44,8 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
     // These examples come from 15.7.1, UnicodeEscapeSequence
 
@@ -59,31 +59,31 @@ function getTestCases() {
     AddRegExpCases( /A2/, "/A2/", "\u00412", "\\u00412", 1, 0, ["A2"]);
     AddRegExpCases( /A/,  "/A/",  "A2",      "A2",       1, 0, ["A"] );
 
-	function AddRegExpCases(
-	    regexp, str_regexp, pattern, str_pattern, length, index, matches_array ) {
+    function AddRegExpCases(
+        regexp, str_regexp, pattern, str_pattern, length, index, matches_array ) {
 
-	    array[item++] = new TestCase(SECTION,
-	        str_regexp + " .exec(" + str_pattern +").length",
-	        length,
-	        regexp.exec(pattern).length );
+        array[item++] = new TestCase(SECTION,
+            str_regexp + " .exec(" + str_pattern +").length",
+            length,
+            regexp.exec(pattern).length );
 
-	    array[item++] = new TestCase(SECTION,
-	        str_regexp + " .exec(" + str_pattern +").index",
-	        index,
-	        regexp.exec(pattern).index );
+        array[item++] = new TestCase(SECTION,
+            str_regexp + " .exec(" + str_pattern +").index",
+            index,
+            regexp.exec(pattern).index );
 
-	    array[item++] = new TestCase(SECTION,
-	        str_regexp + " .exec(" + str_pattern +").input",
-	        pattern,
-	        regexp.exec(pattern).input );
+        array[item++] = new TestCase(SECTION,
+            str_regexp + " .exec(" + str_pattern +").input",
+            pattern,
+            regexp.exec(pattern).input );
 
-	    for ( var matches = 0; matches < matches_array.length; matches++ ) {
-	        array[item++] = new TestCase(SECTION,
-	            str_regexp + " .exec(" + str_pattern +")[" + matches +"]",
-	            matches_array[matches],
-	            regexp.exec(pattern)[matches] );
-	    }
-	}
+        for ( var matches = 0; matches < matches_array.length; matches++ ) {
+            array[item++] = new TestCase(SECTION,
+                str_regexp + " .exec(" + str_pattern +")[" + matches +"]",
+                matches_array[matches],
+                regexp.exec(pattern)[matches] );
+        }
+    }
 
-	return array;
+    return array;
 }

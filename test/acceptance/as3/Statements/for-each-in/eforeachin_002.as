@@ -70,7 +70,7 @@ startTest();                // leave this alone
  s = 0;
  
  for each ( i in x1.z )
- 	s += i.A;
+    s += i.A;
  
  AddTestCase( "for-each-in       :", true, (s==6) );
 

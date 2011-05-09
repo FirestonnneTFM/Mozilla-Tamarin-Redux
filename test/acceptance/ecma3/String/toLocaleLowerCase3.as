@@ -59,7 +59,7 @@ function getTestCases() {
                                         String.fromCharCode(U.lower),
                                         (s = new String( String.fromCharCode("+i+ ) ), s.toLocaleLowerCase()") );
 */
-	s = new String(String.fromCharCode(i));
+    s = new String(String.fromCharCode(i));
         array[item++] = new TestCase(   SECTION,
                                         "var s = new String( String.fromCharCode("+i+") ); s.toLocaleLowerCase().charCodeAt(0)",
                                         U.lower,

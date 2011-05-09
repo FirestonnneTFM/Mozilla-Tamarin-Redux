@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package bug127174{
-	public interface ITestInterface extends IBaseInterface
-	{
-    	   function method2():void;
-	}
+    public interface ITestInterface extends IBaseInterface
+    {
+           function method2():void;
+    }
 }

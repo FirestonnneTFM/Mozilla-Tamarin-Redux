@@ -35,6 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package StaticFunctionBody {
-	public class Custom {}
+    public class Custom {}
 }
 

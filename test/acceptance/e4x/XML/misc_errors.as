@@ -43,14 +43,14 @@
 START("13.4 XML Object - Miscellaneous errors");
 
 function grabError(err, str) {
-	var typeIndex = str.indexOf("Error:");
-	var type = str.substr(0, typeIndex + 5);
-	if (type == "TypeError") {
-		AddTestCase("Asserting for TypeError", true, (err is TypeError));
-	}
-	var numIndex = str.indexOf("Error #");
-	var num = str.substr(numIndex, 11);
-	return num;
+    var typeIndex = str.indexOf("Error:");
+    var type = str.substr(0, typeIndex + 5);
+    if (type == "TypeError") {
+        AddTestCase("Asserting for TypeError", true, (err is TypeError));
+    }
+    var numIndex = str.indexOf("Error #");
+    var num = str.substr(numIndex, 11);
+    return num;
 }
 
 var expected, result;
@@ -170,7 +170,7 @@ result = grabError(e6, e6.toString());
 AddTestCase( "unterminated comment", expected, result );
 
 
-// unterminated doctype 
+// unterminated doctype
 
 expectedStr = "TypeError: Error #1093: XML parser failure: Unterminated DOCTYPE declaration";
 expected = "Error #1093";

@@ -49,16 +49,16 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
     var str = 'foo "bar" baz';
     reportCompare ('foo \\"bar\\" baz', str.replace(/([\'\"])/g, "\\$1"),
                    "str.replace failed.");
     array[item++] = new TestCase(SECTION,
-    	"str.replace failed.",
-    	'foo \\"bar\\" baz',
-    	str.replace(/([\'\"])/g, "\\$1"));
+        "str.replace failed.",
+        'foo \\"bar\\" baz',
+        str.replace(/([\'\"])/g, "\\$1"));
 
-	return array;
+    return array;
 }

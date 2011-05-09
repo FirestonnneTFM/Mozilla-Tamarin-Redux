@@ -38,47 +38,47 @@ import OverrideFunctionName.*;
 
 // inside class outside package
 class OverrideFunctionNameClassBase {
-    	// constructor
-    	function OverrideFunctionNameClassBase() {}
+        // constructor
+        function OverrideFunctionNameClassBase() {}
 
-    	// not the constructor but looks like it
-    	function overrideFunctionNameClass() { return null; }
+        // not the constructor but looks like it
+        function overrideFunctionNameClass() { return null; }
 
-    	function a1 () { return null; }
-    	function a_1 () { return null; }
-    	function _a1 () { return null; }
-    	function __a1 () { return null; }
-    	function _a1_ () { return null; }
-    	function __a1__ () { return null; }
-    	function $a1 () { return null; }
-    	function a$1 () { return null; }
-    	function a1$ () { return null; }
-    	function A1 () { return null; }
-    	function cases () { return null; }
-    	function Cases () { return null; }
-    	function abcdefghijklmnopqrstuvwxyz0123456789$_ () { return null; }
+        function a1 () { return null; }
+        function a_1 () { return null; }
+        function _a1 () { return null; }
+        function __a1 () { return null; }
+        function _a1_ () { return null; }
+        function __a1__ () { return null; }
+        function $a1 () { return null; }
+        function a$1 () { return null; }
+        function a1$ () { return null; }
+        function A1 () { return null; }
+        function cases () { return null; }
+        function Cases () { return null; }
+        function abcdefghijklmnopqrstuvwxyz0123456789$_ () { return null; }
 }
 
 class OverrideFunctionNameClass extends OverrideFunctionNameClassBase {
-    	// constructor
-    	function OverrideFunctionNameClass() {}
+        // constructor
+        function OverrideFunctionNameClass() {}
 
-    	// not the constructor but looks like it
-    	override function overrideFunctionNameClass() { return "not the constructor" }
+        // not the constructor but looks like it
+        override function overrideFunctionNameClass() { return "not the constructor" }
 
-    	override function a1 () { return "a1"; }
-    	override function a_1 () { return "a_1"; }
-    	override function _a1 () { return "_a1"; }
-    	override function __a1 () { return "__a1"; }
-    	override function _a1_ () { return "_a1_"; }
-    	override function __a1__ () { return "__a1__"; }
-    	override function $a1 () { return "$a1"; }
-    	override function a$1 () { return "a$1"; }
-    	override function a1$ () { return "a1$"; }
-    	override function A1 () { return "A1"; }
-    	override function cases () { return "cases"; }
-    	override function Cases () { return "Cases"; }
-    	override function abcdefghijklmnopqrstuvwxyz0123456789$_ () { return "all"; }
+        override function a1 () { return "a1"; }
+        override function a_1 () { return "a_1"; }
+        override function _a1 () { return "_a1"; }
+        override function __a1 () { return "__a1"; }
+        override function _a1_ () { return "_a1_"; }
+        override function __a1__ () { return "__a1__"; }
+        override function $a1 () { return "$a1"; }
+        override function a$1 () { return "a$1"; }
+        override function a1$ () { return "a1$"; }
+        override function A1 () { return "A1"; }
+        override function cases () { return "cases"; }
+        override function Cases () { return "Cases"; }
+        override function abcdefghijklmnopqrstuvwxyz0123456789$_ () { return "all"; }
 }
 
 

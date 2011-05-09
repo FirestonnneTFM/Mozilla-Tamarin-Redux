@@ -47,7 +47,7 @@ TEST(1, "xml", typeof(x1));
 TEST(2, true, x1 instanceof XML);
 
 correct =
-<Envelope 
+<Envelope
     xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
     xmlns:stock="http://mycompany.com/stocks"
     soap:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
@@ -62,7 +62,7 @@ x1 = XML(correct);
 TEST(3, correct, x1);
 
 text =
-"<Envelope" + 
+"<Envelope" +
 "    xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"" +
 "    xmlns:stock=\"http://mycompany.com/stocks\"" +
 "    soap:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">" +
@@ -77,7 +77,7 @@ x1 =  XML(text);
 TEST(4, correct, x1);
 
 // Make sure it's not copied if it's XML
-x1 = 
+x1 =
 <alpha>
     <bravo>two</bravo>
 </alpha>;
@@ -86,7 +86,7 @@ y1 = XML(x1);
 
 x1.bravo = "three";
 
-correct = 
+correct =
 <alpha>
     <bravo>three</bravo>
 </alpha>;
@@ -123,7 +123,7 @@ AddTestCase( "typeof XML(undefined)", "xml", typeof XML(undefined) );
 AddTestCase( "XML().valueOf().toString()", "", XML().valueOf().toString() );
 AddTestCase( "typeof XML()", "xml", typeof XML() );
 
-// value is supplied 
+// value is supplied
 AddTestCase( "XML(thisXML).valueOf().toString()", thisXML, XML(thisXML).valueOf().toString() );
 AddTestCase( "typeof XML(thisXML)", "xml", typeof XML(thisXML) );
 

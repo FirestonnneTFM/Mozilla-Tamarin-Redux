@@ -53,7 +53,7 @@ var apiVersion:int = System.apiVersion;
 
 // expected answers
 var apiExpectedAns:Array = [];
-re = re1065;                          
+re = re1065;
 apiExpectedAns[API_AIR_1_0]         = [true, true, true,   re,   re,   re,   re,   re,   re, true, true,   re, true];
 apiExpectedAns[API_FP_10_0]         = [true, true,   re, true,   re,   re,   re,   re,   re, true, true, true, true];
 apiExpectedAns[API_AIR_1_5]         = [true, true, true, true, true,   re,   re,   re,   re, true, true, true, true];
@@ -71,7 +71,7 @@ apiExpectedSetAns[API_AIR_1_5_1]    = [true, true, true, true, true, true,   re,
 apiExpectedSetAns[API_FP_10_0_32]   = [true, true,   re, true,   re,   re, true,   re,   re, true, true, true, true];
 apiExpectedSetAns[API_AIR_1_5_2]    = [true, true, true, true, true, true, true, true,   re, true, true, true, true];
 
-// set expected answers to specified api version 
+// set expected answers to specified api version
 var ea:Array = apiExpectedAns[apiVersion]
 var ea_set:Array = apiExpectedSetAns[apiVersion]
 

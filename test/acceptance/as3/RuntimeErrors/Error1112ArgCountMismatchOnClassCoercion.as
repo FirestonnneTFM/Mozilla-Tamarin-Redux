@@ -34,7 +34,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1112; //	Argument count mismatch on class coercion. Expected 1, got _.
+var CODE = 1112; // Argument count mismatch on class coercion. Expected 1, got _.
 
 //-----------------------------------------------------------
 startTest();
@@ -43,14 +43,14 @@ startTest();
 var expected = "Error #" + CODE;
 var result = "no error";
 try {
-	class a {
-		function a() {}
-	}
-	var b = a(1,2);
+    class a {
+        function a() {}
+    }
+    var b = a(1,2);
 } catch (err) {
-	result = grabError(err, err.toString());
+    result = grabError(err, err.toString());
 } finally {
-	AddTestCase("Runtime Error", expected, result);
+    AddTestCase("Runtime Error", expected, result);
 }
 
 //-----------------------------------------------------------

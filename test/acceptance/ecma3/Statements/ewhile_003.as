@@ -105,5 +105,5 @@ function getTestCases(){
             "pass",
             result );
     }
-    return array;    
+    return array;
 }

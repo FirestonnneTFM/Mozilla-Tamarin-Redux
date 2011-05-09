@@ -108,7 +108,7 @@ function exhaustiveSpliceTestWithArgs(testname, testArray)
       expectedSpliced = [];
 
       for (var i = 0; i < testArray.length; ++i)
-	actualSpliced.push(testArray[i]);
+    actualSpliced.push(testArray[i]);
 
       actualRemoved   = actualSpliced.splice(first,len,-97,new String("test arg"),[],9.8);
       expectedRemoved = mySplice(testArray,expectedSpliced,first,len,[-97,new String("test arg"),[],9.8]);
@@ -119,28 +119,28 @@ function exhaustiveSpliceTestWithArgs(testname, testArray)
 
 
       if (  (String(actualSpliced) != String(expectedSpliced))
-	    ||(String(actualRemoved) != String(expectedRemoved)))
+        ||(String(actualRemoved) != String(expectedRemoved)))
       {
-	if (  (String(actualSpliced) == String(expectedSpliced))
-	      &&(String(actualRemoved) != String(expectedRemoved)) )
-	{
+    if (  (String(actualSpliced) == String(expectedSpliced))
+          &&(String(actualRemoved) != String(expectedRemoved)) )
+    {
 
-	  if ( (expectedRemoved.length == 1)
-	       &&(String(actualRemoved) == String(expectedRemoved[0]))) continue;
-	  if ( expectedRemoved.length == 0  && actualRemoved == void 0 ) continue;
-	}
+      if ( (expectedRemoved.length == 1)
+           &&(String(actualRemoved) == String(expectedRemoved[0]))) continue;
+      if ( expectedRemoved.length == 0  && actualRemoved == void 0 ) continue;
+    }
 
-	errorMessage =
-	  "ERROR: 'TEST FAILED' ERROR: 'TEST FAILED' ERROR: 'TEST FAILED'\n" +
-	  "             test: " + "a.splice(" + first + "," + len + ",-97,new String('test arg'),[],9.8)\n" +
-	  "                a: " + String(testArray) + "\n" +
-	  "   actual spliced: " + String(actualSpliced) + "\n" +
-	  " expected spliced: " + String(expectedSpliced) + "\n" +
-	  "   actual removed: " + String(actualRemoved) + "\n" +
-	  " expected removed: " + String(expectedRemoved);
-	reason = reason + errorMessage;
-	writeHeaderToLog(errorMessage);
-	passed = false;
+    errorMessage =
+      "ERROR: 'TEST FAILED' ERROR: 'TEST FAILED' ERROR: 'TEST FAILED'\n" +
+      "             test: " + "a.splice(" + first + "," + len + ",-97,new String('test arg'),[],9.8)\n" +
+      "                a: " + String(testArray) + "\n" +
+      "   actual spliced: " + String(actualSpliced) + "\n" +
+      " expected spliced: " + String(expectedSpliced) + "\n" +
+      "   actual removed: " + String(actualRemoved) + "\n" +
+      " expected removed: " + String(expectedRemoved);
+    reason = reason + errorMessage;
+    writeHeaderToLog(errorMessage);
+    passed = false;
       }
     }
   }

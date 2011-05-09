@@ -52,37 +52,37 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var TEST_PASSED = 'TypeError';
-	var TEST_FAILED = 'Generated an error, but NOT a TypeError!';
-	var TEST_FAILED_BADLY = 'Did not generate ANY error!!!';
-	var status = '';
-	var actual = '';
-	var expect= '';
+    var TEST_PASSED = 'TypeError';
+    var TEST_FAILED = 'Generated an error, but NOT a TypeError!';
+    var TEST_FAILED_BADLY = 'Did not generate ANY error!!!';
+    var status = '';
+    var actual = '';
+    var expect= '';
 
 
-	status = inSection(1);
-	expect = TEST_PASSED;
-	actual = TEST_FAILED_BADLY;
-	/*
-	 * This should generate a TypeError. See ECMA reference
-	 * at http://bugzilla.mozilla.org/show_bug.cgi?id=167325
-	 */
-	try
-	{
-	  var obj = {toString: function() {return new Object();}}
-	  obj == 'abc';
-	}
-	catch(e)
-	{
-	  if (e instanceof TypeError)
-	    actual = TEST_PASSED;
-	  else
-	    actual = TEST_FAILED;
-	}
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = inSection(1);
+    expect = TEST_PASSED;
+    actual = TEST_FAILED_BADLY;
+    /*
+     * This should generate a TypeError. See ECMA reference
+     * at http://bugzilla.mozilla.org/show_bug.cgi?id=167325
+     */
+    try
+    {
+      var obj = {toString: function() {return new Object();}}
+      obj == 'abc';
+    }
+    catch(e)
+    {
+      if (e instanceof TypeError)
+        actual = TEST_PASSED;
+      else
+        actual = TEST_FAILED;
+    }
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	return array;
+    return array;
 }

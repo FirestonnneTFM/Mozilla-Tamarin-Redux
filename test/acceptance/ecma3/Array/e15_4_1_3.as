@@ -54,7 +54,7 @@ function getTestCases() {
                                     "object",
                                     typeof Array() );
 
-	var MYARR;
+    var MYARR;
 
     array[item++] = new TestCase(   SECTION,
                                     "MYARR = new Array();MYARR.getClass = Object.prototype.toString;MYARR.getClass()",

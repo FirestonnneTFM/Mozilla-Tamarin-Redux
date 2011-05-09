@@ -57,10 +57,10 @@ function addtestcases()
  
 
 
-  function f1() { 
-    function f0() { return arguments[0]; } 
-    for (var i = 0; i < 4; i++) f0('a'); 
-  } 
+  function f1() {
+    function f0() { return arguments[0]; }
+    for (var i = 0; i < 4; i++) f0('a');
+  }
   f1();
 
 

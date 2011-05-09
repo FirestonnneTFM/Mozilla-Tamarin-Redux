@@ -52,24 +52,24 @@ AddTestCase( "XML.prettyIndent = 4, XML.prettyIndent", 4, (XML.prettyIndent = 4,
 AddTestCase( "XML.prettyIndent = 2, XML.prettyIndent", 2, (XML.prettyIndent = 2, XML.prettyIndent));
 AddTestCase( "XML.prettyIndent = -1, XML.prettyIndent", -1, (XML.prettyIndent = -1, XML.prettyIndent));
 
-// b) pretty printing 
+// b) pretty printing
 
-AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyIndent = 2; MYOB.toString()", 
-			"<XML>" + NL() + "  <TEAM>Giants</TEAM>" + NL() + "  <CITY>San Francisco</CITY>" + NL() + "  <SPORT>Baseball</SPORT>" + NL() + "</XML>", 
+AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyIndent = 2; MYOB.toString()",
+            "<XML>" + NL() + "  <TEAM>Giants</TEAM>" + NL() + "  <CITY>San Francisco</CITY>" + NL() + "  <SPORT>Baseball</SPORT>" + NL() + "</XML>",
              (MYOB = new XML(xmlDoc), XML.prettyIndent = 2, MYOB.toString()));
 
-AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyIdent = 4; MYOB.toString()", 
-			"<XML>" + NL() + "    <TEAM>Giants</TEAM>" + NL() + "    <CITY>San Francisco</CITY>" + NL() + "    <SPORT>Baseball</SPORT>" + NL() + "</XML>", 
+AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyIdent = 4; MYOB.toString()",
+            "<XML>" + NL() + "    <TEAM>Giants</TEAM>" + NL() + "    <CITY>San Francisco</CITY>" + NL() + "    <SPORT>Baseball</SPORT>" + NL() + "</XML>",
              (MYOB = new XML(xmlDoc), XML.prettyIndent = 4, MYOB.toString()));
 
-AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyIndent = 1; MYOB.toString()", 
-			"<XML>" + NL() + " <TEAM>Giants</TEAM>" + NL() + " <CITY>San Francisco</CITY>" + NL() + " <SPORT>Baseball</SPORT>" + NL() + "</XML>", 
+AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyIndent = 1; MYOB.toString()",
+            "<XML>" + NL() + " <TEAM>Giants</TEAM>" + NL() + " <CITY>San Francisco</CITY>" + NL() + " <SPORT>Baseball</SPORT>" + NL() + "</XML>",
              (MYOB = new XML(xmlDoc), XML.prettyIndent = 1, MYOB.toString()));
 
 // !!@ bad value causes pretty printing to be disabled
-AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyIndent = -5; MYOB.toString()", 
-			"<XML><TEAM>Giants</TEAM><CITY>San Francisco</CITY><SPORT>Baseball</SPORT></XML>",
-			//"<XML>" + NL() + "  <TEAM>Giants</TEAM>" + NL() + "  <CITY>San Francisco</CITY>" + NL() + "  <SPORT>Baseball</SPORT>" + NL() + "</XML>", 
+AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyIndent = -5; MYOB.toString()",
+            "<XML><TEAM>Giants</TEAM><CITY>San Francisco</CITY><SPORT>Baseball</SPORT></XML>",
+            //"<XML>" + NL() + "  <TEAM>Giants</TEAM>" + NL() + "  <CITY>San Francisco</CITY>" + NL() + "  <SPORT>Baseball</SPORT>" + NL() + "</XML>",
              (MYOB = new XML(xmlDoc), XML.prettyIndent = -5, MYOB.toString()));
 
 
@@ -77,8 +77,8 @@ AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyIndent = -5; MYOB.toString()",
 // !!@ very simple example of printing output
 XML.prettyPrinting = true;
 XML.prettyIndent = 10;
-AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyPrinting = true; MYOB.toString()", 
-			"<XML>" + NL() + "          <TEAM>Giants</TEAM>" + NL() + "          <CITY>San Francisco</CITY>" + NL() + "          <SPORT>Baseball</SPORT>" + NL() + "</XML>", 
+AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyPrinting = true; MYOB.toString()",
+            "<XML>" + NL() + "          <TEAM>Giants</TEAM>" + NL() + "          <CITY>San Francisco</CITY>" + NL() + "          <SPORT>Baseball</SPORT>" + NL() + "</XML>",
              (MYOB = new XML(xmlDoc), XML.prettyPrinting = true, MYOB.toString()));
 
 
@@ -86,8 +86,8 @@ AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyPrinting = true; MYOB.toString()
 
 XML.prettyIndent = 5;
 xmlDoc = "<XML><TEAM attr1=\"attr\" attr2=\"hi\">Giants</TEAM><CITY>San Francisco</CITY><SPORT>Baseball</SPORT></XML>"
-AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyPrinting = true; MYOB.toString()", 
-			"<XML>" + NL() + "     <TEAM attr1=\"attr\" attr2=\"hi\">Giants</TEAM>" + NL() + "     <CITY>San Francisco</CITY>" + NL() + "     <SPORT>Baseball</SPORT>" + NL() + "</XML>", 
+AddTestCase( "MYOB = new XML(xmlDoc); XML.prettyPrinting = true; MYOB.toString()",
+            "<XML>" + NL() + "     <TEAM attr1=\"attr\" attr2=\"hi\">Giants</TEAM>" + NL() + "     <CITY>San Francisco</CITY>" + NL() + "     <SPORT>Baseball</SPORT>" + NL() + "</XML>",
              (MYOB = new XML(xmlDoc), XML.prettyPrinting = true, MYOB.toString()));
 
 

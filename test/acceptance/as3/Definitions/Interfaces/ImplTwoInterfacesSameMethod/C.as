@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package ImplTwoInterfacesSameMethod{
-	public class C implements A, B{
+    public class C implements A, B{
 
-		public function sameName(){ return "{A,B} function sameName"; }
-	}
+        public function sameName(){ return "{A,B} function sameName"; }
+    }
 }

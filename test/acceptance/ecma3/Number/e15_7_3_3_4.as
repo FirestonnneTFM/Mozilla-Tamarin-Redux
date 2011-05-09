@@ -50,7 +50,7 @@ function getTestCases() {
     var item = 0;
 
     string = '';
-    for ( prop in Number ) { 
+    for ( prop in Number ) {
         string += ( prop == 'MIN_VALUE' ) ? prop : '';
     }
 

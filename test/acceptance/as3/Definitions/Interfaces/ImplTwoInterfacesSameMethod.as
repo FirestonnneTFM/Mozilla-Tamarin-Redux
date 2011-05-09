@@ -40,12 +40,12 @@ startTest();
 
 var OBJ = new C();
 
-AddTestCase( "Interface name does not disambiguate method definitions", 
-			 "{A,B} function sameName", 
-			 OBJ.A::sameName() );
-AddTestCase( "Interface name does not disambiguate method definitions", 
-			 "{A,B} function sameName",
-			 OBJ.B::sameName() );
+AddTestCase( "Interface name does not disambiguate method definitions",
+             "{A,B} function sameName",
+             OBJ.A::sameName() );
+AddTestCase( "Interface name does not disambiguate method definitions",
+             "{A,B} function sameName",
+             OBJ.B::sameName() );
 
 
 test();

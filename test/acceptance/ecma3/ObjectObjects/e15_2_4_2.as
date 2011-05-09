@@ -50,30 +50,30 @@ function getTestCases() {
 
     array[item++] = new TestCase( SECTION,  "(new Object()).toString()",    "[object Object]",  (new Object()).toString() );
 
-	myvar = this;
-	myvar.toString = Object.prototype.toString;
+    myvar = this;
+    myvar.toString = Object.prototype.toString;
     array[item++] = new TestCase( SECTION,  "myvar = this;  myvar.toString = Object.prototype.toString; myvar.toString()",
                                             GLOBAL,
                                              myvar.toString());
 
 
-/*	myvar = MyObject;
-	myvar.toString = Object.prototype.toString;
+/*  myvar = MyObject;
+    myvar.toString = Object.prototype.toString;
     array[item++] = new TestCase( SECTION,  "myvar = MyObject; myvar.toString = Object.prototype.toString; myvar.toString()",
                                             "[object Function]",
                                              myvar.toString() );
 */
-	myvar = new MyObject( true );
-	myvar.toString = Object.prototype.toString;
+    myvar = new MyObject( true );
+    myvar.toString = Object.prototype.toString;
     array[item++] = new TestCase( SECTION,  "myvar = new MyObject( true ); myvar.toString = Object.prototype.toString; myvar.toString()",
                                             '[object Object]',
                                             myvar.toString());
 
-	// save
-	var origNumProto = Number.prototype.toString;
+    // save
+    var origNumProto = Number.prototype.toString;
 
-	Number.prototype.toString=Object.prototype.toString;
-	myvar = new Number(0);
+    Number.prototype.toString=Object.prototype.toString;
+    myvar = new Number(0);
     var expectedAns = "[object Number]";
     if (as3Enabled) {
         expectedAns = "0";
@@ -89,52 +89,52 @@ function getTestCases() {
     //save
     var origStrProto = String.prototype.toString;
 
-	String.prototype.toString=Object.prototype.toString;
-	myvar = new String('');
+    String.prototype.toString=Object.prototype.toString;
+    myvar = new String('');
     expectedAns = "[object String]";
     if (as3Enabled) {
         expectedAns = "";
     }
-	array[item++] = new TestCase( SECTION,  "myvar = new String(''); myvar.toString = Object.prototype.toString; myvar.toString()",
+    array[item++] = new TestCase( SECTION,  "myvar = new String(''); myvar.toString = Object.prototype.toString; myvar.toString()",
                                             expectedAns,
                                             myvar.toString() );
 
     // restore
     String.prototype.toString = origStrProto;
 
-	myvar = Math;
+    myvar = Math;
 
-	var thisError = "no exception thrown";
+    var thisError = "no exception thrown";
 
 // The new Funtion() has been replaced by function() {}
-	myvar = function() {};
+    myvar = function() {};
     
-	myvar.toString = Object.prototype.toString;
-	array[item++] = new TestCase( SECTION,  "myvar = function() {}; myvar.toString = Object.prototype.toString; myvar.toString()",
+    myvar.toString = Object.prototype.toString;
+    array[item++] = new TestCase( SECTION,  "myvar = function() {}; myvar.toString = Object.prototype.toString; myvar.toString()",
                                             true,
                                             Boolean(myvar.toString().match(/\[object Function-[0-9]+\]/)) || myvar.toString()=="[object null]");
 
 /*
-	myvar = new Array();
-	myvar.toString = Object.prototype.toString;
-	array[item++] = new TestCase( SECTION,  "myvar = new Array(); myvar.toString = Object.prototype.toString; myvar.toString()",
+    myvar = new Array();
+    myvar.toString = Object.prototype.toString;
+    array[item++] = new TestCase( SECTION,  "myvar = new Array(); myvar.toString = Object.prototype.toString; myvar.toString()",
                                             "[object Array]",
                                             myvar.toString());
 
-	// save
-	var origBoolProto = Boolean.prototype.toString;
+    // save
+    var origBoolProto = Boolean.prototype.toString;
 
-	Boolean.prototype.toString=Object.prototype.toString;
-	myvar = new Boolean();
-   	array[item++] = new TestCase( SECTION,  "myvar = new Boolean(); myvar.toString = Object.prototype.toString; myvar.toString()",
+    Boolean.prototype.toString=Object.prototype.toString;
+    myvar = new Boolean();
+    array[item++] = new TestCase( SECTION,  "myvar = new Boolean(); myvar.toString = Object.prototype.toString; myvar.toString()",
                                             "[object Boolean]",
                                              myvar.toString());
 
     // restore
     Boolean.prototype.toString = origBoolProto;
 
-	myvar = new Date();
-	myvar.toString = Object.prototype.toString;
+    myvar = new Date();
+    myvar.toString = Object.prototype.toString;
     array[item++] = new TestCase( SECTION,  "myvar = new Date(); myvar.toString = Object.prototype.toString; myvar.toString()",
                                             "[object Date]",
                                             myvar.toString());

@@ -50,7 +50,7 @@ printStatus (summary);
 var a = [, 1, , 2, undefined];
 
 actual = a.sort().toString();
-expect = '1,2,,,'; 
+expect = '1,2,,,';
 
 AddTestCase(summary, expect, actual);
 

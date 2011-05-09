@@ -43,7 +43,7 @@
     var testcases = getTestCases();
     test();
     
-function getTestCases(){    
+function getTestCases(){
     var array = new Array();
     var item = 0;
 

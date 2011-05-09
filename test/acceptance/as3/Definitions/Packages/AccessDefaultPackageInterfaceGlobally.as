@@ -35,13 +35,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package 
+package
 {
     public interface B{};
 }
 
-var SECTION = "Definitions\Packages";       			// provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";  			// Version of JavaScript or ECMA
+var SECTION = "Definitions\Packages";                   // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
 var TITLE   = "access default package interface globally";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 

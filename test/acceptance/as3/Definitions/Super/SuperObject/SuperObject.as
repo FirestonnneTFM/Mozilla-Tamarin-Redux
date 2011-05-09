@@ -36,9 +36,9 @@
  * ***** END LICENSE BLOCK ***** */
 // 16.3 class with explicit base, super() initialize Object
 package SuperObject {
-	public class SuperObject {
-		function SuperObject() {
-			super()	// should call Object constructor
-		}
-	}
+    public class SuperObject {
+        function SuperObject() {
+            super() // should call Object constructor
+        }
+    }
 }

@@ -38,14 +38,14 @@
     var VERSION = "ECMA_2";
     var TITLE   = "new RegExp()";
 
-	startTest();
-	writeHeaderToLog(SECTION + " " + TITLE);
-	var testcases = getTestCases();
-	test();
+    startTest();
+    writeHeaderToLog(SECTION + " " + TITLE);
+    var testcases = getTestCases();
+    test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
     /*
      * for each test case, verify:
@@ -61,7 +61,7 @@ function getTestCases() {
     RegExp.prototype.getClassProperty = Object.prototype.toString;
     var re = new RegExp();
 
-	array[item++] = new TestCase(SECTION,
+    array[item++] = new TestCase(SECTION,
         "RegExp.prototype.getClassProperty = Object.prototype.toString; " +
         "(new RegExp()).getClassProperty()",
         "[object RegExp]",
@@ -95,5 +95,5 @@ function getTestCases() {
     //restore
     delete RegExp.prototype.getClassProperty;
 
-	return array;
+    return array;
 }

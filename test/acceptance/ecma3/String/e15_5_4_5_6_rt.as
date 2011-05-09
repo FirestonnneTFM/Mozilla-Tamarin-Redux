@@ -54,21 +54,21 @@ function getTestCases() {
     
     var origBooleanCharCodeAt = Boolean.prototype.charCodeAt;
     Boolean.prototype.charCodeAt= String.prototype.charCodeAt;
-    try{ 
+    try{
     
         obj.__proto__.charAt = String.prototype.charAt;
-        for ( var i = 0; i < 4; i++ ) 
-            s+= String.fromCharCode( obj.charCodeAt(i) ); 
+        for ( var i = 0; i < 4; i++ )
+            s+= String.fromCharCode( obj.charCodeAt(i) );
     }catch(eP0:ReferenceError){
         thisError=eP0.toString();
     }
     array[item++] = new TestCase( SECTION,"var obj = true; obj.__proto__.charCodeAt = String.prototype.charCodeAt; var s = ''; for ( var i = 0; i < 4; i++ ) s+= String.fromCharCode( obj.charCodeAt(i) ); s","ReferenceError: Error #1069", referenceError(thisError));
      
 
-    /*var obj = true; 
+    /*var obj = true;
     obj.__proto__.charCodeAt = String.prototype.charCodeAt;
     var s = '';
-    for ( var i = 0; i < 4; i++ ) 
+    for ( var i = 0; i < 4; i++ )
         s+= String.fromCharCode( obj.charCodeAt(i) );
 
     array[item++] = new TestCase( SECTION,
@@ -79,11 +79,11 @@ function getTestCases() {
     thisError="no error";
     var obj = 1234;
     var s = '';
-    try{ 
+    try{
     
         obj.__proto__.charAt = String.prototype.charAt;
-        for ( var i = 0; i < 4; i++ ) 
-            s+= String.fromCharCode( obj.charCodeAt(i) ); 
+        for ( var i = 0; i < 4; i++ )
+            s+= String.fromCharCode( obj.charCodeAt(i) );
     }catch(eP1:Error){
         thisError=eP1.toString();
     }
@@ -93,7 +93,7 @@ function getTestCases() {
     /*obj = 1234;
     obj.__proto__.charCodeAt = String.prototype.charCodeAt;
     s = '';
-    for ( var i = 0; i < 4; i++ ) 
+    for ( var i = 0; i < 4; i++ )
         s+= String.fromCharCode( obj.charCodeAt(i) );
 
     array[item++] = new TestCase( SECTION,
@@ -103,11 +103,11 @@ function getTestCases() {
     thisError="no error";
     var obj = 'hello';
     var s = '';
-    try{ 
+    try{
     
         obj.__proto__.charAt = String.prototype.charAt;
-        for ( var i = 0; i < 4; i++ ) 
-            s+= String.fromCharCode( obj.charCodeAt(i) ); 
+        for ( var i = 0; i < 4; i++ )
+            s+= String.fromCharCode( obj.charCodeAt(i) );
     }catch(eP2:Error){
         thisError=eP2.toString();
     }
@@ -117,7 +117,7 @@ function getTestCases() {
    /* obj = 'hello';
     obj.__proto__.charCodeAt = String.prototype.charCodeAt;
     s = '';
-    for ( var i = 0; i < 5; i++ ) 
+    for ( var i = 0; i < 5; i++ )
         s+= String.fromCharCode( obj.charCodeAt(i) );
 
     array[item++] = new TestCase( SECTION,
@@ -127,8 +127,8 @@ function getTestCases() {
 
     var myvar = new String(true);
     var s = '';
-    for ( var i = 0; i < 4; i++ ) 
-        s+= String.fromCharCode( myvar.charCodeAt(i)) 
+    for ( var i = 0; i < 4; i++ )
+        s+= String.fromCharCode( myvar.charCodeAt(i))
     
     array[item++] = new TestCase( SECTION,
                                   "var myvar = new String(true); var s = ''; for ( var i = 0; i < 4; i++ ) s+= String.fromCharCode( myvar.charCodeAt(i) ); s",
@@ -137,8 +137,8 @@ function getTestCases() {
 
     var myvar = new String(1234);
     var s = '';
-    for ( var i = 0; i < 4; i++ ) 
-        s+= String.fromCharCode( myvar.charCodeAt(i)) 
+    for ( var i = 0; i < 4; i++ )
+        s+= String.fromCharCode( myvar.charCodeAt(i))
     
     array[item++] = new TestCase( SECTION,
                                   "var myvar = new String(1234); var s = ''; for ( var i = 0; i < 4; i++ ) s+= String.fromCharCode( myvar.charCodeAt(i) ); s",
@@ -147,8 +147,8 @@ function getTestCases() {
 
     var myvar = new String('hello');
     var s = '';
-    for ( var i = 0; i < myvar.length; i++ ) 
-        s+= String.fromCharCode( myvar.charCodeAt(i)) 
+    for ( var i = 0; i < myvar.length; i++ )
+        s+= String.fromCharCode( myvar.charCodeAt(i))
     
     array[item++] = new TestCase( SECTION,
                                   "var myvar = new String('hello'); var s = ''; for ( var i = 0; i < 4; i++ ) s+= String.fromCharCode( myvar.charCodeAt(i) ); s",

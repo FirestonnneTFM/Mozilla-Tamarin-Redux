@@ -47,7 +47,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     DoWhile( new DoWhileObject( false, false, 10 ) );
     DoWhile( new DoWhileObject( true, false, 2 ) );
@@ -116,5 +116,5 @@ function getTestCases() {
             
       
     }
-    return array;    
+    return array;
 }

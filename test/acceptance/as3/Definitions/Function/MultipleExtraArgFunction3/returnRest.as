@@ -36,14 +36,14 @@
  * ***** END LICENSE BLOCK ***** */
 package MultipleExtraArgFunction3 {
 
-	public function returnRest(str:String,arr:Array,... rest):Number {
-		 
-	 var count = rest.length;
-		    
-	 var a:int = 0;
-	
-	 return count;
-		 
-	}
+    public function returnRest(str:String,arr:Array,... rest):Number {
+         
+     var count = rest.length;
+            
+     var a:int = 0;
+    
+     return count;
+         
+    }
 }
 

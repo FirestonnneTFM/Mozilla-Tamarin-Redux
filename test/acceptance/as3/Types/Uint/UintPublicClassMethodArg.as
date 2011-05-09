@@ -57,55 +57,55 @@ AddTestCase( "UintPublicClass.pubStatProp = 11", 11 , UintPublicClass.pubStatPro
 
 var pResult = null;
 try{
-	obj.oneArg(-1);
-	pResult = "exception NOT caught";
+    obj.oneArg(-1);
+    pResult = "exception NOT caught";
 } catch (e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "Precision runtime error one arg", "exception NOT caught", pResult );
 
 pResult = null;
 try{
-	obj.twoArg(1,-2);
-	pResult = "exception NOT caught";
+    obj.twoArg(1,-2);
+    pResult = "exception NOT caught";
 } catch (e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "Precision runtime error two args", "exception NOT caught", pResult );
 
 pResult = null;
 try{
-	obj.threeArg(1,-2);
-	pResult = "exception NOT caught";
+    obj.threeArg(1,-2);
+    pResult = "exception NOT caught";
 } catch (e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "Precision runtime error three args", "exception caught", pResult );
 
 pResult = null;
 try{
-	obj.diffArg(-1,-2,-3);
-	pResult = "exception NOT caught";
+    obj.diffArg(-1,-2,-3);
+    pResult = "exception NOT caught";
 } catch (e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "Precision runtime error diffArg", "exception NOT caught", pResult );
 
 pResult = null;
 try{
-	obj.diffArg2(-1,-2,-3);
-	pResult = "exception NOT caught";
+    obj.diffArg2(-1,-2,-3);
+    pResult = "exception NOT caught";
 } catch (e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "Precision runtime error diffArg2", "exception NOT caught", pResult );
 
 pResult = null;
 try{
-	obj.diffArg3(-1,-2,-3);
-	pResult = "exception NOT caught";
+    obj.diffArg3(-1,-2,-3);
+    pResult = "exception NOT caught";
 } catch (e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "Precision runtime error diffArg3", "exception NOT caught", pResult );
 
@@ -113,64 +113,64 @@ var n:Number = -20;
 
 pResult = null;
 try{
-	obj.oneArg(n);
-	pResult = "exception NOT caught";
+    obj.oneArg(n);
+    pResult = "exception NOT caught";
 } catch (e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "var n:Number = -20; obj.oneArg(n);", "exception NOT caught", pResult );
 
 pResult = null;
 try{
-	obj.twoArg(n);
-	pResult = "exception NOT caught";
+    obj.twoArg(n);
+    pResult = "exception NOT caught";
 } catch (e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "var n:Number = -20; obj.twoArg(n);", "exception caught", pResult );
 
 pResult = null;
 try{
-	obj.twoArg(n,n);
-	pResult = "exception NOT caught";
+    obj.twoArg(n,n);
+    pResult = "exception NOT caught";
 } catch (e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "var n:Number = -20; obj.twoArg(n,n);", "exception NOT caught", pResult );
 
 pResult = null;
 try{
-	obj.threeArg(n,n,n);
-	pResult = "exception NOT caught";
+    obj.threeArg(n,n,n);
+    pResult = "exception NOT caught";
 } catch (e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "var n:Number = -20; obj.threeArg(n,n,n);", "exception NOT caught", pResult );
 
 pResult = null;
 try{
-	obj.diffArg(n,n,n);
-	pResult = "exception NOT caught";
+    obj.diffArg(n,n,n);
+    pResult = "exception NOT caught";
 } catch (e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "var n:Number = -20; obj.diffArg(n,n,n)", "exception NOT caught", pResult );
 
 pResult = null;
 try{
-	obj.diffArg2(n,n,n);
-	pResult = "exception NOT caught";
+    obj.diffArg2(n,n,n);
+    pResult = "exception NOT caught";
 } catch (e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "var n:Number = -20; obj.diffArg2(n,n,n)", "exception NOT caught", pResult );
 
 pResult = null;
 try{
-	obj.diffArg3(n,n,n);
-	pResult = "exception NOT caught";
+    obj.diffArg3(n,n,n);
+    pResult = "exception NOT caught";
 } catch (e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "var n:Number = -20; obj.diffArg3(n,n,n)", "exception NOT caught", pResult );
 
@@ -179,20 +179,20 @@ AddTestCase( "var n:Number = -20; obj.diffArg3(n,n,n)", "exception NOT caught", 
 
 pResult = null;
 try{
-	obj.pubProp = -1;
-	pResult = "exception NOT caught";
+    obj.pubProp = -1;
+    pResult = "exception NOT caught";
 } catch (e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "obj.pubProp = -1", "exception NOT caught", pResult );
 
 pResult = null;
 
 try{
-	UintPublicClass.pubStatProp = -1;
-	pResult = "exception NOT caught";
+    UintPublicClass.pubStatProp = -1;
+    pResult = "exception NOT caught";
 } catch (e) {
-	pResult = "exception caught";
+    pResult = "exception caught";
 }
 AddTestCase( "UintPublicClass.pubStatProp = -1", "exception NOT caught", pResult );
 

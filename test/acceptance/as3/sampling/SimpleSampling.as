@@ -50,7 +50,7 @@ var isdebugger=System.isDebugger();
 var objs:Array=new Array();
 class simpleobject {
     var str:String;
-    function simpleobject(s:String) { 
+    function simpleobject(s:String) {
         this.str=s;
     }
 }

@@ -51,21 +51,21 @@ function getTestCases() {
       var TDATE:Date = new Date(0);
       TDATE.setUTCFullYear(2005);
       addNewTestCase(TDATE,
-		    UTCDateFromTime(SetUTCFullYear(0,2005)),
+            UTCDateFromTime(SetUTCFullYear(0,2005)),
                     LocalDateFromTime(SetUTCFullYear(0,2005)) );
 
 //    addNewTestCase( "TDATE = new Date(0); TDATE.setUTCFullYear(2004);TDATE",
       TDATE = new Date(0);
       TDATE.setUTCFullYear(2004);
       addNewTestCase(TDATE,
-		    UTCDateFromTime(SetUTCFullYear(0,2004)),
+            UTCDateFromTime(SetUTCFullYear(0,2004)),
                     LocalDateFromTime(SetUTCFullYear(0,2004)) );
 
 //    addNewTestCase( "TDATE = new Date(0); TDATE.setUTCFullYear(2006);TDATE",
-      TDATE = new Date(0); 
+      TDATE = new Date(0);
       TDATE.setUTCFullYear(2006);
       addNewTestCase(TDATE,
-		    UTCDateFromTime(SetUTCFullYear(0,2006)),
+            UTCDateFromTime(SetUTCFullYear(0,2006)),
                     LocalDateFromTime(SetUTCFullYear(0,2006)) );
 
 /*

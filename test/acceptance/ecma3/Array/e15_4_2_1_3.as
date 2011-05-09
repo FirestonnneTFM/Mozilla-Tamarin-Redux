@@ -57,7 +57,7 @@ function getTestCases() {
 
     var TEST_ARRAY = ARGUMENTS.split(",");
 
-	var item;
+    var item;
     for ( item = 0; item < TEST_LENGTH; item++ ) {
         array[item] = new TestCase( SECTION, "TEST_ARRAY["+item+"]",     item+"",    TEST_ARRAY[item] );
     }
@@ -69,8 +69,8 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION, "TEST_ARRAY.reverse", "function Function() {}", (TEST_ARRAY.reverse).toString());
     array[item++] = new TestCase( SECTION, "TEST_ARRAY.length", TEST_LENGTH,  TEST_ARRAY.length);
 
-	TEST_ARRAY.toString = Object.prototype.toString;
-	array[item++] = new TestCase( SECTION,
+    TEST_ARRAY.toString = Object.prototype.toString;
+    array[item++] = new TestCase( SECTION,
                                 "TEST_ARRAY.toString = Object.prototype.toString; TEST_ARRAY.toString()",
                                 "[object Array]",
                                 TEST_ARRAY.toString());

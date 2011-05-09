@@ -59,19 +59,19 @@ f1 = function() { return "passed!" }
   function f2() { f3 = function() { return "passed!" }; return f3(); }
 
 testcases[index++] = new TestCase( SECTION,
-	      'f1 = function() { return "passed!" }; f1()',
-	      "passed!",
-	      f1() );
+          'f1 = function() { return "passed!" }; f1()',
+          "passed!",
+          f1() );
 
 testcases[index++] = new TestCase( SECTION,
-	      'function f2() { f3 = function { return "passed!" }; return f3() }; f2()',
-	      "passed!",
-	      f2() );
+          'function f2() { f3 = function { return "passed!" }; return f3() }; f2()',
+          "passed!",
+          f2() );
 
 testcases[index++] = new TestCase( SECTION,
-	      'f3()',
-	      "passed!",
-	      f3() );
+          'f3()',
+          "passed!",
+          f3() );
 
 test();
 

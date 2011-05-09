@@ -45,7 +45,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     // go through all Native Function objects, methods, and properties and get their typeof.
 

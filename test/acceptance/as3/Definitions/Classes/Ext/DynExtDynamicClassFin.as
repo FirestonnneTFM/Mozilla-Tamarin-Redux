@@ -66,7 +66,7 @@ startTest();                // leave this alone
 
   
 //*******************************************
-//  access final method from 
+//  access final method from
 //  outside of class
 //*******************************************
 
@@ -86,7 +86,7 @@ AddTestCase( "EXTDCLASS.testSubArray(arr)", arr, (EXTDCLASS.testSubArray(arr)) )
 
 
 // ********************************************
-// access final method from a public 
+// access final method from a public
 // method of a sub class
 //
 // ********************************************
@@ -97,7 +97,7 @@ AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (
 
 
 // ********************************************
-// access final method from a private 
+// access final method from a private
 // method of a sub class
 //
 // ********************************************
@@ -108,7 +108,7 @@ AddTestCase( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(
 
 
 // ********************************************
-// access final method from a final 
+// access final method from a final
 // method of a sub class
 //
 // ********************************************
@@ -118,7 +118,7 @@ AddTestCase( "*** Access final method from final method of sub class ***", 1, 1 
 AddTestCase( "EXTDCLASS.testFinSubArray(arr)", arr, (EXTDCLASS.testFinSubArray(arr)) );
 
 // ********************************************
-// access final method from a private final 
+// access final method from a private final
 // method of a sub class
 //
 // ********************************************
@@ -128,7 +128,7 @@ AddTestCase( "*** Access final method from private final method of sub class ***
 AddTestCase( "EXTDCLASS.testPrivFinSubArray(arr)", arr, (EXTDCLASS.testPrivFinSubArray(arr)) );
 
 // ********************************************
-// access final method from a virtual 
+// access final method from a virtual
 // method of a sub class
 //
 // ********************************************
@@ -145,7 +145,7 @@ AddTestCase( "EXTDCLASS.testVirSubArray(arr)", arr, (EXTDCLASS.testVirSubArray(a
 
 
 // ********************************************
-// access final property from 
+// access final property from
 // default method in sub class
 // ********************************************
 
@@ -155,7 +155,7 @@ AddTestCase( "EXTDCLASS.testSubGetDPArray(arr)", arr, (EXTDCLASS.testSubGetDPArr
 
 
 // ********************************************
-// access final property from 
+// access final property from
 // public method in sub class
 // ********************************************
 
@@ -165,7 +165,7 @@ AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", ar
 
 
 // ********************************************
-// access final property from 
+// access final property from
 // private method in sub class
 // ********************************************
 
@@ -175,7 +175,7 @@ AddTestCase( "EXTDCLASS.testPrivSubGetDPArray(arr)", arr, (EXTDCLASS.testPrivSub
 
 
 // ********************************************
-// access final property from 
+// access final property from
 // private virtual method in sub class
 // ********************************************
 

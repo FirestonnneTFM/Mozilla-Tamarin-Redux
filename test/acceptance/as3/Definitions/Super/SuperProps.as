@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "8.6.1 Constructor Methods";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS3";        // Version of ECMAScript or ActionScript
 var TITLE   = "Super Property Access";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -71,11 +71,11 @@ AddTestCase( "sanity check derived object 6", "base::dynamicX", sp.getBaseVal("x
 AddTestCase( "sanity check derived object 7", "base::staticY", sp.getDerivedVal("y") );
 // currently fails - throws exception instead of finding fixed property:
 try {
-	result = sp.getSuperVal("y");	// super["y"] *should* find base::staticY
+    result = sp.getSuperVal("y");   // super["y"] *should* find base::staticY
 } catch (e) {
-	result = referenceError( e.toString() );
+    result = referenceError( e.toString() );
 } finally {
-	AddTestCase( "sanity check derived object 8", "base::staticY", result );
+    AddTestCase( "sanity check derived object 8", "base::staticY", result );
 }
 // currently fails - finds undefined dynamic property instead of fixed property:
 AddTestCase( "sanity check derived object 9", "base::staticY", sp.getBaseVal("y") );

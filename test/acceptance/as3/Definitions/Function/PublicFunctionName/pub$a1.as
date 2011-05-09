@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package PublicFunctionName {
-	public function $a1 () { return "$a1"; }
-	public function pub$a1 () { return $a1(); }
+    public function $a1 () { return "$a1"; }
+    public function pub$a1 () { return $a1(); }
 }
 

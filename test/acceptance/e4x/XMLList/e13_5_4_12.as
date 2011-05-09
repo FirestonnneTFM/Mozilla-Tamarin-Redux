@@ -45,7 +45,7 @@ START("13.5.4.12 - XMLList hasComplexContent()");
 //TEST(1, true, XMLList.prototype.hasOwnProperty("hasComplexContent"));
 
 // One element should be same as XML case
-x1 = 
+x1 =
 <>
 <alpha attr1="value1">
     <bravo>one</bravo>
@@ -77,7 +77,7 @@ TEST(10, false, x1.bravo.child(0).hasComplexContent());
 TEST(11, true, x1.india.hasComplexContent());
 
 // More than one element is complex if one or more things in the list are elements.
-x1 = 
+x1 =
 <>
 <alpha>one</alpha>
 <bravo>two</bravo>
@@ -103,26 +103,26 @@ TEST(14, false, x1.@*.hasComplexContent());
 var xmlDoc = "<employee id='1'><firstname>John</firstname><lastname>Walton</lastname><age dob='1/2/1978'>25</age></employee>"
 
 // propertyName as a string
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()", true, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()", true,
              (MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()));
 
-xmlDoc = "<firstname>John</firstname>"  
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()", false, 
-	  (MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()));
+xmlDoc = "<firstname>John</firstname>"
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()", false,
+      (MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()));
 
 XML.ignoreComments = false;
-xmlDoc = "<XML><!-- firstname --></XML>"  
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()", false, 
-	  (MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()));
+xmlDoc = "<XML><!-- firstname --></XML>"
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()", false,
+      (MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()));
 
 XML.ignoreProcessingInstructions = false;
-xmlDoc = "<XML><?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?></XML>"  
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()", false, 
-	  (MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()));
+xmlDoc = "<XML><?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?></XML>"
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()", false,
+      (MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()));
 
 XML.ignoreComments = false;
-xmlDoc = "<XML>foo</XML>"  
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()", false, 
-	  (MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()));
-	  
+xmlDoc = "<XML>foo</XML>"
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()", false,
+      (MYXML = new XMLList(xmlDoc), MYXML.hasComplexContent()));
+      
 END();

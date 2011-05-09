@@ -36,13 +36,13 @@
  * ***** END LICENSE BLOCK ***** */
 package MultipleExtraArgFunction1 {
 
-	class TestObjInner{
-			
-	  public function returnRest(... rest):Number { return rest.length; }
-		 
-	}
-	
-	public class TestObj extends TestObjInner {}
+    class TestObjInner{
+            
+      public function returnRest(... rest):Number { return rest.length; }
+         
+    }
+    
+    public class TestObj extends TestObjInner {}
 
 }
 

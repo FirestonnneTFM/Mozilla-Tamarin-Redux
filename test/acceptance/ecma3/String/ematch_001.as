@@ -124,8 +124,8 @@ function getTestCases() {
             string.match(regexp).length );
     
         for ( var matches = 0; matches < matches_array.length; matches++ ) {
-    		// adding toString on result... this is ok since we now distinguish
-    		// between string and object.
+            // adding toString on result... this is ok since we now distinguish
+            // between string and object.
             array[item++] = new TestCase(SECTION,
                 "( " + string + " ).match(" + str_regexp +")[" + matches +"]",
                 matches_array[matches],

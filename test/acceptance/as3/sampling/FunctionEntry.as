@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/* testcases: 
+/* testcases:
  *   function entry: execute deep recursion verify significant number of samples
  */
 
@@ -54,7 +54,7 @@ package {
     writeHeaderToLog("Sampling function entry tests");
 
     var callcount:uint=0;
-    var samplescount:uint=0;    
+    var samplescount:uint=0;
     var stoppagetime=0;
 
     function ackermann(m:uint,n:uint):Number {
@@ -74,7 +74,7 @@ package {
     setSamplerCallback(samplecallback);
     sampleInternalAllocs(false);
     startSampling();
-    var totaltime=getTimer();    
+    var totaltime=getTimer();
     var result=0;
     // if exception is thrown, stack overflow ok
     try {

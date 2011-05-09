@@ -45,7 +45,7 @@ package MultipleCatchBlocksType
             throw new TypeError();
             
                                                         
-        }                            
-    }                            
+        }
+    }
                               
 }

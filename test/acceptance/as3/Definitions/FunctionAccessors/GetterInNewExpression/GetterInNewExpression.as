@@ -37,11 +37,11 @@
 package GetterInNewExpression{
  public class GetterInNewExpression {
  
- 	
- 	public var xx; 
- 	public function GetterInNewExpression() { xx = 22; } 
-	
-	
+    
+    public var xx;
+    public function GetterInNewExpression() { xx = 22; }
+    
+    
    }
 }
 

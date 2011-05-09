@@ -48,7 +48,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     NestedLabel();
 
@@ -94,4 +94,4 @@ function getTestCases() {
             result2 );
     }
     return array;
-}    
+}

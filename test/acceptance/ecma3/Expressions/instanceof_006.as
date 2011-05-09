@@ -46,7 +46,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     function InstanceOf( object_1, object_2, expect, array, item ) {
         result = object_1 instanceof object_2;
@@ -62,7 +62,7 @@ function getTestCases() {
         this.value = value;
         this.generation = 3;
         //this.toString = new Function ( "return \"(Gen\"+this.generation+\" instance)\"" );
-	this.toString = function (){return "Gen" + this.generation+" instance"};
+    this.toString = function (){return "Gen" + this.generation+" instance"};
     }
     Gen3.name = 3;
     //Gen3.__proto__.toString = new Function( "return \"(\"+this.name+\" object)\"");
@@ -97,7 +97,7 @@ function getTestCases() {
         this.value = value;
         this.generation = "A";
         //this.toString = new Function ( "return \"(instance of Gen\"+this.generation+\")\"" );
-	this.toString = function (){return "instance of Gen" + this.generation};
+    this.toString = function (){return "instance of Gen" + this.generation};
 
     }
     GenA.prototype = new Gen0();
@@ -107,7 +107,7 @@ function getTestCases() {
         this.value = value;
         this.generation = "B";
         //this.toString = new Function ( "return \"(instance of Gen\"+this.generation+\")\"" );
-	this.toString = function (){return "instance of Gen" + this.generation};
+    this.toString = function (){return "instance of Gen" + this.generation};
     }
     GenB.name = "B"
     //GenB.prototype = void 0;

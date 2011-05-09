@@ -108,9 +108,9 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION, "43247503.43   <  945540654.654",          true,       43247503.43   <  945540654.654 );
     array[item++] = new TestCase( SECTION, "-56.43 < 65.0",          true,       -56.43 < 65.0 );
     array[item++] = new TestCase( SECTION, "-56.43 < -65.0",          false,       -56.43 < -65.0 );
-	var b = (-56.43) < (-56.43); 
+    var b = (-56.43) < (-56.43);
     array[item++] = new TestCase( SECTION, "-56.43 < -56.43",          false,       b );
-	
+    
     array[item++] = new TestCase( SECTION, "100 < 100",          false,       100 < 100 );
 
     // https://bugzilla.mozilla.org/show_bug.cgi?id=476556
@@ -123,7 +123,7 @@ function getTestCases() {
 
     var b = 0/0;
     var result;
-    if (b < 0.0001) 
+    if (b < 0.0001)
        result = "wrong";
     else
        result = "right";
