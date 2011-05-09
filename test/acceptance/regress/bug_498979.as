@@ -44,11 +44,11 @@ startTest();
 var _any:*;
 
 function set any(val:*) {
-		_any = val;
+        _any = val;
 }
 
 function get any():* {
-		return _any;
+        return _any;
 }
 
 any = 'hello world';
@@ -60,11 +60,11 @@ AddTestCase("Verify value when calling setter with * type", 'hello world', any);
  https://bugs.adobe.com/jira/browse/ASC-3889
  
 function set obj(val:Object) {
-		_any = val;
+        _any = val;
 }
 
 function get obj():Object {
-		return _any;
+        return _any;
 }
 
 var testValues = ['hello there', 2.0000000005547, 7.314e24, new Object(), -982743278642,

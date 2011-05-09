@@ -60,7 +60,7 @@ emps =
     <employee>
         <name>Sue</name>
     </employee>
-</employees>    
+</employees>
 
 correct =
 <employees>
@@ -71,7 +71,7 @@ correct =
     <employee>
         <name>Sue</name>
     </employee>
-</employees>    
+</employees>
 
 TEST(3,2,emps..name.length());
 
@@ -79,30 +79,30 @@ var xmlDoc = "<employee id='1'><firstname>John</firstname><lastname>Walton</last
 
 
 
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.length()", 2, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.length()", 2,
              (MYXML = new XMLList(xmlDoc), MYXML.length()));
 
 xmlDoc = "<xml><employee id='1'><firstname>John</firstname><lastname>Walton</lastname><age>25</age></employee><employee id='2'><firstname>Sue</firstname><lastname>Day</lastname><age>32</age></employee></xml>";
 
 
 // propertyName as a string
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.length()", 1, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.length()", 1,
              (MYXML = new XMLList(xmlDoc), MYXML.length()));
 
-AddTestCase( "MYXML = new XMLList(), MYXML.length()", 0, 
+AddTestCase( "MYXML = new XMLList(), MYXML.length()", 0,
              (MYXML = new XMLList(), MYXML.length()));
 
-AddTestCase( "MYXML = new XMLList(null), MYXML.length()", 0, 
+AddTestCase( "MYXML = new XMLList(null), MYXML.length()", 0,
              (MYXML = new XMLList(null), MYXML.length()));
 
-AddTestCase( "MYXML = new XMLList(undefined), MYXML.length()", 0, 
+AddTestCase( "MYXML = new XMLList(undefined), MYXML.length()", 0,
              (MYXML = new XMLList(undefined), MYXML.length()));
 
-AddTestCase( "MYXML = new XMLList('foo'), MYXML.length()", 1, 
+AddTestCase( "MYXML = new XMLList('foo'), MYXML.length()", 1,
              (MYXML = new XMLList("foo"), MYXML.length()));
 
 XML.ignoreComments = false;
-AddTestCase( "MYXML = new XMLList('<XML><!-- comment --></XML>'), MYXML.length()", 1, 
+AddTestCase( "MYXML = new XMLList('<XML><!-- comment --></XML>'), MYXML.length()", 1,
              (MYXML = new XMLList("<XML><!-- comment --></XML>"), MYXML.length()));
              
 END();

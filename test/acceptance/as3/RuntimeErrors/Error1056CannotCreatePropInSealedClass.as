@@ -34,7 +34,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1056; //	Cannot create property _ on _.
+var CODE = 1056; // Cannot create property _ on _.
 
 //-----------------------------------------------------------
 startTest();
@@ -43,13 +43,13 @@ startTest();
 class C {}
 
 try {
-	var result = "no error";
-	var c:C = new C();
-	c.c = 0;
+    var result = "no error";
+    var c:C = new C();
+    c.c = 0;
 } catch (err) {
-	result = err.toString();
+    result = err.toString();
 } finally {
-	AddTestCase("Runtime Error", REFERENCEERROR + CODE, referenceError(result));
+    AddTestCase("Runtime Error", REFERENCEERROR + CODE, referenceError(result));
 }
 
 //-----------------------------------------------------------

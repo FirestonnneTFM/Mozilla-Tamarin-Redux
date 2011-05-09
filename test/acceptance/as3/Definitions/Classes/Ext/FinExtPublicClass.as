@@ -39,8 +39,8 @@
 import PublicClass.*;
 
 
-var SECTION = "Definitions\Ext";       		        // provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";  					// Version of JavaScript or ECMA
+var SECTION = "Definitions\Ext";                    // provide a document reference (ie, ECMA section)
+var VERSION = "AS 3.0";                     // Version of JavaScript or ECMA
 var TITLE   = "Final Class Extends Public Class Default Methods";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -204,6 +204,6 @@ AddTestCase( "*** Access default property from private static method of sub clas
 AddTestCase( "testPrivStatSubDPArray( arr )", arr, testPrivStatSubDPArray( arr ) );
 
 
-test();       		// Leave this function alone.
-			// This function is for executing the test case and then
-			// displaying the result on to the console or the LOG file.
+test();             // Leave this function alone.
+            // This function is for executing the test case and then
+            // displaying the result on to the console or the LOG file.

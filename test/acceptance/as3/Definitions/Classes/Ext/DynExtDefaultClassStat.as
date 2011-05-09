@@ -71,7 +71,7 @@ arr = new Array(1, 2, 3);
 // from outside of class
 //*******************************************
 /*
-AddTestCase( "Access static method of parent class from outside of class", arr, 
+AddTestCase( "Access static method of parent class from outside of class", arr,
              (EXTDCLASS.setStatArray(arr), EXTDCLASS.statArray) );
 
 */
@@ -87,7 +87,7 @@ AddTestCase( "EXTDCLASS.testSubArray(arr)", arr, (EXTDCLASS.testSubArray(arr)) )
 
 
 // ********************************************
-// access static method from a public 
+// access static method from a public
 // method of a sub class
 //
 // ********************************************
@@ -97,7 +97,7 @@ AddTestCase( "*** Access static method from public method of sub class ***", 1, 
 AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()) );
 
 // ********************************************
-// access static method from a private 
+// access static method from a private
 // method of a sub class
 //
 // ********************************************
@@ -107,7 +107,7 @@ AddTestCase( "*** Access static method from private method of sub class ***", 1,
 AddTestCase( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(arr) );
 
 // ********************************************
-// access static method from a final 
+// access static method from a final
 // method of a sub class
 //
 // ********************************************
@@ -116,38 +116,38 @@ EXTDCLASS = new DynExtDefaultClassStat();
 AddTestCase( "access static method from final method of sub class", arr, (EXTDCLASS.testFinSubArray(arr)) );
 
 // ********************************************
-// access static method from a static 
+// access static method from a static
 // method of a sub class
 //
 // ********************************************
 /*
 AddTestCase( "*** Access static method from static method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testStatSubArray(arr)", arr, 
+AddTestCase( "EXTDCLASS.testStatSubArray(arr)", arr,
              (EXTDCLASS.testStatSubArray(arr)) );
 
 // ********************************************
-// access static method from a public static 
+// access static method from a public static
 // method of a sub class
 //
 // ********************************************
 
 AddTestCase( "*** Access static method from public static method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testPubStatSubArray(arr)", arr, 
+AddTestCase( "EXTDCLASS.testPubStatSubArray(arr)", arr,
              (EXTDCLASS.testPubStatSubArray(arr)) );
 */
 // ********************************************
-// access static method from a private static 
+// access static method from a private static
 // method of a sub class
 //
 // ********************************************
 
 var EXTDEFAULTCLASS = new DynExtDefaultClassStat();
 AddTestCase( "*** Access static method from private static method of sub class ***", 1, 1 );
-AddTestCase( "EXTDEFAULTCLASS.testPrivStatSubArray(arr)", arr, 
+AddTestCase( "EXTDEFAULTCLASS.testPrivStatSubArray(arr)", arr,
               EXTDEFAULTCLASS.testPrivStatSubArray(arr) );
               
 // ********************************************
-// access static property from 
+// access static property from
 // default method in sub class
 // ********************************************
 
@@ -157,7 +157,7 @@ AddTestCase( "EXTDCLASS.testSubPArray(arr)", arr, (EXTDCLASS.testSubPArray(arr))
 
 
 // ********************************************
-// access static property from 
+// access static property from
 // public method in sub class
 // ********************************************
 
@@ -167,7 +167,7 @@ AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", ar
 
 
 // ********************************************
-// access static property from 
+// access static property from
 // private method in sub class
 // ********************************************
 
@@ -178,7 +178,7 @@ AddTestCase( "EXTDCLASS.testPrivSubPArray(arr)", arr, (EXTDCLASS.testPrivSubPArr
 
 // ********************************************
 // access static property from
-// static method in sub class 
+// static method in sub class
 // ********************************************
 
 AddTestCase( "*** Access static property from static method in sub class ***", 1, 1 );
@@ -187,7 +187,7 @@ AddTestCase( "*** Access static property from static method in sub class ***", 1
 */
 // ********************************************
 // access static property from
-// public static method in sub class 
+// public static method in sub class
 // ********************************************
 
 AddTestCase( "*** Access static property from public static method in sub class ***", 1, 1 );
@@ -195,17 +195,17 @@ AddTestCase( "*** Access static property from public static method in sub class 
              (ExtDefaultClassStat.pubStatSubSetSPArray(arr), ExtDefaultClassStat.pubStatSubGetSPArray()) );
 */
 // ********************************************
-// access static property from 
+// access static property from
 // private static method in sub class
 // ********************************************
 
 EXTDCLASS = new DynExtDefaultClassStat();
 AddTestCase( "*** Access static property from private static method in sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testPrivStatSubPArray(arr)", arr, 
+AddTestCase( "EXTDCLASS.testPrivStatSubPArray(arr)", arr,
               EXTDCLASS.testPrivStatSubPArray(arr));
 
 // ********************************************
-// access static property from 
+// access static property from
 // final method in sub class
 // ********************************************
 

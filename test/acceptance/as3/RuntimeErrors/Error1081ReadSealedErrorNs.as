@@ -57,7 +57,7 @@ package
 
 
 import Main;
-var CODE = 1081; //	Property name not found on name and there is no default value.
+var CODE = 1081; // Property name not found on name and there is no default value.
 
 //-----------------------------------------------------------
 startTest();
@@ -66,9 +66,9 @@ startTest();
 try {
     var m = new Main();
 } catch (err) {
-	result = err.toString();
+    result = err.toString();
 } finally {
-	AddTestCase("Reference Error", REFERENCEERROR + CODE, referenceError(result));
+    AddTestCase("Reference Error", REFERENCEERROR + CODE, referenceError(result));
 }
 
 //-----------------------------------------------------------

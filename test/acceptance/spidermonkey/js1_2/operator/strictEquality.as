@@ -55,39 +55,39 @@ writeHeaderToLog('Executing script: strictEquality.js');
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 testcases[index++] = new TestCase( SECTION, "('8' === 8)                              ",
-	      false,  ('8' === 8));
+          false,  ('8' === 8));
 
 testcases[index++] = new TestCase( SECTION, "(8 === 8)                                ",
-	      true,   (8 === 8));
+          true,   (8 === 8));
 
 testcases[index++] = new TestCase( SECTION, "(8 === true)                             ",
-	      false,  (8 === true));
+          false,  (8 === true));
 
 testcases[index++] = new TestCase( SECTION, "(new String('') === new String(''))      ",
-	      true,  (new String('') === new String('')));
+          true,  (new String('') === new String('')));
 
 testcases[index++] = new TestCase( SECTION, "(new Boolean(true) === new Boolean(true))",
-	      true,  (new Boolean(true) === new Boolean(true)));
+          true,  (new Boolean(true) === new Boolean(true)));
 
 var anObject = { one:1 , two:2 };
 
 testcases[index++] = new TestCase( SECTION, "(anObject === anObject)                  ",
-	      true,  (anObject === anObject));
+          true,  (anObject === anObject));
 
 testcases[index++] = new TestCase( SECTION, "(anObject === { one:1 , two:2 })         ",
-	      false,  (anObject === { one:1 , two:2 }));
+          false,  (anObject === { one:1 , two:2 }));
 
 testcases[index++] = new TestCase( SECTION, "({ one:1 , two:2 } === anObject)         ",
-	      false,  ({ one:1 , two:2 } === anObject));
+          false,  ({ one:1 , two:2 } === anObject));
 
 testcases[index++] = new TestCase( SECTION, "(null === null)                          ",
-	      true,  (null === null));
+          true,  (null === null));
 
 testcases[index++] = new TestCase( SECTION, "(null === 0)                             ",
-	      false,  (null === 0));
+          false,  (null === 0));
 
 testcases[index++] = new TestCase( SECTION, "(true === !false)                        ",
-	      true,  (true === !false));
+          true,  (true === !false));
 
 test();
 

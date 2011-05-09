@@ -35,5 +35,5 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package functionReturnTypes {
-	public interface TestInterface {}
+    public interface TestInterface {}
 }

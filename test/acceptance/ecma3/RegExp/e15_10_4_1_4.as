@@ -83,94 +83,94 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var statprefix = 'Applying RegExp() twice to pattern ';
-	var statmiddle = ' and flag ';
-	var statsuffix =  '; testing property ';
-	var singlequote = "'";
-	var i = -1; var j = -1; var s = '';
-	var obj1 = {}; var obj2 = {};
-	var status = ''; var actual = ''; var expect = ''; var msg = '';
-	var patterns = new Array();
-	var flags = new Array();
-
-
-	// various regular expressions to try -
-	patterns[0] = '';
-	patterns[1] = 'abc';
-	patterns[2] = '(.*)(3-1)\s\w';
-	patterns[3] = '(.*)(...)\\s\\w';
-	patterns[4] = '[^A-Za-z0-9_]';
-	patterns[5] = '[^\f\n\r\t\v](123.5)([4 - 8]$)';
-
-	// various flags to try -
-	flags[0] = 'i';
-	flags[1] = 'g';
-	flags[2] = 'm';
-	flags[3] = undefined;
+    var statprefix = 'Applying RegExp() twice to pattern ';
+    var statmiddle = ' and flag ';
+    var statsuffix =  '; testing property ';
+    var singlequote = "'";
+    var i = -1; var j = -1; var s = '';
+    var obj1 = {}; var obj2 = {};
+    var status = ''; var actual = ''; var expect = ''; var msg = '';
+    var patterns = new Array();
+    var flags = new Array();
 
 
-	//***************************************
-	// uncomment when bug 110188 is fixed
-	//***************************************
+    // various regular expressions to try -
+    patterns[0] = '';
+    patterns[1] = 'abc';
+    patterns[2] = '(.*)(3-1)\s\w';
+    patterns[3] = '(.*)(...)\\s\\w';
+    patterns[4] = '[^A-Za-z0-9_]';
+    patterns[5] = '[^\f\n\r\t\v](123.5)([4 - 8]$)';
 
-	for (i in patterns)
-	  {
-	    s = patterns[i];
-
-	    for (j in flags)
-	    {
-	      f = flags[j];
-	      status = getStatus(s, f);
-	      obj1 = new RegExp(s, f);
-
-	      obj2 = new RegExp(obj1, undefined);  // see introduction to bug
-
-		  msg  = status + quote("dotall");
-		  actual = obj2.dotall;
-		  expect = obj1.dotall;
-		  array[item++] = new TestCase(SECTION, msg, expect, actual);
-
-		  msg  = status + quote("extended");
-		  actual = obj2.extended;
-		  expect = obj1.extended;
-		  array[item++] = new TestCase(SECTION, msg, expect, actual);
-
-		  msg  = status + quote("ignoreCase");
-		  actual = obj2.ignoreCase;
-		  expect = obj1.ignoreCase;
-		  array[item++] = new TestCase(SECTION, msg, expect, actual);
-
-		  msg  = status + quote("lastIndex");
-		  actual = obj2.lastIndex;
-		  expect = obj1.lastIndex;
-		  array[item++] = new TestCase(SECTION, msg, expect, actual);
-
-		  msg  = status + quote("multiline");
-		  actual = obj2.multiline;
-		  expect = obj1.multiline;
-		  array[item++] = new TestCase(SECTION, msg, expect, actual);
-
-		  msg  = status + quote("source");
-		  actual = obj2.source;
-		  expect = obj1.source;
-		  array[item++] = new TestCase(SECTION, msg, expect, actual);
-  	    }
-	  }
+    // various flags to try -
+    flags[0] = 'i';
+    flags[1] = 'g';
+    flags[2] = 'm';
+    flags[3] = undefined;
 
 
-	function getStatus(regexp, flag)
-	{
-	  return (statprefix  +  quote(regexp) +  statmiddle  +  flag  +  statsuffix);
-	}
+    //***************************************
+    // uncomment when bug 110188 is fixed
+    //***************************************
+
+    for (i in patterns)
+      {
+        s = patterns[i];
+
+        for (j in flags)
+        {
+          f = flags[j];
+          status = getStatus(s, f);
+          obj1 = new RegExp(s, f);
+
+          obj2 = new RegExp(obj1, undefined);  // see introduction to bug
+
+          msg  = status + quote("dotall");
+          actual = obj2.dotall;
+          expect = obj1.dotall;
+          array[item++] = new TestCase(SECTION, msg, expect, actual);
+
+          msg  = status + quote("extended");
+          actual = obj2.extended;
+          expect = obj1.extended;
+          array[item++] = new TestCase(SECTION, msg, expect, actual);
+
+          msg  = status + quote("ignoreCase");
+          actual = obj2.ignoreCase;
+          expect = obj1.ignoreCase;
+          array[item++] = new TestCase(SECTION, msg, expect, actual);
+
+          msg  = status + quote("lastIndex");
+          actual = obj2.lastIndex;
+          expect = obj1.lastIndex;
+          array[item++] = new TestCase(SECTION, msg, expect, actual);
+
+          msg  = status + quote("multiline");
+          actual = obj2.multiline;
+          expect = obj1.multiline;
+          array[item++] = new TestCase(SECTION, msg, expect, actual);
+
+          msg  = status + quote("source");
+          actual = obj2.source;
+          expect = obj1.source;
+          array[item++] = new TestCase(SECTION, msg, expect, actual);
+        }
+      }
 
 
-	function quote(text)
-	{
-	  return (singlequote  +  text  + singlequote);
-	}
+    function getStatus(regexp, flag)
+    {
+      return (statprefix  +  quote(regexp) +  statmiddle  +  flag  +  statsuffix);
+    }
 
-	return array;
+
+    function quote(text)
+    {
+      return (singlequote  +  text  + singlequote);
+    }
+
+    return array;
 }

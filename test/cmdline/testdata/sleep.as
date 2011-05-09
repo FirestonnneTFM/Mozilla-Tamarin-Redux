@@ -45,7 +45,7 @@ while (getTimer()<60000) {
     var ctime=int(getTimer()/1000);
     if (ctime>time) {
         time=ctime;
-        System.write(time+" "); 
+        System.write(time+" ");
     }
 }
 print();

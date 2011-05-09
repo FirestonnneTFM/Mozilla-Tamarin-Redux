@@ -85,7 +85,7 @@ AddTestCase( "EXTDCLASS.testSubArray(arr)", arr, (EXTDCLASS.testSubArray(arr)) )
 
 
 // ********************************************
-// access public method from a public 
+// access public method from a public
 // method of a sub class
 //
 // ********************************************
@@ -96,7 +96,7 @@ AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (
 
 
 // ********************************************
-// access public method from a private 
+// access public method from a private
 // method of a sub class
 //
 // ********************************************
@@ -107,7 +107,7 @@ AddTestCase( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(
 
 
 // ********************************************
-// access public method from a final 
+// access public method from a final
 // method of a sub class
 //
 // ********************************************
@@ -127,7 +127,7 @@ AddTestCase( "EXTDCLASS.pubArray = arr", arr, (EXTDCLASS.pubArray = arr, EXTDCLA
 
 
 // ********************************************
-// access public property from 
+// access public property from
 // default method in sub class
 // ********************************************
 
@@ -137,7 +137,7 @@ AddTestCase( "EXTDCLASS.testSubDPArray(arr)", arr, (EXTDCLASS.testSubDPArray(arr
 
 
 // ********************************************
-// access public property from 
+// access public property from
 // public method in sub class
 // ********************************************
 
@@ -147,7 +147,7 @@ AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", ar
 
 
 // ********************************************
-// access public property from 
+// access public property from
 // private method in sub class
 // ********************************************
 
@@ -157,7 +157,7 @@ AddTestCase( "EXTDCLASS.testPrivSubDPArray(arr)", arr, (EXTDCLASS.testPrivSubDPA
 
 
 // ********************************************
-// access public property from 
+// access public property from
 // final method in sub class
 // ********************************************
 

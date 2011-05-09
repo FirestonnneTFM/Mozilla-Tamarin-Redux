@@ -51,10 +51,10 @@ package DynamicClass {
     function subSetArray(a:Array) { setPubStatArray(a); }
 
 
-	public function testSubGetSetArray(a:Array) : Array {
-		this.subSetArray(a);
-		return this.subGetArray();
-	}
+    public function testSubGetSetArray(a:Array) : Array {
+        this.subSetArray(a);
+        return this.subGetArray();
+    }
 
 
     // ************************************
@@ -87,10 +87,10 @@ package DynamicClass {
     final function finSubGetArray() : Array { return getPubStatArray(); }
     final function finSubSetArray(a:Array) { setPubStatArray(a); }
 
-	public function testFinSubArray(a:Array):Array{
-		this.finSubSetArray(a);
-		return this.finSubGetArray();
-	}
+    public function testFinSubArray(a:Array):Array{
+        this.finSubSetArray(a);
+        return this.finSubGetArray();
+    }
 
 
     // ***************************************
@@ -130,17 +130,17 @@ package DynamicClass {
     }
 
     // ***************************************
-    // access public static property from 
+    // access public static property from
     // default method of sub class
     // ***************************************
 
     function subGetDPArray() : Array { return pubStatArray; }
     function subSetDPArray(a:Array) { pubStatArray = a; }
 
-	public function testSubGetSetDPArray(a:Array) : Array {
-		this.subSetDPArray(a);
-		return this.subGetDPArray();
-	}
+    public function testSubGetSetDPArray(a:Array) : Array {
+        this.subSetDPArray(a);
+        return this.subGetDPArray();
+    }
 
 
     // ***************************************
@@ -159,10 +159,10 @@ package DynamicClass {
     private function privSubGetDPArray() : Array { return pubStatArray; }
     private function privSubSetDPArray(a:Array) { pubStatArray = a; }
 
-	public function testPrivSubDPArray(a:Array) : Array {
-		this.privSubSetDPArray(a);
-		return this.privSubGetDPArray();
-	}
+    public function testPrivSubDPArray(a:Array) : Array {
+        this.privSubSetDPArray(a);
+        return this.privSubGetDPArray();
+    }
 
 
     // ***************************************
@@ -202,17 +202,17 @@ package DynamicClass {
     }
 
     // ***************************************
-    // access public static property from 
+    // access public static property from
     // final method of sub class
     // ***************************************
 
     final function finSubGetDPArray() : Array { return pubStatArray; }
     final function finSubSetDPArray(a:Array) { pubStatArray = a; }
 
-	public function testFinSubDPArray(a:Array):Array {
-		this.finSubSetDPArray(a);
-		return this.finSubGetDPArray();
-	}
+    public function testFinSubDPArray(a:Array):Array {
+        this.finSubSetDPArray(a);
+        return this.finSubGetDPArray();
+    }
 
 
  }

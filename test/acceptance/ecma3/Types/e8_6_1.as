@@ -75,13 +75,13 @@ function getTestCases() {
                                     Object.prototype,
                                     Object.prototype );
 
-    var OBJ_PROT1 = Object.prototype; 
-    delete( Object.prototype ); 
+    var OBJ_PROT1 = Object.prototype;
+    delete( Object.prototype );
     array[item++] = new TestCase(SECTION, "var OBJ_PROT1 = Object.prototype; delete( Object.prototype ); OBJ_PROT1 == Object.prototype",    true, OBJ_PROT1 == Object.prototype);
     array[item++] = new TestCase(SECTION, "delete( Object.prototype )",          false,       delete( Object.prototype ) );
 
     var string = '';
-    for ( prop in Object ) { 
+    for ( prop in Object ) {
         string += ( prop == 'prototype' ) ? prop : '';
     }
 

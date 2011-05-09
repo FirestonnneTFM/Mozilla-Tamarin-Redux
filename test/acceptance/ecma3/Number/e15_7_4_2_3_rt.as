@@ -65,9 +65,9 @@ function getTestCases() {
                             REFERENCEERROR+expectedError,
                             referenceError(thisError));
                      
-    } 
+    }
      
-    //o = new String(); 
+    //o = new String();
     //o.toString = Number.prototype.toString;
     
     //array[item++] = new TestCase(SECTION,  "o = new String(); o.toString = //Number.prototype.toString; o.toString()",  "error",    o.toString() );

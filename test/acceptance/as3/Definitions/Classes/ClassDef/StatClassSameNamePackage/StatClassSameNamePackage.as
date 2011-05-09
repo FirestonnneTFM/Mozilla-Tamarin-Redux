@@ -36,10 +36,10 @@
  * ***** END LICENSE BLOCK ***** */
 // bug 134955: test access of statics from a class in a package with the same name
 package StatClassSameNamePackage {
-	public class StatClassSameNamePackage {
-		public static var aStatic : String  = "x.x.a";
-		public static function fStatic() : String {
-			return "x.x.f()";
-		}
-	}
+    public class StatClassSameNamePackage {
+        public static var aStatic : String  = "x.x.a";
+        public static function fStatic() : String {
+            return "x.x.f()";
+        }
+    }
 }

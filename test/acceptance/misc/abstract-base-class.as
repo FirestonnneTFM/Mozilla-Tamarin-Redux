@@ -41,7 +41,7 @@ import avmshell.*;
 startTest();
 
 // standard AddErrorTest function doesn't handle no-error well.
-function MyAddErrorTest(desc:String, expectedErr:String, testFunc:Function) 
+function MyAddErrorTest(desc:String, expectedErr:String, testFunc:Function)
 {
     actualErr = "no error";
     try {

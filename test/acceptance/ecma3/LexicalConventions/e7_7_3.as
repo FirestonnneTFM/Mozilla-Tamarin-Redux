@@ -205,7 +205,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION, "0XF",  15,  0XF );
 
 
-	// we will not support octal for flash 8
+    // we will not support octal for flash 8
     array[item++] = new TestCase( SECTION, "00",  0,   00 );
     array[item++] = new TestCase( SECTION, "01",  1,   01 );
     array[item++] = new TestCase( SECTION, "02",  2,   02 );

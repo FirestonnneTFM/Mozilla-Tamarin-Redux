@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 class MultipleExtraArgFunction1{
- 			
-	function returnRest(... rest):Number { return rest.length; }
+            
+    function returnRest(... rest):Number { return rest.length; }
 
-} 			
+}
 

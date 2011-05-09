@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 class OneExtraArgFunctionClass{
-  	
-	function returnRest(... rest):Number { return rest.length; }
-  	
+    
+    function returnRest(... rest):Number { return rest.length; }
+    
 }
 
 

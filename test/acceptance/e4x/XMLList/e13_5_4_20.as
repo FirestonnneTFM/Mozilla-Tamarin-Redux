@@ -57,43 +57,43 @@ var xmlDoc = "<employees><employee id='1'><firstname>John</firstname><lastname>W
 
 
 XML.prettyPrinting = false;
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[0].toString()", 
-	"<employee id=\"1\"><firstname>John</firstname><lastname>Walton</lastname><age>25</age></employee>", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[0].toString()",
+    "<employee id=\"1\"><firstname>John</firstname><lastname>Walton</lastname><age>25</age></employee>",
     (MYXML = new XMLList(xmlDoc), MYXML.employee[0].toString()));
 
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[1].toString()", 
-	"<employee id=\"2\"><firstname>Sue</firstname><lastname>Day</lastname><age>32</age></employee>", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[1].toString()",
+    "<employee id=\"2\"><firstname>Sue</firstname><lastname>Day</lastname><age>32</age></employee>",
     (MYXML = new XMLList(xmlDoc), MYXML.employee[1].toString()));
 
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[0].firstname.toString()", 
-	"John", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[0].firstname.toString()",
+    "John",
     (MYXML = new XMLList(xmlDoc), MYXML.employee[0].firstname.toString()));
 
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[1].firstname.toString()", 
-	"Sue", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[1].firstname.toString()",
+    "Sue",
     (MYXML = new XMLList(xmlDoc), MYXML.employee[1].firstname.toString()));
 
 XML.prettyPrinting = true;
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[0].toString()", 
-	"<employee id=\"1\">" + NL() + "  <firstname>John</firstname>" + NL() + "  <lastname>Walton</lastname>" + NL() + "  <age>25</age>" + NL() + "</employee>", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[0].toString()",
+    "<employee id=\"1\">" + NL() + "  <firstname>John</firstname>" + NL() + "  <lastname>Walton</lastname>" + NL() + "  <age>25</age>" + NL() + "</employee>",
     (MYXML = new XMLList(xmlDoc), MYXML.employee[0].toString()));
 
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[1].toString()", 
-	"<employee id=\"2\">" + NL() + "  <firstname>Sue</firstname>" + NL() + "  <lastname>Day</lastname>" + NL() + "  <age>32</age>" + NL() + "</employee>", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[1].toString()",
+    "<employee id=\"2\">" + NL() + "  <firstname>Sue</firstname>" + NL() + "  <lastname>Day</lastname>" + NL() + "  <age>32</age>" + NL() + "</employee>",
     (MYXML = new XMLList(xmlDoc), MYXML.employee[1].toString()));
 
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[0].firstname.toString()", 
-	"John", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[0].firstname.toString()",
+    "John",
     (MYXML = new XMLList(xmlDoc), MYXML.employee[0].firstname.toString()));
 
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[1].firstname.toString()", 
-	"Sue", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.employee[1].firstname.toString()",
+    "Sue",
     (MYXML = new XMLList(xmlDoc), MYXML.employee[1].firstname.toString()));
 
 xmlDoc = new XMLList("<XML>foo</XML>");
 
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.toString()", 
-	"foo", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.toString()",
+    "foo",
     (MYXML = new XMLList(xmlDoc), MYXML.toString()));
 
 END();

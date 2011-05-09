@@ -49,16 +49,16 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    array[item++] = new TestCase( SECTION,	"String('string primitive')",	"string primitive",	String('string primitive') );
-    array[item++] = new TestCase( SECTION,	"String(void 0)",		"undefined",		String( void 0) );
-    array[item++] = new TestCase( SECTION,	"String(null)","null",String(null));
-    array[item++] = new TestCase( SECTION,	"String(true)",			    "true",			String( true) );
-    array[item++] = new TestCase( SECTION,	"String(false)",		    "false",		String( false ) );
-    array[item++] = new TestCase( SECTION,	"String(Boolean(true))",	"true",			String(Boolean(true)) );
-    array[item++] = new TestCase( SECTION,	"String(Boolean(false))",	"false",		String(Boolean(false)) );
-    array[item++] = new TestCase( SECTION,	"String(Boolean())",		"false",		String(Boolean(false)) );
-    array[item++] = new TestCase( SECTION,	"String(new Array())",		"",			    String( new Array()) );
-    array[item++] = new TestCase( SECTION,	"String(new Array(1,2,3))",	"1,2,3",		String( new Array(1,2,3)) );
+    array[item++] = new TestCase( SECTION,  "String('string primitive')",   "string primitive", String('string primitive') );
+    array[item++] = new TestCase( SECTION,  "String(void 0)",       "undefined",        String( void 0) );
+    array[item++] = new TestCase( SECTION,  "String(null)","null",String(null));
+    array[item++] = new TestCase( SECTION,  "String(true)",             "true",         String( true) );
+    array[item++] = new TestCase( SECTION,  "String(false)",            "false",        String( false ) );
+    array[item++] = new TestCase( SECTION,  "String(Boolean(true))",    "true",         String(Boolean(true)) );
+    array[item++] = new TestCase( SECTION,  "String(Boolean(false))",   "false",        String(Boolean(false)) );
+    array[item++] = new TestCase( SECTION,  "String(Boolean())",        "false",        String(Boolean(false)) );
+    array[item++] = new TestCase( SECTION,  "String(new Array())",      "",             String( new Array()) );
+    array[item++] = new TestCase( SECTION,  "String(new Array(1,2,3))", "1,2,3",        String( new Array(1,2,3)) );
 
 
     array[item++] = new TestCase( SECTION,    "String( Number.NaN )",       "NaN",                  String( Number.NaN ) );
@@ -117,7 +117,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "String( .0000012345 )",              "0.0000012345",          String(.0000012345) );
     array[item++] = new TestCase( SECTION,    "String( .00000012345 )",             "1.2345e-7",            String(.00000012345));
 
-    array[item++] = new TestCase( "15.5.2",	"String()","",String() );
+    array[item++] = new TestCase( "15.5.2", "String()","",String() );
 
     return ( array );
 }

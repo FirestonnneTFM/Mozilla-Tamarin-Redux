@@ -36,11 +36,11 @@
  * ***** END LICENSE BLOCK ***** */
 //-----------------------------------------------------------------------------
 var SECTION = "15.9.5.4";
-var VERSION = "ECMA_3";  
-var TITLE   = "Date.prototype.toTimeString()"; 
+var VERSION = "ECMA_3";
+var TITLE   = "Date.prototype.toTimeString()";
 
 var status = '';
-var actual = '';  
+var actual = '';
 var expect = '';
 var givenDate;
 var year = '';
@@ -64,14 +64,14 @@ function getTestCases() {
 
     // first, a couple of generic tests -
 
-    status = "typeof (now.toTimeString())";  
+    status = "typeof (now.toTimeString())";
     actual =   typeof (now.toTimeString());
     expect = "string";
     array[item++] = new TestCase(SECTION, status, expect, actual);
 
-    status = "Date.prototype.toTimeString.length";   
+    status = "Date.prototype.toTimeString.length";
     actual =  Date.prototype.toTimeString.length;
-    expect =  0;   
+    expect =  0;
     array[item++] = new TestCase(SECTION, status, expect, actual);
 
 
@@ -111,7 +111,7 @@ function getTestCases() {
     
     function addTestCase()
     {
-      array[item++] = new TestCase( SECTION, status, expect, actual); 
+      array[item++] = new TestCase( SECTION, status, expect, actual);
     }
     
     
@@ -119,7 +119,7 @@ function getTestCases() {
     {
        givenDate = new Date(date_given_in_milliseconds);
        
-       status = '('  +  givenDate  +  ').toTimeString()'; 
+       status = '('  +  givenDate  +  ').toTimeString()';
        actual = givenDate.toTimeString();
        expect = extractTimeString(givenDate);
        addTestCase();
@@ -139,9 +139,9 @@ function getTestCases() {
  */
 function extractTimeString(date)
 {
-  year = date.getFullYear(); 
+  year = date.getFullYear();
   // strip the year off date.toDateString().
-  // the pattern for regexp:   /(.*)year$/ 
+  // the pattern for regexp:   /(.*)year$/
   regexp = new RegExp('(.*)' +   year  +  '$');
   reducedDateString = (date.toDateString()).match(regexp)[1];
   

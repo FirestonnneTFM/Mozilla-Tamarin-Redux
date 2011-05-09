@@ -37,36 +37,36 @@
 
 package PublicClassPackage {
 
-	import PublicClassPackage.*;
+    import PublicClassPackage.*;
 
-	class ExtPublicOverRideProtectedInner extends PublicClass {
+    class ExtPublicOverRideProtectedInner extends PublicClass {
 
-		public var orSet = false;
-		public var orGet = false;
+        public var orSet = false;
+        public var orGet = false;
 
-		// *********************************
-		// override a protected method
-		// *********************************
+        // *********************************
+        // override a protected method
+        // *********************************
 
-		override protected function setBoolean( b:Boolean ) {
-			orSet = true;
-			this.boolean = b;
-		}
+        override protected function setBoolean( b:Boolean ) {
+            orSet = true;
+            this.boolean = b;
+        }
 
-		override protected function getBoolean() : Boolean {
-			orGet = true;
-			return this.boolean;
-		}
+        override protected function getBoolean() : Boolean {
+            orGet = true;
+            return this.boolean;
+        }
 
-		public function setGetBoolean(b:Boolean):Boolean {
-			this.setBoolean(b);
-			return this.getBoolean();
-		}
-		
+        public function setGetBoolean(b:Boolean):Boolean {
+            this.setBoolean(b);
+            return this.getBoolean();
+        }
+        
 
-	}
+    }
 
-	public class ExtPublicOverRideProtected extends ExtPublicOverRideProtectedInner {}
+    public class ExtPublicOverRideProtected extends ExtPublicOverRideProtectedInner {}
 
-	
+    
 }

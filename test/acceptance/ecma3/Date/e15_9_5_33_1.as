@@ -47,28 +47,28 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
     
-	// addNewTestCase( "TDATE = new Date(0);(TDATE).setUTCDate(31);TDATE",
-	TDATE = new Date(0);
-	(TDATE).setUTCDate(31);
-	
-	addNewTestCase( TDATE, UTCDateFromTime(SetUTCDate(0,31)), LocalDateFromTime(SetUTCDate(0,31)) );
+    // addNewTestCase( "TDATE = new Date(0);(TDATE).setUTCDate(31);TDATE",
+    TDATE = new Date(0);
+    (TDATE).setUTCDate(31);
+    
+    addNewTestCase( TDATE, UTCDateFromTime(SetUTCDate(0,31)), LocalDateFromTime(SetUTCDate(0,31)) );
 
-	
-	//   addNewTestCase( "TDATE = new Date(0);(TDATE).setUTCDate(1);TDATE",
-	TDATE = new Date(0);	
-	(TDATE).setUTCDate(1);
-	
-	addNewTestCase(TDATE, UTCDateFromTime(SetUTCDate(0,1)), LocalDateFromTime(SetUTCDate(0,1)) );
-
-
-	// addNewTestCase( "TDATE = new Date(86400000);(TDATE).setUTCDate(1);TDATE",
-	TDATE = new Date(86400000);
-	(TDATE).setUTCDate(1);
-
-	addNewTestCase( TDATE, UTCDateFromTime(SetUTCDate(86400000,1)), LocalDateFromTime(SetUTCDate(86400000,1)) );  
+    
+    //   addNewTestCase( "TDATE = new Date(0);(TDATE).setUTCDate(1);TDATE",
+    TDATE = new Date(0);
+    (TDATE).setUTCDate(1);
+    
+    addNewTestCase(TDATE, UTCDateFromTime(SetUTCDate(0,1)), LocalDateFromTime(SetUTCDate(0,1)) );
 
 
-    	
+    // addNewTestCase( "TDATE = new Date(86400000);(TDATE).setUTCDate(1);TDATE",
+    TDATE = new Date(86400000);
+    (TDATE).setUTCDate(1);
+
+    addNewTestCase( TDATE, UTCDateFromTime(SetUTCDate(86400000,1)), LocalDateFromTime(SetUTCDate(86400000,1)) );
+
+
+        
     
     function addNewTestCase( DateString, UTCDate, LocalDate) {
         var DateCase:Date = new Date();

@@ -48,15 +48,15 @@ var x1, a, b, c, d;
 
 x1 = new XMLList("<XML>b<c></c>onetwo<foo>three</foo></XML>");
 
-AddTestCase( "xml has multiple text nodes, xml.normalize(), xml.toString()", 
-	"<XML>" + NL() + "  b" + NL() + "  <c/>" + NL() + "  onetwo" + NL() + "  <foo>three</foo>" + NL() + "</XML>", 
-	(x1.normalize(), x1.toString()));
-	
-	
+AddTestCase( "xml has multiple text nodes, xml.normalize(), xml.toString()",
+    "<XML>" + NL() + "  b" + NL() + "  <c/>" + NL() + "  onetwo" + NL() + "  <foo>three</foo>" + NL() + "</XML>",
+    (x1.normalize(), x1.toString()));
+    
+    
 x1 = new XMLList("<XML>bonetwo<c></c><foo>three</foo></XML>");
 
-AddTestCase( "xml has multiple text nodes, xml.normalize(), xml.toString()", 
-	"<XML>" + NL() + "  bonetwo" + NL() + "  <c/>" + NL() + "  <foo>three</foo>" + NL() + "</XML>", 
+AddTestCase( "xml has multiple text nodes, xml.normalize(), xml.toString()",
+    "<XML>" + NL() + "  bonetwo" + NL() + "  <c/>" + NL() + "  <foo>three</foo>" + NL() + "</XML>",
 (x1.normalize(), x1.toString()));
 
 END();

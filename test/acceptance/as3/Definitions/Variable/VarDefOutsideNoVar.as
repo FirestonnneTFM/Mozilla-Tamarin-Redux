@@ -61,16 +61,16 @@ startTest();                // leave this alone
 AddTestCase( "Variable Definition <empty> defined inside class", 1, 1);
 
 AddTestCase( "var Identifier = <empty>", "id", (id = "id", id));
-AddTestCase( "var Identifier = AssignmentExpression", true, idAssignExpr); 
-AddTestCase( "var VariableBindingList, Identifier = <empty> [1]", true, (id1 = true, id1)); 
-AddTestCase( "var VariableBindingList, Identifier = <empty> [2]", true, (id2 = true, id2)); 
-AddTestCase( "var VariableBindingList, Identifier = <empty> [3]", true, (id3 = true, id3)); 
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [1]", true, id1AssignExpr); 
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [2]", false, id2AssignExpr); 
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [3]", true, id3AssignExpr); 
-//AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [4]", undefined, id1AssignExprB); 
-//AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [5]", undefined, id2AssignExprB); 
-//AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [6]", true, id3AssignExprB); 
+AddTestCase( "var Identifier = AssignmentExpression", true, idAssignExpr);
+AddTestCase( "var VariableBindingList, Identifier = <empty> [1]", true, (id1 = true, id1));
+AddTestCase( "var VariableBindingList, Identifier = <empty> [2]", true, (id2 = true, id2));
+AddTestCase( "var VariableBindingList, Identifier = <empty> [3]", true, (id3 = true, id3));
+AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [1]", true, id1AssignExpr);
+AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [2]", false, id2AssignExpr);
+AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [3]", true, id3AssignExpr);
+//AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [4]", undefined, id1AssignExprB);
+//AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [5]", undefined, id2AssignExprB);
+//AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [6]", true, id3AssignExprB);
 
 
 test();       // leave this alone.  this executes the test cases and

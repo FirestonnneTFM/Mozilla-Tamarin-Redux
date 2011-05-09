@@ -66,7 +66,7 @@ function getTestCases() {
     array[item++] = new TestCase( "15.8.1.8", "typeof Math.SQRT2",  "number",               typeof Math.SQRT2 );
 
     MATHPROPS='';
-    for( p in Math ){ 
+    for( p in Math ){
         MATHPROPS +=p;
     }
 

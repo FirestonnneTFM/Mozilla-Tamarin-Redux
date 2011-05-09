@@ -51,7 +51,7 @@ function getTestCases() {
     var item = 0;
     //var x = new String();
     var thisError="no error";
-    array[item++] = new TestCase( SECTION,   "typeof String.fromCharCode",      "function", typeof String.fromCharCode );  
+    array[item++] = new TestCase( SECTION,   "typeof String.fromCharCode",      "function", typeof String.fromCharCode );
     array[item++] = new TestCase( SECTION,   "typeof String.prototype.fromCharCode",        "undefined", typeof String.prototype.fromCharCode );
     try{
         var x = new String();

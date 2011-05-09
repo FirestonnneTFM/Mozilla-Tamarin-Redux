@@ -47,7 +47,7 @@ var expect = '';
 printBugNumber(BUGNUMBER);
 printStatus (summary);
 
-/* 
+/*
     Case 1. The input string contains an English month name.
     The form of the string can be month f l, or f month l, or
     f l month which each evaluate to the same date.

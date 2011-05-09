@@ -62,11 +62,11 @@ function addtestcases()
   actual = 'toString not called';
   try
   {
-    var x = {toString: function() { 
-        actual = 'toString called'; 
-        print(actual); 
-      } 
-    }; 
+    var x = {toString: function() {
+        actual = 'toString called';
+        print(actual);
+      }
+    };
     var f = function() { var j = x; j + ""; }
     f();
     AddTestCase(summary + ': 1', expect, actual);
@@ -79,7 +79,7 @@ function addtestcases()
   actual = 'toString not called';
   try
   {
-    (function() { const a = 
+    (function() { const a =
          ({toString: function(){
              actual = 'toString called'; print(actual)} }); var j = a + ""; })();
     AddTestCase(summary + ': 2', expect, actual);

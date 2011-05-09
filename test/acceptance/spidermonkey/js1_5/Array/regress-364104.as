@@ -58,7 +58,7 @@ AddTestCase('[2].indexOf(2, 0) == 0', true, [2].indexOf(2, 0) == 0);    // index
 AddTestCase('[2].indexOf(2, 1) == -1', true, [2].indexOf(2, 1) == -1);  // indexOf: ignoring second argument with value equal to array length!
 AddTestCase('[2].indexOf(2, 2) == -1', true, [2].indexOf(2, 2) == -1);  // indexOf: ignoring second argument greater than array length!
 AddTestCase('[2].indexOf(2, 17) == -1', true, [2].indexOf(2, 17) == -1);// indexOf: ignoring large second argument!
-AddTestCase('[2].indexOf(2, -5) == 0', true, [2].indexOf(2, -5) == 0);  // indexOf: calculated fromIndex < 0, should search entire array!         
+AddTestCase('[2].indexOf(2, -5) == 0', true, [2].indexOf(2, -5) == 0);  // indexOf: calculated fromIndex < 0, should search entire array!
 AddTestCase('[2, 3].indexOf(2, -1) == -1', true, [2, 3].indexOf(2, -1) == -1);  // indexOf: not handling index == (-1 + 2), element 2 correctly!
 AddTestCase('[2, 3].indexOf(3, -1) == 1', true, [2, 3].indexOf(3, -1) == 1);    // indexOf: not handling index == (-1 + 2), element 3 correctly!
 AddTestCase('[2].lastIndexOf(2) == 0', true, [2].lastIndexOf(2) == 0);          // lastIndexOf: not finding 2!?

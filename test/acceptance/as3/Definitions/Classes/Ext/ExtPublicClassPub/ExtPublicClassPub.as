@@ -50,10 +50,10 @@ package PublicClass {
     function subGetArray() : Array { return this.getPubArray(); }
     function subSetArray(a:Array) { this.setPubArray(a); }
 
-	public function testSubArray(a:Array):Array{
-		this.subSetArray(a);
-		return this.subGetArray();
-	}
+    public function testSubArray(a:Array):Array{
+        this.subSetArray(a);
+        return this.subGetArray();
+    }
 
     // ************************************
     // access public method of parent
@@ -78,24 +78,24 @@ package PublicClass {
     }
 
     // ***************************************
-	// access public method of parent
-	// from public static method of sub class
+    // access public method of parent
+    // from public static method of sub class
     // ***************************************
 
-	public static function pubStatSubGetArray():Array{ return getPubArray(); }
+    public static function pubStatSubGetArray():Array{ return getPubArray(); }
 
     // ***************************************
-    // access public property from 
+    // access public property from
     // default method of sub class
     // ***************************************
 
     function subGetDPArray() : Array { return this.pubArray; }
     function subSetDPArray(a:Array) { this.pubArray = a; }
 
-	public function testSubDPArray(a:Array):Array{
-		this.subSetDPArray(a);
-		return this.subGetDPArray();
-	}
+    public function testSubDPArray(a:Array):Array{
+        this.subSetDPArray(a);
+        return this.subGetDPArray();
+    }
    
     // ***************************************
     // access public property from
@@ -114,11 +114,11 @@ package PublicClass {
     private function privSubSetDPArray(a:Array) { this.pubArray = a; }
 
     // ***************************************
-	// access public property from
-	// public static method of sub class
+    // access public property from
+    // public static method of sub class
     // ***************************************
 
-	public static function pubStatSubGetDPArray():Array{ return pubArray; }
+    public static function pubStatSubGetDPArray():Array{ return pubArray; }
 
   }
   

@@ -34,7 +34,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1050; //	Cannot convert _ to primitive.
+var CODE = 1050; // Cannot convert _ to primitive.
 
 //-----------------------------------------------------------
 startTest();
@@ -43,12 +43,12 @@ startTest();
 var expected = "Error #" + CODE;
 var result = "no error";
 try {
-	var object1 = { toString: function() { return this; } };
-	isXMLName(object1);
+    var object1 = { toString: function() { return this; } };
+    isXMLName(object1);
 } catch (err) {
-	result = grabError(err, err.toString());
+    result = grabError(err, err.toString());
 } finally {
-	AddTestCase("Runtime Error", expected, result);
+    AddTestCase("Runtime Error", expected, result);
 }
 
 //-----------------------------------------------------------

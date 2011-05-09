@@ -40,66 +40,66 @@
  */
 
 package packOne {
-	public var var1="packOne:var1";
-	public var var2="packOne:var2";
-	public var var3="packOne:var3";
-	public var var4="packOne:var4";
+    public var var1="packOne:var1";
+    public var var2="packOne:var2";
+    public var var3="packOne:var3";
+    public var var4="packOne:var4";
 }
 
 package packTwo {
-	public var p2var1="packTwo:var1";
-	public var p2var2="packTwo:var2";
-	public var p2var3="packTwo:var3";
-	public var p2var4="packTwo:var4";
+    public var p2var1="packTwo:var1";
+    public var p2var2="packTwo:var2";
+    public var p2var3="packTwo:var3";
+    public var p2var4="packTwo:var4";
 }
 package {
 class testClass {
-	var testClassVar1 = "Inside testClass";
-	function func1() {
-		return "Inside func1()";
-	}
-	function func2() {
-		return "Inside func2()";
+    var testClassVar1 = "Inside testClass";
+    function func1() {
+        return "Inside func1()";
+    }
+    function func2() {
+        return "Inside func2()";
 
-	}
+    }
 }
 
 final class finClass {
-	var finClassVar1 = "Inside finClass";
-	function finFunc1() {
-		return "Inside func1()";
-	}
-	function finFunc2() {
-		return "Inside func2()";
+    var finClassVar1 = "Inside finClass";
+    function finFunc1() {
+        return "Inside func1()";
+    }
+    function finFunc2() {
+        return "Inside func2()";
 
-	}
+    }
 }
 
 interface inInterface {
-	function intFunc1();
-	function intFunc2();
+    function intFunc1();
+    function intFunc2();
 }
 
 
 class accSpecClass {
-	var accSpec1 = "string";
-	public function func1() {
-		return "Inside func1()-public function";
-	}
-	function func2() {
-		return "Inside func2()-Dynamic function";
-	}
+    var accSpec1 = "string";
+    public function func1() {
+        return "Inside func1()-public function";
+    }
+    function func2() {
+        return "Inside func2()-Dynamic function";
+    }
 
 }
 
 dynamic class dynClass {
-	var dynSpec1 = "string";
-	public function func1() {
-		return "Inside func1()-public function";
-	}
-	function func2() {
-		return "Inside func2()-Dynamic function";
-	}
+    var dynSpec1 = "string";
+    public function func1() {
+        return "Inside func1()-public function";
+    }
+    function func2() {
+        return "Inside func2()-Dynamic function";
+    }
 }
 
 class baseClass

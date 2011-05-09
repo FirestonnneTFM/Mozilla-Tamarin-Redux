@@ -47,7 +47,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;        
+    var item = 0;
 
     LabeledContinue( 0, 1 );
     LabeledContinue( 1, 1 );

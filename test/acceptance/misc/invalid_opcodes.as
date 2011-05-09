@@ -69,9 +69,9 @@ var invalidOpcodes:Array = [
     0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF
 ];
 
-/*  
- *  The bytecode array is from the following abcasm code:  
- *  
+/*
+ *  The bytecode array is from the following abcasm code:
+ *
  *  function m() {
  *      // Try to use the internal opcode OP_lix8 = 0x33
  *      0x33

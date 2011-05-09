@@ -37,21 +37,21 @@
 /*
  * Default Class DefaultClass
  * Class methods
- *  
+ *
  */
 
 package DefClassImpPublicInt{
 
-	class DefaultClass implements PublicInt{
-		
+    class DefaultClass implements PublicInt{
+        
 
-		public function deffunc():String{  			       
-			return"PASSED";
-		}
-	}
+        public function deffunc():String{
+            return"PASSED";
+        }
+    }
 
-	public class DefaultClassAccesor extends DefaultClass{
+    public class DefaultClassAccesor extends DefaultClass{
 
-       } 	
-	
-}  
+       }
+    
+}

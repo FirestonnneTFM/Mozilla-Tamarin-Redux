@@ -37,11 +37,11 @@
 
 package ExtError{
 
-	public dynamic class CustEvalError2 extends EvalError{
-		public function CustEvalError2(message=""){
-			this.message = message;
-		}
-	}
+    public dynamic class CustEvalError2 extends EvalError{
+        public function CustEvalError2(message=""){
+            this.message = message;
+        }
+    }
 
 }
 

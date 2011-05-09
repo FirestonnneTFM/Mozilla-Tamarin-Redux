@@ -49,17 +49,17 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
         
-	var x;
+    var x;
     array[item++] = new TestCase( SECTION,
                                     "var x; typeof x",
                                     "undefined",
                                      typeof x);
-	var x; 
+    var x;
     array[item++] = new TestCase( SECTION,
                                     "var x; typeof x == 'undefined",
                                     true,
                                     typeof x == 'undefined');
-	var x;
+    var x;
     array[item++] = new TestCase( SECTION,
                                     "var x; x == void 0",
                                     true,

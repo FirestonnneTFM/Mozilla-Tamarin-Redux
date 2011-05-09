@@ -35,5 +35,5 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package MCPackage {
-	public class GetMCFromSuperClass extends BaseClass {}
+    public class GetMCFromSuperClass extends BaseClass {}
 }

@@ -38,7 +38,7 @@
 
 package DynamicClass {
 
- import DynamicClass.*; 
+ import DynamicClass.*;
 
  class ExtDynamicClassStatInner extends DynamicClass {
 
@@ -101,10 +101,10 @@ package DynamicClass {
     public static function pubStatSubGetArray() : Array { return getStatArray(); }
     public static function pubStatSubSetArray(a:Array) { setStatArray(a); }
 
-	public function testPubStatSubGetSetArray(a:Array):Array {
-		pubStatSubSetArray(a);
-		return pubStatSubGetArray();
-	}
+    public function testPubStatSubGetSetArray(a:Array):Array {
+        pubStatSubSetArray(a);
+        return pubStatSubGetArray();
+    }
 
     // ***************************************
     // access static method of parent
@@ -121,7 +121,7 @@ package DynamicClass {
     }
 
     // ***************************************
-    // access static property from 
+    // access static property from
     // default method of sub class
     // ***************************************
 
@@ -180,10 +180,10 @@ package DynamicClass {
     public static function pubStatSubGetSPArray() : Array { return statArray; }
     public static function pubStatSubSetSPArray(a:Array) { statArray = a; }
 
-	public function testPubStatSubGetSetSPArray(a:Array):Array{
-		pubStatSubSetSPArray(a);
-		return pubStatSubGetSPArray();
-	}
+    public function testPubStatSubGetSetSPArray(a:Array):Array{
+        pubStatSubSetSPArray(a);
+        return pubStatSubGetSPArray();
+    }
 
     // ***************************************
     // access static property from

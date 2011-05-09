@@ -71,7 +71,7 @@ function dosubst()
 
 }
 
-dosubst(); 
+dosubst();
 
 AddTestCase(summary, expect, actual);
 

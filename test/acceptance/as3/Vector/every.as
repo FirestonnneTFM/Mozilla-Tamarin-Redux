@@ -64,20 +64,20 @@ function checker3(value,index,obj):Boolean {
 
 var msg="";
 var v1=new Vector.<int>();
-AddTestCase(	"every empty array",
-		true,
-		v1.every(checker1));
+AddTestCase(    "every empty array",
+        true,
+        v1.every(checker1));
 
 var msg="";
 var v1=new Vector.<int>();
 for (var i=0;i<3;i++) v1.push(i+1);
-AddTestCase(	"every small array returns true",
-		true,
-		v1.every(checker1));
+AddTestCase(    "every small array returns true",
+        true,
+        v1.every(checker1));
 
-AddTestCase(	"every small array check function",
-		"checker1(1,0,[1,2,3])checker1(2,1,[1,2,3])checker1(3,2,[1,2,3])",
-		msg);
+AddTestCase(    "every small array check function",
+        "checker1(1,0,[1,2,3])checker1(2,1,[1,2,3])checker1(3,2,[1,2,3])",
+        msg);
 
 var msg="";
 var v1=new Vector.<int>();
@@ -111,9 +111,9 @@ var thisobj=new Object();
 thisobj.message="object";
 var v1=new Vector.<int>(5);
 v1.every(checker3,thisobj);
-AddTestCase(	"every small array with a specified this object",
-		"objectobjectobjectobjectobject",
-		msg);
+AddTestCase(    "every small array with a specified this object",
+        "objectobjectobjectobjectobject",
+        msg);
 
 // Custom vector class
 class TestClass {
@@ -173,7 +173,7 @@ try {
 }
 
 AddTestCase("thisObject test 3",
-            "TypeError: Error #1006", 
+            "TypeError: Error #1006",
             parseError(errorMsg,"TypeError: Error #1006".length)
             );
 
@@ -185,7 +185,7 @@ try {
 }
 
 AddTestCase("thisObject test 4",
-            "TypeError: Error #1006", 
+            "TypeError: Error #1006",
             parseError(errorMsg,"TypeError: Error #1006".length)
             );
 
@@ -197,7 +197,7 @@ try {
 }
 
 AddTestCase("thisObject test 5",
-            "TypeError: Error #1006", 
+            "TypeError: Error #1006",
             parseError(errorMsg,"TypeError: Error #1006".length)
             );
 

@@ -115,10 +115,10 @@ function getTestCases() {
   
     array[item++] = new TestCase( SECTION,    "Math.abs(-1234567890)", "1234567890",Math.abs(-1234567890)+"");
    
-    array[item++] = new TestCase( SECTION,    "Math.abs(-10 )", "10",Math.abs(-10)+"");   
+    array[item++] = new TestCase( SECTION,    "Math.abs(-10 )", "10",Math.abs(-10)+"");
    
-    array[item++] = new TestCase( SECTION,    "Math.abs(-100 )", "100",Math.abs(-100)+"");   
-    array[item++] = new TestCase( SECTION,    "Math.abs(-1000 )", "1000",Math.abs(-1000)+""); 
+    array[item++] = new TestCase( SECTION,    "Math.abs(-100 )", "100",Math.abs(-100)+"");
+    array[item++] = new TestCase( SECTION,    "Math.abs(-1000 )", "1000",Math.abs(-1000)+"");
    
     array[item++] = new TestCase( SECTION,    "Math.abs(-1000000000 )", "1000000000",Math.abs(-1000000000 )+"");
    

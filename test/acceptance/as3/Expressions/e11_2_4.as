@@ -46,10 +46,10 @@
     
     test();
     
-  class MyClass{}    
+  class MyClass{}
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     //Empty argument list
 

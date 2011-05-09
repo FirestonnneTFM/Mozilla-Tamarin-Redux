@@ -35,5 +35,5 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package isOper {
-	public class TestClassB extends TestClassA {}
+    public class TestClassB extends TestClassA {}
 }

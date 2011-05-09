@@ -42,9 +42,9 @@
  *
  * The getJSClass() function we use is in a utility file, e.g. "shell.js".
  *
- *    Modified:		28th October 2004 (gasingh@macromedia.com)
- *    			Removed the occurence of new Function('abc').
- *    			This is being changed to function() { abc }.
+ *    Modified:     28th October 2004 (gasingh@macromedia.com)
+ *              Removed the occurence of new Function('abc').
+ *              This is being changed to function() { abc }.
  *
  */
 //-------------------------------------------------------------------------------------------------
@@ -59,70 +59,70 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var status = '';
-	var actual = '';
-	var expect= '';
+    var status = '';
+    var actual = '';
+    var expect= '';
         var k = new Function();
         
         
-	status = 'the global object';
-	actual = getJSClass(this);
-	expect = 'global';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
-	status = 'new Object()';
-	actual = getJSClass(new Object());
-	expect = 'Object';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'the global object';
+    actual = getJSClass(this);
+    expect = 'global';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'new Object()';
+    actual = getJSClass(new Object());
+    expect = 'Object';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	// new Function() will be dropped in ecma4, will return undefined
-	// new Function() has been replaced by function() {}
-	/*status = 'new Function()';
-	actual = getJSClass(k)+"";
-	expect = 'Function';
-	array[item++] = new TestCase(SECTION, status, expect, actual);*/
+    // new Function() will be dropped in ecma4, will return undefined
+    // new Function() has been replaced by function() {}
+    /*status = 'new Function()';
+    actual = getJSClass(k)+"";
+    expect = 'Function';
+    array[item++] = new TestCase(SECTION, status, expect, actual);*/
 
-	status = 'new Array()';
-	actual = getJSClass(new Array());
-	expect = 'Array';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'new Array()';
+    actual = getJSClass(new Array());
+    expect = 'Array';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'new String()';
-	actual = getJSClass(new String());
-	expect = 'String';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'new String()';
+    actual = getJSClass(new String());
+    expect = 'String';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'new Boolean()';
-	actual = getJSClass(new Boolean());
-	expect = 'Boolean';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'new Boolean()';
+    actual = getJSClass(new Boolean());
+    expect = 'Boolean';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'new Number()';
-	actual = getJSClass(new Number());
-	expect = 'Number';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'new Number()';
+    actual = getJSClass(new Number());
+    expect = 'Number';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'Math';
-	actual = getJSClass(Math);  // can't use 'new' with the Math object (EMCA3, 15.8)
-	expect = 'Math';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'Math';
+    actual = getJSClass(Math);  // can't use 'new' with the Math object (EMCA3, 15.8)
+    expect = 'Math';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'new Date()';
-	actual = getJSClass(new Date());
-	expect = 'Date';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'new Date()';
+    actual = getJSClass(new Date());
+    expect = 'Date';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'new RegExp()';
-	actual = getJSClass(new RegExp());
-	expect = 'RegExp';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'new RegExp()';
+    actual = getJSClass(new RegExp());
+    expect = 'RegExp';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = 'new Error()';
-	actual = getJSClass(new Error());
-	expect = 'Error';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = 'new Error()';
+    actual = getJSClass(new Error());
+    expect = 'Error';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	return array;
+    return array;
 }

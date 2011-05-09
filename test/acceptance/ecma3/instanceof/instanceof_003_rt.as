@@ -54,7 +54,7 @@ function getTestCases() {
     var theproto = {};
     Foo.prototype = theproto;
 
-    array[item++] = new TestCase(SECTION, 
+    array[item++] = new TestCase(SECTION,
         "function Foo() = {}; theproto = {}; Foo.prototype = theproto; " +
             "theproto instanceof Foo",
         false,

@@ -58,7 +58,7 @@ package DynamicClass {
     public var pubNumber:Number;
     public var pubObject:Object;
     public var pubString:String;
-   // public var pubSimple:Simple; 
+   // public var pubSimple:Simple;
 
     private var privArray:Array;
     private var privBoolean:Boolean;
@@ -68,7 +68,7 @@ package DynamicClass {
     private var privNumber:Number;
     private var privObject:Object;
     private var privString:String;
-    //private var privSimple:Simple; 
+    //private var privSimple:Simple;
 
     static var statArray:Array;
     static var statBoolean:Boolean;
@@ -78,7 +78,7 @@ package DynamicClass {
     static var statNumber:Number;
     static var statObject:Object;
     static var statString:String;
-    //static var statSimple:Simple; 
+    //static var statSimple:Simple;
 
     var finArray:Array;
     var finBoolean:Boolean;
@@ -98,7 +98,7 @@ package DynamicClass {
     public static var pubStatNumber:Number;
     public static var pubStatObject:Object;
     public static var pubStatString:String;
-    //public static var pubStatSimple:Simple; 
+    //public static var pubStatSimple:Simple;
 
     private static var privStatArray:Array;
     private static var privStatBoolean:Boolean;
@@ -108,7 +108,7 @@ package DynamicClass {
     private static var privStatNumber:Number;
     private static var privStatObject:Object;
     private static var privStatString:String;
-    //private static var privStatSimple:Simple; 
+    //private static var privStatSimple:Simple;
 
     // ****************
     // constructor

@@ -157,7 +157,7 @@ function getTestCases() {
                                     "var obj = new Number(NaN); obj.substring = String.prototype.substring; obj.substring(false)",
                                     "ReferenceError: Error #1056",referenceError(thisError)
                                     );
-    } 
+    }
    /* array[item++] = new TestCase(   SECTION,
                                     "var obj = new Number(NaN); obj.substring = String.prototype.substring; obj.substring(false)",
                                     "NaN",
@@ -184,7 +184,7 @@ function getTestCases() {
                                     "var obj = new Boolean(); obj.substring = String.prototype.substring; obj.substring(new Array())",
                                     "ReferenceError: Error #1056",referenceError(thisError)
                                     );
-    } 
+    }
 
     /*array[item++] = new TestCase(   SECTION,
                                     "var obj = new Boolean(); obj.substring = String.prototype.substring; obj.substring(new Array())",

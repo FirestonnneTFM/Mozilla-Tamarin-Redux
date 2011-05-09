@@ -75,13 +75,13 @@ case "bad string 2":
 }
 
 testcases[index++] = new TestCase ( SECTION, 'switch statement',
-	       true, match1);
+           true, match1);
 
 testcases[index++] = new TestCase ( SECTION, 'switch statement',
-	       true, match2);
+           true, match2);
 
 testcases[index++] = new TestCase ( SECTION, 'switch statement',
-	       false, match3);
+           false, match3);
 
 var var2 = 3;
 
@@ -94,7 +94,7 @@ var match5 = false;
 switch (var2)
 {
 case 1:
-/*	        switch (var1)
+/*          switch (var1)
   {
   case "foo":
   match1 = true;
@@ -113,18 +113,18 @@ case 3:
   break;
 }
 testcases[index++] = new TestCase ( SECTION, 'switch statement',
-	       false, match1);
+           false, match1);
 
 testcases[index++] = new TestCase ( SECTION, 'switch statement',
-	       false, match2);
+           false, match2);
 
 testcases[index++] = new TestCase ( SECTION, 'switch statement',
-	       false, match3);
+           false, match3);
 
 testcases[index++] = new TestCase ( SECTION, 'switch statement',
-	       false, match4);
+           false, match4);
 
 testcases[index++] = new TestCase ( SECTION, 'switch statement',
-	       true, match5);
+           true, match5);
 
 test();

@@ -163,7 +163,7 @@ function getTestCases() {
 
         try {
             try {
-                throw 3; 
+                throw 3;
             } finally {
                 innerFinally = "PASS";
             }

@@ -47,7 +47,7 @@ var BUGNUMBER = "";
 startTest();                // leave this alone
 
 
-//var currentDate = new Date();                     
+//var currentDate = new Date();
 var wrapintDefCons:wrapintClassDefCons = new wrapintClassDefCons();
 //print (wrapintDefCons.getAdd());
 //print (DefCons.wrapprivchangeval());

@@ -34,20 +34,20 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1074; //	Illegal write to read-only property _ on _.
+var CODE = 1074; // Illegal write to read-only property _ on _.
 
 //-----------------------------------------------------------
 startTest();
 //-----------------------------------------------------------
 
 try {
-	var z = "no error";
-	Object = new Object();
-	Object.valueOf = Number.prototype.valueOf;
+    var z = "no error";
+    Object = new Object();
+    Object.valueOf = Number.prototype.valueOf;
 } catch (err) {
-	z = err.toString();
+    z = err.toString();
 } finally {
-	AddTestCase("Runtime Error", REFERENCEERROR + CODE, referenceError(z));
+    AddTestCase("Runtime Error", REFERENCEERROR + CODE, referenceError(z));
 }
 
 //-----------------------------------------------------------

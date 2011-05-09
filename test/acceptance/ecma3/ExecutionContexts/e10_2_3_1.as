@@ -64,12 +64,12 @@ function getTestCases() {
                                     true,
                                     o == this );
 
-	function MyFunction( value ) {
-	    return this;
-	}
-	function MyObject( value ) {
-	 this.THIS = this;
-	}
+    function MyFunction( value ) {
+        return this;
+    }
+    function MyObject( value ) {
+     this.THIS = this;
+    }
 
     return ( array );
 }

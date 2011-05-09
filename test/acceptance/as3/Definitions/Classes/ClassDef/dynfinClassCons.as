@@ -47,7 +47,7 @@ var BUGNUMBER = "";
 startTest();                // leave this alone
 
 
-//var currentDate = new Date();                     
+//var currentDate = new Date();
 var deffinCons:dynfinClassCons = new dynfinClassCons();
 //print (deffinCons.Add());
 //print (DefCons.wrapprivchangeval());

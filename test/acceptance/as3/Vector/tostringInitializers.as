@@ -56,25 +56,25 @@ var TITLE   = "Vector.toString-initializers";
 writeHeaderToLog( SECTION + " "+ TITLE);
  
 AddTestCase(
-	      "new <int>[].toString()",     
-	      "",     
-	      new <int>[].toString() );
+          "new <int>[].toString()",
+          "",
+          new <int>[].toString() );
 AddTestCase(
-	      "(new Vector.<Boolean>(5)).toString()",    
-	      "false,false,false,false,false",    
-	      (new <Boolean>[false,false,false,false,false,]).toString() );
+          "(new Vector.<Boolean>(5)).toString()",
+          "false,false,false,false,false",
+          (new <Boolean>[false,false,false,false,false,]).toString() );
 AddTestCase(
-	      "(new Vector.<String>(2)).toString()",    
-	      ",",    
-	      (new <String>["","",]).toString() );
+          "(new Vector.<String>(2)).toString()",
+          ",",
+          (new <String>["","",]).toString() );
 
-AddTestCase(  
-	      "small vector toString",  
-	      "1.1,3.14,99.99",  
-	      new<Number>[1.1,3.14,99.99].toString() );
+AddTestCase(
+          "small vector toString",
+          "1.1,3.14,99.99",
+          new<Number>[1.1,3.14,99.99].toString() );
 
-AddTestCase(  
-	      "default Number values",
-	      "NaN,NaN",
-	      new<Number>[NaN,NaN,].toString());
+AddTestCase(
+          "default Number values",
+          "NaN,NaN",
+          new<Number>[NaN,NaN,].toString());
 test();

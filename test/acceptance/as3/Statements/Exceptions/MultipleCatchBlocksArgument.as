@@ -49,7 +49,7 @@ startTest();                // leave this alone
 var z = new ArgumentErrors();
 thisError = "no error";
        
-try{   
+try{
    z.MyArgumentError();
    }catch(e:ReferenceError){
          thisError=e.toString();

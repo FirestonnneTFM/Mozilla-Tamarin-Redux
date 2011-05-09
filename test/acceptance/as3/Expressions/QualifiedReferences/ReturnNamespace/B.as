@@ -36,12 +36,12 @@
  * ***** END LICENSE BLOCK ***** */
 package ns {
 
-	public class B {
-	    public function befriendAnA(a:A) {
-		var key:Namespace = a.beMyFriend(this)
-		return a.key::makeMyDay();
-		
-	    }
-	}
+    public class B {
+        public function befriendAnA(a:A) {
+        var key:Namespace = a.beMyFriend(this)
+        return a.key::makeMyDay();
+        
+        }
+    }
 
 }

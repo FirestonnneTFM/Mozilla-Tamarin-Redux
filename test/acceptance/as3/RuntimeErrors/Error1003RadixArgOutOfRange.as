@@ -34,20 +34,20 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1003; //	The radix argument must be between 2 and 36; got _.
+var CODE = 1003; // The radix argument must be between 2 and 36; got _.
 
 //-----------------------------------------------------------
 startTest();
 //-----------------------------------------------------------
 
 try {
-	var result = "no error";
-	var n:Number = new Number(1);
-	n.toString(1);
+    var result = "no error";
+    var n:Number = new Number(1);
+    n.toString(1);
 } catch (err) {
-	result = err.toString();
+    result = err.toString();
 } finally {
-	AddTestCase("Runtime Error", RANGEERROR + CODE, rangeError(result));
+    AddTestCase("Runtime Error", RANGEERROR + CODE, rangeError(result));
 }
 
 //-----------------------------------------------------------

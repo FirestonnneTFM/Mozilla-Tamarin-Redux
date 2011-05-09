@@ -47,31 +47,31 @@ function getTestCases() {
     var item = 0;
     
 //    addNewTestCase( "TDATE = new Date(0);(TDATE).setUTCMonth(0);TDATE",
-	var TDATE:Date = new Date(0);
-	(TDATE).setUTCMonth(0);
-	addNewTestCase( TDATE,
+    var TDATE:Date = new Date(0);
+    (TDATE).setUTCMonth(0);
+    addNewTestCase( TDATE,
                     UTCDateFromTime(SetUTCMonth(0,0)),
                     LocalDateFromTime(SetUTCMonth(0,0)) );
 
    // addNewTestCase( "TDATE = new Date(0);(TDATE).setUTCMonth(11);TDATE",
-	var TDATE:Date = new Date(0);
-	(TDATE).setUTCMonth(11);
-	 addNewTestCase(TDATE,
-		    UTCDateFromTime(SetUTCMonth(0,11)),
+    var TDATE:Date = new Date(0);
+    (TDATE).setUTCMonth(11);
+     addNewTestCase(TDATE,
+            UTCDateFromTime(SetUTCMonth(0,11)),
                     LocalDateFromTime(SetUTCMonth(0,11)) );
 
 //    addNewTestCase( "TDATE = new Date(0);(TDATE).setUTCMonth(3,4);TDATE",
-	var TDATE:Date = new Date(0);
-	(TDATE).setUTCMonth(3,4);
+    var TDATE:Date = new Date(0);
+    (TDATE).setUTCMonth(3,4);
       addNewTestCase(TDATE,
-		    UTCDateFromTime(SetUTCMonth(0,3,4)),
+            UTCDateFromTime(SetUTCMonth(0,3,4)),
                     LocalDateFromTime(SetUTCMonth(0,3,4)) );
 
     
     
     function addNewTestCase( DateString, UTCDate, LocalDate) {
        
-           DateCase = DateString ;	  	
+           DateCase = DateString ;
     
     //    fixed_year = ( ExpectDate.year >=1900 || ExpectDate.year < 2000 ) ? ExpectDate.year - 1900 : ExpectDate.year;
     
@@ -90,21 +90,21 @@ function getTestCases() {
         array[item++] = new TestCase( SECTION, "DateString+.getFullYear()",         LocalDate.year,       DateCase.getFullYear() );
         array[item++] = new TestCase( SECTION, "DateString+.getMonth()",            LocalDate.month,      DateCase.getMonth() );
 
-	//Allow for DST variation on different platforms (osx) - see https://bugzilla.mozilla.org/show_bug.cgi?id=401898
-	var date = DateCase.getDate();
-	if (LocalDate.date == (date+1)) date++;
+    //Allow for DST variation on different platforms (osx) - see https://bugzilla.mozilla.org/show_bug.cgi?id=401898
+    var date = DateCase.getDate();
+    if (LocalDate.date == (date+1)) date++;
         array[item++] = new TestCase( SECTION, DateString+".getDate()",             LocalDate.date,       date);
 
-	var day = DateCase.getDay();
-	if (LocalDate.day == (day+1)) day++;
+    var day = DateCase.getDay();
+    if (LocalDate.day == (day+1)) day++;
         array[item++] = new TestCase( SECTION, DateString+".getDay()",              LocalDate.day,        day );
 
-	var hours = DateCase.getHours();
-	if (LocalDate.hours == (hours+1)) {
-		hours++;
-	} else if (hours == 23 && LocalDate.hours == 0) {
-		hours = 0;
-	}
+    var hours = DateCase.getHours();
+    if (LocalDate.hours == (hours+1)) {
+        hours++;
+    } else if (hours == 23 && LocalDate.hours == 0) {
+        hours = 0;
+    }
         array[item++] = new TestCase( SECTION, DateString+".getHours()",            LocalDate.hours,      hours );
 
         array[item++] = new TestCase( SECTION, "DateString+.getMinutes()",          LocalDate.minutes,    DateCase.getMinutes() );

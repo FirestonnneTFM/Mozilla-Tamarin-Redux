@@ -106,9 +106,9 @@ function getTestCases() {
 
     x = new MyObject(true); y = x; z = x;
     array[item++] = new TestCase( SECTION,    "x = new MyObject(true); y = x; z = x; z == y",   true,   z == y );
-    x = new MyObject(false); y = x; z = x; 
+    x = new MyObject(false); y = x; z = x;
     array[item++] = new TestCase( SECTION,    "x = new MyObject(false); y = x; z = x; z == y",  true,  z == y );
-    x = new Boolean(true); y = x; z = x; 
+    x = new Boolean(true); y = x; z = x;
     array[item++] = new TestCase( SECTION,    "x = new Boolean(true); y = x; z = x; z == y",   true,  z == y );
     x = new Boolean(false); y = x; z = x;
     array[item++] = new TestCase( SECTION,   "x = new Boolean(false); y = x; z = x; z == y",   true,  z == y );

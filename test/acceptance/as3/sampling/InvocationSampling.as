@@ -61,7 +61,7 @@ public class testclass {
     public static var public_static_string:String;
     private static var private_static_string:String;
 
-    function testclass(s:String) { 
+    function testclass(s:String) {
         this.string_instance=s;
     }
     function func() {}

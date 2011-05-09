@@ -65,8 +65,8 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,  "Math.tan(false)",          0,              Math.tan(false) );
 
     array[item++] = new TestCase( SECTION,  "Math.tan(NaN)",            Number.NaN,     Math.tan(Number.NaN) );
-    array[item++] = new TestCase( SECTION,  "Math.tan(0)",              0,	            Math.tan(0));
-    array[item++] = new TestCase( SECTION,  "Math.tan(-0)",             -0,         	Math.tan(-0));
+    array[item++] = new TestCase( SECTION,  "Math.tan(0)",              0,              Math.tan(0));
+    array[item++] = new TestCase( SECTION,  "Math.tan(-0)",             -0,             Math.tan(-0));
     array[item++] = new TestCase( SECTION,  "Math.tan(Infinity)",       Number.NaN,     Math.tan(Number.POSITIVE_INFINITY));
     array[item++] = new TestCase( SECTION,  "Math.tan(-Infinity)",      Number.NaN,     Math.tan(Number.NEGATIVE_INFINITY));
     array[item++] = new TestCase( SECTION,  "Math.tan(Math.PI/4)",      0.9999999999999999,              Math.tan(Math.PI/4));

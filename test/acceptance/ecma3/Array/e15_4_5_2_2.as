@@ -58,7 +58,7 @@
     var length = Math.pow(2,12);
     var a = new Array(length);
     for (var i = 0; i < Math.pow(2,12); i++ ) {
-		a[i] = i;
+        a[i] = i;
     }
     addCase( a, i, i, i );
     addCase( a, i, Math.pow(2,12)+i+1, Math.pow(2,12)+i+1, true );
@@ -67,10 +67,10 @@
     test();
 
 function addCase( object, old_len, set_len, new_len, ... rest) {
-	var checkitems;
-	if( rest.length == 1 ){
-		checkitems = rest[0];
-	}
+    var checkitems;
+    if( rest.length == 1 ){
+        checkitems = rest[0];
+    }
 
     object.length = set_len;
 

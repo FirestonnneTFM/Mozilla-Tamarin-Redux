@@ -56,22 +56,22 @@ function getTestCases() {
     }
     array[item++] = new TestCase( SECTION,  "var props = '', for ( p in Array  ) { props += p } props", "", props );
 
-	// avmplus will throw a ReferenceError here. Becaue we are using const instead of enum, and this
-	// is expected(?) behavior when using const
-	var thisError:String = "no error";
+    // avmplus will throw a ReferenceError here. Becaue we are using const instead of enum, and this
+    // is expected(?) behavior when using const
+    var thisError:String = "no error";
 
 
-	try{
-		Array.prototype = null;
-		result = "no exception thrown"
+    try{
+        Array.prototype = null;
+        result = "no exception thrown"
 
-	} catch (e:ReferenceError) {
-		thisError = e.toString();
+    } catch (e:ReferenceError) {
+        thisError = e.toString();
 
 
 
-	} finally {
-		array[item++] = new TestCase( SECTION,  "Array.prototype = null; Array.prototype ",
+    } finally {
+        array[item++] = new TestCase( SECTION,  "Array.prototype = null; Array.prototype ",
 "ReferenceError: Error #1074", referenceError(thisError) );
 
     }

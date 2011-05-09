@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package EmptyFunctionBody {
-	function returnNoParamsInner():String { return "returnNoParams"; }
-	public function returnNoParams():String { return returnNoParamsInner(); }
+    function returnNoParamsInner():String { return "returnNoParams"; }
+    public function returnNoParams():String { return returnNoParamsInner(); }
 }
 

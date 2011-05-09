@@ -47,7 +47,7 @@
     
 function getTestCases():Array {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     var BOOLEAN = new Boolean();
     try{

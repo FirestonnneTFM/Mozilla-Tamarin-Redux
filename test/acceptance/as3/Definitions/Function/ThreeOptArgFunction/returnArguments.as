@@ -36,15 +36,15 @@
  * ***** END LICENSE BLOCK ***** */
 package ThreeOptArgFunction {
 
-	function returnArgumentsInner(s:String = "Str2", b:Boolean = false, n:Number = 20, ... rest) {
-	
-		str = s;
-		bool = b;
-	  	num = n;
-	}
-	
-	
-	public function returnArguments() { returnArgumentsInner("Str2",false,20,true); }
+    function returnArgumentsInner(s:String = "Str2", b:Boolean = false, n:Number = 20, ... rest) {
+    
+        str = s;
+        bool = b;
+        num = n;
+    }
+    
+    
+    public function returnArguments() { returnArgumentsInner("Str2",false,20,true); }
 
 }
 

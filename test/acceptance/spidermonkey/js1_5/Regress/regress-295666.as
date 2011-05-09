@@ -54,7 +54,7 @@ try
 }
 catch(e)
 {
-} 
+}
 AddTestCase(summary, expect, actual);
 
 test();

@@ -73,18 +73,18 @@ function Foo() {}
     var array = new Array();
     var item = 0;
     
-	var theproto = {};
-	Foo.prototype = theproto
-	//theproto instanceof Foo
+    var theproto = {};
+    Foo.prototype = theproto
+    //theproto instanceof Foo
 
     array[item++] = new TestCase( SECTION,
             "function Foo() {}; theproto = {}; Foo.prototype = theproto; theproto instanceof Foo",
-			false,
-			theproto instanceof Foo );
-	
-	var o  = {};
+            false,
+            theproto instanceof Foo );
+    
+    var o  = {};
 
-	//AddTestCase( "var o = {}; o instanceof o", false, o instanceof o );
+    //AddTestCase( "var o = {}; o instanceof o", false, o instanceof o );
     var thisError="no error";
     try{
         o instanceof o;
@@ -95,7 +95,7 @@ function Foo() {}
             "o = {}; o instanceof o","TypeError: Error #1040",typeError(thisError));
     }
 
-	var f = new Function();
+    var f = new Function();
 
     array[item++] = new TestCase( SECTION, "var f = new Function(); f instanceof f", false, f instanceof f );
     

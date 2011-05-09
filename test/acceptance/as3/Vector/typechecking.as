@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 /**
    File Name:    typechecking.as
-   Description:  
+   Description:
    verify runtime error when set or add mismatched types.
    *
    */
@@ -61,9 +61,9 @@ try {
 }
 
 AddTestCase(
-		"assign vector variable to mismatched builtin type, throws runtime error",
-		"TypeError: Error #1034",
-		parseError(err1,"TypeError: Error #1034".length));
+        "assign vector variable to mismatched builtin type, throws runtime error",
+        "TypeError: Error #1034",
+        parseError(err1,"TypeError: Error #1034".length));
 
 class A { }
 class B extends A { }
@@ -77,15 +77,15 @@ try {
   err3=e.toString();
 }
 AddTestCase(
-		"assign vector variable to mismatched types, throws runtime error",
-		"TypeError: Error #1034",
-		parseError(err3,"TypeError: Error #1034".length));
+        "assign vector variable to mismatched types, throws runtime error",
+        "TypeError: Error #1034",
+        parseError(err3,"TypeError: Error #1034".length));
 
 
 AddTestCase(
-		"push inherited type into Vector is allowed",
-		2,
-		v2.push(new A(),new B()));
+        "push inherited type into Vector is allowed",
+        2,
+        v2.push(new A(),new B()));
 
 var err4="no error";
 try {
@@ -94,21 +94,21 @@ try {
   err4=e.toString();
 }
 AddTestCase(
-		"push wrong type into Vector, throws runtime error",
-		"TypeError: Error #1034",
-		parseError(err4,"TypeError: Error #1034".length));
+        "push wrong type into Vector, throws runtime error",
+        "TypeError: Error #1034",
+        parseError(err4,"TypeError: Error #1034".length));
 
 var v4:Vector.<A>=new Vector.<A>();
 
 AddTestCase(
-		"unshift inherited types is allowed",
-		2,
-		v4.unshift(new A(),new B()));
+        "unshift inherited types is allowed",
+        2,
+        v4.unshift(new A(),new B()));
 
 AddTestCase(
-		"unshift inherited types is allowed, verify toString",
-		"[object A],[object B]",
-		v4.toString());
+        "unshift inherited types is allowed, verify toString",
+        "[object A],[object B]",
+        v4.toString());
 
 var err5="no error";
 var v5=new Vector.<A>();
@@ -118,18 +118,18 @@ try {
  err5=e.toString();
 }
 AddTestCase(
-		"unshift wrong type into Vector, throws runtime error",
-		"TypeError: Error #1034",
-		parseError(err5,"TypeError: Error #1034".length));
+        "unshift wrong type into Vector, throws runtime error",
+        "TypeError: Error #1034",
+        parseError(err5,"TypeError: Error #1034".length));
 
 var v6:Vector.<A>=new Vector.<A>();
 v6.push(new A(),new A());
 var v6a:Vector.<B>=new Vector.<B>();
 v6a.push(new B(),new B());
 AddTestCase(
-		"concat inherited types returns correct vector",
-		"[object A],[object A],[object B],[object B]",
-		v6.concat(v6a).toString());
+        "concat inherited types returns correct vector",
+        "[object A],[object A],[object B],[object B]",
+        v6.concat(v6a).toString());
 
 var err7="no error";
 var v7:Vector.<C>=new Vector.<C>();
@@ -140,9 +140,9 @@ try {
   err7=e.toString();
 }
 AddTestCase(
-		"vector concat throws runtime error",
-		"TypeError: Error #1034",
-		parseError(err7,"TypeError: Error #1034".length));
+        "vector concat throws runtime error",
+        "TypeError: Error #1034",
+        parseError(err7,"TypeError: Error #1034".length));
 
 var v8:Vector.<A>=new Vector.<A>();
 var err8="no error";
@@ -152,8 +152,8 @@ try {
   err8=e.toString();
 }
 AddTestCase(
-		"vector assignment on incorrect type throws runtime error",
-		"TypeError: Error #1034",
-		parseError(err8,"TypeError: Error #1034".length));
+        "vector assignment on incorrect type throws runtime error",
+        "TypeError: Error #1034",
+        parseError(err8,"TypeError: Error #1034".length));
 
 test();

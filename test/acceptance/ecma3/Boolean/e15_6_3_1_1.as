@@ -48,11 +48,11 @@
 function getTestCases() {
     var array = new Array();
     var item = 0;
-	var str='';
-	for ( p in Boolean )
-	{
-		str += p;
-	}
+    var str='';
+    for ( p in Boolean )
+    {
+        str += p;
+    }
     array[item++] = new TestCase( SECTION,
                                  "var str='';for ( p in Boolean ) { str += p } str;",
                                  "",

@@ -63,12 +63,12 @@ function doFrame() {
 }
 
 try {
-	doFrame();
-	actual = "no error";
+    doFrame();
+    actual = "no error";
 } catch(e1) {
-	actual = "error thrown: " + e1.toString();
+    actual = "error thrown: " + e1.toString();
 }
-	
+    
 
 
 AddTestCase("QName in nested function", expect, actual);

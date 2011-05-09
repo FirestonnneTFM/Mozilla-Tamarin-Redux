@@ -34,27 +34,27 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1077; //	Illegal read of write-only property _ on _.
+var CODE = 1077; // Illegal read of write-only property _ on _.
 
 //-----------------------------------------------------------
 startTest();
 //-----------------------------------------------------------
 
 class C {
-	var x:int = 0;
-	function set a(b:int):void {
-		x = b;
-	}
+    var x:int = 0;
+    function set a(b:int):void {
+        x = b;
+    }
 }
 
 try {
-	var result = "no error";
-	var c = new C();
-	c.a();
+    var result = "no error";
+    var c = new C();
+    c.a();
 } catch (err) {
-	result = err.toString();
+    result = err.toString();
 } finally {
-	AddTestCase("Runtime Error", REFERENCEERROR + CODE, referenceError(result));
+    AddTestCase("Runtime Error", REFERENCEERROR + CODE, referenceError(result));
 }
 
 //-----------------------------------------------------------

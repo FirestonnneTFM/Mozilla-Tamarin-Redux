@@ -85,7 +85,7 @@ for (var i = 0; i != array.length; ++i) {
     var code = elem.charCodeAt(0);
     if (0 <= code && code < array.length) {
       if (code === elem.charCodeAt(1) && code == elem.charCodeAt(2))
-	++original_string_count;
+    ++original_string_count;
     }
   }
 }

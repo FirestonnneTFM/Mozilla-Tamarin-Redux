@@ -44,7 +44,7 @@ START("13.4 XML Object - Assignment to indexed XML not allowed error");
 
 var xml;
 
-xml = new XML("<x><a>1</a><b>2</b><c>3</c></x>"); 
+xml = new XML("<x><a>1</a><b>2</b><c>3</c></x>");
 
 var expectedStr = "TypeError: Error #1087: Assignment to indexed XML is not allowed.";
 var expected = "Error #1087";

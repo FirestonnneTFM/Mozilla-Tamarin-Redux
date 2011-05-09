@@ -46,19 +46,19 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     //  for ( LeftHandSideExpression in Expression )
     //  LeftHandSideExpression:NewExpression:MemberExpression
 
     var count = 0;
-    function f() {     
-		//print( "f called" );
-		count++; 
-		return new Array("h","e","l","o"); 
-	}
+    function f() {
+        //print( "f called" );
+        count++;
+        return new Array("h","e","l","o");
+    }
 
-	var myArray = new Array("h","e","l","o"); 
+    var myArray = new Array("h","e","l","o");
 
     var result = "";
     for ( p in f() ) { result += f()[p] };
@@ -70,15 +70,15 @@ function getTestCases() {
         5,
         count );
 
-	// ecma does not gaurantee the order that for in will run... changed
+    // ecma does not gaurantee the order that for in will run... changed
     // to verify that all letters of hello are called
-	var result2 = "PASSED";
-	for( var x = 0; x<myArray.length; x++ ){
-		if( result.indexOf( myArray[x] ) == -1 ){
-			result2 = "FAILED";
-			break;
-		}
-	}
+    var result2 = "PASSED";
+    for( var x = 0; x<myArray.length; x++ ){
+        if( result.indexOf( myArray[x] ) == -1 ){
+            result2 = "FAILED";
+            break;
+        }
+    }
 
     array[item++] = new TestCase( SECTION,
         "Verify all letters of hello are found in result",

@@ -49,19 +49,19 @@
 function getTestCases() {
     var array = new Array();
     var item = 0;
-	var arr;
+    var arr;
 
-    array[item++] = new TestCase( SECTION,	"typeof new Array(1,2)",        "object",           typeof new Array(1,2) );
-    array[item++] = new TestCase( SECTION,	"(new Array(1,2)).toString",    "function Function() {}",    ((new Array(1,2)).toString).toString() );
+    array[item++] = new TestCase( SECTION,  "typeof new Array(1,2)",        "object",           typeof new Array(1,2) );
+    array[item++] = new TestCase( SECTION,  "(new Array(1,2)).toString",    "function Function() {}",    ((new Array(1,2)).toString).toString() );
     array[item++] = new TestCase( SECTION,
                                     "var arr = new Array(1,2,3); arr.getClass = Object.prototype.toString; arr.getClass()",
                                     "[object Array]",
                                     (arr = new Array(1,2,3), arr.getClass = Object.prototype.toString, arr.getClass() ) );
 
-    array[item++] = new TestCase( SECTION,	"(new Array(1,2)).length",      2,                  (new Array(1,2)).length );
-    array[item++] = new TestCase( SECTION,	"var arr = (new Array(1,2)), arr[0]",  1,           (arr = (new Array(1,2)), arr[0] ) );
-    array[item++] = new TestCase( SECTION,	"var arr = (new Array(1,2)), arr[1]",  2,           (arr = (new Array(1,2)), arr[1] ) );
-    array[item++] = new TestCase( SECTION,	"var arr = (new Array(1,2)), String(arr)",  "1,2",  (arr = (new Array(1,2)), String(arr) ) );
+    array[item++] = new TestCase( SECTION,  "(new Array(1,2)).length",      2,                  (new Array(1,2)).length );
+    array[item++] = new TestCase( SECTION,  "var arr = (new Array(1,2)), arr[0]",  1,           (arr = (new Array(1,2)), arr[0] ) );
+    array[item++] = new TestCase( SECTION,  "var arr = (new Array(1,2)), arr[1]",  2,           (arr = (new Array(1,2)), arr[1] ) );
+    array[item++] = new TestCase( SECTION,  "var arr = (new Array(1,2)), String(arr)",  "1,2",  (arr = (new Array(1,2)), String(arr) ) );
 
     return ( array );
 }

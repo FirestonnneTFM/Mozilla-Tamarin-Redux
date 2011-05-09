@@ -46,7 +46,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     ToPrimitive_1();
 
@@ -69,8 +69,8 @@ function getTestCases() {
             array[item++] = new TestCase(
                 SECTION,
                 "new MyObject() + new MyObject()",
-				"TypeError: Error #1006",
-				typeError( exception ) );
+                "TypeError: Error #1006",
+                typeError( exception ) );
         }
     }
     

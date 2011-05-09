@@ -81,8 +81,8 @@ function Engineer ( name, projs, machine ) {
 Engineer.prototype = new WorkerBee();
 
 var pat = new Engineer( "Toonces, Pat",
-			["SpiderMonkey", "Rhino"],
-			"indy" );
+            ["SpiderMonkey", "Rhino"],
+            "indy" );
 
 Employee.prototype.specialty = "none";
 
@@ -90,38 +90,38 @@ Employee.prototype.specialty = "none";
 // Pat, the Engineer
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.name",
-	      "Toonces, Pat",
-	      pat.name );
+          "pat.name",
+          "Toonces, Pat",
+          pat.name );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.dept",
-	      "engineering",
-	      pat.dept );
+          "pat.dept",
+          "engineering",
+          pat.dept );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.projects.length",
-	      2,
-	      pat.projects.length );
+          "pat.projects.length",
+          2,
+          pat.projects.length );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.projects[0]",
-	      "SpiderMonkey",
-	      pat.projects[0] );
+          "pat.projects[0]",
+          "SpiderMonkey",
+          pat.projects[0] );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.projects[1]",
-	      "Rhino",
-	      pat.projects[1] );
+          "pat.projects[1]",
+          "Rhino",
+          pat.projects[1] );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.machine",
-	      "indy",
-	      pat.machine );
+          "pat.machine",
+          "indy",
+          pat.machine );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.specialty",
-	      "none",
-	      pat.specialty );
+          "pat.specialty",
+          "none",
+          pat.specialty );
 
 test();

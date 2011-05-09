@@ -69,12 +69,12 @@ function getTestCases()
 
 function throwError()
 {
-	try
-	{
-		throw THE_ERROR;
-	}
-	catch(e)
-	{
-		return e;
-	}
+    try
+    {
+        throw THE_ERROR;
+    }
+    catch(e)
+    {
+        return e;
+    }
 }

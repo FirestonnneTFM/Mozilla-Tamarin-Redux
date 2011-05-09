@@ -69,9 +69,9 @@ try {
   errormsg=e.toString();
 }
 AddTestCase(
-		"map mapper is undefined",
-		"ArgumentError: Error #1063",
-		parseError(errormsg,"ArgumentError: Error #1063".length));
+        "map mapper is undefined",
+        "ArgumentError: Error #1063",
+        parseError(errormsg,"ArgumentError: Error #1063".length));
 
 var errormsg="";
 try {
@@ -80,25 +80,25 @@ try {
   errormsg=e.toString();
 }
 AddTestCase(
-		"map mapper is not a function",
-		"TypeError: Error #1034",
-		parseError(errormsg,"TypeError: Error #1034".length));
+        "map mapper is not a function",
+        "TypeError: Error #1034",
+        parseError(errormsg,"TypeError: Error #1034".length));
 
 AddTestCase(
-		"map empty vector",
-		"",
-		new <int>[].map(mapper1).toString());
+        "map empty vector",
+        "",
+        new <int>[].map(mapper1).toString());
 
 AddTestCase(
-		"map small vector",
-		"(a:0),(b:1),(c:2)",
-		new<String>['a','b','c'].map(mapper1).toString());
+        "map small vector",
+        "(a:0),(b:1),(c:2)",
+        new<String>['a','b','c'].map(mapper1).toString());
 
 
 AddTestCase(
-		"map fixed size small vector",
-		"(a:0),(b:1),(c:2)",
-		new<String>['a','b','c'].map(mapper1).toString());
+        "map fixed size small vector",
+        "(a:0),(b:1),(c:2)",
+        new<String>['a','b','c'].map(mapper1).toString());
 
 testobj=new Object();
 testobj.message="testobj";

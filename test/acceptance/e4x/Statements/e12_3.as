@@ -58,7 +58,7 @@ AddTestCase( "for-each-in       :", true, (s=="123") );
 s = "";
 
 for each ( i in x1.z )
-	s += i.A;
+    s += i.A;
 
 AddTestCase( "for-each-in (var) :", true, (s=="123") );
 
@@ -78,7 +78,7 @@ AddTestCase( "for-each-in       :", true, (s=="123") );
 s = "";
 
 for each ( i in xl.z )
-	s += i.A;
+    s += i.A;
 
 AddTestCase( "for-each-in (var) :", true, (s=="123") );
 

@@ -35,11 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package SuperDifferentNamespace {
-	public class SuperDifferentNamespace extends BaseClass {
-	
-		override ns1 function echo() : String { 
-			return super.ns2::echo() + " override";
-		}
-		
-	}
+    public class SuperDifferentNamespace extends BaseClass {
+    
+        override ns1 function echo() : String {
+            return super.ns2::echo() + " override";
+        }
+        
+    }
 }

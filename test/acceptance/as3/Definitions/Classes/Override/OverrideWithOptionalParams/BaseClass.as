@@ -35,24 +35,24 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package OptionalParams {
-	
-	public class BaseClass {
-		public var i:int;
-		public var s:String;
+    
+    public class BaseClass {
+        public var i:int;
+        public var s:String;
 
-		public function setInt( input:int = 0 ) {
-			i = input;
-		}
-		
-		public function setString( string:String = "default" ) {
-			s = string;
-		}
-		
-		public function setAll( input:int = 0, string:String = "default" ) {
-			i = input;
-			s = string;
-		}
-		
-	}
-	
+        public function setInt( input:int = 0 ) {
+            i = input;
+        }
+        
+        public function setString( string:String = "default" ) {
+            s = string;
+        }
+        
+        public function setAll( input:int = 0, string:String = "default" ) {
+            i = input;
+            s = string;
+        }
+        
+    }
+    
 }

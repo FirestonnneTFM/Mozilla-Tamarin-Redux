@@ -64,18 +64,18 @@ function getTestCases() {
                                     false,
                                     MyOtherFunction(true) );
 
-	function MyFunction( value ) {
-	    var x = value;
-	    delete x;
-	    return x;
-	}
-	function MyOtherFunction(value) {
-	    var x = value;
-	    return delete x;
-	}
-	function MyObject( value ) {
-	 this.THIS = this;
-	}
+    function MyFunction( value ) {
+        var x = value;
+        delete x;
+        return x;
+    }
+    function MyOtherFunction(value) {
+        var x = value;
+        return delete x;
+    }
+    function MyObject( value ) {
+     this.THIS = this;
+    }
 
     return ( array );
 }

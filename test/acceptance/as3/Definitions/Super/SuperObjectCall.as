@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "8.6.1 Constructor Methods";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS3";        // Version of ECMAScript or ActionScript
 var TITLE   = "SuperExpression on Object";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -51,11 +51,11 @@ import SuperObjectCall.*
 var soc = new SuperObjectCall();
 var thisException = "no exception thrown";
 try {
-	var s = soc.whatIsIt();
+    var s = soc.whatIsIt();
 } catch (e) {
-	thisException = e.toString();
+    thisException = e.toString();
 } finally {
-	AddTestCase( "super call to Object toString() should fail", REFERENCEERROR+1070, referenceError( thisException ) );
+    AddTestCase( "super call to Object toString() should fail", REFERENCEERROR+1070, referenceError( thisException ) );
 }
 
 //

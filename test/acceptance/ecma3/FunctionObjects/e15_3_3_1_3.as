@@ -56,7 +56,7 @@ function getTestCases() {
                                     delete Function.prototype
                                 );
 
-	delete Function.prototype;
+    delete Function.prototype;
     array[item++] = new TestCase(   SECTION,
                                     "delete Function.prototype; Function.prototype",
                                     FUN_PROTO,

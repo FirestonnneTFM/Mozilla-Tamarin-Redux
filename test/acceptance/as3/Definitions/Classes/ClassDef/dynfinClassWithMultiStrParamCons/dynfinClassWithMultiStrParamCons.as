@@ -56,7 +56,7 @@ package testdynfinalClassWithMultiStringParamCons{
                   var g3=new dynfinClassWithMultiStrParamCons("hello"+
 "world");
                                     
-                                     return g3.myString();    
+                                     return g3.myString();
 
 
                                           }

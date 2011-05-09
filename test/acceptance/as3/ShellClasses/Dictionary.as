@@ -67,7 +67,7 @@
       dict_weak!=null
       );
 
-    // test get/set keys and values 
+    // test get/set keys and values
 
     AddTestCase(
       "empty dictionary toString",
@@ -169,7 +169,7 @@
     AddTestCase(
      "for each in dictionary",
      "obj1_value,one_value",
-     out3.toString()); 
+     out3.toString());
 
     var out4=new Array();
     for each (a in dict_weak) {
@@ -179,7 +179,7 @@
     AddTestCase(
      "for each in weak dictionary",
      "obj1_value,one_value",
-     out4.toString()); 
+     out4.toString());
 
 // test delete
 

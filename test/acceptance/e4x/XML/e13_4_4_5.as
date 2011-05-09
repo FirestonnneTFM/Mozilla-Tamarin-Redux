@@ -68,21 +68,21 @@ for each (var a in x1.attributes())
 
 var xmlDoc = "<TEAM foo = 'bar' two='second'>Giants</TEAM>";
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.attributes() instanceof XMLList", true, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.attributes() instanceof XMLList", true,
              (MYXML = new XML(xmlDoc), MYXML.attributes() instanceof XMLList ));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.attributes() instanceof XML", false, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.attributes() instanceof XML", false,
              (MYXML = new XML(xmlDoc), MYXML.attributes() instanceof XML ));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.attributes().length()", 2, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.attributes().length()", 2,
              (MYXML = new XML(xmlDoc), MYXML.attributes().length() ));
 XML.prettyPrinting = false;
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.attributes().toString()", "barsecond", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.attributes().toString()", "barsecond",
              (MYXML = new XML(xmlDoc), MYXML.attributes().toString() ));
 XML.prettyPrinting = true;
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.attributes().toString()", "barsecond", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.attributes().toString()", "barsecond",
              (MYXML = new XML(xmlDoc), MYXML.attributes().toString() ));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.attributes()[0].nodeKind()", "attribute", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.attributes()[0].nodeKind()", "attribute",
              (MYXML = new XML(xmlDoc), MYXML.attributes()[0].nodeKind() ));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.attributes()[1].nodeKind()", "attribute", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.attributes()[1].nodeKind()", "attribute",
              (MYXML = new XML(xmlDoc), MYXML.attributes()[1].nodeKind() ));
 
 END();

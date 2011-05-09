@@ -61,26 +61,26 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 var o = new Object();
 
 testcases[index++] = new TestCase( SECTION,
-	      "var o = new Object(); o.toString()",
-	      "[object Object]",
-	      o.toString() );
+          "var o = new Object(); o.toString()",
+          "[object Object]",
+          o.toString() );
 
 o = {};
 
 testcases[index++] = new TestCase( SECTION,
-	      "o = {}; o.toString()",
-	      "[object Object]",
-	      o.toString() );
+          "o = {}; o.toString()",
+          "[object Object]",
+          o.toString() );
 
 
 o = { name:"object", length:0, value:"hello",
       toString:function (){return this.value+''} }
 
   testcases[index++] = new TestCase( SECTION,
-		"o = { name:\"object\", length:0, value:\"hello\", "+
-		"toString:new Function( \"return this.value+''\" ) }; o.toString()",
-		"hello",
-		o.toString() );
+        "o = { name:\"object\", length:0, value:\"hello\", "+
+        "toString:new Function( \"return this.value+''\" ) }; o.toString()",
+        "hello",
+        o.toString() );
 
 
 

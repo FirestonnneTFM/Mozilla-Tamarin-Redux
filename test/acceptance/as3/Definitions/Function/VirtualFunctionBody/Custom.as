@@ -35,6 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package VirtualFunctionBody {
-	public class Custom {}
+    public class Custom {}
 }
 

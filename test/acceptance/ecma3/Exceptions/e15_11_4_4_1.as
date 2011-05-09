@@ -38,7 +38,7 @@
 * Date:    22 Jan 2002
 * SUMMARY: Testing Error.prototype.toString()
 *
-* Note that ECMA-262 3rd Edition Final, Section 15.11.4.4 states that 
+* Note that ECMA-262 3rd Edition Final, Section 15.11.4.4 states that
 * Error.prototype.toString() returns an implementation-dependent string.
 * Therefore any testcase on this property is somewhat arbitrary.
 *
@@ -119,7 +119,7 @@ function getTestCases() {
     status = "run-time error";
     try
     {
-    	throw new Error();
+        throw new Error();
     }
     catch(err5)
     {
@@ -139,7 +139,7 @@ function getTestCases() {
  * We allow for no colon in case err.message was not provided by the user.
  * In such a case, SpiderMonkey and Rhino currently set err.message = '',
  * as allowed for by ECMA 15.11.4.3. This makes |pattern| work in this case.
- * 
+ *
  * If this is ever changed to a non-empty string, e.g. 'undefined',
  * you may have to modify |pattern| to take that into account -
  *

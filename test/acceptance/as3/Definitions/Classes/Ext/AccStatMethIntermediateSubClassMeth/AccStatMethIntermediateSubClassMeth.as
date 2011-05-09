@@ -38,24 +38,24 @@
 package StaticPropertyPackage {
 
         public class BaseClass {
-		
-		internal static function echo(s:String): String {
-			return s;
-		}
-	}
+        
+        internal static function echo(s:String): String {
+            return s;
+        }
+    }
 
         internal class IntermediateClass extends BaseClass {}
 
-	public class AccStatMethIntermediateSubClassMeth extends IntermediateClass {
-	
-		public function callEcho(s:String): String {
-			return echo(s);
-		}
-		
-		public function callBaseEcho(s:String): String {
-			return BaseClass.echo(s);
-		}
+    public class AccStatMethIntermediateSubClassMeth extends IntermediateClass {
+    
+        public function callEcho(s:String): String {
+            return echo(s);
+        }
+        
+        public function callBaseEcho(s:String): String {
+            return BaseClass.echo(s);
+        }
 
 
-	}
+    }
 }

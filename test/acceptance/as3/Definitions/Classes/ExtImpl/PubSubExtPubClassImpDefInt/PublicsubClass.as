@@ -40,22 +40,22 @@ package PublicClassImpDefInt{
 use namespace ns;
 
    public class PublicsubClass extends PublicClass{
-		
+        
 
-	//override public function getdeffunc():String{return deffunc();}
-		// access default function deffunc
+    //override public function getdeffunc():String{return deffunc();}
+        // access default function deffunc
 
 
-	override public function pubFunc():Boolean{	       //Public method
-				return !true;
-		}	
-			
-	override ns function nsFunc(a="test"):int{	       //Namespace method
-			return a.length;	
-		} 
-		
-	}
+    override public function pubFunc():Boolean{        //Public method
+                return !true;
+        }
+            
+    override ns function nsFunc(a="test"):int{         //Namespace method
+            return a.length;
+        }
+        
+    }
 
-	
-	
-}  
+    
+    
+}

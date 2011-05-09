@@ -46,7 +46,7 @@ startTest();
  * "Negative integers as object properties: strange behavior!"
  *
  * We check that object properties may be indexed by signed
- * numeric literals, as in assignments like obj[-1] = 'Hello' 
+ * numeric literals, as in assignments like obj[-1] = 'Hello'
  *
  * NOTE: it should not matter whether we provide the literal with
  * quotes around it or not; e.g. these should be equivalent:
@@ -66,10 +66,10 @@ var status = ''; var actual = ''; var expect = ''; var value = '';
 
 
 //  various indices to try -
-var index = Array(-5000, -507, -3, -2, -1, 0, 1, 2, 3); 
+var index = Array(-5000, -507, -3, -2, -1, 0, 1, 2, 3);
 
 
-//------------------------------------------------------------------------------------------------- 
+//-------------------------------------------------------------------------------------------------
 addtestcases();
 //-------------------------------------------------------------------------------------------------
 
@@ -91,12 +91,12 @@ function testProperty(i)
   status = getStatus(i);
 
   // try to assign a property using the given index -
-  obj[i] = value = (propprefix  +  i);  
+  obj[i] = value = (propprefix  +  i);
  
   // try to read the property back via the index (as number) -
   expect = value;
   actual = obj[i];
-  AddTestCase(status, expect, actual); 
+  AddTestCase(status, expect, actual);
 
   // try to read the property back via the index as string -
   expect = value;

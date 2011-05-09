@@ -35,11 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package errors {
-	public namespace ns1;
-	public namespace ns2;
+    public namespace ns1;
+    public namespace ns2;
 
-	class BaseClass {
-		ns1 function foo(): String { return "A.ns1::foo()"; }
-	}
-	
+    class BaseClass {
+        ns1 function foo(): String { return "A.ns1::foo()"; }
+    }
+    
 }

@@ -38,12 +38,12 @@
 import PublicClass.*;
 
 
-var SECTION = "Definitions";       							// provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";  								// Version of JavaScript or ECMA
-var TITLE   = "Override default function in public class extending public class";    	// Provide ECMA section title or a description
+var SECTION = "Definitions";                                // provide a document reference (ie, ECMA section)
+var VERSION = "AS 3.0";                                 // Version of JavaScript or ECMA
+var TITLE   = "Override default function in public class extending public class";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                							// leave this alone
+startTest();                                            // leave this alone
 
 
 var CLASSDEFN = new PubExtPublicOverRideDefault();
@@ -57,6 +57,6 @@ AddTestCase( "CLASSDEFN.orSet", true, CLASSDEFN.orSet );
 AddTestCase( "CLASSDEFN.orGet", true, CLASSDEFN.orGet );
 
 
-test();       		// Leave this function alone.
-			// This function is for executing the test case and then
-			// displaying the result on to the console or the LOG file.
+test();             // Leave this function alone.
+            // This function is for executing the test case and then
+            // displaying the result on to the console or the LOG file.

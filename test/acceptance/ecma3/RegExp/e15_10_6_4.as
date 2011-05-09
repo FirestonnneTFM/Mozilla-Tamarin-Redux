@@ -55,116 +55,116 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var status = '';
-	var pattern = '';
-	var string = '';
-	var actualmatch = '';
-	var expectedmatch = '';
-
-
-	status = inSection(1);
-	pattern = "a|ab";
-	var regexp = new RegExp(pattern);
-	string = 'abc';
-	var regexp2 = pattern.toString();
-	actualmatch = string.match(regexp2);
-	expectedmatch = Array('a');
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
-
-	status = inSection(2);
-	pattern = "((a)|(ab))((c)|(bc))";
-	string = 'abc';
-	var regexp = new RegExp(pattern);
-	regexp2 = pattern.toString();
-	actualmatch = string.match(regexp2);
-	expectedmatch = Array('abc', 'a', 'a', undefined, 'bc', undefined, 'bc');
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
-
-	status = inSection(3);
-	pattern = "a[a-z]{2,4}";
-	var regexp = new RegExp(pattern);
-	string = 'abcdefghi';
-	regexp2 = pattern.toString();
-	actualmatch = string.match(regexp2);
-	expectedmatch = Array('abcde');
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
-
-	status = inSection(4);
-	pattern = "a[a-z]{2,4}?";
-	string = 'abcdefghi';
-	var regexp = new RegExp(pattern);
-	regexp2 = pattern.toString();
-	actualmatch = string.match(regexp2);
-	expectedmatch = Array('abc');
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
-
-	status = inSection(5);
-	pattern = "(aa|aabaac|ba|b|c)*";
-	var regexp = new RegExp(pattern);
-	string = 'aabaac';
-	regexp2 = pattern.toString();
-	actualmatch = string.match(regexp2);
-	expectedmatch = Array('aaba', 'ba');
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    var status = '';
+    var pattern = '';
+    var string = '';
+    var actualmatch = '';
+    var expectedmatch = '';
 
 
+    status = inSection(1);
+    pattern = "a|ab";
+    var regexp = new RegExp(pattern);
+    string = 'abc';
+    var regexp2 = pattern.toString();
+    actualmatch = string.match(regexp2);
+    expectedmatch = Array('a');
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	status = inSection(6);
-	pattern = "(z)((a+)?(b+)?(c))*";
-	string = 'zaacbbbcac';
-	regexp = pattern.toString();
-	actualmatch = string.match(regexp);
-	expectedmatch = Array('zaacbbbcac', 'z', 'ac', 'a', undefined, 'c');
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    status = inSection(2);
+    pattern = "((a)|(ab))((c)|(bc))";
+    string = 'abc';
+    var regexp = new RegExp(pattern);
+    regexp2 = pattern.toString();
+    actualmatch = string.match(regexp2);
+    expectedmatch = Array('abc', 'a', 'a', undefined, 'bc', undefined, 'bc');
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	status = inSection(7);
-	pattern = "(a*)*";
-	string = 'b';
-	regexp = pattern.toString();
-	actualmatch = string.match(regexp);
-	expectedmatch = Array('', "");
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    status = inSection(3);
+    pattern = "a[a-z]{2,4}";
+    var regexp = new RegExp(pattern);
+    string = 'abcdefghi';
+    regexp2 = pattern.toString();
+    actualmatch = string.match(regexp2);
+    expectedmatch = Array('abcde');
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+    status = inSection(4);
+    pattern = "a[a-z]{2,4}?";
+    string = 'abcdefghi';
+    var regexp = new RegExp(pattern);
+    regexp2 = pattern.toString();
+    actualmatch = string.match(regexp2);
+    expectedmatch = Array('abc');
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+    status = inSection(5);
+    pattern = "(aa|aabaac|ba|b|c)*";
+    var regexp = new RegExp(pattern);
+    string = 'aabaac';
+    regexp2 = pattern.toString();
+    actualmatch = string.match(regexp2);
+    expectedmatch = Array('aaba', 'ba');
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
 
 
-	status = inSection(8);
-	pattern = "(?=(a+))";
-	string = 'baaabac';
-	regexp = pattern.toString();
-	actualmatch = string.match(regexp);
-	expectedmatch = Array('', 'aaa');
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    status = inSection(6);
+    pattern = "(z)((a+)?(b+)?(c))*";
+    string = 'zaacbbbcac';
+    regexp = pattern.toString();
+    actualmatch = string.match(regexp);
+    expectedmatch = Array('zaacbbbcac', 'z', 'ac', 'a', undefined, 'c');
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+    status = inSection(7);
+    pattern = "(a*)*";
+    string = 'b';
+    regexp = pattern.toString();
+    actualmatch = string.match(regexp);
+    expectedmatch = Array('', "");
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
 
 
-	status = inSection(9);
-	pattern = "(.*?)a(?!(a+)b\2c)\2(.*)";
-	string = 'baaabaac';
-	regexp = pattern.toString();
-	actualmatch = string.match(regexp);
+    status = inSection(8);
+    pattern = "(?=(a+))";
+    string = 'baaabac';
+    regexp = pattern.toString();
+    actualmatch = string.match(regexp);
+    expectedmatch = Array('', 'aaa');
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	/* This will need to be changed when bug 110184 is fixed
-	//////////////////////////////
-	*/
 
-	//expectedmatch = Array('baaabaac', 'ba', undefined, 'abaac');
-	expectedmatch = null;
 
-	/*
-	//////////////////////////////
-	*/
-	array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+    status = inSection(9);
+    pattern = "(.*?)a(?!(a+)b\2c)\2(.*)";
+    string = 'baaabaac';
+    regexp = pattern.toString();
+    actualmatch = string.match(regexp);
 
-	status = inSection(10);
-	pattern = "(?=(a+))";
-	string = 'baaabac';
-	var regexp = pattern.toString();
-	actualmatch = string.match(regexp);
-	expectedmatch = Array('', 'aaa');
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    /* This will need to be changed when bug 110184 is fixed
+    //////////////////////////////
+    */
 
-	return array;
+    //expectedmatch = Array('baaabaac', 'ba', undefined, 'abaac');
+    expectedmatch = null;
+
+    /*
+    //////////////////////////////
+    */
+    array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+
+    status = inSection(10);
+    pattern = "(?=(a+))";
+    string = 'baaabac';
+    var regexp = pattern.toString();
+    actualmatch = string.match(regexp);
+    expectedmatch = Array('', 'aaa');
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+    return array;
 }

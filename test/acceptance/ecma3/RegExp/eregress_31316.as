@@ -55,23 +55,23 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var cnEmptyString = '';
-	var status = '';
-	var pattern = '';
-	var string = '';
-	var actualmatch = '';
-	var expectedmatch = '';
+    var cnEmptyString = '';
+    var status = '';
+    var pattern = '';
+    var string = '';
+    var actualmatch = '';
+    var expectedmatch = '';
 
 
-	status = inSection(1);
-	pattern = /<([^\/<>][^<>]*[^\/])>|<([^\/<>])>/;
-	string = '<p>Some<br />test</p>';
-	actualmatch = string.match(pattern);
-	expectedmatch = Array('<p>', undefined, 'p');
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    status = inSection(1);
+    pattern = /<([^\/<>][^<>]*[^\/])>|<([^\/<>])>/;
+    string = '<p>Some<br />test</p>';
+    actualmatch = string.match(pattern);
+    expectedmatch = Array('<p>', undefined, 'p');
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	return array;
+    return array;
 }

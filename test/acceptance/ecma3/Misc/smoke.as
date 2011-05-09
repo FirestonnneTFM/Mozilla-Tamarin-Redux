@@ -50,7 +50,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
     /*
      * Calls to AddTestCase here. AddTestCase is a function that is defined
      * in shell.js and takes three arguments:

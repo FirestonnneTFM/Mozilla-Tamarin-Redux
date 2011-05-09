@@ -56,26 +56,26 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 // 'abcde'.match(new RegExp('\e'))
 testcases[index++] = new TestCase ( SECTION, "'abcde'.match(new RegExp('\e'))",
-	       String(["e"]), String('abcde'.match(new RegExp('\e'))));
+           String(["e"]), String('abcde'.match(new RegExp('\e'))));
 
 // 'ab\\cde'.match(new RegExp('\\\\'))
 testcases[index++] = new TestCase ( SECTION, "'ab\\cde'.match(new RegExp('\\\\'))",
-	       String(["\\"]), String('ab\\cde'.match(new RegExp('\\\\'))));
+           String(["\\"]), String('ab\\cde'.match(new RegExp('\\\\'))));
 
 // 'ab\\cde'.match(/\\/) (using literal)
 testcases[index++] = new TestCase ( SECTION, "'ab\\cde'.match(/\\\\/)",
-	       String(["\\"]), String('ab\\cde'.match(/\\/)));
+           String(["\\"]), String('ab\\cde'.match(/\\/)));
 
 // 'before ^$*+?.()|{}[] after'.match(new RegExp('\^\$\*\+\?\.\(\)\|\{\}\[\]'))
 testcases[index++] = new TestCase ( SECTION,
-	       "'before ^$*+?.()|{}[] after'.match(new RegExp('\\^\\$\\*\\+\\?\\.\\(\\)\\|\\{\\}\\[\\]'))",
-	       String(["^$*+?.()|{}[]"]),
-	       String('before ^$*+?.()|{}[] after'.match(new RegExp('\\^\\$\\*\\+\\?\\.\\(\\)\\|\\{\\}\\[\\]'))));
+           "'before ^$*+?.()|{}[] after'.match(new RegExp('\\^\\$\\*\\+\\?\\.\\(\\)\\|\\{\\}\\[\\]'))",
+           String(["^$*+?.()|{}[]"]),
+           String('before ^$*+?.()|{}[] after'.match(new RegExp('\\^\\$\\*\\+\\?\\.\\(\\)\\|\\{\\}\\[\\]'))));
 
 // 'before ^$*+?.()|{}[] after'.match(/\^\$\*\+\?\.\(\)\|\{\}\[\]/) (using literal)
 testcases[index++] = new TestCase ( SECTION,
-	       "'before ^$*+?.()|{}[] after'.match(/\\^\\$\\*\\+\\?\\.\\(\\)\\|\\{\\}\\[\\]/)",
-	       String(["^$*+?.()|{}[]"]),
-	       String('before ^$*+?.()|{}[] after'.match(/\^\$\*\+\?\.\(\)\|\{\}\[\]/)));
+           "'before ^$*+?.()|{}[] after'.match(/\\^\\$\\*\\+\\?\\.\\(\\)\\|\\{\\}\\[\\]/)",
+           String(["^$*+?.()|{}[]"]),
+           String('before ^$*+?.()|{}[] after'.match(/\^\$\*\+\?\.\(\)\|\{\}\[\]/)));
 
 test();

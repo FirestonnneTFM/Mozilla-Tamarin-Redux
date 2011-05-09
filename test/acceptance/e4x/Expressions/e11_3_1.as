@@ -42,7 +42,7 @@
 
 START("11.3.1 - Delete Operator");
 
-order = 
+order =
 <order id="123456">
     <customer id="123">
         <firstname>John</firstname>
@@ -66,7 +66,7 @@ order =
         <price>399.99</price>
         <quantity>1</quantity>
     </item>
-</order>;    
+</order>;
 
 // Delete the customer address
 correct =
@@ -92,13 +92,13 @@ correct =
         <price>399.99</price>
         <quantity>1</quantity>
     </item>
-</order>;    
+</order>;
 
 delete order.customer.address;
 TEST_XML(1, "", order.customer.address);
 TEST(2, correct, order);
 
-order = 
+order =
 <order id="123456">
     <customer id="123">
         <firstname>John</firstname>
@@ -122,7 +122,7 @@ order =
         <price>399.99</price>
         <quantity>1</quantity>
     </item>
-</order>;    
+</order>;
 
 // delete the custmomer ID
 correct =
@@ -149,13 +149,13 @@ correct =
         <price>399.99</price>
         <quantity>1</quantity>
     </item>
-</order>;    
+</order>;
 
 delete order.customer.@id;
 TEST_XML(3, "", order.customer.@id);
 TEST(4, correct, order);
 
-order = 
+order =
 <order id="123456">
     <customer id="123">
         <firstname>John</firstname>
@@ -179,7 +179,7 @@ order =
         <price>399.99</price>
         <quantity>1</quantity>
     </item>
-</order>;    
+</order>;
 
 // delete the first item price
 correct =
@@ -205,14 +205,14 @@ correct =
         <price>399.99</price>
         <quantity>1</quantity>
     </item>
-</order>;    
+</order>;
 
 delete order.item.price[0];
 TEST_XML(5, "", order.item[0].price);
 TEST(6, <price>1299.99</price>, order.item.price[0]);
 TEST(7, order, correct);
 
-order = 
+order =
 <order id="123456">
     <customer id="123">
         <firstname>John</firstname>
@@ -236,7 +236,7 @@ order =
         <price>399.99</price>
         <quantity>1</quantity>
     </item>
-</order>;    
+</order>;
 
 // delete all the items
 correct =
@@ -248,13 +248,13 @@ correct =
         <city>Bellevue</city>
         <state>WA</state>
     </customer>
-</order>;    
+</order>;
 
 delete order.item;
-TEST_XML(8, "", order.item); 
+TEST_XML(8, "", order.item);
 TEST(9, correct, order);
 
-order = 
+order =
 <order id="123456">
     <customer id="123">
         <firstname>John</firstname>
@@ -278,12 +278,12 @@ order =
         <price>399.99</price>
         <quantity>1</quantity>
     </item>
-</order>;    
+</order>;
 
 
 // delete all description tags with descendant operator
 // is not supposed to do anything, see bug 149397
-correct = 
+correct =
 <order id="123456">
     <customer id="123">
         <firstname>John</firstname>
@@ -307,13 +307,13 @@ correct =
         <price>399.99</price>
         <quantity>1</quantity>
     </item>
-</order>;    
+</order>;
    
 
 delete order..description;
 TEST(10, correct, order);
 
-order = 
+order =
 <order id="123456">
     <customer id="123">
         <firstname>John</firstname>
@@ -329,18 +329,18 @@ order =
             <city>Bel Air</city>
             <state>CA</state>
     </customer>
-</order>; 
+</order>;
 
 try {
-	delete order.customer.(firstname == "John");
-	result = order;
+    delete order.customer.(firstname == "John");
+    result = order;
 } catch (e1) {
-	result = typeError(e1.toString());
+    result = typeError(e1.toString());
 }
 
 AddTestCase("Delete an XMLList", "TypeError: Error #1119", result);
 
-order = 
+order =
 <order id="123456">
     <customer id="123">
         <firstname>John</firstname>
@@ -364,10 +364,10 @@ order =
         <price>399.99</price>
         <quantity>1</quantity>
     </item>
-</order>;    
+</order>;
 
 // delete all id attributes
-correct = 
+correct =
 <order id="123456">
     <customer id="123">
         <firstname>John</firstname>
@@ -391,13 +391,13 @@ correct =
         <price>399.99</price>
         <quantity>1</quantity>
     </item>
-</order>;    
+</order>;
    
 
 delete order.item.@id;
 TEST(11, correct, order);
 
-order = 
+order =
 <order id="123456">
   <blah>
     <customer id="123">
@@ -426,7 +426,7 @@ order =
 </order>;
 
 // delete all id attributes, using descendant operator
-correct = 
+correct =
 <order id="123456">
   <blah>
     <customer id="123">
@@ -452,7 +452,7 @@ correct =
         <quantity>1</quantity>
     </item>
   </blah>
-</order>;    
+</order>;
    
 
 delete order..item.@id;

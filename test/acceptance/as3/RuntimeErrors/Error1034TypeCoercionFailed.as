@@ -34,21 +34,21 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1034; //	Type Coercion failed: cannot convert _ to _.
+var CODE = 1034; // Type Coercion failed: cannot convert _ to _.
 
 //-----------------------------------------------------------
 startTest();
 //-----------------------------------------------------------
 
 try {
-	var result = "no error";
-	f = function (arg):Function {return arg;};
+    var result = "no error";
+    f = function (arg):Function {return arg;};
     f({});
 } catch (err) {
-	result = err.toString();
-	trace(err);
+    result = err.toString();
+    trace(err);
 } finally {
-	AddTestCase("Runtime Error", TYPEERROR + CODE, typeError(result));
+    AddTestCase("Runtime Error", TYPEERROR + CODE, typeError(result));
 }
 
 //-----------------------------------------------------------

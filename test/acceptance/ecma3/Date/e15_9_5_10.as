@@ -42,8 +42,8 @@
 
     writeHeaderToLog(SECTION + " "+ TITLE);
 
-	var testcases = getTestCases();
-	test();
+    var testcases = getTestCases();
+    test();
 
 function getTestCases() {
     var array = new Array();
@@ -90,15 +90,15 @@ function getTestCases() {
                                     Date.prototype.getFullYear.length );
 
 
-	function addTestCase( t ) {
-	    for ( d = 0; d < TimeInMonth(MonthFromTime(t)); d+= msPerDay ) {
-	        t += d;
-	        array[item++] = new TestCase( SECTION,
-	                                    "(new Date(currentTime+"+d+")).getFullYear()",
-	                                    true, YearFromTime(LocalTime(t)) ==
-	                                    (new Date(t)).getFullYear() );
-	    }
-	}
+    function addTestCase( t ) {
+        for ( d = 0; d < TimeInMonth(MonthFromTime(t)); d+= msPerDay ) {
+            t += d;
+            array[item++] = new TestCase( SECTION,
+                                        "(new Date(currentTime+"+d+")).getFullYear()",
+                                        true, YearFromTime(LocalTime(t)) ==
+                                        (new Date(t)).getFullYear() );
+        }
+    }
 
     return ( array );
 }

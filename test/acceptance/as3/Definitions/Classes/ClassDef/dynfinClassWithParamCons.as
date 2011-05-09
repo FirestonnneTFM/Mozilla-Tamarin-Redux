@@ -47,7 +47,7 @@ var BUGNUMBER = "";
 startTest();                // leave this alone
 
 
-//var currentDate = new Date();                     
+//var currentDate = new Date();
 var deffinWithParamCons:dynfinClassWithParamCons = new dynfinClassWithParamCons(20,40);
 //print (deffinWithParamCons.Add());
 

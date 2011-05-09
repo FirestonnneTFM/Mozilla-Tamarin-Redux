@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SECTION = "Definitions\const";       			// provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";  			// Version of JavaScript or ECMA
+var SECTION = "Definitions\const";                  // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
 var TITLE   = "Initialize a subclass instance const globally";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -44,7 +44,7 @@ startTest();
 
 class MyClass {
 
-	public const pubConst;
+    public const pubConst;
 }
 
 

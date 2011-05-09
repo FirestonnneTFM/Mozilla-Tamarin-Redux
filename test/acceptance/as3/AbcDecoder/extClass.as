@@ -36,8 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 package extClass{
-	public class subClass extends parentClass {
-	}
+    public class subClass extends parentClass {
+    }
 }
 
 import extClass.*;

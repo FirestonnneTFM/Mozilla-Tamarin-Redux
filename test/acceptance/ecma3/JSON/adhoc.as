@@ -56,11 +56,11 @@ function jformat(x) {
     return x;
 }
 
-// set the Object.toString and Array.toString to show each property value 
+// set the Object.toString and Array.toString to show each property value
 // instead of [Object object] for testing
 var oldObject = Object.prototype.toString;
 var oldArray = Array.prototype.toString;
-Object.prototype.toString = 
+Object.prototype.toString =
     (function () {
     var s = "{";
     var first = true;
@@ -74,7 +74,7 @@ Object.prototype.toString =
     }
     return s + "}";
 });
-Array.prototype.toString = 
+Array.prototype.toString =
     (function () {
     var s = "[";
     var first = true;

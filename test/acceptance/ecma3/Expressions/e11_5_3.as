@@ -128,9 +128,9 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "0 % -1",                        0,              0 % -1 );
     array[item++] = new TestCase( SECTION,    "-0 % 1",                        -0,              -0 % 1 );
     array[item++] = new TestCase( SECTION,    "-0 % -1",                       -0,               -0 % -1 );
-	
-	// the sign of the result equals the sign of the dividend
-	
+    
+    // the sign of the result equals the sign of the dividend
+    
     array[item++] = new TestCase( SECTION,    "10 % 3",                       1,               10 % 3 );
     array[item++] = new TestCase( SECTION,    "-10 % 3",                       -1,               -10 % 3 );
     array[item++] = new TestCase( SECTION,    "10 % -3",                       1,               10 % -3 );
@@ -141,7 +141,7 @@ function getTestCases() {
 //      is negative only if n/d is negative and positive only if n/d is positive, and whose magnitude is as large as
 //      possible without exceeding the magnitude of the true mathematical quotient of n and d.
 
-	array[item++] = new TestCase( SECTION,    "66.6 % 25.4",                       15.799999999999997,              66.6 % 25.4 );
+    array[item++] = new TestCase( SECTION,    "66.6 % 25.4",                       15.799999999999997,              66.6 % 25.4 );
     array[item++] = new TestCase( SECTION,    "66.6 % -25.4",                       15.799999999999997,               66.6 % -25.4);
     array[item++] = new TestCase( SECTION,    "-66.6 % 25.4",                       -15.799999999999997,              -66.6 % 25.4 );
     array[item++] = new TestCase( SECTION,    "-66.6 % -25.4",                       -15.799999999999997,             -66.6 % -25.4 );

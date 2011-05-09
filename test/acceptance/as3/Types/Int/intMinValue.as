@@ -56,7 +56,7 @@ function getTestCases() {
     delete( int.MIN_VALUE );
     array[item++] = new TestCase(  SECTION, "delete( int.MIN_VALUE ); int.MIN_VALUE",     MIN_VAL,    int.MIN_VALUE );
 
-	// moved to error folder, now gives compiler error in strict
+    // moved to error folder, now gives compiler error in strict
     /*int.MIN_VALUE=0;
     array[item++] = new TestCase(
                     SECTION,
@@ -65,7 +65,7 @@ function getTestCases() {
                     int.MIN_VALUE );
 */
     var string = '';
-    for ( var prop in int ) { 
+    for ( var prop in int ) {
         string += ( prop == 'MIN_VALUE' ) ? prop : '';
     }
 

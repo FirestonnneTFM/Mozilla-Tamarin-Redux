@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SECTION = "Directives";       							// provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";  							// Version of JavaScript or ECMA
+var SECTION = "Directives";                                 // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";                           // Version of JavaScript or ECMA
 var TITLE   = "Check if a file can be included using include without the # symbol and front slashes";     // Provide ECMA section title or a description
 var BUGNUMBER = "";
 

@@ -47,17 +47,17 @@ test();
 
 function InstanceOf( object_1, object_2, expect, array, item ) {
 
-	try{
-		result = object_1 instanceof object_2;
-	} catch (e) {
-		result = e.toString();
-	} finally {
-		array[item] = new TestCase(
-			SECTION,
-			"(" + object_1 + ") instanceof " + object_2,
-			expect,
-			result);
-	}
+    try{
+        result = object_1 instanceof object_2;
+    } catch (e) {
+        result = e.toString();
+    } finally {
+        array[item] = new TestCase(
+            SECTION,
+            "(" + object_1 + ") instanceof " + object_2,
+            expect,
+            result);
+    }
 
 }
 function getTestCases() {
@@ -67,9 +67,9 @@ function getTestCases() {
 // I'm not sure what we expect here yet... All I know is that this needs to be tested...
 
     function GenB(value) {
-    	this.value=value;
-    	this.generation="B";
-    	this.toString=function(){return "toString";}
+        this.value=value;
+        this.generation="B";
+        this.toString=function(){return "toString";}
     }
 
     GenB.name = "B";

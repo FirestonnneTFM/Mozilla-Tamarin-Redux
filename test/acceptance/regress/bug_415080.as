@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "Regression Tests";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS3";        // Version of ECMAScript or ActionScript
 var TITLE   = "Bug 415080";       // Provide ECMA section title or a description
 
 
@@ -54,7 +54,7 @@ class Bug415080 {
                 a.indexOf('e');
                 if(true == true) {
                     return true;
-                } 
+                }
         }
         return false;
     }

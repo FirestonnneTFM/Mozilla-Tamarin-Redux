@@ -35,5 +35,5 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package asOper {
-	public interface TestInterface {}
+    public interface TestInterface {}
 }

@@ -46,10 +46,10 @@ startTest();                // leave this alone
 
 var employees = [{fname:"John",age:20},{fname:"Sue",age:30}]
 try {
-	var names = employees.*;
-	result = "no exception";
+    var names = employees.*;
+    result = "no exception";
 } catch(e1) {
-	result = referenceError(e1.toString());
+    result = referenceError(e1.toString());
 }
 
 expected = "ReferenceError: Error #1081";
@@ -59,10 +59,10 @@ AddTestCase("Use wildcard operator on an array", expected, result);
 var object = {a:1, b:2, c:3};
 
 try {
-	var names = object.*;
-	result = "no exception";
+    var names = object.*;
+    result = "no exception";
 } catch(e2) {
-	result = referenceError(e2.toString());
+    result = referenceError(e2.toString());
 }
 
 expected = "ReferenceError: Error #1081";
@@ -72,10 +72,10 @@ AddTestCase("Use wildcard operator on an object", expected, result);
 var string = "this is a string";
 
 try {
-	var names = string.*;
-	result = "no exception";
+    var names = string.*;
+    result = "no exception";
 } catch(e3) {
-	result = referenceError(e3.toString());
+    result = referenceError(e3.toString());
 }
 
 expected = "ReferenceError: Error #1069";

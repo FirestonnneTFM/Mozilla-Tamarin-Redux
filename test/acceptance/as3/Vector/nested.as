@@ -92,7 +92,7 @@ class tree {
   var value:String;
   var left:tree;
   var right:tree;
-  function tree(value:String,left:tree,right:tree){ 
+  function tree(value:String,left:tree,right:tree){
     this.value=value;
     this.left=left;
     this.right=right;
@@ -119,7 +119,7 @@ class tree {
     }
     return ret;
   }
-} 
+}
 var two=new tree("two",undefined,undefined);
 var three=new tree("three",undefined,undefined);
 var one=new tree("one",two,three);

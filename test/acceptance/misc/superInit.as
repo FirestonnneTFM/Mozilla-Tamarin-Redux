@@ -41,23 +41,23 @@ class Thing
 
 class A
 {
-	public var container:Thing;
+    public var container:Thing;
 }
 
 class B extends A
 {
-	public function B(s:Thing)
-	{
-		/*
-			existing code relies on the fact that for object-typed member slots,
-			we don't generate explicit initialization code for the slot as part
-			of the ctor, but rather just leave the slot alone (it's allocated 
-			pre-zeroed-out)... this allows assignments to inherited members to
-			work when done prior to the super call.
-		*/
-		container = s;	// yes, assign *before* the super calls
-		super();
-	}
+    public function B(s:Thing)
+    {
+        /*
+            existing code relies on the fact that for object-typed member slots,
+            we don't generate explicit initialization code for the slot as part
+            of the ctor, but rather just leave the slot alone (it's allocated
+            pre-zeroed-out)... this allows assignments to inherited members to
+            work when done prior to the super call.
+        */
+        container = s;  // yes, assign *before* the super calls
+        super();
+    }
 }
 
 var t = new Thing;

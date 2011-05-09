@@ -47,7 +47,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     if (as3Enabled) {
         var OBJ = new MyObject( new Date(0) );

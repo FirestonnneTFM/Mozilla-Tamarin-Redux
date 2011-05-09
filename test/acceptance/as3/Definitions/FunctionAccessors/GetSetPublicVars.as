@@ -38,7 +38,7 @@
 import GetSetPublicVars.*;
 
 var SECTION = "FunctionAccessors";
-var VERSION = "AS3"; 
+var VERSION = "AS3";
 var TITLE   = "Function Accessors";
 var BUGNUMBER = "";
 
@@ -61,53 +61,53 @@ AddTestCase("Set private untyped var", "new value", (OBJ.noType = "new value", O
 
 // Attempt to access the private vars directly
 try{
-	var res = "not run";
-	OBJ._x = new Array();
-	res = "no exception";
+    var res = "not run";
+    OBJ._x = new Array();
+    res = "no exception";
 } catch (e1) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access private var:Array", "no exception", res);
+    AddTestCase("Access private var:Array", "no exception", res);
 }
 
 try{
-	var res = "not run";
-	OBJ._y = 4;
-	res = "no exception";
+    var res = "not run";
+    OBJ._y = 4;
+    res = "no exception";
 } catch (e2) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access private var:int", "no exception", res);
+    AddTestCase("Access private var:int", "no exception", res);
 }
 
 try{
-	var res = "not run";
-	OBJ._b = true;
-	res = "no exception";
+    var res = "not run";
+    OBJ._b = true;
+    res = "no exception";
 } catch (e3) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access private var:Boolean", "no exception", res);
+    AddTestCase("Access private var:Boolean", "no exception", res);
 }
 
 try{
-	var res = "not run";
-	OBJ._u = 4;
-	res = "no exception";
+    var res = "not run";
+    OBJ._u = 4;
+    res = "no exception";
 } catch (e4) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access private var:uint", "no exception", res);
+    AddTestCase("Access private var:uint", "no exception", res);
 }
 
 try{
-	var res = "not run";
-	OBJ._s = "test";
-	res = "no exception";
+    var res = "not run";
+    OBJ._s = "test";
+    res = "no exception";
 } catch (e5) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access private var:String", "no exception", res);
+    AddTestCase("Access private var:String", "no exception", res);
 }
 
 // call setter from setter
@@ -131,24 +131,24 @@ AddTestCase("Call getter from getter", "PASSED", OBJ.gfg2);
 
 //define a getter for a property and call the undefined setter
 try{
-	var res = "not run";
-	OBJ.noSetter = "test";
-	res = "no exception";
+    var res = "not run";
+    OBJ.noSetter = "test";
+    res = "no exception";
 } catch (e6) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("call undefined setter", "exception", res);
+    AddTestCase("call undefined setter", "exception", res);
 }
 
 //define a setter for a property and call the undefined getter
 try{
-	var res = "not run";
-	OBJ.noGetter;
-	res = "no exception";
+    var res = "not run";
+    OBJ.noGetter;
+    res = "no exception";
 } catch (e7) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("call undefined getter", "exception", res);
+    AddTestCase("call undefined getter", "exception", res);
 }
 
 

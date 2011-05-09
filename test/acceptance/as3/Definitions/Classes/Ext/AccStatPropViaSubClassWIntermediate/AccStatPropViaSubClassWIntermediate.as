@@ -37,17 +37,17 @@
 
 package StaticPropertyPackage {
         class BaseClass {
-		static var string:String = "baseclass";
-	}
+        static var string:String = "baseclass";
+    }
         class IntermediateClass extends BaseClass { }
-		
-	public class AccStatPropViaSubClassWIntermediate extends IntermediateClass {
-		
-		public function getString() : String {
-			// modified for d359, scorfield, 8/1/05:
-			//return IntermediateClass.string;
-			// should be visible without qualification:
-			return string;
-		}
-	}
+        
+    public class AccStatPropViaSubClassWIntermediate extends IntermediateClass {
+        
+        public function getString() : String {
+            // modified for d359, scorfield, 8/1/05:
+            //return IntermediateClass.string;
+            // should be visible without qualification:
+            return string;
+        }
+    }
 }

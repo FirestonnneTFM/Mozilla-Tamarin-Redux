@@ -38,12 +38,12 @@
 import MCPackage.*;
 
 
-var SECTION = "Method Closures";       							// provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";  								// Version of JavaScript or ECMA
-var TITLE   = "Extract method from a dynamic class";    	// Provide ECMA section title or a description
+var SECTION = "Method Closures";                                // provide a document reference (ie, ECMA section)
+var VERSION = "AS 3.0";                                 // Version of JavaScript or ECMA
+var TITLE   = "Extract method from a dynamic class";        // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                							// leave this alone
+startTest();                                            // leave this alone
 
 
 
@@ -66,7 +66,7 @@ AddTestCase( "obj.getDate()", year, obj.getDate().getFullYear() );
 
 // *****************************
 // Extract the method from dynamic class
-// Trying to extract a new method from a dynamic class 
+// Trying to extract a new method from a dynamic class
 // should not work, bug #135844
 // *****************************
 var mc : Function = obj.getDate;
@@ -78,6 +78,6 @@ AddTestCase( "obj.getDate() == mc()", null, mc() );
 
 
 
-test();       		// Leave this function alone.
-			// This function is for executing the test case and then
-			// displaying the result on to the console or the LOG file.
+test();             // Leave this function alone.
+            // This function is for executing the test case and then
+            // displaying the result on to the console or the LOG file.

@@ -52,17 +52,17 @@ test();
 
 function getTestCases() {
 
-	var actual:String;
-	try
-	{
-		var xml:XML=new XML("<a><b:c xmlns:b=\"abc\"></d:c></a>") ;
-		actual = xml.toXMLString();
-	}
-	catch(e)
-	{
-		actual = grabError(e, e.toString());
-	}
-	
+    var actual:String;
+    try
+    {
+        var xml:XML=new XML("<a><b:c xmlns:b=\"abc\"></d:c></a>") ;
+        actual = xml.toXMLString();
+    }
+    catch(e)
+    {
+        actual = grabError(e, e.toString());
+    }
+    
     var expect:String= "Error #1085"; // kXMLUnterminatedElementTag
 
     var status:String = "new XML(\"<a><b:c xmlns:b=\"abc\"></d:c></a>\")";

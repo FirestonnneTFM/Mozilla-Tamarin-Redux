@@ -36,30 +36,30 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "FunctionAccessors";
-var VERSION = "AS3"; 
+var VERSION = "AS3";
 var TITLE   = "Function Accessors";
 var BUGNUMBER = "";
 
 startTest();
 
 class foo{
-	// infinite recursion calling setter from setter and back again
-	private var _inf;
-	private var _inf2;
-	public function get inf(){ return inf2; }
-	public function get inf2(){ return inf; }
+    // infinite recursion calling setter from setter and back again
+    private var _inf;
+    private var _inf2;
+    public function get inf(){ return inf2; }
+    public function get inf2(){ return inf; }
 
 }
 
 var OBJ = new foo();
 try{
-	var res = "not run";
-	OBJ.inf; // should cause infinite recursion
-	res = "no exception";
+    var res = "not run";
+    OBJ.inf; // should cause infinite recursion
+    res = "no exception";
 } catch (e) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Infinite recursion getter calling getter", "exception", res);
+    AddTestCase("Infinite recursion getter calling getter", "exception", res);
 }
 
 test();

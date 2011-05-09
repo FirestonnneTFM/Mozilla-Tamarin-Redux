@@ -35,28 +35,28 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-	var SECTION = '12.4';
-	var VERSION = 'no version';
+    var SECTION = '12.4';
+    var VERSION = 'no version';
     startTest();
-	var TITLE = 'Statement:expression';
+    var TITLE = 'Statement:expression';
 
-	writeHeaderToLog('Executing script: expression.as');
-	writeHeaderToLog( SECTION + " "+ TITLE);
+    writeHeaderToLog('Executing script: expression.as');
+    writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-	var testcases = getTestCases();
+    var testcases = getTestCases();
     test();
     
 function getTestCases() {
     var array = new Array();
     var item = 0;
-        	
-	var t;
-	var x = 3;
-	var y= 5;
-	ExpressionStatement: t = x + y;
-			
-	
-	array[item++] = new TestCase( SECTION, "Expression:{t}", 8, t);
-    return array;	
+            
+    var t;
+    var x = 3;
+    var y= 5;
+    ExpressionStatement: t = x + y;
+            
+    
+    array[item++] = new TestCase( SECTION, "Expression:{t}", 8, t);
+    return array;
 }

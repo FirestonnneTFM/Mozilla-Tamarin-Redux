@@ -71,13 +71,13 @@ var obj:AccStatMethSubClassMethSuper = new AccStatMethSubClassMethSuper();
 
 var thisError = "no exception thrown";
 try{
-	obj.getBaseDate();
+    obj.getBaseDate();
 } catch (e1) {
-	thisError = e1.toString();
+    thisError = e1.toString();
 } finally {
-	AddTestCase( "access static method of base class using 'super.foo()'",
-				REFERENCEERROR+1070,
-				referenceError( thisError) );
+    AddTestCase( "access static method of base class using 'super.foo()'",
+                REFERENCEERROR+1070,
+                referenceError( thisError) );
 }
 
 

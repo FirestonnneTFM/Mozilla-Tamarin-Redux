@@ -44,7 +44,7 @@ START("13.4.4.27 - XML parent()");
 
 //TEST(1, true, XML.prototype.hasOwnProperty("parent"));
     
-var x1 = 
+var x1 =
 <alpha>
     <bravo>one</bravo>
     <charlie>

@@ -44,7 +44,7 @@ package {
 
     writeHeaderToLog( SECTION + " "+ TITLE);
 
-    // set the Object.toString and Array.toString to show each property value 
+    // set the Object.toString and Array.toString to show each property value
     // instead of [Object object] for testing
     var oldObject = Object.prototype.toString;
     var oldArray = Array.prototype.toString;
@@ -79,7 +79,7 @@ package {
             if (!this.hasOwnProperty(i))
                 continue;
             s += jformat(this[i]);
-        } 
+        }
         return s + "]";
     });
 

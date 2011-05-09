@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package MCPackage {
-	public dynamic class DynamicClass {
-		public var date:Date = new Date(0);
-	}
+    public dynamic class DynamicClass {
+        public var date:Date = new Date(0);
+    }
 }

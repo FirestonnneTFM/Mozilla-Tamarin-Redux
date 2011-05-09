@@ -61,74 +61,74 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var STRESS = 10;
+    var STRESS = 10;
 
-	var thisError = "no exceptions";
-	var testRegExp = new TestRegExp("test_string");
+    var thisError = "no exceptions";
+    var testRegExp = new TestRegExp("test_string");
 
-	for (var i=0; i<STRESS; i++)
-	{
-		try
-		{
-			testRegExp.checkDate();
-			testRegExp.checkDNSName();
-			testRegExp.checkEmail();
-			testRegExp.checkHostOrIP();
-			testRegExp.checkIPAddress();
-			testRegExp.checkURL();
-		}
-		catch(e)
-		{
-			thisError = "exception occurred";
-		}
-	}
+    for (var i=0; i<STRESS; i++)
+    {
+        try
+        {
+            testRegExp.checkDate();
+            testRegExp.checkDNSName();
+            testRegExp.checkEmail();
+            testRegExp.checkHostOrIP();
+            testRegExp.checkIPAddress();
+            testRegExp.checkURL();
+        }
+        catch(e)
+        {
+            thisError = "exception occurred";
+        }
+    }
 
-	array[item++] = new TestCase(SECTION, "Test completion status", "no exceptions", thisError);
+    array[item++] = new TestCase(SECTION, "Test completion status", "no exceptions", thisError);
 
-	return array;
+    return array;
 }
 
 class TestRegExp {
-	var value;
+    var value;
 
-	function TestRegExp(v)
-	{
-		this.value = v;
-	}
+    function TestRegExp(v)
+    {
+        this.value = v;
+    }
 
-	function checkDate()
-	{
-	  return (this.value.search("/^[012]?\d\/[0123]?\d\/[0]\d$/") != -1);
-	}
+    function checkDate()
+    {
+      return (this.value.search("/^[012]?\d\/[0123]?\d\/[0]\d$/") != -1);
+    }
 
-	function checkDNSName()
-	{
-	  return (this.value.search("/^([\w\-]+\.)+([\w\-]{2,3})$/") != -1);
-	}
+    function checkDNSName()
+    {
+      return (this.value.search("/^([\w\-]+\.)+([\w\-]{2,3})$/") != -1);
+    }
 
-	function checkEmail()
-	{
-	  return (this.value.search("/^([\w\-]+\.)*[\w\-]+@([\w\-]+\.)+([\w\-]{2,3})$/") != -1);
-	}
+    function checkEmail()
+    {
+      return (this.value.search("/^([\w\-]+\.)*[\w\-]+@([\w\-]+\.)+([\w\-]{2,3})$/") != -1);
+    }
 
-	function checkHostOrIP()
-	{
-	  if (this.value.search("/^([\w\-]+\.)+([\w\-]{2,3})$/") == -1)
-	    return (this.value.search("/^[1-2]?\d{1,2}\.[1-2]?\d{1,2}\.[1-2]?\d{1,2}\.[1-2]?\d{1,2}$/") != -1);
-	  else
-	    return true;
-	}
+    function checkHostOrIP()
+    {
+      if (this.value.search("/^([\w\-]+\.)+([\w\-]{2,3})$/") == -1)
+        return (this.value.search("/^[1-2]?\d{1,2}\.[1-2]?\d{1,2}\.[1-2]?\d{1,2}\.[1-2]?\d{1,2}$/") != -1);
+      else
+        return true;
+    }
 
-	function checkIPAddress()
-	{
-	  return (this.value.search("/^[1-2]?\d{1,2}\.[1-2]?\d{1,2}\.[1-2]?\d{1,2}\.[1-2]?\d{1,2}$/") != -1);
-	}
+    function checkIPAddress()
+    {
+      return (this.value.search("/^[1-2]?\d{1,2}\.[1-2]?\d{1,2}\.[1-2]?\d{1,2}\.[1-2]?\d{1,2}$/") != -1);
+    }
 
-	function checkURL()
-	{
-	  return (this.value.search("/^(((https?)|(ftp)):\/\/([\-\w]+\.)+\w{2,4}(\/[%\-\w]+(\.\w{2,})?)*(([\w\-\.\?\\/\*\$+@&#;`~=%!]*)(\.\w{2,})?)*\/?)$/") != -1);
-	}
+    function checkURL()
+    {
+      return (this.value.search("/^(((https?)|(ftp)):\/\/([\-\w]+\.)+\w{2,4}(\/[%\-\w]+(\.\w{2,})?)*(([\w\-\.\?\\/\*\$+@&#;`~=%!]*)(\.\w{2,})?)*\/?)$/") != -1);
+    }
 }

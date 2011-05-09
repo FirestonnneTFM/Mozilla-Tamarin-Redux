@@ -39,10 +39,10 @@ package A
 {
     public class C
     {
-		public function C()
-		{
-		}
-	}
+        public function C()
+        {
+        }
+    }
 }
 
 package B
@@ -50,11 +50,11 @@ package B
     import A.*;
     public class C extends A.C
     {
-		var _x = "FAILED";
-		public function get x(){ return _x; }
+        var _x = "FAILED";
+        public function get x(){ return _x; }
         public function C()
         {
-			_x = "PASSED";
+            _x = "PASSED";
         }
     }
 }
@@ -62,7 +62,7 @@ package B
 import B.*;
 
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 

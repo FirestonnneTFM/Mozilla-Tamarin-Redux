@@ -47,10 +47,10 @@ var BUGNUMBER = "";
 startTest();                // leave this alone
 
 
-//var x = "test"; 
+//var x = "test";
 //var y:Boolean = true;
 //var myArray:Array = new Array(4,6,5);
-//var pbClCons:publicClassCons = new publicClassCons();                   
+//var pbClCons:publicClassCons = new publicClassCons();
 var WIntCWPC:wrapIntClassWithStrParamCons=new wrapIntClassWithStrParamCons();
 //print (dynWithStrParamCons.myString());
 //print(x);

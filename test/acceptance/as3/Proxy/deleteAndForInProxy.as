@@ -65,36 +65,36 @@ AddTestCase("delete function on Proxy Object", true,
 
 myObject.delEchoFunction0 = function(myArg:String):String
 {
-	return myArg;
+    return myArg;
 }
 myObject.delEchoFunction1 = function(myArg:String):String
 {
-	return myArg;
+    return myArg;
 }
 myObject.echoString = function(myArg:String):String
 {
-	return myArg;
+    return myArg;
 }
 
 myObject.multiplyNumbers = function(myNum1:Number, myNum2:Number):Number
 {
-	return (myNum1 * myNum2);
+    return (myNum1 * myNum2);
 }
 
 myObject.sayHello = function():String
 {
-	return "Hello, World!";
+    return "Hello, World!";
 }
 function compareArray(a0:Array, a1:Array):int{
-	var num = 0;
-	trace("-------");
-	for(var i in a1){
-		trace(a0[i] + " / " + a1[i]);
-		if(a0[i] != a1[i]){
-			num++;
-		}
-	}
-	return num;
+    var num = 0;
+    trace("-------");
+    for(var i in a1){
+        trace(a0[i] + " / " + a1[i]);
+        if(a0[i] != a1[i]){
+            num++;
+        }
+    }
+    return num;
 }
 
 myObject.testHasProperty1 = "weasel";
@@ -103,23 +103,23 @@ myObjectProxy.testHasProperty2 = "coffee";
 // test inumerating over proxied object
 function checkProxy(proxy:*, ansArray0:Array, ansArray1:Array):Boolean
 {
-	var pArray0 = new Array();
-	var pArray1 = new Array();
-	for(var i in proxy){
-		pArray0.push(i);
-		pArray1.push(proxy[i]);
-	}
-	pArray0.sort();
-	pArray1.sort();
-	trace("pArray0: " + pArray0.toString());
-	trace("pArray1: " + pArray1.toString());
-	var num0 = compareArray(pArray0, ansArray0);
-	var num1 = compareArray(pArray0, ansArray0);
-	if(num0 != 0 || num1 != 0){
-		return false;
-	}else{
-		return true;
-	}
+    var pArray0 = new Array();
+    var pArray1 = new Array();
+    for(var i in proxy){
+        pArray0.push(i);
+        pArray1.push(proxy[i]);
+    }
+    pArray0.sort();
+    pArray1.sort();
+    trace("pArray0: " + pArray0.toString());
+    trace("pArray1: " + pArray1.toString());
+    var num0 = compareArray(pArray0, ansArray0);
+    var num1 = compareArray(pArray0, ansArray0);
+    if(num0 != 0 || num1 != 0){
+        return false;
+    }else{
+        return true;
+    }
 }
 
 
@@ -135,10 +135,10 @@ var obj = {firstName:"Tara", age:27, city:"San Francisco"};
 var feProxy:ProxySmoke = new ProxySmoke(obj);
 var feArray0 = new Array();
 var ansFeArray0 = ["27", "San Francisco", "Tara"];
-for each (var item in feProxy) { 
-	feArray0.push(item);
-    //trace("item: " + item); 
-} 
+for each (var item in feProxy) {
+    feArray0.push(item);
+    //trace("item: " + item);
+}
 feArray0.sort();
 
 AddTestCase("for in loop over Proxy Object variables", true,
@@ -168,9 +168,9 @@ AddTestCase("add properties one by one and for in on props", true,
 
 var errorMsg = "no error";
 try{
-	obj1Proxy0.doAction();
+    obj1Proxy0.doAction();
 }catch(e){
-	errorMsg = e.toString().substring(0,"TypeError: Error #1006".length);
+    errorMsg = e.toString().substring(0,"TypeError: Error #1006".length);
 }
 
 AddTestCase("call non existent function on proxy", "TypeError: Error #1006",

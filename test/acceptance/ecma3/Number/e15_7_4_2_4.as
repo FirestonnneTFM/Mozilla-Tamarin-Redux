@@ -46,61 +46,61 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	
-    var o = 3; 
-    array[item++] = new TestCase(SECTION,"o = 3;o.toString()",             
-						"3",    
-						o.toString() );
+    
+    var o = 3;
+    array[item++] = new TestCase(SECTION,"o = 3;o.toString()",
+                        "3",
+                        o.toString() );
 
-    var o = new Number(3); 
-    array[item++] = new TestCase(SECTION, "o = new Number(3);o.toString()",             
-						"3",    
-						o.toString() );
+    var o = new Number(3);
+    array[item++] = new TestCase(SECTION, "o = new Number(3);o.toString()",
+                        "3",
+                        o.toString() );
 
-    var o = new Number(); 
-    array[item++] = new TestCase(SECTION,"o = new Number();o.toString()",             
-						"0",    
-						o.toString() );
+    var o = new Number();
+    array[item++] = new TestCase(SECTION,"o = new Number();o.toString()",
+                        "0",
+                        o.toString() );
 
    
-    var o = new Number(3); 
-    array[item++] = new TestCase(SECTION,"o = new Number(3);o.toString()",             
-						"3",    
-						o.toString(10) );
+    var o = new Number(3);
+    array[item++] = new TestCase(SECTION,"o = new Number(3);o.toString()",
+                        "3",
+                        o.toString(10) );
 
     o = new Number(3);
-    array[item++] = new TestCase(SECTION,"o = new Number(3);o.toString()",             
-						"11",    
-						o.toString(2) );
+    array[item++] = new TestCase(SECTION,"o = new Number(3);o.toString()",
+                        "11",
+                        o.toString(2) );
 
     o = new Number(3);
-    array[item++] = new TestCase(SECTION,"o = new Number(3);o.toString()",             
-						"3",    
-						o.toString(8) );
+    array[item++] = new TestCase(SECTION,"o = new Number(3);o.toString()",
+                        "3",
+                        o.toString(8) );
 
     o = new Number(11);
-    array[item++] = new TestCase(SECTION,"o = new Number(11);o.toString()",             
-						"13",    
-						o.toString(8) );
+    array[item++] = new TestCase(SECTION,"o = new Number(11);o.toString()",
+                        "13",
+                        o.toString(8) );
    
     o= new Number(3);
-    array[item++] = new TestCase(SECTION,"o = new Number(3);o.toString()",             
-						"3",    
-						o.toString(16) );
+    array[item++] = new TestCase(SECTION,"o = new Number(3);o.toString()",
+                        "3",
+                        o.toString(16) );
 
     o= new Number(17);
-    array[item++] = new TestCase(SECTION,"o = new Number(17);o.toString()",             
-						"11",    
-						o.toString(16) );
+    array[item++] = new TestCase(SECTION,"o = new Number(17);o.toString()",
+                        "11",
+                        o.toString(16) );
 
     o=new Number(true);
 
-    array[item++] = new TestCase( SECTION,	"o=new Number(true)",			    "1",o.toString() );
+    array[item++] = new TestCase( SECTION,  "o=new Number(true)",               "1",o.toString() );
     
     o=new Number(false);
-    array[item++] = new TestCase( SECTION,	"o=new Number(false)",		    "0",		o.toString() );
+    array[item++] = new TestCase( SECTION,  "o=new Number(false)",          "0",        o.toString() );
     o=new Number(new Array());
-    array[item++] = new TestCase( SECTION,	"o=new Number(new Array())",		"0",			    o.toString() );
+    array[item++] = new TestCase( SECTION,  "o=new Number(new Array())",        "0",                o.toString() );
     o=Number.NaN;
     array[item++] = new TestCase( SECTION,    "o=Number.NaN;o.toString()",       "NaN",                  o.toString() );
     o=new Number(0)
@@ -146,7 +146,7 @@ function getTestCases() {
     o=new Number(-100 );
     array[item++] = new TestCase( SECTION,    "o=new Number(-100 );o.toString()", "-100",o.toString() );
     o=new Number(-1000 );
-    array[item++] = new TestCase( SECTION,    "o=new Number(-1000 );o.toString()", "-1000",o.toString() ); 
+    array[item++] = new TestCase( SECTION,    "o=new Number(-1000 );o.toString()", "-1000",o.toString() );
     o=new Number(-1000000000 );
     array[item++] = new TestCase( SECTION,    "o=new Number(-1000000000 );o.toString()", "-1000000000",o.toString() );
     o=new Number(-1000000000000000);
@@ -196,10 +196,10 @@ function getTestCases() {
         thisError = e.toString()
     }
    
-    array[item++] = new TestCase(SECTION,  
-						"date.myToString=Number.prototype.toString;date.myToString()",             
-						"TypeError: Error #1004",    
-						typeError(thisError) );
+    array[item++] = new TestCase(SECTION,
+                        "date.myToString=Number.prototype.toString;date.myToString()",
+                        "TypeError: Error #1004",
+                        typeError(thisError) );
 
     var o = new Number(3);
 
@@ -209,9 +209,9 @@ function getTestCases() {
         thisError=e.toString();
     }
 
-    array[item++] = new TestCase(SECTION,  
-						"var o=new Number(3);o.toString(1)","RangeError: Error #1003",    
-						rangeError(thisError) );
+    array[item++] = new TestCase(SECTION,
+                        "var o=new Number(3);o.toString(1)","RangeError: Error #1003",
+                        rangeError(thisError) );
 
     var o = new Number(3);
 
@@ -221,9 +221,9 @@ function getTestCases() {
         thisError=e.toString();
     }
 
-    array[item++] = new TestCase(SECTION,  
-						"var o=new Number(3);o.toString(37)","RangeError: Error #1003",    
-						rangeError(thisError) );
+    array[item++] = new TestCase(SECTION,
+                        "var o=new Number(3);o.toString(37)","RangeError: Error #1003",
+                        rangeError(thisError) );
 
    
 

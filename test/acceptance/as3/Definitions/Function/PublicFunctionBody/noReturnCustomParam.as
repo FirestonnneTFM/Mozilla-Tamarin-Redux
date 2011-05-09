@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package PublicFunctionBody {
-	public function noReturnCustomParamInner(c:Custom) { return new Custom(); }
-	public function noReturnCustomParam(c:Custom) { return noReturnCustomParamInner(c); }
+    public function noReturnCustomParamInner(c:Custom) { return new Custom(); }
+    public function noReturnCustomParam(c:Custom) { return noReturnCustomParamInner(c); }
 }
 

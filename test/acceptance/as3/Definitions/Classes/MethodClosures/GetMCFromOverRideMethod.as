@@ -38,12 +38,12 @@
 import MCPackage.*;
 
 
-var SECTION = "Method Closures";       							// provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";  								// Version of JavaScript or ECMA
-var TITLE   = "Extract an overridedn method from a class";    	// Provide ECMA section title or a description
+var SECTION = "Method Closures";                                // provide a document reference (ie, ECMA section)
+var VERSION = "AS 3.0";                                 // Version of JavaScript or ECMA
+var TITLE   = "Extract an overridedn method from a class";      // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                							// leave this alone
+startTest();                                            // leave this alone
 
 
 
@@ -51,7 +51,7 @@ var base:BaseClass = new BaseClass();
 var obj:GetMCFromOverRideMethod = new GetMCFromOverRideMethod();
 
 // *****************************
-// Make sure that we can access 
+// Make sure that we can access
 // the base and override method
 // *****************************
 AddTestCase( "*** Make sure that we can access the method ***", 1, 1 );
@@ -69,6 +69,6 @@ AddTestCase( "obj.addition(2, 3) == mc(2, 3)", obj.addition(2, 3), mc(2, 3) );
 
 
 
-test();       		// Leave this function alone.
-			// This function is for executing the test case and then
-			// displaying the result on to the console or the LOG file.
+test();             // Leave this function alone.
+            // This function is for executing the test case and then
+            // displaying the result on to the console or the LOG file.

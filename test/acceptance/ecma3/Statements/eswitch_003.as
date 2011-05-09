@@ -48,7 +48,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     SwitchTest( "a", "abc" );
     SwitchTest( "b", "bc" );
@@ -83,5 +83,5 @@ function getTestCases() {
             expect,
             result );
     }
-    return array;   
-}    
+    return array;
+}

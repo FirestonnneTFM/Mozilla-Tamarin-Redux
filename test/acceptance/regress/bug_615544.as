@@ -37,13 +37,13 @@
 
 /*
 On an unset variable in a class inside a with block with jit and hybrid shells the value is null and
-with interp the value is undefined.  
+with interp the value is undefined.
 */
 
 package {
 
     var SECTION = "Regression Tests";       // provide a document reference (ie, Actionscript section)
-    var VERSION = "AS3";        // Version of ECMAScript or ActionScript 
+    var VERSION = "AS3";        // Version of ECMAScript or ActionScript
     var TITLE   = "Bug 615544";       // Provide ECMA section title or a description
 
     // 1st bug example using with
@@ -66,7 +66,7 @@ package {
     class test2 {
         var bar;
     }
-    var o=new test2();    
+    var o=new test2();
     o.bar=foo;
 
     var testclass:Bug615544=new Bug615544();

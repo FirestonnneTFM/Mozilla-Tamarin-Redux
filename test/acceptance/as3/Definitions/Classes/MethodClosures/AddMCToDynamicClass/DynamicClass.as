@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package MCPackage {
-	public dynamic class DynamicClass {
-		public var string:String = "ERROR if you see this";
-	}
+    public dynamic class DynamicClass {
+        public var string:String = "ERROR if you see this";
+    }
 }

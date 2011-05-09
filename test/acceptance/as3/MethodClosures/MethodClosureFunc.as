@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SECTION = "MethodClosure";       					// provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";  					// Version of JavaScript or ECMA
-var TITLE   = "Method Closure for implementing event handlers";		// Provide ECMA section title or a description
+var SECTION = "MethodClosure";                          // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";                   // Version of JavaScript or ECMA
+var TITLE   = "Method Closure for implementing event handlers";     // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
 startTest();                // leave this alone
@@ -48,8 +48,8 @@ startTest();                // leave this alone
 
 
 function MethodClosure( myReturnArg ) {
-		
-		return myReturnArg * myReturnArg;
+        
+        return myReturnArg * myReturnArg;
 }
 
 var myMCVar = MethodClosure;

@@ -47,7 +47,7 @@ var BUGNUMBER = "";
 startTest();                // leave this alone
 
 
-var x = "test"; 
+var x = "test";
 var y:Boolean = true;
 var myArray:Array = new Array(4,6,5);
 
@@ -70,7 +70,7 @@ var myArray:Array = new Array(4,6,5);
 import testdynfinalClassWithStringParamCons.publicClassCons;
 var pbClCons:publicClassCons = new publicClassCons();
 
-var MyDefaultClass:DefaultClass;               
+var MyDefaultClass:DefaultClass;
 var dynWithStrParamCons=new dynfinClassWithStrParamCons(x,y,myArray,pbClCons,MyDefaultClass);
 //print (dynWithStrParamCons.myString());
 //print(x);

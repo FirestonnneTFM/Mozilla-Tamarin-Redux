@@ -94,67 +94,67 @@ var twoChildren = new XMLList("<employee id='1'><name>John</name></employee><emp
 
 var wholeString = "<company><employee id='1'><name>John</name></employee><employee id='2'><name>Sue</name></employee><employee id='3'><name>Bob</name></employee></company>";
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.toString()", 
-	"<company><employee id=\"1\"><name>John</name></employee></company>", 
-	(MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.toString()",
+    "<company><employee id=\"1\"><name>John</name></employee></company>",
+    (MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.children()[0].parent() == MYXML", 
-	true, 
-	(MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.children()[0].parent() == MYXML));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.children()[0].parent() == MYXML",
+    true,
+    (MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.children()[0].parent() == MYXML));
 
 // The child is equal to child1 (but not the same object)
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.children()[0] == child1", 
-	true, 
-	(MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.children()[0] == child1));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.children()[0] == child1",
+    true,
+    (MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.children()[0] == child1));
 
 // The child is a duplicate of child1
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.children()[0] === child1", 
-	true, 
-	(MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.children()[0] === child1));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.children()[0] === child1",
+    true,
+    (MYXML = new XML(xmlDoc), MYXML.insertChildBefore(null, child1), MYXML.children()[0] === child1));
 
 var MYXML = new XML(xmlDoc);
 MYXML.insertChildBefore(null, child1);
 
 // !!@ this crashes Rhino's implementation
-AddTestCase( "MYXML.insertChildBefore(child1, child2), MYXML.toString()", 
-	"<company><employee id=\"2\"><name>Sue</name></employee><employee id=\"1\"><name>John</name></employee></company>", 
-	(MYXML.insertChildBefore(child1, child2), MYXML.toString()));
+AddTestCase( "MYXML.insertChildBefore(child1, child2), MYXML.toString()",
+    "<company><employee id=\"2\"><name>Sue</name></employee><employee id=\"1\"><name>John</name></employee></company>",
+    (MYXML.insertChildBefore(child1, child2), MYXML.toString()));
 
 
 var MYXML = new XML(xmlDoc);
 MYXML.insertChildBefore(null, child1);
 
-AddTestCase( "MYXML.insertChildBefore(MYXML.children()[0], child2), MYXML.toString()", 
-	"<company><employee id=\"2\"><name>Sue</name></employee><employee id=\"1\"><name>John</name></employee></company>", 
-	(MYXML.insertChildBefore(MYXML.children()[0], child2), MYXML.toString()));
+AddTestCase( "MYXML.insertChildBefore(MYXML.children()[0], child2), MYXML.toString()",
+    "<company><employee id=\"2\"><name>Sue</name></employee><employee id=\"1\"><name>John</name></employee></company>",
+    (MYXML.insertChildBefore(MYXML.children()[0], child2), MYXML.toString()));
 
 MYXML = new XML(xmlDoc);
 MYXML.insertChildBefore(null, child2);
 MYXML.insertChildBefore(MYXML.children()[0], child1);
 
 // !!@ this crashes Rhino's implementation
-AddTestCase( "MYXML.insertChildBefore(child2, child3), MYXML.toString()", 
-	"<company><employee id=\"1\"><name>John</name></employee><employee id=\"3\"><name>Bob</name></employee><employee id=\"2\"><name>Sue</name></employee></company>", 
-	(MYXML.insertChildBefore(child2, child3), MYXML.toString()));
+AddTestCase( "MYXML.insertChildBefore(child2, child3), MYXML.toString()",
+    "<company><employee id=\"1\"><name>John</name></employee><employee id=\"3\"><name>Bob</name></employee><employee id=\"2\"><name>Sue</name></employee></company>",
+    (MYXML.insertChildBefore(child2, child3), MYXML.toString()));
 
 MYXML = new XML(xmlDoc);
 MYXML.insertChildBefore(null, child2);
 MYXML.insertChildBefore(MYXML.children()[0], child1);
 
-AddTestCase( "MYXML.insertChildBefore(MYXML.children()[1], child3), MYXML.toString()", 
-	"<company><employee id=\"1\"><name>John</name></employee><employee id=\"3\"><name>Bob</name></employee><employee id=\"2\"><name>Sue</name></employee></company>", 
-	(MYXML.insertChildBefore(MYXML.children()[1], child3), MYXML.toString()));
-	
+AddTestCase( "MYXML.insertChildBefore(MYXML.children()[1], child3), MYXML.toString()",
+    "<company><employee id=\"1\"><name>John</name></employee><employee id=\"3\"><name>Bob</name></employee><employee id=\"2\"><name>Sue</name></employee></company>",
+    (MYXML.insertChildBefore(MYXML.children()[1], child3), MYXML.toString()));
+    
 MYXML = new XML(xmlDoc);
 
-AddTestCase("MYXML.insertChildBefore(null, XMLList), MYXML.toString()", 
+AddTestCase("MYXML.insertChildBefore(null, XMLList), MYXML.toString()",
              new XML(wholeString).toString(),
              (MYXML.insertChildBefore(null, allChildren), MYXML.toString()));
              
 MYXML = new XML(xmlDoc);
 MYXML.insertChildBefore(null, child3);
 
-AddTestCase("MYXML.insertChildBefore(child3, XMLList), MYXML.toString()", 
+AddTestCase("MYXML.insertChildBefore(child3, XMLList), MYXML.toString()",
              new XML(wholeString).toString(),
              (MYXML.insertChildBefore(MYXML.children()[0], twoChildren), MYXML.toString()));
              
@@ -162,16 +162,16 @@ MYXML = new XML(xmlDoc);
 MYXML.insertChildBefore(null, child1);
 
 AddTestCase("MYXML.insertChildBefore(child1, \"string\"), MYXML.toString()",
-	     new XML("<company>string<employee id='1'><name>John</name></employee></company>").toString(),
-	     (MYXML.insertChildBefore(MYXML.children()[0], "string"), MYXML.toString()));
+         new XML("<company>string<employee id='1'><name>John</name></employee></company>").toString(),
+         (MYXML.insertChildBefore(MYXML.children()[0], "string"), MYXML.toString()));
              
 var a = <a><b><c/></b></a>;
 
 try {
-	a.b.c.insertChildBefore (null, a);
-	result = a;
+    a.b.c.insertChildBefore (null, a);
+    result = a;
 } catch (e1) {
-	result = typeError(e1.toString());
+    result = typeError(e1.toString());
 }
 AddTestCase("a = <a><b><c/></b></a>, a.b.c.insertChildBefore(null,a)", "TypeError: Error #1118", result);
 

@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "namespace inside a function";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -60,18 +60,18 @@ Football function getTeam(){
 
     use namespace Football;
     return Football::teamName;
-} 
+}
 
 Baseball function getTeam() {
-	return teamName;
+    return teamName;
 }
 
 public function callNSFunction() {
-	return Football::getTeam();
+    return Football::getTeam();
 }
 
 public function getNSVariable() {
-	return Football::teamName;
+    return Football::teamName;
 }
 
 public function a1(){

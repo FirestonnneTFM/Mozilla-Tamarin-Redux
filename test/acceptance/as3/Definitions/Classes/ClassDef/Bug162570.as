@@ -37,21 +37,21 @@
 // Bug 162570: http://flashqa.macromedia.com/bugapp/detail.asp?ID=162570
 
 package same {
-	public class same {
-		function same() {}
-	}
+    public class same {
+        function same() {}
+    }
 }
 
 package test {
-	public class More {
-		function More() {}
+    public class More {
+        function More() {}
 
-		public static var a:int = 0;
-		public static function foo(foo:int):void { More.a = foo; }
+        public static var a:int = 0;
+        public static function foo(foo:int):void { More.a = foo; }
 
-		public var b:Boolean = false;
-		public function bar(bar:Boolean):void { b = bar; }
-	}
+        public var b:Boolean = false;
+        public function bar(bar:Boolean):void { b = bar; }
+    }
 }
 
 

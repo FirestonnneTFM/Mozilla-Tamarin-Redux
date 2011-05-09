@@ -162,7 +162,7 @@ package DynamicClass {
     }
 
     // ***************************************
-    // access static property from 
+    // access static property from
     // default method of sub class
     // ***************************************
 
@@ -232,7 +232,7 @@ package DynamicClass {
     }
 
     // ***************************************
-    // access static property from 
+    // access static property from
     // final method of sub class
     // ***************************************
 
@@ -246,7 +246,7 @@ package DynamicClass {
     }
     
     // ***************************************
-    // access static property from 
+    // access static property from
     // virtual public method of sub class
     // ***************************************
 
@@ -257,7 +257,7 @@ package DynamicClass {
     public function testPubVirSubDPArray(a:Array) : Array {
         this.pubVirSubSetDPArray( a );
         return pubVirSubGetDPArray();
-    }    
+    }
     
   }
   public class DynExtDynamicClassStat extends DynExtDynamicClassStatInner {}

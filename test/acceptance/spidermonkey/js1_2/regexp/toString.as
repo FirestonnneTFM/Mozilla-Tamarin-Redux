@@ -56,21 +56,21 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 var re = new RegExp();
 testcases[index++] = new TestCase ( SECTION, "var re = new RegExp(); re.toString()",
-	       '//', re.toString());
+           '//', re.toString());
 
 // re = /.+/; re.toString();
 re = /.+/;
 testcases[index++] = new TestCase ( SECTION, "re = /.+/; re.toString()",
-	       '/.+/', re.toString());
+           '/.+/', re.toString());
 
 // re = /test/gi; re.toString()
 re = /test/gi;
 testcases[index++] = new TestCase ( SECTION, "re = /test/gi; re.toString()",
-	       '/test/gi', re.toString());
+           '/test/gi', re.toString());
 
 // re = /test2/ig; re.toString()
 re = /test2/ig;
 testcases[index++] = new TestCase ( SECTION, "re = /test2/ig; re.toString()",
-	       '/test2/gi', re.toString());
+           '/test2/gi', re.toString());
 
 test();

@@ -57,7 +57,7 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 // 'cowboy boyish boy'.match(new RegExp('\bboy\b'))
 testcases[index++] = new TestCase ( SECTION, "'cowboy boyish boy'.match(new RegExp('\\bboy\\b'))",
-	       String(["boy"]), String('cowboy boyish boy'.match(new RegExp('\\bboy\\b'))));
+           String(["boy"]), String('cowboy boyish boy'.match(new RegExp('\\bboy\\b'))));
 
 var boundary_characters = "\f\n\r\t\v~`!@#$%^&*()-+={[}]|\\:;'<,>./? " + '"';
 var non_boundary_characters = '1234567890_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -70,8 +70,8 @@ for (i = 0; i < boundary_characters.length; ++i)
   s = '123ab' + boundary_characters.charAt(i) + '123c' + boundary_characters.charAt(i);
 
   testcases[index++] = new TestCase ( SECTION,
-		 "'" + s + "'.match(new RegExp('\\b123[a-z]\\b'))",
-		 String(["123c"]), String(s.match(new RegExp('\\b123[a-z]\\b'))));
+         "'" + s + "'.match(new RegExp('\\b123[a-z]\\b'))",
+         String(["123c"]), String(s.match(new RegExp('\\b123[a-z]\\b'))));
 }
 
 // testing whether all non-boundary characters are matched when they should be
@@ -80,8 +80,8 @@ for (i = 0; i < non_boundary_characters.length; ++i)
   s = '123ab' + non_boundary_characters.charAt(i) + '123c' + non_boundary_characters.charAt(i);
 
   testcases[index++] = new TestCase ( SECTION,
-		 "'" + s + "'.match(new RegExp('\\B123[a-z]\\B'))",
-		 String(["123c"]), String(s.match(new RegExp('\\B123[a-z]\\B'))));
+         "'" + s + "'.match(new RegExp('\\B123[a-z]\\B'))",
+         String(["123c"]), String(s.match(new RegExp('\\B123[a-z]\\B'))));
 }
 
 s = '';
@@ -94,12 +94,12 @@ for (i = 0; i < boundary_characters.length; ++i)
 s += "xa1111bx";
 
 testcases[index++] = new TestCase ( SECTION,
-	       "'" + s + "'.match(new RegExp('\\Ba\\d+b\\B'))",
-	       String(["a1111b"]), String(s.match(new RegExp('\\Ba\\d+b\\B'))));
+           "'" + s + "'.match(new RegExp('\\Ba\\d+b\\B'))",
+           String(["a1111b"]), String(s.match(new RegExp('\\Ba\\d+b\\B'))));
 
 testcases[index++] = new TestCase ( SECTION,
-	       "'" + s + "'.match(/\\Ba\\d+b\\B/)",
-	       String(["a1111b"]), String(s.match(/\Ba\d+b\B/)));
+           "'" + s + "'.match(/\\Ba\\d+b\\B/)",
+           String(["a1111b"]), String(s.match(/\Ba\d+b\B/)));
 
 s = '';
 
@@ -111,11 +111,11 @@ for (i = 0; i < non_boundary_characters.length; ++i)
 s += "(a1111b)";
 
 testcases[index++] = new TestCase ( SECTION,
-	       "'" + s + "'.match(new RegExp('\\ba\\d+b\\b'))",
-	       String(["a1111b"]), String(s.match(new RegExp('\\ba\\d+b\\b'))));
+           "'" + s + "'.match(new RegExp('\\ba\\d+b\\b'))",
+           String(["a1111b"]), String(s.match(new RegExp('\\ba\\d+b\\b'))));
 
 testcases[index++] = new TestCase ( SECTION,
-	       "'" + s + "'.match(/\\ba\\d+b\\b/)",
-	       String(["a1111b"]), String(s.match(/\ba\d+b\b/)));
+           "'" + s + "'.match(/\\ba\\d+b\\b/)",
+           String(["a1111b"]), String(s.match(/\ba\d+b\b/)));
 
 test();

@@ -60,7 +60,7 @@ function getTestCases() {
     array[item++] = new TestCase(SECTION, "typeof (new Number())",         "number",           typeof (new Number()) );
     array[item++] = new TestCase(SECTION,  "(new Number()).valueOf()",     0,                   (new Number()).valueOf() );
 
-	
+    
     NUMB = new Number();
     
     array[item++] = new TestCase(SECTION,

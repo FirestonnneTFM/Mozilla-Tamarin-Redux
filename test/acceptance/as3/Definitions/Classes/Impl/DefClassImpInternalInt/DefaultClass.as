@@ -37,21 +37,21 @@
 /*
  * Default Class DefaultClass
  * Class methods
- *  
+ *
  */
 
 package DefClassImpInternalInt{
-	class DefaultClass implements InternalInt{
-		
+    class DefaultClass implements InternalInt{
+        
 
-		public function deffunc():String{  			    
-			return"PASSED";
-		}
-	
-	}
+        public function deffunc():String{
+            return"PASSED";
+        }
+    
+    }
 
-	public class DefaultClassAccesor extends DefaultClass{
+    public class DefaultClassAccesor extends DefaultClass{
 
-       } 	
-	
-}  
+       }
+    
+}

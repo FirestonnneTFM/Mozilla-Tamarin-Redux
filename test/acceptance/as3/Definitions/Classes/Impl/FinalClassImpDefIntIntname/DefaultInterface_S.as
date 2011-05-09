@@ -35,17 +35,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 /*
- *  Default Interface DefaultInterface 
- * Interface methods 
- *  
+ *  Default Interface DefaultInterface
+ * Interface methods
+ *
  */
 
 
-package FinalClassImpDefIntIntname{ 
+package FinalClassImpDefIntIntname{
 
-	interface DefaultInt_S{
-	
-		function deffunc():String;  		
+    interface DefaultInt_S{
+    
+        function deffunc():String;
 
-	}
+    }
 }

@@ -51,10 +51,10 @@ package DefaultClass {
     function subGetArray() : Array { return getPubStatArray(); }
     function subSetArray(a:Array) { setPubStatArray(a); }
 
-	public function testSubGetSetArray(a:Array) : Array {
-		this.subSetArray(a);
-		return this.subGetArray();
-	}
+    public function testSubGetSetArray(a:Array) : Array {
+        this.subSetArray(a);
+        return this.subGetArray();
+    }
 
 
     // ************************************
@@ -87,10 +87,10 @@ package DefaultClass {
     final function finSubGetArray() : Array { return getPubStatArray(); }
     final function finSubSetArray(a:Array) { setPubStatArray(a); }
 
-	public function testFinSubArray(a:Array):Array {
-		this.finSubSetArray(a);
-		return this.finSubGetArray();
-	}
+    public function testFinSubArray(a:Array):Array {
+        this.finSubSetArray(a);
+        return this.finSubGetArray();
+    }
 
 
     // ***************************************
@@ -101,10 +101,10 @@ package DefaultClass {
     static function statSubGetArray() : Array { return getPubStatArray(); }
     static function statSubSetArray(a:Array) { setPubStatArray(a); }
 
-	public static function testStatSubArray(a:Array):Array {
-		statSubSetArray(a);
-		return statSubGetArray();
-	}
+    public static function testStatSubArray(a:Array):Array {
+        statSubSetArray(a);
+        return statSubGetArray();
+    }
 
 
     // ***************************************
@@ -130,17 +130,17 @@ package DefaultClass {
     }
 
     // ***************************************
-    // access public static property from 
+    // access public static property from
     // default method of sub class
     // ***************************************
 
     function subGetDPArray() : Array { return pubStatArray; }
     function subSetDPArray(a:Array) { pubStatArray = a; }
 
-	public function testSubGetSetDPArray(a:Array) : Array {
-		this.subSetDPArray(a);
-		return this.subGetDPArray();
-	}
+    public function testSubGetSetDPArray(a:Array) : Array {
+        this.subSetDPArray(a);
+        return this.subGetDPArray();
+    }
 
 
     // ***************************************
@@ -159,24 +159,24 @@ package DefaultClass {
     private function privSubGetDPArray() : Array { return pubStatArray; }
     private function privSubSetDPArray(a:Array) { pubStatArray = a; }
 
-	public function testPrivSubDPArray(a:Array) : Array {
-		this.privSubSetDPArray(a);
-		return this.privSubGetDPArray();
-	}
+    public function testPrivSubDPArray(a:Array) : Array {
+        this.privSubSetDPArray(a);
+        return this.privSubGetDPArray();
+    }
 
 
     // ***************************************
-    // access public static property from 
+    // access public static property from
     // final method of sub class
     // ***************************************
 
     final function finSubGetDPArray() : Array { return pubStatArray; }
     final function finSubSetDPArray(a:Array) { pubStatArray = a; }
 
-	public function testFinSubDPArray(a:Array):Array {
-		this.finSubSetDPArray(a);
-		return this.finSubGetDPArray();
-	}
+    public function testFinSubDPArray(a:Array):Array {
+        this.finSubSetDPArray(a);
+        return this.finSubGetDPArray();
+    }
 
 
     // ***************************************
@@ -188,8 +188,8 @@ package DefaultClass {
     static function statSubSetSPArray(a:Array) { pubStatArray = a; }
 
     public static function testStatSubSPArray(a:Array):Array {
-	statSubSetSPArray(a);
-	return statSubGetSPArray();
+    statSubSetSPArray(a);
+    return statSubGetSPArray();
     }
 
 

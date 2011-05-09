@@ -35,12 +35,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package SuperDifferentNamespace {
-	public namespace ns1;
-	public namespace ns2;
-	
-	public class BaseClass {
-		ns1 function echo() : String { return "echo() from BaseClass.ns1"; }
-		
-		ns2 function echo() : String { return "echo() from BaseClass.ns2"; }
-	}
+    public namespace ns1;
+    public namespace ns2;
+    
+    public class BaseClass {
+        ns1 function echo() : String { return "echo() from BaseClass.ns1"; }
+        
+        ns2 function echo() : String { return "echo() from BaseClass.ns2"; }
+    }
 }

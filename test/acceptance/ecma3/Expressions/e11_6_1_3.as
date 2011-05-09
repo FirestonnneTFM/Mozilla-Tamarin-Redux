@@ -47,7 +47,7 @@ function getTestCases() {
     var item = 0;
 
     // tests for boolean primitive, boolean object, Object object, a "MyObject" whose value is
-    // a boolean primitive and a boolean object, 
+    // a boolean primitive and a boolean object,
 
     var DATE1 = new Date(0);
 

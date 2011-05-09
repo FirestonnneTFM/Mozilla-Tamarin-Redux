@@ -39,14 +39,14 @@
 
 package DefClassImpPublicInt{ //package name
 
-	namespace ns;
-	//namespace
+    namespace ns;
+    //namespace
 
-	public interface PublicInt{
-	
-		function deffunc():String;  			    //Default attribute                      //function deffunc2():Number;
-                function deffunc3():int;                                                                
+    public interface PublicInt{
+    
+        function deffunc():String;                  //Default attribute                      //function deffunc2():Number;
+                function deffunc3():int;
 
 
-	}
+    }
 }

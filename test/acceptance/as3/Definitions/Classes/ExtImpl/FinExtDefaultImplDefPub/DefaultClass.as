@@ -138,9 +138,9 @@ package DefaultClass {
     function setDate( d:Date ) { date = d; }
     function setFunction( f:Function ) { myFunction = f; }
     function setMath( m:Math ) { math = m; }
-    function setNumber( n:Number ) { 
-		number = n; 
-	}
+    function setNumber( n:Number ) {
+        number = n;
+    }
     function setObject( o:Object ) { object = o; }
     function setString( s:String ) { string = s; }
 

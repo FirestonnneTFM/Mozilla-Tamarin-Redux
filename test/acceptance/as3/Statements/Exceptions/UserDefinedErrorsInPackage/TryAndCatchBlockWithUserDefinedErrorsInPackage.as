@@ -119,7 +119,7 @@ package UserDefinedErrorsInPackage
                      //print(e3.toString());
                      //trace("An error occurred:"+e3.toString());
                  }finally{
-                      AddTestCase( "Testing try block and multiple catch blocks with custom error classes", "Box dimensions should be greater than 0",thisError );   
+                      AddTestCase( "Testing try block and multiple catch blocks with custom error classes", "Box dimensions should be greater than 0",thisError );
                   }
           }
       }

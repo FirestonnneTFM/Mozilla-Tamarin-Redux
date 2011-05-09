@@ -40,19 +40,19 @@
 // that is equivalent to a namespace...
 package Example_9_2_const {
 
-	interface I { function f(); }
-	
-	
-	class A implements I {
-		public function f() {
-			return "A::f";
-		}
-	}
-	var a : A = new A();
-	public class ExampleTest {
-		public function doTest() : String {
-		    return a.I::f();
-		}
-	}
-	
+    interface I { function f(); }
+    
+    
+    class A implements I {
+        public function f() {
+            return "A::f";
+        }
+    }
+    var a : A = new A();
+    public class ExampleTest {
+        public function doTest() : String {
+            return a.I::f();
+        }
+    }
+    
 }

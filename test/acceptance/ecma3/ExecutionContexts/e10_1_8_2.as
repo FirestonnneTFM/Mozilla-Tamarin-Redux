@@ -63,7 +63,7 @@ function getTestCases() {
                                     GetCallee,
                                     GetCallee() );
 
-	var LENGTH = GetLength( 1,2,3,4,5 );
+    var LENGTH = GetLength( 1,2,3,4,5 );
     array[item++] = new TestCase( SECTION,
                                     "GetLength(1,2,3,4,5)",
                                     5,

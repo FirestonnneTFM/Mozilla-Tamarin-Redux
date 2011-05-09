@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "namespace inside try catch block";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -53,18 +53,18 @@ class A{
        namespace N4;
        
             
-       N2 function func() { 
+       N2 function func() {
            return "Called N2::func1";
        }
        
-       N3 function func() { 
-           return "Called N3::func1";	
+       N3 function func() {
+           return "Called N3::func1";
        }
        public function accfunc1(){
-	    return N2::func()
+        return N2::func()
        }
        public function accfunc2(){
-	  return N3::func()
+      return N3::func()
    }
  }
 
@@ -75,6 +75,6 @@ class A{
        
        test();
   
-} catch (e) { 
+} catch (e) {
       AddTestCase( "Make sure there is no error", false, true);
 }

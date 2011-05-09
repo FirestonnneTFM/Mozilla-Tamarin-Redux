@@ -39,15 +39,15 @@
 
 package PublicClassImpInternalInt{ //package name
 
-	namespace ns;
-	//namespace
+    namespace ns;
+    //namespace
 
-	internal interface InternalInt{
-	
-		function deffunc():String;  			//Default attribute method
+    internal interface InternalInt{
+    
+        function deffunc():String;              //Default attribute method
 
-	//	public function pubFunc():Boolean;	       //Public attribute method
+    //  public function pubFunc():Boolean;         //Public attribute method
 
-	//	ns function nsFunc(a="test"):int;	       //Namespace attribute method
-	}
+    //  ns function nsFunc(a="test"):int;          //Namespace attribute method
+    }
 }

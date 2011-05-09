@@ -50,7 +50,7 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    delete Math.LOG10E; 
+    delete Math.LOG10E;
     array[item++] = new TestCase( SECTION, "delete Math.LOG10E; Math.LOG10E",   0.4342944819032518,     Math.LOG10E );
     array[item++] = new TestCase( SECTION, "delete Math.LOG10E",                false,                  delete Math.LOG10E );
     return ( array );

@@ -45,31 +45,31 @@ startTest();                // leave this alone
 
 
 class A{
-	namespace Baseball;
-	namespace Football;
+    namespace Baseball;
+    namespace Football;
     namespace Basketball;
-	namespace Public;
+    namespace Public;
 
-	Football var teamName = "Chargers";
+    Football var teamName = "Chargers";
 
-	use namespace Baseball;
+    use namespace Baseball;
 
-	Baseball var teamColor = "blue";
+    Baseball var teamColor = "blue";
     Basketball var teamName = "basketball";
     Football var teamColor = "yellow";
 
-	Football function getTeam(){
-	    use namespace Football;
-	    return teamName;
-	}
+    Football function getTeam(){
+        use namespace Football;
+        return teamName;
+    }
 
-	public function a1(){
-		return Football::getTeam();
-	}
+    public function a1(){
+        return Football::getTeam();
+    }
 
-	public function a2(){
-		return teamColor ;
-	}
+    public function a2(){
+        return teamColor ;
+    }
 }
 
 var obj:A = new A()

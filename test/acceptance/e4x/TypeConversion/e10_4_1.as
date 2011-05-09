@@ -44,7 +44,7 @@ START("10.4.1 - toXMLList Applied to String type");
 
 var x1, y1, correct;
 
-x1 = 
+x1 =
 <>
     <alpha>one</alpha>
     <bravo>two</bravo>
@@ -80,7 +80,7 @@ TEST(6, "<alpha>one</alpha>" + NL() + "<bravo>two</bravo>", x1.toXMLString());
 John = "<employee><name>John</name><age>25</age></employee>";
 Sue = "<employee><name>Sue</name><age>32</age></employee>";
 
-correct = 
+correct =
 <>
     <employee><name>John</name><age>25</age></employee>
     <employee><name>Sue</name><age>32</age></employee>

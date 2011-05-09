@@ -57,7 +57,7 @@ function addtestcases()
 
 
  
-// regression test for Bug 452008 - TM: SRP in Clipperz crypto library fails when JIT (TraceMonkey) is enabled. 
+// regression test for Bug 452008 - TM: SRP in Clipperz crypto library fails when JIT (TraceMonkey) is enabled.
 
   var x = [9385, 32112, 25383, 16317, 30138, 14565, 17812, 24500, 2719, 30174, 3546, 9096, 15352, 19120, 20648, 14334, 7426, 0, 0, 0];
   var n = [27875, 25925, 30422, 12227, 27798, 32170, 10873, 21748, 30629, 26296, 20697, 5125, 4815, 2221, 14392, 23369, 5560, 2, 0, 0];

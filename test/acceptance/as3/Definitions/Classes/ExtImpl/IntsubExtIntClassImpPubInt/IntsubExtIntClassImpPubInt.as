@@ -41,49 +41,49 @@ namespace ns;
 
 
                public interface PublicInt{
-	
-		
-          function pubFunc():Boolean;	       //attribute method
+    
+        
+          function pubFunc():Boolean;          //attribute method
 
-//		ns function nsFunc(a="test"):int;	       //Namespace attribute method
-	}
+//      ns function nsFunc(a="test"):int;          //Namespace attribute method
+    }
 
-	internal class InternalClass implements PublicInt{
-		
-		
-		public function pubFunc():Boolean{	       //Public method
-				return true;
-		}	
-			
-		ns function nsFunc(a="test"):int{	       //Namespace method
-			return a.length;	
-		} 
-		
-	}
+    internal class InternalClass implements PublicInt{
+        
+        
+        public function pubFunc():Boolean{         //Public method
+                return true;
+        }
+            
+        ns function nsFunc(a="test"):int{          //Namespace method
+            return a.length;
+        }
+        
+    }
 
 
-	
+    
        class InternalsubClass extends InternalClass{
-		
+        
 
-		
+        
 
 
-		
-			
-		ns override function nsFunc(a="test"):int{	       //Namespace method
-			return a.length;	
-		}
-		
-	}
+        
+            
+        ns override function nsFunc(a="test"):int{         //Namespace method
+            return a.length;
+        }
+        
+    }
 
-	public class IntsubExtIntClassImpPubInt extends InternalsubClass{
+    public class IntsubExtIntClassImpPubInt extends InternalsubClass{
 
                 
-        	
-		public function accnsFunc(a="test"){return ns::nsFunc(a);}
-		// access default function nsFunc
-       } 	
-	 	
-	
-}  
+            
+        public function accnsFunc(a="test"){return ns::nsFunc(a);}
+        // access default function nsFunc
+       }
+        
+    
+}

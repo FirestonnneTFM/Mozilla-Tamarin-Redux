@@ -55,15 +55,15 @@ function parse(s:String):String
     XML.prettyPrinting = false;
     XML.prettyIndent = 0;
     
-	var results = []
+    var results = []
 
     var s:String = "foo"
     var r:String = parse(s);
-	results.push({expected: "foo", actual: r});
+    results.push({expected: "foo", actual: r});
 
     var s:String = "<one>1</one>"
     var r:String = parse(s);
-	results.push({expected: "<one>1</one>", actual: r});
+    results.push({expected: "<one>1</one>", actual: r});
 
     var s:String = "foo" + String.fromCharCode(0) + "<one>1</one>"
     var r:String = parse(s);

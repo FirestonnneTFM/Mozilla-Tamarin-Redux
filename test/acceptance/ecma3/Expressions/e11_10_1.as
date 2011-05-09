@@ -53,10 +53,10 @@ function getTestCases() {
     for ( shiftpow = 0; shiftpow < 1; shiftpow++ ) {
         shiftexp += Math.pow( 2, shiftpow );
 
-		// changing from 31 to 33... ecma3 only requires that we 
-		// support up to the max signed 32-bit int... this was
-		// testing the max unsigned 32-bit int which we will not
-		// support
+        // changing from 31 to 33... ecma3 only requires that we
+        // support up to the max signed 32-bit int... this was
+        // testing the max unsigned 32-bit int which we will not
+        // support
         for ( addpow = 0; addpow < 31; addpow++ ) {
             addexp += Math.pow(2, addpow);
 

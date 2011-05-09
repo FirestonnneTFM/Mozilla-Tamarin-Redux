@@ -37,24 +37,24 @@
 /*
  * Default Class DefaultClass
  * Class methods
- *  
+ *
  */
 
 package DefClassImpPublicIntname{
 
-	class DefaultClass implements PublicInt{
-		
+    class DefaultClass implements PublicInt{
+        
 
-		public function deffunc():String{  			       
-			return"PASSED";
-		}
-	}
+        public function deffunc():String{
+            return"PASSED";
+        }
+    }
 
-	public class DefaultClassAccesor{
-		var c:DefaultClass = new DefaultClass(); 
-		var i:PublicInt = c;
-		public function accdeffunc(){return i.deffunc();}
-		// access default function deffunc
-        } 	
-	
-}  
+    public class DefaultClassAccesor{
+        var c:DefaultClass = new DefaultClass();
+        var i:PublicInt = c;
+        public function accdeffunc(){return i.deffunc();}
+        // access default function deffunc
+        }
+    
+}

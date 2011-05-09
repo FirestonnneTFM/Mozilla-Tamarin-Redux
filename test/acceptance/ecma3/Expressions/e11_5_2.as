@@ -120,24 +120,24 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "-0 / Number.POSITIVE_INFINITY",  -0,     -0 / Number.POSITIVE_INFINITY );
     array[item++] = new TestCase( SECTION,    "-0 / Number.NEGATIVE_INFINITY",  0,      -0 / Number.NEGATIVE_INFINITY );
 
-	// the sign of the result is positive if both operands have the same sign
-	// the sign of the result is negative if the operands have different signs
+    // the sign of the result is positive if both operands have the same sign
+    // the sign of the result is negative if the operands have different signs
 
     array[item++] = new TestCase( SECTION,    "1 / 1",                          1,              1 / 1 );
     array[item++] = new TestCase( SECTION,    "1 / -1",                        -1,              1 / -1 );
     array[item++] = new TestCase( SECTION,    "-1 / 1",                        -1,              -1 / 1 );
-	var q = -1 / -1;
+    var q = -1 / -1;
     array[item++] = new TestCase( SECTION,    "-1 / -1",                       1,               q );
 
-	array[item++] = new TestCase( SECTION,    "Number.MIN_VALUE / Number.MAX_VALUE ",         0,   Number.MIN_VALUE / Number.MAX_VALUE );
-	array[item++] = new TestCase( SECTION,    "Number.MAX_VALUE / Number.MIN_VALUE ",         Number.POSITIVE_INFINITY,   Number.MAX_VALUE / Number.MIN_VALUE );
-	array[item++] = new TestCase( SECTION,    "10.3 / 5e-324",         Number.POSITIVE_INFINITY,   10.3 / 5e-324 );
-	array[item++] = new TestCase( SECTION,    "Number.MIN_VALUE / 1.1 ",         4.9406564584124654e-324,   Number.MIN_VALUE / 1.1 );
-	array[item++] = new TestCase( SECTION,    "Number.MIN_VALUE / 1.9 ",         4.9406564584124654e-324,   Number.MIN_VALUE / 1.9 );
-	array[item++] = new TestCase( SECTION,    "Number.MIN_VALUE / 2.0 ",         0,   Number.MIN_VALUE / 2.0 );
-	array[item++] = new TestCase( SECTION,    "Number.MIN_VALUE / 3 ",         0,   Number.MIN_VALUE / 3 );
-	array[item++] = new TestCase( SECTION,    "Number.MIN_VALUE / 5 ",         0,   Number.MIN_VALUE / 5 );
-	array[item++] = new TestCase( SECTION,    "Number.MIN_VALUE / 9 ",         0,   Number.MIN_VALUE / 9 );
+    array[item++] = new TestCase( SECTION,    "Number.MIN_VALUE / Number.MAX_VALUE ",         0,   Number.MIN_VALUE / Number.MAX_VALUE );
+    array[item++] = new TestCase( SECTION,    "Number.MAX_VALUE / Number.MIN_VALUE ",         Number.POSITIVE_INFINITY,   Number.MAX_VALUE / Number.MIN_VALUE );
+    array[item++] = new TestCase( SECTION,    "10.3 / 5e-324",         Number.POSITIVE_INFINITY,   10.3 / 5e-324 );
+    array[item++] = new TestCase( SECTION,    "Number.MIN_VALUE / 1.1 ",         4.9406564584124654e-324,   Number.MIN_VALUE / 1.1 );
+    array[item++] = new TestCase( SECTION,    "Number.MIN_VALUE / 1.9 ",         4.9406564584124654e-324,   Number.MIN_VALUE / 1.9 );
+    array[item++] = new TestCase( SECTION,    "Number.MIN_VALUE / 2.0 ",         0,   Number.MIN_VALUE / 2.0 );
+    array[item++] = new TestCase( SECTION,    "Number.MIN_VALUE / 3 ",         0,   Number.MIN_VALUE / 3 );
+    array[item++] = new TestCase( SECTION,    "Number.MIN_VALUE / 5 ",         0,   Number.MIN_VALUE / 5 );
+    array[item++] = new TestCase( SECTION,    "Number.MIN_VALUE / 9 ",         0,   Number.MIN_VALUE / 9 );
 
     return ( array );
 }

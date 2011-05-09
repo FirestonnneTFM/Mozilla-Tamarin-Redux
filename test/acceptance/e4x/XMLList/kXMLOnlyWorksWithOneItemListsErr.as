@@ -45,7 +45,7 @@ START("13.5 XMLList Objects - XML only works with one item lists error");
 var xl;
 var result, expected, expectedStr;
 
-xl = new XMLList("<a>1</a><a>2</a><a>3</a>"); 
+xl = new XMLList("<a>1</a><a>2</a><a>3</a>");
 expectedStr = "TypeError: Error #1086: The addNamespace method works only on lists containing one item.";
 expected = "Error #1086";
 result = "error, exception not thrown";
@@ -65,7 +65,7 @@ AddTestCase( "xmllist.addNamespace('uri')", expected, result );
 
 
 
-xl = new XMLList("<a>1</a><a>2</a><a>3</a>");  
+xl = new XMLList("<a>1</a><a>2</a><a>3</a>");
 expectedStr = "TypeError: Error #1086: The appendChild method works only on lists containing one item.";
 expected = "Error #1086";
 result = "error, exception not thrown";
@@ -85,7 +85,7 @@ AddTestCase( "xmllist.appendChild('<e>f</e>')", expected, result );
 
 
 
-xl = new XMLList("<a>1</a><a>2</a><a>3</a>");  
+xl = new XMLList("<a>1</a><a>2</a><a>3</a>");
 expectedStr = "TypeError: Error #1086: The inScopeNamespaces method works only on lists containing one item.";
 expected = "Error #1086";
 result = "error, exception not thrown";
@@ -105,7 +105,7 @@ AddTestCase( "xmllist.inScopeNamespaces()", expected, result );
 
 
 
-xl = new XMLList("<a>1</a><a>2</a><a>3</a>");  
+xl = new XMLList("<a>1</a><a>2</a><a>3</a>");
 expectedStr = "TypeError: Error #1086: The insertChildAfter method works only on lists containing one item.";
 expected = "Error #1086";
 result = "error, exception not thrown";
@@ -125,7 +125,7 @@ AddTestCase( "xmllist.insertChildAfter(null, \"<s>t</s>\")", expected, result );
 
 
 
-xl = new XMLList("<a>1</a><a>2</a><a>3</a>");  
+xl = new XMLList("<a>1</a><a>2</a><a>3</a>");
 expectedStr = "TypeError: Error #1086: The insertChildBefore method works only on lists containing one item.";
 expected = "Error #1086";
 result = "error, exception not thrown";
@@ -145,7 +145,7 @@ AddTestCase( "xmllist.insertChildBefore(null, \"<s>t</s>\")", expected, result )
 
 
 
-xl = new XMLList("<a>1</a><a>2</a><a>3</a>");  
+xl = new XMLList("<a>1</a><a>2</a><a>3</a>");
 expectedStr = "TypeError: Error #1086: The name method works only on lists containing one item.";
 expected = "Error #1086";
 result = "error, exception not thrown";
@@ -165,7 +165,7 @@ AddTestCase( "xmllist.name()", expected, result );
 
 
 
-xl = new XMLList("<a>1</a><a>2</a><a>3</a>");  
+xl = new XMLList("<a>1</a><a>2</a><a>3</a>");
 expectedStr = "TypeError: Error #1086: The getNamespace method works only on lists containing one item.";
 expected = "Error #1086";
 result = "error, exception not thrown";
@@ -186,7 +186,7 @@ AddTestCase( "xmllist.getNamespace(\"blah\")", expected, result );
 
 
 
-xl = new XMLList("<a>1</a><a>2</a><a>3</a>");  
+xl = new XMLList("<a>1</a><a>2</a><a>3</a>");
 expectedStr = "TypeError: Error #1086: The namespaceDeclarations method works only on lists containing one item.";
 expected = "Error #1086";
 result = "error, exception not thrown";
@@ -206,7 +206,7 @@ AddTestCase( "xmllist.namespaceDeclarations()", expected, result );
 
 
 
-xl = new XMLList("<a>1</a><a>2</a><a>3</a>");  
+xl = new XMLList("<a>1</a><a>2</a><a>3</a>");
 expectedStr = "TypeError: Error #1086: The nodeKind method works only on lists containing one item.";
 expected = "Error #1086";
 result = "error, exception not thrown";
@@ -226,7 +226,7 @@ AddTestCase( "xmllist.nodeKind()", expected, result );
 
 
 
-xl = new XMLList("<a>1</a><a>2</a><a>3</a>");  
+xl = new XMLList("<a>1</a><a>2</a><a>3</a>");
 expectedStr = "TypeError: Error #1086: The removeNamespace method works only on lists containing one item.";
 expected = "Error #1086";
 result = "error, exception not thrown";
@@ -246,7 +246,7 @@ AddTestCase( "xmllist.removeNamespace('pfx')", expected, result );
 
 
 
-xl = new XMLList("<a>1</a><a>2</a><a>3</a>");  
+xl = new XMLList("<a>1</a><a>2</a><a>3</a>");
 expectedStr = "TypeError: Error #1086: The setChildren method works only on lists containing one item.";
 expected = "Error #1086";
 result = "error, exception not thrown";
@@ -266,7 +266,7 @@ AddTestCase( "xmllist.setChildren(\"<c>4</c><c>5</c>\")", expected, result );
 
 
 
-xl = new XMLList("<a>1</a><a>2</a><a>3</a>");  
+xl = new XMLList("<a>1</a><a>2</a><a>3</a>");
 expectedStr = "TypeError: Error #1086: The setLocalName method works only on lists containing one item.";
 expected = "Error #1086";
 result = "error, exception not thrown";
@@ -286,7 +286,7 @@ AddTestCase( "xmllist.setLocalName(\"new local name\")", expected, result );
 
 
 
-xl = new XMLList("<a>1</a><a>2</a><a>3</a>");  
+xl = new XMLList("<a>1</a><a>2</a><a>3</a>");
 expectedStr = "TypeError: Error #1086: The setName method works only on lists containing one item.";
 expected = "Error #1086";
 result = "error, exception not thrown";
@@ -306,7 +306,7 @@ AddTestCase( "xmllist.setName(\"myName\")", expected, result );
 
 
 
-xl = new XMLList("<a>1</a><a>2</a><a>3</a>");  
+xl = new XMLList("<a>1</a><a>2</a><a>3</a>");
 expectedStr = "TypeError: Error #1086: The setNamespace method works only on lists containing one item.";
 expected = "Error #1086";
 result = "error, exception not thrown";

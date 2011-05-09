@@ -62,7 +62,7 @@ do
 } while (!done);
 
 testcases[index++] = new TestCase( SECTION, "do_while ",
-	      4, x);
+          4, x);
 
 //load('d:/javascript/tests/output/statements/do_while.js')
 test();

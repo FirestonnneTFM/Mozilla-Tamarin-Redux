@@ -83,23 +83,23 @@ Array.prototype.getClass = Object.prototype.toString;
 // Pat, the WorkerBee
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.name",
-	      "",
-	      pat.name );
+          "pat.name",
+          "",
+          pat.name );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.dept",
-	      "general",
-	      pat.dept );
+          "pat.dept",
+          "general",
+          pat.dept );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.projects.getClass",
-	      "[object Array]",
-	      pat.projects.getClass() );
+          "pat.projects.getClass",
+          "[object Array]",
+          pat.projects.getClass() );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat.projects.length",
-	      0,
-	      pat.projects.length );
+          "pat.projects.length",
+          0,
+          pat.projects.length );
 
 test();

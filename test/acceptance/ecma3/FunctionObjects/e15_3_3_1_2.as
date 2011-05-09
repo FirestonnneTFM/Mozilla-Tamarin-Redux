@@ -49,7 +49,7 @@ function getTestCases() {
     var item = 0;
 
     str='';
-    for (prop in Function) 
+    for (prop in Function)
         str += prop;
     array[item++] = new TestCase(   SECTION,
                                     "var str='';for (prop in Function ) str += prop; str;",

@@ -39,5 +39,5 @@
 package  PubClassImpInternalInt{
 use namespace ns;
 
-	
-}  
+    
+}

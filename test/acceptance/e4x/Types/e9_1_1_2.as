@@ -44,7 +44,7 @@ START('9.1.1.2 - XML [[Put]]');
 
 
 // .
-var x1 = 
+var x1 =
 <alpha attr1="value1" attr2="value2">
     <bravo>
         one
@@ -72,10 +72,10 @@ TEST_XML(4, "foo", x1.@name)
 var a = <a><b><c/></b></a>;
 
 try {
-	a.b[0] = a;
-	result = a;
+    a.b[0] = a;
+    result = a;
 } catch (e1) {
-	result = typeError(e1.toString());
+    result = typeError(e1.toString());
 }
 
 

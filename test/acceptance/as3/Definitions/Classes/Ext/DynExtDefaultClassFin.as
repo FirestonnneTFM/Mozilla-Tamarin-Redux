@@ -39,8 +39,8 @@
 
 import DefaultClass.*;
 
-var SECTION = "Definitions";       			// provide a document reference (ie, ECMA section)
-var VERSION = "AS3";  					// Version of JavaScript or ECMA
+var SECTION = "Definitions";                // provide a document reference (ie, ECMA section)
+var VERSION = "AS3";                    // Version of JavaScript or ECMA
 var TITLE   = "final Class Extends Default Class";      // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -85,7 +85,7 @@ AddTestCase( "EXTDCLASS.testSubGetSetArray(arr)", arr, (EXTDCLASS.testSubGetSetA
 
 
 // ********************************************
-// access final method from a public 
+// access final method from a public
 // method of a sub class
 //
 // ********************************************
@@ -97,7 +97,7 @@ AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (
 
 
 // ********************************************
-// access final method from a private 
+// access final method from a private
 // method of a sub class
 //
 // ********************************************
@@ -109,7 +109,7 @@ AddTestCase( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(
 
 
 // ********************************************
-// access final method from a final 
+// access final method from a final
 // method of a sub class
 //
 // ********************************************
@@ -122,12 +122,12 @@ AddTestCase( "EXTDCLASS.testFinSubArray(arr)", arr, (EXTDCLASS.testFinSubArray(a
 
 
 // ********************************************
-// access final method from a virtual 
+// access final method from a virtual
 // method of a sub class
 // ********************************************
 
-AddTestCase( "access 'final' method from 'virtual' method of sub class", arr, 
-			  EXTDCLASS.testVirtSubArray(arr) );
+AddTestCase( "access 'final' method from 'virtual' method of sub class", arr,
+              EXTDCLASS.testVirtSubArray(arr) );
 
 // ********************************************
 // access final property from outside
@@ -139,7 +139,7 @@ AddTestCase( "*** Access final from outside the class ***", 1, 1 );
 //AddTestCase( "EXTDCLASS.finArray = arr", arr, (EXTDCLASS.finArray = arr, EXTDCLASS.finArray) );
 
 // ********************************************
-// access final property from 
+// access final property from
 // default method in sub class
 // ********************************************
 
@@ -149,7 +149,7 @@ AddTestCase( "*** Access final property from default method in sub class ***", 1
 AddTestCase( "EXTDCLASS.testSubGetSetDPArray(arr)", arr, (EXTDCLASS.testSubGetSetDPArray(arr)) );
 
 // ********************************************
-// access final property from 
+// access final property from
 // public method in sub class
 // ********************************************
 
@@ -159,7 +159,7 @@ AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", ar
 
 
 // ********************************************
-// access final property from 
+// access final property from
 // private method in sub class
 // ********************************************
 
@@ -168,7 +168,7 @@ AddTestCase( "*** Access final property from private method in sub class ***", 1
 AddTestCase( "EXTDCLASS.testSubPrivDPArray(arr)", arr, (EXTDCLASS.testSubPrivDPArray(arr)) );
 
 // ********************************************
-// access final property from 
+// access final property from
 // final method in sub class
 // ********************************************
 
@@ -177,14 +177,14 @@ AddTestCase( "*** Access final property from final method in sub class ***", 1, 
 AddTestCase( "EXTDCLASS.testSubFinDPArray(arr)", arr, (EXTDCLASS.testSubFinDPArray(arr)) );
 
 // ********************************************
-// access final property from 
+// access final property from
 // virtual method in sub class
 // ********************************************
 
 DYNEXTDCLASS = new DynExtDefaultClassFin();
-AddTestCase( "access 'final' property from 'virtual' method of sub class", arr, 
-				(EXTDCLASS.testVirtSubDPArray(arr)) );
+AddTestCase( "access 'final' property from 'virtual' method of sub class", arr,
+                (EXTDCLASS.testVirtSubDPArray(arr)) );
 
 test();       // leave this alone.  this executes the test cases and
-              // displays results.  
+              // displays results.
   

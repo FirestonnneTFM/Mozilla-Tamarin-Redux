@@ -44,7 +44,7 @@ START("bug157735 - XML comments()");
 
 XML.ignoreComments = false;
 
-var p = <p><!--this is a comment-->this is normal text</p>;  
+var p = <p><!--this is a comment-->this is normal text</p>;
 
 TEST(1, "this is normal text", p.toString());
 

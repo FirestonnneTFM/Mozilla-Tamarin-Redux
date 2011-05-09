@@ -35,7 +35,7 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
-function test_pos() 
+function test_pos()
 {
     // d starts life as a kIntegerType atom
     var d = 0xffff|0
@@ -58,7 +58,7 @@ function test_pos()
     return i;
 }
 
-function test_neg() 
+function test_neg()
 {
     // d starts life as a kIntegerType atom
     var d = -65535
@@ -82,19 +82,19 @@ function test_neg()
 }
 
 
-	var results = []
+    var results = []
 
     var e = (-1 >>> 0)
-	results.push({expected: 4294967295, actual: e});
+    results.push({expected: 4294967295, actual: e});
 
-	results.push({expected: 2147483648, actual: (- - "0x80000000")});
+    results.push({expected: 2147483648, actual: (- - "0x80000000")});
 
-	results.push({expected: 64, actual: test_pos()});
-	results.push({expected: 64, actual: test_neg()});
+    results.push({expected: 64, actual: test_pos()});
+    results.push({expected: 64, actual: test_neg()});
     
     var u:uint = 0xffffffff;
-	results.push({expected: 0, actual: ~u});
-	results.push({expected: -4294967295, actual: -u});
+    results.push({expected: 0, actual: ~u});
+    results.push({expected: -4294967295, actual: -u});
     
 startTest();
 for (var i in results)

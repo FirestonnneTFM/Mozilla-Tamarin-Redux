@@ -41,8 +41,8 @@
     var TITLE   = "Date.prototype.constructor";
 
     writeHeaderToLog(SECTION + " "+ TITLE);
-	var testcases = getTestCases();
-	test();
+    var testcases = getTestCases();
+    test();
 
 function getTestCases() {
     var array = new Array();

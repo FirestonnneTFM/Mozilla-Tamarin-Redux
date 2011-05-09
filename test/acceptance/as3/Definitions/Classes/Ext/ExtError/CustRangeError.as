@@ -37,7 +37,7 @@
 
 package ExtError{
 
-	public class CustRangeError extends RangeError{}
+    public class CustRangeError extends RangeError{}
 
 }
 

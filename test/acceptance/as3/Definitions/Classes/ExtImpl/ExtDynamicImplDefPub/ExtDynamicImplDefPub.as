@@ -49,11 +49,11 @@ class ExtDynImplDefPubInner extends DynamicClass implements DefaultIntDef {
 
     public function iGetBoolean() : Boolean { return this.boolean; }
 
-	public function testGetSetBoolean( flag:Boolean ) : Boolean {
+    public function testGetSetBoolean( flag:Boolean ) : Boolean {
 
-	  setBoolean(flag);
-	  return iGetBoolean();
-	}
+      setBoolean(flag);
+      return iGetBoolean();
+    }
 
 
     // ****************************************
@@ -63,7 +63,7 @@ class ExtDynImplDefPubInner extends DynamicClass implements DefaultIntDef {
 
     public function iGetPubBoolean() : Boolean { return this.pubBoolean; }
 
-	
+    
     // ************************************
     // access public method of parent
     // from default method of sub class

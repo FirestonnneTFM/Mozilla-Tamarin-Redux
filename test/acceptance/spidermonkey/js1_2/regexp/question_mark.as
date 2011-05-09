@@ -56,46 +56,46 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 // 'abcdef'.match(new RegExp('cd?e'))
 testcases[index++] = new TestCase ( SECTION, "'abcdef'.match(new RegExp('cd?e'))",
-	       String(["cde"]), String('abcdef'.match(new RegExp('cd?e'))));
+           String(["cde"]), String('abcdef'.match(new RegExp('cd?e'))));
 
 // 'abcdef'.match(new RegExp('cdx?e'))
 testcases[index++] = new TestCase ( SECTION, "'abcdef'.match(new RegExp('cdx?e'))",
-	       String(["cde"]), String('abcdef'.match(new RegExp('cdx?e'))));
+           String(["cde"]), String('abcdef'.match(new RegExp('cdx?e'))));
 
 // 'pqrstuvw'.match(new RegExp('o?pqrst'))
 testcases[index++] = new TestCase ( SECTION, "'pqrstuvw'.match(new RegExp('o?pqrst'))",
-	       String(["pqrst"]), String('pqrstuvw'.match(new RegExp('o?pqrst'))));
+           String(["pqrst"]), String('pqrstuvw'.match(new RegExp('o?pqrst'))));
 
 // 'abcd'.match(new RegExp('x?y?z?'))
 testcases[index++] = new TestCase ( SECTION, "'abcd'.match(new RegExp('x?y?z?'))",
-	       String([""]), String('abcd'.match(new RegExp('x?y?z?'))));
+           String([""]), String('abcd'.match(new RegExp('x?y?z?'))));
 
 // 'abcd'.match(new RegExp('x?ay?bz?c'))
 testcases[index++] = new TestCase ( SECTION, "'abcd'.match(new RegExp('x?ay?bz?c'))",
-	       String(["abc"]), String('abcd'.match(new RegExp('x?ay?bz?c'))));
+           String(["abc"]), String('abcd'.match(new RegExp('x?ay?bz?c'))));
 
 // 'abcd'.match(/x?ay?bz?c/)
 testcases[index++] = new TestCase ( SECTION, "'abcd'.match(/x?ay?bz?c/)",
-	       String(["abc"]), String('abcd'.match(/x?ay?bz?c/)));
+           String(["abc"]), String('abcd'.match(/x?ay?bz?c/)));
 
 // 'abbbbc'.match(new RegExp('b?b?b?b'))
 testcases[index++] = new TestCase ( SECTION, "'abbbbc'.match(new RegExp('b?b?b?b'))",
-	       String(["bbbb"]), String('abbbbc'.match(new RegExp('b?b?b?b'))));
+           String(["bbbb"]), String('abbbbc'.match(new RegExp('b?b?b?b'))));
 
 // '123az789'.match(new RegExp('ab?c?d?x?y?z'))
 testcases[index++] = new TestCase ( SECTION, "'123az789'.match(new RegExp('ab?c?d?x?y?z'))",
-	       String(["az"]), String('123az789'.match(new RegExp('ab?c?d?x?y?z'))));
+           String(["az"]), String('123az789'.match(new RegExp('ab?c?d?x?y?z'))));
 
 // '123az789'.match(/ab?c?d?x?y?z/)
 testcases[index++] = new TestCase ( SECTION, "'123az789'.match(/ab?c?d?x?y?z/)",
-	       String(["az"]), String('123az789'.match(/ab?c?d?x?y?z/)));
+           String(["az"]), String('123az789'.match(/ab?c?d?x?y?z/)));
 
 // '?????'.match(new RegExp('\\??\\??\\??\\??\\??'))
 testcases[index++] = new TestCase ( SECTION, "'?????'.match(new RegExp('\\??\\??\\??\\??\\??'))",
-	       String(["?????"]), String('?????'.match(new RegExp('\\??\\??\\??\\??\\??'))));
+           String(["?????"]), String('?????'.match(new RegExp('\\??\\??\\??\\??\\??'))));
 
 // 'test'.match(new RegExp('.?.?.?.?.?.?.?'))
 testcases[index++] = new TestCase ( SECTION, "'test'.match(new RegExp('.?.?.?.?.?.?.?'))",
-	       String(["test"]), String('test'.match(new RegExp('.?.?.?.?.?.?.?'))));
+           String(["test"]), String('test'.match(new RegExp('.?.?.?.?.?.?.?'))));
 
 test();

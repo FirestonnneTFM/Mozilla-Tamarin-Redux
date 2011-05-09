@@ -56,7 +56,7 @@ package PubClassExtIntClassImpPubIntExtPubPub{
                                      }
                                               
         public class PublicSubClass extends PublicSuperClass implements PublicInt3{
-                              var s = new PublicSuperClass();                              
+                              var s = new PublicSuperClass();
                                  
                                  public function MyString():String{
                                                                     return "Good Morning!";

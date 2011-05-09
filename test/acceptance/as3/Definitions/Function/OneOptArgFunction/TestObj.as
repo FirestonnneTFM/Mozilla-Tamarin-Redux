@@ -36,19 +36,19 @@
  * ***** END LICENSE BLOCK ***** */
 package OneOptArgFunction {
 
-	class TestObjInner{
-			
-	 function returnStringInner(s:String = "inside class inside package",... rest):String { return s; }
-	 function returnBooleanInner(b:Boolean = true,... rest):Boolean { return b; }
-	 function returnNumberInner(n:Number = 10,... rest):Number { return n; }
-	}
-	
-	public class TestObj extends TestObjInner {
-			
-	 public function returnString():String { return returnStringInner(); }
-	 public function returnBoolean():Boolean { return returnBooleanInner(); }
-	 public function returnNumber():Number { return returnNumberInner(); }		
-	}
+    class TestObjInner{
+            
+     function returnStringInner(s:String = "inside class inside package",... rest):String { return s; }
+     function returnBooleanInner(b:Boolean = true,... rest):Boolean { return b; }
+     function returnNumberInner(n:Number = 10,... rest):Number { return n; }
+    }
+    
+    public class TestObj extends TestObjInner {
+            
+     public function returnString():String { return returnStringInner(); }
+     public function returnBoolean():Boolean { return returnBooleanInner(); }
+     public function returnNumber():Number { return returnNumberInner(); }
+    }
 
 }
 

@@ -120,7 +120,7 @@ package DefaultClass {
     public static var pubStatOverLoadVar;
     private static var privStatOverLoadVar;
 
-	//For class prototype testing
+    //For class prototype testing
     var pObj:Number = 1;
 
     // ****************

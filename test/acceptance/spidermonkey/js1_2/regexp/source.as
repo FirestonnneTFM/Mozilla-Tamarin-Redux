@@ -57,34 +57,34 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 // /xyz/g.source
 testcases[index++] = new TestCase ( SECTION, "/xyz/g.source",
-	       "xyz", /xyz/g.source);
+           "xyz", /xyz/g.source);
 
 // /xyz/.source
 testcases[index++] = new TestCase ( SECTION, "/xyz/.source",
-	       "xyz", /xyz/.source);
+           "xyz", /xyz/.source);
 
 // /abc\\def/.source
 testcases[index++] = new TestCase ( SECTION, "/abc\\\\def/.source",
-	       "abc\\\\def", /abc\\def/.source);
+           "abc\\\\def", /abc\\def/.source);
 
 // /abc[\b]def/.source
 testcases[index++] = new TestCase ( SECTION, "/abc[\\b]def/.source",
-	       "abc[\\b]def", /abc[\b]def/.source);
+           "abc[\\b]def", /abc[\b]def/.source);
 
 // (new RegExp('xyz')).source
 testcases[index++] = new TestCase ( SECTION, "(new RegExp('xyz')).source",
-	       "xyz", (new RegExp('xyz')).source);
+           "xyz", (new RegExp('xyz')).source);
 
 // (new RegExp('xyz','g')).source
 testcases[index++] = new TestCase ( SECTION, "(new RegExp('xyz','g')).source",
-	       "xyz", (new RegExp('xyz','g')).source);
+           "xyz", (new RegExp('xyz','g')).source);
 
 // (new RegExp('abc\\\\def')).source
 testcases[index++] = new TestCase ( SECTION, "(new RegExp('abc\\\\\\\\def')).source",
-	       "abc\\\\def", (new RegExp('abc\\\\def')).source);
+           "abc\\\\def", (new RegExp('abc\\\\def')).source);
 
 // (new RegExp('abc[\\b]def')).source
 testcases[index++] = new TestCase ( SECTION, "(new RegExp('abc[\\\\b]def')).source",
-	       "abc[\\b]def", (new RegExp('abc[\\b]def')).source);
+           "abc[\\b]def", (new RegExp('abc[\\b]def')).source);
 
 test();

@@ -67,14 +67,14 @@ var obj = new AccStatMethIntermediateSubClassMeth();
 
 
 // ********************************************
-// Access the static method via sub class, 
+// Access the static method via sub class,
 // using unadorned "foo()"
 // ********************************************
 AddTestCase( "*** Access the static method via sub class using unadorned method call ***", 1, 1 );
 AddTestCase( "obj.callEcho('world')", "world", obj.callEcho("world") );
 
 // ********************************************
-// Access the static method via sub class, 
+// Access the static method via sub class,
 // using "BaseClass.foo()"
 // ********************************************
 AddTestCase( "*** Access the static method via sub class using base class method call ***", 1, 1 );

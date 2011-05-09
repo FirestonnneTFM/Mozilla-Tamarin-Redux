@@ -59,27 +59,27 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 re=/x./g;
 re.lastIndex=4;
 testcases[index++] = new TestCase ( SECTION, "re=/x./g; re.lastIndex=4; re.exec('xyabcdxa')",
-	       'xa', String(re.exec('xyabcdxa')));
+           'xa', String(re.exec('xyabcdxa')));
 
 // re.lastIndex
 testcases[index++] = new TestCase ( SECTION, "re.lastIndex",
-	       8, re.lastIndex);
+           8, re.lastIndex);
 
 // re.exec('xyabcdef');
 testcases[index++] = new TestCase ( SECTION, "re.exec('xyabcdef')",
-	       null, re.exec('xyabcdef'));
+           null, re.exec('xyabcdef'));
 
 // re.lastIndex
 testcases[index++] = new TestCase ( SECTION, "re.lastIndex",
-	       0, re.lastIndex);
+           0, re.lastIndex);
 
 // re.exec('xyabcdef');
 testcases[index++] = new TestCase ( SECTION, "re.exec('xyabcdef')",
-	       'xy', String(re.exec('xyabcdef')));
+           'xy', String(re.exec('xyabcdef')));
 
 // re.lastIndex=30; re.exec('123xaxbxc456');
 re.lastIndex=30;
 testcases[index++] = new TestCase ( SECTION, "re.lastIndex=30; re.exec('123xaxbxc456')",
-	       null, re.exec('123xaxbxc456'));
+           null, re.exec('123xaxbxc456'));
 
 test();

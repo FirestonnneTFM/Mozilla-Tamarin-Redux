@@ -48,7 +48,7 @@ var expect = 'No Crash';
 printBugNumber(BUGNUMBER);
 printStatus (summary);
 
-if (typeof window != 'undefined' && typeof document != 'undefined') 
+if (typeof window != 'undefined' && typeof document != 'undefined')
 {
   // delay test driver end
   gDelayTestDriverEnd = true;

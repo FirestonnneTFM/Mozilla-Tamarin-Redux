@@ -70,17 +70,17 @@ function negativeTestSearch(hexFrom, hexTo, array, item, testStr)
             var searchExpect = -1
             if (searchExpect != searchResult)
                 stringSearchResult += 'Expected: ' + searchExpect +' Found: ' + searchResult +' ';
-               	
+                
             var pattern:RegExp = new RegExp(searchStr);
             var searchResult2:int = testStr.search(pattern);
             var searchExpect2 = -1;
-						if (searchExpect2 != searchResult2)
+                        if (searchExpect2 != searchResult2)
                 stringSearchResult += 'Expected: ' + searchExpect2 +' Found: ' + searchResult2 +' ';
         }
     }
 
-		this.array[this.item++] = new TestCase(SECTION,
-            	"Negative String.search", '', stringSearchResult);
+        this.array[this.item++] = new TestCase(SECTION,
+                "Negative String.search", '', stringSearchResult);
     
     var hexFromStr = decimalToHexString(hexFrom);
     var hexToStr = decimalToHexString(hexTo);
@@ -89,22 +89,22 @@ function negativeTestSearch(hexFrom, hexTo, array, item, testStr)
     var searchResult:int = testStr.search(undefined);
     var searchExpect = -1;
     this.array[this.item++] = new TestCase(SECTION,
-		hexFromStr + " to " + hexToStr + 
-		" String.search(undefined)", searchExpect, searchResult);
+        hexFromStr + " to " + hexToStr +
+        " String.search(undefined)", searchExpect, searchResult);
 
     //test matching with no parameter
     var searchResult2:int = testStr.search();
     var searchExpect2 = -1;
     this.array[this.item++] = new TestCase(SECTION,
-		hexFromStr + " to " + hexToStr + 
-		" String.search()", searchExpect2, searchResult2);
+        hexFromStr + " to " + hexToStr +
+        " String.search()", searchExpect2, searchResult2);
 }
 
 function negativeTestMatch(hexFrom, hexTo, array, item, testStr)
 {
     // String.match()
     //test matching a string that doesn't exist in the testStr
-		var stringSearchResult:String = '';
+        var stringSearchResult:String = '';
     for (var i = hexFrom; i <= hexTo; i++ ) {
         if (notReserved(i)) {
             var matchResult:Array = testStr.match(String.fromCharCode(i)+String.fromCharCode(i));
@@ -114,12 +114,12 @@ function negativeTestMatch(hexFrom, hexTo, array, item, testStr)
             var pattern:RegExp = new RegExp(String.fromCharCode(i) + String.fromCharCode(i));
             var matchResult2:Array = testStr.match(pattern);
             if (matchResult2 != null)
-                stringSearchResult += 'Expected: null Found: ' + matchResult2 +' ';        		
+                stringSearchResult += 'Expected: null Found: ' + matchResult2 +' ';
         }
     }
-		
-		this.array[this.item++] = new TestCase(SECTION,
-				"Negative String.match", '', stringSearchResult);
+        
+        this.array[this.item++] = new TestCase(SECTION,
+                "Negative String.match", '', stringSearchResult);
 
     var hexFromStr = decimalToHexString(hexFrom);
     var hexToStr = decimalToHexString(hexTo);
@@ -127,78 +127,78 @@ function negativeTestMatch(hexFrom, hexTo, array, item, testStr)
     //test matching undefined
     var matchResult2:Array = testStr.match(undefined);
     this.array[this.item++] = new TestCase(SECTION,
-		hexFromStr + " to " + hexToStr + 
-		" String.match(undefined)", null, matchResult2);
+        hexFromStr + " to " + hexToStr +
+        " String.match(undefined)", null, matchResult2);
 
     //test matching with no parameter
     var matchResult3:Array = testStr.match();
     this.array[this.item++] = new TestCase(SECTION,
-		hexFromStr + " to " + hexToStr + 
-		" String.match()", null, matchResult3);
+        hexFromStr + " to " + hexToStr +
+        " String.match()", null, matchResult3);
 }
 
 function negativeTestSplit(hexFrom, hexTo, array, item, testStr, splitExpected)
 {
     // String.split()
     //split on empty string
-		var stringSplitResult:String = '';
+        var stringSplitResult:String = '';
     var splitDelimiter = "";
     var splitResult:Array = testStr.split(splitDelimiter);
     if (splitResult != null && splitExpected != null) {
-				if (splitExpected.length != splitResult.length) {
-						stringSplitResult += 'unexpected length - expected: '+splitExpected.length + 'Found: '+splitResult.length+' ';
+                if (splitExpected.length != splitResult.length) {
+                        stringSplitResult += 'unexpected length - expected: '+splitExpected.length + 'Found: '+splitResult.length+' ';
         } else {
             for (var i = 0; i< splitExpected.length; i++) {
-								if (splitExpected[i] != splitResult[i]) 
-										stringSplitResult += 'mismatch - expected: '+splitExpected[i]+' Found: '+splitResult[i] + ' ';
+                                if (splitExpected[i] != splitResult[i])
+                                        stringSplitResult += 'mismatch - expected: '+splitExpected[i]+' Found: '+splitResult[i] + ' ';
             }
         }
     }
     else {
         stringSplitResult += 'result array null! ';
     }
-		this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = new TestCase(SECTION,
             "String.split('')", '', stringSplitResult);
 
 
     //split on empty regular expression
-		stringSplitResult = '';
+        stringSplitResult = '';
     var pattern:RegExp = new RegExp();
     var splitResult2:Array = testStr.split(pattern);
     if (splitResult2 != null && splitExpected != null) {
-				if (splitExpected.length != splitResult2.length) {
-								stringSplitResult += 'unexpected length - expected: '+splitExpected.length + 'Found: '+splitResult2.length+' ';
-				} else {
-						for (var i = 0; i< splitExpected.length; i++) {
-								if (splitExpected[i] != splitResult2[i]) 
-										stringSplitResult += 'mismatch - expected: '+splitExpected[i]+' Found: '+splitResult2[i] + ' ';
-						}
-				}
+                if (splitExpected.length != splitResult2.length) {
+                                stringSplitResult += 'unexpected length - expected: '+splitExpected.length + 'Found: '+splitResult2.length+' ';
+                } else {
+                        for (var i = 0; i< splitExpected.length; i++) {
+                                if (splitExpected[i] != splitResult2[i])
+                                        stringSplitResult += 'mismatch - expected: '+splitExpected[i]+' Found: '+splitResult2[i] + ' ';
+                        }
+                }
     }
     else {
         stringSplitResult += 'result array null! ';
     }
-		this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = new TestCase(SECTION,
             "String.split(new RegExp())", '', stringSplitResult);
 
     //split on empty regular expression
-		stringSplitResult = '';
+        stringSplitResult = '';
     var pattern:RegExp = new RegExp("");
     var splitResult3:Array = testStr.split(pattern);
     if (splitResult3 != null && splitExpected != null) {
-				if (splitExpected.length != splitResult3.length) {
-								stringSplitResult += 'unexpected length - expected: '+splitExpected.length + 'Found: '+splitResult3.length+' ';
-				} else {
-						for (var i = 0; i< splitExpected.length; i++) {
-								if (splitExpected[i] != splitResult3[i]) 
-										stringSplitResult += 'mismatch - expected: '+splitExpected[i]+' Found: '+splitResult3[i] + ' ';
-						}
-				}
+                if (splitExpected.length != splitResult3.length) {
+                                stringSplitResult += 'unexpected length - expected: '+splitExpected.length + 'Found: '+splitResult3.length+' ';
+                } else {
+                        for (var i = 0; i< splitExpected.length; i++) {
+                                if (splitExpected[i] != splitResult3[i])
+                                        stringSplitResult += 'mismatch - expected: '+splitExpected[i]+' Found: '+splitResult3[i] + ' ';
+                        }
+                }
     }
     else {
         stringSplitResult += 'result array null! ';
     }
-		this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = new TestCase(SECTION,
             "String.split(new RegExp(''))", '', stringSplitResult);
 
 
@@ -211,7 +211,7 @@ function negativeTestSplit(hexFrom, hexTo, array, item, testStr, splitExpected)
         if (splitResult4.length == 1) {
             this.array[this.item++] = new TestCase(SECTION,
                 "String.split(undefined)[0]", testStr, splitResult4[0]);
-        }            
+        }
     }
 }
 
@@ -219,7 +219,7 @@ function negativeTestReplace(hexFrom, hexTo, array, item, testStr)
 {
     var replaceResult = testStr.replace(String.fromCharCode(hexFrom)+String.fromCharCode(hexTo));
     this.array[this.item++] = new TestCase(SECTION,
-	    "String.replace(" + decimalToHexString(hexFrom) + decimalToHexString(hexTo) + ")", testStr, replaceResult);
+        "String.replace(" + decimalToHexString(hexFrom) + decimalToHexString(hexTo) + ")", testStr, replaceResult);
 }
 
 // return true if unicode is not a regexp reserved character
@@ -253,7 +253,7 @@ function decimalToHexString( n ) {
                 if ( t == 14 ) { h += "E"; }
                 if ( t == 15 ) { h += "F"; }
             } else {
-            	h += String( t );
+                h += String( t );
             }
         } else {
             h += "0";

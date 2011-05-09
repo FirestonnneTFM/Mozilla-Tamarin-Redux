@@ -112,9 +112,9 @@ package TryCatchBlockPackage3
                      thisError = e3.message;
                     //trace("An error occurred:"+e3.toString());
                 }finally{
-                     AddTestCase( "Testing try block and multiple catch blocks with custom error classes", "Illegal Box Dimension specified",thisError );   
+                     AddTestCase( "Testing try block and multiple catch blocks with custom error classes", "Illegal Box Dimension specified",thisError );
                  }
         }
                                                       
        }
-}         
+}

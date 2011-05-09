@@ -46,7 +46,7 @@ START("13.4.4.38 - XML toString()");
 
 XML.prettyPrinting = false;
 
-x1 = 
+x1 =
 <alpha>
     <bravo>one</bravo>
     <charlie>
@@ -57,7 +57,7 @@ x1 =
 TEST(2, "one", x1.bravo.toString());
 TEST(3, "<bravo>one</bravo>" + NL() + "<bravo>two</bravo>", x1..bravo.toString());
 
-x1 = 
+x1 =
 <alpha>
     <bravo>one</bravo>
     <charlie/>
@@ -65,7 +65,7 @@ x1 =
 
 TEST(4, "", x1.charlie.toString());
 
-x1 = 
+x1 =
 <alpha>
     <bravo>one</bravo>
     <charlie>
@@ -75,7 +75,7 @@ x1 =
 
 TEST(5, "<charlie><bravo>two</bravo></charlie>", x1.charlie.toString());
 
-x1 = 
+x1 =
 <alpha>
     <bravo>one</bravo>
     <charlie>
@@ -86,7 +86,7 @@ x1 =
 
 TEST(5, "<charlie>two<bravo/></charlie>", x1.charlie.toString());
 
-x1 = 
+x1 =
 <alpha>
     <bravo></bravo>
     <bravo/>
@@ -94,7 +94,7 @@ x1 =
 
 TEST(6, "<bravo/>" + NL() + "<bravo/>", x1.bravo.toString());
 
-x1 = 
+x1 =
 <alpha>
     <bravo>one<charlie/></bravo>
     <bravo>two<charlie/></bravo>
@@ -106,43 +106,43 @@ var xmlDoc = "<employees><employee id='1'><firstname>John</firstname><lastname>W
 
 
 XML.prettyPrinting = false;
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[0].toString()", 
-	"<employee id=\"1\"><firstname>John</firstname><lastname>Walton</lastname><age>25</age></employee>", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[0].toString()",
+    "<employee id=\"1\"><firstname>John</firstname><lastname>Walton</lastname><age>25</age></employee>",
     (MYXML = new XML(xmlDoc), MYXML.employee[0].toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[1].toString()", 
-	"<employee id=\"2\"><firstname>Sue</firstname><lastname>Day</lastname><age>32</age></employee>", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[1].toString()",
+    "<employee id=\"2\"><firstname>Sue</firstname><lastname>Day</lastname><age>32</age></employee>",
     (MYXML = new XML(xmlDoc), MYXML.employee[1].toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[0].firstname.toString()", 
-	"John", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[0].firstname.toString()",
+    "John",
     (MYXML = new XML(xmlDoc), MYXML.employee[0].firstname.toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[1].firstname.toString()", 
-	"Sue", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[1].firstname.toString()",
+    "Sue",
     (MYXML = new XML(xmlDoc), MYXML.employee[1].firstname.toString()));
 
 XML.prettyPrinting = true;
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[0].toString()", 
-	"<employee id=\"1\">" + NL() + "  <firstname>John</firstname>" + NL() + "  <lastname>Walton</lastname>" + NL() + "  <age>25</age>" + NL() + "</employee>", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[0].toString()",
+    "<employee id=\"1\">" + NL() + "  <firstname>John</firstname>" + NL() + "  <lastname>Walton</lastname>" + NL() + "  <age>25</age>" + NL() + "</employee>",
     (MYXML = new XML(xmlDoc), MYXML.employee[0].toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[1].toString()", 
-	"<employee id=\"2\">" + NL() + "  <firstname>Sue</firstname>" + NL() + "  <lastname>Day</lastname>" + NL() + "  <age>32</age>" + NL() + "</employee>", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[1].toString()",
+    "<employee id=\"2\">" + NL() + "  <firstname>Sue</firstname>" + NL() + "  <lastname>Day</lastname>" + NL() + "  <age>32</age>" + NL() + "</employee>",
     (MYXML = new XML(xmlDoc), MYXML.employee[1].toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[0].firstname.toString()", 
-	"John", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[0].firstname.toString()",
+    "John",
     (MYXML = new XML(xmlDoc), MYXML.employee[0].firstname.toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[1].firstname.toString()", 
-	"Sue", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.employee[1].firstname.toString()",
+    "Sue",
     (MYXML = new XML(xmlDoc), MYXML.employee[1].firstname.toString()));
 
 xmlDoc = new XML("<XML>foo</XML>");
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.toString()", 
-	"foo", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.toString()",
+    "foo",
     (MYXML = new XML(xmlDoc), MYXML.toString()));
     
 END();

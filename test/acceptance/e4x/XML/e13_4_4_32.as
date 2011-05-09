@@ -101,18 +101,18 @@ XML.prettyPrinting = false;
 var xmlDoc = "<employee id='1'><firstname>John</firstname><lastname>Walton</lastname><age>25</age></employee>"
 
 // propertyName as a string
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.replace(0,'Mr. John')", 
-	"<employee id=\"1\">Mr. John<lastname>Walton</lastname><age>25</age></employee>", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.replace(0,'Mr. John')",
+    "<employee id=\"1\">Mr. John<lastname>Walton</lastname><age>25</age></employee>",
              (MYXML = new XML(xmlDoc), MYXML.replace(0,'Mr. John').toString()));
 
 xmlDoc = "<employee id='1'><firstname>John</firstname><lastname>Walton</lastname><age>25</age></employee>"
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.replace('phone','542144')", 
-	"<employee id=\"1\"><firstname>John</firstname><lastname>Walton</lastname><age>25</age></employee>", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.replace('phone','542144')",
+    "<employee id=\"1\"><firstname>John</firstname><lastname>Walton</lastname><age>25</age></employee>",
              (MYXML = new XML(xmlDoc), MYXML.replace('phone','542144').toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.replace('firstname','Johnny')", 
-	"<employee id=\"1\">Johnny<lastname>Walton</lastname><age>25</age></employee>", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.replace('firstname','Johnny')",
+    "<employee id=\"1\">Johnny<lastname>Walton</lastname><age>25</age></employee>",
              (MYXML = new XML(xmlDoc), MYXML.replace('firstname','Johnny').toString()));
 
 var expectedResult;
@@ -122,14 +122,14 @@ else
     expectedResult = '<phone>1234567</phone>';
 
 // This should replace all the children
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.replace('*','<phone>1234567</phone>')", 
-	expectedResult, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.replace('*','<phone>1234567</phone>')",
+    expectedResult,
              (MYXML = new XML(xmlDoc), MYXML.replace('*',"<phone>1234567</phone>").toString()));
 
 // What about using an attribute name as a input parameter
 // !!@ Rhino does an attribute addition after id!?!?
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.replace('@phone','<phone>7654321</phone>')", 
-	"<employee id=\"1\"><firstname>John</firstname><lastname>Walton</lastname><age>25</age></employee>", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.replace('@phone','<phone>7654321</phone>')",
+    "<employee id=\"1\"><firstname>John</firstname><lastname>Walton</lastname><age>25</age></employee>",
              (MYXML = new XML(xmlDoc), MYXML.replace('@phone',"<phone>7654321</phone>").toString()));
 
 

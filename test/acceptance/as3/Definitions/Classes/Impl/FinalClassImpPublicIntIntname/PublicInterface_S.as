@@ -35,17 +35,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 /*
- * Internal Interface InternalInterface 
- * Interface methods 
- *  
+ * Internal Interface InternalInterface
+ * Interface methods
+ *
  */
 
 
 package FinalClassImpPublicIntIntname{
 
-	public interface PublicInt_S{
-	
-		function deffunc():String;  	
+    public interface PublicInt_S{
+    
+        function deffunc():String;
 
-  	}
+    }
 }

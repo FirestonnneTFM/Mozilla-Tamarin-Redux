@@ -55,38 +55,38 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var status = '';
-	var pattern = '';
-	var string = '';
-	var actualmatch = '';
-	var expectedmatch = '';
+    var status = '';
+    var pattern = '';
+    var string = '';
+    var actualmatch = '';
+    var expectedmatch = '';
 
 
-	pattern = /(a)?a/;
-	string = 'a';
-	status = inSection(1);
-	actualmatch = string.match(pattern);
-	expectedmatch = Array('a', undefined);
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    pattern = /(a)?a/;
+    string = 'a';
+    status = inSection(1);
+    actualmatch = string.match(pattern);
+    expectedmatch = Array('a', undefined);
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	pattern = /a|(b)/;
-	string = 'a';
-	status = inSection(2);
-	actualmatch = string.match(pattern);
+    pattern = /a|(b)/;
+    string = 'a';
+    status = inSection(2);
+    actualmatch = string.match(pattern);
 
-	expectedmatch = Array('a', undefined);
+    expectedmatch = Array('a', undefined);
 
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	pattern = /(a)?(a)/;
-	string = 'a';
-	status = inSection(3);
-	actualmatch = string.match(pattern);
-	expectedmatch = Array('a', undefined, 'a');
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    pattern = /(a)?(a)/;
+    string = 'a';
+    status = inSection(3);
+    actualmatch = string.match(pattern);
+    expectedmatch = Array('a', undefined, 'a');
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	return array;
+    return array;
 }

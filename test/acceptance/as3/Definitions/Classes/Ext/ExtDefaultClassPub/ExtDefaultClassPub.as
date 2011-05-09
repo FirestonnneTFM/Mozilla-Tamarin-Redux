@@ -79,17 +79,17 @@ package DefaultClass {
     }
 
     // ***************************************
-    // access public property from 
+    // access public property from
     // default method of sub class
     // ***************************************
 
     function subGetDPArray() : Array { return this.pubArray; }
     function subSetDPArray(a:Array) { this.pubArray = a; }
 
-	public function testSubDPArray(a:Array):Array{
-		this.subSetDPArray(a);
-		return this.subGetDPArray();
-	}
+    public function testSubDPArray(a:Array):Array{
+        this.subSetDPArray(a);
+        return this.subGetDPArray();
+    }
 
    
     // ***************************************
@@ -108,11 +108,11 @@ package DefaultClass {
     private function privSubGetDPArray() : Array { return this.pubArray; }
     private function privSubSetDPArray(a:Array) { this.pubArray = a; }
 
-	// function to test above
-	public function testPrivSubPArray(a:Array):Array{
-		this.privSubSetDPArray(a);
-		return this.privSubGetDPArray();
-	}
+    // function to test above
+    public function testPrivSubPArray(a:Array):Array{
+        this.privSubSetDPArray(a);
+        return this.privSubGetDPArray();
+    }
 
   }
   public class ExtDefaultClassPub extends InnerExtDefaultClassPub {}

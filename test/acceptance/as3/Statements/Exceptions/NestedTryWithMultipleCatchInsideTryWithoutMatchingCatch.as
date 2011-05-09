@@ -47,7 +47,7 @@ thisError = "no error";
 thisError1="no error";
 try{
    //throw new ReferenceError();
-   try { 
+   try {
        throw new TypeError();
        }catch(ei1:ReferenceError){
            thisError="Inner reference error:"+ei1.toString();

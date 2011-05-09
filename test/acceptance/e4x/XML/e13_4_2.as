@@ -47,7 +47,7 @@ TEST(1, "xml", typeof(x1));
 TEST(2, true, x1 instanceof XML);
 
 correct =
-<Envelope 
+<Envelope
     xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
     xmlns:stock="http://mycompany.com/stocks"
     soap:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
@@ -62,7 +62,7 @@ x1 = new XML(correct);
 TEST_XML(3, correct.toXMLString(), x1);
 
 text =
-"<Envelope" + 
+"<Envelope" +
 "    xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"" +
 "    xmlns:stock=\"http://mycompany.com/stocks\"" +
 "    soap:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">" +
@@ -137,9 +137,9 @@ AddTestCase( "(new XML(5).nodeKind())", "text", (new XML(5)).nodeKind());
 AddTestCase( "MYOB = new XML(5); MYOB.toString()", "5",
              (MYOB = new XML(5), MYOB.toString(), MYOB.toString()) );
 
-//value is 
+//value is
 
-// value is supplied 
+// value is supplied
 XML.prettyPrinting = false;
 AddTestCase( "typeof new XML(thisXML)", "xml", typeof new XML(thisXML) );
 AddTestCase( "new XML(thisXML) instanceof XML", true, new XML(thisXML) instanceof XML);
@@ -166,11 +166,11 @@ var a = new XML("<?xml version='1.0' encoding='UTF-8'?><?xml-stylesheet href='my
 
 AddTestCase("XML with PI and comments", "compiled", a.toString());
 
-try { 
-	var b = new XML("<a/><b/>"); 
-	result = b;
+try {
+    var b = new XML("<a/><b/>");
+    result = b;
 } catch(e1) {
-	result = typeError(e1.toString());
+    result = typeError(e1.toString());
 }
 
 AddTestCase("new XML(\"<a/><b/>\")", "TypeError: Error #1088", result);

@@ -45,7 +45,7 @@ startTest();                // leave this alone
 
 thisError = "no error";
        
-try { 
+try {
      throw new TypeError();
     } catch(e:TypeError){
        thisError="This is Type Error";

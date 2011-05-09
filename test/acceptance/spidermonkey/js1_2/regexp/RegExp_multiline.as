@@ -58,44 +58,44 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 // (multiline == false) '123\n456'.match(/^4../)
 testcases[index++] = new TestCase ( SECTION, "(multiline == false) '123\\n456'.match(/^4../)",
-	       null, '123\n456'.match(/^4../));
+           null, '123\n456'.match(/^4../));
 
 // (multiline == false) 'a11\na22\na23\na24'.match(/^a../g)
 testcases[index++] = new TestCase ( SECTION, "(multiline == false) 'a11\\na22\\na23\\na24'.match(/^a../g)",
-	       String(['a11']), String('a11\na22\na23\na24'.match(/^a../g)));
+           String(['a11']), String('a11\na22\na23\na24'.match(/^a../g)));
 
 // (multiline == false) 'a11\na22'.match(/^.+^./)
 testcases[index++] = new TestCase ( SECTION, "(multiline == false) 'a11\na22'.match(/^.+^./)",
-	       null, 'a11\na22'.match(/^.+^./));
+           null, 'a11\na22'.match(/^.+^./));
 
 // (multiline == false) '123\n456'.match(/.3$/)
 testcases[index++] = new TestCase ( SECTION, "(multiline == false) '123\\n456'.match(/.3$/)",
-	       null, '123\n456'.match(/.3$/));
+           null, '123\n456'.match(/.3$/));
 
 // (multiline == false) 'a11\na22\na23\na24'.match(/a..$/g)
 testcases[index++] = new TestCase ( SECTION, "(multiline == false) 'a11\\na22\\na23\\na24'.match(/a..$/g)",
-	       String(['a24']), String('a11\na22\na23\na24'.match(/a..$/g)));
+           String(['a24']), String('a11\na22\na23\na24'.match(/a..$/g)));
 
 // (multiline == false) 'abc\ndef'.match(/c$...$/)
 testcases[index++] = new TestCase ( SECTION, "(multiline == false) 'abc\ndef'.match(/c$...$/)",
-	       null, 'abc\ndef'.match(/c$...$/));
+           null, 'abc\ndef'.match(/c$...$/));
 
 // (multiline == false) 'a11\na22\na23\na24'.match(new RegExp('a..$','g'))
 testcases[index++] = new TestCase ( SECTION, "(multiline == false) 'a11\\na22\\na23\\na24'.match(new RegExp('a..$','g'))",
-	       String(['a24']), String('a11\na22\na23\na24'.match(new RegExp('a..$','g'))));
+           String(['a24']), String('a11\na22\na23\na24'.match(new RegExp('a..$','g'))));
 
 // (multiline == false) 'abc\ndef'.match(new RegExp('c$...$'))
 testcases[index++] = new TestCase ( SECTION, "(multiline == false) 'abc\ndef'.match(new RegExp('c$...$'))",
-	       null, 'abc\ndef'.match(new RegExp('c$...$')));
+           null, 'abc\ndef'.match(new RegExp('c$...$')));
 
 
 // (multiline == true) '123\n456'.match(/^4../)
 testcases[index++] = new TestCase ( SECTION, "(multiline == true) '123\\n456'.match(/^4../m)",
-	       String(['456']), String('123\n456'.match(/^4../m)));
+           String(['456']), String('123\n456'.match(/^4../m)));
 
 // (multiline == true) 'a11\na22\na23\na24'.match(/^a../g)
 testcases[index++] = new TestCase ( SECTION, "(multiline == true) 'a11\\na22\\na23\\na24'.match(/^a../mg)",
-	       String(['a11','a22','a23','a24']), String('a11\na22\na23\na24'.match(/^a../mg)));
+           String(['a11','a22','a23','a24']), String('a11\na22\na23\na24'.match(/^a../mg)));
 
 // (multiline == true) 'a11\na22'.match(/^.+^./)
 //testcases[index++] = new TestCase ( SECTION, "(multiline == true) 'a11\na22'.match(/^.+^./)",
@@ -103,15 +103,15 @@ testcases[index++] = new TestCase ( SECTION, "(multiline == true) 'a11\\na22\\na
 
 // (multiline == true) '123\n456'.match(/.3$/)
 testcases[index++] = new TestCase ( SECTION, "(multiline == true) '123\\n456'.match(/.3$/m)",
-	       String(['23']), String('123\n456'.match(/.3$/m)));
+           String(['23']), String('123\n456'.match(/.3$/m)));
 
 // (multiline == true) 'a11\na22\na23\na24'.match(/a..$/g)
 testcases[index++] = new TestCase ( SECTION, "(multiline == true) 'a11\\na22\\na23\\na24'.match(/a..$/mg)",
-	       String(['a11','a22','a23','a24']), String('a11\na22\na23\na24'.match(/a..$/mg)));
+           String(['a11','a22','a23','a24']), String('a11\na22\na23\na24'.match(/a..$/mg)));
 
 // (multiline == true) 'a11\na22\na23\na24'.match(new RegExp('a..$','g'))
 testcases[index++] = new TestCase ( SECTION, "(multiline == true) 'a11\\na22\\na23\\na24'.match(new RegExp('a..$','mg'))",
-	       String(['a11','a22','a23','a24']), String('a11\na22\na23\na24'.match(new RegExp('a..$','mg'))));
+           String(['a11','a22','a23','a24']), String('a11\na22\na23\na24'.match(new RegExp('a..$','mg'))));
 
 // (multiline == true) 'abc\ndef'.match(/c$....$/)
 //testcases[index++] = new TestCase ( SECTION, "(multiline == true) 'abc\ndef'.match(/c$.+$/)",

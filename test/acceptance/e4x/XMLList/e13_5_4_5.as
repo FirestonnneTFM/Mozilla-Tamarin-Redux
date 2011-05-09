@@ -50,7 +50,7 @@ TEST(2, "xml", typeof(x1.children()));
 TEST_XML(3, "", x1.children());
 
 // Test with XMLList of size 1
-x1 += <alpha>one<bravo>two</bravo></alpha>;    
+x1 += <alpha>one<bravo>two</bravo></alpha>;
 TEST(4, "xml", typeof(x1.children()));
 
 correct = <>one<bravo>two</bravo></>;
@@ -72,7 +72,7 @@ TEST_XML(9, "", x1.children());
 
 //get all grandchildren of the order that have the name price
 
-order = 
+order =
 <order>
     <customer>
         <name>John Smith</name>
@@ -94,8 +94,8 @@ TEST(10, correct, order.children().price);
 var xmlDoc = "<employee id=\"1\"><firstname>John</firstname><lastname>Walton</lastname><age>25</age></employee><employee id=\"2\"><firstname>Sue</firstname><lastname>Day</lastname><age>32</age></employee>"
 
 // propertyName as a string
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.children()", 
-		"<firstname>John</firstname>" + NL() + "<lastname>Walton</lastname>" + NL() + "<age>25</age>" + NL() + "<firstname>Sue</firstname>" + NL() + "<lastname>Day</lastname>" + NL() + "<age>32</age>", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.children()",
+        "<firstname>John</firstname>" + NL() + "<lastname>Walton</lastname>" + NL() + "<age>25</age>" + NL() + "<firstname>Sue</firstname>" + NL() + "<lastname>Day</lastname>" + NL() + "<age>32</age>",
         (MYXML = new XMLList(xmlDoc), MYXML.children().toString()));
 
 END();

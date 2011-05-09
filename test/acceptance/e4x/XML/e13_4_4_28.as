@@ -58,7 +58,7 @@ correct = "<?xyz abc=\"123\" michael=\"weird\"?>";
 
 TEST_XML(4, correct, x1.processingInstructions("xyz"));
 
-// test XML-decl 
+// test XML-decl
 // Un-comment these tests when we can read in doc starting with PI.
 x1 = new XML("<?xml version=\"1.0\" ?><alpha><bravo>one</bravo></alpha>");
 
@@ -74,42 +74,42 @@ var xmlDoc = "<?xml version='1.0'?><xml><?xml-stylesheet href='mystyle.xsl'?><em
 // propertyName as a string
 XML.ignoreProcessingInstructions = true;
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions().toString()", "", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions().toString()", "",
              (MYXML = new XML(xmlDoc), MYXML.processingInstructions().toString()));
 
 XML.ignoreProcessingInstructions = false;
 
-AddTestCase( "ignorePI = false, MYXML = new XML(xmlDoc), MYXML.processingInstructions().toString()", 
-			 "<?xml-stylesheet href='mystyle.xsl'?>\n<?foo bar?>", 
+AddTestCase( "ignorePI = false, MYXML = new XML(xmlDoc), MYXML.processingInstructions().toString()",
+             "<?xml-stylesheet href='mystyle.xsl'?>\n<?foo bar?>",
              (MYXML = new XML(xmlDoc), MYXML.processingInstructions().toXMLString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions('*')", 
-	"<?xml-stylesheet href='mystyle.xsl'?>\n<?foo bar?>", 
-	(MYXML = new XML(xmlDoc), MYXML.processingInstructions("*").toXMLString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions('*')",
+    "<?xml-stylesheet href='mystyle.xsl'?>\n<?foo bar?>",
+    (MYXML = new XML(xmlDoc), MYXML.processingInstructions("*").toXMLString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions('xml-stylesheet')", 
-	"<?xml-stylesheet href='mystyle.xsl'?>", 
-	(MYXML = new XML(xmlDoc), MYXML.processingInstructions("xml-stylesheet").toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions('xml-stylesheet')",
+    "<?xml-stylesheet href='mystyle.xsl'?>",
+    (MYXML = new XML(xmlDoc), MYXML.processingInstructions("xml-stylesheet").toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions(new QName('xml-stylesheet'))", 
-	"<?xml-stylesheet href='mystyle.xsl'?>", 
-	(MYXML = new XML(xmlDoc), MYXML.processingInstructions(new QName("xml-stylesheet")).toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions(new QName('xml-stylesheet'))",
+    "<?xml-stylesheet href='mystyle.xsl'?>",
+    (MYXML = new XML(xmlDoc), MYXML.processingInstructions(new QName("xml-stylesheet")).toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions(new QName('foo'))", 
-	"<?foo bar?>", 
-	(MYXML = new XML(xmlDoc), MYXML.processingInstructions(new QName("foo")).toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions(new QName('foo'))",
+    "<?foo bar?>",
+    (MYXML = new XML(xmlDoc), MYXML.processingInstructions(new QName("foo")).toString()));
 
 // Attribute name does not match
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions('@xml-stylesheet')", 
-	"", 
-	(MYXML = new XML(xmlDoc), MYXML.processingInstructions("@xml-stylesheet").toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions('@xml-stylesheet')",
+    "",
+    (MYXML = new XML(xmlDoc), MYXML.processingInstructions("@xml-stylesheet").toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions('xml-foo')", 
-	"", 
-	(MYXML = new XML(xmlDoc), MYXML.processingInstructions("xml-foo").toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions('xml-foo')",
+    "",
+    (MYXML = new XML(xmlDoc), MYXML.processingInstructions("xml-foo").toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions('child-xml')", 
-	"", 
-	(MYXML = new XML(xmlDoc), MYXML.processingInstructions("child-xml").toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.processingInstructions('child-xml')",
+    "",
+    (MYXML = new XML(xmlDoc), MYXML.processingInstructions("child-xml").toString()));
 
 END();

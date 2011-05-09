@@ -35,5 +35,5 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package asOper {
-	public class TestClassA {}
+    public class TestClassA {}
 }

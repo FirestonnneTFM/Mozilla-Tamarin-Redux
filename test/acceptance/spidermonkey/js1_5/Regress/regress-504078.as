@@ -65,7 +65,7 @@ function addtestcases()
   var data2 = { a : 1, b : 2 };
 
   function boot() {
-	  keys(data);
+      keys(data);
     keys(g);
     keys(data2); // this call dies with "var prop is not a function"
     print('no error');

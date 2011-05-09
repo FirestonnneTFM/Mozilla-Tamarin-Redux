@@ -37,21 +37,21 @@
 
 package foo {
 
-	public namespace fletch;
-	
-	public class A {
+    public namespace fletch;
+    
+    public class A {
 
-		fletch var lives = 'PASSED';
-		public function getFletch() {
-			return fletch::lives;
-		}
-	}
+        fletch var lives = 'PASSED';
+        public function getFletch() {
+            return fletch::lives;
+        }
+    }
 }
 import foo.*;
 use namespace fletch;
 
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 

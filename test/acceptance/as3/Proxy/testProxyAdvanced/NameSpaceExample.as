@@ -36,21 +36,21 @@
  * ***** END LICENSE BLOCK ***** */
 
 package NameSpacePackage{
-		
-	import NameSpacePackage.*;
-	use namespace NameSpaceDef;
-	
-	public class NameSpaceExample
-	{
-		
-		NameSpaceDef var one:String = "";
-		NameSpaceDef var two:String = "";
-		NameSpaceDef var three:Number = 0;
-		NameSpaceDef var four:Number = 0;
-		public var onePub:String;
-		
-		function NameSpaceExample(){
-			trace('inside NameSpaceExample');
-		}
-	}
+        
+    import NameSpacePackage.*;
+    use namespace NameSpaceDef;
+    
+    public class NameSpaceExample
+    {
+        
+        NameSpaceDef var one:String = "";
+        NameSpaceDef var two:String = "";
+        NameSpaceDef var three:Number = 0;
+        NameSpaceDef var four:Number = 0;
+        public var onePub:String;
+        
+        function NameSpaceExample(){
+            trace('inside NameSpaceExample');
+        }
+    }
 }

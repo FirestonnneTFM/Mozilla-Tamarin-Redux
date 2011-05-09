@@ -93,7 +93,7 @@ AddTestCase( "PUBEXTDCLASS.subSetArray(arr), PUBEXTDCLASS.subGetArray()", arr, P
 
 
 // ********************************************
-// access default method from a public 
+// access default method from a public
 // method of a sub class
 //
 // ********************************************
@@ -105,7 +105,7 @@ AddTestCase( "PUBEXTDCLASS.pubSubSetArray(arr), PUBEXTDCLASS.pubSubGetArray()", 
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access default method from a private 
+// access default method from a private
 // method of a sub class
 //
 // ********************************************
@@ -117,7 +117,7 @@ AddTestCase( "PUBEXTDCLASS.testPrivSubArray(arr)", arr, PUBEXTDCLASS.testPrivSub
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access default method from a final 
+// access default method from a final
 // method of a sub class
 //
 // ********************************************
@@ -138,7 +138,7 @@ AddTestCase( "*** Access default property from outside the class ***", 1, 1 );
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access default property from 
+// access default property from
 // default method in sub class
 // ********************************************
 
@@ -149,7 +149,7 @@ AddTestCase( "PUBEXTDCLASS.subSetDPArray(arr), PUBEXTDCLASS.subGetDPArray()", ar
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access default property from 
+// access default property from
 // public method in sub class
 // ********************************************
 
@@ -160,7 +160,7 @@ AddTestCase( "PUBEXTDCLASS.pubSubSetDPArray(arr), PUBEXTDCLASS.pubSubGetDPArray(
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access default property from 
+// access default property from
 // private method in sub class
 // ********************************************
 
@@ -171,7 +171,7 @@ AddTestCase( "PUBEXTDCLASS.privSubSetDPArray(arr), PUBEXTDCLASS.privSubGetDPArra
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access default property from 
+// access default property from
 // final method in sub class
 // ********************************************
 

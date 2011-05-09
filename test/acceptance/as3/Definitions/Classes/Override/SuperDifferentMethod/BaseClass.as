@@ -35,13 +35,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package SuperDifferentMethod {
-	public class BaseClass {
-		public function echo() : String {
-			return "echo() from BaseClass";
-		}
-		
-		public function foo() : String {
-			return "foo() from BaseClass";
-		} 
-	}
+    public class BaseClass {
+        public function echo() : String {
+            return "echo() from BaseClass";
+        }
+        
+        public function foo() : String {
+            return "foo() from BaseClass";
+        }
+    }
 }

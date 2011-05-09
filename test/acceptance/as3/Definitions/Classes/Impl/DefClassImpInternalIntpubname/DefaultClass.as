@@ -37,23 +37,23 @@
 /*
  * Default Class DefaultClass
  * Class methods
- *  
+ *
  */
 
 package DefClassImpInternalIntpubname{
 
-	class DefaultClass implements InternalInt{
-		
+    class DefaultClass implements InternalInt{
+        
 
-		public function deffunc():String{  			
-			return"PASSED";
-		}
-	}
+        public function deffunc():String{
+            return"PASSED";
+        }
+    }
 
-	public class DefaultClassAccesor{
-                var c:DefaultClass = new DefaultClass(); 
-		public function accdeffunc(){return c.deffunc();}
-		// access default function deffunc
-       } 	
-	
-}  
+    public class DefaultClassAccesor{
+                var c:DefaultClass = new DefaultClass();
+        public function accdeffunc(){return c.deffunc();}
+        // access default function deffunc
+       }
+    
+}

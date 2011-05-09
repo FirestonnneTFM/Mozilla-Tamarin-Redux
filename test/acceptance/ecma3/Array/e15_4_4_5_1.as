@@ -50,7 +50,7 @@
 function getTestCases() {
     var S = new Array();
     var item = 0;
-	var A;
+    var A;
 
     // array is empty.
     S[item++] = (A = new Array());

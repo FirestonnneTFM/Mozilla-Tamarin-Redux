@@ -45,7 +45,7 @@ START("13.5.4.11 - XMLList hasOwnProperty()");
 //TEST(1, true, XMLList.prototype.hasOwnProperty("hasOwnProperty"));
   
 
-x1 = 
+x1 =
 <>
 <alpha attr1="value1">
     <bravo>one</bravo>
@@ -74,20 +74,20 @@ TEST(6, false, XMLList.prototype.hasOwnProperty("foobar"));
 
 var xmlDoc = "<employee id='1'><firstname>John</firstname><lastname>Walton</lastname><age dob='1/2/1978'>26</age></employee>"
 
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasOwnProperty('copy')", false, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasOwnProperty('copy')", false,
              (MYXML = new XMLList(xmlDoc), MYXML.hasOwnProperty('copy')));
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasOwnProperty('hasSimpleContent')", false, 
-             (MYXML = new XMLList(xmlDoc), MYXML.hasOwnProperty('hasSimpleContent')));  
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasOwnProperty('hasSimpleContent')", false,
+             (MYXML = new XMLList(xmlDoc), MYXML.hasOwnProperty('hasSimpleContent')));
 
 //!!@ we're not supporting prototype properties
-AddTestCase( "XML.prototype.hasOwnProperty('copy')", true, 
+AddTestCase( "XML.prototype.hasOwnProperty('copy')", true,
              (XML.prototype.hasOwnProperty('copy')));
-AddTestCase( "XML.prototype.hasOwnProperty('hasSimpleContent')", true, 
+AddTestCase( "XML.prototype.hasOwnProperty('hasSimpleContent')", true,
              (XML.prototype.hasOwnProperty('hasSimpleContent')));
              
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasOwnProperty('firstname')", true, 
-             (MYXML = new XMLList(xmlDoc), MYXML.hasOwnProperty('firstname')));  
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasOwnProperty('lastname')", true, 
-             (MYXML = new XMLList(xmlDoc), MYXML.hasOwnProperty('lastname')));  
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasOwnProperty('firstname')", true,
+             (MYXML = new XMLList(xmlDoc), MYXML.hasOwnProperty('firstname')));
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.hasOwnProperty('lastname')", true,
+             (MYXML = new XMLList(xmlDoc), MYXML.hasOwnProperty('lastname')));
              
 END();

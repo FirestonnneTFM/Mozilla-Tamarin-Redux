@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 // ActionScript file
 package LatticeAmbiguous {
-	public interface IFuncF {
-	 	function f() : String
-	}
+    public interface IFuncF {
+        function f() : String
+    }
 }

@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "Expressions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS3";        // Version of ECMAScript or ActionScript
 var TITLE   = "Logical Assignment";       // Provide ECMA section title or a description
 
 
@@ -44,8 +44,8 @@ startTest();                // leave this alone
 
 // Logical AND
 // Assigns expression1 the value of expression1 && expression2. For example, the following two statements are equivalent:
-//  x &&= y; 
-//  x = x && y; 
+//  x &&= y;
+//  x = x && y;
 
 var x = true;
 var y = true;
@@ -87,8 +87,8 @@ AddTestCase('Logical AND Assignment: x=false; x &&= true; x=', false, x);
 
 // Logical OR
 // Assigns expression1 the value of expression1 || expression2. For example, the following two statements are equivalent:
-//  x ||= y; 
-//  x = x || y; 
+//  x ||= y;
+//  x = x || y;
 
 x=true;
 y=true;

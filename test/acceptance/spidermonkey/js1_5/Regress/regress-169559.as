@@ -47,7 +47,7 @@ printStatus("Ratio of global to local time " + ratio.toFixed(3));
 
 expect = true;
 actual = (ratio < maxratio);
-summary += ', Ratio: ' + ratio + ' '; 
+summary += ', Ratio: ' + ratio + ' ';
 AddTestCase(summary, expect, actual);
 
 function local()

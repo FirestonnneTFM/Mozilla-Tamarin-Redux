@@ -73,60 +73,60 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var i = -1; var j = -1; var s = ''; var f = '';
-	var obj = {}; var status = ''; var actual = ''; var expect = '';
-	var patterns = new Array();
-	var flags = new Array();
-	var cnSUCCESS = 'RegExp() returned the supplied RegExp object';
-	var cnFAILURE =  'RegExp() did NOT return the supplied RegExp object';
+    var i = -1; var j = -1; var s = ''; var f = '';
+    var obj = {}; var status = ''; var actual = ''; var expect = '';
+    var patterns = new Array();
+    var flags = new Array();
+    var cnSUCCESS = 'RegExp() returned the supplied RegExp object';
+    var cnFAILURE =  'RegExp() did NOT return the supplied RegExp object';
 
-	// various regular expressions to try -
-	patterns[0] = '';
-	patterns[1] = 'abc';
-	patterns[2] = '(.*)(3-1)\s\w';
-	patterns[3] = '(.*)(...)\\s\\w';
-	patterns[4] = '[^A-Za-z0-9_]';
-	patterns[5] = '[^\f\n\r\t\v](123.5)([4 - 8]$)';
+    // various regular expressions to try -
+    patterns[0] = '';
+    patterns[1] = 'abc';
+    patterns[2] = '(.*)(3-1)\s\w';
+    patterns[3] = '(.*)(...)\\s\\w';
+    patterns[4] = '[^A-Za-z0-9_]';
+    patterns[5] = '[^\f\n\r\t\v](123.5)([4 - 8]$)';
 
-	// various flags to try -
-	flags[0] = 'i';
-	flags[1] = 'g';
-	flags[2] = 'm';
-	flags[3] = undefined;
+    // various flags to try -
+    flags[0] = 'i';
+    flags[1] = 'g';
+    flags[2] = 'm';
+    flags[3] = undefined;
 
-	for (i in patterns)
-	{
-		s = patterns[i];
-		for (j in flags)
-		{
-			f = flags[j];
-			status = getStatus(s, f);
-			obj = new RegExp(s, f);
+    for (i in patterns)
+    {
+        s = patterns[i];
+        for (j in flags)
+        {
+            f = flags[j];
+            status = getStatus(s, f);
+            obj = new RegExp(s, f);
 
-			actual = (obj == RegExp(obj))? cnSUCCESS : cnFAILURE;
-			expect = cnSUCCESS;
-			array[item++] = new TestCase(SECTION, status, expect, actual);
-		}
-	}
+            actual = (obj == RegExp(obj))? cnSUCCESS : cnFAILURE;
+            expect = cnSUCCESS;
+            array[item++] = new TestCase(SECTION, status, expect, actual);
+        }
+    }
 
 
-	var statprefix = 'RegExp(new RegExp(';
-	var comma =  ', ';
-	var singlequote = "'";
-	var closeparens = '))';
+    var statprefix = 'RegExp(new RegExp(';
+    var comma =  ', ';
+    var singlequote = "'";
+    var closeparens = '))';
 
-	function getStatus(regexp, flag)
-	{
-	  return (statprefix  +  quote(regexp) +  comma  +   flag  +  closeparens);
-	}
+    function getStatus(regexp, flag)
+    {
+      return (statprefix  +  quote(regexp) +  comma  +   flag  +  closeparens);
+    }
 
-	function quote(text)
-	{
-	  return (singlequote  +  text  + singlequote);
-	}
+    function quote(text)
+    {
+      return (singlequote  +  text  + singlequote);
+    }
 
-	return array;
+    return array;
 }

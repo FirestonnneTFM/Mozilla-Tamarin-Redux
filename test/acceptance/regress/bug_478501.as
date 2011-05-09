@@ -40,7 +40,7 @@
  *  templates taken from mozilla.org.  This template or
  *  any test cases written from it are not for external
  *  use or distribution.
- *  
+ *
  *  Author: Brent Baker <brbaker@adobe.com>
  *  Date: 10/02/2009
  *
@@ -49,7 +49,7 @@
  */
 
 var SECTION = "";       // provide a document reference (ie, Actionscript section)
-var VERSION = "";        // Version of ECMAScript or ActionScript 
+var VERSION = "";        // Version of ECMAScript or ActionScript
 var TITLE   = "E4X truncate String when it found the '\0'";       // Provide ECMA section title or a description
 var BUGNUMBER = "478501";
 

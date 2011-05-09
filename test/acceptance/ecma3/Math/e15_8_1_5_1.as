@@ -58,7 +58,7 @@ function getTestCases() {
         thisError=e.toString();
     }finally{
         array[item++]=new TestCase(SECTION,"Trying to verify the ReadOnly attribute of Math.LOG10E","ReferenceError: Error #1074",referenceError(thisError));
-    } 
+    }
     array[item++] = new TestCase( SECTION, "Math.LOG10E=0; Math.LOG10E", 0.4342944819032518,   Math.LOG10E );
     return ( array );
 }

@@ -42,8 +42,8 @@
 
     writeHeaderToLog( SECTION + " "+ TITLE);
 
-	var testcases = getTestCases();
-	test();
+    var testcases = getTestCases();
+    test();
 
 function getTestCases() {
     var array = new Array();
@@ -56,40 +56,40 @@ function getTestCases() {
 
     addTestCase( UTC_JAN_1_2005 );
 
-	function addTestCase( t ) {
-	    for ( var m = 0; m < 11; m++ ) {
-	        t += TimeInMonth(m);
+    function addTestCase( t ) {
+        for ( var m = 0; m < 11; m++ ) {
+            t += TimeInMonth(m);
 
-	        for ( var d = 0; d < TimeInMonth( m ); d += 7*msPerDay ) {
-	            t += d;
-	            array[item++] = new TestCase( SECTION,
-	                                    "(new Date("+t+")).getUTCDate()",
-	                                    DateFromTime((t)),
-	                                    (new Date(t)).getUTCDate() );
-	/*
-	            array[item++] = new TestCase( SECTION,
-	                                    "(new Date("+(t+1)+")).getUTCDate()",
-	                                    DateFromTime((t+1)),
-	                                    (new Date(t+1)).getUTCDate() );
+            for ( var d = 0; d < TimeInMonth( m ); d += 7*msPerDay ) {
+                t += d;
+                array[item++] = new TestCase( SECTION,
+                                        "(new Date("+t+")).getUTCDate()",
+                                        DateFromTime((t)),
+                                        (new Date(t)).getUTCDate() );
+    /*
+                array[item++] = new TestCase( SECTION,
+                                        "(new Date("+(t+1)+")).getUTCDate()",
+                                        DateFromTime((t+1)),
+                                        (new Date(t+1)).getUTCDate() );
 
-	            array[item++] = new TestCase( SECTION,
-	                                    "(new Date("+(t-1)+")).getUTCDate()",
-	                                    DateFromTime((t-1)),
-	                                    (new Date(t-1)).getUTCDate() );
+                array[item++] = new TestCase( SECTION,
+                                        "(new Date("+(t-1)+")).getUTCDate()",
+                                        DateFromTime((t-1)),
+                                        (new Date(t-1)).getUTCDate() );
 
-	            array[item++] = new TestCase( SECTION,
-	                                    "(new Date("+(t-TZ_ADJUST)+")).getUTCDate()",
-	                                    DateFromTime((t-TZ_ADJUST)),
-	                                    (new Date(t-TZ_ADJUST)).getUTCDate() );
+                array[item++] = new TestCase( SECTION,
+                                        "(new Date("+(t-TZ_ADJUST)+")).getUTCDate()",
+                                        DateFromTime((t-TZ_ADJUST)),
+                                        (new Date(t-TZ_ADJUST)).getUTCDate() );
 
-	            array[item++] = new TestCase( SECTION,
-	                                    "(new Date("+(t+TZ_ADJUST)+")).getUTCDate()",
-	                                    DateFromTime((t+TZ_ADJUST)),
-	                                    (new Date(t+TZ_ADJUST)).getUTCDate() );
-	*/
-	        }
-	    }
-	}
+                array[item++] = new TestCase( SECTION,
+                                        "(new Date("+(t+TZ_ADJUST)+")).getUTCDate()",
+                                        DateFromTime((t+TZ_ADJUST)),
+                                        (new Date(t+TZ_ADJUST)).getUTCDate() );
+    */
+            }
+        }
+    }
 
     return ( array );
 }

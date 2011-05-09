@@ -123,13 +123,13 @@ AddTestCase( "Access public method from private method of sub class", arr, EXTDC
 
 thisError = "No exception thrown!";
 try{
-	ExtPublicClassPub.pubStatSubGetArray();
+    ExtPublicClassPub.pubStatSubGetArray();
 } catch(e){
-	thisError = e.toString();
+    thisError = e.toString();
 } finally {
 AddTestCase( "Access public method from a public static method of sub class",
-					TYPEERROR+1006,
-					typeError( thisError ) );
+                    TYPEERROR+1006,
+                    typeError( thisError ) );
 }
 
 // ********************************************
@@ -163,13 +163,13 @@ AddTestCase( "Access public property from public method in sub class", arr, (EXT
 
 thisError = "no exception thrown";
 try{
-	ExtPublicClassPub.pubStatSubGetDPArray();
+    ExtPublicClassPub.pubStatSubGetDPArray();
 } catch (e10){
-	thisError = e10.toString();
+    thisError = e10.toString();
 } finally {
-	AddTestCase( "Access public property from public static method of sub class",
-					TYPEERROR+1006,
-					typeError( thisError ) );
+    AddTestCase( "Access public property from public static method of sub class",
+                    TYPEERROR+1006,
+                    typeError( thisError ) );
 }
 test();       // leave this alone.  this executes the test cases and
               // displays results.

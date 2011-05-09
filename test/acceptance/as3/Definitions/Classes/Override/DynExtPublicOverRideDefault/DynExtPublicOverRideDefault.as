@@ -37,41 +37,41 @@
 
 package PublicClass {
 
-	import PublicClass.*;
+    import PublicClass.*;
 
-	dynamic class DynExtPublicOverRideDefaultInner extends PublicClass {
+    dynamic class DynExtPublicOverRideDefaultInner extends PublicClass {
 
-		public var orSet = false;
-		public var orGet = false;
+        public var orSet = false;
+        public var orGet = false;
 
-		// *********************************
-		// override a default method
-		// with a default method in subclass
-		// *********************************
+        // *********************************
+        // override a default method
+        // with a default method in subclass
+        // *********************************
 
-		override function setBoolean( b:Boolean ) {
-			orSet = true;
-			this.boolean = b;
-		}
+        override function setBoolean( b:Boolean ) {
+            orSet = true;
+            this.boolean = b;
+        }
 
-		override function getBoolean() : Boolean {
-			orGet = true;
-			return this.boolean;
-		}
+        override function getBoolean() : Boolean {
+            orGet = true;
+            return this.boolean;
+        }
 
-		public function setGetBoolean(b:Boolean):Boolean {
-			this.setBoolean(b);
-			return this.getBoolean();
-		}
+        public function setGetBoolean(b:Boolean):Boolean {
+            this.setBoolean(b);
+            return this.getBoolean();
+        }
 
-		public function superSetBoolean (b:Boolean){
-			super.setBoolean(true);
-		}
+        public function superSetBoolean (b:Boolean){
+            super.setBoolean(true);
+        }
 
-		public function superGetBoolean (){
-			return super.getBoolean();
-		}
-	}
+        public function superGetBoolean (){
+            return super.getBoolean();
+        }
+    }
 
-	public class DynExtPublicOverRideDefault extends DynExtPublicOverRideDefaultInner {}
+    public class DynExtPublicOverRideDefault extends DynExtPublicOverRideDefaultInner {}
 }

@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "Expressions";        // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        		// Version of ECMAScript or ActionScript
+var VERSION = "AS3";                // Version of ECMAScript or ActionScript
 var TITLE   = "as operator";        // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -80,7 +80,7 @@ AddTestCase( "null as uint as uint", null, (null as uint as uint));
 
 //other
 AddTestCase( "null as Array as Boolean as Date as Number as String ", null,
-			 (null as Array as Boolean as Date as Number as String ));
+             (null as Array as Boolean as Date as Number as String ));
 
 test();       // leave this alone.  this executes the test cases and
               // displays results.

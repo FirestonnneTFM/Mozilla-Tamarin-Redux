@@ -36,23 +36,23 @@
  * ***** END LICENSE BLOCK ***** */
 package VirtualFunctionBody {
 
-	class TestObjInner{
-		virtual function noReturnNoParamsInner() { return "noReturnNoParams"; }
-		virtual function noReturnParamsInner(s:String, b:Boolean) { return s; }
-		virtual function noReturnCustomParamInner(c:Custom) { return new Custom(); }
-		virtual function returnNoParamsInner():String { return "returnNoParams"; } 
-		virtual function returnParamsInner(s:String, b:Boolean):String { return s; }
-		virtual function returnCustomNoParamsInner():Custom { return new Custom(); }
-	}
+    class TestObjInner{
+        virtual function noReturnNoParamsInner() { return "noReturnNoParams"; }
+        virtual function noReturnParamsInner(s:String, b:Boolean) { return s; }
+        virtual function noReturnCustomParamInner(c:Custom) { return new Custom(); }
+        virtual function returnNoParamsInner():String { return "returnNoParams"; }
+        virtual function returnParamsInner(s:String, b:Boolean):String { return s; }
+        virtual function returnCustomNoParamsInner():Custom { return new Custom(); }
+    }
 
-	public class TestObj extends TestObjInner {
-		public function noReturnNoParams() { return noReturnNoParamsInner(); }
-		public function noReturnParams(s:String, b:Boolean) { return noReturnParamsInner(s,b); }
-		public function noReturnCustomParam(c:Custom) { return noReturnCustomParamInner(c); }
-		public function returnNoParams():String { return returnNoParamsInner(); } 
-		public function returnParams(s:String, b:Boolean):String { return returnParamsInner(s,b); }
-		public function returnCustomNoParams():Custom { return returnCustomNoParamsInner(); }
-	}
+    public class TestObj extends TestObjInner {
+        public function noReturnNoParams() { return noReturnNoParamsInner(); }
+        public function noReturnParams(s:String, b:Boolean) { return noReturnParamsInner(s,b); }
+        public function noReturnCustomParam(c:Custom) { return noReturnCustomParamInner(c); }
+        public function returnNoParams():String { return returnNoParamsInner(); }
+        public function returnParams(s:String, b:Boolean):String { return returnParamsInner(s,b); }
+        public function returnCustomNoParams():Custom { return returnCustomNoParamsInner(); }
+    }
 
 }
 

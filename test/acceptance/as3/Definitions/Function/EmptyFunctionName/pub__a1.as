@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package EmptyFunctionName {
-	function __a1 () { return "__a1"; }
-	public function pub__a1 () { return __a1(); }
+    function __a1 () { return "__a1"; }
+    public function pub__a1 () { return __a1(); }
 }
 

@@ -38,7 +38,7 @@
 
 package DynamicClass {
 
-import 	DynamicClass.*;
+import  DynamicClass.*;
 
 class ExtDynImplDefDefStatInner extends DynamicClass implements DefaultIntDef, DefaultInt {
  // ****************************************
@@ -48,11 +48,11 @@ class ExtDynImplDefDefStatInner extends DynamicClass implements DefaultIntDef, D
 
      public function iGetBoolean() : Boolean { return boolean; }
 
-	public function testGetBoolean(flag:Boolean):Boolean {
+    public function testGetBoolean(flag:Boolean):Boolean {
 
-	  setBoolean(flag);
-	  return iGetBoolean();
-	}
+      setBoolean(flag);
+      return iGetBoolean();
+    }
 
 
     // ****************************************
@@ -62,11 +62,11 @@ class ExtDynImplDefDefStatInner extends DynamicClass implements DefaultIntDef, D
 
     public function iGetPubBoolean() : Boolean { return pubBoolean; }
 
-	public function testGetPubBoolean(flag:Boolean):Boolean {
+    public function testGetPubBoolean(flag:Boolean):Boolean {
 
-	  setPubBoolean(flag);
-	  return iGetPubBoolean();
-	}
+      setPubBoolean(flag);
+      return iGetPubBoolean();
+    }
 
 
     // ****************************************
@@ -76,11 +76,11 @@ class ExtDynImplDefDefStatInner extends DynamicClass implements DefaultIntDef, D
 
     public function iGetNumber() : Number { return number; }
 
-	public function testGetSetNumber( num:Number ) : Number {
+    public function testGetSetNumber( num:Number ) : Number {
 
-	  setNumber(num);
-	  return iGetNumber();
-	}
+      setNumber(num);
+      return iGetNumber();
+    }
 
 
     // ****************************************
@@ -152,10 +152,10 @@ class ExtDynImplDefDefStatInner extends DynamicClass implements DefaultIntDef, D
     public static function pubStatSubGetArray() : Array { return getStatArray(); }
     public static function pubStatSubSetArray(a:Array) { setStatArray(a); }
 
-	public function testPubStatSubGetSetArray(a:Array):Array {
-		pubStatSubSetArray(a);
-		return pubStatSubGetArray();
-	}
+    public function testPubStatSubGetSetArray(a:Array):Array {
+        pubStatSubSetArray(a);
+        return pubStatSubGetArray();
+    }
 
     // ***************************************
     // access static method of parent
@@ -172,7 +172,7 @@ class ExtDynImplDefDefStatInner extends DynamicClass implements DefaultIntDef, D
     }
 
     // ***************************************
-    // access static property from 
+    // access static property from
     // default method of sub class
     // ***************************************
 
@@ -231,10 +231,10 @@ class ExtDynImplDefDefStatInner extends DynamicClass implements DefaultIntDef, D
     public static function pubStatSubGetSPArray() : Array { return statArray; }
     public static function pubStatSubSetSPArray(a:Array) { statArray = a; }
 
-	public function testPubStatSubGetSetSPArray(a:Array):Array{
-		pubStatSubSetSPArray(a);
-		return pubStatSubGetSPArray();
-	}
+    public function testPubStatSubGetSetSPArray(a:Array):Array{
+        pubStatSubSetSPArray(a);
+        return pubStatSubGetSPArray();
+    }
 
     // ***************************************
     // access static property from

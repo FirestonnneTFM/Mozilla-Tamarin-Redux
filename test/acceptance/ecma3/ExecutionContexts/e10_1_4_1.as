@@ -42,7 +42,7 @@
     var SECTION = "10.1.4.1";
     var VERSION = "";
     var TITLE   = "Entering An Execution Context";
-	var bug     = "none";
+    var bug     = "none";
 
     startTest();
     writeHeaderToLog( SECTION + " "+ TITLE);
@@ -55,12 +55,12 @@ function getTestCases() {
 
     var y;
     var x = 1;
-	z = 11;  // dynamic var z
+    z = 11;  // dynamic var z
 
     if (delete y)
         array[item++] = new TestCase(SECTION, "Expected *NOT* to be able to delete y", "fail", "fail");
 
-	if (!delete z)
+    if (!delete z)
         array[item++] = new TestCase(SECTION, "Expected to be able to delete z", "fail", "fail");
 
     if (typeof x == "undefined")
@@ -72,7 +72,7 @@ function getTestCases() {
     if (delete x)
         array[item++] = new TestCase(SECTION, "Expected to be able to delete x", "fail", "fail");
 
-	array[item++] = new TestCase(SECTION, "All tests passed", true, true);
+    array[item++] = new TestCase(SECTION, "All tests passed", true, true);
 
     return ( array );
 }

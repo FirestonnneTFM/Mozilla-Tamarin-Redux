@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package PublicFunctionName {
-	public function abcdefghijklmnopqrstuvwxyz0123456789$_ () { return "all"; }
-	public function puball () { return abcdefghijklmnopqrstuvwxyz0123456789$_(); }
+    public function abcdefghijklmnopqrstuvwxyz0123456789$_ () { return "all"; }
+    public function puball () { return abcdefghijklmnopqrstuvwxyz0123456789$_(); }
 }
 

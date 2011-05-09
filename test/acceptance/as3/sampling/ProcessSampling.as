@@ -52,7 +52,7 @@ writeHeaderToLog("Sampling api");
 var objs:Array=new Array();
 class simpleobject {
     var str:String;
-    function simpleobject(s:String) { 
+    function simpleobject(s:String) {
         this.str=s;
     }
 }
@@ -79,13 +79,13 @@ for each (var sample in getSamples()) {
     if ( (nos=sample as NewObjectSample) != null) {
         nallocs++;
         allocs+=nos.size;
-        alloctable[nos.id]=nos.size;   	
+        alloctable[nos.id]=nos.size;
     } else if ( (dos=sample as DeleteObjectSample) !=null) {
         ndeallocs++;
-	deallocs+=dos.size;
-	if (alloctable[dos.id]!=dos.size) {
-	    badalloc+="dealloc id:"+dos.id+" "+dos.size+" does not match alloc size: "+alloctable[dos.id]+"\n";
-	}
+    deallocs+=dos.size;
+    if (alloctable[dos.id]!=dos.size) {
+        badalloc+="dealloc id:"+dos.id+" "+dos.size+" does not match alloc size: "+alloctable[dos.id]+"\n";
+    }
     }
 }
 print("nallocs  ="+nallocs+" allocs  ="+allocs);
@@ -121,7 +121,7 @@ if (isdebugger) {
         false,
         sizeAllocs>0
     );
-}    
+}
 var objs1:Object=new Object();
 for each (var sample2 in getSamples()) {
     var nos2 : NewObjectSample;

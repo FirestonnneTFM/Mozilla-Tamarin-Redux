@@ -34,26 +34,26 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-	
-	
-	var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-	var VERSION = 'no version';
+    
+    
+    var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+    var VERSION = 'no version';
     startTest();
-	var TITLE = 'String:concat';
+    var TITLE = 'String:concat';
 
-	writeHeaderToLog('Executing script: concat.js');
-	writeHeaderToLog( SECTION + " "+ TITLE);
+    writeHeaderToLog('Executing script: concat.js');
+    writeHeaderToLog( SECTION + " "+ TITLE);
 
-	var testcases = new getTestCases();
+    var testcases = new getTestCases();
     test();
     
-function getTestCases() {    
+function getTestCases() {
 
     var array = new Array();
     var item = 0;
     
-	var aString = new String("test string");
-	var bString = new String(" another ");
+    var aString = new String("test string");
+    var bString = new String(" another ");
 
     array[item++] = new TestCase( SECTION, "String.prototype.concat.length", 0,     String.prototype.concat.length);
 
@@ -77,7 +77,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION, "'abcde'.concat([1,2,3])", "abcde1,2,3",     'abcde'.concat([1,2,3]).toString());
     array[item++] = new TestCase( SECTION, "'abcde'.concat([1,2,3])", "abcde1,2,33,4,5string12345nulltrueundefined",     'abcde'.concat([1,2,3],[3,4,5],'string',12345,null,true,undefined).toString());
 
-	//what should this do:
+    //what should this do:
     array[item++] = new TestCase( SECTION, "'abcde'.concat()       ", "abcde",          'abcde'.concat().toString());
 
     //concat method transferred to other objects for use as method

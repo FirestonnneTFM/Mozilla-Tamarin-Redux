@@ -36,35 +36,35 @@
  * ***** END LICENSE BLOCK ***** */
  
 package {
- 	public var a = "boo";
- 	//private var b = "hoo"; Changing private variable to default variable since
+    public var a = "boo";
+    //private var b = "hoo"; Changing private variable to default variable since
         var b = "hoo";           //private attribute is allowed only on class property
- 	
- 	public class PublicClass {
- 		public function sayHi() {
- 			return "hi";
- 		}
- 		function sayBye() {
- 			return "bye";
- 		}
- 	}
- 	
- 	/*private class PrivateClass {       //Commenting out since private attribute is                                              //allowed only on class property
- 		function sayHi() {
- 			return "private hi";
- 		}
- 	}*/
+    
+    public class PublicClass {
+        public function sayHi() {
+            return "hi";
+        }
+        function sayBye() {
+            return "bye";
+        }
+    }
+    
+    /*private class PrivateClass {       //Commenting out since private attribute is                                              //allowed only on class property
+        function sayHi() {
+            return "private hi";
+        }
+    }*/
         
- 	
- 	class NotAPublicClass {
- 		public function sayHi() {
- 			return "hi";
- 		}
- 	}
+    
+    class NotAPublicClass {
+        public function sayHi() {
+            return "hi";
+        }
+    }
 }
 
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
@@ -80,9 +80,9 @@ var expected = 'error';
 var actual = 'no error';
 
 try {
-	var internalVar = b;
+    var internalVar = b;
 } catch(e1) {
-	actual = 'error';
+    actual = 'error';
 }
 
 AddTestCase("Access internal variable in package with no name", expected, actual);
@@ -94,10 +94,10 @@ var expected = 'error';
 var actual = 'no error';
 
 try {
-	var c2 = new PublicClass();
-	c2.sayBye();
+    var c2 = new PublicClass();
+    c2.sayBye();
 } catch(e2) {
-	actual = 'error';
+    actual = 'error';
 }
 
 AddTestCase("Try to access function not declared as public", expected, actual);
@@ -106,10 +106,10 @@ var expected = 'error';
 var actual = 'no error';
 
 /*try {
-	var c3 = new PrivateClass();
-	c3.sayHi();
+    var c3 = new PrivateClass();
+    c3.sayHi();
 } catch(e3) {
-	actual = 'error';
+    actual = 'error';
 }
 
 AddTestCase("Try to access private variable", expected, actual);*/
@@ -119,10 +119,10 @@ var expected = 'error';
 var actual = 'no error';
 
 try {
-	var c4 = new NotAPublicClass();
-	c4.sayHi();
+    var c4 = new NotAPublicClass();
+    c4.sayHi();
 } catch(e4) {
-	actual = 'error';
+    actual = 'error';
 }
 
 AddTestCase("Try to access class not declared as public", expected, actual);

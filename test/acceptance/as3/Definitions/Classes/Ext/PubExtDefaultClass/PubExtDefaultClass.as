@@ -60,12 +60,12 @@ package DefaultClass {
     public function pubSubGetArray() : Array { return this.getArray(); }
     public function pubSubSetArray(a:Array) { this.setArray(a); }
 
-	// this is needed so that the test cases can access this from
-	// outside the class.  This way the test case itself preserved
-	public function testSubGetSetArray(a:Array) : Array {
-		this.subSetArray(a);
-		return this.subGetArray();
-	}
+    // this is needed so that the test cases can access this from
+    // outside the class.  This way the test case itself preserved
+    public function testSubGetSetArray(a:Array) : Array {
+        this.subSetArray(a);
+        return this.subGetArray();
+    }
 
     // ************************************
     // access default method of parent
@@ -89,23 +89,23 @@ package DefaultClass {
     final function finSubGetArray() : Array { return this.getArray(); }
     final function finSubSetArray(a:Array) { this.setArray(a); }
 
-	public function testFinSubArray(a:Array):Array{
-		this.finSubSetArray(a);
-		return this.finSubGetArray();
-	}
+    public function testFinSubArray(a:Array):Array{
+        this.finSubSetArray(a);
+        return this.finSubGetArray();
+    }
 
     // ***************************************
-    // access default property from 
+    // access default property from
     // default method of sub class
     // ***************************************
 
     function subGetDPArray() : Array { return array; }
     function subSetDPArray(a:Array) { array = a; }
 
-	public function testSubGetSetDPArray(a:Array) : Array {
-		this.subSetDPArray(a);
-		return this.subGetDPArray();
-	}
+    public function testSubGetSetDPArray(a:Array) : Array {
+        this.subSetDPArray(a);
+        return this.subGetDPArray();
+    }
    
     // ***************************************
     // access default property from
@@ -123,24 +123,24 @@ package DefaultClass {
     private function privSubGetDPArray() : Array { return this.array; }
     private function privSubSetDPArray(a:Array) { this.array = a; }
 
-	public function testPrivSubDPArray(a:Array) : Array {
-		this.privSubSetDPArray(a);
-		return this.privSubGetDPArray();
-	}
+    public function testPrivSubDPArray(a:Array) : Array {
+        this.privSubSetDPArray(a);
+        return this.privSubGetDPArray();
+    }
 
 
     // ***************************************
-    // access default property from 
+    // access default property from
     // final method of sub class
     // ***************************************
 
     final function finSubGetDPArray() : Array { return array; }
     final function finSubSetDPArray(a:Array) { array = a; }
 
-	public function testFinSubDPArray(a:Array):Array {
-		this.finSubSetDPArray(a);
-		return this.finSubGetDPArray();
-	}
+    public function testFinSubDPArray(a:Array):Array {
+        this.finSubSetDPArray(a);
+        return this.finSubGetDPArray();
+    }
 
    
   }

@@ -34,7 +34,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-/* 
+/*
 -*- Mode: java; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
 *
 * ***** BEGIN LICENSE BLOCK *****
@@ -315,7 +315,7 @@ markRange(chars, 0x30A1, 0x30FA, marker);
 markRange(chars, 0x3105, 0x312C, marker);
 markRange(chars, 0xAC00, 0xD7A3, marker);
 
-// Ideographic 
+// Ideographic
 
 markRange(chars, 0x4E00, 0x9FA5, marker);
 markRange(chars, 0x3007, 0x3007, marker);
@@ -452,7 +452,7 @@ markRange(chars, 0x302A, 0x302F, marker);
 markRange(chars, 0x3099, 0x3099, marker);
 markRange(chars, 0x309A, 0x309A, marker);
 
-// Extender 
+// Extender
 
 markRange(chars, 0x00B7, 0x00B7, marker);
 markRange(chars, 0x02D0, 0x02D0, marker);

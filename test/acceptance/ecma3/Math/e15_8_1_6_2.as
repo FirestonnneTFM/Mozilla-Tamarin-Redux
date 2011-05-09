@@ -49,7 +49,7 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    delete Math.PI; 
+    delete Math.PI;
     array[item++] = new TestCase( SECTION, "delete Math.PI; Math.PI",       3.141592653589793,  Math.PI );
     array[item++] = new TestCase( SECTION, "delete Math.PI; Math.PI",       false,                  delete Math.PI );
     return ( array );

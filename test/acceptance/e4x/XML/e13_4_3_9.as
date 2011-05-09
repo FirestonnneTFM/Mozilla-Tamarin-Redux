@@ -42,15 +42,15 @@
 
 START("13.4.3.9 - XML.defaultSettings()");
 
-AddTestCase( "settings = XML.defaultSettings(), settings.ignoreComments", true, 
+AddTestCase( "settings = XML.defaultSettings(), settings.ignoreComments", true,
              (settings = XML.defaultSettings(), settings.ignoreComments) );
-AddTestCase( "settings = XML.defaultSettings(), settings.ignoreProcessingInstructions", true, 
+AddTestCase( "settings = XML.defaultSettings(), settings.ignoreProcessingInstructions", true,
              (settings = XML.defaultSettings(), settings.ignoreProcessingInstructions) );
-AddTestCase( "settings = XML.defaultSettings(), settings.ignoreWhitespace", true, 
+AddTestCase( "settings = XML.defaultSettings(), settings.ignoreWhitespace", true,
              (settings = XML.defaultSettings(), settings.ignoreWhitespace) );
-AddTestCase( "settings = XML.defaultSettings(), settings.prettyPrinting", true, 
+AddTestCase( "settings = XML.defaultSettings(), settings.prettyPrinting", true,
              (settings = XML.defaultSettings(), settings.prettyPrinting) );
-AddTestCase( "settings = XML.defaultSettings(), settings.prettyIndent", 2, 
+AddTestCase( "settings = XML.defaultSettings(), settings.prettyIndent", 2,
              (settings = XML.defaultSettings(), settings.prettyIndent) );
 
 var tempSettings = XML.settings();
@@ -60,15 +60,15 @@ tempSettings.ignoreWhitespace = false;
 tempSettings.prettyPrinting = false;
 tempSettings.prettyIndent = 4;
 
-AddTestCase( "XML.setSettings(tempSettings), XML.setSettings(XML.defaultSettings()), XML.ignoreComments", true, 
+AddTestCase( "XML.setSettings(tempSettings), XML.setSettings(XML.defaultSettings()), XML.ignoreComments", true,
              (XML.setSettings(tempSettings), XML.setSettings(XML.defaultSettings()), XML.ignoreComments) );
-AddTestCase( "XML.setSettings(tempSettings), XML.setSettings(XML.defaultSettings()), XML.ignoreProcessingInstructions", true, 
+AddTestCase( "XML.setSettings(tempSettings), XML.setSettings(XML.defaultSettings()), XML.ignoreProcessingInstructions", true,
              (XML.setSettings(tempSettings), XML.setSettings(XML.defaultSettings()), XML.ignoreProcessingInstructions) );
-AddTestCase( "XML.setSettings(tempSettings), XML.setSettings(XML.defaultSettings()), XML.ignoreWhitespace", true, 
+AddTestCase( "XML.setSettings(tempSettings), XML.setSettings(XML.defaultSettings()), XML.ignoreWhitespace", true,
              (XML.setSettings(tempSettings), XML.setSettings(XML.defaultSettings()), XML.ignoreWhitespace) );
-AddTestCase( "XML.setSettings(tempSettings), XML.setSettings(XML.defaultSettings()), XML.prettyPrinting", true, 
+AddTestCase( "XML.setSettings(tempSettings), XML.setSettings(XML.defaultSettings()), XML.prettyPrinting", true,
              (XML.setSettings(tempSettings), XML.setSettings(XML.defaultSettings()), XML.prettyPrinting) );
-AddTestCase( "XML.setSettings(tempSettings), XML.setSettings(XML.defaultSettings()), XML.prettyIndent", 2, 
+AddTestCase( "XML.setSettings(tempSettings), XML.setSettings(XML.defaultSettings()), XML.prettyIndent", 2,
              (XML.setSettings(tempSettings), XML.setSettings(XML.defaultSettings()), XML.prettyIndent) );
 
 END();

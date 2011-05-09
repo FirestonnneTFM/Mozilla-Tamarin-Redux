@@ -38,27 +38,27 @@
 package StaticPropertyPackage {
 
         public class BaseClass {
-		
-		public static function echo(s:String): String {
-			return s;
-		}
-	}
+        
+        public static function echo(s:String): String {
+            return s;
+        }
+    }
 
-	public class AccStatMethSubClassMeth extends BaseClass {
-	
-		public function callEcho(s:String): String {
-			return echo(s);
-		}
-		
-		public function callBaseEcho(s:String): String {
-			return BaseClass.echo(s);
-		}
-		
-		// not legal to access static via subclass name:
-		//public function callSubEcho(s:String): String {
-		//	return AccStatMethSubClassMeth.echo(s);
-		//}
+    public class AccStatMethSubClassMeth extends BaseClass {
+    
+        public function callEcho(s:String): String {
+            return echo(s);
+        }
+        
+        public function callBaseEcho(s:String): String {
+            return BaseClass.echo(s);
+        }
+        
+        // not legal to access static via subclass name:
+        //public function callSubEcho(s:String): String {
+        //  return AccStatMethSubClassMeth.echo(s);
+        //}
 
 
-	}
+    }
 }

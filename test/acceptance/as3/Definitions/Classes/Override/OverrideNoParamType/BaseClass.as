@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package MyPackage {
-	public class BaseClass {
-		public function echo(s) : String {
-			return "echo: " + s;
-		}
-	}
+    public class BaseClass {
+        public function echo(s) : String {
+            return "echo: " + s;
+        }
+    }
 }

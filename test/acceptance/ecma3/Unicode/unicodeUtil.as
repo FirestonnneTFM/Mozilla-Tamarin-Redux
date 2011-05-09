@@ -97,7 +97,7 @@ function testUnicodeRangeHelper(hexFrom, hexTo) {
         // 2. String.match()
         var matchResult:Array = testStr.match(charStrPattern);
         if (matchResult == null) {
-						stringMatchResult += "Failed to find match: " + charStrPattern + " ";
+                        stringMatchResult += "Failed to find match: " + charStrPattern + " ";
         } else if (charStr != matchResult[0]) {
             stringMatchResult += "Failed to match chars: "+charStr + " with " + matchResult[0] + ' ';
         }
@@ -106,31 +106,31 @@ function testUnicodeRangeHelper(hexFrom, hexTo) {
         var re = new RegExp("(" + charStrPattern + ")");
         var splitResult:Array = testStr.split(re);
         if (splitResult == null) {
-						stringSplitResult += "Failed to split string on: " + charStr + ' ';
+                        stringSplitResult += "Failed to split string on: " + charStr + ' ';
         } else {
             // test string before searched char
-						if (testStr.substring(0,searchResult) != splitResult[0])
-								stringSplitResult += "split failed before: " + charStr + ' ';
-						// test searched char
-						if (charStr != splitResult[1])
-								stringSplitResult += "split failed on: " + charStr + ' ';
-						// test string after searched char
-						if (testStr.substring(searchResult + 1, testStr.length) != splitResult[2])
-								stringSplitResult += "split failed after: " + charStr + ' ';
+                        if (testStr.substring(0,searchResult) != splitResult[0])
+                                stringSplitResult += "split failed before: " + charStr + ' ';
+                        // test searched char
+                        if (charStr != splitResult[1])
+                                stringSplitResult += "split failed on: " + charStr + ' ';
+                        // test string after searched char
+                        if (testStr.substring(searchResult + 1, testStr.length) != splitResult[2])
+                                stringSplitResult += "split failed after: " + charStr + ' ';
         }
 
     } // for loop
 
-		// Output test results
+        // Output test results
     this.array[this.item++] = new TestCase(SECTION,
         "Unicode String.search from " + decimalToHexString(hexFrom) + " to " + decimalToHexString(hexFrom),
         '', stringSearchResult);
-		this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = new TestCase(SECTION,
         "Unicode String.search for 3 chars from " + decimalToHexString(hexFrom) + " to " + decimalToHexString(hexFrom),
-				'', string3SearchResult);
-		this.array[this.item++] = new TestCase(SECTION,
+                '', string3SearchResult);
+        this.array[this.item++] = new TestCase(SECTION,
         "Unicode String.match", '', stringMatchResult);
-		this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = new TestCase(SECTION,
         "Unicode String.split", '', stringSplitResult);
 
     testReplace(hexFrom, hexTo);
@@ -149,7 +149,7 @@ function testReplace(hexFrom, hexTo)
         testStr += String.fromCharCode(i);
     }
 
-		var stringReplaceResult:String = '';
+        var stringReplaceResult:String = '';
 
     for (var i = hexFrom; i <= hexTo; i++ ) {
         var charStr = String.fromCharCode(i);
@@ -161,8 +161,8 @@ function testReplace(hexFrom, hexTo)
         var replaceResult:String = testStr.replace(charStr, "");
         var replaceExpect = testStr.substring(0, index);
         replaceExpect += testStr.substring(index + 1, testStr.length);
-				if (replaceExpect != replaceResult)
-						stringReplaceResult += "Replace failed on: " + charStr + " ";
+                if (replaceExpect != replaceResult)
+                        stringReplaceResult += "Replace failed on: " + charStr + " ";
         
         // replace with first and last char in given Unicode range
         var firstLastChars = stringPatternFromCharCode(hexFrom) + stringPatternFromCharCode(hexTo);
@@ -170,60 +170,60 @@ function testReplace(hexFrom, hexTo)
         var replaceExpect2 = testStr.substring(0, index);
         replaceExpect2 += firstLastChars;
         replaceExpect2 += testStr.substring(index + 1, testStr.length);
-				if (replaceExpect2 != replaceResult2)
-						stringReplaceResult += "Replace failed swapping: " + firstLastChars + " "; 
+                if (replaceExpect2 != replaceResult2)
+                        stringReplaceResult += "Replace failed swapping: " + firstLastChars + " ";
     }
 
-		this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = new TestCase(SECTION,
             "Unicode String.replace", '', stringReplaceResult);
 
 }
 
 function testSplitOnMark(testStr:String, markArray:Array, markArrayName:String) {
-	var testSplitResult:String = ''; //holds results of splitting
+    var testSplitResult:String = ''; //holds results of splitting
 
-	for (var i = 0; i < markArray.length; i++) {
-		var mark = markArray[i];
-		var markStr = String.fromCharCode(mark);
-		var markStrPattern = stringPatternFromCharCode(mark);
+    for (var i = 0; i < markArray.length; i++) {
+        var mark = markArray[i];
+        var markStr = String.fromCharCode(mark);
+        var markStrPattern = stringPatternFromCharCode(mark);
 
-		// insert the mark character into the middle of testStr
-		var insertIndex = Math.floor(testStr.length / 2);
-		var markedStr = testStr.substring(0, insertIndex);
-		markedStr += markStr;
-		markedStr += testStr.substring(insertIndex, testStr.length);
+        // insert the mark character into the middle of testStr
+        var insertIndex = Math.floor(testStr.length / 2);
+        var markedStr = testStr.substring(0, insertIndex);
+        markedStr += markStr;
+        markedStr += testStr.substring(insertIndex, testStr.length);
 
-		// split around the mark
-		
-		var markRE = new RegExp("(" + markStrPattern + ")");
-		var splitMarkedResult:Array = markedStr.split(markRE);
-		var splitMessage = "Split on " + markArrayName + " mark " + decimalToHexString(mark);
-		if (splitMarkedResult == null) {
-				testSplitResult += 'array is null, expected not null!';
-		} else {
-			var markIndex = markedStr.indexOf(markStr, 0);
+        // split around the mark
+        
+        var markRE = new RegExp("(" + markStrPattern + ")");
+        var splitMarkedResult:Array = markedStr.split(markRE);
+        var splitMessage = "Split on " + markArrayName + " mark " + decimalToHexString(mark);
+        if (splitMarkedResult == null) {
+                testSplitResult += 'array is null, expected not null!';
+        } else {
+            var markIndex = markedStr.indexOf(markStr, 0);
 
-			// test segment before mark
-			if (markedStr.substring(0, markIndex) != splitMarkedResult[0])
-					testSplitResult += "Split failed before: " + decimalToHexString(mark);
+            // test segment before mark
+            if (markedStr.substring(0, markIndex) != splitMarkedResult[0])
+                    testSplitResult += "Split failed before: " + decimalToHexString(mark);
 
-			// test the mark we split on
-			if (markedStr.substring(markIndex, markIndex + 1) != splitMarkedResult[1])
-					testSplitResult += "Split failed on: " + decimalToHexString(mark);
+            // test the mark we split on
+            if (markedStr.substring(markIndex, markIndex + 1) != splitMarkedResult[1])
+                    testSplitResult += "Split failed on: " + decimalToHexString(mark);
 
-			// test segment after mark
-			var segmentEnd = markedStr.indexOf(markStr, markIndex + 1);
-			if (segmentEnd == -1) {
-				segmentEnd = markedStr.length;
-			}
-			if (markedStr.substring(markIndex + 1, segmentEnd) != splitMarkedResult[2])
-					testSplitResult += "Split failed after: " + decimalToHexString(mark);
-		} // else
-	} // for
-	
-	this.array[this.item++] = new TestCase(SECTION,
+            // test segment after mark
+            var segmentEnd = markedStr.indexOf(markStr, markIndex + 1);
+            if (segmentEnd == -1) {
+                segmentEnd = markedStr.length;
+            }
+            if (markedStr.substring(markIndex + 1, segmentEnd) != splitMarkedResult[2])
+                    testSplitResult += "Split failed after: " + decimalToHexString(mark);
+        } // else
+    } // for
+    
+    this.array[this.item++] = new TestCase(SECTION,
             "Unicode Split on Mark", '', testSplitResult);
-	
+    
 }
 
 function regexpReserved(charCode) {

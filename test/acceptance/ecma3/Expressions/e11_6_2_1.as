@@ -84,14 +84,14 @@ function getTestCases() {
                                     "var EXP_1 = new MyOtherObject(new Boolean(true)); var EXP_2 = new MyOtherObject(new Boolean(false)); EXP_1 - EXP_2",
                                     1,
                                      EXP_1 - EXP_2 );
-    var EXP_1 = new MyValuelessObject(true); 
-	var EXP_2 = new MyValuelessObject(false); 
+    var EXP_1 = new MyValuelessObject(true);
+    var EXP_2 = new MyValuelessObject(false);
     array[item++] = new TestCase(   SECTION,
                                     "var EXP_1 = new MyValuelessObject(true); var EXP_2 = new MyValuelessObject(false); EXP_1 - EXP_2",
                                     NaN,
                                      EXP_1 - EXP_2 );
-    var EXP_1 = new MyValuelessObject(new Boolean(true)); 
-	var EXP_2 = new MyValuelessObject(new Boolean(false));
+    var EXP_1 = new MyValuelessObject(new Boolean(true));
+    var EXP_2 = new MyValuelessObject(new Boolean(false));
     array[item++] = new TestCase(   SECTION,
                                     "var EXP_1 = new MyValuelessObject(new Boolean(true)); var EXP_2 = new MyValuelessObject(new Boolean(false)); EXP_1 - EXP_2",
                                     0, // true - true = 0 not NaN
@@ -105,14 +105,14 @@ function getTestCases() {
                                     "var EXP_1 = 100; var EXP_2 = 1; EXP_1 - EXP_2",
                                     99,
                                      EXP_1 - EXP_2 );
-    var EXP_1 = new Number(100); 
-	var EXP_2 = new Number(1);
+    var EXP_1 = new Number(100);
+    var EXP_2 = new Number(1);
     array[item++] = new TestCase(   SECTION,
                                     "var EXP_1 = new Number(100); var EXP_2 = new Number(1); EXP_1 - EXP_2",
                                     99,
                                      EXP_1 - EXP_2 );
-    var EXP_1 = new Object(100); 
-	var EXP_2 = new Object(1);
+    var EXP_1 = new Object(100);
+    var EXP_2 = new Object(1);
     array[item++] = new TestCase(   SECTION,
                                     "var EXP_1 = new Object(100); var EXP_2 = new Object(1); EXP_1 - EXP_2",
                                     99,
@@ -127,8 +127,8 @@ function getTestCases() {
                                     "var EXP_1 = new MyObject(100); var EXP_2 = new MyObject(1); EXP_1 - EXP_2",
                                     99,
                                      EXP_1 - EXP_2 );
-    var EXP_1 = new MyObject(new Number(100)); 
-	var EXP_2 = new MyObject(new Number(1)); 
+    var EXP_1 = new MyObject(new Number(100));
+    var EXP_2 = new MyObject(new Number(1));
     array[item++] = new TestCase(   SECTION,
                                     "var EXP_1 = new MyObject(new Number(100)); var EXP_2 = new MyObject(new Number(1)); EXP_1 - EXP_2",
                                     99,
@@ -138,8 +138,8 @@ function getTestCases() {
                                     "var EXP_1 = new MyOtherObject(new Number(100)); var EXP_2 = new MyOtherObject(new Number(1)); EXP_1 - EXP_2",
                                     99,
                                      EXP_1 - EXP_2 );
-    var EXP_1 = new MyValuelessObject(100); 
-	var EXP_2 = new MyValuelessObject(1);
+    var EXP_1 = new MyValuelessObject(100);
+    var EXP_2 = new MyValuelessObject(1);
     array[item++] = new TestCase(   SECTION,
                                     "var EXP_1 = new MyValuelessObject(100); var EXP_2 = new MyValuelessObject(1); EXP_1 - EXP_2",
                                     0,

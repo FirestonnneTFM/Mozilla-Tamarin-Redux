@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/* testcases: 
+/* testcases:
  *   master string exposed to heap graph
  */
 

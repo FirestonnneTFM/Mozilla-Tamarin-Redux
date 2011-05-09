@@ -37,17 +37,17 @@
 
 
 /**
- *  All 'import' statements  should be the first 
+ *  All 'import' statements  should be the first
  *  in a file.
  */
 import PublicClass.*;
 
-var SECTION = "Definitions";       			// provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";  				// Version of JavaScript or ECMA
-var TITLE   = "dynamic Class Extends Public Class";     	// Provide ECMA section title or a description
+var SECTION = "Definitions";                // provide a document reference (ie, ECMA section)
+var VERSION = "AS 3.0";                 // Version of JavaScript or ECMA
+var TITLE   = "dynamic Class Extends Public Class";         // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                				// leave this alone
+startTest();                                // leave this alone
 
 /**
  * Calls to AddTestCase here. AddTestCase is a function that is defined
@@ -82,7 +82,7 @@ AddTestCase( "PUBEXTDCLASSS.testSubArray(arr)", arr, (PUBEXTDCLASSS.testSubArray
 
 
 // ********************************************
-// access static method from a public 
+// access static method from a public
 // method of a sub class
 //
 // ********************************************
@@ -93,7 +93,7 @@ AddTestCase( "PUBEXTDCLASSS.pubSubSetArray(arr), PUBEXTDCLASSS.pubSubGetArray()"
 
 
 // ********************************************
-// access static method from a private 
+// access static method from a private
 // method of a sub class
 //
 // ********************************************
@@ -104,7 +104,7 @@ AddTestCase( "PUBEXTDCLASSS.testPrivSubArray(arr)", arr, PUBEXTDCLASSS.testPrivS
 
 
 // ********************************************
-// access static method from a final 
+// access static method from a final
 // method of a sub class
 //
 // ********************************************
@@ -113,7 +113,7 @@ PUBEXTDCLASSS = new PubExtPublicClassStat();
 AddTestCase( "PUBEXTDCLASSS.testFinSubArray(arr)", arr, PUBEXTDCLASSS.testFinSubArray(arr) );
 
 // ********************************************
-// access static method from a static 
+// access static method from a static
 // method of a sub class
 //
 // ********************************************
@@ -123,18 +123,18 @@ AddTestCase( "PubExtPublicClassStat.testStatSubArray(arr)", arr, PubExtPublicCla
 
 
 // ********************************************
-// access static method from a public static 
+// access static method from a public static
 // method of a sub class
 //
 // ********************************************
 
 AddTestCase( "*** Access static method from public static method of sub class ***", 1, 1 );
-AddTestCase( "PubExtPublicClassStat.pubStatSubSetArray(arr), PubExtPublicClassStat.pubStatSubGetArray()", arr, 
+AddTestCase( "PubExtPublicClassStat.pubStatSubSetArray(arr), PubExtPublicClassStat.pubStatSubGetArray()", arr,
              (PubExtPublicClassStat.pubStatSubSetArray(arr), PubExtPublicClassStat.pubStatSubGetArray()) );
 
 
 // ********************************************
-// access static method from a private static 
+// access static method from a private static
 // method of a sub class
 //
 // ********************************************
@@ -145,7 +145,7 @@ AddTestCase( "PubExtPublicClassStat.testPrivStatSubArray(arr)", arr, PubExtPubli
 
 
 // ********************************************
-// access static property from 
+// access static property from
 // default method in sub class
 // ********************************************
 
@@ -156,7 +156,7 @@ AddTestCase( "PUBEXTDCLASSS.testSubDPArray(arr)", arr, PUBEXTDCLASSS.testSubDPAr
 
 
 // ********************************************
-// access static property from 
+// access static property from
 // public method in sub class
 // ********************************************
 
@@ -166,7 +166,7 @@ AddTestCase( "PUBEXTDCLASSS.pubSubSetDPArray(arr), PUBEXTDCLASSS.pubSubGetDPArra
 
 
 // ********************************************
-// access static property from 
+// access static property from
 // private method in sub class
 // ********************************************
 
@@ -177,7 +177,7 @@ AddTestCase( "PUBEXTDCLASSS.testPrivSubDPArray(arr)", arr, PUBEXTDCLASSS.testPri
 
 // ********************************************
 // access static property from
-// static method in sub class 
+// static method in sub class
 // ********************************************
 
 AddTestCase( "*** Access static property from static method in sub class ***", 1, 1 );
@@ -185,7 +185,7 @@ AddTestCase( "PubExtPublicClassStat.testStatSubPArray(arr)", arr, PubExtPublicCl
 
 // ********************************************
 // access static property from
-// public static method in sub class 
+// public static method in sub class
 // ********************************************
 
 AddTestCase( "*** Access static property from public static method in sub class ***", 1, 1 );
@@ -193,7 +193,7 @@ AddTestCase( "PubExtPublicClassStat.pubStatSubSetSPArray(arr), PubExtPublicClass
              (PubExtPublicClassStat.pubStatSubSetSPArray(arr), PubExtPublicClassStat.pubStatSubGetSPArray()) );
 
 // ********************************************
-// access static property from 
+// access static property from
 // private static method in sub class
 // ********************************************
 
@@ -204,7 +204,7 @@ AddTestCase( "PUBEXTDCLASSS.testPrivStatSubPArray(arr)", arr, PUBEXTDCLASSS.test
 
 
 // ********************************************
-// access static property from 
+// access static property from
 // final method in sub class
 // ********************************************
 
@@ -213,6 +213,6 @@ AddTestCase( "*** Access static property from final method in sub class ***", 1,
 AddTestCase( "PUBEXTDCLASSS.testFinSubDPArray(arr)", arr, PUBEXTDCLASSS.testFinSubDPArray(arr) );
 
 
-test();       		// Leave this function alone.
-			// This function is for executing the test case and then 
-			// displaying the result on to the console or the LOG file.
+test();             // Leave this function alone.
+            // This function is for executing the test case and then
+            // displaying the result on to the console or the LOG file.

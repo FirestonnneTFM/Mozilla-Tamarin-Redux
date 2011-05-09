@@ -93,13 +93,13 @@ var a = /(?:xx|x)*/(s);
 var b = /(xx|x)*/(s);
 
 AddTestCase( "var s = 'x'; for (var i = 0; i != 13; i++) s += s; " +
-	     "a = /(?:xx|x)*/(s); a.length",
-	     1,
-	     a.length );
+         "a = /(?:xx|x)*/(s); a.length",
+         1,
+         a.length );
 
 AddTestCase( "var b = /(xx|x)*/(s); b.length",
-	     2,
-	     b.length );
+         2,
+         b.length );
 
 test();       // leave this alone.  this executes the test cases and
 // displays results.

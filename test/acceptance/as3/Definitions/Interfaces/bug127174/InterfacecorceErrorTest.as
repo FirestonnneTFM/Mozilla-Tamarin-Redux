@@ -35,11 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package bug127174{
-	public class InterfaceCorceErrorTest {
+    public class InterfaceCorceErrorTest {
 
-    	public function causeCoerceError(intf:IBaseInterface):Boolean
-    	{
-			return true;
-    	}
-	}
+        public function causeCoerceError(intf:IBaseInterface):Boolean
+        {
+            return true;
+        }
+    }
 }

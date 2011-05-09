@@ -50,10 +50,10 @@ package PublicClass {
     function subGetArray() : Array { return this.getFinArray(); }
     function subSetArray(a:Array) { this.setFinArray(a); }
 
-	public function testSubGetArray(arr:Array):Array { 
-		this.subSetArray(arr);
-		return subGetArray(); 
-	}
+    public function testSubGetArray(arr:Array):Array {
+        this.subSetArray(arr);
+        return subGetArray();
+    }
 
     // ************************************
     // access final method of parent
@@ -85,30 +85,30 @@ package PublicClass {
     final function finSubGetArray() : Array { return this.getFinArray(); }
     final function finSubSetArray(a:Array) { this.setFinArray(a); }
 
-	public function testFinSubArray(a:Array):Array {
-		this.finSubSetArray(a);
-		return this.finSubGetArray();
-	}
+    public function testFinSubArray(a:Array):Array {
+        this.finSubSetArray(a);
+        return this.finSubGetArray();
+    }
 
     // ***************************************
-	// access final method from public static method
-	// of the sub class
+    // access final method from public static method
+    // of the sub class
     // ***************************************
 
-	public static function pubStatSubGetArray():Array { return getFinArray(); }
+    public static function pubStatSubGetArray():Array { return getFinArray(); }
 
     // ***************************************
-    // access final property from 
+    // access final property from
     // default method of sub class
     // ***************************************
 
     function subGetDPArray() : Array { return finArray; }
     function subSetDPArray(a:Array) { finArray = a; }
 
-	public function testSubDPArray(a:Array):Array {
-		this.subSetDPArray(a);
-		return this.subGetDPArray();
-	}
+    public function testSubDPArray(a:Array):Array {
+        this.subSetDPArray(a);
+        return this.subGetDPArray();
+    }
    
     // ***************************************
     // access final property from
@@ -127,15 +127,15 @@ package PublicClass {
     private function privSubSetDPArray(a:Array) { this.finArray = a; }
 
     // ***************************************
-    // access final property from 
+    // access final property from
     // final method of sub class
     // ***************************************
 
     public final function finSubGetDPArray() : Array { return pubFinArray; }
     public final function finSubSetDPArray(a:Array) { pubFinArray = a; }
 
-	// access final property from public static method
-	public static function pubStatSubGetFPArray():Array { return finArray; }
+    // access final property from public static method
+    public static function pubStatSubGetFPArray():Array { return finArray; }
 
   }
   public class ExtPublicClassFin extends ExtPublicClassFinInner {}

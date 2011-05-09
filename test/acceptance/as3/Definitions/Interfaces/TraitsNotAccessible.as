@@ -51,11 +51,11 @@ AddTestCase("call implemented method", "x.I::f()", eg.doCall());
 var thisError : String = "no exception thrown";
 var result = "";
 try {
-	result = eg.doSuperCall();
+    result = eg.doSuperCall();
 } catch (e) {
-	thisError = e.toString();
+    thisError = e.toString();
 } finally {
-	AddTestCase("call super method", REFERENCEERROR+1070, referenceError(thisError));
+    AddTestCase("call super method", REFERENCEERROR+1070, referenceError(thisError));
 
 }
 

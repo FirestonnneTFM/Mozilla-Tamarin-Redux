@@ -55,35 +55,35 @@ writeHeaderToLog('Executing script: test.js');
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 testcases[index++] = new TestCase ( SECTION,
-	       "/[0-9]{3}/.test('23 2 34 678 9 09')",
-	       true, /[0-9]{3}/.test('23 2 34 678 9 09'));
+           "/[0-9]{3}/.test('23 2 34 678 9 09')",
+           true, /[0-9]{3}/.test('23 2 34 678 9 09'));
 
 testcases[index++] = new TestCase ( SECTION,
-	       "/[0-9]{3}/.test('23 2 34 78 9 09')",
-	       false, /[0-9]{3}/.test('23 2 34 78 9 09'));
+           "/[0-9]{3}/.test('23 2 34 78 9 09')",
+           false, /[0-9]{3}/.test('23 2 34 78 9 09'));
 
 testcases[index++] = new TestCase ( SECTION,
-	       "/\w+ \w+ \w+/.test('do a test')",
-	       true, /\w+ \w+ \w+/.test("do a test"));
+           "/\w+ \w+ \w+/.test('do a test')",
+           true, /\w+ \w+ \w+/.test("do a test"));
 
 testcases[index++] = new TestCase ( SECTION,
-	       "/\w+ \w+ \w+/.test('a test')",
-	       false, /\w+ \w+ \w+/.test("a test"));
+           "/\w+ \w+ \w+/.test('a test')",
+           false, /\w+ \w+ \w+/.test("a test"));
 
 testcases[index++] = new TestCase ( SECTION,
-	       "(new RegExp('[0-9]{3}')).test('23 2 34 678 9 09')",
-	       true, (new RegExp('[0-9]{3}')).test('23 2 34 678 9 09'));
+           "(new RegExp('[0-9]{3}')).test('23 2 34 678 9 09')",
+           true, (new RegExp('[0-9]{3}')).test('23 2 34 678 9 09'));
 
 testcases[index++] = new TestCase ( SECTION,
-	       "(new RegExp('[0-9]{3}')).test('23 2 34 78 9 09')",
-	       false, (new RegExp('[0-9]{3}')).test('23 2 34 78 9 09'));
+           "(new RegExp('[0-9]{3}')).test('23 2 34 78 9 09')",
+           false, (new RegExp('[0-9]{3}')).test('23 2 34 78 9 09'));
 
 testcases[index++] = new TestCase ( SECTION,
-	       "(new RegExp('\\\\w+ \\\\w+ \\\\w+')).test('do a test')",
-	       true, (new RegExp('\\w+ \\w+ \\w+')).test("do a test"));
+           "(new RegExp('\\\\w+ \\\\w+ \\\\w+')).test('do a test')",
+           true, (new RegExp('\\w+ \\w+ \\w+')).test("do a test"));
 
 testcases[index++] = new TestCase ( SECTION,
-	       "(new RegExp('\\\\w+ \\\\w+ \\\\w+')).test('a test')",
-	       false, (new RegExp('\\w+ \\w+ \\w+')).test("a test"));
+           "(new RegExp('\\\\w+ \\\\w+ \\\\w+')).test('a test')",
+           false, (new RegExp('\\w+ \\w+ \\w+')).test("a test"));
 
 test();

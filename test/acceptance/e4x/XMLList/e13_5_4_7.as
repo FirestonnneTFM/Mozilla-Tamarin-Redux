@@ -60,11 +60,11 @@ var xmlobj2 = "<Street>56 Hill Street</Street>";
 
 
 // XML object passed as value exists in the XML List
-AddTestCase( "MYXML = new XMLList(xmlDoc),MYOBJ = new XML(xmlobj1), MYXML.contains(MYOBJ)",true, 
+AddTestCase( "MYXML = new XMLList(xmlDoc),MYOBJ = new XML(xmlobj1), MYXML.contains(MYOBJ)",true,
              (MYXML = new XMLList(xmlDoc),MYOBJ = new XML(xmlobj1), MYXML.contains(MYOBJ)));
 
 //XML object passed as value does not exist in the XML List
-AddTestCase( "MYXML = new XMLList(xmlDoc), MYOBJ = new XML(xmlobj2), MYXML.contains(MYOBJ)",false, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), MYOBJ = new XML(xmlobj2), MYXML.contains(MYOBJ)",false,
              (MYXML = new XMLList(xmlDoc), MYOBJ = new XML(xmlobj2), MYXML.contains(MYOBJ)));
 
 END();

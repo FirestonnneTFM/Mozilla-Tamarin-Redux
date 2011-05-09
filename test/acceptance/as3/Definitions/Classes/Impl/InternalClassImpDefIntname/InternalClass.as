@@ -37,25 +37,25 @@
 /*
  * Internal Class InternalClass
  * Class methods
- *  
+ *
  */
 
 package InternalClassImpDefIntname{
 
-	internal class InternalClass implements DefaultInt{
-		
-		public function deffunc():String{  		
-			return"PASSED";
-		}
-		
-	}
+    internal class InternalClass implements DefaultInt{
+        
+        public function deffunc():String{
+            return"PASSED";
+        }
+        
+    }
 
 
-	public class InternalClassAccesor{
-	        var c:InternalClass = new InternalClass(); 
-		var i:DefaultInt = c;
-		public function accdeffunc(){return i.deffunc();}
-	        	
-       } 	
-	
-}  
+    public class InternalClassAccesor{
+            var c:InternalClass = new InternalClass();
+        var i:DefaultInt = c;
+        public function accdeffunc(){return i.deffunc();}
+                
+       }
+    
+}

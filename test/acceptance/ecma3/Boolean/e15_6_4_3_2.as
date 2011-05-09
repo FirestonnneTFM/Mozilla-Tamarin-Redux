@@ -52,25 +52,25 @@ function getTestCases() {
     var item = 0;
 
     valof=Boolean.prototype.valueOf;
-	Boolean.prototype.valueOf=valof;
-	x=new Boolean();
+    Boolean.prototype.valueOf=valof;
+    x=new Boolean();
 
     array[item++] = new TestCase( SECTION,
-							"valof=Boolean.prototype.valueOf; Boolean.prototpye.valueOf=valof; x=new Boolean();x.valueOf()",
-							false,
-							x.valueOf());
+                            "valof=Boolean.prototype.valueOf; Boolean.prototpye.valueOf=valof; x=new Boolean();x.valueOf()",
+                            false,
+                            x.valueOf());
 
-	x=new Boolean(true);
+    x=new Boolean(true);
     array[item++] = new TestCase( SECTION,
-							"valof=Boolean.prototype.valueOf; Boolean.prototpye.valueOf=valof; x=new Boolean(true);x.valueOf()",
-							true,
-							x.valueOf());
+                            "valof=Boolean.prototype.valueOf; Boolean.prototpye.valueOf=valof; x=new Boolean(true);x.valueOf()",
+                            true,
+                            x.valueOf());
 
-	x=new Boolean(false);
+    x=new Boolean(false);
     array[item++] = new TestCase( SECTION,
-							"valof=Boolean.prototype.valueOf; Boolean.prototpye.valueOf=valof; x=new Boolean(false);x.valueOf()",
-							false,
-							x.valueOf());
+                            "valof=Boolean.prototype.valueOf; Boolean.prototpye.valueOf=valof; x=new Boolean(false);x.valueOf()",
+                            false,
+                            x.valueOf());
 
     return ( array );
 }

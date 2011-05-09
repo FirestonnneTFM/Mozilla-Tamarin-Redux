@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package MCPackage {
-	public class BaseClass {
-		public function addition(i:int, x:int) : int {
-			return i + x;
-		}
-	}
+    public class BaseClass {
+        public function addition(i:int, x:int) : int {
+            return i + x;
+        }
+    }
 }

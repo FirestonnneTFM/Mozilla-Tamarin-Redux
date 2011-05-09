@@ -48,15 +48,15 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	var i:uint = 3;
-	var result;
-	try{
-		result = typeof i;
-	} catch (e) {
-		result = "exception thrown";
-	} finally {
-	    array[item++] = new TestCase(SECTION, "typeof i:int",        "number",        result );
-	}
+    var i:uint = 3;
+    var result;
+    try{
+        result = typeof i;
+    } catch (e) {
+        result = "exception thrown";
+    } finally {
+        array[item++] = new TestCase(SECTION, "typeof i:int",        "number",        result );
+    }
     return ( array );
 }
 function test() {

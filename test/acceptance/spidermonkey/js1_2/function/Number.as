@@ -58,27 +58,27 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 date = new Date(2200);
 
 testcases[index++] = new TestCase( SECTION, "Number(new Date(2200))  ",
-	      2200,  (Number(date)));
+          2200,  (Number(date)));
 testcases[index++] = new TestCase( SECTION, "Number(true)            ",
-	      1,  (Number(true)));
+          1,  (Number(true)));
 testcases[index++] = new TestCase( SECTION, "Number(false)           ",
-	      0,  (Number(false)));
+          0,  (Number(false)));
 testcases[index++] = new TestCase( SECTION, "Number('124')           ",
-	      124,  (Number('124')));
+          124,  (Number('124')));
 testcases[index++] = new TestCase( SECTION, "Number('1.23')          ",
-	      1.23,  (Number('1.23')));
+          1.23,  (Number('1.23')));
 testcases[index++] = new TestCase( SECTION, "Number({p:1})           ",
-	      NaN,  (Number({p:1})));
+          NaN,  (Number({p:1})));
 testcases[index++] = new TestCase( SECTION, "Number(null)            ",
-	      0,  (Number(null)));
+          0,  (Number(null)));
 testcases[index++] = new TestCase( SECTION, "Number(-45)             ",
-	      -45,  (Number(-45)));
+          -45,  (Number(-45)));
 
 // http://scopus.mcom.com/bugsplat/show_bug.cgi?id=123435
 // under js1.2, Number([1,2,3]) should return 3.
 
 testcases[index++] = new TestCase( SECTION, "Number([1,2,3])         ",
-	      NaN,  (Number([1,2,3])));
+          NaN,  (Number([1,2,3])));
 
 
 test();

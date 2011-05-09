@@ -68,8 +68,8 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(	"filter checker is undefined",
-		"ArgumentError: Error #1063",
+AddTestCase(    "filter checker is undefined",
+        "ArgumentError: Error #1063",
     parseError(errormsg,"ArgumentError: Error #1063".length));
 
 var errormsg="";
@@ -78,25 +78,25 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(	"filter checker is not a function",
-		"TypeError: Error #1034",
+AddTestCase(    "filter checker is not a function",
+        "TypeError: Error #1034",
               parseError(errormsg,"TypeError: Error #1034".length));
 
 var result=new <int>[].filter(EvenChecker);
-AddTestCase(	"filter empty vector",
-		"",
-		result.toString());
+AddTestCase(    "filter empty vector",
+        "",
+        result.toString());
 
-AddTestCase(	"filter small vector",
-		"0,2,4,6,8",
-		new <int>[0,1,2,3,4,5,6,7,8,9].filter(EvenChecker).toString());
+AddTestCase(    "filter small vector",
+        "0,2,4,6,8",
+        new <int>[0,1,2,3,4,5,6,7,8,9].filter(EvenChecker).toString());
 
 var myobject=new Object();
 myobject.message="message";
 var msg="";
 var result=new <int>[0,1,2].filter(ThisChecker,myobject);
-AddTestCase(	"filter use thisobj",
-		"messagemessagemessage",
-		msg);
+AddTestCase(    "filter use thisobj",
+        "messagemessagemessage",
+        msg);
 
 test();

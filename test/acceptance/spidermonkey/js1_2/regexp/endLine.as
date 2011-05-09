@@ -57,27 +57,27 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 // 'abcde'.match(new RegExp('de$'))
 testcases[index++] = new TestCase ( SECTION, "'abcde'.match(new RegExp('de$'))",
-	       String(["de"]), String('abcde'.match(new RegExp('de$'))));
+           String(["de"]), String('abcde'.match(new RegExp('de$'))));
 
 // 'ab\ncde'.match(new RegExp('..$e$'))
 testcases[index++] = new TestCase ( SECTION, "'ab\ncde'.match(new RegExp('..$e$'))",
-	       null, 'ab\ncde'.match(new RegExp('..$e$')));
+           null, 'ab\ncde'.match(new RegExp('..$e$')));
 
 // 'yyyyy'.match(new RegExp('xxx$'))
 testcases[index++] = new TestCase ( SECTION, "'yyyyy'.match(new RegExp('xxx$'))",
-	       null, 'yyyyy'.match(new RegExp('xxx$')));
+           null, 'yyyyy'.match(new RegExp('xxx$')));
 
 // 'a$$$'.match(new RegExp('\\$+$'))
 testcases[index++] = new TestCase ( SECTION, "'a$$$'.match(new RegExp('\\$+$'))",
-	       String(['$$$']), String('a$$$'.match(new RegExp('\\$+$'))));
+           String(['$$$']), String('a$$$'.match(new RegExp('\\$+$'))));
 
 // 'a$$$'.match(/\$+$/)
 testcases[index++] = new TestCase ( SECTION, "'a$$$'.match(/\\$+$/)",
-	       String(['$$$']), String('a$$$'.match(/\$+$/)));
+           String(['$$$']), String('a$$$'.match(/\$+$/)));
 
 //RegExp.multiline = true;
 // 'abc\n123xyz890\nxyz'.match(new RegExp('\d+$')) <multiline==true>
 testcases[index++] = new TestCase ( SECTION, "'abc\n123xyz890\nxyz'.match(new RegExp('\\d+$', 'm'))",
-	       String(['890']), String('abc\n123xyz890\nxyz'.match(new RegExp('\\d+$', 'm'))));
+           String(['890']), String('abc\n123xyz890\nxyz'.match(new RegExp('\\d+$', 'm'))));
 
 test();

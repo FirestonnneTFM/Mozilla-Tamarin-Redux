@@ -48,7 +48,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     ONE = new Number(1);
     ZERO = new Number(0);

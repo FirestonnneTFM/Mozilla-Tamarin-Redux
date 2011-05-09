@@ -49,17 +49,17 @@
 * The interesting parts of this testcase are the contrasting expectations for
 * Brendan's test below, when applied to Array objects vs. non-Array objects.
 *
-*    Modified:		28th October 2004 (gasingh@macromedia.com)
-*    			Removed the occurence of new Function('abc').
-*    			This is being changed to function() { abc }.
+*    Modified:      28th October 2004 (gasingh@macromedia.com)
+*               Removed the occurence of new Function('abc').
+*               This is being changed to function() { abc }.
 *
 *
 */
 //-----------------------------------------------------------------------------
-	var SECTION = "eregress_130451";
-	var VERSION = "ECMA";
+    var SECTION = "eregress_130451";
+    var VERSION = "ECMA";
     var TITLE   = "Array.prototype.sort() should not (re-)define .length";
-	var bug     = "130451";
+    var bug     = "130451";
 
     startTest();
     writeHeaderToLog( SECTION + " "+ TITLE);
@@ -70,66 +70,66 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	var status = '';
-	var actual = '';
-	var expect= '';
-	var arr = [];
-	var cmp = function() {};
+    var status = '';
+    var actual = '';
+    var expect= '';
+    var arr = [];
+    var cmp = function() {};
 
-	/*
-	 * First: test Array.prototype.sort() on Array objects
-	 */
-	status = inSection(1);
-	arr = [0,1,2,3];
-	cmp = function(x,y) {return x-y;};
-	actual = arr.sort(cmp).length;
-	expect = 4;
-	array[item++] = new TestCase(SECTION, "section 1", expect, actual );
+    /*
+     * First: test Array.prototype.sort() on Array objects
+     */
+    status = inSection(1);
+    arr = [0,1,2,3];
+    cmp = function(x,y) {return x-y;};
+    actual = arr.sort(cmp).length;
+    expect = 4;
+    array[item++] = new TestCase(SECTION, "section 1", expect, actual );
 
-	status = inSection(2);
-	arr = [0,1,2,3];
-	cmp = function(x,y) {return y-x;};
-	actual = arr.sort(cmp).length;
-	expect = 4;
-	array[item++] = new TestCase(SECTION, "section 2", expect, actual );
+    status = inSection(2);
+    arr = [0,1,2,3];
+    cmp = function(x,y) {return y-x;};
+    actual = arr.sort(cmp).length;
+    expect = 4;
+    array[item++] = new TestCase(SECTION, "section 2", expect, actual );
 
-	status = inSection(3);
-	arr = [0,1,2,3];
-	cmp = function(x,y) {return x-y;};
-	arr.length = 1;
-	actual = arr.sort(cmp).length;
-	expect = 1;
-	array[item++] = new TestCase(SECTION, "section 3", expect, actual );
+    status = inSection(3);
+    arr = [0,1,2,3];
+    cmp = function(x,y) {return x-y;};
+    arr.length = 1;
+    actual = arr.sort(cmp).length;
+    expect = 1;
+    array[item++] = new TestCase(SECTION, "section 3", expect, actual );
 
-	/*
-	 * This test is by Brendan. Setting arr.length to
-	 * 2 and then 4 should cause elements to be deleted.
-	 */
-	arr = [0,1,2,3];
-	cmp = function(x,y) {return x-y;};
-	arr.sort(cmp);
+    /*
+     * This test is by Brendan. Setting arr.length to
+     * 2 and then 4 should cause elements to be deleted.
+     */
+    arr = [0,1,2,3];
+    cmp = function(x,y) {return x-y;};
+    arr.sort(cmp);
 
-	status = inSection(4);
-	actual = arr.join();
-	expect = '0,1,2,3';
-	array[item++] = new TestCase(SECTION, "section 4", expect, actual );
+    status = inSection(4);
+    actual = arr.join();
+    expect = '0,1,2,3';
+    array[item++] = new TestCase(SECTION, "section 4", expect, actual );
 
-	status = inSection(5);
-	actual = arr.length;
-	expect = 4;
-	array[item++] = new TestCase(SECTION, "section 5", expect, actual );
+    status = inSection(5);
+    actual = arr.length;
+    expect = 4;
+    array[item++] = new TestCase(SECTION, "section 5", expect, actual );
 
-	status = inSection(6);
-	arr.length = 2;
-	actual = arr.join();
-	expect = '0,1';
-	array[item++] = new TestCase(SECTION, "section 6", expect, actual );
+    status = inSection(6);
+    arr.length = 2;
+    actual = arr.join();
+    expect = '0,1';
+    array[item++] = new TestCase(SECTION, "section 6", expect, actual );
 
-	status = inSection(7);
-	arr.length = 4;
-	actual = arr.join();
-	expect = '0,1,,';  //<---- see how 2,3 have been lost
-	array[item++] = new TestCase(SECTION, "section 7", expect, actual );
+    status = inSection(7);
+    arr.length = 4;
+    actual = arr.join();
+    expect = '0,1,,';  //<---- see how 2,3 have been lost
+    array[item++] = new TestCase(SECTION, "section 7", expect, actual );
 
 
     if (!as3Enabled) {

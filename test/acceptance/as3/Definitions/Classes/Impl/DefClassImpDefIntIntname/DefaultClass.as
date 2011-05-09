@@ -37,27 +37,27 @@
 /*
  * Default Class DefaultClass
  * Class methods
- *  
+ *
  */
 
 package DefClassImpDefIntIntname{
 
-	class DefaultClass implements DefaultInt, DefaultInt_S{
-		
+    class DefaultClass implements DefaultInt, DefaultInt_S{
+        
 
-		public function deffunc():String{  			       
-			return"PASSED";
-		}
+        public function deffunc():String{
+            return"PASSED";
+        }
 
-	}
+    }
 
-	public class DefaultClassAccesor{
+    public class DefaultClassAccesor{
  
-		var c:DefaultClass = new DefaultClass(); 
-		public function accdeffunc(){return c.DefaultInt::deffunc();}
-		public function accdeffunc_s(){return c.DefaultInt_S::deffunc();}
-        	
+        var c:DefaultClass = new DefaultClass();
+        public function accdeffunc(){return c.DefaultInt::deffunc();}
+        public function accdeffunc_s(){return c.DefaultInt_S::deffunc();}
+            
 
-       } 	
-	
-}  
+       }
+    
+}

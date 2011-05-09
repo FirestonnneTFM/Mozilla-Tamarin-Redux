@@ -66,39 +66,39 @@ function f(x) {return x;}
 x = f(/abc/);
 
 testcases[index++] = new TestCase( SECTION,
-	      "function f(x) {return x;}; f()",
-	      void 0,
-	      f() );
+          "function f(x) {return x;}; f()",
+          void 0,
+          f() );
 
 testcases[index++] = new TestCase( SECTION,
-	      "f(\"hi\")",
-	      "hi",
-	      f("hi") );
+          "f(\"hi\")",
+          "hi",
+          f("hi") );
 
 testcases[index++] = new TestCase( SECTION,
-	      "new f(/abc/) +''",
-	      "/abc/",
-	      new f(/abc/) +"" );
+          "new f(/abc/) +''",
+          "/abc/",
+          new f(/abc/) +"" );
 
 testcases[index++] = new TestCase( SECTION,
-	      "f(/abc/)+'')",
-	      "/abc/",
-	      f(/abc/) +'');   
+          "f(/abc/)+'')",
+          "/abc/",
+          f(/abc/) +'');
        
 testcases[index++] = new TestCase( SECTION,
-	      "typeof f(/abc/)",
-	      "object",
-	      typeof f(/abc/) );
+          "typeof f(/abc/)",
+          "object",
+          typeof f(/abc/) );
 
 testcases[index++] = new TestCase( SECTION,
-	      "typeof new f(/abc/)",
-	      "object",
-	      typeof new f(/abc/) );
+          "typeof new f(/abc/)",
+          "object",
+          typeof new f(/abc/) );
 
 testcases[index++] = new TestCase( SECTION,
-	      "x = new f(/abc/); x(\"hi\")",
-	      null,
-	      x("hi") );
+          "x = new f(/abc/); x(\"hi\")",
+          null,
+          x("hi") );
 
 
 // js> x()

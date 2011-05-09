@@ -48,7 +48,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     //  for ( LeftHandSideExpression in Expression )
     //  LeftHandSideExpression:NewExpression:MemberExpression
@@ -56,19 +56,19 @@ function getTestCases() {
     var o = new MyObject();
     var result = 0;
 
-	var thisError = "no exception thrown";
-	try{
+    var thisError = "no exception thrown";
+    try{
         for ( var o in foo) {
             result += this[o];
-    	}
-	} catch (e) {
+        }
+    } catch (e) {
         thisError = e.toString();
-	} finally {
+    } finally {
         array[item++] = new TestCase( SECTION,
-    	    "object is not defined",
-			"ReferenceError: Error #1065",
-    	    referenceError( thisError) );
-	}
+            "object is not defined",
+            "ReferenceError: Error #1065",
+            referenceError( thisError) );
+    }
     return array;
 }
 

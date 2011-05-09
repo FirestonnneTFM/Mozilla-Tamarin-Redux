@@ -67,7 +67,7 @@ try{
        thisError1="This is outer Error:"+eo7.toString();
    }finally{
        AddTestCase( "Testing Nested try block with multiple catch block inside the finally block of the outer try block","This is outer finally:This is outer reference error:ReferenceError","This is outer finally:"+thisError1 );
-      try { 
+      try {
           throw new TypeError();
           }catch(ei:TypeError){
                thisError="This is Inner Type Error:"+ei.toString();

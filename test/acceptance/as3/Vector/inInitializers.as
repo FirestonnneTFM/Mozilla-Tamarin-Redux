@@ -48,40 +48,40 @@ startTest();
 writeHeaderToLog( SECTION + " Vector in statement");
 
 AddTestCase(    "in value valid index",
-		true,
-		(0 in new <int>["zero","one","two","three","four","five"]));
+        true,
+        (0 in new <int>["zero","one","two","three","four","five"]));
 AddTestCase(    "in value for empty vector",
-		false,
-		(0 in new <*>[]));
+        false,
+        (0 in new <*>[]));
 
 AddTestCase(    "in value valid index does not exist",
-		false,
-		(6 in new <*>[]));
+        false,
+        (6 in new <*>[]));
 
 AddTestCase(    "in value valid index in string form",
-		true,
-		("2" in new <int>["zero","one","two","three","four","five"]));
+        true,
+        ("2" in new <int>["zero","one","two","three","four","five"]));
 
 err1="no exception";
 try {
 AddTestCase(    "in value is push function index ",
-		true,
-		("push" in new <*>[]));
+        true,
+        ("push" in new <*>[]));
 AddTestCase(    "in value is concat function index ",
-		true,
-		("concat" in new <*>[]));
+        true,
+        ("concat" in new <*>[]));
 AddTestCase(    "in value negative number index ",
-		false,
-		(-2 in new <*>[]));
+        false,
+        (-2 in new <*>[]));
 AddTestCase(    "in value decimal index",
-		false,
-		(1.1 in new <*>[]));
+        false,
+        (1.1 in new <*>[]));
 AddTestCase(    "in value decimal in string index",
-		false,
-		("1.1" in new <*>[]));
+        false,
+        ("1.1" in new <*>[]));
 AddTestCase(    "in value valid string",
-		false,
-		("string" in new <*>[]));
+        false,
+        ("string" in new <*>[]));
 } catch(e) {
   err1=e.toString();
   AddTestCase(    "in throws exception for invalid vector indexes",

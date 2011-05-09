@@ -46,14 +46,14 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	// The Boolean is a Class in AS 3.0.
-	// Change when bug 149667 is fixed; should be true:
-	array[item++] = new TestCase( SECTION, "Boolean.constructor.prototype == Class.prototype", true, Boolean.constructor.prototype == Class.prototype );
-	array[item++] = new TestCase( SECTION, "Boolean.length", 1, Boolean.length );
+    // The Boolean is a Class in AS 3.0.
+    // Change when bug 149667 is fixed; should be true:
+    array[item++] = new TestCase( SECTION, "Boolean.constructor.prototype == Class.prototype", true, Boolean.constructor.prototype == Class.prototype );
+    array[item++] = new TestCase( SECTION, "Boolean.length", 1, Boolean.length );
 
-	return ( array );
+    return ( array );
 
 }

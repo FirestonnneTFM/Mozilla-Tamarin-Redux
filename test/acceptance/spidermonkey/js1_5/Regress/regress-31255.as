@@ -67,7 +67,7 @@ var expectedvalues = [];
 <!-- HTML comment start is already a single-line JS comment indicator
  var x = 1; <!-- until end-of-line
 
-	     status = inSection(1);
+         status = inSection(1);
 actual = (x == 1);
 expect = true;
 addThis();

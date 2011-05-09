@@ -50,9 +50,9 @@ function getTestCases() {
 
     var thisError="no error";
     var x = null;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(0);
     }catch(eP1:Error){
         thisError=eP1.toString();
@@ -63,9 +63,9 @@ function getTestCases() {
     thisError="no error";
     x = null;
     
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(1);
     }catch(eP2:Error){
         thisError=eP2.toString();
@@ -75,9 +75,9 @@ function getTestCases() {
 
     thisError="no error";
     x = null;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(2);
     }catch(eP3:Error){
         thisError=eP3.toString();
@@ -86,9 +86,9 @@ function getTestCases() {
     }
     thisError="no error";
     x = null;
-    try{ 
+    try{
     
-    x.__proto.charAt = String.prototype.charAt; 
+    x.__proto.charAt = String.prototype.charAt;
     x.charAt(3);
     }catch(eP4:Error){
         thisError=eP4.toString();
@@ -102,9 +102,9 @@ function getTestCases() {
     
     thisError="no error";
     x = undefined;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(0);
     }catch(eP5:Error){
         thisError=eP5.toString();
@@ -114,9 +114,9 @@ function getTestCases() {
 
     thisError="no error";
     x = undefined;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(1);
     }catch(eP6:Error){
         thisError=eP6.toString();
@@ -126,9 +126,9 @@ function getTestCases() {
 
     thisError="no error";
     x = undefined;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(2);
     }catch(eP7:Error){
         thisError=eP7.toString();
@@ -138,9 +138,9 @@ function getTestCases() {
 
     thisError="no error";
     x = undefined;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(3);
     }catch(eP8:Error){
         thisError=eP8.toString();
@@ -155,9 +155,9 @@ function getTestCases() {
 
     thisError="no error";
     x = false;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(0);
     }catch(eP9:Error){
         thisError=eP9.toString();
@@ -167,9 +167,9 @@ function getTestCases() {
 
     thisError="no error";
     x = false;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(1);
     }catch(eP10:Error){
         thisError=eP10.toString();
@@ -179,9 +179,9 @@ function getTestCases() {
 
     thisError="no error";
     x = false;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(2);
     }catch(eP11:Error){
         thisError=eP11.toString();
@@ -191,9 +191,9 @@ function getTestCases() {
 
     thisError="no error";
     x = false;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(3);
     }catch(eP12:Error){
         thisError=eP12.toString();
@@ -203,9 +203,9 @@ function getTestCases() {
 
     thisError="no error";
     x = false;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(4);
     }catch(eP13:Error){
         thisError=eP13.toString();
@@ -223,9 +223,9 @@ function getTestCases() {
 
     thisError="no error";
     x = true;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(0);
     }catch(eP14:ReferenceError){
         thisError=eP14.toString();
@@ -235,9 +235,9 @@ function getTestCases() {
 
     thisError="no error";
     x = true;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(1);
     }catch(eP15:Error){
         thisError=eP15.toString();
@@ -247,9 +247,9 @@ function getTestCases() {
 
     thisError="no error";
     x = true;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(2);
     }catch(eP16:Error){
         thisError=eP16.toString();
@@ -259,9 +259,9 @@ function getTestCases() {
     
     thisError="no error";
     x = true;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(3);
     }catch(eP17:Error){
         thisError=eP17.toString();
@@ -271,9 +271,9 @@ function getTestCases() {
 
     thisError="no error";
     x = true;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(4);
     }catch(eP18:Error){
         thisError=eP18.toString();
@@ -288,9 +288,9 @@ function getTestCases() {
 
     thisError="no error";
     x = NaN;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(0);
     }catch(eP19:Error){
         thisError=eP19.toString();
@@ -300,9 +300,9 @@ function getTestCases() {
 
     thisError="no error";
     x = NaN;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(1);
     }catch(eP20:Error){
         thisError=eP20.toString();
@@ -312,9 +312,9 @@ function getTestCases() {
 
     thisError="no error";
     x = NaN;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(2);
     }catch(eP21:Error){
         thisError=eP21.toString();
@@ -324,9 +324,9 @@ function getTestCases() {
 
     thisError="no error";
     x = NaN;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(3);
     }catch(eP22:Error){
         thisError=eP22.toString();
@@ -336,9 +336,9 @@ function getTestCases() {
     
     thisError="no error";
     x = NaN;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(4);
     }catch(eP23:Error){
         thisError=eP23.toString();
@@ -352,9 +352,9 @@ function getTestCases() {
 
     thisError="no error";
     x = 123;
-    try{ 
+    try{
     
-    x.__proto.charAt = String.prototype.charAt; 
+    x.__proto.charAt = String.prototype.charAt;
     x.charAt(0);
     }catch(eP24:Error){
         thisError=eP24.toString();
@@ -364,9 +364,9 @@ function getTestCases() {
 
     thisError="no error";
     x = 123;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(1);
     }catch(eP25:Error){
         thisError=eP25.toString();
@@ -376,9 +376,9 @@ function getTestCases() {
 
     thisError="no error";
     x = 123;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(2);
     }catch(eP26:Error){
         thisError=eP26.toString();
@@ -388,9 +388,9 @@ function getTestCases() {
 
     thisError="no error";
     x = 123;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(3);
     }catch(eP27:Error){
         thisError=eP27.toString();
@@ -400,9 +400,9 @@ function getTestCases() {
     
     thisError="no error";
     x = 123;
-    try{ 
+    try{
     
-        x.__proto.charAt = String.prototype.charAt; 
+        x.__proto.charAt = String.prototype.charAt;
         x.charAt(4);
     }catch(eP28:Error){
         thisError=eP28.toString();
@@ -425,9 +425,9 @@ function getTestCases() {
 
     thisError="no error";
     x = new Number(123);
-    try{ 
+    try{
     
-        x.charAt = String.prototype.charAt; 
+        x.charAt = String.prototype.charAt;
         x.charAt(0);
     }catch(eN1:Error){
         thisError=eN1.toString();
@@ -437,9 +437,9 @@ function getTestCases() {
 
     thisError="no error";
     x = new Number(123);
-    try{ 
+    try{
     
-        x.charAt = String.prototype.charAt; 
+        x.charAt = String.prototype.charAt;
         x.charAt(1);
     }catch(eN2:Error){
         thisError=eN2.toString();
@@ -449,9 +449,9 @@ function getTestCases() {
 
     thisError="no error";
     x = new Number(123);
-    try{ 
+    try{
     
-        x.charAt = String.prototype.charAt; 
+        x.charAt = String.prototype.charAt;
         x.charAt(2);
     }catch(eN3:Error){
         thisError=eN3.toString();

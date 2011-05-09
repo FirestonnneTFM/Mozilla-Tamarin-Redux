@@ -53,27 +53,27 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	tryThis();
+    tryThis();
 
-	array[item++] = new TestCase(SECTION, "Make sure there is no crash", true, true);
+    array[item++] = new TestCase(SECTION, "Make sure there is no crash", true, true);
 
-	function tryThis()
-	{
-	  obj={};
-	  obj.a = obj.b = obj.c = 1;
-	  delete obj.a;
-	  delete obj.b;
-	  delete obj.c;
-	  obj.d = obj.e = 1;
-	  obj.a=1;
-	  obj.b=1;
-	  obj.c=1;
-	  obj.d=1;
-	  obj.e=1;
-	}
+    function tryThis()
+    {
+      obj={};
+      obj.a = obj.b = obj.c = 1;
+      delete obj.a;
+      delete obj.b;
+      delete obj.c;
+      obj.d = obj.e = 1;
+      obj.a=1;
+      obj.b=1;
+      obj.c=1;
+      obj.d=1;
+      obj.e=1;
+    }
 
-	return array;
+    return array;
 }

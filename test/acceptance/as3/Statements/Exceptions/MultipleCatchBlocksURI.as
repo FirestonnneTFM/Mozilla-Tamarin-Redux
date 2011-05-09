@@ -49,7 +49,7 @@ startTest();                // leave this alone
 var z = new URIErrors();
 thisError = "no error";
        
-try{   
+try{
    z.MyArgumentError(6);
    }catch(e:ReferenceError){
          thisError=e.toString();

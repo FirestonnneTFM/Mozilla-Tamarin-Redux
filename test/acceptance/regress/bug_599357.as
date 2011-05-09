@@ -259,7 +259,7 @@ test();
     };
 
 
-	function getTestCases() {
+    function getTestCases() {
         var array:Array = new Array();
         var index:int = 0;
         var arr:Array = [1, 2, 3, 4, 5];

@@ -46,9 +46,9 @@ package MultipleCatchBlocksWithTwoType
                       m.k();
                       return 6;
                                                         
-            }                            
+            }
                                  
                                
          }
-	                     
+                         
 }

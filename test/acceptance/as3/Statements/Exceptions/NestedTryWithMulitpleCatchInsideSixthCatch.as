@@ -62,7 +62,7 @@ try{
        thisError1="This is outer Eval Error:"+eo4.toString();
    }catch(eo5:RangeError){
        thisError1="This is outer Range Error:"+eo5.toString();
-       try { 
+       try {
            throw new TypeError();
            }catch(ei:TypeError){
                thisError="This is Inner Type Error:"+ei.toString();

@@ -73,15 +73,15 @@ TEST(4, correct, x1);
 XML.prettyPrinting = false;
 var xmlDoc = "<MLB><Team>Giants</Team><City>San Francisco</City><Team>Padres</Team><City>San Diego</City></MLB>";
 
-AddTestCase( "MYXML = new XMLList(xmlDoc), XMLCOPY = MYXML.copy()", xmlDoc, 
+AddTestCase( "MYXML = new XMLList(xmlDoc), XMLCOPY = MYXML.copy()", xmlDoc,
              (MYXML = new XMLList(xmlDoc), XMLCOPY = MYXML.copy(), XMLCOPY.toString()) );
-AddTestCase( "MYXML = new XMLList(null), XMLCOPY = MYXML.copy()", "", 
+AddTestCase( "MYXML = new XMLList(null), XMLCOPY = MYXML.copy()", "",
              (MYXML = new XMLList(null), XMLCOPY = MYXML.copy(), XMLCOPY.toString()) );
-AddTestCase( "MYXML = new XMLList(undefined), XMLCOPY = MYXML.copy()", MYXML.toString(), 
+AddTestCase( "MYXML = new XMLList(undefined), XMLCOPY = MYXML.copy()", MYXML.toString(),
              (MYXML = new XMLList(undefined), XMLCOPY = MYXML.copy(), XMLCOPY.toString()) );
-AddTestCase( "MYXML = new XMLList(), XMLCOPY = MYXML.copy()", MYXML.toString(), 
+AddTestCase( "MYXML = new XMLList(), XMLCOPY = MYXML.copy()", MYXML.toString(),
              (MYXML = new XMLList(), XMLCOPY = MYXML.copy(), XMLCOPY.toString()) );
-AddTestCase( "MYXML = new XMLList(xmlDoc), XMLCOPY = MYXML.Team.copy()", "<Team>Giants</Team>" + NL() + "<Team>Padres</Team>", 
+AddTestCase( "MYXML = new XMLList(xmlDoc), XMLCOPY = MYXML.Team.copy()", "<Team>Giants</Team>" + NL() + "<Team>Padres</Team>",
              (MYXML = new XMLList(xmlDoc), XMLCOPY = MYXML.Team.copy(), XMLCOPY.toString()) );
 
 // Make sure it's a copy

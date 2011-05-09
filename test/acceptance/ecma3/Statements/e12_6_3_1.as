@@ -50,7 +50,7 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    var x; 
+    var x;
     Number.prototype.foo = 34;
     for ( j in 7 )
     {
@@ -58,12 +58,12 @@ function getTestCases() {
         if(x = "foo"){           //The property foo will be returned during anytime using for..in                //loop.  So added this if statement and break to test that foo is returned
             break;         //--Subha Subramanian
         }
-    } 
+    }
 
     if( x != "foo" ){
-	    x = "not foo";
+        x = "not foo";
     }
-	
+    
     array[item++] = new TestCase( SECTION,
         "var x; Number.prototype.foo = 34; for ( j in 7 ) x = j; x",
         "foo",

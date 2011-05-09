@@ -37,38 +37,38 @@
 
 // Test dynamic getter setter from usage 1 of AS 1/2 help documentation
 package{
-	import flash.utils.*;
+    import flash.utils.*;
     import avmplus.*;
 
-	public class Book extends Proxy
-	{
-		var getter:Array;
-		var setter:Array;
-		
-		public function Book() {
-			getter = new Array();
-			setter = new Array();
-		}
-		
-		public function addProperty(name:String, getFunc:Function, setFunc:Function):void {
-			getter[name] = getFunc;
-			setter[name] = setFunc;
-		}
-		
-		override flash_proxy function getProperty(name:*):* 
-		{
-			return getter[name]();
-		}
-	
-		override flash_proxy function setProperty(name:*, value:*):void 
-		{
-			setter[name](value);
-		}
-		
-		override flash_proxy function callProperty(name:*, ...rest):* 
-		{
-			return getter[name]();
-		}
-	}
+    public class Book extends Proxy
+    {
+        var getter:Array;
+        var setter:Array;
+        
+        public function Book() {
+            getter = new Array();
+            setter = new Array();
+        }
+        
+        public function addProperty(name:String, getFunc:Function, setFunc:Function):void {
+            getter[name] = getFunc;
+            setter[name] = setFunc;
+        }
+        
+        override flash_proxy function getProperty(name:*):*
+        {
+            return getter[name]();
+        }
+    
+        override flash_proxy function setProperty(name:*, value:*):void
+        {
+            setter[name](value);
+        }
+        
+        override flash_proxy function callProperty(name:*, ...rest):*
+        {
+            return getter[name]();
+        }
+    }
 
 }

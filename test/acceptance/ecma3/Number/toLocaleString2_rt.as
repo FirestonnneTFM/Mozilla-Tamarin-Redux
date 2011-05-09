@@ -47,7 +47,7 @@ function getTestCases() {
     var array:Array = new Array();
     var item:Number = 0;
 
-    var o:* = new Object(); 
+    var o:* = new Object();
     o.toString = Number.prototype.toString;
     array[item++] = new TestCase(SECTION,  "o = new Object(); o.toString = Number.prototype.toString; o.toLocaleString()",  "[object Object]",    o.toLocaleString() );
 //    array[item++] = new TestCase(SECTION,  "o = new String(); o.toString = Number.prototype.toString; o.toLocaleString()",  "error",    "o = new String(); o.toString = Number.prototype.toString; o.toLocaleString()" );

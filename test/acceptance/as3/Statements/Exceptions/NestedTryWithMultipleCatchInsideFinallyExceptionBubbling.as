@@ -48,8 +48,8 @@ startTest();                // leave this alone
 
 var z:NestedTryWithMultipleCatchInsideFinally = new NestedTryWithMultipleCatchInsideFinally();
 thisError = "no error";
-thisError1 = "no error";       
-try{   
+thisError1 = "no error";
+try{
    z.NestedTryWithMultipleCatchInsideFinallyFunction();
    }catch(eo:ReferenceError){
          thisError=eo.toString();

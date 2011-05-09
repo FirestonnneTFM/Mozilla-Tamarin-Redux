@@ -49,7 +49,7 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
     
-    var str1 = new String("h");	
+    var str1 = new String("h");
     var str2 = new String ("H");
     array[item++] = new TestCase( SECTION,  "str1.localeCompare(str2)", 32,  str1.localeCompare(str2) );
 

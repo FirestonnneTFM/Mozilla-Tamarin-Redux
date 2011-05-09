@@ -37,98 +37,98 @@
 // 9 / 16.4 instances of classes that implement an interface belong
 // to the type represented by the interface
 package InterfaceAsType {
-	interface A {
-		function a();
-	}
-	interface B {
-		function b();
-	}
-	interface C extends A, B {
-	}
+    interface A {
+        function a();
+    }
+    interface B {
+        function b();
+    }
+    interface C extends A, B {
+    }
 
-	class X implements A, B {
-		public function a() {
-			return "x.A::a()";
-		}
-		public function b() {
-			return "x.B::b()";
-		}
-	}
-	class Y implements C {
-		public function a() {
-			return "y.A::a()";
-		}
-		public function b() {
-			return "y.B::b()";
-		}
-	}
+    class X implements A, B {
+        public function a() {
+            return "x.A::a()";
+        }
+        public function b() {
+            return "x.B::b()";
+        }
+    }
+    class Y implements C {
+        public function a() {
+            return "y.A::a()";
+        }
+        public function b() {
+            return "y.B::b()";
+        }
+    }
 
-	public class TypeTest {
-		var ax : A = new X();
-		var bx : B = new X();
-		var x : X = new X();
-		var ay : A = new Y();
-		var by : B = new Y();
-		var c : C = new Y();
-		var y : Y = new Y();
-		public function doCallXViaA() : String {
-			return ax.a();
-		}
-		public function doCallXViaB() : String {
-			return bx.b();
-		}
-		private function callArgA(aa:A) : String {
-			return aa.a();
-		}
-		private function callArgB(bb:B) : String {
-			return bb.b();
-		}
-		public function doCallXViaArgs() : String {
-			return callArgA(x) + "," + callArgB(x);
-		}
-		private function returnXAsA() : A {
-			return new X();
-		}
-		private function returnXAsB() : B {
-			return new X();
-		}
-		public function doCallXViaReturn() : String {
-			return returnXAsA().a() + "," + returnXAsB().b();
-		}
-		
-		public function doCallYViaA() : String {
-			return ay.a();
-		}
-		public function doCallYViaB() : String {
-			return by.b();
-		}
-		public function doCallYViaC() : String {
-			return c.a() + "," + c.b();
-		}
-		private function callArgC(cc:C) : String {
-			return cc.a() + "," + cc.b();
-		}
-		public function doCallYViaArgs() : String {
-			return callArgA(y) + "," + callArgB(y);
-		}
-		public function doCallYViaArgC() : String {
-			return callArgC(y);
-		}
-		private function returnYAsA() : A {
-			return new Y();
-		}
-		private function returnYAsB() : B {
-			return new Y();
-		}
-		private function returnYAsC() : C {
-			return new Y();
-		}
-		public function doCallYViaReturn() : String {
-			return returnYAsA().a() + "," + returnYAsB().b();
-		}
-		public function doCallYViaReturnC() : String {
-			return returnYAsC().a() + "," + returnYAsC().b();
-		}
-	}
+    public class TypeTest {
+        var ax : A = new X();
+        var bx : B = new X();
+        var x : X = new X();
+        var ay : A = new Y();
+        var by : B = new Y();
+        var c : C = new Y();
+        var y : Y = new Y();
+        public function doCallXViaA() : String {
+            return ax.a();
+        }
+        public function doCallXViaB() : String {
+            return bx.b();
+        }
+        private function callArgA(aa:A) : String {
+            return aa.a();
+        }
+        private function callArgB(bb:B) : String {
+            return bb.b();
+        }
+        public function doCallXViaArgs() : String {
+            return callArgA(x) + "," + callArgB(x);
+        }
+        private function returnXAsA() : A {
+            return new X();
+        }
+        private function returnXAsB() : B {
+            return new X();
+        }
+        public function doCallXViaReturn() : String {
+            return returnXAsA().a() + "," + returnXAsB().b();
+        }
+        
+        public function doCallYViaA() : String {
+            return ay.a();
+        }
+        public function doCallYViaB() : String {
+            return by.b();
+        }
+        public function doCallYViaC() : String {
+            return c.a() + "," + c.b();
+        }
+        private function callArgC(cc:C) : String {
+            return cc.a() + "," + cc.b();
+        }
+        public function doCallYViaArgs() : String {
+            return callArgA(y) + "," + callArgB(y);
+        }
+        public function doCallYViaArgC() : String {
+            return callArgC(y);
+        }
+        private function returnYAsA() : A {
+            return new Y();
+        }
+        private function returnYAsB() : B {
+            return new Y();
+        }
+        private function returnYAsC() : C {
+            return new Y();
+        }
+        public function doCallYViaReturn() : String {
+            return returnYAsA().a() + "," + returnYAsB().b();
+        }
+        public function doCallYViaReturnC() : String {
+            return returnYAsC().a() + "," + returnYAsC().b();
+        }
+    }
 }
 

@@ -35,21 +35,21 @@
  *
  * ***** END LICENSE BLOCK ***** */
 class MultipleExtraArgFunction3Class implements Inter {
- 	
-	public function returnRest(obj:Object,arr:Array,... rest):Number {
- 	 
-		var count = rest.length;
-   		var a:int = 0;
+    
+    public function returnRest(obj:Object,arr:Array,... rest):Number {
+     
+        var count = rest.length;
+        var a:int = 0;
  
-   		//print("Output from 3rd test case");
+        //print("Output from 3rd test case");
              
-   		/*for( a = 0; a<count; a++ ){
-      		print( rest[a] );
-     	}*/
+        /*for( a = 0; a<count; a++ ){
+            print( rest[a] );
+        }*/
            
-     	return count; 
- 	 
-   	}
- 	
+        return count;
+     
+    }
+    
 }
 

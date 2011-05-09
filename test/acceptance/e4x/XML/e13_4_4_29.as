@@ -46,7 +46,7 @@ START("13.4.4.29 - XML prependChild()");
 
 //TEST(1, true, XML.prototype.hasOwnProperty("prependChild"));
 
-x1 = 
+x1 =
 <alpha>
     <bravo>
         <charlie>one</charlie>
@@ -73,7 +73,7 @@ emps =
     <employee>
         <name>Sue</name>
     </employee>
-</employees>    
+</employees>
 
 correct =
 <employees>
@@ -84,7 +84,7 @@ correct =
     <employee>
         <name>Sue</name>
     </employee>
-</employees>    
+</employees>
 
 emps.employee.(name == "John").prependChild(<prefix>Mr.</prefix>);
 
@@ -96,16 +96,16 @@ var child1 = new XML("<employee id='1'><name>John</name></employee>");
 var child2 = new XML("<employee id='2'><name>Sue</name></employee>");
 var child3 = new XML("<employee id='3'><name>Bob</name></employee>");
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.prependChild(child1), MYXML.toString()", 
-	"<company><employee id=\"1\"><name>John</name></employee></company>", 
-	(MYXML = new XML(xmlDoc), MYXML.prependChild(child1), MYXML.toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.prependChild(child1), MYXML.toString()",
+    "<company><employee id=\"1\"><name>John</name></employee></company>",
+    (MYXML = new XML(xmlDoc), MYXML.prependChild(child1), MYXML.toString()));
 
 var MYXML = new XML(xmlDoc);
 MYXML.prependChild(child2);
 
-AddTestCase( "MYXML.prependChild(child1), MYXML.toString()", 
-	"<company><employee id=\"1\"><name>John</name></employee><employee id=\"2\"><name>Sue</name></employee></company>", 
-	(MYXML.prependChild(child1), MYXML.toString()));
+AddTestCase( "MYXML.prependChild(child1), MYXML.toString()",
+    "<company><employee id=\"1\"><name>John</name></employee><employee id=\"2\"><name>Sue</name></employee></company>",
+    (MYXML.prependChild(child1), MYXML.toString()));
 
 MYXML = new XML(xmlDoc);
 MYXML.prependChild(child3);
@@ -114,13 +114,13 @@ MYXML.prependChild(child2);
 AddTestCase ("Making sure child added is a duplicate", true, (child2 === MYXML.children()[0]));
 AddTestCase ("Making sure child added is a true copy", true, (child2 == MYXML.children()[0]));
 
-AddTestCase( "MYXML.prependChild(child1), MYXML.toString()", 
-	"<company><employee id=\"1\"><name>John</name></employee><employee id=\"2\"><name>Sue</name></employee><employee id=\"3\"><name>Bob</name></employee></company>", 
-	(MYXML.prependChild(child1), MYXML.toString()));
+AddTestCase( "MYXML.prependChild(child1), MYXML.toString()",
+    "<company><employee id=\"1\"><name>John</name></employee><employee id=\"2\"><name>Sue</name></employee><employee id=\"3\"><name>Bob</name></employee></company>",
+    (MYXML.prependChild(child1), MYXML.toString()));
 
-AddTestCase( "MYXML.prependChild('simple text string'), MYXML.toString()", 
-	"<company>simple text string<employee id=\"1\"><name>John</name></employee><employee id=\"2\"><name>Sue</name></employee><employee id=\"3\"><name>Bob</name></employee></company>", 
-	(MYXML.prependChild("simple text string"), MYXML.toString()));
+AddTestCase( "MYXML.prependChild('simple text string'), MYXML.toString()",
+    "<company>simple text string<employee id=\"1\"><name>John</name></employee><employee id=\"2\"><name>Sue</name></employee><employee id=\"3\"><name>Bob</name></employee></company>",
+    (MYXML.prependChild("simple text string"), MYXML.toString()));
 
 // !!@ test cases for adding comment nodes, PI nodes
 
@@ -135,9 +135,9 @@ if (System.swfVersion < 10)
 else
     expectedResult = '<company>&lt;!-- comment --&gt;<employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
 
-AddTestCase( "MYXML.prependChild('<!-- comment -->'), MYXML.toString()", 
-	expectedResult,
-	(MYXML.prependChild("<!-- comment -->"), MYXML.toString()));
+AddTestCase( "MYXML.prependChild('<!-- comment -->'), MYXML.toString()",
+    expectedResult,
+    (MYXML.prependChild("<!-- comment -->"), MYXML.toString()));
 
 XML.ignoreComments = false;
 MYXML = new XML(xmlDoc);
@@ -150,9 +150,9 @@ if (System.swfVersion < 10)
 else
     expectedResult = '<company>&lt;!-- comment --&gt;<employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
 
-AddTestCase( "MYXML.prependChild('<!-- comment -->'), MYXML.toString()", 
-	expectedResult, 
-	(MYXML.prependChild("<!-- comment -->"), MYXML.toString()));
+AddTestCase( "MYXML.prependChild('<!-- comment -->'), MYXML.toString()",
+    expectedResult,
+    (MYXML.prependChild("<!-- comment -->"), MYXML.toString()));
 
 MYXML = new XML(xmlDoc);
 MYXML.prependChild(child3);
@@ -164,9 +164,9 @@ if (System.swfVersion < 10)
 else
     expectedResult = '<company>&lt;?xml-stylesheet href="classic.xsl" type="text/xml"?&gt;<employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
 
-AddTestCase( "MYXML.prependChild('<?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?>'), MYXML.toString()", 
-	expectedResult, 
-	(MYXML.prependChild("<?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?>"), MYXML.toString()));
+AddTestCase( "MYXML.prependChild('<?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?>'), MYXML.toString()",
+    expectedResult,
+    (MYXML.prependChild("<?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?>"), MYXML.toString()));
 
 XML.ignoreProcessingInstructions = false;
 MYXML = new XML(xmlDoc);
@@ -182,9 +182,9 @@ if (System.swfVersion < 10)
 else
     expectedResult = '<company>&lt;?xml-stylesheet href="classic.xsl" type="text/xml"?&gt;<employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
 
-AddTestCase( "MYXML.prependChild('<?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?>'), MYXML.toString()", 
-	expectedResult,
-	(MYXML.prependChild("<?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?>"), MYXML.toString()));
+AddTestCase( "MYXML.prependChild('<?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?>'), MYXML.toString()",
+    expectedResult,
+    (MYXML.prependChild("<?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?>"), MYXML.toString()));
 
 try{
 
@@ -211,51 +211,51 @@ if (System.swfVersion < 10)
 else
     expectedResult = '<company>&lt;@notanattribute&gt;hi&lt;/@notanattribute&gt;<employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
 
-AddTestCase( "MYXML.prependChild(\"<@notanattribute>hi</@notanattribute>\"), MYXML.toString()", 
-	expectedResult,
-	(MYXML.prependChild("<@notanattribute>hi</@notanattribute>"), MYXML.toString()));
+AddTestCase( "MYXML.prependChild(\"<@notanattribute>hi</@notanattribute>\"), MYXML.toString()",
+    expectedResult,
+    (MYXML.prependChild("<@notanattribute>hi</@notanattribute>"), MYXML.toString()));
 
 MYXML = new XML('<LEAGUE></LEAGUE>');
 x1 = new XMLList('<TEAM t="a">Giants</TEAM><TEAM t="b">Robots</TEAM>');
 MYXML.prependChild(x1);
-			
+            
 AddTestCase( "Prepend XMLList",
-			'<LEAGUE><TEAM t="a">Giants</TEAM><TEAM t="b">Robots</TEAM></LEAGUE>',
-			(MYXML.toString()) );
-			
+            '<LEAGUE><TEAM t="a">Giants</TEAM><TEAM t="b">Robots</TEAM></LEAGUE>',
+            (MYXML.toString()) );
+            
 MYXML = new XML('<SCARY><MOVIE></MOVIE></SCARY>');
 x1 = "poltergeist";
 MYXML.MOVIE.prependChild(x1);
-			
+            
 AddTestCase( "Prepend a string to child node",
-			'<SCARY><MOVIE>poltergeist</MOVIE></SCARY>',
-			(MYXML.toString()) );
+            '<SCARY><MOVIE>poltergeist</MOVIE></SCARY>',
+            (MYXML.toString()) );
 
 // I believe the following two test cases are wrong. See bug 145184.
-			
+            
 MYXML = new XML('<SCARY><MOVIE></MOVIE></SCARY>');
 x1 = "poltergeist";
 MYXML.prependChild(x1);
-			
+            
 AddTestCase( "Prepend a string to top node",
-			'<SCARY>poltergeist<MOVIE/></SCARY>',
-			(MYXML.toString()) );
-			
+            '<SCARY>poltergeist<MOVIE/></SCARY>',
+            (MYXML.toString()) );
+            
 MYXML = new XML('<SCARY><MOVIE></MOVIE></SCARY>');
 x1 = new XML("<the>poltergeist</the>");
 MYXML.prependChild(x1);
-			
+            
 AddTestCase( "Prepend a node to child node",
-			'<SCARY><the>poltergeist</the><MOVIE/></SCARY>',
-			(MYXML.toString()) );
+            '<SCARY><the>poltergeist</the><MOVIE/></SCARY>',
+            (MYXML.toString()) );
 
 var a = <a><b><c/></b></a>;
 
 try {
-	a.b.prependChild (a);
-	result = a;
+    a.b.prependChild (a);
+    result = a;
 } catch (e1) {
-	result = typeError(e1.toString());
+    result = typeError(e1.toString());
 }
 
 AddTestCase("a = <a><b><c/></b></a>, a.b.prependChild(a)", "TypeError: Error #1118", result);

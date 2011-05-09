@@ -57,29 +57,29 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 // 'abcde'.match(new RegExp('^ab'))
 testcases[index++] = new TestCase ( SECTION, "'abcde'.match(new RegExp('^ab'))",
-	       String(["ab"]), String('abcde'.match(new RegExp('^ab'))));
+           String(["ab"]), String('abcde'.match(new RegExp('^ab'))));
 
 // 'ab\ncde'.match(new RegExp('^..^e'))
 testcases[index++] = new TestCase ( SECTION, "'ab\ncde'.match(new RegExp('^..^e'))",
-	       null, 'ab\ncde'.match(new RegExp('^..^e')));
+           null, 'ab\ncde'.match(new RegExp('^..^e')));
 
 // 'yyyyy'.match(new RegExp('^xxx'))
 testcases[index++] = new TestCase ( SECTION, "'yyyyy'.match(new RegExp('^xxx'))",
-	       null, 'yyyyy'.match(new RegExp('^xxx')));
+           null, 'yyyyy'.match(new RegExp('^xxx')));
 
 // '^^^x'.match(new RegExp('^\\^+'))
 testcases[index++] = new TestCase ( SECTION, "'^^^x'.match(new RegExp('^\\^+'))",
-	       String(['^^^']), String('^^^x'.match(new RegExp('^\\^+'))));
+           String(['^^^']), String('^^^x'.match(new RegExp('^\\^+'))));
 
 // '^^^x'.match(/^\^+/)
 testcases[index++] = new TestCase ( SECTION, "'^^^x'.match(/^\\^+/)",
-	       String(['^^^']), String('^^^x'.match(/^\^+/)));
+           String(['^^^']), String('^^^x'.match(/^\^+/)));
 
 
 // RegExp.multiline = true;   <-- readonly property in AS3, must use m (multiline) flag
 
 // 'abc\n123xyz'.match(new RegExp('^\d+')) <multiline==true>
 testcases[index++] = new TestCase ( SECTION, "'abc\n123xyz'.match(new RegExp('^\\d+', 'm'))",
-	       String(['123']), String('abc\n123xyz'.match(new RegExp('^\\d+', 'm'))));
+           String(['123']), String('abc\n123xyz'.match(new RegExp('^\\d+', 'm'))));
 
 test();

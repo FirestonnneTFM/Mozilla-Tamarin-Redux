@@ -36,11 +36,11 @@
  * ***** END LICENSE BLOCK ***** */
 
    var SECTION = "15.9.5.5";
-   var VERSION = "ECMA_3";  
-   var TITLE   = "Date.prototype.toLocaleString()";  
+   var VERSION = "ECMA_3";
+   var TITLE   = "Date.prototype.toLocaleString()";
    
    var status = '';
-   var actual = '';  
+   var actual = '';
    var expect = '';
 
 
@@ -58,18 +58,18 @@ function getTestCases() {
     var item = 0;
    // first, some generic tests -
 
-    status = "typeof (now.toLocaleString())";  
+    status = "typeof (now.toLocaleString())";
     actual =   typeof (now.toLocaleString());
     expect = "string";
     array[item++] = new TestCase(SECTION, status, expect, actual);
 
-    status = "Date.prototype.toLocaleString.length";   
+    status = "Date.prototype.toLocaleString.length";
     actual =  Date.prototype.toLocaleString.length;
-    expect =  0;   
+    expect =  0;
     array[item++] = new TestCase(SECTION, status, expect, actual);
     
     // Date.parse is accurate to the second;  valueOf() to the millisecond  -
-    status = "Math.abs(Date.parse(now.toLocaleString()) - now.valueOf()) < 1000";   
+    status = "Math.abs(Date.parse(now.toLocaleString()) - now.valueOf()) < 1000";
     actual =   Math.abs(Date.parse(now.toLocaleString()) -  now.valueOf()) < 1000;
     expect = true;
     array[item++] = new TestCase(SECTION, status, expect, actual);
@@ -77,11 +77,11 @@ function getTestCases() {
 
     // 1970
     addDateTestCase(0);
-    addDateTestCase(TZ_ADJUST);   
+    addDateTestCase(TZ_ADJUST);
 
    
     // 1900
-    addDateTestCase(TIME_1900); 
+    addDateTestCase(TIME_1900);
     addDateTestCase(TIME_1900 -TZ_ADJUST);
 
    
@@ -92,7 +92,7 @@ function getTestCases() {
     
     // 29 Feb 2000
     addDateTestCase(UTC_29_FEB_2000);
-    addDateTestCase(UTC_29_FEB_2000 - 1000);    
+    addDateTestCase(UTC_29_FEB_2000 - 1000);
     addDateTestCase(UTC_29_FEB_2000 - TZ_ADJUST);
  
 
@@ -104,7 +104,7 @@ function getTestCases() {
     
     function addTestCase()
     {
-      array[item++] = new TestCase( SECTION, status, expect, actual); 
+      array[item++] = new TestCase( SECTION, status, expect, actual);
     }
     
     
@@ -112,7 +112,7 @@ function getTestCases() {
     {
       var givenDate = new Date(date_given_in_milliseconds);
     
-      status = 'Date.parse(   +   givenDate   +   ).toLocaleString())';   
+      status = 'Date.parse(   +   givenDate   +   ).toLocaleString())';
       actual =  Date.parse(givenDate.toLocaleString());
       expect = date_given_in_milliseconds;
       addTestCase();

@@ -41,7 +41,7 @@ package Importfunc {
     // *******************
 
     var array:Array;
-    public var pubArray:Array; 
+    public var pubArray:Array;
 
     // *******************
     // public methods
@@ -53,12 +53,12 @@ package Importfunc {
 
 
 
-var SECTION = "Directives";       				// provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";  				// Version of JavaScript or ECMA
-var TITLE   = "Import only a public function";       	// Provide ECMA section title or a description
+var SECTION = "Directives";                     // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";               // Version of JavaScript or ECMA
+var TITLE   = "Import only a public function";          // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                					// leave this alone
+startTest();                                    // leave this alone
 
 
 

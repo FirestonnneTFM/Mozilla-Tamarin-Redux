@@ -44,7 +44,7 @@ START("13.4.4.14 - XML hasOwnProperty()");
 
 //TEST(1, true, XML.prototype.hasOwnProperty("hasOwnProperty"));
     
-x1 = 
+x1 =
 <alpha attr1="value1">
     <bravo>one</bravo>
     <charlie>
@@ -68,18 +68,18 @@ var xmlDoc = "<employee id='1'><firstname>John</firstname><lastname>Walton</last
 
 // !!@ we're not supporting prototype properties
 // propertyName as a string
-AddTestCase( "XML.prototype.hasOwnProperty('copy')", true, 
+AddTestCase( "XML.prototype.hasOwnProperty('copy')", true,
              (XML.prototype.hasOwnProperty('copy')));
-AddTestCase( "XML.prototype.hasOwnProperty('hasSimpleContent')", true, 
-             (XML.prototype.hasOwnProperty('hasSimpleContent')));  
+AddTestCase( "XML.prototype.hasOwnProperty('hasSimpleContent')", true,
+             (XML.prototype.hasOwnProperty('hasSimpleContent')));
              
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasOwnProperty('copy')", false, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasOwnProperty('copy')", false,
              (MYXML = new XML(xmlDoc), MYXML.hasOwnProperty('copy')));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasOwnProperty('hasSimpleContent')", false, 
-             (MYXML = new XML(xmlDoc), MYXML.hasOwnProperty('hasSimpleContent')));  
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasOwnProperty('firstname')", true, 
-             (MYXML = new XML(xmlDoc), MYXML.hasOwnProperty('firstname')));  
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasOwnProperty('lastname')", true, 
-             (MYXML = new XML(xmlDoc), MYXML.hasOwnProperty('lastname')));  
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasOwnProperty('hasSimpleContent')", false,
+             (MYXML = new XML(xmlDoc), MYXML.hasOwnProperty('hasSimpleContent')));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasOwnProperty('firstname')", true,
+             (MYXML = new XML(xmlDoc), MYXML.hasOwnProperty('firstname')));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasOwnProperty('lastname')", true,
+             (MYXML = new XML(xmlDoc), MYXML.hasOwnProperty('lastname')));
 
 END();

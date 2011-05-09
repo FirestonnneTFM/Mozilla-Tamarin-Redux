@@ -63,13 +63,13 @@ result = grabError(e1, e1.toString());
 
 AddTestCase( "new XML(\"<root><a><b>c</b></a></root></root>\")", expected, result );
 
-expected = "TypeError: Error #1088: XML parser failure: element is malformed"; 
+expected = "TypeError: Error #1088: XML parser failure: element is malformed";
 
 // This needs to be a compiler error test case.
 /*
 try{
 
-xml = 
+xml =
 <root>
 <blah a="attr"
 hi

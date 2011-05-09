@@ -82,12 +82,12 @@ function addtestcases()
 
   var firstCall = true;
   a.sort(function (a, b) {
-	   if (firstCall) {
-	     firstCall = false;
-	     System.forceFullCollection();
-	   }
-	   return a - b;
-	 });
+       if (firstCall) {
+         firstCall = false;
+         System.forceFullCollection();
+       }
+       return a - b;
+     });
 
   AddTestCase(summary, expect, actual);
 

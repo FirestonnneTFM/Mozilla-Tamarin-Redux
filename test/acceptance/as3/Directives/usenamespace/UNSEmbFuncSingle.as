@@ -44,21 +44,21 @@ startTest();                // leave this alone
 
 
 class A {
-	namespace Baseball;
-	Baseball var teamName = "Giants";
+    namespace Baseball;
+    Baseball var teamName = "Giants";
 
-	namespace Football;
-	Football var teamName = "Angels";
+    namespace Football;
+    Football var teamName = "Angels";
 
-	public function nsTest1(){
-	    use namespace Baseball;
-	    return teamName;
-	}
+    public function nsTest1(){
+        use namespace Baseball;
+        return teamName;
+    }
 
-	public function nsTest2(){
-	    use namespace Football;
-	    return teamName;
-	}
+    public function nsTest2(){
+        use namespace Football;
+        return teamName;
+    }
 }
 
 var obj:A = new A()

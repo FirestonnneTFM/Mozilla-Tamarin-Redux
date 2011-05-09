@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package PublicFunctionBody {
-	public function returnNoParamsInner():String { return "returnNoParams"; }
-	public function returnNoParams():String { return returnNoParamsInner(); }
+    public function returnNoParamsInner():String { return "returnNoParams"; }
+    public function returnNoParams():String { return returnNoParamsInner(); }
 }
 

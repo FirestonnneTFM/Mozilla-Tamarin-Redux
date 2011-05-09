@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package PublicFunctionName {
-	public function __a1__ () { return "__a1__"; }
-	public function pub__a1__ () { return __a1__(); }
+    public function __a1__ () { return "__a1__"; }
+    public function pub__a1__ () { return __a1__(); }
 }
 

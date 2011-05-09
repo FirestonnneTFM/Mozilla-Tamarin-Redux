@@ -37,67 +37,67 @@
  
 package Discontinuous.Pack {
 
-	public interface IClickable {
-		function whoAmI():String; 
-	}
+    public interface IClickable {
+        function whoAmI():String;
+    }
 }
 
 package Discontinuous.Pack {
 
-	public class A {
-		public function whoAmI():String {
-			return "A";
-		}
-	
-	}
+    public class A {
+        public function whoAmI():String {
+            return "A";
+        }
+    
+    }
 }
 
 package Discontinuous.Pack {
-	use namespace Kitty;
-	
-	public class C {
-		Kitty var b:Boolean = true;
-		public function returnNSVar():Boolean {
-			return Kitty::b;
-		}
-		
-		Kitty function returnArray():Array {
-			return [1,2,3];
-		}
-		
-		public function callNSFunc() {
-			var k:Array = Kitty::returnArray();
-			return k;
-		}
-	}
-}
-
-package Discontinuous.Pack {
-
-	public class B implements IClickable {
-		public function whoAmI():String {
-			return "B";
-		}
-	
-	}
-
+    use namespace Kitty;
+    
+    public class C {
+        Kitty var b:Boolean = true;
+        public function returnNSVar():Boolean {
+            return Kitty::b;
+        }
+        
+        Kitty function returnArray():Array {
+            return [1,2,3];
+        }
+        
+        public function callNSFunc() {
+            var k:Array = Kitty::returnArray();
+            return k;
+        }
+    }
 }
 
 package Discontinuous.Pack {
 
-	public var s:String = "hello";
-	public function publicFunc(i:int):String {
-		return "You passed " + i.toString();
-	}
-	
-	public namespace Kitty;
-	
+    public class B implements IClickable {
+        public function whoAmI():String {
+            return "B";
+        }
+    
+    }
+
+}
+
+package Discontinuous.Pack {
+
+    public var s:String = "hello";
+    public function publicFunc(i:int):String {
+        return "You passed " + i.toString();
+    }
+    
+    public namespace Kitty;
+    
 }
 
 import Discontinuous.Pack.*;
 
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
@@ -118,7 +118,7 @@ AddTestCase("Namespace function defined in [Package.Name]/C.as", "1,2,3", c.call
 class X{
 Kitty var num:Number = 5;
 Kitty function kittyFunc(s:String):String {
-	return "You said hi";
+    return "You said hi";
 }
 }
 

@@ -128,7 +128,7 @@ function getTestCases() {
     // G is out of hex range
 
     array[item++] = new TestCase( SECTION, "\\xG",        "xG",                                 "\xG" );
-    array[item++] = new TestCase( SECTION, "\\xCG",       "xCG",      				"\xCG" );
+    array[item++] = new TestCase( SECTION, "\\xCG",       "xCG",                    "\xCG" );
 
     // DoubleStringCharacter::EscapeSequence::CharacterEscapeSequence::\ NonEscapeCharacter
     array[item++] = new TestCase( SECTION, "\\a",    "a",        "\a" );

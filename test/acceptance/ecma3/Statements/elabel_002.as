@@ -47,7 +47,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     LabelTest( { p1:"hi,", p2:" norris" }, "hi, norris", " norrishi," );
     LabelTest( { 0:"zero", 1:"one" }, "zeroone", "onezero" );

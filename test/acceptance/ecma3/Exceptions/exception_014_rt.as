@@ -47,18 +47,18 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;  
+    var item = 0;
 
     try {
-		throw "Exception";
+        throw "Exception";
     } catch ( e ) {
-		array[item++] = new TestCase(SECTION, "first thrown Exception", "Exception", e.toString() );
+        array[item++] = new TestCase(SECTION, "first thrown Exception", "Exception", e.toString() );
     }
 
     try {
-		throw "Exception";
+        throw "Exception";
     } catch ( e1 ) {
-		array[item++] = new TestCase(SECTION, "first thrown Exception", "Exception", e1.toString() );
+        array[item++] = new TestCase(SECTION, "first thrown Exception", "Exception", e1.toString() );
     }
     return array;
 }

@@ -37,25 +37,25 @@
 /*
  * Dynamic Class DynamicClass
  * Class methods
- *  
+ *
  */
 
 package DynamicClassImpDefIntname{
 
-	class DynamicClass implements DefaultInt{
-		public function deffunc():String{  			
-			return"PASSED";
-		}
-		
-	}
+    class DynamicClass implements DefaultInt{
+        public function deffunc():String{
+            return"PASSED";
+        }
+        
+    }
 
-	public class DynamicClassAccessor{
-		 var acc:DynamicClass= new DynamicClass();
-		 var i:DefaultInt=acc;
+    public class DynamicClassAccessor{
+         var acc:DynamicClass= new DynamicClass();
+         var i:DefaultInt=acc;
 
  
- 	  public function accdeffunc():String{return i.deffunc();}
-		
-		      	
-      } 	
-}  
+      public function accdeffunc():String{return i.deffunc();}
+        
+                
+      }
+}

@@ -35,21 +35,21 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package PublicClassPackage {
-	public class PublicClass {
-		
-		var date:Date;
-		
-		// ****************
-		// constructor
-		// ****************
-		function PublicClass() {
-		}
-		
-		// *****************
-		// internal methods
-		// *****************
-		internal function getDate() : Date { return date; }
-		internal function setDate( d:Date ) { date = d; }
-	}
+    public class PublicClass {
+        
+        var date:Date;
+        
+        // ****************
+        // constructor
+        // ****************
+        function PublicClass() {
+        }
+        
+        // *****************
+        // internal methods
+        // *****************
+        internal function getDate() : Date { return date; }
+        internal function setDate( d:Date ) { date = d; }
+    }
 
 }

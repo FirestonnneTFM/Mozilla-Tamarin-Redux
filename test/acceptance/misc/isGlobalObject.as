@@ -41,13 +41,13 @@ namespace ns = "some_ns"
 
 interface IFoo
 {
-	function i1():*;
+    function i1():*;
 };
 
 class Foo extends Object implements IFoo
 {
-	public var z:int;
-	public function i1():* { return null; }
+    public var z:int;
+    public function i1():* { return null; }
 }
 
 var f:Foo = new Foo();

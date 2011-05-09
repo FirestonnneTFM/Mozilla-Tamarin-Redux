@@ -38,7 +38,7 @@
 import GetSetFinal.*;
 
 var SECTION = "FunctionAccessors";
-var VERSION = "AS3"; 
+var VERSION = "AS3";
 var TITLE   = "Function Accessors";
 var BUGNUMBER = "";
 
@@ -59,53 +59,53 @@ AddTestCase("Final class setter var:String", "new string", (OBJ.string = "new st
 
 // Attempt to access the private vars directly
 try{
-	var res = "not run";
-	OBJ._x = 4;
-	res = "no exception";
+    var res = "not run";
+    OBJ._x = 4;
+    res = "no exception";
 } catch (e1) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access private var:Array", "exception", res);
+    AddTestCase("Access private var:Array", "exception", res);
 }
 
 try{
-	var res = "not run";
-	OBJ._y = 4;
-	res = "no exception";
+    var res = "not run";
+    OBJ._y = 4;
+    res = "no exception";
 } catch (e2) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access private var:int", "exception", res);
+    AddTestCase("Access private var:int", "exception", res);
 }
 
 try{
-	var res = "not run";
-	OBJ._b = 4;
-	res = "no exception";
+    var res = "not run";
+    OBJ._b = 4;
+    res = "no exception";
 } catch (e3) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access private var:Boolean", "exception", res);
+    AddTestCase("Access private var:Boolean", "exception", res);
 }
 
 try{
-	var res = "not run";
-	OBJ._u = 4;
-	res = "no exception";
+    var res = "not run";
+    OBJ._u = 4;
+    res = "no exception";
 } catch (e4) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access private var:uint", "exception", res);
+    AddTestCase("Access private var:uint", "exception", res);
 }
 
 try{
-	var res = "not run";
-	OBJ._s = 4;
-	res = "no exception";
+    var res = "not run";
+    OBJ._s = 4;
+    res = "no exception";
 } catch (e5) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access private var:String", "exception", res);
+    AddTestCase("Access private var:String", "exception", res);
 }
 
 // call setter from setter

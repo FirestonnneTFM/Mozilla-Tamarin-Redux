@@ -38,16 +38,16 @@
 package StaticPropertyPackage {
 
         public namespace ns1;
-	
-	class BaseClass {
-		static var string:String = "baseclass";
-		ns1 static var date:Date = new Date(0);
-	}
-		
-	public class AccStatPropViaSubClass extends BaseClass {
-		
-		public function getString() : String {
-			return this.string;
-		}
-	}
+    
+    class BaseClass {
+        static var string:String = "baseclass";
+        ns1 static var date:Date = new Date(0);
+    }
+        
+    public class AccStatPropViaSubClass extends BaseClass {
+        
+        public function getString() : String {
+            return this.string;
+        }
+    }
 }

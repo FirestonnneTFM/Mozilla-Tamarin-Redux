@@ -35,17 +35,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 /*
- * Public Interface PublicInterface 
- * Interface methods 
- *  
+ * Public Interface PublicInterface
+ * Interface methods
+ *
  */
 
 
-package PublicClassImpPublicInt{ 
+package PublicClassImpPublicInt{
 
-	public interface PublicInt{
-	
-		function deffunc():String;
+    public interface PublicInt{
+    
+        function deffunc():String;
 
-	}
+    }
 }

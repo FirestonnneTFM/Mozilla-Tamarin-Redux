@@ -36,28 +36,28 @@
  * ***** END LICENSE BLOCK ***** */
 // 13.7 super expression - new to AS3: super(object).method(args)
 package SuperArgsCall {
-	class SuperArgsCallBase {
-		private var x : String
-		function SuperArgsCallBase( a : String ) {
-			x = a
-		}
-		function f() : String {
-			return "base f(" + x + ")"
-		}
-	}
-	public class SuperArgsCall extends SuperArgsCallBase {
-		function SuperArgsCall( s : String ) {
-			super( s )
-		}
-		override function f() : String {
-			return "derived f()"
-		}
-		public function test0() {
-			return super(this).f()
-		}
-		public function test1( o : SuperArgsCall ) {
-			return super(o).f()
-		}
-	}
+    class SuperArgsCallBase {
+        private var x : String
+        function SuperArgsCallBase( a : String ) {
+            x = a
+        }
+        function f() : String {
+            return "base f(" + x + ")"
+        }
+    }
+    public class SuperArgsCall extends SuperArgsCallBase {
+        function SuperArgsCall( s : String ) {
+            super( s )
+        }
+        override function f() : String {
+            return "derived f()"
+        }
+        public function test0() {
+            return super(this).f()
+        }
+        public function test1( o : SuperArgsCall ) {
+            return super(o).f()
+        }
+    }
 }
 

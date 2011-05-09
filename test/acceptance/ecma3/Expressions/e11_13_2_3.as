@@ -47,21 +47,21 @@ function getTestCases() {
     var item = 0;
 
     // If either operand is NaN,  result is NaN
-	VAR1 = Number.NaN; VAR2=1;
+    VAR1 = Number.NaN; VAR2=1;
     array[item++] = new TestCase( SECTION,    "VAR1 = NaN; VAR2=1; VAR1 %= VAR2",       Number.NaN,  VAR1 %= VAR2);
     VAR1 = Number.NaN; VAR2=1; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = NaN; VAR2=1; VAR1 %= VAR2; VAR1", Number.NaN,  VAR1);
-	VAR1 = Number.NaN; VAR2=0; 
+    VAR1 = Number.NaN; VAR2=0;
     array[item++] = new TestCase( SECTION,    "VAR1 = NaN; VAR2=0; VAR1 %= VAR2",       Number.NaN, VAR1 %= VAR2);
-    VAR1 = Number.NaN; VAR2=0; VAR1 %= VAR2; 
+    VAR1 = Number.NaN; VAR2=0; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = NaN; VAR2=0; VAR1 %= VAR2; VAR1", Number.NaN, VAR1);
-     VAR1 = 0; VAR2=Number.NaN; 
+     VAR1 = 0; VAR2=Number.NaN;
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2=NaN; VAR1 %= VAR2",       Number.NaN, VAR1 %= VAR2);
     VAR1 = 0; VAR2=Number.NaN; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2=NaN; VAR1 %= VAR2; VAR1", Number.NaN,  VAR1 );
 
     // if the dividend is infinity or the divisor is zero or both, the result is NaN
-    VAR1 = Number.POSITIVE_INFINITY; VAR2 = Number.POSITIVE_INFINITY; VAR1 %= VAR2;	
+    VAR1 = Number.POSITIVE_INFINITY; VAR2 = Number.POSITIVE_INFINITY; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = Infinity; VAR2= Infinity; VAR1 %= VAR2; VAR1",   Number.NaN,       VAR1 );
     VAR1 = Number.POSITIVE_INFINITY; VAR2 = Number.NEGATIVE_INFINITY; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = Infinity; VAR2= -Infinity; VAR1 %= VAR2; VAR1",  Number.NaN,       VAR1 );
@@ -69,13 +69,13 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "VAR1 =-Infinity; VAR2= Infinity; VAR1 %= VAR2; VAR1",   Number.NaN,      VAR1 );
     VAR1 = Number.NEGATIVE_INFINITY; VAR2 = Number.NEGATIVE_INFINITY; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 =-Infinity; VAR2=-Infinity; VAR1 %= VAR2; VAR1",   Number.NaN,      VAR1);
-    VAR1 = 0; VAR2 = Number.POSITIVE_INFINITY; VAR2 %= VAR1; 
+    VAR1 = 0; VAR2 = Number.POSITIVE_INFINITY; VAR2 %= VAR1;
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2= Infinity; VAR2 %= VAR1",    Number.NaN,      VAR2);
-    VAR1 = -0; VAR2 = Number.POSITIVE_INFINITY; VAR2 %= VAR1; 
+    VAR1 = -0; VAR2 = Number.POSITIVE_INFINITY; VAR2 %= VAR1;
     array[item++] = new TestCase( SECTION,    "VAR1 = -0; VAR2= Infinity; VAR2 %= VAR1",   Number.NaN,      VAR2);
-    VAR1 = -0; VAR2 = Number.NEGATIVE_INFINITY; VAR2 %= VAR1; 
+    VAR1 = -0; VAR2 = Number.NEGATIVE_INFINITY; VAR2 %= VAR1;
     array[item++] = new TestCase( SECTION,    "VAR1 = -0; VAR2= -Infinity; VAR2 %= VAR1",  Number.NaN,      VAR2);
-    VAR1 = 0; VAR2 = Number.NEGATIVE_INFINITY; VAR2 %= VAR1; 
+    VAR1 = 0; VAR2 = Number.NEGATIVE_INFINITY; VAR2 %= VAR1;
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2= -Infinity; VAR2 %= VAR1",   Number.NaN,       VAR2);
     VAR1 = 1; VAR2 = Number.POSITIVE_INFINITY; VAR2 %= VAR1;
     array[item++] = new TestCase( SECTION,    "VAR1 = 1; VAR2= Infinity; VAR2 %= VAR1",    Number.NaN,       VAR2);
@@ -85,7 +85,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "VAR1 = -1; VAR2= -Infinity; VAR2 %= VAR1",  Number.NaN,      VAR2);
     VAR1 = 1; VAR2 = Number.NEGATIVE_INFINITY; VAR2 %= VAR1;
     array[item++] = new TestCase( SECTION,    "VAR1 = 1; VAR2= -Infinity; VAR2 %= VAR1",   Number.NaN,       VAR2);
-	VAR1 = 0; VAR2 = 0; VAR1 %= VAR2;
+    VAR1 = 0; VAR2 = 0; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2= 0; VAR1 %= VAR2",    Number.NaN,       VAR1 );
     VAR1 = 0; VAR2 = -0; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2= -0; VAR1 %= VAR2",   Number.NaN,       VAR1 );
@@ -97,9 +97,9 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "VAR1 = 1; VAR2= 0; VAR1 %= VAR2",    Number.NaN,      VAR1 );
     VAR1 = 1; VAR2 = -0; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = 1; VAR2= -0; VAR1 %= VAR2",   Number.NaN,       VAR1 );
-    VAR1 = -1; VAR2 = 0; VAR1 %= VAR2; 
+    VAR1 = -1; VAR2 = 0; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = -1; VAR2= 0; VAR1 %= VAR2",   Number.NaN,      VAR1 );
-     VAR1 = -1; VAR2 = -0; VAR1 %= VAR2; 
+     VAR1 = -1; VAR2 = -0; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = -1; VAR2= -0; VAR1 %= VAR2",  Number.NaN, VAR1 );
 
     // if the dividend is finite and the divisor is an infinity, the result equals the dividend.
@@ -107,7 +107,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2= Infinity; VAR1 %= VAR2;VAR1",    0,       VAR1 );
     VAR1 = -0; VAR2 = Number.POSITIVE_INFINITY; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = -0; VAR2= Infinity; VAR1 %= VAR2;VAR1",   -0,      VAR1 );
-     VAR1 = -0; VAR2 = Number.NEGATIVE_INFINITY; VAR1 %= VAR2; 
+     VAR1 = -0; VAR2 = Number.NEGATIVE_INFINITY; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = -0; VAR2= -Infinity; VAR1 %= VAR2;VAR1",  -0,    VAR1 );
     VAR1 = 0; VAR2 = Number.NEGATIVE_INFINITY; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2= -Infinity; VAR1 %= VAR2;VAR1",   0,       VAR1 );
@@ -121,7 +121,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "VAR1 = 1; VAR2= -Infinity; VAR1 %= VAR2;VAR1",   1,       VAR1 );
 
     // if the dividend is a zero and the divisor is finite, the result is the same as the dividend
-      VAR1 = 0; VAR2 = 1; VAR1 %= VAR2; 
+      VAR1 = 0; VAR2 = 1; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2= 1; VAR1 %= VAR2; VAR1",    0,  VAR1 );
     VAR1 = -0; VAR2 = 1; VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = -0; VAR2= 1; VAR1 %= VAR2; VAR1",   -0,    VAR1 );
@@ -131,14 +131,14 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "VAR1 = 0; VAR2= -1; VAR1 %= VAR2; VAR1",   0,     VAR1 );
 
     // string cases
-       VAR1 = 1000; VAR2 = '10', VAR1 %= VAR2; 
+       VAR1 = 1000; VAR2 = '10', VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = 1000; VAR2 = '10', VAR1 %= VAR2; VAR1", 0,    VAR1 );
-       VAR1 = '1000'; VAR2 = 10, VAR1 %= VAR2; 
+       VAR1 = '1000'; VAR2 = 10, VAR1 %= VAR2;
     array[item++] = new TestCase( SECTION,    "VAR1 = '1000'; VAR2 = 10, VAR1 %= VAR2; VAR1", 0,    VAR1 );
 /*
          VAR1 = 10; VAR2 = '0XFF';
     array[item++] = new TestCase( SECTION,    "VAR1 = 10; VAR2 = '0XFF', VAR1 %= VAR2", 2550,   VAR1 %= VAR2 );
-         VAR1 = '0XFF'; VAR2 = 0XA; 
+         VAR1 = '0XFF'; VAR2 = 0XA;
     array[item++] = new TestCase( SECTION,    "VAR1 = '0xFF'; VAR2 = 0xA, VAR1 %= VAR2", 2550, VAR1 %= VAR2 );
     VAR1 = '10'; VAR2 = '255';
     array[item++] = new TestCase( SECTION,    "VAR1 = '10'; VAR2 = '255', VAR1 %= VAR2", 2550,       VAR1 %= VAR2 );
@@ -148,9 +148,9 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "VAR1 = '0xFF'; VAR2 = 0xA, VAR1 %= VAR2", 2550,      VAR1 %= VAR2 );
 
     // boolean cases
-     VAR1 = true; VAR2 = false; 
+     VAR1 = true; VAR2 = false;
     array[item++] = new TestCase( SECTION,    "VAR1 = true; VAR2 = false; VAR1 %= VAR2",    0,     VAR1 %= VAR2 );
-    VAR1 = true; VAR2 = true; 
+    VAR1 = true; VAR2 = true;
     array[item++] = new TestCase( SECTION,    "VAR1 = true; VAR2 = true; VAR1 %= VAR2",    1,      VAR1 %= VAR2 );
 
     // object cases

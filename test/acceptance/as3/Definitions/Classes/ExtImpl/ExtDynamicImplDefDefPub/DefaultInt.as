@@ -41,7 +41,7 @@ package DynamicClass {
  interface DefaultInt {
 
     function iGetNumber():Number
-//    public function iGetPubNumber(): Number	
+//    public function iGetPubNumber(): Number
 
  }
 

@@ -34,19 +34,19 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1075; //	Math is not a function.
+var CODE = 1075; // Math is not a function.
 
 //-----------------------------------------------------------
 startTest();
 //-----------------------------------------------------------
 
 try {
-	var z = "no error";
-	Math();
+    var z = "no error";
+    Math();
 } catch (err) {
-	z = err.toString();
+    z = err.toString();
 } finally {
-	AddTestCase("Runtime Error", "TypeError: Error #" + CODE, typeError(z));
+    AddTestCase("Runtime Error", "TypeError: Error #" + CODE, typeError(z));
 }
 
 //-----------------------------------------------------------

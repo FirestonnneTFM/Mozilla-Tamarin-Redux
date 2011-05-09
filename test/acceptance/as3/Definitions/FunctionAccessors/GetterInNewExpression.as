@@ -38,7 +38,7 @@
 import GetterInNewExpression.*;
 
 var SECTION = "FunctionAccessors";
-var VERSION = "AS3"; 
+var VERSION = "AS3";
 var TITLE   = "Function Accessors";
 var BUGNUMBER = "";
 
@@ -53,10 +53,10 @@ function get someClass2():GetterInNewExpression{ return GetterInNewExpression; }
 var result:String="no exception";
 
 try {
-	var b:GetterInNewExpression= new someClass2();
-	
+    var b:GetterInNewExpression= new someClass2();
+    
 } catch (e1:TypeError) {
-	result = e1.toString();
+    result = e1.toString();
 }
 
 
@@ -64,10 +64,10 @@ AddTestCase("Getter in new expression with strong typing", "TypeError: Error #10
 
 result = "no exception";
 try {
-	var c = new someClass2();
-	
+    var c = new someClass2();
+    
 } catch (e2:TypeError) {
-	result = e2.toString();;
+    result = e2.toString();;
 }
 AddTestCase("Getter in new expression without strong typing", "TypeError: Error #1034", typeError(result));
 AddTestCase("Getter in new expression without strong typing", false, (c is Object));

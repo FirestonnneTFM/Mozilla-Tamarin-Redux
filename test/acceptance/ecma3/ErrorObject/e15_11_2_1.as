@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "ErrorObjects";       // provide a document reference (ie, Actionscript section)
-var VERSION = "ES3";        // Version of ECMAScript or ActionScript 
+var VERSION = "ES3";        // Version of ECMAScript or ActionScript
 var TITLE   = "new Error(message)";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -50,7 +50,7 @@ test();       // leave this alone.  this executes the test cases and
               
 function getTestCases() {
     var array = new Array();
-    var item = 0;              
+    var item = 0;
     var error = new Error();
     var ee = new EvalError();
     var te = new TypeError();
@@ -88,36 +88,36 @@ function getTestCases() {
     array[item++] = new TestCase(SECTION, "typeof new RangeError('test')", "object", typeof new RangeError('test') );
 
     array[item++] = new TestCase(SECTION, "(err = new Error(), err.getClass = Object.prototype.toString, err.getClass() )",
-    			 "[object Error]",
-    			 (err = new Error(), err.getClass = Object.prototype.toString, err.getClass() ) );
+                 "[object Error]",
+                 (err = new Error(), err.getClass = Object.prototype.toString, err.getClass() ) );
     array[item++] = new TestCase(SECTION, "(err = new EvalError(), err.getClass = Object.prototype.toString, err.getClass() )",
-    			 "[object EvalError]",
-    			 (err = new EvalError(), err.getClass = Object.prototype.toString, err.getClass() ) );
+                 "[object EvalError]",
+                 (err = new EvalError(), err.getClass = Object.prototype.toString, err.getClass() ) );
     array[item++] = new TestCase(SECTION, "(err = new TypeError(), err.getClass = Object.prototype.toString, err.getClass() )",
-    			 "[object TypeError]",
-    			 (err = new TypeError(), err.getClass = Object.prototype.toString, err.getClass() ) );
+                 "[object TypeError]",
+                 (err = new TypeError(), err.getClass = Object.prototype.toString, err.getClass() ) );
     array[item++] = new TestCase(SECTION, "(err = new ReferenceError(), err.getClass = Object.prototype.toString, err.getClass() )",
-    			 "[object ReferenceError]",
-    			 (err = new ReferenceError(), err.getClass = Object.prototype.toString, err.getClass() ) );
+                 "[object ReferenceError]",
+                 (err = new ReferenceError(), err.getClass = Object.prototype.toString, err.getClass() ) );
     array[item++] = new TestCase(SECTION, "(err = new RangeError(), err.getClass = Object.prototype.toString, err.getClass() )",
-    			 "[object RangeError]",
-    			 (err = new RangeError(), err.getClass = Object.prototype.toString, err.getClass() ) );
+                 "[object RangeError]",
+                 (err = new RangeError(), err.getClass = Object.prototype.toString, err.getClass() ) );
 
     array[item++] = new TestCase(SECTION, "(err = new Error('test'), err.getClass = Object.prototype.toString, err.getClass() )",
-    			 "[object Error]",
-    			 (err = new Error('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
+                 "[object Error]",
+                 (err = new Error('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
     array[item++] = new TestCase(SECTION, "(err = new EvalError('test'), err.getClass = Object.prototype.toString, err.getClass() )",
-    			 "[object EvalError]",
-    			 (err = new EvalError('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
+                 "[object EvalError]",
+                 (err = new EvalError('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
     array[item++] = new TestCase(SECTION, "(err = new TypeError('test'), err.getClass = Object.prototype.toString, err.getClass() )",
-    			 "[object TypeError]",
-    			 (err = new TypeError('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
+                 "[object TypeError]",
+                 (err = new TypeError('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
     array[item++] = new TestCase(SECTION, "(err = new ReferenceError('test'), err.getClass = Object.prototype.toString, err.getClass() )",
-    			 "[object ReferenceError]",
-    			 (err = new ReferenceError('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
+                 "[object ReferenceError]",
+                 (err = new ReferenceError('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
     array[item++] = new TestCase(SECTION, "(err = new RangeError('test'), err.getClass = Object.prototype.toString, err.getClass() )",
-    			 "[object RangeError]",
-    			 (err = new RangeError('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
+                 "[object RangeError]",
+                 (err = new RangeError('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
 
     return array;
 }

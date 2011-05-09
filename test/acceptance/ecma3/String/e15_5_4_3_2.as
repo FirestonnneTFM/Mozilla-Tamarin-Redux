@@ -51,9 +51,9 @@ function getTestCases() {
     var item = 0;
 
     valof=String.prototype.valueOf;
-	String.prototype.valueOf=valof;
+    String.prototype.valueOf=valof;
 
-	var astring=new String(); 
+    var astring=new String();
     array[item++] = new TestCase( SECTION,
                                   "valof=String.prototype.valueOf,String.prototype.valueOf=valof,astring=new String(), astring.valueOf()",
                                   "",

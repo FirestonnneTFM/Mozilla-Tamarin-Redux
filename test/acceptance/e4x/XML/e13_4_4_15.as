@@ -44,7 +44,7 @@ START("13.4.4.15 - hasComplexContent()");
 
 //TEST(1, true, XML.prototype.hasOwnProperty("hasComplexContent"));
 
-x1 = 
+x1 =
 <alpha attr1="value1">
     <bravo>one</bravo>
     <charlie>
@@ -76,26 +76,26 @@ TEST(11, true, x1.india.hasComplexContent());
 var xmlDoc = "<employee id='1'><firstname>John</firstname><lastname>Walton</lastname><age dob='1/2/1978'>25</age></employee>"
 
 // propertyName as a string
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasComplexContent()", true, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasComplexContent()", true,
              (MYXML = new XML(xmlDoc), MYXML.hasComplexContent()));
 
-xmlDoc = "<firstname>John</firstname>"  
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasComplexContent()", false, 
+xmlDoc = "<firstname>John</firstname>"
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasComplexContent()", false,
              (MYXML = new XML(xmlDoc), MYXML.hasComplexContent()));
 
 XML.ignoreComments = false;
-xmlDoc = "<XML><!-- firstname --></XML>"  
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasComplexContent()", false, 
+xmlDoc = "<XML><!-- firstname --></XML>"
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasComplexContent()", false,
              (MYXML = new XML(xmlDoc), MYXML.hasComplexContent()));
 
 XML.ignoreProcessingInstructions = false;
-xmlDoc = "<XML><?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?></XML>"  
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasComplexContent()", false, 
+xmlDoc = "<XML><?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?></XML>"
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasComplexContent()", false,
              (MYXML = new XML(xmlDoc), MYXML.hasComplexContent()));
 
 XML.ignoreComments = false;
-xmlDoc = "<XML>foo</XML>"  
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasComplexContent()", false, 
+xmlDoc = "<XML>foo</XML>"
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.hasComplexContent()", false,
              (MYXML = new XML(xmlDoc), MYXML.hasComplexContent()));
 
 END();

@@ -48,7 +48,7 @@
 function getTestCases() {
     var array = new Array();
     var item = 0;
-	    
+        
     var b = new Boolean();
 
     array[item++] = new TestCase( SECTION,

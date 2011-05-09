@@ -49,7 +49,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     var TZ_ADJUST = TZ_DIFF * msPerHour;
 
@@ -106,8 +106,8 @@ function getTestCases() {
                 t += 1000;
                 array[item++] = new TestCase( SECTION,
                                         "(new Date(currentDate)).getUTCSeconds()",
-                                        true, 
-					compareDate(SecFromTime(t),
+                                        true,
+                    compareDate(SecFromTime(t),
                                         (new Date(t)).getUTCSeconds()) );
         }
     }

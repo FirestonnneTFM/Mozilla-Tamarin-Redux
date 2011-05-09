@@ -37,32 +37,32 @@
 
 package DefaultClass {
 
-	import DefaultClass.*;
+    import DefaultClass.*;
 
-	class ExtDefaultOverRidePublicInner extends DefaultClass {
-	
-		public var orSetString = "FAILED";
-		public var orGetString = "FAILED";
+    class ExtDefaultOverRidePublicInner extends DefaultClass {
+    
+        public var orSetString = "FAILED";
+        public var orGetString = "FAILED";
 
-		// *******************************
-		// override a public method
-		// with a public method
-		// *******************************
+        // *******************************
+        // override a public method
+        // with a public method
+        // *******************************
 
-		override public function getPubString(): String {
-			orGetString = "PASSED";
-			return this.string+"_override";
-		}
+        override public function getPubString(): String {
+            orGetString = "PASSED";
+            return this.string+"_override";
+        }
 
-		override public function setPubString(s:String) {
+        override public function setPubString(s:String) {
                         
-			    string = "override_"+s;
+                string = "override_"+s;
                         
                     
-			orSetString = "PASSED";
-		}
+            orSetString = "PASSED";
+        }
 
-	}
+    }
 
-	public class ExtDefaultOverRidePublic extends ExtDefaultOverRidePublicInner {}
+    public class ExtDefaultOverRidePublic extends ExtDefaultOverRidePublicInner {}
 }

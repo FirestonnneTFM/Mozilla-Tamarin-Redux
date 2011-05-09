@@ -48,7 +48,7 @@ function getTestCases() {
     var item = 0;
 
     // tests for boolean primitive, boolean object, Object object, a "MyObject" whose value is
-    // a boolean primitive and a boolean object, 
+    // a boolean primitive and a boolean object,
     var EXP_1 = true; var EXP_2 = false;
     array[item++] = new TestCase(   SECTION,
                                     "var EXP_1 = true; var EXP_2 = false; EXP_1 + EXP_2",
@@ -74,7 +74,7 @@ function getTestCases() {
                                     "var EXP_1 = new MyObject(true); var EXP_2 = new MyObject(false); EXP_1 + EXP_2",
                                     1,
                                      EXP_1 + EXP_2 );
-    var EXP_1 = new MyObject(new Boolean(true)); var EXP_2 = new MyObject(new Boolean(false)); 
+    var EXP_1 = new MyObject(new Boolean(true)); var EXP_2 = new MyObject(new Boolean(false));
     array[item++] = new TestCase(   SECTION,
                                     "var EXP_1 = new MyObject(new Boolean(true)); var EXP_2 = new MyObject(new Boolean(false)); EXP_1 + EXP_2",
                                     1,
@@ -97,7 +97,7 @@ function getTestCases() {
                                     "var EXP_1 = 100; var EXP_2 = -1; EXP_1 + EXP_2",
                                     99,
                                      EXP_1 + EXP_2 );
-    var EXP_1 = new Number(100); var EXP_2 = new Number(-1); 
+    var EXP_1 = new Number(100); var EXP_2 = new Number(-1);
     array[item++] = new TestCase(   SECTION,
                                     "var EXP_1 = new Number(100); var EXP_2 = new Number(-1); EXP_1 + EXP_2",
                                     99,
@@ -112,7 +112,7 @@ function getTestCases() {
                                     "var EXP_1 = new Object(new Number(100)); var EXP_2 = new Object(new Number(-1)); EXP_1 + EXP_2",
                                     99,
                                      EXP_1 + EXP_2 );
-    var EXP_1 = new MyObject(100); var EXP_2 = new MyObject(-1); 
+    var EXP_1 = new MyObject(100); var EXP_2 = new MyObject(-1);
     array[item++] = new TestCase(   SECTION,
                                     "var EXP_1 = new MyObject(100); var EXP_2 = new MyObject(-1); EXP_1 + EXP_2",
                                     99,
@@ -128,7 +128,7 @@ function getTestCases() {
     //                               "var EXP_1 = new MyValuelessObject(100); var EXP_2 = new MyValuelessObject(-1); EXP_1 + EXP_2",
     //                                99,
     //                                 EXP_1 + EXP_2 );
-    //var EXP_1 = new MyValuelessObject(new Number(100)); var EXP_2 = new MyValuelessObject(new Number(-1)); 
+    //var EXP_1 = new MyValuelessObject(new Number(100)); var EXP_2 = new MyValuelessObject(new Number(-1));
     //array[item++] = new TestCase(   SECTION,
     //                                "var EXP_1 = new MyValuelessObject(new Number(100)); var EXP_2 = new MyValuelessObject(new Number(-1)); EXP_1 + EXP_2",
     //                                "100-1",
@@ -138,7 +138,7 @@ function getTestCases() {
     //                                "var EXP_1 = new MyValuelessObject( new MyValuelessObject( new Boolean(true) ) ); EXP_1 + EXP_1",
     //                                "truetrue",
     //                                 EXP_1 + EXP_1 );
-	//
+    //
     return ( array );
 }
 

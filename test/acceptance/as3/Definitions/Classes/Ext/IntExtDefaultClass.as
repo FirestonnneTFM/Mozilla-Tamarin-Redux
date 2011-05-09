@@ -84,7 +84,7 @@ AddTestCase( "access 'default' method from 'default' method of sub class", arr, 
 arr = new Array( 4, 5, 6 );
 EXTDCLASS = new IntExtDefaultClass();
 AddTestCase( "access 'default' method from 'public' method of sub class", arr,
-			 (EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()) );
+             (EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()) );
 
 // ********************************************
 // access default method from a final
@@ -103,7 +103,7 @@ AddTestCase( "access 'default' method from 'final' method of sub class", arr, (E
 arr = new Array( 8, "two", 9 );
 EXTDCLASS = new IntExtDefaultClass();
 AddTestCase( "access 'default' method from 'public final' method of sub class", arr,
-		     (EXTDCLASS.pubFinSubSetArray(arr), EXTDCLASS.pubFinSubGetArray()) );
+             (EXTDCLASS.pubFinSubSetArray(arr), EXTDCLASS.pubFinSubGetArray()) );
 
 // ********************************************
 // access default method from a final
@@ -129,7 +129,7 @@ AddTestCase( "access 'default' method from 'private' method of sub class", arr, 
 // ********************************************
 
 AddTestCase( "access 'default' method from 'virtual' method of sub class", arr,
-			  EXTDCLASS.testVirtSubArray(arr) );
+              EXTDCLASS.testVirtSubArray(arr) );
 
 // ********************************************
 // access default method from a virtual
@@ -137,7 +137,7 @@ AddTestCase( "access 'default' method from 'virtual' method of sub class", arr,
 // ********************************************
 
 AddTestCase( "access 'default' method from 'public virtual' method of sub class", arr,
-		     (EXTDCLASS.pubVirtSubSetArray(arr), EXTDCLASS.pubVirtSubGetArray()) );
+             (EXTDCLASS.pubVirtSubSetArray(arr), EXTDCLASS.pubVirtSubGetArray()) );
 
 // ********************************************
 // access default method from a virtual
@@ -145,7 +145,7 @@ AddTestCase( "access 'default' method from 'public virtual' method of sub class"
 // ********************************************
 
 AddTestCase( "access 'default' method from 'private virtual' method of sub class", arr,
-			  EXTDCLASS.testPrivVirtSubArray(arr) );
+              EXTDCLASS.testPrivVirtSubArray(arr) );
 
 // ********************************************
 // access default method from static
@@ -154,13 +154,13 @@ AddTestCase( "access 'default' method from 'private virtual' method of sub class
 
 public var thisError10 = "no exception thrown";
 try{
-	IntExtDefaultClass.pubStatSubGetArray();
+    IntExtDefaultClass.pubStatSubGetArray();
 } catch (e1) {
-	thisError = e1.toString();
+    thisError = e1.toString();
 } finally {
-	AddTestCase( "access 'default' method from 'static' method of the sub class",
-				TYPEERROR+1006,
-				typeError( thisError) );
+    AddTestCase( "access 'default' method from 'static' method of the sub class",
+                TYPEERROR+1006,
+                typeError( thisError) );
 }
 
 // ********************************************
@@ -170,7 +170,7 @@ try{
 
 EXTDCLASS = new IntExtDefaultClass();
 AddTestCase( "access 'default' property from 'default' method of sub class", arr,
-				(EXTDCLASS.testSubGetSetDPArray(arr)) );
+                (EXTDCLASS.testSubGetSetDPArray(arr)) );
 
 // ********************************************
 // access default property from
@@ -179,7 +179,7 @@ AddTestCase( "access 'default' property from 'default' method of sub class", arr
 
 EXTDCLASS = new IntExtDefaultClass();
 AddTestCase( "access 'default' property from 'final' method of sub class", arr,
-				(EXTDCLASS.testFinSubDPArray(arr)) );
+                (EXTDCLASS.testFinSubDPArray(arr)) );
 
 // ********************************************
 // access default property from
@@ -188,7 +188,7 @@ AddTestCase( "access 'default' property from 'final' method of sub class", arr,
 
 EXTDCLASS = new IntExtDefaultClass();
 AddTestCase( "access 'default' property from 'virtual' method of sub class", arr,
-				(EXTDCLASS.testVirtSubDPArray(arr)) );
+                (EXTDCLASS.testVirtSubDPArray(arr)) );
 
 // ********************************************
 // access default property from
@@ -197,7 +197,7 @@ AddTestCase( "access 'default' property from 'virtual' method of sub class", arr
 
 EXTDCLASS = new IntExtDefaultClass();
 AddTestCase( "access 'default' property from 'public' method of sub class", arr,
-				(EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()) );
+                (EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()) );
 
 // ********************************************
 // access default property from
@@ -206,7 +206,7 @@ AddTestCase( "access 'default' property from 'public' method of sub class", arr,
 
 EXTDCLASS = new IntExtDefaultClass();
 AddTestCase( "access 'default' property from 'private' method of sub class", arr,
-			 (EXTDCLASS.testPrivSubDPArray(arr)) );
+             (EXTDCLASS.testPrivSubDPArray(arr)) );
 
 // ********************************************
 // access default property from
@@ -215,7 +215,7 @@ AddTestCase( "access 'default' property from 'private' method of sub class", arr
 
 EXTDCLASS = new IntExtDefaultClass();
 AddTestCase( "access 'default' property from 'public final' method of sub class", arr,
-			 (EXTDCLASS.pubFinSubSetDPArray(arr), EXTDCLASS.pubFinSubGetDPArray()) );
+             (EXTDCLASS.pubFinSubSetDPArray(arr), EXTDCLASS.pubFinSubGetDPArray()) );
 
 // ********************************************
 // access default property from
@@ -224,7 +224,7 @@ AddTestCase( "access 'default' property from 'public final' method of sub class"
 
 EXTDCLASS = new IntExtDefaultClass();
 AddTestCase( "access 'default' property from 'public virtual' method of sub class", arr,
-			 (EXTDCLASS.pubVirtSubSetDPArray(arr), EXTDCLASS.pubVirtSubGetDPArray()) );
+             (EXTDCLASS.pubVirtSubSetDPArray(arr), EXTDCLASS.pubVirtSubGetDPArray()) );
 
 // ********************************************
 // access default property from
@@ -233,7 +233,7 @@ AddTestCase( "access 'default' property from 'public virtual' method of sub clas
 
 EXTDCLASS = new IntExtDefaultClass();
 AddTestCase( "access 'default' property from 'private final' method of sub class", arr,
-			 (EXTDCLASS.testPrivFinSubDPArray(arr)) );
+             (EXTDCLASS.testPrivFinSubDPArray(arr)) );
 
 // ********************************************
 // access default property from
@@ -242,7 +242,7 @@ AddTestCase( "access 'default' property from 'private final' method of sub class
 
 EXTDCLASS = new IntExtDefaultClass();
 AddTestCase( "access 'default' property from 'private virtual' method of sub class", arr,
-			 (EXTDCLASS.testPrivVirtSubDPArray(arr)) );
+             (EXTDCLASS.testPrivVirtSubDPArray(arr)) );
 
 // ********************************************
 // Class Prototype Testing
@@ -265,13 +265,13 @@ AddTestCase("*** Try overriding parent property through prototype object, verify
 
 thisError10 = "no error thrown";
 try{
-	IntExtDefaultClass.pubStatSubGetDPArray();
+    IntExtDefaultClass.pubStatSubGetDPArray();
 } catch(e3) {
-	thisError = e3.toString();
+    thisError = e3.toString();
 } finally {
-	AddTestCase( "access default property from static public method of sub class",
-			TYPEERROR+1006,
-			typeError( thisError ) );
+    AddTestCase( "access default property from static public method of sub class",
+            TYPEERROR+1006,
+            typeError( thisError ) );
 }
 
 test();       // leave this alone.  this executes the test cases and

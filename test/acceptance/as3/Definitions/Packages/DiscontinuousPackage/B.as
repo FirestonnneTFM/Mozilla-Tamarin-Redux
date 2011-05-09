@@ -36,11 +36,11 @@
  * ***** END LICENSE BLOCK ***** */
 package DiscontinuousPackage {
 
-	public class B implements IClickable {
-		public function whoAmI():String {
-			return "B";
-		}
-	
-	}
+    public class B implements IClickable {
+        public function whoAmI():String {
+            return "B";
+        }
+    
+    }
 
 }

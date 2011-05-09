@@ -39,45 +39,45 @@
 package DefClassImpInternalInt{
 use namespace ns;
 
-	class DefaultClass implements InternalInt{
-		
+    class DefaultClass implements InternalInt{
+        
 
-		public function deffunc():String{  			      //Default method
-			return"PASSED";
-		}
-                public function deffunc2():Number{ // 			        
-                	var a:Number;
+        public function deffunc():String{                 //Default method
+            return"PASSED";
+        }
+                public function deffunc2():Number{ //
+                    var a:Number;
                         a=10;
-			return a;
-		}
-                public function deffunc3():int{  			        
-                	var b:int;
+            return a;
+        }
+                public function deffunc3():int{
+                    var b:int;
                         b=20;
-			return b;
-		}
-        	
+            return b;
+        }
+            
 
-		public function pubFunc():Boolean{	       //Public method
-				return true;
-		}	
-			
-		ns function nsFunc(a="test"):int{	       //Namespace method
-			return a.length;	
-		}
-		
-	}
+        public function pubFunc():Boolean{         //Public method
+                return true;
+        }
+            
+        ns function nsFunc(a="test"):int{          //Namespace method
+            return a.length;
+        }
+        
+    }
 
-	public class DefaultClassAccessor{
+    public class DefaultClassAccessor{
 
                 var B = new DefaultClass();
                 var i:InternalInt=B;
-		public function accdeffunc(){return deffunc();}
-		// access default function deffunc
+        public function accdeffunc(){return deffunc();}
+        // access default function deffunc
                 public function accdeffunc2():Number{return i.deffunc2();}
                 public function accdeffunc3():int{return B.InternalInt::deffunc3();}
                 
-		public function accnsFunc(a="test"){return ns::nsFunc(a);}
-		// access default function nsFunc
-       } 	
-	
-}  
+        public function accnsFunc(a="test"){return ns::nsFunc(a);}
+        // access default function nsFunc
+       }
+    
+}

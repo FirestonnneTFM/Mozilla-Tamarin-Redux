@@ -37,25 +37,25 @@
 /*
  * Default Class DefaultClass
  * Class methods
- *  
+ *
  */
 
 package DefClassImpDefInt{
 
 
-	class DefaultClass implements DefaultInt{
-		
+    class DefaultClass implements DefaultInt{
+        
 
-		public function deffunc():String{  			      
-			return"PASSED";
-		}
+        public function deffunc():String{
+            return"PASSED";
+        }
 
-		
-	}
+        
+    }
 
-	public class DefaultClassAccesor extends DefaultClass{
-		
+    public class DefaultClassAccesor extends DefaultClass{
+        
 
-       } 	
-	
-}  
+       }
+    
+}

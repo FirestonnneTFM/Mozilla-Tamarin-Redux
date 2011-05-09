@@ -36,11 +36,11 @@
  * ***** END LICENSE BLOCK ***** */
 
    var SECTION = "15.9.5.6";
-   var VERSION = "ECMA_3";  
-   var TITLE   = "Date.prototype.toLocaleDateString()";  
+   var VERSION = "ECMA_3";
+   var TITLE   = "Date.prototype.toLocaleDateString()";
   
    var status = '';
-   var actual = '';  
+   var actual = '';
    var expect = '';
 
 
@@ -55,23 +55,23 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
    // first, some generic tests -
 
-    status = "typeof (now.toLocaleDateString())";  
+    status = "typeof (now.toLocaleDateString())";
     actual =   typeof (now.toLocaleDateString());
     expect = "string";
     array[item++] = new TestCase(SECTION, status, expect, actual);
     
-    status = "Date.prototype.toLocaleDateString.length";   
+    status = "Date.prototype.toLocaleDateString.length";
     actual =  Date.prototype.toLocaleDateString.length;
-    expect =  0;   
+    expect =  0;
     array[item++] = new TestCase(SECTION, status, expect, actual);
 
    /* Date.parse is accurate to the second;  valueOf() to the millisecond.
         Here we expect them to coincide, as we expect a time of exactly midnight -  */
-    status = "(Date.parse(now.toLocaleDateString()) - (midnight(now)).valueOf()) == 0";   
+    status = "(Date.parse(now.toLocaleDateString()) - (midnight(now)).valueOf()) == 0";
     actual =   (Date.parse(now.toLocaleDateString()) - (midnight(now)).valueOf()) == 0;
     expect = true;
     array[item++] = new TestCase(SECTION, status, expect, actual);
@@ -79,11 +79,11 @@ function getTestCases() {
 
     // 1970
     addDateTestCase(0);
-    addDateTestCase(TZ_ADJUST);   
+    addDateTestCase(TZ_ADJUST);
 
    
     // 1900
-    addDateTestCase(TIME_1900); 
+    addDateTestCase(TIME_1900);
     addDateTestCase(TIME_1900 - TZ_ADJUST);
 
    
@@ -94,7 +94,7 @@ function getTestCases() {
     
     // 29 Feb 2000
     addDateTestCase(UTC_29_FEB_2000);
-    addDateTestCase(UTC_29_FEB_2000 - 1000);    
+    addDateTestCase(UTC_29_FEB_2000 - 1000);
     addDateTestCase(UTC_29_FEB_2000 - TZ_ADJUST);
  
 
@@ -106,7 +106,7 @@ function getTestCases() {
 
     function addTestCase()
     {
-      array[item++] = new TestCase( SECTION, status, expect, actual); 
+      array[item++] = new TestCase( SECTION, status, expect, actual);
     }
     
     
@@ -114,7 +114,7 @@ function getTestCases() {
     {
       var givenDate = new Date(date_given_in_milliseconds);
     
-      status = 'Date.parse(   +   givenDate   +   ).toLocaleDateString())';   
+      status = 'Date.parse(   +   givenDate   +   ).toLocaleDateString())';
       actual =  Date.parse(givenDate.toLocaleDateString());
       expect = Date.parse(midnight(givenDate));
       addTestCase();
@@ -122,7 +122,7 @@ function getTestCases() {
     return array;
 }
 
-function midnight(givenDate) 
+function midnight(givenDate)
 {
   // midnight on the given date -
   return new Date(givenDate.getFullYear(), givenDate.getMonth(), givenDate.getDate());

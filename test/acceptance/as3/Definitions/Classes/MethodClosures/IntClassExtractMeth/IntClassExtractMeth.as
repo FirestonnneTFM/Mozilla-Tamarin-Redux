@@ -35,5 +35,5 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package ExtractMethPackage {
-	public class IntClassExtracMeth extends InternalClass {}
+    public class IntClassExtracMeth extends InternalClass {}
 }

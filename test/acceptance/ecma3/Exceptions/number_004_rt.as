@@ -46,7 +46,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;  
+    var item = 0;
 
 
     var result = "Failed";
@@ -70,7 +70,7 @@ function getTestCases() {
         expect,
         result );
 
-	// new Number()
+    // new Number()
     try {
         tostr= Number.prototype.toString;
         OBJECT = new Number();
@@ -88,7 +88,7 @@ function getTestCases() {
         expect,
         result );
 
-	// new Number(4)
+    // new Number(4)
     try {
         tostr= Number.prototype.toString;
         OBJECT = new Number(4);
@@ -106,7 +106,7 @@ function getTestCases() {
         expect,
         result );
 
-	// 4
+    // 4
     try {
         tostr= Number.prototype.toString;
         OBJECT = 4;

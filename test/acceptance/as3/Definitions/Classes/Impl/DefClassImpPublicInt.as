@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 import DefClassImpPublicInt.*;
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS3";        // Version of ECMAScript or ActionScript
 var TITLE   = "Default class implements public interface";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -47,7 +47,7 @@ startTest();                // leave this alone
 // add your tests here
   
 
-var obj:DefaultClassAccesor = new DefaultClassAccesor(); 
+var obj:DefaultClassAccesor = new DefaultClassAccesor();
 
 
 //Default class implements a default interface with a public method

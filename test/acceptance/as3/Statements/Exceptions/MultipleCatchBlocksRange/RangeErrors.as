@@ -45,7 +45,7 @@ package MultipleCatchBlocksRange
              var arr = new Array(-10);
              return 6;
                                                         
-         }                            
+         }
                                  
       }
 }

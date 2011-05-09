@@ -48,7 +48,7 @@ var xl;
 try {
     xl = null;
     xl.toString();
-    SHOULD_THROW(1); 
+    SHOULD_THROW(1);
 } catch (ex) {
     TEST(1, "TypeError", ex.name);
 }
@@ -62,7 +62,7 @@ x = new String("<alpha><bravo>one</bravo></alpha>");
 TEST(3, <alpha><bravo>one</bravo></alpha>, new XMLList(x));
 
 x = new String("<alpha>one</alpha><charlie>two</charlie>");
-TEST(4, "<alpha>one</alpha>" + "\n" + "<charlie>two</charlie>", 
+TEST(4, "<alpha>one</alpha>" + "\n" + "<charlie>two</charlie>",
   new XMLList(x).toXMLString());
 
 // XML
@@ -77,7 +77,7 @@ x = new XMLList(<alpha><bravo>one</bravo></alpha>);
 TEST(7, <alpha><bravo>one</bravo></alpha>, new XMLList(x));
 
 x = new XMLList(<><alpha>one</alpha><bravo>two</bravo></>);
-TEST(8, "<alpha>one</alpha>" + "\n" + "<bravo>two</bravo>", 
+TEST(8, "<alpha>one</alpha>" + "\n" + "<bravo>two</bravo>",
   new XMLList(x).toXMLString());
   
 END();

@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 package Importtwonamespace {
 
-	public namespace N1
+    public namespace N1
     
 }
 
@@ -47,12 +47,12 @@ package Packagnamespace {
 }
 
 
-var SECTION = "Definitions";       				// provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";  				// Version of JavaScript or ECMA
-var TITLE   = "Import two namespaces from two different packages";       	// Provide ECMA section title or a description
+var SECTION = "Definitions";                    // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";               // Version of JavaScript or ECMA
+var TITLE   = "Import two namespaces from two different packages";          // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                					// leave this alone
+startTest();                                    // leave this alone
 
 
 import Importtwonamespace.N1

@@ -38,13 +38,13 @@
 import EmptyFunctionBody.*;
 
 class EmptyFunctionBodyClass {
-	function EmptyFunctionBodyClass() {}
+    function EmptyFunctionBodyClass() {}
     function noReturnNoParams() { return "noReturnNoParams"; }
-	function noReturnParams(s:String, b:Boolean) { return s; }
-	function noReturnCustomParam(c:Custom) { return new Custom(); }
-	function returnNoParams():String { return "returnNoParams"; }
-	function returnParams(s:String, b:Boolean):String { return s; }
-	function returnCustomNoParams():Custom { return new Custom(); }
+    function noReturnParams(s:String, b:Boolean) { return s; }
+    function noReturnCustomParam(c:Custom) { return new Custom(); }
+    function returnNoParams():String { return "returnNoParams"; }
+    function returnParams(s:String, b:Boolean):String { return s; }
+    function returnCustomNoParams():Custom { return new Custom(); }
 }
 
 function noReturnNoParamsNoPackage() { return "noReturnNoParams"; }

@@ -35,6 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package PublicFunctionBody {
-	public class Custom {}
+    public class Custom {}
 }
 

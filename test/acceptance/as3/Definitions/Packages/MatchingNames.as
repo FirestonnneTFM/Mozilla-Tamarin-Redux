@@ -37,50 +37,50 @@
  
 
  package A {
-	public class A {
-		public function whoAmI():String {
-			return "A.A";
-		}
+    public class A {
+        public function whoAmI():String {
+            return "A.A";
+        }
                 
-	}
-	
-	
-	public class B  {
-		var sB;
-		public function createB() {
-			sB = new A();
-		}
-		public function createB2() {
-			sB = new A.A();
+    }
+    
+    
+    public class B  {
+        var sB;
+        public function createB() {
+            sB = new A();
+        }
+        public function createB2() {
+            sB = new A.A();
                    
-		}
-		public function whoAmI():String {
-			return "A.B";
-		}
-	}
+        }
+        public function whoAmI():String {
+            return "A.B";
+        }
+    }
 }
 
 package D {
-	public var D:String = "hello";
+    public var D:String = "hello";
 }
 package E {
-	public var E:String = "E";
+    public var E:String = "E";
         
 }
 package F {
-	public function F(n:Number):String {
-		return "You passed " + n;
-	}
+    public function F(n:Number):String {
+        return "You passed " + n;
+    }
 }
 package IG {
-	interface IG {
-		function whoAmI():String;
-	}
-	public class G implements IG {
-		public function whoAmI():String {
-			return "G";
-		}
-	}
+    interface IG {
+        function whoAmI():String;
+    }
+    public class G implements IG {
+        public function whoAmI():String {
+            return "G";
+        }
+    }
 }
 
 import A.*;
@@ -90,7 +90,7 @@ import F.*;
 import IG.*;
 
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
@@ -106,10 +106,10 @@ AddTestCase("Class B in package A", "A.B", b.whoAmI());
 
 result = "";
 try {
-	b.createB();
-	result = "no exception";
+    b.createB();
+    result = "no exception";
 } catch (e2) {
-	result = "exception";
+    result = "exception";
 }
 
 // !!! This will have to be changed when bug 139002 is fixed.
@@ -118,24 +118,24 @@ AddTestCase("Access A in A as new A()", "no exception", result);
 
 result = "";
 try {
-	b.createB2();
-	result = "no exception";
+    b.createB2();
+    result = "no exception";
 } catch (e3) {
-	result = "exception";
+    result = "exception";
 }
 
 // !!! This will have to be changed when bug 138845 is fixed.
 //bug 138845 is fixed so changing "exception" to "no exception"
 
 AddTestCase("Access A in A as new A.A()", "no exception", result);
-	
+    
 AddTestCase("Variable D in package D", "hello", D);
 
 try {
-	e=E.E;
-	result = "no exception";
+    e=E.E;
+    result = "no exception";
 } catch(e) {
-	result = "exception";
+    result = "exception";
 }
 AddTestCase("Public variable E inside package E", "no exception", result);
 AddTestCase("Public variable E inside package E", "E", E.E);

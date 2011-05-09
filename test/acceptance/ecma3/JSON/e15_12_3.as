@@ -88,7 +88,7 @@ package {
         AddTestCase("15.12.3-8-a-3: JSON.stringify treats an null space argument the same as a missing space argument.", true, JSON.stringify(obj)=== JSON.stringify(obj,null, null));
     } catch (e) {
         AddTestCase("15.12.3-8-a-3: JSON.stringify treats an null space argument the same as a missing space argument. '",'no exception',e.toString());
-    }  
+    }
 
     try {
         AddTestCase("15.12.3-8-a-4: JSON.stringify treats an Boolean wrapper space argument the same as a missing space argument.", true, JSON.stringify(obj)=== JSON.stringify(obj,null, new Boolean(true)));

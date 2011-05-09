@@ -115,7 +115,7 @@ package DefaultClass {
     }
 
     // ***************************************
-    // access public static property from 
+    // access public static property from
     // default method of sub class
     // ***************************************
 

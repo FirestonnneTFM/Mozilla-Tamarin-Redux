@@ -34,23 +34,23 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-	var SECTION = "15.6.3.1-3";
-	var VERSION = "ECMA_1";
-	startTest();
-	var TITLE   = "Boolean.prototype"
-	writeHeaderToLog( SECTION + TITLE );
+    var SECTION = "15.6.3.1-3";
+    var VERSION = "ECMA_1";
+    startTest();
+    var TITLE   = "Boolean.prototype"
+    writeHeaderToLog( SECTION + TITLE );
 
-	var testcases = getTestCases();
-	test();
+    var testcases = getTestCases();
+    test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	delete( Boolean.prototype);
-	array[item++] = new TestCase( SECTION,
-			 "delete( Boolean.prototype); Boolean.prototype",
-				 'false',
-				 String(Boolean.prototype));
-	return ( array );
+    delete( Boolean.prototype);
+    array[item++] = new TestCase( SECTION,
+             "delete( Boolean.prototype); Boolean.prototype",
+                 'false',
+                 String(Boolean.prototype));
+    return ( array );
 }

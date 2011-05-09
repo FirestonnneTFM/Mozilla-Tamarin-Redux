@@ -50,13 +50,13 @@ writeHeaderToLog( " Vector.pop()");
 
 var v1=new Vector.<int>();
 AddTestCase(
-		"pop empty vector",
-		0,
-		v1.pop());
+        "pop empty vector",
+        0,
+        v1.pop());
 AddTestCase(
-		"pop empty vector, original vector change",
-		"",
-		v1.toString());
+        "pop empty vector, original vector change",
+        "",
+        v1.toString());
 
 var v1=new Vector.<int>();
 v1[0]=100;

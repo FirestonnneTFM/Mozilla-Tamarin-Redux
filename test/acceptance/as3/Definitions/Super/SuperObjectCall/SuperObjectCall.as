@@ -36,11 +36,11 @@
  * ***** END LICENSE BLOCK ***** */
 // 16.3 class with explicit base, super() initialize Object
 package SuperObjectCall {
-	public class SuperObjectCall {
-		public function whatIsIt() : String {
-			// SuperObjectCall extends Object but Object
-			// has no addressable traits
-			return super.toString()	// error even tho' this.toString() works
-		}
-	}
+    public class SuperObjectCall {
+        public function whatIsIt() : String {
+            // SuperObjectCall extends Object but Object
+            // has no addressable traits
+            return super.toString() // error even tho' this.toString() works
+        }
+    }
 }

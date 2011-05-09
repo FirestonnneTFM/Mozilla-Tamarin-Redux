@@ -42,7 +42,7 @@
 
 START("10.1.1 - XML.toString");
 
-order = 
+order =
 <order>
     <customer>
         <firstname>John</firstname>

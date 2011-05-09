@@ -52,26 +52,26 @@ function getTestCases() {
       var TDATE:Date = new Date(0);
       TDATE.setUTCFullYear(1900);
       addNewTestCase(TDATE,
-		    UTCDateFromTime(SetUTCFullYear(0,1900)),
+            UTCDateFromTime(SetUTCFullYear(0,1900)),
                     LocalDateFromTime(SetUTCFullYear(0,1900)) );
 
 //    addNewTestCase( "TDATE = new Date(0); TDATE.setUTCFullYear(1899);TDATE",
       TDATE = new Date(0);
       TDATE.setUTCFullYear(1899);
       addNewTestCase(TDATE,
-		    UTCDateFromTime(SetUTCFullYear(0,1899)),
+            UTCDateFromTime(SetUTCFullYear(0,1899)),
                     LocalDateFromTime(SetUTCFullYear(0,1899)) );
 
 //    addNewTestCase( "TDATE = new Date(0); TDATE.setUTCFullYear(1901);TDATE",
       TDATE = new Date(0);
       TDATE.setUTCFullYear(1901);
       addNewTestCase(TDATE,
-		    UTCDateFromTime(SetUTCFullYear(0,1901)),
+            UTCDateFromTime(SetUTCFullYear(0,1901)),
                     LocalDateFromTime(SetUTCFullYear(0,1901)) );
 
     function addNewTestCase( DateString, UTCDate, LocalDate) {
     //    DateCase = ( DateString );
-        var DateCase = DateString ; 
+        var DateCase = DateString ;
     
     //    fixed_year = ( ExpectDate.year >=1900 || ExpectDate.year < 2000 ) ? ExpectDate.year - 1900 : ExpectDate.year;
     

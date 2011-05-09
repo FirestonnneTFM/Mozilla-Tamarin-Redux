@@ -91,80 +91,80 @@ Engineer.prototype = new WorkerBee();
 var jim = new Employee();
 
 testcases[index++] = new TestCase( SECTION,
-	      "jim = new Employee(); jim.name",
-	      "",
-	      jim.name );
+          "jim = new Employee(); jim.name",
+          "",
+          jim.name );
 
 
 testcases[index++] = new TestCase( SECTION,
-	      "jim = new Employee(); jim.dept",
-	      "general",
-	      jim.dept );
+          "jim = new Employee(); jim.dept",
+          "general",
+          jim.dept );
 
 var sally = new Manager();
 
 testcases[index++] = new TestCase( SECTION,
-	      "sally = new Manager(); sally.name",
-	      "",
-	      sally.name );
+          "sally = new Manager(); sally.name",
+          "",
+          sally.name );
 testcases[index++] = new TestCase( SECTION,
-	      "sally = new Manager(); sally.dept",
-	      "general",
-	      sally.dept );
+          "sally = new Manager(); sally.dept",
+          "general",
+          sally.dept );
 
 testcases[index++] = new TestCase( SECTION,
-	      "sally = new Manager(); sally.reports.length",
-	      0,
-	      sally.reports.length );
+          "sally = new Manager(); sally.reports.length",
+          0,
+          sally.reports.length );
 
 testcases[index++] = new TestCase( SECTION,
-	      "sally = new Manager(); typeof sally.reports",
-	      "object",
-	      typeof sally.reports );
+          "sally = new Manager(); typeof sally.reports",
+          "object",
+          typeof sally.reports );
 
 var fred = new SalesPerson();
 
 testcases[index++] = new TestCase( SECTION,
-	      "fred = new SalesPerson(); fred.name",
-	      "",
-	      fred.name );
+          "fred = new SalesPerson(); fred.name",
+          "",
+          fred.name );
 
 testcases[index++] = new TestCase( SECTION,
-	      "fred = new SalesPerson(); fred.dept",
-	      "sales",
-	      fred.dept );
+          "fred = new SalesPerson(); fred.dept",
+          "sales",
+          fred.dept );
 
 testcases[index++] = new TestCase( SECTION,
-	      "fred = new SalesPerson(); fred.quota",
-	      100,
-	      fred.quota );
+          "fred = new SalesPerson(); fred.quota",
+          100,
+          fred.quota );
 
 testcases[index++] = new TestCase( SECTION,
-	      "fred = new SalesPerson(); fred.projects.length",
-	      0,
-	      fred.projects.length );
+          "fred = new SalesPerson(); fred.projects.length",
+          0,
+          fred.projects.length );
 
 var jane = new Engineer();
 
 testcases[index++] = new TestCase( SECTION,
-	      "jane = new Engineer(); jane.name",
-	      "",
-	      jane.name );
+          "jane = new Engineer(); jane.name",
+          "",
+          jane.name );
 
 testcases[index++] = new TestCase( SECTION,
-	      "jane = new Engineer(); jane.dept",
-	      "engineering",
-	      jane.dept );
+          "jane = new Engineer(); jane.dept",
+          "engineering",
+          jane.dept );
 
 testcases[index++] = new TestCase( SECTION,
-	      "jane = new Engineer(); jane.projects.length",
-	      0,
-	      jane.projects.length );
+          "jane = new Engineer(); jane.projects.length",
+          0,
+          jane.projects.length );
 
 testcases[index++] = new TestCase( SECTION,
-	      "jane = new Engineer(); jane.machine",
-	      "",
-	      jane.machine );
+          "jane = new Engineer(); jane.machine",
+          "",
+          jane.machine );
 
 
 test();

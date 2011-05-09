@@ -35,6 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package EmptyFunctionBody {
-	public class Custom {}
+    public class Custom {}
 }
 

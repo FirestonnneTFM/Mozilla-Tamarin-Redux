@@ -54,7 +54,7 @@ function getTestCases() {
 
     array[item++] = new TestCase( SECTION, "delete(Math.LN2)",              false,          delete(Math.LN2) );
 
-    delete(Math.LN2); 
+    delete(Math.LN2);
     array[item++] = new TestCase( SECTION, "delete(Math.LN2); Math.LN2",    MATH_LN2,       Math.LN2 );
 
     return ( array );

@@ -81,7 +81,7 @@ AddTestCase( "PUBEXTDCLASS.testSubGetSetArray(arr)", arr, PUBEXTDCLASS.testSubGe
 
 
 // ********************************************
-// access default method from a public 
+// access default method from a public
 // method of a sub class
 //
 // ********************************************
@@ -93,7 +93,7 @@ AddTestCase( "PUBEXTDCLASS.pubSubSetArray(arr), PUBEXTDCLASS.pubSubGetArray()", 
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access default method from a private 
+// access default method from a private
 // method of a sub class
 //
 // ********************************************
@@ -106,7 +106,7 @@ AddTestCase( "PUBEXTDCLASS.testPrivSubArray(arr)", arr, PUBEXTDCLASS.testPrivSub
 
 
 // ********************************************
-// access default property from 
+// access default property from
 // default method in sub class
 // ********************************************
 
@@ -117,7 +117,7 @@ AddTestCase( "PUBEXTDCLASS.testSubGetSetDPArray(arr)", arr, PUBEXTDCLASS.testSub
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access default property from 
+// access default property from
 // public method in sub class
 // ********************************************
 
@@ -128,7 +128,7 @@ AddTestCase( "PUBEXTDCLASS.pubSubSetDPArray(arr), PUBEXTDCLASS.pubSubGetDPArray(
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access default property from 
+// access default property from
 // private method in sub class
 // ********************************************
 

@@ -57,58 +57,58 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 // /xyz/i.ignoreCase
 testcases[index++] = new TestCase ( SECTION, "/xyz/i.ignoreCase",
-	       true, /xyz/i.ignoreCase);
+           true, /xyz/i.ignoreCase);
 
 // /xyz/.ignoreCase
 testcases[index++] = new TestCase ( SECTION, "/xyz/.ignoreCase",
-	       false, /xyz/.ignoreCase);
+           false, /xyz/.ignoreCase);
 
 // 'ABC def ghi'.match(/[a-z]+/ig)
 testcases[index++] = new TestCase ( SECTION, "'ABC def ghi'.match(/[a-z]+/ig)",
-	       String(["ABC","def","ghi"]), String('ABC def ghi'.match(/[a-z]+/ig)));
+           String(["ABC","def","ghi"]), String('ABC def ghi'.match(/[a-z]+/ig)));
 
 // 'ABC def ghi'.match(/[a-z]+/i)
 testcases[index++] = new TestCase ( SECTION, "'ABC def ghi'.match(/[a-z]+/i)",
-	       String(["ABC"]), String('ABC def ghi'.match(/[a-z]+/i)));
+           String(["ABC"]), String('ABC def ghi'.match(/[a-z]+/i)));
 
 // 'ABC def ghi'.match(/([a-z]+)/ig)
 testcases[index++] = new TestCase ( SECTION, "'ABC def ghi'.match(/([a-z]+)/ig)",
-	       String(["ABC","def","ghi"]), String('ABC def ghi'.match(/([a-z]+)/ig)));
+           String(["ABC","def","ghi"]), String('ABC def ghi'.match(/([a-z]+)/ig)));
 
 // 'ABC def ghi'.match(/([a-z]+)/i)
 testcases[index++] = new TestCase ( SECTION, "'ABC def ghi'.match(/([a-z]+)/i)",
-	       String(["ABC","ABC"]), String('ABC def ghi'.match(/([a-z]+)/i)));
+           String(["ABC","ABC"]), String('ABC def ghi'.match(/([a-z]+)/i)));
 
 // 'ABC def ghi'.match(/[a-z]+/)
 testcases[index++] = new TestCase ( SECTION, "'ABC def ghi'.match(/[a-z]+/)",
-	       String(["def"]), String('ABC def ghi'.match(/[a-z]+/)));
+           String(["def"]), String('ABC def ghi'.match(/[a-z]+/)));
 
 // (new RegExp('xyz','i')).ignoreCase
 testcases[index++] = new TestCase ( SECTION, "(new RegExp('xyz','i')).ignoreCase",
-	       true, (new RegExp('xyz','i')).ignoreCase);
+           true, (new RegExp('xyz','i')).ignoreCase);
 
 // (new RegExp('xyz')).ignoreCase
 testcases[index++] = new TestCase ( SECTION, "(new RegExp('xyz')).ignoreCase",
-	       false, (new RegExp('xyz')).ignoreCase);
+           false, (new RegExp('xyz')).ignoreCase);
 
 // 'ABC def ghi'.match(new RegExp('[a-z]+','ig'))
 testcases[index++] = new TestCase ( SECTION, "'ABC def ghi'.match(new RegExp('[a-z]+','ig'))",
-	       String(["ABC","def","ghi"]), String('ABC def ghi'.match(new RegExp('[a-z]+','ig'))));
+           String(["ABC","def","ghi"]), String('ABC def ghi'.match(new RegExp('[a-z]+','ig'))));
 
 // 'ABC def ghi'.match(new RegExp('[a-z]+','i'))
 testcases[index++] = new TestCase ( SECTION, "'ABC def ghi'.match(new RegExp('[a-z]+','i'))",
-	       String(["ABC"]), String('ABC def ghi'.match(new RegExp('[a-z]+','i'))));
+           String(["ABC"]), String('ABC def ghi'.match(new RegExp('[a-z]+','i'))));
 
 // 'ABC def ghi'.match(new RegExp('([a-z]+)','ig'))
 testcases[index++] = new TestCase ( SECTION, "'ABC def ghi'.match(new RegExp('([a-z]+)','ig'))",
-	       String(["ABC","def","ghi"]), String('ABC def ghi'.match(new RegExp('([a-z]+)','ig'))));
+           String(["ABC","def","ghi"]), String('ABC def ghi'.match(new RegExp('([a-z]+)','ig'))));
 
 // 'ABC def ghi'.match(new RegExp('([a-z]+)','i'))
 testcases[index++] = new TestCase ( SECTION, "'ABC def ghi'.match(new RegExp('([a-z]+)','i'))",
-	       String(["ABC","ABC"]), String('ABC def ghi'.match(new RegExp('([a-z]+)','i'))));
+           String(["ABC","ABC"]), String('ABC def ghi'.match(new RegExp('([a-z]+)','i'))));
 
 // 'ABC def ghi'.match(new RegExp('[a-z]+'))
 testcases[index++] = new TestCase ( SECTION, "'ABC def ghi'.match(new RegExp('[a-z]+'))",
-	       String(["def"]), String('ABC def ghi'.match(new RegExp('[a-z]+'))));
+           String(["def"]), String('ABC def ghi'.match(new RegExp('[a-z]+'))));
 
 test();

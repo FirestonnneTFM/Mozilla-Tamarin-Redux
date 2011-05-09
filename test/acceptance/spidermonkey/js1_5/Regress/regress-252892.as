@@ -49,7 +49,7 @@ var expect = '';
 printBugNumber(BUGNUMBER);
 printStatus (summary);
 
-var status; 
+var status;
 
 var dodis;
 

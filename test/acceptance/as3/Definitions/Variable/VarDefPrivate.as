@@ -50,37 +50,37 @@ var VARDEFEMPTY = new VarDefPrivate();
 AddTestCase( "Private Variable Definition defined inside class", 1, 1);
 
 AddTestCase( "var Identifier = <empty>", "id", (VARDEFEMPTY.setid("id"), VARDEFEMPTY.getid()));
-AddTestCase( "var Identifier : TypeExpression = <empty>", true, (VARDEFEMPTY.setidTypeExpr(true), 
+AddTestCase( "var Identifier : TypeExpression = <empty>", true, (VARDEFEMPTY.setidTypeExpr(true),
                                                                  VARDEFEMPTY.getidTypeExpr()));
-AddTestCase( "var Identifier = AssignmentExpression", true, VARDEFEMPTY.getidAssignExpr()); 
-AddTestCase( "var Identifier : TypeExpression = AssignmentExpression", true, VARDEFEMPTY.getidTypeExprAssignExpr()); 
-AddTestCase( "var VariableBindingList, Identifier = <empty> [1]", true, (VARDEFEMPTY.setid1(true), 
+AddTestCase( "var Identifier = AssignmentExpression", true, VARDEFEMPTY.getidAssignExpr());
+AddTestCase( "var Identifier : TypeExpression = AssignmentExpression", true, VARDEFEMPTY.getidTypeExprAssignExpr());
+AddTestCase( "var VariableBindingList, Identifier = <empty> [1]", true, (VARDEFEMPTY.setid1(true),
                                                                          VARDEFEMPTY.getid1()));
-AddTestCase( "var VariableBindingList, Identifier = <empty> [2]", true, (VARDEFEMPTY.setid2(true), 
+AddTestCase( "var VariableBindingList, Identifier = <empty> [2]", true, (VARDEFEMPTY.setid2(true),
                                                                          VARDEFEMPTY.getid2()));
-AddTestCase( "var VariableBindingList, Identifier = <empty> [3]", true, (VARDEFEMPTY.setid3(true), 
+AddTestCase( "var VariableBindingList, Identifier = <empty> [3]", true, (VARDEFEMPTY.setid3(true),
                                                                          VARDEFEMPTY.getid3()));
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = <empty> [1]", true, (VARDEFEMPTY.setid1TypeExpr(true), 
+AddTestCase( "var VariableBindingList, Identifier : TypeExpression = <empty> [1]", true, (VARDEFEMPTY.setid1TypeExpr(true),
                                                                                           VARDEFEMPTY.getid1TypeExpr()));
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = <empty> [2]", true, (VARDEFEMPTY.setid2TypeExpr(true), 
+AddTestCase( "var VariableBindingList, Identifier : TypeExpression = <empty> [2]", true, (VARDEFEMPTY.setid2TypeExpr(true),
                                                                                           VARDEFEMPTY.getid2TypeExpr()));
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = <empty> [3]", true, (VARDEFEMPTY.setid3TypeExpr(true), 
+AddTestCase( "var VariableBindingList, Identifier : TypeExpression = <empty> [3]", true, (VARDEFEMPTY.setid3TypeExpr(true),
                                                                                           VARDEFEMPTY.getid3TypeExpr()));
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [1]", true, VARDEFEMPTY.getid1AssignExpr()); 
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [2]", false, VARDEFEMPTY.getid2AssignExpr()); 
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [3]", true, VARDEFEMPTY.getid3AssignExpr()); 
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [4]", undefined, VARDEFEMPTY.getid1AssignExprB()); 
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [5]", undefined, VARDEFEMPTY.getid2AssignExprB()); 
-AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [6]", true, VARDEFEMPTY.getid3AssignExprB()); 
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [1]", true, VARDEFEMPTY.getid1TypeExprAssignExpr()); 
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [2]", false, VARDEFEMPTY.getid2TypeExprAssignExpr()); 
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [3]", true, VARDEFEMPTY.getid3TypeExprAssignExpr()); 
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [4]", false, VARDEFEMPTY.getid1TypeExprAssignExprB()); 
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [5]", false, VARDEFEMPTY.getid2TypeExprAssignExprB()); 
-AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [6]", true, VARDEFEMPTY.getid3TypeExprAssignExprB()); 
-AddTestCase( "var Identifier, Identifier : TypeExpression = <empty> [1]", true, (VARDEFEMPTY.setidA(true), 
+AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [1]", true, VARDEFEMPTY.getid1AssignExpr());
+AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [2]", false, VARDEFEMPTY.getid2AssignExpr());
+AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [3]", true, VARDEFEMPTY.getid3AssignExpr());
+AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [4]", undefined, VARDEFEMPTY.getid1AssignExprB());
+AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [5]", undefined, VARDEFEMPTY.getid2AssignExprB());
+AddTestCase( "var VariableBindingList, Identifier = AssignmentExpression [6]", true, VARDEFEMPTY.getid3AssignExprB());
+AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [1]", true, VARDEFEMPTY.getid1TypeExprAssignExpr());
+AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [2]", false, VARDEFEMPTY.getid2TypeExprAssignExpr());
+AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [3]", true, VARDEFEMPTY.getid3TypeExprAssignExpr());
+AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [4]", false, VARDEFEMPTY.getid1TypeExprAssignExprB());
+AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [5]", false, VARDEFEMPTY.getid2TypeExprAssignExprB());
+AddTestCase( "var VariableBindingList, Identifier : TypeExpression = AssignmentExpression [6]", true, VARDEFEMPTY.getid3TypeExprAssignExprB());
+AddTestCase( "var Identifier, Identifier : TypeExpression = <empty> [1]", true, (VARDEFEMPTY.setidA(true),
                                                                                  VARDEFEMPTY.getidA()));
-AddTestCase( "var Identifier, Identifier : TypeExpression = <empty> [2]", true, (VARDEFEMPTY.setidB(true), 
+AddTestCase( "var Identifier, Identifier : TypeExpression = <empty> [2]", true, (VARDEFEMPTY.setidB(true),
                                                                                  VARDEFEMPTY.getidB()));
 AddTestCase( "var Identifier, Identifier : TypeExpression = AssignmentExpression [1]", false, VARDEFEMPTY.getidAAssign() )
 AddTestCase( "var Identifier, Identifier : TypeExpression = AssignmentExpression [2]", true, VARDEFEMPTY.getidBAssign() )

@@ -91,7 +91,7 @@ package DynamicClass {
     }
 
     // ***************************************
-    // access default property from 
+    // access default property from
     // default method of sub class
     // ***************************************
 
@@ -125,7 +125,7 @@ package DynamicClass {
     }
 
     // ***************************************
-    // access default property from 
+    // access default property from
     // final method of sub class
     // ***************************************
 
@@ -142,9 +142,9 @@ package DynamicClass {
    
   }
       
-      	// PUBLIC wrapper function for the dynamic class to be accessed;
-      	// otherwise it will give the error:
-      	// ReferenceError: DynExtDefaultClass is not defined
-              //	at global$init()
-	public class DynExtDynamicClass extends DynExtDynamicClassInner  {}
+        // PUBLIC wrapper function for the dynamic class to be accessed;
+        // otherwise it will give the error:
+        // ReferenceError: DynExtDefaultClass is not defined
+              //    at global$init()
+    public class DynExtDynamicClass extends DynExtDynamicClassInner  {}
 }

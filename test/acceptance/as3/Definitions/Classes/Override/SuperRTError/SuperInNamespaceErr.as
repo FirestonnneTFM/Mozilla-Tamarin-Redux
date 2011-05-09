@@ -36,11 +36,11 @@
  * ***** END LICENSE BLOCK ***** */
 package errors {
 
-	
-	public class SuperInNamespace extends BaseClass {
-		override ns1 function foo(): String { 
-			return super.foo() + " override";
-		}
-	}
-	
+    
+    public class SuperInNamespace extends BaseClass {
+        override ns1 function foo(): String {
+            return super.foo() + " override";
+        }
+    }
+    
 }

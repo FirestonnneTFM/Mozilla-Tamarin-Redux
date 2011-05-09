@@ -54,21 +54,21 @@ function getTestCases() {
         this.toString = function() {return this.value+"";}
     }
     
-	var myvar = new MyObject( true );
-	myvar.toString = Object.prototype.toString; 
+    var myvar = new MyObject( true );
+    myvar.toString = Object.prototype.toString;
     array[item++] = new TestCase( SECTION,  "myvar = new MyObject( true );  myvar.toString()",'[object Object]',myvar.toString());
         
     myvar = function() {};
 
-	array[item++] = new TestCase( SECTION,  "myvar = function() {};  myvar.toString()",
+    array[item++] = new TestCase( SECTION,  "myvar = function() {};  myvar.toString()",
                                             "function Function() {}",
                                             myvar.toString());
-	
+    
                                  
-	array[item++] = new TestCase( SECTION,  "Function.prototype.toString()",
+    array[item++] = new TestCase( SECTION,  "Function.prototype.toString()",
                                             "function Function() {}",
                                             Function.prototype.toString());
-	myvar = Function();
+    myvar = Function();
  
     array[item++] = new TestCase( SECTION,  "myvar = Function();  myvar.toString()","function Function() {}",myvar.toString());
 

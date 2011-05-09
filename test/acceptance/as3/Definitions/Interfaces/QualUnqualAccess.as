@@ -61,23 +61,23 @@ AddTestCase("double implements (extends and add), default, interface, class", "d
 AddTestCase("double implements, default, interface, class", "d.V::h(),d.V::h(),d.V::h()", eg.doAccessDH());
 
 AddTestCase("extends (implements (extends and add)) and add, default, interface, base, class",
-				"b.T::f(),b.T::f(),b.T::f(),b.T::f()", eg.doAccessEF());
+                "b.T::f(),b.T::f(),b.T::f(),b.T::f()", eg.doAccessEF());
 
 AddTestCase("extends (implements (extends and add)) and add, default, interface, class",
-				"b.U::g(),b.U::g(),b.U::g()", eg.doAccessEG());
+                "b.U::g(),b.U::g(),b.U::g()", eg.doAccessEG());
 
 
 AddTestCase("extends and add, default, interface, class",
-				"e.E::h()", eg.doAccessEH());
+                "e.E::h()", eg.doAccessEH());
 
 AddTestCase("extends (implements (extends and add)) and add, default, interface, base, class",
-				"b.T::f(),b.T::f(),b.T::f(),b.T::f()", eg.doAccessFF());
+                "b.T::f(),b.T::f(),b.T::f(),b.T::f()", eg.doAccessFF());
 
 AddTestCase("extends (implements (extends and add)) and add, default, interface, class",
-				"b.U::g(),b.U::g(),b.U::g()", eg.doAccessFG());
+                "b.U::g(),b.U::g(),b.U::g()", eg.doAccessFG());
 /*
 AddTestCase("extends and add, default, interface, class",
-				"f.V::h(),f.V::h(),f.V::h()", eg.doAccessFH());
+                "f.V::h(),f.V::h(),f.V::h()", eg.doAccessFH());
 */
 test();       // leave this alone.  this executes the test cases and
               // displays results.

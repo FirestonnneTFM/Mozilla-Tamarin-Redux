@@ -47,7 +47,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     var OBJ = new MyObject( new Date(0) );
     
@@ -77,7 +77,7 @@ function getTestCases() {
         }
     }
            
-    return array;           
+    return array;
 }
 function MyObject( value ) {
     this.value = value;

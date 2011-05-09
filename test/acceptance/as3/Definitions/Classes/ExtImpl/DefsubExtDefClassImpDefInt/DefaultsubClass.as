@@ -39,38 +39,38 @@
 package DefClassImpDefInt{
 use namespace ns;
 
-	class DefaultsubClass extends DefaultClass{
-		
+    class DefaultsubClass extends DefaultClass{
+        
 
-		
+        
 
 
-		override public function pubFunc():Boolean{//Public method
+        override public function pubFunc():Boolean{//Public method
                   
 
-				return !true;
-		}	
-			
-		ns override function nsFunc(a="test"):int{	       //Namespace method
-			return a.length;	
-		}
-		
-	}
+                return !true;
+        }
+            
+        ns override function nsFunc(a="test"):int{         //Namespace method
+            return a.length;
+        }
+        
+    }
 
-	public class DefaultsubClassAccessor extends DefaultsubClass{
+    public class DefaultsubClassAccessor extends DefaultsubClass{
 
                 var DefSubClass = new DefaultsubClass();
                 var DefSupClass = new DefaultClass();
                 var i:DefaultInt = DefSupClass;
                 //var k = new DefaultClassAccessor();
-		public function accdeffunc(){return DefSubClass.deffunc();}
-		// access default function deffunc
+        public function accdeffunc(){return DefSubClass.deffunc();}
+        // access default function deffunc
                 public function accdeffunc2(){return i.deffunc2();}
                 public function accdeffunc3(){return DefSupClass.DefaultInt::deffunc3();}
                 public function accsupdeffunc(){return DefSupClass.deffunc();}
-        	
-		public function accnsFunc(a="test"){return ns::nsFunc(a);}
-		// access default function nsFunc
-       } 	
-	
-}  
+            
+        public function accnsFunc(a="test"){return ns::nsFunc(a);}
+        // access default function nsFunc
+       }
+    
+}

@@ -55,13 +55,13 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,  "MYOB = new Object(null); MYOB.toString = Object.prototype.toString; MYOB.toString()",  "[object Object]",    MYOB.toString());
 
     array[item++] = new TestCase( SECTION,  "typeof new Object(void 0)",      "object",           typeof new Object(void 0) );
-	MYOB = new Object(new Object(void 0));
-	MYOB.toString = Object.prototype.toString;
+    MYOB = new Object(new Object(void 0));
+    MYOB.toString = Object.prototype.toString;
     array[item++] = new TestCase( SECTION,  "MYOB = new Object(new Object(void 0)); MYOB.toString = Object.prototype.toString; MYOB.toString()",  "[object Object]",    MYOB.toString());
 
     array[item++] = new TestCase( SECTION,  "typeof new Object(undefined)",      "object",           typeof new Object(undefined) );
-	MYOB = new Object(new Object(undefined));
-	MYOB.toString = Object.prototype.toString;
+    MYOB = new Object(new Object(undefined));
+    MYOB.toString = Object.prototype.toString;
     array[item++] = new TestCase( SECTION,  "MYOB = new Object(new Object(undefined)); MYOB.toString = Object.prototype.toString; MYOB.toString()",  "[object Object]",    MYOB.toString());
 
     array[item++] = new TestCase( SECTION,  "typeof new Object('string')",      "string",           typeof new Object('string') );
@@ -103,8 +103,8 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,  "(new Object(-1).valueOf()",  -1,               (new Object(-1)).valueOf() );
 
     array[item++] = new TestCase( SECTION,  "typeof new Object(true)",      "boolean",                 typeof new Object(true) );
-	Boolean.prototype.valueOf=Object.prototype.valueOf;
-	MYOB = new Object(true);
+    Boolean.prototype.valueOf=Object.prototype.valueOf;
+    MYOB = new Object(true);
     array[item++] = new TestCase( SECTION,  "MYOB = (new Object(true); MYOB.toString = Object.prototype.toString; MYOB.toString()",  "true",  MYOB.toString() );
     array[item++] = new TestCase( SECTION,  "(new Object(true).valueOf()",  true,               (new Object(true)).valueOf() );
 
@@ -125,7 +125,7 @@ function getTestCases() {
     var mynumber    = new Number();
     var mystring    = new String();
     var myobject    = new Object();
-    myfunction  	= function(x){return x;}
+    myfunction      = function(x){return x;}
     var mymath      = Math;
     var myregexp    = new RegExp(new String(''));
 

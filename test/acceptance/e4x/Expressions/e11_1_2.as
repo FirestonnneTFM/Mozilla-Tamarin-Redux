@@ -42,7 +42,7 @@
 
 START("11.1.2 - Qualified Identifiers");
 
-x1 = 
+x1 =
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
     soap:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
     <soap:Body>
@@ -50,7 +50,7 @@ x1 =
             <symbol>DIS</symbol>
         </m:getLastTradePrice>
     </soap:Body>
-</soap:Envelope>;    
+</soap:Envelope>;
 
 soap = new Namespace("http://schemas.xmlsoap.org/soap/envelope/");
 stock = new Namespace("http://mycompany.com/stocks");
@@ -58,7 +58,7 @@ stock = new Namespace("http://mycompany.com/stocks");
 encodingStyle = x1.@soap::encodingStyle;
 TEST_XML(1, "http://schemas.xmlsoap.org/soap/encoding/", encodingStyle);
 
-correct = 
+correct =
 <soap:Body xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <m:getLastTradePrice xmlns:m="http://mycompany.com/stocks">
         <symbol>DIS</symbol>
@@ -75,7 +75,7 @@ q = new QName(soap, "Body");
 body = x1[q];
 TEST_XML(4, correct.toXMLString(), body);
 
-correct = 
+correct =
 <symbol xmlns:m="http://mycompany.com/stocks" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">MYCO</symbol>;
 
 x1.soap::Body.stock::getLastTradePrice.symbol = "MYCO";
@@ -83,45 +83,45 @@ TEST_XML(5, correct.toXMLString(), x1.soap::Body.stock::getLastTradePrice.symbol
 
 // SOAP messages
 var msg1 = <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
-		s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
-	<s:Body>
-		<m:GetLastTradePrice xmlns:m="http://mycompany.com/stocks/">
-			<symbol>DIS</symbol>
-		</m:GetLastTradePrice>
-	</s:Body>
+        s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+    <s:Body>
+        <m:GetLastTradePrice xmlns:m="http://mycompany.com/stocks/">
+            <symbol>DIS</symbol>
+        </m:GetLastTradePrice>
+    </s:Body>
 </s:Envelope>
 
 var msg2 = <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
-		s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
-	<s:Body>
-		<m:GetLastTradePrice xmlns:m="http://mycompany.com/stocks/">
-			<symbol>MACR</symbol>
-		</m:GetLastTradePrice>
-	</s:Body>
+        s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+    <s:Body>
+        <m:GetLastTradePrice xmlns:m="http://mycompany.com/stocks/">
+            <symbol>MACR</symbol>
+        </m:GetLastTradePrice>
+    </s:Body>
 </s:Envelope>
 
 var msg3 = <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
-		s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
-	<s:Body>
-		<m:GetLastTradePrice xmlns:m="http://mycompany.com/stocks/"
-		 m:blah="http://www.hooping.org">
-			<symbol>MACR</symbol>
-		</m:GetLastTradePrice>
-	</s:Body>
+        s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+    <s:Body>
+        <m:GetLastTradePrice xmlns:m="http://mycompany.com/stocks/"
+         m:blah="http://www.hooping.org">
+            <symbol>MACR</symbol>
+        </m:GetLastTradePrice>
+    </s:Body>
 </s:Envelope>
 
 var msg4 = <soap>
-	<bakery>
-		<m:g xmlns:m="http://macromedia.com/software/central/"
-		pea="soup"
-		pill="box"
-		neck="lace"
-		m:blah="http://www.hooping.org">
-			<pill>box</pill>
-			<neck>lace</neck>
-			<pea>soup</pea>
-		</m:g>
-	</bakery>
+    <bakery>
+        <m:g xmlns:m="http://macromedia.com/software/central/"
+        pea="soup"
+        pill="box"
+        neck="lace"
+        m:blah="http://www.hooping.org">
+            <pill>box</pill>
+            <neck>lace</neck>
+            <pea>soup</pea>
+        </m:g>
+    </bakery>
 </soap>
 
 var msg5 = "soupboxlacehttp://www.hooping.org";

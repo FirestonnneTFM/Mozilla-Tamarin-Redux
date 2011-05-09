@@ -55,7 +55,7 @@ function getTestCases() {
         thisError=e.toString();
     }finally{
         array[item++] = new TestCase(SECTION,"Trying to verify the ReadOnly attribute of Math.SQRT1_2","ReferenceError: Error #1074",referenceError(thisError));
-    } 
+    }
     array[item++] = new TestCase( SECTION, "Math.SQRT1_2=0; Math.SQRT1_2", 0.7071067811865476, Math.SQRT1_2 );
     return ( array );
 }

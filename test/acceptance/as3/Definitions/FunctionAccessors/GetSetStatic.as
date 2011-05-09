@@ -59,53 +59,53 @@ AddTestCase("Static setter var:String", "new string", (GetSetStatic.string = "ne
 // Attempt to access the private vars directly
 // New instances of vars will be created since the private vars are not accessible
 try{
-	var res = "not run";
-	AddTestCase("Access private var:Array", 4, GetSetStatic._x = 4);
-	res = "no exception";
+    var res = "not run";
+    AddTestCase("Access private var:Array", 4, GetSetStatic._x = 4);
+    res = "no exception";
 } catch (e1) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access private var:Array", "no exception", res);
+    AddTestCase("Access private var:Array", "no exception", res);
 }
 
 try{
-	var res = "not run";
-	AddTestCase("Access private var:int", 4, GetSetStatic._y = 4);
-	res = "no exception";
+    var res = "not run";
+    AddTestCase("Access private var:int", 4, GetSetStatic._y = 4);
+    res = "no exception";
 } catch (e2) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access private var:int", "no exception", res);
+    AddTestCase("Access private var:int", "no exception", res);
 }
 
 try{
-	var res = "not run";
-	AddTestCase("Access private var:Boolean", 4, GetSetStatic._b = 4);
-	res = "no exception";
+    var res = "not run";
+    AddTestCase("Access private var:Boolean", 4, GetSetStatic._b = 4);
+    res = "no exception";
 } catch (e3) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access private var:Boolean", "no exception", res);
+    AddTestCase("Access private var:Boolean", "no exception", res);
 }
 
 try{
-	var res = "not run";
-	AddTestCase("Access private var:uint", 4, GetSetStatic._u = 4);
-	res = "no exception";
+    var res = "not run";
+    AddTestCase("Access private var:uint", 4, GetSetStatic._u = 4);
+    res = "no exception";
 } catch (e4) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access private var:uint", "no exception", res);
+    AddTestCase("Access private var:uint", "no exception", res);
 }
 
 try{
-	var res = "not run";
-	AddTestCase("Access private var:String", 4, GetSetStatic._s = 4);
-	res = "no exception";
+    var res = "not run";
+    AddTestCase("Access private var:String", 4, GetSetStatic._s = 4);
+    res = "no exception";
 } catch (e5) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access private var:String", "no exception", res);
+    AddTestCase("Access private var:String", "no exception", res);
 }
 
 // call setter from setter
@@ -130,37 +130,37 @@ AddTestCase("Call getter from getter", "PASSED", GetSetStatic.gfg2);
 // Try to access a getter in a class that's the same name as the package it's in
 // See bug 133422; test case needs to be updated when/if bug is fixed
 try{
-	var res = "not run";
-	trace(GetSetStaticSameName.y);
-	res = "no exception";
+    var res = "not run";
+    trace(GetSetStaticSameName.y);
+    res = "no exception";
 } catch (e6) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Access getter in class in package of same name", "exception", res);
+    AddTestCase("Access getter in class in package of same name", "exception", res);
 }
 
 // Attempt to access non-static var
 // See bug 117661; test case needs to be updated when/if bug is fixed
 try{
-	var res = "not run";
-	var someVar = GetSetStatic.n;
-	res = "no exception";
+    var res = "not run";
+    var someVar = GetSetStatic.n;
+    res = "no exception";
 } catch (e7) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Get non-static var:Number", "exception", res);
+    AddTestCase("Get non-static var:Number", "exception", res);
 }
 
 // Set non-static var
 // See bug 133468; test case needs to be updated when/if bug is fixed
 try{
-	var res = "not run";
-	GetSetStatic.n = 5.55;
-	res = GetSetStatic.n;
+    var res = "not run";
+    GetSetStatic.n = 5.55;
+    res = GetSetStatic.n;
 } catch (e8) {
-	res = "exception";
+    res = "exception";
 } finally {
-	AddTestCase("Set non-static var:Number", 5.55, res);
+    AddTestCase("Set non-static var:Number", 5.55, res);
 }
 
 test();

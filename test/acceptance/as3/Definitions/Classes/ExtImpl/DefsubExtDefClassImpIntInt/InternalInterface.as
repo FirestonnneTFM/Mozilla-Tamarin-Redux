@@ -39,12 +39,12 @@
 
 package DefClassImpInternalInt{ //package name
 
-	namespace ns;
-	//namespace
+    namespace ns;
+    //namespace
 
-	internal interface InternalInt{
-	
-	  function deffunc():String; //interface namespace  method
+    internal interface InternalInt{
+    
+      function deffunc():String; //interface namespace  method
 
           function deffunc2():Number; //interface namespace  method
           function deffunc3():int;     //interface namespace  method
@@ -53,5 +53,5 @@ package DefClassImpInternalInt{ //package name
 
 
                                       }
-	
+    
 }

@@ -106,23 +106,23 @@ AddTestCase( "Access static public method from same package", 42, Obj.accPubStat
 // access private property from same package not same class
 var thisError = "no error thrown";
 try{
-	Obj.accPrivPropErr();
+    Obj.accPrivPropErr();
 } catch (e) {
-	thisError = e.toString();
+    thisError = e.toString();
 } finally {
-	AddTestCase( "Access private property from same package not same class", "ReferenceError: Error #1065",
-				referenceError( thisError ) );
+    AddTestCase( "Access private property from same package not same class", "ReferenceError: Error #1065",
+                referenceError( thisError ) );
 }
 
 // access private method from same package not same class
 thisError = "no error thrown";
 try{
-	Obj.accPrivMethErr();
+    Obj.accPrivMethErr();
 } catch (e2) {
-	thisError = e2.toString();
+    thisError = e2.toString();
 } finally {
-	AddTestCase( "Access private method from same package not same class", "ReferenceError: Error #1065",
-				referenceError( thisError ) );
+    AddTestCase( "Access private method from same package not same class", "ReferenceError: Error #1065",
+                referenceError( thisError ) );
 }
 
 

@@ -61,10 +61,10 @@ testcases[index++] = new TestCase( SECTION, "(new Boolean(true) == new Boolean(t
                                             true,   (new Boolean(true) == new Boolean(true)));
 
 testcases[index++] = new TestCase( SECTION, "(new String('x') == 'x')                 ",
-	      true,   (new String('x') == 'x'));
+          true,   (new String('x') == 'x'));
 
 testcases[index++] = new TestCase( SECTION, "('x' == new String('x'))                 ",
-	      true,   ('x' == new String('x')));
+          true,   ('x' == new String('x')));
 
 
 test();

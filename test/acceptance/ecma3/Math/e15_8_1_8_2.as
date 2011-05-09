@@ -48,7 +48,7 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    delete Math.SQRT2; 
+    delete Math.SQRT2;
     array[item++] = new TestCase( SECTION, "delete Math.SQRT2; Math.SQRT2", 1.4142135623730951,     Math.SQRT2 );
     array[item++] = new TestCase( SECTION, "delete Math.SQRT2",             false,                  delete Math.SQRT2 );
     return ( array );

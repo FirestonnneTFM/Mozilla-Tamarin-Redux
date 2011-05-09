@@ -40,7 +40,7 @@
  *  templates taken from mozilla.org.  This template or
  *  any test cases written from it are not for external
  *  use or distribution.
- *  
+ *
  *  Author: Brent Baker <brbaker@adobe.com>
  *  Date: 10/06/2009
  *
@@ -49,7 +49,7 @@
  */
 
 var SECTION = "Unicode";       // provide a document reference (ie, Actionscript section)
-var VERSION = "ECMAScript";        // Version of ECMAScript or ActionScript 
+var VERSION = "ECMAScript";        // Version of ECMAScript or ActionScript
 var TITLE   = "UTF16 surrogate pairs not being translated correctly from UTF8";
 var BUGNUMBER = "515947";
 

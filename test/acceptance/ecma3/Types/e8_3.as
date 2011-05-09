@@ -49,17 +49,17 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
         
-	var x:Boolean;
+    var x:Boolean;
     array[item++] = new TestCase( SECTION,
                                     "var x:Boolean; typeof x",
                                     "boolean",
                                      typeof x);
-	var x:Boolean; 
+    var x:Boolean;
     array[item++] = new TestCase( SECTION,
                                     "var x:Boolean; typeof x == 'boolean'",
                                     true,
                                     typeof x == 'boolean');
-	var x:Boolean;
+    var x:Boolean;
     array[item++] = new TestCase( SECTION,
                                     "var x:Boolean; x == false",
                                     true,

@@ -59,13 +59,13 @@ function getTestCases() {
 
     var str = "";
     
-    str = "4"; str += String.fromCharCode(52); 
+    str = "4"; str += String.fromCharCode(52);
     status = "new Number " + escape(str);
     expect = '44';
     actual = new Number(str);
     array[item++] = new TestCase(SECTION, status, expect, actual);
     
-    str = "4"; str += String.fromCharCode(0); 
+    str = "4"; str += String.fromCharCode(0);
     status = "new Number " + escape(str);
     expect = '4';
     actual = new Number(str);
@@ -149,7 +149,7 @@ function getTestCases() {
     actual = new Number(str);
     array[item++] = new TestCase(SECTION, status, expect, actual);
     
-    str = "44"; str += String.fromCharCode(0); 
+    str = "44"; str += String.fromCharCode(0);
     status = "parseInt " + escape(str);
     expect = '44';
     actual = parseInt(str);
@@ -161,7 +161,7 @@ function getTestCases() {
     actual = parseInt(str);
     array[item++] = new TestCase(SECTION, status, expect, actual);
 
-    str = "0x44"; str += String.fromCharCode(0); 
+    str = "0x44"; str += String.fromCharCode(0);
     status = "parseInt " + escape(str);
     expect = '68';
     actual = parseInt(str);

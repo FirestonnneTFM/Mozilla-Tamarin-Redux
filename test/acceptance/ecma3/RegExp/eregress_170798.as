@@ -53,24 +53,24 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var status = '';
-	var actual = '';
-	var expect= '';
+    var status = '';
+    var actual = '';
+    var expect= '';
 
-	var a:Array = [ /foo/, /bar/ ]
+    var a:Array = [ /foo/, /bar/ ]
 
-	status = inSection(1);
-	actual = String(a[0]);
-	expect = "/foo/";
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = inSection(1);
+    actual = String(a[0]);
+    expect = "/foo/";
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	status = inSection(2);
-	actual = String(a[1]);
-	expect = "/bar/";
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = inSection(2);
+    actual = String(a[1]);
+    expect = "/bar/";
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	return array;
+    return array;
 }

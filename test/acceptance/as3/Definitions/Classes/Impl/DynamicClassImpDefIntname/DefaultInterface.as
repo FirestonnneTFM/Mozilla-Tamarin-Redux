@@ -35,17 +35,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 /*
- *  Default Interface DefaultInterface 
- * Interface methods 
- *  
+ *  Default Interface DefaultInterface
+ * Interface methods
+ *
  */
 
 
-package DynamicClassImpDefIntname{ 
+package DynamicClassImpDefIntname{
 
-	interface DefaultInt{
-	
-		function deffunc():String;  	
+    interface DefaultInt{
+    
+        function deffunc():String;
 
-	}
+    }
 }

@@ -40,7 +40,7 @@ import GetSetSameName.*;
 
   
  var SECTION = "FunctionAccessors";
- var VERSION = "AS3"; 
+ var VERSION = "AS3";
  var TITLE   = "Function Accessors";
  var BUGNUMBER = "133108, 133828";
  
@@ -56,10 +56,10 @@ var h = new GetSetSame();
 
 
 try {
-	result = h.GetSetSameName.toString();
+    result = h.GetSetSameName.toString();
 } catch (e1) {
-	result = "exception";
-	
+    result = "exception";
+    
 }
 // This will have to be changed when bug 133824 is fixed
 AddTestCase("Calling getter of same name as package", "1,2,3", result);
@@ -68,12 +68,12 @@ AddTestCase("Calling getter of same name as package", "1,2,3", result);
 
 
 try {
-	h.GetSetSameName = [7,8,9];
+    h.GetSetSameName = [7,8,9];
 
-	result = h.GetSetSameName.toString();
+    result = h.GetSetSameName.toString();
 } catch (e2) {
-	result = "exception";
-	
+    result = "exception";
+    
 }
 // This will have to be changed when bug 133824 is fixed
 AddTestCase("Calling setter of same name as package", "7,8,9", result);
@@ -81,20 +81,20 @@ AddTestCase("Calling setter of same name as package", "7,8,9", result);
 
 
 try {
-	ff = GetSetSameName.GetSetSameName.x.toString();
+    ff = GetSetSameName.GetSetSameName.x.toString();
 
 } catch (e3) {
-	ff = "exception";
+    ff = "exception";
 }
 
 AddTestCase("Calling static getter in matching package/class", "1,2,3", GetSetSameName.GetSetSameName.x.toString());
 
 
-try { 	
-	GetSetSameName.GetSetSameName.x = [4,5,6];
-	ff = GetSetSameName.GetSetSameName.x.toString();
+try {
+    GetSetSameName.GetSetSameName.x = [4,5,6];
+    ff = GetSetSameName.GetSetSameName.x.toString();
 } catch (e4) {
-	ff = "exception";
+    ff = "exception";
 }
 
 AddTestCase("Calling static setter in matching package/class", "4,5,6", ff);

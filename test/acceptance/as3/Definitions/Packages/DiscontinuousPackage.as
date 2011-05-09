@@ -38,7 +38,7 @@
 import DiscontinuousPackage.*;
 
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
@@ -59,7 +59,7 @@ AddTestCase("Namespace function defined in [Packagename]/C.as", "1,2,3", c.callN
 class X{
 Kitty var num:Number = 5;
 Kitty function kittyFunc(s:String):String {
-	return "You said hi";
+    return "You said hi";
 }
 }
 var obj:X = new X()

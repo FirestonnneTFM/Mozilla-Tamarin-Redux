@@ -68,7 +68,7 @@
 
     AddTestCase(
       "ByteArray available on empty",
-      0, 
+      0,
       bytearray.bytesAvailable);
 
 // boolean
@@ -271,7 +271,7 @@
      bytearray[9]);
 
     var bytearray_shrink=new ByteArray;
-    bytearray_shrink.length=10;    
+    bytearray_shrink.length=10;
     bytearray_shrink.length=5;
     AddTestCase(
      "ByteArray shrink length",
@@ -419,7 +419,7 @@
     var origlength=bytearray_compress.length;
     bytearray_compress.compress();
     // test the compressed bytearray values are all different from the original
-    var compressstate=(bytearray_compress[0]==0xef || 
+    var compressstate=(bytearray_compress[0]==0xef ||
                        bytearray_compress[1]==0xbb ||
                        bytearray_compress[2]==0xbf ||
                        bytearray_compress[3]==100 ||
@@ -429,7 +429,7 @@
     bytearray_compress.uncompress();
     // check the uncompress/compress length should equal original length 7
     var restoredlength=bytearray_compress.length;
-    var restorestate=(bytearray_compress[0]==0xef && 
+    var restorestate=(bytearray_compress[0]==0xef &&
                        bytearray_compress[1]==0xbb &&
                        bytearray_compress[2]==0xbf &&
                        bytearray_compress[3]==100 &&

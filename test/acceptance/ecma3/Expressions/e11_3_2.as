@@ -49,7 +49,7 @@ function getTestCases() {
     // special numbers
     var MYVAR;
     array[item++] = new TestCase( SECTION,  "var MYVAR; MYVAR--", NaN, MYVAR-- );
-    var MYVAR = void 0; 
+    var MYVAR = void 0;
     array[item++] = new TestCase( SECTION,  "var MYVAR= void 0; MYVAR--", NaN, MYVAR-- );
     var MYVAR=null;
     array[item++] = new TestCase( SECTION,  "var MYVAR=null; MYVAR--", 0, MYVAR-- );
@@ -59,7 +59,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,  "var MYVAR=false; MYVAR--", 0, MYVAR-- );
 
     // verify return value
-    var MYVAR=Number.POSITIVE_INFINITY; 
+    var MYVAR=Number.POSITIVE_INFINITY;
     array[item++] = new TestCase( SECTION, "var MYVAR=Number.POSITIVE_INFINITY; MYVAR--", Number.POSITIVE_INFINITY, MYVAR-- );
       var MYVAR=Number.NEGATIVE_INFINITY;
     array[item++] = new TestCase( SECTION, "var MYVAR=Number.NEGATIVE_INFINITY;MYVAR--", Number.NEGATIVE_INFINITY, MYVAR-- );
@@ -67,7 +67,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION, "var MYVAR=Number.NaN;MYVAR--", Number.NaN, MYVAR-- );
 
     // verify value of variable
-    var MYVAR=Number.POSITIVE_INFINITY; 
+    var MYVAR=Number.POSITIVE_INFINITY;
     MYVAR--;
     array[item++] = new TestCase( SECTION,    "var MYVAR=Number.POSITIVE_INFINITY;MYVAR--;MYVAR", Number.POSITIVE_INFINITY, MYVAR );
     

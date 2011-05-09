@@ -36,13 +36,13 @@
  * ***** END LICENSE BLOCK ***** */
 package GetterSetter {
 
-	public class BaseClass {
-		private var _string:String;
-		
-		public function get string() : String { return _string; }
-		public function set string( s:String ) { _string=s; }	
-	
-	}
+    public class BaseClass {
+        private var _string:String;
+        
+        public function get string() : String { return _string; }
+        public function set string( s:String ) { _string=s; }
+    
+    }
 
 
 }

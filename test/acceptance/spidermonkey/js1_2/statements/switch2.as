@@ -73,19 +73,19 @@ function f0(i) {
   return "";
 }
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     f0("a"), "ab*");
+         f0("a"), "ab*");
 
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     f0("b"), "ab*");
+         f0("b"), "ab*");
 
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     f0("*"), "ab*");
+         f0("*"), "ab*");
 
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     f0("c"), "c");
+         f0("c"), "c");
 
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     f0("d"), "d");
+         f0("d"), "d");
 
 function f1(i) {
   switch(i) {
@@ -102,19 +102,19 @@ function f1(i) {
 }
 
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     f1("a"), "ab*");
+         f1("a"), "ab*");
 
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     f1("b"), "ab*");
+         f1("b"), "ab*");
 
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     f1("*"), "ab*");
+         f1("*"), "ab*");
 
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     f1("c"), "c");
+         f1("c"), "c");
 
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     f1("d"), "d");
+         f1("d"), "d");
 
 // Switch on integer; will use TABLESWITCH opcode in C engine
 function f2(i) {
@@ -130,23 +130,23 @@ function f2(i) {
 }
 
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     f2(0), 1);
+         f2(0), 1);
 
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     f2(1), 1);
+         f2(1), 1);
 
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     f2(2), 2);
+         f2(2), 2);
 
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     f2(3), 3);
+         f2(3), 3);
 
 // empty switch: make sure expression is evaluated
 var se = 0;
 switch (se = 1) {
 }
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     se, 1);
+         se, 1);
 
 // only default
 se = 0;
@@ -155,7 +155,7 @@ default:
   se = 1;
 }
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     se, 1);
+         se, 1);
 
 // in loop, break should only break out of switch
 se = 0;
@@ -168,7 +168,7 @@ for (var i=0; i < 2; i++) {
   se = 1;
 }
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     se, 1);
+         se, 1);
 
 // test "fall through"
 se = 0;
@@ -182,7 +182,7 @@ case 1:
   break;
 }
 testcases[index++] = new TestCase(SECTION, 'switch statement',
-	     se, 2);
+         se, 2);
 print("hi");
 
 test();

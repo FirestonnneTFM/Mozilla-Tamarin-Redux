@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "namespace used in the case of same function is defined multiple defined";
 var BUGNUMBER = "";
 
@@ -51,25 +51,25 @@ class Game{
     public namespace Football;
 
     public function getTeam(){
-	    teamName = "Dummy";
+        teamName = "Dummy";
             return teamName;
-    } 
+    }
 
     Football function getTeam(){
-	    var teamName = "Chargers";
-     	     return teamName;
-    } 
+        var teamName = "Chargers";
+             return teamName;
+    }
 
    Baseball function getTeam(){
-	    var teamName = "Giants";
+        var teamName = "Giants";
             return teamName;
    }
 
    public function accgetTeam1(){
-	return Football::getTeam()
+    return Football::getTeam()
    }
    public function accgetTeam2(){
-	return Baseball::getTeam()
+    return Baseball::getTeam()
    }
 }
 

@@ -44,8 +44,8 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
     AddRegExpCases( /a||b/(''),
                     "//a||b/('')",
@@ -53,21 +53,21 @@ function getTestCases() {
                     [''] );
 
 
-	function AddRegExpCases( regexp, str_regexp, length, matches_array ) {
+    function AddRegExpCases( regexp, str_regexp, length, matches_array ) {
 
-	    array[item++] = new TestCase(SECTION,
-	        "( " + str_regexp + " ).length",
-	        regexp.length,
-	        regexp.length );
+        array[item++] = new TestCase(SECTION,
+            "( " + str_regexp + " ).length",
+            regexp.length,
+            regexp.length );
 
 
-	    for ( var matches = 0; matches < matches_array.length; matches++ ) {
-	        array[item++] = new TestCase(SECTION,
-	            "( " + str_regexp + " )[" + matches +"]",
-	            matches_array[matches],
-	            regexp[matches] );
-	    }
-	}
+        for ( var matches = 0; matches < matches_array.length; matches++ ) {
+            array[item++] = new TestCase(SECTION,
+                "( " + str_regexp + " )[" + matches +"]",
+                matches_array[matches],
+                regexp[matches] );
+        }
+    }
 
-	return array;
+    return array;
 }

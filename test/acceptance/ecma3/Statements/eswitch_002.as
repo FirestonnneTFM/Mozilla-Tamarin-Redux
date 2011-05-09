@@ -47,7 +47,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     SwitchTest( 0, 6 );
     SwitchTest( 1, 4 );

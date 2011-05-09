@@ -50,7 +50,7 @@ printBugNumber(BUGNUMBER);
 printStatus (summary);
 
 if (typeof document != 'undefined')
-{ 
+{
   // delay test driver end
   gDelayTestDriverEnd = true;
   window.onload = onLoad;

@@ -53,7 +53,7 @@ function identity(v, index, array)
 {
   reportCompare(v, array[index], 'identity: check callback argument consistency');
   return v;
-} 
+}
 
 function mutate(v, index, array)
 {
@@ -196,7 +196,7 @@ sparsestrings[2] = 'sparse';
   {
     actual = e.name;
   }
-  reportCompare(expect, actual, 'Array.map(undefined) throws ArgumentError'); 
+  reportCompare(expect, actual, 'Array.map(undefined) throws ArgumentError');
 
   try
   {
@@ -208,7 +208,7 @@ sparsestrings[2] = 'sparse';
   {
     actual = dumpError(e);
   }
-  reportCompare(expect, actual, 'Array.map: identity'); 
+  reportCompare(expect, actual, 'Array.map: identity');
 
 
   try
@@ -220,7 +220,7 @@ sparsestrings[2] = 'sparse';
   {
     actual = dumpError(e);
   }
-  reportCompare(expect, actual, 'Array.map: mutate'); 
+  reportCompare(expect, actual, 'Array.map: mutate');
 
   strings = ['hello', 'Array', 'WORLD'];
 
@@ -234,7 +234,7 @@ sparsestrings[2] = 'sparse';
   {
     actual = dumpError(e);
   }
-  reportCompare(expect, actual, 'Array.map: uppercase'); 
+  reportCompare(expect, actual, 'Array.map: uppercase');
 
   try
   {
@@ -247,7 +247,7 @@ sparsestrings[2] = 'sparse';
   {
     actual = dumpError(e);
   }
-  reportCompare(expect, actual, 'Array.map: uppercase with object callback'); 
+  reportCompare(expect, actual, 'Array.map: uppercase with object callback');
 
   try
   {
@@ -259,7 +259,7 @@ sparsestrings[2] = 'sparse';
   {
     actual = dumpError(e);
   }
-  reportCompare(expect, actual, 'Array.map: lowercase with object callback'); 
+  reportCompare(expect, actual, 'Array.map: lowercase with object callback');
 
   try
   {
@@ -271,7 +271,7 @@ sparsestrings[2] = 'sparse';
   {
     actual = dumpError(e);
   }
-  reportCompare(expect, actual, 'Array.map: uppercase on sparse array'); 
+  reportCompare(expect, actual, 'Array.map: uppercase on sparse array');
 
 
 if ('forEach' in Array.prototype)
@@ -296,7 +296,7 @@ if ('forEach' in Array.prototype)
   {
     actual = e.name;
   }
-  reportCompare(expect, actual, 'Array.forEach(undefined) throws ArgumentError'); 
+  reportCompare(expect, actual, 'Array.forEach(undefined) throws ArgumentError');
 
   try
   {
@@ -309,7 +309,7 @@ if ('forEach' in Array.prototype)
   {
     actual = dumpError(e);
   }
-  reportCompare(expect, actual, 'Array.forEach'); 
+  reportCompare(expect, actual, 'Array.forEach');
 
   try
   {
@@ -321,7 +321,7 @@ if ('forEach' in Array.prototype)
   {
     actual = dumpError(e);
   }
-  reportCompare(expect, actual, 'Array.forEach: mutate'); 
+  reportCompare(expect, actual, 'Array.forEach: mutate');
 
   strings = ['hello', 'Array', 'WORLD'];
 
@@ -339,7 +339,7 @@ if ('forEach' in Array.prototype)
   {
     actual = dumpError(e);
   }
-  reportCompare(expect, actual, 'Array.forEach with object callback 1'); 
+  reportCompare(expect, actual, 'Array.forEach with object callback 1');
 
   try
   {
@@ -352,7 +352,7 @@ if ('forEach' in Array.prototype)
   {
     actual = dumpError(e);
   }
-  reportCompare(expect, actual, 'Array.forEach with object callback 2'); 
+  reportCompare(expect, actual, 'Array.forEach with object callback 2');
 
   try
   {
@@ -366,7 +366,7 @@ if ('forEach' in Array.prototype)
   {
     actual = dumpError(e);
   }
-  reportCompare(expect, actual, 'Array.forEach on sparse array'); 
+  reportCompare(expect, actual, 'Array.forEach on sparse array');
 }
 
 if ('filter' in Array.prototype)
@@ -391,7 +391,7 @@ if ('filter' in Array.prototype)
   {
     actual = e.name;
   }
-  reportCompare(expect, actual, 'Array.filter(undefined) throws ArgumentError'); 
+  reportCompare(expect, actual, 'Array.filter(undefined) throws ArgumentError');
 
   try
   {
@@ -453,7 +453,7 @@ if ('every' in Array.prototype)
   {
     actual = e.name;
   }
-  reportCompare(expect, actual, 'Array.every(undefined) throws ArgumentError'); 
+  reportCompare(expect, actual, 'Array.every(undefined) throws ArgumentError');
 
   // test general every
 
@@ -554,7 +554,7 @@ if ('some' in Array.prototype)
   {
     actual = e.name;
   }
-  reportCompare(expect, actual, 'Array.some(undefined) throws ArgumentError'); 
+  reportCompare(expect, actual, 'Array.some(undefined) throws ArgumentError');
 
   // test general some
 

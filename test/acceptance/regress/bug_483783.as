@@ -42,7 +42,7 @@ var TITLE = "Bug 483783: crash when creating large strings";
 startTest();
 
 var myString:String = "";
-for(var j:Number = 0; j < 3000000; j++) 
+for(var j:Number = 0; j < 3000000; j++)
     myString += "a";
 
 AddTestCase("Verify large string is created",

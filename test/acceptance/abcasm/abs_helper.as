@@ -38,7 +38,7 @@
 
 // Canonical API: call START first, then PASS or FAIL for each test, then END.
 
-package 
+package
 {
     var PASSED = " PASSED!";
     var FAILED = " FAILED! expected: ";

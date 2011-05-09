@@ -70,7 +70,7 @@ function getTestCases() {
 
     
     function addNewTestCase( DateString, UTCDate, LocalDate) {
-    	var DateCase = DateString;
+        var DateCase = DateString;
     
         array[item++] = new TestCase( SECTION, "DateString+.getTime()",             UTCDate.value,       DateCase.getTime() );
         array[item++] = new TestCase( SECTION, "DateString+.valueOf()",             UTCDate.value,       DateCase.valueOf() );

@@ -45,7 +45,7 @@ startTest();                // leave this alone
 
 thisError = "no error";
        
-try { 
+try {
      throw new TypeError();
     } catch(e:ReferenceError){
        thisError="This is Reference Error";

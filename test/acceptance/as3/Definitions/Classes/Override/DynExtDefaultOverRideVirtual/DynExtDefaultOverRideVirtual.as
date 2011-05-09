@@ -37,44 +37,44 @@
 
 package DefaultClass {
 
-	import DefaultClass.*;
+    import DefaultClass.*;
 
-	dynamic class DynExtDefaultOverRideVirtualInner extends DefaultClass {
-	
-		public var orSet = false;
-		public var orGet = false;
+    dynamic class DynExtDefaultOverRideVirtualInner extends DefaultClass {
+    
+        public var orSet = false;
+        public var orGet = false;
 
-		// *********************************
-		// override a virtual method
-		// with a default method in subclass
-		// *********************************
+        // *********************************
+        // override a virtual method
+        // with a default method in subclass
+        // *********************************
 
-		override virtual function setVirtualString( newString:String ) {
-			orSet = true;
-			string = "override: " + newString;
-		}
+        override virtual function setVirtualString( newString:String ) {
+            orSet = true;
+            string = "override: " + newString;
+        }
 
-		override virtual function getVirtualString() : String{
-			orGet = true;
-			return string;
-		}
+        override virtual function getVirtualString() : String{
+            orGet = true;
+            return string;
+        }
 
-		// public accessor to work outside of package
-		public function setGetString( newString:String ) : String {
-			setVirtualString(newString);
-			return getVirtualString();
-		}
-		
-		public function callSuper( input:String ) : String {
-			super.setVirtualString(input);
-			return super.getVirtualString();
-		}
+        // public accessor to work outside of package
+        public function setGetString( newString:String ) : String {
+            setVirtualString(newString);
+            return getVirtualString();
+        }
+        
+        public function callSuper( input:String ) : String {
+            super.setVirtualString(input);
+            return super.getVirtualString();
+        }
 
-		
+        
 
-	}
+    }
 
-	public class DynExtDefaultOverRideVirtual extends DynExtDefaultOverRideVirtualInner {}
+    public class DynExtDefaultOverRideVirtual extends DynExtDefaultOverRideVirtualInner {}
 
-	
+    
 }

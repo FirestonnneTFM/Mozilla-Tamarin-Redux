@@ -36,27 +36,27 @@
  * ***** END LICENSE BLOCK ***** */
 package ns {
 
-	namespace Baseball;
-	namespace Basketball;
-	namespace Hockey;
-	
-	public class foo {
+    namespace Baseball;
+    namespace Basketball;
+    namespace Hockey;
+    
+    public class foo {
 
-		Baseball var teamName = "Giants";
-		Basketball var teamName = "Kings";
-		Hockey var teamName = "Sharks";
+        Baseball var teamName = "Giants";
+        Basketball var teamName = "Kings";
+        Hockey var teamName = "Sharks";
 
-		public function getTeam1(){
-	  	  return Baseball::teamName;
-		} 
+        public function getTeam1(){
+          return Baseball::teamName;
+        }
 
-		public function getTeam2(){
-	   	 return Basketball::teamName;
-		} 
+        public function getTeam2(){
+         return Basketball::teamName;
+        }
 
-		public function getTeam3(){
-	   	 return Hockey::teamName;
-		}
-	}
+        public function getTeam3(){
+         return Hockey::teamName;
+        }
+    }
 
 }

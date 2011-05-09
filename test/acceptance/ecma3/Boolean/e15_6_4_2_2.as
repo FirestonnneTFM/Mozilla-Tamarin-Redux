@@ -49,7 +49,7 @@ function getTestCases() {
     var item = 0;
 
     tostr=Boolean.prototype.toString;
-	Boolean.prototype.toString=tostr;
+    Boolean.prototype.toString=tostr;
     x=new Boolean();
     array[item++] = new TestCase(   SECTION,
                                     "tostr=Boolean.prototype.toString; Boolean.prototype.toString=tostr;x=new Boolean();x.toString()",
@@ -57,7 +57,7 @@ function getTestCases() {
                                     x.toString());
 
     tostr=Boolean.prototype.toString;
-	Boolean.prototype.toString=tostr;
+    Boolean.prototype.toString=tostr;
     x=new Boolean(true);
     array[item++] = new TestCase(   SECTION,
                                     "tostr=Boolean.prototype.toString; Boolean.prototype.toString=tostr;x=new Boolean(true);x.toString()",
@@ -65,7 +65,7 @@ function getTestCases() {
                                     x.toString());
 
     tostr = Boolean.prototype.toString;
-	Boolean.prototype.toString=tostr;
+    Boolean.prototype.toString=tostr;
     x=new Boolean(false);
     array[item++] = new TestCase( SECTION,
                                     "tostr=Boolean.prototype.toString; Boolean.prototype.toString=tostr;x=new Boolean(false);x.toString()",

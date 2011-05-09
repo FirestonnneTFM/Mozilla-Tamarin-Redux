@@ -54,127 +54,127 @@ startTest();
 var v = new<int>[1,2];
 
 AddTestCase(
-	"Initialize a variable with a Vector",
-	"1,2", 
-	v.toString());
+    "Initialize a variable with a Vector",
+    "1,2",
+    v.toString());
 
 var v2:Vector.<int> = new<int>[3,4];
 
 AddTestCase(
-	"Initialize a typed variable with a Vector",
-	"3,4", 
-	v2.toString());
+    "Initialize a typed variable with a Vector",
+    "3,4",
+    v2.toString());
 
 var msg="no exception";
 try {
-	var v3:Vector.<*> = new<int>[49];
+    var v3:Vector.<*> = new<int>[49];
 } catch ( ex )
 {
-	msg = ex.toString();
+    msg = ex.toString();
 }
 
 AddTestCase(
-	"[neg]Initialize a typed variable with a Vector",
-	"TypeError: Error #1034",
-	parseError(msg,"TypeError: Error #1034".length));
+    "[neg]Initialize a typed variable with a Vector",
+    "TypeError: Error #1034",
+    parseError(msg,"TypeError: Error #1034".length));
 
 AddTestCase(
-	"pass Vector initializer as parameter", 
-	2, 
-	getLength(new <*>[new Object(),3.14159,]));
+    "pass Vector initializer as parameter",
+    2,
+    getLength(new <*>[new Object(),3.14159,]));
 
 AddTestCase(
-	"call Vector initializer method",
-	3, 
-	new<int>[1,2,3].length);
+    "call Vector initializer method",
+    3,
+    new<int>[1,2,3].length);
 
 AddTestCase(
-	"compare Vector initializers",
-	false, 
-	new<int>[1,2] == new<int>[1,2]);
+    "compare Vector initializers",
+    false,
+    new<int>[1,2] == new<int>[1,2]);
 
 AddTestCase(
-	"compare Vector initializers - ne",
-	true, 
-	new<int>[1,2] != new<int>[1,2]);
+    "compare Vector initializers - ne",
+    true,
+    new<int>[1,2] != new<int>[1,2]);
 
 AddTestCase(
-	"compare Vector initializers - ne",
-	true, 
-	new<int>[1,2] != new<*>[1,2]);
+    "compare Vector initializers - ne",
+    true,
+    new<int>[1,2] != new<*>[1,2]);
 
 AddTestCase(
-	"add scalar to Vector",
-	"1,2,34", 
-	new<int>[1,2,3]+4);
+    "add scalar to Vector",
+    "1,2,34",
+    new<int>[1,2,3]+4);
 
 AddTestCase(
-	"add Vector to scalar",
-	"61,2,3",
-	6+ new<int>[1,2,3]);
-
-
-AddTestCase(
-	"subtract scalar from Vector",
-	NaN,
-	new<int>[1,2,3]-4);
-
-AddTestCase(
-	"subtract Vector from scalar",
-	NaN,
-	4 - new<int>[1,2,3]);
-
-AddTestCase(
-	"multiply scalar by Vector",
-	NaN,
-	new<int>[1,2,3]*4);
-
-AddTestCase(
-	"multiply Vector by scalar",
-	NaN,
-	4 * new<int>[1,2,3]);
-
-AddTestCase(
-	"divide scalar by Vector",
-	NaN,
-	new<int>[1,2,3]/4);
-
-AddTestCase(
-	"divide Vector by scalar",
-	NaN,
-	4 / new<int>[1,2,3]);
-
-AddTestCase(
-	"typeof Vector initializer",
-	"object",
-	typeof(new<int>[1,2]));
-
-AddTestCase(
-	"select element from Vector initializer",
-	3,
-	new<int>[1,2,3,4][2]);
-
-AddTestCase(
-	"select element from Vector initializer",
-	3,
-	new<int>[1,2,3,4]["2.00"]);
-
-AddTestCase(
-	"assign to element from Vector initializer",
-	7,
-	new<int>[1,2,3,4][2] = 7);
+    "add Vector to scalar",
+    "61,2,3",
+    6+ new<int>[1,2,3]);
 
 
 AddTestCase(
-	"stringify Vector initializer",
-	"1,2,3",
-	String(new<int>[1,2,3]));
+    "subtract scalar from Vector",
+    NaN,
+    new<int>[1,2,3]-4);
+
+AddTestCase(
+    "subtract Vector from scalar",
+    NaN,
+    4 - new<int>[1,2,3]);
+
+AddTestCase(
+    "multiply scalar by Vector",
+    NaN,
+    new<int>[1,2,3]*4);
+
+AddTestCase(
+    "multiply Vector by scalar",
+    NaN,
+    4 * new<int>[1,2,3]);
+
+AddTestCase(
+    "divide scalar by Vector",
+    NaN,
+    new<int>[1,2,3]/4);
+
+AddTestCase(
+    "divide Vector by scalar",
+    NaN,
+    4 / new<int>[1,2,3]);
+
+AddTestCase(
+    "typeof Vector initializer",
+    "object",
+    typeof(new<int>[1,2]));
+
+AddTestCase(
+    "select element from Vector initializer",
+    3,
+    new<int>[1,2,3,4][2]);
+
+AddTestCase(
+    "select element from Vector initializer",
+    3,
+    new<int>[1,2,3,4]["2.00"]);
+
+AddTestCase(
+    "assign to element from Vector initializer",
+    7,
+    new<int>[1,2,3,4][2] = 7);
 
 
 AddTestCase(
-	"delete Vector initializer property",
-	false,
-	delete new<int>[1,2,3].length);
+    "stringify Vector initializer",
+    "1,2,3",
+    String(new<int>[1,2,3]));
+
+
+AddTestCase(
+    "delete Vector initializer property",
+    false,
+    delete new<int>[1,2,3].length);
 
 AddTestCase(
     "initializer fixed property is false",
@@ -285,5 +285,5 @@ test();
 
 function getLength(x:Vector.<*>):int
 {
-	return x.length;
+    return x.length;
 }

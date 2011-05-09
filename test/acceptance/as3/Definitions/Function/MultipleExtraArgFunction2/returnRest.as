@@ -36,11 +36,11 @@
  * ***** END LICENSE BLOCK ***** */
 package MultipleExtraArgFunction2 {
 
-	public function returnRest(str:String,arr:Array,... rest):Number {
-	 
-	    var count = rest.length;
-	    
-	    var a:int = 0;
+    public function returnRest(str:String,arr:Array,... rest):Number {
+     
+        var count = rest.length;
+        
+        var a:int = 0;
 
             //print("Output from 2nd test case");
             
@@ -51,8 +51,8 @@ package MultipleExtraArgFunction2 {
             }*/
           
           return count;
-	 
-	}
+     
+    }
 
 }
 

@@ -75,7 +75,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     // set the value of lastIndex
     re = /0./;
@@ -145,17 +145,17 @@ function getTestCases() {
             return;
         }
     
-        array[item++] = new TestCase(SECTION, 
+        array[item++] = new TestCase(SECTION,
             "( " + string  + " ).match(" + str_regexp +").length",
             matches_array.length,
             string.match(regexp).length );
     
-        array[item++] = new TestCase(SECTION, 
+        array[item++] = new TestCase(SECTION,
             "( " + string + " ).match(" + str_regexp +").index",
             index,
             string.match(regexp).index );
     
-        array[item++] = new TestCase(SECTION, 
+        array[item++] = new TestCase(SECTION,
             "( " + string + " ).match(" + str_regexp +").input",
             str_string,
             string.match(regexp).input );
@@ -165,7 +165,7 @@ function getTestCases() {
                     string.match(regexp).length;
     
         for ( var matches = 0; matches < limit; matches++ ) {
-            array[item++] = new TestCase(SECTION, 
+            array[item++] = new TestCase(SECTION,
                 "( " + string + " ).match(" + str_regexp +")[" + matches +"]",
                 matches_array[matches],
                 string.match(regexp)[matches] );
@@ -178,7 +178,7 @@ function getTestCases() {
       // prevent a runtime error
     
         if ( regexp.exec(string) == null || matches_array == null ) {
-            array[item++] = new TestCase(SECTION, 
+            array[item++] = new TestCase(SECTION,
                 regexp + ".exec(" + string +")",
                 matches_array,
                 regexp.exec(string) );
@@ -186,7 +186,7 @@ function getTestCases() {
             return;
         }
     
-        array[item++] = new TestCase(SECTION, 
+        array[item++] = new TestCase(SECTION,
             "( " + string  + " ).match(" + str_regexp +").length",
             matches_array.length,
             string.match(regexp).length );
@@ -196,7 +196,7 @@ function getTestCases() {
                     string.match(regexp).length;
     
         for ( var matches = 0; matches < limit; matches++ ) {
-            array[item++] = new TestCase(SECTION, 
+            array[item++] = new TestCase(SECTION,
                 "( " + string + " ).match(" + str_regexp +")[" + matches +"]",
                 matches_array[matches],
                 string.match(regexp)[matches] );

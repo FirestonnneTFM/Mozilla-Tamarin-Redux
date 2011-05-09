@@ -61,12 +61,12 @@ function addtestcases()
 
   expect = undefined;
   o[0xffffffff] = 'end';
-  actual = o[-1];  
+  actual = o[-1];
   AddTestCase(summary + ': 1', expect, actual);
 
   expect = 42;
   o['42'] = 42;
-  actual = o[42];  
+  actual = o[42];
   AddTestCase(summary + ': 2', expect, actual);
 
   //
@@ -75,12 +75,12 @@ function addtestcases()
 
   expect = undefined;
   o[0xffffffff] = 'end';
-  actual = o[-1];  
+  actual = o[-1];
   AddTestCase(summary + ': 3', expect, actual);
 
   expect = 42;
   o['42'] = 42;
-  actual = o[42];  
+  actual = o[42];
   AddTestCase(summary + ': 4', expect, actual);
 
 

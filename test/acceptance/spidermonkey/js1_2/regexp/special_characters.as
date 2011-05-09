@@ -78,7 +78,7 @@ testcases[index++] = new TestCase ( SECTION, "'abcdefghi'.match(/c.e/)", String(
 
 // testing remembering ()
 testcases[index++] = new TestCase ( SECTION, "'abcewirjskjdabciewjsdf'.match(/(abc).+\\1'/)",
-	       String(["abcewirjskjdabc","abc"]), String('abcewirjskjdabciewjsdf'.match(/(abc).+\1/)));
+           String(["abcewirjskjdabc","abc"]), String('abcewirjskjdabciewjsdf'.match(/(abc).+\1/)));
 
 // testing or match '|'
 testcases[index++] = new TestCase ( SECTION, "'abcdefghi'.match(/xyz|def/)", String(["def"]), String('abcdefghi'.match(/xyz|def/)));
@@ -106,11 +106,11 @@ testcases[index++] = new TestCase ( SECTION, "'netscape inc'.match(/t[^a-c]ca/)"
 
 // testing backspace [\b]
 testcases[index++] = new TestCase ( SECTION, "'this is b\ba test'.match(/is b[\b]a test/)",
-	       String(["is b\ba test"]), String('this is b\ba test'.match(/is b[\b]a test/)));
+           String(["is b\ba test"]), String('this is b\ba test'.match(/is b[\b]a test/)));
 
 // testing word boundary \b
 testcases[index++] = new TestCase ( SECTION, "'today is now - day is not now'.match(/\bday.*now/)",
-	       String(["day is not now"]), String('today is now - day is not now'.match(/\bday.*now/)));
+           String(["day is not now"]), String('today is now - day is not now'.match(/\bday.*now/)));
 
 // control characters???
 

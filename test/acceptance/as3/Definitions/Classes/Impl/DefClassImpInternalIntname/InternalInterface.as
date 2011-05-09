@@ -35,23 +35,23 @@
  *
  * ***** END LICENSE BLOCK ***** */
 /*
- *  Internal Interface InternalInterface 
- * Interface methods 
- *  
+ *  Internal Interface InternalInterface
+ * Interface methods
+ *
  */
 
 
 package DefClassImpInternalIntname{ //package name
 
-	//namespace ns;
-	//namespace
+    //namespace ns;
+    //namespace
 
-	internal interface InternalInt{
-	
-		function deffunc():String;  			     
+    internal interface InternalInt{
+    
+        function deffunc():String;
 
-		//public function pubFunc():Boolean;	       //Public attribute method
+        //public function pubFunc():Boolean;           //Public attribute method
 
-	//	ns function nsFunc(a="test"):int;	       //Namespace attribute method
-	}
+    //  ns function nsFunc(a="test"):int;          //Namespace attribute method
+    }
 }

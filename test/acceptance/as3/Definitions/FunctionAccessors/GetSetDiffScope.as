@@ -51,12 +51,12 @@ w = new GetSetDiffScope();
 
 
 try {
-	w.g1 = {a:1, b:2, c:3};
-	errorNumber = -1;
-	errorType = undefined;
+    w.g1 = {a:1, b:2, c:3};
+    errorNumber = -1;
+    errorType = undefined;
 } catch(e1) {
-	errorNumber = referenceError(e1.toString());
-	errorType = e1 is ReferenceError;
+    errorNumber = referenceError(e1.toString());
+    errorType = e1 is ReferenceError;
 
 }
 
@@ -66,12 +66,12 @@ AddTestCase("Make sure property value hasn't changed", "original value", w.g1);
 
 
 try {
-	w.g2 = {a:1, b:2, c:3};
-	errorNumber = -1;
-	errorType = undefined;
+    w.g2 = {a:1, b:2, c:3};
+    errorNumber = -1;
+    errorType = undefined;
 } catch(e2) {
-	errorNumber = referenceError(e2.toString());
-	errorType = e2 is ReferenceError;
+    errorNumber = referenceError(e2.toString());
+    errorType = e2 is ReferenceError;
 
 }
 
@@ -80,12 +80,12 @@ AddTestCase("Make sure property value hasn't changed", 5, w.g2);
 
 
 try {
-	somevar = w.s1;
-	errorNumber = -1;
-	errorType = undefined;
+    somevar = w.s1;
+    errorNumber = -1;
+    errorType = undefined;
 } catch(e3) {
-	errorNumber = referenceError(e3.toString());
-	errorType = e3 is ReferenceError;
+    errorNumber = referenceError(e3.toString());
+    errorType = e3 is ReferenceError;
 
 }
 
@@ -93,12 +93,12 @@ AddTestCase("Setter is missing, error 1069", "ReferenceError: Error #1069", erro
 AddTestCase("Checking for correct error type ReferenceError", true, errorType);
 
 try {
-	somevar = w.s2;
-	errorNumber = -1;
-	errorType = undefined;
+    somevar = w.s2;
+    errorNumber = -1;
+    errorType = undefined;
 } catch(e4) {
-	errorNumber = referenceError(e4.toString());
-	errorType = e4 is ReferenceError;
+    errorNumber = referenceError(e4.toString());
+    errorType = e4 is ReferenceError;
 
 }
 
@@ -108,24 +108,24 @@ AddTestCase("Checking for correct error type ReferenceError", true, errorType);
 var t:testclass = new testclass();
 
 try {
-	somevar = t.doGet();
-	errorNumber = -1;
-	errorType = undefined;
+    somevar = t.doGet();
+    errorNumber = -1;
+    errorType = undefined;
 } catch (e1) {
-	errorNumber = referenceError(e1.toString());
-	errorType = e1 is ReferenceError;
+    errorNumber = referenceError(e1.toString());
+    errorType = e1 is ReferenceError;
 }
 AddTestCase("Public getter, namespace setter; get", 1, somevar);
 AddTestCase("Checking error did not occur, error number", -1, errorNumber);
 AddTestCase("Checking error did not occur, error type", undefined, errorType);
 
 try {
-	somevar = t.doSet();
-	errorNumber = -1;
-	errorType = undefined;
+    somevar = t.doSet();
+    errorNumber = -1;
+    errorType = undefined;
 } catch (e2) {
-	errorNumber = referenceError(e2.toString());
-	errorType = e2 is ReferenceError;
+    errorNumber = referenceError(e2.toString());
+    errorType = e2 is ReferenceError;
 }
 
 AddTestCase("Public getter, namespace setter, set; error 1074", "ReferenceError: Error #1074", errorNumber);

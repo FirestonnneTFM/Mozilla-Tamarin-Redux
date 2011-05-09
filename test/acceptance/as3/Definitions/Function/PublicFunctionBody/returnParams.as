@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package PublicFunctionBody {
-	public function returnParamsInner(s:String, b:Boolean):String { return s; }
-	public function returnParams(s:String, b:Boolean):String { return returnParamsInner(s,b); }
+    public function returnParamsInner(s:String, b:Boolean):String { return s; }
+    public function returnParams(s:String, b:Boolean):String { return returnParamsInner(s,b); }
 }
 

@@ -49,16 +49,16 @@ function getTestCases() {
     function foo2(){ foo(); }
     
     try{
-    	unknownfunction();
+        unknownfunction();
     } catch(e) {
     } finally {
     }
     
     try{
-    	foo();
+        foo();
     } catch( e ){
     } finally {
-    	array[item++] = new TestCase(SECTION, "throw an exception in a script where there is infinite recursion", "no crash", "no crash" );
+        array[item++] = new TestCase(SECTION, "throw an exception in a script where there is infinite recursion", "no crash", "no crash" );
     }
     return array;
 }

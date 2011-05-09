@@ -45,7 +45,7 @@ writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
 test();
 
-function getTestCases() 
+function getTestCases()
 {
     var array = new Array();
     var item = 0;
@@ -57,7 +57,7 @@ function getTestCases()
 
     testThis(500, NO_BACKREFS, 'blah', 'hello', 'goodbye');
     testThis(500, DO_BACKREFS, 'blah', 'hello', 'goodbye');
-	
+    
     // constructs not allowed
     testThis2("(?<=a{3,})bla", "bbbla", -1);
     testThis2("(?<=a?)bla", "bla", -1);
@@ -94,56 +94,56 @@ function getTestCases()
      * */
     function testThis(numParens, doBackRefs, strLookbehind, strOriginal, strReplace)
     {
-	var openParen = doBackRefs? '(' : '(?:';
-	var closeParen = ')';
-	var pattern = '';
+    var openParen = doBackRefs? '(' : '(?:';
+    var closeParen = ')';
+    var pattern = '';
 
-	pattern += '(?<=';
+    pattern += '(?<=';
 
-	for (var i=0; i<numParens; i++) {pattern += openParen;}
-	pattern += strLookbehind;
-	for (i=0; i<numParens; i++) {pattern += closeParen;}
-	pattern += closeParen;
-	pattern += strOriginal;
+    for (var i=0; i<numParens; i++) {pattern += openParen;}
+    pattern += strLookbehind;
+    for (i=0; i<numParens; i++) {pattern += closeParen;}
+    pattern += closeParen;
+    pattern += strOriginal;
 
-	// We don't know who is going to compile the RE, so just wrap the whole thing.
-	// We're not testing search, match, or replace, just RE compilation, so don't
-	// worry about handling individual cases.
-	try {
-	    var re = new RegExp(pattern);
+    // We don't know who is going to compile the RE, so just wrap the whole thing.
+    // We're not testing search, match, or replace, just RE compilation, so don't
+    // worry about handling individual cases.
+    try {
+        var re = new RegExp(pattern);
 
-	    strOriginal = strLookbehind + strOriginal;
-	
-	    if (doBackRefs) {
-		var res = strOriginal.search(re);
-		array[item++] = new TestCase(SECTION, "strOriginal.search(re)", -1, res);
+        strOriginal = strLookbehind + strOriginal;
+    
+        if (doBackRefs) {
+        var res = strOriginal.search(re);
+        array[item++] = new TestCase(SECTION, "strOriginal.search(re)", -1, res);
 
-		res = strOriginal.match(re);
-		array[item++] = new TestCase(SECTION, "strOriginal.match(re)", null, res);
+        res = strOriginal.match(re);
+        array[item++] = new TestCase(SECTION, "strOriginal.match(re)", null, res);
 
-		res = strOriginal.replace(re, strReplace);
-		array[item++] = new TestCase(SECTION, "strOriginal.replace(re, strReplace)", "blahhello", res);
-	    } else {
-		var res = strOriginal.search(re);
-		array[item++] = new TestCase(SECTION, "strOriginal.search(re)", 4, res);
+        res = strOriginal.replace(re, strReplace);
+        array[item++] = new TestCase(SECTION, "strOriginal.replace(re, strReplace)", "blahhello", res);
+        } else {
+        var res = strOriginal.search(re);
+        array[item++] = new TestCase(SECTION, "strOriginal.search(re)", 4, res);
 
-		res = strOriginal.match(re);
-		//Get the first element to compare
-		res = res[0];
-		array[item++] = new TestCase(SECTION, "strOriginal.match(re)", 'hello', res);
+        res = strOriginal.match(re);
+        //Get the first element to compare
+        res = res[0];
+        array[item++] = new TestCase(SECTION, "strOriginal.match(re)", 'hello', res);
 
-		res = strOriginal.replace(re, strReplace);
-		array[item++] = new TestCase(SECTION, "strOriginal.replace(re, strReplace)", "blahgoodbye", res);
-	    }
-	}
-	catch (e: Error) {
-	    if (e.message.match("#1023"))
-		array[item++] = new TestCase(SECTION, "strOriginal.search/match/replace(re)", 0, 0);
-	    else
-		throw(e);
-	}
+        res = strOriginal.replace(re, strReplace);
+        array[item++] = new TestCase(SECTION, "strOriginal.replace(re, strReplace)", "blahgoodbye", res);
+        }
     }
-	
+    catch (e: Error) {
+        if (e.message.match("#1023"))
+        array[item++] = new TestCase(SECTION, "strOriginal.search/match/replace(re)", 0, 0);
+        else
+        throw(e);
+    }
+    }
+    
     /*
      * Creates a regex from the pattern and applies search to the strSubject with the regexp created
      *
@@ -151,10 +151,10 @@ function getTestCases()
      * */
     function testThis2(strPattern, strSubject, expected)
     {
-	var regex = new RegExp(strPattern);
-	var result = strSubject.search(regex);
+    var regex = new RegExp(strPattern);
+    var result = strSubject.search(regex);
 
-	array[item++] = new TestCase(SECTION, "\"" + strSubject + "\".search(new RegExp(" + strPattern + "))", expected, result);
+    array[item++] = new TestCase(SECTION, "\"" + strSubject + "\".search(new RegExp(" + strPattern + "))", expected, result);
     }
 
     return array;

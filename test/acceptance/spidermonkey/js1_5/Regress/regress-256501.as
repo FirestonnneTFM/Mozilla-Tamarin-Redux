@@ -51,7 +51,7 @@ printStatus (summary);
 expect = 'error';
 
 try
-{ 
+{
   var N = 100*1000;
   var buffer = new Array(N * 2 + 1);
   for (var i = 0; i != N; ++i)

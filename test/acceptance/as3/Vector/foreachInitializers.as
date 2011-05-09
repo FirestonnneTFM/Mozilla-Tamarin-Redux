@@ -62,8 +62,8 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase( 	"forEach eacher is undefined",
-		"ArgumentError: Error #1063",
+AddTestCase(    "forEach eacher is undefined",
+        "ArgumentError: Error #1063",
     parseError(errormsg,"ArgumentError: Error #1063".length));
 
 var errormsg="";
@@ -73,15 +73,15 @@ try {
   errormsg=e.toString();
 }
 AddTestCase("forEach eacher is not a function",
-         		"TypeError: Error #1034",
+                "TypeError: Error #1034",
             parseError(errormsg,"TypeError: Error #1034".length));
 
 var result="";
 new <String>["s0","s1","s2"].forEach(eacher);
-AddTestCase(	"forEach simple vector",
-		"(s0:0)(s1:1)(s2:2)",
-		result);
-		
+AddTestCase(    "forEach simple vector",
+        "(s0:0)(s1:1)(s2:2)",
+        result);
+        
 var i:int;
 for (i in new <int> [1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8])
 {}

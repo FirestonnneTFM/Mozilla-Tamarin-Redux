@@ -51,8 +51,8 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	valof=Boolean.prototype.valueOf;
-	Boolean.prototype.valueOf=valof;
+    valof=Boolean.prototype.valueOf;
+    Boolean.prototype.valueOf=valof;
     x=true;
     array[item++] = new TestCase( SECTION,
                                 "valof=Boolean.prototype.valueOf; Boolean.prototype.valueOf=valof; x=true; x.valueOf()",

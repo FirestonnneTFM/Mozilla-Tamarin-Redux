@@ -67,9 +67,9 @@ try {
   errormsg=e.toString();
 }
 AddTestCase(
-		"some no checker",
-		"ArgumentError: Error #1063",
-		parseError(errormsg,"ArgumentError: Error #1063".length));
+        "some no checker",
+        "ArgumentError: Error #1063",
+        parseError(errormsg,"ArgumentError: Error #1063".length));
 
 
 var checker2="a string";
@@ -82,9 +82,9 @@ try {
   errormsg=e.toString();
 }
 AddTestCase(
-		"some checker not a function",
-		"TypeError: Error #1034",
-		parseError(errormsg,"TypeError: Error #1034".length));
+        "some checker not a function",
+        "TypeError: Error #1034",
+        parseError(errormsg,"TypeError: Error #1034".length));
 
 var msg="";
 var v1=new Vector.<int>();

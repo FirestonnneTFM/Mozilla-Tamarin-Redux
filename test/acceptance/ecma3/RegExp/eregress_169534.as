@@ -53,19 +53,19 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var status = '';
-	var actual = '';
-	var expect= '';
+    var status = '';
+    var actual = '';
+    var expect= '';
 
-	status = inSection(1);
-	var re = /(\|)([\w\x81-\xff ]*)(\|)([\/a-z][\w:\/\.]*\.[a-z]{3,4})(\|)/ig;
-	var str = "To sign up click |here|https://www.xxxx.org/subscribe.htm|";
-	actual = str.replace(re, '<a href="$4">$2</a>');
-	expect = 'To sign up click <a href="https://www.xxxx.org/subscribe.htm">here</a>';
-	array[item++] = new TestCase(SECTION, status, expect, actual);
+    status = inSection(1);
+    var re = /(\|)([\w\x81-\xff ]*)(\|)([\/a-z][\w:\/\.]*\.[a-z]{3,4})(\|)/ig;
+    var str = "To sign up click |here|https://www.xxxx.org/subscribe.htm|";
+    actual = str.replace(re, '<a href="$4">$2</a>');
+    expect = 'To sign up click <a href="https://www.xxxx.org/subscribe.htm">here</a>';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
 
-	return array;
+    return array;
 }

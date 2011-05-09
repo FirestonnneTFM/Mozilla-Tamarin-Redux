@@ -55,81 +55,81 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var cnEmptyString = '';
-	var status = '';
-	var pattern = '';
-	var string = '';
-	var actualmatch = '';
-	var expectedmatch = '';
-
-
-	/*
-	 * The bug: this match was coming up null in Rhino and SpiderMonkey.
-	 * It should match the whole string. The reason:
-	 *
-	 * The * operator is greedy, but *? is non-greedy: it will stop
-	 * at the simplest match it can find. But the pattern here asks us
-	 * to match till the end of the string. So the simplest match must
-	 * go all the way out to the end, and *? has no choice but to do it.
-	 */
-	status = inSection(1);
-	pattern = /^.*?$/;
-	string = 'Hello World';
-	actualmatch = string.match(pattern);
-	expectedmatch = Array(string);
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    var cnEmptyString = '';
+    var status = '';
+    var pattern = '';
+    var string = '';
+    var actualmatch = '';
+    var expectedmatch = '';
 
 
-	/*
-	 * Leave off the '$' condition - here we expect the empty string.
-	 * Unlike the above pattern, we don't have to match till the end of
-	 * the string, so the non-greedy operator *? doesn't try to...
-	 */
-	status = inSection(2);
-	pattern = /^.*?/;
-	string = 'Hello World';
-	actualmatch = string.match(pattern);
-	expectedmatch = Array(cnEmptyString);
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    /*
+     * The bug: this match was coming up null in Rhino and SpiderMonkey.
+     * It should match the whole string. The reason:
+     *
+     * The * operator is greedy, but *? is non-greedy: it will stop
+     * at the simplest match it can find. But the pattern here asks us
+     * to match till the end of the string. So the simplest match must
+     * go all the way out to the end, and *? has no choice but to do it.
+     */
+    status = inSection(1);
+    pattern = /^.*?$/;
+    string = 'Hello World';
+    actualmatch = string.match(pattern);
+    expectedmatch = Array(string);
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
 
-	/*
-	 * Try '$' combined with an 'or' operator.
-	 *
-	 * The operator *? will consume the string from left to right,
-	 * attempting to satisfy the condition (:|$). When it hits ':',
-	 * the match will stop because the operator *? is non-greedy.
-	 *
-	 * The submatch $1 = (:|$) will contain the ':'
-	 */
-	status = inSection(3);
-	pattern = /^.*?(:|$)/;
-	string = 'Hello: World';
-	actualmatch = string.match(pattern);
-	expectedmatch = Array('Hello:', ':');
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    /*
+     * Leave off the '$' condition - here we expect the empty string.
+     * Unlike the above pattern, we don't have to match till the end of
+     * the string, so the non-greedy operator *? doesn't try to...
+     */
+    status = inSection(2);
+    pattern = /^.*?/;
+    string = 'Hello World';
+    actualmatch = string.match(pattern);
+    expectedmatch = Array(cnEmptyString);
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
 
-	/*
-	 * Again, '$' combined with an 'or' operator.
-	 *
-	 * The operator * will consume the string from left to right,
-	 * attempting to satisfy the condition (:|$). When it hits ':',
-	 * the match will not stop since * is greedy. The match will
-	 * continue until it hits $, the end-of-string boundary.
-	 *
-	 * The submatch $1 = (:|$) will contain the empty string
-	 * conceived to exist at the end-of-string boundary.
-	 */
-	status = inSection(4);
-	pattern = /^.*(:|$)/;
-	string = 'Hello: World';
-	actualmatch = string.match(pattern);
-	expectedmatch = Array(string, cnEmptyString);
-	array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    /*
+     * Try '$' combined with an 'or' operator.
+     *
+     * The operator *? will consume the string from left to right,
+     * attempting to satisfy the condition (:|$). When it hits ':',
+     * the match will stop because the operator *? is non-greedy.
+     *
+     * The submatch $1 = (:|$) will contain the ':'
+     */
+    status = inSection(3);
+    pattern = /^.*?(:|$)/;
+    string = 'Hello: World';
+    actualmatch = string.match(pattern);
+    expectedmatch = Array('Hello:', ':');
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
 
-	return array;
+
+    /*
+     * Again, '$' combined with an 'or' operator.
+     *
+     * The operator * will consume the string from left to right,
+     * attempting to satisfy the condition (:|$). When it hits ':',
+     * the match will not stop since * is greedy. The match will
+     * continue until it hits $, the end-of-string boundary.
+     *
+     * The submatch $1 = (:|$) will contain the empty string
+     * conceived to exist at the end-of-string boundary.
+     */
+    status = inSection(4);
+    pattern = /^.*(:|$)/;
+    string = 'Hello: World';
+    actualmatch = string.match(pattern);
+    expectedmatch = Array(string, cnEmptyString);
+    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+
+    return array;
 }

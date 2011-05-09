@@ -63,41 +63,41 @@ var whitespace_desc = "\\f\\n\\r\\t ";
 
 // be sure all whitespace is matched by \s
 testcases[index++] = new TestCase ( SECTION,
-	       "(whitespace).match(new RegExp('\\s+'))",
-	       String([whitespace]), String(whitespace.match(new RegExp('\\s+'))));
+           "(whitespace).match(new RegExp('\\s+'))",
+           String([whitespace]), String(whitespace.match(new RegExp('\\s+'))));
 
 // be sure all non-whitespace is matched by \S
 testcases[index++] = new TestCase ( SECTION,
-	       "'" + non_whitespace + "'.match(new RegExp('\\S+'))",
-	       String([non_whitespace]), String(non_whitespace.match(new RegExp('\\S+'))));
+           "'" + non_whitespace + "'.match(new RegExp('\\S+'))",
+           String([non_whitespace]), String(non_whitespace.match(new RegExp('\\S+'))));
 
 // be sure all non-whitespace is not matched by \s
 testcases[index++] = new TestCase ( SECTION,
-	       "'" + non_whitespace + "'.match(new RegExp('\\s'))",
-	       null, non_whitespace.match(new RegExp('\\s')));
+           "'" + non_whitespace + "'.match(new RegExp('\\s'))",
+           null, non_whitespace.match(new RegExp('\\s')));
 
 // be sure all whitespace is not matched by \S
 testcases[index++] = new TestCase ( SECTION,
-	       "(whitespace).match(new RegExp('\\S'))",
-	       null, whitespace.match(new RegExp('\\S')));
+           "(whitespace).match(new RegExp('\\S'))",
+           null, whitespace.match(new RegExp('\\S')));
 
 var s = non_whitespace + whitespace;
 
 // be sure all digits are matched by \s
 testcases[index++] = new TestCase ( SECTION,
-	       "'" + non_whitespace + whitespace_desc + "'.match(new RegExp('\\s+'))",
-	       String([whitespace]), String(s.match(new RegExp('\\s+'))));
+           "'" + non_whitespace + whitespace_desc + "'.match(new RegExp('\\s+'))",
+           String([whitespace]), String(s.match(new RegExp('\\s+'))));
 
 s = whitespace + non_whitespace;
 
 // be sure all non-whitespace are matched by \S
 testcases[index++] = new TestCase ( SECTION,
-	       "'" + whitespace_desc + non_whitespace + "'.match(new RegExp('\\S+'))",
-	       String([non_whitespace]), String(s.match(new RegExp('\\S+'))));
+           "'" + whitespace_desc + non_whitespace + "'.match(new RegExp('\\S+'))",
+           String([non_whitespace]), String(s.match(new RegExp('\\S+'))));
 
 // '1233345find me345'.match(new RegExp('[a-z\\s][a-z\\s]+'))
 testcases[index++] = new TestCase ( SECTION, "'1233345find me345'.match(new RegExp('[a-z\\s][a-z\\s]+'))",
-	       String(["find me"]), String('1233345find me345'.match(new RegExp('[a-z\\s][a-z\\s]+'))));
+           String(["find me"]), String('1233345find me345'.match(new RegExp('[a-z\\s][a-z\\s]+'))));
 
 var i;
 whitespace_desc = ['\\f','\\n','\\r','\\t','\\v',' '];
@@ -107,22 +107,22 @@ for (i = 0; i < whitespace.length; ++i)
   s = 'ab' + whitespace.charAt(i) + 'cd';
   s_desc = 'ab' + whitespace_desc[i] + 'cd';
   testcases[index++] = new TestCase ( SECTION,
-		 "'" + s_desc + "'.match(new RegExp('\\\\s'))",
-		 String([whitespace.charAt(i)]), String(s.match(new RegExp('\\s'))));
+         "'" + s_desc + "'.match(new RegExp('\\\\s'))",
+         String([whitespace.charAt(i)]), String(s.match(new RegExp('\\s'))));
   testcases[index++] = new TestCase ( SECTION,
-		 "'" + s_desc + "'.match(/\s/)",
-		 String([whitespace.charAt(i)]), String(s.match(/\s/)));
+         "'" + s_desc + "'.match(/\s/)",
+         String([whitespace.charAt(i)]), String(s.match(/\s/)));
 }
 // be sure all non_whitespace characters match individually
 for (i = 0; i < non_whitespace.length; ++i)
 {
   s = '  ' + non_whitespace.charAt(i) + '  ';
   testcases[index++] = new TestCase ( SECTION,
-		 "'" + s + "'.match(new RegExp('\\\\S'))",
-		 String([non_whitespace.charAt(i)]), String(s.match(new RegExp('\\S'))));
+         "'" + s + "'.match(new RegExp('\\\\S'))",
+         String([non_whitespace.charAt(i)]), String(s.match(new RegExp('\\S'))));
   testcases[index++] = new TestCase ( SECTION,
-		 "'" + s + "'.match(/\S/)",
-		 String([non_whitespace.charAt(i)]), String(s.match(/\S/)));
+         "'" + s + "'.match(/\S/)",
+         String([non_whitespace.charAt(i)]), String(s.match(/\S/)));
 }
 
 

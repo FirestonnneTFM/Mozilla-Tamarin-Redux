@@ -60,37 +60,37 @@ var digits = "1234567890";
 
 // be sure all digits are matched by \d
 testcases[index++] = new TestCase ( SECTION,
-	       "'" + digits + "'.match(new RegExp('\\d+'))",
-	       String([digits]), String(digits.match(new RegExp('\\d+'))));
+           "'" + digits + "'.match(new RegExp('\\d+'))",
+           String([digits]), String(digits.match(new RegExp('\\d+'))));
 
 // be sure all non-digits are matched by \D
 testcases[index++] = new TestCase ( SECTION,
-	       "'" + non_digits + "'.match(new RegExp('\\D+'))",
-	       String([non_digits]), String(non_digits.match(new RegExp('\\D+'))));
+           "'" + non_digits + "'.match(new RegExp('\\D+'))",
+           String([non_digits]), String(non_digits.match(new RegExp('\\D+'))));
 
 // be sure all non-digits are not matched by \d
 testcases[index++] = new TestCase ( SECTION,
-	       "'" + non_digits + "'.match(new RegExp('\\d'))",
-	       null, non_digits.match(new RegExp('\\d')));
+           "'" + non_digits + "'.match(new RegExp('\\d'))",
+           null, non_digits.match(new RegExp('\\d')));
 
 // be sure all digits are not matched by \D
 testcases[index++] = new TestCase ( SECTION,
-	       "'" + digits + "'.match(new RegExp('\\D'))",
-	       null, digits.match(new RegExp('\\D')));
+           "'" + digits + "'.match(new RegExp('\\D'))",
+           null, digits.match(new RegExp('\\D')));
 
 var s = non_digits + digits;
 
 // be sure all digits are matched by \d
 testcases[index++] = new TestCase ( SECTION,
-	       "'" + s + "'.match(new RegExp('\\d+'))",
-	       String([digits]), String(s.match(new RegExp('\\d+'))));
+           "'" + s + "'.match(new RegExp('\\d+'))",
+           String([digits]), String(s.match(new RegExp('\\d+'))));
 
 var s = digits + non_digits;
 
 // be sure all non-digits are matched by \D
 testcases[index++] = new TestCase ( SECTION,
-	       "'" + s + "'.match(new RegExp('\\D+'))",
-	       String([non_digits]), String(s.match(new RegExp('\\D+'))));
+           "'" + s + "'.match(new RegExp('\\D+'))",
+           String([non_digits]), String(s.match(new RegExp('\\D+'))));
 
 var i;
 
@@ -99,22 +99,22 @@ for (i = 0; i < digits.length; ++i)
 {
   s = 'ab' + digits.charAt(i) + 'cd';
   testcases[index++] = new TestCase ( SECTION,
-		 "'" + s + "'.match(new RegExp('\\d'))",
-		 String([digits.charAt(i)]), String(s.match(new RegExp('\\d'))));
+         "'" + s + "'.match(new RegExp('\\d'))",
+         String([digits.charAt(i)]), String(s.match(new RegExp('\\d'))));
   testcases[index++] = new TestCase ( SECTION,
-		 "'" + s + "'.match(/\\d/)",
-		 String([digits.charAt(i)]), String(s.match(/\d/)));
+         "'" + s + "'.match(/\\d/)",
+         String([digits.charAt(i)]), String(s.match(/\d/)));
 }
 // be sure all non_digits match individually
 for (i = 0; i < non_digits.length; ++i)
 {
   s = '12' + non_digits.charAt(i) + '34';
   testcases[index++] = new TestCase ( SECTION,
-		 "'" + s + "'.match(new RegExp('\\D'))",
-		 String([non_digits.charAt(i)]), String(s.match(new RegExp('\\D'))));
+         "'" + s + "'.match(new RegExp('\\D'))",
+         String([non_digits.charAt(i)]), String(s.match(new RegExp('\\D'))));
   testcases[index++] = new TestCase ( SECTION,
-		 "'" + s + "'.match(/\\D/)",
-		 String([non_digits.charAt(i)]), String(s.match(/\D/)));
+         "'" + s + "'.match(/\\D/)",
+         String([non_digits.charAt(i)]), String(s.match(/\D/)));
 }
 
 test();

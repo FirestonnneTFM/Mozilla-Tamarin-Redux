@@ -49,11 +49,11 @@ package{
             target = obj;
         }
         
-        override flash_proxy function getProperty(name:*):* 
+        override flash_proxy function getProperty(name:*):*
         {
             if (target[name])
             {
-                return target[name]; 
+                return target[name];
             }
             else
             {
@@ -65,7 +65,7 @@ package{
         {
             target[name] = value;
         }
-        override flash_proxy function deleteProperty(name:*):Boolean 
+        override flash_proxy function deleteProperty(name:*):Boolean
         {
             delete target[name] ;
         };
@@ -83,7 +83,7 @@ package{
             return ("Method " + name + " was called");
         }
         
-        override flash_proxy function callProperty(name:*, ...rest):* 
+        override flash_proxy function callProperty(name:*, ...rest):*
         {
             // test that if a function has more than 2 arguments, just call the default function myFunction
             if(rest[2] != undefined)

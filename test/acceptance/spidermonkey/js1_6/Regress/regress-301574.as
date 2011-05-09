@@ -54,7 +54,7 @@ try
 catch(e)
 {
   actual = 'error: ' + e;
-} 
+}
 
 reportCompare(expect, actual, summary + ': XML()');
 
@@ -65,7 +65,7 @@ try
 catch(e)
 {
   actual = 'error: ' + e;
-} 
+}
 
 reportCompare(expect, actual, summary + ': XMLList()');
 test();

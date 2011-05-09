@@ -56,7 +56,7 @@ var d2 = new Date(1);
 var f = new Function();
 var str = "Test";
 var ob = new Object();
-var foo; 
+var foo;
 
 // ********************************************
 // Basic Constructor tests

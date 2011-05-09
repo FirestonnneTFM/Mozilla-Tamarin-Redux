@@ -42,17 +42,17 @@ var global_e2:Error;
 flash.sampler.startSampling();
 
 try {
-	throw new Error();
+    throw new Error();
 } catch (e:Error) {
-	global_e2 = e; // save a reference to the error, so that the sampler will
-					// get a live reference when it is triggered
+    global_e2 = e; // save a reference to the error, so that the sampler will
+                    // get a live reference when it is triggered
 }
 
 var s = flash.sampler.getSamples();
 for each (var ss in s)
 {
-	// nothing -- just iterate to force the samples to be generated
-	// print(ss);
+    // nothing -- just iterate to force the samples to be generated
+    // print(ss);
 }
 
 flash.sampler.stopSampling();

@@ -37,21 +37,21 @@
 // Section 9.2 example with qualifiers
 package Example_9_2_qual {
 
-	interface I {
-		function m();	// example erroneously has { } here
-	}
-	
-	class A implements I {
-		public function m() {
-			return "a.I::m()";
-		}
-	}
-		
-	public class ExampleTest {
-		var x : A = new A;
-		public function doTest() : String {
-			return x.I::m();
-		}
-	}
+    interface I {
+        function m();   // example erroneously has { } here
+    }
+    
+    class A implements I {
+        public function m() {
+            return "a.I::m()";
+        }
+    }
+        
+    public class ExampleTest {
+        var x : A = new A;
+        public function doTest() : String {
+            return x.I::m();
+        }
+    }
 
 }

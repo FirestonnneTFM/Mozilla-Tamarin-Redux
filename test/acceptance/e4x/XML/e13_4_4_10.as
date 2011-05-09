@@ -55,34 +55,34 @@ TEST(2, true, emps.contains(emps));
 var xmlDoc = "<MLB><Team>Giants</Team><City>San Francisco</City><Team>Padres</Team><City>San Diego</City></MLB>";
 
 // same object, returns true
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.contains(MYMXL)", true, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.contains(MYMXL)", true,
              (MYXML = new XML(xmlDoc), MYXML.contains(MYXML)) );
              
 // duplicated object, returns true
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.contains(MYMXL.copy())", true, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.contains(MYMXL.copy())", true,
              (MYXML = new XML(xmlDoc), MYXML.contains(MYXML.copy())) );
              
 // identical objects, returns true
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML2 = new XML(xmlDoc), MYXML.contains(MYMXL2)", true, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML2 = new XML(xmlDoc), MYXML.contains(MYMXL2)", true,
              (MYXML = new XML(xmlDoc), MYXML2 = new XML(xmlDoc), MYXML.contains(MYXML2)) );
              
 // identical objects, returns true
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML2 = new XML(xmlDoc), MYXML2.contains(MYMXL)", true, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML2 = new XML(xmlDoc), MYXML2.contains(MYMXL)", true,
              (MYXML = new XML(xmlDoc), MYXML2 = new XML(xmlDoc), MYXML2.contains(MYXML)) );
              
 // slightly different objects, returns false
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML2 = new XML(xmlDoc), MYXML2.foo = 'bar', MYXML.contains(MYMXL2)", false, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML2 = new XML(xmlDoc), MYXML2.foo = 'bar', MYXML.contains(MYMXL2)", false,
              (MYXML = new XML(xmlDoc), MYXML2 = new XML(xmlDoc), MYXML2.foo = 'bar', MYXML.contains(MYXML2)) );
 
 // slightly different objects #2, returns false
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML2 = new XML(xmlDoc), MYXML2.Team[0].foo = 'bar', MYXML.contains(MYMXL2)", false, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML2 = new XML(xmlDoc), MYXML2.Team[0].foo = 'bar', MYXML.contains(MYMXL2)", false,
              (MYXML = new XML(xmlDoc), MYXML2 = new XML(xmlDoc), MYXML2.Team[0].foo = 'bar', MYXML.contains(MYXML2)) );
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.Team[0].contains('Giants')", false, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.Team[0].contains('Giants')", false,
              (MYXML = new XML(xmlDoc), MYXML.Team[0].contains('Giants')) );
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.Team[1].contains('Giants')", false, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.Team[1].contains('Giants')", false,
              (MYXML = new XML(xmlDoc), MYXML.Team[1].contains('Giants')) );
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.City.contains('Giants')", false, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.City.contains('Giants')", false,
              (MYXML = new XML(xmlDoc), MYXML.City.contains('Giants')) );
 
 END();

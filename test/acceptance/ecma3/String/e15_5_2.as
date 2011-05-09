@@ -34,7 +34,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-	
+    
     var SECTION = "15.5.2";
     var VERSION = "ECMA_1";
     startTest();
@@ -49,52 +49,52 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	String.prototype.myToString=Object.prototype.toString;
-	TESTSTRING = new String('string primitive'); 
-	
-    array[item++] = new TestCase( SECTION,	"typeof new String('string primitive')",	    "string",	        typeof new String('string primitive') );
-    array[item++] = new TestCase( SECTION,	"var TESTSTRING = new String('string primitive'), TESTSTRING.myToString=Object.prototype.toString,TESTSTRING.myToString()", "[object String]",   TESTSTRING.myToString() );
+    String.prototype.myToString=Object.prototype.toString;
+    TESTSTRING = new String('string primitive');
+    
+    array[item++] = new TestCase( SECTION,  "typeof new String('string primitive')",        "string",           typeof new String('string primitive') );
+    array[item++] = new TestCase( SECTION,  "var TESTSTRING = new String('string primitive'), TESTSTRING.myToString=Object.prototype.toString,TESTSTRING.myToString()", "[object String]",   TESTSTRING.myToString() );
     array[item++] = new TestCase( SECTION,  "(new String('string primitive')).valueOf()",   'string primitive', (new String('string primitive')).valueOf() );
     array[item++] = new TestCase( SECTION,  "(new String('string primitive')).substring",   "function Function() {}",((new String('string primitive')).substring+"") );
 
-    array[item++] = new TestCase( SECTION,	"typeof new String(void 0)",	                "string",	        typeof new String(void 0) );
-    array[item++] = new TestCase( SECTION,	"var TESTSTRING = new String(void 0), TESTSTRING.myToString=Object.prototype.toString,TESTSTRING.myToString()", "[object String]",   (TESTSTRING = new String(void 0), TESTSTRING.myToString() ) );
+    array[item++] = new TestCase( SECTION,  "typeof new String(void 0)",                    "string",           typeof new String(void 0) );
+    array[item++] = new TestCase( SECTION,  "var TESTSTRING = new String(void 0), TESTSTRING.myToString=Object.prototype.toString,TESTSTRING.myToString()", "[object String]",   (TESTSTRING = new String(void 0), TESTSTRING.myToString() ) );
     array[item++] = new TestCase( SECTION,  "(new String(void 0)).valueOf()",               "undefined", (new String(void 0)).valueOf() );
     array[item++] = new TestCase( SECTION,  "(new String(void 0)).toString",               "function Function() {}",((new String(void 0)).toString+"") );
 
-    array[item++] = new TestCase( SECTION,	"typeof new String(null)",	            "string",	        typeof new String(null) );
-    array[item++] = new TestCase( SECTION,	"var TESTSTRING = new String(null), TESTSTRING.myToString=Object.prototype.toString,TESTSTRING.myToString()", "[object String]",   (TESTSTRING = new String(null), TESTSTRING.myToString() ) );
+    array[item++] = new TestCase( SECTION,  "typeof new String(null)",              "string",           typeof new String(null) );
+    array[item++] = new TestCase( SECTION,  "var TESTSTRING = new String(null), TESTSTRING.myToString=Object.prototype.toString,TESTSTRING.myToString()", "[object String]",   (TESTSTRING = new String(null), TESTSTRING.myToString() ) );
     array[item++] = new TestCase( SECTION,  "(new String(null)).valueOf()",         "null",             (new String(null)).valueOf() );
     array[item++] = new TestCase( SECTION,  "(new String(null)).valueOf",         (String.prototype.valueOf+""),  ((new String(null)).valueOf+"") );
 
-    array[item++] = new TestCase( SECTION,	"typeof new String(true)",	            "string",	        typeof new String(true) );
-    array[item++] = new TestCase( SECTION,	"var TESTSTRING = new String(true), TESTSTRING.myToString=Object.prototype.toString,TESTSTRING.myToString()", "[object String]",   (TESTSTRING = new String(true), TESTSTRING.myToString() ) );
+    array[item++] = new TestCase( SECTION,  "typeof new String(true)",              "string",           typeof new String(true) );
+    array[item++] = new TestCase( SECTION,  "var TESTSTRING = new String(true), TESTSTRING.myToString=Object.prototype.toString,TESTSTRING.myToString()", "[object String]",   (TESTSTRING = new String(true), TESTSTRING.myToString() ) );
     array[item++] = new TestCase( SECTION,  "(new String(true)).valueOf()",         "true",             (new String(true)).valueOf() );
     array[item++] = new TestCase( SECTION,  "(new String(true)).charAt",         (String.prototype.charAt+""),((new String(true)).charAt+"") );
 
-    array[item++] = new TestCase( SECTION,	"typeof new String(false)",	            "string",	        typeof new String(false) );
-    array[item++] = new TestCase( SECTION,	"var TESTSTRING = new String(false), TESTSTRING.myToString=Object.prototype.toString,TESTSTRING.myToString()", "[object String]",   (TESTSTRING = new String(false), TESTSTRING.myToString() ) );
+    array[item++] = new TestCase( SECTION,  "typeof new String(false)",             "string",           typeof new String(false) );
+    array[item++] = new TestCase( SECTION,  "var TESTSTRING = new String(false), TESTSTRING.myToString=Object.prototype.toString,TESTSTRING.myToString()", "[object String]",   (TESTSTRING = new String(false), TESTSTRING.myToString() ) );
     array[item++] = new TestCase( SECTION,  "(new String(false)).valueOf()",        "false",            (new String(false)).valueOf() );
     array[item++] = new TestCase( SECTION,  "(new String(false)).charCodeAt",        (String.prototype.charCodeAt+""),   ((new String(false)).charCodeAt+"") );
 
-    array[item++] = new TestCase( SECTION,	"typeof new String(new Boolean(true))",	       "string",	        typeof new String(new Boolean(true)) );
-    array[item++] = new TestCase( SECTION,	"var TESTSTRING = new String(new Boolean(true)), TESTSTRING.toString=Object.prototype.toString,TESTSTRING.toString()", "true",   (TESTSTRING = new String(new Boolean(true)), TESTSTRING.toString() ) );
+    array[item++] = new TestCase( SECTION,  "typeof new String(new Boolean(true))",        "string",            typeof new String(new Boolean(true)) );
+    array[item++] = new TestCase( SECTION,  "var TESTSTRING = new String(new Boolean(true)), TESTSTRING.toString=Object.prototype.toString,TESTSTRING.toString()", "true",   (TESTSTRING = new String(new Boolean(true)), TESTSTRING.toString() ) );
     array[item++] = new TestCase( SECTION,  "(new String(new Boolean(true))).valueOf()",   "true",              (new String(new Boolean(true))).valueOf() );
     array[item++] = new TestCase( SECTION,  "(new String(new Boolean(true))).indexOf",   (String.prototype.indexOf+""),((new String(new Boolean(true))).indexOf+"") );
 
-    array[item++] = new TestCase( SECTION,	"typeof new String()",	                        "string",	        typeof new String() );
-    array[item++] = new TestCase( SECTION,	"var TESTSTRING = new String(), TESTSTRING.myToString=Object.prototype.toString,TESTSTRING.myToString()", "[object String]",   (TESTSTRING = new String(), TESTSTRING.myToString() ) );
+    array[item++] = new TestCase( SECTION,  "typeof new String()",                          "string",           typeof new String() );
+    array[item++] = new TestCase( SECTION,  "var TESTSTRING = new String(), TESTSTRING.myToString=Object.prototype.toString,TESTSTRING.myToString()", "[object String]",   (TESTSTRING = new String(), TESTSTRING.myToString() ) );
     array[item++] = new TestCase( SECTION,  "(new String()).valueOf()",   '',                 (new String()).valueOf() );
     array[item++] = new TestCase( SECTION,  "(new String()).lastIndexOf",   (String.prototype.lastIndexOf+""),((new String()).lastIndexOf+"") );
 
-    array[item++] = new TestCase( SECTION,	"typeof new String('')",	    "string",	        typeof new String('') );
-    array[item++] = new TestCase( SECTION,	"var TESTSTRING = new String(''), TESTSTRING.myToString=Object.prototype.toString,TESTSTRING.myToString()", "[object String]",   (TESTSTRING = new String(''), TESTSTRING.myToString() ) );
+    array[item++] = new TestCase( SECTION,  "typeof new String('')",        "string",           typeof new String('') );
+    array[item++] = new TestCase( SECTION,  "var TESTSTRING = new String(''), TESTSTRING.myToString=Object.prototype.toString,TESTSTRING.myToString()", "[object String]",   (TESTSTRING = new String(''), TESTSTRING.myToString() ) );
     array[item++] = new TestCase( SECTION,  "(new String('')).valueOf()",   '',                 (new String('')).valueOf() );
     array[item++] = new TestCase( SECTION,  "(new String('')).split",   (String.prototype.split+""),((new String('')).split+"") );
-    array[item++] = new TestCase( SECTION,	"new String(true)",			    "true",new String( true) );
-    array[item++] = new TestCase( SECTION,	"new String(false)",		    "false",		new String( false ) );
-    array[item++] = new TestCase( SECTION,	"new String(new Array())",		"",			    new String( new Array()) );
-    array[item++] = new TestCase( SECTION,	"new String(new Array(1,2,3))",	"1,2,3",		new String( new Array(1,2,3)) );
+    array[item++] = new TestCase( SECTION,  "new String(true)",             "true",new String( true) );
+    array[item++] = new TestCase( SECTION,  "new String(false)",            "false",        new String( false ) );
+    array[item++] = new TestCase( SECTION,  "new String(new Array())",      "",             new String( new Array()) );
+    array[item++] = new TestCase( SECTION,  "new String(new Array(1,2,3))", "1,2,3",        new String( new Array(1,2,3)) );
     array[item++] = new TestCase( SECTION,    "new String( Number.NaN )",       "NaN",                  new String( Number.NaN ) );
     array[item++] = new TestCase( SECTION,    "new String( 0 )",                "0",                    new String( 0 ) );
     array[item++] = new TestCase( SECTION,    "new String( -0 )",               "0",                   new String( -0 ) );
@@ -151,7 +151,7 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "new String( .0000012345 )",              "0.0000012345",new String(.0000012345) );
     array[item++] = new TestCase( SECTION,    "new String( .00000012345 )",             "1.2345e-7",new String(.00000012345));
 
-    array[item++] = new TestCase( "15.5.2",	"new String()","",new String() );
+    array[item++] = new TestCase( "15.5.2", "new String()","",new String() );
 
     return ( array );
 }

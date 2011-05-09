@@ -74,13 +74,13 @@ var arr = new Array(1, 2, 3);
 
 var thisError = "Exception not thrown!";
 try{
-	EXTDCLASS.finSetArray(arr);
+    EXTDCLASS.finSetArray(arr);
 } catch (e) {
-	thisError = e.toString();
+    thisError = e.toString();
 } finally {
-	AddTestCase( "Access final method from outside of class",
-				REFERENCEERROR+1069,
-				referenceError(thisError) );
+    AddTestCase( "Access final method from outside of class",
+                REFERENCEERROR+1069,
+                referenceError(thisError) );
 }
 // ********************************************
 // access final method from a default
@@ -89,8 +89,8 @@ try{
 
 EXTDCLASS = new ExtPublicClassFin();
 AddTestCase( "Access final method from default method of sub class",
-			 "1,2,3",
-			 EXTDCLASS.testSubGetArray(new Array(1,2,3)).toString()	);
+             "1,2,3",
+             EXTDCLASS.testSubGetArray(new Array(1,2,3)).toString() );
 
 // ********************************************
 // access final method from a public
@@ -121,13 +121,13 @@ AddTestCase( "Access final method from final method of sub class", arr, EXTDCLAS
 // ********************************************
 thisError = "Exception not thrown!";
 try{
-	ExtPublicClassFin.pubStatSubGetArray();
+    ExtPublicClassFin.pubStatSubGetArray();
 } catch (e2) {
-	thisError = e2.toString();
+    thisError = e2.toString();
 } finally {
-	AddTestCase( "Access final property from outside of class",
-			TYPEERROR+1006,
-			typeError( thisError ) );
+    AddTestCase( "Access final property from outside of class",
+            TYPEERROR+1006,
+            typeError( thisError ) );
 }
 
 // ********************************************
@@ -138,13 +138,13 @@ try{
 EXTDCLASS = new ExtPublicClassFin();
 thisError = "Exception not thrown!";
 try{
-	EXTDCLASS.finArray;
+    EXTDCLASS.finArray;
 } catch (e3) {
-	thisError = e3.toString();
+    thisError = e3.toString();
 } finally {
-	AddTestCase( "Access final property from outside of class",
-		REFERENCEERROR+1069,
-		referenceError( thisError ) );
+    AddTestCase( "Access final property from outside of class",
+        REFERENCEERROR+1069,
+        referenceError( thisError ) );
 }
 
 // ********************************************

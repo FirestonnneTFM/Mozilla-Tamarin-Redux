@@ -46,44 +46,44 @@ startTest();                // leave this alone
 thisError = "no error";
 thisError1="no error";
 try{
-	throw new ArgumentError();
+    throw new ArgumentError();
 }catch(eo:ReferenceError){
-	thisError1 = "This is outer Reference error:"+"  "+eo.toString();
-	//print(thisError1);
+    thisError1 = "This is outer Reference error:"+"  "+eo.toString();
+    //print(thisError1);
 }catch(eo1:TypeError){
-	thisError1="This is outer TypeError:"+eo1.toString();
-	//print(thisError1);
+    thisError1="This is outer TypeError:"+eo1.toString();
+    //print(thisError1);
 }catch(eo2:ArgumentError){
-	thisError1="This is outer Argument Error:"+eo2.toString();
-	//print(thisError1);
-	try {
-		throw new EvalError();
-	}catch(ei1:ReferenceError){
-		thisError="Inner reference error:"+ei1.toString();
-	}catch(ei2:URIError){
-		thisError="This is inner URI Error:"+ei2.toString();
-	}catch(ei3:EvalError){
-		thisError="This is inner Eval Error:"+ei3.toString();
-	}catch(ei4:RangeError){
-		thisError="This is inner Range Error:"+ei4.toString();
-	}catch(ei5:SecurityError){
-		thisError="This is inner Security Error!!!"+ei5.toString();
-	}catch(ei6:ArgumentError){
-		thisError="This is inner Argument Error"+ei6.toString();
-	}
+    thisError1="This is outer Argument Error:"+eo2.toString();
+    //print(thisError1);
+    try {
+        throw new EvalError();
+    }catch(ei1:ReferenceError){
+        thisError="Inner reference error:"+ei1.toString();
+    }catch(ei2:URIError){
+        thisError="This is inner URI Error:"+ei2.toString();
+    }catch(ei3:EvalError){
+        thisError="This is inner Eval Error:"+ei3.toString();
+    }catch(ei4:RangeError){
+        thisError="This is inner Range Error:"+ei4.toString();
+    }catch(ei5:SecurityError){
+        thisError="This is inner Security Error!!!"+ei5.toString();
+    }catch(ei6:ArgumentError){
+        thisError="This is inner Argument Error"+ei6.toString();
+    }
 }catch(eo3:URIError){
-	thisError1="This is outer URI Error"+eo3.toString();
+    thisError1="This is outer URI Error"+eo3.toString();
 }catch(eo4:EvalError){
-	thisError1="This is outer Eval Error"+eo4.toString();
+    thisError1="This is outer Eval Error"+eo4.toString();
 }catch(eo5:RangeError){
-	thisError1="This is outer Range Error"+eo5.toString();
+    thisError1="This is outer Range Error"+eo5.toString();
 }catch(eo6:SecurityError){
-	thisError1="This is outer Security Error!!!"+eo6.toString();
+    thisError1="This is outer Security Error!!!"+eo6.toString();
 }catch(eo7:Error){
-	thisError="This is inner Error:"+eo7.toString();
+    thisError="This is inner Error:"+eo7.toString();
 }finally{
-	AddTestCase( "Testing Nested try block with multiple catch block inside the third catch block of the outer try block", "This is outer finally:This is outer Argument Error:ArgumentError","This is outer finally:"+ thisError1 );
+    AddTestCase( "Testing Nested try block with multiple catch block inside the third catch block of the outer try block", "This is outer finally:This is outer Argument Error:ArgumentError","This is outer finally:"+ thisError1 );
 }
 
 test();       // leave this alone.  this executes the test cases and
-			  // displays results.
+              // displays results.

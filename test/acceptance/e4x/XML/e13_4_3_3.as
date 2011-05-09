@@ -54,13 +54,13 @@ AddTestCase( "XML.ignoreProcessingInstructions = false, XML.ignoreProcessingInst
 AddTestCase( "XML.ignoreProcessingInstructions = true, XML.ignoreProcessingInstructions", true, (XML.ignoreProcessingInstructions = true, XML.ignoreProcessingInstructions));
 
 // b) if ignoreProcessingInstructions is true, XML processing instructions are ignored when construction the new XML objects
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.toString()", "<XML><TEAM>Giants</TEAM><CITY>San Francisco</CITY></XML>", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.toString()", "<XML><TEAM>Giants</TEAM><CITY>San Francisco</CITY></XML>",
              (XML.ignoreProcessingInstructions = true, MYXML = new XML(xmlDoc), MYXML.toString() ));
              
-// !!@ note that the "<?xml version=\"1.0\"?>" tag magically disappeared.             
+// !!@ note that the "<?xml version=\"1.0\"?>" tag magically disappeared.
              
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.toString() with ignoreProcessingInstructions=false", 
-		"<XML><?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?><TEAM>Giants</TEAM><CITY>San Francisco</CITY></XML>", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.toString() with ignoreProcessingInstructions=false",
+        "<XML><?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?><TEAM>Giants</TEAM><CITY>San Francisco</CITY></XML>",
         (XML.ignoreProcessingInstructions = false, MYXML = new XML(xmlDoc), MYXML.toString() ));
 
 
@@ -69,12 +69,12 @@ XML.ignoreProcessingInstructions = false;
 var MYXML = new XML(xmlDoc); // this XML node has processing instructions
 XML.ignoreProcessingInstructions = true;
 var xml2 = new XML(MYXML); // this XML tree should not have processing instructions
-AddTestCase( "xml2 = new XML(MYXML), xml2.toString()", "<XML><TEAM>Giants</TEAM><CITY>San Francisco</CITY></XML>", 
+AddTestCase( "xml2 = new XML(MYXML), xml2.toString()", "<XML><TEAM>Giants</TEAM><CITY>San Francisco</CITY></XML>",
              (xml2.toString()) );
 XML.ignoreProcessingInstructions = false;
 var xml3 = new XML(MYXML); // this XML tree will have processing instructions
-AddTestCase( "xml3 = new XML(MYXML), xml3.toString()", 
-		"<XML><?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?><TEAM>Giants</TEAM><CITY>San Francisco</CITY></XML>",
+AddTestCase( "xml3 = new XML(MYXML), xml3.toString()",
+        "<XML><?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?><TEAM>Giants</TEAM><CITY>San Francisco</CITY></XML>",
              (xml3.toString()) );
 
 

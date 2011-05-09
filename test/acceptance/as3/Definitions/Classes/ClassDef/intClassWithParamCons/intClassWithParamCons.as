@@ -57,7 +57,7 @@ package testInternalClassWithParamCons{
        public class wrapintClassWithParamCons{
        
 
-        var intWithParamCons:intClassWithParamCons=new intClassWithParamCons(20,40); 
+        var intWithParamCons:intClassWithParamCons=new intClassWithParamCons(20,40);
                                   
 
                                  public function getAdd(){

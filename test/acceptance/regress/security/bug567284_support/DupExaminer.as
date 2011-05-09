@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 package {
-   public class DupExaminer { 
-      function examine() { return new Dup().a; } 
+   public class DupExaminer {
+      function examine() { return new Dup().a; }
    }
 };

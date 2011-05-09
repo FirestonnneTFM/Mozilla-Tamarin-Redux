@@ -77,26 +77,26 @@ AddTestCase( "typeof QName('name')", "object", typeof QName('name') );
 //AddTestCase( "QName('name').__proto__", Namespace.prototype, QName('name').__proto__ );
 
 // If one parameter is QName, same value is returned
-AddTestCase ("foo = QName('foo'), bar = Qname(foo), bar === foo", true, 
-	(foo = QName("foo"), bar = QName(foo), bar === foo));
+AddTestCase ("foo = QName('foo'), bar = Qname(foo), bar === foo", true,
+    (foo = QName("foo"), bar = QName(foo), bar === foo));
 
 // If one parameter is QName but there is a Namespace param, different object is returned
-AddTestCase ("foo = QName('foo'), bar = Qname(\"\", foo), bar === foo", false, 
-	(foo = QName("foo"), bar = QName("", foo), bar === foo));
+AddTestCase ("foo = QName('foo'), bar = Qname(\"\", foo), bar === foo", false,
+    (foo = QName("foo"), bar = QName("", foo), bar === foo));
 
 
-//Two values are supplied 
-AddTestCase( "ns = new Namespace('duh'), QName(ns, 'name')", 
-	"duh::name",
-	(ns = new Namespace('duh'), QName(ns, 'name').toString() ));
-	
-AddTestCase( "ns = new Namespace('duh'), typeof QName(ns, 'name')", 
-	"object",
-	( ns = new Namespace('duh'), typeof QName(ns, 'name') ));
+//Two values are supplied
+AddTestCase( "ns = new Namespace('duh'), QName(ns, 'name')",
+    "duh::name",
+    (ns = new Namespace('duh'), QName(ns, 'name').toString() ));
+    
+AddTestCase( "ns = new Namespace('duh'), typeof QName(ns, 'name')",
+    "object",
+    ( ns = new Namespace('duh'), typeof QName(ns, 'name') ));
 
-AddTestCase( "ns = new Namespace('duh'), typeof QName(ns, 'name')", 
-	true,
-	( ns = new Namespace('duh'), QName(ns, 'name') instanceof QName));
+AddTestCase( "ns = new Namespace('duh'), typeof QName(ns, 'name')",
+    true,
+    ( ns = new Namespace('duh'), QName(ns, 'name') instanceof QName));
 
 
 END();

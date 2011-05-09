@@ -48,57 +48,57 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
-    var MYVAR; 
-    if ( true ) 
-        MYVAR='PASSED'; 
-    else 
+    var item = 0;
+    var MYVAR;
+    if ( true )
+        MYVAR='PASSED';
+    else
         MYVAR= 'FAILED';
     array[item++] = new TestCase(   SECTION,
                                     "var MYVAR; if ( true ) MYVAR='PASSED'; else MYVAR= 'FAILED';",
                                     "PASSED",
                                      MYVAR);
-    var MYVAR; 
-    if ( false ) 
-	    MYVAR='FAILED'; 
-    else 
-    	MYVAR= 'PASSED';
+    var MYVAR;
+    if ( false )
+        MYVAR='FAILED';
+    else
+        MYVAR= 'PASSED';
     array[item++] = new TestCase(  SECTION,
                                     "var MYVAR; if ( false ) MYVAR='FAILED'; else MYVAR= 'PASSED';",
                                     "PASSED",
                                      MYVAR);
-    var MYVAR; 
+    var MYVAR;
     if ( new Boolean(true) )
-        MYVAR='PASSED'; 
-    else 
+        MYVAR='PASSED';
+    else
         MYVAR= 'FAILED';
     array[item++] = new TestCase(   SECTION,
                                     "var MYVAR; if ( new Boolean(true) ) MYVAR='PASSED'; else MYVAR= 'FAILED';",
                                     "PASSED",
                                      MYVAR);
-    var MYVAR; 
-    if ( new Boolean(false) ) 
-        MYVAR='PASSED'; 
-    else 
+    var MYVAR;
+    if ( new Boolean(false) )
+        MYVAR='PASSED';
+    else
         MYVAR= 'FAILED';
     array[item++] = new TestCase(  SECTION,
                                     "var MYVAR; if ( new Boolean(false) ) MYVAR='PASSED'; else MYVAR= 'FAILED';",
                                     "FAILED",
                                     MYVAR);
     var MYVAR;
-    if ( 1 ) 
+    if ( 1 )
         MYVAR='PASSED';
-    else 
+    else
         MYVAR= 'FAILED';
     array[item++] = new TestCase(   SECTION,
                                     "var MYVAR; if ( 1 ) MYVAR='PASSED'; else MYVAR= 'FAILED';",
                                     "PASSED",
                                     MYVAR);
-	var MYVAR; 
-	if ( 0 ) 
-		MYVAR='FAILED'; 
-	else 
-		MYVAR= 'PASSED';
+    var MYVAR;
+    if ( 0 )
+        MYVAR='FAILED';
+    else
+        MYVAR= 'PASSED';
     array[item++] = new TestCase(  SECTION,
                                     "var MYVAR; if ( 0 ) MYVAR='FAILED'; else MYVAR= 'PASSED';",
                                     "PASSED",

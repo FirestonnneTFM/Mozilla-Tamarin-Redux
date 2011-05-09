@@ -56,7 +56,7 @@ function addtestcases()
   printStatus (summary);
 
   try
-  { 
+  {
     var chars = '0123456789abcdef';
     var size = 1000;
     var mult = 100;

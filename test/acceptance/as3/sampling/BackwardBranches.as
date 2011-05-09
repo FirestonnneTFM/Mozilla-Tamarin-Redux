@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/* testcases: 
+/* testcases:
  *   backward branches: execute loop to verify significant number of samples
  */
 
@@ -54,7 +54,7 @@ package {
     writeHeaderToLog("Sampling backward branches tests");
 
     var callcount:uint=0;
-    var samplescount:uint=0;    
+    var samplescount:uint=0;
     var stoppagetime=0;
 
     function calculatepi(n:uint):Number {
@@ -83,7 +83,7 @@ package {
     setSamplerCallback(samplecallback);
     sampleInternalAllocs(false);
     startSampling();
-    var totaltime=getTimer();    
+    var totaltime=getTimer();
     var result=calculatepi(1000);
     pauseSampling();
     totaltime=getTimer()-totaltime-stoppagetime;

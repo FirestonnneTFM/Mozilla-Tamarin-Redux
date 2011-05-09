@@ -39,30 +39,30 @@
 package InternalClassImpDefInt{
 use namespace ns;
 
-	internal class InternalClass implements DefaultInt{
-		
-	  public  function deffunc():String{  			     //Default method
-			return"PASSED";
-		}
+    internal class InternalClass implements DefaultInt{
+        
+      public  function deffunc():String{                 //Default method
+            return"PASSED";
+        }
 
-		public function pubFunc():Boolean{	       //Public method
-				return true;
-		}	
-			
-		ns function nsFunc(a="test"):int{	       //Namespace method
-			return a.length;	
-		} 
-		
-	}
+        public function pubFunc():Boolean{         //Public method
+                return true;
+        }
+            
+        ns function nsFunc(a="test"):int{          //Namespace method
+            return a.length;
+        }
+        
+    }
 
 
-	public class InternalClassAccesor extends InternalClass{
-	//use namespace ns;
-		public  function accdeffunc(){return deffunc();}
-		// access default function deffunc
-        	
-		public function accnsFunc(a="test"){return ns::nsFunc(a);}
-		// access default function nsFunc
-       } 	
-	
-}  
+    public class InternalClassAccesor extends InternalClass{
+    //use namespace ns;
+        public  function accdeffunc(){return deffunc();}
+        // access default function deffunc
+            
+        public function accnsFunc(a="test"){return ns::nsFunc(a);}
+        // access default function nsFunc
+       }
+    
+}

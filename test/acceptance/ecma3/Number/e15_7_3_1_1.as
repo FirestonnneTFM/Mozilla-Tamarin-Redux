@@ -51,8 +51,8 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    var NUM_PROT = Number.prototype; 
-    delete( Number.prototype ); 
+    var NUM_PROT = Number.prototype;
+    delete( Number.prototype );
     array[item++] = new TestCase(SECTION, "var NUM_PROT = Number.prototype; delete( Number.prototype ); NUM_PROT == Number.prototype",    true, NUM_PROT == Number.prototype );
     array[item++] = new TestCase(SECTION, "delete( Number.prototype )",          false,       delete( Number.prototype ) );
 

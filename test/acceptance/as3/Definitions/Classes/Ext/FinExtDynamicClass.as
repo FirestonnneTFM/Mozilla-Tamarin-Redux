@@ -51,8 +51,8 @@ import DynamicClass.*;
 
 
 
-var SECTION = "Definitions\Ext";       			// provide a document reference (ie, ECMA section)
-var VERSION = "AS3";  					// Version of JavaScript or ECMA
+var SECTION = "Definitions\Ext";                // provide a document reference (ie, ECMA section)
+var VERSION = "AS3";                    // Version of JavaScript or ECMA
 var TITLE   = "Final Class Extends Dynamic Class Default Methods";      // Provide ECMA section title or a description
 //var BUGNUMBER = "";
 
@@ -244,7 +244,7 @@ DynamicClassInner.prototype.pObj = 2;
 child = new FinExtDynamicClass();
 AddTestCase("*** Try overriding parent property through prototype object, verify child object has correct value ***", 1, child.pObj);
 
-test();       		// Leave this function alone.
-			// This function is for executing the test case and then
-			// displaying the result on to the console or the LOG file.
+test();             // Leave this function alone.
+            // This function is for executing the test case and then
+            // displaying the result on to the console or the LOG file.
 }

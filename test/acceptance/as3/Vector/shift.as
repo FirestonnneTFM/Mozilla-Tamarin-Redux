@@ -50,45 +50,45 @@ writeHeaderToLog( " Vector.shift()");
 
 var v1=new Vector.<int>();
 AddTestCase(
-		"shift on empty vector returns undefined",
-		0,
-		v1.shift());
+        "shift on empty vector returns undefined",
+        0,
+        v1.shift());
 AddTestCase(
-		"shift on empty vector original vector is empty",
-		"",
-		v1.toString());
+        "shift on empty vector original vector is empty",
+        "",
+        v1.toString());
 
 var v1=new Vector.<int>();
 v1.push(10);
 AddTestCase(
-		"shift on single element vector returns element[0]",
-		10,
-		v1.shift());
+        "shift on single element vector returns element[0]",
+        10,
+        v1.shift());
 AddTestCase(
-		"shift on single element vector removes first element",
-		"",
-		v1.toString());
+        "shift on single element vector removes first element",
+        "",
+        v1.toString());
 
 var v1=new Vector.<int>();
 for (var i=0;i<5;i++) v1[i]=10+i;
 AddTestCase(
-		"shift on vector returns element[0]",
-		10,
-		v1.shift());
+        "shift on vector returns element[0]",
+        10,
+        v1.shift());
 AddTestCase(
-		"shift on vector removes first element",
-		"11,12,13,14",
-		v1.toString());
+        "shift on vector removes first element",
+        "11,12,13,14",
+        v1.toString());
 
 var v1=new Vector.<int>(10);
 AddTestCase(
-		"shift on initialized vector returns element[0]",
-		0,
-		v1.shift());
+        "shift on initialized vector returns element[0]",
+        0,
+        v1.shift());
 AddTestCase(
-		"shift on initialized vector removes first element",
-		"0,0,0,0,0,0,0,0,0",
-		v1.toString());
+        "shift on initialized vector removes first element",
+        "0,0,0,0,0,0,0,0,0",
+        v1.toString());
 
 var v1=new Vector.<int>(10,true);
 for (var i=0;i<10;i++) v1[i]=10+i;
@@ -100,14 +100,14 @@ try {
   errormsg=e.toString();
 }
 AddTestCase(
-		"shift on fixed vector throws exception",
-		"RangeError: Error #1126",
-		parseError(errormsg,"RangeError: Error #1126".length));
+        "shift on fixed vector throws exception",
+        "RangeError: Error #1126",
+        parseError(errormsg,"RangeError: Error #1126".length));
 
 AddTestCase(
-		"shift on fixed vector does not shift",
-		"10,11,12,13,14,15,16,17,18,19",
-		v1.toString());
+        "shift on fixed vector does not shift",
+        "10,11,12,13,14,15,16,17,18,19",
+        v1.toString());
 
 AddTestCase("Shift string vector",
             "h",

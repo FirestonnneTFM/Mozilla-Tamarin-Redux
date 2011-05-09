@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 /**
    File Name:    initializerWs.as
-   Description:  
+   Description:
      Test whitespace behavior of Vector initializers.
 */
 var SECTION="";
@@ -46,7 +46,7 @@ startTest();
 
 writeHeaderToLog( " Vector-initializers-whitespace");
 
-var x:Vector.<int> = 
+var x:Vector.<int> =
 
 
  new
@@ -62,8 +62,8 @@ var x:Vector.<int> =
   ];
 
 AddTestCase("spraddled initializer",
-		"1,2,3",
-		x.toString());
+        "1,2,3",
+        x.toString());
 
 var v:Vector.<XML> = new <  XML
 >

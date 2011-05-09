@@ -56,26 +56,26 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 // 'abc\bdef'.match(new RegExp('.[\b].'))
 testcases[index++] = new TestCase ( SECTION, "'abc\bdef'.match(new RegExp('.[\\b].'))",
-	       String(["c\bd"]), String('abc\bdef'.match(new RegExp('.[\\b].'))));
+           String(["c\bd"]), String('abc\bdef'.match(new RegExp('.[\\b].'))));
 
 // 'abc\\bdef'.match(new RegExp('.[\b].'))
 testcases[index++] = new TestCase ( SECTION, "'abc\\bdef'.match(new RegExp('.[\\b].'))",
-	       null, 'abc\\bdef'.match(new RegExp('.[\\b].')));
+           null, 'abc\\bdef'.match(new RegExp('.[\\b].')));
 
 // 'abc\b\b\bdef'.match(new RegExp('c[\b]{3}d'))
 testcases[index++] = new TestCase ( SECTION, "'abc\b\b\bdef'.match(new RegExp('c[\\b]{3}d'))",
-	       String(["c\b\b\bd"]), String('abc\b\b\bdef'.match(new RegExp('c[\\b]{3}d'))));
+           String(["c\b\b\bd"]), String('abc\b\b\bdef'.match(new RegExp('c[\\b]{3}d'))));
 
 // 'abc\bdef'.match(new RegExp('[^\\[\b\\]]+'))
 testcases[index++] = new TestCase ( SECTION, "'abc\bdef'.match(new RegExp('[^\\[\\b\\]]+'))",
-	       String(["abc"]), String('abc\bdef'.match(new RegExp('[^\\[\\b\\]]+'))));
+           String(["abc"]), String('abc\bdef'.match(new RegExp('[^\\[\\b\\]]+'))));
 
 // 'abcdef'.match(new RegExp('[^\\[\b\\]]+'))
 testcases[index++] = new TestCase ( SECTION, "'abcdef'.match(new RegExp('[^\\[\\b\\]]+'))",
-	       String(["abcdef"]), String('abcdef'.match(new RegExp('[^\\[\\b\\]]+'))));
+           String(["abcdef"]), String('abcdef'.match(new RegExp('[^\\[\\b\\]]+'))));
 
 // 'abcdef'.match(/[^\[\b\]]+/)
 testcases[index++] = new TestCase ( SECTION, "'abcdef'.match(/[^\\[\\b\\]]+/)",
-	       String(["abcdef"]), String('abcdef'.match(/[^\[\b\]]+/)));
+           String(["abcdef"]), String('abcdef'.match(/[^\[\b\]]+/)));
 
 test();

@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package PublicFunctionBody {
-	public function noReturnParamsInner(s:String, b:Boolean) { return s; }
-	public function noReturnParams(s:String, b:Boolean) { return noReturnParamsInner(s,b); }
+    public function noReturnParamsInner(s:String, b:Boolean) { return s; }
+    public function noReturnParams(s:String, b:Boolean) { return noReturnParamsInner(s,b); }
 }
 

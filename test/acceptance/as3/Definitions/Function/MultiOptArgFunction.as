@@ -38,17 +38,17 @@
 import MultiOptArgFunction.*
 
 class MultiOptArgFunctionClass {
- 	function returnArguments(s:String = "Str3", b:Boolean = true, n:Number = 30) {
- 		str = s;
- 		bool = b;
- 	  	num = n;
- 	}
+    function returnArguments(s:String = "Str3", b:Boolean = true, n:Number = 30) {
+        str = s;
+        bool = b;
+        num = n;
+    }
 }
 
 function returnArgumentsNoPackage(s:String = "Str4", b:Boolean = false, n:Number = 40) {
-	str = s;
-	bool = b;
-	num = n;
+    str = s;
+    bool = b;
+    num = n;
 }
 
 

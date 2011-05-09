@@ -37,31 +37,31 @@
 
 package DefaultClass {
 
-	import DefaultClass.*;
+    import DefaultClass.*;
 
-	dynamic class DynExtDefaultOverRidePublicInner extends DefaultClass {
+    dynamic class DynExtDefaultOverRidePublicInner extends DefaultClass {
 
-		public var orSetCalled = false;
-		public var orGetCalled = false;
-	
+        public var orSetCalled = false;
+        public var orGetCalled = false;
+    
 
-		// *******************************
-		// override a public method
-		// with a public method
-		// *******************************
+        // *******************************
+        // override a public method
+        // with a public method
+        // *******************************
 
-		override public function setPubBoolean( b:Boolean ) {
-			orSetCalled = true;
-			boolean = b;
-		}
+        override public function setPubBoolean( b:Boolean ) {
+            orSetCalled = true;
+            boolean = b;
+        }
 
-		override public function getPubBoolean(): Boolean {
-			orGetCalled = true;
-			return this.boolean;
-		}
+        override public function getPubBoolean(): Boolean {
+            orGetCalled = true;
+            return this.boolean;
+        }
 
-	}
+    }
 
-	//public wrapper
-	public dynamic class DynExtDefaultOverRidePublic extends DynExtDefaultOverRidePublicInner {}
+    //public wrapper
+    public dynamic class DynExtDefaultOverRidePublic extends DynExtDefaultOverRidePublicInner {}
 }

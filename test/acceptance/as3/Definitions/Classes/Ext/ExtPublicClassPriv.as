@@ -74,13 +74,13 @@ var arr = new Array(1, 2, 3);
 EXTDCLASS = new ExtPublicClass();
 var thisError = "no exception thrown!";
 try {
-	EXTDCLASS.testSubGetSetArray(arr);
+    EXTDCLASS.testSubGetSetArray(arr);
 } catch (e1) {
-	thisError = e1.toString();
+    thisError = e1.toString();
 } finally {
-	AddTestCase( "Access private method from a default method of a sub class",
-					REFERENCEERROR+1069,
-					referenceError( thisError ) );
+    AddTestCase( "Access private method from a default method of a sub class",
+                    REFERENCEERROR+1069,
+                    referenceError( thisError ) );
 }
 
 
@@ -93,13 +93,13 @@ try {
 EXTDCLASS = new ExtPublicClass();
 thisError = "no exception thrown!";
 try {
-	EXTDCLASS.pubSubSetArray(arr);
+    EXTDCLASS.pubSubSetArray(arr);
 } catch (e2) {
-	thisError = e2.toString();
+    thisError = e2.toString();
 } finally {
-	AddTestCase( "Access private method from a public method of a sub class",
-					REFERENCEERROR+1069,
-					referenceError( thisError ) );
+    AddTestCase( "Access private method from a public method of a sub class",
+                    REFERENCEERROR+1069,
+                    referenceError( thisError ) );
 }
 
 
@@ -113,13 +113,13 @@ try {
 EXTDCLASS = new ExtPublicClass();
 thisError = "no exception thrown!";
 try {
-	EXTDCLASS.testPrivSubArray(arr);
+    EXTDCLASS.testPrivSubArray(arr);
 } catch (e3) {
-	thisError = e3.toString();
+    thisError = e3.toString();
 } finally {
-	AddTestCase( "Access private method from a private method of a sub class",
-					REFERENCEERROR+1069,
-					referenceError( thisError ) );
+    AddTestCase( "Access private method from a private method of a sub class",
+                    REFERENCEERROR+1069,
+                    referenceError( thisError ) );
 }
 
 
@@ -132,13 +132,13 @@ try {
 EXTDCLASS = new ExtPublicClass();
 thisError = "no exception thrown!";
 try {
-	EXTDCLASS.testSubGetSetDPArray(arr);
+    EXTDCLASS.testSubGetSetDPArray(arr);
 } catch (e4) {
-	thisError = e4.toString();
+    thisError = e4.toString();
 } finally {
-	AddTestCase( "Access private method from a public method of a sub class",
-					REFERENCEERROR+1069,
-					referenceError( thisError ) );
+    AddTestCase( "Access private method from a public method of a sub class",
+                    REFERENCEERROR+1069,
+                    referenceError( thisError ) );
 }
 
 
@@ -150,13 +150,13 @@ try {
 EXTDCLASS = new ExtPublicClass();
 thisError = "no exception thrown!";
 try {
-	EXTDCLASS.pubSubGetDPArray();
+    EXTDCLASS.pubSubGetDPArray();
 } catch (e5) {
-	thisError = e5.toString();
+    thisError = e5.toString();
 } finally {
-	AddTestCase( "Access private method from a public method of a sub class",
-					REFERENCEERROR+1069,
-					referenceError( thisError ) );
+    AddTestCase( "Access private method from a public method of a sub class",
+                    REFERENCEERROR+1069,
+                    referenceError( thisError ) );
 }
 
 
@@ -170,13 +170,13 @@ EXTDCLASS = new ExtPublicClass();
 
 thisError = "no Exception thrown!";
 try{
-	ExtPublicClass.pubStatSubGetDPArray();
+    ExtPublicClass.pubStatSubGetDPArray();
 } catch (e10){
-	thisError = e10.toString();
+    thisError = e10.toString();
 } finally {
-	AddTestCase( "access private property from public static method of sub class",
-					TYPEERROR+1006,
-					typeError( thisError ) );
+    AddTestCase( "access private property from public static method of sub class",
+                    TYPEERROR+1006,
+                    typeError( thisError ) );
 }
 
 test();       // leave this alone.  this executes the test cases and

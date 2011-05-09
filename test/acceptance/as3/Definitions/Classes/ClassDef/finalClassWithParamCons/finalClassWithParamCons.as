@@ -42,7 +42,7 @@ package testfinalClassWithParamCons{
 
                         public function finalClassWithParamCons(a:Number,b:Number){
                                                                      x=a;
-                                                                     y=b;            
+                                                                     y=b;
 
                                                                                 }
                                         

@@ -58,7 +58,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;  
+    var item = 0;
     var UBound = 0;
     var status = '';
     var statusitems = [];

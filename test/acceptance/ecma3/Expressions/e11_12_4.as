@@ -45,11 +45,11 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     // the following expression should NOT be an error in JS.
-	true ? MYVAR1 = 'PASSED' : MYVAR1 = 'FAILED'
-	array[item++] = new TestCase( SECTION,
+    true ? MYVAR1 = 'PASSED' : MYVAR1 = 'FAILED'
+    array[item++] = new TestCase( SECTION,
                                     "true ? MYVAR1 = 'PASSED' : MYVAR1 = 'FAILED'; MYVAR1",
                                     "PASSED",
                                     MYVAR1);

@@ -44,7 +44,7 @@ START("11.1.4 - XML Initializer");
 
 XML.ignoreWhitespace = true;
 person = <person><name>John</name><age>25</age></person>;
-TEST(1, <person><name>John</name><age>25</age></person>, person);    
+TEST(1, <person><name>John</name><age>25</age></person>, person);
 
 e = <employees>
     <employee id = "1"><name>Joe</name><age>20</age></employee>
@@ -102,7 +102,7 @@ TEST(14, "<name id=\"5\">Fred</name>", x1.toXMLString());
 
 
 // Test {} on XML and XMLList types
-x1 = 
+x1 =
 <rectangle>
     <length>30</length>
     <width>50</width>
@@ -146,7 +146,7 @@ content = "Fred";
  
 var xml1 = <{tagname} {attributename}={attributevalue}>{content}</{tagname}>;
 
-AddTestCase( "x = <{tagname} {attributename}={attributevalue}>{content}</{tagname}>", true, 
+AddTestCase( "x = <{tagname} {attributename}={attributevalue}>{content}</{tagname}>", true,
            (  x1 = new XML('<name id="5">Fred</name>'), (xml1 == x1)));
            
 
@@ -158,37 +158,37 @@ var xml2;
 var xml2string = "<employees>";
 var e = new Array();
 for (i = 0; i < 10; i++) {
-	e[i] = <employee id={i}>			
-		<name>{names[i].toUpperCase()}</name>	
-		<age>{ages[i]}</age>			
-	</employee>;
-	xml2string += "<employee id=\"" + i + "\"><name>" + names[i].toUpperCase() + "</name><age>" + ages[i] + "</age></employee>";
+    e[i] = <employee id={i}>
+        <name>{names[i].toUpperCase()}</name>
+        <age>{ages[i]}</age>
+    </employee>;
+    xml2string += "<employee id=\"" + i + "\"><name>" + names[i].toUpperCase() + "</name><age>" + ages[i] + "</age></employee>";
 }
 xml2 = <employees>{e[0]}{e[1]}{e[2]}{e[3]}{e[4]}{e[5]}{e[6]}{e[7]}{e[8]}{e[9]}</employees>;
 xml2string += "</employees>";
 
-AddTestCase( "Evaluating expressions in a for loop", true, 
+AddTestCase( "Evaluating expressions in a for loop", true,
            (  x1 = new XML(xml2string), (xml2 == x1)));
           
 
 var xml3 = <person><name>John</name><age>25</age></person>;
 
-AddTestCase( "x = <person><name>John</name><age>25</age></person>", true, 
+AddTestCase( "x = <person><name>John</name><age>25</age></person>", true,
            (  x1 = new XML(xml3.toString()), (xml3 == x1)));
 
 var xml4 = new XML("<xml><![CDATA[<hey>]]></xml>");
 
-AddTestCase( "<xml><![CDATA[<hey>]]></xml>", true, 
+AddTestCase( "<xml><![CDATA[<hey>]]></xml>", true,
            (  x1 = new XML("<xml><![CDATA[<hey>]]></xml>"), (xml4 == x1)));
           
 xml5 = <xml><b>heh            hey</b></xml>;
 XML.ignoreWhitespace = true;
 
-AddTestCase( "<xml><b>heh            hey</b></xml>", true, 
+AddTestCase( "<xml><b>heh            hey</b></xml>", true,
            (  x1 = new XML("<xml><b>heh            hey</b></xml>"), (xml5 == x1)));
 
 
-AddTestCase( "x = new XML(\"\"), xml = \"\", (xml == x)", true, 
+AddTestCase( "x = new XML(\"\"), xml = \"\", (xml == x)", true,
            (  x1 = new XML(""), xml = "", (xml == x1)));
            
 

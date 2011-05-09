@@ -98,7 +98,7 @@ function getTestCases() {
     // properties of the Function object
 
     array[item++] = new TestCase( SECTION,  "typeof Function.prototype",              "function",typeof Function.prototype );
-    array[item++] = new TestCase( SECTION,  "typeof Function['prototype']",		   "function",typeof Function['prototype'] );
+    array[item++] = new TestCase( SECTION,  "typeof Function['prototype']",        "function",typeof Function['prototype'] );
     array[item++] = new TestCase( SECTION,  "typeof Function.prototype.toString",     "function",typeof Function.prototype.toString );
     array[item++] = new TestCase( SECTION,  "typeof Function.prototype['toString']",     "function",typeof Function.prototype['toString'] );
     array[item++] = new TestCase( SECTION,  "typeof Function.prototype.length",       "number", typeof Function.prototype.length);
@@ -341,7 +341,7 @@ function getTestCases() {
                                         RESULT );
 
 
-	RESULT = typeof (PROPERTY[i].object['PROPERTY[i].name']);
+    RESULT = typeof (PROPERTY[i].object['PROPERTY[i].name']);
 
 
         array[item++] = new TestCase( SECTION,

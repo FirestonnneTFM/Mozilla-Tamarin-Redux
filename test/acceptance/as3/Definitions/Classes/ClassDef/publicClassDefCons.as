@@ -47,7 +47,7 @@ var BUGNUMBER = "";
 startTest();                // leave this alone
 
 
-var currentDate = new Date(0);                     
+var currentDate = new Date(0);
 var DefCons:publicClassDefCons = new publicClassDefCons();
 //print (DefCons.Add());
 //print (DefCons.wrapprivchangeval());

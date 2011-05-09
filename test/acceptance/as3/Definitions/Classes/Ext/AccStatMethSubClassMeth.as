@@ -72,21 +72,21 @@ AddTestCase( "*** Access the static method via base class ***", 1, 1 );
 AddTestCase( "BaseClass.echo('hello')", "hello", BaseClass.echo("hello") );
 
 // ********************************************
-// Access the static method via sub class, 
+// Access the static method via sub class,
 // using unadorned "foo()"
 // ********************************************
 AddTestCase( "*** Access the static method via sub class using unadorned method call ***", 1, 1 );
 AddTestCase( "obj.callEcho('world')", "world", obj.callEcho("world") );
 
 // ********************************************
-// Access the static method via sub class, 
+// Access the static method via sub class,
 // using "BaseClass.foo()"
 // ********************************************
 AddTestCase( "*** Access the static method via sub class using base class method call ***", 1, 1 );
 AddTestCase( "obj.callBaseEcho('here')", "here", obj.callBaseEcho("here") );
 
 // ********************************************
-// Access the static method via sub class using 
+// Access the static method via sub class using
 // subclass.foo() in a method
 // ********************************************
 // no longer legal as of d359

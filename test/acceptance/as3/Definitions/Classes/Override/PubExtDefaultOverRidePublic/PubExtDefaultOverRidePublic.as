@@ -37,26 +37,26 @@
 
 package DefaultClass {
 
-	import DefaultClass.*;
+    import DefaultClass.*;
 
-	public class PubExtDefaultOverRidePublic extends DefaultClass {
+    public class PubExtDefaultOverRidePublic extends DefaultClass {
 
-		public var orSet = false;
-		public var orGet = false;
+        public var orSet = false;
+        public var orGet = false;
 
-		// *******************************
-		// override a public method
-		// with a public method
-		// *******************************
+        // *******************************
+        // override a public method
+        // with a public method
+        // *******************************
 
-		override public function getPubBoolean(): Boolean {
-			orGet = true;
-			return this.boolean;
-		}
+        override public function getPubBoolean(): Boolean {
+            orGet = true;
+            return this.boolean;
+        }
 
-		override public function setPubBoolean( b:Boolean ) {
-			orSet = true;
-			this.boolean = b;
-		}
-	}
+        override public function setPubBoolean( b:Boolean ) {
+            orSet = true;
+            this.boolean = b;
+        }
+    }
 }

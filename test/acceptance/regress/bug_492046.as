@@ -36,16 +36,16 @@
  * ***** END LICENSE BLOCK ***** */
 
 class State {
-	var next = null;
+    var next = null;
 }
 
 const depths = new Vector.<State>(2,true);
 
 function expand(depth)
 {
-	var x = new State;
-	x.next = depths[depth];
-	return(x);
+    var x = new State;
+    x.next = depths[depth];
+    return(x);
 }
 
 var TITLE   = "Regression Testcase for Bug 492046: null value assigned to slot raises assertion failure";

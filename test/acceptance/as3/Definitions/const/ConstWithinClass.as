@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SECTION = "Definitions\const";       		// provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";  			// Version of JavaScript or ECMA
-var TITLE   = "const variable inside a class";       	// Provide ECMA section title or a description
+var SECTION = "Definitions\const";              // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
+var TITLE   = "const variable inside a class";          // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
 startTest();                // leave this alone
@@ -48,16 +48,16 @@ startTest();                // leave this alone
 // Test case for checking the CONST keyword.
 
 class myConsts {
-	
-	const myVar = 10;
+    
+    const myVar = 10;
 }
 
 
 var Obj = new myConsts();
 
-AddTestCase( "class myConsts { const myVar = 10; }; var Obj = new myConsts();", 10, Obj.myVar ); 
+AddTestCase( "class myConsts { const myVar = 10; }; var Obj = new myConsts();", 10, Obj.myVar );
 
 
-test();       		// Leave this function alone.
-			// This function is for executing the test case and then
-			// displaying the result on to the console or the LOG file.
+test();             // Leave this function alone.
+            // This function is for executing the test case and then
+            // displaying the result on to the console or the LOG file.

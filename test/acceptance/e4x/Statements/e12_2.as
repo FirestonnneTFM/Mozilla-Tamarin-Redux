@@ -43,7 +43,7 @@
 START("12.2 - For-in statement");
 
 // All the employee names
-e = 
+e =
 <employees>
     <employee id="1">
         <name>Joe</name>
@@ -67,7 +67,7 @@ TEST("1." + i, 2, i);
 
 
 // Each child of the first item
-order = 
+order =
 <order>
     <customer>
         <name>John Smith</name>
@@ -117,7 +117,7 @@ AddTestCase( "for-in       :", true, (s=="123") );
 s = "";
 
 for ( i in x1.z )
-	s += x1.z[i].A;
+    s += x1.z[i].A;
 
 AddTestCase( "for-in (var) :", true, (s=="123") );
 
@@ -136,7 +136,7 @@ AddTestCase( "for-in       :", true, (s=="123") );
 s = "";
 
 for ( i in xl.z )
-	s += xl.z[i].A;
+    s += xl.z[i].A;
 
 AddTestCase( "for-in (var) :", true, (s=="123") );
 

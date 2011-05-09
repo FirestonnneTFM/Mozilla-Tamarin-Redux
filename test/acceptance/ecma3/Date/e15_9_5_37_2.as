@@ -52,21 +52,21 @@ function getTestCases() {
       var TDATE:Date = new Date(0);
       TDATE.setUTCFullYear(2000);
       addNewTestCase(TDATE,
-		    UTCDateFromTime(SetUTCFullYear(0,2000)),
+            UTCDateFromTime(SetUTCFullYear(0,2000)),
                     LocalDateFromTime(SetUTCFullYear(0,2000)) );
 
 //    addNewTestCase( "TDATE = new Date(0); TDATE.setUTCFullYear(2001);TDATE",
       TDATE = new Date(0);
       TDATE.setUTCFullYear(2001);
-      addNewTestCase(TDATE, 
-		    UTCDateFromTime(SetUTCFullYear(0,2001)),
+      addNewTestCase(TDATE,
+            UTCDateFromTime(SetUTCFullYear(0,2001)),
                     LocalDateFromTime(SetUTCFullYear(0,2001)) );
 
 //    addNewTestCase( "TDATE = new Date(0); TDATE.setUTCFullYear(1999);TDATE",
       TDATE = new Date(0);
       TDATE.setUTCFullYear(1999);
       addNewTestCase(TDATE,
-		    UTCDateFromTime(SetUTCFullYear(0,1999)),
+            UTCDateFromTime(SetUTCFullYear(0,1999)),
                     LocalDateFromTime(SetUTCFullYear(0,1999)) );
 /*
     // Dates around 29 February 2000

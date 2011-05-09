@@ -45,7 +45,7 @@ package {
         public function testclass1(desc) {
             this.desc=desc;
         }
-        public function toString() { 
+        public function toString() {
             return desc;
         }
     }
@@ -56,7 +56,7 @@ package {
         var ba=new ByteArray;
         for (n in data) {
             ba.writeByte(data[n]);
-	}
+    }
         File.writeByteArray("testclass.abc", ba);
     }
 

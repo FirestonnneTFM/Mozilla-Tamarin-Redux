@@ -38,18 +38,18 @@
 package StaticPropertyPackage {
 
         public class BaseClass {
-		public static var i:int;
-	}
+        public static var i:int;
+    }
 
-	public class AccStatPropSubClassStatMeth extends BaseClass {
-	
-		public static function getInt(): int {
-			return i;
-		}
-		
-		public static function getBaseInt(): int {
-			return BaseClass.i;
-		}
+    public class AccStatPropSubClassStatMeth extends BaseClass {
+    
+        public static function getInt(): int {
+            return i;
+        }
+        
+        public static function getBaseInt(): int {
+            return BaseClass.i;
+        }
 
-	}
+    }
 }

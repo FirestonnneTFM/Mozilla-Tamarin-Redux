@@ -48,7 +48,7 @@ package Importall {
     var string:String;
     //var simple:Simple;
 
-    public var pubArray:Array; 
+    public var pubArray:Array;
     
     public var pubBoolean:Boolean;
     public var pubDate:Date;
@@ -57,7 +57,7 @@ package Importall {
     public var pubNumber:Number;
     public var pubObject:Object;
     public var pubString:String;
-    //public var pubSimple:Simple; 
+    //public var pubSimple:Simple;
 
   
     // *******************
@@ -88,12 +88,12 @@ package Importall {
 }
 
 
-var SECTION = "Directives";       				// provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";  				// Version of JavaScript or ECMA
-var TITLE   = "Import all public names in a package";       	// Provide ECMA section title or a description
+var SECTION = "Directives";                     // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";               // Version of JavaScript or ECMA
+var TITLE   = "Import all public names in a package";           // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                					// leave this alone
+startTest();                                    // leave this alone
 
 
 import Importall.*
@@ -107,7 +107,7 @@ num = new Number();
 str = new String("test");
 
 // ********************************************
-// access all public method  
+// access all public method
 // ********************************************
 
 AddTestCase( "obj.setPubArray(arr), obj.pubArray", arr, (obj.setPubArray(arr), obj.pubArray) );

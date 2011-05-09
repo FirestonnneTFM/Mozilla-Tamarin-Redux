@@ -56,7 +56,7 @@ thisError4 = "no error";
 thisError5 = "no error";
 thisError6 = "no error";
 thisError7 = "no error";
-try {   
+try {
     z.MyArgumentError();
     }catch(e:ReferenceError){
           thisError=(e.toString()).substr(0,26);//print(thisError);
@@ -78,10 +78,10 @@ try {
 AddTestCase( "Testing catch block with Reference Error", "no error" ,thisError);
 AddTestCase( "Testing catch block with Type Error", "no error" ,thisError1);
 AddTestCase( "Testing catch block with Argument Error", "ArgumentError: Error #1063",thisError2);
-AddTestCase( "Testing catch block with URIError", "no error" ,thisError3);    
-AddTestCase( "Testing catch block with Eval Error", "no error" ,thisError5);                           
+AddTestCase( "Testing catch block with URIError", "no error" ,thisError3);
+AddTestCase( "Testing catch block with Eval Error", "no error" ,thisError5);
 AddTestCase( "Testing catch block with Range Error", "no error" ,thisError6);
-AddTestCase( "Testing catch block with Error", "no error" ,thisError7);                           
+AddTestCase( "Testing catch block with Error", "no error" ,thisError7);
             }
 
 test();       // leave this alone.  this executes the test cases and

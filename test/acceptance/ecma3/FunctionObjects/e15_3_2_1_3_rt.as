@@ -68,7 +68,7 @@ function getTestCases() {
 
     var thisError="no error";
     try{
-        MyFunc = new  Function( args, "var r=0; for (var i = 0; i < MyFunc.length; i++ ){ if ( eval('arg'+i) == void 0) break; else r += eval('arg'+i); }; return r"); 
+        MyFunc = new  Function( args, "var r=0; for (var i = 0; i < MyFunc.length; i++ ){ if ( eval('arg'+i) == void 0) break; else r += eval('arg'+i); }; return r");
     }catch(e1:EvalError){
         thisError=(e1.toString()).substring(0,22);
     }finally{//print(e.toString());

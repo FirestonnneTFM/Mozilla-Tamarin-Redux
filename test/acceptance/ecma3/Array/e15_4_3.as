@@ -49,7 +49,7 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    array[item++] = new TestCase( SECTION,	"Array.constructor.prototype",Object.constructor.prototype,Array.constructor.prototype);
+    array[item++] = new TestCase( SECTION,  "Array.constructor.prototype",Object.constructor.prototype,Array.constructor.prototype);
 
     return ( array );
 }

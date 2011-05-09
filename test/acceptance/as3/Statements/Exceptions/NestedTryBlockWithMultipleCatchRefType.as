@@ -50,7 +50,7 @@ try{
    }catch(eo:ReferenceError){
         thisError1 = "This is outer reference error:"+"  "+eo.toString();
         
-        try { 
+        try {
             throw new TypeError();
             }catch(ei:TypeError){
                  thisError="This is Inner Type Error:"+ei.toString();

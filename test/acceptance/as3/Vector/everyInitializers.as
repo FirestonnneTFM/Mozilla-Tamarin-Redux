@@ -63,18 +63,18 @@ function checker3(value,index,obj):Boolean {
 }
 
 var msg="";
-AddTestCase(	"every empty Vector",
-		true,
-		new <int>[].every(checker1));
+AddTestCase(    "every empty Vector",
+        true,
+        new <int>[].every(checker1));
 
 var msg="";
-AddTestCase(	"every small Vector returns true",
-		true,
-		new <int>[1,2,3].every(checker1));
+AddTestCase(    "every small Vector returns true",
+        true,
+        new <int>[1,2,3].every(checker1));
 
-AddTestCase(	"every small array check function",
-		"checker1(1,0,[1,2,3])checker1(2,1,[1,2,3])checker1(3,2,[1,2,3])",
-		msg);
+AddTestCase(    "every small array check function",
+        "checker1(1,0,[1,2,3])checker1(2,1,[1,2,3])checker1(3,2,[1,2,3])",
+        msg);
 
 var msg="";
 AddTestCase(    "every small array returns false on 0",
@@ -85,8 +85,8 @@ var msg="";
 var thisobj=new Object();
 thisobj.message="object";
 new <int>[1,2,3,4,5,].every(checker3,thisobj);
-AddTestCase(	"every small array with a specified this object",
-		"objectobjectobjectobjectobject",
-		msg);
+AddTestCase(    "every small array with a specified this object",
+        "objectobjectobjectobjectobject",
+        msg);
 
 test();

@@ -38,7 +38,7 @@
 //Note that there is no import statement here
 
 var SECTION = "Definitions/Packages";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "UnNamedPackage" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 

@@ -113,10 +113,10 @@ package DynamicClass {
     public function testVirSubArray(a:Array) : Array {
         this.virSubSetArray(a);
         return this.virSubGetArray();
-    }    
+    }
 
     // ***************************************
-    // access final property from 
+    // access final property from
     // default method of sub class
     // ***************************************
 
@@ -151,7 +151,7 @@ package DynamicClass {
     }
 
     // ***************************************
-    // access final property from 
+    // access final property from
     // final method of sub class
     // ***************************************
 
@@ -164,7 +164,7 @@ package DynamicClass {
     }
     
     // ***************************************
-    // access final property from 
+    // access final property from
     // private virtual method of sub class
     // ***************************************
 
@@ -174,7 +174,7 @@ package DynamicClass {
     public function testPrivVirSubGetDPArray(a:Array) : Array {
         this.privVirSubSetDPArray(a);
         return this.privVirSubGetDPArray();
-    }    
+    }
 
   }
   public class DynExtDynamicClassFin extends DynExtDynamicClassFinInner  {}

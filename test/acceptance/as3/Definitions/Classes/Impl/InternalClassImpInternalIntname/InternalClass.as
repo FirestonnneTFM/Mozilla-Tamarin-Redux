@@ -37,28 +37,28 @@
 /*
  * Internal Class InternalClass
  * Class methods
- *  
+ *
  */
 
 package InternalClassImpInternalIntname{
 
 
-	internal class InternalClass implements InternalInt{
-		
-		public function deffunc():String{  			   
-			return"PASSED";
-		}
-		
-	}
+    internal class InternalClass implements InternalInt{
+        
+        public function deffunc():String{
+            return"PASSED";
+        }
+        
+    }
 
 
-	public class InternalClassAccesor extends InternalClass{
-	
-		
-		var c:InternalClass = new InternalClass(); 
-		var i:InternalInt = c;
-		public function accdeffunc(){return i.deffunc();}
-			
-      } 	
-	
-}  
+    public class InternalClassAccesor extends InternalClass{
+    
+        
+        var c:InternalClass = new InternalClass();
+        var i:InternalInt = c;
+        public function accdeffunc(){return i.deffunc();}
+            
+      }
+    
+}

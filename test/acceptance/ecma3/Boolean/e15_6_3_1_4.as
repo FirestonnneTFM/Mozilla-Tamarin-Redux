@@ -54,20 +54,20 @@ function getTestCases() {
                                  true,
                                  (BOOL_PROTO = Boolean.prototype, Boolean.prototype, Boolean.prototype == BOOL_PROTO ) );
 
-	var thisError="no error";
+    var thisError="no error";
 
-	try{
-		// save
-		var origBoolProto = Boolean.prototype;
+    try{
+        // save
+        var origBoolProto = Boolean.prototype;
 
-	    Boolean.prototype=null;
+        Boolean.prototype=null;
 
-	    // restore
-	    Boolean.prototype = origBoolProto;
-	}catch(e:ReferenceError){
-	    thisError=e.toString();
+        // restore
+        Boolean.prototype = origBoolProto;
+    }catch(e:ReferenceError){
+        thisError=e.toString();
     }finally{
-    	array[item++]=new TestCase(SECTION,"Trying to verify that Boolean.prototype is read-only","ReferenceError: Error #1074",referenceError(thisError));
+        array[item++]=new TestCase(SECTION,"Trying to verify that Boolean.prototype is read-only","ReferenceError: Error #1074",referenceError(thisError));
     }
 
     return ( array );

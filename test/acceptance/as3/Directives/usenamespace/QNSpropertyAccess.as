@@ -48,15 +48,15 @@ public namespace T1;
 
 class nsTest
 {
-	T1 var o = new Object();
-	T1 function get x () { return "T1 ns";}
-	public function get x () {return "public ns";}
-	private function get z () {return "private var";}
+    T1 var o = new Object();
+    T1 function get x () { return "T1 ns";}
+    public function get x () {return "public ns";}
+    private function get z () {return "private var";}
 
-	function nsTest()
-	{
-		T1::o.y = "hello y";
-	}
+    function nsTest()
+    {
+        T1::o.y = "hello y";
+    }
 
 
 

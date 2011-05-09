@@ -55,11 +55,11 @@ AddTestCase( "XML.ignoreWhitespace = true, XML.ignoreWhitespace", true, (XML.ign
 
 
 // b) whitespace is ignored when true, not ignored when false
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.toString()", "<XML><TEAM>Giants</TEAM><CITY>San Francisco</CITY><SPORT>Baseball</SPORT></XML>", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.toString()", "<XML><TEAM>Giants</TEAM><CITY>San Francisco</CITY><SPORT>Baseball</SPORT></XML>",
              (XML.ignoreWhitespace = true, MYXML = new XML(xmlDoc), MYXML.toString() ));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.toString() with ignoreWhitespace=false", 
-		"<XML>  <TEAM>Giants</TEAM>\u000D<CITY>San\u0020Francisco</CITY>\u000A<SPORT>Baseball</SPORT>\u0009</XML>", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.toString() with ignoreWhitespace=false",
+        "<XML>  <TEAM>Giants</TEAM>\u000D<CITY>San\u0020Francisco</CITY>\u000A<SPORT>Baseball</SPORT>\u0009</XML>",
         (XML.ignoreWhitespace = false, MYXML = new XML(xmlDoc), MYXML.toString() ));
 
 // c) whitespace characters

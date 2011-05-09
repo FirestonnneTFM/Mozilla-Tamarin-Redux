@@ -230,7 +230,7 @@ function condenseStr(str)
    *
    * So replace them with the empty string -
    */
-  str = str.replace(/[\r\n]/g, '') 
+  str = str.replace(/[\r\n]/g, '')
   
   //return eval("'" + str + "'");
   return ("'"+ str + "'");

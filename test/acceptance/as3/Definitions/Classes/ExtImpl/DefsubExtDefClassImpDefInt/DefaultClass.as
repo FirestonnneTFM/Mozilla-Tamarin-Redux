@@ -39,34 +39,34 @@
 package DefClassImpDefInt{
 use namespace ns;
 
-	class DefaultClass implements DefaultInt{
-		
+    class DefaultClass implements DefaultInt{
+        
 
-		public function deffunc():String{ 
-			return"PASSED";
-		}
+        public function deffunc():String{
+            return"PASSED";
+        }
                 
-                public function deffunc2():Number{ 
-                	var a:Number;
+                public function deffunc2():Number{
+                    var a:Number;
                         a=10;
-			return a;
-		}
-                public function deffunc3():int{ 
-                	var b:int;
+            return a;
+        }
+                public function deffunc3():int{
+                    var b:int;
                         b=20;
-			return b;
-		}
-                public function pubFunc():Boolean{	       //Public method
-				return true;
-		}	
-			
-		ns function nsFunc(a="test"):int{	       //Namespace method
-			return a.length;	
-		}
-       		
-		
-	}
+            return b;
+        }
+                public function pubFunc():Boolean{         //Public method
+                return true;
+        }
+            
+        ns function nsFunc(a="test"):int{          //Namespace method
+            return a.length;
+        }
+            
+        
+    }
 
-	
-	
-}  
+    
+    
+}

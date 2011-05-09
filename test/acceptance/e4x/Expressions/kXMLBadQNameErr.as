@@ -50,7 +50,7 @@ expected = "Error #1084";
 result = "error, exception not thrown";
 
 namespace ns="http://www.foo.com";
-var x1 = new XML("<x xmlns='http://www.foo.com'><a>foo</a></x>"); 
+var x1 = new XML("<x xmlns='http://www.foo.com'><a>foo</a></x>");
 
 try{
 

@@ -37,32 +37,32 @@
 
 package DynamicClass {
 
-	import DynamicClass.*;
+    import DynamicClass.*;
 
-	public class PubExtDynamicOverRideDefault extends DynamicClass {
+    public class PubExtDynamicOverRideDefault extends DynamicClass {
 
-		public var orSet = false;
-		public var orGet = false;
+        public var orSet = false;
+        public var orGet = false;
 
-		// *********************************
-		// override a default method
-		// with a default method in subclass
-		// *********************************
+        // *********************************
+        // override a default method
+        // with a default method in subclass
+        // *********************************
 
-		override function setBoolean( b:Boolean ) {
-			orSet = true;
-			this.boolean = b;
-		}
+        override function setBoolean( b:Boolean ) {
+            orSet = true;
+            this.boolean = b;
+        }
 
-		override function getBoolean() : Boolean {
-			orGet = true;
-			return this.boolean;
-		}
+        override function getBoolean() : Boolean {
+            orGet = true;
+            return this.boolean;
+        }
 
-		public function setGetBoolean(b:Boolean):Boolean {
-			this.setBoolean(b);
-			return this.getBoolean();
-		}
-	}
+        public function setGetBoolean(b:Boolean):Boolean {
+            this.setBoolean(b);
+            return this.getBoolean();
+        }
+    }
 
 }

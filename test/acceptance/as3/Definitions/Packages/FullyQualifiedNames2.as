@@ -37,60 +37,60 @@
  
 
  package FullyQualifiedNames2 {
-	
+    
 
-	public namespace Kitty;
-		
-		public interface IClickable {
-				function whoAmI():String; 
-	}
-	public class A {
-		public function whoAmI():String {
-			return "A";
-		}
-	
-	}
-	
-	use namespace FullyQualifiedNames2.Kitty;
-	
-	public class C {
-		Kitty var b:Boolean = true;
-		public function returnNSVar():Boolean {
-			return Kitty::b;
-		}
-		
-		Kitty function returnArray():Array {
-			return [1,2,3];
-		}
-		
-		public function callNSFunc() {
-			var k:Array = Kitty::returnArray();
-			return k;
-		}
-	}
+    public namespace Kitty;
+        
+        public interface IClickable {
+                function whoAmI():String;
+    }
+    public class A {
+        public function whoAmI():String {
+            return "A";
+        }
+    
+    }
+    
+    use namespace FullyQualifiedNames2.Kitty;
+    
+    public class C {
+        Kitty var b:Boolean = true;
+        public function returnNSVar():Boolean {
+            return Kitty::b;
+        }
+        
+        Kitty function returnArray():Array {
+            return [1,2,3];
+        }
+        
+        public function callNSFunc() {
+            var k:Array = Kitty::returnArray();
+            return k;
+        }
+    }
 
-	public class B implements FullyQualifiedNames2.IClickable {
-		public function whoAmI():String {
-			return "B";
-		}
-	
-	}
+    public class B implements FullyQualifiedNames2.IClickable {
+        public function whoAmI():String {
+            return "B";
+        }
+    
+    }
 
 
-	public var s:String = "hello";
-	var p:String = "private";
-	public function publicFunc(i:int):String {
-		return "You passed " + i.toString();
-	}
-	
-	
-	
+    public var s:String = "hello";
+    var p:String = "private";
+    public function publicFunc(i:int):String {
+        return "You passed " + i.toString();
+    }
+    
+    
+    
 }
 
 import FullyQualifiedNames.*;
 
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "138845";
 
@@ -106,10 +106,10 @@ AddTestCase("Interface with fully qualified path", "B", b.whoAmI());
 AddTestCase("Fully qualified reference to variable", "hello", FullyQualifiedNames2.s);
 
 try {
-	p = FullyQualifiedNames2.p;
-	result = "no exception";
+    p = FullyQualifiedNames2.p;
+    result = "no exception";
 } catch(e) {
-	result = "exception";
+    result = "exception";
 }
 AddTestCase("Fully qualified reference to internal variable", "exception", result);
 AddTestCase("Fully qualified reference to function", "You passed 5", FullyQualifiedNames2.publicFunc(5));

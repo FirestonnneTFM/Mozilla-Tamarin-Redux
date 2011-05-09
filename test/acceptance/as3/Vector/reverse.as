@@ -57,39 +57,39 @@ var VERSION = "ECMA_1";
 startTest();
 
 writeHeaderToLog( SECTION + " Vector.reverse()");
-AddTestCase( 
-	      "Vector.<int>.prototype.reverse.length",           
-	      0,      
-	      Vector.<int>.prototype.reverse.length );
+AddTestCase(
+          "Vector.<int>.prototype.reverse.length",
+          0,
+          Vector.<int>.prototype.reverse.length );
 var v1:Vector.<int>=new Vector.<int>();
 v1.reverse();
 AddTestCase(
-	      "reverse empty vector",
-	      "",
-	      v1.toString());
+          "reverse empty vector",
+          "",
+          v1.toString());
 
 var v1:Vector.<int>=new Vector.<int>();
 v1[0]=111;
 v1.reverse();
 AddTestCase(
-	      "reverse vector length 1",
-	      "111",
-	      v1.toString());
+          "reverse vector length 1",
+          "111",
+          v1.toString());
 
 var v1:Vector.<int>=new Vector.<int>();
 for (var i=0;i<20;i++) v1[i]=i;
 v1.reverse();
 AddTestCase(
-	      "reverse vector of int",
-	      "19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0",
-	      v1.toString() );
+          "reverse vector of int",
+          "19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0",
+          v1.toString() );
 
 var v2:Vector.<String>=new Vector.<String>();
 v2[0]='one';v2[1]='two';v2[2]='three';
 v2.reverse();
 AddTestCase(
-	      "reverse vector of String",
-	      "three,two,one",
-	      v2.toString() );
+          "reverse vector of String",
+          "three,two,one",
+          v2.toString() );
 
 test();

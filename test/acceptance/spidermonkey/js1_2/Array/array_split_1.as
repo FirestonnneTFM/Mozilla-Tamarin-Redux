@@ -62,25 +62,25 @@ function getTestCases() {
     var item = 0;
     
     array[item++] = new TestCase( SECTION,
-	      "('a,b,c'.split(',')).length",
-	      3,
-	      ('a,b,c'.split(',')).length );
+          "('a,b,c'.split(',')).length",
+          3,
+          ('a,b,c'.split(',')).length );
 
     array[item++] = new TestCase( SECTION,
-	      "('a,b'.split(',')).length",
-	      2,
-	      ('a,b'.split(',')).length );
+          "('a,b'.split(',')).length",
+          2,
+          ('a,b'.split(',')).length );
 
     array[item++] = new TestCase( SECTION,
-	      "('a'.split(',')).length",
-	      1,
-	      ('a'.split(',')).length );
+          "('a'.split(',')).length",
+          1,
+          ('a'.split(',')).length );
 
     // creates an array with a single element that is an emptystring
     array[item++] = new TestCase( SECTION,
-	      "(''.split(',')).length",
-	      1,
-	      (''.split(',')).length );
+          "(''.split(',')).length",
+          1,
+          (''.split(',')).length );
 
     return array;
 }

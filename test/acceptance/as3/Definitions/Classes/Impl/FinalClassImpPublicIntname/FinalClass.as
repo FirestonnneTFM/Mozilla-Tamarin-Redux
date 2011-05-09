@@ -37,25 +37,25 @@
 /*
  * Final Class FinalClass
  * Class methods
- *  
+ *
  */
 
 package FinalClassImpPublicIntname{
 
-	final class FinalClass implements PublicInt{
-		
-		public function deffunc():String{  		
-			return"PASSED";
-		}
+    final class FinalClass implements PublicInt{
+        
+        public function deffunc():String{
+            return"PASSED";
+        }
 
-	}
+    }
 
 public class ClassGet {
-	private var obj:FinalClass = new FinalClass();
-	var i:PublicInt = obj;
+    private var obj:FinalClass = new FinalClass();
+    var i:PublicInt = obj;
 
-		public function accdeffunc():String{return i.deffunc();}
-		// access default function deffunc
-        	
-	       } 	
-}  
+        public function accdeffunc():String{return i.deffunc();}
+        // access default function deffunc
+            
+           }
+}

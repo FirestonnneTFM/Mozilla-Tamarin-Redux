@@ -43,7 +43,7 @@ package P {
 
      public class Game{
           
-	  use namespace Football;
+      use namespace Football;
           Football function whoplay(){return "Joe"}
           use namespace Baseball;
           Baseball function whoplay(){return "Steve"}
@@ -52,7 +52,7 @@ package P {
 
  
 var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "use namespace";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 

@@ -35,16 +35,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 /*
- * Internal Interface InternalInterface 
- * Interface methods 
- *  
+ * Internal Interface InternalInterface
+ * Interface methods
+ *
  *
 */
 
-package PublicClassImpInternalIntInt{ 
+package PublicClassImpInternalIntInt{
 
-	internal interface InternalInt_S{
-	
-		function deffunc():String;  			
-	}
+    internal interface InternalInt_S{
+    
+        function deffunc():String;
+    }
 }

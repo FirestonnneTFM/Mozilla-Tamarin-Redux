@@ -35,17 +35,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package bug127174{
-	public class CoerceErrorForInterfaces implements ITestInterface
-	{
-    	public function CoerceErrorForInterfaces()
-    	{
-        	super();
-    	}
+    public class CoerceErrorForInterfaces implements ITestInterface
+    {
+        public function CoerceErrorForInterfaces()
+        {
+            super();
+        }
 
-    	public function method1():void {
-    	}
+        public function method1():void {
+        }
 
-    	public function method2():void {
-    	}
-	}
+        public function method2():void {
+        }
+    }
 }

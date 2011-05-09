@@ -41,10 +41,10 @@
 *
 */
 //-----------------------------------------------------------------------------
-	var SECTION = "15.4.4.4";
-	var VERSION = "ECMA_1";
+    var SECTION = "15.4.4.4";
+    var VERSION = "ECMA_1";
     var TITLE   = "Testing Array.prototype.concat()";
-	var bug     = "169795";
+    var bug     = "169795";
 
     startTest();
     writeHeaderToLog( SECTION + " "+ TITLE);
@@ -55,77 +55,77 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	var status = '';
-	var actual = '';
-	var expect= '';
-	var x;
+    var status = '';
+    var actual = '';
+    var expect= '';
+    var x;
 
-	status = inSection(1);
-	x = "Hello";
-	actual = [].concat(x).toString();
-	expect = x.toString();
-	array[item++] = new TestCase(SECTION, "concat(x).toString()", expect, actual );
+    status = inSection(1);
+    x = "Hello";
+    actual = [].concat(x).toString();
+    expect = x.toString();
+    array[item++] = new TestCase(SECTION, "concat(x).toString()", expect, actual );
 
-	status = inSection(2);
-	x = 999;
-	actual = [].concat(x).toString();
-	expect = x.toString();
-	array[item++] = new TestCase(SECTION, "[].concat(999).toString()", expect, actual );
+    status = inSection(2);
+    x = 999;
+    actual = [].concat(x).toString();
+    expect = x.toString();
+    array[item++] = new TestCase(SECTION, "[].concat(999).toString()", expect, actual );
 
-	status = inSection(3);
-	x = /Hello/g;
-	actual = [].concat(x).toString();
-	expect = x.toString();
-	array[item++] = new TestCase(SECTION, "[].concat(/Hello/g).toString()", expect, actual );
+    status = inSection(3);
+    x = /Hello/g;
+    actual = [].concat(x).toString();
+    expect = x.toString();
+    array[item++] = new TestCase(SECTION, "[].concat(/Hello/g).toString()", expect, actual );
 
-	status = inSection(4);
-	x = new Error("Hello");
-	actual = [].concat(x).toString();
-	expect = x.toString();
-	array[item++] = new TestCase(SECTION, "[].concat(new Error('hello')).toString()", expect, actual );
+    status = inSection(4);
+    x = new Error("Hello");
+    actual = [].concat(x).toString();
+    expect = x.toString();
+    array[item++] = new TestCase(SECTION, "[].concat(new Error('hello')).toString()", expect, actual );
 
 
-	/*
-	status = inSection(5);
-	x = function() {return "Hello";};
-	actual = [].concat(x).toString();
-	expect = x.toString();
-	addThis();
-	*/
+    /*
+    status = inSection(5);
+    x = function() {return "Hello";};
+    actual = [].concat(x).toString();
+    expect = x.toString();
+    addThis();
+    */
 
-	status = inSection(6);
-	x = [function() {return "Hello";}];
-	actual = [].concat(x).toString();
-	expect = x.toString();
-	array[item++] = new TestCase(SECTION, "[].concat([function() {return 'Hello';}).toString()", expect, actual );
+    status = inSection(6);
+    x = [function() {return "Hello";}];
+    actual = [].concat(x).toString();
+    expect = x.toString();
+    array[item++] = new TestCase(SECTION, "[].concat([function() {return 'Hello';}).toString()", expect, actual );
 
-	status = inSection(7);
-	x = [1,2,3].concat([4,5,6]);
-	actual = [].concat(x).toString();
-	expect = x.toString();
-	array[item++] = new TestCase(SECTION, "[].concat([1,2,3].concat([4,5,6]).toString()", expect, actual );
+    status = inSection(7);
+    x = [1,2,3].concat([4,5,6]);
+    actual = [].concat(x).toString();
+    expect = x.toString();
+    array[item++] = new TestCase(SECTION, "[].concat([1,2,3].concat([4,5,6]).toString()", expect, actual );
 
-	status = inSection(8);
-	x = this;
-	actual = [].concat(x).toString();
-	expect = x.toString();
-	array[item++] = new TestCase(SECTION, "[].concat(this).toString()", expect, actual );
+    status = inSection(8);
+    x = this;
+    actual = [].concat(x).toString();
+    expect = x.toString();
+    array[item++] = new TestCase(SECTION, "[].concat(this).toString()", expect, actual );
 
-	/*
-	 * The next two sections are by igor@icesoft.no; see
-	 * http://bugzilla.mozilla.org/show_bug.cgi?id=169795#c3
-	 */
-	status = inSection(9);
-	x={length:0};
-	actual = [].concat(x).toString();
-	expect = x.toString();
-	array[item++] = new TestCase(SECTION, "[].concat({length:0}).toString()", expect, actual );
+    /*
+     * The next two sections are by igor@icesoft.no; see
+     * http://bugzilla.mozilla.org/show_bug.cgi?id=169795#c3
+     */
+    status = inSection(9);
+    x={length:0};
+    actual = [].concat(x).toString();
+    expect = x.toString();
+    array[item++] = new TestCase(SECTION, "[].concat({length:0}).toString()", expect, actual );
 
-	status = inSection(10);
-	x={length:2, 0:0, 1:1};
-	actual = [].concat(x).toString();
-	expect = x.toString();
-	array[item++] = new TestCase(SECTION, "[].concat({length:2, 0:0, 1:1}).toString()", expect, actual );
+    status = inSection(10);
+    x={length:2, 0:0, 1:1};
+    actual = [].concat(x).toString();
+    expect = x.toString();
+    array[item++] = new TestCase(SECTION, "[].concat({length:2, 0:0, 1:1}).toString()", expect, actual );
 
     return ( array );
 }

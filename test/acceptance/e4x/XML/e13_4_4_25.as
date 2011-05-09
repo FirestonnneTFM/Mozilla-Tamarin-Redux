@@ -60,51 +60,51 @@ TEST(4, "text", x1.nodeKind());
 var xmlDoc = "<company><employee id='1'><name1>John</name1> <city>California</city> </employee></company>";
 
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.nodeKind()", 
-	"element", 
-	(MYXML = new XML(xmlDoc), MYXML.nodeKind()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.nodeKind()",
+    "element",
+    (MYXML = new XML(xmlDoc), MYXML.nodeKind()));
 
-AddTestCase( "MYXML = new XML(null), MYXML.nodeKind()", 
-	"text", 
-	(MYXML = new XML(null), MYXML.nodeKind()));
+AddTestCase( "MYXML = new XML(null), MYXML.nodeKind()",
+    "text",
+    (MYXML = new XML(null), MYXML.nodeKind()));
 
-AddTestCase( "MYXML = new XML(undefined), MYXML.nodeKind()", 
-	"text", 
-	(MYXML = new XML(undefined), MYXML.nodeKind()));
+AddTestCase( "MYXML = new XML(undefined), MYXML.nodeKind()",
+    "text",
+    (MYXML = new XML(undefined), MYXML.nodeKind()));
 
-AddTestCase( "MYXML = new XML(), MYXML.nodeKind()", 
-	"text", 
-	(MYXML = new XML(), MYXML.nodeKind()));
+AddTestCase( "MYXML = new XML(), MYXML.nodeKind()",
+    "text",
+    (MYXML = new XML(), MYXML.nodeKind()));
 
-AddTestCase( "MYXML = new XML(), MYXML.children()[0].nodeKind()", 
-	"element", 
-	(MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()));
+AddTestCase( "MYXML = new XML(), MYXML.children()[0].nodeKind()",
+    "element",
+    (MYXML = new XML(xmlDoc), MYXML.children()[0].nodeKind()));
 
-AddTestCase( "MYXML = new XML(), MYXML.children()[0].attributes()[0].nodeKind()", 
-	"attribute", 
-	(MYXML = new XML(xmlDoc), MYXML.children()[0].attributes()[0].nodeKind()));
+AddTestCase( "MYXML = new XML(), MYXML.children()[0].attributes()[0].nodeKind()",
+    "attribute",
+    (MYXML = new XML(xmlDoc), MYXML.children()[0].attributes()[0].nodeKind()));
 
-AddTestCase( "MYXML = new XML(), MYXML.children()[0].name1.children()[0].nodeKind()", 
-	"text", 
-	(MYXML = new XML(xmlDoc), MYXML.children()[0].name1.children()[0].nodeKind()));
+AddTestCase( "MYXML = new XML(), MYXML.children()[0].name1.children()[0].nodeKind()",
+    "text",
+    (MYXML = new XML(xmlDoc), MYXML.children()[0].name1.children()[0].nodeKind()));
 
 XML.ignoreComments = false
-AddTestCase( "MYXML = new XML(\"<!-- this is a comment -->\"), MYXML.nodeKind()", 
-	"element", 
-	(MYXML = new XML("<XML><!-- this is a comment --></XML>"), MYXML.nodeKind()));
+AddTestCase( "MYXML = new XML(\"<!-- this is a comment -->\"), MYXML.nodeKind()",
+    "element",
+    (MYXML = new XML("<XML><!-- this is a comment --></XML>"), MYXML.nodeKind()));
 
-AddTestCase( "MYXML = new XML(\"<!-- this is a comment -->\"), MYXML.children()[0].nodeKind()", 
-	"comment", 
-	(MYXML = new XML("<XML><!-- this is a comment --></XML>"), MYXML.children()[0].nodeKind()));
+AddTestCase( "MYXML = new XML(\"<!-- this is a comment -->\"), MYXML.children()[0].nodeKind()",
+    "comment",
+    (MYXML = new XML("<XML><!-- this is a comment --></XML>"), MYXML.children()[0].nodeKind()));
 
 XML.ignoreProcessingInstructions = false
-AddTestCase( "MYXML = new XML(\"<XML><?foo this is a pi ?></XML>\"), MYXML.nodeKind()", 
-	"element", 
-	(MYXML = new XML("<XML><?foo-- this is a pi--?></XML>"), MYXML.nodeKind()));
+AddTestCase( "MYXML = new XML(\"<XML><?foo this is a pi ?></XML>\"), MYXML.nodeKind()",
+    "element",
+    (MYXML = new XML("<XML><?foo-- this is a pi--?></XML>"), MYXML.nodeKind()));
 
-AddTestCase( "MYXML = new XML(\"<XML><?foo this is a pi ?></XML>\"), MYXML.children()[0].nodeKind()", 
-	"processing-instruction", 
-	(MYXML = new XML("<XML><?foo this is a pi ?></XML>"), MYXML.children()[0].nodeKind()));
+AddTestCase( "MYXML = new XML(\"<XML><?foo this is a pi ?></XML>\"), MYXML.children()[0].nodeKind()",
+    "processing-instruction",
+    (MYXML = new XML("<XML><?foo this is a pi ?></XML>"), MYXML.children()[0].nodeKind()));
 
 
 END();

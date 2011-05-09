@@ -75,67 +75,67 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
-	var statprefix = 'Passing RegExp object on pattern ';
-	var statsuffix =  '; passing flag ';
-	var cnSUCCESS = 'Got expected exception -';
-	var cnFAILURE = 'Expected an exception to be thrown, but none was -';
-	var singlequote = "'";
-	var i = -1; var j = -1; var s = ''; var f = '';
-	var obj1 = null; var obj2 = null;
-	var patterns = new Array();
-	var flags = new Array();
-	var thisError = "no error";
+    var statprefix = 'Passing RegExp object on pattern ';
+    var statsuffix =  '; passing flag ';
+    var cnSUCCESS = 'Got expected exception -';
+    var cnFAILURE = 'Expected an exception to be thrown, but none was -';
+    var singlequote = "'";
+    var i = -1; var j = -1; var s = ''; var f = '';
+    var obj1 = null; var obj2 = null;
+    var patterns = new Array();
+    var flags = new Array();
+    var thisError = "no error";
 
-	// various regular expressions to try -
-	patterns[0] = '';
-	patterns[1] = 'abc';
-	patterns[2] = '(.*)(3-1)\s\w';
-	patterns[3] = '(.*)(...)\\s\\w';
-	patterns[4] = '[^A-Za-z0-9_]';
-	patterns[5] = '[^\f\n\r\t\v](123.5)([4 - 8]$)';
+    // various regular expressions to try -
+    patterns[0] = '';
+    patterns[1] = 'abc';
+    patterns[2] = '(.*)(3-1)\s\w';
+    patterns[3] = '(.*)(...)\\s\\w';
+    patterns[4] = '[^A-Za-z0-9_]';
+    patterns[5] = '[^\f\n\r\t\v](123.5)([4 - 8]$)';
 
-	// various flags to try -
-	flags[0] = 'i';
-	flags[1] = 'g';
-	flags[2] = 'm';
-
-
-	for (i in patterns)
-	{
-	  s = patterns[i];
-
-	  for (j in flags)
-	  {
-	    f = flags[j];
-	    msg = getStatus(s, f);
-	    expect = cnSUCCESS;
-	    actual = "";
-	    obj1 = new RegExp(s, f);
-	    try{
-		    obj2 = new RegExp(obj1, f);   // this should cause an exception
-		    actual = cnFAILURE;
-	    }catch(e:Error){
-	        actual = cnSUCCESS;
-	    }finally{
-	    	array[item++] = new TestCase(SECTION, msg, expect, actual);
-	    }
-	  }
-	}
+    // various flags to try -
+    flags[0] = 'i';
+    flags[1] = 'g';
+    flags[2] = 'm';
 
 
-	function getStatus(regexp, flag)
-	{
-	  return (statprefix  +  quote(regexp) +  statsuffix  +   flag);
-	}
+    for (i in patterns)
+    {
+      s = patterns[i];
+
+      for (j in flags)
+      {
+        f = flags[j];
+        msg = getStatus(s, f);
+        expect = cnSUCCESS;
+        actual = "";
+        obj1 = new RegExp(s, f);
+        try{
+            obj2 = new RegExp(obj1, f);   // this should cause an exception
+            actual = cnFAILURE;
+        }catch(e:Error){
+            actual = cnSUCCESS;
+        }finally{
+            array[item++] = new TestCase(SECTION, msg, expect, actual);
+        }
+      }
+    }
 
 
-	function quote(text)
-	{
-	  return (singlequote  +  text  + singlequote);
-	}
+    function getStatus(regexp, flag)
+    {
+      return (statprefix  +  quote(regexp) +  statsuffix  +   flag);
+    }
 
-	return array;
+
+    function quote(text)
+    {
+      return (singlequote  +  text  + singlequote);
+    }
+
+    return array;
 }

@@ -40,7 +40,7 @@
  *  templates taken from mozilla.org.  This template or
  *  any test cases written from it are not for external
  *  use or distribution.
- *  
+ *
  *  Author: Brent Baker <brbaker@adobe.com>
  *  Date: 10/02/2009
  *
@@ -49,7 +49,7 @@
  */
 
 var SECTION = "15.5.4.8";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS3";        // Version of ECMAScript or ActionScript
 var TITLE   = "lastindexof(null)";       // Provide ECMA section title or a description
 var BUGNUMBER = "477132";
 

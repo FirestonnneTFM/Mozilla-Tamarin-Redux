@@ -38,13 +38,13 @@
  *  File Name:          e15_4_4_7.as
  *  ECMA Section:       15.4.4.7 Array.prototype.push()
  *  Description:        Test Case for push function of Array Class.
- *			The arguments are appended to the end of the array,
- *			in the order in which they appear. The new length of
- *			the array is returned as a result of the call.
+ *          The arguments are appended to the end of the array,
+ *          in the order in which they appear. The new length of
+ *          the array is returned as a result of the call.
 
  *
- *  Author: 		Gagneet Singh (gasingh@macromedia.com)
- *  Date:   		01/09/2005
+ *  Author:         Gagneet Singh (gasingh@macromedia.com)
+ *  Date:           01/09/2005
  *
  */
 
@@ -63,8 +63,8 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
         var MYEMPTYARR:Array= new Array();
 
@@ -81,13 +81,13 @@ function getTestCases() {
 
         var MYARR = new Array( 1, 4 );
 
-	var MYVAR = 2;
-	var ARRLENGTH = 3;
+    var MYVAR = 2;
+    var ARRLENGTH = 3;
 
         array[item++] = new TestCase( SECTION, "MYARR = new Array(); MYARR.push();", 2, MYARR.push() );
 
 
-	array[item++] = new TestCase( SECTION, "MYARR = new Array(); MYARR.push(2);", ARRLENGTH, MYARR.push(MYVAR) );
+    array[item++] = new TestCase( SECTION, "MYARR = new Array(); MYARR.push(2);", ARRLENGTH, MYARR.push(MYVAR) );
 
     if (!as3Enabled) {
         //push function is intentionally generic.  It does not require its this value to be         //an array object
@@ -110,6 +110,6 @@ function getTestCases() {
 
     array[item++] = new TestCase( SECTION, "var MYBIGARR[i] = i; MYBIGARR.push(101);", 102, MYBIGARR.push(101) );
 
-	return ( array );
+    return ( array );
 
 }

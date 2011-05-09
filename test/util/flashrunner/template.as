@@ -36,7 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package { 
+package {
     import flash.utils.ByteArray;
     import flash.net.Socket;
     import flash.display.*;
@@ -52,13 +52,13 @@ package {
             trace("[flashrunner]"+s[i]);
             contents+=s[i]+"\n";
             if (linectr<50)
-     	        tf.text+=s[i]+"\n";
+                tf.text+=s[i]+"\n";
             linectr++;
         }
     }
     public class template extends Sprite {
         var loader:Loader;
-        var context; 
+        var context;
         var sock:Socket;
         public function template():void {
             setup();

@@ -34,7 +34,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1117; //	Invalid XML name: _.
+var CODE = 1117; // Invalid XML name: _.
 
 //-----------------------------------------------------------
 startTest();
@@ -43,12 +43,12 @@ startTest();
 var expected = "Error #" + CODE;
 var result = "no error";
 try {
-	var xml = new XML("<a></a>");
-	xml.setName(undefined);
+    var xml = new XML("<a></a>");
+    xml.setName(undefined);
 } catch (err) {
-	result = grabError(err, err.toString());
+    result = grabError(err, err.toString());
 } finally {
-	AddTestCase("Runtime Error", expected, result);
+    AddTestCase("Runtime Error", expected, result);
 }
 
 //-----------------------------------------------------------

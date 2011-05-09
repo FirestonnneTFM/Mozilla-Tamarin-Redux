@@ -38,12 +38,12 @@
 import StaticFunctionBody.*;
 
 class TestObjNoPackage{
-	static function noReturnNoParams() { return "noReturnNoParams"; }
-	static function noReturnParams(s:String, b:Boolean) { return s; }
-	static function noReturnCustomParam(c:Custom) { return new Custom(); }
-	static function returnNoParams():String { return "returnNoParams"; }
-	static function returnParams(s:String, b:Boolean):String { return s; }
-	static function returnCustomNoParams():Custom { return new Custom(); }
+    static function noReturnNoParams() { return "noReturnNoParams"; }
+    static function noReturnParams(s:String, b:Boolean) { return s; }
+    static function noReturnCustomParam(c:Custom) { return new Custom(); }
+    static function returnNoParams():String { return "returnNoParams"; }
+    static function returnParams(s:String, b:Boolean):String { return s; }
+    static function returnCustomNoParams():Custom { return new Custom(); }
 }
 
 var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)

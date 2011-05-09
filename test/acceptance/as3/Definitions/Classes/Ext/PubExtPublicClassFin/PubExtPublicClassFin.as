@@ -93,7 +93,7 @@ package PublicClass {
 
 
     // ***************************************
-    // access final property from 
+    // access final property from
     // default method of sub class
     // ***************************************
 
@@ -129,7 +129,7 @@ package PublicClass {
 
 
     // ***************************************
-    // access final property from 
+    // access final property from
     // final method of sub class
     // ***************************************
 

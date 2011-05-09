@@ -112,48 +112,48 @@ var chris = new Engineer();
 
 
 testcases[index++] = new TestCase( SECTION,
-	      "jim = new Employee(); jim.specialty",
-	      "none",
-	      jim.specialty );
+          "jim = new Employee(); jim.specialty",
+          "none",
+          jim.specialty );
 
 testcases[index++] = new TestCase( SECTION,
-	      "terry = new Engineer(); terry.specialty",
-	      "code",
-	      terry.specialty );
+          "terry = new Engineer(); terry.specialty",
+          "code",
+          terry.specialty );
 
 testcases[index++] = new TestCase( SECTION,
-	      "sean = new SalesPerson(); sean.specialty",
-	      "none",
-	      sean.specialty );
+          "sean = new SalesPerson(); sean.specialty",
+          "none",
+          sean.specialty );
 
 testcases[index++] = new TestCase( SECTION,
-	      "wally = new Manager(); wally.specialty",
-	      "none",
-	      wally.specialty );
+          "wally = new Manager(); wally.specialty",
+          "none",
+          wally.specialty );
 
 testcases[index++] = new TestCase( SECTION,
-	      "furry = new Manager(); furry.specialty",
-	      "none",
-	      furry.specialty );
+          "furry = new Manager(); furry.specialty",
+          "none",
+          furry.specialty );
 
 testcases[index++] = new TestCase( SECTION,
-	      "pat = new Employee(); pat.specialty",
-	      "none",
-	      pat.specialty );
+          "pat = new Employee(); pat.specialty",
+          "none",
+          pat.specialty );
 
 testcases[index++] = new TestCase( SECTION,
-	      "leslie = new Engineer(); leslie.specialty",
-	      "code",
-	      leslie.specialty );
+          "leslie = new Engineer(); leslie.specialty",
+          "code",
+          leslie.specialty );
 
 testcases[index++] = new TestCase( SECTION,
-	      "bubbles = new SalesPerson(); bubbles.specialty",
-	      "none",
-	      bubbles.specialty );
+          "bubbles = new SalesPerson(); bubbles.specialty",
+          "none",
+          bubbles.specialty );
 
 
 testcases[index++] = new TestCase( SECTION,
-	      "chris = new Employee(); chris.specialty",
-	      "code",
-	      chris.specialty );
+          "chris = new Employee(); chris.specialty",
+          "code",
+          chris.specialty );
 test();

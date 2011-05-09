@@ -54,7 +54,7 @@ correct =
     <foo:bravo>one</foo:bravo>
 </bar:alpha>;
 
-x1.setNamespace("http://bar/");   
+x1.setNamespace("http://bar/");
 
 TEST(2, correct, x1);
 
@@ -62,13 +62,13 @@ XML.prettyPrinting = false;
 var xmlDoc = "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/TR/xsl\"><xsl:template match=\"/\"><html>body</html></xsl:template></xsl:stylesheet>"
 
 // !!@ Rhino comes with with the "ns" prefix for this namespace.  I have no idea how that happens.
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setNamespace('http://xyx.org/xml'),MYXML.toString()", 
-	"<stylesheet xmlns:xsl=\"http://www.w3.org/TR/xsl\" xmlns=\"http://xyx.org/xml\"><xsl:template match=\"/\"><html>body</html></xsl:template></stylesheet>", 
-	(MYXML = new XML(xmlDoc), MYXML.setNamespace('http://xyx.org/xml'), MYXML.toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setNamespace('http://xyx.org/xml'),MYXML.toString()",
+    "<stylesheet xmlns:xsl=\"http://www.w3.org/TR/xsl\" xmlns=\"http://xyx.org/xml\"><xsl:template match=\"/\"><html>body</html></xsl:template></stylesheet>",
+    (MYXML = new XML(xmlDoc), MYXML.setNamespace('http://xyx.org/xml'), MYXML.toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setNamespace('http://xyx.org/xml'),MYXML.getNamespace()", 
-	"http://xyx.org/xml", 
-	(MYXML = new XML(xmlDoc), MYXML.setNamespace('http://xyx.org/xml'), myGetNamespace(MYXML).toString()));
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setNamespace('http://xyx.org/xml'),MYXML.getNamespace()",
+    "http://xyx.org/xml",
+    (MYXML = new XML(xmlDoc), MYXML.setNamespace('http://xyx.org/xml'), myGetNamespace(MYXML).toString()));
 
 
 xmlDoc = "<a><b><c>d</c></b></a>";
@@ -76,10 +76,10 @@ MYXML = new XML(xmlDoc);
 MYXML.setNamespace('http://foo');
 MYXML.b.c.setNamespace('http://bar');
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setNamespace('http://zxz.org/xml'),MYXML.toString()", 
-	"<a xmlns=\"http://foo\"><b><aaa:c xmlns:aaa=\"http://bar\">d</aaa:c></b></a>", 
-	(MYXML.toString()));
-	
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.setNamespace('http://zxz.org/xml'),MYXML.toString()",
+    "<a xmlns=\"http://foo\"><b><aaa:c xmlns:aaa=\"http://bar\">d</aaa:c></b></a>",
+    (MYXML.toString()));
+    
 var n1 = new Namespace('zzz', 'http://www.zzz.com');
 var n2 = new Namespace('zzz', 'http://www.zzz.org');
 var n3 = new Namespace('abc', 'http://www.zzz.com');
@@ -87,18 +87,18 @@ var n4 = new Namespace('def', 'http://www.zzz.com');
 
 xmlDoc = "<a><b>c</b></a>";
 
-AddTestCase("Adding two namespaces by uri", 
-	"<a xmlns=\"http://www.zzz.com\"><aaa:b xmlns:aaa=\"http://www.zzz.org\">c</aaa:b></a>", 
-	(MYXML = new XML(xmlDoc), MYXML.setNamespace('http://www.zzz.com'), MYXML.b.setNamespace('http://www.zzz.org'), MYXML.toString()));
+AddTestCase("Adding two namespaces by uri",
+    "<a xmlns=\"http://www.zzz.com\"><aaa:b xmlns:aaa=\"http://www.zzz.org\">c</aaa:b></a>",
+    (MYXML = new XML(xmlDoc), MYXML.setNamespace('http://www.zzz.com'), MYXML.b.setNamespace('http://www.zzz.org'), MYXML.toString()));
 
-AddTestCase("Adding two namespaces with prefix 'zzz'", 
-	"<zzz:a xmlns:zzz=\"http://www.zzz.com\"><zzz:b xmlns:zzz=\"http://www.zzz.org\">c</zzz:b></zzz:a>", 
-	(MYXML = new XML(xmlDoc), MYXML.setNamespace(n1), MYXML.b.setNamespace(n2), MYXML.toString()));
-	
-AddTestCase("Adding two namespaces with prefix 'zzz'", 
-	"<abc:a xmlns:abc=\"http://www.zzz.com\"><abc:b xmlns:def=\"http://www.zzz.com\">c</abc:b></abc:a>", 
-	(MYXML = new XML(xmlDoc), MYXML.setNamespace(n3), MYXML.b.setNamespace(n4), MYXML.toString()));
-	
+AddTestCase("Adding two namespaces with prefix 'zzz'",
+    "<zzz:a xmlns:zzz=\"http://www.zzz.com\"><zzz:b xmlns:zzz=\"http://www.zzz.org\">c</zzz:b></zzz:a>",
+    (MYXML = new XML(xmlDoc), MYXML.setNamespace(n1), MYXML.b.setNamespace(n2), MYXML.toString()));
+    
+AddTestCase("Adding two namespaces with prefix 'zzz'",
+    "<abc:a xmlns:abc=\"http://www.zzz.com\"><abc:b xmlns:def=\"http://www.zzz.com\">c</abc:b></abc:a>",
+    (MYXML = new XML(xmlDoc), MYXML.setNamespace(n3), MYXML.b.setNamespace(n4), MYXML.toString()));
+    
 
 ns = new Namespace("moo", "http://moo/");
 ns2 = new Namespace("zoo", "http://zoo/");
@@ -163,5 +163,5 @@ correct = <alpha>
 
 AddTestCase("Calling setNamespace() on an attribute with no existing namespace", correct.toString(), (MYXML = new XML(x1), MYXML.bravo.@attr.setNamespace(ns), MYXML.toString()));
 
-	
+    
 END();

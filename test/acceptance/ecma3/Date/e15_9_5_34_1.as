@@ -135,9 +135,9 @@ function getTestCases() {
 
     function addNewTestCase( DateString, UTCDate, LocalDate) {
         var TDATE:Date = new Date(0);
-    	TDATE.setMonth(1,1);
+        TDATE.setMonth(1,1);
         var DateCase:Date = new Date()
-    	DateCase = TDATE;
+        DateCase = TDATE;
         var thisError:String = "no error";
     
         array[item++] = new TestCase( SECTION, DateString+".getTime()",             true, UTCDate.value ==       DateCase.getTime() );
@@ -174,9 +174,9 @@ function getTestCases() {
 
     function addNewTestCase1( DateString, UTCDate, LocalDate) {
         var TDATE:Date = new Date(0);
-    	(TDATE).setMonth(11);
+        (TDATE).setMonth(11);
         var DateCase:Date = new Date()
-    	DateCase = TDATE;
+        DateCase = TDATE;
         var thisError:String = "no error";
     
         array[item++] = new TestCase( SECTION, DateString+".getTime()",             true, UTCDate.value ==    DateCase.getTime() );
@@ -215,9 +215,9 @@ function getTestCases() {
     
     function addNewTestCase2( DateString, UTCDate, LocalDate) {
         var TDATE:Date = new Date(now);
-    	(TDATE).setMonth(11,31);
+        (TDATE).setMonth(11,31);
         var DateCase:Date = new Date();
-    	DateCase = TDATE;
+        DateCase = TDATE;
         var thisError:String = "no error";
     
         array[item++] = new TestCase( SECTION, DateString+".getTime()",             true, UTCDate.value ==   DateCase.getTime() );
@@ -253,9 +253,9 @@ function getTestCases() {
     
     function addNewTestCase5( DateString, UTCDate, LocalDate) {
         var TDATE:Date = new Date(now);
-    	(TDATE).setMonth(1);
+        (TDATE).setMonth(1);
         var DateCase:Date = new Date();
-    	DateCase = TDATE;
+        DateCase = TDATE;
         var thisError:String = "no error";
     
         array[item++] = new TestCase( SECTION, DateString+".getTime()",             true, UTCDate.value ==       DateCase.getTime() );
@@ -294,9 +294,9 @@ function getTestCases() {
     function addNewTestCase3( DateString, UTCDate, LocalDate) {
         //DateCase = eval( DateString );
         var TDATE:Date = new Date(0);
-    	(TDATE).setMonth(0,1);
+        (TDATE).setMonth(0,1);
         var Datecase:Date = new Date();
-    	DateCase = TDATE;
+        DateCase = TDATE;
         var thisError:String = "no error";
     
         array[item++] = new TestCase( SECTION, DateString+".getTime()",             true, UTCDate.value ==       DateCase.getTime() );
@@ -338,7 +338,7 @@ function getTestCases() {
         var TDATE:Date = new Date(TIME_1900);
         (TDATE).setMonth(11,31);
         var DateCase:Date = new Date();
-    	DateCase = TDATE;
+        DateCase = TDATE;
         var thisError:String = "no error";
     
         array[item++] = new TestCase( SECTION, DateString+".getTime()",             true, UTCDate.value ==       DateCase.getTime() );
@@ -378,7 +378,7 @@ function getTestCases() {
         var TDATE:Date = new Date(TIME_1900);
         (TDATE).setMonth(1);
         var DateCase:Date = new Date();
-    	DateCase = TDATE;
+        DateCase = TDATE;
         var thisError:String = "no error";
     
         array[item++] = new TestCase( SECTION, DateString+".getTime()",             true, UTCDate.value ==       DateCase.getTime() );
@@ -418,7 +418,7 @@ function getTestCases() {
         var TDATE:Date = new Date(TIME_2000);
         (TDATE).setMonth(11,31);
         var DateCase:Date = new Date();
-    	DateCase = TDATE;
+        DateCase = TDATE;
         var thisError:String = "no error";
     
         array[item++] = new TestCase( SECTION, DateString+".getTime()",             true, UTCDate.value ==       DateCase.getTime() );
@@ -457,7 +457,7 @@ function getTestCases() {
         var TDATE:Date = new Date(TIME_2000);
         (TDATE).setMonth(1);
         var DateCase:Date = new Date();
-    	DateCase = TDATE;
+        DateCase = TDATE;
         var thisError:String = "no error";
     
         array[item++] = new TestCase( SECTION, DateString+".getTime()",             true, UTCDate.value ==       DateCase.getTime() );

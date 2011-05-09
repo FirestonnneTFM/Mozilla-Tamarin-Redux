@@ -164,7 +164,7 @@ function getTestCases() {
 
     array[item++]= new TestCase(SECTION,"Assigning Object.prototype.toString to f.toString",true, (f.toString=Object.prototype.toString, f.toString())=="[object null]" ||
                                                                                                   (f.toString=Object.prototype.toString, f.toString()).indexOf("[object Function-")==0
-																								  );
+                                                                                                  );
         
     array[item++] = new TestCase( SECTION,
                                   "var f = function() {}; f.toString = Object.prototype.toString; f.indexOf = String.prototype.indexOf; f.indexOf('[object Function-')",
@@ -174,8 +174,8 @@ function getTestCases() {
                                    );
 
     try{
-        var b = new Boolean(); 
-        b.indexOf = String.prototype.indexOf; 
+        var b = new Boolean();
+        b.indexOf = String.prototype.indexOf;
         b.indexOf('true');
     }
     catch(e2){
@@ -186,8 +186,8 @@ function getTestCases() {
                                   "var b = new Boolean(); b.indexOf = String.prototype.indexOf; b.indexOf('true')","ReferenceError: Error #1056",referenceError(thisError));
     }
     try{
-        var b = new Boolean(); 
-        b.indexOf = String.prototype.indexOf; 
+        var b = new Boolean();
+        b.indexOf = String.prototype.indexOf;
         b.indexOf('false',1);
     }
     catch(e3){
@@ -198,8 +198,8 @@ function getTestCases() {
                                   "var b = new Boolean(); b.indexOf = String.prototype.indexOf; b.indexOf('true')","ReferenceError: Error #1056",referenceError(thisError));
     }
     try{
-        var b = new Boolean(); 
-        b.indexOf = String.prototype.indexOf; 
+        var b = new Boolean();
+        b.indexOf = String.prototype.indexOf;
         b.indexOf('false',0);
     }
     catch(e4){
@@ -210,9 +210,9 @@ function getTestCases() {
                                   "var b = new Boolean(); b.indexOf = String.prototype.indexOf; b.indexOf('true')","ReferenceError: Error #1056",referenceError(thisError));
     }
     try{
-        n = new Number(1e21); 
-        n.indexOf = String.prototype.indexOf; 
-        n.indexOf('e'); 
+        n = new Number(1e21);
+        n.indexOf = String.prototype.indexOf;
+        n.indexOf('e');
     }
     catch(e5){
         thisError=e5.toString();
@@ -222,9 +222,9 @@ function getTestCases() {
                                   "var n = new Number(1e21); n.indexOf = String.prototype.indexOf; n.indexOf('e')","ReferenceError: Error #1056",referenceError(thisError));
     }
     try{
-        n = new Number(-Infinity); 
-        n.indexOf = String.prototype.indexOf; 
-        n.indexOf('-'); 
+        n = new Number(-Infinity);
+        n.indexOf = String.prototype.indexOf;
+        n.indexOf('-');
     }
     catch(e6){
         thisError=e6.toString();
@@ -234,8 +234,8 @@ function getTestCases() {
                                   "var n = new Number(-Infinity); n.indexOf = String.prototype.indexOf; n.indexOf('-')","ReferenceError: Error #1056",referenceError(thisError));
     }
     try{
-        var n = new Number(0xFF); 
-        n.indexOf = String.prototype.indexOf; 
+        var n = new Number(0xFF);
+        n.indexOf = String.prototype.indexOf;
         n.indexOf('5');
     }
     catch(e7){
@@ -246,7 +246,7 @@ function getTestCases() {
                                   "var n = new Number(0xFF); n.indexOf = String.prototype.indexOf; n.indexOf('5')","ReferenceError: Error #1056",referenceError(thisError));
     }
     try{
-        var m = Math; 
+        var m = Math;
         m.indexOf = String.prototype.indexOf; m.indexOf( 'Math' );
     }catch(e8){
         thisError=e8.toString();

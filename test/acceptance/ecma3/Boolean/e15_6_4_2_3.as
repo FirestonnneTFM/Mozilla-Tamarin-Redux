@@ -50,17 +50,17 @@ function getTestCases() {
     var item = 0;
 
     tostr=Boolean.prototype.toString;
-	Boolean.prototype.toString=tostr;
+    Boolean.prototype.toString=tostr;
     x=true;
     array[item++] = new TestCase( SECTION, "tostr=Boolean.prototype.toString; Boolean.prototype.toString=tostr; x=true; x.toString()",
-											"true",
-											x.toString());
+                                            "true",
+                                            x.toString());
 
 
     x=false;
     array[item++] = new TestCase( SECTION, "tostr=Boolean.prototype.toString; Boolean.prototype.toString=tostr; x=false;x.toString()",
-											"false",
-											x.toString() );
+                                            "false",
+                                            x.toString() );
 
     return ( array );
 }

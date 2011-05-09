@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 package foo{
-	public function fletch(){ return 'PASSED'; }
+    public function fletch(){ return 'PASSED'; }
 }
 
 function fletch2(){ return 'PASSED2'; }
@@ -44,7 +44,7 @@ function fletch2(){ return 'PASSED2'; }
 import foo.*;
 
 var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
 var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 

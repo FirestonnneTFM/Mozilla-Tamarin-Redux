@@ -37,17 +37,17 @@
 /*
  * Public Class PublicClass
  * Class methods
- *  
+ *
  */
 
 package PublicClassImpPublicIntpubname{
 
-	public class PublicClass implements PublicInt{
-		
-		public function deffunc():String{  
-			return"PASSED";
-		}
+    public class PublicClass implements PublicInt{
+        
+        public function deffunc():String{
+            return"PASSED";
+        }
 
 
-       } 	
-}  
+       }
+}

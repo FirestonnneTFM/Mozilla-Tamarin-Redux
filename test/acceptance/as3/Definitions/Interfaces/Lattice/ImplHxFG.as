@@ -36,9 +36,9 @@
  * ***** END LICENSE BLOCK ***** */
 // ActionScript file
 package Lattice {
-	public class ImplHxFG extends ImplFG implements IFuncH {
-		public function h() : String {
-			return "IFuncH::h"
-		}
-	}
+    public class ImplHxFG extends ImplFG implements IFuncH {
+        public function h() : String {
+            return "IFuncH::h"
+        }
+    }
 }

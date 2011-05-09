@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 package {
-   public class Dup { 
+   public class Dup {
        var a:String;
        function Dup() { a = "Dup1"; }
    }

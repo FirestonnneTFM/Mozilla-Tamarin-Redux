@@ -72,7 +72,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     // the regexp argument is not a RegExp object
     // this is not a string object

@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "8.6.1 Constructor Methods";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS3";        // Version of ECMAScript or ActionScript
 var TITLE   = "Implicit SuperStatement";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -54,29 +54,29 @@ var thisError = "";
 
 thisError = "no exception thrown";
 try {
-	result = srte.missingSuperMethod();
+    result = srte.missingSuperMethod();
 } catch (e) {
-	thisError = e.toString();
+    thisError = e.toString();
 } finally {
-	AddTestCase( "call missing base method via super", REFERENCEERROR+1070, referenceError( thisError ) );
+    AddTestCase( "call missing base method via super", REFERENCEERROR+1070, referenceError( thisError ) );
 }
 
 thisError = "no exception thrown";
 try {
-	result = srte.callSuperPrivate();
+    result = srte.callSuperPrivate();
 } catch (e) {
-	thisError = e.toString();
+    thisError = e.toString();
 } finally {
-	AddTestCase( "call private base method via super", REFERENCEERROR+1070, referenceError( thisError ) );
+    AddTestCase( "call private base method via super", REFERENCEERROR+1070, referenceError( thisError ) );
 }
 
 thisError = "no exception thrown";
 try {
-	result = srte.callSuperOtherPackage();
+    result = srte.callSuperOtherPackage();
 } catch (e) {
-	thisError = e.toString();
+    thisError = e.toString();
 } finally {
-	AddTestCase( "call internal base method from different package via super", REFERENCEERROR+1070, referenceError( thisError ) );
+    AddTestCase( "call internal base method from different package via super", REFERENCEERROR+1070, referenceError( thisError ) );
 }
 
 //

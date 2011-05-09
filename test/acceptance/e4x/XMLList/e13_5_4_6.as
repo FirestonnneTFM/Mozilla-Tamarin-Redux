@@ -50,15 +50,15 @@ var xmlDoc = "<!-- This is Comment --><employee id='1'><!-- This is another Comm
 
 XML.prettyPrinting = true;
 XML.ignoreComments = false;
-AddTestCase( "XML.ignoreComments = false, MYXML = new XMLList(xmlDoc), MYXML.comments().toString()", 
-	"<!-- This is another Comment -->", 
-	(XML.ignoreComments = false, MYXML = new XMLList(xmlDoc), MYXML.comments().toString()));
+AddTestCase( "XML.ignoreComments = false, MYXML = new XMLList(xmlDoc), MYXML.comments().toString()",
+    "<!-- This is another Comment -->",
+    (XML.ignoreComments = false, MYXML = new XMLList(xmlDoc), MYXML.comments().toString()));
 AddTestCase( "XML.ignoreComments = false, MYXML = new XMLList(xmlDoc), MYXML.comments() instanceof XMLList", true, (MYXML = new XMLList(xmlDoc), MYXML.comments() instanceof XMLList));
 AddTestCase( "XML.ignoreComments = false, MYXML = new XMLList(xmlDoc), MYXML.comments() instanceof XML", false, (MYXML = new XMLList(xmlDoc), MYXML.comments() instanceof XML));
 AddTestCase( "XML.ignoreComments = false, MYXML = new XMLList(xmlDoc), MYXML.comments().length()", 1, (MYXML = new XMLList(xmlDoc), MYXML.comments().length() ));
 
-AddTestCase( "XML.ignoreComments = false, MYXML = new XMLList(xmlDoc), XML.ignoreComments = true, MYXML.comments().toString()", 
-	"<!-- This is another Comment -->", 
-	(XML.ignoreComments = false, MYXML = new XMLList(xmlDoc), XML.ignoreComments = true, MYXML.comments().toString()));
+AddTestCase( "XML.ignoreComments = false, MYXML = new XMLList(xmlDoc), XML.ignoreComments = true, MYXML.comments().toString()",
+    "<!-- This is another Comment -->",
+    (XML.ignoreComments = false, MYXML = new XMLList(xmlDoc), XML.ignoreComments = true, MYXML.comments().toString()));
 
 END();

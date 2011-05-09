@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SECTION = "Function";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript 
+var VERSION = "AS3";        // Version of ECMAScript or ActionScript
 var TITLE   = "ReturnTypes";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
@@ -45,28 +45,28 @@ startTest();                // leave this alone
 //vars, functions and classes to be used by the test
 import functionReturnTypes.*;
 
-var myClassA:TestClassA = new TestClassA();	// class TestClassA {}
-var myClassB:TestClassB = new TestClassB();	// class TestClassB extends TestClassA {}
-var myClassC:TestClassC = new TestClassC();	// class TestClassC extends TestClassB implements TestInterface {}
-											// interface TestInterface {}
+var myClassA:TestClassA = new TestClassA(); // class TestClassA {}
+var myClassB:TestClassB = new TestClassB(); // class TestClassB extends TestClassA {}
+var myClassC:TestClassC = new TestClassC(); // class TestClassC extends TestClassB implements TestInterface {}
+                                            // interface TestInterface {}
 function emptyFunction() {};
 var emptyObject:Object = new Object();
 var myDate:Date = new Date(1977,8,24);
 
 
 var valueArr:Array = [{},"string","10",null,undefined,true,false,0,1,-1,1.23,-1.23,NaN,Infinity,emptyFunction,emptyObject,
-		    myClassA, myClassB,myClassC,myDate,Number.MAX_VALUE,Number.MIN_VALUE,Number.NEGATIVE_INFINITY,Number.POSITIVE_INFINITY,
-		    uint.MAX_VALUE,uint.MIN_VALUE,int.MAX_VALUE,int.MIN_VALUE,""];
+            myClassA, myClassB,myClassC,myDate,Number.MAX_VALUE,Number.MIN_VALUE,Number.NEGATIVE_INFINITY,Number.POSITIVE_INFINITY,
+            uint.MAX_VALUE,uint.MIN_VALUE,int.MAX_VALUE,int.MIN_VALUE,""];
 
 // The valueDescArr array has the string representations of the valueArr values.
 // This is due to the fact that some values (objects) do not resolve to strings.
 var valueDescArr:Array = ["{}",'"string"','"10"',"null","undefined","true","false","0","1","-1","1.23","-1.23","NaN","Infinity","emptyFunction",
-			"emptyObject","myClassA","myClassB","myClassC","myDate","Number.MAX_VALUE",'Number.MIN_VALUE','Number.NEGATIVE_INFINITY',
-			'Number.POSITIVE_INFINITY','uint.MAX_VALUE','uint.MIN_VALUE','int.MAX_VALUE','int.MIN_VALUE','"" (empty string)'];
+            "emptyObject","myClassA","myClassB","myClassC","myDate","Number.MAX_VALUE",'Number.MIN_VALUE','Number.NEGATIVE_INFINITY',
+            'Number.POSITIVE_INFINITY','uint.MAX_VALUE','uint.MIN_VALUE','int.MAX_VALUE','int.MIN_VALUE','"" (empty string)'];
 
 
 var typeArr:Array =[String,Number,int,uint,Boolean,Object,Function,TestClassA,TestClassB,TestClassC,Date];
-var typeDescArr:Array =	["String","Number","int","uint","Boolean","Object","Function","TestClassA","TestClassB","TestClassC","Date"];
+var typeDescArr:Array = ["String","Number","int","uint","Boolean","Object","Function","TestClassA","TestClassB","TestClassC","Date"];
 
 
 
@@ -93,15 +93,15 @@ populateResults();
 var resultCounter = 0;
 //Error cases that try to return an incorrect return type.
 for (var i=0; i<funcArr.length; i++) {  //loop through each function
-    for (var j=0; j<valueArr.length; j++) {	//loop through each type
-	try {
-	    result = funcArr[i](valueArr[j]) is typeArr[i];
-	} catch (e) {
-	    result = e;
-	} finally {
-	   AddTestCase("return type: "+ typeDescArr[i] + " arg: "+valueDescArr[j], String(resultArr[resultCounter++]), String(result).substr(0,22));
-	   //trace("resultArr[x++] = "+result+"; // funcArr["+i+"]("+valueDescArr[j]+") - return type: "+typeDescArr[i]  );
-	}
+    for (var j=0; j<valueArr.length; j++) { //loop through each type
+    try {
+        result = funcArr[i](valueArr[j]) is typeArr[i];
+    } catch (e) {
+        result = e;
+    } finally {
+       AddTestCase("return type: "+ typeDescArr[i] + " arg: "+valueDescArr[j], String(resultArr[resultCounter++]), String(result).substr(0,22));
+       //trace("resultArr[x++] = "+result+"; // funcArr["+i+"]("+valueDescArr[j]+") - return type: "+typeDescArr[i]  );
+    }
     }
 }
 

@@ -49,13 +49,13 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
         
-    var MYVAR; if ( true ) MYVAR='PASSED';  
+    var MYVAR; if ( true ) MYVAR='PASSED';
     array[item++] = new TestCase(   SECTION,
                                     "var MYVAR; if ( true ) MYVAR='PASSED'; MYVAR",
                                     "PASSED",
                                     MYVAR);
-	var MYVAR="PASSED";
-	if ( false ) 
+    var MYVAR="PASSED";
+    if ( false )
         MYVAR='FAILED';
     array[item++] = new TestCase(  SECTION,
                                     "var MYVAR; if ( false ) MYVAR='FAILED'; MYVAR;",
@@ -63,26 +63,26 @@ function getTestCases() {
                                      MYVAR);
     var MYVAR;
     if ( new Boolean(true) )
-	    MYVAR='PASSED';
+        MYVAR='PASSED';
     array[item++] = new TestCase(   SECTION,
                                     "var MYVAR; if ( new Boolean(true) ) MYVAR='PASSED'; MYVAR",
                                     "PASSED",
                                      MYVAR );
-	var MYVAR;
-	if ( new Boolean(false) )
-		MYVAR='PASSED';
+    var MYVAR;
+    if ( new Boolean(false) )
+        MYVAR='PASSED';
     array[item++] = new TestCase(   SECTION,
                                     "var MYVAR; if ( new Boolean(false) ) MYVAR='PASSED'; MYVAR",
                                     "PASSED",
                                      MYVAR);
     var MYVAR;
     if ( 1 )
-	    MYVAR='PASSED';
+        MYVAR='PASSED';
     array[item++] = new TestCase(   SECTION,
                                     "var MYVAR; if ( 1 ) MYVAR='PASSED'; MYVAR",
                                     "PASSED",
                                      MYVAR );
-    var MYVAR="PASSED"; 
+    var MYVAR="PASSED";
     if ( 0 )
         MYVAR='FAILED';
     array[item++] = new TestCase(  SECTION,

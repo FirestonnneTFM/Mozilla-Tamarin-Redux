@@ -47,7 +47,7 @@
     
 function getTestCases() {
     var array = new Array();
-    var item = 0;    
+    var item = 0;
 
     array[item++] = new TestCase( SECTION,
                                     "// the following character should not be interpreted as a line terminator in a comment: \u000A",

@@ -47,9 +47,9 @@ startTest();
 var thisError = "Exited with uncaught exception";
 
 try {
-	throw null;
+    throw null;
 } catch(e) {
-	thisError = e;
+    thisError = e;
 } finally {
         AddTestCase("Catch thrown null", "null", String(thisError));
 }

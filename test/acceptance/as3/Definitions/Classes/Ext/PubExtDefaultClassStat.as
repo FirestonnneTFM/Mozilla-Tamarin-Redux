@@ -89,7 +89,7 @@ AddTestCase( "EXTDCLASS.subSetArray(arr), EXTDCLASS.subGetArray()", arr, EXTDCLA
 
 
 // ********************************************
-// access static method from a public 
+// access static method from a public
 // method of a sub class
 //
 // ********************************************
@@ -101,7 +101,7 @@ AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access static method from a private 
+// access static method from a private
 // method of a sub class
 //
 // ********************************************
@@ -113,7 +113,7 @@ AddTestCase( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access static method from a final 
+// access static method from a final
 // method of a sub class
 //
 // ********************************************
@@ -122,7 +122,7 @@ EXTDCLASS = new PubExtDefaultClassStat();
 AddTestCase( "access static method from final method of sub class", arr, EXTDCLASS.testFinSubArray(arr) );
 
 // ********************************************
-// access static method from a static 
+// access static method from a static
 // method of a sub class
 //
 // ********************************************
@@ -133,32 +133,32 @@ AddTestCase( "PubExtDefaultClassStat.testStatSubArray(arr)", arr, PubExtDefaultC
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access static method from a public static 
+// access static method from a public static
 // method of a sub class
 //
 // ********************************************
 
 AddTestCase( "*** Access static method from public static method of sub class ***", 1, 1 );
-AddTestCase( "PubExtDefaultClassStat.pubStatSubSetArray(arr), PubExtDefaultClassStat.pubStatSubGetArray()", arr, 
+AddTestCase( "PubExtDefaultClassStat.pubStatSubSetArray(arr), PubExtDefaultClassStat.pubStatSubGetArray()", arr,
              (PubExtDefaultClassStat.pubStatSubSetArray(arr), PubExtDefaultClassStat.pubStatSubGetArray()) );
 
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access static method from a private static 
+// access static method from a private static
 // method of a sub class
 //
 // ********************************************
 
 var EXTDEFAULTCLASS = new PubExtDefaultClassStat();
 AddTestCase( "*** Access static method from private static method of sub class ***", 1, 1 );
-AddTestCase( "EXTDEFAULTCLASS.testPrivStatSubArray(arr)", arr, 
+AddTestCase( "EXTDEFAULTCLASS.testPrivStatSubArray(arr)", arr,
               EXTDEFAULTCLASS.testPrivStatSubArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access static property from 
+// access static property from
 // default method in sub class
 // ********************************************
 
@@ -170,7 +170,7 @@ AddTestCase( "EXTDCLASS.subSetDPArray(arr), EXTDCLASS.subGetDPArray()", arr, EXT
 
 
 // ********************************************
-// access static property from 
+// access static property from
 // public method in sub class
 // ********************************************
 
@@ -181,7 +181,7 @@ AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", ar
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access static property from 
+// access static property from
 // private method in sub class
 // ********************************************
 
@@ -193,7 +193,7 @@ AddTestCase( "EXTDCLASS.privSubSetDPArray(arr), EXTDCLASS.privSubGetDPArray()", 
 
 // ********************************************
 // access static property from
-// static method in sub class 
+// static method in sub class
 // ********************************************
 
 AddTestCase( "*** Access static property from static method in sub class ***", 1, 1 );
@@ -201,7 +201,7 @@ AddTestCase( "PubExtDefaultClassStat.testStatSubPArray(arr)", arr, PubExtDefault
 
 // ********************************************
 // access static property from
-// public static method in sub class 
+// public static method in sub class
 // ********************************************
 
 AddTestCase( "*** Access static property from public static method in sub class ***", 1, 1 );
@@ -211,19 +211,19 @@ AddTestCase( "PubExtDefaultClassStat.pubStatSubSetSPArray(arr), PubExtDefaultCla
 
 
 // ********************************************
-// access static property from 
+// access static property from
 // private static method in sub class
 // ********************************************
 
 EXTDCLASS = new PubExtDefaultClassStat();
 AddTestCase( "*** Access static property from private static method in sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testPrivStatSubPArray(arr)", arr, 
+AddTestCase( "EXTDCLASS.testPrivStatSubPArray(arr)", arr,
               EXTDCLASS.testPrivStatSubPArray(arr));
 
 // <TODO>  fill in the rest of the cases here
 
 // ********************************************
-// access static property from 
+// access static property from
 // final method in sub class
 // ********************************************
 

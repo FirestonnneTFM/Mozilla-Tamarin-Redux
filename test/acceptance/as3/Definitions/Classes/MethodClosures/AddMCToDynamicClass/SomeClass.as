@@ -35,11 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package MCPackage {
-	public class SomeClass {
-		public var string:String;
-		
-		public function getString() : String {
-			return this.string;
-		}
-	}
+    public class SomeClass {
+        public var string:String;
+        
+        public function getString() : String {
+            return this.string;
+        }
+    }
 }

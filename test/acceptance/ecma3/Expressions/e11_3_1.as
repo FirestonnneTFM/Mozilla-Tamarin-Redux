@@ -52,11 +52,11 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,  "var MYVAR; MYVAR++",                       NaN,                             MYVAR++ );
     var MYVAR=void 0;
     array[item++] = new TestCase( SECTION,  "var MYVAR= void 0; MYVAR++",               NaN,                             MYVAR++ );
-    var MYVAR=null; 
+    var MYVAR=null;
     array[item++] = new TestCase( SECTION,  "var MYVAR=null; MYVAR++",                  0,                            MYVAR++ );
-      var MYVAR=true; 
+      var MYVAR=true;
     array[item++] = new TestCase( SECTION,  "var MYVAR=true; MYVAR++",                  1,                          MYVAR++ );
-    var MYVAR=false; 
+    var MYVAR=false;
     array[item++] = new TestCase( SECTION,  "var MYVAR=false; MYVAR++",                 0,                            MYVAR++ );
 
     // verify return value

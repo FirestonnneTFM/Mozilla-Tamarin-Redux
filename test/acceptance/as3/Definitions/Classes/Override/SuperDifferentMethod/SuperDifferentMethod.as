@@ -35,15 +35,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package SuperDifferentMethod {
-	public class SuperDifferentMethod extends BaseClass {
-		override public function echo() : String {
-			return super.foo();
-		}
-		
-		public function callFoo() : String {
-			return foo();
-		}
-		
+    public class SuperDifferentMethod extends BaseClass {
+        override public function echo() : String {
+            return super.foo();
+        }
+        
+        public function callFoo() : String {
+            return foo();
+        }
+        
 
-	}
+    }
 }

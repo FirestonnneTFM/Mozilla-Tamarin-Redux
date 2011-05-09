@@ -49,10 +49,10 @@ function getTestCases() {
     var item = 0;
 
     array[item++] = new TestCase( SECTION, "typeof String.prototype",   "object",   typeof String.prototype );
-    array[item++] = new TestCase( SECTION, "String.prototype.valueOf()", 
-											"",        
-											(String.prototype.valueOf()).toString() );
-    var origStringGetClass = String.prototype.getClass;											
+    array[item++] = new TestCase( SECTION, "String.prototype.valueOf()",
+                                            "",
+                                            (String.prototype.valueOf()).toString() );
+    var origStringGetClass = String.prototype.getClass;
     array[item++] = new TestCase( SECTION,
                                   "String.prototype.getClass = Object.prototype.toString; String.prototype.getClass()",
                                   "[object Object]",

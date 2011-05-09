@@ -68,68 +68,68 @@ var xmlDoc = "<MLB><Team>Giants</Team><City>San Francisco</City><Team>Padres</Te
 // Rhino returns "<Team>Giants</Team>\n<Team>Padres></Team>"
 
 // propertyName as a string
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child('Team')", "<Team>Giants</Team>" + NL() + "<Team>Padres</Team>", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child('Team')", "<Team>Giants</Team>" + NL() + "<Team>Padres</Team>",
              (MYXML = new XML(xmlDoc), MYXML.child('Team').toString() ));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child('Team') instanceof XMLList", true, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child('Team') instanceof XMLList", true,
              (MYXML = new XML(xmlDoc), MYXML.child('Team') instanceof XMLList ));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child('Team') instanceof XML", false, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child('Team') instanceof XML", false,
              (MYXML = new XML(xmlDoc), MYXML.child('Team') instanceof XML ));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child('Team').length()", 2, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child('Team').length()", 2,
              (MYXML = new XML(xmlDoc), MYXML.child('Team').length()));
-AddTestCase( "MYXML = new XML(null), MYXML.child('Team')", "", 
+AddTestCase( "MYXML = new XML(null), MYXML.child('Team')", "",
              (MYXML = new XML(null), MYXML.child('Team').toString() ));
-AddTestCase( "MYXML = new XML(undefined), MYXML.child('Team')", "", 
+AddTestCase( "MYXML = new XML(undefined), MYXML.child('Team')", "",
              (MYXML = new XML(undefined), MYXML.child('Team').toString() ));
-AddTestCase( "MYXML = new XML(), MYXML.child('Team')", "", 
+AddTestCase( "MYXML = new XML(), MYXML.child('Team')", "",
              (MYXML = new XML(), MYXML.child('Team').toString() ));
 
 // propertyName as a numeric index
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(1) instanceof XMLList", true, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(1) instanceof XMLList", true,
              (MYXML = new XML(xmlDoc), MYXML.child(1) instanceof XMLList ));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(1)", "San Francisco", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(1)", "San Francisco",
              (MYXML = new XML(xmlDoc), MYXML.child(1).toString() ));
-AddTestCase( "MYXML = new XML(null), MYXML.child(1)", "", 
+AddTestCase( "MYXML = new XML(null), MYXML.child(1)", "",
              (MYXML = new XML(null), MYXML.child(1).toString() ));
-AddTestCase( "MYXML = new XML(undefined), MYXML.child(1)", "", 
+AddTestCase( "MYXML = new XML(undefined), MYXML.child(1)", "",
              (MYXML = new XML(undefined), MYXML.child(1).toString() ));
-AddTestCase( "MYXML = new XML(), MYXML.child(1)", "", 
+AddTestCase( "MYXML = new XML(), MYXML.child(1)", "",
              (MYXML = new XML(), MYXML.child(1).toString() ));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(0) instanceof XMLList", true, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(0) instanceof XMLList", true,
              (MYXML = new XML(xmlDoc), MYXML.child(0) instanceof XMLList ));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(0)", "Giants", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(0)", "Giants",
              (MYXML = new XML(xmlDoc), MYXML.child(0).toString() ));
-AddTestCase( "MYXML = new XML(null), MYXML.child(0)", "", 
+AddTestCase( "MYXML = new XML(null), MYXML.child(0)", "",
              (MYXML = new XML(null), MYXML.child(0).toString() ));
-AddTestCase( "MYXML = new XML(undefined), MYXML.child(0)", "", 
+AddTestCase( "MYXML = new XML(undefined), MYXML.child(0)", "",
              (MYXML = new XML(undefined), MYXML.child(0).toString() ));
-AddTestCase( "MYXML = new XML(), MYXML.child(0)", "", 
+AddTestCase( "MYXML = new XML(), MYXML.child(0)", "",
              (MYXML = new XML(), MYXML.child(0).toString() ));
 
 // propertyName is invalid
 
 // invalid propertyName
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child('DoesNotExist') instanceof XMLList", true, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child('DoesNotExist') instanceof XMLList", true,
              (MYXML = new XML(xmlDoc), MYXML.child('DoesNotExist') instanceof XMLList ));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child('DoesNotExist')", "", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child('DoesNotExist')", "",
              (MYXML = new XML(xmlDoc), MYXML.child('DoesNotExist').toString() ));
-AddTestCase( "MYXML = new XML(null), MYXML.child('DoesNotExist')", "", 
+AddTestCase( "MYXML = new XML(null), MYXML.child('DoesNotExist')", "",
              (MYXML = new XML(null), MYXML.child('DoesNotExist').toString() ));
-AddTestCase( "MYXML = new XML(undefined), MYXML.child('DoesNotExist')", "", 
+AddTestCase( "MYXML = new XML(undefined), MYXML.child('DoesNotExist')", "",
              (MYXML = new XML(undefined), MYXML.child('DoesNotExist').toString() ));
-AddTestCase( "MYXML = new XML(), MYXML.child('DoesNotExist')", "", 
+AddTestCase( "MYXML = new XML(), MYXML.child('DoesNotExist')", "",
              (MYXML = new XML(), MYXML.child('DoesNotExist').toString() ));
 
 // invalid index
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(8) instanceof XMLList", true, 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(8) instanceof XMLList", true,
              (MYXML = new XML(xmlDoc), MYXML.child(8) instanceof XMLList ));
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(8)", "", 
+AddTestCase( "MYXML = new XML(xmlDoc), MYXML.child(8)", "",
              (MYXML = new XML(xmlDoc), MYXML.child(8).toString() ));
-AddTestCase( "MYXML = new XML(null), MYXML.child(8)", "", 
+AddTestCase( "MYXML = new XML(null), MYXML.child(8)", "",
              (MYXML = new XML(null), MYXML.child(8).toString() ));
-AddTestCase( "MYXML = new XML(undefined), MYXML.child(8)", "", 
+AddTestCase( "MYXML = new XML(undefined), MYXML.child(8)", "",
              (MYXML = new XML(undefined), MYXML.child(8).toString() ));
-AddTestCase( "MYXML = new XML(), MYXML.child(8)", "", 
+AddTestCase( "MYXML = new XML(), MYXML.child(8)", "",
              (MYXML = new XML(), MYXML.child(8).toString() ));
 
 

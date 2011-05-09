@@ -72,8 +72,8 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase( "constructor fixed parameter set to true write beyond length-1 throws exception", 
-             "RangeError: Error #1126", 
+AddTestCase( "constructor fixed parameter set to true write beyond length-1 throws exception",
+             "RangeError: Error #1126",
              parseError(errormsg,"RangeError: Error #1126".length));
 AddTestCase( "constructor fixed parameter set to true length is unchanged", 10, v7.length);
 var v8=new Vector.<uint>(10,true);
@@ -90,7 +90,7 @@ var v9=new Vector.<int>(1073741824);
 AddTestCase( "constructor large vector", 1073741824, v9.length);
 */
 
-// test basic types: already 
+// test basic types: already
 var v10=new Vector.<uint>();
 v10.push(10);
 AddTestCase( "constructor type uint", 10, v10[0]);
@@ -122,8 +122,8 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase("constructor type custom class class mismatch", 
-            "TypeError: Error #1034", 
+AddTestCase("constructor type custom class class mismatch",
+            "TypeError: Error #1034",
             parseError(errormsg,"TypeError: Error #1034".length));
 
 var c3inst=new c3();

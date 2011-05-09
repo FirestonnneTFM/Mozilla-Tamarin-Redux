@@ -49,7 +49,7 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
         
-	var x = null;
+    var x = null;
     array[item++] = new TestCase( SECTION,
                                     "var x = null; typeof x",
                                     null,

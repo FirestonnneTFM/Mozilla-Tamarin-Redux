@@ -44,6 +44,6 @@ package publicClassConsNoParamPackage{
        public function Add():Number{
            var z:Number=x+y;
            return z;
-       }                                                                                                                                                                                                                             
+       }
     }
 }

@@ -72,7 +72,7 @@ AddTestCase( "Namespace()", NULL_OBJECT, Namespace().toString());
 AddTestCase( "typeof Namespace()", "object", typeof Namespace() );
 //AddTestCase( "Namespace().__proto__ == Namespace.prototype", true, Namespace().__proto__ == Namespace.prototype);
 
-//One value is supplied 
+//One value is supplied
 AddTestCase( "Namespace('pfx').toString()", 'pfx', Namespace('pfx').toString() );
 AddTestCase( "typeof Namespace('pfx')", "object", typeof Namespace('pfx') );
 //AddTestCase( "Namespace('pfx').__proto__ == Namespace.prototype", true, Namespace('pfx').__proto__ == Namespace.prototype);
@@ -80,7 +80,7 @@ AddTestCase( "typeof Namespace('pfx')", "object", typeof Namespace('pfx') );
 var ns = new Namespace('http://foo.bar');
 AddTestCase( "Namespace(nsObj).toString()", 'http://foo.bar', Namespace(ns).toString() );
 
-//Two values are supplied 
+//Two values are supplied
 AddTestCase( "Namespace('pfx','ns') == new Namespace('pfx', 'ns')", new Namespace('pfx', 'http://www.w3.org/TR/html4/'), Namespace('pfx','http://www.w3.org/TR/html4/') );
 AddTestCase( "typeof Namespace('pfx','http://www.w3.org/TR/html4/')", "object", typeof Namespace('pfx','http://www.w3.org/TR/html4/') );
 //AddTestCase( "Namespace('pfx','http://www.w3.org/TR/html4/').__proto__ == Namespace.prototype", true, Namespace('pfx','http://www.w3.org/TR/html4/').__proto__ == Namespace.prototype );

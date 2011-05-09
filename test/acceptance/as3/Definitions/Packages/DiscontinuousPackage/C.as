@@ -35,21 +35,21 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package DiscontinuousPackage {
-	use namespace Kitty;
-	
-	public class C {
-		Kitty var b:Boolean = true;
-		public function returnNSVar():Boolean {
-			return Kitty::b;
-		}
-		
-		Kitty function returnArray():Array {
-			return [1,2,3];
-		}
-		
-		public function callNSFunc() {
-			var k:Array = Kitty::returnArray();
-			return k;
-		}
-	}
+    use namespace Kitty;
+    
+    public class C {
+        Kitty var b:Boolean = true;
+        public function returnNSVar():Boolean {
+            return Kitty::b;
+        }
+        
+        Kitty function returnArray():Array {
+            return [1,2,3];
+        }
+        
+        public function callNSFunc() {
+            var k:Array = Kitty::returnArray();
+            return k;
+        }
+    }
 }

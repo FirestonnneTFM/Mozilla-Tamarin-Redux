@@ -76,12 +76,12 @@ TEST(5, undefined, y1.parent());
 var xDoc = "<doc><employee id='1'><a>b</a></employee><employee id='2'><a>c</a></employee></doc>";
 var MYXML = new XMLList(xDoc);
 
-AddTestCase( "MYXML = new XMLList(xDoc), MYXML.employee[0].parent()", MYXML.name(), 
+AddTestCase( "MYXML = new XMLList(xDoc), MYXML.employee[0].parent()", MYXML.name(),
              (MYXML.employee[0].parent().name()));
 
 xDoc = "<employee id='1'><firstname>John</firstname><lastname>Walton</lastname><age>25</age></employee><company><name>Macromedia</name></company>";
 
-AddTestCase( "MYXML = new XMLList(xDoc), MYXML.parent()", undefined, 
+AddTestCase( "MYXML = new XMLList(xDoc), MYXML.parent()", undefined,
              (MYXML = new XMLList(xDoc), MYXML.parent()));
 
 var x1 = new XMLList("<XML>text node<foo>bar</foo></XML>");

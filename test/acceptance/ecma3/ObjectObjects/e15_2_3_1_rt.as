@@ -46,7 +46,7 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-  	array[item++] = new TestCase( SECTION,  "Object.constructor.prototype",     Object.prototype+"",     Object.constructor.prototype+"");
+    array[item++] = new TestCase( SECTION,  "Object.constructor.prototype",     Object.prototype+"",     Object.constructor.prototype+"");
     array[item++] = new TestCase( SECTION,  "Object.length",        1,                      Object.length );
 
     return ( array );

@@ -92,7 +92,7 @@ var LENGTH_EXPECTED = LENGTH_SPIDERMONKEY;
  * The various NativeError objects; see ECMA-262 Edition 3, Section 15.11.6
  */
 var errObjects = [Error, EvalError, RangeError,
-		  ReferenceError, SyntaxError, TypeError, URIError];
+          ReferenceError, SyntaxError, TypeError, URIError];
 
 for (var i in errObjects)
 {

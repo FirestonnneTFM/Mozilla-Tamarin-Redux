@@ -35,21 +35,21 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package InternalClassPackage {
-	internal class InternalClass {
-		
-		var date:Date;
-		
-		// ****************
-		// constructor
-		// ****************
-		function InternalClass() {
-		}
-		
-		// *****************
-		// public methods
-		// *****************
-		public function getDate() : Date { return date; }
-		public function setDate( d:Date ) { date = d; }
-	}
+    internal class InternalClass {
+        
+        var date:Date;
+        
+        // ****************
+        // constructor
+        // ****************
+        function InternalClass() {
+        }
+        
+        // *****************
+        // public methods
+        // *****************
+        public function getDate() : Date { return date; }
+        public function setDate( d:Date ) { date = d; }
+    }
 
 }

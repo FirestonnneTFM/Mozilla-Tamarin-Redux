@@ -54,7 +54,7 @@
       );
 
 
-    // CVE-2008-2371 begins with an option and contains multiple branches. 
+    // CVE-2008-2371 begins with an option and contains multiple branches.
     var optionsRegExp:String = "(?i)[\xc3\xa9\xc3\xbd]|[\xc3\xa9\xc3\xbdA]";
     var evilRegExp2:RegExp = new RegExp(optionsRegExp);
     evilRegExp2.exec("Hello World");

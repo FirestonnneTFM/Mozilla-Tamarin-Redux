@@ -35,5 +35,5 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package asOper {
-	public class TestClassC extends TestClassB implements TestInterface {}
+    public class TestClassC extends TestClassB implements TestInterface {}
 }

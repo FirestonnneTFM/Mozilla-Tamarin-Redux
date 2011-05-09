@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package SuperSameNamespace {
-	public class SuperSameNamespace extends BaseClass {
-		override ns1 function echo() : String { 
-			return super.ns1::echo() + " override";
-		}
-	}
+    public class SuperSameNamespace extends BaseClass {
+        override ns1 function echo() : String {
+            return super.ns1::echo() + " override";
+        }
+    }
 }
