@@ -117,6 +117,8 @@ namespace avmshell
 #include "JavaGlue.h"
 #include "ShellCore.h"
 
+#include "shell_toplevel-classes.hh"
+
 namespace avmshell
 {
     // The stack margin is the amount of stack that should be available to native

@@ -3697,7 +3697,7 @@ class avmplus_JSONClassSlots
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::JSONClass;
 private:
-    DRCWB(avmplus::Namespace*) m_private_as3ns;
+    MMgc::GCTraceableObject::GCMember<avmplus::Namespace> m_private_as3ns;
 public:
     REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
     {
@@ -3778,7 +3778,7 @@ class avmplus_WalkerObjectSlots
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::WalkerObject;
 private:
-    DRCWB(avmplus::FunctionObject*) m_reviver;
+    MMgc::GCTraceableObject::GCMember<avmplus::FunctionObject> m_reviver;
 };
 //-----------------------------------------------------------
 
@@ -4153,8 +4153,8 @@ class avmplus_CompressionAlgorithmClassSlots
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::CompressionAlgorithmClass;
 private:
-    DRCWB(avmplus::String*) m_ZLIB;
-    DRCWB(avmplus::String*) m_DEFLATE;
+    MMgc::GCTraceableObject::GCMember<avmplus::String> m_ZLIB;
+    MMgc::GCTraceableObject::GCMember<avmplus::String> m_DEFLATE;
 };
 //-----------------------------------------------------------
 
