@@ -57,24 +57,11 @@ class Node {
     }
 }
 
-var i_loops = 1000;
-var j_loops = 2500;
+var i_loops = 400;
+var j_loops = 500;
 
-// Need to reduce the number of loops on slow machines so test does
-// not time out in the player
 var start = new Date();
-var a = []
-for (var i=0; i<25000; i++)
-    a[0] = 3.14159 + i*i;
-var loop_time = new Date() - start;
-trace("loop_time: "+loop_time);
-if (loop_time > 14) {
-    i_loops = 900;
-    j_loops = 1000;
-}
-
-
-var fractions = [Number.MIN_VALUE, 0, -0, 0.2499999, 0.25, 0.5, 0.75, 1.0];
+var fractions = [Number.MIN_VALUE, 0, -0,  0.25, 0.5, 0.75, 1.0];
 for each(var f in fractions) {
     trace("starting pauseForGCIfCollectionImminent test @ " + f);
 
@@ -97,30 +84,25 @@ for each(var f in fractions) {
                 true,
                 ((hits > 0) == (f < 1.0)));
 }
+trace('Main tests: '+(new Date() - start))
 
-trace("Finished loop portion")
 
-// Error cases
-if (playerType == 'AVMPlus') {
-    expected_error = "ArgumentError: Error #1508";
-} else {
-    expected_error = "ArgumentError: Error #2004";
-}
-
+start = new Date();
 var error_cases = [NaN, undefined, Number.NEGATIVE_INFINITY,
                    -1, 1.000000001, 10000, Number.MAX_VALUE,
                    Number.POSITIVE_INFINITY];
 
-for each(var ec in error_cases) {
+for each (var ec in error_cases) {
     error = "no error";
     try {
         System.pauseForGCIfCollectionImminent(ec);
     } catch (err) {
-        error = err.toString().substr(0, expected_error.length);
+        error = err.toString();
     }
-    AddTestCase("pauseForGCIfCollectionImminent error - " + ec,
-                expected_error, error);
+    AddTestCase("pauseForGCIfCollectionImminent test @ " + ec,
+                "no error", error);
 }
+var loop_time = new Date() - start;
+trace("error tests: "+loop_time);
 
-trace("Total Runtime: "+(new Date() - start))
 test();
