@@ -93,16 +93,6 @@ done
 sleep 60
 echo ""
 
-echo "========================================="
-echo "rooting devices..."
-for device in $devices
-do
-    echo "Rooting device - $device"
-    ${adb} -s $device root
-done
-sleep 5
-echo ""
-
 #
 # for each device look for avmshell processes and kill them
 #
@@ -130,8 +120,8 @@ echo "cleanup up /data/app directories on device..."
 for device in $devices
 do
     echo "cleaning up device - $device"
-    ${adb} -s $device shell rm -r /data/app
-    ${adb} -s $device shell mkdir /data/app
+    ${adb} -s $device shell rm -r /data/local/tamarin
+    ${adb} -s $device shell mkdir /data/local/tamarin
 done
 echo ""
 
