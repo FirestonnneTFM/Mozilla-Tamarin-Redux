@@ -3832,7 +3832,7 @@ namespace MMgc
                 bool wasDeletedGCRoot=false;
                 const void *container = findGCGraphBeginning(addr, wasDeletedGCRoot);
                 const void *displayContainer =  container ? container : addr;
-                uint32_t offset = container ? (char*)addr - (char*)container : 0;
+                uint32_t offset = container ? uint32_t((char*)addr - (char*)container) : 0;
                 const char *containerDescription = IsPointerToGCPage(container) ? "gc" : (container ? "gcroot" : "stack");
                 if(wasDeletedGCRoot)
                     containerDescription = "gcroot-deleted";
