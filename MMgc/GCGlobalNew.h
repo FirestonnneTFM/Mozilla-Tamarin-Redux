@@ -269,7 +269,10 @@ namespace MMgc
     T *MMgcConstructTaggedArray(T* /*dummy template arg*/, size_t count, MMgc::FixedMallocOpts opts)
     {
         T *mem = (T*) MMgc::NewTaggedArray(count, sizeof(T), opts, false /* !isPrimitive */);
-        if (mem == NULL && (opts & MMgc::kCanFail))
+        // Observe that mem can be NULL only if (opts & kCanFail) is true, so there is no
+        // reason to redundantly test that condition here, and in fact adding the condition
+        // will confuse tools like Coverity (bugzilla 655048).
+        if (mem == NULL)
             return NULL;
         T *tp = mem;
         for(size_t i=count; i>0; i--, tp++)
