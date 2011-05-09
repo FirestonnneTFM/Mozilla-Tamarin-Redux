@@ -74,13 +74,13 @@ echo "Installing $filename"
 for device in ${deviceids};do
 
     # Copy the shell and runner script to the device
-    ${adb} -s ${device} push $filename /data/app/avmshell 2> /dev/null
-    ${adb} -s ${device} shell 'chmod 777 /data/app/avmshell' 2> /dev/null
-    ${adb} -s ${device} push ${basedir}/platform/android/android_runner.sh /data/app 2> /dev/null
-    ${adb} -s ${device} shell 'chmod 777 /data/app/android_runner.sh' 2> /dev/null
+    ${adb} -s ${device} push $filename /data/local/tamarin/avmshell 2> /dev/null
+    ${adb} -s ${device} shell 'chmod 777 /data/local/tamarin/avmshell' 2> /dev/null
+    ${adb} -s ${device} push ${basedir}/platform/android/android_runner.sh /data/local/tamarin 2> /dev/null
+    ${adb} -s ${device} shell 'chmod 777 /data/local/tamarin/android_runner.sh' 2> /dev/null
 
     # Make sure that the version running on the device is the expected revision
-    adb -s ${device} shell 'cd /data/app; ./avmshell' > /tmp/stdout${device}
+    adb -s ${device} shell 'cd /data/local/tamarin; ./avmshell' > /tmp/stdout${device}
     # Verify that the shell was successfully deployed
     # Remove CR from the stdout as they really mess up shell commands on mac, 
     # causing really weird output, characters getting moved around 

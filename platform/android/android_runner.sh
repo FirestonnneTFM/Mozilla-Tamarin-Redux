@@ -1,6 +1,6 @@
 #/bin/sh
 
-cd /data/app
+cd /data/local/tamarin
 ./avmshell $*
 echo "EXITCODE=$?"
 
