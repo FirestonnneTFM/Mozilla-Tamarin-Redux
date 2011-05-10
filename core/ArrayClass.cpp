@@ -316,7 +316,11 @@ namespace avmplus
 
     /**
      * ArraySort implements actionscript Array.sort().
-     * It's also the base class SortWithParameters, which handles all other permutations of Array
+     * It's also the base class SortWithParameters, which handles all
+     * other permutations of Array.
+     *
+     * NOTE: Instances of ArraySort must be stack-allocated, as it uses
+     * VMPI_alloca for a temporary data structure.
      */
     class ArraySort
     {
@@ -334,10 +338,13 @@ namespace avmplus
             ,kNumeric               = 16
         };
 
-        /** Array.sortOn() will pass an array of field names */
+        /** 
+         * Array.sortOn() will pass an array of field names, which is converted to a stack-
+         * allocated array of FieldName structures (hence no write barriers here).
+         */
         struct FieldName
         {
-            RCObject::GCMember<String> name;
+            String* name;
             int options;
         };
 
@@ -655,14 +662,7 @@ namespace avmplus
         mmfx_delete_array(index);
         delete atoms;
         delete fieldatoms;
-        if(fields) {
-            int numFields = (int)GC::Size(fields)/sizeof(FieldName);
-            for(int i=0; i<numFields; i++) {
-                fields[i].name = NULL;
-            }
-            core->GetGC()->Free(fields);
-            fields = NULL;
-        }
+        fields = NULL;
     }
 
     /*
@@ -1193,6 +1193,7 @@ namespace avmplus
         //  Perhaps it is the union of all field's options?
 
         ArraySort::FieldName *fn = NULL;
+        GC::AllocaAutoPtr fn_autoptr;
         uint32_t nFields = 0;
         int options = 0;
         
@@ -1202,7 +1203,7 @@ namespace avmplus
 
             options = AvmCore::integer(optionsAtom);
 
-            fn = (ArraySort::FieldName*) core->GetGC()->Alloc(sizeof(ArraySort::FieldName), GC::kZero|GC::kContainsPointers);
+            fn = (ArraySort::FieldName*) VMPI_alloca(core, fn_autoptr, GCHeap::CheckForCallocSizeOverflow(nFields, sizeof(ArraySort::FieldName)));
             fn[0].name = core->internString(namesAtom);
             fn[0].options = options;
         }
@@ -1211,7 +1212,7 @@ namespace avmplus
             ArrayObject *obj = (ArrayObject *)AvmCore::atomToScriptObject(namesAtom);
 
             nFields = obj->getLength();
-            fn = (ArraySort::FieldName*) core->GetGC()->Calloc(nFields, sizeof(ArraySort::FieldName), GC::kZero|GC::kContainsPointers);
+            fn = (ArraySort::FieldName*) VMPI_alloca(core, fn_autoptr, GCHeap::CheckForCallocSizeOverflow(nFields, sizeof(ArraySort::FieldName)));
 
             for (uint32_t i = 0; i < nFields; i++)
             {
@@ -1243,7 +1244,6 @@ namespace avmplus
             }
         }
 
-        // ~ArraySort() will "delete [] fn;"
         Atom result;
         ArraySort sort(result, toplevel->arrayClass(), d, options, ArraySort::FieldCompareFunc, NULL, undefinedAtom, nFields, fn);
         return result;
