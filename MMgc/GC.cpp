@@ -1416,7 +1416,7 @@ namespace MMgc
         gc = _gc;
         object = _object;
         size = (_size | (_isExactlyTraced ? kIsExactlyTraced : 0) | (_isStackMemory ? kIsStackMemory : 0));
-        markStackSentinel = NULL;
+        markStackSentinel = 0;
         gc->AddRoot(this);
     }
 
@@ -1451,7 +1451,7 @@ namespace MMgc
         GCAssert(_size % 4 == 0);
         GCAssert(uintptr_t(_object) % 4 == 0);
         
-        SetMarkStackSentinelPointer(NULL);
+        SetMarkStackSentinelPointer(0); // Set of 0 is *not* equiv of Clear
         object = _object;
         size = (_size | (size & kFlags));    // Flags are sticky
     }
@@ -1487,7 +1487,7 @@ namespace MMgc
 
     void GCRoot::ClearMarkStackSentinelPointer()
     {
-        markStackSentinel = NULL;
+        markStackSentinel = 0;
     }
 
     void GCRoot::Destroy()
