@@ -1918,8 +1918,14 @@ namespace avmplus
                 // only non-builtin classes should hit this code; since they don't have C++ representations,
                 // "overlap" of fields between parent and child isn't possibly so we can safely declare the 
                 // offsetOfSlots to be an the end of the base.
-
-                AvmAssert(postype == TRAITSTYPE_INTERFACE || !pool->isBuiltin);
+#ifdef VMCFG_VERIFYALL
+                // (Don't bother with this assert in verifyonly mode, as avmglue.abc (etc) will appear to be
+                // non-builtin (since we specify them as arguments, triggering false positives)
+                if (!core->config.verifyonly)
+#endif
+                {
+                    AvmAssert(postype == TRAITSTYPE_INTERFACE || !pool->isBuiltin);
+                }
                 
                 // 0 means "put the slots at the end of my immediate parent"
                 offsetofSlots = 0;
