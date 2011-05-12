@@ -259,7 +259,8 @@ namespace avmplus
         GCRef<Toplevel> toplevel = this->toplevel();
         GCRef<builtinClassManifest> builtinClasses = toplevel->builtinClasses();
         int proxy_argc = argc+1;
-        Atom* proxy_argv = (Atom*) core()->GetGC()->Calloc(proxy_argc+1, sizeof(Atom), MMgc::GC::kContainsPointers|MMgc::GC::kZero);
+        MMgc::GC::AllocaAutoPtr proxy_argv_autoptr;
+        Atom* proxy_argv = (Atom*) VMPI_alloca(core(), proxy_argv_autoptr, MMgc::GCHeap::CheckForCallocSizeOverflow(proxy_argc+1, sizeof(Atom)));
 
         GCRef<QNameObject> q = QNameObject::create(core()->GetGC(), builtinClasses->get_QNameClass(), *name);
 
