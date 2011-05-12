@@ -254,6 +254,7 @@ vm avmplus:ScopeChain.obj
 vm avmplus:avmfeatures.obj
 vm avmplus:instr.obj
 vm avmplus:LirHelper.obj
+vm avmplus:ProxyGlue.obj
 
 eval eval-abc.obj
 eval eval-avmplus.obj
