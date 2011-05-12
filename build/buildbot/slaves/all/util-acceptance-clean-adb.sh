@@ -116,7 +116,7 @@ echo ""
 # remove old abc and shells from the device
 #
 echo "========================================="
-echo "cleanup up /data/app directories on device..."
+echo "cleanup up /data/local/tamarin directories on device..."
 for device in $devices
 do
     echo "cleaning up device - $device"
