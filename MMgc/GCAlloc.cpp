@@ -831,55 +831,55 @@ namespace MMgc
 
             gcbits_t* blockbits = b->bits;
             for ( char *item = b->items, *limit = b->items + m_itemSize * b->GetCount() ; item < limit ; item += m_itemSize )
-                {
-                    gcbits_t& marks = blockbits[GetBitsIndex(b,item)];
-                    int mq = marks & kFreelist;
-                    if(mq == kFreelist)
-                        continue;
+            {
+                gcbits_t& marks = blockbits[GetBitsIndex(b,item)];
+                int mq = marks & kFreelist;
+                if(mq == kFreelist)
+                    continue;
 
-                    if(mq == kMark) {
-                        numMarkedItems++;
-                        continue;
-                    }
+                if(mq == kMark) {
+                    numMarkedItems++;
+                    continue;
+                }
 
-                    GCAssertMsg(mq != kQueued, "No queued objects should exist when finalizing");
+                GCAssertMsg(mq != kQueued, "No queued objects should exist when finalizing");
 
 #ifdef MMGC_HOOKS
-                    if(m_gc->heap->HooksEnabled())
-                    {
-                    #ifdef MMGC_MEMORY_PROFILER
-                        if(m_gc->heap->GetProfiler())
-                            m_totalAskSize -= m_gc->heap->GetProfiler()->GetAskSize(GetUserPointer(item));
-                    #endif
+                if(m_gc->heap->HooksEnabled())
+                {
+                #ifdef MMGC_MEMORY_PROFILER
+                    if(m_gc->heap->GetProfiler())
+                        m_totalAskSize -= m_gc->heap->GetProfiler()->GetAskSize(GetUserPointer(item));
+                #endif
 
-                        m_gc->heap->FinalizeHook(GetUserPointer(item), m_itemSize - DebugSize());
-                    }
+                    m_gc->heap->FinalizeHook(GetUserPointer(item), m_itemSize - DebugSize());
+                }
 #endif
 
-                    if(!(marks & (kFinalizable|kHasWeakRef)))
-                        continue;
+                if(!(marks & (kFinalizable|kHasWeakRef)))
+                    continue;
 
-                    if (marks & kFinalizable)
-                    {
-                        GCFinalizedObject *obj = (GCFinalizedObject*)(void *)GetUserPointer(item);
-                        marks &= ~kFinalizable;     // Clear bits first so we won't get second finalization if finalizer longjmps out
+                if (marks & kFinalizable)
+                {
+                    GCFinalizedObject *obj = (GCFinalizedObject*)(void *)GetUserPointer(item);
+                    marks &= ~kFinalizable;     // Clear bits first so we won't get second finalization if finalizer longjmps out
 
-                        /* See https://bugzilla.mozilla.org/show_bug.cgi?id=573737 for the case where the object might remain in
-                         * uninitialized state and thus crash occurs while calling the dtor below. 
-                         */
-                        if(*(intptr_t*)obj != 0)
-                            obj->~GCFinalizedObject();
+                    /* See https://bugzilla.mozilla.org/show_bug.cgi?id=573737 for the case where the object might remain in
+                     * uninitialized state and thus crash occurs while calling the dtor below. 
+                     */
+                    if(*(intptr_t*)obj != 0)
+                        obj->~GCFinalizedObject();
 
 #if defined(_DEBUG)
-                        if(((GCAlloc*)b->alloc)->ContainsRCObjects()) {
-                            m_gc->RCObjectZeroCheck((RCObject*)obj);
-                        }
+                    if(((GCAlloc*)b->alloc)->ContainsRCObjects()) {
+                        m_gc->RCObjectZeroCheck((RCObject*)obj);
+                    }
 #endif
-                    }
+                }
 
-                    if (marks & kHasWeakRef) {
-                        b->gc->ClearWeakRef(GetUserPointer(item));
-                    }
+                if (marks & kHasWeakRef) {
+                    b->gc->ClearWeakRef(GetUserPointer(item));
+                }
             }
 
             // 3 outcomes:
@@ -917,27 +917,27 @@ namespace MMgc
     {
         gcbits_t* blockbits = b->bits;
         for ( char *item = b->items, *limit = b->items + m_itemSize * b->GetCount() ; item < limit ; item += m_itemSize )
+        {
+            uint32_t bitsindex = GetBitsIndex(b, item);
+            gcbits_t& marks = blockbits[bitsindex];
+
+            int mq = marks & kFreelist;
+            if(mq == kMark || mq == kQueued)    // Sweeping is lazy; don't sweep objects on the mark stack
             {
-                uint32_t bitsindex = GetBitsIndex(b, item);
-                gcbits_t& marks = blockbits[bitsindex];
+                // live item, clear bits
+                marks &= ~kFreelist;
+                continue;
+            }
 
-                int mq = marks & kFreelist;
-                if(mq == kMark || mq == kQueued)    // Sweeping is lazy; don't sweep objects on the mark stack
-                {
-                    // live item, clear bits
-                    marks &= ~kFreelist;
-                    continue;
-                }
+             if(mq == kFreelist)
+                 continue; // freelist item, ignore
 
-                 if(mq == kFreelist)
-                     continue; // freelist item, ignore
-
-                // garbage, freelist it
+            // garbage, freelist it
 #ifdef MMGC_HOOKS
-                if(m_gc->heap->HooksEnabled())
-                    m_gc->heap->FreeHook(GetUserPointer(item), b->size - DebugSize(), uint8_t(GCHeap::GCSweptPoison));
+            if(m_gc->heap->HooksEnabled())
+                m_gc->heap->FreeHook(GetUserPointer(item), b->size - DebugSize(), uint8_t(GCHeap::GCSweptPoison));
 #endif
-                b->FreeSweptItem(item, bitsindex);
+            b->FreeSweptItem(item, bitsindex);
         }
     }
 
