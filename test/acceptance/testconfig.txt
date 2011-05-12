@@ -104,6 +104,10 @@ regress/bug_551587_2.*, .*diff,, skip, test runs different testcases based on ru
 # specific skips when running differential testing between 32bit and 64bit shells
 as3/Array/regress_524122 , .*3264-diff,, skip , swf 9/10 32bit and 64bit shells return different results, so can not run diff
 
+# Different error codes based on runmode for swf9/10, this test has been superseded by vectorIndexRangeExceptions.as
+as3/Vector/nonindexproperty, .*diff, , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+
+
 ####################
 # Windows Mobile
 ####################
