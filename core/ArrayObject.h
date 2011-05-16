@@ -167,7 +167,7 @@ namespace avmplus
 
         uint32_t calcDenseUsed() const;
 
-    private:
+    protected:
         // Helper methods used only by ArrayClass, as special-case
         // optimizations for various "generic" optimizations that
         // can be done on dense arrays. These optimizations used
@@ -181,8 +181,15 @@ namespace avmplus
         bool try_concat(ArrayObject* that);
         bool try_reverse();
         bool try_shift(Atom& result);
-        ArrayObject* try_splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const ArrayObject* that, uint32_t that_skip);
+        virtual ArrayObject* try_splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const ArrayObject* that, uint32_t that_skip);
         bool try_unshift(ArrayObject* that);
+
+    protected:
+        void unseal() 
+        { 
+            AvmAssert(m_denseStart == IS_SEALED); 
+            m_denseStart = 0; 
+        }
 
     private:
         
@@ -210,6 +217,43 @@ namespace avmplus
     private:
         DECLARE_SLOTS_ArrayObject;
     // ------------------------ DATA SECTION END
+    };
+
+    // Special subclass used for "SemiSealed" Array subclasses
+    // see https://bugzilla.mozilla.org/show_bug.cgi?id=654807
+    class SemiSealedArrayObject : public ArrayObject
+    {
+    protected:
+        REALLY_INLINE SemiSealedArrayObject(VTable* ivtable, ScriptObject* delegate)
+            : ArrayObject(ivtable, delegate)
+        {
+            AvmAssert(!traits()->needsHashtable());
+            unseal();
+        }
+
+    protected:
+        friend class ClassClosure;
+        static ScriptObject* FASTCALL SemiSealedArrayObject::createInstanceProc(ClassClosure* cls);
+
+    public:
+        virtual Atom getAtomProperty(Atom name) const;
+        virtual void setAtomProperty(Atom name, Atom value);
+        virtual bool deleteAtomProperty(Atom name);
+        virtual bool hasAtomProperty(Atom name) const;
+
+        // Faster versions that takes direct indices
+        virtual Atom getUintProperty(uint32_t index) const;
+        virtual void setUintProperty(uint32_t index, Atom value);
+        virtual bool delUintProperty(uint32_t index);
+        virtual bool hasUintProperty(uint32_t i) const;
+
+        virtual bool getAtomPropertyIsEnumerable(Atom name) const;
+        virtual void setAtomPropertyIsEnumerable(Atom name, bool enumerable);
+
+        virtual void setLength(uint32_t newLen);
+
+    protected:
+        virtual ArrayObject* try_splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const ArrayObject* that, uint32_t that_skip);
     };
 }
 

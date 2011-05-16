@@ -70,7 +70,13 @@ namespace avmplus
                 // ...otherwise, we're done.
                 ClassClosure* base_cc = base->toClassClosure();
                 AvmAssert(base_cc != NULL);
-                return base_cc->m_createInstanceProc;
+                CreateInstanceProc proc = base_cc->m_createInstanceProc;
+                // If the proc is SemiSealedArrayObject, revert back to normal Array,
+                // and let checkForRestrictedInheritance() choose the proper proc:
+                // we might be a dynamic subclass of a non-dynamic subclass of Array.
+                if (proc == SemiSealedArrayObject::createInstanceProc)
+                    proc = ArrayClass::createInstanceProc;
+                return proc;
             }
         }
 
@@ -83,6 +89,16 @@ create_normal:
         if (ivtable)
         {
             Traits* itraits = ivtable->traits;
+            if (p == ArrayClass::createInstanceProc && !itraits->needsHashtable())
+            {
+                // If we are a sealed subclass of Array, we want to check BugCompatibility
+                // to see if instances of this class should behave as "semisealed" instead.
+                if (!itraits->core->currentBugCompatibility()->bugzilla654807)
+                {
+                    return SemiSealedArrayObject::createInstanceProc;
+                }
+            }
+
             Traits* base = itraits->base;
             if (base != NULL && base->isRestrictedInheritance && base->pool != itraits->pool)
             {
