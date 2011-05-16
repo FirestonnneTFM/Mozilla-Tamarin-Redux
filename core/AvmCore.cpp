@@ -5003,6 +5003,7 @@ return the result of the comparison ToPrimitive(x) == y.
         {
             bugzilla532454  = 1;    // Sort incorrectly converts result of user-supplied comparison function to integer
             bugzilla574600  = 1;    // Vector.<>.AS3::map returns no value
+            bugzilla654807  = 1;    // sealed subclasses of Array act sort-of-dynamic
         }
     }
 

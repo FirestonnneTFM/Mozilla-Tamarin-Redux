@@ -363,6 +363,7 @@ const int kBufferPadding = 16;
         unsigned bugzilla585791:1;      // String.localeCompare with a null String object returns 0
         unsigned bugzilla598683:1;      // Bad XML with unterminated node with namespace not throwing correctly
         unsigned bugzilla609416:1;      // encodeURIComponent and decodeURIComponent give wrong output when input contains surrogate pairs
+        unsigned bugzilla654807:1;      // sealed subclasses of Array act sort-of-dynamic
 
     protected:
         friend class AvmCore;

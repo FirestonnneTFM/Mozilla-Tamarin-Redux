@@ -300,25 +300,27 @@ namespace avmplus
     Atom ArrayObject::_getIntProperty(int32_t index) const
     {
         if (index >= 0)
-            // this is a hot function; explicitly call the force-inlined
-            // implementation to ensure we don't tail-call to _getUintProperty
-            return getUintPropertyImpl(index);
+            // this is a hot function, but we still must
+            // call the virtual function in case it's been overridden
+            return getUintProperty(index);
         else // integer is negative - we must intern it
             return getStringProperty(core()->internInt(index));
     }
 
     Atom ArrayObject::_getUintProperty(uint32_t index) const
     {
-        return getUintPropertyImpl(index);
+        // this is a hot function, but we still must
+        // call the virtual function in case it's been overridden
+        return getUintProperty(index);
     }
 
     Atom ArrayObject::_getDoubleProperty(double d) const
     {
         uint32_t index = uint32_t(d);
         if (double(index) == d)
-            // this is a hot function; explicitly call the force-inlined
-            // implementation to ensure we don't tail-call to _getUintProperty
-            return getUintPropertyImpl(index);
+            // this is a hot function, but we still must
+            // call the virtual function in case it's been overridden
+            return getUintProperty(index);
         else
             // Number is non-integral, negative, or too large to be a valid index, so intern it.
             return getStringProperty(core()->internDouble(d));
@@ -495,6 +497,10 @@ namespace avmplus
         }
         else
         {
+sparse_or_sealed:
+            if (!isDynamic())
+                throwWriteSealedError(indexToName(index));
+
             // Indices > 0x7fffffff aren't candidates for dense arrays; in that case we
             // always revert to sparse. (Note that per ES3 spec, 0xffffffff is not a legal
             // array index, so doesn't affect length, but does get stored as a dynamic prop)
@@ -503,10 +509,6 @@ namespace avmplus
             {
                 m_length = index + 1;
             }
-
-sparse_or_sealed:
-            if (!isDynamic())
-                throwWriteSealedError(indexToName(index));
 
             if (isDense())
             {
@@ -525,7 +527,9 @@ convert_and_set_sparse:
         AvmAssert(value != atomNotFound);
 
         if (index >= 0)
-            _setUintProperty(index, value);
+            // this is a hot function, but we still must
+            // call the virtual function in case it's been overridden
+            setUintProperty(index, value);
         else // integer is negative - we must intern it
             setStringProperty(core()->internInt(index), value);
     }
@@ -534,7 +538,9 @@ convert_and_set_sparse:
     {
         uint32_t index = uint32_t(d);
         if (double(index) == d)
-            _setUintProperty(index, value);
+            // this is a hot function, but we still must
+            // call the virtual function in case it's been overridden
+            setUintProperty(index, value);
         else
             // Number is non-integral, negative, or too large to be a valid index, so intern it.
             setStringProperty(core()->internDouble(d), value);
@@ -1108,5 +1114,76 @@ unshift_sparse:
             ScriptObject::setLengthProperty(newLen);
         }
     }
+    
+    // --------------
 
+    Atom SemiSealedArrayObject::getAtomProperty(Atom name) const
+    {
+        return getAtomPropertyFromProtoChain(name, getDelegate(), traits());
+    }
+
+    void SemiSealedArrayObject::setAtomProperty(Atom name, Atom)
+    {
+        throwWriteSealedError(name);
+    }
+
+    bool SemiSealedArrayObject::deleteAtomProperty(Atom)
+    {
+        return false;
+    }
+
+    bool SemiSealedArrayObject::hasAtomProperty(Atom) const
+    {
+        return false;
+    }
+
+    Atom SemiSealedArrayObject::getUintProperty(uint32_t i) const
+    {
+        Stringp interned;
+        bool present = core()->isInternedUint(i, &interned);
+        return present ? getAtomProperty(interned->atom()) : undefinedAtom;
+    }
+
+    void SemiSealedArrayObject::setUintProperty(uint32_t i, Atom)
+    {
+        throwWriteSealedError(core()->internUint32(i)->atom());
+    }
+
+    bool SemiSealedArrayObject::delUintProperty(uint32_t)
+    {
+        return false;
+    }
+
+    bool SemiSealedArrayObject::hasUintProperty(uint32_t) const
+    {
+        return false;
+    }
+
+    bool SemiSealedArrayObject::getAtomPropertyIsEnumerable(Atom) const
+    {
+        return false;
+    }
+
+    void SemiSealedArrayObject::setAtomPropertyIsEnumerable(Atom name, bool)
+    {
+        throwWriteSealedError(name);
+    }
+
+
+    void SemiSealedArrayObject::setLength(uint32_t)
+    {
+        // nothing
+    }
+
+    ArrayObject* SemiSealedArrayObject::try_splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const ArrayObject* that, uint32_t that_skip)
+    {
+        if (deleteCount > 0)
+            toplevel()->throwReferenceError(kReadSealedError, core()->toErrorString(insertPoint));
+        return ArrayObject::try_splice(insertPoint, insertCount, deleteCount, that, that_skip);
+    }
+
+    /*static*/ ScriptObject* FASTCALL SemiSealedArrayObject::createInstanceProc(avmplus::ClassClosure* cls)
+    {
+        return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) SemiSealedArrayObject(cls->ivtable(), cls->prototypePtr());
+    }
 }
