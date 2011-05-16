@@ -233,7 +233,7 @@ namespace avmplus
 
     protected:
         friend class ClassClosure;
-        static ScriptObject* FASTCALL SemiSealedArrayObject::createInstanceProc(ClassClosure* cls);
+        static ScriptObject* FASTCALL createInstanceProc(ClassClosure* cls);
 
     public:
         virtual Atom getAtomProperty(Atom name) const;
