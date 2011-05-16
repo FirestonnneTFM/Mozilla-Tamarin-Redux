@@ -3396,6 +3396,7 @@ class avmplus_IOErrorClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::IOErrorClass;
+#define GC_TRIVIAL_TRACER_IOErrorClass
 };
 //-----------------------------------------------------------
 
@@ -3406,6 +3407,7 @@ class avmplus_IOErrorObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::IOErrorObject;
+#define GC_TRIVIAL_TRACER_IOErrorObject
 };
 //-----------------------------------------------------------
 
@@ -3416,6 +3418,7 @@ class avmplus_MemoryErrorClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::MemoryErrorClass;
+#define GC_TRIVIAL_TRACER_MemoryErrorClass
 };
 //-----------------------------------------------------------
 
@@ -3426,6 +3429,7 @@ class avmplus_MemoryErrorObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::MemoryErrorObject;
+#define GC_TRIVIAL_TRACER_MemoryErrorObject
 };
 //-----------------------------------------------------------
 
@@ -3436,6 +3440,7 @@ class avmplus_IllegalOperationErrorClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::IllegalOperationErrorClass;
+#define GC_TRIVIAL_TRACER_IllegalOperationErrorClass
 };
 //-----------------------------------------------------------
 
@@ -3446,6 +3451,7 @@ class avmplus_IllegalOperationErrorObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::IllegalOperationErrorObject;
+#define GC_TRIVIAL_TRACER_IllegalOperationErrorObject
 };
 //-----------------------------------------------------------
 
@@ -3456,6 +3462,7 @@ class avmplus_EOFErrorClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::EOFErrorClass;
+#define GC_TRIVIAL_TRACER_EOFErrorClass
 };
 //-----------------------------------------------------------
 
@@ -3466,6 +3473,7 @@ class avmplus_EOFErrorObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::EOFErrorObject;
+#define GC_TRIVIAL_TRACER_EOFErrorObject
 };
 //-----------------------------------------------------------
 
@@ -3757,6 +3765,7 @@ class avmplus_JSONObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::JSONObject;
+#define GC_TRIVIAL_TRACER_JSONObject
 };
 //-----------------------------------------------------------
 
@@ -3767,6 +3776,7 @@ class avmplus_WalkerClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::WalkerClass;
+#define GC_TRIVIAL_TRACER_WalkerClass
 };
 //-----------------------------------------------------------
 
@@ -3779,6 +3789,11 @@ class avmplus_WalkerObjectSlots
     friend class avmplus::WalkerObject;
 private:
     MMgc::GCTraceableObject::GCMember<avmplus::FunctionObject> m_reviver;
+public:
+    REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
+    {
+        gc->TraceLocation(&m_reviver);
+    }
 };
 //-----------------------------------------------------------
 
@@ -4155,6 +4170,12 @@ class avmplus_CompressionAlgorithmClassSlots
 private:
     MMgc::GCTraceableObject::GCMember<avmplus::String> m_ZLIB;
     MMgc::GCTraceableObject::GCMember<avmplus::String> m_DEFLATE;
+public:
+    REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
+    {
+        gc->TraceLocation(&m_ZLIB);
+        gc->TraceLocation(&m_DEFLATE);
+    }
 };
 //-----------------------------------------------------------
 
@@ -4165,6 +4186,7 @@ class avmplus_CompressionAlgorithmObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::CompressionAlgorithmObject;
+#define GC_TRIVIAL_TRACER_CompressionAlgorithmObject
 };
 //-----------------------------------------------------------
 

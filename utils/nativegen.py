@@ -732,6 +732,14 @@ class NativeInfo:
                 if md.name == "native":
                     ni.parse_one_nativeinfo(md.attrs, is_vm_builtin)
 
+        # force to True or False (no "None" allowed)
+        if ni.class_gc_exact != True:
+            ni.class_gc_exact = False;
+        if ni.instance_gc_exact != True:
+            ni.instance_gc_exact = False;
+        t.is_gc_exact = ni.class_gc_exact
+        itraits.is_gc_exact = ni.instance_gc_exact
+
         if itraits.is_interface:
             if t.cpp_name_comps != None or itraits.cpp_name_comps != None:
                 raise Error("It is not legal to specify native(cls/instance) for an interface")
@@ -747,6 +755,7 @@ class NativeInfo:
             if t.cpp_name_comps == None:
                 t.cpp_name_comps = ni.fullyQualifiedCPPClassName(itraits.name.name + "Class")
                 t.is_synthetic = True
+                t.is_gc_exact = True
 
             if itraits.cpp_name_comps == None:
                 if str(t.name) == "Object$":
@@ -755,14 +764,7 @@ class NativeInfo:
                 else:
                     itraits.cpp_name_comps = ni.fullyQualifiedCPPClassName(itraits.name.name + "Object")
                     itraits.is_synthetic = True
-
-        # force to True or False (no "None" allowed)
-        if ni.class_gc_exact != True:
-            ni.class_gc_exact = False;
-        if ni.instance_gc_exact != True:
-            ni.instance_gc_exact = False;
-        t.is_gc_exact = ni.class_gc_exact
-        itraits.is_gc_exact = ni.instance_gc_exact
+                    itraits.is_gc_exact = True
 
         if ni.construct != None:
             t.construct = ni.construct
@@ -1775,6 +1777,17 @@ class AbcThunkGen:
                 continue;
             traitsSet.add(c)
             traitsSet.add(c.itraits)
+            if c.itraits.is_gc_exact:
+                base = self.lookupTraits(c.itraits.base)
+                # ScriptObject isn't marked as gc_exact, but that's ok here
+                while base != None and base.fqcppname() != BASE_INSTANCE_NAME:
+                    if not base.is_gc_exact:
+                        if c.itraits.is_synthetic:
+                            raise Error("class %s is implicitly assumed to be exact-gc but its ancestor %s is not; this is not supported" % (c.itraits.fqcppname(), base.fqcppname()))
+                        else:
+                            raise Error("class %s is explicitly marked as exact-gc but its ancestor %s is not; this is not supported" % (c.itraits.fqcppname(), base.fqcppname()))
+                    base = self.lookupTraits(base.base)
+                    
 
         for t in frozenset(traitsSet):
             filteredSlots = filter(lambda s: s is not None, t.slots)

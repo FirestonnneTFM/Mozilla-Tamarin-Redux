@@ -153,13 +153,13 @@ package avmplus
 package avmshell 
 {
     // this class exists solely to test construct="abstract"
-    [native(cls="::avmshell::AbstractBaseClass", instance="::avmshell::AbstractBaseObject", methods="auto", construct="abstract")]
+    [native(cls="::avmshell::AbstractBaseClass", instance="::avmshell::AbstractBaseObject", gc="exact", methods="auto", construct="abstract")]
     public class AbstractBase
     {
     }
 
     // this class exists solely to test construct="abstract"
-    [native(cls="::avmshell::NativeSubclassOfAbstractBaseClass", instance="::avmshell::NativeSubclassOfAbstractBaseObject", methods="auto")]
+    [native(cls="::avmshell::NativeSubclassOfAbstractBaseClass", instance="::avmshell::NativeSubclassOfAbstractBaseObject", gc="exact", methods="auto")]
     public class NativeSubclassOfAbstractBase extends AbstractBase
     {
     }
@@ -170,13 +170,13 @@ package avmshell
     }
 
     // this class exists solely to test construct="restricted"
-    [native(cls="::avmshell::RestrictedBaseClass", instance="::avmshell::RestrictedBaseObject", methods="auto", construct="restricted")]
+    [native(cls="::avmshell::RestrictedBaseClass", instance="::avmshell::RestrictedBaseObject", gc="exact", methods="auto", construct="restricted")]
     public class RestrictedBase
     {
     }
 
     // this class exists solely to test construct="restricted"
-    [native(cls="::avmshell::NativeSubclassOfRestrictedBaseClass", instance="::avmshell::NativeSubclassOfRestrictedBaseObject", methods="auto")]
+    [native(cls="::avmshell::NativeSubclassOfRestrictedBaseClass", instance="::avmshell::NativeSubclassOfRestrictedBaseObject", gc="exact", methods="auto")]
     public class NativeSubclassOfRestrictedBase extends RestrictedBase
     {
     }
@@ -187,13 +187,13 @@ package avmshell
     }
 
     // this class exists solely to test construct="abstract-restricted"
-    [native(cls="::avmshell::AbstractRestrictedBaseClass", instance="::avmshell::AbstractRestrictedBaseObject", methods="auto", construct="abstract-restricted")]
+    [native(cls="::avmshell::AbstractRestrictedBaseClass", instance="::avmshell::AbstractRestrictedBaseObject", gc="exact", methods="auto", construct="abstract-restricted")]
     public class AbstractRestrictedBase
     {
     }
 
     // this class exists solely to test construct="abstract-restricted"
-    [native(cls="::avmshell::NativeSubclassOfAbstractRestrictedBaseClass", instance="::avmshell::NativeSubclassOfAbstractRestrictedBaseObject", methods="auto")]
+    [native(cls="::avmshell::NativeSubclassOfAbstractRestrictedBaseClass", instance="::avmshell::NativeSubclassOfAbstractRestrictedBaseObject", gc="exact", methods="auto")]
     public class NativeSubclassOfAbstractRestrictedBase extends AbstractRestrictedBase
     {
     }
@@ -204,7 +204,7 @@ package avmshell
     }
 
     // this class exists solely to test construct="check"
-    [native(cls="::avmshell::CheckBaseClass", instance="::avmshell::CheckBaseObject", methods="auto", construct="check")]
+    [native(cls="::avmshell::CheckBaseClass", instance="::avmshell::CheckBaseObject", gc="exact", methods="auto", construct="check")]
     public class CheckBase
     {
     }
@@ -212,7 +212,7 @@ package avmshell
     // this class exists test construct="native" with a C++ class,
     // and also to test for correct calculation of slot offsets for
     // native classes with padding at the end (bugzilla 655300)
-    [native(cls="::avmshell::NativeBaseClass", instance="::avmshell::NativeBaseObject", methods="auto", construct="native")]
+    [native(cls="::avmshell::NativeBaseClass", instance="::avmshell::NativeBaseObject", gc="exact", methods="auto", construct="native")]
     public class NativeBase
     {
     }
