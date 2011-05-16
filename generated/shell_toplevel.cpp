@@ -42,7 +42,7 @@ namespace avmplus { namespace NativeID {
 const uint32_t shell_toplevel_abc_class_count = 52;
 const uint32_t shell_toplevel_abc_script_count = 7;
 const uint32_t shell_toplevel_abc_method_count = 254;
-const uint32_t shell_toplevel_abc_length = 16449;
+const uint32_t shell_toplevel_abc_length = 16481;
 
 /* thunks (64 total) */
 avmplus::Atom avmplus_Domain_currentDomain_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
@@ -1393,7 +1393,7 @@ AVMTHUNK_END_NATIVE_TABLES()
 AVMTHUNK_DEFINE_NATIVE_INITIALIZER(shell_toplevel)
 
 /* abc */
-const uint8_t shell_toplevel_abc_data[16449] = {
+const uint8_t shell_toplevel_abc_data[16481] = {
   16,   0,  46,   0,   8,  42, 101,   0,   2,   1,   3,   4,   0,   8,   0,   0,
    0,   0,   0,   0, 232,  63,   0,   0,   0,   0,   0,   0, 240,  63,   0,   0,
    0,   0,   0,   0,   0,  64,   0,   0,   0,   0,   0,   0,   8,  64,   0,   0,
@@ -1639,62 +1639,62 @@ const uint8_t shell_toplevel_abc_data[16449] = {
  118, 109, 115, 104, 101, 108, 108,  58,  58,  65,  98, 115, 116, 114,  97,  99,
  116,  66,  97, 115, 101,  67, 108,  97, 115, 115,  30,  58,  58,  97, 118, 109,
  115, 104, 101, 108, 108,  58,  58,  65,  98, 115, 116, 114,  97,  99, 116,  66,
-  97, 115, 101,  79,  98, 106, 101,  99, 116,   8,  97,  98, 115, 116, 114,  97,
-  99, 116,  45,  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  78,
-  97, 116, 105, 118, 101,  83, 117,  98,  99, 108,  97, 115, 115,  79, 102,  65,
-  98, 115, 116, 114,  97,  99, 116,  66,  97, 115, 101,  67, 108,  97, 115, 115,
-  46,  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  78,  97, 116,
- 105, 118, 101,  83, 117,  98,  99, 108,  97, 115, 115,  79, 102,  65,  98, 115,
- 116, 114,  97,  99, 116,  66,  97, 115, 101,  79,  98, 106, 101,  99, 116,  31,
-  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  82, 101, 115, 116,
- 114, 105,  99, 116, 101, 100,  66,  97, 115, 101,  67, 108,  97, 115, 115,  32,
-  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  82, 101, 115, 116,
+  97, 115, 101,  79,  98, 106, 101,  99, 116,   2, 103,  99,   8,  97,  98, 115,
+ 116, 114,  97,  99, 116,  45,  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,
+  58,  58,  78,  97, 116, 105, 118, 101,  83, 117,  98,  99, 108,  97, 115, 115,
+  79, 102,  65,  98, 115, 116, 114,  97,  99, 116,  66,  97, 115, 101,  67, 108,
+  97, 115, 115,  46,  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,
+  78,  97, 116, 105, 118, 101,  83, 117,  98,  99, 108,  97, 115, 115,  79, 102,
+  65,  98, 115, 116, 114,  97,  99, 116,  66,  97, 115, 101,  79,  98, 106, 101,
+  99, 116,  31,  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  82,
+ 101, 115, 116, 114, 105,  99, 116, 101, 100,  66,  97, 115, 101,  67, 108,  97,
+ 115, 115,  32,  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  82,
+ 101, 115, 116, 114, 105,  99, 116, 101, 100,  66,  97, 115, 101,  79,  98, 106,
+ 101,  99, 116,  10, 114, 101, 115, 116, 114, 105,  99, 116, 101, 100,  47,  58,
+  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  78,  97, 116, 105, 118,
+ 101,  83, 117,  98,  99, 108,  97, 115, 115,  79, 102,  82, 101, 115, 116, 114,
+ 105,  99, 116, 101, 100,  66,  97, 115, 101,  67, 108,  97, 115, 115,  48,  58,
+  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  78,  97, 116, 105, 118,
+ 101,  83, 117,  98,  99, 108,  97, 115, 115,  79, 102,  82, 101, 115, 116, 114,
+ 105,  99, 116, 101, 100,  66,  97, 115, 101,  79,  98, 106, 101,  99, 116,  39,
+  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  65,  98, 115, 116,
+ 114,  97,  99, 116,  82, 101, 115, 116, 114, 105,  99, 116, 101, 100,  66,  97,
+ 115, 101,  67, 108,  97, 115, 115,  40,  58,  58,  97, 118, 109, 115, 104, 101,
+ 108, 108,  58,  58,  65,  98, 115, 116, 114,  97,  99, 116,  82, 101, 115, 116,
  114, 105,  99, 116, 101, 100,  66,  97, 115, 101,  79,  98, 106, 101,  99, 116,
-  10, 114, 101, 115, 116, 114, 105,  99, 116, 101, 100,  47,  58,  58,  97, 118,
- 109, 115, 104, 101, 108, 108,  58,  58,  78,  97, 116, 105, 118, 101,  83, 117,
-  98,  99, 108,  97, 115, 115,  79, 102,  82, 101, 115, 116, 114, 105,  99, 116,
- 101, 100,  66,  97, 115, 101,  67, 108,  97, 115, 115,  48,  58,  58,  97, 118,
- 109, 115, 104, 101, 108, 108,  58,  58,  78,  97, 116, 105, 118, 101,  83, 117,
-  98,  99, 108,  97, 115, 115,  79, 102,  82, 101, 115, 116, 114, 105,  99, 116,
- 101, 100,  66,  97, 115, 101,  79,  98, 106, 101,  99, 116,  39,  58,  58,  97,
- 118, 109, 115, 104, 101, 108, 108,  58,  58,  65,  98, 115, 116, 114,  97,  99,
- 116,  82, 101, 115, 116, 114, 105,  99, 116, 101, 100,  66,  97, 115, 101,  67,
- 108,  97, 115, 115,  40,  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,
-  58,  65,  98, 115, 116, 114,  97,  99, 116,  82, 101, 115, 116, 114, 105,  99,
- 116, 101, 100,  66,  97, 115, 101,  79,  98, 106, 101,  99, 116,  19,  97,  98,
- 115, 116, 114,  97,  99, 116,  45, 114, 101, 115, 116, 114, 105,  99, 116, 101,
- 100,  55,  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  78,  97,
- 116, 105, 118, 101,  83, 117,  98,  99, 108,  97, 115, 115,  79, 102,  65,  98,
- 115, 116, 114,  97,  99, 116,  82, 101, 115, 116, 114, 105,  99, 116, 101, 100,
-  66,  97, 115, 101,  67, 108,  97, 115, 115,  56,  58,  58,  97, 118, 109, 115,
- 104, 101, 108, 108,  58,  58,  78,  97, 116, 105, 118, 101,  83, 117,  98,  99,
- 108,  97, 115, 115,  79, 102,  65,  98, 115, 116, 114,  97,  99, 116,  82, 101,
- 115, 116, 114, 105,  99, 116, 101, 100,  66,  97, 115, 101,  79,  98, 106, 101,
-  99, 116,  26,  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  67,
- 104, 101,  99, 107,  66,  97, 115, 101,  67, 108,  97, 115, 115,  27,  58,  58,
-  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  67, 104, 101,  99, 107,  66,
-  97, 115, 101,  79,  98, 106, 101,  99, 116,   5,  99, 104, 101,  99, 107,  27,
-  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  78,  97, 116, 105,
- 118, 101,  66,  97, 115, 101,  67, 108,  97, 115, 115,  28,  58,  58,  97, 118,
- 109, 115, 104, 101, 108, 108,  58,  58,  78,  97, 116, 105, 118, 101,  66,  97,
- 115, 101,  79,  98, 106, 101,  99, 116,   6, 102, 114, 105, 101, 110, 100,  19,
-  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  83, 104, 101, 108, 108,  67,
- 111, 114, 101,  43,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  83, 104,
- 101, 108, 108,  67, 111, 114, 101,  44,  97, 118, 109, 115, 104, 101, 108, 108,
-  58,  58,  83, 104, 101, 108, 108,  84, 111, 112, 108, 101, 118, 101, 108,  15,
- 102, 108,  97, 115, 104,  46, 115, 121, 115, 116, 101, 109, 238, 138, 148,  14,
- 103, 101, 116,  67, 108,  97, 115, 115,  66, 121,  78,  97, 109, 101,   5, 112,
- 114, 105, 110, 116,  11,  97, 118, 109, 115, 104, 101, 108, 108, 238, 138, 149,
-  11,  97, 118, 109, 115, 104, 101, 108, 108, 238, 138, 150,  11,  97, 118, 109,
- 115, 104, 101, 108, 108, 238, 138, 151,  11,  97, 118, 109, 115, 104, 101, 108,
- 108, 238, 138, 152,  11,  97, 118, 109, 115, 104, 101, 108, 108, 238, 138, 153,
-  11,  97, 118, 109, 115, 104, 101, 108, 108, 238, 138, 154,  14,  97, 118, 109,
- 112, 108, 117, 115,  58,  68, 111, 109,  97, 105, 110,   4, 105, 110, 105, 116,
-  11,  68, 111, 109,  97, 105, 110,  46,  97, 115,  36,  50,   9, 108, 111,  97,
- 100,  66, 121, 116, 101, 115,  24,  77,  73,  78,  95,  68,  79,  77,  65,  73,
-  78,  95,  77,  69,  77,  79,  82,  89,  95,  76,  69,  78,  71,  84,  72,   4,
- 108, 111,  97, 100,  12, 100, 111, 109,  97, 105, 110,  77, 101, 109, 111, 114,
- 121,  11,  68, 111, 109,  97, 105, 110,  67, 108,  97, 115, 115,   2, 103,  99,
+  19,  97,  98, 115, 116, 114,  97,  99, 116,  45, 114, 101, 115, 116, 114, 105,
+  99, 116, 101, 100,  55,  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,
+  58,  78,  97, 116, 105, 118, 101,  83, 117,  98,  99, 108,  97, 115, 115,  79,
+ 102,  65,  98, 115, 116, 114,  97,  99, 116,  82, 101, 115, 116, 114, 105,  99,
+ 116, 101, 100,  66,  97, 115, 101,  67, 108,  97, 115, 115,  56,  58,  58,  97,
+ 118, 109, 115, 104, 101, 108, 108,  58,  58,  78,  97, 116, 105, 118, 101,  83,
+ 117,  98,  99, 108,  97, 115, 115,  79, 102,  65,  98, 115, 116, 114,  97,  99,
+ 116,  82, 101, 115, 116, 114, 105,  99, 116, 101, 100,  66,  97, 115, 101,  79,
+  98, 106, 101,  99, 116,  26,  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,
+  58,  58,  67, 104, 101,  99, 107,  66,  97, 115, 101,  67, 108,  97, 115, 115,
+  27,  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  67, 104, 101,
+  99, 107,  66,  97, 115, 101,  79,  98, 106, 101,  99, 116,   5,  99, 104, 101,
+  99, 107,  27,  58,  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  78,
+  97, 116, 105, 118, 101,  66,  97, 115, 101,  67, 108,  97, 115, 115,  28,  58,
+  58,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  78,  97, 116, 105, 118,
+ 101,  66,  97, 115, 101,  79,  98, 106, 101,  99, 116,   6, 102, 114, 105, 101,
+ 110, 100,  19,  97, 118, 109, 115, 104, 101, 108, 108,  58,  58,  83, 104, 101,
+ 108, 108,  67, 111, 114, 101,  43,  97, 118, 109, 115, 104, 101, 108, 108,  58,
+  58,  83, 104, 101, 108, 108,  67, 111, 114, 101,  44,  97, 118, 109, 115, 104,
+ 101, 108, 108,  58,  58,  83, 104, 101, 108, 108,  84, 111, 112, 108, 101, 118,
+ 101, 108,  15, 102, 108,  97, 115, 104,  46, 115, 121, 115, 116, 101, 109, 238,
+ 138, 148,  14, 103, 101, 116,  67, 108,  97, 115, 115,  66, 121,  78,  97, 109,
+ 101,   5, 112, 114, 105, 110, 116,  11,  97, 118, 109, 115, 104, 101, 108, 108,
+ 238, 138, 149,  11,  97, 118, 109, 115, 104, 101, 108, 108, 238, 138, 150,  11,
+  97, 118, 109, 115, 104, 101, 108, 108, 238, 138, 151,  11,  97, 118, 109, 115,
+ 104, 101, 108, 108, 238, 138, 152,  11,  97, 118, 109, 115, 104, 101, 108, 108,
+ 238, 138, 153,  11,  97, 118, 109, 115, 104, 101, 108, 108, 238, 138, 154,  14,
+  97, 118, 109, 112, 108, 117, 115,  58,  68, 111, 109,  97, 105, 110,   4, 105,
+ 110, 105, 116,  11,  68, 111, 109,  97, 105, 110,  46,  97, 115,  36,  50,   9,
+ 108, 111,  97, 100,  66, 121, 116, 101, 115,  24,  77,  73,  78,  95,  68,  79,
+  77,  65,  73,  78,  95,  77,  69,  77,  79,  82,  89,  95,  76,  69,  78,  71,
+  84,  72,   4, 108, 111,  97, 100,  12, 100, 111, 109,  97, 105, 110,  77, 101,
+ 109, 111, 114, 121,  11,  68, 111, 109,  97, 105, 110,  67, 108,  97, 115, 115,
   12,  68, 111, 109,  97, 105, 110,  79,  98, 106, 101,  99, 116,   8,  70, 117,
  110,  99, 116, 105, 111, 110,   5,  81,  78,  97, 109, 101,  19,  95, 103, 101,
  116,  73, 110, 118, 111,  99,  97, 116, 105, 111, 110,  67, 111, 117, 110, 116,
@@ -1820,8 +1820,8 @@ const uint8_t shell_toplevel_abc_data[16449] = {
   24, 172,   1,   5, 174,   1,  24, 174,   1,   5, 176,   1,  24, 176,   1,   5,
  178,   1,  24, 178,   1,   5, 180,   1,  24, 180,   1,   5, 182,   1,  24, 182,
    1,   5, 184,   1,  24, 184,   1,  23,  66,  22, 202,   1,  22, 210,   1,  22,
- 234,   1,  22, 237,   1,  22, 238,   1,  22, 239,   1,  22, 240,   1,  22, 241,
-   1,  22, 242,   1,   5, 243,   1,   5, 245,   1,  24, 243,   1,  26, 243,   1,
+ 235,   1,  22, 238,   1,  22, 239,   1,  22, 240,   1,  22, 241,   1,  22, 242,
+   1,  22, 243,   1,   5, 244,   1,   5, 246,   1,  24, 244,   1,  26, 244,   1,
    5, 128,   2,  22, 129,   2,  23, 129,   2,   5, 136,   2,  24, 136,   2,  26,
  136,   2,   5, 147,   2,  24, 147,   2,   5, 151,   2,  24, 151,   2,   5, 157,
    2,  24, 157,   2,   5, 163,   2,  24, 163,   2,  22, 165,   2,   5, 200,   2,
@@ -1896,7 +1896,7 @@ const uint8_t shell_toplevel_abc_data[16449] = {
   69,  29,   9, 175,   1,  29,   9, 177,   1,  29,   9,  71,  29,   9, 179,   1,
   29,   9, 181,   1,  29,   9,  73,  29,   9,  75,  29,   9, 183,   1,  29,   9,
  187,   1,  29,   9,  77,  29,   9,  79,  29,   9,  81,  29,   9,  86,  30,   9,
- 235,   1,   4,   9, 236,   1,   4,   9, 188,   1,  29,   9, 189,   1,  29,   9,
+ 236,   1,   4,   9, 237,   1,   4,   9, 188,   1,  29,   9, 189,   1,  29,   9,
  190,   1,  29,   9, 191,   1,  29,   9, 192,   1,  29,   9, 193,   1,  29,   9,
   88,  29,   9,  90,  31,   9,  94,  32,   9,  97,  33,   9, 100,  34,   9, 103,
   35,   9, 106,  36,   9, 108,  37,   9, 109,  38,   9, 110,  39,   9, 111,  29,
@@ -1911,9 +1911,9 @@ const uint8_t shell_toplevel_abc_data[16449] = {
    9, 155,   1,  37,   9, 157,   1,  38,   9, 159,   1,  39,   9, 160,   1,  29,
    9, 161,   1,  31,   9, 162,   1,  32,   9, 163,   1,  33,   9, 164,   1,  34,
    9, 165,   1,  35,   9, 166,   1,  36,   9, 167,   1,  37,   9, 168,   1,  38,
-   9, 169,   1,  39,   7,   4,  12,   9, 244,   1,  40,   9,  64,  40,   9,  62,
-  40,   9, 246,   1,  40,   9,  13,   4,   9, 247,   1,   4,   9, 244,   1,  41,
-   9, 246,   1,   4,   9,  14,   4,   9, 248,   1,   4,   9, 249,   1,   4,   9,
+   9, 169,   1,  39,   7,   4,  12,   9, 245,   1,  40,   9,  64,  40,   9,  62,
+  40,   9, 247,   1,  40,   9,  13,   4,   9, 248,   1,   4,   9, 245,   1,  41,
+   9, 247,   1,   4,   9,  14,   4,   9, 249,   1,   4,   9, 250,   1,   4,   9,
   12,  23,   9,  23,  42,   9,  12,  28,   7,   1, 253,   1,   7,   1, 254,   1,
    9, 255,   1,  43,   9, 130,   2,  43,   9, 131,   2,  43,   7,   1, 132,   2,
    9, 133,   2,  44,   9, 134,   2,  43,   9, 131,   2,  44,   9, 135,   2,  44,
@@ -1936,7 +1936,7 @@ const uint8_t shell_toplevel_abc_data[16449] = {
  205,   2,   4,   9, 206,   2,   4,   9, 207,   2,   4,   9, 208,   2,   4,   9,
  209,   2,   4,   9, 210,   2,   4,   9, 211,   2,   4,   7, 114, 213,   2,   9,
   23,  47,   9, 213,   2,  48,   9, 218,   2,  49,   9, 220,   2,  49,   9, 221,
-   2,  49,   9, 244,   1,  49,   9, 244,   1,  50,   7,  18, 222,   2,   9,  23,
+   2,  49,   9, 245,   1,  49,   9, 245,   1,  50,   7,  18, 222,   2,   9,  23,
   51,   9, 222,   2,  52,   7,   1, 227,   2,   7,   1, 229,   2,   9, 227,   2,
    4,   9, 229,   2,   4,   7,  18, 231,   2,   9,  23,  53,   9, 231,   2,  52,
    7,   4, 234,   2,   9, 235,   2,   4,   9, 236,   2,   4,   9, 237,   2,   4,
@@ -2019,17 +2019,19 @@ const uint8_t shell_toplevel_abc_data[16449] = {
  195,   1,   3, 196,   1, 198,   1, 200,   1, 197,   1, 199,   1, 201,   1, 195,
    1,   4, 196,   1, 204,   1, 200,   1, 207,   1, 203,   1, 205,   1, 206,   1,
  208,   1, 195,   1,   3, 196,   1, 200,   1, 207,   1, 209,   1, 206,   1, 208,
-   1, 195,   1,   4, 196,   1, 198,   1, 200,   1, 207,   1, 211,   1, 212,   1,
- 206,   1, 213,   1, 195,   1,   3, 196,   1, 198,   1, 200,   1, 214,   1, 215,
-   1, 206,   1, 195,   1,   4, 196,   1, 198,   1, 200,   1, 207,   1, 216,   1,
- 217,   1, 206,   1, 218,   1, 195,   1,   3, 196,   1, 198,   1, 200,   1, 219,
-   1, 220,   1, 206,   1, 195,   1,   4, 196,   1, 198,   1, 200,   1, 207,   1,
- 221,   1, 222,   1, 206,   1, 223,   1, 195,   1,   3, 196,   1, 198,   1, 200,
-   1, 224,   1, 225,   1, 206,   1, 195,   1,   4, 196,   1, 198,   1, 200,   1,
- 207,   1, 226,   1, 227,   1, 206,   1, 228,   1, 195,   1,   4, 196,   1, 198,
-   1, 200,   1, 207,   1, 229,   1, 230,   1, 206,   1, 195,   1, 195,   1,   1,
- 207,   1, 195,   1, 195,   1,   1, 231,   1, 232,   1, 195,   1,   1, 231,   1,
- 233,   1, 195,   1,   4, 196,   1, 251,   1, 198,   1, 200,   1, 250,   1, 205,
+   1, 195,   1,   5, 196,   1, 198,   1, 213,   1, 200,   1, 207,   1, 211,   1,
+ 212,   1, 205,   1, 206,   1, 214,   1, 195,   1,   4, 196,   1, 198,   1, 213,
+   1, 200,   1, 215,   1, 216,   1, 205,   1, 206,   1, 195,   1,   5, 196,   1,
+ 198,   1, 213,   1, 200,   1, 207,   1, 217,   1, 218,   1, 205,   1, 206,   1,
+ 219,   1, 195,   1,   4, 196,   1, 198,   1, 213,   1, 200,   1, 220,   1, 221,
+   1, 205,   1, 206,   1, 195,   1,   5, 196,   1, 198,   1, 213,   1, 200,   1,
+ 207,   1, 222,   1, 223,   1, 205,   1, 206,   1, 224,   1, 195,   1,   4, 196,
+   1, 198,   1, 213,   1, 200,   1, 225,   1, 226,   1, 205,   1, 206,   1, 195,
+   1,   5, 196,   1, 198,   1, 213,   1, 200,   1, 207,   1, 227,   1, 228,   1,
+ 205,   1, 206,   1, 229,   1, 195,   1,   5, 196,   1, 198,   1, 213,   1, 200,
+   1, 207,   1, 230,   1, 231,   1, 205,   1, 206,   1, 195,   1, 195,   1,   1,
+ 207,   1, 195,   1, 195,   1,   1, 232,   1, 233,   1, 195,   1,   1, 232,   1,
+ 234,   1, 195,   1,   4, 196,   1, 213,   1, 198,   1, 200,   1, 251,   1, 205,
    1, 252,   1, 206,   1, 195,   1,   3, 196,   1, 198,   1, 200,   1, 155,   2,
  166,   2, 206,   1, 195,   1,   1,   0, 168,   2, 195,   1,   1,   0, 170,   2,
  195,   1,   1,   0, 172,   2, 195,   1,   1,   0, 174,   2, 195,   1,   1,   0,
@@ -2038,7 +2040,7 @@ const uint8_t shell_toplevel_abc_data[16449] = {
  195,   1,   1,   0, 190,   2, 195,   1,   1,   0, 192,   2, 195,   1,   1,   0,
  194,   2, 195,   1,   1,   0, 196,   2, 195,   1,   1,   0, 198,   2,  91,   1,
    0, 199,   2, 195,   1,   3, 196,   1, 200,   1, 207,   1, 216,   2, 206,   1,
- 208,   1, 195,   1,   4, 196,   1, 251,   1, 198,   1, 200,   1, 224,   2, 205,
+ 208,   1, 195,   1,   4, 196,   1, 213,   1, 198,   1, 200,   1, 224,   2, 205,
    1, 225,   2, 206,   1, 195,   1,   3, 196,   1, 198,   1, 200,   1, 242,   2,
  234,   2, 206,   1,  52,  16,   0,   5,   0,  38,   1,  15,   1,   0,  37,  18,
   19,   9,   9,   0,  41,   1,  17,   1,   0,  40,  22,  19,   9,  11,   0,  44,
@@ -2507,13 +2509,13 @@ extern "C" const struct {
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::CTestClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::CTestClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::CTestClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::CTestClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_CTestClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::CTestClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::CTestObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::CTestObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::CTestClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::CTestObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
@@ -2551,7 +2553,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::FileObject::construct(int argc, avmp
 /*static*/ avmplus::ClassClosure* FASTCALL avmshell::AbstractBaseClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::cantInstantiateCreateInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::AbstractBaseClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmshell::AbstractBaseClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmshell_AbstractBaseClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
@@ -2560,20 +2562,20 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::AbstractBaseObject::construct(int a
 /*static*/ avmplus::ClassClosure* FASTCALL avmshell::RestrictedBaseClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmshell::RestrictedBaseClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::RestrictedBaseClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmshell::RestrictedBaseClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmshell_RestrictedBaseClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmshell::RestrictedBaseClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmshell::RestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmshell::RestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::RestrictedBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::RestrictedBaseObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmshell::AbstractRestrictedBaseClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::cantInstantiateCreateInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::AbstractRestrictedBaseClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmshell::AbstractRestrictedBaseClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmshell_AbstractRestrictedBaseClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
@@ -2582,313 +2584,313 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::AbstractRestrictedBaseObject::const
 /*static*/ avmplus::ClassClosure* FASTCALL avmshell::CheckBaseClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmshell::CheckBaseClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::CheckBaseClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmshell::CheckBaseClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmshell_CheckBaseClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmshell::CheckBaseClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     avmshell::CheckBaseClass::preCreateInstanceCheck(cls);
-    return new (cls->gc(), cls->getExtraSize()) avmshell::CheckBaseObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmshell::CheckBaseObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::CheckBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::CheckBaseObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmshell::NativeBaseClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::cantInstantiateCreateInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::NativeBaseClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmshell::NativeBaseClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmshell_NativeBaseClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmshell::NativeBaseClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmshell::NativeBaseObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmshell::NativeBaseObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeBaseObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::NativeBaseAS3Class::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::cantInstantiateCreateInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::NativeBaseAS3Class(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::NativeBaseAS3Class(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_NativeBaseAS3Class(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::NativeBaseAS3Class::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::NativeBaseAS3Object(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::NativeBaseAS3Object(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::NativeBaseAS3Class::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::NativeBaseAS3Object::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::ShellCoreFriend1Class::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::ShellCoreFriend1Class::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::ShellCoreFriend1Class(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::ShellCoreFriend1Class(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_ShellCoreFriend1Class(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::ShellCoreFriend1Class::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::ShellCoreFriend1Object(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::ShellCoreFriend1Object(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ShellCoreFriend1Class::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ShellCoreFriend1Object::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::ShellCoreFriend2Class::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::ShellCoreFriend2Class::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::ShellCoreFriend2Class(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::ShellCoreFriend2Class(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_ShellCoreFriend2Class(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::ShellCoreFriend2Class::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::ShellCoreFriend2Object(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::ShellCoreFriend2Object(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ShellCoreFriend2Class::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ShellCoreFriend2Object::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::CapabilitiesClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::CapabilitiesClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::CapabilitiesClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::CapabilitiesClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_CapabilitiesClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::CapabilitiesClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::CapabilitiesObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::CapabilitiesObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::CapabilitiesClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::CapabilitiesObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::public_classClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::public_classClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::public_classClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::public_classClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_public_classClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::public_classClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::public_classObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::public_classObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_classClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_classObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::public_class_AIR_1_0Class::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::public_class_AIR_1_0Class::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::public_class_AIR_1_0Class(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::public_class_AIR_1_0Class(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_public_class_AIR_1_0Class(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::public_class_AIR_1_0Class::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::public_class_AIR_1_0Object(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::public_class_AIR_1_0Object(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_AIR_1_0Class::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_AIR_1_0Object::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::public_class_FP_10_0Class::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::public_class_FP_10_0Class::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::public_class_FP_10_0Class(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::public_class_FP_10_0Class(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_public_class_FP_10_0Class(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::public_class_FP_10_0Class::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::public_class_FP_10_0Object(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::public_class_FP_10_0Object(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_FP_10_0Class::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_FP_10_0Object::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::public_class_AIR_1_5Class::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::public_class_AIR_1_5Class::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::public_class_AIR_1_5Class(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::public_class_AIR_1_5Class(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_public_class_AIR_1_5Class(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::public_class_AIR_1_5Class::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::public_class_AIR_1_5Object(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::public_class_AIR_1_5Object(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_AIR_1_5Class::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_AIR_1_5Object::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::public_class_AIR_1_5_1Class::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::public_class_AIR_1_5_1Class::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::public_class_AIR_1_5_1Class(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::public_class_AIR_1_5_1Class(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_public_class_AIR_1_5_1Class(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::public_class_AIR_1_5_1Class::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::public_class_AIR_1_5_1Object(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::public_class_AIR_1_5_1Object(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_AIR_1_5_1Class::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_AIR_1_5_1Object::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::public_class_FP_10_0_32Class::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::public_class_FP_10_0_32Class::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::public_class_FP_10_0_32Class(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::public_class_FP_10_0_32Class(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_public_class_FP_10_0_32Class(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::public_class_FP_10_0_32Class::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::public_class_FP_10_0_32Object(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::public_class_FP_10_0_32Object(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_FP_10_0_32Class::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_FP_10_0_32Object::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::public_class_AIR_1_5_2Class::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::public_class_AIR_1_5_2Class::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::public_class_AIR_1_5_2Class(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::public_class_AIR_1_5_2Class(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_public_class_AIR_1_5_2Class(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::public_class_AIR_1_5_2Class::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::public_class_AIR_1_5_2Object(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::public_class_AIR_1_5_2Object(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_AIR_1_5_2Class::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_AIR_1_5_2Object::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::public_class_AIR_1_0_FP_10_0Class::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::public_class_AIR_1_0_FP_10_0Class::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::public_class_AIR_1_0_FP_10_0Class(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::public_class_AIR_1_0_FP_10_0Class(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_public_class_AIR_1_0_FP_10_0Class(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::public_class_AIR_1_0_FP_10_0Class::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::public_class_AIR_1_0_FP_10_0Object(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::public_class_AIR_1_0_FP_10_0Object(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_AIR_1_0_FP_10_0Class::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_AIR_1_0_FP_10_0Object::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Class::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Class::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Class(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Class(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_public_class_FP_10_0_32_AIR_1_0_FP_10_0Class(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Class::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Class::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmshell::NativeSubclassOfAbstractBaseClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmshell::NativeSubclassOfAbstractBaseClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::NativeSubclassOfAbstractBaseClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmshell::NativeSubclassOfAbstractBaseClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmshell_NativeSubclassOfAbstractBaseClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmshell::NativeSubclassOfAbstractBaseClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmshell::NativeSubclassOfAbstractBaseObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmshell::NativeSubclassOfAbstractBaseObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeSubclassOfAbstractBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeSubclassOfAbstractBaseObject::construct(int argc, avmplus::Atom* argv) { return avmshell::AbstractBaseObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::SubclassOfAbstractBaseClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::SubclassOfAbstractBaseClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::SubclassOfAbstractBaseClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::SubclassOfAbstractBaseClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_SubclassOfAbstractBaseClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::SubclassOfAbstractBaseClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::SubclassOfAbstractBaseObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::SubclassOfAbstractBaseObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SubclassOfAbstractBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SubclassOfAbstractBaseObject::construct(int argc, avmplus::Atom* argv) { return avmshell::AbstractBaseObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmshell::NativeSubclassOfRestrictedBaseClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmshell::NativeSubclassOfRestrictedBaseClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::NativeSubclassOfRestrictedBaseClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmshell::NativeSubclassOfRestrictedBaseClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmshell_NativeSubclassOfRestrictedBaseClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmshell::NativeSubclassOfRestrictedBaseClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmshell::NativeSubclassOfRestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmshell::NativeSubclassOfRestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeSubclassOfRestrictedBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeSubclassOfRestrictedBaseObject::construct(int argc, avmplus::Atom* argv) { return avmshell::RestrictedBaseObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::SubclassOfRestrictedBaseClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::SubclassOfRestrictedBaseClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::SubclassOfRestrictedBaseClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::SubclassOfRestrictedBaseClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_SubclassOfRestrictedBaseClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::SubclassOfRestrictedBaseClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::SubclassOfRestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::SubclassOfRestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SubclassOfRestrictedBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SubclassOfRestrictedBaseObject::construct(int argc, avmplus::Atom* argv) { return avmshell::RestrictedBaseObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmshell::NativeSubclassOfAbstractRestrictedBaseClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmshell::NativeSubclassOfAbstractRestrictedBaseClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::NativeSubclassOfAbstractRestrictedBaseClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmshell::NativeSubclassOfAbstractRestrictedBaseClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmshell_NativeSubclassOfAbstractRestrictedBaseClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmshell::NativeSubclassOfAbstractRestrictedBaseClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmshell::NativeSubclassOfAbstractRestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmshell::NativeSubclassOfAbstractRestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeSubclassOfAbstractRestrictedBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeSubclassOfAbstractRestrictedBaseObject::construct(int argc, avmplus::Atom* argv) { return avmshell::AbstractRestrictedBaseObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::SubclassOfAbstractRestrictedBaseClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::SubclassOfAbstractRestrictedBaseClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::SubclassOfAbstractRestrictedBaseClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::SubclassOfAbstractRestrictedBaseClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_SubclassOfAbstractRestrictedBaseClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::SubclassOfAbstractRestrictedBaseClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::SubclassOfAbstractRestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::SubclassOfAbstractRestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SubclassOfAbstractRestrictedBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SubclassOfAbstractRestrictedBaseObject::construct(int argc, avmplus::Atom* argv) { return avmshell::AbstractRestrictedBaseObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::NativeBaseExtender1Class::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::NativeBaseExtender1Class::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::NativeBaseExtender1Class(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::NativeBaseExtender1Class(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_NativeBaseExtender1Class(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::NativeBaseExtender1Class::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::NativeBaseExtender1Object(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::NativeBaseExtender1Object(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::NativeBaseExtender1Class::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::NativeBaseExtender1Object::construct(int argc, avmplus::Atom* argv) { return avmshell::NativeBaseObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::NativeBaseExtender2Class::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::NativeBaseExtender2Class::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::NativeBaseExtender2Class(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::NativeBaseExtender2Class(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_NativeBaseExtender2Class(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::NativeBaseExtender2Class::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::NativeBaseExtender2Object(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::NativeBaseExtender2Object(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::NativeBaseExtender2Class::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::NativeBaseExtender2Object::construct(int argc, avmplus::Atom* argv) { return avmshell::NativeBaseObject::construct(argc, argv); } )
@@ -2908,39 +2910,39 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DomainObject::construct(int argc, av
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::StackFrameClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::StackFrameClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::StackFrameClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::StackFrameClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_StackFrameClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::StackFrameClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::StackFrameObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::StackFrameObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::StackFrameClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::StackFrameObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::SampleClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::SampleClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::SampleClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::SampleClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_SampleClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::SampleClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::SampleObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::SampleObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SampleClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SampleObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::ClassFactoryClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::ClassFactoryClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::ClassFactoryClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::ClassFactoryClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_ClassFactoryClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::ClassFactoryClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::ClassFactoryObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::ClassFactoryObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ClassFactoryClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ClassFactoryObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
@@ -2960,13 +2962,13 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::NewObjectSampleObject::construct(int
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::DeleteObjectSampleClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::DeleteObjectSampleClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::DeleteObjectSampleClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::DeleteObjectSampleClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_DeleteObjectSampleClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::DeleteObjectSampleClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::DeleteObjectSampleObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::DeleteObjectSampleObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DeleteObjectSampleClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DeleteObjectSampleObject::construct(int argc, avmplus::Atom* argv) { return avmplus::SampleObject::construct(argc, argv); } )
@@ -2995,13 +2997,13 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DictionaryObject::construct(int argc
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::EndianClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::EndianClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::EndianClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::EndianClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_EndianClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::EndianClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::EndianObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::EndianObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::EndianClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::EndianObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )

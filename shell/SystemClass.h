@@ -43,98 +43,122 @@
 
 namespace avmshell
 {
-    class AbstractBaseClass : public avmplus::ClassClosure
+    class GC_AS3_EXACT(AbstractBaseClass, avmplus::ClassClosure)
     {
     public:
         AbstractBaseClass(avmplus::VTable* cvtable) : ClassClosure(cvtable) {}
+        
+        GC_NO_DATA(AbstractBaseClass)
 
         DECLARE_SLOTS_AbstractBaseClass;
     };
 
-    class AbstractBaseObject : public avmplus::ScriptObject
+    class GC_AS3_EXACT(AbstractBaseObject, avmplus::ScriptObject)
     {
     public:
         AbstractBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : avmplus::ScriptObject(vtable, prototype) {}
 
+        GC_NO_DATA(AbstractBaseObject)
+
         DECLARE_SLOTS_AbstractBaseObject;
     };
 
-    class NativeSubclassOfAbstractBaseClass : public avmplus::ClassClosure
+    class GC_AS3_EXACT(NativeSubclassOfAbstractBaseClass, avmplus::ClassClosure)
     {
     public:
         NativeSubclassOfAbstractBaseClass(avmplus::VTable* cvtable) : avmplus::ClassClosure(cvtable) {}
 
+        GC_NO_DATA(NativeSubclassOfAbstractBaseClass)
+
         DECLARE_SLOTS_NativeSubclassOfAbstractBaseClass;
     };
 
-    class NativeSubclassOfAbstractBaseObject : public AbstractBaseObject
+    class GC_AS3_EXACT(NativeSubclassOfAbstractBaseObject, AbstractBaseObject)
     {
     public:
         NativeSubclassOfAbstractBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : AbstractBaseObject(vtable, prototype) {}
 
+        GC_NO_DATA(NativeSubclassOfAbstractBaseObject)
+
         DECLARE_SLOTS_NativeSubclassOfAbstractBaseObject;
     };
 
-    class RestrictedBaseClass : public avmplus::ClassClosure
+    class GC_AS3_EXACT(RestrictedBaseClass, avmplus::ClassClosure)
     {
     public:
         RestrictedBaseClass(avmplus::VTable* cvtable) : avmplus::ClassClosure(cvtable) {}
 
+        GC_NO_DATA(RestrictedBaseClass)
+
         DECLARE_SLOTS_RestrictedBaseClass;
     };
 
-    class RestrictedBaseObject : public avmplus::ScriptObject
+    class GC_AS3_EXACT(RestrictedBaseObject, avmplus::ScriptObject)
     {
     public:
         RestrictedBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : avmplus::ScriptObject(vtable, prototype) {}
 
+        GC_NO_DATA(RestrictedBaseObject)
+
         DECLARE_SLOTS_RestrictedBaseObject;
     };
 
-    class NativeSubclassOfRestrictedBaseClass : public avmplus::ClassClosure
+    class GC_AS3_EXACT(NativeSubclassOfRestrictedBaseClass, avmplus::ClassClosure)
     {
     public:
         NativeSubclassOfRestrictedBaseClass(avmplus::VTable* cvtable) : avmplus::ClassClosure(cvtable) {}
 
+        GC_NO_DATA(NativeSubclassOfRestrictedBaseClass)
+
         DECLARE_SLOTS_NativeSubclassOfRestrictedBaseClass;
     };
 
-    class NativeSubclassOfRestrictedBaseObject : public RestrictedBaseObject
+    class GC_AS3_EXACT(NativeSubclassOfRestrictedBaseObject, RestrictedBaseObject)
     {
     public:
         NativeSubclassOfRestrictedBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : RestrictedBaseObject(vtable, prototype) {}
 
+        GC_NO_DATA(NativeSubclassOfRestrictedBaseObject)
+
         DECLARE_SLOTS_NativeSubclassOfRestrictedBaseObject;
     };
 
-    class AbstractRestrictedBaseClass : public avmplus::ClassClosure
+    class GC_AS3_EXACT(AbstractRestrictedBaseClass, avmplus::ClassClosure)
     {
     public:
         AbstractRestrictedBaseClass(avmplus::VTable* cvtable) : avmplus::ClassClosure(cvtable) {}
 
+        GC_NO_DATA(AbstractRestrictedBaseClass)
+
         DECLARE_SLOTS_AbstractRestrictedBaseClass;
     };
 
-    class AbstractRestrictedBaseObject : public avmplus::ScriptObject
+    class GC_AS3_EXACT(AbstractRestrictedBaseObject, avmplus::ScriptObject)
     {
     public:
         AbstractRestrictedBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : avmplus::ScriptObject(vtable, prototype) {}
 
+        GC_NO_DATA(AbstractRestrictedBaseObject)
+
         DECLARE_SLOTS_AbstractRestrictedBaseObject;
     };
 
-    class NativeSubclassOfAbstractRestrictedBaseClass : public avmplus::ClassClosure
+    class GC_AS3_EXACT(NativeSubclassOfAbstractRestrictedBaseClass, avmplus::ClassClosure)
     {
     public:
         NativeSubclassOfAbstractRestrictedBaseClass(avmplus::VTable* cvtable) : avmplus::ClassClosure(cvtable) {}
 
+        GC_NO_DATA(NativeSubclassOfAbstractRestrictedBaseClass)
+
         DECLARE_SLOTS_NativeSubclassOfAbstractRestrictedBaseClass;
     };
 
-    class NativeSubclassOfAbstractRestrictedBaseObject : public AbstractRestrictedBaseObject
+    class GC_AS3_EXACT(NativeSubclassOfAbstractRestrictedBaseObject, AbstractRestrictedBaseObject)
     {
     public:
         NativeSubclassOfAbstractRestrictedBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : AbstractRestrictedBaseObject(vtable, prototype) {}
+
+        GC_NO_DATA(NativeSubclassOfAbstractRestrictedBaseObject)
 
         DECLARE_SLOTS_NativeSubclassOfAbstractRestrictedBaseObject;
     };
@@ -168,36 +192,45 @@ namespace avmshell
         double plus(double v) { return v + amount; }
     };
 
-    class CheckBaseClass : public avmplus::ClassClosure
+    class GC_AS3_EXACT(CheckBaseClass, avmplus::ClassClosure)
     {
     public:
         CheckBaseClass(avmplus::VTable* cvtable) : avmplus::ClassClosure(cvtable) {}
 
+        GC_NO_DATA(CheckBaseClass)
+
         DECLARE_SLOTS_CheckBaseClass;
     };
 
-    class CheckBaseObject : public avmplus::ScriptObject
+    class GC_AS3_EXACT(CheckBaseObject, avmplus::ScriptObject)
     {
     public:
         CheckBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : avmplus::ScriptObject(vtable, prototype) {}
 
+        GC_NO_DATA(CheckBaseObject)
+
         DECLARE_SLOTS_CheckBaseObject;
     };
 
-    class NativeBaseClass : public avmplus::ClassClosure
+    class GC_AS3_EXACT(NativeBaseClass, avmplus::ClassClosure)
     {
     public:
         NativeBaseClass(avmplus::VTable* cvtable) : avmplus::ClassClosure(cvtable) {}
 
+        GC_NO_DATA(NativeBaseClass)
+
         DECLARE_SLOTS_NativeBaseClass;
     };
 
-    class NativeBaseObject : public avmplus::ScriptObject
+    class GC_AS3_EXACT(NativeBaseObject, avmplus::ScriptObject)
     {
     public:
         NativeBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : avmplus::ScriptObject(vtable, prototype) {}
 
+        GC_DATA_BEGIN(NativeBaseObject)
         char nine_bytes[9]; // deliberately ending on a misaligned boundary
+        GC_DATA_END(NativeBaseObject)
+        
         DECLARE_SLOTS_NativeBaseObject;
     };
 

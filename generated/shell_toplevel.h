@@ -333,6 +333,7 @@ class avmplus_CTestClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::CTestClass;
+#define GC_TRIVIAL_TRACER_CTestClass
 };
 //-----------------------------------------------------------
 
@@ -343,6 +344,7 @@ class avmplus_CTestObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::CTestObject;
+#define GC_TRIVIAL_TRACER_CTestObject
 };
 //-----------------------------------------------------------
 
@@ -490,6 +492,7 @@ class avmplus_SystemObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::SystemObject;
+#define GC_TRIVIAL_TRACER_SystemObject
 };
 //-----------------------------------------------------------
 
@@ -549,6 +552,7 @@ class avmplus_FileObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::FileObject;
+#define GC_TRIVIAL_TRACER_FileObject
 };
 //-----------------------------------------------------------
 
@@ -559,6 +563,7 @@ class avmshell_AbstractBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::AbstractBaseClass;
+#define GC_TRIVIAL_TRACER_AbstractBaseClass
 };
 #define DECLARE_SLOTS_AbstractBaseClass \
     public: \
@@ -608,6 +613,7 @@ class avmshell_AbstractBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::AbstractBaseObject;
+#define GC_TRIVIAL_TRACER_AbstractBaseObject
 };
 #define DECLARE_SLOTS_AbstractBaseObject \
     public: \
@@ -626,6 +632,7 @@ class avmshell_RestrictedBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::RestrictedBaseClass;
+#define GC_TRIVIAL_TRACER_RestrictedBaseClass
 };
 #define DECLARE_SLOTS_RestrictedBaseClass \
     public: \
@@ -684,6 +691,7 @@ class avmshell_RestrictedBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::RestrictedBaseObject;
+#define GC_TRIVIAL_TRACER_RestrictedBaseObject
 };
 #define DECLARE_SLOTS_RestrictedBaseObject \
     public: \
@@ -702,6 +710,7 @@ class avmshell_AbstractRestrictedBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::AbstractRestrictedBaseClass;
+#define GC_TRIVIAL_TRACER_AbstractRestrictedBaseClass
 };
 #define DECLARE_SLOTS_AbstractRestrictedBaseClass \
     public: \
@@ -751,6 +760,7 @@ class avmshell_AbstractRestrictedBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::AbstractRestrictedBaseObject;
+#define GC_TRIVIAL_TRACER_AbstractRestrictedBaseObject
 };
 #define DECLARE_SLOTS_AbstractRestrictedBaseObject \
     public: \
@@ -769,6 +779,7 @@ class avmshell_CheckBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::CheckBaseClass;
+#define GC_TRIVIAL_TRACER_CheckBaseClass
 };
 #define DECLARE_SLOTS_CheckBaseClass \
     public: \
@@ -828,6 +839,7 @@ class avmshell_CheckBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::CheckBaseObject;
+#define GC_TRIVIAL_TRACER_CheckBaseObject
 };
 #define DECLARE_SLOTS_CheckBaseObject \
     public: \
@@ -846,6 +858,7 @@ class avmshell_NativeBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::NativeBaseClass;
+#define GC_TRIVIAL_TRACER_NativeBaseClass
 };
 #define DECLARE_SLOTS_NativeBaseClass \
     public: \
@@ -904,6 +917,7 @@ class avmshell_NativeBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::NativeBaseObject;
+#define GC_TRIVIAL_TRACER_NativeBaseObject
 };
 #define DECLARE_SLOTS_NativeBaseObject \
     public: \
@@ -922,6 +936,7 @@ class avmplus_NativeBaseAS3ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::NativeBaseAS3Class;
+#define GC_TRIVIAL_TRACER_NativeBaseAS3Class
 };
 //-----------------------------------------------------------
 
@@ -932,6 +947,7 @@ class avmplus_NativeBaseAS3ObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::NativeBaseAS3Object;
+#define GC_TRIVIAL_TRACER_NativeBaseAS3Object
 };
 //-----------------------------------------------------------
 
@@ -944,6 +960,7 @@ class avmplus_ShellCoreFriend1ClassSlots
     friend class avmplus::ShellCoreFriend1Class;
 private:
     int32_t m_private_foo;
+#define GC_TRIVIAL_TRACER_ShellCoreFriend1Class
 };
 //-----------------------------------------------------------
 
@@ -954,6 +971,7 @@ class avmplus_ShellCoreFriend1ObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::ShellCoreFriend1Object;
+#define GC_TRIVIAL_TRACER_ShellCoreFriend1Object
 };
 //-----------------------------------------------------------
 
@@ -966,6 +984,7 @@ class avmplus_ShellCoreFriend2ClassSlots
     friend class avmplus::ShellCoreFriend2Class;
 private:
     int32_t m_private_bar;
+#define GC_TRIVIAL_TRACER_ShellCoreFriend2Class
 };
 //-----------------------------------------------------------
 
@@ -976,6 +995,7 @@ class avmplus_ShellCoreFriend2ObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::ShellCoreFriend2Object;
+#define GC_TRIVIAL_TRACER_ShellCoreFriend2Object
 };
 //-----------------------------------------------------------
 
@@ -986,6 +1006,7 @@ class avmplus_CapabilitiesClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::CapabilitiesClass;
+#define GC_TRIVIAL_TRACER_CapabilitiesClass
 };
 //-----------------------------------------------------------
 
@@ -996,6 +1017,7 @@ class avmplus_CapabilitiesObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::CapabilitiesObject;
+#define GC_TRIVIAL_TRACER_CapabilitiesObject
 };
 //-----------------------------------------------------------
 
@@ -1006,6 +1028,7 @@ class avmplus_public_classClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_classClass;
+#define GC_TRIVIAL_TRACER_public_classClass
 };
 //-----------------------------------------------------------
 
@@ -1037,6 +1060,7 @@ private:
     avmplus::bool32 m_public_const_AIR_1_0_FP_10_0;
     avmplus::bool32 m_public_const_AIR_1_5_1_FP_10_0_AIR_1_5_2;
     avmplus::bool32 m_public_const_FP_10_0_32_AIR_1_0_FP_10_0;
+#define GC_TRIVIAL_TRACER_public_classObject
 };
 //-----------------------------------------------------------
 
@@ -1047,6 +1071,7 @@ class avmplus_public_class_AIR_1_0ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_AIR_1_0Class;
+#define GC_TRIVIAL_TRACER_public_class_AIR_1_0Class
 };
 //-----------------------------------------------------------
 
@@ -1057,6 +1082,7 @@ class avmplus_public_class_AIR_1_0ObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_AIR_1_0Object;
+#define GC_TRIVIAL_TRACER_public_class_AIR_1_0Object
 };
 //-----------------------------------------------------------
 
@@ -1067,6 +1093,7 @@ class avmplus_public_class_FP_10_0ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_FP_10_0Class;
+#define GC_TRIVIAL_TRACER_public_class_FP_10_0Class
 };
 //-----------------------------------------------------------
 
@@ -1077,6 +1104,7 @@ class avmplus_public_class_FP_10_0ObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_FP_10_0Object;
+#define GC_TRIVIAL_TRACER_public_class_FP_10_0Object
 };
 //-----------------------------------------------------------
 
@@ -1087,6 +1115,7 @@ class avmplus_public_class_AIR_1_5ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_AIR_1_5Class;
+#define GC_TRIVIAL_TRACER_public_class_AIR_1_5Class
 };
 //-----------------------------------------------------------
 
@@ -1097,6 +1126,7 @@ class avmplus_public_class_AIR_1_5ObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_AIR_1_5Object;
+#define GC_TRIVIAL_TRACER_public_class_AIR_1_5Object
 };
 //-----------------------------------------------------------
 
@@ -1107,6 +1137,7 @@ class avmplus_public_class_AIR_1_5_1ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_AIR_1_5_1Class;
+#define GC_TRIVIAL_TRACER_public_class_AIR_1_5_1Class
 };
 //-----------------------------------------------------------
 
@@ -1117,6 +1148,7 @@ class avmplus_public_class_AIR_1_5_1ObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_AIR_1_5_1Object;
+#define GC_TRIVIAL_TRACER_public_class_AIR_1_5_1Object
 };
 //-----------------------------------------------------------
 
@@ -1127,6 +1159,7 @@ class avmplus_public_class_FP_10_0_32ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_FP_10_0_32Class;
+#define GC_TRIVIAL_TRACER_public_class_FP_10_0_32Class
 };
 //-----------------------------------------------------------
 
@@ -1137,6 +1170,7 @@ class avmplus_public_class_FP_10_0_32ObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_FP_10_0_32Object;
+#define GC_TRIVIAL_TRACER_public_class_FP_10_0_32Object
 };
 //-----------------------------------------------------------
 
@@ -1147,6 +1181,7 @@ class avmplus_public_class_AIR_1_5_2ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_AIR_1_5_2Class;
+#define GC_TRIVIAL_TRACER_public_class_AIR_1_5_2Class
 };
 //-----------------------------------------------------------
 
@@ -1157,6 +1192,7 @@ class avmplus_public_class_AIR_1_5_2ObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_AIR_1_5_2Object;
+#define GC_TRIVIAL_TRACER_public_class_AIR_1_5_2Object
 };
 //-----------------------------------------------------------
 
@@ -1167,6 +1203,7 @@ class avmplus_public_class_AIR_1_0_FP_10_0ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_AIR_1_0_FP_10_0Class;
+#define GC_TRIVIAL_TRACER_public_class_AIR_1_0_FP_10_0Class
 };
 //-----------------------------------------------------------
 
@@ -1177,6 +1214,7 @@ class avmplus_public_class_AIR_1_0_FP_10_0ObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_AIR_1_0_FP_10_0Object;
+#define GC_TRIVIAL_TRACER_public_class_AIR_1_0_FP_10_0Object
 };
 //-----------------------------------------------------------
 
@@ -1187,6 +1225,7 @@ class avmplus_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class;
+#define GC_TRIVIAL_TRACER_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class
 };
 //-----------------------------------------------------------
 
@@ -1197,6 +1236,7 @@ class avmplus_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2ObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object;
+#define GC_TRIVIAL_TRACER_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object
 };
 //-----------------------------------------------------------
 
@@ -1207,6 +1247,7 @@ class avmplus_public_class_FP_10_0_32_AIR_1_0_FP_10_0ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Class;
+#define GC_TRIVIAL_TRACER_public_class_FP_10_0_32_AIR_1_0_FP_10_0Class
 };
 //-----------------------------------------------------------
 
@@ -1217,6 +1258,7 @@ class avmplus_public_class_FP_10_0_32_AIR_1_0_FP_10_0ObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object;
+#define GC_TRIVIAL_TRACER_public_class_FP_10_0_32_AIR_1_0_FP_10_0Object
 };
 //-----------------------------------------------------------
 
@@ -1227,6 +1269,7 @@ class avmshell_NativeSubclassOfAbstractBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::NativeSubclassOfAbstractBaseClass;
+#define GC_TRIVIAL_TRACER_NativeSubclassOfAbstractBaseClass
 };
 #define DECLARE_SLOTS_NativeSubclassOfAbstractBaseClass \
     public: \
@@ -1285,6 +1328,7 @@ class avmshell_NativeSubclassOfAbstractBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::NativeSubclassOfAbstractBaseObject;
+#define GC_TRIVIAL_TRACER_NativeSubclassOfAbstractBaseObject
 };
 #define DECLARE_SLOTS_NativeSubclassOfAbstractBaseObject \
     public: \
@@ -1303,6 +1347,7 @@ class avmplus_SubclassOfAbstractBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::SubclassOfAbstractBaseClass;
+#define GC_TRIVIAL_TRACER_SubclassOfAbstractBaseClass
 };
 //-----------------------------------------------------------
 
@@ -1313,6 +1358,7 @@ class avmplus_SubclassOfAbstractBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::SubclassOfAbstractBaseObject;
+#define GC_TRIVIAL_TRACER_SubclassOfAbstractBaseObject
 };
 //-----------------------------------------------------------
 
@@ -1323,6 +1369,7 @@ class avmshell_NativeSubclassOfRestrictedBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::NativeSubclassOfRestrictedBaseClass;
+#define GC_TRIVIAL_TRACER_NativeSubclassOfRestrictedBaseClass
 };
 #define DECLARE_SLOTS_NativeSubclassOfRestrictedBaseClass \
     public: \
@@ -1381,6 +1428,7 @@ class avmshell_NativeSubclassOfRestrictedBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::NativeSubclassOfRestrictedBaseObject;
+#define GC_TRIVIAL_TRACER_NativeSubclassOfRestrictedBaseObject
 };
 #define DECLARE_SLOTS_NativeSubclassOfRestrictedBaseObject \
     public: \
@@ -1399,6 +1447,7 @@ class avmplus_SubclassOfRestrictedBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::SubclassOfRestrictedBaseClass;
+#define GC_TRIVIAL_TRACER_SubclassOfRestrictedBaseClass
 };
 //-----------------------------------------------------------
 
@@ -1409,6 +1458,7 @@ class avmplus_SubclassOfRestrictedBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::SubclassOfRestrictedBaseObject;
+#define GC_TRIVIAL_TRACER_SubclassOfRestrictedBaseObject
 };
 //-----------------------------------------------------------
 
@@ -1419,6 +1469,7 @@ class avmshell_NativeSubclassOfAbstractRestrictedBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::NativeSubclassOfAbstractRestrictedBaseClass;
+#define GC_TRIVIAL_TRACER_NativeSubclassOfAbstractRestrictedBaseClass
 };
 #define DECLARE_SLOTS_NativeSubclassOfAbstractRestrictedBaseClass \
     public: \
@@ -1477,6 +1528,7 @@ class avmshell_NativeSubclassOfAbstractRestrictedBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::NativeSubclassOfAbstractRestrictedBaseObject;
+#define GC_TRIVIAL_TRACER_NativeSubclassOfAbstractRestrictedBaseObject
 };
 #define DECLARE_SLOTS_NativeSubclassOfAbstractRestrictedBaseObject \
     public: \
@@ -1495,6 +1547,7 @@ class avmplus_SubclassOfAbstractRestrictedBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::SubclassOfAbstractRestrictedBaseClass;
+#define GC_TRIVIAL_TRACER_SubclassOfAbstractRestrictedBaseClass
 };
 //-----------------------------------------------------------
 
@@ -1505,6 +1558,7 @@ class avmplus_SubclassOfAbstractRestrictedBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::SubclassOfAbstractRestrictedBaseObject;
+#define GC_TRIVIAL_TRACER_SubclassOfAbstractRestrictedBaseObject
 };
 //-----------------------------------------------------------
 
@@ -1515,6 +1569,7 @@ class avmplus_NativeBaseExtender1ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::NativeBaseExtender1Class;
+#define GC_TRIVIAL_TRACER_NativeBaseExtender1Class
 };
 //-----------------------------------------------------------
 
@@ -1527,6 +1582,7 @@ class avmplus_NativeBaseExtender1ObjectSlots
     friend class avmplus::NativeBaseExtender1Object;
 private:
     int32_t m_private_foo;
+#define GC_TRIVIAL_TRACER_NativeBaseExtender1Object
 };
 //-----------------------------------------------------------
 
@@ -1537,6 +1593,7 @@ class avmplus_NativeBaseExtender2ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::NativeBaseExtender2Class;
+#define GC_TRIVIAL_TRACER_NativeBaseExtender2Class
 };
 //-----------------------------------------------------------
 
@@ -1551,6 +1608,7 @@ private:
     int32_t m_private_foo;
     int32_t m_private_foo1;
     int32_t m_private_foo2;
+#define GC_TRIVIAL_TRACER_NativeBaseExtender2Object
 };
 //-----------------------------------------------------------
 
@@ -1639,6 +1697,7 @@ class avmplus_StackFrameClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::StackFrameClass;
+#define GC_TRIVIAL_TRACER_StackFrameClass
 };
 //-----------------------------------------------------------
 
@@ -1654,6 +1713,12 @@ private:
     MMgc::GCTraceableObject::GCMember<avmplus::String> m_name;
     MMgc::GCTraceableObject::GCMember<avmplus::String> m_file;
     double m_scriptID;
+public:
+    REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
+    {
+        gc->TraceLocation(&m_name);
+        gc->TraceLocation(&m_file);
+    }
 };
 //-----------------------------------------------------------
 
@@ -1664,6 +1729,7 @@ class avmplus_SampleClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::SampleClass;
+#define GC_TRIVIAL_TRACER_SampleClass
 };
 //-----------------------------------------------------------
 
@@ -1677,6 +1743,11 @@ class avmplus_SampleObjectSlots
 private:
     MMgc::GCTraceableObject::GCMember<avmplus::ArrayObject> m_stack;
     double m_time;
+public:
+    REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
+    {
+        gc->TraceLocation(&m_stack);
+    }
 };
 //-----------------------------------------------------------
 
@@ -1692,6 +1763,14 @@ private:
     MMgc::GCTraceableObject::GCMember<avmplus::ClassClosure> m_SampleClass;
     MMgc::GCTraceableObject::GCMember<avmplus::ClassClosure> m_DeleteObjectSampleClass;
     MMgc::GCTraceableObject::GCMember<avmplus::ClassClosure> m_NewObjectSampleClass;
+public:
+    REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
+    {
+        gc->TraceLocation(&m_StackFrameClass);
+        gc->TraceLocation(&m_SampleClass);
+        gc->TraceLocation(&m_DeleteObjectSampleClass);
+        gc->TraceLocation(&m_NewObjectSampleClass);
+    }
 };
 //-----------------------------------------------------------
 
@@ -1702,6 +1781,7 @@ class avmplus_ClassFactoryObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::ClassFactoryObject;
+#define GC_TRIVIAL_TRACER_ClassFactoryObject
 };
 //-----------------------------------------------------------
 
@@ -1799,6 +1879,7 @@ class avmplus_DeleteObjectSampleClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::DeleteObjectSampleClass;
+#define GC_TRIVIAL_TRACER_DeleteObjectSampleClass
 };
 //-----------------------------------------------------------
 
@@ -1812,6 +1893,7 @@ class avmplus_DeleteObjectSampleObjectSlots
 private:
     double m_id;
     double m_size;
+#define GC_TRIVIAL_TRACER_DeleteObjectSampleObject
 };
 //-----------------------------------------------------------
 
@@ -1902,6 +1984,7 @@ class avmplus_TraceObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::TraceObject;
+#define GC_TRIVIAL_TRACER_TraceObject
 };
 //-----------------------------------------------------------
 
@@ -1999,6 +2082,12 @@ class avmplus_EndianClassSlots
 private:
     MMgc::GCTraceableObject::GCMember<avmplus::String> m_BIG_ENDIAN;
     MMgc::GCTraceableObject::GCMember<avmplus::String> m_LITTLE_ENDIAN;
+public:
+    REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
+    {
+        gc->TraceLocation(&m_BIG_ENDIAN);
+        gc->TraceLocation(&m_LITTLE_ENDIAN);
+    }
 };
 //-----------------------------------------------------------
 
@@ -2009,6 +2098,7 @@ class avmplus_EndianObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::EndianObject;
+#define GC_TRIVIAL_TRACER_EndianObject
 };
 //-----------------------------------------------------------
 

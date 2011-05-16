@@ -9211,52 +9211,52 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ArgumentErrorObject::construct(int a
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::IOErrorClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::IOErrorClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::IOErrorClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::IOErrorClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_IOErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::IOErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::IOErrorObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::IOErrorObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IOErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IOErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::MemoryErrorClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::MemoryErrorClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::MemoryErrorClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::MemoryErrorClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_MemoryErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::MemoryErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::MemoryErrorObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::MemoryErrorObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::MemoryErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::MemoryErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::IllegalOperationErrorClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::IllegalOperationErrorClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::IllegalOperationErrorClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::IllegalOperationErrorClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_IllegalOperationErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::IllegalOperationErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::IllegalOperationErrorObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::IllegalOperationErrorObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IllegalOperationErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IllegalOperationErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::EOFErrorClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::EOFErrorClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::EOFErrorClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::EOFErrorClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_EOFErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::EOFErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::EOFErrorObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::EOFErrorObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::EOFErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::EOFErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::IOErrorObject::construct(argc, argv); } )
@@ -9288,13 +9288,13 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::JSONObject::construct(int argc, avmp
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::WalkerClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::WalkerClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::WalkerClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::WalkerClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_WalkerClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::WalkerClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::WalkerObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::WalkerObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::WalkerClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::WalkerObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
@@ -9338,13 +9338,13 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ProxyObject::construct(int argc, avm
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::CompressionAlgorithmClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::CompressionAlgorithmClass::createInstanceProc;
-    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::CompressionAlgorithmClass(cvtable);
+    ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::CompressionAlgorithmClass(cvtable);
     AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_CompressionAlgorithmClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::CompressionAlgorithmClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new (cls->gc(), cls->getExtraSize()) avmplus::CompressionAlgorithmObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::CompressionAlgorithmObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::CompressionAlgorithmClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::CompressionAlgorithmObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
