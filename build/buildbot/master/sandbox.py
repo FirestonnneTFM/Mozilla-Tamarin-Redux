@@ -131,12 +131,12 @@ class sandbox:
     sb_windows_compile_factory.addStep(sync_clone_sandbox)
     sb_windows_compile_factory.addStep(sync_update)
     sb_windows_compile_factory.addStep(bb_slaveupdate(slave="windows"))
-    sb_windows_compile_factory.addStep(compile_builtin)
     sb_windows_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell", args=" ", upload="false"))
     sb_windows_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-debug", upload="false"))
     sb_windows_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-debugger", upload="false"))
     sb_windows_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-debug --enable-debugger", upload="false"))
     sb_windows_compile_factory.addStep(compile_buildcheck)
+    sb_windows_compile_factory.addStep(verify_generated)    
     sb_windows_compile_factory.addStep(util_upload_asteam)
     sb_windows_compile_factory.addStep(BuildShellCommand(
                 command=['../all/file-check.py', '../../../../../repo'],
@@ -163,12 +163,12 @@ class sandbox:
     sb_windows_64_compile_factory.addStep(sync_clone_sandbox)
     sb_windows_64_compile_factory.addStep(sync_update)
     sb_windows_64_compile_factory.addStep(bb_slaveupdate(slave="windows64"))
-    sb_windows_64_compile_factory.addStep(compile_builtin)
     sb_windows_64_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_64", args="--target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
     sb_windows_64_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_64", args="--enable-debug --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
     sb_windows_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64", args="--enable-debugger --target=x86_64-win", upload="false", features="'+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     sb_windows_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-debug --enable-debugger --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     sb_windows_64_compile_factory.addStep(compile_buildcheck)
+    sb_windows_64_compile_factory.addStep(verify_generated)    
     sb_windows_64_compile_factory.addStep(util_upload_asteam)
 
     sb_windows_64_compile_builder = {
@@ -187,12 +187,12 @@ class sandbox:
     sb_mac_intel_105_compile_factory.addStep(sync_clone_sandbox)
     sb_mac_intel_105_compile_factory.addStep(sync_update)
     sb_mac_intel_105_compile_factory.addStep(bb_slaveupdate(slave="mac-intel-10_5"))
-    sb_mac_intel_105_compile_factory.addStep(compile_builtin)
     sb_mac_intel_105_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell", args="--mac-sdk=105 --target=i686-darwin", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32"))
     sb_mac_intel_105_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-debug --mac-sdk=105 --target=i686-darwin", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32"))
     sb_mac_intel_105_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-debugger --mac-sdk=105 --target=i686-darwin", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
     sb_mac_intel_105_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-debug --enable-debugger --mac-sdk=105 --target=i686-darwin", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
     sb_mac_intel_105_compile_factory.addStep(compile_buildcheck)
+    sb_mac_intel_105_compile_factory.addStep(verify_generated)
     sb_mac_intel_105_compile_factory.addStep(util_upload_asteam)
 
     sb_mac_intel_105_compile_builder = {
@@ -211,12 +211,12 @@ class sandbox:
     sb_mac_intel_64_compile_factory.addStep(sync_clone_sandbox)
     sb_mac_intel_64_compile_factory.addStep(sync_update)
     sb_mac_intel_64_compile_factory.addStep(bb_slaveupdate(slave="mac64-intel"))
-    sb_mac_intel_64_compile_factory.addStep(compile_builtin)
     sb_mac_intel_64_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_64", args="--target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
     sb_mac_intel_64_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_64", args="--enable-debug --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
     sb_mac_intel_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64", args="--enable-debugger --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     sb_mac_intel_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-debug --enable-debugger --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     sb_mac_intel_64_compile_factory.addStep(compile_buildcheck)
+    sb_mac_intel_64_compile_factory.addStep(verify_generated)
     sb_mac_intel_64_compile_factory.addStep(util_upload_asteam)
 
     sb_mac_intel_64_compile_builder = {
@@ -235,12 +235,12 @@ class sandbox:
     sb_linux_compile_factory.addStep(sync_clone_sandbox)
     sb_linux_compile_factory.addStep(sync_update)
     sb_linux_compile_factory.addStep(bb_slaveupdate(slave="linux"))
-    sb_linux_compile_factory.addStep(compile_builtin)
     sb_linux_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell", args="--target=i686-linux", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32"))
     sb_linux_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-debug --target=i686-linux", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32"))
     sb_linux_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-debugger --target=i686-linux", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
     sb_linux_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-debug --enable-debugger --target=i686-linux", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
     sb_linux_compile_factory.addStep(compile_buildcheck)
+    sb_linux_compile_factory.addStep(verify_generated)
     sb_linux_compile_factory.addStep(util_upload_asteam)
 
     sb_linux_compile_builder = {
@@ -259,11 +259,11 @@ class sandbox:
     sb_linux_64_compile_factory.addStep(sync_clone_sandbox)
     sb_linux_64_compile_factory.addStep(sync_update)
     sb_linux_64_compile_factory.addStep(bb_slaveupdate(slave="linux64"))
-    sb_linux_64_compile_factory.addStep(compile_builtin)
     sb_linux_64_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_64", args=" ", upload="false"))
     sb_linux_64_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_64", args="--enable-debug", upload="false"))
     sb_linux_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64", args="--enable-debugger", upload="false"))
     sb_linux_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-debug --enable-debugger", upload="false"))
+    sb_linux_64_compile_factory.addStep(verify_generated)
     sb_linux_64_compile_factory.addStep(compile_testmedia)
     sb_linux_64_compile_factory.addStep(compile_buildcheck_local)
     sb_linux_64_compile_factory.addStep(util_upload_asteam_local)
@@ -284,10 +284,10 @@ class sandbox:
     sb_solaris_sparc_compile_factory.addStep(sync_clone_sandbox)
     sb_solaris_sparc_compile_factory.addStep(sync_update)
     sb_solaris_sparc_compile_factory.addStep(bb_slaveupdate(slave="solaris-sparc"))
-    sb_solaris_sparc_compile_factory.addStep(compile_builtin)
     sb_solaris_sparc_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell", args=" ", upload="false"))
     sb_solaris_sparc_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-debugger", upload="false"))
     sb_solaris_sparc_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-debug --enable-debugger", upload="false"))
+    sb_solaris_sparc_compile_factory.addStep(verify_generated)
     sb_solaris_sparc_compile_factory.addStep(compile_buildcheck_local)
     sb_solaris_sparc_compile_factory.addStep(util_upload_asteam)
 
@@ -308,9 +308,9 @@ class sandbox:
     sb_android_compile_factory.addStep(sync_clone_sandbox)
     sb_android_compile_factory.addStep(sync_update)
     sb_android_compile_factory.addStep(bb_slaveupdate(slave="android"))
-    sb_android_compile_factory.addStep(compile_builtin)
     sb_android_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell", args="--arm-arch=armv7-a --target=arm-android", upload="false"))
     sb_android_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-debug --arm-arch=armv7-a --target=arm-android", upload="false"))
+    sb_android_compile_factory.addStep(verify_generated)
     sb_android_compile_factory.addStep(compile_buildcheck_local)
     sb_android_compile_factory.addStep(util_upload_asteam_local)
     
@@ -329,9 +329,9 @@ class sandbox:
     sb_linux_arm_compile_factory.addStep(sync_clone_sandbox)
     sb_linux_arm_compile_factory.addStep(sync_update)
     sb_linux_arm_compile_factory.addStep(bb_slaveupdate(slave="linux-arm"))
-    sb_linux_arm_compile_factory.addStep(compile_builtin)
     sb_linux_arm_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_neon_arm", args="--enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5", upload="false", features=""))
     sb_linux_arm_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_neon_arm_d", args="--enable-debug --enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5", upload="false", features=""))
+    sb_linux_arm_compile_factory.addStep(verify_generated)
     sb_linux_arm_compile_factory.addStep(compile_buildcheck_local)
     sb_linux_arm_compile_factory.addStep(util_upload_asteam_local)
 
@@ -351,7 +351,6 @@ class sandbox:
     sb_linux_mips_compile_factory.addStep(sync_clone_sandbox)
     sb_linux_mips_compile_factory.addStep(sync_update)
     sb_linux_mips_compile_factory.addStep(bb_slaveupdate(slave="linux-mips"))
-    sb_linux_mips_compile_factory.addStep(compile_builtin)
     sb_linux_mips_compile_factory.addStep(BuildShellCommand(
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--target=mips-linux', 'avmshell_mips', 'false'],
                 env={
@@ -382,6 +381,7 @@ class sandbox:
                 name="Debug_mips-linux",
                 workdir="../repo/build/buildbot/slaves/scripts")
     )
+    sb_linux_mips_compile_factory.addStep(verify_generated)
     sb_linux_mips_compile_factory.addStep(compile_buildcheck_local)
     sb_linux_mips_compile_factory.addStep(util_upload_asteam_local)
     
