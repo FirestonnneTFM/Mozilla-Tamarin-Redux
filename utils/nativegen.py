@@ -656,8 +656,9 @@ class NativeInfo:
         if (self.traits.cpp_name_comps == None) and (self.itraits.cpp_name_comps == None):
             # it's OK to specify construct="native" for a pure AS3 class
             # it's OK to specify friend="whatever" for a pure AS3 class
-            if not (self.construct == "native" or self.traits.cpp_friend_classes != None):
-                raise Error("native metadata must specify (cls,instance)")
+            # it's OK to specify gc="whatever" for a pure AS3 class
+            if not (self.construct == "native" or self.traits.cpp_friend_classes != None or self.class_gc_exact != None or self.instance_gc_exact != None):
+                raise Error("native metadata must specify (cls,instance): %s" % str(attrs))
   
     def fullyQualifiedCPPClassName(self, className):
         r = className.split('::')
@@ -707,7 +708,7 @@ class NativeInfo:
         if gc == "exact":
             self.class_gc_exact = True
         elif gc == "conservative":
-            True
+            self.class_gc_exact = False
         else:
             raise Error("native(classgc) can only be specified as 'exact' or 'conservative': %s %s" % (self.traits.fqcppname(), gc))
 
@@ -717,7 +718,7 @@ class NativeInfo:
         if gc == "exact":
             self.instance_gc_exact = True
         elif gc == "conservative":
-            True
+            self.instance_gc_exact = False
         else:
             raise Error("native(instancegc) can only be specified as 'exact' or 'conservative': %s %s" % (self.itraits.fqcppname(), gc))
 
@@ -731,14 +732,6 @@ class NativeInfo:
             for md in t.metadata:
                 if md.name == "native":
                     ni.parse_one_nativeinfo(md.attrs, is_vm_builtin)
-
-        # force to True or False (no "None" allowed)
-        if ni.class_gc_exact != True:
-            ni.class_gc_exact = False;
-        if ni.instance_gc_exact != True:
-            ni.instance_gc_exact = False;
-        t.is_gc_exact = ni.class_gc_exact
-        itraits.is_gc_exact = ni.instance_gc_exact
 
         if itraits.is_interface:
             if t.cpp_name_comps != None or itraits.cpp_name_comps != None:
@@ -755,7 +748,9 @@ class NativeInfo:
             if t.cpp_name_comps == None:
                 t.cpp_name_comps = ni.fullyQualifiedCPPClassName(itraits.name.name + "Class")
                 t.is_synthetic = True
-                t.is_gc_exact = True
+                # if gc metadata not specified, assume we want it exact
+                if ni.class_gc_exact == None:
+                    ni.class_gc_exact = True
 
             if itraits.cpp_name_comps == None:
                 if str(t.name) == "Object$":
@@ -764,7 +759,17 @@ class NativeInfo:
                 else:
                     itraits.cpp_name_comps = ni.fullyQualifiedCPPClassName(itraits.name.name + "Object")
                     itraits.is_synthetic = True
-                    itraits.is_gc_exact = True
+                    # if gc metadata not specified, assume we want it exact
+                    if ni.instance_gc_exact == None:
+                        ni.instance_gc_exact = True
+
+        # force to True or False (no "None" allowed)
+        if ni.class_gc_exact != True:
+            ni.class_gc_exact = False;
+        if ni.instance_gc_exact != True:
+            ni.instance_gc_exact = False;
+        t.is_gc_exact = ni.class_gc_exact
+        itraits.is_gc_exact = ni.instance_gc_exact
 
         if ni.construct != None:
             t.construct = ni.construct
