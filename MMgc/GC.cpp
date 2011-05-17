@@ -330,6 +330,9 @@ namespace MMgc
             weaklings = NULL;
         }
 #endif
+#ifdef MMGC_HEAP_GRAPH
+        printBlacklist();
+#endif
         policy.shutdown();
         allocaShutdown();
 
@@ -1136,7 +1139,9 @@ namespace MMgc
         GCAssert(m_barrierWork.Count() == 0);
 
 #ifdef MMGC_HEAP_GRAPH
-        pruneBlacklist();
+        // if destroying, then marks are gone and thus pruning is meaningless
+        if (!destroying)
+            pruneBlacklist();
 #endif
 
         Finalize();
@@ -1218,7 +1223,8 @@ namespace MMgc
         }
 
 #ifdef MMGC_HEAP_GRAPH
-        printBlacklist();
+        if (!destroying)
+            printBlacklist();
 #endif
 
     }
