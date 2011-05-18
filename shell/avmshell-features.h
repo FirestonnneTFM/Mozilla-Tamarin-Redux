@@ -89,6 +89,10 @@
   #define AVMFEATURE_OSR               0
 #endif
 
+#ifndef AVMFEATURE_COMPILEPOLICY
+  #define AVMFEATURE_COMPILEPOLICY     1
+#endif
+
 #ifndef AVMFEATURE_AOT
   #define AVMFEATURE_AOT               0
 #endif

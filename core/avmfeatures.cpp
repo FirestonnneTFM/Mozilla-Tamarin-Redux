@@ -122,6 +122,9 @@ const char * const avmfeatures = ""
   #if AVMFEATURE_OSR
     "AVMFEATURE_OSR;"
   #endif
+  #if AVMFEATURE_COMPILEPOLICY
+    "AVMFEATURE_COMPILEPOLICY;"
+  #endif
   #if AVMFEATURE_AOT
     "AVMFEATURE_AOT;"
   #endif

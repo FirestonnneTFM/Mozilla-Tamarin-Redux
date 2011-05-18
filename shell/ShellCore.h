@@ -83,6 +83,7 @@ namespace avmshell
         nanojit::Config njconfig;       // copy to config
         avmplus::JitConfig jitconfig;   // copy to config
         uint32_t osr_threshold;         // Invocation count to trigger JIT.
+        const char* policyRulesArg;     // copy to config (raw unprocessed)
 #endif
         avmplus::AvmCore::CacheSizes cacheSizes; // Default to unlimited
         const char* st_component;
@@ -233,7 +234,7 @@ namespace avmshell
 
     private:
         ShellToplevel(avmplus::AbcEnv* abcEnv);
-    
+
     public:
         REALLY_INLINE static ShellToplevel* create(MMgc::GC* gc, avmplus::AbcEnv* abcEnv)
         {
@@ -246,7 +247,7 @@ namespace avmshell
 
     private:
         GC_DATA_BEGIN(ShellToplevel)
-        
+
         GCMember<avmplus::shell_toplevelClassManifest> GC_POINTER(shellClasses);
 
         GC_DATA_END(ShellToplevel)

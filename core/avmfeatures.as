@@ -427,6 +427,19 @@ var FEATURES =
   </feature>
 
   <feature>
+    <desc> Allows the default JIT compilation policy to be overriden with alternate rules.
+           In shell builds, this enables the -policy option which allows one to specify
+           which methods should be compiled and which should be interpreted.  There are
+           currently three means of identifying a method to be controlled; unique id,
+           exact name match, and regular expression name match.
+            </desc>
+
+    <name> AVMFEATURE_COMPILEPOLICY  </name>
+    <requires> AVMFEATURE_JIT </requires>
+    <defines> VMCFG_COMPILEPOLICY  </defines>
+  </feature>
+
+  <feature>
     <desc>Enables the ahead-of-time compiler.</desc>
 
     <name> AVMFEATURE_AOT </name>
@@ -653,7 +666,7 @@ var FEATURES =
     <name> AVMFEATURE_VALGRIND </name>
     <defines> MMGC_VALGRIND </defines>
   </feature>
-  
+
   <feature>
     <desc> Enables safepoints and the mechanism to dispatch SafepointTasks
       </desc>
@@ -668,7 +681,7 @@ var FEATURES =
     <defines> VMCFG_FLOAT </defines> <!-- Tentative! Intended for use *outside* the VM only, to see if the feature is present -->
     <defines> VMCFG_FLOAT4 </defines> <!-- Tentative!  Intended for use *outside* the VM only, to see if the feature is present -->
   </feature>
-  
+
   <feature>
     <desc> Enabling this will support SWF13 / ABC version 47.13 </desc>
     <name> AVMFEATURE_SWF13 </name>
@@ -749,7 +762,7 @@ var FEATURES =
     <defines> VMCFG_EXACT_TRACING </defines>
     <default> true </default>
   </tweak>
-  
+
   <tweak>
     <desc> Run-time selectable exact tracing, for experimentation </desc>
     <name> AVMTWEAK_SELECTABLE_EXACT_TRACING </name>
@@ -768,7 +781,7 @@ var FEATURES =
     <name> AVMTWEAK_EXACT_TRACING </name>
     <name> AVMTWEAK_SELECTABLE_EXACT_TRACING </name>
   </at-most-one>
-  
+
 </features>;
 
 /****************************************************************************

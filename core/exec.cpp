@@ -65,6 +65,9 @@ BaseExecMgr* BaseExecMgr::exec(MethodEnv* env)
 BaseExecMgr::BaseExecMgr(AvmCore* core)
     : core(core)
     , config(core->config)
+#ifdef VMCFG_COMPILEPOLICY
+    , _ruleSet(NULL)
+#endif
 #ifdef VMCFG_VERIFYALL
     , verifyFunctionQueue(core->gc, 0)
     , verifyTraitsQueue(core->gc, 0)
@@ -75,6 +78,9 @@ BaseExecMgr::BaseExecMgr(AvmCore* core)
 {
 #ifdef SUPERWORD_PROFILING
     WordcodeTranslator::swprofStart();
+#endif
+#ifdef VMCFG_COMPILEPOLICY
+    prepPolicyRules();
 #endif
 #if defined VMCFG_NANOJIT && defined VMCFG_OSR && defined VMCFG_OSR_ENV_VAR
     if (config.osr_threshold == AvmCore::osr_threshold_default) {
@@ -348,10 +354,6 @@ void BaseExecMgr::verifyMethod(MethodInfo* m, Toplevel *toplevel, AbcEnv* abc_en
         verifyNative(m, ms);
 #ifdef VMCFG_NANOJIT
     else if (shouldJitFirst(abc_env, m, ms)) {
-        #ifdef AVMPLUS_VERBOSE
-        if (m->pool()->isVerbose(VB_execpolicy))
-            core->console << "execpolicy jit first " << m << "\n";
-        #endif
         verifyJit(m, ms, toplevel, abc_env, NULL);
     }
 #endif
@@ -378,8 +380,8 @@ void BaseExecMgr::verifyInterp(MethodInfo* m, MethodSignaturep ms, Toplevel *top
 
 #ifdef VMCFG_NANOJIT
 # ifdef AVMPLUS_VERBOSE
-    if (m->pool()->isVerbose(VB_execpolicy)) // Currently shouldn't print "unknown", accounting for code evolution.
-        core->console << "execpolicy interp " << m << (shouldJitFirst(abc_env,m,ms) ? " unknown\n" : " jit-policy\n");
+    if (m->pool()->isVerbose(VB_execpolicy))
+        core->console << "execpolicy interp (" << m->unique_method_id() << ") " << m << " jit-available\n";
 # endif
 # ifdef VMCFG_OSR
     setInterp(m, ms, OSR::isSupported(abc_env, m, ms));

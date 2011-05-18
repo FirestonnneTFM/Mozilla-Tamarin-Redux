@@ -381,15 +381,15 @@ namespace avmshell
     static void masterThread(MultiworkerState& state);
 
     class SlaveThread : public vmbase::VMThread
-    {        
+    {
     public:
         SlaveThread(ThreadNode* tn) : self(tn) {}
-        
+
         virtual void run();
 
     private:
         ThreadNode* self;
-        
+
     };
 
     /* static */
@@ -842,6 +842,11 @@ namespace avmshell
                 else if (!VMPI_strcmp(arg, "-Ojit")) {
                     settings.runmode = avmplus::RM_jit_all;
                 }
+#ifdef VMCFG_COMPILEPOLICY
+                else if (!VMPI_strcmp(arg, "-policy")) {
+                    settings.policyRulesArg = argv[++i];  // capture the string process it later
+                }
+#endif /* VMCFG_COMPILEPOLICY */
 #ifdef VMCFG_OSR
                 else if (!VMPI_strncmp(arg, "-osr=", 5)) {
                     // parse the commandline threshold
@@ -1267,6 +1272,14 @@ namespace avmshell
         avmplus::AvmLog("          [-Darm_arch N]  nanojit assumes ARMvN architecture (default=5)\n");
         avmplus::AvmLog("          [-Darm_vfp]     nanojit uses VFP rather than SoftFloat\n");
     #endif
+    #ifdef VMCFG_COMPILEPOLICY
+        avmplus::AvmLog("          [-policy [{interp|jit}={id|name|%%regex%%}]+ ]\n");
+        avmplus::AvmLog("                        override the default policy using method identifiers (see -Dverbose=execpolicy,builtins)\n");
+        avmplus::AvmLog("                        and/or method names and/or regular expressions. ids can be specified either\n");
+        avmplus::AvmLog("                        singly or as a range, while names will attempt to match exactly. regex follows\n");
+        avmplus::AvmLog("                        perl regular expression syntax. Note: rules are *not* checked for consistency\n");
+        avmplus::AvmLog("                        e.g. -Dverbose=execpolicy,builtins -policy \"jit=%%(avmshell)|(global)%%,interp=Function/prime\",jit=-3,interp=5-9,jit=42\n");
+    #endif /* VMCFG_COMPILEPOLICY */
 #endif
 #ifdef AVMPLUS_JITMAX
         avmplus::AvmLog("          [-jitmax N-M] jit the Nth to Mth methods only; N- and -M are also valid.\n");
@@ -1276,7 +1289,7 @@ namespace avmshell
         avmplus::AvmLog("          [-Dverifyonly] verify greedily and don't execute anything\n");
 #endif
 #ifdef VMCFG_SELFTEST
-        avmplus::AvmLog("          [-Dselftest[=component,category,test]]");
+        avmplus::AvmLog("          [-Dselftest[=component,category,test]]\n");
         avmplus::AvmLog("                        run selftests\n");
 #endif
         avmplus::AvmLog("          [-Dtimeout]   enforce maximum 15 seconds execution\n");

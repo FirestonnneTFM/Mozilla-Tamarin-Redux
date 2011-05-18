@@ -61,7 +61,7 @@ namespace avmplus
         Stringp     str;
         const uint8_t* abcPtr;
     };
-    
+
     // Used within PoolObject.
     //
     // The macros for exact tracing fail us here: The interpretation
@@ -69,12 +69,12 @@ namespace avmplus
     // with GC_STRUCTURES.  Instead there's a hand-written tracer.  No doubt
     // we could concoct a mechanism to handle this case but we should only
     // do so if we see more instances of it.
-    
+
     class ConstantStringContainer : public MMgc::GCTraceableObject
     {
     private:
         ConstantStringContainer(PoolObject* pool) : pool(pool) {}
-        
+
     public:
         REALLY_INLINE static ConstantStringContainer* create(MMgc::GC* gc, size_t extra, PoolObject* pool)
         {
@@ -82,9 +82,9 @@ namespace avmplus
         }
 
         virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
-        
+
         PoolObject* const pool;
-        
+
         // The real length is max(1,pool->constantStringCount).
         ConstantStringData data[1];
     };
@@ -100,16 +100,16 @@ namespace avmplus
         friend class ConstantStringContainer;
 
         PoolObject(AvmCore* core, ScriptBuffer& sb, const uint8_t* startpos, ApiVersion apiVersion);
-        
+
     public:
         static PoolObject* create(AvmCore* core, ScriptBuffer& sb, const uint8_t* startpos, ApiVersion apiVersion);
 
         ~PoolObject();
- 
+
         int32_t getAPI();
 
         // TODO - group the data members of this class, it's a mess.
-        
+
         GC_DATA_BEGIN(PoolObject)
 
         AvmCore *core;
@@ -156,7 +156,7 @@ namespace avmplus
     public:
         void initPrecomputedMultinames();
         const Multiname* precomputedMultiname(int32_t index);
-        
+
         static void destroyPrecomputedMultinames(ExactStructContainer<HeapMultiname>* self);
 
 
@@ -194,6 +194,9 @@ namespace avmplus
         ScriptBuffer code();
         bool isCodePointer(const uint8_t* pos);
 
+        int32_t uniqueId() const;
+        void    setUniqueId(int32_t val);
+
     public:
         uint32_t classCount() const;
         Traits* getClassTraits(uint32_t i) const;
@@ -230,6 +233,7 @@ namespace avmplus
         const uint8_t *                             _abcStringStart;
         // points behind end of ABC string data - see AbcParser.cpp
         const uint8_t *                             _abcStringEnd;
+
         GCMember<ConstantStringContainer>           GC_POINTER(_abcStrings);                // The length is constantStringCount
         GCList<Traits>                              GC_STRUCTURE(_classes);
         GCList<Traits>                              GC_STRUCTURE(_scripts);
@@ -244,6 +248,7 @@ namespace avmplus
         DataList<int32_t>                           GC_STRUCTURE(_method_name_indices);
                 void                                setupConstantStrings(uint32_t count);
         ApiVersion const                            _apiVersion;
+        int32_t                                     _uniqueId; // _uniqueId + mi->method_id() produces a unique id for methods
 
     public:
     #ifdef AVMPLUS_VERBOSE
@@ -257,7 +262,7 @@ namespace avmplus
         const AOTInfo* aotInfo; // points to non-gc memory
         MMgc::GCRoot *aotRoot;
     #endif
-        
+
         GC_DATA_END(PoolObject)
     };
 }

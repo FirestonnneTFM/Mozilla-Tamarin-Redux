@@ -89,6 +89,7 @@
 #undef VMCFG_METHODENV_IMPL32
 #undef FEATURE_NANOJIT
 #undef VMCFG_OSR
+#undef VMCFG_COMPILEPOLICY
 #undef VMCFG_AOT
 #undef VMCFG_AOTSHELL
 #undef VMCFG_CDECL
@@ -388,6 +389,19 @@
  */
 #if !defined AVMFEATURE_OSR || AVMFEATURE_OSR != 0 && AVMFEATURE_OSR != 1
 #  error "AVMFEATURE_OSR must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_COMPILEPOLICY
+ *
+ * Allows the default JIT compilation policy to be overriden with alternate rules.
+ * In shell builds, this enables the -policy option which allows one to specify
+ * which methods should be compiled and which should be interpreted.  There are
+ * currently three means of identifying a method to be controlled; unique id,
+ * exact name match, and regular expression name match.
+ */
+#if !defined AVMFEATURE_COMPILEPOLICY || AVMFEATURE_COMPILEPOLICY != 0 && AVMFEATURE_COMPILEPOLICY != 1
+#  error "AVMFEATURE_COMPILEPOLICY must be defined and 0 or 1 (only)."
 #endif
 
 
@@ -837,6 +851,11 @@
 #    error "AVMFEATURE_JIT is required for AVMFEATURE_OSR"
 #  endif
 #endif
+#if AVMFEATURE_COMPILEPOLICY
+#  if !AVMFEATURE_JIT
+#    error "AVMFEATURE_JIT is required for AVMFEATURE_COMPILEPOLICY"
+#  endif
+#endif
 #if AVMFEATURE_AOT
 #if AVMSYSTEM_IA32+AVMSYSTEM_ARM != 1
 #  error "Exactly one of AVMSYSTEM_IA32,AVMSYSTEM_ARM must be defined."
@@ -1085,6 +1104,9 @@
 #endif
 #if AVMFEATURE_OSR
 #  define VMCFG_OSR
+#endif
+#if AVMFEATURE_COMPILEPOLICY
+#  define VMCFG_COMPILEPOLICY
 #endif
 #if AVMFEATURE_AOT
 #  define VMCFG_AOT

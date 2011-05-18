@@ -39,6 +39,7 @@
 
 
 #include "avmplus.h"
+#include "pcre.h"
 
 //#define DOPROF
 //#include "../vprof/vprof.h"
@@ -80,7 +81,7 @@ namespace avmplus
         AvmAssert(native_info != NULL);
         this->_native.thunker = native_info->thunker;
         this->setAotCompiled(handler);
-        
+
         declTraits->core->exec->init(this, native_info);
     }
 #endif
@@ -586,7 +587,7 @@ namespace avmplus
 
         const uint32_t extra = sizeof(MethodSignature::AtomOrType) * (param_count + (hasOptional() ? param_count : 0));
         MethodSignature* ms = MethodSignature::create(gc, extra, param_count);
-        
+
         if (pos)
         {
             returnType = pool->resolveTypeName(pos, toplevel, /*allowVoid=*/true);
@@ -1040,4 +1041,177 @@ namespace avmplus
                 gc->TraceLocation(&_args[i].paramType);
         }
     }
+
+    /**
+     * MethodRecognizer and the associated helper functions
+     */
+    #ifdef AVMPLUS_VERBOSE
+    // PrinterWriter interface
+    PrintWriter& MethodRecognizer::print(PrintWriter& prw) const { AvmAssert(0); return prw; }
+
+    PrintWriter& MethodNameRecognizer::print(PrintWriter& prw) const
+    {
+        prw << "methods with a name that exactly matches '";
+        prw.writeN(_pattern, _length);
+        prw << "'";
+        return prw;
+    }
+
+    PrintWriter& MethodNameRegExRecognizer::print(PrintWriter& prw) const
+    {
+        prw << "methods with names matching '";
+        prw.write(_pattern);
+        prw << "'";
+        return prw;
+    }
+
+    PrintWriter& MethodIdRecognizer::print(PrintWriter& prw) const
+    {
+        prw << "methods processed in the range ";
+        if (_low) prw << (uint64_t)_low;
+        prw << "-";
+        if (_high) prw << (uint64_t)_high;
+        return prw;
+    }
+    #endif
+
+    #if defined(VMCFG_COMPILEPOLICY) || defined(AVMPLUS_VERBOSE)
+    // Exact string match
+    MethodNameRecognizer::MethodNameRecognizer(const char* pattern, size_t length)
+        : _pattern(pattern)
+        , _length(length)
+    {}
+
+    bool MethodNameRecognizer::matches(const MethodInfo* m) const
+    {
+        String* nm = m->getMethodName();
+        bool match = nm->equalsLatin1(_pattern, (int32_t)_length);
+        return match;
+    }
+
+    // RegEx string match on the name
+    MethodNameRegExRecognizer::MethodNameRegExRecognizer(const char* pattern, size_t length)
+    {
+        char* str = new char[length + 1];
+        VMPI_strncpy(str, pattern, length);
+        str[length]='\0';
+        _pattern = str;
+        _invalid = false;
+
+        int options = PCRE_UTF8;
+        int error, errOffset;
+        const char* errStr;
+        _regex = (void*)pcre_compile2(_pattern, options, &error, &errStr, &errOffset, NULL);
+
+        // effective but not so pretty error handling.
+        if (_regex == NULL)
+        {
+            delete _pattern;
+
+            size_t errLen = (errStr == NULL) ? 0 : VMPI_strlen(errStr);
+            const char* msg = "*** REGULAR EXPRESSION PARSE ERROR *** : ";
+            const char* msgcont = " in : ";
+            str = new char[VMPI_strlen(msg) + errLen + VMPI_strlen(msgcont) + length + 1];
+            VMPI_strcpy(str, msg);
+            (errLen) ? VMPI_strcat(str, errStr) : 0;
+            VMPI_strcat(str, msgcont);
+            VMPI_strncat(str, pattern, length);
+            _pattern = str;
+            _invalid = true;
+        }
+    }
+
+    MethodNameRegExRecognizer::~MethodNameRegExRecognizer()
+    {
+        delete _pattern;
+        _pattern = NULL;
+        (pcre_free)((pcre*)_regex);
+        _regex = NULL;
+    }
+
+    bool MethodNameRegExRecognizer::matches(const MethodInfo* m) const
+    {
+        StUTF8String nm( m->getMethodName() );
+        int matches = (_invalid) ? -1 : pcre_exec((pcre*)_regex, NULL, nm.c_str(), nm.length(), 0, PCRE_NO_UTF8_CHECK, NULL, 0);
+        return (matches >= 0);
+    }
+
+    // Unique id compare
+    MethodIdRecognizer::MethodIdRecognizer(size_t low, size_t high)
+        : _low(low)
+        , _high(high)
+    {}
+
+    bool MethodIdRecognizer::matches(const MethodInfo* m) const
+    {
+        uint32_t currentId = m->unique_method_id();
+        bool match = false;
+        if (_low == 0)
+            match = currentId <= _high;
+        else if (_high == 0)
+            match = currentId >= _low;
+        else
+            match = currentId >= _low && currentId <= _high;
+        return match;
+    }
+
+    static const char* parseDigit(const char* c, size_t* val)
+    {
+        *val = VMPI_atoi(c);
+        while( VMPI_isdigit(*c) )
+            c++;
+        return c;
+    }
+
+    /**
+     * Read a method specification from the given string and return
+     * the appropriate MethodSpecifier.  The original ptr to the string
+     * is updated to reflect the location where the parsing stopped.
+     */
+    MethodRecognizer* MethodRecognizer::parse(const char** ptr, char separator)
+    {
+        MethodRecognizer* r = NULL;
+        const char* s = *ptr;
+
+        // check for numeric ranges of the form
+        //   'n', 'n-' , '-m' , 'n-m'
+        if (*s == '-')
+        {
+            size_t high = 0;
+            s = parseDigit(&s[1], &high);
+            r = mmfx_new( MethodIdRecognizer(0, high) );
+        }
+        else if (VMPI_isdigit(*s))
+        {
+            size_t low = 0;
+            size_t high = 0;
+            s = parseDigit(s, &low);
+            if (*s && *s == '-')
+                s = parseDigit(&s[1], &high);
+            else if (*s)
+                high = low; // single #
+            r = mmfx_new( MethodIdRecognizer(low, high) );
+        }
+        else if (*s == '%')
+        {
+            // regex case; read until '%'
+            const char* c = s+1;
+            while( *c && *c != '%')
+                c++;
+            r = mmfx_new( MethodNameRegExRecognizer(s+1,c-(s+1)) );
+            s = c;
+        }
+        else
+        {
+            // string case; read until ','
+            const char* c = s;
+            while( *c && *c != separator)
+                c++;
+            r = mmfx_new( MethodNameRecognizer(s,c-s) );
+            s = c;
+        }
+        *ptr = s;
+        return r;
+    }
+    #endif /* VMCFG_COMPILEPOLICY || AVMPLUS_VERBOSE */
 }

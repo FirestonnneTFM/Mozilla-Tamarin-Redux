@@ -40,6 +40,11 @@
 #ifndef __avmplus_MethodInfo__
 #define __avmplus_MethodInfo__
 
+#ifdef AVMPLUS_VERBOSE
+    #define verbose_only(...)        __VA_ARGS__
+#else
+    #define verbose_only(...)
+#endif
 
 #ifdef verify
 #undef verify
@@ -60,7 +65,7 @@ namespace avmplus
          const ScopeTypeChain* getScope() const;
          void setTraits(MMgc::GC* gc, void* container, Traits* t);
          void setScope(MMgc::GC* gc, void* container, const ScopeTypeChain* s);
-         
+
          REALLY_INLINE void gcTrace(MMgc::GC* gc) { gc->TraceLocation(&_scopeOrTraits); }
      };
 
@@ -84,7 +89,7 @@ namespace avmplus
         const int32_t           local_count;        // FIXME: merge with localCount above; this one may be visible to a debugger?
         const int32_t           max_scopes;         // FIXME: merge with maxScopeDepth above; this one is not used by the VM but may be visible to a debugger?
         Stringp                 GC_POINTERS_SMALL(localNames[1], local_count);      // array of names for args and locals in framep order, written with explicit WBRC (actually local_count)
-        
+
         GC_DATA_END(DebuggerMethodInfo)
     };
 #endif
@@ -135,14 +140,14 @@ namespace avmplus
         {
             return new (gc, MMgc::kExact) MethodInfo(stub, declTraits);
         }
-        
+
 #ifdef VMCFG_AOT
         REALLY_INLINE static MethodInfo* create(MMgc::GC* gc, InitMethodStub stub, Traits* declTraits, const NativeMethodInfo* native_info, const AvmThunkNativeHandler& handler, int32_t method_id)
         {
             return new (gc, MMgc::kExact) MethodInfo(stub, declTraits, native_info, handler, method_id);
         }
 #endif
-        
+
         bool usesCallerContext() const;
 
         // Builtin + non-native functions always need the dxns code emitted
@@ -226,9 +231,7 @@ namespace avmplus
         Stringp FASTCALL getMethodNameWithTraits(Traits* declaringTraits, bool includeAllNamespaces = false) const;
         Stringp FASTCALL getMethodName(bool includeAllNamespaces = false) const;
 
-#ifdef AVMPLUS_VERBOSE
-        PrintWriter& print(PrintWriter& prw) const;
-#endif
+        verbose_only( PrintWriter& print(PrintWriter& prw) const; )
 #ifdef DEBUGGER
         /**
          * Basically the same as AvmPlusScriptableObject::bytesUsed().
@@ -263,7 +266,8 @@ namespace avmplus
         void set_lookup_cache_size(int32_t s);
     #endif
 
-        int32_t method_id() const;
+        int32_t  method_id() const;
+        uint32_t unique_method_id() const;
 
         Traits* declaringTraits() const;
         const ScopeTypeChain* declaringScope() const;
@@ -329,10 +333,10 @@ namespace avmplus
         };
 
         void gcTraceHook_MethodInfo(MMgc::GC* gc);
-        
+
     // ------------------------ DATA SECTION BEGIN
         GC_DATA_BEGIN(MethodInfo)
-        
+
     private:
         GCMember<MMgc::GCWeakRef> GC_POINTER(_msref); // our MethodSignature
         ScopeOrTraits             GC_STRUCTURE(_declarer);
@@ -453,7 +457,7 @@ namespace avmplus
         // If true, Function.apply & call() use a fast path that only works
         // for JIT and Native code, not interpreted code.
         uint32_t                _apply_fastpath:1;
-        
+
         GC_DATA_END(MethodInfo)
     // ------------------------ DATA SECTION END
     };
@@ -466,10 +470,10 @@ namespace avmplus
         {
             return new (gc, MMgc::kExact, extra) MethodSignature(param_count);
         }
-            
+
     private:
         MethodSignature(int32_t param_count);
-        
+
         union AtomOrType
         {
             Traits* paramType;
@@ -530,11 +534,76 @@ namespace avmplus
         bool        _isNative;          // dupe of owner's flag of same name.
         bool        _allowExtraArgs;    // == _needRest | _needArguments | _ignoreRest
         AtomOrType  _args[1];           // lying, actually 1+param_count+optional_count.  Traced by gcTraceHook().
-        
+
         GC_DATA_END(MethodSignature)
     // ------------------------ DATA SECTION END
     };
 
+
+    /**
+     * MethodRecognizer is an interface used to determine if a MethodInfo matches
+     * some criteria (e.g. a name).
+     *
+     * It also doubles as factory to produce recognizers based on a string input.
+     */
+    class MethodRecognizer
+    {
+    public:
+        static MethodRecognizer* parse(const char** s, char separator);
+
+        virtual bool matches(const MethodInfo* m) const = 0;
+
+        virtual ~MethodRecognizer() {}
+        verbose_only( virtual PrintWriter& print(PrintWriter& prw) const = 0; )
+    };
+
+    /**
+     * A MethodRecognizer that performs an exact match comparision against a method name
+     */
+    class MethodNameRecognizer : /* implements */ public MethodRecognizer
+    {
+    public:
+        MethodNameRecognizer(const char* pattern, size_t length);
+        virtual bool matches(const MethodInfo* m) const;
+        verbose_only( virtual PrintWriter& print(PrintWriter& prw) const; )
+
+    private:
+        const char* _pattern;
+        size_t _length;
+    };
+
+    /**
+     * A MethodRecognizer that performs an Perl Regular Expression comparision against a method name
+     */
+    class MethodNameRegExRecognizer : /* implements */ public MethodRecognizer
+    {
+    public:
+        MethodNameRegExRecognizer(const char* pattern, size_t length);
+        virtual ~MethodNameRegExRecognizer();
+        virtual bool matches(const MethodInfo* m) const;
+        verbose_only( virtual PrintWriter& print(PrintWriter& prw) const; )
+
+    private:
+        const char* _pattern;
+        void* _regex;
+        bool _invalid;  // bad expression?
+    };
+
+    /**
+     * A MethodRecognizer that performs compares a method's unique id against a range of id's.
+     */
+    class MethodIdRecognizer : /* implements */ public MethodRecognizer
+    {
+    public:
+        MethodIdRecognizer(size_t low, size_t high);
+        virtual bool matches(const MethodInfo* m) const;
+        verbose_only( virtual PrintWriter& print(PrintWriter& prw) const; )
+
+    private:
+        size_t _low, _high;
+    };
 }
+
+#undef verbose_only
 
 #endif /* __avmplus_MethodInfo__ */

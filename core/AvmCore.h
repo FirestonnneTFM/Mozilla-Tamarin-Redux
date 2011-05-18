@@ -94,13 +94,13 @@ const int kBufferPadding = 16;
 
     struct Config
     {
-#ifdef VMCFG_NANOJIT
+    #ifdef VMCFG_NANOJIT
         // options for nanojit
         nanojit::Config njconfig;
         // options for CodegenLIR
         JitConfig jitconfig;
-#endif
 
+    #endif
         /**
          * The verbose flag may be set to display each bytecode
          * instruction as it is executed, along with a snapshot of
@@ -118,6 +118,7 @@ const int kBufferPadding = 16;
 
         enum Runmode runmode;
         uint32_t osr_threshold;
+        const char* compilePolicyRules; // JIT compilation override
 
         /**
          * If this switch is set, executing code will check the
@@ -526,6 +527,9 @@ const int kBufferPadding = 16;
         int numStrings;
         int numNamespaces;
 
+        // a running count of MethodInfos used to generate unique id's for the PoolObjects
+        uint32_t currentMethodInfoCount;
+
         // API versioning state
         ApiVersionSeries const  m_activeApiVersionSeries;
         uint32_t const          m_activeApiVersionSeriesMask;
@@ -780,6 +784,9 @@ const int kBufferPadding = 16;
         // BugCompatibility associated with the VM's builtins.
         // This call will never return NULL.
         const BugCompatibility* currentBugCompatibility() const;
+
+        // To be called post-PoolObjects' population to assign it a unique id amongst pools
+        void assignPoolId(PoolObject* pool);
 
 #ifdef DEBUGGER
     public:

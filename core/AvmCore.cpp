@@ -340,6 +340,9 @@ namespace avmplus
         // set default mode flags
         config.verbose_vb = verbose_default;
 
+        // policy rule overrides 0=none
+        config.compilePolicyRules = NULL;
+
         // default to recording method names, if possible.
         // (subclass might change this in its ctor if it wants to conserve memory.)
         config.methodNames = methodNames_default;
@@ -388,6 +391,7 @@ namespace avmplus
         deletedCount    = 0;
         nsCount         = 0;
 
+        currentMethodInfoCount = 0;
         numStrings = 1024; // power of 2
         numNamespaces = 1024;  // power of 2
         strings = mmfx_new_array(GCRoot::GCMember<String>, numStrings);
