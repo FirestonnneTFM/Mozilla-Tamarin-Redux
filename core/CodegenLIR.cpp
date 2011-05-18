@@ -7204,12 +7204,6 @@ namespace avmplus
         deadvars_kill(dv_alloc, varlivein, varlabels, taglivein, taglabels);
     }
 
-#ifdef AVMPLUS_JITMAX
-    int jitcount = 0;
-    int jitmin = 1;
-    int jitmax = 0x7fffffff;
-#endif
-
 #ifdef NJ_VERBOSE
     void listing(const char* title, AvmLogControl &log, Fragment* frag)
     {
@@ -7351,36 +7345,18 @@ namespace avmplus
         PERFM_NVPROF("IR-bytes", frag->lirbuf->byteCount());
         PERFM_NVPROF("IR", frag->lirbuf->insCount());
 
-        bool keep = //!driver->hasReachableExceptions() &&
-            !assm->error();
-#ifdef AVMPLUS_JITMAX
-        jitcount++;
-        keep = keep && (jitcount >= jitmin && jitcount <= jitmax);
-        //AvmLog(stderr, "jitcount %d keep %d\n", jitcount, (int)keep);
-#endif
-        //_nvprof("keep",keep);
         GprMethodProc code;
+        bool keep = !assm->error();
         if (keep) {
-#if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
-            if (pool->isVerbose(VB_execpolicy))
-                AvmLog("keeping %d, loop=%d\n", jitcount, assm->hasLoop);
-#endif
             // save pointer to generated code
             code = (GprMethodProc) frag->code();
             PERFM_NVPROF("JIT method bytes", CodeAlloc::size(assm->codeList));
         } else {
-#if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
-            if (pool->isVerbose(VB_execpolicy))
-                AvmLog("reverting to interpreter %d assm->error %d \n", jitcount, assm->error());
-#endif
+            verbose_only (if (pool->isVerbose(VB_execpolicy))
+                AvmLog("execpolicy revert to interp (%d) compiler error %d \n", info->unique_method_id(), assm->error());
+            )
             // assm puked, or we did something untested, so interpret.
             code = NULL;
-#ifdef AVMPLUS_JITMAX
-            // we need to distiguish between an error and the policy saying we want
-            // to interp.   In the latter case, we should free up jit resources.
-            if (!assm->error())
-                assm->cleanupAfterError();
-#endif // AVMPLUS_JITMAX
             PERFM_NVPROF("lir-error",1);
         }
 

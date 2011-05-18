@@ -69,12 +69,6 @@
     #endif
 #endif
 
-// This is here because it's for VM debugging.
-#ifdef VMCFG_NANOJIT
-// Enable the jitmax global variables and -jitmax switch to the shell, for bisecting nanojit bugs
-//#define AVMPLUS_JITMAX
-#endif
-
 // This is here because it's an always-enabled switch to externally sourced code:
 // PCRE should always be compiled as a statically linked library, never as a shared
 // library.  See pcre/pcre_internal.h, pcre/pcre.h, and pcre/config.h.
