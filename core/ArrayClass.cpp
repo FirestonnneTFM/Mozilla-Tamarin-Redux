@@ -423,7 +423,9 @@ namespace avmplus
         CompareFuncPtr altCmpFunc;
         Atom cmpActionScript;
 
-        uint32_t *index;
+
+        GC::AllocaAutoPtr index_autoptr;
+        uint32_t* index;
         HeapAtomList* atoms;
 
         uint32_t numFields;
@@ -449,6 +451,7 @@ namespace avmplus
         cmpFunc(cmpFunc),
         altCmpFunc(altCmpFunc),
         cmpActionScript(cmpActionScript),
+        index_autoptr(),
         index(NULL),
         atoms(NULL),
         numFields(numFields),
@@ -464,8 +467,7 @@ namespace avmplus
         // So I limit the length -- for larger values, I expect new will fail anyways.
         if ((len > 0) && (len < (0x10000000)))
         {
-
-            index = mmfx_new_array(uint32_t, len);
+            index = (uint32_t*)VMPI_alloca(core, index_autoptr, GCHeap::CheckForCallocSizeOverflow(len, sizeof(uint32_t)));
             atoms = new (core->GetGC()) HeapAtomList(core->GetGC(), len);
         }
 
@@ -659,7 +661,6 @@ namespace avmplus
 
     ArraySort::~ArraySort()
     {
-        mmfx_delete_array(index);
         delete atoms;
         delete fieldatoms;
         fields = NULL;
