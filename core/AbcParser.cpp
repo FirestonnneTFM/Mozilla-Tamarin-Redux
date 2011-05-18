@@ -111,8 +111,10 @@ namespace avmplus
             /*NOTREACHED*/
             return NULL;
         }
-        else
-            return pObject;
+
+        // register this pool giving it a unique id based on MethodInfo count
+        core->assignPoolId(pObject);
+        return pObject;
     }
 
 #if defined(VMCFG_AOT) && defined(DEBUGGER)
@@ -1300,7 +1302,7 @@ namespace avmplus
             (++dataP)->abcPtr = pos;
             // number of characters
             // todo - is compiler emitting no. of chars or no. of bytes?
-            
+
             // don't call readU30(), as it can throw. call readU32 and sanity-check ourself here.
             uint32_t len = AvmCore::readU32(pos);
 
@@ -1395,7 +1397,7 @@ namespace avmplus
                             // hidey hole.
                             if (!hasVersionMark && type == Namespace::NS_Public && core->isVersionedURI(uri))
                                 apiVersion = kApiVersion_VM_INTERNAL;
-                            
+
                         }
                         else
                         {

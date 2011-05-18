@@ -667,6 +667,16 @@ CLASSMANIFEST* AvmCore::prepareBuiltinActionPool(PoolObject* pool,
     return manifest;
 }
 
+REALLY_INLINE void AvmCore::assignPoolId(PoolObject* pool)
+{
+    // each pool is assigned an id that is based on a running total of MethodInfo's
+    // this is so that MethodInfo.unique_method_id() can return a AvmCore-wide unique
+    // identifier for any given method.
+    pool->setUniqueId(this->currentMethodInfoCount);
+    uint32_t num = pool->methodCount();
+    AvmAssert(num > 0);
+    currentMethodInfoCount += num;
+}
 
 } // namespace avmplus
 

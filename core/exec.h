@@ -121,6 +121,8 @@ static const size_t VARSIZE = 8;
  */
 int32_t argSize(Traits*);
 
+class MethodRecognizer;
+
 /**
  * BaseExecMgr implements for all policies, and encapsulates
  * jit+abc, abc-only, and wordcode-only mechanisms.  This could be improved
@@ -356,9 +358,39 @@ private:
     static GprImtThunkProcRetType dispatchImt(class ImtThunkEnv* ite,
                                   int argc, uint32_t* ap, uintptr_t iid);
 
+
+    #ifdef VMCFG_COMPILEPOLICY
+        /**
+         * The policy rule objects utilize MethodRecognizers
+         * to determine the policy on per method basis.
+         */
+        typedef UnmanagedPointerList<MethodRecognizer*> PolicyRuleSet;
+
+        /**
+         * This RuleSet object houses two sets of rules, one for jit'ing
+         * and one for interp.  No attempt is made to determine if the
+         * rules overlap and/or conflict in any manner.
+         */
+        class JitInterpRuleSet : public MMgc::GCFinalizedObject
+        {
+        public:
+            PolicyRuleSet jit;
+            PolicyRuleSet interp;
+
+            JitInterpRuleSet(MMgc::GC* gc);
+            ~JitInterpRuleSet();
+        };
+
+        bool ruleMatch(PolicyRuleSet* rules, const MethodInfo* m) const;
+        bool prepPolicyRules();
+    #endif
+
 private:
     AvmCore* core;
     const struct Config& config;
+#ifdef VMCFG_COMPILEPOLICY
+    JitInterpRuleSet* _ruleSet;
+#endif
 #ifdef VMCFG_VERIFYALL
     GCList<MethodInfo> verifyFunctionQueue;
     GCList<Traits> verifyTraitsQueue;
@@ -409,7 +441,7 @@ private:
     };
     /** pointer to invoker used when callee must coerce args. */
     AtomMethodProc _invoker;
-    
+
     GC_DATA_END(MethodInfoProcHolder)
 };
 
@@ -427,7 +459,7 @@ class GC_CPP_EXACT(MethodEnvProcHolder, MMgc::GCTraceableObject)
 
 protected:
     MethodEnvProcHolder();
-    
+
     GC_NO_DATA(MethodEnvProcHolder)
 
 #ifdef VMCFG_METHODENV_IMPL32
@@ -444,7 +476,7 @@ public:
   inline GprMethodProc implGPR() const { return _implGPR; }
   inline FprMethodProc implFPR() const { return _implFPR; }
 #endif
-  
+
 };
 
 /**
@@ -471,7 +503,7 @@ class ImtHolder : public MMgc::GCInlineObject
     static uint32_t hashIID(uintptr_t iid);  // Hash the IID into an IMT slot number.
     static uint32_t hashIID(MethodInfo*);    // Hash the method's IID into an IMT slot number.
     class ImtThunkEnv* entries[IMT_SIZE];
-    
+
 public:
     void gcTrace(MMgc::GC* gc)
     {

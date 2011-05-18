@@ -46,6 +46,85 @@
 
 namespace avmplus {
 
+#ifdef VMCFG_COMPILEPOLICY
+BaseExecMgr::JitInterpRuleSet::JitInterpRuleSet(MMgc::GC* gc)
+    : jit(gc,0)
+    , interp(gc,0)
+{
+}
+
+BaseExecMgr::JitInterpRuleSet::~JitInterpRuleSet()
+{
+    while(!jit.isEmpty())
+        mmfx_delete( jit.removeLast() );
+
+    while(!interp.isEmpty())
+        mmfx_delete( interp.removeLast() );
+}
+
+bool BaseExecMgr::prepPolicyRules()
+{
+    bool allgood = true;
+    if (config.compilePolicyRules)
+    {
+        AvmAssert(_ruleSet == NULL);
+        _ruleSet = new (core->gc) JitInterpRuleSet(core->gc);
+        const char* s = config.compilePolicyRules;
+        while(*s)
+        {
+            s = (*s == '\"' || *s == ',') ? s+1 : s;
+            if (!*s)
+                break;
+
+            MethodRecognizer* r = NULL;
+            if (!VMPI_strncmp(s, "jit=", 4))
+            {
+                s += 4;
+                r = MethodRecognizer::parse(&s, ',');
+                if (r != NULL) _ruleSet->jit.add( r );
+                #ifdef AVMPLUS_VERBOSE
+                    if (core->isVerbose(VB_execpolicy))
+                        core->console << "execpolicy override - jit " << r << "\n";
+                #endif
+            }
+            else if (!VMPI_strncmp(s, "interp=", 7))
+            {
+                s += 7;
+                r = MethodRecognizer::parse(&s, ',');
+                if (r != NULL) _ruleSet->interp.add( r );
+                #ifdef AVMPLUS_VERBOSE
+                    if (core->isVerbose(VB_execpolicy))
+                        core->console << "execpolicy override - interp " << r << "\n";
+                #endif
+            }
+            else
+            {
+                // bad option
+                #ifdef AVMPLUS_VERBOSE
+                core->console << "execpolicy ignoring invalid rule " << s << "\n";
+                #endif
+                allgood = false;
+            }
+            if (*s) s++;
+        }
+    }
+    return allgood;
+}
+
+// Attempt to match rules based on MethodInfo and the # of the currently processed method
+// Process rules until a match, this means that conflicting rules are resolved by first match wins.
+bool BaseExecMgr::ruleMatch(PolicyRuleSet* rules, const MethodInfo* m) const
+{
+    bool match = false;
+    for(uint32_t i=0,n=rules->length(); !match && i<n; i++)
+    {
+        MethodRecognizer* r = rules->get(i);
+        match = r->matches(m);
+    }
+    return match;
+}
+#endif /* VMCFG_COMPILEPOLICY */
+
 bool BaseExecMgr::isJitEnabled() const
 {
     Runmode runmode = config.runmode;
@@ -59,30 +138,64 @@ bool BaseExecMgr::isJitEnabled() const
  */
 bool BaseExecMgr::shouldJitFirst(const AbcEnv* abc_env, const MethodInfo* m, MethodSignaturep ms) const
 {
+    (void)abc_env; // squash compiler warning
+
     Runmode runmode = config.runmode;
+    bool jitWouldFail = CodegenLIR::jitWillFail(ms);
+    bool willJit = false;
 
     if (runmode == RM_jit_all)
-        return true;
+    {
+        willJit = true;
+    }
+    else if (runmode == RM_interp_all)
+    {
+        willJit = false;
+    }
+    else
+    {
+        AvmAssert( runmode == RM_mixed );
 
-    if (runmode == RM_interp_all)
-        return false;
+        // Some large methods with large frame sizes may cause the JIT to blow up.
+        // These cases would result in JIT failure during the assembly phase anyhow,
+        // so we will preemptively avoid compiling them.  See bug 601794.
+        if (jitWouldFail)
+        {
+            willJit = false;
+        }
+        #ifdef VMCFG_OSR
+        else if (OSR::isSupported(abc_env, m, ms))
+        {
+            willJit = false;
+        }
+        #endif
+        else
+        {
+            willJit = !m->isStaticInit();
+        }
+    }
 
-    AvmAssert(runmode == RM_mixed);
+    #ifdef VMCFG_COMPILEPOLICY
+    // allow our policy rules to override the default policy
+    if (_ruleSet)
+    {
+        // if we're planning to jit, make sure we don't match a jit rule (i.e user specifically
+        // wants to jit the method) before searching the interp matches.
+        // Similarly if we're planning to interp, search jit rules provided no interp rule matches
+        if (willJit)
+        {
+            if ( !ruleMatch(&_ruleSet->jit, m) )
+                willJit = ruleMatch(&_ruleSet->interp, m) ? false : true;
+        }
+        else
+        {
+            if ( !ruleMatch(&_ruleSet->interp, m) )
+                willJit = ruleMatch(&_ruleSet->jit, m) ? true : false;
+        }
 
-    // Some large methods with large frame sizes may cause the JIT to blow up.
-    // These cases would result in JIT failure during the assembly phase anyhow,
-    // so we will preemptively avoid compiling them.  See bug 601794.
-    if (CodegenLIR::jitWillFail(ms))
-        return false;
-
-#ifdef VMCFG_OSR
-    if (OSR::isSupported(abc_env, m, ms))
-          return false;
-#else
-    (void)abc_env;
-#endif
-
-    return !m->isStaticInit();
+    }
+    #endif /* VMCFG_COMPILEPOLICY */
+    return willJit;
 }
 
 void BaseExecMgr::setJit(MethodInfo* m, GprMethodProc p)
@@ -95,6 +208,10 @@ void BaseExecMgr::setJit(MethodInfo* m, GprMethodProc p)
     m->_invoker = InvokerCompiler::canCompileInvoker(m)
         ? jitInvokerNext
         : invokeGeneric;
+#ifdef AVMPLUS_VERBOSE
+    if (m->pool()->isVerbose(VB_execpolicy))
+        core->console << "execpolicy jit (" << m->unique_method_id() << ") " << m << "\n";
+#endif
 }
 
 Atom BaseExecMgr::jitInvokerNext(MethodEnv* env, int argc, Atom* args)
@@ -318,7 +435,7 @@ REALLY_INLINE ImtThunkEnv* ImtThunkEnv::create(MMgc::GC* gc, uint32_t imtMapCoun
 {
     return new (gc, MMgc::kExact, imtMapCount * sizeof(ImtThunkEntry)) ImtThunkEnv(imtMapCount);
 }
-    
+
 REALLY_INLINE ImtThunkEnv::ImtThunkEnv(VTable* v)
     : vtable(v)
 {}

@@ -81,6 +81,7 @@ namespace avmplus
 #endif
         , _method_name_indices(core->GetGC(), 0)
         , _apiVersion(apiVersion)
+        , _uniqueId(-1)
 #ifdef VMCFG_AOT
         , aotInfo(NULL)
         , aotRoot(NULL)

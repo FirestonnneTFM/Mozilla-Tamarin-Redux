@@ -121,6 +121,18 @@ REALLY_INLINE MethodInfo* PoolObject::getMethodInfo(uint32_t i) const
     return _methods[i];
 }
 
+REALLY_INLINE int32_t PoolObject::uniqueId() const
+{
+    AvmAssertMsg(_uniqueId != -1, "id should have been set during parsing");
+    return _uniqueId;
+}
+
+REALLY_INLINE void PoolObject::setUniqueId(int32_t id)
+{
+    AvmAssertMsg(_uniqueId == -1, "This method should never be called more than once.");
+    _uniqueId = id;
+}
+
 #ifdef DEBUGGER
 REALLY_INLINE DebuggerMethodInfo* PoolObject::getDebuggerMethodInfo(uint32_t i) const
 {

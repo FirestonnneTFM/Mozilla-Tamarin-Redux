@@ -347,6 +347,11 @@ REALLY_INLINE int32_t MethodInfo::method_id() const
     return _method_id;
 }
 
+REALLY_INLINE uint32_t MethodInfo::unique_method_id() const
+{
+    return _pool->uniqueId()+method_id();
+}
+
 REALLY_INLINE Traits* MethodInfo::declaringTraits() const
 {
     return _declarer.getTraits();

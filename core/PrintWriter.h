@@ -115,6 +115,8 @@ namespace avmplus
         int spaces;
     };
 
+    class MethodRecognizer;
+
     /**
      * PrintWriter is a utility class for writing human-readable
      * text.  It has an interface similar to the C++ iostreams
@@ -165,7 +167,7 @@ namespace avmplus
         PrintWriter& operator<< (bool b);
         PrintWriter& operator<< (const ScopeTypeChain* s);
         PrintWriter& operator<< (const ScopeChain* s);
-
+        PrintWriter& operator<< (const MethodRecognizer* s);
         void writeAtom(Atom atom);
         void writeAtomHex(Atom atom);
         void writeUTF16(const void* buffer, size_t count);

@@ -73,6 +73,7 @@ namespace avmshell
         , njconfig()
         , jitconfig()
         , osr_threshold(avmplus::AvmCore::osr_threshold_default)
+        , policyRulesArg(NULL)
 #endif
         , st_component(NULL)
         , st_category(NULL)
@@ -179,11 +180,11 @@ namespace avmshell
         {
         public:
             MMgc::GC* gc;
-            
+
             explicit CodeContextCreator(MMgc::GC* _gc) : gc(_gc)
             {
             }
-            
+
             virtual avmplus::CodeContext* create(avmplus::DomainEnv* domainEnv, const avmplus::BugCompatibility* bugCompatibility)
             {
                 return new (gc) ShellCodeContext(domainEnv, bugCompatibility);
@@ -222,7 +223,7 @@ namespace avmshell
             AvmAssert(shell_toplevel->shellClasses->get_ShellCoreFriend1Class()->get_foo() == 42);
             AvmAssert(shell_toplevel->shellClasses->get_ShellCoreFriend2Class()->get_bar() == 101);
         }
-        
+
         return shell_toplevel;
     }
 
@@ -412,6 +413,7 @@ namespace avmshell
         config.njconfig = settings.njconfig;
         config.jitconfig = settings.jitconfig;
         config.osr_threshold = settings.osr_threshold;
+        config.compilePolicyRules = settings.policyRulesArg;
 #endif
 
 #ifdef AVMPLUS_VERBOSE
@@ -487,7 +489,7 @@ namespace avmshell
     }
 
 #ifdef AVMPLUS_VERBOSE
-    const char* ShellCore::identifyDomain(avmplus::Domain* domain) 
+    const char* ShellCore::identifyDomain(avmplus::Domain* domain)
     {
         return domain == builtinDomain ? "builtin" : (domain == shell_domain ? "shell" : NULL);
     }
