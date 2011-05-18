@@ -3350,7 +3350,24 @@ namespace MMgc
         GCAssert(gc->IsPointerToGCObject(GetRealPointer(userptr)));
         GCAssert((gc->GetGCBits(GetRealPointer(userptr)) & GCAlloc::kFreelist) != GCAlloc::kFreelist);
 
-        if(ref == NULL) {
+        if(ref == NULL)
+        {
+            if (gc->Collecting())
+            {
+                // Do not allow weak references to be created to objects that are about
+                // to be freed; always return gc->emptyWeakRef.  Basically this should not
+                // happen - the program is not sound, it's trying to resurrect a dead object
+                // - so we assert.  The operation used to be legal but in an attempt to
+                // improve the performance of GC::Finalize we have made it illegal.  BTW,
+                // it has always been illegal to store a pointer to a dead object into a
+                // live object, thus resurrecting the dead object - though the conservative
+                // collector would deal with that.  The exact collector does not.
+                if (GC::GetMark(userptr) == 0) 
+                {
+                    GCAssertMsg(false, "Do not attempt to resurrect a dying object by creating a weak reference to it");
+                    return gc->emptyWeakRef;
+                }
+            }
             ref = new (gc) GCWeakRef(userptr);
             gc->weakRefs.put(userptr, ref);
             SetHasWeakRef(userptr, true);
