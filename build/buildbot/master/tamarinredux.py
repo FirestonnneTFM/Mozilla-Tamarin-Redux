@@ -167,13 +167,13 @@ class tamarinredux:
     windows_compile_factory.addStep(sync_clone(url=HG_URL))
     windows_compile_factory.addStep(sync_update)
     windows_compile_factory.addStep(bb_slaveupdate(slave="windows"))
+    windows_compile_factory.addStep(compile_builtin)
     windows_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell", args=" ", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32"))
     windows_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-debug", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32"))
     windows_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-debugger", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
     windows_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-debug --enable-debugger", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
     windows_compile_factory.addStep(compile_buildcheck)
     windows_compile_factory.addStep(util_upload_asteam)
-    windows_compile_factory.addStep(verify_generated)    
     windows_compile_factory.addStep(BuildShellCommand(
                 command=['../all/file-check.py', '../../../../../repo'],
                 env={'branch': WithProperties('%s','branch')},
@@ -209,13 +209,13 @@ class tamarinredux:
     windows_64_compile_factory.addStep(sync_clone(url=HG_URL))
     windows_64_compile_factory.addStep(sync_update)
     windows_64_compile_factory.addStep(bb_slaveupdate(slave="windows64"))
+    windows_64_compile_factory.addStep(compile_builtin)
     windows_64_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_64", args="--target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
     windows_64_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_64", args="--enable-debug --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
     windows_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64", args="--enable-debugger --target=x86_64-win", upload="false", features="'+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     windows_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-debug --enable-debugger --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     windows_64_compile_factory.addStep(compile_buildcheck)
     windows_64_compile_factory.addStep(util_upload_asteam)
-    windows_64_compile_factory.addStep(verify_generated)
 
     windows_64_compile_builder = {
                 'name': "windows64-compile",
@@ -233,13 +233,13 @@ class tamarinredux:
     mac_intel_105_compile_factory.addStep(sync_clone(url=HG_URL))
     mac_intel_105_compile_factory.addStep(sync_update)
     mac_intel_105_compile_factory.addStep(bb_slaveupdate(slave="mac-intel-10_5"))
+    mac_intel_105_compile_factory.addStep(compile_builtin)
     mac_intel_105_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell", args="--mac-sdk=105 --target=i686-darwin", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-debug --mac-sdk=105 --target=i686-darwin", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-debugger --mac-sdk=105 --target=i686-darwin", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-debug --enable-debugger --mac-sdk=105 --target=i686-darwin", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
     mac_intel_105_compile_factory.addStep(compile_buildcheck)
     mac_intel_105_compile_factory.addStep(util_upload_asteam)
-    mac_intel_105_compile_factory.addStep(verify_generated)
 
     mac_intel_105_compile_builder = {
                 'name': "mac-intel-10.5-compile",
@@ -257,13 +257,13 @@ class tamarinredux:
     mac_intel_64_compile_factory.addStep(sync_clone(url=HG_URL))
     mac_intel_64_compile_factory.addStep(sync_update)
     mac_intel_64_compile_factory.addStep(bb_slaveupdate(slave="mac64-intel"))
+    mac_intel_64_compile_factory.addStep(compile_builtin)
     mac_intel_64_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_64", args="--target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
     mac_intel_64_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_64", args="--enable-debug --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
     mac_intel_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64", args="--enable-debugger --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     mac_intel_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-debug --enable-debugger --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     mac_intel_64_compile_factory.addStep(compile_buildcheck)
     mac_intel_64_compile_factory.addStep(util_upload_asteam)
-    mac_intel_64_compile_factory.addStep(verify_generated)
 
     mac_intel_64_compile_builder = {
                 'name': "mac64-intel-compile",
@@ -281,13 +281,13 @@ class tamarinredux:
     linux_compile_factory.addStep(sync_clone(url=HG_URL))
     linux_compile_factory.addStep(sync_update)
     linux_compile_factory.addStep(bb_slaveupdate(slave="linux"))
+    linux_compile_factory.addStep(compile_builtin)
     linux_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell", args="--target=i686-linux", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32"))
     linux_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-debug --target=i686-linux", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32"))
     linux_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-debugger --target=i686-linux", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
     linux_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-debug --enable-debugger --target=i686-linux", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
     linux_compile_factory.addStep(compile_buildcheck)
     linux_compile_factory.addStep(util_upload_asteam)
-    linux_compile_factory.addStep(verify_generated)
 
     linux_compile_builder = {
                 'name': "linux-compile",
@@ -305,6 +305,7 @@ class tamarinredux:
     linux_64_compile_factory.addStep(sync_clone(url=HG_URL))
     linux_64_compile_factory.addStep(sync_update)
     linux_64_compile_factory.addStep(bb_slaveupdate(slave="linux64"))
+    linux_64_compile_factory.addStep(compile_builtin)
     linux_64_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_64", args=" ", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
     linux_64_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_64", args="--enable-debug", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
     linux_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64", args="--enable-debugger", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
@@ -312,7 +313,6 @@ class tamarinredux:
     linux_64_compile_factory.addStep(compile_testmedia)
     linux_64_compile_factory.addStep(compile_buildcheck_local)
     linux_64_compile_factory.addStep(util_upload_asteam_local)
-    linux_64_compile_factory.addStep(verify_generated)
 
     linux_64_compile_builder = {
                 'name': "linux64-compile",
@@ -330,12 +330,12 @@ class tamarinredux:
     solaris_sparc_compile_factory.addStep(sync_clone(url=HG_URL))
     solaris_sparc_compile_factory.addStep(sync_update)
     solaris_sparc_compile_factory.addStep(bb_slaveupdate(slave="solaris-sparc"))
+    solaris_sparc_compile_factory.addStep(compile_builtin)
     solaris_sparc_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell", args=" ", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC"))
     solaris_sparc_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-debugger", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC +AVMFEATURE_DEBUGGER"))
     solaris_sparc_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-debug --enable-debugger", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC +AVMFEATURE_DEBUGGER"))
     solaris_sparc_compile_factory.addStep(compile_buildcheck_local)
     solaris_sparc_compile_factory.addStep(util_upload_asteam)
-    solaris_sparc_compile_factory.addStep(verify_generated)
 
     solaris_sparc_compile_builder = {
                 'name': "solaris-sparc-compile",
@@ -354,11 +354,11 @@ class tamarinredux:
     android_compile_factory.addStep(sync_clone(url=HG_URL))
     android_compile_factory.addStep(sync_update)
     android_compile_factory.addStep(bb_slaveupdate(slave="android"))
+    android_compile_factory.addStep(compile_builtin)
     android_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell", args="--arm-arch=armv7-a --target=arm-android", upload="false"))
     android_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-debug --arm-arch=armv7-a --target=arm-android", upload="false"))
     android_compile_factory.addStep(compile_buildcheck_local)
     android_compile_factory.addStep(util_upload_asteam_local)
-    android_compile_factory.addStep(verify_generated)
     
     android_compile_builder = {
                 'name': "android-compile",
@@ -375,11 +375,11 @@ class tamarinredux:
     linux_arm_compile_factory.addStep(sync_clone(url=HG_URL))
     linux_arm_compile_factory.addStep(sync_update)
     linux_arm_compile_factory.addStep(bb_slaveupdate(slave="linux-arm"))
+    linux_arm_compile_factory.addStep(compile_builtin)
     linux_arm_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_neon_arm", args="--enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5", upload="false", features=""))
     linux_arm_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_neon_arm_d", args="--enable-debug --enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5", upload="false", features=""))
     linux_arm_compile_factory.addStep(compile_buildcheck_local)
     linux_arm_compile_factory.addStep(util_upload_asteam_local)
-    linux_arm_compile_factory.addStep(verify_generated)
 
     linux_arm_compile_builder = {
                 'name': "linux-arm-compile",
@@ -397,6 +397,7 @@ class tamarinredux:
     linux_mips_compile_factory.addStep(sync_clone(url=HG_URL))
     linux_mips_compile_factory.addStep(sync_update)
     linux_mips_compile_factory.addStep(bb_slaveupdate(slave="linux-mips"))
+    linux_mips_compile_factory.addStep(compile_builtin)
     linux_mips_compile_factory.addStep(BuildShellCommand(
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--target=mips-linux', 'avmshell_mips', 'false'],
                 env={
@@ -427,7 +428,6 @@ class tamarinredux:
     )
     linux_mips_compile_factory.addStep(compile_buildcheck_local)
     linux_mips_compile_factory.addStep(util_upload_asteam_local)
-    linux_mips_compile_factory.addStep(verify_generated)
     
     linux_mips_compile_builder = {
                 'name': "linux-mips-compile",
@@ -872,6 +872,7 @@ class tamarinredux:
     windows_deep_factory.addStep(sync_clone(url=HG_URL))
     windows_deep_factory.addStep(sync_update)
     windows_deep_factory.addStep(bb_slaveupdate(slave="windows-deep"))
+    windows_deep_factory.addStep(compile_builtin)
     windows_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode", args="--enable-wordcode-interp", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_WORDCODE_INTERP"))
     windows_deep_factory.addStep(compile_generic(name="DebugDebugger-wordcode", shellname="avmshell_sd_wordcode", args="--enable-debug --enable-debugger --enable-wordcode-interp", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_WORDCODE_INTERP"))    
     windows_deep_factory.addStep(download_testmedia)
@@ -922,6 +923,7 @@ class tamarinredux:
     windows_64_deep_factory.addStep(sync_clone(url=HG_URL))
     windows_64_deep_factory.addStep(sync_update)
     windows_64_deep_factory.addStep(bb_slaveupdate(slave="windows64-deep"))
+    windows_64_deep_factory.addStep(compile_builtin)
     windows_64_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode_64", args="--enable-wordcode-interp --target=x86_64-win", upload="true", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))
     windows_64_deep_factory.addStep(compile_generic(name="DebugDebugger-wordcode", shellname="avmshell_sd_wordcode_64", args="--enable-debug --enable-debugger --enable-wordcode-interp --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))    
     windows_64_deep_factory.addStep(download_testmedia)
@@ -981,6 +983,7 @@ class tamarinredux:
     mac_deep_factory.addStep(sync_clone(url=HG_URL))
     mac_deep_factory.addStep(sync_update)
     mac_deep_factory.addStep(bb_slaveupdate(slave="mac-deep"))
+    mac_deep_factory.addStep(compile_builtin)
     mac_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode", args="--enable-wordcode-interp --mac-sdk=105", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_WORDCODE_INTERP"))
     mac_deep_factory.addStep(compile_generic(name="DebugDebugger-wordcode", shellname="avmshell_sd_wordcode", args="--enable-debug --enable-debugger --enable-wordcode-interp --mac-sdk=105", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_WORDCODE_INTERP"))    
     mac_deep_factory.addStep(download_testmedia)
@@ -1038,6 +1041,7 @@ class tamarinredux:
     mac64_deep_factory.addStep(sync_clone(url=HG_URL))
     mac64_deep_factory.addStep(sync_update)
     mac64_deep_factory.addStep(bb_slaveupdate(slave="mac64-deep"))
+    mac64_deep_factory.addStep(compile_builtin)
     mac64_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode_64", args="--enable-wordcode-interp --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))
     mac64_deep_factory.addStep(compile_generic(name="DebugDebugger-wordcode", shellname="avmshell_sd_wordcode_64", args="--enable-debug --enable-debugger --enable-wordcode-interp --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))    
     mac64_deep_factory.addStep(download_testmedia)
@@ -1080,6 +1084,7 @@ class tamarinredux:
     linux_deep_factory.addStep(sync_clone(url=HG_URL))
     linux_deep_factory.addStep(sync_update)
     linux_deep_factory.addStep(bb_slaveupdate(slave="linux-deep"))
+    linux_deep_factory.addStep(compile_builtin)
     linux_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode_64", args="--enable-wordcode-interp", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))
     linux_deep_factory.addStep(compile_generic(name="DebugDebugger-wordcode", shellname="avmshell_sd_wordcode_64", args="--enable-debug --enable-debugger --enable-wordcode-interp", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))    
     linux_deep_factory.addStep(download_testmedia)
@@ -1186,9 +1191,9 @@ class tamarinredux:
     solaris_sparc_deep_factory.addStep(sync_clone(url=HG_URL))
     solaris_sparc_deep_factory.addStep(sync_update)
     solaris_sparc_deep_factory.addStep(bb_slaveupdate(slave="solaris-sparc-deep"))
+    solaris_sparc_deep_factory.addStep(compile_builtin)
     solaris_sparc_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode", args="--enable-wordcode-interp", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC +AVMFEATURE_WORDCODE_INTERP"))
     solaris_sparc_deep_factory.addStep(compile_generic(name="DebugDebugger-wordcode", shellname="avmshell_sd_wordcode", args="--enable-debug --enable-debugger --enable-wordcode-interp", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC +AVMFEATURE_WORDCODE_INTERP"))    
-    solaris_sparc_deep_factory.addStep(verify_generated)    
     solaris_sparc_deep_factory.addStep(download_testmedia)
     solaris_sparc_deep_factory.addStep(test_selftest(name="ReleaseDebugger", shellname="avmshell_s"))
     solaris_sparc_deep_factory.addStep(test_selftest(name="DebugDebugger", shellname="avmshell_sd"))
@@ -1224,8 +1229,8 @@ class tamarinredux:
     solaris_sparc2_deep_factory.addStep(sync_clone(url=HG_URL))
     solaris_sparc2_deep_factory.addStep(sync_update)
     solaris_sparc2_deep_factory.addStep(bb_slaveupdate(slave="solaris-sparc-deep"))
+    solaris_sparc2_deep_factory.addStep(compile_builtin)
     solaris_sparc2_deep_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-debug", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC"))
-    solaris_sparc2_deep_factory.addStep(verify_generated)
     solaris_sparc2_deep_factory.addStep(download_testmedia)
     solaris_sparc2_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_d"))
     solaris_sparc2_deep_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))

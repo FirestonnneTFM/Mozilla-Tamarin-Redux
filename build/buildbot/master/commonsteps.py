@@ -226,12 +226,12 @@ bb_lockrelease = BuildShellCommand(
             name="LockRelease",
             workdir="../repo/build/buildbot/slaves/scripts")
 
-verify_generated = BuildShellCommand(
-            command=['../all/verify-generated.sh', WithProperties('%s','revision')],
+compile_builtin = BuildShellCommand(
+            command=['../all/build-builtinabc.sh', WithProperties('%s','revision')],
             env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
-            description='starting to build builtin and exactgc tracer files..',
-            descriptionDone='builtin and exactgc tracer files diff',
-            name="Verify_Generated",
+            description='starting to build builtin.abc..',
+            descriptionDone='builtin.abc build',
+            name="Compile_builtin.abc",
             workdir="../repo/build/buildbot/slaves/scripts")
 
 compile_buildcheck = BuildShellCheckCommand(
