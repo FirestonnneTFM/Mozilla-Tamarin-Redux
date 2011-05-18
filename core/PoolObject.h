@@ -252,7 +252,7 @@ namespace avmplus
 
     public:
     #ifdef AVMPLUS_VERBOSE
-        bool isVerbose(uint32_t flag);
+        bool isVerbose(uint32_t flag, MethodInfo* mi=NULL);
         uint32_t                    verbose_vb;
     #endif
         // @todo, privatize & make into bitfield (requires API churn)

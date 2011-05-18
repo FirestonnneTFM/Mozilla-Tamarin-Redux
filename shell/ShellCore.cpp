@@ -417,6 +417,8 @@ namespace avmshell
 #endif
 
 #ifdef AVMPLUS_VERBOSE
+        config.verboseOnlyString = settings.verboseOnlyArg;
+
         if (settings.do_verbose & avmplus::VB_builtins)
             config.verbose_vb = settings.do_verbose;  // ~builtins then skip verbose settings during setup()
 #endif

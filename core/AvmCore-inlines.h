@@ -102,18 +102,6 @@ REALLY_INLINE bool AvmCore::use_sse2() const
 
 #endif // VMCFG_NANOJIT
 
-#ifdef AVMPLUS_VERBOSE
-REALLY_INLINE /*static*/ bool AvmCore::isBitSet(uint32_t v, uint32_t bit)
-{
-    return (v&bit) ? true : false;
-}
-
-REALLY_INLINE bool AvmCore::isVerbose(uint32_t b) const
-{
-    return isBitSet(config.verbose_vb, b);
-}
-#endif // AVMPLUS_VERBOSE
-
 REALLY_INLINE void AvmCore::stackCheck(MethodEnv* env)
 {
     // Take the address of a local variable to get stack pointer

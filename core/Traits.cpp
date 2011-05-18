@@ -1637,7 +1637,7 @@ namespace avmplus
 
         m_resolved = true;
 #ifdef AVMPLUS_VERBOSE
-        if (core->isVerbose(VB_traits)) {
+        if (pool->isVerbose(VB_traits)) {
             core->console << "Resolved ";
             printExtended(core->console) << "\n";
         }
@@ -1969,11 +1969,11 @@ namespace avmplus
                 uint32_t* p;
             };
             p_8 = (char*)obj + m_sizeofInstance;
-            
+
             AvmAssert(m_slotDestroyInfo.cap() >= 1);
             AvmAssert((uintptr_t(p) & 3) == 0);
             const uint32_t bitsUsed = slotAreaSize / sizeof(uint32_t);  // not sizeof(Atom)!
-            
+
             traceSlotsFromBitmap(gc, p, m_slotDestroyInfo, bitsUsed);
         }
     }
@@ -1984,7 +1984,7 @@ namespace avmplus
     // that provides uint32_t values representing sets of 32 bits, and
     // make the loop here doubly nested.  That would also allow us to skip
     // quickly areas of objects that have all non-pointer data.
-    
+
     void Traits::traceSlotsFromBitmap(MMgc::GC* gc, uint32_t* p, const FixedBitSet& traceInfo, uint32_t bitsUsed) const
     {
         for (uint32_t bit = 1; bit <= bitsUsed; bit++)
@@ -2010,7 +2010,7 @@ namespace avmplus
             p++;
         }
     }
-    
+
     Stringp Traits::formatClassName()
     {
 #ifdef VMCFG_CACHE_GQCN

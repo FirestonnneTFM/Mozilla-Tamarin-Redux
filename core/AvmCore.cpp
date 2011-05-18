@@ -270,6 +270,48 @@ namespace avmplus
         return domain == builtinDomain  ? "builtin" : NULL;
     }
 
+    static void parseVerboseRestrictions(const char* s, MethodRecognizerSet* list, PrintWriter& console)
+    {
+        while(*s)
+        {
+            s = (*s == '\"' || *s == ',') ? s+1 : s;
+            if (!*s)
+                break;
+
+            MethodRecognizer* r = MethodRecognizer::parse(&s, ',');
+            list->add( r );
+            if (r != NULL)
+                console << "verbose only for " << r << "\n";
+            else
+                console << "warning: not able to parse verbose only rule :" << s << "\n";
+            if (*s) s++;
+        }
+    }
+
+    /**
+     * If verbosity is restricted per-method, then scan each MethodRecognizer seeing
+     * seeing if we get a match , otherwise just check the bit.
+     */
+    bool AvmCore::isVerbose(uint32_t b, MethodInfo* info)
+    {
+        bool v = (b & config.verbose_vb) ? true : false;
+        if (v && info && config.verboseOnlyString)
+        {
+            MethodRecognizerSet* list = &_verboseRestrictedTo;
+            if (list->isEmpty())
+                parseVerboseRestrictions(config.verboseOnlyString, list, console); // no good way to init it prior to this call since verboseOnlyString update occurs post-ctor
+
+            // disabled by default
+            v = false;
+            for(uint32_t i=0,n=list->length(); !v && i<n; i++)
+            {
+                MethodRecognizer* r = list->get(i);
+                v = (r) ? r->matches(info) : false;
+            }
+        }
+        return v;
+    }
+
 #endif
 
     // a single string with characters 0x00...0x7f (inclusive)
@@ -317,6 +359,9 @@ namespace avmplus
         , m_tmCache(QCache::create(CacheSizes::DEFAULT_METADATA, g))
         , m_msCache(QCache::create(CacheSizes::DEFAULT_METHODS, g))
         , m_domainMgr(NULL)
+#ifdef AVMPLUS_VERBOSE
+        , _verboseRestrictedTo(gc,0)
+#endif
     {
         // sanity check for all our types
         MMGC_STATIC_ASSERT(sizeof(int8_t) == 1);
@@ -339,6 +384,7 @@ namespace avmplus
 
         // set default mode flags
         config.verbose_vb = verbose_default;
+        config.verboseOnlyString = NULL;
 
         // policy rule overrides 0=none
         config.compilePolicyRules = NULL;
@@ -550,6 +596,11 @@ namespace avmplus
             node = next;
         }
         livePools = NULL;
+
+#ifdef AVMPLUS_VERBOSE
+        while(!_verboseRestrictedTo.isEmpty())
+            mmfx_delete( _verboseRestrictedTo.removeLast() );
+#endif
     }
 
     void AvmCore::initBuiltinPool(

@@ -70,13 +70,15 @@ const int kBufferPadding = 16;
         ,VB_interp       = 1<<28 // interpreter information
         ,VB_jit          = 1<<27 // jit information
         ,VB_traits       = 1<<26 // traits creation information
-        ,VB_execpolicy   = 1<<25  // traits creation information
+        ,VB_execpolicy   = 1<<25  // execution policy information
         ,VB_raw          = 1<<24  // native code (via nanojit) is displayed in raw (i.e unbuffered bottom-up) fashion.
         ,VB_lircfg       = 1<<23  // produce a control-flow graph of any resultant lir (gml format) in extended basic blocks
         ,VB_lircfg_bb    = 1<<22  // same as above, except each vertex is a basic block
         ,VB_lircfg_ins   = 1<<21  // same as above, except each vertex is an instruction
         // @warning make sure these don't collide with LC_xxx bits
     };
+
+    typedef UnmanagedPointerList<MethodRecognizer*> MethodRecognizerSet;
 
 #ifdef VMCFG_NANOJIT
     // ABC->LIR JIT options.  This doesn't belong here, but
@@ -108,6 +110,14 @@ const int kBufferPadding = 16;
          * @see VB_Bits for individual settings of these flags
          */
         uint32_t verbose_vb;
+
+        /**
+         * A list of MethodRecognizers that is used to determine
+         * whether verbose output is to occur on a given method
+         * or not.  If this list is empty then verbosity is enabled
+         * for all methods (assuming its on).
+         */
+        const char* verboseOnlyString;
 
         // if true, record original names of methods at runtime.
         // if false, don't (Function.toString will return things like "Function-21")
@@ -848,9 +858,17 @@ const int kBufferPadding = 16;
 #endif
 
 #ifdef AVMPLUS_VERBOSE
-        bool isVerbose(uint32_t b) const;
-        static bool isBitSet(uint32_t v, uint32_t bit);
+        bool isVerbose(uint32_t b, MethodInfo* info=NULL);
         static uint32_t parseVerboseFlags(const char* arg, char*& badFlag);
+
+        /**
+         * A list of MethodRecognizers that is used to determine
+         * whether verbose output is to occur on a given method
+         * or not.  If this list is empty then verbosity is enabled
+         * for all methods (assuming its on).
+         */
+        MethodRecognizerSet _verboseRestrictedTo;
+
         virtual const char* identifyDomain(Domain* domain);
 #endif
 

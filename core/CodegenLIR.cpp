@@ -756,7 +756,7 @@ namespace avmplus
         #endif
 
         verbose_only(
-            if (pool->isVerbose(VB_jit)) {
+            if (pool->isVerbose(VB_jit, i)) {
                 core->console << "codegen " << i;
                 core->console <<
                     " required=" << ms->requiredParamCount() <<
@@ -874,7 +874,7 @@ namespace avmplus
             , haveDebugger(info->pool()->core->debugger() != NULL)
 #endif
 #ifdef AVMPLUS_VERBOSE
-            , verbose(info->pool()->isVerbose(VB_jit))
+            , verbose(info->pool()->isVerbose(VB_jit, info))
 #endif
         {
             (void) info; // suppress warning if !DEBUGGER && !AVMPLUS_VERBOSE
@@ -6651,7 +6651,7 @@ namespace avmplus
 #ifdef NJ_VERBOSE
     bool CodegenLIR::verbose()
     {
-        return pool->isVerbose(VB_jit);
+        return pool->isVerbose(VB_jit, info);
     }
 #endif
 
@@ -7027,7 +7027,7 @@ namespace avmplus
         while (again);
 
         // now make a final pass, modifying LIR to delete dead stores (make them LIR_neartramps)
-        verbose_only( if (pool->isVerbose(LC_Liveness))
+        verbose_only( if (pool->isVerbose(LC_Liveness, info))
             AvmLog("killing dead stores after %d LA iterations.\n",iter);
         )
     }
@@ -7039,7 +7039,7 @@ namespace avmplus
     {
 #ifdef NJ_VERBOSE
       LInsPrinter *printer = frag->lirbuf->printer;
-      bool verbose = printer && pool->isVerbose(LC_AfterDCE);
+      bool verbose = printer && pool->isVerbose(LC_AfterDCE, info);
       if (verbose) {
           InsBuf b;
           AvmLog("- %s\n", printer->formatIns(&b, ins));
@@ -7054,7 +7054,7 @@ namespace avmplus
     {
 #ifdef NJ_VERBOSE
         LInsPrinter *printer = frag->lirbuf->printer;
-        bool verbose = printer && pool->isVerbose(LC_AfterDCE);
+        bool verbose = printer && pool->isVerbose(LC_AfterDCE, info);
         InsBuf b;
 #endif
         LIns *catcher = this->catch_label.labelIns;
@@ -7269,23 +7269,23 @@ namespace avmplus
 
         CodeMgr *mgr = pool->codeMgr;
         #ifdef NJ_VERBOSE
-        if (pool->isVerbose(LC_ReadLIR)) {
+        if (pool->isVerbose(LC_ReadLIR, info)) {
             StringBuffer sb(core);
             sb << info;
             core->console << "Final LIR " << info;
             listing(sb.c_str(), mgr->log, frag);
         }
-        if (pool->isVerbose(LC_Liveness)) {
+        if (pool->isVerbose(LC_Liveness, info)) {
             Allocator live_alloc;
             LirReader in(frag->lastIns);
             nanojit::live(&in, live_alloc, frag, &mgr->log);
         }
-        if (pool->isVerbose(LC_AfterDCE | LC_Native)) {
+        if (pool->isVerbose(LC_AfterDCE | LC_Native, info)) {
             StringBuffer sb(core);
             sb << info;
             mgr->log.printf("jit-assembler %s\n", sb.c_str());
         }
-        if (pool->isVerbose(VB_lircfg)) {
+        if (pool->isVerbose(VB_lircfg, info)) {
             // For the control-flow graph :
             //   The list of instructions that we don't want to show explicit
             //   edges for are added to the 'ignore' set.
@@ -7302,8 +7302,8 @@ namespace avmplus
             }
 
             // type of cfg graph to produce
-            CfgLister::CfgMode mode = pool->isVerbose(VB_lircfg_ins) ? CfgLister::CFG_INS
-                                    : pool->isVerbose(VB_lircfg_bb)  ? CfgLister::CFG_BB
+            CfgLister::CfgMode mode = pool->isVerbose(VB_lircfg_ins, info) ? CfgLister::CFG_INS
+                                    : pool->isVerbose(VB_lircfg_bb, info)  ? CfgLister::CFG_BB
                                     : CfgLister::CFG_EBB;
 
             StringBuffer sb(core);
@@ -7315,15 +7315,25 @@ namespace avmplus
         }
         #endif
 
-        Assembler *assm = new (*lir_alloc) Assembler(mgr->codeAlloc, mgr->allocator, *lir_alloc, &mgr->log, core->config.njconfig);
+        // Use the 'active' log if we are in verbose output mode otherwise sink the output
+        LogControl* log = &(mgr->log);
+        verbose_only(
+            SinkLogControl sink;
+            log = pool->isVerbose(VB_jit,info) ? log : &sink;
+        )
+
+        Assembler *assm = new (*lir_alloc) Assembler(mgr->codeAlloc, mgr->allocator, *lir_alloc, log, core->config.njconfig);
         #ifdef VMCFG_VTUNE
         assm->vtuneHandle = vtuneInit(info->getMethodName());
         #endif /* VMCFG_VTUNE */
 
         assm->setNoiseGenerator( &noise );
 
-        verbose_only( StringList asmOutput(*lir_alloc); )
-        verbose_only( if (!pool->isVerbose(VB_raw)) assm->_outputCache = &asmOutput; )
+        verbose_only(
+            StringList asmOutput(*lir_alloc);
+            if (!pool->isVerbose(VB_raw, info))
+                assm->_outputCache = &asmOutput;
+        );
 
         assm->beginAssembly(frag);
         LirReader reader(frag->lastIns);
@@ -7794,7 +7804,7 @@ namespace avmplus
     {
         CodeMgr* codeMgr = method->pool()->codeMgr;
 
-        verbose_only(if (pool->isVerbose(LC_Liveness)) {
+        verbose_only(if (pool->isVerbose(LC_Liveness, method)) {
             Allocator live_alloc;
             LirReader in(frag->lastIns);
             nanojit::live(&in, live_alloc, frag, &codeMgr->log);
@@ -7805,10 +7815,16 @@ namespace avmplus
         cfg.harden_function_alignment = false;
         cfg.harden_nop_insertion = false;
 
-        Assembler *assm = new (*lir_alloc) Assembler(codeMgr->codeAlloc, codeMgr->allocator, *lir_alloc,
-            &codeMgr->log, cfg);
+        // Use the 'active' log if we are in verbose output mode otherwise sink the output
+        LogControl* log = &(codeMgr->log);
+        verbose_only(
+            SinkLogControl sink;
+            log = pool->isVerbose(VB_jit,method) ? log : &sink;
+        )
+
+        Assembler *assm = new (*lir_alloc) Assembler(codeMgr->codeAlloc, codeMgr->allocator, *lir_alloc, log, cfg);
         verbose_only( StringList asmOutput(*lir_alloc); )
-        verbose_only( if (!pool->isVerbose(VB_raw)) assm->_outputCache = &asmOutput; )
+        verbose_only( if (!pool->isVerbose(VB_raw, method)) assm->_outputCache = &asmOutput; )
         LirReader bufreader(frag->lastIns);
         assm->beginAssembly(frag);
         assm->assemble(frag, &bufreader);
@@ -7894,7 +7910,7 @@ namespace avmplus
 #ifdef NJ_VERBOSE
     bool InvokerCompiler::verbose()
     {
-        return method->pool()->isVerbose(VB_jit);
+        return method->pool()->isVerbose(VB_jit, method);
     }
 #endif
 }

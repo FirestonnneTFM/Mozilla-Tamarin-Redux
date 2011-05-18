@@ -75,7 +75,7 @@ namespace avmplus
         #endif
 
         #ifdef AVMPLUS_VERBOSE
-        verbose = pool->isVerbose(VB_verify);
+        verbose = pool->isVerbose(VB_verify, info);
         #endif
 
         pool->initPrecomputedMultinames();
