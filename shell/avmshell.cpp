@@ -863,28 +863,6 @@ namespace avmshell
                 }
 #endif /* VMCFG_OSR */
 #endif /* VMCFG_NANOJIT */
-#ifdef AVMPLUS_JITMAX
-                else if (!VMPI_strcmp(arg, "-jitmax") && i+1 < argc ) {
-                    extern int jitmin;
-                    extern int jitmax;
-
-                    char* val = argv[++i];
-                    char* dash = VMPI_strchr(val,'-');
-                    if (dash) {
-                        if (dash==&val[0])
-                            jitmax = VMPI_atoi(&val[1]); // -n form
-                        else {
-                            int32_t hl = VMPI_strlen(dash);
-                            dash[0] = '\0'; // hammer argv ;)  - go boom?
-                            jitmin = VMPI_atoi(val);
-                            if (hl>1)
-                                jitmax = VMPI_atoi(&dash[1]);
-                        }
-                    } else {
-                        jitmax = VMPI_atoi(val);
-                    }
-                }
-#endif /* AVMPLUS_JITMAX */
                 else if (!VMPI_strcmp(arg, "-memstats")) {
                     MMgc::GCHeap::GetGCHeap()->Config().gcstats = true;
                     MMgc::GCHeap::GetGCHeap()->Config().autoGCStats = true;
@@ -1287,9 +1265,6 @@ namespace avmshell
         avmplus::AvmLog("                        perl regular expression syntax. Note: rules are *not* checked for consistency\n");
         avmplus::AvmLog("                        e.g. -Dverbose=execpolicy,builtins -policy \"jit=%%(avmshell)|(global)%%,interp=Function/prime\",jit=-3,interp=5-9,jit=42\n");
     #endif /* VMCFG_COMPILEPOLICY */
-#endif
-#ifdef AVMPLUS_JITMAX
-        avmplus::AvmLog("          [-jitmax N-M] jit the Nth to Mth methods only; N- and -M are also valid.\n");
 #endif
 #ifdef VMCFG_VERIFYALL
         avmplus::AvmLog("          [-Dverifyall] verify greedily instead of lazily\n");
