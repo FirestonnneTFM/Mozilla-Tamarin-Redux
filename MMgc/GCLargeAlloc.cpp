@@ -229,10 +229,16 @@ namespace MMgc
         LargeBlock **prev = &m_blocks;
         while (*prev) {
             LargeBlock *b = *prev;
-            if ((b->flags[0] & kMark) == 0) {
+            if ((b->flags[0] & kMark) == 0)
+            {
                 GCAssert((b->flags[0] & kQueued) == 0);
                 GC* gc = b->gc;
 
+                // GC::Finalize calls GC::ClearUnmarkedWeakRefs before calling GCAlloc::Finalize,
+                // ergo there should be no unmarked objects with weak refs.
+                
+                GCAssertMsg((b->flags[0] & kHasWeakRef) == 0, "No unmarked object should have a weak ref at this point");
+                
                 // Large blocks may be allocated by finalizers for large blocks, creating contention
                 // for the block list.  Yet the block list must be live, since eg GetUsageInfo may be
                 // called by the finalizers (or their callees).
@@ -243,7 +249,8 @@ namespace MMgc
                 b->next = NULL;
 
                 void *item = b+1;
-                if (b->flags[0] & kFinalizable) {
+                if (b->flags[0] & kFinalizable)
+                {
                     GCFinalizedObject *obj = (GCFinalizedObject *) item;
                     obj = (GCFinalizedObject *) GetUserPointer(obj);
                     obj->~GCFinalizedObject();
@@ -253,9 +260,11 @@ namespace MMgc
                     }
 #endif
                 }
-                if(b->flags[0] & kHasWeakRef) {
-                    gc->ClearWeakRef(GetUserPointer(item));
-                }
+                
+                // GC::GetWeakRef will not allow a weak reference to be created to an object that
+                // is ready for destruction.
+                
+                GCAssertMsg((b->flags[0] & kHasWeakRef) == 0, "No unmarked object should have a weak ref at this point");
 
 #ifdef MMGC_HOOKS
                 if(m_gc->heap->HooksEnabled())

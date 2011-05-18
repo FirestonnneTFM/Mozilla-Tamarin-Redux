@@ -75,7 +75,13 @@ private:
     int n;
 };
 
-%%test unmarked_object
+class D : public GCFinalizedObject
+{
+public:
+    ~D() { GC::GetWeakRef(this); }
+};
+
+%%test unmarked_object_presweep
 
   // Bugzilla 572331 - it's possible for a weak reference to yield up a pointer to an unmarked
   // object in a presweep handler, and for that pointer to be stored into the heap even with
@@ -135,3 +141,43 @@ private:
     VMPI_memset(refs, 0, sizeof(refs));
     VMPI_memset(objs, 0, sizeof(objs));
 }
+
+%%explicit unmarked_object_finalize
+
+  // Bugzilla 647155 - ditto as the previous test, but now it's the object's destructor that tries
+  // to store a pointer to an unmarked object (in this case the object itself) into a weak ref.
+  // This will assert in debug builds, so the test is marked "explicit" for that reason: in a
+  // debug build we want to verify that the assert is hit, in a release build we want to verify that
+  // the test does not crash.
+  
+{
+    GC* gc = core->gc;
+
+    // Stack allocated storage, so automatically these arrays are roots
+
+    D* objs[1000];
+
+    // Create strong references to 1000 objects
+
+    for ( int i=0 ; i < 1000 ; i++ ) {
+        objs[i] = new (gc) D();
+    }
+
+    // Get the collector into a reasonable state.
+
+    gc->Collect();
+    gc->Collect();
+
+    // Remove the even-numbered strong refs.
+
+    for ( int i=0 ; i < 1000 ; i+=2 )
+        objs[i] = NULL;
+
+    // Now trigger the collector again.
+
+    gc->Collect();
+
+%%verify true
+}
+  
+  

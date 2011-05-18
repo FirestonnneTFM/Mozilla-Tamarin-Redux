@@ -2579,6 +2579,12 @@ private:
     int n;
 };
 
+class D : public GCFinalizedObject
+{
+public:
+    ~D() { GC::GetWeakRef(this); }
+};
+
 class ST_mmgc_weakref : public Selftest {
 public:
 ST_mmgc_weakref(AvmCore* core);
@@ -2587,15 +2593,17 @@ private:
 static const char* ST_names[];
 static const bool ST_explicits[];
 void test0();
+void test1();
 };
 ST_mmgc_weakref::ST_mmgc_weakref(AvmCore* core)
     : Selftest(core, "mmgc", "weakref", ST_mmgc_weakref::ST_names,ST_mmgc_weakref::ST_explicits)
 {}
-const char* ST_mmgc_weakref::ST_names[] = {"unmarked_object", NULL };
-const bool ST_mmgc_weakref::ST_explicits[] = {false, false };
+const char* ST_mmgc_weakref::ST_names[] = {"unmarked_object_presweep","unmarked_object_finalize", NULL };
+const bool ST_mmgc_weakref::ST_explicits[] = {false,true, false };
 void ST_mmgc_weakref::run(int n) {
 switch(n) {
 case 0: test0(); return;
+case 1: test1(); return;
 }
 }
 void ST_mmgc_weakref::test0() {
@@ -2651,7 +2659,7 @@ void ST_mmgc_weakref::test0() {
     // crash.
 
     for ( int i=1 ; i < 1000 ; i+= 2 ) {
-// line 131 "ST_mmgc_weakref.st"
+// line 137 "ST_mmgc_weakref.st"
 verifyPass(objs[i]->next->key == i-1, "objs[i]->next->key == i-1", __FILE__, __LINE__);
     }
 
@@ -2660,6 +2668,47 @@ verifyPass(objs[i]->next->key == i-1, "objs[i]->next->key == i-1", __FILE__, __L
     VMPI_memset(objs, 0, sizeof(objs));
 }
 
+}
+void ST_mmgc_weakref::test1() {
+
+  // Bugzilla 647155 - ditto as the previous test, but now it's the object's destructor that tries
+  // to store a pointer to an unmarked object (in this case the object itself) into a weak ref.
+  // This will assert in debug builds, so the test is marked "explicit" for that reason: in a
+  // debug build we want to verify that the assert is hit, in a release build we want to verify that
+  // the test does not crash.
+  
+{
+    GC* gc = core->gc;
+
+    // Stack allocated storage, so automatically these arrays are roots
+
+    D* objs[1000];
+
+    // Create strong references to 1000 objects
+
+    for ( int i=0 ; i < 1000 ; i++ ) {
+        objs[i] = new (gc) D();
+    }
+
+    // Get the collector into a reasonable state.
+
+    gc->Collect();
+    gc->Collect();
+
+    // Remove the even-numbered strong refs.
+
+    for ( int i=0 ; i < 1000 ; i+=2 )
+        objs[i] = NULL;
+
+    // Now trigger the collector again.
+
+    gc->Collect();
+
+// line 180 "ST_mmgc_weakref.st"
+verifyPass(true, "true", __FILE__, __LINE__);
+}
+  
+  
 }
 void create_mmgc_weakref(AvmCore* core) { new ST_mmgc_weakref(core); }
 }

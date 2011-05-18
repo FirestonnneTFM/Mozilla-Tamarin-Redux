@@ -844,6 +844,11 @@ namespace MMgc
 
                 GCAssertMsg(mq != kQueued, "No queued objects should exist when finalizing");
 
+                // GC::Finalize calls GC::ClearUnmarkedWeakRefs before calling GCAlloc::Finalize,
+                // ergo there should be no unmarked objects with weak refs.
+                
+                GCAssertMsg(!(marks & kHasWeakRef), "No unmarked object should have a weak ref at this point");
+                
 #ifdef MMGC_HOOKS
                 if(m_gc->heap->HooksEnabled())
                 {
@@ -855,9 +860,6 @@ namespace MMgc
                     m_gc->heap->FinalizeHook(GetUserPointer(item), m_itemSize - DebugSize());
                 }
 #endif
-
-                if(!(marks & (kFinalizable|kHasWeakRef)))
-                    continue;
 
                 if (marks & kFinalizable)
                 {
@@ -877,9 +879,10 @@ namespace MMgc
 #endif
                 }
 
-                if (marks & kHasWeakRef) {
-                    b->gc->ClearWeakRef(GetUserPointer(item));
-                }
+                // GC::GetWeakRef will not allow a weak reference to be created to an object that
+                // is ready for destruction.
+
+                GCAssertMsg(!(marks & kHasWeakRef), "No unmarked object should have a weak ref at this point");
             }
 
             // 3 outcomes:
