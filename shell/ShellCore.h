@@ -63,6 +63,7 @@ namespace avmshell
         bool nodebugger;
         int  astrace_console;
         uint32_t do_verbose;            // copy to config
+        const char* verboseOnlyArg;     // copy to config (raw unprocessed)
         bool enter_debugger_on_launch;
         bool interrupts;                // copy to config
         bool verifyall;                 // copy to config

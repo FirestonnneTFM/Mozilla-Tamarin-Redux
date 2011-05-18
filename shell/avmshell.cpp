@@ -790,6 +790,9 @@ namespace avmshell
                     }
 #endif /* VMCFG_SELFTEST */
 #ifdef AVMPLUS_VERBOSE
+                    else if (!VMPI_strncmp(arg+2, "verbose-only", 12)) {
+                        settings.verboseOnlyArg = argv[++i];  // capture the string process it later
+                    }
                     else if (!VMPI_strncmp(arg+2, "verbose", 7)) {
                         settings.do_verbose = avmplus::AvmCore::DEFAULT_VERBOSE_ON; // all 'on' by default
                         if (arg[9] == '=') {
@@ -1253,6 +1256,10 @@ namespace avmshell
 
         avmplus::AvmLog("                        Note that ordering matters for options with dependencies.  Dependencies \n");
         avmplus::AvmLog("                        are contained in [ ] For example, 'sweep' requires 'memstats' \n");
+        avmplus::AvmLog("          [-Dverbose-only [{id|name|%%regex%%}]+ ]\n");
+        avmplus::AvmLog("                        enable verbose output only for the methods identified. Valid only for verify,interp and jit\n");
+        avmplus::AvmLog("                        options.  The method identification follows the same syntax as -policy (see below)\n");
+        avmplus::AvmLog("                        e.g. -Dverbose-only \"Function/prime_val.as\\$1:prime,%%global%%\" \n");
 #endif
 #ifdef VMCFG_NANOJIT
         avmplus::AvmLog("          [-Dinterp]    do not generate machine code, interpret instead\n");

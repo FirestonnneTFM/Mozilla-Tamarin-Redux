@@ -141,9 +141,9 @@ REALLY_INLINE DebuggerMethodInfo* PoolObject::getDebuggerMethodInfo(uint32_t i) 
 #endif
 
 #ifdef AVMPLUS_VERBOSE
-REALLY_INLINE bool PoolObject::isVerbose(uint32_t flag)
+REALLY_INLINE bool PoolObject::isVerbose(uint32_t flag, MethodInfo* info)
 {
-    return AvmCore::isBitSet(verbose_vb, flag);
+    return core->isVerbose(flag, info);
 }
 #endif
 

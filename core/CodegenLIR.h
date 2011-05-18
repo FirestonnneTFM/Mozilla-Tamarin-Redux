@@ -100,6 +100,17 @@ namespace avmplus
 #endif
     };
 
+    // logger used to eat output
+    class SinkLogControl : public AvmLogControl
+    {
+    public:
+        SinkLogControl() { lcbits = 0; }
+        virtual ~SinkLogControl() {}
+#ifdef NJ_VERBOSE
+        void printf( const char* /*format*/, ... ) PRINTF_CHECK(2,3) {}  // no-op
+#endif
+    };
+
     /**
      * CodeMgr manages memory for compiled code, including the code itself
      * (in a nanojit::CodeAlloc), and any data with code lifetime
