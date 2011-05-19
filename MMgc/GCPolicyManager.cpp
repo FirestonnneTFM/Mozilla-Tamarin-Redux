@@ -60,13 +60,14 @@ namespace MMgc
 #define GREEDY_TRIGGER (-(INT_MAX/2))               // must be <= 0 but should never go positive as a result of a single alloc action or multiple free actions
 
     GCConfig::GCConfig()
-        : collectionThreshold(0)
+        : collectionThreshold(256) // 4KB blocks, that is, 1MB
         , markstackAllowance(0)
         , exactTracing(true)
         , drc(true)
+        , mode(kIncrementalGC)
     {}
 
-    GCPolicyManager::GCPolicyManager(GC* gc, GCHeap* heap, GCConfig* config/*=NULL*/)
+    GCPolicyManager::GCPolicyManager(GC* gc, GCHeap* heap, GCConfig& config)
         // public
         : timeStartIncrementalMark(0)
         , timeIncrementalMark(0)
@@ -114,10 +115,7 @@ namespace MMgc
         , bytesScannedPointerfreeTotal(0)
         , start_time(0)
         , start_event(NO_EVENT)
-        , collectionThreshold((config != NULL
-                               && config->collectionThreshold > 0)
-                              ? config->collectionThreshold
-                              : 256) // 4KB blocks, that is, 1MB
+        , collectionThreshold(config.collectionThreshold)
         , fullCollectionQueued(false)
         , pendingClearZCTStats(false)
 #ifdef MMGC_POLICY_PROFILING

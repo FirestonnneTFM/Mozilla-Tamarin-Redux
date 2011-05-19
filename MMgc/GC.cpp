@@ -128,17 +128,17 @@ namespace MMgc
 #  pragma warning(disable:4355) // 'this': used in base member initializer list
 #endif
 
-    GC::GC(GCHeap *gcheap, GCMode mode, GCConfig *config/*=NULL*/)
+    GC::GC(GCHeap *gcheap, GCConfig& config)
         :
-        greedy(mode == kGreedyGC),
-        nogc(mode == kDisableGC),
-        incremental(mode == kIncrementalGC),
-        drcEnabled(mode != kDisableGC && (config == NULL || config->drc)),
+        greedy(config.mode == GCConfig::kGreedyGC),
+        nogc(config.mode == GCConfig::kDisableGC),
+        incremental(config.mode == GCConfig::kIncrementalGC),
+        drcEnabled(config.mode != GCConfig::kDisableGC && config.drc),
         findUnmarkedPointers(false),
-        validateDefRef(false),
+        validateDefRef(config.validateDRC),
         keepDRCHistory(false),
         dontAddToZCTDuringCollection(false),
-        incrementalValidation(false),
+        incrementalValidation(config.incrementalValidation),
 #ifdef _DEBUG
         // check for missing write barriers at every Alloc
         incrementalValidationPedantic(false),
@@ -161,11 +161,11 @@ namespace MMgc
         stackEnter(0),
         enterCount(0),
 #ifdef VMCFG_SELECTABLE_EXACT_TRACING
-        runtimeSelectableExactnessFlag(config == NULL || config->exactTracing ? kVirtualGCTrace : 0),
+        runtimeSelectableExactnessFlag(config.exactTracing ? kVirtualGCTrace : 0),
 #endif
 #ifdef MMGC_MARKSTACK_ALLOWANCE
-        m_incrementalWork(config != NULL ? config->markstackAllowance : 0),
-        m_barrierWork(config != NULL ? config->markstackAllowance : 0),
+        m_incrementalWork(config.markstackAllowance),
+        m_barrierWork(config.markstackAllowance),
 #endif
         m_markStackOverflow(false),
         mark_item_recursion_control(20),    // About 3KB as measured with GCC 4.1 on MacOS X (144 bytes / frame), May 2009

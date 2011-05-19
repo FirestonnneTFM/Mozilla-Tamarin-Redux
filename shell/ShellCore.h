@@ -94,12 +94,12 @@ namespace avmshell
         avmplus::ApiVersion apiVersion;
         avmplus::BugCompatibility::Version swfVersion;
 
-        MMgc::GC::GCMode gcMode()
+        MMgc::GCConfig::GCMode gcMode()
         {
-            if (nogc)               return MMgc::GC::kDisableGC;
-            else if (greedy)        return MMgc::GC::kGreedyGC;
-            else if (incremental)   return MMgc::GC::kIncrementalGC;
-            else                    return MMgc::GC::kNonincrementalGC;
+            if (nogc)               return MMgc::GCConfig::kDisableGC;
+            else if (greedy)        return MMgc::GCConfig::kGreedyGC;
+            else if (incremental)   return MMgc::GCConfig::kIncrementalGC;
+            else                    return MMgc::GCConfig::kNonincrementalGC;
         }
     };
 

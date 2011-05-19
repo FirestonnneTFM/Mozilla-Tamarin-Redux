@@ -569,21 +569,8 @@ namespace MMgc
         bool incrementalValidationPedantic;
 #endif
 
-        /**
-         * Garbage collection mode.  The GC is configured at creation in one of
-         * these (it would be pointlessly hairy to allow the mode to be changed
-         * at run-time).
-         */
-        enum GCMode
-        {
-            kDisableGC=1,       // never collect
-            kGreedyGC,          // stop-the-world collection at every allocation
-            kIncrementalGC,     // incremental collection
-            kNonincrementalGC   // nonincremental collection
-        };
-
         /* NULL config means select defaults for configuration parameters. */
-        GC(GCHeap *heap, GCMode mode, GCConfig *config = NULL);
+        GC(GCHeap *heap, GCConfig& config);
 
         virtual ~GC();
 
