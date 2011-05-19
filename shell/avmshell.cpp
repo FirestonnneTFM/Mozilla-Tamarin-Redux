@@ -163,7 +163,9 @@ namespace avmshell
     void Shell::singleWorker(ShellSettings& settings)
     {
         MMgc::GCConfig gcconfig;
-        gcconfig.collectionThreshold = settings.gcthreshold;
+        if (settings.gcthreshold != 0)
+            // (zero means use default value already in gcconfig.)
+            gcconfig.collectionThreshold = settings.gcthreshold;
         gcconfig.exactTracing = settings.exactgc;
         gcconfig.markstackAllowance = settings.markstackAllowance;
         gcconfig.drc = settings.drc;

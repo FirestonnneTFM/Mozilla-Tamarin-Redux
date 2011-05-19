@@ -64,6 +64,8 @@ namespace MMgc
         , markstackAllowance(0)
         , exactTracing(true)
         , drc(true)
+        , validateDRC(false)
+        , incrementalValidation(false)
         , mode(kIncrementalGC)
     {}
 
