@@ -313,5 +313,5 @@ as3/sampling/Callback , .* ,, skip,  Bugzilla 614529
 as3/sampling/FunctionEntry , .* ,, skip,  Bugzilla 614529
 
 as3/Definitions/Function/OneOptArgFunction, mips-lnx-tvm-.*,, skip, Intermittent Failure: Bugzilla 638533
-
+ecma3/Statements/eregress_74474_003, mips-lnx-tvm-.*,, skip, Intermittent Failure: Bugzilla 658253
 
