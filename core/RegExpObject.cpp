@@ -92,7 +92,6 @@ namespace avmplus
         , m_global(toCopy->m_global)
         , m_hasNamedGroups(toCopy->m_hasNamedGroups)
     {
-        GC::SetFinalize(this);
     }
 
     // This variant is used for "new RegExp(s)" and "new RegExp(s,f)" where s is not
@@ -196,8 +195,6 @@ namespace avmplus
     void RegExpObject::completeInitialization(String* options)
     {
         AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpObject));
-
-        GC::SetFinalize(this);
 
         bool found = false;
         RegexCacheEntry& r = core()->m_regexCache.findCachedRegex(found, m_source, options);

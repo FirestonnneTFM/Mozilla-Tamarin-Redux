@@ -418,14 +418,6 @@ namespace MMgc
     }
 
     /*static*/
-    REALLY_INLINE void GC::SetFinalize(const void *userptr)
-    {
-        const void *realptr = GetRealPointer(userptr);
-        GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
-        GetGCBits(realptr) |= kFinalizable;
-    }
-
-    /*static*/
     REALLY_INLINE int GC::IsFinalized(const void *userptr)
     {
         const void *realptr = GetRealPointer(userptr);

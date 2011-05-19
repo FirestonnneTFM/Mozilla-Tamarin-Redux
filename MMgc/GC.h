@@ -880,16 +880,15 @@ namespace MMgc
          * @return the queued bit for the given object: zero if not set, nonzero if set.
          */
         static int GetQueued(const void *userptr);
-        
+
         // Not a hot method
         void ClearQueued(const void *userptr);
 
+    private:
         // not a hot method
         static void ClearFinalized(const void *userptr);
 
-        // not a hot method
-        static void SetFinalize(const void *userptr);
-
+    public:
         // not a hot method
         static int IsFinalized(const void *userptr);
 
