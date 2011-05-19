@@ -147,10 +147,11 @@ private:
     MMgc::FixedMalloc *fm;
 
 %%prologue
-    gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
+    MMgc::GCConfig config;
+    gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), config);
     if (gc==NULL) {
         MMgc::GCHeap::Init();
-        gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
+        gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), config);
     }
 
 %%epilogue
@@ -303,7 +304,8 @@ delete gc;
 
 
 %%test nestedGCs
-    GC *gcb = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
+    GCConfig config;
+    GC *gcb = new GC(GCHeap::GetGCHeap(), config);
     MMGC_GCENTER(gc);
     void *a = gc->Alloc(8);
     {
@@ -322,7 +324,8 @@ delete gc;
 
 %%test collectDormantGC
     {
-        GC *gcb = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
+        GCConfig config;
+        GC *gcb = new GC(GCHeap::GetGCHeap(), config);
         {
             MMGC_GCENTER(gcb);
             gcb->Alloc(8);
@@ -338,7 +341,8 @@ delete gc;
 
 %%test lockObject
     {
-        GC *gc = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
+        GCConfig config;
+        GC *gc = new GC(GCHeap::GetGCHeap(), config);
         MMGC_GCENTER(gc);
 
         %%verify LockerAndUnlocker::createAndLockObjects(gc)
@@ -371,7 +375,8 @@ delete gc;
 
 %%test regression_551169
     {
-        GC *testGC = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
+        GCConfig config;
+        GC *testGC = new GC(GCHeap::GetGCHeap(), config);
         {
             MMGC_GCENTER(testGC);
             testGC->StartIncrementalMark();
@@ -409,7 +414,8 @@ delete gc;
 
 %%test blacklisting
 #ifdef MMGC_HEAP_GRAPH
-    GC *gc = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
+    GCConfig config;
+    GC *gc = new GC(GCHeap::GetGCHeap(), config);
     MMGC_GCENTER(gc);
     MyGCObject *mygcobject;
     mygcobject = (MyGCObject *)new (gc) MyGCObject();

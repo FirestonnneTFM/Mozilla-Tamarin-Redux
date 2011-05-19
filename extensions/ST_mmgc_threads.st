@@ -127,10 +127,11 @@ private:
     }
 
 %%prologue
-    gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
+    MMgc::GCConfig config;
+    gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), config);
     if (gc==NULL) {
         MMgc::GCHeap::Init();
-        gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
+        gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), config);
     }
     pthread_mutex_init(&pmutex, NULL);
     pthread_cond_init(&pcond, NULL);

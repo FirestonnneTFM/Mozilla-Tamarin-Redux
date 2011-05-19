@@ -120,7 +120,8 @@ private:
     MMgc::GC *gc;
 
 %%prologue
-    gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
+    MMgc::GCConfig config;
+    gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap(), config);
 
 %%epilogue
     delete gc;

@@ -70,7 +70,30 @@ namespace MMgc
 
         /* Defaults to true. Set to false to disable DRC. */
         bool drc;
+        
+        /* Defaults to false. Turn on to test that zero count objects being
+         * deleted aren't reachable. */
+        bool validateDRC;
+        
+        /* Defaults to false.  Validate incremental marking. */
+        bool incrementalValidation;
 
+        /**
+         * Garbage collection mode.  The GC is configured at creation in one of
+         * these (it would be pointlessly hairy to allow the mode to be changed
+         * at run-time).
+         */
+        enum GCMode
+        {
+            kDisableGC=1,       // never collect
+            kGreedyGC,          // stop-the-world collection at every allocation
+            kIncrementalGC,     // incremental collection
+            kNonincrementalGC   // nonincremental collection
+        };        
+        
+        /* Default to kIncrementalGC. */
+        GCMode mode;
+        
         /* selects defaults for all configuration parameters. */
         GCConfig();
     private: // unimplemented ctors/methods.
@@ -102,8 +125,7 @@ namespace MMgc
      */
     class GCPolicyManager {
     public:
-        /* NULL config means select defaults for configuration parameters. */
-        GCPolicyManager(GC* gc, GCHeap* heap, GCConfig* config=NULL);
+        GCPolicyManager(GC* gc, GCHeap* heap, GCConfig& config);
 
         /**
          * Clean up and print any final statistics.  Should be called from the very

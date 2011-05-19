@@ -73,7 +73,8 @@ private:
     MMgc::GC *gc;
 
 %%prologue
-    gc = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
+    GCConfig config;
+    gc = new GC(GCHeap::GetGCHeap(), config);
 
 %%epilogue
     delete gc;

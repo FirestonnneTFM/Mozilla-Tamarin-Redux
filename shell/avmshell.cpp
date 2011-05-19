@@ -167,7 +167,8 @@ namespace avmshell
         gcconfig.exactTracing = settings.exactgc;
         gcconfig.markstackAllowance = settings.markstackAllowance;
         gcconfig.drc = settings.drc;
-        MMgc::GC *gc = mmfx_new( MMgc::GC(MMgc::GCHeap::GetGCHeap(), settings.gcMode(), &gcconfig) );
+        gcconfig.mode = settings.gcMode();
+        MMgc::GC *gc = mmfx_new( MMgc::GC(MMgc::GCHeap::GetGCHeap(), gcconfig) );
         {
             MMGC_GCENTER(gc);
             ShellCore* shell = new ShellCoreImpl(gc, settings, true);
@@ -407,6 +408,7 @@ namespace avmshell
         gcconfig.collectionThreshold = settings.gcthreshold;
         gcconfig.exactTracing = settings.exactgc;
         gcconfig.markstackAllowance = settings.markstackAllowance;
+        gcconfig.mode = settings.gcMode();
 
         // Going multi-threaded.
 
@@ -420,7 +422,7 @@ namespace avmshell
         // Create collectors and cores.
         // Extra credit: perform setup in parallel on the threads.
         for ( int i=0 ; i < numcores ; i++ ) {
-            MMgc::GC* gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap(), settings.gcMode(), &gcconfig);
+            MMgc::GC* gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap(),  gcconfig);
             MMGC_GCENTER(gc);
             cores[i] = new CoreNode(new ShellCoreImpl(gc, settings, false), i);
             if (!cores[i]->core->setup(settings))
