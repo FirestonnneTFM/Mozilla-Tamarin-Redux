@@ -649,7 +649,14 @@ namespace MMgc
     {
         TraceAtomValue(loc->value() HEAP_GRAPH_ARG(loc->location()));
     }
-    
+   
+    template<class T>
+    REALLY_INLINE void GC::TraceLocations(MMgc::GCMemberBase<T>* p, size_t numobjects)
+    {
+        for ( size_t i=0 ; i < numobjects ; i++ )
+            TracePointer((void*)(p+i)->value() HEAP_GRAPH_ARG((uintptr_t*)(p+i)->location()));
+    }
+ 
     template<class T>
     REALLY_INLINE void GC::TraceLocations(T** p, size_t numobjects)
     {

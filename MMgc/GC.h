@@ -1314,6 +1314,10 @@ namespace MMgc
         // queue (if it contains pointers) or marked (if it does not contain pointers).
         void TraceConservativeLocation(uintptr_t* loc);
 
+        // Trace an array of GCMembers.
+        template <class T>
+        void TraceLocations(MMgc::GCMemberBase<T>* p, size_t numobjects);
+
         // Trace an array of pointers as if by TraceLocation(void**).  Does not bounds check.
         template <class T>
         void TraceLocations(T** p, size_t numobjects);
