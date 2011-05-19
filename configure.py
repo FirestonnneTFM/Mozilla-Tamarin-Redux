@@ -149,7 +149,7 @@ LDFLAGS = config._acvars['LDFLAGS']
 MMGC_CPPFLAGS = "-DAVMSHELL_BUILD "
 AVMSHELL_CPPFLAGS = ""
 AVMSHELL_LDFLAGS = ""
-MMGC_DEFINES = {'SOFT_ASSERTS': None}
+MMGC_DEFINES = {}
 NSPR_INCLUDES = ""
 NSPR_LDOPTS = ""
 DISABLE_RTMPE = None
@@ -256,13 +256,14 @@ if config.getCompiler() == 'GCC':
         # These flags are shared with some of the other builds such as ARM, but better to keep them separate here for flexibility
         COMMON_CXX_FLAGS = "-Wall -Wdisabled-optimization -Wextra -Wformat=2 -Winit-self -Winvalid-pch -Wno-invalid-offsetof " \
                            "-Wno-switch -Wpointer-arith -Wwrite-strings -Woverloaded-virtual -Wsign-promo " \
-                           "-fmessage-length=0 -fno-exceptions -fno-rtti -fsigned-char "
+                           "-fmessage-length=0 -fno-exceptions -fno-rtti -fsigned-char -fno-inline-functions-called-once -ffunction-sections -fdata-sections "
 
         # Additional flags used by android
         APP_CXX_FLAGS = "%s -Wctor-dtor-privacy -Wlogical-op -Wstrict-overflow=1 " \
                     "-Wmissing-include-dirs -Wno-missing-field-initializers -Wno-type-limits -Wno-unused-parameter " \
                     "-Wnon-virtual-dtor -Wstrict-null-sentinel -Wno-missing-braces -Wno-multichar -Wno-psabi -Wno-reorder " \
-                    "-fno-strict-aliasing -fpic -funwind-tables -fstack-protector -finline-limit=200 -MD -fwrapv " % COMMON_CXX_FLAGS
+                    "-fno-strict-aliasing -fpic -funwind-tables -fstack-protector -finline-limit=200 -ftree-vectorize " \
+                    "-feliminate-unused-debug-symbols -feliminate-unused-debug-types -MD -fwrapv " % COMMON_CXX_FLAGS
         APP_CXXFLAGS += _setGCCVersionedFlags(APP_CXX_FLAGS, GCC_MAJOR_VERSION, GCC_MINOR_VERSION, cpu)
 
         # LFLAGS_HEADLESS gets picked up in configuration.py by MKPROGRAM
@@ -280,11 +281,11 @@ if config.getCompiler() == 'GCC':
         # SEARCH_DIRS gets picked up in configuration.py by MKPROGRAM
         SEARCH_DIRS = "-L$(topsrcdir)/objdir-release/"
 
-        BASE_M_FLAGS = "-mlong-calls -mthumb-interwork -mthumb"
+        BASE_M_FLAGS = "-mlong-calls -mthumb-interwork "
 
         if arm_arch == "armv7-a" or arm_arch == None:
-            BASE_CXX_FLAGS = "%s -march=armv7-a -mtune=cortex-a8 -mfloat-abi=softfp -mfpu=neon -D__ARM_ARCH__=7 " \
-                        "-DARMV6_ASSEMBLY -DTARGET_NEON -DSDK_ON2_OPT -DSDK_ON2_OPT_ARM11 -DFP_ON2_USE_C_FILTERING_FUNCTIONS " % BASE_M_FLAGS
+            BASE_CXX_FLAGS = "%s -march=armv7-a -mtune=cortex-a8 -mfloat-abi=softfp -mfpu=neon -mno-thumb -fno-section-anchors -D__ARM_ARCH__=7 " \
+                        "-DARMV6_ASSEMBLY -DTARGET_NEON " % BASE_M_FLAGS
             APP_CXXFLAGS += BASE_CXX_FLAGS
 
         elif arm_arch == "armv6":
@@ -300,7 +301,7 @@ if config.getCompiler() == 'GCC':
         else:
             raise Exception('Unrecognized architecture: %s' % arm_arch)
 
-        APP_CPPFLAGS += "-DAVMPLUS_UNIX -DUNIX -Dlinux -DUSE_PTHREAD_MUTEX -DNO_SYS_SIGNAL -DHAVE_STDARG -DNO_CONSOLE_FWRITE -DAVMPLUS_ARM %s" % ANDROID_INCLUDES
+        APP_CPPFLAGS += "-DAVMPLUS_UNIX -DUNIX -Dlinux -DUSE_PTHREAD_MUTEX -DHAVE_STDARG -DAVMPLUS_ARM %s" % ANDROID_INCLUDES
 
     else:
         APP_CXXFLAGS += "-Wall -Wcast-align -Wdisabled-optimization -Wextra -Wformat=2 -Winit-self -Winvalid-pch -Wno-invalid-offsetof -Wno-switch "\
@@ -447,12 +448,7 @@ elif the_os == "linux":
     if config.getDebug():
         OS_LIBS.append("dl")
 elif the_os == "android":
-    MMGC_DEFINES.update({'AVMFEATURE_OVERRIDE_GLOBAL_NEW': 0,
-            'RTMFPUTIL_OVERRIDE_OPERATOR_NEW': None})
-
-    BASE_D_FLAGS = "-DANDROID -DNETSCAPE -DDISABLE_DRM -DGENERIC_PLATFORM -DHAVE_SYS_UIO_H -Dlinux -DNEEDS_IN6_H -DUNIX -Dcompress=zlib_compress "
-    if DISABLE_RTMPE:
-        BASE_D_FLAGS += "-DDISABLE_RTMPE "
+    BASE_D_FLAGS = "-DANDROID -DHAVE_SYS_UIO_H -Dlinux -DUNIX -Dcompress=zlib_compress "
 
     APP_CXXFLAGS += BASE_D_FLAGS
 
