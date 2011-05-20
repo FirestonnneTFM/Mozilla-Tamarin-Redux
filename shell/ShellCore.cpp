@@ -53,6 +53,7 @@ namespace avmshell
         , nodebugger(false)
         , astrace_console(0)
         , do_verbose(0)
+        , verboseOnlyArg(NULL)
         , enter_debugger_on_launch(false)
         , interrupts(avmplus::AvmCore::interrupts_default)
         , verifyall(avmplus::AvmCore::verifyall_default)
