@@ -67,16 +67,10 @@ namespace avmplus
 
     private:
 
-        REALLY_INLINE void gcTraceHook_DictionaryObject(MMgc::GC *gc)
-        {
-            // This code was ripped out of ScriptObject::getTableNoInit
-            union {
-                uint8_t* p;
-                HeapHashtable** hht;
-            };
-            p = (uint8_t*)this + vtable->traits->getHashtableOffset();
-            gc->TraceLocation(hht);
-        }
+        // Deliberately declared out-of-line; inline declaration inexplicably
+        // makes certain permutations of XCode 3.2.x for iOS segfault.
+        // Voodoo coding FTW!
+        void gcTraceHook_DictionaryObject(MMgc::GC *gc);
             
         inline HeapHashtable* getHeapHashtable() const
         {
