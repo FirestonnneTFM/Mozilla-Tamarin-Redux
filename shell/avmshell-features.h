@@ -90,7 +90,11 @@
 #endif
 
 #ifndef AVMFEATURE_COMPILEPOLICY
-  #define AVMFEATURE_COMPILEPOLICY     1
+  #if AVMFEATURE_JIT
+    #define AVMFEATURE_COMPILEPOLICY     1
+  #else
+    #define AVMFEATURE_COMPILEPOLICY     0
+  #endif
 #endif
 
 #ifndef AVMFEATURE_AOT
