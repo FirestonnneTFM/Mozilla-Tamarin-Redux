@@ -295,6 +295,7 @@ const int kBufferPadding = 16;
             kSWF11,             // SWF11 (Flash Player 10.2 Spicy)
             kSWF12,             // SWF12 (Flash Player TBD Wasabi)
             kSWF13,             // SWF13 (Flash Player TBD Serrano)
+            kSWF14,             // SWF14 (Flash Player TBD Anza)
 
             VersionCount,
 
