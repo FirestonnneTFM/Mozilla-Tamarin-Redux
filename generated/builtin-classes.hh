@@ -47,6 +47,7 @@ namespace avmplus {
 //-----------------------------------------------------------
 class IOErrorObject : public avmplus::ErrorObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -61,11 +62,13 @@ private:
     void operator=(const IOErrorObject&); // unimplemented
 };
 
+#define avmplus_IOErrorObject_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.errors::IOError$
 //-----------------------------------------------------------
 class IOErrorClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -132,11 +135,13 @@ private:
     void operator=(const IOErrorClass&); // unimplemented
 };
 
+#define avmplus_IOErrorClass_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.errors::MemoryError
 //-----------------------------------------------------------
 class MemoryErrorObject : public avmplus::ErrorObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -151,11 +156,13 @@ private:
     void operator=(const MemoryErrorObject&); // unimplemented
 };
 
+#define avmplus_MemoryErrorObject_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.errors::MemoryError$
 //-----------------------------------------------------------
 class MemoryErrorClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -222,11 +229,13 @@ private:
     void operator=(const MemoryErrorClass&); // unimplemented
 };
 
+#define avmplus_MemoryErrorClass_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.errors::IllegalOperationError
 //-----------------------------------------------------------
 class IllegalOperationErrorObject : public avmplus::ErrorObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -241,11 +250,13 @@ private:
     void operator=(const IllegalOperationErrorObject&); // unimplemented
 };
 
+#define avmplus_IllegalOperationErrorObject_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.errors::IllegalOperationError$
 //-----------------------------------------------------------
 class IllegalOperationErrorClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -312,11 +323,13 @@ private:
     void operator=(const IllegalOperationErrorClass&); // unimplemented
 };
 
+#define avmplus_IllegalOperationErrorClass_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.errors::EOFError
 //-----------------------------------------------------------
 class EOFErrorObject : public avmplus::IOErrorObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -331,11 +344,13 @@ private:
     void operator=(const EOFErrorObject&); // unimplemented
 };
 
+#define avmplus_EOFErrorObject_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.errors::EOFError$
 //-----------------------------------------------------------
 class EOFErrorClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -402,11 +417,13 @@ private:
     void operator=(const EOFErrorClass&); // unimplemented
 };
 
+#define avmplus_EOFErrorClass_isExactInterlock 1
 //-----------------------------------------------------------
 // JSON
 //-----------------------------------------------------------
 class JSONObject : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -421,11 +438,13 @@ private:
     void operator=(const JSONObject&); // unimplemented
 };
 
+#define avmplus_JSONObject_isExactInterlock 1
 //-----------------------------------------------------------
 // Walker
 //-----------------------------------------------------------
 class WalkerObject : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -445,11 +464,13 @@ private:
     void operator=(const WalkerObject&); // unimplemented
 };
 
+#define avmplus_WalkerObject_isExactInterlock 1
 //-----------------------------------------------------------
 // Walker$
 //-----------------------------------------------------------
 class WalkerClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -503,11 +524,13 @@ private:
     void operator=(const WalkerClass&); // unimplemented
 };
 
+#define avmplus_WalkerClass_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.utils::CompressionAlgorithm
 //-----------------------------------------------------------
 class CompressionAlgorithmObject : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -522,11 +545,13 @@ private:
     void operator=(const CompressionAlgorithmObject&); // unimplemented
 };
 
+#define avmplus_CompressionAlgorithmObject_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.utils::CompressionAlgorithm$
 //-----------------------------------------------------------
 class CompressionAlgorithmClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -588,6 +613,7 @@ private:
     void operator=(const CompressionAlgorithmClass&); // unimplemented
 };
 
+#define avmplus_CompressionAlgorithmClass_isExactInterlock 1
 }
 
 #endif // _H_nativegen_classes_builtin

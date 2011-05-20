@@ -9220,7 +9220,49 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ArgumentErrorObject::construct(int a
     return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::IOErrorObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IOErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+bool avmplus::IOErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_IOErrorClass
+    m_slots_IOErrorClass.gcTracePrivateProperties(gc);
+#endif
+    avmplus::ClassClosure::gcTrace(gc, 0);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
+}
+#ifdef DEBUG
+MMgc::GCTracerCheckResult avmplus::IOErrorClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if ((result = avmplus::ClassClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound) return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IOErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
+bool avmplus::IOErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_IOErrorObject
+    m_slots_IOErrorObject.gcTracePrivateProperties(gc);
+#endif
+    avmplus::ErrorObject::gcTrace(gc, 0);
+    (void)(avmplus_ErrorObject_isExactInterlock != 0);
+    return false;
+}
+#ifdef DEBUG
+MMgc::GCTracerCheckResult avmplus::IOErrorObject::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if ((result = avmplus::ErrorObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound) return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::MemoryErrorClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::MemoryErrorClass::createInstanceProc;
@@ -9233,7 +9275,49 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IOErrorObject::construct(int argc, a
     return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::MemoryErrorObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::MemoryErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+bool avmplus::MemoryErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_MemoryErrorClass
+    m_slots_MemoryErrorClass.gcTracePrivateProperties(gc);
+#endif
+    avmplus::ClassClosure::gcTrace(gc, 0);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
+}
+#ifdef DEBUG
+MMgc::GCTracerCheckResult avmplus::MemoryErrorClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if ((result = avmplus::ClassClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound) return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::MemoryErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
+bool avmplus::MemoryErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_MemoryErrorObject
+    m_slots_MemoryErrorObject.gcTracePrivateProperties(gc);
+#endif
+    avmplus::ErrorObject::gcTrace(gc, 0);
+    (void)(avmplus_ErrorObject_isExactInterlock != 0);
+    return false;
+}
+#ifdef DEBUG
+MMgc::GCTracerCheckResult avmplus::MemoryErrorObject::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if ((result = avmplus::ErrorObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound) return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::IllegalOperationErrorClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::IllegalOperationErrorClass::createInstanceProc;
@@ -9246,7 +9330,49 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::MemoryErrorObject::construct(int arg
     return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::IllegalOperationErrorObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IllegalOperationErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+bool avmplus::IllegalOperationErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_IllegalOperationErrorClass
+    m_slots_IllegalOperationErrorClass.gcTracePrivateProperties(gc);
+#endif
+    avmplus::ClassClosure::gcTrace(gc, 0);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
+}
+#ifdef DEBUG
+MMgc::GCTracerCheckResult avmplus::IllegalOperationErrorClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if ((result = avmplus::ClassClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound) return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IllegalOperationErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
+bool avmplus::IllegalOperationErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_IllegalOperationErrorObject
+    m_slots_IllegalOperationErrorObject.gcTracePrivateProperties(gc);
+#endif
+    avmplus::ErrorObject::gcTrace(gc, 0);
+    (void)(avmplus_ErrorObject_isExactInterlock != 0);
+    return false;
+}
+#ifdef DEBUG
+MMgc::GCTracerCheckResult avmplus::IllegalOperationErrorObject::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if ((result = avmplus::ErrorObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound) return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::EOFErrorClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::EOFErrorClass::createInstanceProc;
@@ -9259,7 +9385,49 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IllegalOperationErrorObject::constru
     return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::EOFErrorObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::EOFErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+bool avmplus::EOFErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_EOFErrorClass
+    m_slots_EOFErrorClass.gcTracePrivateProperties(gc);
+#endif
+    avmplus::ClassClosure::gcTrace(gc, 0);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
+}
+#ifdef DEBUG
+MMgc::GCTracerCheckResult avmplus::EOFErrorClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if ((result = avmplus::ClassClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound) return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::EOFErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::IOErrorObject::construct(argc, argv); } )
+bool avmplus::EOFErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_EOFErrorObject
+    m_slots_EOFErrorObject.gcTracePrivateProperties(gc);
+#endif
+    avmplus::IOErrorObject::gcTrace(gc, 0);
+    (void)(avmplus_IOErrorObject_isExactInterlock != 0);
+    return false;
+}
+#ifdef DEBUG
+MMgc::GCTracerCheckResult avmplus::EOFErrorObject::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if ((result = avmplus::IOErrorObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound) return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::DateClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
@@ -9285,6 +9453,27 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::RegExpObject::construct(int argc, av
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::JSONClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::JSONObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
+bool avmplus::JSONObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_JSONObject
+    m_slots_JSONObject.gcTracePrivateProperties(gc);
+#endif
+    avmplus::ScriptObject::gcTrace(gc, 0);
+    (void)(avmplus_ScriptObject_isExactInterlock != 0);
+    return false;
+}
+#ifdef DEBUG
+MMgc::GCTracerCheckResult avmplus::JSONObject::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if ((result = avmplus::ScriptObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound) return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::WalkerClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::WalkerClass::createInstanceProc;
@@ -9297,7 +9486,52 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::JSONObject::construct(int argc, avmp
     return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::WalkerObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::WalkerClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+bool avmplus::WalkerClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_WalkerClass
+    m_slots_WalkerClass.gcTracePrivateProperties(gc);
+#endif
+    avmplus::ClassClosure::gcTrace(gc, 0);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
+}
+#ifdef DEBUG
+MMgc::GCTracerCheckResult avmplus::WalkerClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if ((result = avmplus::ClassClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound) return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::WalkerObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
+bool avmplus::WalkerObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_WalkerObject
+    m_slots_WalkerObject.gcTracePrivateProperties(gc);
+#endif
+    avmplus::ScriptObject::gcTrace(gc, 0);
+    (void)(avmplus_ScriptObject_isExactInterlock != 0);
+    return false;
+}
+#ifdef DEBUG
+const uint32_t avmplus::WalkerObject::gcTracePointerOffsets[] = {
+    offsetof(avmplus::WalkerObject, m_slots_WalkerObject.m_reviver),
+    0};
+MMgc::GCTracerCheckResult avmplus::WalkerObject::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if ((result = avmplus::ScriptObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound) return result;
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,1);
+}
+#endif // DEBUG
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::XMLClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
@@ -9347,7 +9581,53 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ProxyObject::construct(int argc, avm
     return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) avmplus::CompressionAlgorithmObject(cls->ivtable(), cls->prototypePtr());
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::CompressionAlgorithmClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+bool avmplus::CompressionAlgorithmClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_CompressionAlgorithmClass
+    m_slots_CompressionAlgorithmClass.gcTracePrivateProperties(gc);
+#endif
+    avmplus::ClassClosure::gcTrace(gc, 0);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
+}
+#ifdef DEBUG
+const uint32_t avmplus::CompressionAlgorithmClass::gcTracePointerOffsets[] = {
+    offsetof(avmplus::CompressionAlgorithmClass, m_slots_CompressionAlgorithmClass.m_ZLIB),
+    offsetof(avmplus::CompressionAlgorithmClass, m_slots_CompressionAlgorithmClass.m_DEFLATE),
+    0};
+MMgc::GCTracerCheckResult avmplus::CompressionAlgorithmClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if ((result = avmplus::ClassClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound) return result;
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,2);
+}
+#endif // DEBUG
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::CompressionAlgorithmObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
+bool avmplus::CompressionAlgorithmObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_CompressionAlgorithmObject
+    m_slots_CompressionAlgorithmObject.gcTracePrivateProperties(gc);
+#endif
+    avmplus::ScriptObject::gcTrace(gc, 0);
+    (void)(avmplus_ScriptObject_isExactInterlock != 0);
+    return false;
+}
+#ifdef DEBUG
+MMgc::GCTracerCheckResult avmplus::CompressionAlgorithmObject::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if ((result = avmplus::ScriptObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound) return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::ByteArrayClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::ByteArrayClass::createInstanceProc;
