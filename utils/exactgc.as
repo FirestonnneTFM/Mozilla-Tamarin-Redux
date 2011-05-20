@@ -1509,6 +1509,14 @@ function constructAndPrintTracers()
             // Safety net stuff
             emitSafetyNet(c,output);
 
+            // IMPORTANT NOTE: The code for emitting gcTrace() bodies is essentially
+            // replicated in exactgc.as (for handwritten C++ classes) and in nativegen.py 
+            // (for synthetically-generated C++ classes representing pure AS3 builtins).
+            // This is a highly undesirable situation which is intended to be temporary;
+            // we should really unify this code into a single place. At the time of
+            // this writing, however (May 2011) it's an expediency we are willing to live with.
+            // Until these are unified, please keep in mind that any changes to one may
+            // necessitate similar changes to the other.
             if (c.probablyLarge) {
                 output.
                     PR("bool " + c.fullName() + "::gcTrace(MMgc::GC* gc, size_t _xact_cursor)").

@@ -47,6 +47,7 @@ namespace avmplus {
 //-----------------------------------------------------------
 class CTestObject : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -61,11 +62,13 @@ private:
     void operator=(const CTestObject&); // unimplemented
 };
 
+#define avmplus_CTestObject_isExactInterlock 1
 //-----------------------------------------------------------
 // avmplus::CTest$
 //-----------------------------------------------------------
 class CTestClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -119,11 +122,13 @@ private:
     void operator=(const CTestClass&); // unimplemented
 };
 
+#define avmplus_CTestClass_isExactInterlock 1
 //-----------------------------------------------------------
 // avmplus::System
 //-----------------------------------------------------------
 class SystemObject : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -138,11 +143,13 @@ private:
     void operator=(const SystemObject&); // unimplemented
 };
 
+#define avmplus_SystemObject_isExactInterlock 1
 //-----------------------------------------------------------
 // avmplus::File
 //-----------------------------------------------------------
 class FileObject : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -157,11 +164,13 @@ private:
     void operator=(const FileObject&); // unimplemented
 };
 
+#define avmplus_FileObject_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::NativeBaseAS3
 //-----------------------------------------------------------
 class NativeBaseAS3Object : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -176,11 +185,13 @@ private:
     void operator=(const NativeBaseAS3Object&); // unimplemented
 };
 
+#define avmplus_NativeBaseAS3Object_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::NativeBaseAS3$
 //-----------------------------------------------------------
 class NativeBaseAS3Class : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -234,11 +245,13 @@ private:
     void operator=(const NativeBaseAS3Class&); // unimplemented
 };
 
+#define avmplus_NativeBaseAS3Class_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::ShellCoreFriend1
 //-----------------------------------------------------------
 class ShellCoreFriend1Object : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -254,11 +267,13 @@ private:
     void operator=(const ShellCoreFriend1Object&); // unimplemented
 };
 
+#define avmplus_ShellCoreFriend1Object_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::ShellCoreFriend1$
 //-----------------------------------------------------------
 class ShellCoreFriend1Class : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -318,11 +333,13 @@ private:
     void operator=(const ShellCoreFriend1Class&); // unimplemented
 };
 
+#define avmplus_ShellCoreFriend1Class_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::ShellCoreFriend2
 //-----------------------------------------------------------
 class ShellCoreFriend2Object : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -339,11 +356,13 @@ private:
     void operator=(const ShellCoreFriend2Object&); // unimplemented
 };
 
+#define avmplus_ShellCoreFriend2Object_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::ShellCoreFriend2$
 //-----------------------------------------------------------
 class ShellCoreFriend2Class : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -404,11 +423,13 @@ private:
     void operator=(const ShellCoreFriend2Class&); // unimplemented
 };
 
+#define avmplus_ShellCoreFriend2Class_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.system::Capabilities
 //-----------------------------------------------------------
 class CapabilitiesObject : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -423,11 +444,13 @@ private:
     void operator=(const CapabilitiesObject&); // unimplemented
 };
 
+#define avmplus_CapabilitiesObject_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.system::Capabilities$
 //-----------------------------------------------------------
 class CapabilitiesClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -481,11 +504,13 @@ private:
     void operator=(const CapabilitiesClass&); // unimplemented
 };
 
+#define avmplus_CapabilitiesClass_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class
 //-----------------------------------------------------------
 class public_classObject : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -562,11 +587,13 @@ private:
     void operator=(const public_classObject&); // unimplemented
 };
 
+#define avmplus_public_classObject_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class$
 //-----------------------------------------------------------
 class public_classClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -620,11 +647,13 @@ private:
     void operator=(const public_classClass&); // unimplemented
 };
 
+#define avmplus_public_classClass_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_AIR_1_0
 //-----------------------------------------------------------
 class public_class_AIR_1_0Object : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -639,11 +668,13 @@ private:
     void operator=(const public_class_AIR_1_0Object&); // unimplemented
 };
 
+#define avmplus_public_class_AIR_1_0Object_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_AIR_1_0$
 //-----------------------------------------------------------
 class public_class_AIR_1_0Class : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -697,11 +728,13 @@ private:
     void operator=(const public_class_AIR_1_0Class&); // unimplemented
 };
 
+#define avmplus_public_class_AIR_1_0Class_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_FP_10_0
 //-----------------------------------------------------------
 class public_class_FP_10_0Object : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -716,11 +749,13 @@ private:
     void operator=(const public_class_FP_10_0Object&); // unimplemented
 };
 
+#define avmplus_public_class_FP_10_0Object_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_FP_10_0$
 //-----------------------------------------------------------
 class public_class_FP_10_0Class : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -774,11 +809,13 @@ private:
     void operator=(const public_class_FP_10_0Class&); // unimplemented
 };
 
+#define avmplus_public_class_FP_10_0Class_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_AIR_1_5
 //-----------------------------------------------------------
 class public_class_AIR_1_5Object : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -793,11 +830,13 @@ private:
     void operator=(const public_class_AIR_1_5Object&); // unimplemented
 };
 
+#define avmplus_public_class_AIR_1_5Object_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_AIR_1_5$
 //-----------------------------------------------------------
 class public_class_AIR_1_5Class : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -851,11 +890,13 @@ private:
     void operator=(const public_class_AIR_1_5Class&); // unimplemented
 };
 
+#define avmplus_public_class_AIR_1_5Class_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_AIR_1_5_1
 //-----------------------------------------------------------
 class public_class_AIR_1_5_1Object : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -870,11 +911,13 @@ private:
     void operator=(const public_class_AIR_1_5_1Object&); // unimplemented
 };
 
+#define avmplus_public_class_AIR_1_5_1Object_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_AIR_1_5_1$
 //-----------------------------------------------------------
 class public_class_AIR_1_5_1Class : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -928,11 +971,13 @@ private:
     void operator=(const public_class_AIR_1_5_1Class&); // unimplemented
 };
 
+#define avmplus_public_class_AIR_1_5_1Class_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_FP_10_0_32
 //-----------------------------------------------------------
 class public_class_FP_10_0_32Object : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -947,11 +992,13 @@ private:
     void operator=(const public_class_FP_10_0_32Object&); // unimplemented
 };
 
+#define avmplus_public_class_FP_10_0_32Object_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_FP_10_0_32$
 //-----------------------------------------------------------
 class public_class_FP_10_0_32Class : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -1005,11 +1052,13 @@ private:
     void operator=(const public_class_FP_10_0_32Class&); // unimplemented
 };
 
+#define avmplus_public_class_FP_10_0_32Class_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_AIR_1_5_2
 //-----------------------------------------------------------
 class public_class_AIR_1_5_2Object : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -1024,11 +1073,13 @@ private:
     void operator=(const public_class_AIR_1_5_2Object&); // unimplemented
 };
 
+#define avmplus_public_class_AIR_1_5_2Object_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_AIR_1_5_2$
 //-----------------------------------------------------------
 class public_class_AIR_1_5_2Class : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -1082,11 +1133,13 @@ private:
     void operator=(const public_class_AIR_1_5_2Class&); // unimplemented
 };
 
+#define avmplus_public_class_AIR_1_5_2Class_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_AIR_1_0_FP_10_0
 //-----------------------------------------------------------
 class public_class_AIR_1_0_FP_10_0Object : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -1101,11 +1154,13 @@ private:
     void operator=(const public_class_AIR_1_0_FP_10_0Object&); // unimplemented
 };
 
+#define avmplus_public_class_AIR_1_0_FP_10_0Object_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_AIR_1_0_FP_10_0$
 //-----------------------------------------------------------
 class public_class_AIR_1_0_FP_10_0Class : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -1159,11 +1214,13 @@ private:
     void operator=(const public_class_AIR_1_0_FP_10_0Class&); // unimplemented
 };
 
+#define avmplus_public_class_AIR_1_0_FP_10_0Class_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2
 //-----------------------------------------------------------
 class public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -1178,11 +1235,13 @@ private:
     void operator=(const public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object&); // unimplemented
 };
 
+#define avmplus_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2$
 //-----------------------------------------------------------
 class public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -1236,11 +1295,13 @@ private:
     void operator=(const public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class&); // unimplemented
 };
 
+#define avmplus_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_FP_10_0_32_AIR_1_0_FP_10_0
 //-----------------------------------------------------------
 class public_class_FP_10_0_32_AIR_1_0_FP_10_0Object : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -1255,11 +1316,13 @@ private:
     void operator=(const public_class_FP_10_0_32_AIR_1_0_FP_10_0Object&); // unimplemented
 };
 
+#define avmplus_public_class_FP_10_0_32_AIR_1_0_FP_10_0Object_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::public_class_FP_10_0_32_AIR_1_0_FP_10_0$
 //-----------------------------------------------------------
 class public_class_FP_10_0_32_AIR_1_0_FP_10_0Class : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -1313,11 +1376,13 @@ private:
     void operator=(const public_class_FP_10_0_32_AIR_1_0_FP_10_0Class&); // unimplemented
 };
 
+#define avmplus_public_class_FP_10_0_32_AIR_1_0_FP_10_0Class_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::SubclassOfAbstractBase
 //-----------------------------------------------------------
 class SubclassOfAbstractBaseObject : public avmshell::AbstractBaseObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -1332,11 +1397,13 @@ private:
     void operator=(const SubclassOfAbstractBaseObject&); // unimplemented
 };
 
+#define avmplus_SubclassOfAbstractBaseObject_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::SubclassOfAbstractBase$
 //-----------------------------------------------------------
 class SubclassOfAbstractBaseClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -1390,11 +1457,13 @@ private:
     void operator=(const SubclassOfAbstractBaseClass&); // unimplemented
 };
 
+#define avmplus_SubclassOfAbstractBaseClass_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::SubclassOfRestrictedBase
 //-----------------------------------------------------------
 class SubclassOfRestrictedBaseObject : public avmshell::RestrictedBaseObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -1409,11 +1478,13 @@ private:
     void operator=(const SubclassOfRestrictedBaseObject&); // unimplemented
 };
 
+#define avmplus_SubclassOfRestrictedBaseObject_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::SubclassOfRestrictedBase$
 //-----------------------------------------------------------
 class SubclassOfRestrictedBaseClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -1467,11 +1538,13 @@ private:
     void operator=(const SubclassOfRestrictedBaseClass&); // unimplemented
 };
 
+#define avmplus_SubclassOfRestrictedBaseClass_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::SubclassOfAbstractRestrictedBase
 //-----------------------------------------------------------
 class SubclassOfAbstractRestrictedBaseObject : public avmshell::AbstractRestrictedBaseObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -1486,11 +1559,13 @@ private:
     void operator=(const SubclassOfAbstractRestrictedBaseObject&); // unimplemented
 };
 
+#define avmplus_SubclassOfAbstractRestrictedBaseObject_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::SubclassOfAbstractRestrictedBase$
 //-----------------------------------------------------------
 class SubclassOfAbstractRestrictedBaseClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -1544,11 +1619,13 @@ private:
     void operator=(const SubclassOfAbstractRestrictedBaseClass&); // unimplemented
 };
 
+#define avmplus_SubclassOfAbstractRestrictedBaseClass_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::NativeBaseExtender1
 //-----------------------------------------------------------
 class NativeBaseExtender1Object : public avmshell::NativeBaseObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -1568,11 +1645,13 @@ private:
     void operator=(const NativeBaseExtender1Object&); // unimplemented
 };
 
+#define avmplus_NativeBaseExtender1Object_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::NativeBaseExtender1$
 //-----------------------------------------------------------
 class NativeBaseExtender1Class : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -1626,11 +1705,13 @@ private:
     void operator=(const NativeBaseExtender1Class&); // unimplemented
 };
 
+#define avmplus_NativeBaseExtender1Class_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::NativeBaseExtender2
 //-----------------------------------------------------------
 class NativeBaseExtender2Object : public avmshell::NativeBaseObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -1656,11 +1737,13 @@ private:
     void operator=(const NativeBaseExtender2Object&); // unimplemented
 };
 
+#define avmplus_NativeBaseExtender2Object_isExactInterlock 1
 //-----------------------------------------------------------
 // avmshell::NativeBaseExtender2$
 //-----------------------------------------------------------
 class NativeBaseExtender2Class : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -1714,11 +1797,13 @@ private:
     void operator=(const NativeBaseExtender2Class&); // unimplemented
 };
 
+#define avmplus_NativeBaseExtender2Class_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.sampler::StackFrame
 //-----------------------------------------------------------
 class StackFrameObject : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -1747,11 +1832,13 @@ private:
     void operator=(const StackFrameObject&); // unimplemented
 };
 
+#define avmplus_StackFrameObject_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.sampler::StackFrame$
 //-----------------------------------------------------------
 class StackFrameClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -1805,11 +1892,13 @@ private:
     void operator=(const StackFrameClass&); // unimplemented
 };
 
+#define avmplus_StackFrameClass_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.sampler::Sample
 //-----------------------------------------------------------
 class SampleObject : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -1832,11 +1921,13 @@ private:
     void operator=(const SampleObject&); // unimplemented
 };
 
+#define avmplus_SampleObject_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.sampler::Sample$
 //-----------------------------------------------------------
 class SampleClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -1890,11 +1981,13 @@ private:
     void operator=(const SampleClass&); // unimplemented
 };
 
+#define avmplus_SampleClass_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.sampler::ClassFactory
 //-----------------------------------------------------------
 class ClassFactoryObject : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -1909,11 +2002,13 @@ private:
     void operator=(const ClassFactoryObject&); // unimplemented
 };
 
+#define avmplus_ClassFactoryObject_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.sampler::ClassFactory$
 //-----------------------------------------------------------
 class ClassFactoryClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -1981,11 +2076,13 @@ private:
     void operator=(const ClassFactoryClass&); // unimplemented
 };
 
+#define avmplus_ClassFactoryClass_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.sampler::DeleteObjectSample
 //-----------------------------------------------------------
 class DeleteObjectSampleObject : public avmplus::SampleObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -2008,11 +2105,13 @@ private:
     void operator=(const DeleteObjectSampleObject&); // unimplemented
 };
 
+#define avmplus_DeleteObjectSampleObject_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.sampler::DeleteObjectSample$
 //-----------------------------------------------------------
 class DeleteObjectSampleClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -2066,11 +2165,13 @@ private:
     void operator=(const DeleteObjectSampleClass&); // unimplemented
 };
 
+#define avmplus_DeleteObjectSampleClass_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.trace::Trace
 //-----------------------------------------------------------
 class TraceObject : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -2085,11 +2186,13 @@ private:
     void operator=(const TraceObject&); // unimplemented
 };
 
+#define avmplus_TraceObject_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.utils::Endian
 //-----------------------------------------------------------
 class EndianObject : public avmplus::ScriptObject
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
 private:
@@ -2104,11 +2207,13 @@ private:
     void operator=(const EndianObject&); // unimplemented
 };
 
+#define avmplus_EndianObject_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.utils::Endian$
 //-----------------------------------------------------------
 class EndianClass : public avmplus::ClassClosure
 {
+    GC_DECLARE_EXACT_METHODS
 public:
     static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
 public:
@@ -2170,6 +2275,7 @@ private:
     void operator=(const EndianClass&); // unimplemented
 };
 
+#define avmplus_EndianClass_isExactInterlock 1
 }
 
 #endif // _H_nativegen_classes_shell_toplevel

@@ -1965,16 +1965,7 @@ class AbcThunkGen:
                 anonCount = anonCount + 1
 
         if t.is_gc_exact:
-            numTracedSlots = 0
-            for slot in sortedSlots:
-                if (slot is not None):
-                    slotTraits = self.lookupTraits(slot.type)
-                    if slotTraits.ctype == CTYPE_ATOM:
-                        numTracedSlots += 1
-                    elif (slotTraits.ctype == CTYPE_STRING) or (slotTraits.ctype == CTYPE_NAMESPACE) or (slotTraits.ctype == CTYPE_OBJECT):
-                        numTracedSlots += 1
-                else:
-                    numTracedSlots += 1
+            numTracedSlots = self.countTracedSlots(sortedSlots)
             if numTracedSlots > 0:
                 out.indent -= 1
                 out.println('public:');
@@ -2268,6 +2259,10 @@ class AbcThunkGen:
         baseclassname = self.lookupTraits(t.base).fqcppname()
         out.println("class %s : public %s" % (t.cppname(), baseclassname))
         out.println("{")
+        if t.is_gc_exact:
+            out.indent += 1
+            out.println("GC_DECLARE_EXACT_METHODS")
+            out.indent -= 1
         self.emitConstructDeclarations(out, t, sortedSlots, slotsTypeInfo)
         self.emitMethodWrappers(out, t)
         self.emitSlotDeclarations(out, t, sortedSlots, slotsTypeInfo, ";")
@@ -2286,6 +2281,8 @@ class AbcThunkGen:
         out.indent -= 1
         out.println("};")
         out.println('')
+        if t.is_gc_exact:
+            out.println("#define %s_isExactInterlock 1" % to_cname(t.fqcppname()))
 
     def emitSyntheticClasses(self, out):
         for i in range(0, len(self.abc.classes)):
@@ -2295,7 +2292,81 @@ class AbcThunkGen:
                 self.emitOneSyntheticClass(out, t.itraits)
             if t.is_synthetic:
                 self.emitOneSyntheticClass(out, t)
-        
+
+    def countTracedSlots(self, sortedSlots):
+        numTracedSlots = 0
+        for slot in sortedSlots:
+            if (slot is not None):
+                slotTraits = self.lookupTraits(slot.type)
+                if slotTraits.ctype in [CTYPE_ATOM, CTYPE_STRING, CTYPE_NAMESPACE, CTYPE_OBJECT]:
+                    numTracedSlots += 1
+            else:
+                numTracedSlots += 1
+        return numTracedSlots
+    
+    # IMPORTANT NOTE: The code for emitting gcTrace() bodies is essentially
+    # replicated in exactgc.as (for handwritten C++ classes) and in nativegen.py 
+    # (for synthetically-generated C++ classes representing pure AS3 builtins).
+    # This is a highly undesirable situation which is intended to be temporary;
+    # we should really unify this code into a single place. At the time of
+    # this writing, however (May 2011) it's an expediency we are willing to live with.
+    # Until these are unified, please keep in mind that any changes to one may
+    # necessitate similar changes to the other.
+    def emitSyntheticClassGcTrace(self, out, t, sortedSlots,slotsTypeInfo):
+        base = self.lookupTraits(t.base)
+        out.println("bool %s::gcTrace(MMgc::GC* gc, size_t _xact_cursor)" % t.fqcppname())
+        out.println("{")
+        out.indent += 1
+        out.println("(void)gc;")
+        out.println("(void)_xact_cursor;")
+        out.indent -= 1
+        out.println("#ifndef GC_TRIVIAL_TRACER_%s" % t.cppname())
+        out.indent += 1
+        out.println("m_slots_%s.gcTracePrivateProperties(gc);" % t.cppname())
+        out.indent -= 1
+        out.println("#endif")
+        out.indent += 1
+        if base != None:
+            out.println("%s::gcTrace(gc, 0);" % base.fqcppname())
+            out.println("(void)(%s_isExactInterlock != 0);" % to_cname(base.fqcppname()))
+        out.println("return false;")
+        out.indent -= 1
+        out.println("}")
+
+        numTracedSlots = self.countTracedSlots(sortedSlots)
+
+        out.println("#ifdef DEBUG")
+        if numTracedSlots > 0:
+            out.println("const uint32_t %s::gcTracePointerOffsets[] = {" % t.fqcppname())
+            out.indent += 1
+            anonCount = 0
+            for slot in sortedSlots:
+                if (slot is not None):
+                    slotTraits = self.lookupTraits(slot.type)
+                    if slotTraits.ctype in [CTYPE_ATOM, CTYPE_STRING, CTYPE_NAMESPACE, CTYPE_OBJECT]:
+                        out.println('offsetof(%s, m_slots_%s.m_%s),' % (t.fqcppname(), t.cppname(), to_cname(slot.name)))
+                else:
+                    out.println('offsetof(%s, m_slots_%s.__anonymous_slot_%u),' % (t.fqcppname(), t.cppname(), anonCount))
+                    anonCount = anonCount + 1
+            out.println("0};")
+            out.indent -= 1
+
+        out.println("MMgc::GCTracerCheckResult %s::gcTraceOffsetIsTraced(uint32_t off) const" % t.fqcppname())
+        out.println("{")
+        out.indent += 1
+        out.println("MMgc::GCTracerCheckResult result;")
+        out.println("(void)off;")
+        out.println("(void)result;")
+        if base != None:
+            out.println("if ((result = %s::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound) return result;" % base.fqcppname())
+        if numTracedSlots > 0:
+            out.println("return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,%d);" % numTracedSlots)
+        else:
+            out.println("return MMgc::kOffsetNotFound;")
+        out.indent -= 1
+        out.println("}")
+        out.println("#endif // DEBUG")
+
     def emitMethodBodiesForTraits(self, out, t, visitedGlueClasses):
         
         if (t.fqcppname() in visitedGlueClasses):
@@ -2309,6 +2380,8 @@ class AbcThunkGen:
         
         sortedSlots,slotsTypeInfo = self.sortSlots(t)
         self.emitConstructStubs(out, t, sortedSlots, slotsTypeInfo)
+        if t.is_synthetic and t.is_gc_exact:
+            self.emitSyntheticClassGcTrace(out, t, sortedSlots, slotsTypeInfo)
 
     def printStructAsserts(self, out, abc):
         out.println('class SlotOffsetsAndAsserts')
