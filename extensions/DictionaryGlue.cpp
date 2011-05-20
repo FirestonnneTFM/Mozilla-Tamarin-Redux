@@ -64,6 +64,17 @@ namespace avmplus
         GCAssert(vtable->traits->isDictionary());
     }
 
+    void DictionaryObject::gcTraceHook_DictionaryObject(MMgc::GC *gc)
+    {
+        // This code was ripped out of ScriptObject::getTableNoInit
+        union {
+            uint8_t* p;
+            HeapHashtable** hht;
+        };
+        p = (uint8_t*)this + vtable->traits->getHashtableOffset();
+        gc->TraceLocation(hht);
+    }
+        
     void DictionaryObject::init(bool weakKeys)
     {
         GCAssert(vtable->traits->isDictionary());
