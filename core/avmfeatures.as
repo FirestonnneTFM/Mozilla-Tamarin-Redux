@@ -488,6 +488,7 @@ var FEATURES =
     <defines>    VMCFG_WORDCODE  </defines>
     <defines>    VMCFG_WORDCODE_PEEPHOLE  </defines>
     <defines>    VMCFG_LOOKUP_CACHE </defines>
+    <precludes>  AVMFEATURE_COMPILEPOLICY </precludes>
   </feature>
 
   <feature>
