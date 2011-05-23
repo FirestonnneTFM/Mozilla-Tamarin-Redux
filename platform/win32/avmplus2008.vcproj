@@ -2016,6 +2016,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\InvokerCompiler.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\InvokerCompiler.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\JSONClass.cpp"
 				>
 			</File>

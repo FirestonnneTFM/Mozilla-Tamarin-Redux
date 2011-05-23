@@ -78,6 +78,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/FunctionClass.cpp \
   $(curdir)/IntClass.cpp \
   $(curdir)/Interpreter.cpp \
+  $(curdir)/InvokerCompiler.cpp \
   $(curdir)/JSONClass.cpp \
   $(curdir)/LirHelper.cpp \
   $(curdir)/MathClass.cpp \

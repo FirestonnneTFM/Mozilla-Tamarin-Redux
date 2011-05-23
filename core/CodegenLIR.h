@@ -42,6 +42,7 @@
 #define __avmplus_CodegenLIR__
 
 #include "LirHelper.h"
+#include "InvokerCompiler.h"
 
 namespace avmplus
 {
@@ -85,46 +86,6 @@ namespace avmplus
         {}
 #endif
 
-    };
-
-    class BindingCache;
-
-    class AvmLogControl : public LogControl
-    {
-    public:
-        virtual ~AvmLogControl() {}
-#ifdef NJ_VERBOSE
-        void printf( const char* format, ... ) PRINTF_CHECK(2,3);
-
-        AvmCore* core; // access console via core dynamically since core may modify it.
-#endif
-    };
-
-    // logger used to eat output
-    class SinkLogControl : public AvmLogControl
-    {
-    public:
-        SinkLogControl() { lcbits = 0; }
-        virtual ~SinkLogControl() {}
-#ifdef NJ_VERBOSE
-        void printf( const char* /*format*/, ... ) PRINTF_CHECK(2,3) {}  // no-op
-#endif
-    };
-
-    /**
-     * CodeMgr manages memory for compiled code, including the code itself
-     * (in a nanojit::CodeAlloc), and any data with code lifetime
-     * (in a nanojit::Allocator), such as debuging info, or inline caches.
-     */
-    class CodeMgr {
-    public:
-        CodeAlloc   codeAlloc;  // allocator for code memory
-        AvmLogControl  log;        // controller for verbose output
-        Allocator   allocator;  // data with same lifetime of this CodeMgr
-        BindingCache* bindingCaches;    // head of linked list of all BindingCaches allocated by this codeMgr
-                                        // (only for flushing... lifetime is still managed by codeAlloc)
-        CodeMgr();
-        void flushBindingCaches();      // invalidate all binding caches for this codemgr... needed when AbcEnv is unloaded
     };
 
     /**
@@ -594,64 +555,6 @@ namespace avmplus
         void writeOpcodeVerified(const FrameState* state, const uint8_t* pc, AbcOpcode opcode);
         void writeFixExceptionsAndLabels(const FrameState* state, const uint8_t* pc);
         void cleanup();
-    };
-
-    /**
-     * compiles MethodEnv::coerceEnter, specialized for the method being
-     * called, where the expected arg count and argument types are known.  This
-     * allows all the arg coersion to be unrolled and specialized.
-     *
-     * Native methods and JIT methods are compiled in this way.  Interpreted
-     * methods do not gain enough from compilation since the method bodies are
-     * interpreted, and since arguments only need to be coerced, not unboxed.
-     *
-     * Compilation occurs on the second invocation.
-     */
-    class InvokerCompiler: public LirHelper {
-    public:
-        // true if we are able to compile an invoker for this method
-        static bool canCompileInvoker(MethodInfo* info);
-
-        // main compiler driver
-        static AtomMethodProc compile(MethodInfo* info);
-
-    private:
-        // sets up compiler pipeline
-        InvokerCompiler(MethodInfo*);
-
-        // compiler front end; generates LIR
-        void generate_lir();
-
-        // compiler back end; generates native code from LIR
-        void* assemble();
-
-        // generates argc check
-        void emit_argc_check(LIns* argc_param);
-
-        // downcast and unbox (and optionally copy) each arg
-        void downcast_args(LIns* env_param, LIns* argc_param, LIns* args_param);
-
-        // downcast and unbox one arg
-        void downcast_arg(int arg, int offset, LIns* env_param, LIns* args_param);
-
-        // downcast and unbox the value for the given type.
-        LIns* downcast_expr(LIns* val, Traits* t, LIns* env);
-
-        // generate code to call the underlying method directly
-        void call_method(LIns* env_param, LIns* argc_param);
-
-        // is verbose-mode enabled?
-        bool verbose();
-
-        // should unmodified args be copied?  true if we are not coercing in-place
-        bool copyArgs(); // true if un-modified args must be copied anyway
-
-    private:
-        MethodInfo* method;     // MethodInfo for method that we will call
-        MethodSignaturep ms;    // the signature for same
-        LIns* maxargs_br;       // branch that tests for too many args
-        LIns* minargs_br;       // branch that tests for not enough args
-        LIns* args_out;         // separate allocation for outgoing args (optional, NULL if unused)
     };
 }
 
