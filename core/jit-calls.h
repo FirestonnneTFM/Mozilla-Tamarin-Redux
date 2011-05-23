@@ -37,51 +37,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#define SIG0(r)\
-    nanojit::CallInfo::typeSig0(ARGTYPE_##r)
-#define SIG1(r,a1)\
-    nanojit::CallInfo::typeSig1(ARGTYPE_##r, ARGTYPE_##a1)
-#define SIG2(r,a1,a2)\
-    nanojit::CallInfo::typeSig2(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2)
-#define SIG3(r,a1,a2,a3)\
-    nanojit::CallInfo::typeSig3(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3)
-#define SIG4(r,a1,a2,a3,a4)\
-    nanojit::CallInfo::typeSig4(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
-                                ARGTYPE_##a4)
-#define SIG5(r,a1,a2,a3,a4,a5)\
-    nanojit::CallInfo::typeSig5(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
-                                ARGTYPE_##a4, ARGTYPE_##a5)
-#define SIG6(r,a1,a2,a3,a4,a5,a6)\
-    nanojit::CallInfo::typeSig6(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
-                                ARGTYPE_##a4, ARGTYPE_##a5, ARGTYPE_##a6)
-#define SIG7(r,a1,a2,a3,a4,a5,a6,a7)\
-    nanojit::CallInfo::typeSig7(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
-                                ARGTYPE_##a4, ARGTYPE_##a5, ARGTYPE_##a6, ARGTYPE_##a7)
-#define SIG8(r,a1,a2,a3,a4,a5,a6,a7,a8)\
-    nanojit::CallInfo::typeSig8(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
-                        ARGTYPE_##a4, ARGTYPE_##a5, ARGTYPE_##a6, ARGTYPE_##a7, ARGTYPE_##a8)
-
 #ifdef NJ_VERBOSE
     #define DEFINE_CALLINFO(f, sig, abi, isPure, storeAccSet, name) \
         const CallInfo ci_##name = { f, sig, abi, isPure, storeAccSet, #name };
 #else
     #define DEFINE_CALLINFO(f, sig, abi, isPure, storeAccSet, name) \
         const CallInfo ci_##name = { f, sig, abi, isPure, storeAccSet };
-#endif
-
-#if _MSC_VER
-    #define ABI_FUNCTION ABI_CDECL
-    #define ABI_FAST     ABI_FASTCALL
-    #define ABI_METHOD   ABI_THISCALL
-#elif defined(__SUNPRO_CC)
-    #define ABI_FUNCTION ABI_CDECL
-    #define ABI_FAST     ABI_CDECL
-    #define ABI_METHOD   ABI_CDECL
-#else
-    // gcc, probably
-    #define ABI_FUNCTION ABI_CDECL
-    #define ABI_FAST     ABI_FASTCALL
-    #define ABI_METHOD   ABI_CDECL
 #endif
 
 #define FUNCTION(f, sig, name) \

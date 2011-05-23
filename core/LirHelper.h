@@ -43,24 +43,74 @@
 using namespace MMgc;
 #include "../nanojit/nanojit.h"
 
-#ifdef DEBUGGER
-#define DEBUGGER_ONLY(...) __VA_ARGS__
-#else
-#define DEBUGGER_ONLY(...)
-#endif
-
-#ifdef VMCFG_SSE2
-# define SSE2_ONLY(...) __VA_ARGS__
-#else
-# define SSE2_ONLY(...)
-#endif
-
-/** Wrapper macro to generate the name of a CallInfo structure */
-#define FUNCTIONID(n) &ci_##n
-
 namespace avmplus
 {
     using namespace nanojit;
+
+    /**
+     * LogControl adapter to print output to AvmCore.console.
+     */
+    class AvmLogControl : public LogControl
+    {
+    public:
+        virtual ~AvmLogControl() {}
+#ifdef NJ_VERBOSE
+        void printf( const char* format, ... ) PRINTF_CHECK(2,3);
+
+        AvmCore* core; // access console via core dynamically since core may modify it.
+#endif
+    };
+
+    /**
+     * Logger used to eat output.
+     */
+    class SinkLogControl : public AvmLogControl
+    {
+    public:
+        SinkLogControl() { lcbits = 0; }
+        virtual ~SinkLogControl() {}
+#ifdef NJ_VERBOSE
+        void printf( const char* /*format*/, ... ) PRINTF_CHECK(2,3) {}  // no-op
+#endif
+    };
+
+    class BindingCache; // forward.
+
+    /**
+     * CodeMgr manages memory for compiled code, including the code itself
+     * (in a nanojit::CodeAlloc), and any data with code lifetime
+     * (in a nanojit::Allocator), such as debuging info, or inline caches.
+     */
+    class CodeMgr {
+    public:
+        CodeAlloc   codeAlloc;  // allocator for code memory
+        AvmLogControl  log;        // controller for verbose output
+        Allocator   allocator;  // data with same lifetime of this CodeMgr
+        BindingCache* bindingCaches;    // head of linked list of all BindingCaches allocated by this codeMgr
+                                        // (only for flushing... lifetime is still managed by codeAlloc)
+        CodeMgr();
+        void flushBindingCaches();      // invalidate all binding caches for this codemgr... needed when AbcEnv is unloaded
+    };
+
+    // AccSet conventions
+    // nanojit currently supports very coarse grained access-set tags
+    // for loads, stores, and calls.  See the comments in LIR.h for a
+    // detailed description.  Here we define a set of constants to use that
+    // are more fine grained, and then map them to AccessSets that nanojit supports.
+    //
+    // If you aren't sure what to use, use ACCSET_LOAD_ANY or ACCSET_STORE_ANY.
+    // Warning: if you annotate a load or store with something other
+    // than ACC_*_ANY, and get it wrong, you will introduce subtle and
+    // hard to find bugs: "if you lie to the compiler, it will get its revenge"
+    //
+    // we use ACCSET_OTHER for a catchall that does not overlap with any other
+    // predefined alias set.  Future work should subdivide this set where
+    // the improvements outweigh the cost of additional alias sets.
+
+    const AccSet ACCSET_VARS  = (1 << 0);    // values of local variables
+    const AccSet ACCSET_TAGS  = (1 << 1);    // BuiltinTraits tags for local variables
+    const AccSet ACCSET_OTHER = (1 << 2);
+    const uint8_t TR_NUM_USED_ACCS = 3;      // number of access regions used by Tamarin
 
     /** helper code to make LIR generation nice and tidy */
     class LirHelper {
@@ -138,21 +188,37 @@ namespace avmplus
         debug_only(ValidateWriter* validate2;)
     };
 
-    /** Returns true for functions that never return. */
+    /**
+     * Returns true for functions that never return.
+     */
     bool neverReturns(const CallInfo* call);
 
+
+    /**
+     * Initialize the code manager the first time we jit any method for this
+     * PoolObject.
+     */
+    CodeMgr* initCodeMgr(PoolObject *pool);
+
     // Forward declarations for CallInfos of shared helper functions.
+    extern const CallInfo ci_argcError;
+    extern const CallInfo ci_boolean;
     extern const CallInfo ci_doubleToAtom;
     extern const CallInfo ci_intToAtom;
     extern const CallInfo ci_uintToAtom;
+    extern const CallInfo ci_number;
     extern const CallInfo ci_number_d;
+    extern const CallInfo ci_integer;
     extern const CallInfo ci_integer_i;
     extern const CallInfo ci_integer_u;
     extern const CallInfo ci_throwAtom;
+    extern const CallInfo ci_toUInt32;
     extern const CallInfo ci_npe;
     extern const CallInfo ci_upe;
     extern const CallInfo ci_mop_rangeCheckFailed;
     extern const CallInfo ci_handleInterruptMethodEnv;
+    extern const CallInfo ci_coerce;
+    extern const CallInfo ci_coerce_s;
     extern const CallInfo ci_coerceobj_atom;
 
 #ifdef VMCFG_SSE2
@@ -162,9 +228,62 @@ namespace avmplus
     const ArgType ARGTYPE_U = ARGTYPE_UI; // uint32_t
     const ArgType ARGTYPE_F = ARGTYPE_D;  // double
     const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
-
 }
 
 #include "LirHelper-inlines.h"
+
+#ifdef DEBUGGER
+#define DEBUGGER_ONLY(...) __VA_ARGS__
+#else
+#define DEBUGGER_ONLY(...)
+#endif
+
+#ifdef VMCFG_SSE2
+#define SSE2_ONLY(...) __VA_ARGS__
+#else
+#define SSE2_ONLY(...)
+#endif
+
+/** Wrapper macro to generate the name of a CallInfo structure. */
+#define FUNCTIONID(n) &ci_##n
+
+#define SIG0(r)\
+    nanojit::CallInfo::typeSig0(ARGTYPE_##r)
+#define SIG1(r,a1)\
+    nanojit::CallInfo::typeSig1(ARGTYPE_##r, ARGTYPE_##a1)
+#define SIG2(r,a1,a2)\
+    nanojit::CallInfo::typeSig2(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2)
+#define SIG3(r,a1,a2,a3)\
+    nanojit::CallInfo::typeSig3(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3)
+#define SIG4(r,a1,a2,a3,a4)\
+    nanojit::CallInfo::typeSig4(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
+                                ARGTYPE_##a4)
+#define SIG5(r,a1,a2,a3,a4,a5)\
+    nanojit::CallInfo::typeSig5(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
+                                ARGTYPE_##a4, ARGTYPE_##a5)
+#define SIG6(r,a1,a2,a3,a4,a5,a6)\
+    nanojit::CallInfo::typeSig6(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
+                                ARGTYPE_##a4, ARGTYPE_##a5, ARGTYPE_##a6)
+#define SIG7(r,a1,a2,a3,a4,a5,a6,a7)\
+    nanojit::CallInfo::typeSig7(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
+                                ARGTYPE_##a4, ARGTYPE_##a5, ARGTYPE_##a6, ARGTYPE_##a7)
+#define SIG8(r,a1,a2,a3,a4,a5,a6,a7,a8)\
+    nanojit::CallInfo::typeSig8(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
+                        ARGTYPE_##a4, ARGTYPE_##a5, ARGTYPE_##a6, ARGTYPE_##a7, ARGTYPE_##a8)
+
+#if _MSC_VER
+    #define ABI_FUNCTION ABI_CDECL
+    #define ABI_FAST     ABI_FASTCALL
+    #define ABI_METHOD   ABI_THISCALL
+#elif defined(__SUNPRO_CC)
+    #define ABI_FUNCTION ABI_CDECL
+    #define ABI_FAST     ABI_CDECL
+    #define ABI_METHOD   ABI_CDECL
+#else
+    // gcc, probably
+    #define ABI_FUNCTION ABI_CDECL
+    #define ABI_FAST     ABI_FASTCALL
+    #define ABI_METHOD   ABI_CDECL
+#endif
 
 #endif /* __avmplus_LirHelper__ */

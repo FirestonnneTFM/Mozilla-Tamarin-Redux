@@ -188,6 +188,8 @@
 		1992FDA3102869D10032FBBF /* Containers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1992FDA1102869D10032FBBF /* Containers.cpp */; };
 		19A1174B133A2266003B9C38 /* LirHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A11749133A2266003B9C38 /* LirHelper.cpp */; };
 		19A1174C133A2266003B9C38 /* LirHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A11749133A2266003B9C38 /* LirHelper.cpp */; };
+		19A767AB138AEBB900D93B21 /* InvokerCompiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A767A9138AEBB900D93B21 /* InvokerCompiler.cpp */; };
+		19A767AC138AEBB900D93B21 /* InvokerCompiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A767A9138AEBB900D93B21 /* InvokerCompiler.cpp */; };
 		19BB29A00F8119E100C5F1F7 /* swf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BB299F0F8119E100C5F1F7 /* swf.cpp */; };
 		19BDA443100CC20200172A70 /* Allocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BDA441100CC20200172A70 /* Allocator.cpp */; };
 		3F5B2BCC0F54B223009A93FE /* PosixFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BC80F54B223009A93FE /* PosixFile.cpp */; };
@@ -866,6 +868,8 @@
 		19A21B371213443300CB55E0 /* PageMap-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "PageMap-inlines.h"; path = "../../../MMgc/PageMap-inlines.h"; sourceTree = SOURCE_ROOT; };
 		19A21B381213443300CB55E0 /* PageMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PageMap.cpp; path = ../../../MMgc/PageMap.cpp; sourceTree = SOURCE_ROOT; };
 		19A21B391213443300CB55E0 /* PageMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PageMap.h; path = ../../../MMgc/PageMap.h; sourceTree = SOURCE_ROOT; };
+		19A767A9138AEBB900D93B21 /* InvokerCompiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InvokerCompiler.cpp; path = ../../../core/InvokerCompiler.cpp; sourceTree = SOURCE_ROOT; };
+		19A767AA138AEBB900D93B21 /* InvokerCompiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InvokerCompiler.h; path = ../../../core/InvokerCompiler.h; sourceTree = SOURCE_ROOT; };
 		19BB299F0F8119E100C5F1F7 /* swf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = swf.cpp; path = ../../../shell/swf.cpp; sourceTree = SOURCE_ROOT; };
 		19BDA441100CC20200172A70 /* Allocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Allocator.cpp; path = ../../../nanojit/Allocator.cpp; sourceTree = SOURCE_ROOT; };
 		19BDA442100CC20200172A70 /* Allocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Allocator.h; path = ../../../nanojit/Allocator.h; sourceTree = SOURCE_ROOT; };
@@ -1184,6 +1188,8 @@
 				E8B532051069A1DE00ED299A /* instr.h */,
 				079DF7F30F3A882D0031D1B4 /* Interpreter.cpp */,
 				079DF7F40F3A882D0031D1B4 /* Interpreter.h */,
+				19A767A9138AEBB900D93B21 /* InvokerCompiler.cpp */,
+				19A767AA138AEBB900D93B21 /* InvokerCompiler.h */,
 				E8B532201069A28F00ED299A /* jit-calls.h */,
 				19A11749133A2266003B9C38 /* LirHelper.cpp */,
 				19A1174A133A2266003B9C38 /* LirHelper.h */,
@@ -1998,6 +2004,7 @@
 				19487E271362250900586A91 /* JSONClass.cpp in Sources */,
 				D914C1EF1367956F00CD302D /* ProxyGlue.cpp in Sources */,
 				193B2135136EE3CC001CA302 /* SelftestExec.cpp in Sources */,
+				19A767AC138AEBB900D93B21 /* InvokerCompiler.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2187,6 +2194,7 @@
 				19487E261362250800586A91 /* JSONClass.cpp in Sources */,
 				D914C1EE1367956F00CD302D /* ProxyGlue.cpp in Sources */,
 				193B2134136EE3CB001CA302 /* SelftestExec.cpp in Sources */,
+				19A767AB138AEBB900D93B21 /* InvokerCompiler.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
