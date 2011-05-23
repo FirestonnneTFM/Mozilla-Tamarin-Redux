@@ -1027,20 +1027,22 @@ namespace MMgc
     
     void GC::ClearUnmarkedWeakRefs()
     {
-        GCHashtable::Iterator it(&weakRefs);
+        {
+            GCHashtable::Iterator it(&weakRefs);
 #ifdef MMGC_WEAKREF_PROFILER
-        uint32_t count = weakRefs.count();
-        uint32_t deleted = 0;
+            uint32_t count = weakRefs.count();
+            uint32_t deleted = 0;
 #endif
 
-        while (it.nextKey() != NULL) {
-            GCWeakRef* w = (GCWeakRef*)it.value();
-            GCObject* o = w->peek();
-            if (o != NULL && !GC::GetMark(o)) {
+            while (it.nextKey() != NULL) {
+                GCWeakRef* w = (GCWeakRef*)it.value();
+                GCObject* o = w->peek();
+                if (o != NULL && !GC::GetMark(o)) {
 #ifdef MMGC_WEAKREF_PROFILER
-                deleted++;
+                    deleted++;
 #endif
-                ClearWeakRef(o, false);
+                    ClearWeakRef(o, false);
+                }
             }
         }
         weakRefs.prune();

@@ -48,6 +48,9 @@ namespace MMgc
         , tableSize(capacity)
         , numValues(0)
         , numDeleted(0)
+#ifdef _DEBUG
+        , numIterators(0)
+#endif
 #ifdef MMGC_GCHASHTABLE_PROFILER
         , probes(0)
         , accesses(0)
@@ -75,6 +78,9 @@ namespace MMgc
         tableSize = 0;
         numValues = 0;
         numDeleted = 0;
+#ifdef _DEBUG
+        numIterators = 0;
+#endif
 #ifdef MMGC_GCHASHTABLE_PROFILER
         probes = 0;
         accesses = 0;
@@ -129,6 +135,14 @@ namespace MMgc
         accesses++;
 #endif
         GCAssert(table != NULL);
+
+        // Bug 637993: this assertion could be next to grow()
+        // invocation below, to cover special-case where caller knows
+        // key is already present and thus it will not rehash during
+        // put().  But it would be better then to expand the interface
+        // so that this assumption is explicitly built into the point
+        // of invocation.  For now adopting simpler, aggressive solution.
+        GCAssert(numIterators == 0);
 
         // this is basically an inlined version of find() with one minor difference:
         // it notices if there are DELETED slots along the probe, and if there is one,
@@ -192,6 +206,9 @@ namespace MMgc
     template <typename VAL, class KEYHANDLER, class ALLOCHANDLER>
     VAL GCHashtableBase<VAL, KEYHANDLER,ALLOCHANDLER>::remove(const void* key, bool allowRehash)
     {
+        // Bug 637993: allowRehash implies no active iterators.
+        GCAssert(!allowRehash || (numIterators == 0));
+
         VAL ret = 0;
         uint32_t i = find(key, table, tableSize);
         if (table[i].key == key)
@@ -213,6 +230,8 @@ namespace MMgc
     template <typename VAL, class KEYHANDLER, class ALLOCHANDLER>
     void GCHashtableBase<VAL, KEYHANDLER,ALLOCHANDLER>::prune()
     {
+        GCAssert(numIterators == 0);
+
         // this helps a bit on pathologic memory profiler use case, needs more investigation
         // 20% deleted == rehash
         // FIXME: Bugzilla
