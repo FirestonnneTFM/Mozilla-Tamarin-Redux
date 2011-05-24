@@ -612,7 +612,7 @@ namespace MMgc
         double remainingMajorAllocationBudget;
 
         // the allocation budget for the minor GC cycle.  This variable remains constant
-        // throughout the minor cycle.
+        // throughout the minor cycle, is measured in bytes, and must be positive.
         int32_t minorAllocationBudget;
 
         // the remaining allocation budget for the minor GC cycle.  Initially this has the

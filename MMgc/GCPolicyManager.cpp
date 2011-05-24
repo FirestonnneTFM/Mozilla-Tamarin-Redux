@@ -319,7 +319,7 @@ namespace MMgc
         remainingMajorAllocationBudget = majorAllocationBudget = double(lowerLimitCollectionThreshold()) * double(GCHeap::kBlockSize);
 
         if (gc->incremental)
-            remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
+            remainingMinorAllocationBudget = minorAllocationBudget = max(1,int32_t(remainingMajorAllocationBudget * T));
         else
             remainingMinorAllocationBudget = int32_t(remainingMajorAllocationBudget);
 
@@ -348,10 +348,11 @@ namespace MMgc
         if (remainingMajorAllocationBudget < remainingBeforeGC)
             remainingMajorAllocationBudget = remainingBeforeGC;
 
-        if (gc->incremental)
-            remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
-        else
+        if (gc->incremental) {
+            remainingMinorAllocationBudget = minorAllocationBudget = max(1,int32_t(remainingMajorAllocationBudget * T));
+        } else {
             remainingMinorAllocationBudget = int32_t(remainingMajorAllocationBudget);
+        }
 
 #ifdef MMGC_POLICY_PROFILING
         if (summarizeGCBehavior())
@@ -379,6 +380,7 @@ namespace MMgc
         }
         remainingMinorAllocationBudget = int32_t(A());
         minorAllocationBudget = remainingMinorAllocationBudget;
+        GCAssert(minorAllocationBudget > 0);
         remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
 
         if (gc->greedy)
