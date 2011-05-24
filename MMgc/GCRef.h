@@ -105,13 +105,8 @@ namespace MMgc
             }
 
             //  Allow assignment to T*(or T<derived>*) for implicit conversion from raw pointers
-            REALLY_INLINE GCRef& operator=(T *tNew)
-            {
+            REALLY_INLINE GCRef& operator=(T *tNew);
             
-                t = tNew;
-                return *this;
-            }
-
             //  Construct from T* (or T<derived>*) for implicit conversion from raw pointers
             REALLY_INLINE GCRef(T* valuePtr) : t(valuePtr)
             {
@@ -129,11 +124,7 @@ namespace MMgc
             
             //  Allow Any GCRef to be assigned to another GCRef
             template <class T2>
-            REALLY_INLINE GCRef& operator =(const GCRef<T2> &other)
-            {
-                t = other.t;
-                return *this;
-            }
+            REALLY_INLINE GCRef& operator =(const GCRef<T2> &other);
             
             //  Allow Any GCRef<derived> to be cast to a GCRef<base>
             template < class T2 >
@@ -227,11 +218,7 @@ namespace MMgc
         public:
             //  Allow Any GCRef_Union to be assigned to another GCRef
             template <class T2>
-            REALLY_INLINE GCRef_Union& operator =(const GCRef<T2> &other)
-            {
-                t = other.t;
-                return *this;
-            }
+            REALLY_INLINE GCRef_Union& operator =(const GCRef<T2> &other);
 
             //  Cast a GCRef_Union to a GCRef<T>
             REALLY_INLINE operator GCRef<T>() const
@@ -246,10 +233,7 @@ namespace MMgc
                 return t;
             }
             
-            void operator=(T *tNew)
-            {
-                t = tNew;
-            }
+            void operator=(T *tNew);
                   
             //  Allows GCRef_Union to be used like pointers
             REALLY_INLINE T* operator->() const
