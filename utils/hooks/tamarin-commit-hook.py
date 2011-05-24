@@ -130,7 +130,11 @@ def heuristic_log_check(ui, repo, operation, **kwargs):
 
     tip_id = repo.changelog.tip()
     tip_changeset = repo[tip_id]
-    return check_desc_for_bugnum_and_reviews(ui, tip_changeset, operation)
+
+    # See master_hook for interpretation of error flag.
+    error = check_desc_for_bugnum_and_reviews(ui, tip_changeset, operation)
+    error = error or check_user_for_valid_email(ui, tip_changeset, operation)
+    return error
 
 def prompt_yesno(ui, operation):
     return ui.promptchoice(('Continue %s (n)o, (y)es? [n]' % operation),
@@ -160,6 +164,35 @@ def check_bug_type(bug):
     elif p.title == 'Invalid Bug ID':
         return BugType.INVALID
     return BugType.NORMAL
+
+def has_email_in_brackets(user):
+    return re.match(r'.*<.+>', user)
+
+def has_email_with_domain(user):
+    return re.match(r'.*<.+@.+>', user)
+
+def check_user_for_valid_email(ui, changeset, operation):
+    user = changeset.user()
+    ui.debug('\ncheck_user_for_valid_email: %s' % user)
+    has_email = has_email_in_brackets(user)
+    if not has_email:
+        ui.warn('\nUser missing email address for changeset %s: \n  %s\n'
+                % (changeset, user))
+        response = prompt_yesno(ui, operation)
+        if response == 0:
+            ui.warn('Aborting %s due to user missing email.\n' % operation)
+            return True;
+    else:
+        has_domain = has_email_with_domain(user)
+        if not has_domain:
+            ui.warn('\nUser email missing domain for changeset %s: \n  %s\n'
+                    % (changeset, user))
+            response = prompt_yesno(ui, operation)
+            if response == 0:
+                ui.warn('Aborting %s due to email without domain.\n' % operation)
+                return True;
+
+    return False;
 
 def check_desc_for_bugnum_and_reviews(ui, changeset, operation):
     # Check first line of log of tip changeset; if it appears questionable,
