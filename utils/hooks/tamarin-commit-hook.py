@@ -52,6 +52,25 @@
 import sys, re, os
 from mercurial import hg, ui, commands, cmdutil, patch
 from mercurial.node import hex, short
+from HTMLParser import HTMLParser
+from urllib2 import urlopen
+
+class BugType:
+    NORMAL = 1
+    SECURITY = 2
+    INVALID = 3
+
+class TitleParser(HTMLParser):
+    '''Very simple parser to extract the title from an HTML page'''
+    in_title = False
+    title = ''
+    def handle_starttag(self, tag, attrs):
+        if tag == 'title':
+            self.in_title = True
+    def handle_data(self, data):
+        if self.in_title:
+            self.title = data
+            self.in_title = False
 
 def master_hook(ui, repo, **kwargs):
     ui.debug('running tamarin master_hook\n')
@@ -117,13 +136,30 @@ def prompt_yesno(ui, operation):
     return ui.promptchoice(('Continue %s (n)o, (y)es? [n]' % operation),
                            (('&No'),('&Yes')), 0)
 
-def has_bugzilla_reference(line):
+def bugzilla_reference(line):
     # Match bug number of >= 6 digits and prefixed by "Bug", "For", etc
-    return re.match(r'.*(Bug|For|Fix)\s*[0-9]{6,}', line, re.IGNORECASE)
+    try:
+        bug_number = re.match(r'.*(Bug|For|Fix)\s*([0-9]{6,})',
+                              line, re.IGNORECASE).group(2)
+    except AttributeError:
+        return None
+    return bug_number
 
 def has_reviewer_notes(line):
     # Match "r=<name>" or "r+<name>"; assumes names are alphanumeric.
     return re.match(r'.*r(=|\+)[a-zA-Z0-9]+', line)
+
+def check_bug_type(bug):
+    p = TitleParser()
+    u = urlopen('https://bugzilla.mozilla.org/show_bug.cgi?id=%s' % bug)
+    p.feed(u.read().decode(u.info().getparam('charset')))
+    p.close()
+    
+    if p.title == 'Access Denied':
+        return BugType.SECURITY
+    elif p.title == 'Invalid Bug ID':
+        return BugType.INVALID
+    return BugType.NORMAL
 
 def check_desc_for_bugnum_and_reviews(ui, changeset, operation):
     # Check first line of log of tip changeset; if it appears questionable,
@@ -131,19 +167,33 @@ def check_desc_for_bugnum_and_reviews(ui, changeset, operation):
     desc = changeset.description()
     lines = desc.split('\n')
     first_line = lines[0]
-    has_bug_num = has_bugzilla_reference(first_line)
+    bug_num = bugzilla_reference(first_line)
     has_review = has_reviewer_notes(first_line)
 
-    if not has_bug_num or not has_review:
+    if not bug_num or not has_review:
         ui.warn('\nQuestionable log for changeset %s:\n  %s\n'
                 % (changeset,first_line))
 
-    if not has_bug_num:
+    if not bug_num:
         ui.warn('Missing bug number, e.g. "Bug NNNNNN: ..."\n')
         response = prompt_yesno(ui, operation)
         if response == 0:
             ui.warn('Aborting %s due to missing bug number.\n' % operation)
             return True
+    else:
+        bug_type = check_bug_type(bug_num)
+        if bug_type == BugType.SECURITY:
+            ui.warn('Bug %s is a security bug.' % bug_num)
+            response = prompt_yesno(ui, operation)
+            if response == 0:
+                ui.warn('Aborting %s due to security bug.\n' % operation)
+                return True
+        elif bug_type == BugType.INVALID:
+            ui.warn('Bug %s is a not defined in bugzilla.' % bug_num)
+            response = prompt_yesno(ui, operation)
+            if response == 0:
+                ui.warn('Aborting %s due to invalid bug number.\n' % operation)
+                return True
 
     if not has_review:
         ui.warn('Missing review notes, e.g. "... (r=<name>,sr=<name>)"\n')
