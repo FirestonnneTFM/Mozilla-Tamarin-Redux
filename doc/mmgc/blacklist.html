@@ -59,7 +59,7 @@ this object, we just print out the one the GC actually traversed. <P>
 <h2>Setup</h2>
 
 <UL>
-<LI>Enable MMGC_HEAP_GRAPH in MMgc.h</LI>
+<LI>Enable AVMTWEAK_HEAP_GRAPH in the avmhost-features.h header (or avmshell-features.h for the shell).</LI>
 <LI>Make sure you are on a mac or windows machine and your build has debugging symbols</LI>
 <LI>Set the MMGC_PROFILE=1 env var to 1 when launching the process</LI>
 <LI>Add calls to GC::addToBlacklist in your program for the objects in question</LI>
