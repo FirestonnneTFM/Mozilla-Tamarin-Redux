@@ -142,13 +142,17 @@ namespace MMgc
  
     REALLY_INLINE void GC::InlineWriteBarrierGuardedTrap(const void *address)
     {
-        if (BarrierActive()) {
+#ifdef _DEBUG
+        {
             const void* container = FindBeginningFast(address);
 
             GCAssert(IsPointerToGCPage(container));
             GCAssert(address >= container);
             GCAssert(address < (char*)container + Size(container));
-            
+        }
+#endif
+        if (BarrierActive()) {
+            const void* container = FindBeginningFast(address);
             InlineWriteBarrierTrap(container);
         }
     }
