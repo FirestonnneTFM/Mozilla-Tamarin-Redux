@@ -1662,8 +1662,10 @@ namespace MMgc
 
     void GC::DumpAlloc(GCAlloc *a, size_t& internal_waste, size_t& overhead)
     {
-        int inUse =  a->GetNumAlloc() * a->GetItemSize();
-        int maxAlloc =  a->GetMaxAlloc()* a->GetItemSize();
+        int inUse, maxAlloc;
+        a->GetAllocStats(inUse, maxAlloc);
+        inUse *= a->GetItemSize();
+        maxAlloc *= a->GetItemSize();
 
         overhead = maxAlloc-inUse;
         internal_waste = 0;

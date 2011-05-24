@@ -178,9 +178,6 @@ namespace MMgc
         m_totalAskSize(0),
     #endif
         m_bitsInPage(_containsPointers && kBlockSize - int(m_itemsPerBlock * m_itemSize + sizeof(GCBlock)) >= m_numBitmapBytes),
-        m_maxAlloc(0),
-        m_numAlloc(0),
-        m_numBlocks(0),
         multiple(ComputeMultiply((uint16_t)m_itemSize)),
         shift(ComputeShift((uint16_t)m_itemSize)),
         containsPointers(_containsPointers),
@@ -235,9 +232,6 @@ namespace MMgc
 
         if (b)
         {
-            m_maxAlloc += m_itemsPerBlock;
-            m_numBlocks++;
-
             VALGRIND_CREATE_MEMPOOL(b, 0/*redZoneSize*/, 1/*zeroed*/);
 
             // treat block header as a separate allocation
@@ -350,9 +344,6 @@ namespace MMgc
         if ( ((b->prevFree && (b->prevFree->nextFree!=b))) ||
             ((b->nextFree && (b->nextFree->prevFree!=b))) )
             VMPI_abort();
-
-        m_maxAlloc -= m_itemsPerBlock;
-        m_numBlocks--;
 
         // Unlink the block from the list
         if (b == m_firstBlock) {
@@ -469,9 +460,6 @@ namespace MMgc
         b->bits[GetBitsIndex(b, item)] = (flags & GC::kFinalize);
 #endif
 
-#ifdef MMGC_MEMORY_INFO
-        m_numAlloc++;
-#endif
 #ifdef MMGC_HOOKS
         GCHeap* heap = GCHeap::GetGCHeap();
         if(heap->HooksEnabled()) {
@@ -605,10 +593,6 @@ namespace MMgc
             m_gc->RCObjectZeroCheck((RCObject*)GetUserPointer(item));
 #endif
 
-#ifdef MMGC_MEMORY_INFO
-        GCAssert(m_numAlloc != 0);
-        m_numAlloc--;
-#endif
 #ifdef MMGC_HOOKS
         GCHeap* heap = GCHeap::GetGCHeap();
         if(heap->HooksEnabled())
@@ -1114,10 +1098,6 @@ namespace MMgc
         GCAssert((bits[bitsindex] & kQueued) == 0);
         alloc->VerifyNotFree(this, item);
 #endif
-#ifdef MMGC_MEMORY_INFO
-        GCAssert(alloc->m_numAlloc != 0);
-        alloc->m_numAlloc--;
-#endif
 
         numFree++;
 
@@ -1132,18 +1112,13 @@ namespace MMgc
 
     void GCAlloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)
     {
-        totalAskSize = totalAllocated = 0;
-
-        GCBlock *b=m_firstBlock;
-        while (b) {
-            totalAllocated += (m_itemsPerBlock - b->numFree) * m_itemSize;
-            b = Next(b);
-        }
-
-        totalAllocated -= (m_qBudgetObtained - m_qBudget) * m_itemSize;
-
+        int numAlloc, maxAlloc;
+        GetAllocStats(numAlloc, maxAlloc);
+        totalAllocated = numAlloc * m_itemSize;
 #ifdef MMGC_MEMORY_PROFILER
         totalAskSize = m_totalAskSize;
+#else
+        totalAskSize = 0;
 #endif
     }
 
@@ -1182,6 +1157,20 @@ namespace MMgc
 
 #endif //MMGC_MEMORY_INFO
 
+    void GCAlloc::GetAllocStats(int& numAlloc, int& maxAlloc) const
+    {
+        numAlloc = 0;
+        maxAlloc = 0;
+        GCBlock *b=m_firstBlock;
+        while (b)
+        {
+            maxAlloc++;
+            numAlloc += (m_itemsPerBlock - b->numFree);
+            b = Next(b);
+        }
+        numAlloc -= (m_qBudgetObtained - m_qBudget);
+    }
+    
 #ifdef _DEBUG
     bool GCAlloc::IsOnEitherList(GCBlock *b)
     {
