@@ -164,23 +164,28 @@ namespace MMgc
         static bool IsUnmarkedPointer(const void *val);
         static void SetBlockHasWeakRef(const void *userptr);
 
+        // Return the actual size of items managed by this allocator (includes debugging overheads)
         REALLY_INLINE uint32_t GetItemSize() { return m_itemSize; }
-        REALLY_INLINE int GetNumAlloc() const { return m_numAlloc; }
-        REALLY_INLINE int GetMaxAlloc() const { return m_maxAlloc; }
-        REALLY_INLINE int GetNumBlocks() const { return m_numBlocks; }
+        
+        // Return the number of live objects owned by this allocator in *numAlloc and 
+        // the number of objects (live and free) owned by this allocator in *maxAlloc.
+        void GetAllocStats(int& numAlloc, int& maxAlloc) const;
+
+        REALLY_INLINE int GetNumAlloc() const
+        {
+            int numAlloc, maxAlloc;
+            GetAllocStats(numAlloc, maxAlloc);
+            return numAlloc;
+        }
 
         REALLY_INLINE bool ContainsPointers() const { return containsPointers; }
         REALLY_INLINE bool ContainsRCObjects() const { return containsRCObjects; }
 
         void GetBitsPages(void **pages);
 
-        //This method returns the number bytes allocated for GC objects
-        size_t GetBytesInUse();
-
         //This method is for more fine grained allocation details
         //It reports the total number of bytes requested (i.e. ask size) and
-        //the number of bytes actually allocated.  The latter is the same
-        //number as reported by GetBytesInUse()
+        //the number of bytes actually allocated.
         void GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated);
 
 #ifdef MMGC_MEMORY_PROFILER
@@ -274,10 +279,6 @@ namespace MMgc
 #endif
 
         const bool m_bitsInPage;
-
-        int    m_maxAlloc;
-        int    m_numAlloc;
-        int    m_numBlocks;
 
         // fast divide numbers for GetObjectIndex
         const uint16_t multiple;
