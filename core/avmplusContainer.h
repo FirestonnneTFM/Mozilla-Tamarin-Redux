@@ -55,7 +55,12 @@ namespace avmplus
             size_t extra = 0;
             if (capacity > 0)
                 extra = MMgc::GCHeap::CheckForCallocSizeOverflow(capacity-1, sizeof(T));
-            return new (gc, MMgc::kExact, extra) ExactStructContainer<T>(capacity, finalizer);
+            ExactStructContainer<T>* obj;
+            if (finalizer == NULL)
+                obj = new (gc, MMgc::kExact, MMgc::kNoFinalize, extra) ExactStructContainer<T>(capacity, finalizer);
+            else
+                obj = new (gc, MMgc::kExact, extra) ExactStructContainer<T>(capacity, finalizer);
+            return obj;
         }
 
         ~ExactStructContainer() {

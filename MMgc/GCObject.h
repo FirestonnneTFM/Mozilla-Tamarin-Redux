@@ -360,6 +360,10 @@ namespace MMgc
         static void* operator new(size_t size, GC *gc, size_t extra);
         static void* operator new(size_t size, GC *gc, GCExactFlag flag);
         static void* operator new(size_t size, GC *gc);
+        static void* operator new(size_t size, GC *gc, GCExactFlag, GCNoFinalizeFlag, size_t extra);
+        static void* operator new(size_t size, GC *gc, GCNoFinalizeFlag, size_t extra);
+        static void* operator new(size_t size, GC *gc, GCExactFlag, GCNoFinalizeFlag);
+        static void* operator new(size_t size, GC *gc, GCNoFinalizeFlag);
         static void operator delete (void *gcObject);
     };
 
@@ -436,6 +440,26 @@ namespace MMgc
     REALLY_INLINE void* GCFinalizedObject::operator new(size_t size, GC *gc, GCExactFlag)
     {
         return gc->AllocPtrZeroFinalizedExact(size);
+    }
+    
+    REALLY_INLINE void* GCFinalizedObject::operator new(size_t size, GC *gc, GCNoFinalizeFlag, size_t extra)
+    {
+        return gc->AllocExtraPtrZero(size, extra);
+    }
+    
+    REALLY_INLINE void* GCFinalizedObject::operator new(size_t size, GC *gc, GCNoFinalizeFlag)
+    {
+        return gc->AllocPtrZero(size);
+    }
+    
+    REALLY_INLINE void* GCFinalizedObject::operator new(size_t size, GC *gc, GCExactFlag, GCNoFinalizeFlag, size_t extra)
+    {
+        return gc->AllocExtraPtrZeroExact(size, extra);
+    }
+    
+    REALLY_INLINE void* GCFinalizedObject::operator new(size_t size, GC *gc, GCExactFlag, GCNoFinalizeFlag)
+    {
+        return gc->AllocPtrZeroExact(size);
     }
     
     REALLY_INLINE void GCFinalizedObject::operator delete (void *gcObject)
