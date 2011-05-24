@@ -179,6 +179,10 @@ namespace MMgc
     typedef GCExactDummyClass* GCExactFlag;
     const   GCExactFlag kExact = 0;
     
+    class GCNoFinalizeDummyClass;
+    typedef GCNoFinalizeDummyClass* GCNoFinalizeFlag;
+    const GCNoFinalizeFlag kNoFinalize = 0;
+
     /**
      * GCRoot is root in the reachability graph, it contains a pointer a size
      * and will be searched for things.
