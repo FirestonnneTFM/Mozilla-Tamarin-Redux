@@ -170,6 +170,7 @@ namespace avmshell
         gcconfig.markstackAllowance = settings.markstackAllowance;
         gcconfig.drc = settings.drc;
         gcconfig.mode = settings.gcMode();
+        gcconfig.validateDRC = settings.drcValidation;
         MMgc::GC *gc = mmfx_new( MMgc::GC(MMgc::GCHeap::GetGCHeap(), gcconfig) );
         {
             MMGC_GCENTER(gc);
@@ -734,6 +735,9 @@ namespace avmshell
                     else if (!VMPI_strcmp(arg+2, "noincgc")) {
                         settings.incremental = false;
                     }
+                    else if (!VMPI_strcmp(arg+2, "drcvalidation")) {
+                        settings.drcValidation = true;
+                    }
 #ifdef VMCFG_SELECTABLE_EXACT_TRACING
                     else if (!VMPI_strcmp(arg+2, "noexactgc")) {
                         settings.exactgc = false;
@@ -1199,6 +1203,7 @@ namespace avmshell
         avmplus::AvmLog("          [-Dgreedy]    collect before every allocation\n");
         avmplus::AvmLog("          [-Dnogc]      don't collect (including DRC)\n");
         avmplus::AvmLog("          [-Dnodrc]     don't use DRC (only use mark/sweep)\n");
+        avmplus::AvmLog("          [-Ddrcvalidation]     Perform a mark before each Reap to seek out reachable zero count items\n");
 #ifdef VMCFG_SELECTABLE_EXACT_TRACING
         avmplus::AvmLog("          [-Dnoexactgc] disable exact tracing\n");
 #endif
