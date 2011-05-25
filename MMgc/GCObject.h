@@ -853,7 +853,7 @@ namespace MMgc
             if(checkMissingWB)
                 GCAssertMsg(GC::GetActiveGC() == NULL
                             || !GC::GetActiveGC()->IsPointerToGCPage(this),
-                            "Need to use DRCWB on GC memory");
+                            "Need to use GCMember<> on GC memory");
             t = NULL;
         }
         RCPtr(T _t) : t(_t)
@@ -861,7 +861,7 @@ namespace MMgc
             if(checkMissingWB)
                 GCAssertMsg(GC::GetActiveGC() == NULL
                             || !GC::GetActiveGC()->IsPointerToGCPage(this),
-                            "Need to use DRCWB on GC memory");
+                            "Need to use GCMember<> on GC memory");
             if(valid())
                 t->IncrementRef();
         }
@@ -871,7 +871,7 @@ namespace MMgc
                 t->DecrementRef();
 
             // 02may06 grandma : I want to enable
-            //  class DataIOBase { DRC(PlayerToplevel *) const m_toplevel; }
+            //  class DataIOBase { GCMember<PlayerToplevel> const m_toplevel; }
             //
             // DataIOBase is a virtual base class, so we don't know if the
             // subclass is GCObject or not. We need it to be const, or
@@ -929,12 +929,14 @@ namespace MMgc
 //
 // NOTE!!  DRC and DRC_NOWB are deprecated!  Use GCMember<> when possible.
 
-// put spaces around the template arg to avoid possible digraph warnings
-#define DRC(_type) MMgc::RCPtr< _type, true >
+#ifndef AVMSHELL_BUILD
+    // put spaces around the template arg to avoid possible digraph warnings
+    #define DRC(_type) MMgc::RCPtr< _type, true >
 
-// This is a temporary bandaid for places where DRC is asserting due to
-// it being used on GC memory, use DRCWB instead.
-#define DRC_NOWB(_type) MMgc::RCPtr< _type, false >
+    // This is a temporary bandaid for places where DRC is asserting due to
+    // it being used on GC memory, use DRCWB instead.
+    #define DRC_NOWB(_type) MMgc::RCPtr< _type, false >
+#endif // AVMSHELL_BUILD
 
 #undef GNUC_ONLY
 

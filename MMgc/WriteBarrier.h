@@ -61,13 +61,15 @@ inline void write_null(void* p) { *(uintptr_t*)(p) = 0; }
 //
 // NOTE!!  DWB and DRCWB are deprecated!  Use GCMember<> when possible.
 
-// declare write barrier
-// put spaces around the template arg to avoid possible digraph warnings
-#define DWB(type) MMgc::WriteBarrier< type >
+#ifndef AVMSHELL_BUILD
+    // declare write barrier
+    // put spaces around the template arg to avoid possible digraph warnings
+    #define DWB(type) MMgc::WriteBarrier< type >
 
-// declare an optimized RCObject write barrier
-// put spaces around the template arg to avoid possible digraph warnings
-#define DRCWB(type) MMgc::WriteBarrierRC< type >
+    // declare an optimized RCObject write barrier
+    // put spaces around the template arg to avoid possible digraph warnings
+    #define DRCWB(type) MMgc::WriteBarrierRC< type >
+#endif // AVMSHELL_BUILD
 
 // This is used in places where the mutator has convinced itself the
 // barrier isn't necessary.  FIXME: The idea is to check this in DEBUG
