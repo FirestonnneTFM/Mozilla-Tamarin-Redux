@@ -234,7 +234,7 @@ namespace MMgc
                 GCAssert((b->flags[0] & kQueued) == 0);
                 GC* gc = b->gc;
 
-                // GC::Finalize calls GC::ClearUnmarkedWeakRefs before calling GCAlloc::Finalize,
+                // GC::Finalize calls GC::MarkOrClearWeakRefs before calling GCAlloc::Finalize,
                 // ergo there should be no unmarked objects with weak refs.
                 
                 GCAssertMsg((b->flags[0] & kHasWeakRef) == 0, "No unmarked object should have a weak ref at this point");

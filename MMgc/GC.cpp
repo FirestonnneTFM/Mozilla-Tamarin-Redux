@@ -955,7 +955,7 @@ namespace MMgc
 
     void GC::Finalize()
     {
-        ClearUnmarkedWeakRefs();
+        MarkOrClearWeakRefs();
 
         for(int i=0; i < kNumSizeClasses; i++) {
             containsPointersRCAllocs[i]->Finalize();
@@ -1025,7 +1025,17 @@ namespace MMgc
             GetGCBits(realptr) &= ~kHasWeakRef;
     }
     
-    void GC::ClearUnmarkedWeakRefs()
+    /* The main wrinkle here is to keep a weakref alive with its object: 
+     * The invariant is that there is a weakref object for an object iff the
+     * kHasWeakRef bit is set on the object.  With weakrefs not being finalized,
+     * a weakref could be GC'd without properly clearing the kHasWeakRef bit
+     * in the object if the object is kept alive by a strong pointer, thus
+     * violating the invariant.  The invariant is upheld by keeping the weakref
+     * alive.  (I suppose it could also have been upheld by clearing the
+     * kHasWeakRef bit on the object and letting the weakref be GC'd, but 
+     * that seemed trickier.  Bugzilla 656942.)
+     */
+    void GC::MarkOrClearWeakRefs()
     {
         {
             GCHashtable::Iterator it(&weakRefs);
@@ -1043,6 +1053,8 @@ namespace MMgc
 #endif
                     ClearWeakRef(o, false);
                 }
+                else if (!GC::GetMark(w))
+                    GC::SetMark(w);
             }
         }
         weakRefs.prune();

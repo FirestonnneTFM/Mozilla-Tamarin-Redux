@@ -47,8 +47,24 @@
 
 namespace MMgc
 {
-    // new improved weak ref
-    class GCWeakRef : public GCFinalizedObject
+    /**
+     * Weak reference type (not exposed to AS3).
+     *
+     * GC::GetWeakRef(o) will return a unique GCWeakRef instance for the object o, possibly
+     * creating that instance.  The weakref instance holds o weakly, that is, if the last 
+     * reference to o is from the weakref instance then o becomes reclaimable.
+     *
+     * The implementation maintains a table of mappings from objects to their weakrefs.
+     *
+     * When the GC prepares to run finalizers it walks the mappings table.  If a weakref
+     * holds an object that is not marked then the weakref is cleared.  If a weakref
+     * holds an object that is marked, but the weakref is itself not marked, then the weakref
+     * becomes marked, that is, weakrefs live at least as long as their objects.
+     *
+     * When finalizers run there is no reason to handle weakrefs specially, though GetWeakRef
+     * has to check that a weak reference is not created to a dead object by a finalizer.
+     */
+    class GCWeakRef : public GCObject
     {
         friend class GC;
     public:
@@ -90,13 +106,6 @@ namespace MMgc
 
         GCObject *peek() { return (GCObject*)m_obj; }
 
-        ~GCWeakRef()
-        {
-            if(m_obj) {
-                GC::GetGC(this)->ClearWeakRef(m_obj);
-            }
-        }
-
     private:
         /**
          * When allocating a GCWeakRef, tell the GC we don't contain pointers
@@ -104,10 +113,13 @@ namespace MMgc
          */
         static void *operator new(size_t size, GC *gc)
         {
-            return gc->Alloc(size, GC::kFinalize);
+            return gc->Alloc(size, 0);
         }
 
-        // private, only GC can access
+        /**
+         * GCWeakRef cannot be subclassed.
+         * GCWeakRef should never be destructed, the GC should just reclaim the object.
+         */
         GCWeakRef(const void *obj) : m_obj(obj)
         {
 #ifdef MMGC_MEMORY_INFO
