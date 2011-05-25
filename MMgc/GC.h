@@ -1404,8 +1404,11 @@ namespace MMgc
 
         GCHashtable weakRefs;
 
-        // Remove all weak references whose non-NULL objects are unmarked from the table.
-        void ClearUnmarkedWeakRefs();
+        // If a weak reference in the weakref table points to an unmarked object then 
+        // clear the weak reference and remove it from the weakref table.  If a weak
+        // reference in the table points to a marked object and is itself unmarked then
+        // mark it.
+        void MarkOrClearWeakRefs();
 
         // BEGIN FLAGS
         // The flags are hot, group them and hope they end up in the same cache line
