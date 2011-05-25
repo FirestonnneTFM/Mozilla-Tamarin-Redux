@@ -63,6 +63,7 @@ namespace avmshell
         , incremental(true)
         , exactgc(true)
         , drc(true)
+        , drcValidation(false)
         , markstackAllowance(0)
         , fixedcheck(true)
         , gcthreshold(0)
