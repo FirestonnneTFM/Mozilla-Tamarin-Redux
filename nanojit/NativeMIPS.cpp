@@ -587,6 +587,63 @@ namespace nanojit
         TAG("asm_d2i(ins=%p{%s})", ins, lirNames[ins->opcode()]);
     }
 
+#ifdef VMCFG_FLOAT
+    void Assembler::asm_ui2f(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_ui2f not yet supported for this architecture");
+    }
+    void Assembler::asm_i2f(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_i2f not yet supported for this architecture");
+    }
+    void Assembler::asm_f2i(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_f2i not yet supported for this architecture");
+    }
+    void Assembler::asm_f2d(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_f2d not yet supported for this architecture");
+    }
+    void Assembler::asm_d2f(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_d2f not yet supported for this architecture");
+    }
+    void Assembler::asm_immf(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_immf not yet supported for this architecture");
+    }
+    void Assembler::asm_immf4(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_immf4 not yet supported for this architecture");
+    }
+    void Assembler::asm_f2f4(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_f2f4 not yet supported for this architecture");
+    }
+    void Assembler::asm_f4comp(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_f4comp not yet supported for this architecture");
+    }
+    void Assembler::asm_condf4(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "asm_condf4 not yet supported for this architecture");
+    }
+    void
+        Assembler::asm_load128(LIns* ins)
+    {
+        (void)ins;
+        NanoAssertMsg(0, "asm_load128 not yet supported for this architecture");
+    }
+
+    void
+        Assembler::asm_store128(LOpcode op, LIns* value, int dr, LIns* base)
+    {
+        (void)op; (void)value;(void)dr;(void)base;
+        NanoAssertMsg(0, "asm_store128 not yet supported for this architecture");
+    }
+#endif // VMCFG_FLOAT
+
+
     void Assembler::asm_fop(LIns *ins)
     {
         NanoAssert(cpu_has_fpu);
@@ -1694,8 +1751,9 @@ namespace nanojit
     }
 
     void
-    Assembler::asm_spill(Register rr, int d, bool quad)
+    Assembler::asm_spill(Register rr, int d, IFFLOAT(int8_t nWords, bool quad) )
     {
+        FLOAT_ONLY(bool quad = nWords==2);
         USE(quad);
         NanoAssert(d);
         if (IsFpReg(rr)) {

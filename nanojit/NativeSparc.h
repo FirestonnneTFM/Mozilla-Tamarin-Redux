@@ -81,6 +81,7 @@ namespace nanojit
 #define NJ_F2I_SUPPORTED                1
 #define NJ_SOFTFLOAT_SUPPORTED          0
 #define NJ_DIVI_SUPPORTED               0
+#define RA_PREFERS_LSREG                1
 
     const int NJ_ALIGN_STACK = 16;
 
@@ -195,7 +196,11 @@ namespace nanojit
                                         _rmask_(F6)  | _rmask_(F14) | _rmask_(F16) |
                                         _rmask_(F18) | _rmask_(F20) | _rmask_(F22);
     static const RegisterMask AllowableFlagRegs = GpRegs;
-
+#ifdef VMCFG_FLOAT // Just a hack so that it compiles with float enabled
+#define FpSRegs FpRegs
+#define FpDRegs FpRegs
+#define FpQRegs FpRegs
+#endif
     verbose_only( extern const char* regNames[]; )
 
 #define DECLARE_PLATFORM_STATS()

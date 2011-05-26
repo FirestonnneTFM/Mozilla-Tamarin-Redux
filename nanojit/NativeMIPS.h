@@ -221,6 +221,10 @@ namespace nanojit {
         REGMASK(FT0) | REGMASK(FT1) | REGMASK(FT2) |
         REGMASK(FT3) | REGMASK(FT4) | REGMASK(FT5);
 
+#define FpDRegs FpRegs
+#define FpSRegs 0x0 // not implemented
+#define FpQRegs 0x0 // not implemented
+
     static inline bool IsGpReg(Register r)
     {
         return (REGMASK(r) & GpRegs) != 0;
