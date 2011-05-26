@@ -164,7 +164,7 @@ class tamarinredux:
 
     windows_compile_factory = factory.BuildFactory()
     windows_compile_factory.addStep(sync_clean)
-    windows_compile_factory.addStep(sync_clone(url=HG_URL))
+    windows_compile_factory.addStep(sync_clone_sandbox)
     windows_compile_factory.addStep(sync_update)
     windows_compile_factory.addStep(bb_slaveupdate(slave="windows"))
     windows_compile_factory.addStep(compile_builtin)
@@ -206,7 +206,7 @@ class tamarinredux:
     #######################################
     windows_64_compile_factory = factory.BuildFactory()
     windows_64_compile_factory.addStep(sync_clean)
-    windows_64_compile_factory.addStep(sync_clone(url=HG_URL))
+    windows_64_compile_factory.addStep(sync_clone_sandbox)
     windows_64_compile_factory.addStep(sync_update)
     windows_64_compile_factory.addStep(bb_slaveupdate(slave="windows64"))
     windows_64_compile_factory.addStep(compile_builtin)
@@ -230,7 +230,7 @@ class tamarinredux:
     ############################################
     mac_intel_105_compile_factory = factory.BuildFactory()
     mac_intel_105_compile_factory.addStep(sync_clean)
-    mac_intel_105_compile_factory.addStep(sync_clone(url=HG_URL))
+    mac_intel_105_compile_factory.addStep(sync_clone_sandbox)
     mac_intel_105_compile_factory.addStep(sync_update)
     mac_intel_105_compile_factory.addStep(bb_slaveupdate(slave="mac-intel-10_5"))
     mac_intel_105_compile_factory.addStep(compile_builtin)
@@ -254,7 +254,7 @@ class tamarinredux:
     ##########################################
     mac_intel_64_compile_factory = factory.BuildFactory()
     mac_intel_64_compile_factory.addStep(sync_clean)
-    mac_intel_64_compile_factory.addStep(sync_clone(url=HG_URL))
+    mac_intel_64_compile_factory.addStep(sync_clone_sandbox)
     mac_intel_64_compile_factory.addStep(sync_update)
     mac_intel_64_compile_factory.addStep(bb_slaveupdate(slave="mac64-intel"))
     mac_intel_64_compile_factory.addStep(compile_builtin)
@@ -278,7 +278,7 @@ class tamarinredux:
     ###################################
     linux_compile_factory = factory.BuildFactory()
     linux_compile_factory.addStep(sync_clean)
-    linux_compile_factory.addStep(sync_clone(url=HG_URL))
+    linux_compile_factory.addStep(sync_clone_sandbox)
     linux_compile_factory.addStep(sync_update)
     linux_compile_factory.addStep(bb_slaveupdate(slave="linux"))
     linux_compile_factory.addStep(compile_builtin)
@@ -302,7 +302,7 @@ class tamarinredux:
     #####################################
     linux_64_compile_factory = factory.BuildFactory()
     linux_64_compile_factory.addStep(sync_clean)
-    linux_64_compile_factory.addStep(sync_clone(url=HG_URL))
+    linux_64_compile_factory.addStep(sync_clone_sandbox)
     linux_64_compile_factory.addStep(sync_update)
     linux_64_compile_factory.addStep(bb_slaveupdate(slave="linux64"))
     linux_64_compile_factory.addStep(compile_builtin)
@@ -327,7 +327,7 @@ class tamarinredux:
     ###########################################
     solaris_sparc_compile_factory = factory.BuildFactory()
     solaris_sparc_compile_factory.addStep(sync_clean)
-    solaris_sparc_compile_factory.addStep(sync_clone(url=HG_URL))
+    solaris_sparc_compile_factory.addStep(sync_clone_sandbox)
     solaris_sparc_compile_factory.addStep(sync_update)
     solaris_sparc_compile_factory.addStep(bb_slaveupdate(slave="solaris-sparc"))
     solaris_sparc_compile_factory.addStep(compile_builtin)
@@ -351,7 +351,7 @@ class tamarinredux:
 
     android_compile_factory = factory.BuildFactory()
     android_compile_factory.addStep(sync_clean)
-    android_compile_factory.addStep(sync_clone(url=HG_URL))
+    android_compile_factory.addStep(sync_clone_sandbox)
     android_compile_factory.addStep(sync_update)
     android_compile_factory.addStep(bb_slaveupdate(slave="android"))
     android_compile_factory.addStep(compile_builtin)
@@ -372,7 +372,7 @@ class tamarinredux:
     ###############################
     linux_arm_compile_factory = factory.BuildFactory()
     linux_arm_compile_factory.addStep(sync_clean)
-    linux_arm_compile_factory.addStep(sync_clone(url=HG_URL))
+    linux_arm_compile_factory.addStep(sync_clone_sandbox)
     linux_arm_compile_factory.addStep(sync_update)
     linux_arm_compile_factory.addStep(bb_slaveupdate(slave="linux-arm"))
     linux_arm_compile_factory.addStep(compile_builtin)
@@ -394,7 +394,7 @@ class tamarinredux:
     ################################
     linux_mips_compile_factory = factory.BuildFactory()
     linux_mips_compile_factory.addStep(sync_clean)
-    linux_mips_compile_factory.addStep(sync_clone(url=HG_URL))
+    linux_mips_compile_factory.addStep(sync_clone_sandbox)
     linux_mips_compile_factory.addStep(sync_update)
     linux_mips_compile_factory.addStep(bb_slaveupdate(slave="linux-mips"))
     linux_mips_compile_factory.addStep(compile_builtin)
@@ -869,7 +869,7 @@ class tamarinredux:
     ##################################
     windows_deep_factory = factory.BuildFactory()
     windows_deep_factory.addStep(sync_clean)
-    windows_deep_factory.addStep(sync_clone(url=HG_URL))
+    windows_deep_factory.addStep(sync_clone_sandbox)
     windows_deep_factory.addStep(sync_update)
     windows_deep_factory.addStep(bb_slaveupdate(slave="windows-deep"))
     windows_deep_factory.addStep(compile_builtin)
@@ -920,7 +920,7 @@ class tamarinredux:
     ##################################
     windows_64_deep_factory = factory.BuildFactory()
     windows_64_deep_factory.addStep(sync_clean)
-    windows_64_deep_factory.addStep(sync_clone(url=HG_URL))
+    windows_64_deep_factory.addStep(sync_clone_sandbox)
     windows_64_deep_factory.addStep(sync_update)
     windows_64_deep_factory.addStep(bb_slaveupdate(slave="windows64-deep"))
     windows_64_deep_factory.addStep(compile_builtin)
@@ -980,7 +980,7 @@ class tamarinredux:
     ##################################
     mac_deep_factory = factory.BuildFactory()
     mac_deep_factory.addStep(sync_clean)
-    mac_deep_factory.addStep(sync_clone(url=HG_URL))
+    mac_deep_factory.addStep(sync_clone_sandbox)
     mac_deep_factory.addStep(sync_update)
     mac_deep_factory.addStep(bb_slaveupdate(slave="mac-deep"))
     mac_deep_factory.addStep(compile_builtin)
@@ -1038,7 +1038,7 @@ class tamarinredux:
     ################################
     mac64_deep_factory = factory.BuildFactory()
     mac64_deep_factory.addStep(sync_clean)
-    mac64_deep_factory.addStep(sync_clone(url=HG_URL))
+    mac64_deep_factory.addStep(sync_clone_sandbox)
     mac64_deep_factory.addStep(sync_update)
     mac64_deep_factory.addStep(bb_slaveupdate(slave="mac64-deep"))
     mac64_deep_factory.addStep(compile_builtin)
@@ -1081,7 +1081,7 @@ class tamarinredux:
     ##################################
     linux_deep_factory = factory.BuildFactory()
     linux_deep_factory.addStep(sync_clean)
-    linux_deep_factory.addStep(sync_clone(url=HG_URL))
+    linux_deep_factory.addStep(sync_clone_sandbox)
     linux_deep_factory.addStep(sync_update)
     linux_deep_factory.addStep(bb_slaveupdate(slave="linux-deep"))
     linux_deep_factory.addStep(compile_builtin)
@@ -1135,7 +1135,7 @@ class tamarinredux:
     ######################################
     linux_arm_deep_factory = factory.BuildFactory()
     linux_arm_deep_factory.addStep(sync_clean)
-    linux_arm_deep_factory.addStep(sync_clone(url=HG_URL))
+    linux_arm_deep_factory.addStep(sync_clone_sandbox)
     linux_arm_deep_factory.addStep(sync_update)
     linux_arm_deep_factory.addStep(bb_slaveupdate(slave="linux-arm-deep"))
     linux_arm_deep_factory.addStep(download_testmedia)
@@ -1165,7 +1165,7 @@ class tamarinredux:
     #######################################
     linux_mips_deep_factory = factory.BuildFactory()
     linux_mips_deep_factory.addStep(sync_clean)
-    linux_mips_deep_factory.addStep(sync_clone(url=HG_URL))
+    linux_mips_deep_factory.addStep(sync_clone_sandbox)
     linux_mips_deep_factory.addStep(sync_update)
     linux_mips_deep_factory.addStep(bb_slaveupdate(slave="linux-mips-deep"))
     linux_mips_deep_factory.addStep(download_testmedia)
@@ -1188,7 +1188,7 @@ class tamarinredux:
     ########################################
     solaris_sparc_deep_factory = factory.BuildFactory()
     solaris_sparc_deep_factory.addStep(sync_clean)
-    solaris_sparc_deep_factory.addStep(sync_clone(url=HG_URL))
+    solaris_sparc_deep_factory.addStep(sync_clone_sandbox)
     solaris_sparc_deep_factory.addStep(sync_update)
     solaris_sparc_deep_factory.addStep(bb_slaveupdate(slave="solaris-sparc-deep"))
     solaris_sparc_deep_factory.addStep(compile_builtin)
@@ -1226,7 +1226,7 @@ class tamarinredux:
     #########################################
     solaris_sparc2_deep_factory = factory.BuildFactory()
     solaris_sparc2_deep_factory.addStep(sync_clean)
-    solaris_sparc2_deep_factory.addStep(sync_clone(url=HG_URL))
+    solaris_sparc2_deep_factory.addStep(sync_clone_sandbox)
     solaris_sparc2_deep_factory.addStep(sync_update)
     solaris_sparc2_deep_factory.addStep(bb_slaveupdate(slave="solaris-sparc-deep"))
     solaris_sparc2_deep_factory.addStep(compile_builtin)
