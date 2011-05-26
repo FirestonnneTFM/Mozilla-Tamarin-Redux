@@ -1,3 +1,5 @@
+/* -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -34,105 +36,57 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+package abcasm;
 
-/*
- *  Tests arithmetic with the constant pools.
+
+/**
+ * Helper class that holds a Float4 value, needed since Java 
+ * doesn't have a builtin float4 type
+ *
  */
-function main():*
+public class Float4 implements Comparable
 {
-	getlocal0
-	pushscope
-	findpropstrict	{package}::print
-	setlocal1
+    public Float x,y,z,w;
+    
+    public Float4(){
+       x=y=z=w=Float.NaN;    
+    }
+    public Float4(Float x, Float y, Float z, Float w)
+    {
+        this.x=x; this.y=y; this.z = z; this.w = w;
+    }
+    
+    public String toString()
+    {
+        return x.toString()+","+y.toString()+","+z.toString()+","+w.toString();
+    }
 
-	pushstring "byte 9 + short 938="
-    pushbyte 9
-	pushshort 938
-	add
-	add // string + int
-	getlocal1
-	swap
-	callproperty print(1)
+     public int compareTo(Object anotherF4) throws ClassCastException 
+     {
+        if (!(anotherF4 instanceof Float4))
+          throw new ClassCastException("A Float4 object expected.");
 
-	pushstring "int 3652147 + uint 0x80000000="
-	pushint 3652147
-	pushuint 0x80000000
-	add
-	add
-	getlocal1
-	swap
-	callproperty print(1)
+        Float4 o = (Float4) anotherF4;
+        if(x.compareTo(o.x)!=0) return x.compareTo(o.x);
+        if(y.compareTo(o.y)!=0) return y.compareTo(o.y);
+        if(z.compareTo(o.z)!=0) return z.compareTo(o.z);
+        return w.compareTo(o.w);
+      }    
 
-	pushstring "9.391 / 3.2="
-	pushdouble 9.391
-	pushdouble 3.2
-	divide
-	add //  String add
-	getlocal1
-	swap
-	callproperty print(1)
+     public boolean equals(Object anotherF4) 
+     {
+        if (!(anotherF4 instanceof Float4)) return false;
+        return compareTo(anotherF4) == 0;
+     }
+     
+     public int hashCode()
+     {
+         int result = Float.floatToIntBits(x);
+         result = result * 37 + Float.floatToIntBits(y);
+         result = result * 37 + Float.floatToIntBits(z);
+         result = result * 37 + Float.floatToIntBits(w);
+         return result;
+     }
 
-	pushstring "convert_f(9.391) / convert_f(3.2)="
-	pushdouble 9.391
-	convert_f
-	pushdouble 3.2
-	convert_f
-	divide
-	add //  String add
-	getlocal1
-	swap
-	callproperty print(1) 
-
-	pushstring "9.391f / 3.2f="
-	pushfloat 9.391f
-	pushfloat 3.2f
-	divide
-	add //  String add
-	getlocal1
-	swap
-	callproperty print(1)
-
-	pushstring "9.391f * 3.2f="
-	pushfloat 9.391f
-	pushfloat 3.2f
-	multiply
-	add //  String add
-	getlocal1
-	swap
-	callproperty print(1)
-
-	pushstring "9.391f + 3.2f="
-	pushfloat 9.391f
-	pushfloat 3.2f
-	add
-	add //  String add
-	getlocal1
-	swap
-	callproperty print(1)
-
-	pushstring "9.391f - 3.2f="
-	pushfloat 9.391f
-	pushfloat 3.2f
-	subtract
-	add //  String add
-	getlocal1
-	swap
-	callproperty print(1)
-
-	pushstring "9.391f / 3.2f="
-	pushfloat4 9.391f,-2.2f,NaN,4.5
-	pushstring "3.2"
-	unplus
-	add
-	pushdouble 1.0
-	convert_f4
-	pushfloat 1.0f
-	unplus
-	add
-	multiply
-	getlocal1
-	swap
-	callproperty print(1)
-
-	returnvoid
 }
+

@@ -624,6 +624,26 @@ integer_operands_insn
       ;
 
 /*
+ * This ugly workaround with pushfloat_helper_helper is required because ANTLR 3.0.1
+ * does not handle automatically generated local float variables correctly 
+ * (always initializes them to 0.0 rather than to 0.0f which causes compilation errors).
+ * This bug has been fixed in ANTLR 3.1 (http://www.antlr.org/jira/browse/ANTLR-188)
+ */
+pushfloat_helper returns[Float result]
+    : 'pushfloat' FLOAT_LITERAL
+    {
+        result = new Float(Float.parseFloat($FLOAT_LITERAL.getText()));
+    }
+    | 'pushfloat' MINUS FLOAT_LITERAL
+    {
+        result = new Float(-Float.parseFloat($FLOAT_LITERAL.getText()));
+    }
+    | 'pushfloat' 'NaN'
+    {
+        result = new Float(Float.NaN);
+    }
+    ;
+/*
  *  Instructions that operate on a pool.
  */
 pool_insn
@@ -638,6 +658,16 @@ pool_insn
     | 'pushdouble' double_operand = double_literal
     {
         $decl::method_body_info.insn(OP_pushdouble, asmCore.createPoolId(new Double(double_operand)));
+    }
+    | pushfloat_op = pushfloat_helper
+    {
+        asmCore.floatSupport = true;
+        $decl::method_body_info.insn(OP_pushfloat, asmCore.createPoolId(pushfloat_op));
+    }
+    | 'pushfloat4' float4_operand = float4_literal
+    {
+        asmCore.floatSupport = true;
+        $decl::method_body_info.insn(OP_pushfloat4, asmCore.createPoolId(float4_operand));
     }
     | 'pushnamespace' ns = namespace_specification
     {
@@ -722,7 +752,7 @@ no_operand_insn
         'label' | 'lessequals' | 'lessthan' | 'lshift' |
         'modulo' | 'multiply' | 'multiply_i' |
         'negate' | 'negate_i' | 'newactivation' | 'nextname' | 'nextvalue' | 'nop' | 'not' |
-        'pop' | 'popscope' | 'pushfalse' | 'pushtrue' | 'pushnan' | 'pushnull' | 'pushscope' | 
+        'pop' | 'popscope' | 'pushfalse' | 'pushtrue' | 'pushnan' | 'pushnull' | 'pushscope' |
         'pushundefined' | 'pushwith' |
         'returnvalue' | 'returnvoid' | 'rshift' |
         'setlocal0' | 'setlocal1' | 'setlocal2' | 'setlocal3' |
@@ -732,6 +762,11 @@ no_operand_insn
         | 'bkpt' | 'timestamp' 
         )
     {
+        $decl::method_body_info.insn(opcode);
+    }
+    | opcode = ('convert_f' | 'convert_f4' | 'unplus')
+    {
+        asmCore.floatSupport = true;
         $decl::method_body_info.insn(opcode);
     }
     ;
@@ -1054,6 +1089,38 @@ double_literal returns [double result]
     }
     ;
 
+float_literal returns [float result = 0.0f]
+    : FLOAT_LITERAL
+    {
+        result = Float.parseFloat($FLOAT_LITERAL.getText());
+    }
+    | MINUS FLOAT_LITERAL
+    {
+        result = - Float.parseFloat($FLOAT_LITERAL.getText());
+    }
+    | 'NaN'
+    {
+        result = Float.NaN;
+    }
+    ;
+
+float4_component returns [double result]
+    : (dbl = double_literal) { result = dbl; }
+    | (FLOAT_LITERAL)
+    {
+        result = (double) Float.parseFloat($FLOAT_LITERAL.getText());
+    }
+    | (MINUS FLOAT_LITERAL)
+    {
+        result = (double) - Float.parseFloat($FLOAT_LITERAL.getText());
+    }
+    ;
+float4_literal returns [Float4 result]
+    : (f4x = float4_component) COMMA (f4y = float4_component) COMMA (f4z = float4_component) COMMA (f4w = float4_component)
+    {
+        result = new Float4((float)f4x,(float)f4y,(float)f4z,(float)f4w);
+    }
+    ;
 hex_literal returns [int result]
     : HEX_LITERAL
     {
@@ -1126,12 +1193,12 @@ FLOATING_POINT_LITERAL
     |   '.' ('0'..'9')+ Exponent? 
     |   ('0'..'9')+ Exponent? 
     ;
+    
+FLOAT_LITERAL
+    : FLOATING_POINT_LITERAL 'f';
 
 fragment
 Exponent : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
-
-fragment
-FloatTypeSuffix : ('f'|'F'|'d'|'D') ;
 
 /*
  *  FIXME: Turn escape sequences into the correct chars
