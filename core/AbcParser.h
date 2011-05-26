@@ -105,27 +105,6 @@ namespace avmplus
         static void addAOTDebugInfo(PoolObject *pool);
 #endif
 
-        // If floatSupport is set (introduced in Brannan) then:
-        //
-        //  - The ABC contains a pool of float values
-        //  - OP_pushfloat is an instruction
-        //  - OP_coerce_f is an instruction
-        //  - The type of OP_add is (Number|String|float) while the type
-        //    of OP_subtract, OP_multiply, OP_divide, OP_modulo, OP_negate,
-        //    OP_increment, OP_inclocal, OP_decrement, and OP_declocal is
-        //    (Number|float).  In older content they were (Number|String)
-        //    and (Number) respectively.
-        //
-        // (Subject to revision)
-
-        /*const*/ unsigned floatSupport:1;
-
-        // If float4Support is set (introduced in Brannan) then:
-        //
-        // - TBD
-
-        /*const*/ unsigned float4Support:1;
-        
     protected:
         PoolObject* parse(ApiVersion apiVersion);
         MethodInfo* resolveMethodInfo(uint32_t index) const;
@@ -177,6 +156,35 @@ namespace avmplus
          */
         double readDouble(const uint8_t* &p) const;
 
+        /** 
+         *   If floatSupport is set (introduced in Cyrill) then:
+         *
+         *  - The ABC contains a pool of float values and a pool of float4 values
+         *  - OP_pushfloat is an instruction
+         *  - OP_pushfloat4 is an instruction
+         *  - OP_coerce_f is an instruction
+         *  - OP_coerce_f4 is an instruction
+         *  - OP_unplus is an instruction (unary plus; "coerce to numeric"
+         *  - The type of OP_add is (Number|String|float|float4) while the type
+         *    of OP_subtract, OP_multiply, OP_divide, OP_modulo, OP_negate,
+         *    OP_increment, OP_inclocal, OP_decrement, and OP_declocal is
+         *    (Number|float|float4).  In older content they were (Number|String)
+         *    and (Number) respectively.
+         *
+         * (Subject to revision)
+         */
+#ifdef VMCFG_FLOAT
+        /**
+         * reads in 4 bytes in little endian order and stores in
+         * memory as an ieee float
+         */
+        float readFloat(const uint8_t* &p) const;
+        /**
+         * reads in 4x4 bytes in little endian order and stores in
+         * memory as a float4 constant (i.e. 4 ieee floats)
+         */
+        float4_t readFloat4(const uint8_t* &p) const;
+#endif
         /**
          * Reads in 2 bytes and turns them into a 16 bit number.  Always reads in 2 bytes.  Currently
          * only used for version number of the ABC file and for version 11 support.

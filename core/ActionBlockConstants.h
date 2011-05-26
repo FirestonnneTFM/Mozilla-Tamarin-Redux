@@ -53,6 +53,9 @@ namespace avmplus
         enum CPoolKind {
             CONSTANT_unused_0x00        = 0x00,
             CONSTANT_Utf8               = 0x01,
+#ifdef VMCFG_FLOAT
+            CONSTANT_Float              = 0x02,
+#endif 
             CONSTANT_Int                = 0x03,
             CONSTANT_UInt               = 0x04,
             CONSTANT_PrivateNs          = 0x05, // non-shared namespace
@@ -77,7 +80,10 @@ namespace avmplus
             CONSTANT_StaticProtectedNs  = 0x1A,
             CONSTANT_MultinameL         = 0x1B,
             CONSTANT_MultinameLA        = 0x1C,
-            CONSTANT_TypeName           = 0x1D
+            CONSTANT_TypeName           = 0x1D,
+#ifdef VMCFG_FLOAT
+            CONSTANT_Float4             = 0x1E,
+#endif
         };
         /*@}*/
 

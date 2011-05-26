@@ -83,7 +83,7 @@ namespace avmplus
         const char * const constantNames[] = {
             "const-0",
             "utf8",//const int CONSTANT_Utf8         = 0x01;
-            "const-2",
+            "float", // const int CONSTANT_Float = 0x02;
             "int",//const int CONSTANT_Int = 0x03;
             "uint",//const int CONSTANT_UInt = 0x04;
             "private",//const int CONSTANT_PrivateNS = 0x05;
@@ -111,6 +111,7 @@ namespace avmplus
             "multinamelate", //const int CONSTANT_MultinameL        = 0x1B, // o.[], ns, rt name
             "@multinamelate", //CONSTANT_MultinameLA        = 0x1C, // o.@[], ns, rt attr-name
             "typename", //CONSTANT_TypeName = 0x1D
+            "float4", // const int CONSTANT_Float4 = 0x1E;
         };
 
         const char * const traitNames[] = {

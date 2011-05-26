@@ -55,6 +55,27 @@ namespace avmplus
         double value;
     };
 
+#ifdef VMCFG_FLOAT
+    // The floats actually take 8 bytes in heap - all allocations are 8-byte
+    // aligned. So we need to add some padding here.
+    // (We use compile-time assertions to verify GCFloat is 8 bytes.)
+    class GCFloat : public MMgc::GCObject
+    {
+    public:
+        float value;
+    private:
+        int32_t padding;
+    };
+
+    // This is intended to be exactly the size of a float4_t in memory.
+    // (We use compile-time assertions to verify this.)
+    class GCFloat4 : public MMgc::GCObject
+    {
+    public:
+        float4_t value;
+    };
+#endif // VMCFG_FLOAT
+
     // Used within ConstantStringContainer
     union ConstantStringData
     {
@@ -120,6 +141,10 @@ namespace avmplus
         DataList<int32_t>       GC_STRUCTURE(cpool_int);
         DataList<uint32_t>      GC_STRUCTURE(cpool_uint);
         GCList<GCDouble>        GC_STRUCTURE(cpool_double);
+#ifdef VMCFG_FLOAT
+        GCList<GCFloat>         GC_STRUCTURE(cpool_float); // We allocate 8 bytes/float in heap.
+        GCList<GCFloat4>        GC_STRUCTURE(cpool_float4); 
+#endif
         RCList<Namespace>       GC_STRUCTURE(cpool_ns);
         GCList<NamespaceSet>    GC_STRUCTURE(cpool_ns_set);
 
@@ -146,6 +171,10 @@ namespace avmplus
         uint32_t constantIntCount;
         uint32_t constantUIntCount;
         uint32_t constantDoubleCount;
+#ifdef VMCFG_FLOAT
+        uint32_t constantFloatCount;
+        uint32_t constantFloat4Count;
+#endif
         uint32_t constantStringCount;
         uint32_t constantNsCount;
         uint32_t constantNsSetCount;
@@ -190,6 +219,13 @@ namespace avmplus
         static bool isLegalDefaultValue(BuiltinType bt, Atom value);
 
         int32_t version;
+        
+        static const int32_t kVERSION_NoExceptionHandlers = 0x002E000F;// (46<<16|15), i.e. major v.46, minor v.15
+#ifdef VMCFG_FLOAT
+        static const int32_t kVERSION_FloatSupport        = 0x002F0010;// (47<<16|16), i.e. Cyrill, major v.47, minor v.16
+        bool hasFloatSupport() const        { return version >= kVERSION_FloatSupport; }
+#endif 
+        bool hasExceptionSupport() const    { return version != kVERSION_NoExceptionHandlers; }
 
         ScriptBuffer code();
         bool isCodePointer(const uint8_t* pos);

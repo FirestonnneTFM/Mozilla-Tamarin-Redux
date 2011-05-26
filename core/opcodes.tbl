@@ -57,6 +57,12 @@
  */
 
 //--------------------------------------------------------------------------------------------------------
+#ifdef VMCFG_FLOAT
+#   define ABC_OP_F ABC_OP
+#else
+#   define ABC_OP_F(o,t,s,i,n) ABC_UNUSED_OP(-1, 0, 0, 0, DISABLED_##n)
+#endif
+
 //              opCount  throw  stack  internal  name                   hex      
 ABC_UNUSED_OP(  -1,      0,     0,     0,        0x00)                  // 0x00  
 ABC_OP(         0,       0,     0,     0,        bkpt)                  // 0x01  
@@ -92,7 +98,7 @@ ABC_OP(         0,       1,     -1,    0,        nextname)              // 0x1E
 ABC_OP(         0,       1,     -1,    0,        hasnext)               // 0x1F  
 ABC_OP(         0,       0,     1,     0,        pushnull)              // 0x20  
 ABC_OP(         0,       0,     1,     0,        pushundefined)         // 0x21  
-ABC_UNUSED_OP(  -1,      0,     0,     0,        0x22)                  // 0x22  
+ABC_OP_F(       1,       0,     1,     0,        pushfloat)             // 0x22  
 ABC_OP(         0,       1,     -1,    0,        nextvalue)             // 0x23  
 ABC_OP(         1,       0,     1,     0,        pushbyte)              // 0x24  
 ABC_OP(         1,       0,     1,     0,        pushshort)             // 0x25  
@@ -142,7 +148,7 @@ ABC_OP(         0,       0,     0,     0,        sxi1)                  // 0x50
 ABC_OP(         0,       0,     0,     0,        sxi8)                  // 0x51  
 ABC_OP(         0,       0,     0,     0,        sxi16)                 // 0x52  
 ABC_OP(         1,       1,     0,     0,        applytype)             // 0x53  
-ABC_UNUSED_OP(  -1,      0,     0,     0,        0x54)                  // 0x54  
+ABC_OP_F(       1,       0,     1,     0,        pushfloat4)            // 0x54  
 ABC_OP(         1,       1,     1,     0,        newobject)             // 0x55  
 ABC_OP(         1,       1,     1,     0,        newarray)              // 0x56  
 ABC_OP(         0,       1,     1,     0,        newactivation)         // 0x57  
@@ -179,9 +185,9 @@ ABC_OP(         0,       1,     0,     0,        convert_d)             // 0x75
 ABC_OP(         0,       1,     0,     0,        convert_b)             // 0x76  
 ABC_OP(         0,       1,     0,     0,        convert_o)             // 0x77  
 ABC_OP(         0,       1,     0,     0,        checkfilter)           // 0x78  
-ABC_UNUSED_OP(  -1,      0,     0,     0,        0x79)                  // 0x79  
-ABC_UNUSED_OP(  -1,      0,     0,     0,        0x7A)                  // 0x7A  
-ABC_UNUSED_OP(  -1,      0,     0,     0,        0x7B)                  // 0x7B  
+ABC_OP_F(       0,       1,     0,     0,        convert_f)             // 0x79  
+ABC_OP_F(       0,       1,     0,     0,        unplus)                // 0x7A  
+ABC_OP_F(       0,       1,     0,     0,        convert_f4)            // 0x7B  
 ABC_UNUSED_OP(  -1,      0,     0,     0,        0x7C)                  // 0x7C  
 ABC_UNUSED_OP(  -1,      0,     0,     0,        0x7D)                  // 0x7D  
 ABC_UNUSED_OP(  -1,      0,     0,     0,        0x7E)                  // 0x7E  
@@ -314,3 +320,4 @@ ABC_UNUSED_OP(  -1,      0,     0,     0,        0xFC)                  // 0xFC
 ABC_UNUSED_OP(  -1,      0,     0,     0,        0xFD)                  // 0xFD  
 ABC_UNUSED_OP(  -1,      0,     0,     0,        0xFE)                  // 0xFE  
 ABC_UNUSED_OP(  -1,      0,     0,     0,        0xFF)                  // 0xFF  
+#undef ABC_OP_F
