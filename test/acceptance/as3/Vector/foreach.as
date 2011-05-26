@@ -105,6 +105,13 @@ AddTestCase(    "forEach simple Number vector",
         "(4560:0)(9120:1)(13680:2)",
         result);
 
+var v1=Vector.<float>([4561,9121,13681]);
+var result="";
+v1.forEach(eacher);
+AddTestCase(    "forEach simple float vector",
+        "(4561:0)(9121:1)(13681:2)",
+        result);
+
 var v1=Vector.<int>([4560,9120,13680]);
 var result="";
 v1.forEach(eacher);

@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 import avmplus.Domain;
 import flash.utils.ByteArray;
+import avmplus.System;
 
 var SECTION = "Misc Tests";
 var VERSION = "";
@@ -47,7 +48,7 @@ var invalidOpcodes:Array = [
     0,
     0x0A,
     0x0B,
-    0x22,
+    0x22,   // OP_pushfloat
     0x33,   // OP_lix8
     0x34,   // OP_lix16
     0x3F,
@@ -58,8 +59,9 @@ var invalidOpcodes:Array = [
     0x5C,   // OP_findpropglobal
     0x69,
     0x6B,
-    0x79,
-    0x7A, 0x7B, 0x7C, 0x7D, 0x7E, 0x7F,
+    0x79,   // OP_convert_f
+    0x7A,   // OP_convert_num
+   0x7B, 0x7C, 0x7D, 0x7E, 0x7F,
     0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F,
     0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D, 0x9E, 0x9F,
     0xB5, 0xB6, 0xB7, 0xB8, 0xB9, 0xBA, 0xBB, 0xBC, 0xBD, 0xBE, 0xBF,
@@ -94,9 +96,20 @@ var bytecode:Array = [0x10, 0, 0x2E, 0,
                       ];
 
 var ba:ByteArray = new ByteArray();
+
+var valid_new_opcodes:Array = new Array();
+
+if(System.swfVersion>=15){
+   // Float support enabled; add the new opcodes as "valid".
+   valid_new_opcodes.push(0x22);   // OP_pushfloat
+   valid_new_opcodes.push(0x79);   // OP_convert_f
+   valid_new_opcodes.push(0x7A);   // OP_convert_num
+}
+
 for (var i = 0; i < bytecode.length; i++) {
     ba.writeByte(bytecode[i]);
 }
+
 
 var d:Domain = new Domain(Domain.currentDomain);
 
@@ -104,8 +117,11 @@ var expected:String = 'VerifyError: Error #1011';
 var actual:String;
 
 for (var i = 0; i < invalidOpcodes.length; i++) {
-    actual = 'no error';
+   actual = 'no error';
     ba[0x1E] = invalidOpcodes[i];   // set the invalid opcode
+   if(valid_new_opcodes.indexOf(ba[0x1E])>=0)
+      continue; // opcode is now valid...
+
     try {
         d.loadBytes(ba);
     } catch (v:VerifyError) {

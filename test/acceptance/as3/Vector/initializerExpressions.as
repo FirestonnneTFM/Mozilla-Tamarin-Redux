@@ -186,6 +186,11 @@ AddTestCase(
     10,
     new <Number> [0,1,2,3,4,5,6,7,8,9].length);
 
+AddTestCase(
+    "length property returns expected value for vector<float>",
+    9,
+    new <float> [0,1,2,3,4,5,6,7,8].length);
+
 // length is used here since comparing the string is a pain
 AddTestCase(
     "xml elements can be used in a vector literal",
@@ -198,6 +203,11 @@ AddTestCase(
     new<String>['not this one', 'not this either','popped'].pop());
 
 AddTestCase(
+    "pop float element from Vector initializer",
+    float(3.15),
+    new<float>[5.15, 4.15,3.15].pop());
+
+AddTestCase(
     "pop empty element from Vector initializer",
     null,
     new<String>['not this one', 'not this either','popped',null,].pop());
@@ -207,6 +217,11 @@ AddTestCase(
     6,
     new<Number>[0.3,.56,.12,3.14].push(4500,.0001));
     
+AddTestCase(
+    "push float element into Vector initializer",
+    6,
+    new<float>[0.3,.56,.12,3.14].push(float(4500),float(.0001))); // TODO: use float literals
+
 AddTestCase(
     "push nothing into Vector initializer",
     1,

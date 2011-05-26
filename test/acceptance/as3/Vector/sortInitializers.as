@@ -80,6 +80,11 @@ AddTestCase(
     "-12,2,17,56,999",
     new<Number>[999,2,56,-12,17].sort(Compare).toString());
 
+AddTestCase(
+    "sort vector of floats",
+    "-12,2,17,56,999",
+    new<float>[999,2,56,-12,17].sort(Compare).toString()); // TODO: use float literals instead of Number literals
+
 
 test();
 

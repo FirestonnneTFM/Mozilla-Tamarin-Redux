@@ -85,7 +85,13 @@ AddTestCase(
 var v1:Vector.<Number>=new Vector.<Number>;
 v1.push(1.1);v1.push(3.14);v1.push(99.99);
 AddTestCase(
-          "small vector toString",
-          "1.1,3.14,99.99",
-          v1.toString() );
+         "small vector toString",
+         "1.1,3.14,99.99",
+         v1.toString() );
+var v2:Vector.<float>=new Vector.<float>;
+v2.push(float(1.1));v2.push(new float(3.14));v2.push(99.99);
+AddTestCase(
+         "small vector of floats toString",
+         "1.100000023841858,3.140000104904175,99.98999786376953",
+         v2.toString() );
 test();

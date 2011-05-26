@@ -105,6 +105,13 @@ AddTestCase("filter small Number vector",
         "0,2,4,6,8",
         result.toString());
 
+var vf:Vector.<float>=new Vector.<float>();
+for (var i=0;i<10;i++) vf[i]=i;
+var result=vf.filter(EvenChecker);
+AddTestCase("filter small float vector",
+        "0,2,4,6,8",
+        result.toString());
+
 var vu:Vector.<uint>=new Vector.<uint>();
 for (var i=0;i<10;i++) vu[i]=i;
 var result=vu.filter(EvenChecker);
