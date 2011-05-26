@@ -147,7 +147,21 @@ AddTestCase("Custom vector sort using sort function with non-standard values",
             testClassVector.sort(mySortFunction).toString()
             );
 
-test();
+// regular sort returning non-standard values
+var myFloatSortFunction:Function = function (x,y):float {
+    if (x.val < y.val)
+        return float(-Infinity);  // TODO: a float literal for "-Infinity"?
+    if (x.val > y.val)
+        return float.MAX_VALUE;
+    return undefined;
+}
+
+AddTestCase("Custom vector sort using sort function with non-standard (float) values",
+            "0,1,2,3,4,5,6,7,8,9,10,11,12,12,13,14,15,16,17,18,19",
+            testClassVector.sort(myFloatSortFunction).toString()
+            );
+
+           test();
 
 function CheckItems( A, E, desc) {
   AddTestCase(

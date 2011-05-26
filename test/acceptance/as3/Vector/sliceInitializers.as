@@ -66,5 +66,9 @@ AddTestCase(
     true,
     new<Number>[3.14,2.73,9999,.0001,1e13].slice(3,-1) is Vector.<Number>)
     
+AddTestCase(
+    "verify Vector<float> return type",
+    true,
+    new<float>[3.14,2.73,9999,.0001,1e13].slice(3,-1) is Vector.<float>)
 
 test();

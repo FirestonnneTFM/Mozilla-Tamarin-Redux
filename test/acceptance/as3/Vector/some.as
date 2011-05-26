@@ -142,6 +142,26 @@ AddTestCase("Verify a value is not in a Number vector",
             false,
             v3.some(ninetyNinePointNineNine));
 
+function ninetyNinePointNineNine_flt(value:float,index,obj) {
+    if (value == float(99.99)) { // todo: use float literal
+        return true;
+    }
+    return false;
+}
+
+
+var v2f = Vector.<float>([1.1, 3.1415, 33.33333, 99.99, 100.0000001]);
+var v3f = Vector.<float>([1.1, 3.1415, 33.33333, 99.9901, 100.0000001]);
+
+AddTestCase("Verify a value is in a float vector",
+            true,
+            v2f.some(ninetyNinePointNineNine_flt));
+
+AddTestCase("Verify a value is not in a float vector",
+            false,
+            v3f.some(ninetyNinePointNineNine_flt));
+
+
 function uint_maxvalue(value,index,obj) {
     if (value == uint.MAX_VALUE) {
         return true;

@@ -74,7 +74,19 @@ AddTestCase(
           new<Number>[1.1,3.14,99.99].toString() );
 
 AddTestCase(
-          "default Number values",
-          "NaN,NaN",
-          new<Number>[NaN,NaN,].toString());
+         "default Number values",
+         "NaN,NaN",
+         new<Number>[NaN,NaN,].toString());
+
+AddTestCase(
+         "small vector of floats toString",
+         "1.100000023841858,3.140000104904175,99.98999786376953",
+         new<float>[float(1.1),float(3.14),float(99.99)].toString() );
+
+AddTestCase(
+         "default float values",
+         "NaN,NaN",
+         new<float>[float.NaN,float.NaN,].toString());
+
+
 test();
