@@ -77,6 +77,32 @@ namespace nanojit
             return p;
         }
 
+        void* alloc(size_t nbytes, size_t align ) {
+            void* p;
+            const size_t align_mask = align - 1;
+            NanoAssert( (align & align_mask) == 0 ); // check alignment is power of 2
+            nbytes = (nbytes + 7) & ~7; // round up
+            size_t albytes = ((uintptr_t)current_top) & align_mask;
+            if(albytes) albytes = align - albytes;
+
+            if (current_top + nbytes + albytes <= current_limit) {
+                p = current_top + albytes;
+                current_top += nbytes + albytes;
+            } else {
+                p = allocSlow(nbytes, /* fallible = */false);
+                NanoAssert(p);
+                albytes = ((uintptr_t)p) & align_mask;
+                if(albytes){
+                    char* cp = (char*)p;
+                    albytes = align - albytes;
+                    NanoAssert( current_top + albytes <= current_limit );
+                    cp += albytes; current_top += albytes;
+                    p = cp;
+                }
+            }
+            return p;
+        }
+
         /** alloc memory, maybe return null. */
         void* fallibleAlloc(size_t nbytes) {
             void* p;
@@ -120,12 +146,19 @@ namespace nanojit
     };
 }
 
+/** global new overload enabling this pattern:  new (allocator, align) T(...) */
+inline void* operator new(size_t size, nanojit::Allocator &a, size_t align) {
+    return a.alloc(size, align);
+}
+
+inline void* operator new(size_t size, nanojit::Allocator *a, size_t align) {
+    return a->alloc(size, align);
+}
+
 /** global new overload enabling this pattern:  new (allocator) T(...) */
 inline void* operator new(size_t size, nanojit::Allocator &a) {
     return a.alloc(size);
 }
-
-/** global new overload enabling this pattern:  new (allocator) T(...) */
 inline void* operator new(size_t size, nanojit::Allocator *a) {
     return a->alloc(size);
 }
@@ -134,10 +167,16 @@ inline void* operator new(size_t size, nanojit::Allocator *a) {
 inline void* operator new[](size_t size, nanojit::Allocator& a) {
     return a.alloc(size);
 }
-
-/** global new[] overload enabling this pattern: new (allocator) T[] */
 inline void* operator new[](size_t size, nanojit::Allocator* a) {
     return a->alloc(size);
+}
+
+/** global new[] overload enabling this pattern: new (allocator,align) T[] */
+inline void* operator new[](size_t size, nanojit::Allocator& a, size_t align) {
+    return a.alloc(size, align);
+}
+inline void* operator new[](size_t size, nanojit::Allocator* a, size_t align) {
+    return a->alloc(size, align);
 }
 
 #endif // __nanojit_Allocator__

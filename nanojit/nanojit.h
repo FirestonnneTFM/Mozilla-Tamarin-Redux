@@ -164,6 +164,20 @@ namespace nanojit
     #define debug_only(x)
 #endif /* DEBUG */
 
+#ifdef VMCFG_FLOAT
+#   ifndef FLOAT_ONLY
+#       define FLOAT_ONLY(...) __VA_ARGS__
+#       define CASEF(X)   case X
+#       define IFFLOAT(a,b)  a
+#   endif
+#else 
+#   ifndef FLOAT_ONLY
+#       define FLOAT_ONLY(...)
+#       define CASEF(X)
+#       define IFFLOAT(a,b)  b
+#   endif
+#endif
+
 #define isS8(i)  ( int32_t(i) == int8_t(i) )
 #define isU8(i)  ( int32_t(i) == uint8_t(i) )
 #define isS16(i) ( int32_t(i) == int16_t(i) )
