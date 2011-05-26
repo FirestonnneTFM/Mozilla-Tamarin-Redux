@@ -3478,7 +3478,7 @@ namespace MMgc
 
                             // find all marked (but not kFreelist) objects and search them
                             void *item = (char*)b->items + alloc->m_itemSize*i;
-                            if(!GetMark(item) || GetQueued(item))
+                            if(!GetMark(GetUserPointer(item)) || GetQueued(GetUserPointer(item)))
                                 continue;
 
                             WhitePointerScan(GetUserPointer(item), alloc->m_itemSize - DebugSize());

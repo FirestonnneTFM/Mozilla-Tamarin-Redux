@@ -1199,7 +1199,7 @@ namespace MMgc
         if(FindBeginning(item) != item)
             return false;
         
-        return (GC::GetGCBits(item) & (kMark|kQueued)) != 0;
+        return (GC::GetGCBits(item) & (kMark|kQueued)) == 0;
     }
 #endif // _DEBUG
 }
