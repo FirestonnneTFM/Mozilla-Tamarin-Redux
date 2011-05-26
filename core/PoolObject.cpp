@@ -50,12 +50,27 @@ namespace avmplus
     // bit value as "double"; GCDouble exists solely to provide
     // a GCObject-descended type to satisfy new constraints on List.
     MMGC_STATIC_ASSERT(sizeof(GCDouble) == sizeof(double));
+#ifdef VMCFG_FLOAT
+   // same for float4_t/GCFloat4
+    MMGC_STATIC_ASSERT(sizeof(GCFloat4) == sizeof(float4_t) && sizeof(GCFloat4)%8 == 0 );
+    // GCFLoat is trickier: allocations in heap are 8-byte aligned.
+    // The static assertions here will verify that
+    // GCFloat's size is greater than float, 8-byte aligned, and
+    // the "value" is right at the beginning of a "GCFloat" so that it is 
+    // safe to reinterpret-cast a GCFLoat* to float*.
+    MMGC_STATIC_ASSERT(sizeof(GCFloat)%8==0 && sizeof(GCFloat)>=sizeof(float)
+                       && offsetof(GCFloat,value)==0 );
+#endif 
 
     PoolObject::PoolObject(AvmCore* core, ScriptBuffer& sb, const uint8_t* startPos, ApiVersion apiVersion) :
         core(core),
         cpool_int(core->GetGC(), 0),
         cpool_uint(core->GetGC(), 0),
         cpool_double(core->GetGC(), 0),
+#ifdef VMCFG_FLOAT
+        cpool_float(core->GetGC(), 0),
+        cpool_float4(core->GetGC(), 0),
+#endif
         cpool_ns(core->GetGC(), 0),
         cpool_ns_set(core->GetGC(), 0),
 #ifndef AVMPLUS_64BIT
@@ -231,6 +246,14 @@ namespace avmplus
             case BUILTIN_number:
                 return AvmCore::isNumber(value);
 
+#ifdef VMCFG_FLOAT
+            case BUILTIN_float:
+                return AvmCore::isNumber(value);
+
+            case BUILTIN_float4:
+                return AvmCore::isFloat4(value);
+#endif
+
             case BUILTIN_boolean:
                 return AvmCore::isBoolean(value);
 
@@ -358,7 +381,18 @@ namespace avmplus
                     goto range_error;
                 value = kDoubleType|(uintptr_t)cpool_double[index];
                 break;
-
+#ifdef VMCFG_FLOAT
+            case CONSTANT_Float:
+                if (index >= (maxcount = constantFloatCount))
+                    goto range_error;
+                value = kSpecialBibopType|(uintptr_t)cpool_float[index];
+                break;
+            case CONSTANT_Float4:
+                if (index >= (maxcount = constantFloat4Count))
+                    goto range_error;
+                value = kSpecialBibopType|(uintptr_t)cpool_float4[index];
+                break;
+#endif
             case CONSTANT_Utf8:
                 if (index >= (maxcount = constantStringCount))
                     goto range_error;
@@ -401,6 +435,14 @@ namespace avmplus
                 case BUILTIN_any:
                     value = undefinedAtom;
                     break;
+#ifdef VMCFG_FLOAT
+                case BUILTIN_float:  
+                    value = core->kFltNaN;
+                    break;
+                case BUILTIN_float4:  
+                    value = core->kFlt4NaN;
+                    break;
+#endif
                 case BUILTIN_number:
                     value = core->kNaN;
                     break;
