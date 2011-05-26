@@ -272,7 +272,7 @@
       // System.out.println("Doing line " + y);
       // For each pixel of the line
       for (x = 0; x < interval.width; x++) {
-        //print("innter loop in render: "+x);
+        //print("inner loop in render: "+x);
         xlen = (2.0 * x) / interval.width - 1.0;
         r.D = Vec.comb(xlen, leftVec, ylen, upVec);
         r.D.add(viewVec);
@@ -451,7 +451,7 @@
    * Launches a ray
    */
   function trace2( level:int,  weight:Number,  r:Ray):Vec {
-    //print("entering trace");
+    //print("entering trace "+ level);
     var P:Vec, N:Vec;
     var hit:Boolean;
     //print("checking recursion in trace");
