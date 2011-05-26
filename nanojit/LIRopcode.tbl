@@ -70,6 +70,7 @@
  * - 'q': "quad",  ie. 64-bit integer
  * - 'u': "unsigned", is used as a prefix on integer type-indicators when necessary
  * - 'f': "float", ie. 32-bit floating point value
+ * -'f4': "float4", ie. 128-bit SIMD value containing 4 single-precision floating point values
  * - 'd': "double", ie. 64-bit floating point value
  * - 'p': "pointer", ie. a int on 32-bit machines, a quad on 64-bit machines
  *
@@ -83,12 +84,18 @@
  *   OP_UN: used to create a gap in the opcode space
  *   OP_32: for opcodes supported only on 32-bit platforms.
  *   OP_64: for opcodes supported only on 64-bit platforms.
+ *   OP__F: OP_UN if float disabled, OP___ if float enabled.
  *   OP_SF: for opcodes supported only on SoftFloat platforms.
  *   OP_86: for opcodes supported only on i386/X64.
  */
 
 #define OP_UN(n)                    OP___(__##n, None, V,    -1)
 
+#ifdef VMCFG_FLOAT
+#   define OP__F                    OP___
+#else
+#   define OP__F(a, c, d, e)        OP_UN(a)
+#endif
 #ifdef NANOJIT_64BIT
 #   define OP_32(a, c, d, e)        OP_UN(a)
 #   define OP_64                    OP___
@@ -132,10 +139,14 @@ OP___(allocp,     I,  P,    0)  // allocate stack space (result is an address)
 OP___(reti,     Op1,  V,    0)  // return an int
 OP_64(retq,     Op1,  V,    0)  // return a quad
 OP___(retd,     Op1,  V,    0)  // return a double
+OP__F(retf,     Op1,  V,    0)  // return a float
+OP__F(retf4,    Op1,  V,    0)  // return a float4
 
 OP___(livei,    Op1,  V,    0)  // extend live range of an int
 OP_64(liveq,    Op1,  V,    0)  // extend live range of a quad
 OP___(lived,    Op1,  V,    0)  // extend live range of a double
+OP__F(livef,    Op1,  V,    0)  // extend live range of a float
+OP__F(livef4,   Op1,  V,    0)  // extend live range of a float4
 
 OP___(file,     Op1,  V,    0)  // source filename for debug symbols
 OP___(line,     Op1,  V,    0)  // source line number for debug symbols
@@ -152,7 +163,9 @@ OP___(ldus2ui,  Ld,   I,   -1)  // load unsigned short and zero-extend to an uns
 OP___(ldi,      Ld,   I,   -1)  // load int
 OP_64(ldq,      Ld,   Q,   -1)  // load quad
 OP___(ldd,      Ld,   D,   -1)  // load double
+OP__F(ldf,      Ld,   F,   -1)  // load float
 OP___(ldf2d,    Ld,   D,   -1)  // load float and extend to a double
+OP__F(ldf4,     Ld,   F4,  -1)  // load float4 (SIMD, 4 floats)
 
 OP___(sti2c,    St,   V,    0)  // store int truncated to char
 OP___(sti2s,    St,   V,    0)  // store int truncated to short
@@ -160,6 +173,8 @@ OP___(sti,      St,   V,    0)  // store int
 OP_64(stq,      St,   V,    0)  // store quad
 OP___(std,      St,   V,    0)  // store double
 OP___(std2f,    St,   V,    0)  // store double as a float (losing precision)
+OP__F(stf,      St,   V,    0)  // store float
+OP__F(stf4,     St,   V,    0)  // store float4 (SIMD, 4 floats)
 
 
 //---------------------------------------------------------------------------
@@ -169,6 +184,8 @@ OP___(callv,    C,    V,   -1)  // call subroutine that returns void
 OP___(calli,    C,    I,   -1)  // call subroutine that returns an int
 OP_64(callq,    C,    Q,   -1)  // call subroutine that returns a quad
 OP___(calld,    C,    D,   -1)  // call subroutine that returns a double
+OP__F(callf,    C,    F,   -1)  // call subroutine that returns a float
+OP__F(callf4,   C,    F4,  -1)  // call subroutine that returns a float4
 
 //---------------------------------------------------------------------------
 // Branches and labels
@@ -203,6 +220,8 @@ OP___(xbarrier, Op2,  V,    0)
 OP___(immi,     I,    I,    1)  // int immediate
 OP_64(immq,     QorD, Q,    1)  // quad immediate
 OP___(immd,     QorD, D,    1)  // double immediate
+OP__F(immf,     F,    F,    1)  // float immediate
+OP__F(immf4,    F4,   F4,   1)  // float immediate
 
 
 //---------------------------------------------------------------------------
@@ -216,7 +235,7 @@ OP___(immd,     QorD, D,    1)  // double immediate
 // for this to work.  They must also remain contiguous so that opcode range
 // checking works correctly.  Static assertions in LIR.h check these
 // requirements.
-OP_UN (align_int_comparisons)
+OP_UN (align_eqi)
 OP___(eqi,      Op2,  I,    1)  //          int equality
 OP___(lti,      Op2,  I,    1)  //   signed int less-than
 OP___(gti,      Op2,  I,    1)  //   signed int greater-than
@@ -244,6 +263,17 @@ OP___(ltd,      Op2,  I,    1)  // double less-than
 OP___(gtd,      Op2,  I,    1)  // double greater-than
 OP___(led,      Op2,  I,    1)  // double less-than-or-equal
 OP___(ged,      Op2,  I,    1)  // double greater-than-or-equal
+
+OP_UN (align_eqf)
+
+OP__F(eqf,      Op2,  I,    1)  // float equality
+OP__F(ltf,      Op2,  I,    1)  // float less-than
+OP__F(gtf,      Op2,  I,    1)  // float greater-than
+OP__F(lef,      Op2,  I,    1)  // float less-than-or-equal
+OP__F(gef,      Op2,  I,    1)  // float greater-than-or-equal
+
+OP__F(eqf4,     Op2,  I,    1)  // float4 equality
+// Note: we don't do lt/gt/le/ge comparisons on float4 values
 
 //---------------------------------------------------------------------------
 // Arithmetic
@@ -295,9 +325,24 @@ OP___(divd,     Op2,  D,    1)  // divide double
 // serious with it.
 OP___(modd,     Op2,  D,    1)  // modulo double
 
+OP__F(negf,     Op1,  F,    1)  // negate float
+OP__F(addf,     Op2,  F,    1)  // add float
+OP__F(subf,     Op2,  F,    1)  // subtract float
+OP__F(mulf,     Op2,  F,    1)  // multiply float
+OP__F(divf,     Op2,  F,    1)  // divide float
+
+OP__F(negf4,    Op1, F4,    1)  // negate float4
+OP__F(addf4,    Op2, F4,    1)  // add float4
+OP__F(subf4,    Op2, F4,    1)  // subtract float4
+OP__F(mulf4,    Op2, F4,    1)  // multiply float4
+OP__F(divf4,    Op2, F4,    1)  // divide float4
+
+
 OP___(cmovi,    Op3,  I,    1)  // conditional move int
 OP_64(cmovq,    Op3,  Q,    1)  // conditional move quad
 OP___(cmovd,    Op3,  D,    1)  // conditional move double
+OP__F(cmovf,    Op3,  F,    1)  // conditional move float
+OP__F(cmovf4,   Op3, F4,    1)  // conditional move float4
 
 //---------------------------------------------------------------------------
 // Conversions
@@ -307,13 +352,26 @@ OP_64(ui2uq,    Op1,  Q,    1)  // zero-extend unsigned int to unsigned quad
 OP_64(q2i,      Op1,  I,    1)  // truncate quad to int (removes the high 32 bits)
 
 OP___(i2d,      Op1,  D,    1)  // convert int to double
+OP__F(i2f,      Op1,  F,    1)  // convert int to float
 OP___(ui2d,     Op1,  D,    1)  // convert unsigned int to double
+OP__F(ui2f,     Op1,  F,    1)  // convert unsigned int to float
+
+OP__F(f2d,      Op1,  D,    1)  // convert float to double
+// rounding behavior of LIR_d2f is platform-specific
+//
+// Platform     Asm code        Behavior
+// --------     --------        --------
+// x86 w/ x87   FST32           uses current FP control word (default is rounding)
+// x86 w/ SSE   cvtsd2ss        according to MXCSR register (default is round to nearest)
+// x64 (SSE)    cvtsd2ss        according to MXCSR register (default is round to nearest)
+// others       not implemented yet
+OP__F(d2f,      Op1,  F,    1)  // convert double to float (no exceptions raised)
 
 
 // The rounding behavior of LIR_d2i is platform specific.
 //
-// Platform     Asm code		Behavior
-// --------     --------		--------
+// Platform     Asm code        Behavior
+// --------     --------        --------
 // x86 w/ x87   fist            uses current FP control word (default is rounding)
 // x86 w/ SSE   cvttsd2si       performs round to zero (truncate)
 // x64 (SSE)    cvttsd2si       performs round to zero (truncate) 
@@ -326,6 +384,13 @@ OP___(ui2d,     Op1,  D,    1)  // convert unsigned int to double
 // round to zero examples:  1.9 -> 1, 1.1 -> 1, -1.1 -> -1, -1.9 -> -1
 // round to nearest examples: 1.9 -> 2, 1.1 -> 1, -1.1 -> -1, -1.9 -> -2
 OP___(d2i,      Op1,  I,    1)  // convert double to int (no exceptions raised)
+OP__F(f2i,      Op1,  I,    1)  // convert float to int (no exceptions raised)
+
+OP__F(f2f4,     Op1, F4,    1)  // convert float to float4 (no exceptions raised) - essentially copies the float across all elements
+OP__F(f4x,      Op1,  F,    1)  // extract first float from a float4 
+OP__F(f4y,      Op1,  F,    1)  // extract second float from a float4 
+OP__F(f4z,      Op1,  F,    1)  // extract third float from a float4 
+OP__F(f4w,      Op1,  F,    1)  // extract fourth float from a float4 
 
 OP_64(dasq,     Op1,  Q,    1)  // interpret the bits of a double as a quad
 OP_64(qasd,     Op1,  D,    1)  // interpret the bits of a quad as a double
@@ -362,6 +427,7 @@ OP_SF(hcalli,   Op1,  I,    1)
 
 
 #undef OP_UN
+#undef OP__F
 #undef OP_32
 #undef OP_64
 #undef OP_SF

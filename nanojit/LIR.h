@@ -126,6 +126,12 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
                      LIR_eqd + 2 == LIR_gtd &&
                      LIR_eqd + 3 == LIR_led &&
                      LIR_eqd + 4 == LIR_ged);
+#ifdef VMCFG_FLOAT
+    NanoStaticAssert(LIR_eqf + 1 == LIR_ltf &&
+                     LIR_eqf + 2 == LIR_gtf &&
+                     LIR_eqf + 3 == LIR_lef &&
+                     LIR_eqf + 4 == LIR_gef);
+#endif 
 
     // Various opcodes must be changeable to their opposite with op^1
     // (although we use invertXyz() when possible, ie. outside static
@@ -148,6 +154,11 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
 
     NanoStaticAssert((LIR_ltd^1) == LIR_gtd && (LIR_gtd^1) == LIR_ltd);
     NanoStaticAssert((LIR_led^1) == LIR_ged && (LIR_ged^1) == LIR_led);
+
+#ifdef VMCFG_FLOAT
+    NanoStaticAssert((LIR_ltf^1) == LIR_gtf && (LIR_gtf^1) == LIR_ltf);
+    NanoStaticAssert((LIR_lef^1) == LIR_gef && (LIR_gef^1) == LIR_lef);
+#endif
 
 
     struct GuardRecord;
@@ -173,7 +184,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         ARGTYPE_Q  = 3,     // uint64_t
 #endif
         ARGTYPE_D  = 4,     // double
-
+#ifdef VMCFG_FLOAT
+        ARGTYPE_F  = 5,     // single-precision float;
+        ARGTYPE_F4 = 6,     // SIMD vector of 4 single-precision floats;
+#endif
         // aliases
         ARGTYPE_P = PTR_SIZE(ARGTYPE_I, ARGTYPE_Q), // pointer
         ARGTYPE_B = ARGTYPE_I                       // bool
@@ -400,6 +414,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
 
         uint32_t count_args() const;
         uint32_t count_int32_args() const;
+#ifdef VMCFG_FLOAT
+        uint32_t count_32bitfloat_args() const;
+        uint32_t count_128bitfloat_args() const;
+#endif
         // Nb: uses right-to-left order, eg. sizes[0] is the size of the right-most arg.
         // XXX: See bug 525815 for fixing this.
         uint32_t getArgTypes(ArgType* types) const;
@@ -425,6 +443,9 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
 #if defined NANOJIT_64BIT
                op == LIR_liveq ||
 #endif
+#ifdef VMCFG_FLOAT
+               op == LIR_livef || op == LIR_livef4 ||
+#endif
                op == LIR_livei || op == LIR_lived;
     }
     inline bool isRetOpcode(LOpcode op) {
@@ -432,12 +453,19 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
 #if defined NANOJIT_64BIT
             op == LIR_retq ||
 #endif
+#ifdef VMCFG_FLOAT
+            op == LIR_retf || op == LIR_retf4 || 
+#endif
             op == LIR_reti || op == LIR_retd;
     }
     inline bool isCmovOpcode(LOpcode op) {
         return
 #if defined NANOJIT_64BIT
             op == LIR_cmovq ||
+#endif
+#ifdef VMCFG_FLOAT
+            op == LIR_cmovf ||
+            op == LIR_cmovf4||
 #endif
             op == LIR_cmovi ||
             op == LIR_cmovd;
@@ -465,13 +493,37 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
     inline bool isCmpDOpcode(LOpcode op) {
         return LIR_eqd <= op && op <= LIR_ged;
     }
+#ifdef VMCFG_FLOAT
+    inline bool isCmpFOpcode(LOpcode op) {
+        return LIR_eqf <= op && op <= LIR_gef;
+    }
+    inline bool isCmpF4Opcode(LOpcode op) {
+        return LIR_eqf4 == op;
+    }
+#endif
     inline bool isCmpOpcode(LOpcode op) {
         return isCmpIOpcode(op) ||
 #if defined NANOJIT_64BIT
                isCmpQOpcode(op) ||
 #endif
+#if defined VMCFG_FLOAT
+               isCmpFOpcode(op) ||
+               isCmpF4Opcode(op)||
+#endif
                isCmpDOpcode(op);
     }
+
+#if defined VMCFG_FLOAT
+    inline LOpcode getCmpFOpcode(LOpcode op){
+        NanoAssert(isCmpDOpcode(op));
+        return LOpcode(op+6);
+    }
+
+    inline LOpcode getCmpDOpcode(LOpcode op){
+        NanoAssert(isCmpFOpcode(op));
+        return LOpcode(op-6);
+    }
+#endif
 
     inline LOpcode invertCondJmpOpcode(LOpcode op) {
         NanoAssert(op == LIR_jt || op == LIR_jf);
@@ -494,6 +546,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         case ARGTYPE_UI: op = LIR_calli; break;
 #ifdef NANOJIT_64BIT
         case ARGTYPE_Q: op = LIR_callq; break;
+#endif
+#ifdef VMCFG_FLOAT
+        case ARGTYPE_F:  op = LIR_callf; break;
+        case ARGTYPE_F4: op = LIR_callf4;break;
 #endif
         case ARGTYPE_D: op = LIR_calld; break;
         default:        NanoAssert(0);  break;
@@ -518,6 +574,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LTy_Q,  // quad: 64-bit integer
 #endif
         LTy_D,  // double: 64-bit float
+#ifdef VMCFG_FLOAT
+        LTy_F,  // float:  32-bit float
+        LTy_F4,  // float4:  128bit, four 32-bit floats
+#endif
 
         LTy_P  = PTR_SIZE(LTy_I, LTy_Q)   // word-sized integer
     };
@@ -612,6 +672,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LRK_C,
         LRK_P,
         LRK_I,
+#ifdef VMCFG_FLOAT
+        LRK_F,
+        LRK_F4,
+#endif
         LRK_QorD,
         LRK_Jtbl,
         LRK_None    // this one is used for unused opcode numbers
@@ -629,6 +693,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
     class LInsI;
     class LInsQorD;
     class LInsJtbl;
+#ifdef VMCFG_FLOAT
+    class LInsF4;
+#define LInsF LInsI
+#endif
 
     class LIns
     {
@@ -669,7 +737,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
 
         inline void initSharedFields(LOpcode opcode)
         {
-            NanoAssert(((int)opcode)>=0 && opcode<255);
+            NanoAssert(((int)opcode)>=0 && opcode<=255);
             // We must zero .inReg, .inAR and .isResultLive, but zeroing the
             // whole word is easier.  Then we set the opcode.
             wholeWord = 0;
@@ -689,6 +757,9 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         inline LInsI*   toLInsI()   const;
         inline LInsQorD* toLInsQorD() const;
         inline LInsJtbl*toLInsJtbl()const;
+#ifdef VMCFG_FLOAT
+        inline LInsF4*   toLInsF4()   const;
+#endif
 
         void staticSanityCheck();
 
@@ -708,7 +779,9 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         inline void initLInsI(LOpcode opcode, int32_t immI);
         inline void initLInsQorD(LOpcode opcode, uint64_t immQorD);
         inline void initLInsJtbl(LIns* index, uint32_t size, LIns** table);
-
+#ifdef VMCFG_FLOAT
+        inline void initLInsF4(LOpcode opcode, float4_t immF4);
+#endif
         LOpcode opcode() const { 
             NanoAssert(sharedFields.opcode< LIR_sentinel); 
             return (LOpcode) sharedFields.opcode;
@@ -840,6 +913,11 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         inline int32_t  immDlo() const;
         inline int32_t  immDhi() const;
         inline double   immD() const;
+#ifdef VMCFG_FLOAT
+        inline float    immF() const;
+        inline float4_t immF4() const;
+        inline int32_t  immFasI() const;
+#endif
         inline uint64_t immDasQ() const;
 
         // For LIR_allocp.
@@ -911,7 +989,16 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
             NanoAssert(LRK_None != repKinds[opcode()]);
             return LRK_Jtbl == repKinds[opcode()];
         }
-
+#ifdef VMCFG_FLOAT
+        bool isLInsF() const {
+            NanoAssert(LRK_None != repKinds[opcode()]);
+            return LRK_F == repKinds[opcode()];
+        }
+        bool isLInsF4() const {
+            NanoAssert(LRK_None != repKinds[opcode()]);
+            return LRK_F4 == repKinds[opcode()];
+        }
+#endif
         // LIns predicates.
         bool isop(LOpcode o) const {
             return opcode() == o;
@@ -927,6 +1014,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
                    isop(LIR_calli) ||
 #if defined NANOJIT_64BIT
                    isop(LIR_callq) ||
+#endif
+#ifdef VMCFG_FLOAT
+                   isop(LIR_callf) ||
+                   isop(LIR_callf4)||
 #endif
                    isop(LIR_calld);
         }
@@ -978,6 +1069,16 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         bool isImmD() const {
             return isop(LIR_immd);
         }
+#ifdef VMCFG_FLOAT
+        // True if the instruction is a 32-bit float immediate.
+        bool isImmF() const {
+            return isop(LIR_immf);
+        }
+        // True if the instruction is a 128-bit float immediate.
+        bool isImmF4() const {
+            return isop(LIR_immf4);
+        }
+#endif
         // True if the instruction is a 64-bit integer or float immediate.
         bool isImmQorD() const {
             return
@@ -988,7 +1089,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         }
         // True if the instruction an any type of immediate.
         bool isImmAny() const {
-            return isImmI() || isImmQorD();
+            return isImmI() || isImmQorD() FLOAT_ONLY( || isImmF() || isImmF4());
         }
 
         bool isConditionalBranch() const {
@@ -1020,6 +1121,14 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         bool isD() const {
             return retType() == LTy_D;
         }
+#ifdef VMCFG_FLOAT
+        bool isF() const {
+            return retType() == LTy_F;
+        }
+        bool isF4() const {
+            return retType() == LTy_F4;
+        }
+#endif
         bool isQorD() const {
             return
 #ifdef NANOJIT_64BIT
@@ -1239,6 +1348,22 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* getLIns() { return &ins; };
     };
 
+#ifdef VMCFG_FLOAT
+    // Used for LIR_immf4.
+    class LInsF4
+    {
+    private:
+        friend class LIns;
+
+        float       immF4[4];
+
+        LIns        ins;
+
+    public:
+        LIns* getLIns() { return &ins; };
+    };
+#endif
+
     // Used for LIR_jtbl.  'oprnd_1' must be a uint32_t index in
     // the range 0 <= index < size; no range check is performed.
     // 'table' is an array of labels.
@@ -1275,6 +1400,9 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
     LInsI*    LIns::toLInsI()    const { return (LInsI*   )(uintptr_t(this+1) - sizeof(LInsI   )); }
     LInsQorD* LIns::toLInsQorD() const { return (LInsQorD*)(uintptr_t(this+1) - sizeof(LInsQorD)); }
     LInsJtbl* LIns::toLInsJtbl() const { return (LInsJtbl*)(uintptr_t(this+1) - sizeof(LInsJtbl)); }
+#ifdef VMCFG_FLOAT
+    LInsF4*   LIns::toLInsF4()   const { return (LInsF4*  )(uintptr_t(this+1) - sizeof(LInsF4  )); }
+#endif
 
     void LIns::initLInsOp0(LOpcode opcode) {
         initSharedFields(opcode);
@@ -1338,7 +1466,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
     void LIns::initLInsI(LOpcode opcode, int32_t immI) {
         initSharedFields(opcode);
         toLInsI()->immI = immI;
-        NanoAssert(isLInsI());
+        NanoAssert(isLInsI() FLOAT_ONLY( || isLInsF() ) );
     }
     void LIns::initLInsQorD(LOpcode opcode, uint64_t immQorD) {
         initSharedFields(opcode);
@@ -1353,7 +1481,17 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         toLInsJtbl()->size = size;
         NanoAssert(isLInsJtbl());
     }
-
+#ifdef VMCFG_FLOAT
+    void LIns::initLInsF4(LOpcode opcode, float4_t immF4) {
+        initSharedFields(opcode);
+        LInsF4* i = toLInsF4();
+        i->immF4[0]= f4_x(immF4); 
+        i->immF4[1]= f4_y(immF4); 
+        i->immF4[2]= f4_z(immF4); 
+        i->immF4[3]= f4_w(immF4); 
+        NanoAssert(isLInsF4());
+    }
+#endif
     LIns* LIns::oprnd1() const {
         NanoAssert(isLInsOp1() || isLInsOp2() || isLInsOp3() || isLInsLd() || isLInsSt() || isLInsJtbl());
         return toLInsOp2()->oprnd_1;
@@ -1474,6 +1612,27 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         u.q = immDasQ();
         return u.f;
     }
+#ifdef VMCFG_FLOAT
+    int32_t       LIns::immFasI()   const {
+        NanoAssert(isImmF());
+        return toLInsI()->immI;
+    }
+    float         LIns::immF()      const {
+        NanoAssert(isImmF());
+        union {
+            float f;
+            int32_t i;
+        } u;
+        u.i = toLInsI()->immI;
+        return u.f;
+    }
+    float4_t      LIns::immF4()    const {
+        NanoAssert(isImmF4());
+        LInsF4* i = toLInsF4();
+        float4_t res = { i->immF4[0],i->immF4[1],i->immF4[2],i->immF4[3] };
+        return res;
+    }
+#endif
     uint64_t       LIns::immDasQ()  const {
         NanoAssert(isImmD());
         return (uint64_t(toLInsQorD()->immQorDhi) << 32) | uint32_t(toLInsQorD()->immQorDlo);
@@ -1564,6 +1723,14 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
 #ifdef NANOJIT_64BIT
         virtual LIns* insImmQ(uint64_t imm) {
             return out->insImmQ(imm);
+        }
+#endif
+#ifdef VMCFG_FLOAT
+        virtual LIns* insImmF(float f) {
+            return out->insImmF(f);
+        }
+        virtual LIns* insImmF4(float4_t f4) {
+            return out->insImmF4(f4);
         }
 #endif
         virtual LIns* insImmD(double d) {
@@ -1906,6 +2073,15 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
             return add(out->insImmQ(imm));
         }
 #endif
+#ifdef VMCFG_FLOAT
+        LIns* insImmF(float f) {
+            return add(out->insImmF(f));
+        }
+
+        LIns* insImmF4(float4_t f4) {
+            return add(out->insImmF4(f4));
+        }
+#endif
         LIns* insImmD(double d) {
             return add(out->insImmD(d));
         }
@@ -1947,11 +2123,14 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
             NL2         = 5,
             NL3         = 6,
             NLCall      = 7,
-
-            NLFirst = 0,
-            NLLast = 7,
+#ifdef VMCFG_FLOAT
+            NLImmF      = 8,
+            NLImmF4     = 9,
+#endif
             // Need a value after "last" to outsmart compilers that insist last+1 is impossible.
-            NLInvalid = 8
+            NLInvalid,  // Don't initialize it explicitly - allow it to be 10 or 8 depending on VMCFG_FLOAT
+            NLFirst = 0,
+            NLLast = NLInvalid-1,
         };
         #define nextNLKind(kind)  NLKind(kind+1)
 
@@ -2030,6 +2209,9 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
 
         static uint32_t hashImmI(int32_t);
         static uint32_t hashImmQorD(uint64_t);     // not NANOJIT_64BIT-only -- used by findImmD()
+#ifdef VMCFG_FLOAT
+        static uint32_t hashImmF4(float4_t);
+#endif
         static uint32_t hash1(LOpcode op, LIns*);
         static uint32_t hash2(LOpcode op, LIns*, LIns*);
         static uint32_t hash3(LOpcode op, LIns*, LIns*, LIns*);
@@ -2041,6 +2223,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* findImmILarge(int32_t a, uint32_t &k);
 #ifdef NANOJIT_64BIT
         LIns* findImmQ(uint64_t a, uint32_t &k);
+#endif
+#ifdef VMCFG_FLOAT
+        LIns* findImmF(int32_t f, uint32_t &k);
+        LIns* findImmF4(float4_t f, uint32_t &k);
 #endif
         LIns* findImmD(uint64_t d, uint32_t &k);
         LIns* find1(LOpcode v, LIns* a, uint32_t &k);
@@ -2057,6 +2243,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         uint32_t findImmILarge(LIns* ins);
 #ifdef NANOJIT_64BIT
         uint32_t findImmQ(LIns* ins);
+#endif
+#ifdef VMCFG_FLOAT
+        uint32_t findImmF(LIns* ins);
+        uint32_t findImmF4(LIns* ins);
 #endif
         uint32_t findImmD(LIns* ins);
         uint32_t find1(LIns* ins);
@@ -2095,6 +2285,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* insImmI(int32_t imm);
 #ifdef NANOJIT_64BIT
         LIns* insImmQ(uint64_t q);
+#endif
+#ifdef VMCFG_FLOAT
+        LIns* insImmF(float f);
+        LIns* insImmF4(float4_t f);
 #endif
         LIns* insImmD(double d);
         LIns* ins0(LOpcode v);
@@ -2176,6 +2370,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
             LIns*   insImmI(int32_t imm);
 #ifdef NANOJIT_64BIT
             LIns*   insImmQ(uint64_t imm);
+#endif
+#ifdef VMCFG_FLOAT
+            LIns*   insImmF(float f);
+            LIns*   insImmF4(float4_t f);
 #endif
             LIns*   insImmD(double d);
             LIns*   insCall(const CallInfo *call, LIns* args[]);
@@ -2438,6 +2636,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* insImmI(int32_t imm);
 #ifdef NANOJIT_64BIT
         LIns* insImmQ(uint64_t imm);
+#endif
+#ifdef VMCFG_FLOAT
+        LIns* insImmF(float f);
+        LIns* insImmF4(float4_t f4);
 #endif
         LIns* insImmD(double d);
         LIns* insCall(const CallInfo *call, LIns* args[]);
