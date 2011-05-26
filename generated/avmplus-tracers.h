@@ -72,6 +72,10 @@
 #define avmplus_EvalErrorObject_isExactInterlock 1
 #define avmplus_ExactGCTest_isExactInterlock 1
 #define avmplus_ExceptionHandlerTable_isExactInterlock 1
+#define avmplus_Float4Class_isExactInterlock 1
+#define avmplus_FloatClass_isExactInterlock 1
+#define avmplus_FloatVectorClass_isExactInterlock 1
+#define avmplus_FloatVectorObject_isExactInterlock 1
 #define avmplus_FunctionClass_isExactInterlock 1
 #define avmplus_FunctionEnv_isExactInterlock 1
 #define avmplus_FunctionObject_isExactInterlock 1
