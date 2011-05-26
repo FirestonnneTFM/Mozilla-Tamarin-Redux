@@ -67,6 +67,9 @@ def startCompile(change):
         # ignore changes to the runsmokes*.txt files
         elif ('runsmokes' in name) and name.endswith('.txt'):
             compile = False
+        # ignore the build trigger files that are added
+        elif ('change-' in name):
+            compile = False
         else:
             return True
     return compile
