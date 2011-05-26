@@ -133,7 +133,6 @@ if buildAot:
     config.subst("ENABLE_AOT", 1)
 
 the_os, cpu = config.getTarget()
-
 APP_CPPFLAGS = "-DAVMSHELL_BUILD "
 APP_CXXFLAGS = ""
 APP_CFLAGS = ""
@@ -452,6 +451,9 @@ elif the_os == "linux":
     MMGC_DEFINES.update({'UNIX': None,
                          'AVMPLUS_UNIX': None})
     OS_LIBS.append('pthread')
+    if cpu == "i686":
+        APP_CPPFLAGS += "-m32 -march=i686 "
+        OS_LDFLAGS += "-m32 "
 #    if cpu == "x86_64":
 #        # workaround https://bugzilla.mozilla.org/show_bug.cgi?id=467776
 #        OPT_CXXFLAGS += '-fno-schedule-insns2 '
@@ -486,8 +488,8 @@ else:
     raise Exception("Unsupported OS")
 
 if cpu == "i686":
-    if config.getCompiler() == 'GCC' and the_os == 'darwin':
-        #only mactel always has sse2
+    if config.getCompiler() == 'GCC' :
+        # we require sse2
         APP_CPPFLAGS += "-msse2 "
 elif cpu == "powerpc":
     # we detect this in core/avmbuild.h and MMgc/*build.h

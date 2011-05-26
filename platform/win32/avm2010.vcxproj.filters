@@ -34,6 +34,9 @@
     <Filter Include="vprof">
       <UniqueIdentifier>{fb25386d-e6de-4e82-941b-3e99a5821acb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AVMPI">
+      <UniqueIdentifier>{31af1aa8-03ac-4575-9107-718d02e5e200}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\core\AbcData.cpp">
@@ -336,27 +339,6 @@
     <ClCompile Include="..\..\extensions\SelftestInit.cpp">
       <Filter>extensions</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\extensions\ST_avmplus_basics.cpp">
-      <Filter>extensions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\extensions\ST_avmplus_peephole.cpp">
-      <Filter>extensions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\extensions\ST_mmgc_543560.cpp">
-      <Filter>extensions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\extensions\ST_mmgc_basics.cpp">
-      <Filter>extensions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\extensions\ST_mmgc_dependent.cpp">
-      <Filter>extensions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\extensions\ST_mmgc_gcheap.cpp">
-      <Filter>extensions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\extensions\ST_mmgc_threads.cpp">
-      <Filter>extensions</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\MMgc\FixedAlloc.cpp">
       <Filter>MMgc</Filter>
     </ClCompile>
@@ -603,12 +585,6 @@
     <ClCompile Include="..\..\shell\WinFile.cpp">
       <Filter>shell</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\VMPI\MMgcPortWin.cpp">
-      <Filter>VMPI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\VMPI\SpyUtilsWin.cpp">
-      <Filter>VMPI</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\VMPI\ThreadsWin.cpp">
       <Filter>VMPI</Filter>
     </ClCompile>
@@ -636,27 +612,57 @@
     <ClCompile Include="..\..\core\exec-verifyall.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\extensions\ST_mmgc_weakref.cpp">
-      <Filter>extensions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\extensions\ST_mmgc_finalize_uninit.cpp">
-      <Filter>extensions</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\core\DomainMgr.cpp">
       <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\extensions\ST_mmgc_575631.cpp" />
-    <ClCompile Include="..\..\vmbase\atom.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\vmbase\AvmAssert.cpp">
-      <Filter>VMPI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\MMgc\GCPolicyManager.cpp">
       <Filter>MMgc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\MMgc\PageMap.cpp">
       <Filter>MMgc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\FloatClass.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\JSONClass.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\ProxyGlue.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\eval\eval-parse-config.cpp">
+      <Filter>eval</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\extensions\SelftestExec.cpp">
+      <Filter>extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\vmbase\Safepoint.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\vmbase\VMThread.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\InvokerCompiler.cpp" />
+    <ClCompile Include="..\..\AVMPI\AvmAssert.cpp">
+      <Filter>VMPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AVMPI\MMgcPortWin.cpp">
+      <Filter>VMPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AVMPI\SpyUtilsWin.cpp">
+      <Filter>VMPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\atom.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\d2a.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\VMPI\GenericPortUtils.cpp">
+      <Filter>VMPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\Float4Class.cpp">
+      <Filter>core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -685,9 +691,6 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\core\ArrayObject-inlines.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\atom-inlines.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\core\AtomWriteBarrier.h">
@@ -1350,18 +1353,47 @@
     <ClInclude Include="..\..\core\DomainMgr.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\vmbase\atom.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\vmbase\AvmAssert.h">
-      <Filter>VMPI</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\MMgc\GCPolicyManager.h">
       <Filter>MMgc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\MMgc\PageMap.h">
       <Filter>MMgc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\core\FloatClass.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\JSONClass.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\ProxyGlue.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vmbase\Safepoint.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vmbase\Safepoint-inlines.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vmbase\VMThread.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vmbase\VMThread-inlines.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\InvokerCompiler.h" />
+    <ClInclude Include="..\..\AVMPI\AvmAssert.h">
+      <Filter>VMPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\atom.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\d2a.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\Float4Class.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\atom-inlines.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="win64setjmp.asm">

@@ -76,6 +76,8 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/exec-jit.cpp \
   $(curdir)/exec-osr.cpp \
   $(curdir)/exec-verifyall.cpp \
+  $(curdir)/FloatClass.cpp \
+  $(curdir)/Float4Class.cpp \
   $(curdir)/FrameState.cpp \
   $(curdir)/FunctionClass.cpp \
   $(curdir)/IntClass.cpp \

@@ -189,6 +189,7 @@ CTYPE_STRING        = 6
 CTYPE_NAMESPACE     = 7
 CTYPE_OBJECT        = 8
 CTYPE_FLOAT         = 9
+CTYPE_FLOAT4        = 10
 
 MIN_API_MARK = 0xE000
 MAX_API_MARK = 0xF8FF
@@ -270,6 +271,7 @@ TYPEMAP_RETTYPE = {
     CTYPE_UINT:         "uint32_t",
     CTYPE_DOUBLE:       "double",
     CTYPE_FLOAT:        "float",
+    CTYPE_FLOAT4:       "float4_t",
     CTYPE_STRING:       "avmplus::String*",
     CTYPE_NAMESPACE:    "avmplus::Namespace*",
 }
@@ -283,6 +285,7 @@ TYPEMAP_RETTYPE_GCREF = {
     CTYPE_UINT:         lambda t: "uint32_t",
     CTYPE_DOUBLE:       lambda t: "double",
     CTYPE_FLOAT:        lambda t: "float",
+    CTYPE_FLOAT4:       lambda t: "float4_t",
     CTYPE_STRING:       lambda t: "GCRef<avmplus::String>",
     CTYPE_NAMESPACE:    lambda t: "GCRef<avmplus::Namespace>",
 }
@@ -296,6 +299,7 @@ TYPEMAP_THUNKRETTYPE = {
     CTYPE_UINT:         "avmplus::Atom(%s)",
     CTYPE_DOUBLE:       "double(%s)",
     CTYPE_FLOAT:        "float(%s)",
+    CTYPE_FLOAT4:       "float4_t(%s)",
     CTYPE_STRING:       "avmplus::Atom(%s)",
     CTYPE_NAMESPACE:    "avmplus::Atom(%s)",
 }
@@ -309,6 +313,7 @@ TYPEMAP_MEMBERTYPE = {
     CTYPE_UINT:         "uint32_t",
     CTYPE_DOUBLE:       "double",
     CTYPE_FLOAT:        "float",
+    CTYPE_FLOAT4:       "float4_t",
     CTYPE_STRING:       "MMgc::GCTraceableObject::GCMember<avmplus::String>",
     CTYPE_NAMESPACE:    "MMgc::GCTraceableObject::GCMember<avmplus::Namespace>",
 }
@@ -322,6 +327,7 @@ TYPEMAP_ARGTYPE = {
     CTYPE_UINT:         "uint32_t",
     CTYPE_DOUBLE:       "double",
     CTYPE_FLOAT:        "float",
+    CTYPE_FLOAT4:       "float4_t",
     CTYPE_STRING:       "avmplus::String*",
     CTYPE_NAMESPACE:    "avmplus::Namespace*",
 }
@@ -335,6 +341,7 @@ TYPEMAP_ARGTYPE_SUFFIX = {
     CTYPE_UINT:         "UINT",
     CTYPE_DOUBLE:       "DOUBLE",
     CTYPE_FLOAT:        "FLOAT",
+    CTYPE_FLOAT4:       "FLOAT4",
     CTYPE_STRING:       "STRING",
     CTYPE_NAMESPACE:    "NAMESPACE",
 }
@@ -348,6 +355,7 @@ TYPEMAP_ARGTYPE_FOR_UNBOX = {
     CTYPE_UINT:         "uint32_t",
     CTYPE_DOUBLE:       "double",
     CTYPE_FLOAT:        "float",
+    CTYPE_FLOAT4:       "float4_t",
     CTYPE_STRING:       "avmplus::String*",
     CTYPE_NAMESPACE:    "avmplus::Namespace*",
 }
@@ -366,6 +374,7 @@ TYPEMAP_TO_ATOM = {
     CTYPE_UINT:         lambda val: "core->uintToAtom(%s)" % val,
     CTYPE_DOUBLE:       lambda val: "core->doubleToAtom(%s)" % val,
     CTYPE_FLOAT:        lambda val: "core->floatToAtom(%s)" % val,
+    CTYPE_FLOAT4:       lambda val: "core->float4ToAtom(%s)" % val,
     CTYPE_STRING:       lambda val: "%s->atom()" % val,
     CTYPE_NAMESPACE:    lambda val: "%s->atom()" % val,
 }
@@ -379,6 +388,7 @@ TYPEMAP_TO_ATOM_NEEDS_CORE = {
     CTYPE_UINT:         True,
     CTYPE_DOUBLE:       True,
     CTYPE_FLOAT:        True,
+    CTYPE_FLOAT4:       True,
     CTYPE_STRING:       False,
     CTYPE_NAMESPACE:    False,
 }
@@ -394,6 +404,7 @@ TYPEMAP_ATOM_TO_GCREF = {
     CTYPE_UINT:         lambda val,t: "avmplus::AvmCore::toUInt32(%s)" % val,
     CTYPE_DOUBLE:       lambda val,t: "avmplus::AvmCore::number(%s)" % val,
     CTYPE_FLOAT:        lambda val,t: "avmplus::AvmCore::singlePrecisionFloat(%s)" % val,
+    CTYPE_FLOAT4:       lambda val,t: "avmplus::AvmCore::float4(%s)" % val,
     CTYPE_STRING:       lambda val,t: "GCRef<avmplus::String>(avmplus::AvmCore::atomToString(%s))" % val,
     CTYPE_NAMESPACE:    lambda val,t: "GCRef<avmplus::Namespace>(avmplus::AvmCore::atomToNamespace(%s))" % val,
 }
@@ -434,6 +445,7 @@ GLUECLASSES_WITHOUT_NS = frozenset((
     'bool',
     'double',
     'float',
+    'float4_t',
     'int32_t',
     'uint32_t'))
 
@@ -528,6 +540,8 @@ class TypeName:
             s += "$double"
         elif t == "float":
             s += "$float"
+        elif t == "float4":
+            s += "$float4"
         else:
             s += "$object"
         return s
@@ -838,7 +852,8 @@ BMAP = {
     "Boolean": CTYPE_BOOLEAN,
     "String": CTYPE_STRING,
     "Namespace": CTYPE_NAMESPACE,
-    "float": CTYPE_FLOAT
+    "float": CTYPE_FLOAT,
+    "float4": CTYPE_FLOAT4
 };
 
 class Traits:
@@ -1133,7 +1148,9 @@ class Abc:
             else:
                 val = "true"
         elif ct == CTYPE_FLOAT:
-        	val = "!!! ERROR, float not handled !!!"
+            val = "!!! ERROR, float not handled !!!"
+        elif ct == CTYPE_FLOAT4:
+            val = "!!! ERROR, float4 not handled !!!"
         if str(val) == "None":
             val = "nullObjectAtom"
         return ct,val,rawval
@@ -1473,6 +1490,7 @@ class IndentingPrintWriter:
 NON_POINTER_4_BYTE_SLOT_BUCKET = 0
 POINTER_SLOT_BUCKET = 1
 NON_POINTER_8_BYTE_SLOT_BUCKET = 2
+NON_POINTER_16_BYTE_SLOT_BUCKET = 3
 
 CTYPE_TO_SLOT_SORT_BUCKET = {
     # following types are 4 bytes
@@ -1487,6 +1505,8 @@ CTYPE_TO_SLOT_SORT_BUCKET = {
     CTYPE_NAMESPACE : POINTER_SLOT_BUCKET,
     # doubles are 8 bytes
     CTYPE_DOUBLE : NON_POINTER_8_BYTE_SLOT_BUCKET,
+    # float4s are 16 bytes
+    CTYPE_FLOAT4 : NON_POINTER_16_BYTE_SLOT_BUCKET,
     # slots should never be of type void
     CTYPE_VOID : -1
 }
@@ -1501,6 +1521,7 @@ CTYPE_TO_NEED_FORWARD_DECL = {
     CTYPE_NAMESPACE : True,
     CTYPE_DOUBLE : False,
     CTYPE_FLOAT : False,
+    CTYPE_FLOAT4 : False,
     CTYPE_VOID : False
 }
 
@@ -1508,6 +1529,7 @@ GLUECLASSES_WITHOUT_SLOTS = frozenset((
     'bool',
     'double',
     'float',
+    'float4_t',
     'int32_t',
     'avmplus::Namespace',
     'avmplus::String',
@@ -1516,6 +1538,8 @@ GLUECLASSES_WITHOUT_SLOTS = frozenset((
 GLUECLASSES_WITHOUT_CONSTRUCT_WRAPPERS = frozenset((
     'bool',
     'double',
+    'float',
+    'float4_t',
     'int32_t',
     'uint32_t'))
 
@@ -1865,7 +1889,7 @@ class AbcThunkGen:
         out.println("friend class avmplus::AvmCore;")
         out.println("friend class avmplus::IntVectorClass;")
         out.println("friend class avmplus::UIntVectorClass;")
-        out.println("// friend class avmplus::FloatVectorClass;") # remove comment when adding FloatVectorClass in Tamarin
+        out.println("FLOAT_ONLY(friend class avmplus::FloatVectorClass;)")
         out.println("friend class avmplus::DoubleVectorClass;")
         out.println("friend class avmplus::ObjectVectorClass;")
         out.indent -= 1
@@ -2354,7 +2378,7 @@ class AbcThunkGen:
         visitedGlueClasses.add(t.fqcppname())
         if (t.fqcppname() in GLUECLASSES_WITHOUT_SLOTS):
             return
-        
+
         sortedSlots,slotsTypeInfo = self.sortSlots(t)
         self.emitDeclareSlotClass(out, t, sortedSlots, slotsTypeInfo)
         
@@ -2595,7 +2619,7 @@ class AbcThunkGen:
         if m.kind == TRAIT_Setter:
             ret_ctype = CTYPE_VOID
         # for return types of thunks, everything but double maps to Atom
-        if ret_ctype != CTYPE_DOUBLE and ret_ctype!= CTYPE_FLOAT :
+        if ret_ctype != CTYPE_DOUBLE and ret_ctype!= CTYPE_FLOAT and ret_ctype!= CTYPE_FLOAT4 :
             thunk_ret_ctype = CTYPE_ATOM
         else:
             thunk_ret_ctype = ret_ctype
@@ -2621,6 +2645,11 @@ class AbcThunkGen:
         param_count = len(m.paramTypes);
         optional_count = m.optional_count;
 
+        unbox_reference = "";
+        if(receiver.ctype == CTYPE_FLOAT4):
+            receiver = receiver.ctraits; 
+            m.receiver = receiver;
+            unbox_reference = "&";
         argtraits = self.argTraits(receiver, m)
 
         argszprev = "0"
@@ -2642,10 +2671,11 @@ class AbcThunkGen:
 
         arg0_typedef = argtraits[0].cpp_argument_name()
         assert(argtraits[0].ctype in [CTYPE_OBJECT,CTYPE_STRING,CTYPE_NAMESPACE])
+
         if unbox_receiver:
             val = "AvmThunkUnbox_AvmAtomReceiver("+arg0_typedef+", argv[argoff0])";
         else:
-            val = "AvmThunkUnbox_AvmReceiver("+arg0_typedef+", argv[argoff0])";
+            val = "AvmThunkUnbox_AvmReceiver("+arg0_typedef+", "+unbox_reference+"argv[argoff0])";
         args.append((val, arg0_typedef))
 
         for i in range(1, len(argtraits)):

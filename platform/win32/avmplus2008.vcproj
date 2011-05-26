@@ -345,7 +345,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE;AVMFEATURE_SELFTEST=1;AVMFEATURE_EVAL=1;AVMFEATURE_SWF12=1;AVMFEATURE_SWF13=1;AVMFEATURE_SWF14=1;AVMFEATURE_SWF15=1;AVMFEATURE_SWF16=1;AVMFEATURE_JIT=1;AVMTWEAK_EXACT_TRACING=1"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
@@ -419,7 +419,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE;AVMFEATURE_SELFTEST=1;AVMFEATURE_EVAL=1;AVMFEATURE_SWF12=1;AVMFEATURE_SWF13=1;AVMFEATURE_SWF14=1;AVMFEATURE_SWF15=1;AVMFEATURE_SWF16=1;AVMFEATURE_JIT=1;AVMTWEAK_EXACT_TRACING=1"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
@@ -492,7 +492,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;_DEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;_DEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE;AVMFEATURE_SELFTEST=1;AVMFEATURE_EVAL=1;AVMFEATURE_SWF12=1;AVMFEATURE_SWF13=1;AVMFEATURE_SWF14=1;AVMFEATURE_SWF15=1;AVMFEATURE_SWF16=1;AVMFEATURE_JIT=1;AVMTWEAK_EXACT_TRACING=1"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
@@ -566,7 +566,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;_DEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;_DEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE;AVMFEATURE_SELFTEST=1;AVMFEATURE_EVAL=1;AVMFEATURE_SWF12=1;AVMFEATURE_SWF13=1;AVMFEATURE_SWF14=1;AVMFEATURE_SWF15=1;AVMFEATURE_SWF16=1;AVMFEATURE_JIT=1;AVMTWEAK_EXACT_TRACING=1"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
@@ -1968,6 +1968,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\Float4Class.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\Float4Class.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\FloatClass.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\FloatClass.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\FrameState-inlines.h"
 				>
 			</File>
@@ -2029,6 +2045,10 @@
 			</File>
 			<File
 				RelativePath="..\..\core\JSONClass.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\LirHelper-Emitters.h"
 				>
 			</File>
 			<File
