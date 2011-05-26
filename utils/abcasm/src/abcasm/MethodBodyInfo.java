@@ -393,6 +393,8 @@ class MethodBodyInfo
                     
                 case OP_pushbyte:
                 case OP_pushdouble:
+                case OP_pushfloat:
+                case OP_pushfloat4:
                 case OP_pushfalse:
                 case OP_pushint:
                 case OP_pushnamespace:

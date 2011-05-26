@@ -49,6 +49,7 @@ const NATIVE:int =				0x20
 const HAS_ParamNames:int =      0x80
 
 const CONSTANT_Utf8					:int = 0x01
+const CONSTANT_Float				:int = 0x02
 const CONSTANT_Int					:int = 0x03
 const CONSTANT_UInt					:int = 0x04
 const CONSTANT_PrivateNs			:int = 0x05 // non-shared namespace
@@ -73,16 +74,17 @@ const CONSTANT_PackageInternalNs	:int = 0x17
 const CONSTANT_ProtectedNs			:int = 0x18
 const CONSTANT_StaticProtectedNs	:int = 0x19
 const CONSTANT_StaticProtectedNs2	:int = 0x1a
-const CONSTANT_MultinameL           :int = 0x1B
-const CONSTANT_MultinameLA          :int = 0x1C
-const CONSTANT_TypeName             :int = 0x1D
+const CONSTANT_MultinameL			:int = 0x1B
+const CONSTANT_MultinameLA			:int = 0x1C
+const CONSTANT_TypeName				:int = 0x1D
+const CONSTANT_Float4				:int = 0x1E
 
-const constantKinds:Array = [ "0", "utf8", "2",
+const constantKinds:Array = [ "0", "utf8", "float",
 "int", "uint", "private", "double", "qname", "namespace",
 "multiname", "false", "true", "null", "@qname", "@multiname", "rtqname",
 "@rtqname", "[qname]", "@[qname]", "[name]", "@[name]", "nsset", "packagens",
 "packageinternalns", "protectedns", "staticprotectedns", "staticprotectedns2",
-"multiname", "multiname2", "typename"
+"multiname", "multiname2", "typename", "float4"
 ]
 
 const TRAIT_Slot		:int = 0x00

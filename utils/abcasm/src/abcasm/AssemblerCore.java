@@ -76,8 +76,12 @@ class AssemblerCore
     Pool<Integer> intPool = new Pool<Integer>(1);
     Pool<Long> uintPool = new Pool<Long>(1);
     Pool<Double> doublePool = new Pool<Double>(1);
+    Pool<Float> floatPool = new Pool<Float>(1);
+    Pool<Float4> float4Pool = new Pool<Float4>(1);
     Pool<Namespace> nsPool = new Pool<Namespace>(1);
     Pool<Nsset> nssetPool = new Pool<Nsset>(1);
+
+    boolean floatSupport = false;
 
     AssemblerCore(AssemblerOptions options)
     {
@@ -124,6 +128,16 @@ class AssemblerCore
             Double dKey = (Double)value;
             return doublePool.add(dKey);
         }
+        else if ( value instanceof Float )
+        {
+            Float dKey = (Float)value;
+            return floatPool.add(dKey);
+        }
+        else if ( value instanceof Float4 )
+        {
+            Float4 dKey = (Float4)value;
+            return float4Pool.add(dKey);
+        }
         else if ( value instanceof String )
         {
             String sKey = (String)value;
@@ -161,6 +175,16 @@ class AssemblerCore
         {
             Double dKey = (Double)value;
             return doublePool.id(dKey);
+        }
+        else if ( value instanceof Float )
+        {
+            Float dKey = (Float)value;
+            return floatPool.id(dKey);
+        }
+        else if ( value instanceof Float4 )
+        {
+            Float4 dKey = (Float4)value;
+            return float4Pool.id(dKey);
         }
         else if ( value instanceof String )
         {

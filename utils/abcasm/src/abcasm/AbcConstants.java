@@ -55,6 +55,7 @@ interface AbcConstants {
     int HAS_ParamNames =    0x80;
 
     int CONSTANT_Utf8                = 0x01;
+    int CONSTANT_Float               = 0x02;
     int CONSTANT_Int                 = 0x03;
     int CONSTANT_UInt                = 0x04;
     int CONSTANT_PrivateNs           = 0x05; // non-shared namespace
@@ -82,11 +83,14 @@ interface AbcConstants {
     int CONSTANT_MultinameL          = 0x1B;
     int CONSTANT_MultinameLA         = 0x1C;
     int CONSTANT_TypeName            = 0x1D;
+    int CONSTANT_Float4              = 0x1E;
 
-    String[] constantKinds = { "0", "utf8", "2",
+    String[] constantKinds = { "0", "utf8", "float",
         "int", "uint", "private", "double", "qname", "namespace",
         "multiname", "false", "true", "null", "@qname", "@multiname", "rtqname",
-        "@rtqname", "[qname]", "@[qname]", "[name]", "@[name]", "nsset"
+        "@rtqname", "[qname]", "@[qname]", "[name]", "@[name]", "nsset", "packagens",
+        "packageinternalns", "protectedns", "staticprotectedns", "staticprotectedns2",
+        "multiname", "multiname2", "typename", "float4"
     };
 
     int TRAIT_Var        = 0x00;
@@ -136,7 +140,7 @@ interface AbcConstants {
     int OP_hasnext = 0x1F;
     int OP_pushnull = 0x20;
     int OP_pushundefined = 0x21;
-    int OP_pushconstant = 0x22;
+    int OP_pushfloat = 0x22;
     int OP_nextvalue = 0x23;
     int OP_pushbyte = 0x24;
     int OP_pushshort = 0x25;
@@ -183,6 +187,7 @@ interface AbcConstants {
     int OP_sxi8 = 0x51;
     int OP_sxi16 = 0x52;
     int OP_applytype = 0x53;
+    int OP_pushfloat4 = 0x54;
     int OP_newobject = 0x55;
     int OP_newarray = 0x56;
     int OP_newactivation = 0x57;
@@ -217,6 +222,9 @@ interface AbcConstants {
     int OP_convert_b = 0x76;
     int OP_convert_o = 0x77;
     int OP_checkfilter = 0x78;
+    int OP_convert_f = 0x79;
+    int OP_unplus = 0x7a;
+    int OP_convert_f4 = 0x7b;
     int OP_coerce = 0x80;
     int OP_coerce_b = 0x81;
     int OP_coerce_a = 0x82;
@@ -314,7 +322,7 @@ interface AbcConstants {
         "hasnext       ",
         "pushnull      ",
         "pushundefined ",
-        "pushconstant  ",
+        "pushfloat     ",
         "nextvalue     ",
         "pushbyte      ",
         "pushshort     ",
@@ -364,7 +372,7 @@ interface AbcConstants {
         "sxi8          ",
         "sxi16         ",
         "applytype     ",
-        "OP_0x54       ",
+        "pushfloat4    ",
         "newobject     ",
         "newarray      ",
         "newactivation ",
@@ -401,9 +409,9 @@ interface AbcConstants {
         "convert_b     ",
         "convert_o     ",
         "checkfilter   ",
-        "OP_0x79       ",
-        "OP_0x7A       ",
-        "OP_0x7B       ",
+        "convert_f     ",
+        "unplus        ",
+        "convert_f4    ",
         "OP_0x7C       ",
         "OP_0x7D       ",
         "OP_0x7E       ",

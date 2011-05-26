@@ -429,6 +429,14 @@ package abcdump
                         case OP_pushdouble:
                             s += abc.doubles[readU32()]
                             break;
+                        case OP_pushfloat:
+                            if( abc.floatSupport)
+                                s += abc.floats[readU32()];
+                            break;
+                        case OP_pushfloat4:
+                            if( abc.floatSupport)
+                                s += abc.float4s[readU32()];
+                            break;
                         case OP_getsuper:
                         case OP_setsuper:
                         case OP_getproperty:
@@ -690,6 +698,8 @@ package abcdump
         var ints:Array
         var uints:Array
         var doubles:Array
+        var floats:Array
+        var float4s:Array
         var strings:Array
         var namespaces:Array
         var nssets:Array
@@ -707,6 +717,7 @@ package abcdump
         var anyNs = new ABCNamespace("*")
 
         var magic:int
+        var floatSupport:Boolean;
 
         function Abc(data:ByteArray)
         {
@@ -716,6 +727,7 @@ package abcdump
 
             infoPrint("magic " + magic.toString(16))
 
+            floatSupport = true;
             switch (magic) {
             case (46<<16|14):
             case (46<<16|15):
@@ -724,6 +736,7 @@ package abcdump
             case (47<<16|13):
             case (47<<16|14):
             case (47<<16|15):
+                floatSupport = false; // No float support prior to Cyrill
             case (47<<16|16):
             case (47<<16|17):
             case (47<<16|18):
@@ -751,6 +764,10 @@ package abcdump
             defaults[CONSTANT_StaticProtectedNs] = namespaces
             defaults[CONSTANT_StaticProtectedNs2] = namespaces
             defaults[CONSTANT_Null] = { 12: null }
+            if(floatSupport){
+               defaults[CONSTANT_Float] = floats
+               defaults[CONSTANT_Float4] = float4s
+            }
 
             parseMethodInfos()
             parseMetadataInfos()
@@ -827,6 +844,29 @@ package abcdump
 
             infoPrint("Cpool numbers size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
             start = data.position
+
+            // floats
+            if( floatSupport) {
+               n = readU32()
+               floats = [float.NaN]
+               for (i=1; i < n; i++)
+                   floats[i] = data.readFloat32()
+               dumpPool("float", floats)
+
+               infoPrint("Cpool floats size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
+               start = data.position
+               // float4
+               n = readU32()
+               var f4:float4 = float4(float.NaN,float.NaN,float.NaN,float.NaN)
+               float4s = [f4]
+               for (i=1; i < n; i++){
+                   float4s[i] = new float4(data.readFloat32(),data.readFloat32(),data.readFloat32(),data.readFloat32());
+               }
+               dumpPool("float4", float4s)
+
+               infoPrint("Cpool float4s size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
+               start = data.position
+            }
 
             // strings
             n = readU32()

@@ -61,8 +61,14 @@ class AbcEmitter
     public byte[] emit()
     throws Exception
     {
-        w.writeU16(16);
-        w.writeU16(46);
+        if (core.floatSupport) {
+            w.writeU16(16);
+            w.writeU16(47);
+        }
+        else {
+            w.writeU16(16);
+            w.writeU16(46);
+        }
 
         int pos = w.size();
         w.writeU30(core.intPool.size());
@@ -82,6 +88,22 @@ class AbcEmitter
             w.write64(Double.doubleToLongBits(x));
 
         pos = w.size();
+
+        if (core.floatSupport) {
+            w.writeU30(core.floatPool.size());
+            for (float x: core.floatPool.getValues())
+                w.write32(Float.floatToIntBits(x));
+            w.writeU30(core.float4Pool.size());
+            for (Float4 xx: core.float4Pool.getValues()){
+                Float4 x = xx;
+                w.write32(Float.floatToIntBits(x.x));
+                w.write32(Float.floatToIntBits(x.y));
+                w.write32(Float.floatToIntBits(x.z));
+                w.write32(Float.floatToIntBits(x.w));
+            }
+
+            pos = w.size();
+        }
 
         w.writeU30(core.stringPool.size());
         for (String s: core.stringPool.getValues())
@@ -488,6 +510,12 @@ class AbcEmitter
             case OP_pushdouble:
                 blockWriter.writeU30(insn.imm[0]);
                 break;
+            case OP_pushfloat:
+                blockWriter.writeU30(insn.imm[0]);
+                break;
+            case OP_pushfloat4:
+                blockWriter.writeU30(insn.imm[0]);
+                break;
             case OP_debugline:
             case OP_bkptline:
                 blockWriter.writeU30(insn.imm[0]);
@@ -562,6 +590,12 @@ class AbcEmitter
         {
             writeU16(i);
             write(i>>16);
+        }
+        
+        void write32(int i)
+        {
+            writeU16(i);
+            writeU16(i>>16);
         }
         
         void write64(long i)
