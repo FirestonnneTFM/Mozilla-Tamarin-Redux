@@ -86,16 +86,11 @@
 // "something important just happened".  We have to just reach a consensus on
 // whether something should trigger a change.
 //
-// AVMPLUS_MINOR_VERSION is updated on /every/ merge from tamarin-redux
-// to tamarin-central and is therefore a serial number for the release.
-//
-// AVMPLUS_MAJOR_DATE and AVMPLUS_MINOR_DATE reflect the dates of the incrementing
-// of the major and minor version numbers, respectively, for the current code.
+// AVMPLUS_MINOR_VERSION is updated on /every/ branch from tamarin-redux
+// into an official release and is therefore a serial number for the release.
 
-#define AVMPLUS_MAJOR_VERSION       1               // original open source version
-#define AVMPLUS_MAJOR_DATE          "2007-04-01"    // close enough
-#define AVMPLUS_MINOR_VERSION       4
-#define AVMPLUS_MINOR_DATE          "2009-04-24"
+#define AVMPLUS_MAJOR_VERSION       2
+#define AVMPLUS_MINOR_VERSION       1
 
 // The simple user-facing version number
 #define AVMPLUS_VERSION_USER        avmplus_stringify(AVMPLUS_MAJOR_VERSION) "." avmplus_stringify(AVMPLUS_MINOR_VERSION)
