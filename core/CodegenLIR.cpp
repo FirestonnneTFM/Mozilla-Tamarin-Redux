@@ -197,7 +197,9 @@ namespace avmplus
         #define VECTORINTADDR(f) vectorIntAddr((int (IntVectorObject::*)())(&f))
         #define VECTORUINTADDR(f) vectorUIntAddr((int (UIntVectorObject::*)())(&f))
         #define VECTORDOUBLEADDR(f) vectorDoubleAddr((int (DoubleVectorObject::*)())(&f))
+        #define VECTORFLOATADDR(f) vectorFloatAddr((int (FloatVectorObject::*)())(&f))
         #define VECTORDOUBLEADDRF(f) vectorDoubleAddrF((double (DoubleVectorObject::*)())(&f))
+        #define VECTORFLOATADDRF(f) vectorFloatAddrF((float (FloatVectorObject::*)())(&f))
         #define VECTOROBJADDR(f) vectorObjAddr((int (ObjectVectorObject::*)())(&f))
         #define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
         #define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
@@ -254,7 +256,16 @@ namespace avmplus
         {
             RETURN_METHOD_PTR_F(DoubleVectorObject, f);
         }
-
+#ifdef VMCFG_FLOAT
+        intptr_t vectorFloatAddr(int (FloatVectorObject::*f)())
+        {
+            RETURN_METHOD_PTR(FloatVectorObject, f);
+        }
+        intptr_t vectorFloatAddrF(float (FloatVectorObject::*f)())
+        {
+            RETURN_METHOD_PTR_SPF(FloatVectorObject, f);
+        }
+#endif // VMCFG_FLOAT
         intptr_t vectorObjAddr(int (ObjectVectorObject::*f)())
         {
             RETURN_METHOD_PTR(ObjectVectorObject, f);
@@ -5005,33 +5016,45 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         liveAlloc(args);
         localSet(ctor_index, atomToNativeRep(itraits, newobj), itraits);
     }
-
+#ifdef VMCFG_FLOAT
+#   define FLT_FUNCTIONID(a) ,FUNCTIONID(a)
+#else
+#   define FLT_FUNCTIONID(a)
+#endif
     static const CallInfo* getArrayHelpers[VI_SIZE] =
-        { FUNCTIONID(ArrayObject_getUintProperty), FUNCTIONID(ArrayObject_getIntProperty), FUNCTIONID(ArrayObject_getDoubleProperty) };
+        { FUNCTIONID(ArrayObject_getUintProperty), FUNCTIONID(ArrayObject_getIntProperty), FUNCTIONID(ArrayObject_getDoubleProperty) FLT_FUNCTIONID(ArrayObject_getFloatProperty) };
 
     static const CallInfo* getObjectVectorHelpers[VI_SIZE] =
-        { FUNCTIONID(ObjectVectorObject_getUintProperty), FUNCTIONID(ObjectVectorObject_getIntProperty), FUNCTIONID(ObjectVectorObject_getDoubleProperty) };
+        { FUNCTIONID(ObjectVectorObject_getUintProperty), FUNCTIONID(ObjectVectorObject_getIntProperty), FUNCTIONID(ObjectVectorObject_getDoubleProperty) FLT_FUNCTIONID(ObjectVectorObject_getFloatProperty) };
 
     static const CallInfo* getIntVectorNativeHelpers[VI_SIZE] =
-        { FUNCTIONID(IntVectorObject_getNativeUintProperty), FUNCTIONID(IntVectorObject_getNativeIntProperty), FUNCTIONID(IntVectorObject_getNativeDoubleProperty) };
+        { FUNCTIONID(IntVectorObject_getNativeUintProperty), FUNCTIONID(IntVectorObject_getNativeIntProperty), FUNCTIONID(IntVectorObject_getNativeDoubleProperty) FLT_FUNCTIONID(IntVectorObject_getNativeFloatProperty)  };
 
     static const CallInfo* getIntVectorHelpers[VI_SIZE] =
-        { FUNCTIONID(IntVectorObject_getUintProperty), FUNCTIONID(IntVectorObject_getIntProperty), FUNCTIONID(IntVectorObject_getDoubleProperty) };
+        { FUNCTIONID(IntVectorObject_getUintProperty), FUNCTIONID(IntVectorObject_getIntProperty), FUNCTIONID(IntVectorObject_getDoubleProperty) FLT_FUNCTIONID(IntVectorObject_getFloatProperty) };
 
     static const CallInfo* getUIntVectorNativeHelpers[VI_SIZE] =
-        { FUNCTIONID(UIntVectorObject_getNativeUintProperty), FUNCTIONID(UIntVectorObject_getNativeIntProperty), FUNCTIONID(UIntVectorObject_getNativeDoubleProperty) };
+        { FUNCTIONID(UIntVectorObject_getNativeUintProperty), FUNCTIONID(UIntVectorObject_getNativeIntProperty), FUNCTIONID(UIntVectorObject_getNativeDoubleProperty) FLT_FUNCTIONID(UIntVectorObject_getNativeFloatProperty) };
 
     static const CallInfo* getUIntVectorHelpers[VI_SIZE] =
-        { FUNCTIONID(UIntVectorObject_getUintProperty), FUNCTIONID(UIntVectorObject_getIntProperty), FUNCTIONID(UIntVectorObject_getDoubleProperty) };
+        { FUNCTIONID(UIntVectorObject_getUintProperty), FUNCTIONID(UIntVectorObject_getIntProperty), FUNCTIONID(UIntVectorObject_getDoubleProperty) FLT_FUNCTIONID(UIntVectorObject_getFloatProperty)  };
 
     static const CallInfo* getDoubleVectorNativeHelpers[VI_SIZE] =
-        { FUNCTIONID(DoubleVectorObject_getNativeUintProperty), FUNCTIONID(DoubleVectorObject_getNativeIntProperty), FUNCTIONID(DoubleVectorObject_getNativeDoubleProperty) };
+        { FUNCTIONID(DoubleVectorObject_getNativeUintProperty), FUNCTIONID(DoubleVectorObject_getNativeIntProperty), FUNCTIONID(DoubleVectorObject_getNativeDoubleProperty) FLT_FUNCTIONID(DoubleVectorObject_getNativeFloatProperty) };
 
     static const CallInfo* getDoubleVectorHelpers[VI_SIZE] =
-        { FUNCTIONID(DoubleVectorObject_getUintProperty), FUNCTIONID(DoubleVectorObject_getIntProperty), FUNCTIONID(DoubleVectorObject_getDoubleProperty) };
+        { FUNCTIONID(DoubleVectorObject_getUintProperty), FUNCTIONID(DoubleVectorObject_getIntProperty), FUNCTIONID(DoubleVectorObject_getDoubleProperty) FLT_FUNCTIONID(DoubleVectorObject_getFloatProperty) };
+
+#ifdef VMCFG_FLOAT
+    static const CallInfo* getFloatVectorNativeHelpers[VI_SIZE] =
+        { FUNCTIONID(FloatVectorObject_getNativeUintProperty), FUNCTIONID(FloatVectorObject_getNativeIntProperty), FUNCTIONID(FloatVectorObject_getNativeDoubleProperty), FUNCTIONID(FloatVectorObject_getNativeFloatProperty) };
+
+    static const CallInfo* getFloatVectorHelpers[VI_SIZE] =
+        { FUNCTIONID(FloatVectorObject_getUintProperty), FUNCTIONID(FloatVectorObject_getIntProperty), FUNCTIONID(FloatVectorObject_getDoubleProperty), FUNCTIONID(FloatVectorObject_getFloatProperty) };
+#endif
 
     static const CallInfo* getGenericHelpers[VI_SIZE] =
-        { FUNCTIONID(getpropertylate_u), FUNCTIONID(getpropertylate_i), FUNCTIONID(getpropertylate_d) };
+        { FUNCTIONID(getpropertylate_u), FUNCTIONID(getpropertylate_i), FUNCTIONID(getpropertylate_d) FLT_FUNCTIONID(getpropertylate_f) };
 
     LIns* CodegenLIR::emitInlineVectorRead(int objIndexOnStack, 
                                            LIns* index,
@@ -5148,6 +5171,18 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 getter = getDoubleVectorHelpers[idxKind];
             }
         }
+#ifdef VMCFG_FLOAT
+        else if (objType == VECTORFLOAT_TYPE) {
+            if (result == FLOAT_TYPE) {
+                getter = getFloatVectorNativeHelpers[idxKind];
+                valIsAtom = false;
+            }
+            else {
+                getter = getFloatVectorHelpers[idxKind];
+            }
+        }
+#endif
+
         if (getter) {
             LIns* value = callIns(getter, 2, localGetp(objIndexOnStack), index);
             return valIsAtom ? atomToNativeRep(result, value) : value;
@@ -5159,37 +5194,46 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     }
 
     static const CallInfo* setArrayHelpers[VI_SIZE] =
-        { FUNCTIONID(ArrayObject_setUintProperty), FUNCTIONID(ArrayObject_setIntProperty), FUNCTIONID(ArrayObject_setDoubleProperty) };
+        { FUNCTIONID(ArrayObject_setUintProperty), FUNCTIONID(ArrayObject_setIntProperty), FUNCTIONID(ArrayObject_setDoubleProperty) FLT_FUNCTIONID(ArrayObject_setFloatProperty) };
 
     static const CallInfo* setObjectVectorHelpers[VI_SIZE] =
-        { FUNCTIONID(ObjectVectorObject_setUintProperty), FUNCTIONID(ObjectVectorObject_setIntProperty), FUNCTIONID(ObjectVectorObject_setDoubleProperty) };
+        { FUNCTIONID(ObjectVectorObject_setUintProperty), FUNCTIONID(ObjectVectorObject_setIntProperty), FUNCTIONID(ObjectVectorObject_setDoubleProperty) FLT_FUNCTIONID(ObjectVectorObject_setFloatProperty) };
 
     static const CallInfo* setKnownTypeObjectVectorHelpers[VI_SIZE] =
-        { FUNCTIONID(ObjectVectorObject_setKnownUintProperty), FUNCTIONID(ObjectVectorObject_setKnownIntProperty), FUNCTIONID(ObjectVectorObject_setKnownDoubleProperty) };
+        { FUNCTIONID(ObjectVectorObject_setKnownUintProperty), FUNCTIONID(ObjectVectorObject_setKnownIntProperty), FUNCTIONID(ObjectVectorObject_setKnownDoubleProperty) FLT_FUNCTIONID(ObjectVectorObject_setKnownFloatProperty)  };
     
     static const CallInfo* setKnownPointerTypeObjectVectorHelpers[VI_SIZE] =
-        { FUNCTIONID(ObjectVectorObject_setKnownUintPropertyWithPointer), FUNCTIONID(ObjectVectorObject_setKnownIntPropertyWithPointer), FUNCTIONID(ObjectVectorObject_setKnownDoublePropertyWithPointer) };
+        { FUNCTIONID(ObjectVectorObject_setKnownUintPropertyWithPointer), FUNCTIONID(ObjectVectorObject_setKnownIntPropertyWithPointer), FUNCTIONID(ObjectVectorObject_setKnownDoublePropertyWithPointer) FLT_FUNCTIONID(ObjectVectorObject_setKnownFloatPropertyWithPointer) };
     
     static const CallInfo* setIntVectorNativeHelpers[VI_SIZE] =
-        { FUNCTIONID(IntVectorObject_setNativeUintProperty), FUNCTIONID(IntVectorObject_setNativeIntProperty), FUNCTIONID(IntVectorObject_setNativeDoubleProperty) };
+        { FUNCTIONID(IntVectorObject_setNativeUintProperty), FUNCTIONID(IntVectorObject_setNativeIntProperty), FUNCTIONID(IntVectorObject_setNativeDoubleProperty) FLT_FUNCTIONID(IntVectorObject_setNativeFloatProperty) };
 
     static const CallInfo* setIntVectorHelpers[VI_SIZE] =
-        { FUNCTIONID(IntVectorObject_setUintProperty), FUNCTIONID(IntVectorObject_setIntProperty), FUNCTIONID(IntVectorObject_setDoubleProperty) };
+        { FUNCTIONID(IntVectorObject_setUintProperty), FUNCTIONID(IntVectorObject_setIntProperty), FUNCTIONID(IntVectorObject_setDoubleProperty) FLT_FUNCTIONID(IntVectorObject_setFloatProperty) };
 
     static const CallInfo* setUIntVectorNativeHelpers[VI_SIZE] =
-        { FUNCTIONID(UIntVectorObject_setNativeUintProperty), FUNCTIONID(UIntVectorObject_setNativeIntProperty), FUNCTIONID(UIntVectorObject_setNativeDoubleProperty) };
+        { FUNCTIONID(UIntVectorObject_setNativeUintProperty), FUNCTIONID(UIntVectorObject_setNativeIntProperty), FUNCTIONID(UIntVectorObject_setNativeDoubleProperty) FLT_FUNCTIONID(UIntVectorObject_setNativeFloatProperty)  };
 
     static const CallInfo* setUIntVectorHelpers[VI_SIZE] =
-        { FUNCTIONID(UIntVectorObject_setUintProperty), FUNCTIONID(UIntVectorObject_setIntProperty), FUNCTIONID(UIntVectorObject_setDoubleProperty) };
+        { FUNCTIONID(UIntVectorObject_setUintProperty), FUNCTIONID(UIntVectorObject_setIntProperty), FUNCTIONID(UIntVectorObject_setDoubleProperty) FLT_FUNCTIONID(UIntVectorObject_setFloatProperty) };
 
     static const CallInfo* setDoubleVectorNativeHelpers[VI_SIZE] =
-        { FUNCTIONID(DoubleVectorObject_setNativeUintProperty), FUNCTIONID(DoubleVectorObject_setNativeIntProperty), FUNCTIONID(DoubleVectorObject_setNativeDoubleProperty) };
+        { FUNCTIONID(DoubleVectorObject_setNativeUintProperty), FUNCTIONID(DoubleVectorObject_setNativeIntProperty), FUNCTIONID(DoubleVectorObject_setNativeDoubleProperty) FLT_FUNCTIONID(DoubleVectorObject_setNativeFloatProperty) };
 
     static const CallInfo* setDoubleVectorHelpers[VI_SIZE] =
-        { FUNCTIONID(DoubleVectorObject_setUintProperty), FUNCTIONID(DoubleVectorObject_setIntProperty), FUNCTIONID(DoubleVectorObject_setDoubleProperty) };
+        { FUNCTIONID(DoubleVectorObject_setUintProperty), FUNCTIONID(DoubleVectorObject_setIntProperty), FUNCTIONID(DoubleVectorObject_setDoubleProperty) FLT_FUNCTIONID(DoubleVectorObject_setFloatProperty) };
+
+#ifdef VMCFG_FLOAT
+    static const CallInfo* setFloatVectorNativeHelpers[VI_SIZE] =
+        { FUNCTIONID(FloatVectorObject_setNativeUintProperty), FUNCTIONID(FloatVectorObject_setNativeIntProperty), FUNCTIONID(FloatVectorObject_setNativeDoubleProperty), FUNCTIONID(FloatVectorObject_setNativeFloatProperty) };
+
+    static const CallInfo* setFloatVectorHelpers[VI_SIZE] =
+        { FUNCTIONID(FloatVectorObject_setUintProperty), FUNCTIONID(FloatVectorObject_setIntProperty), FUNCTIONID(FloatVectorObject_setDoubleProperty), FUNCTIONID(FloatVectorObject_setFloatProperty) };
+#endif
 
     static const CallInfo* setGenericHelpers[VI_SIZE] =
-        { FUNCTIONID(setpropertylate_u), FUNCTIONID(setpropertylate_i), FUNCTIONID(setpropertylate_d) };
+        { FUNCTIONID(setpropertylate_u), FUNCTIONID(setpropertylate_i), FUNCTIONID(setpropertylate_d) FLT_FUNCTIONID(setpropertylate_f) };
+
 
     // Not for values that require a write barrier!
     void CodegenLIR::emitInlineVectorWrite(int objIndexOnStack,
@@ -5308,7 +5352,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 if (idxKind == VI_INT || idxKind == VI_UINT) {
                     emitInlineVectorWrite(objIndexOnStack, 
                                           index,
-                                          localGetf(valIndexOnStack),
+                                          localGetf(valIndexOnStack, DOUBLE_PRECISION),
                                           offsetof(DoubleVectorObject, m_list.m_data),
                                           offsetof(DataListHelper<double>::LISTDATA, len),
                                           offsetof(ListData<double>, entries),
@@ -5325,6 +5369,18 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 setter = setDoubleVectorHelpers[idxKind];
             }
         }
+#ifdef VMCFG_FLOAT
+        else if (objType == VECTORFLOAT_TYPE) {
+            if (valueType == FLOAT_TYPE) {
+                value = localGetf(valIndexOnStack,SINGLE_PRECISION);
+                setter = setFloatVectorNativeHelpers[idxKind];
+            }
+            else {
+                value = loadAtomRep(valIndexOnStack);
+                setter = setFloatVectorHelpers[idxKind];
+            }
+        }
+#endif // VMCFG_FLOAT
         else {
              AvmAssert(setter==NULL);
              // Or in other words: if we got here, we'll use a generic helper.
@@ -6275,6 +6331,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     LIns *value = emitGetIndexedProperty(sp-1, index, result, VI_UINT);
                     localSet(sp-1, value, result);
                 }
+#ifdef VMCFG_FLOAT
+                else if (maybeIntegerIndex && indexType == FLOAT_TYPE) {
+                    LIns *value = emitGetIndexedProperty(sp-1, index, result, VI_FLOAT);
+                    localSet(sp-1, value, result);
+                }
+#endif // VMCFG_FLOAT
                 else if (maybeIntegerIndex && indexType == NUMBER_TYPE) {
                     bool bGeneratedFastPath = false;
 #ifdef VMCFG_FASTPATH_ADD_INLINE

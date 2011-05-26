@@ -155,6 +155,9 @@ namespace avmplus
     class HeapMultiname;
     class InlineHashtable;
     class IntVectorObject;
+#ifdef VMCFG_FLOAT
+    class FloatVectorObject;
+#endif    
     class DoubleVectorObject;
     class UIntVectorObject;
     class ObjectVectorObject;

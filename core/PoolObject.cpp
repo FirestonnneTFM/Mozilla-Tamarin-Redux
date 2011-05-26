@@ -694,6 +694,14 @@ range_error:
                 case BUILTIN_uint:
                     r = core->traits.vectoruint_itraits;
                     break;
+#ifdef VMCFG_FLOAT
+                case BUILTIN_float: 
+                    r = core->traits.vectorfloat_itraits;
+                    break;
+                case BUILTIN_float4: 
+                    AvmAssertMsg(false, "vector<float4> not implemented yet");
+                    break;
+#endif
                 case BUILTIN_number:
                     r = core->traits.vectordouble_itraits;
                     break;

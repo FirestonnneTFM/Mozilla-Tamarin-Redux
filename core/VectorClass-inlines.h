@@ -45,10 +45,12 @@ namespace avmplus
 {
     // For some hand-written tracers that are used by generated tracers.
 
+#define avmplus_TypedVectorClassXFloatVectorObjectX_isExactInterlock 1
 #define avmplus_TypedVectorClassXDoubleVectorObjectX_isExactInterlock 1
 #define avmplus_TypedVectorClassXIntVectorObjectX_isExactInterlock 1
 #define avmplus_TypedVectorClassXUIntVectorObjectX_isExactInterlock 1
 #define avmplus_TypedVectorClassXObjectVectorObjectX_isExactInterlock 1
+#define avmplus_TypedVectorObjectXDataListXfloatXX_isExactInterlock 1
 #define avmplus_TypedVectorObjectXDataListXdoubleXX_isExactInterlock 1
 #define avmplus_TypedVectorObjectXDataListXint32_tXX_isExactInterlock 1
 #define avmplus_TypedVectorObjectXDataListXuint32_tXX_isExactInterlock 1
@@ -157,6 +159,23 @@ namespace avmplus
     {
         return core()->doubleToAtom(value);
     }
+
+#ifdef VMCFG_FLOAT
+    REALLY_INLINE void VectorBaseObject::atomToValue(Atom atom, float& value)
+    {
+        value = AvmCore::singlePrecisionFloat(atom);
+    }
+
+    REALLY_INLINE void VectorBaseObject::atomToValueKnown(Atom atom, float& value)
+    {
+        value = AvmCore::singlePrecisionFloat(atom);
+    }
+    
+    REALLY_INLINE Atom VectorBaseObject::valueToAtom(const float& value) const
+    {
+        return core()->floatToAtom(value);
+    }
+#endif
 
     REALLY_INLINE void VectorBaseObject::atomToValue(Atom atom, OpaqueAtom& value)
     {
@@ -273,6 +292,15 @@ namespace avmplus
         return 0;
     }
 
+#ifdef VMCFG_FLOAT
+    template<class TLIST>
+    REALLY_INLINE uint32_t TypedVectorObject<TLIST>::checkReadIndex_f(float index) const
+    {
+        // just use the corresponding double version, until proven wrong
+        return checkReadIndex_d(index);
+    }
+#endif // VMCFG_FLOAT
+
     template<class TLIST>
     REALLY_INLINE void TypedVectorObject<TLIST>::checkWriteIndex_u(uint32_t index) const
     {
@@ -320,6 +348,16 @@ namespace avmplus
         throwSetDoubleException(index, limit);
         return 0;
     }
+
+#ifdef VMCFG_FLOAT
+    template<class TLIST>
+    REALLY_INLINE uint32_t TypedVectorObject<TLIST>::checkWriteIndex_f(float index) const
+    {
+        // just use the corresponding double version, until proven wrong
+        return checkWriteIndex_d(index);
+    }
+#endif // VMCFG_FLOAT
+    
 
     // ----------------------------
 

@@ -484,6 +484,25 @@ public class ByteArray implements IDataInput, IDataOutput
      * to read.
      * @return  A single-precision (32-bit) floating-point number.
      *
+     * @playerversion Flash TBD Cyril
+     * @langversion 3.0
+     * @helpid
+     * @refpath
+     * @keyword ByteArray, ByteArray.readFloat32, readFloat32
+     *  
+     * @playerversion Lite 4
+     */
+    [API(CONFIG::SWF_16)]
+    CONFIG::VMCFG_FLOAT
+    public native function readFloat32():float;
+
+    /**
+     * Reads an IEEE 754 single-precision (32-bit) floating-point number from the byte stream.
+     *
+     * @throws EOFError There is not sufficient data available
+     * to read.
+     * @return  A single-precision (32-bit) floating-point number.
+     *
      * @playerversion Flash 9
      * @langversion 3.0
      * @helpid

@@ -70,6 +70,7 @@ REALLY_INLINE GCRef<EvalErrorClass> Toplevel::evalErrorClass() const { return bu
 #ifdef VMCFG_FLOAT
 REALLY_INLINE GCRef<FloatClass> Toplevel::floatClass() const { return builtinClasses()->get_floatClass(); }
 REALLY_INLINE GCRef<Float4Class> Toplevel::float4Class() const { return builtinClasses()->get_float4Class(); }
+REALLY_INLINE GCRef<FloatVectorClass> Toplevel::floatVectorClass() const { return builtinClasses()->get_Vector_floatClass(); }
 #endif
 REALLY_INLINE GCRef<FunctionClass> Toplevel::functionClass() const { return builtinClasses()->get_FunctionClass(); }
 REALLY_INLINE GCRef<IntClass> Toplevel::intClass() const { return builtinClasses()->get_intClass(); }

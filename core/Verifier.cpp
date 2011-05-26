@@ -1450,14 +1450,14 @@ namespace avmplus
                 }
 
                 if( obj.traits == VECTORINT_TYPE  || obj.traits == VECTORUINT_TYPE ||
-                    obj.traits == VECTORDOUBLE_TYPE )
+                    obj.traits == VECTORDOUBLE_TYPE FLOAT_ONLY(|| obj.traits == VECTORFLOAT_TYPE) )
                 {
                     bool attr = multiname.isAttr();
                     Traits* indexType = state->value(state->sp()-1).traits;
 
                     // NOTE a dynamic name should have the same version as the current pool
                     bool maybeIntegerIndex = !attr && multiname.isRtname() && multiname.containsAnyPublicNamespace();
-                    if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE || indexType == NUMBER_TYPE) )
+                    if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE || indexType == NUMBER_TYPE  FLOAT_ONLY(|| indexType == FLOAT_TYPE) ) )
                     {
                         if(obj.traits == VECTORINT_TYPE)
                             emitCoerce(INT_TYPE, state->sp());
@@ -1465,6 +1465,10 @@ namespace avmplus
                             emitCoerce(UINT_TYPE, state->sp());
                         else if(obj.traits == VECTORDOUBLE_TYPE)
                             emitCoerce(NUMBER_TYPE, state->sp());
+#ifdef VMCFG_FLOAT
+                        else if(obj.traits == VECTORFLOAT_TYPE)
+                            emitCoerce(FLOAT_TYPE, state->sp());
+#endif
                     }
                 }
 
@@ -2940,13 +2944,13 @@ namespace avmplus
         if( !propType )
         {
             if( obj.traits == VECTORINT_TYPE  || obj.traits == VECTORUINT_TYPE ||
-                obj.traits == VECTORDOUBLE_TYPE )
+                obj.traits == VECTORDOUBLE_TYPE  FLOAT_ONLY(|| obj.traits == VECTORFLOAT_TYPE) )
             {
                 bool attr = multiname.isAttr();
                 Traits* indexType = state->value(state->sp()).traits;
                 // NOTE a dynamic name should have the same version as the current pool
                 bool maybeIntegerIndex = !attr && multiname.isRtname() && multiname.containsAnyPublicNamespace();
-                if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE || indexType == NUMBER_TYPE) )
+                if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE || indexType == NUMBER_TYPE  FLOAT_ONLY(|| indexType == FLOAT_TYPE)) )
                 {
                     if(obj.traits == VECTORINT_TYPE)
                         propType = INT_TYPE;
@@ -2954,6 +2958,10 @@ namespace avmplus
                         propType = UINT_TYPE;
                     else if(obj.traits == VECTORDOUBLE_TYPE)
                         propType = NUMBER_TYPE;
+#ifdef VMCFG_FLOAT
+                    else if(obj.traits == VECTORFLOAT_TYPE)
+                        propType = FLOAT_TYPE;
+#endif // VMCFG_FLOAT
                 }
             }
             else if (obj.traits != NULL && obj.traits->subtypeof(VECTOROBJ_TYPE) && 

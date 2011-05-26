@@ -494,6 +494,22 @@ namespace avmplus
         m_list.set(index, value);
     }
 
+#ifdef VMCFG_FLOAT
+    template<class TLIST>
+    typename TLIST::TYPE TypedVectorObject<TLIST>::_getNativeFloatProperty(float index_f) const
+    {
+        uint32_t const index = checkReadIndex_f(index_f);
+        return m_list.get(index);
+    }
+
+    template<class TLIST>
+    void TypedVectorObject<TLIST>::_setNativeFloatProperty(float index_f, typename TLIST::TYPE value)
+    {
+        uint32_t const index = checkWriteIndex_f(index_f);
+        m_list.set(index, value);
+    }
+#endif // VMCFG_FLOAT
+
     template<class TLIST>
     bool TypedVectorObject<TLIST>::_hasUintProperty(uint32_t index) const
     {
@@ -574,6 +590,33 @@ namespace avmplus
         atomToValueKnown(value, tmp);
         m_list.set(index, (typename TLIST::TYPE)tmp);
     }
+    
+#ifdef VMCFG_FLOAT
+    template<class TLIST>
+    Atom TypedVectorObject<TLIST>::_getFloatProperty(float index_f) const
+    {
+        uint32_t const index = checkReadIndex_f(index_f);
+        return valueToAtom((typename TLIST::OPAQUE_TYPE)m_list.get(index));
+    }
+
+    template<class TLIST>
+    void TypedVectorObject<TLIST>::_setFloatProperty(float index_f, Atom value)
+    {
+        uint32_t index = checkWriteIndex_f(index_f);
+        typename TLIST::OPAQUE_TYPE tmp;
+        atomToValue(value, tmp);
+        m_list.set(index, (typename TLIST::TYPE)tmp);
+    }
+
+    template<class TLIST>
+    void TypedVectorObject<TLIST>::_setKnownFloatProperty(float index_f, Atom value)
+    {
+        uint32_t index = checkWriteIndex_f(index_f);
+        typename TLIST::OPAQUE_TYPE tmp;
+        atomToValueKnown(value, tmp);
+        m_list.set(index, (typename TLIST::TYPE)tmp);
+    }
+#endif // VMCFG_FLOAT
     
     template<class TLIST>
     void FASTCALL TypedVectorObject<TLIST>::throwRangeError_u(uint32_t index) const
