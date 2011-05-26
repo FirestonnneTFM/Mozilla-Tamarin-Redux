@@ -42,8 +42,13 @@
 
 namespace avmplus
 {
-    FrameState::FrameState(MethodSignaturep ms)
-        : wl_next(NULL), abc_pc(NULL),
+#ifdef VMCFG_FLOAT
+    FrameState::FrameState(MethodSignaturep ms, MethodInfo* mi)
+        : info(mi),
+#else
+    FrameState::FrameState(MethodSignaturep ms) :
+#endif // VMCFG_FLOAT
+          wl_next(NULL), abc_pc(NULL),
           scopeDepth(0), stackDepth(0), withBase(-1),
           frameSize(ms->frame_size()),
           scopeBase(ms->scope_base()),
