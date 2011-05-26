@@ -3924,11 +3924,13 @@ namespace MMgc
     void GC::pruneBlacklist()
     {
         if(blacklist.count() > 0) {
-            GCHashtable::Iterator iter(&blacklist);
-            const void *p;
-            while((p = iter.nextKey()) != NULL) {
-                if(!GetMark(p)) {
-                    blacklist.remove(p, /*allowrehash=*/false);
+            {
+                GCHashtable::Iterator iter(&blacklist);
+                const void *p;
+                while((p = iter.nextKey()) != NULL) {
+                    if(!GetMark(p)) {
+                        blacklist.remove(p, /*allowrehash=*/false);
+                    }
                 }
             }
             blacklist.prune();
