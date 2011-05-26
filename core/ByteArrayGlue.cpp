@@ -849,7 +849,7 @@ namespace avmplus
 #endif
         }
     }
-    
+
     int ByteArrayObject::readShort()
     {
         return (int)(int16_t)read16();
@@ -894,6 +894,13 @@ namespace avmplus
     {
         return read32();
     }
+    
+#ifdef VMCFG_FLOAT
+    float ByteArrayObject::readFloat32()
+    {
+        return (float) readFloat();
+    }
+#endif // VMCFG_FLOAT
 
     // Some observations from x86 testing of float and double reading:
     //

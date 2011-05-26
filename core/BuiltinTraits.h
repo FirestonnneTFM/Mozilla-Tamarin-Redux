@@ -71,6 +71,9 @@ namespace avmplus
         BUILTIN_uint,
         BUILTIN_vector,
         BUILTIN_vectordouble,
+#ifdef VMCFG_FLOAT
+        BUILTIN_vectorfloat,
+#endif
         BUILTIN_vectorint,
         BUILTIN_vectorobj,
         BUILTIN_vectoruint,
@@ -128,6 +131,9 @@ namespace avmplus
         Traits *uint_itraits;
         Traits *vector_itraits;
         Traits *vectordouble_itraits;
+#ifdef VMCFG_FLOAT
+        Traits *vectorfloat_itraits;
+#endif
         Traits *vectorint_itraits;
         Traits *vectorobj_itraits;
         Traits *vectoruint_itraits;

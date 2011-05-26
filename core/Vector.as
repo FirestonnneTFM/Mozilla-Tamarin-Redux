@@ -467,4 +467,78 @@ package __AS3__.vec
             return -1;
         }
     }
+
+    [native(cls="FloatVectorClass", gc="exact", instance="FloatVectorObject", methods="auto", construct="override")]
+    [API(CONFIG::SWF_16)]
+    CONFIG::VMCFG_FLOAT
+    dynamic final class Vector$float
+    {
+        // Dummy constructor -- actual code is in construct()
+        public function Vector$float(length:uint=0, fixed:Boolean=false)
+        {
+        }
+
+        // Private helper methods.  These allow most of the implementation to be abstracted into
+        // a file that is included from the implementation of the different Vector types.
+        private static function castToThisType(item) : Vector$float {
+            return item;
+        }
+
+        private native function newThisType() : Vector$float;
+
+        // Include most of the vector implementation.
+        include "VectorImpl.as";
+
+        // Methods with the specific type in their sig.  Can't be in the impl file since it doesn't
+        // know what "type" vector this is (int, uint, Number, Object)
+        // Most of these just call generic versions in impl, but some small ones are implemented here.
+        AS3 function concat(...items) : Vector$float {
+            return _concat(items);
+        }
+
+        AS3 function filter(checker:Function, thisObj: Object=null): Vector$float {
+            return _filter(checker, thisObj);
+        }
+
+        AS3 native function pop(): float ;
+
+        AS3 function reverse() : Vector$float {
+            this._reverse();
+            return this;
+        }
+
+        AS3 native function shift():float;
+
+        AS3 function slice(start:int=0, end:int=0x7fffffff): Vector$float {
+            return this._slice(start, end);
+        }
+
+        AS3 function sort(comparefn): Vector$float {
+            var a : Array = [comparefn];
+            _sort(this, a);
+            return this;
+        }
+        AS3 function splice(start: int, deleteCount: uint, ...items): Vector$float {
+            return this._splice(start, deleteCount, items);
+        }
+
+        AS3 function indexOf(value:float, from:int=0): float {
+            var start:uint = clamp( from, length );
+            for ( var i:uint=start, limit:uint=length ; i < limit ; i++ )
+                if (this[i] === value)
+                    return i;
+            return -1;
+        }
+
+        AS3 function lastIndexOf(value:float, from: int=0x7fffffff): float {
+            var start:uint = clamp( from, length );
+            if( start == length )
+                --start;
+            for ( var i:int=start ; i >= 0 ; i-- ) {
+                if (this[i] === value)
+                    return i;
+            }
+            return -1;
+        }
+    }
 }

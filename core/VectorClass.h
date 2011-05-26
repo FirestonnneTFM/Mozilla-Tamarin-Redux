@@ -381,6 +381,23 @@ namespace avmplus
     };
 
     // ----------------------------
+#ifdef VMCFG_FLOAT
+    class GC_AS3_EXACT(FloatVectorClass, TypedVectorClass<FloatVectorObject>)
+    {
+    private:
+        explicit FloatVectorClass(VTable* vtable);
+    public:
+        REALLY_INLINE static FloatVectorClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) FloatVectorClass(cvtable);
+        }
+
+        GC_NO_DATA(FloatVectorClass)
+
+            DECLARE_SLOTS_FloatVectorClass;
+    };
+#endif
+    // ----------------------------
 
     class GC_AS3_EXACT(ObjectVectorClass, TypedVectorClass<ObjectVectorObject>)
     {
@@ -460,6 +477,12 @@ namespace avmplus
         void atomToValue(Atom atom, double& value);
         void atomToValueKnown(Atom atom, double& value);
         Atom valueToAtom(const double& value) const;
+
+#ifdef VMCFG_FLOAT
+        void atomToValue(Atom atom, float& value);
+        void atomToValueKnown(Atom atom, float& value);
+        Atom valueToAtom(const float& value) const;
+#endif // VMCFG_FLOAT
 
         void atomToValue(Atom atom, OpaqueAtom& value);
         void atomToValueKnown(Atom atom, OpaqueAtom& value);
@@ -542,6 +565,10 @@ namespace avmplus
         void _setNativeUintProperty(uint32_t index, typename TLIST::TYPE value);
         typename TLIST::TYPE _getNativeDoubleProperty(double index) const;
         void _setNativeDoubleProperty(double index, typename TLIST::TYPE value);
+#ifdef VMCFG_FLOAT
+        typename TLIST::TYPE _getNativeFloatProperty(float index) const;
+        void _setNativeFloatProperty(float index, typename TLIST::TYPE value);
+#endif
         bool _hasUintProperty(uint32_t index) const;
         Atom _getUintProperty(uint32_t index) const;
         void _setUintProperty(uint32_t index, Atom value);
@@ -549,6 +576,10 @@ namespace avmplus
         void _setIntProperty(int32_t index, Atom value);
         Atom _getDoubleProperty(double index) const;
         void _setDoubleProperty(double index, Atom value);
+#ifdef VMCFG_FLOAT
+        Atom _getFloatProperty(float index) const;
+        void _setFloatProperty(float index, Atom value);
+#endif
         
         // Optimized setters used by various JIT optimizations.  It is possible that
         // these ought to be moved into ObjectVectorObject in the manner of
@@ -557,6 +588,9 @@ namespace avmplus
         void _setKnownUintProperty(uint32_t index, Atom value);             // ObjectType <: VectorBaseType
         void _setKnownIntProperty(int32_t index, Atom value);               // ditto
         void _setKnownDoubleProperty(double index, Atom value);             // ditto
+#ifdef VMCFG_FLOAT
+        void _setKnownFloatProperty(float index, Atom value);               // ditto
+#endif
 
 #ifdef DEBUGGER
         virtual uint64_t bytesUsed() const;
@@ -571,9 +605,15 @@ namespace avmplus
         void     checkReadIndex_u(uint32_t index) const;
         uint32_t checkReadIndex_i(int32_t index) const;
         uint32_t checkReadIndex_d(double index) const;
+#ifdef VMCFG_FLOAT
+        uint32_t checkReadIndex_f(float index) const;
+#endif
         void     checkWriteIndex_u(uint32_t index) const;
         uint32_t checkWriteIndex_i(int32_t index) const;
         uint32_t checkWriteIndex_d(double index) const;
+#ifdef VMCFG_FLOAT
+        uint32_t checkWriteIndex_f(float index) const;
+#endif
 
         // variant of _spliceHelper with explicit array of Atom.
         // (Not exposed to AS3.)
@@ -699,6 +739,31 @@ namespace avmplus
     typedef VectorAccessor< DataList<double> > DoubleVectorAccessor;
 
     // ----------------------------
+#ifdef VMCFG_FLOAT
+    class GC_AS3_EXACT(FloatVectorObject, TypedVectorObject< DataList<float> >)
+    {
+    protected:
+        explicit FloatVectorObject(VTable* ivtable, ScriptObject* delegate);
+
+    public:
+        REALLY_INLINE static FloatVectorObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate)
+        {
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) FloatVectorObject(ivtable, delegate);
+        }
+
+        // AS3 native function implementations
+        FloatVectorObject* newThisType();
+
+        // ------------------------ DATA SECTION BEGIN
+    private:
+        GC_NO_DATA(FloatVectorObject)
+
+            DECLARE_SLOTS_FloatVectorObject;
+        // ------------------------ DATA SECTION END
+    };
+    typedef VectorAccessor< DataList<float> > FloatVectorAccessor;
+#endif 
+    // ----------------------------
 
     class GC_AS3_EXACT(ObjectVectorObject, TypedVectorObject< AtomList >)
     {
@@ -742,6 +807,16 @@ namespace avmplus
             atomToValueKnown(value, tmp);
             m_list.setPointer(index, (AtomList::TYPE)tmp);
         }
+
+#ifdef VMCFG_FLOAT
+        void _setKnownFloatPropertyWithPointer(float index_f, Atom value)
+        {
+            uint32_t index = checkWriteIndex_f(index_f);
+            AtomList::OPAQUE_TYPE tmp;
+            atomToValueKnown(value, tmp);
+            m_list.setPointer(index, (AtomList::TYPE)tmp);
+        }
+#endif // VMCFG_FLOAT
 
         // AS3 native function implementations
         ObjectVectorObject* newThisType();

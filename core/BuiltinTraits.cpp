@@ -108,6 +108,9 @@ namespace avmplus
         DO_BUILTIN(uint, "uint");
         DO_BUILTIN(vector, "Vector");
         DO_BUILTIN(vectordouble, "Vector$double");
+#ifdef VMCFG_FLOAT
+        DO_BUILTIN(vectorfloat, "Vector$float");
+#endif
         DO_BUILTIN(vectorint, "Vector$int");
         DO_BUILTIN(vectorobj, "Vector$object");
         DO_BUILTIN(vectoruint, "Vector$uint");
@@ -129,6 +132,9 @@ namespace avmplus
         xmlList_itraits->set_needsHashtable(false);
 
         vectordouble_itraits->set_names(vectordouble_itraits->ns(), core->kVectorNumber);
+#ifdef VMCFG_FLOAT
+        vectorfloat_itraits->set_names(vectorfloat_itraits->ns(), core->kVectorFloat);
+#endif
         vectorint_itraits->set_names(vectorint_itraits->ns(), core->kVectorint);
         vectoruint_itraits->set_names(vectoruint_itraits->ns(), core->kVectoruint);
         vectorobj_itraits->set_names(vectorobj_itraits->ns(), core->kVectorAny);

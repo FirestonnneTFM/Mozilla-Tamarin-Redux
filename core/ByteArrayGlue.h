@@ -313,6 +313,7 @@ namespace avmplus
         int readUnsignedShort();
         int readInt();
         uint32_t readUnsignedInt();
+        FLOAT_ONLY(float readFloat32();)
         double readFloat();
         double readDouble();
         String* readMultiByte(uint32_t length, String* charSet);
