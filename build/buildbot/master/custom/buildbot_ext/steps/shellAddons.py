@@ -421,19 +421,27 @@ class SandboxClone(BaseShellCommand):
     def start(self):
         changes = self.step_status.build.getChanges()
 
-        if len(changes) < 1:
-            return SKIPPED
+        # I think that was only here as a safety check since it used to only
+        # be used for sandbox builds which were supposed to only have a single change
+        #if len(changes) < 1:
+        #    return SKIPPED
 
-        changefile = changes[0].files[0]
-        f = open(self.changeDir +"/" + changefile)
-        for line in f.readlines():
-            if line.startswith("url:"):
-                hg_url = line[line.find(":")+1:].strip()
+        # The list of files changed for this build also contains an additional
+        # entry the is the name of the build trigger file, we need to find that
+        # file so that we can pass the build information along the build process
+        for changefile in changes[0].files:
+            if changefile.startswith("change-"):
+                f = open(self.changeDir +"/" + changefile)
+                for line in f.readlines():
+                    if line.startswith("url:"):
+                        hg_url = line[line.find(":")+1:].strip()
+                        break
+
+                self.command = []
+                self.command.append("hg")
+                self.command.append("clone")
+                self.command.append(hg_url)
+                self.command.append(self.dest)
                 break
-                
-        self.command = []
-        self.command.append("hg")
-        self.command.append("clone")
-        self.command.append(hg_url)
-        self.command.append(self.dest)
         BaseShellCommand.start(self)
+
