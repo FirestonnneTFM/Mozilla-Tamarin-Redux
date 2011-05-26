@@ -69,6 +69,9 @@ namespace nanojit
 #define NJ_SOFTFLOAT_SUPPORTED          0
 #define NJ_DIVI_SUPPORTED               1
 #define RA_PREFERS_LSREG                1
+#ifdef VMCFG_FLOAT
+#define NJ_USES_IMMF4_POOL              1   // Note: doesn't use IMMD pool!
+#endif
 
     static const Register RAX = { 0 };      // 1st int return, # of sse varargs
     static const Register RCX = { 1 };      // 4th int arg
@@ -194,19 +197,29 @@ namespace nanojit
         X64_cmovnle = 0xC04F0F4000000004LL, // 32bit conditional mov if (int >)   r = b
         X64_cmplr   = 0xC03B400000000003LL, // 32bit compare r,b
         X64_cmpqr   = 0xC03B480000000003LL, // 64bit compare r,b
+        X64_cmppsr  = 0xC0C20F4000000004LL, // 128bit compare r,b; requires an immediate to specify what kind of comparison
         X64_cmplri  = 0xF881400000000003LL, // 32bit compare r,immI
         X64_cmpqri  = 0xF881480000000003LL, // 64bit compare r,int64(immI)
         X64_cmplr8  = 0x00F8834000000004LL, // 32bit compare r,imm8
         X64_cmpqr8  = 0x00F8834800000004LL, // 64bit compare r,int64(imm8)
         X64_cvtsi2sd= 0xC02A0F40F2000005LL, // convert int32 to double r = (double) b
+        X64_cvtsi2ss= 0xC02A0F40F3000005LL, // convert int32 to float r = (float) b
         X64_cvtsq2sd= 0xC02A0F48F2000005LL, // convert int64 to double r = (double) b
+        X64_cvtsq2ss= 0xC02A0F48F3000005LL, // convert int64 to float r = (float) b
         X64_cvtss2sd= 0xC05A0F40F3000005LL, // convert float to double r = (double) b
         X64_cvtsd2ss= 0xC05A0F40F2000005LL, // convert double to float r = (float) b
         X64_cvtsd2si= 0xC02D0F40F2000005LL, // convert double to int32 with rounding r = (int32) b
         X64_cvttsd2si=0xC02C0F40F2000005LL, // convert double to int32 r = (int32) b
+        X64_cvttss2si=0xC02C0F40F3000005LL, // convert float to int32 r = (int32) b
         X64_divsd   = 0xC05E0F40F2000005LL, // divide scalar double r /= b
         X64_mulsd   = 0xC0590F40F2000005LL, // multiply scalar double r *= b
         X64_addsd   = 0xC0580F40F2000005LL, // add scalar double r += b
+        X64_divss   = 0xC05E0F40F3000005LL, // divide scalar single-precision r /= b
+        X64_mulss   = 0xC0590F40F3000005LL, // multiply scalar single-precision r *= b
+        X64_addss   = 0xC0580F40F3000005LL, // add scalar single-precision r += b
+        X64_divps   = 0xC05E0F4000000004LL, // divide float4 vector single-precision r[i] /= b[i]
+        X64_mulps   = 0xC0590F4000000004LL, // multiply float4 vector single-precision r[i] *= b[i]
+        X64_addps   = 0xC0580F4000000004LL, // add float4 vector single-precision r[i] += b[i]
         X64_idiv    = 0xF8F7400000000003LL, // 32bit signed div (rax = rdx:rax/r, rdx=rdx:rax%r)
         X64_imul    = 0xC0AF0F4000000004LL, // 32bit signed mul r *= b
         X64_imuli   = 0xC069400000000003LL, // 32bit signed mul r = b * immI
@@ -258,12 +271,23 @@ namespace nanojit
         X64_movapsr = 0xC0280F4000000004LL, // 128bit mov xmm <- xmm
         X64_movqrx  = 0xC07E0F4866000005LL, // 64bit mov b <- xmm-r (reverses the usual r/b order)
         X64_movqxr  = 0xC06E0F4866000005LL, // 64bit mov b -> xmm-r
+        X64_movdxr  = 0xC06E0F4066000005LL, // 32bit mov b -> xmm-r
         X64_movqrm  = 0x00000000808B4807LL, // 64bit load r <- [b+d32]
         X64_movsdrr = 0xC0100F40F2000005LL, // 64bit mov xmm-r <- xmm-b (upper 64bits unchanged)
+        X64_movupsrm= 0x80100F4000000004LL, // 128bit load xmm-r <- [b+d32] 
+        X64_movupspr= 0x2484110F48000005LL, // 128bit float store xmm -> [rsp+d32] (sib required)
+        X64_movupsrip=0x05100F4800000004LL, // 128bit load xmm-r <- [RIP+d32] 
+        X64_movapsrm= 0x80280F4000000004LL, // 128bit load xmm-r <- [b+d32] 
+        X64_movapsrip=0x05280F4800000004LL, // 128bit load xmm-r <- [RIP+d32] 
+        X64_movupsmr= 0x80110F4000000004LL, // 128bit store xmm-r -> [b+d32]
+        X64_movlhps = 0xC0160F4000000004LL, // 64bit mov r[64:127] <- l[0:63] (the rest unmodified)
+        X64_pmovmskb= 0xC0D70F4066000005LL, // move byte mask, r = (first bit from every byte of xmm)
         X64_movsdrm = 0x80100F40F2000005LL, // 64bit load xmm-r <- [b+d32] (upper 64 cleared)
         X64_movsdmr = 0x80110F40F2000005LL, // 64bit store xmm-r -> [b+d32]
         X64_movssrm = 0x80100F40F3000005LL, // 32bit load xmm-r <- [b+d32] (upper 96 cleared)
         X64_movssmr = 0x80110F40F3000005LL, // 32bit store xmm-r -> [b+d32]
+        X64_movssspr= 0x2484110F48F30006LL, // 32bit float store xmm -> [rsp+d32] (sib required)
+        X64_movsdspr= 0x2484110F48F20006LL, // 64bit float store xmm -> [rsp+d32] (sib required)
         X64_movsxdr = 0xC063480000000003LL, // sign extend i32 to i64 r = (int64)(int32) b
         X64_movzx8  = 0xC0B60F4000000004LL, // zero extend i8 to i64 r = (uint64)(uint8) b
         X64_movzx8m = 0x80B60F4000000004LL, // zero extend i8 load to i32 r <- [b+d32]
@@ -283,6 +307,7 @@ namespace nanojit
         X64_orqrr   = 0xC00B480000000003LL, // 64bit or r |= b
         X64_popr    = 0x5840000000000002LL, // 64bit pop r <- [rsp++]
         X64_pushr   = 0x5040000000000002LL, // 64bit push r -> [--rsp]
+        X64_pshufd  = 0xC0700F4066000005LL, // 64bit push r -> [--rsp]
         X64_pxor    = 0xC0EF0F4066000005LL, // 128bit xor xmm-r ^= xmm-b
         X64_ret     = 0xC300000000000001LL, // near return from called procedure
         X64_sete    = 0xC0940F4000000004LL, // set byte if equal (ZF == 1)
@@ -297,6 +322,8 @@ namespace nanojit
         X64_setb    = 0xC0920F4000000004LL, // set byte if below (uint <) (CF == 1)
         X64_setbe   = 0xC0960F4000000004LL, // set byte if below or equal (uint <=) (ZF == 1 || CF == 1)
         X64_subsd   = 0xC05C0F40F2000005LL, // subtract scalar double r -= b
+        X64_subss   = 0xC05C0F40F3000005LL, // subtract scalar single-precision r -= b
+        X64_subps   = 0xC05C0F4000000004LL, // subtract float4 vector single-precision r[i] -= b[i]
         X64_shl     = 0xE0D3400000000003LL, // 32bit left shift r <<= rcx
         X64_shlq    = 0xE0D3480000000003LL, // 64bit left shift r <<= rcx
         X64_shr     = 0xE8D3400000000003LL, // 32bit uint right shift r >>= rcx
@@ -314,6 +341,7 @@ namespace nanojit
         X64_subqri  = 0xE881480000000003LL, // 64bit sub r -= int64(immI)
         X64_subqr8  = 0x00E8834800000004LL, // 64bit sub r -= int64(imm8)
         X64_ucomisd = 0xC02E0F4066000005LL, // unordered compare scalar double
+        X64_ucomiss = 0xC02E0F4000000004LL, // unordered compare scalar single-precision float
         X64_xorqrr  = 0xC033480000000003LL, // 64bit xor r &= b
         X64_xorrr   = 0xC033400000000003LL, // 32bit xor r &= b
         X64_xorpd   = 0xC0570F4066000005LL, // 128bit xor xmm (two packed doubles)
@@ -338,6 +366,10 @@ namespace nanojit
 
     static const RegisterMask GpRegs = 0xffff;
     static const RegisterMask FpRegs = 0xffff0000;
+#define FpDRegs FpRegs
+#define FpSRegs FpRegs
+#define FpQRegs FpRegs
+        
 #ifdef _WIN64
     static const RegisterMask SavedRegs = 1<<REGNUM(RBX) | 1<<REGNUM(RSI) | 1<<REGNUM(RDI) |
                                           1<<REGNUM(R12) | 1<<REGNUM(R13) | 1<<REGNUM(R14) |
@@ -400,6 +432,8 @@ namespace nanojit
         uint64_t emit_disp32(uint64_t op, int32_t d);\
         void emitprm(uint64_t op, Register r, int32_t d, Register b);\
         void emitrr_imm(uint64_t op, Register r, Register b, int32_t imm);\
+        void emitrr_imm8(uint64_t op, Register r, Register b, uint8_t imm);\
+        void emitprr_imm8(uint64_t op, Register r, Register b, uint8_t imm);\
         void emitr_imm64(uint64_t op, Register r, uint64_t imm);\
         void emitrm_imm32(uint64_t op, Register r, int32_t d, int32_t imm);\
         void emitprm_imm16(uint64_t op, Register r, int32_t d, int32_t imm);\
@@ -410,7 +444,7 @@ namespace nanojit
         void emitxm_abs(uint64_t op, Register r, int32_t addr32);\
         void emitxm_rel(uint64_t op, Register r, NIns* addr64);\
         bool isTargetWithinS8(NIns* target);\
-        bool isTargetWithinS32(NIns* target);\
+        bool isTargetWithinS32(NIns* target, int32_t maxInstSize=8);\
         void asm_immi(Register r, int32_t v, bool canClobberCCs);\
         void asm_immq(Register r, uint64_t v, bool canClobberCCs);\
         void asm_immd(Register r, uint64_t v, bool canClobberCCs);\
@@ -429,6 +463,7 @@ namespace nanojit
         void asm_cmpi(LIns*);\
         void asm_cmpi_imm(LIns*);\
         void asm_cmpd(LIns*);\
+        void asm_cmpf4(LIns*);\
         Branches asm_branch_helper(bool, LIns*, NIns*);\
         Branches asm_branchi_helper(bool, LIns*, NIns*);\
         Branches asm_branchd_helper(bool, LIns*, NIns*);\
@@ -469,7 +504,9 @@ namespace nanojit
         void XORRR(Register l, Register r);\
         void IMUL(Register l, Register r);\
         void CMPLR(Register l, Register r);\
+        void CMPNEQPS(Register l, Register r);\
         void MOVLR(Register l, Register r);\
+        void PMOVMSKB(Register l, Register r);\
         void ADDQRR(Register l, Register r);\
         void SUBQRR(Register l, Register r);\
         void ANDQRR(Register l, Register r);\
@@ -506,15 +543,29 @@ namespace nanojit
         void MULSD(Register l, Register r);\
         void ADDSD(Register l, Register r);\
         void SUBSD(Register l, Register r);\
+        void DIVSS(Register l, Register r);\
+        void MULSS(Register l, Register r);\
+        void ADDSS(Register l, Register r);\
+        void SUBSS(Register l, Register r);\
+        void DIVPS(Register l, Register r);\
+        void MULPS(Register l, Register r);\
+        void ADDPS(Register l, Register r);\
+        void SUBPS(Register l, Register r);\
         void CVTSQ2SD(Register l, Register r);\
         void CVTSI2SD(Register l, Register r);\
         void CVTSS2SD(Register l, Register r);\
         void CVTSD2SS(Register l, Register r);\
         void CVTSD2SI(Register l, Register r);\
         void CVTTSD2SI(Register l, Register r);\
+        void CVTTSS2SI(Register l, Register r);\
+        void CVTSI2SS(Register l, Register r);\
+        void CVTSQ2SS(Register l, Register r);\
         void UCOMISD(Register l, Register r);\
+        void UCOMISS(Register l, Register r);\
         void MOVQRX(Register l, Register r);\
         void MOVQXR(Register l, Register r);\
+        void MOVDXR(Register l, Register r);\
+        void MOVLHPS(Register l, Register r);\
         void MOVI(Register r, int32_t i32);\
         void ADDLRI(Register r, int32_t i32);\
         void SUBLRI(Register r, int32_t i32);\
@@ -557,9 +608,17 @@ namespace nanojit
         void MOVSX8M(Register r, int d, Register b);\
         void MOVSX16M(Register r, int d, Register b);\
         void MOVSDRM(Register r, int d, Register b);\
+        void MOVSDSPR(Register r, int d);\
         void MOVSDMR(Register r, int d, Register b);\
         void MOVSSMR(Register r, int d, Register b);\
         void MOVSSRM(Register r, int d, Register b);\
+        void MOVSSSPR(Register r, int d);\
+        void MOVUPSMR(Register r, int d, Register b);\
+        void MOVUPSRM(Register r, int d, Register b);\
+        void MOVUPSSPR(Register r, int d);\
+        void MOVAPSRM(Register r, int d, Register b);\
+        void MOVUPSRMRIP(Register r, int d);\
+        void MOVAPSRMRIP(Register r, int d);\
         void JMP8(size_t n, NIns* t);\
         void JMP32(size_t n, NIns* t);\
         void JMP64(size_t n, NIns* t);\
@@ -621,7 +680,12 @@ namespace nanojit
         void MOVLMI(Register base, int disp, int32_t imm32); \
         void MOVSMI(Register base, int disp, int32_t imm16); \
         void MOVBMI(Register base, int disp, int32_t imm8); \
-
+        void PSHUFD(Register l, Register r, int mode); \
+FLOAT_ONLY(\
+        void asm_ptrarg(ArgType, LIns*, Register);\
+        void asm_immf(Register r, uint32_t v, bool canClobberCCs);\
+        void asm_immf4(Register r, float4_t v, bool canClobberCCs);\
+)
     const int LARGEST_UNDERRUN_PROT = 32;  // largest value passed to underrunProtect
 
     typedef uint8_t NIns;
