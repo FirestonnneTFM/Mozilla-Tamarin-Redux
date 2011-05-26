@@ -753,16 +753,6 @@ namespace nanojit
             }
     }
 
-    Register Assembler::nRegisterAllocFromSet(RegisterMask set)
-    {
-        // need to implement faster way
-        Register i = G0;
-        while (!(set & rmask(i)))
-            i = i + 1;
-        _allocator.free &= ~rmask(i);
-        return i;
-    }
-
     void Assembler::nRegisterResetAll(RegAlloc& a)
     {
         a.clear();
@@ -784,7 +774,7 @@ namespace nanojit
         return 0;
     }
 
-    bool Assembler::canRemat(LIns* ins)
+    bool RegAlloc::canRemat(LIns* ins)
     {
         return ins->isImmI() || ins->isop(LIR_allocp);
     }
@@ -992,7 +982,7 @@ namespace nanojit
         // value is either a 64bit struct or maybe a float
         // that isn't live in an FPU reg.  Either way, don't
         // put it in an FPU reg just to load & store it.
-        Register t = registerAllocTmp(GpRegs & ~(rmask(rd)|rmask(rs)));
+        Register t = _allocator.allocTmpReg(GpRegs & ~(rmask(rd)|rmask(rs)));
         STW32(t, dd+4, rd);
         LDSW32(rs, ds+4, t);
         STW32(t, dd, rd);
@@ -1485,7 +1475,7 @@ namespace nanojit
         underrunProtect(72);
         // where our result goes
         Register rr = deprecated_prepResultReg(ins, FpRegs);
-        Register rt = registerAllocTmp(FpRegs & ~(rmask(rr)));
+        Register rt = _allocator.allocTmpReg(FpRegs & ~(rmask(rr)));
         Register gr = findRegFor(ins->oprnd1(), GpRegs);
         int disp = -8;
 
@@ -1511,6 +1501,72 @@ namespace nanojit
         freeResourcesOf(ins);
     }
 
+#ifdef VMCFG_FLOAT
+    void Assembler::asm_ui2f(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_ui2f not yet supported for this architecture");
+    }
+    void Assembler::asm_i2f(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_i2f not yet supported for this architecture");
+    }
+    void Assembler::asm_f2i(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_f2i not yet supported for this architecture");
+    }
+    void Assembler::asm_f2d(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_f2d not yet supported for this architecture");
+    }
+    void Assembler::asm_d2f(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_d2f not yet supported for this architecture");
+    }
+    void Assembler::asm_immf(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_immf not yet supported for this architecture");
+    }
+    void Assembler::asm_immf4(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_immf4 not yet supported for this architecture");
+    }
+    void Assembler::asm_condf4(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_condf4 not yet supported for this architecture");
+    }
+    void Assembler::asm_f4comp(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_f4x/f4y/f4z/f4w not yet supported for this architecture");
+    }
+    void Assembler::asm_f2f4(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_f2f4 not yet supported for this architecture");
+    }
+    void Assembler::asm_load128(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "Load128 not yet supported for this architecture");
+    }
+    void Assembler::asm_store128(LOpcode op, LIns *val, int d, LIns *base) {
+        (void)val; (void)op; (void)d; (void) base;
+        NanoAssertMsg(0, "Store128 not yet supported for this architecture");
+    }
+    void Assembler::asm_mmi(Register rd, int dd, Register rs, int ds){
+        (void)rd; (void)rs; (void)dd; (void)ds;
+        NanoAssertMsg(0, "asm_mmi not yet supported for this architecture");
+    }
+#endif // VMCFG_FLOAT
+
+
+    RegisterMask RegAlloc::nRegCopyCandidates(Register r, RegisterMask allow) {
+        // SPARC doesn't support any GPR<->FPR moves
+        if(rmask(r) & GpRegs)
+            return allow & GpRegs;
+        if(rmask(r) & FpRegs)
+            return allow & FpRegs;
+        NanoAssert(false); // How did we get here?
+        return 0;
+    }
+    
     void Assembler::asm_nongp_copy(Register r, Register s)
     {
         underrunProtect(4);
