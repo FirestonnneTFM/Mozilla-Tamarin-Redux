@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug_Debugger|Win32">
@@ -35,15 +35,26 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\AVMPI\AvmAssert.cpp" />
+    <ClCompile Include="..\..\AVMPI\MMgcPortWin.cpp" />
+    <ClCompile Include="..\..\AVMPI\SpyUtilsWin.cpp" />
     <ClCompile Include="..\..\core\AbcData.cpp" />
     <ClCompile Include="..\..\core\AbcEnv.cpp" />
     <ClCompile Include="..\..\core\AbcParser.cpp" />
     <ClCompile Include="..\..\core\ActionBlockConstants.cpp" />
     <ClCompile Include="..\..\core\ArrayClass.cpp" />
     <ClCompile Include="..\..\core\ArrayObject.cpp" />
+    <ClCompile Include="..\..\core\atom.cpp" />
+    <ClCompile Include="..\..\core\d2a.cpp" />
+    <ClCompile Include="..\..\core\Float4Class.cpp" />
+    <ClCompile Include="..\..\core\FloatClass.cpp" />
+    <ClCompile Include="..\..\core\InvokerCompiler.cpp" />
+    <ClCompile Include="..\..\core\JSONClass.cpp" />
+    <ClCompile Include="..\..\core\ProxyGlue.cpp" />
+    <ClCompile Include="..\..\eval\eval-parse-config.cpp" />
+    <ClCompile Include="..\..\extensions\SelftestExec.cpp" />
     <ClCompile Include="..\..\MMgc\GCPolicyManager.cpp" />
     <ClCompile Include="..\..\MMgc\PageMap.cpp" />
-    <ClCompile Include="..\..\vmbase\atom.cpp" />
     <ClCompile Include="..\..\core\avmplusList.cpp" />
     <ClCompile Include="..\..\core\avm.cpp" />
     <ClCompile Include="..\..\core\AvmCore.cpp" />
@@ -161,17 +172,6 @@
     <ClCompile Include="..\..\extensions\SamplerScript.cpp" />
     <ClCompile Include="..\..\extensions\Selftest.cpp" />
     <ClCompile Include="..\..\extensions\SelftestInit.cpp" />
-    <ClCompile Include="..\..\extensions\ST_avmplus_basics.cpp" />
-    <ClCompile Include="..\..\extensions\ST_avmplus_peephole.cpp" />
-    <ClCompile Include="..\..\extensions\ST_mmgc_543560.cpp" />
-    <ClCompile Include="..\..\extensions\ST_mmgc_575631.cpp" />
-    <ClCompile Include="..\..\extensions\ST_mmgc_basics.cpp" />
-    <ClCompile Include="..\..\extensions\ST_mmgc_dependent.cpp" />
-    <ClCompile Include="..\..\extensions\ST_mmgc_finalize_uninit.cpp" />
-    <ClCompile Include="..\..\extensions\ST_mmgc_gcheap.cpp" />
-    <ClCompile Include="..\..\extensions\ST_mmgc_mmfx_array.cpp" />
-    <ClCompile Include="..\..\extensions\ST_mmgc_threads.cpp" />
-    <ClCompile Include="..\..\extensions\ST_mmgc_weakref.cpp" />
     <ClCompile Include="..\..\MMgc\FixedAlloc.cpp" />
     <ClCompile Include="..\..\MMgc\FixedMalloc.cpp" />
     <ClCompile Include="..\..\MMgc\GC.cpp" />
@@ -318,9 +318,9 @@
     <ClCompile Include="..\..\shell\swf.cpp" />
     <ClCompile Include="..\..\shell\SystemClass.cpp" />
     <ClCompile Include="..\..\shell\WinFile.cpp" />
-    <ClCompile Include="..\..\vmbase\AvmAssert.cpp" />
-    <ClCompile Include="..\..\VMPI\MMgcPortWin.cpp" />
-    <ClCompile Include="..\..\VMPI\SpyUtilsWin.cpp" />
+    <ClCompile Include="..\..\vmbase\Safepoint.cpp" />
+    <ClCompile Include="..\..\vmbase\VMThread.cpp" />
+    <ClCompile Include="..\..\VMPI\GenericPortUtils.cpp" />
     <ClCompile Include="..\..\VMPI\ThreadsWin.cpp" />
     <ClCompile Include="..\..\VMPI\WinDebugUtils.cpp" />
     <ClCompile Include="..\..\VMPI\WinPortUtils.cpp" />
@@ -350,6 +350,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\AVMPI\AvmAssert.h" />
     <ClInclude Include="..\..\core\AbcEnv-inlines.h" />
     <ClInclude Include="..\..\core\AbcEnv.h" />
     <ClInclude Include="..\..\core\AbcParser-inlines.h" />
@@ -360,9 +361,15 @@
     <ClInclude Include="..\..\core\ArrayObject-inlines.h" />
     <ClInclude Include="..\..\core\ArrayObject.h" />
     <ClInclude Include="..\..\core\atom-inlines.h" />
+    <ClInclude Include="..\..\core\atom.h" />
+    <ClInclude Include="..\..\core\d2a.h" />
+    <ClInclude Include="..\..\core\Float4Class.h" />
+    <ClInclude Include="..\..\core\FloatClass.h" />
+    <ClInclude Include="..\..\core\InvokerCompiler.h" />
+    <ClInclude Include="..\..\core\JSONClass.h" />
+    <ClInclude Include="..\..\core\ProxyGlue.h" />
     <ClInclude Include="..\..\MMgc\GCPolicyManager.h" />
     <ClInclude Include="..\..\MMgc\PageMap.h" />
-    <ClInclude Include="..\..\vmbase\atom.h" />
     <ClInclude Include="..\..\core\AtomWriteBarrier.h" />
     <ClInclude Include="..\..\core\avm.h" />
     <ClInclude Include="..\..\core\avmbuild.h" />
@@ -623,7 +630,10 @@
     <ClInclude Include="..\..\shell\ShellCore.h" />
     <ClInclude Include="..\..\shell\SystemClass.h" />
     <ClInclude Include="..\..\shell\WinFile.h" />
-    <ClInclude Include="..\..\vmbase\AvmAssert.h" />
+    <ClInclude Include="..\..\vmbase\Safepoint-inlines.h" />
+    <ClInclude Include="..\..\vmbase\Safepoint.h" />
+    <ClInclude Include="..\..\vmbase\VMThread-inlines.h" />
+    <ClInclude Include="..\..\vmbase\VMThread.h" />
     <ClInclude Include="..\..\VMPI\VMPI.h" />
     <ClInclude Include="..\..\vprof\vprof.h" />
     <ClInclude Include="..\system-selection.h" />
@@ -796,12 +806,12 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\generated;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\generated;..\..\VMPI;..\..\AVMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;%(PreprocessorDefinitions);_DEBUG</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;AVMFEATURE_SELFTEST=1;AVMFEATURE_EVAL=1;AVMFEATURE_SWF12=1;AVMFEATURE_SWF13=1;AVMFEATURE_SWF14=1;AVMFEATURE_SWF15=1;AVMFEATURE_SWF16=1;AVMFEATURE_JIT=1;AVMTWEAK_EXACT_TRACING=1;AVMTWEAK_SELECTABLE_EXACT_TRACING=0;%(PreprocessorDefinitions);_DEBUG</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>false</ExceptionHandling>
@@ -826,12 +836,12 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\generated;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\generated;..\..\VMPI;..\..\AVMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;%(PreprocessorDefinitions);_DEBUG;DEBUGGER</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;AVMFEATURE_SELFTEST=1;AVMFEATURE_EVAL=1;AVMFEATURE_SWF12=1;AVMFEATURE_SWF13=1;AVMFEATURE_SWF14=1;AVMFEATURE_SWF15=1;AVMFEATURE_SWF16=1;AVMFEATURE_JIT=1;AVMTWEAK_EXACT_TRACING=1;%(PreprocessorDefinitions);_DEBUG;DEBUGGER</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>false</ExceptionHandling>
@@ -856,12 +866,12 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\generated;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;%(PreprocessorDefinitions);_DEBUG</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;AVMFEATURE_SELFTEST=1;AVMFEATURE_EVAL=1;AVMFEATURE_SWF12=1;AVMFEATURE_SWF13=1;AVMFEATURE_SWF14=1;AVMFEATURE_SWF15=1;AVMFEATURE_SWF16=1;AVMFEATURE_JIT=1;AVMTWEAK_EXACT_TRACING=1;%(PreprocessorDefinitions);_DEBUG</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>false</ExceptionHandling>
@@ -887,12 +897,12 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\generated;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;%(PreprocessorDefinitions);_DEBUG;DEBUGGER</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;AVMFEATURE_SELFTEST=1;AVMFEATURE_EVAL=1;AVMFEATURE_SWF12=1;AVMFEATURE_SWF13=1;AVMFEATURE_SWF14=1;AVMFEATURE_SWF15=1;AVMFEATURE_SWF16=1;AVMFEATURE_JIT=1;AVMTWEAK_EXACT_TRACING=1;%(PreprocessorDefinitions);_DEBUG;DEBUGGER</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>false</ExceptionHandling>
@@ -912,6 +922,7 @@
       <LargeAddressAware>true</LargeAddressAware>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>winmm.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -919,12 +930,12 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <AdditionalIncludeDirectories>..\..\generated;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\generated;..\..\VMPI;..\..\AVMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;AVMFEATURE_SELFTEST=1;AVMFEATURE_EVAL=1;AVMFEATURE_SWF12=1;AVMFEATURE_SWF13=1;AVMFEATURE_SWF14=1;AVMFEATURE_SWF15=1;AVMFEATURE_SWF16=1;AVMFEATURE_JIT=1;AVMTWEAK_EXACT_TRACING=1;%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>false</ExceptionHandling>
@@ -950,12 +961,12 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <AdditionalIncludeDirectories>..\..\generated;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\generated;..\..\VMPI;..\..\AVMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;%(PreprocessorDefinitions);NDEBUG;DEBUGGER</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;AVMFEATURE_SELFTEST=1;AVMFEATURE_EVAL=1;AVMFEATURE_SWF12=1;AVMFEATURE_SWF13=1;AVMFEATURE_SWF14=1;AVMFEATURE_SWF15=1;AVMFEATURE_SWF16=1;AVMFEATURE_JIT=1;AVMTWEAK_EXACT_TRACING=1;%(PreprocessorDefinitions);NDEBUG;DEBUGGER</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>false</ExceptionHandling>
@@ -981,12 +992,12 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <AdditionalIncludeDirectories>..\..\generated;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;AVMFEATURE_SELFTEST=1;AVMFEATURE_EVAL=1;AVMFEATURE_SWF12=1;AVMFEATURE_SWF13=1;AVMFEATURE_SWF14=1;AVMFEATURE_SWF15=1;AVMFEATURE_SWF16=1;AVMFEATURE_JIT=1;AVMTWEAK_EXACT_TRACING=1;%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>false</ExceptionHandling>
@@ -1013,12 +1024,12 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <AdditionalIncludeDirectories>..\..\generated;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;%(PreprocessorDefinitions);NDEBUG;DEBUGGER</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_CONSOLE;USE_REAL2INT;_UNICODE;UNICODE;AVMFEATURE_SELFTEST=1;AVMFEATURE_EVAL=1;AVMFEATURE_SWF12=1;AVMFEATURE_SWF13=1;AVMFEATURE_SWF14=1;AVMFEATURE_SWF15=1;AVMFEATURE_SWF16=1;AVMFEATURE_JIT=1;AVMTWEAK_EXACT_TRACING=1;%(PreprocessorDefinitions);NDEBUG;DEBUGGER</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>false</ExceptionHandling>
