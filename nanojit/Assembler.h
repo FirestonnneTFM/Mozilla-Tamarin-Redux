@@ -158,10 +158,14 @@ namespace nanojit
         } else {
             switch (ins->retType()) {
             case LTy_I:   n = 1;          break;
+#ifdef VMCFG_FLOAT
+            case LTy_F:   n = 1;          break; 
+            case LTy_F4:  n = 4;          break; 
+#endif
             CASE64(LTy_Q:)
             case LTy_D:   n = 2;          break;
-            case LTy_V:  NanoAssert(0);  break;
-            default:        NanoAssert(0);  break;
+            case LTy_V:   NanoAssert(0);  break;
+            default:      NanoAssert(0);  break;
             }
         }
         return n;
@@ -204,6 +208,30 @@ namespace nanojit
 #if NJ_USES_IMMD_POOL
     typedef HashMap<uint64_t, uint64_t*> ImmDPoolMap;
 #endif
+#if NJ_USES_IMMF4_POOL
+    #if defined(_WIN32) && !defined(NANOJIT_X64) //AVMSYSTEM_32BIT
+        class float4_ref{
+        private: 
+           float _val[4];
+        public:
+            float4_ref(float4_t& p) { _val[0]=f4_x(p); _val[1]=f4_y(p); _val[2]=f4_z(p); _val[3]=f4_w(p); }
+            operator float4_t() const { float4_t ret = { _val[0],_val[1],_val[2],_val[3]}; return ret;}
+            const void* operator&() { return &_val[0]; }
+        };
+        NanoStaticAssert(sizeof(float4_ref) == sizeof(float4_t));
+        template<> inline bool keysEqual<float4_ref>(float4_ref x,float4_ref y){return VMPI_memcmp(&x,&y,sizeof(float4_t)) == 0;}
+        template<> struct DefaultHash<float4_ref> {
+            static size_t hash(const float4_ref k) {
+                // (const void*) cast is required by ARM RVCT 2.2
+                return murmurhash((const void*) &k, sizeof(float4_t));
+            }
+        };
+
+        typedef HashMap<float4_ref, float4_t*> ImmF4PoolMap;
+    #else // other compilers will hopefully support a direct hashmap
+        typedef HashMap<float4_t, float4_t*> ImmF4PoolMap;
+    #endif
+#endif //NJ_USES_IMMF4_POOL
 
 #ifdef VMCFG_VTUNE
     class avmplus::CodegenLIR;
@@ -355,6 +383,11 @@ namespace nanojit
             const uint64_t*
                         findImmDFromPool(uint64_t q);
 #endif
+#if NJ_USES_IMMF4_POOL
+            const float4_t*
+                        findImmF4FromPool(float4_t q);
+#endif
+
             int         findMemFor(LIns* ins);
             Register    findRegFor(LIns* ins, RegisterMask allow);
             void        findRegFor2(RegisterMask allowa, LIns* ia, Register &ra,
@@ -388,7 +421,10 @@ namespace nanojit
             LabelStateMap       _labels;
             Noise*              _noise;             // object to generate random noise used when hardening enabled.
         #if NJ_USES_IMMD_POOL
-            ImmDPoolMap     _immDPool;
+            ImmDPoolMap         _immDPool;
+        #endif
+        #if NJ_USES_IMMF4_POOL
+            ImmF4PoolMap        _immF4Pool;
         #endif
 
             // We generate code into two places:  normal code chunks, and exit
@@ -446,12 +482,18 @@ namespace nanojit
             void        asm_restore(LIns*, Register);
 
             bool        asm_maybe_spill(LIns* ins, bool pop);
+
 #ifdef NANOJIT_IA32
-            void        asm_spill(Register rr, int d, bool pop);
+    #define ASM_SPILL_RESTARGS  bool pop FLOAT_ONLY(, int8_t nWords)
 #else
-            void        asm_spill(Register rr, int d, bool quad);
+    #ifdef VMCFG_FLOAT
+    #define ASM_SPILL_RESTARGS  int8_t nWords
+    #else
+    #define ASM_SPILL_RESTARGS  bool quad
+    #endif
 #endif
-            void        asm_load64(LIns* ins);
+            void        asm_spill(Register rr, int d, ASM_SPILL_RESTARGS);
+
             void        asm_ret(LIns* ins);
 #ifdef NANOJIT_64BIT
             void        asm_immq(LIns* ins);
@@ -462,6 +504,7 @@ namespace nanojit
             void        asm_arith(LIns* ins);
             void        asm_neg_not(LIns* ins);
             void        asm_load32(LIns* ins);
+            void        asm_load64(LIns* ins);
             void        asm_cmov(LIns* ins);
             void        asm_param(LIns* ins);
             void        asm_immi(LIns* ins);
@@ -480,6 +523,21 @@ namespace nanojit
             void        asm_ui2uq(LIns *ins);
             void        asm_dasq(LIns *ins);
             void        asm_qasd(LIns *ins);
+#endif
+#ifdef VMCFG_FLOAT
+            void        asm_mmi(Register rd, int dd, Register rs, int ds);
+            void        asm_store128(LOpcode op, LIns *val, int d, LIns *base);
+            void        asm_load128(LIns* ins);
+            void        asm_immf(LIns* ins);
+            void        asm_immf4(LIns* ins);
+            void        asm_condf4(LIns* ins);
+            void        asm_i2f(LIns* ins);
+            void        asm_ui2f(LIns* ins);
+            void        asm_f2i(LIns* ins);
+            void        asm_d2f(LIns* ins);
+            void        asm_f2d(LIns* ins);
+            void        asm_f2f4(LIns* ins);
+            void        asm_f4comp(LIns* ins);
 #endif
             void        asm_nongp_copy(Register r, Register s);
             void        asm_call(LIns*);

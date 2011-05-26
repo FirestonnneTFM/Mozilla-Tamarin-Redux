@@ -256,6 +256,15 @@ namespace nanojit
         }
     };
 
+    template<class K> inline bool keysEqual(K x,K y){return x==y;}
+#ifdef VMCFG_FLOAT
+    template<> inline bool keysEqual<float4_t>(float4_t x,float4_t y)
+    { // f4_eq is not good; we need something that gives 0!=-0, NaN==NaN etc.
+        float4_t lx = x, ly = y;
+        return VMPI_memcmp(&lx,&ly, sizeof(float4_t) ) == 0;
+    } 
+#endif
+
     /** Bucket hashtable with a fixed # of buckets (never rehash)
      *  Intended for use when a reasonable # of buckets can be estimated ahead of time.
      *  Note that operator== is used to compare keys.
@@ -275,7 +284,7 @@ namespace nanojit
         Node* find(K k, size_t &i) {
             i = H::hash(k) % nbuckets;
             for (Seq<Node>* p = buckets[i]; p != NULL; p = p->tail) {
-                if (p->head.key == k)
+                if (keysEqual(p->head.key, k))
                     return &p->head;
             }
             return NULL;
@@ -304,7 +313,7 @@ namespace nanojit
                 n->value = v;
                 return;
             }
-            buckets[i] = new (allocator) Seq<Node>(Node(k,v), buckets[i]);
+            buckets[i] = new (allocator, sizeof(K)) Seq<Node>(Node(k,v), buckets[i]);
         }
 
         /** return v for element k, or T(0) if k is not present */

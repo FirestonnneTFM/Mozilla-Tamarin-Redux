@@ -76,6 +76,10 @@
 #  define NJ_USES_IMMD_POOL 0
 #endif
 
+#ifndef NJ_USES_IMMF4_POOL
+#  define NJ_USES_IMMF4_POOL 0
+#endif
+
 #ifndef NJ_JTBL_SUPPORTED
 #  define NJ_JTBL_SUPPORTED 0
 #endif
