@@ -515,7 +515,8 @@ class AcceptanceRuntest(RuntestBase):
                             lexpfail += 1
                         else:
                             lfail += 1
-                            outputCalls.append((self.fail,(testName+extraVmArgs, line, self.failmsgs)))
+                            if not self.verbose:
+                                outputCalls.append((self.fail,(testName+extraVmArgs, line, self.failmsgs)))
 
             # exitcode check
             ec_lfail, ec_lexpfail, expectedExitcode = self.check_exit_code(exitcode, root, testName, f, err, settings, outputCalls)
