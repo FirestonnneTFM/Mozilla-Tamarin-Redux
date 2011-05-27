@@ -47,7 +47,7 @@ from commonsteps import *
 
 class sandbox:
     
-    BRANCH = "sandbox"
+    BRANCHES = ["sandbox"]
     
     ####### SCHEDULERS
     from buildbot.scheduler import *
@@ -55,7 +55,7 @@ class sandbox:
     from custom.buildbot_ext.scheduler import *
     
     #### SANDBOX
-    compile = Scheduler(name="compile-sandbox", branch=BRANCH, treeStableTimer=30, properties={'silent':'true'},
+    compile = Scheduler(name="compile-sandbox", branch=BRANCHES, treeStableTimer=30, properties={'silent':'true'},
                      builderNames=["windows-compile-sandbox", "windows64-compile-sandbox",
                                    "mac-intel-10.5-compile-sandbox", "mac64-intel-compile-sandbox",
                                    "linux-compile-sandbox",
