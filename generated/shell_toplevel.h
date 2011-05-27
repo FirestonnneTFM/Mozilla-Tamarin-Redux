@@ -2186,6 +2186,7 @@ class shell_toplevelClassManifest : public avmplus::ClassManifestBase
     friend class avmplus::AvmCore;
     friend class avmplus::IntVectorClass;
     friend class avmplus::UIntVectorClass;
+    // friend class avmplus::FloatVectorClass;
     friend class avmplus::DoubleVectorClass;
     friend class avmplus::ObjectVectorClass;
 private:

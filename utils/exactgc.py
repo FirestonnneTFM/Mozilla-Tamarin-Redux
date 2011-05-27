@@ -56,8 +56,23 @@ import filecmp
 import glob
 import tempfile
 import platform
+import subprocess
+import string
 
-utilsdir = os.path.abspath(os.path.dirname(__file__))
+def platform_filename(filename):
+    filename = os.path.abspath(filename);
+
+    if sys.platform.startswith("cygwin"):
+        from subprocess import Popen
+        from subprocess import PIPE
+
+        retval = Popen(["/usr/bin/cygpath", "-m", filename], stdout=PIPE).communicate()[0]
+    else:
+        retval = filename;
+    return string.rstrip(retval);
+
+
+utilsdir = platform_filename(os.path.dirname(__file__))
 
 def gen(prefix,inputfiles,outputdir,srcdir=os.getcwd(),ns=''):
     avm = os.environ.get('AVM')
@@ -113,7 +128,7 @@ def gen(prefix,inputfiles,outputdir,srcdir=os.getcwd(),ns=''):
     if ns != '':
         ns = '-ns ' + ns
 
-    exactgccmd = '%s %s -- -b %s-tracers.hh -n %s-tracers.hh -i %s-tracers.h %s %s' % (avm, abcfile, prefix, prefix, prefix, ns, '@'+tmpfile.name)
+    exactgccmd = '%s %s -- -b %s-tracers.hh -n %s-tracers.hh -i %s-tracers.h %s %s' % (avm, abcfile, prefix, prefix, prefix, ns, '@'+platform_filename(tmpfile.name))
     ret = os.system(exactgccmd)
     
     if oldpy:
