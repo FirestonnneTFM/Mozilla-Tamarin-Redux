@@ -487,7 +487,6 @@ REALLY_INLINE Atom MethodSignature::getDefaultValue(int32_t i) const
 
 REALLY_INLINE bool MethodSignature::argcOk(int32_t argc) const
 {
-    AvmAssert(argc >= 0);
     AvmAssert(_param_count >= _optional_count);
     // The explicit cast to uint32_t is to avoid a compiler warning (GCC 4.4+):
     // "assuming signed overflow does not occur when assuming that (X + c) < X is always false"
@@ -495,7 +494,7 @@ REALLY_INLINE bool MethodSignature::argcOk(int32_t argc) const
     // In this case, we know that both values are nonnegative, and the result is >= 0, so the cast
     // is safe and simply dodges the warning.
     return uint32_t(argc) >= (uint32_t(_param_count) - uint32_t(_optional_count)) &&
-            (argc <= _param_count || _allowExtraArgs);
+            (uint32_t(argc) <= uint32_t(_param_count) || _allowExtraArgs);
 }
 
 } // namespace avmplus
