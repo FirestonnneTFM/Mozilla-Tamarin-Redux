@@ -48,14 +48,15 @@ from commonsteps import *
 class tamarinredux:
     
     HG_URL = "http://asteam.macromedia.com/hg/tamarin-redux/"
-    BRANCH = "tamarin-redux"
+    BRANCHES = ["tamarin-redux","tamarin-redux-serrano"]
+    BRANCHES_DEEP = ["tamarin-redux-deep","tamarin-redux-serrano-deep"]
     
     ####### SCHEDULERS
     from buildbot.scheduler import *
     # custom.buildbot_ext.scheduler import MUST happen after importing buildbot.scheduler
     from custom.buildbot_ext.scheduler import *
 
-    compile = Scheduler(name="compile", branch=BRANCH, treeStableTimer=30, fileIsImportant=startCompile, properties={'silent':'false'},
+    compile = Scheduler(name="compile", branch=BRANCHES, treeStableTimer=30, fileIsImportant=startCompile, properties={'silent':'false'},
                      builderNames=["windows-compile", "windows64-compile",
                                    "mac-intel-10.5-compile", "mac64-intel-compile",
                                    "linux-compile",
@@ -113,7 +114,7 @@ class tamarinredux:
                                   ["linux-mips-test", "linux-mips-smoke"],
                                  ])
 
-    deep = PhaseTwoScheduler(name="deep", branch="%s-deep" % BRANCH, treeStableTimer=30, properties={'silent':'false'},
+    deep = PhaseTwoScheduler(name="deep", branch=BRANCHES_DEEP, treeStableTimer=30, properties={'silent':'false'},
                     fileIsImportant=startCompile, priority=2, changeDir="changes/deep/processed",
                     builderNames=[
                                     "windows-deep",

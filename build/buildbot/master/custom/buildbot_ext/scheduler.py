@@ -57,6 +57,20 @@ class Scheduler(scheduler.Scheduler):
         to modify any of the master.cfg code) from the original source to add the ability to 
         handle buildsets'''
 
+    def addChange(self, change):
+        if self.branch is not None and change.branch not in self.branch:
+            log.msg("%s ignoring off-branch %s" % (self, change))
+            return
+        if self.categories is not None and change.category not in self.categories:
+            log.msg("%s ignoring non-matching categories %s" % (self, change))
+            return
+        if not self.fileIsImportant:
+            self.addImportantChange(change)
+        elif self.fileIsImportant(change):
+            self.addImportantChange(change)
+        else:
+            self.addUnimportantChange(change)
+
     def fireTimer(self):
         # clear out our state
         self.timer = None
