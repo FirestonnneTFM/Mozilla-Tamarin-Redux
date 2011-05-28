@@ -43,6 +43,12 @@
 #define X86_MATH
 #endif
 
+// Avoid unsafe floating-point optimizations, including replacing library calls
+// with inlined x87 instructions.  We will do this explicitly with inline asm
+// where appropriate.
+#pragma float_control(push)
+#pragma float_control(precise, on)
+
 // warning this code is used by amd64 and arm builds
 
 namespace avmplus
@@ -110,18 +116,16 @@ namespace avmplus
     }
 #endif /* X86_MATH */
 
-#ifdef X86_MATH
-    REALLY_INLINE double MathUtils::cos(double value)
-    {
-        _asm fld [value];
-        _asm fcos;
-    }
-#elif !defined(AVMPLUS_ARM)
+// The x87 trigonometric instructions produce values that differ from the
+// results expected by the ECMAscript test suite for sin, cos, and tan.
+// Use the standard library instead on Win32 as well as Win64. See bug 521245.
+
+#ifndef AVMPLUS_ARM
     REALLY_INLINE double MathUtils::cos(double value)
     {
         return ::cos(value);
     }
-#endif /* X86_MATH */
+#endif /* AVMPLUS_ARM */
 
 #ifndef X86_MATH
     REALLY_INLINE double MathUtils::exp(double value)
@@ -181,25 +185,21 @@ namespace avmplus
     }
 #endif /* X86_MATH */
 
-#ifdef X86_MATH
-    REALLY_INLINE double MathUtils::sin(double value)
-    {
-        _asm fld [value];
-        _asm fsin;
-    }
-#elif !defined(AVMPLUS_ARM)
+// The x87 trigonometric instructions produce values that differ from the
+// results expected by the ECMAscript test suite for sin, cos, and tan.
+// Use the standard library instead on Win32 as well as Win64. See bug 521245.
+
+#ifndef AVMPLUS_ARM
     REALLY_INLINE double MathUtils::sin(double value)
     {
         return ::sin(value);
     }
-#endif /* X86_MATH */
 
-#if !defined(X86_MATH) && !defined(AVMPLUS_ARM)
     REALLY_INLINE double MathUtils::tan(double value)
     {
         return ::tan(value);
     }
-#endif /* !defined(X86_MATH) && !defined(AVMPLUS_ARM) */
+#endif /* AVMPLUS_ARM */
 
     REALLY_INLINE double MathUtils::sqrt(double value)
     {
@@ -212,3 +212,6 @@ namespace avmplus
     }
 
 }
+
+// Restore the prevailing floating-point model.
+#pragma float_control(pop)

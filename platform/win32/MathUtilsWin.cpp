@@ -44,6 +44,11 @@
 #define X86_MATH
 #endif
 
+// Avoid unsafe floating-point optimizations, including replacing library calls
+// with inlined x87 instructions.  We will do this explicitly with inline asm
+// where appropriate.
+#pragma float_control(precise, on)
+
 // warning this code is used by amd64 and arm builds
 
 namespace avmplus
@@ -351,18 +356,7 @@ namespace avmplus
             return ::sin(value);
         }
     }
-#endif /* AVMPLUS_ARM */
 
-#ifdef X86_MATH
-    double MathUtils::tan(double value)
-    {
-        // This is a good candidate for inlining, but VC++ 2008 chokes on it.
-        _asm fld [value];
-        _asm fptan;
-        _asm _emit 0xDD; // fstp st(0);
-        _asm _emit 0xD8;
-    }
-#elif defined(AVMPLUS_ARM)
     double MathUtils::tan(double value)
     {
         if( broken_trig_funcs && (value > AVMPLUS_TRIG_FUNC_MAX || value < -AVMPLUS_TRIG_FUNC_MAX) )
@@ -374,5 +368,5 @@ namespace avmplus
             return ::tan(value);
         }
     }
-#endif /* X86_MATH */
+#endif /* AVMPLUS_ARM */
 }
