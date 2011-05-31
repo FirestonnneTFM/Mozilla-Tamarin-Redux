@@ -239,5 +239,8 @@ package {
     AddTestCase("15.12.2-2-10: JSON.parse - parsing an object where property value middles with a null character",true,result10);
 
     test();
+    
+    Object.prototype.toString = oldObject;
+    Array.prototype.toString = oldArray;
 
 }
