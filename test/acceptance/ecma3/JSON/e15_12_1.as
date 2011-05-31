@@ -321,4 +321,7 @@ package {
     AddTestCase("15.12.1-1-g6-7: The JSON lexical grammer allows 't' as a JSONEscapeCharacter after '\\' in a JSONString",'\t',JSON.parse('"\\t"'));
 
     test();
+    
+    Object.prototype.toString = oldObject;
+    Array.prototype.toString = oldArray;
 }
