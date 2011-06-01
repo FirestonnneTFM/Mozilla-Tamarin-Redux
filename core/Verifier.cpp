@@ -1121,6 +1121,7 @@ namespace avmplus
 
             case OP_debugfile:
                 //checkStack(0,0)
+                // fixme: bugzilla 552988: remove ifdef.
                 #if defined(DEBUGGER) || defined(VMCFG_VTUNE)
                 checkStringOperand(imm30);
                 #endif
@@ -2289,6 +2290,7 @@ namespace avmplus
             case OP_debug:
             {
 #ifdef DEBUGGER
+                // fixme: bugzilla 552988: remove ifdef.
                 uint8_t type = (uint8_t)*(pc + 1);
                 if (type == DI_LOCAL) {
                     // see Debugger::scanCode
