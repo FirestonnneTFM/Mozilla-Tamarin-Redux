@@ -90,6 +90,7 @@ namespace avmplus
         {
             "access",
             "accessors",
+            "API",
             "*",
             "bases",
             "constructor",
@@ -464,10 +465,10 @@ namespace avmplus
 
         const uint32_t name_index = (metadata_pos) ? AvmCore::readU32(metadata_pos) : 0;
         // A bit of a hack: if the pool is builtin, always omit metadata chunks with names of "Version"
-        // or "native", since these are used for reserved purposes internally.
+        // or "native" or "API", since these are used for reserved purposes internally.
         Stringp name = poolstr(pool, name_index);
-        AvmAssert(name->isInterned() && core->kVersion->isInterned() && str(kstrid_native)->isInterned());
-        if (pool->isBuiltin && (name == core->kVersion || name == str(kstrid_native)))
+        AvmAssert(name->isInterned() && core->kVersion->isInterned() && str(kstrid_native)->isInterned() && str(kstrid_api)->isInterned());
+        if (pool->isBuiltin && (name == core->kVersion || name == str(kstrid_native) || name == str(kstrid_api)))
             return NULL;
 
         const uint32_t val_count = (metadata_pos) ? AvmCore::readU32(metadata_pos) : 0;

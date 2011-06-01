@@ -73,6 +73,7 @@ namespace avmplus
         {
             kstrid_access,
             kstrid_accessors,
+            kstrid_api,
             kstrid_asterisk,
             kstrid_bases,
             kstrid_constructor,
