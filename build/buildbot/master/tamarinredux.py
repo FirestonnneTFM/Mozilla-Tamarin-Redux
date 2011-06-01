@@ -50,6 +50,8 @@ class tamarinredux:
     HG_URL = "http://asteam.macromedia.com/hg/tamarin-redux/"
     BRANCHES = ["tamarin-redux","tamarin-redux-serrano"]
     BRANCHES_DEEP = ["tamarin-redux-deep","tamarin-redux-serrano-deep"]
+    branch_deep_priorities = [('tamarin-redux-deep', 2), ('tamarin-redux-serrano-deep', 1)]
+
     
     ####### SCHEDULERS
     from buildbot.scheduler import *
@@ -115,7 +117,7 @@ class tamarinredux:
                                  ])
 
     deep = PhaseTwoScheduler(name="deep", branch=BRANCHES_DEEP, treeStableTimer=30, properties={'silent':'false'},
-                    fileIsImportant=startCompile, priority=2, changeDir="changes/deep/processed",
+                    fileIsImportant=startCompile, priorities=branch_deep_priorities, changeDir="changes/deep/processed",
                     builderNames=[
                                     "windows-deep",
                                     "windows64-deep",                                    

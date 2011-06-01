@@ -101,15 +101,18 @@ class Scheduler(scheduler.Scheduler):
 class PhaseTwoScheduler(Scheduler):
     changeDir = ""
     def __init__(self, name, branch, treeStableTimer, builderNames,
-             fileIsImportant=None, properties={}, categories=None, builderDependencies=[], changeDir=".", priority=1):
-
+             fileIsImportant=None, properties={}, categories=None, builderDependencies=[], changeDir=".", priorities=[]):
+        '''
+        priorities : list of (branch, priorities) tuples that map branches to
+                   priorities (int)
+        '''
         Scheduler.__init__(self, name, branch, treeStableTimer, builderNames, 
             fileIsImportant, properties, categories)
         # - each builder must have a dependent that is in the upstream builder
         # - multiple builders can be dependent on the same upstream builder
         self.builderDependencies = builderDependencies
         self.changeDir = changeDir
-        self.priority = priority
+        self.priorities = priorities
 
     def fireTimer(self):
         # clear out our state
@@ -125,7 +128,12 @@ class PhaseTwoScheduler(Scheduler):
         # Only add builders that are:
         #    1) dependent builder is listed in the change request, this means that the upstream builder was online
         #    2) builder is online
-        f = open("%s/change-%s.%s" % (self.changeDir, change.revision, self.priority))
+
+        # determine the priority based on branch
+        # note that this is a list comprehension, so we need to "unpack" with
+        # [0] at end
+        priority = [p[1] for p in self.priorities if p[0] == change.branch][0]
+        f = open("%s/change-%s.%s" % (self.changeDir, change.revision, priority))
         phase1Builders = []
         for line in f.readlines():
             if line.startswith("builders:"):
