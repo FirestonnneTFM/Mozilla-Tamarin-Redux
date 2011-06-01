@@ -235,15 +235,21 @@ class PBListener(base.StatusReceiverMultiService):
 
 
 class PhaseOneListener(base.StatusReceiverMultiService):
-    compare_attrs = ["denotesPassSchedulerGroups", "changeDir", "priority"]
+    compare_attrs = ["denotesPassSchedulerGroups", "changeDir", "priorities"]
     
-    def __init__(self, denotesPassSchedulerGroups=None, changeDir=None, priority=1):
+    def __init__(self, denotesPassSchedulerGroups=None, changeDir=None, priorities=[]):
+        '''
+        denotesPassSchedulerGroups : list of Schedulers to watch
+        changeDir : location on master where change files are kept
+        priorities : list of (branch, priorities) tuples that map branches to
+                   priorities (int)
+        '''
         base.StatusReceiverMultiService.__init__(self)
         self.passBuilderGroups = []
         if denotesPassSchedulerGroups:
             self.setupDenotesPassSchedulerGroup(denotesPassSchedulerGroups)
         self.changeDir = changeDir
-        self.priority = priority
+        self.priorities = priorities
         
     def setupDenotesPassSchedulerGroup(self, schedulerGroups):
         for schedulerGroup in schedulerGroups:
@@ -332,7 +338,12 @@ class PhaseOneListener(base.StatusReceiverMultiService):
         out += "builders:    %s\n" % (' '.join(onlineslaves))
         out += "description:\n%s\n" % (change.comments)
         
-        filename = "change-%s.%s" % (change.revision,self.priority)
+        # determine the priority based on branch
+        # note that this is a list comprehension, so we need to "unpack" with
+        # [0] at end
+        priority = [p[1] for p in self.priorities if p[0] == change.branch][0]
+
+        filename = "change-%s.%s" % (change.revision, priority)
         changefile = open("%s/%s" % (self.changeDir,filename), "w")
         changefile.write(out)
         changefile.close()
