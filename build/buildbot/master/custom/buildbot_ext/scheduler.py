@@ -75,7 +75,8 @@ class Scheduler(scheduler.Scheduler):
         # clear out our state
         self.timer = None
         self.nextBuildTime = None
-        changes = self.unimportantChanges + self.importantChanges
+        # Only build changes that are deemed important by self.fileIsImportant
+        changes = self.importantChanges
         self.importantChanges = []
         self.unimportantChanges = []
 
