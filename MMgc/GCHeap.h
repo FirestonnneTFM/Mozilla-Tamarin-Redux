@@ -47,6 +47,48 @@ namespace MMgc
     public:
         GCHeapConfig();
 
+        // If true then optionString represents a GC option parsed by
+        // ParseAndApplyOption that will also require a successive
+        // parameter token (e.g. [-memlimit d] or [-load L,B, ...]).
+        //
+        // Note that clients are *not* required to check this before
+        // invoking ParseAndApplyOption with a null successorString;
+        // they only must check this if they plan passing a non-null
+        // successorString.  (This is all largely a hack to interface
+        // with avmshell's command line parsing in a backwards compatible
+        // manner; note when the parameter value is itself encoded in the
+        // option string that this method will return false.)
+        bool IsGCOptionWithParam(const char *optionString);
+
+        // ParseAndApplyOption incorporates options into the config;
+        // it returns true for GC options, valid or invalid, and false
+        // for non GC options, and it will *only* change the config when
+        // given a valid GC option.
+        //
+        // If optionString does not represent a GC option, then leaves
+        // this config unchanged and returns false (and leaves wrongFmt
+        // in an unspecified state; don't read it in this case).
+        //
+        // If optionString represents a GC option but the option as a
+        // whole is malformatted or illegal, then sets wrongFmt to
+        // true, then leaves this config *unchanged*, and returns
+        // *true*.  (This case includes situations where the
+        // optionString requires a successive parameter token that was
+        // not passed as a successorString.)
+        //
+        // If option encodes a legal GC option, then sets wrongFmt to
+        // false, incorporates the option into this config, and
+        // returns true.
+        //
+        // GC options that take parameters can be handed by either
+        // (but not both) of the following:
+        // - encoding the parameter value in the optionString
+        //   (separated from the option key by either a space charater
+        //   or an equals-sign character).
+        // - passing the parameter value as the successor string.
+        bool ParseAndApplyOption(const char *optionString, bool &wrongFmt,
+                                 const char *successorString = 0);
+
         static const size_t kNumLoadFactors = 7;
         static const size_t kDefaultHeapLimit = (size_t)-1;
 
