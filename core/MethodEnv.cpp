@@ -711,13 +711,10 @@ namespace avmplus
     }
 
     // see 13.2 creating function objects
-    ClassClosure* MethodEnv::newfunction(MethodInfo *function,
-                                     ScopeChain* outer,
-                                     Atom* scopes) const
+    ClassClosure* MethodEnv::newfunction(MethodInfo *function, Atom* scopes) const
     {
         Toplevel* toplevel = this->toplevel();
         AvmCore* core = toplevel->core();
-        MMgc::GC* gc = core->GetGC();
 
         FunctionClass* functionClass = toplevel->_functionClass; // can't use functionClass(), might not be inited yet
         VTable* fvtable = functionClass->ivtable();
@@ -729,7 +726,9 @@ namespace avmplus
         // functions should never have 'extra' scopes
         AvmAssert(fstc->size == fstc->fullsize);
 
-        ScopeChain* fscope = ScopeChain::create(gc, fvtable, this->abcEnv(), fstc, outer, core->dxns());
+        MMgc::GC* gc = core->GetGC();
+        ScopeChain* outer = scope();
+        ScopeChain* fscope = ScopeChain::create(gc, fvtable, abcEnv(), fstc, outer, core->dxns());
         for (int i=outer->getSize(), n=fscope->getSize(); i < n; i++)
         {
             fscope->setScope(gc, i, *scopes++);

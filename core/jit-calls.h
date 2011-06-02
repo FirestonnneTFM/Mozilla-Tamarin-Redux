@@ -66,7 +66,7 @@
 
     METHOD(ENVADDR(MethodEnv::newActivation), SIG1(P,P), newActivation)
     METHOD(ENVADDR(MethodEnv::newcatch), SIG2(P,P,P), newcatch)
-    METHOD(ENVADDR(MethodEnv::newfunction), SIG4(P,P,P,P,P), newfunction)
+    METHOD(ENVADDR(MethodEnv::newfunction), SIG3(P,P,P,P), newfunction)
 
     Atom callprop_miss(CallCache&, Atom obj, int argc, Atom* args, MethodEnv*);
 

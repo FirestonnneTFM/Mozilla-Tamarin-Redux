@@ -5114,11 +5114,8 @@ namespace avmplus
 
                 // prepare scopechain args for call
                 LIns* ap = storeAtomArgs(extraScopes, ms->scope_base());
-
-                LIns* outer = loadEnvScope();
-
-                LIns* i3 = callIns(FUNCTIONID(newfunction), 4,
-                    env_param, InsConstPtr(func), outer, ap);
+                LIns* i3 = callIns(FUNCTIONID(newfunction), 3,
+                                   env_param, InsConstPtr(func), ap);
                 liveAlloc(ap);
 
                 AvmAssert(!result->isMachineType());

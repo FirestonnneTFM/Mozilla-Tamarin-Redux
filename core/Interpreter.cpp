@@ -2456,7 +2456,7 @@ namespace avmplus
                 SAVE_EXPC;
                 sp++;
                 MethodInfo *body = pool->getMethodInfo((uint32_t)U30ARG);
-                sp[0] = env->newfunction(body, scope, scopeBase)->atom();
+                sp[0] = env->newfunction(body, scopeBase)->atom();
                 NEXT;
             }
 
