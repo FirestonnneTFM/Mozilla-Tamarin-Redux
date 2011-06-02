@@ -152,6 +152,211 @@ namespace MMgc
             heapSoftLimit = VMPI_strtol(envValue, 0, 10);
     }
 
+    bool GCHeapConfig::IsGCOptionWithParam(const char *arg)
+    {
+        if (!VMPI_strcmp(arg, "-memlimit")
+            || !VMPI_strcmp(arg, "-load")
+            || !VMPI_strcmp(arg, "-loadCeiling")
+            || !VMPI_strcmp(arg, "-gcwork")
+            || !VMPI_strcmp(arg, "-gcstack"))
+            return true;
+        else
+            return false;
+    }
+
+    static bool HasPrefix(const char* aString, const char *aStr)
+    {
+        size_t n = VMPI_strlen(aStr);
+        return (VMPI_strncmp(aString, aStr, n) == 0);
+    }
+
+    static const char * useDefaultOrSkipForward(const char *arg,
+                                                const char *key,
+                                                const char *dflt)
+    {
+        size_t n = VMPI_strlen(key);
+        if (VMPI_strcmp(arg, key) == 0) {
+            return dflt;
+        } else if (HasPrefix(arg, key) &&
+                   VMPI_strcmp(arg, key) > 0) {
+            AvmAssert(dflt == NULL);
+            const char *param = arg + n;
+            while (*param != 0 && (*param == ' ' || *param == '='))
+                param++;
+            return param;
+        } else {
+            return NULL;
+        }
+    }
+
+    bool GCHeapConfig::ParseAndApplyOption(const char *arg, bool &wrong,
+                                           const char *successorString/*=0*/)
+    {
+        wrong = false; // assume input is valid until we see otherwise.
+
+        if (!VMPI_strcmp(arg, "-memstats")) {
+            gcstats = true;
+            autoGCStats = true;
+            return true;
+        }
+        else if (!VMPI_strcmp(arg, "-memstats-verbose")) {
+            gcstats = true;
+            autoGCStats = true;
+            verbose = true;
+            return true;
+        }
+        else if (HasPrefix(arg, "-memlimit")) {
+            const char *param =
+                useDefaultOrSkipForward(arg, "-memlimit", successorString);
+            if (param == NULL) {
+                wrong = true;
+                return true;
+            }
+            heapLimit = VMPI_strtol(param, 0, 10);
+            return true;
+        }
+#ifdef MMGC_POLICY_PROFILING
+        else if (!VMPI_strcmp(arg, "-gcbehavior")) {
+            gcbehavior = 2;
+            return true;
+        }
+        else if (!VMPI_strcmp(arg, "-gcsummary")) {
+            gcbehavior = 1;
+            return true;
+        }
+#endif
+        else if (!VMPI_strcmp(arg, "-eagersweep")) {
+            eagerSweeping = true;
+            return true;
+        }
+        else if (HasPrefix(arg, "-load") && !HasPrefix(arg, "-loadCeiling")) {
+            const char *param =
+                useDefaultOrSkipForward(arg, "-load", successorString);
+            if (param == NULL) {
+                wrong = true;
+                return true;
+            }
+
+            double load;
+            double limit;
+            int nchar;
+            const char* val = param;
+            size_t k = 0;
+            // limit=0 is legal, it means unlimited
+            for (;;) {
+                if (k < kNumLoadFactors) {
+                    if (VMPI_sscanf(val, "%lf,%lf%n", &load, &limit, &nchar) == 2 &&
+                        load > 1.0 &&
+                        limit >= 0.0)
+                    {
+                        k++;
+                        val += nchar;
+                        if (*val == 0) {
+                            break;
+                        }
+                        if (*val == ',') {
+                            val++;
+                            continue;
+                        }
+                    }
+                    else if (VMPI_sscanf(val, "%lf%n", &load, &nchar) == 1 &&
+                             val[nchar] == 0 &&
+                             load > 1.0)
+                    {
+                        break;
+                    }
+                }
+                wrong = true;
+                return true;
+            }
+            // Above loop validated the param string; below loop
+            // applies it.  The control flow of below loop *must*
+            // match that of the above loop *exactly*; otherwise the
+            // validation will be out of sync with the configuration.
+            val = param;
+            k = 0;
+            for (;;) {
+                if (k < kNumLoadFactors) {
+                    if (VMPI_sscanf(val, "%lf,%lf%n", &load, &limit, &nchar) == 2 &&
+                        load > 1.0 &&
+                        limit >= 0.0)
+                    {
+                        gcLoad[k] = load;
+                        gcLoadCutoff[k] = limit;
+                        k++;
+                        val += nchar;
+                        if (*val == 0) {
+                            gcLoadCutoff[k-1] = DBL_MAX;
+                            break;
+                        }
+                        if (*val == ',') {
+                            val++;
+                            continue;
+                        }
+                    }
+                    else if (VMPI_sscanf(val, "%lf%n", &load, &nchar) == 1 &&
+                             val[nchar] == 0 &&
+                             load > 1.0)
+                    {
+                        gcLoad[k] = load;
+                        gcLoadCutoff[k] = DBL_MAX;
+                        break;
+                    }
+                }
+                // (see above note; if we get here, we're out of sync)
+                GCAssert(false);
+            }
+            return true;
+        }
+        else if (HasPrefix(arg, "-loadCeiling")) {
+            const char *param =
+                useDefaultOrSkipForward(arg, "-loadCeiling", successorString);
+            if (param == NULL) {
+                wrong = true;
+                return true;
+            }
+
+            double ceiling;
+            int nchar;
+            const char* val = param;
+            if (VMPI_sscanf(val, "%lf%n", &ceiling, &nchar) == 1 &&
+                size_t(nchar) == VMPI_strlen(val) &&
+                ceiling >= 1.0)
+            {
+                gcLoadCeiling = ceiling;
+                return true;
+            }
+            else
+            {
+                wrong = true;
+                return true;
+            }
+        }
+        else if (HasPrefix(arg, "-gcwork")) {
+            const char* param =
+                useDefaultOrSkipForward(arg, "-gcwork", successorString);
+            if (param == NULL) {
+                wrong = true;
+                return true;
+            }
+
+            double work;
+            int nchar;
+            const char* val = param;
+            if (VMPI_sscanf(val, "%lf%n", &work, &nchar) == 1 && size_t(nchar) == VMPI_strlen(val) && work > 0.0 && work <= 1.0) {
+                gcEfficiency = work;
+                return true;
+            }
+            else {
+                wrong = true;
+                return true;
+            }
+        }
+
+        // arg unmatched; option not handled here.
+        return false;
+    }
+
     /* static */
     void GCHeap::ResetStatics()
     {
