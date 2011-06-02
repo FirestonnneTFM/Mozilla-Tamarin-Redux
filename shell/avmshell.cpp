@@ -677,6 +677,7 @@ namespace avmshell
         settings.programFilename = argv[0];     // How portable / reliable is this?
         for (int i=1; i < argc ; i++) {
             const char * const arg = argv[i];
+            bool mmgcSaysArgIsWrong = false;
 
             if (arg[0] == '-')
             {
@@ -871,84 +872,22 @@ namespace avmshell
                 }
 #endif /* VMCFG_OSR */
 #endif /* VMCFG_NANOJIT */
-                else if (!VMPI_strcmp(arg, "-memstats")) {
-                    MMgc::GCHeap::GetGCHeap()->Config().gcstats = true;
-                    MMgc::GCHeap::GetGCHeap()->Config().autoGCStats = true;
-                }
-                else if (!VMPI_strcmp(arg, "-memstats-verbose")) {
-                    MMgc::GCHeap::GetGCHeap()->Config().gcstats = true;
-                    MMgc::GCHeap::GetGCHeap()->Config().autoGCStats = true;
-                    MMgc::GCHeap::GetGCHeap()->Config().verbose = true;
-                }
-                else if (!VMPI_strcmp(arg, "-memlimit") && i+1 < argc ) {
-                    MMgc::GCHeap::GetGCHeap()->Config().heapLimit = VMPI_strtol(argv[++i], 0, 10);
-                }
-#ifdef MMGC_POLICY_PROFILING
-                else if (!VMPI_strcmp(arg, "-gcbehavior")) {
-                    MMgc::GCHeap::GetGCHeap()->Config().gcbehavior = 2;
-                }
-                else if (!VMPI_strcmp(arg, "-gcsummary")) {
-                    MMgc::GCHeap::GetGCHeap()->Config().gcbehavior = 1;
-                }
-#endif
-                else if (!VMPI_strcmp(arg, "-eagersweep")) {
-                    MMgc::GCHeap::GetGCHeap()->Config().eagerSweeping = true;
-                }
-                else if (!VMPI_strcmp(arg, "-load") && i+1 < argc ) {
-                    double load;
-                    double limit;
-                    int nchar;
-                    const char* val = argv[++i];
-                    const char* origval = val;
-                    size_t k = 0;
-                    // limit=0 is legal, it means unlimited
-                    for (;;) {
-                        if (k < MMgc::GCHeapConfig::kNumLoadFactors) {
-                            if (VMPI_sscanf(val, "%lf,%lf%n", &load, &limit, &nchar) == 2 && load > 1.0 && limit >= 0.0) {
-                                MMgc::GCHeap::GetGCHeap()->Config().gcLoad[k] = load;
-                                MMgc::GCHeap::GetGCHeap()->Config().gcLoadCutoff[k] = limit;
-                                k++;
-                                val += nchar;
-                                if (*val == 0) {
-                                    MMgc::GCHeap::GetGCHeap()->Config().gcLoadCutoff[k-1] = DBL_MAX;
-                                    break;
-                                }
-                                if (*val == ',') {
-                                    val++;
-                                    continue;
-                                }
-                            }
-                            else if (VMPI_sscanf(val, "%lf%n", &load, &nchar) == 1 && val[nchar] == 0 && load > 1.0) {
-                                MMgc::GCHeap::GetGCHeap()->Config().gcLoad[k] = load;
-                                MMgc::GCHeap::GetGCHeap()->Config().gcLoadCutoff[k] = DBL_MAX;
-                                break;
-                            }
+                else if (MMgc::GCHeap::GetGCHeap()->Config().IsGCOptionWithParam(arg) && i+1 < argc ) {
+                    const char *val = argv[++i];
+                    if (MMgc::GCHeap::GetGCHeap()->Config().ParseAndApplyOption(arg, mmgcSaysArgIsWrong, val)) {
+                        if (mmgcSaysArgIsWrong) {
+                            avmplus::AvmLog("Invalid GC option: %s %s\n", arg, val);
+                            usage();
                         }
-                        avmplus::AvmLog("Bad value to -load: %s\n", origval);
-                        usage();
+                        // otherwise, option was implicitly applied during the
+                        // ParseAndApplyOption invocation in the test above.
+                    } else {
+                        AvmAssertMsg(false, "IsGCOptionWithParam inconsistent with ParseAndApplyOption.");
                     }
                 }
-                else if (!VMPI_strcmp(arg, "-loadCeiling") && i+1 < argc) {
-                    double ceiling;
-                    int nchar;
-                    const char* val = argv[++i];
-                    if (VMPI_sscanf(val, "%lf%n", &ceiling, &nchar) == 1 && size_t(nchar) == VMPI_strlen(val) && ceiling >= 1.0) {
-                        MMgc::GCHeap::GetGCHeap()->Config().gcLoadCeiling = ceiling;
-                    }
-                    else {
-                        avmplus::AvmLog("Bad value to -loadCeiling: %s\n", val);
-                        usage();
-                    }
-                }
-                else if (!VMPI_strcmp(arg, "-gcwork") && i+1 < argc ) {
-                    double work;
-                    int nchar;
-                    const char* val = argv[++i];
-                    if (VMPI_sscanf(val, "%lf%n", &work, &nchar) == 1 && size_t(nchar) == VMPI_strlen(val) && work > 0.0 && work <= 1.0) {
-                        MMgc::GCHeap::GetGCHeap()->Config().gcEfficiency = work;
-                    }
-                    else {
-                        avmplus::AvmLog("Bad value to -gcwork: %s\n", val);
+                else if (MMgc::GCHeap::GetGCHeap()->Config().ParseAndApplyOption(arg, mmgcSaysArgIsWrong)) {
+                    if (mmgcSaysArgIsWrong) {
+                        avmplus::AvmLog("Invalid GC option: %s\n", arg);
                         usage();
                     }
                 }
