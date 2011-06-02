@@ -152,9 +152,7 @@ namespace avmplus
          * OP_newfunction
          * see 13.2 creating function objects
          */
-        ClassClosure* newfunction(MethodInfo *function,
-                         ScopeChain* outer,
-                         Atom* scopes) const;
+        ClassClosure* newfunction(MethodInfo *function, Atom* scopes) const;
 
         /**
          * OP_newclass
