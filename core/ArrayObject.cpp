@@ -841,13 +841,10 @@ convert_and_set_sparse:
             if (isDense())
             {
                 uint32_t const curDenseEnd = m_denseStart + m_denseArray.length();
-                if (m_length == curDenseEnd)
-                {
-                    // By far the most common case.
-                    // We don't need to check for sparseness, since we aren't inserting any holes.
-                    m_denseArray.insert(m_denseArray.length(), argv, argc);
-                }
-                else
+                // If m_length == curDenseEnd, we don't need to check for sparseness, 
+                // since we aren't inserting any holes, we're just appending to the end.
+                // (This is by far the most common case in typical code.)
+                if (m_length != curDenseEnd)
                 {
                     AvmAssert(m_length > curDenseEnd);
                     
@@ -856,17 +853,24 @@ convert_and_set_sparse:
                     // (or at least insert "holes").
                     uint32_t const newDenseLen = (m_length - m_denseStart) + argc;
                     uint32_t const newDenseUsed = m_denseUsed + argc;
-                    if (shouldBeSparse(newDenseLen, newDenseUsed))
+                    uint32_t const holesToAppend = m_length - curDenseEnd;
+                    // Since we know argc > 0, "newDenseLen < holesToAppend" can only
+                    // happen if we overflowed a uint32, e.g.:
+                    //
+                    //      var a = new Array(4294967294); a.push("foo", "bar");
+                    //
+                    // If that happens, we want to follow the behavior of older versions
+                    // of Tamarin: wrap the length and convert to sparse.
+                    if (newDenseLen < holesToAppend || shouldBeSparse(newDenseLen, newDenseUsed))
                     {
                         convertToSparse();
                         goto push_sparse;
                     }
                     
                     m_denseArray.ensureCapacity(newDenseLen);
-                    m_denseArray.insert(m_denseArray.length(), atomNotFound, m_length - curDenseEnd);
-                    m_denseArray.insert(m_denseArray.length(), argv, argc);
-                    AvmAssert(m_denseArray.length() == newDenseLen);
+                    m_denseArray.insert(m_denseArray.length(), atomNotFound, holesToAppend);
                 }
+                m_denseArray.insert(m_denseArray.length(), argv, argc);
                 m_denseUsed += argc;
                 m_length += argc;
             }
