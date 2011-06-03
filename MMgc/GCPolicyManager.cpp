@@ -319,7 +319,7 @@ namespace MMgc
         remainingMajorAllocationBudget = majorAllocationBudget = double(lowerLimitCollectionThreshold()) * double(GCHeap::kBlockSize);
 
         if (gc->incremental)
-            remainingMinorAllocationBudget = minorAllocationBudget = max(1,int32_t(remainingMajorAllocationBudget * T));
+            remainingMinorAllocationBudget = minorAllocationBudget = int32_t(max(1,int32_t(remainingMajorAllocationBudget * T)));
         else
             remainingMinorAllocationBudget = int32_t(remainingMajorAllocationBudget);
 
@@ -349,7 +349,7 @@ namespace MMgc
             remainingMajorAllocationBudget = remainingBeforeGC;
 
         if (gc->incremental) {
-            remainingMinorAllocationBudget = minorAllocationBudget = max(1,int32_t(remainingMajorAllocationBudget * T));
+            remainingMinorAllocationBudget = minorAllocationBudget = int32_t(max(1,int32_t(remainingMajorAllocationBudget * T)));
         } else {
             remainingMinorAllocationBudget = int32_t(remainingMajorAllocationBudget);
         }
