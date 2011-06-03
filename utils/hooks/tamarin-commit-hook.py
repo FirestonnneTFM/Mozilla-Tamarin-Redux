@@ -43,11 +43,95 @@
 #   http://mercurial.selenic.com/wiki/MercurialApi
 
 # This file is to be run using a pretxncommit hook
+# (and, at your option, a preoutgoing hook).
 # Place this in your .hg/hgrc file in the repo:
 #
 # [hooks]
 # pretxncommit.master = python:/path/to/tamarin-commit-hook.py:master_hook
 # preoutgoing.checklog = python:/path/to/tamarin-commit-hook.py:preoutgoing_hook
+#
+# ====
+#
+# OVERVIEW
+#
+# These hooks check that the changesets you commit and push adhere to
+# some fairly loose formatting and information-content rules.
+#
+# Ground rules:
+# - Neither hook prevents the commit or push of any changeset (as long
+#   as you respond affirmatively when prompted for confirmation).
+# - Neither hook should significantly impede your personal workflow.
+#   Mercurial Queues and other extensions should work without
+#   introducing a new prompt in the common case*.
+#
+# Counter-examples to either of these two ground rules should be filed as
+# bug against the hooks.  (The objective is to reduce pollution in the
+# central repository, not impose a strait-jacket on your development
+# style.)
+#
+#
+# THE PRETXNCOMMIT HOOK
+#
+# The pretxncommit hook, named master_hook below, fires whenever the
+# user runs a transaction to create a changeset in the working
+# repository via a command such as 'hg commit' or 'hg import <patch>'.
+# The master_hook checks that all changesets introduced by the
+# transaction satisfy two rules:
+#
+# - Source code changes (for a standard set of languages including
+#   C++, AS3, and Python) should have clean whitespace**; this means
+#   they contain no new occurrences of: (1.) tab characters, (2.)
+#   Microsoft Windows line-endings ('\r'), or (3.) trailing whitespace
+#   on a line.
+#
+# - Source code changes should not contain the security change marker
+#   used to demarcate code that is not meant for release to public
+#   repositories.
+#
+# If any of the above checks fail, the user is prompted with a
+# description of the failing checks and a request to confirm that they
+# still want the transaction (i.e. commit or import) to proceed.
+#
+#
+# THE PREOUTGOING HOOK
+#
+# The preoutgoing_hook fires whenever the user transfers changesets
+# between repositories, via a command such a 'hg push' or 'hg pull'.
+# The preoutgoing_hook performs a heuristic*** scan of a changeset to
+# check:
+# - the changeset's log message has a Bugzilla ticket number,
+# - the associated Bugzilla ticket is not tagged as a security bug,
+# - the changeset's log message has a parenthesized list of reviewers, and
+# - the changeset's user has a validly formatted email address.
+#
+# If any of the above checks fail, the user is prompted with a
+# description of the failing checks and a request to confirm that they
+# still want the transfer (i.e. push or pull) to proceed.  One can
+# obviously still push to security bugs (or push without reviews,
+# without an associated ticket, etc); this is just meant as an extra
+# hurdle providing a moment for the user to ask reflectively "Am I
+# pushing to the right repository?  Am I doing the right thing?"
+#
+#
+# FOOTNOTES
+#
+# * (Yes, "in the common case" is deliberate weasel wording, as is
+#   "significantly impede".  For example, the hooks may prompt
+#   occasionally, e.g. when pushing between your own private
+#   repositories.)
+#
+# ** See utils/fixtabs for a cleap-up utility if you feel like fixing
+#   a whole file rather than remove just your own violations of the
+#   whitespace rules.
+#
+# *** The preoutgoing_hook's scan is considered heuristic because it
+#   only scans the tip changeset.  It restricts its attention to the
+#   tip (and not to other changesets that may be included in the push
+#   or pull) for technical reasons documented on Bugzilla 630416 and
+#   in the source below.  Scanning the tip alone is a sufficient
+#   compromise because it captures the common case where the tip
+#   changeset is the sole change being pushed to our central
+#   repository.
 
 import sys, re, os
 from mercurial import hg, ui, commands, cmdutil, patch
