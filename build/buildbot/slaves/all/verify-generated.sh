@@ -37,16 +37,9 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-##
-# Bring in the environment variables
-##
-. ./environment.sh
+echo basedir=$basedir
 
-##
-# Calculate the change number and change id
-##
-. ../all/util-calculate-change.sh $1
-
+## This function is called by verify_builtinabc.sh and verify_tracers.sh
 function verify_generated_files () {
 
     ##
@@ -117,64 +110,4 @@ function verify_generated_files () {
         fi
     done
 }
-
-# silence output if silent=true (function defined in environment.sh)
-logfile=builtinabc.log
-beginSilent
-
-echo basedir=$basedir
-
-##
-# Download the latest asc.jar if it does not exist
-##
-download_asc
-
-echo ""
-echo "Building builtin.abc and shell_toplevel.abc using the following ASC version:"
-echo "`java -jar $ASC`"
-echo ""
-
-FILES="builtin.abc builtin.cpp builtin.h"
-BUILDER="builtin.py"
-BUILDER_DIR="core"
-verify_generated_files $FILES $BUILDER $BUILDER_DIR
-
-FILES="shell_toplevel.abc shell_toplevel.cpp shell_toplevel.h"
-BUILDER="shell_toplevel.py"
-BUILDER_DIR="shell"
-verify_generated_files $FILES $BUILDER $BUILDER_DIR
-
-# exactgc.py, called by builtin-tracers.py and shell_toplevel-tracers.py below, builds against the avmshell
-# so check that we're not cross-compiling and the shell will run on the build platform.
-# Set AVM
-    if [ "$AVM" == "" ]; then
-        export AVM=$buildsdir/$change-${changeid}/$platform/$shell_release
-    fi
-echo "Cross-compile check: Running avmshell at $AVM"    
-$AVM | grep ${change}:${changeid} &> /dev/null
-res=$?
-if [ "$res" != "0" ]; then
-    echo ""
-    echo "Cross-compile check failed - cannot build exactgc tracers on $platform platform"
-    echo ""
-    exit 0
-else
-    echo ""
-    echo "Building exactgc tracer files"
-    echo ""
-    
-    FILES="avmplus-tracers.h avmplus-tracers.hh"
-    BUILDER="builtin-tracers.py"
-    BUILDER_DIR="core"
-    verify_generated_files $FILES $BUILDER $BUILDER_DIR
-    
-    FILES="avmshell-tracers.h avmshell-tracers.hh extensions-tracers.h extensions-tracers.hh"
-    BUILDER="shell_toplevel-tracers.py"
-    BUILDER_DIR="shell"
-    verify_generated_files $FILES $BUILDER $BUILDER_DIR
-fi
-
-endSilent
-
-exit 0
 
