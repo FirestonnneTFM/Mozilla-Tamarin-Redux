@@ -94,6 +94,10 @@ beginSilent
 
 . ../all/util-update-version.sh
 
+##
+# Download the latest asc.jar if it does not exist
+##
+download_asc
 
 ##
 # Make sure that there are no left over directories from previous compile
