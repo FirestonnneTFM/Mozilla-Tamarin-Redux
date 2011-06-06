@@ -52,7 +52,7 @@ beginSilent
 download_asc
 
 # The verify-generated.sh script has a common function called by this script and verify_tracers.sh
-. ./verify-generated.sh
+. ../all/verify-generated.sh
 
 echo ""
 echo "Building builtin.abc and shell_toplevel.abc using the following ASC version:"

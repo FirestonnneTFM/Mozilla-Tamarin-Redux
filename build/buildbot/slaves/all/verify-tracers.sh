@@ -72,7 +72,7 @@ if [ "$res" != "0" ]; then
     exit 0
 else
     # The verify-generated.sh script has a common function called by this script and verify_builtinabc.sh
-    . ./verify-generated.sh
+    . ../all//verify-generated.sh
 
     echo ""
     echo "Building exactgc tracer files"
