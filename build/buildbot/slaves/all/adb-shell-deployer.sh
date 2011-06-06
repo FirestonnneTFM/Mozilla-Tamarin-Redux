@@ -84,7 +84,7 @@ for device in ${deviceids};do
     # Verify that the shell was successfully deployed
     # Remove CR from the stdout as they really mess up shell commands on mac, 
     # causing really weird output, characters getting moved around 
-    deploy_rev=`tr -d '\r' < /tmp/stdout${device} | grep "avmplus shell" | awk '{print $6}'`
+    deploy_rev=`tr -d '\r' < /tmp/stdout${device} | grep "avmplus shell" | awk '{print $NF}'`
     if [ "$change" != "${deploy_rev%:*}" ] || [ "$changeid" != "${deploy_rev#*:}" ]; 
     then
 	echo $0 FAILED!!!
