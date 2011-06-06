@@ -1000,7 +1000,7 @@ rt abcOP_newfunction(MethodEnv *env, Traits** idForDeclaringTraits, Traits*** sc
     AvmAssert(body->declaringTraits() != 0);
     AvmAssert(*idForDeclaringTraits == body->declaringTraits());
 
-    return abcOP_box<rt> (env, (ScriptObject*) env->newfunction(body, env->scope(), scopes));
+    return abcOP_box<rt> (env, (ScriptObject*) env->newfunction(body, scopes));
 }
 
 template<typename rt>
