@@ -137,7 +137,7 @@ do
 
     # verify the deployed shell version if correct
     ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;./avmshell" > /tmp/stdout
-    deploy_rev=`cat /tmp/stdout | grep "avmplus shell" | awk '{print $6}'`
+    deploy_rev=`cat /tmp/stdout | grep "avmplus shell" | awk '{print $NF}'`
     if [ "$change" != "${deploy_rev%:*}" ] || [ "$changeid" != "${deploy_rev#*:}" ]; 
     then
         echo $0 FAILED!!!
