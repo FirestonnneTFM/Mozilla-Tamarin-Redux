@@ -73,6 +73,8 @@ class PerformanceRuntest(RuntestBase):
     avmname = ''
     avmDefaultName = 'avm'
     avm2DefaultName = 'avm2'
+    besttime = 'best'
+    besttime2 = 'best2'
     avm2name = ''
     currentDir = ''
     displayMetrics = []
@@ -118,7 +120,7 @@ class PerformanceRuntest(RuntestBase):
 
     # formatting vars
     testFieldLen = 27   # field length for test name and path
-    resultWidth = 7     # width of result columns
+    resultWidth = 8     # width of result columns
 
     # Index file header
     testIndexHeaderString = '''
@@ -407,7 +409,7 @@ class PerformanceRuntest(RuntestBase):
         if self.avm2:
             self.avm2DefaultName += ':'+self.avm2revision
             if self.iterations == 1:
-                self.js_print('\n%-*s %5s %7s %7s\n' % (self.testFieldLen, 'test', self.avmname,
+                self.js_print('\n%-*s %5s %7s %7s\n' % (self.testFieldLen, 'test', self.besttime,
                                                         self.avm2name, '%diff'))
             else:   # multiple iterations
                 if self.detail:
@@ -437,11 +439,11 @@ class PerformanceRuntest(RuntestBase):
                                                                     self.resultWidth, '%dAvg'))
         else:   # only one avm
             if (self.iterations>1):
-                self.js_print(('\n\n%-*s %5s %6s %6s\n') % (self.testFieldLen, 'test',
-                                                        self.avmname,
+                self.js_print(('\n\n%-*s %6s %7s %12s\n') % (self.testFieldLen, 'test',                                                            
+                                                        self.besttime,
                                                         'avg','95%_conf'))
             else:
-                self.js_print("\n\n%-*s %7s \n" % (self.testFieldLen, "test", self.avmname))
+                self.js_print("\n\n%-*s %7s \n" % (self.testFieldLen, "test", self.besttime))
 
 
     def runTests(self, testList):
@@ -653,9 +655,9 @@ class PerformanceRuntest(RuntestBase):
             print('Score for %s' % (self.avm2name,))
             for k,v in self.score2.iteritems():
                 print('  %s = %s' % (k, str(pow(v['score'],1.0/v['count']))))
-
+    '''
     def formatResult(self, result, truncateLen=DEFAULT_TRUNCATE_LEN, sigFigs = 1, metric = ''):
-        '''Format the test result for display'''
+        #Format the test result for display
         # use currentMetric if no metric specified
         metric = metric or self.currentMetric
         if self.indexFile:
@@ -673,7 +675,20 @@ class PerformanceRuntest(RuntestBase):
                 return ('%% %s.%sf' % ((truncateLen, sigFigs))) % result
                 # line below requires python >= 2.6
                 #return format(result, '%s.%sf' % (truncateLen, decimalPlaces))
-
+    '''
+    def formatResult(self, result, truncateLen=DEFAULT_TRUNCATE_LEN, sigFigs = 1, metric = ''):
+        #Format the test result for display
+        # use currentMetric if no metric specified
+        metric = metric or self.currentMetric
+        if self.indexFile:
+            # automatically format as 2 sigfigs float unless its an int
+            return ('%% %s.%sf' % ((truncateLen, 2))) % result
+        if metric == 'memory':
+            return formatMemory(result)
+        else:
+            return ('%% %s.%sf' % ((truncateLen, sigFigs))) % result
+                # line below requires python >= 2.6
+                #return format(result, '%s.%sf' % (truncateLen, decimalPlaces))
 
     def runTest(self, testAndNum):
         'Run a singe performance testcase self.iterations times and print out results'
@@ -853,21 +868,21 @@ class PerformanceRuntest(RuntestBase):
 
             else:   # multiple iterations
                 if numMetrics == 1:
-                    self.js_print(('%-*s %*s %6s %4.1f%% %s') %
+                    self.js_print(('%-*s %*s %*s %4.1f%% %s') %                        
                         (self.testFieldLen, self.truncateDescField(desc), self.resultWidth,
                           self.formatResult(testData[testName][metric]['best1'], metric=metric),
-                          self.formatResult(testData[testName][metric]['avg1'], metric=metric),
+                          self.resultWidth, self.formatResult(testData[testName][metric]['avg1'], metric=metric),
                           conf95(self.testData[testName][metric]['results1']),
                          [self.formatResult(x, metric=metric) for x in self.testData[testName][metric]['results1']] if self.raw else ''
                          ))
                 else:   # numMetrics > 1
                     self.js_print(desc)
                     for metric in testData[testName].keys():
-                        self.js_print(('    %-*s %*s %6s %4.1f%% %s') %
+                        self.js_print(('    %-*s %*s %*s %4.1f%% %s') %                            
                         (self.testFieldLen-2, self.metricInfo[metric].get('name',metric),
                          self.resultWidth,
                          self.formatResult(testData[testName][metric]['best1'], metric=metric),
-                         self.formatResult(testData[testName][metric]['avg1'], metric=metric),
+                         self.resultWidth, self.formatResult(testData[testName][metric]['avg1'], metric=metric),
                          conf95(self.testData[testName][metric]['results1']),
                          [self.formatResult(x, metric=metric) for x in self.testData[testName][metric]['results1']] if self.raw else ''
                          ))
