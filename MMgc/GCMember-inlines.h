@@ -137,12 +137,22 @@ namespace MMgc
     template<class T>
     REALLY_INLINE void GCRoot::GCMember<T>::set(T* tNew)
     {
+        T* tOld = NULL;
         if (valid())
         {
-            //  This is NOOP for GCObject and GCFinalizedObject
-            this->t->DecrementRef();
+            tOld = this->t;
         }
         this->t = tNew;
+
+        // Only call DecrementRef after installing new value to avoid
+        // tripping up the DRC validator which doesn't like finding a
+        // live zero count object its about to reap (in case tOld drops
+        // to zero and a reap happens).
+        if (tOld)
+        {
+            //  This is NOOP for GCObject and GCFinalizedObject
+            tOld->DecrementRef();
+        }
         if (valid())
         {
             //  This is NOOP for GCObject and GCFinalizedObject

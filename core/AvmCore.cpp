@@ -580,9 +580,12 @@ namespace avmplus
         }
 
         strings = NULL;
+        // important for potential callback invocation of presweep
+        numStrings = 0;
 
         mmfx_delete_array(namespaces);
         namespaces = NULL;
+        numNamespaces = 0;
 
 #ifdef DEBUGGER
         delete _profiler;

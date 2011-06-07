@@ -135,8 +135,10 @@ namespace MMgc
         incremental(config.mode == GCConfig::kIncrementalGC),
         drcEnabled(config.mode != GCConfig::kDisableGC && config.drc),
         findUnmarkedPointers(false),
+#ifdef DEBUG
         validateDefRef(config.validateDRC),
-        keepDRCHistory(false),
+        keepDRCHistory(config.validateDRC),
+#endif
         dontAddToZCTDuringCollection(false),
         incrementalValidation(config.incrementalValidation),
 #ifdef _DEBUG
@@ -154,6 +156,7 @@ namespace MMgc
         destroying(false),
         marking(false),
         collecting(false),
+        performingDRCValidationTrace(false),
         presweeping(false),
         markerActive(0),
         stackCleaned(true),
@@ -546,39 +549,40 @@ namespace MMgc
         GCAssert((GetGCBits(GetRealPointer(p)) & (kQueued|kMark)) == kQueued);
     }
 
-    bool GC::Trace(const void *stackStart/*=NULL*/, uint32_t stackSize/*=0*/)
-    {
-        SAMPLE_FRAME("[mark]", core());
+#endif
 
-        // Kill incremental mark since we're gonna wipe the marks.
-        marking = false;
+    void GC::AbortInProgressMarking()
+    {
         ClearMarkStack();
         m_barrierWork.Clear();
-
-        // Clear all mark bits.
         ClearMarks();
+#ifdef MMGC_HEAP_GRAPH
+        markerGraph.clear();
+#endif
+        marking = false;
+    }
 
-        SAMPLE_CHECK();
-
-        MarkNonstackRoots();
-
-        SAMPLE_CHECK();
-
-        if(stackStart == NULL) {
-            // grab the stack, push it, and
-            MarkQueueAndStack();
-        } else {
-            Push_StackMemory(stackStart, stackSize, stackStart);
-            Mark();
+#ifdef DEBUG
+    void GC::DRCValidationTrace(bool scanStack)
+    {
+        if(marking) {
+            AbortInProgressMarking();
         }
-
-        SAMPLE_CHECK();
-
-        bool failure = m_markStackOverflow;
-
-        ClearMarks();
-
-        return !failure;
+        performingDRCValidationTrace = true;
+        MarkNonstackRoots();
+        MarkQueueAndStack(scanStack);
+#ifdef DEBUG
+        // If we're doing a mark to validate DRC then also pin
+        // RCObjects here. 
+        VMPI_callWithRegistersSaved(ZCT::DoPinProgramStack, &zct);
+#endif
+        if(m_markStackOverflow) {
+            // oh well
+            AbortInProgressMarking();
+            validateDefRef = false;
+            GCLog("Warning: Mark stack overflow during DRC validation, disabling validation.");
+        }
+        performingDRCValidationTrace = false;
     }
 #endif
 
@@ -1074,10 +1078,7 @@ namespace MMgc
         // will be finalized and deallocated and the blocks will be returned to the block
         // manager.
 
-        ClearMarkStack();
-        m_barrierWork.Clear();
-
-        ClearMarks();
+        AbortInProgressMarking();
 
         // System invariant: collecting == false || marking == true
         marking = true;
@@ -3843,22 +3844,30 @@ namespace MMgc
             GCHeap::HeapBlock *b = heap->AddrToBlock(addr);
             if(b) {
                 wasDeletedGCRoot = true;
-                if(b->size == 1) {
-                    return FixedAlloc::FindBeginning(addr);
-                } else {
-                    return GetUserPointer(b->baseAddr);
+                if(b->inUse()) {
+                    if(b->size == 1) {
+                        return FixedAlloc::FindBeginning(addr);
+                    } else {
+                        return GetUserPointer(b->baseAddr);
+                    }
                 }
             }
+            return NULL;
         }
         return FindBeginningGuarded(addr, true); // will return NULL for OS stack
     }
 
+    void GC::DumpBackPointerChain(const void *p)
+    {
+        dumpBackPointerChain(p, markerGraph);
+    }
+
     void GC::dumpBackPointerChain(const void *p, HeapGraph& g)
     {
-        GCLog("Dumping back pointer chain for 0x%p\n", p);
+        GCLog("Dumping back pointer chain for %p\n", p);
         PrintAllocStackTrace(p);
         dumpBackPointerChainHelper(p, g);
-        GCLog("End back pointer chain for 0x%p\n", p);
+        GCLog("End back pointer chain for %p\n", p);
     }
 
     void GC::dumpBackPointerChainHelper(const void *p, HeapGraph& g)
@@ -3875,7 +3884,7 @@ namespace MMgc
                 const char *containerDescription = IsPointerToGCPage(container) ? "gc" : (container ? "gcroot" : "stack");
                 if(wasDeletedGCRoot)
                     containerDescription = "gcroot-deleted";
-                GCLog("0x%p(%x)(%s) -> 0x%p\n", displayContainer, offset, containerDescription, p);
+                GCLog("%p(%p)(%s) -> %p\n", displayContainer, offset, containerDescription, p);
                 if(container) {
                     PrintAllocStackTrace(container);
                     dumpBackPointerChainHelper(container, g);
@@ -3898,7 +3907,10 @@ namespace MMgc
         if(newValue) {
             addresses = (GCHashtable*)backEdges.get(newValue);
             if(!addresses) {
-                addresses = mmfx_new(GCHashtable());
+                // Use system memory to avoid profiling diagnostic
+                // data, having memory profiling and heap graph on
+                // takes forver to complete otherwise on some tests.
+                addresses = system_new(GCHashtable());
                 backEdges.put(newValue, addresses);
             }
             addresses->add(addr, addr);
@@ -3911,7 +3923,7 @@ namespace MMgc
         const void *key;
         while((key = iter.nextKey()) != NULL) {
             GCHashtable *addresses = (GCHashtable*)iter.value();
-            mmfx_delete(addresses);
+            system_delete(addresses);
         }
         backEdges.clear();
     }
@@ -4050,6 +4062,68 @@ namespace MMgc
                 return kOffsetFound;
         }
         return kOffsetNotFound;
+    }
+    
+#ifdef MMGC_HEAP_GRAPH
+    bool GC::BackPointerChainStillValid(const void *obj)
+    {
+        bool valid = false;
+        GCHashtable *pointers = markerGraph.getPointers(obj);
+        if(pointers) {
+            GCHashtable::Iterator iter(pointers);
+            void **addr = (void**)iter.nextKey();
+            if(addr) {
+                bool wasDeletedGCRoot=false;
+                const void *container = findGCGraphBeginning(addr, wasDeletedGCRoot);
+                if(Pointer(*addr) == obj)
+                    return BackPointerChainStillValid(container);
+                else
+                    return false;
+            }
+        }
+        return valid;
+    }
+#endif
+
+    void GC::DefRefValidate(RCObject* obj)
+    {
+        if(!GetMark(obj))
+            return;
+
+#ifdef MMGC_HEAP_GRAPH
+        // Its possible that the path that this thing got marked via
+        // is now gone, ie maybe a RCObject dtor deleted it so its
+        // really not reachable.  Avoid asserting on those by checking
+        // the back pointer linkage.
+        if(!BackPointerChainStillValid(obj))
+            return;
+
+        GCLog("Allocation trace:");
+        PrintAllocStackTrace(obj);
+
+#ifdef MMGC_RC_HISTORY
+        obj->DumpHistory();
+#else
+        GCLog("To see the ref count history enable MMGC_RC_HISTORY and MMGC_MEMORY_PROFILER are enabled and set the MMGC_PROFILE env var to 1.");
+#endif
+
+        DumpBackPointerChain(obj);
+        GCAssertMsg(false, "Zero count object reachable from GCRoot, this may indicate a missing write barrier");
+
+#ifndef MMGC_MEMORY_PROFILER
+        GCLog("Make sure MMGC_MEMORY_PROFILER is enabled for more useful diagnostic info.");
+#else
+        if(heap->GetProfiler() == NULL)
+            GCLog("Set the MMGC_PROFILE env var to 1 for better diagnostic information.");
+#endif
+
+#else // MMGC_HEAP_GRAPH
+
+        // Can only warn if we don't have a heap graph since its too
+        // noisy without the BackPointerChainStillValid check.
+        GCLog("Warning: possible ref count problem, turn on AVMTWEAK_HEAP_GRAPH to enable drc validation asserts.");
+
+#endif // !MMGC_HEAP_GRAPH
     }
 
 #endif // DEBUG
