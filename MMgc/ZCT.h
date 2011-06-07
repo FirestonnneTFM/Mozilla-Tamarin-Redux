@@ -57,6 +57,7 @@ namespace MMgc
      */
     class ZCT
     {
+        friend class GC;
     public:
         ZCT();
 
@@ -218,12 +219,8 @@ namespace MMgc
         // Discard the block (return it to the free list).
         void FreeBlock(RCObject** block);
 
-#ifdef _DEBUG
-        // Debugging code that needs to be validated: reference count validation during reaping
-        static void DoSetupDefRefValidation(void* stackTop, void* arg);
-        void FinishDefRefValidation();
-        void DefRefValidate(RCObject* obj);
-#endif // _DEBUG
+        // When adding should pin be cleared or kept?
+        uint32_t KeepPinned();
 
         // Private data
 

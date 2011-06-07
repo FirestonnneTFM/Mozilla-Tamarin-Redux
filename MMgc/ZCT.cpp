@@ -254,7 +254,7 @@ namespace MMgc
 
         if (slowState && slowTop < slowLimit) {
             *slowTop++ = obj;
-            obj->setZCTIndexAndMaybeUnpin(slowTopIndex++, uint32_t(reaping));
+            obj->setZCTIndexAndMaybeUnpin(slowTopIndex++, KeepPinned());
             return;
         }
 
@@ -322,6 +322,11 @@ namespace MMgc
         if (reaping || topIndex == 0)
             return;
 
+#ifdef _DEBUG
+        if (gc->validateDefRef)
+            gc->DRCValidationTrace(scanStack);
+#endif
+
         reaping = true;
         gc->policy.signal(GCPolicyManager::START_ReapZCT);
         SAMPLE_FRAME("[reap]", gc->core());
@@ -345,17 +350,18 @@ namespace MMgc
         //
         // For some generally difficult problems around pinning see bugzilla #506644.
 
-        if (scanStack)
-            VMPI_callWithRegistersSaved(ZCT::DoPinProgramStack, this);
+        if (scanStack) {
+#ifdef DEBUG
+            // During DRC validation stack scanning happened already.
+            // See GC::DRCValidationTrace().
+            if(!gc->validateDefRef)
+#endif
+                VMPI_callWithRegistersSaved(ZCT::DoPinProgramStack, this);
+        }
         PinRootSegments();
 
         // Invoke prereap on all callbacks
         gc->DoPreReapCallbacks();
-
-#ifdef _DEBUG
-        if (gc->validateDefRef)
-            VMPI_callWithRegistersSaved(ZCT::DoSetupDefRefValidation, this);
-#endif
 
         // We perform depth-first reaping using the ZCT as a stack.
         //
@@ -406,6 +412,11 @@ namespace MMgc
         }
         UsePinningMemory();
 
+#ifdef DEBUG
+        if(gc->validateDefRef)
+            gc->AbortInProgressMarking();
+#endif
+
         // Invoke postreap on all callbacks
         gc->DoPostReapCallbacks();
 
@@ -431,8 +442,6 @@ namespace MMgc
                 GCAssert(!Get(i)->IsPinned());
             }
         }
-        if (gc->validateDefRef)
-            FinishDefRefValidation();
 #endif
 
 #ifdef MMGC_POLICY_PROFILING
@@ -544,9 +553,9 @@ namespace MMgc
     REALLY_INLINE void ZCT::ReapObject(RCObject* obj)
     {
         obj->ClearZCTFlag();
-#ifdef _DEBUG
+#ifdef DEBUG
         if (gc->validateDefRef)
-            DefRefValidate(obj);
+            gc->DefRefValidate(obj);
 #endif
         // Invoke prereap on all callbacks.
         // FIXME: This is fairly wasteful and it would be good to be rid of it.
@@ -559,34 +568,6 @@ namespace MMgc
 
         GCAssert(gc->weakRefs.get(obj) == NULL);
     }
-
-#ifdef _DEBUG
-    // FIXME: document the purpose & mechanisms of DefRef validation
-
-    /*static*/
-    void ZCT::DoSetupDefRefValidation(void* stackPointer, void* arg)
-    {
-        ZCT* zct = (ZCT*)arg;
-        GC* gc = zct->gc;
-        char* stackBase = (char*)gc->GetStackTop();
-        gc->Trace(stackPointer, uint32_t(stackBase - (char*)stackPointer));
-    }
-
-    void ZCT::FinishDefRefValidation()
-    {
-        gc->Sweep();
-    }
-
-    void ZCT::DefRefValidate(RCObject* obj)
-    {
-        if(!gc->GetMark(obj))
-            return;
-#ifdef MMGC_RC_HISTORY
-        obj->DumpHistory();
-#endif
-        GCAssertMsg(false, "Zero count object reachable, ref counts not correct!");
-    }
-#endif // _DEBUG
 
     /*static*/
     void ZCT::DoPinProgramStack(void* stackPointer, void* arg)

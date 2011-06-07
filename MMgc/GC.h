@@ -549,11 +549,11 @@ namespace MMgc
          */
         bool findUnmarkedPointers;
 
+#ifdef DEBUG
         /**
          * validateDefRef is a debugging flag.  It turns on code that does a
          * trace before reaping zero count object and asserting on any objects
-         * that get marked.  Significant space cost.  (The flag is available
-         * in release builds but effective in debug builds only.)
+         * that get marked.  Significant space cost. 
          */
         bool validateDefRef;
 
@@ -565,6 +565,7 @@ namespace MMgc
          * in release builds but effective in debug builds only.)
          */
         bool keepDRCHistory;
+#endif
 
         bool dontAddToZCTDuringCollection;
         bool incrementalValidation;
@@ -1445,6 +1446,12 @@ namespace MMgc
         bool collecting;
 
         /**
+         * True if a pre-Reap validation trace is underway to find
+         * reachable zero count objects.
+         */
+        bool performingDRCValidationTrace;
+
+        /**
          * True during the sweep phase of collection, while we're calling presweep
          * callbacks.  We use this to implement the read barrier in GCWeakRef::get,
          * when a presweep resurrects an unmarked object.
@@ -1576,18 +1583,11 @@ namespace MMgc
 #endif
         void ClearMarks();
 
-#ifdef _DEBUG
-    public:
+#ifdef DEBUG
         /**
-         * Kill any incremental mark in progress, then trace from roots and stack.  If
-         * stackStart/stackSize are NULL/0 then the thread stack is obtained and used.
-         *
-         * It's sometimes useful for mutator to call this; the ZCT reaper uses it for
-         * validating the heap.
-         *
-         * @return   true if it succeeded, false if there was a mark stack overflow.
+         * Do a full GC mark phase for DRC validation purposes.
          */
-        bool Trace(const void *stackStart=NULL, uint32_t stackSize=0);
+        void DRCValidationTrace(bool scanStack=true);
 #endif
 
     private:
@@ -1607,6 +1607,7 @@ namespace MMgc
         void SplitItem_ConservativeOrNonGCObject(const void* object, uint32_t& size, GCMarkStack::TypeTag type, const void* baseptr);
         void EstablishSweepInvariants();
         void ClearMarkStack();
+        void AbortInProgressMarking();
 
         static void DoCleanStack(void* stackPointer, void* arg);
         static void DoMarkFromStack(void* stackPointer, void* arg);
@@ -1898,6 +1899,8 @@ public:
 
         void addToBlacklist(const void *gcptr);
         void removeFromBlacklist(const void *gcptr);
+        // Public utility to dump against marker graph.
+        void DumpBackPointerChain(const void *gcptr);
 
     private:
 
@@ -1914,6 +1917,11 @@ public:
 #endif
 
 #ifdef DEBUG
+
+        // Debugging code that validates reference count during reaping.
+        void DefRefValidate(RCObject* obj);
+        bool BackPointerChainStillValid(const void *obj);
+
     public:
 
         // Called by generated tracer checking code.
