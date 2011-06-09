@@ -48,7 +48,7 @@
 . ../all/util-calculate-change.sh $1
 
 # silence output if silent=true (function defined in environment.sh)
-logfile=verify_tracers.log
+logfile=verify_tracers_${shell_release}.log
 beginSilent
 
 ##
@@ -69,6 +69,7 @@ if [ "$res" != "0" ]; then
     echo ""
     echo "Cross-compile check failed - cannot build exactgc tracers on $platform platform"
     echo ""
+    endSilent
     exit 0
 else
     # The verify-generated.sh script has a common function called by this script and verify_builtinabc.sh
