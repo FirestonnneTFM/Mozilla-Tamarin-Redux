@@ -47,7 +47,13 @@ then
         change=`hg identify -n | awk -F+ '{print $1}'`
         echo "change number not passed using tip: $change"
         changeid=`hg log -r $change | head -n 1 | awk -F: '{print $3}'`
-        
+
+    # Check to see if just a hash was passed in, do this naively by checking length
+    elif [ "${#1}" == 12  ]; then
+        changeid=$1
+        change=`hg log -r $changeid | head -n 1 | awk '{print $2}'|awk -F: '{print $1}'`
+        echo "changeid hash passed in: $changeid"
+
     # only revision passed in
     elif [ "$withhash" == ""  ]; then
         if [ "$1" == "tip" ]; then
@@ -57,7 +63,7 @@ then
         fi
         echo "change number passed: $change"
         changeid=`hg log -r $change | head -n 1 | awk -F: '{print $3}'`
-    
+
     # revision and changeid passed in
     else
         change=${1%:*}
