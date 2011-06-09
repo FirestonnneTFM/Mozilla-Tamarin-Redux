@@ -43,7 +43,7 @@
 . ./environment.sh
 
 # silence output if silent=true (function defined in environment.sh)
-logfile=verify_builtinabc.log
+logfile=verify_builtinabc_${shell_release}.log
 beginSilent
 
 ##

@@ -88,12 +88,19 @@ function verify_generated_files () {
         test -f $basedir/build/buildbot/slaves/scripts/$file".diff" && {
             rm $basedir/build/buildbot/slaves/scripts/$file".diff"
         }
-        diff generated/$file generated/$file.orig
-        diff generated/$file generated/$file.orig > $basedir/build/buildbot/slaves/scripts/$file.diff
+        
+        tr -d '\r' < generated/$file > generated/difftemp
+        tr -d '\r' < generated/$file.orig > generated/difftemp.orig
+        
+        diff generated/difftemp generated/difftemp.orig
+        diff generated/difftemp generated/difftemp.orig > $basedir/build/buildbot/slaves/scripts/$file.diff
+        
+        rm generated/difftemp
+        rm generated/difftemp.orig
         
         # If the diff file is > 0 bytes fire a warning
         if [ -s $basedir/build/buildbot/slaves/scripts/$file.diff ]; then
-            echo "buildbot status: WARNINGS Diff found between generated/$file.orig and generated/$file. See $basedir/build/buildbot/slaves/scripts/$file.diff"
+            echo "buildbot_status: WARNINGS"
         fi
     done
     
