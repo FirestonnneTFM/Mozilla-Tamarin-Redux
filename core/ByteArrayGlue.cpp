@@ -119,7 +119,7 @@ namespace avmplus
         SetCopyOnWriteOwner(owner);
     }
         
-    void FASTCALL ByteArray::Grower::EnsureWritableCapacity(uint64_t minimumCapacity)
+    void FASTCALL ByteArray::Grower::EnsureWritableCapacity(uint32_t minimumCapacity)
     {
         if (minimumCapacity > (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2))
             m_owner->ThrowMemoryError();
