@@ -49,6 +49,7 @@ INCLUDES += \
   -I$(topsrcdir)/VMPI \
   -I$(topsrcdir)/vmbase \
   -I$(topsrcdir)/generated \
+  -I$(topsrcdir)/aot \
   $(NULL)
 
 $(call RECURSE_DIRS,other-licenses/zlib)
@@ -58,6 +59,9 @@ $(call RECURSE_DIRS,MMgc)
 
 ifdef ENABLE_TAMARIN
 $(call RECURSE_DIRS,core pcre vprof)
+ifeq (1,$(ENABLE_AOT))
+$(call RECURSE_DIRS,aot)
+endif
 ifeq (sparc,$(TARGET_CPU))
 $(call RECURSE_DIRS,nanojit)
 endif

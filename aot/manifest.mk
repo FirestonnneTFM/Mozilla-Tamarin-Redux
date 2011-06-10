@@ -1053,10 +1053,10 @@ aotstubs_BUILD_ALL = 1
 aotstubs_CXXSRCS := $(stubcpps)
 aotstubs_EXTRA_CXXFLAGS := -Wno-sign-compare
 
-$(curdir)/dummy.cpp: $(topsrcdir)/aot/aotstubs.py $(topsrcdir)/aot/aotstubs.pickle
+$(curdir)/dummy.cpp: $(topsrcdir)/aot/AOTStubs.py $(topsrcdir)/aot/aotstubs.pickle
 	@echo "Generating AOT stubs..."
 	@mkdir -p aot
-	@cd aot && python $(topsrcdir)/aot/AOTStubs.py --numstubheaders $(numstubs) --picklefile $(topsrcdir)/aot/aotstubs.pickle
+	@cd aot && python ../$(topsrcdir)/aot/AOTStubs.py --numstubheaders $(numstubs) --picklefile $(topsrcdir)/aot/aotstubs.pickle
 	@touch $(curdir)/aot/dummy.cpp
 
 $(stubcpps): $(curdir)/dummy.cpp
