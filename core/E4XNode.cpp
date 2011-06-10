@@ -304,7 +304,7 @@ namespace avmplus
 
         // step 2b + 2c
         int index = -1;
-        for (uint32_t i = 0; i < numNamespaces(); i++)
+        for (unsigned int i = 0, nn = numNamespaces(); i < nn; i++)
         {
             Namespace *ns2 = getNamespaces()->list.get(i);
             if (ns2->getPrefix() == ns->getPrefix())
@@ -340,7 +340,7 @@ namespace avmplus
         // for all attributes
         // if their nodes prefix == n.prefix
         //     set the node prefix to undefined
-        for (unsigned int i = 0; i < numAttributes(); i++)
+        for (unsigned int i = 0, na = numAttributes(); i < na; i++)
         {
             E4XNode *curAttr = m_attributes->list.get(i);
             Multiname ma;
@@ -356,7 +356,7 @@ namespace avmplus
 
     int E4XNode::FindMatchingNamespace (AvmCore *core, Namespace *ns)
     {
-        for (uint32_t i = 0; i < numNamespaces(); i++)
+        for (unsigned int i = 0, nn = numNamespaces(); i < nn; i++)
         {
             Namespace *ns2 = getNamespaces()->list.get(i);
             if (ns2->getURI() == ns->getURI())
@@ -399,7 +399,7 @@ namespace avmplus
         E4XNode *y = this;
         while (y)
         {
-            for (uint32_t i = 0; i < y->numNamespaces(); i++)
+            for (unsigned int i = 0, nn = y->numNamespaces(); i < nn; i++)
             {
                 Namespace *ns = y->getNamespaces()->list.get(i);
                 if (((prefix == core->kEmptyString) && !ns->hasPrefix()) ||
@@ -431,7 +431,7 @@ namespace avmplus
         const E4XNode *y = this;
         while (y)
         {
-            for (uint32_t i = 0; i < y->numNamespaces(); i++)
+            for (unsigned int i = 0, nn = y->numNamespaces(); i < nn; i++)
             {
                 Namespace *ns1 = y->getNamespaces()->list.get(i);
                 uint32_t j;
@@ -557,7 +557,7 @@ namespace avmplus
 
             Multiname m2;
             attrObj->getQName(&m2, publicNS);
-            for (unsigned int i = 0; i < numAttributes(); i++)
+            for (unsigned int i = 0, na = numAttributes(); i < na; i++)
             {
                 E4XNode *curAttr = m_attributes->list.get(i);
                 Multiname m;
@@ -631,22 +631,24 @@ namespace avmplus
             ElementE4XNode *y = (ElementE4XNode *) x;
 
             // step 2 - for each ns in inScopeNamespaces
-            if (numNamespaces())
+            unsigned int nn = numNamespaces();
+            if (nn)
             {
-                y->m_namespaces = HeapNamespaceList::create(core->GetGC(), numNamespaces());
+                y->m_namespaces = HeapNamespaceList::create(core->GetGC(), nn);
                 uint32_t i;
-                for (i = 0; i < numNamespaces(); i++)
+                for (i = 0; i < nn; i++)
                 {
                     y->m_namespaces->list.add(getNamespaces()->list.get(i));
                 }
             }
 
             // step 3 - duplicate attribute nodes
-            if (numAttributes())
+            unsigned int na = numAttributes();
+            if (na)
             {
-                y->m_attributes = HeapE4XNodeList::create(core->GetGC(), numAttributes());
+                y->m_attributes = HeapE4XNodeList::create(core->GetGC(), na);
                 uint32_t i;
-                for (i = 0; i < numAttributes(); i++)
+                for (i = 0; i < na; i++)
                 {
                     E4XNode *ax = getAttribute (i);
                     E4XNode *bx = ax->_deepCopy(core, toplevel, publicNS);
@@ -757,11 +759,11 @@ namespace avmplus
         // step 8
         // for each a in x.attributes
         // if v does not containing matching attribute, return failure
-        for (uint32_t k1 = 0; k1 < numAttributes(); k1++)
+        for (uint32_t k1 = 0, na1 = numAttributes(); k1 < na1; k1++)
         {
             E4XNode *x1 = getAttribute(k1);
             bool bFoundMatch = false;
-            for (uint32_t k2 = 0; k2 < v->numAttributes(); k2++)
+            for (uint32_t k2 = 0, na2 = v->numAttributes(); k2 < na2; k2++)
             {
                 if (x1->_equals(toplevel, core, v->getAttribute(k2)))
                 {
@@ -1117,13 +1119,13 @@ namespace avmplus
 
         uint64_t size = E4XNode::bytesUsedDown();
 
-        for (uint32_t i=0, n=numNamespaces(); i<n; i++)
+        for (uint32_t i=0, nn=numNamespaces(); i<nn; i++)
         {
             Namespace *ns1 = getNamespaces()->list.get(i);
             size += ns1->bytesUsedDeep();
         }
 
-        for (uint32_t i=0, n=numAttributes(); i<n; ++i)
+        for (uint32_t i=0, na=numAttributes(); i<na; ++i)
             size += getAttribute(i)->bytesUsedDown();
 
         for (uint32_t i=0, n=_length(); i<n; ++i)
