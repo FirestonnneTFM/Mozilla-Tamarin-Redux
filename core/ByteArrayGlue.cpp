@@ -84,7 +84,9 @@ namespace avmplus
     {
         if (m_array && !IsCopyOnWrite())
         {
-            TellGcDeleteBufferMemory(m_array, m_length);
+            AvmAssert(m_capacity > 0);
+            // Note that TellGcXXX always expects capacity, not (logical) length.
+            TellGcDeleteBufferMemory(m_array, m_capacity);
             mmfx_delete_array(m_array);
         }
         m_array             = NULL;
@@ -139,6 +141,7 @@ namespace avmplus
             if (!newArray)
                 m_owner->ThrowMemoryError();
 
+            // Note that TellGcXXX always expects capacity, not (logical) length.
             m_owner->TellGcNewBufferMemory(newArray, newCapacity);
             if (m_oldArray)
                 VMPI_memcpy(newArray, m_oldArray, m_oldLength);
@@ -181,7 +184,8 @@ namespace avmplus
         // m_oldArray could be NULL if we grew a copy-on-write ByteArray.
         if (m_oldArray != NULL && m_oldArray != m_owner->m_array)
         {
-            m_owner->TellGcDeleteBufferMemory(m_oldArray, m_oldLength);
+            // Note that TellGcXXX always expects capacity, not (logical) length.
+            m_owner->TellGcDeleteBufferMemory(m_oldArray, m_oldCapacity);
             mmfx_delete_array(m_oldArray);
         }
     }
@@ -336,6 +340,7 @@ namespace avmplus
         // (remember, existing data might be copy-on-write so don't dance on it)
         uint8_t* origData                       = m_array;
         uint32_t origLen                        = m_length;
+        uint32_t origCap                        = m_capacity;
         MMgc::GCObject* origCopyOnWriteOwner    = m_copyOnWriteOwner;
         if (!origLen) // empty buffer should give empty result
             return;
@@ -392,7 +397,8 @@ namespace avmplus
         // to avoid breaking content that relies on misbehavior.)
         if (origData && origData != m_array && origCopyOnWriteOwner == NULL)
         {
-            TellGcDeleteBufferMemory(origData, origLen);
+            // Note that TellGcXXX always expects capacity, not (logical) length.
+            TellGcDeleteBufferMemory(origData, origCap);
             mmfx_delete_array(origData);
         }
     }
@@ -448,7 +454,8 @@ namespace avmplus
             // everything is cool
             if (origData && origData != m_array && origCopyOnWriteOwner == NULL)
             {
-                TellGcDeleteBufferMemory(origData, origLen);
+                // Note that TellGcXXX always expects capacity, not (logical) length.
+                TellGcDeleteBufferMemory(origData, origCap);
                 mmfx_delete_array(origData);
             }
 

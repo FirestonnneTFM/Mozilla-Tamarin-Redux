@@ -145,6 +145,7 @@ namespace avmplus
                 : m_owner(owner)
                 , m_oldArray(owner->m_array)
                 , m_oldLength(owner->m_length)
+                , m_oldCapacity(owner->m_capacity)
             {
             }
             void FASTCALL EnsureWritableCapacity(uint32_t minimumCapacity);
@@ -153,6 +154,7 @@ namespace avmplus
             ByteArray*  m_owner;
             uint8_t*    m_oldArray;
             uint32_t    m_oldLength;
+            uint32_t    m_oldCapacity;
         };
 
     private:
