@@ -95,10 +95,11 @@ const ignorePaths =
 
 class LineInfo
 {
-    function LineInfo(_derived, _base, _isExact, _filename, _lineno) {
+    function LineInfo(_derived, _base, _isExact, _extraBases, _filename, _lineno) {
         derived = _derived;
         base = _base;
         isExact = _isExact;
+        extraBases = _extraBases;
         filename = _filename;
         lineno = _lineno;
     }
@@ -110,6 +111,7 @@ class LineInfo
     var derived;            // name of the class being defined
     var base;               // name of its base class
     var isExact;            // true iff the class is exactly traced
+    var extraBases;         // array of base classes beyond 'base' (usually []).
     var filename;           // file where we found the definition of 'derived'
     var lineno;             // line where we found the definition of 'derived'
     var baseref = null;     // reference to the LineInfo for the base class
@@ -142,8 +144,18 @@ function readFiles(argv) {
     var probable_tracers = {};
     var all_lines = [];
     // Hack, hack, hack
-    var re1 = new RegExp("class\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*:.*(?:public|private|virtual)\\s*(?:MMgc\\s*::\\s*)?([A-Za-z0-9_:]+)");
+    // N.B.: ?<! is a negative-look-behind pattern, used here to avoid matching
+    // friend declarations.
+    var re1 = new RegExp("(?<!friend)\\s*class\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*:(?!:)\\s*(?:(?:public|private|virtual)\\s)?\\s*(?:MMgc\\s*::\\s*)?([A-Za-z0-9_:]+)");
     var re2 = new RegExp("class\\s+GC_(?:MANUAL|AS3|CPP)_EXACT(?:[A-Z_]+)?\\(([^,\\)]+)\\s*,\\s*([^,\\)]+)");
+    var re_inheritance_line =
+        new RegExp("class\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*:(.*)");
+    var re_first_base_class =
+        new RegExp("\\s*(?:(?:public|private|virtual)\\s)?\\s*(?:MMgc\\s*::\\s*)?([A-Za-z0-9_:]+)\\s*(.*)");
+    var re_next_base_class =
+        new RegExp("\\s*,\\s*(?:(?:public|private|virtual)\\s)?\\s*(?:MMgc\\s*::\\s*)?([A-Za-z0-9_:]+)\\s*(.*)");
+    var re_no_next_base_class_on_this_line =
+        new RegExp("\\s*,\\s*(?:(?:public|private|virtual)\\s)?\\s*$");
     var red = new RegExp("~\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\(");
     var red2 = new RegExp("virtual\\s*~\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\(.*\\)\\s*{\\s*}");
     var rtrace = new RegExp("([A-Za-z0-9_]+)\\s*::\\s*gcTrace");
@@ -218,9 +230,31 @@ function readFiles(argv) {
                 else if ((result = l.match(re1)) != null)
                     found = 1;
                 if (found) {
-                    var derived = result[1];
-                    var base = stripNamespaces(result[2]);
-                    all_lines.push(new LineInfo(derived,base,found==2,fn,i+1));
+                    var first_base;
+                    var derived;
+                    var extra_bases = [];
+                    if (found == 2) {
+                        derived = result[1];
+                        first_base = result[2]
+                    } else if (found == 1) {
+                        result = l.match(re_inheritance_line);
+                        derived = result[1];
+                        var bases_text = result[2];
+                        result = bases_text.match(re_first_base_class);
+                        var first_base = result[1];
+                        bases_text = result[2];
+                        while (result = bases_text.match(re_next_base_class)) {
+                            extra_bases.push(stripNamespaces(result[1]));
+                            bases_text = result[2];
+                        }
+                        if (bases_text.match(re_no_next_base_class_on_this_line)) {
+                            print(fn+":"+(i+1)+" WARNING: base class list of "+
+                                  derived+" has trailing comma without name.");
+                            // throw new Error("trailing comma without name.");
+                        }
+                    }
+                    var base = stripNamespaces(first_base);
+                    all_lines.push(new LineInfo(derived,base,found==2,extra_bases, fn,i+1));
                 }
             }
             else if (!ignore && l.indexOf("~") != -1) {
@@ -260,25 +294,30 @@ function processQueue(lines) {
     var classes = {};   // Map of classes processed or in queue to their LineInfo
 
     queue.push(rootclass);
-    classes[rootclass] = new LineInfo(rootclass, "", false, "(internal)", 0); // synthetic
+    classes[rootclass] = new LineInfo(rootclass, "", false, [], "(internal)", 0); // synthetic
 
     while (queue.length > 0) {
         var cls = queue.shift();
         for ( var l=0 ; l < lines.length ; l++ ) {
             var ln = lines[l];
-            if (classes.hasOwnProperty(ln.base)) {
-                if (!classes.hasOwnProperty(ln.derived)) {
-                    var basecls = classes[ln.base];
-                    ln.baseref = basecls;
-                    basecls.subrefs.push(ln);
-                    classes[ln.derived] = ln;
-                    ln.defcount = 1;
-                    queue.push(ln.derived);
-                }
-                else {
-                    // Flag it as used, but it's not canonical because
-                    // it's not in the classes table.
-                    ln.defcount = 1;
+            var baseNames = [ln.base];
+            baseNames = baseNames.concat(ln.extraBases);
+            for ( var b=0; b < baseNames.length ; b++ ) {
+                var baseName = baseNames[b];
+                if (classes.hasOwnProperty(baseName)) {
+                    if (!classes.hasOwnProperty(ln.derived)) {
+                        var basecls = classes[baseName];
+                        ln.baseref = basecls;
+                        basecls.subrefs.push(ln);
+                        classes[ln.derived] = ln;
+                        ln.defcount = 1;
+                        queue.push(ln.derived);
+                    }
+                    else {
+                        // Flag it as used, but it's not canonical because
+                        // it's not in the classes table.
+                        ln.defcount = 1;
+                    }
                 }
             }
         }
@@ -315,6 +354,7 @@ function printClasses(classes) {
     print("  E - at least one of the definitions is exactly traced");
     print("  M - multiple definitions in the tree (in different namespaces or nested within classes)");
     print("  # - continuation line for M with additional locations");
+    print("  m - at least one of the definitions has > 1 base.");
     print("  X - definitions of the same name exist outside the tree");
     print("  @ - continuation line for @ with locations");
     print("");
@@ -330,17 +370,17 @@ function printClasses(classes) {
             classcount++;
             if (cls.destructor) destructors++;
             if (cls.isExact) exacts++;
-            var d = " " + (cls.destructor ? "D" : " ") + (cls.isExact ? "E" : " ") + (cls.defcount > 1 ? "M" : " ") + (cls.external ? "X" : " ") + "  ";
+            var d = " " + (cls.destructor ? "D" : " ") + (cls.isExact ? "E" : " ") + (cls.extraBases.length > 0 ? "m" : " ") + (cls.defcount > 1 ? "M" : " ") + (cls.external ? "X" : " ") + "  ";
             print(d + padTo50(spaces(indent) + cls.derived) + " " + cls.filename + ":" + cls.lineno);
             if (cls.defcount > 1) {
                 var locs = cls.otherlines;
                 for ( var l=0 ; l < locs.length ; l++ )
-                    print("   #    " + padTo50("") + locs[l].filename + ":" + locs[l].lineno);
+                    print("    #    " + padTo50("") + locs[l].filename + ":" + locs[l].lineno);
             }
             if (cls.external) {
                 var locs = cls.exolines;
                 for ( var l=0 ; l < locs.length ; l++ )
-                    print("    @   " + padTo50("") + locs[l].filename + ":" + locs[l].lineno);
+                    print("     @   " + padTo50("") + locs[l].filename + ":" + locs[l].lineno);
             }
         }
         cls.subrefs.sort(function (a,b) { return strcmp(a.derived, b.derived); })
