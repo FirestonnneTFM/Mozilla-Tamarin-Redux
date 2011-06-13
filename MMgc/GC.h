@@ -1692,6 +1692,10 @@ namespace MMgc
          * unlock it n times - call UnlockObject on all the returned locks - to make it collectable
          * again.  Each lock returned is distinct and becomes an invalid object reference the moment
          * it is unlocked.
+         *
+         * GCObjectLock is an opaque type that should be treated like
+         * an unmanaged pointer, no write barriers are needed and they
+         * can be stored anywhere.
          */
         GCObjectLock* LockObject(const void* obj);
 
