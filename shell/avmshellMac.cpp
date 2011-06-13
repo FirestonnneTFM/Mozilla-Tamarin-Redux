@@ -104,7 +104,7 @@ avmshell::Platform* avmshell::Platform::GetInstance()
 int main(int argc, char *argv[])
 {
 #ifdef VMCFG_MACH_EXCEPTIONS
-    GenericGuard::staticInit();
+    avmplus::GenericGuard::staticInit();
 #endif
 
     char* dummy;
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
         write(1, "OUT OF MEMORY\n", 14);
 
 #ifdef VMCFG_MACH_EXCEPTIONS
-    GenericGuard::staticDestroy();
+    avmplus::GenericGuard::staticDestroy();
 #endif
 
     return code;
