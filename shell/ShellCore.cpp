@@ -163,7 +163,7 @@ namespace avmshell
     {
         shell_domain = avmplus::Domain::newDomain(this, builtinDomain);
 #ifdef VMCFG_AOT
-        NativeInitializer shellNInit(this,
+        avmplus::NativeInitializer shellNInit(this,
             avmplus::NativeID::shell_toplevel_versioned_uris,
             &shell_toplevel_aotInfo,
             avmplus::NativeID::shell_toplevel_abc_method_count,
@@ -502,7 +502,7 @@ namespace avmshell
     int ShellCore::evaluateFile(ShellCoreSettings& settings, const char* filename)
     {
 #ifdef VMCFG_AOT
-        ScriptBuffer dummyScriptBuffer;
+        avmplus::ScriptBuffer dummyScriptBuffer;
         return handleArbitraryExecutableContent(settings, dummyScriptBuffer, NULL);
 #endif
 
