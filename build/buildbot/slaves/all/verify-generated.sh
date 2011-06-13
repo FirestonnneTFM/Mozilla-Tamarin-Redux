@@ -42,6 +42,8 @@ echo basedir=$basedir
 ## This function is called by verify_builtinabc.sh and verify_tracers.sh
 function verify_generated_files () {
 
+    export LC_ALL=
+    
     ##
     # Backup the generated files
     ##
@@ -116,5 +118,7 @@ function verify_generated_files () {
             touch $file
         fi
     done
+    
+    export LC_ALL=
 }
 
