@@ -42,7 +42,7 @@ echo basedir=$basedir
 ## This function is called by verify_builtinabc.sh and verify_tracers.sh
 function verify_generated_files () {
 
-    export LC_ALL=
+    export LC_ALL=C
     
     ##
     # Backup the generated files
@@ -53,6 +53,8 @@ function verify_generated_files () {
         # The python scripts that build the files are expecting a specific list of files so fail here if one is missing.    
         if [ ! -e "$file" ]; then       
             echo "Expected file $file does not exist."; echo
+            endSilent
+            export LC_ALL=
             exit 1
         else
             mv $file $file".orig"
@@ -78,6 +80,7 @@ function verify_generated_files () {
             fi
         done
         endSilent
+        export LC_ALL=
         exit 1        
     }
     
