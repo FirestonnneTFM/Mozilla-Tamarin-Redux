@@ -285,7 +285,6 @@ namespace MMgc
         VALGRIND_DESTROY_MEMPOOL(b);
     }
 
-#ifdef DEBUG
     bool FixedAlloc::QueryOwnsObject(const void* item)
     {
         const char* ci = (const char*) item;
@@ -294,7 +293,6 @@ namespace MMgc
                 return true;
         return false;
     }
-#endif
 
 #ifdef MMGC_MEMORY_INFO
     /* static */
@@ -362,7 +360,6 @@ namespace MMgc
         FixedMalloc::GetFixedMalloc()->OutOfLineFree(item);
     }
 
-#ifdef MMGC_HEAP_GRAPH
     /*static*/
     const void *FixedAlloc::FindBeginning(const void *addr)
     {
@@ -372,10 +369,9 @@ namespace MMgc
         while(itemNum++ < b->alloc->m_itemsPerBlock) {
             char *next = mem + b->alloc->m_itemSize;
             if(addr >= mem && addr < next)
-                return mem;
+                return GetUserPointer(mem);
             mem = next;
         }
         return NULL;
     }
-#endif
 }

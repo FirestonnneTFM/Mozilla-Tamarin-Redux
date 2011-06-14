@@ -223,6 +223,38 @@ namespace MMgc
 #endif // !AVMPLUS_SAMPLER
 #endif // DEBUG
 
+        // Find the beginning of an object into which 'addr' points.
+        //
+        // The addr /must/ point into a FixedMalloc-managed block, but
+        // it could point into freed storage, or an address that does
+        // not belong to any actual object.
+        //
+        // Return an object pointer if the pointer is into some object
+        // in the block (could be a free object), NULL otherwise.
+        //
+        // @see FixedMalloc::FindBeginningAndSize
+        // @see FixedAlloc::FindBeginning
+        const void* FindBeginning(const void *addr);
+
+        // Finds beginning + size of object into which 'addr' points.
+        //
+        // The addr /must/ point into a FixedMalloc-managed block, but
+        // it could point into freed storage, or an address that does
+        // not belong to any actual object.
+        //
+        // If 'addr' points into a (potentially freed) object, then
+        // sets begin_recv and size_recv respectively to the beginning
+        // address and size of the object, and returns true.
+        //
+        // If 'addr' does not point into an object in a FixedMalloc-
+        // managed block, then leaves the recv parameters unchanged,
+        // and returns false.
+        //
+        // @see FixedMalloc::FindBeginning
+        // @see FixedAlloc::FindBeginning
+        bool FindBeginningAndSize(const void* addr,
+                                  const void* &begin_recv, size_t &size_recv);
+
         // Return a thread-safe allocator for objects of the given size.
         FixedAllocSafe* FindAllocatorForSize(size_t size);
 
