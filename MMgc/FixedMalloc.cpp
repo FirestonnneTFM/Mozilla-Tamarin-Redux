@@ -308,6 +308,58 @@ namespace MMgc
     }
 #endif
 
+    const void* FixedMalloc::FindBeginning(const void *addr)
+    {
+        const void* begin_recv;
+        size_t size_recv;
+        if (FindBeginningAndSize(addr, begin_recv, size_recv))
+            return begin_recv;
+        else
+            return NULL;
+    }
+
+    bool FixedMalloc::FindBeginningAndSize(const void* addr,
+                                           const void* &begin_recv,
+                                           size_t &size_recv)
+    {
+        const void* obj;
+        size_t sz;
+
+        // Only reliable way to identify small objects is to traverse
+        // the m_allocs array (see Bugzilla 663386).
+        for (int i=0; i<kNumSizeClasses; i++) {
+            if (m_allocs[i].QueryOwnsObject(addr)) {
+                obj = FixedAlloc::FindBeginning(addr);
+                GCAssert(obj != NULL);
+                size_recv = m_allocs[i].GetItemSize();
+
+                // The below assertion currently fails in Debugger
+                // builds because FixedAlloc::Size does not discount
+                // out DebugSize() while GetItemSize does.  What
+                // *should* FixedAlloc::Size do?  How is it used?
+                //GCAssert(size_recv == FixedAlloc::Size(obj));
+
+                begin_recv = obj;
+                return true;
+            }
+        }
+
+        // if its not small, then it must be large (if its any object at all).
+        GCHeap::HeapBlock *b = m_heap->InteriorAddrToBlock(addr);
+        if (b && b->inUse()) {
+            GCAssert(b->size >= 1);
+            obj = GetUserPointer(b->baseAddr);
+            sz = LargeSize(obj);
+            sz = sz - DebugSize();
+
+            size_recv = sz;
+            begin_recv = obj;
+            return true;
+        }
+
+        return false;
+    }
+
 #ifdef DEBUG
     // If EnsureFixedMallocMemory returns and fixed-memory checking has not
     // been disabled then item was definitely allocated by an allocator owned

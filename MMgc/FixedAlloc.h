@@ -172,7 +172,6 @@ namespace MMgc
         // Return the size of any item allocated by FixedAlloc.
         static size_t Size(const void *item);
         
-#ifdef MMGC_HEAP_GRAPH
         // Find the beginning of an object into which 'addr' points.
         //
         // Addr /must/ point into a block currently managed by a FixedAlloc
@@ -182,10 +181,9 @@ namespace MMgc
         // Return an object pointer if the pointer is into some object in the
         // block (could be a free object), NULL otherwise.
         //
-        // This API is used by the back pointer facility to find the beginning
-        // of a GCRoot.
+        // In addition to DEBUG uses, the facility is used to find the
+        // beginning of GCRoots (Bugzilla 664137).
         static const void *FindBeginning(const void *addr);
-#endif
 
 #ifdef MMGC_MEMORY_INFO
         // Go through every item on the free list and make sure it wasn't written to
@@ -238,12 +236,10 @@ namespace MMgc
         void InlineAllocHook(size_t size, void *item);
 #endif
 
-#ifdef DEBUG
         // Query whether 'addr' points into memory controlled by this allocator.
         // The object identified could be free.  'addr' can be any address, it
         // does not need to point into a FixedBlock, for example.
         bool QueryOwnsObject(const void* addr);
-#endif
         
         // Return true iff there are no free items in the block 'b'.
         bool IsFull(FixedBlock *b) const;
