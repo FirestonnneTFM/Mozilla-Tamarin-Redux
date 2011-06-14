@@ -364,7 +364,7 @@ namespace MMgc
     {
         MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
         GCAssert((uintptr_t(item) & (kBlockSize-1)) == 0);
-        HeapBlock *block = AddrToBlock(item);
+        HeapBlock *block = BaseAddrToBlock(item);
         if(block)
             return block->size;
         else if(AddrToRegion(item))

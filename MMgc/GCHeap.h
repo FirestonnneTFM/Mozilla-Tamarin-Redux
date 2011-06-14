@@ -881,7 +881,8 @@ namespace MMgc
 
         void Commit(HeapBlock *block);
 
-        HeapBlock *AddrToBlock(const void *item) const;
+        HeapBlock *InteriorAddrToBlock(const void *item) const;
+        HeapBlock *BaseAddrToBlock(const void *item) const;
         Region *AddrToRegion(const void *item) const;
         void RemoveRegion(Region *r, bool release=true);
 
