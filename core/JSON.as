@@ -54,6 +54,15 @@ package
 {
 
     include "api-versions.as"
+    /**
+    * The JSON class lets developers import and export data to and from JavaScript Object Notation (JSON) format. JSON is an industry standard data-interchange
+    * format that is described at <a href="http://www.json.org">http://www.json.org</a>.
+    * 
+    * <p>This class supports most ActionScript classes. ActionScript classes that do not support JSON typically return their class name as a string.</p>
+    * @playerversion Flash 11
+    * @playerversion AIR 3.0
+    * @langversion 3.0
+    */
 
     [API(CONFIG::SWF_13)]
     [native(cls="JSONClass", classgc="exact", methods="auto", construct="none")]
@@ -71,6 +80,37 @@ package
                                                      replacerFunction:Function,
                                                      gap:String):String;
 
+        /**
+        * Accepts a JSON-formatted String and returns an Actionscript Object that represents that value. JSON objects, 
+        * arrays, strings, numbers, booleans, and null map to corresponding Actionscript values, as shown below:
+        * <p>
+        * <table class="innertable">
+        * <tr><th>JSON type</th><th>ActionScript type</th></tr>
+        * <tr><td>array</td><td>Array</td></tr>
+        * <tr><td>string</td><td>String</td></tr>
+        * <tr><td>number</td><td>Number</td></tr>
+        * <tr><td>boolean</td><td>Boolean</td></tr>
+        * <tr><td>null</td><td>null</td></tr>
+        * </table>
+        * </p>
+        * 
+        * <p>The <code>reviver</code> parameter is a function that takes two parameters: a key and a value. You can use this
+        * function to transform or filter each key/value pair as it is parsed. If you supply a <code>reviver</code> function, your transformed 
+        * or filtered value for each pair, rather than the default parsing, is returned in the <code>parse()</code> function output. If
+        * the <code>reviver</code> function returns <code>undefined</code> for any pair, the property is deleted from the final result.
+        * </p>
+        *
+        * <p>If the <code>parse()</code> function encounters duplicate name strings within the object being parsed, the value of the duplicate 
+        * key encountered last becomes the value for all preceding occurrences of that key.
+        * </p>
+        *
+        * @param text The JSON string to be parsed
+        * @param reviver (Optional) A function that transforms each key/value pair that is parsed
+        (
+        * @playerversion Flash 11
+        * @playerversion AIR 3.0
+        * @langversion 3.0
+        */
         public static function parse(text:String,
                                      reviver:Function = null):Object
         {
@@ -86,6 +126,35 @@ package
             return (new Walker(reviver)).walk({ "": unfiltered }, "");
         }
 
+        /**
+        * Returns a String, in JSON format, that represents an Actionscript value. The <code>stringify</code> method can take three parameters. 
+        * 
+        * <p>The <code>value</code> parameter is required. This parameter is an Actionscript value. Typically, it is an Object or Array, 
+        * but it can also be a String, Boolean, Number, or null.
+        * </p>
+        *
+        * <p>The optional <code>replacer</code> parameter can be either a function or an array of strings or numbers. If it is a function, 
+        * the function takes two parameters: a key and a value. You can use this
+        * function to transform or filter each key/value pair as it is parsed. If you supply a <code>replacer</code> function, your transformed 
+        * or filtered value for each pair, rather than the default parsing, is returned in the <code>parse()</code> function output. If
+        * the <code>replacer</code> function returns <code>undefined</code> for any pair, the property is deleted from the final result. If <code>replacer</code>
+        * is an array, it is used as a filter for designating which properties should be included in the output.
+        * </p>
+        *
+        * <p>The optional <code>space</code> parameter is a String or Number that allows white space to be injected into the returned string to improve human readability. 
+        * Entries in generated JSON objects and JSON arrays are separated by a gap derived from the <code>space</code> parameter. This gap is 
+        * always between 0 and 10 characters wide. If space is a string, then the derived gap is the first ten characters of that string. If space 
+        * is a non-negative number <i>x</i>, then the gap is <i>x</i> space characters, to a maximum of ten spaces.
+        * </p>
+        *
+        * @param value The ActionScript value to be converted into a JSON string
+        * @param replacer (Optional) A function or an array that transforms or filters key/value pairs in the <code>stringify</code> output 
+        * @param space (Optional) A string or number that controls added white space in the returned String
+        *
+        * @playerversion Flash 11
+        * @playerversion AIR 3.0
+        * @langversion 3.0
+        */
         public static function stringify(value:Object,
                                          replacer=null,
                                          space=null):String
