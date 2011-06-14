@@ -1925,7 +1925,7 @@ namespace MMgc
             {
                 // ok so let's see where we are
                 uintptr_t* where = p-1;
-                GCHeap::HeapBlock* block = heap->AddrToBlock(where);
+                GCHeap::HeapBlock* block = heap->InteriorAddrToBlock(where);
                 //GCAssertMsg(block->inUse(), "Not sure how we got here if the block is not in use?");
                 GCAssertMsg(block->committed, "Means we are probing uncommitted memory. not good");
                 int* ptr;
@@ -3890,7 +3890,7 @@ namespace MMgc
             }
 
             // could be a deleted GCRoot
-            GCHeap::HeapBlock *b = heap->AddrToBlock(addr);
+            GCHeap::HeapBlock *b = heap->InteriorAddrToBlock(addr);
             if(b) {
                 wasDeletedGCRoot = true;
                 if(b->inUse()) {

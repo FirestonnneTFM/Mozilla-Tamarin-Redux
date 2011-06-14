@@ -483,7 +483,7 @@ namespace MMgc
         fixedMalloc.DestroyInstance();
         GCAssertMsg(leakedBytes == 0 || GetStatus() == kMemAbort, "Leaks!");
 
-        size_t internalNum = AddrToBlock(blocks)->size + numRegionBlocks;
+        size_t internalNum = BaseAddrToBlock(blocks)->size + numRegionBlocks;
 
         // numAlloc should just be the size of the HeapBlock's space
         if(numAlloc != internalNum && status != kMemAbort)
@@ -716,7 +716,7 @@ namespace MMgc
         bool saved_oomHandling = m_oomHandling;
         m_oomHandling = saved_oomHandling && oomHandling;
 
-        HeapBlock *block = AddrToBlock(item);
+        HeapBlock *block = BaseAddrToBlock(item);
 
         size_t size;
         if(block == NULL) {
@@ -1027,7 +1027,7 @@ namespace MMgc
             char *next = Split(block, numBlocks)->baseAddr;
             // remove it
             RemoveLostBlock(block);
-            block = AddrToBlock(next);
+            block = BaseAddrToBlock(next);
         }
 
         Region *region = AddrToRegion(block->baseAddr);
@@ -1257,7 +1257,7 @@ namespace MMgc
         return NULL;
     }
 
-    GCHeap::HeapBlock* GCHeap::AddrToBlock(const void *item) const
+    GCHeap::HeapBlock* GCHeap::BaseAddrToBlock(const void *item) const
     {
         Region *region = AddrToRegion(item);
         if(region) {
@@ -1265,6 +1265,30 @@ namespace MMgc
                 return NULL;
             size_t index = ((char*)item - region->baseAddr) / kBlockSize;
             HeapBlock *b = blocks + region->blockId + index;
+            GCAssert(item == b->baseAddr);
+            return b;
+        }
+        return NULL;
+    }
+
+    GCHeap::HeapBlock* GCHeap::InteriorAddrToBlock(const void *item) const
+    {
+        Region *region = AddrToRegion(item);
+        if(region) {
+            if(region->blockId == kLargeItemBlockId)
+                return NULL;
+            size_t index = ((char*)item - region->baseAddr) / kBlockSize;
+            HeapBlock *b = blocks + region->blockId + index;
+            // if b->size is 0 then either this is an unallocated
+            // address or the actual block size > kBlockSize and we
+            // need to backtrack to actual block
+            while (b->size == 0) {
+                // should find block before falling off region start;
+                // e.g. (index == 0) implies (b->size > 0).
+                GCAssert(index > 0);
+                index--;
+                b--;
+            }
             GCAssert(item >= b->baseAddr && item < b->baseAddr + b->size * GCHeap::kBlockSize);
             return b;
         }
@@ -1275,7 +1299,7 @@ namespace MMgc
     {
         MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
         GCAssert((uintptr_t(item) & kOffsetMask) == 0);
-        HeapBlock *block = AddrToBlock(item);
+        HeapBlock *block = InteriorAddrToBlock(item);
         if (block)
             return block->size;
         Region *r = AddrToRegion(item);
@@ -1921,7 +1945,7 @@ namespace MMgc
             if(nextRegion == NULL) {
                 extraBlocks++; // may need a new page for regions
             }
-            size_t curHeapBlocksSize = blocks ? AddrToBlock(blocks)->size : 0;
+            size_t curHeapBlocksSize = blocks ? BaseAddrToBlock(blocks)->size : 0;
             size_t newHeapBlocksSize = numHeapBlocksToNumBlocks(blocksLen + size + extraBlocks);
 
             // size is based on newSize and vice versa, loop to settle (typically one loop, sometimes two)
@@ -2208,7 +2232,7 @@ namespace MMgc
 
         // free old blocks space using new blocks (FreeBlock poisons blocks so can't use old blocks)
         if (oldBlocks && oldBlocks != newBlocks) {
-            HeapBlock *oldBlocksHB = AddrToBlock(oldBlocks);
+            HeapBlock *oldBlocksHB = BaseAddrToBlock(oldBlocks);
             numAlloc -= oldBlocksHB->size;
             FreeBlock(oldBlocksHB);
         }
@@ -2796,7 +2820,7 @@ namespace MMgc
                     spanningBlock = NULL;
             }
             HeapBlock *hb;
-            while(addr != r->commitTop && (hb = AddrToBlock(addr)) != NULL) {
+            while(addr != r->commitTop && (hb = BaseAddrToBlock(addr)) != NULL) {
                 GCAssert(hb->size != 0);
 
                 if(hb->inUse())
