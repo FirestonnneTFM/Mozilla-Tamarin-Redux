@@ -136,6 +136,7 @@ namespace avmplus
 
             m_oldArray = m_owner->m_array;
             m_oldLength = m_owner->m_length;
+            m_oldCapacity = m_owner->m_capacity;
 
             uint8_t* newArray = mmfx_new_array_opt(uint8_t, newCapacity, MMgc::kCanFailAndZero);
             if (!newArray)
