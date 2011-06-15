@@ -1,4 +1,4 @@
-// Generated from ST_avmplus_basics.st, ST_avmplus_builtins.st, ST_avmplus_peephole.st, ST_mmgc_543560.st, ST_mmgc_575631.st, ST_mmgc_580603.st, ST_mmgc_637993.st, ST_mmgc_basics.st, ST_mmgc_dependent.st, ST_mmgc_exact.st, ST_mmgc_externalalloc.st, ST_mmgc_finalize_uninit.st, ST_mmgc_gcheap.st, ST_mmgc_gcoption.st, ST_mmgc_mmfx_array.st, ST_mmgc_threads.st, ST_mmgc_weakref.st, ST_vmbase_concurrency.st, ST_vmbase_safepoints.st, ST_vmpi_threads.st
+// Generated from ST_avmplus_basics.st, ST_avmplus_builtins.st, ST_avmplus_peephole.st, ST_mmgc_543560.st, ST_mmgc_575631.st, ST_mmgc_580603.st, ST_mmgc_637993.st, ST_mmgc_basics.st, ST_mmgc_dependent.st, ST_mmgc_exact.st, ST_mmgc_externalalloc.st, ST_mmgc_finalize_uninit.st, ST_mmgc_fixedmalloc_findbeginning.st, ST_mmgc_gcheap.st, ST_mmgc_gcoption.st, ST_mmgc_mmfx_array.st, ST_mmgc_threads.st, ST_mmgc_weakref.st, ST_vmbase_concurrency.st, ST_vmbase_safepoints.st, ST_vmpi_threads.st
 // Generated from ST_avmplus_basics.st
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
@@ -2403,6 +2403,321 @@ verifyPass(true, "true", __FILE__, __LINE__);
 
 }
 void create_mmgc_finalize_uninit(AvmCore* core) { new ST_mmgc_finalize_uninit(core); }
+}
+}
+#endif
+
+// Generated from ST_mmgc_fixedmalloc_findbeginning.st
+// -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
+// vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+//
+// ***** BEGIN LICENSE BLOCK *****
+// Version: MPL 1.1/GPL 2.0/LGPL 2.1
+//
+// The contents of this file are subject to the Mozilla Public License Version
+// 1.1 (the "License"); you may not use this file except in compliance with
+// the License. You may obtain a copy of the License at
+// http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis,
+// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+// for the specific language governing rights and limitations under the
+// License.
+//
+// The Original Code is [Open Source Virtual Machine.].
+//
+// The Initial Developer of the Original Code is
+// Adobe System Incorporated.
+// Portions created by the Initial Developer are Copyright (C) 2004-2006
+// the Initial Developer. All Rights Reserved.
+//
+// Contributor(s):
+//   Adobe AS3 Team
+//
+// Alternatively, the contents of this file may be used under the terms of
+// either the GNU General Public License Version 2 or later (the "GPL"), or
+// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+// in which case the provisions of the GPL or the LGPL are applicable instead
+// of those above. If you wish to allow use of your version of this file only
+// under the terms of either the GPL or the LGPL, and not to allow others to
+// use your version of this file under the terms of the MPL, indicate your
+// decision by deleting the provisions above and replace them with the notice
+// and other provisions required by the GPL or the LGPL. If you do not delete
+// the provisions above, a recipient may use your version of this file under
+// the terms of any one of the MPL, the GPL or the LGPL.
+//
+// ***** END LICENSE BLOCK ***** */
+
+// Bugzilla 663508: Add FixedMalloc::FindBeginning
+
+#include "avmshell.h"
+#ifdef VMCFG_SELFTEST
+namespace avmplus {
+namespace ST_mmgc_fixedmalloc_findbeginning {
+using namespace MMgc;
+
+class ST_mmgc_fixedmalloc_findbeginning : public Selftest {
+public:
+ST_mmgc_fixedmalloc_findbeginning(AvmCore* core);
+virtual void run(int n);
+virtual void prologue();
+private:
+static const char* ST_names[];
+static const bool ST_explicits[];
+void test0();
+void test1();
+void test2();
+void test3();
+void test4();
+void test5();
+void test6();
+void test7();
+void test8();
+void test9();
+void test10();
+void test11();
+
+    MMgc::FixedMalloc *fm;
+
+    // Allocates object of size sz and tests FixedMalloc::FindBeginning
+    // at various addresses within the allocated object.  The sampled
+    // addresses are meant to cover the following interesting edge
+    // cases: at or near the object's start, the middle of the object,
+    // and at or near the object's end.
+    //
+    // If all the tests successively identify the object's start, then
+    // returns 0.  Otherwise returns a numeric code identifying which
+    // tests failed.
+    int allocateVerifyAndFree(size_t sz)
+    {
+        int retval = 0;
+        (void)sz;
+
+        char *obj = (char*)fm->Alloc(sz);
+
+        retval |= checkLookups(obj, obj, sz);
+        retval = retval << 2;
+        if (sz > 1) retval |= checkLookups(obj+1, obj, sz);
+        retval = retval << 2;
+        if (sz > 3) retval |= checkLookups(obj+3, obj, sz);
+        retval = retval << 2;
+        retval |= checkLookups(obj+sz/2, obj, sz);
+        retval = retval << 2;
+        retval |= checkLookups(obj+sz-1, obj, sz);
+        retval = retval << 2;
+
+        fm->Free(obj);
+
+        return retval;
+    }
+
+    // Returns 0 if both test of FixedMalloc::FindBeginning and
+    // FixedMalloc::FindBeginningAndSize pass.
+    // Returns 1 if the first test (of FindBeginning) fails.
+    // Returns 2 if the second test (of FindBeginningAndSize) fails.
+    int checkLookups(const void* probe, const void* realStart, size_t sz)
+    {
+        int retval = 0;
+        const void* begin_recv;
+        size_t size_recv;
+        size_t roundup_actual_size;
+
+        if (sz <= (size_t)FixedMalloc::kLargestAlloc)
+            roundup_actual_size = fm->FindAllocatorForSize(sz)->GetItemSize();
+        else
+            roundup_actual_size =
+                roundUp(sz + DebugSize(), GCHeap::kBlockSize) - DebugSize();
+
+        if (fm->FindBeginning(probe) != realStart)
+            retval |= 1;
+        if (!fm->FindBeginningAndSize(probe, begin_recv, size_recv) ||
+            (begin_recv != realStart) ||
+            (size_recv != roundup_actual_size))
+            retval |= 3;
+
+        return retval;
+    }
+
+    size_t roundUp(size_t s, size_t inc) {
+        return (((s + inc - 1) / inc) * inc);
+    }
+
+};
+ST_mmgc_fixedmalloc_findbeginning::ST_mmgc_fixedmalloc_findbeginning(AvmCore* core)
+    : Selftest(core, "mmgc", "fixedmalloc_findbeginning", ST_mmgc_fixedmalloc_findbeginning::ST_names,ST_mmgc_fixedmalloc_findbeginning::ST_explicits)
+{}
+const char* ST_mmgc_fixedmalloc_findbeginning::ST_names[] = {"findbeginnings_small0","findbeginnings_small1","findbeginnings_small2","findbeginnings_small3","findbeginnings_almost_large1","findbeginnings_almost_large2","findbeginnings_large","findbeginnings_almost_multiblock1","findbeginnings_almost_multiblock2","findbeginnings_barely_multiblock","findbeginnings_multiblock_two","findbeginnings_multiblock_ten", NULL };
+const bool ST_mmgc_fixedmalloc_findbeginning::ST_explicits[] = {false,false,false,false,false,false,false,false,false,false,false,false, false };
+void ST_mmgc_fixedmalloc_findbeginning::run(int n) {
+switch(n) {
+case 0: test0(); return;
+case 1: test1(); return;
+case 2: test2(); return;
+case 3: test3(); return;
+case 4: test4(); return;
+case 5: test5(); return;
+case 6: test6(); return;
+case 7: test7(); return;
+case 8: test8(); return;
+case 9: test9(); return;
+case 10: test10(); return;
+case 11: test11(); return;
+}
+}
+void ST_mmgc_fixedmalloc_findbeginning::prologue() {
+    fm = MMgc::FixedMalloc::GetFixedMalloc();
+
+}
+
+void ST_mmgc_fixedmalloc_findbeginning::test0() {
+    {
+        size_t sz = FixedMalloc::kSizeClasses[0];
+// line 124 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+    }
+
+}
+void ST_mmgc_fixedmalloc_findbeginning::test1() {
+    {
+        size_t sz = FixedMalloc::kSizeClasses[1];
+// line 131 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+    }
+
+}
+void ST_mmgc_fixedmalloc_findbeginning::test2() {
+    {
+        size_t sz = FixedMalloc::kSizeClasses[2];
+// line 138 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+    }
+
+}
+void ST_mmgc_fixedmalloc_findbeginning::test3() {
+    {
+        size_t sz = FixedMalloc::kSizeClasses[3];
+// line 145 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+    }
+
+}
+void ST_mmgc_fixedmalloc_findbeginning::test4() {
+    {
+        size_t sz = FixedMalloc::kLargestAlloc - 1;
+        sz = sz - DebugSize();
+// line 153 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+        sz = sz + DebugSize();
+// line 156 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+    }
+
+}
+void ST_mmgc_fixedmalloc_findbeginning::test5() {
+    {
+        size_t sz = FixedMalloc::kLargestAlloc;
+        sz = sz - DebugSize();
+// line 164 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+        sz = sz + DebugSize();
+// line 167 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+    }
+
+}
+void ST_mmgc_fixedmalloc_findbeginning::test6() {
+    {
+        size_t sz = FixedMalloc::kLargestAlloc+1;
+        sz = sz - DebugSize();
+// line 175 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+        sz = sz + DebugSize();
+// line 178 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+    }
+
+}
+void ST_mmgc_fixedmalloc_findbeginning::test7() {
+    {
+        size_t sz = GCHeap::kBlockSize-1;
+        sz = sz - DebugSize();
+// line 186 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+        sz = sz + DebugSize();
+// line 189 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+    }
+
+}
+void ST_mmgc_fixedmalloc_findbeginning::test8() {
+    {
+        size_t sz = GCHeap::kBlockSize;
+        sz = sz - DebugSize();
+// line 197 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+        sz = sz + DebugSize();
+// line 200 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+    }
+
+}
+void ST_mmgc_fixedmalloc_findbeginning::test9() {
+    {
+        size_t sz = GCHeap::kBlockSize+1;
+        sz = sz - DebugSize();
+// line 208 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+        sz = sz + DebugSize();
+// line 211 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+    }
+
+}
+void ST_mmgc_fixedmalloc_findbeginning::test10() {
+    {
+        size_t sz = GCHeap::kBlockSize*2;
+        sz = sz - DebugSize();
+// line 219 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+        sz = sz + DebugSize();
+// line 222 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+    }
+
+}
+void ST_mmgc_fixedmalloc_findbeginning::test11() {
+    {
+        size_t sz = GCHeap::kBlockSize*10;
+        sz = sz - DebugSize();
+// line 230 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+        sz = sz + DebugSize();
+// line 233 "ST_mmgc_fixedmalloc_findbeginning.st"
+verifyPass(allocateVerifyAndFree(sz) == 0, "allocateVerifyAndFree(sz) == 0", __FILE__, __LINE__);
+              ;
+    }
+
+}
+void create_mmgc_fixedmalloc_findbeginning(AvmCore* core) { new ST_mmgc_fixedmalloc_findbeginning(core); }
 }
 }
 #endif

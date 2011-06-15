@@ -40,6 +40,12 @@
 #ifndef __Malloc__
 #define __Malloc__
 
+namespace avmplus {
+    namespace ST_mmgc_fixedmalloc_findbeginning {
+        class ST_mmgc_fixedmalloc_findbeginning;
+    }
+}
+
 namespace MMgc
 {
     /**
@@ -54,6 +60,7 @@ namespace MMgc
     class FixedMalloc
     {
         friend class GCHeap;
+        friend class avmplus::ST_mmgc_fixedmalloc_findbeginning::ST_mmgc_fixedmalloc_findbeginning;
 
     public:
         /**
