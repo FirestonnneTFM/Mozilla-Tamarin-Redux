@@ -64,6 +64,8 @@
 #  define VMPI_alloca(core, autoptr, nbytes)  (nbytes > AVMPLUS_PARAM_ALLOCA_CUTOFF ? core->gc->allocaPush(nbytes, autoptr) : alloca(nbytes))
 #  define VMPI_alloca_gc(gc, autoptr, nbytes)  (nbytes > AVMPLUS_PARAM_ALLOCA_CUTOFF ? gc->allocaPush(nbytes, autoptr) : alloca(nbytes))
 #endif
+#define VMPI_calloca(core, autoptr, nelem, elemsize) VMPI_alloca(core, autoptr, MMgc::GCHeap::CheckForCallocSizeOverflow(nelem, elemsize))
+#define VMPI_calloca_gc(gc, autoptr, nelem, elemsize) VMPI_alloca_gc(gc, autoptr, MMgc::GCHeap::CheckForCallocSizeOverflow(nelem, elemsize))
 
 // Exact garbage collection (opt-in) macros.  These are not merely macros,
 // they are also processed by a script that generates tracing code.
