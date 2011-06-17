@@ -67,6 +67,10 @@
 #define avmStackAllocArray(core, autoptr, nelem, elemsize) avmStackAlloc(core, autoptr, MMgc::GCHeap::CheckForCallocSizeOverflow(nelem, elemsize))
 #define avmStackAllocArrayGC(gc, autoptr, nelem, elemsize) avmStackAllocGC(gc, autoptr, MMgc::GCHeap::CheckForCallocSizeOverflow(nelem, elemsize))
 
+// For backwards compatibility with the Flash Player until we can rename its uses of the VMPI_ macros
+#define VMPI_alloca    avmStackAlloc
+#define VMPI_alloca_gc avmStackAllocGC
+
 // Exact garbage collection (opt-in) macros.  These are not merely macros,
 // they are also processed by a script that generates tracing code.
 //
