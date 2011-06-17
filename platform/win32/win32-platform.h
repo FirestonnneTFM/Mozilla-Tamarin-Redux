@@ -53,6 +53,7 @@
     #pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
     #pragma warning(disable:4251) // X needs to have dll-interface to be used by clients of class Y
     #pragma warning(disable:4310) // cast truncates constant value
+    #pragma warning(disable:4371) // better packing than in the previous version of the compiler
     #pragma warning(disable:4511) // can't generate copy ctor
     #pragma warning(disable:4512) // assignment operator could not be generated
     #pragma warning(disable:4611) // interaction between '_setjmp' and C++ object destruction is non-portable

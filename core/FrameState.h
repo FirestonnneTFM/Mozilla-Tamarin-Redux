@@ -52,14 +52,14 @@ namespace avmplus
         bool notNull;
         bool isWith;
 #ifdef VMCFG_NANOJIT
-        // One bit for each of 8 possible SlotStorageTypes for the native representation
+        // One bit for each of 16 possible SlotStorageTypes for the native representation
         // of this value.  The JIT uses this mask to handle control-flow merges
         // of incompatible values (e.g. int and String*).  At merge points, masks
         // are OR-ed together.
         // If more than one bit is set, the type will be Object or *, and the JIT
         // will use a separate tag byte to convert the native representation to Atom.
         // See CodegenLIR::localGetp().
-        uint8_t sst_mask;
+        uint16_t sst_mask;
 #endif
     };
 

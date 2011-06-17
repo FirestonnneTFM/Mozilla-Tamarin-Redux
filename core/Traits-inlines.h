@@ -47,12 +47,12 @@ REALLY_INLINE bool isAtomOrRCObjectSlot(SlotStorageType sst)
 
 REALLY_INLINE SlotStorageType TraitsBindings::SlotInfo::sst() const
 {
-    return SlotStorageType(offsetAndSST & 7);
+    return SlotStorageType(offsetAndSST & 0xf);
 }
 
 REALLY_INLINE uint32_t TraitsBindings::SlotInfo::offset() const
 {
-    return (offsetAndSST >> 3) << 2;
+    return (offsetAndSST >> 4) << 2;
 }
 
 REALLY_INLINE TraitsBindings::TraitsBindings(Traits* _owner,
@@ -89,8 +89,8 @@ REALLY_INLINE SlotStorageType TraitsBindings::calcSlotAddrAndSST(uint32_t i, voi
     AvmAssert(m_typesValid);
     AvmAssert(i < slotCount);
     uint32_t offsetAndSST = getSlots()[i].offsetAndSST;
-    pout = (void*)(((uint32_t*)pin) + (offsetAndSST >> 3));
-    return SlotStorageType(offsetAndSST & 7);
+    pout = (void*)(((uint32_t*)pin) + (offsetAndSST >> 4));
+    return SlotStorageType(offsetAndSST & 0xf);
 }
 
 REALLY_INLINE MethodInfo* TraitsBindings::getMethod(uint32_t i) const
@@ -150,10 +150,10 @@ REALLY_INLINE void TraitsBindings::setSlotInfo(uint32_t i, Traits* t, SlotStorag
     AvmAssert(i < slotCount);
     // don't need WB here
     getSlots()[i].type = t;
-    // offset is always a multiple of 4 so skip those, gives us a max of 1<<31-1
+    // offset is always a multiple of 4 so skip those, gives us a max of 1<<30-1
     AvmAssert((offset & 3) == 0);
     AvmAssert(offset <= MAX_SLOT_OFFSET);
-    getSlots()[i].offsetAndSST = (offset<<1) | uint32_t(sst);
+    getSlots()[i].offsetAndSST = (offset<<2) | uint32_t(sst);
 }
 
 REALLY_INLINE void TraitsBindings::setMethodInfo(uint32_t i, MethodInfo* f)
