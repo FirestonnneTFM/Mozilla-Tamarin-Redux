@@ -41,7 +41,7 @@
 #define AOTCompiler_h
 
 #include "avmplus.h"
-#include "CDeclThunk.h"
+#include "CdeclThunk.h"
 
 #ifdef VMCFG_BUFFER_GUARD
 #include "GenericGuard.h"
