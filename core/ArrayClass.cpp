@@ -1204,7 +1204,7 @@ namespace avmplus
 
             options = AvmCore::integer(optionsAtom);
 
-            fn = (ArraySort::FieldName*) VMPI_alloca(core, fn_autoptr, GCHeap::CheckForCallocSizeOverflow(nFields, sizeof(ArraySort::FieldName)));
+            fn = (ArraySort::FieldName*) VMPI_calloca(core, fn_autoptr, nFields, sizeof(ArraySort::FieldName));
             fn[0].name = core->internString(namesAtom);
             fn[0].options = options;
         }
@@ -1213,7 +1213,7 @@ namespace avmplus
             ArrayObject *obj = (ArrayObject *)AvmCore::atomToScriptObject(namesAtom);
 
             nFields = obj->getLength();
-            fn = (ArraySort::FieldName*) VMPI_alloca(core, fn_autoptr, GCHeap::CheckForCallocSizeOverflow(nFields, sizeof(ArraySort::FieldName)));
+            fn = (ArraySort::FieldName*) VMPI_calloca(core, fn_autoptr, nFields, sizeof(ArraySort::FieldName));
 
             for (uint32_t i = 0; i < nFields; i++)
             {

@@ -3758,7 +3758,7 @@ return the result of the comparison ToPrimitive(x) == y.
         AvmAssertMsg(len16 >= 0, "Malformed UTF-8 sequence");
         // use alloca to avoid heap allocations where possible
         MMgc::GC::AllocaAutoPtr _buffer;
-        wchar *buffer = (wchar*) VMPI_alloca(this, _buffer, (len16+1)*sizeof(wchar));
+        wchar *buffer = (wchar*) VMPI_calloca(this, _buffer, (len16+1), sizeof(wchar));
 
         if(!buffer) {
             AvmAssertMsg(false, "alloca failed!");
@@ -4257,7 +4257,7 @@ return the result of the comparison ToPrimitive(x) == y.
                 return this->kEmptyString;
 
             MMgc::GC::AllocaAutoPtr _swapped;
-            wchar* swapped = (wchar*)VMPI_alloca(this, _swapped, sizeof(wchar)*(len));
+            wchar* swapped = (wchar*)VMPI_calloca(this, _swapped, len, sizeof(wchar));
             for (int32_t i = 0; i < len; i++)
             {
                 swapped[i] = avmSwap16(s[i]);

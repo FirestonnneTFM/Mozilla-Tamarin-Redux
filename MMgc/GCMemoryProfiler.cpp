@@ -963,7 +963,7 @@ namespace MMgc
     void ObjectPopulationProfiler<T>::dumpTopBacktraces(int howmany, DumpMode mode)
     {
         MMgc::GC::AllocaAutoPtr _popnode;
-        PopulationNode** xs = (PopulationNode**)VMPI_alloca_gc(gc, _popnode, howmany*sizeof(PopulationNode*));
+        PopulationNode** xs = (PopulationNode**)VMPI_calloca_gc(gc, _popnode, howmany, sizeof(PopulationNode*));
         int live = 0;
         
         typename NodeTable::Iterator traceIter(&nodes);
