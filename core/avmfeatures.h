@@ -560,7 +560,7 @@
 
 /* AVMFEATURE_HEAP_ALLOCA
  *
- * If enabled then always divert VMPI_alloca() to a separately managed stack,
+ * If enabled then always divert avmStackAlloc() to a separately managed stack,
  * to avoid blowing the stack on small systems or to support systems that
  * don't provide alloca().  If disabled then smallish allocations are handled
  * by the built-in alloca() (which must be provided) and larger allocations

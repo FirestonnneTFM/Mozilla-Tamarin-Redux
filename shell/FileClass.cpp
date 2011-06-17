@@ -97,7 +97,7 @@ namespace avmshell
 
         int len = (int)fileSize;
 
-        // Avoid VMPI_alloca - the buffer can be large and the memory is non-pointer-containing,
+        // Avoid avmStackAlloc - the buffer can be large and the memory is non-pointer-containing,
         // but the GC will scan it conservatively.
         uint8_t* c = (uint8_t*)core->gc->Alloc(len+1);
         

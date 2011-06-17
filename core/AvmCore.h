@@ -1980,7 +1980,7 @@ const int kBufferPadding = 16;
             FLAGS_MASK = 0x3
         };
         uintptr_t       envOrCodeContext;
-        Namespace*      dxns; // NOTE: this struct is always stack-allocated (or via VMPI_alloca, which is just as good), so no GCMember needed
+        Namespace*      dxns; // NOTE: this struct is always stack-allocated (or via avmStackAlloc, which is just as good), so no GCMember needed
     };
 
 }

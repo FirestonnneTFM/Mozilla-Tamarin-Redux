@@ -340,7 +340,7 @@ namespace MMgc
         size_t blocks_before = gc->GetNumBlocks();
 
         // Note that we must pin from root segments even if scanStack is false, because the
-        // MMGC_GC_ROOT_THREAD creates one AutoRCRootSegment that is not managed by VMPI_alloca.
+        // MMGC_GC_ROOT_THREAD creates one AutoRCRootSegment that is not managed by avmStackAlloc.
         // The root segment list should be very short if scanStack==false so performance-wise
         // this is not a big deal.
         //

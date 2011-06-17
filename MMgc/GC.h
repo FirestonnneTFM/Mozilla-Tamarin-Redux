@@ -58,14 +58,14 @@
 #define AVMPLUS_PARAM_ALLOCA_CUTOFF     4000    // Don't make real alloca() blow the stack; this limit is heuristic
 #define AVMPLUS_PARAM_ALLOCA_DEFSIZE    1000    // Default number of bytes in a stack segment for heap-based alloca()
 #ifdef AVMPLUS_HEAP_ALLOCA
-#  define VMPI_alloca(core, autoptr, nbytes)    core->gc->allocaPush(nbytes, autoptr)
-#  define VMPI_alloca_gc(gc, autoptr, nbytes)   gc->allocaPush(nbytes, autoptr)
+#  define avmStackAlloc(core, autoptr, nbytes)    core->gc->allocaPush(nbytes, autoptr)
+#  define avmStackAllocGC(gc, autoptr, nbytes)   gc->allocaPush(nbytes, autoptr)
 #else
-#  define VMPI_alloca(core, autoptr, nbytes)  (nbytes > AVMPLUS_PARAM_ALLOCA_CUTOFF ? core->gc->allocaPush(nbytes, autoptr) : alloca(nbytes))
-#  define VMPI_alloca_gc(gc, autoptr, nbytes)  (nbytes > AVMPLUS_PARAM_ALLOCA_CUTOFF ? gc->allocaPush(nbytes, autoptr) : alloca(nbytes))
+#  define avmStackAlloc(core, autoptr, nbytes)  (nbytes > AVMPLUS_PARAM_ALLOCA_CUTOFF ? core->gc->allocaPush(nbytes, autoptr) : alloca(nbytes))
+#  define avmStackAllocGC(gc, autoptr, nbytes)  (nbytes > AVMPLUS_PARAM_ALLOCA_CUTOFF ? gc->allocaPush(nbytes, autoptr) : alloca(nbytes))
 #endif
-#define VMPI_calloca(core, autoptr, nelem, elemsize) VMPI_alloca(core, autoptr, MMgc::GCHeap::CheckForCallocSizeOverflow(nelem, elemsize))
-#define VMPI_calloca_gc(gc, autoptr, nelem, elemsize) VMPI_alloca_gc(gc, autoptr, MMgc::GCHeap::CheckForCallocSizeOverflow(nelem, elemsize))
+#define avmStackAllocArray(core, autoptr, nelem, elemsize) avmStackAlloc(core, autoptr, MMgc::GCHeap::CheckForCallocSizeOverflow(nelem, elemsize))
+#define avmStackAllocArrayGC(gc, autoptr, nelem, elemsize) avmStackAllocGC(gc, autoptr, MMgc::GCHeap::CheckForCallocSizeOverflow(nelem, elemsize))
 
 // Exact garbage collection (opt-in) macros.  These are not merely macros,
 // they are also processed by a script that generates tracing code.
@@ -1834,7 +1834,7 @@ public:
          *    MMgc::GC::AllocaAutoPtr _ptr;                      // by convention prefixed by "_"
          *    int* ptr = (int*)core->allocaPush(_ptr, nbytes);  // by convention same name, no "_"
          *
-         * In practice the VMPI_alloca() macro, defined in avmbuild.h, should be used so that
+         * In practice the avmStackAlloc() macro should be used so that
          * real alloca() can be used on platforms where that makes sense.
          *
          * Benchmarks suggest that the performance differences from using this mechanism

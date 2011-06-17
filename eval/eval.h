@@ -312,7 +312,7 @@ namespace avmplus
         class HostContext {
         public:
 #ifndef AVMC_STANDALONE
-            // AvmCore is used for VMPI_alloca.
+            // AvmCore is used for avmStackAlloc.
             HostContext(AvmCore* core) : core(core), stopAfterParse(false) {}
             AvmCore * const core;
 #else

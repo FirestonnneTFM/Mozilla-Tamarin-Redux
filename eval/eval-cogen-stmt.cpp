@@ -488,7 +488,7 @@ namespace avmplus
             Lcase = (Label**)alloca(sizeof(Label*) * ncases);
 #else
             MMgc::GC::AllocaAutoPtr _Lcase;
-            Lcase = (Label**)VMPI_calloca(compiler->context->core, _Lcase, ncases, sizeof(Label*));
+            Lcase = (Label**)avmStackAllocArray(compiler->context->core, _Lcase, ncases, sizeof(Label*));
 #endif
             Label* Ldefault = cogen->newLabel();
             Label* Lbreak = cogen->newLabel();
