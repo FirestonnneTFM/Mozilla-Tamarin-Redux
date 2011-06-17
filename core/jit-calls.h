@@ -170,7 +170,7 @@
     // handlers for ScriptObject slots, indexed by SlotStorageType.  We only
     // care about slot types that hold something we can call; other cases
     // will be errors, so we use the generic handler for them.
-    static const CallCache::Handler callprop_slot_handlers[8] = {
+    static const CallCache::Handler callprop_slot_handlers[SST_MAX_VALUE] = {
         &callprop_obj_slot<Atom>,           // SST_atom
         &callprop_generic,                  // SST_string
         &callprop_generic,                  // SST_namespace
@@ -346,7 +346,7 @@
     };
 
     // handlers for slots on ScriptObject, indexed by SlotStorageType
-    static const GetCache::Handler getprop_slot_handlers[8] = {
+    static const GetCache::Handler getprop_slot_handlers[SST_MAX_VALUE] = {
         &getprop_obj_slot<OpaqueAtom>,      // SST_atom
         &getprop_obj_slot<String*>,         // SST_string
         &getprop_obj_slot<Namespace*>,      // SST_namespace
@@ -725,7 +725,7 @@
     };
 
     // handlers for sets of a declared var on a ScriptObject, indexed by bindingKind
-    static const SetCache::Handler setprop_slot_handlers[8] = {
+    static const SetCache::Handler setprop_slot_handlers[SST_MAX_VALUE] = {
         &setprop_slot<OpaqueAtom>,          // SST_atom (for slot type Object.  type * is an exception)
         &setprop_generic,                   // SST_string
         &setprop_generic,                   // SST_namespace

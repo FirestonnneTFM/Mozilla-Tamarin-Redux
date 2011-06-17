@@ -3092,7 +3092,7 @@ namespace avmplus
             targetValue.traits = merged_traits;
             targetValue.notNull = merged_notNull;
 #ifdef VMCFG_NANOJIT
-            uint8_t merged_sst = targetValue.sst_mask | curValue.sst_mask;
+            uint16_t merged_sst = targetValue.sst_mask | curValue.sst_mask;
             if (targetValue.sst_mask != merged_sst)
                 targetChanged = true;
             targetValue.sst_mask = merged_sst;

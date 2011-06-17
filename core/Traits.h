@@ -83,7 +83,7 @@ namespace avmplus
 
     typedef const uint8_t* TraitsPosPtr;
 
-    // Note: we rely on this being <= 8 entries.
+    // Note: we rely on this being <= 16 entries.
     enum SlotStorageType
     {
         // we rely on these 4 being first, so we can do <= SST_scriptobject in isAtomOrRCObjectSlot.
@@ -96,7 +96,9 @@ namespace avmplus
         SST_int32,
         SST_uint32,
         SST_bool32,
-        SST_double
+        SST_double,
+        /* insert new values above this line, but make sure that there are no more than 16 entries in total (excluding SST_MAX_VALUE) */
+        SST_MAX_VALUE 
     };
     bool isAtomOrRCObjectSlot(SlotStorageType sst);
     SlotStorageType valueStorageType(BuiltinType bt);
@@ -110,7 +112,7 @@ namespace avmplus
         struct SlotInfo
         {
             Traitsp type;
-            uint32_t offsetAndSST;  // lower 3 bits: SlotStorageType, upper 29 bits: offset div 4
+            uint32_t offsetAndSST;  // lower 4 bits: SlotStorageType, upper 28 bits: offset div 4
             #ifdef AVMPLUS_64BIT
             uint32_t padding;   // alignment to power-of-two boundary is a Good Thing here
             #endif
@@ -132,7 +134,7 @@ namespace avmplus
                             bool typesValid);
 
     public:
-        static const uint32_t MAX_SLOT_OFFSET = (1U << 31) - 1;
+        static const uint32_t MAX_SLOT_OFFSET = (1U << 30) - 1; // 4 bits needed for SST; 28 bits for offset. A slot offset should always be 4-byte aligned, hence  max offset = 2^(28+2)-1
 
     public:
 
