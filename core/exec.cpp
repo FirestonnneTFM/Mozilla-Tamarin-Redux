@@ -788,7 +788,7 @@ Atom BaseExecMgr::apply(MethodEnv* env, Atom thisArg, ArrayObject *a)
         MethodSignaturep ms = env->get_ms();
         const size_t extra_sz = startCoerce(env, argc, ms);
         MMgc::GC::AllocaAutoPtr _ap;
-        uint32_t *ap = (uint32_t *)VMPI_alloca(core, _ap, extra_sz);
+        uint32_t *ap = (uint32_t *)avmStackAlloc(core, _ap, extra_sz);
         unboxCoerceArgs(env, thisArg, a, ap, ms);
         return endCoerce(env, argc, ap, ms);
     }
@@ -798,7 +798,7 @@ Atom BaseExecMgr::apply(MethodEnv* env, Atom thisArg, ArrayObject *a)
 
     // Tail call inhibited by local allocation/deallocation.
     MMgc::GC::AllocaAutoPtr _atomv;
-    Atom* atomv = (Atom*)VMPI_calloca(core, _atomv, (argc+1), sizeof(Atom));
+    Atom* atomv = (Atom*)avmStackAllocArray(core, _atomv, (argc+1), sizeof(Atom));
     atomv[0] = thisArg;
     for (int32_t i=0 ; i < argc ; i++ )
         atomv[i+1] = a->getUintProperty(i);
@@ -818,7 +818,7 @@ Atom BaseExecMgr::call(MethodEnv* env, Atom thisArg, int argc, Atom *argv)
         MethodSignaturep ms = env->get_ms();
         const size_t extra_sz = startCoerce(env, argc, ms);
         MMgc::GC::AllocaAutoPtr _ap;
-        uint32_t *ap = (uint32_t *)VMPI_alloca(core, _ap, extra_sz);
+        uint32_t *ap = (uint32_t *)avmStackAlloc(core, _ap, extra_sz);
         unboxCoerceArgs(env, thisArg, argc, argv, ap, ms);
         return endCoerce(env, argc, ap, ms);
     }
@@ -828,7 +828,7 @@ Atom BaseExecMgr::call(MethodEnv* env, Atom thisArg, int argc, Atom *argv)
 
     // Tail call inhibited by local allocation/deallocation.
     MMgc::GC::AllocaAutoPtr _atomv;
-    Atom* atomv = (Atom*)VMPI_calloca(core, _atomv, (argc+1), sizeof(Atom));
+    Atom* atomv = (Atom*)avmStackAllocArray(core, _atomv, (argc+1), sizeof(Atom));
     atomv[0] = thisArg;
     VMPI_memcpy(atomv+1, argv, sizeof(Atom)*argc);
     return env->coerceEnter(argc, atomv);
@@ -902,7 +902,7 @@ Atom BaseExecMgr::invokeGeneric(MethodEnv *env, int32_t argc, Atom* atomv)
     MethodSignaturep ms = env->get_ms();
     const size_t extra_sz = startCoerce(env, argc, ms);
     MMgc::GC::AllocaAutoPtr _ap;
-    uint32_t *ap = (uint32_t *)VMPI_alloca(env->core(), _ap, extra_sz);
+    uint32_t *ap = (uint32_t *)avmStackAlloc(env->core(), _ap, extra_sz);
     unboxCoerceArgs(env, argc, atomv, ap, ms);
     return endCoerce(env, argc, ap, ms);
 }

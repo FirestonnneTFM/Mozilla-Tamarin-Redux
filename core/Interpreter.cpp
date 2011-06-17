@@ -749,16 +749,16 @@ namespace avmplus
         // Allocation is guaranteed on an 8-byte boundary, but we need 16 for _setjmpex.
         // So allocate 8 bytes extra, then round up to a 16-byte boundary.
         register Atom* const framep =
-               (Atom*)VMPI_alloca(core, _framep,
-                                  sizeof(Atom)*(ms->frame_size())
-                                + 8
-                                + kAuxFrameSize);
+               (Atom*)avmStackAlloc(core, _framep,
+                                    sizeof(Atom)*(ms->frame_size())
+                                    + 8
+                                    + kAuxFrameSize);
         register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)(((uintptr_t)(framep + ms->frame_size()) + 15) & ~15);
 #else
         register Atom* const framep =
-                       (Atom*)VMPI_alloca(core, _framep,
-                                          sizeof(Atom)*(ms->frame_size())
-                                        + kAuxFrameSize);
+                       (Atom*)avmStackAlloc(core, _framep,
+                                            sizeof(Atom)*(ms->frame_size())
+                                            + kAuxFrameSize);
         union {
             Atom* fa;
             InterpreterAuxiliaryFrame* fi;

@@ -320,7 +320,7 @@ namespace avmplus
      * other permutations of Array.
      *
      * NOTE: Instances of ArraySort must be stack-allocated, as it uses
-     * VMPI_alloca for a temporary data structure.
+     * avmStackAlloc for a temporary data structure.
      */
     class ArraySort
     {
@@ -467,7 +467,7 @@ namespace avmplus
         // So I limit the length -- for larger values, I expect new will fail anyways.
         if ((len > 0) && (len < (0x10000000)))
         {
-            index = (uint32_t*)VMPI_alloca(core, index_autoptr, GCHeap::CheckForCallocSizeOverflow(len, sizeof(uint32_t)));
+            index = (uint32_t*)avmStackAlloc(core, index_autoptr, GCHeap::CheckForCallocSizeOverflow(len, sizeof(uint32_t)));
             atoms = new (core->GetGC()) HeapAtomList(core->GetGC(), len);
         }
 
@@ -1204,7 +1204,7 @@ namespace avmplus
 
             options = AvmCore::integer(optionsAtom);
 
-            fn = (ArraySort::FieldName*) VMPI_calloca(core, fn_autoptr, nFields, sizeof(ArraySort::FieldName));
+            fn = (ArraySort::FieldName*) avmStackAllocArray(core, fn_autoptr, nFields, sizeof(ArraySort::FieldName));
             fn[0].name = core->internString(namesAtom);
             fn[0].options = options;
         }
@@ -1213,7 +1213,7 @@ namespace avmplus
             ArrayObject *obj = (ArrayObject *)AvmCore::atomToScriptObject(namesAtom);
 
             nFields = obj->getLength();
-            fn = (ArraySort::FieldName*) VMPI_calloca(core, fn_autoptr, nFields, sizeof(ArraySort::FieldName));
+            fn = (ArraySort::FieldName*) avmStackAllocArray(core, fn_autoptr, nFields, sizeof(ArraySort::FieldName));
 
             for (uint32_t i = 0; i < nFields; i++)
             {

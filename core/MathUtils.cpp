@@ -681,7 +681,7 @@ namespace avmplus
                                               UnsignedTreatment treatAs)
     {
         MMgc::GC::AllocaAutoPtr _buffer;
-        char* buffer = (char*)VMPI_alloca(core, _buffer, kMinSizeForInt64_t_toString);
+        char* buffer = (char*)avmStackAlloc(core, _buffer, kMinSizeForInt64_t_toString);
         int32_t len = kMinSizeForInt64_t_toString;
         char* p = convertIntegerToStringBuffer(value, buffer, len, radix, treatAs);
         return core->newStringLatin1(p, len);
@@ -794,7 +794,7 @@ namespace avmplus
         }
 
         MMgc::GC::AllocaAutoPtr _tmp;
-        char* tmp = (char*)VMPI_alloca(core, _tmp, kMinSizeForDouble_base2_toString);
+        char* tmp = (char*)avmStackAlloc(core, _tmp, kMinSizeForDouble_base2_toString);
         char *src = tmp + kMinSizeForDouble_base2_toString - 1;
         char *srcEnd = src;
 
@@ -868,7 +868,7 @@ namespace avmplus
         int32_t i, len = 0;
 
         MMgc::GC::AllocaAutoPtr _buffer;
-        char* buffer = (char*)VMPI_alloca(core, _buffer, kMinSizeForDouble_base10_toString);
+        char* buffer = (char*)avmStackAlloc(core, _buffer, kMinSizeForDouble_base10_toString);
         char *s = buffer;
         bool negative = false;
 
