@@ -85,7 +85,7 @@ namespace avmplus
     /*static*/ const ScopeTypeChain* ScopeTypeChain::create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, Traits* const* stateTraits, uint32_t nStateTraits, uint32_t nStateWithTraits, Traits* append, Traits* extra)
     {
         MMgc::GC::AllocaAutoPtr valuesPtr;
-        FrameValue *values = (FrameValue *)VMPI_alloca_gc(gc, valuesPtr, sizeof(FrameValue)*nStateTraits);
+        FrameValue *values = (FrameValue *)VMPI_calloca_gc(gc, valuesPtr, nStateTraits, sizeof(FrameValue));
         uint32_t firstWith = nStateTraits - nStateWithTraits;
         for (uint32_t i = 0; i < nStateTraits; i++)
         {

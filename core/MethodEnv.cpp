@@ -376,7 +376,7 @@ namespace avmplus
         // Even tho E3 says create an Object, E4 says create an Array so thats what we will do.
         AvmAssert(argc >= 0);
         MMgc::GC::AllocaAutoPtr _atomv;
-        Atom* atomv = (Atom*) VMPI_alloca(core(), _atomv, (argc+1) * sizeof(Atom));
+        Atom* atomv = (Atom*) VMPI_calloca(core(), _atomv, (argc+1), sizeof(Atom));
         method->getMethodSignature()->boxArgs(core(), argc, ap, atomv);
         return createArguments(atomv, argc);
     }

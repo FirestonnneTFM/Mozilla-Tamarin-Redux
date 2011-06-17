@@ -798,7 +798,7 @@ Atom BaseExecMgr::apply(MethodEnv* env, Atom thisArg, ArrayObject *a)
 
     // Tail call inhibited by local allocation/deallocation.
     MMgc::GC::AllocaAutoPtr _atomv;
-    Atom* atomv = (Atom*)VMPI_alloca(core, _atomv, sizeof(Atom)*(argc+1));
+    Atom* atomv = (Atom*)VMPI_calloca(core, _atomv, (argc+1), sizeof(Atom));
     atomv[0] = thisArg;
     for (int32_t i=0 ; i < argc ; i++ )
         atomv[i+1] = a->getUintProperty(i);
@@ -828,7 +828,7 @@ Atom BaseExecMgr::call(MethodEnv* env, Atom thisArg, int argc, Atom *argv)
 
     // Tail call inhibited by local allocation/deallocation.
     MMgc::GC::AllocaAutoPtr _atomv;
-    Atom* atomv = (Atom*)VMPI_alloca(core, _atomv, sizeof(Atom)*(argc+1));
+    Atom* atomv = (Atom*)VMPI_calloca(core, _atomv, (argc+1), sizeof(Atom));
     atomv[0] = thisArg;
     VMPI_memcpy(atomv+1, argv, sizeof(Atom)*argc);
     return env->coerceEnter(argc, atomv);
