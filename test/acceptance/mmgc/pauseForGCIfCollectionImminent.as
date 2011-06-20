@@ -34,11 +34,9 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-try {
-    import avmplus. * ; // System class in the avmshell
-} catch (e) {
-    import flash.system. * ; // System class in the flash player
-}
+
+import avmplus.* ;      // System class in the avmshell
+import flash.system.* ; // System class in the flash player
 
 var SECTION = "System::pauseForGCIfCollectionImminent";
 var VERSION = "";
@@ -57,8 +55,15 @@ class Node {
     }
 }
 
-var i_loops = 400;
-var j_loops = 500;
+// DO NOT MESS WITH THE PARAMETER VALUES.
+//
+// If the test takes to long to run on mobile with these values then either set the values
+// differently on mobile, or disable the test on mobile.  On desktop we need a decent
+// number of iterations in order to be able to run reliably, the test is statistical and
+// sometimes getting a hit is tricky on a fast machine.
+
+var i_loops = 1000;
+var j_loops = 1000;
 
 var start = new Date();
 var fractions = [Number.MIN_VALUE, 0, -0,  0.25, 0.5, 0.75, 1.0];
