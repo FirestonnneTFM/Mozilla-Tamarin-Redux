@@ -1536,7 +1536,7 @@ namespace MMgc
         // tree inside GC::Alloc.
 
         const uint8_t* const sizeClassIndex;
-        GCAlloc** allocsTable[(kRCObject|kContainsPointers)+1];
+        GCAlloc** allocsTable[(kRCObject|kFinalize|kContainsPointers)+1];
 
         void *m_contextVars[GCV_COUNT];
 
@@ -1576,9 +1576,11 @@ namespace MMgc
          */
         void ConservativeMarkRegion(const void *base, size_t bytes);
 
-        GCAlloc *containsPointersAllocs[kNumSizeClasses];
-        GCAlloc *containsPointersRCAllocs[kNumSizeClasses];
-        GCAlloc *noPointersAllocs[kNumSizeClasses];
+        GCAlloc *containsPointersNonfinalizedAllocs[kNumSizeClasses]; // Non-RC non-finalized objects containing pointers
+        GCAlloc *containsPointersFinalizedAllocs[kNumSizeClasses];    // Non-RC finalized objects containing pointers
+        GCAlloc *containsPointersRCAllocs[kNumSizeClasses];           // RC finalized objects containing pointers
+        GCAlloc *noPointersNonfinalizedAllocs[kNumSizeClasses];       // Non-RC non-finalized objects not containing pointers
+        GCAlloc *noPointersFinalizedAllocs[kNumSizeClasses];          // Non-RC finalized objects not containing pointers
         GCLargeAlloc *largeAlloc;
         GCHeap *heap;
 
