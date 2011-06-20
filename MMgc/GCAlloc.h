@@ -143,7 +143,7 @@ namespace MMgc
 
         enum { kFreelist=kMark|kQueued };
 
-        GCAlloc(GC* gc, int itemSize, bool containsPointers, bool isRC, int sizeClassIndex);
+        GCAlloc(GC* gc, int itemSize, bool containsPointers, bool isRC, bool isFinalized, int sizeClassIndex);
 
 #if defined DEBUG || defined MMGC_MEMORY_PROFILER
         void* Alloc(size_t size, int flags);
@@ -153,6 +153,8 @@ namespace MMgc
         virtual void Free(const void* item);
 
         void Finalize();
+        void FinalizationPass();
+        void LazySweepPass();
         void ClearMarks();
 #ifdef _DEBUG
         void CheckMarks();
@@ -286,6 +288,7 @@ namespace MMgc
 
         const bool containsPointers;
         const bool containsRCObjects;
+        const bool containsFinalizedObjects;
         bool m_finalized;
 
 #ifdef _DEBUG

@@ -157,7 +157,7 @@ namespace MMgc
     {
     }
 
-    GCAlloc::GCAlloc(GC* _gc, int _itemSize, bool _containsPointers, bool _isRC, int _sizeClassIndex) :
+    GCAlloc::GCAlloc(GC* _gc, int _itemSize, bool _containsPointers, bool _isRC, bool _isFinalized, int _sizeClassIndex) :
         m_firstBlock(NULL),
         m_lastBlock(NULL),
         m_firstFree(NULL),
@@ -182,6 +182,7 @@ namespace MMgc
         shift(ComputeShift((uint16_t)m_itemSize)),
         containsPointers(_containsPointers),
         containsRCObjects(_isRC),
+        containsFinalizedObjects(_isFinalized),
         m_finalized(false),
         m_gc(_gc)
     {
@@ -192,6 +193,7 @@ namespace MMgc
         GCAssert(usedSpace <= kBlockSize);
         GCAssert(kBlockSize - usedSpace < (int)m_itemSize);
         GCAssert(m_itemSize < GCHeap::kBlockSize);
+        GCAssert(!_isRC || _isFinalized);
         m_gc->ObtainQuickListBudget(m_itemSize*m_itemsPerBlock);
         m_qBudget = m_qBudgetObtained = m_itemsPerBlock;
     }
@@ -451,6 +453,7 @@ namespace MMgc
         // Code below uses these optimizations
         GCAssert((unsigned long)GC::kFinalize == (unsigned long)kFinalizable);
         GCAssert((unsigned long)GC::kInternalExact == (unsigned long)kVirtualGCTrace);
+        GCAssert((flags & GC::kFinalize) == 0 || containsFinalizedObjects);
 
 #if defined VMCFG_EXACT_TRACING
         b->bits[GetBitsIndex(b, item)] = (flags & (GC::kFinalize|GC::kInternalExact));
@@ -789,6 +792,14 @@ namespace MMgc
     void GCAlloc::Finalize()
     {
         m_finalized = true;
+        if (containsFinalizedObjects)
+            FinalizationPass();
+        else
+            LazySweepPass();
+    }
+
+    void GCAlloc::FinalizationPass()
+    {
         // Go through every item of every block.  Look for items
         // that are in use but not marked as reachable, and delete
         // them.
@@ -886,11 +897,8 @@ namespace MMgc
                 // would not have been scanned) so the page just stays on the freelist
                 ClearMarks(b);
             } else if(!b->needsSweeping()) {
-                // free'ing some items but not all
-                if(b->nextFree || b->prevFree || b == m_firstFree) {
-                    RemoveFromFreeList(b);
-                    b->nextFree = b->prevFree = NULL;
-                }
+                // Removed the block from the free list earlier, check again
+                GCAssert(!(b->nextFree || b->prevFree || b == m_firstFree));
                 AddToSweepList(b);
                 putOnFreeList = false;
             }
@@ -899,6 +907,26 @@ namespace MMgc
                 AddToFreeList(b);
         }
     }
+
+    // For each block that is not already on the sweep list, add it to the sweep list for lazy sweeping.
+    // We don't know if the block will have any free objects, or if it will have all free objects, so the
+    // sweeper must take that into account.  
+
+    void GCAlloc::LazySweepPass()
+    {
+        for (GCBlock* b = m_firstBlock; b != NULL; b = Next(b))
+        {
+            if (!b->needsSweeping())
+            {
+                if(b->nextFree || b->prevFree || b == m_firstFree)
+                    RemoveFromFreeList(b);
+                AddToSweepList(b);
+            }
+            b->finalizeState = m_gc->finalizedValue;
+        }
+    }
+
+    // OPTIMIZEME: There are several opportunities for micro-optimizations here.
 
     void GCAlloc::SweepGuts(GCBlock *b)
     {
@@ -928,6 +956,23 @@ namespace MMgc
         }
     }
 
+    // Incrementality: Note that there is the possibility for an unbounded pause here,
+    // though it can be no worse than before the lazy sweeping.  And we can fix it, as 
+    // shown below.
+    //
+    // AllocSlow calls Sweep, which will sweep the block but (a) may return the block 
+    // to GCHeap rather than making it available to AllocSlow, if it is entirely empty, 
+    // or (b) may find that the block is entirely full and keep it off the free list.
+    // In either case the result may be that no memory is made available.
+    //
+    // AllocSlow handles the situation gracefully by trying another block, but there's no
+    // bound on how many blocks it may have to try.  The alternative would be to bound
+    // the number of attempts, so that a fully free block is not returned to GCHeap after
+    // some have been freed, or a fresh block is allocated from GCHeap after some full
+    // blocks have unsuccessfully been swept.  In either case that can be implemented in
+    // AllocSlow, by AllocSlow just going to GCHeap after failing to obtain memory from
+    // the free list after some attempts.
+
     bool GCAlloc::Sweep(GCBlock *b)
     {
         GCAssert(b->needsSweeping());
@@ -943,7 +988,8 @@ namespace MMgc
             return true;
         }
 
-        AddToFreeList(b);
+        if (b->numFree > 0)
+            AddToFreeList(b);
 
         return false;
     }
