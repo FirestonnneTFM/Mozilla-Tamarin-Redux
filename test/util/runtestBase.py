@@ -969,11 +969,14 @@ class RuntestBase(object):
                 outname = outname.replace("/", ".")
                 outabc = os.path.join(output, outname + ".abc")
 
+                if not os.path.exists(output):
+                    self.mkdir_nothrow(output)
+
                 shutil.copyfile(abcfile, outabc)
                 self.js_print('AOT compilation of %s' % (outabc))
 
                 # t = ("--timeout=%d" % self.testTimeOut) if self.testTimeOut > 0 else ""
-                cmd = '%s -Xshell -Xoutput %s %s %s %s' % (os.path.join(self.aotsdk, 'bin/pfi'), output, self.aotextraargs, " ".join(extraabcs), outabc)
+                cmd = '%s -Xshell -Xoutput %s %s %s %s' % (os.path.join(self.aotsdk, 'bin/adt'), output, self.aotextraargs, " ".join(extraabcs), outabc)
                 self.js_print(cmd)
                 (f,err,exitcode) = self.run_pipe(cmd)
 
@@ -1086,9 +1089,13 @@ class RuntestBase(object):
                 exit(1)
             for test in tests:
                 (testdir, ext) = splitext(test)
+                self.js_print('compiling %s' % test)
                 if self.aotsdk:
                     # We use the test config file to mark abc files that fail to AOT compile,
                     # so we need to take account of that here before we try to compile them.
+                    self.settings, self.directives = self.parseTestConfig(self.testconfig)
+                    failconfig_settings, failconfig_directives = self.parseTestConfig(self.failconfig)
+                    self.settings.update(failconfig_settings)
                     settings = self.get_test_settings(testdir)
                     if '.*' in settings and 'skip' in settings['.*']:
                         self.js_print('Skipping -daa %s ... reason: %s' % (test,settings['.*']['skip']))
@@ -1161,6 +1168,17 @@ class RuntestBase(object):
                                 continue
                             arglist.extend(genAtsArgs(dir,file,self.atstemplate))
 
+                        if self.aotsdk:
+                            # We use the test config file to mark abc files that fail to AOT compile,
+                            # so we need to take account of that here before we try to compile them.
+                            self.settings, self.directives = self.parseTestConfig(self.testconfig)
+                            failconfig_settings, failconfig_directives = self.parseTestConfig(self.failconfig)
+                            self.settings.update(failconfig_settings)
+                            settings = self.get_test_settings(testdir)
+                            if '.*' in settings and 'skip' in settings['.*']:
+                                self.js_print('Skipping -daa %s ... reason: %s' % (test,settings['.*']['skip']))
+                                continue
+                                
                         cmd = "asc -import %s " % (self.builtinabc)
                         for arg in arglist:
                             cmd += ' %s' % arg
@@ -1208,6 +1226,14 @@ class RuntestBase(object):
                             if not exists(testdir+".abc"):
                                 print("ERROR: abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
                                 self.ashErrors.append("abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
+                            else:
+                                extraabcs = []
+                                if test.endswith(self.abcasmExt):
+                                    extraabcs = [self.abcasmShell+'.abc']
+                                    if not exists(self.abcasmShell+'.abc'): # compile abcasmShell with no additional args
+                                        self.run_pipe('%s -jar %s %s' %(self.java, self.asc, self.abcasmShell+'.as'))
+                                self.compile_aot(testdir+".abc", extraabcs)
+
                     total -= 1
 
                     #print("%d remaining, %s" % (total,cmd))
