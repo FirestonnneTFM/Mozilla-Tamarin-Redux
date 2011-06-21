@@ -517,10 +517,35 @@ function strcmp(a,b)
 
 function readLines(filename) {
     var text = File.read(filename);
-    if (text.indexOf("\r\n") != -1)
-        return text.split("\r\n");
 
-    if (text.indexOf("\r") != -1)
+    var crIndex = text.indexOf("\r");
+    var lfIndex = text.indexOf("\n");
+
+    // Be resilient to files with more than one line ending - provide a good error
+    // message and fail.
+    if (crIndex >= 0 && lfIndex >= 0)
+    {
+        // Must be crlf endings or error.  At this point we need to check every line
+        // break, which sucks, but only on Windows...
+
+        for (;;)
+        {
+            var oldCr = -1;
+            var oldLf = -1;
+            crIndex = text.indexOf("\r", oldCr+1);
+            lfIndex = text.indexOf("\n", oldLf+1);
+            if (crIndex == -1 && lfIndex == -1)
+                break;
+            if (lfIndex != crIndex+1)
+                fail("Mixed line endings in file");
+            oldCr = crIndex;
+            oldLf = lfIndex;
+        }
+
+        return text.split("\r\n");
+    }
+
+    if (crIndex >= 0)
         return text.split("\r");
 
     return text.split("\n");
@@ -800,6 +825,8 @@ function readFiles(files)
         cppDataStack.length = 0;
         cppClassStack.length = 0;
         cppIfStack.length = 0;
+
+        errorContext = "On reading " + filename;
 
         const beforeReadLines = new Date();
         const text = readLines(filename);
