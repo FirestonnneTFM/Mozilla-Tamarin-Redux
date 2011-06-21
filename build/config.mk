@@ -120,22 +120,22 @@ GARBAGE += \
 
 $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)): %.$(II_SUFFIX): %.cpp $$(GLOBAL_DEPS)
 	@test -d $$(dir $$@) || mkdir -p $$(dir $$@)
-	@echo "Preprocessing $$*"
+	true "Preprocessing $$*"
 	@$(CXX) -E $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) $$< > $$@
 	@$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps < $$@
 
 $$($(1)_CXXOBJS): %.$(OBJ_SUFFIX): %.$(II_SUFFIX) $$(GLOBAL_DEPS)
-	@echo "Compiling $$*"
+	true "Compiling $$*"
 	@$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
 
 $$($(1)_COBJS:.$(OBJ_SUFFIX)=.$(I_SUFFIX)): %.$(I_SUFFIX): %.c $$(GLOBAL_DEPS)
 	@test -d $$(dir $$@) || mkdir -p $$(dir $$@)
-	@echo "Preprocessing $$*"
+	true "Preprocessing $$*"
 	@$(CC) -E $$($(1)_CPPFLAGS) $$($(1)_CFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) $$< > $$@
 	@$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps < $$@
 
 $$($(1)_COBJS): %.$(OBJ_SUFFIX): %.$(I_SUFFIX) $$(GLOBAL_DEPS)
-	@echo "Compiling $$*"
+	true "Compiling $$*"
 	@$(CC) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
 
 $$($(1)_ASMOBJS): %.$(OBJ_SUFFIX): %.armasm $$(GLOBAL_DEPS)
@@ -157,7 +157,7 @@ define STATIC_LIBRARY_RULES
   $(1)_NAME = $(LIB_PREFIX)$$($(1)_BASENAME).$(LIB_SUFFIX)
 
 $$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_COBJS) $$($(1)_ASMOBJS) $$($(1)_MASMOBJS)
-	@echo "Library $$*"
+	true "Library $$*"
 	$(call MKSTATICLIB,$$@) $$($(1)_CXXOBJS) $$($(1)_COBJS) $$($(1)_ASMOBJS) $$($(1)_MASMOBJS)
 
 GARBAGE += $$($(1)_DIR)$$($(1)_NAME)
@@ -215,7 +215,7 @@ define PROGRAM_RULES
     $(NULL)
 
 $$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_DEPS)
-	@echo "Link $$@"
+	true "Link $$@"
 	$(call MKPROGRAM,$$@) \
 	  $$($(1)_CXXOBJS) \
 	  $(LIBPATH). $$(foreach lib,$$($(1)_STATIC_LIBRARIES),$$(call EXPAND_LIBNAME,$$(lib))) \

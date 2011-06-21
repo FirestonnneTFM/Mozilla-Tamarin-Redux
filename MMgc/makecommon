@@ -100,7 +100,7 @@ MMGC_SRCS := ${MMGC_ROOT}/GCObject.cpp \
 #************************************************************************
 
 define mmgc-cmd
-	@echo "=== compiling MMgc: ===" $@ ${OPT}${MMGC_CXXFLAGS}
+	true "=== compiling MMgc: ===" $@ ${OPT}${MMGC_CXXFLAGS}
     @${CXX} -c ${OPT} ${MMGC_CXXFLAGS} ${MMGC_INCS} $< -o $@
 endef
 
