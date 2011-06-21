@@ -34,10 +34,24 @@
 #
 # ***** END LICENSE BLOCK *****
 
+CPPFLAGS += -DGTEST_HAS_RTTI=0 -D_HAS_EXCEPTIONS=0
+
+GTEST_INCLUDES = \
+  -I$(topsrcdir)/gtest/gtest-1.6.0/include \
+  $(NULL)
+INCLUDES := $(GTEST_INCLUDES)
+
+VMBASE_INCLUDES = \
+  -I$(topsrcdir)/platform \
+  -I$(topsrcdir)/VMPI \
+  -I$(topsrcdir)/vmbase \
+  $(NULL)
+
 # shell must be included here because that's where avmshell-features.h lives,
-# and in shell builds it is included from platform/VMPI.h.  That's how it
+# and in shell builds it is included from platform/AVMPI.h.  That's how it
 # is supposed to be.
-INCLUDES += \
+AVM_INCLUDES = \
+  $(VMBASE_INCLUDES) \
   -I$(topsrcdir) \
   -I$(topsrcdir)/MMgc \
   -I$(topsrcdir)/core \
@@ -46,15 +60,23 @@ INCLUDES += \
   -I$(topsrcdir)/platform \
   -I$(topsrcdir)/other-licenses/zlib \
   -I$(topsrcdir)/shell \
-  -I$(topsrcdir)/VMPI \
-  -I$(topsrcdir)/vmbase \
+  -I$(topsrcdir)/AVMPI \
   -I$(topsrcdir)/generated \
   -I$(topsrcdir)/aot \
   $(NULL)
 
+# This line could just as easily go into core/manifest.mk, but putting it here
+# emphasizes that we should not simply include everything everywhere.
+avmplus_INCLUDES += $(AVM_INCLUDES)
+
 $(call RECURSE_DIRS,other-licenses/zlib)
+
+$(call RECURSE_DIRS,gtest)
+
 $(call RECURSE_DIRS,VMPI)
 $(call RECURSE_DIRS,vmbase)
+
+$(call RECURSE_DIRS,AVMPI)
 $(call RECURSE_DIRS,MMgc)
 
 ifdef ENABLE_TAMARIN

@@ -43,6 +43,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/ActionBlockConstants.cpp \
   $(curdir)/ArrayClass.cpp \
   $(curdir)/ArrayObject.cpp \
+  $(curdir)/atom.cpp \
   $(curdir)/AvmCore.cpp \
   $(curdir)/avm.cpp \
   $(curdir)/avmfeatures.cpp \

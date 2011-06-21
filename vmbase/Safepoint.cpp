@@ -51,7 +51,7 @@ namespace vmbase {
 
     SafepointRecord::~SafepointRecord()
     {
-        AvmAssert(m_status == SP_UNSAFE && m_manager == NULL);
+        assert(m_status == SP_UNSAFE && m_manager == NULL);
     }
 
     SafepointManager::SafepointManager()
@@ -63,14 +63,14 @@ namespace vmbase {
 
     SafepointManager::~SafepointManager()
     {
-        AvmAssert(m_records == NULL);
+        assert(m_records == NULL);
     }
 
     void SafepointManager::requestSafepointTask(SafepointTask& task)
     {
-        AvmAssert(SafepointRecord::hasCurrent());
-        AvmAssert(SafepointRecord::current()->m_manager == this);
-        AvmAssert(!inSafepointTask());
+        assert(SafepointRecord::hasCurrent());
+        assert(SafepointRecord::current()->m_manager == this);
+        assert(!inSafepointTask());
 
         // Serialize dispatch of safepoint tasks.
         SCOPE_LOCK_SP(m_requestMutex) {
@@ -116,7 +116,7 @@ namespace vmbase {
 
     void SafepointManager::enter(SafepointRecord* record)
     {
-        AvmAssert(record->m_manager == NULL);
+        assert(record->m_manager == NULL);
         SafepointRecord* stackPrev = SafepointRecord::current();
         if (stackPrev) {
             // This is a nested entry. Make the previous
@@ -143,7 +143,7 @@ namespace vmbase {
 
     void SafepointManager::leave(SafepointRecord* record)
     {
-        AvmAssert(record->m_manager == this);
+        assert(record->m_manager == this);
         SafepointRecord* const stackPrev = record->m_stackPrev;
         // Remove the SafepointRecord from this SafepointManager.
         SCOPE_LOCK_SP(m_requestMutex) {

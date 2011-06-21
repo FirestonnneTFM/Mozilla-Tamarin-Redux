@@ -40,7 +40,6 @@
 #ifndef __vmbase_inlines__
 #define __vmbase_inlines__
 
-#include "atom-inlines.h"
 #include "VMThread-inlines.h"
 #ifdef VMCFG_SAFEPOINTS
 #include "Safepoint-inlines.h"

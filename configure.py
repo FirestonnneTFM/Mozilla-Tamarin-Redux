@@ -256,23 +256,24 @@ if config.getCompiler() == 'GCC':
         # These flags are shared with some of the other builds such as ARM, but better to keep them separate here for flexibility
         COMMON_CXX_FLAGS = "-Wall -Wdisabled-optimization -Wextra -Wformat=2 -Winit-self -Winvalid-pch -Wno-invalid-offsetof " \
                            "-Wno-switch -Wpointer-arith -Wwrite-strings -Woverloaded-virtual -Wsign-promo " \
-                           "-fmessage-length=0 -fno-exceptions -fno-rtti -fsigned-char -fno-inline-functions-called-once -ffunction-sections -fdata-sections "
+                           "-fmessage-length=0 -fno-exceptions -fno-rtti -fsigned-char -fno-inline-functions-called-once -ffunction-sections -fdata-sections -Wno-ctor-dtor-privacy "
 
         # Additional flags used by android
-        APP_CXX_FLAGS = "%s -Wctor-dtor-privacy -Wlogical-op -Wstrict-overflow=1 " \
+        APP_CXX_FLAGS = "%s -Wno-ctor-dtor-privacy -Wlogical-op -Wstrict-overflow=1 " \
                     "-Wmissing-include-dirs -Wno-missing-field-initializers -Wno-type-limits -Wno-unused-parameter " \
                     "-Wnon-virtual-dtor -Wstrict-null-sentinel -Wno-missing-braces -Wno-multichar -Wno-psabi -Wno-reorder " \
-                    "-fno-strict-aliasing -fpic -funwind-tables -fstack-protector -finline-limit=200 -ftree-vectorize " \
+                    "-fno-short-enums -fno-strict-aliasing -fpic -funwind-tables -fstack-protector -finline-limit=200 -ftree-vectorize " \
                     "-feliminate-unused-debug-symbols -feliminate-unused-debug-types -MD -fwrapv " % COMMON_CXX_FLAGS
         APP_CXXFLAGS += _setGCCVersionedFlags(APP_CXX_FLAGS, GCC_MAJOR_VERSION, GCC_MINOR_VERSION, cpu)
 
         # LFLAGS_HEADLESS gets picked up in configuration.py by MKPROGRAM
         LFLAGS_HEADLESS = "-nostdlib -Bdynamic -Wl,-T,"\
-                          "$(ANDROID_BUILD_TOP)/android-ndk/toolchains/arm-eabi-4.4.0/prebuilt/darwin-x86/arm-eabi/lib/ldscripts/armelf.x -Wl,"\
-                          "-dynamic-linker,/system/bin/linker -Wl,"\
-                          "-z,nocopyreloc "\
-                          "-L$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib -Wl,"\
-                          "-rpath-link=$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib "\
+                          "$(ANDROID_BUILD_TOP)/android-ndk/toolchains/arm-eabi-4.4.0/prebuilt/darwin-x86/arm-eabi/lib/ldscripts/armelf.x "\
+                          "-Wl,-dynamic-linker,/system/bin/linker "\
+                          "-Wl,-z,nocopyreloc "\
+                          "-L$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib "\
+                          "-L$(ANDROID_BUILD_TOP)/android-ndk/sources/cxx-stl/stlport/libs/armeabi "\
+                          "-Wl,-rpath-link=$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib "\
                           "$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib/crtbegin_dynamic.o "\
                           "$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib/crtend_android.o " % (ANDROIDPLATFORMVER,ANDROIDPLATFORMVER,ANDROIDPLATFORMVER,ANDROIDPLATFORMVER)
 
@@ -301,7 +302,7 @@ if config.getCompiler() == 'GCC':
         else:
             raise Exception('Unrecognized architecture: %s' % arm_arch)
 
-        APP_CPPFLAGS += "-DAVMPLUS_UNIX -DUNIX -Dlinux -DUSE_PTHREAD_MUTEX -DHAVE_STDARG -DAVMPLUS_ARM %s" % ANDROID_INCLUDES
+        APP_CPPFLAGS += "-DAVMPLUS_UNIX -DUNIX -Dlinux -DUSE_PTHREAD_MUTEX -DGTEST_USE_OWN_TR1_TUPLE=1 -DHAVE_STDARG -DAVMPLUS_ARM %s" % ANDROID_INCLUDES
 
     else:
         APP_CXXFLAGS += "-Wall -Wcast-align -Wdisabled-optimization -Wextra -Wformat=2 -Winit-self -Winvalid-pch -Wno-invalid-offsetof -Wno-switch "\
@@ -468,6 +469,7 @@ elif the_os == "sunos":
                          'SOLARIS': None})
     OS_LIBS.append('pthread')
     OS_LIBS.append('rt')
+    OS_LIBS.append('Cstd')
     APP_CPPFLAGS += '-DAVMPLUS_CDECL '
     if config.getDebug():
         OS_LIBS.append("dl")

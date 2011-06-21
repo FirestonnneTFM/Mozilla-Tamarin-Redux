@@ -98,10 +98,10 @@ namespace MMgc
         heapSoftLimit(0),
         dispersiveAdversarial(0), // 0 means dispersive allocation is off.
         OOMExitCode(0),
-        useVirtualMemory(VMPI_useVirtualMemory()),
+        useVirtualMemory(AVMPI_useVirtualMemory()),
         trimVirtualMemory(true),
-        mergeContiguousRegions(VMPI_canMergeContiguousRegions()),
-        sloppyCommit(VMPI_canCommitAlreadyCommittedMemory()),
+        mergeContiguousRegions(AVMPI_canMergeContiguousRegions()),
+        sloppyCommit(AVMPI_canCommitAlreadyCommittedMemory()),
         verbose(false),
         returnMemory(true),
         gcstats(false), // tracking
@@ -453,7 +453,7 @@ namespace MMgc
         if(profiler)
         {
             hooksEnabled = true; // set only after creating profiler
-            hasSpy = VMPI_spySetup();
+            hasSpy = AVMPI_spySetup();
         }
 #endif
 
@@ -512,7 +512,7 @@ namespace MMgc
         hooksEnabled = false;
 
         if(hasSpy)
-            VMPI_spyTeardown();
+            AVMPI_spyTeardown();
 #endif
 
         FreeAll();
@@ -860,7 +860,7 @@ namespace MMgc
                         RemoveBlock(block);
                         goto restart;
                     }
-                    else if(VMPI_decommitMemory(block->baseAddr, block->size * kBlockSize))
+                    else if(AVMPI_decommitMemory(block->baseAddr, block->size * kBlockSize))
                     {
                         block->committed = false;
                         block->dirty = false;
@@ -1326,8 +1326,8 @@ namespace MMgc
     static char* reserveSomeRegionDispersively(size_t fill_sz, size_t sizeInBytes) {
         static bool retLowAddr = false; // each call toggles low/high.
 
-        void *mem0 = VMPI_reserveMemoryRegion(NULL, fill_sz);
-        void *mem1 = VMPI_reserveMemoryRegion(NULL, fill_sz);
+        void *mem0 = AVMPI_reserveMemoryRegion(NULL, fill_sz);
+        void *mem1 = AVMPI_reserveMemoryRegion(NULL, fill_sz);
 
         if ((retLowAddr && mem0 > mem1) || ( !retLowAddr && mem0 < mem1)) {
             void *swap_tmp = mem0;
@@ -1335,11 +1335,11 @@ namespace MMgc
             mem1 = swap_tmp;
         }
 
-        VMPI_releaseMemoryRegion(mem0, fill_sz);
-        char *addr = (char*)VMPI_reserveMemoryRegion(mem0, sizeInBytes);
-        VMPI_releaseMemoryRegion(mem1, fill_sz);
+        AVMPI_releaseMemoryRegion(mem0, fill_sz);
+        char *addr = (char*)AVMPI_reserveMemoryRegion(mem0, sizeInBytes);
+        AVMPI_releaseMemoryRegion(mem1, fill_sz);
         if (addr == NULL) {
-            addr = (char*)VMPI_reserveMemoryRegion(NULL, sizeInBytes);
+            addr = (char*)AVMPI_reserveMemoryRegion(NULL, sizeInBytes);
         }
         retLowAddr = ! retLowAddr;
 
@@ -1351,12 +1351,12 @@ namespace MMgc
     {
 #ifdef DEBUG
         if (!config.dispersiveAdversarial)
-            return (char*)VMPI_reserveMemoryRegion(NULL, sizeInBytes);
+            return (char*)AVMPI_reserveMemoryRegion(NULL, sizeInBytes);
         else
             return reserveSomeRegionDispersively(config.dispersiveAdversarial,
                                                  sizeInBytes);
 #else
-        return (char*)VMPI_reserveMemoryRegion(NULL, sizeInBytes);
+        return (char*)AVMPI_reserveMemoryRegion(NULL, sizeInBytes);
 #endif
     }
 
@@ -1377,7 +1377,7 @@ namespace MMgc
         size_t unalignedSize = sizeInBytes;
 
         if(alignmentSlop(addr, alignment) != 0) {
-            VMPI_releaseMemoryRegion(addr, sizeInBytes);
+            AVMPI_releaseMemoryRegion(addr, sizeInBytes);
             unalignedSize = sizeInBytes + (alignment-1) * kBlockSize;
             addr = ReserveSomeRegion(unalignedSize);
             if(!addr)
@@ -1385,8 +1385,8 @@ namespace MMgc
         }
 
         char *alignedAddr = addr + alignmentSlop(addr, alignment) * kBlockSize;
-        if(!VMPI_commitMemory(alignedAddr, sizeInBytes)) {
-            VMPI_releaseMemoryRegion(addr, sizeInBytes);
+        if(!AVMPI_commitMemory(alignedAddr, sizeInBytes)) {
+            AVMPI_releaseMemoryRegion(addr, sizeInBytes);
             return NULL;
         }
 
@@ -1411,7 +1411,7 @@ namespace MMgc
         Region *r = AddrToRegion(item);
         // Must use r->baseAddr which may be less than item due to alignment,
         // and we must calculate full size
-        VMPI_releaseMemoryRegion(r->baseAddr, r->reserveTop - r->baseAddr);
+        AVMPI_releaseMemoryRegion(r->baseAddr, r->reserveTop - r->baseAddr);
         RemoveRegion(r, false);
     }
 
@@ -1646,7 +1646,7 @@ namespace MMgc
     {
         GCAssert(config.sloppyCommit || !block->committed);
 
-        if(!VMPI_commitMemory(block->baseAddr, block->size * kBlockSize))
+        if(!AVMPI_commitMemory(block->baseAddr, block->size * kBlockSize))
         {
             GCAssert(false);
         }
@@ -1656,7 +1656,7 @@ namespace MMgc
         }
         numDecommitted -= block->size;
         block->committed = true;
-        block->dirty = VMPI_areNewPagesDirty();
+        block->dirty = AVMPI_areNewPagesDirty();
     }
 
 #ifdef _DEBUG
@@ -1886,7 +1886,7 @@ namespace MMgc
             // Note that if CheckForNewMaxTotalHeapSize is only called once then maxPrivateMemory
             // will be out of sync with maxTotalHeapSize, see also bugzilla 608684.
             if (instance != NULL)
-                maxPrivateMemory = VMPI_getPrivateResidentPageCount() * VMPI_getVMPageSize();
+                maxPrivateMemory = AVMPI_getPrivateResidentPageCount() * VMPI_getVMPageSize();
 #endif
         }
     }
@@ -1978,7 +1978,7 @@ namespace MMgc
                 // Can this request be satisfied purely by committing more memory that
                 // is already reserved?
                 if (size <= commitAvail) {
-                    if (VMPI_commitMemory(region->commitTop, size * kBlockSize))
+                    if (AVMPI_commitMemory(region->commitTop, size * kBlockSize))
                     {
                         // Succeeded!
                         baseAddr = region->commitTop;
@@ -2007,7 +2007,7 @@ namespace MMgc
                 // - Try for the "default reservation size" if it's larger than
                 //   the requested block.
                 if (defaultReserve > size) {
-                    newRegionAddr = (char*) VMPI_reserveMemoryRegion(region->reserveTop,
+                    newRegionAddr = (char*) AVMPI_reserveMemoryRegion(region->reserveTop,
                                                   defaultReserve * kBlockSize);
                     newRegionSize = defaultReserve;
                 }
@@ -2016,7 +2016,7 @@ namespace MMgc
                 //   enough, go for the exact amount requested, minus the
                 //   committable space in the current region.
                 if (newRegionAddr == NULL) {
-                    newRegionAddr = (char*) VMPI_reserveMemoryRegion(region->reserveTop,
+                    newRegionAddr = (char*) AVMPI_reserveMemoryRegion(region->reserveTop,
                                                   (size - commitAvail)*kBlockSize);
                     newRegionSize = size - commitAvail;
 
@@ -2036,7 +2036,7 @@ namespace MMgc
 
                     // Commit available space from the existing region.
                     if (commitAvail != 0) {
-                        if (!VMPI_commitMemory(region->commitTop, commitAvail * kBlockSize))
+                        if (!AVMPI_commitMemory(region->commitTop, commitAvail * kBlockSize))
                         {
                             // We couldn't commit even this space.  We're doomed.
                             // Un-reserve the space we just reserved and fail.
@@ -2046,13 +2046,13 @@ namespace MMgc
                     }
 
                     // Commit needed space from the new region.
-                    if (!VMPI_commitMemory(newRegionAddr, (size - commitAvail) * kBlockSize))
+                    if (!AVMPI_commitMemory(newRegionAddr, (size - commitAvail) * kBlockSize))
                     {
                         // We couldn't commit this space.  We can't meet the
                         // request.  Un-commit any memory we just committed,
                         // un-reserve any memory we just reserved, and fail.
                         if (commitAvail != 0) {
-                            VMPI_decommitMemory(region->commitTop,
+                            AVMPI_decommitMemory(region->commitTop,
                                            commitAvail * kBlockSize);
                         }
                         ReleaseMemory(newRegionAddr,
@@ -2101,7 +2101,7 @@ namespace MMgc
             }
 
             // - Try to commit the memory.
-            if (VMPI_commitMemory(newRegionAddr,
+            if (AVMPI_commitMemory(newRegionAddr,
                              size*kBlockSize) == 0)
             {
                 // Failed.  Un-reserve the memory and fail.
@@ -2118,7 +2118,7 @@ namespace MMgc
         else
         {
             // Allocate the requested amount of space as a new region.
-            newRegionAddr = (char*)VMPI_allocateAlignedMemory(size * kBlockSize);
+            newRegionAddr = (char*)AVMPI_allocateAlignedMemory(size * kBlockSize);
             baseAddr = newRegionAddr;
             newRegionSize = size;
 
@@ -2303,7 +2303,7 @@ namespace MMgc
             if(region->blockId == kLargeItemBlockId) {
                 // leaks can happen during abort
                 GCAssertMsg(status == kMemAbort, "Allocation of large object not freed");
-                VMPI_releaseMemoryRegion(region->baseAddr, region->reserveTop - region->baseAddr);
+                AVMPI_releaseMemoryRegion(region->baseAddr, region->reserveTop - region->baseAddr);
             } else {
                 ReleaseMemory(region->baseAddr,
                               region->reserveTop-region->baseAddr);
@@ -2320,7 +2320,7 @@ namespace MMgc
         (void)managed;
 #ifdef MMGC_MEMORY_PROFILER
         if(hasSpy) {
-            VMPI_spyCallback();
+            AVMPI_spyCallback();
         }
         if(profiler)
             profiler->RecordAllocation(item, askSize, gotSize, managed);
@@ -2676,7 +2676,7 @@ namespace MMgc
     void GCHeap::DumpMemoryInfo()
     {
         MMGC_LOCK(m_spinlock);
-        size_t priv = VMPI_getPrivateResidentPageCount() * VMPI_getVMPageSize();
+        size_t priv = AVMPI_getPrivateResidentPageCount() * VMPI_getVMPageSize();
         size_t mmgc = GetTotalHeapSize() * GCHeap::kBlockSize;
         size_t unmanaged = GetFixedMalloc()->GetTotalSize() * GCHeap::kBlockSize;
         size_t fixed_alloced;
@@ -2855,7 +2855,7 @@ namespace MMgc
     {
         GCAssert(IsProfilerInitialized() == false);
 
-        profiler = VMPI_isMemoryProfilingEnabled() ? new MemoryProfiler() : NULL;
+        profiler = AVMPI_isMemoryProfilingEnabled() ? new MemoryProfiler() : NULL;
     }
 
 #endif //MMGC_MEMORY_PROFILER
@@ -2885,11 +2885,11 @@ namespace MMgc
     void GCHeap::ReleaseMemory(char *address, size_t size)
     {
         if(config.useVirtualMemory) {
-            bool success = VMPI_releaseMemoryRegion(address, size);
+            bool success = AVMPI_releaseMemoryRegion(address, size);
             GCAssert(success);
             (void)success;
         } else {
-            VMPI_releaseAlignedMemory(address);
+            AVMPI_releaseAlignedMemory(address);
         }
     }
 

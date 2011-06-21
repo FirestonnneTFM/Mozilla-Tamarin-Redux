@@ -613,9 +613,9 @@ namespace vmbase {
             : m_isInitialized(false)
         {
             m_isInitialized = VMPI_tlsCreate(&m_tlsID);
-            AvmAssert(m_isInitialized);
+            assert(m_isInitialized);
             set(0);
-            AvmAssert(get() == 0);
+            assert(get() == 0);
         }
 
         ~VMThreadLocal()
@@ -633,13 +633,13 @@ namespace vmbase {
 
         REALLY_INLINE void set(T value)
         {
-            AvmAssert(m_isInitialized);
+            assert(m_isInitialized);
             VMPI_tlsSetValue(m_tlsID, (void*) (value));
         }
 
         REALLY_INLINE T get() const
         {
-            AvmAssert(m_isInitialized);
+            assert(m_isInitialized);
             return (T) (VMPI_tlsGetValue(m_tlsID));
         }
 

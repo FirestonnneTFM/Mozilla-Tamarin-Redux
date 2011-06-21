@@ -37,12 +37,15 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
-#include "avmplus.h"
+#include "VMPI.h"
 
 #include <sys/time.h>
 #include <math.h>
 #include <sys/mman.h>
 #include "SymbianJITHeap.h"
+#include <e32std.h>
+#include <f32file.h>
+#include <hal.h>
 
 #define kMsecPerDay     86400000
 #define kMsecPerHour    3600000
@@ -56,8 +59,6 @@
 /**
 * Logging code
 */
-#include <e32std.h>
-#include <f32file.h>
 
 void DebugTrace(const TDesC8& aBuffer)
 {
@@ -279,21 +280,34 @@ const char *VMPI_getenv(const char *name)
     return getenv(name);
 }
 
-// Helper functions for VMPI_callWithRegistersSaved, kept in this file to prevent them from
-// being inlined in MMgcPortSymbian.cpp.
-
-// Registers have been flushed; compute a stack pointer and call the user function.
-void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
+uint64_t VMPI_getPerformanceFrequency()
 {
-    (void)buf;
-    volatile int temp = 0;
-    fn((void*)((uintptr_t)&temp & ~7), arg);
+    TInt tickPeriod;
+    HAL::Get(HALData::EFastCounterFrequency, tickPeriod);
+    return (uint64_t)tickPeriod;
 }
 
-// Do nothing - just called to prevent another call from being a tail call, and to keep some values alive
-void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
+uint64_t VMPI_getPerformanceCounter()
 {
-    (void)buf;
-    (void)fn;
-    (void)arg;
+    // Alternative way:
+    /*
+     TTime t;
+     t.UniversalTime ();
+     TInt64 lt = t.Int64 ();
+     return (uint64_t) (lt & 0x7FFFFFFF);
+     */
+    TUint32 counter = User::FastCounter();
+    return counter;
+}
+
+// Defined in GenericPortUtils.cpp to prevent them from being inlined below
+extern void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf);
+extern void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf);
+
+void AVMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
+{
+    jmp_buf buf;
+    AVMPI_setjmpNoUnwind(buf);                   // Save registers
+    CallWithRegistersSaved2(fn, arg, &buf);     // Computes the stack pointer, calls fn
+    CallWithRegistersSaved3(fn, &arg, &buf);    // Probably prevents the previous call from being a tail call
 }

@@ -37,7 +37,7 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
-#include "avmplus.h"
+#include "VMPI.h"
 
 #include <stdlib.h>
 #include <sys/time.h>
@@ -53,6 +53,17 @@
 
 #include <sys/mman.h>
 
+#ifdef SOLARIS
+    #include <ucontext.h>
+
+    // It's possible to use the flushw instruction on sparc9, but this should always work
+    #ifdef MMGC_SPARC
+        #define FLUSHWIN() asm("ta 3");
+    #else
+        #define FLUSHWIN()
+    #endif
+#endif
+
 #define kMsecPerDay     86400000
 #define kMsecPerHour    3600000
 #define kMsecPerSecond  1000
@@ -64,7 +75,7 @@
 
 double VMPI_getLocalTimeOffset()
 {
-    struct tm* t;
+    struct tm t;
     time_t current, localSec, globalSec;
 
     // The win32 implementation ignores the passed in time
@@ -72,11 +83,11 @@ double VMPI_getLocalTimeOffset()
     // behaviour we will do the same
     time( &current );
 
-    t = localtime( &current );
-    localSec = mktime( t );
+    localtime_r( &current, &t );
+    localSec = mktime( &t );
 
-    t = gmtime( &current );
-    globalSec = mktime( t );
+    gmtime_r( &current, &t );
+    globalSec = mktime( &t );
 
     return double( localSec - globalSec ) * 1000.0;
 }
@@ -96,7 +107,7 @@ double VMPI_getDate()
 //time is passed in as milliseconds from UTC.
 double VMPI_getDaylightSavingsTA(double newtime)
 {
-    struct tm *broken_down_time;
+    struct tm broken_down_time;
 
     //convert time from milliseconds
     newtime=newtime/kMsecPerSecond;
@@ -104,14 +115,12 @@ double VMPI_getDaylightSavingsTA(double newtime)
     time_t time_t_time=(time_t)newtime;
 
     //pull out a struct tm
-    broken_down_time = localtime( &time_t_time );
-
-    if (!broken_down_time)
+    if (!localtime_r( &time_t_time, &broken_down_time))
     {
         return 0;
     }
 
-    if (broken_down_time->tm_isdst > 0)
+    if (broken_down_time.tm_isdst > 0)
     {
         //daylight saving is definitely in effect.
         return kMsecPerHour;
@@ -169,143 +178,67 @@ void VMPI_log(const char* message)
         printf("%s",message);
 }
 
-bool VMPI_isMemoryProfilingEnabled()
-{
-    //read the mmgc profiling option switch
-    const char *env = getenv("MMGC_PROFILE");
-    return (env && (VMPI_strncmp(env, "1", 1) == 0));
-}
-
-// Constraint: nbytes must be a multiple of the VM page size.
-//
-// The returned memory will be aligned on a VM page boundary and cover
-// an integral number of VM pages.  This is necessary in order for
-// VMPI_makeCodeMemoryExecutable to work properly - it too operates
-// on entire VM pages.
-//
-// This function is duplicated in the Windows port utils, if you
-// fix a bug here be sure to fix the bug there.
-
-void *VMPI_allocateCodeMemory(size_t nbytes)
-{
-    MMgc::GCHeap* heap = MMgc::GCHeap::GetGCHeap();
-    size_t pagesize = VMPI_getVMPageSize();
-
-    if (nbytes % pagesize != 0) {
-#ifdef DEBUG
-        char buf[256];
-        VMPI_snprintf(buf,
-                      sizeof(buf),
-                      "VMPI_allocateCodeMemory invariants violated: request=%lu pagesize=%lu\nAborting.\n",
-                      (unsigned long)nbytes,
-                      (unsigned long)pagesize);
-        VMPI_log(buf);
-#endif
-        VMPI_abort();
-    }
-
-    size_t nblocks = nbytes / MMgc::GCHeap::kBlockSize;
-
-    heap->SignalCodeMemoryAllocation(nblocks, true);
-    return heap->Alloc(nblocks, MMgc::GCHeap::flags_Alloc, pagesize/MMgc::GCHeap::kBlockSize);
-}
-
-// Constraint: address must have been returned from VMPI_allocateCodeMemory
-// and nbytes must be the size of the allocation.  We can't quite check
-// this, so we check that the address points to a page boundary and that
-// the size is given as an integral number of VM pages and that the size
-// corresponds to GCHeap's notion of the size.
-//
-// Usage note: on Posix, where the memory goes back into the common pool
-// and isn't unmapped by the OS, it is very bad form for the client to
-// free executable memory, we do not try to detect that (in DEBUG mode)
-// but we probably should.
-//
-// This function is duplicated in the Windows port utils, if you
-// fix a bug here be sure to fix the bug there.
-
-void VMPI_freeCodeMemory(void* address, size_t nbytes)
-{
-    MMgc::GCHeap* heap = MMgc::GCHeap::GetGCHeap();
-    size_t pagesize = VMPI_getVMPageSize();
-    size_t nblocks = heap->Size(address);
-    size_t actualBytes = nblocks * MMgc::GCHeap::kBlockSize;
-
-    if ((uintptr_t)address % pagesize != 0 || nbytes % pagesize != 0 || nbytes != actualBytes) {
-#ifdef DEBUG
-        char buf[256];
-        VMPI_snprintf(buf,
-                      sizeof(buf),
-                      "VMPI_freeCodeMemory invariants violated: address=%lu provided=%lu actual=%lu\nAborting.\n",
-                      (unsigned long)address,
-                      (unsigned long)nbytes,
-                      (unsigned long)actualBytes);
-        VMPI_log(buf);
-#endif
-        VMPI_abort();
-    }
-
-    heap->Free(address);
-    heap->SignalCodeMemoryDeallocated(nblocks, true);
-}
-
-// Constraint: address must point into a block returned from VMPI_allocateCodeMemory
-// that has not been freed, it must point to a VM page boundary, and the number of
-// bytes to protect must be an integral number of VM pages.  We can't check that
-// the memory was returned from VMPI_allocateCodeMemory though and we don't check
-// that the memory is currently allocated.
-//
-// GCHeap may return memory that overlaps the boundary between two separately
-// committed regions.  If that causes problems for you there are two options: either
-// don't use GCHeap memory for code memory, or turn off VM support.
-
-void VMPI_makeCodeMemoryExecutable(void *address, size_t nbytes, bool makeItSo)
-{
-    size_t pagesize = VMPI_getVMPageSize();
-
-    if ((uintptr_t)address % pagesize != 0 || nbytes % pagesize != 0) {
-#ifdef DEBUG
-        char buf[256];
-        VMPI_snprintf(buf,
-                      sizeof(buf),
-                      "VMPI_makeCodeMemoryExecutable invariants violated: address=%lu size=%lu pagesize=%lu\nAborting.\n",
-                      (unsigned long)address,
-                      (unsigned long)nbytes,
-                      (unsigned long)pagesize);
-        VMPI_log(buf);
-#endif
-        VMPI_abort();
-    }
-
-    int flags = makeItSo ? PROT_EXEC|PROT_READ : PROT_WRITE|PROT_READ;
-    int retval = mprotect((maddr_ptr)address, (unsigned int)nbytes, flags);
-    AvmAssert(retval == 0);
-    (void)retval;
-}
-
 const char *VMPI_getenv(const char *name)
 {
     return getenv(name);
 }
 
-// Helper functions for VMPI_callWithRegistersSaved, kept in this file to prevent them from
-// being inlined in MMgcPortUnix.cpp / MMgcPortMac.cpp.
+// Defined in GenericPortUtils.cpp to prevent them from being inlined below
 
-// Registers have been flushed; compute a stack pointer and call the user function.
-void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
+extern void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf);
+extern void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf);
+
+#if defined SOLARIS
+
+void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
 {
-    (void)buf;
-    volatile int temp = 0;
-    fn((void*)((uintptr_t)&temp & ~7), arg);
+    ucontext_t buf;
+    
+    FLUSHWIN();
+    
+    getcontext(&buf);                           // Save registers - POSIX method
+    CallWithRegistersSaved2(fn, arg, &buf);     // Computes the stack pointer, calls fn
+    CallWithRegistersSaved3(fn, &arg, &buf);    // Probably prevents the previous call from being a tail call
 }
 
-// Do nothing - just called to prevent another call from being a tail call, and to keep some values alive
-void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
+#elif defined linux || defined __GNUC__ // Assume gcc for Linux
+
+void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
 {
-    (void)buf;
-    (void)fn;
-    (void)arg;
+    __builtin_unwind_init();                    // Save registers - GCC intrinsic
+    CallWithRegistersSaved2(fn, arg, NULL);     // Computes the stack pointer, calls fn
+    CallWithRegistersSaved3(fn, &arg, NULL);    // Probably prevents the previous call from being a tail call
 }
+
+#elif defined(AVMPLUS_MAC)
+
+void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
+{
+#if defined MMGC_IA32
+    void* buf = NULL;
+    __builtin_unwind_init();                    // Save registers - GCC intrinsic.  Not reliable on 10.4 PPC or 64-bit
+#else
+    jmp_buf buf;
+    VMPI_setjmpNoUnwind(buf);                   // Save registers - not always reliable
+#endif
+    CallWithRegistersSaved2(fn, arg, &buf);     // Computes the stack pointer, calls fn
+    CallWithRegistersSaved3(fn, &arg, &buf);    // Probably prevents the previous call from being a tail call
+}
+
+#else
+
+// Is getcontext() reliably available on POSIX systems?  If so it would be good
+// to use it instead of setjmp, and fall back on setjmp on non-POSIX systems.
+
+void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
+{
+    jmp_buf buf;
+    AVMPI_setjmpNoUnwind(buf);                   // Save registers
+    CallWithRegistersSaved2(fn, arg, &buf);     // Computes the stack pointer, calls fn
+    CallWithRegistersSaved3(fn, &arg, &buf);    // Probably prevents the previous call from being a tail call
+}
+
+#endif
 
 // Note: the linux #define provided by the compiler.
 
@@ -357,7 +290,3 @@ void assertSignalMask(uint32_t expected) {
 
 #endif
 }
-
-
-
-

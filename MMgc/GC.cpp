@@ -326,12 +326,12 @@ namespace MMgc
         if (weaklings != NULL)
         {
             GCLog("Peak weakref population: %u\n", weaklings->peakPopulation);
-            GCLog("Probes: %llu accesses: %llu ratio: %f\n", 
+            GCLog("Probes: %llu accesses: %llu ratio: %f\n",
                   (unsigned long long)weakRefs.probes,
                   (unsigned long long)weakRefs.accesses,
                   (double)weakRefs.probes/(double)weakRefs.accesses);
-            GCLog("GCs: %u, scanned: %llu, removed: %llu\n", 
-                  weaklings->collections, 
+            GCLog("GCs: %u, scanned: %llu, removed: %llu\n",
+                  weaklings->collections,
                   (unsigned long long)weaklings->scannedAtGC,
                   (unsigned long long)weaklings->removedAtGC);
             weaklings->dumpTopBacktraces(30, weaklings->BY_COUNT);
@@ -416,8 +416,8 @@ namespace MMgc
 #ifdef MMGC_DELETION_PROFILER
         /* 'deletos' should only be deleted after ForceSweepAtShutdown()
          * as that can lead to ProfileExplicitDeletion() calls
-         */  
-        if (deletos != NULL) 
+         */
+        if (deletos != NULL)
         {
             deletos->dumpTopBacktraces(30, deletos->BY_COUNT);
             delete deletos;
@@ -1054,14 +1054,14 @@ namespace MMgc
             GetGCBits(realptr) &= ~kHasWeakRef;
     }
     
-    /* The main wrinkle here is to keep a weakref alive with its object: 
+    /* The main wrinkle here is to keep a weakref alive with its object:
      * The invariant is that there is a weakref object for an object iff the
      * kHasWeakRef bit is set on the object.  With weakrefs not being finalized,
      * a weakref could be GC'd without properly clearing the kHasWeakRef bit
      * in the object if the object is kept alive by a strong pointer, thus
      * violating the invariant.  The invariant is upheld by keeping the weakref
      * alive.  (I suppose it could also have been upheld by clearing the
-     * kHasWeakRef bit on the object and letting the weakref be GC'd, but 
+     * kHasWeakRef bit on the object and letting the weakref be GC'd, but
      * that seemed trickier.  Bugzilla 656942.)
      */
     void GC::MarkOrClearWeakRefs()
@@ -1401,7 +1401,7 @@ namespace MMgc
         GC* gc = (GC*)arg;
         if( ((char*) stackPointer > (char*)gc->rememberedStackTop) && ((char *)gc->stackEnter > (char*)stackPointer)) {
             size_t amount = (char*)stackPointer - (char*)gc->rememberedStackTop;
-            VMPI_cleanStack(amount);
+            AVMPI_cleanStack(amount);
         }
     }
 
@@ -2173,7 +2173,7 @@ namespace MMgc
     // Mark stack overflow occurs when an item cannot be pushed onto the mark stack because
     // the top mark stack segment is full and a new segment can't be allocated.  In
     // practice, any call to the GC::Push_* methods (or their callers, such as GC::Mark,
-    // GC::MarkItem_*, GC::MarkNonStackRoots, GC::MarkStackRoots, GC::MarkQueueAndStack, and not 
+    // GC::MarkItem_*, GC::MarkNonStackRoots, GC::MarkStackRoots, GC::MarkQueueAndStack, and not
     // least the write barrier GC::TrapWrite) can cause a mark stack overflow.
     //
     // Since garbage collection cannot be allowed to abort the program as a result of
@@ -2277,7 +2277,7 @@ namespace MMgc
 
     // HandleLargeItem handles work items that are too big to be
     // marked atomically.  It does so by splitting the work into chunks;
-    // the incremental marker then gets an opportunity to stop marking 
+    // the incremental marker then gets an opportunity to stop marking
     // after processing each chunk.
     //
     // An object is "too large" if its size is larger than kLargestAlloc.
@@ -2299,7 +2299,7 @@ namespace MMgc
     // on the mark stack.  We can't have it both ways, so split objects
     // are protected against being freed by carrying another bit that
     // prevents deletion when it is set.  We only have this extra bit on
-    // large objects (where there's plenty of space).  Thus the cutoff for 
+    // large objects (where there's plenty of space).  Thus the cutoff for
     // splitting is exactly kLargestObject: only large objects that can
     // carry this bit are split.  (That reason predates the expansion
     // of per-object bits from four to eight.  Now that we have more header
@@ -2398,7 +2398,7 @@ namespace MMgc
     // that more marking is required.
     //
     // We keep the object marked though it remains on the queue, this means it may also
-    // end up on the barrier stack while still on the mark stack but that's fine, and 
+    // end up on the barrier stack while still on the mark stack but that's fine, and
     // inevitable.
     //
     // Here we set up for further marking by creating a mark state for a large object.
@@ -2540,8 +2540,8 @@ namespace MMgc
         // may have been transfered from the barrier stack, and there's nothing we
         // can do about it now.  (Explicit deletion needs to be removed from the API.)
         // The exact marker still works because the mark-exactly bit is cleared in
-        // AbortFree.  However, explicitly deleted objects that are queued 
-        // will be marked conservatively and will sometimes show up as false positive 
+        // AbortFree.  However, explicitly deleted objects that are queued
+        // will be marked conservatively and will sometimes show up as false positive
         // in the profiling of conservatively marked objects.
 
         // The common case is an exactly traced gc item (and an important subcase is
@@ -2558,7 +2558,7 @@ namespace MMgc
 
         if (bits & kVirtualGCTrace)
         {
-            // Inlined and merged SetMark, since we have the bits anyway. 
+            // Inlined and merged SetMark, since we have the bits anyway.
             bits = (bits & ~kQueued) | kMark;
 
             if (((GCTraceableBase*)userptr)->gcTrace(this, 0))
@@ -2827,10 +2827,10 @@ namespace MMgc
         
         gcbits_t& bits2 = GetGCBits(GetRealPointer(obj));
 
-        // Explicit deletion of objects can create dangling pointers which will hit 
-        // this assert. 
+        // Explicit deletion of objects can create dangling pointers which will hit
+        // this assert.
         // More information here: https://bugzilla.mozilla.org/show_bug.cgi?id=626684
-        // If you hit this assert, report with detailed information on the above bug    
+        // If you hit this assert, report with detailed information on the above bug
         GCAssertMsg((bits2 & (kMark|kQueued)) != (kMark|kQueued), "Dangling pointers hit during exact tracing, please report with the details on Bugzilla bug# 626684");
         
         GCAssert(ContainsPointers(obj) || (bits2 & kQueued) == 0);
@@ -2966,7 +2966,7 @@ namespace MMgc
             return;
         }
 
-        // It is possible, probably common, to enter FinishIncrementalMark without the 
+        // It is possible, probably common, to enter FinishIncrementalMark without the
         // mark queue being empty.   Clear out the queue synchronously here, we don't
         // want anything pending when we start marking roots: multiple active root protectors
         // for the same root is a mess.
@@ -3212,11 +3212,11 @@ namespace MMgc
         if (srcOffsetInBytes == dstOffsetInBytes || numPointers == 0)
             return;
        
-        if (BarrierActive() && 
-            GetMark(array) && 
+        if (BarrierActive() &&
+            GetMark(array) &&
             ContainsPointers(array) &&
             // don't push small items that are moving pointers inside the same array
-            Size(array) > kMarkItemSplitThreshold) 
+            Size(array) > kMarkItemSplitThreshold)
         {
             // this could be optimized to just re-scan the dirty region
             InlineWriteBarrierTrap(array);
@@ -3249,11 +3249,11 @@ namespace MMgc
         if (mem == NULL || numPointers <= 1)
             return;
        
-        if (BarrierActive() && 
-            GetMark(mem) && 
+        if (BarrierActive() &&
+            GetMark(mem) &&
             ContainsPointers(mem) &&
             // don't push small items that are moving pointers inside the same mem
-            Size(mem) > kMarkItemSplitThreshold) 
+            Size(mem) > kMarkItemSplitThreshold)
         {
             // this could be optimized to just re-scan the dirty region
             InlineWriteBarrierTrap(mem);
@@ -3428,7 +3428,7 @@ namespace MMgc
                 // it has always been illegal to store a pointer to a dead object into a
                 // live object, thus resurrecting the dead object - though the conservative
                 // collector would deal with that.  The exact collector does not.
-                if (GC::GetMark(userptr) == 0) 
+                if (GC::GetMark(userptr) == 0)
                 {
                     GCAssertMsg(false, "Do not attempt to resurrect a dying object by creating a weak reference to it");
                     return gc->emptyWeakRef;
@@ -4081,7 +4081,7 @@ namespace MMgc
             ((RCObject*)(lock->object))->DecrementRef();
         if (lock->prev != NULL)
             lock->prev->next = lock->next;
-        else 
+        else
             lockedObjects = lock->next;
         if (lock->next != NULL)
             lock->next->prev = lock->prev;

@@ -37,7 +37,8 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
-#include "MMgc.h"
+#include "VMPI.h"
+#include "VMAssert.h"
 
 #ifndef TLS_OUT_OF_INDEXES
     #define TLS_OUT_OF_INDEXES (DWORD)0xFFFFFFFF
@@ -181,7 +182,7 @@ bool VMPI_condVarTimedWaitInternal(vmpi_condvar_t* condvar, vmpi_mutex_t* mutex,
             prev = waiter;
             waiter = waiter->next;
         } while(waiter);
-		AvmAssertMsg(false, "Current thread not found in list of waiters");
+		assert(!"Current thread not found in list of waiters");
 	}
     return rtn == 0;
 }

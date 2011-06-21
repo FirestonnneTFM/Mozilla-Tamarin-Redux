@@ -334,21 +334,21 @@ namespace nanojit
     }
 
     void* CodeAlloc::allocCodeChunk(size_t nbytes) {
-        return VMPI_allocateCodeMemory(nbytes);
+        return AVMPI_allocateCodeMemory(nbytes);
     }
 
     void CodeAlloc::freeCodeChunk(void* addr, size_t nbytes) {
-        VMPI_freeCodeMemory(addr, nbytes);
+        AVMPI_freeCodeMemory(addr, nbytes);
     }
 
     void CodeAlloc::markCodeChunkExec(void* addr, size_t nbytes) {
         //printf("protect   %d %p\n", (int)nbytes, addr);
-        VMPI_makeCodeMemoryExecutable(addr, nbytes, true); // RX
+        AVMPI_makeCodeMemoryExecutable(addr, nbytes, true); // RX
     }
 
     void CodeAlloc::markCodeChunkWrite(void* addr, size_t nbytes) {
         //printf("unprotect %d %p\n", (int)nbytes, addr);
-        VMPI_makeCodeMemoryExecutable(addr, nbytes, false); // RW
+        AVMPI_makeCodeMemoryExecutable(addr, nbytes, false); // RW
     }
 
 #ifdef DEBUG

@@ -40,19 +40,6 @@
 #ifndef __StaticAssert__
 #define __StaticAssert__
 
-namespace MMgc
-{
-    template <int> struct static_assert_MMgc {};
-    template <bool> struct STATIC_ASSERTION_FAILED;
-    template <> struct STATIC_ASSERTION_FAILED<true> {};
-}
-
-#define _MMGC_JOIN(x,y) _MMGC_DO_JOIN(x,y)
-#define _MMGC_DO_JOIN(x,y) _MMGC_DO_JOIN2(x,y)
-#define _MMGC_DO_JOIN2(x,y) x##y
-
-#define MMGC_STATIC_ASSERT(condition) \
-    typedef ::MMgc::static_assert_MMgc<sizeof (::MMgc::STATIC_ASSERTION_FAILED<(bool)(condition)>)> \
-        _MMGC_JOIN(MMgc_static_assert_line_, __LINE__)
+#define MMGC_STATIC_ASSERT(condition) static_assert(condition,"MMGC_STATIC_ASSERT")
 
 #endif /* __StaticAssert__ */

@@ -36,11 +36,12 @@
 # ***** END LICENSE BLOCK *****
 
 PROGRAMS += shell
+shell_INCLUDES += $(AVM_INCLUDES)
 
 shell_BASENAME = avmshell
-shell_INCLUDES = -I$(srcdir) -I$(topsrcdir)/extensions
+shell_INCLUDES += -I$(srcdir) -I$(topsrcdir)/extensions 
 shell_DEFINES = -DAVMPLUS_SHELL
-shell_STATIC_LIBRARIES = zlib MMgc avmplus vmbase
+shell_STATIC_LIBRARIES = zlib avmplus MMgc vmbase
 ifeq (1,$(ENABLE_AOT))
 shell_STATIC_LIBRARIES += aotstubs aot
 endif

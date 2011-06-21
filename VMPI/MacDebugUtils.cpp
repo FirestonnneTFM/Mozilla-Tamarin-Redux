@@ -38,7 +38,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-#include "MMgc.h"
+#include "VMPI.h"
 
 #include <signal.h>
 
