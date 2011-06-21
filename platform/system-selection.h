@@ -241,10 +241,6 @@
 
 // unaligned access
 
-// currently used only by the AVMSYSTEM_ARM case, but we include
-// it on all platforms to ensure consistent build system failures
-#include "../nanojit/njcpudetect.h"
-
 #if AVMSYSTEM_IA32 || AVMSYSTEM_AMD64
   #define AVMSYSTEM_UNALIGNED_INT_ACCESS 1
   #define AVMSYSTEM_UNALIGNED_FP_ACCESS  1
@@ -264,7 +260,12 @@
     // ARMv6 (e.g. ARM1176): Optional support that must be enabled by the OS.
     // ARMv7 (e.g. Cortex-A8): Unaligned access support cannot be disabled; you always have it.
     //
-    #if NJ_COMPILER_ARM_ARCH >= 7
+
+    // GCC and RealView usually define __ARM_ARCH__,
+    // otherwise try well-known GCC flags ( see http://gcc.gnu.org/onlinedocs/gcc/ARM-Options.html )
+    #if __ARM_ARCH__ >= 7 ||  defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) ||  defined(__ARM_ARCH_7M__) || \
+        defined(__ARM_ARCH_7R__) || defined(_ARM_ARCH_7)
+
       #define AVMSYSTEM_UNALIGNED_INT_ACCESS 1
     #else
       #define AVMSYSTEM_UNALIGNED_INT_ACCESS 0

@@ -35,51 +35,53 @@
 #
 # ***** END LICENSE BLOCK *****
 
+# Note: this adds the C sources to the vmbase library build.
+
 ifeq (windows,$(TARGET_OS))
-shell_CXXSRCS := $(shell_CXXSRCS) \
+vmbase_CXXSRCS := $(vmbase_CXXSRCS) \
   $(curdir)/WinDebugUtils.cpp \
   $(curdir)/WinPortUtils.cpp \
-  $(curdir)/MMgcPortWin.cpp \
-  $(curdir)/SpyUtilsWin.cpp \
+  $(curdir)/GenericPortUtils.cpp \
   $(curdir)/ThreadsWin.cpp \
   $(NULL)
 endif
 
 ifeq (darwin,$(TARGET_OS))
-shell_CXXSRCS := $(shell_CXXSRCS) \
+vmbase_CXXSRCS := $(vmbase_CXXSRCS) \
   $(curdir)/MacDebugUtils.cpp \
+  $(curdir)/MacPortUtils.cpp \
   $(curdir)/PosixPortUtils.cpp \
-  $(curdir)/MMgcPortMac.cpp \
-  $(curdir)/SpyUtilsPosix.cpp \
+  $(curdir)/GenericPortUtils.cpp \
   $(curdir)/ThreadsPosix.cpp \
   $(NULL)
 endif
 
 ifeq (linux,$(TARGET_OS))
-shell_CXXSRCS := $(shell_CXXSRCS) \
+vmbase_CXXSRCS := $(vmbase_CXXSRCS) \
   $(curdir)/PosixPortUtils.cpp \
+  $(curdir)/PosixSpecificUtils.cpp \
   $(curdir)/UnixDebugUtils.cpp \
-  $(curdir)/MMgcPortUnix.cpp \
+  $(curdir)/GenericPortUtils.cpp \
   $(curdir)/ThreadsPosix.cpp \
   $(NULL)
 endif
 
 ifeq (android,$(TARGET_OS))
-shell_CXXSRCS := $(shell_CXXSRCS) \
+vmbase_CXXSRCS := $(vmbase_CXXSRCS) \
   $(curdir)/PosixPortUtils.cpp \
+  $(curdir)/PosixSpecificUtils.cpp \
   $(curdir)/UnixDebugUtils.cpp \
-  $(curdir)/MMgcPortUnix.cpp \
+  $(curdir)/GenericPortUtils.cpp \
   $(curdir)/ThreadsPosix.cpp \
   $(NULL)
 endif
 
 ifeq (sunos,$(TARGET_OS))
-shell_CXXSRCS := $(shell_CXXSRCS) \
+vmbase_CXXSRCS := $(vmbase_CXXSRCS) \
   $(curdir)/PosixPortUtils.cpp \
+  $(curdir)/PosixSpecificUtils.cpp \
   $(curdir)/UnixDebugUtils.cpp \
-  $(curdir)/MMgcPortUnix.cpp \
+  $(curdir)/GenericPortUtils.cpp \
   $(curdir)/ThreadsPosix.cpp \
   $(NULL)
 endif
-
-

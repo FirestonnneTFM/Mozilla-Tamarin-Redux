@@ -416,7 +416,7 @@ namespace MMgc
 
     REALLY_INLINE bool GCHeap::newPagesDirty()
     {
-        return config.useVirtualMemory ? VMPI_areNewPagesDirty() : true;
+        return config.useVirtualMemory ? AVMPI_areNewPagesDirty() : true;
     }
 }
 

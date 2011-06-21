@@ -81,11 +81,13 @@
  * https://developer.mozilla.org/En/Tamarin
  */
 
-#include "VMPI.h"           // also includes avmfeatures.h
+#include "AVMPI.h"
 #include "avmbuild.h"       // old-style configuration, may disappear, handles a few things not yet handled by the feature system
 
 #include "vmbase.h"
 
+#include "atom.h"
+#include "atom-inlines.h"
 #include "avmplus-tracers.h"
 #include "GCTypes.h"
 #include "avmplusVersion.h"

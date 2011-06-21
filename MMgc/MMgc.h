@@ -41,10 +41,11 @@
 #ifndef __MMgc__
 #define __MMgc__
 
-// VMPI.h includes avmfeatures.h, which detects platforms and sets up most MMGC_ names.
-#include "VMPI.h"
-
 #include "vmbase.h"
+
+// AVMPI.h includes avmfeatures.h, which detects platforms and sets up most MMGC_ names.
+#include "AVMPI.h"
+#include "atom.h"
 
 #ifdef MMGC_VALGRIND
     // Valgrind information:

@@ -52,8 +52,8 @@ namespace vmbase {
 
     REALLY_INLINE RecursiveMutex::~RecursiveMutex()
     {
-        AvmAssert(m_recursionCount == 0);
-        AvmAssert(m_ownerThreadID == 0);
+        assert(m_recursionCount == 0);
+        assert(m_ownerThreadID == 0);
         VMPI_recursiveMutexDestroy(&m_mutex);
     }
 
@@ -61,7 +61,7 @@ namespace vmbase {
     {
 #ifdef DEBUG
         if (VMPI_recursiveMutexTryLock(&m_mutex)) {
-            AvmAssert(m_recursionCount >= 0);
+            assert(m_recursionCount >= 0);
             if (m_recursionCount++ == 0) {
                 m_ownerThreadID = VMPI_currentThread();
             }
@@ -78,7 +78,7 @@ namespace vmbase {
     {
         VMPI_recursiveMutexLock(&m_mutex);
 #ifdef DEBUG
-        AvmAssert(m_recursionCount >= 0);
+        assert(m_recursionCount >= 0);
         if (m_recursionCount++ == 0) {
             m_ownerThreadID = VMPI_currentThread();
         }
@@ -88,7 +88,7 @@ namespace vmbase {
     REALLY_INLINE void RecursiveMutex::unlock()
     {
 #ifdef DEBUG
-        AvmAssert(m_recursionCount > 0);
+        assert(m_recursionCount > 0);
         if (--m_recursionCount == 0) {
             m_ownerThreadID = (vmpi_thread_t) 0;
         }
@@ -121,8 +121,8 @@ namespace vmbase {
     REALLY_INLINE void ConditionVariable::wait(RecursiveMutex& mutex)
     {
 #ifdef DEBUG
-        AvmAssert(mutex.isLockedByCurrentThread());
-        AvmAssert(mutex.m_recursionCount == 1);
+        assert(mutex.isLockedByCurrentThread());
+        assert(mutex.m_recursionCount == 1);
         mutex.m_recursionCount = 0;
         mutex.m_ownerThreadID = (vmpi_thread_t) 0;
         VMPI_condVarWait(&m_condVar, &mutex.m_mutex);
@@ -136,8 +136,8 @@ namespace vmbase {
     REALLY_INLINE bool ConditionVariable::wait(RecursiveMutex& mutex, int32_t timeoutMillis)
     {
 #ifdef DEBUG
-        AvmAssert(mutex.isLockedByCurrentThread());
-        AvmAssert(mutex.m_recursionCount == 1);
+        assert(mutex.isLockedByCurrentThread());
+        assert(mutex.m_recursionCount == 1);
         mutex.m_recursionCount = 0;
         mutex.m_ownerThreadID = (vmpi_thread_t) 0;
         bool ret = VMPI_condVarTimedWait(&m_condVar, &mutex.m_mutex, timeoutMillis);

@@ -171,7 +171,7 @@ namespace vmbase {
     bool VMThread::start(vmpi_thread_attr_t* attr)
     {
         SCOPE_LOCK_SP(m_joinMonitor) {
-            AvmAssert(m_state == NOT_STARTED);
+            assert(m_state == NOT_STARTED);
             if (m_state == NOT_STARTED) {
                 if (VMPI_threadCreate(&m_threadID, attr, VMThread::startInternal, (vmpi_thread_arg_t) (this))) {
                     m_state = RUNNABLE;
@@ -185,7 +185,7 @@ namespace vmbase {
     void VMThread::join()
     {
         SCOPE_LOCK_SP_NAMED(locker, m_joinMonitor) {
-            AvmAssert(m_state != NOT_STARTED);
+            assert(m_state != NOT_STARTED);
             if (m_state != TERMINATED) {
                 m_joinerQty++;
                 do {
@@ -203,7 +203,7 @@ namespace vmbase {
 
         // Block until we know our parent thread has finished its side of the setup
         SCOPE_LOCK_NO_SP(thread->m_joinMonitor) {
-            AvmAssert(thread->m_state == RUNNABLE);
+            assert(thread->m_state == RUNNABLE);
         }
 
         thread->m_runnable->run();

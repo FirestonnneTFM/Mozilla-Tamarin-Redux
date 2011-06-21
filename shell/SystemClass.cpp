@@ -237,7 +237,7 @@ namespace avmshell
 
     double SystemClass::get_privateMemory()
     {
-        return double(VMPI_getPrivateResidentPageCount() * VMPI_getVMPageSize());
+        return double(AVMPI_getPrivateResidentPageCount() * VMPI_getVMPageSize());
     }
 
     int32_t SystemClass::get_swfVersion()

@@ -37,11 +37,11 @@
 
 STATIC_LIBRARIES += vmbase
 vmbase_BUILD_ALL = 1
+vmbase_INCLUDES += $(VMBASE_INCLUDES)
 
 vmbase_CXXSRCS := $(vmbase_CXXSRCS) \
-  $(curdir)/atom.cpp \
-  $(curdir)/AvmAssert.cpp \
   $(curdir)/VMThread.cpp \
   $(curdir)/Safepoint.cpp \
   $(NULL)
 
+$(call RECURSE_DIRS,unittest)

@@ -40,6 +40,7 @@
 #ifndef __vmbase__
 #define __vmbase__
 
+#include "VMAssert.h"
 #include "VMPI.h"
 
 // vmbase.h is included by both avmplus.h and MMgc.h
@@ -51,11 +52,8 @@ namespace vmbase
     class SafepointRecord;
 }
 
-#include "AvmAssert.h"
-#include "atom.h"
 #include "VMThread.h"
 #include "Safepoint.h"
-
 #include "vmbase-inlines.h"
 
 #endif /* __vmbase__ */

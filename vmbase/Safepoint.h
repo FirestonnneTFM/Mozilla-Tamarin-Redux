@@ -290,7 +290,7 @@
  * by the given SafepointManager.
  */
 #define SAFEPOINT_POLL_FAST(_spManager_) \
-    AvmAssert(vmbase::SafepointRecord::hasCurrent() && \
+    assert(vmbase::SafepointRecord::hasCurrent() && \
               vmbase::SafepointRecord::current()->manager() == &_spManager_); \
     do { \
         if (_spManager_.hasRequest()) \

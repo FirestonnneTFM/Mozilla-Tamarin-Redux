@@ -79,8 +79,8 @@ namespace MMgc
         nameTable(128),
         allocInfoTable(128)
     {
-        VMPI_setupPCResolution();
-        simpleDump = !VMPI_hasSymbols();
+        AVMPI_setupPCResolution();
+        simpleDump = !AVMPI_hasSymbols();
         VMPI_lockInit(&lock);
     }
 
@@ -132,7 +132,7 @@ namespace MMgc
         {
             delete (AllocInfo*)allocIter.value();
         }
-        VMPI_desetupPCResolution();
+        AVMPI_desetupPCResolution();
         VMPI_lockDestroy(&lock);
     }
 
@@ -150,7 +150,7 @@ namespace MMgc
             name = (char*)nameTable.get(ip);
             if(!name) {
                 name = (char*)VMPI_alloc(256);
-                if(VMPI_getFunctionNameFromPC(ip, name, 256) == false)
+                if(AVMPI_getFunctionNameFromPC(ip, name, 256) == false)
                 {
                     VMPI_snprintf(name, 256, "0x%llx", (unsigned long long)ip);
                 }
@@ -301,7 +301,7 @@ namespace MMgc
         uintptr_t trace[kMaxStackTrace];
         VMPI_memset(trace, 0, sizeof(trace));
 
-        VMPI_captureStackTrace(trace, kMaxStackTrace, 3);
+        AVMPI_captureStackTrace(trace, kMaxStackTrace, 3);
         StackTrace *st = (StackTrace*)stackTraceMap.get(trace);
         if(!st) {
             st = new StackTrace(trace);
@@ -611,14 +611,14 @@ namespace MMgc
         GCStackTraceHashtable_VMPI::Iterator iter(&stackTraceMap);
         const void *obj;
         size_t num_traces = 0;
-        // Get a stack trace with VMPI_captureStackTrace as the top address - this will be used to calculate the
+        // Get a stack trace with AVMPI_captureStackTrace as the top address - this will be used to calculate the
         // base address to translate the addresses into relative addresses later
         uintptr_t trace[kMaxStackTrace];
         VMPI_memset(trace, 0, sizeof(trace));
 
-        VMPI_captureStackTrace(trace, kMaxStackTrace, 1);
+        AVMPI_captureStackTrace(trace, kMaxStackTrace, 1);
 
-        GCLog("ReferenceAddress VMPI_captureStackTrace 0x%llx \n", (unsigned long long)trace[0]);
+        GCLog("ReferenceAddress AVMPI_captureStackTrace 0x%llx \n", (unsigned long long)trace[0]);
 
         while((obj = iter.nextKey()) != NULL)
         {
@@ -717,7 +717,7 @@ namespace MMgc
         // what we've tested so far.  Environment variables are not kosher in
         // all settings.
         //
-        // Note you may want to inspect the implementation of VMPI_setupPCResolution
+        // Note you may want to inspect the implementation of AVMPI_setupPCResolution
         // to make sure symbol resolution is available and enabled, otherwise
         // the profiles won't make a lot of sense.
 #ifdef AVMSHELL_BUILD
@@ -793,7 +793,7 @@ namespace MMgc
             }
 
             bool found_name;
-            if((found_name = VMPI_getFunctionNameFromPC(trace[i], buff, sizeof(buff))) == false)
+            if((found_name = AVMPI_getFunctionNameFromPC(trace[i], buff, sizeof(buff))) == false)
             {
                 VMPI_snprintf(buff, sizeof(buff), "0x%llx", (unsigned long long)trace[i]);
             }
@@ -801,7 +801,7 @@ namespace MMgc
             tp += VMPI_strlen(buff);
 
             uint32_t lineNum;
-            if(VMPI_getFileAndLineInfoFromPC(trace[i], buff, sizeof(buff), &lineNum))
+            if(AVMPI_getFileAndLineInfoFromPC(trace[i], buff, sizeof(buff), &lineNum))
             {
                 // Don't bother with file, linenumber, and address if we're just printing the address anyways
                 if (found_name)
@@ -1109,7 +1109,7 @@ namespace MMgc
         if (last_ip == ip)
             return true;
         last_ip = 0;
-        if (!VMPI_getFunctionNameFromPC(ip, last_buf, sizeof(last_buf)))
+        if (!AVMPI_getFunctionNameFromPC(ip, last_buf, sizeof(last_buf)))
             return false;
         last_ip = ip;
         return true;

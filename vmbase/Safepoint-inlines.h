@@ -114,7 +114,7 @@ namespace vmbase {
                 if (current && current->m_status == SafepointRecord::SP_UNSAFE) {
                     SafepointHelper_RecursiveMutex::lock(m_mutex);
                 } else {
-                    AvmAssert(!SafepointRecord::hasCurrent() || SafepointRecord::current()->m_manager->inSafepointTask());
+                    assert(!SafepointRecord::hasCurrent() || SafepointRecord::current()->m_manager->inSafepointTask());
                     m_mutex.lock();
                 }
             }
@@ -141,7 +141,7 @@ namespace vmbase {
                 if (current && current->m_status == SafepointRecord::SP_UNSAFE) {
                     SafepointHelper_RecursiveMutex::lock(m_monitor);
                 } else {
-                    AvmAssert(!SafepointRecord::hasCurrent() || SafepointRecord::current()->m_manager->inSafepointTask());
+                    assert(!SafepointRecord::hasCurrent() || SafepointRecord::current()->m_manager->inSafepointTask());
                     m_monitor.lock();
                 }
             }
@@ -194,7 +194,7 @@ namespace vmbase {
     REALLY_INLINE SafepointGate::SafepointGate(void* stackPointer)
         : m_safepointRecord(SafepointRecord::current())
     {
-        AvmAssert(SafepointRecord::current()->m_status == SafepointRecord::SP_UNSAFE);
+        assert(SafepointRecord::current()->m_status == SafepointRecord::SP_UNSAFE);
         // Record the stack region that is safe
         m_safepointRecord->m_safeRegionEnd = stackPointer;
         // If a SafepointTask submitting thread is busy waiting on
@@ -242,7 +242,7 @@ namespace vmbase {
 
     REALLY_INLINE const void* SafepointRecord::safeRegionEnd() const
     {
-        AvmAssert(m_manager->inSafepointTask());
+        assert(m_manager->inSafepointTask());
         return m_safeRegionEnd;
     }
 

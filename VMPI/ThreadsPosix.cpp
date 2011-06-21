@@ -37,7 +37,8 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
-#include "MMgc.h"
+#include "VMPI.h"
+#include "VMAssert.h"
 
 #include <pthread.h>
 
@@ -49,7 +50,7 @@ bool VMPI_tlsCreate(uintptr_t* tlsId)
     if(r == 0)
     {
         // we expect the value to default to zero
-        GCAssert(pthread_getspecific(key) == 0);
+        assert(pthread_getspecific(key) == 0);
         *tlsId = (uintptr_t) key;
         return true;
     }
