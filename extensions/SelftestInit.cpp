@@ -82,6 +82,9 @@ extern void create_mmgc_finalize_uninit(AvmCore* core);
 namespace ST_mmgc_gcheap {
 extern void create_mmgc_gcheap(AvmCore* core);
 }
+namespace ST_mmgc_gcoption {
+extern void create_mmgc_gcoption(AvmCore* core);
+}
 namespace ST_mmgc_mmfx_array {
 extern void create_mmgc_mmfx_array(AvmCore* core);
 }
@@ -125,6 +128,7 @@ ST_mmgc_dependent::create_mmgc_dependent(core);
 ST_mmgc_exact::create_mmgc_exact(core);
 ST_mmgc_finalize_uninit::create_mmgc_finalize_uninit(core);
 ST_mmgc_gcheap::create_mmgc_gcheap(core);
+ST_mmgc_gcoption::create_mmgc_gcoption(core);
 ST_mmgc_mmfx_array::create_mmgc_mmfx_array(core);
 #if defined VMCFG_WORKERTHREADS
 ST_mmgc_threads::create_mmgc_threads(core);
