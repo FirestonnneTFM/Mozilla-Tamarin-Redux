@@ -1,4 +1,4 @@
-// Generated from ST_avmplus_basics.st, ST_avmplus_builtins.st, ST_avmplus_peephole.st, ST_mmgc_543560.st, ST_mmgc_575631.st, ST_mmgc_580603.st, ST_mmgc_637993.st, ST_mmgc_basics.st, ST_mmgc_dependent.st, ST_mmgc_exact.st, ST_mmgc_finalize_uninit.st, ST_mmgc_gcheap.st, ST_mmgc_mmfx_array.st, ST_mmgc_threads.st, ST_mmgc_weakref.st, ST_vmbase_concurrency.st, ST_vmbase_safepoints.st, ST_vmpi_threads.st
+// Generated from ST_avmplus_basics.st, ST_avmplus_builtins.st, ST_avmplus_peephole.st, ST_mmgc_543560.st, ST_mmgc_575631.st, ST_mmgc_580603.st, ST_mmgc_637993.st, ST_mmgc_basics.st, ST_mmgc_dependent.st, ST_mmgc_exact.st, ST_mmgc_finalize_uninit.st, ST_mmgc_gcheap.st, ST_mmgc_gcoption.st, ST_mmgc_mmfx_array.st, ST_mmgc_threads.st, ST_mmgc_weakref.st, ST_vmbase_concurrency.st, ST_vmbase_safepoints.st, ST_vmpi_threads.st
 // Generated from ST_avmplus_basics.st
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
@@ -2380,6 +2380,423 @@ verifyPass(uintptr_t(((GCHeap::kBlockSize<<(i-1))-1) & uintptr_t(item)) == 0, "u
 
 }
 void create_mmgc_gcheap(AvmCore* core) { new ST_mmgc_gcheap(core); }
+}
+}
+#endif
+
+// Generated from ST_mmgc_gcoption.st
+// -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
+// vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+//
+// ***** BEGIN LICENSE BLOCK *****
+// Version: MPL 1.1/GPL 2.0/LGPL 2.1
+//
+// The contents of this file are subject to the Mozilla Public License Version
+// 1.1 (the "License"); you may not use this file except in compliance with
+// the License. You may obtain a copy of the License at
+// http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis,
+// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+// for the specific language governing rights and limitations under the
+// License.
+//
+// The Original Code is [Open Source Virtual Machine.].
+//
+// The Initial Developer of the Original Code is
+// Adobe System Incorporated.
+// Portions created by the Initial Developer are Copyright (C) 2004-2006
+// the Initial Developer. All Rights Reserved.
+//
+// Contributor(s):
+//   Adobe AS3 Team
+//
+// Alternatively, the contents of this file may be used under the terms of
+// either the GNU General Public License Version 2 or later (the "GPL"), or
+// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+// in which case the provisions of the GPL or the LGPL are applicable instead
+// of those above. If you wish to allow use of your version of this file only
+// under the terms of either the GPL or the LGPL, and not to allow others to
+// use your version of this file under the terms of the MPL, indicate your
+// decision by deleting the provisions above and replace them with the notice
+// and other provisions required by the GPL or the LGPL. If you do not delete
+// the provisions above, a recipient may use your version of this file under
+// the terms of any one of the MPL, the GPL or the LGPL.
+//
+// ***** END LICENSE BLOCK ***** */
+
+#include "avmshell.h"
+#ifdef VMCFG_SELFTEST
+namespace avmplus {
+namespace ST_mmgc_gcoption {
+using namespace MMgc;
+
+class ST_mmgc_gcoption : public Selftest {
+public:
+ST_mmgc_gcoption(AvmCore* core);
+virtual void run(int n);
+virtual void prologue();
+virtual void epilogue();
+private:
+static const char* ST_names[];
+static const bool ST_explicits[];
+void test0();
+void test1();
+void test2();
+void test3();
+void test4();
+    bool m_ret;
+    bool m_wrong;
+    GCHeap *m_heap;
+    GCHeapConfig m_config_orig;
+    bool isParamOption(const char* line) {
+        return m_heap->config.IsGCOptionWithParam(line);
+    }
+    bool notParamOption(const char* line) {
+        return !isParamOption(line);
+    }
+    bool approxEqual(double x, double y) {
+        double delta1 = x - y;
+        // abs() does not produce correct results at e.g. DBL_MAX.
+        double delta2 = (delta1 > 0) ? delta1 : -delta1;
+        return (delta2 < 0.0001);
+    }
+    void parseApply(const char* line, const char* optExtra=0)
+    {
+        m_ret = m_heap->config.ParseAndApplyOption(line, m_wrong, optExtra);
+    }
+    bool parsedCorrectly() {
+        return m_ret && !m_wrong;
+    }
+    bool gcoptionButIncorrectFormat() {
+        return m_ret && m_wrong;
+    }
+
+    void saveOrigHeapConfig() {
+        memcpy(&m_config_orig, &m_heap->config, sizeof(GCHeapConfig));
+    }
+
+    void restoreHeapConfig() {
+        memcpy(&m_heap->config, &m_config_orig, sizeof(GCHeapConfig));
+    }
+
+    bool configUnchanged() {
+        const char* c1 = (const char*)&m_heap->config;
+        const char* c2 = (const char*)&m_config_orig;
+        bool noChangeSeen = true;
+        for (size_t i=0; i < sizeof(GCHeapConfig); i++) {
+            if (*c1 != *c2)
+                noChangeSeen = false;
+        }
+        return noChangeSeen;
+    }
+
+};
+ST_mmgc_gcoption::ST_mmgc_gcoption(AvmCore* core)
+    : Selftest(core, "mmgc", "gcoption", ST_mmgc_gcoption::ST_names,ST_mmgc_gcoption::ST_explicits)
+{}
+const char* ST_mmgc_gcoption::ST_names[] = {"detect_parameterized_options","parse_memstats","parse_memlimit","parse_gcbehavior_gcsummary_eagersweep","parse_load_gcwork", NULL };
+const bool ST_mmgc_gcoption::ST_explicits[] = {false,false,false,false,false, false };
+void ST_mmgc_gcoption::run(int n) {
+switch(n) {
+case 0: test0(); return;
+case 1: test1(); return;
+case 2: test2(); return;
+case 3: test3(); return;
+case 4: test4(); return;
+}
+}
+void ST_mmgc_gcoption::prologue() {
+{
+    m_heap = GCHeap::GetGCHeap();
+    saveOrigHeapConfig();
+}
+
+}
+void ST_mmgc_gcoption::epilogue() {
+{
+    restoreHeapConfig();
+}
+
+}
+void ST_mmgc_gcoption::test0() {
+{
+// line 108 "ST_mmgc_gcoption.st"
+verifyPass(isParamOption("-memlimit"), "isParamOption(\"-memlimit\")", __FILE__, __LINE__);
+// line 109 "ST_mmgc_gcoption.st"
+verifyPass(isParamOption("-load"), "isParamOption(\"-load\")", __FILE__, __LINE__);
+// line 110 "ST_mmgc_gcoption.st"
+verifyPass(isParamOption("-loadCeiling"), "isParamOption(\"-loadCeiling\")", __FILE__, __LINE__);
+// line 111 "ST_mmgc_gcoption.st"
+verifyPass(isParamOption("-gcwork"), "isParamOption(\"-gcwork\")", __FILE__, __LINE__);
+// line 112 "ST_mmgc_gcoption.st"
+verifyPass(isParamOption("-gcstack"), "isParamOption(\"-gcstack\")", __FILE__, __LINE__);
+
+// line 114 "ST_mmgc_gcoption.st"
+verifyPass(notParamOption("-memlimit=10"), "notParamOption(\"-memlimit=10\")", __FILE__, __LINE__);
+// line 115 "ST_mmgc_gcoption.st"
+verifyPass(notParamOption("-load 1.5"), "notParamOption(\"-load 1.5\")", __FILE__, __LINE__);
+// line 116 "ST_mmgc_gcoption.st"
+verifyPass(notParamOption("-loadCeiling 1.5"), "notParamOption(\"-loadCeiling 1.5\")", __FILE__, __LINE__);
+// line 117 "ST_mmgc_gcoption.st"
+verifyPass(notParamOption("-gcwork 1.5"), "notParamOption(\"-gcwork 1.5\")", __FILE__, __LINE__);
+// line 118 "ST_mmgc_gcoption.st"
+verifyPass(notParamOption("-gcstack 10"), "notParamOption(\"-gcstack 10\")", __FILE__, __LINE__);
+
+// line 120 "ST_mmgc_gcoption.st"
+verifyPass(notParamOption("-not_an_option_and_never_will_be"), "notParamOption(\"-not_an_option_and_never_will_be\")", __FILE__, __LINE__);
+// line 121 "ST_mmgc_gcoption.st"
+verifyPass(notParamOption("-not_an_option_and_never_will_be 10"), "notParamOption(\"-not_an_option_and_never_will_be 10\")", __FILE__, __LINE__);
+// line 122 "ST_mmgc_gcoption.st"
+verifyPass(notParamOption("-not_an_option_and_never_will_be=10"), "notParamOption(\"-not_an_option_and_never_will_be=10\")", __FILE__, __LINE__);
+          ;
+}
+
+}
+void ST_mmgc_gcoption::test1() {
+{
+    // sanity checks:
+    // - make sure our configUnchanged check is sane
+    // - make sure our restoreHeapConfig works.
+// line 131 "ST_mmgc_gcoption.st"
+verifyPass(configUnchanged(), "configUnchanged()", __FILE__, __LINE__);
+    memset(&m_heap->config, 0xfe, sizeof(GCHeapConfig));
+// line 133 "ST_mmgc_gcoption.st"
+verifyPass(!configUnchanged(), "!configUnchanged()", __FILE__, __LINE__);
+    restoreHeapConfig();
+// line 135 "ST_mmgc_gcoption.st"
+verifyPass(configUnchanged(), "configUnchanged()", __FILE__, __LINE__);
+          ;
+
+    parseApply("-memstats");
+// line 139 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 140 "ST_mmgc_gcoption.st"
+verifyPass(m_heap->config.gcstats && m_heap->config.autoGCStats, "m_heap->config.gcstats && m_heap->config.autoGCStats", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    parseApply("-memstats-verbose");
+// line 145 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 146 "ST_mmgc_gcoption.st"
+verifyPass(m_heap->config.gcstats && m_heap->config.autoGCStats && m_heap->config.verbose, "m_heap->config.gcstats && m_heap->config.autoGCStats && m_heap->config.verbose", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+}
+}
+void ST_mmgc_gcoption::test2() {
+{
+    parseApply("-memlimit   10");
+// line 153 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 154 "ST_mmgc_gcoption.st"
+verifyPass(m_heap->config.heapLimit == 10, "m_heap->config.heapLimit == 10", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    parseApply("-memlimit=11");
+// line 159 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 160 "ST_mmgc_gcoption.st"
+verifyPass(m_heap->config.heapLimit == 11, "m_heap->config.heapLimit == 11", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    parseApply("-memlimit = 12");
+// line 165 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 166 "ST_mmgc_gcoption.st"
+verifyPass(m_heap->config.heapLimit == 12, "m_heap->config.heapLimit == 12", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    parseApply("-memlimit");
+// line 171 "ST_mmgc_gcoption.st"
+verifyPass(gcoptionButIncorrectFormat(), "gcoptionButIncorrectFormat()", __FILE__, __LINE__);
+// line 172 "ST_mmgc_gcoption.st"
+verifyPass(m_heap->config.heapLimit == m_config_orig.heapLimit, "m_heap->config.heapLimit == m_config_orig.heapLimit", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    parseApply("-memlimit", "13");
+// line 177 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 178 "ST_mmgc_gcoption.st"
+verifyPass(m_heap->config.heapLimit == 13, "m_heap->config.heapLimit == 13", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+}
+}
+void ST_mmgc_gcoption::test3() {
+{
+#ifdef MMGC_POLICY_PROFILING
+    parseApply("-gcbehavior");
+// line 186 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 187 "ST_mmgc_gcoption.st"
+verifyPass((m_heap->config.gcbehavior == 2), "(m_heap->config.gcbehavior == 2)", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    parseApply("-gcsummary");
+// line 192 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 193 "ST_mmgc_gcoption.st"
+verifyPass((m_heap->config.gcbehavior == 1), "(m_heap->config.gcbehavior == 1)", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+#endif
+
+    parseApply("-eagersweep");
+// line 199 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 200 "ST_mmgc_gcoption.st"
+verifyPass(m_heap->config.eagerSweeping, "m_heap->config.eagerSweeping", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+}
+}
+void ST_mmgc_gcoption::test4() {
+{
+    parseApply("-load 7.0");
+// line 207 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 208 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcLoad[0], 7.0), "approxEqual(m_heap->config.gcLoad[0], 7.0)", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    // test load with '<space><param>'
+    parseApply("-load 6.0,10,5.0");
+// line 214 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 215 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcLoad[0], 6.0), "approxEqual(m_heap->config.gcLoad[0], 6.0)", __FILE__, __LINE__);
+// line 216 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcLoadCutoff[0], 10.0), "approxEqual(m_heap->config.gcLoadCutoff[0], 10.0)", __FILE__, __LINE__);
+// line 217 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcLoad[1], 5.0), "approxEqual(m_heap->config.gcLoad[1], 5.0)", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    // test load with separate <param>
+    parseApply("-load", "8.0,20.5,7.0");
+// line 223 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 224 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcLoad[0], 8.0), "approxEqual(m_heap->config.gcLoad[0], 8.0)", __FILE__, __LINE__);
+// line 225 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcLoadCutoff[0], 20.5), "approxEqual(m_heap->config.gcLoadCutoff[0], 20.5)", __FILE__, __LINE__);
+// line 226 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcLoad[1], 7.0), "approxEqual(m_heap->config.gcLoad[1], 7.0)", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    // test load with '=<param>'
+    parseApply("-load=10.0,30.5,9.0");
+// line 232 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 233 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcLoad[0], 10.0), "approxEqual(m_heap->config.gcLoad[0], 10.0)", __FILE__, __LINE__);
+// line 234 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcLoadCutoff[0], 30.5), "approxEqual(m_heap->config.gcLoadCutoff[0], 30.5)", __FILE__, __LINE__);
+// line 235 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcLoad[1], 9.0), "approxEqual(m_heap->config.gcLoad[1], 9.0)", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    // Max load pairs is 7
+    parseApply("-load 1.5,1.5,2,2,3,3,4,4,5,5,6,6,7,7,8,8");
+// line 241 "ST_mmgc_gcoption.st"
+verifyPass(gcoptionButIncorrectFormat(), "gcoptionButIncorrectFormat()", __FILE__, __LINE__);
+// line 242 "ST_mmgc_gcoption.st"
+verifyPass(configUnchanged(), "configUnchanged()", __FILE__, __LINE__);
+    restoreHeapConfig();
+
+    // Ensure that the last load value is ignored
+    parseApply("-load=10.0,30.0,9.0,60.0");
+// line 247 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 248 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcLoad[0], 10.0), "approxEqual(m_heap->config.gcLoad[0], 10.0)", __FILE__, __LINE__);
+// line 249 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcLoadCutoff[0], 30.0), "approxEqual(m_heap->config.gcLoadCutoff[0], 30.0)", __FILE__, __LINE__);
+// line 250 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcLoad[1], 9.0), "approxEqual(m_heap->config.gcLoad[1], 9.0)", __FILE__, __LINE__);
+// line 251 "ST_mmgc_gcoption.st"
+verifyPass(!approxEqual(m_heap->config.gcLoadCutoff[1], 60.0), "!approxEqual(m_heap->config.gcLoadCutoff[1], 60.0)", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    parseApply("-load");
+// line 256 "ST_mmgc_gcoption.st"
+verifyPass(gcoptionButIncorrectFormat(), "gcoptionButIncorrectFormat()", __FILE__, __LINE__);
+// line 257 "ST_mmgc_gcoption.st"
+verifyPass(configUnchanged(), "configUnchanged()", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    // L (load) must be > 1
+    parseApply("-load 1,30");
+// line 263 "ST_mmgc_gcoption.st"
+verifyPass(gcoptionButIncorrectFormat(), "gcoptionButIncorrectFormat()", __FILE__, __LINE__);
+// line 264 "ST_mmgc_gcoption.st"
+verifyPass(configUnchanged(), "configUnchanged()", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    parseApply("-load badvalue");
+// line 269 "ST_mmgc_gcoption.st"
+verifyPass(gcoptionButIncorrectFormat(), "gcoptionButIncorrectFormat()", __FILE__, __LINE__);
+// line 270 "ST_mmgc_gcoption.st"
+verifyPass(configUnchanged(), "configUnchanged()", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+
+    parseApply("-loadCeiling 11.5");
+// line 276 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 277 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcLoadCeiling, 11.5), "approxEqual(m_heap->config.gcLoadCeiling, 11.5)", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    parseApply("-gcwork 12.5");
+// line 282 "ST_mmgc_gcoption.st"
+verifyPass(gcoptionButIncorrectFormat(), "gcoptionButIncorrectFormat()", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    parseApply("-gcwork 0.123456");
+// line 287 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 288 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcEfficiency, .123456), "approxEqual(m_heap->config.gcEfficiency, .123456)", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    parseApply("-gcwork=0.23456");
+// line 293 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 294 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcEfficiency, .23456), "approxEqual(m_heap->config.gcEfficiency, .23456)", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+    parseApply("-gcwork", "0.3456");
+// line 299 "ST_mmgc_gcoption.st"
+verifyPass(parsedCorrectly(), "parsedCorrectly()", __FILE__, __LINE__);
+// line 300 "ST_mmgc_gcoption.st"
+verifyPass(approxEqual(m_heap->config.gcEfficiency, .3456), "approxEqual(m_heap->config.gcEfficiency, .3456)", __FILE__, __LINE__);
+          ;
+    restoreHeapConfig();
+
+}
+
+}
+void create_mmgc_gcoption(AvmCore* core) { new ST_mmgc_gcoption(core); }
 }
 }
 #endif

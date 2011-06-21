@@ -40,6 +40,8 @@
 #ifndef __GCHeap__
 #define __GCHeap__
 
+namespace avmplus { namespace ST_mmgc_gcoption { class ST_mmgc_gcoption; } };
+
 namespace MMgc
 {
     class GCHeapConfig
@@ -269,6 +271,7 @@ namespace MMgc
         friend class FixedAlloc;
         friend class FixedMalloc;
         friend class GCPolicyManager;
+        friend class avmplus::ST_mmgc_gcoption::ST_mmgc_gcoption;
     public:
         // -- Constants
 
