@@ -739,17 +739,19 @@ namespace avmplus
         //      skipU32(pos, param_count+1);
         // in non-verbose builds
             #ifdef AVMPLUS_VERBOSE
-            Multiname returnTypeName;
-            parseTypeName(pos, returnTypeName);
             if(pool->isVerbose(VB_parse)) {
+                Multiname returnTypeName;
+                parseTypeName(pos, returnTypeName);
                 core->console << "    " << offset << ":method["<<i<<"]\n"
                     << "        returnType=" << returnTypeName << "\n"
                     << "        param_count=" << param_count
                     << "\n";
             }
-            #else
-            readU30(pos);// return type name
+            else
             #endif
+            {
+                readU30(pos);// return type name
+            }
 
             for( int j = 1; j <= param_count; ++j)
             {
