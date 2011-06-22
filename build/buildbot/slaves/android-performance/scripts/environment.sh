@@ -63,3 +63,9 @@ baselineConfigTimeJIT=${jit}
 baselineBuildTimeJIT=3765
 baselineConfigTimeInterp=${interp}
 baselineBuildTimeInterp=3765
+
+# Override this, default is avmshell* and since this slave runs on a machine
+# with other slaves, the process cleaner /can/ find avmshell processes,
+# BUT they will NEVER belong to this slave since the shell is run on a device
+# not on the host machine. Reset this to something that will never be found/killed
+export proc_names="fake_never_find_me"
