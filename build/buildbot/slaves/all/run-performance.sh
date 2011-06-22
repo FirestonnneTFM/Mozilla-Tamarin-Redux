@@ -100,7 +100,7 @@ if [ $android ]; then
     # Install the AVMSHELL on the device
     echo "Setting up the device with build #$change"
     adb push $buildsdir/$change-${changeid}/$platform/$shell_release /data/app
-    export AVM=$basedir/platform/android/android_shell.sh
+    export AVM=$basedir/platform/android/android_shell.py
 else
     export AVM=$buildsdir/$change-${changeid}/$platform/$shellname
     echo ""
