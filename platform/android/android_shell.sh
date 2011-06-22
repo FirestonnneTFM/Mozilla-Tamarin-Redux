@@ -39,7 +39,7 @@
 # ***** END LICENSE BLOCK ***** */
 # acts as a proxy to remotely run abc files on android using adb, returns shell output to stdout
 # usage: ./android_shell.sh <vmargs> file.abc
-# assumes the android shell is deployed to /data/app/avmshell
+# assumes the android shell is deployed to /data/local/avmshell
 #
 filelist=""
 flatfilelist=""
@@ -60,7 +60,7 @@ then
         fi
     done
     unset IFS
-    adb -s ${deviceid} shell "cd /data/app;./avmshell $1"
+    adb -s ${deviceid} shell "cd /data/local;./avmshell $1"
 else
     args=""
     for a in $*
@@ -85,7 +85,7 @@ else
                    file=$a
                    flatfile=`basename $a`
                    filelist="$filelist $flatfile"
-                   adb $adbargs push $file /data/app/$flatfile 2> /dev/null
+                   adb $adbargs push $file /data/local/$flatfile 2> /dev/null
                    args="$args $flatfile"
                else
                    args="$args $a"
@@ -94,12 +94,12 @@ else
        fi
     done
     # workaround for adb not returning exit code, run a shell script and print exit code to stdout
-    echo adb $adbargs shell "/data/app/android_runner.sh $args" > /tmp/stdout${id}-${logid}
-    adb $adbargs shell "/data/app/android_runner.sh $args" > /tmp/stdout${id}-${logid}
+    echo adb $adbargs shell "/data/local/android_runner.sh $args" > /tmp/stdout${id}-${logid}
+    adb $adbargs shell "/data/local/android_runner.sh $args" > /tmp/stdout${id}-${logid}
     ret=`cat /tmp/stdout${id}-${logid} | grep "EXITCODE=" | awk -F= '{printf("%d",$2)}'`
     for a in $filelist
     do
-        adb $adbargs shell "rm /data/app/$a"
+        adb $adbargs shell "rm /data/local/$a"
     done
     # remove the EXITCODE from the stdout before returning it so that exact output matching will be fine
     tr -d '\r' < /tmp/stdout${id}-${logid} | sed 's/^EXITCODE=[0-9][0-9]*//g' > /tmp/stdout_clean${id}-${logid}
