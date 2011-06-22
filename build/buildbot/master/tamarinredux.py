@@ -63,7 +63,6 @@ class tamarinredux:
                                    "mac-intel-10.5-compile", "mac64-intel-compile",
                                    "linux-compile",
                                    "linux64-compile",
-                                   "solaris-sparc-compile",
                                    "android-compile",
                                    "linux-arm-compile",
                                    "linux-mips-compile",
@@ -74,7 +73,6 @@ class tamarinredux:
                                    "mac-intel-10.5-smoke", "mac64-intel-smoke",
                                    "linux-smoke",
                                    "linux64-smoke",
-                                   "solaris-sparc-smoke",
                                    "android-smoke",
                                    "linux-arm-smoke",
                                    "linux-mips-smoke",
@@ -86,7 +84,6 @@ class tamarinredux:
                                   ["mac64-intel-smoke", "mac64-intel-compile"],
                                   ["linux-smoke", "linux-compile"],
                                   ["linux64-smoke", "linux64-compile"],
-                                  ["solaris-sparc-smoke", "solaris-sparc-compile"],
                                   ["android-smoke","android-compile"],
                                   ["linux-arm-smoke","linux-arm-compile"],
                                   ["linux-mips-smoke","linux-mips-compile"],
@@ -97,7 +94,6 @@ class tamarinredux:
                                    "mac-intel-10.5-test", "mac64-intel-test",
                                    "linux-test",
                                    "linux64-test",
-                                   "solaris-sparc-test",
                                    "android-test",
                                    "linux-arm-test",
                                    "linux-mips-test",
@@ -110,7 +106,6 @@ class tamarinredux:
                                   ["linux-test", "linux-smoke"],
                                   ["linux2-test", "linux2-smoke"],
                                   ["linux64-test", "linux64-smoke"],
-                                  ["solaris-sparc-test", "solaris-sparc-smoke"],
                                   ["android-test", "android-smoke"],
                                   ["linux-arm-test", "linux-arm-smoke"],
                                   ["linux-mips-test", "linux-mips-smoke"],
@@ -126,7 +121,6 @@ class tamarinredux:
                                     "linux-deep",
                                     "linux-arm-deep",
                                     "linux-mips-deep",
-                                    "solaris-sparc-deep", "solaris-sparc2-deep",                                    
                                     "windows-frr",                                    
                                                                     ],
                     builderDependencies=[
@@ -137,8 +131,6 @@ class tamarinredux:
                                   ["linux-deep", "linux-test"],
                                   ["linux-arm-deep", "linux-arm-test"],
                                   ["linux-mips-deep", "linux-mips-test"],                                  
-                                  ["solaris-sparc-deep", "solaris-sparc-test"],
-                                  ["solaris-sparc2-deep", "solaris-sparc-test"],
                                   ["windows-frr", "windows-test"],                                   
                                  ])
     
@@ -269,6 +261,7 @@ class tamarinredux:
     mac_intel_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64", args="--enable-debugger --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     mac_intel_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-debug --enable-debugger --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     mac_intel_64_compile_factory.addStep(compile_buildcheck)
+    mac_intel_64_compile_factory.addStep(compile_testmedia)    
     mac_intel_64_compile_factory.addStep(util_upload_asteam)
     mac_intel_64_compile_factory.addStep(verify_tracers)
 
@@ -318,7 +311,6 @@ class tamarinredux:
     linux_64_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_64", args="--enable-debug", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
     linux_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64", args="--enable-debugger", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     linux_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-debug --enable-debugger", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
-    linux_64_compile_factory.addStep(compile_testmedia)
     linux_64_compile_factory.addStep(compile_buildcheck_local)
     linux_64_compile_factory.addStep(util_upload_asteam_local)
     linux_64_compile_factory.addStep(verify_tracers)
@@ -328,30 +320,6 @@ class tamarinredux:
                 'slavename': "linux64",
                 'factory': linux_64_compile_factory,
                 'builddir': './linux64-compile',
-    }
-
-
-    ###########################################
-    #### builder for solaris-sparc-compile ####
-    ###########################################
-    solaris_sparc_compile_factory = factory.BuildFactory()
-    solaris_sparc_compile_factory.addStep(sync_clean)
-    solaris_sparc_compile_factory.addStep(sync_clone_sandbox)
-    solaris_sparc_compile_factory.addStep(sync_update)
-    solaris_sparc_compile_factory.addStep(bb_slaveupdate(slave="solaris-sparc"))
-    solaris_sparc_compile_factory.addStep(verify_builtinabc)    
-    solaris_sparc_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell", args=" ", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC"))
-    solaris_sparc_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-debugger", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC +AVMFEATURE_DEBUGGER"))
-    solaris_sparc_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-debug --enable-debugger", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC +AVMFEATURE_DEBUGGER"))
-    solaris_sparc_compile_factory.addStep(compile_buildcheck_local)
-    solaris_sparc_compile_factory.addStep(util_upload_asteam)
-    solaris_sparc_compile_factory.addStep(verify_tracers)
-
-    solaris_sparc_compile_builder = {
-                'name': "solaris-sparc-compile",
-                'slavename': "solaris-sparc",
-                'factory': solaris_sparc_compile_factory,
-                'builddir': './solaris-sparc-compile',
     }
 
 
@@ -556,22 +524,6 @@ class tamarinredux:
                 'slavename': "linux64",
                 'factory': linux_64_smoke_factory,
                 'builddir': './linux64-smoke',
-    }
-
-
-    #########################################
-    #### builder for solaris-sparc-smoke ####
-    #########################################
-    solaris_sparc_smoke_factory = factory.BuildFactory()
-    solaris_sparc_smoke_factory.addStep(download_testmedia)
-    solaris_sparc_smoke_factory.addStep(test_smoke)
-    solaris_sparc_smoke_factory.addStep(util_process_clean)
-
-    solaris_sparc_smoke_builder = {
-                'name': "solaris-sparc-smoke",
-                'slavename': "solaris-sparc",
-                'factory': solaris_sparc_smoke_factory,
-                'builddir': './solaris-sparc-smoke',
     }
 
 
@@ -785,29 +737,6 @@ class tamarinredux:
                 'slavename': "linux64",
                 'factory': linux_64_test_factory,
                 'builddir': './linux64-test',
-    }
-
-
-    ########################################
-    #### builder for solaris-sparc-test ####
-    ########################################
-    solaris_sparc_test_factory = factory.BuildFactory()
-    solaris_sparc_test_factory.addStep(test_commandline)
-    solaris_sparc_test_factory.addStep(test_selftest(name="Release", shellname="avmshell"))
-    solaris_sparc_test_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs="--random --timeout=420"))
-    solaris_sparc_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs="--random --timeout=420"))
-    solaris_sparc_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs="--random --timeout=420"))
-    solaris_sparc_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s", vmargs="", config="", scriptargs="--random --timeout=420"))
-    solaris_sparc_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs="--random --timeout=420"))
-    solaris_sparc_test_factory.addStep(util_process_clean)
-    solaris_sparc_test_factory.addStep(util_clean_buildsdir)
-    solaris_sparc_test_factory.addStep(sync_clean)
-
-    solaris_sparc_test_builder = {
-                'name': "solaris-sparc-test",
-                'slavename': "solaris-sparc",
-                'factory': solaris_sparc_test_factory,
-                'builddir': './solaris-sparc-test',
     }
 
 
@@ -1193,77 +1122,6 @@ class tamarinredux:
     }
 
 
-    ########################################
-    #### builder for solaris-sparc-deep ####
-    ########################################
-    solaris_sparc_deep_factory = factory.BuildFactory()
-    solaris_sparc_deep_factory.addStep(sync_clean)
-    solaris_sparc_deep_factory.addStep(sync_clone_sandbox)
-    solaris_sparc_deep_factory.addStep(sync_update)
-    solaris_sparc_deep_factory.addStep(bb_slaveupdate(slave="solaris-sparc-deep"))
-    solaris_sparc_deep_factory.addStep(verify_builtinabc)        
-    solaris_sparc_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode", args="--enable-wordcode-interp", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC +AVMFEATURE_WORDCODE_INTERP"))
-    solaris_sparc_deep_factory.addStep(compile_generic(name="DebugDebugger-wordcode", shellname="avmshell_sd_wordcode", args="--enable-debug --enable-debugger --enable-wordcode-interp", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC +AVMFEATURE_WORDCODE_INTERP"))    
-    solaris_sparc_deep_factory.addStep(verify_tracers)    
-    solaris_sparc_deep_factory.addStep(download_testmedia)
-    solaris_sparc_deep_factory.addStep(test_selftest(name="ReleaseDebugger", shellname="avmshell_s"))
-    solaris_sparc_deep_factory.addStep(test_selftest(name="DebugDebugger", shellname="avmshell_sd"))
-    solaris_sparc_deep_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode", vmargs="-Dinterp", config="", scriptargs=""))
-    solaris_sparc_deep_factory.addStep(test_generic(name="DebugDebugger-wordcode-interp", shellname="avmshell_sd_wordcode", vmargs="-Dinterp", config="", scriptargs=""))
-    solaris_sparc_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="sparc-sol-tvm-debugdebugger-deep", scriptargs="--showtimes", _timeout=2400))
-    solaris_sparc_deep_factory.addStep(deep_release_esc)
-    solaris_sparc_deep_factory.addStep(test_misc)
-    solaris_sparc_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
-    solaris_sparc_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
-    solaris_sparc_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
-    # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
-    solaris_sparc_deep_factory.addStep(test_generic(name="Release_ES", shellname="avmshell", vmargs="", config="",
-                                              scriptargs="--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"))
-    solaris_sparc_deep_factory.addStep(download_testmedia) # grab test media again, to protect against previous -ES run
-    solaris_sparc_deep_factory.addStep(util_process_clean)
-    solaris_sparc_deep_factory.addStep(util_clean_buildsdir)
-    solaris_sparc_deep_factory.addStep(sync_clean)
-
-    solaris_sparc_deep_builder = {
-                'name': "solaris-sparc-deep",
-                'slavename': "solaris-sparc-deep",
-                'factory': solaris_sparc_deep_factory,
-                'builddir': './solaris-sparc-deep',
-    }
-
-
-    #########################################
-    #### builder for solaris-sparc2-deep ####
-    #########################################
-    solaris_sparc2_deep_factory = factory.BuildFactory()
-    solaris_sparc2_deep_factory.addStep(sync_clean)
-    solaris_sparc2_deep_factory.addStep(sync_clone_sandbox)
-    solaris_sparc2_deep_factory.addStep(sync_update)
-    solaris_sparc2_deep_factory.addStep(bb_slaveupdate(slave="solaris-sparc-deep"))
-    solaris_sparc2_deep_factory.addStep(verify_builtinabc)    
-    solaris_sparc2_deep_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-debug", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC"))
-    solaris_sparc2_deep_factory.addStep(verify_tracers)
-    solaris_sparc2_deep_factory.addStep(download_testmedia)
-    solaris_sparc2_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_d"))
-    solaris_sparc2_deep_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
-    solaris_sparc2_deep_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
-    solaris_sparc2_deep_factory.addStep(test_generic(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs=""))
-    solaris_sparc2_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d", vmargs="", config="", scriptargs=""))
-    solaris_sparc2_deep_factory.addStep(test_generic(name="Debug-deep", shellname="avmshell_d", vmargs="", config="sparc-sol-tvm-debug-deep", scriptargs="--showtimes", _timeout=2400))
-    solaris_sparc2_deep_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s", vmargs="", config="", scriptargs=""))
-    solaris_sparc2_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
-    solaris_sparc2_deep_factory.addStep(util_process_clean)
-    solaris_sparc2_deep_factory.addStep(util_clean_buildsdir)
-    solaris_sparc2_deep_factory.addStep(sync_clean)
-
-    solaris_sparc2_deep_builder = {
-                'name': "solaris-sparc2-deep",
-                'slavename': "solaris-sparc2-deep",
-                'factory': solaris_sparc2_deep_factory,
-                'builddir': './solaris-sparc2-deep',
-    }
-
-
     ##################################
     #### builder for windows-frr ####
     ##################################
@@ -1338,7 +1196,6 @@ class tamarinredux:
                 mac_intel_64_compile_builder,
                 linux_compile_builder,
                 linux_64_compile_builder,
-                solaris_sparc_compile_builder,
                 android_compile_builder,
                 linux_arm_compile_builder,
                 linux_mips_compile_builder,
@@ -1349,7 +1206,6 @@ class tamarinredux:
                 mac_intel_64_smoke_builder,
                 linux_smoke_builder,
                 linux_64_smoke_builder,
-                solaris_sparc_smoke_builder,
                 android_smoke_builder,
                 linux_arm_smoke_builder,
                 linux_mips_smoke_builder,
@@ -1360,7 +1216,6 @@ class tamarinredux:
                 mac_intel_64_test_builder,
                 linux_test_builder,
                 linux_64_test_builder,
-                solaris_sparc_test_builder,
                 android_test_builder,
                 linux_arm_test_builder,
                 linux_mips_test_builder,
@@ -1372,8 +1227,6 @@ class tamarinredux:
                 linux_deep_builder,
                 linux_arm_deep_builder,
                 linux_mips_deep_builder,
-                solaris_sparc_deep_builder,
-                solaris_sparc2_deep_builder,                
                 windows_frr_builder,
                 
                 promote_build_builder,
