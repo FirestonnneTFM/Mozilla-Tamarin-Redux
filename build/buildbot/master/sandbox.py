@@ -216,8 +216,8 @@ class sandbox:
     sb_mac_intel_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-debug --enable-debugger --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     sb_mac_intel_64_compile_factory.addStep(compile_buildcheck)
     sb_mac_intel_64_compile_factory.addStep(compile_testmedia)    
+    sb_mac_intel_64_compile_factory.addStep(util_upload_asteam_local)
     sb_mac_intel_64_compile_factory.addStep(verify_tracers)
-    sb_mac_intel_64_compile_factory.addStep(util_upload_asteam)
 
     sb_mac_intel_64_compile_builder = {
                 'name': "mac64-intel-compile-sandbox",
@@ -267,7 +267,7 @@ class sandbox:
     sb_linux_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-debug --enable-debugger", upload="false"))
     sb_linux_64_compile_factory.addStep(verify_tracers)
     sb_linux_64_compile_factory.addStep(compile_buildcheck_local)
-    sb_linux_64_compile_factory.addStep(util_upload_asteam_local)
+    sb_linux_64_compile_factory.addStep(util_upload_asteam)
 
     sb_linux_64_compile_builder = {
                 'name': "linux64-compile-sandbox",
