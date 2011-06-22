@@ -262,7 +262,7 @@ class tamarinredux:
     mac_intel_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-debug --enable-debugger --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     mac_intel_64_compile_factory.addStep(compile_buildcheck)
     mac_intel_64_compile_factory.addStep(compile_testmedia)    
-    mac_intel_64_compile_factory.addStep(util_upload_asteam)
+    mac_intel_64_compile_factory.addStep(util_upload_asteam_local)
     mac_intel_64_compile_factory.addStep(verify_tracers)
 
     mac_intel_64_compile_builder = {
@@ -312,7 +312,7 @@ class tamarinredux:
     linux_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64", args="--enable-debugger", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     linux_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-debug --enable-debugger", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     linux_64_compile_factory.addStep(compile_buildcheck_local)
-    linux_64_compile_factory.addStep(util_upload_asteam_local)
+    linux_64_compile_factory.addStep(util_upload_asteam)
     linux_64_compile_factory.addStep(verify_tracers)
 
     linux_64_compile_builder = {
