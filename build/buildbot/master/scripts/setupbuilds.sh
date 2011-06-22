@@ -84,7 +84,6 @@ test "$buildnum" = "" || {
     mkdir $tamarin/$branch/$buildnum/mac
     mkdir $tamarin/$branch/$buildnum/linux
     mkdir $tamarin/$branch/$buildnum/winmobile
-    mkdir $tamarin/$branch/$buildnum/solaris
     mkdir $tamarin/$branch/$buildnum/android
     chmod -R 777 $tamarin/$branch
 }
