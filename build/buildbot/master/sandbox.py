@@ -266,7 +266,7 @@ class sandbox:
     sb_linux_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64", args="--enable-debugger", upload="false"))
     sb_linux_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-debug --enable-debugger", upload="false"))
     sb_linux_64_compile_factory.addStep(verify_tracers)
-    sb_linux_64_compile_factory.addStep(compile_buildcheck_local)
+    sb_linux_64_compile_factory.addStep(compile_buildcheck)
     sb_linux_64_compile_factory.addStep(util_upload_asteam)
 
     sb_linux_64_compile_builder = {
