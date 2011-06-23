@@ -265,10 +265,10 @@ namespace MMgc
 #else
 #ifdef MMGC_64BIT
         GCAssert(DebugSize() == 24);
-        bibopAllocFloat = mmfx_new(GCAlloc(this, 8 + DebugSize(), false, false, false, /*sizeclass*/3, avmplus::AtomConstants::kBibopFloatType));
+        bibopAllocFloat = mmfx_new(GCAlloc(this, int(8 + DebugSize()), false, false, false, /*sizeclass*/3, avmplus::AtomConstants::kBibopFloatType));
 #else
         GCAssert(DebugSize() == 16);
-        bibopAllocFloat = mmfx_new(GCAlloc(this, 8 + DebugSize(), false, false, false, /*sizeclass*/2, avmplus::AtomConstants::kBibopFloatType));
+        bibopAllocFloat = mmfx_new(GCAlloc(this, int(8 + DebugSize()), false, false, false, /*sizeclass*/2, avmplus::AtomConstants::kBibopFloatType));
 #endif
 #endif
 
