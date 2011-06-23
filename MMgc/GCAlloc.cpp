@@ -157,7 +157,7 @@ namespace MMgc
     {
     }
 
-    GCAlloc::GCAlloc(GC* _gc, int _itemSize, bool _containsPointers, bool _isRC, bool _isFinalized, int _sizeClassIndex) :
+    GCAlloc::GCAlloc(GC* _gc, int _itemSize, bool _containsPointers, bool _isRC, bool _isFinalized, int _sizeClassIndex, uint8_t _bibopTag) :
         m_firstBlock(NULL),
         m_lastBlock(NULL),
         m_firstFree(NULL),
@@ -178,6 +178,7 @@ namespace MMgc
         m_totalAskSize(0),
     #endif
         m_bitsInPage(_containsPointers && kBlockSize - int(m_itemsPerBlock * m_itemSize + sizeof(GCBlock)) >= m_numBitmapBytes),
+        m_bibopTag(_bibopTag),
         multiple(ComputeMultiply((uint16_t)m_itemSize)),
         shift(ComputeShift((uint16_t)m_itemSize)),
         containsPointers(_containsPointers),
@@ -248,6 +249,8 @@ namespace MMgc
                 b->finalizeState = m_gc->finalizedValue;
             else
                 b->finalizeState = !m_gc->finalizedValue;
+
+            b->bibopTag = m_bibopTag;
 
 #ifdef MMGC_FASTBITS
             b->bitsShift = (uint8_t) m_bitsShift;

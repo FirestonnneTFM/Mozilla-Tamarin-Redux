@@ -184,9 +184,18 @@ namespace MMgc
     REALLY_INLINE void* GC::AllocDouble()
     {
 #if !defined _DEBUG && !defined AVMPLUS_SAMPLER && !defined MMGC_MEMORY_PROFILER
-        return GetUserPointer(noPointersNonfinalizedAllocs[0]->Alloc(0));
+        return GetUserPointer(noPointersNonfinalizedAllocs[0]->Alloc(/*flags*/0));
 #else
         return Alloc(8,0);
+#endif
+    }
+
+    REALLY_INLINE void* GC::AllocFloat()
+    {
+#if !defined _DEBUG && !defined AVMPLUS_SAMPLER && !defined MMGC_MEMORY_PROFILER
+        return GetUserPointer(bibopAllocFloat->Alloc(/*flags*/0));
+#else
+        return AllocFloatSlow();
 #endif
     }
 

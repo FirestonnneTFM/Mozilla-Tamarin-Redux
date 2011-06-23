@@ -105,15 +105,18 @@ namespace avmplus
          */
         /*@{*/
         // cannot use 0 as tag, breaks atomWriteBarrier
-        const Atom kUnusedAtomTag = 0;
-        const Atom kObjectType    = 1;  // null=1
-        const Atom kStringType    = 2;  // null=2
-        const Atom kNamespaceType = 3;  // null=3
-        const Atom kSpecialType   = 4;  // undefined=4
-        const Atom kBooleanType   = 5;  // false=5 true=13
-        const Atom kIntptrType    = 6;
-        const Atom kDoubleType    = 7;
+        const Atom kUnusedAtomTag    = 0;
+        const Atom kObjectType       = 1;  // null=1
+        const Atom kStringType       = 2;  // null=2
+        const Atom kNamespaceType    = 3;  // null=3
+        const Atom kSpecialBibopType = 4;  // undefined=4, payload=bibopPointer
+        const Atom kBooleanType      = 5;  // false=5 true=13
+        const Atom kIntptrType       = 6;
+        const Atom kDoubleType       = 7;
         /*@}*/
+
+        const uint8_t kBibopUndefined   = 0;
+        const uint8_t kBibopFloatType   = 1;
 
         /*
         other things you can do with math on atoms
@@ -121,7 +124,7 @@ namespace avmplus
         isNull          (unsigned)a < 4
         isUndefined     a == undefinedAtom
         isSpecial       (unsigned)a <= 4
-        isNumber        a & 6 == 6
+        isNumber        a & 6 == 6 ( Note: this tests for "int | Number", but not float! ) 
 
                             ^8  jlt(a<8)    ^2      jle(a<=4)
         true        1110  0110  t           1100    f
@@ -140,7 +143,7 @@ namespace avmplus
         const Atom nullObjectAtom = kObjectType|0;
         const Atom nullStringAtom = kStringType|0;
         const Atom nullNsAtom     = kNamespaceType|0;
-        const Atom undefinedAtom  = kSpecialType|0; // 0x03
+        const Atom undefinedAtom  = kSpecialBibopType|0; // 0x03
         const Atom trueAtom       = kBooleanType|0x08; // 0x0D
         const Atom falseAtom      = kBooleanType|0x00; // 0x05
         const Atom zeroIntAtom    = Atom(kIntptrType|0);
@@ -148,6 +151,8 @@ namespace avmplus
         // used in unreachable "return" clauses as a self-documenting invalid value.
         const Atom unreachableAtom = kUnusedAtomTag;
         /*@}*/
+
+        const static uint32_t kBibopBlockSize = 4096;         // This must be the same as GCHeap::kBlockSize, we check that in atom.cpp
 
         /**
          * @name Useful constants for manipulating atoms
@@ -157,6 +162,7 @@ namespace avmplus
         const Atom kAtomTypeMask = 7;       // mask for type tag
         const Atom kAtomPtrMask = ~7;       // mask for atom pointer, or shifted Intptr value
         const unsigned kAtomTypeSize = 3;   // width of type tag
+        const Atom kBibopTypePtrMask = ~(Atom)(kBibopBlockSize - 1); // mask for bibop type pointer (char*, first char from the bibop page)
         /*@}*/
 
         // This is a special value used internally by some VM code to mean
@@ -196,10 +202,16 @@ namespace avmplus
 #endif
 
     // sadly, these generate better code than the inlines in atom-inlines.h
-    #define atomKind(a)     ((avmplus::Atom)((uintptr_t(a) & 7)))
+    #define atomKind(a)     ((avmplus::Atom)(uintptr_t(a) & 7))
     #define atomPtr(a)      ((void*)(uintptr_t(a) & ~7))
-
-    #define ISNULL(a) (((uintptr_t)a) < (uintptr_t)kSpecialType)
+    // bibopKind should be kBibopFloatType. 
+    // In the future also kBibopFloat4Type, kBibopDecimalType etc.
+    // In debug builds bibopKind() is a more elaborate inline function in atom-inlines.h.
+#ifndef DEBUG
+    #define bibopKind(a)     (*(uint8_t*)(uintptr_t(a) & kBibopTypePtrMask))
+#endif
+    
+    #define ISNULL(a) (((uintptr_t)a) < (uintptr_t)kSpecialBibopType)
 
     // returns true if atom type is int.
     // Note that this DOES NOT imply that the Atom's value will

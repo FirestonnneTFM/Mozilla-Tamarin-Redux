@@ -65,16 +65,16 @@ namespace MMgc
      */
     struct GCBlockHeader
     {
+        uint8_t         bibopTag;   // *MUST* be the first byte.  0 means "not a bibop block."  For others, see core/atom.h.
+        uint8_t         bitsShift;  // Right shift for lower 12 bits of a pointer into the block to obtain the mark bit item for that pointer
+                                    // bitsShift is only used if MMGC_FASTBITS is defined but its always present to simplify header layout.
+        uint8_t         containsPointers;   // nonzero if the block contains pointer-containing objects
+        uint8_t         rcobject;           // nonzero if the block contains RCObject instances
+        uint32_t        size;   // Size of objects stored in this block
         GC*             gc;     // The GC that owns this block
         GCAllocBase*    alloc;  // the allocator that owns this block
         GCBlockHeader*  next;   // The next block in the list of blocks for the allocator
         gcbits_t*       bits;   // Variable length table of mark bit entries
-        uint32_t        size;   // Size of objects stored in this block
-        // bitsShift is only used if MMGC_FASTBITS is defined but its always present to simplify header layout.
-        uint8_t         bitsShift;  // Right shift for lower 12 bits of a pointer into the block to obtain the mark bit item for that pointer
-        uint8_t         containsPointers;
-        uint8_t         rcobject;
-        uint8_t         unused1;
     };
 
     GCBlockHeader* GetBlockHeader(const void* item);
@@ -143,7 +143,7 @@ namespace MMgc
 
         enum { kFreelist=kMark|kQueued };
 
-        GCAlloc(GC* gc, int itemSize, bool containsPointers, bool isRC, bool isFinalized, int sizeClassIndex);
+        GCAlloc(GC* gc, int itemSize, bool containsPointers, bool isRC, bool isFinalized, int sizeClassIndex, uint8_t bibopTag);
 
 #if defined DEBUG || defined MMGC_MEMORY_PROFILER
         void* Alloc(size_t size, int flags);
@@ -281,6 +281,7 @@ namespace MMgc
 #endif
 
         const bool m_bitsInPage;
+        uint8_t  m_bibopTag;
 
         // fast divide numbers for GetObjectIndex
         const uint16_t multiple;

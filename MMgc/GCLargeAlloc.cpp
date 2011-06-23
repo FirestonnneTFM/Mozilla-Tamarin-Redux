@@ -105,6 +105,7 @@ namespace MMgc
             block->alloc= this;
             block->next = m_blocks;
             block->size = computedSize;
+            block->bibopTag = 0;
 #ifdef MMGC_FASTBITS
             block->bitsShift = 12;     // Always use bits[0]
 #endif
