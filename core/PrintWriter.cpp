@@ -270,7 +270,7 @@ namespace avmplus
                 if (AvmCore::isString(atom)) *this << AvmCore::atomToString(atom);
                 *this << "\"";
                 break;
-            case kSpecialType:
+            case kSpecialBibopType:
                 *this << "undefined";
                 break;
             case kBooleanType:

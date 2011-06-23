@@ -659,6 +659,15 @@ namespace MMgc
          * non-finalizable non-rc non-zeroed object (a box for an IEEE double).
          */
         void* AllocDouble();
+        void* AllocFloat();
+
+#if defined _DEBUG || defined AVMPLUS_SAMPLER || defined MMGC_MEMORY_PROFILER
+        /**
+         * The actual allocator in situations where there's a lot of singing and
+         * dancing around book-keeping.
+         */
+        void* AllocFloatSlow();
+#endif
 
         /**
          * Like Alloc but allocating a little extra memory; factored out as a
@@ -757,6 +766,10 @@ namespace MMgc
         void reversePointersWithinBlock(void* mem, size_t offsetInBytes, size_t numPointers);
 
     private:
+#ifdef DEBUG
+        void AllocPrologue(size_t size);
+        void* AllocEpilogue(void* item, int flags);
+#endif
         /**
          * Signal that we've allocated some memory and that collection can be triggered
          * if necessary.
@@ -1581,6 +1594,7 @@ namespace MMgc
         GCAlloc *containsPointersRCAllocs[kNumSizeClasses];           // RC finalized objects containing pointers
         GCAlloc *noPointersNonfinalizedAllocs[kNumSizeClasses];       // Non-RC non-finalized objects not containing pointers
         GCAlloc *noPointersFinalizedAllocs[kNumSizeClasses];          // Non-RC finalized objects not containing pointers
+        GCAlloc *bibopAllocFloat;
         GCLargeAlloc *largeAlloc;
         GCHeap *heap;
 

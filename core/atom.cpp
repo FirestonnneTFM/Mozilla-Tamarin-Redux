@@ -43,4 +43,6 @@
 
 namespace avmplus
 {
+    static_assert(avmplus::AtomConstants::kBibopBlockSize == MMgc::GCHeap::kBlockSize,
+                  "The bibop block size must be the same as GCHeap's block size");
 }

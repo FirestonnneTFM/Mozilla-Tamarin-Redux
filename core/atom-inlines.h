@@ -139,6 +139,17 @@ namespace avmplus
         return (a >> 3) != 0;
     }
 
+#ifdef _DEBUG
+    // In non-debug builds this is a macro in atom.h
+    REALLY_INLINE uint8_t bibopKind(const Atom a)
+    {
+        AvmAssert(atomKind(a) == kSpecialBibopType);
+        uint8_t const k = *(uint8_t*)(uintptr_t(a) & kBibopTypePtrMask);
+        AvmAssert(k == kBibopUndefined || k == kBibopFloatType);
+        return k;
+    }
+#endif
+        
 } // namespace
 
 #endif // __avmplus_atom_inlines__

@@ -252,12 +252,25 @@ namespace MMgc
         // so that we don't have to check the pointers for
         // NULL on every allocation.
         for (int i=0; i<kNumSizeClasses; i++) {
-            containsPointersNonfinalizedAllocs[i] = mmfx_new(GCAlloc(this, kSizeClasses[i], true, false, false, i));
-            containsPointersFinalizedAllocs[i] = mmfx_new(GCAlloc(this, kSizeClasses[i], true, false, true, i));
-            containsPointersRCAllocs[i] = mmfx_new(GCAlloc(this, kSizeClasses[i], true, true, true, i));
-            noPointersNonfinalizedAllocs[i] = mmfx_new(GCAlloc(this, kSizeClasses[i], false, false, false, i));
-            noPointersFinalizedAllocs[i] = mmfx_new(GCAlloc(this, kSizeClasses[i], false, false, true, i));
+            containsPointersNonfinalizedAllocs[i] = mmfx_new(GCAlloc(this, kSizeClasses[i], true, false, false, i, 0));
+            containsPointersFinalizedAllocs[i] = mmfx_new(GCAlloc(this, kSizeClasses[i], true, false, true, i, 0));
+            containsPointersRCAllocs[i] = mmfx_new(GCAlloc(this, kSizeClasses[i], true, true, true, i, 0));
+            noPointersNonfinalizedAllocs[i] = mmfx_new(GCAlloc(this, kSizeClasses[i], false, false, false, i, 0));
+            noPointersFinalizedAllocs[i] = mmfx_new(GCAlloc(this, kSizeClasses[i], false, false, true, i, 0));
         }
+
+        /* We must pass 8 for the size here because we can only allocate in 8-byte increments. */
+#if !defined MMGC_MEMORY_INFO
+        bibopAllocFloat = mmfx_new(GCAlloc(this, 8, false, false, false, /*sizeclass*/0, avmplus::AtomConstants::kBibopFloatType));
+#else
+#ifdef MMGC_64BIT
+        GCAssert(DebugSize() == 24);
+        bibopAllocFloat = mmfx_new(GCAlloc(this, 8 + DebugSize(), false, false, false, /*sizeclass*/3, avmplus::AtomConstants::kBibopFloatType));
+#else
+        GCAssert(DebugSize() == 16);
+        bibopAllocFloat = mmfx_new(GCAlloc(this, 8 + DebugSize(), false, false, false, /*sizeclass*/2, avmplus::AtomConstants::kBibopFloatType));
+#endif
+#endif
 
         largeAlloc = mmfx_new(GCLargeAlloc(this));
 
@@ -370,6 +383,8 @@ namespace MMgc
             mmfx_delete(noPointersNonfinalizedAllocs[i]);
             mmfx_delete(noPointersFinalizedAllocs[i]);
         }
+
+        mmfx_delete(bibopAllocFloat);
 
         if (largeAlloc) {
             mmfx_delete(largeAlloc);
@@ -725,9 +740,10 @@ namespace MMgc
     #endif
 #endif
 
-    void *GC::Alloc(size_t size, int flags/*0*/)
-    {
+
 #ifdef _DEBUG
+    void GC::AllocPrologue(size_t size)
+    {
         GCAssertMsg(size > 0, "cannot allocate a 0 sized block");
         GCAssertMsg(onThread(), "GC called from different thread!");
         GCAssertMsg(!Destroying(), "GC allocations during shutdown are illegal.");
@@ -736,7 +752,7 @@ namespace MMgc
             GCAssertMsg(false, "A MMGC_GCENTER macro must exist on the stack");
             GCHeap::SignalInconsistentHeapState("MMGC_GCENTER missing");
             /*NOTREACHED*/
-            return NULL;
+            return;
         }
 
         // always be marking in pedantic mode
@@ -747,6 +763,34 @@ namespace MMgc
                 }
             }
         }
+    }
+
+    void* GC::AllocEpilogue(void* item, int flags)
+    {
+        // Note GetUserPointer(item) only required for DEBUG builds and for non-NULL pointers.
+        
+        if(item != NULL) {
+            item = GetUserPointer(item);
+            bool shouldZero = (flags & kZero) || incrementalValidationPedantic;
+            
+            // in debug mode memory is poisoned so we have to clear it here
+            // in release builds memory is zero'd to start and on free/sweep
+            // in pedantic mode uninitialized data can trip the write barrier
+            // detector, only do it for pedantic because otherwise we want the
+            // mutator to get the poisoned data so it crashes if it relies on
+            // uninitialized values
+            if(shouldZero) {
+                VMPI_memset(item, 0, Size(item));
+            }
+        }
+        return item;
+    }
+#endif
+
+    void *GC::Alloc(size_t size, int flags/*0*/)
+    {
+#ifdef _DEBUG
+        AllocPrologue(size);
 #endif
 #ifdef AVMPLUS_SAMPLER
         avmplus::AvmCore *core = (avmplus::AvmCore*)GetGCContextVariable(GCV_AVMCORE);
@@ -814,26 +858,36 @@ namespace MMgc
         GCAssert(item != NULL || (flags & kCanFail) != 0);
 
 #ifdef _DEBUG
-        // Note GetUserPointer(item) only required for DEBUG builds and for non-NULL pointers.
-
-        if(item != NULL) {
-            item = GetUserPointer(item);
-            bool shouldZero = (flags & kZero) || incrementalValidationPedantic;
-
-            // in debug mode memory is poisoned so we have to clear it here
-            // in release builds memory is zero'd to start and on free/sweep
-            // in pedantic mode uninitialized data can trip the write barrier
-            // detector, only do it for pedantic because otherwise we want the
-            // mutator to get the poisoned data so it crashes if it relies on
-            // uninitialized values
-            if(shouldZero) {
-                VMPI_memset(item, 0, Size(item));
-            }
-        }
+       item = AllocEpilogue(item, flags);
 #endif
 
         return item;
     }
+
+#if defined _DEBUG || defined AVMPLUS_SAMPLER || defined MMGC_MEMORY_PROFILER
+    void *GC::AllocFloatSlow()
+    {
+#ifdef _DEBUG
+        AllocPrologue(bibopAllocFloat->m_itemSize);
+#endif
+#ifdef AVMPLUS_SAMPLER
+        avmplus::AvmCore *core = (avmplus::AvmCore*)GetGCContextVariable(GCV_AVMCORE);
+        if(core)
+            core->sampleCheck();
+#endif
+        void* item;
+#if defined _DEBUG || defined MMGC_MEMORY_PROFILER
+        item = bibopAllocFloat->Alloc(/*sizeof(float)*/4, /*flags*/0);
+#else
+        item = bibopAllocFloat->Alloc(/*flags*/0);
+#endif
+        GCAssert(item != NULL);
+#ifdef _DEBUG
+        item = AllocEpilogue(item, 0);
+#endif
+        return item;
+    }
+#endif
 
     // Mmmm.... gcc -O3 inlines Alloc into this in Release builds :-)
 
@@ -970,6 +1024,7 @@ namespace MMgc
             noPointersNonfinalizedAllocs[i]->ClearMarks();
             noPointersFinalizedAllocs[i]->ClearMarks();
         }
+        bibopAllocFloat->ClearMarks();
         largeAlloc->ClearMarks();
         m_markStackOverflow = false;
     }
@@ -985,6 +1040,7 @@ namespace MMgc
             noPointersNonfinalizedAllocs[i]->Finalize();
             noPointersFinalizedAllocs[i]->Finalize();
         }
+        bibopAllocFloat->Finalize();
         largeAlloc->Finalize();
         finalizedValue = !finalizedValue;
 
@@ -1010,6 +1066,7 @@ namespace MMgc
             noPointersNonfinalizedAllocs[i]->SweepNeedsSweeping();
             noPointersFinalizedAllocs[i]->SweepNeedsSweeping();
         }
+        bibopAllocFloat->SweepNeedsSweeping();
     }
 
     void GC::EstablishSweepInvariants()
@@ -1021,6 +1078,7 @@ namespace MMgc
             noPointersNonfinalizedAllocs[i]->CoalesceQuickList();
             noPointersFinalizedAllocs[i]->CoalesceQuickList();
         }
+        bibopAllocFloat->CoalesceQuickList();
     }
 
     void GC::ClearMarkStack()
@@ -1821,6 +1879,7 @@ namespace MMgc
             noPointersNonfinalizedAllocs[i]->CheckFreelist();
             noPointersFinalizedAllocs[i]->CheckFreelist();
         }
+        bibopAllocFloat->CheckFreelist();
     }
 
     void GC::UnmarkedScan(const void *mem, size_t size)
@@ -2070,6 +2129,7 @@ namespace MMgc
             noPointersNonfinalizedAllocs[i]->CheckMarks();
             noPointersFinalizedAllocs[i]->CheckMarks();
         }
+        bibopAllocFloat->CheckMarks();
 #endif
 
 #ifdef MMGC_HEAP_GRAPH
@@ -2871,6 +2931,7 @@ namespace MMgc
             case avmplus::AtomConstants::kNamespaceType:
                 TracePointer((GCTraceableBase*)(a & ~7) HEAP_GRAPH_ARG((uintptr_t*)loc));
                 break;
+            case avmplus::AtomConstants::kSpecialBibopType:
             case avmplus::AtomConstants::kDoubleType:
                 // Bugzilla 594870: Must trace semi-conservatively because of the genericObjectToAtom API:
                 // the object we're looking at may or may not contain pointers, and we don't know.
@@ -3590,6 +3651,9 @@ namespace MMgc
                 totalAllocated += allocated;
             }
         }
+        bibopAllocFloat->GetUsageInfo(ask, allocated);
+        totalAskSize += ask;
+        totalAllocated += allocated;
 
         largeAlloc->GetUsageInfo(ask, allocated);
         totalAskSize += ask;

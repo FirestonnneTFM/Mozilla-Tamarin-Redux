@@ -127,7 +127,8 @@ REALLY_INLINE /*static*/ bool AvmCore::isObject(Atom atom)
 
 REALLY_INLINE /*static*/ bool AvmCore::isPointer(Atom atom)
 {
-    return atomKind(atom) < kSpecialType || atomKind(atom) == kDoubleType;
+    // kDouble, all kTypes less than kSpecialType, and kSpecialType if it's not "null" - i.e. not undefinedAtom, but a bibopType.
+    return (atomKind(atom+1) <= (kSpecialBibopType+1)) && atom!=undefinedAtom;
 }
 
 REALLY_INLINE /*static*/ bool AvmCore::isNamespace(Atom atom)
@@ -231,9 +232,8 @@ REALLY_INLINE /*static*/ bool AvmCore::isDouble(Atom atom)
 
 REALLY_INLINE /*static*/ bool AvmCore::isNumber(Atom atom)
 {
-    // accept kIntptrType(6) or kDoubleType(7)
     MMGC_STATIC_ASSERT(kIntptrType == 6 && kDoubleType == 7);
-    return (atom&6) == kIntptrType;
+    return (atom&6) == kIntptrType || (atomKind(atom)==kSpecialBibopType && atom!=AtomConstants::undefinedAtom && bibopKind(atom)==kBibopFloatType);
 }
 
 REALLY_INLINE /*static*/ bool AvmCore::isBoolean(Atom atom)
@@ -253,7 +253,7 @@ REALLY_INLINE /*static*/ bool AvmCore::isUndefined(Atom atom)
 
 REALLY_INLINE /*static*/ bool AvmCore::isNullOrUndefined(Atom atom)
 {
-    return ((uintptr_t)atom) <= (uintptr_t)kSpecialType;
+    return ((uintptr_t)atom) <= (uintptr_t)kSpecialBibopType;
 }
 
 REALLY_INLINE /*static*/ uint32_t AvmCore::toUInt32(Atom atom)

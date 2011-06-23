@@ -1053,7 +1053,7 @@ return the result of the comparison ToPrimitive(x) == y.
             switch (ltype)
             {
             case 0:
-            case kSpecialType:
+            case kSpecialBibopType:
                 return trueAtom;
             case kStringType:
                 if (lhs == rhs) return trueAtom;
@@ -1201,7 +1201,7 @@ return the result of the comparison ToPrimitive(x) == y.
             // same type
             switch (ltype)
             {
-            case kSpecialType:
+            case kSpecialBibopType:
                 return trueAtom; // undefined is the only kSpecialType atom
             case kStringType:
                 return (lhs==rhs || *atomToString(lhs) == *atomToString(rhs)) ? trueAtom : falseAtom;
@@ -1723,7 +1723,7 @@ return the result of the comparison ToPrimitive(x) == y.
             double value;
             switch (atomKind(atom))
             {
-            case kSpecialType:
+            case kSpecialBibopType:
                 return kNaN;
             case kStringType:
                 value = atomToString(atom)->toNumber();
@@ -1773,7 +1773,7 @@ return the result of the comparison ToPrimitive(x) == y.
             {
             case kStringType:
                 return atomToString(atom)->toNumber();
-            case kSpecialType:
+            case kSpecialBibopType:
                 return MathUtils::kNaN;
             case kBooleanType:
                 return atom == trueAtom ? 1.0 : 0.0;
@@ -1802,7 +1802,7 @@ return the result of the comparison ToPrimitive(x) == y.
                 return internString(atom);
             case kNamespaceType:
                 return atomToNamespace(atom)->getURI();
-            case kSpecialType:
+            case kSpecialBibopType:
                 return kundefined;
             case kObjectType:
                 return internString(atomToScriptObject(atom)->toString());
@@ -2447,7 +2447,7 @@ return the result of the comparison ToPrimitive(x) == y.
         (1<<BUILTIN_object),                                                                // kObjectType
         (1<<BUILTIN_string) | (1<<BUILTIN_object),                                          // kStringType
         (1<<BUILTIN_namespace) | (1<<BUILTIN_object),                                       // kNamespaceType
-        (1<<BUILTIN_void),                                                                  // kSpecialType
+        (1<<BUILTIN_void),                                                                  // kSpecialBibopType
         (1<<BUILTIN_boolean) | (1<<BUILTIN_object),                                         // kBooleanType
         (1<<BUILTIN_number) | (1<<BUILTIN_object),                                          // kIntptrType
         (1<<BUILTIN_number) | (1<<BUILTIN_object)                                           // kDoubleType
@@ -2528,7 +2528,7 @@ return the result of the comparison ToPrimitive(x) == y.
                 return atomToScriptObject(atom)->toString();
             case kStringType:
                 return atomToString(atom);
-            case kSpecialType:
+            case kSpecialBibopType:
                 return kundefined;
             case kBooleanType:
                 return booleanStrings[atom>>3];
@@ -3017,7 +3017,7 @@ return the result of the comparison ToPrimitive(x) == y.
                     return EscapeElementValue (string(a), true);
                 }
                 break;
-            case kSpecialType:
+            case kSpecialBibopType:
                 return kundefined;
             case kIntptrType:
             case kBooleanType:
@@ -3175,7 +3175,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case kDoubleType:
                 return knumber;
 
-            case kSpecialType:
+            case kSpecialBibopType:
                 return kundefined;
 
             case kStringType:
