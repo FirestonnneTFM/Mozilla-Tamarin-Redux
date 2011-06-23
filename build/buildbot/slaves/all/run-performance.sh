@@ -96,27 +96,31 @@ echo "`java -jar $ASC`"
 echo ""
 
 
+export AVM=$buildsdir/$change-${changeid}/$platform/$shellname
+
 if [ $android ]; then
-    # Install the AVMSHELL on the device
-    echo "Setting up the device with build #$change"
-    adb push $buildsdir/$change-${changeid}/$platform/$shell_release /data/app
+    echo "setup $branch/${change}-${changeid}"
+    ../all/adb-shell-deployer.sh ${change} ${buildsdir}/${change}-${changeid}/${platform}/$shellname
+    res=$?
+    test "$res" = "0" || {
+        echo "message: setup failed"
+        exit 1
+    }
     export AVM=$basedir/platform/android/android_shell.py
-else
-    export AVM=$buildsdir/$change-${changeid}/$platform/$shellname
-    echo ""
-    echo AVM=$AVM
-    echo "`$AVM`"
-    echo; echo "AVM built with the following options:"
-    echo "`$AVM -Dversion`"
-    echo ""
-
-    ##
-    # Ensure that the system is clean and ready
-    ##
-    cd $basedir/build/buildbot/slaves/scripts
-    ../all/util-acceptance-clean.sh
-
 fi
+
+echo ""
+echo AVM=$AVM
+echo "`$AVM`"
+echo; echo "AVM built with the following options:"
+echo "`$AVM -Dversion`"
+echo ""
+
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean.sh
 
 cd $basedir/test/performance
 
