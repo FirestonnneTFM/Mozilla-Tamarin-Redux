@@ -367,6 +367,7 @@ function adjustResultArray(ResultArray, msMode)
     t = ResultArray[TIME]  +  TZ_DIFF*msPerHour;
 
     // Use our date arithmetic functions to determine the local hour, day, etc.
+    ResultArray[MINUTES] = MinFromTime(t);
     ResultArray[HOURS] = HourFromTime(t);
     ResultArray[DAY] = WeekDay(t);
     ResultArray[DATE] = DateFromTime(t);
@@ -381,6 +382,7 @@ function adjustResultArray(ResultArray, msMode)
 
     // Use our date arithmetic functions to determine the UTC hour, day, etc.
     ResultArray[TIME] = t;
+    ResultArray[UTC_MINUTES] = MinFromTime(t);
     ResultArray[UTC_HOURS] = HourFromTime(t);
     ResultArray[UTC_DAY] = WeekDay(t);
     ResultArray[UTC_DATE] = DateFromTime(t);
