@@ -320,6 +320,8 @@ var msPerMinute =       60000;      //  msPerSecond * SecondsPerMinute
 var msPerHour =         3600000;    //  msPerMinute * MinutesPerHour
 var TZ_DIFF = getTimeZoneDiff();  // offset of tester's timezone from UTC
 var             TZ_PST = -8;  // offset of Pacific Standard Time from UTC
+var             TZ_IST = +5.5; // offset of Indian Standard Time from UTC
+var             IST_DIFF = TZ_DIFF - TZ_IST;  // offset of tester's timezone from IST
 var             PST_DIFF = TZ_DIFF - TZ_PST;  // offset of tester's timezone from PST
 var TIME_1970    = 0;
 var TIME_2000    = 946684800000;
@@ -590,6 +592,10 @@ function UTC( t ) {
 }
 
 function DaylightSavingTA( t ) {
+    // There is no Daylight saving time in India
+    if (IST_DIFF == 0)
+        return 0;
+
     var dst_start;
     var dst_end;
     // Windows fix for 2007 DST change made all previous years follow new DST rules
