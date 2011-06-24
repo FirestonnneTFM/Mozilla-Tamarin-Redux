@@ -737,7 +737,7 @@ namespace avmplus
                 // Zero the structure so that the entire thing is
                 // initialized.
                 // See bugzilla#647660
-                NativeMethodInfo compiledMethodInfo = {0};
+                NativeMethodInfo compiledMethodInfo = {{0}, 0, 0};
                 compiledMethodInfo.thunker = aotThunker;
                 AvmThunkNativeHandler nhandler;
                 nhandler.function = aotInfo->activationInfo[method->method_id()].initHandler;
