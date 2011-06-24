@@ -362,21 +362,9 @@ const constructors =
   "GC_DATA_END":            GCDataEnd,
   "GC_NO_DATA":             GCNoData,
   "GC_ATOM":                GCAtom,
-  "GC_ATOM_IF":             GCAtom,
-  "GC_ATOM_IFDEF":          GCAtom,
-  "GC_ATOM_IFNDEF":         GCAtom,
   "GC_POINTER":             GCPointer,
-  "GC_POINTER_IF":          GCPointer,
-  "GC_POINTER_IFDEF":       GCPointer,
-  "GC_POINTER_IFNDEF":      GCPointer,
   "GC_CONSERVATIVE":        GCConservative,
-  "GC_CONSERVATIVE_IF":     GCConservative,
-  "GC_CONSERVATIVE_IFDEF":  GCConservative,
-  "GC_CONSERVATIVE_IFNDEF": GCConservative,
   "GC_STRUCTURE":           GCStructure,
-  "GC_STRUCTURE_IF":        GCStructure, 
-  "GC_STRUCTURE_IFDEF":     GCStructure,
-  "GC_STRUCTURE_IFNDEF":    GCStructure,
   "GC_ATOMS":               GCAtoms,
   "GC_ATOMS_SMALL":         GCAtoms,
   "GC_POINTERS":            GCPointers,
@@ -780,25 +768,33 @@ function readFiles(files)
                     "GC_ATOMS",
                     "GC_ATOMS_SMALL",
                     "GC_STRUCTURE",
-                    "GC_STRUCTURE_IFDEF",
-                    "GC_STRUCTURE_IFNDEF",
-                    "GC_STRUCTURE_IF",
                     "GC_POINTER",
-                    "GC_POINTER_IFDEF",
-                    "GC_POINTER_IFNDEF",
-                    "GC_POINTER_IF",
                     "GC_ATOM",
-                    "GC_ATOM_IFDEF",
-                    "GC_ATOM_IFNDEF",
-                    "GC_ATOM_IF",
-                    "GC_CONSERVATIVE",
-                    "GC_CONSERVATIVE_IFDEF",
-                    "GC_CONSERVATIVE_IFNDEF",
-                    "GC_CONSERVATIVE_IF"].join("|") +
+                    "GC_CONSERVATIVE"].join("|") +
                    ")\\s*\\((.*)");
 
     function matchCppFieldTag(line, where) {
         return cppFieldTag.exec(line.substring(where));
+    }
+
+    const deprecatedFieldTag =
+        new RegExp("^(" +
+                   ["GC_STRUCTURE_IFDEF",
+                    "GC_STRUCTURE_IFNDEF",
+                    "GC_STRUCTURE_IF",
+                    "GC_POINTER_IFDEF",
+                    "GC_POINTER_IFNDEF",
+                    "GC_POINTER_IF",
+                    "GC_ATOM_IFDEF",
+                    "GC_ATOM_IFNDEF",
+                    "GC_ATOM_IF",
+                    "GC_CONSERVATIVE_IFDEF",
+                    "GC_CONSERVATIVE_IFNDEF",
+                    "GC_CONSERVATIVE_IF"].join("|") +
+                    ")\\s*\\((.*)");
+
+    function matchDeprecatedFieldTag(line, where) {
+        return deprecatedFieldTag.exec(line.substring(where));
     }
 
     function stackToCppPrefix() {
@@ -968,6 +964,12 @@ function readFiles(files)
                     reportMatch(line);
                     var v = positionalAttrs(result[1], result[2], ")", currentClassName());
                     specs.push(v);
+                }
+                else {
+                    if(line.indexOf("_IF") >= 0 && matchDeprecatedFieldTag(line, gcIndex) != null) {
+                        print(line);
+                        fail("The above annotation has _IF/_IFDEF/_IFNDEF!! _IF etc. are no longer required on member annotations and should be removed.");
+                    }
                 }
             }
 
