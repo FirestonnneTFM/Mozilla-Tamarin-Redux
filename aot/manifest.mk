@@ -1049,6 +1049,7 @@ stubcpps := $(curdir)/AOTStubs-00000.cpp \
     $(NULL)
 
 STATIC_LIBRARIES += aotstubs
+aotstubs_INCLUDES += $(AVM_INCLUDES)
 aotstubs_BUILD_ALL = 1
 aotstubs_CXXSRCS := $(stubcpps)
 aotstubs_EXTRA_CXXFLAGS := -Wno-sign-compare

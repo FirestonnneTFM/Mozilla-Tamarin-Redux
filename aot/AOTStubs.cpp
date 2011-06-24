@@ -110,6 +110,8 @@ void throwNullOrUndefined(MethodEnv* env, Atom atom) /* __attribute__((noreturn)
     AvmAssert(AvmCore::isNullOrUndefined(atom));
     // This could be made tighter by calling nullcheckfail(), but that's private and not really worth making public.
     env->nullcheck(atom);
+    // Appease g++, avoid 'noreturn' function does return, profit
+    while(1) {}
 }
 
 void throwNull(MethodEnv* env) /* __attribute__((noreturn)) */
@@ -117,6 +119,8 @@ void throwNull(MethodEnv* env) /* __attribute__((noreturn)) */
     ScriptObject* o = NULL;
     // This could be made tighter by calling nullcheckfail(), but that's private and not really worth making public.
     env->nullcheck(o->atom());
+    // Appease g++, avoid 'noreturn' function does return, profit
+    while(1) {}
 }
 
 

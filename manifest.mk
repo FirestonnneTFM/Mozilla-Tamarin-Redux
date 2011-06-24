@@ -82,6 +82,7 @@ $(call RECURSE_DIRS,MMgc)
 ifdef ENABLE_TAMARIN
 $(call RECURSE_DIRS,core pcre vprof)
 ifeq (1,$(ENABLE_AOT))
+aot_INCLUDES += $(AVM_INCLUDES)
 $(call RECURSE_DIRS,aot)
 endif
 ifeq (sparc,$(TARGET_CPU))
