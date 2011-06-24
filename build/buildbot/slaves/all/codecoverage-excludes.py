@@ -71,6 +71,8 @@ exclude_pattern+="!extensions/SamplerScript.h "
 # exclude vprof and eval tools, not part of flash player shipping code
 exclude_pattern+="!vprof/ !eval/ "
 
+# exclude gtest
+exclude_pattern+="!gtest/ "
 
 # The following functions in MathClass and MathUtils have been excluded
 # from the coverage calculation as there are currently not reachable
