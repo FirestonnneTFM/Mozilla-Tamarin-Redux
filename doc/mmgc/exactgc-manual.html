@@ -436,67 +436,6 @@ pointed-to object(s) containing pointers or not and being RC
 objects or not.
 
 
-<a name="data-conditional">
-<h4> Data annotations - Conditional compilation </h4>
-
-<hr>
-<P><center><blink><big><b>NOTE!!  that the conditional compilation facility described in
-this section is not normally necessary!</b></big></blink></center>
-
-<P> The generator script keeps track of conditional compilation
-directives and emits correct code, you do not have to use the _IFDEF,
-_IFNDEF, or _IF annotations.  The conditional compilation facility is
-a vestige of an older, cruder generator script.  It will be removed as
-soon as we know it's not needed.
-
-<hr>
-
-<P> There are variants of <tt>GC_AS3_EXACT</tt>
-and <tt>GC_CPP_EXACT</tt> that provide for the option of conditionally
-defined classes:
-
-<pre>
-  class GC_AS3_EXACT_IFDEF(ArrayClass, MMgc::ClassClosure, DEBUGGER) { ... }
-  class GC_CPP_EXACT_IFDEF(Domain, MMgc::GCTraceableObjectWithTrace, FEATURE_NANOJIT) { ... }
-</pre>
-and
-<pre>
-  class GC_AS3_EXACT_WITH_HOOK_IFDEF(ArrayClass, MMgc::ClassClosure, DEBUGGER) { ... }
-  class GC_CPP_EXACT_WITH_HOOK_IFDEF(Domain, MMgc::GCTraceableObjectWithTrace, FEATURE_NANOJIT) { ... }
-</pre>
-
-<P> You would use an <tt>_IFDEF</tt> variant if the class definition is within
-an <tt>#ifdef</tt> block in the source file already.  (There are also <tt>_IF</tt> and
-<tt>_IFNDEF</tt> variants of all these.)
-
-<P> In the simple field annotation cases there are
-secondary <tt>_IFDEF</tt> variants that cater to the case where the
-fields are conditionally defined:
-<pre>
-  DRCWB(ClassClosure*) GC_POINTER_IFDEF(t, DEBUGGER);
-  uintptr_t            GC_CONSERVATIVE_IFDEF(thisAndThat, MMGC_MEMORY_INFO);
-  GCList&lt;Label>        GC_STRUCTURE_IFDEF(m_labels, FEATURE_NANOJIT);
-  ATOM_WB              GC_ATOM_IFDEF(unobtainium, ALTERNATE_REALITY);
-</pre>
-
-<P> There are also <tt>_IF</tt> and <tt>_IFNDEF</tt> variants for when <tt>_IFDEF</tt> won't do:
-<pre>
-  DRCWB(ClassClosure*) GC_POINTER_IF(t, "defined DEBUGGER && !defined VMCFG_SH4");
-  DRCWB(ClassClosure*) GC_POINTER_IFNDEF(t, DEBUGGER);
-</pre>
-
-<P>In all cases, the <tt>_IF</tt>, <tt>_IFDEF</tt>,
-and <tt>_IFNDEF</tt> variants work in tandem
-with <tt>#if</tt>, <tt>#ifdef</tt>, and <tt>#ifndef</tt> blocks
-already in the C++ file: if a field definition is inside an <tt>#if</tt> block
-then its tracer annotation will be an <tt>_IF</tt> type, and so on:
-<pre>
-  #<b>ifndef</b> <b>DEBUGGER</b>
-      DRCWB(ClassClosure*) GC_POINTER_<b>IFNDEF</b>(t, <b>DEBUGGER</b>);
-  #endif
-</pre>
-
-
 <a name="error-checking">
 <h3> Error checking </h3>
 
