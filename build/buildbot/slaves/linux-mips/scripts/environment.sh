@@ -64,7 +64,7 @@ export proc_names="fake_never_find_me"
 
 export PYTHON_RUNTESTS=python3
 
-export threads=6
+export threads=8
 
 
 
@@ -97,3 +97,14 @@ export SSH_SHELL_REMOTE_HOST5=asteammips1
 export SSH_SHELL_REMOTE_USER5=root
 export SSH_SHELL_REMOTE_BASEDIR5=/root
 export SSH_SHELL_REMOTE_DIR5=/root/app2
+
+export SSH_SHELL_REMOTE_HOST6=asteammips7
+export SSH_SHELL_REMOTE_USER6=root
+export SSH_SHELL_REMOTE_BASEDIR6=/root
+export SSH_SHELL_REMOTE_DIR6=/root/app1
+
+export SSH_SHELL_REMOTE_HOST7=asteammips7
+export SSH_SHELL_REMOTE_USER7=root
+export SSH_SHELL_REMOTE_BASEDIR7=/root
+export SSH_SHELL_REMOTE_DIR7=/root/app2
+
