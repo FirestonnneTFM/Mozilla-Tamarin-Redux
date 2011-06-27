@@ -89,7 +89,7 @@ namespace MMgc
         GCAssert(!IsAddressOnStack(this));
         GC::TracePointerCheck(&(this->t));
 #endif
-        set(ProtectedGetOtherRawPtr(other));
+        set(GCRef<T>::ProtectedGetOtherRawPtr(other));
     }
 
     // copy constructor
@@ -101,7 +101,7 @@ namespace MMgc
         GCAssert(!IsAddressOnStack(this));
         GC::TracePointerCheck(&(this->t));
 #endif
-        set(ProtectedGetOtherRawPtr(other));
+        set(GCRef<T>::ProtectedGetOtherRawPtr(other));
     }
 
     template<class T>
@@ -113,7 +113,7 @@ namespace MMgc
     template<class T>
     REALLY_INLINE GCMemberBase<T>& GCMemberBase<T>::operator=(const GCMemberBase& other)
     {
-        set(ProtectedGetOtherRawPtr(other));
+        set(GCRef<T>::ProtectedGetOtherRawPtr(other));
         return *this;
     }
 
@@ -121,7 +121,7 @@ namespace MMgc
     template<class T2>
     REALLY_INLINE void GCMemberBase<T>::operator=(const GCRef<T2>& other) 
     {
-        set(ProtectedGetOtherRawPtr(other));
+        set(GCRef<T>::ProtectedGetOtherRawPtr(other));
     }	
 
     template<class T>
@@ -178,7 +178,7 @@ namespace MMgc
         : GCRef<T>()
     { 
         GCAssert(!IsAddressOnStack(this));
-        set(ProtectedGetOtherRawPtr(other));
+        set(GCRef<T>::ProtectedGetOtherRawPtr(other));
     }
 
     template<class T>
@@ -187,7 +187,7 @@ namespace MMgc
         : GCRef<T>()
     { 
         GCAssert(!IsAddressOnStack(this));
-        set(ProtectedGetOtherRawPtr(other));
+        set(GCRef<T>::ProtectedGetOtherRawPtr(other));
     }
 
     template<class T>
@@ -208,7 +208,7 @@ namespace MMgc
     template<class T2>
     REALLY_INLINE void GCRoot::GCMember<T>::operator=(const GCRef<T2>& other) 
     { 
-        set(ProtectedGetOtherRawPtr(other));
+        set(GCRef<T>::ProtectedGetOtherRawPtr(other));
     }
 
     template<class T>
@@ -220,7 +220,7 @@ namespace MMgc
     template<class T>
     REALLY_INLINE GCRoot::GCMember<T>& GCRoot::GCMember<T>::operator=(const GCMember& other) 
     { 
-        set(ProtectedGetOtherRawPtr(other));
+        set(GCRef<T>::ProtectedGetOtherRawPtr(other));
         return *this;
     }
 
