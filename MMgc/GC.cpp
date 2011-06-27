@@ -218,6 +218,9 @@ namespace MMgc
         MMGC_STATIC_ASSERT(sizeof(GCLargeAlloc::LargeBlock) % 8 == 0);
         MMGC_STATIC_ASSERT(sizeof(gcbits_t) == 1);
 
+        // Policy code relies on INT_MAX being 32 bit int max.
+        MMGC_STATIC_ASSERT(INT_MAX == 0x7fffffff);
+
         // The size tables above are derived based on a block size of 4096; this
         // assert keeps us honest.  Talk to Lars if you get into trouble here.
         //
