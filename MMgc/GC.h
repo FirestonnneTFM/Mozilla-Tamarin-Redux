@@ -955,7 +955,13 @@ namespace MMgc
         bool IncrementalMarking();
 
         /**
-         * Is the write barrier active?  This is not necessarily the same as IncrementalMarking().
+         * Is the write barrier active?  If true, then pointer stores *must* be filtered
+         * through the write barrier (see the "write barrier" section directly below for
+         * the relevant APIs).
+         *
+         * NOTE: In the past this has been equivalent to IncrementalMarking(), or even to
+         * reading the "marking" member, but in general BarrierActive() is different from
+         * those two methods (generational collectors' barriers are always active, for example).
          */
         bool BarrierActive();
         
