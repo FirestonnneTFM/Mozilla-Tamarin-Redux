@@ -1817,16 +1817,6 @@ namespace MMgc
 
 public:
 
-#ifdef _DEBUG
-        // Dump a list of objects that have pointers to the given location.
-        void WhosPointingAtMe(void* me, int recurseDepth=0, int currentDepth=0);
-
-        /**
-         * Used by WhosPointingAtMe.
-         */
-        void ProbeForMatch(const void *mem, size_t size, uintptr_t value, int recurseDepth, int currentDepth);
-#endif
-
         void DumpAlloc(GCAlloc *a, size_t& internal_waste, size_t& overhead);
 
         //This method returns the number bytes allocated for GC objects
