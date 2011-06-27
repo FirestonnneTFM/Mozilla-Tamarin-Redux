@@ -378,7 +378,11 @@ namespace MMgc
             remainingMajorAllocationBudget -= -remainingMinorAllocationBudget;
             remainingMinorAllocationBudget = 0;
         }
-        remainingMinorAllocationBudget = int32_t(A());
+
+        double aval = A();
+        if(aval > INT_MAX)
+            aval = INT_MAX;
+        remainingMinorAllocationBudget = int32_t(aval);
         minorAllocationBudget = remainingMinorAllocationBudget;
         GCAssert(minorAllocationBudget > 0);
         remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
