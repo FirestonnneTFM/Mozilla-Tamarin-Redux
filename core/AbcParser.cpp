@@ -1810,16 +1810,15 @@ namespace avmplus
             Namespacep ns;
             Stringp name;
             name = mn.getName();
-            const NamespaceSet* nss;
+
             if (mn.namespaceCount() > 1)
             {
-                nss = mn.getNsset();
+                const NamespaceSet* nss = mn.getNsset();
                 ns = nss->nsAt(0);
             }
             else
             {
                 ns = mn.getNamespace();
-                nss = NamespaceSet::create(core->GetGC(), ns);
             }
 
             // resolving base class type means class heirarchy must be a Tree
