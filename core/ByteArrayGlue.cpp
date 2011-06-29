@@ -123,6 +123,12 @@ namespace avmplus
         
     void FASTCALL ByteArray::Grower::EnsureWritableCapacity(uint32_t minimumCapacity)
     {
+        // This lovely bit of hokiness is necessary because
+        // mmfx_new_array_opt doesn't return NULL but instead Abort's
+        // when the size approaches 2^32. We want to be consistent
+        // across the entire uint32_t range and throw a memory error
+        // instead.  The subtraction of two blocks has to do with how
+        // FixedMalloc::LargeAlloc does this check.
         if (minimumCapacity > (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2))
             m_owner->ThrowMemoryError();
 
