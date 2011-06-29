@@ -2934,7 +2934,6 @@ namespace MMgc
         m_notificationThread = VMPI_currentThread();
 
         size_t startingTotal = GetTotalHeapSize() + externalPressure / kBlockSize;
-        size_t currentTotal = startingTotal;
 
         BasicListIterator<OOMCallback*> iter(callbacks);
         OOMCallback *cb = NULL;
@@ -2948,7 +2947,7 @@ namespace MMgc
                 VMPI_lockAcquire(&m_spinlock);
 
                 Decommit();
-                currentTotal = GetTotalHeapSize() + externalPressure / kBlockSize;
+                size_t currentTotal = GetTotalHeapSize() + externalPressure / kBlockSize;
 
                 //  If we've freed MORE than the minimum amount, we can stop freeing
                 if ((startingTotal - currentTotal) > minimumBlocksToFree)
