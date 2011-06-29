@@ -871,6 +871,9 @@ namespace avmplus
         char* buffer = (char*)avmStackAlloc(core, _buffer, kMinSizeForDouble_base10_toString);
         char *s = buffer;
         bool negative = false;
+        bool round = true;
+        bool noFraction = (precision == 0);
+        bool bugzilla513039 = core->currentBugCompatibility()->bugzilla513039;  // Number.toFixed(0) returns incorrect numbers, rounding issues 
 
         // Deal with negative numbers
         if (value < 0) {
@@ -1002,8 +1005,21 @@ namespace avmplus
                         digits++;
                     }
                 } else if (exp10 < 0) {
-                    while ((++exp10 < 0) && (precision-- > 0))
-                        *s++ = '0';
+                    if (bugzilla513039)
+                    {
+                        while ((exp10 < -1) && (precision > 0))
+                        {
+                            exp10++;
+                            precision--;
+                            *s++ = '0';
+                        }
+                        if (precision == 0 && exp10 != 0)
+                            round = false;
+                    }
+                    else {
+                        while ((++exp10 < 0) && (precision-- > 0))
+                            *s++ = '0';
+                    }
                 }
 
                 // Write out significand
@@ -1076,7 +1092,7 @@ namespace avmplus
 
         // Rounding  (todo: argh, was hoping to get rid of this, but we still need it for fastEstimate mode)
         // fix bug 121952: must also do rounding for fixed mode
-        if (d2a->bFastEstimateOk || mode == DTOSTR_FIXED || mode == DTOSTR_PRECISION)
+        if (round && (d2a->bFastEstimateOk || mode == DTOSTR_FIXED || mode == DTOSTR_PRECISION))
         {
             i = d2a->nextDigit();
             if (i > 4) {
@@ -1148,6 +1164,14 @@ namespace avmplus
         }
         if (negative)
             *--s = '-';
+
+        if (bugzilla513039 && mode == DTOSTR_FIXED && noFraction && wroteDecimal)
+        {
+            char *p;
+            for (p=s+len-1 ; *p != '.' ; p-- )
+                ;
+            len = p - s;
+        }
 
         #if 0 // def WIN32
         // Restore control word

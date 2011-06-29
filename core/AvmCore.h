@@ -296,6 +296,7 @@ const int kBufferPadding = 16;
             kSWF12,             // SWF12 (Flash Player TBD Wasabi)
             kSWF13,             // SWF13 (Flash Player TBD Serrano)
             kSWF14,             // SWF14 (Flash Player TBD Anza)
+            kSWF15,             // SWF15 (Flash Player TBD Brannan)
 
             VersionCount,
 
@@ -365,6 +366,7 @@ const int kBufferPadding = 16;
         unsigned bugzilla456852b:1;     // Different runtime error for negative vector index when -Ojit set
         unsigned bugzilla504525:1;      // Vector.concat processes arguments in reverse order
         unsigned bugzilla513018:1;      // parseFloat accepts illegal number syntax
+        unsigned bugzilla513039:1;      // Number.toFixed(0) returns incorrect numbers, rounding issues
         unsigned bugzilla524122:1;      // Incorrect optimization for integers in numeric sort
         unsigned bugzilla526662:1;      // XMLParser stops at NUL char
         unsigned bugzilla532454:1;      // Sort incorrectly converts result of user-supplied comparison function to integer

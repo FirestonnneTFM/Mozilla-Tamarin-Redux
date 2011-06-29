@@ -84,11 +84,15 @@ as3/Math/MathUtils , linux-diff ,, skip , \
 ####################
 # Number
 ####################
-ecma3/Number/e15_7_4_6_1:Section R-(1|2|3|4|5|6|7|8|10|11|12|13|14|16|17) .* , .* ,diff, expectedfail, \
-    bug https://bugzilla.mozilla.org/show_bug.cgi?id=513039
 ecma3/Number/e15_7_4_6_1:Section R-(18|19) .* , .* , diff, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478796
 ecma3/Number/e15_7_4_6_1:Section C , .* ,diff , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478804
 ecma3/Number/e15_7_4_7_1:Section R-1 , .*, diff, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=442974
+
+# The AS3 file here is a dup of the corresponding ECMA3 file, it had to be moved because compatibility testing
+# is not possible under rules for the ecma3 directory.  The ecma3 edition is unversioned and correct in new code.
+# The as3 edition expects wrong answers for old swf versions.
+as3/Number/e15_7_4_6_1:Section R-(18|19) .* , .* , diff, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478796
+as3/Number/e15_7_4_6_1:Section C , .* ,diff , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478804
 
 ####################
 # String

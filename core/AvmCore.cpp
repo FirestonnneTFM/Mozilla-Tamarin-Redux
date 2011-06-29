@@ -5026,6 +5026,13 @@ return the result of the comparison ToPrimitive(x) == y.
 
     BugCompatibility::BugCompatibility(BugCompatibility::Version v)
     {
+#ifdef DEBUG
+        // Prevent the name table from getting out of sync with the enum.
+
+        for ( int i=0 ; i < VersionCount ; i++)
+            assert(kNames[i] != 0);
+#endif
+
         // We rely on the fact that we are allocated pre-zeroed by MMgc,
         // thus ensuring that the default state of all compatibility bits is zero.
         // Thus we only need to set bits based on versions, we don't have to clear anything.
@@ -5057,11 +5064,18 @@ return the result of the comparison ToPrimitive(x) == y.
 
         // if (v >= kSWF12) { nothing to do here }
 
-        if (v >= kSWF13)
+        if (v >= kSWF13)    /* Serrano */
         {
             bugzilla532454  = 1;    // Sort incorrectly converts result of user-supplied comparison function to integer
             bugzilla574600  = 1;    // Vector.<>.AS3::map returns no value
             bugzilla654807  = 1;    // sealed subclasses of Array act sort-of-dynamic
+        }
+
+        // if (v >= kSWF14) /* Anza */ { TBD }
+        
+        if (v >= kSWF15)    /* Brannan */
+        {
+            bugzilla513039 = 1;     // Number.toFixed(0) returns incorrect numbers, rounding issues
         }
     }
 
@@ -5071,6 +5085,8 @@ return the result of the comparison ToPrimitive(x) == y.
         10,
         11,
         12,
-        13
+        13,
+        14,
+        15
     };
 }
