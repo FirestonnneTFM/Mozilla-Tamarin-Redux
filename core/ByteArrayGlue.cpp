@@ -130,7 +130,7 @@ namespace avmplus
         {
             uint32_t newCapacity = m_owner->m_capacity << 1;
             if (newCapacity < minimumCapacity)
-                newCapacity = uint32_t(minimumCapacity);
+                newCapacity = minimumCapacity;
             if (newCapacity < kGrowthIncr)
                 newCapacity = kGrowthIncr;
 
