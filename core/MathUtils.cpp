@@ -1170,7 +1170,7 @@ namespace avmplus
             char *p;
             for (p=s+len-1 ; *p != '.' ; p-- )
                 ;
-            len = p - s;
+            len = (int32_t)(p-s);
         }
 
         #if 0 // def WIN32
