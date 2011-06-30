@@ -700,7 +700,7 @@ void AVMPI_freeCodeMemory(void* address, size_t nbytes)
         VMPI_snprintf(buf,
                       sizeof(buf),
                       "AVMPI_freeCodeMemory invariants violated: address=%llu provided=%llu actual=%llu\nAborting.\n",
-                      (unsigned long long)address,
+                      (unsigned long long)(uintptr_t)address,
                       (unsigned long long)nbytes,
                       (unsigned long long)actualBytes);
         VMPI_log(buf);
@@ -728,7 +728,7 @@ void AVMPI_makeCodeMemoryExecutable(void *address, size_t nbytes, bool makeItSo)
         VMPI_snprintf(buf,
                       sizeof(buf),
                       "AVMPI_makeCodeMemoryExecutable invariants violated: address=%llu size=%llu pagesize=%llu\nAborting.\n",
-                      (unsigned long long)address,
+                      (unsigned long long)(uintptr_t)address,
                       (unsigned long long)nbytes,
                       (unsigned long long)pagesize);
         VMPI_log(buf);
