@@ -885,7 +885,7 @@ function readFiles(files)
                 // It's heuristic; bugzilla 649333 tracks the problem.
 
                 if ((result = (/^\s*#\s*(ifdef|ifndef|if|elif|else|endif|define)/).exec(line)) != null) {
-                    var rest = sanitizeCondition(line.substring(cppIndex + result[0].length));
+                    var rest = sanitizeCondition(line.substring(result[0].length));
                     var directive = result[1];
                     switch (directive) {
                     case "ifdef":
