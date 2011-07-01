@@ -35,5 +35,5 @@
 //
 // ***** END LICENSE BLOCK *****
 
-SDKROOT = macosx10.4
+SDKROOT = macosx10.5
 ARCHS=i386 ppc
