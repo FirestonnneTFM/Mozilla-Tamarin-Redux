@@ -128,10 +128,10 @@ namespace avmplus
         // POSSIBLE EXTENSION: structured data and field access
         //
         // It would be possible to support array, object, xml, and vector initializers
-        // whose initializing subexpressions are either literal values or references 
+        // whose initializing subexpressions are either literal values or references
         // to config variables, as well as field selections on those initializers.
         // It's possible to imagine some use cases.  We need some clean semantics for
-        // when those initializers escape into non-config code - do we want a single 
+        // when those initializers escape into non-config code - do we want a single
         // copy or multiple copies?
 
         Expr* Parser::evaluateConfigDefinition(Str* ns, Expr* e)
@@ -140,7 +140,7 @@ namespace avmplus
             // ns is the default namespace: it will be used to qualify any unqualified name.
             
             switch (e->tag()) {
-                case TAG_literalUndefined: 
+                case TAG_literalUndefined:
                 case TAG_literalString:
                 case TAG_literalNull:
                 case TAG_literalUInt:
@@ -263,7 +263,7 @@ namespace avmplus
                             break;
                         }
                         default:
-                            // "as", "is", "in", ",", "=" 
+                            // "as", "is", "in", ",", "="
                             compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_OP_IN_CONSTEXPR);
                             /*NOTREACHED*/
                             break;
@@ -274,7 +274,7 @@ namespace avmplus
                 case TAG_unaryExpr: {
                     // EXTENSION: typeof
                     //
-                    // Supporting "typeof" makes some sort of sense (for example, the 
+                    // Supporting "typeof" makes some sort of sense (for example, the
                     // operand of typeof can be a config constant that can take on
                     // various values, and computing the name of the type into the
                     // program can be useful).

@@ -89,7 +89,7 @@ namespace avmplus
         {1, OP_strictequals},   // OPR_strictNotEqual
         };
 
-        Cogen::Cogen(Compiler *compiler, ABCFile* abc, ABCTraitsTable* traits, ABCMethodBodyInfo* body, uint32_t first_temp) 
+        Cogen::Cogen(Compiler *compiler, ABCFile* abc, ABCTraitsTable* traits, ABCMethodBodyInfo* body, uint32_t first_temp)
             : compiler(compiler)
             , abc(abc)
             , allocator(compiler->allocator)
@@ -218,7 +218,7 @@ namespace avmplus
             stackMovement(opcode, abc->hasRTNS(index), abc->hasRTName(index), nargs);
         }
         
-        void Cogen::propU30(AbcOpcode opcode, uint32_t index) 
+        void Cogen::propU30(AbcOpcode opcode, uint32_t index)
         {
             code.emitU8((uint8_t)opcode);
             code.emitU30(index);
@@ -284,7 +284,7 @@ namespace avmplus
         
         uint32_t Cogen::emitTypeName(Compiler* compiler, QualifiedName* t)
         {
-            ABCFile* abc = &compiler->abc; 
+            ABCFile* abc = &compiler->abc;
             if (t == NULL)
                 return 0;
             uint32_t ns = compiler->NS_public;
@@ -296,7 +296,7 @@ namespace avmplus
             return abc->addQName(ns, abc->addString(((SimpleName*)t->name)->name));
         }
     
-        void Cogen::I_lookupswitch(Label* default_label, Label** case_labels, uint32_t ncases) 
+        void Cogen::I_lookupswitch(Label* default_label, Label** case_labels, uint32_t ncases)
         {
             AvmAssert( ncases > 0 );
             AvmAssert( default_label != NULL );
@@ -364,10 +364,10 @@ namespace avmplus
                             // AS3 does not support default value other than the six cases above.  Doing better
                             // would be nice.
                             //
-                            // We can use one of the obscure namespace default values as a placeholder, then 
-                            // generate code to test for that value and compute the correct default value.  
-                            // But the signature of the function won't be right; the type of the argument 
-                            // must be '*'.  May be close enough, as long as we assign a provided argument 
+                            // We can use one of the obscure namespace default values as a placeholder, then
+                            // generate code to test for that value and compute the correct default value.
+                            // But the signature of the function won't be right; the type of the argument
+                            // must be '*'.  May be close enough, as long as we assign a provided argument
                             // value to a typed slot and get a type check on entry.
                             compiler->syntaxError(params->hd->default_value->pos, SYNTAXERR_IMPOSSIBLE_DEFAULT);
                     }
@@ -454,7 +454,7 @@ namespace avmplus
                     // FIXME: semantic check for namespaces.
                     // Check that the name on the RHS is actually a ns
                     // Code is the same as for 'use default namespace'
-                    // If we can't tell (name may be shadowed?) then 
+                    // If we can't tell (name may be shadowed?) then
                     // emit code that checks at run-time.  If we can tell,
                     // then don't emit code for looking it up at run-time
                     // here, but just reference the definition of the other

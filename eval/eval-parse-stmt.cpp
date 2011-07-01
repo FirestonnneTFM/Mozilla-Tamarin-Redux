@@ -47,7 +47,7 @@ namespace avmplus
 {
     namespace RTC
     {
-        Stmt* Parser::statement(bool config) 
+        Stmt* Parser::statement(bool config)
         {
             AvmAssert(config == true || hd() == T_LeftBrace);
             switch (hd()) {
@@ -111,7 +111,7 @@ namespace avmplus
                     return switchStatement();
                     
                 case T_Throw: {
-                    Stmt* stmt = throwStatement(); 
+                    Stmt* stmt = throwStatement();
                     semicolon();
                     return stmt;
                 }
@@ -125,7 +125,7 @@ namespace avmplus
                     return stmt;
                 }
 
-                case T_Var: 
+                case T_Var:
                 case T_Const: {
                     Stmt* stmt = varStatement(hd() == T_Const);
                     semicolon();
@@ -147,9 +147,9 @@ namespace avmplus
                         Str* name = fn->name;
                         fn->name = NULL;
                         addVarBinding(name, NULL);
-                        return ALLOC(ExprStmt, (pos, 
-                                                ALLOC(AssignExpr, 
-                                                      (OPR_assign, 
+                        return ALLOC(ExprStmt, (pos,
+                                                ALLOC(AssignExpr,
+                                                      (OPR_assign,
                                                        ALLOC(QualifiedName, (NULL, ALLOC(SimpleName, (name)), false, pos)),
                                                        ALLOC(LiteralFunction, (fn))))));
                     }
@@ -173,7 +173,7 @@ namespace avmplus
             }
         }
         
-        void Parser::semicolon() 
+        void Parser::semicolon()
         {
             switch (hd ()) {
                 case T_Semicolon:
@@ -191,7 +191,7 @@ namespace avmplus
             }
         }
         
-        bool Parser::noNewline() 
+        bool Parser::noNewline()
         {
             switch (hd ()) {
                 case T_EOS:
@@ -215,7 +215,7 @@ namespace avmplus
             return stmts.get();
         }
         
-        // updates bindings by side effect, returns a single expression 
+        // updates bindings by side effect, returns a single expression
         // statement for the initialization.
         
         Stmt* Parser::varStatement(bool is_const)
@@ -341,7 +341,7 @@ namespace avmplus
             return ALLOC(LabeledStmt, (label, stmt));
         }
         
-        Stmt* Parser::returnStatement() 
+        Stmt* Parser::returnStatement()
         {
             eat (T_Return);
             uint32_t pos = position();
@@ -411,7 +411,7 @@ namespace avmplus
             eat(T_While);
             uint32_t pos = position();
             Expr* expr = parenExpression();
-            Stmt* body = statement(); 
+            Stmt* body = statement();
             
             return ALLOC(WhileStmt, (pos, expr, body));
         }
@@ -419,7 +419,7 @@ namespace avmplus
         Stmt* Parser::doStatement()
         {
             eat(T_Do);
-            Stmt* body = statement(); 
+            Stmt* body = statement();
             eat(T_While);
             uint32_t pos = position();
             Expr* expr = parenExpression ();
@@ -427,7 +427,7 @@ namespace avmplus
             return ALLOC(DoWhileStmt, (pos, expr, body));
         }
         
-        Stmt* Parser::forStatement()  
+        Stmt* Parser::forStatement()
         {
             Expr* init=NULL;
             Expr* lhs=NULL;
@@ -458,7 +458,7 @@ namespace avmplus
 
                 Expr* objexpr = commaExpression(0);
                 eat (T_RightParen);
-                Stmt* body = statement(); 
+                Stmt* body = statement();
                 
                 AvmAssert( lhs != NULL );
                 return ALLOC(ForInStmt, (pos, lhs, init, objexpr, body, is_each));
@@ -472,7 +472,7 @@ namespace avmplus
                 eat(T_Semicolon);
                 Expr* update = hd() == T_RightParen ? NULL : commaExpression(0);
                 eat(T_RightParen);
-                Stmt* body = statement (); 
+                Stmt* body = statement ();
 
                 return ALLOC(ForStmt, (pos, init, test, update, body));
             }
@@ -486,7 +486,7 @@ namespace avmplus
 
             eat (T_LeftBrace);
             Seq<CaseClause*>* cases = NULL;
-            if (hd() == T_Case || hd() == T_Default) 
+            if (hd() == T_Case || hd() == T_Default)
                 cases = caseElements();
             eat(T_RightBrace);
 
@@ -539,7 +539,7 @@ namespace avmplus
             }
         }
         
-        Stmt* Parser::throwStatement()  
+        Stmt* Parser::throwStatement()
         {
             eat (T_Throw);
             uint32_t pos = position();
@@ -562,7 +562,7 @@ namespace avmplus
             return ALLOC(TryStmt, (tryblock, catchblocks,finallyblock));
         }
         
-        Seq<CatchClause*>* Parser::catches() 
+        Seq<CatchClause*>* Parser::catches()
         {
             SeqBuilder<CatchClause*> catches(allocator);
 

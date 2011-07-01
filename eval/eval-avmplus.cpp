@@ -45,7 +45,7 @@
 
 namespace avmplus
 {
-    class AvmplusHostContext : public RTC::HostContext 
+    class AvmplusHostContext : public RTC::HostContext
     {
     public:
         AvmplusHostContext(AvmCore* core, Toplevel* toplevel)
@@ -79,7 +79,7 @@ namespace avmplus
     
     const wchar* AvmplusHostContext::readFileForEval(const wchar* basename, const wchar* filename, uint32_t* inputlen)
     {
-        // FIXME: the mismatch between what eval needs and what the core API delivers is just stunning. 
+        // FIXME: the mismatch between what eval needs and what the core API delivers is just stunning.
         if (nextstring == sizeof(strings)/sizeof(strings[0]))
             throwInternalError("includes too deeply nested");
         StUTF16String str(core->readFileForEval(core->newStringUTF16(basename), core->newStringUTF16(filename)));   // return value is already NUL-terminated

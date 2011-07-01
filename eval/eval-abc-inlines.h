@@ -41,7 +41,7 @@
 namespace avmplus {
 namespace RTC {
 
-inline uint32_t ABCFile::addMethod(ABCMethodInfo* m) 
+inline uint32_t ABCFile::addMethod(ABCMethodInfo* m)
 {
     methods.addAtEnd(m);
     return methodCount++;
@@ -96,7 +96,7 @@ inline void ABCMethodInfo::setFlags(uint8_t flags)
     this->flags = flags;
 }
 
-inline uint32_t ABCTraitsTable::addTrait(ABCTrait* t) 
+inline uint32_t ABCTraitsTable::addTrait(ABCTrait* t)
 {
     traits.addAtEnd(t);
     return traitsCount++;

@@ -125,7 +125,7 @@ namespace avmplus
         {
         }
 
-        Parser::Parser(Compiler* compiler, Lexer* lexer, uint32_t first_line) 
+        Parser::Parser(Compiler* compiler, Lexer* lexer, uint32_t first_line)
             : compiler(compiler)
             , allocator(compiler->allocator)
             , line_offset(first_line-1)
@@ -157,7 +157,7 @@ namespace avmplus
             addConfigNamespace(compiler->SYM_CONFIG);
             pushBindingRib(RIB_Program);
             addNamespaceBinding(compiler->SYM_AS3, ALLOC(LiteralString, (compiler->intern("http://adobe.com/AS3/2006/builtin"), 0)));
-            while (hd() == T_Package) 
+            while (hd() == T_Package)
                 package();
             Seq<Stmt*>* stmts = directives(SFLAG_Toplevel);
             Program* prog = ALLOC(Program, (topRib->bindings.get(), topRib->functionDefinitions.get(), topRib->namespaces.get(), topRib->openNamespaces.get(), stmts));
@@ -223,7 +223,7 @@ namespace avmplus
 
         continue_directive:
             if (hd() == T_RightBrace || hd() == T_EOS) {
-                if (committed) 
+                if (committed)
                     compiler->syntaxError(position(), SYNTAXERR_DIRECTIVE_REQUIRED);
                 addExprStatements(&stmts, metadatas.get());
                 goto finish;
@@ -275,7 +275,7 @@ namespace avmplus
         array_metadata: {
             // Could be array-literal metadata or expression statement.
             //
-            // Must parse full expression here in case it's not metadata, eg, 
+            // Must parse full expression here in case it's not metadata, eg,
             //   [native(a,b,c)] + " = " + x
             // or
             //   [a,b,c] = 10
@@ -409,7 +409,7 @@ namespace avmplus
                     metadatas.addAtEnd(e);
                     addExprStatements(&stmts, metadatas.get());
                     goto next_directive;
-                }                    
+                }
 
                 t = QUAL_name;
                 qual.name = (QualifiedName*)e;
@@ -586,7 +586,7 @@ namespace avmplus
         // Qualifiers are known to be appropriate for 'class'
         void Parser::classDefinition(bool config, int /*flags*/, Qualifier* qual)
         {
-			(void)config;
+            (void)config;
             // FIXME: pick up the methods plus all other flags somehow, these are available from the binding ribs
             // Maybe time to package them up conveniently (FunctionDefinition needs it too).
             eat(T_Class);
@@ -618,7 +618,7 @@ namespace avmplus
         
         void Parser::interfaceDefinition(bool config, int /*flags*/, Qualifier* qual)
         {
-			(void)config;
+            (void)config;
             // FIXME: pick up the methods somehow, these are available from the binding ribs
             eat(T_Interface);
             uint32_t pos = position();
@@ -648,14 +648,14 @@ namespace avmplus
 
         void Parser::namespaceDefinition(bool config, int flags, Qualifier* /*qual*/)
         {
-			(void)flags;
+            (void)flags;
             uint32_t pos = position();
             eat(T_Namespace);
             Str* name = identifier();
             checkNoShadowingOfConfigNamespaces(pos, name);
             Expr* value = NULL;
             if (match(T_Assign)) {
-                if (hd() != T_Identifier && hd() != T_StringLiteral) 
+                if (hd() != T_Identifier && hd() != T_StringLiteral)
                     compiler->syntaxError(pos, SYNTAXERR_ILLEGAL_NAMESPACE);
                 value = primaryExpression();
             }
@@ -666,8 +666,8 @@ namespace avmplus
 
         void Parser::configNamespaceDefinition(int flags, bool config)
         {
-			(void)flags;
-			(void)config;
+            (void)flags;
+            (void)config;
         }
 
         void Parser::includeDirective()
@@ -858,14 +858,14 @@ namespace avmplus
 
         void Parser::addQualifiedImport(Seq<Str*>* name)
         {
-			(void)name;
+            (void)name;
             // A map from the last element of the name to the name
             compiler->internalError(0, "Unimplemented: Qualified import not supported, use an unqualified import instead");
         }
         
         void Parser::addUnqualifiedImport(Seq<Str*>* name)
         {
-			(void)name;
+            (void)name;
             // Nothing we care about at this time
         }
         
@@ -886,7 +886,7 @@ namespace avmplus
 
         void Parser::functionDefinition(bool config, Qualifier* qual, bool getters_and_setters, bool require_body)
         {
-			(void)config;
+            (void)config;
             uint32_t pos = position();
             FunctionDefn* fn = functionGuts(qual, true, getters_and_setters, require_body);
             checkNoShadowingOfConfigNamespaces(pos, fn->name);
@@ -1011,9 +1011,9 @@ namespace avmplus
             // FIXME: transmit isGetter and isSetter
             (void)isGetter;
             (void)isSetter;
-            return ALLOC(FunctionDefn, (name, bindings, params.get(), numparams, rest_param, return_type_name, fndefs, namespaces, openNamespaces, stmts, 
-                                        uses_arguments, 
-                                        uses_dxns, 
+            return ALLOC(FunctionDefn, (name, bindings, params.get(), numparams, rest_param, return_type_name, fndefs, namespaces, openNamespaces, stmts,
+                                        uses_arguments,
+                                        uses_dxns,
                                         optional_arguments));
         }
 
@@ -1044,43 +1044,43 @@ namespace avmplus
         //     - Lexer::lex() is shallow
         //     - Token::tokenKind and Token::tokenText have been in-lined
         //   * avoid allocations
-        //     - Communicate with lexer via multiple variables rather than 
+        //     - Communicate with lexer via multiple variables rather than
         //       using multiple return values
         
-        void Parser::start() 
+        void Parser::start()
         {
             T0 = lexer->lex(&L0, &V0);
         }
         
-        Token Parser::divideOperator() 
+        Token Parser::divideOperator()
         {
             AvmAssert( T0 == T_BreakSlash && T1 == T_LAST );
             T0 = lexer->divideOperator(&L0);
             return hd();
         }
         
-        Token Parser::regexp() 
+        Token Parser::regexp()
         {
             AvmAssert( T0 == T_BreakSlash && T1 == T_LAST );
             T0 = lexer->regexp(&L0, &V0);
             return hd();
         }
         
-        Token Parser::rightAngle() 
+        Token Parser::rightAngle()
         {
             AvmAssert( T0 == T_BreakRightAngle && T1 == T_LAST );
             T0 = lexer->rightAngle(&L0);
             return hd();
         }
         
-        Token Parser::leftShiftOrRelationalOperator() 
+        Token Parser::leftShiftOrRelationalOperator()
         {
             AvmAssert( T0 == T_BreakLeftAngle && T1 == T_LAST );
             T0 = lexer->leftShiftOrRelationalOperator(&L0);
             return hd();
         }
         
-        Token Parser::rightShiftOrRelationalOperator() 
+        Token Parser::rightShiftOrRelationalOperator()
         {
             AvmAssert( T0 == T_BreakRightAngle && T1 == T_LAST );
             T0 = lexer->rightShiftOrRelationalOperator(&L0);
@@ -1094,7 +1094,7 @@ namespace avmplus
             return T1;
         }
         
-        void Parser::next() 
+        void Parser::next()
         {
             LP = L0;
             T0 = T1;

@@ -90,7 +90,7 @@ inline int32_t max(int32_t a, int32_t b) { return a > b ? a : b; }
 
 /**
  * Convenience wrapper for accumulating string values for
- * identifiers, strings, regular expressions, xml text. 
+ * identifiers, strings, regular expressions, xml text.
  */
 
 class SBChunk {

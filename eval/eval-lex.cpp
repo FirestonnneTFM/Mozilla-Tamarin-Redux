@@ -101,7 +101,7 @@ namespace avmplus
          * The AVM+ regex engine should evolve to handle \<newline> and blank
          * stripping directly, as that provides better debuggability.
          */
-        Token Lexer::regexpImpl() 
+        Token Lexer::regexpImpl()
         {
             AvmAssert(last_token == T_BreakSlash);
 
@@ -181,7 +181,7 @@ namespace avmplus
             return T_RegexpLiteral;
         }
         
-        Token Lexer::divideOperatorImpl() 
+        Token Lexer::divideOperatorImpl()
         {
             AvmAssert(last_token == T_BreakSlash);
             switch (*idx) {
@@ -194,13 +194,13 @@ namespace avmplus
             }
         }
         
-        Token Lexer::rightAngleImpl() 
+        Token Lexer::rightAngleImpl()
         {
             AvmAssert(last_token == T_BreakRightAngle);
             return T_GreaterThan;
         }
         
-        Token Lexer::rightShiftOrRelationalOperatorImpl() 
+        Token Lexer::rightShiftOrRelationalOperatorImpl()
         {
             AvmAssert(last_token == T_BreakRightAngle);
             switch (*idx) {
@@ -261,7 +261,7 @@ namespace avmplus
          * tends to be very rare in practice.
          *
          * Note that subscanners that consume input until something
-         * happens (like strings and comments and xml) will need to check 
+         * happens (like strings and comments and xml) will need to check
          * for 0 as well.
          */
         Token Lexer::lexImpl()
@@ -503,7 +503,7 @@ namespace avmplus
                         return identifier();
                         
                         // Begin generated code
-                    case 'a': 
+                    case 'a':
                         if (idx[0] == 's' &&
                             !compiler->es3_keywords &&
                             notPartOfIdent(idx[1])) {
@@ -511,7 +511,7 @@ namespace avmplus
                             return T_As;
                         }
                         goto bigswitch_end;
-                    case 'b': 
+                    case 'b':
                         if (idx[0] == 'r' &&
                             idx[1] == 'e' &&
                             idx[2] == 'a' &&
@@ -521,18 +521,18 @@ namespace avmplus
                             return T_Break;
                         }
                         goto bigswitch_end;
-                    case 'c': 
+                    case 'c':
                         switch(idx[0]) {
-                            case 'a': 
+                            case 'a':
                                 switch(idx[1]) {
-                                    case 's': 
+                                    case 's':
                                         if (idx[2] == 'e' &&
                                             notPartOfIdent(idx[3])) {
                                             idx += 3;
                                             return T_Case;
                                         }
                                         goto bigswitch_end;
-                                    case 't': 
+                                    case 't':
                                         if (idx[2] == 'c' &&
                                             idx[3] == 'h' &&
                                             notPartOfIdent(idx[4])) {
@@ -543,7 +543,7 @@ namespace avmplus
                                     default:
                                         goto bigswitch_end;
                                 }
-                            case 'l': 
+                            case 'l':
                                 if (idx[1] == 'a' &&
                                     idx[2] == 's' &&
                                     idx[3] == 's' &&
@@ -553,11 +553,11 @@ namespace avmplus
                                     return T_Class;
                                 }
                                 goto bigswitch_end;
-                            case 'o': 
+                            case 'o':
                                 switch(idx[1]) {
-                                    case 'n': 
+                                    case 'n':
                                         switch(idx[2]) {
-                                            case 's': 
+                                            case 's':
                                                 if (idx[3] == 't' &&
                                                     !compiler->es3_keywords &&
                                                     notPartOfIdent(idx[4])) {
@@ -565,7 +565,7 @@ namespace avmplus
                                                     return T_Const;
                                                 }
                                                 goto bigswitch_end;
-                                            case 't': 
+                                            case 't':
                                                 if (idx[3] == 'i' &&
                                                     idx[4] == 'n' &&
                                                     idx[5] == 'u' &&
@@ -584,11 +584,11 @@ namespace avmplus
                             default:
                                 goto bigswitch_end;
                         }
-                    case 'd': 
+                    case 'd':
                         switch(idx[0]) {
-                            case 'e': 
+                            case 'e':
                                 switch(idx[1]) {
-                                    case 'f': 
+                                    case 'f':
                                         if (idx[2] == 'a' &&
                                             idx[3] == 'u' &&
                                             idx[4] == 'l' &&
@@ -598,7 +598,7 @@ namespace avmplus
                                             return T_Default;
                                         }
                                         goto bigswitch_end;
-                                    case 'l': 
+                                    case 'l':
                                         if (idx[2] == 'e' &&
                                             idx[3] == 't' &&
                                             idx[4] == 'e' &&
@@ -610,12 +610,12 @@ namespace avmplus
                                     default:
                                         goto bigswitch_end;
                                 }
-                            case 'o': 
-                                if (!notPartOfIdent(idx[1])) 
+                            case 'o':
+                                if (!notPartOfIdent(idx[1]))
                                     goto bigswitch_end;
                                 idx += 1;
                                 return T_Do;
-                            case 'y': 
+                            case 'y':
                                 if (idx[1] == 'n' &&
                                     idx[2] == 'a' &&
                                     idx[3] == 'm' &&
@@ -630,7 +630,7 @@ namespace avmplus
                             default:
                                 goto bigswitch_end;
                         }
-                    case 'e': 
+                    case 'e':
                         if (idx[0] == 'l' &&
                             idx[1] == 's' &&
                             idx[2] == 'e' &&
@@ -639,9 +639,9 @@ namespace avmplus
                             return T_Else;
                         }
                         goto bigswitch_end;
-                    case 'f': 
+                    case 'f':
                         switch(idx[0]) {
-                            case 'a': 
+                            case 'a':
                                 if (idx[1] == 'l' &&
                                     idx[2] == 's' &&
                                     idx[3] == 'e' &&
@@ -650,13 +650,13 @@ namespace avmplus
                                     return T_False;
                                 }
                                 goto bigswitch_end;
-                            case 'i': 
+                            case 'i':
                                 switch(idx[1]) {
-                                    case 'n': 
+                                    case 'n':
                                         switch(idx[2]) {
-                                            case 'a': 
+                                            case 'a':
                                                 switch(idx[3]) {
-                                                    case 'l': 
+                                                    case 'l':
                                                         if (idx[4] == 'l' &&
                                                             idx[5] == 'y' &&
                                                             !compiler->es3_keywords &&
@@ -664,7 +664,7 @@ namespace avmplus
                                                             idx += 6;
                                                             return T_Finally;
                                                         }
-                                                        if (!compiler->es3_keywords && !notPartOfIdent(idx[4])) 
+                                                        if (!compiler->es3_keywords && !notPartOfIdent(idx[4]))
                                                             goto bigswitch_end;
                                                         idx += 4;
                                                         return T_Final;
@@ -677,14 +677,14 @@ namespace avmplus
                                     default:
                                         goto bigswitch_end;
                                 }
-                            case 'o': 
+                            case 'o':
                                 if (idx[1] == 'r' &&
                                     notPartOfIdent(idx[2])) {
                                     idx += 2;
                                     return T_For;
                                 }
                                 goto bigswitch_end;
-                            case 'u': 
+                            case 'u':
                                 if (idx[1] == 'n' &&
                                     idx[2] == 'c' &&
                                     idx[3] == 't' &&
@@ -699,14 +699,14 @@ namespace avmplus
                             default:
                                 goto bigswitch_end;
                         }
-                    case 'i': 
+                    case 'i':
                         switch(idx[0]) {
-                            case 'f': 
-                                if (!notPartOfIdent(idx[1])) 
+                            case 'f':
+                                if (!notPartOfIdent(idx[1]))
                                     goto bigswitch_end;
                                 idx += 1;
                                 return T_If;
-                            case 'm': 
+                            case 'm':
                                 if (idx[1] == 'p' &&
                                     idx[2] == 'o' &&
                                     idx[3] == 'r' &&
@@ -717,9 +717,9 @@ namespace avmplus
                                     return T_Import;
                                 }
                                 goto bigswitch_end;
-                            case 'n': 
+                            case 'n':
                                 switch(idx[1]) {
-                                    case 'c': 
+                                    case 'c':
                                         if (idx[2] == 'l' &&
                                             idx[3] == 'u' &&
                                             idx[4] == 'd' &&
@@ -730,7 +730,7 @@ namespace avmplus
                                             return T_Include;
                                         }
                                         goto bigswitch_end;
-                                    case 's': 
+                                    case 's':
                                         if (idx[2] == 't' &&
                                             idx[3] == 'a' &&
                                             idx[4] == 'n' &&
@@ -743,13 +743,13 @@ namespace avmplus
                                             return T_InstanceOf;
                                         }
                                         goto bigswitch_end;
-                                    case 't': 
+                                    case 't':
                                         switch(idx[2]) {
-                                            case 'e': 
+                                            case 'e':
                                                 switch(idx[3]) {
-                                                    case 'r': 
+                                                    case 'r':
                                                         switch(idx[4]) {
-                                                            case 'f': 
+                                                            case 'f':
                                                                 if (idx[5] == 'a' &&
                                                                     idx[6] == 'c' &&
                                                                     idx[7] == 'e' &&
@@ -759,7 +759,7 @@ namespace avmplus
                                                                     return T_Interface;
                                                                 }
                                                                 goto bigswitch_end;
-                                                            case 'n': 
+                                                            case 'n':
                                                                 if (idx[5] == 'a' &&
                                                                     idx[6] == 'l' &&
                                                                     !compiler->es3_keywords &&
@@ -778,24 +778,24 @@ namespace avmplus
                                                 goto bigswitch_end;
                                         }
                                     default:
-                                        if (!notPartOfIdent(idx[1])) 
+                                        if (!notPartOfIdent(idx[1]))
                                             goto bigswitch_end;
                                         idx += 1;
                                         return T_In;
                                 }
-                            case 's': 
-                                if (!compiler->es3_keywords && !notPartOfIdent(idx[1])) 
+                            case 's':
+                                if (!compiler->es3_keywords && !notPartOfIdent(idx[1]))
                                     goto bigswitch_end;
                                 idx += 1;
                                 return T_Is;
                             default:
                                 goto bigswitch_end;
                         }
-                    case 'n': 
+                    case 'n':
                         switch(idx[0]) {
-                            case 'a': 
+                            case 'a':
                                 switch(idx[1]) {
-                                    case 'm': 
+                                    case 'm':
                                         if (idx[2] == 'e' &&
                                             idx[3] == 's' &&
                                             idx[4] == 'p' &&
@@ -808,7 +808,7 @@ namespace avmplus
                                             return T_Namespace;
                                         }
                                         goto bigswitch_end;
-                                    case 't': 
+                                    case 't':
                                         if (idx[2] == 'i' &&
                                             idx[3] == 'v' &&
                                             idx[4] == 'e' &&
@@ -821,14 +821,14 @@ namespace avmplus
                                     default:
                                         goto bigswitch_end;
                                 }
-                            case 'e': 
+                            case 'e':
                                 if (idx[1] == 'w' &&
                                     notPartOfIdent(idx[2])) {
                                     idx += 2;
                                     return T_New;
                                 }
                                 goto bigswitch_end;
-                            case 'u': 
+                            case 'u':
                                 if (idx[1] == 'l' &&
                                     idx[2] == 'l' &&
                                     notPartOfIdent(idx[3])) {
@@ -839,7 +839,7 @@ namespace avmplus
                             default:
                                 goto bigswitch_end;
                         }
-                    case 'o': 
+                    case 'o':
                         if (idx[0] == 'v' &&
                             idx[1] == 'e' &&
                             idx[2] == 'r' &&
@@ -853,9 +853,9 @@ namespace avmplus
                             return T_Override;
                         }
                         goto bigswitch_end;
-                    case 'p': 
+                    case 'p':
                         switch(idx[0]) {
-                            case 'a': 
+                            case 'a':
                                 if (idx[1] == 'c' &&
                                     idx[2] == 'k' &&
                                     idx[3] == 'a' &&
@@ -867,9 +867,9 @@ namespace avmplus
                                     return T_Package;
                                 }
                                 goto bigswitch_end;
-                            case 'r': 
+                            case 'r':
                                 switch(idx[1]) {
-                                    case 'i': 
+                                    case 'i':
                                         if (idx[2] == 'v' &&
                                             idx[3] == 'a' &&
                                             idx[4] == 't' &&
@@ -880,7 +880,7 @@ namespace avmplus
                                             return T_Private;
                                         }
                                         goto bigswitch_end;
-                                    case 'o': 
+                                    case 'o':
                                         if (idx[2] == 't' &&
                                             idx[3] == 'e' &&
                                             idx[4] == 'c' &&
@@ -896,7 +896,7 @@ namespace avmplus
                                     default:
                                         goto bigswitch_end;
                                 }
-                            case 'u': 
+                            case 'u':
                                 if (idx[1] == 'b' &&
                                     idx[2] == 'l' &&
                                     idx[3] == 'i' &&
@@ -910,7 +910,7 @@ namespace avmplus
                             default:
                                 goto bigswitch_end;
                         }
-                    case 'r': 
+                    case 'r':
                         if (idx[0] == 'e' &&
                             idx[1] == 't' &&
                             idx[2] == 'u' &&
@@ -921,9 +921,9 @@ namespace avmplus
                             return T_Return;
                         }
                         goto bigswitch_end;
-                    case 's': 
+                    case 's':
                         switch(idx[0]) {
-                            case 't': 
+                            case 't':
                                 if (idx[1] == 'a' &&
                                     idx[2] == 't' &&
                                     idx[3] == 'i' &&
@@ -934,7 +934,7 @@ namespace avmplus
                                     return T_Static;
                                 }
                                 goto bigswitch_end;
-                            case 'u': 
+                            case 'u':
                                 if (idx[1] == 'p' &&
                                     idx[2] == 'e' &&
                                     idx[3] == 'r' &&
@@ -944,7 +944,7 @@ namespace avmplus
                                     return T_Super;
                                 }
                                 goto bigswitch_end;
-                            case 'w': 
+                            case 'w':
                                 if (idx[1] == 'i' &&
                                     idx[2] == 't' &&
                                     idx[3] == 'c' &&
@@ -957,18 +957,18 @@ namespace avmplus
                             default:
                                 goto bigswitch_end;
                         }
-                    case 't': 
+                    case 't':
                         switch(idx[0]) {
-                            case 'h': 
+                            case 'h':
                                 switch(idx[1]) {
-                                    case 'i': 
+                                    case 'i':
                                         if (idx[2] == 's' &&
                                             notPartOfIdent(idx[3])) {
                                             idx += 3;
                                             return T_This;
                                         }
                                         goto bigswitch_end;
-                                    case 'r': 
+                                    case 'r':
                                         if (idx[2] == 'o' &&
                                             idx[3] == 'w' &&
                                             notPartOfIdent(idx[4])) {
@@ -979,24 +979,24 @@ namespace avmplus
                                     default:
                                         goto bigswitch_end;
                                 }
-                            case 'r': 
+                            case 'r':
                                 switch(idx[1]) {
-                                    case 'u': 
+                                    case 'u':
                                         if (idx[2] == 'e' &&
                                             notPartOfIdent(idx[3])) {
                                             idx += 3;
                                             return T_True;
                                         }
                                         goto bigswitch_end;
-                                    case 'y': 
-                                        if (!notPartOfIdent(idx[2])) 
+                                    case 'y':
+                                        if (!notPartOfIdent(idx[2]))
                                             goto bigswitch_end;
                                         idx += 2;
                                         return T_Try;
                                     default:
                                         goto bigswitch_end;
                                 }
-                            case 'y': 
+                            case 'y':
                                 if (idx[1] == 'p' &&
                                     idx[2] == 'e' &&
                                     idx[3] == 'o' &&
@@ -1009,7 +1009,7 @@ namespace avmplus
                             default:
                                 goto bigswitch_end;
                         }
-                    case 'u': 
+                    case 'u':
                         if (idx[0] == 's' &&
                             idx[1] == 'e' &&
                             !compiler->es3_keywords &&
@@ -1018,16 +1018,16 @@ namespace avmplus
                             return T_Use;
                         }
                         goto bigswitch_end;
-                    case 'v': 
+                    case 'v':
                         switch(idx[0]) {
-                            case 'a': 
+                            case 'a':
                                 if (idx[1] == 'r' &&
                                     notPartOfIdent(idx[2])) {
                                     idx += 2;
                                     return T_Var;
                                 }
                                 goto bigswitch_end;
-                            case 'o': 
+                            case 'o':
                                 if (idx[1] == 'i' &&
                                     idx[2] == 'd' &&
                                     notPartOfIdent(idx[3])) {
@@ -1038,9 +1038,9 @@ namespace avmplus
                             default:
                                 goto bigswitch_end;
                         }
-                    case 'w': 
+                    case 'w':
                         switch(idx[0]) {
-                            case 'h': 
+                            case 'h':
                                 if (idx[1] == 'i' &&
                                     idx[2] == 'l' &&
                                     idx[3] == 'e' &&
@@ -1049,7 +1049,7 @@ namespace avmplus
                                     return T_While;
                                 }
                                 goto bigswitch_end;
-                            case 'i': 
+                            case 'i':
                                 if (idx[1] == 't' &&
                                     idx[2] == 'h' &&
                                     notPartOfIdent(idx[3])) {
@@ -1220,7 +1220,7 @@ namespace avmplus
                 return integerLiteral(10);
         }
         
-        Token Lexer::integerLiteral(int base) 
+        Token Lexer::integerLiteral(int base)
         {
             checkNextCharForNumber();
             double n = parseInt(base);
@@ -1239,7 +1239,7 @@ namespace avmplus
             return T_DoubleLiteral;
         }
 
-        Token Lexer::floatingLiteral() 
+        Token Lexer::floatingLiteral()
         {
             checkNextCharForNumber();
             val.d = parseDouble();
@@ -1251,7 +1251,7 @@ namespace avmplus
         // location.  Note that the identifierStart condition also handles
         // hexadecimal digits properly.
 
-        void Lexer::checkNextCharForNumber() 
+        void Lexer::checkNextCharForNumber()
         {
             int c = *idx;
             if ((c >= '0' && c <= '9') || isUnicodeIdentifierStart(c))
@@ -1261,7 +1261,7 @@ namespace avmplus
         // Returns true iff the literal contains a decimal point or an
         // exponent marker, otherwise false.
         
-        bool Lexer::numberLiteralPrime() 
+        bool Lexer::numberLiteralPrime()
         {
             if (!decimalDigits(-1))
                 compiler->syntaxError(lineno, SYNTAXERR_ILLEGAL_NUMBER);
@@ -1288,7 +1288,7 @@ namespace avmplus
         // has_leading_digits should be true if digits have been seen
         // before the '.'.
         
-        void Lexer::numberFraction(bool has_leading_digits) 
+        void Lexer::numberFraction(bool has_leading_digits)
         {
             if (!decimalDigits (-1) && !has_leading_digits)
                 compiler->syntaxError(lineno, SYNTAXERR_ILLEGAL_NUMBER);
@@ -1304,7 +1304,7 @@ namespace avmplus
         
         // The 'e' has been consumed...
         
-        void Lexer::numberExponent() 
+        void Lexer::numberExponent()
         {
             switch (*idx) {
                 case '+':
@@ -1327,7 +1327,7 @@ namespace avmplus
             return idx > startIndex && k <= 0;
         }
         
-        void Lexer::lineComment() 
+        void Lexer::lineComment()
         {
             for (;;) {
                 switch (*idx++) {
@@ -1342,7 +1342,7 @@ namespace avmplus
             }
         }
         
-        void Lexer::blockComment() 
+        void Lexer::blockComment()
         {
             for (;;) {
                 int c;
@@ -1377,10 +1377,10 @@ namespace avmplus
             }
         }
         
-        Token Lexer::identifier() 
+        Token Lexer::identifier()
         {
-            // The common case here is that an identifier is a sequence of simple ASCII 
-            // characters, followed by a non-identifier-constituent ASCII character.  We 
+            // The common case here is that an identifier is a sequence of simple ASCII
+            // characters, followed by a non-identifier-constituent ASCII character.  We
             // optimize for this.
             
             int c;
@@ -1388,7 +1388,7 @@ namespace avmplus
             
             if ((c = *idx) < 128 && (char_attrs[c] & CHAR_ATTR_INITIAL) != 0) {
                 idx++;
-                while ((c = *idx) < 128 && (char_attrs[c] & CHAR_ATTR_SUBSEQUENT) != 0) 
+                while ((c = *idx) < 128 && (char_attrs[c] & CHAR_ATTR_SUBSEQUENT) != 0)
                     idx++;
             }
             
@@ -1454,7 +1454,7 @@ namespace avmplus
             return T_Identifier;
         }
         
-        Token Lexer::stringLiteral(int delimiter) 
+        Token Lexer::stringLiteral(int delimiter)
         {
             StringBuilder s(compiler);
             int c;
@@ -1471,8 +1471,8 @@ namespace avmplus
                 // OPTIMIZEME: too many conditions in this test now.  Should bias for ASCII
                 // and use table lookup to test for delimiters, NUL, and line endings.
                 
-                while ((c = *idx) != delimiter && 
-                       c != '\\' && 
+                while ((c = *idx) != delimiter &&
+                       c != '\\' &&
                        c != 0 &&
                        c != '\n' &&
                        c != '\r' &&
@@ -1534,7 +1534,7 @@ namespace avmplus
             }
         }
         
-        int Lexer::escapeSequence() 
+        int Lexer::escapeSequence()
         {
             switch (*idx) {
                 case  '0':
@@ -1615,7 +1615,7 @@ namespace avmplus
             }
         }
         
-        int Lexer::octalOrNulEscape() 
+        int Lexer::octalOrNulEscape()
         {
             int c;
             if ((c = *idx) >= 128 || (char_attrs[c] & CHAR_ATTR_OCTAL) == 0)
@@ -1635,7 +1635,7 @@ namespace avmplus
             return octalEscape(2);
         }
         
-        int Lexer::octalEscape(int n) 
+        int Lexer::octalEscape(int n)
         {
             mark = idx;
             octalDigits(n);                 // Ignore result
@@ -1645,7 +1645,7 @@ namespace avmplus
         // Any leading x or u has been consumed.  n is the number of
         // digits to consume and require.
         
-        int Lexer::hexEscape(int n) 
+        int Lexer::hexEscape(int n)
         {
             mark = idx;
             if (!hexDigits(n))
@@ -1655,7 +1655,7 @@ namespace avmplus
         
         // Any leading u has been consumed.
         
-        int Lexer::unicodeEscape() 
+        int Lexer::unicodeEscape()
         {
             if (*idx == '{') {
                 idx++;

@@ -119,7 +119,7 @@ namespace avmplus
             return ALLOC(LiteralObject, (fields, pos));
         }
         
-        Seq<LiteralField*>* Parser::fieldList () 
+        Seq<LiteralField*>* Parser::fieldList ()
         {
             SeqBuilder<LiteralField*> fields(allocator);
             if (hd () != T_RightBrace) {
@@ -132,7 +132,7 @@ namespace avmplus
             return fields.get();
         }
         
-        LiteralField* Parser::literalField() 
+        LiteralField* Parser::literalField()
         {
             Str* name = NULL;
             QualifiedName* config = NULL;
@@ -190,7 +190,7 @@ namespace avmplus
             return ALLOC(LiteralArray, (elts, pos));
         }
         
-        Seq<Expr*>* Parser::elementList() 
+        Seq<Expr*>* Parser::elementList()
         {
             SeqBuilder<Expr*> elts(allocator);
             Expr* elt = NULL;
@@ -533,7 +533,7 @@ namespace avmplus
             return expr;
         }
         
-        Expr* Parser::unaryExpression() 
+        Expr* Parser::unaryExpression()
         {
             Token t;
             
@@ -613,7 +613,7 @@ namespace avmplus
             return expr;
         }
         
-        Expr* Parser::relationalExpression(int flags) 
+        Expr* Parser::relationalExpression(int flags)
         {
             Expr* expr = shiftExpression();
             Token t;
@@ -639,7 +639,7 @@ namespace avmplus
             return expr;
         }
         
-        Expr* Parser::equalityExpression(int flags) 
+        Expr* Parser::equalityExpression(int flags)
         {
             Expr* expr = relationalExpression(flags);
             Token t;
@@ -659,7 +659,7 @@ namespace avmplus
             return expr;
         }
         
-        Expr* Parser::bitwiseXorExpression(int flags) 
+        Expr* Parser::bitwiseXorExpression(int flags)
         {
             Expr* expr = bitwiseAndExpression(flags);
             while (match(T_BitwiseXor))
@@ -670,7 +670,7 @@ namespace avmplus
         Expr* Parser::bitwiseOrExpression(int flags)
         {
             Expr* expr = bitwiseXorExpression(flags);
-            while (match(T_BitwiseOr)) 
+            while (match(T_BitwiseOr))
                 expr = ALLOC(BinaryExpr, (OPR_bitwiseOr, expr, bitwiseXorExpression(flags)));
             return expr;
         }
@@ -678,15 +678,15 @@ namespace avmplus
         Expr* Parser::logicalAndExpression(int flags)
         {
             Expr* expr = bitwiseOrExpression(flags);
-            while (match(T_LogicalAnd)) 
+            while (match(T_LogicalAnd))
                 expr = ALLOC(BinaryExpr, (OPR_logicalAnd, expr, bitwiseOrExpression(flags)));
             return expr;
         }
         
-        Expr* Parser::logicalOrExpression(int flags) 
+        Expr* Parser::logicalOrExpression(int flags)
         {
             Expr* expr = logicalAndExpression(flags);
-            while (match(T_LogicalOr)) 
+            while (match(T_LogicalOr))
                 expr = ALLOC(BinaryExpr, (OPR_logicalOr, expr, logicalAndExpression(flags)));
             return expr;
         }
@@ -706,7 +706,7 @@ namespace avmplus
         Expr* Parser::conditionalExpression(int flags)
         {
             Expr* expr = logicalOrExpression(flags);
-            if (!match(T_Question)) 
+            if (!match(T_Question))
                 return expr;
 
             Expr* consequent = assignmentExpression(flags);
@@ -747,7 +747,7 @@ namespace avmplus
             return expr;
         }
 
-        Expr* Parser::parenExpression() 
+        Expr* Parser::parenExpression()
         {
             eat (T_LeftParen);
             Expr* expr = commaExpression(0);

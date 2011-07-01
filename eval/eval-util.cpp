@@ -234,7 +234,7 @@ namespace avmplus
         
         Str* StringBuilder::str()
         {
-            if (chunk->next == NULL) 
+            if (chunk->next == NULL)
                 return allocator->compiler->intern(chunk->data, len);
 
             wchar* buf = new wchar[len];
@@ -404,7 +404,7 @@ namespace avmplus
             return ((in[0] | (in[1] << 8) | (in[2] << 16)) << 8) >> 8;
         }
         
-        uint32_t utf8length(Str* str) 
+        uint32_t utf8length(Str* str)
         {
             uint32_t len = 0;
 

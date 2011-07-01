@@ -107,7 +107,7 @@ namespace avmplus
             if (qname->qualifier != NULL) {
                 switch (qname->qualifier->tag()) {
                     case TAG_simpleName: {
-                        uint32_t id = cogen->abc->addQName(compiler->NS_public, 
+                        uint32_t id = cogen->abc->addQName(compiler->NS_public,
                                                            cogen->emitString(((SimpleName*)(qname->qualifier))->name),
                                                            false);
                         nsreg = cogen->getTemp();
@@ -139,11 +139,11 @@ namespace avmplus
                         // multiname presumably.  We don't want to have to call addNsset here
                         // every time so be sure to cache the nsset for the current scope somewhere.
                         if (vs->nsset != 0 && ns_wildcard == 0 && !qname->is_attr)
-                            sym = cogen->abc->addMultiname(vs->nsset, 
+                            sym = cogen->abc->addMultiname(vs->nsset,
                                                            cogen->emitString(((SimpleName*)name)->name),
                                                            false);
                         else
-                            sym = cogen->abc->addQName((ns_wildcard ? 0 : compiler->NS_public), 
+                            sym = cogen->abc->addQName((ns_wildcard ? 0 : compiler->NS_public),
                                                        cogen->emitString(((SimpleName*)name)->name),
                                                        qname->is_attr);
                     }
@@ -345,25 +345,25 @@ namespace avmplus
                         n.setup();
                         cogen->I_getproperty(n.sym);
                     }
-                    else 
+                    else
                         expr->cogen(cogen, ctx);
                     cogen->I_typeof();
                     break;
 
-                case OPR_preIncr: 
-                    incdec(cogen, ctx, true, true); 
+                case OPR_preIncr:
+                    incdec(cogen, ctx, true, true);
                     break;
                     
-                case OPR_preDecr: 
-                    incdec(cogen, ctx, true, false); 
+                case OPR_preDecr:
+                    incdec(cogen, ctx, true, false);
                     break;
                     
-                case OPR_postIncr: 
-                    incdec(cogen, ctx, false, true); 
+                case OPR_postIncr:
+                    incdec(cogen, ctx, false, true);
                     break;
                     
-                case OPR_postDecr: 
-                    incdec(cogen, ctx, false, false); 
+                case OPR_postDecr:
+                    incdec(cogen, ctx, false, false);
                     break;
                     
                 case OPR_unplus:
@@ -436,30 +436,30 @@ namespace avmplus
         void LiteralFunction::cogen(Cogen* cogen, Ctx* ctx)
         {
             if (function->name != NULL) {
-                // For a named function expression F with name N, create a new 
+                // For a named function expression F with name N, create a new
                 // expression (function() { F; return N })() and generate code
                 // for that instead.  Note that F then becomes a local function
                 // definition.
                 Allocator* allocator = cogen->allocator;
-                Expr* e = ALLOC(CallExpr, 
-                                (ALLOC(LiteralFunction, 
-                                       (ALLOC(FunctionDefn, 
-                                              (NULL, 
-                                               ALLOC(Seq<Binding*>, 
-                                                     (ALLOC(Binding, 
-                                                            (function->name, NULL, TAG_varBinding)))), 
-                                               NULL, 
+                Expr* e = ALLOC(CallExpr,
+                                (ALLOC(LiteralFunction,
+                                       (ALLOC(FunctionDefn,
+                                              (NULL,
+                                               ALLOC(Seq<Binding*>,
+                                                     (ALLOC(Binding,
+                                                            (function->name, NULL, TAG_varBinding)))),
+                                               NULL,
                                                0,
                                                NULL,
                                                NULL,
-                                               ALLOC(Seq<FunctionDefn*>, 
-                                                     (function)), 
+                                               ALLOC(Seq<FunctionDefn*>,
+                                                     (function)),
                                                NULL,
                                                NULL,
-                                               ALLOC(Seq<Stmt*>, 
-                                                     (ALLOC(ReturnStmt, 
-                                                            (0, ALLOC(QualifiedName, 
-                                                                      (NULL, ALLOC(SimpleName, 
+                                               ALLOC(Seq<Stmt*>,
+                                                     (ALLOC(ReturnStmt,
+                                                            (0, ALLOC(QualifiedName,
+                                                                      (NULL, ALLOC(SimpleName,
                                                                                    (function->name)),
                                                                        false,
                                                                        0)))))),
@@ -621,13 +621,13 @@ namespace avmplus
             switch (fn->tag()) {
                 case TAG_qualifiedName: {
                     // This code is incorrect if the name that's being referenced is
-                    // bound by 'with', because in that case the binding object should be 
-                    // pushed as the receiver object (according to ES-262).  But the AVM+ 
-                    // does not have an instruction that performs the correct operation: 
-                    // callproplex passes NULL as the receiver object, while callproperty 
-                    // passes a non-NULL object.  So in the context of a WITH we would 
-                    // have to simulate the correct behavior by performing a scope chain 
-                    // walk, querying each WITH object for the property and calling it 
+                    // bound by 'with', because in that case the binding object should be
+                    // pushed as the receiver object (according to ES-262).  But the AVM+
+                    // does not have an instruction that performs the correct operation:
+                    // callproplex passes NULL as the receiver object, while callproperty
+                    // passes a non-NULL object.  So in the context of a WITH we would
+                    // have to simulate the correct behavior by performing a scope chain
+                    // walk, querying each WITH object for the property and calling it
                     // if present, otherwise calling the function if it is lexically bound,
                     // otherwise calling the global function.  ASC has the same problem
                     // (and also does not solve it), so no actual bug here, just an
@@ -802,7 +802,7 @@ namespace avmplus
         
         void SuperExpr::cogen(Cogen* cogen, Ctx* ctx)
         {
-			(void)ctx;
+            (void)ctx;
             Compiler* compiler = cogen->compiler;
             compiler->internalError(pos, "Unimplemented: superExpr");
         }
