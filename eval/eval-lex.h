@@ -188,7 +188,7 @@ enum Token {
     T_XmlCDATA,                 //  "<![CDATA[...]]>"  (including the punctuation, ditto for the three following tokens)
     T_XmlComment,               //  "<!-- ... -->"
     T_XmlProcessingInstruction, //  "<? ... ?>
-    T_XmlString,                //  '...' or "..."  
+    T_XmlString,                //  '...' or "..."
     T_XmlName,                  //  string of XMLName characters
     T_XmlWhitespace,            //  string of XMLWhitespace characters
     T_XmlText,                  //  string of characters that are not XMLName or XMLWhitespace
@@ -245,7 +245,7 @@ public:
      *             embedded NULs but the last is considered a terminator, not part
      *             of the input
      * @param keyword_or_ident  True iff this scanner is simply being used to check
-     *             whether an identifier that contains a backslash sequence looks 
+     *             whether an identifier that contains a backslash sequence looks
      *             like a keyword.
      */
     Lexer(Compiler* compiler, const wchar* src, uint32_t srclen, bool keyword_or_ident=false);
@@ -394,7 +394,7 @@ private:
     const wchar*        mark;       // a remembered position, typically the start of a lexeme (not always valid)
     uint32_t            lineno;     // line number of last char of last token returned
     const bool          keyword_or_ident;
-                                    // true if this lexer instance is just used for checking whether an 
+                                    // true if this lexer instance is just used for checking whether an
                                     // identifier that contains a backslash sequence looks like a keyword
 #ifdef DEBUG
     Token               last_token; // last token returned

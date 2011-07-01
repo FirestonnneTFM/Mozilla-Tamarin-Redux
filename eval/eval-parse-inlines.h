@@ -41,12 +41,12 @@
 namespace avmplus {
 namespace RTC {
 
-inline bool Parser::newline() 
+inline bool Parser::newline()
 {
     return LP < L0;
 }
 
-inline uint32_t Parser::position() 
+inline uint32_t Parser::position()
 {
     return L0 + line_offset;
 }
@@ -80,13 +80,13 @@ inline int32_t Parser::intValue()
     return V0.i;
 }
 
-inline uint32_t Parser::uintValue() 
+inline uint32_t Parser::uintValue()
 {
     AvmAssert(T0 == T_UIntLiteral);
     return V0.u;
 }
 
-inline double Parser::doubleValue() 
+inline double Parser::doubleValue()
 {
     AvmAssert(T0 == T_DoubleLiteral);
     return V0.d;
@@ -144,7 +144,7 @@ inline void Parser::setUsesDefaultXmlNamespace()
     topRib->uses_dxns = true;
 }
 
-inline void Parser::xmlAtom() 
+inline void Parser::xmlAtom()
 {
     T0 = lexer->xmlAtom(&L0, &V0);
 }

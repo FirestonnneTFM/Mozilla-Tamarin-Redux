@@ -109,7 +109,7 @@ public:
 
 class ContinueCtx : public ControlFlowCtx {
 public:
-    ContinueCtx(Label* label, Seq<Str*>* label_names, Ctx* ctx0) 
+    ContinueCtx(Label* label, Seq<Str*>* label_names, Ctx* ctx0)
         : ControlFlowCtx(CTX_Continue, label, ctx0)
         , label_names(label_names)
     {
@@ -195,7 +195,7 @@ public:
 
 class ProgramCtx : public VarScopeCtx {
 public:
-    ProgramCtx(Allocator* allocator, uint32_t nsset, Seq<Namespace*>* openNamespaces, uint32_t capture_reg) 
+    ProgramCtx(Allocator* allocator, uint32_t nsset, Seq<Namespace*>* openNamespaces, uint32_t capture_reg)
         : VarScopeCtx(CTX_Program, nsset, openNamespaces, allocator, NULL)
         , capture_reg(capture_reg)
     {
@@ -235,7 +235,7 @@ public:
     void I_callproperty(uint32_t index, uint32_t nargs);
     void I_callproplex(uint32_t index, uint32_t nargs);
     void I_callpropvoid(uint32_t index, uint32_t nargs);
-    void I_callstatic(uint32_t index, uint32_t nargs);          
+    void I_callstatic(uint32_t index, uint32_t nargs);
     void I_callsuper(uint32_t index, uint32_t nargs);
     void I_callsupervoid(uint32_t index, uint32_t nargs);
     void I_construct(uint32_t argc);

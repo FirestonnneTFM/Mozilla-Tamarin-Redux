@@ -76,7 +76,7 @@ inline void Cogen::startCatch()
         max_stack_depth = stack_depth;
 }
 
-inline uint8_t Cogen::getFlags() const 
+inline uint8_t Cogen::getFlags() const
 {
     return traits->getCount() > 0 ? abcMethod_NEED_ACTIVATION : 0;
 }

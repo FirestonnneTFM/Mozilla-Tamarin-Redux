@@ -49,7 +49,7 @@ namespace avmplus
     {
         using namespace ActionBlockConstants;
 
-        template<class T> static uint32_t computeSize(Seq<T>* xs) 
+        template<class T> static uint32_t computeSize(Seq<T>* xs)
         {
             uint32_t size = 0;
             for ( ; xs != NULL ; xs = xs->tl )
@@ -200,7 +200,7 @@ namespace avmplus
             return nssetCount++;
         }
 
-        uint32_t ABCFile::multinameLookup(uint8_t kind, uint32_t ns_or_nsset, uint32_t name) 
+        uint32_t ABCFile::multinameLookup(uint8_t kind, uint32_t ns_or_nsset, uint32_t name)
         {
             Seq<ABCMultinameInfo*>* mns;
             uint32_t i;
@@ -267,7 +267,7 @@ namespace avmplus
             }
         }
         
-        bool ABCFile::hasRTName(uint32_t index) 
+        bool ABCFile::hasRTName(uint32_t index)
         {
             switch (getMultiname(index)->kind) {
                 case CONSTANT_RTQnameL:
@@ -280,7 +280,7 @@ namespace avmplus
             }
         }
 
-        uint32_t ABCFile::size() 
+        uint32_t ABCFile::size()
         {
             AvmAssert(scriptCount != 0);
             AvmAssert(methodCount != 0);
@@ -295,9 +295,9 @@ namespace avmplus
             uint32_t body_size = computeSize(bodies.get());
 
             reported_size = (4 +
-                             lenU30(intCount) + intBuf.size() + 
-                             lenU30(uintCount) + uintBuf.size() + 
-                             lenU30(doubleCount) + doubleBuf.size() + 
+                             lenU30(intCount) + intBuf.size() +
+                             lenU30(uintCount) + uintBuf.size() +
+                             lenU30(doubleCount) + doubleBuf.size() +
                              lenU30(stringCount) + stringBuf.size() +
                              lenU30(namespaceCount) + namespaceBuf.size() +
                              lenU30(nssetCount) + nssetBuf.size() +
@@ -421,14 +421,14 @@ namespace avmplus
             return b;
         }
 
-        ABCScriptInfo::ABCScriptInfo(Compiler* compiler, ABCMethodInfo* init_method, ABCTraitsTable* traits) 
+        ABCScriptInfo::ABCScriptInfo(Compiler* compiler, ABCMethodInfo* init_method, ABCTraitsTable* traits)
             : index(compiler->abc.addScript(this))
             , init_method(init_method)
             , traits(traits)
         {
         }
         
-        uint32_t ABCScriptInfo::size() 
+        uint32_t ABCScriptInfo::size()
         {
             reported_size = (lenU30(init_method->index) + traits->size());
             return reported_size;
@@ -452,7 +452,7 @@ namespace avmplus
         {
         }
     
-        uint32_t ABCMethodBodyInfo::size() 
+        uint32_t ABCMethodBodyInfo::size()
         {
             reported_size = (lenU30(method_info->index) +
                              lenU30(cogen.getMaxStack()) +
@@ -482,8 +482,8 @@ namespace avmplus
             return b;
         }
         
-        ABCMethodInfo::ABCMethodInfo(Compiler* compiler, 
-                                     uint32_t name, 
+        ABCMethodInfo::ABCMethodInfo(Compiler* compiler,
+                                     uint32_t name,
                                      uint32_t param_count,
                                      Seq<uint32_t>* param_types,
                                      uint32_t option_count,
@@ -500,7 +500,7 @@ namespace avmplus
         {
         }
 
-        uint32_t ABCMethodInfo::size() 
+        uint32_t ABCMethodInfo::size()
         {
             AvmAssert(flags != ~0U);
             uint32_t param_size = 0;
@@ -512,10 +512,10 @@ namespace avmplus
                 option_size += 1;
             }
             reported_size = (lenU30(param_count) +
-                             lenU30(return_type) + 
+                             lenU30(return_type) +
                              param_size +
                              lenU30(name) +
-                             1 /* flags */ + 
+                             1 /* flags */ +
                              option_size +
                              0 /* param_names */);
             return reported_size;
@@ -579,7 +579,7 @@ namespace avmplus
         {
         }
         
-        uint32_t ABCExceptionInfo::size() 
+        uint32_t ABCExceptionInfo::size()
         {
             reported_size = (lenU30(from) +
                              lenU30(to) +

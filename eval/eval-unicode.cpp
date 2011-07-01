@@ -50,7 +50,7 @@
  * less than a factor of 2.  As it is, the total size of these tables is about 2KB.
  *
  * Speed is not a big issue here because almost no programs have identifiers that
- * contain characters outside the ASCII range, and ASCII is handled specially 
+ * contain characters outside the ASCII range, and ASCII is handled specially
  * outside this file using faster code paths (see code in eval-lex.cpp).
  *
  * The tables are generated from the Unicode data file by generate-unicode-tables.c
@@ -651,7 +651,7 @@ namespace avmplus
             return false;
         }
 
-        bool isNonASCIIIdentifierStart(wchar c) 
+        bool isNonASCIIIdentifierStart(wchar c)
         {
             return unicodeLookup(&unicodeLetter, c);
         }
@@ -662,7 +662,7 @@ namespace avmplus
                    unicodeLookup(&identifier_subsequent, c);
         }
 
-        bool isUnicodeLetter(wchar c) 
+        bool isUnicodeLetter(wchar c)
         {
             return unicodeLookup(&unicodeLetter, c);
         }

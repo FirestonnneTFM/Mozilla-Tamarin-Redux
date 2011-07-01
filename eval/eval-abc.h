@@ -100,7 +100,7 @@ private:
 
     const uint16_t major_version;
     const uint16_t minor_version;
-    const int NO_VALUE; 
+    const int NO_VALUE;
 
     Compiler* const compiler;
     Allocator* const allocator;
@@ -169,7 +169,7 @@ public:
 class ABCMethodInfo : public ABCChunk {
 public:
     ABCMethodInfo(Compiler* compiler,
-                  uint32_t name, 
+                  uint32_t name,
                   uint32_t param_count,
                   Seq<uint32_t>* params,
                   uint32_t option_count,
@@ -263,7 +263,7 @@ public:
     
     uint32_t type_name;
     virtual uint32_t dataSize();
-    virtual uint8_t* serializeData(uint8_t* b); 
+    virtual uint8_t* serializeData(uint8_t* b);
 };
 
 class ABCMethodTrait : public ABCTrait {

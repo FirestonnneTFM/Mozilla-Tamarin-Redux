@@ -61,7 +61,7 @@ namespace avmplus
                                 idx[4] == 'D' &&
                                 idx[5] == 'A' &&
                                 idx[6] == 'T' &&
-                                idx[7] == 'A' && 
+                                idx[7] == 'A' &&
                                 idx[8] == '[') {
                                 idx += 9;
                                 return xmlMarkup(T_XmlCDATA);
@@ -293,7 +293,7 @@ namespace avmplus
             return T_XmlText;
         }
 
-        bool Lexer::isXmlNameStart(wchar c) 
+        bool Lexer::isXmlNameStart(wchar c)
         {
             return isUnicodeLetter(c) || c == ':' || c == '_';
         }

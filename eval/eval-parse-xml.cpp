@@ -213,7 +213,7 @@ namespace avmplus
                     xmlExpression(ctx, ESC_attributeValue);
                     xmlAtomSkipSpace();
                     // {E} = V is an extension required by the test suite, not in Ecma-357
-                    if (T0 == T_XmlEquals) 
+                    if (T0 == T_XmlEquals)
                         goto attrvalue;
                 }
                 else {
@@ -279,7 +279,7 @@ namespace avmplus
             AvmAssert( T0 == T_XmlLeftBrace );
             next();     // re-enter normal lexing
             Expr* expr = commaExpression(0);
-            if (esc != ESC_none) 
+            if (esc != ESC_none)
                 expr = ALLOC(EscapeExpr, (expr, esc));
             ctx->addExpr(expr);
             AvmAssert( T0 == T_RightBrace && T1 == T_LAST );
@@ -389,7 +389,7 @@ namespace avmplus
                     break;
                 default:
                     compiler->internalError(position(), "Unexpected token in XML parsing");
-            }                   
+            }
         }
         
         void Parser::xmlAtomSkipSpace()

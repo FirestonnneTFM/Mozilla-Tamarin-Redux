@@ -107,7 +107,7 @@ enum QualifierTag {
 
 class Qualifier {
 public:
-    Qualifier() 
+    Qualifier()
         : tag(QUAL_none)
         , is_dynamic(0)
         , is_final(0)
@@ -178,7 +178,7 @@ public:
 
 class Program : public CodeBlock {
 public:
-    Program(Seq<Binding*>* bindings, Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Namespace*>* openNamespaces, Seq<Stmt*>* stmts) 
+    Program(Seq<Binding*>* bindings, Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Namespace*>* openNamespaces, Seq<Stmt*>* stmts)
         : CodeBlock(CODE_Program, bindings, functions, namespaces, openNamespaces, stmts)
     {
     }
@@ -223,9 +223,9 @@ public:
 
 class FunctionDefn : public CodeBlock {
 public:
-    FunctionDefn(Str* name, Seq<Binding*>* bindings, 
+    FunctionDefn(Str* name, Seq<Binding*>* bindings,
                  Seq<FunctionParam*>* params, uint32_t numparams, FunctionParam* rest_param, QualifiedName* return_type_name,
-                 Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Namespace*>* openNamespaces, Seq<Stmt*>* stmts, 
+                 Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Namespace*>* openNamespaces, Seq<Stmt*>* stmts,
                  bool uses_arguments,
                  bool uses_dxns,
                  bool optional_arguments)
@@ -612,7 +612,7 @@ public:
 
 class ObjectRef : public NameExpr {
 public:
-    ObjectRef(Expr* obj, QualifiedName* name, uint32_t pos) 
+    ObjectRef(Expr* obj, QualifiedName* name, uint32_t pos)
         : NameExpr(pos)
         , obj(obj)
         , name(name)
@@ -631,7 +631,7 @@ public:
     virtual NameTag tag() const = 0;
 };
 
-// simple identifier 
+// simple identifier
 class SimpleName : public NameComponent {
 public:
     SimpleName(Str* name) : name(name) { AvmAssert(name != NULL); }
@@ -728,7 +728,7 @@ public:
 
 class IfStmt : public Stmt {
 public:
-    IfStmt(uint32_t pos, Expr* expr, Stmt* consequent, Stmt* alternate) 
+    IfStmt(uint32_t pos, Expr* expr, Stmt* consequent, Stmt* alternate)
         : Stmt(pos)
         , expr(expr)
         , consequent(consequent)
@@ -768,7 +768,7 @@ public:
 
 class ForStmt : public LabelSetStmt {
 public:
-    ForStmt(uint32_t pos, Expr* init, Expr* test, Expr* update, Stmt* body) 
+    ForStmt(uint32_t pos, Expr* init, Expr* test, Expr* update, Stmt* body)
         : LabelSetStmt(pos)
         , init(init)
         , test(test)
@@ -785,7 +785,7 @@ public:
 
 class ForInStmt : public LabelSetStmt {
 public:
-    ForInStmt(uint32_t pos, Expr* lhs, Expr* init, Expr* obj, Stmt* body, bool is_each) 
+    ForInStmt(uint32_t pos, Expr* lhs, Expr* init, Expr* obj, Stmt* body, bool is_each)
         : LabelSetStmt(pos)
         , is_each(is_each)
         , lhs(lhs)

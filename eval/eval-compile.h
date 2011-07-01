@@ -42,7 +42,7 @@ namespace avmplus {
 namespace RTC {
 
 /**
- * The compiler acts as a coordinating class, managing memory, interning strings, 
+ * The compiler acts as a coordinating class, managing memory, interning strings,
  * knowing about settings, etc.  Pretty much everyone points to a compiler instance,
  * which in turn provides the host context and allocator instances.
  */

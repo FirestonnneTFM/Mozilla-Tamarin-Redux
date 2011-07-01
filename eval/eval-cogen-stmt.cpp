@@ -70,7 +70,7 @@ namespace avmplus
             }
         }
 
-        void Cogen::unstructuredControlFlow(Ctx* ctx, bool (hit)(Ctx*,void*), void* package, bool jump, SyntaxError msg, uint32_t pos) 
+        void Cogen::unstructuredControlFlow(Ctx* ctx, bool (hit)(Ctx*,void*), void* package, bool jump, SyntaxError msg, uint32_t pos)
         {
             while (ctx != NULL) {
                 if (hit(ctx, package)) {
@@ -100,7 +100,7 @@ namespace avmplus
             compiler->syntaxError(pos, msg);
         }
 
-        static void restoreScopes(Cogen* cogen, Ctx* ctx) 
+        static void restoreScopes(Cogen* cogen, Ctx* ctx)
         {
             if (ctx == NULL)
                 return;
@@ -118,7 +118,7 @@ namespace avmplus
                 else
                     cogen->I_pushscope();
             }
-        }       
+        }
         
         // Statement code generators
 
@@ -172,7 +172,7 @@ namespace avmplus
                 ss->hd->cogen(cogen, ctx);
         }
         
-        void LabeledStmt::cogen(Cogen* cogen, Ctx* ctx) 
+        void LabeledStmt::cogen(Cogen* cogen, Ctx* ctx)
         {
             Label* L0 = cogen->newLabel();
             BreakCtx ctx1(L0, ctx, label);
@@ -272,7 +272,7 @@ namespace avmplus
         
         // Instruction set bug workaround.
         //
-        // In hasnext2, the second argument reg must be known to be 'int', but this 
+        // In hasnext2, the second argument reg must be known to be 'int', but this
         // means that if we want to kill it below the loop then all paths past that
         // kill (from statements enclosing this statement) must have a kill for the
         // register too.  This is just needless complexity.  Yet if there is not a
@@ -324,7 +324,7 @@ namespace avmplus
 
             if (is_each)
                 cogen->I_nextvalue();
-            else 
+            else
                 cogen->I_nextname();
             cogen->I_setlocal(T_val);
             (ALLOC(AssignExpr, (OPR_assign, lhs, ALLOC(RefLocalExpr, (T_val)))))->cogen(cogen, ctx);
@@ -343,7 +343,7 @@ namespace avmplus
             cogen->I_kill(T_obj);
         }
         
-        static bool hitBreak(Ctx* ctx, void* package) 
+        static bool hitBreak(Ctx* ctx, void* package)
         {
             return ctx->tag == CTX_Break && matchLabel(ctx, (Str*)package);
         }
@@ -358,7 +358,7 @@ namespace avmplus
                                            pos);
         }
 
-        static bool hitContinue(Ctx* ctx, void* package) 
+        static bool hitContinue(Ctx* ctx, void* package)
         {
             return ctx->tag == CTX_Continue && matchLabel(ctx, (Str*)package);
         }
@@ -514,7 +514,7 @@ namespace avmplus
             cogen->I_coerce_a();
             cogen->I_setlocal(tmp);
 
-            // Case clauses are triggered by strict equality, so if the type of the 
+            // Case clauses are triggered by strict equality, so if the type of the
             // dispatch value is not int then we definitely won't hit any of the
             // clauses.  Also, test for 'int' tests for integer values in the 'int'
             // range that are represented as Number, which is what we want here.
@@ -523,11 +523,11 @@ namespace avmplus
             // information this is fairly painful, we must not have observable side
             // effects (eg valueOf conversion) or overflow & truncate.  The rules are:
             //
-            //    if (low != 0) then 
+            //    if (low != 0) then
             //        if (value is not Number) then skip to default
             //    subtract low from value
             //    if (value is not int) then skip to default
-            // 
+            //
             // OPTIMIZEME: avoid type tests if the type is known and if we've verified that
             // the JIT does not perform that optimization.  (It might, but it would have to
             // track the type from the original expression through tmp, and ignore all the
@@ -659,8 +659,8 @@ namespace avmplus
         // - the handler in that block must visit the finally code and then re-throw if
         //   the finally code returns normally
         // - code in the try block or the catch block(s) is compiled with a ctx that
-        //   records the fact that there is a finally block, so that exits to the outside of 
-        //   the try/catch block by means of break/continue (labelled or not) must visit 
+        //   records the fact that there is a finally block, so that exits to the outside of
+        //   the try/catch block by means of break/continue (labelled or not) must visit
         //   the finally block (in inside-out order if there are several)
         // - break, continue, and return must look for finally blocks
         //
@@ -775,7 +775,7 @@ namespace avmplus
             uint32_t catch_idx = cogen->emitException(code_start,
                                                       code_end,
                                                       cogen->getCodeLength(),
-                                                      cogen->emitTypeName(compiler, catchClause->type_name), 
+                                                      cogen->emitTypeName(compiler, catchClause->type_name),
                                                       cogen->abc->addQName(compiler->NS_public, cogen->emitString(catchClause->name)));
             
             cogen->startCatch();
@@ -812,7 +812,7 @@ namespace avmplus
         
         void SuperStmt::cogen(Cogen* cogen, Ctx* ctx)
         {
-			(void)ctx;
+            (void)ctx;
             Compiler* compiler = cogen->compiler;
             compiler->internalError(pos, "Unimplemented: superStmt");
         }

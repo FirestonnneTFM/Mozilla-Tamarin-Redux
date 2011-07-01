@@ -115,7 +115,7 @@ namespace avmplus
         /* SYNTAXERR_INVALID_VAR_ESC */      "Invalid variable-length unicode escape",
         /* SYNTAXERR_ILLEGAL_BREAK */        "No 'break' allowed here",
         /* SYNTAXERR_BREAK_LABEL_UNDEF */    "'break' to undefined label",
-        /* SYNTAXERR_ILLEGAL_CONTINUE */     "No 'continue' allowed here", 
+        /* SYNTAXERR_ILLEGAL_CONTINUE */     "No 'continue' allowed here",
         /* SYNTAXERR_CONTINUE_LABEL_UNDEF */ "'continue' to undefined label",
         /* SYNTAXERR_XML_EOI_IN_MARKUP */    "End of input in XML markup",
         /* SYNTAXERR_UNBOUND_CONST_NAME */   "Unbound name in constant expression",
@@ -330,7 +330,7 @@ namespace avmplus
             
             uint32_t h = hashString(chars, nchars) % tableSize;
             for ( Str* p = strTable[h] ; p != NULL ; p = p->next ) {
-                if (p->hash == h) 
+                if (p->hash == h)
                     if (p->length == nchars)
                         if (VMPI_memcmp(p->s, chars, sizeof(wchar)*nchars) == 0)
                             return p;
