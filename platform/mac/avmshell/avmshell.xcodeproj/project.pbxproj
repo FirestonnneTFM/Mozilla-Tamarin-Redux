@@ -2290,13 +2290,13 @@
 /* Begin XCBuildConfiguration section */
 		079DF9D70F3A8DEE0031D1B4 /* Debug_Debugger */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0772CD170F3C3190008DDBB6 /* avmshell64-debug-debugger.xcconfig */;
 			buildSettings = {
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = macosx10.4;
 			};
 			name = Debug_Debugger;
 		};
@@ -2316,13 +2316,13 @@
 		};
 		079DF9DA0F3A8DF80031D1B4 /* Release_Debugger */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0772CD190F3C3190008DDBB6 /* avmshell64-release-debugger.xcconfig */;
 			buildSettings = {
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = macosx10.4;
 			};
 			name = Release_Debugger;
 		};
@@ -2366,25 +2366,25 @@
 		};
 		1DEB923608733DC60010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0772CD180F3C3190008DDBB6 /* avmshell64-debug.xcconfig */;
 			buildSettings = {
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = macosx10.4;
 			};
 			name = Debug;
 		};
 		1DEB923708733DC60010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0772CD1A0F3C3190008DDBB6 /* avmshell64-release.xcconfig */;
 			buildSettings = {
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = macosx10.4;
 			};
 			name = Release;
 		};
