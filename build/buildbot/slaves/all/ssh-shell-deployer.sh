@@ -117,7 +117,7 @@ do
         exit 1
     fi
     # set executable bit for ssh-shell-runner.sh
-    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "${SSH_SETUP}cd $SSH_SHELL_REMOTE_DIR;chmod 777 ssh-shell-runner.sh"
+    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;chmod 777 ssh-shell-runner.sh"
 
     echo""
     echo "Installing $filename on $SSH_SHELL_REMOTE_HOST to $SSH_SHELL_REMOTE_DIR"
@@ -133,7 +133,7 @@ do
     fi
 
     # copy the shell from the device build directory to the client directory
-    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "${SSH_SETUP}cd $SSH_SHELL_REMOTE_DIR;rm avmshell;cp $SSH_SHELL_REMOTE_BASEDIR/builds/${change}-${changeid}/$exename ./avmshell;chmod 777 ./avmshell"
+    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;${SSH_SETUP}rm avmshell;${SSH_SETUP}cp $SSH_SHELL_REMOTE_BASEDIR/builds/${change}-${changeid}/$exename ./avmshell;chmod 777 ./avmshell"
 
     # verify the deployed shell version if correct
     ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;./avmshell" > /tmp/stdout
@@ -145,7 +145,7 @@ do
         exit 1
     fi
 
-    # check if the base acceptance-tests-abcs.zip if correct version
+    # check if the base acceptance-tests-abcs.zip is correct version
     baseversion=`ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "${SSH_SETUP}cat $SSH_SHELL_REMOTE_BASEDIR/acceptance-tests-abcs.txt"`
     if [ "$baseversion" != "${change}-${changeid}" ]
     then
@@ -164,12 +164,12 @@ do
     then
         # if the version does not match copy from the base version
         echo "unzipping acceptance-tests-abcs.zip..."
-        ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "${SSH_SETUP}cd $SSH_SHELL_REMOTE_DIR;unzip -o -q $SSH_SHELL_REMOTE_BASEDIR/acceptance-tests-abcs.zip"
+        ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;${SSH_SETUP}unzip -o -q $SSH_SHELL_REMOTE_BASEDIR/acceptance-tests-abcs.zip"
         if [[ "$?" -ne "0" ]]; then 
             echo "Error unzipping acceptance-tests-abcs.zip."
             exit 1
         fi
-        ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "${SSH_SETUP}echo ${change}-${changeid} > $SSH_SHELL_REMOTE_DIR/acceptance-tests-abcs.txt"
+        ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "echo ${change}-${changeid} > $SSH_SHELL_REMOTE_DIR/acceptance-tests-abcs.txt"
     fi
 
     # increment the counter, check if we are finished looping
