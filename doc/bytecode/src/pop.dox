@@ -1,0 +1,41 @@
+/*! \page pop 
+
+\addindex pop
+
+
+\section pop pop
+
+\subsection operation Operation
+
+Pop the top value from the stack.
+
+\subsection format Format
+
+\code
+pop
+\endcode
+
+\subsection forms Forms
+\code
+pop = 41 (0x29)
+\endcode
+\subsection stack Stack
+
+\code
+..., value => ...
+\endcode
+
+\subsection description Description
+
+Pops the top value from the stack and discards it.
+
+\subsection rt_execeptions Runtime exceptions
+
+None.
+
+\subsection notes Notes
+
+None.
+
+*/
+

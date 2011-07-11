@@ -1,0 +1,43 @@
+/*! \page nextvalue 
+
+\addindex nextvalue
+
+
+\section nextvalue nextvalue
+
+\subsection operation Operation
+
+Get the name of the next property when iterating over an object.
+
+\subsection format Format
+
+\code
+nextvalue
+\endcode
+
+\subsection forms Forms
+\code
+nextvalue = 35(0x23)
+\endcode
+\subsection stack Stack
+
+\code
+..., obj, index => ..., value
+\endcode
+
+\subsection description Description
+
+index and obj are popped off of the stack. index must be of type int. Get the 
+value of the property that is at position index + 1 on the object obj, and 
+pushes it onto the stack.
+
+\subsection rt_execeptions Runtime exceptions
+
+None.
+
+\subsection notes Notes
+
+Index will usually be the result of executing hasnext on obj.
+
+*/
+

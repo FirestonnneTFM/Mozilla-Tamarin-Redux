@@ -1,0 +1,41 @@
+/*! \page nop 
+
+\addindex nop
+
+
+\section nop nop
+
+\subsection operation Operation
+
+Do nothing.
+
+\subsection format Format
+
+\code
+nop
+\endcode
+
+\subsection forms Forms
+\code
+nop = 2 (0x02)
+\endcode
+\subsection stack Stack
+
+\code
+... => ...
+\endcode
+
+\subsection description Description
+
+Do nothing.
+
+\subsection rt_execeptions Runtime exceptions
+
+None.
+
+\subsection notes Notes
+
+None.
+
+*/
+
