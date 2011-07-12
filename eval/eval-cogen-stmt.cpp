@@ -984,7 +984,8 @@ namespace avmplus
                                                       code_end,
                                                       cogen->getCodeLength(),
                                                       cogen->emitTypeName(compiler, catchClause->type_name),
-                                                      cogen->abc->addQName(compiler->NS_public, cogen->emitString(catchClause->name)));
+                                                      cogen->abc->addQName(cogen->emitNamespace(compiler->parser.defaultNamespace()),
+                                                                           cogen->emitString(catchClause->name)));
             
             cogen->startCatch();
             
@@ -1000,7 +1001,8 @@ namespace avmplus
             
             // Store the exception object in the catch scope.
             cogen->I_swap();
-            cogen->I_setproperty(cogen->abc->addQName(compiler->NS_public, cogen->emitString(catchClause->name)));
+            cogen->I_setproperty(cogen->abc->addQName(cogen->emitNamespace(compiler->parser.defaultNamespace()),
+                                                      cogen->emitString(catchClause->name)));
             
             // catch block body
             cogenStatements(cogen, catchClause->stmts, &ctx1);
@@ -1019,9 +1021,8 @@ namespace avmplus
         
         void SuperStmt::cogen(Cogen* cogen, Ctx* ctx)
         {
-            (void)ctx;
-            Compiler* compiler = cogen->compiler;
-            compiler->internalError(pos, "Unimplemented: superStmt");
+            cogen->I_getlocal(0);
+            cogen->I_constructsuper(cogen->arguments(arguments, ctx));
         }
     }
 }

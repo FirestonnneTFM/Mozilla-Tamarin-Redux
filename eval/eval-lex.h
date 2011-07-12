@@ -255,6 +255,7 @@ public:
     Token regexp(uint32_t* linep, TokenValue* valuep);      // Following T_BreakSlash, to lex a regex literal
     Token divideOperator(uint32_t* linep);                  // Following T_BreakSlash, to lex a division operator
     Token rightAngle(uint32_t* linep);                      // Following T_BreakRightAngle, to lex '>' at the end of a type instantiator
+    Token leftAngle(uint32_t* linep);                       // Following T_BreakLeftAngle, to lex '<' in a vector initializer
     Token rightShiftOrRelationalOperator(uint32_t* linep);  // Following T_BreakRightAngle, to lex a shift or relational operator
     Token leftShiftOrRelationalOperator(uint32_t* linep);   // Following T_BreakLeftAngle, to lex a shift or relational operator
     
@@ -342,6 +343,7 @@ private:
     Token regexpImpl();
     Token divideOperatorImpl();
     Token rightAngleImpl();
+    Token leftAngleImpl();
     Token rightShiftOrRelationalOperatorImpl();
     Token leftShiftOrRelationalOperatorImpl();
     

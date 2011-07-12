@@ -18,21 +18,22 @@ Note that FIXMEs in the code are generally not noted here.
 
 Lexer:
 
-  (nothing)
-
+  P3:
+  - a number of tokens we treat as keywords are no longer keywords in AS3
 
 Parser:
 
   P3:
+  - a number of tokens we treat as keywords are no longer keywords in AS3
+  - metadata spec has changed (again) and parser needs to follow suit (again)
   - 'config namespace'
   - program configuration scope, checking
   - program configuration attributes on blocks, expressions in array / object (but not vector) literals
   - program configuration attributes on definitions
-  - 'package', 'class', and 'interface' are parsed but mainly superficially, see FIXMEs
-  - 'public', 'private', 'protected', 'native', 'static', 'prototype', and named NS are parsed but not really used anywhere
+  - 'package' is parsed but mainly superficially, see FIXMEs
+  - 'public', 'private', 'protected', 'internal', and named NS are parsed and partly used but not tested much
   - lots of places that parse by 'identifier()' should parse by something that handles both id and id::id
-  - generic types (ie, Vector) 
-  - 'super' both stmt and expr
+  - 'super' expression
   - getter and setter functions
 
   P4:
@@ -60,8 +61,7 @@ Code generator:
 ABC layer:
 
   P3:
-  - instance
-  - class
+  - class and interface are generally supported but there are some FIXMEs
 
 
 Code quality, utility, API, etc:
@@ -120,9 +120,14 @@ Code quality, utility, API, etc:
     so that duplicates can be filtered easily, we want to filter duplicates
     both in the parser and when inheriting namespace sets in the code generator.
 
+
 Test harness:
 
-  - need tests for eval function, too
+  - In situations where there are subdirectories with code that's supposed to
+    be compiled independently or imported, the test harness breaks down with
+    eval, and tests fail.
+
+  - Need tests for eval function, too
 
 
 Documentation bugs:

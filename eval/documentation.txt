@@ -1,5 +1,9 @@
 Run-time compiler for ActionScript 3 - some usage and implementation notes.
-2010-10-30 / lhansen@adobe.com
+2011-07-07 / lhansen@adobe.com
+
+
+Note, this list may be out of date now, see notes about what works and doesn't
+at the end of backlog.txt.
 
 
 = AS3 support =
@@ -13,6 +17,8 @@ AS3 extensions supported so far (also see notes below):
 - unqualified "import" directive (ie, 'import foo.*')
 - operators "is", "as", "to"
 - E4X
+- classes, interfaces, "super" statement and built-in namespaces 
+  except "protected" are mostly supported
 
 
 = 'include' directives =

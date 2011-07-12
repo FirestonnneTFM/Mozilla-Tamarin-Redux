@@ -103,7 +103,7 @@ namespace avmplus
             , instanceCount(0)
             , classCount(0)
             , scriptCount(0)
-            , methodbodyCount(0)
+            , nonemptyMethodBodyCount(0)
             , intBuf(allocator, 16)
             , uintBuf(allocator, 16)
             , doubleBuf(allocator, 32)
@@ -237,6 +237,12 @@ namespace avmplus
                     multinameBuf.emitU30(ns_or_nsset);
                     break;
 
+                case CONSTANT_TypeName:
+                    multinameBuf.emitU30(ns_or_nsset);  // really the parameterizedType, eg, __AS3__.vec::Vector
+                    multinameBuf.emitU30(1);            // Must be 1
+                    multinameBuf.emitU30(name);         // really the parameterType
+                    break;
+
                 default:
                     compiler->internalError(0, "Invalid multiname kind");
             }
@@ -284,7 +290,6 @@ namespace avmplus
         {
             AvmAssert(scriptCount != 0);
             AvmAssert(methodCount != 0);
-            AvmAssert(methodbodyCount != 0);
             AvmAssert(classCount == instanceCount);
             
             uint32_t method_size = computeSize(methods.get());
@@ -306,7 +311,7 @@ namespace avmplus
                              lenU30(metadataCount) + metadata_size +
                              lenU30(instanceCount) + instance_size + class_size +
                              lenU30(scriptCount) + script_size +
-                             lenU30(methodbodyCount) + body_size);
+                             lenU30(nonemptyMethodBodyCount) + body_size);
             return reported_size;
         }
 
@@ -340,7 +345,7 @@ namespace avmplus
             b = serializeSeq(b, classes.get());
             b = emitU30(b, scriptCount);
             b = serializeSeq(b, scripts.get());
-            b = emitU30(b, methodbodyCount);
+            b = emitU30(b, nonemptyMethodBodyCount);
             b = serializeSeq(b, bodies.get());
             AvmAssert( b == b0 + reported_size );
             return b;
@@ -421,6 +426,18 @@ namespace avmplus
             return b;
         }
 
+        uint32_t ABCClassTrait::dataSize()
+        {
+            return (lenU30(slot_id) + lenU30(index));
+        }
+        
+        uint8_t* ABCClassTrait::serializeData(uint8_t* b)
+        {
+            b = emitU30(b, slot_id);
+            b = emitU30(b, index);
+            return b;
+        }
+        
         ABCScriptInfo::ABCScriptInfo(Compiler* compiler, ABCMethodInfo* init_method, ABCTraitsTable* traits)
             : index(compiler->abc.addScript(this))
             , init_method(init_method)
@@ -443,41 +460,47 @@ namespace avmplus
             return b;
         }
         
-        ABCMethodBodyInfo::ABCMethodBodyInfo(Compiler* compiler, ABCMethodInfo* method_info, ABCTraitsTable* traits, uint32_t first_temp)
+        ABCMethodBodyInfo::ABCMethodBodyInfo(Compiler* compiler, ABCMethodInfo* method_info, ABCTraitsTable* traits, uint32_t first_temp, bool is_empty)
             : cogen(compiler, &compiler->abc, traits, this, first_temp)
             , exceptions(compiler)
-            , index(compiler->abc.addMethodBody(this))
             , method_info(method_info)
             , traits(traits)
+            , is_empty(is_empty)
         {
+            compiler->abc.addMethodBody(this);
         }
     
         uint32_t ABCMethodBodyInfo::size()
         {
-            reported_size = (lenU30(method_info->index) +
-                             lenU30(cogen.getMaxStack()) +
-                             lenU30(cogen.getLocalCount()) +
-                             lenU30(0) /* init_scope_depth */ +
-                             lenU30(cogen.getMaxScope()) +
-                             lenU30(cogen.getCodeLength()) +
-                             cogen.getCodeLength() +
-                             exceptions.size() +
-                             (traits ? traits->size() : lenU30(0)));
+            if (is_empty)
+                reported_size = 0;
+            else
+                reported_size = (lenU30(method_info->index) +
+                                 lenU30(cogen.getMaxStack()) +
+                                 lenU30(cogen.getLocalCount()) +
+                                 lenU30(0) /* init_scope_depth */ +
+                                 lenU30(cogen.getMaxScope()) +
+                                 lenU30(cogen.getCodeLength()) +
+                                 cogen.getCodeLength() +
+                                 exceptions.size() +
+                                 (traits ? traits->size() : lenU30(0)));
             return reported_size;
         }
         
         uint8_t* ABCMethodBodyInfo::serialize(uint8_t* b)
         {
             DEBUG_ONLY( uint8_t* b0 = b; )
-            b = emitU30(b, method_info->index);
-            b = emitU30(b, cogen.getMaxStack());
-            b = emitU30(b, cogen.getLocalCount());
-            b = emitU30(b, 0); /* init_scope_depth */
-            b = emitU30(b, cogen.getMaxScope());
-            b = emitU30(b, cogen.getCodeLength());
-            b = cogen.serializeCodeBytes(b);
-            b = exceptions.serialize(b);
-            b = (traits ? traits->serialize(b) : emitU30(b, 0));
+            if (!is_empty) {
+                b = emitU30(b, method_info->index);
+                b = emitU30(b, cogen.getMaxStack());
+                b = emitU30(b, cogen.getLocalCount());
+                b = emitU30(b, 0); /* init_scope_depth */
+                b = emitU30(b, cogen.getMaxScope());
+                b = emitU30(b, cogen.getCodeLength());
+                b = cogen.serializeCodeBytes(b);
+                b = exceptions.serialize(b);
+                b = (traits ? traits->serialize(b) : emitU30(b, 0));
+            }
             AvmAssert( b == b0 + reported_size );
             return b;
         }
@@ -601,75 +624,54 @@ namespace avmplus
             return b;
         }
         
-#if 0
-
-        class ABCInstanceInfo
+        uint32_t ABCInstanceInfo::size()
         {
-            function ABCInstanceInfo(name, super_name, flags, protectedNS, interfaces) {
-                this.name = name;
-                this.super_name = super_name;
-                this.flags = flags;
-                this.protectedNS = protectedNS;
-                this.interfaces = interfaces;
-                this.traits = [];
-            }
+            reported_size = (lenU30(name) +
+                             lenU30(super_name) +
+                             1 /* flags */ +
+                             ((flags & CONSTANT_ClassProtectedNs) ? lenU30(protectedNS) : 0) +
+                             lenU30(interface_count) +
+                             lenU30(iinit) +
+                             traits->size());
+            for ( uint32_t i=0 ; i < interface_count ; i++ )
+                reported_size += lenU30(interfaces[i]);
+            return reported_size;
+        }
 
-            function setIInit(x) {
-                iinit = x;
-            }
-
-            function addTrait(t) {
-                return traits.push(t)-1;
-            }
-
-            function serialize(bs) {
-                let i, limit;
-
-                Util::assert( iinit != undefined || (flags & CONSTANT_ClassInterface) != 0);
-
-                bs.uint30(name);
-                bs.uint30(super_name);
-                bs.uint8(flags);
-                if (flags & CONSTANT_ClassProtectedNs)
-                    bs.uint30(protectedNS);
-                bs.uint30(interfaces.length);
-                for ( i=0, limit=interfaces.length ; i < limit ; i++ ) {
-                    Util::assert( interfaces[i] != 0 );
-                    bs.uint30(interfaces[i]);
-                }
-                bs.uint30(iinit);
-                bs.uint30(traits.length);
-                for ( i=0, limit=traits.length ; i < limit ; i++ )
-                    traits[i].serialize(bs);
-            }
-
-            // abc-parse.es grubs around here.
-            / *private* / var name, super_name, flags, protectedNS, interfaces, iinit, traits;
-        };
-
-        class ABCClassInfo
+        uint8_t* ABCInstanceInfo::serialize(uint8_t* b)
         {
-            function setCInit(cinit) {
-                this.cinit = cinit;
+            DEBUG_ONLY( uint8_t* b0 = b );
+            AvmAssert( iinit != 0 || (flags & CONSTANT_ClassInterface) != 0);
+            b = emitU30(b, name);
+            b = emitU30(b, super_name);
+            *b++ = (uint8_t)flags;
+            if (flags & CONSTANT_ClassProtectedNs)
+                b = emitU30(b, protectedNS);
+            b = emitU30(b, interface_count);
+            for ( uint32_t i=0, limit=interface_count ; i < limit ; i++ ) {
+                AvmAssert(interfaces[i] != 0);
+                b = emitU30(b, interfaces[i]);
             }
-
-            function addTrait(t) {
-                return traits.push(t)-1;
-            }
-
-            function serialize(bs) {
-                Util::assert( cinit != undefined );
-                bs.uint30(cinit);
-                bs.uint30(traits.length);
-                for ( let i=0, limit=traits.length ; i < limit ; i++ )
-                    traits[i].serialize(bs);
-            }
-
-            // abc-parse.es grubs around here.
-            /*private*/ var cinit, traits = [];
-        };
-
-#endif // 0
+            b = emitU30(b, iinit);
+            b = traits->serialize(b);
+            AvmAssert( b == b0 + reported_size );
+            return b;
+        }
+        
+        uint32_t ABCClassInfo::size()
+        {
+            reported_size = lenU30(cinit) + traits->size();
+            return reported_size;
+        }
+        
+        uint8_t* ABCClassInfo::serialize(uint8_t* b)
+        {
+            DEBUG_ONLY( uint8_t* b0 = b );
+            b = emitU30(b, cinit);
+            b = traits->serialize(b);
+            AvmAssert( b == b0 + reported_size );
+            return b;
+        }
     }
 }
 

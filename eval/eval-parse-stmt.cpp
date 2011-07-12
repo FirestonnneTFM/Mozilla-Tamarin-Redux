@@ -133,7 +133,7 @@ namespace avmplus
 
                 case T_Var:
                 case T_Const: {
-                    Stmt* stmt = varStatement(hd() == T_Const);
+                    Stmt* stmt = varStatement(defaultNamespace(), hd() == T_Const, false);
                     semicolon();
                     return stmt;
                 }
@@ -152,7 +152,7 @@ namespace avmplus
                         FunctionDefn* fn = functionGuts(&qual, true, false, true);
                         Str* name = fn->name;
                         fn->name = NULL;
-                        addVarBinding(name, NULL);
+                        addVarBinding(defaultNamespace(), name, NULL);
                         return ALLOC(ExprStmt, (pos,
                                                 ALLOC(AssignExpr,
                                                       (OPR_assign,
@@ -224,18 +224,18 @@ namespace avmplus
         // updates bindings by side effect, returns a single expression
         // statement for the initialization.
         
-        Stmt* Parser::varStatement(bool is_const)
+        Stmt* Parser::varStatement(NameComponent* ns, bool is_const, bool is_static)
         {
             uint32_t pos = 0;
-            Expr* inits = varBindings(&pos, is_const);
-            return ALLOC(ExprStmt, (pos, inits));
+            Expr* inits = varBindings(&pos, ns, is_const, is_static);
+            return ALLOC(VardefStmt, (pos, inits));
         }
         
         // updates bindings by side effect, returns a single expression for
         // the initialization, a LiteralUndefined node if there was no useful
         // initialization.
         
-        Expr* Parser::varBindings(uint32_t* pos, bool is_const, int flags, uint32_t* numbindings, Expr** firstName)
+        Expr* Parser::varBindings(uint32_t* pos, NameComponent* ns, bool is_const, bool is_static, int flags, uint32_t* numbindings, Expr** firstName)
         {
             AvmAssert( !is_const || firstName == NULL );
 
@@ -248,22 +248,22 @@ namespace avmplus
                 *firstName = NULL;
             for (;;) {
                 Str* name = identifier();
-                QualifiedName* type_name = NULL;
+                Type* type_name = NULL;
                 if (match(T_Colon))
                     type_name = typeExpression();
                 if (numbindings)
                     *numbindings += 1;
                 if (!is_const)
-                    addVarBinding(name, type_name);
+                    addVarBinding(ns, name, type_name, is_static ? topRib->next : topRib);
                 /*
                 if (is_const && hd() != T_Assign)
                     compiler->syntaxError(*pos, SYNTAXERR_CONST_INIT_REQD);
                 */
                 if (match(T_Assign)) {
                     Expr* init = assignmentExpression(flags);
-                    Expr* lhs = ALLOC(QualifiedName, (NULL, ALLOC(SimpleName, (name)), false, *pos));
+                    Expr* lhs = ALLOC(QualifiedName, (ns, ALLOC(SimpleName, (name)), false, *pos));
                     if (is_const)
-                        addConstBinding(name, type_name);
+                        addConstBinding(ns, name, type_name, is_static ? topRib->next : topRib);
                     Expr* assign = ALLOC(AssignExpr, (is_const ? OPR_init : OPR_assign, lhs, init));
                     if (firstName && *firstName == NULL)
                         *firstName = lhs;
@@ -273,7 +273,7 @@ namespace avmplus
                         inits = ALLOC(BinaryExpr, (OPR_comma, inits, assign));
                 }
                 else if (firstName && *firstName == NULL) {
-                    *firstName = ALLOC(QualifiedName, (NULL, ALLOC(SimpleName, (name)), false, *pos));
+                    *firstName = ALLOC(QualifiedName, (ns, ALLOC(SimpleName, (name)), false, *pos));
                 }
 
                 if (!match(T_Comma))
@@ -298,7 +298,7 @@ namespace avmplus
         {
             SeqBuilder<Str*> name(allocator);
             StringBuilder id(compiler);
-            
+            const bool hackaround = true;   // treat import x.y.z as import x.y.*
             eat(T_Import);
             if (hd() == T_Identifier) {
                 name.addAtEnd(identValue());
@@ -312,16 +312,31 @@ namespace avmplus
                     qualified = false;
                     break;
                 }
-                id.append(".");
-                if (hd() == T_Identifier) {
-                    name.addAtEnd(identValue());
-                    id.append(identValue());
+                if (hackaround)
+                {
+                    if (hd() == T_Identifier && hd2() == T_Dot) {
+                        id.append(".");
+                        name.addAtEnd(identValue());
+                        id.append(identValue());
+                    }
+                    eat(T_Identifier);
                 }
-                eat(T_Identifier);
+                else
+                {
+                    id.append(".");
+                    if (hd() == T_Identifier) {
+                        name.addAtEnd(identValue());
+                        id.append(identValue());
+                    }
+                    eat(T_Identifier);
+                }
             }
             Seq<Str*>* n = name.get();
-            if (qualified)
+            if (qualified) {
+                compiler->internalWarning(position(), "Unimplemented: Qualified import not supported yet, using an unqualified import instead");
+                addOpenNamespace(ALLOC(CommonNamespace, (id.str())));
                 addQualifiedImport(n);
+            }
             else {
                 addOpenNamespace(ALLOC(CommonNamespace, (id.str())));
                 addUnqualifiedImport(n);
@@ -355,7 +370,7 @@ namespace avmplus
                 compiler->syntaxError(pos, SYNTAXERR_RETURN_OUTSIDE_FN);
             Expr* expr = NULL;
             if (noNewline()) {
-                if (topRib->is_void)
+                if (topRib->signature->isVoid)
                     compiler->syntaxError(pos, SYNTAXERR_VOIDFN_RETURNS_VALUE);
                 expr = commaExpression(0);
             }
@@ -460,7 +475,7 @@ namespace avmplus
             if (hd() == T_Var)
             {
                 uint32_t dummy = 0;
-                init = varBindings(&dummy, false, EFLAG_NoIn, &numbindings, &lhs);
+                init = varBindings(&dummy, defaultNamespace(), false, false, EFLAG_NoIn, &numbindings, &lhs);
             }
             else if (hd() == T_Semicolon)
                 ;
@@ -596,7 +611,7 @@ namespace avmplus
         {
             eat (T_LeftParen);
             Str* catchvar_name = identifier();
-            QualifiedName* catchvar_type_name = NULL;
+            Type* catchvar_type_name = NULL;
             if (match(T_Colon))
                 catchvar_type_name = typeExpression();
             eat (T_RightParen);
@@ -624,8 +639,11 @@ namespace avmplus
                 argsPresent = true;
                 arguments = argumentList();
             }
-            if (argsPresent && hd() != T_Dot && hd() != T_LeftBracket)
+            // FIXME: We want to abstract "check for property operator" here.
+            if (argsPresent && hd() != T_Dot && hd() != T_DoubleDot && hd() != T_LeftDotAngle && hd() != T_LeftBracket) {
+                setUsesSuper();
                 return ALLOC(SuperStmt, (pos, arguments));
+            }
             if (argsPresent && (arguments == NULL || arguments->tl != NULL))
                 compiler->syntaxError(pos, SYNTAXERR_ONE_ARGUMENT_REQUIRED);
             Expr* obj = argsPresent ? arguments->hd : ALLOC(ThisExpr, ());

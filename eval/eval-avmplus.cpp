@@ -139,7 +139,7 @@ namespace avmplus
         StUTF16String src(code);
         StUTF16String fn(filename);
         AvmAssert(src.c_str()[src.length()-1] == 0);
-        RTC::Compiler compiler(&context, filename == NULL ? NULL : fn.c_str(), src.c_str(), src.length());
+        RTC::Compiler compiler(&context, filename == NULL ? NULL : fn.c_str(), src.c_str(), src.length(), true);
         TRY(core, kCatchAction_Rethrow) {
             compiler.compile();
             return context.script_buffer;

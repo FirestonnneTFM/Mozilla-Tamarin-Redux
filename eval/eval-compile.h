@@ -48,7 +48,7 @@ namespace RTC {
  */
 class Compiler {
 public:
-    Compiler(HostContext* context, const wchar* filename, const wchar* src, uint32_t srclen);
+    Compiler(HostContext* context, const wchar* filename, const wchar* src, uint32_t srclen, bool public_by_default);
     ~Compiler() { destroy(); }
 
     void compile();
@@ -61,7 +61,8 @@ public:
     // A lineno of 0 is ignored here
     void syntaxError(uint32_t lineno, SyntaxError fmt, ...);
     void internalError(uint32_t lineno, const char* fmt, ...);
-    
+    void internalWarning(uint32_t lineno, const char* fmt, ...);
+
     HostContext * const context;    // For access to the host environment
     Allocator* const allocator;     // Compiler-private bump-a-pointer never-free heap
     const wchar * const filename;   // Some human-readable name of the originator of the script, NUL-terminated
@@ -83,6 +84,8 @@ public:
 private:
     Str** const     strTable;   // fixed-length hash table using chaining on collision, chained through 'next' (in private heap)
 
+    void internalWarningOrError(bool error, uint32_t lineno, const char* fmt, va_list args);
+
 public:
     // Compiler components
     Lexer          lexer;
@@ -94,12 +97,14 @@ public:
     // Pre-interned strings signifying themselves, keep alphabetical
     Str * const SYM_;           // ""
     Str * const SYM_AS3;
+    Str * const SYM_AS3_vec;    // __AS3__.vec
     Str * const SYM_Array;
     Str * const SYM_CONFIG;
     Str * const SYM_Namespace;
     Str * const SYM_Number;
     Str * const SYM_Object;
     Str * const SYM_RegExp;
+    Str * const SYM_Vector;
     Str * const SYM_XML;
     Str * const SYM_XMLList;
     Str * const SYM_anonymous;
@@ -124,12 +129,16 @@ public:
     Str * const str_filename;   // Str representation of the 'filename' member above
 
     // Namespaces and names that are commonly used
-    const uint32_t NS_public;       // public
+    const uint32_t NS_public;       // "public public"
+    const uint32_t NS_private;      // private
+    const uint32_t NS_internal;     // "file internal" == private
+    const uint32_t NS_AS3_vec;      // __AS3__.vec
     const uint32_t ID_Array;        // public::Array
     const uint32_t ID_Namespace;    // public::Namespace
     const uint32_t ID_Number;       // public::Number
     const uint32_t ID_Object;       // public::Object
     const uint32_t ID_RegExp;       // public::RegExp
+    const uint32_t ID_Vector;       // __AS3__.vec::Vector
     const uint32_t ID_XML;          // public::XML
     const uint32_t ID_XMLList;      // public::XMLList
     const uint32_t ID_children;     // public::children
@@ -138,7 +147,7 @@ public:
 #ifdef DEBUG
     const uint32_t ID_print;        // public::print
 #endif
-    const uint32_t NSS_public;      // [public]
+    const uint32_t NSS_public;      // [public,internal]
     const uint32_t MNL_public;      // [public]::<>
     const uint32_t MNL_public_attr; // [public]::<> for @attr names
 };

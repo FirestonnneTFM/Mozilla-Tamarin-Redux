@@ -41,6 +41,14 @@
 namespace avmplus {
 namespace RTC {
 
+// For unknown reasons these are not in ActionBlockConstants.
+enum {
+    CONSTANT_ClassSealed = 1,
+    CONSTANT_ClassFinal = 2,
+    CONSTANT_ClassInterface = 4,
+    CONSTANT_ClassProtectedNs = 8
+};
+    
 /* Structures and methods for constructing and emitting ABC code. */
 
 /* An interface implemented by any part of the ABC file */
@@ -81,13 +89,14 @@ public:
     uint32_t addRTQNameL(bool is_attr=false);
     uint32_t addMultiname(uint32_t nsset, uint32_t name, bool is_attr=false);
     uint32_t addMultinameL(uint32_t nsset, bool is_attr=false);
+    uint32_t addTypeName(uint32_t parameterizedType, uint32_t parameterType);
     uint32_t addMethod(ABCMethodInfo* m);
     uint32_t addMetadata(ABCMetadataInfo* m);
     uint32_t addClassAndInstance(ABCClassInfo* c, ABCInstanceInfo* i);
     uint32_t addInstance(ABCInstanceInfo* i);
     uint32_t addClass(ABCClassInfo* c);
     uint32_t addScript(ABCScriptInfo* s);
-    uint32_t addMethodBody(ABCMethodBodyInfo* m);
+    void addMethodBody(ABCMethodBodyInfo* m);
     bool hasRTNS(uint32_t index);
     bool hasRTName(uint32_t index);
     
@@ -117,7 +126,7 @@ private:
     uint32_t instanceCount;
     uint32_t classCount;
     uint32_t scriptCount;
-    uint32_t methodbodyCount;
+    uint32_t nonemptyMethodBodyCount;
 
     ByteBuffer intBuf;
     ByteBuffer uintBuf;
@@ -223,7 +232,7 @@ private:
 
 class ABCMethodBodyInfo : public ABCChunk {
 public:
-    ABCMethodBodyInfo(Compiler* compiler, ABCMethodInfo* method_info, ABCTraitsTable* traits, uint32_t first_temp);
+    ABCMethodBodyInfo(Compiler* compiler, ABCMethodInfo* method_info, ABCTraitsTable* traits, uint32_t first_temp, bool is_empty);
     
     virtual uint32_t size();
     virtual uint8_t* serialize(uint8_t* b);
@@ -233,9 +242,9 @@ public:
 
     Cogen cogen;
     ABCExceptionTable exceptions;
-    const uint32_t index;
     ABCMethodInfo * const method_info;
     ABCTraitsTable * traits;
+    const bool is_empty;
 };
 
 class ABCTrait : public ABCChunk {
@@ -276,6 +285,17 @@ public:
     const uint32_t method_info;
 };
 
+class ABCClassTrait : public ABCTrait {
+public:
+    ABCClassTrait(uint32_t name, uint32_t slot_id, uint32_t index) : ABCTrait(name, TRAIT_Class), slot_id(slot_id), index(index) {}
+    
+    virtual uint32_t dataSize();
+    virtual uint8_t* serializeData(uint8_t* b);
+    
+    const uint32_t slot_id;
+    const uint32_t index;
+};
+
 class ABCMetadataInfo : public ABCChunk {
 public:
     virtual uint32_t size();
@@ -284,14 +304,47 @@ public:
 
 class ABCInstanceInfo : public ABCChunk {
 public:
+    ABCInstanceInfo(uint32_t name, uint32_t super_name, uint8_t flags, uint32_t protectedNS,
+                    uint32_t interface_count, uint32_t* interfaces,
+                    uint32_t iinit,
+                    ABCTraitsTable* traits)
+        : name(name)
+        , super_name(super_name)
+        , flags(flags)
+        , protectedNS(protectedNS)
+        , interface_count(interface_count)
+        , interfaces(interfaces)
+        , iinit(iinit)
+        , traits(traits)
+    {
+    }
+
     virtual uint32_t size();
     virtual uint8_t* serialize(uint8_t* b);
+    
+    const uint32_t name;
+    const uint32_t super_name;
+    const uint8_t flags;
+    const uint32_t protectedNS;
+    const uint32_t interface_count;
+    uint32_t* const interfaces;
+    const uint32_t iinit;
+    ABCTraitsTable * const traits;
 };
 
 class ABCClassInfo : public ABCChunk {
 public:
+    ABCClassInfo(uint32_t cinit, ABCTraitsTable* traits)
+        : cinit(cinit)
+        , traits(traits)
+    {
+    }
+    
     virtual uint32_t size();
     virtual uint8_t* serialize(uint8_t* b);
+    
+    const uint32_t cinit;
+    ABCTraitsTable * const traits;
 };
 
 class ABCNamespaceInfo {
@@ -312,9 +365,8 @@ class ABCMultinameInfo {
 public:
     ABCMultinameInfo(uint8_t kind, uint32_t ns_or_nsset, uint32_t name) : kind(kind), ns_or_nsset(ns_or_nsset), name(name) {}
     const uint8_t kind;
-    const uint32_t ns_or_nsset;
-    const uint32_t name;
+    const uint32_t ns_or_nsset;     // For CONSTANT_TypeName this is the parameterizedType
+    const uint32_t name;            // For CONSTANT_TypeName this is the parameterType
 };
-
 
 }}

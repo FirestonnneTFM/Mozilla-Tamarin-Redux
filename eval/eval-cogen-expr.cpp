@@ -104,6 +104,7 @@ namespace avmplus
         {
             Compiler* compiler = cogen->compiler;
             bool ns_wildcard = false;
+            bool ns_builtin = false;
             if (qname->qualifier != NULL) {
                 switch (qname->qualifier->tag()) {
                     case TAG_simpleName: {
@@ -120,6 +121,9 @@ namespace avmplus
                     case TAG_wildcardName:
                         ns_wildcard = true;
                         break;
+                    case TAG_builtinNamespace:
+                        ns_builtin = true;
+                        break;
                     default:
                         compiler->internalError(qname->pos, "QName qualifiers can't be computed names");
                 }
@@ -128,9 +132,16 @@ namespace avmplus
             switch (name->tag()) {
                 case TAG_simpleName:
                     if (nsreg != 0) {
-                        AvmAssert(!ns_wildcard);
+                        AvmAssert(!ns_wildcard && !ns_builtin);
                         sym = cogen->abc->addRTQName(cogen->emitString(((SimpleName*)name)->name),
                                                      qname->is_attr);
+                    }
+                    else if (ns_builtin) {
+                        AvmAssert(!ns_wildcard);
+                        uint32_t ns = cogen->emitNamespace(qname->qualifier);
+                        sym = cogen->abc->addQName(ns,
+                                                   cogen->emitString(((SimpleName*)name)->name),
+                                                   qname->is_attr);
                     }
                     else {
                         VarScopeCtx* vs = ctx->findVarScope();
@@ -138,7 +149,7 @@ namespace avmplus
                         // plus some open namespaces; in the latter case we need to generate a
                         // multiname presumably.  We don't want to have to call addNsset here
                         // every time so be sure to cache the nsset for the current scope somewhere.
-                        if (vs->nsset != 0 && ns_wildcard == 0 && !qname->is_attr)
+                        if (vs->nsset != 0 && !ns_wildcard && !qname->is_attr)
                             sym = cogen->abc->addMultiname(vs->nsset,
                                                            cogen->emitString(((SimpleName*)name)->name),
                                                            false);
@@ -186,9 +197,28 @@ namespace avmplus
                 cogen->I_getlocal(namereg);
         }
         
+        void SimpleType::cogen(Cogen* cogen, Ctx* ctx)
+        {
+            name->cogen(cogen, ctx);
+        }
+
+        void InstantiatedType::cogen(Cogen* cogen, Ctx* ctx)
+        {
+            Compiler* compiler = cogen->compiler;
+            Cogen::checkVectorType(compiler, basename);
+            cogen->I_findpropstrict(compiler->ID_Vector);
+            cogen->I_getproperty(compiler->ID_Vector);
+            // FIXME: representing * as NULL is an anti-pattern (also elsewhere)
+            if (tparam == NULL)
+                cogen->I_pushnull();
+            else
+                tparam->cogen(cogen, ctx);
+            tparam->cogen(cogen, ctx);
+            cogen->I_applytype(1);
+        }
+
         void QualifiedName::cogen(Cogen* cogen, Ctx* ctx)
         {
-            (void)ctx;
             Name n(cogen, ctx, this);
             n.setup();
             cogen->I_findpropstrict(n.sym);
@@ -208,6 +238,11 @@ namespace avmplus
             }
         }
         
+        void InstantiatedTypeRef::cogen(Cogen* cogen, Ctx* ctx)
+        {
+            type->cogen(cogen, ctx);
+        }
+
         void RefLocalExpr::cogen(Cogen* cogen, Ctx* ctx)
         {
             (void)ctx;
@@ -323,6 +358,7 @@ namespace avmplus
                         cogen->I_deleteproperty(n.sym);
                     }
                     else {
+                        // FIXME: could be a TAG_instantiatedType
                         // FIXME: e4x requires that if the value computed here is an XMLList then a TypeError (ID 1119) is thrown.
                         expr->cogen(cogen, ctx);
                         cogen->I_pop();
@@ -441,32 +477,20 @@ namespace avmplus
                 // for that instead.  Note that F then becomes a local function
                 // definition.
                 Allocator* allocator = cogen->allocator;
+                SignatureInfo signature(allocator);
+                BodyInfo body(allocator);
+                BuiltinNamespace* ns = cogen->compiler->parser.defaultNamespace();
+                body.bindings.addAtEnd(ALLOC(Binding, (ns, function->name, NULL, TAG_varBinding)));
+                body.functionDefinitions.addAtEnd(function);
+                body.stmts.addAtEnd(ALLOC(ReturnStmt,
+                                            (0, ALLOC(QualifiedName,
+                                                      (ns, ALLOC(SimpleName,
+                                                                    (function->name)),
+                                                       false,
+                                                       0)))));
                 Expr* e = ALLOC(CallExpr,
                                 (ALLOC(LiteralFunction,
-                                       (ALLOC(FunctionDefn,
-                                              (NULL,
-                                               ALLOC(Seq<Binding*>,
-                                                     (ALLOC(Binding,
-                                                            (function->name, NULL, TAG_varBinding)))),
-                                               NULL,
-                                               0,
-                                               NULL,
-                                               NULL,
-                                               ALLOC(Seq<FunctionDefn*>,
-                                                     (function)),
-                                               NULL,
-                                               NULL,
-                                               ALLOC(Seq<Stmt*>,
-                                                     (ALLOC(ReturnStmt,
-                                                            (0, ALLOC(QualifiedName,
-                                                                      (NULL, ALLOC(SimpleName,
-                                                                                   (function->name)),
-                                                                       false,
-                                                                       0)))))),
-                                              false,
-                                              false,
-                                              false,
-                                              false)))),
+                                       (ALLOC(FunctionDefn, (signature, body)))),
                                  NULL,
                                  0));
                 e->cogen(cogen, ctx);
@@ -515,7 +539,7 @@ namespace avmplus
                     if (e != NULL) {
                         cogen->I_dup();
                         e->cogen(cogen, ctx);
-                        cogen->I_setproperty(cogen->abc->addQName(compiler->NS_public,cogen->emitString(compiler->intern(i))));
+                        cogen->I_setproperty(cogen->abc->addQName(compiler->NS_public, cogen->emitString(compiler->intern(i))));
                         last_was_undefined = false;
                     }
                     else
@@ -526,6 +550,29 @@ namespace avmplus
                     cogen->I_pushint(cogen->emitInt(i));
                     cogen->I_setproperty(compiler->ID_length);
                 }
+            }
+        }
+
+        void LiteralVector::cogen(Cogen* cogen, Ctx* ctx)
+        {
+            Compiler* compiler = cogen->compiler;
+            cogen->I_findpropstrict(compiler->ID_Vector);
+            cogen->I_getproperty(compiler->ID_Vector);
+            // FIXME: representing * as NULL is an anti-pattern (also elsewhere)
+            if (type == NULL)
+                cogen->I_pushnull();
+            else
+                type->cogen(cogen, ctx);
+            cogen->I_applytype(1);
+            cogen->I_pushint(cogen->emitInt(length(this->elements)));
+            cogen->I_construct(1);
+            int32_t offset=0;
+            for ( Seq<Expr*>* elements = this->elements ; elements != NULL ; elements = elements->tl ) {
+                cogen->I_dup();
+                cogen->I_pushint(cogen->emitInt(offset));
+                elements->hd->cogen(cogen, ctx);
+                cogen->I_setproperty(compiler->MNL_public);
+                offset++;
             }
         }
 
