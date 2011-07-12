@@ -90,15 +90,7 @@ def gen(prefix,inputfiles,outputdir,srcdir=os.getcwd(),ns=''):
             print "ERROR: ASC environment variable must point to asc.jar"
             exit(1)
         print("Compiling exactgc script...")
-
-        java_home = os.environ.get('JAVA_HOME')
-        if java_home == None:
-            print "warning: no JAVA_HOME set; inferring executable is 'java' and on system path."
-            java_bin = 'java'
-        else:
-            java_bin = java_home + '/bin/java'
-
-        os.system("%s -jar %s -AS3 -import %s/../generated/builtin.abc -import %s/../generated/shell_toplevel.abc -debug %s" % (java_bin, classpath, utilsdir, utilsdir, asfile))
+        os.system("java -jar %s -AS3 -import %s/../generated/builtin.abc -import %s/../generated/shell_toplevel.abc -debug %s" % (classpath, utilsdir, utilsdir, asfile))
 
     # in case outputdir is relative make it absolute before chdir'ing
     outputdir = os.path.abspath(outputdir)
