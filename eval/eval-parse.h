@@ -1290,7 +1290,7 @@ private:
     Seq<Binding*>* bindingsToVars(Seq<Binding*>* bindings);
     Seq<FunctionDefn*>* filterConstructor(Str* name, Seq<FunctionDefn*>* fns, FunctionDefn** constructor);
     Seq<Stmt*>* filterStatements(Seq<Stmt*>* stmts, Seq<Stmt*>** nonDefinitionStmts);
-    FunctionDefn* constructClassConstructor(uint32_t pos, Str* name, Seq<Stmt*>* init_stmts, Seq<Stmt*>* static_stmts);
+    FunctionDefn* constructClassConstructor(uint32_t pos, Str* name, BodyInfo* old_body, Seq<Stmt*>* init_stmts, Seq<Stmt*>* static_stmts);
     FunctionDefn* constructInstanceConstructor(uint32_t pos, Str* name, Seq<Stmt*>* init_stmts, FunctionDefn* constructor);
     NameComponent* qualToNamespace(Qualifier* qual);
     

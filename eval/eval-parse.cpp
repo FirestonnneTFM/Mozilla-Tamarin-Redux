@@ -610,6 +610,15 @@ namespace avmplus
             // must distinguish between initializing stores and other statements.  We hack:
             // just filter the statements after the fact, variable definition stmts are
             // distinguishable from other statements.
+            //
+            // FIXME: the hack is somehow wrong, consider
+            //
+            //   class C {
+            //      L1: var c = v;
+            //   }
+            //
+            // where "c = v" is part of the instance initializer.  Now put it in a (static) loop.
+            // It should not be executed by that loop, but it is.
 
             BodyInfo* cls = &topRib->next->body;
             Seq<FunctionDefn*>* cls_methods = cls->functionDefinitions.get();
@@ -617,7 +626,7 @@ namespace avmplus
             Seq<NamespaceDefn*>* cls_namespaces = cls->namespaces.get();
             Seq<Stmt*>* static_stmts = NULL;
             Seq<Stmt*>* cls_init_stmts = filterStatements(cls->stmts.get(), &static_stmts);
-            FunctionDefn* cls_init = constructClassConstructor(pos, name, cls_init_stmts, static_stmts);
+            FunctionDefn* cls_init = constructClassConstructor(pos, name, cls, cls_init_stmts, static_stmts);
 
             // For the instance constructor only the initializing stores appear in the
             // statements list; this list becomes init1, whereas the constructor (user-provided
@@ -664,7 +673,7 @@ namespace avmplus
         {
         }
 
-        FunctionDefn* Parser::constructClassConstructor(uint32_t pos, Str* name, Seq<Stmt*>* init_stmts, Seq<Stmt*>* stmts)
+        FunctionDefn* Parser::constructClassConstructor(uint32_t pos, Str* name, BodyInfo* old_body, Seq<Stmt*>* init_stmts, Seq<Stmt*>* stmts)
         {
             SignatureInfo signature(allocator);
             BodyInfo body(allocator);
@@ -676,6 +685,11 @@ namespace avmplus
             signature.ns = publicNS;
             signature.name = fnname.str();
 
+            body.uses_finally = old_body->uses_finally;
+            body.uses_catch = old_body->uses_catch;
+            body.uses_goto = old_body->uses_goto;
+            body.uses_dxns = old_body->uses_dxns;
+            
             while (stmts != NULL) {
                 body.stmts.addAtEnd(stmts->hd);
                 stmts = stmts->tl;
@@ -716,7 +730,7 @@ namespace avmplus
                 
                 signature.ns = publicNS;
                 signature.name = fnname.str();
-            
+
                 body.stmts.addAtEnd(ALLOC(SuperStmt, (pos, NULL)));
 
                 return ALLOC(FunctionDefn, (signature, body, init_stmts));
@@ -1069,17 +1083,29 @@ namespace avmplus
 
         void Parser::setUsesFinally()
         {
-            topRib->body.uses_finally = true;
+            // FIXME: Far from ideal
+            if (topRib->tag == RIB_Instance && topRib->next != NULL && topRib->next->tag == RIB_Class)
+                topRib->next->body.uses_finally = true;
+            else
+                topRib->body.uses_finally = true;
         }
         
         void Parser::setUsesCatch()
         {
-            topRib->body.uses_catch = true;
+            // FIXME: Far from ideal
+            if (topRib->tag == RIB_Instance && topRib->next != NULL && topRib->next->tag == RIB_Class)
+                topRib->next->body.uses_catch = true;
+            else
+                topRib->body.uses_catch = true;
         }
 
         void Parser::setUsesGoto()
         {
-            topRib->body.uses_goto = true;
+            // FIXME: Far from ideal
+            if (topRib->tag == RIB_Instance && topRib->next != NULL && topRib->next->tag == RIB_Class)
+                topRib->next->body.uses_goto = true;
+            else
+                topRib->body.uses_goto = true;
         }
 
         void Parser::setUsesSuper()
