@@ -83,30 +83,118 @@ double VMPI_getLocalTimeOffset()
     return -tz.Bias * 60.0 * 1000.0;
 }
 
-//time is passed in as milliseconds from UTC.
-double VMPI_getDaylightSavingsTA(double newtime)
+// Bugzilla 668442, fix this evil of working around tangle of
+// dependencies with local declarations (below are from Date.cpp)
+namespace avmplus
 {
-    struct tm broken_down_time;
-    
-    //convert time from milliseconds
-    newtime=newtime/kMsecPerSecond;
-    
-    time_t time_t_time=(time_t)newtime;
-    
-    //pull out a struct tm
-    if (localtime_s( &broken_down_time, &time_t_time ) != 0)
-    {
+    int WeekDay(double t);
+    double MakeDate(double day, double time);
+    double MakeDay(double year, double month, double date);
+    double MakeTime(double hour, double min, double sec, double ms);
+    int YearFromTime(double t);
+}
+
+static double ConvertWin32DST(int year, SYSTEMTIME *st)
+{
+    // The StandardDate and DaylightDate members of
+    // TIMEZONE_INFORMATION may be specified in two ways:
+    // 1. An absolute time and date
+    // 2. A month, day of week and week in month, and a time of day
+
+    if (st->wYear != 0) {
+        return avmplus::MakeDate(avmplus::MakeDay(year,
+            st->wMonth - 1,
+            st->wDay),
+            avmplus::MakeTime(st->wHour,
+            st->wMinute,
+            st->wSecond,
+            st->wMilliseconds));
+    }
+
+    double timeValue = avmplus::MakeDate(avmplus::MakeDay(year,
+        st->wMonth-1,
+        1),
+        avmplus::MakeTime(st->wHour,
+        st->wMinute,
+        st->wSecond,
+        st->wMilliseconds));
+
+    double nextMonth;
+    if (st->wMonth < 12) {
+        nextMonth = avmplus::MakeDate(avmplus::MakeDay(year, st->wMonth, 1), 0);
+    } else {
+        nextMonth = avmplus::MakeDate(avmplus::MakeDay(year + 1, 0, 1), 0);
+    }
+
+    int dayOfWeek = avmplus::WeekDay(timeValue);
+    if (dayOfWeek != st->wDayOfWeek) {
+        int dayDelta = st->wDayOfWeek - dayOfWeek;
+        if (dayDelta < 0) {
+            dayDelta += 7;
+        }
+        timeValue += (double)kMsecPerDay * dayDelta;
+    }
+
+    // Advance appropriate # of weeks
+    timeValue += (double)kMsecPerDay * 7.0 * (st->wDay - 1);
+
+    // Cap it at the end of the month
+    while (timeValue >= nextMonth) {
+        timeValue -= (double)kMsecPerDay * 7.0;
+    }
+
+    return timeValue;
+}
+
+//time is passed in as milliseconds from UTC.
+double VMPI_getDaylightSavingsTA(double time)
+{
+    // On Windows, ask the OS what the daylight saving time bias
+    // is.  If it's zero, perform no adjustment.
+    TIME_ZONE_INFORMATION tz = UpdateTimeZoneInfo();
+    if (tz.DaylightBias != -60 || tz.DaylightDate.wMonth == 0) {
         return 0;
     }
-    
-    if (broken_down_time.tm_isdst > 0)
+
+    // In most of the US, Daylight Saving Time begins on the
+    // first Sunday of April at 2 AM.  It ends at 2 am on
+    // the last Sunday of October.
+
+    // 1. Compute year this time represents.
+    int year = avmplus::YearFromTime(time);
+
+    // 2. Compute time that daylight saving time begins
+    double timeD = ConvertWin32DST(year, &tz.DaylightDate);
+
+    // 3. Compute time that standard time begins
+    double timeS = ConvertWin32DST(year, &tz.StandardDate);
+
+    // Subtract the daylight bias from the standard transition time
+    timeS -= kMsecPerHour;
+
+    // The times we have calculated are in local time,
+    // but "time" was passed in as UTC.  Convert it to local time.
+    time += VMPI_getLocalTimeOffset();
+
+    // Does time fall in the daylight saving period?
+
+    // Where Daylight savings time is earlier in the year than standard time
+    if(timeS > timeD)
     {
-        //daylight saving is definitely in effect.
-        return kMsecPerHour;
+        if (time >= timeD && time < timeS)
+            return kMsecPerHour;
+        else
+            return 0;
     }
-    
-    //either daylight saving is not in effect, or we don't know (if tm_isdst is negative).
-    return 0;
+    // Where Daylight savings time is later in the year than standard time
+    else
+    {
+        if (time >= timeS && time < timeD)
+            return 0;
+        else
+            return kMsecPerHour;
+    }
+
 }
 
 #define FILETIME_EPOCH_BIAS ((LONGLONG)116444736000000000)
