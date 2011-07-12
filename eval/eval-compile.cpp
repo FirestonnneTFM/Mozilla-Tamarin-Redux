@@ -132,6 +132,8 @@ namespace avmplus
         /* SYNTAXERR_DUPLICATE_QUALIFIER */  "Duplicated qualifier",
         /* SYNTAXERR_CONFIG_REQUIRED */      "Configuration name reference required",
         /* SYNTAXERR_CONFIG_PROHIBITED */    "Configuration name reference prohibited",
+        /* SYNTAXERR_GOTO_LABEL_UNDEFINED */ "Undefined label in 'goto' statement",
+        /* SYNTAXERR_GOTO_LABEL_AMBIGUOUS */ "Ambiguous label in 'goto' statement",
         };
         
         // Assume that the number of unique identifiers in a program is roughly the square root

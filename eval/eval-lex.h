@@ -145,6 +145,7 @@ enum Token {
     T_Finally,
     T_For,
     T_Function,
+    T_Goto,
     T_If,
     T_Import,
     /*T_In,*/

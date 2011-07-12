@@ -305,6 +305,8 @@ namespace avmplus
             SYNTAXERR_DUPLICATE_QUALIFIER = 72,
             SYNTAXERR_CONFIG_REQUIRED = 73,
             SYNTAXERR_CONFIG_PROHIBITED = 74,
+            SYNTAXERR_GOTO_LABEL_UNDEFINED = 75,
+            SYNTAXERR_GOTO_LABEL_AMBIGUOUS = 76
         };
         
         // The HostContext must be implemented by the embedder of eval.  'wchar' is a 16-bit unsigned value always.

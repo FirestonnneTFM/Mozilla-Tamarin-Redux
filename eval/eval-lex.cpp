@@ -699,6 +699,16 @@ namespace avmplus
                             default:
                                 goto bigswitch_end;
                         }
+                    case 'g':
+                        if (idx[0] == 'o' &&
+                            idx[1] == 't' &&
+                            idx[2] == 'o' &&
+                            !compiler->es3_keywords &&
+                            notPartOfIdent(idx[3])) {
+                            idx += 3;
+                            return T_Goto;
+                        }
+                        goto bigswitch_end;
                     case 'i':
                         switch(idx[0]) {
                             case 'f':

@@ -117,6 +117,7 @@ namespace avmplus
             , tag(tag)
             , uses_finally(false)
             , uses_catch(false)
+            , uses_goto(false)
             , uses_arguments(false)
             , uses_dxns(false)
             , is_void(false)
@@ -160,7 +161,12 @@ namespace avmplus
             while (hd() == T_Package)
                 package();
             Seq<Stmt*>* stmts = directives(SFLAG_Toplevel);
-            Program* prog = ALLOC(Program, (topRib->bindings.get(), topRib->functionDefinitions.get(), topRib->namespaces.get(), topRib->openNamespaces.get(), stmts));
+            Program* prog = ALLOC(Program, (topRib->bindings.get(),
+                                            topRib->functionDefinitions.get(),
+                                            topRib->namespaces.get(),
+                                            topRib->openNamespaces.get(),
+                                            topRib->uses_goto,
+                                            stmts));
             popBindingRib();
             return prog;
         }
@@ -884,6 +890,11 @@ namespace avmplus
             topRib->uses_catch = true;
         }
 
+        void Parser::setUsesGoto()
+        {
+            topRib->uses_goto = true;
+        }
+
         void Parser::functionDefinition(bool config, Qualifier* qual, bool getters_and_setters, bool require_body)
         {
             (void)config;
@@ -984,6 +995,7 @@ namespace avmplus
             Seq<Namespace*>* openNamespaces = NULL;
             bool uses_arguments = false;
             bool uses_dxns = false;
+            bool uses_goto = false;
             bool optional_arguments = topRib->optional_arguments;
             if (require_body)
             {
@@ -1003,6 +1015,7 @@ namespace avmplus
                 openNamespaces = topRib->openNamespaces.get();
                 uses_arguments = topRib->uses_arguments;
                 uses_dxns = topRib->uses_dxns;
+                uses_goto = topRib->uses_goto;
             }
             else
                 semicolon();
@@ -1014,6 +1027,7 @@ namespace avmplus
             return ALLOC(FunctionDefn, (name, bindings, params.get(), numparams, rest_param, return_type_name, fndefs, namespaces, openNamespaces, stmts,
                                         uses_arguments,
                                         uses_dxns,
+                                        uses_goto,
                                         optional_arguments));
         }
 
