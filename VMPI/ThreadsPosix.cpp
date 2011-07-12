@@ -37,8 +37,8 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
-#include "VMPI.h"
 #include "VMAssert.h"
+#include "VMPI.h"
 
 #include <pthread.h>
 

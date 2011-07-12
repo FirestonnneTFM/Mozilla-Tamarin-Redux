@@ -71,7 +71,9 @@ avmplus_INCLUDES += $(AVM_INCLUDES)
 
 $(call RECURSE_DIRS,other-licenses/zlib)
 
-$(call RECURSE_DIRS,gtest)
+# Bug 668442: WinPortUtils.cpp VMPI_getDaylightSavingsTA issue
+# Revision buggy, original breaks gtest; disabling gtest until revision fixed.
+# $(call RECURSE_DIRS,gtest)
 
 $(call RECURSE_DIRS,VMPI)
 $(call RECURSE_DIRS,vmbase)

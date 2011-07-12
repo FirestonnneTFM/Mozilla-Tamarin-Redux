@@ -104,7 +104,10 @@
 #include <inttypes.h>
 #include <alloca.h>
 
-#include <CoreServices/CoreServices.h>   // for MakeDataExecutable
+// Bug 645878: must guard the include to avoid breaking AIR_IOS.
+#if defined(AVMPLUS_MAC_CARBON) || defined(AVMPLUS_PPC)
+    #include <CoreServices/CoreServices.h>   // for MakeDataExecutable
+#endif
 
 #include <mach/mach.h>                   // for vm_protect()
 #include <AvailabilityMacros.h>
@@ -120,6 +123,10 @@
 #include <signal.h>
 
 #include <sys/sysctl.h>
+
+#ifdef DEBUG
+#include <assert.h>
+#endif
 
 typedef void *maddr_ptr;
 typedef pthread_t vmpi_thread_t;
