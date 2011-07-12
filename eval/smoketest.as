@@ -333,6 +333,23 @@ var x=5;
 with ({x: 10})
     print(x);
 
+// goto statement
+
+function gotoTest()
+{
+    goto L1;
+    throw "Should not happen: goto failed";
+    L1: print("goto!");
+}
+gotoTest();
+ 
+ // FIXME: super expression
+ // FIXME: super statement
+ 
+ // FIXME: import directive
+ // FIXME: use directive
+ 
+ // FIXME: include directive
 // FIXME: super expression
 // FIXME: super statement
 

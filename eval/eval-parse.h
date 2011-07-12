@@ -178,12 +178,15 @@ public:
 
 class Program : public CodeBlock {
 public:
-    Program(Seq<Binding*>* bindings, Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Namespace*>* openNamespaces, Seq<Stmt*>* stmts)
+    Program(Seq<Binding*>* bindings, Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Namespace*>* openNamespaces, bool uses_goto, Seq<Stmt*>* stmts)
         : CodeBlock(CODE_Program, bindings, functions, namespaces, openNamespaces, stmts)
+        , uses_goto(uses_goto)
     {
     }
     
     virtual void cogenBody(Cogen* cogen, Ctx* ctx, uint32_t activation);
+
+    const bool uses_goto;               // true iff 'goto' is used in the program body
 };
 
 class ClassDefn {
@@ -228,6 +231,7 @@ public:
                  Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Namespace*>* openNamespaces, Seq<Stmt*>* stmts,
                  bool uses_arguments,
                  bool uses_dxns,
+                 bool uses_goto,
                  bool optional_arguments)
         : CodeBlock(CODE_Function, bindings, functions, namespaces, openNamespaces, stmts)
         , name(name)
@@ -237,6 +241,7 @@ public:
         , return_type_name(return_type_name)
         , uses_arguments(uses_arguments)
         , uses_dxns(uses_dxns)
+        , uses_goto(uses_goto)
         , optional_arguments(optional_arguments)
     {
     }
@@ -254,6 +259,7 @@ public:
     QualifiedName* return_type_name;    // may be NULL
     const bool uses_arguments;          // true iff rest_name == NULL and the ident 'arguments' is used in the function
     const bool uses_dxns;               // true iff 'default xml namespace' is used in the function
+    const bool uses_goto;               // true iff 'goto' is used in the function
     const bool optional_arguments;      // true iff any of the parameters have default values
 };
 
@@ -698,11 +704,12 @@ public:
 
 class LabeledStmt : public Stmt {
 public:
-    LabeledStmt(Str* label, Stmt* stmt) : label(label), stmt(stmt) {}
+    LabeledStmt(Str* label, Stmt* stmt) : label(label), stmt(stmt), address(NULL) {}
     virtual void cogen(Cogen* cogen, Ctx* ctx);
     virtual bool isLabeledStmt() { return true; }
     Str* const label;
     Stmt* const stmt;
+    Label* address;     // Used for "goto" processing; updated by a prepass
 };
 
 class ReturnStmt : public Stmt {
@@ -724,6 +731,13 @@ public:
     ContinueStmt(uint32_t pos, Str* label) : Stmt(pos), label(label) {}
     virtual void cogen(Cogen* cogen, Ctx* ctx);
     Str* const label;   // or NULL
+};
+
+class GotoStmt : public Stmt {
+public:
+    GotoStmt(uint32_t pos, Str* label) : Stmt(pos), label(label) {}
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
+    Str* const label;   // never NULL
 };
 
 class IfStmt : public Stmt {
@@ -997,6 +1011,7 @@ private:
     Stmt* returnStatement();
     Stmt* breakStatement();
     Stmt* continueStatement();
+    Stmt* gotoStatement();
     Str* breakOrContinueLabel(Token t);
     Stmt* defaultXmlNamespaceStatement();
     Stmt* ifStatement();
@@ -1074,6 +1089,7 @@ private:
         const RibType tag;
         bool uses_finally;
         bool uses_catch;
+        bool uses_goto;
         bool uses_arguments;
         bool uses_dxns;
         bool is_void;
@@ -1101,6 +1117,7 @@ private:
     void setUsesCatch();
     void setUsesArguments();
     void setUsesDefaultXmlNamespace();
+    void setUsesGoto();
 
     // Program configuration management
 

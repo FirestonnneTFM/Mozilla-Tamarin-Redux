@@ -49,7 +49,7 @@ namespace avmplus
     {
         using namespace ActionBlockConstants;
 
-        static bool matchLabel(Ctx* ctx, Str* label)
+        static bool matchLabel(Ctx* ctx, Str* label, void** result=NULL)
         {
             if (label == NULL)
                 return true;
@@ -59,6 +59,18 @@ namespace avmplus
                     while (labels != NULL) {
                         if (label == labels->hd)
                             return true;
+                        labels = labels->tl;
+                    }
+                    return false;
+                }
+                case CTX_Goto: {
+                    Seq<GotoLabel*>* labels = ((GotoCtx*)ctx)->label_names;
+                    while (labels != NULL) {
+                        if (label == labels->hd->label_name) {
+                            if (result != NULL)
+                                *result = labels->hd;
+                            return true;
+                        }
                         labels = labels->tl;
                     }
                     return false;
@@ -120,8 +132,167 @@ namespace avmplus
             }
         }
         
-        // Statement code generators
+        // Syntax analysis and code generation for goto are intertwined.  That may or may not be
+        // a great idea, but here's how it works:
+        //
+        // When we enter a Program body or Function body we create an initial set of legal goto targets,
+        // this set is empty and provides the base case for the analysis that occurs within the body.
+        // There will be a list of these sets chained through the goto contexts on the stack.
+        //
+        // When we get to a statement list (Block, Cases, Group, Program body, Function body) we walk
+        // the statement list and look for labeled statements in the list (never within statements in
+        // the list).  The labels on these statements will comprise the set of legal "top-level"
+        // (non-nesting) labels for that statement list.  We create a new goto context for the set,
+        // and we enter the labels into that context.  Each entry in the set has the label name,
+        // a Label pointer, and a flag saying whether the entry is ambiguous.  It is ambiguous if the
+        // label name is also found in one of the sets we inherit from nesting contexts (up to a program
+        // or function body).  The labeled statements we find are updated: we store the Label pointer
+        // in each of their "address" members.  This pointer will serve as a flag when code is generated
+        // for the labeled statement (next paragraph).
+        //
+        // When we process a labeled statement, one of two things happens.  If the "address" member
+        // is non-null then this is a top-level labeled statement and we do not create a new goto context,
+        // as one already exists.  Otherwise, we create a new goto context containing just the label for
+        // this labeled statement; the entry may again be ambiguous.  We create an "address" value too.
+        // In either case, we emit the label stored in the address node.
+        //
+        // When we process a goto statement, we search the goto stack for the context node that contains
+        // the label.  If the label is not found, we signal an error.  If the label is found but marked
+        // ambiguous, we signal an error.  Otherwise we emit a nonlocal jump to the node (without control
+        // transfer) and then jump to the target address, which may not be emitted yet (but backpatching
+        // will take care of that).
+        //
+        // Goto contexts are chained through the next_goto field.  If a goto context is not found on
+        // the stack when we want to process a statement list then the function or program body does
+        // not use "goto" and the analysis can be skipped entirely.  There's a small cost to pay
+        // to discover that, but in general the overhead of "goto" on programs not using it is tiny,
+        // as context lists are normally quite short.
+        //
+        // (The cost of checking for duplicates is quadratic in the number of labels in a function, roughly:
+        // hardly ideal.  A hashtable of all known labels in the function with occurence counts could be
+        // created in linear time in the parser, and if the occurence count on a label is 1 we would never
+        // need to search.  Such a table could probably even be created on-line in the code generator.)
+        
+        // Search for the nearest "goto" context starting with c.
+ 
+        static GotoCtx* lookupGoto(Ctx* c)
+        {
+            while ( c->tag != CTX_Program && c->tag != CTX_Function && c->tag != CTX_ClassMethod && c->tag != CTX_Goto )
+                c = c->next;
+            if (c->tag == CTX_Goto)
+                return (GotoCtx*)c;
+            return NULL;
+        }
+ 
+        static bool searchForDuplicateLabel(Str* label, Seq<GotoLabel*>* labels)
+        {
+            while (labels != NULL && labels->hd->label_name != label)
+                labels = labels->tl;
+            return labels != NULL;
+        }
 
+        static bool searchForDuplicateLabel(Str* label, Seq<GotoLabel*>* inner_labels, GotoCtx* outer_goto)
+        {
+            if (inner_labels && searchForDuplicateLabel(label, inner_labels))
+                return true;
+
+            while (outer_goto != NULL) {
+                if (searchForDuplicateLabel(label, outer_goto->label_names))
+                    return true;
+                outer_goto = outer_goto->next_goto;
+            }
+
+            return false;
+        }
+
+        // If there are any labeled statements in the statement list then populate goto_ctx and return it,
+        // otherwise return outer_ctx.
+
+        static Ctx* maybePopulateGotoCtx(Cogen* cogen, Seq<Stmt*>* stmts, GotoCtx* goto_ctx, Ctx* outer_ctx)
+        {
+            GotoCtx* outer_goto = lookupGoto(outer_ctx);
+            if (outer_goto == NULL)
+                return outer_ctx;
+
+            Allocator* allocator = cogen->allocator;
+            Seq<GotoLabel*>* labels = NULL;
+            for ( Seq<Stmt*>* ss = stmts ; ss != NULL ; ss = ss->tl ) {
+                Stmt* s = ss->hd;
+                while (s->isLabeledStmt()) {
+                    LabeledStmt* ls = (LabeledStmt*)s;
+                    bool ambiguous = searchForDuplicateLabel(ls->label, labels, outer_goto);
+                    Label* address = cogen->newLabel();
+                    labels = ALLOC(Seq<GotoLabel*>, (ALLOC(GotoLabel, (ls->label, address, ambiguous)), labels));
+                    ls->address = address;
+                    s = ls->stmt;
+                }
+            }
+
+            goto_ctx->label_names = labels;
+            goto_ctx->next_goto = outer_goto;
+            return goto_ctx;
+        }
+
+        // If there are any labeled statements in the statement lists within the case clauses then populate
+        // goto_ctx and return it, otherwise return outer_ctx.
+        
+        static Ctx* maybePopulateGotoCtx(Cogen* cogen, Seq<CaseClause*>* cases, GotoCtx* goto_ctx, Ctx* outer_ctx)
+        {
+            GotoCtx* outer_goto = lookupGoto(outer_ctx);
+            if (outer_goto == NULL)
+                return outer_ctx;
+
+            Allocator* allocator = cogen->allocator;
+            Seq<GotoLabel*>* labels = NULL;
+            for ( Seq<CaseClause*>* cs = cases ; cs != NULL ; cs = cs->tl ) {
+                for ( Seq<Stmt*>* ss = cs->hd->stmts ; ss != NULL ; ss = ss->tl ) {
+                    Stmt* s = ss->hd;
+                    while (s->isLabeledStmt()) {
+                        LabeledStmt* ls = (LabeledStmt*)s;
+                        bool ambiguous = searchForDuplicateLabel(ls->label, labels, outer_goto);
+                        Label* address = cogen->newLabel();
+                        labels = ALLOC(Seq<GotoLabel*>, (ALLOC(GotoLabel, (ls->label, address, ambiguous)), labels));
+                        ls->address = address;
+                        s = ls->stmt;
+                    }
+                }
+            }
+
+            goto_ctx->label_names = labels;
+            goto_ctx->next_goto = outer_goto;
+            return goto_ctx;
+        }
+
+        static Ctx* maybePopulateGotoCtx(Cogen* cogen, LabeledStmt* stmt, GotoCtx* goto_ctx, Ctx* outer_ctx)
+        {
+            GotoCtx* outer_goto = lookupGoto(outer_ctx);
+            if (outer_goto == NULL)
+                return outer_ctx;
+            
+            bool ambiguous = searchForDuplicateLabel(stmt->label, NULL, outer_goto);
+            stmt->address = cogen->newLabel();
+            
+            Allocator* allocator = cogen->allocator;
+            goto_ctx->label_names = ALLOC(Seq<GotoLabel*>, (ALLOC(GotoLabel, (stmt->label, stmt->address, ambiguous))));
+            goto_ctx->next_goto = outer_goto;
+            return goto_ctx;
+        }
+
+        // Process labeled statements and generate code for the statements.  This must not be used
+        // to generate code for case bodies in switch, but is fine for blocks and function and program
+        // bodies.
+
+        static void cogenStatements(Cogen* cogen, Seq<Stmt*>* stmts, Ctx* ctx)
+        {
+            GotoCtx ctx2(ctx);
+            Ctx* ctx3 = maybePopulateGotoCtx(cogen, stmts, &ctx2, ctx);
+
+            for ( ; stmts != NULL ; stmts = stmts->tl )
+                stmts->hd->cogen(cogen, ctx3);
+        }
+
+        // Statement code generators
+ 
         void Program::cogenBody(Cogen* cogen, Ctx* ctx, uint32_t activation_reg)
         {
             (void)activation_reg;
@@ -131,8 +302,8 @@ namespace avmplus
             cogen->I_pushundefined();
             cogen->I_coerce_a();
             cogen->I_setlocal(capture_reg);
-            for ( Seq<Stmt*>* stmts = this->stmts ; stmts != NULL ; stmts = stmts->tl )
-                stmts->hd->cogen(cogen, ctx);
+            GotoCtx ctx2(ctx);  // An empty set of labels
+            cogenStatements(cogen, stmts, uses_goto ? &ctx2 : ctx);
             cogen->I_getlocal(capture_reg);
             cogen->I_returnvalue();
         }
@@ -155,9 +326,9 @@ namespace avmplus
             FunctionCtx ctx0(cogen->allocator, nsset, openNamespaces, ctx);
             ActivationCtx ctx1(activation_reg, &ctx0);
             Ctx* ctx2 = activation_reg == 0 ? (Ctx*)&ctx0 : (Ctx*)&ctx1;
-            
-            for ( Seq<Stmt*>* stmts = this->stmts ; stmts != NULL ; stmts = stmts->tl )
-                stmts->hd->cogen(cogen, ctx2);
+            GotoCtx ctx3(ctx2); // An empty set of labels
+            Ctx* ctx4 = uses_goto ? &ctx3 : ctx2;
+            cogenStatements(cogen, stmts, ctx4);
             cogen->I_returnvoid();
         }
         
@@ -168,15 +339,20 @@ namespace avmplus
         
         void BlockStmt::cogen(Cogen* cogen, Ctx* ctx)
         {
-            for ( Seq<Stmt*>* ss = stmts ; ss != NULL ; ss = ss->tl )
-                ss->hd->cogen(cogen, ctx);
+            cogenStatements(cogen, stmts, ctx);
         }
         
         void LabeledStmt::cogen(Cogen* cogen, Ctx* ctx)
         {
             Label* L0 = cogen->newLabel();
             BreakCtx ctx1(L0, ctx, label);
-            stmt->cogen(cogen, &ctx1);
+            GotoCtx gctx(&ctx1);
+            Ctx* ctx2 = &ctx1;
+            if (!address)
+                ctx2 = maybePopulateGotoCtx(cogen, this, &gctx, &ctx1);   // may update address
+            if (address)
+                cogen->I_label(address);
+            stmt->cogen(cogen, ctx2);
             cogen->I_label(L0);
         }
 
@@ -372,7 +548,35 @@ namespace avmplus
                                            (label == NULL ? SYNTAXERR_ILLEGAL_CONTINUE : SYNTAXERR_CONTINUE_LABEL_UNDEF),
                                            pos);
         }
-        
+
+        struct GotoPackage
+        {
+            Str* label;
+            GotoLabel* infoloc;
+        };
+
+        static bool hitGoto(Ctx* ctx, void* _package)
+        {
+            GotoPackage* package = (GotoPackage*)_package;
+            return ctx->tag == CTX_Goto && matchLabel(ctx, package->label, (void**)&(package->infoloc));
+        }
+
+        void GotoStmt::cogen(Cogen* cogen, Ctx* ctx)
+        {
+            GotoPackage package;
+            package.label = label;
+            package.infoloc = NULL;
+            cogen->unstructuredControlFlow(ctx,
+                                           hitGoto,
+                                           (void*)&package,
+                                           false,
+                                           SYNTAXERR_GOTO_LABEL_UNDEFINED,
+                                           pos);
+            if (package.infoloc->ambiguous)
+                cogen->compiler->syntaxError(pos, SYNTAXERR_GOTO_LABEL_AMBIGUOUS);
+            cogen->I_jump(package.infoloc->address);
+        }
+
         void ThrowStmt::cogen(Cogen* cogen, Ctx* ctx)
         {
             cogen->I_debugline(pos);
@@ -553,6 +757,9 @@ namespace avmplus
             cogen->I_coerce_i();        // not redundant, the representation could have been Number
             cogen->I_lookupswitch(Ldefault, Lcase, ncases);
             
+            GotoCtx gctx(&nctx);
+            Ctx* actualctx = maybePopulateGotoCtx(cogen, this->cases, &gctx, &nctx);
+
             for ( Seq<CaseClause*>* cases = this->cases ; cases != NULL ; cases = cases->tl ) {
                 CaseClause* c = cases->hd;
                 Expr* e = c->expr;
@@ -574,7 +781,7 @@ namespace avmplus
                 }
                 
                 for ( Seq<Stmt*>* stmts = c->stmts ; stmts != NULL ; stmts = stmts->tl )
-                    stmts->hd->cogen(cogen, &nctx);
+                    stmts->hd->cogen(cogen, actualctx);
             }
             
             if (Ldefault != NULL)
@@ -600,6 +807,9 @@ namespace avmplus
             cogen->I_jump(Lnext);
 
             BreakCtx ctx1(Lbreak, ctx);
+            
+            GotoCtx gctx(&ctx1);
+            Ctx* actualctx = maybePopulateGotoCtx(cogen, cases, &gctx, &ctx1);
             
             for ( Seq<CaseClause*>* cases=this->cases ; cases != NULL ; cases = cases->tl ) {
                 CaseClause* c = cases->hd;
@@ -628,7 +838,7 @@ namespace avmplus
                 }
                 
                 for ( Seq<Stmt*>* stmts = c->stmts ; stmts != NULL ; stmts = stmts->tl )
-                    stmts->hd->cogen(cogen, &ctx1);
+                    stmts->hd->cogen(cogen, actualctx);
                 
                 Lfall = cogen->newLabel();
                 cogen->I_jump(Lfall);           // fall through
@@ -733,8 +943,7 @@ namespace avmplus
             // Finally block
             
             cogen->I_label(Lfinally);
-            for ( Seq<Stmt*>* stmts = this->finallyblock ; stmts != NULL ; stmts = stmts->tl )
-                stmts->hd->cogen(cogen, ctx);
+            cogenStatements(cogen, this->finallyblock, ctx);
 
             // The return-from-subroutine code at the end of the finally block
             // From the above it may seem that there are at most two labels in the list,
@@ -756,8 +965,7 @@ namespace avmplus
         void TryStmt::cogenNoFinally(Cogen* cogen, Ctx* ctx)
         {
             uint32_t code_start = cogen->getCodeLength();
-            for ( Seq<Stmt*>* stmts = this->tryblock ; stmts != NULL ; stmts = stmts->tl )
-                stmts->hd->cogen(cogen, ctx);
+            cogenStatements(cogen, this->tryblock, ctx);
             uint32_t code_end = cogen->getCodeLength();
             
             Label* Lend = cogen->newLabel();
@@ -795,8 +1003,7 @@ namespace avmplus
             cogen->I_setproperty(cogen->abc->addQName(compiler->NS_public, cogen->emitString(catchClause->name)));
             
             // catch block body
-            for ( Seq<Stmt*>* stmts = catchClause->stmts ; stmts != NULL ; stmts = stmts->tl )
-                stmts->hd->cogen(cogen, &ctx1);
+            cogenStatements(cogen, catchClause->stmts, &ctx1);
             
             cogen->I_kill(t);
             

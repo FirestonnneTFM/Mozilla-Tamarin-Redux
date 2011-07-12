@@ -92,6 +92,12 @@ namespace avmplus
                     return stmt;
                 }
                     
+                case T_Goto: {
+                    Stmt* stmt = gotoStatement();
+                    semicolon();
+                    return stmt;
+                }
+
                 case T_For:
                     return forStatement();
                     
@@ -372,6 +378,15 @@ namespace avmplus
         {
             eat(tok);
             return noNewline() ? identifier() : NULL;
+        }
+
+        Stmt* Parser::gotoStatement()
+        {
+            uint32_t pos = position();
+            eat(T_Goto);
+            Str* label = identifier();
+            setUsesGoto();
+            return ALLOC(GotoStmt, (pos, label));
         }
 
         // 'default' has been consumed, hd() is the identifier 'xml'
