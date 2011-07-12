@@ -134,6 +134,9 @@ namespace avmplus
         /* SYNTAXERR_CONFIG_PROHIBITED */    "Configuration name reference prohibited",
         /* SYNTAXERR_GOTO_LABEL_UNDEFINED */ "Undefined label in 'goto' statement",
         /* SYNTAXERR_GOTO_LABEL_AMBIGUOUS */ "Ambiguous label in 'goto' statement",
+        /* SYNTAXERR_MISSING_BASE_CLASS */   "Base class not found",
+        /* SYNTAXERR_CIRCULAR_TYPE_HIERARCHY */ "Cycle in the inheritance hierarchy",
+
         };
         
         // Assume that the number of unique identifiers in a program is roughly the square root
@@ -154,7 +157,7 @@ namespace avmplus
 
         static const wchar default_filename[] = { '(', 'e', 'v', 'a', 'l', ' ', 's', 't', 'r', 'i', 'n', 'g', ')', 0 };
         
-        Compiler::Compiler(HostContext* context, const wchar* filename, const wchar* src, uint32_t srclen)
+        Compiler::Compiler(HostContext* context, const wchar* filename, const wchar* src, uint32_t srclen, bool public_by_default)
             : context(context)
             , allocator(new Allocator(this))
             , filename(filename != NULL ? filename : default_filename)
@@ -169,16 +172,18 @@ namespace avmplus
             , namespace_counter(1)
             , strTable(makeStrTable(allocator, tableSize))
             , lexer(this, src, srclen)
-            , parser(this, &lexer)
+            , parser(this, &lexer, public_by_default)
             , abc(this)
             , SYM_(intern(""))
             , SYM_AS3(intern("AS3"))
+            , SYM_AS3_vec(intern("__AS3__.vec"))
             , SYM_Array(intern("Array"))
             , SYM_CONFIG(intern("CONFIG"))
             , SYM_Namespace(intern("Namespace"))
             , SYM_Number(intern("Number"))
             , SYM_Object(intern("Object"))
             , SYM_RegExp(intern("RegExp"))
+            , SYM_Vector(intern("Vector"))
             , SYM_XML(intern("XML"))
             , SYM_XMLList(intern("XMLList"))
             , SYM_anonymous(intern("anonymous"))
@@ -200,11 +205,15 @@ namespace avmplus
             , SYM_xml(intern("xml"))
             , str_filename(intern(this->filename, 0))
             , NS_public(abc.addNamespace(CONSTANT_Namespace, abc.addString(SYM_)))
+            , NS_private(abc.addNamespace(CONSTANT_PrivateNs, abc.addString(SYM_)))
+            , NS_internal(NS_private)
+            , NS_AS3_vec(abc.addNamespace(CONSTANT_Namespace, abc.addString(SYM_AS3_vec)))
             , ID_Array(abc.addQName(NS_public, abc.addString(SYM_Array)))
             , ID_Namespace(abc.addQName(NS_public, abc.addString(SYM_Namespace)))
             , ID_Number(abc.addQName(NS_public, abc.addString(SYM_Number)))
             , ID_Object(abc.addQName(NS_public, abc.addString(SYM_Object)))
             , ID_RegExp(abc.addQName(NS_public, abc.addString(SYM_RegExp)))
+            , ID_Vector(abc.addQName(NS_AS3_vec, abc.addString(SYM_Vector)))
             , ID_XML(abc.addQName(NS_public, abc.addString(SYM_XML)))
             , ID_XMLList(abc.addQName(NS_public, abc.addString(SYM_XMLList)))
             , ID_children(abc.addQName(NS_public, abc.addString(SYM_children)))
@@ -213,7 +222,7 @@ namespace avmplus
 #ifdef DEBUG
             , ID_print(abc.addQName(NS_public, abc.addString(SYM_print)))
 #endif
-            , NSS_public(abc.addNsset(ALLOC(Seq<uint32_t>, (NS_public))))
+            , NSS_public(abc.addNsset(ALLOC(Seq<uint32_t>, (NS_public, ALLOC(Seq<uint32_t>, (NS_internal))))))
             , MNL_public(abc.addMultinameL(NSS_public, false))
             , MNL_public_attr(abc.addMultinameL(NSS_public, true))
         {
@@ -236,11 +245,11 @@ namespace avmplus
 
             ABCTraitsTable* global_traits = ALLOC(ABCTraitsTable, (this));
             ABCMethodInfo* global_info = ALLOC(ABCMethodInfo, (this, abc.addString("script$init"), 0, NULL, 0, NULL, 0));
-            ABCMethodBodyInfo* global_body = ALLOC(ABCMethodBodyInfo, (this, global_info, global_traits, 1));
+            ABCMethodBodyInfo* global_body = ALLOC(ABCMethodBodyInfo, (this, global_info, global_traits, 1, false));
             uint32_t nsset = 0;
-            if (program->openNamespaces != NULL)
-                nsset = global_body->cogen.buildNssetWithPublic(program->openNamespaces);
+            nsset = global_body->cogen.buildNssetWithPublic(program->openNamespaces);
             ProgramCtx ctx(global_body->cogen.allocator, nsset, program->openNamespaces, global_body->cogen.getTemp());
+            program->cogenTypes(&global_body->cogen, &ctx, global_traits, program->classes);
             program->cogen(&global_body->cogen, &ctx);
             global_info->setFlags(global_body->getFlags() | abcMethod_SETS_DXNS);
 
@@ -253,6 +262,22 @@ namespace avmplus
 
         void Compiler::internalError(uint32_t lineno, const char* fmt, ...)
         {
+            va_list args;
+            va_start(args,fmt);
+            internalWarningOrError(true, lineno, fmt, args);
+            va_end(args);
+        }
+        
+        void Compiler::internalWarning(uint32_t lineno, const char* fmt, ...)
+        {
+            va_list args;
+            va_start(args,fmt);
+            internalWarningOrError(false, lineno, fmt, args);
+            va_end(args);
+        }
+        
+        void Compiler::internalWarningOrError(bool error, uint32_t lineno, const char* fmt, va_list args)
+        {
             char buf[500];
             char lbuf[12];
             if (lineno != 0)
@@ -262,16 +287,14 @@ namespace avmplus
             {
                 char fbuf[500];
                 formatUtf8(fbuf, sizeof(fbuf), filename);
-                VMPI_snprintf(buf, sizeof(buf), "%s:%s: Internal error: ", fbuf, lbuf);
+                VMPI_snprintf(buf, sizeof(buf), "%s:%s: Internal %s: ", fbuf, lbuf, (error ? "error" : "warning"));
                 buf[sizeof(buf)-1] = 0;
             }
             int k = int(VMPI_strlen(buf));
-            va_list args;
-            va_start(args,fmt);
             VMPI_vsnprintf(buf+k, sizeof(buf)-k, fmt, args);
-            va_end(args);
-            
-            context->throwInternalError(buf);
+
+            if (error)
+                context->throwInternalError(buf);
         }
         
         void Compiler::syntaxError(uint32_t lineno, SyntaxError fmt, ...)

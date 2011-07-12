@@ -200,6 +200,12 @@ namespace avmplus
             return T_GreaterThan;
         }
         
+        Token Lexer::leftAngleImpl()
+        {
+            AvmAssert(last_token == T_BreakLeftAngle);
+            return T_LessThan;
+        }
+        
         Token Lexer::rightShiftOrRelationalOperatorImpl()
         {
             AvmAssert(last_token == T_BreakRightAngle);

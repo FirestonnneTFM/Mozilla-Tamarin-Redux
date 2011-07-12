@@ -79,10 +79,12 @@ inline uint32_t ABCFile::addScript(ABCScriptInfo* s)
     return scriptCount++;
 }
 
-inline uint32_t ABCFile::addMethodBody(ABCMethodBodyInfo* m)
+// The offset must not be revealed - the body may not actually be serialized
+inline void ABCFile::addMethodBody(ABCMethodBodyInfo* m)
 {
     bodies.addAtEnd(m);
-    return methodbodyCount++;
+    if (!m->is_empty)
+        nonemptyMethodBodyCount++;
 }
 
 inline uint8_t ABCMethodBodyInfo::getFlags()
@@ -132,6 +134,12 @@ inline uint32_t ABCFile::addMultinameL(uint32_t nsset, bool is_attr)
     return multinameLookup((uint8_t)(is_attr ? CONSTANT_MultinameLA : CONSTANT_MultinameL), nsset, NO_VALUE);
 }
 
+inline uint32_t ABCFile::addTypeName(uint32_t parameterizedType, uint32_t parameterType)
+{
+    using namespace ActionBlockConstants;
+    return multinameLookup(CONSTANT_TypeName, parameterizedType, parameterType);
+}
+    
 inline void ABCMethodBodyInfo::clearTraits()
 {
     traits = NULL;

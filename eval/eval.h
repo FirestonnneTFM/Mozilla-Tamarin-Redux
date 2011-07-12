@@ -171,6 +171,7 @@ namespace avmplus
         class FunctionDefn;
         class FunctionParam;
         class IfStmt;
+        class InstantiatedType;
         class InterfaceDefn;
         class Label;
         class LabelSetStmt;
@@ -205,6 +206,7 @@ namespace avmplus
         class SBChunk;
         class ScopeCtx;
         class SimpleName;
+        class SimpleType;
         class Stmt;
         class Str;
         class StringBuilder;
@@ -212,6 +214,8 @@ namespace avmplus
         class ThisExpr;
         class ThrowStmt;
         class TryStmt;
+        class Type;
+        class TypeDefn;
         class UnaryExpr;
         class VarScopeCtx;
         class WhileStmt;
@@ -306,7 +310,9 @@ namespace avmplus
             SYNTAXERR_CONFIG_REQUIRED = 73,
             SYNTAXERR_CONFIG_PROHIBITED = 74,
             SYNTAXERR_GOTO_LABEL_UNDEFINED = 75,
-            SYNTAXERR_GOTO_LABEL_AMBIGUOUS = 76
+            SYNTAXERR_GOTO_LABEL_AMBIGUOUS = 76,
+            SYNTAXERR_MISSING_BASE_CLASS = 77,
+            SYNTAXERR_CIRCULAR_TYPE_HIERARCHY = 78,
         };
         
         // The HostContext must be implemented by the embedder of eval.  'wchar' is a 16-bit unsigned value always.

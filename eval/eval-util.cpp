@@ -163,6 +163,7 @@ namespace avmplus
         template class SeqBuilder<NamespaceDefn*>;
         template class SeqBuilder<Stmt*>;
         template class SeqBuilder<Str*>;
+        template class SeqBuilder<TypeDefn*>;
 
         StringBuilder::StringBuilder(Compiler* compiler)
             : allocator(compiler->allocator)

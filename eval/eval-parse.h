@@ -93,7 +93,9 @@ enum BindingKind {
     TAG_varBinding,     // also used for function (though not for class methods)
     TAG_constBinding,
     TAG_methodBinding,  // methods in classes and interfaces
-    TAG_namespaceBinding
+    TAG_namespaceBinding,
+    TAG_classBinding,
+    TAG_interfaceBinding
 };
 
 enum QualifierTag {
@@ -130,15 +132,17 @@ public:
 
 class Binding {
 public:
-    Binding(Str* name, QualifiedName* type_name, BindingKind kind)
-        : name(name)
+    Binding(NameComponent* ns, Str* name, Type* type_name, BindingKind kind)
+        : ns(ns)
+        , name(name)
         , type_name(type_name)
         , kind(kind)
     {
     }
 
+    NameComponent* const ns;
     Str* const name;
-    QualifiedName* const type_name;
+    Type* const type_name;
     const BindingKind kind;
 };
 
@@ -151,15 +155,95 @@ enum CodeType {
     CODE_Function
 };
 
+// Information about the body of a program or function, built up during parsing.
+// This is never stored in the AST, its contents are copied into CodeBlock,
+// Program, or FunctionDefn.
+
+class BodyInfo
+{
+public:
+    BodyInfo(Allocator* allocator)
+        : bindings(allocator)
+        , functionDefinitions(allocator)
+        , namespaces(allocator)
+        , openNamespaces(allocator)
+        , stmts(allocator)
+        , uses_finally(false)
+        , uses_catch(false)
+        , uses_goto(false)
+        , uses_arguments(false)
+        , uses_dxns(false)
+        , uses_super(false)
+        , empty_body(false)
+    {
+    }
+
+    SeqBuilder<Binding*> bindings;
+    SeqBuilder<FunctionDefn*> functionDefinitions;
+    SeqBuilder<NamespaceDefn*> namespaces;
+    SeqBuilder<Namespace*> openNamespaces;
+    SeqBuilder<Stmt*> stmts;
+    bool uses_finally;
+    bool uses_catch;
+    bool uses_goto;
+    bool uses_arguments;
+    bool uses_dxns;
+    bool uses_super;          // True only for super /statements/, as in constructors
+    bool empty_body;
+};
+
+// Information about the interface of a function, built up during parsing.
+// This is never stored in the AST, its contents are copied into CodeBlock
+// or FunctionDefn.
+    
+class SignatureInfo
+{
+public:
+    SignatureInfo(Allocator* allocator)
+        : ns(NULL)
+        , name(NULL)
+        , params(allocator)
+        , rest_param(NULL)
+        , numparams(0)
+        , optional_arguments(false)
+        , isVoid(false)
+        , isGetter(false)
+        , isSetter(false)
+        , return_type_name(NULL)
+    {
+    }
+    
+    NameComponent* ns;
+    Str* name;
+    SeqBuilder<FunctionParam*> params;
+    FunctionParam* rest_param;
+    uint32_t numparams;
+    bool optional_arguments;
+    bool isVoid;
+    bool isGetter;
+    bool isSetter;
+    Type* return_type_name;
+};
+
+// Base class for Program and FunctionDefn, holds information about the "body"
+// of whatever we're compiling.
+
 class CodeBlock {
 public:
-    CodeBlock(CodeType tag, Seq<Binding*>* bindings, Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Namespace*>* openNamespaces, Seq<Stmt*>* stmts)
+    CodeBlock(CodeType tag, BodyInfo& body)
         : tag(tag)
-        , bindings(bindings)
-        , functions(functions)
-        , namespaces(namespaces)
-        , openNamespaces(openNamespaces)
-        , stmts(stmts)
+        , bindings(body.bindings.get())
+        , functions(body.functionDefinitions.get())
+        , namespaces(body.namespaces.get())
+        , openNamespaces(body.openNamespaces.get())
+        , stmts(body.stmts.get())
+        , uses_finally(body.uses_finally)
+        , uses_catch(body.uses_catch)
+        , uses_goto(body.uses_goto)
+        , uses_arguments(body.uses_arguments)
+        , uses_dxns(body.uses_dxns)
+        , uses_super(body.uses_super)
+        , empty_body(body.empty_body)
     {
     }
 
@@ -168,81 +252,129 @@ public:
     
     void cogen(Cogen* cogen, Ctx* ctx);
     
-    CodeType tag;
+    const CodeType tag;
     Seq<Binding*>* const bindings;
     Seq<FunctionDefn*>* const functions;
     Seq<NamespaceDefn*>* const namespaces;
     Seq<Namespace*>* const openNamespaces;
-    Seq<Stmt*>* const stmts;
+    Seq<Stmt*>* stmts;                      // Not const because sometimes altered after the fact
+    const bool uses_finally;
+    const bool uses_catch;
+    const bool uses_goto;
+    const bool uses_arguments;
+    const bool uses_dxns;
+    const bool uses_super;                  // True only for super /statements/, as in constructors
+    const bool empty_body;                  // True for all interface methods
 };
 
 class Program : public CodeBlock {
 public:
-    Program(Seq<Binding*>* bindings, Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Namespace*>* openNamespaces, bool uses_goto, Seq<Stmt*>* stmts)
-        : CodeBlock(CODE_Program, bindings, functions, namespaces, openNamespaces, stmts)
-        , uses_goto(uses_goto)
+    Program(BodyInfo& body, Seq<TypeDefn*>* classes)
+        : CodeBlock(CODE_Program, body)
+        , classes(classes)
     {
     }
     
     virtual void cogenBody(Cogen* cogen, Ctx* ctx, uint32_t activation);
+    
+    void cogenTypes(Cogen* cogen, Ctx* ctx, ABCTraitsTable* global_traits, Seq<TypeDefn*>* classes);
+    void cogenTypeHierarchy(Cogen* cogen, Ctx* ctx, ABCTraitsTable* global_traits, TypeDefn* cls);
+    void cogenType(Cogen* cogen, Ctx* ctx, ABCTraitsTable* global_traits, ClassDefn* cls);
+    void cogenType(Cogen* cogen, Ctx* ctx, ABCTraitsTable* global_traits, InterfaceDefn* cls);
+    ABCTraitsTable* cogenClassTraits(Cogen* cogen, Ctx* ctx, Seq<FunctionDefn*>* inst_methods, Seq<Binding*>* inst_vars);
+    uint32_t cogenConstructor(Cogen* cogen, Ctx* ctx, FunctionDefn* constructor);
+    ClassDefn* findClass(Cogen* cogen, uint32_t pos, Str* name);
+    InterfaceDefn* findInterface(Cogen* cogen, uint32_t pos, Str* name);
+    int pushBaseClasses(Cogen* cogen, ClassDefn* currcls);
+    uint32_t* interfaceRefs(Cogen* cogen, Seq<Str*>* ifaces, uint32_t* interface_count);
 
-    const bool uses_goto;               // true iff 'goto' is used in the program body
+    Seq<TypeDefn*>* const classes;
 };
 
-class ClassDefn {
+class TypeDefn {
 public:
-    ClassDefn(Qualifier* qual, Str* name, Str* extends, Seq<Str*>* implements, Seq<Stmt*>* class_init, Seq<Stmt*>* instance_init)
+    TypeDefn(uint32_t pos, NameComponent* ns, Str* name, bool is_interface)
+        : pos(pos)
+        , ns(ns)
+        , name(name)
+        , is_interface(is_interface)
+        , is_generated(false)
+        , is_searching(false)
     {
-        // FIXME: elaborate ClassDefn
-        (void)qual;
-        (void)name;
-        (void)extends;
-        (void)implements;
-        (void)class_init;
-        (void)instance_init;
     }
-};
 
-class InterfaceDefn {
+    uint32_t pos;
+    NameComponent* const ns;
+    Str* const name;
+    const bool is_interface;
+    bool is_generated;
+    bool is_searching;      // A mark used during class hierarchy traversal indicating that the class has already been visited
+};
+    
+class ClassDefn : public TypeDefn {
 public:
-    InterfaceDefn(Qualifier* qual, Str* name, Seq<Str*>* extends)
-    {
-        // FIXME: elaborate InterfaceDefn
-        (void)qual;
-        (void)name;
-        (void)extends;
-    }
+    ClassDefn(uint32_t pos,
+              NameComponent* ns, Str* name, bool is_final, bool is_dynamic, Str* extends, Seq<Str*>* implements,
+              Seq<FunctionDefn*>* cls_methods, Seq<Binding*>* cls_vars, Seq<NamespaceDefn*>* cls_namespaces,
+              FunctionDefn* cls_init,
+              Seq<FunctionDefn*>* inst_methods, Seq<Binding*>* inst_vars, FunctionDefn* inst_init);
+
+    const bool is_final;
+    const bool is_dynamic;
+    Str* const extends;
+    Seq<Str*>* const implements;
+    Seq<FunctionDefn*>* const cls_methods;
+    Seq<Binding*>* const cls_vars;
+    Seq<NamespaceDefn*>* const cls_namespaces;
+    FunctionDefn* const cls_init;
+    Seq<FunctionDefn*>* const inst_methods;     // Does not contain the constructor
+    Seq<Binding*>* const inst_vars;
+    FunctionDefn* const inst_init;
 };
 
-// Somewhat mis-named, also used for function expressions (see LiteralFunction below), where name may be NULL
+class InterfaceDefn : public TypeDefn {
+public:
+    InterfaceDefn(uint32_t pos, NameComponent* ns, Str* name, Seq<Str*>* extends, Seq<FunctionDefn*>* inst_methods)
+        : TypeDefn(pos, ns, name, true)
+        , extends(extends)
+        , inst_methods(inst_methods)
+    {
+    }
+
+    Seq<Str*>* const extends;
+    Seq<FunctionDefn*>* const inst_methods;
+};
 
 class FunctionParam {
 public:
-    FunctionParam(Str* name, QualifiedName* type_name, Expr* default_value) : name(name), type_name(type_name), default_value(default_value) {}
+    FunctionParam(Str* name, Type* type_name, Expr* default_value)
+        : name(name)
+        , type_name(type_name)
+        , default_value(default_value)
+    {
+    }
+
     Str * const name;
-    QualifiedName * const type_name;
+    Type * const type_name;
     Expr * const default_value;
 };
 
+// Somewhat mis-named, also used for function expressions (see LiteralFunction below), where name may be NULL
+    
 class FunctionDefn : public CodeBlock {
 public:
-    FunctionDefn(Str* name, Seq<Binding*>* bindings,
-                 Seq<FunctionParam*>* params, uint32_t numparams, FunctionParam* rest_param, QualifiedName* return_type_name,
-                 Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Namespace*>* openNamespaces, Seq<Stmt*>* stmts,
-                 bool uses_arguments,
-                 bool uses_dxns,
-                 bool uses_goto,
-                 bool optional_arguments)
-        : CodeBlock(CODE_Function, bindings, functions, namespaces, openNamespaces, stmts)
-        , name(name)
-        , params(params)
-        , numparams(numparams)
-        , rest_param(rest_param)
-        , return_type_name(return_type_name)
-        , uses_arguments(uses_arguments)
-        , uses_dxns(uses_dxns)
-        , uses_goto(uses_goto)
-        , optional_arguments(optional_arguments)
+    FunctionDefn(SignatureInfo& signature, BodyInfo& body, Seq<Stmt*>* inits=NULL)
+        : CodeBlock(CODE_Function, body)
+        , ns(signature.ns)
+        , name(signature.name)
+        , params(signature.params.get())
+        , numparams(signature.numparams)
+        , rest_param(signature.rest_param)
+        , return_type_name(signature.return_type_name)
+        , optional_arguments(signature.optional_arguments)
+        , isGetter(signature.isGetter)
+        , isSetter(signature.isSetter)
+        , inits(inits)
     {
     }
 
@@ -252,20 +384,24 @@ public:
     // generate code for the function; set the function's flags properly.
     void cogenGuts(Compiler* compiler, Ctx* ctx, ABCMethodInfo** info, ABCMethodBodyInfo** body);
 
+    void cogenGuts(Compiler* compiler, Ctx* ctx, bool isMethod, ABCMethodInfo** info, ABCMethodBodyInfo** body);
+    
+    NameComponent* ns;                  // Namespace of function or NULL.
     Str* name;                          // Name of function or NULL.  Not const because we sometimes need to set it to NULL.
     Seq<FunctionParam*>* const params;  // List of fixed parameters
     const uint32_t numparams;           // Number of fixed parameters
     FunctionParam* rest_param;          // non-NULL iff we have a ... rest argument; name+type of that argument
-    QualifiedName* return_type_name;    // may be NULL
-    const bool uses_arguments;          // true iff rest_name == NULL and the ident 'arguments' is used in the function
-    const bool uses_dxns;               // true iff 'default xml namespace' is used in the function
-    const bool uses_goto;               // true iff 'goto' is used in the function
+    Type* return_type_name;             // may be NULL
     const bool optional_arguments;      // true iff any of the parameters have default values
+    const bool isGetter;                // true iff this is a getter function
+    const bool isSetter;                // true iff this is a setter function
+    Seq<Stmt*>* inits;                  // initializing statements executed in the outer scope on entry
 };
 
 class NamespaceDefn {
 public:
-    NamespaceDefn(Str* name, Expr* value) : name(name), value(value) {}
+    NamespaceDefn(NameComponent* ns, Str* name, Expr* value) : ns(ns), name(name), value(value) {}
+    NameComponent* const ns;
     Str* const name;
     Expr* const value;  // NULL for anonymous ones; TAG_literalString for string values; otherwise a NameExpr
 };
@@ -276,6 +412,7 @@ enum Tag {
     TAG_expr,                   // generic expr
     TAG_objectRef,              // instance of ObjectRef
     TAG_qualifiedName,          // instance of QualifiedName
+    TAG_instantiatedTypeRef,
     TAG_literalString,          // instance of LiteralString
     TAG_literalUndefined,
     TAG_literalNull,
@@ -288,11 +425,15 @@ enum Tag {
     TAG_commonNamespace,
     TAG_namespaceRef,
     TAG_literalArray,
+    TAG_literalVector,
     TAG_literalObject,
     TAG_literalXml,
     TAG_binaryExpr,
     TAG_unaryExpr,
-    TAG_conditionalExpr
+    TAG_conditionalExpr,
+    TAG_type,                   // generic type
+    TAG_simpleType,             // type name
+    TAG_instantiatedType        // instantiation of parameterized type
 };
 
 // Tags returned from NameComponent::tag()
@@ -364,6 +505,44 @@ enum Unop {
     OPR_void
 };
 
+class Type {
+public:
+    Type(uint32_t pos=0) : pos(pos) {}
+    virtual ~Type() {}    // Not really, but otherwise gcc drowns us in warnings
+    virtual Tag tag() const { return TAG_type; }
+    virtual void cogen(Cogen* cogen, Ctx* ctx) = 0; // Generates a reference to the type
+
+    const uint32_t pos;
+};
+
+class SimpleType : public Type {
+public:
+    SimpleType(QualifiedName* name, uint32_t pos=0)
+        : Type(pos)
+        , name(name)
+    {
+    }
+    
+    QualifiedName* const name;
+    virtual Tag tag() const { return TAG_simpleType; }
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
+};
+
+class InstantiatedType : public Type {
+public:
+    InstantiatedType(QualifiedName* basename, Type* tparam, uint32_t pos=0)
+        : Type(pos)
+        , basename(basename)
+        , tparam(tparam)
+    {
+    }
+    
+    QualifiedName* const basename;
+    Type* const tparam;
+    virtual Tag tag() const { return TAG_instantiatedType; }
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
+};
+
 class Expr {
 public:
     Expr(uint32_t pos=0) : pos(pos) {}
@@ -394,6 +573,15 @@ public:
     virtual void cogen(Cogen* cogen, Ctx* ctx);
     Seq<Expr*>* const elements;
     virtual Tag tag() const { return TAG_literalArray; }
+};
+
+class LiteralVector : public Expr {
+public:
+    LiteralVector(Type* type, Seq<Expr*>* elements, uint32_t pos) : Expr(pos), type(type), elements(elements) {}
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
+    Type* const type;
+    Seq<Expr*>* const elements;
+    virtual Tag tag() const { return TAG_literalVector; }
 };
 
 class LiteralUndefined : public Expr {
@@ -590,6 +778,8 @@ public:
 //
 //    ObjectRef for obj.<QualifiedName>
 //
+//    InstantiatedTypeRef for Vector.<T>
+//
 // Notes:
 //   ns::@... is not legal syntax and need not be supported
 
@@ -631,6 +821,18 @@ public:
     QualifiedName * const name;
 };
 
+class InstantiatedTypeRef : public NameExpr {
+public:
+    InstantiatedTypeRef(InstantiatedType* type, uint32_t pos)
+        : NameExpr(pos)
+        , type(type)
+    {
+    }
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
+    virtual Tag tag() const { return TAG_instantiatedTypeRef; }
+    InstantiatedType * const type;
+};
+    
 class NameComponent {
 public:
     virtual ~NameComponent();
@@ -677,6 +879,7 @@ public:
     virtual void cogen(Cogen* cogen, Ctx*) = 0;
     virtual bool isLabeledStmt() { return false; }
     virtual bool isLabelSetStmt() { return false; }
+    virtual bool isVardefStmt() { return false; }
     uint32_t pos;
 
     static void cogenProgramBody(Cogen* cogen, Seq<Stmt*>* stmts);
@@ -702,6 +905,12 @@ public:
     Expr* const expr;
 };
 
+class VardefStmt: public ExprStmt {
+public:
+    VardefStmt(uint32_t pos, Expr* expr) : ExprStmt(pos, expr) {}
+    virtual bool isVardefStmt() { return true; }
+};
+    
 class LabeledStmt : public Stmt {
 public:
     LabeledStmt(Str* label, Stmt* stmt) : label(label), stmt(stmt), address(NULL) {}
@@ -856,9 +1065,9 @@ public:
 
 class CatchClause {
 public:
-    CatchClause(Str* name, QualifiedName* type_name, Seq<Stmt*>* stmts) : name(name), type_name(type_name), stmts(stmts) {}
+    CatchClause(Str* name, Type* type_name, Seq<Stmt*>* stmts) : name(name), type_name(type_name), stmts(stmts) {}
     Str* const name;
-    QualifiedName* const type_name;
+    Type* const type_name;
     Seq<Stmt*>* const stmts;
 };
 
@@ -912,14 +1121,24 @@ public:
 
 class Parser {
 public:
-    Parser(Compiler* compiler, Lexer* lexer, uint32_t first_line=1);
+    Parser(Compiler* compiler, Lexer* lexer, bool public_by_default, uint32_t first_line=1);
     
     Program* parse();
     Token onEOS(uint32_t* , TokenValue* valuep);
     
+    // Utilities shared with AST node constructors
+    
+    // Return a value representing the internal namespace in an AST.
+    BuiltinNamespace* internalNamespace();
+
+    // Return a value representing the default namespace in an AST.  What it is,
+    // public or internal, depends on "public_by_default".
+    BuiltinNamespace* defaultNamespace();
+
 private:
     Compiler * const compiler;
     Allocator * const allocator;
+    const bool public_by_default;
     const uint32_t line_offset;
 
     // Parser attributes as bit vectors.  A bit vector of all 0s is the "normal"
@@ -942,9 +1161,7 @@ private:
     
     Program* program();
     void package();
-    // In a class body, this returns the class init statements; instance init statements
-    // are returned through the result parameter out_instance_init.
-    Seq<Stmt*>* directives(int flags, Seq<Stmt*>** out_instance_init=NULL);
+    void directives(int flags);
     void includeDirective();
     void classDefinition(bool config, int flags, Qualifier* qual);
     void interfaceDefinition(bool config, int flags, Qualifier* qual);
@@ -953,7 +1170,7 @@ private:
     void functionDefinition(bool config, Qualifier* qualifier, bool getters_and_setters, bool require_body);
     Stmt* variableDefinition(bool config, Qualifier* qualifier);
     FunctionDefn* functionGuts(Qualifier* qual, bool require_name, bool getters_and_setters, bool require_body);
-    Expr* varBindings(uint32_t* pos, bool is_const=false, int flags=0, uint32_t* numbindings=NULL, Expr** firstName=NULL);
+    Expr* varBindings(uint32_t* pos, NameComponent* ns, bool is_const, bool is_static, int flags=0, uint32_t* numbindings=NULL, Expr** firstName=NULL);
     void checkSimpleAttributes(Qualifier* qual);
 
     Seq<Stmt*>* statementBlock(bool config=true);
@@ -964,7 +1181,7 @@ private:
     // a small number of recursive levels from "commaExpression" to "nameExpression"
     // or "primaryExpression" (the common paths).
     
-    QualifiedName* typeExpression();
+    Type* typeExpression();
     Expr* functionExpression();
     QualifiedName* nameExpression(bool is_attr=false);
     Expr* propertyOperator(Expr* obj);
@@ -973,6 +1190,7 @@ private:
     LiteralField* literalField() ;
     Expr* arrayInitializer();
     Seq<Expr*>* elementList();
+    Expr* vectorInitializer(uint32_t pos);
     Expr* primaryExpression();
     QualifiedName* attributeIdentifier();
     QualifiedName* propertyIdentifier();
@@ -1026,7 +1244,7 @@ private:
     CatchClause* catchClause();
     Stmt* useStatement();
     Stmt* importStatement();
-    Stmt* varStatement(bool is_const);
+    Stmt* varStatement(NameComponent* ns, bool is_const, bool is_static);
     Stmt* withStatement();
     Stmt* superStatement();
 
@@ -1069,6 +1287,17 @@ private:
     double strToDouble(Str* s);
     bool isNamespaceReference(Expr* e);
     void addExprStatements(SeqBuilder<Stmt*>* stmts, Seq<Expr*>* exprs);
+    Seq<Binding*>* bindingsToVars(Seq<Binding*>* bindings);
+    Seq<FunctionDefn*>* filterConstructor(Str* name, Seq<FunctionDefn*>* fns, FunctionDefn** constructor);
+    Seq<Stmt*>* filterStatements(Seq<Stmt*>* stmts, Seq<Stmt*>** nonDefinitionStmts);
+    FunctionDefn* constructClassConstructor(uint32_t pos, Str* name, Seq<Stmt*>* init_stmts, Seq<Stmt*>* static_stmts);
+    FunctionDefn* constructInstanceConstructor(uint32_t pos, Str* name, Seq<Stmt*>* init_stmts, FunctionDefn* constructor);
+    NameComponent* qualToNamespace(Qualifier* qual);
+    
+    BuiltinNamespace* const internalNS;
+    BuiltinNamespace* const privateNS;
+    BuiltinNamespace* const protectedNS;
+    BuiltinNamespace* const publicNS;
 
     // Binding management
     
@@ -1082,32 +1311,25 @@ private:
     class BindingRib {
     public:
         BindingRib(Allocator* allocator, BindingRib* next, RibType tag);
-        SeqBuilder<Binding*> bindings;
-        SeqBuilder<FunctionDefn*> functionDefinitions;
-        SeqBuilder<NamespaceDefn*> namespaces;
-        SeqBuilder<Namespace*> openNamespaces;
+
         const RibType tag;
-        bool uses_finally;
-        bool uses_catch;
-        bool uses_goto;
-        bool uses_arguments;
-        bool uses_dxns;
-        bool is_void;
-        bool optional_arguments;
+        SignatureInfo* signature;   // NULL unless tag == RIB_Function
+        BodyInfo body;
         BindingRib* next;
     };
     
     BindingRib* topRib;
-    
-    Binding* findBinding(Str* name, BindingKind kind, BindingRib* rib=NULL);
+    SeqBuilder<TypeDefn*> classes;
+
+    Binding* findBinding(NameComponent* ns, Str* name, BindingKind kind, BindingRib* rib=NULL);
     void pushBindingRib(RibType tag);
     void popBindingRib();
     void addBinding(Str* name, BindingKind kind);
-    void addVarBinding(Str* name, QualifiedName* type_name);
-    void addConstBinding(Str* name, QualifiedName* type_name);
-    void addNamespaceBinding(Str* name, Expr* expr);
-    void addFunctionBinding(FunctionDefn* fn);
-    void addMethodBinding(FunctionDefn* fn, BindingRib* rib);
+    void addVarBinding(NameComponent* ns, Str* name, Type* type_name, BindingRib* rib=NULL);
+    void addConstBinding(NameComponent* ns, Str* name, Type* type_name, BindingRib* rib=NULL);
+    void addNamespaceBinding(NameComponent* ns, Str* name, Expr* expr);
+    void addFunctionBinding(NameComponent* ns, FunctionDefn* fn);
+    void addMethodBinding(NameComponent* ns, FunctionDefn* fn, BindingRib* rib);
     void addClass(ClassDefn* cls);
     void addInterface(InterfaceDefn* iface);
     void addOpenNamespace(Namespace* ns);
@@ -1118,6 +1340,7 @@ private:
     void setUsesArguments();
     void setUsesDefaultXmlNamespace();
     void setUsesGoto();
+    void setUsesSuper();
 
     // Program configuration management
 
@@ -1196,6 +1419,7 @@ private:
     Token divideOperator();
     Token regexp();
     Token rightAngle();
+    Token leftAngle();
     Token rightShiftOrRelationalOperator();
     Token leftShiftOrRelationalOperator();
     Token hd();

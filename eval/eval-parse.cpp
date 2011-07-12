@@ -110,27 +110,24 @@ namespace avmplus
         };
 
         Parser::BindingRib::BindingRib(Allocator* allocator, BindingRib* next, RibType tag)
-            : bindings(allocator)
-            , functionDefinitions(allocator)
-            , namespaces(allocator)
-            , openNamespaces(allocator)
-            , tag(tag)
-            , uses_finally(false)
-            , uses_catch(false)
-            , uses_goto(false)
-            , uses_arguments(false)
-            , uses_dxns(false)
-            , is_void(false)
-            , optional_arguments(false)
+            : tag(tag)
+            , signature(NULL)
+            , body(allocator)
             , next(next)
         {
         }
 
-        Parser::Parser(Compiler* compiler, Lexer* lexer, uint32_t first_line)
+        Parser::Parser(Compiler* compiler, Lexer* lexer, bool public_by_default, uint32_t first_line)
             : compiler(compiler)
             , allocator(compiler->allocator)
+            , public_by_default(public_by_default)
             , line_offset(first_line-1)
+            , internalNS(ALLOC(BuiltinNamespace, (T_Internal)))
+            , privateNS(ALLOC(BuiltinNamespace, (T_Private)))
+            , protectedNS(ALLOC(BuiltinNamespace, (T_Protected)))
+            , publicNS(ALLOC(BuiltinNamespace, (T_Public)))
             , topRib(NULL)
+            , classes(allocator)
             , configNamespaces(NULL)
             , configBindings(NULL)
             , lexerStack(NULL)
@@ -157,16 +154,11 @@ namespace avmplus
         {
             addConfigNamespace(compiler->SYM_CONFIG);
             pushBindingRib(RIB_Program);
-            addNamespaceBinding(compiler->SYM_AS3, ALLOC(LiteralString, (compiler->intern("http://adobe.com/AS3/2006/builtin"), 0)));
+            addNamespaceBinding(defaultNamespace(), compiler->SYM_AS3, ALLOC(LiteralString, (compiler->intern("http://adobe.com/AS3/2006/builtin"), 0)));
             while (hd() == T_Package)
                 package();
-            Seq<Stmt*>* stmts = directives(SFLAG_Toplevel);
-            Program* prog = ALLOC(Program, (topRib->bindings.get(),
-                                            topRib->functionDefinitions.get(),
-                                            topRib->namespaces.get(),
-                                            topRib->openNamespaces.get(),
-                                            topRib->uses_goto,
-                                            stmts));
+            directives(SFLAG_Toplevel);
+            Program* prog = ALLOC(Program, (topRib->body, classes.get()));
             popBindingRib();
             return prog;
         }
@@ -189,10 +181,10 @@ namespace avmplus
             eat(T_RightBrace);
         }
         
-        Seq<Stmt*>* Parser::directives(int flags, Seq<Stmt*>** out_instance_init)
+        void Parser::directives(int flags)
         {
-            (void)out_instance_init;                // Accumulator of statement directives for instance initializer.
-            SeqBuilder<Stmt*> stmts(allocator);     // Accumulator of statement directives.  In a class body, this is also the class_init.
+            SeqBuilder<Stmt*>* instanceStmts = &(topRib->body.stmts);
+            SeqBuilder<Stmt*>* classStmts = (flags & SFLAG_Class) ? &(topRib->next->body.stmts) : NULL;
 
             // Directive parser machine state.
 
@@ -231,7 +223,7 @@ namespace avmplus
             if (hd() == T_RightBrace || hd() == T_EOS) {
                 if (committed)
                     compiler->syntaxError(position(), SYNTAXERR_DIRECTIVE_REQUIRED);
-                addExprStatements(&stmts, metadatas.get());
+                addExprStatements((flags & SFLAG_Class) ? classStmts : instanceStmts, metadatas.get());
                 goto finish;
             }
 
@@ -318,7 +310,7 @@ namespace avmplus
             e = commaExpression(0);
             if (e->tag() != TAG_qualifiedName)
                 goto expr_statement;
-            if (newline())
+            if (newline() || hd() == T_Semicolon || hd() == T_RightBrace)
                 goto configname_or_statement;
             if (isConfigReference(e))
                 goto configname;
@@ -338,7 +330,7 @@ namespace avmplus
                     Expr* p = metadatas.dequeue();
                     if (p == NULL)
                         break;  // Oops - really an error
-                    stmts.addAtEnd(ALLOC(ExprStmt, (e->pos, e)));
+                    ((flags & SFLAG_Class) ? classStmts : instanceStmts)->addAtEnd(ALLOC(ExprStmt, (e->pos, e)));
                     if (e == configname)
                         break;
                 }
@@ -362,7 +354,7 @@ namespace avmplus
                 compiler->syntaxError(position(), SYNTAXERR_DIRECTIVE_REQUIRED);
             semicolon();
             metadatas.addAtEnd(e);
-            addExprStatements(&stmts, metadatas.get());
+            addExprStatements((flags & SFLAG_Class) ? classStmts : instanceStmts, metadatas.get());
             goto next_directive;
 
         namespace_or_statement:
@@ -413,7 +405,7 @@ namespace avmplus
                     // Expression statement
                     semicolon();
                     metadatas.addAtEnd(e);
-                    addExprStatements(&stmts, metadatas.get());
+                    addExprStatements((flags & SFLAG_Class) ? classStmts : instanceStmts, metadatas.get());
                     goto next_directive;
                 }
 
@@ -478,7 +470,7 @@ namespace avmplus
             includeDirective();
             goto next_directive;
         }
-            
+
         namespace_directive: {
             checkSimpleAttributes(&qual);
             if (!(flags & (SFLAG_Function|SFLAG_Toplevel|SFLAG_Package|SFLAG_Class)))
@@ -497,9 +489,8 @@ namespace avmplus
                 (qual.is_static && !(flags & SFLAG_Class)) ||
                 (qual.tag != QUAL_none && !(flags & (SFLAG_Toplevel|SFLAG_Package|SFLAG_Class))))
                 compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
-            // FIXME: if inside a class, the statement goes into the instance initializer ... except if static...
             // FIXME: if const, and at the top level, and the namespace is a config namespace, evaluate and define a config const
-            stmts.addAtEnd(variableDefinition(evaluateConfigReference(configname), &qual));
+            ((flags & SFLAG_Class) && qual.is_static ? classStmts : instanceStmts)->addAtEnd(variableDefinition(evaluateConfigReference(configname), &qual));
             goto next_directive;
         }
 
@@ -509,8 +500,6 @@ namespace avmplus
                 ((qual.is_final || qual.is_override || qual.is_static) && !(flags & SFLAG_Class)) ||
                 (qual.tag != QUAL_none && !(flags & (SFLAG_Toplevel|SFLAG_Package|SFLAG_Class))))
                 compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
-            // FIXME: if inside a class or interface, we want to pick up the methods.
-            // FIXME: if inside a class, it goes into the instance... except if static...
             functionDefinition(evaluateConfigReference(configname), &qual, (flags & SFLAG_Class) != 0, (flags & SFLAG_Interface) == 0);
             goto next_directive;
         }
@@ -540,7 +529,7 @@ namespace avmplus
             AvmAssert(e == NULL);
             if (committed)
                 compiler->syntaxError(position(), SYNTAXERR_DIRECTIVE_REQUIRED);
-            addExprStatements(&stmts, metadatas.get());
+            addExprStatements((flags & SFLAG_Class) ? classStmts : instanceStmts, metadatas.get());
             if (flags & SFLAG_Interface)
                 compiler->syntaxError(position(), SYNTAXERR_STMT_IN_INTERFACE);
             // FIXME: is this test right?
@@ -548,12 +537,11 @@ namespace avmplus
                 compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_STMT);
             if (configname != NULL && hd() != T_LeftBrace)
                 compiler->syntaxError(position(), SYNTAXERR_CONFIG_PROHIBITED);
-            stmts.addAtEnd(statement(evaluateConfigReference(configname)));
+            ((flags & SFLAG_Class) ? classStmts : instanceStmts)->addAtEnd(statement(evaluateConfigReference(configname)));
             goto next_directive;
         }
 
-        finish:
-            return stmts.get();
+        finish: ;
         }
 
         void Parser::checkSimpleAttributes(Qualifier* qual)
@@ -589,12 +577,11 @@ namespace avmplus
             }
         }
 
-        // Qualifiers are known to be appropriate for 'class'
+        // Qualifiers are known to be appropriate for 'class'.
+
         void Parser::classDefinition(bool config, int /*flags*/, Qualifier* qual)
         {
             (void)config;
-            // FIXME: pick up the methods plus all other flags somehow, these are available from the binding ribs
-            // Maybe time to package them up conveniently (FunctionDefinition needs it too).
             eat(T_Class);
             uint32_t pos = position();
             Str* name = identifier();
@@ -614,24 +601,182 @@ namespace avmplus
             eat(T_LeftBrace);
             pushBindingRib(RIB_Class);
             pushBindingRib(RIB_Instance);
-            Seq<Stmt*>* instance_init = NULL;
-            Seq<Stmt*>* class_init = directives(SFLAG_Class, &instance_init);
+            directives(SFLAG_Class);
+            
+            // The initializing statements of the class constructor are hoisted
+            // and become cls_init1, these are executed in an outer scope.  Any other
+            // statements are part of the constructor and executed after the super stmt,
+            // and are within the constructor body.  This means that during parsing we
+            // must distinguish between initializing stores and other statements.  We hack:
+            // just filter the statements after the fact, variable definition stmts are
+            // distinguishable from other statements.
+
+            BodyInfo* cls = &topRib->next->body;
+            Seq<FunctionDefn*>* cls_methods = cls->functionDefinitions.get();
+            Seq<Binding*>* cls_vars = bindingsToVars(cls->bindings.get());
+            Seq<NamespaceDefn*>* cls_namespaces = cls->namespaces.get();
+            Seq<Stmt*>* static_stmts = NULL;
+            Seq<Stmt*>* cls_init_stmts = filterStatements(cls->stmts.get(), &static_stmts);
+            FunctionDefn* cls_init = constructClassConstructor(pos, name, cls_init_stmts, static_stmts);
+
+            // For the instance constructor only the initializing stores appear in the
+            // statements list; this list becomes init1, whereas the constructor (user-provided
+            // or hand-written) becomes init2.
+
+            BodyInfo* instance = &topRib->body;
+            FunctionDefn* constructor = NULL;
+            Seq<FunctionDefn*>* inst_methods = filterConstructor(name, instance->functionDefinitions.get(), &constructor);
+            Seq<Binding*>* inst_vars = bindingsToVars(instance->bindings.get());
+            Seq<Stmt*>* inst_init_stmts = instance->stmts.get();
+            FunctionDefn* inst_init = constructInstanceConstructor(pos, name, inst_init_stmts, constructor);
+            
+            ClassDefn* clsobj = ALLOC(ClassDefn, (pos,
+                                                  qualToNamespace(qual), name,
+                                                  qual->is_final > 0, qual->is_dynamic > 0,
+                                                  extends, implements.get(),
+                                                  cls_methods, cls_vars, cls_namespaces, cls_init,
+                                                  inst_methods, inst_vars, inst_init));
+
             popBindingRib();
             popBindingRib();
             eat(T_RightBrace);
-            addClass(ALLOC(ClassDefn, (qual, name, extends, implements.get(), class_init, instance_init)));
+            addClass(clsobj);
         }
         
+        ClassDefn::ClassDefn(uint32_t pos,
+                             NameComponent* ns, Str* name, bool is_final, bool is_dynamic, Str* extends, Seq<Str*>* implements,
+                             Seq<FunctionDefn*>* cls_methods, Seq<Binding*>* cls_vars, Seq<NamespaceDefn*>* cls_namespaces,
+                             FunctionDefn* cls_init,
+                             Seq<FunctionDefn*>* inst_methods, Seq<Binding*>* inst_vars,
+                             FunctionDefn* inst_init)
+            : TypeDefn(pos, ns, name, false)
+            , is_final(is_final)
+            , is_dynamic(is_dynamic)
+            , extends(extends)
+            , implements(implements)
+            , cls_methods(cls_methods)
+            , cls_vars(cls_vars)
+            , cls_namespaces(cls_namespaces)
+            , cls_init(cls_init)
+            , inst_methods(inst_methods)
+            , inst_vars(inst_vars)
+            , inst_init(inst_init)
+        {
+        }
+
+        FunctionDefn* Parser::constructClassConstructor(uint32_t pos, Str* name, Seq<Stmt*>* init_stmts, Seq<Stmt*>* stmts)
+        {
+            SignatureInfo signature(allocator);
+            BodyInfo body(allocator);
+            StringBuilder fnname(compiler);
+
+            fnname.append(name);
+            fnname.append("$cinit");
+
+            signature.ns = publicNS;
+            signature.name = fnname.str();
+
+            while (stmts != NULL) {
+                body.stmts.addAtEnd(stmts->hd);
+                stmts = stmts->tl;
+            }
+            body.stmts.addAtEnd(ALLOC(SuperStmt, (pos, NULL)));
+
+            return ALLOC(FunctionDefn, (signature, body, init_stmts));
+        }
+
+        // For the instance init we want a function derived from the real constructor method,
+        // it is called CLASSNAME$iinit.  If there's no constructor method one is generated.
+        // Initializer statements are inserted at the beginning of the constructor body; these
+        // statements are the statements in the "inst" body.  Finally, if there's no super
+        // call in the constructor method then one gets inserted at the beginning.
+        //
+        // The spec says:
+        //  - initializers are evaluated *in the instance scope*, not in the scope of the
+        //    constructor.  Thus they cannot simply be added to the start of the constructor
+        //    body, somehow the code generator needs to be in on the joke.
+        //  - super is called at the beginning of the constructor body, after var init,
+        //    if not present.
+
+        FunctionDefn* Parser::constructInstanceConstructor(uint32_t pos, Str* name, Seq<Stmt*>* init_stmts, FunctionDefn* constructor)
+        {
+            if (constructor) {
+                if (!constructor->uses_super)
+                    constructor->stmts = ALLOC(Seq<Stmt*>, (ALLOC(SuperStmt, (pos, NULL)), constructor->stmts));
+                constructor->inits = init_stmts;
+                return constructor;
+            }
+            else {
+                SignatureInfo signature(allocator);
+                BodyInfo body(allocator);
+                StringBuilder fnname(compiler);
+                
+                fnname.append(name);
+                fnname.append("$iinit");
+                
+                signature.ns = publicNS;
+                signature.name = fnname.str();
+            
+                body.stmts.addAtEnd(ALLOC(SuperStmt, (pos, NULL)));
+
+                return ALLOC(FunctionDefn, (signature, body, init_stmts));
+            }
+        }
+        
+        Seq<Stmt*>* Parser::filterStatements(Seq<Stmt*>* stmts, Seq<Stmt*>** nonDefinitionStmts)
+        {
+            SeqBuilder<Stmt*> defStmts(allocator);
+            SeqBuilder<Stmt*> nodefStmts(allocator);
+            
+            while (stmts != NULL) {
+                if (stmts->hd->isVardefStmt())
+                    defStmts.addAtEnd(stmts->hd);
+                else
+                    nodefStmts.addAtEnd(stmts->hd);
+                stmts = stmts->tl;
+            }
+            *nonDefinitionStmts = nodefStmts.get();
+            return defStmts.get();
+        }
+
+        Seq<FunctionDefn*>* Parser::filterConstructor(Str* name, Seq<FunctionDefn*>* fns, FunctionDefn** constructor)
+        {
+            SeqBuilder<FunctionDefn*> out(allocator);
+            *constructor = NULL;
+            while (fns != NULL) {
+                if (fns->hd->name == name) {
+                    if (*constructor != NULL)
+                        compiler->internalError(0, "Multiple constructors in list??");
+                    *constructor = fns->hd;
+                }
+                else
+                    out.addAtEnd(fns->hd);
+                fns = fns->tl;
+            }
+            return out.get();
+        }
+
+        Seq<Binding*>* Parser::bindingsToVars(Seq<Binding*>* bindings)
+        {
+            SeqBuilder<Binding*> l(allocator);
+            while (bindings != NULL) {
+                if (bindings->hd->kind == TAG_varBinding || bindings->hd->kind == TAG_constBinding)
+                    l.addAtEnd(bindings->hd);
+                bindings = bindings->tl;
+            }
+            return l.get();
+        }
+
         void Parser::interfaceDefinition(bool config, int /*flags*/, Qualifier* qual)
         {
             (void)config;
-            // FIXME: pick up the methods somehow, these are available from the binding ribs
             eat(T_Interface);
             uint32_t pos = position();
             Str* name = identifier();
             checkNoShadowingOfConfigNamespaces(pos, name);
             SeqBuilder<Str*> extends(allocator);
             if (hd() == T_Identifier && identValue() == compiler->SYM_extends) {
+                next();
                 do {
                     extends.addAtEnd(identifier());
                 } while (match(T_Comma));
@@ -639,9 +784,18 @@ namespace avmplus
             eat(T_LeftBrace);
             pushBindingRib(RIB_Instance);
             directives(SFLAG_Interface);
+            
+            BodyInfo* instance = &topRib->body;
+            FunctionDefn* constructor = NULL;
+            Seq<FunctionDefn*>* inst_methods = filterConstructor(name, instance->functionDefinitions.get(), &constructor);
+            if (constructor != NULL)
+                compiler->syntaxError(pos, SYNTAXERR_REDUNDANT_METHOD);
+            
+            InterfaceDefn* iface = ALLOC(InterfaceDefn, (pos, qualToNamespace(qual), name, extends.get(), inst_methods));
+
             popBindingRib();
             eat(T_RightBrace);
-            addInterface(ALLOC(InterfaceDefn, (qual, name, extends.get())));
+            addInterface(iface);
         }
         
         // Namespaces are:
@@ -649,10 +803,8 @@ namespace avmplus
         //  - allowed in functions and blocks
         //  - hoisted to the function level and scoped to the entire function
         //  - initialized on entry to the function (so defining them in blocks is pretty silly)
-        //
-        // FIXME: don't discard the qualifier in namespace definitions
 
-        void Parser::namespaceDefinition(bool config, int flags, Qualifier* /*qual*/)
+        void Parser::namespaceDefinition(bool config, int flags, Qualifier* qual)
         {
             (void)flags;
             uint32_t pos = position();
@@ -667,7 +819,7 @@ namespace avmplus
             }
             semicolon();
             if (config)
-                addNamespaceBinding(name, value);
+                addNamespaceBinding(qualToNamespace(qual), name, value);
         }
 
         void Parser::configNamespaceDefinition(int flags, bool config)
@@ -784,11 +936,13 @@ namespace avmplus
                     return true;
                 case TAG_computedName:
                     return false;
+                case TAG_builtinNamespace:
+                    return ((BuiltinNamespace*)n1)->t == ((BuiltinNamespace*)n2)->t;    // tokens are integer values
                 default:
                     return false;
             }
         }
-        
+
         static bool sameName(QualifiedName* n1, QualifiedName* n2)
         {
             // ActionScript allows eg 'var n:Number; var n;".
@@ -796,13 +950,36 @@ namespace avmplus
                 return true;
             return sameName(n1->qualifier, n2->qualifier) && sameName(n1->name, n2->name);
         }
+
+        static bool sameType(Type* t1, Type* t2)
+        {
+            // Iffy, why NULL?
+            if (t1 == NULL || t2 == NULL)
+                return true;
+            if (t1->tag() != t2->tag())
+                return false;
+            switch (t1->tag())
+            {
+                case TAG_simpleType: {
+                    return sameName(((SimpleType*)t1)->name, ((SimpleType*)t2)->name);
+                case TAG_instantiatedType: {
+                    InstantiatedType* it1 = (InstantiatedType*)t1;
+                    InstantiatedType* it2 = (InstantiatedType*)t2;
+                    return sameName(it1->basename, it2->basename) && sameType(it1->tparam, it2->tparam);
+                }
+                default:
+                    AvmAssert(!"Should not happen");
+                    return false;
+                }
+            }
+        }
         
-        Binding* Parser::findBinding(Str* name, BindingKind kind, BindingRib* rib)
+        Binding* Parser::findBinding(NameComponent* ns, Str* name, BindingKind kind, BindingRib* rib)
         {
             if (rib == NULL)
                 rib = topRib;
-            for ( Seq<Binding*>* bindings = rib->bindings.get() ; bindings != NULL ; bindings = bindings->tl ) {
-                if (bindings->hd->name == name) {
+            for ( Seq<Binding*>* bindings = rib->body.bindings.get() ; bindings != NULL ; bindings = bindings->tl ) {
+                if (sameName(bindings->hd->ns, ns) && bindings->hd->name == name) {
                     if (bindings->hd->kind != kind)
                         compiler->syntaxError(0, SYNTAXERR_REDEFINITION);
                     return bindings->hd;
@@ -813,60 +990,70 @@ namespace avmplus
         
         void Parser::addClass(ClassDefn* cls)
         {
-            (void)cls;
-            compiler->internalError(0, "Unimplemented: Class definitions cannot be processed");
+            Binding* b = findBinding(cls->ns, cls->name, TAG_classBinding);
+            if (!b)
+                topRib->body.bindings.addAtEnd(ALLOC(Binding, (cls->ns, cls->name, NULL, TAG_classBinding)));
+            else
+                compiler->syntaxError(0, SYNTAXERR_REDEFINITION_TYPE);
+            classes.addAtEnd(cls);
         }
         
         void Parser::addInterface(InterfaceDefn* iface)
         {
-            (void)iface;
-            compiler->internalError(0, "Unimplemented: Interface definitions cannot be processed");
+            Binding* b = findBinding(iface->ns, iface->name, TAG_interfaceBinding);
+            if (!b)
+                topRib->body.bindings.addAtEnd(ALLOC(Binding, (iface->ns, iface->name, NULL, TAG_interfaceBinding)));
+            else
+                compiler->syntaxError(0, SYNTAXERR_REDEFINITION_TYPE);
+            classes.addAtEnd(iface);
         }
         
-        void Parser::addFunctionBinding(FunctionDefn* fn)
+        void Parser::addFunctionBinding(NameComponent* ns, FunctionDefn* fn)
         {
-            addVarBinding(fn->name, NULL);
-            topRib->functionDefinitions.addAtEnd(fn);
+            addVarBinding(ns, fn->name, NULL);
+            topRib->body.functionDefinitions.addAtEnd(fn);
         }
 
-        // FIXME: this ignores namespaces
-        void Parser::addVarBinding(Str* name, QualifiedName* type_name)
+        void Parser::addVarBinding(NameComponent* ns, Str* name, Type* type_name, BindingRib* rib)
         {
-            Binding* b = findBinding(name, TAG_varBinding);
+            if (rib == NULL)
+                rib = topRib;
+            Binding* b = findBinding(ns, name, TAG_varBinding, rib);
             if (!b)
-                topRib->bindings.addAtEnd(ALLOC(Binding, (name, type_name, TAG_varBinding)));
-            else if (!sameName(b->type_name, type_name))
+                rib->body.bindings.addAtEnd(ALLOC(Binding, (ns, name, type_name, TAG_varBinding)));
+            else if (!sameType(b->type_name, type_name))
                 compiler->syntaxError(0, SYNTAXERR_REDEFINITION_TYPE);
         }
         
-        void Parser::addConstBinding(Str* name, QualifiedName* type_name)
+        void Parser::addConstBinding(NameComponent* ns, Str* name, Type* type_name, BindingRib* rib)
         {
-            if (findBinding(name, TAG_constBinding))
+            if (rib == NULL)
+                rib = topRib;
+            if (findBinding(ns, name, TAG_constBinding, rib))
                 compiler->syntaxError(0, SYNTAXERR_REDUNDANT_CONST);
-            topRib->bindings.addAtEnd(ALLOC(Binding, (name, type_name, TAG_constBinding)));
+            rib->body.bindings.addAtEnd(ALLOC(Binding, (ns, name, type_name, TAG_constBinding)));
         }
         
-        void Parser::addMethodBinding(FunctionDefn* fn, BindingRib* rib)
+        void Parser::addMethodBinding(NameComponent* ns, FunctionDefn* fn, BindingRib* rib)
         {
-            if (findBinding(fn->name, TAG_methodBinding, rib))
+            if (findBinding(ns, fn->name, TAG_methodBinding, rib))
                 compiler->syntaxError(0, SYNTAXERR_REDUNDANT_METHOD);
-            rib->bindings.addAtEnd(ALLOC(Binding, (fn->name, NULL, TAG_methodBinding)));
-            rib->functionDefinitions.addAtEnd(fn);
+            rib->body.bindings.addAtEnd(ALLOC(Binding, (ns, fn->name, NULL, TAG_methodBinding)));
+            rib->body.functionDefinitions.addAtEnd(fn);
         }
         
-        void Parser::addNamespaceBinding(Str* name, Expr* expr)
+        void Parser::addNamespaceBinding(NameComponent* ns, Str* name, Expr* expr)
         {
-            if (findBinding(name, TAG_namespaceBinding))
+            if (findBinding(ns, name, TAG_namespaceBinding))
                 compiler->syntaxError(0, SYNTAXERR_REDUNDANT_NAMESPACE);
-            topRib->bindings.addAtEnd(ALLOC(Binding, (name, NULL, TAG_namespaceBinding)));  // FIXME: type for 'Namespace'
-            topRib->namespaces.addAtEnd(ALLOC(NamespaceDefn, (name, expr)));
+            topRib->body.bindings.addAtEnd(ALLOC(Binding, (ns, name, NULL, TAG_namespaceBinding)));  // FIXME: type for 'Namespace'
+            topRib->body.namespaces.addAtEnd(ALLOC(NamespaceDefn, (ns, name, expr)));
         }
 
         void Parser::addQualifiedImport(Seq<Str*>* name)
         {
             (void)name;
-            // A map from the last element of the name to the name
-            compiler->internalError(0, "Unimplemented: Qualified import not supported, use an unqualified import instead");
+            // Nothing we care about at this time
         }
         
         void Parser::addUnqualifiedImport(Seq<Str*>* name)
@@ -877,22 +1064,27 @@ namespace avmplus
         
         void Parser::addOpenNamespace(Namespace* ns)
         {
-            topRib->openNamespaces.addAtEnd(ns);
+            topRib->body.openNamespaces.addAtEnd(ns);
         }
 
         void Parser::setUsesFinally()
         {
-            topRib->uses_finally = true;
+            topRib->body.uses_finally = true;
         }
         
         void Parser::setUsesCatch()
         {
-            topRib->uses_catch = true;
+            topRib->body.uses_catch = true;
         }
 
         void Parser::setUsesGoto()
         {
-            topRib->uses_goto = true;
+            topRib->body.uses_goto = true;
+        }
+
+        void Parser::setUsesSuper()
+        {
+            topRib->body.uses_super = true;
         }
 
         void Parser::functionDefinition(bool config, Qualifier* qual, bool getters_and_setters, bool require_body)
@@ -900,27 +1092,33 @@ namespace avmplus
             (void)config;
             uint32_t pos = position();
             FunctionDefn* fn = functionGuts(qual, true, getters_and_setters, require_body);
+            // FIXME: if an interface method it's always public, plus functionGuts() will have computed a namespace
+            // in signature.ns and we should use that.
+            NameComponent* ns = qualToNamespace(qual);
             checkNoShadowingOfConfigNamespaces(pos, fn->name);
             if (topRib->tag == RIB_Instance) {
-                // class or interface
+                // Class or interface.  If interface then is_static will never be true because it's
+                // filtered during attribute parsing.
                 if (qual->is_static) {
                     AvmAssert(topRib->next->tag == RIB_Class);
-                    addMethodBinding(fn, topRib->next);
+                    addMethodBinding(ns, fn, topRib->next);
                 }
                 else
-                    addMethodBinding(fn, topRib);
+                    addMethodBinding(ns, fn, topRib);
             }
             else
-                addFunctionBinding(fn);
+                addFunctionBinding(ns, fn);
         }
-        
+
         Stmt* Parser::variableDefinition(bool config, Qualifier* qual)
         {
             // FIXME: do not ignore the config value
+            // FIXME: discards qualifiers on variable definitions
             // FIXME: check that the name we're defining is not shadowing a config NS
-            (void)qual;
-            // FIXME: discards qualifiers on variable definitions!
-            return statement(config);
+            (void)config;
+            Stmt* stmt = varStatement(qualToNamespace(qual), hd() == T_Const, qual->is_static > 0);
+            semicolon();
+            return stmt;
         }
 
         FunctionDefn* Parser::functionGuts(Qualifier* qual, bool require_name, bool getters_and_setters, bool require_body)
@@ -928,107 +1126,117 @@ namespace avmplus
             if (qual->is_native)
                 compiler->syntaxError(position(), SYNTAXERR_NATIVE_NOT_SUPPORTED);
 
-            uint32_t numparams = 0;
-            bool default_value_required = false;
             eat(T_Function);
             uint32_t pos = position();
-            Str* name = NULL;
-            bool isSetter = false;
-            bool isGetter = false;
-            FunctionParam * rest_param = NULL;
+            SignatureInfo signature(allocator);
+
             if (require_name || hd() == T_Identifier)
-                name = identifier();
-            if (name != NULL && hd() == T_Identifier && getters_and_setters) {
-                isGetter = (name == compiler->SYM_get);
-                isSetter = (name == compiler->SYM_set);
-                name = identifier();
+                signature.name = identifier();
+            if (signature.name != NULL && hd() == T_Identifier && getters_and_setters) {
+                signature.isGetter = (signature.name == compiler->SYM_get);
+                signature.isSetter = (signature.name == compiler->SYM_set);
+                signature.name = identifier();
             }
+            if (signature.name != NULL)
+                signature.ns = qualToNamespace(qual);
+
             pushBindingRib(RIB_Function);
             eat(T_LeftParen);
-            SeqBuilder<FunctionParam*> params(allocator);
             if (hd() != T_RightParen) {
                 for (;;)
                 {
                     if (hd() == T_TripleDot) {
                         Str* rest_name = NULL;
-                        QualifiedName* rest_type_name = NULL;
+                        Type* rest_type_name = NULL;
                         eat(T_TripleDot);
                         rest_name = identifier();
                         if (match(T_Colon))
                             rest_type_name = typeExpression();
-                        addVarBinding(rest_name, rest_type_name);
-                        rest_param = ALLOC(FunctionParam, (rest_name, rest_type_name, NULL));
+                        addVarBinding(defaultNamespace(), rest_name, rest_type_name);
+                        signature.rest_param = ALLOC(FunctionParam, (rest_name, rest_type_name, NULL));
                         break;
                     }
-                    ++numparams;
+                    ++signature.numparams;
                     Str* param_name = identifier();
-                    QualifiedName* param_type_name = NULL;
+                    Type* param_type_name = NULL;
                     Expr* param_default_value = NULL;
                     if (match(T_Colon))
                         param_type_name = typeExpression();
                     if (match(T_Assign)) {
-                        default_value_required = true;
+                        signature.optional_arguments = true;
                         param_default_value = assignmentExpression(0);
                     }
-                    else if (default_value_required)
+                    else if (signature.optional_arguments)
                         compiler->syntaxError(pos, SYNTAXERR_DEFAULT_VALUE_REQD);
-                    addVarBinding(param_name, param_type_name);
-                    params.addAtEnd(ALLOC(FunctionParam, (param_name, param_type_name, param_default_value)));
+                    addVarBinding(defaultNamespace(), param_name, param_type_name);
+                    signature.params.addAtEnd(ALLOC(FunctionParam, (param_name, param_type_name, param_default_value)));
                     if (hd() == T_RightParen)
                         break;
                     eat(T_Comma);
                 }
             }
             eat(T_RightParen);
-            topRib->optional_arguments = default_value_required;
-            QualifiedName* return_type_name = NULL;
+            topRib->signature = &signature;
             if (match(T_Colon)) {
                 if (match(T_Void))
-                    topRib->is_void = true;
+                    signature.isVoid = true;
                 else
-                    return_type_name = typeExpression();
+                    signature.return_type_name = typeExpression();
             }
-            Seq<Stmt*>* stmts = NULL;
-            Seq<FunctionDefn*>* fndefs = NULL;
-            Seq<Binding*>* bindings = NULL;
-            Seq<NamespaceDefn*>* namespaces = NULL;
-            Seq<Namespace*>* openNamespaces = NULL;
-            bool uses_arguments = false;
-            bool uses_dxns = false;
-            bool uses_goto = false;
-            bool optional_arguments = topRib->optional_arguments;
             if (require_body)
             {
                 eat(T_LeftBrace);
-                stmts = directives(SFLAG_Function);
+                directives(SFLAG_Function);
                 eat(T_RightBrace);
                 // Rest takes precedence over 'arguments'
-                if (topRib->uses_arguments) {
-                    if (rest_param == NULL)
-                        addVarBinding(compiler->SYM_arguments, NULL);
+                if (topRib->body.uses_arguments) {
+                    if (signature.rest_param == NULL)
+                        addVarBinding(defaultNamespace(), compiler->SYM_arguments, NULL);
                     else
-                        topRib->uses_arguments = false;
+                        topRib->body.uses_arguments = false;
                 }
-                fndefs = topRib->functionDefinitions.get();
-                bindings = topRib->bindings.get();
-                namespaces = topRib->namespaces.get();
-                openNamespaces = topRib->openNamespaces.get();
-                uses_arguments = topRib->uses_arguments;
-                uses_dxns = topRib->uses_dxns;
-                uses_goto = topRib->uses_goto;
             }
-            else
+            else {
+                topRib->body.empty_body = true;
                 semicolon();
+            }
 
+            BindingRib* theRib = topRib;
             popBindingRib();
-            // FIXME: transmit isGetter and isSetter
-            (void)isGetter;
-            (void)isSetter;
-            return ALLOC(FunctionDefn, (name, bindings, params.get(), numparams, rest_param, return_type_name, fndefs, namespaces, openNamespaces, stmts,
-                                        uses_arguments,
-                                        uses_dxns,
-                                        uses_goto,
-                                        optional_arguments));
+            return ALLOC(FunctionDefn, (signature, theRib->body));
+        }
+
+        BuiltinNamespace* Parser::internalNamespace()
+        {
+            return internalNS;
+        }
+
+        BuiltinNamespace* Parser::defaultNamespace()
+        {
+            if (public_by_default)
+                return publicNS;
+            return internalNS;
+        }
+        
+        NameComponent* Parser::qualToNamespace(Qualifier* qual)
+        {
+            switch (qual->tag) {
+                case QUAL_none:
+                    return defaultNamespace();
+                case QUAL_internal:
+                    return internalNS;
+                case QUAL_private:
+                    return privateNS;
+                case QUAL_protected:
+                    return protectedNS;
+                case QUAL_public:
+                    return publicNS;
+                case QUAL_name:
+                    compiler->internalError(position(), "Defintions in user-defined namespaces not implemented");
+                    /*NOTREACHED*/
+                default:
+                    return NULL;
+            }
         }
 
         // Token queue abstractions
@@ -1087,6 +1295,13 @@ namespace avmplus
             return hd();
         }
         
+        Token Parser::leftAngle()
+        {
+            AvmAssert( T0 == T_BreakLeftAngle && T1 == T_LAST );
+            T0 = lexer->leftAngle(&L0);
+            return hd();
+        }
+
         Token Parser::leftShiftOrRelationalOperator()
         {
             AvmAssert( T0 == T_BreakLeftAngle && T1 == T_LAST );

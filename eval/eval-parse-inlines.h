@@ -41,6 +41,11 @@
 namespace avmplus {
 namespace RTC {
 
+inline void FunctionDefn::cogenGuts(Compiler* compiler, Ctx* ctx, ABCMethodInfo** info, ABCMethodBodyInfo** body)
+{
+    cogenGuts(compiler, ctx, false, info, body);
+}
+
 inline bool Parser::newline()
 {
     return LP < L0;
@@ -136,12 +141,12 @@ inline Binop Parser::tokenToBinaryOperator(Token t)
 
 inline void Parser::setUsesArguments()
 {
-    topRib->uses_arguments = true;
+    topRib->body.uses_arguments = true;
 }
 
 inline void Parser::setUsesDefaultXmlNamespace()
 {
-    topRib->uses_dxns = true;
+    topRib->body.uses_dxns = true;
 }
 
 inline void Parser::xmlAtom()

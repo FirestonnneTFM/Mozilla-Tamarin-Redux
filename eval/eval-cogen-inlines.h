@@ -89,6 +89,7 @@ inline AbcOpcode Cogen::binopToOpcode(Binop op, bool* isNegated)
 
 inline void Cogen::I_add() { emitOp(OP_add); }
 inline void Cogen::I_add_i() { emitOp(OP_add_i); }
+inline void Cogen::I_applytype(uint32_t nargs) { emitOpU30(OP_applytype, nargs); }
 inline void Cogen::I_astype(uint32_t index) { emitOpU30(OP_astype, index); }
 inline void Cogen::I_astypelate() { emitOp(OP_astypelate); }
 inline void Cogen::I_bitand() { emitOp(OP_bitand); }

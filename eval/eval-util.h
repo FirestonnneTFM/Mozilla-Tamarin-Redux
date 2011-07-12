@@ -233,15 +233,25 @@ public:
     Seq<T>* tl;
 };
 
+template<class T>
+uint32_t length(Seq<T*>* elts) {
+    uint32_t len = 0;
+    while (elts != NULL) {
+        elts = elts->tl;
+        len++;
+    }
+    return len;
+}
+
 template<class T> class SeqBuilder {
 public:
     SeqBuilder(Allocator* allocator) : allocator(allocator), items(NULL), last(NULL) {}
     
-    void addAtEnd(T item);  // enqueue
-    T dequeue();            // drop and return the first element; queue must not be empty
-    bool isEmpty();         // true iff queue is empty
-    Seq<T>* get() const;    // return the elements in the queue, do not clear the queue
-    void clear();           // reset the queue
+    void addAtEnd(T item);          // enqueue
+    T dequeue();                    // pop and return the first element; queue must not be empty
+    bool isEmpty();                 // true iff queue is empty
+    Seq<T>* get() const;            // return the elements in the queue, do not clear the queue
+    void clear();                   // reset the queue
 
 private:
     Allocator* allocator;

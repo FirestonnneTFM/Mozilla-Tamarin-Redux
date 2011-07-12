@@ -49,7 +49,7 @@ namespace avmplus
     {
         NameComponent::~NameComponent() {}
         
-        QualifiedName* Parser::typeExpression()
+        Type* Parser::typeExpression()
         {
             if (match(T_Multiply))
                 return NULL;
@@ -57,9 +57,16 @@ namespace avmplus
             if ((n->qualifier != NULL && n->qualifier->tag() != TAG_simpleName) ||
                 n->name->tag() != TAG_simpleName)
                 compiler->syntaxError(n->pos, SYNTAXERR_ILLEGAL_TYPENAME);
-            if (hd() == T_LeftDotAngle)
-                compiler->internalError(position(), "Unimplemented: Cannot parse vector types");
-            return n;
+            if (hd() != T_LeftDotAngle) {
+                return ALLOC(SimpleType, (n));
+            }
+            else {
+                next();
+                Type* t2 = typeExpression();
+                rightAngle();
+                next();
+                return ALLOC(InstantiatedType, (n, t2));
+            }
         }
 
         QualifiedName* Parser::nameExpression(bool is_attr)
@@ -232,6 +239,31 @@ namespace avmplus
             return elts.get();
         }
 
+        // The "new" token has been consumed and we're stopped at T_BreakLeftAngle
+        Expr* Parser::vectorInitializer(uint32_t pos)
+        {
+            leftAngle();
+            eat(T_LessThan);
+            Type* type = typeExpression();
+            rightAngle();
+            eat(T_GreaterThan);
+            SeqBuilder<Expr*> elts(allocator);
+            eat (T_LeftBracket);
+            // The grammar allows for a trailing comma following an expression
+            if (hd() != T_RightBracket)
+            {
+                for (;;) {
+                    elts.addAtEnd(assignmentExpression(0));
+                    if (!match(T_Comma))
+                        break;
+                    if (hd() == T_RightBracket)
+                        break;
+                }
+            }
+            eat (T_RightBracket);
+            return ALLOC(LiteralVector, (type, elts.get(), pos));
+        }
+        
         Expr* Parser::functionExpression()
         {
             Qualifier qual;
@@ -375,8 +407,21 @@ namespace avmplus
                     eat (T_RightBracket);
                     return ALLOC(ObjectRef, (obj, ALLOC(QualifiedName, (NULL, ALLOC(ComputedName, (expr)), false, pos)), pos));
                 }
-                case T_LeftDotAngle:
-                    compiler->internalError(position(), "Unimplemented: Cannot parse vector syntax");
+                case T_LeftDotAngle: {
+                    // In this case, obj must be a QualifiedName of a certain form.
+                    if (obj->tag() == TAG_qualifiedName) {
+                        QualifiedName* basename = (QualifiedName*)obj;
+                        Cogen::checkVectorType(compiler, basename);
+                        next();
+                        Type* t2 = typeExpression();
+                        rightAngle();
+                        next();
+                        return ALLOC(InstantiatedTypeRef, (ALLOC(InstantiatedType, (basename, t2)), pos));
+                    }
+                    compiler->syntaxError(pos, SYNTAXERR_ILLEGAL_TYPENAME);
+                    /*NOTREACHED*/
+                    return NULL;
+                }
                 default:
                     compiler->internalError(position(), "Unexpected token in propertyOperator: %d", (int)hd());
                     /*NOTREACHED*/
@@ -402,11 +447,10 @@ namespace avmplus
         {
             switch (hd ()) {
                 case T_New: {
+                    uint32_t pos = position();
                     next();
-                    if (hd() == T_BreakLeftAngle) {
-                        // vector initializer
-                        compiler->internalError(position(), "Unimplemented: Cannot parse vector initializer");
-                    }
+                    if (hd() == T_BreakLeftAngle)
+                        return vectorInitializer(pos);
                     Expr* object_expr = memberExpression ();
                     Seq<Expr*>* argument_exprs = argumentList();
                     return memberExpressionPrime (ALLOC(NewExpr, (object_expr, argument_exprs)));
@@ -482,19 +526,18 @@ namespace avmplus
         {
             Expr* call_expression;
             
+            uint32_t pos = position();
             bool is_new = match(T_New);
             if (is_new) {
-                if (hd() == T_LessThan) {
-                    // vector initializer
-                    compiler->internalError(position(), "Unimplemented: Cannot parse vector initializer");
-                }
-                call_expression = newExpression (new_count+1);
+                if (hd() == T_BreakLeftAngle)
+                    call_expression = vectorInitializer(pos);
+                else
+                    call_expression = newExpression (new_count+1);
             }
             else
                 call_expression = memberExpression();
                     
             if (hd() == T_LeftParen) {   // No more new exprs so this paren must start a call expr
-                uint32_t pos = position();
                 Seq<Expr*>* argument_exprs = argumentList();
                 if (new_count > 0)
                     return ALLOC(NewExpr, (call_expression, argument_exprs));
