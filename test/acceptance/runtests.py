@@ -264,7 +264,7 @@ class AcceptanceRuntest(RuntestBase):
             os.unlink(testName)
         
         # process support dir
-        if exists(root+self.supportFolderExt):
+        if exists(root+self.supportFolderExt) and not (self.runSource or self.eval):
             self.compile_support_files(root+self.supportFolderExt, outputCalls)
         
         # compile file if needed
@@ -292,9 +292,11 @@ class AcceptanceRuntest(RuntestBase):
 
         if self.runSource or self.eval:
             incfiles=self.build_incfiles(testName)
+            # With eval, shell.as must come first
             incfiles.append("shell" + self.sourceExt)
             for incfile in incfiles:
-                testName=incfile+" "+testName
+                if not (incfile == "./shell.as"):
+                    testName=incfile+" "+testName
 
         # read any extra avm arguments, each line will execute the avm with those args
         if isfile('%s.avm_args' % ast):

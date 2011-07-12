@@ -591,9 +591,8 @@ class RuntestBase(object):
             if isfile(shell):
                 files.append(shell)
         (testdir, ext) = splitext(as_file)
-        if not self.eval:
-            for util in glob(join(testdir,'*'+self.sourceExt)) + glob(join(dir,'*Util'+self.sourceExt)):
-                files.append(util.replace("$", "\$"))
+        for util in glob(join(testdir,'*'+self.sourceExt)):
+            files.append(util.replace("$", "\$"))
         return files
 
     def checkExecutable(self, exe, msg):
@@ -1849,4 +1848,3 @@ class RuntestBase(object):
                 os.unlink(cwd+"/version.abc")
         except:
             print('exception deleting %s/version.as or %s/version.abc' % (cwd,cwd))
-    
