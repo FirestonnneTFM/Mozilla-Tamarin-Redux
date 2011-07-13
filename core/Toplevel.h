@@ -463,12 +463,6 @@ namespace avmplus
         GCMember<ScriptEnv>            GC_POINTER(_mainEntryPoint);
         GCMember<builtinClassManifest> GC_POINTER(_builtinClasses);
     public:
-        GCMember<VTable>               GC_POINTER(object_ivtable);
-        GCMember<VTable>               GC_POINTER(class_ivtable);
-        GCMember<ScopeChain>           GC_POINTER(object_cscope);
-        GCMember<ScopeChain>           GC_POINTER(vectorobj_cscope);
-        GCMember<ScopeChain>           GC_POINTER(vectorobj_iscope);
-    public:
         // objectClass is still needed for bootstrapping
         // the VM; it's still public because of 100's of
         // to-be-expunged references in Flash/AIR

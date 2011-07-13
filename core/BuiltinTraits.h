@@ -126,6 +126,8 @@ namespace avmplus
         Traits *xmlList_itraits;
         Traits *xml_itraits;
 
+        Traits* object_ctraits;
+        Traits* class_ctraits;
         Traits* math_ctraits;
         Traits* int_ctraits;
         Traits* uint_ctraits;
@@ -133,10 +135,6 @@ namespace avmplus
         Traits* string_ctraits;
         Traits* boolean_ctraits;
         Traits* vector_ctraits;
-
-        const ScopeTypeChain*   object_istc;
-        const ScopeTypeChain*   class_istc;
-
 
     private:
         Traits* findCTraits(const char* name, PoolObject* pool);

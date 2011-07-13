@@ -755,7 +755,7 @@ namespace avmplus
 
     ScriptEnv* AvmCore::initOneScript(Toplevel* toplevel, AbcEnv* abcEnv, Traits* scriptTraits)
     {
-        VTable* scriptVTable = this->newVTable(scriptTraits, toplevel->object_ivtable, toplevel);
+        VTable* scriptVTable = this->newVTable(scriptTraits, toplevel->objectClass->ivtable(), toplevel);
         const ScopeTypeChain* scriptSTC = scriptTraits->declaringScope();
         if (!scriptSTC)
         {
@@ -844,12 +844,150 @@ namespace avmplus
         // save toplevel since it was initially null
         builtinDomainEnv->setToplevel(toplevel);
 
-        ScriptEnv* main = initAllScripts(toplevel, abcEnv);
-        builtinClassManifest* builtins = builtinClassManifest::create(main);
-        toplevel->init_mainEntryPoint(main, builtins);
+        AvmCore* core = this;
 
-        callScriptEnvEntryPoint(main); // ignore result
+        // adds clarity to what is usually just global$init()
+        SAMPLE_FRAME("[newclass]", core);
 
+        MMgc::GC* gc = core->GetGC();
+        PoolObject* pool = abcEnv->pool();
+        AvmAssert(pool == core->builtinPool);
+        Namespace* dxns = core->dxns();
+        AvmAssert(dxns == publicNamespace);
+
+        uint32_t const last = pool->scriptCount()-1;
+        Traits* scriptTraits = pool->getScriptTraits(last);
+
+        Traits* object_ctraits = core->traits.object_ctraits;
+        Traits* class_ctraits = core->traits.class_ctraits;
+        AvmAssert(object_ctraits->init != NULL);
+        AvmAssert(class_ctraits->init != NULL);
+
+        Traits* object_itraits = object_ctraits->itraits;
+        Traits* class_itraits = class_ctraits->itraits;
+        AvmAssert(object_itraits == core->traits.object_itraits);
+        AvmAssert(class_itraits == core->traits.class_itraits);
+        AvmAssert(object_itraits->init != NULL);
+        AvmAssert(class_itraits->init != NULL);
+ 
+         // ------------------ construct the vtables
+
+        // Object derives from... nothing
+        VTable* object_ivtable = core->newVTable(object_itraits, NULL, toplevel);
+
+        // Class derives from Object
+        VTable* class_ivtable = core->newVTable(class_itraits, object_ivtable, toplevel);
+
+        // Object$ derives from Class
+        VTable* object_cvtable = core->newVTable(object_ctraits, class_ivtable, toplevel);
+        object_cvtable->ivtable = object_ivtable;
+
+        // Class$ derives from Class
+        VTable* class_cvtable = core->newVTable(class_ctraits, class_ivtable, toplevel);
+        class_cvtable->ivtable = class_ivtable;
+
+        // global script derives from Object
+        VTable* scriptVTable = this->newVTable(scriptTraits, object_ivtable, toplevel);
+
+        // ------------------ construct the ScopeTypeChains and ScopeChains
+
+        const ScopeTypeChain* scriptSTC = ScopeTypeChain::createEmpty(gc, scriptTraits);
+        ScopeChain* scriptScope = ScriptEnv::createScriptScope(scriptSTC, scriptVTable, abcEnv);
+
+        Traits* object_cstc_types[] = { scriptTraits, object_ctraits, NULL };
+        const ScopeTypeChain* object_cstc = ScopeTypeChain::createExplicit(gc, object_ctraits, object_cstc_types);
+        ScopeChain* object_cscope = ScopeChain::create(gc, object_cvtable, abcEnv, object_cstc, NULL, dxns);
+
+        Traits* object_istc_types[] = { scriptTraits, object_ctraits, object_itraits, NULL };
+        const ScopeTypeChain* object_istc = ScopeTypeChain::createExplicit(gc, object_itraits, object_istc_types);
+        ScopeChain* object_iscope = ScopeChain::create(gc, object_ivtable, abcEnv, object_istc, NULL, dxns);
+
+        Traits* class_cstc_types[] = { scriptTraits, object_ctraits, class_ctraits, NULL };
+        const ScopeTypeChain* class_cstc = ScopeTypeChain::createExplicit(gc, class_ctraits, class_cstc_types);
+        ScopeChain* class_cscope = ScopeChain::create(gc, class_cvtable, abcEnv, class_cstc, NULL, dxns);
+
+        Traits* class_istc_types[] = { scriptTraits, object_ctraits, class_ctraits, class_itraits, NULL };
+        const ScopeTypeChain* class_istc = ScopeTypeChain::createExplicit(gc, class_itraits, class_istc_types);
+        ScopeChain* class_iscope = ScopeChain::create(gc, class_ivtable, abcEnv, class_istc, NULL, dxns);
+
+        // ------------------ resolve all the vtables
+        
+        object_ivtable->resolveSignatures(object_iscope);
+        class_ivtable->resolveSignatures(class_iscope);
+        object_cvtable->resolveSignatures(object_cscope);
+        class_cvtable->resolveSignatures(class_cscope);
+        scriptVTable->resolveSignatures(scriptScope);
+
+        // ------------------ create Object$ and Class$ instances
+
+        AvmAssert(object_ctraits->getCreateClassClosureProc() == ObjectClass::createClassClosure);
+        ClassClosure* object_class = ObjectClass::createClassClosure(object_cvtable);
+        object_class->initPrototypeConstructor();
+
+        AvmAssert(class_ctraits->getCreateClassClosureProc() == ClassClass::createClassClosure);
+        ClassClosure* class_class = ClassClass::createClassClosure(class_cvtable);
+        class_class->initPrototypeConstructor();
+
+        object_class->setDelegate(class_class->prototypePtr());
+        class_class->prototypePtr()->setDelegate(object_class->prototypePtr());
+
+        class_class->setDelegate(class_class->prototypePtr());
+
+        // ------------------ create global script instance
+
+        ScriptObject* global = ScriptObject::create(gc, scriptVTable, object_class->prototypePtr());
+
+        // ------------------ fix up the scopechains appropriately
+
+        Atom global_atom = global->atom();
+
+        object_cscope->setScope(gc, 0, global_atom);
+
+        object_iscope->setScope(gc, 0, global_atom);
+        object_iscope->setScope(gc, 1, object_class->atom());
+
+        class_cscope->setScope(gc, 0, global_atom);
+        class_cscope->setScope(gc, 1, object_class->atom());
+
+        class_iscope->setScope(gc, 0, global_atom);
+        class_iscope->setScope(gc, 1, object_class->atom());
+        class_iscope->setScope(gc, 2, class_class->atom());
+
+        // ------------------ run the init-methods for Object$ and Class$
+
+        object_cvtable->init->coerceEnter(object_class->atom());
+        class_cvtable->init->coerceEnter(class_class->atom());
+
+        // ------------------ set up the init-method for the global script
+
+        ScriptEnv* main = ScriptEnv::create(gc, scriptTraits->init, scriptScope);
+        main->global = global;
+
+        scriptVTable->init = main;
+#ifdef VMCFG_AOT
+        initScriptActivationTraits(this, toplevel, scriptTraits->init);
+#endif
+
+        // ------------------ register the names in the DomainMgr (must be done before calling the init method)
+
+        GCList<ScriptEnv> envs(GetGC(), pool->scriptCount());
+        envs.add(main);
+        // skip the final one: it's already been done
+        for (uint32_t i=0; i < last; i++)
+        {
+            ScriptEnv* scriptEnv = initOneScript(toplevel, abcEnv, pool->getScriptTraits(i));
+            envs.add(scriptEnv);
+        }
+        this->domainMgr()->addNamedScriptEnvs(abcEnv, envs);
+
+        // ------------------ create the builtin class manifest
+
+        toplevel->init_mainEntryPoint(main, builtinClassManifest::create(main));
+
+        // ------------------ run the init-method for global
+
+        main->coerceEnter(global->atom());
+  
         exec->notifyAbcPrepared(toplevel, abcEnv);
 
         return toplevel;

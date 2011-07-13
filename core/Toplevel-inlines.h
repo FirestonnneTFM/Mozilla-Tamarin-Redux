@@ -40,6 +40,10 @@
 namespace avmplus
 {
 
+REALLY_INLINE Toplevel::Toplevel(AbcEnv* abcEnv) : _abcEnv(abcEnv)
+{
+}
+
 REALLY_INLINE Toplevel* Toplevel::create(MMgc::GC* gc, AbcEnv* abcEnv)
 {
     return new (gc, MMgc::kExact) Toplevel(abcEnv);
@@ -204,6 +208,7 @@ REALLY_INLINE void Toplevel::init_mainEntryPoint(ScriptEnv* main, builtinClassMa
 {
     AvmAssert(_mainEntryPoint == NULL);
     _mainEntryPoint = main;
+    AvmAssert(_builtinClasses == NULL);
     _builtinClasses = builtins;
 }
 

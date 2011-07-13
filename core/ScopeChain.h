@@ -59,6 +59,7 @@ namespace avmplus
         static const ScopeTypeChain* create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, Traits* const* stateTraits, uint32_t nStateTraits, uint32_t nStateWithTraits, Traits* append, Traits* extra);
 #endif
         static const ScopeTypeChain* createEmpty(MMgc::GC* gc, Traits* traits);
+        static const ScopeTypeChain* createExplicit(MMgc::GC* gc, Traits* traits, Traits** types);
 
         const ScopeTypeChain* cloneWithNewTraits(MMgc::GC* gc, Traits* traits) const;
         Traits* traits() const;
@@ -70,7 +71,7 @@ namespace avmplus
         bool equals(const ScopeTypeChain* that) const;
 
     private:
-        void setScopeAt(uint32_t i, Traits* t, bool w);
+        void setScopeAt(uint32_t i, Traits* t, bool w = false);
 
         // Traits are MMgc-allocated, thus always 8-byte-aligned, so the low 3 bits are available for us to use
         static const uintptr_t ISWITH = 0x01;

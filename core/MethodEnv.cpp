@@ -553,10 +553,11 @@ namespace avmplus
     ScriptObject* MethodEnv::op_newobject(Atom* sp, int argc) const
     {
         // pre-size the hashtable since we know how many vars are coming
-        VTable* object_ivtable = toplevel()->object_ivtable;
-        AvmCore* core = this->core();
+        Toplevel* toplevel = this->toplevel();
+        AvmCore* core = toplevel->core();
+        VTable* object_ivtable = toplevel->objectClass->ivtable();
 
-        ScriptObject* o = ScriptObject::create(core->GetGC(), object_ivtable, toplevel()->objectClass->prototypePtr(), 2*argc+1);
+        ScriptObject* o = ScriptObject::create(core->GetGC(), object_ivtable, toplevel->objectClass->prototypePtr(), 2*argc+1);
 
         for (; argc-- > 0; sp -= 2)
         {
@@ -718,8 +719,10 @@ namespace avmplus
 
         FunctionClass* functionClass = toplevel->_functionClass; // can't use functionClass(), might not be inited yet
         VTable* fvtable = functionClass->ivtable();
-        AvmAssert(fvtable->ivtable == NULL || fvtable->ivtable == toplevel->object_ivtable);
-        fvtable->ivtable = toplevel->object_ivtable;
+        VTable* object_ivtable = toplevel->objectClass->ivtable();
+
+        AvmAssert(fvtable->ivtable == NULL || fvtable->ivtable == object_ivtable);
+        fvtable->ivtable = object_ivtable;
         AvmAssert(fvtable->linked);
 
         const ScopeTypeChain* fstc = function->declaringScope();
@@ -757,14 +760,20 @@ namespace avmplus
                             Atom* scopes) const
     {
         AvmCore* core = this->core();
-        MMgc::GC* gc = core->GetGC();
         // adds clarity to what is usually just global$init()
         SAMPLE_FRAME("[newclass]", core);
+
+        MMgc::GC* gc = core->GetGC();
         Toplevel* toplevel = this->toplevel();
-        AbcEnv* abcEnv = this->abcEnv();
 
         Traits* itraits = ctraits->itraits;
         const BuiltinType bt = Traits::getBuiltinType(itraits);
+        if (bt == BUILTIN_object)
+            return toplevel->objectClass;
+        if (bt == BUILTIN_class)
+            return toplevel->_classClass;
+
+        AbcEnv* abcEnv = this->abcEnv();
 
         // finish resolving the base class
         if (!base && itraits->base)
@@ -792,10 +801,8 @@ namespace avmplus
 
         VTable* ivtable = core->newVTable(itraits, base ? base->ivtable() : NULL, toplevel);
 
-        // This is a little weird, as the cvtable should have the ivtable as its base
-        // i.e. Class$ derives from Class
-        VTable* cvbase = (bt == BUILTIN_class) ? ivtable : (VTable*)toplevel->class_ivtable;
-        VTable* cvtable = core->newVTable(ctraits, cvbase, toplevel);
+        VTable* class_ivtable = toplevel->_classClass->ivtable();
+        VTable* cvtable = core->newVTable(ctraits, class_ivtable, toplevel);
 
         // class scopechain = [..., class]
         AvmAssert(ctraits->init != NULL);
@@ -806,60 +813,12 @@ namespace avmplus
             cscope->setScope(gc, i, *scopes++);
         }
 
-        // Note: iff itraits == class_itraits, we used to use cscope (rather than iscope) for ivtable,
-        // but that appears to be simply wrong: it doesn't match the expectations of the ScopeTypeChain filled in for Class.
         AvmAssert(itraits->init != NULL);
         ScopeChain* iscope = ScopeChain::create(gc, ivtable, abcEnv, itraits->init->declaringScope(), cscope, core->dxns());
         ivtable->resolveSignatures(iscope);
-            // Don't resolve signatures for Object$ until after Class has been set up
-            // which should happen very soon after Object is setup.
-        if (bt != BUILTIN_object)
-            cvtable->resolveSignatures(cscope);
 
         cvtable->ivtable = ivtable;
-
-        switch (itraits->builtinType)
-        {
-            case BUILTIN_object:
-            {
-                // we just defined Object
-                toplevel->object_ivtable = ivtable;
-
-                AvmAssert(toplevel->object_cscope == NULL);
-                // save for later
-                toplevel->object_cscope = cscope;
-
-                // We can finish setting up the toplevel object now that
-                // we have the real Object vtable
-                VTable* toplevel_vtable = toplevel->global()->vtable;
-                toplevel_vtable->base = ivtable;
-                toplevel_vtable->linked = false;
-                toplevel_vtable->resolveSignatures(toplevel->toplevel_scope());
-                break;
-            }
-            case BUILTIN_class:
-            {
-                // we just defined Class
-                toplevel->class_ivtable = ivtable;
-
-                // Can't run the Object$ initializer until after Class is done since
-                // Object$ needs the real Class vtable as its base
-                VTable* objectclass_cvtable = toplevel->objectClass->vtable;
-                objectclass_cvtable->base = ivtable;
-                objectclass_cvtable->resolveSignatures(toplevel->object_cscope);
-                objectclass_cvtable->init->coerceEnter(toplevel->objectClass->atom());
-                break;
-            }
-            case BUILTIN_vectorobj:
-            {
-                AvmAssert(toplevel->vectorobj_cscope == NULL);
-                AvmAssert(toplevel->vectorobj_iscope == NULL);
-                // save for later
-                toplevel->vectorobj_cscope = cscope;
-                toplevel->vectorobj_iscope = iscope;
-                break;
-            }
-        }
+        cvtable->resolveSignatures(cscope);
 
         CreateClassClosureProc createClassClosure = cvtable->traits->getCreateClassClosureProc();
         AvmAssert(createClassClosure != NULL);
@@ -869,28 +828,19 @@ namespace avmplus
         {
             // C.prototype.__proto__ = Base.prototype
             if (base != NULL)
-                cc->prototypePtr()->setDelegate( base->prototypePtr() );
+                cc->prototypePtr()->setDelegate(base->prototypePtr());
 
             // C.prototype.constructor = C {DontEnum}
-            cc->prototypePtr()->setStringProperty(core->kconstructor, cc->atom());
-            cc->prototypePtr()->setStringPropertyIsEnumerable(core->kconstructor, false);
+            cc->initPrototypeConstructor();
         }
 
-        if (bt != BUILTIN_class)
-        {
-            AvmAssert(i == iscope->getSize()-1);
-            iscope->setScope(gc, i, cc->atom());
-        }
+        AvmAssert(i == iscope->getSize()-1);
+        iscope->setScope(gc, i, cc->atom());
 
-        if (toplevel->_classClass)
-        {
-            cc->setDelegate( toplevel->_classClass->prototypePtr() );
-        }
+        AvmAssert(toplevel->_classClass != NULL);
+        cc->setDelegate(toplevel->_classClass->prototypePtr());
 
-        // Invoke the class init function.
-        // Don't run it for Object - that has to wait until after Class$ is set up
-        if (cvtable != toplevel->objectClass->vtable)
-            cvtable->init->coerceEnter(cc->atom());
+        cvtable->init->coerceEnter(cc->atom()); // ignore result
 
         return cc;
     }

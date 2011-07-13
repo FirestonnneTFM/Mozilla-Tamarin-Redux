@@ -348,4 +348,14 @@ create_normal:
     {
         return toplevel()->coerce(value, ivtable()->traits);
     }
+
+    void ClassClosure::initPrototypeConstructor()
+    {
+        AvmCore* core = this->core();
+        ScriptObject* cc_proto = this->prototypePtr();
+        AvmAssert(cc_proto != NULL);
+        cc_proto->setStringProperty(core->kconstructor, this->atom());
+        cc_proto->setStringPropertyIsEnumerable(core->kconstructor, false);
+    }
+
 }
