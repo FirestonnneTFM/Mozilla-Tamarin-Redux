@@ -3114,12 +3114,7 @@ const uint32_t Toplevel::gcTracePointerOffsets[] = {
     offsetof(Toplevel, _numberClass),
     offsetof(Toplevel, _stringClass),
     offsetof(Toplevel, _uintClass),
-    offsetof(Toplevel, class_ivtable),
     offsetof(Toplevel, objectClass),
-    offsetof(Toplevel, object_cscope),
-    offsetof(Toplevel, object_ivtable),
-    offsetof(Toplevel, vectorobj_cscope),
-    offsetof(Toplevel, vectorobj_iscope),
     0};
 
 MMgc::GCTracerCheckResult Toplevel::gcTraceOffsetIsTraced(uint32_t off) const
@@ -3127,7 +3122,7 @@ MMgc::GCTracerCheckResult Toplevel::gcTraceOffsetIsTraced(uint32_t off) const
     MMgc::GCTracerCheckResult result;
     (void)off;
     (void)result;
-    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,17);
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,12);
 }
 #endif // DEBUG
 
@@ -3146,12 +3141,7 @@ bool Toplevel::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     gc->TraceLocation(&_numberClass);
     gc->TraceLocation(&_stringClass);
     gc->TraceLocation(&_uintClass);
-    gc->TraceLocation(&class_ivtable);
     gc->TraceLocation(&objectClass);
-    gc->TraceLocation(&object_cscope);
-    gc->TraceLocation(&object_ivtable);
-    gc->TraceLocation(&vectorobj_cscope);
-    gc->TraceLocation(&vectorobj_iscope);
     return false;
 }
 

@@ -43,27 +43,6 @@
 
 namespace avmplus
 {
-    Toplevel::Toplevel(AbcEnv* abcEnv) : _abcEnv(abcEnv)
-    {
-        AvmCore* core = this->core();
-        MMgc::GC* gc = core->GetGC();
-
-        // create a temp object vtable to use, since the real one isn't created yet
-        // later, in OP_newclass, we'll replace with the real Object vtable, so methods
-        // of Object and Class have the right scope.
-        object_ivtable = core->newVTable(core->traits.object_itraits, NULL, this);
-        Namespacep publicNS = core->getPublicNamespace(core->getDefaultAPI());
-        ScopeChain* object_iscope = ScopeChain::create(gc, object_ivtable, abcEnv, core->traits.object_istc, NULL, publicNS);
-        object_ivtable->resolveSignatures(object_iscope);
-
-        // create temporary vtable for Class, so we have something for OP_newclass
-        // to use when it creates Object$ and Class$.  once that happens, we replace
-        // with the real Class$ vtable.
-        class_ivtable = core->newVTable(core->traits.class_itraits, object_ivtable, this);
-        ScopeChain* class_iscope = ScopeChain::create(gc, class_ivtable, abcEnv, core->traits.class_istc, NULL, publicNS);
-        class_ivtable->resolveSignatures(class_iscope);
-    }
-
     ClassClosure* Toplevel::findClassInScriptEnv(int class_id, ScriptEnv* env)
     {
         PoolObject* pool = env->abcEnv()->pool();

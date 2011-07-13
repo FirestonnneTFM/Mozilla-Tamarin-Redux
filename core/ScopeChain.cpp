@@ -42,6 +42,19 @@
 
 namespace avmplus
 {
+    /*static*/ const ScopeTypeChain* ScopeTypeChain::createExplicit(MMgc::GC* gc, Traits* owner, Traits** types)
+    {
+        uint32_t fullsize = 0;
+        for (Traits** t = types; *t != NULL; ++t)
+            ++fullsize;
+        uint32_t size = (fullsize > 0) ? (fullsize - 1) : 0;
+        const size_t padSize = sizeof(uintptr_t) * size;
+        ScopeTypeChain* stc = new(gc, MMgc::kExact, padSize) ScopeTypeChain(size, fullsize, owner);
+        for (uint32_t i = 0; i < fullsize; ++i)
+            stc->setScopeAt(i, types[i]);
+        return stc;
+    }
+
     /* static */ const ScopeTypeChain* ScopeTypeChain::create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const FrameValue* values, int32_t nValues, Traits* append, Traits* extra)
     {
         const int32_t capture = nValues + (append ? 1 : 0);

@@ -119,6 +119,8 @@ namespace avmplus
 
         size_t getExtraSize() const;
 
+        void initPrototypeConstructor();
+
     private:
         static CreateInstanceProc FASTCALL checkForRestrictedInheritance(VTable* ivtable, CreateInstanceProc p);
 

@@ -118,13 +118,12 @@ namespace avmplus
         vectorint_itraits->set_names(vectorint_itraits->ns(), core->kVectorint);
         vectoruint_itraits->set_names(vectoruint_itraits->ns(), core->kVectoruint);
         vectorobj_itraits->set_names(vectorobj_itraits->ns(), core->kVectorAny);
-
-        object_istc = ScopeTypeChain::createEmpty(core->GetGC(), object_itraits);
-        class_istc = ScopeTypeChain::createEmpty(core->GetGC(), class_itraits);
     }
 
     void BuiltinTraits::initClassTypes(PoolObject* pool)
     {
+        object_ctraits = findCTraits("Object$", pool);
+        class_ctraits = findCTraits("Class$", pool);
         math_ctraits = findCTraits("Math$", pool);
         number_ctraits = findCTraits("Number$", pool);
         int_ctraits = findCTraits("int$", pool);

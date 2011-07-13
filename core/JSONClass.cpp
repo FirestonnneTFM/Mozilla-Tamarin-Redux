@@ -692,9 +692,9 @@ namespace avmplus
     ScriptObject* JSONParser::parseObject()
     {
         advance();
-        ScriptObject* o =
-            m_toplevel->core()->newObject(m_toplevel->object_ivtable,
-                                          m_toplevel->objectClass->prototypePtr());
+
+        Atom oa = m_toplevel->objectClass->constructObject();
+        ScriptObject* o = AvmCore::atomToScriptObject(oa);
         if (m_token != '}') {
             for (;;) {
                 // Could short-cut the string alloc when result is
@@ -1004,9 +1004,8 @@ namespace avmplus
     REALLY_INLINE ScriptObject* JSONSerializer::newobject()
     {
         // Would it be worthwhile to pass hashtable htCapacity param below?
-        return ScriptObject::create(core()->GetGC(),
-                                    m_toplevel->object_ivtable,
-                                    m_toplevel->objectClass->prototypePtr());
+        Atom oa = m_toplevel->objectClass->constructObject();
+        return AvmCore::atomToScriptObject(oa);
     }
 
     REALLY_INLINE void JSONSerializer::emit(char c)

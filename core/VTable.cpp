@@ -188,8 +188,12 @@ namespace avmplus
         AvmCore* core = toplevel->core();
         Namespacep traitsNs = this->traits->ns();
 
-        VTable* objVecVTable = toplevel->objectVectorClass()->vtable;
-        AbcEnv* objVecAbcEnv = toplevel->vectorobj_cscope->abcEnv();
+        GCRef<builtinClassManifest> builtinClasses = toplevel->builtinClasses();
+        GCRef<ObjectVectorClass> vectorobj_cls = builtinClasses->get_Vector_objectClass();
+        GCRef<ScopeChain> vectorobj_cscope = vectorobj_cls->vtable->init->scope();
+        GCRef<ScopeChain> vectorobj_iscope = vectorobj_cls->ivtable()->init->scope();
+        VTable* objVecVTable = vectorobj_cls->vtable;
+        AbcEnv* objVecAbcEnv = vectorobj_cscope->abcEnv();
         Toplevel* objVecToplevel = objVecVTable->toplevel();
         VTable* objVecIVTable = objVecVTable->ivtable;
 
@@ -223,11 +227,13 @@ namespace avmplus
 
         AvmAssert(itraits != NULL);
 
-        VTable* cvtab = core->newVTable(ctraits, objVecToplevel->class_ivtable, objVecToplevel);
-        ScopeChain* cvtab_cscope = toplevel->vectorobj_cscope->cloneWithNewVTable(core->GetGC(), cvtab, objVecAbcEnv);
+        VTable* class_ivtable = builtinClasses->get_ClassClass()->ivtable();
+
+        VTable* cvtab = core->newVTable(ctraits, class_ivtable, objVecToplevel);
+        ScopeChain* cvtab_cscope = vectorobj_cscope->cloneWithNewVTable(core->GetGC(), cvtab, objVecAbcEnv);
 
         VTable* ivtab = core->newVTable(itraits, objVecIVTable, objVecToplevel);
-        ScopeChain* ivtab_iscope = toplevel->vectorobj_iscope->cloneWithNewVTable(core->GetGC(), ivtab, objVecAbcEnv);
+        ScopeChain* ivtab_iscope = vectorobj_iscope->cloneWithNewVTable(core->GetGC(), ivtab, objVecAbcEnv);
         cvtab->ivtable = ivtab;
         ivtab->init = objVecIVTable->init;
 
