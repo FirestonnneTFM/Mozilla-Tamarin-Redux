@@ -955,8 +955,13 @@ namespace avmplus
 
         // ------------------ run the init-methods for Object$ and Class$
 
-        object_cvtable->init->coerceEnter(object_class->atom());
-        class_cvtable->init->coerceEnter(class_class->atom());
+#ifdef VMCFG_VERIFYALL
+        if (!config.verifyonly)
+#endif
+        {
+            object_cvtable->init->coerceEnter(object_class->atom());
+            class_cvtable->init->coerceEnter(class_class->atom());
+        }
 
         // ------------------ set up the init-method for the global script
 
@@ -986,7 +991,12 @@ namespace avmplus
 
         // ------------------ run the init-method for global
 
-        main->coerceEnter(global->atom());
+#ifdef VMCFG_VERIFYALL
+        if (!config.verifyonly)
+#endif
+        {
+            main->coerceEnter(global->atom());
+        }
   
         exec->notifyAbcPrepared(toplevel, abcEnv);
 
