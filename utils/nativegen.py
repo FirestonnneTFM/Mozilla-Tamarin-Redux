@@ -2687,6 +2687,7 @@ for file in args:
 
 if abcGenFor:
     hfile = None
+    clsfile = None
     cppfile = None
     try:
         hfile = open(abcGenName+".h","w")
