@@ -353,6 +353,9 @@ are several kinds of annotations.
 
 <ul>
 <li><p> Known pointers are annotated with <tt>GC_POINTER</tt>:
+
+<P><center><big><b>NOTE!! No GC_POINTER member annotation is required for GCMembers (eg. GCMember&lt;ScriptObject&gt; sObject;)</b></big></center>
+
 <pre>
   DRCWB(ClassClosure*) GC_POINTER(t);
 </pre>

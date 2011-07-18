@@ -177,6 +177,9 @@ checking and allows for nested classes.
 
 <P>Annotate each pointer member in the data section by making each thing
 on the left in the table below turn into the thing on the right:
+
+<P><center><big><b>NOTE!! No GC_POINTER member annotation is required for GCMembers (eg. GCMember&lt;ScriptObject&gt; sObject;)</b></big></center>
+
 <pre>
   DRCWB(ClassClosure*) p;  |  DRCWB(ClassClosure*) <b>GC_POINTER</b>(p); // untagged pointer
   ATOM_WB a;               |  ATOM_WB <b>GC_ATOM</b>(a);                 // AVM+ atom
