@@ -601,8 +601,7 @@ namespace avmplus
     private:    FixedBitSet             GC_STRUCTURE(m_slotDestroyInfo);// bitset for non-native slots, destruction of native slots is left to C++ write barriers
     private:    GCMember<MMgc::GCWeakRef> GC_POINTER(m_tbref);            // our TraitsBindings
     private:    GCMember<MMgc::GCWeakRef> GC_POINTER(m_tmref);            // our TraitsMetadata
-    private:    GCMember<const ScopeTypeChain>
-                                        GC_POINTER(m_declaringScope);
+    private:    GCMember<const ScopeTypeChain> GC_POINTER(m_declaringScope);
 #ifdef VMCFG_CACHE_GQCN
     private:    GCMember<String>        GC_POINTER(_fullname);           // _fullname is the value returned by formatClassName
 #endif

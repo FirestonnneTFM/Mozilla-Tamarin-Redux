@@ -301,8 +301,7 @@ namespace avmplus
         uintptr_t                   GC_CONSERVATIVE(activationOrMCTable);
     public:
 #ifdef VMCFG_LOOKUP_CACHE
-        GCMember<ExactStructContainer<LookupCache> >
-                                    GC_POINTER(lookup_cache);
+        GCMember<ExactStructContainer<LookupCache> > GC_POINTER(lookup_cache);
 #endif
 
         GC_DATA_END(MethodEnv)
