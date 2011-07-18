@@ -689,6 +689,16 @@ function readFiles(files)
         return v;
     }
 
+    function pushGCmembers(list, cls) {
+        var members = [];
+        var result = list.split(/,|;/);
+        for(var i = 0; i < result.length - 1; i++) {
+            var attr = [cls];
+            attr[1] = result[i].replace(/^\s*|\s*$/g, "");
+            specs.push(new constructors["GC_POINTER"]("GC_POINTER",attr,copyIfStack()));
+        }
+    }
+
     function positionalAttrs(tag, s, paren, cls) {
         var attr = splitAttrs(s, paren);
         for ( var i=0 ; i < attr.length ; i++ ) {
@@ -797,6 +807,13 @@ function readFiles(files)
         return deprecatedFieldTag.exec(line.substring(where));
     }
 
+    const gcmemberFieldTag = new RegExp("GCMember<.*>\\s*(.*;)");
+    const gcPointerRegex = new RegExp("GC_POINTER\\((.*)");
+
+    function matchGCMemberFields(line, where) {
+        return gcmemberFieldTag.exec(line.substring(where));
+    }
+
     function stackToCppPrefix() {
         var pfx="";
         for ( var i=0; i < cppClassStack.length; i++)
@@ -847,19 +864,22 @@ function readFiles(files)
             var gcIndex = -1;
             var nativeIndex = -1;
             var cppIndex = -1;
+            var gcmemberIndex = -1;
+
             if (!as3file) {
                 gcIndex = line.indexOf("GC_");
-                cppIndex = line.indexOf("#");
+                cppIndex = line.indexOf("#"); // #ifdef ?
+                gcmemberIndex = line.indexOf("GCMember"); // gcmember?
             }
             if (!cppfile)
                 nativeIndex = line.indexOf("[native");
-            if (gcIndex == -1 && cppIndex == -1 && nativeIndex == -1)
+            if (gcIndex == -1 && cppIndex == -1 && nativeIndex == -1 && gcmemberIndex == -1)
                 continue;
 
             // The start we found above may be inside a comment.  Here we handle
             // line comments; it would be better if we could handle block comments too.
             // Bugzilla 649333 tracks the block comment issue.
-        
+
             if (line.match(/^\s*\/\//))
                 continue;
 
@@ -874,9 +894,9 @@ function readFiles(files)
                 //  - preserve the elif / else structure
                 //
                 // I've gone with the former because it fits the structure of existing code, but
-                // if the resulting condtions end up being messy, or it becomes unreliable for
-                // any reason, then we should reconsider.  In practice most conditions are simple
-                // and #if..elif chains are not long.  The main liability is that we sort field names
+                // if the resulting conditions end up being messy, or it becomes unreliable for
+                // any reason, then we should reconsider. In practice most conditions are simple
+                // and #if..elif chains are not long. The main liability is that we sort field names
                 // lexicographically so clauses may become reorganized on output; this does not lead
                 // to bugs but makes the code confusing to read.
 
@@ -928,6 +948,29 @@ function readFiles(files)
                 }
             }
 
+            // Filters for GCMember edge cases
+            if(gcmemberIndex >= 0) {
+                line = line.replace(/GCMember\s*</g, "GCMember<");
+                var singlelineCommentIndex = line.indexOf("//");
+                // GCMember inside a single line comment: " uint64_t* GC_POINTER( m_invocationCounts ); // GCMember<> does not work.... "
+                if(singlelineCommentIndex >=0 && gcmemberIndex > singlelineCommentIndex)
+                    gcmemberIndex = -1;
+
+                var slashStarStartIndex = line.indexOf("/*");
+                var slashStarEndIndex = line.indexOf("*/");
+                // GCMember inside a single line comment: " uint64_t* GC_POINTER( m_invocationCounts ); /* GCMember<> does not work */ "
+                if(gcmemberIndex > slashStarStartIndex && gcmemberIndex < slashStarEndIndex)
+                    gcmemberIndex = -1;
+
+                if(gcmemberIndex != -1) {
+                    gcmemberIndex = line.indexOf("GCMember<");
+                    if(gcmemberIndex == -1) {
+                        print(line);
+                        fail("GCMember incorrectly formatted. Must provide the member name on the same line!!");
+                    }
+                }
+            }
+
             // For line matching of GC_ directives we match only at
             // the start of the line after taking the substring
             // starting at the known-good index.  This yields the same
@@ -962,14 +1005,49 @@ function readFiles(files)
                 }
                 else if ((result = matchCppFieldTag(line, gcIndex)) != null) {
                     reportMatch(line);
-                    var v = positionalAttrs(result[1], result[2], ")", currentClassName());
-                    specs.push(v);
+                    // If its a GCMember, lets just do the work below
+                    if(gcmemberIndex == -1) {
+                        var v = positionalAttrs(result[1], result[2], ")", currentClassName());
+                        specs.push(v);
+                    }
                 }
                 else {
                     if(line.indexOf("_IF") >= 0 && matchDeprecatedFieldTag(line, gcIndex) != null) {
                         print(line);
                         fail("The above annotation has _IF/_IFDEF/_IFNDEF!! _IF etc. are no longer required on member annotations and should be removed.");
                     }
+                }
+            }
+
+            if(gcmemberIndex >= 0) {
+                // Ignore GCMembers in non-exact classes
+                if(cppClassStack.length == 0 || cppDataStack.length == 0) {
+                    continue;
+                }
+
+                if((result = matchGCMemberFields(line, gcmemberIndex)) != null) {
+                    reportMatch(line);
+
+                    // Check if this already has a GC_POINTER annotation (for backward compatibility). This should ideally go away,
+                    // Once there are no DWB etc, we can get rid of all GC_POINTER annotations altogether.
+                    var gcIndexNow = line.indexOf("GC_");
+                     if(gcIndexNow >= 0) {
+                        // Remember we did not handle these above with GC_POINTER condition
+                        // Need to get the member name. This doesn't take care of multiple gcmembers desclarations in a line
+                        // like GCMember<SomeClass> GC_POINTER(x), y, z;
+                        var new_result = gcPointerRegex.exec(result[1]);
+
+                        var v = positionalAttrs("GC_POINTER", new_result[1], ")", currentClassName());
+                        specs.push(v);
+                    }
+                    else {
+                        // Handles multiple GCMember declaration of same class: GCMember<SomeClass> x, y, z;
+                        pushGCmembers(result[1], currentClassName());
+                    }
+                }
+                else {
+                    print(line);
+                    fail("GCMember incorrectly formatted. Must provide the member name on the same line!!");
                 }
             }
 
