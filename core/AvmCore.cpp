@@ -956,7 +956,7 @@ namespace avmplus
         // ------------------ run the init-methods for Object$ and Class$
 
 #ifdef VMCFG_VERIFYALL
-        if (!config.verifyonly)
+        if (!config.verifyonly && !config.verifyall)
 #endif
         {
             object_cvtable->init->coerceEnter(object_class->atom());
@@ -992,13 +992,34 @@ namespace avmplus
         // ------------------ run the init-method for global
 
 #ifdef VMCFG_VERIFYALL
-        if (!config.verifyonly)
+        if (!config.verifyonly && !config.verifyall)
 #endif
         {
             main->coerceEnter(global->atom());
         }
   
-        exec->notifyAbcPrepared(toplevel, abcEnv);
+#ifdef VMCFG_VERIFYALL
+        if (config.verifyall)
+        {
+            // We have to jump thru some hoops here in an ugly way: 
+            // in verifyall mode, the MethodInfo invokers aren't filled in 
+            // properly, and require notifyAbcPrepared to be called first.
+            // This breaks the sequenced bootstrapping above, but it turns out
+            // that we don't need the sequence above in verifyall mode.
+            exec->notifyAbcPrepared(toplevel, abcEnv);
+            
+            object_cvtable->init->coerceEnter(object_class->atom());
+            class_cvtable->init->coerceEnter(class_class->atom());
+            main->coerceEnter(global->atom());
+        }
+        else
+#endif
+        {
+            // We don't really need to call this, since the only implementation
+            // is a no-op when !config.verifyall... but let's do it anyway, in case
+            // additional work is done in the future.
+            exec->notifyAbcPrepared(toplevel, abcEnv);
+        }
 
         return toplevel;
     }
