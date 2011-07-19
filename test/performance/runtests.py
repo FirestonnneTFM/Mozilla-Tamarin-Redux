@@ -409,8 +409,10 @@ class PerformanceRuntest(RuntestBase):
         if self.avm2:
             self.avm2DefaultName += ':'+self.avm2revision
             if self.iterations == 1:
-                self.js_print('\n%-*s %5s %7s %7s\n' % (self.testFieldLen, 'test', self.besttime,
-                                                        self.avm2name, '%diff'))
+                self.js_print('\n{0:>{1}}{2:>{3}}'.format(self.avmname, self.testFieldLen+self.resultWidth-2,
+                                                             self.avm2name, self.resultWidth+1))
+                self.js_print('%-*s %5s %7s %9s\n' % (self.testFieldLen, 'test', 'avg',
+                                                        'avg', '%diff'))
             else:   # multiple iterations
                 if self.detail:
                     # Original old-school header - deprecated
@@ -443,7 +445,7 @@ class PerformanceRuntest(RuntestBase):
                                                         self.besttime,
                                                         'avg','95%_conf'))
             else:
-                self.js_print("\n\n%-*s %7s \n" % (self.testFieldLen, "test", self.besttime))
+                self.js_print("\n\n%-*s %7s \n" % (self.testFieldLen, "test", "result"))
 
 
     def runTests(self, testList):
@@ -895,11 +897,21 @@ class PerformanceRuntest(RuntestBase):
         '''Print output for single iteration when comparing 2 vms'''
         spdup = self.testData[testName][metric]['spdup']
         avg_spdup = self.testData[testName][metric]['avg_spdup']
-        self.js_print('%-*s %5s %7s %6.1f %6.1f' % (self.testFieldLen, self.truncateDescField(descStr),
-                                                      self.formatResult(self.testData[testName][metric]['best1'], metric=metric),
-                                                      self.formatResult(self.testData[testName][metric]['best2'], metric=metric),
-                                                      spdup, avg_spdup))
-
+        
+        if pythonVersion26():
+            self.js_print('{0:<{testwidth}}{1:>{rw}}{2:>{rw}}{3:>{rw}}{4:>{rw}}'.
+                            format(self.truncateDescField(descStr),
+                                   self.formatResult(self.testData[testName][metric]['best1'], metric=metric),
+                                   self.formatResult(self.testData[testName][metric]['best2'], metric=metric),
+                                   self.formatResult(spdup, 4, 1, 'percent'),
+                                   self.formatResult(avg_spdup, 4, 1, 'percent'),
+                                   testwidth=self.testFieldLen, rw=self.resultWidth))
+        else: # python <= 2.5
+            self.js_print('%-*s %5s %7s %6.1f %6.1f' % (self.testFieldLen, self.truncateDescField(descStr),
+                                                          self.formatResult(self.testData[testName][metric]['best1'], metric=metric),
+                                                          self.formatResult(self.testData[testName][metric]['best2'], metric=metric),
+                                                          spdup, avg_spdup))
+            
     def printMultiIterationComparison(self, descStr, testName, metric):
         '''Print output for multiple iterations when comparing 2 vms'''
         relStdDev1 = rel_std_dev(self.testData[testName][metric]['results1'])
