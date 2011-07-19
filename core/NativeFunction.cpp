@@ -204,6 +204,9 @@ namespace avmplus
             }
         }
 #endif
+        // This function should *never* return NULL; if we get in this situation, it's
+        // almost certainly due to an unexpected error during VM bootstrapping.
+        AvmAssert(*cc != NULL);
         return *cc;
     }
 
