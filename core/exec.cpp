@@ -758,7 +758,7 @@ inline void checkArgc(MethodEnv *env, int32_t argc, MethodSignaturep ms)
 
     // Should no longer be possible to have mismatched scopes; we should reject any such
     // functions in makeIntoPrototypeFunction().
-    AvmAssert(env->method->declaringScope() == env->scope()->scopeTraits());
+    AvmAssert(env->method->declaringScope()->equals(env->scope()->scopeTraits()));
 }
 
 // static

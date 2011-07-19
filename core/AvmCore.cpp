@@ -853,7 +853,7 @@ namespace avmplus
         PoolObject* pool = abcEnv->pool();
         AvmAssert(pool == core->builtinPool);
         Namespace* dxns = core->dxns();
-        AvmAssert(dxns == publicNamespace);
+        AvmAssert(dxns->isPublic());
 
         uint32_t const last = pool->scriptCount()-1;
         Traits* scriptTraits = pool->getScriptTraits(last);
