@@ -505,6 +505,132 @@ package apivergen
     }
 
     /*
+      emit java
+    */
+    function emitj(frag) {
+        var out = DO_NOT_EDIT + LICENSE_BLOCK;
+        out += "\n";
+        out += "package adobe.abc;\n";
+        out += "\n";
+        out += "public class APIVersions {\n";
+        out += "\n";
+
+        var c = frag.series_names;
+        for ( var i=0 ; i < c.length ; i++ )
+        {
+            out += "public static final int kApiVersionSeries_" + c[i] + " = " + i + ";\n";
+        }
+        out += "\n";
+        
+        out += "public static final int kApiVersionSeries_count = " + c.length + ";\n";
+        out += "\n";
+
+        var c = frag.ordered_versions;
+        for ( var i=0 ; i < c.length ; i++ )
+        {
+            out += "public static final int kApiVersion_" + c[i].name + " = " + c[i].value + ";\n";
+        }
+        out += "\n";
+
+        out += "public static final int kApiVersion_count = " + frag.ordered_versions.length + ";\n";
+        out += "\n";
+        out += "public static final String kApiVersionNames[]= {\n";
+        var c = frag.ordered_versions;
+        for ( var i=0 ; i < c.length ; i++ )
+        {
+            out += '    "' + c[i].name + '"';
+            if (i < c.length - 1)
+               out += ", ";
+            out += "\n";
+        }
+        out += "};\n";
+        out += "\n";
+
+        out += "public static final int kApiVersionSeriesMembership[kApiVersion_count] = {\n";
+        var c = frag.ordered_versions;
+        for (var i=0 ; i < c.length; i++)
+        {
+            var s:String = "";
+            for (var j=0 ; j < frag.series_names.length; j++)
+            {
+                if (frag.series_names[j] in c[i].series)
+                {
+                    if (s.length > 0)
+                        s += "|";
+                    s += '(1<<kApiVersionSeries_' + frag.series_names[j] + ')';
+                }
+            }
+            out += "    " + s;
+            if (i < c.length-1)
+                out += ",";
+            out += '\n';
+        }
+        out += "};\n";
+        out += "\n";
+
+        out += "public static final int kApiVersionSeriesTransfer[kApiVersion_count][kApiVersionSeries_count] = {\n";
+        var c = frag.ordered_versions;
+        for (var i=0 ; i < c.length; i++)
+        {
+            out += "    { ";
+            for (var j=0 ; j < frag.series_names.length; j++)
+            {
+                var cur_series_name = frag.series_names[j];
+                // Find the smallest version in the given series that has us as a subset.
+                for (var k:int = i; k < c.length; k++)
+                {
+                    if ((cur_series_name in c[k].series) && (c[i].name in c[k].all_subs))
+                    {
+                        out += "kApiVersion_" + c[k].name;
+                        break;
+                    }
+                }
+                if (k == c.length)
+                {
+                    throw Error("impossible");
+                }
+                if (j < frag.series_names.length - 1)
+                    out += ", ";
+            }
+            out += ' }';
+            if (i < c.length-1)
+                out += ",";
+            out += " // " + c[i].name;
+            out += "\n";
+        }
+        out += "};\n";
+        out += "\n";
+
+        out += "public static final int kApiVersionFirst[kApiVersionSeries_count] = {\n";
+        var c = frag.series_first;
+        for (var i=0 ; i < c.length; i++)
+        {
+            out += '    kApiVersion_' + c[i];
+            if (i < c.length-1)
+                out += ",";
+            out += "\n";
+        }
+        out += "};\n";
+        out += "\n";
+
+        out += "public static final int kApiVersionLatest[kApiVersionSeries_count] = {\n";
+        var c = frag.series_latest;
+        for (var i=0 ; i < c.length; i++)
+        {
+            out += '    kApiVersion_' + c[i];
+            if (i < c.length-1)
+                out += ",";
+            out += "\n";
+        }
+        out += "};\n";
+        out += "\n";
+
+        out += "};";
+        out += "\n";
+        return out;
+    }
+    
+    /*
       emit actionscript
     */
     function emitas(frag) 
@@ -531,4 +657,5 @@ package apivergen
     File.write("api-versions.h", emith(frags));
     File.write("api-versions.cpp", emitcpp(frags));
     File.write("api-versions.as", emitas(frags));
+    File.write("api-versions.java", emitj(frags));
 }
