@@ -557,7 +557,7 @@ namespace avmplus
         AvmCore* core = toplevel->core();
         VTable* object_ivtable = toplevel->objectClass->ivtable();
 
-        ScriptObject* o = ScriptObject::create(core->GetGC(), object_ivtable, toplevel->objectClass->prototypePtr(), 2*argc+1);
+        ScriptObject* o = ScriptObject::create(core->GetGC(), object_ivtable, toplevel->objectClass->prototypePtr(), argc);
 
         for (; argc-- > 0; sp -= 2)
         {
