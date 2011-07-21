@@ -1217,6 +1217,12 @@ namespace MMgc
         bool IsPointerToGCObject(const void *realptr);
 
         /**
+         * @return true if address is a GC page, a GCRoot or stack
+         * memory.
+         */
+        bool IsPointerToScannedMemory(const void *address);
+
+        /**
          * GC initialization time, in ticks.  Used for logging.
          * FIXME: why is this public?
          */
@@ -1639,6 +1645,7 @@ namespace MMgc
 
         static void DoCleanStack(void* stackPointer, void* arg);
         static void DoMarkFromStack(void* stackPointer, void* arg);
+        static void DoCheckAddress(void* stackPointer, void* arg);
 
     public:
         // Sweep all small-block pages that need sweeping
@@ -1675,6 +1682,8 @@ namespace MMgc
         GCRoot *m_roots;
         void AddRoot(GCRoot *root);
         void RemoveRoot(GCRoot *root);
+
+        bool IsPointerToGCRoot(const void *address);
 
         /**
          * Points to the head of a linked list of callback objects.

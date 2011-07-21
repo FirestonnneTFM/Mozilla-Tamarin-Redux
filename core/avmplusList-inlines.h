@@ -85,12 +85,6 @@ namespace avmplus
     // ----------------------------
 
     template<class T>
-    REALLY_INLINE /*static*/ void DataListHelper<T>::wbData(const void* /*container*/, LISTDATA** address, LISTDATA* data)
-    {
-        *address = data;
-    }
-
-    template<class T>
     REALLY_INLINE /*static*/ typename DataListHelper<T>::TYPE DataListHelper<T>::load(LISTDATA* data, uint32_t index)
     {
         AvmAssert(data != NULL);
@@ -133,24 +127,10 @@ namespace avmplus
     template<class T>
     REALLY_INLINE /*static*/ void DataListHelper<T>::gcTrace(MMgc::GC* gc, LISTDATA** loc)
     {
-        AvmAssert(!gc->IsPointerToGCPage(*loc));
-        (void)gc; (void)loc;
+        gc->TraceLocation(loc);
     }
 
     // ----------------------------
-
-    REALLY_INLINE /*static*/ void GCListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
-    {
-        MMgc::GC* const gc = data->gc();
-        if (gc->IsPointerToGCPage(container))
-        {
-            WB(gc, gc->FindBeginningFast(container), address, data);
-        }
-        else
-        {
-            *address = data;
-        }
-    }
 
     REALLY_INLINE /*static*/ GCListHelper::TYPE GCListHelper::load(LISTDATA* data, uint32_t index)
     {
@@ -193,19 +173,6 @@ namespace avmplus
     }
     
     // ----------------------------
-
-    REALLY_INLINE /*static*/ void RCListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
-    {
-        MMgc::GC* const gc = data->gc();
-        if (gc->IsPointerToGCPage(container))
-        {
-            WB(gc, gc->FindBeginningFast(container), address, data);
-        }
-        else
-        {
-            *address = data;
-        }
-    }
 
     REALLY_INLINE /*static*/ RCListHelper::TYPE RCListHelper::load(LISTDATA* data, uint32_t index)
     {
@@ -265,19 +232,6 @@ namespace avmplus
 
     // ----------------------------
 
-    REALLY_INLINE /*static*/ void AtomListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
-    {
-        MMgc::GC* const gc = data->gc();
-        if (gc->IsPointerToGCPage(container))
-        {
-            WB(gc, gc->FindBeginningFast(container), address, data);
-        }
-        else
-        {
-            *address = data;
-        }
-    }
-
     REALLY_INLINE /*static*/ AtomListHelper::TYPE AtomListHelper::load(LISTDATA* data, uint32_t index)
     {
         AvmAssert(data != NULL);
@@ -321,19 +275,6 @@ namespace avmplus
     }
 
     // ----------------------------
-
-    REALLY_INLINE /*static*/ void WeakRefListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
-    {
-        MMgc::GC* const gc = data->gc();
-        if (gc->IsPointerToGCPage(container))
-        {
-            WB(gc, gc->FindBeginningFast(container), address, data);
-        }
-        else
-        {
-            *address = data;
-        }
-    }
 
     REALLY_INLINE /*static*/ WeakRefListHelper::TYPE WeakRefListHelper::load(LISTDATA* data, uint32_t index)
     {
@@ -489,7 +430,6 @@ namespace avmplus
         AvmAssert(cap <= kListMaxLength);
         typename ListHelper::LISTDATA* newData = ListHelper::LISTDATA::create(gc, cap);
         newData->len = 0;
-        newData->set_gc(gc);
         return newData;
     }
     
