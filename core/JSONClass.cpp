@@ -185,8 +185,9 @@ namespace avmplus
         Toplevel*  const m_toplevel;
         String*  const m_text;          // The input string
         StUTF8String m_textUTF8;        // input string as utf8 byte array
-        uint32_t m_i;                   // Current index in 'text'
-        uint32_t const m_len;           // Length of 'text'
+        uint32_t m_i;                   // Current index in 'm_textUTF8'
+        uint32_t const m_len;           // Length of 'm_textUTF8'
+        bool m_indexValidForText;       // Implies m_i indexes m_text correctly
         char m_token;                   // The current token
 
         String* m_value;                // Any value associated with
@@ -584,7 +585,8 @@ namespace avmplus
         , m_text(text)
         , m_textUTF8(text)
         , m_i(0)
-        , m_len(uint32_t(text->length()))
+        , m_len(uint32_t(m_textUTF8.length()))
+        , m_indexValidForText(true)
         , m_token('\0')
         , m_value(NULL)
     { }
@@ -840,7 +842,11 @@ namespace avmplus
             adv_digits();
         }
 
-        m_value = m_text->substring(start, m_i);
+        if (m_indexValidForText)
+            m_value = m_text->substring(start, m_i);
+        else
+            m_value = m_toplevel->core()->newStringUTF8(&m_textUTF8.c_str()[start], m_i - start);
+
         m_token = '0';
     }
 
@@ -869,10 +875,17 @@ namespace avmplus
             uint32_t c = m_textUTF8.c_str()[m_i];
             if (c < 32)
                 throwParseInputSyntaxError();
+            if (c >= 128)
+                m_indexValidForText = false;
             if (c == 34)    // double-quote
                 break;
             if (c == 92)  { // backslash
-                buffer = buffer->append(m_text->substring(start,m_i));
+                if (m_indexValidForText)
+                    buffer = buffer->append(m_text->substring(start, m_i));
+                else
+                    buffer = buffer->append
+                        (m_toplevel->core()->newStringUTF8
+                         (&m_textUTF8.c_str()[start], m_i - start));
                 m_i++;
                 if (m_i == m_len)
                     throwParseInputSyntaxError();
@@ -928,7 +941,12 @@ namespace avmplus
             else
                 m_i++;
         }
-        buffer = buffer->append(m_text->substring(start, m_i));
+        if (m_indexValidForText)
+            buffer = buffer->append(m_text->substring(start, m_i));
+        else
+            buffer = buffer->append
+                (m_toplevel->core()->newStringUTF8
+                 (&m_textUTF8.c_str()[start], m_i - start));
 
         if (m_i == m_len || m_textUTF8.c_str()[m_i] != 34)  // double-quote
             throwParseInputSyntaxError();
