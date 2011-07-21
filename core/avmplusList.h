@@ -47,13 +47,12 @@ namespace avmplus
     /*
      * MEMORY MANAGEMENT:
      *
-     * The List variants can be instantiated on the stack or embedded as a field in another class.
-     * However, they cannot be allocated dynamically (operator new is private/unimplemented):
-     * some variants use non-GC memory, and none have a vtable compatible with GCFinalizedObject.
-     * If you need to dynamically allocate a list, use HeapList to wrap an instance.
+     * The List variants can be instantiated on the stack or embedded as a field in another class
+     * if that class is a GCObject or a GCRoot, otherwise an assert will fire.   All lists 
+     * use GC memory.
      *
-     * Also, keep in mind that since some variants allocate using nonGC memory, one MUST
-     * ensure the destructor runs, one way or another:
+     * Also, keep in mind that since some variants contain RCObject,
+     * one MUST ensure the destructor runs, one way or another:
      *
      *   with stack allocation, as long as nobody longjmp's over
      *   the destructor, C++ compiler ensures the destructor is called.
@@ -63,9 +62,7 @@ namespace avmplus
      *   if embedding in a GC-allocated object, the embedder
      *   must be a GCFinalizedObject or RCObject, *not* a plain GCObject)
      *
-     * All variants require you to pass in an MMgc::GC*: although some actually
-     * use other allocators (FixedMalloc, system memory, etc), they still need to
-     * be able to inform GC about allocations.
+     * All variants require you to pass in an MMgc::GC*.
      *
      */
 
@@ -107,44 +104,39 @@ namespace avmplus
     // friend template class declaration cruft. Since there's no way to extract a ListData from a ListImpl,
     // this is probably safe enough.
     //
-    // ListData *always* allocates via FixedMalloc.
+    // ListData *always* allocates via the GC.
     template<class STORAGE>
     struct ListData
     {
         uint32_t    len;
-        MMgc::GC*   _gc;
         STORAGE     entries[1];   // lying, really [cap]
         
         // add an empty, inlined ctor to avoid spurious warnings in MSVC2008
         REALLY_INLINE explicit ListData() {}
 
-        REALLY_INLINE MMgc::GC* gc() { return _gc; }
-        REALLY_INLINE void set_gc(MMgc::GC* g) { _gc = g; }
-
         REALLY_INLINE static ListData<STORAGE>* create(MMgc::GC* gc, size_t totalElements)
         {
             using namespace MMgc;
             
-            FixedMalloc* const fm = FixedMalloc::GetFixedMalloc();
-            void* mem = fm->Alloc(GCHeap::CheckForAllocSizeOverflow(sizeof(ListData<STORAGE>),
-                                                                    GCHeap::CheckForCallocSizeOverflow(totalElements-1, sizeof(STORAGE))),
-                                  kNone);
-            gc->SignalDependentAllocation(fm->Size(mem));
+            size_t bytes = GCHeap::CheckForAllocSizeOverflow(sizeof(ListData<STORAGE>),
+                                                             GCHeap::CheckForCallocSizeOverflow(totalElements-1, sizeof(STORAGE)));
+            void *mem = gc->Alloc(bytes);
+            
             return ::new (mem) ListData<STORAGE>();
         }
-        
+
         REALLY_INLINE static void free(MMgc::GC* gc, void* mem)
         {
-            MMgc::FixedMalloc* const fm = MMgc::FixedMalloc::GetFixedMalloc();
-            gc->SignalDependentDeallocation(fm->Size(mem));
-            fm->Free(mem);
+            gc->Free(mem);
         }
-        
+
         REALLY_INLINE static size_t getSize(void* mem)
         {
-            MMgc::FixedMalloc* const fm = MMgc::FixedMalloc::GetFixedMalloc();
-            return fm->Size(mem);
-        }
+            return MMgc::GC::Size(mem);
+        }        
+        
+        REALLY_INLINE MMgc::GC* gc() { return MMgc::GC::GetGC(this); }
+        REALLY_INLINE void set_gc(MMgc::GC* _gc) { AvmAssert(_gc == gc()); (void)_gc; }
     };
 
     // TracedListData *always* allocates via GC.
@@ -198,11 +190,6 @@ namespace avmplus
         // (syntactic sugar)
         typedef ListData<STORAGE> LISTDATA;
 
-        // Store the data at the address, using WB if necessary.
-        // Any pointer already stored there will be overwritten (but not freed); the caller
-        // must ensure that old pointers are freed.
-        static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
-        
         // Load the item and do any conversion necessary from STORAGE to TYPE.
         static TYPE load(LISTDATA* data, uint32_t index);
 
@@ -236,7 +223,6 @@ namespace avmplus
         typedef MMgc::GCObject* STORAGE;
         typedef TracedListData<STORAGE> LISTDATA;
         
-        static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
         static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
@@ -255,7 +241,6 @@ namespace avmplus
         typedef MMgc::RCObject* STORAGE;
         typedef TracedListData<STORAGE> LISTDATA;
         
-        static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
         static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
@@ -274,7 +259,6 @@ namespace avmplus
         typedef Atom STORAGE;
         typedef TracedListData<STORAGE> LISTDATA;
 
-        static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
         static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
@@ -293,7 +277,6 @@ namespace avmplus
         typedef MMgc::GCWeakRef* STORAGE;
         typedef TracedListData<STORAGE> LISTDATA;
 
-        static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
         static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
@@ -462,6 +445,12 @@ namespace avmplus
         
         // null the m_data pointer and free the storage
         void freeData(MMgc::GC* gc);
+
+        // Update ListData pointer using a WriteBarrier if necessary.
+        // This will assert if the address of m_data isn't GC or stack
+        // memory (ie is unreachable by the GC).  GCRoots count
+        // as GC memory.
+        void wbData(typename ListHelper::LISTDATA* newData);
  
         // This function shouldn't be called directly; it's intended to be called
         // only by ensureCapacity(), which does an inline capacity check

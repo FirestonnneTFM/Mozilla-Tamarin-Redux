@@ -3271,6 +3271,41 @@ namespace MMgc
             root->next->prev = root->prev;
     }
 
+    bool GC::IsPointerToGCRoot(const void *addr)
+    {
+        MMGC_LOCK(m_rootListLock);
+        GCRoot *r = m_roots;
+        while(r)  {
+            if(addr >= r->Get() && addr < r->End())
+                return true;
+            r = r->next;
+        }
+        return false;
+    }
+
+    struct ArgRec {
+        bool isScanned;
+        const void *address;
+        const void *stackBase;
+    };
+
+    void GC::DoCheckAddress(void *stackPointer, void *args)
+    {
+        struct ArgRec *arg = (struct ArgRec*)args;
+        arg->isScanned = arg->address >= stackPointer && arg->address <= arg->stackBase;
+    }
+
+    bool GC::IsPointerToScannedMemory(const void *address)
+    {
+        struct ArgRec args = {false, address, NULL};
+        args.isScanned = IsPointerToGCRoot(address) || IsPointerToGCPage(address);
+        if(!args.isScanned) {
+            args.stackBase = (void*)GetStackTop();            
+            VMPI_callWithRegistersSaved(GC::DoCheckAddress, &args);
+        }
+        return args.isScanned;
+    }
+
     void GC::AddCallback(GCCallback *cb)
     {
         cb->prevCB = NULL;
