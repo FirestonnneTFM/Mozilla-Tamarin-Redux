@@ -2208,10 +2208,10 @@ bool ElementE4XNode::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 
 #ifdef DEBUG
 const uint32_t ExactGCTest::gcTracePointerOffsets[] = {
-#if (CASE1)
+#if !(CASE1) && !(CASE2) && (!CASE3NEG)
     offsetof(ExactGCTest, case1_and_3_w),
 #endif
-#if !(CASE1) && !(CASE2) && (!CASE3NEG)
+#if (CASE1)
     offsetof(ExactGCTest, case1_and_3_w),
 #endif
 #if (CASE1)
@@ -2232,6 +2232,11 @@ const uint32_t ExactGCTest::gcTracePointerOffsets[] = {
 #if !(CASE1) && !(CASE2) && !(!CASE3NEG)
     offsetof(ExactGCTest, else_r),
 #endif
+    offsetof(ExactGCTest, nestedTemplate),
+    offsetof(ExactGCTest, sobject1),
+    offsetof(ExactGCTest, sobject2),
+    offsetof(ExactGCTest, sobject3),
+    offsetof(ExactGCTest, sobject4),
     0};
 
 MMgc::GCTracerCheckResult ExactGCTest::gcTraceOffsetIsTraced(uint32_t off) const
@@ -2241,7 +2246,7 @@ MMgc::GCTracerCheckResult ExactGCTest::gcTraceOffsetIsTraced(uint32_t off) const
     (void)result;
     if((result = ScriptObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
         return result;
-    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,8);
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,13);
 }
 #endif // DEBUG
 
@@ -2251,10 +2256,10 @@ bool ExactGCTest::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     (void)_xact_cursor;
     ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
-#if (CASE1)
+#if !(CASE1) && !(CASE2) && (!CASE3NEG)
     gc->TraceLocation(&case1_and_3_w);
 #endif
-#if !(CASE1) && !(CASE2) && (!CASE3NEG)
+#if (CASE1)
     gc->TraceLocation(&case1_and_3_w);
 #endif
 #if (CASE1)
@@ -2275,6 +2280,11 @@ bool ExactGCTest::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 #if !(CASE1) && !(CASE2) && !(!CASE3NEG)
     gc->TraceLocation(&else_r);
 #endif
+    gc->TraceLocation(&nestedTemplate);
+    gc->TraceLocation(&sobject1);
+    gc->TraceLocation(&sobject2);
+    gc->TraceLocation(&sobject3);
+    gc->TraceLocation(&sobject4);
     return false;
 }
 

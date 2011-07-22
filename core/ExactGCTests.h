@@ -79,7 +79,16 @@ namespace avmplus
 #else
         ScriptObject* GC_POINTER(else_r);
 #endif
-
+        //Test multiple member declaration
+        GCMember<ScriptObject>  sobject1, sobject2 ,sobject3;
+        //spaces between 'GCMember' and '<' should get handled correctly
+        GCMember <ScriptObject> sobject4;
+        //Nested Template with GCMember
+        GCMember < ExactHeapList< GCList<ScriptObject> > > nestedTemplate;
+        // GCMember inside a comment
+        int*     ptr1;          //The script should not fail because of this GCMember<>
+        int*     ptr2;          /* The script should not fail because of this GCMember<> */
+        
         GC_DATA_END(ExactGCTest)
 
         // These reference all the variables above, if ifdefs aren't emitted
