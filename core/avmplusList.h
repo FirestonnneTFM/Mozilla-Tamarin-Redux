@@ -690,24 +690,66 @@ namespace avmplus
     typedef ListImpl<Atom, AtomListHelper> AtomList;
 
     // ----------------------------
+    // DataList wraps a ListImpl instead of inheriting from it or typedef'ing to it so it
+    // can provide a by-reference array operator.  This makes it more suitable for using 
+    // in place of primitive arrays.
     template<class T>
-    class DataList : public ListImpl< T, DataListHelper<T> >
+    class DataList : public MMgc::GCInlineObject
     {
+        template<class T2> friend class DataListAccessor;
+        template<class TLIST> friend class VectorAccessor;
     private:
-        typedef ListImpl< T, DataListHelper<T> > BASE;
+        typedef ListImpl< T, DataListHelper<T> > LIST;
 
     public:
         typedef T TYPE;
+        typedef T OPAQUE_TYPE;
         
     public:
         explicit DataList(MMgc::GC* gc,
                           uint32_t capacity,
                           const T* args = NULL);
 
+        bool isEmpty() const;
+        uint32_t length() const;
+        void set_length(uint32_t len);
+        uint32_t capacity() const;
+        void set_capacity(uint32_t len);
+        TYPE get(uint32_t index) const;
+        TYPE first() const;
+        TYPE last() const;
+        void set(uint32_t index, TYPE value);
+        void replace(uint32_t index, TYPE value);
+        void add(TYPE value);
+        void add(const DataList<T>& that);
+        void insert(uint32_t index, TYPE value, uint32_t count = 1);
+        void insert(uint32_t index, const TYPE* args, uint32_t argc);
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const TYPE* args);
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const DataList<T>& args, uint32_t argsOffset);
+        void reverse();
+        void clear();
+        int32_t indexOf(TYPE value) const;
+        int32_t lastIndexOf(TYPE value) const;
+        TYPE removeAt(uint32_t index);
+        TYPE removeFirst();
+        TYPE removeLast();
+        // Since DataLists don't contain GC data its safe and desirable to allow
+        // writing through the [] operator (ie no write barrier concerns).
+        TYPE& operator[](uint32_t index);
+        TYPE operator[](uint32_t index) const;
+        void ensureCapacity(uint32_t cap);
+        uint64_t bytesUsed() const;
+        void destroy();
+        bool isDestroyed() const;
+        void gcTrace(MMgc::GC* gc);
+
     private:
         DataList<T>& operator=(const DataList<T>& other);       // unimplemented
         explicit DataList(const DataList<T>& other);            // unimplemented
         void* operator new(size_t size);                        // unimplemented, use HeapList instead
+
+    private:
+        LIST m_list;
     };
 
     // ----------------------------
