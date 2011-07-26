@@ -518,7 +518,7 @@ class Multiname:
         self.nsset = nsset
         self.name = name
     def __str__(self):
-        nsStrings = map(lambda ns: '"' + ns.decode("utf8") + '"', self.nsset)
+        nsStrings = map(lambda ns: '"' + str(ns).decode("utf8") + '"', self.nsset)
         stringForNSSet = '[' + ', '.join(nsStrings) + ']'
         return stringForNSSet + '::' + unicode(self.name.decode("utf8"))
 
@@ -753,8 +753,11 @@ class NativeInfo:
                 raise Error("It is not legal to specify native(cls/instance) for an interface")
             # this is a little hacky, but it allows us to assume that all traits have a valid CPP name.
             # since we don't yet surface a C++ wrapper for interfaces, this will have to do.
-            t.cpp_name_comps = BASE_CLASS_NAME.split('::')
-            itraits.cpp_name_comps = BASE_INSTANCE_NAME.split('::')
+            t.cpp_name_comps = ni.fullyQualifiedCPPClassName(itraits.name.name + "Class")
+            t.is_synthetic = True
+            itraits.cpp_name_comps = ni.fullyQualifiedCPPClassName(itraits.name.name + "Interface")
+            itraits.is_synthetic = True
+            itraits.base = "Object"
 
         else:
             if t.cpp_name_comps == None and itraits.cpp_name_comps != None:
@@ -1540,10 +1543,15 @@ class AbcThunkGen:
     def class_id_name(self, c):
         return "abcclass_" + self.class_native_name(c)
 
-    def emitAOT(self, out, name, ctypeObject):
+    def emitAOT(self, out, name):
         out.println('#ifdef VMCFG_AOT')
         
-        traits = filter(lambda t: (not (t.itraits != None and t.itraits.is_interface)) and (not t.is_synthetic) and (t.fqcppname() != "double") and ((t.ctype == ctypeObject) or (t.fqcppname() == BASE_INSTANCE_NAME) or (t.fqcppname() == BASE_CLASS_NAME)), self.abc.classes + self.abc.instances)
+        traits = filter(lambda t: (not (t.itraits != None and t.itraits.is_interface)) and \
+                                    (not t.is_interface) and \
+                                    (not t.is_synthetic) and \
+                                    (t.fqcppname() != "double") and \
+                                    ((t.ctype == CTYPE_OBJECT) or (t.fqcppname() == BASE_INSTANCE_NAME) or (t.fqcppname() == BASE_CLASS_NAME)), \
+                        self.abc.classes + self.abc.instances)
         glueClasses = sorted(set(map(lambda t: tuple([t.fqcppname(), t.niname()]), traits)))
         
         out.println('extern "C" const struct {')
@@ -1768,7 +1776,7 @@ class AbcThunkGen:
         out.println("};");
         out.println('')
 
-        self.emitAOT(out, name, CTYPE_OBJECT)
+        self.emitAOT(out, name)
 
         out.println(' '.join(('}',) * len(nativeIDNamespaces)))
 
@@ -1799,8 +1807,6 @@ class AbcThunkGen:
         traitsSet = set()
         for i in range(0, len(self.abc.classes)):
             c = self.abc.classes[i]
-            if c.itraits.is_interface:
-                continue;
             traitsSet.add(c)
             traitsSet.add(c.itraits)
             if c.itraits.is_gc_exact:
@@ -1926,14 +1932,6 @@ class AbcThunkGen:
             self.emitStructDeclarationsForTraits(out, c, visitedGlueClasses)
             if (self.needsInstanceSlotsStruct(c)):
                 self.emitStructDeclarationsForTraits(out, c.itraits, visitedGlueClasses)
-
-    def emitStructInlines(self, out):
-        for i in range(0, len(self.abc.classes)):
-            c = self.abc.classes[i]
-            if c.itraits.is_interface:
-                continue
-            self.emitMethodWrapperBodies(out, c)
-            self.emitMethodWrapperBodies(out, c.itraits)
 
     def emitMethodBodies(self, out):
         visitedGlueClasses = set()
@@ -2098,10 +2096,7 @@ class AbcThunkGen:
                 argname = "thisRef"
             else:
                 argname = "arg%d" % i
-            if argt.is_interface:
-                # FIXME: interface arguments just pass in as ScriptObject, for now
-                arg_typedef = BASE_INSTANCE_NAME
-            elif argt.ctype == CTYPE_OBJECT:
+            if argt.ctype == CTYPE_OBJECT:
                 arg_typedef = argt.fqcppname()
             else:
                 arg_typedef = None # unused
@@ -2212,6 +2207,28 @@ class AbcThunkGen:
             out.println("}")
             out.indent -= 1
 
+        if t.interfaces != None and len(t.interfaces) > 0:
+            out.println("public:")
+            out.indent += 1
+            for i in t.interfaces:
+                if isinstance(i, Multiname):
+                    for ns in i.nsset:
+                        if str(ns) == "" or str(ns) == "private":
+                            continue
+                        intf = self.lookupTraits(str(ns) + "::" + i.name)
+                else:
+                    intf = self.lookupTraits(i)
+                intf_typedef = TYPEMAP_RETTYPE_GCREF[intf.ctype](intf.fqcppname())
+                out.println("REALLY_INLINE %s as_%s()" % (intf_typedef, intf.cppname()))
+                out.println("{")
+                out.indent += 1
+                # We can't use static_cast<> because the subclass might be only forward-declared at this point;
+                out.println("return %s;" % TYPEMAP_TO_GCREF[intf.ctype]("(%s*)this" % intf.fqcppname(),intf.fqcppname()))
+                out.indent -= 1
+                out.println("}")
+            out.indent -= 1
+
+
     def emitSlotDeclarations(self, out, t, sortedSlots, slotsTypeInfo, closingSemi):
         out.println("private:")
         out.indent += 1
@@ -2278,14 +2295,17 @@ class AbcThunkGen:
         out.println('//-----------------------------------------------------------')
         out.println('// %s' % str(t.name))
         out.println('//-----------------------------------------------------------')
-        baseclassname = self.lookupTraits(t.base).fqcppname()
+        base = self.lookupTraits(t.base)
+        baseclassname = base.fqcppname()
+        either_is_interface = (t.is_interface or (t.itraits != None and t.itraits.is_interface))
         out.println("class %s : public %s" % (t.cppname(), baseclassname))
         out.println("{")
         if t.is_gc_exact:
             out.indent += 1
             out.println("GC_DECLARE_EXACT_METHODS")
             out.indent -= 1
-        self.emitConstructDeclarations(out, t, sortedSlots, slotsTypeInfo)
+        if not either_is_interface:
+            self.emitConstructDeclarations(out, t, sortedSlots, slotsTypeInfo)
         self.emitMethodWrappers(out, t)
         self.emitSlotDeclarations(out, t, sortedSlots, slotsTypeInfo, ";")
         out.println("protected:")
@@ -2417,7 +2437,7 @@ class AbcThunkGen:
         for i in range(0, len(abc.classes)):
             c = abc.classes[i]
             if c.itraits.is_interface:
-                continue;
+                continue
             if (c.fqcppname() not in visitedNativeClasses):
                 visitedNativeClasses.add(c.fqcppname())
                 out.println('kSlotsOffset_%s = %s,' % (to_cname(c.fqcppname()), c.cpp_offsetof_slots()))

@@ -2450,28 +2450,27 @@ extern "C" const struct {
     const char* const n_5; avmplus::JObjectClass* const m_5;
     const char* const n_6; avmplus::NewObjectSampleClass* const m_6;
     const char* const n_7; avmplus::NewObjectSampleObject* const m_7;
-    const char* const n_8; avmplus::ScriptObject* const m_8;
-    const char* const n_9; avmplus::TraceClass* const m_9;
-    const char* const n_10; avmshell::AbstractBaseClass* const m_10;
-    const char* const n_11; avmshell::AbstractBaseObject* const m_11;
-    const char* const n_12; avmshell::AbstractRestrictedBaseClass* const m_12;
-    const char* const n_13; avmshell::AbstractRestrictedBaseObject* const m_13;
-    const char* const n_14; avmshell::CheckBaseClass* const m_14;
-    const char* const n_15; avmshell::CheckBaseObject* const m_15;
-    const char* const n_16; avmshell::FileClass* const m_16;
-    const char* const n_17; avmshell::MIClass* const m_17;
-    const char* const n_18; avmshell::MIObject* const m_18;
-    const char* const n_19; avmshell::NativeBaseClass* const m_19;
-    const char* const n_20; avmshell::NativeBaseObject* const m_20;
-    const char* const n_21; avmshell::NativeSubclassOfAbstractBaseClass* const m_21;
-    const char* const n_22; avmshell::NativeSubclassOfAbstractBaseObject* const m_22;
-    const char* const n_23; avmshell::NativeSubclassOfAbstractRestrictedBaseClass* const m_23;
-    const char* const n_24; avmshell::NativeSubclassOfAbstractRestrictedBaseObject* const m_24;
-    const char* const n_25; avmshell::NativeSubclassOfRestrictedBaseClass* const m_25;
-    const char* const n_26; avmshell::NativeSubclassOfRestrictedBaseObject* const m_26;
-    const char* const n_27; avmshell::RestrictedBaseClass* const m_27;
-    const char* const n_28; avmshell::RestrictedBaseObject* const m_28;
-    const char* const n_29; avmshell::SystemClass* const m_29;
+    const char* const n_8; avmplus::TraceClass* const m_8;
+    const char* const n_9; avmshell::AbstractBaseClass* const m_9;
+    const char* const n_10; avmshell::AbstractBaseObject* const m_10;
+    const char* const n_11; avmshell::AbstractRestrictedBaseClass* const m_11;
+    const char* const n_12; avmshell::AbstractRestrictedBaseObject* const m_12;
+    const char* const n_13; avmshell::CheckBaseClass* const m_13;
+    const char* const n_14; avmshell::CheckBaseObject* const m_14;
+    const char* const n_15; avmshell::FileClass* const m_15;
+    const char* const n_16; avmshell::MIClass* const m_16;
+    const char* const n_17; avmshell::MIObject* const m_17;
+    const char* const n_18; avmshell::NativeBaseClass* const m_18;
+    const char* const n_19; avmshell::NativeBaseObject* const m_19;
+    const char* const n_20; avmshell::NativeSubclassOfAbstractBaseClass* const m_20;
+    const char* const n_21; avmshell::NativeSubclassOfAbstractBaseObject* const m_21;
+    const char* const n_22; avmshell::NativeSubclassOfAbstractRestrictedBaseClass* const m_22;
+    const char* const n_23; avmshell::NativeSubclassOfAbstractRestrictedBaseObject* const m_23;
+    const char* const n_24; avmshell::NativeSubclassOfRestrictedBaseClass* const m_24;
+    const char* const n_25; avmshell::NativeSubclassOfRestrictedBaseObject* const m_25;
+    const char* const n_26; avmshell::RestrictedBaseClass* const m_26;
+    const char* const n_27; avmshell::RestrictedBaseObject* const m_27;
+    const char* const n_28; avmshell::SystemClass* const m_28;
 } aotABCTypes_shell_toplevel = {
     "DictionaryClass", 0,
     "DictionaryObject", 0,
@@ -2481,7 +2480,6 @@ extern "C" const struct {
     "JObjectClass", 0,
     "NewObjectSampleClass", 0,
     "NewObjectSampleObject", 0,
-    "ScriptObject", 0,
     "TraceClass", 0,
     "::avmshell::AbstractBaseClass", 0,
     "::avmshell::AbstractBaseObject", 0,
