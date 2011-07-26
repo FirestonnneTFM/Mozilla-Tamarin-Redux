@@ -49,9 +49,14 @@ export shell_extension=
 
 export platform=linux
 
+export CXX='mipsel-linux-uclibc-g++ -static'
+export CC='mipsel-linux-uclibc-gcc -static'
+export AR=mipsel-linux-uclibc-ar
+export LD=mipsel-linux-uclibc-ld
+
 export shell_release=avmshell_mips
 export shell_debug=avmshell_mips_d
-export ssh_proc_names="avmshell_mips avmshell_mips_d"
+export ssh_proc_names="avmshell_mips avmshell_mips_d avmshell_mips_osr"
 
 # Override the default MAKE_OPTIONS env variable on the machine
 export MAKE_OPTIONS="-j2"
