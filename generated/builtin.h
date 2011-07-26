@@ -66,6 +66,10 @@ namespace avmplus {
     class EvalErrorObject; // EvalError
     class FunctionClass; // Function$
     class FunctionObject; // Function
+    class IDataInputClass; // flash.utils::IDataInput$
+    class IDataInputInterface; // flash.utils::IDataInput
+    class IDataOutputClass; // flash.utils::IDataOutput$
+    class IDataOutputInterface; // flash.utils::IDataOutput
     class IOErrorClass; // flash.errors::IOError$
     class IOErrorObject; // flash.errors::IOError
     class IllegalOperationErrorClass; // flash.errors::IllegalOperationError$
@@ -4270,6 +4274,15 @@ class avmplus_ByteArrayObjectSlots
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::IDataInputInterface> as_IDataInputInterface() \
+        { \
+            return GCRef<avmplus::IDataInputInterface>((avmplus::IDataInputInterface*)this); \
+        } \
+        REALLY_INLINE GCRef<avmplus::IDataOutputInterface> as_IDataOutputInterface() \
+        { \
+            return GCRef<avmplus::IDataOutputInterface>((avmplus::IDataOutputInterface*)this); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
@@ -4302,8 +4315,8 @@ public:
     REALLY_INLINE GCRef<avmplus::ErrorClass> get_ErrorClass() { return (avmplus::ErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_Error)); }
     REALLY_INLINE GCRef<avmplus::EvalErrorClass> get_EvalErrorClass() { return (avmplus::EvalErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_EvalError)); }
     REALLY_INLINE GCRef<avmplus::FunctionClass> get_FunctionClass() { return (avmplus::FunctionClass*)(lazyInitClass(avmplus::NativeID::abcclass_Function)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_IDataInputClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_IDataInput)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_IDataOutputClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_IDataOutput)); }
+    REALLY_INLINE GCRef<avmplus::IDataInputClass> get_IDataInputClass() { return (avmplus::IDataInputClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_IDataInput)); }
+    REALLY_INLINE GCRef<avmplus::IDataOutputClass> get_IDataOutputClass() { return (avmplus::IDataOutputClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_IDataOutput)); }
     REALLY_INLINE GCRef<avmplus::IOErrorClass> get_IOErrorClass() { return (avmplus::IOErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_errors_IOError)); }
     REALLY_INLINE GCRef<avmplus::IllegalOperationErrorClass> get_IllegalOperationErrorClass() { return (avmplus::IllegalOperationErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_errors_IllegalOperationError)); }
     REALLY_INLINE GCRef<avmplus::JSONClass> get_JSONClass() { return (avmplus::JSONClass*)(lazyInitClass(avmplus::NativeID::abcclass_JSON)); }

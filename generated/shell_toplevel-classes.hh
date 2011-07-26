@@ -43,6 +43,64 @@
 namespace avmplus {
 
 //-----------------------------------------------------------
+// avmplus::ITest
+//-----------------------------------------------------------
+class ITestInterface : public avmplus::ScriptObject
+{
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::ITestClass;
+    REALLY_INLINE explicit ITestInterface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit ITestInterface(const ITestInterface&); // unimplemented
+    void operator=(const ITestInterface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmplus::ITest$
+//-----------------------------------------------------------
+class ITestClass : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::ITestInterface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::ITestInterface>((avmplus::ITestInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::ITestInterface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::ITestInterface>((avmplus::ITestInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::ITestInterface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::ITestInterface>((avmplus::ITestInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::ITestInterface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::ITestInterface>((avmplus::ITestInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit ITestClass(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit ITestClass(const ITestClass&); // unimplemented
+    void operator=(const ITestClass&); // unimplemented
+};
+
+//-----------------------------------------------------------
 // avmplus::CTest
 //-----------------------------------------------------------
 class CTestObject : public avmplus::ScriptObject
@@ -1377,6 +1435,586 @@ private:
 };
 
 #define avmplus_public_class_FP_10_0_32_AIR_1_0_FP_10_0Class_isExactInterlock 1
+//-----------------------------------------------------------
+// avmshell::public_interface
+//-----------------------------------------------------------
+class public_interfaceInterface : public avmplus::ScriptObject
+{
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::public_interfaceClass;
+    REALLY_INLINE explicit public_interfaceInterface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit public_interfaceInterface(const public_interfaceInterface&); // unimplemented
+    void operator=(const public_interfaceInterface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface$
+//-----------------------------------------------------------
+class public_interfaceClass : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::public_interfaceInterface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::public_interfaceInterface>((avmplus::public_interfaceInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interfaceInterface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::public_interfaceInterface>((avmplus::public_interfaceInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interfaceInterface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::public_interfaceInterface>((avmplus::public_interfaceInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interfaceInterface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::public_interfaceInterface>((avmplus::public_interfaceInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit public_interfaceClass(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit public_interfaceClass(const public_interfaceClass&); // unimplemented
+    void operator=(const public_interfaceClass&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_AIR_1_0
+//-----------------------------------------------------------
+class public_interface_AIR_1_0Interface : public avmplus::ScriptObject
+{
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::public_interface_AIR_1_0Class;
+    REALLY_INLINE explicit public_interface_AIR_1_0Interface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit public_interface_AIR_1_0Interface(const public_interface_AIR_1_0Interface&); // unimplemented
+    void operator=(const public_interface_AIR_1_0Interface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_AIR_1_0$
+//-----------------------------------------------------------
+class public_interface_AIR_1_0Class : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_0Interface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::public_interface_AIR_1_0Interface>((avmplus::public_interface_AIR_1_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_0Interface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_AIR_1_0Interface>((avmplus::public_interface_AIR_1_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_0Interface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::public_interface_AIR_1_0Interface>((avmplus::public_interface_AIR_1_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_0Interface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_AIR_1_0Interface>((avmplus::public_interface_AIR_1_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit public_interface_AIR_1_0Class(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit public_interface_AIR_1_0Class(const public_interface_AIR_1_0Class&); // unimplemented
+    void operator=(const public_interface_AIR_1_0Class&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_FP_10_0
+//-----------------------------------------------------------
+class public_interface_FP_10_0Interface : public avmplus::ScriptObject
+{
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::public_interface_FP_10_0Class;
+    REALLY_INLINE explicit public_interface_FP_10_0Interface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit public_interface_FP_10_0Interface(const public_interface_FP_10_0Interface&); // unimplemented
+    void operator=(const public_interface_FP_10_0Interface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_FP_10_0$
+//-----------------------------------------------------------
+class public_interface_FP_10_0Class : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_FP_10_0Interface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::public_interface_FP_10_0Interface>((avmplus::public_interface_FP_10_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_FP_10_0Interface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_FP_10_0Interface>((avmplus::public_interface_FP_10_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_FP_10_0Interface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::public_interface_FP_10_0Interface>((avmplus::public_interface_FP_10_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_FP_10_0Interface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_FP_10_0Interface>((avmplus::public_interface_FP_10_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit public_interface_FP_10_0Class(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit public_interface_FP_10_0Class(const public_interface_FP_10_0Class&); // unimplemented
+    void operator=(const public_interface_FP_10_0Class&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_AIR_1_5
+//-----------------------------------------------------------
+class public_interface_AIR_1_5Interface : public avmplus::ScriptObject
+{
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::public_interface_AIR_1_5Class;
+    REALLY_INLINE explicit public_interface_AIR_1_5Interface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit public_interface_AIR_1_5Interface(const public_interface_AIR_1_5Interface&); // unimplemented
+    void operator=(const public_interface_AIR_1_5Interface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_AIR_1_5$
+//-----------------------------------------------------------
+class public_interface_AIR_1_5Class : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5Interface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::public_interface_AIR_1_5Interface>((avmplus::public_interface_AIR_1_5Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5Interface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_AIR_1_5Interface>((avmplus::public_interface_AIR_1_5Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5Interface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::public_interface_AIR_1_5Interface>((avmplus::public_interface_AIR_1_5Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5Interface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_AIR_1_5Interface>((avmplus::public_interface_AIR_1_5Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit public_interface_AIR_1_5Class(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit public_interface_AIR_1_5Class(const public_interface_AIR_1_5Class&); // unimplemented
+    void operator=(const public_interface_AIR_1_5Class&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_AIR_1_5_1
+//-----------------------------------------------------------
+class public_interface_AIR_1_5_1Interface : public avmplus::ScriptObject
+{
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::public_interface_AIR_1_5_1Class;
+    REALLY_INLINE explicit public_interface_AIR_1_5_1Interface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit public_interface_AIR_1_5_1Interface(const public_interface_AIR_1_5_1Interface&); // unimplemented
+    void operator=(const public_interface_AIR_1_5_1Interface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_AIR_1_5_1$
+//-----------------------------------------------------------
+class public_interface_AIR_1_5_1Class : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5_1Interface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::public_interface_AIR_1_5_1Interface>((avmplus::public_interface_AIR_1_5_1Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5_1Interface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_AIR_1_5_1Interface>((avmplus::public_interface_AIR_1_5_1Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5_1Interface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::public_interface_AIR_1_5_1Interface>((avmplus::public_interface_AIR_1_5_1Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5_1Interface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_AIR_1_5_1Interface>((avmplus::public_interface_AIR_1_5_1Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit public_interface_AIR_1_5_1Class(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit public_interface_AIR_1_5_1Class(const public_interface_AIR_1_5_1Class&); // unimplemented
+    void operator=(const public_interface_AIR_1_5_1Class&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_FP_10_0_32
+//-----------------------------------------------------------
+class public_interface_FP_10_0_32Interface : public avmplus::ScriptObject
+{
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::public_interface_FP_10_0_32Class;
+    REALLY_INLINE explicit public_interface_FP_10_0_32Interface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit public_interface_FP_10_0_32Interface(const public_interface_FP_10_0_32Interface&); // unimplemented
+    void operator=(const public_interface_FP_10_0_32Interface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_FP_10_0_32$
+//-----------------------------------------------------------
+class public_interface_FP_10_0_32Class : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_FP_10_0_32Interface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::public_interface_FP_10_0_32Interface>((avmplus::public_interface_FP_10_0_32Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_FP_10_0_32Interface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_FP_10_0_32Interface>((avmplus::public_interface_FP_10_0_32Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_FP_10_0_32Interface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::public_interface_FP_10_0_32Interface>((avmplus::public_interface_FP_10_0_32Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_FP_10_0_32Interface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_FP_10_0_32Interface>((avmplus::public_interface_FP_10_0_32Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit public_interface_FP_10_0_32Class(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit public_interface_FP_10_0_32Class(const public_interface_FP_10_0_32Class&); // unimplemented
+    void operator=(const public_interface_FP_10_0_32Class&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_AIR_1_5_2
+//-----------------------------------------------------------
+class public_interface_AIR_1_5_2Interface : public avmplus::ScriptObject
+{
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::public_interface_AIR_1_5_2Class;
+    REALLY_INLINE explicit public_interface_AIR_1_5_2Interface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit public_interface_AIR_1_5_2Interface(const public_interface_AIR_1_5_2Interface&); // unimplemented
+    void operator=(const public_interface_AIR_1_5_2Interface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_AIR_1_5_2$
+//-----------------------------------------------------------
+class public_interface_AIR_1_5_2Class : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5_2Interface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::public_interface_AIR_1_5_2Interface>((avmplus::public_interface_AIR_1_5_2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5_2Interface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_AIR_1_5_2Interface>((avmplus::public_interface_AIR_1_5_2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5_2Interface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::public_interface_AIR_1_5_2Interface>((avmplus::public_interface_AIR_1_5_2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5_2Interface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_AIR_1_5_2Interface>((avmplus::public_interface_AIR_1_5_2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit public_interface_AIR_1_5_2Class(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit public_interface_AIR_1_5_2Class(const public_interface_AIR_1_5_2Class&); // unimplemented
+    void operator=(const public_interface_AIR_1_5_2Class&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_AIR_1_0_FP_10_0
+//-----------------------------------------------------------
+class public_interface_AIR_1_0_FP_10_0Interface : public avmplus::ScriptObject
+{
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::public_interface_AIR_1_0_FP_10_0Class;
+    REALLY_INLINE explicit public_interface_AIR_1_0_FP_10_0Interface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit public_interface_AIR_1_0_FP_10_0Interface(const public_interface_AIR_1_0_FP_10_0Interface&); // unimplemented
+    void operator=(const public_interface_AIR_1_0_FP_10_0Interface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_AIR_1_0_FP_10_0$
+//-----------------------------------------------------------
+class public_interface_AIR_1_0_FP_10_0Class : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_0_FP_10_0Interface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::public_interface_AIR_1_0_FP_10_0Interface>((avmplus::public_interface_AIR_1_0_FP_10_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_0_FP_10_0Interface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_AIR_1_0_FP_10_0Interface>((avmplus::public_interface_AIR_1_0_FP_10_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_0_FP_10_0Interface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::public_interface_AIR_1_0_FP_10_0Interface>((avmplus::public_interface_AIR_1_0_FP_10_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_0_FP_10_0Interface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_AIR_1_0_FP_10_0Interface>((avmplus::public_interface_AIR_1_0_FP_10_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit public_interface_AIR_1_0_FP_10_0Class(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit public_interface_AIR_1_0_FP_10_0Class(const public_interface_AIR_1_0_FP_10_0Class&); // unimplemented
+    void operator=(const public_interface_AIR_1_0_FP_10_0Class&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2
+//-----------------------------------------------------------
+class public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface : public avmplus::ScriptObject
+{
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Class;
+    REALLY_INLINE explicit public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface(const public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface&); // unimplemented
+    void operator=(const public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2$
+//-----------------------------------------------------------
+class public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Class : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface>((avmplus::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface>((avmplus::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface>((avmplus::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface>((avmplus::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Class(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Class(const public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Class&); // unimplemented
+    void operator=(const public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Class&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_FP_10_0_32_AIR_1_0_FP_10_0
+//-----------------------------------------------------------
+class public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface : public avmplus::ScriptObject
+{
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::public_interface_FP_10_0_32_AIR_1_0_FP_10_0Class;
+    REALLY_INLINE explicit public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface(const public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface&); // unimplemented
+    void operator=(const public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::public_interface_FP_10_0_32_AIR_1_0_FP_10_0$
+//-----------------------------------------------------------
+class public_interface_FP_10_0_32_AIR_1_0_FP_10_0Class : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface>((avmplus::public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface>((avmplus::public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface>((avmplus::public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface>((avmplus::public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit public_interface_FP_10_0_32_AIR_1_0_FP_10_0Class(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit public_interface_FP_10_0_32_AIR_1_0_FP_10_0Class(const public_interface_FP_10_0_32_AIR_1_0_FP_10_0Class&); // unimplemented
+    void operator=(const public_interface_FP_10_0_32_AIR_1_0_FP_10_0Class&); // unimplemented
+};
+
 //-----------------------------------------------------------
 // avmshell::SubclassOfAbstractBase
 //-----------------------------------------------------------

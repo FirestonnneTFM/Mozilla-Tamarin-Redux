@@ -58,6 +58,8 @@ namespace avmplus {
     class EndianClass; // flash.utils::Endian$
     class EndianObject; // flash.utils::Endian
     class FileObject; // avmplus::File
+    class ITestClass; // avmplus::ITest$
+    class ITestInterface; // avmplus::ITest
     class JObject; // avmplus::JObject
     class JObjectClass; // avmplus::JObject$
     class NativeBaseAS3Class; // avmshell::NativeBaseAS3$
@@ -106,6 +108,26 @@ namespace avmplus {
     class public_class_FP_10_0_32Object; // avmshell::public_class_FP_10_0_32
     class public_class_FP_10_0_32_AIR_1_0_FP_10_0Class; // avmshell::public_class_FP_10_0_32_AIR_1_0_FP_10_0$
     class public_class_FP_10_0_32_AIR_1_0_FP_10_0Object; // avmshell::public_class_FP_10_0_32_AIR_1_0_FP_10_0
+    class public_interfaceClass; // avmshell::public_interface$
+    class public_interfaceInterface; // avmshell::public_interface
+    class public_interface_AIR_1_0Class; // avmshell::public_interface_AIR_1_0$
+    class public_interface_AIR_1_0Interface; // avmshell::public_interface_AIR_1_0
+    class public_interface_AIR_1_0_FP_10_0Class; // avmshell::public_interface_AIR_1_0_FP_10_0$
+    class public_interface_AIR_1_0_FP_10_0Interface; // avmshell::public_interface_AIR_1_0_FP_10_0
+    class public_interface_AIR_1_5Class; // avmshell::public_interface_AIR_1_5$
+    class public_interface_AIR_1_5Interface; // avmshell::public_interface_AIR_1_5
+    class public_interface_AIR_1_5_1Class; // avmshell::public_interface_AIR_1_5_1$
+    class public_interface_AIR_1_5_1Interface; // avmshell::public_interface_AIR_1_5_1
+    class public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Class; // avmshell::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2$
+    class public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Interface; // avmshell::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2
+    class public_interface_AIR_1_5_2Class; // avmshell::public_interface_AIR_1_5_2$
+    class public_interface_AIR_1_5_2Interface; // avmshell::public_interface_AIR_1_5_2
+    class public_interface_FP_10_0Class; // avmshell::public_interface_FP_10_0$
+    class public_interface_FP_10_0Interface; // avmshell::public_interface_FP_10_0
+    class public_interface_FP_10_0_32Class; // avmshell::public_interface_FP_10_0_32$
+    class public_interface_FP_10_0_32Interface; // avmshell::public_interface_FP_10_0_32
+    class public_interface_FP_10_0_32_AIR_1_0_FP_10_0Class; // avmshell::public_interface_FP_10_0_32_AIR_1_0_FP_10_0$
+    class public_interface_FP_10_0_32_AIR_1_0_FP_10_0Interface; // avmshell::public_interface_FP_10_0_32_AIR_1_0_FP_10_0
 }
 
 namespace avmshell {
@@ -2204,7 +2226,7 @@ public:
     REALLY_INLINE GCRef<avmplus::DomainClass> get_DomainClass() { return (avmplus::DomainClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_Domain)); }
     REALLY_INLINE GCRef<avmplus::EndianClass> get_EndianClass() { return (avmplus::EndianClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_Endian)); }
     REALLY_INLINE GCRef<avmshell::FileClass> get_FileClass() { return (avmshell::FileClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_File)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_ITestClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_ITest)); }
+    REALLY_INLINE GCRef<avmplus::ITestClass> get_ITestClass() { return (avmplus::ITestClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_ITest)); }
     REALLY_INLINE GCRef<avmplus::JObjectClass> get_JObjectClass() { return (avmplus::JObjectClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_JObject)); }
     REALLY_INLINE GCRef<avmshell::MIClass> get_MIClass() { return (avmshell::MIClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_MI)); }
     REALLY_INLINE GCRef<avmplus::NativeBaseAS3Class> get_NativeBaseAS3Class() { return (avmplus::NativeBaseAS3Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_NativeBaseAS3)); }
@@ -2235,16 +2257,16 @@ public:
     REALLY_INLINE GCRef<avmplus::public_class_FP_10_0Class> get_public_class_FP_10_0Class() { return (avmplus::public_class_FP_10_0Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_FP_10_0)); }
     REALLY_INLINE GCRef<avmplus::public_class_FP_10_0_32Class> get_public_class_FP_10_0_32Class() { return (avmplus::public_class_FP_10_0_32Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_FP_10_0_32)); }
     REALLY_INLINE GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Class> get_public_class_FP_10_0_32_AIR_1_0_FP_10_0Class() { return (avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_FP_10_0_32_AIR_1_0_FP_10_0)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interfaceClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_AIR_1_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_0)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_AIR_1_0_FP_10_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_0_FP_10_0)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_AIR_1_5Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_5)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_AIR_1_5_1Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_5_1)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_AIR_1_5_2Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_5_2)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_FP_10_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_FP_10_0)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_FP_10_0_32Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_FP_10_0_32)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_FP_10_0_32_AIR_1_0_FP_10_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_FP_10_0_32_AIR_1_0_FP_10_0)); }
+    REALLY_INLINE GCRef<avmplus::public_interfaceClass> get_public_interfaceClass() { return (avmplus::public_interfaceClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface)); }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_0Class> get_public_interface_AIR_1_0Class() { return (avmplus::public_interface_AIR_1_0Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_0)); }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_0_FP_10_0Class> get_public_interface_AIR_1_0_FP_10_0Class() { return (avmplus::public_interface_AIR_1_0_FP_10_0Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_0_FP_10_0)); }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5Class> get_public_interface_AIR_1_5Class() { return (avmplus::public_interface_AIR_1_5Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_5)); }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5_1Class> get_public_interface_AIR_1_5_1Class() { return (avmplus::public_interface_AIR_1_5_1Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_5_1)); }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Class> get_public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Class() { return (avmplus::public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2)); }
+    REALLY_INLINE GCRef<avmplus::public_interface_AIR_1_5_2Class> get_public_interface_AIR_1_5_2Class() { return (avmplus::public_interface_AIR_1_5_2Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_5_2)); }
+    REALLY_INLINE GCRef<avmplus::public_interface_FP_10_0Class> get_public_interface_FP_10_0Class() { return (avmplus::public_interface_FP_10_0Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_FP_10_0)); }
+    REALLY_INLINE GCRef<avmplus::public_interface_FP_10_0_32Class> get_public_interface_FP_10_0_32Class() { return (avmplus::public_interface_FP_10_0_32Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_FP_10_0_32)); }
+    REALLY_INLINE GCRef<avmplus::public_interface_FP_10_0_32_AIR_1_0_FP_10_0Class> get_public_interface_FP_10_0_32_AIR_1_0_FP_10_0Class() { return (avmplus::public_interface_FP_10_0_32_AIR_1_0_FP_10_0Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_FP_10_0_32_AIR_1_0_FP_10_0)); }
 };
 }
 #endif // _H_nativegen_header_shell_toplevel
