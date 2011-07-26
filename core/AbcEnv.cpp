@@ -47,7 +47,7 @@ namespace avmplus
         , m_domainEnv(_codeContext->domainEnv())
         , m_codeContext(_codeContext)
 #ifdef DEBUGGER
-        , m_invocationCounts(NULL)
+        , m_invocationCounts(_pool->core->GetGC(), 0)
 #endif
 #if defined(VMCFG_AOT) && defined(VMCFG_BUFFER_GUARD)
         , m_lazyEvalGuard(this)
@@ -57,8 +57,7 @@ namespace avmplus
 #ifdef DEBUGGER
         if (_pool->core->debugger())
         {
-            MMgc::GC* gc = _pool->core->GetGC();
-            WB(gc, this, &m_invocationCounts, (uint64_t*)gc->Alloc(_pool->methodCount() * sizeof(uint64_t), MMgc::GC::kZero));
+            m_invocationCounts.set_length(_pool->methodCount());
         }
 #endif
 

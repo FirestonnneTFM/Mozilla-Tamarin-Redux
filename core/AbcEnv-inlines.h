@@ -78,7 +78,6 @@ REALLY_INLINE void AbcEnv::setMethod(uint32_t i, MethodEnv* env)
 #ifdef DEBUGGER
 REALLY_INLINE uint64_t& AbcEnv::invocationCount(uint32_t i)
 {
-    AvmAssert(m_invocationCounts != NULL);
     AvmAssert(i < m_pool->methodCount());
     return m_invocationCounts[i];
 }
