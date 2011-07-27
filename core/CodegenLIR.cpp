@@ -6558,7 +6558,16 @@ namespace avmplus
     }
 
     /// set position of a label and patch all pending jumps to point here.
-    void CodegenLIR::emitLabel(CodegenLabel& label) {
+    void CodegenLIR::emitLabel(CodegenLabel& label) 
+    {
+        
+        // specialized calls shouldn't be re-used across labels,
+        // otherwise we might use one that isn't valid for a given
+        // code path. simplest fix is to just clear the map when
+        // we see a label.
+        if (specializedCallHashMap)
+            specializedCallHashMap->clear();
+    
         varTracker->trackLabel(label, state);
 
         // patch all unpatched branches to this label
