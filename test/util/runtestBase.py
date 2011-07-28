@@ -969,7 +969,7 @@ class RuntestBase(object):
                 outabc = os.path.join(output, outname + ".abc")
 
                 if not os.path.exists(output):
-                    self.mkdir_nothrow(output)
+                    os.mkdir(output)
 
                 shutil.copyfile(abcfile, outabc)
                 self.js_print('AOT compilation of %s' % (outabc))
