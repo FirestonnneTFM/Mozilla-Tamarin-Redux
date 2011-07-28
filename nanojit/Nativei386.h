@@ -95,7 +95,7 @@ namespace nanojit
 {
     const int NJ_MAX_REGISTERS = 24; // gpregs, x87 regs, xmm regs
 
-    #define NJ_MAX_STACK_ENTRY           4096
+    #define NJ_MAX_STACK_ENTRY           16384
     #define NJ_MAX_PARAMETERS               1
 
     #define NJ_USES_IMMD_POOL          1
