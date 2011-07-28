@@ -84,7 +84,7 @@ namespace nanojit
 // only d0-d7 are used; in addition, we'll use d0 as s0-s1 for i2d/u2f/etc.
 #define NJ_VFP_MAX_REGISTERS            8
 #define NJ_MAX_REGISTERS                (11 + NJ_VFP_MAX_REGISTERS)
-#define NJ_MAX_STACK_ENTRY              4096
+#define NJ_MAX_STACK_ENTRY              16384
 #define NJ_MAX_PARAMETERS               16
 #define NJ_ALIGN_STACK                  8
 
