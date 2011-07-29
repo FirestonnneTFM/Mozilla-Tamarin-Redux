@@ -39,7 +39,7 @@
 
 #include "avmplus.h"
 
-#define DOPROF
+//#define DOPROF
 #include "../vprof/vprof.h"
 
 namespace avmplus
@@ -793,7 +793,6 @@ namespace avmplus
             printState(buf, state);
         }
         #endif
-        int visit_count = 0;
         coder->writePrologue(state, code_pos, this);
         if (code_length > 0 && code_pos[0] == OP_label) {
             // a reachable block starts at code_pos; explicitly create it,
@@ -803,16 +802,13 @@ namespace avmplus
             // inital sequence of code is only reachable from procedure
             // entry, no block will be created, so verify it explicitly
             verifyBlock(code_pos);
-            visit_count++;
         }
         for (FrameState* succ = worklist; succ != NULL; succ = worklist) {
             worklist = succ->wl_next;
             succ->wl_pending = false;
             verifyBlock(loadBlockState(succ));
-            visit_count++;
         }
         coder->writeEpilogue(state);
-        _nvprof("visit-count", visit_count);
 
         // phase 2 - traverse code in abc order and emit
         mmfx_delete(state);
@@ -2981,20 +2977,6 @@ namespace avmplus
         AvmAssert(false);
     }
 
-    /**
-     * Insert f into list in abc_pc order.  Use a linear search for the
-     * right position.  Keeping the worklist sorted avoids pathalogically
-     * revisiting the same block too many times as long as predecessors
-     * generally come before successors in ABC order.
-     */
-    void reque(FrameState* f, FrameState** list) {
-      while (*list && (*list)->abc_pc < f->abc_pc)
-        list = &(*list)->wl_next;
-      f->wl_next = *list;
-      *list = f;
-      f->wl_pending = true;
-    }
-
     // Merge the current FrameState (this->state) with the target
     // FrameState (getFrameState(target)), and report verify errors.
     // Fixme: Bug 558876 - |current| must not be dereferenced, it could point
@@ -3043,8 +3025,11 @@ namespace avmplus
         if (targetOfBackwardsBranch != targetState->targetOfBackwardsBranch)
             targetChanged |= true;
         targetState->targetOfBackwardsBranch = targetOfBackwardsBranch;
-        if (targetChanged && !targetState->wl_pending)
-            reque(targetState, &worklist);
+        if (targetChanged && !targetState->wl_pending) {
+            targetState->wl_pending = true;
+            targetState->wl_next = worklist;
+            worklist = targetState;
+        }
     }
 
     bool Verifier::mergeState(FrameState* targetState)
