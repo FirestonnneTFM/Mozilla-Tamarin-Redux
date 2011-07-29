@@ -100,35 +100,13 @@ namespace avmplus
         FrameValue& stackValue(int32_t i);
         FrameValue& stackTop();
         int32_t sp() const;
-        void setType(int32_t i, Traits* t) {
-          setType(i, t, typeNotNull(t));
-        }
-        void setType(int32_t i, Traits* t, bool notNull, bool isWith = false);
+        void setType(int32_t i, Traits* t, bool notNull=false, bool isWith=false);
         void pop(int32_t n=1);
         FrameValue& peek(int32_t n=1);
         const FrameValue& peek(int32_t n) const;
-        void pop_push(int32_t n, Traits* t) {
-          pop_push(n, t, typeNotNull(t));
-        }
-        void pop_push(int32_t n, Traits* type, bool notNull);
+        void pop_push(int32_t n, Traits* type, bool notNull=false);
         void push(FrameValue& _value);
-        void push(Traits* t) {
-          push(t, typeNotNull(t));
-        }
-        void push(Traits* traits, bool notNull);
-
-    private:
-        bool typeNotNull(Traits* t) {
-          switch (Traits::getBuiltinType(t)) {
-            case BUILTIN_int:
-            case BUILTIN_uint:
-            case BUILTIN_number:
-            case BUILTIN_boolean:
-              return true;
-            default:
-              return false;
-          }
-        }
+        void push(Traits* traits, bool notNull=false);
     };
 }
 
