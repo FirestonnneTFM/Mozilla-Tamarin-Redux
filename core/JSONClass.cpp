@@ -905,9 +905,7 @@ namespace avmplus
                         isHexDigit(d1 = m_textUTF8.c_str()[m_i]) &&
                         isHexDigit(d2 = m_textUTF8.c_str()[m_i+1]) &&
                         isHexDigit(d3 = m_textUTF8.c_str()[m_i+2]) &&
-                        isHexDigit(d4 = m_textUTF8.c_str()[m_i+3]) &&
-                        (m_i + 3 == m_len ||
-                         !isHexDigit(m_textUTF8.c_str()[m_i+4])))
+                        isHexDigit(d4 = m_textUTF8.c_str()[m_i+3]))
                     {
                         wchar charcode =
                             wchar((hexDigitValue(d1) << 12)
