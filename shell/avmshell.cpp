@@ -711,7 +711,7 @@ namespace avmshell
                     }
 #endif /* AVMPLUS_IA32 */
 #if defined(AVMPLUS_ARM) && defined(VMCFG_NANOJIT)
-                    else if (!VMPI_strcmp(arg+2, "arm_arch")) {
+                    else if (!VMPI_strcmp(arg+2, "arm_arch") && i+1 < argc ) {
                         settings.njconfig.arm_arch = (uint8_t)VMPI_strtol(argv[++i], 0, 10);
                     }
                     else if (!VMPI_strcmp(arg+2, "arm_vfp")) {
@@ -757,7 +757,7 @@ namespace avmshell
                     else if (!VMPI_strcmp(arg+2, "astrace") && i+1 < argc ) {
                         settings.astrace_console = VMPI_strtol(argv[++i], 0, 10);
                     }
-                    else if (!VMPI_strcmp(arg+2, "language")) {
+                    else if (!VMPI_strcmp(arg+2, "language") && i+1 < argc ) {
                         settings.langID=-1;
                         for (int j=0;j<kLanguages;j++) {
                             if (!VMPI_strcmp(argv[i+1],languageNames[j].str)) {
@@ -891,7 +891,7 @@ namespace avmshell
                         usage();
                     }
                 }
-                else if (!VMPI_strcmp(arg, "-stack")) {
+                else if (!VMPI_strcmp(arg, "-stack") && i+1 < argc ) {
                     unsigned stack;
                     int nchar;
                     const char* val = argv[++i];
@@ -905,7 +905,7 @@ namespace avmshell
                     }
                 }
 #ifdef MMGC_MARKSTACK_ALLOWANCE
-                else if (!VMPI_strcmp(arg, "-gcstack")) {
+                else if (!VMPI_strcmp(arg, "-gcstack") && i+1 < argc ) {
                     int stack;
                     int nchar;
                     const char* val = argv[++i];
