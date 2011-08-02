@@ -130,6 +130,9 @@ try {
 }
 AddTestCase("Invalid JSON unicode '\\u0033' (missing end quote)","SyntaxError: Error #1132",exception12);
 */
+
+// Bugzilla 672484: The string literal "\u000FF " *is* valid JSON input.
+/*
 exception13='no exception';
 try {
     JSON.parse('"\\u000FF "');
@@ -137,6 +140,7 @@ try {
     exception13=removeExceptionDetail(e.toString());
 }
 AddTestCase("Invalid JSON unicode '\\u000F'","SyntaxError: Error #1132",exception13);
+*/
 
 exception13='no exception';
 try {
