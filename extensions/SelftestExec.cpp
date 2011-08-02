@@ -1,4 +1,4 @@
-// Generated from ST_avmplus_basics.st, ST_avmplus_builtins.st, ST_avmplus_peephole.st, ST_mmgc_543560.st, ST_mmgc_575631.st, ST_mmgc_580603.st, ST_mmgc_637993.st, ST_mmgc_basics.st, ST_mmgc_dependent.st, ST_mmgc_exact.st, ST_mmgc_finalize_uninit.st, ST_mmgc_gcheap.st, ST_mmgc_gcoption.st, ST_mmgc_mmfx_array.st, ST_mmgc_threads.st, ST_mmgc_weakref.st, ST_vmbase_concurrency.st, ST_vmbase_safepoints.st, ST_vmpi_threads.st
+// Generated from ST_avmplus_basics.st, ST_avmplus_builtins.st, ST_avmplus_peephole.st, ST_mmgc_543560.st, ST_mmgc_575631.st, ST_mmgc_580603.st, ST_mmgc_637993.st, ST_mmgc_basics.st, ST_mmgc_dependent.st, ST_mmgc_exact.st, ST_mmgc_externalalloc.st, ST_mmgc_finalize_uninit.st, ST_mmgc_gcheap.st, ST_mmgc_gcoption.st, ST_mmgc_mmfx_array.st, ST_mmgc_threads.st, ST_mmgc_weakref.st, ST_vmbase_concurrency.st, ST_vmbase_safepoints.st, ST_vmpi_threads.st
 // Generated from ST_avmplus_basics.st
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
@@ -2063,6 +2063,126 @@ verifyPass(true, "true", __FILE__, __LINE__);
 
 }
 void create_mmgc_exact(AvmCore* core) { new ST_mmgc_exact(core); }
+}
+}
+#endif
+
+// Generated from ST_mmgc_externalalloc.st
+// -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+//
+// ***** BEGIN LICENSE BLOCK *****
+// Version: MPL 1.1/GPL 2.0/LGPL 2.1
+//
+// The contents of this file are subject to the Mozilla Public License Version
+// 1.1 (the "License"); you may not use this file except in compliance with
+// the License. You may obtain a copy of the License at
+// http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis,
+// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+// for the specific language governing rights and limitations under the
+// License.
+//
+// The Original Code is [Open Source Virtual Machine.].
+//
+// The Initial Developer of the Original Code is
+// Adobe System Incorporated.
+// Portions created by the Initial Developer are Copyright (C) 2011
+// the Initial Developer. All Rights Reserved.
+//
+// Contributor(s):
+//   Adobe AS3 Team
+//
+// Alternatively, the contents of this file may be used under the terms of
+// either the GNU General Public License Version 2 or later (the "GPL"), or
+// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+// in which case the provisions of the GPL or the LGPL are applicable instead
+// of those above. If you wish to allow use of your version of this file only
+// under the terms of either the GPL or the LGPL, and not to allow others to
+// use your version of this file under the terms of the MPL, indicate your
+// decision by deleting the provisions above and replace them with the notice
+// and other provisions required by the GPL or the LGPL. If you do not delete
+// the provisions above, a recipient may use your version of this file under
+// the terms of any one of the MPL, the GPL or the LGPL.
+//
+// ***** END LICENSE BLOCK ***** */
+
+#include "avmshell.h"
+#ifdef VMCFG_SELFTEST
+namespace avmplus {
+namespace ST_mmgc_externalalloc {
+using namespace MMgc;
+class MyCallback : public MMgc::OOMCallback
+{
+public:
+    MMgc::MemoryStatus status;
+
+    MyCallback()
+    {
+        status = MMgc::GCHeap::GetGCHeap()->GetStatus();
+        MMgc::GCHeap::GetGCHeap()->AddOOMCallback(this);
+    }
+
+    void memoryStatusChange(MMgc::MemoryStatus /*oldStatus*/, MMgc::MemoryStatus newStatus)
+    {
+        status = newStatus;
+    }
+};
+
+class ST_mmgc_externalalloc : public Selftest {
+public:
+ST_mmgc_externalalloc(AvmCore* core);
+virtual void run(int n);
+virtual void prologue();
+virtual void epilogue();
+private:
+static const char* ST_names[];
+static const bool ST_explicits[];
+void test0();
+private:
+    MyCallback *cb;
+
+};
+ST_mmgc_externalalloc::ST_mmgc_externalalloc(AvmCore* core)
+    : Selftest(core, "mmgc", "externalalloc", ST_mmgc_externalalloc::ST_names,ST_mmgc_externalalloc::ST_explicits)
+{}
+const char* ST_mmgc_externalalloc::ST_names[] = {"externalAllocation", NULL };
+const bool ST_mmgc_externalalloc::ST_explicits[] = {false, false };
+void ST_mmgc_externalalloc::run(int n) {
+switch(n) {
+case 0: test0(); return;
+}
+}
+void ST_mmgc_externalalloc::prologue() {
+    cb = new MyCallback();
+
+}
+void ST_mmgc_externalalloc::epilogue() {
+    cb = NULL;
+
+}
+void ST_mmgc_externalalloc::test0() {
+    MMGC_GCENTER(core->gc);
+    size_t softlimit = GCHeap::GetGCHeap()->Config().heapSoftLimit;
+    // Remove the heapSoftLimit, this should ensure that we are not in a MMgc::kMemSoftLimit state,
+    // and hopefully we are in a kMemNormal state otherwise we are in a kMemAbort state and all bets are off.
+    GCHeap::GetGCHeap()->Config().heapSoftLimit = 0;
+// line 78 "ST_mmgc_externalalloc.st"
+verifyPass(cb->status==MMgc::kMemNormal, "cb->status==MMgc::kMemNormal", __FILE__, __LINE__);
+    GCHeap::GetGCHeap()->Config().heapSoftLimit = GCHeap::GetGCHeap()->GetTotalHeapSize();
+    MMgc::GCHeap::SignalExternalAllocation(1024*1024);
+// line 81 "ST_mmgc_externalalloc.st"
+verifyPass(cb->status==MMgc::kMemSoftLimit, "cb->status==MMgc::kMemSoftLimit", __FILE__, __LINE__);
+    MMgc::GCHeap::SignalExternalDeallocation(1024*1024);
+// line 83 "ST_mmgc_externalalloc.st"
+verifyPass(cb->status==MMgc::kMemNormal, "cb->status==MMgc::kMemNormal", __FILE__, __LINE__);
+    GCHeap::GetGCHeap()->Config().heapSoftLimit = softlimit;
+    softlimit = NULL;
+
+
+
+}
+void create_mmgc_externalalloc(AvmCore* core) { new ST_mmgc_externalalloc(core); }
 }
 }
 #endif
