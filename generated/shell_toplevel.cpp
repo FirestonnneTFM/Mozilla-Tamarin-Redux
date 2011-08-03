@@ -888,7 +888,12 @@ avmplus::Atom avmplus_File_writeByteArray_thunk(MethodEnv* env, uint32_t argc, A
 class SlotOffsetsAndAsserts
 {
 public:
+    #ifdef DEBUG
     static uint32_t getSlotOffset(Traits* t, int nameId);
+    static uint32_t getMethodIndex(Traits* t, int nameId);
+    static uint32_t getGetterIndex(Traits* t, int nameId);
+    static uint32_t getSetterIndex(Traits* t, int nameId);
+    #endif // DEBUG
     enum {
         kSlotsOffset_avmplus_CTestClass = 0,
         kSlotsOffset_avmplus_CTestObject = 0,
@@ -1034,6 +1039,29 @@ REALLY_INLINE void SlotOffsetsAndAsserts::check_avmshell_SystemClass(Traits* ctr
     MMGC_STATIC_ASSERT(offsetof(avmshell::SystemClass, m_slots_SystemClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmshell::SystemClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 39) == (offsetof(avmshell::SystemClass, m_slots_SystemClass) + offsetof(avmshell_SystemClassSlots, m_argv)));
+    AvmAssert(getMethodIndex(ctraits, 28) == 5); // exit
+    AvmAssert(getMethodIndex(ctraits, 29) == 6); // exec
+    AvmAssert(getMethodIndex(ctraits, 30) == 7); // getAvmplusVersion
+    AvmAssert(getMethodIndex(ctraits, 31) == 8); // getFeatures
+    AvmAssert(getMethodIndex(ctraits, 32) == 9); // getRunmode
+    AvmAssert(getMethodIndex(ctraits, 33) == 10); // trace
+    AvmAssert(getMethodIndex(ctraits, 34) == 11); // write
+    AvmAssert(getMethodIndex(ctraits, 35) == 12); // debugger
+    AvmAssert(getMethodIndex(ctraits, 36) == 13); // isDebugger
+    AvmAssert(getMethodIndex(ctraits, 37) == 14); // getTimer
+    AvmAssert(getMethodIndex(ctraits, 38) == 15); // private::getArgv
+    AvmAssert(getMethodIndex(ctraits, 40) == 16); // readLine
+    AvmAssert(getGetterIndex(ctraits, 41) == 17); // totalMemory
+    AvmAssert(getGetterIndex(ctraits, 42) == 19); // freeMemory
+    AvmAssert(getGetterIndex(ctraits, 43) == 21); // privateMemory
+    AvmAssert(getMethodIndex(ctraits, 44) == 23); // forceFullCollection
+    AvmAssert(getMethodIndex(ctraits, 45) == 24); // queueCollection
+    AvmAssert(getMethodIndex(ctraits, 46) == 25); // http://www.example.com::nstest
+    AvmAssert(getMethodIndex(ctraits, 47) == 26); // isGlobal
+    AvmAssert(getGetterIndex(ctraits, 48) == 27); // swfVersion
+    AvmAssert(getGetterIndex(ctraits, 49) == 29); // apiVersion
+    AvmAssert(getMethodIndex(ctraits, 50) == 31); // disposeXML
+    AvmAssert(getMethodIndex(ctraits, 51) == 32); // pauseForGCIfCollectionImminent
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::check_avmshell_FileClass(Traits* ctraits, Traits* itraits)
 {
@@ -1109,6 +1137,36 @@ REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_public_classClass(Traits
     AvmAssert(getSlotOffset(itraits, 92) == (offsetof(avmplus::public_classObject, m_slots_public_classObject) + offsetof(avmplus_public_classObjectSlots, m_public_const_AIR_1_0_FP_10_0)));
     AvmAssert(getSlotOffset(itraits, 93) == (offsetof(avmplus::public_classObject, m_slots_public_classObject) + offsetof(avmplus_public_classObjectSlots, m_public_const_AIR_1_5_1_FP_10_0_AIR_1_5_2)));
     AvmAssert(getSlotOffset(itraits, 94) == (offsetof(avmplus::public_classObject, m_slots_public_classObject) + offsetof(avmplus_public_classObjectSlots, m_public_const_FP_10_0_32_AIR_1_0_FP_10_0)));
+    AvmAssert(getMethodIndex(itraits, 95) == 3); // public_function
+    AvmAssert(getMethodIndex(itraits, 96) == 4); // public_function_AIR_1_0
+    AvmAssert(getMethodIndex(itraits, 97) == 5); // public_function_FP_10_0
+    AvmAssert(getMethodIndex(itraits, 98) == 6); // public_function_AIR_1_5
+    AvmAssert(getMethodIndex(itraits, 99) == 7); // public_function_AIR_1_5_1
+    AvmAssert(getMethodIndex(itraits, 100) == 8); // public_function_FP_10_0_32
+    AvmAssert(getMethodIndex(itraits, 101) == 9); // public_function_AIR_1_5_2
+    AvmAssert(getMethodIndex(itraits, 102) == 10); // public_function_AIR_1_0_FP_10_0
+    AvmAssert(getMethodIndex(itraits, 103) == 11); // public_function_AIR_1_5_1_FP_10_0_AIR_1_5_2
+    AvmAssert(getMethodIndex(itraits, 104) == 12); // public_function_FP_10_0_32_AIR_1_0_FP_10_0
+    AvmAssert(getGetterIndex(itraits, 105) == 13); // public_getset
+    AvmAssert(getGetterIndex(itraits, 106) == 15); // public_getset_AIR_1_0
+    AvmAssert(getGetterIndex(itraits, 107) == 17); // public_getset_FP_10_0
+    AvmAssert(getGetterIndex(itraits, 108) == 19); // public_getset_AIR_1_5
+    AvmAssert(getGetterIndex(itraits, 109) == 21); // public_getset_AIR_1_5_1
+    AvmAssert(getGetterIndex(itraits, 110) == 23); // public_getset_FP_10_0_32
+    AvmAssert(getGetterIndex(itraits, 111) == 25); // public_getset_AIR_1_5_2
+    AvmAssert(getGetterIndex(itraits, 112) == 27); // public_getset_AIR_1_0_FP_10_0
+    AvmAssert(getGetterIndex(itraits, 113) == 29); // public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2
+    AvmAssert(getGetterIndex(itraits, 114) == 31); // public_getset_FP_10_0_32_AIR_1_0_FP_10_0
+    AvmAssert(getSetterIndex(itraits, 105) == 14); // public_getset
+    AvmAssert(getSetterIndex(itraits, 106) == 16); // public_getset_AIR_1_0
+    AvmAssert(getSetterIndex(itraits, 107) == 18); // public_getset_FP_10_0
+    AvmAssert(getSetterIndex(itraits, 108) == 20); // public_getset_AIR_1_5
+    AvmAssert(getSetterIndex(itraits, 109) == 22); // public_getset_AIR_1_5_1
+    AvmAssert(getSetterIndex(itraits, 110) == 24); // public_getset_FP_10_0_32
+    AvmAssert(getSetterIndex(itraits, 111) == 26); // public_getset_AIR_1_5_2
+    AvmAssert(getSetterIndex(itraits, 112) == 28); // public_getset_AIR_1_0_FP_10_0
+    AvmAssert(getSetterIndex(itraits, 113) == 30); // public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2
+    AvmAssert(getSetterIndex(itraits, 114) == 32); // public_getset_FP_10_0_32_AIR_1_0_FP_10_0
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_public_class_AIR_1_0Class(Traits* ctraits, Traits* itraits)
 {
@@ -1202,6 +1260,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_StackFrameClass(Traits* 
     AvmAssert(getSlotOffset(itraits, 366) == (offsetof(avmplus::StackFrameObject, m_slots_StackFrameObject) + offsetof(avmplus_StackFrameObjectSlots, m_file)));
     AvmAssert(getSlotOffset(itraits, 367) == (offsetof(avmplus::StackFrameObject, m_slots_StackFrameObject) + offsetof(avmplus_StackFrameObjectSlots, m_line)));
     AvmAssert(getSlotOffset(itraits, 368) == (offsetof(avmplus::StackFrameObject, m_slots_StackFrameObject) + offsetof(avmplus_StackFrameObjectSlots, m_scriptID)));
+    AvmAssert(getMethodIndex(itraits, 369) == 3); // toString
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_SampleClass(Traits* ctraits, Traits* itraits)
 {
@@ -1231,6 +1290,8 @@ REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_NewObjectSampleClass(Tra
     MMGC_STATIC_ASSERT(sizeof(avmplus::NewObjectSampleObject) <= 0xFFFF);
     AvmAssert(getSlotOffset(itraits, 383) == (offsetof(avmplus::NewObjectSampleObject, m_slots_NewObjectSampleObject) + offsetof(avmplus_NewObjectSampleObjectSlots, m_id)));
     AvmAssert(getSlotOffset(itraits, 384) == (offsetof(avmplus::NewObjectSampleObject, m_slots_NewObjectSampleObject) + offsetof(avmplus_NewObjectSampleObjectSlots, m_type)));
+    AvmAssert(getGetterIndex(itraits, 385) == 3); // object
+    AvmAssert(getGetterIndex(itraits, 386) == 5); // size
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_DeleteObjectSampleClass(Traits* ctraits, Traits* itraits)
 {
@@ -1254,6 +1315,10 @@ REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_TraceClass(Traits* ctrai
     AvmAssert(getSlotOffset(ctraits, 426) == (offsetof(avmplus::TraceClass, m_slots_TraceClass) + offsetof(avmplus_TraceClassSlots, m_METHODS_AND_LINES_WITH_ARGS)));
     AvmAssert(getSlotOffset(ctraits, 427) == (offsetof(avmplus::TraceClass, m_slots_TraceClass) + offsetof(avmplus_TraceClassSlots, m_FILE)));
     AvmAssert(getSlotOffset(ctraits, 428) == (offsetof(avmplus::TraceClass, m_slots_TraceClass) + offsetof(avmplus_TraceClassSlots, m_LISTENER)));
+    AvmAssert(getMethodIndex(ctraits, 429) == 5); // setLevel
+    AvmAssert(getMethodIndex(ctraits, 430) == 6); // getLevel
+    AvmAssert(getMethodIndex(ctraits, 431) == 7); // setListener
+    AvmAssert(getMethodIndex(ctraits, 432) == 8); // getListener
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_DictionaryClass(Traits* ctraits, Traits* itraits)
 {

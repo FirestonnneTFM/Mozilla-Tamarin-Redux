@@ -46,8 +46,8 @@ namespace avmplus
 {
     namespace NativeID
     {
-
-        uint32_t SlotOffsetsAndAsserts::getSlotOffset(Traits* t, int nameId)
+#ifdef DEBUG
+        static Binding getBinding(Traits* t, int nameId, const TraitsBindings*& tb)
         {
             Multiname name;
             t->pool->parseMultiname(name, nameId);
@@ -56,11 +56,46 @@ namespace avmplus
 
             AvmAssert(!name.isNsset());
 
-            const TraitsBindings* tb = t->getTraitsBindings();
-            Binding b = tb->findBinding(name.getName(), name.getNamespace());
+            tb = t->getTraitsBindings();
+            return tb->findBinding(name.getName(), name.getNamespace());
+        }
+        
+        uint32_t SlotOffsetsAndAsserts::getSlotOffset(Traits* t, int nameId)
+        {
+            const TraitsBindings* tb;
+            Binding b = getBinding(t, nameId, tb);
+
             AvmAssert(AvmCore::isSlotBinding(b));
             int slotId = AvmCore::bindingToSlotId(b);
             return tb->getSlotOffset(slotId);
         }
+
+        uint32_t SlotOffsetsAndAsserts::getMethodIndex(Traits* t, int nameId)
+        {
+            const TraitsBindings* tb;
+            Binding b = getBinding(t, nameId, tb);
+
+            AvmAssert(AvmCore::isMethodBinding(b));
+            return AvmCore::bindingToMethodId(b);
+        }
+
+        uint32_t SlotOffsetsAndAsserts::getGetterIndex(Traits* t, int nameId)
+        {
+            const TraitsBindings* tb;
+            Binding b = getBinding(t, nameId, tb);
+
+            AvmAssert(AvmCore::hasGetterBinding(b));
+            return AvmCore::bindingToGetterId(b);
+        }
+
+        uint32_t SlotOffsetsAndAsserts::getSetterIndex(Traits* t, int nameId)
+        {
+            const TraitsBindings* tb;
+            Binding b = getBinding(t, nameId, tb);
+
+            AvmAssert(AvmCore::hasSetterBinding(b));
+            return AvmCore::bindingToSetterId(b);
+        }
+#endif
     }
 }

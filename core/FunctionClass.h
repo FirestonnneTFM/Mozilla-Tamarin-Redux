@@ -56,8 +56,6 @@ namespace avmplus
             return new (gc, MMgc::kExact, cvtable->getExtraSize()) FunctionClass(cvtable);
         }
 
-        ClassClosure* createEmptyFunction();
-
         Atom call(int argc, Atom* argv)
         {
             return construct(argc,argv);

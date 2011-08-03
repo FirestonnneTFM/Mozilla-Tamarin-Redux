@@ -68,7 +68,7 @@ namespace avmplus
 
         AvmAssert(traits()->getSizeOfInstance() == sizeof(MethodClosureClass));
 
-        setPrototypePtr(toplevel->functionClass()->createEmptyFunction());
+        setPrototypePtr(toplevel->functionClass()->call_createEmptyFunction());
     }
 
     // Function called as constructor ... not supported from user code

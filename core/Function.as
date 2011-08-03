@@ -58,7 +58,9 @@ package
 
         // called by native code to create empty functions used for
         // prototype and no-arg constructor.
-        private static function emptyCtor()
+        [API(CONFIG::VM_INTERNAL)]
+        [cppcall]
+        public static function createEmptyFunction():Function
         {
             return function() {}
         }

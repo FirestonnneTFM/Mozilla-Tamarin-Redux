@@ -275,16 +275,16 @@ TYPEMAP_RETTYPE = {
 }
 
 TYPEMAP_RETTYPE_GCREF = {
-    CTYPE_OBJECT:       lambda type: "GCRef<%s>" % type,
-    CTYPE_ATOM:         lambda type: "avmplus::Atom",
-    CTYPE_VOID:         lambda type: "void",
-    CTYPE_BOOLEAN:      lambda type: "bool",
-    CTYPE_INT:          lambda type: "int32_t",
-    CTYPE_UINT:         lambda type: "uint32_t",
-    CTYPE_DOUBLE:       lambda type: "double",
-    CTYPE_FLOAT:        lambda type: "float",
-    CTYPE_STRING:       lambda type: "GCRef<avmplus::String>",
-    CTYPE_NAMESPACE:    lambda type: "GCRef<avmplus::Namespace>",
+    CTYPE_OBJECT:       lambda t: "GCRef<%s>" % t.fqcppname(),
+    CTYPE_ATOM:         lambda t: "avmplus::Atom",
+    CTYPE_VOID:         lambda t: "void",
+    CTYPE_BOOLEAN:      lambda t: "bool",
+    CTYPE_INT:          lambda t: "int32_t",
+    CTYPE_UINT:         lambda t: "uint32_t",
+    CTYPE_DOUBLE:       lambda t: "double",
+    CTYPE_FLOAT:        lambda t: "float",
+    CTYPE_STRING:       lambda t: "GCRef<avmplus::String>",
+    CTYPE_NAMESPACE:    lambda t: "GCRef<avmplus::Namespace>",
 }
 
 TYPEMAP_THUNKRETTYPE = {
@@ -383,33 +383,21 @@ TYPEMAP_TO_ATOM_NEEDS_CORE = {
     CTYPE_NAMESPACE:    False,
 }
 
-TYPEMAP_FROM_ATOM = {
+TYPEMAP_ATOM_TO_GCREF = {
     # We can't use static_cast<> because the subclass might be only forward-declared at this point;
     # use good old brute-force cast instead.
-    CTYPE_OBJECT:       lambda val,type: "(%s*)(avmplus::AvmCore::atomToScriptObject(%s))" % (type,val),
-    CTYPE_ATOM:         lambda val,type: "%s" % val,
-    CTYPE_VOID:         lambda val,type: "avmplus::undefinedAtom",
-    CTYPE_BOOLEAN:      lambda val,type: "((%s) != avmplus::falseAtom)" % val,
-    CTYPE_INT:          lambda val,type: "avmplus::AvmCore::integer(%s)" % val,
-    CTYPE_UINT:         lambda val,type: "avmplus::AvmCore::toUInt32(%s)" % val,
-    CTYPE_DOUBLE:       lambda val,type: "avmplus::AvmCore::number(%s)" % val,
-    CTYPE_FLOAT:        lambda val,type: "avmplus::AvmCore::singlePrecisionFloat(%s)" % val,
-    CTYPE_STRING:       lambda val,type: "avmplus::AvmCore::atomToString(%s)" % val,
-    CTYPE_NAMESPACE:    lambda val,type: "avmplus::AvmCore::atomToNamespace(%s)" % val,
+    CTYPE_OBJECT:       lambda val,t: "GCRef<%s>((%s*)(avmplus::AvmCore::atomToScriptObject(%s)))" % (t.fqcppname(),t.fqcppname(),val),
+    CTYPE_ATOM:         lambda val,t: "%s" % val,
+    CTYPE_VOID:         lambda val,t: "avmplus::undefinedAtom",
+    CTYPE_BOOLEAN:      lambda val,t: "((%s) != avmplus::falseAtom)" % val,
+    CTYPE_INT:          lambda val,t: "avmplus::AvmCore::integer(%s)" % val,
+    CTYPE_UINT:         lambda val,t: "avmplus::AvmCore::toUInt32(%s)" % val,
+    CTYPE_DOUBLE:       lambda val,t: "avmplus::AvmCore::number(%s)" % val,
+    CTYPE_FLOAT:        lambda val,t: "avmplus::AvmCore::singlePrecisionFloat(%s)" % val,
+    CTYPE_STRING:       lambda val,t: "GCRef<avmplus::String>(avmplus::AvmCore::atomToString(%s))" % val,
+    CTYPE_NAMESPACE:    lambda val,t: "GCRef<avmplus::Namespace>(avmplus::AvmCore::atomToNamespace(%s))" % val,
 }
 
-TYPEMAP_TO_GCREF = {
-    CTYPE_OBJECT:       lambda val,type: "GCRef<%s>(%s)" % (type,val),
-    CTYPE_ATOM:         lambda val,type: val,
-    CTYPE_VOID:         lambda val,type: val,
-    CTYPE_BOOLEAN:      lambda val,type: val,
-    CTYPE_INT:          lambda val,type: val,
-    CTYPE_UINT:         lambda val,type: val,
-    CTYPE_DOUBLE:       lambda val,type: val,
-    CTYPE_FLOAT:        lambda val,type: val,
-    CTYPE_STRING:       lambda val,type: "GCRef<%s>(%s)" % (type,val),
-    CTYPE_NAMESPACE:    lambda val,type: "GCRef<%s>(%s)" % (type,val),
-}
 
 def uint(i):
     return int(i) & 0xffffffff
@@ -555,6 +543,7 @@ class MemberInfo:
     id = -1
     kind = -1
     name = ""
+    name_index = -1
     metadata = None
 
 class MethodInfo(MemberInfo):
@@ -577,6 +566,7 @@ class MethodInfo(MemberInfo):
     override = False
     receiver = None
     unbox_this = -1 # -1 == undetermined, 0 = no, 1 = yes
+    vtable_index = -1
 
     def isNative(self):
         return (self.flags & NATIVE) != 0
@@ -586,6 +576,14 @@ class MethodInfo(MemberInfo):
 
     def hasOptional(self):
         return (self.flags & HAS_OPTIONAL) != 0
+
+    def cpp_wrapper_name(self):
+        if self.kind == TRAIT_Getter:
+            return "get_" + self.name.name
+        elif self.kind == TRAIT_Setter:
+            return "set_" + self.name.name
+        else:
+            return self.name.name
 
     def assign_names(self, traits, prefix):
         self.receiver = traits
@@ -867,6 +865,8 @@ class Traits:
     names = None
     slots = None
     tmethods = None
+    tmethod_index_count = -1
+    tmethods_name_map = None
     members = None
     class_id = -1
     ctype = CTYPE_OBJECT
@@ -1377,6 +1377,7 @@ class Abc:
                 member.override = (tag & ATTR_override) != 0
             member.kind = kind
             member.name = name
+            member.name_index = name_index
             t.members[i] = member
             t.names[str(name)] = member
 
@@ -2096,11 +2097,7 @@ class AbcThunkGen:
                 argname = "thisRef"
             else:
                 argname = "arg%d" % i
-            if argt.ctype == CTYPE_OBJECT:
-                arg_typedef = argt.fqcppname()
-            else:
-                arg_typedef = None # unused
-            arg_typedef = TYPEMAP_RETTYPE_GCREF[argt.ctype](arg_typedef)
+            arg_typedef = TYPEMAP_RETTYPE_GCREF[argt.ctype](argt)
             args.append((argt, arg_typedef, argname))
         return args
 
@@ -2115,13 +2112,11 @@ class AbcThunkGen:
                 not t.itraits.init.needRest()
 
     def emitConstructObjectDeclaration(self, out, t, args):
-        ret_typedef = TYPEMAP_RETTYPE_GCREF[t.itraits.ctype](t.itraits.fqcppname())
+        ret_typedef = TYPEMAP_RETTYPE_GCREF[t.itraits.ctype](t.itraits)
         arglist = ', '.join(map(lambda (argt, arg_typedef, argname): "%s %s" % (arg_typedef, argname), args[1:]))
         out.println("%s constructObject(%s);" % (ret_typedef, arglist))
 
     def emitMethodWrappers(self, out, t):
-        # For now, only emit a constructObject() wrapper; 
-        # someday, probably emit other C++ -> AS3 call wrappers.
         if self.shouldEmitConstructObject(t):
             out.println("public:")
             out.indent += 1
@@ -2130,10 +2125,12 @@ class AbcThunkGen:
             # t.itraits is a pure-AS3 class, so it has no C++ class;
             # the most closest native ancestor and use that.
             fqcppname = t.itraits.fqcppname()
-            ret_typedef = TYPEMAP_RETTYPE_GCREF[ctype](fqcppname)
+            ret_typedef = TYPEMAP_RETTYPE_GCREF[ctype](t.itraits)
             for i in range(0, t.itraits.init.optional_count+1):
                 arglist = ', '.join(map(lambda (argt, arg_typedef, argname): "%s %s" % (arg_typedef, argname), args[1:]))
-                out.println("REALLY_INLINE %s constructObject(%s)" % (ret_typedef, arglist))
+                # "inline" rather than "REALLY_INLINE" -- it's not essential to inline
+                # this, so let the compiler decide to deinline if it so chooses
+                out.println("inline %s constructObject(%s)" % (ret_typedef, arglist))
                 out.println("{")
                 out.indent += 1
                 # bah, does Python not have an equivalent to JS Array.some?
@@ -2142,15 +2139,14 @@ class AbcThunkGen:
                     needcore = needcore or TYPEMAP_TO_ATOM_NEEDS_CORE[argt.ctype]
                 if needcore:
                     # explicitly cast to AvmCore* because it might be an only-forward-declared subclass
-                    out.println("avmplus::AvmCore* const core = ((AvmCore*)(this->core()));")
+                    out.println("avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core()));")
                 arglist = ', '.join(map(lambda (argt, arg_typedef, argname): TYPEMAP_TO_ATOM[argt.ctype](argname), args))
                 out.println("avmplus::Atom args[%d] = { %s };" % (len(args), arglist))
                 if t.construct == "native":
                     out.println("avmplus::Atom const result = this->construct_native(%s::createInstanceProc, %d, args);" % (t.fqcppname(), len(args)-1))
                 else:
                     out.println("avmplus::Atom const result = this->construct(%d, args);" % (len(args)-1))
-                raw_result = TYPEMAP_FROM_ATOM[ctype]("result", fqcppname)
-                out.println("return %s;" % TYPEMAP_TO_GCREF[ctype](raw_result,fqcppname))
+                out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ctype]("result",t.itraits))
                 out.indent -= 1
                 out.println("}")
                 args.pop()
@@ -2160,7 +2156,7 @@ class AbcThunkGen:
             out.indent += 1
             ctype = t.itraits.ctype
             ifqcppname = t.itraits.fqcppname()
-            ret_typedef = TYPEMAP_RETTYPE_GCREF[ctype](ifqcppname)
+            ret_typedef = TYPEMAP_RETTYPE_GCREF[ctype](t.itraits)
             out.println("REALLY_INLINE bool isType(avmplus::Atom value)")
             out.println("{")
             out.indent += 1
@@ -2177,34 +2173,124 @@ class AbcThunkGen:
             out.println("{")
             out.indent += 1
             out.println("avmplus::Atom const result = asTypeImpl(value);")
-            raw_result = TYPEMAP_FROM_ATOM[ctype]("result", ifqcppname)
-            out.println("return %s;" % TYPEMAP_TO_GCREF[ctype](raw_result,ifqcppname))
+            out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ctype]("result",t.itraits))
             out.indent -= 1
             out.println("}")
             out.println("REALLY_INLINE %s asType(GCRef<avmplus::ScriptObject> value)" % ret_typedef)
             out.println("{")
             out.indent += 1
             out.println("avmplus::Atom const result = asTypeImpl(value->atom());")
-            raw_result = TYPEMAP_FROM_ATOM[ctype]("result", ifqcppname)
-            out.println("return %s;" % TYPEMAP_TO_GCREF[ctype](raw_result,ifqcppname))
+            out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ctype]("result",t.itraits))
             out.indent -= 1
             out.println("}")
             out.println("REALLY_INLINE %s coerceToType(avmplus::Atom value)" % ret_typedef)
             out.println("{")
             out.indent += 1
             out.println("avmplus::Atom const result = coerceToTypeImpl(value);")
-            raw_result = TYPEMAP_FROM_ATOM[ctype]("result", ifqcppname)
-            out.println("return %s;" % TYPEMAP_TO_GCREF[ctype](raw_result,ifqcppname))
+            out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ctype]("result",t.itraits))
             out.indent -= 1
             out.println("}")
             out.println("REALLY_INLINE %s coerceToType(GCRef<avmplus::ScriptObject> value)" % ret_typedef)
             out.println("{")
             out.indent += 1
             out.println("avmplus::Atom const result = coerceToTypeImpl(value->atom());")
-            raw_result = TYPEMAP_FROM_ATOM[ctype]("result", ifqcppname)
-            out.println("return %s;" % TYPEMAP_TO_GCREF[ctype](raw_result,ifqcppname))
+            out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ctype]("result",t.itraits))
             out.indent -= 1
             out.println("}")
+            out.indent -= 1
+
+        cpp_vis = {}
+        cpp_vis["public"] = []
+        cpp_vis["protected"] = []
+        cpp_vis["private"] = []
+        for mi in t.tmethods:
+            if mi.metadata == None:
+                continue
+
+            include = False
+            for md in mi.metadata:
+                if md.name == "cppcall":
+                    include = True
+
+            if not include:
+                continue
+
+            if mi.needRest():
+                raise Error("You cannot specify [cppcall] for a method with rest args (%s)" % str(mi.name))
+                
+            if mi.name.ns.isPrivate():
+                cpp_vis["private"].append(mi)
+            elif mi.name.ns.isProtected():
+                cpp_vis["protected"].append(mi)
+            else:
+                # FIXME: what about internal, etc?
+                cpp_vis["public"].append(mi)
+
+        prefixes = { TRAIT_Setter : "call_set_", TRAIT_Getter: "call_get_", TRAIT_Method: "call_" }
+        for v in ["public", "protected", "private"]:
+            if len(cpp_vis[v]) == 0:
+                continue
+            out.println("%s:" % v)
+            out.indent += 1
+            # sort by methodname, for a predictable output
+            cpp_vis[v].sort(None, lambda mi: str(mi.cpp_wrapper_name()))
+            for mi in cpp_vis[v]:
+                args = self.get_args_info(t,mi)
+                ret_traits = self.lookupTraits(mi.returnType)
+                ret_ctype = ret_traits.ctype
+                if mi.kind == TRAIT_Setter:
+                    ret_ctype = CTYPE_VOID
+                ret_typedef = TYPEMAP_RETTYPE_GCREF[ret_ctype](ret_traits)
+                for i in range(0, mi.optional_count+1):
+                    arglist = ', '.join(map(lambda (argt, arg_typedef, argname): "%s %s" % (arg_typedef, argname), args[1:]))
+                    # "inline" rather than "REALLY_INLINE" -- it's not essential to inline
+                    # this, so let the compiler decide to deinline if it so chooses
+                    out.println("inline %s %s%s(%s)" % (ret_typedef, prefixes[mi.kind], mi.name.name, arglist))
+                    out.println("{")
+                    out.indent += 1
+                    # bah, does Python not have an equivalent to JS Array.some?
+                    needcore = False
+                    for (argt, arg_typedef, argname) in args[1:]:
+                        needcore = needcore or TYPEMAP_TO_ATOM_NEEDS_CORE[argt.ctype]
+                    if needcore:
+                        # explicitly cast to AvmCore* because it might be an only-forward-declared subclass
+                        out.println("avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core()));")
+                    arglist = ', '.join(map(lambda (argt, arg_typedef, argname): TYPEMAP_TO_ATOM[argt.ctype](argname), args))
+                    argc = len(args)-1
+                    if t.is_interface:
+                        # for interfaces, must look up by name. we could probably improve this 
+                        # by hooking into the IMT cache, but I'm skeptical it's necessary.
+                        out.println("const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(%d);" % mi.name_index)
+                        if mi.kind == TRAIT_Getter:
+                            out.println("avmplus::Atom const result = this->toplevel()->getproperty(this->atom(), mn, this->vtable);")
+                        elif mi.kind == TRAIT_Setter:
+                            argt, arg_typedef, argname = args[1]
+                            out.println("this->toplevel()->setproperty(this->atom(), mn, %s, this->vtable);" % (TYPEMAP_TO_ATOM[argt.ctype](argname)))
+                            out.println("avmplus::Atom const result = undefinedAtom;")
+                        else:
+                            out.println("avmplus::Atom args[%d] = { %s };" % (len(args), arglist))
+                            out.println("avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, %d, args, this->vtable);" % (argc))
+                    else:
+                        idx = mi.vtable_index
+                        if mi.kind == TRAIT_Setter:
+                            idx += 1
+                        out.println("avmplus::MethodEnv* const method = vtable->methods[%d];" % idx)
+                        if argc == 0:
+                            out.println("avmplus::Atom const result = method->coerceEnter(%s);" % arglist)
+                        else:
+                            out.println("avmplus::Atom args[%d] = { %s };" % (len(args), arglist))
+                            out.println("avmplus::Atom const result = method->coerceEnter(%d, args);" % (argc))
+                    if ret_ctype == CTYPE_VOID:
+                        out.println("AvmAssert(result == undefinedAtom); (void)result;")
+                    else:
+                        out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ret_ctype]("result",ret_traits))
+                    out.indent -= 1
+                    out.println("}")
+                    args.pop()
+                    # Note the "break" here: if you remove it, we'll generate additional stubs, one for each 'default' argument.
+                    # I'm omitting these because IMHO it's not necessary; only select C++ -> AS3 call stubs will be generated,
+                    # and the need for supporting all default arguments should be effectively nil.
+                    break
             out.indent -= 1
 
         if t.interfaces != None and len(t.interfaces) > 0:
@@ -2218,12 +2304,12 @@ class AbcThunkGen:
                         intf = self.lookupTraits(str(ns) + "::" + i.name)
                 else:
                     intf = self.lookupTraits(i)
-                intf_typedef = TYPEMAP_RETTYPE_GCREF[intf.ctype](intf.fqcppname())
+                intf_typedef = TYPEMAP_RETTYPE_GCREF[intf.ctype](intf)
                 out.println("REALLY_INLINE %s as_%s()" % (intf_typedef, intf.cppname()))
                 out.println("{")
                 out.indent += 1
                 # We can't use static_cast<> because the subclass might be only forward-declared at this point;
-                out.println("return %s;" % TYPEMAP_TO_GCREF[intf.ctype]("(%s*)this" % intf.fqcppname(),intf.fqcppname()))
+                out.println("return GCRef<%s>((%s*)this);" % (intf.fqcppname(),intf.fqcppname()))
                 out.indent -= 1
                 out.println("}")
             out.indent -= 1
@@ -2430,7 +2516,12 @@ class AbcThunkGen:
         out.println('{')
         out.println('public:')
         out.indent += 1
+        out.println('#ifdef DEBUG')
         out.println('static uint32_t getSlotOffset(Traits* t, int nameId);')
+        out.println('static uint32_t getMethodIndex(Traits* t, int nameId);')
+        out.println('static uint32_t getGetterIndex(Traits* t, int nameId);')
+        out.println('static uint32_t getSetterIndex(Traits* t, int nameId);')
+        out.println('#endif // DEBUG');
         out.println('enum {')
         out.indent += 1
         visitedNativeClasses = set()
@@ -2483,6 +2574,18 @@ class AbcThunkGen:
                 if slot != None:
                     out.println('AvmAssert(getSlotOffset(%s, %u) == (offsetof(%s, %s) + offsetof(%s, m_%s)));' 
                         % (traitsVarName, self.namesDict[id(slot.name)], t.fqcppname(), t.slotsInstanceName, t.slotsStructName, to_cname(slot.name)))
+            for mi in t.tmethods:
+                if mi.kind == TRAIT_Method:
+                    out.println('AvmAssert(getMethodIndex(%s, %u) == %d); // %s' 
+                        % (traitsVarName, self.namesDict[id(mi.name)], mi.vtable_index, str(mi.name)))
+                elif mi.kind == TRAIT_Getter:
+                    out.println('AvmAssert(getGetterIndex(%s, %u) == %d); // %s' 
+                        % (traitsVarName, self.namesDict[id(mi.name)], mi.vtable_index, str(mi.name)))
+                elif mi.kind == TRAIT_Setter:
+                    # note the "+1" on vtable_index for Setters
+                    out.println('AvmAssert(getSetterIndex(%s, %u) == %d); // %s' 
+                        % (traitsVarName, self.namesDict[id(mi.name)], mi.vtable_index+1, str(mi.name)))
+
 
     def argTraits(self, receiver, m):
         argtraits = [ receiver ]
@@ -2678,7 +2781,77 @@ class AbcThunkGen:
         if m.isNative():
             self.gatherThunk(receiver, m)
 
+    def assignMethodIndices(self, t):
+
+        if t.tmethod_index_count >= 0:
+            return
+
+        methods = {}
+        getters = {}
+        setters = {}
+
+        base = None
+        t.tmethod_index_count = 0
+        t.tmethods_name_map = {}
+        t.tmethods_name_map[TRAIT_Method] = {}
+        t.tmethods_name_map[TRAIT_Getter] = {}
+        t.tmethods_name_map[TRAIT_Setter] = {}
+        if t.base != None:
+            base = self.lookupTraits(t.base)
+            self.assignMethodIndices(base)
+            t.tmethod_index_count = base.tmethod_index_count
+            for kind in [TRAIT_Method,TRAIT_Getter,TRAIT_Setter]:
+                for n in base.tmethods_name_map[kind].keys():
+                    mi = base.tmethods_name_map[kind][n]
+                    if not mi.name.ns.isPrivate():
+                        t.tmethods_name_map[kind][n] = mi;
+
+        # note: this doesn't do all the necessary is-this-a-legal-override
+        # checking; that's going to be done at runtime anyway, so we won't
+        # repeat it all here.
+        #
+        # overrides don't get new slotIDs, they re-use an existing one.
+        #
+        # the tricky part here is get/set; the first instance of get OR set
+        # for a given name, in any of our ancestors *or* ourself, allocates
+        # *two* slotids for both; when checking for override for these we
+        # must only allocate new slots if *neither* get *nor* set is overridden.
+        # but, they can arrive in any order, so we must be careful.
+        getset_ids = {}
+        for kind in [TRAIT_Method,TRAIT_Getter,TRAIT_Setter]:
+            for mi in t.tmethods_name_map[kind].values():
+                assert(isinstance(mi.name, QName))
+                if mi.name.ns.isProtected():
+                    n = "__protected__::" + mi.name.name
+                else:
+                    n = str(mi.name)
+                getset_ids[n] = mi.vtable_index
+
+        for i in range(0, len(t.tmethods)):
+            mi = t.tmethods[i]
+            assert(isinstance(mi.name, QName))
+            if mi.name.ns.isProtected():
+                n = "__protected__::" + mi.name.name
+            else:
+                n = str(mi.name)
+            assert mi.override == t.tmethods_name_map[mi.kind].has_key(n)
+            if mi.override:
+                mi.vtable_index = getset_ids[n]
+            else:
+                if getset_ids.has_key(n):
+                    assert mi.kind in [TRAIT_Getter, TRAIT_Setter]
+                    mi.vtable_index = getset_ids[n]
+                else:
+                    mi.vtable_index = t.tmethod_index_count
+                    getset_ids[n] = mi.vtable_index
+                    if mi.kind in [TRAIT_Getter, TRAIT_Setter]:
+                        t.tmethod_index_count += 2
+                    else:
+                        t.tmethod_index_count += 1
+            t.tmethods_name_map[mi.kind][n] = mi
+
     def processTraits(self, s):
+        self.assignMethodIndices(s)
         if s.init != None:
             if s.init.isNative():
                 raise Error("native constructors are not allowed: " + str(s))
