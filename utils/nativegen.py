@@ -577,14 +577,6 @@ class MethodInfo(MemberInfo):
     def hasOptional(self):
         return (self.flags & HAS_OPTIONAL) != 0
 
-    def cpp_wrapper_name(self):
-        if self.kind == TRAIT_Getter:
-            return "get_" + self.name.name
-        elif self.kind == TRAIT_Setter:
-            return "set_" + self.name.name
-        else:
-            return self.name.name
-
     def assign_names(self, traits, prefix):
         self.receiver = traits
 
@@ -2199,6 +2191,10 @@ class AbcThunkGen:
             out.println("}")
             out.indent -= 1
 
+        # "cpp_vis" is used to sort the visibility of the cpp wrapper functions.
+        # Note that everything other than private/protected currently gets lumped
+        # into C++ "public"; this is suboptimal but hard to improve on easily, and
+        # is probably adequate for our purposes.
         cpp_vis = {}
         cpp_vis["public"] = []
         cpp_vis["protected"] = []
@@ -2233,7 +2229,7 @@ class AbcThunkGen:
             out.println("%s:" % v)
             out.indent += 1
             # sort by methodname, for a predictable output
-            cpp_vis[v].sort(None, lambda mi: str(mi.cpp_wrapper_name()))
+            cpp_vis[v].sort(None, lambda mi: "%s%s" % (prefixes[mi.kind], mi.name.name))
             for mi in cpp_vis[v]:
                 args = self.get_args_info(t,mi)
                 ret_traits = self.lookupTraits(mi.returnType)
