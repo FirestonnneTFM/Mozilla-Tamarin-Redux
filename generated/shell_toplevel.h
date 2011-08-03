@@ -388,7 +388,7 @@ class avmshell_MIClassSlots
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     public: \
-        REALLY_INLINE GCRef<avmshell::MIObject> constructObject() \
+        inline GCRef<avmshell::MIObject> constructObject() \
         { \
             avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
             avmplus::Atom const result = this->construct(0, args); \
@@ -666,7 +666,7 @@ class avmshell_RestrictedBaseClassSlots
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     public: \
-        REALLY_INLINE GCRef<avmshell::RestrictedBaseObject> constructObject() \
+        inline GCRef<avmshell::RestrictedBaseObject> constructObject() \
         { \
             avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
             avmplus::Atom const result = this->construct(0, args); \
@@ -814,7 +814,7 @@ class avmshell_CheckBaseClassSlots
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     public: \
-        REALLY_INLINE GCRef<avmshell::CheckBaseObject> constructObject() \
+        inline GCRef<avmshell::CheckBaseObject> constructObject() \
         { \
             avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
             avmplus::Atom const result = this->construct(0, args); \
@@ -892,7 +892,7 @@ class avmshell_NativeBaseClassSlots
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     public: \
-        REALLY_INLINE GCRef<avmshell::NativeBaseObject> constructObject() \
+        inline GCRef<avmshell::NativeBaseObject> constructObject() \
         { \
             avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
             avmplus::Atom const result = this->construct_native(avmshell::NativeBaseClass::createInstanceProc, 0, args); \
@@ -1303,7 +1303,7 @@ class avmshell_NativeSubclassOfAbstractBaseClassSlots
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     public: \
-        REALLY_INLINE GCRef<avmshell::NativeSubclassOfAbstractBaseObject> constructObject() \
+        inline GCRef<avmshell::NativeSubclassOfAbstractBaseObject> constructObject() \
         { \
             avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
             avmplus::Atom const result = this->construct(0, args); \
@@ -1403,7 +1403,7 @@ class avmshell_NativeSubclassOfRestrictedBaseClassSlots
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     public: \
-        REALLY_INLINE GCRef<avmshell::NativeSubclassOfRestrictedBaseObject> constructObject() \
+        inline GCRef<avmshell::NativeSubclassOfRestrictedBaseObject> constructObject() \
         { \
             avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
             avmplus::Atom const result = this->construct(0, args); \
@@ -1503,7 +1503,7 @@ class avmshell_NativeSubclassOfAbstractRestrictedBaseClassSlots
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     public: \
-        REALLY_INLINE GCRef<avmshell::NativeSubclassOfAbstractRestrictedBaseObject> constructObject() \
+        inline GCRef<avmshell::NativeSubclassOfAbstractRestrictedBaseObject> constructObject() \
         { \
             avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
             avmplus::Atom const result = this->construct(0, args); \
@@ -1653,7 +1653,7 @@ class avmplus_DomainClassSlots
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     public: \
-        REALLY_INLINE GCRef<avmplus::DomainObject> constructObject(GCRef<avmplus::DomainObject> arg1) \
+        inline GCRef<avmplus::DomainObject> constructObject(GCRef<avmplus::DomainObject> arg1) \
         { \
             avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
             avmplus::Atom const result = this->construct(1, args); \
@@ -1825,7 +1825,7 @@ class avmplus_NewObjectSampleClassSlots
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     public: \
-        REALLY_INLINE GCRef<avmplus::NewObjectSampleObject> constructObject() \
+        inline GCRef<avmplus::NewObjectSampleObject> constructObject() \
         { \
             avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
             avmplus::Atom const result = this->construct(0, args); \
@@ -2029,13 +2029,13 @@ class avmplus_DictionaryClassSlots
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     public: \
-        REALLY_INLINE GCRef<avmplus::DictionaryObject> constructObject(bool arg1) \
+        inline GCRef<avmplus::DictionaryObject> constructObject(bool arg1) \
         { \
             avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), ((arg1) ? trueAtom : falseAtom) }; \
             avmplus::Atom const result = this->construct(1, args); \
             return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
         } \
-        REALLY_INLINE GCRef<avmplus::DictionaryObject> constructObject() \
+        inline GCRef<avmplus::DictionaryObject> constructObject() \
         { \
             avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
             avmplus::Atom const result = this->construct(0, args); \
@@ -2142,7 +2142,7 @@ class avmplus_JObjectClassSlots
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     public: \
-        REALLY_INLINE GCRef<avmplus::JObject> constructObject() \
+        inline GCRef<avmplus::JObject> constructObject() \
         { \
             avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
             avmplus::Atom const result = this->construct(0, args); \

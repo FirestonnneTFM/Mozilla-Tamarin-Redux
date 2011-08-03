@@ -78,20 +78,20 @@ public:
 private:
     AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
 public:
-    REALLY_INLINE GCRef<avmplus::IOErrorObject> constructObject(GCRef<avmplus::String> arg1, int32_t arg2)
+    inline GCRef<avmplus::IOErrorObject> constructObject(GCRef<avmplus::String> arg1, int32_t arg2)
     {
-        avmplus::AvmCore* const core = ((AvmCore*)(this->core()));
+        avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core()));
         avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1->atom(), core->intToAtom(arg2) };
         avmplus::Atom const result = this->construct(2, args);
         return GCRef<avmplus::IOErrorObject>((avmplus::IOErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
-    REALLY_INLINE GCRef<avmplus::IOErrorObject> constructObject(GCRef<avmplus::String> arg1)
+    inline GCRef<avmplus::IOErrorObject> constructObject(GCRef<avmplus::String> arg1)
     {
         avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1->atom() };
         avmplus::Atom const result = this->construct(1, args);
         return GCRef<avmplus::IOErrorObject>((avmplus::IOErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
-    REALLY_INLINE GCRef<avmplus::IOErrorObject> constructObject()
+    inline GCRef<avmplus::IOErrorObject> constructObject()
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
@@ -172,20 +172,20 @@ public:
 private:
     AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
 public:
-    REALLY_INLINE GCRef<avmplus::MemoryErrorObject> constructObject(GCRef<avmplus::String> arg1, int32_t arg2)
+    inline GCRef<avmplus::MemoryErrorObject> constructObject(GCRef<avmplus::String> arg1, int32_t arg2)
     {
-        avmplus::AvmCore* const core = ((AvmCore*)(this->core()));
+        avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core()));
         avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1->atom(), core->intToAtom(arg2) };
         avmplus::Atom const result = this->construct(2, args);
         return GCRef<avmplus::MemoryErrorObject>((avmplus::MemoryErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
-    REALLY_INLINE GCRef<avmplus::MemoryErrorObject> constructObject(GCRef<avmplus::String> arg1)
+    inline GCRef<avmplus::MemoryErrorObject> constructObject(GCRef<avmplus::String> arg1)
     {
         avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1->atom() };
         avmplus::Atom const result = this->construct(1, args);
         return GCRef<avmplus::MemoryErrorObject>((avmplus::MemoryErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
-    REALLY_INLINE GCRef<avmplus::MemoryErrorObject> constructObject()
+    inline GCRef<avmplus::MemoryErrorObject> constructObject()
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
@@ -266,20 +266,20 @@ public:
 private:
     AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
 public:
-    REALLY_INLINE GCRef<avmplus::IllegalOperationErrorObject> constructObject(GCRef<avmplus::String> arg1, int32_t arg2)
+    inline GCRef<avmplus::IllegalOperationErrorObject> constructObject(GCRef<avmplus::String> arg1, int32_t arg2)
     {
-        avmplus::AvmCore* const core = ((AvmCore*)(this->core()));
+        avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core()));
         avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1->atom(), core->intToAtom(arg2) };
         avmplus::Atom const result = this->construct(2, args);
         return GCRef<avmplus::IllegalOperationErrorObject>((avmplus::IllegalOperationErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
-    REALLY_INLINE GCRef<avmplus::IllegalOperationErrorObject> constructObject(GCRef<avmplus::String> arg1)
+    inline GCRef<avmplus::IllegalOperationErrorObject> constructObject(GCRef<avmplus::String> arg1)
     {
         avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1->atom() };
         avmplus::Atom const result = this->construct(1, args);
         return GCRef<avmplus::IllegalOperationErrorObject>((avmplus::IllegalOperationErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
-    REALLY_INLINE GCRef<avmplus::IllegalOperationErrorObject> constructObject()
+    inline GCRef<avmplus::IllegalOperationErrorObject> constructObject()
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
@@ -360,20 +360,20 @@ public:
 private:
     AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
 public:
-    REALLY_INLINE GCRef<avmplus::EOFErrorObject> constructObject(GCRef<avmplus::String> arg1, int32_t arg2)
+    inline GCRef<avmplus::EOFErrorObject> constructObject(GCRef<avmplus::String> arg1, int32_t arg2)
     {
-        avmplus::AvmCore* const core = ((AvmCore*)(this->core()));
+        avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core()));
         avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1->atom(), core->intToAtom(arg2) };
         avmplus::Atom const result = this->construct(2, args);
         return GCRef<avmplus::EOFErrorObject>((avmplus::EOFErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
-    REALLY_INLINE GCRef<avmplus::EOFErrorObject> constructObject(GCRef<avmplus::String> arg1)
+    inline GCRef<avmplus::EOFErrorObject> constructObject(GCRef<avmplus::String> arg1)
     {
         avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1->atom() };
         avmplus::Atom const result = this->construct(1, args);
         return GCRef<avmplus::EOFErrorObject>((avmplus::EOFErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
-    REALLY_INLINE GCRef<avmplus::EOFErrorObject> constructObject()
+    inline GCRef<avmplus::EOFErrorObject> constructObject()
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
@@ -480,7 +480,7 @@ public:
 private:
     AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
 public:
-    REALLY_INLINE GCRef<avmplus::WalkerObject> constructObject(GCRef<avmplus::FunctionObject> arg1)
+    inline GCRef<avmplus::WalkerObject> constructObject(GCRef<avmplus::FunctionObject> arg1)
     {
         avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(1, args);
@@ -677,7 +677,7 @@ public:
 private:
     AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
 public:
-    REALLY_INLINE GCRef<avmplus::CompressionAlgorithmObject> constructObject()
+    inline GCRef<avmplus::CompressionAlgorithmObject> constructObject()
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
