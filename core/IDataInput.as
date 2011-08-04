@@ -93,6 +93,7 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function readBytes(bytes:ByteArray,
                               offset:uint=0,
                               length:uint=0):void;
@@ -110,6 +111,7 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function readBoolean():Boolean;
 
     /**
@@ -122,6 +124,7 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function readByte():int;
 
     /**
@@ -134,6 +137,7 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function readUnsignedByte():uint;
 
     /**
@@ -146,6 +150,7 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function readShort():int;
 
 
@@ -159,6 +164,7 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function readUnsignedShort():uint;
 
 
@@ -172,6 +178,7 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function readInt():int;
     
     /**
@@ -184,6 +191,7 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function readUnsignedInt():uint;
 
 
@@ -197,6 +205,7 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function readFloat():Number;
 
 
@@ -210,6 +219,7 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function readDouble():Number;
 
 
@@ -244,6 +254,7 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function readMultiByte(length:uint, charSet:String):String;
 
 
@@ -263,6 +274,7 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function readUTF():String;
     
     
@@ -277,6 +289,7 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function readUTFBytes(length:uint):String;
 
 
@@ -293,6 +306,7 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function get bytesAvailable():uint;
 
 
@@ -311,6 +325,7 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function readObject():*;
 
 
@@ -326,7 +341,9 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function get objectEncoding():uint;
+    [cppcall]
     function set objectEncoding(version:uint):void;
 
 
@@ -340,7 +357,9 @@ public interface IDataInput
      *
      *  @playerversion Lite 4
      */
+    [cppcall]
     function get endian():String;
+    [cppcall]
     function set endian(type:String):void;
 }
 
