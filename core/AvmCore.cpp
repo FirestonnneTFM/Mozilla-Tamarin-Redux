@@ -869,8 +869,8 @@ namespace avmplus
         AvmAssert(class_itraits == core->traits.class_itraits);
         AvmAssert(object_itraits->init != NULL);
         AvmAssert(class_itraits->init != NULL);
- 
-         // ------------------ construct the vtables
+
+        // ------------------ construct the vtables
 
         // Object derives from... nothing
         VTable* object_ivtable = core->newVTable(object_itraits, NULL, toplevel);
