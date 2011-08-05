@@ -63,7 +63,7 @@ export MAKE_OPTIONS="-j2"
 export proc_names="fake_never_find_me"
 
 export PYTHON_RUNTESTS=python3
-export threads=10
+export threads=8
 
 export SSH_SHELL_REMOTE_HOST0=asteam-pandroid1
 export SSH_SHELL_REMOTE_USER0=root
