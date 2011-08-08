@@ -63,7 +63,7 @@ export MAKE_OPTIONS="-j2"
 export proc_names="fake_never_find_me"
 
 export PYTHON_RUNTESTS=python3
-export threads=8
+export threads=10
 
 export SSH_SHELL_REMOTE_HOST0=asteam-pandroid1
 export SSH_SHELL_REMOTE_USER0=root
@@ -85,15 +85,15 @@ export SSH_SHELL_REMOTE_USER3=root
 export SSH_SHELL_REMOTE_BASEDIR3=/data/local
 export SSH_SHELL_REMOTE_DIR3=/data/local/app2
 
-#export SSH_SHELL_REMOTE_HOST4=asteam-pandroid3
-#export SSH_SHELL_REMOTE_USER4=root
-#export SSH_SHELL_REMOTE_BASEDIR4=/data/local
-#export SSH_SHELL_REMOTE_DIR4=/data/local/app1
+export SSH_SHELL_REMOTE_HOST4=asteam-pandroid3
+export SSH_SHELL_REMOTE_USER4=root
+export SSH_SHELL_REMOTE_BASEDIR4=/data/local
+export SSH_SHELL_REMOTE_DIR4=/data/local/app1
 
-#export SSH_SHELL_REMOTE_HOST5=asteam-pandroid3
-#export SSH_SHELL_REMOTE_USER5=root
-#export SSH_SHELL_REMOTE_BASEDIR5=/data/local
-#export SSH_SHELL_REMOTE_DIR5=/data/local/app2
+export SSH_SHELL_REMOTE_HOST5=asteam-pandroid3
+export SSH_SHELL_REMOTE_USER5=root
+export SSH_SHELL_REMOTE_BASEDIR5=/data/local
+export SSH_SHELL_REMOTE_DIR5=/data/local/app2
 
 export SSH_SHELL_REMOTE_HOST6=asteam-pandroid4
 export SSH_SHELL_REMOTE_USER6=root
