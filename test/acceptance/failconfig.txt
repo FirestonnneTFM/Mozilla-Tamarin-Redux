@@ -327,3 +327,4 @@ regress/bug_654807:semisealed.*, .*-ES,, skip, Bugzilla 661575
 ecma3/Exceptions/bug127913,         AOT ,, skip, Need to follow up as this hangs when AOT compiled
 spidermonkey/js1_5/Regress/regress-234389,         AOT ,, skip, Need to follow up as this hangs when AOT compiled
 spidermonkey/js1_5/Exceptions/regress-121658 , AOT,, skip, Need to follow up as this hangs when AOT compiled
+spidermonkey/js1_5/Regress/regress-398085-01 , AOT,, skip, Need to follow up as this hangs when AOT compiled

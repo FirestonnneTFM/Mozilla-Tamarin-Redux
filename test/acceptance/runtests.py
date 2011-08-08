@@ -429,7 +429,7 @@ class AcceptanceRuntest(RuntestBase):
                     cmd = "ssh %s@%s ./%s %s" % (self.remoteuser, self.remoteip, progname, avm_args)
                     (f,err,exitcode) = self.run_pipe(cmd, outputCalls=outputCalls)
                     if exitcode != 0:
-                        sleep(5)
+                        time.sleep(5)
                         retryCount -= 1
                     else:
                         break
