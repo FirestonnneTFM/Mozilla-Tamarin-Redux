@@ -1127,12 +1127,12 @@ namespace MMgc
      */
     void GC::MarkOrClearWeakRefs()
     {
+#ifdef MMGC_WEAKREF_PROFILER
+        uint32_t count = weakRefs.count();
+        uint32_t deleted = 0;
+#endif
         {
             GCHashtable::Iterator it(&weakRefs);
-#ifdef MMGC_WEAKREF_PROFILER
-            uint32_t count = weakRefs.count();
-            uint32_t deleted = 0;
-#endif
 
             while (it.nextKey() != NULL) {
                 GCWeakRef* w = (GCWeakRef*)it.value();
