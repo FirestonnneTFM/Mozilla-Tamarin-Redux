@@ -289,13 +289,13 @@ namespace avmplus
     template<class TLIST>
     REALLY_INLINE typename TLIST::TYPE* VectorAccessor<TLIST>::addr()
     {
-        return (m_vector != NULL) ? m_vector->m_list.m_list.m_data->entries : (typename TLIST::TYPE*)NULL;
+        return (m_vector != NULL) ? m_vector->m_list.m_data->entries : (typename TLIST::TYPE*)NULL;
     }
 
     template<class TLIST>
     REALLY_INLINE uint32_t VectorAccessor<TLIST>::length()
     {
-        return (m_vector != NULL) ? m_vector->m_list.m_list.length() : 0;
+        return (m_vector != NULL) ? m_vector->m_list.length() : 0;
     }
 }
 

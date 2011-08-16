@@ -85,6 +85,12 @@ namespace avmplus
     // ----------------------------
 
     template<class T>
+    REALLY_INLINE /*static*/ void DataListHelper<T>::wbData(const void* /*container*/, LISTDATA** address, LISTDATA* data)
+    {
+        *address = data;
+    }
+
+    template<class T>
     REALLY_INLINE /*static*/ typename DataListHelper<T>::TYPE DataListHelper<T>::load(LISTDATA* data, uint32_t index)
     {
         AvmAssert(data != NULL);
@@ -127,10 +133,24 @@ namespace avmplus
     template<class T>
     REALLY_INLINE /*static*/ void DataListHelper<T>::gcTrace(MMgc::GC* gc, LISTDATA** loc)
     {
-        gc->TraceLocation(loc);
+        AvmAssert(!gc->IsPointerToGCPage(*loc));
+        (void)gc; (void)loc;
     }
 
     // ----------------------------
+
+    REALLY_INLINE /*static*/ void GCListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
+    {
+        MMgc::GC* const gc = data->gc();
+        if (gc->IsPointerToGCPage(container))
+        {
+            WB(gc, gc->FindBeginningFast(container), address, data);
+        }
+        else
+        {
+            *address = data;
+        }
+    }
 
     REALLY_INLINE /*static*/ GCListHelper::TYPE GCListHelper::load(LISTDATA* data, uint32_t index)
     {
@@ -173,6 +193,19 @@ namespace avmplus
     }
     
     // ----------------------------
+
+    REALLY_INLINE /*static*/ void RCListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
+    {
+        MMgc::GC* const gc = data->gc();
+        if (gc->IsPointerToGCPage(container))
+        {
+            WB(gc, gc->FindBeginningFast(container), address, data);
+        }
+        else
+        {
+            *address = data;
+        }
+    }
 
     REALLY_INLINE /*static*/ RCListHelper::TYPE RCListHelper::load(LISTDATA* data, uint32_t index)
     {
@@ -232,6 +265,19 @@ namespace avmplus
 
     // ----------------------------
 
+    REALLY_INLINE /*static*/ void AtomListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
+    {
+        MMgc::GC* const gc = data->gc();
+        if (gc->IsPointerToGCPage(container))
+        {
+            WB(gc, gc->FindBeginningFast(container), address, data);
+        }
+        else
+        {
+            *address = data;
+        }
+    }
+
     REALLY_INLINE /*static*/ AtomListHelper::TYPE AtomListHelper::load(LISTDATA* data, uint32_t index)
     {
         AvmAssert(data != NULL);
@@ -275,6 +321,19 @@ namespace avmplus
     }
 
     // ----------------------------
+
+    REALLY_INLINE /*static*/ void WeakRefListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
+    {
+        MMgc::GC* const gc = data->gc();
+        if (gc->IsPointerToGCPage(container))
+        {
+            WB(gc, gc->FindBeginningFast(container), address, data);
+        }
+        else
+        {
+            *address = data;
+        }
+    }
 
     REALLY_INLINE /*static*/ WeakRefListHelper::TYPE WeakRefListHelper::load(LISTDATA* data, uint32_t index)
     {
@@ -430,6 +489,7 @@ namespace avmplus
         AvmAssert(cap <= kListMaxLength);
         typename ListHelper::LISTDATA* newData = ListHelper::LISTDATA::create(gc, cap);
         newData->len = 0;
+        newData->set_gc(gc);
         return newData;
     }
     
@@ -1145,7 +1205,7 @@ namespace avmplus
 
     template<class T>
     REALLY_INLINE DataList<T>::DataList(MMgc::GC* gc, uint32_t capacity, const T* args)
-        : m_list(gc, capacity, args)
+        : ListImpl< T, DataListHelper<T> >(gc, capacity, args)
     {
         // We must not be a pointer type.
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isNonPointer::value == true);
@@ -1159,190 +1219,6 @@ namespace avmplus
                            TypeSniffer<T>::isGCTraceableObject::value == false);
     }
 
-    template<class T>
-    REALLY_INLINE bool DataList<T>::isEmpty() const
-    {
-        return m_list.isEmpty();
-    }
-
-    template<class T>
-    REALLY_INLINE uint32_t DataList<T>::length() const
-    {
-        return m_list.length();
-    }
-
-    template<class T>
-    REALLY_INLINE void DataList<T>::set_length(uint32_t len)
-    {
-        return m_list.set_length(len);
-    }
-
-    template<class T>
-    REALLY_INLINE uint32_t DataList<T>::capacity() const
-    {
-        return m_list.capacity();
-    }
-    
-    template<class T>
-    REALLY_INLINE void DataList<T>::set_capacity(uint32_t len)
-    {
-        return m_list.set_capacity(len);
-    }
-    
-    template<class T>
-    REALLY_INLINE typename DataList<T>::TYPE DataList<T>::get(uint32_t index) const
-    {
-        return m_list.get(index);
-    }
-
-    template<class T>
-    REALLY_INLINE typename DataList<T>::TYPE DataList<T>::first() const
-    {
-        return m_list.first();
-    }
-
-    template<class T>
-    REALLY_INLINE typename DataList<T>::TYPE DataList<T>::last() const
-    {
-        return m_list.last();
-    }
-
-    template<class T>
-    REALLY_INLINE void DataList<T>::replace(uint32_t index, TYPE value)
-    {
-        m_list.replace(index, to_gc(value));
-    }
-
-    template<class T>
-    REALLY_INLINE void DataList<T>::set(uint32_t index, TYPE value)
-    {
-        m_list.set(index, value);
-    }
-
-    template<class T>
-    REALLY_INLINE void DataList<T>::add(TYPE value)
-    {
-        m_list.add(value);
-    }
-
-    template<class T>
-    REALLY_INLINE void DataList<T>::add(const DataList<T>& that)
-    {
-        m_list.add(that.m_list);
-    }
-
-    template<class T>
-    REALLY_INLINE void DataList<T>::insert(uint32_t index, TYPE value, uint32_t count)
-    {
-        m_list.insert(index, value, count);
-    }
-
-    template<class T>
-    REALLY_INLINE void DataList<T>::insert(uint32_t index, const TYPE* args, uint32_t argc)
-    {
-        m_list.insert(index, args, argc);
-    }
-
-    template<class T>
-    REALLY_INLINE void DataList<T>::splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const TYPE* args)
-    {
-        m_list.splice(insertPoint, insertCount, deleteCount, args);
-    }
-
-    template<class T>
-    REALLY_INLINE void DataList<T>::splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const DataList<T>& args, uint32_t argsOffset)
-    {
-        m_list.splice(insertPoint, insertCount, deleteCount, args.m_list, argsOffset);
-    }
-
-    template<class T>
-    REALLY_INLINE void DataList<T>::reverse()
-    {
-        m_list.reverse();
-    }
-
-    template<class T>
-    REALLY_INLINE void DataList<T>::clear()
-    {
-        m_list.clear();
-    }
-
-    template<class T>
-    REALLY_INLINE int32_t DataList<T>::indexOf(TYPE value) const
-    {
-        return m_list.indexOf(value);
-    }
-
-    template<class T>
-    REALLY_INLINE int32_t DataList<T>::lastIndexOf(TYPE value) const
-    {
-        return m_list.lastIndexOf(value);
-    }
-
-    template<class T>
-    REALLY_INLINE typename DataList<T>::TYPE DataList<T>::removeAt(uint32_t index)
-    {
-        return m_list.removeAt(index);
-    }
-
-    template<class T>
-    REALLY_INLINE typename DataList<T>::TYPE DataList<T>::removeFirst()
-    {
-        return m_list.removeFirst();
-    }
-
-    template<class T>
-    REALLY_INLINE typename DataList<T>::TYPE DataList<T>::removeLast()
-    {
-        return m_list.removeLast();
-    }
-
-    template<class T>
-    REALLY_INLINE typename DataList<T>::TYPE& DataList<T>::operator[](uint32_t index)
-    {
-        AvmAssert(index < m_list.length());
-        DataListAccessor<T> acc(this);
-        T* entries = acc.addr();
-        AvmAssert(entries != NULL);
-        return entries[index];
-    }
-
-    template<class T>
-    REALLY_INLINE typename DataList<T>::TYPE DataList<T>::operator[](uint32_t index) const
-    {
-        return m_list[index];
-    }
-
-    template<class T>
-    REALLY_INLINE void DataList<T>::ensureCapacity(uint32_t cap)
-    {
-        m_list.ensureCapacity(cap);
-    }
-
-    template<class T>
-    REALLY_INLINE uint64_t DataList<T>::bytesUsed() const
-    {
-        return m_list.bytesUsed();
-    }
-
-    template<class T>
-    REALLY_INLINE void DataList<T>::destroy()
-    {
-        m_list.destroy();
-    }
-
-    template<class T>
-    REALLY_INLINE bool DataList<T>::isDestroyed() const
-    {
-        return m_list.isDestroyed();
-    }
-
-    template<class T>
-    REALLY_INLINE void DataList<T>::gcTrace(MMgc::GC* gc)
-    {
-        m_list.gcTrace(gc);
-    }
-
     // ----------------------------
 
     template<class T>
@@ -1353,7 +1229,7 @@ namespace avmplus
     template<class T>
     REALLY_INLINE T* DataListAccessor<T>::addr()
     {
-        return (m_list != NULL) ? m_list->m_list.m_data->entries : (T*)NULL;
+        return (m_list != NULL) ? m_list->m_data->entries : (T*)NULL;
     }
 
     template<class T>
