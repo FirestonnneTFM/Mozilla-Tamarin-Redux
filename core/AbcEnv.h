@@ -85,7 +85,7 @@ namespace avmplus
         DomainEnv* const            GC_POINTER( m_domainEnv );           // Same as m_codeContext->domainEnv(); replicated here solely for efficiency in jitted code
         CodeContext* const          GC_POINTER( m_codeContext );
 #ifdef DEBUGGER
-        DataList<uint64_t>          GC_STRUCTURE( m_invocationCounts );
+        uint64_t*                   GC_POINTER( m_invocationCounts );    // Write with WB; GCMember<> does not work.  Actual size will hold pool->methodCount methods, only allocated if debugger exists.
 #endif
         AvmCore* const              m_core;
 #if defined(VMCFG_AOT) && defined(VMCFG_BUFFER_GUARD)

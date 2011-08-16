@@ -47,12 +47,13 @@ namespace avmplus
     /*
      * MEMORY MANAGEMENT:
      *
-     * The List variants can be instantiated on the stack or embedded as a field in another class
-     * if that class is a GCObject or a GCRoot, otherwise an assert will fire.   All lists 
-     * use GC memory.
+     * The List variants can be instantiated on the stack or embedded as a field in another class.
+     * However, they cannot be allocated dynamically (operator new is private/unimplemented):
+     * some variants use non-GC memory, and none have a vtable compatible with GCFinalizedObject.
+     * If you need to dynamically allocate a list, use HeapList to wrap an instance.
      *
-     * Also, keep in mind that since some variants contain RCObject,
-     * one MUST ensure the destructor runs, one way or another:
+     * Also, keep in mind that since some variants allocate using nonGC memory, one MUST
+     * ensure the destructor runs, one way or another:
      *
      *   with stack allocation, as long as nobody longjmp's over
      *   the destructor, C++ compiler ensures the destructor is called.
@@ -62,7 +63,9 @@ namespace avmplus
      *   if embedding in a GC-allocated object, the embedder
      *   must be a GCFinalizedObject or RCObject, *not* a plain GCObject)
      *
-     * All variants require you to pass in an MMgc::GC*.
+     * All variants require you to pass in an MMgc::GC*: although some actually
+     * use other allocators (FixedMalloc, system memory, etc), they still need to
+     * be able to inform GC about allocations.
      *
      */
 
@@ -104,39 +107,44 @@ namespace avmplus
     // friend template class declaration cruft. Since there's no way to extract a ListData from a ListImpl,
     // this is probably safe enough.
     //
-    // ListData *always* allocates via the GC.
+    // ListData *always* allocates via FixedMalloc.
     template<class STORAGE>
     struct ListData
     {
         uint32_t    len;
+        MMgc::GC*   _gc;
         STORAGE     entries[1];   // lying, really [cap]
         
         // add an empty, inlined ctor to avoid spurious warnings in MSVC2008
         REALLY_INLINE explicit ListData() {}
 
+        REALLY_INLINE MMgc::GC* gc() { return _gc; }
+        REALLY_INLINE void set_gc(MMgc::GC* g) { _gc = g; }
+
         REALLY_INLINE static ListData<STORAGE>* create(MMgc::GC* gc, size_t totalElements)
         {
             using namespace MMgc;
             
-            size_t bytes = GCHeap::CheckForAllocSizeOverflow(sizeof(ListData<STORAGE>),
-                                                             GCHeap::CheckForCallocSizeOverflow(totalElements-1, sizeof(STORAGE)));
-            void *mem = gc->Alloc(bytes);
-            
+            FixedMalloc* const fm = FixedMalloc::GetFixedMalloc();
+            void* mem = fm->Alloc(GCHeap::CheckForAllocSizeOverflow(sizeof(ListData<STORAGE>),
+                                                                    GCHeap::CheckForCallocSizeOverflow(totalElements-1, sizeof(STORAGE))),
+                                  kNone);
+            gc->SignalDependentAllocation(fm->Size(mem));
             return ::new (mem) ListData<STORAGE>();
         }
 
         REALLY_INLINE static void free(MMgc::GC* gc, void* mem)
         {
-            gc->Free(mem);
+            MMgc::FixedMalloc* const fm = MMgc::FixedMalloc::GetFixedMalloc();
+            gc->SignalDependentDeallocation(fm->Size(mem));
+            fm->Free(mem);
         }
 
         REALLY_INLINE static size_t getSize(void* mem)
         {
-            return MMgc::GC::Size(mem);
+            MMgc::FixedMalloc* const fm = MMgc::FixedMalloc::GetFixedMalloc();
+            return fm->Size(mem);
         }        
-        
-        REALLY_INLINE MMgc::GC* gc() { return MMgc::GC::GetGC(this); }
-        REALLY_INLINE void set_gc(MMgc::GC* _gc) { AvmAssert(_gc == gc()); (void)_gc; }
     };
 
     // TracedListData *always* allocates via GC.
@@ -190,6 +198,11 @@ namespace avmplus
         // (syntactic sugar)
         typedef ListData<STORAGE> LISTDATA;
 
+        // Store the data at the address, using WB if necessary.
+        // Any pointer already stored there will be overwritten (but not freed); the caller
+        // must ensure that old pointers are freed.
+        static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
+        
         // Load the item and do any conversion necessary from STORAGE to TYPE.
         static TYPE load(LISTDATA* data, uint32_t index);
 
@@ -223,6 +236,7 @@ namespace avmplus
         typedef MMgc::GCObject* STORAGE;
         typedef TracedListData<STORAGE> LISTDATA;
         
+        static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
         static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
@@ -241,6 +255,7 @@ namespace avmplus
         typedef MMgc::RCObject* STORAGE;
         typedef TracedListData<STORAGE> LISTDATA;
         
+        static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
         static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
@@ -259,6 +274,7 @@ namespace avmplus
         typedef Atom STORAGE;
         typedef TracedListData<STORAGE> LISTDATA;
 
+        static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
         static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
@@ -277,6 +293,7 @@ namespace avmplus
         typedef MMgc::GCWeakRef* STORAGE;
         typedef TracedListData<STORAGE> LISTDATA;
 
+        static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
         static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
@@ -446,12 +463,6 @@ namespace avmplus
         // null the m_data pointer and free the storage
         void freeData(MMgc::GC* gc);
 
-        // Update ListData pointer using a WriteBarrier if necessary.
-        // This will assert if the address of m_data isn't GC or stack
-        // memory (ie is unreachable by the GC).  GCRoots count
-        // as GC memory.
-        void wbData(typename ListHelper::LISTDATA* newData);
- 
         // This function shouldn't be called directly; it's intended to be called
         // only by ensureCapacity(), which does an inline capacity check
         // before calling (which is a clear performance win).
@@ -690,66 +701,24 @@ namespace avmplus
     typedef ListImpl<Atom, AtomListHelper> AtomList;
 
     // ----------------------------
-    // DataList wraps a ListImpl instead of inheriting from it or typedef'ing to it so it
-    // can provide a by-reference array operator.  This makes it more suitable for using 
-    // in place of primitive arrays.
     template<class T>
-    class DataList : public MMgc::GCInlineObject
+    class DataList : public ListImpl< T, DataListHelper<T> >
     {
-        template<class T2> friend class DataListAccessor;
-        template<class TLIST> friend class VectorAccessor;
     private:
-        typedef ListImpl< T, DataListHelper<T> > LIST;
+        typedef ListImpl< T, DataListHelper<T> > BASE;
 
     public:
         typedef T TYPE;
-        typedef T OPAQUE_TYPE;
         
     public:
         explicit DataList(MMgc::GC* gc,
                           uint32_t capacity,
                           const T* args = NULL);
 
-        bool isEmpty() const;
-        uint32_t length() const;
-        void set_length(uint32_t len);
-        uint32_t capacity() const;
-        void set_capacity(uint32_t len);
-        TYPE get(uint32_t index) const;
-        TYPE first() const;
-        TYPE last() const;
-        void set(uint32_t index, TYPE value);
-        void replace(uint32_t index, TYPE value);
-        void add(TYPE value);
-        void add(const DataList<T>& that);
-        void insert(uint32_t index, TYPE value, uint32_t count = 1);
-        void insert(uint32_t index, const TYPE* args, uint32_t argc);
-        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const TYPE* args);
-        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const DataList<T>& args, uint32_t argsOffset);
-        void reverse();
-        void clear();
-        int32_t indexOf(TYPE value) const;
-        int32_t lastIndexOf(TYPE value) const;
-        TYPE removeAt(uint32_t index);
-        TYPE removeFirst();
-        TYPE removeLast();
-        // Since DataLists don't contain GC data its safe and desirable to allow
-        // writing through the [] operator (ie no write barrier concerns).
-        TYPE& operator[](uint32_t index);
-        TYPE operator[](uint32_t index) const;
-        void ensureCapacity(uint32_t cap);
-        uint64_t bytesUsed() const;
-        void destroy();
-        bool isDestroyed() const;
-        void gcTrace(MMgc::GC* gc);
-
     private:
         DataList<T>& operator=(const DataList<T>& other);       // unimplemented
         explicit DataList(const DataList<T>& other);            // unimplemented
         void* operator new(size_t size);                        // unimplemented, use HeapList instead
-
-    private:
-        LIST m_list;
     };
 
     // ----------------------------

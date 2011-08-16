@@ -1796,11 +1796,6 @@ MMgc::GCTracerCheckResult AbcEnv::gcTraceOffsetIsTraced(uint32_t off) const
     MMgc::GCTracerCheckResult result;
     (void)off;
     (void)result;
-#if defined(DEBUGGER)
-    if((result = m_invocationCounts.gcTraceOffsetIsTraced(off - offsetof(AbcEnv,m_invocationCounts))) != MMgc::kOffsetNotFound) {
-        return result;
-    }
-#endif
     return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,4);
 }
 #endif // DEBUG
@@ -1811,7 +1806,7 @@ bool AbcEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
         gc->TraceLocation(&m_codeContext);
         gc->TraceLocation(&m_domainEnv);
 #if defined(DEBUGGER)
-        m_invocationCounts.gcTrace(gc);
+        gc->TraceLocation(&m_invocationCounts);
 #endif
         gc->TraceLocation(&m_pool);
     }

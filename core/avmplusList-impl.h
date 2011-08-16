@@ -51,7 +51,7 @@ namespace avmplus
             MMgc::GCHeap::SignalObjectTooLarge();
         uint32_t const allocCap = (capacity < kListMinCapacity) ? kListMinCapacity : capacity;
         typename ListHelper::LISTDATA* newData = allocData(gc, allocCap);
-        wbData(newData);
+        ListHelper::wbData(this, &m_data, newData);
 
         if (args != NULL)
         {
@@ -87,16 +87,6 @@ namespace avmplus
                 ListHelper::clearRange(m_data, 0, m_data->len);
             freeData(m_data->gc()); // note that this leaves m_data set to NULL.
         }
-    }
-
-    template<class T, class ListHelper>
-    void ListImpl<T,ListHelper>::wbData(typename ListHelper::LISTDATA* data)
-    {
-        MMgc::GC* const gc = data->gc();
-        AvmAssert(gc->IsPointerToScannedMemory(this));
-        if(gc->IsPointerToGCPage(this))
-            gc->WriteBarrierTrap(gc->FindBeginning(this));
-        m_data = data;
     }
 
     template<class T, class ListHelper>
@@ -149,7 +139,7 @@ namespace avmplus
             newData->len = len;
             // don't call ListHelper::clearRange here; we want the refCounts to be transferred
             freeData(gc);
-            wbData(newData);
+            ListHelper::wbData(this, &m_data, newData);
         }
     }
 
@@ -201,7 +191,7 @@ namespace avmplus
             typename ListHelper::LISTDATA* newData = allocData(gc, kListMinCapacity);
             newData->len = 0;
             freeData(gc);
-            wbData(newData);
+            ListHelper::wbData(this, &m_data, newData);
         }
     }
 
@@ -279,7 +269,7 @@ namespace avmplus
         newData->len = m_data->len;
         // don't call ListHelper::clearRange here; we want the refCounts to be transferred
         freeData(gc);
-        wbData(newData);
+        ListHelper::wbData(this, &m_data, newData);
     }
 
     template<class T, class ListHelper>
