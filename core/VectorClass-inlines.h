@@ -269,10 +269,10 @@ namespace avmplus
         // If we are not 'fixed', legal to write exactly 1 past the end, growing as needed.
         int32_t const index_i = int32_t(index);
         uint32_t const index_u = uint32_t(index_i);
-        uint32_t const limit = m_list.length();
+        uint32_t const limit = m_list.length() + 1 - uint32_t(m_fixed);
         if (double(index_i) == index && index_i >= 0)
         {
-            if (index_u <= limit)
+            if (index_u < limit)
                 return index_u;
         }
         throwSetDoubleException(index, limit);
