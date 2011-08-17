@@ -43,11 +43,7 @@ namespace avmplus
 {
 #ifdef VMCFG_WORDCODE
 
-    class TranslatedCode : public MMgc::GCObject
-    {
-    public:
-        uintptr_t data[1];  // more follows
-    };
+    typedef MMgc::LeafVector<uintptr_t,MMgc::GC::kZero> TranslatedCode;
 
     class WordcodeEmitter : public WordcodeTranslator {
     public:
