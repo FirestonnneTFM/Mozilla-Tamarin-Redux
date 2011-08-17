@@ -240,6 +240,12 @@ struct ABCInfo;
 #include "avm.h"
 
 #include "MMgc.h"
+
+namespace avmplus
+{
+    typedef MMgc::LeafVector<Traits*, MMgc::GC::kZero> UnscannedTraitsArray;
+}
+
 #include "QCache.h"
 #include "MathUtils.h"
 #include "UnicodeUtils.h"

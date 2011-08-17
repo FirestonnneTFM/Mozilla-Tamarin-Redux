@@ -662,7 +662,7 @@ const int kBufferPadding = 16;
         HeapHashtable*          m_unversionedURIs;
 #endif
 
-        Traits** _emptySupertypeList; // empty supertype list shared by many Traits
+        GCMember<UnscannedTraitsArray> _emptySupertypeList; // empty supertype list shared by many Traits
 
         // END traced private fields
         ////////////////////////////////////////////////////////////////////

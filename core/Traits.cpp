@@ -1476,7 +1476,7 @@ namespace avmplus
         // copy other base types, and interfaces, into pending[] by
         // and maintaining the partial ordering that each type's bases and
         // interfaces are visited before that type itself is visited.
-        for (Traits** st = m_secondary_supertypes; *st != NULL; st++) {
+        for (Traits** st = get_secondary_supertypes(); *st != NULL; st++) {
             Traits* t = *st;
             if (t != this && !t->m_resolved)
                 insertSupertype(t, pending);
@@ -1501,7 +1501,7 @@ namespace avmplus
         // make sure our supertypes have verified their bindings. (must be done before calling _buildTraitsBindings)
         for (Traits* t = this->base; t != NULL; t = t->base)
             AvmAssert(t->m_bindingsVerified);
-        for (Traits** st = this->m_secondary_supertypes; *st != NULL; st++)
+        for (Traits** st = this->get_secondary_supertypes(); *st != NULL; st++)
             AvmAssert(*st == this || (*st)->m_bindingsVerified);
 #endif
 
@@ -1536,7 +1536,7 @@ namespace avmplus
         // make sure our supertypes are resolved. (must be done before calling _buildTraitsBindings)
         for (Traits* t = this->base; t != NULL; t = t->base)
             AvmAssert(t->m_resolved);
-        for (Traits** st = this->m_secondary_supertypes; *st != NULL; st++)
+        for (Traits** st = this->get_secondary_supertypes(); *st != NULL; st++)
             AvmAssert(*st == this || (*st)->m_resolved);
 #endif
 
@@ -2202,44 +2202,46 @@ failure:
             if (!base) {
                 WB(gc, this, &this->m_secondary_supertypes, core->_emptySupertypeList);
             } else {
-                Traits** base_list = base->m_secondary_supertypes;
+                Traits** base_list = base->get_secondary_supertypes();
                 // If we require base in our secondary_supertypes list, so will other
                 // sibling leaf types.  Try to share the seconary_supertypes list by
                 // inserting base at position 0.
                 if (base->isPrimary() || base_list[0] == base) {
                     // just copy the base list.
-                    WB(gc, this, &this->m_secondary_supertypes, base_list);
+                    m_secondary_supertypes = base->m_secondary_supertypes;
                 } else {
                     // must prepend base to base_list, save the copy on this type and base.
                     count = countSupertypes(base_list);
-                    Traits** list = allocSupertypeList(gc, count + 1);
-                    WB_SKIP(gc, list, list, base);
+                    UnscannedTraitsArray* list = allocSupertypeList(gc, count + 1);
+                    Traits** raw_list = (Traits**)list;
+                    WB_SKIP(gc, raw_list, raw_list, base);
                     for (uint32_t i=0; i < count; i++)
-                        WB_SKIP(gc, list, list+i+1, base_list[i]);
-                    WB(gc, base, &base->m_secondary_supertypes, list);
-                    WB(gc, this, &this->m_secondary_supertypes, list);
+                        WB_SKIP(gc, raw_list, raw_list+i+1, base_list[i]);
+                    base->m_secondary_supertypes = list;
+                    m_secondary_supertypes = list;
                 }
             }
         } else {
             // this type implements new interfaces so we need a new list
             this->m_implementsNewInterfaces = true;
-            if (base && !base->isPrimary() && base->m_secondary_supertypes[0] != base) {
+            if (base && !base->isPrimary() && base->get_secondary_supertypes()[0] != base) {
                 seen.add(base);
                 count++;
             }
-            Traits** list;
-            uint32_t baseCount = base ? countSupertypes(base->m_secondary_supertypes) : 0;
+            UnscannedTraitsArray* list;
+            uint32_t baseCount = base ? countSupertypes(base->get_secondary_supertypes()) : 0;
             if (baseCount > 0) {
                 uint32_t total = count + baseCount;
                 list = allocSupertypeList(gc, total);
-                for (Traits **d = list, **s = base->m_secondary_supertypes; *s != NULL; s++, d++)
+                for (Traits **d = (Traits**)list, **s = base->get_secondary_supertypes(); *s != NULL; s++, d++)
                     WB_SKIP(gc, list, d, *s);
             } else {
                 list = allocSupertypeList(gc, count);
             }
-            WB(gc, this, &this->m_secondary_supertypes, list);
+            m_secondary_supertypes = list;
+            Traits** raw_list = (Traits**)list;
             for (uint32_t i=0; i < count; i++) {
-                WB_SKIP(gc, list, list+baseCount+i, seen[i]);
+                WB_SKIP(gc, raw_list, raw_list+baseCount+i, seen[i]);
             }
         }
 
@@ -2256,7 +2258,7 @@ failure:
                 supertypes.add(t);
             }
         }
-        for (Traits** st = m_secondary_supertypes; *st != NULL; st++) {
+        for (Traits** st = get_secondary_supertypes(); *st != NULL; st++) {
             Traits* t = *st;
             if (supertypes.indexOf(t) != -1) {
                 core->console << "t " << this << " dup secondary " << t << "\n";
@@ -2271,7 +2273,7 @@ failure:
     // and cache positive/negative results
     bool Traits::secondary_subtypeof(Traits* t)
     {
-        for (Traits** s = m_secondary_supertypes; *s != NULL; s++) {
+        for (Traits** s = get_secondary_supertypes(); *s != NULL; s++) {
             if (t == *s) {
                 m_supertype_cache = t;
                 return true;
@@ -2282,10 +2284,10 @@ failure:
     }
 
     // create a new supertype list of the given length
-    Traits** Traits::allocSupertypeList(GC* gc, uint32_t size)
+    UnscannedTraitsArray* Traits::allocSupertypeList(GC* gc, uint32_t size)
     {
-        // kContainsPointer left off on purpose, see comments in header.
-        return (Traits**) gc->Alloc((size+1) * sizeof(Traits*), MMgc::GC::kZero);
+        // This memory is intentionally unscanned, see comments in header.
+        return UnscannedTraitsArray::New(gc, size+1);
     }
 
     // Returns true if a value of type rhs can be assigned to a variable
