@@ -559,7 +559,10 @@ class AcceptanceRuntest(RuntestBase):
         if self.show_time:
             outputCalls.insert(0,(self.js_print,('%s running %s %s %s time %.1f' % (testnum, ast, extraVmArgs, abcargs, time.time()-starttime), '<b>', '</b><br/>')));
         else:
-            outputCalls.insert(0,(self.js_print,('%s running %s %s %s' % (testnum, ast, extraVmArgs, abcargs), '<b>', '</b><br/>')));
+            if self.passthreadid:
+                outputCalls.insert(0,(self.js_print,('%s running %s %s %s threadid=%s' % (testnum, ast, extraVmArgs, abcargs, passByEnv['threadid']), '<b>', '</b><br/>')));
+            else:
+                outputCalls.insert(0,(self.js_print,('%s running %s %s %s' % (testnum, ast, extraVmArgs, abcargs), '<b>', '</b><br/>')));
 
 
         return outputCalls
