@@ -384,13 +384,14 @@ namespace avmplus
          * The supertype list is an optimization containing pointers to memory otherwise
          * reachable, its not allocated with kContainsPointers and write barriers are skipped.
          */
-        static Traits** allocSupertypeList(MMgc:: GC*, uint32_t size);
+        static UnscannedTraitsArray* allocSupertypeList(MMgc:: GC*, uint32_t size);
         static bool canAssign(Traits* lhs, Traits* rhs);
         static Traits* readBinding(Traits* t, Binding b);
 
     private:
         void build_primary_supertypes();
         void build_secondary_supertypes();
+        Traits** get_secondary_supertypes() const;
         bool FASTCALL secondary_subtypeof(Traitsp t);   // slow path called by subtypeof()
         bool isPrimary() const;
         uint32_t countNewInterfaces(GCList<Traits>& seen);
@@ -588,7 +589,7 @@ namespace avmplus
                                         m_supertype_neg_cache;          // 1-entry cache for subtypeof=false (hidden to avoid pinning)
     private:    Traits*                 GC_POINTERS_SMALL(m_primary_supertypes[MAX_PRIMARY_SUPERTYPE], MAX_PRIMARY_SUPERTYPE);
                                                                         // m_primary_supertypes contains the first several base classes, written with explicit WB's
-    private:    Traits**                GC_POINTER(m_secondary_supertypes); // Won't work with GCMember<>, explicit WB required
+    private:    GCMember<UnscannedTraitsArray>           GC_POINTER(m_secondary_supertypes); 
     public:     PoolObject* const       GC_POINTER(pool);               // The constant pool owning this definition. never null, written in constructor, no WB required.
     public:     GCMember<Traits>        GC_POINTER(itraits);            // if this type is a factory, itraits is non-null and points to the type created by this factory.
     private:    GCMember<Namespace>     GC_POINTER(_ns);                // The namespace of the class described by this traits object

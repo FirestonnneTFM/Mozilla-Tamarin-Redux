@@ -281,6 +281,11 @@ REALLY_INLINE bool Traits::subtypeof(Traitsp t)
     return secondary_subtypeof(t);
 }
 
+REALLY_INLINE Traits** Traits::get_secondary_supertypes() const
+{
+    return m_secondary_supertypes->AsArray();
+}
+
 REALLY_INLINE bool Traits::isPrimary() const
 {
     return m_supertype_offset != offsetof(Traits, m_supertype_cache);
@@ -401,12 +406,12 @@ REALLY_INLINE void Traits::set_isDictionary()
 
 REALLY_INLINE InterfaceIterator::InterfaceIterator(Traits* t)
 {
-    st = t->m_secondary_supertypes;
+    st = t->get_secondary_supertypes();
 }
 
 REALLY_INLINE InterfaceIterator::InterfaceIterator(const TraitsBindings* tb)
 {
-    st = tb->owner->m_secondary_supertypes;
+    st = tb->owner->get_secondary_supertypes();
 }
 
 REALLY_INLINE bool InterfaceIterator::hasNext()
