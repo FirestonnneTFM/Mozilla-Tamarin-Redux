@@ -475,6 +475,7 @@ namespace MMgc
         // The new GCMember delegates to methods in these classes that
         // use the private write barriers.
         friend class GCObject;
+        friend class LeafObject;
         friend class GCTraceableBase;
 #ifdef VMCFG_SELFTEST
         friend class avmplus::ST_mmgc_basics::ST_mmgc_basics;
@@ -622,6 +623,7 @@ namespace MMgc
          */
         enum AllocFlags
         {
+            kNoFlags=0,
             kZero=1,
             kContainsPointers=2,
             kFinalize=4,            // This must match kFinalizable in GCAlloc.h
