@@ -193,6 +193,106 @@ namespace MMgc
         }
     };
 
+    /**
+     * Surface the GC's ability to allocate memory that contains no
+     * pointers in the type system.  LeafObject has write barrier
+     * methods so pointers to them can be used in a GCMember but it
+     * doesn't itself define GCMember as it makes no sense for a leaf
+     * object to have a GCMember.
+     */
+    class LeafObject
+    {
+    public:
+
+        // Methods used by GCMember<T>
+        REALLY_INLINE static void WriteBarrier(void **address, void *value)
+        {
+            GC::WriteBarrier(address, value);
+        }
+
+        REALLY_INLINE static void WriteBarrier_dtor(void **address)
+        {
+            *address = NULL;
+        }
+        
+        // These are noops overridden by RCObject to do the right thing.
+        REALLY_INLINE void IncrementRef() {}
+        REALLY_INLINE void DecrementRef() {}
+
+        static void *operator new(size_t size, GC *gc) GNUC_ONLY(throw())
+        {
+            return gc->Alloc(size, GC::kZero);
+        }
+        
+        // On purpose! Forward thinking 
+        //        static void operator delete(void *gcObject);
+
+        GCWeakRef *GetWeakRef() const
+        {
+            return GC::GetWeakRef(this);
+        }
+
+        //  Create a GCRef from "this" with parameter for auto template specialization.
+        template <class T>
+        REALLY_INLINE GCRef<T> GetThisRef(const T *ths) const
+        {
+            GCAssert(ths == (const T*)this);
+            GCRef<T> ref((T*)ths);
+            return ref;
+        }
+    };
+
+    /**
+     * Subclass of LeafObject that provides dynamically sized new
+     * operator that safely calculates extra size based on the vector
+     * type and also avoids zeroing the memory unless requested to do
+     * so by optional GC::AllocFlags template parameter.  The idea
+     * is to do something like this:
+     *
+     * typedef LeafVector<Traits*> UnscannedTraitsPointerArray;
+     * GCMember<UnscannedTraitsPointerArray> list;
+     * list = LeafVector<Traits*>::New(gc, 5);
+     * Traits **traitsp = (Traits**)list;
+     * traits[0] = t;
+     *
+     * The raw cast is unfortunate but safe due to the fact LeafVector
+     * has no members and can't be subclassed. It exists purely to
+     * allow GCMember to be used instead of DWB and for a safe (in
+     * terms of math overflow) New factory to be used instead of
+     * raw Alloc/Calloc.
+     */
+    template<class T, GC::AllocFlags flags=GC::kNoFlags>
+    class LeafVector : public LeafObject
+    {
+    public:
+
+        T* AsArray() 
+        { 
+            return (T*)(void*)this; 
+        }
+
+        static LeafVector<T,flags>* New(GC *gc, size_t count)
+        {
+            return new (gc, count) LeafVector<T,flags>();
+        }
+
+        // On purpose! Forward thinking 
+        //        static void operator delete(void *gcObject);
+        
+    private:
+
+        // 'throw()' annotation to avoid GCC warning: 'operator new' must not return NULL unless it is declared 'throw()' (or -fcheck-new is in effect)
+        static void *operator new(size_t, GC *gc, size_t count) GNUC_ONLY(throw())
+        {
+            // We ignore the first size_t, LeafVector's have no fields and aren't
+            // subclassable because of the private ctor and new operator.
+            return gc->Calloc(count, sizeof(T), flags & GC::kZero);
+        }
+
+        // Private ctor to prevent subclassing.
+        LeafVector() {}
+    };
+
     // GCTraceableBase is internal to MMgc.
 
     class GCTraceableBase
