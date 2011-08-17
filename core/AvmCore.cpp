@@ -3366,8 +3366,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
     const BugCompatibility* AvmCore::createBugCompatibility(BugCompatibility::Version v)
     {
-        // Allocate pointer-free because the structure contains no pointers (bugzilla 596529)
-        return ::new (GetGC()->Alloc(sizeof(BugCompatibility), MMgc::GC::kZero)) BugCompatibility(v);
+        return new (GetGC()) BugCompatibility(v);
     }
 
     void AvmCore::addLivePool(PoolObject* pool)

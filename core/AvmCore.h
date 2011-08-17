@@ -285,7 +285,7 @@ const int kBufferPadding = 16;
      * is pointer-free and allocates it as pointer-free memory (bugzilla 596529).
      * Subclassers should consider doing the same.
      */
-    class BugCompatibility : public MMgc::GCObject
+    class BugCompatibility : public MMgc::LeafObject
     {
     public:
         enum Version
