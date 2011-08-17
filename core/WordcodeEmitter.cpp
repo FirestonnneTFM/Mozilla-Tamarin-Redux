@@ -965,8 +965,8 @@ namespace avmplus
         buffers->entries_used = uint32_t(dest - buffers->data);
         uint32_t total_size = buffer_offset + buffers->entries_used;
 
-        TranslatedCode* code_anchor = (TranslatedCode*)core->GetGC()->Alloc(sizeof(TranslatedCode) + (total_size - 1)*sizeof(uintptr_t), GC::kZero);
-        uintptr_t* code = code_anchor->data;
+        TranslatedCode* code_anchor = TranslatedCode::New(core->GetGC(), total_size);
+        uintptr_t* code = code_anchor->AsArray();
 
         // reverse the list of buffers
         buffer_info* first = buffers;

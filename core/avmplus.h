@@ -199,7 +199,6 @@ namespace avmplus
     class TraitsBindings;
     class TraitsMetadata;
 #ifdef VMCFG_WORDCODE
-    class TranslatedCode;
     class WordcodeTranslator;
     class WordcodeEmitter;
 #endif

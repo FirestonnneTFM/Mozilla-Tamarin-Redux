@@ -318,7 +318,7 @@ REALLY_INLINE void MethodInfo::set_word_code_exceptions(MMgc::GC* gc, ExceptionH
 REALLY_INLINE const uintptr_t* MethodInfo::word_code_start() const
 {
     AvmAssert(!isNative());
-    return _abc.word_code.translated_code->data;
+    return _abc.word_code.translated_code->AsArray();
 }
 
 REALLY_INLINE void MethodInfo::set_word_code(MMgc::GC* gc, TranslatedCode* translated_code)
