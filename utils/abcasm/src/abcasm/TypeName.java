@@ -38,69 +38,32 @@
  * ***** END LICENSE BLOCK ***** */
 package abcasm;
 
+import static abcasm.AbcConstants.*;
 
-class Instruction
+class TypeName extends Name
 {
-    /**
-     * @see AbcConstants
-     */
-    int opcode;
-    
-    /**
-     *  Immediate operands as specified by the program,
-     *  symbolic references may still be present.
-     */
-    Object[] operands;
+    Name n1, n2;
 
-    /**
-     *  Cooked immediate operands, symbolic references resolved.
-     */
-    int [] imm;
-    
-    /**
-     *  Name reference for instructions that operate on a named entity.
-     */
-    Name n;
-    
-    /**
-     *  Control-flow target for branch/jump instructions.
-     */
-    Label target;
-    
-    Instruction(int opcode, Object[] operands)
-    {
-        this.opcode = opcode;
-        this.operands = operands;
+    TypeName(Name n1, Name n2) {
+        super("", null);
+        kind = CONSTANT_TypeName;
+        this.n1 = n1;
+        this.n2 = n2;
     }
-    
-    Instruction(int opcode, Object v)
-    {
-        this(opcode, new Object[]{v});
+
+    public String toString() {
+        return "#" + n1 + ".<" + n2 + ">";
     }
-    
-    public String toString()
-    {
-        StringBuffer result = new StringBuffer(MethodBodyInfo.decodeOp(opcode));
-        
-        if ( n != null )
-        {
-            result.append(" ");
-            result.append(n);
-        }
-        
-        if ( target != null )
-        {
-            result.append(" ");
-            result.append(target);
-        }
-        
-        for ( Object x: operands)
-        {
-            result.append(" ");
-            result.append(x);
-        }
-        
-        return result.toString();
+
+    public int compareTo(Object o) {
+        if (!(o instanceof TypeName))
+            return -1;
+        TypeName other = (TypeName)o;
+        int r = n1.compareTo(other.n1);
+        if (r != 0)
+            return r;
+        else
+            return n2.compareTo(other.n2);
     }
 }
 
