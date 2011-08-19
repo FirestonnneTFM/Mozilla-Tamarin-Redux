@@ -20,7 +20,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Adobe AS3 Team
+ *	 Adobe AS3 Team
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -44,6 +44,10 @@ public class Nsset implements Comparable, Iterable<Namespace>
 {
 	java.util.Vector<Namespace> namespaces = new java.util.Vector<Namespace>();
 	
+	public Nsset()
+	{
+	}
+
 	public Nsset(Namespace single_ns)
 	{
 		namespaces.add(single_ns);

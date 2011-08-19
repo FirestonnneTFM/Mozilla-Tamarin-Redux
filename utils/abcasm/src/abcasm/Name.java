@@ -20,7 +20,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Adobe AS3 Team
+ *	 Adobe AS3 Team
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -43,21 +43,44 @@ import static abcasm.AbcConstants.*;
 class Name implements java.lang.Comparable
 {
 	int kind;
-	String baseName;
-	Nsset qualifiers;
+	String baseName;   // May be "" but is never null
+	Nsset qualifiers;  // May be null
 
+	// Always a QName, even if 'qualifiers' is represented as a set
 	Name(String unqualifiedName)
 	{
 		baseName = unqualifiedName;
 		kind = CONSTANT_Qname;
 		qualifiers = new Nsset( new Namespace(CONSTANT_PackageNs));
 	}
-	
-	Name(Nsset multiname_qualifiers, String baseName)
+
+	// Always a QName, even if 'qualifiers' is represented as a set
+	Name(String ns, String unqualifiedName)
 	{
-		this.baseName = baseName;
-		kind = CONSTANT_Multiname;
-		qualifiers = multiname_qualifiers;
+		baseName = unqualifiedName;
+		kind = CONSTANT_Qname;
+		qualifiers = new Nsset( new Namespace(CONSTANT_Namespace, ns));
+	}
+	
+	// All other cases, pass null for missing parts
+	Name(Nsset multiname_qualifiers, String _baseName)
+	{
+		baseName = (_baseName == null) ? "" : _baseName;
+		qualifiers = multiname_qualifiers == null ? new Nsset() : multiname_qualifiers;
+		if (multiname_qualifiers == null)
+		{
+			if (_baseName == null)
+				kind = CONSTANT_RTQnameL;
+			else
+				kind = CONSTANT_RTQname;
+		}
+		else
+		{
+			if (_baseName == null)
+				kind = CONSTANT_MultinameL;
+			else
+				kind = CONSTANT_Multiname;
+		}
 	}
 
 	public String toString()
@@ -114,3 +137,31 @@ class Name implements java.lang.Comparable
 		return this.qualifiers.namespaces.elementAt(0);
 	}
 }
+
+class TypeName extends Name
+{
+	Name n1, n2;
+
+	TypeName(Name n1, Name n2) {
+		super("", null);
+		kind = CONSTANT_TypeName;
+		this.n1 = n1;
+		this.n2 = n2;
+	}
+
+	public String toString() {
+		return "#" + n1 + ".<" + n2 + ">";
+	}
+
+	public int compareTo(Object o) {
+		if (!(o instanceof TypeName))
+			return -1;
+		TypeName other = (TypeName)o;
+		int r = n1.compareTo(other.n1);
+		if (r != 0)
+			return r;
+		else
+			return n2.compareTo(other.n2);
+	}
+}
+

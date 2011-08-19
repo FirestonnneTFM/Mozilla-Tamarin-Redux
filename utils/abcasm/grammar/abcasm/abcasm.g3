@@ -860,9 +860,78 @@ identifier
 	}
 	;
 
+/* Multiname syntax.
+ *
+ * Multiname
+ *   - Qname .< Nontypename >    a TypeName, ie, instantiated parameterized type, eg  "__AS3__.vec"::Vector.<C>
+ *   - Nontypename
+ *
+ * Nontypename
+ *   - QName
+ *   - IDENTIFIER                a Multiname with a default namespace set
+ *   - { ... } :: IDENTIFIER     a Multiname with the given namespace set
+ *   - []                        a MultinameL with a default namespace set (name part on the stack)
+ *   - { ... } :: []             a MultinameL with the given namespace set (name part on the stack)
+ *   - [] :: name                an RTQName with the given name (namespace set on the stack)
+ *   - [] :: []                  an RTQNameL (both values on the stack)
+ *
+ * QName
+ *   - IDENTIFIER :: IDENTIFIER  a QName
+ *   - String :: IDENTIFIER      a QName, use the "" namespace for "public"
+ *
+ *
+ * NOTE that for TypeName the number of type arguments is always 1 and
+ * the Qname MUST be "__AS3__.vec"::Vector, or the VM will reject the
+ * name.
+ *
+ * NOTE that quoted strings are not accepted inside namespace sets and
+ * that namespaces in sets must scan as identifiers, EXCEPT that a '.'
+ * as a special concession is allowed in namespace names inside
+ * namespace sets.  This discrepancy between the two syntaxes is a
+ * bug.
+ */
 multipart_identifier
 	returns [Name result]
 	: 
+    tn = typename { result = tn; }
+    |
+    ntn = nontypename { result = ntn; }
+    ;
+
+typename
+    returns [Name result]
+    :
+    q1 = multipart_qname DOTLESS q2 = nontypename GREATER
+    {
+        result = asmCore.getName(q1, q2);
+    }
+    ;
+
+nontypename
+    returns [Name result]
+    :
+    mp = multipart_qname { result = mp; }
+    |
+    HOLE
+    {
+        result = asmCore.getName( asmCore.getUsualSuspectNamespaces(), null );
+    }
+    |
+	nsset = multiname_qualifier COLON COLON HOLE
+	{
+	    result = asmCore.getName( nsset, null );
+	}
+    |
+    HOLE COLON COLON id = IDENTIFIER
+    {
+        result = asmCore.getName( (Nsset)null, $IDENTIFIER.getText() );
+    }
+    |
+    HOLE COLON COLON HOLE
+    {
+        result = asmCore.getName( (Nsset)null, null );
+    }
+    |
 	mpid = qualified_multipart_id
 	{
 	    result = mpid;
@@ -873,10 +942,24 @@ multipart_identifier
 	}
 	;
 
+multipart_qname
+    returns [Name result]
+    :
+    id1 = IDENTIFIER COLON COLON id2 = IDENTIFIER
+    {
+        result = asmCore.getName( id1.getText(), id2.getText() );
+    }
+    | 
+    str1 = string_literal COLON COLON x2 = IDENTIFIER
+    {
+        result = asmCore.getName( str1, x2.getText() );
+    }
+    ;
+
 qualified_multipart_id
 	returns [Name result]
 	:
-		nsset = multiname_qualifier COLON COLON  id = IDENTIFIER
+	nsset = multiname_qualifier COLON COLON  id = IDENTIFIER
 	{
 	    result = asmCore.getName(nsset, id.getText());
 	}
@@ -998,6 +1081,9 @@ string_literal returns [String result]
 	QUOTE	: '"' ;
 	SPLAT	: '*' ; 
 	MINUS	: '-' ;
+    HOLE    : '[]' ;
+    DOTLESS : '.<' ;
+    GREATER : '>' ;
 
 	TRY		: '.try';
 	CATCH	: '.catch';
