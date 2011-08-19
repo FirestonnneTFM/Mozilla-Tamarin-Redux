@@ -20,7 +20,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Adobe AS3 Team
+ *	 Adobe AS3 Team
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -47,7 +47,7 @@ class AssemblerCore
 	AssemblerOptions options;
 
 	/**
-	 *  Scripts defined by this translation unit.
+	 *	Scripts defined by this translation unit.
 	 */
 	Vector<ScriptInfo> scripts = new Vector<ScriptInfo>();
 	
@@ -60,7 +60,7 @@ class AssemblerCore
 	Map<String,Integer> methodsByName = new HashMap<String,Integer>();
 
 	/**
-	 *  Method bodies, in entry order.
+	 *	Method bodies, in entry order.
 	 */
 	List<MethodBodyInfo> methodBodies = new ArrayList<MethodBodyInfo>();
 	
@@ -68,7 +68,7 @@ class AssemblerCore
 	List<String> semanticErrors = new LinkedList<String>();
 
 	/*
-	 *  ABC pools.
+	 *	ABC pools.
 	 */
 	Pool<Name> namePool = new Pool<Name>(1);
 	Pool<String> stringPool = new Pool<String>(1);
@@ -187,9 +187,10 @@ class AssemblerCore
 			/* FIXME: not working right now... functionsByName.get(fname).dump(out) */;
 	}
 
+	// Note this is for QName, not for RTQName
 	Name getName(String unqualifiedName)
 	{
-		//  Ensure the package namespace is present.
+		//	Ensure the package namespace is present.
 		getNamespace("package");
 		Name result = new Name(unqualifiedName);
 		
@@ -201,16 +202,37 @@ class AssemblerCore
 
 		return result;
 	}
-	
+
+	// This is for QName too
+	Name getName(String ns, String baseName)
+	{
+		Name result = new Name(ns, baseName);
+		namePool.add(result);
+		getNamespace(ns);
+		stringPool.add(ns);
+		stringPool.add(baseName);
+		return result;
+	}
+
+	// All other cases, pass null for the missing parts.
 	Name getName(Nsset qualifiers, String baseName)
 	{
 		Name result = new Name(qualifiers, baseName);
 		
 		namePool.add(result);
-		stringPool.add(baseName);
+		if (baseName != null)
+			stringPool.add(baseName);
 		return result;
 	}
-	
+
+	// Typename
+	Name getName(Name q1, Name q2)
+	{
+		Name result = new TypeName(q1, q2);
+		namePool.add(result);
+		return result;
+	}
+
 	Namespace getNamespace(String nsName)
 	{
 		Namespace result;
@@ -250,11 +272,11 @@ class AssemblerCore
 	}
 	
 	/**
-	 *  Supports a convenience in the syntax:
-	 *  if a multiname doesn't have qualfiers,
-	 *  then hack together a Nsset with the
-	 *  commonly-searched namespaces.
-	 * 	@return
+	 *	Supports a convenience in the syntax:
+	 *	if a multiname doesn't have qualfiers,
+	 *	then hack together a Nsset with the
+	 *	commonly-searched namespaces.
+	 *	@return
 	 */
 	Nsset getUsualSuspectNamespaces()
 	{
@@ -283,7 +305,7 @@ class AssemblerCore
 	
 	void semanticAnalysis()
 	{
-		//  Add a default script if none was specified.
+		//	Add a default script if none was specified.
 		if ( scripts.isEmpty() )
 		{
 			scripts.add(new ScriptInfo());
@@ -297,7 +319,7 @@ class AssemblerCore
 			}
 		}
 		
-		//  TODO: Classes change these semantics.
+		//	TODO: Classes change these semantics.
 		if ( scripts.size() == 1 )
 			pushTraits(scripts.elementAt(0).traits);
 		
@@ -360,7 +382,7 @@ class AssemblerCore
 				
 				if ( !t.hasAttr("type_name"))
 				{
-					//  Unspecified type is type ANY.
+					//	Unspecified type is type ANY.
 					t.setAttr("type_name", new Name("*"));
 				}
 			}
@@ -377,7 +399,7 @@ class AssemblerCore
 		Integer result = null;
 		if ( immediate_operand instanceof Integer )
 		{
-			//  ID was specified.
+			//	ID was specified.
 			result = (Integer) immediate_operand;
 		}
 		else if ( immediate_operand instanceof SymbolicReference )
@@ -386,7 +408,7 @@ class AssemblerCore
 			
 			if ( SymbolicReference.function_id == symconst.kind )
 			{
-				//  ID should be in the table.
+				//	ID should be in the table.
 				if ( methodsByName.containsKey(symconst.symbolicReference))
 					result = methodsByName.get(symconst.symbolicReference);
 			}
@@ -410,7 +432,7 @@ class AssemblerCore
 	
 	int getNameId(Name n)
 	{
-		if ( null == n  || n.baseName.equals("*"))
+		if ( null == n	|| n.baseName.equals("*"))
 			return 0;
 		else
 			return namePool.id(n);

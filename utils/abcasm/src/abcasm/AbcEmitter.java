@@ -20,7 +20,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Adobe AS3 Team
+ *	 Adobe AS3 Team
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -121,21 +121,25 @@ class AbcEmitter
 				w.writeU30(core.stringPool.id(n.baseName));
 				w.writeU30(core.nssetPool.id(n.qualifiers));
 				break;
-			/*
-			case CONSTANT_RTQname:
-			case CONSTANT_RTQnameA:
-				w.writeU30(core.stringPool.id(n.name));
-				break;
 			case CONSTANT_MultinameL:
 			case CONSTANT_MultinameLA:
-				w.writeU30(core.nssetPool.id(n.nsset));
+				w.writeU30(core.nssetPool.id(n.qualifiers));
+				break;
+			case CONSTANT_RTQname:
+			case CONSTANT_RTQnameA:
+				w.writeU30(core.stringPool.id(n.baseName));
 				break;
 			case CONSTANT_RTQnameL:
 			case CONSTANT_RTQnameLA:
 				break;
 			case CONSTANT_TypeName:
-				throw new IllegalArgumentException("Not implemented.");
-				*/
+			{
+				TypeName nm = (TypeName)n;
+				w.writeU30(core.namePool.id(nm.n1));   // Factory name
+				w.writeU30(1);						   // Number of arguments
+				w.writeU30(core.namePool.id(nm.n2));   // Argument name
+				break;
+			}
 			default:
 				{
 					assert (false);
@@ -224,7 +228,7 @@ class AbcEmitter
 			case TRAIT_Var:
 					w.writeU30(t.getIntAttr("slot_id"));
 					w.writeU30(core.getNameId(t.getNameAttr("type_name")));
-					//  TODO: vindex and vkind
+					//	TODO: vindex and vkind
 					w.writeU30(0);
 					// w.write(0); //  TODO: write vkind when vindex !0
 				break;
@@ -300,10 +304,10 @@ class AbcEmitter
 			Map<Block,Integer> blockends = new HashMap<Block,Integer>();
 			int code_len = 0;
 
-			//  First, generate code for each block.
-			//  Keep a running tally of the code length,
-			//  which corresponds to the starting position
-			//  of each block.
+			//	First, generate code for each block.
+			//	Keep a running tally of the code length,
+			//	which corresponds to the starting position
+			//	of each block.
 			for ( Block b: f.blocks)
 			{
 				pos.put(b,code_len);
@@ -314,20 +318,20 @@ class AbcEmitter
 				
 				code_len += blockWriter.size();
 				
-				//  Blocks with no instructions are
-				//  valid assembly constructs.
+				//	Blocks with no instructions are
+				//	valid assembly constructs.
 				if ( b.insns.size() == 0)
 					continue;
 		
-				//  If the last instruction in the block
-				//  is a jump, leave room for the instruction,
-				//  but don't emit it yet.
+				//	If the last instruction in the block
+				//	is a jump, leave room for the instruction,
+				//	but don't emit it yet.
 				Instruction last = b.insns.lastElement();
 		
 				if (null != last.target)
 				{
-					//  if it's a single branch/fallthrough
-					//  Reserve space for the jump instruction.
+					//	if it's a single branch/fallthrough
+					//	Reserve space for the jump instruction.
 					code_len += 4;
 					padding.put(b, 4);
 				}
@@ -409,6 +413,7 @@ class AbcEmitter
 			case OP_coerce:
 			case OP_astype:
 			case OP_finddef:
+				assert(insn.n != null);
 					blockWriter.writeU30(core.namePool.id(insn.n));
 				break;
 			case OP_callproperty:
