@@ -230,19 +230,30 @@ namespace avmplus
 #endif
 
     template<class TLIST>
-    REALLY_INLINE uint32_t TypedVectorObject<TLIST>::checkReadIndex_u(uint32_t index) const
+    REALLY_INLINE void TypedVectorObject<TLIST>::checkReadIndex_u(uint32_t index) const
     {
         uint32_t const limit = m_list.length();
         if (index >= limit)
             throwRangeError_u(index);
-        return index;
     }
 
+    // For signed 'index', the test (index < 0 || uint32_t(index) >= limit) can be
+    // accomplished by (uint32_t(index) >= limit), provided that limit < 2^31.  The
+    // resulting speedup is worthwhile.
+    //
+    // We assert statically that the maximum object size divided by the element size will
+    // never exceed 2^31-1.  This should always be true at the time of writing (Aug 2011),
+    // because the smallest object to go into a Vector is four bytes and the largest object
+    // size supported by MMgc is 4GB.
+    
     template<class TLIST>
     REALLY_INLINE uint32_t TypedVectorObject<TLIST>::checkReadIndex_i(int32_t index) const
     {
+        static_assert((MMgc::GCHeap::kMaxObjectSize / sizeof(typename TLIST::TYPE)) <= 0x7FFFFFFFU,
+                      "Optimizations in the vector code depend on vectors being shorter than 2^31 elements");
         uint32_t const limit = m_list.length();
-        if (index < 0 || uint32_t(index) >= limit)
+        // See comment above
+        if (uint32_t(index) >= limit)   // See comment above
             throwRangeError_i(index);
         return uint32_t(index);
     }
@@ -263,14 +274,18 @@ namespace avmplus
     }
 
     template<class TLIST>
-    REALLY_INLINE uint32_t TypedVectorObject<TLIST>::checkWriteIndex_u(uint32_t index) const
+    REALLY_INLINE void TypedVectorObject<TLIST>::checkWriteIndex_u(uint32_t index) const
     {
         // If we are 'fixed', we can't write past the end.
         // If we are not 'fixed', legal to write exactly 1 past the end, growing as needed.
-        uint32_t const limit = m_list.length() + 1 - uint32_t(m_fixed);
-        if (index >= limit)
-            throwRangeError_u(index);
-        return index;
+        // Common case is we're in bounds, so fast-path that.  This matters.
+        uint32_t const length = m_list.length();
+        if (index >= length)
+        {
+            uint32_t const limit = length + 1 - uint32_t(m_fixed);
+            if (index >= limit)
+                throwRangeError_u(index);
+        }
     }
 
     template<class TLIST>
@@ -278,9 +293,14 @@ namespace avmplus
     {
         // If we are 'fixed', we can't write past the end.
         // If we are not 'fixed', legal to write exactly 1 past the end, growing as needed.
-        uint32_t const limit = m_list.length() + 1 - uint32_t(m_fixed);
-        if (index < 0 || uint32_t(index) >= limit)
-            throwRangeError_i(index);
+        // Common case is we're in bounds, so fast-path that.  This matters.
+        uint32_t const length = m_list.length();
+        if (uint32_t(index) >= length)      // See comment above checkReadIndex_i
+        {
+            uint32_t const limit = length + 1 - uint32_t(m_fixed);
+            if (uint32_t(index) >= limit)   // See comment above checkReadIndex_i
+                throwRangeError_i(index);
+        }
         return uint32_t(index);
     }
 

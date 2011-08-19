@@ -469,14 +469,14 @@ namespace avmplus
     template<class TLIST>
     typename TLIST::TYPE TypedVectorObject<TLIST>::_getNativeUintProperty(uint32_t index) const
     {
-        index = checkReadIndex_u(index);
+        checkReadIndex_u(index);
         return m_list.get(index);
     }
 
     template<class TLIST>
     void TypedVectorObject<TLIST>::_setNativeUintProperty(uint32_t index, typename TLIST::TYPE value)
     {
-        index = checkWriteIndex_u(index);
+        checkWriteIndex_u(index);
         m_list.set(index, value);
     }
 
@@ -503,14 +503,14 @@ namespace avmplus
     template<class TLIST>
     Atom TypedVectorObject<TLIST>::_getUintProperty(uint32_t index) const
     {
-        index = checkReadIndex_u(index);
+        checkReadIndex_u(index);
         return valueToAtom((typename TLIST::OPAQUE_TYPE)m_list.get(index));
     }
 
     template<class TLIST>
     void TypedVectorObject<TLIST>::_setUintProperty(uint32_t index, Atom value)
     {
-        index = checkWriteIndex_u(index);
+        checkWriteIndex_u(index);
         typename TLIST::OPAQUE_TYPE tmp;
         atomToValue(value, tmp);
         m_list.set(index, (typename TLIST::TYPE)tmp);
@@ -519,7 +519,7 @@ namespace avmplus
     template<class TLIST>
     void TypedVectorObject<TLIST>::_setKnownUintProperty(uint32_t index, Atom value)
     {
-        index = checkWriteIndex_u(index);
+        checkWriteIndex_u(index);
         typename TLIST::OPAQUE_TYPE tmp;
         atomToValueKnown(value, tmp);
         m_list.set(index, (typename TLIST::TYPE)tmp);

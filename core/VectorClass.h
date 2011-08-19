@@ -354,10 +354,10 @@ namespace avmplus
         void FASTCALL throwRangeError_i(int32_t index) const;
         void FASTCALL throwRangeError_a(Atom index) const;
 
-        uint32_t checkReadIndex_u(uint32_t index) const;
+        void     checkReadIndex_u(uint32_t index) const;
         uint32_t checkReadIndex_i(int32_t index) const;
         uint32_t checkReadIndex_d(double index) const;
-        uint32_t checkWriteIndex_u(uint32_t index) const;
+        void     checkWriteIndex_u(uint32_t index) const;
         uint32_t checkWriteIndex_i(int32_t index) const;
         uint32_t checkWriteIndex_d(double index) const;
 
