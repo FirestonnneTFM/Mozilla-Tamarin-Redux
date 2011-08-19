@@ -4536,6 +4536,9 @@ namespace avmplus
     static const CallInfo* setObjectVectorHelpers[VI_SIZE] =
         { FUNCTIONID(ObjectVectorObject_setUintProperty), FUNCTIONID(ObjectVectorObject_setIntProperty), FUNCTIONID(ObjectVectorObject_setDoubleProperty) };
 
+    static const CallInfo* setKnownTypeObjectVectorHelpers[VI_SIZE] =
+        { FUNCTIONID(ObjectVectorObject_setKnownUintProperty), FUNCTIONID(ObjectVectorObject_setKnownIntProperty), FUNCTIONID(ObjectVectorObject_setKnownDoubleProperty) };
+    
     static const CallInfo* setIntVectorNativeHelpers[VI_SIZE] =
         { FUNCTIONID(IntVectorObject_setNativeUintProperty), FUNCTIONID(IntVectorObject_setNativeIntProperty), FUNCTIONID(IntVectorObject_setNativeDoubleProperty) };
 
@@ -4571,7 +4574,11 @@ namespace avmplus
         }
         else if (objType != NULL && objType->subtypeof(VECTOROBJ_TYPE)) {
             value = loadAtomRep(valIndexOnStack);
-            setter = setObjectVectorHelpers[idxKind];
+            // Optimization: avoid coercion if stored value is known to be subtype of vector parameter type
+            if (objType->m_paramTraits != NULL && valueType != NULL && valueType->subtypeof(objType->m_paramTraits))
+                setter = setKnownTypeObjectVectorHelpers[idxKind];
+            else
+                setter = setObjectVectorHelpers[idxKind];
         }
         else if (objType == VECTORINT_TYPE) {
             if (valueType == INT_TYPE) {

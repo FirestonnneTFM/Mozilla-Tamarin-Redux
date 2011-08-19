@@ -517,6 +517,15 @@ namespace avmplus
     }
 
     template<class TLIST>
+    void TypedVectorObject<TLIST>::_setKnownUintProperty(uint32_t index, Atom value)
+    {
+        index = checkWriteIndex_u(index);
+        typename TLIST::OPAQUE_TYPE tmp;
+        atomToValueKnown(value, tmp);
+        m_list.set(index, (typename TLIST::TYPE)tmp);
+    }
+    
+    template<class TLIST>
     Atom TypedVectorObject<TLIST>::_getIntProperty(int32_t index_i) const
     {
         uint32_t const index = checkReadIndex_i(index_i);
@@ -533,6 +542,15 @@ namespace avmplus
     }
 
     template<class TLIST>
+    void TypedVectorObject<TLIST>::_setKnownIntProperty(int32_t index_i, Atom value)
+    {
+        uint32_t index = checkWriteIndex_i(index_i);
+        typename TLIST::OPAQUE_TYPE tmp;
+        atomToValueKnown(value, tmp);
+        m_list.set(index, (typename TLIST::TYPE)tmp);
+    }
+    
+    template<class TLIST>
     Atom TypedVectorObject<TLIST>::_getDoubleProperty(double index_d) const
     {
         uint32_t const index = checkReadIndex_d(index_d);
@@ -545,6 +563,15 @@ namespace avmplus
         uint32_t index = checkWriteIndex_d(index_d);
         typename TLIST::OPAQUE_TYPE tmp;
         atomToValue(value, tmp);
+        m_list.set(index, (typename TLIST::TYPE)tmp);
+    }
+    
+    template<class TLIST>
+    void TypedVectorObject<TLIST>::_setKnownDoubleProperty(double index_d, Atom value)
+    {
+        uint32_t index = checkWriteIndex_d(index_d);
+        typename TLIST::OPAQUE_TYPE tmp;
+        atomToValueKnown(value, tmp);
         m_list.set(index, (typename TLIST::TYPE)tmp);
     }
     

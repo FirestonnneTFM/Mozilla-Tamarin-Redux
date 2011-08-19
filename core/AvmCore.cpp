@@ -5239,9 +5239,12 @@ return the result of the comparison ToPrimitive(x) == y.
             bugzilla654807  = 1;    // sealed subclasses of Array act sort-of-dynamic
         }
 
-        // if (v >= kSWF14) /* Anza */ { TBD }
-        
-        if (v >= kSWF15)    /* Brannan */
+        if (v >= kSWF14) /* Anza, tentative! */
+        {
+            bugzilla678952 = 1;     // Operations on Vector.<C> do not make use of or provide information about C
+        }
+
+        if (v >= kSWF15)    /* Brannan, tentative! */
         {
             bugzilla513039 = 1;     // Number.toFixed(0) returns incorrect numbers, rounding issues
         }

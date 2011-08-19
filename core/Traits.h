@@ -351,7 +351,7 @@ namespace avmplus
                TraitsPosPtr traitsPos,
                TraitsPosType posType);
 
-        Traits* _newParameterizedTraits(Stringp name, Namespacep ns, Traits* _base);
+        Traits* _newParameterizedTraits(Stringp name, Namespacep ns, Traits* _base, Traits* _param_traits);
 
     public:
         /**
@@ -365,7 +365,7 @@ namespace avmplus
                 TraitsPosType posType);
 
         static Traits* newCatchTraits(const Toplevel* toplevel, PoolObject* pool, TraitsPosPtr traitsPos, Stringp name, Namespacep ns);
-        Traits* newParameterizedITraits(Stringp name, Namespacep ns);
+        Traits* newParameterizedITraits(Stringp name, Namespacep ns, Traits* param_traits);
         Traits* newParameterizedCTraits(Stringp name, Namespacep ns);
 
     public:
@@ -584,6 +584,7 @@ namespace avmplus
 
     public:     AvmCore* const          core;                           // @todo remove, can get from pool->core
     public:     Traits* const           GC_POINTER(base);               // Pointer to the base traits; that is, the traits of the base class
+    public:     Traits* /*const*/       GC_POINTER(m_paramTraits);      // Pointer to the type parameter traits for vector itraits, otherwise NULL
     private:    GCMember<Traits>        GC_POINTER(m_supertype_cache);  // 1-entry cache for subtypeof=true
     private:    MMgc::GCHiddenPointer<Traits*>
                                         m_supertype_neg_cache;          // 1-entry cache for subtypeof=false (hidden to avoid pinning)

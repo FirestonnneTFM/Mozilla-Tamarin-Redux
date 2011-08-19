@@ -246,15 +246,19 @@ namespace avmplus
         void FASTCALL throwFixedError() const;
 
         void atomToValue(Atom atom, int32_t& value);
+        void atomToValueKnown(Atom atom, int32_t& value);
         Atom valueToAtom(const int32_t& value) const;
 
         void atomToValue(Atom atom, uint32_t& value);
+        void atomToValueKnown(Atom atom, uint32_t& value);
         Atom valueToAtom(const uint32_t& value) const;
 
         void atomToValue(Atom atom, double& value);
+        void atomToValueKnown(Atom atom, double& value);
         Atom valueToAtom(const double& value) const;
 
         void atomToValue(Atom atom, OpaqueAtom& value);
+        void atomToValueKnown(Atom atom, OpaqueAtom& value);
         Atom valueToAtom(const OpaqueAtom& value) const;
 
         enum VectorIndexStatus { kNotNumber, kInvalidNumber, kValidNumber };
@@ -332,10 +336,13 @@ namespace avmplus
         bool _hasUintProperty(uint32_t index) const;
         Atom _getUintProperty(uint32_t index) const;
         void _setUintProperty(uint32_t index, Atom value);
+        void _setKnownUintProperty(uint32_t index, Atom value);
         Atom _getIntProperty(int32_t index) const;
         void _setIntProperty(int32_t index, Atom value);
+        void _setKnownIntProperty(int32_t index, Atom value);
         Atom _getDoubleProperty(double index) const;
         void _setDoubleProperty(double index, Atom value);
+        void _setKnownDoubleProperty(double index, Atom value);
 
 #ifdef DEBUGGER
         virtual uint64_t bytesUsed() const;
