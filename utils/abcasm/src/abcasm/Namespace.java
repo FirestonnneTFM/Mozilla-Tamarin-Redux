@@ -1,4 +1,5 @@
 /* -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -39,37 +40,37 @@ package abcasm;
 
 public class Namespace implements Comparable
 {
-	int kind;
-	String name;
-	
-	Namespace(int kind)
-	{
-		this(kind, new String());
-	}
-	
-	Namespace(int kind, String name)
-	{
-		this.kind = kind;
-		this.name = name;
-	}
-	
-	public int compareTo(Object o)
-	{
-		Namespace other = (Namespace)o;
-		
-		int result = kind - other.kind;
-		
-		if ( 0 == result )
-			result = name.compareTo(other.name);
-		
-		return result;
-	}
-	
-	public String toString()
-	{
-		if ( name.length() > 0 )
-			return name;
-		else
-			return "0x" + Integer.toHexString(kind);
-	}
+    int kind;
+    String name;
+    
+    Namespace(int kind)
+    {
+        this(kind, new String());
+    }
+    
+    Namespace(int kind, String name)
+    {
+        this.kind = kind;
+        this.name = name;
+    }
+    
+    public int compareTo(Object o)
+    {
+        Namespace other = (Namespace)o;
+        
+        int result = kind - other.kind;
+        
+        if ( 0 == result )
+            result = name.compareTo(other.name);
+        
+        return result;
+    }
+    
+    public String toString()
+    {
+        if ( name.length() > 0 )
+            return name;
+        else
+            return "0x" + Integer.toHexString(kind);
+    }
 }

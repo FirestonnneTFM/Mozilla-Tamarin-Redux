@@ -1,4 +1,5 @@
 /* -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -43,20 +44,20 @@ package abcasm;
  */
 public class Label implements Comparable
 {
-	private String labelText;
+    private String labelText;
 
-	Label(String label_text)
-	{
-		this.labelText = label_text;
-	}
+    Label(String label_text)
+    {
+        this.labelText = label_text;
+    }
 
-	public int compareTo(Object o)
-	{
-		return ((Label)o).labelText.compareTo(this.labelText);
-	}
-	
-	public String toString()
-	{
-		return labelText;
-	}
+    public int compareTo(Object o)
+    {
+        return ((Label)o).labelText.compareTo(this.labelText);
+    }
+    
+    public String toString()
+    {
+        return labelText;
+    }
 }

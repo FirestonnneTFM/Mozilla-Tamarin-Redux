@@ -1,4 +1,5 @@
 /* -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -52,46 +53,46 @@ import java.util.TreeMap;
  */
 public class Pool<T extends Comparable>
 {
-	Map<T,Integer> refs = new TreeMap<T,Integer>();
-	ArrayList<T> values = new ArrayList<T>();
-	int countFrom;
-	
-	public Pool(int countFrom)
-	{
-		this.countFrom = countFrom;
-	}
-	
-	public int add(T e)
-	{
-		if ( !refs.containsKey(e) )
-		{
-			values.add(e);
-			refs.put(e, size());
-		}
+    Map<T,Integer> refs = new TreeMap<T,Integer>();
+    ArrayList<T> values = new ArrayList<T>();
+    int countFrom;
+    
+    public Pool(int countFrom)
+    {
+        this.countFrom = countFrom;
+    }
+    
+    public int add(T e)
+    {
+        if ( !refs.containsKey(e) )
+        {
+            values.add(e);
+            refs.put(e, size());
+        }
 
-		return refs.get(e);
-	}
-	
-	public ArrayList<T> getValues()
-	{
-		return values;
-	}
-	
-	public int id(T e)
-	{
-		if ( !refs.containsKey(e))
-			throw new IllegalArgumentException("Unknown pool item \"" + e.toString() + "\"");
-		return refs.get(e);
-	}
-	
-	public String toString()
-	{
-		return String.valueOf(refs);
-	}
-	
-	public int size()
-	{
-		return countFrom + refs.size();
-	}
+        return refs.get(e);
+    }
+    
+    public ArrayList<T> getValues()
+    {
+        return values;
+    }
+    
+    public int id(T e)
+    {
+        if ( !refs.containsKey(e))
+            throw new IllegalArgumentException("Unknown pool item \"" + e.toString() + "\"");
+        return refs.get(e);
+    }
+    
+    public String toString()
+    {
+        return String.valueOf(refs);
+    }
+    
+    public int size()
+    {
+        return countFrom + refs.size();
+    }
 }
 

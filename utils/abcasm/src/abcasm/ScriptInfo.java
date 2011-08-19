@@ -1,4 +1,5 @@
 /* -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -41,32 +42,32 @@ import java.util.Vector;
 
 class ScriptInfo
 {
-	Object init_id = new Integer(0);
+    Object init_id = new Integer(0);
 
-	Traits traits = new Traits();
-	
-	void setInit(Object i)
-	{
-		init_id = i;
-	}
-	
-	int getInitId()
-	{
-		if ( this.init_id instanceof Integer )
-		{
-			return (Integer)this.init_id;
-		}
-		else
-			throw new IllegalArgumentException("Unknown function " + init_id.toString());
-	}
-	
-	void addTrait(Trait t)
-	{
-		traits.add(t);
-	}
-	
-	Traits getTraits()
-	{
-		return traits;
-	}
+    Traits traits = new Traits();
+    
+    void setInit(Object i)
+    {
+        init_id = i;
+    }
+    
+    int getInitId()
+    {
+        if ( this.init_id instanceof Integer )
+        {
+            return (Integer)this.init_id;
+        }
+        else
+            throw new IllegalArgumentException("Unknown function " + init_id.toString());
+    }
+    
+    void addTrait(Trait t)
+    {
+        traits.add(t);
+    }
+    
+    Traits getTraits()
+    {
+        return traits;
+    }
 }

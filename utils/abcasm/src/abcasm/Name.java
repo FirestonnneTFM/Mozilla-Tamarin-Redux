@@ -1,4 +1,5 @@
 /* -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +21,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *	 Adobe AS3 Team
+ *   Adobe AS3 Team
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -42,126 +43,97 @@ import static abcasm.AbcConstants.*;
 
 class Name implements java.lang.Comparable
 {
-	int kind;
-	String baseName;   // May be "" but is never null
-	Nsset qualifiers;  // May be null
+    int kind;
+    String baseName;   // May be "" but is never null
+    Nsset qualifiers;  // May be null
 
-	// Always a QName, even if 'qualifiers' is represented as a set
-	Name(String unqualifiedName)
-	{
-		baseName = unqualifiedName;
-		kind = CONSTANT_Qname;
-		qualifiers = new Nsset( new Namespace(CONSTANT_PackageNs));
-	}
+    // Always a QName, even if 'qualifiers' is represented as a set
+    Name(String unqualifiedName)
+    {
+        baseName = unqualifiedName;
+        kind = CONSTANT_Qname;
+        qualifiers = new Nsset( new Namespace(CONSTANT_PackageNs));
+    }
 
-	// Always a QName, even if 'qualifiers' is represented as a set
-	Name(String ns, String unqualifiedName)
-	{
-		baseName = unqualifiedName;
-		kind = CONSTANT_Qname;
-		qualifiers = new Nsset( new Namespace(CONSTANT_Namespace, ns));
-	}
-	
-	// All other cases, pass null for missing parts
-	Name(Nsset multiname_qualifiers, String _baseName)
-	{
-		baseName = (_baseName == null) ? "" : _baseName;
-		qualifiers = multiname_qualifiers == null ? new Nsset() : multiname_qualifiers;
-		if (multiname_qualifiers == null)
-		{
-			if (_baseName == null)
-				kind = CONSTANT_RTQnameL;
-			else
-				kind = CONSTANT_RTQname;
-		}
-		else
-		{
-			if (_baseName == null)
-				kind = CONSTANT_MultinameL;
-			else
-				kind = CONSTANT_Multiname;
-		}
-	}
+    // Always a QName, even if 'qualifiers' is represented as a set
+    Name(String ns, String unqualifiedName)
+    {
+        baseName = unqualifiedName;
+        kind = CONSTANT_Qname;
+        qualifiers = new Nsset( new Namespace(CONSTANT_Namespace, ns));
+    }
+    
+    // All other cases, pass null for missing parts
+    Name(Nsset multiname_qualifiers, String _baseName)
+    {
+        baseName = (_baseName == null) ? "" : _baseName;
+        qualifiers = multiname_qualifiers == null ? new Nsset() : multiname_qualifiers;
+        if (multiname_qualifiers == null)
+        {
+            if (_baseName == null)
+                kind = CONSTANT_RTQnameL;
+            else
+                kind = CONSTANT_RTQname;
+        }
+        else
+        {
+            if (_baseName == null)
+                kind = CONSTANT_MultinameL;
+            else
+                kind = CONSTANT_Multiname;
+        }
+    }
 
-	public String toString()
-	{
-		StringBuffer result = new StringBuffer();
+    public String toString()
+    {
+        StringBuffer result = new StringBuffer();
 
-		if ( qualifiers != null )
-		{
-			result.append(qualifiers.toString());
-		}
-		result.append("::");
-		result.append(baseName);
+        if ( qualifiers != null )
+        {
+            result.append(qualifiers.toString());
+        }
+        result.append("::");
+        result.append(baseName);
 
-		return result.toString();
-	}
+        return result.toString();
+    }
 
-	public int compareTo(Object o)
-	{
+    public int compareTo(Object o)
+    {
+        if ( !(o instanceof Name ))
+        {
+            return -1;
+        }
 
-		if ( !(o instanceof Name ))
-		{
-			return -1;
-		}
+        int result = 0;
 
-		int result = 0;
+        Name other = (Name)o;
 
-		Name other = (Name)o;
+        if ( this.qualifiers != null )
+        {
+            if ( other.qualifiers != null )
+            {
+                result =  this.qualifiers.compareTo(other.qualifiers);
+            }
+            else
+            {
+                result = 1;
+            }
+        }
+        else if ( other.qualifiers != null )
+        {
+            result = -1;
+        }
 
-		if ( this.qualifiers != null )
-		{
-			if ( other.qualifiers != null )
-			{
-				result =  this.qualifiers.compareTo(other.qualifiers);
-			}
-			else
-			{
-				result = 1;
-			}
-		}
-		else if ( other.qualifiers != null )
-		{
-			result = -1;
-		}
+        if ( 0 == result )
+            result = baseName.compareTo(other.baseName);
 
-		if ( 0 == result )
-			result = baseName.compareTo(other.baseName);
+        return result;
+    }
 
-		return result;
-	}
-
-	Namespace getSingleQualifier()
-	{
-		assert(this.qualifiers.namespaces.size() == 1);
-		return this.qualifiers.namespaces.elementAt(0);
-	}
+    Namespace getSingleQualifier()
+    {
+        assert(this.qualifiers.namespaces.size() == 1);
+        return this.qualifiers.namespaces.elementAt(0);
+    }
 }
-
-class TypeName extends Name
-{
-	Name n1, n2;
-
-	TypeName(Name n1, Name n2) {
-		super("", null);
-		kind = CONSTANT_TypeName;
-		this.n1 = n1;
-		this.n2 = n2;
-	}
-
-	public String toString() {
-		return "#" + n1 + ".<" + n2 + ">";
-	}
-
-	public int compareTo(Object o) {
-		if (!(o instanceof TypeName))
-			return -1;
-		TypeName other = (TypeName)o;
-		int r = n1.compareTo(other.n1);
-		if (r != 0)
-			return r;
-		else
-			return n2.compareTo(other.n2);
-	}
-}
-

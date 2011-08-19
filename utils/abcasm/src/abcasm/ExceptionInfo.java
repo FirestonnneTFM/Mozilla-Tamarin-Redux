@@ -1,4 +1,5 @@
 /* -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -39,26 +40,26 @@ package abcasm;
 
 class ExceptionInfo
 {
-	Label	from;
-	Label	to;
-	Label	target;
-	
-	Integer	exc_type;
-	Integer	name_id;
-	
-	void validateSemantics()
-	{
-		if ( null == from )
-			throw new IllegalArgumentException(".exception must specify from label");
-		if ( null == to )
-			throw new IllegalArgumentException(".exception must specify to label");
-		if ( null == target )
-			throw new IllegalArgumentException(".exception must specify target label");
-		
-		//  Default the entries that have useful defaults.
-		if ( null == exc_type )
-			exc_type = new Integer(0);
-		if ( null == name_id )
-			name_id = new Integer(0);
-	}
+    Label   from;
+    Label   to;
+    Label   target;
+    
+    Integer exc_type;
+    Integer name_id;
+    
+    void validateSemantics()
+    {
+        if ( null == from )
+            throw new IllegalArgumentException(".exception must specify from label");
+        if ( null == to )
+            throw new IllegalArgumentException(".exception must specify to label");
+        if ( null == target )
+            throw new IllegalArgumentException(".exception must specify target label");
+        
+        //  Default the entries that have useful defaults.
+        if ( null == exc_type )
+            exc_type = new Integer(0);
+        if ( null == name_id )
+            name_id = new Integer(0);
+    }
 }

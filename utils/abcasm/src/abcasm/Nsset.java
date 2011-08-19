@@ -1,4 +1,5 @@
 /* -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +21,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *	 Adobe AS3 Team
+ *   Adobe AS3 Team
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -42,56 +43,56 @@ import java.util.Vector;
 
 public class Nsset implements Comparable, Iterable<Namespace>
 {
-	java.util.Vector<Namespace> namespaces = new java.util.Vector<Namespace>();
-	
-	public Nsset()
-	{
-	}
+    java.util.Vector<Namespace> namespaces = new java.util.Vector<Namespace>();
+    
+    public Nsset()
+    {
+    }
 
-	public Nsset(Namespace single_ns)
-	{
-		namespaces.add(single_ns);
-	}
-	
-	public Nsset(Vector<Namespace> nss) 
-	{
-		namespaces.addAll(nss);
-	}
+    public Nsset(Namespace single_ns)
+    {
+        namespaces.add(single_ns);
+    }
+    
+    public Nsset(Vector<Namespace> nss) 
+    {
+        namespaces.addAll(nss);
+    }
 
-	public int length()
-	{
-		return namespaces.size();
-	}
-	public int compareTo(Object o)
-	{
-		Nsset other = (Nsset)o;
-		
-		int result = this.namespaces.size() - other.namespaces.size();
-		
-		for ( int i = 0; i < this.namespaces.size() && 0 == result; i++ )
-			result = this.namespaces.elementAt(i).compareTo(other.namespaces.elementAt(i));
-		
-		return result;
-	}
+    public int length()
+    {
+        return namespaces.size();
+    }
+    public int compareTo(Object o)
+    {
+        Nsset other = (Nsset)o;
+        
+        int result = this.namespaces.size() - other.namespaces.size();
+        
+        for ( int i = 0; i < this.namespaces.size() && 0 == result; i++ )
+            result = this.namespaces.elementAt(i).compareTo(other.namespaces.elementAt(i));
+        
+        return result;
+    }
 
-	public Iterator<Namespace> iterator()
-	{
-		return namespaces.iterator();
-	}
-	
-	public String toString()
-	{
-		StringBuffer result = new StringBuffer();
-		
-		result.append('{');
-		for ( int i = 0; i < namespaces.size(); i++ )
-		{
-			if ( i > 0 )
-				result.append(',');
-			result.append(namespaces.elementAt(i));
-		}
-		result.append('}');
-		return result.toString();
-	}
+    public Iterator<Namespace> iterator()
+    {
+        return namespaces.iterator();
+    }
+    
+    public String toString()
+    {
+        StringBuffer result = new StringBuffer();
+        
+        result.append('{');
+        for ( int i = 0; i < namespaces.size(); i++ )
+        {
+            if ( i > 0 )
+                result.append(',');
+            result.append(namespaces.elementAt(i));
+        }
+        result.append('}');
+        return result.toString();
+    }
 }
 
