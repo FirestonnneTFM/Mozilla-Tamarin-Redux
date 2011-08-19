@@ -118,12 +118,22 @@ namespace avmplus
         value = AvmCore::integer(atom);
     }
     
+    REALLY_INLINE void VectorBaseObject::atomToValueKnown(Atom atom, int32_t& value)
+    {
+        value = AvmCore::integer(atom);
+    }
+    
     REALLY_INLINE Atom VectorBaseObject::valueToAtom(const int32_t& value) const
     {
         return core()->intToAtom(value);
     }
 
     REALLY_INLINE void VectorBaseObject::atomToValue(Atom atom, uint32_t& value)
+    {
+        value = AvmCore::toUInt32(atom);
+    }
+    
+    REALLY_INLINE void VectorBaseObject::atomToValueKnown(Atom atom, uint32_t& value)
     {
         value = AvmCore::toUInt32(atom);
     }
@@ -138,6 +148,11 @@ namespace avmplus
         value = AvmCore::number(atom);
     }
     
+    REALLY_INLINE void VectorBaseObject::atomToValueKnown(Atom atom, double& value)
+    {
+        value = AvmCore::number(atom);
+    }
+    
     REALLY_INLINE Atom VectorBaseObject::valueToAtom(const double& value) const
     {
         return core()->doubleToAtom(value);
@@ -147,6 +162,13 @@ namespace avmplus
     {
         AvmAssert(m_vecClass != NULL);
         atom = avmplus::coerce(toplevel(), atom, m_vecClass->getTypeTraits());
+        value = (OpaqueAtom)atom;
+    }
+    
+    REALLY_INLINE void VectorBaseObject::atomToValueKnown(Atom atom, OpaqueAtom& value)
+    {
+        AvmAssert(m_vecClass != NULL);
+        AvmAssert(atom == avmplus::coerce(toplevel(), atom, m_vecClass->getTypeTraits()));
         value = (OpaqueAtom)atom;
     }
     

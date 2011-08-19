@@ -230,14 +230,14 @@ REALLY_INLINE void Traits::setMetadataPos(const uint8_t* pos)
     metadata_pos = pos;
 }
 
-REALLY_INLINE Traits* Traits::newParameterizedITraits(Stringp name, Namespacep ns)
+REALLY_INLINE Traits* Traits::newParameterizedITraits(Stringp name, Namespacep ns, Traits* param_traits)
 {
-    return _newParameterizedTraits(name, ns, this);
+    return _newParameterizedTraits(name, ns, this, param_traits);
 }
 
 REALLY_INLINE Traits* Traits::newParameterizedCTraits(Stringp name, Namespacep ns)
 {
-    return _newParameterizedTraits(name, ns, this->base);
+    return _newParameterizedTraits(name, ns, this->base, NULL);
 }
 
 REALLY_INLINE TraitsBindingsp Traits::getTraitsBindings()

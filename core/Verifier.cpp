@@ -2722,6 +2722,26 @@ namespace avmplus
                         propType = NUMBER_TYPE;
                 }
             }
+            else if (obj.traits != NULL && obj.traits->subtypeof(VECTOROBJ_TYPE) && 
+                     abc_env->codeContext()->bugCompatibility()->bugzilla678952)
+            {
+                // We version this because it affects verifier semantics, see comments
+                // Bugzilla 678952.  The versioning is static, however: we only want to
+                // know the compatibility settings for the code, not for the calling context.
+                // If the ABC was compiled for SWFn then it gets SWFn verifier treatment
+                // in every context.  Builtin ABC code is compiled with the latest SWF version
+                // and always gets the optimization; that that is correct requires some
+                // careful argumentation, again see Bugzilla 678952.
+
+                bool attr = multiname.isAttr();
+                Traits* indexType = state->value(state->sp()).traits;
+                // NOTE a dynamic name should have the same version as the current pool
+                bool maybeIntegerIndex = !attr && multiname.isRtname() && multiname.containsAnyPublicNamespace();
+                if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE || indexType == NUMBER_TYPE) )
+                {
+                    propType = obj.traits->m_paramTraits;
+                }
+            }
         }
 
         // default - do getproperty at runtime

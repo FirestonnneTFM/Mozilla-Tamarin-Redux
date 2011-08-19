@@ -480,6 +480,7 @@ namespace avmplus
                    TraitsPosType posType)
         : core(_pool->core)
         , base(_base)
+        , m_paramTraits(NULL)
         , pool(_pool)
         , m_traitsPos(traitsPos)
         , m_tbref(_pool->core->GetGC()->emptyWeakRef)
@@ -539,10 +540,11 @@ namespace avmplus
         return traits;
     }
 
-    Traits* Traits::_newParameterizedTraits(Stringp name, Namespacep ns, Traits* _base)
+    Traits* Traits::_newParameterizedTraits(Stringp name, Namespacep ns, Traits* _base, Traits* _param_traits)
     {
         Traits* newtraits = Traits::newTraits(this->pool, _base, this->getSizeOfInstance(), this->m_offsetofSlots, NULL, TRAITSTYPE_RT);
         newtraits->m_needsHashtable = this->m_needsHashtable;
+        newtraits->m_paramTraits = _param_traits;
         newtraits->set_names(ns, name);
         return newtraits;
     }

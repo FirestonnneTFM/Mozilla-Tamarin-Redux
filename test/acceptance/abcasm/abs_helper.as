@@ -116,6 +116,13 @@ package
         else
             COMPARE_STRICTEQ(name, expected, actual);
     }
+
+    // The definitions of P_678952 and C_678952 are used by bug_678952.abs
+
+    public var P_678952 = "P from global";
+
+    public class C_678952
+    {
+        public var P_678952 = "P from C";
+    }
 }
-
-

@@ -661,7 +661,7 @@ range_error:
                     r = core->domainMgr()->findTraitsInPoolByNameAndNS(pool, fullname, base->ns());
                     if (!r)
                     {
-                        r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns());
+                        r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns(), param_traits);
                         r->verifyBindings(toplevel);
                         core->domainMgr()->addNamedTraits(pool, fullname, base->ns(), r);
                     }
