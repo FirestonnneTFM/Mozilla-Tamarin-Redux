@@ -3168,6 +3168,7 @@ const uint32_t Traits::gcTracePointerOffsets[] = {
     offsetof(Traits, init),
     offsetof(Traits, itraits),
     offsetof(Traits, m_declaringScope),
+    offsetof(Traits, m_paramTraits),
     offsetof(Traits, m_secondary_supertypes),
     offsetof(Traits, m_slotDestroyInfo),
     offsetof(Traits, m_supertype_cache),
@@ -3185,7 +3186,7 @@ MMgc::GCTracerCheckResult Traits::gcTraceOffsetIsTraced(uint32_t off) const
     if((result = m_slotDestroyInfo.gcTraceOffsetIsTraced(off - offsetof(Traits,m_slotDestroyInfo))) != MMgc::kOffsetNotFound) {
         return result;
     }
-    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,14);
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,15);
 }
 #endif // DEBUG
 
@@ -3202,6 +3203,7 @@ bool Traits::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     gc->TraceLocation(&init);
     gc->TraceLocation(&itraits);
     gc->TraceLocation(&m_declaringScope);
+    gc->TraceLocation(&m_paramTraits);
     gc->TraceLocation(&m_secondary_supertypes);
     m_slotDestroyInfo.gcTrace(gc);
     gc->TraceLocation(&m_supertype_cache);
