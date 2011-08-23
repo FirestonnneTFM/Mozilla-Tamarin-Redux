@@ -57,3 +57,8 @@ if [ -z "$CC" ]; then
     export CC="gcc -m32"
 fi
 
+# List of processes that should NEVER be running when the build is not
+# currently running any tests. This list of process will be killed if the
+# process is found. Process must not contain extension as cygwin will return
+# the process without the extension. Used in all/util-process-clean.sh
+export proc_names="${shell_release}$ ${shell_debug}$ ${shell_release_debugger}$ ${shell_debug_debugger}$"
