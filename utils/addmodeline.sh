@@ -3,6 +3,10 @@
 # vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5)
 
 # usage: addmodeline.sh lang file1 file2 ...
+#
+# Where "lang" is one of:
+#    "C", "c", "C++", "c++", "cpp", "cxx", "Java", "java", "Python, "python", "py".
+#
 # Add modeline(s) for language to top of each file.
 #
 # Not clever at all; e.g. leading #! lines, if any, must be restored manually.
@@ -16,9 +20,6 @@
 # 1. Rather than require explicit argument specifying language, infer
 #    it from extension on filename.  (The case dispatch has been
 #    written to accomodate this with relative ease.)
-#
-# 2. Safe-guard against files that already have modelines.
-#    (At the very least, detect them and error in response.)
 #
 # 3. Safe-guard against files with #! in first line.
 #    (At the very least, detect them and error in response;
@@ -36,6 +37,12 @@ function add_modeline() {
     fi
     if [ -e $file.orig ] ; then
         exit 3
+    fi
+
+    egrep '^/\* +(-\*- +Mode:|vi: +set)' $file > /dev/null
+    if [ $? = 0 ]; then
+        echo "Skipping $file, it looks like it has a modeline already"
+        return
     fi
 
     cp $file $file.orig
@@ -95,4 +102,4 @@ function add_modeline_python() {
 EOF
 }
 
-for file in $*; do add_modeline $file ; done
+for file in "$@"; do add_modeline $file ; done
