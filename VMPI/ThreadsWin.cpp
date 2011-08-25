@@ -37,8 +37,8 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
-#include "VMAssert.h"
 #include "VMPI.h"
+#include "VMAssert.h"
 
 #ifndef TLS_OUT_OF_INDEXES
     #define TLS_OUT_OF_INDEXES (DWORD)0xFFFFFFFF
