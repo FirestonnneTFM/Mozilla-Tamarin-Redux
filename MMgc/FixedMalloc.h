@@ -60,6 +60,7 @@ namespace MMgc
     class FixedMalloc
     {
         friend class GCHeap;
+        friend class GCRoot; // expose FindBeginningAndSize to GCRoot
         friend class avmplus::ST_mmgc_fixedmalloc_findbeginning::ST_mmgc_fixedmalloc_findbeginning;
 
     public:
