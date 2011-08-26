@@ -2215,7 +2215,7 @@ failure:
                     // must prepend base to base_list, save the copy on this type and base.
                     count = countSupertypes(base_list);
                     UnscannedTraitsArray* list = allocSupertypeList(gc, count + 1);
-                    Traits** raw_list = (Traits**)list;
+                    Traits** raw_list = list->AsArray();
                     WB_SKIP(gc, raw_list, raw_list, base);
                     for (uint32_t i=0; i < count; i++)
                         WB_SKIP(gc, raw_list, raw_list+i+1, base_list[i]);
@@ -2235,13 +2235,13 @@ failure:
             if (baseCount > 0) {
                 uint32_t total = count + baseCount;
                 list = allocSupertypeList(gc, total);
-                for (Traits **d = (Traits**)list, **s = base->get_secondary_supertypes(); *s != NULL; s++, d++)
+                for (Traits **d = list->AsArray(), **s = base->get_secondary_supertypes(); *s != NULL; s++, d++)
                     WB_SKIP(gc, list, d, *s);
             } else {
                 list = allocSupertypeList(gc, count);
             }
             m_secondary_supertypes = list;
-            Traits** raw_list = (Traits**)list;
+            Traits** raw_list = list->AsArray();
             for (uint32_t i=0; i < count; i++) {
                 WB_SKIP(gc, raw_list, raw_list+baseCount+i, seen[i]);
             }

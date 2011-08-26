@@ -194,11 +194,10 @@ namespace MMgc
     };
 
     /**
-     * Surface the GC's ability to allocate memory that contains no
-     * pointers in the type system.  LeafObject has write barrier
-     * methods so pointers to them can be used in a GCMember but it
-     * doesn't itself define GCMember as it makes no sense for a leaf
-     * object to have a GCMember.
+     * Base class for objects that have no GC pointers in them.  A
+     * LeafObject has all the same APIs as GCObject except it does not
+     * define GCMember as it makes no sense for a LeafObject to have a
+     * GCMember.
      */
     class LeafObject
     {
@@ -243,34 +242,40 @@ namespace MMgc
     };
 
     /**
-     * Subclass of LeafObject that provides dynamically sized new
-     * operator that safely calculates extra size based on the vector
-     * type and also avoids zeroing the memory unless requested to do
-     * so by optional GC::AllocFlags template parameter.  The idea
-     * is to do something like this:
-     *
-     * typedef LeafVector<Traits*> UnscannedTraitsPointerArray;
-     * GCMember<UnscannedTraitsPointerArray> list;
-     * list = LeafVector<Traits*>::New(gc, 5);
-     * Traits **traitsp = (Traits**)list;
-     * traits[0] = t;
-     *
-     * The raw cast is unfortunate but safe due to the fact LeafVector
-     * has no members and can't be subclassed. It exists purely to
-     * allow GCMember to be used instead of DWB and for a safe (in
-     * terms of math overflow) New factory to be used instead of
-     * raw Alloc/Calloc.
+     * LeafVector provides a zero overhead fixed length array of
+     * primitives that don't need to be scanned by the GC for
+     * pointers.  The New factory method safely calculates the amount
+     * of space needed, ie it checks for overflow.  Zeroing of memory
+     * is not done by default, GC::kZero can be passed in the optional
+     * 'flags' template parameter to have the memory zeroed.
+     * 
+     * LeafVectors are not subclassable and access to the array of
+     * elements must happen via the AsArray method.
      */
     template<class T, GC::AllocFlags flags=GC::kNoFlags>
     class LeafVector : public LeafObject
     {
     public:
 
+        /**
+         * Return a pointer to the first element
+         */
         T* AsArray() 
         { 
-            return (T*)(void*)this; 
+#ifdef DEBUG
+            // check that the apiEnforcement field is untouched
+            for(char *dummy = (char*)&apiEnforcement, *end=(char*)(&apiEnforcement+1); dummy < end; dummy++)
+            {
+                GCAssertMsg(*dummy == GCHeap::LeafApiEnforcementPoison, "LeafVector underwrite, make sure AsArray is being used");
+            }
+#endif
+            return elements;
         }
 
+        /**
+         * Allocate a LeafVector that can store 'count' elements of T.
+         * A count of zero will allocate space for 1 element.
+         */
         static LeafVector<T,flags>* New(GC *gc, size_t count)
         {
             return new (gc, count) LeafVector<T,flags>();
@@ -282,15 +287,29 @@ namespace MMgc
     private:
 
         // 'throw()' annotation to avoid GCC warning: 'operator new' must not return NULL unless it is declared 'throw()' (or -fcheck-new is in effect)
-        static void *operator new(size_t, GC *gc, size_t count) GNUC_ONLY(throw())
+        static void *operator new(size_t size, GC *gc, size_t count) GNUC_ONLY(throw())
         {
-            // We ignore the first size_t, LeafVector's have no fields and aren't
-            // subclassable because of the private ctor and new operator.
-            return gc->Calloc(count, sizeof(T), flags & GC::kZero);
+            // Account for element already built into size, if you ask for 0 you get 1.
+            if(count > 0)
+                count--;
+            size_t arraySize = GCHeap::CheckForCallocSizeOverflow(sizeof(T), count);
+            size_t bytes = GCHeap::CheckForAllocSizeOverflow(size, arraySize);
+            return gc->Alloc(bytes, flags & GC::kZero);
         }
 
         // Private ctor to prevent subclassing.
-        LeafVector() {}
+        LeafVector() 
+        {
+#ifdef DEBUG
+            VMPI_memset(&apiEnforcement, GCHeap::LeafApiEnforcementPoison, sizeof(T));
+#endif
+        }
+
+#ifdef DEBUG
+        // prevent raw casting from LeafVector to T*
+        T apiEnforcement;
+#endif
+        T elements[1];
     };
 
     // GCTraceableBase is internal to MMgc.
