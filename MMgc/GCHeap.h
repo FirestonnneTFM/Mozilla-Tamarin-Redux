@@ -339,6 +339,10 @@ namespace MMgc
         const static uint32_t MMNormalArrayTag    = 0xbfbf0001U;// Tag for an array object with constructed/destructed elements
         const static uint32_t MMPrimitiveArrayTag = 0xbfbf0002U;// Tag for an array object with primitive elements, must be one greater than the normal tag
 
+#ifdef DEBUG
+        const static char LeafApiEnforcementPoison = 0xa;
+#endif
+        
         /**
          * Init must be called to set up the GCHeap singleton
          */
