@@ -1542,12 +1542,24 @@ namespace MMgc
     
     GCRoot::GCRoot(GC * _gc)
     {
-        init(_gc, this, FixedMalloc::GetFixedMalloc()->Size(this), false, false);
+        const void* begin_recv;
+        size_t size_recv;
+        FixedMalloc *fm = FixedMalloc::GetFixedMalloc();
+        bool success = fm->FindBeginningAndSize(this, begin_recv, size_recv);
+        (void)success;
+        GCAssert(success);
+        init(_gc, begin_recv, size_recv, false, false);
     }
 
     GCRoot::GCRoot(GC * _gc, GCExactFlag)
     {
-        init(_gc, this, FixedMalloc::GetFixedMalloc()->Size(this), false, true);
+        const void* begin_recv;
+        size_t size_recv;
+        FixedMalloc *fm = FixedMalloc::GetFixedMalloc();
+        bool success = fm->FindBeginningAndSize(this, begin_recv, size_recv);
+        (void)success;
+        GCAssert(success);
+        init(_gc, begin_recv, size_recv, false, true);
     }
 
     GCRoot::~GCRoot()
