@@ -320,7 +320,7 @@ as3/Definitions/Function/OneOptArgFunction, mips-lnx-tvm-.*,, skip, Intermittent
 ecma3/Statements/eregress_74474_003, mips-lnx-tvm-.*,, skip, Intermittent Failure: Bugzilla 658253
 
 regress/bug_654807:semisealed.*, .*-ES,, skip, Bugzilla 661575
-spidermonkey/js1_5/Array/regress-465980-02, .*, ,expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=681399
+spidermonkey/js1_5/Array/regress-465980-02, .*, diff,expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=681399
 
 ####################
 # AOT specific
