@@ -168,6 +168,8 @@
 		079DFB680F3A9C350031D1B4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFB670F3A9C350031D1B4 /* libz.dylib */; };
 		079DFC980F3AB9640031D1B4 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
 		07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
+		07E7976513BC99EC00E25990 /* d2a.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07E7976313BC99EC00E25990 /* d2a.cpp */; };
+		07E7976613BC99EC00E25990 /* d2a.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07E7976313BC99EC00E25990 /* d2a.cpp */; };
 		07ED27F00FBD78C4007E3950 /* GCStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07ED27EF0FBD78C4007E3950 /* GCStack.cpp */; };
 		07F01C5112E1AD880002760B /* eval-parse-config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F01C5012E1AD880002760B /* eval-parse-config.cpp */; };
 		07F01C5212E1AD880002760B /* eval-parse-config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F01C5012E1AD880002760B /* eval-parse-config.cpp */; };
@@ -846,6 +848,8 @@
 		07E65EE410BC19A7000D1EB6 /* PoolObject-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "PoolObject-inlines.h"; path = "../../../core/PoolObject-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07E65EE510BC19A7000D1EB6 /* ScopeChain-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ScopeChain-inlines.h"; path = "../../../core/ScopeChain-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07E65EE610BC19A7000D1EB6 /* Verifier-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Verifier-inlines.h"; path = "../../../core/Verifier-inlines.h"; sourceTree = SOURCE_ROOT; };
+		07E7976313BC99EC00E25990 /* d2a.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = d2a.cpp; path = ../../../core/d2a.cpp; sourceTree = SOURCE_ROOT; };
+		07E7976413BC99EC00E25990 /* d2a.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = d2a.h; path = ../../../core/d2a.h; sourceTree = SOURCE_ROOT; };
 		07ED27EF0FBD78C4007E3950 /* GCStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCStack.cpp; path = ../../../MMgc/GCStack.cpp; sourceTree = SOURCE_ROOT; };
 		07F01C5012E1AD880002760B /* eval-parse-config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "eval-parse-config.cpp"; path = "../../../eval/eval-parse-config.cpp"; sourceTree = SOURCE_ROOT; };
 		07FBECBD1291529500F51879 /* avmplusContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmplusContainer.h; path = ../../../core/avmplusContainer.h; sourceTree = SOURCE_ROOT; };
@@ -1179,6 +1183,8 @@
 				079DF7E30F3A882D0031D1B4 /* Coder.cpp */,
 				079DF7E40F3A882D0031D1B4 /* Coder.h */,
 				07E65EE010BC19A7000D1EB6 /* Coder-inlines.h */,
+				07E7976313BC99EC00E25990 /* d2a.cpp */,
+				07E7976413BC99EC00E25990 /* d2a.h */,
 				079DF7E50F3A882D0031D1B4 /* Date.cpp */,
 				079DF7E60F3A882D0031D1B4 /* Date.h */,
 				079DF7E70F3A882D0031D1B4 /* Domain.cpp */,
@@ -2076,6 +2082,7 @@
 				F68C246913A82E8B00152279 /* atom.cpp in Sources */,
 				F68C247113A82EF800152279 /* GenericPortUtils.cpp in Sources */,
 				F68C247213A82EF800152279 /* MacPortUtils.cpp in Sources */,
+				07E7976613BC99EC00E25990 /* d2a.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2269,6 +2276,7 @@
 				F68C246813A82E8B00152279 /* atom.cpp in Sources */,
 				F68C246F13A82EF800152279 /* GenericPortUtils.cpp in Sources */,
 				F68C247013A82EF800152279 /* MacPortUtils.cpp in Sources */,
+				07E7976513BC99EC00E25990 /* d2a.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

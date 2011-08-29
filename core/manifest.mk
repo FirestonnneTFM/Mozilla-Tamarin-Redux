@@ -60,6 +60,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/ClassClosure.cpp \
   $(curdir)/CodegenLIR.cpp \
   $(curdir)/Coder.cpp \
+  $(curdir)/d2a.cpp \
   $(curdir)/DataIO.cpp \
   $(curdir)/DateClass.cpp \
   $(curdir)/DateObject.cpp \

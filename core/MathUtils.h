@@ -41,15 +41,13 @@
 #ifndef __avmplus_MathUtils__
 #define __avmplus_MathUtils__
 
-#include "BigInteger.h"
-
 namespace avmplus
 {
-#undef min
-#undef max
+#ifdef _MSC_VER
+	#undef max
+	#undef min
+#endif
 
-    class StringIndexer;
-    class String;
     /**
      * Data structure for state of fast random number generator.
      */
@@ -249,63 +247,6 @@ namespace avmplus
         static int32_t Random(int32_t range, pTRandomFast pRandomFast);
 
     };
-
-    /*  D2A class implemention, used for converting double values to           */
-    /*   strings accurately.                                                   */
-
-    // This algorithm for printing floating point numbers is based on the paper
-    //  "Printing floating-point numbers quickly and accurately" by Robert G Burger
-    //  and R. Kent Dybvig  http://www.cs.indiana.edu/~burger/FP-Printing-PLDI96.pdf
-    //  See that paper for details.
-    //
-    //  The algorithm generates the shortest, correctly rounded output string that
-    //   converts to the same number when read back in.  This implementation assumes
-    //   IEEE unbiased rounding, that the input is a 64 bit (base 2) floating point
-    //   number composed of a sign bit, a hidden bit (valued 1) and 52 explict bits of
-    //   mantissa data, and an 11 bit exponent (in base 2).  It also assumes the output
-    //   desired is base 10.
-    class D2A {
-
-    public:
-        D2A(double value, int32_t mode, int32_t minPrecision=0);
-        ~D2A();
-
-        int32_t nextDigit();
-        int32_t expBase10() { return base10Exp; }
-
-        double value;      // double value for quick work when e and mantissa are small;
-        int32_t e;
-        uint64_t mantissa;   // on input, value = mantissa*2^e;  Only last 53 bits are used
-        int32_t mantissaPrec;  // how many bits of precision are actually used in the mantissa;
-        int32_t base10Exp;     // the (derived) base 10 exponent of value.
-        bool finished;     // set to true when we've output all relevant digits.
-        bool bFastEstimateOk; // if minPrecision < 16, use double, rather than BigInteger math
-
-    private:
-        int32_t  minPrecision;    // precision requested
-
-        bool lowOk;    // for IEEE unbiased rounding, this is true when mantissa is even.  When true, use >= in mMinus test instead of >
-        bool highOk;   //  ditto, but for mPlus test.
-
-        // if !bFastEstimateOk, use these
-        BigInteger r;      // on initialization, input double <value> = r / s.  After each nextDigit() call, r = r % s
-        BigInteger s;
-        BigInteger mPlus;  // when (r+mPlus) > s, we have generated all relevant digits.  Just return 0 for remaining nextDigit requests
-        BigInteger mMinus; // when (r < mMins), we have generated all relevant digits.  Just return 0 form remaining nextDigit requests
-
-        // if bFastEstimateOk, use these
-        double      dr;    // same as above, but integer value stored in double
-        double      ds;
-        double      dMPlus;
-        double      dMMinus;
-
-        int32_t scale();   // Estimate base 10 exponent of number, scale r,s,mPlus,mMinus appropriately.
-                       //  Returns result of fixup_ExponentEstimate(est).
-        int32_t fixup_ExponentEstimate(int32_t expEst); // Used by scale to adjust for possible off-by-one error
-                                                //  in the base 10 exponent estimate.  Returns exact base10 exponent of number.
-
-    };
-
 }
 
 #if AVMSYSTEM_WIN32
@@ -323,4 +264,4 @@ namespace avmplus
 #elif AVMSYSTEM_SYMBIAN
     // No inlines presently defined for the Symbian platform.
 #endif
-#endif /* __avmplus__MathUtils__ */
+#endif /* __avmplus_MathUtils__ */
