@@ -65,11 +65,13 @@ function addtestcases()
 
   function testArrayPush(startLength, pushArgs, expectThrow, expectLength)
   {
+    /*
     print("running testArrayPush(" +
           startLength + ", " +
           "[" + pushArgs.join(", ") + "], " +
           expectThrow + ", " +
           expectLength + ")...");
+    */
     var a = new Array(startLength);
     try
     {
@@ -99,27 +101,7 @@ function addtestcases()
       }
     }
     
-    print(a.length+' : '+expectLength)
-    if (a.length !== expectLength)
-    {
-      throw "unexpected modified-array length for " +
-        describe("testArrayPush", startLength, pushArgs, expectThrow,
-                 expectLength);
-    }
-
-    /*
-    for (var i = 0, sz = pushArgs.length; i < sz; i++)
-    {
-      var index = i + startLength;
-      if (a[index] !== pushArgs[i])
-      {
-        throw "unexpected value " + a[index] +
-          " at index " + index + " (" + i + ") during " +
-          describe("testArrayPush", startLength, pushArgs, expectThrow,
-                   expectLength) + ", expected " + pushArgs[i];
-      }
-    }
-    */
+    return a.length;
   }
 
   function testArrayUnshift(startLength, unshiftArgs, expectThrow, expectLength)
@@ -184,58 +166,43 @@ function addtestcases()
 
 
 
-    var foo = "foo", bar = "bar", baz = "baz";
+var foo = "foo", bar = "bar", baz = "baz";
     
-    
-    
-actual = ''
 
 try {
-     testArrayPush(4294967294, [foo, bar], false, 0);
+     actual = testArrayPush(4294967294, [foo, bar], false, 4294967295);
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayPush(4294967294, [foo, bar], false, 4294967295)', expect, actual);
-
-
-actual = ''
+ AddTestCase('testArrayPush(4294967294, [foo, bar], false, 4294967295)', 4294967295, actual);
 
 try {
-     testArrayPush(4294967294, [foo, bar, baz], false, 1);
+     actual = testArrayPush(4294967294, [foo, bar, baz], false, 4294967295);
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayPush(4294967294, [foo, bar, baz], false, 4294967295)', expect, actual);
-
-
-actual = ''
+ AddTestCase('testArrayPush(4294967294, [foo, bar, baz], false, 4294967295)', 4294967295, actual);
 
 try {
-     testArrayPush(4294967295, [foo], false, 0);
+     actual = testArrayPush(4294967295, [foo], false, 4294967295);
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayPush(4294967295, [foo], false, 4294967295)', expect, actual);
-
-
-actual = ''
+ AddTestCase('testArrayPush(4294967295, [foo], false, 4294967295)', 4294967295, actual);
 
 try {
-     testArrayPush(4294967295, [foo, bar], false, 1);
+     actual = testArrayPush(4294967295, [foo, bar], false, 4294967295);
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayPush(4294967295, [foo, bar], false, 4294967295)', expect, actual);
-
-
-actual = ''
+ AddTestCase('testArrayPush(4294967295, [foo, bar], false, 4294967295)', 4294967295, actual);
 
 try {
-     testArrayPush(4294967295, [foo, bar, baz], false, 2);
+     actual = testArrayPush(4294967295, [foo, bar, baz], false, 4294967295);
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayPush(4294967295, [foo, bar, baz], false, 4294967295)', expect, actual);
+ AddTestCase('testArrayPush(4294967295, [foo, bar, baz], false, 4294967295)', 4294967295, actual);
 
 
 /* unshift is very slow for large arrays
