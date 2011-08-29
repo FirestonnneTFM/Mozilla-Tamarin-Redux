@@ -836,6 +836,16 @@ namespace avmplus
                                              int32_t mode,
                                              int32_t precision)
     {
+        // FIXME: Bugzilla 442974: The test for infinity and NaN really needs to be in the
+        // AS3 code, /or/ the range check on precision needs to be in this function, because
+        // the former is supposed to happen before the latter for toExponential and toPrecision.
+        // (As this function is used more generally it seems probable that the correct fix
+        // is to add the infinity and NaN checks to the AS3 code /and/ leave them in here.)
+
+        AvmAssert(mode == DTOSTR_NORMAL || mode == DTOSTR_FIXED || mode == DTOSTR_PRECISION || mode == DTOSTR_EXPONENTIAL);
+        AvmAssert(mode != DTOSTR_PRECISION || (precision >= 1 && precision <= 21));
+        AvmAssert(mode != DTOSTR_EXPONENTIAL || (precision >= 0 && precision <= 20));
+
         switch (isInfinite(value)) {
         case -1:
             return core->newConstantStringLatin1("-Infinity");
@@ -865,39 +875,42 @@ namespace avmplus
                 return convertIntegerToStringBase10(core, intValue, kTreatAsSigned);
         }
 
-        int32_t i, len = 0;
-
         MMgc::GC::AllocaAutoPtr _buffer;
-        char* buffer = (char*)avmStackAlloc(core, _buffer, kMinSizeForDouble_base10_toString);
-        char *s = buffer;
-        bool negative = false;
+        char* const buffer = (char*)avmStackAlloc(core, _buffer, kMinSizeForDouble_base10_toString);
+        const bool negative = value < 0.0;
+        const bool zero = value == 0.0;
+        const bool noFraction = (precision == 0);
+        const bool bugzilla513039 = core->currentBugCompatibility()->bugzilla513039;  // Number.toFixed(0) returns incorrect numbers, rounding issues 
         bool round = true;
-        bool noFraction = (precision == 0);
-        bool bugzilla513039 = core->currentBugCompatibility()->bugzilla513039;  // Number.toFixed(0) returns incorrect numbers, rounding issues 
+        // Pointer to the next available character
+        char *s = buffer;
 
-        // Deal with negative numbers
-        if (value < 0) {
+        // Negate negative numbers and make space for the sign.  The sign
+        // has to be placed just before we finish because we don't know yet
+        // if it will be in buffer[0] or buffer[1].
+
+        if (negative) {
             value = -value;
-            negative = true;
-            // make room for minus sign later (after applying sentinel)
             s++;
         }
 
         // initialize d2a engine
         D2A *d2a = mmfx_new(D2A(value, mode, precision));
-        int32_t exp10 = d2a->expBase10()-1;
+        int32_t exp10 = d2a->expBase10()-1;     // Why "-1"?
 
-        // Sentinel is used for rounding
-        char *sentinel = s;
+        // Sentinel is used for rounding - points to the first digit
+        char* const sentinel = s;
 
-        enum {
+        // Format type selection.
+
+        enum FormatType {
             kNormal,
             kExponential,
             kFraction,
             kFixedFraction
         };
-        int32_t format;
-        int32_t digit;
+
+        FormatType format;
 
         switch (mode) {
         case DTOSTR_FIXED:
@@ -912,6 +925,9 @@ namespace avmplus
             break;
         case DTOSTR_PRECISION:
             {
+                // FIXME: Bugzilla 442974: This is simply not according to spec,
+                // the canonical test case is Number.MIN_VALUE.toPrecision(21), which
+                // formats as a 346-character string.
                 if (exp10 < 0) {
                     format = kFraction;
                 } else if (exp10 >= precision) {
@@ -939,24 +955,14 @@ namespace avmplus
             }
         }
 
-        #if 0 // ifdef WIN32
-        // On Windows, set the FPU control word to round
-        // down for the rest of this operation.
-        volatile uint16_t oldcw;
-        volatile uint16_t newcw;
-        _asm fnstcw [oldcw];
-        _asm mov ax,[oldcw];
-        _asm or ax,0xc3f;
-        _asm mov [newcw],ax;
-        _asm fldcw [newcw];
-        #endif
+        // Digit generation.
 
         bool wroteDecimal = false;
         switch (format) {
         case kNormal:
             {
                 int32_t digits = 0;
-                sentinel = s;
+                int32_t digit;
                 *s++ = '0';
                 digit = d2a->nextDigit();
                 if (digit > 0) {
@@ -997,7 +1003,7 @@ namespace avmplus
                 *s++ = '0';
                 *s++ = '.';
                 wroteDecimal = true;
-                // Write out leading zeros
+                // Write out leading zeroes
                 int32_t digits = 0;
                 if (exp10 > 0) {
                     while (++exp10 < 10 && digits < precision) {
@@ -1044,15 +1050,15 @@ namespace avmplus
                 wroteDecimal = true;
 
                 // Write out leading zeros
-                if (value)
+                if (!zero)
                 {
-                    for (i=exp10; i<-1; i++) {
+                    for (int32_t i=exp10; i<-1; i++) {
                         *s++ = '0';
                     }
                 }
 
                 // Write out significand
-                i=0;
+                int32_t i=0;
                 while (!d2a->finished)
                 {
                     *s++ = (char)(d2a->nextDigit() + '0');
@@ -1069,13 +1075,14 @@ namespace avmplus
             break;
         case kExponential:
             {
+                int32_t digit;
                 digit = d2a->finished ? 0 : d2a->nextDigit();
                 *s++ = (char)(digit + '0');
                 if ( ((mode == DTOSTR_NORMAL) && !d2a->finished) ||
                      ((mode != DTOSTR_NORMAL) && precision > 1) ) {
                     *s++ = '.';
                     wroteDecimal = true;
-                    for (i=0; i<precision-1; i++) {
+                    for (int32_t i=0; i<precision-1; i++) {
                         if (d2a->finished)
                         {
                             if (mode == DTOSTR_NORMAL)
@@ -1090,27 +1097,32 @@ namespace avmplus
             break;
         }
 
-        // Rounding  (todo: argh, was hoping to get rid of this, but we still need it for fastEstimate mode)
-        // fix bug 121952: must also do rounding for fixed mode
+        // Rounding and truncation.
+
         if (round && (d2a->bFastEstimateOk || mode == DTOSTR_FIXED || mode == DTOSTR_PRECISION))
         {
-            i = d2a->nextDigit();
-            if (i > 4) {
-                char *ptr = s-1;
-                while (ptr >= buffer) {
-                    if (*ptr < '0') {
-                        ptr--;
+            if (d2a->nextDigit() > 4) {
+                // Round the value up.
+                
+                for ( char* ptr=s-1 ; ptr >= sentinel ; ptr-- ) {
+                    // Skip the decimal point
+                    if (*ptr == '.')
                         continue;
-                    }
-                    (*ptr)++;
-                    if (*ptr != 0x3A) {
+                    
+                    // Carry in
+                    *ptr = *ptr + 1;
+
+                    // Done if there's no carry out
+                    if (*ptr != ('9'+1))
                         break;
-                    }
-                    *ptr-- = '0';
+                    
+                    // Carry out
+                    *ptr = '0';
                 }
             }
+
             if (mode == MathUtils::DTOSTR_NORMAL && wroteDecimal) {
-                // Remove trailing zeros
+                // Remove trailing zeroes, and if necessary the decimal point.
                 while (*(s-1) == '0') {
                     s--;
                 }
@@ -1120,45 +1132,52 @@ namespace avmplus
             }
         }
 
+        // Clean up zeroes, and place the exponent
         if (exp10) {
-            char *firstNonZero = buffer + int(negative);
+
+            // Handle the case where all digits ended up zero.
+            // FIXME: Bugzilla 442974: This code is broken, it will find the decimal point.
+
+            char *firstNonZero = sentinel;
             while (firstNonZero < s && *firstNonZero == '0') {
                 firstNonZero++;
             }
             if (s == firstNonZero) {
-                // Deal with case where all digits were
-                // rounded away
+                // FIXME: Bugzilla 442974:  This seems wrong, because it places the '1' at
+                // the end of the string, not at the beginning.  Also it is arguably wrong
+                // if the value is zero, and I don't have any proof that that can't happen.
                 *s++ = '1';
                 exp10++;
-            } else {
+            }
+            else if (!zero) {
+                // Remove trailing zeroes, as might appear in 10e+95
                 char *lastNonZero = s;
-                while (lastNonZero > firstNonZero) {
-                    if (*--lastNonZero != '0') {
-                        break;
-                    }
-                }
-                if (value && (firstNonZero == lastNonZero) ) {
-                    // Watch out for extra zeros like
-                    // 10e+95
-                    exp10 += (int32_t) (s - firstNonZero - 1);
+                while (lastNonZero > firstNonZero && *--lastNonZero == '0')
+                    ;
+
+                if (firstNonZero == lastNonZero) {
+                    exp10 += (int32_t) (s - firstNonZero - 1);  // What if exp10 is already the negative of that?
                     s = lastNonZero+1;
                 }
             }
+            
+            // Place the exponent
             *s++ = 'e';
             if (exp10 > 0) {
                 *s++ = '+';
             }
             char expstr[kMinSizeForInt32_t_base10_toString];
-            len = kMinSizeForInt32_t_base10_toString;
+            int32_t len = kMinSizeForInt32_t_base10_toString;
             char* t = convertIntegerToStringBuffer(exp10, expstr, len, 10, kTreatAsSigned);
             while (*t) { *s++ = *t++; }
         }
 
-        len = (int32_t)(s-buffer);
-        s = buffer;
-        if (negative)
-            s++;
-        if (sentinel && sentinel[0] == '0' && sentinel[1] != '.') {
+        int32_t len = (int32_t)(s-buffer);
+        s = sentinel;
+        
+        // Deal with the sentinel introduced for the kFraction case: we might have a leading '00.'
+        
+        if (sentinel[0] == '0' && sentinel[1] != '.') {
             s = sentinel + 1;
             len--;
         }
@@ -1172,11 +1191,6 @@ namespace avmplus
                 ;
             len = (int32_t)(p-s);
         }
-
-        #if 0 // def WIN32
-        // Restore control word
-        _asm fldcw [oldcw];
-        #endif
 
         mmfx_delete(d2a);
 
