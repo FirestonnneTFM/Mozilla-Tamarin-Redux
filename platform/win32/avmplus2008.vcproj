@@ -1836,6 +1836,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\d2a.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\d2a.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\DataIO.cpp"
 				>
 			</File>

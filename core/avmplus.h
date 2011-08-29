@@ -127,6 +127,7 @@ namespace avmplus
     class CodeContext;
     class CompiledRegExp;
     class Console;
+    class D2A;
     class Date;
     class DataInput;
     class DataOutput;
@@ -247,6 +248,8 @@ namespace avmplus
 }
 
 #include "QCache.h"
+#include "BigInteger.h"
+#include "d2a.h"
 #include "MathUtils.h"
 #include "UnicodeUtils.h"
 #include "OSDep.h"
