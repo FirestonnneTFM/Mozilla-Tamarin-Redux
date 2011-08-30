@@ -245,6 +245,7 @@ struct ABCInfo;
 namespace avmplus
 {
     typedef MMgc::LeafVector<Traits*, MMgc::GC::kZero> UnscannedTraitsArray;
+    typedef MMgc::LeafVector<uint64_t, MMgc::GC::kZero> U64Array;
 }
 
 #include "QCache.h"
