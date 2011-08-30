@@ -1547,7 +1547,7 @@ namespace MMgc
         FixedMalloc *fm = FixedMalloc::GetFixedMalloc();
         bool success = fm->FindBeginningAndSize(this, begin_recv, size_recv);
         (void)success;
-        GCAssert(success);
+        GCAssertMsg(success, "GCRoot must be allocated via FixedMalloc");
         init(_gc, begin_recv, size_recv, false, false);
     }
 
@@ -1558,7 +1558,7 @@ namespace MMgc
         FixedMalloc *fm = FixedMalloc::GetFixedMalloc();
         bool success = fm->FindBeginningAndSize(this, begin_recv, size_recv);
         (void)success;
-        GCAssert(success);
+        GCAssertMsg(success, "GCRoot must be allocated via FixedMalloc");
         init(_gc, begin_recv, size_recv, false, true);
     }
 
