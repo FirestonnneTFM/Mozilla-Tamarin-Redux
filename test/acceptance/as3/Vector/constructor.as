@@ -145,18 +145,4 @@ AddTestCase("Bug 449468: Crash with vector constructor in interp mode",
             bug449468().toString()
             );
 
-
-expected = "TypeError: Error #1128";
-err = "exception not thrown";
-try {
-    var vError:Vector.<Number, int> = new Vector.<Number, int>;
- }
-catch (e:Error){
-    err = e.toString();
-}
-AddTestCase("TypeError: Error #1128: Incorrect number of type parameters",
-               expected,
-               parseError(err, expected.length));
-
-
 test();
