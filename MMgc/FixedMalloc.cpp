@@ -163,6 +163,8 @@ namespace MMgc
         for (int i=0; i<kNumSizeClasses; i++)
             m_allocs[i].Init((uint32_t)kSizeClasses[i], heap);
 
+        m_rootFindCache.Init();
+
         FixedMalloc::instance = this;
     }
 
@@ -175,8 +177,21 @@ namespace MMgc
     #if defined DEBUG && !defined AVMPLUS_SAMPLER
         VMPI_lockDestroy(&m_largeObjectLock);
     #endif
+        m_rootFindCache.Destroy();
 
         FixedMalloc::instance = NULL;
+    }
+
+    void FixedMalloc::FindBeginningRootsCache::Init()
+    {
+        VMPI_lockInit(&m_lock);
+        m_objBegin = NULL;
+        m_objSize = 0;
+    }
+
+    void FixedMalloc::FindBeginningRootsCache::Destroy()
+    {
+        VMPI_lockDestroy(&m_lock);
     }
 
     void* FASTCALL FixedMalloc::OutOfLineAlloc(size_t size, FixedMallocOpts flags)
@@ -318,12 +333,34 @@ namespace MMgc
             return NULL;
     }
 
+    REALLY_INLINE
+    bool FixedMalloc::FindBeginningRootsCache::Lookup(const void* addr,
+                                                      const void* &begin_recv,
+                                                      size_t &size_recv)
+    {
+        MMGC_LOCK(m_lock);
+        const char* caddr = (const char*)addr;
+        const char* cached = (const char*)m_objBegin;
+
+        if (cached <= caddr && caddr < cached + m_objSize)
+        {
+            begin_recv = m_objBegin;
+            size_recv  = m_objSize;
+            return true;
+        }
+
+        return false;
+    }
+
     bool FixedMalloc::FindBeginningAndSize(const void* addr,
                                            const void* &begin_recv,
                                            size_t &size_recv)
     {
         const void* obj;
         size_t sz;
+
+        if (m_rootFindCache.Lookup(addr, begin_recv, size_recv))
+            return true;
 
         // Only reliable way to identify small objects is to traverse
         // the m_allocs array (see Bugzilla 663386).

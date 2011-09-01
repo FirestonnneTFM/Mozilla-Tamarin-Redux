@@ -51,12 +51,18 @@ namespace MMgc
 
     REALLY_INLINE void *GCRoot::operator new(size_t size)
     {
-        return FixedMalloc::GetFixedMalloc()->OutOfLineAlloc(size, MMgc::kZero);
+        FixedMalloc *fm = FixedMalloc::GetFixedMalloc();
+        void *retval = fm->OutOfLineAlloc(size, MMgc::kZero);
+        // Bugzilla 664137, 681388: speed up imminent FindBeginning invocation.
+        fm->m_rootFindCache.Stash(retval, size);
+        return retval;
     }
 
     REALLY_INLINE void GCRoot::operator delete (void *object)
     {
-        FixedMalloc::GetFixedMalloc()->OutOfLineFree(object);
+        FixedMalloc* fm = FixedMalloc::GetFixedMalloc();
+        fm->m_rootFindCache.Clear(object);
+        fm->OutOfLineFree(object);
     }
 
     // GC
