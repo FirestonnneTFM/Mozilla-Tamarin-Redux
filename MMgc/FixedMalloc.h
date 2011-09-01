@@ -304,6 +304,53 @@ namespace MMgc
         GCHeap *m_heap;                             // The heap from which we allocate, set in InitInstance
         FixedAllocSafe m_allocs[kNumSizeClasses];   // The array of size-segregated allocators, set in InitInstance
 
+        class FindBeginningRootsCache {
+            friend class GCRoot;
+            friend class FixedMalloc;
+
+            // Records that 'addr' is the start of a FixedMalloc-managed
+            // object of size 'size', anticipating an imminent invocation
+            // of FindBeginningAndSize on an address within the object.
+            //
+            // (Caller must ensure that 'addr' is currently the beginning
+            // of a FixedMalloc-managed object of size 'size'.)
+            //
+            // @see FixedMalloc::FindBeginningAndSize.
+            void Stash(const void *addr, size_t size);
+
+            // If 'addr' cached, then returns true and sets
+            // 'begin_recv' and 'size_recv' to beginning and size of
+            // the object containing 'addr' accordingly.  Otherwise
+            // returns false, leaving 'begin_recv' and 'size_recv'
+            // unchanged.
+            //
+            // Synchronized on m_lock.
+            bool Lookup(const void* addr,
+                        const void* &begin_recv,
+                        size_t &size_recv);
+
+            // Removes 'addr' from the cache, so that subsequent
+            // FindBeginningAndSize invocations on its addresses
+            // go through the uncached slow path.
+            //
+            // @see FixedMalloc::FindBeginningAndSize.
+            void Clear(void *addr);
+
+            // Initialize cache; called from FixedMalloc during GCHeap setup.
+            void Init();
+
+            // Destroy cache and free all resources.
+            void Destroy();
+
+            // m_lock protects m_objSize and m_objBegin.
+            // (m_objBegin may be read unprotected.)
+            vmpi_spin_lock_t m_lock;
+            const void *m_objBegin;  // Most recently stashed addr
+            size_t m_objSize;        //   and size for FindBeginning
+        };
+
+        FindBeginningRootsCache m_rootFindCache;
+
         vmpi_spin_lock_t m_largeAllocInfoLock;  // Protects numLargeBlocks and totalAskSizeLargeAllocs
 
         size_t numLargeBlocks;              // Number of large-object blocks owned by this FixedMalloc

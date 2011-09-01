@@ -175,6 +175,31 @@ namespace MMgc
 #endif
         numLargeBlocks -= blocksFreed;
     }
+
+    REALLY_INLINE
+    void FixedMalloc::FindBeginningRootsCache::Stash(const void *addr,
+                                                     size_t size)
+    {
+        MMGC_LOCK(m_lock);
+        m_objBegin = addr;
+        m_objSize = size;
+    }
+
+    REALLY_INLINE
+    void FixedMalloc::FindBeginningRootsCache::Clear(void *addr)
+    {
+        // Bugzilla 681388: Clear cache until overwritten with fresh entry.
+        if (addr == m_objBegin) {
+            MMGC_LOCK(m_lock); // Lock only when clear is necessary.
+
+            // If overwrite occurred after test above but before lock,
+            // then need not clear entry.
+            if (addr == m_objBegin) {
+                m_objSize = 0;
+                m_objBegin = NULL;
+            }
+        }
+    }
 }
 
 #endif /* __FixedMalloc_inlines__ */
