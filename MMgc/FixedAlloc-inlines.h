@@ -296,13 +296,11 @@ namespace MMgc
         FixedAlloc::Free(item);
     }
 
-#ifdef DEBUG
     REALLY_INLINE bool FixedAllocSafe::QueryOwnsObject(const void* item)
     {
         MMGC_LOCK(m_spinlock);
         return FixedAlloc::QueryOwnsObject(item);
     }
-#endif
 }
 
 #endif /* __FixedAlloc_inlines__ */
