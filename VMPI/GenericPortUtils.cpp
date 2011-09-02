@@ -57,3 +57,17 @@ void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* ar
     (void)fn;
     (void)arg;
 }
+
+typedef void (*LoggingFunction)(const char*);
+
+LoggingFunction logFunc = NULL;
+
+void RedirectLogOutput(LoggingFunction func)
+{
+    logFunc = func;
+}
+
+LoggingFunction GetCurrentLogFunction()
+{
+    return logFunc;
+}

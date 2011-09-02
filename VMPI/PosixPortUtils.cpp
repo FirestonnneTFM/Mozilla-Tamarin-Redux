@@ -162,16 +162,11 @@ size_t VMPI_size(void *ptr)
 }
 
 typedef void (*LoggingFunction)(const char*);
-
-LoggingFunction logFunc = NULL;
-
-void RedirectLogOutput(LoggingFunction func)
-{
-    logFunc = func;
-}
+extern LoggingFunction GetCurrentLogFunction();
 
 void VMPI_log(const char* message)
 {
+    LoggingFunction logFunc = GetCurrentLogFunction();
     if(logFunc)
         logFunc(message);
     else

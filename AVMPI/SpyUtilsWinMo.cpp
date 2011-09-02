@@ -124,6 +124,8 @@ void SpyLog(const char* message)
     fprintf(spyStream, "%s", message);
 }
 
+typedef void (*LoggingFunction)(const char*);
+extern LoggingFunction GetCurrentLogFunction();
 extern void RedirectLogOutput(void (*)(const char*));
 
 void VMPI_spyCallback()
@@ -138,6 +140,7 @@ void VMPI_spyCallback()
             spyStream = fopen("Temp\\gcstats.txt", "w");
 
             GCAssert(spyStream != NULL);
+            LoggingFunction oldLogFunc = GetCurrentLogFunction();
             RedirectLogOutput(SpyLog);
 
             MMgc::GCHeap::GetGCHeap()->DumpMemoryInfo();
@@ -145,7 +148,7 @@ void VMPI_spyCallback()
             fflush(spyStream);
 
             fclose(spyStream);
-            RedirectLogOutput(NULL);
+            RedirectLogOutput(oldLogFunc);
             spyStream = NULL;
         }
         VMPI_lockRelase(&lock);
