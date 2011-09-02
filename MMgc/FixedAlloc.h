@@ -290,11 +290,9 @@ namespace MMgc
         // Free an object obtained from this allocator.  Holds the lock.
         void Free(void *item);
 
-#ifdef DEBUG
         // Query whether 'item' was allocated from this allocator (see the
         // base class documentation for details).  Holds the lock.
         bool QueryOwnsObject(const void* item);
-#endif
     };
 
     /**
