@@ -190,15 +190,6 @@ size_t VMPI_size(void *ptr)
     return 0;
 }
 
-typedef int (*LoggingFunction)(const char*);
-
-LoggingFunction logFunc = NULL;
-
-void RedirectLogOutput(LoggingFunction func)
-{
-    logFunc = func;
-}
-
 void VMPI_log(const char* message)
 {
     DebugTraceString(message);

@@ -142,7 +142,9 @@ void SpyLog(const char* message)
     send(clientSocket, message, VMPI_strlen(message)+1, 0);
 }
 
-extern void RedirectLogOutput(void (*)(const char*));
+typedef void (*LoggingFunction)(const char*);
+extern LoggingFunction GetCurrentLogFunction();
+extern void RedirectLogOutput(LoggingFunction);
 
 void AVMPI_spyCallback()
 {
@@ -153,9 +155,10 @@ void AVMPI_spyCallback()
         {
             spy_connected = false;
 
+            LoggingFunction oldLogFunc = GetCurrentLogFunction();
             RedirectLogOutput(SpyLog);
             MMgc::GCHeap::GetGCHeap()->DumpMemoryInfo();
-            RedirectLogOutput(NULL);
+            RedirectLogOutput(oldLogFunc);
 
             //we are done dumping memory info to the spy
             //signal the condition variable to
