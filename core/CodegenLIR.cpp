@@ -4480,6 +4480,39 @@ namespace avmplus
     static const CallInfo* getGenericHelpers[VI_SIZE] =
         { FUNCTIONID(getpropertylate_u), FUNCTIONID(getpropertylate_i), FUNCTIONID(getpropertylate_d) };
 
+    LIns* CodegenLIR::emitInlineVectorRead(int objIndexOnStack, 
+                                           LIns* index,
+                                           size_t arrayDataOffset, size_t lenOffset, size_t entriesOffset, int scale, LOpcode load_item,
+                                           const CallInfo* helper)
+    {
+        CodegenLabel &begin_label = createLabel("arrayoutofbounds");
+
+        // index is "int" or "uint".
+        //
+        // arrayData = *(array+arrayDataOffset)                  ; array->data
+        // arrayLen  = *(arrayData + lenOffset)                  ; array->data->len
+        // if ((unsigned)index >= (unsigned)arrayLen)
+        //   call(helper, array, index)
+        // value = *(arrayData + (index<<scale) + entriesOffset) ; value = array->data->entries[index]
+        //
+        // The "(unsigned)index" compare trick works because vectors are shorter than 2^31 elements,
+        // that fact is verified statically in the vector code, see eg checkReadIndex_i.
+        //
+        // We also depend on vectors being shorter than 2^32 bytes in computing the scaled offset for
+        // the vector.  The 4GB object limit is enforced by MMgc as of September 2011.
+
+        LIns* arrayData = loadIns(LIR_ldp, int32_t(arrayDataOffset), localGetp(objIndexOnStack), ACCSET_OTHER, LOAD_NORMAL);
+        LIns* arrayLen = loadIns(LIR_ldi, int32_t(lenOffset), arrayData, ACCSET_OTHER, LOAD_NORMAL);
+        LIns* cmp = binaryIns(LIR_geui, index, arrayLen);
+        branchToLabel(LIR_jf, cmp, begin_label);
+        callIns(helper, 2, localGetp(objIndexOnStack), index);
+        emitLabel(begin_label);
+        LIns* valOffset = binaryIns(LIR_addp, arrayData, ui2p(binaryIns(LIR_lshi, index, InsConst(scale))));
+        LIns* value = loadIns(load_item, int32_t(entriesOffset), valOffset, ACCSET_OTHER, LOAD_NORMAL);
+
+        return value;
+    }
+
     // Generate code for get obj[index] where index is a signed or unsigned integer type, or double type.
     LIns* CodegenLIR::emitGetIndexedProperty(int objIndexOnStack, LIns* index, Traits* result, IndexKind idxKind)
     {
@@ -4491,10 +4524,30 @@ namespace avmplus
             getter = getArrayHelpers[idxKind];
         }
         else if (objType != NULL && objType->subtypeof(VECTOROBJ_TYPE)) {
+            if (idxKind == VI_INT || idxKind == VI_UINT) {
+                return atomToNativeRep(result, emitInlineVectorRead(objIndexOnStack, 
+                                                                    index,
+                                                                    offsetof(ObjectVectorObject, m_list.m_data),
+                                                                    offsetof(AtomListHelper::LISTDATA, len),
+                                                                    offsetof(ListData<Atom>, entries),
+                                                                    sizeof(void*) == 8 ? 3 : 2,
+                                                                    LIR_ldp,
+                                                                    getObjectVectorHelpers[idxKind]));
+            }
             getter = getObjectVectorHelpers[idxKind];
         }
         else if (objType == VECTORINT_TYPE) {
             if (result == INT_TYPE) {
+                if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    return emitInlineVectorRead(objIndexOnStack, 
+                                                index,
+                                                offsetof(IntVectorObject, m_list.m_data),
+                                                offsetof(DataListHelper<int32_t>::LISTDATA, len),
+                                                offsetof(ListData<int32_t>, entries),
+                                                2,
+                                                LIR_ldi,
+                                                getIntVectorNativeHelpers[idxKind]);
+                }
                 getter = getIntVectorNativeHelpers[idxKind];
                 valIsAtom = false;
             }
@@ -4504,6 +4557,16 @@ namespace avmplus
         }
         else if (objType == VECTORUINT_TYPE) {
             if (result == UINT_TYPE) {
+                if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    return emitInlineVectorRead(objIndexOnStack, 
+                                                index,
+                                                offsetof(UIntVectorObject, m_list.m_data),
+                                                offsetof(DataListHelper<uint32_t>::LISTDATA, len),
+                                                offsetof(ListData<uint32_t>, entries),
+                                                2,
+                                                LIR_ldi,
+                                                getUIntVectorNativeHelpers[idxKind]);
+                }
                 getter = getUIntVectorNativeHelpers[idxKind];
                 valIsAtom = false;
             }
@@ -4513,6 +4576,16 @@ namespace avmplus
         }
         else if (objType == VECTORDOUBLE_TYPE) {
             if (result == NUMBER_TYPE) {
+                if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    return emitInlineVectorRead(objIndexOnStack, 
+                                                index,
+                                                offsetof(DoubleVectorObject, m_list.m_data),
+                                                offsetof(DataListHelper<double>::LISTDATA, len),
+                                                offsetof(ListData<double>, entries),
+                                                3,
+                                                LIR_ldd,
+                                                getDoubleVectorNativeHelpers[idxKind]);
+                }
                 getter = getDoubleVectorNativeHelpers[idxKind];
                 valIsAtom = false;
             }
@@ -4560,6 +4633,43 @@ namespace avmplus
     static const CallInfo* setGenericHelpers[VI_SIZE] =
         { FUNCTIONID(setpropertylate_u), FUNCTIONID(setpropertylate_i), FUNCTIONID(setpropertylate_d) };
 
+    // Not for values that require a write barrier!
+    void CodegenLIR::emitInlineVectorWrite(int objIndexOnStack,
+                                           LIns* index,
+                                           LIns* value,
+                                           size_t arrayDataOffset, size_t lenOffset, size_t entriesOffset, int scale, LOpcode store_item,
+                                           const CallInfo* helper)
+    {
+        CodegenLabel &begin_label = createLabel("arrayoutofbounds");
+        CodegenLabel &end_label = createLabel("traprecovered");
+        
+        // index is "int" or "uint".
+        //
+        // arrayData = *(array+arrayDataOffset)                    ; array->data
+        // arrayLen  = *(arrayData + lenOffset)                    ; array->data->len
+        // if ((unsigned)index >= (unsigned)arrayLen)
+        //   call(helper, array, index, value)
+        // else
+        //   *(arrayData + (index<<scale) + entriesOffset) = value ; array->data->entries[index] = value
+        //
+        // The "(unsigned)index" compare trick works because vectors are shorter than 2^31 elements,
+        // that fact is verified statically in the vector code, see eg checkReadIndex_i.
+        //
+        // We also depend on vectors being shorter than 2^32 bytes in computing the scaled offset for
+        // the vector.  The 4GB object limit is enforced by MMgc as of September 2011.
+
+        LIns* arrayData = loadIns(LIR_ldp, int32_t(arrayDataOffset), localGetp(objIndexOnStack), ACCSET_OTHER, LOAD_NORMAL);
+        LIns* arrayLen = loadIns(LIR_ldi, int32_t(lenOffset), arrayData, ACCSET_OTHER, LOAD_NORMAL);
+        LIns* cmp = binaryIns(LIR_geui, index, arrayLen);
+        branchToLabel(LIR_jf, cmp, begin_label);
+        callIns(helper, 3, localGetp(objIndexOnStack), index, value);
+        branchToLabel(LIR_j, NULL, end_label);
+        emitLabel(begin_label);
+        LIns *valOffset = binaryIns(LIR_addp, arrayData, ui2p(binaryIns(LIR_lshi, index, InsConst(scale))));
+        storeIns(store_item, value, int32_t(entriesOffset), valOffset, ACCSET_OTHER);
+        emitLabel(end_label);
+    }
+
     // Generate code for 'obj[index] = value' where index is a signed or unsigned integer type, or a double.
     void CodegenLIR::emitSetIndexedProperty(int objIndexOnStack, int valIndexOnStack, LIns* index, IndexKind idxKind)
     {
@@ -4582,6 +4692,18 @@ namespace avmplus
         }
         else if (objType == VECTORINT_TYPE) {
             if (valueType == INT_TYPE) {
+                if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    emitInlineVectorWrite(objIndexOnStack, 
+                                          index,
+                                          localGet(valIndexOnStack),
+                                          offsetof(IntVectorObject, m_list.m_data),
+                                          offsetof(DataListHelper<int32_t>::LISTDATA, len),
+                                          offsetof(ListData<int32_t>, entries),
+                                          2,
+                                          LIR_sti,
+                                          setIntVectorNativeHelpers[idxKind]);
+                    return;
+                }
                 value = localGet(valIndexOnStack);
                 setter = setIntVectorNativeHelpers[idxKind];
             }
@@ -4592,6 +4714,18 @@ namespace avmplus
         }
         else if (objType == VECTORUINT_TYPE) {
             if (valueType == UINT_TYPE) {
+                if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    emitInlineVectorWrite(objIndexOnStack, 
+                                          index,
+                                          localGet(valIndexOnStack),
+                                          offsetof(UIntVectorObject, m_list.m_data),
+                                          offsetof(DataListHelper<uint32_t>::LISTDATA, len),
+                                          offsetof(ListData<uint32_t>, entries),
+                                          2,
+                                          LIR_sti,
+                                          setUIntVectorNativeHelpers[idxKind]);
+                    return;
+                }
                 value = localGet(valIndexOnStack);
                 setter = setUIntVectorNativeHelpers[idxKind];
             }
@@ -4602,6 +4736,18 @@ namespace avmplus
         }
         else if (objType == VECTORDOUBLE_TYPE) {
             if (valueType == NUMBER_TYPE) {
+                if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    emitInlineVectorWrite(objIndexOnStack, 
+                                          index,
+                                          localGetf(valIndexOnStack),
+                                          offsetof(DoubleVectorObject, m_list.m_data),
+                                          offsetof(DataListHelper<double>::LISTDATA, len),
+                                          offsetof(ListData<double>, entries),
+                                          3,
+                                          LIR_std,
+                                          setDoubleVectorNativeHelpers[idxKind]);
+                    return;
+                }
                 value = localGetf(valIndexOnStack);
                 setter = setDoubleVectorNativeHelpers[idxKind];
             }

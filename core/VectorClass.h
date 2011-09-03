@@ -281,6 +281,7 @@ namespace avmplus
     template<class TLIST>
     class TypedVectorObject : public VectorBaseObject
     {
+        friend class CodegenLIR;
         template<class OBJ> friend class TypedVectorClass;
         template<class TLISTVA> friend class VectorAccessor;
 
@@ -488,6 +489,7 @@ namespace avmplus
 
     class GC_AS3_EXACT(ObjectVectorObject, TypedVectorObject< AtomList >)
     {
+        friend class CodegenLIR;
     protected:
         explicit ObjectVectorObject(VTable* ivtable, ScriptObject* delegate);
 
