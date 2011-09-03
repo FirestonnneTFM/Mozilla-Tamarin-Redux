@@ -307,6 +307,7 @@ namespace avmplus
     template<class T, class ListHelper>
     class ListImpl : public MMgc::GCInlineObject
     {
+        friend class CodegenLIR;
         template<class TLIST> friend class VectorAccessor;
         template<class T2> friend class DataListAccessor;
 

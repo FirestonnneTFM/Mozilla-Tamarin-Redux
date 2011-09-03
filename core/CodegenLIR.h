@@ -481,6 +481,15 @@ namespace avmplus
         void emitCoerce(uint32_t index, Traits* type);
         void emitCheckNull(LIns* ptr, Traits* type);
         LIns* emitGetIndexedProperty(int objIndex, LIns *index, Traits *result, IndexKind idxKind);
+        LIns* emitInlineVectorRead(int objIndexOnStack, 
+                                   LIns* index,
+                                   size_t arrayDataOffset, size_t lenOffset, size_t entriesOffset, int scale, LOpcode load_item,
+                                   const CallInfo* helper);
+        void emitInlineVectorWrite(int objIndexOnStack, 
+                                   LIns* index,
+                                   LIns* value,
+                                   size_t arrayDataOffset, size_t lenOffset, size_t entriesOffset, int scale, LOpcode store_item,
+                                   const CallInfo* helper);
         void emitSetIndexedProperty(int objIndex, int valIndex, LIns *index, IndexKind idxKind);
         void localSet(int i, LIns* o, Traits* type);
         LIns* convertToString(int i, bool preserveNull);
