@@ -195,32 +195,8 @@ prototype.pop = function() {
     return castToThisType(this).AS3::pop();
 }
 
-// Bugzilla 477139, the allocation of 'args' is optimized away by the VM here and
-// this code is efficient.
-prototype.push = function (...args) {
-    // Type check - Vector methods are not generic.
-    castToThisType(this);
-
-    // FP 10.1 throws this error specifically, the setting of the element in the
-    // loop below will generate error 1125 instead.
-    if (this.fixed)
-        Error.throwError(RangeError, 1126);
-
-    // The loop is correct because Tamarin (as of June 2010) has a 4GB object limit.
-    // Thus at most 1G elements can be accommodated in a Vector, and the index never
-    // wraps around.
-    var n:uint = this.length;
-    var i:uint=0;
-    var argc:uint=args.length;
-    while (i < argc) {
-        this[n] = args[i];
-        i++;
-        n++;
-    }
-    this.length = n;
-    return n;
-}
-
+// Bugzilla 573452, Type-specialized Vector methods, moved the prototype.push method to Vector.as
+  
 prototype.reverse = function() {
     return castToThisType(this).AS3::reverse();
 }
