@@ -516,10 +516,10 @@ function readLines(filename) {
         // Must be crlf endings or error.  At this point we need to check every line
         // break, which sucks, but only on Windows...
 
+        var oldCr = -1;
+        var oldLf = -1;
         for (;;)
         {
-            var oldCr = -1;
-            var oldLf = -1;
             crIndex = text.indexOf("\r", oldCr+1);
             lfIndex = text.indexOf("\n", oldLf+1);
             if (crIndex == -1 && lfIndex == -1)
