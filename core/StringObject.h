@@ -675,7 +675,7 @@ namespace avmplus
         REALLY_INLINE   wchar       operator[](int index) const { return m_str->charAt(index); }
 
     private:
-                Stringp const volatile  m_str;
+                Stringp const m_str;
 
         // do not create on the heap
                 void*       operator new(size_t); // unimplemented
