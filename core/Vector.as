@@ -60,6 +60,39 @@ package __AS3__.vec
 
         private native function newThisType() : Vector$object;
         
+        // Bugzilla 573452, Type-specialized Vector methods: specialize Push.
+        //
+        // NOTE FOUR ALMOST-DUPLICATED COPIES OF THIS FUNCTION IN THE FILE.
+
+        prototype.push = function (...args) // rest args are efficient
+        {
+            // Type check - Vector methods are not generic.
+            castToThisType(this);
+
+            // making it type specialized, otherwise compiler treats 'this' as untyped
+            var v:Vector$object = this;
+            
+            // FP 10.1 throws this error specifically, the setting of the element in the
+            // loop below will generate error 1125 instead.
+            if (v.fixed)
+                Error.throwError(RangeError, 1126);
+
+            // The loop is correct because Tamarin (as of June 2010) has a 4GB object limit.
+            // Thus at most 1G elements can be accommodated in a Vector, and the index never
+            // wraps around.
+            var n:uint = v.length;
+            var i:uint=0;
+            var argc:uint=args.length;
+            while (i < argc) 
+            {
+                v[n] = args[i];
+                i++;
+                n++;
+            }
+            v.length = n;
+            return n;
+        }
+
         // Include most of the vector implementation.
         include "VectorImpl.as";
 
@@ -134,6 +167,39 @@ package __AS3__.vec
 
         private native function newThisType() : Vector$int;
 
+        // Bugzilla 573452, Type-specialized Vector methods: specialize Push.
+        //
+        // NOTE FOUR ALMOST-DUPLICATED COPIES OF THIS FUNCTION IN THE FILE.
+
+        prototype.push = function (...args)  // rest args are efficient
+        {
+            // Type check - Vector methods are not generic.
+            castToThisType(this);
+
+            // making it type specialized, otherwise compiler treats 'this' as untyped
+            var v:Vector$int = this;
+            
+            // FP 10.1 throws this error specifically, the setting of the element in the
+            // loop below will generate error 1125 instead.
+            if (v.fixed)
+                Error.throwError(RangeError, 1126);
+            
+            // The loop is correct because Tamarin (as of June 2010) has a 4GB object limit.
+            // Thus at most 1G elements can be accommodated in a Vector, and the index never
+            // wraps around.
+            var n:uint = v.length;
+            var i:uint=0;
+            var argc:uint=args.length;
+            while (i < argc) 
+            {
+                v[n] = args[i];
+                i++;
+                n++;
+            }
+            v.length = n;
+            return n;
+        }
+        
         // Include most of the vector implementation.
         include "VectorImpl.as";
 
@@ -207,6 +273,39 @@ package __AS3__.vec
 
         private native function newThisType() : Vector$uint;
 
+        // Bugzilla 573452, Type-specialized Vector methods: specialize Push.
+        //
+        // NOTE FOUR ALMOST-DUPLICATED COPIES OF THIS FUNCTION IN THE FILE.
+
+        prototype.push = function (...args)  // rest args are efficient
+        {
+            // Type check - Vector methods are not generic.
+            castToThisType(this);
+
+            // making it type specialized, otherwise compiler treats 'this' as untyped
+            var v:Vector$uint = this;
+            
+            // FP 10.1 throws this error specifically, the setting of the element in the
+            // loop below will generate error 1125 instead.
+            if (v.fixed)
+                Error.throwError(RangeError, 1126);
+
+            // The loop is correct because Tamarin (as of June 2010) has a 4GB object limit.
+            // Thus at most 1G elements can be accommodated in a Vector, and the index never
+            // wraps around.
+            var n:uint = v.length;
+            var i:uint=0;
+            var argc:uint=args.length;
+            while (i < argc) 
+            {
+                v[n] = args[i];
+                i++;
+                n++;
+            }
+            v.length = n;
+            return n;
+        }
+
         // Include most of the vector implementation.
         include "VectorImpl.as";
 
@@ -279,6 +378,39 @@ package __AS3__.vec
         }
 
         private native function newThisType() : Vector$double;
+
+        // Bugzilla 573452, Type-specialized Vector methods: specialize Push.
+        //
+        // NOTE FOUR ALMOST-DUPLICATED COPIES OF THIS FUNCTION IN THE FILE.
+
+        prototype.push = function (...args)  // rest args are efficient
+        {
+            // Type check - Vector methods are not generic.
+            castToThisType(this);
+
+            // making it type specialized, otherwise compiler treats 'this' as untyped
+            var v:Vector$double = this;
+
+            // FP 10.1 throws this error specifically, the setting of the element in the
+            // loop below will generate error 1125 instead.
+            if (v.fixed)
+                Error.throwError(RangeError, 1126);
+
+            // The loop is correct because Tamarin (as of June 2010) has a 4GB object limit.
+            // Thus at most 1G elements can be accommodated in a Vector, and the index never
+            // wraps around.
+            var n:uint = v.length;
+            var i:uint=0;
+            var argc:uint=args.length;
+            while (i < argc) 
+            {
+                v[n] = args[i];
+                i++;
+                n++;
+            }
+            v.length = n;
+            return n;
+        }        
 
         // Include most of the vector implementation.
         include "VectorImpl.as";
