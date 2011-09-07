@@ -49,6 +49,9 @@ namespace ST_avmplus_peephole {
 extern void create_avmplus_peephole(AvmCore* core);
 }
 #endif
+namespace ST_avmplus_vector_accessors {
+extern void create_avmplus_vector_accessors(AvmCore* core);
+}
 #if defined AVMPLUS_WIN32
 #if !defined VMCFG_ARM
 namespace ST_mmgc_bugzilla_543560 {
@@ -119,6 +122,7 @@ ST_avmplus_builtins::create_avmplus_builtins(core);
 #if defined AVMPLUS_PEEPHOLE_OPTIMIZER
 ST_avmplus_peephole::create_avmplus_peephole(core);
 #endif
+ST_avmplus_vector_accessors::create_avmplus_vector_accessors(core);
 #if defined AVMPLUS_WIN32
 #if !defined VMCFG_ARM
 ST_mmgc_bugzilla_543560::create_mmgc_bugzilla_543560(core);
