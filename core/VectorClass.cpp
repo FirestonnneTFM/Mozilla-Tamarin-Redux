@@ -245,10 +245,9 @@ namespace avmplus
     {
         Toplevel* toplevel = this->toplevel();
 
-        // Vector only takes 1 type argument
-        AvmAssert(argc==1);
         if (argc != 1)
         {
+            // Vector only takes 1 type argument
             toplevel->typeErrorClass()->throwError(kWrongTypeArgCountError, traits()->formatClassName(), core()->toErrorString(1), core()->toErrorString(argc));
         }
 
