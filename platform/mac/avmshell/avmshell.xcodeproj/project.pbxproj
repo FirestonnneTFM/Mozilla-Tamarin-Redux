@@ -504,6 +504,7 @@
 		075CBE9610739FF5009E599C /* GC-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GC-inlines.h"; path = "../../../MMgc/GC-inlines.h"; sourceTree = SOURCE_ROOT; };
 		075CBECC1074ACB7009E599C /* GCAlloc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCAlloc-inlines.h"; path = "../../../MMgc/GCAlloc-inlines.h"; sourceTree = SOURCE_ROOT; };
 		075CBF191074B252009E599C /* GCLargeAlloc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCLargeAlloc-inlines.h"; path = "../../../MMgc/GCLargeAlloc-inlines.h"; sourceTree = SOURCE_ROOT; };
+		075E82001417D72A00F695A5 /* ST_avmplus_vector_accessors.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_avmplus_vector_accessors.st; path = ../../../extensions/ST_avmplus_vector_accessors.st; sourceTree = SOURCE_ROOT; };
 		075EB7B011009E3B002F92B5 /* ClassClosure-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ClassClosure-inlines.h"; path = "../../../core/ClassClosure-inlines.h"; sourceTree = SOURCE_ROOT; };
 		076899071019D3AC00BC72AA /* ZCT-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ZCT-inlines.h"; path = "../../../MMgc/ZCT-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07689A9E101DC28000BC72AA /* ZCT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ZCT.cpp; path = ../../../MMgc/ZCT.cpp; sourceTree = SOURCE_ROOT; };
@@ -1083,11 +1084,12 @@
 			isa = PBXGroup;
 			children = (
 				CB13ECD11358E06B00A09CBE /* ST_avmplus_builtins.st */,
+				0772CCF20F3C3084008DDBB6 /* ST_avmplus_basics.st */,
+				0772CCF30F3C3084008DDBB6 /* ST_avmplus_peephole.st */,
+				075E82001417D72A00F695A5 /* ST_avmplus_vector_accessors.st */,
 				D9909EB7125BBC96007EBE1E /* ST_mmgc_575631.st */,
 				19F9615E127730530079C6E9 /* ST_mmgc_580603.st */,
 				D9909EB8125BBC96007EBE1E /* ST_mmgc_finalize_uninit.st */,
-				0772CCF20F3C3084008DDBB6 /* ST_avmplus_basics.st */,
-				0772CCF30F3C3084008DDBB6 /* ST_avmplus_peephole.st */,
 				0772CCF40F3C3084008DDBB6 /* ST_mmgc_basics.st */,
 				07E2E7AD114EE67C00B3AFCD /* ST_mmgc_dependent.st */,
 				073AC650116A5DC000215772 /* ST_mmgc_gcheap.st */,
