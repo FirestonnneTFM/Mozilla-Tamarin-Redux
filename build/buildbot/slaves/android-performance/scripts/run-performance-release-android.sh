@@ -88,7 +88,7 @@ echo "Building ABC files using the following ASC version:"
 echo "`java -jar $ASC`"
 echo ""
 
-export AVM=$basedir/platform/android/android_shell.sh
+export AVM=$basedir/platform/android/android_shell.py
 
 
 

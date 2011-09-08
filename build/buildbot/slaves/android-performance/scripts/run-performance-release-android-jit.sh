@@ -88,7 +88,7 @@ echo ""
 
 
 
-export AVM=$basedir/platform/android/android_shell.sh
+export AVM=$basedir/platform/android/android_shell.py
 
 
 

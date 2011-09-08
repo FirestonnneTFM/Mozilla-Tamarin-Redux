@@ -36,7 +36,7 @@
 #
 # ***** END LICENSE BLOCK ***** */
 # acts as a proxy to remotely run abc files on android using adb, returns shell output to stdout
-# usage: ./android_shell.sh <vmargs> file.abc
+# usage: ./android_shell.py <vmargs> file.abc
 # assumes the android shell is deployed to /data/local/tamarin/avmshell
 #
 
