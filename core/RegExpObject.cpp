@@ -477,7 +477,13 @@ namespace avmplus
         }
         else
         {
-            ArrayObject *a = toplevel()->arrayClass()->newArray();
+            ArrayObject *a = NULL;
+            if (!core()->currentBugCompatibility()->bugzilla513020)
+            {
+                // Return a zero-length array instead of NULL.
+                // See Bugzilla 513020
+                a = toplevel()->arrayClass()->newArray();
+            }
 
             int oldLastIndex = m_lastIndex;
             m_lastIndex = 0;
@@ -500,6 +506,11 @@ namespace avmplus
 
                 if ((matchArray == NULL) || (last == m_lastIndex))
                     break;
+                if (!a)
+                {
+                    a = toplevel()->arrayClass()->newArray();
+                }
+
                 a->setUintProperty(n++, matchArray->getUintProperty(0));
             }
 

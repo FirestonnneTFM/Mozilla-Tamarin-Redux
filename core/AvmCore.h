@@ -367,6 +367,7 @@ const int kBufferPadding = 16;
         unsigned bugzilla456852b:1;     // Different runtime error for negative vector index when -Ojit set
         unsigned bugzilla504525:1;      // Vector.concat processes arguments in reverse order
         unsigned bugzilla513018:1;      // parseFloat accepts illegal number syntax
+        unsigned bugzilla513020:1;      // [Regexp] String.match with global flag does not return null when nothing is found
         unsigned bugzilla513039:1;      // Number.toFixed(0) returns incorrect numbers, rounding issues
         unsigned bugzilla524122:1;      // Incorrect optimization for integers in numeric sort
         unsigned bugzilla526662:1;      // XMLParser stops at NUL char
