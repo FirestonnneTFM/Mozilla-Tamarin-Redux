@@ -66,7 +66,9 @@ namespace avmplus
 
         if( this->linked )
             return;
-        linked = true;
+        // don't mark as resolved until the end of the function:
+        // if traits->resolveSignatures() throws, we end up with the VTable as
+        // "resolved" but the Traits not, which makes us crash in unpredictable ways.
         if (!traits->isResolved())
         {
             traits->resolveSignatures(toplevel());
@@ -126,6 +128,8 @@ namespace avmplus
             traits->set_isDictionary();
 
         traits->core->exec->notifyVTableResolved(this);
+
+        linked = true;
     }
 
     MethodEnv* VTable::makeMethodEnv(MethodInfo* func, ScopeChain* scope)

@@ -441,8 +441,10 @@ ScriptEnv* DomainMgr::mapScriptToScriptEnv(DomainEnv* domainEnv, MethodInfo* mi)
                 }
             }
         }
-        AvmAssert(se != NULL);
-        AvmAssert(se->method == mi);
+        // If the MethodInfo was entered, but the script then failed verification,
+        // we might not have a matching ScriptEnv... so don't crash in Debug builds.
+        // (Caller already expects NULL and checks for it.)
+        AvmAssert(se == NULL || se->method == mi);
     }
     return se;
 }
