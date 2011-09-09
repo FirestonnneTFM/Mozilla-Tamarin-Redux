@@ -265,6 +265,24 @@ namespace avmplus
 
     // ----------------------------
 
+    REALLY_INLINE AtomList::AtomList(MMgc::GC* gc, uint32_t capacity, const Atom* args)
+        : ListImpl<Atom,AtomListHelper>(gc, capacity, args)
+    {
+    }
+
+    REALLY_INLINE void AtomList::setPointer(uint32_t index, Atom value)
+    {
+        // Yes, this is worth inlining, according to performance testing.  Notably it
+        // can be CSE'd when setPointer is inlined into its caller along with another
+        // range check.
+        if (index >= m_data->len)
+        {
+            ensureCapacityExtra(index, 1);
+            m_data->len = index+1;
+        }
+        AtomListHelper::storePointer(m_data, index, value);
+    }
+
     REALLY_INLINE /*static*/ void AtomListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
     {
         MMgc::GC* const gc = data->gc();
@@ -290,6 +308,33 @@ namespace avmplus
         AvmCore::atomWriteBarrier(data->gc(), data, &data->entries[index], value);
     }
 
+    REALLY_INLINE /*static*/ void AtomListHelper::storePointer(LISTDATA* data, uint32_t index, TYPE value)
+    {
+        AvmAssert(data != NULL);
+#ifdef _DEBUG
+        int oldtag = atomKind(data->entries[index]);
+        AvmAssert(oldtag == kObjectType || oldtag == kStringType || oldtag == kNamespaceType);
+        int newtag = atomKind(value);
+        AvmAssert(newtag == kObjectType || newtag == kStringType || newtag == kNamespaceType);
+#endif
+        // This is atomWriteBarrier specialized to the case of known-pointers and inlined.
+
+        MMgc::RCObject* rcptr;
+        rcptr = (MMgc::RCObject*)atomPtr(data->entries[index]);
+        if (rcptr)
+            rcptr->DecrementRef();
+
+        rcptr = (MMgc::RCObject*)atomPtr(value);
+        if (rcptr)
+            rcptr->IncrementRef();
+        
+        MMgc::GC* gc = data->gc();
+        if (gc->BarrierActive())
+            gc->InlineWriteBarrierTrap(data);
+        
+        data->entries[index] = value;
+    }
+    
     REALLY_INLINE /*static*/ void AtomListHelper::storeInEmpty(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);

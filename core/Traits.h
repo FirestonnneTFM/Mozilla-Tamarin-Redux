@@ -101,6 +101,7 @@ namespace avmplus
         SST_MAX_VALUE 
     };
     bool isAtomOrRCObjectSlot(SlotStorageType sst);
+    bool isRCObjectSlot(SlotStorageType sst);
     SlotStorageType valueStorageType(BuiltinType bt);
 
     class GC_CPP_EXACT_WITH_HOOK(TraitsBindings, QCachedItem)

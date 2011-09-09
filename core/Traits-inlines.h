@@ -45,6 +45,11 @@ REALLY_INLINE bool isAtomOrRCObjectSlot(SlotStorageType sst)
     return sst <= SST_scriptobject;
 }
 
+REALLY_INLINE bool isRCObjectSlot(SlotStorageType sst)
+{
+    return isAtomOrRCObjectSlot(sst) && sst != SST_atom;
+}
+
 REALLY_INLINE SlotStorageType TraitsBindings::SlotInfo::sst() const
 {
     return SlotStorageType(offsetAndSST & 0xf);

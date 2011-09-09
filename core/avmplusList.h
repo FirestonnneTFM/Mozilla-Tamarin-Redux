@@ -268,6 +268,7 @@ namespace avmplus
 
     class AtomListHelper
     {
+        friend class CodegenLIR;
     public:
         typedef Atom TYPE;
         typedef OpaqueAtom OPAQUE_TYPE;
@@ -277,6 +278,7 @@ namespace avmplus
         static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
+        static void storePointer(LISTDATA* data, uint32_t index, TYPE value);
         static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
         static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
         static void moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
@@ -308,6 +310,7 @@ namespace avmplus
     class ListImpl : public MMgc::GCInlineObject
     {
         friend class CodegenLIR;
+        friend class AtomList;
         template<class TLIST> friend class VectorAccessor;
         template<class T2> friend class DataListAccessor;
 
@@ -699,8 +702,21 @@ namespace avmplus
 
     // ----------------------------
 
-    typedef ListImpl<Atom, AtomListHelper> AtomList;
-
+    class AtomList : public ListImpl<Atom, AtomListHelper>
+    {
+        friend class CodegenLIR;
+    public:
+        explicit AtomList(MMgc::GC* gc, uint32_t capacity, const Atom* args = NULL);
+        
+        // setPointer can be used when the list is known to contain all RCObject values
+        // and the value stored is also an RCObject.  The method checks that the old and
+        // new values are RCObjects in DEBUG builds.  The purpose of the method is to
+        // significantly speed up stores by specializing and inlining the write barrier.
+        // Mainly this method should be called from specialized JIT callouts.
+        // See Bugzilla 601817 for more information.
+        void setPointer(uint32_t index, Atom value);
+    };
+    
     // ----------------------------
     template<class T>
     class DataList : public ListImpl< T, DataListHelper<T> >
