@@ -282,6 +282,7 @@ namespace avmplus
     class TypedVectorObject : public VectorBaseObject
     {
         friend class CodegenLIR;
+        friend class ObjectVectorObject;
         template<class OBJ> friend class TypedVectorClass;
         template<class TLISTVA> friend class VectorAccessor;
 
@@ -337,13 +338,18 @@ namespace avmplus
         bool _hasUintProperty(uint32_t index) const;
         Atom _getUintProperty(uint32_t index) const;
         void _setUintProperty(uint32_t index, Atom value);
-        void _setKnownUintProperty(uint32_t index, Atom value);
         Atom _getIntProperty(int32_t index) const;
         void _setIntProperty(int32_t index, Atom value);
-        void _setKnownIntProperty(int32_t index, Atom value);
         Atom _getDoubleProperty(double index) const;
         void _setDoubleProperty(double index, Atom value);
-        void _setKnownDoubleProperty(double index, Atom value);
+        
+        // Optimized setters used by various JIT optimizations.  It is possible that
+        // these ought to be moved into ObjectVectorObject in the manner of
+        // _setKnown*PropertyWithPointer(), they only make sense for ObjectVectorObject.
+
+        void _setKnownUintProperty(uint32_t index, Atom value);             // ObjectType <: VectorBaseType
+        void _setKnownIntProperty(int32_t index, Atom value);               // ditto
+        void _setKnownDoubleProperty(double index, Atom value);             // ditto
 
 #ifdef DEBUGGER
         virtual uint64_t bytesUsed() const;
@@ -489,7 +495,6 @@ namespace avmplus
 
     class GC_AS3_EXACT(ObjectVectorObject, TypedVectorObject< AtomList >)
     {
-        friend class CodegenLIR;
     protected:
         explicit ObjectVectorObject(VTable* ivtable, ScriptObject* delegate);
 
@@ -498,7 +503,39 @@ namespace avmplus
         {
             return new (gc, MMgc::kExact, ivtable->getExtraSize()) ObjectVectorObject(ivtable, delegate);
         }
-    
+
+        // The JIT calls _setKnown*PropertyWithPointer when the Vector is known to contain only
+        // RCObject values and the value to be stored is an RCObject subtype of the element type.
+        // Note the call to m_list.setPointer() instead of m_list.set(); the former streamlines
+        // the write barrier.
+        //
+        // These are here and not in TypedVectorObject because they only make sense
+        // for ObjectVectorObject.
+
+        void _setKnownUintPropertyWithPointer(uint32_t index, Atom value)
+        {
+            checkWriteIndex_u(index);
+            AtomList::OPAQUE_TYPE tmp;
+            atomToValueKnown(value, tmp);
+            m_list.setPointer(index, (AtomList::TYPE)tmp);
+        }
+        
+        void _setKnownIntPropertyWithPointer(int32_t index_i, Atom value)
+        {
+            uint32_t index = checkWriteIndex_i(index_i);
+            AtomList::OPAQUE_TYPE tmp;
+            atomToValueKnown(value, tmp);
+            m_list.setPointer(index, (AtomList::TYPE)tmp);
+        }
+        
+        void _setKnownDoublePropertyWithPointer(double index_d, Atom value)
+        {
+            uint32_t index = checkWriteIndex_d(index_d);
+            AtomList::OPAQUE_TYPE tmp;
+            atomToValueKnown(value, tmp);
+            m_list.setPointer(index, (AtomList::TYPE)tmp);
+        }
+
         // AS3 native function implementations
         ObjectVectorObject* newThisType();
 

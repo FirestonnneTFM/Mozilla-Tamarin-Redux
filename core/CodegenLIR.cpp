@@ -4612,6 +4612,9 @@ namespace avmplus
     static const CallInfo* setKnownTypeObjectVectorHelpers[VI_SIZE] =
         { FUNCTIONID(ObjectVectorObject_setKnownUintProperty), FUNCTIONID(ObjectVectorObject_setKnownIntProperty), FUNCTIONID(ObjectVectorObject_setKnownDoubleProperty) };
     
+    static const CallInfo* setKnownPointerTypeObjectVectorHelpers[VI_SIZE] =
+        { FUNCTIONID(ObjectVectorObject_setKnownUintPropertyWithPointer), FUNCTIONID(ObjectVectorObject_setKnownIntPropertyWithPointer), FUNCTIONID(ObjectVectorObject_setKnownDoublePropertyWithPointer) };
+    
     static const CallInfo* setIntVectorNativeHelpers[VI_SIZE] =
         { FUNCTIONID(IntVectorObject_setNativeUintProperty), FUNCTIONID(IntVectorObject_setNativeIntProperty), FUNCTIONID(IntVectorObject_setNativeDoubleProperty) };
 
@@ -4684,9 +4687,18 @@ namespace avmplus
         }
         else if (objType != NULL && objType->subtypeof(VECTOROBJ_TYPE)) {
             value = loadAtomRep(valIndexOnStack);
-            // Optimization: avoid coercion if stored value is known to be subtype of vector parameter type
-            if (objType->m_paramTraits != NULL && valueType != NULL && valueType->subtypeof(objType->m_paramTraits))
-                setter = setKnownTypeObjectVectorHelpers[idxKind];
+            // Optimization: avoid coercion if the stored value is known to be a subtype
+            // of the vector parameter type.
+            Traits* paramType = objType->m_paramTraits;
+            if (paramType != NULL && valueType != NULL && valueType->subtypeof(paramType)) {
+                // Optimization: avoid atomWriteBarrier if the vector parameter type is
+                // known to be an RCObject; atomWriteBarrier has a bunch of run-time tests
+                // that try to determine that fact.
+                if (isRCObjectSlot(valueStorageType(Traits::getBuiltinType(paramType))))
+                    setter = setKnownPointerTypeObjectVectorHelpers[idxKind];
+                else
+                    setter = setKnownTypeObjectVectorHelpers[idxKind];
+            }
             else
                 setter = setObjectVectorHelpers[idxKind];
         }
