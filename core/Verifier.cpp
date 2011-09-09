@@ -3018,6 +3018,47 @@ namespace avmplus
         FrameState *targetState = getFrameState(target);
         bool targetChanged;
         if (!targetState) {
+            if (blockStates != NULL && target > current)
+            {
+                // If we're jumping forward to an instruction with no FrameState,
+                // we need to re-verify the block that contains it to merge FrameStates.
+                // This is a conservative approach: roughly,
+                //
+                // if (target is new) and (branch < nearest < target) and (nearest not queued) then queue(nearest)
+                //
+                // this is suboptimal in that we may guess wrong and requeue blocks that don't need
+                // reverification, but this is theoretically harmless, just extra work.
+                //
+                int i = blockStates->map.findNear(target);
+                // i too large should be impossible, but i < 0 is possible, if the insertion point
+                // was before the first block. In that case, just ignore it, since we only
+                // need to requeue if it's possible that an existing block has already been
+                // verified once; in this case no such block could exist.
+                AvmAssert(i < blockStates->map.length());
+                // (But let's check anyway...)
+                if (i >= 0 && i < blockStates->map.length())
+                {
+                    // If the block we find in the table is in between the
+                    // position of the branch and the position of the target,
+                    // requeue. (And also, if it's already pending, don't bother.)
+                    FrameState* existingState = blockStates->map.at(i);
+                    if (current < existingState->abc_pc &&
+                        existingState->abc_pc < target &&
+                        !existingState->wl_pending)
+                    {
+                        #ifdef AVMPLUS_VERBOSE
+                        if (verbose) {
+                            core->console << "------------------------------------\n";
+                            core->console << "RE-QUEUE B" << int(existingState->abc_pc - code_pos) << ":";
+                        }
+                        #endif
+                        existingState->wl_pending = true;
+                        existingState->wl_next = worklist;
+                        worklist = existingState;
+                        // no return: we want to fall thru and create the new blockstate as well.
+                    }
+                }
+            }
             if (!blockStates)
                 blockStates = new (core->GetGC()) BlockStatesType(core->GetGC());
             targetState = mmfx_new( FrameState(ms) );
