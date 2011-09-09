@@ -256,7 +256,8 @@ namespace avmplus
             2093, 146,
             2105, 147,
             2106, 148,
-            2107, 149
+            2107, 149,
+            2108, 150
         };
 
         const char* errorConstants[][kNumErrorConstants] =
@@ -413,7 +414,8 @@ namespace avmplus
                 /*2093,146*/ "The Proxy class does not implement getDescendants. It must be overridden by a subclass.",
                 /*2105,147*/ "The Proxy class does not implement nextNameIndex. It must be overridden by a subclass.",
                 /*2106,148*/ "The Proxy class does not implement nextName. It must be overridden by a subclass.",
-                /*2107,149*/ "The Proxy class does not implement nextValue. It must be overridden by a subclass."
+                /*2107,149*/ "The Proxy class does not implement nextValue. It must be overridden by a subclass.",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_cs
@@ -568,7 +570,8 @@ namespace avmplus
                 /*2093,146*/ "Třída Proxy neimplementuje funkci getDescendants. Musí být přepsána podtřídou.",
                 /*2105,147*/ "Třída Proxy neimplementuje funkci nextNameIndex. Musí být přepsána podtřídou.",
                 /*2106,148*/ "Třída Proxy neimplementuje funkci nextName. Musí být přepsána podtřídou.",
-                /*2107,149*/ "Třída Proxy neimplementuje funkci nextValue. Musí být přepsána podtřídou."
+                /*2107,149*/ "Třída Proxy neimplementuje funkci nextValue. Musí být přepsána podtřídou.",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_de
@@ -723,7 +726,8 @@ namespace avmplus
                 /*2093,146*/ "Die Proxy-Klasse implementiert getDescendants nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.",
                 /*2105,147*/ "Die Proxy-Klasse implementiert nextNameIndex nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.",
                 /*2106,148*/ "Die Proxy-Klasse implementiert nextName nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.",
-                /*2107,149*/ "Die Proxy-Klasse implementiert nextValue nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden."
+                /*2107,149*/ "Die Proxy-Klasse implementiert nextValue nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_es
@@ -878,7 +882,8 @@ namespace avmplus
                 /*2093,146*/ "La clase Proxy no implementa getDescendants. Debe sustituirse por una subclase.",
                 /*2105,147*/ "La clase Proxy no implementa nextNameIndex. Debe sustituirse por una subclase.",
                 /*2106,148*/ "La clase Proxy no implementa nextName. Debe sustituirse por una subclase.",
-                /*2107,149*/ "La clase Proxy no implementa nextValue. Debe sustituirse por una subclase."
+                /*2107,149*/ "La clase Proxy no implementa nextValue. Debe sustituirse por una subclase.",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_fr
@@ -1033,7 +1038,8 @@ namespace avmplus
                 /*2093,146*/ "La classe Proxy ne met pas en oeuvre getDescendants. Elle doit être remplacée par une sous-classe.",
                 /*2105,147*/ "La classe Proxy ne met pas en oeuvre nextNameIndex. Elle doit être remplacée par une sous-classe.",
                 /*2106,148*/ "La classe Proxy ne met pas en oeuvre nextName. Elle doit être remplacée par une sous-classe.",
-                /*2107,149*/ "La classe Proxy ne met pas en oeuvre nextValue. Elle doit être remplacée par une sous-classe."
+                /*2107,149*/ "La classe Proxy ne met pas en oeuvre nextValue. Elle doit être remplacée par une sous-classe.",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_it
@@ -1188,7 +1194,8 @@ namespace avmplus
                 /*2093,146*/ "La classe Proxy non implementa getDescendants. Deve essere sostituita da una sottoclasse.",
                 /*2105,147*/ "La classe Proxy non implementa nextNameIndex. Deve essere sostituita da una sottoclasse.",
                 /*2106,148*/ "La classe Proxy non implementa nextName. Deve essere sostituita da una sottoclasse.",
-                /*2107,149*/ "La classe Proxy non implementa nextValue. Deve essere sostituita da una sottoclasse."
+                /*2107,149*/ "La classe Proxy non implementa nextValue. Deve essere sostituita da una sottoclasse.",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ja
@@ -1343,7 +1350,8 @@ namespace avmplus
                 /*2093,146*/ "Proxy クラスは、getDescendants を実装しません。サブクラスでオーバーライドする必要があります。",
                 /*2105,147*/ "Proxy クラスは、nextNameIndex を実装しません。サブクラスでオーバーライドする必要があります。",
                 /*2106,148*/ "Proxy クラスは、nextName を実装しません。サブクラスでオーバーライドする必要があります。",
-                /*2107,149*/ "Proxy クラスは、nextValue を実装しません。サブクラスでオーバーライドする必要があります。"
+                /*2107,149*/ "Proxy クラスは、nextValue を実装しません。サブクラスでオーバーライドする必要があります。",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ko
@@ -1498,7 +1506,8 @@ namespace avmplus
                 /*2093,146*/ "Proxy 클래스는 getDescendants를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.",
                 /*2105,147*/ "Proxy 클래스는 nextNameIndex를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.",
                 /*2106,148*/ "Proxy 클래스는 nextName을 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.",
-                /*2107,149*/ "Proxy 클래스는 nextValue를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다."
+                /*2107,149*/ "Proxy 클래스는 nextValue를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_nl
@@ -1653,7 +1662,8 @@ namespace avmplus
                 /*2093,146*/ "De klasse Proxy implementeert getDescendants niet. Het moet worden overschreven door een subklasse.",
                 /*2105,147*/ "De klasse Proxy implementeert nextNameIndex niet. Het moet worden overschreven door een subklasse.",
                 /*2106,148*/ "De klasse Proxy implementeert nextName niet. Het moet worden overschreven door een subklasse.",
-                /*2107,149*/ "De klasse Proxy implementeert nextValue niet. Het moet worden overschreven door een subklasse."
+                /*2107,149*/ "De klasse Proxy implementeert nextValue niet. Het moet worden overschreven door een subklasse.",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_pl
@@ -1808,7 +1818,8 @@ namespace avmplus
                 /*2093,146*/ "Klasa Proxy nie implementuje metody getDescendants. Należy ją przesłonić w podklasie.",
                 /*2105,147*/ "Klasa Proxy nie implementuje metody nextNameIndex. Należy ją przesłonić w podklasie.",
                 /*2106,148*/ "Klasa Proxy nie implementuje metody nextName. Należy ją przesłonić w podklasie.",
-                /*2107,149*/ "Klasa Proxy nie implementuje metody nextValue. Należy ją przesłonić w podklasie."
+                /*2107,149*/ "Klasa Proxy nie implementuje metody nextValue. Należy ją przesłonić w podklasie.",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_cs
@@ -1963,7 +1974,8 @@ namespace avmplus
                 /*2093,146*/ "A classe Proxy não implementa getDescendants. Ela deve ser substituída por uma subclasse.",
                 /*2105,147*/ "A classe Proxy não implementa nextNameIndex. Ela deve ser substituída por uma subclasse.",
                 /*2106,148*/ "A classe Proxy não implementa nextName. Ela deve ser substituída por uma subclasse.",
-                /*2107,149*/ "A classe Proxy não implementa nextValue. Ela deve ser substituída por uma subclasse."
+                /*2107,149*/ "A classe Proxy não implementa nextValue. Ela deve ser substituída por uma subclasse.",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ru
@@ -2118,7 +2130,8 @@ namespace avmplus
                 /*2093,146*/ "Класс Proxy не поддерживает getDescendants. Он должен быть заменен на подкласс.",
                 /*2105,147*/ "Класс Proxy не поддерживает nextNameIndex. Он должен быть заменен на подкласс.",
                 /*2106,148*/ "Класс Proxy не поддерживает nextName. Он должен быть заменен на подкласс.",
-                /*2107,149*/ "Класс Proxy не поддерживает nextValue. Он должен быть заменен на подкласс."
+                /*2107,149*/ "Класс Proxy не поддерживает nextValue. Он должен быть заменен на подкласс.",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_sv
@@ -2273,7 +2286,8 @@ namespace avmplus
                 /*2093,146*/ "Klassen Proxy implementerar inte getDescendants. Den måste åsidosättas av en underordnad klass.",
                 /*2105,147*/ "Klassen Proxy implementerar inte nextNameIndex. Den måste åsidosättas av en underordnad klass.",
                 /*2106,148*/ "Klassen Proxy implementerar inte nextName. Den måste åsidosättas av en underordnad klass.",
-                /*2107,149*/ "Klassen Proxy implementerar inte nextValue. Den måste åsidosättas av en underordnad klass."
+                /*2107,149*/ "Klassen Proxy implementerar inte nextValue. Den måste åsidosättas av en underordnad klass.",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_tr
@@ -2428,7 +2442,8 @@ namespace avmplus
                 /*2093,146*/ "Proxy sınıfı getDescendants uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.",
                 /*2105,147*/ "Proxy sınıfı nextNameIndex uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.",
                 /*2106,148*/ "Proxy sınıfı nextName uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.",
-                /*2107,149*/ "Proxy sınıfı nextValue uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır."
+                /*2107,149*/ "Proxy sınıfı nextValue uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_zh_CN
@@ -2583,7 +2598,8 @@ namespace avmplus
                 /*2093,146*/ "Proxy 类不实现 getDescendants。它必须由一个子类覆盖。",
                 /*2105,147*/ "Proxy 类不实现 nextNameIndex。它必须由一个子类覆盖。",
                 /*2106,148*/ "Proxy 类不实现 nextName。它必须由一个子类覆盖。",
-                /*2107,149*/ "Proxy 类不实现 nextValue。它必须由一个子类覆盖。"
+                /*2107,149*/ "Proxy 类不实现 nextValue。它必须由一个子类覆盖。",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_zh_TW
@@ -2738,7 +2754,8 @@ namespace avmplus
                 /*2093,146*/ "Proxy 類別不會實作 getDescendants。它必須以子類別覆寫。",
                 /*2105,147*/ "Proxy 類別不會實作 nextNameIndex。它必須以子類別覆寫。",
                 /*2106,148*/ "Proxy 類別不會實作 nextName。它必須以子類別覆寫。",
-                /*2107,149*/ "Proxy 類別不會實作 nextValue。它必須以子類別覆寫。"
+                /*2107,149*/ "Proxy 類別不會實作 nextValue。它必須以子類別覆寫。",
+                /*2108,150*/ "The value %1 is not a valid Array length."
             }
         #endif
         };

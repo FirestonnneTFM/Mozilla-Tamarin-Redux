@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8' standalone='no' ?>
+<?xml version='1.0' encoding='utf-8' standalone='no' ?>
 <!-- -*- Mode: xml; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- -->
 <!-- vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) -->
 <!-- ***** BEGIN LICENSE BLOCK *****
@@ -686,4 +686,5 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">The Proxy class does not implement nextNameIndex. It must be overridden by a subclass.</error>
   <error id="2106" label="kProxyNextNameError">The Proxy class does not implement nextName. It must be overridden by a subclass.</error>
   <error id="2107" label="kProxyNextValueError">The Proxy class does not implement nextValue. It must be overridden by a subclass.</error>
+  <error id="2108" label="kInvalidArrayLengthError">The value %1 is not a valid Array length.</error>
 </errors>

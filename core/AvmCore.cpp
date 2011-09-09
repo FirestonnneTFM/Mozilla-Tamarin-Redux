@@ -5248,6 +5248,7 @@ return the result of the comparison ToPrimitive(x) == y.
         if (v >= kSWF15)    /* Brannan, tentative! */
         {
             bugzilla513039 = 1;     // Number.toFixed(0) returns incorrect numbers, rounding issues
+            bugzilla661330 = 1;     // Array.length behavior doesn't follow ECMA262 near 2^32-1
         }
     }
 

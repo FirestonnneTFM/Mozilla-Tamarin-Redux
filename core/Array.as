@@ -54,6 +54,24 @@ package
         public native function get length():uint
         public native function set length(newLength:uint)
 
+        // Assigns this.length = newLength if latter fits; otherwise
+        // throws exception or assigns altLength (SWF version dependent).
+        //
+        // It is responsibility of caller to provide an appropriate
+        // altLength.  Old behavior used altLength == uint(newLength),
+        // but it is better to clamp rather than wrap in such cases.
+        // More discussion on Bugzilla 658677, 661330, and 681399.
+        private function set_length(newLength:*, altLength:uint)
+        {
+            if (newLength is uint)
+                this.length = newLength;
+            else if (bugzilla(661330))
+                Error.throwError( RangeError, 2108, // kInvalidArrayLengthError
+                                  newLength );
+            else
+                this.length = altLength;
+        }
+
         // Array.length = 1 per ES3
         public static const length:int = 1
 

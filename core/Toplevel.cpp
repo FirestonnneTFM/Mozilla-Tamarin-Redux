@@ -1356,6 +1356,7 @@ namespace avmplus
         {
             HANDLE_BUG(504525)
             HANDLE_BUG(574600)
+            HANDLE_BUG(661330)
             default:        AvmAssert(0); return false;
         }
 #undef HANDLE_BUG
