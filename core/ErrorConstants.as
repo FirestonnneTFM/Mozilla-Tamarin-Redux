@@ -198,4 +198,5 @@ class Errors
         public static const kProxyNextNameIndexError          = 2105;
         public static const kProxyNextNameError               = 2106;
         public static const kProxyNextValueError              = 2107;
+        public static const kInvalidArrayLengthError          = 2108;
 };
