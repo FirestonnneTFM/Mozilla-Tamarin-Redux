@@ -806,7 +806,9 @@ namespace avmplus
 
     Atom ScriptObject::nextName(int index)
     {
-        AvmAssert(traits()->needsHashtable());
+        if (!traits()->needsHashtable())
+            return nullStringAtom;
+        
         AvmAssert(index > 0);
 
         InlineHashtable* ht = getTable();
@@ -816,7 +818,9 @@ namespace avmplus
 
     Atom ScriptObject::nextValue(int index)
     {
-        AvmAssert(traits()->needsHashtable());
+        if (!traits()->needsHashtable())
+            return undefinedAtom;
+
         AvmAssert(index > 0);
 
         InlineHashtable* ht = getTable();
