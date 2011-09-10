@@ -198,7 +198,6 @@ package flash.sampler
          * @playerversion Flash 9.0.115.0
          * @langversion 3.0
          * @keyword DeleteObjectSample, DeleteObjectSample.id, id
-         * @see flash.sampler.NewObjectSample#id
          */
         public const id:Number;
 
@@ -207,7 +206,6 @@ package flash.sampler
          * @playerversion Flash 9.0.115.0
          * @langversion 3.0
          * @keyword DeleteObjectSample, DeleteObjectSample.size, size
-         * @see flash.sampler.NewObjectSample#id
          */
         public const size:Number;
     };
@@ -336,7 +334,7 @@ package flash.sampler
      * @playerversion Flash 9.0.115.0
      * @langversion 3.0
      * @keyword getMemberNames
-     * @see flash.utils#describeType()
+     * @see ../../flash/utils/package.html#describeType() flash.utils.describeType()
      * @see ../../statements.html#for_each..in for each..in
      *
      */
