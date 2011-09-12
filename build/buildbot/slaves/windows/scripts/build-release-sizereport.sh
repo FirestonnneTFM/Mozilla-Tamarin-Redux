@@ -66,7 +66,7 @@ mkdir objdir
 
 cd objdir
 
-python ../configure.py --enable-shell --disable-eval --disable-selftest
+python ../configure.py --disable-eval --disable-selftest
 
 echo ""
 echo "*******************************************************************************"

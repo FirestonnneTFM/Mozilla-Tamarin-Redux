@@ -57,7 +57,7 @@ If you haven't modified any self tests, skip steps 1 and 2.
 3. configure the vm with selftests enabled
 
    mkdir obj; cd obj
-   configure.py --enable-shell --enable-selftests [other options]
+   configure.py --enable-selftests [other options]
    make
 
 RUNNING
