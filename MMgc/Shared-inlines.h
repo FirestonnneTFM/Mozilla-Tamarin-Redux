@@ -86,6 +86,77 @@ namespace MMgc
         VALGRIND_MAKE_MEM_UNDEFINED(p, sizeof(void*));
         return next;
     }
+
+   template<typename T, int growthIncrement>
+    void BasicList<T,growthIncrement>::Add(T item)
+    {
+        if (holes && iteratorCount == 0)
+            Compact();
+        if (count == capacity)
+        {
+            capacity += growthIncrement;
+            T* newItems = mmfx_new_array_opt(T,  capacity, kZero);
+            if (items)
+                VMPI_memcpy(newItems, items, count * sizeof(T));
+            mmfx_delete_array(items);
+            items = newItems;
+        }
+        uint32_t numHoles = 0;
+        if (holes)
+        {
+            uint32_t numFound = 0;
+            for (uint32_t j = 0; numFound < count && j < capacity; j++)
+            {
+                if (items[j] == NULL)
+                {
+                    numHoles++;
+                } else {
+                    numFound++;
+                }
+            }
+        }
+        items[count+numHoles] = item;
+        count++;
+    }
+
+    template<typename T, int growthIncrement>
+    bool BasicList<T,growthIncrement>::TryAdd(T item)
+    {
+        if (holes && iteratorCount == 0)
+            Compact();
+        if (count == capacity)
+        {
+            uint32_t tryCapacity = capacity + growthIncrement;
+            T* newItems = mmfx_new_array_opt(T,  tryCapacity, (MMgc::FixedMallocOpts)(kZero|kCanFail));
+
+            if (newItems == NULL)
+                return false;
+
+            capacity = tryCapacity;
+            if (items)
+                VMPI_memcpy(newItems, items, count * sizeof(T));
+            mmfx_delete_array(items);
+            items = newItems;
+        }
+        uint32_t numHoles = 0;
+        if (holes)
+        {
+            uint32_t numFound = 0;
+            for (uint32_t j = 0; numFound < count && j < capacity; j++)
+            {
+                if (items[j] == NULL)
+                {
+                    numHoles++;
+                } else {
+                    numFound++;
+                }
+            }
+        }
+        items[count+numHoles] = item;
+        count++;
+        return true;
+    }
+
 }
 
 #endif /* __Shared_inlines__ */

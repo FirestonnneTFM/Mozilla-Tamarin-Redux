@@ -140,7 +140,7 @@ REALLY_INLINE void *operator new[](size_t size) MMGC_NEW_THROWS_CLAUSE
 
 REALLY_INLINE void *operator new[](size_t size, MMgc::FixedMallocOpts opts) MMGC_NEW_THROWS_CLAUSE
 {
-    return MMgc::AllocCallInline(size, opts);
+    return ( (size==0) ? NULL : MMgc::AllocCallInline(size, opts) );
 }
 
 // User-defined operator delete.

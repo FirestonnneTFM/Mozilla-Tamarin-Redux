@@ -674,6 +674,32 @@ namespace MMgc
          */
         static size_t CheckForCallocSizeOverflow(size_t count, size_t elsize);
 
+        /**
+         * CheckForNewSizeOverflow
+         * This method is designed to check whether an allocation request
+         * of N objects for a given size might result in numeric overflow
+         * in a call to operator new[].
+         * Overflow detection logic:
+         * In this method we detect overflow occurring from result of (N * M) where
+         * N = number of objects and M = size of one object.
+         * Currently, in MMgc all object allocations are capped to 2^32-1 (=kMaxObjectSize)
+         * which is the largest object size on 32-bit systems.
+         * To detect overflow, we first check if either of N or M exceeds kMaxObjectSize.
+         * This check is a guard against overflow on 64-bit systems where sizeof(size_t) is
+         * greater than 4 bytes.  If this check succeeds then we perform a 64-bit based
+         * product i.e. (N * M) and check if the result exceeds kMaxObjectSize.
+         * Requirement:
+         * Code that is allocating arrays using operator new in the form "new type[count]"
+         * should call this method to validate that the requested size will not cause overflow
+         * @param count number of objects being allocated
+         * @param elsize requested size pertaining to a single object being allocated
+         * @param canFail specifies if the method should return 0 (true) or call Abort (false)
+         * @return: This method will return the count parameter that was passed in if
+         * there was no overflow. If an overflow is detected, the method will return 0 if
+         * the canFail parameter is true, or will call Abort() otherwise
+         */
+        static size_t CheckForNewSizeOverflow(size_t count, size_t elsize, bool canFail);
+
         /** The native VM page size (in bytes) for the current architecture */
         const size_t kNativePageSize;
 

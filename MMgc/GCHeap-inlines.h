@@ -255,6 +255,29 @@ namespace MMgc
         return size_t(total);
     }
 
+    /* static */
+    REALLY_INLINE size_t GCHeap::CheckForNewSizeOverflow(size_t count, size_t elsize, bool canFail)
+    {
+        //If either of the size of requested bytes
+        //or the number of requested size
+        //or if their product exceeds kMaxObjectSize
+        //we treat that as overflow and abort
+        uint64_t total = (uint64_t)elsize * (uint64_t)count;
+#ifdef MMGC_64BIT
+        if(   elsize > MMgc::GCHeap::kMaxObjectSize
+            || count >= MMgc::GCHeap::kMaxObjectSize
+            || total > (uint64_t)MMgc::GCHeap::kMaxObjectSize)
+#else
+        if(total > (uint64_t)MMgc::GCHeap::kMaxObjectSize)
+#endif
+        {
+            if (canFail)
+                return 0;
+            MMgc::GCHeap::SignalObjectTooLarge();
+        }
+        return count;
+    }
+
     REALLY_INLINE GCHeapConfig &GCHeap::Config()
     {
         return config;

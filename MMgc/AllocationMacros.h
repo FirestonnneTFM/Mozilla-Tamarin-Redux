@@ -73,11 +73,10 @@ namespace MMgc
 #define mmfx_new(new_data)                  new new_data
 #define mmfx_new0(new_data)                 new (MMgc::kZero) new_data
 
-#define mmfx_new_array(type, n)             new type[n]
+#define mmfx_new_array(type, n)             new type[MMgc::GCHeap::CheckForNewSizeOverflow(n,sizeof(type),/*canFail*/false)]
 
 #define mmfx_new_opt(new_data, opts)        new (opts) new_data
-#define mmfx_new_array_opt(type, n, opts)   new (opts) type[n]
-
+#define mmfx_new_array_opt(type, n, opts)   new (opts) type[MMgc::GCHeap::CheckForNewSizeOverflow(n,sizeof(type),(opts&MMgc::kCanFail)!=0)]
 #define mmfx_delete(p)                      delete p
 #define mmfx_delete_array(p)                delete[] p
 
