@@ -630,7 +630,7 @@ namespace avmplus
             case OP_setlocal1:
             case OP_setlocal2:
             case OP_setlocal3:
-                imm30 -= OP_setlocal0;
+                imm30 = opcode-OP_setlocal0;
                 goto update_local;
 
             // Locals
