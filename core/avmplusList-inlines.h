@@ -312,8 +312,9 @@ namespace avmplus
     {
         AvmAssert(data != NULL);
 #ifdef _DEBUG
+        // Never-used slots will be all-bits-zero, used slots will always be tagged properly
         int oldtag = atomKind(data->entries[index]);
-        AvmAssert(oldtag == kObjectType || oldtag == kStringType || oldtag == kNamespaceType);
+        AvmAssert(oldtag == kObjectType || oldtag == kStringType || oldtag == kNamespaceType || data->entries[index] == 0);
         int newtag = atomKind(value);
         AvmAssert(newtag == kObjectType || newtag == kStringType || newtag == kNamespaceType);
 #endif
