@@ -625,30 +625,6 @@ namespace MMgc
     }
 
     template <class T>
-    REALLY_INLINE void GC::TraceLocation(MMgc::WriteBarrier<T> const * loc)
-    {
-        TracePointer((void*)loc->value() HEAP_GRAPH_ARG((uintptr_t*)loc->location()));
-    }
-
-    template <>
-    REALLY_INLINE void GC::TraceLocation(MMgc::WriteBarrier<uintptr_t> const * loc)
-    {
-        TracePointer((void*)(loc->value() & ~7) HEAP_GRAPH_ARG(loc->location()));
-    }
-    
-    template <class T>
-    REALLY_INLINE void GC::TraceLocation(MMgc::WriteBarrierRC<T> const * loc)
-    {
-        TracePointer((void*)loc->value() HEAP_GRAPH_ARG((uintptr_t*)loc->location()));
-    }
-
-    template <>
-    REALLY_INLINE void GC::TraceLocation(MMgc::WriteBarrierRC<uintptr_t> const * loc)
-    {
-        TracePointer((void*)(loc->value() & ~7) HEAP_GRAPH_ARG(loc->location()));
-    }
-
-    template <class T>
     REALLY_INLINE void GC::TraceLocation(MMgc::GCMemberBase<T> const * loc)
     {
         TracePointer((void*)loc->value() HEAP_GRAPH_ARG((uintptr_t*)loc->location()));
