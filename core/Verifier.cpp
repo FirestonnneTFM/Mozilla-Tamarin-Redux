@@ -3150,14 +3150,28 @@ namespace avmplus
             if (targetValue.traits != merged_traits || targetValue.notNull != merged_notNull)
                 targetChanged = true;
 
-            targetValue.traits = merged_traits;
-            targetValue.notNull = merged_notNull;
 #ifdef VMCFG_NANOJIT
             uint16_t merged_sst = targetValue.sst_mask | curValue.sst_mask;
+
+            // String+null and Namespace+null are legal but must be special-cased
+            // here.  The SlotStorageType for NULL_TYPE is SST_scriptobject,
+            // which will leave two bits set in merged_sst.  Erase the SST_scriptobject bit.
+            // Any other type merged with null already works, as does String|Namespace
+            // merged with any other type.
+            const uint16_t str_or_obj = (1 << SST_string)    | (1 << SST_scriptobject);
+            const uint16_t ns_or_obj  = (1 << SST_namespace) | (1 << SST_scriptobject);
+            if ((merged_traits == STRING_TYPE    && merged_sst == str_or_obj) ||
+                (merged_traits == NAMESPACE_TYPE && merged_sst == ns_or_obj)) {
+                AvmAssert(targetValue.traits == NULL_TYPE || curValue.traits == NULL_TYPE);
+                merged_sst &= ~(1 << SST_scriptobject);
+            }
+
             if (targetValue.sst_mask != merged_sst)
                 targetChanged = true;
             targetValue.sst_mask = merged_sst;
 #endif
+            targetValue.traits = merged_traits;
+            targetValue.notNull = merged_notNull;
         }
 
 #ifdef AVMPLUS_VERBOSE
