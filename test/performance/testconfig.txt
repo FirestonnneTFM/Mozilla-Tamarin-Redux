@@ -61,6 +61,7 @@ v8.*/.*               , misc    ,, skip  , skip v8
 jsmicro/.*            , misc    ,, skip  , skip jsmicro
 
 misc/.*               , miscdir ,, include  , misc testsuite
+misc/driver           , .*      ,, skip  , included by test files
 
 ## skip mmgc tests always, they are to be run manually for the time being
 mmgc/.*               , misc    ,, skip , mmgc diagnostic tests
