@@ -761,6 +761,25 @@ inline void checkArgc(MethodEnv *env, int32_t argc, MethodSignaturep ms)
     AvmAssert(env->method->declaringScope()->equals(env->scope()->scopeTraits()));
 }
 
+REALLY_INLINE size_t calcAtomAllocSize(int32_t argc, int32_t extra = 0)
+{
+    // We need to check for integer overflow here; it's possible for someone to use Function.apply()
+    // to pass an argument Array with a huge value for length (but sparsely populated).
+    // But since "extra" is int32 and sizeof(Atom) is known here, we can do an efficient check
+    // without a full 64-bit multiply, as CheckForCallocSizeOverflow() does. (Note: yes, I know
+    // that a good compiler should optimize unsigned-divide-by-power-of-2 into a shift, but this is
+    // a hot path, so let's be skeptical and force the issue.)
+#ifdef VMCFG_64BIT
+    uint32_t const kAtomSizeLog2 = 3;
+#else
+    uint32_t const kAtomSizeLog2 = 2;
+#endif
+    MMGC_STATIC_ASSERT(sizeof(Atom) == (1<<kAtomSizeLog2));
+    if (uint32_t(argc) > ((MMgc::GCHeap::kMaxObjectSize - size_t(extra)) >> kAtomSizeLog2))
+        MMgc::GCHeap::SignalObjectTooLarge();
+    return (argc << kAtomSizeLog2) + extra;
+}
+
 // static
 inline size_t BaseExecMgr::startCoerce(MethodEnv *env, int32_t argc, MethodSignaturep ms)
 {
@@ -771,7 +790,7 @@ inline size_t BaseExecMgr::startCoerce(MethodEnv *env, int32_t argc, MethodSigna
     const int32_t extra = argc > param_count ? argc - param_count : 0;
     AvmAssert(ms->rest_offset() > 0 && extra >= 0);
     const int32_t rest_offset = ms->rest_offset();
-    return rest_offset + sizeof(Atom)*extra;
+    return calcAtomAllocSize(extra, rest_offset);
 }
 
 // Specialized to be called from Function.apply().
