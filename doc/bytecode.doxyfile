@@ -583,6 +583,7 @@ WARN_LOGFILE =
 
 INPUT = bytecode/src/add.dox \
 bytecode/src/add_i.dox \
+bytecode/src/applytype.dox \
 bytecode/src/astype.dox \
 bytecode/src/astemplate.dox \
 bytecode/src/bitand.dox \
