@@ -966,9 +966,7 @@
         else if (atomKind(val) == kDoubleType) {
             // Non-int index, check for Number values that are in the int range and nonnegative
             double d = AvmCore::atomToDouble(val);
-            if (d >= 0 && d <= 0xFFFFFFFFU && MathUtils::floor(d) == d)
-                index = (uint32_t)d;
-            else
+            if (!(d >= 0 && d <= 0xFFFFFFFFU && MathUtils::floor(d) == d && (index = (uint32_t)d) < argc))
                 goto exception;
         }
         else
@@ -988,7 +986,8 @@
 
         ArrayObject* array = *restLocal;
         Multiname m2(*m);
-        m2.setName(toplevel->core()->string(val));
+        // Multiname requires an interned string for setName
+        m2.setName(toplevel->core()->intern(val));
         return toplevel->getproperty(array->atom(), &m2, array->vtable);
     }
     FUNCTION(FUNCADDR(restargHelper), SIG6(A,P,P,A,P,U,P), restargHelper)
