@@ -53,7 +53,7 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv[1:] # don't include the script name
 
-    ADB_TIMEOUT=os.getenv('ADB_TIMEOUT', 120)
+    ADB_TIMEOUT=os.getenv('ADB_TIMEOUT', 300)
     ADB_MAX_ATTEMPTS=os.getenv('ADB_MAX_ATTEMPTS', 2)
     attempt=0
 
