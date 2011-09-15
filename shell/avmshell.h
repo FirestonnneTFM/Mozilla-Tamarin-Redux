@@ -86,11 +86,6 @@ namespace avmplus
 
 #include "shell_toplevel.h"
 
-namespace avmplus
-{
-    class Dictionary;
-}
-
 namespace avmshell
 {
     class Shell;
