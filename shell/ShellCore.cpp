@@ -58,6 +58,7 @@ namespace avmshell
         , interrupts(avmplus::AvmCore::interrupts_default)
         , verifyall(avmplus::AvmCore::verifyall_default)
         , verifyonly(avmplus::AvmCore::verifyonly_default)
+        , verifyquiet(avmplus::AvmCore::verifyquiet_default)
         , greedy(false)
         , nogc(false)
         , incremental(true)

@@ -766,6 +766,14 @@ namespace avmplus
         secondTry = false;
         #endif
 
+        #ifdef AVMPLUS_VERBOSE
+        // Switch off Re-Queue messages
+        bool saveVerbose = verbose;
+        if (core->config.verifyquiet) {
+            verbose = false;
+        }
+         #endif
+        
         // Verify in two passes.  Phase 1 does type modelling and
         // iterates to a fixed point to determine the types and nullability
         // of each frame variable at branch targets.  Phase 2 includes the
@@ -821,7 +829,14 @@ namespace avmplus
         // save computed ScopeTypeChain for OP_newfunction and OP_newclass
         ScopeWriter scopeWriter(coder, info, toplevel, this);
         coder = &scopeWriter;
-
+        
+        #ifdef AVMPLUS_VERBOSE
+        // Switch off Re-Queue messages
+        if (core->config.verifyquiet) {
+            verbose = saveVerbose;
+        }
+        #endif
+        
         #ifdef AVMPLUS_VERBOSE
         if (verbose)
             core->console << "\nverify " << info << '\n';

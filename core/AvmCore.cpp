@@ -188,6 +188,7 @@ namespace avmplus
     const bool AvmCore::oldVectorMethodNames_default = true;
     const bool AvmCore::verifyall_default = false;
     const bool AvmCore::verifyonly_default = false;
+    const bool AvmCore::verifyquiet_default = false;
     const Runmode AvmCore::runmode_default = RM_mixed;
     const uint32_t AvmCore::osr_threshold_default = OSR_THRESHOLD_DEFAULT;
     const bool AvmCore::interrupts_default = false;
