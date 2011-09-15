@@ -6309,8 +6309,7 @@ namespace avmplus
         AvmAssert(undefinedAtom == 4);
         LIns* lhs = loadAtomRep(lhsi);
         LIns* rhs = loadAtomRep(rhsi);
-        LIns* atom = callIns(FUNCTIONID(compare), 3,
-            coreAddr, lhs, rhs);
+        LIns* atom = callIns(FUNCTIONID(compare), 2, lhs, rhs);
 
         // caller will use jt for (a<b) and jf for !(a<b)
         // compare          ^8    <8
@@ -6330,8 +6329,7 @@ namespace avmplus
 
         LIns* lhs = loadAtomRep(lhsi);
         LIns* rhs = loadAtomRep(rhsi);
-        LIns* atom = callIns(FUNCTIONID(compare), 3,
-            coreAddr, rhs, lhs);
+        LIns* atom = callIns(FUNCTIONID(compare), 2, rhs, lhs);
 
         // assume caller will use jt for (a<=b) and jf for !(a<=b)
         // compare          ^1    <=4

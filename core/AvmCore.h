@@ -1091,7 +1091,7 @@ const int kBufferPadding = 16;
          * @param rhs
          * @return trueAtom, falseAtom, or undefinedAtom
          */
-        Atom compare(Atom lhs, Atom rhs);
+        static Atom FASTCALL compare(Atom lhs, Atom rhs);
 
         /** Implementation of OP_strictequals */
         static Atom FASTCALL stricteq(Atom lhs, Atom rhs);

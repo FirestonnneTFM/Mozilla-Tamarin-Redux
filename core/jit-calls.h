@@ -1118,7 +1118,7 @@
     METHOD(GCADDR(GC::privateWriteBarrierRC), SIG4(V,P,P,P,P), privateWriteBarrierRC)
     PUREMETHOD(COREADDR(AvmCore::uintToAtom), SIG2(A,P,U), uintToAtom)
     PUREMETHOD(COREADDR(AvmCore::intToAtom), SIG2(A,P,I), intToAtom)
-    METHOD(COREADDR(AvmCore::compare), SIG3(A,P,A,A), compare)
+    FASTFUNCTION(FUNCADDR(AvmCore::compare), SIG2(A,A,A), compare)
     PUREMETHOD(ENVADDR(MethodEnv::createRestHelper), SIG3(P,P,I,P), createRestHelper)
     PUREMETHOD(ENVADDR(MethodEnv::createArgumentsHelper), SIG3(P,P,I,P), createArgumentsHelper)
 
