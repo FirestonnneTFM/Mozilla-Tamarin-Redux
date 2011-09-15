@@ -51,6 +51,8 @@
     DEFINE_CALLINFO(f, sig, ABI_FAST, 0, ACCSET_STORE_ANY, name)
 #define PUREFUNCTION(f, sig, name) \
     DEFINE_CALLINFO(f, sig, ABI_FUNCTION, 1, ACCSET_NONE, name)
+#define PUREFASTFUNCTION(f, sig, name) \
+    DEFINE_CALLINFO(f, sig, ABI_FAST, 1, ACCSET_NONE, name)
 
 #define METHOD(f, sig, name) \
     DEFINE_CALLINFO(f, sig, ABI_METHOD, 0, ACCSET_STORE_ANY, name)
@@ -992,7 +994,7 @@
     }
     FUNCTION(FUNCADDR(restargHelper), SIG6(A,P,P,A,P,U,P), restargHelper)
 
-    PUREMETHOD(COREADDR(AvmCore::stricteq), SIG3(A,P,A,A), stricteq)
+    PUREFASTFUNCTION(FUNCADDR(AvmCore::stricteq), SIG2(A,A,A), stricteq)
     METHOD(COREADDR(AvmCore::equals), SIG3(A,P,A,A), equals)
     PUREMETHOD(COREADDR(AvmCore::concatStrings), SIG3(P,P,P,P), concatStrings)
 

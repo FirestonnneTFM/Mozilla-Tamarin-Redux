@@ -1751,7 +1751,7 @@ namespace avmplus
 
             INSTR(strictequals) {
                 // OPTIMIZEME - strictequals on some classes of values?
-                sp[-1] = core->stricteq(sp[-1], sp[0]);
+                sp[-1] = AvmCore::stricteq(sp[-1], sp[0]);
                 sp--;
                 NEXT;
             }
@@ -1872,14 +1872,14 @@ namespace avmplus
             INSTR(ifstricteq) {
                 LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
             PEEPHOLE_ONLY( compare_stricteq_and_branch_impl: )
-                IFCMP_TWO_VALUES(==, core->stricteq(a1,a2) == trueAtom, a1, a2, i1);
+                IFCMP_TWO_VALUES(==, AvmCore::stricteq(a1,a2) == trueAtom, a1, a2, i1);
                 NEXT;
             }
 
             INSTR(ifstrictne) {
                 LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
             PEEPHOLE_ONLY( compare_strictne_and_branch_impl: )
-                IFNCMP_TWO_VALUES(==, core->stricteq(a1,a2) == trueAtom, a1, a2, i1);
+                IFNCMP_TWO_VALUES(==, AvmCore::stricteq(a1,a2) == trueAtom, a1, a2, i1);
                 NEXT;
             }
 

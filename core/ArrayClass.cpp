@@ -1354,12 +1354,11 @@ namespace avmplus
     template ArrayObject* ArrayClass::newArray(MethodEnv *env, char* argDesc, va_list ap);
 #endif
 
-    /*static*/ int ArrayClass::generic_indexOf(Toplevel* toplevel, Atom thisAtom, Atom searchElement, int startIndex)
+    /*static*/ int ArrayClass::generic_indexOf(Atom thisAtom, Atom searchElement, int startIndex)
     {
         if (!AvmCore::isObject(thisAtom))
             return -1;
 
-        AvmCore* core = toplevel->core();
         ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
         uint32_t len = d->getLengthProperty();
 
@@ -1368,19 +1367,18 @@ namespace avmplus
         for (uint32_t i = start; i < len; i++)
         {
             Atom atom = d->getUintProperty(i);
-            if (core->stricteq(atom, searchElement) == trueAtom)
+            if (AvmCore::stricteq(atom, searchElement) == trueAtom)
                 return i;
         }
 
         return -1;
     }
 
-    /*static*/ int ArrayClass::generic_lastIndexOf(Toplevel* toplevel, Atom thisAtom, Atom searchElement, int startIndex)
+    /*static*/ int ArrayClass::generic_lastIndexOf(Atom thisAtom, Atom searchElement, int startIndex)
     {
         if (!AvmCore::isObject(thisAtom))
             return -1;
 
-        AvmCore* core = toplevel->core();
         ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
         uint32_t len = d->getLengthProperty();
 
@@ -1391,7 +1389,7 @@ namespace avmplus
         for (int i = start; i >= 0; i--)
         {
             Atom atom = d->getUintProperty(i);
-            if (core->stricteq (atom, searchElement) == trueAtom)
+            if (AvmCore::stricteq(atom, searchElement) == trueAtom)
                 return i;
         }
 
