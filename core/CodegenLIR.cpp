@@ -6380,7 +6380,11 @@ namespace avmplus
 
         LIns* lhs = loadAtomRep(lhsi);
         LIns* rhs = loadAtomRep(rhsi);
-        LIns* out = callIns(fid, 3, coreAddr, lhs, rhs);
+        LIns* out;
+        if (fid == FUNCTIONID(stricteq))
+            out = callIns(fid, 2, lhs, rhs);
+        else
+            out = callIns(fid, 3, coreAddr, lhs, rhs);
         result = binaryIns(LIR_eqp, out, InsConstAtom(trueAtom));
         return result;
     }

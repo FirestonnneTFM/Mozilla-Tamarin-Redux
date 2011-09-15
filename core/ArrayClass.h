@@ -79,8 +79,8 @@ namespace avmplus
         Atom _sort(Atom thisAtom, ArrayObject *args) { return ArrayClass::generic_sort(toplevel(), thisAtom, args); }
         Atom _sortOn(Atom thisAtom, Atom namesAtom, Atom optionsAtom) { return ArrayClass::generic_sortOn(toplevel(), thisAtom, namesAtom, optionsAtom); }
         ArrayObject* _splice(Atom thisAtom, ArrayObject* args) { return ArrayClass::generic_splice(toplevel(), thisAtom, args); }
-        int _indexOf(Atom thisAtom, Atom searchElement, int startIndex) { return ArrayClass::generic_indexOf(toplevel(), thisAtom, searchElement, startIndex); }
-        int _lastIndexOf(Atom thisAtom, Atom searchElement, int startIndex) { return ArrayClass::generic_lastIndexOf(toplevel(), thisAtom, searchElement, startIndex); }
+        int _indexOf(Atom thisAtom, Atom searchElement, int startIndex) { return ArrayClass::generic_indexOf(thisAtom, searchElement, startIndex); }
+        int _lastIndexOf(Atom thisAtom, Atom searchElement, int startIndex) { return ArrayClass::generic_lastIndexOf(thisAtom, searchElement, startIndex); }
         bool _every(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_every(toplevel(), thisAtom, callback, thisObject); }
         ArrayObject* _filter(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_filter(toplevel(), thisAtom, callback, thisObject); }
         void _forEach(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_forEach(toplevel(), thisAtom, callback, thisObject); }
@@ -97,8 +97,8 @@ namespace avmplus
         inline Atom sort(Atom thisAtom, ArrayObject *args) { return ArrayClass::generic_sort(toplevel(), thisAtom, args); }
         inline Atom sortOn(Atom thisAtom, Atom namesAtom, Atom optionsAtom) { return ArrayClass::generic_sortOn(toplevel(), thisAtom, namesAtom, optionsAtom); }
         inline ArrayObject* splice(Atom thisAtom, ArrayObject* args) { return ArrayClass::generic_splice(toplevel(), thisAtom, args); }
-        inline int indexOf(Atom thisAtom, Atom searchElement, int startIndex) { return ArrayClass::generic_indexOf(toplevel(), thisAtom, searchElement, startIndex); }
-        inline int lastIndexOf(Atom thisAtom, Atom searchElement, int startIndex) { return ArrayClass::generic_lastIndexOf(toplevel(), thisAtom, searchElement, startIndex); }
+        inline int indexOf(Atom thisAtom, Atom searchElement, int startIndex) { return ArrayClass::generic_indexOf(thisAtom, searchElement, startIndex); }
+        inline int lastIndexOf(Atom thisAtom, Atom searchElement, int startIndex) { return ArrayClass::generic_lastIndexOf(thisAtom, searchElement, startIndex); }
         inline bool every(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_every(toplevel(), thisAtom, callback, thisObject); }
         inline ArrayObject* filter(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_filter(toplevel(), thisAtom, callback, thisObject); }
         inline void forEach(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_forEach(toplevel(), thisAtom, callback, thisObject); }
@@ -113,8 +113,8 @@ namespace avmplus
         static Atom generic_sort(Toplevel* toplevel, Atom thisAtom, ArrayObject *args);
         static Atom generic_sortOn(Toplevel* toplevel, Atom thisAtom, Atom namesAtom, Atom optionsAtom);
         static ArrayObject* generic_splice(Toplevel* toplevel, Atom thisAtom, ArrayObject* args);
-        static int generic_indexOf(Toplevel* toplevel, Atom thisAtom, Atom searchElement, int startIndex);
-        static int generic_lastIndexOf(Toplevel* toplevel, Atom thisAtom, Atom searchElement, int startIndex);
+        static int generic_indexOf(Atom thisAtom, Atom searchElement, int startIndex);
+        static int generic_lastIndexOf(Atom thisAtom, Atom searchElement, int startIndex);
         static bool generic_every(Toplevel* toplevel, Atom thisAtom, ScriptObject* callback, Atom thisObject);
         static ArrayObject* generic_filter(Toplevel* toplevel, Atom thisAtom, ScriptObject* callback, Atom thisObject);
         static void generic_forEach(Toplevel* toplevel, Atom thisAtom, ScriptObject* callback, Atom thisObject);

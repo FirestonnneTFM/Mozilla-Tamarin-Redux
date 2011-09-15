@@ -1094,7 +1094,7 @@ const int kBufferPadding = 16;
         Atom compare(Atom lhs, Atom rhs);
 
         /** Implementation of OP_strictequals */
-        Atom stricteq(Atom lhs, Atom rhs);
+        static Atom FASTCALL stricteq(Atom lhs, Atom rhs);
 
         /**
          * Helper method; returns true if the atom is a tagged ScriptObject
