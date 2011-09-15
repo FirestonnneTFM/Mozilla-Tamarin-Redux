@@ -139,6 +139,7 @@ const int kBufferPadding = 16;
 
         bool verifyall;
         bool verifyonly;
+        bool verifyquiet;
 
         bool jitordie;      // Always JIT, and if the JIT fails then abort
     };
@@ -576,6 +577,7 @@ const int kBufferPadding = 16;
         static const bool oldVectorMethodNames_default;
         static const bool verifyall_default;
         static const bool verifyonly_default;
+        static const bool verifyquiet_default;
         static const Runmode runmode_default;
         static const uint32_t osr_threshold_default;
         static const bool interrupts_default;

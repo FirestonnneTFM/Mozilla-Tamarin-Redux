@@ -721,10 +721,17 @@ namespace avmshell
 #ifdef VMCFG_VERIFYALL
                     else if (!VMPI_strcmp(arg+2, "verifyall")) {
                         settings.verifyall = true;
+                        settings.verifyquiet = false;
                     }
                     else if (!VMPI_strcmp(arg+2, "verifyonly")) {
                         settings.verifyall = true;
                         settings.verifyonly = true;
+                        settings.verifyquiet = false;
+                    }
+                    else if (!VMPI_strcmp(arg+2, "verifyquiet")) {
+                        settings.verifyall = true;
+                        settings.verifyonly = true;
+                        settings.verifyquiet = true;
                     }
 #endif /* VMCFG_VERIFYALL */
                     else if (!VMPI_strcmp(arg+2, "greedy")) {
@@ -1217,6 +1224,7 @@ namespace avmshell
 #ifdef VMCFG_VERIFYALL
         avmplus::AvmLog("          [-Dverifyall] verify greedily instead of lazily\n");
         avmplus::AvmLog("          [-Dverifyonly] verify greedily and don't execute anything\n");
+        avmplus::AvmLog("          [-Dverifyquiet] verify greedily and don't execute anything w/o re-queue msgs\n");
 #endif
 #ifdef VMCFG_SELFTEST
         avmplus::AvmLog("          [-Dselftest[=component,category,test]]\n");
