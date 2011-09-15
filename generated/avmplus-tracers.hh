@@ -400,6 +400,59 @@ bool DefinitionErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 
 
 #ifdef DEBUG
+MMgc::GCTracerCheckResult DictionaryClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = ClassClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
+
+bool DictionaryClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_DictionaryClass
+    m_slots_DictionaryClass.gcTracePrivateProperties(gc);
+#endif
+    ClassClosure::gcTrace(gc, 0);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
+}
+
+
+
+#ifdef DEBUG
+MMgc::GCTracerCheckResult DictionaryObject::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = ScriptObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
+
+bool DictionaryObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_DictionaryObject
+    m_slots_DictionaryObject.gcTracePrivateProperties(gc);
+#endif
+    ScriptObject::gcTrace(gc, 0);
+    (void)(avmplus_ScriptObject_isExactInterlock != 0);
+    gcTraceHook_DictionaryObject(gc);
+    return false;
+}
+
+
+
+#ifdef DEBUG
 MMgc::GCTracerCheckResult DoubleVectorClass::gcTraceOffsetIsTraced(uint32_t off) const
 {
     MMgc::GCTracerCheckResult result;

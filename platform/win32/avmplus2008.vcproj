@@ -1883,6 +1883,14 @@
 				RelativePath="..\..\core\DescribeTypeClass.h"
 				>
 			</File>
+  			<File
+ 				RelativePath="..\..\core\DictionaryGlue.cpp"
+ 				>
+ 			</File>
+ 			<File
+ 				RelativePath="..\..\core\DictionaryGlue.h"
+ 				>
+ 			</File>
 			<File
 				RelativePath="..\..\core\Domain.cpp"
 				>
