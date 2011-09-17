@@ -606,14 +606,6 @@ namespace avmplus
         }
     }
 
-    // returns true if mask has exactly one bit set
-    // see http://aggregate.org/MAGIC/#Is%20Power%20of%202
-    REALLY_INLINE bool exactlyOneBit(uint32_t m)
-    {
-        AvmAssert(m != 0);
-        return (m & (m-1)) == 0;
-    }
-
     void CodegenLIR::localSet(int i, LIns* o, Traits* type)
     {
         BuiltinType tag = bt(type);
@@ -7492,46 +7484,25 @@ namespace avmplus
         return code;
     }
 
-    REALLY_INLINE BindingCache::BindingCache(const Multiname* name, BindingCache* next)
+    BindingCache::BindingCache(const Multiname* name, BindingCache* next)
         : name(name), next(next)
     {}
 
-    REALLY_INLINE CallCache::CallCache(const Multiname* name, BindingCache* next)
+    CallCache::CallCache(const Multiname* name, BindingCache* next)
         : BindingCache(name, next), call_handler(callprop_miss)
     {}
 
-    REALLY_INLINE GetCache::GetCache(const Multiname* name, BindingCache* next)
+    GetCache::GetCache(const Multiname* name, BindingCache* next)
         : BindingCache(name, next), get_handler(getprop_miss)
     {}
 
-    REALLY_INLINE SetCache::SetCache(const Multiname* name, BindingCache* next)
+    SetCache::SetCache(const Multiname* name, BindingCache* next)
         : BindingCache(name, next), set_handler(setprop_miss)
     {}
 
-    template <class C>
-    C* CacheBuilder<C>::findCacheSlot(const Multiname* name)
-    {
-        for (Seq<C*> *p = caches.get(); p != NULL; p = p->tail)
-            if (p->head->name == name)
-                return p->head;
-        return NULL;
-    }
-
-    // The cache structure is expected to be small in the normal case, so use a
-    // linear list.  For some programs, notably classical JS programs, it may however
-    // be larger, and we may need a more sophisticated structure.
-    template <class C>
-    C* CacheBuilder<C>::allocateCacheSlot(const Multiname* name)
-    {
-        C* c = findCacheSlot(name);
-        if (!c) {
-            _nvprof("binding cache bytes", sizeof(C));
-            c = new (codeMgr.allocator) C(name, codeMgr.bindingCaches);
-            codeMgr.bindingCaches = c;
-            caches.add(c);
-        }
-        return c;
-    }
+    template class CacheBuilder<CallCache>;
+    template class CacheBuilder<GetCache>;
+    template class CacheBuilder<SetCache>;
 }
 
 #endif // VMCFG_NANOJIT
