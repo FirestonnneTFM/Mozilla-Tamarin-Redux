@@ -37,28 +37,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifdef NJ_VERBOSE
-    #define DEFINE_CALLINFO(f, sig, abi, isPure, storeAccSet, name) \
-        const CallInfo ci_##name = { f, sig, abi, isPure, storeAccSet, #name };
-#else
-    #define DEFINE_CALLINFO(f, sig, abi, isPure, storeAccSet, name) \
-        const CallInfo ci_##name = { f, sig, abi, isPure, storeAccSet };
-#endif
-
-#define FUNCTION(f, sig, name) \
-    DEFINE_CALLINFO(f, sig, ABI_FUNCTION, 0, ACCSET_STORE_ANY, name)
-#define FASTFUNCTION(f, sig, name) \
-    DEFINE_CALLINFO(f, sig, ABI_FAST, 0, ACCSET_STORE_ANY, name)
-#define PUREFUNCTION(f, sig, name) \
-    DEFINE_CALLINFO(f, sig, ABI_FUNCTION, 1, ACCSET_NONE, name)
-#define PUREFASTFUNCTION(f, sig, name) \
-    DEFINE_CALLINFO(f, sig, ABI_FAST, 1, ACCSET_NONE, name)
-
-#define METHOD(f, sig, name) \
-    DEFINE_CALLINFO(f, sig, ABI_METHOD, 0, ACCSET_STORE_ANY, name)
-#define PUREMETHOD(f, sig, name) \
-    DEFINE_CALLINFO(f, sig, ABI_METHOD, 1, ACCSET_NONE, name)
-
     FUNCTION(CALL_INDIRECT, SIG4(U,P,P,I,P), icalli)
     FUNCTION(CALL_INDIRECT, SIG4(A,P,P,I,P), acalli)
     FUNCTION(CALL_INDIRECT, SIG4(F,P,P,I,P), fcalli)

@@ -253,4 +253,15 @@ REALLY_INLINE LIns* LirHelper::rshup(LIns* a, int32_t b)
     return lirout->ins2(LIR_rshup, a, InsConst(b));
 }
 
+/**
+ * Returns true if mask has exactly one bit set
+ * see http://aggregate.org/MAGIC/#Is%20Power%20of%202
+ */
+REALLY_INLINE bool exactlyOneBit(uint32_t m)
+{
+    AvmAssert(m != 0);
+    return (m & (m-1)) == 0;
+}
+
+
 } // namespace

@@ -89,7 +89,7 @@ REALLY_INLINE LIns* CodegenLIR::binaryIns(LOpcode op, LIns *a, LIns *b)
     return lirout->ins2(op,a,b);
 }
 
-inline bool InvokerCompiler::copyArgs()
+REALLY_INLINE bool InvokerCompiler::copyArgs()
 {
     return args_out->isop(LIR_allocp);
 }
@@ -103,6 +103,30 @@ REALLY_INLINE bool CodegenLIR::jitWillFail(const MethodSignaturep ms)
     // Assembly cannot succeed if frame is too large for NanoJIT.
     // Large frame sizes can lead to pathological VarTracker behavior -- see bug 601794.
     return ms->frame_size() * 2 > NJ_MAX_STACK_ENTRY;
+}
+
+template <class C>
+REALLY_INLINE C* CacheBuilder<C>::findCacheSlot(const Multiname* name)
+{
+    for (Seq<C*> *p = caches.get(); p != NULL; p = p->tail)
+        if (p->head->name == name)
+            return p->head;
+    return NULL;
+}
+
+// The cache structure is expected to be small in the normal case, so use a
+// linear list.  For some programs, notably classical JS programs, it may however
+// be larger, and we may need a more sophisticated structure.
+template <class C>
+REALLY_INLINE C* CacheBuilder<C>::allocateCacheSlot(const Multiname* name)
+{
+    C* c = findCacheSlot(name);
+    if (!c) {
+        c = new (codeMgr.allocator) C(name, codeMgr.bindingCaches);
+        codeMgr.bindingCaches = c;
+        caches.add(c);
+    }
+    return c;
 }
 
 } // namespace
