@@ -2273,10 +2273,12 @@ namespace nanojit
 
             // Be sure to account for any 8-byte-round-up when calculating spaceNeeded.
             uint32_t const spaceLeft = NJ_MAX_STACK_ENTRY - _highWaterMark - 1;
-            uint32_t const spaceNeeded = nStackSlots + (_highWaterMark & 1);
+            // Pad when either _highWaterMark or nStackSlots is odd, but not both, so that the sum is always even.
+            int const padding = (_highWaterMark & 1) != (nStackSlots & 1);
+            uint32_t const spaceNeeded = nStackSlots + padding;
             if (spaceLeft >= spaceNeeded)
             {
-                if (_highWaterMark & 1)
+                if (padding)
                 {
                     NanoAssert(_entries[_highWaterMark+1] == BAD_ENTRY);
                     _entries[_highWaterMark+1] = NULL;
@@ -2288,6 +2290,7 @@ namespace nanojit
                     NanoAssert(_entries[_highWaterMark-j] == BAD_ENTRY);
                     _entries[_highWaterMark-j] = ins;
                 }
+                NanoAssert(_highWaterMark % 2 == 0);
                 return _highWaterMark;
             }
         }
