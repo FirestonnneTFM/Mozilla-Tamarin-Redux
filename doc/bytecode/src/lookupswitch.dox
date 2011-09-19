@@ -1,0 +1,90 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is [Open Source Virtual Machine.].
+ *
+ * The Initial Developer of the Original Code is
+ * Adobe System Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2004-2011
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Adobe AS3 Team
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+ /*! \page lookupswitch 
+
+\addindex lookupswitch
+
+
+\section lookupswitch lookupswitch
+
+\subsection operation Operation
+
+Jump to different locations based on an index.
+
+\subsection format Format
+
+\code
+lookupswitch
+default_offset 
+case_count 
+case_offsets...
+\endcode
+
+\subsection forms Forms
+\code
+lookupswitch = 27(0x1b)
+\endcode
+\subsection stack Stack
+
+\code
+..., index => ...
+\endcode
+
+\subsection description Description
+
+default_offset is an s24 that is the offset to jump, in bytes, for the default case. 
+case_offsets are each an s24 that is the offset to jump for a particular index. 
+There are case_count+1 case offsets. case_count is a u30.
+
+index is popped off of the stack and must be of type int. If index is less 
+than zero or greater than case_count, the target is calculated by adding 
+default_offset to the base location. Otherwise the target is calculated by 
+adding the case_offset at position index to the base location. Execution 
+continues from the target location.
+
+The base location is the address of the lookupswitch instruction itself.
+
+\subsection rt_execeptions Runtime exceptions
+
+None.
+
+\subsection notes Notes
+
+Other control flow instructions take the base location to be the address of the following instruction.
+
+*/
+
