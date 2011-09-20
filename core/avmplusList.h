@@ -111,9 +111,9 @@ namespace avmplus
     template<class STORAGE>
     struct ListData
     {
-        uint32_t    len;
+        uint32_t    len;            // Invariant: Must *never* exceed kListMaxLength
         MMgc::GC*   _gc;
-        STORAGE     entries[1];   // lying, really [cap]
+        STORAGE     entries[1];     // Lying: Really holds capacity()
         
         // add an empty, inlined ctor to avoid spurious warnings in MSVC2008
         REALLY_INLINE explicit ListData() {}
@@ -151,9 +151,9 @@ namespace avmplus
     template<class STORAGE>
     struct TracedListData : public MMgc::GCTraceableObject
     {
-        uint32_t    len;
-        STORAGE     entries[1];   // lying, really [cap]
-        
+        uint32_t    len;            // Invariant: Must *never* exceed kListMaxLength
+        STORAGE     entries[1];     // Lying: Really holds capacity()
+
         REALLY_INLINE explicit TracedListData() { }
 
         REALLY_INLINE static TracedListData<STORAGE>* create(MMgc::GC* gc, size_t totalElements)
@@ -333,6 +333,15 @@ namespace avmplus
 
         ~ListImpl();
 
+        // Set m_data->len from 'newlength', but if newlength exceeds the max
+        // length then abort.
+        void set_length_guarded(uint32_t newlength);
+
+        // Set data->len from 'newlength', but if newlength exceeds the max
+        // length then abort.
+        static
+        void set_length_guarded(typename ListHelper::LISTDATA* data, uint32_t newlength);
+        
         // Return true if list has no elements. equivalent to length()==0.
         bool isEmpty() const;
 
