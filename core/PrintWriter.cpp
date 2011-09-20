@@ -178,7 +178,7 @@ namespace avmplus
             {
                 char buffer[MathUtils::kMinSizeForInt32_t_base10_toString];
                 int32_t len = sizeof(buffer);
-                char* p = MathUtils::convertIntegerToStringBuffer((intptr_t)(uint32_t)value, buffer, len, 10, MathUtils::kTreatAsSigned);
+                char* p = MathUtils::convertIntegerToStringBuffer((intptr_t)value, buffer, len, 10, MathUtils::kTreatAsSigned);
                 return *this << p;
             }
         }
