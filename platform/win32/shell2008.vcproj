@@ -1817,6 +1817,10 @@
 			Name="AS3 Files"
 			>
 			<File
+				RelativePath="..\..\extensions\Dictionary.as"
+				>
+			</File>
+			<File
 				RelativePath="..\..\shell\Domain.as"
 				>
 			</File>
@@ -1865,6 +1869,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\extensions\DictionaryGlue.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\extensions\SamplerScript.h"
 				>
 			</File>
@@ -1882,6 +1890,118 @@
 			>
 			<File
 				RelativePath="..\..\AVMPI\AvmAssert.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\extensions\DictionaryGlue.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"

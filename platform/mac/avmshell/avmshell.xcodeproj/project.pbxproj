@@ -130,6 +130,7 @@
 		079DF97D0F3A89C50031D1B4 /* DomainClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9740F3A89C50031D1B4 /* DomainClass.cpp */; };
 		079DF97E0F3A89C50031D1B4 /* FileClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9760F3A89C50031D1B4 /* FileClass.cpp */; };
 		079DF9800F3A89C50031D1B4 /* SystemClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF97A0F3A89C50031D1B4 /* SystemClass.cpp */; };
+		079DF9930F3A8A320031D1B4 /* DictionaryGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF98D0F3A8A320031D1B4 /* DictionaryGlue.cpp */; };
 		079DF9940F3A8A320031D1B4 /* JavaGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF98F0F3A8A320031D1B4 /* JavaGlue.cpp */; };
 		079DF9950F3A8A320031D1B4 /* SamplerScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9910F3A8A320031D1B4 /* SamplerScript.cpp */; };
 		079DF9A40F3A8AAB0031D1B4 /* Selftest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF99D0F3A8AAB0031D1B4 /* Selftest.cpp */; };
@@ -285,6 +286,7 @@
 		7E87D0B2122C5B980005FEAF /* DomainClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9740F3A89C50031D1B4 /* DomainClass.cpp */; };
 		7E87D0B3122C5B980005FEAF /* FileClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9760F3A89C50031D1B4 /* FileClass.cpp */; };
 		7E87D0B4122C5B980005FEAF /* SystemClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF97A0F3A89C50031D1B4 /* SystemClass.cpp */; };
+		7E87D0B5122C5B980005FEAF /* DictionaryGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF98D0F3A8A320031D1B4 /* DictionaryGlue.cpp */; };
 		7E87D0B6122C5B980005FEAF /* JavaGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF98F0F3A8A320031D1B4 /* JavaGlue.cpp */; };
 		7E87D0B7122C5B980005FEAF /* SamplerScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9910F3A8A320031D1B4 /* SamplerScript.cpp */; };
 		7E87D0B8122C5B980005FEAF /* Selftest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF99D0F3A8AAB0031D1B4 /* Selftest.cpp */; };
@@ -377,8 +379,6 @@
 		D939B112126E358400522895 /* DataIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D939B10F126E358400522895 /* DataIO.cpp */; };
 		D939B113126E358400522895 /* ByteArrayGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D939B10D126E358400522895 /* ByteArrayGlue.cpp */; };
 		D939B114126E358400522895 /* DataIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D939B10F126E358400522895 /* DataIO.cpp */; };
-		D942196513DF3686002A4723 /* DictionaryGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D942196213DF3686002A4723 /* DictionaryGlue.cpp */; };
-		D942196713DF3686002A4723 /* DictionaryGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D942196213DF3686002A4723 /* DictionaryGlue.cpp */; };
 		D94236990F8ACAE400F97706 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */; };
 		D942369B0F8ACAE400F97706 /* PosixPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */; };
 		D987E32311C19E5700474022 /* DomainMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D987E32011C19E5700474022 /* DomainMgr.cpp */; };
@@ -695,25 +695,25 @@
 		079DF8D40F3A88950031D1B4 /* XMLListObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMLListObject.h; path = ../../../core/XMLListObject.h; sourceTree = SOURCE_ROOT; };
 		079DF8D50F3A88950031D1B4 /* XMLObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XMLObject.cpp; path = ../../../core/XMLObject.cpp; sourceTree = SOURCE_ROOT; };
 		079DF8D60F3A88950031D1B4 /* XMLObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMLObject.h; path = ../../../core/XMLObject.h; sourceTree = SOURCE_ROOT; };
-		079DF90A0F3A88B10031D1B4 /* actionscript.lang.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = actionscript.lang.as; path = ../../../core/actionscript.lang.as; sourceTree = SOURCE_ROOT; };
-		079DF90B0F3A88EA0031D1B4 /* Array.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Array.as; path = ../../../core/Array.as; sourceTree = SOURCE_ROOT; };
-		079DF90C0F3A88EA0031D1B4 /* Boolean.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Boolean.as; path = ../../../core/Boolean.as; sourceTree = SOURCE_ROOT; };
-		079DF90D0F3A88EA0031D1B4 /* builtin.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = builtin.as; path = ../../../core/builtin.as; sourceTree = SOURCE_ROOT; };
-		079DF90E0F3A88EA0031D1B4 /* Class.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Class.as; path = ../../../core/Class.as; sourceTree = SOURCE_ROOT; };
-		079DF90F0F3A88EA0031D1B4 /* Date.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Date.as; path = ../../../core/Date.as; sourceTree = SOURCE_ROOT; };
-		079DF9100F3A88EA0031D1B4 /* DescribeType.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = DescribeType.as; path = ../../../core/DescribeType.as; sourceTree = SOURCE_ROOT; };
-		079DF9110F3A88EA0031D1B4 /* Error.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Error.as; path = ../../../core/Error.as; sourceTree = SOURCE_ROOT; };
-		079DF9120F3A88EA0031D1B4 /* ErrorConstants.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = ErrorConstants.as; path = ../../../core/ErrorConstants.as; sourceTree = SOURCE_ROOT; };
-		079DF9130F3A88EA0031D1B4 /* Function.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Function.as; path = ../../../core/Function.as; sourceTree = SOURCE_ROOT; };
-		079DF9140F3A88EA0031D1B4 /* Math.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Math.as; path = ../../../core/Math.as; sourceTree = SOURCE_ROOT; };
-		079DF9150F3A88EA0031D1B4 /* Namespace.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Namespace.as; path = ../../../core/Namespace.as; sourceTree = SOURCE_ROOT; };
-		079DF9160F3A88EA0031D1B4 /* Number.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Number.as; path = ../../../core/Number.as; sourceTree = SOURCE_ROOT; };
-		079DF9170F3A88EA0031D1B4 /* Object.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Object.as; path = ../../../core/Object.as; sourceTree = SOURCE_ROOT; };
-		079DF9180F3A88EA0031D1B4 /* RegExp.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = RegExp.as; path = ../../../core/RegExp.as; sourceTree = SOURCE_ROOT; };
-		079DF9190F3A88EA0031D1B4 /* String.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = String.as; path = ../../../core/String.as; sourceTree = SOURCE_ROOT; };
-		079DF91A0F3A88EA0031D1B4 /* Vector.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Vector.as; path = ../../../core/Vector.as; sourceTree = SOURCE_ROOT; };
-		079DF91B0F3A88EA0031D1B4 /* VectorImpl.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = VectorImpl.as; path = ../../../core/VectorImpl.as; sourceTree = SOURCE_ROOT; };
-		079DF91C0F3A88EA0031D1B4 /* XML.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = XML.as; path = ../../../core/XML.as; sourceTree = SOURCE_ROOT; };
+		079DF90A0F3A88B10031D1B4 /* actionscript.lang.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = actionscript.lang.as; path = ../../../core/actionscript.lang.as; sourceTree = SOURCE_ROOT; };
+		079DF90B0F3A88EA0031D1B4 /* Array.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Array.as; path = ../../../core/Array.as; sourceTree = SOURCE_ROOT; };
+		079DF90C0F3A88EA0031D1B4 /* Boolean.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Boolean.as; path = ../../../core/Boolean.as; sourceTree = SOURCE_ROOT; };
+		079DF90D0F3A88EA0031D1B4 /* builtin.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = builtin.as; path = ../../../core/builtin.as; sourceTree = SOURCE_ROOT; };
+		079DF90E0F3A88EA0031D1B4 /* Class.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Class.as; path = ../../../core/Class.as; sourceTree = SOURCE_ROOT; };
+		079DF90F0F3A88EA0031D1B4 /* Date.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Date.as; path = ../../../core/Date.as; sourceTree = SOURCE_ROOT; };
+		079DF9100F3A88EA0031D1B4 /* DescribeType.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = DescribeType.as; path = ../../../core/DescribeType.as; sourceTree = SOURCE_ROOT; };
+		079DF9110F3A88EA0031D1B4 /* Error.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Error.as; path = ../../../core/Error.as; sourceTree = SOURCE_ROOT; };
+		079DF9120F3A88EA0031D1B4 /* ErrorConstants.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ErrorConstants.as; path = ../../../core/ErrorConstants.as; sourceTree = SOURCE_ROOT; };
+		079DF9130F3A88EA0031D1B4 /* Function.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Function.as; path = ../../../core/Function.as; sourceTree = SOURCE_ROOT; };
+		079DF9140F3A88EA0031D1B4 /* Math.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Math.as; path = ../../../core/Math.as; sourceTree = SOURCE_ROOT; };
+		079DF9150F3A88EA0031D1B4 /* Namespace.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Namespace.as; path = ../../../core/Namespace.as; sourceTree = SOURCE_ROOT; };
+		079DF9160F3A88EA0031D1B4 /* Number.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Number.as; path = ../../../core/Number.as; sourceTree = SOURCE_ROOT; };
+		079DF9170F3A88EA0031D1B4 /* Object.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Object.as; path = ../../../core/Object.as; sourceTree = SOURCE_ROOT; };
+		079DF9180F3A88EA0031D1B4 /* RegExp.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = RegExp.as; path = ../../../core/RegExp.as; sourceTree = SOURCE_ROOT; };
+		079DF9190F3A88EA0031D1B4 /* String.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = String.as; path = ../../../core/String.as; sourceTree = SOURCE_ROOT; };
+		079DF91A0F3A88EA0031D1B4 /* Vector.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Vector.as; path = ../../../core/Vector.as; sourceTree = SOURCE_ROOT; };
+		079DF91B0F3A88EA0031D1B4 /* VectorImpl.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = VectorImpl.as; path = ../../../core/VectorImpl.as; sourceTree = SOURCE_ROOT; };
+		079DF91C0F3A88EA0031D1B4 /* XML.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = XML.as; path = ../../../core/XML.as; sourceTree = SOURCE_ROOT; };
 		079DF9200F3A891C0031D1B4 /* CodegenLIR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodegenLIR.cpp; path = ../../../core/CodegenLIR.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9210F3A891C0031D1B4 /* CodegenLIR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodegenLIR.h; path = ../../../core/CodegenLIR.h; sourceTree = SOURCE_ROOT; };
 		079DF9350F3A893C0031D1B4 /* Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Assembler.cpp; path = ../../../nanojit/Assembler.cpp; sourceTree = SOURCE_ROOT; };
@@ -750,16 +750,19 @@
 		079DF9790F3A89C50031D1B4 /* shell_toplevel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shell_toplevel.h; path = ../../../generated/shell_toplevel.h; sourceTree = SOURCE_ROOT; };
 		079DF97A0F3A89C50031D1B4 /* SystemClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SystemClass.cpp; path = ../../../shell/SystemClass.cpp; sourceTree = SOURCE_ROOT; };
 		079DF97B0F3A89C50031D1B4 /* SystemClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SystemClass.h; path = ../../../shell/SystemClass.h; sourceTree = SOURCE_ROOT; };
-		079DF9880F3A89E60031D1B4 /* Domain.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Domain.as; path = ../../../shell/Domain.as; sourceTree = SOURCE_ROOT; };
-		079DF9890F3A89E60031D1B4 /* Endian.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Endian.as; path = ../../../shell/Endian.as; sourceTree = SOURCE_ROOT; };
-		079DF98A0F3A89E60031D1B4 /* Java.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Java.as; path = ../../../shell/Java.as; sourceTree = SOURCE_ROOT; };
-		079DF98B0F3A89E60031D1B4 /* shell_toplevel.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = shell_toplevel.as; path = ../../../shell/shell_toplevel.as; sourceTree = SOURCE_ROOT; };
+		079DF9880F3A89E60031D1B4 /* Domain.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Domain.as; path = ../../../shell/Domain.as; sourceTree = SOURCE_ROOT; };
+		079DF9890F3A89E60031D1B4 /* Endian.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Endian.as; path = ../../../shell/Endian.as; sourceTree = SOURCE_ROOT; };
+		079DF98A0F3A89E60031D1B4 /* Java.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Java.as; path = ../../../shell/Java.as; sourceTree = SOURCE_ROOT; };
+		079DF98B0F3A89E60031D1B4 /* shell_toplevel.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = shell_toplevel.as; path = ../../../shell/shell_toplevel.as; sourceTree = SOURCE_ROOT; };
+		079DF98D0F3A8A320031D1B4 /* DictionaryGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DictionaryGlue.cpp; path = ../../../extensions/DictionaryGlue.cpp; sourceTree = SOURCE_ROOT; };
+		079DF98E0F3A8A320031D1B4 /* DictionaryGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DictionaryGlue.h; path = ../../../extensions/DictionaryGlue.h; sourceTree = SOURCE_ROOT; };
 		079DF98F0F3A8A320031D1B4 /* JavaGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JavaGlue.cpp; path = ../../../extensions/JavaGlue.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9900F3A8A320031D1B4 /* JavaGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JavaGlue.h; path = ../../../extensions/JavaGlue.h; sourceTree = SOURCE_ROOT; };
 		079DF9910F3A8A320031D1B4 /* SamplerScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SamplerScript.cpp; path = ../../../extensions/SamplerScript.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9920F3A8A320031D1B4 /* SamplerScript.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SamplerScript.h; path = ../../../extensions/SamplerScript.h; sourceTree = SOURCE_ROOT; };
-		079DF99A0F3A8A7D0031D1B4 /* Sampler.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Sampler.as; path = ../../../extensions/Sampler.as; sourceTree = SOURCE_ROOT; };
-		079DF99B0F3A8A7D0031D1B4 /* Trace.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Trace.as; path = ../../../extensions/Trace.as; sourceTree = SOURCE_ROOT; };
+		079DF9990F3A8A7C0031D1B4 /* Dictionary.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Dictionary.as; path = ../../../extensions/Dictionary.as; sourceTree = SOURCE_ROOT; };
+		079DF99A0F3A8A7D0031D1B4 /* Sampler.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Sampler.as; path = ../../../extensions/Sampler.as; sourceTree = SOURCE_ROOT; };
+		079DF99B0F3A8A7D0031D1B4 /* Trace.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Trace.as; path = ../../../extensions/Trace.as; sourceTree = SOURCE_ROOT; };
 		079DF99D0F3A8AAB0031D1B4 /* Selftest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Selftest.cpp; path = ../../../extensions/Selftest.cpp; sourceTree = SOURCE_ROOT; };
 		079DF99E0F3A8AAB0031D1B4 /* Selftest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Selftest.h; path = ../../../extensions/Selftest.h; sourceTree = SOURCE_ROOT; };
 		079DF99F0F3A8AAB0031D1B4 /* SelftestClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SelftestClasses.h; path = ../../../extensions/SelftestClasses.h; sourceTree = SOURCE_ROOT; };
@@ -854,7 +857,7 @@
 		191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodeAlloc.cpp; path = ../../../nanojit/CodeAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		191659970FB88A1400F3DCD3 /* CodeAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeAlloc.h; path = ../../../nanojit/CodeAlloc.h; sourceTree = SOURCE_ROOT; };
 		193B2133136EE3C1001CA302 /* SelftestExec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SelftestExec.cpp; path = ../../../extensions/SelftestExec.cpp; sourceTree = SOURCE_ROOT; };
-		19487E231362248E00586A91 /* JSON.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = JSON.as; path = ../../../core/JSON.as; sourceTree = SOURCE_ROOT; };
+		19487E231362248E00586A91 /* JSON.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = JSON.as; path = ../../../core/JSON.as; sourceTree = SOURCE_ROOT; };
 		19487E24136224BF00586A91 /* JSONClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JSONClass.cpp; path = ../../../core/JSONClass.cpp; sourceTree = SOURCE_ROOT; };
 		19487E25136224BF00586A91 /* JSONClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JSONClass.h; path = ../../../core/JSONClass.h; sourceTree = SOURCE_ROOT; };
 		198CF91711B973BD00A939C7 /* exec-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "exec-inlines.h"; path = "../../../core/exec-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -922,7 +925,7 @@
 		D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadsPosix.cpp; path = ../../../VMPI/ThreadsPosix.cpp; sourceTree = SOURCE_ROOT; };
 		D90A32C2125D24E20039348E /* VectorClass-impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "VectorClass-impl.h"; path = "../../../core/VectorClass-impl.h"; sourceTree = SOURCE_ROOT; };
 		D90A32C3125D24E20039348E /* VectorClass-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "VectorClass-inlines.h"; path = "../../../core/VectorClass-inlines.h"; sourceTree = SOURCE_ROOT; };
-		D914C1EB1367955B00CD302D /* Proxy.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Proxy.as; path = ../../../core/Proxy.as; sourceTree = SOURCE_ROOT; };
+		D914C1EB1367955B00CD302D /* Proxy.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Proxy.as; path = ../../../core/Proxy.as; sourceTree = SOURCE_ROOT; };
 		D914C1EC1367956F00CD302D /* ProxyGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProxyGlue.cpp; path = ../../../core/ProxyGlue.cpp; sourceTree = SOURCE_ROOT; };
 		D914C1ED1367956F00CD302D /* ProxyGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProxyGlue.h; path = ../../../core/ProxyGlue.h; sourceTree = SOURCE_ROOT; };
 		D92373DC11222458006D8AA3 /* njconfig.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = njconfig.cpp; path = ../../../nanojit/njconfig.cpp; sourceTree = SOURCE_ROOT; };
@@ -932,16 +935,13 @@
 		D92B139811EB96B7008170E3 /* avmplusList-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmplusList-inlines.h"; path = "../../../core/avmplusList-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D935BDEB0FA0EBA7001E3E70 /* avm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avm.cpp; path = ../../../core/avm.cpp; sourceTree = SOURCE_ROOT; };
 		D935BDEE0FA0EC17001E3E70 /* avm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avm.h; path = ../../../core/avm.h; sourceTree = SOURCE_ROOT; };
-		D939B10A126E356500522895 /* ByteArray.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = ByteArray.as; path = ../../../core/ByteArray.as; sourceTree = SOURCE_ROOT; };
-		D939B10B126E356500522895 /* IDataInput.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = IDataInput.as; path = ../../../core/IDataInput.as; sourceTree = SOURCE_ROOT; };
-		D939B10C126E356500522895 /* IDataOutput.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = IDataOutput.as; path = ../../../core/IDataOutput.as; sourceTree = SOURCE_ROOT; };
+		D939B10A126E356500522895 /* ByteArray.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ByteArray.as; path = ../../../core/ByteArray.as; sourceTree = SOURCE_ROOT; };
+		D939B10B126E356500522895 /* IDataInput.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = IDataInput.as; path = ../../../core/IDataInput.as; sourceTree = SOURCE_ROOT; };
+		D939B10C126E356500522895 /* IDataOutput.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = IDataOutput.as; path = ../../../core/IDataOutput.as; sourceTree = SOURCE_ROOT; };
 		D939B10D126E358400522895 /* ByteArrayGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ByteArrayGlue.cpp; path = ../../../core/ByteArrayGlue.cpp; sourceTree = SOURCE_ROOT; };
 		D939B10E126E358400522895 /* ByteArrayGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ByteArrayGlue.h; path = ../../../core/ByteArrayGlue.h; sourceTree = SOURCE_ROOT; };
 		D939B10F126E358400522895 /* DataIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataIO.cpp; path = ../../../core/DataIO.cpp; sourceTree = SOURCE_ROOT; };
 		D939B110126E358400522895 /* DataIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataIO.h; path = ../../../core/DataIO.h; sourceTree = SOURCE_ROOT; };
-		D942196113DF3686002A4723 /* Dictionary.as */ = {isa = PBXFileReference; explicitFileType = sourcecode.actionscript; fileEncoding = 4; name = Dictionary.as; path = ../../../core/Dictionary.as; sourceTree = SOURCE_ROOT; };
-		D942196213DF3686002A4723 /* DictionaryGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DictionaryGlue.cpp; path = ../../../core/DictionaryGlue.cpp; sourceTree = SOURCE_ROOT; };
-		D942196313DF3686002A4723 /* DictionaryGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DictionaryGlue.h; path = ../../../core/DictionaryGlue.h; sourceTree = SOURCE_ROOT; };
 		D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MacDebugUtils.cpp; path = ../../../VMPI/MacDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixPortUtils.cpp; path = ../../../VMPI/PosixPortUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D942369C0F8ACB0600F97706 /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../VMPI/manifest.mk; sourceTree = SOURCE_ROOT; };
@@ -1189,8 +1189,6 @@
 				07E7976413BC99EC00E25990 /* d2a.h */,
 				079DF7E50F3A882D0031D1B4 /* Date.cpp */,
 				079DF7E60F3A882D0031D1B4 /* Date.h */,
-				D942196213DF3686002A4723 /* DictionaryGlue.cpp */,
-				D942196313DF3686002A4723 /* DictionaryGlue.h */,
 				079DF7E70F3A882D0031D1B4 /* Domain.cpp */,
 				079DF7E80F3A882D0031D1B4 /* Domain.h */,
 				079DF7E90F3A882D0031D1B4 /* DomainEnv.cpp */,
@@ -1457,7 +1455,6 @@
 				079DF90E0F3A88EA0031D1B4 /* Class.as */,
 				079DF90F0F3A88EA0031D1B4 /* Date.as */,
 				079DF9100F3A88EA0031D1B4 /* DescribeType.as */,
-				D942196113DF3686002A4723 /* Dictionary.as */,
 				079DF9110F3A88EA0031D1B4 /* Error.as */,
 				079DF9120F3A88EA0031D1B4 /* ErrorConstants.as */,
 				079DF9130F3A88EA0031D1B4 /* Function.as */,
@@ -1474,6 +1471,7 @@
 				079DF91A0F3A88EA0031D1B4 /* Vector.as */,
 				079DF91B0F3A88EA0031D1B4 /* VectorImpl.as */,
 				079DF91C0F3A88EA0031D1B4 /* XML.as */,
+				079DF90A0F3A88B10031D1B4 /* actionscript.lang.as */,
 			);
 			name = AS;
 			sourceTree = "<group>";
@@ -1482,6 +1480,8 @@
 			isa = PBXGroup;
 			children = (
 				079DF9860F3A89CA0031D1B4 /* AS */,
+				079DF98D0F3A8A320031D1B4 /* DictionaryGlue.cpp */,
+				079DF98E0F3A8A320031D1B4 /* DictionaryGlue.h */,
 				079DF9740F3A89C50031D1B4 /* DomainClass.cpp */,
 				079DF9750F3A89C50031D1B4 /* DomainClass.h */,
 				079DF9760F3A89C50031D1B4 /* FileClass.cpp */,
@@ -1499,12 +1499,13 @@
 		079DF9860F3A89CA0031D1B4 /* AS */ = {
 			isa = PBXGroup;
 			children = (
+				079DF9990F3A8A7C0031D1B4 /* Dictionary.as */,
+				079DF99A0F3A8A7D0031D1B4 /* Sampler.as */,
+				079DF99B0F3A8A7D0031D1B4 /* Trace.as */,
 				079DF9880F3A89E60031D1B4 /* Domain.as */,
 				079DF9890F3A89E60031D1B4 /* Endian.as */,
 				079DF98A0F3A89E60031D1B4 /* Java.as */,
-				079DF99A0F3A8A7D0031D1B4 /* Sampler.as */,
 				079DF98B0F3A89E60031D1B4 /* shell_toplevel.as */,
-				079DF99B0F3A8A7D0031D1B4 /* Trace.as */,
 			);
 			name = AS;
 			sourceTree = "<group>";
@@ -1987,6 +1988,7 @@
 				7E87D0B2122C5B980005FEAF /* DomainClass.cpp in Sources */,
 				7E87D0B3122C5B980005FEAF /* FileClass.cpp in Sources */,
 				7E87D0B4122C5B980005FEAF /* SystemClass.cpp in Sources */,
+				7E87D0B5122C5B980005FEAF /* DictionaryGlue.cpp in Sources */,
 				7E87D0B6122C5B980005FEAF /* JavaGlue.cpp in Sources */,
 				7E87D0B7122C5B980005FEAF /* SamplerScript.cpp in Sources */,
 				7E87D0B8122C5B980005FEAF /* Selftest.cpp in Sources */,
@@ -2084,7 +2086,6 @@
 				F68C247113A82EF800152279 /* GenericPortUtils.cpp in Sources */,
 				F68C247213A82EF800152279 /* MacPortUtils.cpp in Sources */,
 				07E7976613BC99EC00E25990 /* d2a.cpp in Sources */,
-				D942196713DF3686002A4723 /* DictionaryGlue.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2181,6 +2182,7 @@
 				079DF97D0F3A89C50031D1B4 /* DomainClass.cpp in Sources */,
 				079DF97E0F3A89C50031D1B4 /* FileClass.cpp in Sources */,
 				079DF9800F3A89C50031D1B4 /* SystemClass.cpp in Sources */,
+				079DF9930F3A8A320031D1B4 /* DictionaryGlue.cpp in Sources */,
 				079DF9940F3A8A320031D1B4 /* JavaGlue.cpp in Sources */,
 				079DF9950F3A8A320031D1B4 /* SamplerScript.cpp in Sources */,
 				079DF9A40F3A8AAB0031D1B4 /* Selftest.cpp in Sources */,
@@ -2278,7 +2280,6 @@
 				F68C246F13A82EF800152279 /* GenericPortUtils.cpp in Sources */,
 				F68C247013A82EF800152279 /* MacPortUtils.cpp in Sources */,
 				07E7976513BC99EC00E25990 /* d2a.cpp in Sources */,
-				D942196513DF3686002A4723 /* DictionaryGlue.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
