@@ -38,7 +38,14 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-#include "avmplus.h"
+#ifdef AVMSHELL_BUILD
+#include "avmshell.h"
+#else
+// player
+#include "platformbuild.h"
+#include "avmplayer.h"
+#include "DictionaryGlue.h"
+#endif
 
 using namespace MMgc;
 

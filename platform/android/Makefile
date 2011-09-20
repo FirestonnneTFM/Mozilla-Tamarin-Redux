@@ -346,6 +346,7 @@ SHELL_SRCS := ../../shell/ConsoleOutputStream.cpp \
   ../../shell/avmshell.cpp \
   ../../shell/avmshellUnix.cpp \
   ../../shell/swf.cpp \
+  ../../shell/../extensions/DictionaryGlue.cpp \
   ../../shell/../extensions/JavaGlue.cpp \
   ../../shell/../extensions/SamplerScript.cpp \
   ../../shell/../extensions/Selftest.cpp \
