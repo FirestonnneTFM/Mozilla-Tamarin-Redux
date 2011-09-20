@@ -64,8 +64,12 @@
 #  define AVMSHELL_PROJECTOR_SUPPORT
 #endif
 
-#define INT32_T_MAX     0x7FFFFFFF  //max value for a 32-bit integer
-#define UINT32_T_MAX    0xFFFFFFFF  //max value for a 32-bit unsigned integer
+#ifndef INT32_T_MAX
+    #define INT32_T_MAX     (int32_t(0x7FFFFFFFL))  //max value for a 32-bit integer
+#endif
+#ifndef UINT32_T_MAX
+    #define UINT32_T_MAX    (uint32_t(0xFFFFFFFFUL))  //max value for a 32-bit unsigned integer
+#endif
 
 #ifdef _MSC_VER
 #pragma warning(disable:4996)       // 'scanf' was declared deprecated

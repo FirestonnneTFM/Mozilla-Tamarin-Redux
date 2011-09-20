@@ -40,6 +40,10 @@
 #ifndef __avmplus_List_inlines__
 #define __avmplus_List_inlines__
 
+#ifndef UINT32_T_MAX
+    #define UINT32_T_MAX (uint32_t(0xFFFFFFFFUL))
+#endif
+
 namespace avmplus
 {
     template<>
@@ -278,7 +282,7 @@ namespace avmplus
         if (index >= m_data->len)
         {
             ensureCapacityExtra(index, 1);
-            m_data->len = index+1;
+            set_length_guarded(index+1);
         }
         AtomListHelper::storePointer(m_data, index, value);
     }
@@ -465,7 +469,7 @@ namespace avmplus
         if (index >= m_data->len)
         {
             ensureCapacityExtra(index, 1);
-            m_data->len = index+1;
+            set_length_guarded(index+1);
         }
         ListHelper::store(m_data, index, value);
     }
@@ -498,14 +502,13 @@ namespace avmplus
         return ListHelper::load(m_data, index);
     }
 
+    // Invariant: if cap + extra overflows uint32_t then this method never returns.
     template<class T, class ListHelper>
     REALLY_INLINE void ListImpl<T,ListHelper>::ensureCapacityExtra(uint32_t cap, uint32_t extra)
     {
-        MMGC_STATIC_ASSERT(0xFFFFFFFF > kListMaxLength);
-        uint32_t const ncap = (cap > 0xFFFFFFFF - extra) ?  // if true, cap + extra will overflow a uint32_t...
-                              0xFFFFFFFF :                  // ...in that case, choose a size that will definitely fail in ensureCapacityImpl.
+        uint32_t const ncap = (cap > UINT32_T_MAX - extra) ?  // if true, cap + extra will overflow a uint32_t...
+                              UINT32_T_MAX :                  // ...in that case, choose a size that will definitely fail in ensureCapacityImpl.
                               (cap + extra);
-        
         if (ncap > capacity())
         {
             ensureCapacityImpl(ncap);
@@ -532,7 +535,6 @@ namespace avmplus
     template<class T, class ListHelper>
     REALLY_INLINE /*static*/ typename ListHelper::LISTDATA* ListImpl<T,ListHelper>::allocData(MMgc::GC* gc, uint32_t cap)
     {
-        AvmAssert(cap <= kListMaxLength);
         typename ListHelper::LISTDATA* newData = ListHelper::LISTDATA::create(gc, cap);
         newData->len = 0;
         newData->set_gc(gc);
