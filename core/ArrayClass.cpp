@@ -1562,4 +1562,15 @@ namespace avmplus
         }
         return a->getLengthProperty();
     }
+
+    /*static*/ FASTCALL
+    ScriptObject* ArrayClass::createUnsubclassedInstanceProc(ClassClosure* cls)
+    {
+        return new (cls->gc(), MMgc::kExact, cls->getExtraSize())
+            ArrayObject(cls->ivtable(),
+                        cls->prototypePtr(),
+                        /*capacity = */0,
+                        /*simple   = */true);
+    }
+
 }
