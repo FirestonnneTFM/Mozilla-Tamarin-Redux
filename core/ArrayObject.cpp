@@ -180,8 +180,12 @@ namespace avmplus
 #ifdef DEBUG_ARRAY_VERIFY
     void ArrayObject::verify() const
     {
+        AvmAssert(m_lengthIfSimple <= m_length);
+
         if (m_denseStart == IS_SPARSE)
         {
+            AvmAssert(!m_canBeSimple);
+            AvmAssert(m_lengthIfSimple == 0);
             AvmAssert(m_denseUsed == 0);
             AvmAssert(m_denseArray.length() == 0);
 
@@ -200,14 +204,20 @@ namespace avmplus
         }
         else if (m_denseStart == IS_SEALED)
         {
+            AvmAssert(!m_canBeSimple);
+            AvmAssert(m_lengthIfSimple == 0);
             AvmAssert(m_denseUsed == 0);
             AvmAssert(m_denseArray.length() == 0);
             AvmAssert(m_length == 0);
         }
         else // isDense
         {
+            if (m_canBeSimple)
+                AvmAssert(m_lengthIfSimple == m_denseArray.length());
+            else
+                AvmAssert(m_lengthIfSimple == 0);
             AvmAssert(int32_t(m_denseStart) >= 0);
-            
+
             // can't use getTable()->getSize() == 0 because getSize()
             // includes deleted items.
             InlineHashtable* ht = this->getTable();
@@ -237,6 +247,9 @@ namespace avmplus
         
         verify();
 
+        AvmAssert(!m_canBeSimple);
+        AvmAssert(m_lengthIfSimple == 0);
+
         for (uint32_t index = 0, n = m_denseArray.length(); index < n; index++)
         {
             Atom value = m_denseArray.get(index);
@@ -255,23 +268,26 @@ namespace avmplus
 
     // ----------------- ctors, dtors
 
-    ArrayObject::ArrayObject(VTable* vtable, ScriptObject* proto, uint32_t capacity)
+    ArrayObject::ArrayObject(VTable* vtable, ScriptObject* proto, uint32_t capacity, bool simple/*=false*/)
         : ScriptObject(vtable, proto, 0)
         , m_denseArray(vtable->core()->GetGC(), capacity)
         , m_denseStart(traits()->needsHashtable() ? 0 : IS_SEALED)
         , m_denseUsed(0)
-        , m_length(0)
+        , m_lengthIfSimple(0)
+        , m_canBeSimple(simple)
     {
         SAMPLE_FRAME("Array", core());
         AvmAssert(traits()->getSizeOfInstance() >= sizeof(ArrayObject));
     }
 
-    ArrayObject::ArrayObject(VTable* vtable, ScriptObject* proto, Atom* argv, int argc)
+    ArrayObject::ArrayObject(VTable* vtable, ScriptObject* proto, Atom* argv, int argc, bool simple/*=false*/)
         : ScriptObject(vtable, proto, 0)
         , m_denseArray(vtable->core()->GetGC(), argc, argv)
         , m_denseStart(traits()->needsHashtable() ? 0 : IS_SEALED)
         , m_denseUsed(argc)
         , m_length(argc)
+        , m_lengthIfSimple(simple ? argc : 0)
+        , m_canBeSimple(simple)
     {
     }
 
@@ -284,10 +300,12 @@ namespace avmplus
 
 #ifdef VMCFG_AOT
     template <typename ADT>
-    ArrayObject::ArrayObject(VTable *vtable, ScriptObject* proto, MethodEnv *env, ADT argDesc, uint32_t argc, va_list ap)
+    ArrayObject::ArrayObject(VTable *vtable, ScriptObject* proto, MethodEnv *env, ADT argDesc, uint32_t argc, va_list ap, bool simple/*=false*/)
         : ScriptObject(vtable, proto, 0),
           m_denseArray(vtable->core()->GetGC(), argc),
-          m_length(argc)
+          m_length(argc),
+          m_lengthIfSimple(simple ? argc : 0),
+          m_canBeSimple(simple)
     {
         if (m_length > 0)
             argDescArgsToAtomList(m_denseArray, argDesc, env, ap);
@@ -346,7 +364,19 @@ namespace avmplus
 
     Atom ArrayObject::_getUintProperty(uint32_t index) const
     {
-        // this is a hot function, but we still must
+        // This is a hot function.
+
+        // If this is simple, then we can take fast path.
+        // (This is temporary code emulating logic the JIT will acquire)
+        if (index < m_lengthIfSimple) {
+            AvmAssertMsg(m_canBeSimple, "nonzero lengthIfSimple implies canBeSimple");
+            AvmAssertMsg(m_lengthIfSimple == m_length, "nonzero length match");
+            AvmAssertMsg(m_denseStart == 0, "simple arrays start at 0");
+            Atom value = m_denseArray.get(index);
+            AvmAssertMsg(value != atomNotFound, "hole in simple array");
+            return value;
+        }
+
         // call the virtual function in case it's been overridden
         return getUintProperty(index);
     }
@@ -456,6 +486,13 @@ namespace avmplus
                 AvmAssert(!isSparse());
 
                 // Adding at the end of a nonempty Array.
+
+                // (This is an m_canBeSimple-preserving operation)
+                if (m_canBeSimple) {
+                    AvmAssert(m_lengthIfSimple == denseLen);
+                    m_lengthIfSimple = denseLen + 1;
+                }
+
                 m_denseUsed++;
                 m_denseArray.add(value);
                 // Array was empty.
@@ -465,9 +502,15 @@ namespace avmplus
             else if (denseLen == 0)
             {
                 AvmAssert(!isSparse());
+                AvmAssert(m_lengthIfSimple == 0);
 
                 // Adding to an empty Array.
                 m_denseStart = index;
+                if (index > 0) {
+                    m_canBeSimple = false;
+                } else if (m_canBeSimple) {
+                    m_lengthIfSimple = 1;
+                }
                 m_denseUsed++;
                 m_denseArray.add(value);
             }
@@ -476,6 +519,9 @@ namespace avmplus
                 AvmAssert(!isSparse());
 
                 // Adding past the end of a nonempty Array.
+                // (This never yields an m_canBeSimple result.)
+                m_canBeSimple = false;
+                m_lengthIfSimple = 0;
                 uint32_t const insertCount = denseIdx - denseLen + 1;
                 if (shouldBeSparse(denseLen + insertCount, m_denseUsed + 1))
                 {
@@ -494,6 +540,8 @@ namespace avmplus
             else if (int32_t(index) < int32_t(m_denseStart))
             {
                 AvmAssert(!isSparse());
+                AvmAssert(!m_canBeSimple);
+                AvmAssert(m_lengthIfSimple == 0);
 
                 // Adding before the beginning of a nonempty Array.
                 uint32_t const insertCount = m_denseStart - index;
@@ -549,6 +597,8 @@ sparse_or_sealed:
 
             if (isDense())
             {
+                m_canBeSimple = false;
+                m_lengthIfSimple = 0;
 convert_and_set_sparse:
                 convertToSparse();
             }
@@ -606,6 +656,7 @@ convert_and_set_sparse:
                 // Use set_length(0) rather than clear(), so that
                 // we don't discard allocated capacity.
                 m_denseArray.set_length(0);
+                m_lengthIfSimple = 0;
                 m_denseStart = 0;
             }
         }
@@ -791,6 +842,10 @@ convert_and_set_sparse:
                     if (newLength > m_denseStart)
                     {
                         m_denseArray.set_length(newLength - m_denseStart);
+                        if (m_canBeSimple) {
+                            AvmAssert(m_denseStart == 0);
+                            m_lengthIfSimple = newLength;
+                        }
                         m_denseUsed = calcDenseUsed();
                         // Shouldn't need to check for sparseness if we are reducing length.
                         AvmAssert(!shouldBeSparse(newLength - m_denseStart, m_denseUsed));
@@ -800,12 +855,15 @@ convert_and_set_sparse:
                         // use set_length(0) rather than clear(), so that
                         // we don't discard allocated capacity
                         m_denseArray.set_length(0);
+                        m_lengthIfSimple = 0;
                         m_denseStart = 0;
                         m_denseUsed = 0;
                     }
                 }
                 else if (newLength > oldLength)
                 {
+                    m_canBeSimple = false;
+                    m_lengthIfSimple = 0;
                     // Check for sparseness before set_length, so giant requests don't trigger OOM
                     if (shouldBeSparse(newLength - m_denseStart, m_denseUsed))
                     {
@@ -869,6 +927,9 @@ convert_and_set_sparse:
                 else
                     m_denseUsed--;
                 m_length--;
+                if (m_lengthIfSimple > 0)
+                    m_lengthIfSimple--;
+
             }
             else
             {
@@ -894,10 +955,13 @@ convert_and_set_sparse:
                 if (m_length != curDenseEnd)
                 {
                     AvmAssert(m_length > curDenseEnd);
-                    
+
                     // push() always inserts at m_length, which might be larger than
                     // curDenseEnd. In that case, we might need to become sparse
                     // (or at least insert "holes").
+                    m_canBeSimple = false;
+                    m_lengthIfSimple = 0;
+
                     uint32_t const newDenseLen = (m_length - m_denseStart) + argc;
                     uint32_t const newDenseUsed = m_denseUsed + argc;
                     uint32_t const holesToAppend = m_length - curDenseEnd;
@@ -913,13 +977,15 @@ convert_and_set_sparse:
                         convertToSparse();
                         goto push_sparse;
                     }
-                    
+
                     m_denseArray.ensureCapacity(newDenseLen);
                     m_denseArray.insert(m_denseArray.length(), atomNotFound, holesToAppend);
                 }
                 m_denseArray.insert(m_denseArray.length(), argv, argc);
                 m_denseUsed += argc;
                 m_length += argc;
+                if (m_canBeSimple)
+                    m_lengthIfSimple += argc;
             }
             else
             {
@@ -952,11 +1018,15 @@ push_sparse:
                     }
                     m_denseArray.insert(0, atomNotFound, m_denseStart);
                     m_denseStart = 0;
+                    m_canBeSimple = false;
+                    m_lengthIfSimple = 0;
                 }
 
                 m_denseArray.insert(0, argv, argc);
                 m_denseUsed += argc;
                 m_length += argc;
+                if (m_canBeSimple)
+                    m_lengthIfSimple += argc;
             }
             else
             {
@@ -1002,19 +1072,31 @@ unshift_sparse:
             if (totLen != uint32_t(totLen) ||
                 shouldBeSparse(uint32_t(totLen), this->m_denseUsed + that->m_denseUsed))
             {
+                this->m_canBeSimple = false;
+                this->m_lengthIfSimple = 0;
                 convertToSparse();
                 return false;
+            }
+
+            if (!that->m_canBeSimple) {
+                this->m_canBeSimple = false;
+                this->m_lengthIfSimple = 0;
             }
 
             uint32_t extraHoles = that->m_denseStart;
             uint32_t this_denseEnd = this->m_denseStart + this->m_denseArray.length();
             if (this_denseEnd < this->m_length)
                 extraHoles += (this->m_length - this_denseEnd);
-            if (extraHoles > 0)
+            if (extraHoles > 0) {
                 this->m_denseArray.insert(this->m_denseArray.length(), atomNotFound, extraHoles);
+                this->m_canBeSimple = false;
+                this->m_lengthIfSimple = 0;
+            }
             this->m_denseArray.add(that->m_denseArray);
             this->m_denseUsed += that->m_denseUsed;
             this->m_length += that->m_length;
+            if (this->m_canBeSimple)
+                this->m_lengthIfSimple += that->m_denseArray.length();
 
             AvmAssert(!shouldBeSparse(m_denseArray.length(), m_denseUsed));
             verify();
@@ -1054,6 +1136,8 @@ unshift_sparse:
                 Atom r = undefinedAtom;
                 if (m_denseArray.length() > 0) {
                     Atom v = m_denseArray.removeFirst();
+                    if (m_lengthIfSimple > 0)
+                        m_lengthIfSimple--;
                     if (v != atomNotFound) {
                         --m_denseUsed;
                         r = v;
@@ -1094,17 +1178,37 @@ unshift_sparse:
             deletedItems->m_denseStart = 0;
             deletedItems->m_denseUsed = deletedItems->calcDenseUsed();
             deletedItems->m_length = deleteCount;
-            
+            if (this->m_canBeSimple)
+            {
+                deletedItems->m_canBeSimple = true;
+                deletedItems->m_lengthIfSimple = deleteCount;
+            }
+            else
+            {
+                // (easiest for now to just disable the simple path than
+                // to try to dynamically determine when it is available)
+                deletedItems->m_canBeSimple = false;
+                deletedItems->m_lengthIfSimple = 0;
+            }
+
             uint32_t that_len = that->m_denseArray.length();
             if (insertCount > that_len - that_skip)
                 insertCount = that_len - that_skip;
 
+
+            if (!that->m_canBeSimple)
+            {
+                this->m_canBeSimple = false;
+                this->m_lengthIfSimple = 0;
+            }
             this->m_denseArray.splice(insertPoint, insertCount, deleteCount, that->m_denseArray, that_skip);
             this->m_denseUsed = this->calcDenseUsed();
             this->m_length = this->m_length + insertCount - deleteCount;
+            if (this->m_canBeSimple)
+                this->m_lengthIfSimple += (insertCount - deleteCount);
             if (this->m_denseArray.isEmpty())
                 m_denseStart = 0;
-            
+
             verify();
             deletedItems->verify();
             return deletedItems;
@@ -1137,6 +1241,17 @@ unshift_sparse:
                 }
             }
 
+            if (!that->m_canBeSimple)
+            {
+                this->m_canBeSimple = false;
+                this->m_lengthIfSimple = 0;
+            }
+            else if (this->m_canBeSimple)
+            {
+                AvmAssert(that_length == that->m_lengthIfSimple);
+                AvmAssert(that_length == that->m_denseArray.length());
+            }
+
             // OPTIMIZEME, there's a way to add a list to the end of another,
             // but not to insert at an arbitrary spot.
             m_denseArray.insert(0, atomNotFound, that->m_denseArray.length() + extraHoles);
@@ -1145,6 +1260,9 @@ unshift_sparse:
             this->m_denseStart = that->m_denseStart;
             this->m_denseUsed += that->m_denseUsed;
             this->m_length += that_length;
+            if (this->m_canBeSimple)
+                this->m_lengthIfSimple += that_length;
+
             verify();
             return true;
         }
