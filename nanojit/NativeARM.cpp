@@ -49,14 +49,128 @@ namespace nanojit
 
 #ifdef NJ_VERBOSE
 const char* regNames[] = {"r0","r1","r2","r3","r4","r5","r6","r7","r8","r9","r10","fp","ip","sp","lr","pc",
-                          "d0","d1","d2","d3","d4","d5","d6","d7","s0"};
+#ifdef VMCFG_FLOAT
+                          "s0","s1","s2","s3","s4","s5","s6","s7","s8","s9","s10","s11","s12","s13","s14","s15",
+                          "s16","s17","s18","s19","s20","s21","s22","s23","s24","s25","s26","s27","s28","s29","s30","s31",
+                          "d16","d17","d18","d19","d20","d21","d22","d23","d24","d25","d26","d27","d28","d29","d30","d31",
+                          "d0","d1","d2","d3","d4","d5","d6","d7","d8","d9","d10","d11","d12","d13","d14","d15",
+                          "q0","q1","q2","q3","q4","q5","q6","q7","q8","q9","q10","q11","q12","q13","q14","q15",
+#else
+                          "d0","d1","d2","d3","d4","d5","d6","d7","s0"
+#endif
+                         };
+
 const char* condNames[] = {"eq","ne","cs","cc","mi","pl","vs","vc","hi","ls","ge","lt","gt","le",""/*al*/,"nv"};
 const char* shiftNames[] = { "lsl", "lsl", "lsr", "lsr", "asr", "asr", "ror", "ror" };
 #endif
 
 const Register RegAlloc::argRegs[] = { R0, R1, R2, R3 };
 const Register RegAlloc::retRegs[] = { R0, R1 };
-const Register RegAlloc::savedRegs[] = { R4, R5, R6, R7, R8, R9, R10 };
+const Register RegAlloc::savedRegs[] = { R4, R5, R6, R7, R8, R9, R10 ,
+                             FLOAT_ONLY( S16,S17,S18,S19,S20,S21,S22,S23,S24,S25,S26,S27,S28,S29,S30,S31 )
+                                        };
+#ifdef VMCFG_FLOAT
+const RegisterMask FpArgRegs=      (RegisterMask)0x00000000ffff0000LL; // Q0,Q1,Q2,Q3; or D0-D7, or S0-S15
+const RegisterMask LowBankFPMask = (RegisterMask)0x0000ffffffff0000LL; // Q0,Q1,Q2,Q3,Q4,Q5,Q6,Q7
+const RegisterMask ARM_REG_MASKS[] = {
+    0x0000000000000001LL , // r0, 
+    0x0000000000000002LL , // r1, 
+    0x0000000000000004LL , // r2, 
+    0x0000000000000008LL , // r3, 
+    0x0000000000000010LL , // r4, 
+    0x0000000000000020LL , // r5, 
+    0x0000000000000040LL , // r6, 
+    0x0000000000000080LL , // r7, 
+    0x0000000000000100LL , // r8, 
+    0x0000000000000200LL , // r9, 
+    0x0000000000000400LL , // r10, 
+    0x0000000000000800LL , // fp,
+    0x0000000000001000LL , // ip, 
+    0x0000000000002000LL , // sp, 
+    0x0000000000004000LL , // lr, 
+    0x0000000000008000LL , // pc, 
+    0x0000000000010000LL , // s0
+    0x0000000000020000LL , // s1
+    0x0000000000040000LL , // s2
+    0x0000000000080000LL , // s3
+    0x0000000000100000LL , // s4
+    0x0000000000200000LL , // s5
+    0x0000000000400000LL , // s6
+    0x0000000000800000LL , // s7
+    0x0000000001000000LL , // s8
+    0x0000000002000000LL , // s9
+    0x0000000004000000LL , // s10
+    0x0000000008000000LL , // s11
+    0x0000000010000000LL , // s12
+    0x0000000020000000LL , // s13
+    0x0000000040000000LL , // s14
+    0x0000000080000000LL , // s15
+    0x0000000100000000LL , // s16
+    0x0000000200000000LL , // s17
+    0x0000000400000000LL , // s18
+    0x0000000800000000LL , // s19
+    0x0000001000000000LL , // s20
+    0x0000002000000000LL , // s21
+    0x0000004000000000LL , // s22
+    0x0000008000000000LL , // s23
+    0x0000010000000000LL , // s24
+    0x0000020000000000LL , // s25
+    0x0000040000000000LL , // s26
+    0x0000080000000000LL , // s27
+    0x0000100000000000LL , // s28
+    0x0000200000000000LL , // s29
+    0x0000400000000000LL , // s30
+    0x0000800000000000LL , // s31
+    0x0001000000000000LL , // d16
+    0x0002000000000000LL , // d17
+    0x0004000000000000LL , // d18
+    0x0008000000000000LL , // d19
+    0x0010000000000000LL , // d20
+    0x0020000000000000LL , // d21
+    0x0040000000000000LL , // d22
+    0x0080000000000000LL , // d23
+    0x0100000000000000LL , // d24
+    0x0200000000000000LL , // d25
+    0x0400000000000000LL , // d26
+    0x0800000000000000LL , // d27
+    0x1000000000000000LL , // d28
+    0x2000000000000000LL , // d29
+    0x4000000000000000LL , // d30
+    0x8000000000000000LL , // d31
+    0x0000000000030000LL , // d0=s0,s1
+    0x00000000000C0000LL , // d1=s2,s3
+    0x0000000000300000LL , // d2=s4,s5
+    0x0000000000C00000LL , // d3=s6,s7
+    0x0000000003000000LL , // d4=s8,s9
+    0x000000000C000000LL , // d5=s10,s11
+    0x0000000030000000LL , // d6=s12,s13
+    0x00000000C0000000LL , // d7=s14,s15
+    0x0000000300000000LL , // d8=s16,s17
+    0x0000000C00000000LL , // d9=s18,s19
+    0x0000003000000000LL , // d10=s20,s21
+    0x000000C000000000LL , // d11=s22,s23
+    0x0000030000000000LL , // d12=s24,s25
+    0x00000C0000000000LL , // d13=s26,s27
+    0x0000300000000000LL , // d14=s28,s29
+    0x0000C00000000000LL , // d15=s30,s31
+    0x00000000000F0000LL , // q0=d0,d1=s0,s1,s2,s3
+    0x0000000000F00000LL , // q1=d2,d3=s4,s5,s6,s7
+    0x000000000F000000LL , // q2=d4,d5=s8,s9,s10,s11
+    0x00000000F0000000LL , // q3=d6,d7=s12,s13,s14,s15
+    0x0000000F00000000LL , // q4=d8,d9=s16,s17,s18,s19
+    0x000000F000000000LL , // q5=d10,d11=s20,s21,s22,s23
+    0x00000F0000000000LL , // q6=d12,d13=s24,s25,s26,s27
+    0x0000F00000000000LL , // q7=d14,d15=s28,s29,s30,s31
+    0x0003000000000000LL , // q8=d16,d17
+    0x000C000000000000LL , // q9=d18,d19
+    0x0030000000000000LL , // q10=d20,d21
+    0x00C0000000000000LL , // q11=d22,d23
+    0x0300000000000000LL , // q12=d24,d25
+    0x0C00000000000000LL , // q13=d26,d27
+    0x3000000000000000LL , // q14=d28,d29
+    0xC000000000000000LL , // q15=d30,d31
+};
+#endif // VMCFG_FLOAT
 
 // --------------------------------
 // ARM-specific utility functions.
@@ -113,7 +227,7 @@ CountLeadingZeroesSlow(uint32_t data)
     return leading_zeroes;
 }
 
-inline uint32_t
+inline uint32_t 
 Assembler::CountLeadingZeroes(uint32_t data)
 {
     uint32_t    leading_zeroes;
@@ -122,31 +236,7 @@ Assembler::CountLeadingZeroes(uint32_t data)
     // ARMCC can do this with an intrinsic.
     leading_zeroes = __clz(data);
 #elif defined(__GNUC__)
-    // GCC can use inline assembler to insert a CLZ instruction.
-    if (ARM_ARCH_AT_LEAST(5)) {
-        __asm (
-#if defined(ANDROID) && (NJ_COMPILER_ARM_ARCH < 7)
-        // On Android gcc compiler, the clz instruction is not supported with a
-        // target smaller than armv7, despite it being legal for armv5+.
-            "   .arch armv7-a\n"
-        // Force the object to be tagged as armv4t to avoid it bumping the final
-        // binary target.
-            "   .object_arch armv4t\n"
-#elif (NJ_COMPILER_ARM_ARCH < 5)
-        // Targetting armv5t allows a toolchain with armv4t target to still build
-        // with clz, and clz to be used when appropriate at runtime.
-            "   .arch armv5t\n"
-        // Force the object file to be tagged as armv4t to avoid it bumping the
-        // final binary target.
-            "   .object_arch armv4t\n"
-#endif
-            "   clz     %0, %1  \n"
-            :   "=r"    (leading_zeroes)
-            :   "r"     (data)
-        );
-    } else {
-        leading_zeroes = CountLeadingZeroesSlow(data);
-    }
+    leading_zeroes = __builtin_clz(data);
 #else
     leading_zeroes = CountLeadingZeroesSlow(data);
 #endif
@@ -568,16 +658,15 @@ Assembler::nFragExit(LIns* guard)
 NIns*
 Assembler::genEpilogue()
 {
-    RegisterMask savingMask;
+    uint32_t savingMask; 
 
     if (ARM_ARCH_AT_LEAST(5)) {
         // On ARMv5+, loading directly to PC correctly handles interworking.
-        savingMask = rmask(FP) | rmask(PC);
-
+        savingMask = (uint32_t) (rmask(FP) | rmask(PC));
     } else {
         // On ARMv4T, interworking is not handled properly, therefore, we pop
         // lr and use bx lr to avoid that.
-        savingMask = rmask(FP) | rmask(LR);
+        savingMask = (uint32_t) (rmask(FP) | rmask(LR));
         BX(LR);
     }
     POP_mask(savingMask); // regs
@@ -615,9 +704,9 @@ Assembler::asm_arg(ArgType ty, LIns* arg, ParameterRegisters& params)
     // The stack pointer must always be at least aligned to 4 bytes.
     NanoAssert((params.stkd & 3) == 0);
 
-    if (ty == ARGTYPE_D) {
-        // This task is fairly complex and so is delegated to asm_arg_64.
-        asm_arg_64(arg, params);
+    if (ty == ARGTYPE_D FLOAT_ONLY(|| ty == ARGTYPE_F || ty == ARGTYPE_F4) ) {
+        // This task is fairly complex and so is delegated to asm_arg_float.
+        asm_arg_float(arg, params);
     } else {
         NanoAssert(ty == ARGTYPE_I || ty == ARGTYPE_UI);
         // pre-assign registers R0-R3 for arguments (if they fit)
@@ -631,14 +720,39 @@ Assembler::asm_arg(ArgType ty, LIns* arg, ParameterRegisters& params)
     }
 }
 
-// Encode a 64-bit floating-point argument using the appropriate ABI.
+// Encode a floating-point argument using the appropriate ABI.
 // This function operates in the same way as asm_arg, except that it will only
-// handle arguments where (ArgType)ty == ARGTYPE_D.
+// handle arguments where (ArgType)ty == ARGTYPE_D/F/F4.
 
 #ifdef NJ_ARM_EABI_HARD_FLOAT
 void
-Assembler::asm_arg_64(LIns* arg, ParameterRegisters& params)
+Assembler::asm_arg_float(LIns* arg, ParameterRegisters& params)
 {
+#ifdef VMCFG_FLOAT
+    RegisterMask mask = arg->isF()? FpSRegs:
+                        arg->isF4()?FpQRegs:
+                        arg->isD()? FpDRegs: ((RegisterMask)0);
+
+    NanoAssert( (bool)mask);
+    RegisterMask avail = params.float_r & mask;
+    if ( (bool)avail ){
+        Register r = { avail.getLsb() }; // get first available from the proper class; backfills available regs
+        NanoAssert( (IsFpSReg(r) && arg->isF()) ||
+                    (IsFpDReg(r) && arg->isD()) ||
+                    (IsFpQReg(r) && arg->isF4()) );
+        RegisterMask consumedRegs = FpOverlapMask[ REGNUM(r) ];
+#ifdef DEBUG
+        int nbits = (consumedRegs & params.float_r).bitCount(); 
+        NanoAssert( ((bitCount>=1) && arg->isF()) || // at least the SReg must be free
+                    ((bitCount>=3) && arg->isD()) || // at least 2 SRegs+ 1Dreg
+                    ((bitCount==7) && arg->isF4()) ); // must have 4Sregsm 2Dregs, 1Qreg free
+#endif
+        params.float_r &= ~consumedRegs;
+        findSpecificRegFor(arg, r);
+    } else {
+        NanoAssertMsg(0, "Too many floating point arguments!!!");
+    }
+#else  // not VMCFG_FLOAT
     NanoAssert(IsFpReg(params.float_r));
     if (params.float_r <= D7) {
         findSpecificRegFor(arg, params.float_r);
@@ -646,29 +760,48 @@ Assembler::asm_arg_64(LIns* arg, ParameterRegisters& params)
     } else {
         NanoAssertMsg(0, "Only 8 floating point arguments supported");
     }
+#endif // VMCFG_FLOAT
 }
 
 #else
 void
-Assembler::asm_arg_64(LIns* arg, ParameterRegisters& params)
+Assembler::asm_arg_float(LIns* arg, ParameterRegisters& params)
 {
     // The stack pointer must always be at least aligned to 4 bytes.
     NanoAssert((params.stkd & 3) == 0);
     // The only use for this function when we are using soft floating-point
     // is for LIR_ii2d.
     NanoAssert(ARM_VFP || arg->isop(LIR_ii2d));
+    bool singlePrecision = IFFLOAT(arg->isF(), false);
+    bool qwordPrecision =  IFFLOAT(arg->isF4(),false);
 
-    // EABI requires that 64-bit arguments are aligned on even-numbered
+    // EABI requires that 64-bit and 128-bit arguments are aligned on even-numbered
     // registers, as R0:R1 or R2:R3. If the register base is at an
     // odd-numbered register, advance it. Note that this will push r past
     // R3 if r is R3 to start with, and will force the argument to go on
-    // the stack.
-    if ((params.r == R1) || (params.r == R3)) {
+    // the stack. Also, for 128-bit arguments this means that half of the argument
+    // may be in registers (R2:R3) and half on stack
+
+
+    if( !singlePrecision && ((params.r == R1) || (params.r == R3)) ) {
         params.r = Register(params.r + 1);
     }
 
-    if (params.r < R3) {
+    verbose_only(if (_logc->lcbits & LC_Native)
+        _logc->printf("Param.r now: %d (%s)\n",REGNUM(params.r),gpn(params.r)));
+    if (params.r <= R3) {
         Register    ra = params.r;
+        Register dm;
+
+#ifdef VMCFG_FLOAT
+        if (singlePrecision) {
+            NanoAssert(ARM_VFP);
+            dm = findRegFor(arg, FpSRegs);
+            FMRS(ra,dm);
+            params.r = Register(ra + 1);
+            return;
+        }
+#endif // VMCFG_FLOAT
         Register    rb = Register(params.r + 1);
         params.r = Register(rb + 1);
 
@@ -680,16 +813,53 @@ Assembler::asm_arg_64(LIns* arg, ParameterRegisters& params)
         // use FMRRD to move it to ra and rb. Otherwise, let asm_regarg deal
         // with the argument as if it were two 32-bit arguments.
         if (ARM_VFP) {
-            Register dm = findRegFor(arg, FpRegs);
+            
+            if(qwordPrecision)
+            {
+#ifdef VMCFG_FLOAT
+                dm = findRegFor(arg, FpQRegs);
+                verbose_only(if (_logc->lcbits & LC_Native)
+                    _logc->printf("FOUND QREG: %d (%s)",REGNUM(dm),gpn(dm)));
+                dm = DReg (FpQRegNum(dm)*2); // get first Dn reg. in pair
+                verbose_only(if (_logc->lcbits & LC_Native)
+                    _logc->printf(" -> TRANSFORMED TO DREG: %d (%s)\n",REGNUM(dm),gpn(dm)));
+                NanoAssert(IsFpDReg(dm));
+#endif // VMCFG_FLOAT
+            } else {
+                dm = findRegFor(arg, FpDRegs);
+            }
             FMRRD(ra, rb, dm);
         } else {
+            NanoAssert(!qwordPrecision && !singlePrecision);
             asm_regarg(ARGTYPE_I, arg->oprnd1(), ra);
             asm_regarg(ARGTYPE_I, arg->oprnd2(), rb);
         }
+        if(!qwordPrecision) return; // we are done, unless the arg is float4
+
+#ifdef VMCFG_FLOAT
+        /* handle the second half of the float 4; note that it could go to stack! */
+        qwordPrecision = false; 
+        dm = dm + 1;
+        NanoAssert(ARM_VFP); NanoAssert(IsFpDReg(dm));
+        
+        if(params.r<R3){
+            ra = params.r;
+            rb = Register(params.r + 1);
+            NanoAssert( (ra == R2) && (rb == R3) ); NanoAssert(ARM_VFP);
+            params.r = Register(rb + 1);
+            FMRRD(ra, rb, dm);
+        } else {
+            /* handle storing here, it's too complicated to defer to arm_stkarg */
+            if ((params.stkd & 7) != 0) 
+                params.stkd += 4;
+             FSTD(dm, SP, params.stkd);
+             params.stkd += 8;
+        }
+#endif 
     } else {
         // The argument won't fit in registers, so pass on to asm_stkarg.
         // EABI requires that 64-bit arguments are 64-bit aligned.
-        if ((params.stkd & 7) != 0) {
+        if ( !singlePrecision && ((params.stkd & 7) != 0) ){
             // stkd will always be aligned to at least 4 bytes; this was
             // asserted on entry to this function.
             params.stkd += 4;
@@ -700,7 +870,8 @@ Assembler::asm_arg_64(LIns* arg, ParameterRegisters& params)
             asm_stkarg(arg->oprnd1(), params.stkd);
             asm_stkarg(arg->oprnd2(), params.stkd+4);
         }
-        params.stkd += 8;
+        params.stkd += singlePrecision ? 4  :
+                        qwordPrecision ? 16 : 8;
     }
 }
 #endif // NJ_ARM_EABI_HARD_FLOAT
@@ -744,23 +915,45 @@ Assembler::asm_stkarg(LIns* arg, int stkd)
         Register rt = findRegFor(arg, GpRegs);
         asm_str(rt, SP, stkd);
     } else {
-        // According to the comments in asm_arg_64, LIR_ii2d
+        // According to the comments in asm_arg_float, LIR_ii2d
         // can have a 64-bit argument even if VFP is disabled. However,
-        // asm_arg_64 will split the argument and issue two 32-bit
+        // asm_arg_float will split the argument and issue two 32-bit
         // arguments to asm_stkarg so we can ignore that case here.
-        NanoAssert(arg->isD());
+        bool singlePrecision = IFFLOAT(arg->isF(), false);
+        bool quad = IFFLOAT(arg->isF4(), false);
+        NanoAssert(arg->isD() || singlePrecision || quad);
         NanoAssert(ARM_VFP);
-        Register dt = findRegFor(arg, FpRegs);
-        // EABI requires that 64-bit arguments are 64-bit aligned.
-        NanoAssert((stkd % 8) == 0);
-        FSTD(dt, SP, stkd);
+        Register dt = findRegFor(arg, singlePrecision? FpSRegs:
+                                                 quad? FpQRegs:FpDRegs);
+#ifdef VMCFG_FLOAT
+        if(singlePrecision){
+            NanoAssert((stkd % 4) == 0);
+            FSTS(dt,SP,stkd);
+        } else if (quad) 
+        {
+            // EABI requires that 128-bit arguments are 64-bit aligned.
+            NanoAssert((stkd % 8) == 0);
+            VSTQR(dt, IP);
+            asm_add_imm(IP, SP, stkd);
+        } else 
+#endif
+        {
+            // EABI requires that 64-bit arguments are 64-bit aligned.
+            NanoAssert((stkd % 8) == 0);
+            FSTD(dt, SP, stkd);
+        }
     }
 }
 
 void
 Assembler::asm_call(LIns* ins)
 {
-    if (ARM_VFP && ins->isop(LIR_calld)) {
+    bool handled = false;
+#ifdef VMCFG_FLOAT
+    NanoAssert(ARM_VFP);
+#endif
+    RegisterMask nonVolatile = 0;
+    if (ARM_VFP) {
         /* Because ARM actually returns the result in (R0,R1), and not in a
          * floating point register, the code to move the result into a correct
          * register is below.  We do nothing here.
@@ -787,10 +980,37 @@ Assembler::asm_call(LIns* ins)
          * from the function. We need to prepare it like we do for R0 in the else
          * branch.
          */
-        prepareResultReg(ins, rmask(D0));
-        freeResourcesOf(ins);
+        if(ins->isop(LIR_calld)){
+           prepareResultReg(ins, rmask(D0));
+           freeResourcesOf(ins);
+           handled = true;
+        }
+#ifdef VMCFG_FLOAT
+        else if(ins->isop(LIR_callf)){
+            prepareResultReg(ins, rmask(S0));
+            freeResourcesOf(ins);
+            handled = true;
+        } 
+        else if(ins->isop(LIR_callf4)){
+            prepareResultReg(ins, rmask(Q0));
+            freeResourcesOf(ins);
+            handled = true;
+        };
+#endif // VMCFG_FLOAT
+#else   //!NJ_ARM_EABI_HARD_FLOAT
+        bool isFloat = IFFLOAT(ins->isop(LIR_callf4) || ins->isop(LIR_callf), false);
+        if( ins->isop(LIR_calld)  || isFloat ){
+            if(ins->isInReg()){
+                nonVolatile = rmask(ins->getReg());
+                asm_maybe_spill(ins, false);
+            }
+            handled = true;
+        }
 #endif
-    } else if (!ins->isop(LIR_callv)) {
+    }
+    if (!handled && !ins->isop(LIR_callv)) {
+        verbose_only(if (_logc->lcbits & LC_Native)
+           _logc->printf(" ASM_CALL preparing result reg %d\n",RegAlloc::retRegs[0]));
         prepareResultReg(ins, rmask(RegAlloc::retRegs[0]));
         // Immediately free the resources as we need to re-use the register for
         // the arguments.
@@ -799,8 +1019,11 @@ Assembler::asm_call(LIns* ins)
 
     // Do this after we've handled the call result, so we don't
     // force the call result to be spilled unnecessarily.
-
-    evictScratchRegsExcept(0);
+    verbose_only(if (_logc->lcbits & LC_Native) 
+        _logc->printf(" ASM_CALL evicting scratch registers\n"));
+    evictScratchRegsExcept(nonVolatile);
+    verbose_only(if (_logc->lcbits & LC_Native)
+        _logc->printf(" ASM_CALL evicted scratch registers\n"));
 
     const CallInfo* ci = ins->callInfo();
     ArgType argTypes[MAXARGS];
@@ -819,13 +1042,30 @@ Assembler::asm_call(LIns* ins)
     if (!ARM_EABI_HARD && ARM_VFP && ins->isExtant()) {
         // If the result size is a floating-point value, treat the result
         // specially, as described previously.
-        if (ci->returnType() == ARGTYPE_D) {
-            NanoAssert(ins->isop(LIR_calld));
-
-            if (ins->isInReg()) {
+        ArgType rtype = ci->returnType();
+        bool returnsFloat = IFFLOAT( rtype == ARGTYPE_F || rtype == ARGTYPE_F4, false);
+        if (rtype==ARGTYPE_D || returnsFloat) {
+            if(ins->isInReg()){
                 Register dd = ins->getReg();
                 // Copy the result to the (VFP) result register.
-                FMDRR(dd, R0, R1);
+                if(rtype==ARGTYPE_D){
+                    NanoAssert(ins->isop(LIR_calld));
+                    FMDRR(dd, R0, R1);
+                } 
+#ifdef VMCFG_FLOAT
+                else if (rtype == ARGTYPE_F ){
+                    NanoAssert(ins->isop(LIR_callf));
+                    FMSR(dd,R0);
+                } else {
+                    NanoAssert(ins->isop(LIR_callf4) && rtype== ARGTYPE_F4);
+                    Register d0 = DReg ( FpQRegNum(dd)*2 );
+                    Register d1 = d0 + 1; // ok since d0 can't be D15
+                    NanoAssert(IsFpDReg(d0) && IsFpDReg(d1));
+                    FMDRR(d0, R0, R1);
+                    FMDRR(d1, R2, R3);
+                }
+#endif // VMCFG_FLOAT
+                freeResourcesOf(ins);
             } else {
                 int d = findMemFor(ins);
                 // Immediately free the resources so the arguments can re-use
@@ -833,10 +1073,27 @@ Assembler::asm_call(LIns* ins)
                 freeResourcesOf(ins);
 
                 // The result doesn't have a register allocated, so store the
-                // result (in R0,R1) directly to its stack slot.
+                // result (in R0[,R1[,R2,R3]]) directly to its stack slot.
                 asm_str(R0, FP, d+0);
-                asm_str(R1, FP, d+4);
+#ifdef VMCFG_FLOAT
+                if(rtype!=ARGTYPE_F){
+                    asm_str(R1, FP, d+4);
+                    if (rtype==ARGTYPE_F4) {
+                        NanoAssert(ins->isop(LIR_callf4));
+                        asm_str(R2, FP, d+8);
+                        asm_str(R3, FP, d+12);
+                    } else {
+                        NanoAssert(ins->isop(LIR_calld));
+                    }
+                } else {
+                    NanoAssert(ins->isop(LIR_callf));
+                }
+#else
+               asm_str(R1, FP, d+4);
+#endif
             }
+        } else {
+            NanoAssert(false); // should never get here!! rtype must be ARGTYPE_D, F or F4
         }
     }
 
@@ -860,9 +1117,12 @@ Assembler::asm_call(LIns* ins)
         asm_regarg(ARGTYPE_I, ins->arg(--argc), LR);
     }
 
+    verbose_only(if (_logc->lcbits & LC_Native)
+        _logc->printf(" ASM_CALL preparing %d params!\n", argc));
+
     // Encode the arguments, starting at R0 and with an empty argument stack (0).
     // With hardware fp ABI, floating point arguments start from D0.
-    ParameterRegisters params = init_params(0, R0, D0);
+    ParameterRegisters params = init_params(0, R0, IFFLOAT(FpArgRegs, D0) );
 
     // Iterate through the argument list and encode each argument according to
     // the ABI.
@@ -870,13 +1130,86 @@ Assembler::asm_call(LIns* ins)
     // in reverse order.
     uint32_t    i = argc;
     while(i--) {
+        verbose_only(if (_logc->lcbits & LC_Native)
+            _logc->printf(" ASM_CALL preparing param %d of type %x!\n", i, argTypes[i]));
         asm_arg(argTypes[i], ins->arg(i), params);
     }
 
     if (params.stkd > max_out_args) {
         max_out_args = params.stkd;
     }
+    verbose_only(if (_logc->lcbits & LC_Native) _logc->printf(" ASM_CALL DONE!\n"));
 }
+
+#ifdef VMCFG_FLOAT
+inline Register 
+getSuitableRegFor(Register r, enum LTy insType)
+{
+    switch(insType){
+        case LTy_I: NanoAssert(IsGpReg(r));  return r;
+        case LTy_F: NanoAssert(IsFpSReg(r)); return r;
+        case LTy_D: NanoAssert(IsFpSReg(r) || IsFpDReg(r) ); 
+                    if(IsFpSReg(r)) return DReg(FpSRegNum(r)/2);
+                                    return r;
+        case LTy_F4:NanoAssert(!IsGpReg(r));
+                    if(IsFpSReg(r)) return QReg(FpSRegNum(r)/4);
+                    if(IsFpDReg(r)) return QReg(FpDRegNum(r)/2);
+                    return r;
+
+        default:    NanoAssertMsg(0, "TODO: Soft-float implementation of LIR_stf.");
+    }
+    return r;
+}
+
+Register 
+RegAlloc::getSuitableRegFor(Register r,LIns* ins)
+{
+    NanoAssert(ins); if(!ins) return r;
+    
+    if(ins->opcode() == LIR_parami && IsFpSReg(r)) return nanojit::getSuitableRegFor(r,LTy_F); // FIXME:remove hack
+    return nanojit::getSuitableRegFor(r,ins->retType());
+}
+
+#ifdef NANOJIT_64BIT
+#error ARM CAN'T HANDLE 64bit YET'
+#endif
+
+Register 
+RegAlloc::getAvailableReg(LIns* ins, Register regClass, RegisterMask m)
+{
+    NanoAssert(!ins || ins->opcode()==LIR_label || !ins->isV());
+    if(m==0) return UnspecifiedReg;
+    if(!ins){
+        Register ret = msReg(m);
+        return ret;
+    }
+    bool isInt = ins->isI() || IsGpReg(regClass);
+    if(isInt){
+        if (m & AllowableFlagRegs)
+           m &= AllowableFlagRegs; // hack for parami
+        NanoAssert(m!=0);
+        Register ret = msReg(m);
+        return ret;
+    }
+    bool isFloat = ins->isF() || IsFpSReg(regClass);
+    bool isDouble= ins->isD() || IsFpDReg(regClass);
+    bool isFloat4= ins->isF4()|| IsFpQReg(regClass);
+    NanoAssert( ( isFloat && !isDouble && !isFloat4 ) ||
+                (!isFloat &&  isDouble && !isFloat4 ) ||
+                (!isFloat && !isDouble &&  isFloat4 ) ); (void)isDouble;
+    enum LTy insType = isFloat? LTy_F: isFloat4? LTy_F4: LTy_D;
+    while(m!=0){
+        Register reg = msReg(m) ;
+        reg = nanojit::getSuitableRegFor(reg, insType);
+        RegisterMask rm = rmask(reg);
+        if ((m & rm) == rm)
+            return reg;
+        m &= ~rm;
+    }
+    NanoAssert(isDouble || isFloat4); // shouldn't get here with non-composite registers
+    return UnspecifiedReg;
+}
+#endif // VMCFG_FLOAT
 
 RegisterMask
 RegAlloc::nInitManagedRegisters()
@@ -885,7 +1218,7 @@ RegAlloc::nInitManagedRegisters()
 #define _config _assembler->_config
     if (ARM_VFP) {
 #undef _config        
-        retval |= FpRegs;
+        retval |= IFFLOAT( FpQRegs, FpRegs) ;
     }
     return retval;
 }
@@ -1221,7 +1554,7 @@ Assembler::asm_restore(LIns* i, Register r)
         // ensure that memory is allocated for the constant and load it from
         // memory.
         int d = findMemFor(i);
-        if (ARM_VFP && IsFpReg(r)) {
+        if (ARM_VFP && IsFpDReg(r)) {
             if (isU8(d/4) || isU8(-d/4)) {
                 FLDD(r, FP, d);
             } else {
@@ -1250,19 +1583,28 @@ Assembler::asm_restore(LIns* i, Register r)
 }
 
 void
-Assembler::asm_spill(Register rr, int d, bool quad)
+Assembler::asm_spill(Register rr, int d, IFFLOAT(int8_t nWords, bool quad) )
 {
-    (void) quad;
+    IFFLOAT( (void) nWords, (void) quad);
     NanoAssert(d);
     // The following registers should never be spilled:
     NanoAssert(rr != PC);
     NanoAssert(rr != IP);
     NanoAssert(rr != SP);
-    if (ARM_VFP && IsFpReg(rr)) {
+
+    bool isFPR = IsFpDReg(rr) FLOAT_ONLY(|| IsFpSReg(rr) || IsFpQReg(rr));
+    FLOAT_ONLY( NanoAssert(ARM_VFP || !isFPR) );
+    if (ARM_VFP && isFPR ) {
+#ifdef VMCFG_FLOAT
+        if(IsFpQReg(rr)){
+            VSTQR(rr, IP);
+            asm_add_imm(IP, FP, d);
+        } else
+#endif // VMCFG_FLOAT
         if (isU8(d/4) || isU8(-d/4)) {
-            FSTD(rr, FP, d);
+            VSTR(rr, FP, d);
         } else {
-            FSTD(rr, IP, d%1024);
+            VSTR(rr, IP, d%1024);
             asm_add_imm(IP, FP, d-(d%1024));
         }
     } else {
@@ -1288,10 +1630,26 @@ Assembler::asm_spill(Register rr, int d, bool quad)
     }
 }
 
+#ifdef VMCFG_FLOAT
+void
+Assembler::asm_load128(LIns* ins)
+{
+    LIns*       base = ins->oprnd1();
+    Register    rn = findRegFor(base, GpRegs);
+    int         offset = ins->disp();
+    Register qd = prepareResultReg(ins, FpQRegs );
+
+    VLDQR(qd, IP);
+    asm_add_imm(IP, rn, offset);
+    
+    freeResourcesOf(ins);
+}
+#endif
+
 void
 Assembler::asm_load64(LIns* ins)
 {
-    NanoAssert(ins->isD());
+    NanoAssert(ins->isD() FLOAT_ONLY(|| ins->isF()) );
 
     if (ARM_VFP) {
         Register    dd;
@@ -1300,30 +1658,31 @@ Assembler::asm_load64(LIns* ins)
         int         offset = ins->disp();
 
         if (ins->isInReg()) {
-            dd = prepareResultReg(ins, FpRegs & ~rmask(D0));
+            dd = prepareResultReg(ins, ins->isD()? (FpDRegs & ~rmask(D0)) : (FpSRegs& ~rmask(S0)) );
         } else {
             // If the result isn't already in a register, use the VFP scratch
             // register for the result and store it directly into memory.
             NanoAssert(ins->isInAr());
             int d = arDisp(ins);
             evictIfActive(D0);
-            dd = D0;
+            dd = ins->isD()? D0:S0;
             // VFP can only do loads and stores with a range of ±1020, so we
             // might need to do some arithmetic to extend its range.
             if (isU8(d/4) || isU8(-d/4)) {
-                FSTD(dd, FP, d);
+                VSTR(dd, FP, d);
             } else {
-                FSTD(dd, IP, d%1024);
+                VSTR(dd, IP, d%1024);
                 asm_add_imm(IP, FP, d-(d%1024));
             }
         }
 
         switch (ins->opcode()) {
+            CASEF(LIR_ldf:)
             case LIR_ldd:
                 if (isU8(offset/4) || isU8(-offset/4)) {
-                    FLDD(dd, rn, offset);
+                    VLDR(dd, rn, offset);
                 } else {
-                    FLDD(dd, IP, offset%1024);
+                    VLDR(dd, IP, offset%1024);
                     asm_add_imm(IP, rn, offset-(offset%1024));
                 }
                 break;
@@ -1353,6 +1712,11 @@ Assembler::asm_load64(LIns* ins)
             case LIR_ldd:
                 asm_mmq(FP, d, rn, offset);
                 break;
+#ifdef VMCFG_FLOAT
+            case LIR_ldf:
+                NanoAssertMsg(0, "LIR_ldf is not yet implemented for soft-float.");
+                break;
+#endif // VMCFG_FLOAT
             case LIR_ldf2d:
                 NanoAssertMsg(0, "LIR_ldf2d is not yet implemented for soft-float.");
                 break;
@@ -1365,41 +1729,67 @@ Assembler::asm_load64(LIns* ins)
     freeResourcesOf(ins);
 }
 
+#ifdef VMCFG_FLOAT
+void
+Assembler::asm_store128(LOpcode op, LIns* value, int dr, LIns* base)
+{
+    NanoAssert(op==LIR_stf4); (void)op;
+    NanoAssert(ARM_VFP && value->isF4());
+    Register rn = findRegFor(base, GpRegs);
+    Register qd = findRegFor(value, FpQRegs);
+
+    VSTQR(qd, IP);
+    asm_add_imm(IP, rn, dr);
+}
+#endif 
+
 void
 Assembler::asm_store64(LOpcode op, LIns* value, int dr, LIns* base)
 {
-    NanoAssert(value->isD());
+    NanoAssert(value->isD() FLOAT_ONLY(|| value ->isF()) );
 
     if (ARM_VFP) {
-        Register dd = findRegFor(value, FpRegs & ~rmask(D0));
         Register rn = findRegFor(base, GpRegs);
+#ifdef VMCFG_FLOAT
+        Register dd = value->isD()? findRegFor(value, FpDRegs)
+                                  : findRegFor(value, FpSRegs);
+#else
+        Register dd = findRegFor(value, FpDRegs & ~rmask(D0) );
+#endif 
 
         switch (op) {
+            CASEF(LIR_stf:)
             case LIR_std:
                 // VFP can only do stores with a range of ±1020, so we might
                 // need to do some arithmetic to extend its range.
                 if (isU8(dr/4) || isU8(-dr/4)) {
-                    FSTD(dd, rn, dr);
+                    VSTR(dd, rn, dr);      // FSTS or FSTD
                 } else {
-                    FSTD(dd, IP, dr%1024);
+                    VSTR(dd, IP, dr%1024); // FSTS or FSTD
                     asm_add_imm(IP, rn, dr-(dr%1024));
                 }
 
                 break;
-            case LIR_std2f:
+            case LIR_std2f:{
                 // VFP can only do stores with a range of ±1020, so we might
                 // need to do some arithmetic to extend its range.
+#ifdef VMCFG_FLOAT
+                Register tmp = _allocator.allocTempReg(FpSRegs,S0);
+#else
+                Register tmp = S0;
                 evictIfActive(D0);
+#endif 
                 if (isU8(dr/4) || isU8(-dr/4)) {
-                    FSTS(S0, rn, dr);
+                    FSTS(tmp, rn, dr);
                 } else {
-                    FSTS(S0, IP, dr%1024);
+                    FSTS(tmp, IP, dr%1024);
                     asm_add_imm(IP, rn, dr-(dr%1024));
                 }
 
-                FCVTSD(S0, dd);
+                FCVTSD(tmp, dd);
 
-                break;
+                break;      
+            }
             default:
                 NanoAssertMsg(0, "LIR opcode unsupported by asm_store64.");
                 break;
@@ -1409,6 +1799,9 @@ Assembler::asm_store64(LOpcode op, LIns* value, int dr, LIns* base)
         Register    rn = findRegFor(base, GpRegs);
 
         switch (op) {
+            CASEF(LIR_stf:)
+                NanoAssertMsg(0, "TODO: Soft-float implementation of LIR_stf.");
+                break;
             case LIR_std:
                 // Doubles in soft-float never get registers allocated, so this
                 // is always a simple two-word memcpy.
@@ -1425,6 +1818,23 @@ Assembler::asm_store64(LOpcode op, LIns* value, int dr, LIns* base)
     }
 }
 
+#ifdef VMCFG_FLOAT
+// Load the float32 specified by immFasI into VFP register dd.
+void
+Assembler::asm_immf_nochk(Register dd, int32_t immFasI)
+{
+
+    // Why 12? In ARM state, the value of the PC is the address of 
+    // the current instruction plus 8 bytes.
+    // See also coments in asm_immd_nochk for explanations
+    FLDS(dd, PC, -12);
+    
+    *(--_nIns) = (NIns) immFasI;
+    
+    B_nochk(_nIns+1);
+}
+#endif 
+    
 // Load the float64 specified by immDhi:immDlo into VFP register dd.
 void
 Assembler::asm_immd_nochk(Register dd, int32_t immDlo, int32_t immDhi)
@@ -1455,7 +1865,7 @@ Assembler::asm_immd(LIns* ins)
     // instructions to put the value in its stack slot. Otherwise, use a VFP
     // load to get the value from a literal pool.
     if (ARM_VFP && ins->isInReg()) {
-        Register dd = prepareResultReg(ins, FpRegs);
+        Register dd = prepareResultReg(ins, FpDRegs);
         underrunProtect(4*4);
         asm_immd_nochk(dd, ins->immDlo(), ins->immDhi());
     } else {
@@ -1475,8 +1885,14 @@ RegAlloc::nRegCopyCandidates(Register r, RegisterMask allow) {
     if( IsGpReg(r) )
         return allow & GpRegs;
 
-    if( IsFpReg(r) )
-        return allow & FpRegs;
+    if( IsFpDReg(r) )
+        return allow & FpDRegs;
+#ifdef VMCFG_FLOAT
+    if( IsFpSReg(r) )
+        return allow & FpSRegs;
+    if( IsFpQReg(r) )
+        return allow & FpQRegs;
+#endif 
 
     NanoAssert(false); // How did we get here?
     return 0;
@@ -1485,12 +1901,26 @@ RegAlloc::nRegCopyCandidates(Register r, RegisterMask allow) {
 void
 Assembler::asm_nongp_copy(Register r, Register s)
 {
-    if (ARM_VFP && IsFpReg(r) && IsFpReg(s)) {
+    if (ARM_VFP && IsFpDReg(r) && IsFpDReg(s)) {
         // fp->fp
         FCPYD(r, s);
+#ifdef VMCFG_FLOAT
+    } else
+    if (ARM_VFP && IsFpQReg(r) && IsFpQReg(s)) {
+        // fp->fp
+        FCPYQ(r, s);
+    } else
+    if (ARM_VFP && IsFpSReg(r) && IsFpSReg(s)) {
+        // fp->fp
+        FCPYS(r, s);
+#endif 
     } else {
-        // We can't move a double-precision FP register into a 32-bit GP
-        // register, so assert that no calling code is trying to do that.
+        verbose_only(if (_logc->lcbits & LC_Native)
+                       _logc->printf("nongpcpy %d<-%d\n",r,s));
+        // We can't move between registers of different precisions, so
+        // assert that no calling code is trying to do that.
+        // Theoretically we could move between Sn and GPR, but we shouldn't
+        // need to, we we leave that unhandled
         NanoAssert(0);
     }
 }
@@ -1798,8 +2228,22 @@ Assembler::BLX(Register addr, bool chk /* = true */)
 void
 Assembler::asm_ldr_chk(Register d, Register b, int32_t off, bool chk)
 {
-    if (ARM_VFP && IsFpReg(d)) {
-        FLDD_chk(d,b,off,chk);
+    if (ARM_VFP && !IsGpReg(d) ) {
+#ifdef VMCFG_FLOAT
+        if(IsFpQReg(d)){
+            NanoAssert(IsGpReg(b));
+            VLDQR(d, IP);
+            asm_add_imm(IP, b, off);
+        } else 
+#endif // VMCFG_FLOAT
+        {
+            if (isU8(off/4) || isU8(-off/4)) {
+                VLDR_chk(d,b,off,chk);     // this can handle Dn and Sn registers
+            } else {
+                VLDR_chk(d, IP, off%1024,chk);
+                asm_add_imm(IP, FP, off-(off%1024));
+            }
+        }
         return;
     }
 
@@ -2085,12 +2529,19 @@ Assembler::B_cond_chk(ConditionCode _c, NIns* _t, bool _chk)
 void
 Assembler::asm_i2d(LIns* ins)
 {
+#ifdef VMCFG_FLOAT
+    Register dd = prepareResultReg(ins, FpDRegs);
+    Register tmp = _allocator.allocTempReg(FpSRegs & ~rmask(dd) ,S0);
+#else
     Register dd = prepareResultReg(ins, FpRegs & ~rmask(D0));
+    Register tmp = S0;
+    evictIfActive(D0);
+#endif 
     Register rt = findRegFor(ins->oprnd1(), GpRegs);
 
-    evictIfActive(D0);
-    FSITOD(dd, S0);
-    FMSR(S0, rt);
+//    BKPT_nochk();
+    FSITOD(dd, tmp);
+    FMSR(tmp, rt);
 
     freeResourcesOf(ins);
 }
@@ -2098,22 +2549,33 @@ Assembler::asm_i2d(LIns* ins)
 void
 Assembler::asm_ui2d(LIns* ins)
 {
+#ifdef VMCFG_FLOAT
+    Register dd = prepareResultReg(ins, FpDRegs);
+    Register tmp = _allocator.allocTempReg(FpSRegs & ~rmask(dd),S0);
+#else
     Register dd = prepareResultReg(ins, FpRegs & ~rmask(D0));
+    Register tmp = S0;
+    evictIfActive(D0);
+#endif 
     Register rt = findRegFor(ins->oprnd1(), GpRegs);
 
-    evictIfActive(D0);
-    FUITOD(dd, S0);
-    FMSR(S0, rt);
+    FUITOD(dd, tmp);
+    FMSR(tmp, rt);
 
     freeResourcesOf(ins);
 }
 
 void Assembler::asm_d2i(LIns* ins)
 {
+#ifdef VMCFG_FLOAT
+    Register tmp = _allocator.allocTempReg(FpSRegs,S0);
+#else
+    Register tmp = S0;
     evictIfActive(D0);
+#endif 
     if (ins->isInReg()) {
         Register rt = ins->getReg();
-        FMRS(rt, S0);
+        FMRS(rt, tmp);
     } else {
         // There's no active result register, so store the result directly into
         // memory to avoid the FP->GP transfer cost on Cortex-A8.
@@ -2121,30 +2583,219 @@ void Assembler::asm_d2i(LIns* ins)
         // VFP can only do stores with a range of ±1020, so we might need to do
         // some arithmetic to extend its range.
         if (isU8(d/4) || isU8(-d/4)) {
-            FSTS(S0, FP, d);
+            FSTS(tmp, FP, d);
         } else {
-            FSTS(S0, IP, d%1024);
+            FSTS(tmp, IP, d%1024);
             asm_add_imm(IP, FP, d-(d%1024));
         }
     }
 
-    Register dm = findRegFor(ins->oprnd1(), FpRegs & ~rmask(D0));
+    Register tmpd = IFFLOAT(tmp, D0); // note: tmp is enough; if half of reg isn't available, the reg isn't available. 
+    Register dm = findRegFor(ins->oprnd1(), FpDRegs & ~rmask(tmpd));
 
-    FTOSID(S0, dm);
+    FTOSID(tmp, dm);
 
     freeResourcesOf(ins);
 }
+
+#ifdef VMCFG_FLOAT
+void Assembler::asm_ui2f(LIns *ins) {
+    Register dd = prepareResultReg(ins, FpSRegs );
+    Register rt = findRegFor(ins->oprnd1(), GpRegs);
+    Register tmp = _allocator.allocTempReg(FpSRegs & ~rmask(dd) ,S0);
+    FUITOS(dd, tmp);
+    FMSR(tmp, rt);
+    
+    freeResourcesOf(ins);
+}
+void Assembler::asm_i2f(LIns *ins) {
+    Register dd = prepareResultReg(ins, FpSRegs );
+    Register rt = findRegFor(ins->oprnd1(), GpRegs);
+    Register tmp = _allocator.allocTempReg(FpSRegs & ~rmask(dd) ,S0);
+    FSITOS(dd, tmp);
+    FMSR(tmp, rt);
+    
+    freeResourcesOf(ins);
+}
+void Assembler::asm_f2i(LIns *ins) {
+    Register rt = prepareResultReg(ins, GpRegs );
+    Register dd = findRegFor(ins->oprnd1(), FpSRegs);
+    Register tmp = _allocator.allocTempReg(FpSRegs & ~rmask(dd),S0);
+    FMRS(rt,tmp);
+    FTOSIS(tmp, dd);
+    
+    freeResourcesOf(ins);
+}
+void Assembler::asm_f2d(LIns *ins) {
+    Register dd = prepareResultReg(ins, FpDRegs );
+    Register sm = findRegFor(ins->oprnd1(), FpSRegs);
+    FCVTDS(dd, sm);
+
+    freeResourcesOf(ins);
+}
+void Assembler::asm_d2f(LIns *ins) {
+    Register sd = prepareResultReg(ins, FpSRegs );
+    Register dm = findRegFor(ins->oprnd1(), FpDRegs);
+    FCVTSD(sd, dm);
+
+    freeResourcesOf(ins);
+}
+void Assembler::asm_immf(LIns *ins) {
+    //TODO: use fconsts/fconstd?
+    
+    // If the value isn't in a register, it's simplest to use integer
+    // instructions to put the value in its stack slot. Otherwise, use a VFP
+    // load to get the value from a literal pool.
+    if (ARM_VFP && ins->isInReg()) {
+        Register dd = prepareResultReg(ins, FpSRegs);
+        underrunProtect(4*3); 
+        asm_immf_nochk(dd, ins->immFasI());
+    } else {
+        NanoAssert(ins->isInAr());
+        int d = arDisp(ins);
+        asm_str(IP, FP, d);
+        asm_ld_imm(IP, ins->immFasI());
+    }
+    
+    freeResourcesOf(ins);
+}
+    
+void Assembler::asm_immf4(LIns *ins) {
+    union {
+        float4_t f4;
+        NIns fp;
+        } u;
+    u.f4 = ins->immF4();
+    const NIns* fp = &u.fp;
+
+    if (ARM_VFP && ins->isInReg()) {
+        Register dd = prepareResultReg(ins, FpQRegs);
+
+        VLDQR(dd,IP);
+        underrunProtect(4*7); 
+                
+        /* The following addi will be taking word, so PC has to be unaligned now
+           in order for it to be aligned after the "add" (sub, in fact) */
+        bool is_aligned = (((intptr_t)_nIns) & 7) != 0;
+        
+        // In ARM state, the value of the PC is the address of the current instruction plus 8 bytes.
+        asm_add_imm(IP,PC, - (24+(is_aligned?0:4)) ); // 8 + 4*4 + optional alignment
+        NanoAssert( (  is_aligned && (((intptr_t)_nIns) & 7) == 0 )
+                 || ( !is_aligned && (((intptr_t)_nIns) & 7) != 0 ));
+                    
+        if(!is_aligned)
+            BKPT_nochk(); // should never get here; inserted for alignment purposes only.
+        *(--_nIns) = fp[3];
+        *(--_nIns) = fp[2];
+        *(--_nIns) = fp[1];
+        *(--_nIns) = fp[0];
+        
+        B_nochk(_nIns+ (is_aligned?4:5));
+    } else {
+        NanoAssert(ins->isInAr());
+        int d = arDisp(ins);
+        asm_str(IP, FP, d);
+        asm_ld_imm(IP, fp[0]);
+        asm_str(IP, FP, d+4);
+        asm_ld_imm(IP, fp[1]);
+        asm_str(IP, FP, d+8);
+        asm_ld_imm(IP, fp[2]);
+        asm_str(IP, FP, d+12);
+        asm_ld_imm(IP, fp[3]);
+    }
+    
+    freeResourcesOf(ins);
+}
+                    
+void Assembler::asm_f2f4(LIns *ins) {
+    NanoAssert(ARM_VFP);
+    Register qd = prepareResultReg(ins, FpQRegs );
+    Register rs = findRegFor(ins->oprnd1(), FpSRegs);
+    VDUP(qd, rs);
+    freeResourcesOf(ins);
+}
+    
+void Assembler::asm_f4comp(LIns *ins) {
+    LIns *a = ins->oprnd1();
+    NanoAssert(ins->isF() && a->isF4());
+    Register rd = prepareResultReg(ins, FpSRegs);
+    Register rs = findRegFor(a, LowBankFPMask );
+    int idx = 0;
+    switch(ins->opcode()){
+        default: NanoAssertMsg(0,"unsupported opcode in asm_f4comp"); break;
+        case LIR_f4x: idx = 0; break;
+        case LIR_f4y: idx = 1; break;
+        case LIR_f4z: idx = 2; break;
+        case LIR_f4w: idx = 3; break;
+    }
+    
+    rs = SReg(4* FpQRegNum(rs)) + idx;
+    NanoAssert(IsFpSReg(rs));
+    FCPYS(rd,rs);
+
+    freeResourcesOf(ins);
+}
+    
+void Assembler::asm_condf4(LIns *ins) {
+    Register rd = prepareResultReg(ins, GpRegs);
+    SETEQ(rd);
+    freeResourcesOf(ins);
+    asm_cmpf4(ins);
+}
+               
+// WARNING: This function cannot generate any code that will affect the
+// condition codes prior to the generation of the ucomisd.  See asm_cmpi()
+// for more details.
+void Assembler::asm_cmpf4(LIns *ins) {
+
+    NanoAssert(ins->opcode()== LIR_eqf4);
+    NanoAssert(ARM_VFP);
+
+    LIns* lhs = ins->oprnd1();
+    LIns* rhs = ins->oprnd2();
+    NanoAssert( lhs->isF4() && rhs->isF4() );
+   
+    /* We do this:
+      - compare vectors for equality (VCEQ) - 4 32-bit elements, either 0xff(eq) or 0x0 (neq)
+      - Narrow result (VMOVN) - 4 16-bit elements in a Dn reg (the lower half of the Qn)
+      - Negate result (VMVN) - 4 16-bit elements, 0x0 for eq, 0xff for new
+      - Compare Dn reg with 0
+      - FMSTAT - transfer to flags
+    */
+    
+    FMSTAT();
+
+    Register tmp = _allocator.allocTempReg(FpQRegs,Q0);
+    Register tmp0 = DReg(FpQRegNum(tmp)*2);
+    Register tmp1 = tmp0+1; // ok since tmp0 can't be D15
+    VCMPZ(tmp1);
+    VMVN(tmp1,tmp0);
+    VMOVN(tmp0,tmp);
+
+    Register ra, rb;
+    RegisterMask allow = FpQRegs & ~rmask(tmp);
+    findRegFor2(allow, lhs, ra, allow, rhs, rb);
+    VCEQ(tmp,ra,rb);
+}
+#endif // VMCFG_FLOAT
+
 
 void
 Assembler::asm_fneg(LIns* ins)
 {
     LIns* lhs = ins->oprnd1();
-
-    Register dd = prepareResultReg(ins, FpRegs);
+#ifdef VMCFG_FLOAT
+    NanoAssert((lhs->isD() && ins->isD())   ||
+               (lhs->isF4() && ins->isF4()) ||
+               (lhs->isF() && ins->isF()));
+#endif         
+    RegisterMask resultMask = IFFLOAT(ins->isD() ? FpDRegs :ins->isF() ? FpSRegs : FpQRegs
+                                , FpDRegs);
+    Register dd = prepareResultReg(ins,resultMask );
     // If the argument doesn't have a register assigned, re-use dd.
     Register dm = lhs->isInReg() ? lhs->getReg() : dd;
 
-    FNEGD(dd, dm);
+    VNEG(dd, dm);
 
     freeResourcesOf(ins);
     if (dd == dm) {
@@ -2159,36 +2810,87 @@ Assembler::asm_fop(LIns* ins)
     LIns*   lhs = ins->oprnd1();
     LIns*   rhs = ins->oprnd2();
 
-    Register    dd = prepareResultReg(ins, FpRegs);
-    // Try to re-use the result register for one of the arguments.
+#ifdef VMCFG_FLOAT
+    NanoAssert((ins->isD() && lhs->isD() && rhs->isD())
+            || (ins->isF() && lhs->isF() && rhs->isF())
+            || (ins->isF4() && lhs->isF4() && rhs->isF4()));
+    RegisterMask legalQRegs = FpQRegs;
+    if(ins->opcode()==LIR_divf4){
+        // We do divf4 through 4 fdivs; we are restricted to the low bank of Qn regs
+        legalQRegs = LowBankFPMask;
+    }
+    Register    dd = ins->isD()? prepareResultReg(ins, FpDRegs): 
+                     ins->isF()? prepareResultReg(ins, FpSRegs)
+                               : prepareResultReg(ins, legalQRegs);
+#else 
+    Register    dd = prepareResultReg(ins, FpDRegs);
+#endif // VMCFG_FLOAT
+
+
     Register    dn = lhs->isInReg() ? lhs->getReg() : dd;
     Register    dm = rhs->isInReg() ? rhs->getReg() : dd;
-    if ((dn == dm) && (lhs != rhs)) {
-        // We can't re-use the result register for both arguments, so force one
-        // into its own register.
-        dm = findRegFor(rhs, FpRegs & ~rmask(dd));
+
+#ifdef VMCFG_FLOAT
+    if(ins->opcode()==LIR_divf4){
+        if(lhs->isInReg()){
+            if(! (rmask(dn) & legalQRegs) ){
+                if(rhs->isInReg()){ // try to reuse the dd Register
+                    dn = dd; 
+                } else {
+                    dn = findRegFor(lhs,legalQRegs & ~rmask(dd) );
+                }
+            }
+        }
+        
+        if(lhs==rhs){
+            dm = dn; 
+        } else{
+            if(rhs->isInReg()){
+                if(! (rmask(dm) & legalQRegs) ){
+                    if(dn!=dd){ // try to reuse the dd Register, if possible
+                        dm = dd;
+                    } else {
+                        dm = findRegFor(rhs,legalQRegs & ~rmask(dd) & ~rmask(dn) );
+                    }
+                }
+            }            
+        }
+        
+    } 
+#endif // VMCFG_FLOAT
+
+    if ( (dn == dm) && (lhs != rhs) ) {
+    // We can't re-use the result register for both arguments, so we'll force one
+    // into its own register.
+        RegisterMask allowedRegs = IFFLOAT( (rhs->isD()? FpDRegs : rhs->isF() ? FpSRegs : legalQRegs), FpRegs);
+        dm = findRegFor(rhs, allowedRegs  & ~rmask(dd));
         NanoAssert(rhs->isInReg());
     }
 
     // TODO: Special cases for simple constants.
 
     switch(ins->opcode()) {
-        case LIR_addd:      FADDD(dd,dn,dm);        break;
-        case LIR_subd:      FSUBD(dd,dn,dm);        break;
-        case LIR_muld:      FMULD(dd,dn,dm);        break;
-        case LIR_divd:      FDIVD(dd,dn,dm);        break;
-        default:            NanoAssert(0);          break;
+        CASEF(LIR_addf:)CASEF(LIR_addf4:)case LIR_addd:      VADD(dd,dn,dm);        break;
+        CASEF(LIR_subf:)CASEF(LIR_subf4:)case LIR_subd:      VSUB(dd,dn,dm);        break;
+        CASEF(LIR_mulf:)CASEF(LIR_mulf4:)case LIR_muld:      VMUL(dd,dn,dm);        break;
+        CASEF(LIR_divf:)CASEF(LIR_divf4:)case LIR_divd:      VDIV(dd,dn,dm);        break;
+        default: NanoAssert(false); break;
     }
 
     freeResourcesOf(ins);
 
     // If we re-used the result register, mark it as active.
     if (dn == dd) {
-        NanoAssert(!lhs->isInReg());
-        findSpecificRegForUnallocated(lhs, dd);
-    } else if (dm == dd) {
-        NanoAssert(!rhs->isInReg());
-        findSpecificRegForUnallocated(rhs, dd);
+        if(lhs->isInReg())
+            findSpecificRegFor(lhs,dd);
+        else
+            findSpecificRegForUnallocated(lhs, dd);
+    } else if (dm == dd ) {
+        if(rhs->isInReg()){
+            findSpecificRegFor(rhs, dd);
+        } else {
+            findSpecificRegForUnallocated(rhs, dd);
+        }
     } else {
         NanoAssert(lhs->isInReg());
         NanoAssert(rhs->isInReg());
@@ -2201,21 +2903,23 @@ Assembler::asm_cmpd(LIns* ins)
     LIns* lhs = ins->oprnd1();
     LIns* rhs = ins->oprnd2();
     LOpcode op = ins->opcode();
-
+    bool singlePrecision = IFFLOAT(isCmpFOpcode(op), false);
     NanoAssert(ARM_VFP);
-    NanoAssert(isCmpDOpcode(op));
-    NanoAssert(lhs->isD() && rhs->isD());
+    NanoAssert(  (isCmpDOpcode(op) && lhs->isD() && rhs->isD()) 
+    FLOAT_ONLY(||( singlePrecision && lhs->isF() && rhs->isF())) );
+    RegisterMask regClass = singlePrecision? FpSRegs:FpDRegs;
 
     Register ra, rb;
-    findRegFor2(FpRegs, lhs, ra, FpRegs, rhs, rb);
+    findRegFor2(regClass, lhs, ra, regClass, rhs, rb);
 
-    int e_bit = (op != LIR_eqd);
+    int e_bit = op != LIR_eqd;
+    FLOAT_ONLY( e_bit &= op != LIR_eqf );
 
     // Do the comparison and get results loaded in ARM status register.
     // TODO: For asm_condd, we should put the results directly into an ARM
     // machine register, then use bit operations to get the result.
     FMSTAT();
-    FCMPD(ra, rb, e_bit);
+    VCMP(ra, rb, e_bit);
 }
 
 /* Call this with targ set to 0 if the target is not yet known and the branch
@@ -2241,11 +2945,11 @@ Assembler::asm_branch(bool branchOnFalse, LIns* cond, NIns* targ)
         // Floating-point conditions. Note that the VFP LT/LE conditions
         // require use of the unsigned condition codes, even though
         // float-point comparisons are always signed.
-        case LIR_eqd:   cc = EQ;    fp_cond = true;     break;
-        case LIR_ltd:   cc = LO;    fp_cond = true;     break;
-        case LIR_led:   cc = LS;    fp_cond = true;     break;
-        case LIR_ged:   cc = GE;    fp_cond = true;     break;
-        case LIR_gtd:   cc = GT;    fp_cond = true;     break;
+        case LIR_eqd:CASEF(LIR_eqf:)   cc = EQ;    fp_cond = true;     break;
+        case LIR_ltd:CASEF(LIR_ltf:)   cc = LO;    fp_cond = true;     break;
+        case LIR_led:CASEF(LIR_lef:)   cc = LS;    fp_cond = true;     break;
+        case LIR_ged:CASEF(LIR_gef:)   cc = GE;    fp_cond = true;     break;
+        case LIR_gtd:CASEF(LIR_gtf:)   cc = GT;    fp_cond = true;     break;
 
         // Standard signed and unsigned integer comparisons.
         case LIR_eqi:   cc = EQ;    fp_cond = false;    break;
@@ -2310,7 +3014,19 @@ Assembler::asm_cmp(LIns *cond)
         asm_cmpd(cond);
         return;
     }
-
+#ifdef VMCFG_FLOAT
+    if (lhs->isF()) {
+        NanoAssert(rhs->isF());
+        asm_cmpd(cond);
+        return;
+    }
+    if (lhs->isF4()) {
+        NanoAssert(rhs->isF4());
+        asm_cmpf4(cond);
+        return;
+    }
+#endif 
+    
     NanoAssert(lhs->isI() && rhs->isI());
 
     // ready to issue the compare
@@ -2352,11 +3068,17 @@ Assembler::asm_condd(LIns* ins)
 {
     Register rd = prepareResultReg(ins, GpRegs);
 
+    LOpcode op = ins->opcode();
+#ifdef VMCFG_FLOAT
+    if( isCmpFOpcode(op) ) 
+        op = getCmpDOpcode(op); // the only difference between float/double is in asm_cmpd
+#endif 
+
     // TODO: Modify cmpd to allow the FP flags to move directly to an ARM
     // machine register, then use simple bit operations here rather than
     // conditional moves.
 
-    switch (ins->opcode()) {
+    switch (op) {
         case LIR_eqd:   SETEQ(rd);      break;
         case LIR_ltd:   SETLO(rd);      break; // Note: VFP LT/LE operations require
         case LIR_led:   SETLS(rd);      break; // unsigned LO/LS condition codes!
@@ -2645,12 +3367,21 @@ Assembler::asm_cmov(LIns* ins)
     LIns*           condval = ins->oprnd1();
     LIns*           iftrue  = ins->oprnd2();
     LIns*           iffalse = ins->oprnd3();
-    RegisterMask    allow = ins->isD() ? FpRegs : GpRegs;
+    RegisterMask    allow = ins->isD() ? FpDRegs :
+#ifdef VMCFG_FLOAT
+                            ins->isF() ? FpSRegs :
+                            ins->isF4()? FpQRegs : 
+#endif
+                                                   GpRegs;
     ConditionCode   cc;
 
     NanoAssert(condval->isCmp());
-    NanoAssert((ins->isop(LIR_cmovi) && iftrue->isI() && iffalse->isI()) ||
-               (ins->isop(LIR_cmovd) && iftrue->isD() && iffalse->isD()));
+    NanoAssert((ins->isop(LIR_cmovi) && iftrue->isI() && iffalse->isI())  ||
+#ifdef VMCFG_FLOAT
+               (ins->isop(LIR_cmovf4)&& iftrue->isF4()&& iffalse->isF4()) ||
+               (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
+#endif
+               (ins->isop(LIR_cmovd) && iftrue->isD() && iffalse->isD())  );
 
     Register rd = prepareResultReg(ins, allow);
 
@@ -2679,10 +3410,16 @@ Assembler::asm_cmov(LIns* ins)
         case LIR_gtui:  cc = HI;        break;
         case LIR_geui:  cc = HS;        break;
         // VFP comparisons.
+        CASEF(LIR_eqf:)
+        CASEF(LIR_eqf4:)
         case LIR_eqd:   cc = EQ;        break;
+        CASEF(LIR_ltf:)
         case LIR_ltd:   cc = LO;        break;
+        CASEF(LIR_lef:)
         case LIR_led:   cc = LS;        break;
+        CASEF(LIR_gef:)
         case LIR_ged:   cc = GE;        break;
+        CASEF(LIR_gtf:)
         case LIR_gtd:   cc = GT;        break;
     }
 
@@ -2699,18 +3436,33 @@ Assembler::asm_cmov(LIns* ins)
         if (rd != rt) {
             MOV_cond(cc, rd, rt);
         }
-    } else if (ins->isD()) {
+    } else if (ins->isD() FLOAT_ONLY(|| ins->isF()) ) {
         // The VFP sequence is similar to the integer sequence, but uses a
         // VFP instruction in place of MOV.
         NanoAssert(ARM_VFP);
         if (rd != rf) {
-            FCPYD_cond(OppositeCond(cc), rd, rf);
+            VMOV_cond(OppositeCond(cc), rd, rf);
         }
         if (rd != rt) {
-            FCPYD_cond(cc, rd, rt);
+            VMOV_cond(cc, rd, rt);
         }
     } else {
-        NanoAssert(0);
+        NanoAssert( IFFLOAT(ins->isF4(), 0) ); 
+#ifdef VMCFG_FLOAT
+        // There is no conditional move for Qn regs; we move the Dn regs
+        Register rd0 = DReg(2*FpQRegNum(rd));
+        NanoAssert(ARM_VFP);
+        if (rd != rf) {
+            Register rf0 = DReg(2*FpQRegNum(rf));
+            VMOV_cond(OppositeCond(cc), rd0, rf0); rd0 = rd0 + 1; rf0 = rf0 + 1;
+            VMOV_cond(OppositeCond(cc), rd0, rf0); rd0 = rd0 - 1; //rd0 may be used below, restore.
+        }
+        if (rd != rt) {
+            Register rt0 = DReg(2*FpQRegNum(rt));
+            VMOV_cond(cc, rd0, rt0); rd0 = rd0 + 1; rt0 = rt0 + 1;
+            VMOV_cond(cc, rd0, rt0);
+        }
+#endif
     }
 
     freeResourcesOf(ins);
@@ -2792,14 +3544,21 @@ void
 Assembler::asm_ret(LIns *ins)
 {
     genEpilogue();
+#ifdef VMCFG_FLOAT
+    bool isFPR = ins->isop(LIR_retd) || ins->isop(LIR_retf) || ins->isop(LIR_retf4);
+    bool singlePrecision = isFPR && ins->isop(LIR_retf);
+    bool quad = isFPR && ins->isop(LIR_retf4);
+#else
+    bool isFPR = ins->isop(LIR_retd);
+#endif // VMCFG_FLOAT
 
     // NB: our contract with genEpilogue is actually that the return value
     // we are intending for R0 is currently IP, not R0. This has to do with
     // the strange dual-nature of the patchable jump in a side-exit. See
     // nPatchBranch.
     //
-    // With hardware floating point ABI we can skip this for retd.
-    if (!(ARM_EABI_HARD && ins->isop(LIR_retd))) {
+    // With hardware floating point ABI we can skip this for retd/retf/retf4.
+    if (!(ARM_EABI_HARD && isFPR) ) {
         MOV(IP, R0);
     }
 
@@ -2813,15 +3572,31 @@ Assembler::asm_ret(LIns *ins)
         findSpecificRegFor(value, R0);
     }
     else {
-        NanoAssert(ins->isop(LIR_retd));
+        NanoAssert(isFPR);
         if (ARM_VFP) {
 #ifdef NJ_ARM_EABI_HARD_FLOAT
-            findSpecificRegFor(value, D0);
+            findSpecificRegFor(value, FLOAT_ONLY(singlePrecision ? S0 : quad ? Q0 :) D0 );
 #else
-            Register reg = findRegFor(value, FpRegs);
+            Register reg = findRegFor(value, FLOAT_ONLY(singlePrecision ? FpSRegs : quad ? FpQRegs:) FpDRegs );
+#ifdef VMCFG_FLOAT
+            if(singlePrecision)
+                FMRS(R0,reg);
+            else {
+                if(quad){
+                    reg = DReg(2*FpQRegNum(reg)) + 1;
+                    NanoAssert(IsFpDReg(reg));
+                    FMRRD(R2,R3,reg);
+                    reg = reg - 1;
+                    NanoAssert(IsFpDReg(reg));
+                }
+                FMRRD(R0, R1, reg);
+            }
+#else 
             FMRRD(R0, R1, reg);
+#endif // VMCFG_FLOAT
 #endif
         } else {
+            FLOAT_ONLY( NanoAssert(!singlePrecision && !quad) );
             NanoAssert(value->isop(LIR_ii2d));
             findSpecificRegFor(value->oprnd1(), R0); // lo
             findSpecificRegFor(value->oprnd2(), R1); // hi
@@ -2833,7 +3608,7 @@ void
 Assembler::asm_jtbl(LIns* ins, NIns** table)
 {
     Register indexreg = findRegFor(ins->oprnd1(), GpRegs);
-    Register tmp = _allocator.allocTempReg(GpRegs & ~rmask(indexreg));
+    Register tmp = _allocator.allocTempReg(GpRegs & ~rmask(indexreg), R0);
     LDR_scaled(PC, tmp, indexreg, 2);      // LDR PC, [tmp + index*4]
     asm_ld_imm(tmp, (int32_t)table);       // tmp = #table
 }
