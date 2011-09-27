@@ -75,10 +75,30 @@ for each(var f in fractions) {
     for (var i = 0; i < i_loops; i++) {
         for (var j = 0; j < j_loops; j++)
             a[0] = 3.14159 + i * j; // compute a Number and store it in a * location to box it
-        var before = System.totalMemory - System.freeMemory;
+
+        // Bugzilla 685161: Invoking a System method can disrupt
+        // observed memory if its MethodSignature had been evicted but
+        // weakly-held until some GC during loop freed it and cleared
+        // the weak ref.
+        //
+        // As work-around, pre-call pauseForGCIfCollectionImminent
+        // with imminence=1.0 (which should be a no-op) and the two
+        // getters, ensuring all MethodSignatures are available before
+        // memory observations in critical section.
+        System.pauseForGCIfCollectionImminent(1.0);
+        System.totalMemory;
+        System.freeMemory;
+
+        // Start critical section
+        var beforeTotal = System.totalMemory;
+        var beforeFree = System.freeMemory;
         System.pauseForGCIfCollectionImminent(f);
-        var after = System.totalMemory - System.freeMemory;
-        
+        var afterTotal = System.totalMemory;
+        var afterFree = System.freeMemory;
+        // End of critical section
+
+        var before = beforeTotal - beforeFree;
+        var after = afterTotal - afterFree;
         if (after < before)
             hits++;
         if (((i + 1) % 100) == 0)
