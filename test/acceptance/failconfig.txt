@@ -146,7 +146,6 @@ regress/bug_558442a, arm-winmobile-emulator.*,, skip , https://bugzilla.mozilla.
 ####################
 # verifier
 ####################
-regress/bug_498979, -Dverifyall,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=498979
 
 ####################
 # Sampling

@@ -206,6 +206,7 @@ mops/mops, Dgreedy,, skip, skip slow test in -Dgreedy mode
 # verifier
 ####################
 regress/bug_555705, -Dverifyall,, skip, test throws an expected verifyerror that is normally caught by the test itself
+regress/bug_498979, -Dverifyall,, skip, test contains OP_callstatic instruction which can't be verified in -Dverifyall mode
 
 ####################
 # ATS
@@ -250,6 +251,7 @@ ecma3/Exceptions/exception_011_rt, .*-Dverifyonly.*,, skip, Test expects exitcod
 regress/bug_515935, .*-Dverifyonly.*,, skip, out of memory test
 regress/bug_555542, .*-Dverifyonly.*,, skip, uncaught ReferenceError test
 regress/bug_555705, .*-Dverifyonly.*,, skip, test intentionally throws a verifyerror
+abcasm/bug_655118, .*-Dverifyonly.*,, skip, uncaught ReferenceError test
 
 ####################
 # AOT specific
