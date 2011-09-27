@@ -70,10 +70,10 @@ The values of these types appear directly in the ABC file or in the instruction
 encodings. Important characteristics of these types are:
 - int - This type is used to represent an integer valued number whose values are 
 32-bit signed two’s complement integers. The range of values is from -2,147,483,648 
-to 2,147,483,647 (-2^31 to 2^31 -1), inclusive.
+to 2,147,483,647 (-2^31 to 2^31 - 1), inclusive.
 - uint - This type is used for integer valued numbers with values that are 32-bit 
-unsigned two’s complement integers. The range of values is from 0 to 4,294,967,296 
-(2^32), inclusive.
+unsigned two’s complement integers. The range of values is from 0 to 4,294,967,295 
+(2^32 - 1), inclusive.
 - double - This type is used for capturing floating point numbers using 64-bit double precision IEEE
 754 values as specified in IEEE Standard for Binary Floating-Point Arithmetic (ANSI/IEEE Standard. 
 754 - 1985).
