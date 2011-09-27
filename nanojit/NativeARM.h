@@ -93,7 +93,14 @@ namespace nanojit
 #define NJ_F2I_SUPPORTED                1
 #define NJ_SOFTFLOAT_SUPPORTED          1
 #define NJ_DIVI_SUPPORTED               0
-#define RA_PREFERS_MSREG                1
+
+#ifndef VMCFG_FLOAT
+#   define RA_PREFERS_MSREG                1
+#else
+#   define RA_REGISTERS_OVERLAP            1
+#   define firstAvailableReg               getAvailableReg
+#   define getFatherReg                    _allocator.getSuitableRegFor
+#endif
 
 #define NJ_CONSTANT_POOLS
 const int NJ_MAX_CPOOL_OFFSET = 4096;
@@ -126,6 +133,7 @@ static const Register
     LR  = { 14 },
     PC  = { 15 },
 
+#ifndef VMCFG_FLOAT
     // VFP regs (we currently only use D0-D7 and S0)
     D0 = { 16 },
     D1 = { 17 },
@@ -146,11 +154,105 @@ static const Register
     // S0 overlaps with D0 and is hard-coded into i2d and u2f operations
     S0 = { 24 },
 
+#else
+    // VFP regs
+    S0  = { 16 },
+    S1  = S0 + 1,
+    S2  = S0 + 2,
+    S3  = S0 + 3,
+    S4  = S0 + 4,
+    S5  = S0 + 5,
+    S6  = S0 + 6,
+    S7  = S0 + 7,
+    S8  = S0 + 8,
+    S9  = S0 + 9,
+    S10 = S0 +10,
+    S11 = S0 +11,
+    S12 = S0 +12,
+    S13 = S0 +13,
+    S14 = S0 +14,
+    S15 = S0 +15,
+    S16 = S0 +16,
+    S17 = S0 +17,
+    S18 = S0 +18,
+    S19 = S0 +19,
+    S20 = S0 +20,
+    S21 = S0 +21,
+    S22 = S0 +22,
+    S23 = S0 +23,
+    S24 = S0 +24,
+    S25 = S0 +25,
+    S26 = S0 +26,
+    S27 = S0 +27,
+    S28 = S0 +28,
+    S29 = S0 +29,
+    S30 = S0 +30,
+    S31 = S0 +31,
+    // We reverse the order of the Dn register banks: first, the Dn regs that have no Sn subregs
+    D16 = { 48 },
+    D17 = D16+ 1,
+    D18 = D16+ 2,
+    D19 = D16+ 3,
+    D20 = D16+ 4,
+    D21 = D16+ 5,
+    D22 = D16+ 6,
+    D23 = D16+ 7,
+    D24 = D16+ 8,
+    D25 = D16+ 9,
+    D26 = D16+10,
+    D27 = D16+11,
+    D28 = D16+12,
+    D29 = D16+13,
+    D30 = D16+14,
+    D31 = D16+15,
+    // The following regs are just alternate names for gruops of registers already listed above
+    D0  = { 64 },
+    D1  = D0 + 1,
+    D2  = D0 + 2,
+    D3  = D0 + 3,
+    D4  = D0 + 4,
+    D5  = D0 + 5,
+    D6  = D0 + 6,
+    D7  = D0 + 7,
+    D8  = D0 + 8,
+    D9  = D0 + 9,
+    D10 = D0 +10,
+    D11 = D0 +11,
+    D12 = D0 +12,
+    D13 = D0 +13,
+    D14 = D0 +14,
+    D15 = D0 +15,
+    
+    Q0  = { 80 },
+    Q1  = { 81 },
+    Q2  = { 82 },
+    Q3  = { 83 },
+    Q4  = { 84 },
+    Q5  = { 85 },
+    Q6  = { 86 },
+    Q7  = { 87 },
+    Q8  = { 88 },
+    Q9  = { 89 },
+    Q10 = { 90 },
+    Q11 = { 91 },
+    Q12 = { 92 },
+    Q13 = { 93 },
+    Q14 = { 94 },
+    Q15 = { 95 },
+
+    FirstDFloatReg = D16,
+    FirstQFloatReg = Q0,
+    FirstSFloatReg = S0,
+
+    UnspecifiedReg = { 128 },
+    deprecated_UnknownReg = { 128 },     // XXX: remove eventually, see bug 538924
+#endif
     SBZ = { 0 } ;   // Used for 'should-be-zero' fields in instructions with
                     // unused register fields.
 
 static const uint32_t FirstRegNum = 0; /* R0 */
-static const uint32_t LastRegNum = 23; /* D7 */
+static const uint32_t LastRegNum = IFFLOAT( 95; /* Q15 */ 
+                                          , 23; /* D7 */ )
 }
 
 #define NJ_USE_UINT32_REGISTER 1
@@ -191,7 +293,14 @@ typedef enum {
 // meaning.
 #define OppositeCond(cc)  ((ConditionCode)((unsigned int)(cc)^0x1))
 
-typedef uint32_t RegisterMask;
+#ifdef VMCFG_FLOAT
+    typedef uint64_t RegisterMask;
+#   define rmask(r) ARM_REG_MASKS[REGNUM(r)]
+    extern const RegisterMask ARM_REG_MASKS[LastRegNum+1];
+#else
+    typedef uint32_t RegisterMask;
+#endif 
+
 typedef struct _FragInfo {
     RegisterMask    needRestoring;
     NIns*           epilogue;
@@ -201,7 +310,7 @@ typedef struct _ParameterRegisters {
     int stkd;
     Register r;
 #ifdef NJ_ARM_EABI_HARD_FLOAT
-    Register float_r;
+    IFFLOAT( RegisterMask float_r, Register float_r);
 #endif
 } ParameterRegisters;
 
@@ -211,6 +320,17 @@ typedef struct _ParameterRegisters {
 #define init_params(a,b,c) { (a), (b) }
 #endif
 
+#ifdef VMCFG_FLOAT
+const RegisterMask SavedFpRegs = 0x0000ffff00000000LL; // S16,S17,S18,S19,S20,S21,S22,S23,S23,S25,S26,S27,S28,S29,S30,S31; or Q4-Q7, or D8-D15
+const RegisterMask SavedRegs = SavedFpRegs | 0x7f0; // R4, R5, R6, R7, R8, R9, R10, SAVED_FPREGS_LIST
+const int NumSavedRegs = 23;
+
+const RegisterMask FpSRegs = 0x0000ffffffff0000LL; // S0,S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14,S15,S16,S17,S18,S19,S20,S21,S22,S23,S24,S25,S26,S27,S28,S29,S30,S31
+const RegisterMask FpDRegs = 0xffffffffffff0000LL; //  D0,D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31;
+const RegisterMask FpQRegs = 0xffffffffffff0000LL; // Q0,Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8,Q9,Q10,Q11,Q12,Q13,Q14,Q15 
+const RegisterMask GpRegs  = 0xffff; // R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,FP,IP,SP,LR,PC
+const RegisterMask AllowableFlagRegs = 0x07ff; // R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10 
+#else
 // D0-D7 are not saved; D8-D15 are, but we don't use those,
 // so we don't have to worry about saving/restoring them
 static const RegisterMask SavedFpRegs = 0;
@@ -220,17 +340,42 @@ static const int NumSavedRegs = 7;
 static const RegisterMask FpRegs = 1<<D0 | 1<<D1 | 1<<D2 | 1<<D3 | 1<<D4 | 1<<D5 | 1<<D6 | 1<<D7;
 static const RegisterMask GpRegs = 0xFFFF;
 static const RegisterMask AllowableFlagRegs = 1<<R0 | 1<<R1 | 1<<R2 | 1<<R3 | 1<<R4 | 1<<R5 | 1<<R6 | 1<<R7 | 1<<R8 | 1<<R9 | 1<<R10;
+#define FpDRegs FpRegs
+#define FpSRegs 1 << S0   // Not implemented
+#define FpQRegs 0         // Not implemented
+#endif // VMCFG_FLOAT
 
 #define isU12(offs) (((offs) & 0xfff) == (offs))
 
-// True if this is a (managed) FP register (i.e. D0-D7 in our case)
-inline bool IsFpReg(Register _r) { return (rmask(_r) & FpRegs) != 0; }
-// True if this is a GP register (i.e. R0-R10 SP FP IP LR PC in our case)
-inline bool IsGpReg(Register _r) { return (rmask(_r) & GpRegs) != 0; }
-// True if single-precision FP register (i.e. S0)
-inline bool IsFpSReg(Register _r){ return _r == S0; } 
-#define FpRegNum(_fpr)  ((_fpr) - FirstFloatReg)
-#define FpDRegs FpRegs
+#ifdef VMCFG_FLOAT
+    inline bool IsFpSReg(Register _r) { return _r >=FirstSFloatReg && _r < FirstDFloatReg; }
+    inline bool IsFpDReg(Register _r) { return _r >=FirstDFloatReg && _r < FirstQFloatReg; }
+    inline bool IsFpQReg(Register _r) { return _r >=FirstQFloatReg && _r <= Q15; }
+    inline bool IsGpReg(Register _r) { return _r < FirstSFloatReg; }
+#   define FpSRegNum(_fpr)  (REGNUM(_fpr) - FirstSFloatReg )
+#   define FpDRegNum(_fpr)  ( (REGNUM(_fpr) - FirstDFloatReg) ^ 16 ) // mind the reversed order of the banks
+#   define FpQRegNum(_fpr)  (REGNUM(_fpr) - FirstQFloatReg )
+#   define SReg(num)  (FirstSFloatReg + (num) )
+#   define DReg(num)  (FirstDFloatReg + ((num) ^ 16))  // mind the reversed order of the register banks
+#   define QReg(num)  (FirstQFloatReg + (num) )
+
+#else
+    // True if this is a GP register (i.e. R0-R10 SP FP IP LR PC in our case)
+    inline bool IsGpReg(Register _r) { return (rmask(_r) & GpRegs) != 0; }
+    // True if single-precision FP register (i.e. Sn)
+    inline bool IsFpSReg(Register _r){ return _r == S0; } 
+    // True if this is a (managed) FP register (i.e. Dn in our case)
+    inline bool IsFpReg(Register _r) { return (rmask(_r) & FpRegs) != 0; }
+#   define IsFpDReg IsFpReg
+    inline bool IsFpQReg(Register _r) { (void)_r;return false; }
+#   define FpRegNum(_fpr)   ((_fpr) - FirstFloatReg)
+#   define FpDRegNum        FpRegNum
+#   define FpQRegNum(_fpr)  0
+#   define FpSRegNum(_fpr)  0
+#   define SReg(num)        S0
+#   define DReg(num)        (FirstFloatReg + (num) )
+#   define QReg(num)        UnspecifiedReg
+#endif
 
 #define firstreg()      R0
 
@@ -245,7 +390,11 @@ verbose_only( extern const char* shiftNames[]; )
 
 #define DECLARE_PLATFORM_REGALLOC()                                     \
     const static Register argRegs[4], retRegs[2];                       \
-                                                                        \
+FLOAT_ONLY(                                                             \
+    Register getAvailableReg(LIns* ins, Register regClass, RegisterMask allow);\
+    Register getSuitableRegFor(Register r, LIns* curins);               \
+)
+
 
 #ifdef DEBUG
 # define DECLARE_PLATFORM_ASSEMBLER_DEBUG()                             \
@@ -280,7 +429,7 @@ verbose_only( extern const char* shiftNames[]; )
     void        asm_cmpd(LIns *cond);                                           \
     void        asm_ld_imm(Register d, int32_t imm, bool chk = true);           \
     void        asm_arg(ArgType ty, LIns* arg, ParameterRegisters& params);     \
-    void        asm_arg_64(LIns* arg, ParameterRegisters& params);              \
+    void        asm_arg_float(LIns* arg, ParameterRegisters& params);           \
     void        asm_add_imm(Register rd, Register rn, int32_t imm, int stat = 0);   \
     void        asm_sub_imm(Register rd, Register rn, int32_t imm, int stat = 0);   \
     void        asm_and_imm(Register rd, Register rn, int32_t imm, int stat = 0);   \
@@ -288,6 +437,14 @@ verbose_only( extern const char* shiftNames[]; )
     void        asm_eor_imm(Register rd, Register rn, int32_t imm, int stat = 0);   \
     inline bool     encOp2Imm(uint32_t literal, uint32_t * enc);                \
     inline uint32_t CountLeadingZeroes(uint32_t data);                          \
+                                                                                \
+FLOAT_ONLY(                                                                     \
+    void        asm_immf_nochk(Register, int32_t);                              \
+    void        asm_cmpf4(LIns *cond);                                          \
+    Register    getAvailableReg(LIns* ins, RegisterMask m, Register regClass)   \
+               { return _allocator.getAvailableReg(ins, m, regClass); }         \
+)                                                                               \
+                                                                                \
     int *       _nSlot;                                                         \
     int *       _nExitSlot;                                                     \
     int         max_out_args; /* bytes */
@@ -862,253 +1019,397 @@ enum {
     } while(0)
 
 /*
- * VFP
+ * VFP, general encoding utilities
+ */
+
+#define split_qreg_enc(_Qd,D,Vd)  do{  Vd = FpQRegNum(_Qd);NanoAssert(Vd <= 15);\
+                                       Vd *= 2;                                 \
+                                       D = (Vd & 0x10) >> 4;                    \
+                                       Vd = Vd & 0xf; } while(0)
+#define split_dreg_enc(_Dd,D,Vd)  do{  Vd = FpDRegNum(_Dd);NanoAssert(Vd <= 31);\
+                                       D = (Vd & 0x10) >> 4;                    \
+                                       Vd = Vd & 0xf; } while(0)
+#define split_sreg_enc(_Sd,D,Vd)  do{  Vd = FpSRegNum(_Sd);NanoAssert(Vd <= 31);\
+                                       D = (Vd & 0x1);                          \
+                                       Vd = Vd >> 1; } while(0)
+    
+#define encodeCommon(_Dm,M,Vm,sOk,dOk,qOk)                                      \
+        if(IsFpSReg(_Dm)){                                                      \
+            NanoAssert( sOk || (#_Dm" register is Sn but Sn inacceptable"==0) );\
+            split_sreg_enc(_Dm,M,Vm);                                           \
+        } else if(IsFpDReg(_Dm)){                                               \
+            NanoAssert( dOk || (#_Dm" register is Dn but Dn inacceptable"==0) );\
+            split_dreg_enc(_Dm,M,Vm);                                           \
+        } else if(IsFpQReg(_Dm)){                                               \
+            NanoAssert( qOk || (#_Dm" register is Qn but Qn inacceptable"==0) );\
+            split_qreg_enc(_Dm,M,Vm);                                           \
+        } else {                                                                \
+            NanoAssert( dOk || (#_Dm" register should be FP register"==0) );    \
+            M=Vm=0;                                                             \
+        }
+
+
+#define __encodeRegM(_Dm,sOk,dOk,qOk)                               \
+        int M,Vm;                                                   \
+        encodeCommon(_Dm,M,Vm,sOk,dOk,qOk);                         \
+        DmEnc = (M << 5) | Vm;                                      
+#define __encodeRegN(_Dn,sOk,dOk,qOk)                               \
+        int N,Vn;                                                   \
+        encodeCommon(_Dn,N,Vn,sOk,dOk,qOk);                         \
+        DnEnc = (N<<7) | (Vn<<16);                                  
+#define __encodeRegD(_Dd,sOk,dOk,qOk)                               \
+        int D,Vd;                                                   \
+        encodeCommon(_Dd,D,Vd,sOk,dOk,qOk);                         \
+        DdEnc = (Vd<<12) | (D<<22);                                 
+#define DFlag(_Dd) ( IsFpDReg(_Dd) ? (1 << 8) : 0 )
+    
+#define encodeRegM(...) __encodeRegM(__VA_ARGS__)        
+#define encodeRegN(...) __encodeRegN(__VA_ARGS__)        
+#define encodeRegD(...) __encodeRegD(__VA_ARGS__)        
+
+
+#define SD_  true , true , false
+#define S__  true , false, false
+#define _D_  false, true , false
+#define __Q  false, false, true
+    
+/*
+ * VFP, instructions
  */
 
 #define FMDRR(_Dm,_Rd,_Rn) do {                                         \
         underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(IsFpReg(_Dm) && IsGpReg(_Rd) && IsGpReg(_Rn));       \
-        *(--_nIns) = (NIns)( COND_AL | (0xC4<<20) | ((_Rn)<<16) | ((_Rd)<<12) | (0xB1<<4) | (FpRegNum(_Dm)) ); \
-        asm_output("fmdrr %s,%s,%s", gpn(_Dm), gpn(_Rd), gpn(_Rn));    \
+        NanoAssert(ARM_VFP);                                            \
+        NanoAssert(IsGpReg(_Rd) && IsGpReg(_Rn));                       \
+        int DmEnc; encodeRegM(_Dm,_D_);                                 \
+        *(--_nIns) = (NIns)( COND_AL | (0xC4<<20) | ((_Rn)<<16) | ((_Rd)<<12) | (0xB1<<4) | DmEnc ); \
+        asm_output("fmdrr %s,%s,%s", gpn(_Dm), gpn(_Rd), gpn(_Rn));     \
     } while (0)
 
 #define FMRRD(_Rd,_Rn,_Dm) do {                                         \
         underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(IsGpReg(_Rd) && IsGpReg(_Rn) && IsFpReg(_Dm));       \
-        *(--_nIns) = (NIns)( COND_AL | (0xC5<<20) | ((_Rn)<<16) | ((_Rd)<<12) | (0xB1<<4) | (FpRegNum(_Dm)) ); \
-        asm_output("fmrrd %s,%s,%s", gpn(_Rd), gpn(_Rn), gpn(_Dm));    \
+        NanoAssert(ARM_VFP);                                            \
+        NanoAssert(IsGpReg(_Rd) && IsGpReg(_Rn));                       \
+        int DmEnc; encodeRegM(_Dm,_D_);                                 \
+        *(--_nIns) = (NIns)( COND_AL | (0xC5<<20) | ((_Rn)<<16) | ((_Rd)<<12) | (0xB1<<4) | DmEnc ); \
+        asm_output("fmrrd %s,%s,%s", gpn(_Rd), gpn(_Rn), gpn(_Dm));     \
     } while (0)
 
 #define FMRDH(_Rd,_Dn) do {                                             \
         underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(IsGpReg(_Rd) && IsFpReg(_Dn));                       \
-        *(--_nIns) = (NIns)( COND_AL | (0xE3<<20) | (FpRegNum(_Dn)<<16) | ((_Rd)<<12) | (0xB<<8) | (1<<4) ); \
+        NanoAssert(ARM_VFP);                                            \
+        NanoAssert(IsGpReg(_Rd) );                                      \
+        int DnEnc; encodeRegN(_Dn,_D_);                                 \
+        *(--_nIns) = (NIns)( COND_AL | (0xE3<<20) | DnEnc | ((_Rd)<<12) | 0xB10 ); \
         asm_output("fmrdh %s,%s", gpn(_Rd), gpn(_Dn));                  \
     } while (0)
 
 #define FMRDL(_Rd,_Dn) do {                                             \
         underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(IsGpReg(_Rd) && IsFpReg(_Dn));                       \
-        *(--_nIns) = (NIns)( COND_AL | (0xE1<<20) | (FpRegNum(_Dn)<<16) | ((_Rd)<<12) | (0xB<<8) | (1<<4) ); \
+        NanoAssert(ARM_VFP);                                            \
+        NanoAssert(IsGpReg(_Rd));                                       \
+        int DnEnc; encodeRegN(_Dn,DnEnc,_D_);                           \
+        *(--_nIns) = (NIns)( COND_AL | (0xE1<<20) | DnEnc | ((_Rd)<<12) | 0xB10 ); \
         asm_output("fmrdh %s,%s", gpn(_Rd), gpn(_Dn));                  \
     } while (0)
 
-#define FSTD_allowD7(_Dd,_Rn,_offs,_allowD7) do {                       \
-        underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                            \
-        NanoAssert(((_offs)%4) == 0);                                   \
-        NanoAssert(isU8((_offs)/4) || isU8(-(_offs)/4));                \
-        NanoAssert(IsFpReg(_Dd) && IsGpReg(_Rn));                       \
-        int negflag = 1<<23;                                            \
-        intptr_t offs = (_offs);                                        \
-        if (_offs < 0) {                                                \
-            negflag = 0<<23;                                            \
-            offs = -(offs);                                             \
-        }                                                               \
-        *(--_nIns) = (NIns)( COND_AL | (0xD0<<20) | ((_Rn)<<16) | (FpRegNum(_Dd)<<12) | (0xB<<8) | negflag | ((offs>>2)&0xff) ); \
-        asm_output("fstd %s,%s(%d)", gpn(_Dd), gpn(_Rn), _offs);    \
-    } while (0)
-
-#define FSTD(_Dd,_Rn,_offs) \
-        FSTD_allowD7(_Dd,_Rn,_offs,0)
-
-#define FLDD_chk(_Dd,_Rn,_offs,_chk) do {                               \
+#define VLDR_chk(_Dd,_Rn,_offs,_chk) do{ \
         if(_chk) underrunProtect(4);                                    \
         NanoAssert(ARM_VFP);                                            \
+        NanoAssert(((_offs) % 4) == 0);                                 \
+        NanoAssert(isU8((_offs)/4) || isU8(-(_offs)/4));                \
+        NanoAssert( IsGpReg(_Rn));                                      \
+        int negflag = 1<<23;                                            \
+        int dflag = DFlag(_Dd);                                         \
+        int DdEnc; encodeRegD(_Dd,SD_);                                 \
+        intptr_t offs = (_offs);                                        \
+        if (_offs < 0) {                                                \
+            negflag = 0<<23;                                            \
+            offs = -(offs);                                             \
+        }                                                               \
+        *(--_nIns) = (NIns)( COND_AL | (0xD1<<20) | ((_Rn)<<16) | DdEnc | (0xA<<8) | dflag | negflag | ((offs>>2)&0xff) ); \
+        asm_output("fld%c %s,%s(%d)", dflag?'d':'s', gpn(_Dd), gpn(_Rn), _offs); \
+    } while(0)
+
+#define VLDQR(_Qd,_Rn) do {                                             \
+        underrunProtect(4);                                             \
+        NanoAssert(ARM_VFP);                                            \
+        NanoAssert( IsGpReg(_Rn));                                      \
+        int DdEnc; encodeRegD(_Qd,__Q);                                 \
+        *(--_nIns) = (NIns)( COND_AL | (0xC9<<20) | ((_Rn)<<16) | DdEnc | 0xB04 );        \
+        asm_output("vldm <d%d,d%d>,%s // i.e. %s",  Vd+D*16,Vd+D*16+1,gpn(_Rn),gpn(_Qd)); \
+    } while (0)
+
+#define FLDD_chk VLDR_chk
+#define FLDS_chk VLDR_chk
+#define FLDD(_Dd,_Rn,_offs) FLDD_chk(_Dd,_Rn,_offs,1)
+#define FLDS(_Sd,_Rn,_offs) FLDS_chk(_Sd,_Rn,_offs,1)
+#define VLDR FLDD
+    
+    
+#define VSTR(_Dd,_Rn,_offs)  do {                                       \
+        underrunProtect(4);                                             \
+        NanoAssert(ARM_VFP);                                            \
         NanoAssert(((_offs)%4) == 0);                                   \
         NanoAssert(isU8((_offs)/4) || isU8(-(_offs)/4));                \
-        NanoAssert(IsFpReg(_Dd) && !IsFpReg(_Rn));                      \
+        NanoAssert( IsGpReg(_Rn));                                      \
+        int dflag = DFlag(_Dd);                                         \
+        int DdEnc; encodeRegD(_Dd,SD_);                                 \
         int negflag = 1<<23;                                            \
         intptr_t offs = (_offs);                                        \
         if (_offs < 0) {                                                \
             negflag = 0<<23;                                            \
             offs = -(offs);                                             \
         }                                                               \
-        *(--_nIns) = (NIns)( COND_AL | (0xD1<<20) | ((_Rn)<<16) | (FpRegNum(_Dd)<<12) | (0xB<<8) | negflag | ((offs>>2)&0xff) ); \
-        asm_output("fldd %s,%s(%d)", gpn(_Dd), gpn(_Rn), _offs);       \
+        *(--_nIns) = (NIns)( COND_AL | (0xD0<<20) | ((_Rn)<<16) | (DdEnc) | (0xA<<8) | dflag | negflag | ((offs>>2)&0xff) ); \
+        asm_output("fst%c %s,%s(%d)", dflag?'d':'s',gpn(_Dd), gpn(_Rn), _offs);           \
     } while (0)
-#define FLDD(_Dd,_Rn,_offs) FLDD_chk(_Dd,_Rn,_offs,1)
 
-#define FUITOD(_Dd,_Sm) do {                                            \
+
+#define VSTQR(_Qd,_Rn) do {                                             \
         underrunProtect(4);                                             \
         NanoAssert(ARM_VFP);                                            \
-        NanoAssert(IsFpReg(_Dd) && IsFpSReg(_Sm));                      \
-        *(--_nIns) = (NIns)( COND_AL | (0xEB8<<16) | (FpRegNum(_Dd)<<12) | (0x2D<<6) | (0<<5) | (0x0) ); \
-        asm_output("fuitod %s,%s", gpn(_Dd), gpn(_Sm));                \
-    } while (0)
+        NanoAssert( IsGpReg(_Rn));                                      \
+        int DdEnc; encodeRegD(_Qd,__Q);                                 \
+        *(--_nIns) = (NIns)( COND_AL | (0xC8<<20) | ((_Rn)<<16) | DdEnc | 0xB04 );        \
+        asm_output("vstm %s,<d%d,d%d> // i.e. %s", gpn(_Rn), Vd+D*16,Vd+D*16+1,gpn(_Qd)); \
+     } while (0)
+#define FSTS  VSTR
+#define FSTD  VSTR
 
-#define FNEGD(_Dd,_Dm) do {                                             \
+#define VNEGvfp(_Dd,_Dm) do {                                           \
         underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(IsFpReg(_Dd) && IsFpReg(_Dm));                       \
-        *(--_nIns) = (NIns)( COND_AL | (0xEB1<<16) | (FpRegNum(_Dd)<<12) | (0xB4<<4) | (FpRegNum(_Dm)) ); \
-        asm_output("fnegd %s,%s", gpn(_Dd), gpn(_Dm));                 \
-    } while (0)
+        NanoAssert(ARM_VFP);                                            \
+        int dflag = DFlag(_Dd); NanoAssert(dflag==DFlag(_Dm));          \
+        int DdEnc; encodeRegD(_Dd,SD_);                                 \
+        int DmEnc; encodeRegM(_Dm,SD_);                                 \
+        *(--_nIns) = (NIns)( COND_AL | (0xEB10A40) | DdEnc | DmEnc | dflag ); \
+        asm_output("fneg%c %s,%s",dflag?'d':'s', gpn(_Dd), gpn(_Dm));   \
+     } while (0)
 
-#define FADDD(_Dd,_Dn,_Dm) do {                                         \
+#define VNEGneon(_Qd,_Qm) do {                                          \
         underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(IsFpReg(_Dd) && IsFpReg(_Dn) && IsFpReg(_Dm));       \
-        *(--_nIns) = (NIns)( COND_AL | (0xE3<<20) | (FpRegNum(_Dn)<<16) | (FpRegNum(_Dd)<<12) | (0xB0<<4) | (FpRegNum(_Dm)) ); \
-        asm_output("faddd %s,%s,%s", gpn(_Dd), gpn(_Dn), gpn(_Dm));    \
-    } while (0)
+        NanoAssert(ARM_VFP);                                            \
+        int DdEnc; encodeRegD(_Qd,__Q);                                 \
+        int DmEnc; encodeRegM(_Qm,__Q);                                 \
+        *(--_nIns) = (NIns)( 0xF3B907C0 | DdEnc | DmEnc );              \
+        asm_output("fnegq %s,%s", gpn(_Qd), gpn(_Qm));                  \
+     } while (0)
 
-#define FSUBD(_Dd,_Dn,_Dm) do {                                         \
+
+#define GenericVfp(NAME,_Dd,_Dn,_Dm,SPECIFIC_ENC) do {                  \
         underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(IsFpReg(_Dd) && IsFpReg(_Dn) && IsFpReg(_Dm));       \
-        *(--_nIns) = (NIns)( COND_AL | (0xE3<<20) | (FpRegNum(_Dn)<<16) | (FpRegNum(_Dd)<<12) | (0xB4<<4) | (FpRegNum(_Dm)) ); \
-        asm_output("fsubd %s,%s,%s", gpn(_Dd), gpn(_Dn), gpn(_Dm));    \
-    } while (0)
+        NanoAssert(ARM_VFP);                                            \
+        int dflag = DFlag(_Dd); NanoAssert(dflag==DFlag(_Dm));NanoAssert(dflag==DFlag(_Dn)); \
+        int DdEnc; encodeRegD(_Dd,SD_);                                 \
+        int DmEnc; encodeRegM(_Dm,SD_);                                 \
+        int DnEnc; encodeRegN(_Dn,SD_);                                 \
+        *(--_nIns) = (NIns)( COND_AL | SPECIFIC_ENC | DnEnc | DdEnc | DmEnc | dflag);        \
+        asm_output(#NAME"%c %s,%s,%s",dflag?'d':'s', gpn(_Dd), gpn(_Dn), gpn(_Dm));          \
+     } while (0)
 
-#define FMULD(_Dd,_Dn,_Dm) do {                                         \
+#define GenericNeon(NAME,_Qd,_Qn,_Qm,SPECIFIC_ENC) do {                 \
         underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(IsFpReg(_Dd) && IsFpReg(_Dn) && IsFpReg(_Dm));       \
-        *(--_nIns) = (NIns)( COND_AL | (0xE2<<20) | (FpRegNum(_Dn)<<16) | (FpRegNum(_Dd)<<12) | (0xB0<<4) | (FpRegNum(_Dm)) ); \
-        asm_output("fmuld %s,%s,%s", gpn(_Dd), gpn(_Dn), gpn(_Dm));    \
+        NanoAssert(ARM_VFP);                                            \
+        int DdEnc; encodeRegD(_Qd,__Q);                                 \
+        int DmEnc; encodeRegM(_Qm,__Q);                                 \
+        int DnEnc; encodeRegN(_Qn,__Q);                                 \
+        *(--_nIns) = (NIns)( (0xF2 << 24) | (SPECIFIC_ENC) | DdEnc | DnEnc| DmEnc );         \
+        asm_output(#NAME" %s,%s,%s", gpn(_Qd), gpn(_Qn), gpn(_Qm));     \
     } while (0)
 
-#define FDIVD(_Dd,_Dn,_Dm) do {                                         \
+
+#define VADDvfp(_Dd,_Dn,_Dm)  GenericVfp(fadd,_Dd,_Dn,_Dm,0xE300A00)
+#define VSUBvfp(_Dd,_Dn,_Dm)  GenericVfp(fsub,_Dd,_Dn,_Dm,0xE300A40)
+#define VMULvfp(_Dd,_Dn,_Dm)  GenericVfp(fmul,_Dd,_Dn,_Dm,0xE200A00)
+#define VDIVvfp(_Dd,_Dn,_Dm)  GenericVfp(fdiv,_Dd,_Dn,_Dm,0xE800A00)
+
+#define VADDneon(_Qd,_Qn,_Qm) GenericNeon(vadd,_Qd,_Qn,_Qm, 0xD40)
+#define VSUBneon(_Qd,_Qn,_Qm) GenericNeon(vsub,_Qd,_Qn,_Qm, 0x200D40)
+#define VMULneon(_Qd,_Qn,_Qm) GenericNeon(vmul,_Qd,_Qn,_Qm, 0x1000D50)
+  /* neon doesn't have VDIV; we'll do it on the components */
+#define VDIVneon(_Qd,_Qn,_Qm) do{                                       \
+            NanoAssert(IsFpQReg(_Qn) && IsFpQReg(_Qd) && IsFpQReg(_Qm));\
+            Register Sn = S0 + (FpQRegNum(_Qn) << 2);                   \
+            Register Sm = S0 + (FpQRegNum(_Qm) << 2);                   \
+            Register Sd = S0 + (FpQRegNum(_Qd) << 2);                   \
+            VDIVvfp(Sd,Sn,Sm); Sn = Sn + 1; Sm = Sm + 1; Sd = Sd + 1;   \
+            VDIVvfp(Sd,Sn,Sm); Sn = Sn + 1; Sm = Sm + 1; Sd = Sd + 1;   \
+            VDIVvfp(Sd,Sn,Sm); Sn = Sn + 1; Sm = Sm + 1; Sd = Sd + 1;   \
+            VDIVvfp(Sd,Sn,Sm);                                          \
+        } while (0) 
+
+#define VADD(_Dd,_Dn,_Dm) if(IsFpQReg(_Dd)) VADDneon(_Dd,_Dn,_Dm); else VADDvfp(_Dd,_Dn,_Dm);
+#define VSUB(_Dd,_Dn,_Dm) if(IsFpQReg(_Dd)) VSUBneon(_Dd,_Dn,_Dm); else VSUBvfp(_Dd,_Dn,_Dm);
+#define VMUL(_Dd,_Dn,_Dm) if(IsFpQReg(_Dd)) VMULneon(_Dd,_Dn,_Dm); else VMULvfp(_Dd,_Dn,_Dm);
+#define VDIV(_Dd,_Dn,_Dm) if(IsFpQReg(_Dd)) VDIVneon(_Dd,_Dn,_Dm); else VDIVvfp(_Dd,_Dn,_Dm);
+#define VNEG(_Dd, _Dm)    if(IsFpQReg(_Dd)) VNEGneon(_Dd,_Dm);     else VNEGvfp(_Dd,_Dm);
+#define VCEQ(_Qd,_Qn,_Qm) GenericNeon(vceq.f32,_Qd,_Qn,_Qm,0xE40)
+
+#define VMOVN(_Dd,_Qm)  do { \
         underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(IsFpReg(_Dd) && IsFpReg(_Dn) && IsFpReg(_Dm));       \
-        *(--_nIns) = (NIns)( COND_AL | (0xE8<<20) | (FpRegNum(_Dn)<<16) | (FpRegNum(_Dd)<<12) | (0xB0<<4) | (FpRegNum(_Dm)) ); \
-        asm_output("fdivd %s,%s,%s", gpn(_Dd), gpn(_Dn), gpn(_Dm));    \
+        NanoAssert(ARM_VFP);                                            \
+        int DdEnc; encodeRegD(_Dd,_D_);                                 \
+        int DmEnc; encodeRegM(_Qm,__Q);                                 \
+        *(--_nIns) = (NIns)( 0xF3B60200 | DdEnc | DmEnc );              \
+        asm_output("vmovn.i32 %s,%s", gpn(_Dd), gpn(_Qm));              \
     } while (0)
 
-#define FMSTAT() do {                               \
-        underrunProtect(4);                         \
-        NanoAssert(ARM_VFP);                \
-        *(--_nIns) = (NIns)( COND_AL | 0x0EF1FA10); \
-        asm_output("fmstat");                       \
-    } while (0)
-
-#define FCMPD(_Dd,_Dm,_E) do {                                          \
+#define VMVN(_Dd,_Dm)  do { \
         underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(IsFpReg(_Dd) && IsFpReg(_Dm));                       \
-        NanoAssert(((_E)==0) || ((_E)==1));                             \
-        *(--_nIns) = (NIns)( COND_AL | (0xEB4<<16) | (FpRegNum(_Dd)<<12) | (0xB<<8) | ((_E)<<7) | (0x4<<4) | (FpRegNum(_Dm)) ); \
-        asm_output("fcmp%sd %s,%s", (((_E)==1)?"e":""), gpn(_Dd), gpn(_Dm)); \
+        NanoAssert(ARM_VFP);                                            \
+        int DdEnc; encodeRegD(_Dd,_D_);                                 \
+        int DmEnc; encodeRegM(_Dm,_D_);                                 \
+        *(--_nIns) = (NIns)( 0xF3B00580 | DdEnc | DmEnc );              \
+        asm_output("vmvn %s,%s", gpn(_Dd), gpn(_Dm));                   \
     } while (0)
 
-#define FCPYD_cond(_cond,_Dd,_Dm) do {                                      \
+#define VPMINU16(_Dd,_Dn,_Dm)  do { \
+        underrunProtect(4);                                             \
+        NanoAssert(ARM_VFP);                                            \
+        int DdEnc; encodeRegD(_Dd,_D_);                                 \
+        int DmEnc; encodeRegM(_Dm,_D_);                                 \
+        int DnEnc; encodeRegN(_Dn,_D_);                                 \
+        *(--_nIns) = (NIns)( 0xF3100A10 | DnEnc | DdEnc | DmEnc );      \
+        asm_output("vpmin.u16 %s,%s,%s", gpn(_Dd), gpn(_Dn), gpn(_Dm)); \
+    } while (0)
+    
+#define VDUP(_Qd,_Sm) do {\
+        underrunProtect(4);                                                   \
+        NanoAssert(ARM_VFP);                                                  \
+        int DdEnc; encodeRegD(_Qd,__Q);                                       \
+        int M,Vm; NanoAssert(IsFpSReg(_Sm));                                  \
+        split_sreg_enc(_Sm,M,Vm);                                             \
+   /* M is part of th 'imm4' encoding; the first bit. the rest is 0x4 (100)*/ \
+   /* The actual M is always 0 - Sn registers never get to D16-31 range    */ \
+        *(--_nIns) = (NIns)( 0xF3B40C40 | DdEnc | Vm | (M<<19) );             \
+        asm_output("vdup.32 %s,%s", gpn(_Qd), gpn(_Sm));                      \
+    } while (0)
+
+
+#define FMSTAT() do {                                                       \
         underrunProtect(4);                                                 \
         NanoAssert(ARM_VFP);                                                \
-        NanoAssert(IsFpReg(_Dd) && IsFpReg(_Dm));                           \
+        *(--_nIns) = (NIns)( COND_AL | 0x0EF1FA10);                         \
+        asm_output("fmstat");                                               \
+    } while (0)
+
+#define VCMP(_Dd,_Dm,_E) do {                                               \
+        underrunProtect(4);                                                 \
+        NanoAssert(ARM_VFP);                                                \
+        int dflag = DFlag(_Dd); NanoAssert(dflag==DFlag(_Dm));              \
+        int DdEnc; encodeRegD(_Dd,SD_);                                     \
+        int DmEnc; encodeRegM(_Dm,SD_);                                     \
+        NanoAssert(((_E)==0) || ((_E)==1));                                 \
+        *(--_nIns) = (NIns)( COND_AL | (0xEB4<<16) | DdEnc | 0xA40 | ((_E)<<7) | dflag | DmEnc ); \
+        asm_output("fcmp%s%c %s,%s", (((_E)==1)?"e":""),dflag?'d':'s', gpn(_Dd), gpn(_Dm));       \
+    } while (0)
+
+#define VCMPZ(_Dd) do {                                                     \
+        underrunProtect(4);                                                 \
+        NanoAssert(ARM_VFP);                                                \
+        int DdEnc; encodeRegD(_Dd,_D_);                                     \
+        *(--_nIns) = (NIns)( COND_AL | (0xEB5<<16) | DdEnc | 0xBC0 );       \
+        asm_output("vcmpz %s", gpn(_Dd) );                                  \
+    } while (0)
+
+#define VMOV_cond(_cond,_Dd,_Dm) do {                                       \
+        underrunProtect(4);                                                 \
+        NanoAssert(ARM_VFP);                                                \
         NanoAssert(IsCond(_cond));                                          \
-        *(--_nIns) = (NIns)( ((_cond)<<28) | (0xEB0<<16) | (FpRegNum(_Dd)<<12) | (0xB4<<4) | (FpRegNum(_Dm)) ); \
-        asm_output("fcpyd%s %s,%s", condNames[_cond], gpn(_Dd), gpn(_Dm));  \
-    } while (0)
-#define FCPYD(_Dd,_Dm)      FCPYD_cond(AL,_Dd,_Dm)
+        int dflag = DFlag(_Dd); NanoAssert(dflag==DFlag(_Dm));              \
+        int DdEnc; encodeRegD(_Dd,SD_);                                     \
+        int DmEnc; encodeRegM(_Dm,SD_);                                     \
+        *(--_nIns) = (NIns)( ((_cond)<<28) | (0xEB0<<16) | DdEnc | 0xA40 | DmEnc | dflag );       \
+        asm_output("fcpy%c%s %s,%s", dflag?'d':'s', condNames[_cond], gpn(_Dd), gpn(_Dm));        \
+     } while (0)
 
-#define FMRS(_Rd,_Sn) do {                                              \
-        underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(((_Sn) == S0) && IsGpReg(_Rd));                     \
-        *(--_nIns) = (NIns)( COND_AL | (0xE1<<20) | (0x0<<16) | ((_Rd)<<12) | (0xA<<8) | (0<<7) | (0x1<<4) ); \
-        asm_output("fmrs %s,%s", gpn(_Rd), gpn(_Sn));                  \
-    } while (0)
-
-/*
- * The following instructions can only be used with S0 as the
- * single-precision register; that limitation can be removed if
- * needed, but we'd have to teach NJ about all the single precision
- * regs, and their encoding is strange (top 4 bits usually in a block,
- * low bit elsewhere).
- */
-
-#define FSITOD(_Dd,_Sm) do {                                            \
-        underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                            \
-        NanoAssert(IsFpReg(_Dd) && (IsFpSReg(_Sm)));                     \
-        *(--_nIns) = (NIns)( COND_AL | (0xEB8<<16) | (FpRegNum(_Dd)<<12) | (0x2F<<6) | (0<<5) | (0x0) ); \
-        asm_output("fsitod %s,%s", gpn(_Dd), gpn(_Sm));                \
+#define FCPYS(_Sd,_Sm)      VMOV_cond(AL,_Sd,_Sm)
+#define FCPYD(_Dd,_Dm)      VMOV_cond(AL,_Dd,_Dm)
+#define FCPYD_cond          VMOV_cond
+#define FCPYQ(_Qd,_Qm)  do {                                                \
+        underrunProtect(4);                                                 \
+        NanoAssert(ARM_VFP); /*NEON!*/                                      \
+        int DdEnc; encodeRegD(_Qd,__Q);                                     \
+        int DmEnc; encodeRegM(_Qm,__Q);                                     \
+        int DnEnc; encodeRegN(_Qm,__Q);                                     \
+        *(--_nIns) = (NIns)( (0xF2200150) | DdEnc  | DmEnc  | DnEnc );      \
+        asm_output("fcpyq %s,%s", gpn(_Qd), gpn(_Qm));                      \
     } while (0)
 
-#define FMSR(_Sn,_Rd) do {                                              \
-        underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(((_Sn) == S0) && IsGpReg(_Rd));                     \
-        *(--_nIns) = (NIns)( COND_AL | (0xE0<<20) | (0x0<<16) | ((_Rd)<<12) | (0xA<<8) | (0<<7) | (0x1<<4) ); \
-        asm_output("fmsr %s,%s", gpn(_Sn), gpn(_Rd));                  \
+#define FMSR(_Sn,_Rd) do {                                                  \
+        underrunProtect(4);                                                 \
+        NanoAssert(ARM_VFP);                                                \
+        NanoAssert( IsGpReg(_Rd) );                                         \
+        int DnEnc; encodeRegN(_Sn,S__);                                     \
+        *(--_nIns) = (NIns)( COND_AL | (0xE0<<20) |((_Rd)<<12) | 0xA10 | DnEnc ); \
+        asm_output("fmsr %s,%s", gpn(_Sn), gpn(_Rd));                       \
     } while (0)
 
-#define FMRS(_Rd,_Sn) do {                                              \
-        underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(((_Sn) == S0) && IsGpReg(_Rd));                     \
-        *(--_nIns) = (NIns)( COND_AL | (0xE1<<20) | (0x0<<16) | ((_Rd)<<12) | (0xA<<8) | (0<<7) | (0x1<<4) ); \
-        asm_output("fmrs %s,%s", gpn(_Rd), gpn(_Sn));                  \
+#define FMRS(_Rd,_Sn) do {                                                  \
+        underrunProtect(4);                                                 \
+        NanoAssert(ARM_VFP);                                                \
+        NanoAssert( IsGpReg(_Rd) );                                         \
+        int DnEnc; encodeRegN(_Sn,S__);                                     \
+        *(--_nIns) = (NIns)( COND_AL | (0xE1<<20) |((_Rd)<<12) | 0xA10 | DnEnc ); \
+        asm_output("fmrs %s,%s", gpn(_Rd), gpn(_Sn));                       \
     } while (0)
 
-#define FMSR(_Sn,_Rd) do {                                              \
-        underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(((_Sn) == S0) && IsGpReg(_Rd));                     \
-        *(--_nIns) = (NIns)( COND_AL | (0xE0<<20) | (0x0<<16) | ((_Rd)<<12) | (0xA<<8) | (0<<7) | (0x1<<4) ); \
-        asm_output("fmsr %s,%s", gpn(_Sn), gpn(_Rd));                  \
-    } while (0)
 
-#define FCVTSD(_Sd,_Dm) do {                        \
-        underrunProtect(4);                         \
-        NanoAssert(ARM_VFP);                \
-        NanoAssert(((_Sd) == S0) && IsFpReg(_Dm)); \
-        *(--_nIns) = (NIns)( COND_AL | (0xEB7<<16) | (0x0<<12) | (0xBC<<4) | (FpRegNum(_Dm)) ); \
-        asm_output("[0x%08x] fcvtsd s0,%s", *_nIns, gpn(_Dm));                          \
-    } while (0)
+/* Conversions: to/from int(signed, unsigned), to/from single/double precision */
 
-#define FCVTDS(_Dd,_Sm) do {                                    \
-        underrunProtect(4);                                     \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(((_Sm) == S0) && IsFpReg(_Dd));             \
-        *(--_nIns) = (NIns)( COND_AL | (0xEB7<<16) | (FpRegNum(_Dd)<<12) | (0xAC<<4) | (0x0) ); \
-        asm_output("fcvtds %s,s0", gpn(_Dd));                  \
+#define VCVTx(NAME,_Rd,_Rm,SPECIFIC_ENC,check_dst) do {                     \
+        underrunProtect(4);                                                 \
+        NanoAssert(ARM_VFP);                                                \
+        int dflag = DFlag((check_dst?_Rd:_Rm));                             \
+        int DdEnc; encodeRegD(_Rd,SD_);                                     \
+        int DmEnc; encodeRegM(_Rm,SD_);                                     \
+        *(--_nIns) = (NIns)( COND_AL | (0xEB<<20) | SPECIFIC_ENC | dflag | DdEnc | DmEnc ); \
+        asm_output(#NAME" %s,%s",gpn(_Rd), gpn(_Rm));                       \
     } while(0)
+#define VCVT(A,B,C,D) VCVTx(A,B,C,D,true)
 
-#define FLDS(_Sd,_Rn,_offs) do {                                \
-        underrunProtect(4);                                     \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(((_Sd) == S0) && !IsFpReg(_Rn));            \
-        NanoAssert(((_offs)%4) == 0);                           \
-        NanoAssert((isU8((_offs)/4)) || isU8(-(_offs)/4));      \
-        int addflag = 1<<23;                                    \
-        intptr_t offs = (_offs);                                \
-        if (offs < 0) {                                         \
-            addflag = 0;                                        \
-            offs = -offs;                                       \
-        }                                                       \
-        *(--_nIns) = (NIns)( COND_AL | (0xD1<<20) | ((_Rn)<<16) | (0x0<<12) | (0xA << 8) | addflag | ((offs>>2)&0xff) ); \
-        asm_output("flds s0, [%s, #%d]", gpn(_Rn), (_offs));   \
+#define FCVTDS(_Dd,_Sm) do {                                               \
+        NanoAssert(IsFpDReg(_Dd) && IsFpSReg(_Sm));                        \
+        VCVTx(fcvtds,_Dd,_Sm,0x70AC0,false);                               \
     } while (0)
 
-#define FSTS(_Sd,_Rn,_offs) do {                                \
-        underrunProtect(4);                                     \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(((_Sd) == S0) && !IsFpReg(_Rn));            \
-        NanoAssert(((_offs)%4) == 0);                           \
-        NanoAssert((isU8((_offs)/4)) || isU8(-(_offs)/4));      \
-        int addflag = 1<<23;                                    \
-        intptr_t offs = (_offs);                                \
-        if (offs < 0) {                                         \
-            addflag = 0;                                        \
-            offs = -offs;                                       \
-        }                                                       \
-        *(--_nIns) = (NIns)( COND_AL | (0xD0<<20) | ((_Rn)<<16) | (0x0<<12) | (0xA << 8) | addflag | ((offs>>2)&0xff) ); \
-        asm_output("fsts s0, [%s, #%d]", gpn(_Rn), (_offs));   \
+#define FCVTSD(_Sd,_Dm) do {                                               \
+        NanoAssert(IsFpSReg(_Sd) && IsFpDReg(_Dm));                        \
+        VCVTx(fcvtsd,_Sd,_Dm,0x70AC0,false);                               \
     } while (0)
 
-#define FTOSID(_Sd,_Dm) do {                                   \
-        underrunProtect(4);                                    \
-        NanoAssert(ARM_VFP);                           \
-        NanoAssert(((_Sd) == S0) && IsFpReg(_Dm));            \
-        *(--_nIns) = (NIns)( COND_AL | (0xEBD<<16) | (0x0<<12) | (0xB4<<4) | FpRegNum(_Dm) ); \
-        asm_output("ftosid s0, %s", gpn(_Dm));                \
+#define FSITOD(_Dd,_Sm) do {                                               \
+        NanoAssert(IsFpDReg(_Dd) && IsFpSReg(_Sm));                        \
+        VCVT(fsitod,_Dd,_Sm,0x80AC0);                                      \
+    } while (0)
+
+#define FUITOD(_Dd,_Sm) do {                                               \
+        NanoAssert(IsFpDReg(_Dd) && IsFpSReg(_Sm));                        \
+        VCVT(fuitod,_Dd,_Sm,0x80A40);                                      \
+    } while (0)
+
+#define FSITOS(_Sd,_Sm) do {                                              \
+        NanoAssert(IsFpSReg(_Sd) && IsFpSReg(_Sm));                       \
+        VCVT(fsitos,_Sd,_Sm,0x80AC0);                                     \
+    } while (0)
+
+//  unsigned int, to single-precision float
+#define FUITOS(_Sd,_Sm) do {                                              \
+        NanoAssert(IsFpSReg(_Sd) && IsFpSReg(_Sm));                       \
+        VCVT(fuitos,_Sd,_Sm,0x80A40);                                     \
+    } while (0)
+
+//  Double to signed int, stored in Sn reg
+#define FTOSID(_Sd,_Dm)do {                                               \
+        NanoAssert(IsFpSReg(_Sd) && IsFpDReg(_Dm));                       \
+        VCVTx(ftosid,_Sd,_Dm,0xD0A40,false);                              \
+    } while (0)
+
+//  Single-precision float to signed int, stored in Sn reg
+#define FTOSIS(_Sd,_Sm)do {                                               \
+        NanoAssert(IsFpSReg(_Sd) && IsFpSReg(_Sm));                       \
+        VCVTx(ftosis,_Sd,_Sm,0xD0A40,false);                              \
     } while (0)
 
 } // namespace nanojit
