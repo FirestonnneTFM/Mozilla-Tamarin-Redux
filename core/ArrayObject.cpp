@@ -1033,7 +1033,7 @@ unshift_sparse:
             ArrayObject* deletedItems = toplevel()->arrayClass()->newArray(0);
             deletedItems->m_denseArray.splice(0, deleteCount, 0, this->m_denseArray, insertPoint);
             deletedItems->m_denseStart = 0;
-            deletedItems->m_denseUsed = deleteCount;
+            deletedItems->m_denseUsed = deletedItems->calcDenseUsed();
             deletedItems->m_length = deleteCount;
             
             uint32_t that_len = that->m_denseArray.length();
