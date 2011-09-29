@@ -96,7 +96,7 @@ def gen(prefix,inputfiles,outputdir,srcdir=os.getcwd(),ns=''):
             print "warning: no JAVA_HOME set; inferring executable is 'java' and on system path."
             java_bin = 'java'
         else:
-            java_bin = java_home + '/bin/java'
+            java_bin = os.path.join(java_home, "bin", "java")
 
         # "java_bin" because path may have spaces, parentheses, etc (Windows).
         os.system("\"%s\" -jar %s -AS3 -import %s/../generated/builtin.abc -import %s/../generated/shell_toplevel.abc -debug %s" % (java_bin, classpath, utilsdir, utilsdir, asfile))
