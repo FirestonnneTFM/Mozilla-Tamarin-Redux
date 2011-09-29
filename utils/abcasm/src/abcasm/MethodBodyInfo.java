@@ -230,7 +230,6 @@ class MethodBodyInfo
                 case OP_add_i:
                 case OP_astypelate:
                 case OP_bitand:
-                case OP_bitnot:
                 case OP_bitor:
                 case OP_bitxor:
                     stkdepth = adjustValueStack(stkdepth,-1);
