@@ -467,6 +467,8 @@ namespace MMgc
         friend class GCPolicyManager;
 
         // WriteBarrier classes use private write barriers.
+        template<class T> friend class WriteBarrier;
+        template<class T> friend class WriteBarrierRC;
         template<class T> friend class GCMemberBase;
         friend class AtomWBCore;
 
@@ -1024,7 +1026,8 @@ namespace MMgc
 
         /**
          * Static out of line versions of write barriers, primarily
-         * for use from smart pointer class GCMember<T>.
+         * for use from smart pointer classes WriteBarrier<T> and
+         * WriteBarrierRC<T>.
          *
          * These have the added overhead of having to calculate the
          * container address and GC*.  An assert will fire if the
@@ -1311,6 +1314,12 @@ namespace MMgc
         // onto the mark queue (if pointer-containing) if not already marked or queued.
         template <class T>
         void TraceLocation(T* const * loc);
+
+        template <class T>
+        void TraceLocation(MMgc::WriteBarrier<T> const * loc);
+        
+        template <class T>
+        void TraceLocation(MMgc::WriteBarrierRC<T> const * loc);
 
         template <class T>
         void TraceLocation(MMgc::GCMemberBase<T> const * loc);
