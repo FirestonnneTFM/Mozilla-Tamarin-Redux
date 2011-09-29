@@ -223,6 +223,65 @@ namespace MMgc
             privateConservativeWriteBarrierNoSubstitute(address);
     }
 
+    template<class T>
+    REALLY_INLINE WriteBarrier<T>::WriteBarrier() : t(0)
+    {
+#ifdef DEBUG
+        GC::TracePointerCheck(&t);
+#endif
+    }
+
+    template<class T>
+    REALLY_INLINE WriteBarrier<T>::WriteBarrier(T _t)
+    {
+#ifdef DEBUG
+        GC::TracePointerCheck(&t);
+#endif
+        set(_t);
+    }
+
+    // Always pay for a single real function call; then inline & optimize massively in WriteBarrier()
+    template<class T>
+    REALLY_INLINE T WriteBarrier<T>::set(const T tNew)
+    {
+        GC::WriteBarrier(&t, (const void*)tNew);    // updates 't'
+        return tNew;
+    }
+
+    // Always pay for a single real function call; then inline & optimize massively in WriteBarrierRC()
+    template<class T>
+    REALLY_INLINE T WriteBarrierRC<T>::set(const T tNew)
+    {
+        GC::WriteBarrierRC(&t, (const void*)tNew);  // updates 't'
+        return tNew;
+    }
+    
+    template<class T>
+    REALLY_INLINE WriteBarrierRC<T>::WriteBarrierRC() : t(0)
+    {
+#ifdef DEBUG
+        GC::TracePointerCheck(&t);
+#endif
+    }
+
+    template<class T>
+    REALLY_INLINE WriteBarrierRC<T>::WriteBarrierRC(const T _t) // : t(0) -- not necessary, WriteBarrierRC_ctor handles it
+    {
+        GC::WriteBarrierRC_ctor(&t, (const void*)_t);
+    }
+    
+    template<class T>
+    REALLY_INLINE WriteBarrierRC<T>::~WriteBarrierRC()
+    {
+        GC::WriteBarrierRC_dtor(&t);
+    }
+    
+    template<class T>
+    REALLY_INLINE void WriteBarrierRC<T>::set(MMgc::GC* gc, void* container, T newValue)
+    {
+        WBRC(gc, container, &t, newValue);
+    }
+
     REALLY_INLINE AtomWBCore::AtomWBCore(avmplus::Atom a) : m_atom(a)
     {
 #ifdef DEBUG
