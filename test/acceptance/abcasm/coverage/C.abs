@@ -366,6 +366,48 @@ function runTest2()
 		callpropvoid COMPARE_STRICTEQ 3
 
 		findproperty COMPARE_STRICTEQ
+	pushstring "coerce_u int to uint"
+		pushuint 4294967217 // expected
+		pushint -79
+		coerce_u
+		callpropvoid COMPARE_STRICTEQ 3
+
+		findproperty COMPARE_STRICTEQ
+	pushstring "coerce_u String to int"
+		pushuint 79 // expected
+		pushstring "79"
+		coerce_u
+		callpropvoid COMPARE_STRICTEQ 3
+
+		findproperty COMPARE_STRICTEQ
+	pushstring "coerce_u boolean true to int"
+		pushuint 1 // expected
+		pushtrue
+		coerce_u
+		callpropvoid COMPARE_STRICTEQ 3
+
+		findproperty COMPARE_STRICTEQ
+	pushstring "coerce_u boolean false to int"
+		pushuint 0 // expected
+		pushfalse
+		coerce_u
+		callpropvoid COMPARE_STRICTEQ 3
+
+		findproperty COMPARE_STRICTEQ
+	pushstring "coerce_o null to Object"
+		pushnull // expected
+		pushnull
+		coerce_o
+		callpropvoid COMPARE_STRICTEQ 3
+
+		findproperty COMPARE_STRICTEQ
+	pushstring "coerce_o undefined to Object"
+		pushnull // expected
+		pushundefined
+		coerce_o
+		callpropvoid COMPARE_STRICTEQ 3
+
+		findproperty COMPARE_STRICTEQ
 	pushstring "coerce_s int to String"
 		pushstring "7" // expected
 		pushint 7

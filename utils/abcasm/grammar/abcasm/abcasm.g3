@@ -708,7 +708,7 @@ no_operand_insn
     : opcode = ( 
         'add' | 'add_i' | 'astypelate' |
         'bitand' | 'bitnot' | 'bitor' | 'bitxor' |
-        'checkfilter' | 'coerce_a' | 'coerce_b' | 'coerce_d' | 'coerce_i' | 'coerce_s' |
+        'checkfilter' | 'coerce_a' | 'coerce_b' | 'coerce_d' | 'coerce_i' | 'coerce_s' | 'coerce_o' | 'coerce_u' |
         'convert_b' | 'convert_i' | 'convert_d' | 'convert_o' | 'convert_u' | 'convert_s' |
         'decrement' | 'decrement_i' | 'divide' | 'dup' | 
         'dxnslate' |
