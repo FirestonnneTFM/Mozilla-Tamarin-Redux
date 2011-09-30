@@ -816,7 +816,7 @@ convert_and_set_sparse:
             if (isDense())
             {
                 // Yes, we can have isDense=true but m_denseArray empty.
-                result = !m_denseArray.isEmpty() ? m_denseArray.removeLast() : undefinedAtom;
+                result = !m_denseArray.isEmpty() ? m_denseArray.removeLast() : atomNotFound;
                 if (result == atomNotFound)
                     result = undefinedAtom;
                 else
