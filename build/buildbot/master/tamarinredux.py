@@ -50,7 +50,9 @@ class tamarinredux:
     HG_URL = "http://asteam.macromedia.com/hg/tamarin-redux/"
     BRANCHES = ["tamarin-redux","tamarin-redux-serrano"]
     BRANCHES_DEEP = ["tamarin-redux-deep","tamarin-redux-serrano-deep"]
+    BRANCHES_FRR = ["tamarin-redux-frr","tamarin-redux-serrano-frr"]    
     branch_deep_priorities = [('tamarin-redux-deep', 2), ('tamarin-redux-serrano-deep', 1)]
+    branch_frr_priorities = [('tamarin-redux-frr', 2), ('tamarin-redux-serrano-frr', 1)]
 
     
     ####### SCHEDULERS
@@ -104,24 +106,28 @@ class tamarinredux:
                                   ["mac-intel-10.5-test", "mac-intel-10.5-smoke"],
                                   ["mac64-intel-test", "mac64-intel-smoke"],
                                   ["linux-test", "linux-smoke"],
-                                  ["linux2-test", "linux2-smoke"],
                                   ["linux64-test", "linux64-smoke"],
                                   ["android-test", "android-smoke"],
                                   ["linux-arm-test", "linux-arm-smoke"],
                                   ["linux-mips-test", "linux-mips-smoke"],
                                  ])
 
+    frr = PhaseTwoScheduler(name="frr", branch=BRANCHES_FRR, treeStableTimer=30, properties={'silent':'false'},
+                    fileIsImportant=startCompile, priorities=branch_frr_priorities, changeDir="changes/frr/processed",
+                    builderNames=["windows-frr"],
+                    builderDependencies=[
+                                  ["windows-frr", "windows-test"],
+                                ])
+
     deep = PhaseTwoScheduler(name="deep", branch=BRANCHES_DEEP, treeStableTimer=30, properties={'silent':'false'},
                     fileIsImportant=startCompile, priorities=branch_deep_priorities, changeDir="changes/deep/processed",
-                    builderNames=[
-                                    "windows-deep",
+                    builderNames=["windows-deep",
                                     "windows64-deep",                                    
                                     "mac-deep",
                                     "mac64-deep",
                                     "linux-deep",
                                     "linux-arm-deep",
                                     "linux-mips-deep",
-                                    "windows-frr",                                    
                                                                     ],
                     builderDependencies=[
                                   ["windows-deep", "windows-test"],
@@ -131,7 +137,6 @@ class tamarinredux:
                                   ["linux-deep", "linux-test"],
                                   ["linux-arm-deep", "linux-arm-test"],
                                   ["linux-mips-deep", "linux-mips-test"],                                  
-                                  ["windows-frr", "windows-test"],                                   
                                  ])
     
     # The promote_build phase only runs when deep passes all tests.
@@ -141,7 +146,7 @@ class tamarinredux:
     
 
     
-    schedulers = [compile, smoke, test, deep, promote_build]
+    schedulers = [compile, smoke, test, frr, deep, promote_build]
     
     
 
@@ -1263,6 +1268,8 @@ class tamarinredux:
                 linux_arm_test_builder,
                 linux_mips_test_builder,
 
+                windows_frr_builder,
+
                 windows_deep_builder,
                 windows_64_deep_builder,                
                 mac_deep_builder,
@@ -1270,7 +1277,6 @@ class tamarinredux:
                 linux_deep_builder,
                 linux_arm_deep_builder,
                 linux_mips_deep_builder,
-                windows_frr_builder,
                 
                 promote_build_builder,
                 ]
