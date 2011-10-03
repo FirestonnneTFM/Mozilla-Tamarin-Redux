@@ -601,6 +601,15 @@ namespace avmplus
         }
         livePools = NULL;
 
+#ifdef DEBUGGER
+        while (callStack != NULL)
+        {
+            // note that reset() sets callStack to callStack->next,
+            // so this loop will terminate
+            callStack->reset();
+        }
+#endif
+
 #ifdef AVMPLUS_VERBOSE
         while(!_verboseRestrictedTo.isEmpty())
             mmfx_delete( _verboseRestrictedTo.removeLast() );
@@ -5105,6 +5114,32 @@ return the result of the comparison ToPrimitive(x) == y.
         AvmAssert(isValidApiVersion(apiVersion));
         return publicNamespaces->nsAt(apiVersion);
     }
+
+// NOTE: this is a temporary fix until OOM handling hooks in to Avm exceptions generally;
+// see https://bugzilla.mozilla.org/show_bug.cgi?id=611078
+#ifdef DEBUGGER
+    AvmCoreAutoEnter::AvmCoreAutoEnter(AvmCore* core)
+        : m_ef(GCHeap::GetGCHeap()->GetEnterFrame())
+        , m_savedCore(core)
+        , m_savedCallStack(core ? core->callStack : NULL)
+    {
+        if (m_ef)
+            m_ef->AddAbortUnwindObject(this);
+    }
+
+    AvmCoreAutoEnter::~AvmCoreAutoEnter()
+    {
+        if (m_ef)
+            m_ef->RemoveAbortUnwindObject(this);
+    }
+
+    void AvmCoreAutoEnter::Unwind()
+    {
+        if (m_savedCore)
+            m_savedCore->callStack = m_savedCallStack;
+    }
+#endif
+
 
     // global helpers
 
