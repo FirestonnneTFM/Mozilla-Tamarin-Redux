@@ -1989,6 +1989,25 @@ const int kBufferPadding = 16;
         Namespace*      dxns; // NOTE: this struct is always stack-allocated (or via avmStackAlloc, which is just as good), so no GCMember needed
     };
 
+// NOTE: this is a temporary fix until OOM handling hooks in to Avm exceptions generally;
+// see https://bugzilla.mozilla.org/show_bug.cgi?id=611078
+#ifdef DEBUGGER
+    class AvmCoreAutoEnter : public MMgc::AbortUnwindObject
+    {
+    public:
+        AvmCoreAutoEnter(AvmCore* core);
+        ~AvmCoreAutoEnter();
+        virtual void Unwind();
+    private:
+        MMgc::EnterFrame* m_ef;
+        AvmCore* m_savedCore;
+        CallStackNode* m_savedCallStack;
+    };
+    #define AVMCORE_ENTER(c) avmplus::AvmCoreAutoEnter __avmcore_auto_enter(c);
+#else
+    #define AVMCORE_ENTER(c)
+#endif
+
 }
 
 #endif /* __avmplus_AvmCore__ */
