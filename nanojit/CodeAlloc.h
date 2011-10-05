@@ -152,9 +152,6 @@ namespace nanojit
         /** add raw memory to the free list */
         void addMem();
 
-        /** make sure all the higher/lower pointers are correct for every block */
-        void sanity_check();
-
         /** find the beginning of the heapblock terminated by term */
         CodeList* firstBlock(CodeList* term);
 
@@ -245,6 +242,11 @@ namespace nanojit
 
         /** unprotect the code chunk containing just this one block */
         void markBlockWrite(CodeList* b);
+
+#ifdef _DEBUG
+        /** make sure all the higher/lower pointers are correct for every block */
+        void sanity_check();
+#endif
     };
 }
 

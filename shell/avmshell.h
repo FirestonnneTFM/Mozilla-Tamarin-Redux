@@ -45,6 +45,11 @@
 #include "extensions-tracers.h"
 #include "avmshell-tracers.h"
 
+#ifdef VMCFG_SELFTEST
+// Allow selftests coded directly to nanojit APIs.
+#include "../nanojit/nanojit.h"
+#endif
+
 #if defined AVMPLUS_MAC || defined AVMPLUS_UNIX
   // Support for the -workers switch and distributing files across
   // multiple AvmCores on multiple threads.  Only the code in the
