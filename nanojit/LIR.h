@@ -528,10 +528,6 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
     // Array holding the size in bytes of each LIns from LIRopcode.tbl.
     extern const uint8_t insSizes[];
 
-    inline RegisterMask rmask(Register r)
-    {
-        return RegisterMask(1) << REGNUM(r);
-    }
 
     //-----------------------------------------------------------------------
     // Low-level instructions.  This is a bit complicated, because we have a

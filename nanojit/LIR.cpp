@@ -2212,15 +2212,15 @@ namespace nanojit
             case LIR_paramp: {
                 uint32_t arg = i->paramArg();
                 if (!i->paramKind()) {
-                    if (arg < sizeof(Assembler::argRegs)/sizeof(Assembler::argRegs[0])) {
+                    if (arg < sizeof(RegAlloc::argRegs)/sizeof(RegAlloc::argRegs[0])) {
                         VMPI_snprintf(s, n, "%s = %s %d %s", formatRef(&b1, i), lirNames[op],
-                            arg, gpn(Assembler::argRegs[arg]));
+                            arg, gpn(RegAlloc::argRegs[arg]));
                     } else {
                         VMPI_snprintf(s, n, "%s = %s %d", formatRef(&b1, i), lirNames[op], arg);
                     }
                 } else {
                     VMPI_snprintf(s, n, "%s = %s %d %s", formatRef(&b1, i), lirNames[op],
-                        arg, gpn(Assembler::savedRegs[arg]));
+                        arg, gpn(RegAlloc::savedRegs[arg]));
                 }
                 break;
             }

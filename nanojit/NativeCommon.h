@@ -117,6 +117,11 @@ namespace nanojit
         return r;
     }
 #endif
+
+#ifndef RA_REGISTERS_OVERLAP
+    #define rmask(r) ( (RegisterMask(1)) << REGNUM(r) )
+#endif  // otherwishe, it's the platform's responsibility to define rmask
+
 } // namespace nanojit
 
 #endif // __nanojit_NativeCommon__

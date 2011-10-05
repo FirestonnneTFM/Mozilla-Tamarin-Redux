@@ -261,6 +261,7 @@ namespace nanojit
      */
     class Assembler
     {
+        friend class RegAlloc; // allow allocReg to evict instructions; allow init functions to access config settings
         friend class VerboseBlockReader;
             #ifdef NJ_VERBOSE
         public:
@@ -336,9 +337,6 @@ namespace nanojit
             void        arFree(LIns* ins);
             void        arReset();
 
-            Register    registerAlloc(LIns* ins, RegisterMask allow, RegisterMask prefer);
-            Register    registerAllocTmp(RegisterMask allow);
-            void        registerResetAll();
             void        evictAllActiveRegs() {
                 // The evicted set will be be intersected with activeSet(),
                 // so use an all-1s mask to avoid an extra load or call.
@@ -349,7 +347,6 @@ namespace nanojit
             void        intersectRegisterState(RegAlloc& saved);
             void        unionRegisterState(RegAlloc& saved);
             void        assignSaved(RegAlloc &saved, RegisterMask skip);
-            LIns*       findVictim(RegisterMask allow);
 
             Register    getBaseReg(LIns *ins, int &d, RegisterMask allow);
             void        getBaseReg2(RegisterMask allowValue, LIns* value, Register& rv,
@@ -370,7 +367,6 @@ namespace nanojit
             void        freeResourcesOf(LIns *ins);
             void        evictIfActive(Register r);
             void        evict(LIns* vic);
-            RegisterMask hint(LIns* ins);
 
             void        getBaseIndexScale(LIns* addp, LIns** base, LIns** index, int* scale);
 
@@ -378,16 +374,6 @@ namespace nanojit
                                   verbose_only(, size_t &nBytes)
                                   , size_t byteLimit=0);
 
-            // These instructions don't have to be saved & reloaded to spill,
-            // they can just be recalculated cheaply.
-            //
-            // WARNING: this function must match asm_restore() -- it should return
-            // true for the instructions that are handled explicitly without a spill
-            // in asm_restore(), and false otherwise.
-            //
-            // If it doesn't match asm_restore(), the register allocator's decisions
-            // about which values to evict will be suboptimal.
-            static bool canRemat(LIns*);
 
             bool deprecated_isKnownReg(Register r) {
                 return r != deprecated_UnknownReg;
@@ -407,7 +393,7 @@ namespace nanojit
 
             // We generate code into two places:  normal code chunks, and exit
             // code chunks (for exit stubs).  We use a hack to avoid having to
-            // parameterise the code that does the generating -- we let that
+            // parameterize the code that does the generating -- we let that
             // code assume that it's always generating into a normal code
             // chunk (most of the time it is), and when we instead need to
             // generate into an exit code chunk, we set _inExit to true and
@@ -509,24 +495,12 @@ namespace nanojit
             void        handleLoopCarriedExprs(InsList& pending_lives);
 
             // platform specific implementation (see NativeXXX.cpp file)
-            void        nInit();
             void        nBeginAssembly();
-            Register    nRegisterAllocFromSet(RegisterMask set);
-            void        nRegisterResetAll(RegAlloc& a);
             void        nPatchBranch(NIns* branch, NIns* location);
             void        nFragExit(LIns* guard);
 
-            RegisterMask nHints[LIR_sentinel+1];
-            RegisterMask nHint(LIns* ins);
-
-            // A special entry for hints[];  if an opcode has this value, we call
-            // nHint() in the back-end.  Used for cases where you need to look at more
-            // than just the opcode to decide.
-            static const RegisterMask PREFER_SPECIAL = 0xffffffff;
-
             // platform specific methods
         public:
-            const static Register savedRegs[NumSavedRegs+1]; // Allocate an extra element in case NumSavedRegs == 0
             DECLARE_PLATFORM_ASSEMBLER()
 
         private:
