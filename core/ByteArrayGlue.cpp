@@ -473,7 +473,13 @@ namespace avmplus
         }
         else
         {
-            // When we error, put the original data back
+            // When we error:
+
+            // 1) free the new buffer
+            TellGcDeleteBufferMemory(m_array, m_capacity);
+            mmfx_delete_array(m_array);
+
+            // 2) put the original data back.
             m_array = origData;
             m_length = origLen;
             m_capacity = origCap;
