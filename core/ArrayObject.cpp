@@ -1028,6 +1028,9 @@ unshift_sparse:
             insertPoint + deleteCount <= this->m_denseStart + this->m_denseArray.length() &&
             that->m_denseStart == 0)
         {
+            // Leave this->m_denseStart alone; denseStart <= insertPoint,
+            // and splice does not add or modify elements before insertPoint.
+
             insertPoint -= this->m_denseStart;
 
             ArrayObject* deletedItems = toplevel()->arrayClass()->newArray(0);
@@ -1041,7 +1044,6 @@ unshift_sparse:
                 insertCount = that_len - that_skip;
 
             this->m_denseArray.splice(insertPoint, insertCount, deleteCount, that->m_denseArray, that_skip);
-            this->m_denseStart = 0;
             this->m_denseUsed = this->calcDenseUsed();
             this->m_length = this->m_length + insertCount - deleteCount;
             
