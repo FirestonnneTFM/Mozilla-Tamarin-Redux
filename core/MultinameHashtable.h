@@ -45,15 +45,21 @@ namespace avmplus
     typedef struct Binding_* Binding;
     enum BindingKind
     {
-        BKIND_NONE              = 0,        // no such binding (id == 0)            000
-        BKIND_METHOD            = 1,        // MethodEnv*                           001
-        BKIND_VAR               = 2,        // int local slot number (r/w var)      010
-        BKIND_CONST             = 3,        // int local slot number (r/o const)    011
-        BKIND_unused            = 4,        // not in use                           100
-        BKIND_GET               = 5,        // get-only property                    101
-        BKIND_SET               = 6,        // set-only property                    110
-        BKIND_GETSET            = 7         // readwrite property                   111
+        BKIND_NONE    = 0, // no such binding (id == 0)            000
+        BKIND_METHOD  = 1, // disp_id of method                    001
+        BKIND_VAR     = 2, // slot number (r/w var)                010
+        BKIND_CONST   = 3, // slot number (r/o const)              011
+        BKIND_unused  = 4, // not in use                           100
+        BKIND_GET     = 5, // get-only property                    101
+        BKIND_SET     = 6, // set-only property                    110
+        BKIND_GETSET  = 7  // get+set  property                    111
     };
+
+    // Dispatch id: BKIND_METHOD, BKIND_GET, BKIND_SET, and BKIND_GETSET
+    // are tags for a disp_id which indexes into VTable::methods[].  The
+    // disp_id for a setter (BKIND_SET or BKIND_GETSET) is actually disp_id+1,
+    // whether or not a getter exists at [disp_id].
+
     // A couple of common Binding results that are worth having constants for
     const Binding BIND_AMBIGUOUS = (Binding)-1;
     const Binding BIND_NONE      = (Binding)BKIND_NONE;      // no such binding
