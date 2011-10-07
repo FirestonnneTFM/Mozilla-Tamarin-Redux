@@ -35,6 +35,7 @@ stale.xml
 *.pbxuser
 CVS/**
 docs/**
+doc/avmspec-generated/**
 extensions/Sampler*
 classicprefix_*.pch++
 test/**.abc
