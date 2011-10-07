@@ -408,6 +408,9 @@ namespace avmplus
         // Delete deleteCount entries, starting at insertPoint, then insert insertCount entries from args,
         // starting at insertPoint.
         void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const T* args);
+        // First delete deleteCount entries, starting at insertPoint.
+        // Then insert insertCount entries starting at insertPoint;
+        // the insertCount entries are read from args, starting at argsOffset.
         void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const ListImpl<T,ListHelper>& args, uint32_t argsOffset);
         
         // Reverse the ListImpl in place.

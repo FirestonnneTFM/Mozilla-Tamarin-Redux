@@ -305,6 +305,9 @@ namespace avmplus
         Atom _map(ScriptObject* callback, Atom thisObject);
         Atom _filter(ScriptObject* callback, Atom thisObject);
         void _reverse();
+        // First delete deleteCount entries, starting at insertPoint.
+        // Then insert insertCount entries starting at insertPoint;
+        // the insertCount entries are read from args, starting at offset.
         void _spliceHelper(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, Atom args, uint32_t offset);
         uint32_t AS3_push(Atom* argv, int argc);
         typename TLIST::TYPE AS3_pop();
