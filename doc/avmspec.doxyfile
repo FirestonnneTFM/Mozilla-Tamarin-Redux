@@ -643,6 +643,7 @@ bytecode/src/callsuper.dox \
 bytecode/src/callsupervoid.dox \
 bytecode/src/checkfilter.dox \
 bytecode/src/coerce_a.dox \
+bytecode/src/coerce_o.dox \
 bytecode/src/coerce_s.dox \
 bytecode/src/construct.dox \
 bytecode/src/constructprop.dox \
