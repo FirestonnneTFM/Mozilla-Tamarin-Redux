@@ -628,7 +628,7 @@ bytecode/src/add.dox \
 bytecode/src/add_i.dox \
 bytecode/src/applytype.dox \
 bytecode/src/astype.dox \
-bytecode/src/astemplate.dox \
+bytecode/src/astypelate.dox \
 bytecode/src/bitand.dox \
 bytecode/src/bitnot.dox \
 bytecode/src/bitor.dox \
