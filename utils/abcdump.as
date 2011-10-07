@@ -716,8 +716,23 @@ package abcdump
 
             infoPrint("magic " + magic.toString(16))
 
-            if (magic != (46<<16|14) && magic != (46<<16|15) && magic != (46<<16|16))
+            switch (magic) {
+            case (46<<16|14):
+            case (46<<16|15):
+            case (46<<16|16):
+            case (47<<16|12):
+            case (47<<16|13):
+            case (47<<16|14):
+            case (47<<16|15):
+            case (47<<16|16):
+            case (47<<16|17):
+            case (47<<16|18):
+            case (47<<16|19):
+            case (47<<16|20):
+                break;
+            default:
                 throw new Error("not an abc file.  magic=" + magic.toString(16))
+            }
 
             parseCpool()
 
@@ -1582,6 +1597,15 @@ package abcdump
         case 46<<16|14:
         case 46<<16|15:
         case 46<<16|16:
+        case 47<<16|12:
+        case 47<<16|13:
+        case 47<<16|14:
+        case 47<<16|15:
+        case 47<<16|16:
+        case 47<<16|17:
+        case 47<<16|18:
+        case 47<<16|19:
+        case 47<<16|20:
             var abc:Abc = new Abc(data)
             abc.dump()
             break
