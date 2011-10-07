@@ -143,6 +143,9 @@ private function _splice(start, deleteCount, items : Array) {
     return result;
 }
 
+// First delete deleteCount entries, starting at insertpoint.
+// Then insert insertcount entries starting at insertpoint;
+// the insertcount entries are read from args object, starting at offset.
 private native function _spliceHelper(insertpoint:uint, insertcount:uint, deleteCount:uint, args:Object, offset:uint):void;
 
 AS3 native function unshift(...items) : uint;
