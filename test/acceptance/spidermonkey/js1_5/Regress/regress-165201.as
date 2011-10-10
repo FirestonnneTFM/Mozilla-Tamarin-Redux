@@ -89,5 +89,6 @@ actual = g.toString().indexOf('Hi there');
 AddTestCase(summary, expect, actual);
 
 
+delete(Array.prototype.toSource);
 
 test();
