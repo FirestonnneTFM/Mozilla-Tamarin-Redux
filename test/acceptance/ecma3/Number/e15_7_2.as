@@ -222,7 +222,7 @@ function getTestCases() {
 
     array[item++] = new TestCase(SECTION, "new Number(-'3000000000.25')",          (-3000000000.25),   new Number(-"3000000000.25") );
 
-    array[item++] = new TestCase(SECTION, "new Number('1.79769313486231e+308')",(Number.MAX_VALUE+""),new Number("1.79769313486231e+308")+"" );
+    array[item++] = new TestCase(SECTION, "new Number('1.797693134862316e+308')",(Number.MAX_VALUE+""),new Number("1.797693134862316e+308")+"" );
     // https://bugzilla.mozilla.org/show_bug.cgi?id=555805 - MIN_VALUE is not a cross-platform constant,
     // This test is not useful.  The number formatter prevents us from making it useful.
     //array[item++] = new TestCase(SECTION, "new Number('4.9406564584124654e-324')",(Number.MIN_VALUE+""),new Number("4.9406564584124654e-324")+"" );
