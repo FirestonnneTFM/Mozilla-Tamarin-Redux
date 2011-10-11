@@ -63,6 +63,7 @@ import shutil
 import traceback
 from . import which
 from . import threadpool
+from . import convertAcceptanceToJunit
 
 # runtestUtils must be imported after "from os.path import *" as walk is overridden
 from . import runtestUtils
@@ -110,6 +111,8 @@ class RuntestBase(object):
     avm_features = ''
     builtinabc = ''
     config = ''
+    junitlog = None
+    junitlogname = None
     
     # directives are used in the config files to indicate special test behavior
     directives = None
@@ -239,6 +242,8 @@ class RuntestBase(object):
         print('    --addtoconfig   add string to default config')
         print(' -q --quiet         display minimum output during testrun')
         print(' -l --log           also log all output to given logfile')
+        print('    --logjunit      log to junit output format')
+        print('    --logjunitname  specify the toplevel name for to junit output (e.g. windows-hybrid-acceptance')
         print('    --valgrind      run tests under valgrind')
         print('    --summaryonly   only display final summary')
         print('    --rebuildtests  rebuild the tests only - do not run against VM')
@@ -272,7 +277,7 @@ class RuntestBase(object):
                    'timeout=','testtimeout=', 'rebuildtests','quiet','notimecheck',
                    'showtimes','java=','html','random', 'seed=', 'playerglobalabc=', 'toplevelabc=',
                    'javaargs=', 'summaryonly', 'log=', 'valgrind', 'addtoconfig=',
-                   'writeresult'
+                   'writeresult','logjunit=','logjunitname='
                    ]
 
     def parseOptions(self):
@@ -345,6 +350,14 @@ class RuntestBase(object):
                 self.js_output = v
                 self.logFileType = 'txt'
                 self.createOutputFile()
+            elif o in ('--logjunit'):
+                self.junitlog = v
+                if self.js_output == '':
+                    self.js_output = v+'.txt'
+                    self.logFileType = 'txt'
+                self.createOutputFile()
+            elif o in ('--logjunitname'):
+                self.junitlogname=v
             elif o in ('--valgrind',):
                 self.valgrind = True
             elif o in ('--html',):
@@ -1634,6 +1647,13 @@ class RuntestBase(object):
               logfile.write("failures=%d" % self.allfails)
             else:
               logfile.write("no failures")
+
+        if self.junitlog!=None:
+            if self.junitlogname==None:
+                self.junitlogname=self.config
+            convertAcceptanceToJunit.convertAcceptanceToJunit(self.js_output,self.junitlog,self.junitlogname)
+            if os.path.exists(self.junitlog+'.txt'):
+                os.unlink(self.junitlog+'.txt')
 
         if self.ashErrors:
             exit(1)

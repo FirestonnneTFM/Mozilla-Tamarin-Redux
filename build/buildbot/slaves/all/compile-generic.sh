@@ -161,87 +161,97 @@ test -f shell/$shell || {
     exit 1
 }
 
-mkdir -p $buildsdir/${change}-${changeid}/$platform
-chmod 777 $buildsdir/${change}-${changeid}/$platform
-cp shell/$shell $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension
-chmod 777 $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension
+# check to see if we're running under Jenkins
+if [ "$JENKINS_HOME" != "" ]; then
+    shellpath="shell"
+    shellname="$filename$shell_extension"
+else
+    shellpath="$buildsdir/${change}-${changeid}/$platform"
+    shellname="$filename$shell_extension"
+    mkdir -p $shellpath
+    chmod 777 $shellpath
+fi # end Jenkins check
 
+cp shell/$shell $shellpath/$shellname
+chmod 777 $shellpath/$shellname
 
 # Check to see if it is possible to run the generated shell, we could be cross compiling
 # Look for the version string since calling the shell without an ABC will have a non-zero exitcode
-echo ""
-echo "*******************************************************************************"
-echo "shell compiled with these features:"
-avmfeatures=`$buildsdir/${change}-${changeid}/$platform/$filename$shell_extension -Dversion | grep AVM | sed 's/\;/ /g' | sed 's/features //g'`
-for i in ${avmfeatures}; do
-echo $i
-done
-echo ""
-failbuild=0
-for i in ${features}; do
-feature_ok=0
-if [[ $i == +* ]]; then
-    echo "Make sure that ${i:1} is enabled"
-    for feat in ${avmfeatures}; do
-    if [ "$feat" == "${i:1}" ]; then
-        feature_ok=1
-        break		
-    fi
-        done
-    if [ $feature_ok != 1 ]; then
-    echo "---> FAIL"
-    failbuild=1
-    else
-    echo "---> PASS"
-    fi
-fi
-if [[ $i == -* ]]; then
-    feature_ok=1
-    echo "Make sure that ${i:1} is NOT enabled"
-    for feat in ${avmfeatures}; do
-    if [ "$feat" == "${i:1}" ]; then
-        feature_ok=0
-        break		
-    fi
-        done
-    if [ $feature_ok == 0 ]; then
-    echo "---> FAIL"
-    failbuild=1
-    else
-    echo "---> PASS"
-    fi
-fi
-echo ""
-done
-if [ $failbuild == 1 ]; then
-    echo "message: feature check FAILED"
-    cd $basedir/core
-    mv avmplusVersion.h.orig avmplusVersion.h
-    # Remove the binary since we have determined that it is NOT valid
-    rm $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension
-    endSilent
-    exit 1
+    echo ""
+    echo "*******************************************************************************"
+    echo "shell compiled with these features:"
+    avmfeatures=`$shellpath/$shellname -Dversion | grep AVM | sed 's/\;/ /g' | sed 's/features //g'`
+    for i in ${avmfeatures}; do
+	echo $i
+    done
+    echo ""
+    failbuild=0
+    for i in ${features}; do
+	feature_ok=0
+	if [[ $i == +* ]]; then
+	    echo "Make sure that ${i:1} is enabled"
+	    for feat in ${avmfeatures}; do
+		if [ "$feat" == "${i:1}" ]; then
+		    feature_ok=1
+		    break		
+		fi
+            done
+	    if [ $feature_ok != 1 ]; then
+		echo "---> FAIL"
+		failbuild=1
+	    else
+		echo "---> PASS"
+	    fi
+	fi
+	if [[ $i == -* ]]; then
+	    feature_ok=1
+	    echo "Make sure that ${i:1} is NOT enabled"
+	    for feat in ${avmfeatures}; do
+		if [ "$feat" == "${i:1}" ]; then
+		    feature_ok=0
+		    break		
+		fi
+            done
+	    if [ $feature_ok == 0 ]; then
+		echo "---> FAIL"
+		failbuild=1
+	    else
+		echo "---> PASS"
+	    fi
+	fi
+	echo ""
+    done
+    if [ $failbuild == 1 ]; then
+	echo "message: feature check FAILED"
+	cd $basedir/core
+	mv avmplusVersion.h.orig avmplusVersion.h
+	# Remove the binary since we have determined that it is NOT valid
+	rm $shellpath/$shellname
+	endSilent
+	exit 1
 fi # end feature check
-echo "*******************************************************************************"
+    echo "*******************************************************************************"
 
 cd $basedir/core
 mv avmplusVersion.h.orig avmplusVersion.h
 
-
-
 # Post the build shell to ASTEAM
 if ${upload}; then
     cd $basedir/build/buildbot/slaves/scripts/
-    ../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension $ftp_asteam/$branch/${change}-${changeid}/$platform/$filename$shell_extension
+    ../all/util-upload-ftp-asteam.sh $shellpath/$shellname $ftp_asteam/$branch/$shellname
     ret=$?
     if [ "$ret" != "0" ]; then
-	echo "Uploading of $platform/$filename$shell_extension failed"
+	echo "Uploading of $platform/$shellname failed"
 	exit 1
     fi
 fi
 
+# only delete if not running under Jenkins
+if [ "$JENKINS_HOME" == "" ]; then
+    rm -rf $basedir/objdir
+fi # end Jenkins check
+
 echo "build succeeded"
-rm -rf $basedir/objdir
 
 endSilent
 

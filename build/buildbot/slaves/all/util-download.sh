@@ -103,7 +103,18 @@ do
     if [ "$expectedFilesize" = "" ]; then
         expectedFilesize=-1
     fi
-    filesize=`ls -l $dest | awk '{print $5}'`
+
+    if [ `uname -o` = "Cygwin" ]
+    then
+        # on windows, the ls columns are not quoted
+        # and the "group" may contain a space;
+        # use "du -sb" to return size in bytes
+        filesize=`du -sb $dest | awk '{print $1}'`
+    else
+        # osx du command doesn't have a bytes option
+        filesize=`ls -l $dest | awk '{print $5}'`
+    fi
+    
     echo "Downloaded file is $filesize bytes"
     if [ "$filesize" -eq "$expectedFilesize" ]; then
         echo "Download successful"

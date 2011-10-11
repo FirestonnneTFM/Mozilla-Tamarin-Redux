@@ -82,17 +82,22 @@ scriptargs=$*
 
 export shell=$filename$shell_extension
 
+# If running under Jenkins, avm and asc come from upstream jobs via the
+# "copy artifact" plugin and should not be downloaded via ftp
+if [ "$JENKINS_HOME" = "" ]; then
+    ##
+    # Download the AVMSHELL if it does not exist
+    ##
+    download_shell $shell
 
-##
-# Download the AVMSHELL if it does not exist
-##
-download_shell $shell
+    ##
+    # Download the latest asc.jar if it does not exist
+    ##
+    download_asc
 
-##
-# Download the latest asc.jar if it does not exist
-##
-download_asc
+    export AVM=$buildsdir/$change-${changeid}/$platform/$shell
 
+fi # end Jenkins check
 
 echo ""
 echo "Missing media will be compiled using the following ASC version:"
@@ -113,8 +118,8 @@ cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-clean-adb.sh
 
 
-echo "setup $branch/${change}-${changeid}"
-../all/adb-shell-deployer.sh ${change} ${buildsdir}/${change}-${changeid}/${platform}/$shell
+echo "setup $AVM"
+../all/adb-shell-deployer.sh ${change} $AVM
 res=$?
 test "$res" = "0" || {
     echo "message: setup failed"

@@ -246,18 +246,21 @@ if config.getCompiler() == 'GCC':
 
     if the_os == 'android':
         try:
-            ANDROID_BUILD_TOP = os.environ['ANDROID_BUILD_TOP']
+            ANDROID_TOOLCHAIN = os.environ['ANDROID_TOOLCHAIN']
+            ANDROID_NDK = os.environ['ANDROID_NDK']
+            ANDROID_NDK_BIN = os.environ['ANDROID_NDK_BIN']
+            ANDROID_SDK = os.environ['ANDROID_SDK']
         except:
-            print('\nANDROID_BUILD_TOP not found in environment\nPlease run /android-public/android-vars.sh')
+            print('\nANDROID_ variables not found in environment\nPlease run /android-public/android-vars.sh')
             exit(0)
 
         ANDROID_INCLUDES = "-I$(topsrcdir)/other-licenses/zlib "\
-                           "-I$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/include "\
-                           "-I$(ANDROID_BUILD_TOP)/android-ndk/toolchains/%s-%s/prebuilt/darwin-x86/bin "\
-                           "-I$(ANDROID_BUILD_TOP)/android-sdk-mac_86 "\
-                           "-I$(ANDROID_BUILD_TOP)/android-ndk/sources/cxx-stl/stlport/stlport "\
-                           "-I$(ANDROID_BUILD_TOP)/openssl/include "\
-                           "-I$(ANDROID_BUILD_TOP)/frameworks/base/opengl/include " % (ANDROIDPLATFORMVER,ARM_EABI,ARM_EABI_VER)
+                           "-I$(ANDROID_NDK)/platforms/%s/arch-arm/usr/include "\
+                           "-I$(ANDROID_NDK_BIN) "\
+                           "-I$(ANDROID_SDK) "\
+                           "-I$(ANDROID_NDK)/sources/cxx-stl/stlport/stlport "\
+                           "-I$(ANDROID_TOOLCHAIN)/openssl/include "\
+                           "-I$(ANDROID_TOOLCHAIN)/frameworks/base/opengl/include " % (ANDROIDPLATFORMVER)
 
         # These flags are shared with some of the other builds such as ARM, but better to keep them separate here for flexibility
         COMMON_CXX_FLAGS = "-Wall -Wdisabled-optimization -Wextra -Wformat=2 -Winit-self -Winvalid-pch -Wno-invalid-offsetof " \
@@ -274,16 +277,16 @@ if config.getCompiler() == 'GCC':
 
         # LFLAGS_HEADLESS gets picked up in configuration.py by MKPROGRAM
         LFLAGS_HEADLESS = "-nostdlib -Bdynamic -Wl,-T,"\
-                          "$(ANDROID_BUILD_TOP)/android-ndk/toolchains/%s-%s/prebuilt/darwin-x86/%s/lib/ldscripts/armelf_linux_eabi.x "\
+                          "$(ANDROID_NDK_BIN)/../%s/lib/ldscripts/armelf_linux_eabi.x "\
                           "-Wl,-dynamic-linker,/system/bin/linker "\
                           "-Wl,-z,nocopyreloc "\
-                          "-L$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib "\
-                          "-L$(ANDROID_BUILD_TOP)/android-ndk/sources/cxx-stl/stlport/libs/armeabi "\
-                          "-Wl,-rpath-link=$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib "\
-                          "$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib/crtbegin_dynamic.o "\
-                          "$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib/crtend_android.o " % (ARM_EABI,ARM_EABI_VER,ARM_EABI,ANDROIDPLATFORMVER,ANDROIDPLATFORMVER,ANDROIDPLATFORMVER,ANDROIDPLATFORMVER)
+                          "-L$(ANDROID_NDK)/platforms/%s/arch-arm/usr/lib "\
+                          "-L$(ANDROID_NDK)/sources/cxx-stl/stlport/libs/armeabi "\
+                          "-Wl,-rpath-link=$(ANDROID_NDK)/platforms/%s/arch-arm/usr/lib "\
+                          "$(ANDROID_NDK)/platforms/%s/arch-arm/usr/lib/crtbegin_dynamic.o "\
+                          "$(ANDROID_NDK)/platforms/%s/arch-arm/usr/lib/crtend_android.o " % (ARM_EABI,ANDROIDPLATFORMVER,ANDROIDPLATFORMVER,ANDROIDPLATFORMVER,ANDROIDPLATFORMVER)
 
-        LDFLAGS += "$(ANDROID_BUILD_TOP)/openssl/libcrypto.a $(ANDROID_BUILD_TOP)/openssl/libssl.a"
+        LDFLAGS += "$(ANDROID_TOOLCHAIN)/openssl/libcrypto.a $(ANDROID_TOOLCHAIN)/openssl/libssl.a"
         
         # SEARCH_DIRS gets picked up in configuration.py by MKPROGRAM
         SEARCH_DIRS = "-L."
