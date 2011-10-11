@@ -79,43 +79,48 @@ scriptargs=$*
 
 export shell=$filename$shell_extension
 
-
-##
-# Download the AVMSHELL if it does not exist
-##
-download_shell $shell
-
-
-##
-# Download the latest asc.jar if it does not exist
-##
-download_asc
+# If running under Jenkins, avm and asc come from upstream jobs via the 
+# "copy artifact" plugin and should not be downloaded via ftp
+if [ "$JENKINS_HOME" = "" ]; then
+    ##
+    # Download the AVMSHELL if it does not exist
+    ##
+    download_shell $shell
 
 
-echo ""
-echo "Missing media will be compiled using the following ASC version:"
-echo "`java -jar $ASC`"
-echo ""
+    ##
+    # Download the latest asc.jar if it does not exist
+    ##
+    download_asc
 
 
+    echo ""
+    echo "Missing media will be compiled using the following ASC version:"
+    echo "`java -jar $ASC`"
+    echo ""
 
-export AVM=$buildsdir/$change-${changeid}/$platform/$shell
 
-echo AVM=$AVM
-echo "`$AVM`"
-test -f $AVM || {
-  echo "ERROR: $AVM not found"
-  exit 1
-}
+    export AVM=$buildsdir/$change-${changeid}/$platform/$shell
+
+    echo AVM=$AVM
+    echo "`$AVM`"
+    test -f $AVM || {
+      echo "ERROR: $AVM not found"
+      exit 1
+    }
+
+    ##
+    # Ensure that the system is clean and ready
+    ##
+    cd $basedir/build/buildbot/slaves/scripts
+    ../all/util-acceptance-clean.sh
+
+fi # end Jenkins check
 echo; echo "AVM built with the following options:"
 echo "`$AVM -Dversion`"
 
 
-##
-# Ensure that the system is clean and ready
-##
-cd $basedir/build/buildbot/slaves/scripts
-../all/util-acceptance-clean.sh
+
 
 cd $basedir/test/acceptance
 
@@ -147,11 +152,14 @@ if [ "$silent" == "true" ] && [ "$internal_repo" == "true" ]; then
     echo "url: http://asteam.corp.adobe.com/builds/$branch/${change}-${changeid}/$platform/$logfile logfile"
 fi
 
+
+if [ "$JENKINS_HOME" = "" ]; then
 ##
 # Ensure that the system is torn down and clean
 ##
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-teardown.sh
+fi
 
 exit 0
 
