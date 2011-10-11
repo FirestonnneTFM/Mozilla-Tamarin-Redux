@@ -41,7 +41,8 @@
 #export vmbuilds=ftp://ftp.mozilla.org/pub/js/tamarin/builds
 export vmbuilds=ftp://10.60.48.47/
 #export ascbuilds=ftp://ftp.mozilla.org/pub/js/tamarin/builds/asc/latest
-export ascbuilds=ftp://10.60.48.47/asc/latest/
+export ascbuilds=http://10.60.48.47/hg/users/jodyer/asc-redux/raw-file/tip/lib/
+
 
 ## Used by performance slaves for locking
 export sleeptime=`expr $RANDOM % 60 + 60`
