@@ -94,6 +94,11 @@ ecma3/Number/e15_7_4_7_1:Section R-1 , .*, diff, expectedfail, bug https://bugzi
 as3/Number/e15_7_4_6_1:Section R-(18|19) .* , .* , diff, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478796
 as3/Number/e15_7_4_6_1:Section C , .* ,diff , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478804
 
+
+ecma3/Number/e15_7_1:Number\('1\.797693134862316e\+308'\), .*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=692402
+ecma3/Number/e15_7_2:Number\('1\.797693134862316e\+308'\), .*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=692402
+
+
 ####################
 # String
 ####################
