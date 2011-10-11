@@ -65,9 +65,11 @@ public static final int kApiVersion_SWF_13 = 14;
 public static final int kApiVersion_AIR_3_0 = 15;
 public static final int kApiVersion_SWF_14 = 16;
 public static final int kApiVersion_AIR_3_1 = 17;
-public static final int kApiVersion_VM_INTERNAL = 18;
+public static final int kApiVersion_SWF_15 = 18;
+public static final int kApiVersion_AIR_3_2 = 19;
+public static final int kApiVersion_VM_INTERNAL = 20;
 
-public static final int kApiVersion_count = 19;
+public static final int kApiVersion_count = 21;
 
 public static final String kApiVersionNames[]= {
     "VM_ALLVERSIONS", 
@@ -88,6 +90,8 @@ public static final String kApiVersionNames[]= {
     "AIR_3_0", 
     "SWF_14", 
     "AIR_3_1", 
+    "SWF_15", 
+    "AIR_3_2", 
     "VM_INTERNAL"
 };
 
@@ -101,6 +105,8 @@ public static final int kApiVersionSeriesMembership[kApiVersion_count] = {
     (1<<kApiVersionSeries_AIR),
     (1<<kApiVersionSeries_FP),
     (1<<kApiVersionSeries_AIR),
+    (1<<kApiVersionSeries_AIR),
+    (1<<kApiVersionSeries_FP),
     (1<<kApiVersionSeries_AIR),
     (1<<kApiVersionSeries_FP),
     (1<<kApiVersionSeries_AIR),
@@ -132,6 +138,8 @@ public static final int kApiVersionSeriesTransfer[kApiVersion_count][kApiVersion
     { kApiVersion_AIR_3_0, kApiVersion_VM_INTERNAL }, // AIR_3_0
     { kApiVersion_AIR_3_1, kApiVersion_SWF_14 }, // SWF_14
     { kApiVersion_AIR_3_1, kApiVersion_VM_INTERNAL }, // AIR_3_1
+    { kApiVersion_AIR_3_2, kApiVersion_SWF_15 }, // SWF_15
+    { kApiVersion_AIR_3_2, kApiVersion_VM_INTERNAL }, // AIR_3_2
     { kApiVersion_VM_INTERNAL, kApiVersion_VM_INTERNAL } // VM_INTERNAL
 };
 
@@ -141,8 +149,8 @@ public static final int kApiVersionFirst[kApiVersionSeries_count] = {
 };
 
 public static final int kApiVersionLatest[kApiVersionSeries_count] = {
-    kApiVersion_AIR_3_1,
-    kApiVersion_SWF_14
+    kApiVersion_AIR_3_2,
+    kApiVersion_SWF_15
 };
 
 };
