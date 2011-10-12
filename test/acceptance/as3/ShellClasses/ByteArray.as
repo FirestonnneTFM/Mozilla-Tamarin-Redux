@@ -68,6 +68,16 @@ function makeByteArray(padding=0) : ByteArray
     return bytearray;
 }
 
+// Utility to test for RangeError
+function expectRangeError(tag, thunk)
+{
+    var exn_ok = "No exn";
+    try                   { thunk(); }
+    catch (e: RangeError) { exn_ok = "OK"; }
+    catch (e)             { exn_ok = "Wrong type"; }
+    AddTestCase(tag, "OK", exn_ok);
+}
+
 // Utility to test for EOFError
 function expectEOF(tag, thunk)
 {
@@ -398,6 +408,21 @@ function testInt()
                           v = bytearray.readInt();
                       }));
         }
+
+        // Testing for wraparound problems when reading with position
+        // much greater than length.  Given that the bytevector size
+        // is 1000, a length of 0xFFFFFFF0 will always wrap around on
+        // a 32-bit system.  On a 64-bit system we depend on the C++
+        // run-time code using uint32_t to represent length and
+        // position; if it did not we might abort due to a too-large
+        // allocation attempt.
+
+        bytearray.length = 1000;
+        expectEOF("ByteArray readInt_3 #2 at position=2^32-16",
+                  (function () {
+                      bytearray.position = 0xFFFFFFF0;
+                      v = bytearray.readInt();
+                    }));
     }
 
     for ( var offs=0 ; offs < 4 ; offs++ ) {
@@ -769,7 +794,32 @@ function testUtf()
                   bytearray.readUTF();
               }));
 
-    // TODO: test that any UTF8 BOM is being skipped
+    // Doc sez: A RangeError will be thrown for writeUTF if the string length exceeds 65535.
+    expectRangeError("RangeError in writeUTF",
+                     (function () {
+                         var s = "86868686";
+                         while (s.length <= 65535)
+                             s = s + s;
+                         bytearray.writeUTF(s);
+                     }));
+
+    // Skip UTF-8 BOM.
+    // This seems fairly ill-defined and ad-hoc since the BOM is skipped but is accounted for in the byte count,
+    // but it's what we do, so test that we continue to do it...
+    bytearray.length = 0;
+    bytearray.position = 0;
+    bytearray.endian = "bigEndian";
+    bytearray.writeByte(0);
+    bytearray.writeByte(6);
+    bytearray.writeByte(0xEF);
+    bytearray.writeByte(0xBB);
+    bytearray.writeByte(0xBF);
+    bytearray.writeUTFBytes("string");
+    bytearray.position = 0;
+    AddTestCase("ByteArray readUTF skips UTF8 BOM after length bytes but includes it in the length",
+                "str",
+                bytearray.readUTF());
+
     // TODO: test invalid UTF - we should still get data, in a predictable way (invalid input turns into individual bytes)
 }
 
@@ -821,7 +871,21 @@ function testUtfBytes()
                   bytearray.readUTFBytes(6); // one too much
               }));
 
-    // TODO: test that any UTF8 BOM is being skipped
+    // Skip UTF-8 BOM.
+    // This seems fairly ill-defined and ad-hoc since the BOM is skipped but is accounted for in the byte count,
+    // but it's what we do, so test that we continue to do it...
+    bytearray.length = 0;
+    bytearray.position = 0;
+    bytearray.endian = "bigEndian";
+    bytearray.writeByte(0xEF);
+    bytearray.writeByte(0xBB);
+    bytearray.writeByte(0xBF);
+    bytearray.writeUTFBytes("string");
+    bytearray.position = 0;
+    AddTestCase("ByteArray readUTFBytes skips UTF8 BOM but includes it in the length",
+                "str",
+                bytearray.readUTFBytes(6));
+
     // TODO: test invalid UTF - we should still get data, in a predictable way (invalid input turns into individual bytes)
 }
 
@@ -839,6 +903,21 @@ function testCompressAndUncompress() {
     bytearray.uncompress();
     AddTestCase(
         "ByteArray length after uncompress",
+        6,
+        bytearray.length);
+
+    bytearray.length = 0;
+    bytearray.position = 0;
+    bytearray.writeUTFBytes("string");
+    bytearray.deflate();
+    AddTestCase(
+        "ByteArray length after deflate",
+        8,  // This is what the inflate algorithm produces on 2011-09-22, so we accept it as Truth.
+        bytearray.length);
+
+    bytearray.inflate();
+    AddTestCase(
+        "ByteArray length after inflate",
         6,
         bytearray.length);
 
@@ -1041,6 +1120,13 @@ function testReadBytes() {
                   bytearray.readBytes(bytearray3, 0, bytearray.length+1);
               }));
 
+    // Doc sez: A RangeError will be thrown if the value of offset+length exceeds 2^32-1
+    expectRangeError("RangeError in readBytes",
+                     (function () {
+                         bytearray3.position = 0;
+                         bytearray.readBytes(bytearray3, 0xFFFFFFFF, 1);
+                     }));
+
     // TODO: test more combinations of offset and count
 }
 
@@ -1128,6 +1214,8 @@ testFileIO();
 
 function testBOM() {
     var bytearray_bom:ByteArray=new ByteArray;
+
+// TODO: toString also skips little-endian and big-endian UTF-16 BOMs (0xFF 0xFE and 0xFE 0xFF).
     bytearray_bom[0]=0xef;
     bytearray_bom[1]=0xbb;
     bytearray_bom[2]=0xbf;
