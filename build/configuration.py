@@ -310,15 +310,15 @@ class Configuration:
                 'CXXFLAGS'     : '',
                 'DLL_CFLAGS'   : '',
                 'LDFLAGS'      : '-lstlport_static -lc -lm -lstdc++ -lgcc ',
-                'AR'           : 'arm-eabi-ar',
-                'AS'           : 'arm-eabi-as',
+                'AR'           : 'arm-linux-androideabi-ar',
+                'AS'           : 'arm-linux-androideabi-as',
                 'MKSTATICLIB'  : '$(AR) -rcs $(1)',
                 'MKDLL'        : '$(CXX) -shared -o $(1)',
                 'MKPROGRAM'    : '$(CXX) $(LFLAGS_HEADLESS) $(SEARCH_DIRS) -o $(1)',
-                'STRIP'        : 'arm-eabi-strip',
-                'LD'           : 'arm-eabi-ld',
-                'CXX'          : 'arm-eabi-g++',
-                'CC'           : 'arm-eabi-gcc'
+                'STRIP'        : 'arm-linux-androideabi-strip',
+                'LD'           : 'arm-linux-androideabi-ld',
+                'CXX'          : 'arm-linux-androideabi-g++',
+                'CC'           : 'arm-linux-androideabi-gcc'
                 })
             
         elif self._target[0] == 'sunos':
