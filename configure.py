@@ -154,6 +154,8 @@ NSPR_INCLUDES = ""
 NSPR_LDOPTS = ""
 DISABLE_RTMPE = None
 ANDROIDPLATFORMVER = "android-9"
+ARM_EABI_VER = '4.4.3'
+ARM_EABI = 'arm-linux-androideabi'
 
 if 'APP_CPPFLAGS' in os.environ:
     APP_CPPFLAGS += os.environ['APP_CPPFLAGS'] + " "
@@ -179,6 +181,10 @@ if 'MMGC_CPPFLAGS' in os.environ:
     MMGC_CPPFLAGS += os.environ['MMGC_CPPFLAGS'] + " "
 if 'AVMSHELL_CPPFLAGS' in os.environ:
     AVMSHELL_CPPFLAGS += os.environ['AVMSHELL_CPPFLAGS'] + " "
+if 'ARM_EABI' in os.environ:
+    ARM_EABI = os.environ['ARM_EABI']
+if 'ARM_EABI_VER' in os.environ:
+    ARM_EABI_VER = os.environ['ARM_EABI_VER']
 if 'AVMSHELL_LDFLAGS' in os.environ:
     AVMSHELL_LDFLAGS += os.environ['AVMSHELL_LDFLAGS'] + " "
 if 'NSPR_INCLUDES' in os.environ:
@@ -247,11 +253,11 @@ if config.getCompiler() == 'GCC':
 
         ANDROID_INCLUDES = "-I$(topsrcdir)/other-licenses/zlib "\
                            "-I$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/include "\
-                           "-I$(ANDROID_BUILD_TOP)/android-ndk/toolchains/arm-eabi-4.4.0/prebuilt/darwin-x86/bin "\
+                           "-I$(ANDROID_BUILD_TOP)/android-ndk/toolchains/%s-%s/prebuilt/darwin-x86/bin "\
                            "-I$(ANDROID_BUILD_TOP)/android-sdk-mac_86 "\
                            "-I$(ANDROID_BUILD_TOP)/android-ndk/sources/cxx-stl/stlport/stlport "\
                            "-I$(ANDROID_BUILD_TOP)/openssl/include "\
-                           "-I$(ANDROID_BUILD_TOP)/frameworks/base/opengl/include " % ANDROIDPLATFORMVER
+                           "-I$(ANDROID_BUILD_TOP)/frameworks/base/opengl/include " % (ANDROIDPLATFORMVER,ARM_EABI,ARM_EABI_VER)
 
         # These flags are shared with some of the other builds such as ARM, but better to keep them separate here for flexibility
         COMMON_CXX_FLAGS = "-Wall -Wdisabled-optimization -Wextra -Wformat=2 -Winit-self -Winvalid-pch -Wno-invalid-offsetof " \
@@ -268,19 +274,19 @@ if config.getCompiler() == 'GCC':
 
         # LFLAGS_HEADLESS gets picked up in configuration.py by MKPROGRAM
         LFLAGS_HEADLESS = "-nostdlib -Bdynamic -Wl,-T,"\
-                          "$(ANDROID_BUILD_TOP)/android-ndk/toolchains/arm-eabi-4.4.0/prebuilt/darwin-x86/arm-eabi/lib/ldscripts/armelf.x "\
+                          "$(ANDROID_BUILD_TOP)/android-ndk/toolchains/%s-%s/prebuilt/darwin-x86/%s/lib/ldscripts/armelf_linux_eabi.x "\
                           "-Wl,-dynamic-linker,/system/bin/linker "\
                           "-Wl,-z,nocopyreloc "\
                           "-L$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib "\
                           "-L$(ANDROID_BUILD_TOP)/android-ndk/sources/cxx-stl/stlport/libs/armeabi "\
                           "-Wl,-rpath-link=$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib "\
                           "$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib/crtbegin_dynamic.o "\
-                          "$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib/crtend_android.o " % (ANDROIDPLATFORMVER,ANDROIDPLATFORMVER,ANDROIDPLATFORMVER,ANDROIDPLATFORMVER)
+                          "$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib/crtend_android.o " % (ARM_EABI,ARM_EABI_VER,ARM_EABI,ANDROIDPLATFORMVER,ANDROIDPLATFORMVER,ANDROIDPLATFORMVER,ANDROIDPLATFORMVER)
 
         LDFLAGS += "$(ANDROID_BUILD_TOP)/openssl/libcrypto.a $(ANDROID_BUILD_TOP)/openssl/libssl.a"
         
         # SEARCH_DIRS gets picked up in configuration.py by MKPROGRAM
-        SEARCH_DIRS = "-L$(topsrcdir)/objdir-release/"
+        SEARCH_DIRS = "-L."
 
         BASE_M_FLAGS = "-mlong-calls -mthumb-interwork "
 
