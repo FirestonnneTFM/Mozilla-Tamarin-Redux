@@ -67,9 +67,9 @@ cd ./acceptance;./runtests.py  --notimecheck --threads=1 as3/Vector/reverse.as
 cd ./acceptance;./runtests.py  --notimecheck --threads=1 --vmargs=-Dinterp as3/Vector/reverse.as
 cd ./acceptance;./runtests.py  --notimecheck --threads=1 --vmargs=-Ojit as3/Vector/reverse.as
 
-cd ./acceptance;./runtests.py  --notimecheck --threads=1 as3/ShellClasses/ByteArray.as
-cd ./acceptance;./runtests.py  --notimecheck --threads=1 --vmargs=-Dinterp as3/ShellClasses/ByteArray.as
-cd ./acceptance;./runtests.py  --notimecheck --threads=1 --vmargs=-Ojit as3/ShellClasses/ByteArray.as
+cd ./acceptance;./runtests.py  --notimecheck --threads=1 as3/ByteArray/ByteArray.as
+cd ./acceptance;./runtests.py  --notimecheck --threads=1 --vmargs=-Dinterp as3/ByteArray/ByteArray.as
+cd ./acceptance;./runtests.py  --notimecheck --threads=1 --vmargs=-Ojit as3/ByteArray/ByteArray.as
 
 cd ./acceptance;./runtests.py  --notimecheck --threads=1 ecma3/FunctionObjects/e15_3_1_1_1_rt.as
 cd ./acceptance;./runtests.py  --notimecheck --threads=1 --vmargs=-Dinterp ecma3/FunctionObjects/e15_3_1_1_1_rt.as
