@@ -158,9 +158,44 @@
 /* AVMSYSTEM_UNALIGNED_INT_ACCESS
  *
  * Selects an architecture that allows load/store of unaligned 16- and 32-bit ints.
- * There may be a performance penalty, but it will not generate a runtime
- * fault, and will be at least as efficient as separate instructions to load
- * and assembly the word one byte at a time.
+ *
+ * While it's OK for an unaligned int load or store to be slower than an aligned load
+ * or store, we require that:
+ *
+ * - an unaligned load/store MUST NOT generate a run-time fault, and
+ * - an unaligned load/store MUST be at least as efficient as separate instructions
+ * to load and assemble the word one byte at a time / disassemble and store one
+ * byte at a time.
+ *
+ * If you cannot guarantee that the requirements are met then DO NOT enable
+ * this feature.  (For example, on Palm Pre unaligned loads/stores are allowed but
+ * they're reportedly so slow that they're pointless.)
+ *
+ * Code that uses this feature MUST NOT use it as a license to load/store floating-point
+ * data using integer instructions, since in general that will not work.  In
+ * particular this classical pattern will not work:
+ *
+ * uint8_t* p = ...;  // possibly-unaligned address we're loading from
+ * union (
+ * float f;
+ * uint32_t i;
+ * ) u;
+ * #ifdef VMCFG_UNALIGNED_INT_ACCESS
+ * u.i = *(uint32_t*)p;
+ * return u.f;
+ * #else
+ * ...
+ *
+ * The reason it won't work is that some compilers (notably on ARM) will generate
+ * code that uses a floating-point load into an FP register, so the code actually
+ * needs unaligned floating-point loads to be supported, AVMSYSTEM_UNALIGNED_FP_ACCESS.
+ * (Whether it is correct for the compiler to generate that code is beside the point.)
+ *
+ * The prohibition applies to 64-bit loads/stores as well (expressed as pairs of
+ * uint32_t loads/stores): ARM compilers as of October 2011 will rewrite a pair of loads
+ * into a uint32_t array in a union with a return of a double from the union as a single
+ * double load into the return register.  See comments throughout the code as well
+ * as Bugzilla 569691 and 685441.
  */
 #if !defined AVMSYSTEM_UNALIGNED_INT_ACCESS || AVMSYSTEM_UNALIGNED_INT_ACCESS != 0 && AVMSYSTEM_UNALIGNED_INT_ACCESS != 1
 #  error "AVMSYSTEM_UNALIGNED_INT_ACCESS must be defined and 0 or 1 (only)."
@@ -170,10 +205,20 @@
 /* AVMSYSTEM_UNALIGNED_FP_ACCESS
  *
  * Selects an architecture that allows load/store of unaligned 32- and 64-bit floats.
- * There may be a performance penalty, but it will not generate a runtime
- * fault, and will be at least as efficient as separate instructions to load
- * and assembly the word one byte at a time. (Note that if this is not set,
- * it is assumed that 64-bit floats require 8-byte alignment.)
+ *
+ * While it's OK for an unaligned floating-point load/store to be slower than an aligned
+ * load/store, we require that:
+ *
+ * - an unaligned load/store MUST NOT generate a run-time fault, and
+ * - an unaligned load/store MUST be at least as efficient as separate instructions
+ * to load and assemble the datum one byte at a time / disassemble and store one
+ * byte at a time.
+ *
+ * If you cannot guarantee that the requirements are met then DO NOT enable
+ * this feature.
+ *
+ * Note that if AVMSYSTEM_UNALIGNED_FP_ACCESS is not set then it is assumed that 64-bit
+ * floats require 8-byte alignment.
  */
 #if !defined AVMSYSTEM_UNALIGNED_FP_ACCESS || AVMSYSTEM_UNALIGNED_FP_ACCESS != 0 && AVMSYSTEM_UNALIGNED_FP_ACCESS != 1
 #  error "AVMSYSTEM_UNALIGNED_FP_ACCESS must be defined and 0 or 1 (only)."
