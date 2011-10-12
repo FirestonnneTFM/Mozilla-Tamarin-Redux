@@ -63,7 +63,7 @@ cd acceptance;${PYTHON_RUNTESTS} ./runtests.py ${RTARGS}  --notimecheck --avm=${
 cd acceptance;${PYTHON_RUNTESTS} ./runtests.py ${RTARGS}  --notimecheck --avm=${avmr} --vmargs="-Ojit" as3/Definitions/Classes/ClassDef/DynamicClassSameMethPropName.as
 
 # ByteArray compress/uncompress: https://bugzilla.mozilla.org/show_bug.cgi?id=436372
-cd acceptance;${PYTHON_RUNTESTS} ./runtests.py ${RTARGS} --notimecheck --avm=${avmr} as3/ShellClasses/ByteArray.as
+cd acceptance;${PYTHON_RUNTESTS} ./runtests.py ${RTARGS} --notimecheck --avm=${avmr} as3/ByteArray/ByteArray.as
 cd acceptance;${PYTHON_RUNTESTS} ./runtests.py ${RTARGS} --notimecheck --avm=${avmr} as3/ShellClasses/File.as
 
 # https://bugzilla.mozilla.org/show_bug.cgi?id=517858
