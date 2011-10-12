@@ -187,22 +187,21 @@ namespace nanojit
         CASE64(LIR_subjovq:)
             target = ins->getTarget();
             addEdge(ins, target);
-            _vertices.put(target,true);
+            _vertices.put(target, true);
             priorAsVertex = (_mode == CFG_BB);
             break;
 
         case LIR_jtbl: {
             uint32_t tableSize = ins->getTableSize();
             NanoAssert(tableSize > 0);
-            for (uint32_t i = 0; i < tableSize; i++)
-            {
-                target = ins->getTarget();
-                addEdge(ins, ins->getTarget());
-                _vertices.put(target,true);
+            for (uint32_t i = 0; i < tableSize; i++) {
+                target = ins->getTarget(i);
+                addEdge(ins, target);
+                _vertices.put(target, true);
             }
             priorAsVertex = (_mode == CFG_BB);
             break;
-            }
+        }
         default:
             ;
         }
