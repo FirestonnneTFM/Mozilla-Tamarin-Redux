@@ -845,10 +845,10 @@ double FASTCALL mop_lf64(const void* addr)
     // word first.
     const uint8_t* u = (const uint8_t*)addr;
     double_overlay d;
-#if defined(VMCFG_UNALIGNED_INT_ACCESS) && defined(VMCFG_LITTLE_ENDIAN)
-    d.words.lsw = *(uint32_t*)u;
-    d.words.msw = *((uint32_t*)u+1);
-#else
+
+    // Bugzilla 685441: Do not copy 32-bit blocks here for some ARM platforms
+    // to avoid unaligned memory access, even though VMCFG_UNALIGNED_INT_ACCESS
+    // is turned on.
     d.words.lsw = ((uint64_t(u[3]) << 24) |
                    (uint64_t(u[2]) << 16) |
                    (uint64_t(u[1]) << 8) |
@@ -857,7 +857,6 @@ double FASTCALL mop_lf64(const void* addr)
                    (uint32_t(u[6]) << 16) |
                    (uint32_t(u[5]) << 8) |
                    (uint32_t(u[4])));
-#endif
     return d.value;
 #endif
 }
@@ -922,10 +921,10 @@ void mop_sf64(void* addr, double value)
 #else
     double_overlay d(value);
     uint8_t* u = (uint8_t*)addr;
-#if defined(VMCFG_UNALIGNED_INT_ACCESS) && defined(VMCFG_LITTLE_ENDIAN)
-    *(uint32_t*)u = d.words.lsw;
-    *((uint32_t*)u+1) = d.words.msw;
-#else
+
+    // Bugzilla 685441: Do not copy 32-bit blocks here for some ARM platforms
+    // to avoid unaligned memory access, even though VMCFG_UNALIGNED_INT_ACCESS
+    // is turned on.
     u[0] = uint8_t(d.words.lsw);
     u[1] = uint8_t(d.words.lsw >> 8);
     u[2] = uint8_t(d.words.lsw >> 16);
@@ -934,7 +933,6 @@ void mop_sf64(void* addr, double value)
     u[5] = uint8_t(d.words.msw >> 8);
     u[6] = uint8_t(d.words.msw >> 16);
     u[7] = uint8_t(d.words.msw >> 24);
-#endif
 #endif
 }
 
