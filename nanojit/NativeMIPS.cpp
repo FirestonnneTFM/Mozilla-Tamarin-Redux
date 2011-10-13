@@ -278,7 +278,10 @@ namespace nanojit
     {
 #if !PEDANTIC
         if (isS16(dr)) {
-            LDSTGPR(op, rt, dr, rbase);
+            if (IsGpReg(rt))
+                LDSTGPR(op, rt, dr, rbase);
+            else
+                LDSTFPR(op, rt, dr, rbase);
             return;
         }
 #endif
@@ -286,7 +289,10 @@ namespace nanojit
         // lui AT,hi(d)
         // addu AT,rbase
         // ldst rt,lo(d)(AT)
-        LDSTGPR(op, rt, lo(dr), AT);
+        if (IsGpReg(rt))
+            LDSTGPR(op, rt, lo(dr), AT);
+        else
+            LDSTFPR(op, rt, lo(dr), AT);
         ADDU(AT, AT, rbase);
         LUI(AT, hi(dr));
     }
@@ -659,46 +665,62 @@ namespace nanojit
     {
         NanoAssert(ins->isD());
 
-        LIns* base = ins->oprnd1();
-        int dr = ins->disp();
+        if (cpu_has_fpu) {
+            Register    dd;
+            LIns*       base = ins->oprnd1();
+            Register    rn = findRegFor(base, GpRegs);
+            int         offset = ins->disp();
 
-        Register rd = ins->deprecated_getReg();
-        int ds = deprecated_disp(ins);
+            if (ins->isInReg()) {
+                dd = prepareResultReg(ins, FpRegs);
+            }
+            else {
+                // If the result isn't already in a register, allocate a temporary
+                // register for the result and store it directly into memory.
+                NanoAssert(ins->isInAr());
+                int d = arDisp(ins);
+                dd = Assembler::registerAllocTmp(FpRegs);
+                asm_ldst64(true, dd, d, FP);
+            }
 
-        Register rbase = findRegFor(base, GpRegs);
-        NanoAssert(IsGpReg(rbase));
-        deprecated_freeRsrcOf(ins);
-
-        if (cpu_has_fpu && deprecated_isKnownReg(rd)) {
-            NanoAssert(IsFpReg(rd));
-            asm_ldst64 (false, rd, dr, rbase);
+            switch (ins->opcode()) {
+            case LIR_ldd:
+                asm_ldst64(false, dd, offset, rn);
+                break;
+            case LIR_ldf2d:
+                CVT_D_S(dd, dd);
+                asm_ldst(OP_LWC1, dd, offset, rn);
+                break;
+            default:
+                NanoAssertMsg(0, "LIR opcode unsupported by asm_load64.");
+                break;
+            }
         }
         else {
-            // Either FPU is not available or the result needs to go into memory;
-            // in either case, FPU instructions are not required. Note that the
-            // result will never be loaded into registers if FPU is not available.
-            NanoAssert(!deprecated_isKnownReg(rd));
-            NanoAssert(ds != 0);
+            NanoAssert(ins->isInAr());
+            int         d = arDisp(ins);
 
-            NanoAssert(isS16(dr) && isS16(dr+4));
-            NanoAssert(isS16(ds) && isS16(ds+4));
+            LIns*       base = ins->oprnd1();
+            Register    rn = findRegFor(base, GpRegs);
+            int         offset = ins->disp();
 
-            // Check that the offset is 8-byte (64-bit) aligned.
-            NanoAssert((ds & 0x7) == 0);
-
-            // FIXME: allocate a temporary to use for the copy
-            // to avoid load to use delay
-            // lw $at,dr($rbase)
-            // sw $at,ds($fp)
-            // lw $at,dr+4($rbase)
-            // sw $at,ds+4($fp)
-
-            SW(AT, ds+4, FP);
-            LW(AT, dr+4, rbase);
-            SW(AT, ds,   FP);
-            LW(AT, dr,   rbase);
+            switch (ins->opcode()) {
+            case LIR_ldd:
+                SW(AT, d+4, FP);
+                LW(AT, offset+4, rn);
+                SW(AT, d,   FP);
+                LW(AT, offset,   rn);
+                break;
+            case LIR_ldf2d:
+                NanoAssertMsg(0, "LIR_ldf2d is not yet implemented for soft-float.");
+                break;
+            default:
+                NanoAssertMsg(0, "LIR opcode unsupported by asm_load64.");
+                break;
+            }
         }
 
+        freeResourcesOf(ins);
         TAG("asm_load64(ins=%p{%s})", ins, lirNames[ins->opcode()]);
     }
 
@@ -914,7 +936,6 @@ namespace nanojit
             } else {
                 // incoming arg is on stack
                 Register r = deprecated_prepResultReg(ins, GpRegs);
-                TODO(Check stack offset);
                 int d = FRAMESIZE + a * sizeof(intptr_t);
                 LW(r, d, FP);
             }
@@ -1246,11 +1267,21 @@ namespace nanojit
                     SW(AT, dr,   rbase);
                     LW(AT, ds,   FP);
                 }
-
                 break;
+
             case LIR_std2f:
-                NanoAssertMsg(0, "NJ_EXPANDED_LOADSTORE_SUPPORTED not yet supported for this architecture");
-                return;
+                if (cpu_has_fpu) {
+                    Register fr = value->isInReg() ? value->getReg() : findRegFor(value, FpRegs);
+                    Register rbase = getBaseReg(base, dr, GpRegs);
+                    Register ft = registerAllocTmp(FpRegs & ~(rmask(fr)));
+                    asm_ldst(OP_SWC1, ft, dr, rbase);
+                    CVT_S_D(ft, fr);
+                }
+                else {
+                    TODO(Soft-float implementation of LIR_std2f);
+                }
+                break;
+
             default:
                 BADOPCODE(op);
                 return;
