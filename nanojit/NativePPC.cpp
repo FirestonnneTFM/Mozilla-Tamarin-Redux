@@ -22,6 +22,8 @@
  *
  * Contributor(s):
  *   Adobe AS3 Team
+ *   Cameron Kaiser <ckaiser@floodgap.com> and the TenFourFox team
+ *    (with big thanks to Edwin Smith)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -93,6 +95,7 @@ namespace nanojit
     const int cr_offset = 1*sizeof(void*); // linkage.cr
 
     NIns* Assembler::genPrologue() {
+        SwapDisable();
         // mflr r0
         // stw r0, lr_offset(sp)
         // stwu sp, -framesize(sp)
@@ -103,6 +106,10 @@ namespace nanojit
         // r3-r10 to the parameter area.
         uint32_t param_area = (max_param_size > min_param_area_size) ? max_param_size : min_param_area_size;
         // activation frame is 4 bytes per entry even on 64bit machines
+
+        // NB: We can run out of stack space easily with this. In TenFourFox
+        // we build with 64MB of stack or else we crash in things like Kraken.
+        // The PPC ABI seems to account for this significant difference.
         uint32_t stackNeeded = param_area + linkage_size + _activation.stackSlotsNeeded() * 4;
         uint32_t aligned = alignUp(stackNeeded, NJ_ALIGN_STACK);
 
@@ -119,15 +126,19 @@ namespace nanojit
         STP(R0, lr_offset, SP); // save LR in linkage.lr
         MFLR(R0);
 
+        SwapEnable();
         return patchEntry;
     }
 
     NIns* Assembler::genEpilogue() {
+        SwapDisable();
         BLR();
         MTLR(R0);
         LP(R0, lr_offset, SP);
         LP(FP, cr_offset, SP); // restore FP from linkage.cr
         MR(SP,FP);
+        MR(R3,R12); // move our scratch state to R3 (see nFragExit, asm_ret)
+        SwapEnable();
         return _nIns;
     }
 
@@ -137,7 +148,13 @@ namespace nanojit
         Register rr = deprecated_prepResultReg(ins, GpRegs);
         Register ra = getBaseReg(base, d, GpRegs);
 
+        if (ins->opcode() == LIR_ldc2i)
+            EXTSB(rr, rr);
+        if (ins->opcode() == LIR_lds2i) // XXX LHA, LHAX?
+            EXTSH(rr, rr);
+
         switch(ins->opcode()) {
+            case LIR_ldc2i:
             case LIR_lduc2ui:
                 if (isS16(d)) {
                     LBZ(rr, d, ra);
@@ -146,6 +163,7 @@ namespace nanojit
                     asm_li(R0,d);
                 }
                 return;
+            case LIR_lds2i:
             case LIR_ldus2ui:
                 // these are expected to be 2 or 4-byte aligned
                 if (isS16(d)) {
@@ -164,10 +182,6 @@ namespace nanojit
                     asm_li(R0,d);
                 }
                 return;
-            case LIR_ldc2i:
-            case LIR_lds2i:
-                NanoAssertMsg(0, "NJ_EXPANDED_LOADSTORE_SUPPORTED not yet supported for this architecture");
-                return;
             default:
                 NanoAssertMsg(0, "asm_load32 should never receive this LIR opcode");
                 return;
@@ -176,14 +190,13 @@ namespace nanojit
 
     void Assembler::asm_store32(LOpcode op, LIns *value, int32_t dr, LIns *base) {
 
+        // XXX?
         switch (op) {
             case LIR_sti:
             case LIR_sti2c:
+            case LIR_sti2s:
                 // handled by mainline code below for now
                 break;
-            case LIR_sti2s:
-                NanoAssertMsg(0, "NJ_EXPANDED_LOADSTORE_SUPPORTED not yet supported for this architecture");
-                return;
             default:
                 NanoAssertMsg(0, "asm_store32 should never receive this LIR opcode");
                 return;
@@ -201,6 +214,9 @@ namespace nanojit
             case LIR_sti2c:
                 STB(rs, dr, ra);
                 break;
+            case LIR_sti2s:
+                STH(rs, dr, ra);
+                break;
             }
             return;
         }
@@ -214,20 +230,22 @@ namespace nanojit
         case LIR_sti2c:
             STBX(rs, ra, R0);
             break;
+        case LIR_sti2s:
+            STHX(rs, ra, R0);
+            break;
         }
         asm_li(R0, dr);
     }
 
     void Assembler::asm_load64(LIns *ins) {
 
+        // XXX?
         switch (ins->opcode()) {
+            case LIR_ldf2d:
             case LIR_ldd:
             CASE64(LIR_ldq:)
                 // handled by mainline code below for now
                 break;
-            case LIR_ldf2d:
-                NanoAssertMsg(0, "NJ_EXPANDED_LOADSTORE_SUPPORTED not yet supported for this architecture");
-                return;
             default:
                 NanoAssertMsg(0, "asm_load64 should never receive this LIR opcode");
                 return;
@@ -252,6 +270,10 @@ namespace nanojit
         Register ra = getBaseReg(base, dr, GpRegs);
 
     #ifdef NANOJIT_64BIT
+        if (ins->opcode() == LIR_ldf2d) {
+            NanoAssertMsg(0, "NJ_EXPANDED_LOADSTORE_SUPPORTED not yet supported for this architecture");
+            return;
+        }
         if (rmask(rr) & GpRegs) {
             #if !PEDANTIC
                 if (isS16(dr)) {
@@ -269,13 +291,19 @@ namespace nanojit
         // FPR
     #if !PEDANTIC
         if (isS16(dr)) {
-            LFD(rr, dr, ra);
+            if (ins->opcode() == LIR_ldf2d)
+                LFS(rr, dr, ra);
+            else
+                LFD(rr, dr, ra);
             return;
         }
     #endif
 
         // general case FPR load
-        LFDX(rr, ra, R0);
+        if (ins->opcode() == LIR_ldf2d)
+            LFSX(rr, ra, R0);
+        else
+            LFDX(rr, ra, R0);
         asm_li(R0, dr);
     }
 
@@ -295,31 +323,32 @@ namespace nanojit
     }
 
     void Assembler::asm_li32(Register r, int32_t imm) {
-        // general case
-        // TODO use ADDI instead of ORI if r != r0, impl might have 3way adder
-        ORI(r, r, imm);
-        LIS(r, imm>>16);  // on ppc64, this sign extends
+        // general case. One day, a real three-way adder will come and
+        // wash all the scum off the streets.
+        ORI(r,r,imm);
+        LIS(r, imm>>16);
     }
 
     void Assembler::asm_li64(Register r, uint64_t imm) {
+        SwapDisable();
         underrunProtect(5*sizeof(NIns)); // must be contiguous to be patchable
         ORI(r,r,uint16_t(imm));        // r[0:15] = imm[0:15]
         ORIS(r,r,uint16_t(imm>>16));   // r[16:31] = imm[16:31]
         SLDI(r,r,32);                  // r[32:63] = r[0:31], r[0:31] = 0
         asm_li32(r, int32_t(imm>>32)); // r[0:31] = imm[32:63]
+        SwapEnable();
     }
 
     void Assembler::asm_store64(LOpcode op, LIns *value, int32_t dr, LIns *base) {
         NanoAssert(value->isQorD());
 
+        // XXX?
         switch (op) {
             case LIR_std:
             CASE64(LIR_stq:)
+            case LIR_std2f:
                 // handled by mainline code below for now
                 break;
-            case LIR_std2f:
-                NanoAssertMsg(0, "NJ_EXPANDED_LOADSTORE_SUPPORTED not yet supported for this architecture");
-                return;
             default:
                 NanoAssertMsg(0, "asm_store64 should never receive this LIR opcode");
                 return;
@@ -332,6 +361,11 @@ namespace nanojit
         // on 32bit cpu's, we only use store64 for doubles
         Register rs = findRegFor(value, FpRegs);
     #else
+        if (op == LIR_std2f) {
+            NanoAssertMsg(0, "NJ_EXPANDED_LOADSTORE_SUPPORTED not yet supported for this architecture");
+            return;
+        }
+
         // if we have to choose a register, use a GPR
         Register rs = ( !value->isInReg()
                       ? findRegFor(value, GpRegs & ~rmask(ra))
@@ -355,13 +389,21 @@ namespace nanojit
     #if !PEDANTIC
         if (isS16(dr)) {
             // short offset
-            STFD(rs, dr, ra);
+            if (op == LIR_std2f) {
+                STFS(rs, dr, ra);
+            } else {
+                STFD(rs, dr, ra);
+            }
             return;
         }
     #endif
 
         // general case for any offset
-        STFDX(rs, ra, R0);
+        if (op == LIR_std2f) {
+            STFSX(rs, ra, R0);
+        } else {
+            STFDX(rs, ra, R0);
+        }
         asm_li(R0, dr);
     }
 
@@ -369,43 +411,45 @@ namespace nanojit
         LOpcode op = ins->opcode();
         LIns *a = ins->oprnd1();
         LIns *b = ins->oprnd2();
-        ConditionRegister cr = CR7;
+        SwapDisable();
+        ConditionRegister cr = CR0;
         Register r = deprecated_prepResultReg(ins, GpRegs);
         switch (op) {
         case LIR_eqi: case LIR_eqd:
         CASE64(LIR_eqq:)
-            EXTRWI(r, r, 1, 4*cr+COND_eq); // extract CR7.eq
+            EXTRWI(r, r, 1, 4*cr+COND_eq); // extract CR0.eq
             MFCR(r);
             break;
         case LIR_lti: case LIR_ltui:
         case LIR_ltd: case LIR_led:
         CASE64(LIR_ltq:) CASE64(LIR_ltuq:)
-            EXTRWI(r, r, 1, 4*cr+COND_lt); // extract CR7.lt
+            EXTRWI(r, r, 1, 4*cr+COND_lt); // extract CR0.lt
             MFCR(r);
             break;
         case LIR_gti: case LIR_gtui:
         case LIR_gtd: case LIR_ged:
         CASE64(LIR_gtq:) CASE64(LIR_gtuq:)
-            EXTRWI(r, r, 1, 4*cr+COND_gt); // extract CR7.gt
+            EXTRWI(r, r, 1, 4*cr+COND_gt); // extract CR0.gt
             MFCR(r);
             break;
         case LIR_lei: case LIR_leui:
         CASE64(LIR_leq:) CASE64(LIR_leuq:)
-            EXTRWI(r, r, 1, 4*cr+COND_eq); // extract CR7.eq
+            EXTRWI(r, r, 1, 4*cr+COND_eq); // extract CR0.eq
             MFCR(r);
-            CROR(CR7, eq, lt, eq);
+            CROR(CR0, eq, lt, eq);
             break;
         case LIR_gei: case LIR_geui:
         CASE64(LIR_geq:) CASE64(LIR_geuq:)
-            EXTRWI(r, r, 1, 4*cr+COND_eq); // select CR7.eq
+            EXTRWI(r, r, 1, 4*cr+COND_eq); // select CR0.eq
             MFCR(r);
-            CROR(CR7, eq, gt, eq);
+            CROR(CR0, eq, gt, eq);
             break;
         default:
             debug_only(outputf("%s",lirNames[ins->opcode()]);)
             TODO(asm_cond);
             break;
         }
+        SwapEnable();
         asm_cmp(op, a, b, cr);
     }
 
@@ -433,60 +477,76 @@ namespace nanojit
         else
     #endif
             patch = asm_branch_far(onfalse, cond, targ);
-        asm_cmp(condop, cond->oprnd1(), cond->oprnd2(), CR7);
+        asm_cmp(condop, cond->oprnd1(), cond->oprnd2(), CR0);
         return Branches(patch);
     }
 
     NIns* Assembler::asm_branch_near(bool onfalse, LIns *cond, NIns * const targ) {
         NanoAssert(targ != 0);
-        underrunProtect(4);
-        ptrdiff_t bd = targ - (_nIns-1);
+        SwapDisable();
+        underrunProtect(16);
+
+        // emit enough NOPs so that we can patch this to a far branch
+        // later if we have to, and keep these all on the same page.
+        // include the NOPs in our branch computations.
+
+        ptrdiff_t bd = targ - (_nIns-4); // *instructions* (3 nops + bc = 4)
         NIns *patch = 0;
+        uint32_t likely = 0;
         if (!isS14(bd)) {
-            underrunProtect(8);
-            bd = targ - (_nIns-1);
+            bd = targ - (_nIns-3); // 2 nops + b = 3
             if (isS24(bd)) {
                 // can't fit conditional branch offset into 14 bits, but
                 // we can fit in 24, so invert the condition and branch
                 // around an unconditional jump
                 verbose_only(verbose_outputf("%p:", _nIns);)
                 NIns *skip = _nIns;
+                NOP(); NOP(); // two only -- we have the branch too
                 B(bd);
                 patch = _nIns; // this is the patchable branch to the given target
                 onfalse = !onfalse;
-                bd = skip - (_nIns-1);
+                likely = 1; // the branch is now the default case
+                bd = skip - (_nIns-1); // this is correct.
                 NanoAssert(isS14(bd));
                 verbose_only(verbose_outputf("branch24");)
+                // and fall through to S14
             }
             else {
                 // known far target
                 return asm_branch_far(onfalse, cond, targ);
             }
         }
-        ConditionRegister cr = CR7;
+
+        // S14 branch
+        verbose_only(verbose_outputf("branch14");)
+        if(!patch) {
+            NOP(); NOP(); NOP(); // to be patched later if needed
+        }
+
+        ConditionRegister cr = CR0;
         switch (cond->opcode()) {
         case LIR_eqi:
         case LIR_eqd:
         CASE64(LIR_eqq:)
-            if (onfalse) BNE(cr,bd); else BEQ(cr,bd);
+            if (onfalse) BNE(cr,bd,likely); else BEQ(cr,bd,likely);
             break;
         case LIR_lti: case LIR_ltui:
         case LIR_ltd: case LIR_led:
         CASE64(LIR_ltq:) CASE64(LIR_ltuq:)
-            if (onfalse) BNL(cr,bd); else BLT(cr,bd);
+            if (onfalse) BNL(cr,bd,likely); else BLT(cr,bd,likely);
             break;
         case LIR_lei: case LIR_leui:
         CASE64(LIR_leq:) CASE64(LIR_leuq:)
-            if (onfalse) BGT(cr,bd); else BLE(cr,bd);
+            if (onfalse) BGT(cr,bd,likely); else BLE(cr,bd,likely);
             break;
         case LIR_gti: case LIR_gtui:
         case LIR_gtd: case LIR_ged:
         CASE64(LIR_gtq:) CASE64(LIR_gtuq:)
-            if (onfalse) BNG(cr,bd); else BGT(cr,bd);
+            if (onfalse) BNG(cr,bd,likely); else BGT(cr,bd,likely);
             break;
         case LIR_gei: case LIR_geui:
         CASE64(LIR_geq:) CASE64(LIR_geuq:)
-            if (onfalse) BLT(cr,bd); else BGE(cr,bd);
+            if (onfalse) BLT(cr,bd,likely); else BGE(cr,bd,likely);
             break;
         default:
             debug_only(outputf("%s",lirNames[cond->opcode()]);)
@@ -494,37 +554,40 @@ namespace nanojit
         }
         if (!patch)
             patch = _nIns;
+        SwapEnable();
         return patch;
     }
 
     // general case branch to any address (using CTR)
     NIns *Assembler::asm_branch_far(bool onfalse, LIns *cond, NIns * const targ) {
+        SwapDisable();
         LOpcode condop = cond->opcode();
-        ConditionRegister cr = CR7;
+        ConditionRegister cr = CR0;
+        uint32_t likely = 0;
         underrunProtect(16);
         switch (condop) {
         case LIR_eqi:
         case LIR_eqd:
         CASE64(LIR_eqq:)
-            if (onfalse) BNECTR(cr); else BEQCTR(cr);
+            if (onfalse) BNECTR(cr,likely); else BEQCTR(cr,likely);
             break;
         case LIR_lti: case LIR_ltui:
         CASE64(LIR_ltq:) CASE64(LIR_ltuq:)
         case LIR_ltd: case LIR_led:
-            if (onfalse) BNLCTR(cr); else BLTCTR(cr);
+            if (onfalse) BNLCTR(cr,likely); else BLTCTR(cr,likely);
             break;
         case LIR_lei: case LIR_leui:
         CASE64(LIR_leq:) CASE64(LIR_leuq:)
-            if (onfalse) BGTCTR(cr); else BLECTR(cr);
+            if (onfalse) BGTCTR(cr,likely); else BLECTR(cr,likely);
             break;
         case LIR_gti: case LIR_gtui:
         CASE64(LIR_gtq:) CASE64(LIR_gtuq:)
         case LIR_gtd: case LIR_ged:
-            if (onfalse) BNGCTR(cr); else BGTCTR(cr);
+            if (onfalse) BNGCTR(cr,likely); else BGTCTR(cr,likely);
             break;
         case LIR_gei: case LIR_geui:
         CASE64(LIR_geq:) CASE64(LIR_geuq:)
-            if (onfalse) BLTCTR(cr); else BGECTR(cr);
+            if (onfalse) BLTCTR(cr,likely); else BGECTR(cr,likely);
             break;
         default:
             debug_only(outputf("%s",lirNames[condop]);)
@@ -542,12 +605,60 @@ namespace nanojit
             asm_li32(R0, uint32_t(uintptr_t(targ)));
         }
     #endif
+        SwapEnable();
         return _nIns;
     }
 
-    NIns* Assembler::asm_branch_ov(LOpcode, NIns*) {
-        TODO(asm_branch_ov);
-        return _nIns;
+    NIns* Assembler::asm_branch_ov(LOpcode op, NIns* targ) {
+        // This only works for our overflow-enabled instructions (see
+        // asm_arith). We want overflow, not summary overflow, so that
+        // we aren't carrying overflow forward from something else.
+        SwapDisable();
+        ConditionRegister cr = CR0;
+        NIns *patch = 0;
+
+        // XXX This assumes a far branch every time. Frankly, I am doubtful it
+        // will ever be a short branch, so only far branches are implemented.
+
+    #if !defined NANOJIT_64BIT
+        underrunProtect(28);
+        NIns *here = _nIns;
+        // Only do the work to compute the far branch if absolutely necessary.
+        BCTR(0);
+        MTCTR(R0);
+        asm_li32(R0, (int)targ); // 2 instructions
+        // patchable branch is here, not the actual comparison.
+        patch = _nIns;
+        ptrdiff_t offset = here - (_nIns-1);
+        BLE(cr,offset,1); // this branch is likely; we usually don't overflow.
+      #ifndef _PPC970_
+        MCRXR(0); // move XER[0-2] to CR[0-2] (CA,OV,SO), clears XER.
+        // Now overflow is in CR[1].
+        // This makes the test effectively for "greater than"
+      #else
+        // POWER4 and up (including 970) don't have mcrxr in hardware.
+        MTXER(R0);
+        RLWINM(R0, R0, 0, 0, 28); // then clear the bits
+        MTCRF(128, R0); // thus put XER into CR0-2
+        MFXER(R0);
+      #endif
+    #else
+        // This needs to be optimized better at some point, but this works.
+        // we also need to get the MCRXR out of here for POWER4+.
+        //underrunProtect() XXX
+        BGTCTR(cr,0); 
+        MTCTR(R0);
+        MCRXR(7);
+        if (!targ || !isU32(uintptr_t(targ))) {
+            asm_li64(R0, uint64_t(targ)); // 5 instructions
+        } else {
+            asm_li32(R0, uint32_t(uintptr_t(targ))); // 2 instructions
+        }
+        patch = _nIns; // patch goes here
+    #endif
+
+        SwapEnable();
+        return patch;
     }
 
     void Assembler::asm_cmp(LOpcode condop, LIns *a, LIns *b, ConditionRegister cr) {
@@ -615,15 +726,19 @@ namespace nanojit
         else {
             TODO(asm_cmp);
         }
+
     }
 
     void Assembler::asm_ret(LIns *ins) {
+        SwapDisable();
         genEpilogue();
+        MR(R12,R3); // get our return value into scratch for genEpilogue
         releaseRegisters();
         assignSavedRegs();
         LIns *value = ins->oprnd1();
         Register r = ins->isop(LIR_retd) ? F1 : R3;
         findSpecificRegFor(value, r);
+        SwapEnable();
     }
 
     void Assembler::asm_nongp_copy(Register r, Register s) {
@@ -669,7 +784,12 @@ namespace nanojit
 
     void Assembler::asm_fneg(LIns *ins) {
         Register rr = deprecated_prepResultReg(ins, FpRegs);
-        Register ra = findRegFor(ins->oprnd1(), FpRegs);
+        LIns* lhs = ins->oprnd1();
+        // We can clobber the result register for "free."
+        Register ra = ( !lhs->isInReg()
+                      ? findSpecificRegFor(lhs, rr)
+                      : findRegFor(lhs, FpRegs) );
+
         FNEG(rr,ra);
     }
 
@@ -718,10 +838,12 @@ namespace nanojit
             // Indirect call: we assign the address arg to R11 since it's not
             // used for regular arguments, and is otherwise scratch since it's
             // clobberred by the call.
+            SwapDisable();
             underrunProtect(8); // underrunProtect might clobber CTR
             BCTRL();
             MTCTR(R11);
             asm_regarg(ARGTYPE_P, ins->arg(--argc), R11);
+            SwapEnable();
         }
 
         int param_size = 0;
@@ -850,12 +972,23 @@ namespace nanojit
         LOpcode op = ins->opcode();
         LIns* lhs = ins->oprnd1();
         LIns* rhs = ins->oprnd2();
+
         RegisterMask allow = GpRegs;
         Register rr = deprecated_prepResultReg(ins, allow);
+        // Not sure which is faster, but we *could* clobber the lhs reg
+        // in the same way as FNEG ...
         Register ra = findRegFor(lhs, GpRegs);
 
-        if (rhs->isImmI()) {
+        // Try immediate mode, except if one of the unsupported opcodes.
+        if (rhs->isImmI() &&
+          op != LIR_mulxovi &&
+          op != LIR_muljovi &&
+          op != LIR_addxovi &&
+          op != LIR_addjovi &&
+          op != LIR_subjovi &&
+          op != LIR_subxovi) {
             int32_t rhsc = rhs->immI();
+
             if (isS16(rhsc)) {
                 // ppc arith immediate ops sign-exted the imm16 value
                 switch (op) {
@@ -867,10 +1000,106 @@ namespace nanojit
                     SUBI(rr, ra, rhsc);
                     return;
                 case LIR_muli:
+                    // MULLI can take up to 5 cycles in the worst case.
+                    // Let's try desperately to avoid it with some
+                    // strength-reduced chains of addition. We might even
+                    // write up a shifter at some point, but signage is
+                    // a little complex.
+                    switch(rhsc) {
+                    case 0:
+                        // uh ...
+                        TODO(multiply_by_zero_shouldnt_this_be_optimized_out);
+                        break; // fall through
+                    case 1:
+                        // um ...
+                        TODO(multiply_by_one_shouldnt_this_be_optimized_out);
+                        break; // fall through
+                    case 2:
+                        // Add itself to itself.
+                        ADD(rr, ra, ra);
+                        return;
+                    case 3:
+                        // This is on SunSpider, btw.
+                        // Save a copy in R0 if rr == ra because it will be
+                        // clobbered.
+                        if (rr == ra) {
+                            ADD(rr, rr, R0);
+                        } else {
+                            ADD(rr, rr, ra);
+                        }
+                        // Add itself to itself.
+                        ADD(rr, ra, ra);
+                        if (rr == ra) {
+                            MR(R0, ra);
+                        }
+                        return;
+                    case 4:
+                        // Add itself to itself and itself to itself.
+                        // XXX A signed shift left might be faster.
+                        ADD(rr, rr, rr);
+                        ADD(rr, ra, ra);
+                        return;
+                    case 5:
+                        // Save a copy in R0 if rr == ra because it will be
+                        // clobbered.
+                        if (rr == ra) {
+                            ADD(rr, rr, R0);
+                        } else {
+                            ADD(rr, rr, ra);
+                        }
+                        // Add itself to itself and itself to itself.
+                        ADD(rr, rr, rr);
+                        ADD(rr, ra, ra);
+                        if (rr == ra) {
+                            MR(R0, ra);
+                        }
+                        return;
+                    case 8:
+                        // Add itself to itself and itself to itself, then
+                        // itself to itself.
+                        // XXX A signed shift left likely will be faster.
+                        ADD(rr, rr, rr);
+                        ADD(rr, rr, rr);
+                        ADD(rr, ra, ra);
+                        return;
+                    case 10:
+                        // Like 5, but then a post add. Worst case is
+                        // still 5 cycles, but it might be taken out of order
+                        // and we can probably beat that then.
+                        ADD(rr, rr, rr);
+                        if (rr == ra) {
+                            ADD(rr, rr, R0);
+                        } else {
+                            ADD(rr, rr, ra);
+                        }
+                        // Add itself to itself and itself to itself.
+                        ADD(rr, rr, rr);
+                        ADD(rr, ra, ra);
+                        if (rr == ra) {
+                            MR(R0, ra);
+                        }
+                        return;
+                    case 16:
+                        // Add itself to itself and itself to itself, then
+                        // itself to itself, and itself to itself.
+                        // XXX A signed shift left likely will be faster.
+                        ADD(rr, rr, rr);
+                        ADD(rr, rr, rr);
+                        ADD(rr, rr, rr);
+                        ADD(rr, ra, ra);
+                        return;
+                    // Beyond that, there is no savings over mulli with
+                    // repeated adds except if we can shift. We could
+                    // optimize 2^x+1 and 2^x-1 in the future.
+                    default:
+                        break; // fall through
+                    }
+                    // XXX Shifter here. For now, just MULLI, and sigh.
                     MULLI(rr, ra, rhsc);
                     return;
                 }
             }
+
             if (isU16(rhsc)) {
                 // ppc logical immediate zero-extend the imm16 value
                 switch (op) {
@@ -907,8 +1136,10 @@ namespace nanojit
         Register rb = rhs==lhs ? ra : findRegFor(rhs, GpRegs&~rmask(ra));
         switch (op) {
             CASE64(LIR_addq:)
-            case LIR_addi:
-                ADD(rr, ra, rb);
+            case LIR_addi: ADD(rr, ra, rb); break;
+            case LIR_addjovi:
+            case LIR_addxovi:
+                ADDO(rr, ra, rb);
                 break;
             CASE64(LIR_andq:)
             case LIR_andi:
@@ -923,10 +1154,16 @@ namespace nanojit
                 XOR(rr, ra, rb);
                 break;
             case LIR_subi:  SUBF(rr, rb, ra);    break;
+            case LIR_subjovi:
+            case LIR_subxovi:
+                SUBFO(rr, rb, ra);    break;
             case LIR_lshi:  SLW(rr, ra, R0);     ANDI(R0, rb, 31);   break;
             case LIR_rshi:  SRAW(rr, ra, R0);    ANDI(R0, rb, 31);   break;
             case LIR_rshui: SRW(rr, ra, R0);     ANDI(R0, rb, 31);   break;
             case LIR_muli:  MULLW(rr, ra, rb);   break;
+            case LIR_muljovi:
+            case LIR_mulxovi:
+                MULLWO(rr, ra, rb); break;
         #ifdef NANOJIT_64BIT
             case LIR_lshq:
                 SLD(rr, ra, R0);
@@ -954,8 +1191,10 @@ namespace nanojit
         LIns* rhs = ins->oprnd2();
         RegisterMask allow = FpRegs;
         Register rr = deprecated_prepResultReg(ins, allow);
-        Register ra, rb;
-        findRegFor2(allow, lhs, ra, allow, rhs, rb);
+        Register ra = ( !lhs->isInReg()
+                      ? findSpecificRegFor(lhs, rr)
+                      : lhs->deprecated_getReg() );
+        Register rb = rhs==lhs ? ra : findRegFor(rhs, allow&~rmask(ra));
         switch (op) {
             case LIR_addd: FADD(rr, ra, rb); break;
             case LIR_subd: FSUB(rr, ra, rb); break;
@@ -1012,8 +1251,26 @@ namespace nanojit
     #endif
     }
 
-    void Assembler::asm_d2i(LIns*) {
-        NanoAssertMsg(0, "NJ_F2I_SUPPORTED not yet supported for this architecture");
+    void Assembler::asm_d2i(LIns* ins) {
+    // Like SPARC, PPC fctid/fctiw only handles fpr->mem->gpr ultimately.
+    #if defined NANOJIT_64BIT
+        TODO(d2i_64bit);
+    #else
+        LIns *lhs = ins->oprnd1();
+        Register rr = deprecated_prepResultReg(ins, GpRegs);
+        Register ra = findRegFor(lhs, FpRegs);
+        const int d = 16; // see asm_i2d for why we're using SP+d, not FP
+        LWZ(rr, d+4, SP);
+      #ifdef _PPC970_
+        // POWER4 and 5 (and 6/7?) does better if the stfd and lwz aren't
+        // in the same dispatch group, including the 970. Two nop()s seems
+        // optimal for our workload; more actually degrades runtime.
+        NOP();
+        NOP();
+      #endif
+        STFD(F0, d, SP);
+        FCTIW(F0, ra);
+    #endif
     }
 
     #if defined NANOJIT_64BIT
@@ -1131,6 +1388,8 @@ namespace nanojit
         }
     }
 
+    // XXX This must NEVER be used for patchable branches currently.
+    // If you must use br, use br_far for patchable branches.
     void Assembler::br(NIns* addr, int link) {
         // destination unknown, then use maximum branch possible
         if (!addr) {
@@ -1163,6 +1422,8 @@ namespace nanojit
         // would also clobber ctr and r2.  We use R2 here because it's not available
         // to the register allocator, and we use R0 everywhere else as scratch, so using
         // R2 here avoids clobbering anything else besides CTR.
+
+        SwapDisable();
     #ifdef NANOJIT_64BIT
         if (addr==0 || !isU32(uintptr_t(addr))) {
             // really far jump to 64bit abs addr
@@ -1170,6 +1431,7 @@ namespace nanojit
             BCTR(link);
             MTCTR(R2);
             asm_li64(R2, uintptr_t(addr)); // 5 instructions
+            SwapEnable();
             return;
         }
     #endif
@@ -1177,6 +1439,7 @@ namespace nanojit
         BCTR(link);
         MTCTR(R2);
         asm_li32(R2, uint32_t(uintptr_t(addr))); // 2 instructions
+        SwapEnable();
     }
 
     void Assembler::underrunProtect(int bytes) {
@@ -1232,33 +1495,64 @@ namespace nanojit
         NanoAssert((ins->opcode() == LIR_cmovi  && iftrue->isI() && iffalse->isI()) ||
                    (ins->opcode() == LIR_cmovq  && iftrue->isQ() && iffalse->isQ()));
     #else
-        NanoAssert((ins->opcode() == LIR_cmovi  && iftrue->isI() && iffalse->isI()));
+        NanoAssert((ins->opcode() == LIR_cmovi  && iftrue->isI() && iffalse->isI()) ||
+                   (ins->opcode() == LIR_cmovd  && iftrue->isD() && iffalse->isD()));
     #endif
 
-        Register rr = prepareResultReg(ins, GpRegs);
-        Register rf = findRegFor(iffalse, GpRegs & ~rmask(rr));
+        SwapDisable();
+        Register rr;
+        Register rf;
+        Register rt;
+        if (ins->opcode() == LIR_cmovd) {
+            // floats. This is a very naive implementation, frankly.
+            // However, we can't use fsel here because of LIR's design.
 
-        // If 'iftrue' isn't in a register, it can be clobbered by 'ins'.
-        Register rt = iftrue->isInReg() ? iftrue->getReg() : rr;
+            rr = prepareResultReg(ins, FpRegs);
+            rf = findRegFor(iffalse, FpRegs & ~rmask(rr));
+            // If 'iftrue' isn't in a register, it can be clobbered by 'ins'.
+            rt = iftrue->isInReg() ? iftrue->getReg() : rr;
 
-        underrunProtect(16); // make sure branch target and branch are on same page and thus near
-        NIns *after = _nIns;
-        verbose_only(if (_logc->lcbits & LC_Native) outputf("%p:",after);)
-        MR(rr,rf);
+            underrunProtect(20);
+            // make sure branch target and branch are on same page and thus near
+            NIns *after = _nIns;
+            verbose_only(if (_logc->lcbits & LC_Native) outputf("%p:",after);)
+            FMR(rr,rf);
+            
+            NanoAssert(isS24(after - (_nIns-1)));
+            asm_branch_near(false, condval, after);
 
-        NanoAssert(isS24(after - (_nIns-1)));
-        asm_branch_near(false, condval, after);
+            if (rr != rt)
+                FMR(rr, rt);
+        } else {
+            // ints. Basically the same code, but GPRs.
+            // isel would work, but few PPCs have that (and no Power Macs do).
+            rr = prepareResultReg(ins, GpRegs);
+            rf = findRegFor(iffalse, GpRegs & ~rmask(rr));
 
-        if (rr != rt)
-            MR(rr, rt);
+            // If 'iftrue' isn't in a register, it can be clobbered by 'ins'.
+            rt = iftrue->isInReg() ? iftrue->getReg() : rr;
 
+            underrunProtect(20);
+            // make sure branch target and branch are on same page and thus near
+            NIns *after = _nIns;
+            verbose_only(if (_logc->lcbits & LC_Native) outputf("%p:",after);)
+            MR(rr,rf);
+
+            NanoAssert(isS24(after - (_nIns-1)));
+            asm_branch_near(false, condval, after);
+
+            if (rr != rt)
+                MR(rr, rt);
+        }
+
+        // this code is common to cmovd and cmovi.
         freeResourcesOf(ins);
         if (!iftrue->isInReg()) {
             NanoAssert(rt == rr);
             findSpecificRegForUnallocated(iftrue, rr);
         }
-
-        asm_cmp(condval->opcode(), condval->oprnd1(), condval->oprnd2(), CR7);
+        SwapEnable();
+        asm_cmp(condval->opcode(), condval->oprnd1(), condval->oprnd2(), CR0);
     }
 
     RegisterMask Assembler::nHint(LIns* ins) {
@@ -1272,7 +1566,12 @@ namespace nanojit
 
     void Assembler::asm_neg_not(LIns *ins) {
         Register rr = deprecated_prepResultReg(ins, GpRegs);
-        Register ra = findRegFor(ins->oprnd1(), GpRegs);
+        LIns* lhs = ins->oprnd1();
+        // We can clobber the result register for "free."
+        Register ra = ( !lhs->isInReg()
+                      ? findSpecificRegFor(lhs, rr)
+                      : lhs->deprecated_getReg() );
+
         if (ins->isop(LIR_negi)) {
             NEG(rr, ra);
         } else {
@@ -1301,8 +1600,11 @@ namespace nanojit
         }
     }
 
-    void Assembler::nativePageReset()
-    {}
+    void Assembler::nativePageReset() {
+        // don't swap at the beginning either.
+        _lastOpcode.reg1 = NoSwap;
+        _doNotSwap = false;
+    }
 
     // Increment the 32-bit profiling counter at pCtr, without
     // changing any registers.
@@ -1312,28 +1614,113 @@ namespace nanojit
     }
     )
 
+#ifdef FAST_FLUSH_ICACHE
+// Generic cache flush routine for when we patch a jump.
+// Keeping this around for non-Mac PowerPCs.
+// However, this dropped Dromaeo by around 1 run/sec on 10.4, so MDE seems to
+// be overall faster. In fact, if we don't call MDE or this at all, it still
+// works but we lose almost 100ms, so MDE seems needed for Macs. -- Cameron
+#ifdef __GNUC__
+    static inline void fast_flush_icache1(NIns *branch) {
+        register uint32_t j = (uint32_t)branch;
+        register uint32_t z = 0;
+        asm ("sync\n\t" /* assume instruction is already in main memory */
+             "icbi 0,%1\n\t" /* invalidate icache block */
+             "isync\n\t" /* discard prefetch */
+             : /* no output */
+             : "r" (z), "r" (j));
+    }
+
+    // We unroll these loops a bit to make sure that we don't have to
+    // make a mess out of the icache.
+    #define ICBI "icbi 0,%1\n\t"
+    #define INCI "addi %1,%1,4\n\t"
+
+    static inline void fast_flush_icache2(NIns *branch) {
+        register uint32_t j = (uint32_t)branch;
+        register uint32_t z = 0;
+        asm ("sync\n\t"
+             ICBI INCI ICBI
+             "isync\n\t"
+             :
+             : "r" (z), "r" (j));
+    }
+
+    static inline void fast_flush_icache4(NIns *branch) {
+        register uint32_t j = (uint32_t)branch;
+        register uint32_t z = 0;
+        asm ("sync\n\t"
+             ICBI INCI ICBI INCI ICBI INCI ICBI
+             "isync\n\t"
+             :
+             : "r" (z), "r" (j));
+    }
+
+#else // __GNUC__
+# error("unsupported compiler")
+#endif // __GNUC__
+#endif // FAST_FLUSH_ICACHE
+
+    static void demote_to_far_branch(NIns *branch, NIns *target) {
+        // Our branch has exceeded its range, so now we have to fall back
+        // on a far branch. Hope we have NOPs to overwrite ...
+        uint32_t imm = uint32_t(target);
+        Register rd = R0; // for now
+        // rewrite our branch instruction into a bcctr using this one
+        if ((branch[0] & (63<<25)) == PPC_b) { // trivial case
+            branch[3] = PPC_bcctr | (branch[0] | 1); // preserve link bit    
+        } else { // PPC_bc, I assume
+            branch[0] &= ((0x3ff << 16) | 1); // preserve bo, bi, link
+            branch[3] = PPC_bcctr | branch[0];
+        }
+        branch[0] = PPC_addis | GPR(rd)<<21 | uint16_t(imm >> 16); // lis rd, imm >> 16
+        branch[1] = PPC_ori | GPR(rd)<<21 | GPR(rd)<<16 | uint16_t(imm); // ori rd, rd, imm & 0xffff
+        branch[2] = PPC_mtspr | GPR(rd)<<21 | SPR(ctr)<<11; // mtctr
+    #ifdef FAST_FLUSH_ICACHE
+        fast_flush_icache4(branch);
+    #endif
+    }
+
     void Assembler::nPatchBranch(NIns *branch, NIns *target) {
         // ppc relative offsets are based on the addr of the branch instruction
         ptrdiff_t bd = target - branch;
-        if (branch[0] == PPC_b) {
+        // bitmasks courtesy http://www.mactech.com/articles/mactech/Vol.10/10.09/PowerPCAssembly/
+        if ((branch[0] & (63<<25)) == PPC_b) {
             // unconditional, 24bit offset.  Whoever generated the unpatched jump
             // must have known the final size would fit in 24bits!  otherwise the
             // jump would be (lis,ori,mtctr,bctr) and we'd be patching the lis,ori.
+            if (!isS24(bd)) {
+                demote_to_far_branch(branch, target);
+                return;
+            }
             NanoAssert(isS24(bd));
             branch[0] |= (bd & 0xffffff) << 2;
+    #ifdef FAST_FLUSH_ICACHE
+            fast_flush_icache1(branch);
+    #endif
+            return;
         }
-        else if ((branch[0] & PPC_bc) == PPC_bc) {
+        else if ((branch[0] & (63<<25)) == PPC_bc) {
             // conditional, 14bit offset. Whoever generated the unpatched jump
             // must have known the final size would fit in 14bits!  otherwise the
             // jump would be (lis,ori,mtctr,bcctr) and we'd be patching the lis,ori below.
+            if (!isS14(bd)) {
+                demote_to_far_branch(branch, target);
+                return;
+            }
             NanoAssert(isS14(bd));
             NanoAssert(((branch[0] & 0x3fff)<<2) == 0);
             branch[0] |= (bd & 0x3fff) << 2;
-            TODO(patch_bc);
+    #ifdef FAST_FLUSH_ICACHE
+            fast_flush_icache1(branch);
+    #endif
+            return;
         }
     #ifdef NANOJIT_64BIT
         // patch 64bit branch
-        else if ((branch[0] & ~(31<<21)) == PPC_addis) {
+        // XXX this probably needs to be patched in the same way for 32bit
+        TODO(64bit_bitmask_patch_far);
+        else if ((branch[0] & ~(31<<21)) == PPC_addis) { // XXX?
             // general branch, using lis,ori,sldi,oris,ori to load the const 64bit addr.
             Register rd = { (branch[0] >> 21) & 31 };
             NanoAssert(branch[1] == PPC_ori  | GPR(rd)<<21 | GPR(rd)<<16);
@@ -1349,22 +1736,47 @@ namespace nanojit
         }
     #else // NANOJIT_64BIT
         // patch 32bit branch
-        else if ((branch[0] & ~(31<<21)) == PPC_addis) {
+        else if ((branch[0] & (31<<25)) == PPC_addis) {
             // general branch, using lis,ori to load the const addr.
             // patch a lis,ori sequence with a 32bit value
             Register rd = { (branch[0] >> 21) & 31 };
             NanoAssert(branch[1] == PPC_ori | GPR(rd)<<21 | GPR(rd)<<16);
+
+            // First see if we can promote the branch to 14-bit.
+            ptrdiff_t bd = target - branch;
+            if (isS14(bd)) {
+                // We can. Extract bo,bi,link from the bcctr/bctr and
+                // emit a short branch.
+                uint32_t mask = branch[3] & ((0x3ff << 16) | 1);
+                branch[0] = PPC_bc | mask | ((bd & 0x3fff) << 2);
+                branch[1] = PPC_nop;
+                branch[2] = PPC_nop;
+                branch[3] = PPC_nop;
+    #ifdef FAST_FLUSH_ICACHE
+                fast_flush_icache4(branch);
+    #endif
+                return;
+            }
+            // XXX 24-bit later
+
+            // We can't promote this branch, so patch it in place.
             uint32_t imm = uint32_t(target);
             branch[0] = PPC_addis | GPR(rd)<<21 | uint16_t(imm >> 16); // lis rd, imm >> 16
             branch[1] = PPC_ori | GPR(rd)<<21 | GPR(rd)<<16 | uint16_t(imm); // ori rd, rd, imm & 0xffff
+    #ifdef FAST_FLUSH_ICACHE
+            fast_flush_icache2(branch);
+    #endif
+            return;
         }
     #endif // !NANOJIT_64BIT
         else {
+            fprintf(stderr, "ASSERTION: can't patch opcode @ %08x : %08x\n",
+                (uint32_t)branch, (uint32_t)branch[0]);
             TODO(unknown_patch);
         }
     }
 
-    static int cntzlw(int set) {
+    static inline int cntzlw(int set) {
         // On PowerPC, prefer higher registers, to minimize
         // size of nonvolatile area that must be saved.
         register uint32_t i;
@@ -1414,8 +1826,36 @@ namespace nanojit
     }
 #endif // NANOJIT_64BIT
 
-    void Assembler::nFragExit(LIns*) {
-        TODO(nFragExit);
+    void Assembler::nFragExit(LIns* guard) {
+        SideExit *  exit = guard->record()->exit;
+        Fragment *  frag = exit->target;
+        bool        target_is_known = frag && frag->fragEntry;
+
+        SwapDisable();
+        if (target_is_known) {
+            // We have a target, so jump to frag->fragEntry
+            // leaving our state in R3; this should "just work".
+            // Since this branch does not need to be patched, we can
+            // try to make this a near branch and save some cycles.
+            br(frag->fragEntry, 0);
+        } else {
+            // Target doesn't exist. Jump to an epilogue for now.
+            // This can be patched later. Right now it must always be far
+            // to allow the patch to work. This is a little tricky with
+            // our optimizer dance.
+            GuardRecord *gr = guard->record();
+            if (!_epilogue)
+                _epilogue = genEpilogue();
+            br_far(_epilogue, 0);
+            gr->jmp = _nIns;
+            // Save our guard record in a scratch register that
+            // the epilogue will later move to R3 (see asm_ret and
+            // genEpilogue), leaving R3 with the interpreter state.
+            asm_li(R12, (int)gr);
+        }
+        SwapEnable();
+
+        //TAG("nFragExit(guard=%p{%s})", guard, lirNames[guard->opcode()]);
     }
 
     void Assembler::asm_jtbl(LIns* ins, NIns** native_table)
@@ -1423,6 +1863,7 @@ namespace nanojit
         // R0 = index*4, R2 = table, CTR = computed address to jump to.
         // must ensure no page breaks in here because R2 & CTR can get clobbered.
         Register indexreg = findRegFor(ins->oprnd1(), GpRegs);
+        SwapDisable();
 #ifdef NANOJIT_64BIT
         underrunProtect(9*4);
         BCTR(0);                                // jump to address in CTR
@@ -1438,6 +1879,7 @@ namespace nanojit
         SLWI(R0, indexreg, 2);                  // R0 = index*4
         asm_li(R2, int32_t(native_table));      // R2 = table (up to 2 instructions)
 #endif // 64bit
+        SwapEnable();
     }
 
     void Assembler::swapCodeChunks() {
