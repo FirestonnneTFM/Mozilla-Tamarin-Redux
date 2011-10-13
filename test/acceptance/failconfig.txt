@@ -316,6 +316,7 @@ as3/sampling/Callback , .* ,, skip,  Bugzilla 614529
 as3/sampling/FunctionEntry , .* ,, skip,  Bugzilla 614529
 
 as3/Definitions/Function/OneOptArgFunction, mips-lnx-tvm-.*,, skip, Intermittent Failure: Bugzilla 638533
+# Temporarily re-instate to see if removing asteammips1 from build system (in bug 679515) fixed this as well.
 ecma3/Statements/eregress_74474_003, mips-lnx-tvm-.*,, skip, Intermittent Failure: Bugzilla 658253
 
 regress/bug_654807:semisealed.*, .*-ES,, skip, Bugzilla 661575
