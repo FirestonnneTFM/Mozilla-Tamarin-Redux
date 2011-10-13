@@ -332,36 +332,8 @@ class sandbox:
     sb_linux_mips_compile_factory.addStep(sync_update)
     sb_linux_mips_compile_factory.addStep(bb_slaveupdate(slave="linux-mips"))
     sb_linux_mips_compile_factory.addStep(verify_builtinabc)    
-    sb_linux_mips_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--target=mips-linux', 'avmshell_mips', 'false'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'silent':WithProperties('%s','silent'),
-                    'CXX': 'mipsel-linux-uclibc-g++ -static',
-                    'CC' : 'mipsel-linux-uclibc-gcc -static',
-                    'LD' : 'mipsel-linux-uclibc-ld',
-                    'AR' : 'mipsel-linux-uclibc-ar',
-                },
-                description='starting Release-mips-linux build...',
-                descriptionDone='finished Release-mips-linux build.',
-                name="Release_mips-linux",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    sb_linux_mips_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-debug --target=mips-linux', 'avmshell_mips_d', 'false'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'silent':WithProperties('%s','silent'),
-                    'CXX': 'mipsel-linux-uclibc-g++ -static',
-                    'CC' : 'mipsel-linux-uclibc-gcc -static',
-                    'LD' : 'mipsel-linux-uclibc-ld',
-                    'AR' : 'mipsel-linux-uclibc-ar',
-                },
-                description='starting Debug-mips-linux build...',
-                descriptionDone='finished Debug-mips-linux build.',
-                name="Debug_mips-linux",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
+    sb_linux_misp_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_mips", args="--target=mips-linux", upload="false", features=""))
+    sb_linux_mips_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_mips_d", args="--enable-debug --target=mips-linux", upload="false", features=""))
     sb_linux_mips_compile_factory.addStep(verify_tracers)
     sb_linux_mips_compile_factory.addStep(compile_buildcheck_local)
     sb_linux_mips_compile_factory.addStep(util_upload_asteam_local)
