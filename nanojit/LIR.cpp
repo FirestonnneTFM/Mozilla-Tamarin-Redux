@@ -45,7 +45,7 @@ namespace nanojit
     #ifdef FEATURE_NANOJIT
 
     const uint8_t repKinds[] = {
-#define OP___(op, number, repKind, retType, isCse) \
+#define OP___(op, repKind, retType, isCse) \
         LRK_##repKind,
 #include "LIRopcode.tbl"
 #undef OP___
@@ -53,7 +53,7 @@ namespace nanojit
     };
 
     const LTy retTypes[] = {
-#define OP___(op, number, repKind, retType, isCse) \
+#define OP___(op, repKind, retType, isCse) \
         LTy_##retType,
 #include "LIRopcode.tbl"
 #undef OP___
@@ -61,7 +61,7 @@ namespace nanojit
     };
 
     const uint8_t insSizes[] = {
-#define OP___(op, number, repKind, retType, isCse) \
+#define OP___(op, repKind, retType, isCse) \
         sizeof(LIns##repKind),
 #include "LIRopcode.tbl"
 #undef OP___
@@ -69,7 +69,7 @@ namespace nanojit
     };
 
     const int8_t isCses[] = {
-#define OP___(op, number, repKind, retType, isCse) \
+#define OP___(op, repKind, retType, isCse) \
         isCse,
 #include "LIRopcode.tbl"
 #undef OP___
@@ -80,7 +80,7 @@ namespace nanojit
     #ifdef NJ_VERBOSE
 
     const char* lirNames[] = {
-#define OP___(op, number, repKind, retType, isCse) \
+#define OP___(op, repKind, retType, isCse) \
         #op,
 #include "LIRopcode.tbl"
 #undef OP___

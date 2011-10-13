@@ -43,13 +43,9 @@
 namespace nanojit
 {
     enum LOpcode
-#if defined(_MSC_VER) && _MSC_VER >= 1400
-#pragma warning(disable:4480) // nonstandard extension used: specifying underlying type for enum
-          : unsigned
-#endif
     {
-#define OP___(op, number, repKind, retType, isCse) \
-        LIR_##op = (number),
+#define OP___(op, repKind, retType, isCse) \
+        LIR_##op,
 #include "LIRopcode.tbl"
         LIR_sentinel,
 #undef OP___
@@ -99,6 +95,13 @@ namespace nanojit
         LIR_cmovp   = PTR_SIZE(LIR_cmovi,   LIR_cmovq)
     };
 
+// Check that all opcodes are between 0 and 255.
+#define OP___(op, repKind, retType, isCse) \
+NanoStaticAssert(LIR_##op >= 0 && LIR_##op < 256);
+#include "LIRopcode.tbl"
+#undef OP___
+NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_sentinel is 256 since it's not actually used as opcode.
+    
     // 32-bit integer comparisons must be contiguous, as must 64-bit integer
     // comparisons and 64-bit float comparisons.
     NanoStaticAssert(LIR_eqi + 1 == LIR_lti  &&
@@ -654,7 +657,10 @@ namespace nanojit
 
             uint32_t arIndex:14;        // index into stack frame;  displ is -4*arIndex
 
-            LOpcode  opcode:8;          // instruction's opcode
+            uint32_t  opcode:8;          // instruction's opcode; actually a LOpcode - but since 
+                                        // there is no reliable way to enforce an enum's 
+                                        // underlying type to be unsigned on all compilers, we
+                                        // store it explicitly as uint8_t rather than LOpcode:8
         };
 
         union {
@@ -667,10 +673,11 @@ namespace nanojit
 
         inline void initSharedFields(LOpcode opcode)
         {
+            NanoAssert(((int)opcode)>=0 && opcode<255);
             // We must zero .inReg, .inAR and .isResultLive, but zeroing the
             // whole word is easier.  Then we set the opcode.
             wholeWord = 0;
-            sharedFields.opcode = opcode;
+            sharedFields.opcode = (uint8_t)opcode;
         }
 
         // LIns-to-LInsXYZ converters.
@@ -706,7 +713,10 @@ namespace nanojit
         inline void initLInsQorD(LOpcode opcode, uint64_t immQorD);
         inline void initLInsJtbl(LIns* index, uint32_t size, LIns** table);
 
-        LOpcode opcode() const { return sharedFields.opcode; }
+        LOpcode opcode() const { 
+            NanoAssert(sharedFields.opcode< LIR_sentinel); 
+            return (LOpcode) sharedFields.opcode;
+        }
 
         // Generally, void instructions (statements) are always live and
         // non-void instructions (expressions) are live if used by another
@@ -1299,6 +1309,7 @@ namespace nanojit
         toLInsLd()->disp = int16_t(d);
         toLInsLd()->miniAccSetVal = compressAccSet(accSet).val;
         toLInsLd()->loadQual = loadQual;
+        NanoAssert(loadQual<4 && loadQual>=0);
         NanoAssert(isLInsLd());
     }
     void LIns::initLInsSt(LOpcode opcode, LIns* val, LIns* base, int32_t d, AccSet accSet) {
@@ -1674,6 +1685,9 @@ namespace nanojit
         void lookupAddr(void *p, char*& name, int32_t& offset);
     };
 
+#ifdef _MSC_VER
+#pragma warning(disable:4996) // disable "strcpy is unsafe" warnings in Visual Studio, they break the build
+#endif
     // Maps LIR instructions to meaningful names.
     class LirNameMap
     {
@@ -2224,8 +2238,8 @@ namespace nanojit
             const uint8_t insReadSizes[] = {
             // LIR_start is treated specially -- see below.  We intentionally
             // do not use the global insSizes[] because of this customization.
-        #define OP___(op, number, repKind, retType, isCse) \
-                ((number) == LIR_start ? 0 : sizeof(LIns##repKind)),
+        #define OP___(op, repKind, retType, isCse) \
+                (LIR_##op == LIR_start ? 0 : sizeof(LIns##repKind)),
         #include "LIRopcode.tbl"
         #undef OP___
                 0
