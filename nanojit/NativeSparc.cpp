@@ -1641,5 +1641,9 @@ namespace nanojit
         NanoAssert(0); // not supported
     }
 
+    void Assembler::asm_label() {
+        // do nothing right now
+    }
+
 #endif /* FEATURE_NANOJIT */
 }

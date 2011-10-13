@@ -502,6 +502,7 @@ namespace nanojit
             NIns*       asm_branch_ov(LOpcode op, NIns* targ);
             void        asm_jtbl(LIns* ins, NIns** table);
             void        asm_insert_random_nop();
+            void        asm_label();
             void        assignSavedRegs();
             void        reserveSavedRegs();
             void        assignParamRegs();
