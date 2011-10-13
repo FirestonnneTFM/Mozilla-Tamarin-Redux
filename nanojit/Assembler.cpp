@@ -1891,6 +1891,9 @@ namespace nanojit
 
                 case LIR_label: {
                     countlir_label();
+                    // see if the backend needs to be notified about this
+                    // labels: PPC tracks them as an instruction swap fence.
+                    asm_label();
                     LabelState *label = _labels.get(ins);
                     // add profiling inc, if necessary.
                     verbose_only( if (_logc->lcbits & LC_FragProfile) {

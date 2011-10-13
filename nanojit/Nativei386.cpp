@@ -2905,5 +2905,9 @@ namespace nanojit
         verbose_only( SWAP(size_t, codeBytes, exitBytes); )
     }
 
+    void Assembler::asm_label() {
+        // do nothing right now
+    }
+
     #endif /* FEATURE_NANOJIT */
 }

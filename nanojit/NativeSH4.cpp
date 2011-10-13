@@ -1809,6 +1809,11 @@ namespace nanojit
             goto try_again;
         }
     }
+
+    void Assembler::asm_label() {
+        // do nothing right now
+    }
+
 }
 
 #endif // FEATURE_NANOJIT && FEATURE_SH4

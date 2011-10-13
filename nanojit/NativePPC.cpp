@@ -1896,6 +1896,10 @@ namespace nanojit
         NanoAssert(0); // not supported
     }
 
+    void Assembler::asm_label() {
+        // do nothing right now
+    }
+
 } // namespace nanojit
 
 #endif // FEATURE_NANOJIT && NANOJIT_PPC
