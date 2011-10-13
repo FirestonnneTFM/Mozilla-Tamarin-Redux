@@ -85,7 +85,7 @@ abcasm/nullCheck/CallStatic , verifyall ,, expectedfail, \
     Expected failure in -Dverifyall, see https://bugzilla.mozilla.org/show_bug.cgi?id=491356
 abcasm/bug_678952 , (interp|wordcode) , , skip , this test is only consistent in jit mode and was written that way, avm_args contains -Ojit
 abcasm/bug_612641 , (interp|wordcode) , , skip , this test needs to run the jit so skip when running interp, avm_args contains -Djitordie
-abcasm/coverage/C.abc , (interp|wordcode) ,, expectedfail , 10-10-2011 - test is failing across five platforms in deep see https://bugzilla.mozilla.org/show_bug.cgi?id=690779
+abcasm/coverage/C , (interp|wordcode) ,, expectedfail , 10-10-2011 - test is failing across five platforms in deep see https://bugzilla.mozilla.org/show_bug.cgi?id=690779
 
 ####################
 # Differential testing (avmdiff.py)
