@@ -57,6 +57,10 @@
 
 namespace nanojit
 {
+#define NJ_JTBL_SUPPORTED               0
+#define NJ_EXPANDED_LOADSTORE_SUPPORTED 1
+#define NJ_F2I_SUPPORTED                1
+
     // Req: NJ_MAX_STACK_ENTRY is number of instructions to hold in LIR stack
 #if 0
     // FIXME: Inconsistent use in signed/unsigned expressions makes this generate errors
@@ -368,6 +372,7 @@ namespace nanojit {
 #define COP1_NEG        0x07
 #define COP1_BC         0x08
 #define COP1_TRUNCW     0x0d
+#define COP1_CVTS       0x20
 #define COP1_CVTD       0x21
 
 // COP1X: bits 5..0
@@ -678,7 +683,9 @@ namespace nanojit {
 #define MFC1(rt, fs)            NanoAssertMsg(0, "softfloat MFC1")
 #define MTC1(rt, fs)            NanoAssertMsg(0, "softfloat MTC1")
 #define MOVF(rt, fs, cc)        NanoAssertMsg(0, "softfloat MOVF")
+#define CVT_D_S(fd, fs)         NanoAssertMsg(0, "softfloat CVT_D_S")
 #define CVT_D_W(fd, fs)         NanoAssertMsg(0, "softfloat CVT_D_W")
+#define CVT_S_D(fd, fs)         NanoAssertMsg(0, "softfloat CVT_S_D")
 #define C_EQ_D(fs, ft)          NanoAssertMsg(0, "softfloat C_EQ_D")
 #define C_LE_D(fs, ft)          NanoAssertMsg(0, "softfloat C_LE_D")
 #define C_LT_D(fs, ft)          NanoAssertMsg(0, "softfloat C_LT_D")
@@ -720,9 +727,18 @@ namespace nanojit {
     do { count_fpu(); EMIT(R_FORMAT(OP_SPECIAL, GPR(rs), (cc)<<2, GPR(rd), 0, SPECIAL_MOVCI), \
                            "movf %s, %s, $fcc%d", gpn(rd), gpn(rs), cc); } while (0)
 
+#define CVT_D_S(fd, fs)                                                 \
+    do { count_fpu(); EMIT(F_FORMAT(OP_COP1, FMT_S, FPR(F0), FPR(fs), FPR(fd), COP1_CVTD), \
+                           "cvt.d.s %s, %s", fpn(fd), fpn(fs)); } while (0)
+
 #define CVT_D_W(fd, fs)                                                 \
     do { count_fpu(); EMIT(F_FORMAT(OP_COP1, FMT_W, FPR(F0), FPR(fs), FPR(fd), COP1_CVTD), \
                            "cvt.d.w %s, %s", fpn(fd), fpn(fs)); } while (0)
+
+#define CVT_S_D(fd, fs)                                                 \
+    do { count_fpu(); EMIT(F_FORMAT(OP_COP1, FMT_D, FPR(F0), FPR(fs), FPR(fd), COP1_CVTS), \
+                           "cvt.s.d %s, %s", fpn(fd), fpn(fs)); } while (0)
+
 
 #define TRUNC_W_D(fd, fs)                                               \
     do { count_fpu(); EMIT(F_FORMAT(OP_COP1, FMT_D, FPR(F0), FPR(fs), FPR(fd), COP1_TRUNCW), \
