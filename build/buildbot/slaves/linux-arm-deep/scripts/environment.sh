@@ -59,7 +59,7 @@ export shell_release_debugger=avmshell_neon_arm
 export shell_debug=avmshell_neon_arm_d
 export shell_debug_debugger=avmshell_neon_arm_d
 
-export ssh_proc_names="avmshell_neon_arm avmshell_neon_arm_d avmshell_neon_arm_osr"
+export ssh_proc_names="avmshell_neon_arm avmshell_neon_arm_d avmshell_neon_arm_osr avmshell_neon_arm_aot"
 
 # Override this, default is avmshell* and since this slave runs on a machine
 # with other slaves, the process cleaner /can/ find avmshell processes, 
