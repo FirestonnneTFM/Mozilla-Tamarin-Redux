@@ -325,7 +325,7 @@ namespace MMgc
 
     const void* FixedMalloc::FindBeginning(const void *addr)
     {
-        const void* begin_recv;
+        const void* begin_recv = NULL;
         size_t size_recv;
         if (FindBeginningAndSize(addr, begin_recv, size_recv))
             return begin_recv;
