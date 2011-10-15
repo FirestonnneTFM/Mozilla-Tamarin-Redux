@@ -332,7 +332,7 @@ class sandbox:
     sb_linux_mips_compile_factory.addStep(sync_update)
     sb_linux_mips_compile_factory.addStep(bb_slaveupdate(slave="linux-mips"))
     sb_linux_mips_compile_factory.addStep(verify_builtinabc)    
-    sb_linux_misp_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_mips", args="--target=mips-linux", upload="false", features=""))
+    sb_linux_mips_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_mips", args="--target=mips-linux", upload="false", features=""))
     sb_linux_mips_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_mips_d", args="--enable-debug --target=mips-linux", upload="false", features=""))
     sb_linux_mips_compile_factory.addStep(verify_tracers)
     sb_linux_mips_compile_factory.addStep(compile_buildcheck_local)

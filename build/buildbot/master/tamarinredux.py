@@ -383,7 +383,7 @@ class tamarinredux:
     linux_mips_compile_factory.addStep(sync_update)
     linux_mips_compile_factory.addStep(bb_slaveupdate(slave="linux-mips"))
     linux_mips_compile_factory.addStep(verify_builtinabc)
-    linux_misp_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_mips", args="--target=mips-linux", upload="false", features=""))
+    linux_mips_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_mips", args="--target=mips-linux", upload="false", features=""))
     linux_mips_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_mips_d", args="--enable-debug --target=mips-linux", upload="false", features=""))
     linux_mips_compile_factory.addStep(compile_buildcheck_local)
     linux_mips_compile_factory.addStep(util_upload_asteam_local)
