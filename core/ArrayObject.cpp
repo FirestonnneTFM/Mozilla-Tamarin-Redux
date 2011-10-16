@@ -904,6 +904,7 @@ push_sparse:
                         goto unshift_sparse;
                     }
                     m_denseArray.insert(0, atomNotFound, m_denseStart);
+                    m_denseStart = 0;
                 }
 
                 m_denseArray.insert(0, argv, argc);
