@@ -999,13 +999,20 @@ unshift_sparse:
                 --m_denseStart;
                 result = undefinedAtom;
             }
-            else if (m_denseArray.length() > 0)
+            else
             {
                 // m_length>0 does not imply m_denseArray.length()>0;
                 // we could have set the length on a new array to something
                 // large, and not yet populated the storage.
-                result = m_denseArray.removeFirst();
-                --m_denseUsed;
+                Atom r = undefinedAtom;
+                if (m_denseArray.length() > 0) {
+                    Atom v = m_denseArray.removeFirst();
+                    if (v != atomNotFound) {
+                        --m_denseUsed;
+                        r = v;
+                    }
+                }
+                result = r;
             }
             --m_length;
 
