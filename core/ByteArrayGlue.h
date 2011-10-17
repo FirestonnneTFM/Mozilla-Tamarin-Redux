@@ -66,6 +66,11 @@ namespace avmplus
         // Use Clear() to eliminate existing memory allocations.
         void FASTCALL SetLength(uint32_t newLength);
 
+        // Set the length to x+y, with overflow check.  If x+y overflows a uint32_t then
+        // throw a MemoryError (same error that the one-argument variety will throw if
+        // trying to create a buffer larger than the buffer limit, which is less than 2^32-1).
+        void FASTCALL SetLength(uint32_t x, uint32_t y);
+        
         // You can use this call to get a READ_ONLY pointer into the ByteArray.
         // The pointer starts at offset zero (regardless of the value of GetPosition())
         // and the data is guaranteed to be valid for GetLength() bytes.
@@ -127,6 +132,22 @@ namespace avmplus
         void Compress(CompressionAlgorithm algorithm);
         void Uncompress(CompressionAlgorithm algorithm);
 
+        // For use by ByteArrayObject for optimized read functions: check that there are
+        // nbytes available to read at the current position, and throw an EOF exception
+        // if not.  Update the position to point beyond that area.  Return a pointer to
+        // the start of the area.
+        //
+        // Precondition: 0 < nbytes < 4096
+        uint8_t* requestBytesForShortRead(uint32_t nbytes);
+        
+        // For use by ByteArrayObject for optimized write functions: check that there are
+        // nbytes available to write at the current position, and extend the array if not.
+        // Throw MemoryError if the array cannot be extended.  Update the position to point
+        // beyond the write area.  Return a pointer to the start of the area.
+        //
+        // Precondition: 0 < nbytes < 4096
+        uint8_t* requestBytesForShortWrite(uint32_t nbytes);
+        
 #ifdef DEBUGGER
     public:
         // Called by the profiler to determine the number of bytes attributed
@@ -322,6 +343,10 @@ namespace avmplus
 #endif
 
     private:
+        // REALLY_INLINE helpers for fast reading and writing, without code duplication.
+        uint32_t read32();
+        uint32_t read16();
+        void write32(uint32_t value);
 
         ByteArray::CompressionAlgorithm algorithmToEnum(String* algorithm);
 

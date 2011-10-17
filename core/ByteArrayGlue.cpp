@@ -41,6 +41,74 @@
 #include "avmplus.h"
 #include "zlib.h"
 
+// Compiler and architecture dependent byte swapping functions.
+//
+// Define HAVE_BYTESWAP32 and/or HAVE_BYTESWAP16 on platforms where there are
+// instructions or fast idioms for byte swapping backed by compiler intrinsics.
+//
+// This is not quite a porting API, because we do not abstract byteSwap16()
+// and byteSwap32() generally: if fast byte swapping is not available then 
+// it's probably faster to use generic in-line byte load/store code.  Hence 
+// the code is all here and not in a platform file.
+//
+// Survey of architectures:
+//
+//   On x86 there is BSWAP (32-bit) and XCHG (16-bit).
+//   On PPC there is supposedly a three-operation sequence that byte swaps 32-bit
+//     data [Warren, Hacker's Delight].
+//   On MIPS a two-operation sequence of WSBH and ROTR can byte swap a 32-bit word,
+//     WSBH can byte swap a halfword by itself.
+//   On SH4 a combination of SWAP.B (twice) and SWAP.H should byte swap a 32-bit word,
+//     while SWAP.B by itself should byte swap a 16-bit halfword.
+//   On ARM there are the REV (32-bit) and REV16 (16-bit) instructions since ARMv6.
+//   To my knowledge SPARC has no byte swap instructions.
+//
+// Survey of compilers:
+//
+//   MSVC starting with Visual Studio 2005 have _byteswap_ulong, _byteswap_ushort, _byteswap_uint64.
+//   GCC starting with 4.3 have __builtin_bswap32 and __builtin_bswap64, must include <byteswap.h>
+
+#if defined VMCFG_IA32 || defined VMCFG_AMD64 || defined VMCFG_PPC || defined VMCFG_MIPS || defined VMCFG_SH4 || defined VMCFG_ARM
+
+#if defined _MSC_VER
+#define HAVE_BYTESWAP32
+#define HAVE_BYTESWAP16
+REALLY_INLINE uint32_t byteSwap32(uint32_t x)
+{
+    return _byteswap_ulong(x);
+}
+
+REALLY_INLINE uint16_t byteSwap16(uint16_t x)
+{
+    return _byteswap_ushort(x);
+}
+#endif // _MSC_VER
+
+#if defined __GNUC__ && (__GNUC__ == 4 && __GNUC_MINOR__ >= 3 || __GNUC__ > 4)
+#include <byteswap.h>
+#define HAVE_BYTESWAP32
+
+REALLY_INLINE uint32_t byteSwap32(uint32_t x)
+{
+    return __builtin_bswap32(x);
+}
+#endif // __GNUC__
+
+#endif // Various architectures with byteswap idioms backed by intrinsics
+
+// MAX_BYTEARRAY_STORE_LENGTH is the largest value that can be taken on by m_length,
+// strictly less than 2^32.  See constraint in ByteArray::Grower::EnsureWritableCapacity().
+//
+// MAX_BYTEARRAY_SHORT_ACCESS_LENGTH is a value no smaller than 4095 and no greater
+// than 2^32-1-MAX_BYTEARRAY_STORE_LENGTH.
+//
+// The purpose of these two limits is to allow relatively efficient bounds checking
+// on common ByteArray accesses, see comments on ByteArray::requestBytesForShortRead()
+// and ByteArray::requestBytesForShortWrite() for more information.
+
+#define MAX_BYTEARRAY_STORE_LENGTH (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2)
+#define MAX_BYTEARRAY_SHORT_ACCESS_LENGTH (MMgc::GCHeap::kBlockSize*2 - 1)
+
 namespace avmplus
 {
     //
@@ -60,6 +128,9 @@ namespace avmplus
         , m_length(0)
         , m_position(0)
     {
+        static_assert(uint64_t(MAX_BYTEARRAY_STORE_LENGTH) < 0x100000000ULL, "Constraint on MAX_BYTEARRAY_STORE_LENGTH");
+        static_assert(MAX_BYTEARRAY_SHORT_ACCESS_LENGTH >= 4095, "Constraint on MAX_BYTEARRAY_SHORT_ACCESS_LENGTH");
+        static_assert(uint64_t(MAX_BYTEARRAY_STORE_LENGTH) + uint64_t(MAX_BYTEARRAY_SHORT_ACCESS_LENGTH) < 0x100000000ULL, "Constraints on internal ByteArray constants");
         AvmAssert(m_gc != NULL);
     }
 
@@ -123,12 +194,24 @@ namespace avmplus
         
     void FASTCALL ByteArray::Grower::EnsureWritableCapacity(uint32_t minimumCapacity)
     {
-        // This lovely bit of hokiness is necessary because
-        // mmfx_new_array_opt doesn't return NULL but instead Abort's
+        // The extra check on maximum size is necessary because
+        // mmfx_new_array_opt doesn't return NULL but instead Aborts
         // when the size approaches 2^32. We want to be consistent
         // across the entire uint32_t range and throw a memory error
         // instead.  The subtraction of two blocks has to do with how
         // FixedMalloc::LargeAlloc does this check.
+        //
+        // The length limitation is however useful for other purposes.
+        // Observe that the length limit is duplicated above in the 
+        // definition of MAX_BYTEARRAY_STORE_LENGTH and that there is 
+        // code below in ByteArray::requestBytesForShortRead() and
+        // ByteArray::requestBytesForShortWrite() that depends on the
+        // limit on m_length, see comments there and also comments on
+        // MAX_BYTEARRAY_STORE_LENGTH.
+
+        static_assert(MAX_BYTEARRAY_STORE_LENGTH == (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2),
+                      "Constraint on maximum ByteArray storage size");
+
         if (minimumCapacity > (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2))
             m_owner->ThrowMemoryError();
 
@@ -209,6 +292,25 @@ namespace avmplus
         if (index >= m_length)
             SetLength(index + 1);
         return m_array[index];
+    }
+
+    // Set the length to x+y, but check for overflow.
+    //
+    // MemoryError is the error thrown by SetLength(index), or really by
+    // ByteArray::Grower::EnsureWritableCapacity(), if we try to create a
+    // buffer larger than the buffer limit, so it's the most consistent 
+    // error to throw here.
+    //
+    // We don't know anything about x and y so 64-bit math is the most
+    // expedient solution.  SetLength() is not hot in any case, it's always
+    // guarded by some other check.
+
+    void FASTCALL ByteArray::SetLength(uint32_t x, uint32_t y)
+    {
+        uint64_t sum = uint64_t(x) + uint64_t(y);
+        if (sum >= 0x100000000ULL)
+            ThrowMemoryError();
+        SetLength(uint32_t(sum));
     }
 
     void FASTCALL ByteArray::SetLength(uint32_t newLength)
@@ -489,6 +591,62 @@ namespace avmplus
         }
     }
 
+    // For requestBytesForShortRead() there is no limit on m_position, but m_length 
+    // is limited to MAX_BYTEARRAY_STORE_LENGTH, which is well below 2^32.  We limit 
+    // nbytes to MAX_BYTEARRAY_SHORT_ACCESS_LENGTH, which is less than
+    // 2^32-MAX_BYTEARRAY_STORE_LENGTH but at least 4095.  Callers that might have a
+    // larger value for nbytes should not use this API.  The purpose of all these limits
+    // is to make the range check tractably small for inlining in jitted code without
+    // limiting the ByteArray size unreasonably.  (Requiring m_length < 2^31 would lead 
+    // to further optimizations but that seems unreasonably short.)
+    //
+    // Observe that ByteArray::Grower::EnsureWritableCapacity() implements the appropriate
+    // limit on m_capacity, and that is the only code that allocates memory for ByteArray.
+    // Everywhere else we ensure m_length <= m_capacity.
+
+    REALLY_INLINE uint8_t* ByteArray::requestBytesForShortRead(uint32_t nbytes)
+    {
+        AvmAssert(m_length <= m_capacity);
+        AvmAssert(m_capacity <= MAX_BYTEARRAY_STORE_LENGTH);
+        AvmAssert(nbytes > 0 && nbytes <= MAX_BYTEARRAY_SHORT_ACCESS_LENGTH);
+
+        // m_position + nbytes does not overflow uint32_t in the second disjunct because:
+        //
+        //   m_position < m_length <= m_capacity <= MAX_BYTEARRAY_STORE_LENGTH      (by the first disjunct + global invariants)
+        //   nbytes <= MAX_BYTEARRAY_SHORT_ACCESS_LENGTH                            (global invariant)
+        //   MAX_BYTEARRAY_STORE_LENGTH + MAX_BYTEARRAY_SHORT_ACCESS_LENGTH < 2^32  (global invariant)
+
+        if (m_position >= m_length || m_position + nbytes > m_length)
+            ThrowEOFError();      // Does not return
+        uint8_t *b = m_array + m_position;
+        m_position += nbytes;
+        return b;
+    }
+
+    // Same argument as for requestBytesForShortRead(), above.
+    
+    REALLY_INLINE uint8_t* ByteArray::requestBytesForShortWrite(uint32_t nbytes)
+    {
+        AvmAssert(nbytes > 0 && nbytes <= MAX_BYTEARRAY_SHORT_ACCESS_LENGTH);
+    
+        // m_position + nbytes does not overflow uint32_t in the second disjunct because:
+        //
+        //   m_position < m_length <= m_capacity <= MAX_BYTEARRAY_STORE_LENGTH     (by the first disjunct + global invariants)
+        //   nbytes <= MAX_BYTEARRAY_SHORT_ACCESS_LENGTH                           (global invariant)
+        //   MAX_BYTEARRAY_STORE_LENGTH + MAX_BYTEARRAY_SHORT_ACCESS_LENGTH < 2^32 (global invariant)
+
+        if (m_position >= m_length || m_position + nbytes > m_length)
+            SetLength(m_position, nbytes);  // The addition would *not* be safe against overflow here
+    
+        AvmAssert(m_length <= m_capacity);
+        AvmAssert(m_capacity <= MAX_BYTEARRAY_STORE_LENGTH);
+        AvmAssert(m_length >= nbytes && m_position <= m_length - nbytes);
+
+        uint8_t *b = m_array + m_position;
+        m_position += nbytes;
+        return b;
+    }
+    
     //
     // ByteArrayObject
     //
@@ -502,6 +660,10 @@ namespace avmplus
         m_byteArray.SetObjectEncoding((ObjectEncoding)cls->get_defaultObjectEncoding());
         toplevel()->byteArrayCreated(this);
     }
+
+    // Inspection of the object code (GCC 4.2) shows that the forced inlining of GetLength
+    // and operator[] lead to optimal code here: no redundant range check is being executed
+    // even if there is a redundant check in operator[].
 
     Atom ByteArrayObject::getUintProperty(uint32_t i) const
     {
@@ -656,82 +818,409 @@ namespace avmplus
     
     int ByteArrayObject::readByte()
     {
-        return (int8_t)m_byteArray.ReadU8();
+        return (int8_t)*m_byteArray.requestBytesForShortRead(1);
     }
 
     int ByteArrayObject::readUnsignedByte()
     {
-        return m_byteArray.ReadU8();
+        return *m_byteArray.requestBytesForShortRead(1);
     }
 
+    REALLY_INLINE uint32_t ByteArrayObject::read16()
+    {
+        uint8_t *b = m_byteArray.requestBytesForShortRead(2);
+        if (m_byteArray.GetEndian() == m_byteArray.GetNativeEndian()) {  // GetNativeEndian expands to a constant
+#if defined VMCFG_UNALIGNED_INT_ACCESS
+            return *(uint16_t*)b;
+#elif defined VMCFG_BIG_ENDIAN
+            return ((uint32_t)b[0] << 8) | (uint32_t)b[1]; // read big-endian
+#else
+            return ((uint32_t)b[1] << 8) | (uint32_t)b[0]; // read little-endian
+#endif
+        }
+        else
+        {
+#if defined VMCFG_UNALIGNED_INT_ACCESS && defined HAVE_BYTESWAP16
+            return byteSwap16(*(uint16_t*)b);
+#elif defined VMCFG_BIG_ENDIAN
+            return ((uint32_t)b[1] << 8) | (uint32_t)b[0]; // read little-endian
+#else
+            return ((uint32_t)b[0] << 8) | (uint32_t)b[1]; // read big-endian
+#endif
+        }
+    }
+    
     int ByteArrayObject::readShort()
     {
-        return (int16_t)m_byteArray.ReadU16();
+        return (int)(int16_t)read16();
     }
 
     int ByteArrayObject::readUnsignedShort()
     {
-        return m_byteArray.ReadU16();
+        return (int)read16();
+    }
+
+    REALLY_INLINE uint32_t ByteArrayObject::read32()
+    {
+        uint8_t *b = m_byteArray.requestBytesForShortRead(4);
+        if (m_byteArray.GetEndian() == m_byteArray.GetNativeEndian())  // GetNativeEndian expands to a constant
+        {
+#if defined VMCFG_UNALIGNED_INT_ACCESS
+            return *(uint32_t*)b;
+#elif defined VMCFG_BIG_ENDIAN
+            return ((uint32_t)b[0] << 24) | ((uint32_t)b[1] << 16) | ((uint32_t)b[2] << 8) | (uint32_t)b[3]; // read big-endian
+#else
+            return ((uint32_t)b[3] << 24) | ((uint32_t)b[2] << 16) | ((uint32_t)b[1] << 8) | (uint32_t)b[0]; // read little-endian
+#endif
+        }
+        else
+        {
+#if defined VMCFG_UNALIGNED_INT_ACCESS && defined HAVE_BYTESWAP32
+            return byteSwap32(*(uint32_t*)b);
+#elif defined VMCFG_BIG_ENDIAN
+            return ((uint32_t)b[3] << 24) | ((uint32_t)b[2] << 16) | ((uint32_t)b[1] << 8) | (uint32_t)b[0]; // read little-endian
+#else
+            return ((uint32_t)b[0] << 24) | ((uint32_t)b[1] << 16) | ((uint32_t)b[2] << 8) | (uint32_t)b[3]; // read big-endian
+#endif
+        }
     }
 
     int ByteArrayObject::readInt()
     {
-        return (int32_t)m_byteArray.ReadU32();
+        return (int)read32();
     }
 
     uint32_t ByteArrayObject::readUnsignedInt()
     {
-        return m_byteArray.ReadU32();
-    }
-    
-    double ByteArrayObject::readFloat()
-    {
-        return m_byteArray.ReadFloat();
+        return read32();
     }
 
+    // Some observations from x86 testing of float and double reading:
+    //
+    //  - It pays to make use of VMCFG_UNALIGNED_FP_ACCESS.
+    //  - It pays to assemble an int32 in a register and then store it in
+    //    a 32-bit field of the union, that is then read (either alone for
+    //    float or as part of a pair for double), rather than shuffling 
+    //    bytes individually into a byte array in the union.
+
+    // Bugzilla 569691/685441: Do not try to be clever here by loading from
+    // '*(uint32_t*)b' into 'u.word', even if VMCFG_UNALIGNED_INT_ACCESS and
+    // on native endianness - gcc may emit code that loads directly
+    // to the ARM VFP register, and that requires VMCFG_UNALIGNED_FP_ACCESS.
+
+    double ByteArrayObject::readFloat()
+    {
+        union {
+            uint32_t word;
+            float    fval;
+        } u;
+        
+        uint8_t *b = m_byteArray.requestBytesForShortRead(4);
+        if (m_byteArray.GetEndian() == m_byteArray.GetNativeEndian())  // GetNativeEndian expands to a constant
+        {
+#if defined VMCFG_UNALIGNED_FP_ACCESS
+            return *(float*)b;
+#elif defined VMCFG_BIG_ENDIAN
+            u.word = ((uint32_t)b[0] << 24) | ((uint32_t)b[1] << 16) | ((uint32_t)b[2] << 8) | (uint32_t)b[3]; // read big-endian
+            return u.fval;
+#else
+            u.word = ((uint32_t)b[3] << 24) | ((uint32_t)b[2] << 16) | ((uint32_t)b[1] << 8) | (uint32_t)b[0]; // read little-endian
+            return u.fval;
+#endif
+        }
+        else
+        {
+#if defined VMCFG_UNALIGNED_INT_ACCESS && defined HAVE_BYTESWAP32
+            u.word = byteSwap32(*(uint32_t*)b);
+#elif defined VMCFG_BIG_ENDIAN
+            u.word = ((uint32_t)b[3] << 24) | ((uint32_t)b[2] << 16) | ((uint32_t)b[1] << 8) | (uint32_t)b[0]; // read little-endian
+#else
+            u.word = ((uint32_t)b[0] << 24) | ((uint32_t)b[1] << 16) | ((uint32_t)b[2] << 8) | (uint32_t)b[3]; // read big-endian
+#endif
+            return u.fval;
+        }
+    }
+
+    // Bugzilla 569691/685441: Do not try to be clever here by loading from
+    // '*(uint32_t*)b' into 'u.word[i]', even if VMCFG_UNALIGNED_INT_ACCESS and
+    // on native endianness - gcc may emit code that loads directly
+    // to the ARM VFP register, and that requires VMCFG_UNALIGNED_FP_ACCESS.
+    
     double ByteArrayObject::readDouble()
     {
-        return m_byteArray.ReadDouble();
+        // Handle reversed word order for doubles
+#if defined VMCFG_DOUBLE_MSW_FIRST
+        const int first = 1;
+        const int second = 0;
+#else
+        const int first = 0;
+        const int second = 1;
+#endif
+        union {
+            uint32_t words[2];
+            double   dval;
+        } u;
+        uint8_t *b = m_byteArray.requestBytesForShortRead(8);
+        if (m_byteArray.GetEndian() == m_byteArray.GetNativeEndian())  // GetNativeEndian expands to a constant
+        {
+#if defined VMCFG_UNALIGNED_FP_ACCESS
+            return *(double*)b;
+#elif defined VMCFG_BIG_ENDIAN
+            u.words[first] = ((uint32_t)b[0] << 24) | ((uint32_t)b[1] << 16) | ((uint32_t)b[2] << 8) | (uint32_t)b[3]; // read
+            u.words[second] = ((uint32_t)b[4] << 24) | ((uint32_t)b[5] << 16) | ((uint32_t)b[6] << 8) | (uint32_t)b[7]; //   big-endian
+            return u.dval;
+#else
+            u.words[first] = ((uint32_t)b[7] << 24) | ((uint32_t)b[6] << 16) | ((uint32_t)b[5] << 8) | (uint32_t)b[4]; // read
+            u.words[second] = ((uint32_t)b[3] << 24) | ((uint32_t)b[2] << 16) | ((uint32_t)b[1] << 8) | (uint32_t)b[0]; //   little-endian
+            return u.dval;
+#endif
+        }
+        else
+        {
+#if defined VMCFG_UNALIGNED_INT_ACCESS && defined HAVE_BYTESWAP32
+            u.words[first] = byteSwap32(*(uint32_t*)(b+4));
+            u.words[second] = byteSwap32(*(uint32_t*)b);
+#elif defined VMCFG_BIG_ENDIAN
+            u.words[first] = ((uint32_t)b[7] << 24) | ((uint32_t)b[6] << 16) | ((uint32_t)b[5] << 8) | (uint32_t)b[4]; // read
+            u.words[second] = ((uint32_t)b[3] << 24) | ((uint32_t)b[2] << 16) | ((uint32_t)b[1] << 8) | (uint32_t)b[0]; //   little-endian
+#else
+            u.words[first] = ((uint32_t)b[4] << 24) | ((uint32_t)b[5] << 16) | ((uint32_t)b[6] << 8) | (uint32_t)b[7]; // read
+            u.words[second] = ((uint32_t)b[0] << 24) | ((uint32_t)b[1] << 16) | ((uint32_t)b[2] << 8) | (uint32_t)b[3]; //   big-endian
+#endif
+            return u.dval;
+        }
     }
 
     bool ByteArrayObject::readBoolean()
     {
-        return m_byteArray.ReadBoolean();
+        return (*m_byteArray.requestBytesForShortRead(1)) != 0;
     }
 
     void ByteArrayObject::writeBoolean(bool value)
     {
-        m_byteArray.WriteBoolean(value);
+        m_byteArray.requestBytesForShortWrite(1)[0] = (value ? 1 : 0);
     }
 
     void ByteArrayObject::writeByte(int value)
     {
-        m_byteArray.WriteU8((uint8_t)value);
+        m_byteArray.requestBytesForShortWrite(1)[0] = (uint8_t)value;
     }
 
     void ByteArrayObject::writeShort(int value)
     {
-        m_byteArray.WriteU16((uint16_t)value);
+        uint8_t *b = m_byteArray.requestBytesForShortWrite(2);
+        if (m_byteArray.GetEndian() == m_byteArray.GetNativeEndian())   // GetNativeEndian expands to a constant
+        {
+#if defined VMCFG_UNALIGNED_INT_ACCESS
+            *(int16_t*)b = (int16_t)value;
+#elif defined VMCFG_BIG_ENDIAN
+            b[0] = (value >> 8);  // write
+            b[1] = value;         //   big-endian
+#else
+            b[1] = (value >> 8);  // write
+            b[0] = value;         //   little-endian
+#endif
+        }
+        else
+        {
+#if defined VMCFG_UNALIGNED_INT_ACCESS && defined HAVE_BYTESWAP16
+            *(int16_t*)b = byteSwap16((uint16_t)value);
+#elif defined VMCFG_BIG_ENDIAN
+            b[1] = (value >> 8);  // write
+            b[0] = value;         //   little-endian
+#else
+            b[0] = (value >> 8);  // write
+            b[1] = value;         //   big-endian
+#endif
+        }
+    }
+
+    REALLY_INLINE void ByteArrayObject::write32(uint32_t value)
+    {
+        uint8_t *b = m_byteArray.requestBytesForShortWrite(4);
+        if (m_byteArray.GetEndian() == m_byteArray.GetNativeEndian())   // GetNativeEndian expands to a constant
+        {
+#if defined VMCFG_UNALIGNED_INT_ACCESS
+            *(uint32_t*)b = value;
+#elif defined VMCFG_BIG_ENDIAN
+            b[0] = (value >> 24);   // write
+            b[1] = (value >> 16);   //   big
+            b[2] = (value >> 8);    //     endian
+            b[3] = value;
+#else
+            b[3] = (value >> 24);   // write
+            b[2] = (value >> 16);   //   little
+            b[1] = (value >> 8);    //     endian
+            b[0] = value;
+#endif
+        }
+        else
+        {
+#if defined VMCFG_UNALIGNED_INT_ACCESS && defined HAVE_BYTESWAP32
+            *(uint32_t*)b = byteSwap32(value);
+#elif defined VMCFG_BIG_ENDIAN
+            b[3] = (value >> 24);   // write
+            b[2] = (value >> 16);   //   little
+            b[1] = (value >> 8);    //     endian
+            b[0] = value;
+#else
+            b[0] = (value >> 24);   // write
+            b[1] = (value >> 16);   //   big
+            b[2] = (value >> 8);    //     endian
+            b[3] = value;
+#endif
+        }
     }
 
     void ByteArrayObject::writeInt(int value)
     {
-        m_byteArray.WriteU32((uint32_t)value);
+        write32((uint32_t)value);
     }
 
     void ByteArrayObject::writeUnsignedInt(uint32_t value)
     {
-        m_byteArray.WriteU32(value);
+        write32(value);
     }
     
+    // Bugzilla 569691/685441: Do not try to be clever here by storing from
+    // 'u.word' into '*(uint32_t*)b', even if both VMCFG_UNALIGNED_INT_ACCESS and
+    // on native endianness - gcc will emit code that stores directly
+    // from the ARM VFP register, and that requires VMCFG_UNALIGNED_FP_ACCESS.
+
     void ByteArrayObject::writeFloat(double value)
     {
-        m_byteArray.WriteFloat((float)value);
+        union {
+            uint32_t word;
+            float    fval;
+        } u;
+        uint8_t *b = m_byteArray.requestBytesForShortWrite(4);
+        if (m_byteArray.GetEndian() == m_byteArray.GetNativeEndian())   // GetNativeEndian expands to a constant
+        {
+#if defined VMCFG_UNALIGNED_FP_ACCESS
+            *(float*)b = (float)value;
+#elif defined VMCFG_BIG_ENDIAN
+            u.fval = (float)value;
+            uint32_t w = u.word;
+            b[0] = (w >> 24);   // write
+            b[1] = (w >> 16);   //   big
+            b[2] = (w >> 8);    //     endian
+            b[3] = w;
+#else
+            u.fval = (float)value;
+            uint32_t w = u.word;
+            b[3] = (w >> 24);   // write
+            b[2] = (w >> 16);   //   little
+            b[1] = (w >> 8);    //     endian
+            b[0] = w;
+#endif
+        }
+        else
+        {
+            u.fval = (float)value;
+#if defined VMCFG_UNALIGNED_INT_ACCESS && defined HAVE_BYTESWAP32
+            *(uint32_t*)b = byteSwap32(u.word);
+#elif defined VMCFG_BIG_ENDIAN
+            uint32_t w = u.word;
+            b[3] = (w >> 24);   // write
+            b[2] = (w >> 16);   //   little
+            b[1] = (w >> 8);    //     endian
+            b[0] = w;
+#else
+            uint32_t w = u.word;
+            b[0] = (w >> 24);   // write
+            b[1] = (w >> 16);   //   big
+            b[2] = (w >> 8);    //     endian
+            b[3] = w;
+#endif
+        }
     }
 
+    // Bugzilla 569691/685441: Do not try to be clever here by storing from
+    // 'u.word[i]' into '*(uint32_t*)b', even if both VMCFG_UNALIGNED_INT_ACCESS and
+    // on native endianness - gcc will emit code that stores directly
+    // from the ARM VFP register, and that requires VMCFG_UNALIGNED_FP_ACCESS.
+    
     void ByteArrayObject::writeDouble(double value)
     {
-        m_byteArray.WriteDouble(value);
+        // Handle reversed word order for doubles
+#if defined VMCFG_DOUBLE_MSW_FIRST
+        const int first = 1;
+        const int second = 0;
+#else
+        const int first = 0;
+        const int second = 1;
+#endif
+        union {
+            uint32_t words[2];
+            double   dval;
+        } u;
+        uint8_t *b = m_byteArray.requestBytesForShortWrite(8);
+        if (m_byteArray.GetEndian() == m_byteArray.GetNativeEndian())   // GetNativeEndian expands to a constant
+        {
+#if defined VMCFG_UNALIGNED_FP_ACCESS
+            *(double*)b = value;
+#elif defined VMCFG_BIG_ENDIAN
+            uint32_t w;
+            u.dval = value;
+            w = u.words[first];
+            b[0] = (w >> 24);   // write
+            b[1] = (w >> 16);   //   big
+            b[2] = (w >> 8);    //     endian
+            b[3] = w;
+            w = u.words[second];
+            b[4] = (w >> 24);   // write
+            b[5] = (w >> 16);   //   big
+            b[6] = (w >> 8);    //     endian
+            b[7] = w;
+#else
+            uint32_t w;
+            u.dval = value;
+            w = u.words[first];
+            b[7] = (w >> 24);   // write
+            b[6] = (w >> 16);   //   little
+            b[5] = (w >> 8);    //     endian
+            b[4] = w;
+            w = u.words[second];
+            b[3] = (w >> 24);   // write
+            b[2] = (w >> 16);   //   little
+            b[1] = (w >> 8);    //     endian
+            b[0] = w;
+#endif
+        }
+        else
+        {
+            u.dval = value;
+#if defined VMCFG_UNALIGNED_INT_ACCESS && defined HAVE_BYTESWAP32
+            *(uint32_t*)b = byteSwap32(u.words[second]);       // write
+            *(uint32_t*)(b+4) = byteSwap32(u.words[first]);   //   opposite endianness
+#elif defined VMCFG_BIG_ENDIAN
+            uint32_t w;
+            u.dval = value;
+            w = u.words[first];
+            b[7] = (w >> 24);   // write
+            b[6] = (w >> 16);   //   little
+            b[5] = (w >> 8);    //     endian
+            b[4] = w;
+            w = u.words[second];
+            b[3] = (w >> 24);   // write
+            b[2] = (w >> 16);   //   little
+            b[1] = (w >> 8);    //     endian
+            b[0] = w;
+#else
+            uint32_t w;
+            u.dval = value;
+            w = u.words[second];
+            b[0] = (w >> 24);   // write
+            b[1] = (w >> 16);   //   big
+            b[2] = (w >> 8);    //     endian
+            b[3] = w;
+            w = u.words[first];
+            b[4] = (w >> 24);   // write
+            b[5] = (w >> 16);   //   big
+            b[6] = (w >> 8);    //     endian
+            b[7] = w;
+#endif
+        }
     }
 
     ByteArray::CompressionAlgorithm ByteArrayObject::algorithmToEnum(String* algorithm)
