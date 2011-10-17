@@ -1291,12 +1291,41 @@ namespace avmplus
     
     String* ByteArrayObject::readUTF()
     {
-        return m_byteArray.ReadUTF();
+        return readUTFBytes((uint32_t)readUnsignedShort());
     }
 
     String* ByteArrayObject::readUTFBytes(uint32_t length)
     {
-        return m_byteArray.ReadUTFBytes(length);
+        if (m_byteArray.Available() < length)
+            toplevel()->throwEOFError(kEOFError);
+
+        const uint8_t* p = (const uint8_t*)m_byteArray.GetReadableBuffer() + m_byteArray.GetPosition();
+        // Skip UTF8 BOM (but it is still counted in the length we consume).
+        if (length >= 3 && p[0] == 0xEFU && p[1] == 0xBBU && p[2] == 0xBFU)
+        {
+            p += 3;
+            length -= 3;
+        }
+        
+        // Bugzilla 687341: we must stop at NUL, so here we need to scan for a NUL
+        // in the portion we're considering.  With a fix to that bug we won't need
+        // to do so.
+#if 1
+        const uint8_t* limit = p + length;
+        const uint8_t* q = p;
+        while (q < limit && *q != 0)
+            q++;
+#else
+        const uint8_t* q = p + length;
+#endif
+
+        String *result = toplevel()->core()->newStringUTF8((const char*)p, int(q-p));
+
+        // The position is always updated as if the entire string had been consumed, 
+        // even if there was a NUL that made us stop early.
+        m_byteArray.SetPosition(m_byteArray.GetPosition()+length);
+
+        return result;
     }
 
     void ByteArrayObject::writeMultiByte(String* value, String* charSet)
