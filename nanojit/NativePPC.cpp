@@ -610,6 +610,8 @@ namespace nanojit
     }
 
     NIns* Assembler::asm_branch_ov(LOpcode op, NIns* targ) {
+        (void)op;
+
         // This only works for our overflow-enabled instructions (see
         // asm_arith). We want overflow, not summary overflow, so that
         // we aren't carrying overflow forward from something else.
