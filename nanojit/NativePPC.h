@@ -414,7 +414,7 @@ namespace nanojit
                     (_lastOpcode.reg3 != r1 &&\
                      _lastOpcode.reg3 != r2 &&\
                      _lastOpcode.reg3 != r3))) {\
-              asm_output("; swapped @ %08x\n", (uint32_t)_nIns);\
+              asm_output("; swapped @ %p\n", _nIns);\
               swapme = *(_nIns++);\
            }\
         }\

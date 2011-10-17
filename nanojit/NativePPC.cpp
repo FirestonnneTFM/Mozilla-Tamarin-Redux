@@ -646,7 +646,7 @@ namespace nanojit
         // This needs to be optimized better at some point, but this works.
         // we also need to get the MCRXR out of here for POWER4+.
         //underrunProtect() XXX
-        BGTCTR(cr,0); 
+        BGTCTR(cr,0);
         MTCTR(R0);
         MCRXR(7);
         if (!targ || !isU32(uintptr_t(targ))) {
@@ -1254,6 +1254,7 @@ namespace nanojit
     void Assembler::asm_d2i(LIns* ins) {
     // Like SPARC, PPC fctid/fctiw only handles fpr->mem->gpr ultimately.
     #if defined NANOJIT_64BIT
+        (void)ins;
         TODO(d2i_64bit);
     #else
         LIns *lhs = ins->oprnd1();
@@ -1517,7 +1518,7 @@ namespace nanojit
             NIns *after = _nIns;
             verbose_only(if (_logc->lcbits & LC_Native) outputf("%p:",after);)
             FMR(rr,rf);
-            
+
             NanoAssert(isS24(after - (_nIns-1)));
             asm_branch_near(false, condval, after);
 
@@ -1662,13 +1663,16 @@ namespace nanojit
 #endif // FAST_FLUSH_ICACHE
 
     static void demote_to_far_branch(NIns *branch, NIns *target) {
+#ifdef NANOJIT_64BIT
+        TODO(demote_to_far_branch);(void) branch; (void) target;
+#else
         // Our branch has exceeded its range, so now we have to fall back
         // on a far branch. Hope we have NOPs to overwrite ...
         uint32_t imm = uint32_t(target);
         Register rd = R0; // for now
         // rewrite our branch instruction into a bcctr using this one
         if ((branch[0] & (63<<25)) == PPC_b) { // trivial case
-            branch[3] = PPC_bcctr | (branch[0] | 1); // preserve link bit    
+            branch[3] = PPC_bcctr | (branch[0] | 1); // preserve link bit
         } else { // PPC_bc, I assume
             branch[0] &= ((0x3ff << 16) | 1); // preserve bo, bi, link
             branch[3] = PPC_bcctr | branch[0];
@@ -1679,6 +1683,7 @@ namespace nanojit
     #ifdef FAST_FLUSH_ICACHE
         fast_flush_icache4(branch);
     #endif
+#endif        
     }
 
     void Assembler::nPatchBranch(NIns *branch, NIns *target) {
@@ -1720,6 +1725,8 @@ namespace nanojit
         // patch 64bit branch
         // XXX this probably needs to be patched in the same way for 32bit
         TODO(64bit_bitmask_patch_far);
+        const bool WTF=true;
+        if(WTF) /*nothing*/;
         else if ((branch[0] & ~(31<<21)) == PPC_addis) { // XXX?
             // general branch, using lis,ori,sldi,oris,ori to load the const 64bit addr.
             Register rd = { (branch[0] >> 21) & 31 };
@@ -1770,8 +1777,8 @@ namespace nanojit
         }
     #endif // !NANOJIT_64BIT
         else {
-            fprintf(stderr, "ASSERTION: can't patch opcode @ %08x : %08x\n",
-                (uint32_t)branch, (uint32_t)branch[0]);
+            fprintf(stderr, "ASSERTION: can't patch opcode @ %p : %08x\n",
+                branch, branch[0]);
             TODO(unknown_patch);
         }
     }
@@ -1851,7 +1858,11 @@ namespace nanojit
             // Save our guard record in a scratch register that
             // the epilogue will later move to R3 (see asm_ret and
             // genEpilogue), leaving R3 with the interpreter state.
+#ifdef NANOJIT_64BIT
+            TODO(asm_li(R12,gr));
+#else            
             asm_li(R12, (int)gr);
+#endif // NANOJIT_64BIT
         }
         SwapEnable();
 
@@ -1897,7 +1908,8 @@ namespace nanojit
     }
 
     void Assembler::asm_label() {
-        // do nothing right now
+        // disable swapping for the next instruction; it's a branch point.
+        _lastOpcode.reg1 = NoSwap;
     }
 
 } // namespace nanojit
