@@ -610,6 +610,7 @@ namespace nanojit
     }
 
     NIns* Assembler::asm_branch_ov(LOpcode op, NIns* targ) {
+        (void) op;
         // This only works for our overflow-enabled instructions (see
         // asm_arith). We want overflow, not summary overflow, so that
         // we aren't carrying overflow forward from something else.
@@ -1254,6 +1255,7 @@ namespace nanojit
     void Assembler::asm_d2i(LIns* ins) {
     // Like SPARC, PPC fctid/fctiw only handles fpr->mem->gpr ultimately.
     #if defined NANOJIT_64BIT
+        (void)ins;
         TODO(d2i_64bit);
     #else
         LIns *lhs = ins->oprnd1();
@@ -1662,6 +1664,9 @@ namespace nanojit
 #endif // FAST_FLUSH_ICACHE
 
     static void demote_to_far_branch(NIns *branch, NIns *target) {
+#ifdef NANOJIT_64BIT
+        TODO(demote_to_far_branch);(void) branch; (void) target;
+#else
         // Our branch has exceeded its range, so now we have to fall back
         // on a far branch. Hope we have NOPs to overwrite ...
         uint32_t imm = uint32_t(target);
@@ -1679,6 +1684,7 @@ namespace nanojit
     #ifdef FAST_FLUSH_ICACHE
         fast_flush_icache4(branch);
     #endif
+#endif        
     }
 
     void Assembler::nPatchBranch(NIns *branch, NIns *target) {
@@ -1720,6 +1726,8 @@ namespace nanojit
         // patch 64bit branch
         // XXX this probably needs to be patched in the same way for 32bit
         TODO(64bit_bitmask_patch_far);
+        const bool WTF=true;
+        if(WTF) /*nothing*/;
         else if ((branch[0] & ~(31<<21)) == PPC_addis) { // XXX?
             // general branch, using lis,ori,sldi,oris,ori to load the const 64bit addr.
             Register rd = { (branch[0] >> 21) & 31 };
@@ -1770,8 +1778,8 @@ namespace nanojit
         }
     #endif // !NANOJIT_64BIT
         else {
-            fprintf(stderr, "ASSERTION: can't patch opcode @ %08x : %08x\n",
-                (uint32_t)branch, (uint32_t)branch[0]);
+            fprintf(stderr, "ASSERTION: can't patch opcode @ %p : %08x\n",
+                branch, branch[0]);
             TODO(unknown_patch);
         }
     }
@@ -1851,7 +1859,11 @@ namespace nanojit
             // Save our guard record in a scratch register that
             // the epilogue will later move to R3 (see asm_ret and
             // genEpilogue), leaving R3 with the interpreter state.
+#ifdef NANOJIT_64BIT
+            TODO(asm_li(R12,gr));
+#else            
             asm_li(R12, (int)gr);
+#endif // NANOJIT_64BIT
         }
         SwapEnable();
 
