@@ -3331,7 +3331,51 @@ namespace avmplus
             // early bind accessor
             if (AvmCore::hasGetterBinding(b))
             {
-                // Invoke the getter
+                // Inline certain blessed and possibly-hot accessors.
+                //
+                // -  Optimize access to vector's "length", which is final.
+                //
+                //    The verifier has computed that the return type of the "length" 
+                //    getter is uint, so we can just load "len" here: it is a uint32_t.
+
+                int32_t arrayDataOffset = -1;
+                int32_t lenOffset = -1;
+
+                MethodInfo* getter_info = obj.traits->getTraitsBindings()->getMethod(AvmCore::bindingToGetterId(b));
+                switch (getter_info->method_id())
+                {
+                    case avmplus::NativeID::__AS3___vec_Vector_object_length_get:
+                        arrayDataOffset = int32_t(offsetof(ObjectVectorObject, m_list.m_data));
+                        lenOffset = int32_t(offsetof(AtomListHelper::LISTDATA, len));
+                        goto vector_length;
+                    case avmplus::NativeID::__AS3___vec_Vector_double_length_get:
+                        arrayDataOffset = int32_t(offsetof(DoubleVectorObject, m_list.m_data));
+                        lenOffset = int32_t(offsetof(DataListHelper<double>::LISTDATA, len));
+                        goto vector_length;
+                    case avmplus::NativeID::__AS3___vec_Vector_int_length_get:
+                        arrayDataOffset = int32_t(offsetof(IntVectorObject, m_list.m_data));
+                        lenOffset = int32_t(offsetof(DataListHelper<int32_t>::LISTDATA, len));
+                        goto vector_length;
+                    case avmplus::NativeID::__AS3___vec_Vector_uint_length_get:
+                        arrayDataOffset = int32_t(offsetof(UIntVectorObject, m_list.m_data));
+                        lenOffset = int32_t(offsetof(DataListHelper<uint32_t>::LISTDATA, len));
+                        goto vector_length;
+
+                    // Add more specializations here
+
+                    default:
+                        goto invoke_getter;
+                }
+                
+            vector_length: {
+                LIns *arrayData = loadIns(LIR_ldp, arrayDataOffset, localGetp(sp), ACCSET_OTHER, LOAD_NORMAL);
+                LIns *arrayLen  = loadIns(LIR_ldi, lenOffset, arrayData, ACCSET_OTHER, LOAD_NORMAL);
+                localSet(sp, arrayLen, type);
+                break;
+            }
+
+            invoke_getter:
+                // Default case: Invoke the getter
                 int disp_id = AvmCore::bindingToGetterId(b);
                 const TraitsBindingsp objtd = obj.traits->getTraitsBindings();
                 MethodInfo *f = objtd->getMethod(disp_id);
