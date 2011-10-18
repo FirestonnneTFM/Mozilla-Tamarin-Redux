@@ -2181,7 +2181,7 @@ namespace avmplus
     //     intptr_t rhsa = CONVERT_TO_ATOM(rhs);                    # box atom if needed
     //     if (((lhsa ^ kIntptrType) | (rhsa ^ kIntptrType)) & kAtomTypeMask) goto fallback;
     //     # both arguments are intptr atoms
-    //     intptr_t lhsStripped = lhsa - kIntptrtype;               # zero out tag bits on lhs
+    //     intptr_t lhsStripped = lhsa - kIntptrType;               # zero out tag bits on lhs
     //     intptr_t lhsShifted = lhsStripped << 8;                  # left-justify 53-bit payload (followed by 0s in tag position)
     //     intptr_t rhsShifted = rhsa << 8;                         # align rhs payload and tag with left-justified lhs
     //     intptr_t sumShifted = lhsShifted + rhsShifted;           # add aligned values, producing 53-bit left-justified sum followed by tag
@@ -2198,7 +2198,7 @@ namespace avmplus
     //     intptr_t rhsa = CONVERT_TO_ATOM(rhs);                    # box atom if needed
     //     if (((lhsa ^ kIntptrType) | (rhsa ^ kIntptrType)) & kAtomTypeMask) goto fallback;
     //     # both arguments are intptr atoms
-    //     intptr_t lhsStripped = lhsa - kIntptrtype;               # zero out tag bits on lhs (note rhs retains its tag)
+    //     intptr_t lhsStripped = lhsa - kIntptrType;               # zero out tag bits on lhs (note rhs retains its tag)
     //     intptr_t sum = lhsStripped + rhs;                        # add, producing 29-bit sum followed by 3-bit tag
     //     if (OVERFLOW) goto fallback;
     //     result = sum;
