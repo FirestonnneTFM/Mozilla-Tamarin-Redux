@@ -91,7 +91,7 @@ namespace avmplus
      *  - using last 3 bits means allocations must be 8-byte aligned.
      *  - related types are 1 bit apart, e.g. int/double
      *
-     *  kInteger atoms are used to represent integer values from -2^28..2^28-1,
+     *  kIntptrType atoms are used to represent integer values from -2^28..2^28-1,
      *  regardless of whether the context implies int, uint, or Number.
      *  If a number doesn't fit into that range it is stored as a kDoubleType
      *
