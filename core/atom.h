@@ -117,6 +117,7 @@ namespace avmplus
 
         const uint8_t kBibopUndefined   = 0;
         const uint8_t kBibopFloatType   = 1;
+        const uint8_t kBibopFloat4Type  = 2;
 
         /*
         other things you can do with math on atoms

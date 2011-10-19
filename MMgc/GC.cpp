@@ -264,14 +264,17 @@ namespace MMgc
 
         /* We must pass 8 for the size here because we can only allocate in 8-byte increments. */
 #if !defined MMGC_MEMORY_INFO
-        bibopAllocFloat = mmfx_new(GCAlloc(this, 8, false, false, false, /*sizeclass*/0, avmplus::AtomConstants::kBibopFloatType));
+        bibopAllocFloat  = mmfx_new(GCAlloc(this,  8, false, false, false, /*sizeclass*/0, avmplus::AtomConstants::kBibopFloatType));
+        bibopAllocFloat4 = mmfx_new(GCAlloc(this, 16, false, false, false, /*sizeclass*/1, avmplus::AtomConstants::kBibopFloat4Type));
 #else
 #ifdef MMGC_64BIT
         GCAssert(DebugSize() == 24);
-        bibopAllocFloat = mmfx_new(GCAlloc(this, int(8 + DebugSize()), false, false, false, /*sizeclass*/3, avmplus::AtomConstants::kBibopFloatType));
+        bibopAllocFloat  = mmfx_new(GCAlloc(this, int( 8 + DebugSize()), false, false, false, /*sizeclass*/3, avmplus::AtomConstants::kBibopFloatType));
+        bibopAllocFloat4 = mmfx_new(GCAlloc(this, int(16 + DebugSize()), false, false, false, /*sizeclass*/4, avmplus::AtomConstants::kBibopFloat4Type));
 #else
         GCAssert(DebugSize() == 16);
-        bibopAllocFloat = mmfx_new(GCAlloc(this, int(8 + DebugSize()), false, false, false, /*sizeclass*/2, avmplus::AtomConstants::kBibopFloatType));
+        bibopAllocFloat  = mmfx_new(GCAlloc(this, int( 8 + DebugSize()), false, false, false, /*sizeclass*/2, avmplus::AtomConstants::kBibopFloatType));
+        bibopAllocFloat4 = mmfx_new(GCAlloc(this, int(16 + DebugSize()), false, false, false, /*sizeclass*/3, avmplus::AtomConstants::kBibopFloat4Type));
 #endif
 #endif
 
@@ -388,6 +391,7 @@ namespace MMgc
         }
 
         mmfx_delete(bibopAllocFloat);
+        mmfx_delete(bibopAllocFloat4);
 
         if (largeAlloc) {
             mmfx_delete(largeAlloc);
@@ -868,10 +872,10 @@ namespace MMgc
     }
 
 #if defined _DEBUG || defined AVMPLUS_SAMPLER || defined MMGC_MEMORY_PROFILER
-    void *GC::AllocFloatSlow()
+    void *GC::AllocSlow(GCAlloc* bibopAlloc)
     {
 #ifdef _DEBUG
-        AllocPrologue(bibopAllocFloat->m_itemSize);
+        AllocPrologue(bibopAlloc->m_itemSize);
 #endif
 #ifdef AVMPLUS_SAMPLER
         avmplus::AvmCore *core = (avmplus::AvmCore*)GetGCContextVariable(GCV_AVMCORE);
@@ -880,9 +884,9 @@ namespace MMgc
 #endif
         void* item;
 #if defined _DEBUG || defined MMGC_MEMORY_PROFILER
-        item = bibopAllocFloat->Alloc(/*sizeof(float)*/4, /*flags*/0);
+        item = bibopAlloc->Alloc(/*sizeof(float)*/ bibopAlloc == bibopAllocFloat4? 16:4, /*flags*/0);
 #else
-        item = bibopAllocFloat->Alloc(/*flags*/0);
+        item = bibopAlloc->Alloc(/*flags*/0);
 #endif
         GCAssert(item != NULL);
 #ifdef _DEBUG
@@ -1028,6 +1032,7 @@ namespace MMgc
             noPointersFinalizedAllocs[i]->ClearMarks();
         }
         bibopAllocFloat->ClearMarks();
+        bibopAllocFloat4->ClearMarks();
         largeAlloc->ClearMarks();
         m_markStackOverflow = false;
     }
@@ -1044,9 +1049,9 @@ namespace MMgc
             noPointersFinalizedAllocs[i]->Finalize();
         }
         bibopAllocFloat->Finalize();
+        bibopAllocFloat4->Finalize();
         largeAlloc->Finalize();
         finalizedValue = !finalizedValue;
-
 
         for(int i=0; i < kNumSizeClasses; i++) {
             containsPointersRCAllocs[i]->m_finalized = false;
@@ -1055,6 +1060,9 @@ namespace MMgc
             noPointersNonfinalizedAllocs[i]->m_finalized = false;
             noPointersFinalizedAllocs[i]->m_finalized = false;
         }
+
+        bibopAllocFloat->m_finalized = false;
+        bibopAllocFloat4->m_finalized = false;
     }
 
     void GC::SweepNeedsSweeping()
@@ -1070,6 +1078,7 @@ namespace MMgc
             noPointersFinalizedAllocs[i]->SweepNeedsSweeping();
         }
         bibopAllocFloat->SweepNeedsSweeping();
+        bibopAllocFloat4->SweepNeedsSweeping();
     }
 
     void GC::EstablishSweepInvariants()
@@ -1082,6 +1091,7 @@ namespace MMgc
             noPointersFinalizedAllocs[i]->CoalesceQuickList();
         }
         bibopAllocFloat->CoalesceQuickList();
+        bibopAllocFloat4->CoalesceQuickList();
     }
 
     void GC::ClearMarkStack()
@@ -1895,6 +1905,7 @@ namespace MMgc
             noPointersFinalizedAllocs[i]->CheckFreelist();
         }
         bibopAllocFloat->CheckFreelist();
+        bibopAllocFloat4->CheckFreelist();
     }
 
     void GC::UnmarkedScan(const void *mem, size_t size)
@@ -2009,6 +2020,7 @@ namespace MMgc
             noPointersFinalizedAllocs[i]->CheckMarks();
         }
         bibopAllocFloat->CheckMarks();
+        bibopAllocFloat4->CheckMarks();
 #endif
 
 #ifdef MMGC_HEAP_GRAPH
@@ -3531,6 +3543,10 @@ namespace MMgc
             }
         }
         bibopAllocFloat->GetUsageInfo(ask, allocated);
+        totalAskSize += ask;
+        totalAllocated += allocated;
+
+        bibopAllocFloat4->GetUsageInfo(ask, allocated);
         totalAskSize += ask;
         totalAllocated += allocated;
 
