@@ -724,6 +724,8 @@ namespace avmplus
                 break;
             default:
                 // unsupported traits type -- can't happen, caught in AbcParser::parseTraits
+                id = 0;
+                info = 0;
                 AvmAssert(0);
                 break;
         }
