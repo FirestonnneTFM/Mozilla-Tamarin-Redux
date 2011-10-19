@@ -86,9 +86,9 @@ namespace nanojit
     };
 #endif
 
-    const Register Assembler::argRegs[] = { A0, A1, A2, A3 };
-    const Register Assembler::retRegs[] = { V0, V1 };
-    const Register Assembler::savedRegs[] = {
+    const Register RegAlloc::argRegs[] = { A0, A1, A2, A3 };
+    const Register RegAlloc::retRegs[] = { V0, V1 };
+    const Register RegAlloc::savedRegs[] = {
         S0, S1, S2, S3, S4, S5, S6, S7,
 #ifdef FPCALLEESAVED
         FS0, FS1, FS2, FS3, FS4, FS5
@@ -547,7 +547,7 @@ namespace nanojit
     {
         Register fr = deprecated_prepResultReg(ins, FpRegs);
         Register v = findRegFor(ins->oprnd1(), GpRegs);
-        Register ft = registerAllocTmp(FpRegs & ~(rmask(fr)));    // allocate temporary register for constant
+        Register ft = _allocator.allocTempReg(FpRegs & ~(rmask(fr)));    // allocate temporary register for constant
 
         // todo: support int value in memory, as per x86
         NanoAssert(deprecated_isKnownReg(v));
@@ -679,7 +679,7 @@ namespace nanojit
                 // register for the result and store it directly into memory.
                 NanoAssert(ins->isInAr());
                 int d = arDisp(ins);
-                dd = Assembler::registerAllocTmp(FpRegs);
+                dd = _allocator.allocTempReg(FpRegs);
                 asm_ldst64(true, dd, d, FP);
             }
 
@@ -932,7 +932,7 @@ namespace nanojit
             // first 4 args A0..A3
             if (a < 4) {
                 // incoming arg in register
-                deprecated_prepResultReg(ins, rmask(argRegs[a]));
+                deprecated_prepResultReg(ins, rmask(RegAlloc::argRegs[a]));
             } else {
                 // incoming arg is on stack
                 Register r = deprecated_prepResultReg(ins, GpRegs);
@@ -942,7 +942,7 @@ namespace nanojit
         }
         else {
             // saved param
-            deprecated_prepResultReg(ins, rmask(savedRegs[a]));
+            deprecated_prepResultReg(ins, rmask(RegAlloc::savedRegs[a]));
         }
         TAG("asm_param(ins=%p{%s})", ins, lirNames[ins->opcode()]);
     }
@@ -988,7 +988,7 @@ namespace nanojit
                     // [and  $at,$at,$rr]       if (rhsc >= 0)
                     // srl   $at,$at,31
 
-                    t = registerAllocTmp(allow);
+                    t = _allocator.allocTempReg(allow);
                     SRL(AT, AT, 31);
                     if (rhsc < 0) {
                         AND(AT, AT, t);
@@ -1023,7 +1023,7 @@ namespace nanojit
                     // [and  $at,$at,$t]        if (rhsc < 0)
                     // srl   $at,$at,31
                     if (isS16(-rhsc)) {
-                        t = registerAllocTmp(allow);
+                        t = _allocator.allocTempReg(allow);
                         SRL(AT,AT,31);
                         if (rhsc < 0) {
                             AND(AT, AT, t);
@@ -1129,7 +1129,7 @@ namespace nanojit
 
                 t = ZERO;
                 if (rr == ra || ra != rb)
-                    t = registerAllocTmp(allow);
+                    t = _allocator.allocTempReg(allow);
                 SRL(AT, AT, 31);
                 if (ra != rb) {
                     AND(AT, AT, t);
@@ -1176,7 +1176,7 @@ namespace nanojit
                     SUBU(rr, ra, rb);
                 }
                 else {
-                    t = registerAllocTmp(allow);
+                    t = _allocator.allocTempReg(allow);
                     SRL(AT, AT, 31);
                     AND(AT, AT, t);
                     if (rr == ra)
@@ -1206,7 +1206,7 @@ namespace nanojit
                 break;
             case LIR_mulxovi:
             case LIR_muljovi:
-                t = registerAllocTmp(allow);
+                t = _allocator.allocTempReg(allow);
                 // Overflow indication required
                 // Do a 32x32 signed multiply generating a 64 bit result
                 // Compare bit31 of the result with the high order bits
@@ -1273,7 +1273,7 @@ namespace nanojit
                 if (cpu_has_fpu) {
                     Register fr = value->isInReg() ? value->getReg() : findRegFor(value, FpRegs);
                     Register rbase = getBaseReg(base, dr, GpRegs);
-                    Register ft = registerAllocTmp(FpRegs & ~(rmask(fr)));
+                    Register ft = _allocator.allocTempReg(FpRegs & ~(rmask(fr)));
                     asm_ldst(OP_SWC1, ft, dr, rbase);
                     CVT_S_D(ft, fr);
                 }
@@ -1291,7 +1291,7 @@ namespace nanojit
             value, lirNames[value->opcode()], dr, base, lirNames[base->opcode()]);
     }
 
-    bool Assembler::canRemat(LIns* ins)
+    bool RegAlloc::canRemat(LIns* ins)
     {
         return ins->isImmI() || ins->isop(LIR_allocp);
     }
@@ -1709,6 +1709,17 @@ namespace nanojit
         TAG("asm_spill(rr=%d, d=%d, quad=%d)", rr, d, quad);
     }
 
+    RegisterMask 
+    RegAlloc::nRegCopyCandidates(Register r, RegisterMask allow) {
+        // MIPS doesn't support any GPR<->FPR moves
+        if(rmask(r) & GpRegs)
+            return allow & GpRegs;
+        if(rmask(r) & FpRegs)
+            return allow & FpRegs;
+        NanoAssert(false); // How did we get here?
+        return RegisterMask(0);
+    }
+    
     void
     Assembler::asm_nongp_copy(Register dst, Register src)
     {
@@ -1763,7 +1774,7 @@ namespace nanojit
 
             switch (op) {
             case LIR_calli:
-                rr = retRegs[0];
+                rr = RegAlloc::retRegs[0];
                 break;
             case LIR_calld:
                 NanoAssert(cpu_has_fpu);
@@ -1818,7 +1829,7 @@ namespace nanojit
     }
 
     Register
-    Assembler::nRegisterAllocFromSet(RegisterMask set)
+    RegAlloc::nRegisterAllocFromSet(RegisterMask set)
     {
         int n;
 
@@ -1837,19 +1848,17 @@ namespace nanojit
             n = 32 + n - 1;
         }
         Register r = { n };
-        _allocator.free &= ~rmask(r);
         TAG("nRegisterAllocFromSet(set=%016llx) => %s", set, gpn(r));
         return r;
     }
 
-    void
-    Assembler::nRegisterResetAll(RegAlloc& regs)
-    {
-        regs.clear();
-        regs.free = GpRegs;
+    RegisterMask RegAlloc::nInitManagedRegisters() {
+        RegisterMask retval = GpRegs;
         if (cpu_has_fpu)
-            regs.free |= FpRegs;
+            retval |= FpRegs;
+        return retval;
     }
+
 
 #define signextend16(s) ((int32_t(s)<<16)>>16)
 
@@ -1949,17 +1958,6 @@ namespace nanojit
 
         // return value is GuardRecord*
         TAG("nFragExit(guard=%p{%s})", guard, lirNames[guard->opcode()]);
-    }
-
-    void
-    Assembler::nInit()
-    {
-        nHints[LIR_calli]  = rmask(V0);
-#if NJ_SOFTFLOAT_SUPPORTED
-        nHints[LIR_hcalli] = rmask(V1);
-#endif
-        nHints[LIR_calld]  = rmask(FV0);
-        nHints[LIR_paramp] = PREFER_SPECIAL;
     }
 
     void Assembler::nBeginAssembly()
@@ -2064,15 +2062,35 @@ namespace nanojit
         return _nIns;
     }
 
-    RegisterMask
-    Assembler::nHint(LIns* ins)
+    const RegisterMask PREFER_SPECIAL = ~ ((RegisterMask)0);
+    // Init per-opcode register hint table.  Defaults to no hints for all instructions 
+    // (initialized to 0 )
+    static bool nHintsInit(RegisterMask Hints[])
     {
+        VMPI_memset(Hints,0,sizeof(RegisterMask)*LIR_sentinel );
+        Hints[LIR_calli]  = rmask(V0);
+#if NJ_SOFTFLOAT_SUPPORTED
+        Hints[LIR_hcalli] = rmask(V1);
+#endif
+        Hints[LIR_calld]  = rmask(FV0);
+        Hints[LIR_paramp] = PREFER_SPECIAL;
+        return true;
+    }
+
+    RegisterMask
+    RegAlloc::nHint(LIns* ins)
+    {
+        static RegisterMask  Hints[LIR_sentinel+1]; // effectively const, save for the initialization
+        static bool initialized = nHintsInit(Hints); (void)initialized; 
+        
+        RegisterMask prefer = Hints[ins->opcode()];
+        if(prefer != PREFER_SPECIAL) return prefer;
+
         NanoAssert(ins->isop(LIR_paramp));
-        RegisterMask prefer = 0;
         // FIXME: FLOAT parameters?
         if (ins->paramKind() == 0)
             if (ins->paramArg() < 4)
-                prefer = rmask(argRegs[ins->paramArg()]);
+                prefer = rmask(RegAlloc::argRegs[ins->paramArg()]);
         return prefer;
     }
 

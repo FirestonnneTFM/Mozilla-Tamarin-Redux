@@ -70,6 +70,7 @@ namespace nanojit
 #endif
 #define NJ_SOFTFLOAT_SUPPORTED          0
 #define NJ_DIVI_SUPPORTED               0
+#define firstAvailableReg(i,c,m)   nRegisterAllocFromSet(m)
 
     enum ConditionRegister {
         CR0 = 0,
@@ -174,6 +175,7 @@ namespace nanojit
         // for the optimizer
         NoSwap = { 125 }, // don't try to swap with this instruction
         NoReg = { 126 }, // dummy register
+        UnspecifiedReg        = NoReg,
 
         deprecated_UnknownReg = { 127 };    // XXX: remove eventually, see bug 538924
 
@@ -303,7 +305,9 @@ namespace nanojit
     verbose_only( extern const char* regNames[]; )
 
     #define DECLARE_PLATFORM_STATS()
-    #define DECLARE_PLATFORM_REGALLOC()
+    #define DECLARE_PLATFORM_REGALLOC()                                     \
+        const static Register argRegs[8], retRegs[2];                       \
+        Register nRegisterAllocFromSet(RegisterMask set);
 
 #ifdef NANOJIT_64BIT
     #define DECL_PPC64()\
@@ -313,7 +317,6 @@ namespace nanojit
 #endif
 
     #define DECLARE_PLATFORM_ASSEMBLER()                                    \
-        const static Register argRegs[8], retRegs[2];                       \
         void underrunProtect(int bytes);                                    \
         void nativePageReset();                                             \
         void nativePageSetup();                                             \

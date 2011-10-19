@@ -167,6 +167,7 @@ namespace nanojit
         FS4 = F28,
         FS5 = F30,
 
+        UnspecifiedReg        = { 127 },
         deprecated_UnknownReg = { 127 };    // XXX: remove eventually, see bug 538924
 
     static const uint32_t FirstRegNum = 0; // R0
@@ -258,8 +259,6 @@ namespace nanojit {
 
 // REQ: Platform specific declarations to include in Assembler class
 #define DECLARE_PLATFORM_ASSEMBLER()                                    \
-    const static Register argRegs[4];                                   \
-    const static Register retRegs[2];                                   \
     void nativePageSetup(void);                                         \
     void nativePageReset(void);                                         \
     void underrunProtect(int bytes);                                    \
@@ -286,7 +285,11 @@ namespace nanojit {
     NIns *asm_bxx(bool, LOpcode, Register, Register, NIns*);
 
 // REQ: Platform specific declarations to include in RegAlloc class
-#define DECLARE_PLATFORM_REGALLOC()
+#define firstAvailableReg(i,c,m) nRegisterAllocFromSet(m)   // custom "firstAvailableReg" implementation
+#define DECLARE_PLATFORM_REGALLOC()                                     \
+    const static Register argRegs[4];                                   \
+    const static Register retRegs[2];                                   \
+    Register nRegisterAllocFromSet(RegisterMask);
 
 // REQ:
 #define swapptrs()  do {                                                \

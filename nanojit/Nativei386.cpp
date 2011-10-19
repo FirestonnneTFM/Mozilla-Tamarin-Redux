@@ -62,9 +62,9 @@ namespace nanojit
 
     #define TODO(x) do{ verbose_only(outputf(#x);) NanoAssertMsgf(false, "%s", #x); } while(0)
 
-    const Register Assembler::argRegs[] = { rECX, rEDX };
-    const Register Assembler::retRegs[] = { rEAX, rEDX };
-    const Register Assembler::savedRegs[] = { rEBX, rESI, rEDI };
+    const Register RegAlloc::argRegs[] = { rECX, rEDX };
+    const Register RegAlloc::retRegs[] = { rEAX, rEDX };
+    const Register RegAlloc::savedRegs[] = { rEBX, rESI, rEDI };
 
     const static uint8_t max_abi_regs[] = {
         2, /* ABI_FASTCALL */
@@ -896,17 +896,23 @@ namespace nanojit
         debug_only(if (ci->returnType()==ARGTYPE_D) fpu_push();) (void)ci;
     }
 
-    void Assembler::nInit()
+    const RegisterMask PREFER_SPECIAL = ~ ((RegisterMask)0);
+    // Init per-opcode register hint table.  Defaults to no hints for all instructions 
+    // (initialized to 0 )
+    static bool nHintsInit(RegisterMask Hints[])
     {
-        nHints[LIR_calli]  = rmask(retRegs[0]);
-        nHints[LIR_calld]  = rmask(FST0);
-        nHints[LIR_paramp] = PREFER_SPECIAL;
-        nHints[LIR_immi]   = ScratchRegs;
+        VMPI_memset(Hints,0,sizeof(RegisterMask)*LIR_sentinel );
+
+        Hints[LIR_calli]  = rmask(RegAlloc::retRegs[0]);
+        Hints[LIR_calld]  = rmask(FST0);
+        Hints[LIR_paramp] = PREFER_SPECIAL;
+        Hints[LIR_immi]   = ScratchRegs;
         // Nb: Doing this with a loop future-proofs against the possibilty of
         // new comparison operations being added.
         for (LOpcode op = LOpcode(0); op < LIR_sentinel; op = LOpcode(op+1))
             if (isCmpOpcode(op))
-                nHints[op] = AllowableByteRegs;
+                Hints[op] = AllowableByteRegs;
+        return true;
     }
 
     void Assembler::nBeginAssembly() {
@@ -1002,7 +1008,7 @@ namespace nanojit
     void Assembler::asm_call(LIns* ins)
     {
         if (!ins->isop(LIR_callv)) {
-            Register rr = ( ins->isop(LIR_calld) ? FST0 : retRegs[0] );
+            Register rr = ( ins->isop(LIR_calld) ? FST0 : RegAlloc::retRegs[0] );
             prepareResultReg(ins, rmask(rr));
             evictScratchRegsExcept(rmask(rr));
         } else {
@@ -1095,7 +1101,7 @@ namespace nanojit
             ArgType ty = argTypes[j];
             Register r = UnspecifiedReg;
             if (n < max_regs && ty != ARGTYPE_D) {
-                r = argRegs[n++]; // tell asm_arg what reg to use
+                r = RegAlloc::argRegs[n++]; // tell asm_arg what reg to use
             }
             asm_arg(ty, ins->arg(j), r, stkd);
             if (!_config.i386_fixed_esp)
@@ -1110,35 +1116,14 @@ namespace nanojit
         }
     }
 
-    Register Assembler::nRegisterAllocFromSet(RegisterMask set)
-    {
-        Register r;
-        RegAlloc &regs = _allocator;
-    #ifdef _MSC_VER
-        _asm
-        {
-            mov ecx, regs
-            bsf eax, set                    // i = first bit set
-            btr RegAlloc::free[ecx], eax    // free &= ~rmask(i)
-            mov r, eax
-        }
-    #else
-        asm(
-            "bsf    %1, %%eax\n\t"
-            "btr    %%eax, %2\n\t"
-            "movl   %%eax, %0\n\t"
-            : "=m"(r) : "m"(set), "m"(regs.free) : "%eax", "memory" );
-    #endif /* _MSC_VER */
-        return r;
-    }
-
-    void Assembler::nRegisterResetAll(RegAlloc& a)
+    RegisterMask RegAlloc::nInitManagedRegisters()
     {
         // add scratch registers to our free list for the allocator
-        a.clear();
-        a.free = SavedRegs | ScratchRegs;
-        if (!_config.i386_sse2)
-            a.free &= ~XmmRegs;
+        RegisterMask retval = SavedRegs | ScratchRegs;
+        NanoAssert(_assembler);
+        if (!_assembler->_config.i386_sse2)
+            retval &= ~XmmRegs;
+        return retval;
     }
 
     void Assembler::nPatchBranch(NIns* branch, NIns* targ)
@@ -1152,18 +1137,25 @@ namespace nanojit
             NanoAssertMsg(0, "Unknown branch type in nPatchBranch");
     }
 
-    RegisterMask Assembler::nHint(LIns* ins)
+    RegisterMask RegAlloc::nHint(LIns* ins)
     {
+        static RegisterMask  Hints[LIR_sentinel+1]; // effectively const, save for the initialization
+        static bool initialized = nHintsInit(Hints); (void)initialized; 
+
+        RegisterMask prefer = Hints[ins->opcode()];
+
+        if(prefer != PREFER_SPECIAL) return prefer;
+
         NanoAssert(ins->isop(LIR_paramp));
-        RegisterMask prefer = 0;
+        NanoAssert(_assembler);
         uint8_t arg = ins->paramArg();
         if (ins->paramKind() == 0) {
-            uint32_t max_regs = max_abi_regs[_thisfrag->lirbuf->abi];
+            uint32_t max_regs = max_abi_regs[_assembler->_thisfrag->lirbuf->abi];
             if (arg < max_regs)
-                prefer = rmask(argRegs[arg]);
+                prefer = rmask(RegAlloc::argRegs[arg]);
         } else {
             if (arg < NumSavedRegs)
-                prefer = rmask(savedRegs[arg]);
+                prefer = rmask(RegAlloc::savedRegs[arg]);
         }
         return prefer;
     }
@@ -1182,7 +1174,7 @@ namespace nanojit
         return false;
     }
 
-    bool Assembler::canRemat(LIns* ins)
+    bool RegAlloc::canRemat(LIns* ins)
     {
         return ins->isImmAny() || ins->isop(LIR_allocp) || canRematLEA(ins);
     }
@@ -1431,7 +1423,7 @@ namespace nanojit
 
             if (rmask(rv) & XmmRegs) {
                 // need a scratch reg
-                Register rt = registerAllocTmp(XmmRegs);
+                Register rt = _allocator.allocTempReg(XmmRegs);
 
                 // cvt to single-precision and store
                 SSE_STSS(d, rb, rt);
@@ -1487,13 +1479,13 @@ namespace nanojit
         // an FPU reg.  Either way, avoid allocating an FPU reg just to load
         // and store it.
         if (_config.i386_sse2) {
-            Register t = registerAllocTmp(XmmRegs);
+            Register t = _allocator.allocTempReg(XmmRegs);
             SSE_STQ(dd, rd, t);
             SSE_LDQ(t, ds, rs);
         } else {
             // We avoid copying via the FP stack because it's slow and likely
             // to cause spills.
-            Register t = registerAllocTmp(GpRegs & ~(rmask(rd)|rmask(rs)));
+            Register t = _allocator.allocTempReg(GpRegs & ~(rmask(rd)|rmask(rs)));
             ST(rd, dd+4, t);
             LD(t, ds+4, rs);
             ST(rd, dd, t);
@@ -2152,10 +2144,10 @@ namespace nanojit
             // requirement of an abi.  Currently, this is 2, for ABI_FASTCALL.  See
             // the definition of max_abi_regs earlier in this file.  The following
             // assertion reflects this invariant:
-            NanoAssert(abi_regcount <= sizeof(argRegs)/sizeof(argRegs[0]));
+            NanoAssert(abi_regcount <= sizeof(RegAlloc::argRegs)/sizeof(RegAlloc::argRegs[0]));
             if (arg < abi_regcount) {
                 // Incoming arg in register.
-                prepareResultReg(ins, rmask(argRegs[arg]));
+                prepareResultReg(ins, rmask(RegAlloc::argRegs[arg]));
                 // No code to generate.
             } else {
                 // Incoming arg is on stack, and rEBP points nearby (see genPrologue()).
@@ -2165,7 +2157,7 @@ namespace nanojit
             }
         } else {
             // Saved param.
-            prepareResultReg(ins, rmask(savedRegs[arg]));
+            prepareResultReg(ins, rmask(RegAlloc::savedRegs[arg]));
             // No code to generate.
         }
         freeResourcesOf(ins);
@@ -2205,7 +2197,7 @@ namespace nanojit
                 SSE_XORPDr(r, r);
             } else if (d && d == (int)d && canClobberCCs) {
                 // can fit in 32bits? then use cvt which is faster
-                Register tr = registerAllocTmp(GpRegs);
+                Register tr = _allocator.allocTempReg(GpRegs);
                 SSE_CVTSI2SD(r, tr);
                 SSE_XORPDr(r, r);   // zero r to ensure no dependency stalls
                 asm_immi(tr, (int)d, canClobberCCs);
@@ -2528,7 +2520,7 @@ namespace nanojit
 
         Register rr = prepareResultReg(ins, FpRegs);
         if (rmask(rr) & XmmRegs) {
-            Register rt = registerAllocTmp(GpRegs);
+            Register rt = _allocator.allocTempReg(GpRegs);
 
             // Technique inspired by gcc disassembly.  Edwin explains it:
             //
@@ -2595,6 +2587,20 @@ namespace nanojit
         }
 
         freeResourcesOf(ins);
+    }
+
+    RegisterMask RegAlloc::nRegCopyCandidates(Register r, RegisterMask allow) {
+        if(rmask(r) & GpRegs)
+            return allow & GpRegs;// theoretically we could allow XmmRegs too, but asm_nongp_copy is not done. 
+        
+        if(rmask(r) & XmmRegs)// we can't allow GpRegs, even though nongp_copy works, because XMM may need the full 128bits
+            return allow & XmmRegs;
+
+        if(rmask(r) & x87Regs)
+            return allow & x87Regs;
+
+        NanoAssert(false); // How did we get here?
+        return 0;
     }
 
     void Assembler::asm_nongp_copy(Register rd, Register rs)
@@ -2888,7 +2894,7 @@ namespace nanojit
 
         LIns *val = ins->oprnd1();
         if (ins->isop(LIR_reti)) {
-            findSpecificRegFor(val, retRegs[0]);
+            findSpecificRegFor(val, RegAlloc::retRegs[0]);
         } else {
             NanoAssert(ins->isop(LIR_retd));
             findSpecificRegFor(val, FST0);
