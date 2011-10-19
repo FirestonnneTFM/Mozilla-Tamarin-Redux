@@ -608,7 +608,6 @@ var FEATURES =
     <desc> Makes all JIT code buffers read-only whenever JIT code is executing,
            to reduce the probability of heap overflow attacks. </desc>
     <name> AVMFEATURE_PROTECT_JITMEM </name>
-    <defines> AVMPLUS_JIT_READONLY </defines> <!-- fixme: Bug 536304 legacy name -->
     <defines> VMCFG_PROTECT_JITMEM </defines>
   </feature>
 
