@@ -82,8 +82,8 @@ namespace avmplus
         // downcast and unbox one arg
         void downcast_arg(int arg, int offset, LIns* env_param, LIns* args_param);
 
-        // downcast and unbox the value for the given type.
-        LIns* downcast_expr(LIns* val, Traits* t, LIns* env);
+        // downcast and unbox the value for the given type and store result in args_out
+        void downcast_and_store(LIns* val, Traits* t, LIns* env, int offset);
 
         // generate code to call the underlying method directly
         void call_method(LIns* env_param, LIns* argc_param);

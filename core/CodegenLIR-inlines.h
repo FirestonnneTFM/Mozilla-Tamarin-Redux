@@ -72,18 +72,6 @@ REALLY_INLINE LIns* CodegenLIR::ui2dIns(LIns* v)
     return lirout->ins1(LIR_ui2d, v);
 }
 
-REALLY_INLINE LIns* CodegenLIR::p2dIns(LIns* v)
-{
-#ifdef NANOJIT_64BIT
-    // Not yet implemented on 64-bit platforms.
-    (void)v;
-    AvmAssert(false);
-    return NULL;
-#else
-    return lirout->ins1(LIR_i2d, v);
-#endif
-}
-
 REALLY_INLINE LIns* CodegenLIR::binaryIns(LOpcode op, LIns *a, LIns *b)
 {
     return lirout->ins2(op,a,b);

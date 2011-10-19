@@ -81,6 +81,19 @@ REALLY_INLINE LIns* LirHelper::p2i(LIns *i)
 #endif
 }
 
+REALLY_INLINE LIns* LirHelper::p2dIns(LIns* v)
+{
+#ifdef NANOJIT_64BIT
+    // Not yet implemented on 64-bit platforms.
+    (void)v;
+    AvmAssert(false);
+    return NULL;
+#else
+    return lirout->ins1(LIR_i2d, v);
+#endif
+}
+
+
 #if NJ_SOFTFLOAT_SUPPORTED
 REALLY_INLINE LIns* LirHelper::qlo(LIns* q)
 {
