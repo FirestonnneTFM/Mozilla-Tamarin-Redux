@@ -224,7 +224,7 @@ void LirHelper::emitStart(Allocator& alloc, LirBuffer *lirbuf, LirWriter* &lirou
         LIns *p = lirout->insParam(i, 1); (void) p;
         verbose_only(if (lirbuf->printer)
             lirbuf->printer->lirNameMap->addName(p,
-                regNames[REGNUM(Assembler::savedRegs[i])]);)
+                regNames[REGNUM(RegAlloc::savedRegs[i])]);)
     }
 }
 
