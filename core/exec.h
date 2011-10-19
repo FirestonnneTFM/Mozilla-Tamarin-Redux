@@ -462,14 +462,12 @@ protected:
 
     GC_NO_DATA(MethodEnvProcHolder)
 
-#ifdef VMCFG_METHODENV_IMPL32
 private:
     union {
         GprMethodProc   _implGPR;
         FprMethodProc   _implFPR;
         GprImtThunkProc _implImtGPR;
     };
-#endif
 
 #ifdef VMCFG_AOT
 public:

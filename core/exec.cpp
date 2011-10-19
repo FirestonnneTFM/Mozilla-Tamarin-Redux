@@ -137,8 +137,6 @@ void BaseExecMgr::init(MethodInfo* m, const NativeMethodInfo* native_info)
     }
 }
 
-#ifdef VMCFG_METHODENV_IMPL32
-
 // Stub that is invoked when a methodenv is called the first time.
 // Copy the invoker pointer from the underlying method, then call there.
 uintptr_t BaseExecMgr::delegateInvoke(MethodEnv* env, int32_t argc, uint32_t *ap)
@@ -152,11 +150,6 @@ void BaseExecMgr::init(MethodEnv* env)
 {
     env->_implGPR = delegateInvoke;
 }
-#else
-// Called when MethodEnv is constructed.
-void BaseExecMgr::init(MethodEnv*)
-{}
-#endif
 
 // Called after MethodInfo is resolved.
 void BaseExecMgr::notifyMethodResolved(MethodInfo* m, MethodSignaturep ms)
@@ -333,13 +326,11 @@ void BaseExecMgr::verifyOnCall(MethodEnv* env)
 
     exec->verifyMethod(env->method, env->toplevel(), env->abcEnv());
 
-    #ifdef VMCFG_METHODENV_IMPL32
     // We got here by calling env->_implGPR, which was pointing to verifyEnterGPR/FPR,
     // but next time we want to call the real code, not verifyEnter again.
     // All other MethodEnv's in their default state will call the target method
     // directly and never go through verifyEnter().  Update the copy in MethodEnv.
     env->_implGPR = env->method->_implGPR;
-    #endif
 }
 
 // Verify the given method according to its type, with a CodeWriter
