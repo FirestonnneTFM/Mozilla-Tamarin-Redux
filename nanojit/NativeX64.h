@@ -68,6 +68,7 @@ namespace nanojit
 #define NJ_F2I_SUPPORTED                1
 #define NJ_SOFTFLOAT_SUPPORTED          0
 #define NJ_DIVI_SUPPORTED               1
+#define RA_PREFERS_LSREG                1
 
     static const Register RAX = { 0 };      // 1st int return, # of sse varargs
     static const Register RCX = { 1 };      // 4th int arg
@@ -368,7 +369,8 @@ namespace nanojit
     verbose_only( extern const char* gpRegNames8hi[]; )
 
     #define DECLARE_PLATFORM_STATS()
-    #define DECLARE_PLATFORM_REGALLOC()
+    #define DECLARE_PLATFORM_REGALLOC()                                     \
+        const static Register argRegs[NumArgRegs], retRegs[1];
 
     #define DECLARE_PLATFORM_ASSEMBLER()                                    \
         const static Register argRegs[NumArgRegs], retRegs[1];              \

@@ -105,6 +105,7 @@ namespace nanojit
     #define NJ_F2I_SUPPORTED                1
     #define NJ_SOFTFLOAT_SUPPORTED          0
     #define NJ_DIVI_SUPPORTED               1
+    #define RA_PREFERS_LSREG                1
     
         // Preserve a 16-byte stack alignment, to support the use of
         // SSE instructions like MOVDQA (if not by Tamarin itself,
@@ -153,7 +154,7 @@ namespace nanojit
     static const uint32_t FirstRegNum = 0;
     static const uint32_t LastRegNum = 16;
 
-    typedef int RegisterMask;
+    typedef uint32_t RegisterMask;
 
     static const int NumSavedRegs = 3;
     static const RegisterMask SavedRegs   = 1<<REGNUM(rEBX) | 1<<REGNUM(rEDI) | 1<<REGNUM(rESI);
@@ -181,14 +182,14 @@ namespace nanojit
 
     #define DECLARE_PLATFORM_STATS()
 
-    #define DECLARE_PLATFORM_REGALLOC()
+    #define DECLARE_PLATFORM_REGALLOC()               \
+        const static Register argRegs[2], retRegs[2];
 
     #define JCC32 0x0f
     #define JMP8  0xeb
     #define JMP32 0xe9
 
     #define DECLARE_PLATFORM_ASSEMBLER()    \
-        const static Register argRegs[2], retRegs[2]; \
         int32_t max_stk_args;\
         debug_only( int32_t _fpuStkDepth; ) \
         debug_only( int32_t _sv_fpuStkDepth; ) \
@@ -230,11 +231,13 @@ namespace nanojit
         } \
         void OPCODE2(int32_t opc2) { /* Length: 2 bytes.  */ \
             NanoAssert(unsigned(opc2) <= 0xffff); \
+            NanoAssert(unsigned(opc2) > 0xff); \
             *(--_nIns) = uint8_t(opc2); \
             *(--_nIns) = uint8_t(opc2 >> 8); \
         } \
         void OPCODE3(int32_t opc3) { /* Length: 3 bytes.  */ \
             NanoAssert(unsigned(opc3) <= 0xffffff); \
+            NanoAssert(unsigned(opc3) > 0xffff); \
             *(--_nIns) = uint8_t(opc3); \
             *(--_nIns) = uint8_t(opc3 >> 8); \
             *(--_nIns) = uint8_t(opc3 >> 16); \

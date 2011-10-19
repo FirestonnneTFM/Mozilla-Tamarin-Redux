@@ -54,9 +54,9 @@ const char* condNames[] = {"eq","ne","cs","cc","mi","pl","vs","vc","hi","ls","ge
 const char* shiftNames[] = { "lsl", "lsl", "lsr", "lsr", "asr", "asr", "ror", "ror" };
 #endif
 
-const Register Assembler::argRegs[] = { R0, R1, R2, R3 };
-const Register Assembler::retRegs[] = { R0, R1 };
-const Register Assembler::savedRegs[] = { R4, R5, R6, R7, R8, R9, R10 };
+const Register RegAlloc::argRegs[] = { R0, R1, R2, R3 };
+const Register RegAlloc::retRegs[] = { R0, R1 };
+const Register RegAlloc::savedRegs[] = { R4, R5, R6, R7, R8, R9, R10 };
 
 // --------------------------------
 // ARM-specific utility functions.
@@ -466,14 +466,6 @@ Assembler::asm_eor_imm(Register rd, Register rn, int32_t imm, int stat /* =0 */)
 // Assembler functions.
 // --------------------------------
 
-void
-Assembler::nInit()
-{
-    nHints[LIR_calli]  = rmask(retRegs[0]);
-    nHints[LIR_hcalli] = rmask(retRegs[1]);
-    nHints[LIR_paramp] = PREFER_SPECIAL;
-}
-
 void Assembler::nBeginAssembly()
 {
     max_out_args = 0;
@@ -558,7 +550,7 @@ Assembler::nFragExit(LIns* guard)
         // load R1 with Fragment *fromFrag, target fragment
         // will make use of this when calling fragenter().
         int fromfrag = int((Fragment*)_thisfrag);
-        asm_ld_imm(argRegs[1], fromfrag);
+        asm_ld_imm(RegAlloc::argRegs[1], fromfrag);
     }
 #endif
 
@@ -799,7 +791,7 @@ Assembler::asm_call(LIns* ins)
         freeResourcesOf(ins);
 #endif
     } else if (!ins->isop(LIR_callv)) {
-        prepareResultReg(ins, rmask(retRegs[0]));
+        prepareResultReg(ins, rmask(RegAlloc::retRegs[0]));
         // Immediately free the resources as we need to re-use the register for
         // the arguments.
         freeResourcesOf(ins);
@@ -886,38 +878,18 @@ Assembler::asm_call(LIns* ins)
     }
 }
 
-Register
-Assembler::nRegisterAllocFromSet(RegisterMask set)
+RegisterMask
+RegAlloc::nInitManagedRegisters()
 {
-    NanoAssert(set != 0);
-
-    // The CountLeadingZeroes function will use the CLZ instruction where
-    // available. In other cases, it will fall back to a (slower) C
-    // implementation.
-    Register r = (Register)(31-CountLeadingZeroes(set));
-    _allocator.free &= ~rmask(r);
-
-    NanoAssert(IsGpReg(r) || IsFpReg(r));
-    NanoAssert((rmask(r) & set) == rmask(r));
-
-    return r;
-}
-
-void
-Assembler::nRegisterResetAll(RegAlloc& a)
-{
-    // add scratch registers to our free list for the allocator
-    a.clear();
-    a.free =
-        rmask(R0) | rmask(R1) | rmask(R2) | rmask(R3) | rmask(R4) |
-        rmask(R5) | rmask(R6) | rmask(R7) | rmask(R8) | rmask(R9) |
-        rmask(R10) | rmask(LR);
+    RegisterMask retval = ( (RegisterMask)0x7ff) | (1<< REGNUM(LR)); // R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,LR 
+#define _config _assembler->_config
     if (ARM_VFP) {
-        a.free |=
-            rmask(D0) | rmask(D1) | rmask(D2) | rmask(D3) |
-            rmask(D4) | rmask(D5) | rmask(D6) | rmask(D7);
+#undef _config        
+        retval |= FpRegs;
     }
+    return retval;
 }
+
 
 static inline ConditionCode
 get_cc(NIns *ins)
@@ -1109,11 +1081,30 @@ Assembler::nPatchBranch(NIns* branch, NIns* target)
     }
 }
 
-RegisterMask
-Assembler::nHint(LIns* ins)
+const RegisterMask PREFER_SPECIAL = ~ ((RegisterMask)0);
+// Init per-opcode register hint table.  Defaults to no hints for all instructions 
+// (initialized to 0 )
+static bool
+nHintsInit(RegisterMask Hints[])
 {
+    VMPI_memset(Hints, 0, sizeof(RegisterMask) * LIR_sentinel );
+    Hints[LIR_calli]  = rmask(RegAlloc::retRegs[0]);
+    Hints[LIR_hcalli] = rmask(RegAlloc::retRegs[1]);
+    Hints[LIR_paramp] = PREFER_SPECIAL;
+
+    return true;
+}
+
+RegisterMask
+RegAlloc::nHint(LIns* ins)
+{
+    static RegisterMask  Hints[LIR_sentinel+1]; // effectively const, save for the initialization
+    static bool initialized = nHintsInit(Hints); (void)initialized; 
+    
+    RegisterMask prefer = Hints[ins->opcode()];
+    if(prefer != PREFER_SPECIAL) return prefer;
+
     NanoAssert(ins->isop(LIR_paramp));
-    RegisterMask prefer = 0;
     if (ins->paramKind() == 0)
         if (ins->paramArg() < 4)
             prefer = rmask(argRegs[ins->paramArg()]);
@@ -1196,7 +1187,7 @@ canRematALU(LIns *ins)
 }
 
 bool
-Assembler::canRemat(LIns* ins)
+RegAlloc::canRemat(LIns* ins)
 {
     return ins->isImmI() || ins->isop(LIR_allocp) || canRematALU(ins);
 }
@@ -1479,6 +1470,18 @@ Assembler::asm_immd(LIns* ins)
     freeResourcesOf(ins);
 }
 
+RegisterMask
+RegAlloc::nRegCopyCandidates(Register r, RegisterMask allow) {
+    if( IsGpReg(r) )
+        return allow & GpRegs;
+
+    if( IsFpReg(r) )
+        return allow & FpRegs;
+
+    NanoAssert(false); // How did we get here?
+    return 0;
+}
+
 void
 Assembler::asm_nongp_copy(Register r, Register s)
 {
@@ -1544,10 +1547,8 @@ Assembler::asm_mmq(Register rd, int dd, Register rs, int ds)
     NanoAssert(rs != IP);
     NanoAssert(rd != IP);
 
-    // Find the list of free registers from the allocator's free list and the
-    // GpRegs mask. This excludes any floating-point registers that may be on
-    // the free list.
-    RegisterMask    free = _allocator.free & AllowableFlagRegs;
+    // Find a free GPR register for temporary usage
+    Register    tmp= _allocator.allocTempRegIfAvailable(AllowableFlagRegs, R0);
 
     // Ensure that ds and dd are within the +/-4095 offset range of STR and
     // LDR. If either is out of range, adjust and modify rd or rs so that the
@@ -1576,28 +1577,12 @@ Assembler::asm_mmq(Register rd, int dd, Register rs, int ds)
     ds -= ds_adj;
     dd -= dd_adj;
 
-    if (free) {
-        // There is at least one register on the free list, so grab one for
-        // temporary use. There is no need to allocate it explicitly because
-        // we won't need it after this function returns.
-
-        // The CountLeadingZeroes utility can be used to quickly find a set bit
-        // in the free mask.
-        Register    rr = (Register)(31-CountLeadingZeroes(free));
-
-        // Note: Not every register in GpRegs is usable here. However, these
-        // registers will never appear on the free list.
-        NanoAssert((free & rmask(PC)) == 0);
-        NanoAssert((free & rmask(LR)) == 0);
-        NanoAssert((free & rmask(SP)) == 0);
-        NanoAssert((free & rmask(IP)) == 0);
-        NanoAssert((free & rmask(FP)) == 0);
-
+    if (tmp!=UnspecifiedReg) {
         // Emit the actual instruction sequence.
-        STR(IP, rd, dd+4);
-        STR(rr, rd, dd);
-        LDR(IP, rs, ds+4);
-        LDR(rr, rs, ds);
+        STR(IP , rd, dd+4);
+        STR(tmp, rd, dd);
+        LDR(IP , rs, ds+4);
+        LDR(tmp, rs, ds);
     } else {
         // There are no free registers, so fall back to using IP twice.
         STR(IP, rd, dd+4);
@@ -2780,7 +2765,7 @@ Assembler::asm_param(LIns* ins)
         // be in the first four registers (argRegs) and then on the stack.
         if (a < 4) {
             // Register argument.
-            prepareResultReg(ins, rmask(argRegs[a]));
+            prepareResultReg(ins, rmask(RegAlloc::argRegs[a]));
         } else {
             // Stack argument.
             Register r = prepareResultReg(ins, GpRegs);
@@ -2789,8 +2774,8 @@ Assembler::asm_param(LIns* ins)
         }
     } else {
         // Saved parameter.
-        NanoAssert(a < (sizeof(savedRegs)/sizeof(savedRegs[0])));
-        prepareResultReg(ins, rmask(savedRegs[a]));
+        NanoAssert(a < (sizeof(RegAlloc::savedRegs)/sizeof(RegAlloc::savedRegs[0])));
+        prepareResultReg(ins, rmask(RegAlloc::savedRegs[a]));
     }
     freeResourcesOf(ins);
 }
@@ -2848,7 +2833,7 @@ void
 Assembler::asm_jtbl(LIns* ins, NIns** table)
 {
     Register indexreg = findRegFor(ins->oprnd1(), GpRegs);
-    Register tmp = registerAllocTmp(GpRegs & ~rmask(indexreg));
+    Register tmp = _allocator.allocTempReg(GpRegs & ~rmask(indexreg));
     LDR_scaled(PC, tmp, indexreg, 2);      // LDR PC, [tmp + index*4]
     asm_ld_imm(tmp, (int32_t)table);       // tmp = #table
 }

@@ -93,6 +93,7 @@ namespace nanojit
 #define NJ_F2I_SUPPORTED                1
 #define NJ_SOFTFLOAT_SUPPORTED          1
 #define NJ_DIVI_SUPPORTED               0
+#define RA_PREFERS_MSREG                1
 
 #define NJ_CONSTANT_POOLS
 const int NJ_MAX_CPOOL_OFFSET = 4096;
@@ -139,6 +140,7 @@ static const Register
     FirstFloatReg = D0,
     LastFloatReg = D7,
 
+    UnspecifiedReg = { 32 },
     deprecated_UnknownReg = { 32 },     // XXX: remove eventually, see bug 538924
 
     // S0 overlaps with D0 and is hard-coded into i2d and u2f operations
@@ -189,7 +191,7 @@ typedef enum {
 // meaning.
 #define OppositeCond(cc)  ((ConditionCode)((unsigned int)(cc)^0x1))
 
-typedef int RegisterMask;
+typedef uint32_t RegisterMask;
 typedef struct _FragInfo {
     RegisterMask    needRestoring;
     NIns*           epilogue;
@@ -221,13 +223,16 @@ static const RegisterMask AllowableFlagRegs = 1<<R0 | 1<<R1 | 1<<R2 | 1<<R3 | 1<
 
 #define isU12(offs) (((offs) & 0xfff) == (offs))
 
-#define IsFpReg(_r)     ((rmask((Register)_r) & (FpRegs)) != 0)
-#define IsGpReg(_r)     ((rmask((Register)_r) & (GpRegs)) != 0)
+// True if this is a (managed) FP register (i.e. D0-D7 in our case)
+inline bool IsFpReg(Register _r) { return (rmask(_r) & FpRegs) != 0; }
+// True if this is a GP register (i.e. R0-R10 SP FP IP LR PC in our case)
+inline bool IsGpReg(Register _r) { return (rmask(_r) & GpRegs) != 0; }
+// True if single-precision FP register (i.e. S0)
+inline bool IsFpSReg(Register _r){ return _r == S0; } 
 #define FpRegNum(_fpr)  ((_fpr) - FirstFloatReg)
+#define FpDRegs FpRegs
 
 #define firstreg()      R0
-// only good for normal regs
-#define imm2register(c) (Register)(c-1)
 
 verbose_only( extern const char* regNames[]; )
 verbose_only( extern const char* condNames[]; )
@@ -238,7 +243,9 @@ verbose_only( extern const char* shiftNames[]; )
 
 #define DECLARE_PLATFORM_STATS()
 
-#define DECLARE_PLATFORM_REGALLOC()
+#define DECLARE_PLATFORM_REGALLOC()                                     \
+    const static Register argRegs[4], retRegs[2];                       \
+                                                                        \
 
 #ifdef DEBUG
 # define DECLARE_PLATFORM_ASSEMBLER_DEBUG()                             \
@@ -254,8 +261,6 @@ verbose_only( extern const char* shiftNames[]; )
 #define DECLARE_PLATFORM_ASSEMBLER()                                            \
                                                                                 \
     DECLARE_PLATFORM_ASSEMBLER_DEBUG()                                          \
-                                                                                \
-    const static Register argRegs[4], retRegs[2];                               \
                                                                                 \
     void        BranchWithLink(NIns* addr);                                     \
     inline void BLX(Register addr, bool chk = true);                            \
@@ -930,8 +935,8 @@ enum {
 
 #define FUITOD(_Dd,_Sm) do {                                            \
         underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(IsFpReg(_Dd) && ((_Sm) == S0));                     \
+        NanoAssert(ARM_VFP);                                            \
+        NanoAssert(IsFpReg(_Dd) && IsFpSReg(_Sm));                      \
         *(--_nIns) = (NIns)( COND_AL | (0xEB8<<16) | (FpRegNum(_Dd)<<12) | (0x2D<<6) | (0<<5) | (0x0) ); \
         asm_output("fuitod %s,%s", gpn(_Dd), gpn(_Sm));                \
     } while (0)
@@ -1020,8 +1025,8 @@ enum {
 
 #define FSITOD(_Dd,_Sm) do {                                            \
         underrunProtect(4);                                             \
-        NanoAssert(ARM_VFP);                                    \
-        NanoAssert(IsFpReg(_Dd) && ((_Sm) == S0));                     \
+        NanoAssert(ARM_VFP);                                            \
+        NanoAssert(IsFpReg(_Dd) && (IsFpSReg(_Sm)));                     \
         *(--_nIns) = (NIns)( COND_AL | (0xEB8<<16) | (FpRegNum(_Dd)<<12) | (0x2F<<6) | (0<<5) | (0x0) ); \
         asm_output("fsitod %s,%s", gpn(_Dd), gpn(_Sm));                \
     } while (0)

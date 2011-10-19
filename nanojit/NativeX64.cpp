@@ -66,15 +66,15 @@ tracing
 
 namespace nanojit
 {
-    const Register Assembler::retRegs[] = { RAX };
+    const Register RegAlloc::retRegs[] = { RAX };
 #ifdef _WIN64
-    const Register Assembler::argRegs[] = { RCX, RDX, R8, R9 };
+    const Register RegAlloc::argRegs[] = { RCX, RDX, R8, R9 };
     const static int maxArgRegs = 4;
-    const Register Assembler::savedRegs[] = { RBX, RSI, RDI, R12, R13, R14, R15 };
+    const Register RegAlloc::savedRegs[] = { RBX, RSI, RDI, R12, R13, R14, R15 };
 #else
-    const Register Assembler::argRegs[] = { RDI, RSI, RDX, RCX, R8, R9 };
+    const Register RegAlloc::argRegs[] = { RDI, RSI, RDX, RCX, R8, R9 };
     const static int maxArgRegs = 6;
-    const Register Assembler::savedRegs[] = { RBX, R12, R13, R14, R15 };
+    const Register RegAlloc::savedRegs[] = { RBX, R12, R13, R14, R15 };
 #endif
 
     const char *regNames[] = {
@@ -951,7 +951,7 @@ namespace nanojit
 
     void Assembler::asm_call(LIns *ins) {
         if (!ins->isop(LIR_callv)) {
-            Register rr = ( ins->isop(LIR_calld) ? XMM0 : retRegs[0] );
+            Register rr = ( ins->isop(LIR_calld) ? XMM0 : RegAlloc::retRegs[0] );
             prepareResultReg(ins, rmask(rr));
             evictScratchRegsExcept(rmask(rr));
         } else {
@@ -1003,7 +1003,7 @@ namespace nanojit
             LIns* arg = ins->arg(j);
             if ((ty == ARGTYPE_I || ty == ARGTYPE_UI || ty == ARGTYPE_Q) && arg_index < NumArgRegs) {
                 // gp arg
-                asm_regarg(ty, arg, argRegs[arg_index]);
+                asm_regarg(ty, arg, RegAlloc::argRegs[arg_index]);
                 arg_index++;
             }
         #ifdef _WIN64
@@ -1529,7 +1529,7 @@ namespace nanojit
         return false;
     }
 
-    bool Assembler::canRemat(LIns* ins) {
+    bool RegAlloc::canRemat(LIns* ins) {
         return ins->isImmAny() || ins->isop(LIR_allocp) || canRematLEA(ins);
     }
 
@@ -1619,6 +1619,11 @@ namespace nanojit
         findSpecificRegFor(value, r);
     }
 
+    RegisterMask RegAlloc::nRegCopyCandidates(Register r, RegisterMask allow) {
+        (void) r;
+        return allow; // can freely transfer registers among different classes
+    }
+    
     void Assembler::asm_nongp_copy(Register d, Register s) {
         if (!IsFpReg(d) && IsFpReg(s)) {
             // gpr <- xmm: use movq r/m64, xmm (66 REX.W 0F 7E /r)
@@ -1727,12 +1732,9 @@ namespace nanojit
                 break;
             }
             case LIR_std2f: {
-                Register r = findRegFor(value, FpRegs);
-                Register t = registerAllocTmp(FpRegs & ~rmask(r));
-                // Here, it is safe to call getBaseReg after registerAllocTmp
-                // because BaseRegs does not overlap with FpRegs, so getBaseReg
-                // will not allocate register |t|.
                 Register b = getBaseReg(base, d, BaseRegs);
+                Register r = findRegFor(value, FpRegs);
+                Register t = _allocator.allocTempReg(FpRegs & ~rmask(r));
 
                 MOVSSMR(t, d, b);   // store
                 CVTSD2SS(t, r);     // cvt to single-precision
@@ -1826,7 +1828,7 @@ namespace nanojit
             // For non-zero floats the best thing is to put the equivalent
             // 64-bit integer into a scratch GpReg and then move it into the
             // appropriate FpReg.
-            Register rt = registerAllocTmp(GpRegs);
+            Register rt = _allocator.allocTempReg(GpRegs);
             MOVQXR(r, rt);
             asm_immq(rt, v, canClobberCCs);
         }
@@ -1839,7 +1841,7 @@ namespace nanojit
             // Ordinary param.  First four or six args always in registers for x86_64 ABI.
             if (a < (uint32_t)NumArgRegs) {
                 // incoming arg in register
-                prepareResultReg(ins, rmask(argRegs[a]));
+                prepareResultReg(ins, rmask(RegAlloc::argRegs[a]));
                 // No code to generate.
             } else {
                 // todo: support stack based args, arg 0 is at [FP+off] where off
@@ -1849,7 +1851,7 @@ namespace nanojit
         }
         else {
             // Saved param.
-            prepareResultReg(ins, rmask(savedRegs[a]));
+            prepareResultReg(ins, rmask(RegAlloc::savedRegs[a]));
             // No code to generate.
         }
         freeResourcesOf(ins);
@@ -1930,8 +1932,12 @@ namespace nanojit
             //   mov   gt, 0x8000000000000000
             //   mov   rt, gt
             //   xorps rr, rt
-            Register rt = registerAllocTmp(FpRegs & ~(rmask(ra)|rmask(rr)));
-            Register gt = registerAllocTmp(GpRegs);
+
+            // NOTE: we can use allocTempReg, since we allocate from different classes,
+            // AND all the called functions (asm_immq, asm_immi) don't alloc/inspect the regstate
+            // But this is arguably dangerous (some called function may change in the future), 
+            Register rt = _allocator.allocTempReg(FpRegs & ~(rmask(ra)|rmask(rr)));
+            Register gt = _allocator.allocTempReg(GpRegs);
             XORPS(rr, rt);
             MOVQXR(rt, gt);
             asm_immq(gt, negateMask[0], /*canClobberCCs*/true);
@@ -2008,13 +2014,12 @@ namespace nanojit
         return _nIns;
     }
 
-    void Assembler::nRegisterResetAll(RegAlloc &a) {
+    RegisterMask RegAlloc::nInitManagedRegisters() {
         // add scratch registers to our free list for the allocator
-        a.clear();
 #ifdef _WIN64
-        a.free = 0x001fffcf; // rax-rbx, rsi, rdi, r8-r15, xmm0-xmm5
+        return 0x001fffcf; // rax-rbx, rsi, rdi, r8-r15, xmm0-xmm5
 #else
-        a.free = 0xffffffff & ~(1<<REGNUM(RSP) | 1<<REGNUM(RBP));
+        return 0xffffffff & ~(1<<REGNUM(RSP) | 1<<REGNUM(RBP));
 #endif
     }
 
@@ -2043,26 +2048,6 @@ namespace nanojit
             return;         // don't patch
         }
         ((int32_t*)next)[-1] = int32_t(target - next);
-    }
-
-    Register Assembler::nRegisterAllocFromSet(RegisterMask set) {
-    #if defined _MSC_VER
-        DWORD tr;
-        _BitScanForward(&tr, set);
-        Register r = { tr };
-        _allocator.free &= ~rmask(r);
-        return r;
-    #else
-        // gcc asm syntax
-        uint32_t regnum;
-        asm("bsf    %1, %%eax\n\t"
-            "btr    %%eax, %2\n\t"
-            "movl   %%eax, %0\n\t"
-            : "=m"(regnum) : "m"(set), "m"(_allocator.free) : "%eax", "memory");
-        (void)set;
-        Register r = { regnum };
-        return r;
-    #endif
     }
 
     void Assembler::nFragExit(LIns *guard) {
@@ -2096,10 +2081,15 @@ namespace nanojit
         asm_immq(RAX, uintptr_t(lr), /*canClobberCCs*/true);
     }
 
-    void Assembler::nInit() {
-        nHints[LIR_calli]  = rmask(retRegs[0]);
-        nHints[LIR_calld]  = rmask(XMM0);
-        nHints[LIR_paramp] = PREFER_SPECIAL;
+    const RegisterMask PREFER_SPECIAL = ~ ((RegisterMask)0);
+    // Init per-opcode register hint table.  
+    static bool nHintsInit(RegisterMask Hints[])
+    {
+        VMPI_memset(Hints,0,sizeof(RegisterMask)*LIR_sentinel );
+        Hints[LIR_calli]  = rmask(RegAlloc::retRegs[0]);
+        Hints[LIR_calld]  = rmask(XMM0);
+        Hints[LIR_paramp] = PREFER_SPECIAL;
+        return true;
     }
 
     void Assembler::nBeginAssembly() {
@@ -2146,10 +2136,16 @@ namespace nanojit
     #endif
     }
 
-    RegisterMask Assembler::nHint(LIns* ins)
+    RegisterMask RegAlloc::nHint(LIns* ins)
     {
+        static RegisterMask  Hints[LIR_sentinel+1]; // effectively const, save for the initialization
+        static bool initialized = nHintsInit(Hints); (void)initialized; 
+
+        RegisterMask prefer = Hints[ins->opcode()];
+
+        if(prefer != PREFER_SPECIAL) return prefer;
+
         NanoAssert(ins->isop(LIR_paramp));
-        RegisterMask prefer = 0;
         uint8_t arg = ins->paramArg();
         if (ins->paramKind() == 0) {
             if (arg < maxArgRegs)
@@ -2200,7 +2196,7 @@ namespace nanojit
             JMPX(indexreg, table);
         } else {
             // don't use R13 for base because we want to use mod=00, i.e. [index*8+base + 0]
-            Register tablereg = registerAllocTmp(GpRegs & ~(rmask(indexreg)|rmask(R13)));
+            Register tablereg =  _allocator.allocTempReg(GpRegs & ~(rmask(indexreg)|rmask(R13)));
             // jmp [indexreg*8 + tablereg]
             JMPXB(indexreg, tablereg);
             // tablereg <- #table
