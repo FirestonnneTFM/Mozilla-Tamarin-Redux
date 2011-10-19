@@ -196,13 +196,25 @@ namespace MMgc
 #endif
     }
 
-    REALLY_INLINE void* GC::AllocFloat()
+    REALLY_INLINE void* GC::AllocBibop(GCAlloc* bibopAlloc)
     {
 #if !defined _DEBUG && !defined AVMPLUS_SAMPLER && !defined MMGC_MEMORY_PROFILER
-        return GetUserPointer(bibopAllocFloat->Alloc(/*flags*/0));
+        return GetUserPointer(bibopAlloc->Alloc(/*flags*/0));
 #else
-        return AllocFloatSlow();
+        return AllocSlow(bibopAlloc);
 #endif
+    }
+
+    template<>
+    REALLY_INLINE void* GC::AllocBibopType<avmplus::AtomConstants::kBibopFloatType>()
+    {
+        return AllocBibop(bibopAllocFloat);
+    }
+
+    template<>
+    REALLY_INLINE void* GC::AllocBibopType<avmplus::AtomConstants::kBibopFloat4Type>()
+    {
+        return AllocBibop(bibopAllocFloat4);
     }
 
     // For AllocExtra the trick is that we can compute (size|extra) quickly without risk of overflow

@@ -661,14 +661,20 @@ namespace MMgc
          * non-finalizable non-rc non-zeroed object (a box for an IEEE double).
          */
         void* AllocDouble();
-        void* AllocFloat();
+
+        /* Bibop-type allocators */
+        void* AllocBibop(GCAlloc* bibopAlloc);
+        template<uint8_t bibopType> void* AllocBibopType();
+
+#define  AllocFloat     AllocBibopType<avmplus::AtomConstants::kBibopFloatType>
+#define  AllocFloat4    AllocBibopType<avmplus::AtomConstants::kBibopFloat4Type>
 
 #if defined _DEBUG || defined AVMPLUS_SAMPLER || defined MMGC_MEMORY_PROFILER
         /**
          * The actual allocator in situations where there's a lot of singing and
          * dancing around book-keeping.
          */
-        void* AllocFloatSlow();
+        void* AllocSlow(GCAlloc* bibopAlloc);
 #endif
 
         /**
@@ -1603,6 +1609,7 @@ namespace MMgc
         GCAlloc *noPointersNonfinalizedAllocs[kNumSizeClasses];       // Non-RC non-finalized objects not containing pointers
         GCAlloc *noPointersFinalizedAllocs[kNumSizeClasses];          // Non-RC finalized objects not containing pointers
         GCAlloc *bibopAllocFloat;
+        GCAlloc *bibopAllocFloat4;
         GCLargeAlloc *largeAlloc;
         GCHeap *heap;
 
