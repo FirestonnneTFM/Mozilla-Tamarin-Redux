@@ -3039,6 +3039,8 @@ namespace avmplus
             return promoteNumberIns(in, index);
         } else {
             // * -> Number
+            // Note that another version of this code exists in InvokerCompiler::downcast_and_store, if we make
+            // changes here they might need to be propagated there too.
             #ifdef VMCFG_FASTPATH_FROMATOM
             if (inlineFastpath) {
                 //     double rslt;

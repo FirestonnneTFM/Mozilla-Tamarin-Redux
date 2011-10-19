@@ -218,8 +218,7 @@ namespace avmplus
         BuiltinType bt = ms->paramTraitsBT(i);
         if (bt != BUILTIN_any) {
             LIns* atom = ldp(args_param, i*sizeof(Atom), ACCSET_OTHER);
-            LIns* native = downcast_expr(atom, ms->paramTraits(i), env_param);
-            lirout->insStore(native, args_out, offset, ACCSET_OTHER);
+            downcast_and_store(atom, ms->paramTraits(i), env_param, offset);
         } else if (copyArgs()) {
             LIns* atom = ldp(args_param, i*sizeof(Atom), ACCSET_OTHER);
             lirout->insStore(atom, args_out, offset, ACCSET_OTHER);
@@ -353,31 +352,106 @@ namespace avmplus
         retp(nativeToAtom(result, ms->returnTraits()));
     }
 
-    LIns* InvokerCompiler::downcast_expr(LIns* atom, Traits* t, LIns* env)
+    void InvokerCompiler::downcast_and_store(LIns* atom, Traits* t, LIns* env, int offset)
     {
-        switch (bt(t)) {
+        LIns *native;
+        BuiltinType b = bt(t);
+        switch (b) {
         case BUILTIN_object:
             // return (atom == undefinedAtom) ? nullObjectAtom : atom;
-            return choose(eqp(atom, undefinedAtom), nullObjectAtom, atom);
+            native = choose(eqp(atom, undefinedAtom), nullObjectAtom, atom);
+            break;
         case BUILTIN_int:
-            return i2p(callIns(FUNCTIONID(integer), 1, atom));
         case BUILTIN_uint:
-            return ui2p(callIns(FUNCTIONID(toUInt32), 1, atom));
+            {
+                //     int tag = atom & kAtomTypeMask;
+                //     if(tag == kIntptrType)
+                //        args[i] == atom >> kAtomTypeSize;
+                //     else
+                //        args[i] = isInt ? integer(atmo) : toUint32(atom);
+                LIns* tag = andp(atom, AtomConstants::kAtomTypeMask);
+                LIns* slow_br = lirout->insBranch(LIR_jf, eqp(tag, InsConstAtom(AtomConstants::kIntptrType)), NULL);
+                LIns* ival = p2i(rshp(atom, AtomConstants::kAtomTypeSize));
+                native = BUILTIN_int == b ? i2p(ival) : ui2p(ival);
+                stp(native, args_out, offset, ACCSET_OTHER);
+                LIns* fast_br = lirout->insBranch(LIR_j, NULL, NULL);
+                slow_br->setTarget(label());
+                native = BUILTIN_int == b ? i2p(callIns(FUNCTIONID(integer), 1, atom)) : ui2p(callIns(FUNCTIONID(toUInt32), 1, atom));
+                stp(native, args_out, offset, ACCSET_OTHER);
+                fast_br->setTarget(label());
+                return;
+            }
         case BUILTIN_number:
-            return callIns(FUNCTIONID(number), 1, atom);
+            {
+                // Based on code from CodegenLIR::coerceToNumber.
+                // * -> Number
+#ifdef VMCFG_FASTPATH_FROMATOM
+                //     double rslt;
+                //     intptr_t val = CONVERT_TO_ATOM(arg);
+                //     if ((val & kAtomTypeMask) != kIntptrType) goto not_intptr;   # test for kIntptrType tag
+                //     # kIntptrType
+                //     rslt = double(val >> kAtomTypeSize);                         # extract integer value and convert to double
+                //     goto done;
+                // not_intptr:
+                //     if ((val & kAtomTypeMask) != kDoubleType) goto not_double;   # test for kDoubleType tag
+                //     # kDoubleType
+                //     rslt = *(val - kDoubleType);                                 # remove tag and dereference
+                //     goto done;
+                // not_double:
+                //     rslt = number(val);                                          # slow path -- call helper
+                // done:
+                //     result = rslt;
+                LIns* tag = andp(atom, AtomConstants::kAtomTypeMask);
+                // kIntptrType
+                LIns* not_intptr = lirout->insBranch(LIR_jf, eqp(tag, AtomConstants::kIntptrType), NULL);
+                // Note that this works on 64bit platforms only if we are careful
+                // to restrict the range of intptr values to those that fit within
+                // the integer range of the double type.
+                std(p2dIns(rshp(atom, AtomConstants::kAtomTypeSize)), args_out, offset, ACCSET_OTHER);
+                LIns* fast_path_exit1 = lirout->insBranch(LIR_j, NULL, NULL);
+                not_intptr->setTarget(label());
+                // kDoubleType
+                LIns* not_double = lirout->insBranch(LIR_jf, eqp(tag, AtomConstants::kDoubleType), NULL);
+                std(ldd(subp(atom, AtomConstants::kDoubleType), 0, ACCSET_OTHER), args_out, offset, ACCSET_OTHER);
+                LIns* fast_path_exit2 = lirout->insBranch(LIR_j, NULL, NULL);
+                not_double->setTarget(label());
+                std(callIns(FUNCTIONID(number), 1, atom), args_out, offset, ACCSET_OTHER);
+                LIns* done = label();
+                fast_path_exit1->setTarget(done);
+                fast_path_exit2->setTarget(done);
+                return;
+#else
+                native = callIns(FUNCTIONID(number), 1, atom);
+#endif
+            }            
+            break;
         case BUILTIN_boolean:
-            return ui2p(callIns(FUNCTIONID(boolean), 1, atom));
+            {
+                LIns* tag = andp(atom, AtomConstants::kAtomTypeMask);
+                LIns* not_bool = lirout->insBranch(LIR_jf, eqp(tag, AtomConstants::kBooleanType), NULL);
+                stp(rshp(atom, AtomConstants::kAtomTypeSize), args_out, offset, ACCSET_OTHER);
+                LIns* fast_path_exit = lirout->insBranch(LIR_j, NULL, NULL);
+                not_bool->setTarget(label());
+                stp(ui2p(callIns(FUNCTIONID(boolean), 1, atom)), args_out, offset, ACCSET_OTHER);
+                fast_path_exit->setTarget(label());
+                return;
+            }
+            break;
         case BUILTIN_string:
-            return callIns(FUNCTIONID(coerce_s), 2, InsConstPtr(t->core), atom);
+            native = callIns(FUNCTIONID(coerce_s), 2, InsConstPtr(t->core), atom);
+            break;
         case BUILTIN_namespace:
-            return andp(callIns(FUNCTIONID(coerce), 3, env, atom, InsConstPtr(t)), ~7);
+            native = andp(callIns(FUNCTIONID(coerce), 3, env, atom, InsConstPtr(t)), ~AtomConstants::kAtomTypeMask);
+            break;
         case BUILTIN_void:
         case BUILTIN_null:
         case BUILTIN_any:
             AvmAssert(false);
         default:
-            return downcast_obj(atom, env, t);
+            native = downcast_obj(atom, env, t);
+            break;
         }
+        lirout->insStore(native, args_out, offset, ACCSET_OTHER);
     }
 
 #ifdef NJ_VERBOSE

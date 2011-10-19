@@ -130,6 +130,7 @@ namespace avmplus
         LIns* i2p(LIns* i);             // 32bit: nop, 64bit: l2q(i)
         LIns* ui2p(LIns* u);             // 32bit: nop, 64bit: ul2uq(i)
         LIns* p2i(LIns* ptr);           // 32bit: nop, 64bit: q2l(ptr)
+        LIns* p2dIns(LIns* v);
         LIns* InsConst(int32_t c);
         LIns* InsConstPtr(const void *p);
         LIns* InsConstAtom(Atom c);
