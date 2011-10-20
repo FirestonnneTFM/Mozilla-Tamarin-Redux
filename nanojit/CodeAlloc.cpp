@@ -59,6 +59,9 @@ namespace nanojit
     static const int pagesPerAlloc = 16;
 #endif
 
+    // Sanity checks that should remain enabled in release builds.
+    #define ABORT_UNLESS(cond) do { NanoAssert(cond); if (!(cond)) VMPI_abort(); } while(0)
+
     CodeAlloc::CodeAlloc()
         : heapblocks(0)
         , availblocks(0)
@@ -162,6 +165,9 @@ namespace nanojit
             }
 
             // break block into 2 pieces, returning the lower portion to the free list
+            ABORT_UNLESS(b->higher->lower == b);
+            ABORT_UNLESS(b->terminator->end == 0);
+            ABORT_UNLESS(b->terminator->terminator == 0);
             CodeList* higher = b->higher;
             b->end = (NIns*) ( (uintptr_t)b->end - consume );
             CodeList* b1 = b->higher;
@@ -199,6 +205,8 @@ namespace nanojit
             CodeList* lower = blk->lower;
             CodeList* higher = blk->higher;
             already_on_avail_list = lower->size() >= minAllocSize;
+            ABORT_UNLESS(lower->higher == blk);
+            ABORT_UNLESS(higher->lower == blk);
             lower->higher = higher;
             higher->lower = lower;
             blk = lower;
@@ -231,6 +239,8 @@ namespace nanojit
             }
 
             // combine blk->higher into blk (destroy coalescedBlock)
+            ABORT_UNLESS(coalescedBlock->higher->lower == coalescedBlock);
+            ABORT_UNLESS(coalescedBlock->lower->higher == coalescedBlock);
             blk->higher = higher;
             higher->lower = blk;
         }
