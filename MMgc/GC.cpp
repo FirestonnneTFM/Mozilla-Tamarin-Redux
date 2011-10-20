@@ -1007,12 +1007,14 @@ namespace MMgc
 
     void GC::SignalDependentAllocation(size_t nbytes)
     {
+        GCAssertMsg(onThread(), "SignalDependentAllocation can only be called on the currently entered GC");
         policy.signalDependentAllocation(nbytes);
         SignalAllocWork(nbytes);
     }
 
     void GC::SignalDependentDeallocation(size_t nbytes)
     {
+        GCAssertMsg(onThread(), "SignalDependentDeallocation can only be called on the currently entered GC");
         policy.signalDependentDeallocation(nbytes);
         SignalFreeWork(nbytes);
     }
