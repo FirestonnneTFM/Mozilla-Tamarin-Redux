@@ -4542,9 +4542,11 @@ namespace avmplus
         LIns* arrayData = loadIns(LIR_ldp, int32_t(arrayDataOffset), localGetp(objIndexOnStack), ACCSET_OTHER, LOAD_NORMAL);
         LIns* arrayLen = loadIns(LIR_ldi, int32_t(lenOffset), arrayData, ACCSET_OTHER, LOAD_NORMAL);
         LIns* cmp = binaryIns(LIR_geui, index, arrayLen);
+        suspendCSE();
         branchToLabel(LIR_jf, cmp, begin_label);
         callIns(helper, 2, localGetp(objIndexOnStack), index);
         emitLabel(begin_label);
+        resumeCSE();
         LIns* valOffset = binaryIns(LIR_addp, arrayData, ui2p(binaryIns(LIR_lshi, index, InsConst(scale))));
         LIns* value = loadIns(load_item, int32_t(entriesOffset), valOffset, ACCSET_OTHER, LOAD_NORMAL);
 
@@ -4702,6 +4704,7 @@ namespace avmplus
         LIns* arrayData = loadIns(LIR_ldp, int32_t(arrayDataOffset), localGetp(objIndexOnStack), ACCSET_OTHER, LOAD_NORMAL);
         LIns* arrayLen = loadIns(LIR_ldi, int32_t(lenOffset), arrayData, ACCSET_OTHER, LOAD_NORMAL);
         LIns* cmp = binaryIns(LIR_geui, index, arrayLen);
+        suspendCSE();
         branchToLabel(LIR_jf, cmp, begin_label);
         callIns(helper, 3, localGetp(objIndexOnStack), index, value);
         branchToLabel(LIR_j, NULL, end_label);
@@ -4709,6 +4712,7 @@ namespace avmplus
         LIns *valOffset = binaryIns(LIR_addp, arrayData, ui2p(binaryIns(LIR_lshi, index, InsConst(scale))));
         storeIns(store_item, value, int32_t(entriesOffset), valOffset, ACCSET_OTHER);
         emitLabel(end_label);
+        resumeCSE();
     }
 
     // Generate code for 'obj[index] = value' where index is a signed or unsigned integer type, or a double.
