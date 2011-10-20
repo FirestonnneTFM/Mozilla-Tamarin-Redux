@@ -1077,6 +1077,7 @@
     METHOD(ENVADDR(MethodEnv::getsuper), SIG3(A,P,A,P), getsuper)
     METHOD(COREADDR(AvmCore::throwAtom), SIG2(V,P,A), throwAtom)
     PUREFUNCTION(FUNCADDR(MathUtils::mod), SIG2(F,F,F), mod)
+    PUREFUNCTION(FUNCADDR(MathUtils::abs), SIG1(F,F), Math_abs)
     PUREFUNCTION(FUNCADDR(MathUtils::acos), SIG1(F,F), Math_acos)
     PUREFUNCTION(FUNCADDR(MathUtils::asin), SIG1(F,F), Math_asin)
     PUREFUNCTION(FUNCADDR(MathUtils::atan), SIG1(F,F), Math_atan)
