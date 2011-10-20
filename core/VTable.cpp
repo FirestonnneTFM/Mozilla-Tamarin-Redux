@@ -210,6 +210,11 @@ namespace avmplus
 
         PoolObject* traitsPool = this->traits->pool;
 
+        // See comments in VectorClass.h: the lookup of the ctraits under the class name is
+        // redundant, because the ctraits are never registered.  That's mostly OK: the call to
+        // newParameterizedVTable is guarded by its caller, getTypedVectorClass, and is never
+        // invoked more than once on any param_traits for the same factory.
+
         Stringp classname = core->internString(fullname->appendLatin1("$"));
         Traits* ctraits = core->domainMgr()->findTraitsInPoolByNameAndNS(traitsPool, classname, traitsNs);
         Traits* itraits;
@@ -226,6 +231,7 @@ namespace avmplus
         }
         else
         {
+            // Never happens
             itraits = ctraits->itraits;
         }
 

@@ -41,6 +41,210 @@
 #ifndef __avmplus_VectorClass__
 #define __avmplus_VectorClass__
 
+/* Documentation on the structure of the Vector code in Tamarin (2011-10-20).
+ *
+ *
+ * Five components: AS3, ABC, ASC, verifier, runtime.  These interact in various ways and a
+ * linear narrative is not possible.
+ *
+ *
+ * On the AS3 side we have this (core/Vector.as, core/VectorImpl.as):
+ *
+ *   package __AS3__.vec 
+ *   {
+ *     class Vector ...
+ *     class Vector$int ...
+ *     class Vector$uint ...
+ *     class Vector$double ...
+ *     class Vector$object ...
+ *   }
+ *
+ * The namespace "__AS3__.vec" is an artifact of a time when we did not have good API
+ * versioning and could not introduce new top-level names without the risk of breaking
+ * existing code.  Today we would probably have made "Vector" public & versioned.
+ *
+ * "Vector" is public in its package but cannot be instantiated (a run-time error is thrown)
+ * and has no members.  It is possible to capture its value and use it as part of a type 
+ * application, eg, "var v=Vector; new v.<int>" will create a Vector.<int>.  It's also 
+ * referenced in code using the APPLYTYPE instruction and CONSTANT_TypeName multiname kind (below).
+ *
+ * Vector$int, Vector$uint, Vector$double, and Vector$object are not public in their package.
+ * They represent Vector.<int>, Vector.<uint>, Vector.<Number>, and Vector.<*> respectively;
+ * the first three special cases are provided in order to specialize the representation
+ * and the last is a catch-all.
+ *
+ * The Vector$int etc bindings are artifacts of an older design and are kept around for the
+ * sake of backward compatibility with existing bytecode, which referenced those names
+ * directly (see ASC notes below).
+ *
+ * The object resulting from the expression "Vector.<int>" is the same object as the Vector$int
+ * object in the __AS3__.vec package, ditto for the other three base types.  Note carefully
+ * that Vector$object maps to Vector.<*> and that Vector.<Object> is different.  (Vector$object
+ * should really have been called Vector$any.)
+ *
+ * For other base types than int, uint, Number, and * the VM synthesizes new Vector classes at
+ * run-time.  The new classes are effectively clones of Vector$object, but their class objects
+ * are distinct from the object held in Vector$object.
+ *
+ *
+ * ASC:
+ *
+ * If AS3 code references the name "Vector" and Vector is not bound lexically in the compilation
+ * unit then ASC will generate code that opens the namespace "__AS3__.vec" so that the "Vector"
+ * binding becomes available.
+ *
+ * The current ASC - unlike older ASC - does not reference the Vector$int etc names directly,
+ * instead it emits the APPLYTYPE instruction and the CONSTANT_TypeName multiname kind to
+ * reference parameterized types in expression and type contexts, respectively.
+ *
+ * 
+ * ABC and verification:
+ *
+ * The ABC instruction APPLYTYPE creates a class object for a type application T0.<T1,...>.
+ * It's a general instruction.  APPLYTYPE is effectively implemented as an a call to the 
+ * applyTypeArgs() virtual on avmplus::ScriptObject.
+ *
+ * APPLYTYPE does not have any interesting verification constraints, all the checking is
+ * done at runtime (see below); basically the factory must be Vector and there must be one
+ * type argument.
+ *
+ * The ABC multiname kind CONSTANT_TypeName references an instantiated type and comprises a
+ * base type (a factory), an argument count, and a number of arguments, all of which must be
+ * multinames.
+ *
+ * The AbcParser checks that there is exactly one type parameter for CONSTANT_TypeName, this
+ * simplifies the representation of Multiname as it only has to support the special case.
+ * This constraint can be lifted later without invalidating existing code or needing to introduce
+ * a new instruction for the general case.
+ *
+ * CONSTANT_TypeName names will eventually end up being passed through PoolObject::resolveParameterizedType,
+ * which will fail (return NULL) if the base type is not Vector.  That will in turn lead to a
+ * verification error, at least in type contexts (called from resolveTypeName).
+ *
+ * In sum, only Vector.<T> for exactly one T is supported at this time through a combination
+ * of checks.
+ *
+ * 
+ * Runtime.
+ * 
+ * APPLYTYPE ends up in VectorClass::applyTypeArgs(), which checks that there's one parameter 
+ * and that it is NULL (representing *) or a normal class object and fails otherwise with
+ * a VerifyError (that is a weird error but it's a fact of life at this point).  APPLYTYPE
+ * then delegates to VectorClass::getTypedVectorClass().
+ *
+ * When Vector is instantiated in VectorClass::getTypedVectorClass() and a new Vector type must
+ * be created then the new class is stored in a table in the Domain of the factory, the key
+ * to the table is the string "Vector.<T>" where "T" is the full formatted name of the
+ * parameter class.  The table is used by getTypedVectorClass() to ensure that only one type is
+ * instantiated per class parameter.  getTypedVectorClass() has special cases for base types
+ * int, uint, Number, and *: in those cases the built-in classes Vector$int, etc are returned.
+ *
+ * Issues with getTypedVectorClass: The string-based mechanism feels a little clunky, and it's not
+ * obvious that a table in Domain is correct, it should probably be in DomainEnv.
+ *
+ * CONSTANT_TypeName triggers invocations of PoolObject::resolveParameterizedType(), which must
+ * create Traits objects corresponding to the parameterized types.  These are stored with the
+ * "loaded" traits in the Domain, again the key is the string "Vector.<T>" where "T" is the full
+ * formatted name of the parameter class, and again there are special cases for instantiations
+ * corresponding to the built-in Vector instantiations Vector$int etc.
+ *
+ *
+ * On the C++ side we have these two hierarchies:
+ *
+ *   ClassClosure
+ *     VectorClass
+ *       TypedVectorClassBase
+ *         TypedVectorClass<T>
+ *           IntVectorClass = TypedVectorClass<IntVectorObject>
+ *           UIntVectorClass = TypedVectorClass<UintVectorObject>
+ *           DoubleVectorClass = TypedVectorClass<DoubleVectorObject>
+ *           ObjectVectorClass = TypedVectorClass<ObjectVectorObject>
+ *
+ *    ScriptObject
+ *      VectorBaseObject
+ *        TypedVectorObject<T>
+ *          IntVectorObject = TypedVectorObject< DataList<int32_t> >
+ *          UIntVectorObject = TypedVectorObject< DataList<uint32_t> >
+ *          DoubleVectorObject = TypedVectorObject< DataList<double> >
+ *          ObjectVectorObject = TypedVectorObject< AtomList >
+ *
+ * IntVectorClass corresponds to Vector$int, etc, and IntVectorObject corresponds to instances of
+ * Vector$int, ect, with the wrinkle that ObjectVectorClass and ObjectVectorObject are also
+ * used internally to represent classes and instances for dynamically instantiated classes,
+ * ie Vector.<T> for T not int, uint, Number, or *.
+ *
+ * The Toplevel's builtin class manifest has getters, get_VectorClass(), get_Vector_intClass(), etc,
+ * to return the unique instances representing Vector, Vector$int, etc.  The traits for those
+ * classes are stored on the AvmCore: traits.vectorint_itraits, etc.
+ *
+ *
+ * There are several workhorse methods:
+ *
+ *  VectorClass::getTypedVectorClass      ->  ClassClosure*
+ *    Resolves to the vector Class object given the Class object for the parameter type.
+ *    Calls newParameterizedVTable.
+ *
+ *  VTable::newParameterizedVTable        ->  VTable*
+ *    Orchestrates building new VTable, ITraits, and CTraits for a new Vector type, reusing
+ *    any existing ITraits and CTraits.  Calls newParameterizedCTraits and resolveParameterizedType.
+ *
+ *  PoolObject::resolveParameterizedType  ->  Traits*
+ *    Resolves to the instance traits, ie, "Vector.<T>", used to handle CONSTANT_TypeName.
+ *    (Can return NULL if the factory is not Vector.)  Calls newParameterizedITraits.
+ *
+ *  Traits::newParameterizedITraits       ->  Traits*
+ *    Creates a Traits representing a Vector.<T> instance
+ *
+ *  Traits::newParameterizedCTraits       ->  Traits*
+ *    Creates a Traits representing the Vector.<T> class
+ *
+ * When the traits for a new Vector type has been created it is added to the set of loaded traits
+ * in the domain under the name "Vector.<T>$".
+ *
+ *
+ * Consider APPLYTYPE VectorClass, T:
+ *
+ *   - VectorClass::applyTypeArgs does some error checking and tail-calls VectorClass::getTypedVectorClass
+ *   - VectorClass::getTypedVectorClass looks for a cached class object in the Domain
+ *   - If found return it
+ *   - If not found:
+ *     - newParameterizedVTable is called with fullname="Vector.<T>"
+ *       - Call DomainMgr::findTraitsInPoolByNameAndNS to look for a loaded trait for "Vector.<T>$"
+ *         - If not found then create ctraits and itraits
+ *           - That will register the itraits (in resolveParameterizedType) but not the ctraits
+ *              [[[ The CTraits are never registered.  The lookup is redundant, I think,
+ *                  for that reason.  That's OK, because the call to newParameterizedVTable
+ *                  is guarded by the lookup in getTypedVectorClass, so we make one lookup
+ *                  that fails but that's all.  I've left a comment in the code.  ]]]
+ *       - Create and initialize a new vtable based on the ctraits/itraits
+ *       - return the vtable
+ *     - a new instance of ObjectVectorClass is created and initialized
+ *     - the new instance is registered with the Domain
+ *     - return the new instance
+ *
+ *
+ * Consider CONSTANT_TypeName VectorClass, T:
+ *
+ *   - PoolObject::resolveParameterizedType is called to resolve the type and return an itraits
+ *     - Call DomainMgr::findTraitsInPoolByNameAndNS to look for a loaded itrait for "Vector.<T>"
+ *       - If not found then create it and register it
+ *       - return it
+ *
+ * From all of that it follows that CONSTANT_TypeName and APPLYTYPE communicate about itraits via the
+ * domain manager, and itraits are stored as loaded traits in the domain.  
+ *
+ *
+ * Questions to resolve in the future (not all of these are hard, necessarily):
+ *
+ * Q: When does a traits represent a parameterized class, or an instance of a parameterized class?
+ *    Ie, how do we recognize it in C++ code?
+ *
+ * Q: Given some traits representing a parameterized class, how can we find its class object?
+ *    (Right now getTypedVectorClass keys on the class object of the parameter class.)
+ *
+ * Q: Given an instantiation of Vector with T (a class object), how do we find T (class object)?
+ */
+
 namespace avmplus
 {
     // ----------------------------
