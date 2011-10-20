@@ -3891,30 +3891,6 @@ namespace avmplus
         localSet(op1-2, i2dIns(s2), result);
     }
 
-    void CodegenLIR::emitMathAbs(Traits* result)
-    {
-        int op1 = state->sp();
-        LIns *arg = localGetf(op1);
-        // inline asm for Math.abs
-        // result = arg
-        // if (!(arg > 0.0))
-        //   result = -arg    // NaN and -0.0 get here too.
-        //
-        // We do not have an optimized integer path because Math.abs(-2147484648)
-        // generates a floating point result. (Math.abs(0x80000000) > MAX_INT)
-        CodegenLabel done("done");
-        suspendCSE();
-        localSet(op1-1, arg, result);
-
-        LIns *s2 = binaryIns(LIR_gtd, arg, lirout->insImmD(0.0));
-        branchToLabel(LIR_jt, s2, done);
-
-        localSet(op1-1, Ins(LIR_negd, arg), result);
-
-        emitLabel(done);
-        resumeCSE();
-    }
-
     void CodegenLIR::emitStringLength(Traits* result)
     {
         int op1 = state->sp();
@@ -4028,7 +4004,8 @@ namespace avmplus
         { avmplus::NativeID::Math_atan2,                   2, {BUILTIN_number, BUILTIN_number}, FUNCTIONID(Math_atan2), 0},
         { avmplus::NativeID::Math_pow,                     2, {BUILTIN_number, BUILTIN_number}, FUNCTIONID(Math_pow), 0},
 
-        { avmplus::NativeID::Math_abs,                     1, {BUILTIN_number, BUILTIN_none},   0, &CodegenLIR::emitMathAbs},
+        // We would like to inline abs(), but the obvious implementation does not work, as both 0.0 and -0.0 compare as the same.
+        { avmplus::NativeID::Math_abs,                     1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(Math_abs), 0},
 
         { avmplus::NativeID::Math_min,                     2, {BUILTIN_int,    BUILTIN_int},    0, &CodegenLIR::emitIntMathMin},
         { avmplus::NativeID::Math_max,                     2, {BUILTIN_int,    BUILTIN_int},    0, &CodegenLIR::emitIntMathMax},

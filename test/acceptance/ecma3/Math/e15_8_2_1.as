@@ -67,9 +67,10 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,   "Math.abs( string object )",   Number.NaN,     Math.abs(new String( 'a String object' ))       );
     array[item++] = new TestCase( SECTION,   "Math.abs( Number.NaN )",      Number.NaN,     Math.abs(Number.NaN) );
 
-    array[item++] = new TestCase( SECTION,   "Math.abs(0)",                 0,              Math.abs( 0 )                                   );
+    array[item++] = new TestCase( SECTION,   "Math.abs(0)",                 0,              Math.abs( 0 ) );
+    array[item++] = new TestCase( SECTION,   "Infinity/Math.abs(0)",        Infinity,       Infinity/Math.abs(0) );
     array[item++] = new TestCase( SECTION,   "Math.abs( -0 )",              0,              Math.abs(-0) );
-    array[item++] = new TestCase( SECTION,   "Infinity/Math.abs(-0)",      Infinity,        Infinity/Math.abs(-0) );
+    array[item++] = new TestCase( SECTION,   "Infinity/Math.abs(-0)",       Infinity,       Infinity/Math.abs(-0) );
 
     array[item++] = new TestCase( SECTION,   "Math.abs( -Infinity )",       Number.POSITIVE_INFINITY,   Math.abs( Number.NEGATIVE_INFINITY ) );
     array[item++] = new TestCase( SECTION,   "Math.abs( Infinity )",        Number.POSITIVE_INFINITY,   Math.abs( Number.POSITIVE_INFINITY ) );
