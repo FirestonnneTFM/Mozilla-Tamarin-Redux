@@ -87,6 +87,7 @@ ASC and AVM to control the visibility of names in the API.
         <version name="SWF_13"/>
         <version name="SWF_14"/>
         <version name="SWF_15"/>
+        <version name="SWF_16"/>
     </series>
 
     <!-- this means "every API in sub is also in super" -->
