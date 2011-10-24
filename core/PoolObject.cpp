@@ -152,6 +152,7 @@ namespace avmplus
 
     bool ConstantStringContainer::gcTrace(MMgc::GC* gc, size_t cursor)
     {
+        gc->TraceLocation(&pool);
         size_t cap = pool->constantStringCount;
         const uint32_t work_increment = 2000/sizeof(void*);
         if (work_increment * cursor >= cap)
