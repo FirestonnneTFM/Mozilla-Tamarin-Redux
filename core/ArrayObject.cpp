@@ -364,20 +364,8 @@ namespace avmplus
 
     Atom ArrayObject::_getUintProperty(uint32_t index) const
     {
-        // This is a hot function.
-
-        // If this is simple, then we can take fast path.
-        // (This is temporary code emulating logic the JIT will acquire)
-        if (index < m_lengthIfSimple) {
-            AvmAssertMsg(m_canBeSimple, "nonzero lengthIfSimple implies canBeSimple");
-            AvmAssertMsg(m_lengthIfSimple == m_length, "nonzero length match");
-            AvmAssertMsg(m_denseStart == 0, "simple arrays start at 0");
-            Atom value = m_denseArray.get(index);
-            AvmAssertMsg(value != atomNotFound, "hole in simple array");
-            return value;
-        }
-
-        // call the virtual function in case it's been overridden
+        // This function may be hot, but we must call the virtual
+        // function in case it's been overridden
         return getUintProperty(index);
     }
 
