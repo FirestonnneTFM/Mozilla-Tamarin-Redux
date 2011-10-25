@@ -4530,6 +4530,53 @@ namespace avmplus
         return value;
     }
 
+    LIns* CodegenLIR::emitInlineSpeculativeArrayRead(int objIndexOnStack,
+                                                     LIns* index,
+                                                     const CallInfo* helper)
+    {
+        CodegenLabel &nonsimpleBeginLabel = createLabel("nonsimplearray");
+        CodegenLabel &joinLabel = createLabel("joinarraygetprop");
+
+        // index is "int" or "uint"
+
+        // Emitted speculative fast path for simple-marked array:
+        //  ``return ((unsigned)index < m_lengthIfSimple) ?
+        //            m_denseArray.get(index) : getUintProperty(index));''
+
+        size_t lenIfSimpleOffset = offsetof(ArrayObject, m_lengthIfSimple);
+        size_t denseArrayOffset = offsetof(ArrayObject, m_denseArray);
+        size_t entriesOffset = offsetof(ListData<Atom>, entries);
+        int scale = (sizeof(void*) == 8) ? 3 : 2;
+
+        LIns* arrayPtr = localGetp(objIndexOnStack);
+        LIns* arraySimpleLen =
+            loadIns(LIR_ldi, int32_t(lenIfSimpleOffset), arrayPtr,
+                    ACCSET_OTHER, LOAD_NORMAL);
+        LIns* cmp = binaryIns(LIR_geui, index, arraySimpleLen);
+
+        suspendCSE();
+        LIns* result = insAlloc(sizeof(Atom));
+        branchToLabel(LIR_jt, cmp, nonsimpleBeginLabel);
+
+        LIns* arrayData = loadIns(LIR_ldp, int32_t(denseArrayOffset), arrayPtr,
+                                  ACCSET_OTHER, LOAD_NORMAL );
+        LIns* idxScaled = ui2p(binaryIns(LIR_lshi, index, InsConst(scale)));
+        LIns* valOffset = binaryIns(LIR_addp, arrayData, idxScaled);
+        LIns* loadValue = loadIns(LIR_ldp, int32_t(entriesOffset), valOffset,
+                                  ACCSET_OTHER, LOAD_NORMAL);
+        stp(loadValue, result, 0, ACCSET_OTHER);
+        branchToLabel(LIR_j, NULL, joinLabel);
+
+        emitLabel(nonsimpleBeginLabel);
+        LIns* callValue = callIns(helper, 2, localGetp(objIndexOnStack), index);
+        stp(callValue, result, 0, ACCSET_OTHER);
+
+        emitLabel(joinLabel);
+        resumeCSE();
+
+        return ldp(result, 0, ACCSET_OTHER);
+    }
+
     // Generate code for get obj[index] where index is a signed or unsigned integer type, or double type.
     LIns* CodegenLIR::emitGetIndexedProperty(int objIndexOnStack, LIns* index, Traits* result, IndexKind idxKind)
     {
@@ -4539,6 +4586,12 @@ namespace avmplus
 
         if (objType == ARRAY_TYPE) {
             getter = getArrayHelpers[idxKind];
+            if (idxKind == VI_INT || idxKind == VI_UINT) {
+                LIns* value = emitInlineSpeculativeArrayRead(objIndexOnStack,
+                                                             index,
+                                                             getter);
+                return atomToNativeRep(result, value);
+            }
         }
         else if (objType != NULL && objType->subtypeof(VECTOROBJ_TYPE)) {
             if (idxKind == VI_INT || idxKind == VI_UINT) {
