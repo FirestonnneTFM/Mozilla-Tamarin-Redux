@@ -657,16 +657,6 @@ var FEATURES =
   </feature>
 
   <feature>
-   <desc> Enable interfacing to Java so you can access java methods/properties like
-          native AS properties; e.g.
-             var hello = JObject.create("java.lang.String", " hello world ");
-             print(hello.indexOf('o'));
-          </desc>
-    <name> AVMFEATURE_JNI </name>
-    <defines> AVMPLUS_WITH_JNI </defines>
-  </feature>
-
-  <feature>
     <desc> If enabled then always divert avmStackAlloc() to a separately managed stack,
            to avoid blowing the stack on small systems or to support systems that
            don't provide alloca().  If disabled then smallish allocations are handled

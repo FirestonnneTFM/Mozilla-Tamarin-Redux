@@ -345,7 +345,6 @@ shell DictionaryGlue.obj
 shell SystemClass.obj
 shell ConsoleOutputStream.obj
 shell FileInputStream.obj
-shell JavaGlue.obj
 shell vprof.obj
 shell SamplerScript.obj
 shell ShellCore.obj

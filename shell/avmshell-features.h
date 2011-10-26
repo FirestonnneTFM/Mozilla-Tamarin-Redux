@@ -156,10 +156,6 @@
   #define AVMFEATURE_INTERIOR_POINTERS 0
 #endif
 
-#ifndef AVMFEATURE_JNI
-  #define AVMFEATURE_JNI               0
-#endif
-
 #ifndef AVMFEATURE_HEAP_ALLOCA
     #if AVMSYSTEM_SYMBIAN
         // symbian doesn't support alloca

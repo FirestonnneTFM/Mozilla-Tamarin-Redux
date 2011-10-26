@@ -161,9 +161,6 @@ const char * const avmfeatures = ""
   #if AVMFEATURE_INTERIOR_POINTERS
     "AVMFEATURE_INTERIOR_POINTERS;"
   #endif
-  #if AVMFEATURE_JNI
-    "AVMFEATURE_JNI;"
-  #endif
   #if AVMFEATURE_HEAP_ALLOCA
     "AVMFEATURE_HEAP_ALLOCA;"
   #endif

@@ -131,7 +131,6 @@
 		079DF97E0F3A89C50031D1B4 /* FileClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9760F3A89C50031D1B4 /* FileClass.cpp */; };
 		079DF9800F3A89C50031D1B4 /* SystemClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF97A0F3A89C50031D1B4 /* SystemClass.cpp */; };
 		079DF9930F3A8A320031D1B4 /* DictionaryGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF98D0F3A8A320031D1B4 /* DictionaryGlue.cpp */; };
-		079DF9940F3A8A320031D1B4 /* JavaGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF98F0F3A8A320031D1B4 /* JavaGlue.cpp */; };
 		079DF9950F3A8A320031D1B4 /* SamplerScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9910F3A8A320031D1B4 /* SamplerScript.cpp */; };
 		079DF9A40F3A8AAB0031D1B4 /* Selftest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF99D0F3A8AAB0031D1B4 /* Selftest.cpp */; };
 		079DF9A50F3A8AAB0031D1B4 /* SelftestInit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9A00F3A8AAB0031D1B4 /* SelftestInit.cpp */; };
@@ -287,7 +286,6 @@
 		7E87D0B3122C5B980005FEAF /* FileClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9760F3A89C50031D1B4 /* FileClass.cpp */; };
 		7E87D0B4122C5B980005FEAF /* SystemClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF97A0F3A89C50031D1B4 /* SystemClass.cpp */; };
 		7E87D0B5122C5B980005FEAF /* DictionaryGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF98D0F3A8A320031D1B4 /* DictionaryGlue.cpp */; };
-		7E87D0B6122C5B980005FEAF /* JavaGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF98F0F3A8A320031D1B4 /* JavaGlue.cpp */; };
 		7E87D0B7122C5B980005FEAF /* SamplerScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9910F3A8A320031D1B4 /* SamplerScript.cpp */; };
 		7E87D0B8122C5B980005FEAF /* Selftest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF99D0F3A8AAB0031D1B4 /* Selftest.cpp */; };
 		7E87D0B9122C5B980005FEAF /* SelftestInit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9A00F3A8AAB0031D1B4 /* SelftestInit.cpp */; };
@@ -756,8 +754,6 @@
 		079DF98B0F3A89E60031D1B4 /* shell_toplevel.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = shell_toplevel.as; path = ../../../shell/shell_toplevel.as; sourceTree = SOURCE_ROOT; };
 		079DF98D0F3A8A320031D1B4 /* DictionaryGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DictionaryGlue.cpp; path = ../../../extensions/DictionaryGlue.cpp; sourceTree = SOURCE_ROOT; };
 		079DF98E0F3A8A320031D1B4 /* DictionaryGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DictionaryGlue.h; path = ../../../extensions/DictionaryGlue.h; sourceTree = SOURCE_ROOT; };
-		079DF98F0F3A8A320031D1B4 /* JavaGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JavaGlue.cpp; path = ../../../extensions/JavaGlue.cpp; sourceTree = SOURCE_ROOT; };
-		079DF9900F3A8A320031D1B4 /* JavaGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JavaGlue.h; path = ../../../extensions/JavaGlue.h; sourceTree = SOURCE_ROOT; };
 		079DF9910F3A8A320031D1B4 /* SamplerScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SamplerScript.cpp; path = ../../../extensions/SamplerScript.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9920F3A8A320031D1B4 /* SamplerScript.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SamplerScript.h; path = ../../../extensions/SamplerScript.h; sourceTree = SOURCE_ROOT; };
 		079DF9990F3A8A7C0031D1B4 /* Dictionary.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Dictionary.as; path = ../../../extensions/Dictionary.as; sourceTree = SOURCE_ROOT; };
@@ -1486,8 +1482,6 @@
 				079DF9750F3A89C50031D1B4 /* DomainClass.h */,
 				079DF9760F3A89C50031D1B4 /* FileClass.cpp */,
 				079DF9770F3A89C50031D1B4 /* FileClass.h */,
-				079DF98F0F3A8A320031D1B4 /* JavaGlue.cpp */,
-				079DF9900F3A8A320031D1B4 /* JavaGlue.h */,
 				079DF9780F3A89C50031D1B4 /* shell_toplevel.cpp */,
 				079DF9790F3A89C50031D1B4 /* shell_toplevel.h */,
 				079DF97A0F3A89C50031D1B4 /* SystemClass.cpp */,
@@ -1989,7 +1983,6 @@
 				7E87D0B3122C5B980005FEAF /* FileClass.cpp in Sources */,
 				7E87D0B4122C5B980005FEAF /* SystemClass.cpp in Sources */,
 				7E87D0B5122C5B980005FEAF /* DictionaryGlue.cpp in Sources */,
-				7E87D0B6122C5B980005FEAF /* JavaGlue.cpp in Sources */,
 				7E87D0B7122C5B980005FEAF /* SamplerScript.cpp in Sources */,
 				7E87D0B8122C5B980005FEAF /* Selftest.cpp in Sources */,
 				7E87D0B9122C5B980005FEAF /* SelftestInit.cpp in Sources */,
@@ -2183,7 +2176,6 @@
 				079DF97E0F3A89C50031D1B4 /* FileClass.cpp in Sources */,
 				079DF9800F3A89C50031D1B4 /* SystemClass.cpp in Sources */,
 				079DF9930F3A8A320031D1B4 /* DictionaryGlue.cpp in Sources */,
-				079DF9940F3A8A320031D1B4 /* JavaGlue.cpp in Sources */,
 				079DF9950F3A8A320031D1B4 /* SamplerScript.cpp in Sources */,
 				079DF9A40F3A8AAB0031D1B4 /* Selftest.cpp in Sources */,
 				079DF9A50F3A8AAB0031D1B4 /* SelftestInit.cpp in Sources */,

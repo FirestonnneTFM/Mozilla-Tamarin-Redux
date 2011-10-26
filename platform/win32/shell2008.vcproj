@@ -1719,10 +1719,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\extensions\JavaGlue.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\extensions\Selftest.cpp"
 				>
 			</File>
@@ -1778,10 +1774,6 @@
 			</File>
 			<File
 				RelativePath="..\..\shell\FileInputStream.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\JavaGlue.h"
 				>
 			</File>
 			<File

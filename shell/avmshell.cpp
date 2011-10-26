@@ -146,11 +146,6 @@ namespace avmshell
 #endif
         }
 
-#ifdef AVMPLUS_WITH_JNI
-        // This surely does not belong here?
-        if (Java::startup_options) delete Java::startup_options;
-#endif /* AVMPLUS_WITH_JNI */
-
         MMgc::GCHeap::Destroy();
         MMgc::GCHeap::EnterLockDestroy();
         return 0;
@@ -962,25 +957,6 @@ namespace avmshell
 #endif
                 }
 #endif // AVMPLUS_WIN32
-#ifdef AVMPLUS_WITH_JNI
-                else if (!VMPI_strcmp(arg, "-jargs")) {
-                    // all the following args until the semi colon is for java.
-                    //@todo fix up this hard limit
-                    bool first = true;
-                    Java::startup_options = new char[256];
-                    VMPI_memset(Java::startup_options, 0, 256);
-
-                    for(i++; i<argc; i++)
-                    {
-                        if (*argv[i] == ';')
-                            break;
-                        if (!first) VMPI_strcat(Java::startup_options, " ");
-                        VMPI_strcat(Java::startup_options, argv[i]);
-                        first = false;
-                    }
-                    AvmAssert(VMPI_strlen(Java::startup_options) < 256);
-                }
-#endif /* AVMPLUS_WITH_JNI */
 #ifdef DEBUGGER
                 else if (!VMPI_strcmp(arg, "-d")) {
                     settings.enter_debugger_on_launch = true;
@@ -1260,7 +1236,6 @@ namespace avmshell
         }
         avmplus::AvmLog("          [-log]\n");
         avmplus::AvmLog("          [-api N] execute ABCs as version N (see api-versions.h)\n");
-        avmplus::AvmLog("          [-jargs ... ;] args passed to Java runtime\n");
         avmplus::AvmLog("          [filename.{abc,swf} ...\n");
         avmplus::AvmLog("          [-- application argument ...]\n");
         Platform::GetInstance()->exit(1);

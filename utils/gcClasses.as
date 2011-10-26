@@ -89,7 +89,6 @@ var rootclass = "GCFinalizedObject";
 const ignorePaths =
     [ new RegExp("^.*/shell/.*$"),
      new RegExp("^.*/extensions/ST_.*$"),
-     new RegExp("^.*/extensions/JavaGlue.*$"),
      new RegExp("^.*/eval/.*$"),
      new RegExp("^.*/MMgc/GCTests.*$")];
 
