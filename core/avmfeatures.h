@@ -107,7 +107,6 @@
 #undef MMGC_USE_SYSTEM_MALLOC
 #undef MMGC_ENABLE_CPP_EXCEPTIONS
 #undef MMGC_INTERIOR_PTRS
-#undef AVMPLUS_WITH_JNI
 #undef AVMPLUS_HEAP_ALLOCA
 #undef MMGC_OVERRIDE_GLOBAL_NEW
 #undef MMGC_MEMORY_PROFILER
@@ -588,18 +587,6 @@
 #endif
 
 
-/* AVMFEATURE_JNI
- *
- * Enable interfacing to Java so you can access java methods/properties like
- * native AS properties; e.g.
- * var hello = JObject.create("java.lang.String", " hello world ");
- * print(hello.indexOf('o'));
- */
-#if !defined AVMFEATURE_JNI || AVMFEATURE_JNI != 0 && AVMFEATURE_JNI != 1
-#  error "AVMFEATURE_JNI must be defined and 0 or 1 (only)."
-#endif
-
-
 /* AVMFEATURE_HEAP_ALLOCA
  *
  * If enabled then always divert avmStackAlloc() to a separately managed stack,
@@ -935,7 +922,6 @@
 
 
 
-
 #if AVMFEATURE_SWF13
 #  if !AVMFEATURE_SWF12
 #    error "AVMFEATURE_SWF12 is required for AVMFEATURE_SWF13"
@@ -1204,9 +1190,6 @@
 #endif
 #if AVMFEATURE_INTERIOR_POINTERS
 #  define MMGC_INTERIOR_PTRS
-#endif
-#if AVMFEATURE_JNI
-#  define AVMPLUS_WITH_JNI
 #endif
 #if AVMFEATURE_HEAP_ALLOCA
 #  define AVMPLUS_HEAP_ALLOCA

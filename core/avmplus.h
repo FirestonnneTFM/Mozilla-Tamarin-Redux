@@ -158,7 +158,6 @@ namespace avmplus
     class DoubleVectorObject;
     class UIntVectorObject;
     class ObjectVectorObject;
-    class Java;
     class JSONClass;
     class MathClass;
     class MathUtils;

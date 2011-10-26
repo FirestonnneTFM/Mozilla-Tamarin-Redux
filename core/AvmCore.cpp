@@ -528,10 +528,6 @@ namespace avmplus
         // create public namespace -- note that this
         publicNamespace = internNamespace(newNamespace(kEmptyString, Namespace::NS_Public, kApiVersion_VM_ALLVERSIONS));
 
-#ifdef AVMPLUS_WITH_JNI
-        java = NULL;
-#endif
-
         _emptySupertypeList = Traits::allocSupertypeList(gc, 0);
 
         // the public namespace (empty uri) is always versioned.

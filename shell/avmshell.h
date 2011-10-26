@@ -123,7 +123,6 @@ namespace avmshell
 #include "DataIO.h"
 #include "DictionaryGlue.h"
 #include "SamplerScript.h"
-#include "JavaGlue.h"
 #include "ShellCore.h"
 
 #include "shell_toplevel-classes.hh"

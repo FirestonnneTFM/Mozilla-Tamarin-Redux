@@ -128,11 +128,6 @@ def featureSettings(o):
         args += "-DAVMFEATURE_INTERIOR_POINTERS=1 "
     if (arg == False):
         args += "-DAVMFEATURE_INTERIOR_POINTERS=0 "
-    arg = o.getBoolArg("jni")
-    if (arg == True):
-        args += "-DAVMFEATURE_JNI=1 "
-    if (arg == False):
-        args += "-DAVMFEATURE_JNI=0 "
     arg = o.getBoolArg("heap-alloca")
     if (arg == True):
         args += "-DAVMFEATURE_HEAP_ALLOCA=1 "

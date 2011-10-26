@@ -626,10 +626,6 @@ const int kBufferPadding = 16;
         // execution manager, responsible for all invocation
         ExecMgr* exec;
 
-#ifdef AVMPLUS_WITH_JNI
-        Java* java;     /* java vm control */
-#endif
-
         /** The call stack of currently executing code. */
         CallStackNode *callStack;
 

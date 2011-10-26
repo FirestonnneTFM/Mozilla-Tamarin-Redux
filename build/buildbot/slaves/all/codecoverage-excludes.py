@@ -48,7 +48,7 @@ exclude_pattern=""
 # document each exclude with a reason
 
 # exclude the self tests, they are not part of the source code
-exclude_pattern+="!extensions/JavaGlue.h !extensions/ST_*.cpp !extensions/Selftest*.cpp "
+exclude_pattern+="!extensions/ST_*.cpp !extensions/Selftest*.cpp "
 
 # exclude generated code
 exclude_pattern+="!generated/shell_toplevel.h !generated/shell_toplevel.cpp !generated/shell_toplevel*.hh "
