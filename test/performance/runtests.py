@@ -678,7 +678,16 @@ class PerformanceRuntest(RuntestBase):
                 # line below requires python >= 2.6
                 #return format(result, '%s.%sf' % (truncateLen, decimalPlaces))
     '''
-    def formatResult(self, result, truncateLen=DEFAULT_TRUNCATE_LEN, sigFigs = 1, metric = ''):
+    def formatResult(self, result, truncateLen=DEFAULT_TRUNCATE_LEN, sigFigs = None, metric = ''):
+        if sigFigs is None:
+            # Infer suitable number of decimal places from result's magnitude
+            if result < 1:
+                sigFigs = 3
+            elif result < 10:
+                sigFigs = 2
+            else:
+                sigFigs = 1
+
         #Format the test result for display
         # use currentMetric if no metric specified
         metric = metric or self.currentMetric
