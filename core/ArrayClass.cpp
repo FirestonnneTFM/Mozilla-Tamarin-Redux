@@ -459,7 +459,6 @@ namespace avmplus
         fieldatoms(NULL)
     {
         uint32_t len = d->getLengthProperty();
-        uint32_t iFirstUndefined = len;
         uint32_t iFirstAbsent = len;
 
         // new class[n] compiles into code which tries to allocate n * sizeof(class).
@@ -595,10 +594,9 @@ namespace avmplus
         }
 
         iFirstAbsent = newlen;
-        iFirstUndefined = j;
 
-        // The portion of the array containing defined values is now [0, iFirstUndefined).
-        // The portion of the array containing values undefined is now [iFirstUndefined, iFirstAbsent).
+        // The portion of the array containing defined values is now [0, j).
+        // The portion of the array containing values undefined is now [j, iFirstAbsent).
         // The portion of the array containing absent values is now [iFirstAbsent, len).
 
         // now sort the remaining defined() elements
