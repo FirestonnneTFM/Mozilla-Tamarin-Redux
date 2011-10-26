@@ -1145,6 +1145,12 @@ const int kBufferPadding = 16;
         /** Helper method; returns true if atom's type is double */
         static bool isDouble(Atom atom);
 
+        /** Helper method; returns true if atom's type is float */
+        static bool isFloat(Atom atom);
+
+        /** Helper method; returns true if atom's type is float4 */
+        static bool isFloat4(Atom atom);
+
         // removed, because it was being (erroneously) used to ask
         // "will you fit in int32_t?", which was never right for 64-bit.
         // instead, use atomIsIntptr(), which asks "will you fit in intptr?"

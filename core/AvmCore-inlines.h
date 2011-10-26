@@ -230,6 +230,17 @@ REALLY_INLINE /*static*/ bool AvmCore::isDouble(Atom atom)
     return atomKind(atom) == kDoubleType;
 }
 
+/** Helper method; returns true if atom's type is float */
+REALLY_INLINE /*static*/ bool AvmCore::isFloat(Atom atom)
+{
+    return atomKind(atom) == kSpecialBibopType && atom != AtomConstants::undefinedAtom && bibopKind(atom) == kBibopFloatType; 
+}
+/** Helper method; returns true if atom's type is float4 */
+REALLY_INLINE /*static*/ bool AvmCore::isFloat4(Atom atom)
+{
+    return atomKind(atom) == kSpecialBibopType && atom != AtomConstants::undefinedAtom && bibopKind(atom) == kBibopFloatType; 
+}
+
 REALLY_INLINE /*static*/ bool AvmCore::isNumber(Atom atom)
 {
     MMGC_STATIC_ASSERT(kIntptrType == 6 && kDoubleType == 7);
