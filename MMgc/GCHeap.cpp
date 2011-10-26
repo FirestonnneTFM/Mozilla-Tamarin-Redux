@@ -2942,7 +2942,9 @@ namespace MMgc
             cb = iter.next();
             if(cb)
             {
+                VMPI_lockRelease(&m_spinlock);
                 cb->memoryStatusChange(kFreeMemoryIfPossible, kFreeMemoryIfPossible);
+                VMPI_lockAcquire(&m_spinlock);
 
                 Decommit();
                 size_t currentTotal = GetTotalHeapSize() + externalPressure / kBlockSize;
@@ -2979,7 +2981,9 @@ namespace MMgc
             }
             if(cb)
             {
+                VMPI_lockRelease(&m_spinlock);
                 cb->memoryStatusChange(oldStatus, to);
+                VMPI_lockAcquire(&m_spinlock);
             }
         } while(cb != NULL);
 
