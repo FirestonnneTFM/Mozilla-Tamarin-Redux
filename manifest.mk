@@ -133,6 +133,7 @@ $(call RECURSE_DIRS,shell)
 
 # Bug 632086: These definitions must come *after* the foo_CXXSRCS
 # variables have been completely populated.
+MMgc_PREPROCESSED := $(MMgc_CXXSRCS:.cpp=.$(II_SUFFIX))
 avmplus_PREPROCESSED := $(avmplus_CXXSRCS:.cpp=.$(II_SUFFIX))
 vmbase_PREPROCESSED := $(vmbase_CXXSRCS:.cpp=.$(II_SUFFIX))
 shell_PREPROCESSED := $(shell_CXXSRCS:.cpp=.$(II_SUFFIX))
@@ -147,10 +148,11 @@ GENERATED_SHELL_CODE := \
  $(topsrcdir)/generated/shell_toplevel.h \
  $(topsrcdir)/generated/shell_toplevel.cpp
 
-$(avmplus_PREPROCESSED): $(GENERATED_BUILTIN_CODE)
-$(vmbase_PREPROCESSED): $(GENERATED_BUILTIN_CODE)
-$(shell_PREPROCESSED): $(GENERATED_BUILTIN_CODE)
-$(shell_PREPROCESSED): $(GENERATED_SHELL_CODE)
+$(MMgc_PREPROCESSED): | core-tracers
+$(avmplus_PREPROCESSED): $(GENERATED_BUILTIN_CODE) | core-tracers
+$(vmbase_PREPROCESSED): $(GENERATED_BUILTIN_CODE) | core-tracers
+$(shell_PREPROCESSED): $(GENERATED_BUILTIN_CODE) | core-tracers
+$(shell_PREPROCESSED): $(GENERATED_SHELL_CODE) | shell-tracers
 
 echo:
 	@echo avmplus_CXXFLAGS = $(avmplus_CXXFLAGS)
