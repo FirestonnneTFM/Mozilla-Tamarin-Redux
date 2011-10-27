@@ -114,12 +114,11 @@
 #undef MMGC_VALGRIND
 #undef VMCFG_SAFEPOINTS
 #undef VMCFG_SWF12
-#undef VMCFG_FLOAT
-#undef VMCFG_FLOAT4
 #undef VMCFG_SWF13
 #undef VMCFG_SWF14
 #undef VMCFG_SWF15
 #undef VMCFG_SWF16
+#undef VMCFG_FLOAT
 #undef VMCFG_SWF17
 #undef VMCFG_SWF18
 #undef VMCFG_SWF19
@@ -1212,12 +1211,6 @@
 #if AVMFEATURE_SWF12
 #  define VMCFG_SWF12
 #endif
-#if AVMFEATURE_SWF12
-#  define VMCFG_FLOAT
-#endif
-#if AVMFEATURE_SWF12
-#  define VMCFG_FLOAT4
-#endif
 #if AVMFEATURE_SWF13
 #  define VMCFG_SWF13
 #endif
@@ -1229,6 +1222,9 @@
 #endif
 #if AVMFEATURE_SWF16
 #  define VMCFG_SWF16
+#endif
+#if AVMFEATURE_SWF16
+#  define VMCFG_FLOAT
 #endif
 #if AVMFEATURE_SWF17
 #  define VMCFG_SWF17
