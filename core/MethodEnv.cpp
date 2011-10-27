@@ -508,6 +508,42 @@ namespace avmplus
         }
     }
 
+#ifdef VMCFG_FLOAT
+    Atom MethodEnv::getpropertylate_f(Atom obj, float index_f) const
+    {
+        // here we put the case for bind-none, since we know there are no bindings
+        // with numeric names.
+        if (atomKind(obj) == kObjectType)
+        {
+            // Use signed conversion, as it is faster on most platforms.
+            int32_t index_i = int32_t(index_f);
+            if (float(index_i) == index_f && index_i >= 0)
+            {
+                // try dynamic lookup on instance.  even if the traits are sealed,
+                // we might need to search the prototype chain
+                return AvmCore::atomToScriptObject(obj)->getUintProperty(uint32_t(index_i));
+            }
+            else
+            {
+                // Negative, fractional, or out of range, so we must intern the float.
+                // Sufficiently large non-negative numbers will also take this slower path,
+                // but we know an exception will be thrown (Vector) or a dense representation
+                // will not be used (Array, others).
+                return AvmCore::atomToScriptObject(obj)->getAtomProperty(this->core()->internFloat(index_f)->atom());
+            }
+        }
+        else
+        {
+            // primitive types are not dynamic, so we can go directly
+            // to their __proto__ object
+            AvmCore* core = this->core();
+            Toplevel *toplevel = this->toplevel();
+            ScriptObject *protoObject = toplevel->toPrototype(obj);
+            return protoObject->ScriptObject::getStringPropertyFromProtoChain(core->internFloat(index_f), protoObject, toplevel->toTraits(obj));
+        }
+    }
+#endif
+
     ScriptObject* MethodEnv::finddef(const Multiname* multiname) const
     {
         // getting toplevel() is slightly more expensive than it used to be (more indirection)...
@@ -596,6 +632,12 @@ namespace avmplus
             return AvmCore::atomToScriptObject(objAtom)->nextName(index);
         case kNamespaceType:
             return AvmCore::atomToNamespace(objAtom)->nextName(this->core(), index);
+#ifdef VMCFG_FLOAT
+        case kSpecialBibopType:
+            if (AvmCore::isFloat4(objAtom) && index <= 4) 
+                return atomFromIntptrValue(index-1);  
+            // Else fall through
+#endif // VMCFG_FLOAT
         default:
             ScriptObject* proto = toplevel()->toPrototype(objAtom);  // cn: types like Number are sealed, but their prototype could have dynamic properties
             return proto ? proto->nextName(index) : undefinedAtom;
@@ -625,6 +667,15 @@ namespace avmplus
             return AvmCore::atomToScriptObject(objAtom)->nextValue(index);
         case kNamespaceType:
             return AvmCore::atomToNamespace(objAtom)->nextValue(index);
+        case kSpecialBibopType:
+#ifdef VMCFG_FLOAT
+            if (AvmCore::isFloat4(objAtom) && index <= 4)
+            {
+                float* f4p = (float*)atomPtr(objAtom);
+                return toplevel()->core()->floatToAtom( f4p[index-1] );
+            }
+            // Else fall through
+#endif
         default:
             ScriptObject*  proto = toplevel()->toPrototype(objAtom);
             return (proto ? proto->nextValue(index) : undefinedAtom);
@@ -644,6 +695,12 @@ namespace avmplus
                 return AvmCore::atomToScriptObject(objAtom)->nextNameIndex(index);
             case kNamespaceType:
                 return AvmCore::atomToNamespace(objAtom)->nextNameIndex(index);
+#ifdef VMCFG_FLOAT
+            case kSpecialBibopType:
+                if (AvmCore::isFloat4(objAtom) && index <= 3)
+                    return index + 1;
+                // Else fall through
+#endif // VMCFG_FLOAT
             default:
                 ScriptObject* proto = toplevel()->toPrototype(objAtom);
                 int nextIndex = ( proto ? proto->nextNameIndex(index) : 0);
@@ -680,6 +737,15 @@ namespace avmplus
                     delegate = toplevel()->namespaceClass()->prototypePtr();
                 }
                 break;
+#ifdef VMCFG_FLOAT
+            case kSpecialBibopType:
+                if (AvmCore::isFloat4(objAtom) && index <= 3)
+                {
+                    index++;
+                    return 1;   /// TODO: Why?
+                }
+                // Else fall through
+#endif // VMCFG_FLOAT
             default:
                 {
                     ScriptObject* proto = toplevel()->toPrototype(objAtom);
@@ -955,6 +1021,45 @@ namespace avmplus
             toplevel()->throwReferenceError(kWriteSealedError, &tempname, toplevel()->toTraits(obj));
         }
     }
+
+#ifdef VMCFG_FLOAT
+    void MethodEnv::setpropertylate_f(Atom obj, float index_f, Atom value) const
+    {
+        if (AvmCore::isObject(obj))
+        {
+            ScriptObject* o = AvmCore::atomToScriptObject(obj);
+
+            // Use signed conversion, as it is faster on most platforms.
+            // We do not allocate objects large enough for an integral value
+            // that will not fit an int32 to index a vector or dense array,
+            // thus we'd have to use a string property name anyway in the
+            // cases where this conversion fails.
+            int32_t index_i = int32_t(index_f);
+            if (float(index_i) == index_f && index_i >= 0)
+            {
+                o->setUintProperty(uint32_t(index_i), value);
+                return;
+            }
+
+            // No need to worry about SWF10 compatibility (like setpropertylate_d does) 
+
+            // Negative, fractional, or out of range, so we must intern the float.
+            // Sufficiently large non-negative numbers will also take this slower path,
+            // but we know an exception will be thrown (Vector) or a dense representation
+            // will not be used (Array, others).
+            o->setAtomProperty(this->core()->internFloat(index_f)->atom(), value);
+        }
+        else
+        {
+            // obj represents a primitive Number, Boolean, int, float or String, and primitives
+            // are sealed and final.  Cannot add dynamic vars to them.
+
+            // throw a ReferenceError exception  Property not found and could not be created.
+            Multiname tempname(core()->getPublicNamespace(method->pool()), core()->internFloat(index_f));
+            toplevel()->throwReferenceError(kWriteSealedError, &tempname, toplevel()->toTraits(obj));
+        }
+    }
+#endif
 
     Atom MethodEnv::callsuper(const Multiname* multiname, int argc, Atom* atomv) const
     {

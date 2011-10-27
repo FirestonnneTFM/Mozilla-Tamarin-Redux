@@ -111,6 +111,9 @@ namespace avmplus
         Atom getpropertylate_i(Atom obj, int32_t index) const;
         Atom getpropertylate_u(Atom obj, uint32_t index) const;
         Atom getpropertylate_d(Atom obj, double index) const;
+#ifdef VMCFG_FLOAT
+        Atom getpropertylate_f(Atom obj, float index) const;
+#endif
         /*bool*/ int32_t haspropertylate_i(Atom obj, int32_t index) const;
         /*bool*/ int32_t haspropertylate_u(Atom obj, uint32_t index) const;
 
@@ -167,6 +170,9 @@ namespace avmplus
         void setpropertylate_i(Atom obj, int32_t index, Atom value) const;
         void setpropertylate_u(Atom obj, uint32_t index, Atom value) const;
         void setpropertylate_d(Atom obj, double index, Atom value) const;
+#ifdef VMCFG_FLOAT
+        void setpropertylate_f(Atom obj, float index, Atom value) const;
+#endif
 
         /** same as callproperty but only considers the bindings in given vtable */
         Atom callsuper(const Multiname* name, int32_t argc, Atom* atomv) const;

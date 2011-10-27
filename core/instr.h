@@ -189,9 +189,17 @@ void coerceobj_obj(MethodEnv* env, ScriptObject* obj, Traits*);
 void coerceobj_atom(MethodEnv* env, Atom atom, Traits*);
 
 /**
- * generic implementation of OP_add
+ * generic implementation of OP_add/subtract/modulo/multiply/divide
  */
 Atom op_add(AvmCore*, Atom lhs, Atom rhs);
+#ifdef VMCFG_FLOAT
+Atom op_add_legacy(AvmCore*, Atom lhs, Atom rhs);
+Atom op_multiply(AvmCore*, Atom lhs, Atom rhs);
+Atom op_subtract(AvmCore*, Atom lhs, Atom rhs);
+Atom op_modulo(AvmCore*, Atom lhs, Atom rhs);
+Atom op_divide(AvmCore*, Atom lhs, Atom rhs);
+Atom op_negate(AvmCore*, Atom oper );
+#endif // VMCFG_FLOAT
 
 /**
  * Arithmetic fastpath helper functions
@@ -202,6 +210,13 @@ Atom op_add_a_ai(AvmCore* core, Atom lhs, int32_t rhs);
 Atom op_add_a_ia(AvmCore* core, int32_t lhs, Atom rhs);
 Atom op_add_a_ad(AvmCore* core, Atom lhs, double rhs);
 Atom op_add_a_da(AvmCore* core, double lhs, Atom rhs);
+#ifdef VMCFG_FLOAT
+Atom op_add_a_aa_legacy(AvmCore* core, Atom lhs, Atom rhs);
+Atom op_add_a_ai_legacy(AvmCore* core, Atom lhs, int32_t rhs);
+Atom op_add_a_ia_legacy(AvmCore* core, int32_t lhs, Atom rhs);
+Atom op_add_a_ad_legacy(AvmCore* core, Atom lhs, double rhs);
+Atom op_add_a_da_legacy(AvmCore* core, double lhs, Atom rhs);
+#endif
 #endif
 
 void FASTCALL mop_rangeCheckFailed(MethodEnv* env);
