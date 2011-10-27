@@ -62,6 +62,9 @@ namespace avmplus
         _method_id(-1),
         _hasMethodBody(1),
         _isResolved(1)
+#ifdef VMCFG_FLOAT
+        ,_has128bitLocals(0)
+#endif // VMCFG_FLOAT
     {
         declTraits->core->exec->init(this, NULL);
     }
@@ -77,6 +80,9 @@ namespace avmplus
         _method_id(method_id),
         _hasMethodBody(1),
         _isResolved(1)
+#ifdef VMCFG_FLOAT
+        ,_has128bitLocals(0)
+#endif // VMCFG_FLOAT
     {
         AvmAssert(native_info != NULL);
         this->_native.thunker = native_info->thunker;
@@ -109,6 +115,9 @@ namespace avmplus
         _setsDxns((abcFlags & abcMethod_SETS_DXNS) != 0),
         _hasParamNames((abcFlags & abcMethod_HAS_PARAM_NAMES) != 0),
         _hasMethodBody(1) // assume we have bytecode body until set otherwise
+#ifdef VMCFG_FLOAT
+        ,_has128bitLocals(0)
+#endif // VMCFG_FLOAT
     {
         AvmAssert(method_id >= 0);
 
@@ -147,6 +156,17 @@ namespace avmplus
         _activation.setScope(pool()->core->GetGC(), this, scope);
     }
 
+#ifdef VMCFG_FLOAT
+    REALLY_INLINE float unpack_float(const void* src)
+    {
+        return *(const float*)src;
+    }
+
+    REALLY_INLINE float4_t unpack_float4(const void* src){
+        return AvmThunkUnbox_FLOAT4(float4_t,*(const Atom*)src);
+    }
+#endif // VMCFG_FLOAT
+    
     REALLY_INLINE double unpack_double(const void* src)
     {
     #if defined(AVMPLUS_64BIT) || defined(VMCFG_UNALIGNED_FP_ACCESS)
@@ -170,6 +190,12 @@ namespace avmplus
         {
             case SST_double:
                 return core->doubleToAtom(unpack_double(src));
+#ifdef VMCFG_FLOAT
+            case SST_float:
+                return core->floatToAtom(unpack_float(src));
+            case SST_float4:
+                return core->float4ToAtom(unpack_float4(src));
+#endif // VMCFG_FLOAT
             default:
                 AvmAssert(false);
             case SST_int32:
@@ -200,6 +226,12 @@ namespace avmplus
     {
         switch (bt)
         {
+#ifdef VMCFG_FLOAT
+            case BUILTIN_float:
+                return core->floatToAtom(unpack_float(src));
+            case BUILTIN_float4:
+                return core->float4ToAtom(unpack_float4(src));
+#endif // VMCFG_FLOAT
             case BUILTIN_number:
             {
                 return core->doubleToAtom(unpack_double(src));
@@ -374,7 +406,7 @@ namespace avmplus
         // if we are running jit then the types are native and we need to box them.
         if (_isJitImpl)
         {
-            src = FramePtr(uintptr_t(src) + srcPos * VARSIZE);
+            src = FramePtr(uintptr_t(src) + srcPos * IFFLOAT(varSize(),VARSIZE));
             AvmAssert(sstArr != NULL);
             return nativeLocalToAtom(this->pool()->core, src, (SlotStorageType)sstArr[srcPos]);
         }
@@ -417,7 +449,7 @@ namespace avmplus
         if (_isJitImpl)
         {
             AvmAssert(sstArr != NULL);
-            dst = FramePtr(uintptr_t(dst) + dstPos * VARSIZE);
+            dst = FramePtr(uintptr_t(dst) + dstPos * IFFLOAT(varSize(),VARSIZE) );
             switch ((SlotStorageType)sstArr[dstPos])
             {
                 case SST_double:
@@ -425,6 +457,19 @@ namespace avmplus
                     *(double*)dst = AvmCore::number_d(src);
                     break;
                 }
+#ifdef VMCFG_FLOAT
+                case SST_float:
+                {
+                    *(float*)dst =  AvmCore::atomToFloat(src);
+                    break;
+                }
+                case SST_float4:
+                {
+                    AvmAssert( (((uintptr_t)dst) & 0xf) == 0); // should be 16-byte aligned.
+                    *(float4_t*)dst =  AvmCore::atomToFloat4(src);
+                    break;
+                }
+#endif // VMCFG_FLOAT
                 case SST_int32:
                 {
                     *(int32_t*)dst = AvmCore::integer_i(src);

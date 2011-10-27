@@ -237,6 +237,20 @@ namespace avmplus
 struct ABCInfo;
 #endif
 
+#ifdef VMCFG_FLOAT
+#   ifndef FLOAT_ONLY
+#       define FLOAT_ONLY(...) __VA_ARGS__
+#       define CASEF(X)   case X
+#       define IFFLOAT(a,b)  a
+#   endif
+#else 
+#   ifndef FLOAT_ONLY
+#       define FLOAT_ONLY(...)
+#       define CASEF(X)
+#       define IFFLOAT(a,b)  b
+#   endif
+#endif
+
 #include "avm.h"
 
 #include "MMgc.h"
@@ -308,6 +322,10 @@ namespace avmplus
 #include "BooleanClass.h"
 #include "NumberClass.h"
 #include "IntClass.h"
+#ifdef VMCFG_FLOAT
+#include "FloatClass.h"
+#include "Float4Class.h"
+#endif
 #include "ArrayClass.h"
 #include "ObjectClass.h"
 #include "StringClass.h"

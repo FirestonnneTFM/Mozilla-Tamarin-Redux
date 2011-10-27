@@ -271,6 +271,22 @@ namespace avmplus
                 *this << "\"";
                 break;
             case kSpecialBibopType:
+#ifdef VMCFG_FLOAT
+                if(atom == AtomConstants::undefinedAtom){
+                    *this << "undefined";
+                    break;
+                }
+                if (bibopKind(atom) == kBibopFloatType) {
+                    *this << AvmCore::atomToFloat(atom);
+                    break;
+                }
+                if (bibopKind(atom) == kBibopFloat4Type) {
+                    float4_t v = AvmThunkUnbox_FLOAT4(FLOAT4_TYPE, *(Atom*) atomPtr(atom));
+                    *this << ((float)f4_x(v)) << "," << ((float)f4_y(v)) << "," << ((float)f4_z(v)) << "," <<  ((float)f4_w(v));
+                    break;
+                }
+                AvmAssertMsg(false,"Unknown bibop type!!!");
+#endif // VMCFG_FLOAT
                 *this << "undefined";
                 break;
             case kBooleanType:

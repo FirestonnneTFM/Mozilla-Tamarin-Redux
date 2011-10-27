@@ -67,6 +67,10 @@ REALLY_INLINE GCRef<DateClass> Toplevel::dateClass() const { return builtinClass
 REALLY_INLINE GCRef<DoubleVectorClass> Toplevel::doubleVectorClass() const { return builtinClasses()->get_Vector_doubleClass(); }
 REALLY_INLINE GCRef<ErrorClass> Toplevel::errorClass() const { return builtinClasses()->get_ErrorClass(); }
 REALLY_INLINE GCRef<EvalErrorClass> Toplevel::evalErrorClass() const { return builtinClasses()->get_EvalErrorClass(); }
+#ifdef VMCFG_FLOAT
+REALLY_INLINE GCRef<FloatClass> Toplevel::floatClass() const { return builtinClasses()->get_floatClass(); }
+REALLY_INLINE GCRef<Float4Class> Toplevel::float4Class() const { return builtinClasses()->get_float4Class(); }
+#endif
 REALLY_INLINE GCRef<FunctionClass> Toplevel::functionClass() const { return builtinClasses()->get_FunctionClass(); }
 REALLY_INLINE GCRef<IntClass> Toplevel::intClass() const { return builtinClasses()->get_intClass(); }
 REALLY_INLINE GCRef<IntVectorClass> Toplevel::intVectorClass() const { return builtinClasses()->get_Vector_intClass(); }
@@ -199,8 +203,12 @@ REALLY_INLINE Atom Toplevel::atom() const
     return _mainEntryPoint->global->atom();
 }
 
-REALLY_INLINE Atom Toplevel::add2(Atom val1, Atom val2)
+REALLY_INLINE Atom Toplevel::add2(Atom val1, Atom val2  FLOAT_ONLY(, bool enableFloats) )
 {
+#ifdef VMCFG_FLOAT
+    if(!enableFloats)
+        return avmplus::op_add_legacy(this->core(), val1, val2);
+#endif 
     return avmplus::op_add(this->core(), val1, val2);
 }
 

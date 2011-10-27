@@ -332,13 +332,42 @@ REALLY_INLINE /*static*/ double AvmCore::number_d(Atom a)
     if (atomIsIntptr(a))
         return (double)atomGetIntptr(a);
     else
-        return atomToDouble(a);
+        // TODO is the float handling correct?? Should floats even get here?
+        // I suspect it may not be right ... double-check transition from JIT to interpreted in case of float
+        return IFFLOAT( isDouble(a) ? atomToDouble(a) : atomToFloat(a)
+                       , atomToDouble(a));
 }
 
 REALLY_INLINE Atom AvmCore::intAtom(Atom atom)
 {
     return intToAtom(AvmCore::integer(atom));
 }
+
+#ifdef VMCFG_FLOAT
+REALLY_INLINE Atom AvmCore::floatToAtom(float n)
+{
+    // Note: "Number" handles some integer values w/out allocation
+    // But we allocate floats even for integers that would fit in an Atom; 
+    // that's because "int" is a Number, but 'int' is not a float!
+
+    return allocFloat(n);
+}
+
+REALLY_INLINE Atom AvmCore::float4ToAtom(float4_t n)
+{
+    return allocFloat4(n);
+}
+
+REALLY_INLINE Atom AvmCore::floatAtom(Atom atom)
+{
+    return floatToAtom(AvmCore::singlePrecisionFloat(atom));
+}
+
+REALLY_INLINE Atom AvmCore::float4Atom(Atom atom)
+{
+    return float4ToAtom(AvmCore::float4(atom));
+}
+#endif // VMCFG_FLOAT
 
 REALLY_INLINE Atom AvmCore::uintAtom(Atom atom)
 {
@@ -465,6 +494,20 @@ REALLY_INLINE /*static*/ double AvmCore::atomToDouble(Atom atom)
     return *(const double*)atomPtr(atom);
 }
 
+#ifdef VMCFG_FLOAT
+REALLY_INLINE /*static*/ float AvmCore::atomToFloat(Atom atom)
+{
+    AvmAssert(isFloat(atom));
+    return *(const float*)atomPtr(atom);
+}
+
+REALLY_INLINE /*static*/ float4_t AvmCore::atomToFloat4(Atom atom)
+{
+    AvmAssert(isFloat4(atom));
+    return AvmThunkUnbox_FLOAT4(float4_t, *(Atom*)atomPtr(atom));
+}
+#endif // VMCFG_FLOAT
+
 /**
  * Convert an Atom of kStringType to a Stringp
  * @param atom atom to convert.  Note that the Atom
@@ -528,6 +571,32 @@ REALLY_INLINE Atom AvmCore::allocDouble(double n)
     *d = n;
     return kDoubleType | (uintptr_t)d;
 }
+
+#ifdef VMCFG_FLOAT
+REALLY_INLINE Atom AvmCore::allocFloat(float n)
+{
+    float *f = (float*) GetGC()->AllocFloat();
+    *f = n;
+    return kSpecialBibopType | (uintptr_t)f;
+}
+
+REALLY_INLINE Atom AvmCore::allocFloat4(float4_t n)
+{
+    float4_t *f = (float4_t*) GetGC()->AllocFloat4();
+// Note: VMCFG_UNALIGNED_FP_ACCESS doesn't seem to apply to float4_t* pointers, too... 
+    if( (((uintptr_t) f) & 0xf) != 0 )
+    {
+        AvmAssert(  (((uintptr_t)f) & 0x7) ==0);
+        VMPI_memcpy(f, &n, sizeof(float4_t));
+    }
+    else
+    {
+        *f = n;
+    } 
+    return kSpecialBibopType | (uintptr_t)f;
+}
+#endif // VMCFG_FLOAT
+
 
 #ifdef VMCFG_LOOKUP_CACHE
 REALLY_INLINE uint32_t AvmCore::lookupCacheTimestamp() const

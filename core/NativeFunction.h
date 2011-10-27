@@ -98,6 +98,8 @@ namespace avmplus
     #define AvmThunkUnbox_STRING(t,r)         ((t)(r))
     #define AvmThunkUnbox_VOID(t,r)           (error ??? illegal)
     #define AvmThunkUnbox_DOUBLE(t,r)         AvmThunkUnbox_double_impl(&(r))
+    #define AvmThunkUnbox_FLOAT(t,r)         (*(const t*)(&(r)))
+    #define AvmThunkUnbox_FLOAT4(t,r)         AvmThunkUnbox_float4_impl(&(r))
 
     #define AvmThunkArgSize_OBJECT          1
     #define AvmThunkArgSize_BOOLEAN         1
@@ -107,10 +109,13 @@ namespace avmplus
     #define AvmThunkArgSize_ATOM            1
     #define AvmThunkArgSize_STRING          1
     #define AvmThunkArgSize_VOID            (error ??? illegal)
+    #define AvmThunkArgSize_FLOAT           1
 #ifdef AVMPLUS_64BIT
     #define AvmThunkArgSize_DOUBLE          1
+    #define AvmThunkArgSize_FLOAT4          2
 #else
     #define AvmThunkArgSize_DOUBLE          2
+    #define AvmThunkArgSize_FLOAT4          4
 #endif
 
     REALLY_INLINE double AvmThunkUnbox_double_impl(const Atom* b)
@@ -129,6 +134,19 @@ namespace avmplus
         return u.value;
     #endif
     }
+
+#ifdef VMCFG_FLOAT
+    REALLY_INLINE float4_t AvmThunkUnbox_float4_impl(const Atom* b)
+    {
+        if( ( ((uintptr_t)b) & 0xf) == 0){
+            return *(const float4_t*)b;
+        } else {
+            float4_t res;
+            VMPI_memcpy(&res, b, sizeof(float4_t));
+            return res;
+        }
+    }
+#endif
 
     // trick, since values are compile-time known we usually don't need to call intToAtom, can statically transform them
     // good for ints and ints currently
