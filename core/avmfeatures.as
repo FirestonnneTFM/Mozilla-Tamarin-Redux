@@ -713,8 +713,6 @@ var FEATURES =
     <desc> Enabling this will support SWF12 / ABC version 47.12 </desc>
     <name> AVMFEATURE_SWF12 </name>
     <defines> VMCFG_SWF12 </defines>
-    <defines> VMCFG_FLOAT </defines> <!-- Tentative! Intended for use *outside* the VM only, to see if the feature is present -->
-    <defines> VMCFG_FLOAT4 </defines> <!-- Tentative!  Intended for use *outside* the VM only, to see if the feature is present -->
   </feature>
 
   <feature>
@@ -742,6 +740,7 @@ var FEATURES =
     <desc> Enabling this will support SWF16 / ABC version 47.16 </desc>
     <name> AVMFEATURE_SWF16 </name>
     <defines> VMCFG_SWF16 </defines>
+    <defines> VMCFG_FLOAT </defines> 
     <requires> AVMFEATURE_SWF15 </requires>
   </feature>
 
