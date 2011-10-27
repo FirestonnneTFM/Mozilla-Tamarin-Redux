@@ -60,23 +60,31 @@ namespace avmplus
     // BUILTIN_object is required because sometimes the verifier will treat other classes
     // as generic object types such as "new Number" or "new Boolean".
     const uint32_t HAS_COMPLEX_EQUALITY_RULES =
-        (1<<BUILTIN_boolean) |
-        (1<<BUILTIN_int) |
-        (1<<BUILTIN_namespace) |
-        (1<<BUILTIN_null) |
-        (1<<BUILTIN_number) |
-        (1<<BUILTIN_object) |
-        (1<<BUILTIN_qName) |
-        (1<<BUILTIN_string) |
-        (1<<BUILTIN_uint) |
-        (1<<BUILTIN_void) |
-        (1<<BUILTIN_xmlList) |
+        (1<<BUILTIN_boolean)    |
+        (1<<BUILTIN_int)        |
+        (1<<BUILTIN_namespace)  |
+        (1<<BUILTIN_null)       |
+        (1<<BUILTIN_number)     |
+#ifdef VMCFG_FLOAT
+        (1<<BUILTIN_float)      |
+        (1<<BUILTIN_float4)     |
+#endif // VMCFG_FLOAT
+        (1<<BUILTIN_object)     |
+        (1<<BUILTIN_qName)      |
+        (1<<BUILTIN_string)     |
+        (1<<BUILTIN_uint)       |
+        (1<<BUILTIN_void)       |
+        (1<<BUILTIN_xmlList)    |
         (1<<BUILTIN_xml);
 
-    const uint32_t MACHINE_TYPE_MASK = (1<<BUILTIN_object) | (1<<BUILTIN_void) | (1<<BUILTIN_int) | (1<<BUILTIN_uint) | (1<<BUILTIN_boolean) | (1<<BUILTIN_number);
-    const uint32_t NUMERIC_TYPE_MASK = (1<<BUILTIN_int) | (1<<BUILTIN_uint) | (1<<BUILTIN_number);
+    const uint32_t NUMERIC_TYPE_MASK = (1<<BUILTIN_int) | (1<<BUILTIN_uint) | (1<<BUILTIN_number) 
+                                            FLOAT_ONLY( | (1<<BUILTIN_float) | (1<<BUILTIN_float4));
+
+    const uint32_t MACHINE_TYPE_MASK = (1<<BUILTIN_object) | (1<<BUILTIN_void) | (1<<BUILTIN_boolean) | NUMERIC_TYPE_MASK;
+    const uint32_t NUMBER_TYPE_MASK  = (1<<BUILTIN_int) | (1<<BUILTIN_uint) | (1<<BUILTIN_number);
     const uint32_t XML_TYPE_MASK = (1<<BUILTIN_xml) | (1<<BUILTIN_xmlList);
 #ifdef VMCFG_AOT
+    // TODO: AOT support for VMCFG_FLOAT
     const uint32_t SSTOBJECT_TYPE_MASK = ~ ((1<<BUILTIN_int) | (1<<BUILTIN_uint) | (1<<BUILTIN_number) | (1<<BUILTIN_boolean) | (1<<BUILTIN_any) | (1<<BUILTIN_object) | (1<<BUILTIN_string) | (1<<BUILTIN_namespace));
     const uint32_t SSTATOM_TYPE_MASK = (1<<BUILTIN_object) | (1<<BUILTIN_any);
 #endif
@@ -97,6 +105,10 @@ namespace avmplus
         SST_uint32,
         SST_bool32,
         SST_double,
+#ifdef VMCFG_FLOAT
+        SST_float,
+        SST_float4,
+#endif // VMCFG_FLOAT
         /* insert new values above this line, but make sure that there are no more than 16 entries in total (excluding SST_MAX_VALUE) */
         SST_MAX_VALUE 
     };
@@ -312,8 +324,11 @@ namespace avmplus
             uint32_t pointerSlotCount;
             uint32_t nonPointer32BitSlotCount;
             uint32_t nonPointer64BitSlotCount;
+#ifdef VMCFG_FLOAT
+            uint32_t nonPointer128BitSlotCount;
+#endif
 
-            SlotSizeInfo() : pointerSlotCount(0), nonPointer32BitSlotCount(0), nonPointer64BitSlotCount(0) { }
+            SlotSizeInfo() : pointerSlotCount(0), nonPointer32BitSlotCount(0), nonPointer64BitSlotCount(0) FLOAT_ONLY(, nonPointer128BitSlotCount(0)) { }
         };
 
         void buildBindings(TraitsBindingsp basetb,
@@ -416,6 +431,7 @@ namespace avmplus
         bool hasComplexEqualityRules() const;
         bool isMachineType() const;
         bool isNumeric() const;
+        bool isNumberType() const;  // this type is actually a form of "Number" - i.e. int, uint, double (not float, not "numeric")
         bool isXMLType() const;
         bool isInterface() const;       // true if this is an interface type
         bool isInstanceType() const;    // interface type or class instance type

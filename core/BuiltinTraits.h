@@ -53,6 +53,10 @@ namespace avmplus
         BUILTIN_class,  // class Class only, not subclasses of Class
         BUILTIN_date,
         BUILTIN_error,
+#ifdef VMCFG_FLOAT
+        BUILTIN_float,
+        BUILTIN_float4,
+#endif 
         BUILTIN_function,
         BUILTIN_int,
         BUILTIN_math,
@@ -105,6 +109,11 @@ namespace avmplus
         Traits *class_itraits;
         Traits *date_itraits;
         Traits *error_itraits;
+#ifdef VMCFG_FLOAT
+        Traits *float_itraits;
+        Traits *float4_itraits;
+        Traits *numeric_itraits;
+#endif 
         Traits *function_itraits;
         Traits *int_itraits;
         Traits *math_itraits;
@@ -131,6 +140,10 @@ namespace avmplus
         Traits* math_ctraits;
         Traits* int_ctraits;
         Traits* uint_ctraits;
+#ifdef VMCFG_FLOAT
+        Traits* float_ctraits;
+        Traits* float4_ctraits;
+#endif 
         Traits* number_ctraits;
         Traits* string_ctraits;
         Traits* boolean_ctraits;

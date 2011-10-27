@@ -145,7 +145,7 @@ namespace avmplus
     {
         AvmAssert(atomKind(a) == kSpecialBibopType);
         uint8_t const k = *(uint8_t*)(uintptr_t(a) & kBibopTypePtrMask);
-        AvmAssert(k == kBibopUndefined || k == kBibopFloatType);
+        AvmAssert(k == kBibopUndefined || k == kBibopFloatType  || k == kBibopFloat4Type);
         return k;
     }
 #endif

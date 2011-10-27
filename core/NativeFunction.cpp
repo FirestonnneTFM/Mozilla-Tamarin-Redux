@@ -192,15 +192,19 @@ namespace avmplus
         {
             switch(class_id)
             {
-            case avmplus::NativeID::abcclass_Object: AvmAssert(*cc == t->objectClass); break;
-            case avmplus::NativeID::abcclass_Class: AvmAssert(*cc == t->_classClass); break;
-            case avmplus::NativeID::abcclass_Function: AvmAssert(*cc == t->_functionClass); break;
-            case avmplus::NativeID::abcclass_Boolean: AvmAssert(*cc == t->_booleanClass); break;
+            case avmplus::NativeID::abcclass_Object:    AvmAssert(*cc == t->objectClass);     break;
+            case avmplus::NativeID::abcclass_Class:     AvmAssert(*cc == t->_classClass);     break;
+            case avmplus::NativeID::abcclass_Function:  AvmAssert(*cc == t->_functionClass);  break;
+            case avmplus::NativeID::abcclass_Boolean:   AvmAssert(*cc == t->_booleanClass);   break;
             case avmplus::NativeID::abcclass_Namespace: AvmAssert(*cc == t->_namespaceClass); break;
-            case avmplus::NativeID::abcclass_Number: AvmAssert(*cc == t->_numberClass); break;
-            case avmplus::NativeID::abcclass_int: AvmAssert(*cc == t->_intClass); break;
-            case avmplus::NativeID::abcclass_uint: AvmAssert(*cc == t->_uintClass); break;
-            case avmplus::NativeID::abcclass_String: AvmAssert(*cc == t->_stringClass); break;
+            case avmplus::NativeID::abcclass_Number:    AvmAssert(*cc == t->_numberClass);    break;
+#ifdef VMCFG_FLOAT
+            case avmplus::NativeID::abcclass_float:     AvmAssert(*cc == t->_floatClass);     break;
+            case avmplus::NativeID::abcclass_float4:    AvmAssert(*cc == t->_float4Class);    break;
+#endif // VMCFG_FLOAT
+            case avmplus::NativeID::abcclass_int:       AvmAssert(*cc == t->_intClass);       break;
+            case avmplus::NativeID::abcclass_uint:      AvmAssert(*cc == t->_uintClass);      break;
+            case avmplus::NativeID::abcclass_String:    AvmAssert(*cc == t->_stringClass);    break;
             }
         }
 #endif

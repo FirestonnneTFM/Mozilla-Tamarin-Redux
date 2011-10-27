@@ -303,17 +303,25 @@ REALLY_INLINE BuiltinType Traits::getBuiltinType(const Traitsp t)
 
 REALLY_INLINE bool Traits::hasComplexEqualityRules() const
 {
-    return ((1<<builtinType) & HAS_COMPLEX_EQUALITY_RULES) != 0;
+    return (((1<<builtinType) & HAS_COMPLEX_EQUALITY_RULES) != 0) 
+        FLOAT_ONLY(|| this==NUMERIC_TYPE);
 }
 
 REALLY_INLINE bool Traits::isMachineType() const
 {
-    return ((1<<builtinType) & MACHINE_TYPE_MASK) != 0;
+    return ((1<<builtinType) & MACHINE_TYPE_MASK) != 0 
+        FLOAT_ONLY(|| this==NUMERIC_TYPE);
 }
 
 REALLY_INLINE bool Traits::isNumeric() const
 {
-    return ((1<<builtinType) & NUMERIC_TYPE_MASK) != 0;
+    return ((1<<builtinType) & NUMERIC_TYPE_MASK) != 0
+        FLOAT_ONLY(|| this==NUMERIC_TYPE);
+}
+
+REALLY_INLINE bool Traits::isNumberType() const
+{
+    return ((1<<builtinType) & NUMBER_TYPE_MASK) != 0 ;
 }
 
 REALLY_INLINE bool Traits::isXMLType() const

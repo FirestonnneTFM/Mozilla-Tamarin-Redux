@@ -279,6 +279,10 @@ namespace avmplus
 
         MethodSignaturep getMethodSignature();
         void update_max_stack(int32_t max_stack);
+#ifdef VMCFG_FLOAT
+        void forceLargeVarSize();
+        int32_t varSize();
+#endif // VMCFG_FLOAT
 
         /**
          * Determine whether a function is trivial.  A function is (conservatively) trivial
@@ -458,6 +462,10 @@ namespace avmplus
         // for JIT and Native code, not interpreted code.
         uint32_t                _apply_fastpath:1;
 
+#ifdef VMCFG_FLOAT
+        // if true, the function operates on float4_t values, and needs a double VARSIZE
+        uint32_t                _has128bitLocals:1;
+#endif
         GC_DATA_END(MethodInfo)
     // ------------------------ DATA SECTION END
     };

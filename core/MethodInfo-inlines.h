@@ -92,6 +92,26 @@ REALLY_INLINE uint32_t MethodInfo::hasExceptions() const
     return _hasExceptions;
 }
 
+#ifdef VMCFG_FLOAT
+/**
+ * Size of a variable in a JIT stack frame, in bytes.  VARSIZE is large
+ * enough to hold double, int, pointers, or Atom on 32-bit or 64-bit cpus.
+ * This is an aspect of the JIT implementation, but is defined here because
+ * the debugger boxing/unboxing code in MethodInfo needs to know it.
+ * Also, varSize depends on whether the method makes use of float4 (128bit) 
+ * locals or not - it is the verifier who will set the flag.
+ */
+
+REALLY_INLINE int32_t MethodInfo::varSize(){
+    static const size_t VARSIZE = 8;
+    static const size_t LARGEVARSIZE = 16;
+    if(_has128bitLocals) 
+        return LARGEVARSIZE; 
+    else 
+        return VARSIZE;
+}
+#endif // VMCFG_FLOAT
+
 REALLY_INLINE uint32_t MethodInfo::hasMethodBody() const
 {
     return _hasMethodBody;
@@ -382,6 +402,13 @@ REALLY_INLINE MethodSignaturep MethodInfo::getMethodSignature()
         ms = _getMethodSignature();
     return ms;
 }
+
+#ifdef VMCFG_FLOAT
+REALLY_INLINE void MethodInfo::forceLargeVarSize()
+{
+    _has128bitLocals = 1;
+}
+#endif // VMCFG_FLOAT
 
 REALLY_INLINE MethodSignature::MethodSignature(int32_t param_count)
 {

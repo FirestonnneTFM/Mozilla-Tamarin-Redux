@@ -61,6 +61,14 @@ namespace avmplus
         {
             switch (atomKind(atom))
             {
+#ifdef VMCFG_FLOAT
+            case kSpecialBibopType:
+                if(bibopKind(atom)==kBibopFloatType)
+                    return floatClass()->prototypePtr();
+                if(bibopKind(atom)==kBibopFloat4Type)
+                    return float4Class()->prototypePtr();
+                // fall thru to default
+#endif
             default:
 
             case kNamespaceType:
@@ -110,6 +118,14 @@ namespace avmplus
             case kDoubleType:
                 // ISSUE what about int?
                 return core()->traits.number_itraits;
+#ifdef VMCFG_FLOAT
+            case kSpecialBibopType:
+                AvmAssert(atom != AtomConstants::undefinedAtom);
+                if(bibopKind(atom) == kBibopFloatType)
+                    return core()->traits.float_itraits;
+                if(bibopKind(atom) == kBibopFloat4Type)
+                    return core()->traits.float4_itraits;
+#endif
             }
         }
         else
@@ -441,13 +457,35 @@ namespace avmplus
         if (!AvmCore::isDictionaryLookup(nameatom, obj))
         {
             Stringp name;
-
+            bool is_float4 = IFFLOAT( AvmCore::isFloat4(obj), false);
+            
             if (avmplus::atomIsIntptr(nameatom) &&
                 avmplus::atomCanBeUint32(nameatom))
             {
-                ScriptObject* o = (atomKind(obj) == kObjectType) ?
-                    AvmCore::atomToScriptObject(obj) :
-                    this->toPrototype(obj);
+                ScriptObject* o;
+                if (atomKind(obj) != kObjectType)
+                {
+#ifdef VMCFG_FLOAT
+                    if (is_float4)
+                    {
+                        // If index value then absorb it here
+                        // FIXME: This is not correct!  We need to do as Vector here.
+                        // See VectorBaseObject::getVectorIndex, which should be generalized.
+                        uint32_t index;
+                        if (AvmCore::getIndexFromAtom(nameatom, &index))
+                        {
+                            if (index <= 3)
+                                return trueAtom;
+
+                            return falseAtom;
+                        }
+                    }
+#endif
+                    o = this->toPrototype(obj);
+                }
+                else
+                    o = AvmCore::atomToScriptObject(obj);
+                
                 return o->hasUintProperty((uint32_t)atomGetIntptr(nameatom)) ?
                     trueAtom :
                     falseAtom;
@@ -455,6 +493,9 @@ namespace avmplus
 
             name = core->intern(nameatom);
             has_interned = true;
+
+            if (is_float4 && name == core->klength)  // TODO: is this test really necessary?
+                return trueAtom;
 
             // ISSUE should we try this on each object on the proto chain or just the first?
             TraitsBindingsp td = t->getTraitsBindings();
@@ -607,6 +648,29 @@ namespace avmplus
             }
             else
             {
+#ifdef VMCFG_FLOAT
+                // Handle numeric indices and "length" access on float4 objects, otherwise fall through to prototype lookup.
+                if (AvmCore::isFloat4(obj))
+                {
+                    float4_overlay f4(AvmCore::atomToFloat4(obj));
+                    if (multiname->isValidDynamicName())
+                    {
+                        // FIXME: This is not correct!  We need to do as Vector here.
+                        // See VectorBaseObject::getVectorIndex, which should be generalized.
+                        uint32_t index;
+                        if (AvmCore::getIndexFromAtom(multiname->getName()->atom(), &index))
+                        {
+                            if (index <= 3)
+                                return core()->floatToAtom(f4.floats[index]);
+                            throwRangeError(kReadSealedError, multiname->getName(), core()->internFloat4(f4.value));    // FIXME: error type? error code?
+                        }
+                        
+                        if (multiname->getName() == core()->klength)
+                            return atomFromIntptrValue(4);
+                    }
+                }
+#endif // VMCFG_FLOAT
+                
                 // primitive types are not dynamic, so we can go directly
                 // to their __proto__ object.  but they are sealed, so fail if
                 // the property is not found on the proto chain.
@@ -704,7 +768,7 @@ namespace avmplus
             }
             else
             {
-                // obj represents a primitive Number, Boolean, int, or String, and primitives
+                // obj represents a primitive Number, Boolean, float, float4, int, or String, and primitives
                 // are sealed and final.  Cannot add dynamic vars to them.
 
                 // property could not be found and created.

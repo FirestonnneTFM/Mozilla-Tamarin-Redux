@@ -69,6 +69,7 @@ namespace avmplus
                 const SlotInfo* src = &_base->getSlots()[0];
                 SlotInfo* dst = &tb->getSlots()[0];
                 VMPI_memcpy(dst, src, _base->slotCount * sizeof(SlotInfo));
+                FLOAT_ONLY( AvmAssert(_owner != _owner->core->traits.numeric_itraits) );
                 AvmAssert(((_owner->isMachineType()) || (tb->owner->m_sizeofInstance >= _base->owner->m_sizeofInstance)));
             }
             if (_base->methodCount)
@@ -592,10 +593,16 @@ namespace avmplus
         return pos;
     }
 
+#ifdef VMCFG_FLOAT
+    static bool is16ByteSlot(Traits* slotTE){
+        return Traits::getBuiltinType(slotTE) == BUILTIN_float4;
+    }
+#endif // VMCFG_FLOAT
+
     static bool is8ByteSlot(Traits* slotTE)
     {
         #ifdef AVMPLUS_64BIT
-        const uint32_t BIG_TYPE_MASK = ~((1U<<BUILTIN_int) | (1U<<BUILTIN_uint) | (1U<<BUILTIN_boolean));
+        const uint32_t BIG_TYPE_MASK = ~((1U<<BUILTIN_int) | (1U<<BUILTIN_uint) | (1U<<BUILTIN_boolean) FLOAT_ONLY(| (1U<<BUILTIN_float) | (1U<<BUILTIN_float4)) ); 
         #else
         const uint32_t BIG_TYPE_MASK = (1U<<BUILTIN_number);
         #endif
@@ -617,6 +624,20 @@ namespace avmplus
         return slotOffset;
     }
 
+#ifdef VMCFG_FLOAT
+    // Sun compilers don't allow static and REALLY_INLINE
+    /*static*/ REALLY_INLINE int32_t pad16(int32_t nextSlotOffset)
+    {
+        // 16-aligned, 16-byte field
+        if (nextSlotOffset & 0xf)
+        {
+            AvmAssert((nextSlotOffset % 4) == 0);   // should always be a multiple of 4
+            nextSlotOffset += 16 - (nextSlotOffset & 0xf);
+        };
+        return nextSlotOffset;
+    }
+#endif // VMCFG_FLOAT
+
     SlotStorageType valueStorageType(BuiltinType bt)
     {
         switch (bt)
@@ -624,6 +645,10 @@ namespace avmplus
             case BUILTIN_int:       return SST_int32;
             case BUILTIN_uint:      return SST_uint32;
             case BUILTIN_number:    return SST_double;
+#ifdef VMCFG_FLOAT
+            case BUILTIN_float:     return SST_float;
+            case BUILTIN_float4:    return SST_float4;
+#endif // VMCFG_FLOAT
             case BUILTIN_boolean:   return SST_bool32;
             case BUILTIN_void:      return SST_atom;
             case BUILTIN_any:       return SST_atom;
@@ -647,7 +672,7 @@ namespace avmplus
         AvmAssert(bt != BUILTIN_void);
 
         MMGC_STATIC_ASSERT(BUILTIN_COUNT < (sizeof(int) * 8));
-        int const IS_POINTER = ~((1<<BUILTIN_int)|(1<<BUILTIN_uint)|(1<<BUILTIN_number)|(1<<BUILTIN_boolean));
+        int const IS_POINTER = ~((1<<BUILTIN_int)|(1<<BUILTIN_uint)|(1<<BUILTIN_number)|(1<<BUILTIN_boolean) FLOAT_ONLY(|(1<<BUILTIN_float)|(1<<BUILTIN_float4)));
 
         return ((1 << bt) & IS_POINTER) != 0;
     }
@@ -851,6 +876,11 @@ namespace avmplus
                                             pool->resolveTypeName(ne.info, toplevel);
                         if (!isPointerSlot(slotType))
                         {
+#ifdef VMCFG_FLOAT
+                            if (is16ByteSlot(slotType))
+                                slotSizeInfo->nonPointer128BitSlotCount += 1;
+                            else 
+#endif // VMCFG_FLOAT
                             if (is8ByteSlot(slotType))
                                 slotSizeInfo->nonPointer64BitSlotCount += 1;
                             else
@@ -933,7 +963,8 @@ namespace avmplus
         slotCount = sic.slotCount();
         if (slotSizeInfo)
         {
-            uint32_t const c = slotSizeInfo->nonPointer32BitSlotCount + slotSizeInfo->nonPointer64BitSlotCount + baseSlotCount;
+            uint32_t const c = slotSizeInfo->nonPointer32BitSlotCount + slotSizeInfo->nonPointer64BitSlotCount + baseSlotCount
+                               + IFFLOAT(slotSizeInfo->nonPointer128BitSlotCount,0);
             // We calculate this at the end because we might have a sparse slot table...
             // the unused slots will be, well, unused, but we still have to reserve space
             // for them to guard against pathological code.
@@ -963,10 +994,39 @@ namespace avmplus
         static const bool align8ByteSlots = (offsetof(GlueClassTest_Slots, m_numberSlot) == 8);
         static const bool alignPointersTo8Bytes = (offsetof(GlueClassTest_Slots, m_ptrSlot) == 24);
         static const bool is64Bit = sizeof(void*) == 8;
+#ifdef VMCFG_FLOAT
+        struct GlueClassTest128_Slots{
+            int32_t m_intSlot;
+            float4_t m_float4Slot;
+        };
+        static const bool align16ByteSlots = offsetof(GlueClassTest128_Slots , m_float4Slot) >=8;
+#ifdef _DEBUG
+        struct AlmostStaticAsserts {
+            AlmostStaticAsserts(){
+                AvmAssert( ( offsetof(GlueClassTest_Slots , m_numberSlot) == 4 ) || ( offsetof(GlueClassTest_Slots , m_numberSlot) == 8 ) );
+                AvmAssert( ( offsetof(GlueClassTest_Slots , m_otherIntSlot) == 12 ) || ( offsetof(GlueClassTest_Slots , m_otherIntSlot) == 16 ) );
+                AvmAssert( ( offsetof(GlueClassTest_Slots , m_ptrSlot) == 16 ) || ( offsetof(GlueClassTest_Slots , m_ptrSlot) == 20 ) || ( offsetof(GlueClassTest_Slots , m_ptrSlot) == 24 ) );
+                AvmAssert( ( offsetof(GlueClassTest128_Slots , m_float4Slot) == 4 ) || ( offsetof(GlueClassTest128_Slots , m_float4Slot) == 16 )|| ( offsetof(GlueClassTest128_Slots , m_float4Slot) == 8 ) );
+                /* Is it EVER the case that pointers are 8-byte aligned, but doubles are not? 
+                   We currently assume "no", but let's double-test this assumption */
+                struct GlueClassTestPtr_Slots{
+                    int32_t m_intSlot;
+                    void* m_ptrSlot;
+                };
+                AvmAssert( ((offsetof(GlueClassTestPtr_Slots , m_ptrSlot) == 8) && alignPointersTo8Bytes) 
+                        || ((offsetof(GlueClassTestPtr_Slots , m_ptrSlot) == 4) && !alignPointersTo8Bytes) );
+            }
+        } __unused_var;
+#endif
+#endif // VMCFG_FLOAT
     }
 
     // Sun compilers don't allow static and REALLY_INLINE
+#ifdef VMCFG_FLOAT
+    /*static*/ REALLY_INLINE int32_t computeSlotOffset(Traits* slotType, int32_t& next32BitSlotOffset, int32_t& nextPointerSlotOffset, int32_t& next64BitSlotOffset, int32_t& next128BitSlotOffset)
+#else
     /*static*/ REALLY_INLINE int32_t computeSlotOffset(Traits* slotType, int32_t& next32BitSlotOffset, int32_t& nextPointerSlotOffset, int32_t& next64BitSlotOffset)
+#endif // VMCFG_FLOAT
     {
         if (isPointerSlot(slotType))
         {
@@ -980,6 +1040,14 @@ namespace avmplus
             next64BitSlotOffset += 8;
             return result;
         }
+#ifdef VMCFG_FLOAT
+        else if (is16ByteSlot(slotType))
+        {
+            int32_t const result = next128BitSlotOffset;
+            next128BitSlotOffset += 16;
+            return result;
+        }
+#endif // VMCFG_FLOAT
         else
         {
             int32_t const result = next32BitSlotOffset;
@@ -1099,6 +1167,10 @@ namespace avmplus
         int32_t endOfPointerSlots = nextPointerSlotOffset + (sizeInfo.pointerSlotCount * sizeof(void*));
         int32_t next64BitSlotOffset = align8ByteSlots && (sizeInfo.nonPointer64BitSlotCount != 0) ? pad8(endOfPointerSlots) : endOfPointerSlots;
         int32_t endOf64BitSlots = next64BitSlotOffset + (sizeInfo.nonPointer64BitSlotCount * 8);
+#ifdef VMCFG_FLOAT
+        int32_t next128BitSlotOffset = align16ByteSlots && (sizeInfo.nonPointer128BitSlotCount != 0) ? pad16(endOf64BitSlots) : endOf64BitSlots;
+        int32_t endOf128BitSlots = next128BitSlotOffset + (sizeInfo.nonPointer128BitSlotCount * 16);
+#endif // VMCFG_FLOAT
 
         NameEntry ne;
         const uint32_t nameCount = pos ? AvmCore::readU32(pos) : 0;
@@ -1106,7 +1178,9 @@ namespace avmplus
         {
             AvmAssert(next32BitSlotOffset <= endOf32BitSlots);
             AvmAssert(nextPointerSlotOffset <= endOfPointerSlots);
-            AvmAssert(next64BitSlotOffset <= endOf64BitSlots); (void)endOf64BitSlots;
+            AvmAssert(next64BitSlotOffset <= endOf64BitSlots);
+            FLOAT_ONLY(AvmAssert(next128BitSlotOffset <= endOf128BitSlots));
+            (void)IFFLOAT(endOf128BitSlots,endOf64BitSlots);
             ne.readNameEntry(pos);
             Multiname mn;
             this->pool->resolveBindingNameNoCheck(ne.qni, mn, toplevel);
@@ -1131,7 +1205,7 @@ namespace avmplus
                     Traitsp slotType = (ne.kind == TRAIT_Class) ?
                                         pool->getClassTraits(ne.info) :
                                         pool->resolveTypeName(ne.info, toplevel);
-                    uint32_t slotOffset = computeSlotOffset(slotType, next32BitSlotOffset, nextPointerSlotOffset, next64BitSlotOffset);
+                    uint32_t slotOffset = computeSlotOffset(slotType, next32BitSlotOffset, nextPointerSlotOffset, next64BitSlotOffset FLOAT_ONLY(, next128BitSlotOffset));
                     AvmAssert(slotOffset >= sizeof(ScriptObject));
                     tb->setSlotInfo(slotid, slotType, slotStorageType(getBuiltinType(slotType)), slotOffset);
                     break;
@@ -1191,7 +1265,8 @@ namespace avmplus
         if (!(next32BitSlotOffset == endOf32BitSlots &&
                 nextPointerSlotOffset == endOfPointerSlots &&
                 next64BitSlotOffset == endOf64BitSlots &&
-                endOf64BitSlots >= slotAreaStart))
+                FLOAT_ONLY(next128BitSlotOffset == endOf128BitSlots &&)
+                IFFLOAT(endOf128BitSlots,endOf64BitSlots) >= slotAreaStart))
         {
             // Verify that we used exactly the space we predicted; if not, we may
             // have a fuzzed file that duplicate slots in certain orders. This is unacceptable,
@@ -1200,7 +1275,7 @@ namespace avmplus
                 toplevel->throwVerifyError(kCorruptABCError);
             AvmAssert(!"unhandled verify error");
         }
-        return endOf64BitSlots - slotAreaStart;
+        return IFFLOAT(endOf128BitSlots,endOf64BitSlots) - slotAreaStart;
     }
 
     static const uint8_t* skipToInterfaceCount(const uint8_t* pos)
@@ -1388,7 +1463,7 @@ namespace avmplus
         const uint8_t* pos = traitsPosStart();
         const uint32_t nameCount = pos ? AvmCore::readU32(pos) : 0;
         SlotIdCalcer sic(td->base ? td->base->slotCount : 0, this->allowEarlyBinding());
-        NameEntry ne;
+        NameEntry ne; 
         for (uint32_t i = 0; i < nameCount; i++)
         {
             ne.readNameEntry(pos);
@@ -1831,7 +1906,7 @@ namespace avmplus
     {
         const uint8_t* pos = traitsPosStart();
         SlotIdCalcer sic(tb->base ? tb->base->slotCount : 0, this->allowEarlyBinding());
-        NameEntry ne;
+        NameEntry ne; 
         const uint32_t nameCount = pos ? AvmCore::readU32(pos) : 0;
         for (uint32_t i = 0; i < nameCount; i++)
         {
@@ -1857,6 +1932,13 @@ namespace avmplus
                     if (value == 0)
                         continue;
                     break;
+#ifdef VMCFG_FLOAT
+                case BUILTIN_float:
+                        if (AvmCore::atomToFloat(value)==0) {
+                            continue;
+                        }
+                        break;
+#endif // VMCFG_FLOAT
                 case BUILTIN_number:
                     if (AvmCore::number_d(value) == 0)
                         continue;
@@ -1874,6 +1956,7 @@ namespace avmplus
                     break;
                 case BUILTIN_namespace:
                 case BUILTIN_string:
+                CASEF(BUILTIN_float4:) // FIXME: probably wrong but don't know what to do here.
                 default:
                     if (AvmCore::isNull(value))
                         continue;
