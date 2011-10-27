@@ -238,7 +238,7 @@ REALLY_INLINE /*static*/ bool AvmCore::isFloat(Atom atom)
 /** Helper method; returns true if atom's type is float4 */
 REALLY_INLINE /*static*/ bool AvmCore::isFloat4(Atom atom)
 {
-    return atomKind(atom) == kSpecialBibopType && atom != AtomConstants::undefinedAtom && bibopKind(atom) == kBibopFloatType; 
+    return atomKind(atom) == kSpecialBibopType && atom != AtomConstants::undefinedAtom && bibopKind(atom) == kBibopFloat4Type; 
 }
 
 REALLY_INLINE /*static*/ bool AvmCore::isNumber(Atom atom)
