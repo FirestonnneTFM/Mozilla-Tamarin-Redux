@@ -373,8 +373,17 @@ namespace MMgc
 #define GetRealPointer(_x) _x
 #define GetUserPointer(_x) _x
 #define DebugSize() 0
-
+#define USER_POINTER_WORDS 0
+    
 #else
+
+    // USER_POINTER_WORDS is the number of 32-bit words to add to the realptr to get
+    // the userptr.
+    //
+    // Traditionally USER_POINTER_WORDS is 2.  For proper alignment of float4 boxes
+    // we require USER_POINTER_WORDS to be 4, however.  See comments in GC::GC for 
+    // more about that.
+#define USER_POINTER_WORDS 4
 
     /**
     * How much extra size does DebugDecorate need?
@@ -394,12 +403,12 @@ namespace MMgc
     /**
     * Given a user pointer back up to real beginning
     */
-    inline void *GetRealPointer(const void *item) { return (void*)((uintptr_t) item -  2 * sizeof(int32_t)); }
+    inline void *GetRealPointer(const void *item) { return (void*)((uintptr_t) item -  USER_POINTER_WORDS * sizeof(int32_t)); }
 
     /**
     * Given a real pointer return pointer to user memory
     */
-    inline void *GetUserPointer(const void *item) { return (void*)((uintptr_t) item +  2 * sizeof(int32_t)); }
+    inline void *GetUserPointer(const void *item) { return (void*)((uintptr_t) item +  USER_POINTER_WORDS * sizeof(int32_t)); }
 
     /**
     * Print errorr messsage and stack traces for allocation/free of memory
