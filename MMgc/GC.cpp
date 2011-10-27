@@ -262,19 +262,40 @@ namespace MMgc
             noPointersFinalizedAllocs[i] = mmfx_new(GCAlloc(this, kSizeClasses[i], false, false, true, i, 0));
         }
 
-        /* We must pass 8 for the size here because we can only allocate in 8-byte increments. */
+        /* Bibop allocators are a little tricky:
+         *  - For the float allocator the /payload/ size is 8, because that's the smallest payload supported
+         *  - For the float4 allocator the /total/ size must be divisible by 16; in this case GCAlloc guarantees
+         *    16-byte aligned allocations.  We check that this guarantee is not violated in the implementation
+         *    of GC::AllocBibopType() specialized for float4 (GC-inlines.h).
+         *
+         * For MMGC_MEMORY_INFO builds the bibop allocators waste a lot of space for these boxes, but frankly
+         * it's no worse than for double boxes, and anyway if the common case is fully typed code with Vector
+         * (this will be true for float and float4 especially) then the box cost is not a big deal.
+         */
 #if !defined MMGC_MEMORY_INFO
         bibopAllocFloat  = mmfx_new(GCAlloc(this,  8, false, false, false, /*sizeclass*/0, avmplus::AtomConstants::kBibopFloatType));
         bibopAllocFloat4 = mmfx_new(GCAlloc(this, 16, false, false, false, /*sizeclass*/1, avmplus::AtomConstants::kBibopFloat4Type));
 #else
 #ifdef MMGC_64BIT
+#if USER_POINTER_WORDS == 2
         GCAssert(DebugSize() == 24);
-        bibopAllocFloat  = mmfx_new(GCAlloc(this, int( 8 + DebugSize()), false, false, false, /*sizeclass*/3, avmplus::AtomConstants::kBibopFloatType));
-        bibopAllocFloat4 = mmfx_new(GCAlloc(this, int(16 + DebugSize()), false, false, false, /*sizeclass*/4, avmplus::AtomConstants::kBibopFloat4Type));
+        bibopAllocFloat  = mmfx_new(GCAlloc(this, int(32), false, false, false, /*sizeclass*/3, avmplus::AtomConstants::kBibopFloatType));
+        bibopAllocFloat4 = mmfx_new(GCAlloc(this, int(48), false, false, false, /*sizeclass*/5 /*sic!*/, avmplus::AtomConstants::kBibopFloat4Type));
 #else
+        GCAssert(DebugSize() == 32);
+        bibopAllocFloat  = mmfx_new(GCAlloc(this, int(40), false, false, false, /*sizeclass*/4, avmplus::AtomConstants::kBibopFloatType));
+        bibopAllocFloat4 = mmfx_new(GCAlloc(this, int(48), false, false, false, /*sizeclass*/5, avmplus::AtomConstants::kBibopFloat4Type));
+#endif
+#else
+#if USER_POINTER_WORDS == 2
         GCAssert(DebugSize() == 16);
-        bibopAllocFloat  = mmfx_new(GCAlloc(this, int( 8 + DebugSize()), false, false, false, /*sizeclass*/2, avmplus::AtomConstants::kBibopFloatType));
-        bibopAllocFloat4 = mmfx_new(GCAlloc(this, int(16 + DebugSize()), false, false, false, /*sizeclass*/3, avmplus::AtomConstants::kBibopFloat4Type));
+        bibopAllocFloat  = mmfx_new(GCAlloc(this, int(24), false, false, false, /*sizeclass*/2, avmplus::AtomConstants::kBibopFloatType));
+        bibopAllocFloat4 = mmfx_new(GCAlloc(this, int(32), false, false, false, /*sizeclass*/3, avmplus::AtomConstants::kBibopFloat4Type));
+#else
+        GCAssert(DebugSize() == 24);
+        bibopAllocFloat  = mmfx_new(GCAlloc(this, int(32), false, false, false, /*sizeclass*/3, avmplus::AtomConstants::kBibopFloatType));
+        bibopAllocFloat4 = mmfx_new(GCAlloc(this, int(48), false, false, false, /*sizeclass*/5 /*sic!*/, avmplus::AtomConstants::kBibopFloat4Type));
+#endif
 #endif
 #endif
 
