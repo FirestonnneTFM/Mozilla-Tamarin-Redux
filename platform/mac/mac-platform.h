@@ -131,6 +131,39 @@
 typedef void *maddr_ptr;
 typedef pthread_t vmpi_thread_t;
 
+#ifdef VMCFG_FLOAT
+#if AVMSYSTEM_PPC
+/* Just make the build work, we don't really support Mac-PPC */
+typedef struct { float x,y,z,w;} float4_t;
+#define f4_mul(a,b)         (((void)a),b) // f4_mul not implemented!
+#define f4_add(a,b)         (((void)a),b) // f4_add not implemented!
+#define f4_sub(a,b)         (((void)a),b) // f4_sub not implemented!
+#define f4_div(a,b)         (((void)a),b) // f4_div not implemented!
+#define f4_eq_i(a,b)        (a.x==b.x)    // f4_eq_i not implemented!
+#define f4_x(x)             ((void)x,1.0f) // not implemented!!
+#define f4_y(x)             ((void)x,1.0f) // not implemented!!
+#define f4_z(x)             ((void)x,1.0f) // not implemented!!
+#define f4_w(x)             ((void)x,1.0f) // not implemented!!
+#define f4_shuffle(a,i)     (((void)i),a) // f4_shuffle not implemented yet!
+#else
+#include <xmmintrin.h>
+
+typedef __m128              float4_t;
+
+#define f4_mul              _mm_mul_ps
+#define f4_add              _mm_add_ps
+#define f4_sub              _mm_sub_ps
+#define f4_div              _mm_div_ps
+#define f4_eq_i(a,b)        ( _mm_movemask_epi8( _mm_castps_si128 (_mm_cmpneq_ps( (a) , (b)))  ) == 0 )
+#define f4_x(v)            _mm_cvtss_f32(v)
+#define f4_y(v)            _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(1,1,1,1)))
+#define f4_z(v)            _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(2,2,2,2)))
+#define f4_w(v)            _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(3,3,3,3)))
+#define f4_ith(v,i)        _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(i,i,i,i)))
+#define f4_shuffle(v,i)    _mm_shuffle_ps(v,v,i)
+#endif 
+#endif // VMCFG_FLOAT
+
 #ifdef AVMPLUS_MAC_CARBON
     /**
      * On Mac Carbon, if you compile with Altivec support,

@@ -129,6 +129,76 @@
 
 typedef pthread_t vmpi_thread_t;
 
+#ifdef VMCFG_FLOAT
+#if AVMSYSTEM_ARM
+#include <arm_neon.h>
+
+typedef float32x4_t              float4_t;
+
+#define f4_mul              vmulq_f32
+#define f4_add              vaddq_f32
+#define f4_sub              vsubq_f32
+inline float32x4_t f4_div(float32x4_t a,float32x4_t b)  {
+      /* get an initial estimate of 1/b.*/     
+      float32x4_t reciprocal = vrecpeq_f32(b); 
+
+      /* use a couple Newton-Raphson steps to refine the estimate. */
+      reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
+      reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
+       /* and finally, compute a/b = a*(1/b)*/
+      float32x4_t result = vmulq_f32(a,reciprocal);
+      return result;
+}
+
+inline bool f4_eq_i(float32x4_t a, float32x4_t b){
+    uint32x2_t res = vreinterpret_u32_u16( vmovn_u32(vceqq_f32(a, b)) );
+    return vget_lane_u32(res, 0) == 0xffffffff && vget_lane_u32(res, 1) == 0xffffffff;
+}
+#define f4_x(v)            vgetq_lane_f32(v,0)
+#define f4_y(v)            vgetq_lane_f32(v,1)
+#define f4_z(v)            vgetq_lane_f32(v,2)
+#define f4_w(v)            vgetq_lane_f32(v,3)
+#define f4_ith(v,i)        vgetq_lane_f32(v,i)
+inline float32x4_t f4_shuffle(float32x4_t v, int i){
+    (void)i; // TODO! fix/implement shuffle
+    return v;
+}
+#elif AVMSYSTEM_MIPS
+typedef struct{ float x,y,z,t;} float4_t;
+
+#define f4_mul(x,y)         (x,y) /* NOT IMPLEMENTED YET! */
+#define f4_div(x,y)         (x,y) /* NOT IMPLEMENTED YET! */
+#define f4_add(x,y)         (x,y) /* NOT IMPLEMENTED YET! */
+#define f4_sub(x,y)         (x,y) /* NOT IMPLEMENTED YET! */
+#define f4_eq_i(x,y)        (x,y,false) /* NOT IMPLEMENTED YET! */
+#define f4_x(v)            (v).x
+#define f4_y(v)            (v).y
+#define f4_z(v)            (v).z
+#define f4_w(v)            (v).t
+#define f4_ith(v,i)        (v).x /* NOT IMPLEMENTED YET!! */
+#define f4_shuffle(v,i)    (i,v) /* NOT IMPLEMENTED YET!! */
+
+#else  /* GNU/Linux, x86 */
+#include <xmmintrin.h>
+
+typedef __m128              float4_t;
+
+#define f4_mul              _mm_mul_ps
+#define f4_add              _mm_add_ps
+#define f4_sub              _mm_sub_ps
+#define f4_div              _mm_div_ps
+#define f4_eq_i(a,b)        ( _mm_movemask_epi8( _mm_castps_si128 (_mm_cmpneq_ps( (a) , (b)))  ) == 0 )
+#define f4_x(v)            _mm_cvtss_f32(v)
+#define f4_y(v)            _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(1,1,1,1)))
+#define f4_z(v)            _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(2,2,2,2)))
+#define f4_w(v)            _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(3,3,3,3)))
+#define f4_ith(v,i)        _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(i,i,i,i)))
+#define f4_shuffle(v,i)    _mm_shuffle_ps(v,v,i)
+
+#endif
+#endif // VMCFG_FLOAT
+
+
 #ifdef ANDROID
 #define USE_CUTILS_ATOMICS FALSE
 #if USE_CUTILS_ATOMICS
@@ -436,7 +506,7 @@ REALLY_INLINE void VMPI_memoryBarrier()
 
 #endif // USE_CUTILS_ATOMICS
 
-#elif defined(AVMSYSTEM_ARM)
+#elif defined(AVMSYSTEM_ARM) // TODO!!! THIS IS DEFINITELY A BUG, BUT IF I CHANGE TO "IF" THEN LOTS OF PLATFORMS FAIL TO COMPILE!!!
 //FIXME: bug 609810 VMPI atomic primitives for ARM require inline-asm implementations
 #define EMULATE_ATOMICS_WITH_PTHREAD_MUTEX
 
