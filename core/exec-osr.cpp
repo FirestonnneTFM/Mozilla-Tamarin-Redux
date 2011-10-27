@@ -268,8 +268,8 @@ namespace avmplus
 
         // zero out stack area for unused scopes:
         if (scopeTop < stackBase) {
-            void* p = ((char*) jitFramePointer + scopeTop * VARSIZE);
-            size_t nbytes = (stackBase - scopeTop) * VARSIZE;
+            void* p = ((char*) jitFramePointer + scopeTop * IFFLOAT(env->MethodEnv->varSize(), VARSIZE) );
+            size_t nbytes = (stackBase - scopeTop) * IFFLOAT(env->MethodEnv->varSize(), VARSIZE);
             VMPI_memset(p, 0, nbytes);
         }
 
@@ -337,7 +337,7 @@ namespace avmplus
 
         // Unbox the value and store in jit vars[].
         AvmAssert(isValidAtom(value, atom));
-        Atom* addr = (Atom *) ((char *) jitFramePointer + (index * VARSIZE));
+        Atom* addr = (Atom *) ((char *) jitFramePointer + index * IFFLOAT(env->method->varSize(), VARSIZE));
         Traits* type = value.traits;
         BaseExecMgr::unbox1(atom, type, addr);
 

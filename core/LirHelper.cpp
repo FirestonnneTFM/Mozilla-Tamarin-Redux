@@ -117,12 +117,23 @@ LIns* LirHelper::vcallIns(const CallInfo *ci, uint32_t argc, va_list ap)
     // by terminating control-flow with a ret.
     if (neverReturns(ci))
         lirout->ins1(LIR_retp, InsConstPtr(0));
+    NanoAssert(!ins->isInReg());
     return ins;
 }
 
 LIns* LirHelper::nativeToAtom(LIns* native, Traits* t)
 {
     switch (bt(t)) {
+#ifdef VMCFG_FLOAT
+    case BUILTIN_float: 
+        // always allocFloat; we don't currently have the option to represent a float
+        // as part of the atom, like doubles/numbers can 
+            return callIns(FUNCTIONID(floatToAtom), 2, coreAddr, native);
+
+    case BUILTIN_float4: 
+        return callIns(FUNCTIONID(float4ToAtom), 2, coreAddr, native);
+#endif
+
     case BUILTIN_number:
         SSE2_ONLY(if(core->config.njconfig.i386_sse2) {
             return callIns(FUNCTIONID(doubleToAtom_sse2), 2, coreAddr, native);
@@ -161,6 +172,7 @@ LIns* LirHelper::nativeToAtom(LIns* native, Traits* t)
         return addp(native, kNamespaceType);
 
     default:
+        FLOAT_ONLY(AvmAssert(t!=NUMERIC_TYPE));
         return addp(native, kObjectType);
     }
 }
@@ -174,6 +186,22 @@ LIns* LirHelper::atomToNative(BuiltinType bt, LIns* atom)
     case BUILTIN_void:
         return atom;
 
+#ifdef VMCFG_FLOAT
+    case BUILTIN_float4:
+        if (atom->isImmP())
+        {
+            float4_t f4val = AvmCore::float4((Atom)atom->immP());
+            return lirout->insImmF4(f4val);
+        }
+        else
+            return callIns(FUNCTIONID(float4), 1, atom);
+
+    case BUILTIN_float:
+        if (atom->isImmP())
+            return lirout->insImmF((float)AvmCore::number_d((Atom)atom->immP()));
+        else
+            return callIns(FUNCTIONID(singlePrecisionFloat), 1, atom);
+#endif
     case BUILTIN_number:
         if (atom->isImmP())
             return lirout->insImmD(AvmCore::number_d((Atom)atom->immP()));
@@ -239,6 +267,12 @@ LIns* LirHelper::stForTraits(Traits *t, LIns* val, LIns* p, int32_t d, AccSet ac
     switch (bt(t)) {
         case BUILTIN_number:
             return std(val, p, d, accSet);
+#ifdef VMCFG_FLOAT
+        case BUILTIN_float: 
+            return stf(val, p, d, accSet);
+        case BUILTIN_float4: 
+            return stf4(val, p, d, accSet);
+#endif
         case BUILTIN_int:
         case BUILTIN_uint:
         case BUILTIN_boolean:
@@ -251,14 +285,20 @@ LIns* LirHelper::stForTraits(Traits *t, LIns* val, LIns* p, int32_t d, AccSet ac
 LIns* LirHelper::ldForTraits(Traits *t, LIns* p, int32_t d, AccSet accSet)
 {
     switch (bt(t)) {
-        case BUILTIN_number:
-            return ldd(p, d, accSet);
-        case BUILTIN_int:
-        case BUILTIN_uint:
-        case BUILTIN_boolean:
-            return ldi(p, d, accSet);
-        default:
-            return ldp(p, d, accSet);
+    case BUILTIN_number:
+        return ldd(p, d, accSet);
+#ifdef VMCFG_FLOAT
+    case BUILTIN_float: 
+        return ldf(p, d, accSet);
+    case BUILTIN_float4: 
+        return ldf4(p, d, accSet);
+#endif
+    case BUILTIN_int:
+    case BUILTIN_uint:
+    case BUILTIN_boolean:
+        return ldi(p, d, accSet);
+    default:
+        return ldp(p, d, accSet);
     }
 }
 
@@ -290,6 +330,49 @@ void AvmLogControl::printf( const char* format, ... )
 }
 #endif
 
+#ifdef VMCFG_FLOAT
+LIns* LirHelper::BasicLIREmitter::operator()(enum BuiltinType bt, LIns* oper1,LIns* oper2) const
+{
+    switch(bt){
+    case BUILTIN_number: return _lh->binaryIns(_dblOp, oper1, oper2); 
+    case BUILTIN_any:    if(_call) return _lh->callIns(_call, 3, _lh->coreAddr, oper1, oper2); // else, fall through - a call is unexpected
+    default: return TODO("Unexpected builtin type InstructionEmiter, binary op");
+    }
+}
+
+LIns* LirHelper::BasicLIREmitter::operator()(enum BuiltinType bt,LIns* oper) const 
+{ 
+    switch(bt){
+    case BUILTIN_number: return _lh->lirout->ins1(_dblOp, oper); 
+    case BUILTIN_any:    if(_call) return _lh->callIns(_call, 2, _lh->coreAddr, oper); // else, fall through - a call is unexpected
+    default: return TODO("Unexpected builtin type InstructionEmiter, unary op");
+    }
+} 
+
+LIns* LirHelper::ModuloLIREmitter::operator()(enum BuiltinType bt, LIns* op1,LIns* op2) const
+{
+    switch(bt){
+    case BUILTIN_number: return _lh->callIns(FUNCTIONID(mod), 2, op1, op2 );
+    case BUILTIN_any:    return _lh->callIns(FUNCTIONID(op_modulo), 3, _lh->coreAddr, op1, op2);
+    default: return TODO("Unexpected builtin type in ModuloLIREmitter"); 
+    }
+}
+
+LIns* LirHelper::IncrementLIREmitter::operator()(enum BuiltinType bt,LIns* oper) const 
+{ 
+    switch(bt){
+    case BUILTIN_number: return _lh->binaryIns(LIR_addd, oper, _lh->lirout->insImmD(_shouldDecrement?-1:1));
+    case BUILTIN_any:  
+        {
+            /* Note: we add with 1.0f/-1.0f, to make sure that  the results stays float if operand is float */
+            const CallInfo* addfunc = _lh->pool->hasFloatSupport() ? FUNCTIONID(op_add): FUNCTIONID(op_add_legacy);
+            return _lh->callIns( addfunc, 3, _lh->coreAddr, oper, _lh->InsConstAtom(_shouldDecrement? _lh->core->kFltMinusOne:_lh->core->kFltOne ));
+        }
+    default: return TODO("Unexpected builtin type in IncrementLIREmitter");
+    }
+}
+
+#endif
 }
 
 //

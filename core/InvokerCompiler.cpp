@@ -335,12 +335,22 @@ namespace avmplus
         switch (ms->returnTraitsBT()) {
         case BUILTIN_number:
             call->_address = (uintptr_t) method->_implFPR;
-            call->_typesig = SIG3(F,P,I,P);
+            call->_typesig = SIG3(D,P,I,P);
             break;
         case BUILTIN_int: case BUILTIN_uint: case BUILTIN_boolean:
             call->_address = (uintptr_t) method->_implGPR;
             call->_typesig = SIG3(I,P,I,P);
             break;
+#ifdef VMCFG_FLOAT
+        case BUILTIN_float: 
+                call->_address = (uintptr_t) method->_implFPR;
+                call->_typesig = SIG3(F,P,I,P);
+                break;
+        case BUILTIN_float4: 
+            call->_address = (uintptr_t) method->_implVECR;
+            call->_typesig = SIG3(F4,P,I,P);
+            break;
+#endif // VMCFG_FLOAT
         default:
             call->_address = (uintptr_t) method->_implGPR;
             call->_typesig = SIG3(A,P,I,P);
@@ -425,6 +435,14 @@ namespace avmplus
 #endif
             }            
             break;
+#ifdef VMCFG_FLOAT
+        case BUILTIN_float:    // TODO: I assume we don't need to inline here since we don't care about untyped performance; check assumption
+            native = callIns(FUNCTIONID(singlePrecisionFloat), 1, atom); 
+            break;
+        case BUILTIN_float4: 
+            native = callIns(FUNCTIONID(float4), 1, atom);
+            break;
+#endif            
         case BUILTIN_boolean:
             {
                 LIns* tag = andp(atom, AtomConstants::kAtomTypeMask);

@@ -52,6 +52,11 @@ REALLY_INLINE LIns* LirHelper::InsConst(int32_t c)
     return lirout->insImmI(c);
 }
 
+REALLY_INLINE LIns* LirHelper::binaryIns(LOpcode op, LIns *a, LIns *b)
+{
+    return lirout->ins2(op,a,b);
+}
+
 REALLY_INLINE LIns* LirHelper::InsConstPtr(const void *p)
 {
     return lirout->insImmP(p);
@@ -93,6 +98,42 @@ REALLY_INLINE LIns* LirHelper::p2dIns(LIns* v)
 #endif
 }
 
+#ifdef VMCFG_FLOAT
+REALLY_INLINE LIns* LirHelper::i2fIns(LIns* v)
+{
+    return lirout->ins1(LIR_i2f, v);
+}
+
+REALLY_INLINE LIns* LirHelper::ui2fIns(LIns* v)
+{
+    return lirout->ins1(LIR_ui2f, v);
+}
+
+REALLY_INLINE LIns* LirHelper::d2fIns(LIns* v)
+{
+    return lirout->ins1(LIR_d2f, v);
+}
+
+REALLY_INLINE LIns* LirHelper::f2dIns(LIns* v)
+{
+    return lirout->ins1(LIR_f2d, v);
+}
+
+REALLY_INLINE LIns* LirHelper::f2f4Ins(LIns* v)
+{
+    return lirout->ins1(LIR_f2d, v);
+}
+
+REALLY_INLINE LIns* LirHelper::f4tofIns(LIns* v,eFloat4Component comp)
+{
+    switch(comp){
+    case F4_X: return lirout->ins1(LIR_f4x, v);
+    case F4_Y: return lirout->ins1(LIR_f4y, v);
+    case F4_Z: return lirout->ins1(LIR_f4z, v);
+    case F4_W: return lirout->ins1(LIR_f4w, v);
+    }
+}
+#endif
 
 #if NJ_SOFTFLOAT_SUPPORTED
 REALLY_INLINE LIns* LirHelper::qlo(LIns* q)
@@ -276,5 +317,32 @@ REALLY_INLINE bool exactlyOneBit(uint32_t m)
     return (m & (m-1)) == 0;
 }
 
+#ifdef VMCFG_FLOAT
+REALLY_INLINE LIns* LirHelper::InsConstFlt(float f)
+{
+    return lirout->insImmF(f);
+}
 
+REALLY_INLINE LIns* LirHelper::stf(LIns* val, LIns* p, int32_t d, AccSet accSet)
+{
+    AvmAssert(val->isF());
+    return lirout->insStore(LIR_stf, val, p, d, accSet);
+}
+
+REALLY_INLINE LIns* LirHelper::ldf(LIns* p, int32_t d, AccSet accSet)
+{
+    return lirout->insLoad(LIR_ldf, p, d, accSet);
+}
+
+REALLY_INLINE LIns* LirHelper::stf4(LIns* val, LIns* p, int32_t d, AccSet accSet)
+{
+    AvmAssert(val->isF4());
+    return lirout->insStore(LIR_stf4, val, p, d, accSet);
+}
+
+REALLY_INLINE LIns* LirHelper::ldf4(LIns* p, int32_t d, AccSet accSet)
+{
+    return lirout->insLoad(LIR_ldf4, p, d, accSet);
+}
+#endif
 } // namespace
