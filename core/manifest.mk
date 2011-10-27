@@ -148,6 +148,14 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
 %/generated/builtin.h %/generated/builtin.cpp: $(topsrcdir)/core/*.as
 	cd $(topsrcdir)/core; python builtin.py $(avmplus_BUILTINFLAGS)
 
+.PHONY: core-tracers
+core-tracers:
+ifdef AVM
+	cd $(topsrcdir)/core; python ./builtin-tracers.py
+else
+	@echo Skipping core-tracers since AVM unset
+endif
+
 # 1. Use of '$(topsrcdir)/generated' is deliberate; we use absolute
 #    paths for code being generated outside build dir.
 #

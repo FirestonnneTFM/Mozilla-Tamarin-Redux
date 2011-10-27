@@ -117,6 +117,17 @@ endif
 %/generated/shell_toplevel.h %/generated/shell_toplevel.cpp: $(topsrcdir)/shell/shell_toplevel.as $(topsrcdir)/core/api-versions.as
 	cd $(topsrcdir)/shell; python shell_toplevel.py $(shell_BUILTINFLAGS)
 
+.PHONY: shell-tracers
+# Order dependence on core-tracers is to force a strict ordering
+# because both tracer generation scripts will attempt to recompile
+# exactgc.abc if it is missing.
+shell-tracers: | core-tracers
+ifdef AVM
+	cd $(topsrcdir)/shell; python ./shell_toplevel-tracers.py
+else
+	@echo Skipping shell-tracers since AVM unset
+endif
+
 # 1. Use of '$(topsrcdir)/generated' is deliberate; we use absolute
 #    paths for code being generated (or referenced) outside build dir.
 #
