@@ -118,7 +118,14 @@ namespace avmplus
         LirHelper(PoolObject*);
         ~LirHelper();
         void cleanup();
-
+        
+        typedef enum {
+            F4_X=0,
+            F4_Y=1,
+            F4_Z=2,
+            F4_W=3
+        } eFloat4Component;
+        
     protected:
         LIns* downcast_obj(LIns* atom, LIns* env, Traits* t); // atom -> typed scriptobj
         static BuiltinType bt(Traits *t);
@@ -167,6 +174,20 @@ namespace avmplus
         LIns* lshp(LIns* a, int32_t b);
         LIns* rshp(LIns* a, int32_t b);
         LIns* rshup(LIns* a, int32_t b);
+        LIns* binaryIns(LOpcode op, LIns *a, LIns *b);
+#ifdef VMCFG_FLOAT
+        LIns* InsConstFlt(float f);
+        LIns* ldf(LIns* p, int32_t d, AccSet);
+        LIns* ldf4(LIns* p,int32_t d, AccSet);
+        LIns* stf(LIns* val, LIns* p, int32_t d, AccSet);
+        LIns* stf4(LIns* val,LIns* p, int32_t d, AccSet);
+        LIns* i2fIns(LIns* v);
+        LIns* d2fIns(LIns* v);
+        LIns* f2dIns(LIns* v);
+        LIns* ui2fIns(LIns* v);
+        LIns* f2f4Ins(LIns* v);
+        LIns* f4tofIns(LIns* v, eFloat4Component comp);        
+#endif        
         void  liveAlloc(LIns* expr);        // extend lifetime of LIR_allocp, otherwise no-op
         void  emitStart(Allocator&, LirBuffer*, LirWriter*&);
 
@@ -187,6 +208,10 @@ namespace avmplus
         bool const use_cmov;
         debug_only(ValidateWriter* validate1;)
         debug_only(ValidateWriter* validate2;)
+
+#ifdef VMCFG_FLOAT
+#include "LirHelper-Emitters.h"
+#endif
     };
 
     /**
@@ -205,6 +230,12 @@ namespace avmplus
     extern const CallInfo ci_argcError;
     extern const CallInfo ci_boolean;
     extern const CallInfo ci_doubleToAtom;
+#ifdef VMCFG_FLOAT
+    extern const CallInfo ci_floatToAtom;
+    extern const CallInfo ci_float4ToAtom;
+    extern const CallInfo ci_singlePrecisionFloat;
+    extern const CallInfo ci_float4;
+#endif
     extern const CallInfo ci_intToAtom;
     extern const CallInfo ci_uintToAtom;
     extern const CallInfo ci_number;
@@ -221,13 +252,22 @@ namespace avmplus
     extern const CallInfo ci_coerce;
     extern const CallInfo ci_coerce_s;
     extern const CallInfo ci_coerceobj_atom;
+#ifdef VMCFG_FLOAT
+    extern const CallInfo ci_mod;
+    extern const CallInfo ci_op_modulo;
+    extern const CallInfo ci_op_add;
+    extern const CallInfo ci_op_add_legacy;
+    extern const CallInfo ci_op_subtract;
+    extern const CallInfo ci_op_multiply;
+    extern const CallInfo ci_op_divide;
+    extern const CallInfo ci_op_negate;
+#endif
 
 #ifdef VMCFG_SSE2
     extern const CallInfo ci_doubleToAtom_sse2;
 #endif
 
     const ArgType ARGTYPE_U = ARGTYPE_UI; // uint32_t
-    const ArgType ARGTYPE_F = ARGTYPE_D;  // double
     const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
 }
 

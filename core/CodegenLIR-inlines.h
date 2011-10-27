@@ -72,11 +72,6 @@ REALLY_INLINE LIns* CodegenLIR::ui2dIns(LIns* v)
     return lirout->ins1(LIR_ui2d, v);
 }
 
-REALLY_INLINE LIns* CodegenLIR::binaryIns(LOpcode op, LIns *a, LIns *b)
-{
-    return lirout->ins2(op,a,b);
-}
-
 REALLY_INLINE bool InvokerCompiler::copyArgs()
 {
     return args_out->isop(LIR_allocp);

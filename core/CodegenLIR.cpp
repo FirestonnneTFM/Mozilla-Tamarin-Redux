@@ -113,26 +113,35 @@ return *((intptr_t*)&_method);
 #define RETURN_METHOD_PTR_F(_class, _method) \
 return *((int*)&_method);
 #else
-#define RETURN_METHOD_PTR_F(_class, _method) \
+#define RETURN_METHOD_PTR_F_HELPER(_class, _method, _type) \
 union { \
-    double (_class::*bar)(); \
+    _type (_class::*bar)(); \
     int foo[2]; \
 }; \
 bar = _method; \
 return foo[0];
+#define RETURN_METHOD_PTR_F(a,b) RETURN_METHOD_PTR_F_HELPER(a,b,double)
+#define RETURN_METHOD_PTR_SPF(a,b) RETURN_METHOD_PTR_F_HELPER(a,b,float)
 #endif
 
 #elif defined __GNUC__
-#define RETURN_METHOD_PTR_F(_class, _method) \
+#define RETURN_METHOD_PTR_F_HELPER(_class, _method, _type) \
 union { \
-    double (_class::*bar)(); \
+    _type (_class::*bar)(); \
     intptr_t foo; \
 }; \
 bar = _method; \
 return foo;
+
+#define RETURN_METHOD_PTR_F(a,b) RETURN_METHOD_PTR_F_HELPER(a,b,double)
+#define RETURN_METHOD_PTR_SPF(a,b) RETURN_METHOD_PTR_F_HELPER(a,b,float)
 #else
 #define RETURN_METHOD_PTR_F(_class, _method) \
 return *((intptr_t*)&_method);
+#endif
+
+#ifndef RETURN_METHOD_PTR_SPF
+#define RETURN_METHOD_PTR_SPF RETURN_METHOD_PTR_F
 #endif
 
 #ifdef PERFM
@@ -595,8 +604,14 @@ namespace avmplus
     LIns* CodegenLIR::localCopy(int i)
     {
         switch (bt(state->value(i).traits)) {
+#ifdef VMCFG_FLOAT
+        case BUILTIN_float: 
+            return localGetf(i,SINGLE_PRECISION);
+        case BUILTIN_float4: 
+            return localGetf4(i);
+#endif
         case BUILTIN_number:
-            return localGetf(i);
+            return localGetf(i,DOUBLE_PRECISION);
         case BUILTIN_boolean:
         case BUILTIN_int:
         case BUILTIN_uint:
@@ -611,9 +626,16 @@ namespace avmplus
         BuiltinType tag = bt(type);
         SlotStorageType sst = valueStorageType(tag);
 #ifdef DEBUG
-        jit_sst[i] = uint8_t(1 << sst);
+#ifdef VMCFG_FLOAT
+        if(type==NUMERIC_TYPE)
+            jit_sst[i] = uint16_t((1<<SST_float)|(1<<SST_double)|(1<<SST_float4));
+        else
+            jit_sst[i] = uint16_t(1 << sst); 
+#else
+        jit_sst[i] = uint8_t(1 << sst); 
+#endif // VMCFG_FLOAT
 #endif
-        lirout->insStore(o, vars, i * VARSIZE, ACCSET_VARS);
+        lirout->insStore(o, vars, i * IFFLOAT(info->varSize(), VARSIZE) , ACCSET_VARS);
         lirout->insStore(LIR_sti2c, InsConst(sst), tags, i, ACCSET_TAGS);
     }
 
@@ -624,6 +646,7 @@ namespace avmplus
 
     LIns* CodegenLIR::ptrToNativeRep(Traits*t, LIns* ptr)
     {
+        FLOAT_ONLY(AvmAssert(t!= NUMERIC_TYPE);)
         return t->isMachineType() ? addp(ptr, kObjectType) : ptr;
     }
 
@@ -757,7 +780,10 @@ namespace avmplus
 
     bool isNullable(Traits* t) {
         BuiltinType bt = Traits::getBuiltinType(t);
-        return bt != BUILTIN_int && bt != BUILTIN_uint && bt != BUILTIN_boolean && bt != BUILTIN_number;
+        FLOAT_ONLY( const AvmCore* core = t ? t->core : NULL; )
+
+        return bt != BUILTIN_int && bt != BUILTIN_uint && bt != BUILTIN_boolean && bt != BUILTIN_number
+                      FLOAT_ONLY(&& bt != BUILTIN_float && bt != BUILTIN_float4 && (bt!=BUILTIN_any || !core || NUMERIC_TYPE !=t)) ; 
     }
 
     /**
@@ -782,6 +808,7 @@ namespace avmplus
         LIns* vars;                     // LIns that defines the vars[] array
         LIns* tags;                     // LIns that defines the tags[] array
         const int nvar;                 // this method's frame size.
+        FLOAT_ONLY(const int varSize;)  // the size of a frame variable in bytes (8 or 16)
         const int scopeBase;            // index of first local scope
         const int stackBase;            // index of first stack slot
         int restLocal;                  // -1 or, if it's lazily allocated, the local holding the rest array
@@ -806,11 +833,11 @@ namespace avmplus
 
     public:
         VarTracker(MethodInfo* info, Allocator& alloc, LirWriter *out,
-                int nvar, int scopeBase, int stackBase, int restLocal,
+                int nvar, FLOAT_ONLY(int varSize,) int scopeBase, int stackBase, int restLocal,
                 uint32_t code_len)
             : LirWriter(out), alloc(alloc),
               vars(NULL), tags(NULL),
-              nvar(nvar), scopeBase(scopeBase), stackBase(stackBase),
+              nvar(nvar), FLOAT_ONLY(varSize(varSize),) scopeBase(scopeBase), stackBase(stackBase),
               restLocal(restLocal), reachable(true),
               has_backedges(false)
 #ifdef DEBUGGER
@@ -1040,8 +1067,8 @@ namespace avmplus
         }
 
         REALLY_INLINE int varOffsetToIndex(int offset) {
-            AvmAssert(IS_ALIGNED(offset, VARSIZE));
-            return offset / VARSIZE;
+            AvmAssert(IS_ALIGNED(offset, IFFLOAT(varSize,VARSIZE)));
+            return offset / IFFLOAT(varSize,VARSIZE);
         }
 
         // keep track of the value stored in var d and update notnull
@@ -1078,6 +1105,7 @@ namespace avmplus
                 LIns *val = varTracker[i];
                 if (!val) {
                     val = out->insLoad(op, base, d, accSet, loadQual);
+                    FLOAT_ONLY(AvmAssert(!val->isF4() || varSize==16));
                     trackVarLoad(val, i);
                 }
                 return val;
@@ -1098,7 +1126,10 @@ namespace avmplus
         // when we see stores to vars or tags.
         LIns *insStore(LOpcode op, LIns *value, LIns *base, int32_t d, AccSet accSet) {
             if (base == vars)
+            {
+                FLOAT_ONLY(AvmAssert(!value->isF4() || varSize == 16));
                 trackVarStore(value, varOffsetToIndex(d));
+            }
             else if (base == tags)
                 trackTagStore(value, d);
             return out->insStore(op, value, base, d, accSet);
@@ -1161,16 +1192,32 @@ namespace avmplus
                   (v.sst_mask == (1 << SST_uint32) && v.traits == UINT_TYPE) ||
                   (v.sst_mask == (1 << SST_bool32) && v.traits == BOOLEAN_TYPE));
 #endif
-        return lirout->insLoad(LIR_ldi, vars, i * VARSIZE, ACCSET_VARS);
+        return lirout->insLoad(LIR_ldi, vars, i * IFFLOAT(info->varSize(), VARSIZE) , ACCSET_VARS);
     }
 
-    LIns* CodegenLIR::localGetf(int i) {
+    LIns* CodegenLIR::localGetf(int i, ePrecision precision) {
+        const bool singlePrecision = IFFLOAT(precision == SINGLE_PRECISION, false); (void)precision; (void)singlePrecision;
 #ifdef DEBUG
         const FrameValue& v = state->value(i);
-        AvmAssert(v.sst_mask == (1<<SST_double) && v.traits == NUMBER_TYPE);
+        if(singlePrecision)
+            FLOAT_ONLY(AvmAssert(v.sst_mask == (1<<SST_float) && v.traits == FLOAT_TYPE));
+        else
+            AvmAssert((v.sst_mask == (1<<SST_double) && v.traits == NUMBER_TYPE));
 #endif
-        return lirout->insLoad(LIR_ldd, vars, i * VARSIZE, ACCSET_VARS);
+        LOpcode ldop = IFFLOAT(singlePrecision ? LIR_ldf:LIR_ldd , LIR_ldd);
+        return lirout->insLoad(ldop, vars, i * IFFLOAT(info->varSize(), VARSIZE) , ACCSET_VARS);
     }
+
+#ifdef VMCFG_FLOAT
+    LIns* CodegenLIR::localGetf4(int i) {
+#ifdef DEBUG
+        const FrameValue& v = state->value(i);
+        AvmAssert(v.sst_mask == (1<<SST_float4) && v.traits == FLOAT4_TYPE);
+        AvmAssert(info->varSize() == 16);
+#endif
+        return lirout->insLoad(LIR_ldf4, vars, i * info->varSize(), ACCSET_VARS);
+    }
+#endif
 
     // Load a pointer-sized var, and update null tracking state if the driver
     // informs us that it is not null via FrameState.value.
@@ -1178,18 +1225,22 @@ namespace avmplus
     {
         const FrameValue& v = state->value(i);
         LIns* ins;
-        if (exactlyOneBit(v.sst_mask)) {
+        if (exactlyOneBit(v.sst_mask) 
+            FLOAT_ONLY(|| (v.traits == NUMERIC_TYPE && v.sst_mask== ((1 << SST_double)|(1 << SST_float)|(1 << SST_float4))))
+           ) {
             // pointer or atom
-            AvmAssert(!(v.sst_mask == (1 << SST_int32) && v.traits == INT_TYPE) &&
-                      !(v.sst_mask == (1 << SST_uint32) && v.traits == UINT_TYPE) &&
+            AvmAssert(!(v.sst_mask == (1 << SST_int32)  && v.traits == INT_TYPE)     &&
+                      !(v.sst_mask == (1 << SST_uint32) && v.traits == UINT_TYPE)    &&
                       !(v.sst_mask == (1 << SST_bool32) && v.traits == BOOLEAN_TYPE) &&
-                      !(v.sst_mask == (1 << SST_double) && v.traits == NUMBER_TYPE));
-            ins = lirout->insLoad(LIR_ldp, vars, i * VARSIZE, ACCSET_VARS);
-        } else {
+FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYPE)   &&
+                      !(v.sst_mask == (1 << SST_float4) && v.traits == FLOAT4_TYPE)  && )
+                      !(v.sst_mask == (1 << SST_double) && v.traits == NUMBER_TYPE)  );
+            ins = lirout->insLoad(LIR_ldp, vars, i * IFFLOAT(info->varSize(),VARSIZE) , ACCSET_VARS);
+        } else    {
             // more than one representation is possible: convert to atom using tag found at runtime.
             AvmAssert(bt(v.traits) == BUILTIN_any || bt(v.traits) == BUILTIN_object);
             LIns* tag = lirout->insLoad(LIR_lduc2ui, tags, i, ACCSET_TAGS);
-            LIns* varAddr = leaIns(i * VARSIZE, vars);
+            LIns* varAddr = leaIns( i * IFFLOAT(info->varSize(), VARSIZE) , vars);
             ins = callIns(FUNCTIONID(makeatom), 3, coreAddr, varAddr, tag);
         }
         if (v.notNull)
@@ -1246,9 +1297,10 @@ namespace avmplus
         LIns *vars;
         LIns *tags;
         int nvar;
+        int varSize;
     public:
-        DebuggerCheck(AvmCore* core, Allocator& alloc, LirWriter *out, int nvar)
-            : LirWriter(out), core(core), vars(NULL), tags(NULL), nvar(nvar)
+        DebuggerCheck(AvmCore* core, Allocator& alloc, LirWriter *out, int nvar, int varSize)
+            : LirWriter(out), core(core), vars(NULL), tags(NULL), nvar(nvar), varSize(varSize)
         {
             varTracker = new (alloc) LIns*[nvar];
             tagTracker = new (alloc) LIns*[nvar];
@@ -1261,8 +1313,9 @@ namespace avmplus
         }
 
         void trackVarStore(LIns *value, int d) {
-            AvmAssert(IS_ALIGNED(d, VARSIZE));
-            int i = d / VARSIZE;
+            AvmAssert(IS_ALIGNED(d, varSize));
+            FLOAT_ONLY(AvmAssert(varSize==16 || !value->isF4());)
+            int i = d / varSize;
             if (i >= nvar)
                 return;
             varTracker[i] = value;
@@ -1292,6 +1345,15 @@ namespace avmplus
             case SST_double:
                 AvmAssert(val->isQorD());
                 break;
+#ifdef VMCFG_FLOAT
+            case SST_float:
+                AvmAssert(val->isF()); 
+                break;
+            case SST_float4:
+                AvmAssert(val->isF4()); 
+                break;
+#endif
+
             case SST_int32:
             case SST_uint32:
             case SST_bool32:
@@ -1387,6 +1449,14 @@ namespace avmplus
         virtual LIns* insImmD(double d) {
             return lastIns = out->insImmD(d);
         }
+#ifdef VMCFG_FLOAT
+        virtual LIns* insImmF(float f) {
+            return lastIns = out->insImmF(f);
+        }
+        virtual LIns* insImmF4(float4_t f) {
+            return lastIns = out->insImmF4(f);
+        }
+#endif // VMCFG_FLOAT
         virtual LIns* insLoad(LOpcode op, LIns* base, int32_t d, AccSet accSet, LoadQual loadQual) {
             return lastIns = out->insLoad(op, base, d, accSet, loadQual);
         }
@@ -1578,7 +1648,7 @@ namespace avmplus
         #ifdef DEBUG
         DebuggerCheck *checker = NULL;
         if (haveDebugger) {
-            checker = new (*alloc1) DebuggerCheck(core, *alloc1, lirout, dbg_framesize);
+            checker = new (*alloc1) DebuggerCheck(core, *alloc1, lirout, dbg_framesize, IFFLOAT(info->varSize(),VARSIZE));
             lirout = checker;
         }
         #endif // DEBUG
@@ -1588,7 +1658,7 @@ namespace avmplus
 
         // add the VarTracker filter last because we want it to be first in line.
         lirout = varTracker = new (*alloc1) VarTracker(info, *alloc1, lirout,
-                framesize, ms->scope_base(), ms->stack_base(), restLocal, codeLength);
+                framesize, FLOAT_ONLY(info->varSize(),) ms->scope_base(), ms->stack_base(), restLocal, codeLength);
 
         // last pc value that we generated a store for
         lastPcSave = NULL;
@@ -1636,7 +1706,7 @@ namespace avmplus
         #endif
 
         // allocate room for our local variables
-        vars = insAlloc(framesize * VARSIZE);   // room for double|Atom|int|pointer
+        vars = insAlloc(framesize * IFFLOAT(info->varSize(),VARSIZE));   // room for double|Atom|int|pointer, and float4 if used 
         tags = insAlloc(framesize);             // one tag byte per var
         prolog_buf->sp = vars;
         varTracker->init(vars, tags);
@@ -1701,8 +1771,8 @@ namespace avmplus
         #endif
 
 #ifdef DEBUG
-        jit_sst = new (*alloc1) uint8_t[framesize];
-        memset(jit_sst, 0, framesize);
+        jit_sst = new (*alloc1) IFFLOAT(uint16_t,uint8_t)[framesize];
+        memset(jit_sst, 0, framesize FLOAT_ONLY(*sizeof(uint16_t)) );
 #endif
 
         //
@@ -1973,6 +2043,19 @@ namespace avmplus
         Traits* type = ms->paramTraits(i);
         LIns *arg;
         switch (bt(type)) {
+#ifdef VMCFG_FLOAT
+        case BUILTIN_float: 
+            arg = loadIns(LIR_ldf, offset,apArg, ACCSET_OTHER, LOAD_CONST);
+            offset += sizeof(Atom); // float is 4 bytes; but on x64, it takes up 8 bytes too, just like any int.
+            break;
+        case BUILTIN_float4: 
+            // float4 is passed inline [i.e. not as a pointer to the value !! ] //
+            arg = loadIns(LIR_ldf4, offset, apArg //0, 
+                         //  loadIns(LIR_ldp, offset, apArg, ACCSET_OTHER, LOAD_CONST)                          
+                           , ACCSET_OTHER, LOAD_CONST);
+            offset += sizeof(float4_t);
+            break;
+#endif // VMCFG_FLOAT
         case BUILTIN_number:
             arg = loadIns(LIR_ldd, offset, apArg, ACCSET_OTHER, LOAD_CONST);
             offset += sizeof(double);
@@ -2014,6 +2097,130 @@ namespace avmplus
     {
         localSet(i, undefConst, NULL);
     }
+
+#ifdef VMCFG_FLOAT
+    void CodegenLIR::emitNumericOp2(int32_t op1, int32_t op2, const LIREmitter& emitIns)
+    {
+        AvmAssert (state->value(op1).traits == NUMERIC_TYPE && state->value(op2).traits ==NUMERIC_TYPE) ;
+
+        CodegenLabel slow_path("_numeric2_slow_path_");
+        CodegenLabel both_double("_numeric2_both_double_");
+        CodegenLabel done("_numeric2_done_");
+        CodegenLabel int_op_number("_numeric2_int_op_number_");
+        CodegenLabel v1_is_int("_numeric2_v1_is_int_");
+        
+        LIns* val1 = loadAtomRep(op1);
+        LIns* val2 = loadAtomRep(op2);
+        LIns* rslt = insAlloc(sizeof(intptr_t));
+        LIns* tag = andp(  binaryIns(LIR_andp,val1,val2), AtomConstants::kAtomTypeMask);
+        // kIntptrType
+        suspendCSE();
+        /* NOTE: to make the fast path faster, we're playing with the bits to quickly determine if 
+           "both are double", "at least one is not Number"m and "both are int"
+           We *RELY* on the Atom TAG scheme, i.e. "kIntPtrType is 6" and "kDoubleType is 7".
+        */
+        branchToLabel(LIR_jt, eqp(tag, AtomConstants::kDoubleType), both_double);
+        branchToLabel(LIR_jf, eqp(tag, AtomConstants::kIntptrType), slow_path);
+        LIns* xormask = andp( binaryIns(LIR_xorp,val1,val2), AtomConstants::kAtomTypeMask );
+
+        branchToLabel(LIR_jf, eqp0(xormask), int_op_number);
+    // both_integers:
+        // Note that this works on 64bit platforms only if we are careful
+        // to restrict the range of intptr values to those that fit within
+        // the integer range of the double type.
+        stp( nativeToAtom(
+                    emitIns(BUILTIN_number, i2dIns(p2i(rshp(val1, AtomConstants::kAtomTypeSize))) 
+                                          , i2dIns(p2i(rshp(val2, AtomConstants::kAtomTypeSize))) ),
+                    NUMBER_TYPE ),
+             rslt, 0, ACCSET_OTHER);
+        JIT_EVENT(jit_numeric2_fast_int);
+        branchToLabel(LIR_j, NULL, done);
+
+    // int_op_number:
+        emitLabel(int_op_number);
+        tag = andp (val1, AtomConstants::kAtomTypeMask); 
+        branchToLabel(LIR_jt, eqp(tag, AtomConstants::kIntptrType),v1_is_int );
+    // v2_is_int: (v1 is number!)
+        stp( nativeToAtom(
+                emitIns(BUILTIN_number, ldd(subp(val1, AtomConstants::kDoubleType), 0, ACCSET_OTHER)
+                                      , i2dIns(p2i(rshp(val2, AtomConstants::kAtomTypeSize))) ),
+                NUMBER_TYPE ),
+            rslt, 0, ACCSET_OTHER);
+        JIT_EVENT(jit_numeric2_dbl_int);
+        branchToLabel(LIR_j, NULL, done);
+    // v1_is_int: (v2 is number!)
+        emitLabel(v1_is_int);
+        stp( nativeToAtom(
+                    emitIns(BUILTIN_number, i2dIns(p2i(rshp(val1, AtomConstants::kAtomTypeSize)))
+                                          , ldd(subp(val2, AtomConstants::kDoubleType), 0, ACCSET_OTHER) ),
+                NUMBER_TYPE ),
+            rslt, 0, ACCSET_OTHER);
+        JIT_EVENT(jit_numeric2_dbl_int);
+        branchToLabel(LIR_j, NULL, done);
+        
+    // slow_path:        
+        emitLabel(slow_path);
+        stp( emitIns(BUILTIN_any,  val1, val2) , rslt, 0, ACCSET_OTHER);
+        JIT_EVENT(jit_numeric2_slow);
+        branchToLabel(LIR_j, NULL, done);
+
+    // both_double:
+        emitLabel(both_double);
+        stp( nativeToAtom( 
+                        emitIns(BUILTIN_number,  ldd(subp(val1, AtomConstants::kDoubleType), 0, ACCSET_OTHER)
+                                              ,  ldd(subp(val2, AtomConstants::kDoubleType), 0, ACCSET_OTHER))
+                        , NUMBER_TYPE),
+             rslt, 0, ACCSET_OTHER);
+        JIT_EVENT(jit_numeric2_fast_double);
+
+   // done:
+        emitLabel(done);
+        resumeCSE();
+        localSet( op1, ldp(rslt, 0, ACCSET_OTHER), NUMERIC_TYPE);
+    }
+
+    void CodegenLIR::emitNumericOp1(int32_t op1, const LIREmitter &emitIns)
+    {
+        AvmAssert(state->value(op1).traits == NUMERIC_TYPE);
+
+        CodegenLabel not_intptr("_not_intptr_");
+        CodegenLabel not_double("_not_double_");
+        CodegenLabel done("_done_");
+        LIns* val = loadAtomRep(op1); // load Atom.
+        LIns* rslt = insAlloc(sizeof(intptr_t));
+        LIns* tag = andp(val, AtomConstants::kAtomTypeMask);
+        // kIntptrType
+        suspendCSE();
+        branchToLabel(LIR_jf, eqp(tag, AtomConstants::kIntptrType), not_intptr);
+        // Note that this works on 64bit platforms only if we are careful
+        // to restrict the range of intptr values to those that fit within
+        // the integer range of the double type.
+        stp( nativeToAtom(
+            emitIns(BUILTIN_number, i2dIns(p2i(rshp(val, AtomConstants::kAtomTypeSize))) )
+            , NUMBER_TYPE
+            ) , rslt, 0, ACCSET_OTHER);
+
+        JIT_EVENT(jit_numeric1_fast_int);
+        branchToLabel(LIR_j, NULL, done);
+        emitLabel(not_intptr);
+        // kDoubleType
+        branchToLabel(LIR_jf, eqp(tag, AtomConstants::kDoubleType), not_double);
+        stp( nativeToAtom( 
+            emitIns(BUILTIN_number,  ldd(subp(val, AtomConstants::kDoubleType), 0, ACCSET_OTHER) )
+            , NUMBER_TYPE
+            ) , rslt, 0, ACCSET_OTHER);
+        JIT_EVENT(jit_numeric1_fast_number);
+
+        branchToLabel(LIR_j, NULL, done);
+        emitLabel(not_double);
+
+        stp( emitIns(BUILTIN_any,  val) , rslt, 0, ACCSET_OTHER);
+        JIT_EVENT(jit_numeric1_slow);
+        emitLabel(done);
+        resumeCSE();
+        localSet( op1, ldp(rslt, 0, ACCSET_OTHER), NUMERIC_TYPE);
+    }
+#endif // VMCFG_FLOAT
 
 #ifdef VMCFG_FASTPATH_ADD
 
@@ -2087,6 +2294,8 @@ namespace avmplus
     {
         LIns* rhs = loadAtomRep(j);
         LIns* lhs = localGet(i);
+        FLOAT_ONLY(const bool floatSupport = pool->hasFloatSupport();)
+        const CallInfo* addFunction = IFFLOAT(floatSupport? FUNCTIONID(op_add_a_ia):FUNCTIONID(op_add_a_ia_legacy),FUNCTIONID(op_add_a_ia));
 
         #ifdef VMCFG_FASTPATH_ADD_INLINE
         if (inlineFastpath) {
@@ -2097,7 +2306,7 @@ namespace avmplus
             JIT_EVENT(jit_add_a_ia_fast_intptr);
             branchToLabel(LIR_j, NULL, done);
             emitLabel(fallback);
-            LIns* out = callIns(FUNCTIONID(op_add_a_ia), 3, coreAddr, lhs, rhs);
+            LIns* out = callIns(addFunction, 3, coreAddr, lhs, rhs);
             localSet(i, out, type);
             JIT_EVENT(jit_add_a_ia_slow);
             emitLabel(done);
@@ -2106,7 +2315,7 @@ namespace avmplus
         }
         #endif
 
-        LIns* out = callIns(FUNCTIONID(op_add_a_ia), 3, coreAddr, lhs, rhs);
+        LIns* out = callIns(addFunction, 3, coreAddr, lhs, rhs);
         localSet(i, out, type);
         JIT_EVENT(jit_add_a_ia);
     }
@@ -2116,8 +2325,14 @@ namespace avmplus
     void CodegenLIR::emitAddDoubleToAtom(int i, int j, Traits* type)
     {
         LIns* rhs = loadAtomRep(j);
-        LIns* lhs = localGetf(i);
-        LIns* out = callIns(FUNCTIONID(op_add_a_da), 3, coreAddr, lhs, rhs);
+        LIns* lhs = localGetf(i,DOUBLE_PRECISION);
+#ifdef VMCFG_FLOAT
+        const bool floatSupport = pool->hasFloatSupport();
+        const CallInfo* addFunction = floatSupport? FUNCTIONID(op_add_a_da):FUNCTIONID(op_add_a_da_legacy);
+#else 
+        const CallInfo* addFunction = FUNCTIONID(op_add_a_da);
+#endif // VMCFG_FLOAT
+        LIns* out = callIns(addFunction, 3, coreAddr, lhs, rhs);
         localSet(i, out, type);
         JIT_EVENT(jit_add_a_da);
     }
@@ -2136,6 +2351,12 @@ namespace avmplus
     {
         LIns* lhs = loadAtomRep(i);
         LIns* rhs = localGet(j);
+#ifdef VMCFG_FLOAT
+        const bool floatSupport = pool->hasFloatSupport();
+        const CallInfo* addFunction = floatSupport? FUNCTIONID(op_add_a_ai):FUNCTIONID(op_add_a_ai_legacy);
+#else
+        const CallInfo* addFunction = FUNCTIONID(op_add_a_ai);
+#endif // VMCFG_FLOAT
 
         #ifdef VMCFG_FASTPATH_ADD_INLINE
         if (inlineFastpath) {
@@ -2146,7 +2367,7 @@ namespace avmplus
             JIT_EVENT(jit_add_a_ai_fast_intptr);
             branchToLabel(LIR_j, NULL, done);
             emitLabel(fallback);
-            LIns* out = callIns(FUNCTIONID(op_add_a_ai), 3, coreAddr, lhs, rhs);
+            LIns* out = callIns(addFunction, 3, coreAddr, lhs, rhs);
             localSet(i, out, type);
             JIT_EVENT(jit_add_a_ai_slow);
             emitLabel(done);
@@ -2155,7 +2376,7 @@ namespace avmplus
         }
         #endif
 
-        LIns* out = callIns(FUNCTIONID(op_add_a_ai), 3, coreAddr, lhs, rhs);
+        LIns* out = callIns(addFunction, 3, coreAddr, lhs, rhs);
         localSet(i, out, type);
         JIT_EVENT(jit_add_a_ai);
     }
@@ -2165,8 +2386,15 @@ namespace avmplus
     void CodegenLIR::emitAddAtomToDouble(int i, int j, Traits* type)
     {
         LIns* lhs = loadAtomRep(i);
-        LIns* rhs = localGetf(j);
-        LIns* out = callIns(FUNCTIONID(op_add_a_ad), 3, coreAddr, lhs, rhs);
+        LIns* rhs = localGetf(j,DOUBLE_PRECISION);
+#ifdef VMCFG_FLOAT
+        const bool floatSupport = pool->hasFloatSupport();
+        const CallInfo* addFunction = floatSupport? FUNCTIONID(op_add_a_ad):FUNCTIONID(op_add_a_ad_legacy);
+#else
+        const CallInfo* addFunction = FUNCTIONID(op_add_a_ad);
+#endif // VMCFG_FLOAT
+
+        LIns* out = callIns(addFunction, 3, coreAddr, lhs, rhs);
         localSet(i, out, type);
         JIT_EVENT(jit_add_a_ad);
     }
@@ -2211,6 +2439,12 @@ namespace avmplus
     {
         LIns* lhs = loadAtomRep(i);
         LIns* rhs = loadAtomRep(j);
+#ifdef VMCFG_FLOAT
+        const bool floatSupport = pool->hasFloatSupport();
+        const CallInfo* addFunction = floatSupport? FUNCTIONID(op_add_a_aa):FUNCTIONID(op_add_a_aa_legacy);
+#else
+        const CallInfo* addFunction = FUNCTIONID(op_add_a_aa);
+#endif // VMCFG_FLOAT
 
         #ifdef VMCFG_FASTPATH_ADD_INLINE
         if (inlineFastpath) {
@@ -2238,7 +2472,7 @@ namespace avmplus
             JIT_EVENT(jit_add_a_aa_fast_intptr);
             branchToLabel(LIR_j, NULL, done);
             emitLabel(fallback);
-            LIns* out = callIns(FUNCTIONID(op_add_a_aa), 3, coreAddr, lhs, rhs);
+            LIns* out = callIns(addFunction, 3, coreAddr, lhs, rhs);
             localSet(i, out, type);
             JIT_EVENT(jit_add_a_aa_slow);
             emitLabel(done);
@@ -2247,7 +2481,7 @@ namespace avmplus
         }
         #endif
 
-        LIns* out = callIns(FUNCTIONID(op_add_a_aa), 3, coreAddr, lhs, rhs);
+        LIns* out = callIns(addFunction, 3, coreAddr, lhs, rhs);
         localSet(i, atomToNativeRep(type, out), type);
         JIT_EVENT(jit_add_a_aa);
     }
@@ -2258,7 +2492,13 @@ namespace avmplus
     {
         LIns* lhs = loadAtomRep(i);
         LIns* rhs = loadAtomRep(j);
-        LIns* out = callIns(FUNCTIONID(op_add), 3, coreAddr, lhs, rhs);
+        LIns* out;
+#ifdef VMCFG_FLOAT
+        if(!pool->hasFloatSupport())
+            out = callIns(FUNCTIONID(op_add_legacy), 3, coreAddr, lhs, rhs);
+        else 
+#endif // float is disabled, we have no "legacy" function, it's the op_add that has the "legacy" behaviour
+           out = callIns(FUNCTIONID(op_add), 3, coreAddr, lhs, rhs);
         localSet(i, atomToNativeRep(type, out), type);
         JIT_EVENT(jit_add);
     }
@@ -2282,11 +2522,42 @@ namespace avmplus
             // TODO: The tests for isNumeric() above could be isNumericOrBool(),
             // but a corresponding change would be needed in the verifier, resulting
             // in a slight change to the verifier's type inference algorithm.
-            AvmAssert(type == NUMBER_TYPE);
-            LIns* lhs = coerceToNumber(i);
-            LIns* rhs = coerceToNumber(j);
-            localSet(i, binaryIns(LIR_addd, lhs, rhs), type);
-            JIT_EVENT(jit_add_a_nn);
+            AvmAssert(type == NUMBER_TYPE FLOAT_ONLY(|| type==FLOAT_TYPE || type== NUMERIC_TYPE || type== FLOAT4_TYPE) );
+#ifdef VMCFG_FLOAT
+            if(!pool->hasFloatSupport()) 
+                type = NUMBER_TYPE; 
+            else
+                if(val1.traits== FLOAT4_TYPE || val2.traits == FLOAT4_TYPE) 
+                    type = FLOAT4_TYPE;
+            if (type == FLOAT4_TYPE) {
+                AvmAssert( type == FLOAT4_TYPE );
+                LIns* lhs = coerceToFloat4(i);
+                LIns* rhs = coerceToFloat4(j);
+                localSet(i, binaryIns(LIR_addf4, lhs, rhs), type);
+                JIT_EVENT(jit_add_a_f4f4);
+            } else if(type==FLOAT_TYPE){
+                LIns* lhs = coerceToFloat(i);
+                LIns* rhs = coerceToFloat(j);
+                localSet(i, binaryIns(LIR_addf, lhs, rhs), type);
+                JIT_EVENT(jit_add_a_ff);
+            } else if(type==NUMBER_TYPE){
+#endif // VMCFG_FLOAT
+                LIns* lhs = coerceToNumber(i);
+                LIns* rhs = coerceToNumber(j);
+                localSet(i, binaryIns(LIR_addd, lhs, rhs), type);
+                JIT_EVENT(jit_add_a_nn);
+#ifdef VMCFG_FLOAT
+            } else {
+                /* Numeric type */
+                AvmAssert(val1.traits==NUMERIC_TYPE);
+                if(val1.traits!=NUMERIC_TYPE)
+                    localSet(i,coerceToNumeric(i),NUMERIC_TYPE); // this should never happen!
+                AvmAssert(val2.traits==NUMERIC_TYPE);
+                if(val2.traits!=NUMERIC_TYPE)
+                    localSet(j,coerceToNumeric(j), NUMERIC_TYPE);// this should never happen!
+                    emitNumericOp2( i, j, BasicLIREmitter(this, LIR_addd, FUNCTIONID(op_add)) );
+            }
+#endif // VMCFG_FLOAT
 #ifdef VMCFG_FASTPATH_ADD
         // If we arrive here, at least one argument is not known to be of a numeric type.
         // Thus, having determined one argument to be of a known numeric type, we will coerce
@@ -2294,24 +2565,24 @@ namespace avmplus
         // of type kIntptrType or kDoubleType, checking for these cases first.
         } else if (val1.traits == INT_TYPE) {
             // integer + atom
-            AvmAssert(type == OBJECT_TYPE);
+            AvmAssert(type == OBJECT_TYPE FLOAT_ONLY(|| type == NUMERIC_TYPE) );
             emitAddIntToAtom(i, j, type);
         } else if (val1.traits == NUMBER_TYPE) {
             // double + atom
-            AvmAssert(type == OBJECT_TYPE);
+            AvmAssert(type == OBJECT_TYPE FLOAT_ONLY(|| type == NUMERIC_TYPE) );
             emitAddDoubleToAtom(i, j, type);
         } else if (val2.traits == INT_TYPE) {
             // atom + integer
-            AvmAssert(type == OBJECT_TYPE);
+            AvmAssert(type == OBJECT_TYPE FLOAT_ONLY(|| type == NUMERIC_TYPE) );
             emitAddAtomToInt(i, j, type);
         } else if (val2.traits == NUMBER_TYPE) {
             // atom + double
-            AvmAssert(type == OBJECT_TYPE);
+            AvmAssert(type == OBJECT_TYPE FLOAT_ONLY(|| type == NUMERIC_TYPE) );
             emitAddAtomToDouble(i, j, type);
 #endif
         } else {
             // Neither argument is known to be of a numeric type, so coerce both to atoms.
-            AvmAssert(type == OBJECT_TYPE);
+            AvmAssert(type == OBJECT_TYPE FLOAT_ONLY(|| type == NUMERIC_TYPE) );
             emitAddAtomToAtom(i, j, type);
         }
     }
@@ -2325,7 +2596,7 @@ namespace avmplus
         emitSetPc(state->abc_pc);
 
 #ifdef DEBUG
-        memset(jit_sst, 0, framesize);
+        memset(jit_sst, 0, framesize FLOAT_ONLY(*sizeof(uint16_t)) );
 #endif
 
         // If this is a backwards branch, generate an interrupt check.
@@ -2347,7 +2618,7 @@ namespace avmplus
             if (i >= scopeTop && i < ms->stack_base())
                 continue;
             const FrameValue& v = state->value(i);
-            AvmAssert(!jit_sst[i] || jit_sst[i] == v.sst_mask);
+            AvmAssert(!jit_sst[i] || jit_sst[i] == v.sst_mask  );
         }
 #else
         (void)state;
@@ -2437,6 +2708,16 @@ namespace avmplus
             AvmAssert(type == NUMBER_TYPE);
             emitDoubleConst(sp+1, &pool->cpool_double[imm30]->value);
             break;
+#ifdef VMCFG_FLOAT
+        case OP_pushfloat:
+            AvmAssert(type == FLOAT_TYPE);
+            emitFloatConst(sp+1, pool->cpool_float[imm30]->value);
+            break;
+        case OP_pushfloat4:
+            AvmAssert(type == FLOAT4_TYPE);
+            emitFloat4Const(sp+1, (const float4_t*) pool->cpool_float4[imm30] );
+            break;
+#endif
         case OP_pushnan:
             AvmAssert(type == NUMBER_TYPE);
             emitDoubleConst(sp+1, (double*)atomPtr(core->kNaN));
@@ -2474,7 +2755,8 @@ namespace avmplus
             break;
         case OP_inclocal:
         case OP_declocal:
-            emit(opcode, imm30, opcode==OP_inclocal ? 1 : -1, NUMBER_TYPE);
+            AvmAssert(type==NUMBER_TYPE FLOAT_ONLY(|| type == FLOAT_TYPE) );
+            emit(opcode, imm30, opcode==OP_inclocal ? 1 : -1, type);
             break;
         case OP_inclocal_i:
         case OP_declocal_i:
@@ -2528,7 +2810,19 @@ namespace avmplus
         case OP_convert_d:
         case OP_coerce_d:
         case OP_coerce_s:
-            AvmAssert(
+#ifdef VMCFG_FLOAT
+        case OP_convert_f:
+        case OP_convert_f4:
+        case OP_unplus:
+#define EXTRA_CHECKS                                               \
+                (opcode == OP_unplus && type == NUMERIC_TYPE) ||   \
+                (opcode == OP_convert_f && type == FLOAT_TYPE) ||  \
+                (opcode == OP_convert_f4 && type == FLOAT4_TYPE)
+#else
+#define EXTRA_CHECKS 0
+#endif
+
+            AvmAssert( EXTRA_CHECKS ||
                     (opcode == OP_coerce    && type != NULL) ||
                     (opcode == OP_coerce_b  && type == BOOLEAN_TYPE) ||
                     (opcode == OP_convert_b && type == BOOLEAN_TYPE) ||
@@ -2648,12 +2942,14 @@ namespace avmplus
         case OP_subtract:
         case OP_divide:
         case OP_multiply:
-            emit(opcode, 0, 0, NUMBER_TYPE);
+            AvmAssert(type==NUMBER_TYPE FLOAT_ONLY(|| type==NUMERIC_TYPE || type == FLOAT_TYPE || type == FLOAT4_TYPE));
+            emit(opcode, 0, 0, type);
             break;
 
         case OP_increment:
         case OP_decrement:
-            emit(opcode, sp, opcode == OP_increment ? 1 : -1, NUMBER_TYPE);
+            AvmAssert(type==NUMBER_TYPE FLOAT_ONLY(|| type==NUMERIC_TYPE || type == FLOAT_TYPE || type == FLOAT4_TYPE));
+            emit(opcode, sp, opcode == OP_increment ? 1 : -1, type);
             break;
 
         case OP_increment_i:
@@ -2668,7 +2964,8 @@ namespace avmplus
             break;
 
         case OP_negate:
-            emit(opcode, sp, 0, NUMBER_TYPE);
+            AvmAssert(type==NUMBER_TYPE FLOAT_ONLY(|| type==NUMERIC_TYPE || type == FLOAT_TYPE || type == FLOAT4_TYPE));
+            emit(opcode, sp, 0, type);
             break;
 
         case OP_negate_i:
@@ -2982,7 +3279,7 @@ namespace avmplus
                                 loadEnvToplevel(),
                                 InsConstPtr(multiname),
                                 loadAtomRep(state->sp()),
-                                leaIns(restLocal * VARSIZE, vars),
+                                leaIns(restLocal * IFFLOAT(info->varSize(), VARSIZE) , vars),
                                 restArgc,
                                 (info->needRest() ?
                                     binaryIns(LIR_addp, ap_param, InsConstPtr((void*)(ms->rest_offset()))) :
@@ -3002,7 +3299,7 @@ namespace avmplus
     {
         const FrameValue& value = state->value(index);
         Traits* in = value.traits;
-
+        
         switch (bt(in)) {
         case BUILTIN_null:
         case BUILTIN_string:
@@ -3012,8 +3309,14 @@ namespace avmplus
             return callIns(FUNCTIONID(intToString), 2, coreAddr, localGet(index));
         case BUILTIN_uint:
             return callIns(FUNCTIONID(uintToString), 2, coreAddr, localGet(index));
+#ifdef VMCFG_FLOAT
+        case BUILTIN_float: 
+                return callIns(FUNCTIONID(floatToString),2,coreAddr,localGetf(index,SINGLE_PRECISION));
+        case BUILTIN_float4: 
+            return callIns(FUNCTIONID(float4ToString),2,coreAddr,localGetf4(index));
+#endif
         case BUILTIN_number:
-            return callIns(FUNCTIONID(doubleToString), 2, coreAddr, localGetf(index));
+              return callIns(FUNCTIONID(doubleToString), 2, coreAddr, localGetf(index,DOUBLE_PRECISION));
         case BUILTIN_boolean: {
             // load "true" or "false" string constant from AvmCore.booleanStrings[]
             LIns *offset = binaryIns(LIR_lshp, i2p(localGet(index)), InsConst(PTR_SCALE));
@@ -3035,7 +3338,8 @@ namespace avmplus
         const FrameValue& value = state->value(index);
         Traits* in = value.traits;
 
-        if (in && (in->isNumeric() || in == BOOLEAN_TYPE)) {
+        /* can't promote "Numeric" to "Number", we don't know the exact type at compile time */
+        if (in && FLOAT_ONLY(in != NUMERIC_TYPE &&) (in->isNumeric() || in == BOOLEAN_TYPE)) {
             return promoteNumberIns(in, index);
         } else {
             // * -> Number
@@ -3091,6 +3395,70 @@ namespace avmplus
             return callIns(FUNCTIONID(number), 1, loadAtomRep(index));
         }
     }
+
+#ifdef VMCFG_FLOAT
+    /** emit code for * -> Float conversion */
+    LIns* CodegenLIR::coerceToFloat(int index)
+    {
+        const FrameValue& value = state->value(index);
+        Traits* in = value.traits;
+        
+        if (in && in!=NUMERIC_TYPE && (in->isNumeric() || in == BOOLEAN_TYPE)) {
+            return promoteFloatIns(in, index);
+        } else {
+            // * -> Float
+            return callIns(FUNCTIONID(singlePrecisionFloat), 1, loadAtomRep(index));
+        }
+    }
+
+    /** emit code for * -> Float4 conversion */
+    LIns* CodegenLIR::coerceToFloat4(int index)
+    {
+        const FrameValue& value = state->value(index);
+        Traits* in = value.traits;
+        return promoteFloat4Ins(in, index);
+    }
+
+    /** emit code for * -> Float|Number conversion */
+    LIns* CodegenLIR::coerceToNumeric(int index)
+    {
+        const FrameValue& value = state->value(index);
+        Traits* in = value.traits;
+
+        if( in && (in->isNumeric() || in == BOOLEAN_TYPE))  
+            return loadAtomRep(index); // already numeric, just load the atom.
+        else{
+            CodegenLabel already_numeric("_coercenum_already_numeric_");
+            CodegenLabel done("_coercenum_done_");
+            CodegenLabel non_numeric("_coercenum_non_numeric_");
+            LIns* val = loadAtomRep(index);
+            LIns* tag = andp(val, AtomConstants::kAtomTypeMask);
+            LIns* rslt = insAlloc(sizeof(intptr_t));
+            suspendCSE();
+
+            LIns* tagmask = binaryIns(LIR_lshi, InsConst(1),p2i(tag));
+            const int32_t numericMask = ( (1<<AtomConstants::kIntptrType) | (1<< AtomConstants::kDoubleType) | (1 << AtomConstants::kSpecialBibopType) );
+            branchToLabel(LIR_jt, binaryIns(LIR_eqi, binaryIns(LIR_andi, tagmask, InsConst(numericMask)) , InsConst(0)  ), non_numeric);
+            branchToLabel(LIR_jf, eqp(val, AtomConstants::undefinedAtom), already_numeric); // we still need to test for "undefined" before we conclude it's already a numeric type
+            /* If we got here, the input was "undefined" - just return NaN */
+            stp(InsConstAtom(core->kNaN),rslt,0,ACCSET_OTHER ); 
+            branchToLabel(LIR_j, NULL, done);
+
+            emitLabel(non_numeric);
+            stp(callIns(FUNCTIONID(numericAtom), 2, coreAddr, val) , rslt,0,ACCSET_OTHER);
+            JIT_EVENT(jit_atom2numeric_dbl);
+            branchToLabel(LIR_j, NULL, done);
+            
+
+            emitLabel(already_numeric);
+            stp(val,rslt,0, ACCSET_OTHER); 
+            JIT_EVENT(jit_atom2numeric_flt);
+            emitLabel(done);
+            resumeCSE();
+            return ldp(rslt,0,ACCSET_OTHER);
+        }
+    }
+#endif // VMCFG_FLOAT
 
     LIns *CodegenLIR::emitStringCall(int index, const CallInfo *stringCall, bool preserveNull)
     {
@@ -3467,6 +3835,18 @@ namespace avmplus
         localSet(index, lirout->insImmD(*pd), NUMBER_TYPE);
     }
 
+#ifdef VMCFG_FLOAT
+    void CodegenLIR::emitFloatConst(int index, const float f)
+    {
+        localSet(index, lirout->insImmF(f), FLOAT_TYPE);
+    }
+    
+    void CodegenLIR::emitFloat4Const(int index, const float4_t* f4)
+    {
+        localSet(index, lirout->insImmF4(AvmThunkUnbox_float4_impl((const Atom* )f4)), FLOAT4_TYPE);
+    }
+#endif // VMCFG_FLOAT
+    
     void CodegenLIR::writeCoerce(const FrameState* state, uint32_t loc, Traits* result)
     {
         this->state = state;
@@ -3568,7 +3948,7 @@ namespace avmplus
     // and specialize charCodeAt to an faster integer version.
     LIns* CodegenLIR::coerceNumberToInt(int loc)
     {
-        LIns *arg = localGetf(loc);
+        LIns *arg = localGetf(loc,DOUBLE_PRECISION);
         LOpcode op = arg->opcode();
         switch (op) {
             case LIR_ui2d:
@@ -3704,6 +4084,20 @@ namespace avmplus
         {
             expr = coerceToNumber(loc);
         }
+#ifdef VMCFG_FLOAT
+        else if (result == FLOAT_TYPE)
+        {
+            expr = coerceToFloat(loc);
+        }
+        else if (result == FLOAT4_TYPE)
+        {
+            expr = coerceToFloat4(loc);
+        }
+        else if (result == NUMERIC_TYPE)
+        {
+            expr = coerceToNumeric(loc);
+        }
+#endif // VMCFG_FLOAT
         else if (result == INT_TYPE)
         {
             if (in == UINT_TYPE || in == BOOLEAN_TYPE || in == INT_TYPE)
@@ -3745,9 +4139,13 @@ namespace avmplus
             {
                 expr = localGet(loc);
             }
-            else if (in == NUMBER_TYPE)
+            else if (in == NUMBER_TYPE FLOAT_ONLY(|| in ==FLOAT_TYPE) )
             {
-                expr = callIns(FUNCTIONID(doubleToBool), 1, localGetf(loc));
+                FLOAT_ONLY(bool singlePrecision = (in==FLOAT_TYPE));
+                ePrecision prec = IFFLOAT(singlePrecision ? SINGLE_PRECISION : DOUBLE_PRECISION, DOUBLE_PRECISION);
+                LIns* getIns = localGetf(loc,prec);
+                LIns* ins = IFFLOAT(singlePrecision?f2dIns(getIns):getIns, getIns) ;
+                expr = callIns(FUNCTIONID(doubleToBool), 1, ins);
             }
             else if (in == INT_TYPE || in == UINT_TYPE)
             {
@@ -3847,15 +4245,29 @@ namespace avmplus
 
     void CodegenLIR::emitIsNaN(Traits* result)
     {
-        int op1 = state->sp();
-        LIns *f = localGetf(op1);
+         int op1 = state->sp();
+        /* In practice, floats will be coerced to double before calling isNaN - so "singlePrecision" should be always false for now.
+        But this is implemented as if isNaN was polymorphic - there's no reason why it won't eventually be polymorphic */
+        bool singlePrecision = IFFLOAT(state->value(op1).traits == FLOAT_TYPE, false);
+        LIns *f = localGetf(op1, singlePrecision ? SINGLE_PRECISION : DOUBLE_PRECISION);
         if (isPromote(f->opcode())) {
             // Promoting an integer to a double cannot result in a NaN.
             localSet(op1-1, InsConst(0), result);
         }
         else {
+#ifdef VMCFG_FLOAT
+            if (f->opcode()==LIR_f2d) {
+                /* handle the case when isNan() was called on a float */
+                f = f->oprnd1();
+                singlePrecision = true;
+            }
+            LOpcode eqop = singlePrecision ? LIR_eqf : LIR_eqd;
+#else
+            LOpcode eqop = LIR_eqd;
+#endif // VMCFG_FLOAT
+
             // LIR is required to follow IEEE floating point semantics, thus x is a NaN iff x != x.
-            localSet(op1-1, binaryIns(LIR_eqi, binaryIns(LIR_eqd, f, f), InsConst(0)), result);
+            localSet(op1-1, binaryIns(LIR_eqi, binaryIns(eqop, f, f), InsConst(0)), result);
         }
     }
 
@@ -3909,7 +4321,7 @@ namespace avmplus
         BuiltinType bt = this->bt(state->value(argOffset).traits);
         int32_t btMask = 1 << bt;
         if (bt == BUILTIN_number) {
-            LIns *arg = localGetf(argOffset);
+            LIns *arg = localGetf(argOffset, DOUBLE_PRECISION);
             if (arg->isImmD()) {
                 int32_t intVal = (int32_t) arg->immD();
                 if ((double) intVal == arg->immD() && !MathUtils::isNegZero(arg->immD())) {
@@ -3917,11 +4329,36 @@ namespace avmplus
                         btMask |= 1 << BUILTIN_uint;
                     btMask |= 1 << BUILTIN_int;
                 }
+#ifdef VMCFG_FLOAT
+                float fVal = (float) arg->immD();
+                if((double)fVal == arg->immD() || MathUtils::isNaN(arg->immD()))
+                    btMask |= 1 << BUILTIN_float;
+#endif // VMCFG_FLOAT
             }
             else if (arg->opcode() == LIR_i2d)
                 btMask |= 1 << BUILTIN_int;
             else if (arg->opcode() == LIR_ui2d)
                 btMask |= 1 << BUILTIN_uint;
+#ifdef VMCFG_FLOAT
+            else if (arg->opcode() == LIR_f2d)
+                btMask |= 1<< BUILTIN_float;
+        }
+        else if (bt == BUILTIN_float) {
+            LIns *arg = localGetf(argOffset, SINGLE_PRECISION);
+            btMask |= 1 << BUILTIN_number;
+            if (arg->isImmF()) {
+                int32_t intVal = (int32_t) arg->immF();
+                if ((float) intVal == arg->immF() && !MathUtils::isNegZero(arg->immF())) {
+                    if (intVal >= 0)
+                        btMask |= 1 << BUILTIN_uint;
+                    btMask |= 1 << BUILTIN_int;
+                }
+            }
+            else if (arg->opcode() == LIR_i2f)
+                btMask |= 1 << BUILTIN_int;
+            else if (arg->opcode() == LIR_ui2f)
+                btMask |= 1 << BUILTIN_uint;
+#endif // VMCFG_FLOAT
         }
         else if (bt == BUILTIN_int) {
             LIns *arg = localGet(argOffset);
@@ -3939,7 +4376,7 @@ namespace avmplus
         BuiltinType oldBt = this->bt(state->value(argOffset).traits);
 
         if (oldBt == BUILTIN_number) {
-            LIns *arg = localGetf(argOffset);
+            LIns *arg = localGetf(argOffset, DOUBLE_PRECISION);
             if (newBt == BUILTIN_int) {
                 if (arg->isImmD())
                     return InsConst((int32_t)arg->immD());
@@ -3956,11 +4393,69 @@ namespace avmplus
                 else
                     AvmAssert(0);
             }
+#ifdef VMCFG_FLOAT
+            else if (newBt == BUILTIN_float) {  // not used right now, but maybe soon...
+                if (arg->isImmD())
+                    return InsConstFlt((float)arg->immD());
+                else if (arg->opcode() == LIR_f2d)
+                    return arg->oprnd1();
+                else
+                    AvmAssert(0);
+            }
+            AvmAssert(newBt==BUILTIN_number);
+            return arg;
+        }
+        else if (oldBt == BUILTIN_float) {
+            LIns *arg = localGetf(argOffset, SINGLE_PRECISION);
+            if (newBt == BUILTIN_int) {
+                if (arg->isImmF())
+                    return InsConst((int32_t)arg->immF());
+                else if (arg->opcode() == LIR_i2f)
+                    return arg->oprnd1();
+                else
+                    AvmAssert(0);
+            }
+            else if (newBt == BUILTIN_uint) {
+                if (arg->isImmD())
+                    return InsConst((int32_t)arg->immD());
+                else if (arg->opcode() == LIR_ui2d)
+                    return arg->oprnd1();
+                else
+                    AvmAssert(0);
+            }
+            else if (newBt == BUILTIN_number) {  // not used right now, but maybe soon...
+                if (arg->isImmF())
+                    return lirout->insImmD(arg->immF());
+                else 
+                    return f2dIns(arg);
+            }
+            AvmAssert(newBt==BUILTIN_float);
+            return arg;
+#endif // VMCFG_FLOAT
         }
 
+        /* See determineBuiltinMaskForArg - so far we can have:
+             - for Number/float - newBt may be any of float, int, uint, number
+             - for int  - newBt may also be uint 
+             - for others: newBt must be identical with oldBt
+             That's why the switch below works.
+        */
+
         switch (newBt) {
+#ifdef VMCFG_FLOAT
         case BUILTIN_number:
-            return localGetf(argOffset);
+            AvmAssertMsg(false, "Case should be already handled; this means oldBt is not number, but newBt is Number!");
+            return localGetf(argOffset, DOUBLE_PRECISION);
+        case BUILTIN_float:
+            AvmAssertMsg(false, "Case should be already handled; this means oldBt is not float, but newBt is float!");
+            return localGetf(argOffset, SINGLE_PRECISION);
+        case BUILTIN_float4:
+            AvmAssertMsg(false, "Case should be already handled; this means oldBt is not float4, but newBt is float4!");
+            return localGetf4(argOffset);
+#else
+        case BUILTIN_number:
+            return localGetf(argOffset, DOUBLE_PRECISION);
+#endif // VMCFG_FLOAT
         case BUILTIN_boolean:
         case BUILTIN_int:
         case BUILTIN_uint:
@@ -3978,6 +4473,7 @@ namespace avmplus
     {
         { 0, /* dummy entry so 0 can be treated as HashMap miss*/ 1, {}, 0, 0},
         { avmplus::NativeID::native_script_function_isNaN, 1, {BUILTIN_number, BUILTIN_none},   0, &CodegenLIR::emitIsNaN },
+        /*could theoretically also add { avmplus::NativeID::native_script_function_isNaN, 1, {BUILTIN_float, BUILTIN_none},   0, &CodegenLIR::emitIsNaN }, */
 
         { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_uint,   BUILTIN_none},   FUNCTIONID(String_charCodeAtFU), 0},
         { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_int,    BUILTIN_none},   FUNCTIONID(String_charCodeAtFI), 0},
@@ -4261,24 +4757,36 @@ namespace avmplus
             Traits* paramType = i <= param_count ? ms->paramTraits(i) : NULL;
             LIns* v;
             switch (bt(paramType)) {
+#ifdef VMCFG_FLOAT
+            case BUILTIN_float: 
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldf, vars, index * info->varSize(), ACCSET_VARS);
+                stf(v, ap, disp, ACCSET_OTHER);
+                disp += sizeof(intptr_t); // same size as an 'int' ! (64 bits on x64)
+                break;
+            case BUILTIN_float4: 
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldf4, vars, index * info->varSize(), ACCSET_VARS);
+                stf4(v, ap, disp, ACCSET_OTHER);
+                disp += sizeof(float4_t); 
+                break;
+#endif
             case BUILTIN_number:
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldd, vars, index * VARSIZE, ACCSET_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldd, vars, index * IFFLOAT(info->varSize(), VARSIZE), ACCSET_VARS);
                 std(v, ap, disp, ACCSET_OTHER);
                 disp += sizeof(double);
                 break;
             case BUILTIN_int:
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldi, vars, index * VARSIZE, ACCSET_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldi, vars, index * IFFLOAT(info->varSize(), VARSIZE), ACCSET_VARS);
                 stp(i2p(v), ap, disp, ACCSET_OTHER);
                 disp += sizeof(intptr_t);
                 break;
             case BUILTIN_uint:
             case BUILTIN_boolean:
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldi, vars, index * VARSIZE, ACCSET_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldi, vars, index * IFFLOAT(info->varSize(), VARSIZE), ACCSET_VARS);
                 stp(ui2p(v), ap, disp, ACCSET_OTHER);
                 disp += sizeof(uintptr_t);
                 break;
             default:
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldp, vars, index * VARSIZE, ACCSET_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldp, vars, index * IFFLOAT(info->varSize(), VARSIZE), ACCSET_VARS);
                 stp(v, ap, disp, ACCSET_OTHER);
                 disp += sizeof(void*);
                 break;
@@ -4296,6 +4804,14 @@ namespace avmplus
         if (!iid) {
             const CallInfo *fid;
             switch (rbt) {
+#ifdef VMCFG_FLOAT
+            case BUILTIN_float: 
+                fid = FUNCTIONID(spfcalli);
+                break;
+            case BUILTIN_float4: 
+                fid = FUNCTIONID(vfcalli);
+                break;
+#endif
             case BUILTIN_number:
                 fid = FUNCTIONID(fcalli);
                 break;
@@ -4310,6 +4826,14 @@ namespace avmplus
         } else {
             const CallInfo *fid;
             switch (rbt) {
+#ifdef VMCFG_FLOAT
+            case BUILTIN_float: 
+                fid = FUNCTIONID(spfcallimt);// TODO: Test this!!!
+                break;
+            case BUILTIN_float4: 
+                fid = FUNCTIONID(vfcallimt);// TODO: Test this!!!
+                break;
+#endif
             case BUILTIN_number:
                 fid = FUNCTIONID(fcallimt);
                 break;
@@ -4344,6 +4868,10 @@ namespace avmplus
         // get
         LOpcode op;
         switch (bt(slotType)) {
+#ifdef VMCFG_FLOAT
+        case BUILTIN_float4:    op = LIR_ldf4;   break;
+        case BUILTIN_float:     op = LIR_ldf;   break;
+#endif
         case BUILTIN_number:    op = LIR_ldd;   break;
         case BUILTIN_int:
         case BUILTIN_uint:
@@ -4406,12 +4934,12 @@ namespace avmplus
 
         // if storing to a pointer-typed slot, inline a WB
         Traits* slotType = tb->getSlotTraits(slot);
-
-        if (!slotType || !slotType->isMachineType() || slotType == OBJECT_TYPE)
+        FLOAT_ONLY( AvmAssert( slotType != NUMERIC_TYPE ) );
+        if (!slotType || !slotType->isMachineType() || slotType == OBJECT_TYPE )
         {
             // slot type is Atom (for *, Object) or RCObject* (String, Namespace, or other user types)
             const CallInfo *wbAddr = FUNCTIONID(privateWriteBarrierRC);
-            if (slotType == NULL || slotType == OBJECT_TYPE) {
+            if (slotType == NULL FLOAT_ONLY(|| slotType == NUMERIC_TYPE) ||  slotType == OBJECT_TYPE) {
                 // use fast atom wb
                 wbAddr = FUNCTIONID(atomWriteBarrier);
             }
@@ -4421,6 +4949,16 @@ namespace avmplus
                     leaIns(offset, ptr),
                     value);
         }
+#ifdef VMCFG_FLOAT
+        else if (slotType == FLOAT_TYPE) {
+            // slot type is double or int
+            stf(value, ptr, offset, ACCSET_OTHER);
+        }
+        else if (slotType == FLOAT4_TYPE) {
+            // slot type is double or int
+            stf4(value, ptr, offset, ACCSET_OTHER);
+        }
+#endif
         else if (slotType == NUMBER_TYPE) {
             // slot type is double or int
             std(value, ptr, offset, ACCSET_OTHER);
@@ -4779,7 +5317,7 @@ namespace avmplus
                                           setDoubleVectorNativeHelpers[idxKind]);
                     return;
                 }
-                value = localGetf(valIndexOnStack);
+                value = localGetf(valIndexOnStack,DOUBLE_PRECISION);
                 setter = setDoubleVectorNativeHelpers[idxKind];
             }
             else {
@@ -4787,6 +5325,11 @@ namespace avmplus
                 setter = setDoubleVectorHelpers[idxKind];
             }
         }
+        else {
+             AvmAssert(setter==NULL);
+             // Or in other words: if we got here, we'll use a generic helper.
+        }
+
         if (setter) {
             callIns(setter, 3, localGetp(objIndexOnStack), index, value);
         } else {
@@ -4815,19 +5358,23 @@ namespace avmplus
         }
         // Convert Number expression to int or uint if it is a promotion
         // from int or uint, or if it is a constant in range for int or uint.
-        else if (*indexType == NUMBER_TYPE) {
-            index = localGetf(sp);
-            if (index->opcode() == LIR_i2d) {
+        else if (*indexType == NUMBER_TYPE FLOAT_ONLY(|| *indexType == FLOAT_TYPE)) {
+            FLOAT_ONLY(bool singlePrecision = *indexType == FLOAT_TYPE);
+            ePrecision precision = IFFLOAT( singlePrecision?SINGLE_PRECISION:DOUBLE_PRECISION, DOUBLE_PRECISION);
+            index = localGetf(sp,precision);
+            if (index->opcode() == LIR_i2d FLOAT_ONLY(|| index->opcode()== LIR_i2f)) {
+                FLOAT_ONLY(AvmAssert(singlePrecision == (index->opcode()==LIR_i2f)) );
                 *indexType = INT_TYPE;
                 return index->oprnd1();
             }
-            else if (index->opcode() == LIR_ui2d) {
+            else if (index->opcode() == LIR_ui2d FLOAT_ONLY(|| index->opcode()== LIR_ui2f)) {
+                FLOAT_ONLY(AvmAssert(singlePrecision == (index->opcode()==LIR_ui2f)) );
                 *indexType = UINT_TYPE;
                 return index->oprnd1();
             }
-            else if (index->isImmD())
+            else if (index->isImmD() FLOAT_ONLY(|| index->isImmF()) )
             {
-                double d = index->immD();
+                double d = IFFLOAT( index->isImmD() ? index->immD(): (double)index->immF(), index->immD());
                 // Convert to uint if possible.
                 uint32_t u = uint32_t(d);
                 if (double(u) == d) {
@@ -4938,7 +5485,13 @@ namespace avmplus
             case OP_sf32:
             case OP_sf64:
             {
-                LIns* svalue = localGetf(sp-1);
+#ifdef VMCFG_FLOAT
+                bool singlePrecision = state->value(sp-1).traits == FLOAT_TYPE;
+                ePrecision precision = singlePrecision?SINGLE_PRECISION:DOUBLE_PRECISION;
+#else
+                ePrecision precision = DOUBLE_PRECISION;
+#endif
+                LIns* svalue = localGetf(sp-1, precision);
                 LIns* mopAddr = localGet(sp);
                 const MopsInfo& mi = kMopsStoreInfo[opcode-OP_si8];
             #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP
@@ -5064,6 +5617,14 @@ namespace avmplus
                     }
                 }
                 switch (bt(t)) {
+#ifdef VMCFG_FLOAT
+                case BUILTIN_float: 
+                    Ins(LIR_retf, retvalue);
+                    break;
+                case BUILTIN_float4: 
+                    Ins(LIR_retf4, retvalue);
+                    break;
+#endif
                 case BUILTIN_number:
                     Ins(LIR_retd, retvalue);
                     break;
@@ -5105,7 +5666,22 @@ namespace avmplus
 
             case OP_negate: {
                 int32_t index = (int32_t) op1;
-                localSet(index, Ins(LIR_negd, localGetf(index)),result);
+#ifdef VMCFG_FLOAT
+                const Traits*  vt = state->value(index).traits;
+                AvmAssert ( vt == result );
+                if( vt == NUMBER_TYPE )
+                    localSet(index, Ins(LIR_negd, localGetf(index,DOUBLE_PRECISION)), result);
+                else if(vt==FLOAT_TYPE)
+                    localSet(index, Ins(LIR_negf, localGetf(index,SINGLE_PRECISION)), result);
+                else if(vt==FLOAT4_TYPE)
+                    localSet(index, Ins(LIR_negf4, localGetf4(index)), result);
+                else {
+                    NanoAssert( vt == NUMERIC_TYPE );
+                    emitNumericOp1( index, BasicLIREmitter(this, LIR_negd, FUNCTIONID(op_negate)) );
+                }
+#else
+                localSet(index, Ins(LIR_negd, localGetf(index)), result);
+#endif // VMCFG_FLOAT
                 break;
             }
 
@@ -5123,7 +5699,28 @@ namespace avmplus
             case OP_declocal: {
                 int32_t index = (int32_t) op1;
                 int32_t incr = (int32_t) op2; // 1 or -1
+#ifdef VMCFG_FLOAT
+                LIns* addIns = NULL;
+                const Traits*  vt = state->value(index).traits;
+                AvmAssert(result==vt);
+                if( vt == NUMBER_TYPE ){
+                    addIns = binaryIns(LIR_addd, localGetf(index, DOUBLE_PRECISION), i2dIns(InsConst(incr)));
+                }
+                else if( vt == FLOAT_TYPE ){
+                       addIns = binaryIns(LIR_addf, localGetf(index, SINGLE_PRECISION), InsConstFlt((float)incr));
+                }
+                else if( vt == FLOAT4_TYPE ){
+                    addIns = binaryIns(LIR_addf4, localGetf4(index), Ins(LIR_f2f4, InsConstFlt((float)incr)) );
+                }
+                else { /// NUMERIC - i.e., unknown
+                    AvmAssert(vt==NUMERIC_TYPE);
+                    emitNumericOp1( index, IncrementLIREmitter(this, incr<0));
+                    JIT_EVENT(jit_add);
+                }
+                if(addIns) localSet(index, addIns,result);  // emitNumericOp1() does its own localSet
+#else
                 localSet(index, binaryIns(LIR_addd, localGetf(index), i2dIns(InsConst(incr))), result);
+#endif // VMCFG_FLOAT
                 break;
             }
 
@@ -5147,23 +5744,83 @@ namespace avmplus
             }
 
             case OP_modulo: {
+#ifdef VMCFG_FLOAT
+                if(result ==FLOAT_TYPE){
+                    AvmAssert(state->value(sp-1).traits == FLOAT_TYPE);
+                    AvmAssert(state->value(sp).traits == FLOAT_TYPE);
+                    LIns* get1 = f2dIns(localGetf(sp-1,SINGLE_PRECISION));
+                    LIns* get2 = f2dIns(localGetf(sp,SINGLE_PRECISION));
+                    LIns* out = callIns(FUNCTIONID(mod), 2,get1,get2);
+                    localSet(sp-1,  d2fIns(out), result);
+                } else if(result == FLOAT4_TYPE){
+                    AvmAssert(state->value(sp-1).traits == FLOAT4_TYPE);
+                    AvmAssert(state->value(sp).traits == FLOAT4_TYPE);
+                    LIns* f4 = localGetf4(sp-1), *g4 = localGetf4(sp);
+                    LIns* f4x = f2dIns(lirout->ins1(LIR_f4x, f4)), *g4x = f2dIns(lirout->ins1(LIR_f4x, g4));
+                    LIns* ox = callIns(FUNCTIONID(mod), 2,f4x,g4x);
+                    LIns* f4y = f2dIns(lirout->ins1(LIR_f4y, f4)), *g4y = f2dIns(lirout->ins1(LIR_f4y, g4));
+                    LIns* oy = callIns(FUNCTIONID(mod), 2,f4y,g4y);
+                    LIns* f4z = f2dIns(lirout->ins1(LIR_f4z, f4)), *g4z = f2dIns(lirout->ins1(LIR_f4z, g4));
+                    LIns* oz = callIns(FUNCTIONID(mod), 2,f4z,g4z);
+                    LIns* f4w = f2dIns(lirout->ins1(LIR_f4w, f4)), *g4w = f2dIns(lirout->ins1(LIR_f4w, g4));
+                    LIns* ow = callIns(FUNCTIONID(mod), 2,f4w,g4w);
+                    LIns* out = callIns(FUNCTIONID(float4FromComponents), 4,
+                                         d2fIns(ox), d2fIns(oy), d2fIns(oz), d2fIns(ow) );
+                    localSet(sp-1,  out, result);
+                } else if(result == NUMBER_TYPE){
+                    AvmAssert(state->value(sp-1).traits == NUMBER_TYPE);
+                    AvmAssert(state->value(sp).traits == NUMBER_TYPE);
+                    LIns* get1= localGetf(sp-1,DOUBLE_PRECISION);
+                    LIns* get2 = localGetf(sp,DOUBLE_PRECISION);
+                    LIns* out = callIns(FUNCTIONID(mod), 2,get1,get2);
+                    localSet(sp-1,  out, result);
+                } else {
+                    AvmAssert(result == NUMERIC_TYPE);
+                    emitNumericOp2( sp-1, sp,  ModuloLIREmitter(this) );
+                }
+#else
                 LIns* out = callIns(FUNCTIONID(mod), 2,
                     localGetf(sp-1), localGetf(sp));
                 localSet(sp-1,  out, result);
+#endif // VMCFG_FLOAT
                 break;
             }
 
             case OP_divide:
             case OP_multiply:
             case OP_subtract: {
+#ifdef VMCFG_FLOAT
+                LOpcode opf,opf4,opd;
+                const CallInfo* interpCall = NULL;
+                AvmAssert(state->value(sp-1).traits==result && state->value(sp-1).traits ==result);
+
+                switch(opcode){
+                    default: AvmAssert(false);
+                    case OP_divide:   opf= LIR_divf; opf4= LIR_divf4; opd = LIR_divd; interpCall= FUNCTIONID(op_divide); break;
+                    case OP_multiply: opf= LIR_mulf; opf4= LIR_mulf4; opd = LIR_muld; interpCall= FUNCTIONID(op_multiply); break;
+                    case OP_subtract: opf= LIR_subf; opf4= LIR_subf4; opd = LIR_subd; interpCall= FUNCTIONID(op_subtract); break;
+                }
+
+                if(result ==FLOAT_TYPE){
+                    localSet(sp-1, binaryIns(opf, localGetf(sp-1,SINGLE_PRECISION), localGetf(sp,SINGLE_PRECISION)), result);
+                } else if(result == NUMBER_TYPE){
+                    localSet(sp-1, binaryIns(opd, localGetf(sp-1,DOUBLE_PRECISION), localGetf(sp,DOUBLE_PRECISION)), result);
+                } else if(result == FLOAT4_TYPE){
+                    localSet(sp-1, binaryIns(opf4, localGetf4(sp-1), localGetf4(sp)), result);
+                } else {
+                    AvmAssert(result == NUMERIC_TYPE);
+                    emitNumericOp2( sp-1, sp, BasicLIREmitter(this, opd, interpCall) );
+                }
+#else
                 LOpcode op;
                 switch (opcode) {
-                    default:
+                default:
                     case OP_divide:     op = LIR_divd; break;
                     case OP_multiply:   op = LIR_muld; break;
                     case OP_subtract:   op = LIR_subd; break;
                 }
                 localSet(sp-1, binaryIns(op, localGetf(sp-1), localGetf(sp)), result);
+#endif // VMCFG_FLOAT
                 break;
             }
 
@@ -6151,7 +6808,7 @@ namespace avmplus
 
     LIns *CodegenLIR::optimizeIntCmpWithNumberCall(int callIndex, int otherIndex, LOpcode icmp, bool swap)
     {
-        LIns* numSide = localGetf(callIndex);
+        LIns* numSide = localGetf(callIndex,DOUBLE_PRECISION);
         const CallInfo *ci = numSide->callInfo();
 
         // Try to optimize charCodeAt to return an integer if possible. Because it can return NaN for
@@ -6244,19 +6901,37 @@ namespace avmplus
             LIns* rhs = localGet(rhsi);
             return binaryIns(ucmp, lhs, rhs);
         }
+#ifdef VMCFG_FLOAT
+        else if (lht == rht && lht == FLOAT_TYPE)
+        {
+            LIns* lhs = localGetf(lhsi,SINGLE_PRECISION);
+            LIns* rhs = localGetf(rhsi,SINGLE_PRECISION);
+            return binaryIns(getCmpFOpcode(fcmp), lhs, rhs);
+        }
+        else if( lht == FLOAT4_TYPE || rht == FLOAT4_TYPE){
+            if(fcmp != LIR_eqd ){
+                return InsConst(0); // comparison with NaN, always false
+            } else {
+                LIns* lhs = promoteFloat4Ins(lht, lhsi);
+                LIns* rhs = promoteFloat4Ins(rht, rhsi);
+                return binaryIns(LIR_eqf4, lhs, rhs);
+            }
+        }
+#endif // VMCFG_FLOAT
         else if (lht && lht->isNumeric() && rht && rht->isNumeric())
         {
             // Comparing the result of a call returning a Number to another int value.
-            if (lht == NUMBER_TYPE && rht == INT_TYPE && localGetf(lhsi)->opcode() == LIR_calld) {
+            if (lht == NUMBER_TYPE && rht == INT_TYPE && localGetf(lhsi,DOUBLE_PRECISION)->opcode() == LIR_calld) {
                 LIns* result = optimizeIntCmpWithNumberCall(lhsi, rhsi, icmp, false);
                 if (result)
                     return result;
             }
-            if (rht == NUMBER_TYPE && lht == INT_TYPE && localGetf(rhsi)->opcode() == LIR_calld) {
+            if (rht == NUMBER_TYPE && lht == INT_TYPE && localGetf(rhsi,DOUBLE_PRECISION)->opcode() == LIR_calld) {
                 LIns* result = optimizeIntCmpWithNumberCall(rhsi, lhsi, icmp, true);
                 if (result)
                     return result;
             }
+            /* Note: no optimizations needed above for "float" or "numeric"; those optimize String.charCodeAt(), which returns a Number by language definition */
 
             // If we're comparing a uint to an int and the int is a non-negative
             // integer constant, don't promote to doubles for the compare
@@ -6294,10 +6969,20 @@ namespace avmplus
                     return binaryIns(ucmp, lhs, rhs);
             #endif
             }
-
-            LIns* lhs = promoteNumberIns(lht, lhsi);
-            LIns* rhs = promoteNumberIns(rht, rhsi);
-            return binaryIns(fcmp, lhs, rhs);
+            /* NOTE: this assumes that comparisons between two floats, performed as doubles, work just as well */
+#ifdef VMCFG_FLOAT
+            if(lht == NUMERIC_TYPE || rht == NUMERIC_TYPE)
+            {
+                LIns* lhs = coerceToNumber(lhsi);
+                LIns* rhs = coerceToNumber(rhsi);
+                return binaryIns(fcmp, lhs, rhs);
+            } else 
+#endif // VMCFG_FLOAT
+            {
+                LIns* lhs =  promoteNumberIns(lht, lhsi);
+                LIns* rhs = promoteNumberIns(rht, rhsi);
+                return binaryIns(fcmp, lhs, rhs);
+            }
         }
 
         if (lht == STRING_TYPE && rht == STRING_TYPE) {
@@ -6446,7 +7131,7 @@ namespace avmplus
             // _ef.beginCatch()
             int stackBase = ms->stack_base();
             LIns* pc = loadIns(LIR_ldp, 0, _save_eip, ACCSET_OTHER);
-            LIns* slotAddr = leaIns(stackBase * VARSIZE, vars);
+            LIns* slotAddr = leaIns(stackBase * IFFLOAT(info->varSize(), VARSIZE) , vars);
             LIns* tagAddr = leaIns(stackBase, tags);
             LIns* handler_ordinal = callIns(FUNCTIONID(beginCatch), 6, coreAddr, _ef, InsConstPtr(info), pc, slotAddr, tagAddr);
 
@@ -6707,12 +7392,16 @@ namespace avmplus
         }
 
         LIns* toplevel = loadEnvToplevel();
-
+        FLOAT_ONLY(AvmAssert( t != NUMERIC_TYPE));
         int offset;
         if (t == NAMESPACE_TYPE)    offset = offsetof(Toplevel, _namespaceClass);
         else if (t == STRING_TYPE)  offset = offsetof(Toplevel, _stringClass);
         else if (t == BOOLEAN_TYPE) offset = offsetof(Toplevel, _booleanClass);
         else if (t == NUMBER_TYPE)  offset = offsetof(Toplevel, _numberClass);
+#ifdef VMCFG_FLOAT
+        else if (t == FLOAT_TYPE)   offset = offsetof(Toplevel, _floatClass);
+        else if (t == FLOAT4_TYPE)  offset = offsetof(Toplevel, _float4Class );
+#endif        
         else if (t == INT_TYPE)     offset = offsetof(Toplevel, _intClass);
         else if (t == UINT_TYPE)    offset = offsetof(Toplevel, _uintClass);
         else
@@ -6733,15 +7422,58 @@ namespace avmplus
     {
         if (t == NUMBER_TYPE)
         {
-            return localGetf(i);
+            return localGetf(i,DOUBLE_PRECISION);
         }
         if (t == INT_TYPE || t == BOOLEAN_TYPE)
         {
             return i2dIns(localGet(i));
         }
-        AvmAssert(t == UINT_TYPE);
+        if (t != UINT_TYPE){
+            AvmAssert( IFFLOAT( t == FLOAT_TYPE, false) );
+            FLOAT_ONLY(return f2dIns(localGetf(i,SINGLE_PRECISION));)
+        }
         return ui2dIns(localGet(i));
     }
+
+#ifdef VMCFG_FLOAT
+    LIns* CodegenLIR::promoteFloatIns(Traits* t, int i)
+    {
+        if (t == FLOAT_TYPE)
+        {
+            return localGetf(i,SINGLE_PRECISION);
+        }
+        if (t == FLOAT4_TYPE)
+        {
+            return InsConstFlt(AvmCore::atomToFloat(core->kFltNaN));
+        }
+        if(t == NUMBER_TYPE)
+            return d2fIns(localGetf(i,DOUBLE_PRECISION));
+        if (t == INT_TYPE || t == BOOLEAN_TYPE)
+        {
+            return i2fIns(localGet(i));
+        }
+        AvmAssert(t == UINT_TYPE);
+        return ui2fIns(localGet(i));
+    }
+
+    LIns* CodegenLIR::promoteFloat4Ins(Traits* t, int i)
+    {
+        // This function hadles * -> Float4, too.
+        // That is because if any operand is float4, the other needs to be coerced to float4
+        switch(bt(t)){
+            case BUILTIN_float:
+            case BUILTIN_number:
+            case BUILTIN_int:
+            case BUILTIN_uint:
+            case BUILTIN_boolean:
+                return Ins(LIR_f2f4, promoteFloatIns(t,i));
+            case BUILTIN_float4: 
+                return localGetf4(i);
+            default:
+                return callIns(FUNCTIONID(float4), 1, loadAtomRep(i));
+        }
+    }
+#endif // VMCFG_FLOAT
 
     /// set position of a label and patch all pending jumps to point here.
     void CodegenLIR::emitLabel(CodegenLabel& label) 
@@ -6918,6 +7650,12 @@ namespace avmplus
     LIns* CodegenLIR::insAllocForTraits(Traits *t)
     {
         switch (bt(t)) {
+#ifdef VMCFG_FLOAT
+            case BUILTIN_float: 
+                return insAlloc(sizeof(float));
+            case BUILTIN_float4: 
+                return insAlloc(sizeof(float4_t));
+#endif // VMCFG_FLOAT
             case BUILTIN_number:
                 return insAlloc(sizeof(double));
             case BUILTIN_int:
@@ -6958,30 +7696,32 @@ namespace avmplus
 
     // Treat addp(vars, const) as a load from vars[const]
     // for the sake of dead store analysis.
-    void analyze_addp(LIns* ins, LIns* vars, nanojit::BitSet& varlivein)
+    void analyze_addp(LIns* ins, LIns* vars, nanojit::BitSet& varlivein FLOAT_ONLY(, const size_t varSize))
     {
+        IFFLOAT(/*nothing*/,const int varSize = VARSIZE);
         AvmAssert(ins->isop(LIR_addp));
         if (ins->oprnd1() == vars && ins->oprnd2()->isImmP()) {
-            AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), VARSIZE));
-            int d = int(uintptr_t(ins->oprnd2()->immP()) / VARSIZE);
+            AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), varSize));
+            int d = int(uintptr_t(ins->oprnd2()->immP()) / varSize);
             varlivein.set(d);
         }
     }
 
     // Treat the calculated address of addp(vars, const) as the target
     // of a store to the variable pointed to, as well as its associated tag.
-    void analyze_addp_store(LIns* ins, LIns* vars, nanojit::BitSet& varlivein, nanojit::BitSet& taglivein)
+    void analyze_addp_store(LIns* ins, LIns* vars, nanojit::BitSet& varlivein, nanojit::BitSet& taglivein FLOAT_ONLY(, const size_t varSize))
     {
+        IFFLOAT(/*nothing*/,const int varSize = VARSIZE);
         AvmAssert(ins->isop(LIR_addp));
         if (ins->oprnd1() == vars && ins->oprnd2()->isImmP()) {
-            AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), VARSIZE));
-            int d = int(uintptr_t(ins->oprnd2()->immP()) / VARSIZE);
+            AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), varSize));
+            int d = int(uintptr_t(ins->oprnd2()->immP()) / varSize);
             varlivein.clear(d);
             taglivein.clear(d);
         }
     }
 
-    void analyze_call(LIns* ins, LIns* catcher, LIns* vars, DEBUGGER_ONLY(bool haveDebugger, int dbg_framesize,)
+    void analyze_call(LIns* ins, LIns* catcher, LIns* vars, DEBUGGER_ONLY(bool haveDebugger, int dbg_framesize,) FLOAT_ONLY(const size_t varSize,)
             nanojit::BitSet& varlivein, LabelBitSet& varlabels,
             nanojit::BitSet& taglivein, LabelBitSet& taglabels)
     {
@@ -6992,9 +7732,21 @@ namespace avmplus
                 varlivein.clear(0);
                 taglivein.clear(0);
             } else if (varPtrArg->isop(LIR_addp)) {
-                analyze_addp_store(varPtrArg, vars, varlivein, taglivein);
+                analyze_addp_store(varPtrArg, vars, varlivein, taglivein FLOAT_ONLY(, varSize));
             }
         } else if (!ins->callInfo()->_isPure) {
+#ifdef VMCFG_FLOAT
+            if (ins->callInfo() == FUNCTIONID(makeatom)) {
+                // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
+                LIns* varPtrArg = ins->arg(1);  // varPtrArg == vars, OR addp(vars, index)
+                if (varPtrArg == vars)
+                    varlivein.set(0);
+                else if (varPtrArg->isop(LIR_addp))
+                    analyze_addp(varPtrArg, vars, varlivein, varSize);
+                else
+                    AvmAssert(false);
+            }
+#endif
             if (catcher) {
                 // non-cse call is like a conditional forward branch to the catcher label.
                 // this could be made more precise by checking whether this call
@@ -7026,7 +7778,9 @@ namespace avmplus
             if (varPtrArg == vars)
                 varlivein.set(0);
             else if (varPtrArg->isop(LIR_addp))
-                analyze_addp(varPtrArg, vars, varlivein);
+                analyze_addp(varPtrArg, vars, varlivein FLOAT_ONLY(, varSize));
+            else
+                AvmAssert(false);
         }
         else if (ins->callInfo() == FUNCTIONID(restargHelper)) {
             // restargHelper(Toplevel*, Multiname*, Atom, ArrayObject**, uint32_t, Atom*)
@@ -7035,7 +7789,7 @@ namespace avmplus
             if (varPtrArg == vars)
                 varlivein.set(0);
             else if (varPtrArg->isop(LIR_addp))
-                analyze_addp(varPtrArg, vars, varlivein);
+                analyze_addp(varPtrArg, vars, varlivein FLOAT_ONLY(, varSize));
         }
     }
 
@@ -7095,15 +7849,18 @@ namespace avmplus
                 case LIR_reti:
                 CASE64(LIR_retq:)
                 case LIR_retd:
+                CASEF(LIR_retf:)
                     varlivein.reset();
                     taglivein.reset();
                     break;
                 CASE64(LIR_stq:)
                 case LIR_sti:
                 case LIR_std:
+                CASEF(LIR_stf:)
                 case LIR_sti2c:
                     if (i->oprnd2() == vars) {
-                        int d = i->disp() / VARSIZE;
+                        AvmAssert( IS_ALIGNED(i->disp(), IFFLOAT(info->varSize(), VARSIZE)) );
+                        int d = i->disp() / IFFLOAT(info->varSize(), VARSIZE);
                         varlivein.clear(d);
                     } else if (i->oprnd2() == tags) {
                         int d = i->disp(); // 1 byte per tag
@@ -7117,14 +7874,16 @@ namespace avmplus
                     // that the address will be used for a read rather than a store,
                     // other than that to do so would break the deadvars analysis
                     // because of the dodgy assumption made here.
-                    analyze_addp(i, vars, varlivein);
+                    analyze_addp(i, vars, varlivein FLOAT_ONLY(, info->varSize()) );
                     break;
                 CASE64(LIR_ldq:)
                 case LIR_ldi:
                 case LIR_ldd:
+                CASEF(LIR_ldf:)
                 case LIR_lduc2ui: case LIR_ldc2i:
                     if (i->oprnd1() == vars) {
-                        int d = i->disp() / VARSIZE;
+                        AvmAssert( IS_ALIGNED(i->disp(), IFFLOAT(info->varSize(), VARSIZE)) );
+                        int d = i->disp() / IFFLOAT(info->varSize(), VARSIZE);
                         varlivein.set(d);
                     }
                     else if (i->oprnd1() == tags) {
@@ -7159,8 +7918,9 @@ namespace avmplus
                 CASE64(LIR_callq:)
                 case LIR_calli:
                 case LIR_calld:
+                CASEF(LIR_callf:)
                 case LIR_callv:
-                    analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,)
+                    analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,) FLOAT_ONLY(info->varSize(),)
                             varlivein, varlabels, taglivein, taglabels);
                     break;
                 }
@@ -7212,15 +7972,18 @@ namespace avmplus
                 case LIR_reti:
                 CASE64(LIR_retq:)
                 case LIR_retd:
+                CASEF(LIR_retf:)
                     varlivein.reset();
                     taglivein.reset();
                     break;
                 CASE64(LIR_stq:)
                 case LIR_sti:
                 case LIR_std:
+                CASEF(LIR_stf:)
                 case LIR_sti2c:
                     if (i->oprnd2() == vars) {
-                        int d = i->disp() / VARSIZE;
+                        AvmAssert( IS_ALIGNED(i->disp(), IFFLOAT(info->varSize(), VARSIZE)) );
+                        int d = i->disp() / IFFLOAT(info->varSize(), VARSIZE);
                         if (!varlivein.get(d)) {
                             eraseIns(i, in.peek());
                             continue;
@@ -7243,14 +8006,16 @@ namespace avmplus
                     break;
                 case LIR_addp:
                     // treat pointer calculations into vars as a read from vars
-                    analyze_addp(i, vars, varlivein);
+                    analyze_addp(i, vars, varlivein FLOAT_ONLY(,info->varSize()));
                     break;
                 CASE64(LIR_ldq:)
                 case LIR_ldi:
                 case LIR_ldd:
+                CASEF(LIR_ldf:)
                 case LIR_lduc2ui: case LIR_ldc2i:
                     if (i->oprnd1() == vars) {
-                        int d = i->disp() / VARSIZE;
+                        AvmAssert( IS_ALIGNED(i->disp(), IFFLOAT(info->varSize(), VARSIZE)) );
+                        int d = i->disp() / IFFLOAT(info->varSize(), VARSIZE);
                         varlivein.set(d);
                     }
                     else if (i->oprnd1() == tags) {
@@ -7285,8 +8050,9 @@ namespace avmplus
                 CASE64(LIR_callq:)
                 case LIR_calli:
                 case LIR_calld:
+                CASEF(LIR_callf:)
                 case LIR_callv:
-                    analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,)
+                    analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,) FLOAT_ONLY(info->varSize(),)
                             varlivein, varlabels, taglivein, taglabels);
                     break;
             }

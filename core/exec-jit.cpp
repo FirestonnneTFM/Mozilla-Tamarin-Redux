@@ -289,6 +289,14 @@ double BaseExecMgr::initInterpFPR(MethodEnv* env, int argc, uint32_t* ap)
     return interpFPR(env, argc, ap);
 }
 
+#ifdef VMCFG_FLOAT
+float4_t BaseExecMgr::initInterpVECR(MethodEnv* env, int argc, uint32_t* ap)
+{
+    initObj(env, (ScriptObject*) atomPtr(((uintptr_t*)ap)[0]));
+    return interpVECR(env, argc, ap);
+}
+#endif // VMCFG_FLOAT
+
 // Transition from JIT code to the interpreter.
 uintptr_t BaseExecMgr::interpGPR(MethodEnv* env, int argc, uint32_t *ap)
 {
@@ -320,6 +328,19 @@ double BaseExecMgr::interpFPR(MethodEnv* env, int argc, uint32_t * ap)
     Atom a = interpBoxed(env, argc, atomv);
     return AvmCore::number_d(a);
 }
+
+#ifdef VMCFG_FLOAT
+// Transition from JIT code to the interpreter, for a function returning float4.
+float4_t BaseExecMgr::interpVECR(MethodEnv* env, int argc, uint32_t * ap)
+{
+    AvmAssert(exec(env)->isJitEnabled());
+    Atom* const atomv = (Atom*)ap;
+    MethodSignaturep ms = env->method->getMethodSignature();
+    ms->boxArgs(env->core(), argc, (uint32_t *)ap, atomv);
+    Atom a = interpBoxed(env, argc, atomv);
+    return AvmCore::float4(a);
+}
+#endif // VMCFG_FLOAT
 
 void BaseExecMgr::setNative(MethodInfo* m, GprMethodProc p)
 {

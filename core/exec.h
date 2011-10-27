@@ -95,6 +95,9 @@ enum Runmode {
 // and boxes results.  Typically the caller is JIT code.
 typedef uintptr_t (*GprMethodProc)(MethodEnv*, int32_t, uint32_t *);
 typedef double (*FprMethodProc)(MethodEnv*, int32_t, uint32_t *);
+#ifdef VMCFG_FLOAT
+typedef float4_t (*VecrMethodProc)(MethodEnv*, int32_t, uint32_t *);
+#endif
 
 // Signature for invocation when callee coerces & boxes;
 // the caller is calling an unknown function with an unknown signature.
@@ -112,8 +115,12 @@ typedef GprImtThunkProcRetType (*GprImtThunkProc)(class ImtThunkEnv*,
  * enough to hold double, int, pointers, or Atom on 32-bit or 64-bit cpus.
  * This is an aspect of the JIT implementation, but is defined here because
  * the debugger boxing/unboxing code in MethodInfo needs to know it.
+ * Note: for VMCFG_FLOAT we use a function call, to decide the size of a variable
+ * per method (if method uses float4, then 16 bytes; otherwise, 8 bytes
  */
+#ifndef VMCFG_FLOAT
 static const size_t VARSIZE = 8;
+#endif
 
 /**
  * Compute number of bytes needed for the unboxed representation
@@ -158,12 +165,18 @@ private:
     // Trampolines that verify on first call:
     static uintptr_t verifyEnterGPR(MethodEnv*, int32_t argc, uint32_t* args);
     static double verifyEnterFPR(MethodEnv*, int32_t argc, uint32_t* args);
+#ifdef VMCFG_FLOAT
+    static float4_t verifyEnterVECR(MethodEnv*, int32_t argc, uint32_t* args);
+#endif
     static Atom verifyInvoke(MethodEnv*, int32_t argc, Atom* args);
     static void verifyOnCall(MethodEnv*); // helper called by verify trampolines
 
     // Trampolines to call debugEnter/Exit around native methods:
     static uintptr_t debugEnterExitWrapper32(MethodEnv* env, int32_t argc, uint32_t* argv);
     static double debugEnterExitWrapperN(MethodEnv* env, int32_t argc, uint32_t* argv);
+#ifdef VMCFG_FLOAT
+    static float4_t debugEnterExitWrapperV(MethodEnv* env, int32_t argc, uint32_t* argv);
+#endif
 
     // Trampoline to set MethodEnv->impl to MethodInfo->impl on first call.
     static uintptr_t delegateInvoke(MethodEnv* env, int32_t argc, uint32_t* ap);
@@ -172,6 +185,9 @@ private:
     // calls to the interpreter go through one of the invoke_interp variants.
     static uintptr_t interpGPR(MethodEnv* method, int argc, uint32_t *ap);
     static double interpFPR(MethodEnv* method, int argc, uint32_t *ap);
+#ifdef VMCFG_FLOAT
+    static float4_t interpVECR(MethodEnv* method, int argc, uint32_t *ap);
+#endif
 
     /** General purpose interpreter invocation. */
     static Atom invokeInterp(MethodEnv* env, int32_t argc, Atom* argv);
@@ -187,6 +203,9 @@ private:
     // interpreter.  See initObj() in exec.cpp.
     static uintptr_t initInterpGPR(MethodEnv*, int, uint32_t*);
     static double initInterpFPR(MethodEnv*, int, uint32_t*);
+#ifdef VMCFG_FLOAT
+    static float4_t initInterpVECR(MethodEnv*, int, uint32_t*);
+#endif
     static Atom initInvokeInterp(MethodEnv*, int, Atom*);
     static Atom initInvokeInterpNoCoerce(MethodEnv*, int, Atom*);
 
@@ -436,8 +455,9 @@ protected:
 
 private:
     union {
-        GprMethodProc _implGPR;
-        FprMethodProc _implFPR;
+        GprMethodProc  _implGPR;
+        FprMethodProc  _implFPR;
+        FLOAT_ONLY(VecrMethodProc _implVECR;)
     };
     /** pointer to invoker used when callee must coerce args. */
     AtomMethodProc _invoker;
@@ -466,6 +486,7 @@ private:
     union {
         GprMethodProc   _implGPR;
         FprMethodProc   _implFPR;
+        FLOAT_ONLY(VecrMethodProc  _implVECR;)
         GprImtThunkProc _implImtGPR;
     };
 

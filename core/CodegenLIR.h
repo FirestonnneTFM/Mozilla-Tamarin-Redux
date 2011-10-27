@@ -306,8 +306,13 @@ namespace avmplus
        void jitLineNumUpdate(uint32_t line);
        void jitCodePosUpdate(uint32_t pos);
        #endif /* VTUNE */
+       
+       typedef enum {
+           SINGLE_PRECISION,
+           DOUBLE_PRECISION
+       } ePrecision;
 
-    private:
+    protected:
         friend struct JitInitVisitor;
         MethodInfo *info;
         const MethodSignaturep ms;
@@ -364,10 +369,10 @@ namespace avmplus
 #endif
 #ifdef DEBUG
         /** jit_sst is an array of sst_mask bytes, used to double check that we
-         *  are modelling storage types the same way the verifier did for us.
+         *  are modeling storage types the same way the verifier did for us.
          *  Mismatches are caught in writeOpcodeVerified() after the Verifier has
          *  updated FrameValue.sst_mask. */
-        uint8_t *jit_sst;   // array of SST masks to sanity check with FrameState
+        IFFLOAT(uint16_t,uint8_t) *jit_sst;   // array of SST masks to sanity check with FrameState
         ValidateWriter* validate3; // ValidateWriter for method body.
 #endif
 
@@ -380,7 +385,8 @@ namespace avmplus
         LIns* leaIns(int32_t d, LIns *base);
         LIns* localGet(int i);
         LIns* localGetp(int i);
-        LIns* localGetf(int i);
+        LIns* localGetf(int i, ePrecision precision = DOUBLE_PRECISION);
+        FLOAT_ONLY( LIns* localGetf4(int i); )
         LIns* localCopy(int i); // sniff's type from FrameState
         void branchToLabel(LOpcode op, LIns *cond, CodegenLabel& label);
         LIns* branchJovToLabel(LOpcode op, LIns *a, LIns *b, CodegenLabel& label);
@@ -396,6 +402,10 @@ namespace avmplus
         LIns* storeAtomArgs(int count, int index);
         LIns* storeAtomArgs(LIns *obj, int count, int index);
         LIns* promoteNumberIns(Traits *t, int i);
+#ifdef VMCFG_FLOAT
+        LIns* promoteFloatIns(Traits *t, int i);
+        LIns* promoteFloat4Ins(Traits *t, int i);
+#endif // VMCFG_FLOAT
         LIns* loadVTable(LIns* obj, Traits* t);
         LIns* cmpEq(const CallInfo *fid, int lhsi, int rhsi);
         LIns* cmpLt(int lhsi, int rhsi);
@@ -432,8 +442,14 @@ namespace avmplus
         LIns* Ins(LOpcode op, LIns *a);
         LIns* i2dIns(LIns* v);
         LIns* ui2dIns(LIns* v);
-        LIns* binaryIns(LOpcode op, LIns *a, LIns *b);
         LIns* callIns(const CallInfo *, uint32_t argc, ...);
+
+#ifdef VMCFG_FLOAT
+         /* Handle 1- and 2-operand numeric operations. Assumption: "number"/"int" is the "fastpath",
+            the rest may be slow (should really be typed if the user wants speed)   */
+        void emitNumericOp1(int32_t op1, const LIREmitter &emitIns);
+        void emitNumericOp2(int32_t op1, int32_t op2, const LIREmitter& emitIns);
+#endif // VMCFG_FLOAT
 
         /** emit a constructor call, and early bind if possible */
         void emitConstruct(int argc, LIns* ctor, Traits* ctraits);
@@ -473,6 +489,10 @@ namespace avmplus
         void emitIntConst(int index, int32_t c, Traits* type);
         void emitPtrConst(int index, void* c, Traits* type);
         void emitDoubleConst(int index, const double* pd);
+#ifdef VMCFG_FLOAT
+        void emitFloatConst(int index, const float f);
+        void emitFloat4Const(int index, const float4_t* pf4);
+#endif // VMCFG_FLOAT
         void emitGetslot(int slot, int ptr_index, Traits *slotType);
         void emitSetslot(AbcOpcode opcode, int slot, int ptr_index);
         void emitSetslot(AbcOpcode opcode, int slot, int ptr_index, LIns* value);
@@ -494,6 +514,11 @@ namespace avmplus
         LIns* convertToString(int i, bool preserveNull);
         LIns* coerceToString(int i);
         LIns* coerceToNumber(int i);
+#ifdef VMCFG_FLOAT
+        LIns* coerceToFloat(int i);
+        LIns* coerceToFloat4(int i);
+        LIns* coerceToNumeric(int i);
+#endif // VMCFG_FLOAT
         LIns* loadFromSlot(int ptr_index, int slot, Traits* slotType);
         LIns* coerceToType(int i, Traits*);
         void emitInitializers();
