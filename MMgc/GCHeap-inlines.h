@@ -56,7 +56,7 @@ namespace MMgc
 
     REALLY_INLINE bool GCManager::tryAddGC(GC* gc)
     {
-        return collectors.TryAdd(gc);
+        return collectors.Add(gc);
     }
 
     REALLY_INLINE void GCManager::removeGC(GC* gc)
@@ -385,7 +385,7 @@ namespace MMgc
 
     REALLY_INLINE size_t GCHeap::Size(const void *item)
     {
-        MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
+        MMGC_LOCK(m_spinlock);
         GCAssert((uintptr_t(item) & (kBlockSize-1)) == 0);
         HeapBlock *block = BaseAddrToBlock(item);
         if(block)
@@ -416,7 +416,7 @@ namespace MMgc
 
     REALLY_INLINE bool GCHeap::statusNotificationBeingSent()
     {
-        return m_notificationThread != 0;
+        return m_notificationBeingSent;
     }
 
     REALLY_INLINE bool GCHeap::statusNotNormalOrAbort()

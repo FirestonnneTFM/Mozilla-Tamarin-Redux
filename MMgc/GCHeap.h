@@ -996,7 +996,6 @@ namespace MMgc
         size_t externalCodeMemory;
         size_t externalPressure;
         vmpi_spin_lock_t m_spinlock;
-        vmpi_thread_t m_notificationThread;
         GCHeapConfig config;
         GCManager gcManager;
         BasicList<OOMCallback*> callbacks;
@@ -1007,7 +1006,7 @@ namespace MMgc
         uint32_t enterCount;
         uint32_t preventDestruct;
         bool m_oomHandling;                 // temporarily false when allocating or deallocating with kNoOOMHandling
-
+        bool m_notificationBeingSent;
         vmpi_spin_lock_t gclog_spinlock;    // a lock used by GC::gclog for exclusive access to GCHeap::DumpMemoryInfo
 
 #ifdef MMGC_MEMORY_PROFILER

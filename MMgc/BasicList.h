@@ -64,7 +64,7 @@ namespace MMgc
         {
             if ( items )
             {
-                mmfx_delete_array(items);
+                VMPI_free(items);
                 items = NULL;
             }
             count = capacity = iteratorCount = 0;
@@ -72,8 +72,7 @@ namespace MMgc
             cursor = 0;
         }
 
-        void Add(T item);
-        bool TryAdd(T item);
+        bool Add(T item);
 
         void Remove(T item)
         {
