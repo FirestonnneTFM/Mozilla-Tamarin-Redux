@@ -397,12 +397,12 @@ namespace MMgc
           gcheapCodeMemory(0),
           externalCodeMemory(0),
           externalPressure(0),
-          m_notificationThread(0),
           config(c),
           status(kMemNormal),
           enterCount(0),
           preventDestruct(0),
           m_oomHandling(true),
+          m_notificationBeingSent(false),
     #ifdef MMGC_MEMORY_PROFILER
           hasSpy(false),
     #endif
@@ -556,7 +556,7 @@ namespace MMgc
         bool zero = (flags & kZero) != 0;
         bool expand = (flags & kExpand) != 0;
         {
-            MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
+            MMGC_LOCK(m_spinlock);
 
             bool saved_oomHandling = m_oomHandling;
             m_oomHandling = saved_oomHandling && (flags & kNoOOMHandling) == 0;
@@ -711,7 +711,7 @@ namespace MMgc
         (void)profile;
 
         // recursive free calls are allowed from StatusChangeNotify
-        MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
+        MMGC_LOCK(m_spinlock);
 
         bool saved_oomHandling = m_oomHandling;
         m_oomHandling = saved_oomHandling && oomHandling;
@@ -799,7 +799,7 @@ namespace MMgc
         }
 
 
-        MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
+        MMGC_LOCK(m_spinlock);
 
     restart:
 
@@ -1297,7 +1297,7 @@ namespace MMgc
 
     size_t GCHeap::SafeSize(const void *item)
     {
-        MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
+        MMGC_LOCK(m_spinlock);
         GCAssert((uintptr_t(item) & kOffsetMask) == 0);
         HeapBlock *block = InteriorAddrToBlock(item);
         if (block)
@@ -2522,7 +2522,7 @@ namespace MMgc
     {
         GCHeap* heap = GetGCHeap();
 
-        MMGC_LOCK_ALLOW_RECURSION(heap->m_spinlock, heap->m_notificationThread);
+        MMGC_LOCK(heap->m_spinlock);
 
         heap->externalPressure += nbytes;
 
@@ -2535,7 +2535,7 @@ namespace MMgc
     {
         GCHeap* heap = GetGCHeap();
 
-        MMGC_LOCK_ALLOW_RECURSION(heap->m_spinlock, heap->m_notificationThread);
+        MMGC_LOCK(heap->m_spinlock);
 
         heap->externalPressure -= nbytes;
         heap->CheckForStatusReturnToNormal();
@@ -2547,7 +2547,7 @@ namespace MMgc
         GCHeap* heap = GetGCHeap();
         GCAssertMsg(heap != NULL, "GCHeap not valid!");
 
-        MMGC_LOCK_ALLOW_RECURSION(heap->m_spinlock, heap->m_notificationThread);
+        MMGC_LOCK(heap->m_spinlock);
 
         // When calling SendFreeMemorySignal with kMaxObjectSize it will try to release
         // as much memory as possible. Otherwise it interprets the parameter as number
@@ -2599,7 +2599,7 @@ namespace MMgc
         //  If we hit abort, we need to turn m_oomHandling back on so that listeners are guaranteed to get this signal
         //  We also need to set m_notoficationThread to NULL in case we hit abort while we were processing another memory status change
         m_oomHandling = true;
-        m_notificationThread = NULL;
+        m_notificationBeingSent = false;
 
         GCLog("error: out of memory\n");
 
@@ -2865,7 +2865,7 @@ namespace MMgc
 
     void GCHeap::TrackSystemAlloc(void *addr, size_t askSize)
     {
-        MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
+        MMGC_LOCK(m_spinlock);
         if(!IsProfilerInitialized())
             InitProfiler();
         if(profiler)
@@ -2874,7 +2874,7 @@ namespace MMgc
 
     void GCHeap::TrackSystemFree(void *addr)
     {
-        MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
+        MMGC_LOCK(m_spinlock);
         if(addr && profiler)
             profiler->RecordDeallocation(addr, VMPI_size(addr));
     }
@@ -2931,7 +2931,7 @@ namespace MMgc
         if (statusNotificationBeingSent() || status != kMemNormal || !m_oomHandling)
             return;
 
-        m_notificationThread = VMPI_currentThread();
+        m_notificationBeingSent = true;
 
         size_t startingTotal = GetTotalHeapSize() + externalPressure / kBlockSize;
 
@@ -2944,9 +2944,9 @@ namespace MMgc
             {
                 VMPI_lockRelease(&m_spinlock);
                 cb->memoryStatusChange(kFreeMemoryIfPossible, kFreeMemoryIfPossible);
+                Decommit();
                 VMPI_lockAcquire(&m_spinlock);
 
-                Decommit();
                 size_t currentTotal = GetTotalHeapSize() + externalPressure / kBlockSize;
 
                 //  If we've freed MORE than the minimum amount, we can stop freeing
@@ -2959,7 +2959,7 @@ namespace MMgc
 
         iter.MarkCursorInList();
 
-        m_notificationThread = NULL;
+        m_notificationBeingSent = false;
     }
 
     void GCHeap::StatusChangeNotify(MemoryStatus to)
@@ -2968,7 +2968,7 @@ namespace MMgc
         if ((statusNotificationBeingSent() && to == status) || !m_oomHandling)
             return;
 
-        m_notificationThread = VMPI_currentThread();
+        m_notificationBeingSent = true;
 
         MemoryStatus oldStatus = status;
         status = to;
@@ -2987,8 +2987,7 @@ namespace MMgc
             }
         } while(cb != NULL);
 
-
-        m_notificationThread = NULL;
+        m_notificationBeingSent = false;
 
         CheckForStatusReturnToNormal();
     }
@@ -3017,11 +3016,7 @@ namespace MMgc
         bool bAdded = false;
         {
             MMGC_LOCK(m_spinlock);
-            // hack to allow GCManager's list back in for list mem operations
-            vmpi_thread_t notificationThreadSave = m_notificationThread;
-            m_notificationThread = VMPI_currentThread();
             bAdded = gcManager.tryAddGC(gc);
-            m_notificationThread = notificationThreadSave;
         }
         if (!bAdded)
         {
@@ -3032,12 +3027,8 @@ namespace MMgc
     // When the GC is destroyed it must remove itself from the GCHeap.
     void GCHeap::RemoveGC(GC *gc)
     {
-        MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
-        // hack to allow GCManager's list back in for list mem operations
-        vmpi_thread_t notificationThreadSave = m_notificationThread;
-        m_notificationThread = VMPI_currentThread();
+        MMGC_LOCK(m_spinlock);
         gcManager.removeGC(gc);
-        m_notificationThread = notificationThreadSave;
         EnterFrame* ef = GetEnterFrame();
         if (ef && ef->GetActiveGC() == gc)
             ef->SetActiveGC(NULL);
@@ -3048,11 +3039,7 @@ namespace MMgc
         bool bAdded = false;
         {
             MMGC_LOCK(m_spinlock);
-            // hack to allow GCManager's list back in for list mem operations
-            vmpi_thread_t notificationThreadSave = m_notificationThread;
-            m_notificationThread = VMPI_currentThread();
-            bAdded = callbacks.TryAdd(p);
-            m_notificationThread = notificationThreadSave;
+            bAdded = callbacks.Add(p);
         }
         if (!bAdded)
         {
@@ -3063,11 +3050,7 @@ namespace MMgc
     void GCHeap::RemoveOOMCallback(OOMCallback *p)
     {
         MMGC_LOCK(m_spinlock);
-        // hack to allow GCManager's list back in for list mem operations
-        vmpi_thread_t notificationThreadSave = m_notificationThread;
-        m_notificationThread = VMPI_currentThread();
         callbacks.Remove(p);
-        m_notificationThread = notificationThreadSave;
     }
 
     bool GCHeap::EnsureFreeRegion(bool allowExpansion)
@@ -3141,7 +3124,7 @@ namespace MMgc
 #ifdef DEBUG
     void GCHeap::CheckForOOMAbortAllocation()
     {
-        if(m_notificationThread == VMPI_currentThread() && status == kMemAbort)
+        if(m_notificationBeingSent && status == kMemAbort)
             GCAssertMsg(false, "Its not legal to perform allocations during OOM kMemAbort callback");
     }
 #endif
