@@ -104,7 +104,6 @@ class RuntestBase(object):
     # list of args to remove defined using -no-argname format in --ascargs
     asc_negative_args = []
     atsDir = 'ATS_SWFS'
-    ascversion = ''
     avm = ''
     avmce = ''
     avmversion = ''
@@ -307,7 +306,6 @@ class RuntestBase(object):
                 self.timestamps = False
             elif o in ('-f', '--forcerebuild'):
                 self.forcerebuild = True
-                self.ascversion = self.getAscVersion(self.asc)
             elif o in ('-c', '--config'):
                 self.config = v
             elif o in ('--addtoconfig',):
@@ -338,7 +336,6 @@ class RuntestBase(object):
             elif o in ('--rebuildtests',):
                 self.rebuildtests = True
                 self.forcerebuild = True
-                self.ascversion = self.getAscVersion(self.asc)
             elif o in ('-q', '--quiet'):
                 self.quiet = True
             elif o in ('--summaryonly',):
@@ -1470,10 +1467,10 @@ class RuntestBase(object):
     def preProcessTests(self):  # don't need AVM if rebuilding tests
         self.js_print('current configuration: %s' % self.config, overrideQuiet=True)
         self.verbose_print(self.avm_features)
-        if self.avmversion:
-            self.js_print('avm version: %s' % self.avmversion)
-        if self.ascversion:
-            self.js_print('asc version: %s' % self.ascversion)
+        self.js_print('avm: %s' % self.avm)
+        self.js_print('avm version: %s' % self.avmversion)
+        self.js_print('asc: %s' % self.asc)
+        self.js_print('asc version: %s' % self.getAscVersion(self.asc))
         self.js_print('thread count: %d' % self.threads)
         self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True)
 
@@ -1622,6 +1619,14 @@ class RuntestBase(object):
 
             if self.js_output:
                 print('Results were written to %s' % self.js_output)
+
+            self.js_print('')
+            self.js_print('configuration: %s' % self.config, overrideQuiet=True)
+            self.js_print('avm: %s' % self.avm)
+            self.js_print('avm version: %s' % self.avmversion)
+            self.js_print('asc: %s' % self.asc)
+            self.js_print('asc version: %s' % self.getAscVersion(self.asc))
+            self.js_print('')
 
         if self.writeResultProperties:
             logfile = open('result.properties', 'w')
