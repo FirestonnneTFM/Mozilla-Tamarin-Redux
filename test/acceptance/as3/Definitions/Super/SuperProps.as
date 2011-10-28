@@ -86,6 +86,14 @@ AddTestCase( "check base property 1", "base::staticY", sp.superPropDot );
 AddTestCase( "check base property 2", "derived::x", sp.superPropIndex );
 AddTestCase( "check base property 3", "derived::x", sp.getSuperVal("x") );
 AddTestCase( "check base property 4", "derived::x", sp.getBaseVal("x") );
+
+// Test setting super values.  Tests rely on getters functioning properly.
+sp.superPropDot = "new dot property value";
+AddTestCase("Set super value via . property", "new dot property value", sp.superPropDot);
+
+sp.superPropIndex = "new index property value";
+AddTestCase("Set super value via index property", "new index property value", sp.superPropIndex);
+
 //
 ////////////////////////////////////////////////////////////////
 
