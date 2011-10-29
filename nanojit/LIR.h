@@ -2014,11 +2014,11 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         // comparisons.
         InsSet knownCmpValues;
 
-        // If true, we will not add new instructions to the CSE tables, but we
+        // If nonzero, we will not add new instructions to the CSE tables, but we
         // will continue to CSE instructions that match existing table
         // entries.  Load instructions will still be removed if aliasing
         // stores are encountered.
-        bool suspended;
+        uint32_t suspended;
 
         CseAcc miniAccSetToCseAcc(MiniAccSet miniAccSet, LoadQual loadQual) {
             NanoAssert(miniAccSet.val < NUM_ACCS || miniAccSet.val == MINI_ACCSET_MULTIPLE.val);
@@ -2115,9 +2115,9 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         // flow.  A suspend()/resume() pair may be put around a synthetic
         // control flow diamond, preventing the inserted label from resetting
         // the CSE state.  A suspend() call must be dominated by a resume()
-        // call, else incorrect code could result.
-        void suspend() { suspended = true; }
-        void resume() { suspended = false; }
+        // call, else incorrect code could result.  CSE-suspended regions nest.
+        void suspend() { suspended++; }
+        void resume()  { NanoAssert(suspended > 0); --suspended; }
     };
 
     class LirBuffer
