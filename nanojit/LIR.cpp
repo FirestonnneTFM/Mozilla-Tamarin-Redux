@@ -2392,7 +2392,7 @@ namespace nanojit
           storesSinceLastLoad(ACCSET_NONE),
           alloc(alloc),
           knownCmpValues(alloc),
-          suspended(false),
+          suspended(0),
           initOOM(false)
     {
         m_findNL[NLImmISmall] = &CseFilter::findImmISmall;
