@@ -169,64 +169,60 @@ chmod 777 $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension
 
 # Check to see if it is possible to run the generated shell, we could be cross compiling
 # Look for the version string since calling the shell without an ABC will have a non-zero exitcode
-$buildsdir/${change}-${changeid}/$platform/$filename$shell_extension | grep ${change}:${changeid} &> /dev/null
-res=$?
-if [ "$res" == "0" ]; then
-    echo ""
-    echo "*******************************************************************************"
-    echo "shell compiled with these features:"
-    avmfeatures=`$buildsdir/${change}-${changeid}/$platform/$filename$shell_extension -Dversion | grep AVM | sed 's/\;/ /g' | sed 's/features //g'`
-    for i in ${avmfeatures}; do
-	echo $i
-    done
-    echo ""
-    failbuild=0
-    for i in ${features}; do
-	feature_ok=0
-	if [[ $i == +* ]]; then
-	    echo "Make sure that ${i:1} is enabled"
-	    for feat in ${avmfeatures}; do
-		if [ "$feat" == "${i:1}" ]; then
-		    feature_ok=1
-		    break		
-		fi
-            done
-	    if [ $feature_ok != 1 ]; then
-		echo "---> FAIL"
-		failbuild=1
-	    else
-		echo "---> PASS"
-	    fi
-	fi
-	if [[ $i == -* ]]; then
-	    feature_ok=1
-	    echo "Make sure that ${i:1} is NOT enabled"
-	    for feat in ${avmfeatures}; do
-		if [ "$feat" == "${i:1}" ]; then
-		    feature_ok=0
-		    break		
-		fi
-            done
-	    if [ $feature_ok == 0 ]; then
-		echo "---> FAIL"
-		failbuild=1
-	    else
-		echo "---> PASS"
-	    fi
-	fi
-	echo ""
-    done
-    if [ $failbuild == 1 ]; then
-	echo "message: feature check FAILED"
-	cd $basedir/core
-	mv avmplusVersion.h.orig avmplusVersion.h
-	# Remove the binary since we have determined that it is NOT valid
-	rm $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension
-	endSilent
-	exit 1
+echo ""
+echo "*******************************************************************************"
+echo "shell compiled with these features:"
+avmfeatures=`$buildsdir/${change}-${changeid}/$platform/$filename$shell_extension -Dversion | grep AVM | sed 's/\;/ /g' | sed 's/features //g'`
+for i in ${avmfeatures}; do
+echo $i
+done
+echo ""
+failbuild=0
+for i in ${features}; do
+feature_ok=0
+if [[ $i == +* ]]; then
+    echo "Make sure that ${i:1} is enabled"
+    for feat in ${avmfeatures}; do
+    if [ "$feat" == "${i:1}" ]; then
+        feature_ok=1
+        break		
     fi
-    echo "*******************************************************************************"
+        done
+    if [ $feature_ok != 1 ]; then
+    echo "---> FAIL"
+    failbuild=1
+    else
+    echo "---> PASS"
+    fi
+fi
+if [[ $i == -* ]]; then
+    feature_ok=1
+    echo "Make sure that ${i:1} is NOT enabled"
+    for feat in ${avmfeatures}; do
+    if [ "$feat" == "${i:1}" ]; then
+        feature_ok=0
+        break		
+    fi
+        done
+    if [ $feature_ok == 0 ]; then
+    echo "---> FAIL"
+    failbuild=1
+    else
+    echo "---> PASS"
+    fi
+fi
+echo ""
+done
+if [ $failbuild == 1 ]; then
+    echo "message: feature check FAILED"
+    cd $basedir/core
+    mv avmplusVersion.h.orig avmplusVersion.h
+    # Remove the binary since we have determined that it is NOT valid
+    rm $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension
+    endSilent
+    exit 1
 fi # end feature check
+echo "*******************************************************************************"
 
 cd $basedir/core
 mv avmplusVersion.h.orig avmplusVersion.h
