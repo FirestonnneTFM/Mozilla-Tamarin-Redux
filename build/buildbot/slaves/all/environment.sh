@@ -98,6 +98,9 @@ export shell_selftest_64=avmshell_64$shell_extension
 export shell_release_min=avmshell_min$shell_extension
 export shell_debug_min=avmshell_d_min$shell_extension
 
+export shell_release_aot=avmshell_aot$shell_extension
+export shell_debug_aot=avmshell_d_aot$shell_extension
+
 export jit="-Ojit"
 export interp="-Dinterp"
 
