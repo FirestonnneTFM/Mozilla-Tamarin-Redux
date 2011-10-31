@@ -43,11 +43,6 @@
 
 namespace avmplus
 {
-    // When DEBUG_ARRAY_VERIFY is defined, we do extra verification that is very
-    // slow, even in debug builds; thus normally this is disabled unless you
-    // are running tests for Array-specific changes.
-    #define NO_DEBUG_ARRAY_VERIFY
-
     /**
      * an instance of class Array.  constructed with "new Array" or
      * an array literal [...].   We need this class to support Array's

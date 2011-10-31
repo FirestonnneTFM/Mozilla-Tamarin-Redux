@@ -42,6 +42,11 @@
 
 namespace avmplus
 {
+    // When DEBUG_ARRAY_VERIFY is defined, we do extra verification that is very
+    // slow, even in debug builds; thus normally this is disabled unless you
+    // are running tests for Array-specific changes.
+    #define NO_DEBUG_ARRAY_VERIFY
+
     /*
         A dense array is faster and more efficient than a sparse array. Also, most
         Arrays are (mostly) dense in actual usage. Thus we now start with the assumption
@@ -106,6 +111,38 @@ namespace avmplus
 
     // Arrays <= this in length are always dense, regardless of how many slots are used
     static const uint32_t MIN_SPARSE_INDEX = 32;
+
+    REALLY_INLINE bool ArrayObject::isSparse() const
+    {
+        return m_denseStart == IS_SPARSE;
+    }
+
+    REALLY_INLINE bool ArrayObject::isDense() const
+    {
+        return int32_t(m_denseStart) >= 0;
+    }
+
+    REALLY_INLINE bool ArrayObject::isDynamic() const
+    {
+         return int32_t(m_denseStart) >= -1;
+    }
+
+    /*virtual*/
+    REALLY_INLINE uint32_t ArrayObject::getLength() const
+    {
+        return m_length;
+    }
+
+#ifdef DEBUG_ARRAY_VERIFY
+    // declared out-of-line
+#else
+    REALLY_INLINE void ArrayObject::verify() const
+    {
+        // nothing
+    }
+#endif
+
+
 
     /*static*/ REALLY_INLINE bool shouldBeSparse(const uint32_t denseLen, const uint32_t denseUsed)
     {
