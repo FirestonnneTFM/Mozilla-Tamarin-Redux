@@ -1625,7 +1625,7 @@ class RuntestBase(object):
             self.js_print('avm: %s' % self.avm)
             self.js_print('avm version: %s' % self.avmversion)
             self.js_print('asc: %s' % self.asc)
-            self.js_print('asc version: %s' % self.getAscVersion(self.asc))
+            #self.js_print('asc version: %s' % self.getAscVersion(self.asc))
             self.js_print('')
 
         if self.writeResultProperties:
