@@ -816,7 +816,17 @@ convert_and_set_sparse:
             if (isDense())
             {
                 // Yes, we can have isDense=true but m_denseArray empty.
-                result = !m_denseArray.isEmpty() ? m_denseArray.removeLast() : atomNotFound;
+                if (!m_denseArray.isEmpty())
+                {
+                    result = m_denseArray.removeLast();
+                    if (m_denseArray.isEmpty())
+                        m_denseStart = 0;
+                }
+                else
+                {
+                    result = atomNotFound;
+                }
+
                 if (result == atomNotFound)
                     result = undefinedAtom;
                 else
@@ -1038,6 +1048,7 @@ unshift_sparse:
         {
             // Leave this->m_denseStart alone; denseStart <= insertPoint,
             // and splice does not add or modify elements before insertPoint.
+            // Exception: when m_denseArray cleared, clear denseStart too.
 
             insertPoint -= this->m_denseStart;
 
@@ -1054,6 +1065,8 @@ unshift_sparse:
             this->m_denseArray.splice(insertPoint, insertCount, deleteCount, that->m_denseArray, that_skip);
             this->m_denseUsed = this->calcDenseUsed();
             this->m_length = this->m_length + insertCount - deleteCount;
+            if (this->m_denseArray.isEmpty())
+                m_denseStart = 0;
             
             verify();
             deletedItems->verify();
