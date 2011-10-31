@@ -228,7 +228,7 @@ void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void
 void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
 {
     jmp_buf buf;
-    AVMPI_setjmpNoUnwind(buf);                   // Save registers
+    VMPI_setjmpNoUnwind(buf);                   // Save registers
     CallWithRegistersSaved2(fn, arg, &buf);     // Computes the stack pointer, calls fn
     CallWithRegistersSaved3(fn, &arg, &buf);    // Probably prevents the previous call from being a tail call
 }
