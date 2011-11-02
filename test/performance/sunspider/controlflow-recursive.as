@@ -20,7 +20,7 @@
  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 // The Computer Language Shootout
@@ -71,7 +71,7 @@ expectedresults['tak5']=7;
 
 var msg="";
 for (var a in results) {
-    if (expectedresults[a]!=results[a]) 
+    if (expectedresults[a]!=results[a])
         msg+=" test: "+a+" expected "+expectedresults[a]+" got "+results[a];
 }
 if (msg=="")

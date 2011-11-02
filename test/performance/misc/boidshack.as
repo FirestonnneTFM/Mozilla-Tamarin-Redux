@@ -108,12 +108,12 @@ class Vector1
 
 dynamic class MovieClip
 {
-	var _xscale:Number
-	var _yscale:Number
-	var _width:Number
-	var _height:Number
-	var _x:Number
-	var _y:Number
+        var _xscale:Number
+        var _yscale:Number
+        var _width:Number
+        var _height:Number
+        var _x:Number
+        var _y:Number
 }
 
 //
@@ -123,10 +123,10 @@ dynamic class MovieClip
 // HACK no intrinsic definition for MovieClip
 class Entity extends MovieClip
 {
-	var _rotation:Number;
-	var _alpha:uint;
-	var _root:MovieClip;
-	
+        var _rotation:Number;
+        var _alpha:uint;
+        var _root:MovieClip;
+        
     function Entity()
     {
         position = new Vector1();
@@ -141,7 +141,7 @@ class Entity extends MovieClip
         
         tmp.mulScalar( elapsed );
    
-        position.addVector( tmp );   
+        position.addVector( tmp );
 
         _x = position.x;
         _y = position.y;
@@ -167,14 +167,14 @@ class Entity extends MovieClip
         _rotation = degree;
     }
 
-    static function rnd( min:Number, max:Number ):Number 
+    static function rnd( min:Number, max:Number ):Number
     {
         var r:Number = Math.random();
 
         // Flash 5R30 has a bug where it will occasionally
         // generate a 1.0.  Oops.
 
-        while (r == 1) 
+        while (r == 1)
         {
             r = Math.random();
         }
@@ -322,7 +322,7 @@ class Fish extends Entity
 
     function onEnterFrame():void
     {
-		++frame;
+                ++frame;
 
         var thisTime:Number = getTick();
         var elapsed:Number = (thisTime - lastTime) / 1000;
@@ -366,7 +366,7 @@ class Fish extends Entity
 
     function update()
     {
-		updateCount++
+                updateCount++
         rule1.setMembers( 0, 0 );
         rule2.setMembers( 0, 0 );
         rule3.setMembers( 0, 0 );
@@ -378,12 +378,12 @@ class Fish extends Entity
             if ( i == id )
                 continue;
 
-			// HACK self-ref type removed due to compiler bug
+                        // HACK self-ref type removed due to compiler bug
             var otherfish/*:Fish*/ = boids.fishArray[i];
 
             // Rule 1 + 3
 
-            tmp.setMembers( otherfish.position.x, 
+            tmp.setMembers( otherfish.position.x,
                             otherfish.position.y );
             tmp.subVector( position );
 
@@ -535,21 +535,21 @@ class Fish extends Entity
         var fishTopY:Number = _y - halfHeight;
 
         // check for horizontal bounce
-        if (fishLeftX < leftBorder) 
+        if (fishLeftX < leftBorder)
         {
             velocity.x += 40;
-        } 
-        else if (fishRightX > rightBorder) 
+        }
+        else if (fishRightX > rightBorder)
         {
             velocity.x -= 40;
         }
 
         // check for vertical bounce
-        if (fishTopY < topBorder) 
+        if (fishTopY < topBorder)
         {
             velocity.y += 40;
-        } 
-        else if (fishBottomY > bottomBorder) 
+        }
+        else if (fishBottomY > bottomBorder)
         {
             velocity.y -= 40;
         }
@@ -597,7 +597,7 @@ dynamic class Boids
     function Boids(numFish:Number)
     {
         this.numFish = numFish;
-		initialize();
+                initialize();
     }
 
     var numFish:Number;
@@ -651,10 +651,10 @@ dynamic class Boids
         maxVel = e.target.value;
     }
 
-	function onEnterFrame()
-	{
-		trace("onEnterFrame  name");
-	}
+        function onEnterFrame()
+        {
+                trace("onEnterFrame  name");
+        }
 
     var fishSymbol:String;
     var fishArray:Array = [];
@@ -696,7 +696,7 @@ var boids = new Boids(numFish);
 if (CONFIG::desktop){
     var frames = 20;
     var t:Number = new Date();
-} 
+}
 else {// mobile
     var frames = 5;
     var t:int = getTimer();

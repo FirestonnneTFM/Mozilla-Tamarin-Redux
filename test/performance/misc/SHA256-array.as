@@ -30,17 +30,17 @@ package mx.utils
      * Implementation of SHA-256 hash algorithm as described in
      * Federal Information Processing Standards Publication 180-2
      * at http://csrc.nist.gov/publications/fips/fips180-2/fips180-2.pdf
-     *  
+     *
      *  @langversion 3.0
      *  @playerversion Flash 9
      *  @playerversion AIR 1.1
      *  @productversion Flex 3
      */
     public class SHA256
-    {     
+    {
         /**
         *  Identifies this hash is of type "SHA-256".
-        *  
+        *
         *  @langversion 3.0
         *  @playerversion Flash 9
         *  @playerversion AIR 1.1
@@ -48,7 +48,7 @@ package mx.utils
         */
         public static const TYPE_ID:String = "SHA-256";
         
-        private static var k:Array = 
+        private static var k:Array =
                         [0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
                          0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
                          0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -61,17 +61,17 @@ package mx.utils
         
         /**
         * Computes the digest of a message using the SHA-256 hash algorithm.
-        * 
+        *
         * @param byteArray - the message, may not be null.
-        * 
+        *
         * return String - 64 character hexidecimal representation of the digest.
-        * 
-        *  
+        *
+        *
         *  @langversion 3.0
         *  @playerversion Flash 9
         *  @playerversion AIR 1.1
         *  @productversion Flex 3
-        */   
+        */
         public static function computeDigest(byteArray:ByteArray):String
         {
             // Preprocessing
@@ -108,7 +108,7 @@ package mx.utils
             for (i = 0; i < 4; i++)
             {
                 messagePadding[lastIndex - i] = (messageLengthBits >> (i << 3)) & 0xff;
-            }    
+            }
             
 
             // 2. Set initial hash H(0)
@@ -128,7 +128,7 @@ package mx.utils
             var e:int;
             var f:int;
             var g:int;
-            var h:int;        
+            var h:int;
             
             // Hash computation
             // for all message blocks
@@ -175,7 +175,7 @@ package mx.utils
                         paddingSize = 64;
                     }
                     else
-					{
+                                        {
                         paddingStart = 64 - messagePadding.length;
                         paddingSize = messagePadding.length;
                     }
@@ -187,34 +187,34 @@ package mx.utils
                 }
              
                 // prepare the message schedule, w
-                //startTime= getTimer();    
+                //startTime= getTimer();
                 for (t = 0; t < 64; t++)
                 {
                     if (t < 16)
                     {
                         msgIndex = t << 2;
-                        w[t] = int((m[msgIndex] << 24) | 
-                               (m[msgIndex + 1] << 16) | 
-                               (m[msgIndex + 2] << 8) | 
+                        w[t] = int((m[msgIndex] << 24) |
+                               (m[msgIndex + 1] << 16) |
+                               (m[msgIndex + 2] << 8) |
                                 m[msgIndex + 3]);
                     }
-                    else 
+                    else
                     {
                        // inline functions to boost performance. keep orginal code for reference.
                        // w[t] = divisor1(w[t - 2]) + uint(w[t - 7]) + divisor0(w[t - 15]) + uint(w[t - 16]);
                         wt2 = w[t -2];
-                        wt15 = w[t-15];   
+                        wt15 = w[t-15];
                         w[t] = int(int((((wt2 >>> 17) | (wt2 << 15)) ^ ((wt2 >>> 19) | (wt2 << 13)) ^ (wt2 >>> 10))) + // divisor1(w[t - 2])
-                               int(w[t - 7]) + 
+                               int(w[t - 7]) +
                                int((((wt15 >>> 7) | (wt15 << 25)) ^ ((wt15 >>> 18) | (wt15 << 14)) ^ (wt15 >>> 3))) + // divisor0(w[t - 15])
                                int(w[t - 16]));
                     }
                 }
                 
-                //endTime= getTimer();    
+                //endTime= getTimer();
                 //messageSchTime += endTime - startTime;
                 
-                //startTime= getTimer();    
+                //startTime= getTimer();
 
                 a = h0;
                 b = h1;
@@ -230,10 +230,10 @@ package mx.utils
                     // inline functions to boost performance. keep orginal code for reference.
                     //t1 = h + sum1(e) + Ch(e, f, g) + uint(k[t]) + uint(w[t]);
                     //t2 = sum0(a) + Maj(a, b, c);
-                    t1 = h + 
+                    t1 = h +
                         int((((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7)))) + //  sum1(e)
                         int(((e & f) ^ (~e & g))) + // Ch(e, f, g)
-                        int(k[t]) + 
+                        int(k[t]) +
                         int(w[t]);
                     t2 = int((((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10)))) + // sum0(a)
                          int(((a & b) ^ (a & c) ^ (b & c))); // Maj(a, b, c)
@@ -245,11 +245,11 @@ package mx.utils
                     d = c;
                     c = b;
                     b = a;
-                    a = t1 + t2;    
+                    a = t1 + t2;
 
-                    //trace("t = " + t + " a = " + uint(a).toString(16) + " b = " + uint(b).toString(16) + 
+                    //trace("t = " + t + " a = " + uint(a).toString(16) + " b = " + uint(b).toString(16) +
                     //      " c = " + uint(c).toString(16) + " d = " + uint(d).toString(16) + "\n");
-                    //trace("t = " + t + " e = " + uint(e).toString(16) + " f = " + uint(f).toString(16) + 
+                    //trace("t = " + t + " e = " + uint(e).toString(16) + " f = " + uint(f).toString(16) +
                     //      " g = " + uint(g).toString(16) + " h = " + uint(h).toString(16) + "\n");
 
                 }
@@ -263,7 +263,7 @@ package mx.utils
                 h6 += g;
                 h7 += h;
               
-                //endTime= getTimer();    
+                //endTime= getTimer();
                 //hashTime += endTime - startTime;
 
             }
@@ -288,7 +288,7 @@ package mx.utils
         *
         * @param byteArray - message
         * @param m - message block (output)
-        *  
+        *
         *  @langversion 3.0
         *  @playerversion Flash 9
         *  @playerversion AIR 1.1
@@ -326,10 +326,10 @@ package mx.utils
         
         // The below functions are defined in Federal Information
         // Processing Standards Publication 180-2
-        // at 
+        // at
         // http://csrc.nist.gov/publications/fips/fips180-2/fips180-2.pdf
         
-/*      The functions have been inlined to boost performance. They are 
+/*      The functions have been inlined to boost performance. They are
         kept here for reference.
         
         private static function Ch(x:uint, y:uint, z:uint):uint
@@ -375,7 +375,7 @@ package mx.utils
         {
             return x >>> n;
         }
-*  
+*
 *  @langversion 3.0
 *  @playerversion Flash 9
 *  @playerversion AIR 1.1
@@ -389,15 +389,15 @@ package {
     var DESC = "SHA256 benchmark using Array data";
     include "driver.as";
 
-	import flash.utils.ByteArray;
+        import flash.utils.ByteArray;
 
     var testinput = new ByteArray();
     for ( var i=0 ; i < 8000 ; i++ )
         testinput.writeByte(i);
 
-	var result = mx.utils.SHA256.computeDigest(testinput);
-	if (result != "4c97962111c8040e7cab18539cd7f0fa2601dc5d3c625a7b63bfcd10d45fc9bc") 
-		print("SHA256-array failed!");
-	else
-		TEST(function () { mx.utils.SHA256.computeDigest(testinput) }, "SHA256-array");
+        var result = mx.utils.SHA256.computeDigest(testinput);
+        if (result != "4c97962111c8040e7cab18539cd7f0fa2601dc5d3c625a7b63bfcd10d45fc9bc")
+                print("SHA256-array failed!");
+        else
+                TEST(function () { mx.utils.SHA256.computeDigest(testinput) }, "SHA256-array");
 }

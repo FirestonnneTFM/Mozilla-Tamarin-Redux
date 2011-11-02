@@ -20,32 +20,32 @@
  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package {
-	// The Computer Language Shootout
-	// http://shootout.alioth.debian.org/
-	// contributed by Isaac Gouy
+        // The Computer Language Shootout
+        // http://shootout.alioth.debian.org/
+        // contributed by Isaac Gouy
 
-	function ack(m:int, n:int):int{
-	   if (m==0) { return n+1; }
-	   if (n==0) { return ack(m-1,1); }
-	   return ack(m-1, ack(m,n-1) );
-	}
+        function ack(m:int, n:int):int{
+           if (m==0) { return n+1; }
+           if (n==0) { return ack(m-1,1); }
+           return ack(m-1, ack(m,n-1) );
+        }
 
-	function fib(n:Number):Number {
-	    if (n < 2){ return 1; }
-	    return fib(n-2) + fib(n-1);
-	}
+        function fib(n:Number):Number {
+            if (n < 2){ return 1; }
+            return fib(n-2) + fib(n-1);
+        }
 
-	function tak(x:Number,y:Number,z:Number):Number {
-	    if (y >= x) return z;
-	    return tak(tak(x-1,y,z), tak(y-1,z,x), tak(z-1,x,y));
-	}
+        function tak(x:Number,y:Number,z:Number):Number {
+            if (y >= x) return z;
+            return tak(tak(x-1,y,z), tak(y-1,z,x), tak(z-1,x,y));
+        }
 
     var results:Array=new Array();
     
-    if (CONFIG::desktop) 
+    if (CONFIG::desktop)
         var start:Number = new Date();
     else // mobile
         var start:int = getTimer();
@@ -54,7 +54,7 @@ package {
         results['fib'+(17+i)]=fib(17.0+i);
         results['tak'+i]=tak(3*i+3,2*i+2,i+1);
     }
-    if (CONFIG::desktop) 
+    if (CONFIG::desktop)
         var totaltime:Number = new Date() - start;
     else // mobile
         var totaltime:int = getTimer() - start;
@@ -73,7 +73,7 @@ package {
 
     var msg:String="";
     for (var a:String in results) {
-        if (expectedresults[a]!=results[a]) 
+        if (expectedresults[a]!=results[a])
             msg+=" test: "+a+" expected "+expectedresults[a]+" got "+results[a];
     }
     if (msg=="")

@@ -572,13 +572,13 @@ package FlogRayTracer {
             for(var y:int=0; y < canvasHeight; y++){
                 for(var x:int=0; x < canvasWidth; x++){
                     var yp:Number = y * 1.0 / canvasHeight * 2 - 1;
-              		var xp:Number = x * 1.0 / canvasWidth * 2 - 1;
+                        var xp:Number = x * 1.0 / canvasWidth * 2 - 1;
 
-              		var ray:Ray = scene.camera.getRay(xp, yp);
+                        var ray:Ray = scene.camera.getRay(xp, yp);
 
-              		var color:Color = this.getPixelColor(ray, scene);
+                        var color:Color = this.getPixelColor(ray, scene);
 
-                	this.setPixel(x, y, color);
+                        this.setPixel(x, y, color);
                 }
             }
 //            print(result.toString()==expectedResult);

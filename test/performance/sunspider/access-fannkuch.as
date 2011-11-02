@@ -20,7 +20,7 @@
  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /* The Great Computer Language Shootout
    http://shootout.alioth.debian.org/
@@ -96,7 +96,7 @@ else { // mobile
 }
 print("fannkuch(8)="+res);
 if (res==22) {
-    print("metric time "+totaltime); 
+    print("metric time "+totaltime);
 } else {
     print("error fannkkuch(8) expecting 22 got "+res);
 }
