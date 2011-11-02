@@ -801,15 +801,64 @@ namespace nanojit
         LIns* condval = ins->oprnd1();
         LIns* iftrue  = ins->oprnd2();
         LIns* iffalse = ins->oprnd3();
+        RegisterMask allow = ins->isD() ? FpRegs : GpRegs;
 
         NanoAssert(condval->isCmp());
-        NanoAssert(ins->opcode() == LIR_cmovi && iftrue->isI() && iffalse->isI());
+        NanoAssert((ins->isop(LIR_cmovi) && iftrue->isI() && iffalse->isI()) ||
+                   (ins->isop(LIR_cmovd) && iftrue->isD() && iffalse->isD()));
 
-        const Register rr = deprecated_prepResultReg(ins, GpRegs);
+        Register rd = prepareResultReg(ins, allow);
 
-        const Register iftruereg = findRegFor(iftrue, GpRegs & ~rmask(rr));
-        MOVN(rr, iftruereg, AT);
-        /*const Register iffalsereg =*/ findSpecificRegFor(iffalse, rr);
+        // Try to re-use the result register for one of the arguments.
+        Register rt = iftrue->isInReg() ? iftrue->getReg() : rd;
+        Register rf = iffalse->isInReg() ? iffalse->getReg() : rd;
+        // Note that iftrue and iffalse may actually be the same, though it
+        // shouldn't happen with the LIR optimizers turned on.
+        if ((rt == rf) && (iftrue != iffalse)) {
+            // We can't re-use the result register for both arguments, so force one
+            // into its own register.
+            rf = findRegFor(iffalse, allow & ~rmask(rd));
+            NanoAssert(iffalse->isInReg());
+        }
+
+        if (ins->isI()) {
+            if (rd == rf)
+                MOVN(rd, rt, AT);
+            else if (rd == rt)
+                MOVZ(rd, rf, AT);
+            else {
+                MOVZ(rd, rf, AT);
+                MOVE(rd, rt);
+            }
+        } else if (ins->isD()) {
+            NanoAssert(cpu_has_fpu);
+            if (cpu_has_fpu) {
+                if (rd == rf)
+                    MOVT_D(rd, rt, 0);
+                else if (rd == rt)
+                    MOVF_D(rd, rf, 0);
+                else {
+                    MOVF_D(rd, rf, 0);
+                    MOV_D(rd, rt);
+                }
+            }
+        }
+
+        freeResourcesOf(ins);
+
+        // If we re-used the result register, mark it as active for either iftrue
+        // or iffalse (or both in the corner-case where they're the same).
+        if (rt == rd) {
+            NanoAssert(!iftrue->isInReg());
+            findSpecificRegForUnallocated(iftrue, rd);
+        } else if (rf == rd) {
+            NanoAssert(!iffalse->isInReg());
+            findSpecificRegForUnallocated(iffalse, rd);
+        } else {
+            NanoAssert(iffalse->isInReg());
+            NanoAssert(iftrue->isInReg());
+        }
+
         asm_cmp(condval->opcode(), condval->oprnd1(), condval->oprnd2(), AT);
         TAG("asm_cmov(ins=%p{%s})", ins, lirNames[ins->opcode()]);
     }
