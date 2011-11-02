@@ -5,11 +5,16 @@
 # usage: addmodeline.sh lang file1 file2 ...
 #
 # Where "lang" is one of:
-#    "C", "c", "C++", "c++", "cpp", "cxx", "Java", "java", "Python, "python", "py".
+#    "C", "c", "C++", "c++", "cpp", "cxx", "Java", "java",
+#    "Python, "python", "py", "c_modeless".
 #
 # Add modeline(s) for language to top of each file.
 #
 # Not clever at all; e.g. leading #! lines, if any, must be restored manually.
+#
+# The "c_modeless" language avoids adding any mode at all, but adds a
+# fallback modeline lines (taken from builtin.as) in a C comment.
+# (See code for text of fallback modeline.)
 
 # WARNINGS:
 # 1. requires $file.orig does not exist (for all $file arguments).
@@ -33,9 +38,11 @@ function add_modeline() {
     file=$1
 
     if [ ! -e $file ] ; then
+        echo "Skipping $file, as it does not exist"
         exit 2
     fi
     if [ -e $file.orig ] ; then
+        echo "Skipping $file; there is already a $file.orig present"
         exit 3
     fi
 
@@ -59,6 +66,9 @@ function add_modeline() {
             ;;
         Python | python | py )
             add_modeline_python $file
+            ;;
+        c_modeless)
+            add_modeline_c_modeless $file
             ;;
         * )
             echo "Unsupported language: $MODE_LANG"
@@ -99,6 +109,14 @@ function add_modeline_python() {
 #!/usr/bin/env python
 # -*- Mode: Python; indent-tabs-mode: nil; tab-width: 4 -*-
 # vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5)
+EOF
+}
+
+function add_modeline_c_modeless() {
+    file_new=$1
+    cat > $file_new << "EOF"
+/* -*- c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 EOF
 }
 
