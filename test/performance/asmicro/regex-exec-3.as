@@ -47,10 +47,10 @@ function matchloop():Array {
         var re3:RegExp = /eall?i/;    /* not "g", we want searching to start at the beginning */
         var re4:RegExp = /fall?i/;    /* not "g", we want searching to start at the beginning */
         var re5:RegExp = /gall?i/;    /* not "g", we want searching to start at the beginning */
-	x = re2.exec(s);
-	x = re3.exec(s);
-	x = re4.exec(s);
-	x = re5.exec(s);
+        x = re2.exec(s);
+        x = re3.exec(s);
+        x = re4.exec(s);
+        x = re5.exec(s);
         x = re1.exec(s);
     }
     return x;

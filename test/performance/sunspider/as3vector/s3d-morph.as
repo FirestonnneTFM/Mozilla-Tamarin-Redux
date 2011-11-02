@@ -20,7 +20,7 @@
  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 var loops:int = 15
@@ -39,14 +39,14 @@ function morph(a:Vector.<Number>, f:Number):void {
     }
 }
 
-function run3dMorph():int {    
+function run3dMorph():int {
   if (CONFIG::desktop)
       var _sunSpiderStartDate:Number = new Date();
   else // mobile
       var _sunSpiderStartDate:int = getTimer();
 
   var a:Vector.<Number> = new Vector.<Number>(nx*nz*3,true);
-  for (var i:int=0; i < nx*nz*3; ++i) 
+  for (var i:int=0; i < nx*nz*3; ++i)
       a[i] = 0
 
   for (var i:int = 0; i < loops; ++i) {

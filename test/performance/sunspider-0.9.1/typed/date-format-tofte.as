@@ -15,15 +15,15 @@ function formatDate (self:Date, input:String, time:uint = 0) {
     // input : format string
     // time : epoch time (seconds, and optional)
     //
-    // if time is not passed, formatting is based on 
+    // if time is not passed, formatting is based on
     // the current "this" date object's set time.
     //
     // supported:
-    // a, A, B, d, D, F, g, G, h, H, i, j, l (lowercase L), L, 
+    // a, A, B, d, D, F, g, G, h, H, i, j, l (lowercase L), L,
     // m, M, n, O, r, s, S, t, U, w, W, y, Y, z
     //
     // unsupported:
-    // I (capital i), T, Z    
+    // I (capital i), T, Z
 
     var switches:Array =    ["a", "A", "B", "d", "D", "F", "g", "G", "h", "H",
                        "i", "j", "l", "L", "m", "M", "n", "O", "r", "s",
@@ -132,7 +132,7 @@ function formatDate (self:Date, input:String, time:uint = 0) {
           var s:String = new String(self.getHours());
           return s.length == 1?
           "0"+self.getHours() : String(self.getHours());
-        }  
+        }
     }
     function H():String {
         // 24-hour format of an hour with leading zeros
@@ -147,7 +147,7 @@ function formatDate (self:Date, input:String, time:uint = 0) {
     function j():uint {
         // Day of the month without leading zeros
         return self.getDate();
-    }    
+    }
     function l():String {
         // A full textual representation of the day of the week
         return daysLong[self.getDay()];
@@ -156,7 +156,7 @@ function formatDate (self:Date, input:String, time:uint = 0) {
         // leap year or not. 1 if leap year, 0 if not.
         // the logic should match iso's 8601 standard.
         var y_ = Y();
-        if (         
+        if (
             (y_ % 4 == 0 && y_ % 100 != 0) ||
             (y_ % 4 == 0 && y_ % 100 == 0 && y_ % 400 == 0)
             ) {
@@ -168,7 +168,7 @@ function formatDate (self:Date, input:String, time:uint = 0) {
     function m():String {
         // Numeric representation of a month, with leading zeros
         return self.getMonth() < 9?
-        "0"+(self.getMonth()+1) : 
+        "0"+(self.getMonth()+1) :
         String(self.getMonth()+1);
     }
     function M():String {
@@ -235,8 +235,8 @@ function formatDate (self:Date, input:String, time:uint = 0) {
         var ny:Date = new Date("January 1 " + Y() + " 00:00:00");
         var nyDay:uint = ny.getDay()!=0?ny.getDay()-1:6;
         if (
-            (afterNY <= 2) && 
-            (nyDay >=4)  && 
+            (afterNY <= 2) &&
+            (nyDay >=4)  &&
             (afterNY >= (6-nyDay))
             ) {
             // Since I'm not sure we can just always return 53,
@@ -271,7 +271,7 @@ function formatDate (self:Date, input:String, time:uint = 0) {
         if ((new Date()).getFullYear) {
             var newDate:Date = new Date("Jan 1 2001");
             var x:uint = newDate.getFullYear();
-            if (x == 2001) {              
+            if (x == 2001) {
                 // i trust the method now
                 return self.getFullYear();
             }

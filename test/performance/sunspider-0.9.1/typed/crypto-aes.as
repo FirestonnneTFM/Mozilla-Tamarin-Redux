@@ -53,7 +53,7 @@ function ShiftRows(s:Array, Nb:uint):Array {    // shift row r of state S left b
     for (var c:uint=0; c<4; c++) t[c] = s[r][(c+r)%Nb];  // shift into temp copy
     for (var c:uint=0; c<4; c++) s[r][c] = t[c];         // and copy back
   }          // note that this will work for Nb=4,5,6, but not 7,8 (always 4 for AES):
-  return s;  // see fp.gladman.plus.com/cryptography_technology/rijndael/aes.spec.311.pdf 
+  return s;  // see fp.gladman.plus.com/cryptography_technology/rijndael/aes.spec.311.pdf
 }
 
 
@@ -152,12 +152,12 @@ var Rcon:Array = [ [0x00, 0x00, 0x00, 0x00],
              [0x40, 0x00, 0x00, 0x00],
              [0x80, 0x00, 0x00, 0x00],
              [0x1b, 0x00, 0x00, 0x00],
-             [0x36, 0x00, 0x00, 0x00] ]; 
+             [0x36, 0x00, 0x00, 0x00] ];
 
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
-/* 
+/*
  * Use AES to encrypt 'plaintext' with 'password' using 'nBits' key, in 'Counter' mode of operation
  *                           - see http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf
  *   for each block
@@ -167,7 +167,7 @@ var Rcon:Array = [ [0x00, 0x00, 0x00, 0x00],
 function AESEncryptCtr(plaintext:String, password:String, nBits:uint):String {
   if (!(nBits==128 || nBits==192 || nBits==256)) return '';  // standard allows 128/192/256 bit keys
 
-  // for this example script, generate the key by applying Cipher to 1st 16/24/32 chars of password; 
+  // for this example script, generate the key by applying Cipher to 1st 16/24/32 chars of password;
   // for real-world applications, a more secure approach would be to hash the password e.g. with SHA-1
   var nBytes:uint = nBits/8;  // no bytes in key
   var pwBytes:Array = new Array(nBytes);
@@ -223,7 +223,7 @@ function AESEncryptCtr(plaintext:String, password:String, nBits:uint):String {
 }
 
 
-/* 
+/*
  * Use AES to decrypt 'ciphertext' with 'password' using 'nBits' key, in Counter mode of operation
  *
  *   for each block

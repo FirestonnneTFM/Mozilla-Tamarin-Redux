@@ -20,7 +20,7 @@
  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 // The Great Computer Language Shootout
@@ -41,7 +41,7 @@ function primes(isPrime:Vector.<int>, n:int):int {
 
   for (i=2; i<m; i++) {
     if (isPrime[i>>5] & 1<<(i&31)) {
-      for (var j:int=i+i; j<m; j+=i) 
+      for (var j:int=i+i; j<m; j+=i)
         isPrime[j>>5] &= ~(1<<(j&31));
       count++;
     }

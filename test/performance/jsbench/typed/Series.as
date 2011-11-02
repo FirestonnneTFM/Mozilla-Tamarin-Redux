@@ -90,7 +90,7 @@ var size:int;
   
     /*
    * buildTestData
-   * 
+   *
    */
 
   // Instantiate array(s) to hold fourier coefficients.
@@ -106,7 +106,7 @@ var size:int;
 
   /*
    * Do
-   * 
+   *
    * This consists of calculating the first n pairs of fourier coefficients of
    * the function (x+1)^x on the interval 0,2. n is given by array_rows, the
    * array size. NOTE: The # of integration steps is fixed at 1000.
@@ -121,7 +121,7 @@ var size:int;
         2.0, // Upper bound.
         1000, // # of steps.
         0.0, // No omega*n needed.
-        0) / 2.0; 
+        0) / 2.0;
         // 0 = term A[0].
     TestArray[1][0]=0.0;
     // Calculate the fundamental frequency.
@@ -149,7 +149,7 @@ var size:int;
 
   /*
    * TrapezoidIntegrate
-   * 
+   *
    * Perform a simple trapezoid integration on the function (x+1)**x. x0,x1
    * set the lower and upper bounds of the integration. nsteps indicates # of
    * trapezoidal sections. omegan is the fundamental frequency times the
@@ -197,7 +197,7 @@ var size:int;
 
   /*
    * thefunction
-   * 
+   *
    * This routine selects the function to be used in the Trapezoid
    * integration. x is the independent variable, omegan is omega * n, and
    * select chooses which of the sine/cosine functions are used. Note the

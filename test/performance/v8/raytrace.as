@@ -591,13 +591,13 @@ public class Engine {
         for(var y=0; y < canvasHeight; y++){
             for(var x=0; x < canvasWidth; x++){
                 var yp = y * 1.0 / canvasHeight * 2 - 1;
-          		var xp = x * 1.0 / canvasWidth * 2 - 1;
+                        var xp = x * 1.0 / canvasWidth * 2 - 1;
 
-          		var ray = scene.camera.getRay(xp, yp);
+                        var ray = scene.camera.getRay(xp, yp);
 
-          		var color = this.getPixelColor(ray, scene);
+                        var color = this.getPixelColor(ray, scene);
 
-            	this.setPixel(x, y, color);
+                this.setPixel(x, y, color);
             }
         }
         
@@ -843,7 +843,7 @@ var RayTrace = new BenchmarkSuite('RayTrace', 932666, [
 ]);
 
 // if running individually, start the Benchmark suite.
-try { 
+try {
   runSuite
 } catch (e:ReferenceError) {
   BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,

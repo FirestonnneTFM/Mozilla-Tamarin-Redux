@@ -20,7 +20,7 @@
  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 function createVector(x,y,z) {
     return new Array(x,y,z);
@@ -84,7 +84,7 @@ function scale(v, scale) {
 }
 
 function cross(v1, v2) {
-    return [v1[1] * v2[2] - v1[2] * v2[1], 
+    return [v1[1] * v2[2] - v1[2] * v2[1],
             v1[2] * v2[0] - v1[0] * v2[2],
             v1[0] * v2[1] - v1[1] * v2[0]];
 
@@ -108,8 +108,8 @@ function invertMatrix(self) {
     var tx = -self[3];
     var ty = -self[7];
     var tz = -self[11];
-    for (h = 0; h < 3; h++) 
-        for (v = 0; v < 3; v++) 
+    for (h = 0; h < 3; h++)
+        for (v = 0; v < 3; v++)
             temp[h + v * 4] = self[v + h * 4];
     for (i = 0; i < 11; i++)
         self[i] = temp[i];
@@ -127,13 +127,13 @@ function Triangle(p1, p2, p3) {
     var normal = cross(edge1, edge2);
     if (Math.abs(normal[0]) > Math.abs(normal[1]))
         if (Math.abs(normal[0]) > Math.abs(normal[2]))
-            this.axis = 0; 
-        else 
+            this.axis = 0;
+        else
             this.axis = 2;
     else
-        if (Math.abs(normal[1]) > Math.abs(normal[2])) 
+        if (Math.abs(normal[1]) > Math.abs(normal[2]))
             this.axis = 1;
-        else 
+        else
             this.axis = 2;
     var u = (this.axis + 1) % 3;
     var v = (this.axis + 2) % 3;
@@ -148,11 +148,11 @@ function Triangle(p1, p2, p3) {
     this.nd = dot(normal, p1) / normal[this.axis];
     var det = u1 * v2 - v1 * u2;
     this.eu = p1[u];
-    this.ev = p1[v]; 
+    this.ev = p1[v];
     this.nu1 = u1 / det;
     this.nv1 = -v1 / det;
     this.nu2 = v2 / det;
-    this.nv2 = -u2 / det; 
+    this.nv2 = -u2 / det;
     this.material = [0.7, 0.7, 0.7];
 }
 
@@ -166,13 +166,13 @@ Triangle.prototype.intersect = function(orig, dir, near, far) {
     var Pu = orig[u] + t * dir[u] - this.eu;
     var Pv = orig[v] + t * dir[v] - this.ev;
     var a2 = Pv * this.nu1 + Pu * this.nv1;
-    if (a2 < 0) 
+    if (a2 < 0)
         return null;
     var a3 = Pu * this.nu2 + Pv * this.nv2;
-    if (a3 < 0) 
+    if (a3 < 0)
         return null;
 
-    if ((a2 + a3) > 1) 
+    if ((a2 + a3) > 1)
         return null;
     return t;
 }
@@ -188,7 +188,7 @@ var zero = new Array(0,0,0);
 Scene.prototype.intersect = function(origin, dir, near, far) {
     var closest = null;
     for (i = 0; i < this.triangles.length; i++) {
-        var triangle = this.triangles[i];   
+        var triangle = this.triangles[i];
         var d = triangle.intersect(origin, dir, near, far);
         if (d == null || d > far || d < near)
             continue;
@@ -200,7 +200,7 @@ Scene.prototype.intersect = function(origin, dir, near, far) {
         return [this.background[0],this.background[1],this.background[2]];
         
     var normal = closest.normal;
-    var hit = add(origin, scale(dir, far)); 
+    var hit = add(origin, scale(dir, far));
     if (dot(dir, normal) > 0)
         normal = [-normal[0], -normal[1], -normal[2]];
     
@@ -244,7 +244,7 @@ Scene.prototype.blocked = function(O, D, far) {
     var near = 0.0001;
     var closest = null;
     for (i = 0; i < this.triangles.length; i++) {
-        var triangle = this.triangles[i];   
+        var triangle = this.triangles[i];
         var d = triangle.intersect(O, D, near, far);
         if (d == null || d > far || d < near)
             continue;
@@ -364,7 +364,7 @@ function raytraceScene()
             // angle *= angle;
             //grey.reflection = angle;
             return grey;
-        } else 
+        } else
             return green;
     }
     var ffl = createVector(-1000, -30, -1000);

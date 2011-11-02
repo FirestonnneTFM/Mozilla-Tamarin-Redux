@@ -42,12 +42,12 @@ include "driver.as"
 function plainfunc(e,i,a){}
 var a:Array = [];
 for(var i:uint=0;i<1000;i++)
-	a.push(i);
+        a.push(i);
 
 function doit():uint {
-	for(var j:uint = 0; j < 100; j++)
-		a.forEach(plainfunc);
-	return i*j;
+        for(var j:uint = 0; j < 100; j++)
+                a.forEach(plainfunc);
+        return i*j;
 }
 
 TEST(doit, "array-foreach-func");

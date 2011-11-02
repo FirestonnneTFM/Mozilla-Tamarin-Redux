@@ -41,17 +41,17 @@ include "driver.as"
 function pushloop() {
     var a = new <uint>[0,1,2,3,4,5,6,7,8,9];
     for ( var i=0 ; i < 100000 ; i+=10 ) {
-	a.length = 0;
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
+        a.length = 0;
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
     }
     return a.length;
 }

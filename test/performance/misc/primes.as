@@ -37,14 +37,14 @@
  
 
 function prime(n:int) {
-	var m : int = n;
-	var limit : int = n/2;
-	for (var i : int = 2; i<=limit;++i) {
-		if(!(m%i)) {
-			return false;
-		}
-	}
-	return true;
+        var m : int = n;
+        var limit : int = n/2;
+        for (var i : int = 2; i<=limit;++i) {
+                if(!(m%i)) {
+                        return false;
+                }
+        }
+        return true;
 }
 
 
@@ -60,9 +60,9 @@ else { // mobile
 var numprimes:int=0;
 print("searching for primes 1.."+n)
 for(var j:int = n;j>0;--j) {
-	if( prime(j) ) {
-		numprimes++;
-	}
+        if( prime(j) ) {
+                numprimes++;
+        }
 }
 print("found "+numprimes);
 if (CONFIG::desktop)
