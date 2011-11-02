@@ -313,7 +313,8 @@ namespace nanojit {
 // This is a bit hacky...
 #define TRAMP(ins, fmt, ...) do {                                       \
         verbose_only(                                                   \
-                     NIns *save_nIns = _nIns; _nIns = _nSlot;           \
+            NIns *save_nIns = _nIns; _nIns = _nSlot;                    \
+            NIns *save_nInsAfter = _nInsAfter; _nInsAfter = _nSlot+1;   \
                      )                                                  \
         *_nSlot = (NIns)ins;                                            \
         debug_only(codegenBreak(_nSlot);)                               \
@@ -321,7 +322,8 @@ namespace nanojit {
         verbose_only(setOutputForEOL("<= trampoline");)                 \
         asm_output(fmt, ##__VA_ARGS__);                                 \
         verbose_only(                                                   \
-                     _nIns = save_nIns;                                 \
+            _nIns = save_nIns;                                          \
+            _nInsAfter = save_nInsAfter;                                \
                      )                                                  \
     } while (0)
 
