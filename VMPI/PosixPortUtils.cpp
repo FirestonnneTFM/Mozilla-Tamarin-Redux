@@ -212,7 +212,7 @@ void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void
         intptr_t force_align;
         jmp_buf buf;
     };
-    assert((intptr_t(&buf) & ~(sizeof(void*)-1)) == 0); (void) force_align;
+    assert((intptr_t(&buf) & (sizeof(void*)-1)) == 0); (void) force_align;
     VMPI_setjmpNoUnwind(buf);                   // Save registers in jmp_buf.
 #endif
     CallWithRegistersSaved2(fn, arg, &buf);     // Computes the stack pointer, calls fn
@@ -241,7 +241,7 @@ void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void
         intptr_t force_align;
         jmp_buf buf;
     };
-    assert((jmp_buf & ~(sizeof(void*)-1)) == 0);
+    assert((jmp_buf & (sizeof(void*)-1)) == 0);
     VMPI_setjmpNoUnwind(buf);                   // Save registers
     CallWithRegistersSaved2(fn, arg, &buf);     // Computes the stack pointer, calls fn
     CallWithRegistersSaved3(fn, &arg, &buf);    // Probably prevents the previous call from being a tail call
