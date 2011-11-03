@@ -113,7 +113,7 @@ AddTestCase("Number(Infinity) is NOT float", false, (new Number(Infinity)) is fl
 
 AddTestCase("2.01 is NOT float (not identical on conversion)", false, 2.01 is float);
 
-AddTestCase("int.length (1) is NOT float", true, int.length is float);
+AddTestCase("int.length (1) is NOT float", false, int.length is float);
 
 AddTestCase("int.MIN_VALUE is NOT float (large negative no., but requires little mantissa)", false, int.MIN_VALUE is float);
 
@@ -122,7 +122,7 @@ AddTestCase("large_negative_int is NOT float", false, large_neg_int is float);
 
 AddTestCase("uint.MAX_VALUE is NOT float (too big positive no)", false, uint.MAX_VALUE is float);
 
-AddTestCase("uint.MIN_VALUE (0) is NOT float", true, uint.MIN_VALUE is float);
+AddTestCase("uint.MIN_VALUE (0) is NOT float", false, uint.MIN_VALUE is float);
 
 var large_int:int = -268435456;
 AddTestCase("large int is NOT float (if it ends in lots of zeroes - i.e. requires less than 23bits of mantissa)", false, large_int is float);
