@@ -134,7 +134,7 @@ OP___(skip,      Sk,  V,    0)  // links code chunks
 OP_32(parami,     P,  I,    0)  // load an int parameter (register or stack location)
 OP_64(paramq,     P,  Q,    0)  // load a quad parameter (register or stack location)
 
-OP___(allocp,     I,  P,    0)  // allocate stack space (result is an address)
+OP___(allocp,   IorF, P,    0)  // allocate stack space (result is an address)
 
 OP___(reti,     Op1,  V,    0)  // return an int
 OP_64(retq,     Op1,  V,    0)  // return a quad
@@ -217,12 +217,11 @@ OP___(xbarrier, Op2,  V,    0)
 //---------------------------------------------------------------------------
 // Immediates
 //---------------------------------------------------------------------------
-OP___(immi,     I,    I,    1)  // int immediate
+OP___(immi,     IorF, I,    1)  // int immediate
 OP_64(immq,     QorD, Q,    1)  // quad immediate
 OP___(immd,     QorD, D,    1)  // double immediate
-OP__F(immf,     F,    F,    1)  // float immediate
+OP__F(immf,     IorF, F,    1)  // float immediate
 OP__F(immf4,    F4,   F4,   1)  // float immediate
-
 
 //---------------------------------------------------------------------------
 // Comparisons

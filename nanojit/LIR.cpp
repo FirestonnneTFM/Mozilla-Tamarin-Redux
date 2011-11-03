@@ -115,7 +115,6 @@ namespace nanojit
         return argc;
     }
 
-#ifdef VMCFG_FLOAT
     uint32_t CallInfo::count_32bitfloat_args() const
     {
         uint32_t argc = 0;
@@ -143,7 +142,6 @@ namespace nanojit
         }
         return argc;
     }
-#endif
 
     uint32_t CallInfo::getArgTypes(ArgType* argTypes) const
     {
@@ -585,12 +583,12 @@ namespace nanojit
     {
         // Make sure the size is ok
         NanoAssert(0 == szB % sizeof(void*));
-#if !defined(NANOJIT_64BIT) && defined(VMCFG_FLOAT)
-         NanoAssert(sizeof(LIns) <= szB && szB <= sizeof(LInsF4));  // LInsF4 is the biggest one
+#ifdef NANOJIT_64BIT
+        NanoAssert(sizeof(LIns) <= szB && szB <= sizeof(LInsSt));  // LInsSt is the biggest one
 #else
-         NanoAssert(sizeof(LIns) <= szB && szB <= sizeof(LInsSt));  // LInsSt is the biggest one
+        NanoAssert(sizeof(LIns) <= szB && szB <= sizeof(LInsF4));  // LInsF4 is the biggest one
 #endif
-         NanoAssert(_unused < _limit);
+        NanoAssert(_unused < _limit);
 
         debug_only( bool moved = false; )
 
@@ -722,9 +720,9 @@ namespace nanojit
     LIns* LirBufWriter::insAlloc(int32_t size)
     {
         size = (size+3)>>2; // # of required 32bit words
-        LInsI* insI = (LInsI*)_buf->makeRoom(sizeof(LInsI));
-        LIns*  ins  = insI->getLIns();
-        ins->initLInsI(LIR_allocp, size);
+        LInsIorF* insIorF = (LInsIorF*)_buf->makeRoom(sizeof(LInsIorF));
+        LIns*  ins  = insIorF->getLIns();
+        ins->initLInsIorF(LIR_allocp, size);
         return ins;
     }
 
@@ -742,9 +740,22 @@ namespace nanojit
 
     LIns* LirBufWriter::insImmI(int32_t imm)
     {
-        LInsI* insI = (LInsI*)_buf->makeRoom(sizeof(LInsI));
-        LIns*  ins  = insI->getLIns();
-        ins->initLInsI(LIR_immi, imm);
+        LInsIorF* insIorF = (LInsIorF*)_buf->makeRoom(sizeof(LInsIorF));
+        LIns*  ins  = insIorF->getLIns();
+        ins->initLInsIorF(LIR_immi, imm);
+        return ins;
+    }
+
+    LIns* LirBufWriter::insImmF(float f)
+    {
+        union{
+            float flt;
+            int32_t i;
+        } u;
+        u.flt = f;
+        LInsIorF* insIorF = (LInsIorF*)_buf->makeRoom(sizeof(LInsIorF));
+        LIns*  ins  = insIorF->getLIns();
+        ins->initLInsIorF(LIR_immf, u.i);
         return ins;
     }
 
@@ -757,6 +768,27 @@ namespace nanojit
         return ins;
     }
 #endif
+
+    LIns* LirBufWriter::insImmD(double d)
+    {
+        LInsQorD* insQorD = (LInsQorD*)_buf->makeRoom(sizeof(LInsQorD));
+        LIns*     ins     = insQorD->getLIns();
+        union {
+            double d;
+            uint64_t q;
+        } u;
+        u.d = d;
+        ins->initLInsQorD(LIR_immd, u.q);
+        return ins;
+    }
+
+    LIns* LirBufWriter::insImmF4(float4_t f4)
+    {
+        LInsF4* insF4 = (LInsF4*)_buf->makeRoom(sizeof(LInsF4));
+        LIns*  ins  = insF4->getLIns();
+        ins->initLInsF4(LIR_immf4, f4);
+        return ins;
+    }
 
     LIns* LirBufWriter::insComment(const char* str)
     {
@@ -772,42 +804,6 @@ namespace nanojit
         LInsSk* insSk = (LInsSk*)_buf->makeRoom(sizeof(LInsSk));
         LIns*   ins   = insSk->getLIns();
         ins->initLInsSk(skipTo);
-        return ins;
-    }
-
-#ifdef VMCFG_FLOAT
-    LIns* LirBufWriter::insImmF(float f)
-    {
-        union{
-            float flt;
-            int32_t i;
-        } u;
-        u.flt = f;
-        LInsF* insF = (LInsF*)_buf->makeRoom(sizeof(LInsF));
-        LIns*  ins  = insF->getLIns();
-        ins->initLInsI(LIR_immf, u.i);
-        return ins;
-    }
-    
-    LIns* LirBufWriter::insImmF4(float4_t f4)
-    {
-        LInsF4* insF4 = (LInsF4*)_buf->makeRoom(sizeof(LInsF4));
-        LIns*  ins  = insF4->getLIns();
-        ins->initLInsF4(LIR_immf4, f4);
-        return ins;
-    }
-#endif
-
-    LIns* LirBufWriter::insImmD(double d)
-    {
-        LInsQorD* insQorD = (LInsQorD*)_buf->makeRoom(sizeof(LInsQorD));
-        LIns*     ins     = insQorD->getLIns();
-        union {
-            double d;
-            uint64_t q;
-        } u;
-        u.d = d;
-        ins->initLInsQorD(LIR_immd, u.q);
         return ins;
     }
 
@@ -882,14 +878,13 @@ namespace nanojit
         NanoStaticAssert(sizeof(LInsSk)   == 2*sizeof(void*));
         NanoStaticAssert(sizeof(LInsC)    == 3*sizeof(void*));
         NanoStaticAssert(sizeof(LInsP)    == 2*sizeof(void*));
-        NanoStaticAssert(sizeof(LInsI)    == 2*sizeof(void*));
-        FLOAT_ONLY( NanoStaticAssert(sizeof(LInsF)    == 2*sizeof(void*)) );
+        NanoStaticAssert(sizeof(LInsIorF) == 2*sizeof(void*));
     #if defined NANOJIT_64BIT
         NanoStaticAssert(sizeof(LInsQorD) == 2*sizeof(void*));
-        FLOAT_ONLY( NanoStaticAssert(sizeof(LInsF4)   == 3*sizeof(void*)) );
+        NanoStaticAssert(sizeof(LInsF4)   == 3*sizeof(void*));
     #else
         NanoStaticAssert(sizeof(LInsQorD) == 3*sizeof(void*));
-        FLOAT_ONLY( NanoStaticAssert(sizeof(LInsF4  ) == 5*sizeof(void*)) );
+        NanoStaticAssert(sizeof(LInsF4  ) == 5*sizeof(void*));
     #endif
         NanoStaticAssert(sizeof(LInsJtbl) == 4*sizeof(void*));
 
@@ -907,13 +902,11 @@ namespace nanojit
         #define OP2OFFSET (offsetof(LInsOp2, ins) - offsetof(LInsOp2, oprnd_2))
         NanoStaticAssert( OP2OFFSET == (offsetof(LInsOp3, ins) - offsetof(LInsOp3, oprnd_2)) );
         NanoStaticAssert( OP2OFFSET == (offsetof(LInsSt,  ins) - offsetof(LInsSt,  oprnd_2)) );
-#ifdef VMCFG_FLOAT
         NanoStaticAssert(LIR_eqf==LIR_eqd+6);
         NanoStaticAssert(LIR_ltf==LIR_ltd+6);
         NanoStaticAssert(LIR_gtf==LIR_gtd+6);
         NanoStaticAssert(LIR_lef==LIR_led+6);
         NanoStaticAssert(LIR_gef==LIR_ged+6);
-#endif
     }
 
     void LIns::overwriteWithSkip(LIns* skipTo)
@@ -996,14 +989,12 @@ namespace nanojit
             if (oprnd->isop(LIR_subd))
                 return out->ins2(LIR_subd, oprnd->oprnd2(), oprnd->oprnd1());
             goto involution;
-#ifdef VMCFG_FLOAT
         case LIR_negf:
             if (oprnd->isImmF())
                 return insImmF(-oprnd->immF());
             if (oprnd->isop(LIR_subf))
                 return out->ins2(LIR_subf, oprnd->oprnd2(), oprnd->oprnd1());
             goto involution;
-#endif
         case LIR_i2d:
             if (oprnd->isImmI())
                 return insImmD(oprnd->immI());
@@ -1229,7 +1220,6 @@ namespace nanojit
             default:        break;
             }
         } 
-#ifdef VMCFG_FLOAT
         else if (oprnd1->isImmF() && oprnd2->isImmF()) {
             // The operands are both single-precision float immediates.
             float c1 = oprnd1->immF();
@@ -1255,7 +1245,6 @@ namespace nanojit
             float4_t c2 = oprnd2->immF4();
             if(v==LIR_eqf4)  return insImmI( f4_eq_i(c1,c2) );
         }
-#endif // VMCFG_FLOAT
         
         //-------------------------------------------------------------------
         // If only one operand is an immediate, make sure it's on the RHS, if possible
@@ -1657,10 +1646,8 @@ namespace nanojit
 #ifdef NANOJIT_64BIT
         case LTy_Q: op = LIR_stq;   break;
 #endif
-#ifdef VMCFG_FLOAT
         case LTy_F: op = LIR_stf;   break;
         case LTy_F4:op = LIR_stf4;  break;
-#endif
         case LTy_D: op = LIR_std;   break;
         case LTy_V: NanoAssert(0);  break;
         default:    NanoAssert(0);  break;
@@ -1689,12 +1676,10 @@ namespace nanojit
             } else if (iftrue->isQ() && iffalse->isQ()) {
                 op = LIR_cmovq;
 #endif
-#ifdef VMCFG_FLOAT
             } else if (iftrue->isF() && iffalse->isF()) {
                 op = LIR_cmovf;
             } else if (iftrue->isF4() && iffalse->isF4()) {
                 op = LIR_cmovf4;
-#endif
             } else if (iftrue->isD() && iffalse->isD()) {
                 op = LIR_cmovd;
             } else {
@@ -2287,7 +2272,6 @@ namespace nanojit
         else if (ref->isImmD() && showImmValue) {
             VMPI_snprintf(buf->buf, buf->len, "%s/*%s*/", name, formatImmD(&buf2, ref->immD()));
         } 
-#ifdef VMCFG_FLOAT
         else if (ref->isImmF() && showImmValue) { // float is printed as a double
             VMPI_snprintf(buf->buf, buf->len, "%s/*%s*/", name, formatImmD(&buf2, ref->immF()));
         }
@@ -2296,7 +2280,6 @@ namespace nanojit
             float4_t v = ref->immF4();
             VMPI_snprintf(buf->buf, buf->len, "%s/*%s,%s,%s,%s*/", name, formatImmD(&bufx,f4_x(v)), formatImmD(&bufy,f4_y(v)), formatImmD(&bufz,f4_z(v)), formatImmD(&bufw,f4_w(v)) );
         }
-#endif // VMCFG_FLOAT
         else {
             VMPI_snprintf(buf->buf, buf->len, "%s", name);
         }
@@ -2324,11 +2307,11 @@ namespace nanojit
                 break;
 #endif
 
-#ifdef VMCFG_FLOAT
             case LIR_immf:
                 VMPI_snprintf(s, n, "%s = %s %s", formatRef(&b1, i, /*showImmValue*/false),
                               lirNames[op], formatImmD(&b2, i->immF()));
                 break;
+
             case LIR_immf4:{
                 RefBuf b5;
                 float4_t v = i->immF4();
@@ -2336,7 +2319,6 @@ namespace nanojit
                     lirNames[op], formatImmD(&b2, f4_x(v)), formatImmD(&b3, f4_y(v)), formatImmD(&b4, f4_z(v)), formatImmD(&b5, f4_w(v)));
                 break;
             }
-#endif // VMCFG_FLOAT
 
             case LIR_immd:
                 VMPI_snprintf(s, n, "%s = %s %s", formatRef(&b1, i, /*showImmValue*/false),
@@ -2619,29 +2601,25 @@ namespace nanojit
     {
         m_findNL[NLImmISmall] = &CseFilter::findImmISmall;
         m_findNL[NLImmILarge] = &CseFilter::findImmILarge;
+        m_findNL[NLImmF]      = &CseFilter::findImmF;
         m_findNL[NLImmQ]      = PTR_SIZE(NULL, &CseFilter::findImmQ);
         m_findNL[NLImmD]      = &CseFilter::findImmD;
         m_findNL[NL1]         = &CseFilter::find1;
         m_findNL[NL2]         = &CseFilter::find2;
         m_findNL[NL3]         = &CseFilter::find3;
         m_findNL[NLCall]      = &CseFilter::findCall;
-#ifdef VMCFG_FLOAT
-        m_findNL[NLImmF]      = &CseFilter::findImmF;
         m_findNL[NLImmF4]     = &CseFilter::findImmF4;
-#endif // VMCFG_FLOAT
 
         m_capNL[NLImmISmall]  = 17;   // covers 0..16, which is over half the cases for TraceMonkey
         m_capNL[NLImmILarge]  = 64;
+        m_capNL[NLImmF]       = 16;
         m_capNL[NLImmQ]       = PTR_SIZE(0, 16);
         m_capNL[NLImmD]       = 16;
         m_capNL[NL1]          = 256;
         m_capNL[NL2]          = 512;
         m_capNL[NL3]          = 16;
         m_capNL[NLCall]       = 64;
-#ifdef VMCFG_FLOAT
-        m_capNL[NLImmF]       = 16; 
         m_capNL[NLImmF4]      = 16; 
-#endif // VMCFG_FLOAT
 
         // The largish allocations are fallible, the small ones are
         // infallible.  See the comment on initOOM's declaration for why.
@@ -2744,7 +2722,6 @@ namespace nanojit
         return hashfinish(hash32(0, a));
     }
 
-#ifdef VMCFG_FLOAT
     inline uint32_t CseFilter::hashImmF4(float4_t a) {
         const uint32_t* up = reinterpret_cast<const uint32_t*>(&a);
 
@@ -2755,7 +2732,6 @@ namespace nanojit
 
         return hashfinish(hash);
     }
-#endif // VMCFG_FLOAT
 
     inline uint32_t CseFilter::hashImmQorD(uint64_t a) {
         uint32_t hash = hash32(0, uint32_t(a >> 32));
@@ -2994,7 +2970,6 @@ namespace nanojit
         return k;
     }
 
-#ifdef VMCFG_FLOAT
     inline LIns* CseFilter::findImmF(int32_t a, uint32_t &k)
     {
         NLKind nlkind = NLImmF;
@@ -3012,6 +2987,15 @@ namespace nanojit
             k = (k + n) & bitmask;
             n += 1;
         }
+    }
+
+    uint32_t CseFilter::findImmF(LIns* ins)
+    {
+        NanoAssert(ins->isImmF());
+
+        uint32_t k;
+        findImmF(ins->immFasI(), k);
+        return k;
     }
     
     inline LIns* CseFilter::findImmF4(float4_t a, uint32_t &k)
@@ -3036,15 +3020,6 @@ namespace nanojit
         }
     }
 
-    uint32_t CseFilter::findImmF(LIns* ins)
-    {
-        NanoAssert(ins->isImmF());
-
-        uint32_t k;
-        findImmF(ins->immFasI(), k);
-        return k;
-    }
-    
     uint32_t CseFilter::findImmF4(LIns* ins)
     {
         NanoAssert(ins->isImmF4());
@@ -3053,7 +3028,6 @@ namespace nanojit
         findImmF4(ins->immF4(), k);
         return k;
     }
-#endif // VMCFG_FLOAT
 
     inline LIns* CseFilter::find1(LOpcode op, LIns* a, uint32_t &k)
     {
@@ -3249,7 +3223,6 @@ namespace nanojit
         return ins;
     }
 
-#ifdef VMCFG_FLOAT
     LIns* CseFilter::insImmF(float f)
     {
         uint32_t k;
@@ -3285,7 +3258,6 @@ namespace nanojit
 #endif
         return ins;
     }
-#endif // VMCFG_FLOAT
 
     LIns* CseFilter::ins0(LOpcode op)
     {
@@ -3797,13 +3769,13 @@ namespace nanojit
     LIns* SoftFloatFilter::ins1(LOpcode op, LIns *a) {
         const CallInfo *ci = softFloatOps.opmap[op];
         if (ci) {
-            FLOAT_ONLY( NanoAssertMsg(ci->returnType() != ARGTYPE_F, "Softfloat not implemented yet for single precision floats.") );
+            NanoAssertMsg(ci->returnType() != ARGTYPE_F, "Softfloat not implemented yet for single precision floats.");
             if (ci->returnType() == ARGTYPE_D)            
                 return callD1(ci, a);
             else
                 return callI1(ci, a);
         }
-        FLOAT_ONLY( NanoAssertMsg(op!=LIR_retf, "Softfloat not implemented yet for single precision floats.") );
+        NanoAssertMsg(op!=LIR_retf, "Softfloat not implemented yet for single precision floats.");
         if (op == LIR_retd)
             return out->ins1(op, split(a));
         return out->ins1(op, a);
@@ -3903,10 +3875,8 @@ namespace nanojit
 #ifdef NANOJIT_64BIT
         case LTy_Q:                     return "quad";
 #endif
-#ifdef VMCFG_FLOAT
         case LTy_F:                     return "float";
         case LTy_F4:                    return "float4";
-#endif 
         case LTy_D:                     return "double";
         default:       NanoAssert(0);   return "???";
         }
@@ -4049,7 +4019,6 @@ namespace nanojit
             formals[0] = LTy_Q;
             break;
 #endif
-#ifdef VMCFG_FLOAT
         case LIR_stf:
             formals[0] = LTy_F;
             break;
@@ -4057,7 +4026,6 @@ namespace nanojit
         case LIR_stf4:
             formals[0] = LTy_F4;
             break;
-#endif // VMCFG_FLOAT
 
         case LIR_std:
         case LIR_std2f:
@@ -4151,7 +4119,6 @@ namespace nanojit
             formals[0] = LTy_D;
             break;
 
-#ifdef VMCFG_FLOAT
         case LIR_negf4:
         case LIR_retf4:
         case LIR_livef4:
@@ -4170,8 +4137,6 @@ namespace nanojit
         case LIR_f2f4:
             formals[0] = LTy_F;
             break;
-
-#endif // VMCFG_FLOAT
                 
         case LIR_file:
         case LIR_line:
@@ -4264,7 +4229,7 @@ namespace nanojit
             formals[0] = LTy_D;
             formals[1] = LTy_D;
             break;
-#ifdef VMCFG_FLOAT
+
         case LIR_addf:
         case LIR_subf:
         case LIR_mulf:
@@ -4286,7 +4251,6 @@ namespace nanojit
             formals[0] = LTy_F4;
             formals[1] = LTy_F4;
             break;
-#endif // VMCFG_FLOAT
                 
         default:
             NanoAssert(0);
@@ -4324,7 +4288,6 @@ namespace nanojit
             formals[2] = LTy_D;
             break;
 
-#ifdef VMCFG_FLOAT
         case LIR_cmovf:
             checkLInsIsACondOrConst(op, 1, a);
             formals[1] = LTy_F;
@@ -4336,7 +4299,6 @@ namespace nanojit
             formals[1] = LTy_F4;
             formals[2] = LTy_F4;
             break;
-#endif // VMCFG_FLOAT
 
         default:
             NanoAssert(0);
@@ -4369,7 +4331,6 @@ namespace nanojit
         return out->insImmD(d);
     }
 
-#ifdef VMCFG_FLOAT
     LIns* ValidateWriter::insImmF(float f)
     {
         return out->insImmF(f);
@@ -4379,7 +4340,6 @@ namespace nanojit
     {
         return out->insImmF4(f);
     }
-#endif 
 
     static const char* argtypeNames[] = {
         "void",     // ARGTYPE_V  = 0
@@ -4387,10 +4347,8 @@ namespace nanojit
         "uint32_t", // ARGTYPE_UI = 2
         "uint64_t", // ARGTYPE_Q  = 3
         "double",   // ARGTYPE_D  = 4
-#ifdef VMCFG_FLOAT
         "float",    // ARGTYPE_F  = 5
         "float4",   // ARGTYPE_F4 = 6
-#endif 
     };
 
     LIns* ValidateWriter::insCall(const CallInfo *ci, LIns* args0[])
@@ -4409,10 +4367,8 @@ namespace nanojit
 #ifdef NANOJIT_64BIT
             (op == LIR_callq) != (retType == ARGTYPE_Q) ||
 #endif
-#ifdef VMCFG_FLOAT
             (op == LIR_callf) != (retType == ARGTYPE_F) ||
             (op == LIR_callf4) != (retType == ARGTYPE_F4) ||
-#endif 
             (op == LIR_calld) != (retType == ARGTYPE_D)) {
             NanoAssertMsgf(0,
                 "LIR structure error (%s): return type mismatch: opcode %s with %s return type",
@@ -4442,10 +4398,8 @@ namespace nanojit
 #ifdef NANOJIT_64BIT
             case ARGTYPE_Q:         formals[i2] = LTy_Q;   break;
 #endif
-#ifdef VMCFG_FLOAT
             case ARGTYPE_F:         formals[i2] = LTy_F;   break;
             case ARGTYPE_F4:        formals[i2] = LTy_F4;  break;
-#endif 
             case ARGTYPE_D:         formals[i2] = LTy_D;   break;
             default: NanoAssertMsgf(0, "%d %s\n", argTypes[i],ci->_name); formals[i2] = LTy_V;  break;
             }
