@@ -1,3 +1,5 @@
+/* -*- c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -15,7 +17,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2007-2008
+ * Portions created by the Initial Developer are Copyright (C) 2011
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -34,37 +36,30 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var SECTION="";
-var VERSION = "ECMA_1";
+include "../floatUtil.as";
+
+
+var SECTION = "";
+var VERSION = "AS3";
+var TITLE   = "Vector.<type> constructor (length, fixed) with float";
 
 startTest();
+writeHeaderToLog( SECTION + " "+ TITLE);
 
-writeHeaderToLog( " Vector.slice()");
+var v12_f=new Vector.<float>();
+v12_f.push(3.15);
+AddTestCase( "constructor type float", float(3.15), v12_f[0]); // todo: use float literals
 
-AddTestCase(
-        "slice no args on empty vector",
-        "",
-        new<String>[].slice().toString());
+function bug449468_f() {
+    var v : Vector.<Vector.<float>> = new Vector.<Vector.<float>>(4);
+    return v;
+}
 
-AddTestCase(
-    "slice startIndex only",
-    "6,7,8,9",
-    new<int>[0,1,2,3,4,5,6,7,8,9].slice(6).toString());
-    
-AddTestCase(
-    "slice -1 to -1",
-    "",
-    new<int>[0,1,2,3,4,5,6,7,8,9].slice(-1,-1).toString());
-    
-AddTestCase(
-    "slice -2 to -1",
-    "8",
-    new<int>[0,1,2,3,4,5,6,7,8,9].slice(-2,-1).toString());
-    
-AddTestCase(
-    "verify return type",
-    true,
-    new<Number>[3.14,2.73,9999,.0001,1e13].slice(3,-1) is Vector.<Number>)
-    
+AddTestCase("Replicating bug 449468 testcase on float: Crash with vector constructor in interp mode",
+            "null,null,null,null",
+            bug449468_f().toString()
+            );
+
+
 
 test();

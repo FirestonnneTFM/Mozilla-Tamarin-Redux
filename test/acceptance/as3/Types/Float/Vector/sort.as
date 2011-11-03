@@ -1,3 +1,5 @@
+/* -*- c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -15,7 +17,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2007-2008
+ * Portions created by the Initial Developer are Copyright (C) 2011
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -34,37 +36,48 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var SECTION="";
-var VERSION = "ECMA_1";
+include "../floatUtil.as";
+
+
+var SECTION = "";
+var VERSION = "AS3";
+var TITLE   = "Vector.sort(comparefn) with float";
 
 startTest();
+writeHeaderToLog( SECTION + " "+ TITLE);
 
-writeHeaderToLog( " Vector.slice()");
+class TestClass {
+    private var myVal:Object;
+    public function TestClass(v:Object):void {
+        myVal = v;
+    }
+    public function toString():String {
+        return myVal.toString();
+    }
+    public function get val():Object {
+        return myVal;
+    }
+}
 
-AddTestCase(
-        "slice no args on empty vector",
-        "",
-        new<String>[].slice().toString());
+var testClassVector = new Vector.<TestClass>();
+for (var i=0; i<20; i++) {
+    testClassVector.push(new TestClass(i));
+}
+// push one duplicate value
+testClassVector.push(new TestClass(12));
 
-AddTestCase(
-    "slice startIndex only",
-    "6,7,8,9",
-    new<int>[0,1,2,3,4,5,6,7,8,9].slice(6).toString());
-    
-AddTestCase(
-    "slice -1 to -1",
-    "",
-    new<int>[0,1,2,3,4,5,6,7,8,9].slice(-1,-1).toString());
-    
-AddTestCase(
-    "slice -2 to -1",
-    "8",
-    new<int>[0,1,2,3,4,5,6,7,8,9].slice(-2,-1).toString());
-    
-AddTestCase(
-    "verify return type",
-    true,
-    new<Number>[3.14,2.73,9999,.0001,1e13].slice(3,-1) is Vector.<Number>)
-    
+// regular sort returning non-standard values
+var myFloatSortFunction:Function = function (x,y):float {
+    if (x.val < y.val)
+        return float(-Infinity);  // TODO: a float literal for "-Infinity"?
+    if (x.val > y.val)
+        return float.MAX_VALUE;
+    return undefined;
+}
+
+AddTestCase("Custom vector sort using sort function with non-standard (float) values",
+            "0,1,2,3,4,5,6,7,8,9,10,11,12,12,13,14,15,16,17,18,19",
+            testClassVector.sort(myFloatSortFunction).toString()
+            );
 
 test();
