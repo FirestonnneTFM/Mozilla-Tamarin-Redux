@@ -196,7 +196,7 @@ extern size_t           VMPI_size(void* ptr);
 * Method to get the frequency of a high performance counter/timer on the system
 * On platforms where no API to retrieve this information should return a number that closely
 * matches its timer frequency
-* @return 64-bit value indicating the frequency of the system's performance counter or clock with highest resolution
+* @return 64-bit value indicating the frequency (i.e. counts per second) of the system's performance counter or clock with highest resolution
 * @see VMPI_getPerformanceCounter()
 */
 extern uint64_t     VMPI_getPerformanceFrequency();

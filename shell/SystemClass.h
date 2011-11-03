@@ -320,6 +320,7 @@ namespace avmshell
          * ActionScript extensions to ECMAScript
          */
         /*@{*/
+        double getNanosecondTimer();
         unsigned getTimer();
         /*@}*/
 

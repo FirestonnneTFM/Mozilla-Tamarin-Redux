@@ -83,6 +83,7 @@ package avmplus
         public native static function write(s:String):void
         public native static function debugger():void
         public native static function isDebugger():Boolean
+        public native static function getNanosecondTimer():Number
         public native static function getTimer():uint
         private native static function getArgv():Array
         public static const argv:Array = getArgv();
