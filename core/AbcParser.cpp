@@ -219,7 +219,7 @@ namespace avmplus
                 return 0;
 #endif
 #ifdef VMCFG_SWF16
-            case (47<<16|16):   // Flash player Cyrill
+            case (47<<16|16):   // Flash player Cyril
                 return 0;
 #endif
 #ifdef VMCFG_SWF17
@@ -1185,72 +1185,149 @@ namespace avmplus
        verbose_only(pool->verbose_vb = core->config.verbose_vb); // pool picks up global settings
        verbose_only(const uint8_t* startpos);
 
-#define READ_POOL(Ltype,name,Cname )                                                  \
-    uint32_t name##_count = readU30(pos);                                             \
-    /* sanity check to prevent huge allocations*/                                     \
-    if (name##_count > (uint32_t)(abcEnd - pos))                                      \
-        toplevel->throwVerifyError(kCorruptABCError);                                 \
-                                                                                      \
-    Ltype& cpool_##name = pool->cpool_##name;                                         \
-    cpool_##name.ensureCapacity(name##_count);                                        \
-    pool->constant##Cname##Count = name##_count;                                      \
-                                                                                      \
-    verbose_only(startpos = pos);                                                     \
-                                                                                      \
-    for(uint32_t i = 1; i < name##_count; ++i)                                        \
-    {                                                                                 \
-        verbose_only(int offset = (int)(pos-startpos) );                              \
-                                                                                      \
-        cpool_##name.set(i, readvalue(pos) );                                         \
-        verbose_only(                                                                 \
-            if(pool->isVerbose(VB_parse)) {                                           \
-                core->console << "    " << offset << ":" << "cpool_"#name"["<<i<<"]=" \
-                    <<constantNames[CONSTANT_##Cname] << " ";                         \
-                core->console << printvalue(cpool_##name[i]) << "\n";                 \
-            }                                                                         \
-        );                                                                            \
+        uint32_t int_count = readU30(pos);
+        // sanity check to prevent huge allocations
+        if (int_count > (uint32_t)(abcEnd - pos))
+            toplevel->throwVerifyError(kCorruptABCError);
+
+        DataList<int32_t>& cpool_int = pool->cpool_int;
+        cpool_int.ensureCapacity(int_count);
+        pool->constantIntCount = int_count;
+
+        verbose_only(startpos = pos);
+
+        for(uint32_t i = 1; i < int_count; ++i)
+        {
+            verbose_only(int offset = (int)(pos-startpos));
+            // S32 value
+            cpool_int.set(i, readS32(pos));
+#ifdef AVMPLUS_VERBOSE
+            if(pool->isVerbose(VB_parse)) {
+                core->console << "    " << offset << ":" << "cpool_int["<<(uint32_t)i<<"]="
+                    <<constantNames[CONSTANT_Int] << " ";
+                core->console << cpool_int[i] << "\n";
+            }
+#endif
+        }
+
+        uint32_t uint_count = readU30(pos);
+        if (uint_count > (uint32_t)(abcEnd - pos))
+            toplevel->throwVerifyError(kCorruptABCError);
+
+        DataList<uint32_t>& cpool_uint = pool->cpool_uint;
+        cpool_uint.ensureCapacity(uint_count);
+        pool->constantUIntCount = uint_count;
+
+        verbose_only(startpos = pos);
+
+        for(uint32_t i = 1; i < uint_count; ++i)
+        {
+            verbose_only(int offset = (int)(pos-startpos));
+            // U32 value
+            cpool_uint.set(i, (unsigned)readS32(pos));
+#ifdef AVMPLUS_VERBOSE
+            if(pool->isVerbose(VB_parse)) {
+                core->console << "    " << offset << ":" << "cpool_uint["<<i<<"]="
+                    <<constantNames[CONSTANT_UInt] << " ";
+                core->console << (double)cpool_uint[i];
+                core->console << "\n";
+            }
+#endif
     }
 
+        uint32_t double_count = readU30(pos);
+        if (double_count > (uint32_t)(abcEnd - pos))
+            toplevel->throwVerifyError(kCorruptABCError);
 
-#define readvalue(pos) readS32(pos)
-#define printvalue(v) v
-        READ_POOL(DataList<int32_t>, int,Int);
-#undef readvalue
-#undef printvalue
+        GCList<GCDouble>& cpool_double = pool->cpool_double;
+        cpool_double.ensureCapacity(double_count);
+        pool->constantDoubleCount = double_count;
 
-#define readvalue(pos) (unsigned) readS32(pos)
-#define printvalue(v) (double)v
-        READ_POOL(DataList<uint32_t>,uint,UInt);
-#undef readvalue
-#undef printvalue
+        verbose_only(startpos = pos);
 
-#define readvalue(pos) (GCDouble*)(core->allocDouble(readDouble(pos))&~7)
-#define printvalue(v) v->value
-        READ_POOL(GCList<GCDouble>,double,Double);
-#undef readvalue
-#undef printvalue
+        for(uint32_t i = 1; i < double_count; ++i)
+        {
+            verbose_only(int offset = (int)(pos-startpos));
+            double value = readDouble(pos);
+            cpool_double.set(i, (GCDouble*)(core->allocDouble(value)&~7));
+#ifdef AVMPLUS_VERBOSE
+            if(pool->isVerbose(VB_parse)) {
+                core->console << "    " << offset << ":" << "cpool_double["<<i<<"]="
+                    <<constantNames[CONSTANT_Double] << " ";
+                core->console << value;
+                core->console << "\n";
+            }
+#endif
+        }
 
 #ifdef VMCFG_FLOAT
         if(pool->hasFloatSupport()){
-#define readvalue(pos) (GCFloat*)  (((uintptr_t)core->allocFloat(readFloat(pos))&~7))
-#define printvalue(v) v->value
-        READ_POOL(GCList<GCFloat>,float,Float);
-#undef readvalue
-#undef printvalue
+            // read float constant pool
+            uint32_t float_count = readU30(pos);
+            if (float_count> (uint32_t)(abcEnd - pos))
+                toplevel->throwVerifyError(kCorruptABCError);
 
-#define readvalue(pos) (GCFloat4*)  (((uintptr_t)core->allocFloat4(readFloat4(pos))&~7))
-#define printvalue(v) ((float*)v)[0] << "," << ((float*)v)[1] << "," << ((float*)v)[2] << "," << ((float*)v)[3]
-        READ_POOL(GCList<GCFloat4>,float4,Float4);
-#undef readvalue
-#undef printvalue 
+            GCList<GCFloat>& cpool_float = pool->cpool_float;
+            cpool_float.ensureCapacity(float_count);
+            pool->constantFloatCount = float_count;
+
+            verbose_only(startpos = pos);
+
+            for(uint32_t i = 1; i < float_count; ++i)
+            {
+                verbose_only(int offset = (int)(pos-startpos));
+                float value = readFloat(pos);
+                cpool_float.set(i, (GCFloat*)(core->allocFloat(value)&~7));
+#ifdef AVMPLUS_VERBOSE
+                if(pool->isVerbose(VB_parse)) {
+                    core->console << "    " << offset << ":" << "cpool_float["<<i<<"]="
+                        << constantNames[CONSTANT_Float] << " ";
+                    core->console << value;
+                    core->console << "\n";
+                }
+#endif
+            }
+
+            // read float4 constant pool
+            uint32_t float4_count = readU30(pos);
+            if (float4_count> (uint32_t)(abcEnd - pos))
+                toplevel->throwVerifyError(kCorruptABCError);
+
+            GCList<GCFloat4>& cpool_float4 = pool->cpool_float4;
+            cpool_float4.ensureCapacity(float4_count);
+            pool->constantFloat4Count = float4_count;
+
+            verbose_only(startpos = pos);
+
+            for(uint32_t i = 1; i < float4_count; ++i)
+            {
+                verbose_only(int offset = (int)(pos-startpos));
+                float4_t value = readFloat4(pos);
+                cpool_float4.set(i, (GCFloat4*)(core->allocFloat4(value)&~7));
+#ifdef AVMPLUS_VERBOSE
+                if(pool->isVerbose(VB_parse)) {
+                    core->console << "    " << offset << ":" << "cpool_float4["<<i<<"]="
+                        << constantNames[CONSTANT_Float4] << " ";
+                    core->console << ((float*)&value)[0] << "," << ((float*)&value)[1] << "," << ((float*)&value)[2] << "," << ((float*)&value)[3];
+                    core->console << "\n";
+                }
+#endif
+            }
         } else {
             // reserve 1 entry - for the "NaN" values
             pool->constantFloatCount = 1; 
             pool->cpool_float.ensureCapacity(1);
             pool->constantFloat4Count = 1;
             pool->cpool_float4.ensureCapacity(1);
+
         }
-#endif 
+        pool->cpool_int.set(0, 0);
+        pool->cpool_uint.set(0, 0);
+        pool->cpool_double.set(0, (GCDouble*) atomPtr(core->kNaN));
+        pool->cpool_float.set(0,  (GCFloat*)  atomPtr(core->kFltNaN));
+        pool->cpool_float4.set(0, (GCFloat4*) atomPtr(core->kFlt4NaN));
+#endif // VMCFG_FLOAT
+
 
         uint32_t string_count = readU30(pos);
         if (string_count > (uint32_t)(abcEnd - pos))
@@ -2096,7 +2173,7 @@ namespace avmplus
     float4_t AbcParser::readFloat4(const uint8_t* &p) const
     {
         // check to see if we are trying to read past the file end.
-        if (p < abcStart || p+3 >= abcEnd )
+        if (p < abcStart || p + 15 >= abcEnd )
             toplevel->throwVerifyError(kCorruptABCError);
 
         float4_overlay f4o;

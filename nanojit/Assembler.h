@@ -210,24 +210,18 @@ namespace nanojit
 #endif
 #if NJ_USES_IMMF4_POOL
     #if defined(_WIN32) && !defined(NANOJIT_X64) //AVMSYSTEM_32BIT
-        class float4_ref{
+        class float4_key{
         private: 
            float _val[4];
         public:
-            float4_ref(float4_t& p) { _val[0]=f4_x(p); _val[1]=f4_y(p); _val[2]=f4_z(p); _val[3]=f4_w(p); }
+            float4_key(float4_t& p) { _val[0]=f4_x(p); _val[1]=f4_y(p); _val[2]=f4_z(p); _val[3]=f4_w(p); }
             operator float4_t() const { float4_t ret = { _val[0],_val[1],_val[2],_val[3]}; return ret;}
             const void* operator&() { return &_val[0]; }
         };
-        NanoStaticAssert(sizeof(float4_ref) == sizeof(float4_t));
-        template<> inline bool keysEqual<float4_ref>(float4_ref x,float4_ref y){return VMPI_memcmp(&x,&y,sizeof(float4_t)) == 0;}
-        template<> struct DefaultHash<float4_ref> {
-            static size_t hash(const float4_ref k) {
-                // (const void*) cast is required by ARM RVCT 2.2
-                return murmurhash((const void*) &k, sizeof(float4_t));
-            }
-        };
+        NanoStaticAssert(sizeof(float4_key) == sizeof(float4_t));
+        template<> inline bool keysEqual<float4_key>(float4_key x,float4_key y){return VMPI_memcmp(&x,&y,sizeof(float4_t)) == 0;}
 
-        typedef HashMap<float4_ref, float4_t*> ImmF4PoolMap;
+        typedef HashMap<float4_key, float4_t*> ImmF4PoolMap;
     #else // other compilers will hopefully support a direct hashmap
         typedef HashMap<float4_t, float4_t*> ImmF4PoolMap;
     #endif
