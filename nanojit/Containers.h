@@ -256,14 +256,16 @@ namespace nanojit
         }
     };
 
-    template<class K> inline bool keysEqual(K x,K y){return x==y;}
-#ifdef VMCFG_FLOAT
-    template<> inline bool keysEqual<float4_t>(float4_t x,float4_t y)
-    { // f4_eq is not good; we need something that gives 0!=-0, NaN==NaN etc.
+    template<class K> inline bool keysEqual(K x,K y) {
+        return x == y;
+    }
+
+    template<> inline bool keysEqual<float4_t>(float4_t x, float4_t y) {
+        // f4_eq is no good; we need something that gives 0!=-0, NaN==NaN etc,
+        // so we do a bitwise comparison.
         float4_t lx = x, ly = y;
         return VMPI_memcmp(&lx,&ly, sizeof(float4_t) ) == 0;
     } 
-#endif
 
     /** Bucket hashtable with a fixed # of buckets (never rehash)
      *  Intended for use when a reasonable # of buckets can be estimated ahead of time.
