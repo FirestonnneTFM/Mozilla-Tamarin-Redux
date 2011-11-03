@@ -2456,7 +2456,7 @@ namespace nanojit
         for (Register r = lsReg(evict_set); evict_set; r = nextLsReg(evict_set, r)) {
             LIns *ins = regs->getActive(r);
             Register r1 = ins->getReg();
-            NanoAssert( (rmask(r1) & rmask(r)) == rmask(r) ); // r must be strlictly included in r1
+            NanoAssert( (rmask(r1) & rmask(r)) == rmask(r) ); // r must be strictly included in r1
             r = r1;
             if (RegAlloc::canRemat(ins)) {
                 evict(ins);

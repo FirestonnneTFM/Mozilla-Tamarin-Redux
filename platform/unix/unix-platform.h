@@ -130,7 +130,7 @@
 typedef pthread_t vmpi_thread_t;
 
 #ifdef VMCFG_FLOAT
-#if AVMSYSTEM_ARM
+#ifdef VMCFG_ARM
 #include <arm_neon.h>
 
 typedef float32x4_t              float4_t;
@@ -142,7 +142,7 @@ inline float32x4_t f4_div(float32x4_t a,float32x4_t b)  {
       /* get an initial estimate of 1/b.*/     
       float32x4_t reciprocal = vrecpeq_f32(b); 
 
-      /* use a couple Newton-Raphson steps to refine the estimate. */
+      /* use two Newton-Raphson steps to refine the estimate. */
       reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
       reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
        /* and finally, compute a/b = a*(1/b)*/
@@ -163,7 +163,7 @@ inline float32x4_t f4_shuffle(float32x4_t v, int i){
     (void)i; // TODO! fix/implement shuffle
     return v;
 }
-#elif AVMSYSTEM_MIPS
+#elif defined VMCFG_MIPS
 typedef struct{ float x,y,z,t;} float4_t;
 
 #define f4_mul(x,y)         (x,y) /* NOT IMPLEMENTED YET! */

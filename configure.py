@@ -293,8 +293,8 @@ if config.getCompiler() == 'GCC':
         BASE_M_FLAGS = "-mlong-calls -mthumb-interwork "
 
         if arm_arch == "armv7-a" or arm_arch == None:
-            BASE_CXX_FLAGS = "%s -march=armv7-a -mtune=cortex-a8 -mfloat-abi=softfp -mno-thumb -fno-section-anchors -D__ARM_ARCH__=7 " \
-                        "-DARMV6_ASSEMBLY " % BASE_M_FLAGS
+            BASE_CXX_FLAGS = "%s -march=armv7-a -mtune=cortex-a8 -mfloat-abi=softfp -mfpu=neon -mno-thumb -fno-section-anchors -D__ARM_ARCH__=7 " \
+                        "-DARMV6_ASSEMBLY -DTARGET_NEON " % BASE_M_FLAGS
             APP_CXXFLAGS += BASE_CXX_FLAGS
 
         elif arm_arch == "armv6":
