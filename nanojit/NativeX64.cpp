@@ -2279,7 +2279,7 @@ namespace nanojit
         uintptr_t mask;
 
         switch (ins->opcode()) {
-        default: NanoAssert(!"bad opcode for asm_fneg"); break;
+        default: NanoAssert(!"bad opcode for asm_fneg"); mask = 0; break;
         case LIR_negf:    mask = (uintptr_t) negateMaskF;  break;
         case LIR_negf4:   mask = (uintptr_t) negateMaskF4; break;
         case LIR_negd:    mask = (uintptr_t) negateMaskD;     break;

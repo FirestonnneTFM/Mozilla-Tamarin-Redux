@@ -637,14 +637,7 @@ namespace avmplus
         BuiltinType tag = bt(type);
         SlotStorageType sst = valueStorageType(tag);
 #ifdef DEBUG
-#ifdef VMCFG_FLOAT
-        if(type==NUMERIC_TYPE)
-            jit_sst[i] = uint16_t((1<<SST_float)|(1<<SST_double)|(1<<SST_float4));
-        else
-            jit_sst[i] = uint16_t(1 << sst); 
-#else
-        jit_sst[i] = uint8_t(1 << sst);
-#endif // VMCFG_FLOAT
+        jit_sst[i] = uint16_t(1 << sst); 
 #endif
         lirout->insStore(o, vars, i * IFFLOAT(info->varSize(), VARSIZE) , ACCSET_VARS);
         lirout->insStore(LIR_sti2c, InsConst(sst), tags, i, ACCSET_TAGS);
@@ -657,7 +650,6 @@ namespace avmplus
 
     LIns* CodegenLIR::ptrToNativeRep(Traits*t, LIns* ptr)
     {
-        FLOAT_ONLY(AvmAssert(t!= NUMERIC_TYPE);)
         return t->isMachineType() ? addp(ptr, kObjectType) : ptr;
     }
 
@@ -791,10 +783,9 @@ namespace avmplus
 
     bool isNullable(Traits* t) {
         BuiltinType bt = Traits::getBuiltinType(t);
-        FLOAT_ONLY( const AvmCore* core = t ? t->core : NULL; )
 
         return bt != BUILTIN_int && bt != BUILTIN_uint && bt != BUILTIN_boolean && bt != BUILTIN_number
-                      FLOAT_ONLY(&& bt != BUILTIN_float && bt != BUILTIN_float4 && (bt!=BUILTIN_any || !core || NUMERIC_TYPE !=t)) ; 
+                      FLOAT_ONLY(&& bt != BUILTIN_float && bt != BUILTIN_float4); 
     }
 
     /**
@@ -1244,9 +1235,7 @@ namespace avmplus
     {
         const FrameValue& v = state->value(i);
         LIns* ins;
-        if (exactlyOneBit(v.sst_mask) 
-            FLOAT_ONLY(|| (v.traits == NUMERIC_TYPE && v.sst_mask== ((1 << SST_double)|(1 << SST_float)|(1 << SST_float4))))
-           ) {
+        if (exactlyOneBit(v.sst_mask)) {
             // pointer or atom
             AvmAssert(!(v.sst_mask == (1 << SST_int32) && v.traits == INT_TYPE) &&
                       !(v.sst_mask == (1 << SST_uint32) && v.traits == UINT_TYPE) &&
@@ -1790,8 +1779,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         #endif
 
 #ifdef DEBUG
-        jit_sst = new (*alloc1) IFFLOAT(uint16_t,uint8_t)[framesize];
-        memset(jit_sst, 0, framesize FLOAT_ONLY(*sizeof(uint16_t)) );
+        jit_sst = new (*alloc1) uint16_t[framesize];
+        memset(jit_sst, 0, framesize * sizeof(uint16_t));
 #endif
 
         //
@@ -2003,7 +1992,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     {
         // Compiling an OSR entry point; save FrameState at the OSR loop header,
         // for later use by adjust_frame().
-        FrameState* osr_state = mmfx_new(FrameState(ms));
+        FrameState* osr_state = mmfx_new(FrameState(ms FLOAT_ONLY(,info) ));
         const FrameState* loop_state = driver->getFrameState(osr->osrPc());
         AvmAssert(loop_state->targetOfBackwardsBranch);
         osr_state->init(loop_state);
@@ -2120,7 +2109,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_FLOAT
     void CodegenLIR::emitNumericOp2(int32_t op1, int32_t op2, const LIREmitter& emitIns)
     {
-        AvmAssert (state->value(op1).traits == NUMERIC_TYPE && state->value(op2).traits ==NUMERIC_TYPE) ;
+        const FrameValue& v1 = state->value(op1); (void) v1;
+        const FrameValue& v2 = state->value(op2); (void) v2;
+        AvmAssert (v1.traits == OBJECT_TYPE && v2.traits == OBJECT_TYPE && v1.notNull && v2.notNull);
 
         CodegenLabel slow_path("_numeric2_slow_path_");
         CodegenLabel both_double("_numeric2_both_double_");
@@ -2130,12 +2121,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         
         LIns* val1 = loadAtomRep(op1);
         LIns* val2 = loadAtomRep(op2);
-        LIns* rslt = insAlloc(sizeof(intptr_t));
-        LIns* tag = andp(  binaryIns(LIR_andp,val1,val2), AtomConstants::kAtomTypeMask);
+        LIns* result = insAlloc(sizeof(intptr_t));
+        LIns* tag = andp(  binaryIns(LIR_andp, val1, val2), AtomConstants::kAtomTypeMask);
         // kIntptrType
         suspendCSE();
         /* NOTE: to make the fast path faster, we're playing with the bits to quickly determine if 
-           "both are double", "at least one is not Number"m and "both are int"
+           "both are double", "at least one is not Number" and "both are int"
            We *RELY* on the Atom TAG scheme, i.e. "kIntPtrType is 6" and "kDoubleType is 7".
         */
         branchToLabel(LIR_jt, eqp(tag, AtomConstants::kDoubleType), both_double);
@@ -2151,7 +2142,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     emitIns(BUILTIN_number, i2dIns(p2i(rshp(val1, AtomConstants::kAtomTypeSize))) 
                                           , i2dIns(p2i(rshp(val2, AtomConstants::kAtomTypeSize))) ),
                     NUMBER_TYPE ),
-             rslt, 0, ACCSET_OTHER);
+             result, 0, ACCSET_OTHER);
         JIT_EVENT(jit_numeric2_fast_int);
         branchToLabel(LIR_j, NULL, done);
 
@@ -2164,7 +2155,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 emitIns(BUILTIN_number, ldd(subp(val1, AtomConstants::kDoubleType), 0, ACCSET_OTHER)
                                       , i2dIns(p2i(rshp(val2, AtomConstants::kAtomTypeSize))) ),
                 NUMBER_TYPE ),
-            rslt, 0, ACCSET_OTHER);
+            result, 0, ACCSET_OTHER);
         JIT_EVENT(jit_numeric2_dbl_int);
         branchToLabel(LIR_j, NULL, done);
     // v1_is_int: (v2 is number!)
@@ -2173,13 +2164,13 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     emitIns(BUILTIN_number, i2dIns(p2i(rshp(val1, AtomConstants::kAtomTypeSize)))
                                           , ldd(subp(val2, AtomConstants::kDoubleType), 0, ACCSET_OTHER) ),
                 NUMBER_TYPE ),
-            rslt, 0, ACCSET_OTHER);
+            result, 0, ACCSET_OTHER);
         JIT_EVENT(jit_numeric2_dbl_int);
         branchToLabel(LIR_j, NULL, done);
         
     // slow_path:        
         emitLabel(slow_path);
-        stp( emitIns(BUILTIN_any,  val1, val2) , rslt, 0, ACCSET_OTHER);
+        stp( emitIns(BUILTIN_any,  val1, val2) , result, 0, ACCSET_OTHER);
         JIT_EVENT(jit_numeric2_slow);
         branchToLabel(LIR_j, NULL, done);
 
@@ -2189,24 +2180,25 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                         emitIns(BUILTIN_number,  ldd(subp(val1, AtomConstants::kDoubleType), 0, ACCSET_OTHER)
                                               ,  ldd(subp(val2, AtomConstants::kDoubleType), 0, ACCSET_OTHER))
                         , NUMBER_TYPE),
-             rslt, 0, ACCSET_OTHER);
+             result, 0, ACCSET_OTHER);
         JIT_EVENT(jit_numeric2_fast_double);
 
    // done:
         emitLabel(done);
         resumeCSE();
-        localSet( op1, ldp(rslt, 0, ACCSET_OTHER), NUMERIC_TYPE);
+        localSet( op1, ldp(result, 0, ACCSET_OTHER), OBJECT_TYPE);
     }
 
     void CodegenLIR::emitNumericOp1(int32_t op1, const LIREmitter &emitIns)
     {
-        AvmAssert(state->value(op1).traits == NUMERIC_TYPE);
+        const FrameValue& v = state->value(op1); (void)v;
+        AvmAssert(v.traits == OBJECT_TYPE && v.notNull);
 
         CodegenLabel not_intptr("_not_intptr_");
         CodegenLabel not_double("_not_double_");
         CodegenLabel done("_done_");
         LIns* val = loadAtomRep(op1); // load Atom.
-        LIns* rslt = insAlloc(sizeof(intptr_t));
+        LIns* result = insAlloc(sizeof(intptr_t));
         LIns* tag = andp(val, AtomConstants::kAtomTypeMask);
         // kIntptrType
         suspendCSE();
@@ -2217,7 +2209,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         stp( nativeToAtom(
             emitIns(BUILTIN_number, i2dIns(p2i(rshp(val, AtomConstants::kAtomTypeSize))) )
             , NUMBER_TYPE
-            ) , rslt, 0, ACCSET_OTHER);
+            ) , result, 0, ACCSET_OTHER);
 
         JIT_EVENT(jit_numeric1_fast_int);
         branchToLabel(LIR_j, NULL, done);
@@ -2227,17 +2219,17 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         stp( nativeToAtom( 
             emitIns(BUILTIN_number,  ldd(subp(val, AtomConstants::kDoubleType), 0, ACCSET_OTHER) )
             , NUMBER_TYPE
-            ) , rslt, 0, ACCSET_OTHER);
+            ) , result, 0, ACCSET_OTHER);
         JIT_EVENT(jit_numeric1_fast_number);
 
         branchToLabel(LIR_j, NULL, done);
         emitLabel(not_double);
 
-        stp( emitIns(BUILTIN_any,  val) , rslt, 0, ACCSET_OTHER);
+        stp( emitIns(BUILTIN_any,  val) , result, 0, ACCSET_OTHER);
         JIT_EVENT(jit_numeric1_slow);
         emitLabel(done);
         resumeCSE();
-        localSet( op1, ldp(rslt, 0, ACCSET_OTHER), NUMERIC_TYPE);
+        localSet( op1, ldp(result, 0, ACCSET_OTHER), OBJECT_TYPE);
     }
 #endif // VMCFG_FLOAT
 
@@ -2541,42 +2533,32 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             // TODO: The tests for isNumeric() above could be isNumericOrBool(),
             // but a corresponding change would be needed in the verifier, resulting
             // in a slight change to the verifier's type inference algorithm.
-            AvmAssert(type == NUMBER_TYPE FLOAT_ONLY(|| type==FLOAT_TYPE || type== NUMERIC_TYPE || type== FLOAT4_TYPE) );
+            AvmAssert(type == NUMBER_TYPE FLOAT_ONLY(|| type==FLOAT_TYPE || type== FLOAT4_TYPE) );
 #ifdef VMCFG_FLOAT
             if(!pool->hasFloatSupport()) 
                 type = NUMBER_TYPE; 
-            else
-                if(val1.traits== FLOAT4_TYPE || val2.traits == FLOAT4_TYPE) 
-                    type = FLOAT4_TYPE;
+            else if(val1.traits== FLOAT4_TYPE || val2.traits == FLOAT4_TYPE) 
+                type = FLOAT4_TYPE;
+
             if (type == FLOAT4_TYPE) {
-                AvmAssert( type == FLOAT4_TYPE );
                 LIns* lhs = coerceToFloat4(i);
                 LIns* rhs = coerceToFloat4(j);
                 localSet(i, binaryIns(LIR_addf4, lhs, rhs), type);
                 JIT_EVENT(jit_add_a_f4f4);
             } else if(type==FLOAT_TYPE){
+                AvmAssert(val1.traits == FLOAT_TYPE && val2.traits == FLOAT_TYPE);
                 LIns* lhs = coerceToFloat(i);
                 LIns* rhs = coerceToFloat(j);
                 localSet(i, binaryIns(LIR_addf, lhs, rhs), type);
                 JIT_EVENT(jit_add_a_ff);
-            } else if(type==NUMBER_TYPE){
+            } else 
 #endif // VMCFG_FLOAT
-            LIns* lhs = coerceToNumber(i);
-            LIns* rhs = coerceToNumber(j);
-            localSet(i, binaryIns(LIR_addd, lhs, rhs), type);
-            JIT_EVENT(jit_add_a_nn);
-#ifdef VMCFG_FLOAT
-            } else {
-                /* Numeric type */
-                AvmAssert(val1.traits==NUMERIC_TYPE);
-                if(val1.traits!=NUMERIC_TYPE)
-                    localSet(i,coerceToNumeric(i),NUMERIC_TYPE); // this should never happen!
-                AvmAssert(val2.traits==NUMERIC_TYPE);
-                if(val2.traits!=NUMERIC_TYPE)
-                    localSet(j,coerceToNumeric(j), NUMERIC_TYPE);// this should never happen!
-                    emitNumericOp2( i, j, BasicLIREmitter(this, LIR_addd, FUNCTIONID(op_add)) );
+            {
+                LIns* lhs = coerceToNumber(i);
+                LIns* rhs = coerceToNumber(j);
+                localSet(i, binaryIns(LIR_addd, lhs, rhs), type);
+                JIT_EVENT(jit_add_a_nn);
             }
-#endif // VMCFG_FLOAT
 #ifdef VMCFG_FASTPATH_ADD
         // If we arrive here, at least one argument is not known to be of a numeric type.
         // Thus, having determined one argument to be of a known numeric type, we will coerce
@@ -2584,24 +2566,24 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         // of type kIntptrType or kDoubleType, checking for these cases first.
         } else if (val1.traits == INT_TYPE) {
             // integer + atom
-            AvmAssert(type == OBJECT_TYPE FLOAT_ONLY(|| type == NUMERIC_TYPE) );
+            AvmAssert(type == OBJECT_TYPE);
             emitAddIntToAtom(i, j, type);
         } else if (val1.traits == NUMBER_TYPE) {
             // double + atom
-            AvmAssert(type == OBJECT_TYPE FLOAT_ONLY(|| type == NUMERIC_TYPE) );
+            AvmAssert(type == OBJECT_TYPE);
             emitAddDoubleToAtom(i, j, type);
         } else if (val2.traits == INT_TYPE) {
             // atom + integer
-            AvmAssert(type == OBJECT_TYPE FLOAT_ONLY(|| type == NUMERIC_TYPE) );
+            AvmAssert(type == OBJECT_TYPE);
             emitAddAtomToInt(i, j, type);
         } else if (val2.traits == NUMBER_TYPE) {
             // atom + double
-            AvmAssert(type == OBJECT_TYPE FLOAT_ONLY(|| type == NUMERIC_TYPE) );
+            AvmAssert(type == OBJECT_TYPE);
             emitAddAtomToDouble(i, j, type);
 #endif
         } else {
             // Neither argument is known to be of a numeric type, so coerce both to atoms.
-            AvmAssert(type == OBJECT_TYPE FLOAT_ONLY(|| type == NUMERIC_TYPE) );
+            AvmAssert(type == OBJECT_TYPE);
             emitAddAtomToAtom(i, j, type);
         }
     }
@@ -2615,7 +2597,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         emitSetPc(state->abc_pc);
 
 #ifdef DEBUG
-        memset(jit_sst, 0, framesize FLOAT_ONLY(*sizeof(uint16_t)) );
+        memset(jit_sst, 0, framesize * sizeof(uint16_t));
 #endif
 
         // If this is a backwards branch, generate an interrupt check.
@@ -2832,28 +2814,23 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_FLOAT
         case OP_convert_f:
         case OP_convert_f4:
-        case OP_unplus:
-#define EXTRA_CHECKS                                               \
-                (opcode == OP_unplus && type == NUMERIC_TYPE) ||   \
-                (opcode == OP_convert_f && type == FLOAT_TYPE) ||  \
-                (opcode == OP_convert_f4 && type == FLOAT4_TYPE)
-#else
-#define EXTRA_CHECKS 0
 #endif
 
-            AvmAssert( EXTRA_CHECKS ||
-                    (opcode == OP_coerce    && type != NULL) ||
+            AvmAssert( FLOAT_ONLY(
+                    (opcode == OP_convert_f && type == FLOAT_TYPE)   ||  
+                    (opcode == OP_convert_f4 && type == FLOAT4_TYPE) ||)
+                    (opcode == OP_coerce    && type != NULL)         ||
                     (opcode == OP_coerce_b  && type == BOOLEAN_TYPE) ||
                     (opcode == OP_convert_b && type == BOOLEAN_TYPE) ||
-                    (opcode == OP_coerce_o  && type == OBJECT_TYPE) ||
-                    (opcode == OP_coerce_a  && type == NULL) ||
-                    (opcode == OP_convert_i && type == INT_TYPE) ||
-                    (opcode == OP_coerce_i  && type == INT_TYPE) ||
-                    (opcode == OP_convert_u && type == UINT_TYPE) ||
-                    (opcode == OP_coerce_u  && type == UINT_TYPE) ||
-                    (opcode == OP_convert_d && type == NUMBER_TYPE) ||
-                    (opcode == OP_coerce_d  && type == NUMBER_TYPE) ||
-                    (opcode == OP_coerce_s  && type == STRING_TYPE));
+                    (opcode == OP_coerce_o  && type == OBJECT_TYPE)  ||
+                    (opcode == OP_coerce_a  && type == NULL)         ||
+                    (opcode == OP_convert_i && type == INT_TYPE)     ||
+                    (opcode == OP_coerce_i  && type == INT_TYPE)     ||
+                    (opcode == OP_convert_u && type == UINT_TYPE)    ||
+                    (opcode == OP_coerce_u  && type == UINT_TYPE)    ||
+                    (opcode == OP_convert_d && type == NUMBER_TYPE)  ||
+                    (opcode == OP_coerce_d  && type == NUMBER_TYPE)  ||
+                    (opcode == OP_coerce_s  && type == STRING_TYPE)  );
             emitCoerce(sp, type);
             break;
 
@@ -2961,13 +2938,13 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         case OP_subtract:
         case OP_divide:
         case OP_multiply:
-            AvmAssert(type==NUMBER_TYPE FLOAT_ONLY(|| type==NUMERIC_TYPE || type == FLOAT_TYPE || type == FLOAT4_TYPE));
+            AvmAssert(type==NUMBER_TYPE FLOAT_ONLY(|| type == OBJECT_TYPE || type == FLOAT_TYPE || type == FLOAT4_TYPE));
             emit(opcode, 0, 0, type);
             break;
 
         case OP_increment:
         case OP_decrement:
-            AvmAssert(type==NUMBER_TYPE FLOAT_ONLY(|| type==NUMERIC_TYPE || type == FLOAT_TYPE || type == FLOAT4_TYPE));
+            AvmAssert(type==NUMBER_TYPE FLOAT_ONLY(|| type == OBJECT_TYPE || type == FLOAT_TYPE || type == FLOAT4_TYPE));
             emit(opcode, sp, opcode == OP_increment ? 1 : -1, type);
             break;
 
@@ -2983,7 +2960,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             break;
 
         case OP_negate:
-            AvmAssert(type==NUMBER_TYPE FLOAT_ONLY(|| type==NUMERIC_TYPE || type == FLOAT_TYPE || type == FLOAT4_TYPE));
+            AvmAssert(type==NUMBER_TYPE FLOAT_ONLY(|| type == OBJECT_TYPE || type == FLOAT_TYPE || type == FLOAT4_TYPE));
             emit(opcode, sp, 0, type);
             break;
 
@@ -3358,7 +3335,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         Traits* in = value.traits;
 
         /* can't promote "Numeric" to "Number", we don't know the exact type at compile time */
-        if (in && FLOAT_ONLY(in != NUMERIC_TYPE &&) (in->isNumeric() || in == BOOLEAN_TYPE)) {
+        if (in && (in->isNumeric() || in == BOOLEAN_TYPE)) {
             return promoteNumberIns(in, index);
         } else {
             // * -> Number
@@ -3366,48 +3343,48 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             // changes here they might need to be propagated there too.
             #ifdef VMCFG_FASTPATH_FROMATOM
             if (inlineFastpath) {
-                //     double rslt;
+                //     double result;
                 //     intptr_t val = CONVERT_TO_ATOM(arg);
                 //     if ((val & kAtomTypeMask) != kIntptrType) goto not_intptr;   # test for kIntptrType tag
                 //     # kIntptrType
-                //     rslt = double(val >> kAtomTypeSize);                         # extract integer value and convert to double
+                //     result = double(val >> kAtomTypeSize);                         # extract integer value and convert to double
                 //     goto done;
                 // not_intptr:
                 //     if ((val & kAtomTypeMask) != kDoubleType) goto not_double;   # test for kDoubleType tag
                 //     # kDoubleType
-                //     rslt = *(val - kDoubleType);                                 # remove tag and dereference
+                //     result = *(val - kDoubleType);                                 # remove tag and dereference
                 //     goto done;
                 // not_double:
-                //     rslt = number(val);                                          # slow path -- call helper
+                //     result = number(val);                                          # slow path -- call helper
                 // done:
-                //     result = rslt;
+                //     return result;
                 CodegenLabel not_intptr;
                 CodegenLabel not_double;
                 CodegenLabel done;
                 suspendCSE();
                 LIns* val = loadAtomRep(index);
-                LIns* rslt = insAlloc(sizeof(double));
+                LIns* result = insAlloc(sizeof(double));
                 LIns* tag = andp(val, AtomConstants::kAtomTypeMask);
                 // kIntptrType
                 branchToLabel(LIR_jf, eqp(tag, AtomConstants::kIntptrType), not_intptr);
                 // Note that this works on 64bit platforms only if we are careful
                 // to restrict the range of intptr values to those that fit within
                 // the integer range of the double type.
-                std(p2dIns(rshp(val, AtomConstants::kAtomTypeSize)), rslt, 0, ACCSET_OTHER);
+                std(p2dIns(rshp(val, AtomConstants::kAtomTypeSize)), result, 0, ACCSET_OTHER);
                 JIT_EVENT(jit_atom2double_fast_intptr);
                 branchToLabel(LIR_j, NULL, done);
                 emitLabel(not_intptr);
                 // kDoubleType
                 branchToLabel(LIR_jf, eqp(tag, AtomConstants::kDoubleType), not_double);
-                std(ldd(subp(val, AtomConstants::kDoubleType), 0, ACCSET_OTHER), rslt, 0, ACCSET_OTHER);
+                std(ldd(subp(val, AtomConstants::kDoubleType), 0, ACCSET_OTHER), result, 0, ACCSET_OTHER);
                 JIT_EVENT(jit_atom2double_fast_double);
                 branchToLabel(LIR_j, NULL, done);
                 emitLabel(not_double);
-                std(callIns(FUNCTIONID(number), 1, val), rslt, 0, ACCSET_OTHER);
+                std(callIns(FUNCTIONID(number), 1, val), result, 0, ACCSET_OTHER);
                 JIT_EVENT(jit_atom2double_slow);
                 emitLabel(done);
                 resumeCSE();
-                return ldd(rslt, 0, ACCSET_OTHER);
+                return ldd(result, 0, ACCSET_OTHER);
             }
             #endif
 
@@ -3422,7 +3399,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         const FrameValue& value = state->value(index);
         Traits* in = value.traits;
         
-        if (in && in!=NUMERIC_TYPE && (in->isNumeric() || in == BOOLEAN_TYPE)) {
+        if (in && (in->isNumeric() || in == BOOLEAN_TYPE)) {
             return promoteFloatIns(in, index);
         } else {
             // * -> Float
@@ -3452,7 +3429,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             CodegenLabel non_numeric("_coercenum_non_numeric_");
             LIns* val = loadAtomRep(index);
             LIns* tag = andp(val, AtomConstants::kAtomTypeMask);
-            LIns* rslt = insAlloc(sizeof(intptr_t));
+            LIns* result = insAlloc(sizeof(intptr_t));
             suspendCSE();
 
             LIns* tagmask = binaryIns(LIR_lshi, InsConst(1),p2i(tag));
@@ -3460,21 +3437,20 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             branchToLabel(LIR_jt, binaryIns(LIR_eqi, binaryIns(LIR_andi, tagmask, InsConst(numericMask)) , InsConst(0)  ), non_numeric);
             branchToLabel(LIR_jf, eqp(val, AtomConstants::undefinedAtom), already_numeric); // we still need to test for "undefined" before we conclude it's already a numeric type
             /* If we got here, the input was "undefined" - just return NaN */
-            stp(InsConstAtom(core->kNaN),rslt,0,ACCSET_OTHER ); 
+            stp(InsConstAtom(core->kNaN),result,0,ACCSET_OTHER ); 
             branchToLabel(LIR_j, NULL, done);
 
             emitLabel(non_numeric);
-            stp(callIns(FUNCTIONID(numericAtom), 2, coreAddr, val) , rslt,0,ACCSET_OTHER);
+            stp(callIns(FUNCTIONID(numericAtom), 2, coreAddr, val) , result,0,ACCSET_OTHER);
             JIT_EVENT(jit_atom2numeric_dbl);
             branchToLabel(LIR_j, NULL, done);
-            
 
             emitLabel(already_numeric);
-            stp(val,rslt,0, ACCSET_OTHER); 
+            stp(val,result,0, ACCSET_OTHER); 
             JIT_EVENT(jit_atom2numeric_flt);
             emitLabel(done);
             resumeCSE();
-            return ldp(rslt,0,ACCSET_OTHER);
+            return ldp(result,0,ACCSET_OTHER);
         }
     }
 #endif // VMCFG_FLOAT
@@ -3866,6 +3842,13 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     }
 #endif // VMCFG_FLOAT
     
+    void CodegenLIR::writeCoerceToNumeric(const FrameState* state, uint32_t loc)
+    {
+        this->state = state;
+        emitSetPc(state->abc_pc);
+        localSet(loc, coerceToNumeric(loc), OBJECT_TYPE);
+    }
+
     void CodegenLIR::writeCoerce(const FrameState* state, uint32_t loc, Traits* result)
     {
         this->state = state;
@@ -4111,10 +4094,6 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         else if (result == FLOAT4_TYPE)
         {
             expr = coerceToFloat4(loc);
-        }
-        else if (result == NUMERIC_TYPE)
-        {
-            expr = coerceToNumeric(loc);
         }
 #endif // VMCFG_FLOAT
         else if (result == INT_TYPE)
@@ -4951,12 +4930,11 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
         // if storing to a pointer-typed slot, inline a WB
         Traits* slotType = tb->getSlotTraits(slot);
-        FLOAT_ONLY( AvmAssert( slotType != NUMERIC_TYPE ) );
         if (!slotType || !slotType->isMachineType() || slotType == OBJECT_TYPE)
         {
             // slot type is Atom (for *, Object) or RCObject* (String, Namespace, or other user types)
             const CallInfo *wbAddr = FUNCTIONID(privateWriteBarrierRC);
-            if (slotType == NULL FLOAT_ONLY(|| slotType == NUMERIC_TYPE) ||  slotType == OBJECT_TYPE) {
+            if (slotType == NULL ||  slotType == OBJECT_TYPE) {
                 // use fast atom wb
                 wbAddr = FUNCTIONID(atomWriteBarrier);
             }
@@ -5725,14 +5703,14 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_FLOAT
                 const Traits*  vt = state->value(index).traits;
                 AvmAssert ( vt == result );
-                if( vt == NUMBER_TYPE )
+                if(vt == NUMBER_TYPE)
                     localSet(index, Ins(LIR_negd, localGetd(index)), result);
-                else if(vt==FLOAT_TYPE)
+                else if(vt == FLOAT_TYPE)
                     localSet(index, Ins(LIR_negf, localGetf(index)), result);
-                else if(vt==FLOAT4_TYPE)
+                else if(vt == FLOAT4_TYPE)
                     localSet(index, Ins(LIR_negf4, localGetf4(index)), result);
                 else {
-                    NanoAssert( vt == NUMERIC_TYPE );
+                    NanoAssert( vt == OBJECT_TYPE && state->value(index).notNull );
                     emitNumericOp1( index, BasicLIREmitter(this, LIR_negd, FUNCTIONID(op_negate)) );
                 }
 #else
@@ -5755,28 +5733,28 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             case OP_declocal: {
                 int32_t index = (int32_t) op1;
                 int32_t incr = (int32_t) op2; // 1 or -1
-#ifdef VMCFG_FLOAT
                 LIns* addIns = NULL;
+#ifdef VMCFG_FLOAT
                 const Traits*  vt = state->value(index).traits;
-                AvmAssert(result==vt);
-                if( vt == NUMBER_TYPE ){
+                AvmAssert(result == vt);
+                if(vt == NUMBER_TYPE)
                     addIns = binaryIns(LIR_addd, localGetd(index), i2dIns(InsConst(incr)));
-                }
-                else if( vt == FLOAT_TYPE ){
-                       addIns = binaryIns(LIR_addf, localGetf(index), InsConstFlt((float)incr));
-                }
-                else if( vt == FLOAT4_TYPE ){
+                else if(vt == FLOAT_TYPE)
+                    addIns = binaryIns(LIR_addf, localGetf(index), InsConstFlt((float)incr));
+                else if(vt == FLOAT4_TYPE)
                     addIns = binaryIns(LIR_addf4, localGetf4(index), Ins(LIR_f2f4, InsConstFlt((float)incr)) );
-                }
-                else { /// NUMERIC - i.e., unknown
-                    AvmAssert(vt==NUMERIC_TYPE);
-                    emitNumericOp1( index, IncrementLIREmitter(this, incr<0));
+                else 
+                { /// NUMERIC - i.e., unknown
+                    AvmAssert(vt == OBJECT_TYPE && state->value(index).notNull);
+                    emitNumericOp1(index, IncrementLIREmitter(this, incr<0));
                     JIT_EVENT(jit_add);
+                    break; // skip the localSet, emitNumericOp1 already does it
                 }
-                if(addIns) localSet(index, addIns,result);  // emitNumericOp1() does its own localSet
+                
 #else
-                localSet(index, binaryIns(LIR_addd, localGetd(index), i2dIns(InsConst(incr))), result);
+                addIns = binaryIns(LIR_addd, localGetd(index), i2dIns(InsConst(incr)));
 #endif // VMCFG_FLOAT
+                localSet(index, addIns,result);  
                 break;
             }
 
@@ -5831,12 +5809,11 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     LIns* out = callIns(FUNCTIONID(mod), 2,get1,get2);
                     localSet(sp-1,  out, result);
                 } else {
-                    AvmAssert(result == NUMERIC_TYPE);
+                    AvmAssert(result == OBJECT_TYPE && state->value(sp).traits == OBJECT_TYPE && state->value(sp-1).traits == OBJECT_TYPE && state->value(sp).notNull && state->value(sp-1).notNull);
                     emitNumericOp2( sp-1, sp,  ModuloLIREmitter(this) );
                 }
 #else
-                LIns* out = callIns(FUNCTIONID(mod), 2,
-                    localGetd(sp-1), localGetd(sp));
+                LIns* out = callIns(FUNCTIONID(mod), 2, localGetd(sp-1), localGetd(sp));
                 localSet(sp-1,  out, result);
 #endif // VMCFG_FLOAT
                 break;
@@ -5851,7 +5828,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 AvmAssert(state->value(sp-1).traits==result && state->value(sp-1).traits ==result);
 
                 switch(opcode){
-                    default: AvmAssert(false);
+                    default: AvmAssertMsg(false,"Can only handle OP_divide/OP_multiply/OP_subtract");
                     case OP_divide:   opf= LIR_divf; opf4= LIR_divf4; opd = LIR_divd; interpCall= FUNCTIONID(op_divide); break;
                     case OP_multiply: opf= LIR_mulf; opf4= LIR_mulf4; opd = LIR_muld; interpCall= FUNCTIONID(op_multiply); break;
                     case OP_subtract: opf= LIR_subf; opf4= LIR_subf4; opd = LIR_subd; interpCall= FUNCTIONID(op_subtract); break;
@@ -5864,8 +5841,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 } else if(result == FLOAT4_TYPE){
                     localSet(sp-1, binaryIns(opf4, localGetf4(sp-1), localGetf4(sp)), result);
                 } else {
-                    AvmAssert(result == NUMERIC_TYPE);
-                    emitNumericOp2( sp-1, sp, BasicLIREmitter(this, opd, interpCall) );
+                    AvmAssert(result == OBJECT_TYPE && state->value(sp).traits == OBJECT_TYPE && state->value(sp-1).traits == OBJECT_TYPE && state->value(sp).notNull && state->value(sp-1).notNull);
+                    emitNumericOp2(sp-1, sp, BasicLIREmitter(this, opd, interpCall) );
                 }
 #else
                 LOpcode op;
@@ -7032,19 +7009,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             #endif
             }
             /* NOTE: this assumes that comparisons between two floats, performed as doubles, work just as well */
-#ifdef VMCFG_FLOAT
-            if(lht == NUMERIC_TYPE || rht == NUMERIC_TYPE)
-            {
-                LIns* lhs = coerceToNumber(lhsi);
-                LIns* rhs = coerceToNumber(rhsi);
-                return binaryIns(fcmp, lhs, rhs);
-            } else 
-#endif // VMCFG_FLOAT
-            {
             LIns* lhs = promoteNumberIns(lht, lhsi);
             LIns* rhs = promoteNumberIns(rht, rhsi);
             return binaryIns(fcmp, lhs, rhs);
-        }
         }
 
         if (lht == STRING_TYPE && rht == STRING_TYPE) {
@@ -7059,7 +7026,6 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     return result;
             }
         }
-
         return NULL;
     }
 
@@ -7069,6 +7035,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         LIns *result = cmpOptimization(lhsi, rhsi, LIR_lti, LIR_ltui, LIR_ltd);
         if (result)
             return result;
+        
+        // TODO numeric comparisons can be optimized by inlining the fastpath (int/int, number/number)
 
         AvmAssert(trueAtom == 13);
         AvmAssert(falseAtom == 5);
@@ -7093,6 +7061,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         if (result)
             return result;
 
+        // TODO numeric comparisons can be optimized by inlining the fastpath (int/int, number/number)
         LIns* lhs = loadAtomRep(lhsi);
         LIns* rhs = loadAtomRep(rhsi);
         LIns* atom = callIns(FUNCTIONID(compare), 2, rhs, lhs);
@@ -7135,6 +7104,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             LIns* rhs = localGetp(rhsi);
             return binaryIns(LIR_eqp, lhs, rhs);
         }
+        
+        // TODO numeric comparisons can be optimized by inlining the fastpath (int/int, number/number)
 
         if ((lht == rht) && (lht == STRING_TYPE)) {
             LIns* lhs = localGetp(lhsi);
@@ -7454,7 +7425,6 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         }
 
         LIns* toplevel = loadEnvToplevel();
-        FLOAT_ONLY(AvmAssert( t != NUMERIC_TYPE));
         int offset;
         if (t == NAMESPACE_TYPE)    offset = offsetof(Toplevel, _namespaceClass);
         else if (t == STRING_TYPE)  offset = offsetof(Toplevel, _stringClass);

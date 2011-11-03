@@ -1296,16 +1296,11 @@ namespace avmplus
                 {
                     FrameValue& v = checkLocal(imm30);
                     Traits* vt = v.traits;
-                    if(!vt)
-                    {
-                        emitCoerce(NUMERIC_TYPE,imm30);
-                        vt = NUMERIC_TYPE;
-                    } 
-                    else if(vt != FLOAT_TYPE && vt != FLOAT4_TYPE && vt != NUMERIC_TYPE)
-                    {
-                        emitCoerce(NUMBER_TYPE, imm30);
-                        vt = NUMBER_TYPE;
+                    if(!vt){
+                        vt = OBJECT_TYPE;
+                        emitCoerce(vt,imm30);
                     }
+                    
                     coder->write(state, pc, opcode, vt);
                 } else 
 #endif
@@ -1690,22 +1685,9 @@ namespace avmplus
                 FrameValue &v = state->value(sp);
                 Traits *type = v.traits;
                 if( !type || !type->isNumeric() )
-                    type = NUMERIC_TYPE; 
-                else 
-                {
-                    if(type == FLOAT_TYPE)
-                        opcode = OP_convert_f;
-                    else if(type == FLOAT4_TYPE)
-                        opcode = OP_convert_f4;
-                    else 
-                    {
-                        opcode = OP_convert_d;
-                        type = NUMBER_TYPE;
-                    }
-                }
-
-                coder->write(state, pc, opcode, type);
-                state->setType(sp, type, v.notNull);
+                    emitCoerceToNumeric(sp);
+                else if(type != FLOAT_TYPE && type != FLOAT4_TYPE)
+                    emitCoerce(NUMBER_TYPE, sp);
                 break;
             }
 #endif   // VMCFG_FLOAT
@@ -2303,10 +2285,10 @@ namespace avmplus
                 }
                 else if (lhst && lhst->isNumeric() && rhst && rhst->isNumeric())
                 {
+                    Traits* type = NUMBER_TYPE;
 #ifdef VMCFG_FLOAT
                     if(pool->hasFloatSupport())
                     {
-                        Traits* type = NUMERIC_TYPE;
                         if(lhst == FLOAT4_TYPE || rhst == FLOAT4_TYPE)
                             type = FLOAT4_TYPE; // float4 + anything numeric gives float4
                         else
@@ -2315,18 +2297,18 @@ namespace avmplus
                         else 
                         if(rhst == FLOAT_TYPE && lhst == FLOAT_TYPE)
                             type = FLOAT_TYPE;
-                        // else, the result is "NUMERIC" because at least one is NUMERIC and the other is NUMERIC or FLOAT.
-
-                        coder->write(state, pc, OP_add, type);
-                        state->pop_push(2, type);
-                    } 
-                    else 
-#endif // VMCFG_FLOAT
-                    {
-                        coder->write(state, pc, OP_add, NUMBER_TYPE);
-                        state->pop_push(2, NUMBER_TYPE);
+                        else 
+                        {
+                            // the result is "NUMERIC" because at least one is NUMERIC and the other is NUMERIC or FLOAT.
+                            emitCoerceToNumeric(sp);
+                            emitCoerceToNumeric(sp-1);
+                            type = OBJECT_TYPE;
+                        }
                     }
-                }
+#endif // VMCFG_FLOAT
+                    coder->write(state, pc, OP_add, type);
+                    state->pop_push(2, type, true);
+                } 
                 else
                 {
                     coder->write(state, pc, OP_add, OBJECT_TYPE);
@@ -2343,8 +2325,11 @@ namespace avmplus
             case OP_multiply:
                 {
                     checkStack(2,1);
+                    Traits* type = NUMBER_TYPE;
+                    bool already_coerced = false;
 #ifdef VMCFG_FLOAT
-                    if(pool->hasFloatSupport()){
+                    if(pool->hasFloatSupport())
+                    {
                         FrameValue& rhs = state->peek(1);
                         FrameValue& lhs = state->peek(2);
                         Traits* lhst = lhs.traits;
@@ -2353,57 +2338,51 @@ namespace avmplus
                            If any is float4, operate on float4.
                            If any is number, operate on number.
                            Otherwise - convert to numeric */
-                        if(!lhst) lhst = NUMERIC_TYPE;
-                        if(!rhst) rhst = NUMERIC_TYPE;
-                        if(lhst == FLOAT_TYPE && rhst == FLOAT_TYPE){
-                            /* do nothing */
-                        } else 
-                            if(lhst == FLOAT4_TYPE || rhst == FLOAT4_TYPE)
-                                lhst = rhst = FLOAT4_TYPE;
-                            else
-                            if(lhst->isNumberType() || rhst->isNumberType())
-                                lhst = rhst = NUMBER_TYPE;
-                            else
-                                lhst = rhst = NUMERIC_TYPE;
-
-                        emitCoerce(lhst, sp-1);
-                        emitCoerce(rhst, sp);
-                        coder->write(state, pc, opcode,lhst);
-                        state->pop_push(2, lhst);
-                    } else 
-#endif
-                    {
-                        emitCoerce(NUMBER_TYPE, sp-1);
-                        emitCoerce(NUMBER_TYPE, sp);
-                        coder->write(state, pc, opcode,NUMBER_TYPE);
-                        state->pop_push(2, NUMBER_TYPE);
+                        if(lhst == FLOAT_TYPE && rhst == FLOAT_TYPE)
+                            type = FLOAT_TYPE;
+                        else if(lhst == FLOAT4_TYPE || rhst == FLOAT4_TYPE)
+                            type = FLOAT4_TYPE;
+                        else if( (lhst && lhst->isNumberType()) || (rhst && rhst->isNumberType()) )
+                            type = NUMBER_TYPE;
+                        else
+                        {
+                            emitCoerceToNumeric(sp-1);
+                            emitCoerceToNumeric(sp);
+                            already_coerced = true;
+                            type = OBJECT_TYPE;
+                        }
                     }
+#endif
+                    if(!already_coerced)
+                    {
+                        emitCoerce(type, sp-1);
+                        emitCoerce(type, sp);
+                    }
+                    coder->write(state, pc, opcode, type);
+                    state->pop_push(2, type);
                     break;
                 }
             case OP_negate:
                 {
                 checkStack(1,1);
+                Traits* retType = NUMBER_TYPE;
 #ifdef VMCFG_FLOAT
-                if(pool->hasFloatSupport())
-                {
+                if(pool->hasFloatSupport()){
                     FrameValue& v = state->peek(1);
                     Traits* vt = v.traits;
-                    if(!vt){
-                        emitCoerce(NUMERIC_TYPE, sp);
-                        vt = NUMERIC_TYPE;
-                    } else 
-                    if(vt != FLOAT_TYPE && vt != FLOAT4_TYPE && vt != NUMERIC_TYPE){
-                        emitCoerce(NUMBER_TYPE, sp);
-                        vt = NUMBER_TYPE;
+                    if( !vt || !vt->isNumeric() ){
+                        emitCoerceToNumeric(sp);
+                        retType = OBJECT_TYPE;
                     }
-                    coder->write(state, pc, opcode,vt);
-                } 
-                else 
-#endif // VMCFG_FLOAT
-                {
-                    emitCoerce(NUMBER_TYPE, sp);
-                    coder->write(state, pc, opcode,NUMBER_TYPE);
+                    else if (vt == FLOAT4_TYPE || vt == FLOAT_TYPE) 
+                        retType = vt;
+                    else
+                        retType = NUMBER_TYPE;
                 }
+#endif
+                if(retType == NUMBER_TYPE)
+                    emitCoerce(NUMBER_TYPE, sp);
+                coder->write(state, pc, opcode, retType);
                 break;
                 }
 
@@ -2411,30 +2390,26 @@ namespace avmplus
             case OP_decrement:
                 {
                 checkStack(1,1);
+                Traits* retType = NUMBER_TYPE;
 #ifdef VMCFG_FLOAT
                 if(pool->hasFloatSupport())
                 {
                     FrameValue& v = state->peek(1);
                     Traits* vt = v.traits;
-                    if(!vt || vt == OBJECT_TYPE)
+                    if(!vt || !vt->isNumeric() )
                     {
-                        emitCoerce(NUMERIC_TYPE,sp);
-                        vt = NUMERIC_TYPE;
+                        emitCoerceToNumeric(sp);
+                        retType = OBJECT_TYPE;
                     }
+                    else if(vt == FLOAT_TYPE || vt == FLOAT4_TYPE)
+                        retType = vt;
                     else
-                    if(vt != FLOAT_TYPE && vt != FLOAT4_TYPE && vt != NUMERIC_TYPE)
-                    {
-                        emitCoerce(NUMBER_TYPE, sp);
-                        vt = NUMBER_TYPE;
-                    }
-                    coder->write(state, pc, opcode,vt);
-                } 
-                else 
-#endif // VMCFG_FLOAT
-                {
-                    emitCoerce(NUMBER_TYPE, sp);
-                    coder->write(state, pc, opcode, NUMBER_TYPE);
+                        retType = NUMBER_TYPE;
                 }
+#endif // VMCFG_FLOAT
+                if(retType == NUMBER_TYPE)
+                    emitCoerce(NUMBER_TYPE, sp);
+                coder->write(state, pc, opcode, retType);
                 break;
                 }
 
@@ -3075,6 +3050,12 @@ namespace avmplus
         FrameValue &v = state->value(index);
         coder->writeCoerce(state, index, target);
         state->setType(index, target, v.notNull);
+    }
+
+    void Verifier::emitCoerceToNumeric(int index)
+    {
+        coder->writeCoerceToNumeric(state, index);
+        state->setType(index, OBJECT_TYPE, true);
     }
 
     Traits* Verifier::peekType(Traits* requiredType, int n)

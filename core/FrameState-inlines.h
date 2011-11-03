@@ -86,19 +86,12 @@ REALLY_INLINE void FrameState::setType(int32_t i, Traits* t, bool notNull, bool 
     v.notNull = notNull;
     v.isWith = isWith;
 #ifdef VMCFG_NANOJIT
-#ifdef VMCFG_FLOAT
-    AvmCore* core = t == NULL ? NULL : t->core;
-    BuiltinType bt = Traits::getBuiltinType(t);
-    if(bt==BUILTIN_any && core && NUMERIC_TYPE == t) 
-        v.sst_mask = (1<<SST_float) | (1<<SST_double) | (1<<SST_float4);
-    else 
-        v.sst_mask = 1 << valueStorageType(bt);
-    if(bt == BUILTIN_float4)
-        info->forceLargeVarSize();
-#else
     BuiltinType bt = Traits::getBuiltinType(t);
     v.sst_mask = 1 << valueStorageType(bt);
-#endif // VMCFG_FLOAT
+
+FLOAT_ONLY( 
+    if(bt == BUILTIN_float4) info->forceLargeVarSize();
+)
 #endif
 }
 

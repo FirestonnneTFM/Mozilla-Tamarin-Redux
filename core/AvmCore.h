@@ -49,7 +49,6 @@ namespace avmplus
 #define ARRAY_TYPE        (core->traits.array_itraits)
 #define STRING_TYPE       (core->traits.string_itraits)
 #define NUMBER_TYPE       (core->traits.number_itraits)
-#define NUMERIC_TYPE      (core->traits.numeric_itraits) 
 #define FLOAT_TYPE        (core->traits.float_itraits)
 #define FLOAT4_TYPE       (core->traits.float4_itraits)
 #define INT_TYPE          (core->traits.int_itraits)

@@ -367,7 +367,7 @@ namespace avmplus
          *  are modeling storage types the same way the verifier did for us.
          *  Mismatches are caught in writeOpcodeVerified() after the Verifier has
          *  updated FrameValue.sst_mask. */
-        IFFLOAT(uint16_t,uint8_t) *jit_sst;   // array of SST masks to sanity check with FrameState
+        uint16_t *jit_sst;   // array of SST masks to sanity check with FrameState
         ValidateWriter* validate3; // ValidateWriter for method body.
 #endif
 
@@ -578,6 +578,7 @@ namespace avmplus
         void writeNip(const FrameState* state, const uint8_t *pc);
         void writeCheckNull(const FrameState* state, uint32_t index);
         void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
+        void writeCoerceToNumeric(const FrameState* state, uint32_t index);
         void writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver*);
         void writeEpilogue(const FrameState* state);
         void writeBlockStart(const FrameState* state);
