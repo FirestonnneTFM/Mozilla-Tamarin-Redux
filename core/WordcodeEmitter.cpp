@@ -724,6 +724,9 @@ namespace avmplus
     void WordcodeEmitter::writeCoerce(const FrameState*, uint32_t, Traits*)
     {}
 
+    void WordcodeEmitter::writeCoerceToNumeric(const FrameState*, uint32_t)
+    { /* FIXME: implement CoerceToNumeric in the wordcode interpreter */ }
+
     void WordcodeEmitter::emitOp1(const uint8_t *pc, WordOpcode opcode)
     {
 #ifdef _DEBUG

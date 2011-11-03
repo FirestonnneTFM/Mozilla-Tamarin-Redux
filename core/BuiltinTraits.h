@@ -115,7 +115,6 @@ namespace avmplus
 #ifdef VMCFG_FLOAT
         Traits *float_itraits;
         Traits *float4_itraits;
-        Traits *numeric_itraits;
 #endif 
         Traits *function_itraits;
         Traits *int_itraits;

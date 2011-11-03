@@ -69,15 +69,6 @@ namespace avmplus
         void_itraits->verifyBindings(NULL);
         void_itraits->resolveSignatures(NULL);
         
-#ifdef VMCFG_FLOAT
-        numeric_itraits = Traits::newTraits(pool, NULL, 0, 0, 0, TRAITSTYPE_NVA);
-        numeric_itraits->set_names(publicNS, core->knumeric);
-        numeric_itraits->final = true;
-        numeric_itraits->builtinType = BUILTIN_any;
-        numeric_itraits->verifyBindings(NULL);
-        numeric_itraits->resolveSignatures(NULL);
-#endif // VMCFG_FLOAT
-
 #define DO_BUILTIN(nm, clsnm) \
     do { \
         nm##_itraits = core->domainMgr()->findBuiltinTraitsByName(pool, core->internConstantStringLatin1(clsnm)); \
@@ -99,7 +90,6 @@ namespace avmplus
 #ifdef VMCFG_FLOAT
         DO_BUILTIN(float, "float");
         DO_BUILTIN(float4, "float4");
-        // numeric is handled above
 #endif 
 //      DO_BUILTIN(object, "FOO");      // can't do yet, handled elsewhere
         DO_BUILTIN(qName, "QName");

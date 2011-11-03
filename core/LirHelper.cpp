@@ -172,7 +172,6 @@ LIns* LirHelper::nativeToAtom(LIns* native, Traits* t)
         return addp(native, kNamespaceType);
 
     default:
-        FLOAT_ONLY(AvmAssert(t!=NUMERIC_TYPE));
         return addp(native, kObjectType);
     }
 }
