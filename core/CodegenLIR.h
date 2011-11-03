@@ -380,7 +380,7 @@ namespace avmplus
         LIns* leaIns(int32_t d, LIns *base);
         LIns* localGet(int i);
         LIns* localGetp(int i);
-        LIns* localGetf(int i);
+        LIns* localGetd(int i);
         LIns* localCopy(int i); // sniff's type from FrameState
         void branchToLabel(LOpcode op, LIns *cond, CodegenLabel& label);
         LIns* branchJovToLabel(LOpcode op, LIns *a, LIns *b, CodegenLabel& label);

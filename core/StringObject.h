@@ -437,11 +437,11 @@ namespace avmplus
                 Stringp             _charAtU(uint32_t i);
                 Stringp             AS3_charAt(double i=0);
 
-                double              _charCodeAtFI(int32_t i); // returns NaN for out-of-bounds
+                double              _charCodeAtDI(int32_t i); // returns NaN for out-of-bounds
                 int32_t             _charCodeAtII(int32_t i); // returns 0 for out-of-bounds
                 double              AS3_charCodeAt(double i); // returns NaN for out-of-bounds
-                int32_t             _charCodeAtIF(double i); // returns 0 for out-of-bounds
-                double              _charCodeAtFU(uint32_t i); // returns NaN for out-of-bounds
+                int32_t             _charCodeAtID(double i); // returns 0 for out-of-bounds
+                double              _charCodeAtDU(uint32_t i); // returns NaN for out-of-bounds
                 int32_t             _charCodeAtIU(uint32_t i); // returns 0 for out-of-bounds
 
                 int32_t             AS3_localeCompare(Atom other);
