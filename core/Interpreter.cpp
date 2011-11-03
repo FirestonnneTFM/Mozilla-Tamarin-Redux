@@ -1584,6 +1584,7 @@ FLOAT_ONLY(\
                         *a2p = core->float4ToAtom( f4_sub(AvmCore::atomToFloat4(a1), one ) );
                         NEXT;
                     }
+                    AvmAssert( IS_DOUBLE(a1) || IS_INTEGER(a1) );
                 } else
 #endif // VMCFG_FLOAT
                 {
