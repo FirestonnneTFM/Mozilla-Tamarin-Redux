@@ -1692,6 +1692,8 @@ namespace nanojit
 #ifdef VMCFG_FLOAT
             } else if (iftrue->isF() && iffalse->isF()) {
                 op = LIR_cmovf;
+            } else if (iftrue->isF4() && iffalse->isF4()) {
+                op = LIR_cmovf4;
 #endif
             } else if (iftrue->isD() && iffalse->isD()) {
                 op = LIR_cmovd;
