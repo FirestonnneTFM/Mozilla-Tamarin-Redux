@@ -110,10 +110,10 @@ return *((intptr_t*)&_method);
 
 #ifdef AVMPLUS_ARM
 #ifdef _MSC_VER
-#define RETURN_METHOD_PTR_F(_class, _method) \
+#define RETURN_METHOD_PTR_D(_class, _method) \
 return *((int*)&_method);
 #else
-#define RETURN_METHOD_PTR_F(_class, _method) \
+#define RETURN_METHOD_PTR_D(_class, _method) \
 union { \
     double (_class::*bar)(); \
     int foo[2]; \
@@ -123,7 +123,7 @@ return foo[0];
 #endif
 
 #elif defined __GNUC__
-#define RETURN_METHOD_PTR_F(_class, _method) \
+#define RETURN_METHOD_PTR_D(_class, _method) \
 union { \
     double (_class::*bar)(); \
     intptr_t foo; \
@@ -131,7 +131,7 @@ union { \
 bar = _method; \
 return foo;
 #else
-#define RETURN_METHOD_PTR_F(_class, _method) \
+#define RETURN_METHOD_PTR_D(_class, _method) \
 return *((intptr_t*)&_method);
 #endif
 
@@ -188,7 +188,7 @@ namespace avmplus
         #define VECTORINTADDR(f) vectorIntAddr((int (IntVectorObject::*)())(&f))
         #define VECTORUINTADDR(f) vectorUIntAddr((int (UIntVectorObject::*)())(&f))
         #define VECTORDOUBLEADDR(f) vectorDoubleAddr((int (DoubleVectorObject::*)())(&f))
-        #define VECTORDOUBLEADDRF(f) vectorDoubleAddrF((double (DoubleVectorObject::*)())(&f))
+        #define VECTORDOUBLEADDRD(f) vectorDoubleAddrD((double (DoubleVectorObject::*)())(&f))
         #define VECTOROBJADDR(f) vectorObjAddr((int (ObjectVectorObject::*)())(&f))
         #define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
         #define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
@@ -241,9 +241,9 @@ namespace avmplus
             RETURN_METHOD_PTR(DoubleVectorObject, f);
         }
 
-        intptr_t vectorDoubleAddrF(double (DoubleVectorObject::*f)())
+        intptr_t vectorDoubleAddrD(double (DoubleVectorObject::*f)())
         {
-            RETURN_METHOD_PTR_F(DoubleVectorObject, f);
+            RETURN_METHOD_PTR_D(DoubleVectorObject, f);
         }
 
         intptr_t vectorObjAddr(int (ObjectVectorObject::*f)())
@@ -596,7 +596,7 @@ namespace avmplus
     {
         switch (bt(state->value(i).traits)) {
         case BUILTIN_number:
-            return localGetf(i);
+            return localGetd(i);
         case BUILTIN_boolean:
         case BUILTIN_int:
         case BUILTIN_uint:
@@ -1164,7 +1164,7 @@ namespace avmplus
         return lirout->insLoad(LIR_ldi, vars, i * VARSIZE, ACCSET_VARS);
     }
 
-    LIns* CodegenLIR::localGetf(int i) {
+    LIns* CodegenLIR::localGetd(int i) {
 #ifdef DEBUG
         const FrameValue& v = state->value(i);
         AvmAssert(v.sst_mask == (1<<SST_double) && v.traits == NUMBER_TYPE);
@@ -2116,7 +2116,7 @@ namespace avmplus
     void CodegenLIR::emitAddDoubleToAtom(int i, int j, Traits* type)
     {
         LIns* rhs = loadAtomRep(j);
-        LIns* lhs = localGetf(i);
+        LIns* lhs = localGetd(i);
         LIns* out = callIns(FUNCTIONID(op_add_a_da), 3, coreAddr, lhs, rhs);
         localSet(i, out, type);
         JIT_EVENT(jit_add_a_da);
@@ -2165,7 +2165,7 @@ namespace avmplus
     void CodegenLIR::emitAddAtomToDouble(int i, int j, Traits* type)
     {
         LIns* lhs = loadAtomRep(i);
-        LIns* rhs = localGetf(j);
+        LIns* rhs = localGetd(j);
         LIns* out = callIns(FUNCTIONID(op_add_a_ad), 3, coreAddr, lhs, rhs);
         localSet(i, out, type);
         JIT_EVENT(jit_add_a_ad);
@@ -3013,7 +3013,7 @@ namespace avmplus
         case BUILTIN_uint:
             return callIns(FUNCTIONID(uintToString), 2, coreAddr, localGet(index));
         case BUILTIN_number:
-            return callIns(FUNCTIONID(doubleToString), 2, coreAddr, localGetf(index));
+            return callIns(FUNCTIONID(doubleToString), 2, coreAddr, localGetd(index));
         case BUILTIN_boolean: {
             // load "true" or "false" string constant from AvmCore.booleanStrings[]
             LIns *offset = binaryIns(LIR_lshp, i2p(localGet(index)), InsConst(PTR_SCALE));
@@ -3557,9 +3557,9 @@ namespace avmplus
     }
 
     static Specialization coerceDoubleToInt[] = {
-        { FUNCTIONID(String_charCodeAtFI),    FUNCTIONID(String_charCodeAtIU) },
-        { FUNCTIONID(String_charCodeAtFU),    FUNCTIONID(String_charCodeAtIU) },
-        { FUNCTIONID(String_charCodeAtFF),    FUNCTIONID(String_charCodeAtIF) },
+        { FUNCTIONID(String_charCodeAtDI),    FUNCTIONID(String_charCodeAtIU) },
+        { FUNCTIONID(String_charCodeAtDU),    FUNCTIONID(String_charCodeAtIU) },
+        { FUNCTIONID(String_charCodeAtDD),    FUNCTIONID(String_charCodeAtID) },
         { 0, 0 }
     };
 
@@ -3568,7 +3568,7 @@ namespace avmplus
     // and specialize charCodeAt to an faster integer version.
     LIns* CodegenLIR::coerceNumberToInt(int loc)
     {
-        LIns *arg = localGetf(loc);
+        LIns *arg = localGetd(loc);
         LOpcode op = arg->opcode();
         switch (op) {
             case LIR_ui2d:
@@ -3747,7 +3747,7 @@ namespace avmplus
             }
             else if (in == NUMBER_TYPE)
             {
-                expr = callIns(FUNCTIONID(doubleToBool), 1, localGetf(loc));
+                expr = callIns(FUNCTIONID(doubleToBool), 1, localGetd(loc));
             }
             else if (in == INT_TYPE || in == UINT_TYPE)
             {
@@ -3848,7 +3848,7 @@ namespace avmplus
     void CodegenLIR::emitIsNaN(Traits* result)
     {
         int op1 = state->sp();
-        LIns *f = localGetf(op1);
+        LIns *f = localGetd(op1);
         if (isPromote(f->opcode())) {
             // Promoting an integer to a double cannot result in a NaN.
             localSet(op1-1, InsConst(0), result);
@@ -3909,7 +3909,7 @@ namespace avmplus
         BuiltinType bt = this->bt(state->value(argOffset).traits);
         int32_t btMask = 1 << bt;
         if (bt == BUILTIN_number) {
-            LIns *arg = localGetf(argOffset);
+            LIns *arg = localGetd(argOffset);
             if (arg->isImmD()) {
                 int32_t intVal = (int32_t) arg->immD();
                 if ((double) intVal == arg->immD() && !MathUtils::isNegZero(arg->immD())) {
@@ -3939,7 +3939,7 @@ namespace avmplus
         BuiltinType oldBt = this->bt(state->value(argOffset).traits);
 
         if (oldBt == BUILTIN_number) {
-            LIns *arg = localGetf(argOffset);
+            LIns *arg = localGetd(argOffset);
             if (newBt == BUILTIN_int) {
                 if (arg->isImmD())
                     return InsConst((int32_t)arg->immD());
@@ -3960,7 +3960,7 @@ namespace avmplus
 
         switch (newBt) {
         case BUILTIN_number:
-            return localGetf(argOffset);
+            return localGetd(argOffset);
         case BUILTIN_boolean:
         case BUILTIN_int:
         case BUILTIN_uint:
@@ -3979,12 +3979,12 @@ namespace avmplus
         { 0, /* dummy entry so 0 can be treated as HashMap miss*/ 1, {}, 0, 0},
         { avmplus::NativeID::native_script_function_isNaN, 1, {BUILTIN_number, BUILTIN_none},   0, &CodegenLIR::emitIsNaN },
 
-        { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_uint,   BUILTIN_none},   FUNCTIONID(String_charCodeAtFU), 0},
-        { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_int,    BUILTIN_none},   FUNCTIONID(String_charCodeAtFI), 0},
-        { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(String_charCodeAtFF), 0},
+        { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_uint,   BUILTIN_none},   FUNCTIONID(String_charCodeAtDU), 0},
+        { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_int,    BUILTIN_none},   FUNCTIONID(String_charCodeAtDI), 0},
+        { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(String_charCodeAtDD), 0},
         { avmplus::NativeID::String_AS3_charAt,            1, {BUILTIN_uint,   BUILTIN_none},   FUNCTIONID(String_charAtU), 0},
         { avmplus::NativeID::String_AS3_charAt,            1, {BUILTIN_int,    BUILTIN_none},   FUNCTIONID(String_charAtI), 0},
-        { avmplus::NativeID::String_AS3_charAt,            1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(String_charAtF), 0},
+        { avmplus::NativeID::String_AS3_charAt,            1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(String_charAtD), 0},
 
         { avmplus::NativeID::String_length_get,            0, {BUILTIN_none,   BUILTIN_none},   0, &CodegenLIR::emitStringLength},
 
@@ -4297,7 +4297,7 @@ namespace avmplus
             const CallInfo *fid;
             switch (rbt) {
             case BUILTIN_number:
-                fid = FUNCTIONID(fcalli);
+                fid = FUNCTIONID(dcalli);
                 break;
             case BUILTIN_int: case BUILTIN_uint: case BUILTIN_boolean:
                 fid = FUNCTIONID(icalli);
@@ -4311,7 +4311,7 @@ namespace avmplus
             const CallInfo *fid;
             switch (rbt) {
             case BUILTIN_number:
-                fid = FUNCTIONID(fcallimt);
+                fid = FUNCTIONID(dcallimt);
                 break;
             case BUILTIN_int: case BUILTIN_uint: case BUILTIN_boolean:
                 fid = FUNCTIONID(icallimt);
@@ -4770,7 +4770,7 @@ namespace avmplus
                 if (idxKind == VI_INT || idxKind == VI_UINT) {
                     emitInlineVectorWrite(objIndexOnStack, 
                                           index,
-                                          localGetf(valIndexOnStack),
+                                          localGetd(valIndexOnStack),
                                           offsetof(DoubleVectorObject, m_list.m_data),
                                           offsetof(DataListHelper<double>::LISTDATA, len),
                                           offsetof(ListData<double>, entries),
@@ -4779,7 +4779,7 @@ namespace avmplus
                                           setDoubleVectorNativeHelpers[idxKind]);
                     return;
                 }
-                value = localGetf(valIndexOnStack);
+                value = localGetd(valIndexOnStack);
                 setter = setDoubleVectorNativeHelpers[idxKind];
             }
             else {
@@ -4816,7 +4816,7 @@ namespace avmplus
         // Convert Number expression to int or uint if it is a promotion
         // from int or uint, or if it is a constant in range for int or uint.
         else if (*indexType == NUMBER_TYPE) {
-            index = localGetf(sp);
+            index = localGetd(sp);
             if (index->opcode() == LIR_i2d) {
                 *indexType = INT_TYPE;
                 return index->oprnd1();
@@ -4938,7 +4938,7 @@ namespace avmplus
             case OP_sf32:
             case OP_sf64:
             {
-                LIns* svalue = localGetf(sp-1);
+                LIns* svalue = localGetd(sp-1);
                 LIns* mopAddr = localGet(sp);
                 const MopsInfo& mi = kMopsStoreInfo[opcode-OP_si8];
             #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP
@@ -5105,7 +5105,7 @@ namespace avmplus
 
             case OP_negate: {
                 int32_t index = (int32_t) op1;
-                localSet(index, Ins(LIR_negd, localGetf(index)),result);
+                localSet(index, Ins(LIR_negd, localGetd(index)),result);
                 break;
             }
 
@@ -5123,7 +5123,7 @@ namespace avmplus
             case OP_declocal: {
                 int32_t index = (int32_t) op1;
                 int32_t incr = (int32_t) op2; // 1 or -1
-                localSet(index, binaryIns(LIR_addd, localGetf(index), i2dIns(InsConst(incr))), result);
+                localSet(index, binaryIns(LIR_addd, localGetd(index), i2dIns(InsConst(incr))), result);
                 break;
             }
 
@@ -5148,7 +5148,7 @@ namespace avmplus
 
             case OP_modulo: {
                 LIns* out = callIns(FUNCTIONID(mod), 2,
-                    localGetf(sp-1), localGetf(sp));
+                    localGetd(sp-1), localGetd(sp));
                 localSet(sp-1,  out, result);
                 break;
             }
@@ -5163,7 +5163,7 @@ namespace avmplus
                     case OP_multiply:   op = LIR_muld; break;
                     case OP_subtract:   op = LIR_subd; break;
                 }
-                localSet(sp-1, binaryIns(op, localGetf(sp-1), localGetf(sp)), result);
+                localSet(sp-1, binaryIns(op, localGetd(sp-1), localGetd(sp)), result);
                 break;
             }
 
@@ -6143,15 +6143,15 @@ namespace avmplus
     // to be the left-hand argument.  The swap parameter, if true, reverses this convention.
 
     static Specialization intCmpWithNumber[] = {
-        { FUNCTIONID(String_charCodeAtFI),    FUNCTIONID(String_charCodeAtIU) },
-        { FUNCTIONID(String_charCodeAtFU),    FUNCTIONID(String_charCodeAtIU) },
-        { FUNCTIONID(String_charCodeAtFF),    FUNCTIONID(String_charCodeAtIF) },
+        { FUNCTIONID(String_charCodeAtDI),    FUNCTIONID(String_charCodeAtIU) },
+        { FUNCTIONID(String_charCodeAtDU),    FUNCTIONID(String_charCodeAtIU) },
+        { FUNCTIONID(String_charCodeAtDD),    FUNCTIONID(String_charCodeAtID) },
         { 0, 0 }
     };
 
     LIns *CodegenLIR::optimizeIntCmpWithNumberCall(int callIndex, int otherIndex, LOpcode icmp, bool swap)
     {
-        LIns* numSide = localGetf(callIndex);
+        LIns* numSide = localGetd(callIndex);
         const CallInfo *ci = numSide->callInfo();
 
         // Try to optimize charCodeAt to return an integer if possible. Because it can return NaN for
@@ -6165,7 +6165,7 @@ namespace avmplus
         // int < String.CharCodeAt  - zero or any positive integer constant
         // int <= String.CharCodeAt - any positive integer constant
 
-        if (ci == FUNCTIONID(String_charCodeAtFI) || ci == FUNCTIONID(String_charCodeAtFU) || ci == FUNCTIONID(String_charCodeAtFF)) {
+        if (ci == FUNCTIONID(String_charCodeAtDI) || ci == FUNCTIONID(String_charCodeAtDU) || ci == FUNCTIONID(String_charCodeAtDD)) {
 
             AvmAssert(numSide->opcode() == LIR_calld);
 
@@ -6194,7 +6194,7 @@ namespace avmplus
     static Specialization stringCmpWithString[] = {
         { FUNCTIONID(String_charAtI),    FUNCTIONID(String_charCodeAtII) },
         { FUNCTIONID(String_charAtU),    FUNCTIONID(String_charCodeAtIU) },
-        { FUNCTIONID(String_charAtF),    FUNCTIONID(String_charCodeAtIF) },
+        { FUNCTIONID(String_charAtD),    FUNCTIONID(String_charCodeAtID) },
         { 0, 0 }
     };
 
@@ -6202,7 +6202,7 @@ namespace avmplus
     {
         LIns* callSide = localGetp(callIndex);
         const CallInfo *ci = callSide->callInfo();
-        if (ci == FUNCTIONID(String_charAtI) || ci == FUNCTIONID(String_charAtU) || ci == FUNCTIONID(String_charAtF)) {
+        if (ci == FUNCTIONID(String_charAtI) || ci == FUNCTIONID(String_charAtU) || ci == FUNCTIONID(String_charAtD)) {
             LIns*  strSide = localGetp(otherIndex);
             if (!strSide->isImmP())
                 return NULL;
@@ -6247,12 +6247,12 @@ namespace avmplus
         else if (lht && lht->isNumeric() && rht && rht->isNumeric())
         {
             // Comparing the result of a call returning a Number to another int value.
-            if (lht == NUMBER_TYPE && rht == INT_TYPE && localGetf(lhsi)->opcode() == LIR_calld) {
+            if (lht == NUMBER_TYPE && rht == INT_TYPE && localGetd(lhsi)->opcode() == LIR_calld) {
                 LIns* result = optimizeIntCmpWithNumberCall(lhsi, rhsi, icmp, false);
                 if (result)
                     return result;
             }
-            if (rht == NUMBER_TYPE && lht == INT_TYPE && localGetf(rhsi)->opcode() == LIR_calld) {
+            if (rht == NUMBER_TYPE && lht == INT_TYPE && localGetd(rhsi)->opcode() == LIR_calld) {
                 LIns* result = optimizeIntCmpWithNumberCall(rhsi, lhsi, icmp, true);
                 if (result)
                     return result;
@@ -6733,7 +6733,7 @@ namespace avmplus
     {
         if (t == NUMBER_TYPE)
         {
-            return localGetf(i);
+            return localGetd(i);
         }
         if (t == INT_TYPE || t == BOOLEAN_TYPE)
         {

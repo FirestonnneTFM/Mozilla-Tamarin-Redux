@@ -227,7 +227,6 @@ namespace avmplus
 #endif
 
     const ArgType ARGTYPE_U = ARGTYPE_UI; // uint32_t
-    const ArgType ARGTYPE_F = ARGTYPE_D;  // double
     const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
 }
 

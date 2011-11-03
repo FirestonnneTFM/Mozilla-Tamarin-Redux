@@ -335,7 +335,7 @@ namespace avmplus
         switch (ms->returnTraitsBT()) {
         case BUILTIN_number:
             call->_address = (uintptr_t) method->_implFPR;
-            call->_typesig = SIG3(F,P,I,P);
+            call->_typesig = SIG3(D,P,I,P);
             break;
         case BUILTIN_int: case BUILTIN_uint: case BUILTIN_boolean:
             call->_address = (uintptr_t) method->_implGPR;
