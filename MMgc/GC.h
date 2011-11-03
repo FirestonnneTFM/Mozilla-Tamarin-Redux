@@ -639,6 +639,13 @@ namespace MMgc
          * This function returns NULL only if kCanFail is passed in 'flags'.
          * Note that kContainsPointers implies kZero, pointer containing memory is
          * always zeroed (see bug 594533).
+         *
+         * We have the following invariants:
+         *
+         * A pointer returned from Alloc is aligned at least on an 8-byte boundary.
+         *
+         * There are at present no useful guarantees about better alignment like that, 
+         * notably there are no guarantees about 16-byte alignment to benefit float4.
          */
         void *Alloc(size_t size, int flags=0);
 

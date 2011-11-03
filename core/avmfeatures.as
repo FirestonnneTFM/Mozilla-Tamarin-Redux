@@ -225,6 +225,14 @@ var FEATURES =
 
         Note that if AVMSYSTEM_UNALIGNED_FP_ACCESS is not set then it is assumed that 64-bit
         floats require 8-byte alignment.
+        
+        Note that AVMSYSTEM_UNALIGNED_FP_ACCESS does not apply to float4 values.  Some SIMD
+        units have different instructions for aligned and unaligned access; on some 
+        systems the alignment requirement is 16 bytes, on others it's 8 bytes.  But as of
+        November 2011 all C++ compilers we use will assume such alignment when manipulating
+        float4 values and will not use the instructions for unaligned access even if
+        they are available.  C++ code must never assume that unaligned access is OK is
+        appropriate for float4 data.
     </desc>
 
     <name>      AVMSYSTEM_UNALIGNED_FP_ACCESS </name>

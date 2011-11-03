@@ -215,14 +215,9 @@ namespace MMgc
     REALLY_INLINE void* GC::AllocBibopType<avmplus::AtomConstants::kBibopFloat4Type>()
     {
         void* p = AllocBibop(bibopAllocFloat4);
-#if USER_POINTER_WORDS == 4
-#if defined DEBUG || 0  /* you can change this to 1 to enable the test in release builds */
+#if defined VMCFG_FLOAT && (defined DEBUG || 0) /* Change 0 to 1 to enable the test in release builds */
         if (uintptr_t(p) & 15)
-        {
-            printf("Bad alignment of float4\n");
             GCHeap::GetGCHeap()->Abort();
-        }
-#endif
 #endif
         return p;
     }

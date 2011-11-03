@@ -273,9 +273,15 @@ namespace MMgc
          * (this will be true for float and float4 especially) then the box cost is not a big deal.
          */
 #if !defined MMGC_MEMORY_INFO
+#if USER_POINTER_WORDS != 0
+    #error "GC::GC cannot handle this value of USER_POINTER_WORDS"
+#endif
         bibopAllocFloat  = mmfx_new(GCAlloc(this,  8, false, false, false, /*sizeclass*/0, avmplus::AtomConstants::kBibopFloatType));
         bibopAllocFloat4 = mmfx_new(GCAlloc(this, 16, false, false, false, /*sizeclass*/1, avmplus::AtomConstants::kBibopFloat4Type));
 #else
+#if USER_POINTER_WORDS != 2 && USER_POINTER_WORDS != 4
+    #error "GC::GC cannot handle this value of USER_POINTER_WORDS"
+#endif
 #ifdef MMGC_64BIT
 #if USER_POINTER_WORDS == 2
         GCAssert(DebugSize() == 24);
@@ -286,7 +292,7 @@ namespace MMgc
         bibopAllocFloat  = mmfx_new(GCAlloc(this, int(40), false, false, false, /*sizeclass*/4, avmplus::AtomConstants::kBibopFloatType));
         bibopAllocFloat4 = mmfx_new(GCAlloc(this, int(48), false, false, false, /*sizeclass*/5, avmplus::AtomConstants::kBibopFloat4Type));
 #endif
-#else
+#else // !MMGC_64BIT
 #if USER_POINTER_WORDS == 2
         GCAssert(DebugSize() == 16);
         bibopAllocFloat  = mmfx_new(GCAlloc(this, int(24), false, false, false, /*sizeclass*/2, avmplus::AtomConstants::kBibopFloatType));

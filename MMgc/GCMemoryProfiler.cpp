@@ -1167,19 +1167,25 @@ namespace MMgc
     // This returns a constant so I don't know why it can't be inline somewhere.
     size_t DebugSize()
     {
-        // Debug padding (word == 32 bits):
+        // Debug padding, note word == 32 bits:
         //
-        // 1 word of size                 +
-        // 1 word of stack trace index    +-- USER_POINTER_WORDS
-        // 2 words of padding, maybe      +
+        // 1 word of size                      )
+        // 1 word of stack trace index         )-- USER_POINTER_WORDS
+        // 2 words of padding, for VMCFG_FLOAT )
         // (object goes here)
         // 1 word of poison
-        // 1 writeback pointer (1 or 2 words)
-        // 1 word of padding on 64-bit systems
+        // 1 writeback pointer (1 or 2 words)  (may be obsolete information)
+        // 1 word of padding on 64-bit systems (ie round up to even number of 32-bit words)
         //
-        // The 2 words of padding before the object are experimental / temporary, to get
-        // 16-byte alignment for float4 boxes.  It's not ideal.
-        return ((USER_POINTER_WORDS + 1 + sizeof(void*)/sizeof(int32_t) + 1) & ~1) * sizeof(int32_t);
+        // The 2 words of padding for VMCFG_FLOAT is there to get 16-byte alignment
+        // for float4 boxes.  It's not ideal, but it's acceptable.  We will probably
+        // reengineer it, see bugzilla 697672.
+
+        const size_t poison_words = 1;
+        const size_t writeback_pointer_words = sizeof(void*)/sizeof(int32_t);
+        const size_t words = USER_POINTER_WORDS + poison_words + writeback_pointer_words;
+        const size_t words_rounded = (words + 1) & ~1;
+        return words_rounded * sizeof(int32_t);
     }
 
     /*
