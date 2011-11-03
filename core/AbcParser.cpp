@@ -1306,9 +1306,10 @@ namespace avmplus
                 cpool_float4.set(i, (GCFloat4*)(core->allocFloat4(value)&~7));
 #ifdef AVMPLUS_VERBOSE
                 if(pool->isVerbose(VB_parse)) {
+                    const float* fp = reinterpret_cast<const float*>(&value);
                     core->console << "    " << offset << ":" << "cpool_float4["<<i<<"]="
                         << constantNames[CONSTANT_Float4] << " ";
-                    core->console << ((float*)&value)[0] << "," << ((float*)&value)[1] << "," << ((float*)&value)[2] << "," << ((float*)&value)[3];
+                    core->console << fp[0] << "," << fp[1] << "," << fp[2] << "," << fp[3];
                     core->console << "\n";
                 }
 #endif
