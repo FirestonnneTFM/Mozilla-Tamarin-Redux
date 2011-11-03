@@ -39,16 +39,16 @@
 
     FUNCTION(CALL_INDIRECT, SIG4(U,P,P,I,P), icalli)
     FUNCTION(CALL_INDIRECT, SIG4(A,P,P,I,P), acalli)
-    FUNCTION(CALL_INDIRECT, SIG4(D,P,P,I,P), fcalli)
+    FUNCTION(CALL_INDIRECT, SIG4(D,P,P,I,P), dcalli)
 #ifdef VMCFG_FLOAT
-    FUNCTION(CALL_INDIRECT, SIG4(F,P,P,I,P), spfcalli)
+    FUNCTION(CALL_INDIRECT, SIG4(F,P,P,I,P), fcalli)
     FUNCTION(CALL_INDIRECT, SIG4(F4,P,P,I,P), vfcalli)
 #endif // VMCFG_FLOAT
     FUNCTION(CALL_INDIRECT, SIG5(I,P,P,I,P,P), icallimt)
     FUNCTION(CALL_INDIRECT, SIG5(A,P,P,I,P,P), acallimt)
-    FUNCTION(CALL_INDIRECT, SIG5(D,P,P,I,P,P), fcallimt)
+    FUNCTION(CALL_INDIRECT, SIG5(D,P,P,I,P,P), dcallimt)
 #ifdef VMCFG_FLOAT
-    FUNCTION(CALL_INDIRECT, SIG5(F,P,P,I,P,P), spfcallimt)
+    FUNCTION(CALL_INDIRECT, SIG5(F,P,P,I,P,P), fcallimt)
     FUNCTION(CALL_INDIRECT, SIG5(F4,P,P,I,P,P),vfcallimt)
 #endif // VMCFG_FLOAT
 
@@ -465,17 +465,17 @@
 #endif
     METHOD(ENVADDR(MethodEnv::hasnextproto), SIG3(I,P,P,P), hasnextproto)
 
-    PUREMETHOD(STRINGADDR(String::_charCodeAtFI),  SIG2(D,P,I), String_charCodeAtFI)
+    PUREMETHOD(STRINGADDR(String::_charCodeAtDI),  SIG2(D,P,I), String_charCodeAtDI)
     PUREMETHOD(STRINGADDR(String::_charCodeAtII),  SIG2(I,P,I), String_charCodeAtII)
-    PUREMETHOD(STRINGADDR(String::AS3_charCodeAt), SIG2(D,P,D), String_charCodeAtFF)
-    PUREMETHOD(STRINGADDR(String::_charCodeAtIF),  SIG2(I,P,D), String_charCodeAtIF)
-    PUREMETHOD(STRINGADDR(String::_charCodeAtFU),  SIG2(D,P,U), String_charCodeAtFU)
+    PUREMETHOD(STRINGADDR(String::AS3_charCodeAt), SIG2(D,P,D), String_charCodeAtDD)
+    PUREMETHOD(STRINGADDR(String::_charCodeAtID),  SIG2(I,P,D), String_charCodeAtID)
+    PUREMETHOD(STRINGADDR(String::_charCodeAtDU),  SIG2(D,P,U), String_charCodeAtDU)
     PUREMETHOD(STRINGADDR(String::_charCodeAtIU),  SIG2(I,P,U), String_charCodeAtIU)
     FASTFUNCTION(FUNCADDR(String::equalsWithNullChecks),  SIG2(I,P,P), String_equals)
 
     PUREMETHOD(STRINGADDR(String::_charAtI),  SIG2(P,P,I), String_charAtI)
     PUREMETHOD(STRINGADDR(String::_charAtU),  SIG2(P,P,U), String_charAtU)
-    PUREMETHOD(STRINGADDR(String::AS3_charAt),  SIG2(P,P,D), String_charAtF)
+    PUREMETHOD(STRINGADDR(String::AS3_charAt),  SIG2(P,P,D), String_charAtD)
 
     // FIXME: Bug 570049
     // Note that Toplevel::throwTypeError() assumes that Toplevel::typeErrorClass()
@@ -764,7 +764,7 @@
         }
     }
 
-// storing dynamic property on object
+    // storing dynamic property on object
     void setprop_none(SetCache& c, Atom obj, Atom val, MethodEnv* env)
     {
         PROF_IF ("setprop_none hit", OBJ_HIT(obj, c)) {
@@ -1042,7 +1042,7 @@
             if (index >= argc) // Out of range
                 goto exception;
         }
-        else if (atomKind(val) == kDoubleType) { 
+        else if (atomKind(val) == kDoubleType) {
             // Non-int index, check for Number values that are in the int range and nonnegative
             double d = AvmCore::atomToDouble(val);
             if (!(d >= 0 && d <= 0xFFFFFFFFU && MathUtils::floor(d) == d && (index = (uint32_t)d) < argc))
@@ -1108,7 +1108,7 @@
     FUNCTION(FUNCADDR(op_divide), SIG3(A,P,A,A), op_divide)
     FUNCTION(FUNCADDR(op_modulo), SIG3(A,P,A,A), op_modulo)
     FUNCTION(FUNCADDR(op_negate), SIG2(A,P,A), op_negate)
-#endif 
+#endif
 
     PUREMETHOD(COREADDR(AvmCore::EscapeAttributeValue), SIG2(P,P,A), EscapeAttributeValue)
     PUREMETHOD(COREADDR(AvmCore::ToXMLString), SIG2(P,P,A), ToXMLString)
@@ -1216,7 +1216,7 @@
     METHOD(VECTORUINTADDR(UIntVectorObject::_getDoubleProperty), SIG2(U,P,D), UIntVectorObject_getDoubleProperty)
     METHOD(VECTORUINTADDR(UIntVectorObject::_getNativeDoubleProperty), SIG2(U,P,D), UIntVectorObject_getNativeDoubleProperty)
     METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getDoubleProperty), SIG2(D,P,D), DoubleVectorObject_getDoubleProperty)
-    METHOD(VECTORDOUBLEADDRF(DoubleVectorObject::_getNativeDoubleProperty), SIG2(D,P,D), DoubleVectorObject_getNativeDoubleProperty)
+    METHOD(VECTORDOUBLEADDRD(DoubleVectorObject::_getNativeDoubleProperty), SIG2(D,P,D), DoubleVectorObject_getNativeDoubleProperty)
 #ifdef VMCFG_FLOAT
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getDoubleProperty), SIG2(F,P,D), FloatVectorObject_getDoubleProperty)
     METHOD(VECTORFLOATADDRF(FloatVectorObject::_getNativeDoubleProperty), SIG2(F,P,D), FloatVectorObject_getNativeDoubleProperty)
@@ -1231,7 +1231,7 @@
     METHOD(VECTORUINTADDR(UIntVectorObject::_getFloatProperty), SIG2(U,P,F), UIntVectorObject_getFloatProperty)
     METHOD(VECTORUINTADDR(UIntVectorObject::_getNativeFloatProperty), SIG2(U,P,F), UIntVectorObject_getNativeFloatProperty)
     METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getFloatProperty), SIG2(D,P,F), DoubleVectorObject_getFloatProperty)
-    METHOD(VECTORDOUBLEADDRF(DoubleVectorObject::_getNativeFloatProperty), SIG2(D,P,F), DoubleVectorObject_getNativeFloatProperty)
+    METHOD(VECTORDOUBLEADDRD(DoubleVectorObject::_getNativeFloatProperty), SIG2(D,P,F), DoubleVectorObject_getNativeFloatProperty)
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getFloatProperty), SIG2(F,P,F), FloatVectorObject_getFloatProperty)
     METHOD(VECTORFLOATADDRF(FloatVectorObject::_getNativeFloatProperty), SIG2(F,P,F), FloatVectorObject_getNativeFloatProperty)
 #endif

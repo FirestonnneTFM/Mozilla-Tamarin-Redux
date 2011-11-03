@@ -110,22 +110,22 @@ return *((intptr_t*)&_method);
 
 #ifdef AVMPLUS_ARM
 #ifdef _MSC_VER
-#define RETURN_METHOD_PTR_F(_class, _method) \
+#define RETURN_METHOD_PTR_D(_class, _method) \
 return *((int*)&_method);
 #else
-#define RETURN_METHOD_PTR_F_HELPER(_class, _method, _type) \
+#define RETURN_METHOD_PTR_DF_HELPER(_class, _method, _type) \
 union { \
     _type (_class::*bar)(); \
     int foo[2]; \
 }; \
 bar = _method; \
 return foo[0];
-#define RETURN_METHOD_PTR_F(a,b) RETURN_METHOD_PTR_F_HELPER(a,b,double)
-#define RETURN_METHOD_PTR_SPF(a,b) RETURN_METHOD_PTR_F_HELPER(a,b,float)
+#define RETURN_METHOD_PTR_D(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,double)
+#define RETURN_METHOD_PTR_F(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,float)
 #endif
 
 #elif defined __GNUC__
-#define RETURN_METHOD_PTR_F_HELPER(_class, _method, _type) \
+#define RETURN_METHOD_PTR_DF_HELPER(_class, _method, _type) \
 union { \
     _type (_class::*bar)(); \
     intptr_t foo; \
@@ -133,15 +133,15 @@ union { \
 bar = _method; \
 return foo;
 
-#define RETURN_METHOD_PTR_F(a,b) RETURN_METHOD_PTR_F_HELPER(a,b,double)
-#define RETURN_METHOD_PTR_SPF(a,b) RETURN_METHOD_PTR_F_HELPER(a,b,float)
+#define RETURN_METHOD_PTR_D(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,double)
+#define RETURN_METHOD_PTR_F(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,float)
 #else
-#define RETURN_METHOD_PTR_F(_class, _method) \
+#define RETURN_METHOD_PTR_D(_class, _method) \
 return *((intptr_t*)&_method);
 #endif
 
-#ifndef RETURN_METHOD_PTR_SPF
-#define RETURN_METHOD_PTR_SPF RETURN_METHOD_PTR_F
+#ifndef RETURN_METHOD_PTR_F
+#define RETURN_METHOD_PTR_F RETURN_METHOD_PTR_D
 #endif
 
 #ifdef PERFM
@@ -197,8 +197,8 @@ namespace avmplus
         #define VECTORINTADDR(f) vectorIntAddr((int (IntVectorObject::*)())(&f))
         #define VECTORUINTADDR(f) vectorUIntAddr((int (UIntVectorObject::*)())(&f))
         #define VECTORDOUBLEADDR(f) vectorDoubleAddr((int (DoubleVectorObject::*)())(&f))
+        #define VECTORDOUBLEADDRD(f) vectorDoubleAddrD((double (DoubleVectorObject::*)())(&f))
         #define VECTORFLOATADDR(f) vectorFloatAddr((int (FloatVectorObject::*)())(&f))
-        #define VECTORDOUBLEADDRF(f) vectorDoubleAddrF((double (DoubleVectorObject::*)())(&f))
         #define VECTORFLOATADDRF(f) vectorFloatAddrF((float (FloatVectorObject::*)())(&f))
         #define VECTOROBJADDR(f) vectorObjAddr((int (ObjectVectorObject::*)())(&f))
         #define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
@@ -252,9 +252,9 @@ namespace avmplus
             RETURN_METHOD_PTR(DoubleVectorObject, f);
         }
 
-        intptr_t vectorDoubleAddrF(double (DoubleVectorObject::*f)())
+        intptr_t vectorDoubleAddrD(double (DoubleVectorObject::*f)())
         {
-            RETURN_METHOD_PTR_F(DoubleVectorObject, f);
+            RETURN_METHOD_PTR_D(DoubleVectorObject, f);
         }
 #ifdef VMCFG_FLOAT
         intptr_t vectorFloatAddr(int (FloatVectorObject::*f)())
@@ -263,7 +263,7 @@ namespace avmplus
         }
         intptr_t vectorFloatAddrF(float (FloatVectorObject::*f)())
         {
-            RETURN_METHOD_PTR_SPF(FloatVectorObject, f);
+            RETURN_METHOD_PTR_F(FloatVectorObject, f);
         }
 #endif // VMCFG_FLOAT
         intptr_t vectorObjAddr(int (ObjectVectorObject::*f)())
@@ -617,12 +617,12 @@ namespace avmplus
         switch (bt(state->value(i).traits)) {
 #ifdef VMCFG_FLOAT
         case BUILTIN_float: 
-            return localGetf(i,SINGLE_PRECISION);
+            return localGetf(i);
         case BUILTIN_float4: 
             return localGetf4(i);
 #endif
         case BUILTIN_number:
-            return localGetf(i,DOUBLE_PRECISION);
+            return localGetd(i);
         case BUILTIN_boolean:
         case BUILTIN_int:
         case BUILTIN_uint:
@@ -643,7 +643,7 @@ namespace avmplus
         else
             jit_sst[i] = uint16_t(1 << sst); 
 #else
-        jit_sst[i] = uint8_t(1 << sst); 
+        jit_sst[i] = uint8_t(1 << sst);
 #endif // VMCFG_FLOAT
 #endif
         lirout->insStore(o, vars, i * IFFLOAT(info->varSize(), VARSIZE) , ACCSET_VARS);
@@ -1206,17 +1206,25 @@ namespace avmplus
         return lirout->insLoad(LIR_ldi, vars, i * IFFLOAT(info->varSize(), VARSIZE) , ACCSET_VARS);
     }
 
-    LIns* CodegenLIR::localGetf(int i, ePrecision precision) {
-        const bool singlePrecision = IFFLOAT(precision == SINGLE_PRECISION, false); (void)precision; (void)singlePrecision;
+    LIns* CodegenLIR::localGetf(int i) {
+#ifdef VMCFG_FLOAT
 #ifdef DEBUG
         const FrameValue& v = state->value(i);
-        if(singlePrecision)
-            FLOAT_ONLY(AvmAssert(v.sst_mask == (1<<SST_float) && v.traits == FLOAT_TYPE));
-        else
-            AvmAssert((v.sst_mask == (1<<SST_double) && v.traits == NUMBER_TYPE));
+        AvmAssert(v.sst_mask == (1<<SST_float) && v.traits == FLOAT_TYPE);
 #endif
-        LOpcode ldop = IFFLOAT(singlePrecision ? LIR_ldf:LIR_ldd , LIR_ldd);
-        return lirout->insLoad(ldop, vars, i * IFFLOAT(info->varSize(), VARSIZE) , ACCSET_VARS);
+        return lirout->insLoad(LIR_ldf, vars, i * info->varSize(), ACCSET_VARS);
+#else
+        toplevel->throwError(kNotImplementedError);
+        return NULL;
+#endif
+    }
+
+    LIns* CodegenLIR::localGetd(int i) {
+#ifdef DEBUG
+        const FrameValue& v = state->value(i);
+        AvmAssert((v.sst_mask == (1<<SST_double) && v.traits == NUMBER_TYPE));
+#endif
+        return lirout->insLoad(LIR_ldd, vars, i * IFFLOAT(info->varSize(), VARSIZE) , ACCSET_VARS);
     }
 
 #ifdef VMCFG_FLOAT
@@ -1240,14 +1248,14 @@ namespace avmplus
             FLOAT_ONLY(|| (v.traits == NUMERIC_TYPE && v.sst_mask== ((1 << SST_double)|(1 << SST_float)|(1 << SST_float4))))
            ) {
             // pointer or atom
-            AvmAssert(!(v.sst_mask == (1 << SST_int32)  && v.traits == INT_TYPE)     &&
-                      !(v.sst_mask == (1 << SST_uint32) && v.traits == UINT_TYPE)    &&
+            AvmAssert(!(v.sst_mask == (1 << SST_int32) && v.traits == INT_TYPE) &&
+                      !(v.sst_mask == (1 << SST_uint32) && v.traits == UINT_TYPE) &&
                       !(v.sst_mask == (1 << SST_bool32) && v.traits == BOOLEAN_TYPE) &&
 FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYPE)   &&
                       !(v.sst_mask == (1 << SST_float4) && v.traits == FLOAT4_TYPE)  && )
-                      !(v.sst_mask == (1 << SST_double) && v.traits == NUMBER_TYPE)  );
+                      !(v.sst_mask == (1 << SST_double) && v.traits == NUMBER_TYPE));
             ins = lirout->insLoad(LIR_ldp, vars, i * IFFLOAT(info->varSize(),VARSIZE) , ACCSET_VARS);
-        } else    {
+        } else {
             // more than one representation is possible: convert to atom using tag found at runtime.
             AvmAssert(bt(v.traits) == BUILTIN_any || bt(v.traits) == BUILTIN_object);
             LIns* tag = lirout->insLoad(LIR_lduc2ui, tags, i, ACCSET_TAGS);
@@ -2336,7 +2344,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     void CodegenLIR::emitAddDoubleToAtom(int i, int j, Traits* type)
     {
         LIns* rhs = loadAtomRep(j);
-        LIns* lhs = localGetf(i,DOUBLE_PRECISION);
+        LIns* lhs = localGetd(i);
 #ifdef VMCFG_FLOAT
         const bool floatSupport = pool->hasFloatSupport();
         const CallInfo* addFunction = floatSupport? FUNCTIONID(op_add_a_da):FUNCTIONID(op_add_a_da_legacy);
@@ -2397,7 +2405,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     void CodegenLIR::emitAddAtomToDouble(int i, int j, Traits* type)
     {
         LIns* lhs = loadAtomRep(i);
-        LIns* rhs = localGetf(j,DOUBLE_PRECISION);
+        LIns* rhs = localGetd(j);
 #ifdef VMCFG_FLOAT
         const bool floatSupport = pool->hasFloatSupport();
         const CallInfo* addFunction = floatSupport? FUNCTIONID(op_add_a_ad):FUNCTIONID(op_add_a_ad_legacy);
@@ -2553,10 +2561,10 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 JIT_EVENT(jit_add_a_ff);
             } else if(type==NUMBER_TYPE){
 #endif // VMCFG_FLOAT
-                LIns* lhs = coerceToNumber(i);
-                LIns* rhs = coerceToNumber(j);
-                localSet(i, binaryIns(LIR_addd, lhs, rhs), type);
-                JIT_EVENT(jit_add_a_nn);
+            LIns* lhs = coerceToNumber(i);
+            LIns* rhs = coerceToNumber(j);
+            localSet(i, binaryIns(LIR_addd, lhs, rhs), type);
+            JIT_EVENT(jit_add_a_nn);
 #ifdef VMCFG_FLOAT
             } else {
                 /* Numeric type */
@@ -2629,7 +2637,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             if (i >= scopeTop && i < ms->stack_base())
                 continue;
             const FrameValue& v = state->value(i);
-            AvmAssert(!jit_sst[i] || jit_sst[i] == v.sst_mask  );
+            AvmAssert(!jit_sst[i] || jit_sst[i] == v.sst_mask);
         }
 #else
         (void)state;
@@ -3310,7 +3318,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     {
         const FrameValue& value = state->value(index);
         Traits* in = value.traits;
-        
+
         switch (bt(in)) {
         case BUILTIN_null:
         case BUILTIN_string:
@@ -3322,12 +3330,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             return callIns(FUNCTIONID(uintToString), 2, coreAddr, localGet(index));
 #ifdef VMCFG_FLOAT
         case BUILTIN_float: 
-                return callIns(FUNCTIONID(floatToString),2,coreAddr,localGetf(index,SINGLE_PRECISION));
+                return callIns(FUNCTIONID(floatToString),2,coreAddr,localGetf(index));
         case BUILTIN_float4: 
             return callIns(FUNCTIONID(float4ToString),2,coreAddr,localGetf4(index));
 #endif
         case BUILTIN_number:
-              return callIns(FUNCTIONID(doubleToString), 2, coreAddr, localGetf(index,DOUBLE_PRECISION));
+            return callIns(FUNCTIONID(doubleToString), 2, coreAddr, localGetd(index));
         case BUILTIN_boolean: {
             // load "true" or "false" string constant from AvmCore.booleanStrings[]
             LIns *offset = binaryIns(LIR_lshp, i2p(localGet(index)), InsConst(PTR_SCALE));
@@ -3948,9 +3956,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     }
 
     static Specialization coerceDoubleToInt[] = {
-        { FUNCTIONID(String_charCodeAtFI),    FUNCTIONID(String_charCodeAtIU) },
-        { FUNCTIONID(String_charCodeAtFU),    FUNCTIONID(String_charCodeAtIU) },
-        { FUNCTIONID(String_charCodeAtFF),    FUNCTIONID(String_charCodeAtIF) },
+        { FUNCTIONID(String_charCodeAtDI),    FUNCTIONID(String_charCodeAtIU) },
+        { FUNCTIONID(String_charCodeAtDU),    FUNCTIONID(String_charCodeAtIU) },
+        { FUNCTIONID(String_charCodeAtDD),    FUNCTIONID(String_charCodeAtID) },
         { 0, 0 }
     };
 
@@ -3959,7 +3967,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     // and specialize charCodeAt to an faster integer version.
     LIns* CodegenLIR::coerceNumberToInt(int loc)
     {
-        LIns *arg = localGetf(loc,DOUBLE_PRECISION);
+        LIns *arg = localGetd(loc);
         LOpcode op = arg->opcode();
         switch (op) {
             case LIR_ui2d:
@@ -4152,10 +4160,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             }
             else if (in == NUMBER_TYPE FLOAT_ONLY(|| in ==FLOAT_TYPE) )
             {
-                FLOAT_ONLY(bool singlePrecision = (in==FLOAT_TYPE));
-                ePrecision prec = IFFLOAT(singlePrecision ? SINGLE_PRECISION : DOUBLE_PRECISION, DOUBLE_PRECISION);
-                LIns* getIns = localGetf(loc,prec);
-                LIns* ins = IFFLOAT(singlePrecision?f2dIns(getIns):getIns, getIns) ;
+                bool singlePrecision = IFFLOAT(in==FLOAT_TYPE, false);
+                LIns* ins = singlePrecision? f2dIns(localGetf(loc)):localGetd(loc);
                 expr = callIns(FUNCTIONID(doubleToBool), 1, ins);
             }
             else if (in == INT_TYPE || in == UINT_TYPE)
@@ -4256,11 +4262,11 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
     void CodegenLIR::emitIsNaN(Traits* result)
     {
-         int op1 = state->sp();
+        int op1 = state->sp();
         /* In practice, floats will be coerced to double before calling isNaN - so "singlePrecision" should be always false for now.
         But this is implemented as if isNaN was polymorphic - there's no reason why it won't eventually be polymorphic */
         bool singlePrecision = IFFLOAT(state->value(op1).traits == FLOAT_TYPE, false);
-        LIns *f = localGetf(op1, singlePrecision ? SINGLE_PRECISION : DOUBLE_PRECISION);
+        LIns *f = singlePrecision? localGetf(op1):localGetd(op1);
         if (isPromote(f->opcode())) {
             // Promoting an integer to a double cannot result in a NaN.
             localSet(op1-1, InsConst(0), result);
@@ -4332,7 +4338,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         BuiltinType bt = this->bt(state->value(argOffset).traits);
         int32_t btMask = 1 << bt;
         if (bt == BUILTIN_number) {
-            LIns *arg = localGetf(argOffset, DOUBLE_PRECISION);
+            LIns *arg = localGetd(argOffset);
             if (arg->isImmD()) {
                 int32_t intVal = (int32_t) arg->immD();
                 if ((double) intVal == arg->immD() && !MathUtils::isNegZero(arg->immD())) {
@@ -4355,7 +4361,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 btMask |= 1<< BUILTIN_float;
         }
         else if (bt == BUILTIN_float) {
-            LIns *arg = localGetf(argOffset, SINGLE_PRECISION);
+            LIns *arg = localGetf(argOffset);
             btMask |= 1 << BUILTIN_number;
             if (arg->isImmF()) {
                 int32_t intVal = (int32_t) arg->immF();
@@ -4387,7 +4393,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         BuiltinType oldBt = this->bt(state->value(argOffset).traits);
 
         if (oldBt == BUILTIN_number) {
-            LIns *arg = localGetf(argOffset, DOUBLE_PRECISION);
+            LIns *arg = localGetd(argOffset);
             if (newBt == BUILTIN_int) {
                 if (arg->isImmD())
                     return InsConst((int32_t)arg->immD());
@@ -4417,7 +4423,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             return arg;
         }
         else if (oldBt == BUILTIN_float) {
-            LIns *arg = localGetf(argOffset, SINGLE_PRECISION);
+            LIns *arg = localGetf(argOffset);
             if (newBt == BUILTIN_int) {
                 if (arg->isImmF())
                     return InsConst((int32_t)arg->immF());
@@ -4456,16 +4462,16 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_FLOAT
         case BUILTIN_number:
             AvmAssertMsg(false, "Case should be already handled; this means oldBt is not number, but newBt is Number!");
-            return localGetf(argOffset, DOUBLE_PRECISION);
+            return localGetd(argOffset);
         case BUILTIN_float:
             AvmAssertMsg(false, "Case should be already handled; this means oldBt is not float, but newBt is float!");
-            return localGetf(argOffset, SINGLE_PRECISION);
+            return localGetf(argOffset);
         case BUILTIN_float4:
             AvmAssertMsg(false, "Case should be already handled; this means oldBt is not float4, but newBt is float4!");
             return localGetf4(argOffset);
 #else
         case BUILTIN_number:
-            return localGetf(argOffset, DOUBLE_PRECISION);
+            return localGetd(argOffset);
 #endif // VMCFG_FLOAT
         case BUILTIN_boolean:
         case BUILTIN_int:
@@ -4486,12 +4492,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         { avmplus::NativeID::native_script_function_isNaN, 1, {BUILTIN_number, BUILTIN_none},   0, &CodegenLIR::emitIsNaN },
         /*could theoretically also add { avmplus::NativeID::native_script_function_isNaN, 1, {BUILTIN_float, BUILTIN_none},   0, &CodegenLIR::emitIsNaN }, */
 
-        { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_uint,   BUILTIN_none},   FUNCTIONID(String_charCodeAtFU), 0},
-        { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_int,    BUILTIN_none},   FUNCTIONID(String_charCodeAtFI), 0},
-        { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(String_charCodeAtFF), 0},
+        { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_uint,   BUILTIN_none},   FUNCTIONID(String_charCodeAtDU), 0},
+        { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_int,    BUILTIN_none},   FUNCTIONID(String_charCodeAtDI), 0},
+        { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(String_charCodeAtDD), 0},
         { avmplus::NativeID::String_AS3_charAt,            1, {BUILTIN_uint,   BUILTIN_none},   FUNCTIONID(String_charAtU), 0},
         { avmplus::NativeID::String_AS3_charAt,            1, {BUILTIN_int,    BUILTIN_none},   FUNCTIONID(String_charAtI), 0},
-        { avmplus::NativeID::String_AS3_charAt,            1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(String_charAtF), 0},
+        { avmplus::NativeID::String_AS3_charAt,            1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(String_charAtD), 0},
 
         { avmplus::NativeID::String_length_get,            0, {BUILTIN_none,   BUILTIN_none},   0, &CodegenLIR::emitStringLength},
 
@@ -4817,14 +4823,14 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             switch (rbt) {
 #ifdef VMCFG_FLOAT
             case BUILTIN_float: 
-                fid = FUNCTIONID(spfcalli);
+                fid = FUNCTIONID(fcalli);
                 break;
             case BUILTIN_float4: 
                 fid = FUNCTIONID(vfcalli);
                 break;
 #endif
             case BUILTIN_number:
-                fid = FUNCTIONID(fcalli);
+                fid = FUNCTIONID(dcalli);
                 break;
             case BUILTIN_int: case BUILTIN_uint: case BUILTIN_boolean:
                 fid = FUNCTIONID(icalli);
@@ -4839,14 +4845,14 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             switch (rbt) {
 #ifdef VMCFG_FLOAT
             case BUILTIN_float: 
-                fid = FUNCTIONID(spfcallimt);// TODO: Test this!!!
+                fid = FUNCTIONID(fcallimt);// TODO: Test this!!!
                 break;
             case BUILTIN_float4: 
                 fid = FUNCTIONID(vfcallimt);// TODO: Test this!!!
                 break;
 #endif
             case BUILTIN_number:
-                fid = FUNCTIONID(fcallimt);
+                fid = FUNCTIONID(dcallimt);
                 break;
             case BUILTIN_int: case BUILTIN_uint: case BUILTIN_boolean:
                 fid = FUNCTIONID(icallimt);
@@ -4946,7 +4952,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         // if storing to a pointer-typed slot, inline a WB
         Traits* slotType = tb->getSlotTraits(slot);
         FLOAT_ONLY( AvmAssert( slotType != NUMERIC_TYPE ) );
-        if (!slotType || !slotType->isMachineType() || slotType == OBJECT_TYPE )
+        if (!slotType || !slotType->isMachineType() || slotType == OBJECT_TYPE)
         {
             // slot type is Atom (for *, Object) or RCObject* (String, Namespace, or other user types)
             const CallInfo *wbAddr = FUNCTIONID(privateWriteBarrierRC);
@@ -5352,7 +5358,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 if (idxKind == VI_INT || idxKind == VI_UINT) {
                     emitInlineVectorWrite(objIndexOnStack, 
                                           index,
-                                          localGetf(valIndexOnStack, DOUBLE_PRECISION),
+                                          localGetd(valIndexOnStack),
                                           offsetof(DoubleVectorObject, m_list.m_data),
                                           offsetof(DataListHelper<double>::LISTDATA, len),
                                           offsetof(ListData<double>, entries),
@@ -5361,7 +5367,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                                           setDoubleVectorNativeHelpers[idxKind]);
                     return;
                 }
-                value = localGetf(valIndexOnStack,DOUBLE_PRECISION);
+                value = localGetd(valIndexOnStack);
                 setter = setDoubleVectorNativeHelpers[idxKind];
             }
             else {
@@ -5372,7 +5378,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_FLOAT
         else if (objType == VECTORFLOAT_TYPE) {
             if (valueType == FLOAT_TYPE) {
-                value = localGetf(valIndexOnStack,SINGLE_PRECISION);
+                value = localGetf(valIndexOnStack);
                 setter = setFloatVectorNativeHelpers[idxKind];
             }
             else {
@@ -5415,9 +5421,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         // Convert Number expression to int or uint if it is a promotion
         // from int or uint, or if it is a constant in range for int or uint.
         else if (*indexType == NUMBER_TYPE FLOAT_ONLY(|| *indexType == FLOAT_TYPE)) {
-            FLOAT_ONLY(bool singlePrecision = *indexType == FLOAT_TYPE);
-            ePrecision precision = IFFLOAT( singlePrecision?SINGLE_PRECISION:DOUBLE_PRECISION, DOUBLE_PRECISION);
-            index = localGetf(sp,precision);
+            bool singlePrecision = IFFLOAT(*indexType == FLOAT_TYPE,false);
+            index = singlePrecision ? localGetf(sp) : localGetd(sp);
             if (index->opcode() == LIR_i2d FLOAT_ONLY(|| index->opcode()== LIR_i2f)) {
                 FLOAT_ONLY(AvmAssert(singlePrecision == (index->opcode()==LIR_i2f)) );
                 *indexType = INT_TYPE;
@@ -5541,13 +5546,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             case OP_sf32:
             case OP_sf64:
             {
-#ifdef VMCFG_FLOAT
-                bool singlePrecision = state->value(sp-1).traits == FLOAT_TYPE;
-                ePrecision precision = singlePrecision?SINGLE_PRECISION:DOUBLE_PRECISION;
-#else
-                ePrecision precision = DOUBLE_PRECISION;
-#endif
-                LIns* svalue = localGetf(sp-1, precision);
+                bool singlePrecision = IFFLOAT(state->value(sp-1).traits == FLOAT_TYPE, false);
+                LIns* svalue = singlePrecision ? localGetf(sp-1) : localGetd(sp-1);
                 LIns* mopAddr = localGet(sp);
                 const MopsInfo& mi = kMopsStoreInfo[opcode-OP_si8];
             #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP
@@ -5726,9 +5726,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 const Traits*  vt = state->value(index).traits;
                 AvmAssert ( vt == result );
                 if( vt == NUMBER_TYPE )
-                    localSet(index, Ins(LIR_negd, localGetf(index,DOUBLE_PRECISION)), result);
+                    localSet(index, Ins(LIR_negd, localGetd(index)), result);
                 else if(vt==FLOAT_TYPE)
-                    localSet(index, Ins(LIR_negf, localGetf(index,SINGLE_PRECISION)), result);
+                    localSet(index, Ins(LIR_negf, localGetf(index)), result);
                 else if(vt==FLOAT4_TYPE)
                     localSet(index, Ins(LIR_negf4, localGetf4(index)), result);
                 else {
@@ -5736,7 +5736,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     emitNumericOp1( index, BasicLIREmitter(this, LIR_negd, FUNCTIONID(op_negate)) );
                 }
 #else
-                localSet(index, Ins(LIR_negd, localGetf(index)), result);
+                localSet(index, Ins(LIR_negd, localGetd(index)),result);
 #endif // VMCFG_FLOAT
                 break;
             }
@@ -5760,10 +5760,10 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 const Traits*  vt = state->value(index).traits;
                 AvmAssert(result==vt);
                 if( vt == NUMBER_TYPE ){
-                    addIns = binaryIns(LIR_addd, localGetf(index, DOUBLE_PRECISION), i2dIns(InsConst(incr)));
+                    addIns = binaryIns(LIR_addd, localGetd(index), i2dIns(InsConst(incr)));
                 }
                 else if( vt == FLOAT_TYPE ){
-                       addIns = binaryIns(LIR_addf, localGetf(index, SINGLE_PRECISION), InsConstFlt((float)incr));
+                       addIns = binaryIns(LIR_addf, localGetf(index), InsConstFlt((float)incr));
                 }
                 else if( vt == FLOAT4_TYPE ){
                     addIns = binaryIns(LIR_addf4, localGetf4(index), Ins(LIR_f2f4, InsConstFlt((float)incr)) );
@@ -5775,7 +5775,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 }
                 if(addIns) localSet(index, addIns,result);  // emitNumericOp1() does its own localSet
 #else
-                localSet(index, binaryIns(LIR_addd, localGetf(index), i2dIns(InsConst(incr))), result);
+                localSet(index, binaryIns(LIR_addd, localGetd(index), i2dIns(InsConst(incr))), result);
 #endif // VMCFG_FLOAT
                 break;
             }
@@ -5804,8 +5804,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 if(result ==FLOAT_TYPE){
                     AvmAssert(state->value(sp-1).traits == FLOAT_TYPE);
                     AvmAssert(state->value(sp).traits == FLOAT_TYPE);
-                    LIns* get1 = f2dIns(localGetf(sp-1,SINGLE_PRECISION));
-                    LIns* get2 = f2dIns(localGetf(sp,SINGLE_PRECISION));
+                    LIns* get1 = f2dIns(localGetf(sp-1));
+                    LIns* get2 = f2dIns(localGetf(sp));
                     LIns* out = callIns(FUNCTIONID(mod), 2,get1,get2);
                     localSet(sp-1,  d2fIns(out), result);
                 } else if(result == FLOAT4_TYPE){
@@ -5826,8 +5826,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 } else if(result == NUMBER_TYPE){
                     AvmAssert(state->value(sp-1).traits == NUMBER_TYPE);
                     AvmAssert(state->value(sp).traits == NUMBER_TYPE);
-                    LIns* get1= localGetf(sp-1,DOUBLE_PRECISION);
-                    LIns* get2 = localGetf(sp,DOUBLE_PRECISION);
+                    LIns* get1= localGetd(sp-1);
+                    LIns* get2 = localGetd(sp);
                     LIns* out = callIns(FUNCTIONID(mod), 2,get1,get2);
                     localSet(sp-1,  out, result);
                 } else {
@@ -5836,7 +5836,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 }
 #else
                 LIns* out = callIns(FUNCTIONID(mod), 2,
-                    localGetf(sp-1), localGetf(sp));
+                    localGetd(sp-1), localGetd(sp));
                 localSet(sp-1,  out, result);
 #endif // VMCFG_FLOAT
                 break;
@@ -5858,9 +5858,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 }
 
                 if(result ==FLOAT_TYPE){
-                    localSet(sp-1, binaryIns(opf, localGetf(sp-1,SINGLE_PRECISION), localGetf(sp,SINGLE_PRECISION)), result);
+                    localSet(sp-1, binaryIns(opf, localGetf(sp-1), localGetf(sp)), result);
                 } else if(result == NUMBER_TYPE){
-                    localSet(sp-1, binaryIns(opd, localGetf(sp-1,DOUBLE_PRECISION), localGetf(sp,DOUBLE_PRECISION)), result);
+                    localSet(sp-1, binaryIns(opd, localGetd(sp-1), localGetd(sp)), result);
                 } else if(result == FLOAT4_TYPE){
                     localSet(sp-1, binaryIns(opf4, localGetf4(sp-1), localGetf4(sp)), result);
                 } else {
@@ -5870,12 +5870,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #else
                 LOpcode op;
                 switch (opcode) {
-                default:
+                    default:
                     case OP_divide:     op = LIR_divd; break;
                     case OP_multiply:   op = LIR_muld; break;
                     case OP_subtract:   op = LIR_subd; break;
                 }
-                localSet(sp-1, binaryIns(op, localGetf(sp-1), localGetf(sp)), result);
+                localSet(sp-1, binaryIns(op, localGetd(sp-1), localGetd(sp)), result);
 #endif // VMCFG_FLOAT
                 break;
             }
@@ -6862,15 +6862,15 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     // to be the left-hand argument.  The swap parameter, if true, reverses this convention.
 
     static Specialization intCmpWithNumber[] = {
-        { FUNCTIONID(String_charCodeAtFI),    FUNCTIONID(String_charCodeAtIU) },
-        { FUNCTIONID(String_charCodeAtFU),    FUNCTIONID(String_charCodeAtIU) },
-        { FUNCTIONID(String_charCodeAtFF),    FUNCTIONID(String_charCodeAtIF) },
+        { FUNCTIONID(String_charCodeAtDI),    FUNCTIONID(String_charCodeAtIU) },
+        { FUNCTIONID(String_charCodeAtDU),    FUNCTIONID(String_charCodeAtIU) },
+        { FUNCTIONID(String_charCodeAtDD),    FUNCTIONID(String_charCodeAtID) },
         { 0, 0 }
     };
 
     LIns *CodegenLIR::optimizeIntCmpWithNumberCall(int callIndex, int otherIndex, LOpcode icmp, bool swap)
     {
-        LIns* numSide = localGetf(callIndex,DOUBLE_PRECISION);
+        LIns* numSide = localGetd(callIndex);
         const CallInfo *ci = numSide->callInfo();
 
         // Try to optimize charCodeAt to return an integer if possible. Because it can return NaN for
@@ -6884,7 +6884,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         // int < String.CharCodeAt  - zero or any positive integer constant
         // int <= String.CharCodeAt - any positive integer constant
 
-        if (ci == FUNCTIONID(String_charCodeAtFI) || ci == FUNCTIONID(String_charCodeAtFU) || ci == FUNCTIONID(String_charCodeAtFF)) {
+        if (ci == FUNCTIONID(String_charCodeAtDI) || ci == FUNCTIONID(String_charCodeAtDU) || ci == FUNCTIONID(String_charCodeAtDD)) {
 
             AvmAssert(numSide->opcode() == LIR_calld);
 
@@ -6913,7 +6913,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     static Specialization stringCmpWithString[] = {
         { FUNCTIONID(String_charAtI),    FUNCTIONID(String_charCodeAtII) },
         { FUNCTIONID(String_charAtU),    FUNCTIONID(String_charCodeAtIU) },
-        { FUNCTIONID(String_charAtF),    FUNCTIONID(String_charCodeAtIF) },
+        { FUNCTIONID(String_charAtD),    FUNCTIONID(String_charCodeAtID) },
         { 0, 0 }
     };
 
@@ -6921,7 +6921,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     {
         LIns* callSide = localGetp(callIndex);
         const CallInfo *ci = callSide->callInfo();
-        if (ci == FUNCTIONID(String_charAtI) || ci == FUNCTIONID(String_charAtU) || ci == FUNCTIONID(String_charAtF)) {
+        if (ci == FUNCTIONID(String_charAtI) || ci == FUNCTIONID(String_charAtU) || ci == FUNCTIONID(String_charAtD)) {
             LIns*  strSide = localGetp(otherIndex);
             if (!strSide->isImmP())
                 return NULL;
@@ -6966,8 +6966,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_FLOAT
         else if (lht == rht && lht == FLOAT_TYPE)
         {
-            LIns* lhs = localGetf(lhsi,SINGLE_PRECISION);
-            LIns* rhs = localGetf(rhsi,SINGLE_PRECISION);
+            LIns* lhs = localGetf(lhsi);
+            LIns* rhs = localGetf(rhsi);
             return binaryIns(getCmpFOpcode(fcmp), lhs, rhs);
         }
         else if( lht == FLOAT4_TYPE || rht == FLOAT4_TYPE){
@@ -6983,12 +6983,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         else if (lht && lht->isNumeric() && rht && rht->isNumeric())
         {
             // Comparing the result of a call returning a Number to another int value.
-            if (lht == NUMBER_TYPE && rht == INT_TYPE && localGetf(lhsi,DOUBLE_PRECISION)->opcode() == LIR_calld) {
+            if (lht == NUMBER_TYPE && rht == INT_TYPE && localGetd(lhsi)->opcode() == LIR_calld) {
                 LIns* result = optimizeIntCmpWithNumberCall(lhsi, rhsi, icmp, false);
                 if (result)
                     return result;
             }
-            if (rht == NUMBER_TYPE && lht == INT_TYPE && localGetf(rhsi,DOUBLE_PRECISION)->opcode() == LIR_calld) {
+            if (rht == NUMBER_TYPE && lht == INT_TYPE && localGetd(rhsi)->opcode() == LIR_calld) {
                 LIns* result = optimizeIntCmpWithNumberCall(rhsi, lhsi, icmp, true);
                 if (result)
                     return result;
@@ -7041,10 +7041,10 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             } else 
 #endif // VMCFG_FLOAT
             {
-                LIns* lhs =  promoteNumberIns(lht, lhsi);
-                LIns* rhs = promoteNumberIns(rht, rhsi);
-                return binaryIns(fcmp, lhs, rhs);
-            }
+            LIns* lhs = promoteNumberIns(lht, lhsi);
+            LIns* rhs = promoteNumberIns(rht, rhsi);
+            return binaryIns(fcmp, lhs, rhs);
+        }
         }
 
         if (lht == STRING_TYPE && rht == STRING_TYPE) {
@@ -7484,7 +7484,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     {
         if (t == NUMBER_TYPE)
         {
-            return localGetf(i,DOUBLE_PRECISION);
+            return localGetd(i);
         }
         if (t == INT_TYPE || t == BOOLEAN_TYPE)
         {
@@ -7492,7 +7492,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         }
         if (t != UINT_TYPE){
             AvmAssert( IFFLOAT( t == FLOAT_TYPE, false) );
-            FLOAT_ONLY(return f2dIns(localGetf(i,SINGLE_PRECISION));)
+            FLOAT_ONLY(return f2dIns(localGetf(i));)
         }
         return ui2dIns(localGet(i));
     }
@@ -7502,14 +7502,14 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     {
         if (t == FLOAT_TYPE)
         {
-            return localGetf(i,SINGLE_PRECISION);
+            return localGetf(i);
         }
         if (t == FLOAT4_TYPE)
         {
             return InsConstFlt(AvmCore::atomToFloat(core->kFltNaN));
         }
         if(t == NUMBER_TYPE)
-            return d2fIns(localGetf(i,DOUBLE_PRECISION));
+            return d2fIns(localGetd(i));
         if (t == INT_TYPE || t == BOOLEAN_TYPE)
         {
             return i2fIns(localGet(i));
