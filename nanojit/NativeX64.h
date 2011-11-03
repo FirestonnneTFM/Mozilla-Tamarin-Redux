@@ -69,9 +69,7 @@ namespace nanojit
 #define NJ_SOFTFLOAT_SUPPORTED          0
 #define NJ_DIVI_SUPPORTED               1
 #define RA_PREFERS_LSREG                1
-#ifdef VMCFG_FLOAT
 #define NJ_USES_IMMF4_POOL              1   // Note: doesn't use IMMD pool!
-#endif
 
     static const Register RAX = { 0 };      // 1st int return, # of sse varargs
     static const Register RCX = { 1 };      // 4th int arg
@@ -402,7 +400,7 @@ namespace nanojit
 
     #define DECLARE_PLATFORM_STATS()
     #define DECLARE_PLATFORM_REGALLOC()                                     \
-        const static Register argRegs[NumArgRegs], retRegs[1];
+        const static Register argRegs[NumArgRegs];
 
     #define DECLARE_PLATFORM_ASSEMBLER()                                    \
         const static Register argRegs[NumArgRegs], retRegs[1];              \
@@ -681,11 +679,10 @@ namespace nanojit
         void MOVSMI(Register base, int disp, int32_t imm16); \
         void MOVBMI(Register base, int disp, int32_t imm8); \
         void PSHUFD(Register l, Register r, int mode); \
-FLOAT_ONLY(\
         void asm_ptrarg(ArgType, LIns*, Register);\
         void asm_immf(Register r, uint32_t v, bool canClobberCCs);\
-        void asm_immf4(Register r, float4_t v, bool canClobberCCs);\
-)
+        void asm_immf4(Register r, float4_t v, bool canClobberCCs);
+
     const int LARGEST_UNDERRUN_PROT = 32;  // largest value passed to underrunProtect
 
     typedef uint8_t NIns;
