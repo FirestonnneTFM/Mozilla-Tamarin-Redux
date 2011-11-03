@@ -55,32 +55,32 @@
  * it is to trigger reaping.  Even so this test could be thwarted
  * if the GC is running at the time a reap should have been triggered.
  */
-package 
+package
 {
     import avmplus.*;
 
     function fib(n, pp) {
-		var p = {};
-		if (n < 2)
-			return p;
-		else {
-			p.x = fib(n-1, p);
-			p.y = fib(n-2, p);
-			return p;
-		}
+                var p = {};
+                if (n < 2)
+                        return p;
+                else {
+                        p.x = fib(n-1, p);
+                        p.y = fib(n-2, p);
+                        return p;
+                }
     }
     var then = new Date();
     var res = new Array();
     var tmp = new Array();
     var i;
     for ( i=0 ; i < 500 ; i++ )
-		tmp[i] = {};
+                tmp[i] = {};
     for ( i=0 ; i < 21 ; i++ )
-		res[i] = fib(20, null);
+                res[i] = fib(20, null);
     for ( i=0 ; i < 21 ; i++ )
-		res[i] = null;
+                res[i] = null;
     for ( i=0 ; i < 500 ; i++ )
-		tmp[i] = null;
+                tmp[i] = null;
     var now = new Date();
     print("metric time " + (now - then));
 }

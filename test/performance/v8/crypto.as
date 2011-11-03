@@ -80,7 +80,7 @@ package crypto {
         default:
           trace('Error: no am value is set');
       }
-    }   
+    }
     
     // (public) alternate constructor
     // bnpFromNumber
@@ -90,7 +90,7 @@ package crypto {
         if(a < 2) this.fromInt(1);
         else {
           this.fromNumber(a,c);
-          if(!this.testBit(a-1))	// force MSB set
+          if(!this.testBit(a-1))        // force MSB set
             this.bitwiseTo(BigInteger.ONE.shiftLeft(a-1),op_or,this);
           if(this.isEven()) this.dAddOffset(1,0); // force odd
           while(!this.isProbablePrime(b)) {
@@ -215,10 +215,10 @@ package crypto {
       BigInteger.ONE = nbv(1);
     }
       // return bigint initialized to value
-    public static function nbv(i) { 
-      var r = nbi(); 
-      r.fromInt(i); 
-      return r; 
+    public static function nbv(i) {
+      var r = nbi();
+      r.fromInt(i);
+      return r;
     }
     
     // return new, unset BigInteger
@@ -227,7 +227,7 @@ package crypto {
     }
 
     public function int2char(n) {
-      return BI_RM.charAt(n); 
+      return BI_RM.charAt(n);
     }
     
     public function intAt(s,i) {
@@ -240,7 +240,7 @@ package crypto {
     // (public) return x s.t. r^x < DV
     // bnpChunkSize
     public function chunkSize(r) {
-      return Math.floor(Math.LN2*BI_DB/Math.log(r)); 
+      return Math.floor(Math.LN2*BI_DB/Math.log(r));
     }
     
     // (public) convert to radix string
@@ -448,9 +448,9 @@ package crypto {
     // (public)
     // bnClone
     public function clone() {
-      var r = nbi(); 
-      this.copyTo(r); 
-      return r; 
+      var r = nbi();
+      this.copyTo(r);
+      return r;
     }
     
     
@@ -521,7 +521,7 @@ package crypto {
     
     // bnEquals
     public function equals(a) {
-      return(this.compareTo(a)==0); 
+      return(this.compareTo(a)==0);
     }
     
     // bnMin
@@ -531,7 +531,7 @@ package crypto {
     
     // bnMax
     public function max(a) {
-      return(this.compareTo(a)>0)?this:a; 
+      return(this.compareTo(a)>0)?this:a;
     }
     
     
@@ -540,18 +540,18 @@ package crypto {
     private function op_and(x,y) { return x&y; }
     // bnAnd
     public function and(a) {
-      var r = nbi(); 
-      this.bitwiseTo(a,op_and,r); 
+      var r = nbi();
+      this.bitwiseTo(a,op_and,r);
       return r;
     }
     
     // (public) this | a
     public function op_or(x,y) { return x|y; }
     // bnOr
-    public function or(a) { 
+    public function or(a) {
       var r = nbi();
       this.bitwiseTo(a,op_or,r);
-      return r; 
+      return r;
     }
     
     // (public) this ^ a
@@ -560,16 +560,16 @@ package crypto {
     public function xor(a) {
       var r = nbi();
       this.bitwiseTo(a,op_xor,r);
-      return r; 
+      return r;
     }
     
     // (public) this & ~a
     public function op_andnot(x,y) { return x&~y; }
     // bnAndNot
-    public function andNot(a) { 
-      var r = nbi(); 
-      this.bitwiseTo(a,op_andnot,r); 
-      return r; 
+    public function andNot(a) {
+      var r = nbi();
+      this.bitwiseTo(a,op_andnot,r);
+      return r;
     }
     
     // (public) ~this
@@ -661,7 +661,7 @@ package crypto {
     
     // (public) this + a
     // bnAdd
-    public function add(a) { 
+    public function add(a) {
       var r = nbi();
       this.addTo(a,r);
       return r;
@@ -669,7 +669,7 @@ package crypto {
     
     // (public) this - a
     // bnSubtract
-    public function subtract(a) { 
+    public function subtract(a) {
       var r = nbi();
       this.subTo(a,r);
       return r;
@@ -677,7 +677,7 @@ package crypto {
     
     // (public) this * a
     // bnMultiply
-    public function multiply(a) { 
+    public function multiply(a) {
       var r = nbi();
       this.multiplyTo(a,r);
       return r;
@@ -813,16 +813,16 @@ package crypto {
     
     // (public) -this
     // bnNegate
-    public function negate() { 
-      var r = nbi(); 
-      BigInteger.ZERO.subTo(this,r); 
+    public function negate() {
+      var r = nbi();
+      BigInteger.ZERO.subTo(this,r);
       return r;
     }
     
     // (public) |this|
     // bnAbs
-    public function abs() { 
-      return (this.s<0)?this.negate():this; 
+    public function abs() {
+      return (this.s<0)?this.negate():this;
     }
     
     // (public) return + if this > a, - if this < a, 0 if equal
@@ -1013,7 +1013,7 @@ package crypto {
       if(r == null) r = nbi();
       var y= nbi(), ts = this.s, ms = m.s;
       var pm_array = pm.array;
-      var nsh = BI_DB-nbits(pm_array[pm.t-1]);	// normalize modulus
+      var nsh = BI_DB-nbits(pm_array[pm.t-1]);  // normalize modulus
       if(nsh > 0) { pm.lShiftTo(nsh,y); pt.lShiftTo(nsh,r); }
       else { pm.copyTo(y); pt.copyTo(r); }
       var ys = y.t;
@@ -1032,12 +1032,12 @@ package crypto {
         r.subTo(t,r);
       }
       BigInteger.ONE.dlShiftTo(ys,t);
-      t.subTo(y,y);	// "negative" y so we can replace sub with am later
+      t.subTo(y,y);     // "negative" y so we can replace sub with am later
       while(y.t < ys) y_array[y.t++] = 0;
       while(--j >= 0) {
         // Estimate quotient digit
         var qd = (r_array[--i]==y0)?BI_DM:Math.floor(r_array[i]*d1+(r_array[i-1]+e)*d2);
-        if((r_array[i]+=y.am(0,qd,r,j,0,ys)) < qd) {	// Try it out
+        if((r_array[i]+=y.am(0,qd,r,j,0,ys)) < qd) {    // Try it out
           y.dlShiftTo(j,t);
           r.subTo(t,r);
           while(r_array[i] < --qd) r.subTo(t,r);
@@ -1049,7 +1049,7 @@ package crypto {
       }
       r.t = ys;
       r.clamp();
-      if(nsh > 0) r.rShiftTo(nsh,r);	// Denormalize remainder
+      if(nsh > 0) r.rShiftTo(nsh,r);    // Denormalize remainder
       if(ts < 0) BigInteger.ZERO.subTo(r,r);
     }
     
@@ -1078,13 +1078,13 @@ package crypto {
       if(this.t < 1) return 0;
       var x = this_array[0];
       if((x&1) == 0) return 0;
-      var y = x&3;		// y == 1/x mod 2^2
-      y = (y*(2-(x&0xf)*y))&0xf;	// y == 1/x mod 2^4
-      y = (y*(2-(x&0xff)*y))&0xff;	// y == 1/x mod 2^8
-      y = (y*(2-(((x&0xffff)*y)&0xffff)))&0xffff;	// y == 1/x mod 2^16
+      var y = x&3;              // y == 1/x mod 2^2
+      y = (y*(2-(x&0xf)*y))&0xf;        // y == 1/x mod 2^4
+      y = (y*(2-(x&0xff)*y))&0xff;      // y == 1/x mod 2^8
+      y = (y*(2-(((x&0xffff)*y)&0xffff)))&0xffff;       // y == 1/x mod 2^16
       // last step - calculate inverse mod DV directly;
       // assumes 16 < DB <= 32 and assumes ability to handle 48-bit ints
-      y = (y*(2-x*y%BI_DV))%BI_DV;		// y == 1/x mod 2^dbits
+      y = (y*(2-x*y%BI_DV))%BI_DV;              // y == 1/x mod 2^dbits
       // we really want the negative inverse, and -DV < y < DV
       return (y>0)?BI_DV-y:-y;
     }
@@ -1120,8 +1120,8 @@ package crypto {
   
     // (public) this^e
     // bnPow
-    public function pow(e) { 
-      return this.exp(e,new NullExp()); 
+    public function pow(e) {
+      return this.exp(e,new NullExp());
     }
     
     // (public) this^e % m (HAC 14.85)
@@ -1167,7 +1167,7 @@ package crypto {
         n = k;
         while((w&1) == 0) { w >>= 1; --n; }
         if((i -= n) < 0) { i += BI_DB; --j; }
-        if(is1) {	// ret == 1, don't bother squaring or multiplying it
+        if(is1) {       // ret == 1, don't bother squaring or multiplying it
           g[w].copyTo(r);
           is1 = false;
         }
@@ -1287,7 +1287,7 @@ package crypto {
     // A "null" reducer
     public function NullExp() {}
     // nNop
-    public function convert(x) { 
+    public function convert(x) {
       return x;
     }
     public function revert(x) {
@@ -1329,13 +1329,13 @@ package crypto {
     public function reduce(x) { x.divRemTo(this.m,null,x); }
     // cMulTo
     public function mulTo(x,y,r) {
-      x.multiplyTo(y,r); 
+      x.multiplyTo(y,r);
       this.reduce(r);
     }
     // cSqrTo
     public function sqrTo(x,r) {
-      x.squareTo(r); 
-      this.reduce(r); 
+      x.squareTo(r);
+      this.reduce(r);
     }
   } // class Classic
   
@@ -1396,8 +1396,8 @@ package crypto {
     
     // r = "xy/R mod m"; x,y != r
     public function mulTo(x,y,r) {
-      x.multiplyTo(y,r); 
-      this.reduce(r); 
+      x.multiplyTo(y,r);
+      this.reduce(r);
     }
 
   } // class Montgomery
@@ -1535,7 +1535,7 @@ public class SecureRandom {
   // rng_get_bytes
   public function nextBytes(ba) {
     var i;
-    for(i = 0; i < ba.length; ++i) 
+    for(i = 0; i < ba.length; ++i)
       ba[i] = rng_get_byte();
       
   }
@@ -1798,7 +1798,7 @@ public class RSAKey {
     return pkcs1unpad2(m, (this.n.bitLength()+7)>>3);
   }
   
-} // class RSAKey 
+} // class RSAKey
 
 
 var nValue="a5261939975948bb7a58dffe5ff54e65f0498f9175f5a09288810b8975871e99af3b5dd94057b0fc07535f5f97444504fa35169d461d0d30cf0192e307727c065168c788771c561a9400fb49175e9e6aa4e23fe11af69e9412dd23b0cb6684c4c2429bce139e848ab26d0829073351f4acd36074eafd036a5eb83359d2a698d3";
@@ -1844,7 +1844,7 @@ function decrypt() {
 }
 
 // if running individually, start the Benchmark suite.
-try { 
+try {
   runSuite
 } catch (e:ReferenceError) {
   BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,

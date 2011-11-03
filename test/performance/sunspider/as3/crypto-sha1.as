@@ -20,7 +20,7 @@
  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
@@ -227,7 +227,7 @@ function binb2b64(binarray:Array):String
 }
 
 
-if (CONFIG::desktop) 
+if (CONFIG::desktop)
     var start:Number = new Date();
 else // mobile
     var start:int = getTimer();
@@ -252,7 +252,7 @@ for (var i:int = 0; i <4; i++) {
 }
 
 var sha1Output:String = hex_sha1(plainText);
-if (CONFIG::desktop) 
+if (CONFIG::desktop)
     var totaltime:Number = new Date() - start;
 else // mobile
     var totaltime:int = getTimer() - start;

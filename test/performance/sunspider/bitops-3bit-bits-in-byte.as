@@ -20,7 +20,7 @@
  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 // Copyright (c) 2004 by Arthur Langereis (arthur_ext at domain xfinitegames, tld com
 // 1 op = 6 ANDs, 3 SHRs, 3 SHLs, 4 assigns, 2 ADDs
@@ -49,7 +49,7 @@ addr3,r3,r10
 function TimeFunc(func) {
 var x, y, t;
 for(var x=0; x<500; x++)
- for(var y=0; y<256; y++) 
+ for(var y=0; y<256; y++)
   res=func(y);
 return res;
 }

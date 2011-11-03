@@ -13,7 +13,7 @@ include "scimarkutil/Matrix.as";
 
 
 */
-public class LU 
+public class LU
 {
     /**
         Returns a <em>copy</em> of the compact LU factorization.
@@ -27,14 +27,14 @@ public class LU
     */
 
 
-	public static  function num_flops(N:uint):Number
-	{
-		// rougly 2/3*N^3
+        public static  function num_flops(N:uint):Number
+        {
+                // rougly 2/3*N^3
 
-		var Nd:Number =  N;
+                var Nd:Number =  N;
 
-		return (2.0 * Nd *Nd *Nd/ 3.0);
-	}
+                return (2.0 * Nd *Nd *Nd/ 3.0);
+        }
 
      static function new_copyN( x:Array):Array
     {
@@ -52,8 +52,8 @@ public class LU
         var N = A[0].length;
 
         var T:Array = new Array(M);
-		for(var i:Number=0; i<M; i++)
-			T[i] = new Array(N);
+                for(var i:Number=0; i<M; i++)
+                        T[i] = new Array(N);
 
         for (i=0; i<M; i++)
         {
@@ -82,22 +82,22 @@ public class LU
         var M:uint = A.length;
         var N:uint = A[0].length;
 
-		var remainder = N & 3;		 // N mod 4;
+                var remainder = N & 3;           // N mod 4;
 
         for (var i=0; i<M; i++)
         {
             var Bi:Array = B[i];
             var Ai:Array = A[i];
-			for (var j:Number=0; j<remainder; j++)
+                        for (var j:Number=0; j<remainder; j++)
                 Bi[j] = Ai[j];
             for (j=remainder; j<N; j+=4)
-			{
-				Bi[j] = Ai[j];
-				Bi[j+1] = Ai[j+1];
-				Bi[j+2] = Ai[j+2];
-				Bi[j+3] = Ai[j+3];
-			}
-		}
+                        {
+                                Bi[j] = Ai[j];
+                                Bi[j+1] = Ai[j+1];
+                                Bi[j+2] = Ai[j+2];
+                                Bi[j+3] = Ai[j+3];
+                        }
+                }
         
     }
     public function getLU():Array
@@ -131,8 +131,8 @@ public class LU
 
         //if ( LU_ == null || LU_.length != M || LU_[0].length != N)
         LU_ = new Array(M);
-		for(var i:Number=0; i<M; i++)
-			LU_[i] = new Array(N);
+                for(var i:Number=0; i<M; i++)
+                        LU_[i] = new Array(N);
 
 
         insert_copy(LU_, A);
@@ -198,10 +198,10 @@ public static function factor(A:Array,  pivot:Array):uint
         
         pivot[j] = jp;
 
-        // jp now has the index of maximum element 
+        // jp now has the index of maximum element
         // of column j, below the diagonal
 
-        if ( A[jp][j] == 0 )                 
+        if ( A[jp][j] == 0 )
             return 1;       // factorization failed because of zero pivot
 
 
@@ -255,7 +255,7 @@ public static function factor(A:Array,  pivot:Array):uint
             in LU form.
 
 
-        @param LU (in) the factored matrix in LU form. 
+        @param LU (in) the factored matrix in LU form.
         @param pivot (in) the pivot vector which lists
             the reordering used during the factorization
             stage.
@@ -277,7 +277,7 @@ public static function factor(A:Array,  pivot:Array):uint
             if (ii==0)
                 for (var j:uint=ii; j<i; j++)
                     sum -= LU[i][j] * b[j];
-            else 
+            else
                 if (sum == 0.0)
                     ii = i;
             b[i] = sum;
@@ -290,7 +290,7 @@ public static function factor(A:Array,  pivot:Array):uint
                 sum -= LU[i][j] * b[j];
             b[i] = sum / LU[i][i];
         }
-    }               
+    }
 
 
     private var LU_:Array;
