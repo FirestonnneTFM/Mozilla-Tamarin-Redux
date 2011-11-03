@@ -83,7 +83,7 @@ function CalcNormal(V0:Array, V1:Array, V2:Array):Array {
     B[i] = V2[i] - V1[i];
   }
   A = CalcCross(A, B);
-  var Length = Math.sqrt(A[0]*A[0] + A[1]*A[1] + A[2]*A[2]); 
+  var Length = Math.sqrt(A[0]*A[0] + A[1]*A[1] + A[2]*A[2]);
   for (i = 0; i < 3; i++) A[i] = A[i] / Length;
   A[3] = 1;
   return A;
@@ -181,7 +181,7 @@ function RotateZ(M:Array, Phi:Number):Array {
   var R:Array = [
   [Cos,-Sin,0,0],
   [Sin,Cos,0,0],
-  [0,0,1,0],   
+  [0,0,1,0],
   [0,0,0,1]
   ];
   return MMulti(R, M);

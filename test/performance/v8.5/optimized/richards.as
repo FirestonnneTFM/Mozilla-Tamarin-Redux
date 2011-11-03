@@ -562,7 +562,7 @@ package richards {
     public class Packet {
         public var link:Packet;
         public var id:int;
-        public var kind:int; 
+        public var kind:int;
         public var a1:int;
         public var a2:Vector.<int>;
 

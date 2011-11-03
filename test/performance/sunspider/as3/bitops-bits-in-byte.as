@@ -20,7 +20,7 @@
  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 // Copyright (c) 2004 by Arthur Langereis (arthur_ext at domain xfinitegames, tld com)
@@ -29,21 +29,21 @@
 // 1 op = 2 assigns, 16 compare/branches, 8 ANDs, (0-8) ADDs, 8 SHLs
 // O(n)
 package {
-	function bitsinbyte(b:int):int {
-	var m:int = 1, c:int = 0;
-	while(m<0x100) {
-	if(b & m) c++;
-	m <<= 1;
-	}
-	return c;
-	}
+        function bitsinbyte(b:int):int {
+        var m:int = 1, c:int = 0;
+        while(m<0x100) {
+        if(b & m) c++;
+        m <<= 1;
+        }
+        return c;
+        }
 
-	function TimeFunc(func:Function):int {
-	var res:int, x:int, y:int, t:int;
-	for(x=0; x<350; x++)
-	for(y=0; y<256; y++) res=func(y);
+        function TimeFunc(func:Function):int {
+        var res:int, x:int, y:int, t:int;
+        for(x=0; x<350; x++)
+        for(y=0; y<256; y++) res=func(y);
         return res;
-	}
+        }
 
     if (CONFIG::desktop) {
         var start:Number = new Date();
@@ -55,9 +55,9 @@ package {
         var res:int = TimeFunc(bitsinbyte);
         var totaltime:int = getTimer() - start;
     }
-	print("bitsinbyte()="+res);
-	if (res==8)
-   	    print("metric time " + totaltime);
-	else
+        print("bitsinbyte()="+res);
+        if (res==8)
+            print("metric time " + totaltime);
+        else
             print("error bitsinbyte() expected 8 got "+res);
 }

@@ -156,38 +156,38 @@
 
   /*
    * dgefa factors a double precision matrix by gaussian elimination.
-   * 
+   *
    * dgefa is usually called by dgeco, but it can be called directly with a
    * saving in time if rcond is not needed. (time for dgeco) = (1 + 9/n)*(time
    * for dgefa) .
-   * 
+   *
    * on entry
-   * 
+   *
    * a double precision[n][lda] the matrix to be factored.
-   * 
+   *
    * lda integer the leading dimension of the array a .
-   * 
+   *
    * n integer the order of the matrix a .
-   * 
+   *
    * on return
-   * 
+   *
    * a an upper triangular matrix and the multipliers which were used to
    * obtain it. the factorization can be written a = l*u where l is a product
    * of permutation and unit lower triangular matrices and u is upper
    * triangular.
-   * 
+   *
    * ipvt integer[n] an integer vector of pivot indices.
-   * 
+   *
    * info integer = 0 normal value. = k if u[k][k] .eq. 0.0 . this is not an
    * error condition for this subroutine, but it does indicate that dgesl or
    * dgedi will divide by zero if called. use rcond in dgeco for a reliable
    * indication of singularity.
-   * 
+   *
    * linpack. this version dated 08/14/78. cleve moler, university of new
    * mexico, argonne national lab.
-   * 
+   *
    * functions
-   * 
+   *
    * blas daxpy,dscal,idamax
    */
   function dgefa(a:Vector.<Vector.<Number>>,  lda:int,  n:int,  ipvt:Vector.<int>) {
@@ -253,43 +253,43 @@
   /*
    * dgesl solves the double precision system a * x = b or trans(a) * x = b
    * using the factors computed by dgeco or dgefa.
-   * 
+   *
    * on entry
-   * 
+   *
    * a double precision[n][lda] the output from dgeco or dgefa.
-   * 
+   *
    * lda integer the leading dimension of the array a .
-   * 
+   *
    * n integer the order of the matrix a .
-   * 
+   *
    * ipvt integer[n] the pivot vector from dgeco or dgefa.
-   * 
+   *
    * b double precision[n] the right hand side vector.
-   * 
+   *
    * job integer = 0 to solve a*x = b , = nonzero to solve trans(a)*x = b
    * where trans(a) is the transpose.
-   * 
+   *
    * on return
-   * 
+   *
    * b the solution vector x .
-   * 
+   *
    * error condition
-   * 
+   *
    * a division by zero will occur if the input factor contains a zero on the
    * diagonal. technically this indicates singularity but it is often caused
    * by improper arguments or improper setting of lda . it will not occur if
    * the subroutines are called correctly and if dgeco has set rcond .gt. 0.0
    * or dgefa has set info .eq. 0 .
-   * 
+   *
    * to compute inverse(a) * c where c is a matrix with p columns
    * dgeco(a,lda,n,ipvt,rcond,z) if (!rcond is too small){ for (j=0,j<p,j++)
    * dgesl(a,lda,n,ipvt,c[j][0],0); }
-   * 
+   *
    * linpack. this version dated 08/14/78 . cleve moler, university of new
    * mexico, argonne national lab.
-   * 
+   *
    * functions
-   * 
+   *
    * blas daxpy,ddot
    */
   function dgesl(a:Vector.<Vector.<Number>>,  lda:int,  n:int,  ipvt:Vector.<int>,  b:Vector.<Number>, job:int):void {
@@ -490,7 +490,7 @@
 
   /*
    * estimate unit roundoff in quantities of size x.
-   * 
+   *
    * this program should function properly on all systems satisfying the
    * following two assumptions, 1. the base used in representing dfloating
    * point numbers is not a power of three. 2. the quantity a in statement 10
@@ -502,21 +502,21 @@
    * equal to one, eps measures the separation of 1.0 from the next larger
    * dfloating point number. the developers of eispack would appreciate being
    * informed about any systems where these assumptions do not hold.
-   * 
+   *
    * **************************************************************** this
    * routine is one of the auxiliary routines used by eispack iii to avoid
    * machine dependencies.
    * ****************************************************************
-   * 
+   *
    * this version dated 4/6/83.
    */
-  function epslon(x:Number):Number 
+  function epslon(x:Number):Number
   {
     var a:Number, b:Number, c:Number, eps:Number;
 
     a = 4.0e0 / 3.0e0;
     eps = 0;
-    while (eps == 0) 
+    while (eps == 0)
     {
       b = a - 1.0;
       c = b + b + b;
@@ -528,21 +528,21 @@
 
   /*
    * purpose: multiply matrix m times vector x and add the result to vector y.
-   * 
+   *
    * parameters:
-   * 
+   *
    * n1 integer, number of elements in vector y, and number of rows in matrix
    * m
-   * 
+   *
    * y double [n1], vector of length n1 to which is added the product m*x
-   * 
+   *
    * n2 integer, number of elements in vector x, and number of columns in
    * matrix m
-   * 
+   *
    * ldm integer, leading dimension of array m
-   * 
+   *
    * x double [n2], vector of length n2
-   * 
+   *
    * m double [ldm][n2], matrix of n1 rows and n2 columns
    */
   function dmxpy( n1:int,  y:Vector.<Number>,  n2:int,  ldm:int,  x:Vector.<Number>,  m:Vector.<Vector.<Number>>):void {

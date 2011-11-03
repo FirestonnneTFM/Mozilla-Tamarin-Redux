@@ -92,7 +92,7 @@ var ITERS = 100;
     }
 
     function JGFtidyup() {
-    	print("tidyup");
+        print("tidyup");
 
         one = null;
     }
@@ -111,7 +111,7 @@ var ITERS = 100;
     function initialise() {
 
         /* Parameter determination */
-		print("inside initialise");
+                print("inside initialise");
         mm = datasizes[size];
         PARTSIZE = mm * mm * mm * 4;
         mdsize = PARTSIZE;
@@ -133,17 +133,17 @@ var ITERS = 100;
         vaverh = vaver * h;
         
         /* Particle Generation */
-		print("particle generation");
+                print("particle generation");
         ijk = 0;
         var loopLimit = 1;
         for (lg = 0; lg <= loopLimit; lg++) {
             for (i = 0; i < mm; i++) {
                 for (j = 0; j < mm; j++) {
                     for (k = 0; k < mm; k++) {
-                    	one[ijk].setValues((i * a + lg * a * 0.5),
+                        one[ijk].setValues((i * a + lg * a * 0.5),
                                 (j * a + lg * a * 0.5), (k * a), 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0);       
-                        ijk = ijk + 1;                       
+                                0.0, 0.0, 0.0);
+                        ijk = ijk + 1;
                     }
                 }
             }
@@ -155,7 +155,7 @@ var ITERS = 100;
                     for (k = 0; k < mm; k++) {
                         one[ijk].setValues((i * a + (2 - lg) * a * 0.5),
                                 (j * a + (lg - 1) * a * 0.5),
-                                (k * a + a * 0.5), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);                              
+                                (k * a + a * 0.5), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
                         ijk = ijk + 1;
                     }
                 }
@@ -163,7 +163,7 @@ var ITERS = 100;
         }
 
         /* Initialise velocities */
-		print("initialize velocities");
+                print("initialize velocities");
         iseed = 0;
         v1 = 0.0;
         v2 = 0.0;
@@ -242,7 +242,7 @@ var ITERS = 100;
     }
 
     function runiters() {
-    	print("in run iterations");
+        print("in run iterations");
         move = 0;
         for (move = 0; move < movemx; move++) {
 
@@ -255,15 +255,15 @@ var ITERS = 100;
 
             epot = 0.0;
             vir = 0.0;
-			one[0].force(0,1,2,3);
+                        one[0].force(0,1,2,3);
             for (i = 0; i < mdsize; i++) {
-            	//print("i: " + i + ", side: " + side + ", rcoff: " + rcoff + ", mdsize: " + mdsize);
+                //print("i: " + i + ", side: " + side + ", rcoff: " + rcoff + ", mdsize: " + mdsize);
                 one[i].force(side, rcoff, mdsize, i); /* compute forces */
             }
 
             sum = 0.0;
             for (i = 0; i < mdsize; i++) {
-            	//print(i);
+                //print(i);
                 sum = sum + one[i].mkekin(hsq2); /*
                                                      * scale forces, update
                                                      * velocities
@@ -489,7 +489,7 @@ class particle {
             yvelocity = yvelocity * sc;
             zvelocity = zvelocity * sc;
         }
-	}
+        }
 
     class random {
 
@@ -549,7 +549,7 @@ class particle {
             return r;
 
         }
-	}
+        }
     if (CONFIG::desktop) {
         var start = new Date();
         JGFrun(0);
@@ -560,5 +560,5 @@ class particle {
         JGFrun(3);
         var elapsed = getTimer() - start;
     }
-	print("metric time "+elapsed);
+        print("metric time "+elapsed);
 

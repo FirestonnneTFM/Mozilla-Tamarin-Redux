@@ -20,7 +20,7 @@
  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
@@ -279,7 +279,7 @@ function binl2b64(binarray:Array):String
   return str;
 }
 
-if (CONFIG::desktop) 
+if (CONFIG::desktop)
     var start:Number = new Date();
 else // mobile
     var start:int = getTimer();
@@ -313,7 +313,7 @@ for (var i:int = 0; i <4; i++) {
 }
 
 var md5Output:String = hex_md5(plainText);
-if (CONFIG::desktop) 
+if (CONFIG::desktop)
     var totaltime:Number = new Date() - start;
 else // mobile
     var totaltime:int = getTimer() - start;

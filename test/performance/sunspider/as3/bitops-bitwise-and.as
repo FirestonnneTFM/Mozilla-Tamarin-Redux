@@ -20,7 +20,7 @@
  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
@@ -45,13 +45,13 @@
  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package {
-	function runBitopsBitwiseAnd():int {
-	  var bitwiseAndValue:int = 4294967296;
-	  for (var i:int = 0; i < 600000; i++)
-	    bitwiseAndValue = bitwiseAndValue & i;
+        function runBitopsBitwiseAnd():int {
+          var bitwiseAndValue:int = 4294967296;
+          for (var i:int = 0; i < 600000; i++)
+            bitwiseAndValue = bitwiseAndValue & i;
           return bitwiseAndValue;
         }
         if (CONFIG::desktop) {
@@ -65,7 +65,7 @@ package {
             var totaltime:Number = getTimer() - start;
         }
         if (res==0)
-  	  print("metric time " + totaltime);
+          print("metric time " + totaltime);
         else
           print("error bitwiseAnd() expecting 0 got "+res);
 

@@ -6,7 +6,7 @@ include "scimarkutil/Random.as";
 
  How: generate N random numbers in the unit square, (0,0) to (1,1)
  and see how are within a radius of 1 or less, i.e.
- <pre>  
+ <pre>
 
  sqrt(x^2 + y^2) < r
 
@@ -20,11 +20,11 @@ include "scimarkutil/Random.as";
   </pre>
   this area under the curve is (Pi * r^2)/ 4.0,
   and the area of the unit of square is 1.0,
-  so Pi can be approximated by 
+  so Pi can be approximated by
   <pre>
-		        # points with x^2+y^2 < 1
-     Pi =~ 		--------------------------  * 4.0
-		             total # points
+                        # points with x^2+y^2 < 1
+     Pi =~              --------------------------  * 4.0
+                             total # points
 
   </pre>
 
@@ -32,36 +32,36 @@ include "scimarkutil/Random.as";
 
 public class MonteCarlo
 {
-	 static var SEED:uint = 113;
+         static var SEED:uint = 113;
 
-	public static  function num_flops(Num_samples:uint):Number
-	{
-		// 3 flops in x^2+y^2 and 1 flop in random routine
+        public static  function num_flops(Num_samples:uint):Number
+        {
+                // 3 flops in x^2+y^2 and 1 flop in random routine
 
-		return (Num_samples)* 4.0;
+                return (Num_samples)* 4.0;
 
-	}
+        }
 
-	
+        
 
-	public static  function integrate(Num_samples:uint):Number
-	{
+        public static  function integrate(Num_samples:uint):Number
+        {
 
-		var R:Random = new Random(SEED, 0, 1);
+                var R:Random = new Random(SEED, 0, 1);
 
-		var under_curve:uint = 0;
-		for (var count:Number=0; count<Num_samples; count++)
-		{
-			var x:Number = R.nextDouble();
-			var y:Number = R.nextDouble();
+                var under_curve:uint = 0;
+                for (var count:Number=0; count<Num_samples; count++)
+                {
+                        var x:Number = R.nextDouble();
+                        var y:Number = R.nextDouble();
 
-			if ( x*x + y*y <= 1.0)
-				 under_curve ++;
-			
-		}
+                        if ( x*x + y*y <= 1.0)
+                                 under_curve ++;
+                        
+                }
 
-		return (under_curve / Num_samples) * 4.0;
-	}
+                return (under_curve / Num_samples) * 4.0;
+        }
 
 
 }

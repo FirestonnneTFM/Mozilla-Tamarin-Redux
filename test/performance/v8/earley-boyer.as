@@ -24,23 +24,23 @@ var EarleyBoyer = new BenchmarkSuite('EarleyBoyer', 765819, [
  * a DIV.
 function initRuntime() {
     function escapeHTML(s) {
-	var tmp = s;
-	tmp = tmp.replace(/&/g, "&amp;");
-	tmp = tmp.replace(/</g, "&lt;");
-	tmp = tmp.replace(/>/g, "&gt;");
-	tmp = tmp.replace(/ /g, "&nbsp;");
-	tmp = tmp.replace(/\n/g, "<br />");
-	tmp = tmp.replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp");
-	return tmp;
-	
+        var tmp = s;
+        tmp = tmp.replace(/&/g, "&amp;");
+        tmp = tmp.replace(/</g, "&lt;");
+        tmp = tmp.replace(/>/g, "&gt;");
+        tmp = tmp.replace(/ /g, "&nbsp;");
+        tmp = tmp.replace(/\n/g, "<br />");
+        tmp = tmp.replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp");
+        return tmp;
+        
     }
 
     document.write("<div id='stdout'></div>");
     SC_DEFAULT_OUT = new sc_GenericOutputPort(
-	function(s) {
-	    var stdout = document.getElementById('stdout');
-	    stdout.innerHTML = stdout.innerHTML + escapeHTML(s);
-	});
+        function(s) {
+            var stdout = document.getElementById('stdout');
+            stdout.innerHTML = stdout.innerHTML + escapeHTML(s);
+        });
     SC_ERROR_OUT = SC_DEFAULT_OUT;
 }
 */
@@ -77,7 +77,7 @@ function sc_typeof( x ) {
 function sc_error() {
     var a = [sc_jsstring2symbol("*error*")];
     for (var i = 0; i < arguments.length; i++) {
-	a[i+1] = arguments[i];
+        a[i+1] = arguments[i];
     }
     throw a;
 }
@@ -92,12 +92,12 @@ function sc_raise(obj) {
 /*** META ((export with-handler-lambda)) */
 function sc_withHandlerLambda(handler, body) {
     try {
-	return body();
+        return body();
     } catch(e) {
-	if (!e._internalException)
-	    return handler(e);
-	else
-	    throw e;
+        if (!e._internalException)
+            return handler(e);
+        else
+            throw e;
     }
 }
 
@@ -107,8 +107,8 @@ var sc_properties = new Object();
 function sc_putpropBang(sym, key, val) {
     var ht = sc_properties[sym];
     if (!ht) {
-	ht = new Object();
-	sc_properties[sym] = ht;
+        ht = new Object();
+        sc_properties[sym] = ht;
     }
     ht[key] = val;
 }
@@ -117,25 +117,25 @@ function sc_putpropBang(sym, key, val) {
 function sc_getprop(sym, key) {
     var ht = sc_properties[sym];
     if (ht) {
-	if (key in ht)
-	    return ht[key];
-	else
-	    return false;
+        if (key in ht)
+            return ht[key];
+        else
+            return false;
     } else
-	return false;
+        return false;
 }
 
 /*** META ((export #t)) */
 function sc_rempropBang(sym, key) {
     var ht = sc_properties[sym];
     if (ht)
-	delete ht[key];
+        delete ht[key];
 }
 
 /*** META ((export #t)) */
 function sc_any2String(o) {
     return jsstring2string(sc_toDisplayString(o));
-}    
+}
 
 /*** META ((export #t)
            (peephole (infix 2 2 "==="))
@@ -199,7 +199,7 @@ function sc_isExact(n) {
 
 /*** META ((export #t)
            (peephole (postfix ", true"))
-	   (type bool))
+           (type bool))
 */
 function sc_isInexact(n) {
     return true;
@@ -211,8 +211,8 @@ function sc_isInexact(n) {
 */
 function sc_equal(x) {
     for (var i = 1; i < arguments.length; i++)
-	if (x !== arguments[i])
-	    return false;
+        if (x !== arguments[i])
+            return false;
     return true;
 }
 
@@ -222,9 +222,9 @@ function sc_equal(x) {
 */
 function sc_less(x) {
     for (var i = 1; i < arguments.length; i++) {
-	if (x >= arguments[i])
-	    return false;
-	x = arguments[i];
+        if (x >= arguments[i])
+            return false;
+        x = arguments[i];
     }
     return true;
 }
@@ -235,9 +235,9 @@ function sc_less(x) {
 */
 function sc_greater(x, y) {
     for (var i = 1; i < arguments.length; i++) {
-	if (x <= arguments[i])
-	    return false;
-	x = arguments[i];
+        if (x <= arguments[i])
+            return false;
+        x = arguments[i];
     }
     return true;
 }
@@ -248,9 +248,9 @@ function sc_greater(x, y) {
 */
 function sc_lessEqual(x, y) {
     for (var i = 1; i < arguments.length; i++) {
-	if (x > arguments[i])
-	    return false;
-	x = arguments[i];
+        if (x > arguments[i])
+            return false;
+        x = arguments[i];
     }
     return true;
 }
@@ -261,9 +261,9 @@ function sc_lessEqual(x, y) {
 */
 function sc_greaterEqual(x, y) {
     for (var i = 1; i < arguments.length; i++) {
-	if (x < arguments[i])
-	    return false;
-	x = arguments[i];
+        if (x < arguments[i])
+            return false;
+        x = arguments[i];
     }
     return true;
 }
@@ -319,7 +319,7 @@ var sc_min = Math.min;
 function sc_plus() {
     var sum = 0;
     for (var i = 0; i < arguments.length; i++)
-	sum += arguments[i];
+        sum += arguments[i];
     return sum;
 }
 
@@ -329,7 +329,7 @@ function sc_plus() {
 function sc_multi() {
     var product = 1;
     for (var i = 0; i < arguments.length; i++)
-	product *= arguments[i];
+        product *= arguments[i];
     return product;
 }
 
@@ -338,12 +338,12 @@ function sc_multi() {
 */
 function sc_minus(x) {
     if (arguments.length === 1)
-	return -x;
+        return -x;
     else {
-	var res = x;
-	for (var i = 1; i < arguments.length; i++)
-	    res -= arguments[i];
-	return res;
+        var res = x;
+        for (var i = 1; i < arguments.length; i++)
+            res -= arguments[i];
+        return res;
     }
 }
 
@@ -352,12 +352,12 @@ function sc_minus(x) {
 */
 function sc_div(x) {
     if (arguments.length === 1)
-	return 1/x;
+        return 1/x;
     else {
-	var res = x;
-	for (var i = 1; i < arguments.length; i++)
-	    res /= arguments[i];
-	return res;
+        var res = x;
+        for (var i = 1; i < arguments.length; i++)
+            res /= arguments[i];
+        return res;
     }
 }
 
@@ -385,9 +385,9 @@ function sc_modulo(x, y) {
     var remainder = x % y;
     // if they don't have the same sign
     if ((remainder * y) < 0)
-	return remainder + y;
+        return remainder + y;
     else
-	return remainder;
+        return remainder;
 }
 
 function sc_euclid_gcd(a, b) {
@@ -398,10 +398,10 @@ function sc_euclid_gcd(a, b) {
     if (b < 0) {b = -b;};
     if (b > a) {temp = a; a = b; b = temp;};
     while (true) {
-	a %= b;
-	if(a === 0) {return b;};
-	b %= a;
-	if(b === 0) {return a;};
+        a %= b;
+        if(a === 0) {return b;};
+        b %= a;
+        if(b === 0) {return a;};
     };
     return b;
 }
@@ -410,7 +410,7 @@ function sc_euclid_gcd(a, b) {
 function sc_gcd() {
     var gcd = 0;
     for (var i = 0; i < arguments.length; i++)
-	gcd = sc_euclid_gcd(gcd, arguments[i]);
+        gcd = sc_euclid_gcd(gcd, arguments[i]);
     return gcd;
 }
 
@@ -418,8 +418,8 @@ function sc_gcd() {
 function sc_lcm() {
     var lcm = 1;
     for (var i = 0; i < arguments.length; i++) {
-	var f = Math.round(arguments[i] / sc_euclid_gcd(arguments[i], lcm));
-	lcm *= Math.abs(f);
+        var f = Math.round(arguments[i] / sc_euclid_gcd(arguments[i], lcm));
+        lcm *= Math.abs(f);
     }
     return lcm;
 }
@@ -491,31 +491,31 @@ function sc_inexact2exact(x) {
 
 function sc_number2jsstring(x, radix) {
     if (radix)
-	return x.toString(radix);
+        return x.toString(radix);
     else
-	return x.toString();
+        return x.toString();
 }
 
 function sc_jsstring2number(s, radix) {
     if (s === "") return false;
 
     if (radix) {
-	var t = parseInt(s, radix);
-	if (!t && t !== 0) return false;
-	// verify that each char is in range. (parseInt ignores leading
-	// white and trailing chars)
-	var allowedChars = "01234567890abcdefghijklmnopqrstuvwxyz".substring(0, radix+1);
-	if ((new RegExp("^["+allowedChars+"]*$", "i")).test(s))
-	    return t;
-	else return false;
+        var t = parseInt(s, radix);
+        if (!t && t !== 0) return false;
+        // verify that each char is in range. (parseInt ignores leading
+        // white and trailing chars)
+        var allowedChars = "01234567890abcdefghijklmnopqrstuvwxyz".substring(0, radix+1);
+        if ((new RegExp("^["+allowedChars+"]*$", "i")).test(s))
+            return t;
+        else return false;
     } else {
-	var t = +s; // does not ignore trailing chars.
-	if (!t && t !== 0) return false;
-	// simply verify that first char is not whitespace.
-	var c = s.charAt(0);
-	// if +c is 0, but the char is not "0", then we have a whitespace.
-	if (+c === 0 && c !== "0") return false;
-	return t;
+        var t = +s; // does not ignore trailing chars.
+        if (!t && t !== 0) return false;
+        // simply verify that first char is not whitespace.
+        var c = s.charAt(0);
+        // if +c is 0, but the char is not "0", then we have a whitespace.
+        if (+c === 0 && c !== "0") return false;
+        return t;
     }
 }
 
@@ -548,17 +548,17 @@ sc_Pair.prototype.sc_toWriteOrDisplayString = function(writeOrDisplay) {
     var res = "(";
 
     while(true) {
-	res += writeOrDisplay(current.car);
-	if (sc_isPair(current.cdr)) {
-	    res += " ";
-	    current = current.cdr;
-	} else if (current.cdr !== null) {
-	    res += " . " + writeOrDisplay(current.cdr);
-	    break;
-	} else // current.cdr == null
-	    break;
+        res += writeOrDisplay(current.car);
+        if (sc_isPair(current.cdr)) {
+            res += " ";
+            current = current.cdr;
+        } else if (current.cdr !== null) {
+            res += " . " + writeOrDisplay(current.cdr);
+            break;
+        } else // current.cdr == null
+            break;
     }
-	
+        
     res += ")";
 
     return res;
@@ -594,7 +594,7 @@ function sc_cons(car, cdr) {
 function sc_consStar() {
     var res = arguments[arguments.length - 1];
     for (var i = arguments.length-2; i >= 0; i--)
-	res = new sc_Pair(arguments[i], res);
+        res = new sc_Pair(arguments[i], res);
     return res;
 }
 
@@ -745,8 +745,8 @@ function sc_lastPair(l) {
     var res = l;
     var cdr = l.cdr;
     while (sc_isPair(cdr)) {
-	res = cdr;
-	cdr = res.cdr;
+        res = cdr;
+        cdr = res.cdr;
     }
     return res;
 }
@@ -769,16 +769,16 @@ function sc_isList(o) {
     var rabbit = o;
     var turtle = o;
     while (true) {
-	if (rabbit === null ||
-	    (rabbit instanceof sc_Pair && rabbit.cdr === null))
-	    return true;  // end of list
-	else if ((rabbit instanceof sc_Pair) &&
-		 (rabbit.cdr instanceof sc_Pair)) {
-	    rabbit = rabbit.cdr.cdr;
-	    turtle = turtle.cdr;
-	    if (rabbit === turtle) return false; // cycle
-	} else
-	    return false; // not pair
+        if (rabbit === null ||
+            (rabbit instanceof sc_Pair && rabbit.cdr === null))
+            return true;  // end of list
+        else if ((rabbit instanceof sc_Pair) &&
+                 (rabbit.cdr instanceof sc_Pair)) {
+            rabbit = rabbit.cdr.cdr;
+            turtle = turtle.cdr;
+            if (rabbit === turtle) return false; // cycle
+        } else
+            return false; // not pair
     }
 }
 
@@ -787,7 +787,7 @@ function sc_list() {
     var res = null;
     var a = arguments;
     for (var i = a.length-1; i >= 0; i--)
-	res = new sc_Pair(a[i], res);
+        res = new sc_Pair(a[i], res);
     return res;
 }
 
@@ -804,7 +804,7 @@ function sc_iota(num, init) {
 function sc_makeList(nbEls, fill) {
     var res = null;
     for (var i = 0; i < nbEls; i++)
-	res = new sc_Pair(fill, res);
+        res = new sc_Pair(fill, res);
     return res;
 }
 
@@ -812,8 +812,8 @@ function sc_makeList(nbEls, fill) {
 function sc_length(l) {
     var res = 0;
     while (l !== null) {
-	res++;
-	l = l.cdr;
+        res++;
+        l = l.cdr;
     }
     return res;
 }
@@ -823,11 +823,11 @@ function sc_remq(o, l) {
     var dummy = { cdr : null };
     var tail = dummy;
     while (l !== null) {
-	if (l.car !== o) {
-	    tail.cdr = sc_cons(l.car, null);
-	    tail = tail.cdr;
-	}
-	l = l.cdr;
+        if (l.car !== o) {
+            tail.cdr = sc_cons(l.car, null);
+            tail = tail.cdr;
+        }
+        l = l.cdr;
     }
     return dummy.cdr;
 }
@@ -838,16 +838,16 @@ function sc_remqBang(o, l) {
     var tail = dummy;
     var needsAssig = true;
     while (l !== null) {
-	if (l.car === o) {
-	    needsAssig = true;
-	} else {
-	    if (needsAssig) {
-		tail.cdr = l;
-		needsAssig = false;
-	    }
-	    tail = l;
-	}
-	l = l.cdr;
+        if (l.car === o) {
+            needsAssig = true;
+        } else {
+            if (needsAssig) {
+                tail.cdr = l;
+                needsAssig = false;
+            }
+            tail = l;
+        }
+        l = l.cdr;
     }
     tail.cdr = null;
     return dummy.cdr;
@@ -858,11 +858,11 @@ function sc_delete(o, l) {
     var dummy = { cdr : null };
     var tail = dummy;
     while (l !== null) {
-	if (!sc_isEqual(l.car, o)) {
-	    tail.cdr = sc_cons(l.car, null);
-	    tail = tail.cdr;
-	}
-	l = l.cdr;
+        if (!sc_isEqual(l.car, o)) {
+            tail.cdr = sc_cons(l.car, null);
+            tail = tail.cdr;
+        }
+        l = l.cdr;
     }
     return dummy.cdr;
 }
@@ -873,16 +873,16 @@ function sc_deleteBang(o, l) {
     var tail = dummy;
     var needsAssig = true;
     while (l !== null) {
-	if (sc_isEqual(l.car, o)) {
-	    needsAssig = true;
-	} else {
-	    if (needsAssig) {
-		tail.cdr = l;
-		needsAssig = false;
-	    }
-	    tail = l;
-	}
-	l = l.cdr;
+        if (sc_isEqual(l.car, o)) {
+            needsAssig = true;
+        } else {
+            if (needsAssig) {
+                tail.cdr = l;
+                needsAssig = false;
+            }
+            tail = l;
+        }
+        l = l.cdr;
     }
     tail.cdr = null;
     return dummy.cdr;
@@ -891,14 +891,14 @@ function sc_deleteBang(o, l) {
 function sc_reverseAppendBang(l1, l2) {
     var res = l2;
     while (l1 !== null) {
-	var tmp = res;
-	res = l1;
-	l1 = l1.cdr;
-	res.cdr = tmp;
+        var tmp = res;
+        res = l1;
+        l1 = l1.cdr;
+        res.cdr = tmp;
     }
     return res;
 }
-	
+        
 function sc_dualAppend(l1, l2) {
     if (l1 === null) return l2;
     if (l2 === null) return l1;
@@ -909,10 +909,10 @@ function sc_dualAppend(l1, l2) {
 /*** META ((export #t)) */
 function sc_append() {
     if (arguments.length === 0)
-	return null;
+        return null;
     var res = arguments[arguments.length - 1];
     for (var i = arguments.length - 2; i >= 0; i--)
-	res = sc_dualAppend(arguments[i], res);
+        res = sc_dualAppend(arguments[i], res);
     return res;
 }
 
@@ -929,7 +929,7 @@ function sc_dualAppendBang(l1, l2) {
 function sc_appendBang() {
     var res = null;
     for (var i = 0; i < arguments.length; i++)
-	res = sc_dualAppendBang(res, arguments[i]);
+        res = sc_dualAppendBang(res, arguments[i]);
     return res;
 }
 
@@ -937,8 +937,8 @@ function sc_appendBang() {
 function sc_reverse(l1) {
     var res = null;
     while (l1 !== null) {
-	res = sc_cons(l1.car, res);
-	l1 = l1.cdr;
+        res = sc_cons(l1.car, res);
+        l1 = l1.cdr;
     }
     return res;
 }
@@ -952,7 +952,7 @@ function sc_reverseBang(l) {
 function sc_listTail(l, k) {
     var res = l;
     for (var i = 0; i < k; i++) {
-	res = res.cdr;
+        res = res.cdr;
     }
     return res;
 }
@@ -965,9 +965,9 @@ function sc_listRef(l, k) {
 /* // unoptimized generic versions
 function sc_memX(o, l, comp) {
     while (l != null) {
-	if (comp(l.car, o))
-	    return l;
-	l = l.cdr;
+        if (comp(l.car, o))
+            return l;
+        l = l.cdr;
     }
     return false;
 }
@@ -980,27 +980,27 @@ function sc_member(o, l) { return sc_memX(o, l, sc_isEqual); }
 /*** META ((export #t)) */
 function sc_memq(o, l) {
     while (l !== null) {
-	if (l.car === o)
-	    return l;
-	l = l.cdr;
+        if (l.car === o)
+            return l;
+        l = l.cdr;
     }
     return false;
 }
 /*** META ((export #t)) */
 function sc_memv(o, l) {
     while (l !== null) {
-	if (l.car === o)
-	    return l;
-	l = l.cdr;
+        if (l.car === o)
+            return l;
+        l = l.cdr;
     }
     return false;
 }
 /*** META ((export #t)) */
 function sc_member(o, l) {
     while (l !== null) {
-	if (sc_isEqual(l.car,o))
-	    return l;
-	l = l.cdr;
+        if (sc_isEqual(l.car,o))
+            return l;
+        l = l.cdr;
     }
     return false;
 }
@@ -1008,9 +1008,9 @@ function sc_member(o, l) {
 /* // generic unoptimized versions
 function sc_assX(o, al, comp) {
     while (al != null) {
-	if (comp(al.car.car, o))
-	    return al.car;
-	al = al.cdr;
+        if (comp(al.car.car, o))
+            return al.car;
+        al = al.cdr;
     }
     return false;
 }
@@ -1022,27 +1022,27 @@ function sc_assoc(o, al) { return sc_assX(o, al, sc_isEqual); }
 /*** META ((export #t)) */
 function sc_assq(o, al) {
     while (al !== null) {
-	if (al.car.car === o)
-	    return al.car;
-	al = al.cdr;
+        if (al.car.car === o)
+            return al.car;
+        al = al.cdr;
     }
     return false;
 }
 /*** META ((export #t)) */
 function sc_assv(o, al) {
     while (al !== null) {
-	if (al.car.car === o)
-	    return al.car;
-	al = al.cdr;
+        if (al.car.car === o)
+            return al.car;
+        al = al.cdr;
     }
     return false;
 }
 /*** META ((export #t)) */
 function sc_assoc(o, al) {
     while (al !== null) {
-	if (sc_isEqual(al.car.car, o))
-	    return al.car;
-	al = al.cdr;
+        if (sc_isEqual(al.car.car, o))
+            return al.car;
+        al = al.cdr;
     }
     return false;
 }
@@ -1070,7 +1070,7 @@ function sc_isCharStringCIGreaterEqual(cs1, cs2)
 function sc_Char(c) {
     var cached = sc_Char.lazy[c];
     if (cached)
-	return cached;
+        return cached;
     this.val = c;
     sc_Char.lazy[c] = this;
     // add return, so FF does not complain.
@@ -1172,9 +1172,9 @@ sc_Char.prototype.toString = function() {
 sc_Char.prototype.sc_toWriteString = function() {
     var entry = sc_Char.char2readable[this.val];
     if (entry)
-	return entry;
+        return entry;
     else
-	return "#\\" + this.val;
+        return "#\\" + this.val;
 };
 
 /*** META ((export #t)
@@ -1247,7 +1247,7 @@ function sc_isCharOfClass(c, cl) { return (cl.indexOf(c) != -1); }
 */
 function sc_isCharAlphabetic(c)
     { return sc_isCharOfClass(c.val, SC_LOWER_CLASS) ||
-	  sc_isCharOfClass(c.val, SC_UPPER_CLASS); }
+          sc_isCharOfClass(c.val, SC_UPPER_CLASS); }
 /*** META ((export #t)
            (type bool)
            (peephole (hole 1 "SC_NUMBER_CLASS.indexOf(" c ".val) != -1")))
@@ -1299,17 +1299,17 @@ function sc_charDowncase(c)
 function sc_makeJSStringOfLength(k, c) {
     var fill;
     if (c === undefined)
-	fill = " ";
+        fill = " ";
     else
-	fill = c;
+        fill = c;
     var res = "";
     var len = 1;
     // every round doubles the size of fill.
     while (k >= len) {
-	if (k & len)
-	    res = res.concat(fill);
-	fill = fill.concat(fill);
-	len *= 2;
+        if (k & len)
+            res = res.concat(fill);
+        fill = fill.concat(fill);
+        len *= 2;
     }
     return res;
 }
@@ -1317,24 +1317,24 @@ function sc_makeJSStringOfLength(k, c) {
 function sc_makejsString(k, c) {
     var fill;
     if (c)
-	fill = c.val;
+        fill = c.val;
     else
-	fill = " ";
+        fill = " ";
     return sc_makeJSStringOfLength(k, fill);
 }
 
 function sc_jsstring2list(s) {
     var res = null;
     for (var i = s.length - 1; i >= 0; i--)
-	res = sc_cons(new sc_Char(s.charAt(i)), res);
+        res = sc_cons(new sc_Char(s.charAt(i)), res);
     return res;
 }
 
 function sc_list2jsstring(l) {
     var a = new Array();
     while(l !== null) {
-	a.push(l.car.val);
-	l = l.cdr;
+        a.push(l.car.val);
+        l = l.cdr;
     }
     return "".concat.apply("", a);
 }
@@ -1346,7 +1346,7 @@ sc_Vector.prototype.sc_toWriteOrDisplayString = function(writeOrDisplay) {
 
     var res = "#(" + writeOrDisplay(this[0]);
     for (var i = 1; i < this.length; i++)
-	res += " " + writeOrDisplay(this[i]);
+        res += " " + writeOrDisplay(this[i]);
     res += ")";
     return res;
 };
@@ -1369,7 +1369,7 @@ function sc_isVector(v) {
 function sc_isVectorEqual(v1, v2, comp) {
     if (v1.length !== v2.length) return false;
     for (var i = 0; i < v1.length; i++)
-	if (!comp(v1[i], v2[i])) return false;
+        if (!comp(v1[i], v2[i])) return false;
     return true;
 }
 
@@ -1377,7 +1377,7 @@ function sc_isVectorEqual(v1, v2, comp) {
 function sc_makeVector(size, fill) {
     var a = new sc_Vector(size);
     if (fill !== undefined)
-	sc_vectorFillBang(a, fill);
+        sc_vectorFillBang(a, fill);
     return a;
 }
 
@@ -1387,7 +1387,7 @@ function sc_makeVector(size, fill) {
 function sc_vector() {
     var a = new sc_Vector();
     for (var i = 0; i < arguments.length; i++)
-	a.push(arguments[i]);
+        a.push(arguments[i]);
     return a;
 }
 
@@ -1416,7 +1416,7 @@ function sc_vectorSetBang(v, pos, val) {
 function sc_vector2list(a) {
     var res = null;
     for (var i = a.length-1; i >= 0; i--)
-	res = sc_cons(a[i], res);
+        res = sc_cons(a[i], res);
     return res;
 }
 
@@ -1424,8 +1424,8 @@ function sc_vector2list(a) {
 function sc_list2vector(l) {
     var a = new sc_Vector();
     while(l !== null) {
-	a.push(l.car);
-	l = l.cdr;
+        a.push(l.car);
+        l = l.cdr;
     }
     return a;
 }
@@ -1433,18 +1433,18 @@ function sc_list2vector(l) {
 /*** META ((export vector-fill! array-fill!)) */
 function sc_vectorFillBang(a, fill) {
     for (var i = 0; i < a.length; i++)
-	a[i] = fill;
+        a[i] = fill;
 }
 
 
 /*** META ((export #t)) */
 function sc_copyVector(a, len) {
     if (len <= a.length)
-	return a.slice(0, len);
+        return a.slice(0, len);
     else {
-	var tmp = a.concat();
-	tmp.length = len;
-	return tmp;
+        var tmp = a.concat();
+        tmp.length = len;
+        return tmp;
     }
 }
 
@@ -1462,16 +1462,16 @@ function sc_vectorCopyBang(target, tstart, source, sstart, send) {
 
     // if target == source we don't want to overwrite not yet copied elements.
     if (tstart <= sstart) {
-	for (var i = tstart, j = sstart; j < send; i++, j++) {
-	    target[i] = source[j];
-	}
+        for (var i = tstart, j = sstart; j < send; i++, j++) {
+            target[i] = source[j];
+        }
     } else {
-	var diff = send - sstart;
-	for (var i = tstart + diff - 1, j = send - 1;
-	     j >= sstart;
-	     i--, j--) {
-	    target[i] = source[j];
-	}
+        var diff = send - sstart;
+        for (var i = tstart + diff - 1, j = send - 1;
+             j >= sstart;
+             i--, j--) {
+            target[i] = source[j];
+        }
     }
     return target;
 }
@@ -1489,11 +1489,11 @@ function sc_apply(proc) {
     var args = new Array();
     // first part of arguments are not in list-form.
     for (var i = 1; i < arguments.length - 1; i++)
-	args.push(arguments[i]);
+        args.push(arguments[i]);
     var l = arguments[arguments.length - 1];
     while (l !== null) {
-	args.push(l.car);
-	l = l.cdr;
+        args.push(l.car);
+        l = l.cdr;
     }
     return proc.apply(null, args);
 }
@@ -1501,17 +1501,17 @@ function sc_apply(proc) {
 /*** META ((export #t)) */
 function sc_map(proc, l1) {
     if (l1 === undefined)
-	return null;
+        return null;
     // else
     var nbApplyArgs = arguments.length - 1;
     var applyArgs = new Array(nbApplyArgs);
     var revres = null;
     while (l1 !== null) {
-	for (var i = 0; i < nbApplyArgs; i++) {
-	    applyArgs[i] = arguments[i + 1].car;
-	    arguments[i + 1] = arguments[i + 1].cdr;
-	}
-	revres = sc_cons(proc.apply(null, applyArgs), revres);
+        for (var i = 0; i < nbApplyArgs; i++) {
+            applyArgs[i] = arguments[i + 1].car;
+            arguments[i + 1] = arguments[i + 1].cdr;
+        }
+        revres = sc_cons(proc.apply(null, applyArgs), revres);
     }
     return sc_reverseAppendBang(revres, null);
 }
@@ -1519,18 +1519,18 @@ function sc_map(proc, l1) {
 /*** META ((export #t)) */
 function sc_mapBang(proc, l1) {
     if (l1 === undefined)
-	return null;
+        return null;
     // else
     var l1_orig = l1;
     var nbApplyArgs = arguments.length - 1;
     var applyArgs = new Array(nbApplyArgs);
     while (l1 !== null) {
-	var tmp = l1;
-	for (var i = 0; i < nbApplyArgs; i++) {
-	    applyArgs[i] = arguments[i + 1].car;
-	    arguments[i + 1] = arguments[i + 1].cdr;
-	}
-	tmp.car = proc.apply(null, applyArgs);
+        var tmp = l1;
+        for (var i = 0; i < nbApplyArgs; i++) {
+            applyArgs[i] = arguments[i + 1].car;
+            arguments[i + 1] = arguments[i + 1].cdr;
+        }
+        tmp.car = proc.apply(null, applyArgs);
     }
     return l1_orig;
 }
@@ -1538,16 +1538,16 @@ function sc_mapBang(proc, l1) {
 /*** META ((export #t)) */
 function sc_forEach(proc, l1) {
     if (l1 === undefined)
-	return undefined;
+        return undefined;
     // else
     var nbApplyArgs = arguments.length - 1;
     var applyArgs = new Array(nbApplyArgs);
     while (l1 !== null) {
-	for (var i = 0; i < nbApplyArgs; i++) {
-	    applyArgs[i] = arguments[i + 1].car;
-	    arguments[i + 1] = arguments[i + 1].cdr;
-	}
-	proc.apply(null, applyArgs);
+        for (var i = 0; i < nbApplyArgs; i++) {
+            applyArgs[i] = arguments[i + 1].car;
+            arguments[i + 1] = arguments[i + 1].cdr;
+        }
+        proc.apply(null, applyArgs);
     }
     // add return so FF does not complain.
     return undefined;
@@ -1558,11 +1558,11 @@ function sc_filter(proc, l1) {
     var dummy = { cdr : null };
     var tail = dummy;
     while (l1 !== null) {
-	if (proc(l1.car) !== false) {
-	    tail.cdr = sc_cons(l1.car, null);
-	    tail = tail.cdr;
-	}
-	l1 = l1.cdr;
+        if (proc(l1.car) !== false) {
+            tail.cdr = sc_cons(l1.car, null);
+            tail = tail.cdr;
+        }
+        l1 = l1.cdr;
     }
     return dummy.cdr;
 }
@@ -1574,10 +1574,10 @@ function sc_filterBang(proc, l1) {
     var next = l1;
     while (next !== null) {
         if (proc(next.car) !== false) {
-	    it.cdr = next
-	    it = next;
-	}
-	next = next.cdr;
+            it.cdr = next
+            it = next;
+        }
+        next = next.cdr;
     }
     it.cdr = null;
     return head.cdr;
@@ -1597,8 +1597,8 @@ function sc_filterMap2(proc, l1, l2) {
     while (l1 !== null) {
         var tmp = proc(l1.car, l2.car);
         if(tmp !== false) revres = sc_cons(tmp, revres);
-	l1 = l1.cdr;
-	l2 = l2.cdr
+        l1 = l1.cdr;
+        l2 = l2.cdr
     }
     return sc_reverseAppendBang(revres, null);
 }
@@ -1606,20 +1606,20 @@ function sc_filterMap2(proc, l1, l2) {
 /*** META ((export #t)) */
 function sc_filterMap(proc, l1, l2, l3) {
     if (l2 === undefined)
-	return sc_filterMap1(proc, l1);
+        return sc_filterMap1(proc, l1);
     else if (l3 === undefined)
-	return sc_filterMap2(proc, l1, l2);
+        return sc_filterMap2(proc, l1, l2);
     // else
     var nbApplyArgs = arguments.length - 1;
     var applyArgs = new Array(nbApplyArgs);
     var revres = null;
     while (l1 !== null) {
-	for (var i = 0; i < nbApplyArgs; i++) {
-	    applyArgs[i] = arguments[i + 1].car;
-	    arguments[i + 1] = arguments[i + 1].cdr;
-	}
-	var tmp = proc.apply(null, applyArgs);
-	if(tmp !== false) revres = sc_cons(tmp, revres);
+        for (var i = 0; i < nbApplyArgs; i++) {
+            applyArgs[i] = arguments[i + 1].car;
+            arguments[i + 1] = arguments[i + 1].cdr;
+        }
+        var tmp = proc.apply(null, applyArgs);
+        if(tmp !== false) revres = sc_cons(tmp, revres);
     }
     return sc_reverseAppendBang(revres, null);
 }
@@ -1630,7 +1630,7 @@ function sc_any(proc, l) {
     while (l !== null) {
         var tmp = proc(l.car);
         if(tmp !== false) return tmp;
-	l = l.cdr;
+        l = l.cdr;
     }
     return false;
 }
@@ -1649,7 +1649,7 @@ function sc_every(proc, l) {
     while (l !== null) {
         tmp = proc(l.car);
         if (tmp === false) return false;
-	l = l.cdr;
+        l = l.cdr;
     }
     return tmp;
 }
@@ -1675,14 +1675,14 @@ function sc_makePromise(proc) {
     var isResultReady = false;
     var result = undefined;
     return function() {
-	if (!isResultReady) {
-	    var tmp = proc();
-	    if (!isResultReady) {
-		isResultReady = true;
-		result = tmp;
-	    }
-	}
-	return result;
+        if (!isResultReady) {
+            var tmp = proc();
+            if (!isResultReady) {
+                isResultReady = true;
+                result = tmp;
+            }
+        }
+        return result;
     };
 }
 
@@ -1695,28 +1695,28 @@ function sc_Values(values) {
 */
 function sc_values() {
     if (arguments.length === 1)
-	return arguments[0];
+        return arguments[0];
     else
-	return new sc_Values(arguments);
+        return new sc_Values(arguments);
 }
 
 /*** META ((export #t)) */
 function sc_callWithValues(producer, consumer) {
     var produced = producer();
     if (produced instanceof sc_Values)
-	return consumer.apply(null, produced.values);
+        return consumer.apply(null, produced.values);
     else
-	return consumer(produced);
+        return consumer(produced);
 }
 
 /*** META ((export #t)) */
 function sc_dynamicWind(before, thunk, after) {
     before();
     try {
-	var res = thunk();
-	return res;
+        var res = thunk();
+        return res;
     } finally {
-	after();
+        after();
     }
 }
 
@@ -1848,7 +1848,7 @@ function sc_deleteJsFieldBang(o, field) {
 function sc_jsCall(o, fun) {
     var args = new Array();
     for (var i = 2; i < arguments.length; i++)
-	args[i-2] = arguments[i];
+        args[i-2] = arguments[i];
     return fun.apply(o, args);
 }
 
@@ -1858,7 +1858,7 @@ function sc_jsCall(o, fun) {
 function sc_jsMethodCall(o, field) {
     var args = new Array();
     for (var i = 2; i < arguments.length; i++)
-	args[i-2] = arguments[i];
+        args[i-2] = arguments[i];
     return o[field].apply(o, args);
 }
 
@@ -1869,10 +1869,10 @@ function sc_jsNew(c) {
     var evalStr = "new c(";
     evalStr +=arguments.length > 1? "arguments[1]": "";
     for (var i = 2; i < arguments.length; i++)
-	evalStr += ", arguments[" + i + "]";
+        evalStr += ", arguments[" + i + "]";
     evalStr +=")";
     return eval(evalStr);
-}    
+}
 
 // ======================== RegExp ====================
 /*** META ((export #t)) */
@@ -1889,11 +1889,11 @@ function sc_pregexpMatch(re, s) {
     
     var res = null;
     for (var i = tmp.length-1; i >= 0; i--) {
-	if (tmp[i] !== null) {
-	    res = sc_cons(sc_jsstring2string(tmp[i]), res);
-	} else {
-	    res = sc_cons(false, res);
-	}
+        if (tmp[i] !== null) {
+            res = sc_cons(sc_jsstring2string(tmp[i]), res);
+        } else {
+            res = sc_cons(false, res);
+        }
     }
     return res;
 }
@@ -1906,9 +1906,9 @@ function sc_pregexpReplace(re, s1, s2) {
 
    if (re instanceof RegExp) {
        if (re.global)
-	   reg = re;
+           reg = re;
        else
-	   reg = new RegExp(re.source);
+           reg = new RegExp(re.source);
    } else {
        reg = new RegExp(sc_string2jsstring(re));
    }
@@ -1924,9 +1924,9 @@ function sc_pregexpReplaceAll(re, s1, s2) {
 
    if (re instanceof RegExp) {
       if (re.global)
-	  reg = re;
+          reg = re;
       else
-	  reg = new RegExp(re.source, "g");
+          reg = new RegExp(re.source, "g");
    } else {
        reg = new RegExp(sc_string2jsstring(re), "g");
    }
@@ -1937,8 +1937,8 @@ function sc_pregexpReplaceAll(re, s1, s2) {
 /*** META ((export #t)) */
 function sc_pregexpSplit(re, s) {
    var reg = ((re instanceof RegExp) ?
-	      re :
-	      new RegExp(sc_string2jsstring(re)));
+              re :
+              new RegExp(sc_string2jsstring(re)));
    var jss = sc_string2jsstring(s);
    var tmp = jss.split(reg);
 
@@ -1995,16 +1995,16 @@ function sc_hashtablePutBang(ht, key, val) {
 function sc_hashtableGet(ht, key) {
     var hash = sc_hash(key);
     if (hash in ht)
-	return ht[hash].val;
+        return ht[hash].val;
     else
-	return false;
+        return false;
 }
 
 /*** META ((export #t)) */
 function sc_hashtableForEach(ht, f) {
     for (var v in ht) {
-	if (ht[v] instanceof sc_HashtableElement)
-	    f(ht[v].key, ht[v].val);
+        if (ht[v] instanceof sc_HashtableElement)
+            f(ht[v].key, ht[v].val);
     }
 }
 
@@ -2014,35 +2014,35 @@ function sc_hashtableForEach(ht, f) {
 function sc_hashtableContains(ht, key) {
     var hash = sc_hash(key);
     if (hash in ht)
-	return true;
+        return true;
     else
-	return false;
+        return false;
 }
 
 var SC_HASH_COUNTER = 0;
 
 function sc_hash(o) {
     if (o === null)
-	return "null";
+        return "null";
     else if (o === undefined)
-	return "undefined";
+        return "undefined";
     else if (o === true)
-	return "true";
+        return "true";
     else if (o === false)
-	return "false";
+        return "false";
     else if (typeof o === "number")
-	return "num-" + o;
+        return "num-" + o;
     else if (typeof o === "string")
-	return "jsstr-" + o;
+        return "jsstr-" + o;
     else if (o.sc_getHash)
-	return o.sc_getHash();
+        return o.sc_getHash();
     else
-	return sc_counterHash.call(o);
+        return sc_counterHash.call(o);
 }
 function sc_counterHash() {
     if (!this.sc_hash) {
-	this.sc_hash = "hash-" + SC_HASH_COUNTER;
-	SC_HASH_COUNTER++;
+        this.sc_hash = "hash-" + SC_HASH_COUNTER;
+        SC_HASH_COUNTER++;
     }
     return this.sc_hash;
 }
@@ -2056,14 +2056,14 @@ function sc_Trampoline(args, maxTailCalls) {
 sc_Trampoline.prototype.restart = function() {
     var o = this;
     while (true) {
-	// set both globals.
-	SC_TAIL_OBJECT.calls = o.MAX_TAIL_CALLs-1;
-	var fun = o.args.callee;
-	var res = fun.apply(SC_TAIL_OBJECT, o.args);
-	if (res instanceof sc_Trampoline)
-	    o = res;
-	else
-	    return res;
+        // set both globals.
+        SC_TAIL_OBJECT.calls = o.MAX_TAIL_CALLs-1;
+        var fun = o.args.callee;
+        var res = fun.apply(SC_TAIL_OBJECT, o.args);
+        if (res instanceof sc_Trampoline)
+            o = res;
+        else
+            return res;
     }
 }
 
@@ -2071,16 +2071,16 @@ sc_Trampoline.prototype.restart = function() {
 function sc_bindExitLambda(proc) {
     var escape_obj = new sc_BindExitException();
     var escape = function(res) {
-	escape_obj.res = res;
-	throw escape_obj;
+        escape_obj.res = res;
+        throw escape_obj;
     };
     try {
-	return proc(escape);
+        return proc(escape);
     } catch(e) {
-	if (e === escape_obj) {
-	    return e.res;
-	}
-	throw e;
+        if (e === escape_obj) {
+            return e.res;
+        }
+        throw e;
     }
 }
 function sc_BindExitException() {
@@ -2112,7 +2112,7 @@ sc_InputPort.prototype = new sc_Port();
 
 sc_InputPort.prototype.peekChar = function() {
     if (!("peeked" in this))
-	this.peeked = this.getNextChar();
+        this.peeked = this.getNextChar();
     return this.peeked;
 }
 sc_InputPort.prototype.readChar = function() {
@@ -2151,7 +2151,7 @@ function sc_StringInputPort(jsStr) {
 sc_StringInputPort.prototype = new sc_InputPort();
 sc_StringInputPort.prototype.getNextChar = function() {
     if (this.pos >= this.str.length)
-	return SC_EOF_OBJECT;
+        return SC_EOF_OBJECT;
     return this.str.charAt(this.pos++);
 };
 
@@ -2189,7 +2189,7 @@ function sc_Tokenizer(port) {
 }
 sc_Tokenizer.prototype.peekToken = function() {
     if (this.peeked)
-	return this.peeked;
+        return this.peeked;
     var newToken = this.nextToken();
     this.peeked = newToken;
     return newToken;
@@ -2203,215 +2203,215 @@ sc_Tokenizer.prototype.nextToken = function() {
     var port = this.port;
     
     function isNumberChar(c) {
-	return (c >= "0" && c <= "9");
+        return (c >= "0" && c <= "9");
     };
     function isIdOrNumberChar(c) {
-	return SC_ID_CLASS.indexOf(c) != -1 || // ID-char
-	    (c >= "0" && c <= "9");
+        return SC_ID_CLASS.indexOf(c) != -1 || // ID-char
+            (c >= "0" && c <= "9");
     }
     function isWhitespace(c) {
-	return c === " " || c === "\r" || c === "\n" || c === "\t" || c === "\f";
+        return c === " " || c === "\r" || c === "\n" || c === "\t" || c === "\f";
     };
     function isWhitespaceOrEOF(c) {
-	return isWhitespace(c) || c === SC_EOF_OBJECT;
+        return isWhitespace(c) || c === SC_EOF_OBJECT;
     };
 
     function readString() {
-	res = "";
-	while (true) {
-	    var c = port.readChar();
-	    switch (c) {
-	    case '"':
-		return new sc_Token(11/*STRING*/, res);
-	    case "\\":
-		var tmp = port.readChar();
-		switch (tmp) {
-		case '0': res += "\0"; break;
-		case 'a': res += "\a"; break;
-		case 'b': res += "\b"; break;
-		case 'f': res += "\f"; break;
-		case 'n': res += "\n"; break;
-		case 'r': res += "\r"; break;
-		case 't': res += "\t"; break;
-		case 'v': res += "\v"; break;
-		case '"': res += '"'; break;
-		case '\\': res += '\\'; break;
-		case 'x':
-		    /* hexa-number */
-		    var nb = 0;
-		    while (true) {
-			var hexC = port.peekChar();
-			if (hexC >= '0' && hexC <= '9') {
-			    port.readChar();
-			    nb = nb * 16 + hexC.charCodeAt(0) - '0'.charCodeAt(0);
-			} else if (hexC >= 'a' && hexC <= 'f') {
-			    port.readChar();
-			    nb = nb * 16 + hexC.charCodeAt(0) - 'a'.charCodeAt(0);
-			} else if (hexC >= 'A' && hexC <= 'F') {
-			    port.readChar();
-			    nb = nb * 16 + hexC.charCodeAt(0) - 'A'.charCodeAt(0);
-			} else {
-			    // next char isn't part of hex.
-			    res += String.fromCharCode(nb);
-			    break;
-			}
-		    }
-		    break;
-		default:
-		    if (tmp === SC_EOF_OBJECT) {
-			return new sc_Token(13/*ERROR*/, "unclosed string-literal" + res);
-		    }
-		    res += tmp;
-		}
-		break;
-	    default:
-		if (c === SC_EOF_OBJECT) {
-		    return new sc_Token(13/*ERROR*/, "unclosed string-literal" + res);
-		}
-		res += c;
-	    }
-	}
+        res = "";
+        while (true) {
+            var c = port.readChar();
+            switch (c) {
+            case '"':
+                return new sc_Token(11/*STRING*/, res);
+            case "\\":
+                var tmp = port.readChar();
+                switch (tmp) {
+                case '0': res += "\0"; break;
+                case 'a': res += "\a"; break;
+                case 'b': res += "\b"; break;
+                case 'f': res += "\f"; break;
+                case 'n': res += "\n"; break;
+                case 'r': res += "\r"; break;
+                case 't': res += "\t"; break;
+                case 'v': res += "\v"; break;
+                case '"': res += '"'; break;
+                case '\\': res += '\\'; break;
+                case 'x':
+                    /* hexa-number */
+                    var nb = 0;
+                    while (true) {
+                        var hexC = port.peekChar();
+                        if (hexC >= '0' && hexC <= '9') {
+                            port.readChar();
+                            nb = nb * 16 + hexC.charCodeAt(0) - '0'.charCodeAt(0);
+                        } else if (hexC >= 'a' && hexC <= 'f') {
+                            port.readChar();
+                            nb = nb * 16 + hexC.charCodeAt(0) - 'a'.charCodeAt(0);
+                        } else if (hexC >= 'A' && hexC <= 'F') {
+                            port.readChar();
+                            nb = nb * 16 + hexC.charCodeAt(0) - 'A'.charCodeAt(0);
+                        } else {
+                            // next char isn't part of hex.
+                            res += String.fromCharCode(nb);
+                            break;
+                        }
+                    }
+                    break;
+                default:
+                    if (tmp === SC_EOF_OBJECT) {
+                        return new sc_Token(13/*ERROR*/, "unclosed string-literal" + res);
+                    }
+                    res += tmp;
+                }
+                break;
+            default:
+                if (c === SC_EOF_OBJECT) {
+                    return new sc_Token(13/*ERROR*/, "unclosed string-literal" + res);
+                }
+                res += c;
+            }
+        }
     };
     function readIdOrNumber(firstChar) {
-	var res = firstChar;
-	while (isIdOrNumberChar(port.peekChar()))
-	    res += port.readChar();
-	if (isNaN(res))
-	    return new sc_Token(9/*ID*/, res);
-	else
-	    return new sc_Token(12/*NUMBER*/, res - 0);
+        var res = firstChar;
+        while (isIdOrNumberChar(port.peekChar()))
+            res += port.readChar();
+        if (isNaN(res))
+            return new sc_Token(9/*ID*/, res);
+        else
+            return new sc_Token(12/*NUMBER*/, res - 0);
     };
     
     function skipWhitespaceAndComments() {
-	var done = false;
-	while (!done) {
-	    done = true;
-	    while (isWhitespace(port.peekChar()))
-		port.readChar();
-	    if (port.peekChar() === ';') {
-		port.readChar();
-		done = false;
-		while (true) {
-		    curChar = port.readChar();
-		    if (curChar === SC_EOF_OBJECT ||
-			curChar === '\n')
-			break;
-		}
-	    }
-	}
+        var done = false;
+        while (!done) {
+            done = true;
+            while (isWhitespace(port.peekChar()))
+                port.readChar();
+            if (port.peekChar() === ';') {
+                port.readChar();
+                done = false;
+                while (true) {
+                    curChar = port.readChar();
+                    if (curChar === SC_EOF_OBJECT ||
+                        curChar === '\n')
+                        break;
+                }
+            }
+        }
     };
     
     function readDot() {
-	if (isWhitespace(port.peekChar()))
-	    return new sc_Token(10/*DOT*/);
-	else
-	    return readIdOrNumber(".");
+        if (isWhitespace(port.peekChar()))
+            return new sc_Token(10/*DOT*/);
+        else
+            return readIdOrNumber(".");
     };
 
     function readSharp() {
-	var c = port.readChar();
-	if (isWhitespace(c))
-	    return new sc_Token(13/*ERROR*/, "bad #-pattern0.");
+        var c = port.readChar();
+        if (isWhitespace(c))
+            return new sc_Token(13/*ERROR*/, "bad #-pattern0.");
 
-	// reference
-	if (isNumberChar(c)) {
-	    var nb = c - 0;
-	    while (isNumberChar(port.peekChar()))
-		nb = nb*10 + (port.readChar() - 0);
-	    switch (port.readChar()) {
-	    case '#':
-		return new sc_Token(18/*REFERENCE*/, nb);
-	    case '=':
-		return new sc_Token(19/*STORE*/, nb);
-	    default:
-		return new sc_Token(13/*ERROR*/, "bad #-pattern1." + nb);
-	    }
-	}
+        // reference
+        if (isNumberChar(c)) {
+            var nb = c - 0;
+            while (isNumberChar(port.peekChar()))
+                nb = nb*10 + (port.readChar() - 0);
+            switch (port.readChar()) {
+            case '#':
+                return new sc_Token(18/*REFERENCE*/, nb);
+            case '=':
+                return new sc_Token(19/*STORE*/, nb);
+            default:
+                return new sc_Token(13/*ERROR*/, "bad #-pattern1." + nb);
+            }
+        }
 
-	if (c === "(")
-	    return new sc_Token(14/*VECTOR_BEGIN*/);
-	
-	if (c === "\\") { // character
-	    var tmp = ""
-	    while (!isWhitespaceOrEOF(port.peekChar()))
-		tmp += port.readChar();
-	    switch (tmp.length) {
-	    case 0: // it's escaping a whitespace char:
-		if (sc_isEOFObject(port.peekChar))
-		    return new sc_Token(13/*ERROR*/, "bad #-pattern2.");
-		else
-		    return new sc_Token(20/*CHAR*/, port.readChar());
-	    case 1:
-		return new sc_Token(20/*CHAR*/, tmp);
-	    default:
-		var entry = sc_Char.readable2char[tmp.toLowerCase()];
-		if (entry)
-		    return new sc_Token(20/*CHAR*/, entry);
-		else
-		    return new sc_Token(13/*ERROR*/, "unknown character description: #\\" + tmp);
-	    }
-	}
+        if (c === "(")
+            return new sc_Token(14/*VECTOR_BEGIN*/);
+        
+        if (c === "\\") { // character
+            var tmp = ""
+            while (!isWhitespaceOrEOF(port.peekChar()))
+                tmp += port.readChar();
+            switch (tmp.length) {
+            case 0: // it's escaping a whitespace char:
+                if (sc_isEOFObject(port.peekChar))
+                    return new sc_Token(13/*ERROR*/, "bad #-pattern2.");
+                else
+                    return new sc_Token(20/*CHAR*/, port.readChar());
+            case 1:
+                return new sc_Token(20/*CHAR*/, tmp);
+            default:
+                var entry = sc_Char.readable2char[tmp.toLowerCase()];
+                if (entry)
+                    return new sc_Token(20/*CHAR*/, entry);
+                else
+                    return new sc_Token(13/*ERROR*/, "unknown character description: #\\" + tmp);
+            }
+        }
 
-	// some constants (#t, #f, #unspecified)
-	var res;
-	var needing;
-	switch (c) {
-	case 't': res = new sc_Token(15/*TRUE*/, true); needing = ""; break;
-	case 'f': res = new sc_Token(16/*FALSE*/, false); needing = ""; break;
-	case 'u': res = new sc_Token(17/*UNSPECIFIED*/, undefined); needing = "nspecified"; break;
-	default:
-	    return new sc_Token(13/*ERROR*/, "bad #-pattern3: " + c);
-	}
-	while(true) {
-	    c = port.peekChar();
-	    if ((isWhitespaceOrEOF(c) || c === ')') &&
-		needing == "")
-		return res;
-	    else if (isWhitespace(c) || needing == "")
-		return new sc_Token(13/*ERROR*/, "bad #-pattern4 " + c + " " + needing);
-	    else if (needing.charAt(0) == c) {
-		port.readChar(); // consume
-		needing = needing.slice(1);
-	    } else
-		return new sc_Token(13/*ERROR*/, "bad #-pattern5");
-	}
-	
+        // some constants (#t, #f, #unspecified)
+        var res;
+        var needing;
+        switch (c) {
+        case 't': res = new sc_Token(15/*TRUE*/, true); needing = ""; break;
+        case 'f': res = new sc_Token(16/*FALSE*/, false); needing = ""; break;
+        case 'u': res = new sc_Token(17/*UNSPECIFIED*/, undefined); needing = "nspecified"; break;
+        default:
+            return new sc_Token(13/*ERROR*/, "bad #-pattern3: " + c);
+        }
+        while(true) {
+            c = port.peekChar();
+            if ((isWhitespaceOrEOF(c) || c === ')') &&
+                needing == "")
+                return res;
+            else if (isWhitespace(c) || needing == "")
+                return new sc_Token(13/*ERROR*/, "bad #-pattern4 " + c + " " + needing);
+            else if (needing.charAt(0) == c) {
+                port.readChar(); // consume
+                needing = needing.slice(1);
+            } else
+                return new sc_Token(13/*ERROR*/, "bad #-pattern5");
+        }
+        
     };
 
     skipWhitespaceAndComments();
     var curChar = port.readChar();
     if (curChar === SC_EOF_OBJECT)
-	return new sc_Token(0/*EOF*/, curChar);
+        return new sc_Token(0/*EOF*/, curChar);
     switch (curChar)
     {
     case " ":
     case "\n":
     case "\t":
-	return readWhitespace();
+        return readWhitespace();
     case "(":
-	return new sc_Token(1/*OPEN_PAR*/);
+        return new sc_Token(1/*OPEN_PAR*/);
     case ")":
-	return new sc_Token(2/*CLOSE_PAR*/);
+        return new sc_Token(2/*CLOSE_PAR*/);
     case "{":
-	return new sc_Token(3/*OPEN_BRACE*/);
+        return new sc_Token(3/*OPEN_BRACE*/);
     case "}":
-	return new sc_Token(4/*CLOSE_BRACE*/);
+        return new sc_Token(4/*CLOSE_BRACE*/);
     case "[":
-	return new sc_Token(5/*OPEN_BRACKET*/);
+        return new sc_Token(5/*OPEN_BRACKET*/);
     case "]":
-	return new sc_Token(6/*CLOSE_BRACKET*/);
+        return new sc_Token(6/*CLOSE_BRACKET*/);
     case "'":
-	return new sc_Token(8/*QUOTE*/);
+        return new sc_Token(8/*QUOTE*/);
     case "#":
-	return readSharp();
+        return readSharp();
     case ".":
-	return readDot();
+        return readDot();
     case '"':
-	return readString();
+        return readString();
     default:
-	if (isIdOrNumberChar(curChar))
-	    return readIdOrNumber(curChar);
-	throw "unexpected character: " + curChar;
+        if (isIdOrNumberChar(curChar))
+            return readIdOrNumber(curChar);
+        throw "unexpected character: " + curChar;
     }
 };
 
@@ -2421,76 +2421,76 @@ function sc_Reader(tokenizer) {
 }
 sc_Reader.prototype.read = function() {
     function readList(listBeginType) {
-	function matchesPeer(open, close) {
-	    return open === 1/*OPEN_PAR*/ && close === 2/*CLOSE_PAR*/
-	    	|| open === 3/*OPEN_BRACE*/ && close === 4/*CLOSE_BRACE*/
-		|| open === 5/*OPEN_BRACKET*/ && close === 6/*CLOSE_BRACKET*/;
-	};
-	var res = null;
+        function matchesPeer(open, close) {
+            return open === 1/*OPEN_PAR*/ && close === 2/*CLOSE_PAR*/
+                || open === 3/*OPEN_BRACE*/ && close === 4/*CLOSE_BRACE*/
+                || open === 5/*OPEN_BRACKET*/ && close === 6/*CLOSE_BRACKET*/;
+        };
+        var res = null;
 
-	while (true) {
-	    var token = tokenizer.peekToken();
-	    
-	    switch (token.type) {
-	    case 2/*CLOSE_PAR*/:
-	    case 4/*CLOSE_BRACE*/:
-	    case 6/*CLOSE_BRACKET*/:
-		if (matchesPeer(listBeginType, token.type)) {
-		    tokenizer.readToken(); // consume token
-		    return sc_reverseBang(res);
-		} else
-		    throw "closing par doesn't match: " + listBeginType
-			+ " " + listEndType;
+        while (true) {
+            var token = tokenizer.peekToken();
+            
+            switch (token.type) {
+            case 2/*CLOSE_PAR*/:
+            case 4/*CLOSE_BRACE*/:
+            case 6/*CLOSE_BRACKET*/:
+                if (matchesPeer(listBeginType, token.type)) {
+                    tokenizer.readToken(); // consume token
+                    return sc_reverseBang(res);
+                } else
+                    throw "closing par doesn't match: " + listBeginType
+                        + " " + listEndType;
 
-	    case 0/*EOF*/:
-		throw "unexpected end of file";
+            case 0/*EOF*/:
+                throw "unexpected end of file";
 
-	    case 10/*DOT*/:
-		tokenizer.readToken(); // consume token
-		var cdr = this.read();
-		var par = tokenizer.readToken();
-		if (!matchesPeer(listBeginType, par.type))
-		    throw "closing par doesn't match: " + listBeginType
-			+ " " + par.type;
-		else
-		    return sc_reverseAppendBang(res, cdr);
-		
+            case 10/*DOT*/:
+                tokenizer.readToken(); // consume token
+                var cdr = this.read();
+                var par = tokenizer.readToken();
+                if (!matchesPeer(listBeginType, par.type))
+                    throw "closing par doesn't match: " + listBeginType
+                        + " " + par.type;
+                else
+                    return sc_reverseAppendBang(res, cdr);
+                
 
-	    default:
-		res = sc_cons(this.read(), res);
-	    }
-	}
+            default:
+                res = sc_cons(this.read(), res);
+            }
+        }
     };
     function readQuote() {
-	return sc_cons("quote", sc_cons(this.read(), null));
+        return sc_cons("quote", sc_cons(this.read(), null));
     };
     function readVector() {
-	// opening-parenthesis is already consumed
-	var a = new Array();
-	while (true) {
-	    var token = tokenizer.peekToken();
-	    switch (token.type) {
-	    case 2/*CLOSE_PAR*/:
-		tokenizer.readToken();
-		return a;
-		
-	    default:
-		a.push(this.read());
-	    }
-	}
+        // opening-parenthesis is already consumed
+        var a = new Array();
+        while (true) {
+            var token = tokenizer.peekToken();
+            switch (token.type) {
+            case 2/*CLOSE_PAR*/:
+                tokenizer.readToken();
+                return a;
+                
+            default:
+                a.push(this.read());
+            }
+        }
     };
 
     function storeRefence(nb) {
-	var tmp = this.read();
-	this.backref[nb] = tmp;
-	return tmp;
+        var tmp = this.read();
+        this.backref[nb] = tmp;
+        return tmp;
     };
-	
+        
     function readReference(nb) {
-	if (nb in this.backref)
-	    return this.backref[nb];
-	else
-	    throw "bad reference: " + nb;
+        if (nb in this.backref)
+            return this.backref[nb];
+        else
+            throw "bad reference: " + nb;
     };
     
     var tokenizer = this.tokenizer;
@@ -2499,65 +2499,65 @@ sc_Reader.prototype.read = function() {
 
     // handle error
     if (token.type === 13/*ERROR*/)
-	throw token.val;
+        throw token.val;
     
     switch (token.type) {
     case 1/*OPEN_PAR*/:
     case 3/*OPEN_BRACE*/:
     case 5/*OPEN_BRACKET*/:
-	return readList.call(this, token.type);
+        return readList.call(this, token.type);
     case 8/*QUOTE*/:
-	return readQuote.call(this);
+        return readQuote.call(this);
     case 11/*STRING*/:
-	return sc_jsstring2string(token.val);
+        return sc_jsstring2string(token.val);
     case 20/*CHAR*/:
-	return new sc_Char(token.val);
+        return new sc_Char(token.val);
     case 14/*VECTOR_BEGIN*/:
-	return readVector.call(this);
+        return readVector.call(this);
     case 18/*REFERENCE*/:
-	return readReference.call(this, token.val);
+        return readReference.call(this, token.val);
     case 19/*STORE*/:
-	return storeRefence.call(this, token.val);
+        return storeRefence.call(this, token.val);
     case 9/*ID*/:
-	return sc_jsstring2symbol(token.val);
+        return sc_jsstring2symbol(token.val);
     case 0/*EOF*/:
     case 12/*NUMBER*/:
     case 15/*TRUE*/:
     case 16/*FALSE*/:
     case 17/*UNSPECIFIED*/:
-	return token.val;
+        return token.val;
     default:
-	throw "unexpected token " + token.type + " " + token.val;
+        throw "unexpected token " + token.type + " " + token.val;
     }
 };
 
 /*** META ((export #t)) */
 function sc_read(port) {
     if (port === undefined) // we assume the port hasn't been given.
-	port = SC_DEFAULT_IN; // THREAD: shared var...
+        port = SC_DEFAULT_IN; // THREAD: shared var...
     var reader = new sc_Reader(new sc_Tokenizer(port));
     return reader.read();
 }
 /*** META ((export #t)) */
 function sc_readChar(port) {
     if (port === undefined) // we assume the port hasn't been given.
-	port = SC_DEFAULT_IN; // THREAD: shared var...
+        port = SC_DEFAULT_IN; // THREAD: shared var...
     var t = port.readChar();
     return t === SC_EOF_OBJECT? t: new sc_Char(t);
 }
 /*** META ((export #t)) */
 function sc_peekChar(port) {
     if (port === undefined) // we assume the port hasn't been given.
-	port = SC_DEFAULT_IN; // THREAD: shared var...
+        port = SC_DEFAULT_IN; // THREAD: shared var...
     var t = port.peekChar();
     return t === SC_EOF_OBJECT? t: new sc_Char(t);
-}    
+}
 /*** META ((export #t)
            (type bool))
 */
 function sc_isCharReady(port) {
     if (port === undefined) // we assume the port hasn't been given.
-	port = SC_DEFAULT_IN; // THREAD: shared var...
+        port = SC_DEFAULT_IN; // THREAD: shared var...
     return port.isCharReady();
 }
 /*** META ((export #t)
@@ -2647,11 +2647,11 @@ function sc_dirname(p) {
 /*** META ((export #t)) */
 function sc_withInputFromPort(p, thunk) {
     try {
-	var tmp = SC_DEFAULT_IN; // THREAD: shared var.
-	SC_DEFAULT_IN = p;
-	return thunk();
+        var tmp = SC_DEFAULT_IN; // THREAD: shared var.
+        SC_DEFAULT_IN = p;
+        return thunk();
     } finally {
-	SC_DEFAULT_IN = tmp;
+        SC_DEFAULT_IN = tmp;
     }
 }
 
@@ -2663,11 +2663,11 @@ function sc_withInputFromString(s, thunk) {
 /*** META ((export #t)) */
 function sc_withOutputToPort(p, thunk) {
     try {
-	var tmp = SC_DEFAULT_OUT; // THREAD: shared var.
-	SC_DEFAULT_OUT = p;
-	return thunk();
+        var tmp = SC_DEFAULT_OUT; // THREAD: shared var.
+        SC_DEFAULT_OUT = p;
+        return thunk();
     } finally {
-	SC_DEFAULT_OUT = tmp;
+        SC_DEFAULT_OUT = tmp;
     }
 }
 
@@ -2738,7 +2738,7 @@ sc_ErrorOutputPort.prototype.close = function() {
 function sc_GenericOutputPort(appendJSString, close) {
     this.appendJSString = appendJSString;
     if (close)
-	this.close = close;
+        this.close = close;
 }
 sc_GenericOutputPort.prototype = new sc_OutputPort();
 
@@ -2762,58 +2762,58 @@ function sc_closeOutputPort(p) {
 /*** META ((export #t)) */
 function sc_write(o, p) {
     if (p === undefined) // we assume not given
-	p = SC_DEFAULT_OUT;
+        p = SC_DEFAULT_OUT;
     p.appendJSString(sc_toWriteString(o));
 }
 
 function sc_toWriteString(o) {
     if (o === null)
-	return "()";
+        return "()";
     else if (o === true)
-	return "#t";
+        return "#t";
     else if (o === false)
-	return "#f";
+        return "#f";
     else if (o === undefined)
-	return "#unspecified";
+        return "#unspecified";
     else if (typeof o === 'function')
-	return "#<procedure " + sc_hash(o) + ">";
+        return "#<procedure " + sc_hash(o) + ">";
     else if (o.sc_toWriteString)
-	return o.sc_toWriteString();
+        return o.sc_toWriteString();
     else
-	return o.toString();
+        return o.toString();
 }
 
 function sc_escapeWriteString(s) {
     var res = "";
     var j = 0;
     for (i = 0; i < s.length; i++) {
-	switch (s.charAt(i)) {
-	case "\0": res += s.substring(j, i) + "\\0"; j = i + 1; break;
-	case "\b": res += s.substring(j, i) + "\\b"; j = i + 1; break;
-	case "\f": res += s.substring(j, i) + "\\f"; j = i + 1; break;
-	case "\n": res += s.substring(j, i) + "\\n"; j = i + 1; break;
-	case "\r": res += s.substring(j, i) + "\\r"; j = i + 1; break;
-	case "\t": res += s.substring(j, i) + "\\t"; j = i + 1; break;
-	case "\v": res += s.substring(j, i) + "\\v"; j = i + 1; break;
-	case '"': res += s.substring(j, i) + '\\"'; j = i + 1; break;
-	case "\\": res += s.substring(j, i) + "\\\\"; j = i + 1; break;
-	default:
-	    var c = s.charAt(i);
-	    if ("\a" !== "a" && c == "\a") {
-		res += s.substring(j, i) + "\\a"; j = i + 1; continue;
-	    }
-	    if ("\v" !== "v" && c == "\v") {
-		res += s.substring(j, i) + "\\v"; j = i + 1; continue;
-	    }
-	    //if (s.charAt(i) < ' ' || s.charCodeAt(i) > 127) {
-	    // CARE: Manuel is this OK with HOP?
-	    if (s.charAt(i) < ' ') {
-		/* non printable character and special chars */
-		res += s.substring(j, i) + "\\x" + s.charCodeAt(i).toString(16);
-		j = i + 1;
-	    }
-	    // else just let i increase...
-	}
+        switch (s.charAt(i)) {
+        case "\0": res += s.substring(j, i) + "\\0"; j = i + 1; break;
+        case "\b": res += s.substring(j, i) + "\\b"; j = i + 1; break;
+        case "\f": res += s.substring(j, i) + "\\f"; j = i + 1; break;
+        case "\n": res += s.substring(j, i) + "\\n"; j = i + 1; break;
+        case "\r": res += s.substring(j, i) + "\\r"; j = i + 1; break;
+        case "\t": res += s.substring(j, i) + "\\t"; j = i + 1; break;
+        case "\v": res += s.substring(j, i) + "\\v"; j = i + 1; break;
+        case '"': res += s.substring(j, i) + '\\"'; j = i + 1; break;
+        case "\\": res += s.substring(j, i) + "\\\\"; j = i + 1; break;
+        default:
+            var c = s.charAt(i);
+            if ("\a" !== "a" && c == "\a") {
+                res += s.substring(j, i) + "\\a"; j = i + 1; continue;
+            }
+            if ("\v" !== "v" && c == "\v") {
+                res += s.substring(j, i) + "\\v"; j = i + 1; continue;
+            }
+            //if (s.charAt(i) < ' ' || s.charCodeAt(i) > 127) {
+            // CARE: Manuel is this OK with HOP?
+            if (s.charAt(i) < ' ') {
+                /* non printable character and special chars */
+                res += s.substring(j, i) + "\\x" + s.charCodeAt(i).toString(16);
+                j = i + 1;
+            }
+            // else just let i increase...
+        }
     }
     res += s.substring(j, i);
     return res;
@@ -2824,25 +2824,25 @@ function sc_escapeWriteString(s) {
 /*** META ((export #t)) */
 function sc_display(o, p) {
     if (p === undefined) // we assume not given
-	p = SC_DEFAULT_OUT;
+        p = SC_DEFAULT_OUT;
     p.appendJSString(sc_toDisplayString(o));
 }
 
 function sc_toDisplayString(o) {
     if (o === null)
-	return "()";
+        return "()";
     else if (o === true)
-	return "#t";
+        return "#t";
     else if (o === false)
-	return "#f";
+        return "#f";
     else if (o === undefined)
-	return "#unspecified";
+        return "#unspecified";
     else if (typeof o === 'function')
-	return "#<procedure " + sc_hash(o) + ">";
+        return "#<procedure " + sc_hash(o) + ">";
     else if (o.sc_toDisplayString)
-	return o.sc_toDisplayString();
+        return o.sc_toDisplayString();
     else
-	return o.toString();
+        return o.toString();
 }
 
 /* ------------------ newline ---------------------------------------------------*/
@@ -2850,7 +2850,7 @@ function sc_toDisplayString(o) {
 /*** META ((export #t)) */
 function sc_newline(p) {
     if (p === undefined) // we assume not given
-	p = SC_DEFAULT_OUT;
+        p = SC_DEFAULT_OUT;
     p.appendJSString("\n");
 }
     
@@ -2859,7 +2859,7 @@ function sc_newline(p) {
 /*** META ((export #t)) */
 function sc_writeChar(c, p) {
     if (p === undefined) // we assume not given
-	p = SC_DEFAULT_OUT;
+        p = SC_DEFAULT_OUT;
     p.appendJSString(c.val);
 }
 
@@ -2868,7 +2868,7 @@ function sc_writeChar(c, p) {
 /*** META ((export #t)) */
 function sc_writeCircle(o, p) {
     if (p === undefined) // we assume not given
-	p = SC_DEFAULT_OUT;
+        p = SC_DEFAULT_OUT;
     p.appendJSString(sc_toWriteCircleString(o));
 }
 
@@ -2883,101 +2883,101 @@ function sc_toWriteCircleString(o) {
 function sc_prepWriteCircle(o, symb, nbPointer) {
     // TODO sc_Struct
     if (o instanceof sc_Pair ||
-	o instanceof sc_Vector) {
-	if (o[symb] !== undefined) {
-	    // not the first visit.
-	    o[symb]++;
-	    // unless there is already a number, assign one.
-	    if (!o[symb + "nb"]) o[symb + "nb"] = nbPointer.nb++;
-	    return;
-	}
-	o[symb] = 0;
-	if (o instanceof sc_Pair) {
-	    sc_prepWriteCircle(o.car, symb, nbPointer);
-	    sc_prepWriteCircle(o.cdr, symb, nbPointer);
-	} else {
-	    for (var i = 0; i < o.length; i++)
-		sc_prepWriteCircle(o[i], symb, nbPointer);
-	}
+        o instanceof sc_Vector) {
+        if (o[symb] !== undefined) {
+            // not the first visit.
+            o[symb]++;
+            // unless there is already a number, assign one.
+            if (!o[symb + "nb"]) o[symb + "nb"] = nbPointer.nb++;
+            return;
+        }
+        o[symb] = 0;
+        if (o instanceof sc_Pair) {
+            sc_prepWriteCircle(o.car, symb, nbPointer);
+            sc_prepWriteCircle(o.cdr, symb, nbPointer);
+        } else {
+            for (var i = 0; i < o.length; i++)
+                sc_prepWriteCircle(o[i], symb, nbPointer);
+        }
     }
 }
 
 function sc_genToWriteCircleString(o, symb) {
     if (!(o instanceof sc_Pair ||
-	  o instanceof sc_Vector))
-	return sc_toWriteString(o);
+          o instanceof sc_Vector))
+        return sc_toWriteString(o);
     return o.sc_toWriteCircleString(symb);
 }
 sc_Pair.prototype.sc_toWriteCircleString = function(symb, inList) {
     if (this[symb + "use"]) { // use-flag is set. Just use it.
-	var nb = this[symb + "nb"];
-	if (this[symb]-- === 0) { // if we are the last use. remove all fields.
-	    delete this[symb];
-	    delete this[symb + "nb"];
-	    delete this[symb + "use"];
-	}
-	if (inList)
-	    return '. #' + nb + '#';
-	else
-	    return '#' + nb + '#';
+        var nb = this[symb + "nb"];
+        if (this[symb]-- === 0) { // if we are the last use. remove all fields.
+            delete this[symb];
+            delete this[symb + "nb"];
+            delete this[symb + "use"];
+        }
+        if (inList)
+            return '. #' + nb + '#';
+        else
+            return '#' + nb + '#';
     }
     if (this[symb]-- === 0) { // if we are the last use. remove all fields.
-	delete this[symb];
-	delete this[symb + "nb"];
-	delete this[symb + "use"];
+        delete this[symb];
+        delete this[symb + "nb"];
+        delete this[symb + "use"];
     }
 
     var res = "";
     
     if (this[symb] !== undefined) { // implies > 0
-	this[symb + "use"] = true;
-	if (inList)
-	    res += '. #' + this[symb + "nb"] + '=';
-	else
-	    res += '#' + this[symb + "nb"] + '=';
-	inList = false;
+        this[symb + "use"] = true;
+        if (inList)
+            res += '. #' + this[symb + "nb"] + '=';
+        else
+            res += '#' + this[symb + "nb"] + '=';
+        inList = false;
     }
 
     if (!inList)
-	res += "(";
+        res += "(";
     
     // print car
     res += sc_genToWriteCircleString(this.car, symb);
     
     if (sc_isPair(this.cdr)) {
-	res += " " + this.cdr.sc_toWriteCircleString(symb, true);
+        res += " " + this.cdr.sc_toWriteCircleString(symb, true);
     } else if (this.cdr !== null) {
-	res += " . " + sc_genToWriteCircleString(this.cdr, symb);
+        res += " . " + sc_genToWriteCircleString(this.cdr, symb);
     }
     if (!inList)
-	res += ")";
+        res += ")";
     return res;
 };
 sc_Vector.prototype.sc_toWriteCircleString = function(symb) {
     if (this[symb + "use"]) { // use-flag is set. Just use it.
-	var nb = this[symb + "nb"];
-	if (this[symb]-- === 0) { // if we are the last use. remove all fields.
-	    delete this[symb];
-	    delete this[symb + "nb"];
-	    delete this[symb + "use"];
-	}
-	return '#' + nb + '#';
+        var nb = this[symb + "nb"];
+        if (this[symb]-- === 0) { // if we are the last use. remove all fields.
+            delete this[symb];
+            delete this[symb + "nb"];
+            delete this[symb + "use"];
+        }
+        return '#' + nb + '#';
     }
     if (this[symb]-- === 0) { // if we are the last use. remove all fields.
-	delete this[symb];
-	delete this[symb + "nb"];
-	delete this[symb + "use"];
+        delete this[symb];
+        delete this[symb + "nb"];
+        delete this[symb + "use"];
     }
 
     var res = "";
     if (this[symb] !== undefined) { // implies > 0
-	this[symb + "use"] = true;
-	res += '#' + this[symb + "nb"] + '=';
+        this[symb + "use"] = true;
+        res += '#' + this[symb + "nb"] + '=';
     }
     res += "#(";
     for (var i = 0; i < this.length; i++) {
-	res += sc_genToWriteCircleString(this[i], symb);
-	if (i < this.length - 1) res += " ";
+        res += sc_genToWriteCircleString(this[i], symb);
+        if (i < this.length - 1) res += " ";
     }
     res += ")";
     return res;
@@ -2989,13 +2989,13 @@ sc_Vector.prototype.sc_toWriteCircleString = function(symb) {
 /*** META ((export #t)) */
 function sc_print(s) {
     if (arguments.length === 1) {
-	sc_display(s);
-	sc_newline();
+        sc_display(s);
+        sc_newline();
     }
     else {
-	for (var i = 0; i < arguments.length; i++)
-	    sc_display(arguments[i]);
-	sc_newline();
+        for (var i = 0; i < arguments.length; i++)
+            sc_display(arguments[i]);
+        sc_newline();
     }
 }
 
@@ -3010,92 +3010,92 @@ function sc_format(s, args) {
       var i2 = s.indexOf("~", i);
 
       if (i2 == -1) {
-	  p.appendJSString( s.substring( i, len ) );
-	  return p.close();
+          p.appendJSString( s.substring( i, len ) );
+          return p.close();
       } else {
-	 if (i2 > i) {
-	    if (i2 == (len - 1)) {
-		p.appendJSString(s.substring(i, len));
-		return p.close();
-	    } else {
-	       p.appendJSString(s.substring(i, i2));
-	       i = i2;
-	    }
-	 }
+         if (i2 > i) {
+            if (i2 == (len - 1)) {
+                p.appendJSString(s.substring(i, len));
+                return p.close();
+            } else {
+               p.appendJSString(s.substring(i, i2));
+               i = i2;
+            }
+         }
 
-	 switch(s.charCodeAt(i2 + 1)) {
-	    case 65:
-	    case 97:
-	       // a
-	       sc_display(arguments[j], p);
-	       i += 2; j++;
-	       break;
+         switch(s.charCodeAt(i2 + 1)) {
+            case 65:
+            case 97:
+               // a
+               sc_display(arguments[j], p);
+               i += 2; j++;
+               break;
 
-	    case 83:
-	    case 115:
-	       // s
-	       sc_write(arguments[j], p);
-	       i += 2; j++;
-	       break;
+            case 83:
+            case 115:
+               // s
+               sc_write(arguments[j], p);
+               i += 2; j++;
+               break;
 
-	    case 86:
-	    case 118:
-	       // v
-	       sc_display(arguments[j], p);
-	       p.appendJSString("\n");
-	       i += 2; j++;
-	       break;
+            case 86:
+            case 118:
+               // v
+               sc_display(arguments[j], p);
+               p.appendJSString("\n");
+               i += 2; j++;
+               break;
 
-	    case 67:
-	    case 99:
-	       // c
-	       p.appendJSString(String.fromCharCode(arguments[j]));
-	       i += 2; j++;
-	       break;
+            case 67:
+            case 99:
+               // c
+               p.appendJSString(String.fromCharCode(arguments[j]));
+               i += 2; j++;
+               break;
 
-	    case 88:
-	    case 120:
-	       // x
-	       p.appendJSString(arguments[j].toString(6));
-	       i += 2; j++;
-	       break;
+            case 88:
+            case 120:
+               // x
+               p.appendJSString(arguments[j].toString(6));
+               i += 2; j++;
+               break;
 
-	    case 79:
-	    case 111:
-	       // o
-	       p.appendJSString(arguments[j].toString(8));
-	       i += 2; j++;
-	       break;
+            case 79:
+            case 111:
+               // o
+               p.appendJSString(arguments[j].toString(8));
+               i += 2; j++;
+               break;
 
-	    case 66:
-	    case 98:
-	       // b
-	       p.appendJSString(arguments[j].toString(2));
-	       i += 2; j++;
-	       break;
-	       
-	    case 37:
-	    case 110:
-	       // %, n
-	       p.appendJSString("\n");
-	       i += 2; break;
+            case 66:
+            case 98:
+               // b
+               p.appendJSString(arguments[j].toString(2));
+               i += 2; j++;
+               break;
+               
+            case 37:
+            case 110:
+               // %, n
+               p.appendJSString("\n");
+               i += 2; break;
 
-	    case 114:
-	       // r
-	       p.appendJSString("\r");
-	       i += 2; break;
+            case 114:
+               // r
+               p.appendJSString("\r");
+               i += 2; break;
 
-	    case 126:
-	       // ~
-	       p.appendJSString("~");
-	       i += 2; break;
+            case 126:
+               // ~
+               p.appendJSString("~");
+               i += 2; break;
 
-	    default:
-	       sc_error( "format: illegal ~"
-			 + String.fromCharCode(s.charCodeAt(i2 + 1))
-			 + " sequence" );
-	       return "";
-	 }
+            default:
+               sc_error( "format: illegal ~"
+                         + String.fromCharCode(s.charCodeAt(i2 + 1))
+                         + " sequence" );
+               return "";
+         }
       }
    }
 
@@ -3157,7 +3157,7 @@ function sc_jsstring2keyword(s) {
 */
 function sc_isKeyword(s) {
     return (typeof s === "string") &&
-	(s.charAt(0) === sc_KEYWORD_PREFIX);
+        (s.charAt(0) === sc_KEYWORD_PREFIX);
 }
 
 
@@ -3165,9 +3165,9 @@ function sc_isKeyword(s) {
 var sc_gensym = function() {
     var counter = 1000;
     return function(sym) {
-	counter++;
-	if (!sym) sym = sc_SYMBOL_PREFIX;
-	return sym + "s" + counter + "~" + "^sC-GeNsYm ";
+        counter++;
+        if (!sym) sym = sc_SYMBOL_PREFIX;
+        return sym + "s" + counter + "~" + "^sC-GeNsYm ";
     };
 }();
 
@@ -3177,10 +3177,10 @@ var sc_gensym = function() {
 */
 function sc_isEqual(o1, o2) {
     return ((o1 === o2) ||
-	    (sc_isPair(o1) && sc_isPair(o2)
-	     && sc_isPairEqual(o1, o2, sc_isEqual)) ||
-	    (sc_isVector(o1) && sc_isVector(o2)
-	     && sc_isVectorEqual(o1, o2, sc_isEqual)));
+            (sc_isPair(o1) && sc_isPair(o2)
+             && sc_isPairEqual(o1, o2, sc_isEqual)) ||
+            (sc_isVector(o1) && sc_isVector(o2)
+             && sc_isVectorEqual(o1, o2, sc_isEqual)));
 }
 
 /*** META ((export number->symbol integer->symbol)) */
@@ -3221,7 +3221,7 @@ function sc_string2real(s) {
 */
 function sc_isSymbol(s) {
     return (typeof s === "string") &&
-	(s.charAt(0) === sc_SYMBOL_PREFIX);
+        (s.charAt(0) === sc_SYMBOL_PREFIX);
 }
 
 /*** META ((export #t)
@@ -3244,7 +3244,7 @@ function sc_string2symbol(s) {
 function sc_symbolAppend() {
     var res = sc_SYMBOL_PREFIX;
     for (var i = 0; i < arguments.length; i++)
-	res += arguments[i].slice(1);
+        res += arguments[i].slice(1);
     return res;
 }
 
@@ -3263,7 +3263,7 @@ function sc_char2symbol(c) { return sc_SYMBOL_PREFIX + c.val; }
 */
 function sc_isString(s) {
     return (typeof s === "string") &&
-	(s.charAt(0) !== sc_SYMBOL_PREFIX);
+        (s.charAt(0) !== sc_SYMBOL_PREFIX);
 }
 
 /*** META ((export #t)) */
@@ -3273,7 +3273,7 @@ var sc_makeString = sc_makejsString;
 /*** META ((export #t)) */
 function sc_string() {
     for (var i = 0; i < arguments.length; i++)
-	arguments[i] = arguments[i].val;
+        arguments[i] = arguments[i].val;
     return "".concat.apply("", arguments);
 }
 
@@ -3293,70 +3293,70 @@ function sc_stringSet(s, k, c)
 
 
 /*** META ((export string=?)
-	   (type bool)
+           (type bool)
            (peephole (hole 2 str1 " === " str2)))
 */
 function sc_isStringEqual(s1, s2) {
     return s1 === s2;
 }
 /*** META ((export string<?)
-	   (type bool)
+           (type bool)
            (peephole (hole 2 str1 " < " str2)))
 */
 function sc_isStringLess(s1, s2) {
     return s1 < s2;
 }
 /*** META ((export string>?)
-	   (type bool)
+           (type bool)
            (peephole (hole 2 str1 " > " str2)))
 */
 function sc_isStringGreater(s1, s2) {
     return s1 > s2;
 }
 /*** META ((export string<=?)
-	   (type bool)
+           (type bool)
            (peephole (hole 2 str1 " <= " str2)))
 */
 function sc_isStringLessEqual(s1, s2) {
     return s1 <= s2;
 }
 /*** META ((export string>=?)
-	   (type bool)
+           (type bool)
            (peephole (hole 2 str1 " >= " str2)))
 */
 function sc_isStringGreaterEqual(s1, s2) {
     return s1 >= s2;
 }
 /*** META ((export string-ci=?)
-	   (type bool)
+           (type bool)
            (peephole (hole 2 str1 ".toLowerCase() === " str2 ".toLowerCase()")))
 */
 function sc_isStringCIEqual(s1, s2) {
     return s1.toLowerCase() === s2.toLowerCase();
 }
 /*** META ((export string-ci<?)
-	   (type bool)
+           (type bool)
            (peephole (hole 2 str1 ".toLowerCase() < " str2 ".toLowerCase()")))
 */
 function sc_isStringCILess(s1, s2) {
     return s1.toLowerCase() < s2.toLowerCase();
 }
 /*** META ((export string-ci>?)
-	   (type bool)
+           (type bool)
            (peephole (hole 2 str1 ".toLowerCase() > " str2 ".toLowerCase()")))
 */
 function sc_isStringCIGreater(s1, s2) {
     return s1.toLowerCase() > s2.toLowerCase();
 }
 /*** META ((export string-ci<=?)
-	   (type bool)
+           (type bool)
            (peephole (hole 2 str1 ".toLowerCase() <= " str2 ".toLowerCase()")))
 */
 function sc_isStringCILessEqual(s1, s2) {
     return s1.toLowerCase() <= s2.toLowerCase();
 }
 /*** META ((export string-ci>=?)
-	   (type bool)
+           (type bool)
            (peephole (hole 2 str1 ".toLowerCase() >= " str2 ".toLowerCase()")))
 */
 function sc_isStringCIGreaterEqual(s1, s2) {
@@ -3416,22 +3416,22 @@ function sc_string2keyword(o) {
 
 String.prototype.sc_toDisplayString = function() {
     if (this.charAt(0) === sc_SYMBOL_PREFIX)
-	// TODO: care for symbols with spaces (escape-chars symbols).
-	return this.slice(1);
+        // TODO: care for symbols with spaces (escape-chars symbols).
+        return this.slice(1);
     else if (this.charAt(0) === sc_KEYWORD_PREFIX)
-	return ":" + this.slice(1);
+        return ":" + this.slice(1);
     else
-	return this.toString();
+        return this.toString();
 };
 
 String.prototype.sc_toWriteString = function() {
     if (this.charAt(0) === sc_SYMBOL_PREFIX)
-	// TODO: care for symbols with spaces (escape-chars symbols).
-	return this.slice(1);
+        // TODO: care for symbols with spaces (escape-chars symbols).
+        return this.slice(1);
     else if (this.charAt(0) === sc_KEYWORD_PREFIX)
-	return ":" + this.slice(1);
+        return ":" + this.slice(1);
     else
-	return '"' + sc_escapeWriteString(this) + '"';
+        return '"' + sc_escapeWriteString(this) + '"';
 };
 /* Exported Variables */
 var BgL_testzd2boyerzd2;
@@ -4675,12 +4675,12 @@ SC_ERROR_OUT = SC_DEFAULT_OUT;
 
 function RunBenchmark(name, count, run, warn) {
     try {
-	for (var n = 0; n < count; ++n) {
-	    result = run();
-	}
+        for (var n = 0; n < count; ++n) {
+            result = run();
+        }
     }
     catch (e) {
-	print("UNEXPECTED EXCEPTION: " + e);
+        print("UNEXPECTED EXCEPTION: " + e);
     }
 }
 
@@ -4690,7 +4690,7 @@ Number.prototype.sc_toDisplayString = function () { return String(this); }
 var BgL_runzd2benchmarkzd2 = RunBenchmark;
 
 // if running individually, start the Benchmark suite.
-try { 
+try {
   runSuite
 } catch (e:ReferenceError) {
   BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,

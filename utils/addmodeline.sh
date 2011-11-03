@@ -52,6 +52,12 @@ function add_modeline() {
         return
     fi
 
+    file -b $file | grep 'ASCII' > /dev/null
+    if [ $? != 0 ]; then
+        echo "Skipping $file; it is reported as non-ascii text"
+        exit 5
+    fi
+
     cp $file $file.orig
 
     case $MODE_LANG in

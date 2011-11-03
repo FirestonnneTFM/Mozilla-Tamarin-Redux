@@ -462,7 +462,7 @@ function bnpDivRemTo(m,q,r) {
   if(r == null) r = nbi();
   var y = nbi(), ts = this.s, ms = m.s;
   var pm_array = pm.array;
-  var nsh = BI_DB-nbits(pm_array[pm.t-1]);	// normalize modulus
+  var nsh = BI_DB-nbits(pm_array[pm.t-1]);      // normalize modulus
   if(nsh > 0) { pm.lShiftTo(nsh,y); pt.lShiftTo(nsh,r); }
   else { pm.copyTo(y); pt.copyTo(r); }
   var ys = y.t;
@@ -481,12 +481,12 @@ function bnpDivRemTo(m,q,r) {
     r.subTo(t,r);
   }
   BigInteger.ONE.dlShiftTo(ys,t);
-  t.subTo(y,y);	// "negative" y so we can replace sub with am later
+  t.subTo(y,y); // "negative" y so we can replace sub with am later
   while(y.t < ys) y_array[y.t++] = 0;
   while(--j >= 0) {
     // Estimate quotient digit
     var qd = (r_array[--i]==y0)?BI_DM:Math.floor(r_array[i]*d1+(r_array[i-1]+e)*d2);
-    if((r_array[i]+=y.am(0,qd,r,j,0,ys)) < qd) {	// Try it out
+    if((r_array[i]+=y.am(0,qd,r,j,0,ys)) < qd) {        // Try it out
       y.dlShiftTo(j,t);
       r.subTo(t,r);
       while(r_array[i] < --qd) r.subTo(t,r);
@@ -498,7 +498,7 @@ function bnpDivRemTo(m,q,r) {
   }
   r.t = ys;
   r.clamp();
-  if(nsh > 0) r.rShiftTo(nsh,r);	// Denormalize remainder
+  if(nsh > 0) r.rShiftTo(nsh,r);        // Denormalize remainder
   if(ts < 0) BigInteger.ZERO.subTo(r,r);
 }
 
@@ -542,13 +542,13 @@ function bnpInvDigit() {
   if(this.t < 1) return 0;
   var x = this_array[0];
   if((x&1) == 0) return 0;
-  var y = x&3;		// y == 1/x mod 2^2
-  y = (y*(2-(x&0xf)*y))&0xf;	// y == 1/x mod 2^4
-  y = (y*(2-(x&0xff)*y))&0xff;	// y == 1/x mod 2^8
-  y = (y*(2-(((x&0xffff)*y)&0xffff)))&0xffff;	// y == 1/x mod 2^16
+  var y = x&3;          // y == 1/x mod 2^2
+  y = (y*(2-(x&0xf)*y))&0xf;    // y == 1/x mod 2^4
+  y = (y*(2-(x&0xff)*y))&0xff;  // y == 1/x mod 2^8
+  y = (y*(2-(((x&0xffff)*y)&0xffff)))&0xffff;   // y == 1/x mod 2^16
   // last step - calculate inverse mod DV directly;
   // assumes 16 < DB <= 32 and assumes ability to handle 48-bit ints
-  y = (y*(2-x*y%BI_DV))%BI_DV;		// y == 1/x mod 2^dbits
+  y = (y*(2-x*y%BI_DV))%BI_DV;          // y == 1/x mod 2^dbits
   // we really want the negative inverse, and -DV < y < DV
   return (y>0)?BI_DV-y:-y;
 }
@@ -583,7 +583,7 @@ function montRevert(x) {
 // x = x/R mod m (HAC 14.32)
 function montReduce(x) {
   var x_array = x.array;
-  while(x.t <= this.mt2)	// pad x so am has enough room later
+  while(x.t <= this.mt2)        // pad x so am has enough room later
     x_array[x.t++] = 0;
   for(var i = 0; i < this.m.t; ++i) {
     // faster way of calculating u0 = x[i]*mp mod DV
@@ -761,7 +761,7 @@ function bnpFromNumber(a,b,c) {
     if(a < 2) this.fromInt(1);
     else {
       this.fromNumber(a,c);
-      if(!this.testBit(a-1))	// force MSB set
+      if(!this.testBit(a-1))    // force MSB set
         this.bitwiseTo(BigInteger.ONE.shiftLeft(a-1),op_or,this);
       if(this.isEven()) this.dAddOffset(1,0); // force odd
       while(!this.isProbablePrime(b)) {
@@ -1137,7 +1137,7 @@ function bnModPow(e,m) {
     n = k;
     while((w&1) == 0) { w >>= 1; --n; }
     if((i -= n) < 0) { i += BI_DB; --j; }
-    if(is1) {	// ret == 1, don't bother squaring or multiplying it
+    if(is1) {   // ret == 1, don't bother squaring or multiplying it
       g[w].copyTo(r);
       is1 = false;
     }
@@ -1407,7 +1407,7 @@ function rng_seed_int(x) {
 
 // Mix in the current time (w/milliseconds) into the pool
 function rng_seed_time() {
-  // Use pre-computed date to avoid making the benchmark 
+  // Use pre-computed date to avoid making the benchmark
   // results dependent on the current date.
   rng_seed_int(1122926989487);
 }

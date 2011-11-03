@@ -109,7 +109,7 @@ datasizes[3] = 100000;
 
   /*
    * buildTestData
-   * 
+   *
    * Builds the data used for the test -- each time the test is run.
    */
 
@@ -173,7 +173,7 @@ datasizes[3] = 100000;
 
   /*
    * calcEncryptKey
-   * 
+   *
    * Builds the 52 16-bit encryption subkeys Z[] from the user key and stores
    * in 32-bit int array. The routing corrects an error in the source code in
    * the Schnier book. Basically, the sense of the 7- and 9-bit shifts are
@@ -228,7 +228,7 @@ datasizes[3] = 100000;
 
   /*
    * calcDecryptKey
-   * 
+   *
    * Builds the 52 16-bit encryption subkeys DK[] from the encryption- subkeys
    * Z[]. DK[] is a 32-bit int array holding 16-bit values as unsigned.
    */
@@ -277,7 +277,7 @@ datasizes[3] = 100000;
 
   /*
    * cipher_idea
-   * 
+   *
    * IDEA encryption/decryption algorithm. It processes plaintext in 64-bit
    * blocks, one at a time, breaking the block into four 16-bit unsigned
    * subblocks. It goes through eight rounds of processing using 6 new subkeys
@@ -423,7 +423,7 @@ datasizes[3] = 100000;
 
   /*
    * mul
-   * 
+   *
    * Performs multiplication, modulo (2**16)+1. This code is structured on the
    * assumption that untaken branches are cheaper than taken branches, and
    * that the compiler doesn't schedule branches. Java: Must work with 32-bit
@@ -435,7 +435,7 @@ datasizes[3] = 100000;
    * result would zero, be 2**16. And if one of the multiplicands is 0, the
    * result is not zero, but (2**16) + 1 minus the other multiplicand (sort of
    * an additive inverse mod 0x10001).
-   * 
+   *
    * NOTE: The java conversion of this routine works correctly, but is half
    * the speed of using Java's modulus division function (%) on the
    * multiplication with a 16-bit masking of the result--running in the
@@ -463,7 +463,7 @@ datasizes[3] = 100000;
 
   /*
    * inv
-   * 
+   *
    * Compute multiplicative inverse of x, modulo (2**16)+1 using extended
    * Euclid's GCD (greatest common divisor) algorithm. It is unrolled twice to
    * avoid swapping the meaning of the registers. And some subtracts are
@@ -478,7 +478,7 @@ datasizes[3] = 100000;
     if (x <= 1) // Assumes positive x.
       return (x); // 0 and 1 are self-inverse.
     /* (2**16+1)/x; x is >= 2, so fits 16 bits.*/
-    t1 = Math.floor(0x10001 / x); 
+    t1 = Math.floor(0x10001 / x);
     y = 0x10001 % x;
     if (y == 1)
       return ((1 - t1) & 0xFFFF);
