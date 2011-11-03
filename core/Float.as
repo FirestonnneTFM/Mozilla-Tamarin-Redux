@@ -41,6 +41,147 @@
 package
 {
     // No instancegc, value is primitive.
+
+    [native(cls="FloatClass", classgc="exact", instance="float", methods="auto", construct="override")]
+    [API(CONFIG::SWF_16)]
+    CONFIG::VMCFG_FLOAT
+    public final class float
+    {
+        // E262 {DontEnum, DontDelete, ReadOnly}
+        public static const NaN               :float = 0f/0f
+        public static const NEGATIVE_INFINITY :float = -1f/0f
+        public static const POSITIVE_INFINITY :float = 1f/0f
+        public static const MIN_VALUE         :float = _minValue() // 1.175494351e-38 
+        public static const MAX_VALUE         :float = 3.4028235e+38f; // exact value: 340282346638528859811704183484516925440, bit pattern: 0x7f7fffff
+        public static const E                 :float = 2.7182818f;
+        public static const LN10              :float = 2.30258509f;
+        public static const LN2               :float = 0.693147181f;
+        public static const LOG2E             :float = 1.44269504f;
+        public static const PI                :float = 3.1415927f;
+        public static const SQRT1_2           :float = 7.0710677e-1f;
+        public static const SQRT2             :float = 1.4142135f;
+        // these must match the same constants in MathUtils
+        private static const DTOSTR_FIXED:int = 1
+        private static const DTOSTR_PRECISION:int = 2
+        private static const DTOSTR_EXPONENTIAL:int = 3
+
+        // float.length = 1 per ES3
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1
+
+
+
+        public static        function abs        (x:float)        :float  { return float( Math.abs(x) );     }
+        public static        function acos       (x:float)        :float  { return float( Math.acos(x) );    }
+        public static        function asin       (x:float)        :float  { return float( Math.asin(x) );    }
+        public static        function atan       (x:float)        :float  { return float( Math.atan(x) );    }
+        public static        function atan2      (y:float,x:float):float  { return float( Math.atan2(y,x) ); }
+        public static        function ceil       (x:float)        :float  { return float( Math.ceil(x) );    }
+        public static        function cos        (x:float)        :float  { return float( Math.cos(x) );     }
+        public static        function exp        (x:float)        :float  { return float( Math.exp(x) );     }
+        public static        function floor      (x:float)        :float  { return float( Math.floor(x) );   }
+        public static        function log        (x:float)        :float  { return float( Math.log(x) );     }
+        public static        function pow        (x:float,y:float):float  { return float( Math.pow(x,y) );   }
+        public static        function random     ()               :float  { return float( Math.random() );   }
+        public static        function round      (x:float)        :float  { return float( Math.round(x) );   }
+        public static        function sin        (x:float)        :float  { return float( Math.sin(x) );     }
+        public static        function sqrt       (x:float)        :float  { return float( Math.sqrt(x) );    }
+        public static        function tan        (x:float)        :float  { return float( Math.tan(x) );     }
+        public static native function reciprocal (arg:float)      :float;
+        public static native function rsqrt      (arg:float)      :float;
+
+        public static function max( ...xs ) : float  
+        {
+            var result:float = NEGATIVE_INFINITY;
+            for(var i:int = 0; i<xs.length; i++)
+            {
+                var p: float = float(xs[i]);
+                if(isNaN(p)) return p;
+                if(p > result) result = p;
+                else if( p == result && p == 0f && (1f/result)<0f ) result = p; // replace "-0" with "+0". 
+            }
+            return result;
+        }
+
+        public static function min( ...xs ) : float  
+        {
+            var result:float = POSITIVE_INFINITY;
+            for(var i:int = 0; i<xs.length; i++)
+            {
+                var p: float = float(xs[i]);
+                if(isNaN(p)) return p;
+                if(p < result) result = p;
+                else if( p == result && p == 0f && (1f/result)>0f ) result = p; // replace "+0" with "-0". 
+            }
+            return result;
+        }
+
+        private static native function _minValue ():float
+        private static native function _floatToString(n:float, radix:int):String
+        private static native function _convert(n:float, precision:int, mode:int):String
+
+        AS3 function toString(radix=10):String
+        {
+            return _floatToString(this, radix)
+        }
+        AS3 function valueOf():float { return this }
+
+        prototype.toLocaleString =
+        prototype.toString = function (radix=10):String
+        {
+            if (this === prototype) return "0"
+
+            if (!(this is float))
+                Error.throwError( TypeError, 1004 /*kInvokeOnIncompatibleObjectError*/, "float.prototype.toString" );
+
+            return _floatToString(this, radix)
+        }
+
+        prototype.valueOf = function()
+        {
+            if (this === prototype) return 0
+            if (!(this is float))
+                Error.throwError( TypeError, 1004 /*kInvokeOnIncompatibleObjectError*/, "float.prototype.valueOf" );
+            return this
+        }
+
+        AS3 function toExponential(p=0):String
+        {
+            return _convert(this, int(p), DTOSTR_EXPONENTIAL);
+        }
+        prototype.toExponential = function(p=0):String
+        {
+            return _convert(float(this), int(p), DTOSTR_EXPONENTIAL); 
+        }
+
+
+        AS3 function toPrecision(p=0):String
+        {
+            return _convert(this, int(p), DTOSTR_PRECISION);
+        }
+        prototype.toPrecision = function(p=0):String
+        {
+            return _convert(float(this), int(p), DTOSTR_PRECISION); 
+        }
+
+        AS3 function toFixed(p=0):String
+        {
+            return _convert(this, int(p), DTOSTR_FIXED);
+        }
+        prototype.toFixed = function(p=0):String
+        {
+            return _convert(float(this), int(p), DTOSTR_FIXED); 
+        }
+
+        // Dummy constructor function - This is neccessary so the compiler can do arg # checking for the ctor in strict mode
+        // The code for the actual ctor is in FloatClass::construct in the avmplus
+        public function float(value = 0)
+        {}
+
+        _dontEnumPrototype(prototype);
+    }
+
+    // No instancegc, value is primitive.
     [native(cls="Float4Class", classgc="exact", instance="float4_t", methods="auto", construct="override")]
     [API(CONFIG::SWF_16)]
     CONFIG::VMCFG_FLOAT
@@ -48,7 +189,7 @@ package
     {
         // Dummy constructor function - This is neccessary so the compiler can do arg # checking for the ctor in strict mode
         // The code for the actual ctor is in Float4Class::construct in the avmplus
-        public function float4(x:float=0, y:float =0 , z:float =0 , w:float =0 )     {}
+        public function float4(x:float=0f, y:float =0f , z:float =0f , w:float =0f )     {}
 
         // float4.length = 4 per float4 spec
         // {ReadOnly, DontDelete, DontEnum }
