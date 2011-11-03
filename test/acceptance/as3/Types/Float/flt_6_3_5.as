@@ -58,7 +58,7 @@ AddTestCase("returns a float", "float", typeof(u));
 
 
 flt = float.NaN;
-AddTestCase("unary minus on float - NaN", -1  /*0xFFFFFFFF*/, FloatRawBits(-flt));
+AddTestCase("unary minus on float - NaN", -4194304  /*0xFFFFFFFF*/, FloatRawBits(-flt));
 
 flt = new float(-3.1413119f);
 AddTestCase("unary minus on float - regular number", 1078528833 /*0x40490b42*/,FloatRawBits(-flt));

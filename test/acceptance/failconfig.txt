@@ -343,17 +343,17 @@ as3/Types/Float/floatAcceptanceTests:Add\ Math\ object\ tests, .*,, expectedfail
 as3/Types/Float/flt_6_7_6:Order\ of\ evaluation, .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=640052
 as3/Types/Float/flt_6_7_7:Order\ of\ evaluation, .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=640052
 as3/Types/Float/flt_4_5_29: sign check , .*, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=686708
-
 as3/Types/Float/flt_6_4_3:modulo on float, .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=688744
-
 as3/Types/Float/flt_9_2:ToFloat\(Number\.NaN\), .*,, expectedfail, This test probably should be removed see comment in media
+as3/Types/Float/flt_9_8:ToString\(float\.MAX_VALUE\) , .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=699463
+
 
 as3/Types/Float4/flt4_4_4_16_3:float4\.asin\(1f, .*mac.* ,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=694844
 as3/Types/Float4/flt4_4_4_16_7:float4\.cos\(1f, .*mac.* ,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=694844
 as3/Types/Float4/flt4_4_4_16_18:float4\.sin\(1f. 1f. 1f. 1f\), (x64|arm)-lnx, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=694844
 
 as3/Types/Float4/flt4_4_6_3, arm.* ,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
-as3/Types/Float4/flt4_4_6_3_swizzle, arm.* ,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
+as3/Types/Float4/flt4_4_6_3_swizzle, arm.* ,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 
 as3/Types/Float4/flt4_4_6_3, -Ojit, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=696070
 
@@ -371,7 +371,6 @@ as3/Types/Float4/flt4_4_4_16_8:float4\.exp\(1f. 1f. 1f. 1f\) , x86-win-tvm-relea
 as3/Types/Float4/flt4_5_5_3:\'(0|1|2|3)\' in float4, .* , ,   expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=696644
 as3/Types/Float4/flt4_5_5_3:^(0|1|2|3) in float4, -Ojit , ,   expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=696644
 
-as3/Types/Float/flt_6_3_5:unary minus on float - NaN , x64-win-.* , -Ojit , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=
 as3/Types/Float/loadLegacyCode, arm , ,  expectedfail, need to update runner script
 
 as3/Types/Float/flt_4_7_5, .*diff , , skip, skip for differential testing

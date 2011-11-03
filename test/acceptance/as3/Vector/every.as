@@ -96,16 +96,6 @@ AddTestCase("every: Number vector does contain a zero",
             false,
             v1.every(checker1));
 
-var v1 = Vector.<float>([3.1415, float.MAX_VALUE, -0.00032]);
-AddTestCase("every: float vector does not contain a zero",
-            true,
-            v1.every(checker1));
-
-var v1 = Vector.<float>([3.1415, float.MAX_VALUE, 0.00, -0.00032]);
-AddTestCase("every: float vector does contain a zero",
-            false,
-            v1.every(checker1));
-
 var v1 = Vector.<uint>([31415, uint.MAX_VALUE, 999999]);
 AddTestCase("every: uint vector does not contain a zero",
             true,

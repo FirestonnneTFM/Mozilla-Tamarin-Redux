@@ -47,7 +47,7 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 var flt_nan:float = float.NaN;
-var flt_nan_int:int = 2147483647; // 0x7FFFFFFF= float.nan, this CAN change
+var flt_nan_int:int = 2143289344; // 0x7FFFFFFF= float.nan, this CAN change
 AddTestCase("float.NaN", flt_nan_int, FloatRawBits(float.NaN)); // Note: strictly speaking, float.NaN could have another hex representation, too.
 
 var nanfl = 0f/0f;
