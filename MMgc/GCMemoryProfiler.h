@@ -423,6 +423,10 @@ namespace MMgc
 
 #endif //MMGC_MEMORY_INFO
 
+#if USER_POINTER_WORDS != 0 && USER_POINTER_WORDS != 2 && USER_POINTER_WORDS != 4
+    #error "Are you sure about this value of USER_POINTER_WORDS?"
+#endif
+
 } // namespace MMgc
 
 #endif //!__GCMemoryProfiler__
