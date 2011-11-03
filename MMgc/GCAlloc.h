@@ -101,6 +101,15 @@ namespace MMgc
      * This is a fast, fixed-size memory allocator for garbage-collected
      * objects.
      *
+     * We observe the following invariant:
+     *
+     * If the size managed by the allocator is divisible by 2^k and k >= 3 then
+     * the alignment of an object returned by Alloc is on a 2^k byte boundary.
+     *
+     * Note that any space for Debug headers is added outside GCAlloc, and that 
+     * GC::Alloc has a weaker invariant in Debug builds, guaranteeing at most
+     * 16 bytes of alignment for k >= 4.
+     *
      * Memory is allocated from the system on 4096-byte aligned boundaries,
      * which corresponds to the size of an OS page in Windows XP.  Allocation
      * of pages is performed via the GCPageAlloc class.
