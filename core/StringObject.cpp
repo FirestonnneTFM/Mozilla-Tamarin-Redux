@@ -2377,7 +2377,7 @@ namespace avmplus
         return toLowerCase();
     }
 
-    double String::_charCodeAtFI(int32_t iPos)
+    double String::_charCodeAtDI(int32_t iPos)
     {
         double d;
         // use unsigned compare as faster equivalent to >= 0 && < m_length
@@ -2401,7 +2401,7 @@ namespace avmplus
             return 0;
     }
 
-    double String::_charCodeAtFU(uint32_t iPos)
+    double String::_charCodeAtDU(uint32_t iPos)
     {
         double d;
         if (iPos < uint32_t(m_length)) {
@@ -2436,7 +2436,7 @@ namespace avmplus
             return MathUtils::kNaN;
     }
 
-    int32_t String::_charCodeAtIF(double dPos)
+    int32_t String::_charCodeAtID(double dPos)
     {
         int32_t iPos;
         INTCLAMP(iPos, dPos, m_length, 0);
