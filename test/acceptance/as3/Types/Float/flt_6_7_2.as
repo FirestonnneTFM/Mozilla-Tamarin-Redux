@@ -58,6 +58,9 @@ var large_int:int = -268435456;
 var large_uint:uint = 268435456;
 var vf = new Vector.<float>();
 
+function check(var1:*, var2:*):* { return var1 as var2; }
+
+
 AddErrorTest("AS: TypeError if datatype is not Class", TYPEERROR, function(){ return pi_float as "float"; });
 
 AddStrictTestCase("3.14f as float", float(3.14), pi_float as float);
@@ -99,15 +102,17 @@ AddStrictTestCase("float(Number.MAX_VALUE) as float is float(Infinity)", float(I
 
 AddStrictTestCase("2.01 as float (null)", null, 2.01 as float);
 
-AddStrictTestCase("int.length (1) as  float ", float(1), int.length as float);
+AddStrictTestCase("int.length (1) as  float ", null, int.length as float);
 
 AddStrictTestCase("int.MIN_VALUE as  float", null, int.MIN_VALUE as float);
+AddStrictTestCase("check int.MIN_VALUE as float", null, check(int.MIN_VALUE, float));
 
 AddStrictTestCase("large_negative_int as  float (null)", null, large_neg_int as float);
 
 AddStrictTestCase("uint.MAX_VALUE as float (null)", null, uint.MAX_VALUE as float);
 
-AddStrictTestCase("uint.MIN_VALUE (0) as float", float(0), uint.MIN_VALUE as float);
+AddStrictTestCase("uint.MIN_VALUE (0) as float", null, uint.MIN_VALUE as float);
+AddStrictTestCase("check uint.MIN_VALUE (0) as float", null, check(uint.MIN_VALUE, float));
 
 AddStrictTestCase("large int as float (if it ends in lots of zeroes - i.e. requires less than 23bits of mantissa)", null, large_int as float);
 

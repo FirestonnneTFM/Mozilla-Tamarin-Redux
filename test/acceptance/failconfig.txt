@@ -379,3 +379,13 @@ as3/Types/Float4/flt4_4_4_16_8, .*diff , , skip, skip for differential testing
 as3/Types/Float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
 as3/Types/Float4/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
 
+
+as3/Types/Float4/flt4_5_8_1:^float4\(1f\) && float4\(0f\), .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
+as3/Types/Float4/flt4_5_8_1:^float4\(1f. 2f. 3f. 4f\) && float4\(-1f. -2f. -3f. -4f\) , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
+as3/Types/Float4/flt4_5_8_1:^float4\(1f. 2f. 3f. 4f\) && float4\(0f. -2f. -3f. -4f\) , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
+as3/Types/Float4/flt4_5_8_1:^float4\(1f. 2f. -0f. 4f\) && float4\(-1f. -2f. -3f. -4f\) , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
+as3/Types/Float4/flt4_5_8_2:^float4\(1f\) \|\| float4\(0f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
+as3/Types/Float4/flt4_5_8_2:^float4\(1f. 2f. 3f. 4f\) \|\| float4\(-1f. -2f. -3f. -4f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
+as3/Types/Float4/flt4_5_8_2:^float4\(1f. 2f. 3f. 4f\) \|\| float4\(0f. -2f. -3f. -4f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
+as3/Types/Float4/flt4_5_8_2:^float4\(1f. 2f. -0f. 4f\) \|\| float4\(-1f. -2f. -3f. -4f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
+
