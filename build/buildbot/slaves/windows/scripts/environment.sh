@@ -57,9 +57,14 @@ VS_HOME_PATH=`cygpath -a "$VS_HOME"`
 echo VS_HOME: $VS_HOME
 echo VS_HOME_PATH: $VS_HOME_PATH
 
-export PATH="$VS_HOME_PATH/Common7/IDE:$VS_HOME_PATH/VC/bin:$VS_HOME_PATH\Common7\Tools:$VS_HOME_PATH/VC/VCPackages:$PATH"
-export INCLUDE="$INCLUDE;c:\Program Files\Microsoft SDKs\Windows\v6.0\Include;$VS_HOME\VC\atlmfc\include;$VS_HOME\VC\include;"
-export LIB="$LIB;c:\Program Files\Microsoft SDKs\Windows\v6.0\Lib;c:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib;$VS_HOME\VC\atlmfc\lib;$VS_HOME\VC\lib"
-export LIBPATH="$LIBPATH;c:\Program Files\Microsoft SDKs\Windows\v6.0\Lib;c:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib;$VS_HOME\VC\atlmfc\lib;$VS_HOME\VC\lib;"
+if [ "$WINDOWS_SDK" == "" ]
+then
+    WINDOWS_SDK="c:\Program Files\Microsoft SDKs\Windows\v6.0A"
+fi
+
+export PATH="$PATH_PREPEND:$VS_HOME_PATH/Common7/IDE:$VS_HOME_PATH/VC/bin:$VS_HOME_PATH\Common7\Tools:$VS_HOME_PATH/VC/VCPackages:$PATH"
+export INCLUDE="$WINDOWS_SDK\Include;$VS_HOME\VC\atlmfc\include;$VS_HOME\VC\include;"
+export LIB="$WINDOWS_SDK\Lib;$VS_HOME\VC\atlmfc\lib;$VS_HOME\VC\lib"
+export LIBPATH="$WINDOWS_SDK\Lib;$VS_HOME\VC\atlmfc\lib;$VS_HOME\VC\lib;"
 
 

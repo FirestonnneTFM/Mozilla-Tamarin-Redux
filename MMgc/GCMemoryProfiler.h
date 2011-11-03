@@ -382,8 +382,13 @@ namespace MMgc
     //
     // Traditionally USER_POINTER_WORDS is 2.  For proper alignment of float4 boxes
     // we require USER_POINTER_WORDS to be 4, however.  See comments in GC::GC for 
-    // more about that.
-#define USER_POINTER_WORDS 4
+    // more about that, bugzilla 697672 for a discussion, and comments on GCAlloc::Alloc
+    // for an interesting invariant that depends on USER_POINTER_WORDS.
+#ifdef VMCFG_FLOAT
+    #define USER_POINTER_WORDS 4
+#else
+    #define USER_POINTER_WORDS 2
+#endif
 
     /**
     * How much extra size does DebugDecorate need?
@@ -417,6 +422,10 @@ namespace MMgc
     void ReportDeletedMemoryWrite(const void* item);
 
 #endif //MMGC_MEMORY_INFO
+
+#if USER_POINTER_WORDS != 0 && USER_POINTER_WORDS != 2 && USER_POINTER_WORDS != 4
+    #error "Are you sure about this value of USER_POINTER_WORDS?"
+#endif
 
 } // namespace MMgc
 
