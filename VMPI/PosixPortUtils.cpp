@@ -38,6 +38,7 @@
 * ***** END LICENSE BLOCK ***** */
 
 #include "VMPI.h"
+#include "VMAssert.h"
 
 #include <stdlib.h>
 #include <sys/time.h>
