@@ -281,20 +281,24 @@ namespace MMgc
         GCAssert(DebugSize() == 24);
         bibopAllocFloat  = mmfx_new(GCAlloc(this, int(32), false, false, false, /*sizeclass*/3, avmplus::AtomConstants::kBibopFloatType));
         bibopAllocFloat4 = mmfx_new(GCAlloc(this, int(48), false, false, false, /*sizeclass*/5 /*sic!*/, avmplus::AtomConstants::kBibopFloat4Type));
-#else
+#elif USER_POINTER_WORDS == 4
         GCAssert(DebugSize() == 32);
         bibopAllocFloat  = mmfx_new(GCAlloc(this, int(40), false, false, false, /*sizeclass*/4, avmplus::AtomConstants::kBibopFloatType));
         bibopAllocFloat4 = mmfx_new(GCAlloc(this, int(48), false, false, false, /*sizeclass*/5, avmplus::AtomConstants::kBibopFloat4Type));
-#endif
 #else
+    #error "USER_POINTER_WORDS must be 4 if not 2"
+#endif
+#else // !MMGC_64BIT
 #if USER_POINTER_WORDS == 2
         GCAssert(DebugSize() == 16);
         bibopAllocFloat  = mmfx_new(GCAlloc(this, int(24), false, false, false, /*sizeclass*/2, avmplus::AtomConstants::kBibopFloatType));
         bibopAllocFloat4 = mmfx_new(GCAlloc(this, int(32), false, false, false, /*sizeclass*/3, avmplus::AtomConstants::kBibopFloat4Type));
-#else
+#elif USER_POINTER_WORDS == 4
         GCAssert(DebugSize() == 24);
         bibopAllocFloat  = mmfx_new(GCAlloc(this, int(32), false, false, false, /*sizeclass*/3, avmplus::AtomConstants::kBibopFloatType));
         bibopAllocFloat4 = mmfx_new(GCAlloc(this, int(48), false, false, false, /*sizeclass*/5 /*sic!*/, avmplus::AtomConstants::kBibopFloat4Type));
+#else
+    #error "USER_POINTER_WORDS must be 4 if not 2"
 #endif
 #endif
 #endif
