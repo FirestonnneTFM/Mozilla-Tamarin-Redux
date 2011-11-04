@@ -321,8 +321,9 @@ namespace avmplus
     float4_t Float4Class::_swizzle(float4_t val, int32_t how)
     {
         AvmAssert(how >= 0 && how < 256);
+#ifdef VMCFG_SSE21
         switch(how){ // must explicitly expand; the "shuffle" intrinsic doesn't take variables. 
-#define CASE(x)  case x: return f4_shuffle<x>(val);
+#define CASE(x)  case x: return _mm_shuffle_ps(val, val, x);
             CASE(0);CASE(1);CASE(2);CASE(3);CASE(4);CASE(5);CASE(6);CASE(7);CASE(8);CASE(9);
             CASE(10);CASE(11);CASE(12);CASE(13);CASE(14);CASE(15);CASE(16);CASE(17);CASE(18);CASE(19);
             CASE(20);CASE(21);CASE(22);CASE(23);CASE(24);CASE(25);CASE(26);CASE(27);CASE(28);CASE(29);
@@ -350,9 +351,19 @@ namespace avmplus
             CASE(240);CASE(241);CASE(242);CASE(243);CASE(244);CASE(245);CASE(246);CASE(247);CASE(248);CASE(249);
             CASE(250);CASE(251);CASE(252);CASE(253);CASE(254);CASE(255);
 #undef CASE
-            default: break;
+default: return _mm_set1_ps(0); // make all compilers happy
         }
-        return val;
+#else       // No intrinsic available; do the shuffling "by hand"
+        float4_t retval;
+        float* retp = reinterpret_cast<float*>(&retval);
+        float* valp = reinterpret_cast<float*>(&val);
+        for(int i = 0; i < 4; ++i)
+        {
+            int idx = how & 3; how >>= 2;
+            *retp++ = valp[idx];
+        }
+        return retval;
+#endif 
     }
 }
 #endif

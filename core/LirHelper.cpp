@@ -193,13 +193,13 @@ LIns* LirHelper::atomToNative(BuiltinType bt, LIns* atom)
             return lirout->insImmF4(f4val);
         }
         else
-            return callIns(FUNCTIONID(float4), 1, atom);
+            return callIns(FUNCTIONID(float4), 1, atom);   // TODO: AFAICT, this should be replaceable with a single ldf4() (set offset = -kBibopSpecialUndefined)
 
     case BUILTIN_float:
         if (atom->isImmP())
-            return lirout->insImmF((float)AvmCore::number_d((Atom)atom->immP()));
+            return lirout->insImmF(AvmCore::atomToFloat((Atom)atom->immP()));
         else
-            return callIns(FUNCTIONID(singlePrecisionFloat), 1, atom);
+            return callIns(FUNCTIONID(singlePrecisionFloat), 1, atom); // TODO: AFAICT, this should be replaceable with a single ldf() (set offset = -kBibopSpecialUndefined)
 #endif
     case BUILTIN_number:
         if (atom->isImmP())

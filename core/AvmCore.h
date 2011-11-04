@@ -1201,6 +1201,12 @@ const int kBufferPadding = 16;
         /** Helper method; returns true if atom's type is Number */
         static bool isNumber(Atom atom);
 
+        /** Helper method; returns true if atom's type is Number or Float*/
+        static bool isNumberOrFloat(Atom atom);
+
+        /** Helper method; returns true if atom's type is Number or Float or Float4*/
+        static bool isNumeric(Atom atom);
+
         /** Helper method; returns true if atom's type is boolean */
         static bool isBoolean(Atom atom);
 

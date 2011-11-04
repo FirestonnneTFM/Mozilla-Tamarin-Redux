@@ -1175,6 +1175,9 @@ namespace avmplus
 #endif // VMCFG_AOT
 
 /*
+TODO: UPDATE THIS COMMENT, IT IS NO LONGER TRUE/RELIABLE
+True source is the ABC Extensions Spec for float/float4.
+
 11.9.3 The Abstract Equality Comparison Algorithm
 The comparison x == y, where x and y are values, produces true or false. Such a comparison is performed as
 follows:
@@ -1241,11 +1244,12 @@ return the result of the comparison ToPrimitive(x) == y.
             // same type
             switch (ltype)
             {
-            case 0:
+            case 0:   // kUnusedAtomTag
                 return trueAtom;
             case kSpecialBibopType:
                 {
 #ifdef VMCFG_FLOAT
+                    // if either is undefined, return false
                     if (lhs == AtomConstants::undefinedAtom || rhs == AtomConstants::undefinedAtom) 
                         return lhs==rhs ? trueAtom : falseAtom;
                      
@@ -1259,7 +1263,7 @@ return the result of the comparison ToPrimitive(x) == y.
                     }
 
                     AvmAssertMsg(lt==kBibopFloat4Type || rt == kBibopFloat4Type, "Unhandled bibopKind");
-                    return f4_eq_i(float4(lhs), float4(rhs)) ? trueAtom : falseAtom;
+                    return f4_eq_i(float4(lhs), float4(rhs) ) ? trueAtom:falseAtom;
 #else
                     return trueAtom;
 #endif // VMCFG_FLOAT
@@ -1310,36 +1314,51 @@ return the result of the comparison ToPrimitive(x) == y.
         }
         else
         {   
-            // FIXME: handle the comparisons between float4 and other types, return something other 
-            // than false if the spec requires it
-
             if (isNullOrUndefined(lhs) && isNullOrUndefined(rhs))
                 return trueAtom;
+#ifdef VMCFG_FLOAT
+            if( isFloat4(lhs) || isFloat4(rhs) )
+                return f4_eq_i(float4(lhs), float4(rhs) ) ? trueAtom : falseAtom;
+#endif
             if (ltype == kIntptrType && rtype == kDoubleType)
                 return ((double)atomGetIntptr(lhs)) == atomToDouble(rhs) ? trueAtom : falseAtom;
             if (ltype == kDoubleType && rtype == kIntptrType)
                 return atomToDouble(lhs) == ((double)atomGetIntptr(rhs)) ? trueAtom : falseAtom;
 
-            // 16. If Type(x) is Number and Type(y) is String,
-            // return the result of the comparison x == ToNumber(y).
-            if (isNumber(lhs) && isString(rhs)){
+#ifdef VMCFG_FLOAT
+            if(isNumeric(lhs) && isNumeric(rhs)) // float with Number comparison, because other cases were treated above.
+            {
+                AvmAssert(isFloat(lhs) || isFloat(rhs));
+                return number(lhs) == number(rhs) ? trueAtom : falseAtom;
+            }
+#endif 
+            // 16. If Type(x) is Numeric and Type(y) is String,
+            // return the result of the comparison x == ToNumeric(y).
+            // Note: while it's tempting to blindly follow the spec and recursively call equals(),
+            // the truth is that ToNumeric(string) == ToNumber(string), and we always end up doing
+            // a number-to-number comparison.
+            // (important remark: lhs can't be a float4, it would've been already handled)
+            if (isNumeric(lhs) && isString(rhs))
+            { 
 #ifdef VMCFG_FLOAT
                 if(isFloat(lhs))
-                    return equals(lhs, floatToAtom(singlePrecisionFloat(rhs)));
+                    return ((double)atomToFloat(lhs)) == number(rhs) ? trueAtom : falseAtom;
                 else
 #endif // VMCFG_FLOAT
-                    return equals(lhs, doubleToAtom(number(rhs)));
+                    return number_d(lhs) == number(rhs) ? trueAtom : falseAtom;
             }
 
-            // 17. If Type(x) is String and Type(y) is Number,
-            // return the result of the comparison ToNumber(x) == y.
-            if (isString(lhs) && isNumber(rhs)){
+            // 17. If Type(x) is String and Type(y) is Numeric,
+            // return the result of the comparison ToNumeric(x) == y.
+            // See note on the previous point
+            if (isString(lhs) && isNumeric(rhs))
+            {
 #ifdef VMCFG_FLOAT
                 if(isFloat(rhs))
-                    return equals(floatToAtom(singlePrecisionFloat(lhs)), rhs);
+                    return ((double)atomToFloat(rhs)) == number(lhs) ? trueAtom : falseAtom;
                 else
 #endif // VMCFG_FLOAT
-                    return equals(doubleToAtom(number(lhs)), rhs);
+                    return number(lhs) == number_d(rhs) ? trueAtom : falseAtom;
             }
 
             // E4X 11.5.1, step 4.  Placed slightly lower then in the spec
@@ -1362,18 +1381,13 @@ return the result of the comparison ToPrimitive(x) == y.
             // 20. If Type(x) is either String or Number and Type(y) is Object,
             // return the result of the comparison x == ToPrimitive(y).
 
-            if ((isString(lhs) || isNumber(lhs)) && rtype == kObjectType)
+            if ((isString(lhs) || isNumeric(lhs)) && rtype == kObjectType)
                 return equals(lhs, atomToScriptObject(rhs)->defaultValue());
 
             // 21. If Type(x) is Object and Type(y) is either String or Number,
             // return the result of the comparison ToPrimitive(x) == y.
-            if ((isString(rhs) || isNumber(rhs)) && ltype == kObjectType)
+            if ((isString(rhs) || isNumeric(rhs)) && ltype == kObjectType)
                 return equals(atomToScriptObject(lhs)->defaultValue(), rhs);
-#ifdef VMCFG_FLOAT
-            // 22. comparing float with other numeric converts to number 
-            if(isNumber(lhs) && isNumber(rhs))
-                return equals(doubleToAtom(number(lhs)),doubleToAtom(number(rhs)));
-#endif
         }
         return falseAtom;
     }
@@ -1440,7 +1454,7 @@ return the result of the comparison ToPrimitive(x) == y.
                 if(isFloat(lhs) && isFloat(rhs))
                     return atomToFloat(lhs) == atomToFloat(rhs) ? trueAtom : falseAtom;
                 if(isFloat4(lhs) && isFloat4(rhs))
-                    return f4_eq_i(atomToFloat4(lhs), atomToFloat4(rhs))? trueAtom : falseAtom;
+                    return f4_eq_i(atomToFloat4(lhs), atomToFloat4(rhs))? trueAtom:falseAtom;
                 return falseAtom; // one bibop, other "undefined"
 #else
                 return trueAtom;
