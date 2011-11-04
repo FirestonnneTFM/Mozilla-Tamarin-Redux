@@ -543,6 +543,10 @@ namespace avmplus
         case OP_coerce_s:
         case OP_coerce_o:
         case OP_convert_o:
+#ifdef VMCFG_FLOAT
+        case OP_convert_f:
+        case OP_convert_f4:
+#endif
         case OP_istypelate:
         case OP_newactivation:
         case OP_popscope:
@@ -572,6 +576,9 @@ namespace avmplus
         case OP_multiply_i:
         case OP_negate:
         case OP_negate_i:
+#ifdef VMCFG_FLOAT
+        case OP_unplus:
+#endif
         case OP_bitand:
         case OP_bitor:
         case OP_bitxor:
@@ -616,6 +623,10 @@ namespace avmplus
         case OP_pushstring:
         case OP_pushdouble:
         case OP_pushnamespace:
+#ifdef VMCFG_FLOAT
+        case OP_pushfloat:
+        case OP_pushfloat4:
+#endif
         case OP_getlocal:
         case OP_setlocal:
         case OP_inclocal:
