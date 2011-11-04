@@ -389,3 +389,4 @@ as3/Types/Float4/flt4_5_8_2:^float4\(1f. 2f. 3f. 4f\) \|\| float4\(-1f. -2f. -3f
 as3/Types/Float4/flt4_5_8_2:^float4\(1f. 2f. 3f. 4f\) \|\| float4\(0f. -2f. -3f. -4f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
 as3/Types/Float4/flt4_5_8_2:^float4\(1f. 2f. -0f. 4f\) \|\| float4\(-1f. -2f. -3f. -4f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
 
+misc/invalid_opcodes:opcode: 84 , .* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=699735

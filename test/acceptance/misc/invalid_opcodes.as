@@ -129,7 +129,7 @@ for (var i = 0; i < invalidOpcodes.length; i++) {
         if (v.toString().length > expected.length) {
             // debugger build, also test the error message
             var opcodeMsg = 'contained illegal opcode '+invalidOpcodes[i].toString();
-            AddTestCase('check illegal opcode message == actual illegal opcode', true, v.toString().search(opcodeMsg) > 0);
+            AddTestCase('opcode: '+invalidOpcodes[i]+' check illegal opcode message == actual illegal opcode', true, v.toString().search(opcodeMsg) > 0);
             print(v.toString())
         }
     } finally {
