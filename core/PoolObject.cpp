@@ -248,7 +248,7 @@ namespace avmplus
 
 #ifdef VMCFG_FLOAT
             case BUILTIN_float:
-                return AvmCore::isNumber(value);
+                return AvmCore::isFloat(value);
 
             case BUILTIN_float4:
                 return AvmCore::isFloat4(value);

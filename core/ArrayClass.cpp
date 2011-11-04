@@ -556,7 +556,7 @@ namespace avmplus
 
                 // We want to throw if this is an Array.NUMERIC sort and any items are not numbers,
                 // and not strings that can be converted into numbers
-                if(isNumericCompare && !core->isNumber(atoms->list.get(i)))
+                if(isNumericCompare && !core->isNumberOrFloat(atoms->list.get(i)))
                 {
                     double val = AvmCore::number(atoms->list.get(i));
                     if(MathUtils::isNaN(val))
@@ -1123,7 +1123,7 @@ namespace avmplus
                 if (args->getLength() >= 2)
                 {
                     Atom arg1 = args->getUintProperty(1);
-                    if (core->isNumber(arg1))
+                    if (core->isNumberOrFloat(arg1))
                     {
                         opt = AvmCore::integer(arg1);
                     }
@@ -1134,7 +1134,7 @@ namespace avmplus
                     }
                 }
             }
-            else if (core->isNumber(arg0))
+            else if (core->isNumberOrFloat(arg0))
             {
                 opt = AvmCore::integer(arg0);
             }

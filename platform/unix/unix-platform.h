@@ -225,17 +225,6 @@ REALLY_INLINE float f4_y(float4_t v) { return vgetq_lane_f32(v, 1); }
 REALLY_INLINE float f4_z(float4_t v) { return vgetq_lane_f32(v, 2); }
 REALLY_INLINE float f4_w(float4_t v) { return vgetq_lane_f32(v, 3); }
 
-template<int32_t i>
-REALLY_INLINE float f4_ith(float4_t v) { return vgetq_lane_f32(v, i); }
-
-template<int32_t mask>
-REALLY_INLINE float4_t f4_shuffle(float4_t v)
-{
-    // TODO: Not implemented.
-    (void)mask;
-    return v;
-}
-
 #elif defined VMCFG_MIPS
 
 // Just make the build work, we don't really support MIPS.
@@ -253,12 +242,6 @@ REALLY_INLINE float f4_x(float4_t v) { (void)v; return 1.0f; }
 REALLY_INLINE float f4_y(float4_t v) { (void)v; return 1.0f; }
 REALLY_INLINE float f4_z(float4_t v) { (void)v; return 1.0f; }
 REALLY_INLINE float f4_w(float4_t v) { (void)v; return 1.0f; }
-
-template<int32_t i>
-REALLY_INLINE float f4_ith(float4_t v) { (void)v; (void)i; return 1.0f; }
-
-template<int32_t mask>
-REALLY_INLINE float4_t f4_shuffle(float4_t v) { (void)mask; return v; }
 
 #else  /* GNU/Linux, x86 */
 
@@ -280,18 +263,6 @@ REALLY_INLINE float f4_x(float4_t v) { return _mm_cvtss_f32(v); }
 REALLY_INLINE float f4_y(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 1, 1, 1))); }
 REALLY_INLINE float f4_z(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(2, 2, 2, 2))); }
 REALLY_INLINE float f4_w(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(3, 3, 3, 3))); }
-
-template<int32_t i>
-REALLY_INLINE float f4_ith(float4_t v)
-{
-    return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(i, i, i, i)));
-}
-
-template<int32_t mask>
-REALLY_INLINE float4_t f4_shuffle(float4_t v)
-{
-    return  _mm_shuffle_ps(v, v, mask);
-}
 
 #endif /* VMCFG_ARM */
 

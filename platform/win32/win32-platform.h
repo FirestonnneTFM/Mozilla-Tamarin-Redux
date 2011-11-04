@@ -275,18 +275,6 @@ REALLY_INLINE float f4_y(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v,
 REALLY_INLINE float f4_z(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(2, 2, 2, 2))); }
 REALLY_INLINE float f4_w(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(3, 3, 3, 3))); }
 
-template<int32_t i>
-REALLY_INLINE float f4_ith(float4_t v)
-{
-    return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(i, i, i, i)));
-}
-
-template<int32_t mask>
-REALLY_INLINE float4_t f4_shuffle(float4_t v)
-{
-    return  _mm_shuffle_ps(v, v, mask);
-}
-
 /**
 * Type defintion for an opaque data type representing platform-defined spin lock
 * @see VMPI_lockInit(), VMPI_lockAcquire()

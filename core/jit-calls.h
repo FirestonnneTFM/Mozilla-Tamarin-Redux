@@ -611,12 +611,18 @@
             break;
 #ifdef VMCFG_FLOAT
         case SST_float:
-            AvmAssert(AvmCore::isNumber(atom));
-            slotPtr->f = AvmCore::singlePrecisionFloat(atom);
+            AvmAssert(AvmCore::isFloat(atom));
+            slotPtr->f = AvmCore::atomToFloat(atom);
             break;
         case SST_float4:
-            AvmAssert(AvmCore::isFloat4(atom));
-            slotPtr->f4 = AvmCore::float4(atom);
+            {
+                AvmAssert(AvmCore::isFloat4(atom));
+                uintptr_t f4ptr = (uintptr_t) &(slotPtr->f4);
+                if((f4ptr & 0xf) == 0)        // Aligned, safe to assign directly
+                    slotPtr->f4 = AvmCore::atomToFloat4(atom);
+                else
+                    VMPI_memcpy(&(slotPtr->f4), atomPtr(atom), sizeof(float4_t));
+            }
             break;
 #endif // VMCFG_FLOAT
         default:
