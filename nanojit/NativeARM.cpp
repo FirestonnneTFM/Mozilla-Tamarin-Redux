@@ -1677,7 +1677,7 @@ Assembler::asm_load64(LIns* ins)
         }
 
         switch (ins->opcode()) {
-            CASEF(LIR_ldf:)
+            case LIR_ldf:
             case LIR_ldd:
                 if (isU8(offset/4) || isU8(-offset/4)) {
                     VLDR(dd, rn, offset);
@@ -1758,7 +1758,7 @@ Assembler::asm_store64(LOpcode op, LIns* value, int dr, LIns* base)
 #endif 
 
         switch (op) {
-            CASEF(LIR_stf:)
+            case LIR_stf:
             case LIR_std:
                 // VFP can only do stores with a range of ±1020, so we might
                 // need to do some arithmetic to extend its range.
@@ -1799,7 +1799,7 @@ Assembler::asm_store64(LOpcode op, LIns* value, int dr, LIns* base)
         Register    rn = findRegFor(base, GpRegs);
 
         switch (op) {
-            CASEF(LIR_stf:)
+            case LIR_stf:
                 NanoAssertMsg(0, "TODO: Soft-float implementation of LIR_stf.");
                 break;
             case LIR_std:
@@ -2870,10 +2870,10 @@ Assembler::asm_fop(LIns* ins)
     // TODO: Special cases for simple constants.
 
     switch(ins->opcode()) {
-        CASEF(LIR_addf:)CASEF(LIR_addf4:)case LIR_addd:      VADD(dd,dn,dm);        break;
-        CASEF(LIR_subf:)CASEF(LIR_subf4:)case LIR_subd:      VSUB(dd,dn,dm);        break;
-        CASEF(LIR_mulf:)CASEF(LIR_mulf4:)case LIR_muld:      VMUL(dd,dn,dm);        break;
-        CASEF(LIR_divf:)CASEF(LIR_divf4:)case LIR_divd:      VDIV(dd,dn,dm);        break;
+        case LIR_addf: case LIR_addf4: case LIR_addd:      VADD(dd,dn,dm);        break;
+        case LIR_subf: case LIR_subf4: case LIR_subd:      VSUB(dd,dn,dm);        break;
+        case LIR_mulf: case LIR_mulf4: case LIR_muld:      VMUL(dd,dn,dm);        break;
+        case LIR_divf: case LIR_divf4: case LIR_divd:      VDIV(dd,dn,dm);        break;
         default: NanoAssert(false); break;
     }
 
@@ -2945,11 +2945,11 @@ Assembler::asm_branch(bool branchOnFalse, LIns* cond, NIns* targ)
         // Floating-point conditions. Note that the VFP LT/LE conditions
         // require use of the unsigned condition codes, even though
         // float-point comparisons are always signed.
-        case LIR_eqd:CASEF(LIR_eqf:)   cc = EQ;    fp_cond = true;     break;
-        case LIR_ltd:CASEF(LIR_ltf:)   cc = LO;    fp_cond = true;     break;
-        case LIR_led:CASEF(LIR_lef:)   cc = LS;    fp_cond = true;     break;
-        case LIR_ged:CASEF(LIR_gef:)   cc = GE;    fp_cond = true;     break;
-        case LIR_gtd:CASEF(LIR_gtf:)   cc = GT;    fp_cond = true;     break;
+        case LIR_eqd: case LIR_eqf:   cc = EQ;    fp_cond = true;     break;
+        case LIR_ltd: case LIR_ltf:   cc = LO;    fp_cond = true;     break;
+        case LIR_led: case LIR_lef:   cc = LS;    fp_cond = true;     break;
+        case LIR_ged: case LIR_gef:   cc = GE;    fp_cond = true;     break;
+        case LIR_gtd: case LIR_gtf:   cc = GT;    fp_cond = true;     break;
 
         // Standard signed and unsigned integer comparisons.
         case LIR_eqi:   cc = EQ;    fp_cond = false;    break;
@@ -3410,16 +3410,16 @@ Assembler::asm_cmov(LIns* ins)
         case LIR_gtui:  cc = HI;        break;
         case LIR_geui:  cc = HS;        break;
         // VFP comparisons.
-        CASEF(LIR_eqf:)
-        CASEF(LIR_eqf4:)
+        case LIR_eqf:
+        case LIR_eqf4:
         case LIR_eqd:   cc = EQ;        break;
-        CASEF(LIR_ltf:)
+        case LIR_ltf:
         case LIR_ltd:   cc = LO;        break;
-        CASEF(LIR_lef:)
+        case LIR_lef:
         case LIR_led:   cc = LS;        break;
-        CASEF(LIR_gef:)
+        case LIR_gef:
         case LIR_ged:   cc = GE;        break;
-        CASEF(LIR_gtf:)
+        case LIR_gtf:
         case LIR_gtd:   cc = GT;        break;
     }
 

@@ -1736,7 +1736,7 @@ namespace nanojit
                 case LIR_ldd:   SSE_LDQsib(rr, d, rb, ri, scale);  break;
                 case LIR_ldf2d: SSE_CVTSS2SD(rr, rr);
                                 // fall through 
-                CASEF(LIR_ldf:)
+                case LIR_ldf:
                                 SSE_LDSSsib(rr, d, rb, ri, scale);
                                 SSE_XORPDr(rr, rr);                 break;
                 default:        NanoAssert(0);                      break;
@@ -1751,7 +1751,7 @@ namespace nanojit
                     case LIR_ldd:   SSE_LDQ(rr, d, rb);     break;
                     case LIR_ldf2d: SSE_CVTSS2SD(rr, rr);
                                     // fall through 
-                    CASEF(LIR_ldf:)
+                    case LIR_ldf:
                                     SSE_LDSS(rr, d, rb);
                                     SSE_XORPDr(rr, rr);     break;
                     default:        NanoAssert(0);          break;
@@ -1761,7 +1761,7 @@ namespace nanojit
                     switch (ins->opcode()) {
                     case LIR_ldd:   FLDQ(d, rb);            break;
                     case LIR_ldf2d:
-                    CASEF(LIR_ldf:) FLD32(d, rb);           break;
+                    case LIR_ldf:   FLD32(d, rb);           break;
                     default:        NanoAssert(0);          break;
                     }
                 }
@@ -1932,7 +1932,7 @@ FLOAT_ONLY (|| isCmpFOpcode(cond->opcode())) /* note: yes, float4 is handled by 
         if (branchOnFalse) {
             // op == LIR_xf/LIR_jf
             switch (cond->opcode()) {
-            CASEF(LIR_eqf4:) // fall through to LIR_eqi
+            case LIR_eqf4: // fall through to LIR_eqi
             case LIR_eqi:   JNE(targ);      break;
             case LIR_lti:   JNL(targ);      break;
             case LIR_lei:   JNLE(targ);     break;
@@ -1947,7 +1947,7 @@ FLOAT_ONLY (|| isCmpFOpcode(cond->opcode())) /* note: yes, float4 is handled by 
         } else {
             // op == LIR_xt/LIR_jt
             switch (cond->opcode()) {
-            CASEF(LIR_eqf4:) // fall through to LIR_eqi
+            case LIR_eqf4: // fall through to LIR_eqi
             case LIR_eqi:   JE(targ);       break;
             case LIR_lti:   JL(targ);       break;
             case LIR_lei:   JLE(targ);      break;
@@ -3380,7 +3380,7 @@ FLOAT_ONLY (|| isCmpFOpcode(cond->opcode())) /* note: yes, float4 is handled by 
             if (branchOnFalse) {
                 // op == LIR_xf
                 switch (opcode) {
-                CASEF(LIR_eqf:)
+                case LIR_eqf:
                 case LIR_eqd:
                     if (cond->oprnd1() == cond->oprnd2()) {
                         JP(targ);
@@ -3391,20 +3391,20 @@ FLOAT_ONLY (|| isCmpFOpcode(cond->opcode())) /* note: yes, float4 is handled by 
                         patch2 = _nIns;
                     }
                     break;
-                CASEF(LIR_ltf:)
+                case LIR_ltf:
                 case LIR_ltd:
-                CASEF(LIR_gtf:)
+                case LIR_gtf:
                 case LIR_gtd:   JNA(targ);      break;
-                CASEF(LIR_lef:)
+                case LIR_lef:
                 case LIR_led:
-                CASEF(LIR_gef:)
+                case LIR_gef:
                 case LIR_ged:   JNAE(targ);     break;
                 default:        NanoAssert(0);  break;
                 }
             } else {
                 // op == LIR_xt
                 switch (opcode) {
-                CASEF(LIR_eqf:)
+                case LIR_eqf:
                 case LIR_eqd:
                     if (cond->oprnd1() == cond->oprnd2()) {
                         JNP(targ);
@@ -3419,13 +3419,13 @@ FLOAT_ONLY (|| isCmpFOpcode(cond->opcode())) /* note: yes, float4 is handled by 
                         JP(skip); // unordered
                     }
                     break;
-                CASEF(LIR_ltf:)
+                case LIR_ltf:
                 case LIR_ltd:
-                CASEF(LIR_gtf:)
+                case LIR_gtf:
                 case LIR_gtd:   JA(targ);       break;
-                CASEF(LIR_lef:)
+                case LIR_lef:
                 case LIR_led:
-                CASEF(LIR_gef:)
+                case LIR_gef:
                 case LIR_ged:   JAE(targ);      break;
                 default:        NanoAssert(0);  break;
                 }

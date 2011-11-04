@@ -1955,7 +1955,9 @@ namespace avmplus
                     break;
                 case BUILTIN_namespace:
                 case BUILTIN_string:
-                CASEF(BUILTIN_float4:) // FIXME: probably wrong but don't know what to do here.
+#ifdef VMCFG_FLOAT
+                case BUILTIN_float4: // FIXME: probably wrong but don't know what to do here.
+#endif
                 default:
                     if (AvmCore::isNull(value))
                         continue;

@@ -243,13 +243,11 @@ struct ABCInfo;
 #ifdef VMCFG_FLOAT
 #   ifndef FLOAT_ONLY
 #       define FLOAT_ONLY(...) __VA_ARGS__
-#       define CASEF(X)   case X
 #       define IFFLOAT(a,b)  a
 #   endif
 #else 
 #   ifndef FLOAT_ONLY
 #       define FLOAT_ONLY(...)
-#       define CASEF(X)
 #       define IFFLOAT(a,b)  b
 #   endif
 #endif
