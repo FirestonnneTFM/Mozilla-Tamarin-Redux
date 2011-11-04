@@ -185,7 +185,6 @@ namespace avmplus
         LIns* d2fIns(LIns* v);
         LIns* f2dIns(LIns* v);
         LIns* ui2fIns(LIns* v);
-        LIns* f2f4Ins(LIns* v);
         LIns* f4tofIns(LIns* v, eFloat4Component comp);        
 #endif        
         void  liveAlloc(LIns* expr);        // extend lifetime of LIR_allocp, otherwise no-op
