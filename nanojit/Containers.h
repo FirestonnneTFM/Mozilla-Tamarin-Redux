@@ -264,7 +264,7 @@ namespace nanojit
         // f4_eq is no good; we need something that gives 0!=-0, NaN==NaN etc,
         // so we do a bitwise comparison.
         float4_t lx = x, ly = y;
-        return VMPI_memcmp(&lx,&ly, sizeof(float4_t) ) == 0;
+        return VMPI_memcmp(&lx, &ly, sizeof(float4_t)) == 0;
     } 
 
     /** Bucket hashtable with a fixed # of buckets (never rehash)

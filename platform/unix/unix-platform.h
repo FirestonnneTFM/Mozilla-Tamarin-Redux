@@ -129,76 +129,6 @@
 
 typedef pthread_t vmpi_thread_t;
 
-#ifdef VMCFG_FLOAT
-#ifdef VMCFG_ARM
-#include <arm_neon.h>
-
-typedef float32x4_t              float4_t;
-
-#define f4_mul              vmulq_f32
-#define f4_add              vaddq_f32
-#define f4_sub              vsubq_f32
-inline float32x4_t f4_div(float32x4_t a,float32x4_t b)  {
-      /* get an initial estimate of 1/b.*/     
-      float32x4_t reciprocal = vrecpeq_f32(b); 
-
-      /* use two Newton-Raphson steps to refine the estimate. */
-      reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
-      reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
-       /* and finally, compute a/b = a*(1/b)*/
-      float32x4_t result = vmulq_f32(a,reciprocal);
-      return result;
-}
-
-inline bool f4_eq_i(float32x4_t a, float32x4_t b){
-    uint32x2_t res = vreinterpret_u32_u16( vmovn_u32(vceqq_f32(a, b)) );
-    return vget_lane_u32(res, 0) == 0xffffffff && vget_lane_u32(res, 1) == 0xffffffff;
-}
-#define f4_x(v)            vgetq_lane_f32(v,0)
-#define f4_y(v)            vgetq_lane_f32(v,1)
-#define f4_z(v)            vgetq_lane_f32(v,2)
-#define f4_w(v)            vgetq_lane_f32(v,3)
-#define f4_ith(v,i)        vgetq_lane_f32(v,i)
-inline float32x4_t f4_shuffle(float32x4_t v, int i){
-    (void)i; // TODO! fix/implement shuffle
-    return v;
-}
-#elif defined VMCFG_MIPS
-typedef struct{ float x,y,z,t;} float4_t;
-
-#define f4_mul(x,y)         (x,y) /* NOT IMPLEMENTED YET! */
-#define f4_div(x,y)         (x,y) /* NOT IMPLEMENTED YET! */
-#define f4_add(x,y)         (x,y) /* NOT IMPLEMENTED YET! */
-#define f4_sub(x,y)         (x,y) /* NOT IMPLEMENTED YET! */
-#define f4_eq_i(x,y)        (x,y,false) /* NOT IMPLEMENTED YET! */
-#define f4_x(v)            (v).x
-#define f4_y(v)            (v).y
-#define f4_z(v)            (v).z
-#define f4_w(v)            (v).t
-#define f4_ith(v,i)        (v).x /* NOT IMPLEMENTED YET!! */
-#define f4_shuffle(v,i)    (i,v) /* NOT IMPLEMENTED YET!! */
-
-#else  /* GNU/Linux, x86 */
-#include <xmmintrin.h>
-
-typedef __m128              float4_t;
-
-#define f4_mul              _mm_mul_ps
-#define f4_add              _mm_add_ps
-#define f4_sub              _mm_sub_ps
-#define f4_div              _mm_div_ps
-#define f4_eq_i(a,b)        ( _mm_movemask_epi8( _mm_castps_si128 (_mm_cmpneq_ps( (a) , (b)))  ) == 0 )
-#define f4_x(v)            _mm_cvtss_f32(v)
-#define f4_y(v)            _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(1,1,1,1)))
-#define f4_z(v)            _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(2,2,2,2)))
-#define f4_w(v)            _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(3,3,3,3)))
-#define f4_ith(v,i)        _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(i,i,i,i)))
-#define f4_shuffle(v,i)    _mm_shuffle_ps(v,v,i)
-
-#endif
-#endif // VMCFG_FLOAT
-
-
 #ifdef ANDROID
 #define USE_CUTILS_ATOMICS FALSE
 #if USE_CUTILS_ATOMICS
@@ -258,6 +188,113 @@ typedef void *maddr_ptr;
 #else
     #error "Unrecognized compiler"
 #endif
+
+/**
+ * Float and Float4 support.
+ */
+#ifdef VMCFG_ARM
+        
+#include <arm_neon.h>
+
+typedef float32x4_t  float4_t;
+
+#define f4_add       vaddq_f32
+#define f4_sub       vsubq_f32
+#define f4_mul       vmulq_f32
+
+REALLY_INLINE float4_t f4_div(float4_t a, float4_t b)
+{
+      // Get an initial estimate of 1/b.
+      float4_t reciprocal = vrecpeq_f32(b); 
+      // Use two Newton-Raphson steps to refine the estimate.
+      reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
+      reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
+      // Finally, compute a/b = a*(1/b) .
+      float4_t result = vmulq_f32(a, reciprocal);
+      return result;
+}
+
+REALLY_INLINE int32_t f4_eq_i(float4_t a, float4_t b)
+{
+    uint32x2_t res = vreinterpret_u32_u16(vmovn_u32(vceqq_f32(a, b)));
+    return vget_lane_u32(res, 0) == 0xffffffff && vget_lane_u32(res, 1) == 0xffffffff;
+}
+
+REALLY_INLINE float f4_x(float4_t v) { return vgetq_lane_f32(v, 0); }
+REALLY_INLINE float f4_y(float4_t v) { return vgetq_lane_f32(v, 1); }
+REALLY_INLINE float f4_z(float4_t v) { return vgetq_lane_f32(v, 2); }
+REALLY_INLINE float f4_w(float4_t v) { return vgetq_lane_f32(v, 3); }
+
+template<int32_t i>
+REALLY_INLINE float f4_ith(float4_t v) { return vgetq_lane_f32(v, i); }
+
+template<int32_t mask>
+REALLY_INLINE float4_t f4_shuffle(float4_t v, int32_t mask)
+{
+    // TODO: Not implemented.
+    (void)mask;
+    AvmAssert(false);
+    return v;
+}
+
+#elif defined VMCFG_MIPS
+
+// Just make the build work, we don't really support MIPS.
+typedef struct{ float x, y, z, t; } float4_t;
+
+// All of these are stubs that do not return a useful value.
+REALLY_INLINE float4_t f4_add(float4_t a, float4_t b) { (void)a; return b; }
+REALLY_INLINE float4_t f4_sub(float4_t a, float4_t b) { (void)a; return b; }
+REALLY_INLINE float4_t f4_mul(float4_t a, float4_t b) { (void)a; return b; }
+REALLY_INLINE float4_t f4_div(float4_t a, float4_t b) { (void)a; return b; }
+
+REALLY_INLINE int32_t f4_eq_i(float4_t a, float4_t b) { (void)a; (void)b; return true; }
+
+REALLY_INLINE float f4_x(float4_t v) { (void)v; return 1.0f; }
+REALLY_INLINE float f4_y(float4_t v) { (void)v; return 1.0f; }
+REALLY_INLINE float f4_z(float4_t v) { (void)v; return 1.0f; }
+REALLY_INLINE float f4_w(float4_t v) { (void)v; return 1.0f; }
+
+template<int32_t i>
+REALLY_INLINE float f4_ith(float4_t v) { (void)v; (void)i; return 1.0f; }
+
+template<int32_t mask>
+REALLY_INLINE float4_t f4_shuffle(float4_t v) { (void)mask; return v; }
+
+#else  /* GNU/Linux, x86 */
+
+#include <xmmintrin.h>
+
+typedef __m128              float4_t;
+
+#define f4_add              _mm_add_ps
+#define f4_sub              _mm_sub_ps
+#define f4_mul              _mm_mul_ps
+#define f4_div              _mm_div_ps
+
+REALLY_INLINE int32_t f4_eq_i(float4_t a, float4_t b)
+{
+    return (_mm_movemask_epi8(_mm_castps_si128(_mm_cmpneq_ps(a, b))) == 0);
+}
+
+REALLY_INLINE float f4_x(float4_t v) { return _mm_cvtss_f32(v); }
+REALLY_INLINE float f4_y(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 1, 1, 1))); }
+REALLY_INLINE float f4_z(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(2, 2, 2, 2))); }
+REALLY_INLINE float f4_w(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(3, 3, 3, 3))); }
+
+template<int32_t i>
+REALLY_INLINE float f4_ith(float4_t v)
+{
+    return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(i, i, i, i)));
+}
+
+template<int32_t mask>
+REALLY_INLINE float4_t f4_shuffle(float4_t v)
+{
+    return  _mm_shuffle_ps(v, v, mask);
+}
+
+#endif /* VMCFG_ARM */
 
 /**
 * Type defintion for an opaque data type representing platform-defined spin lock

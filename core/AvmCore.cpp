@@ -1258,8 +1258,8 @@ return the result of the comparison ToPrimitive(x) == y.
                         return l == r ? trueAtom : falseAtom;
                     }
 
-                    AvmAssertMsg(lt==kBibopFloat4Type || rt == kBibopFloat4Type ,"Should never get here - there's an unhandled bibopKind");
-                    return f4_eq_i(float4(lhs), float4(rhs) ) ? trueAtom:falseAtom;
+                    AvmAssertMsg(lt==kBibopFloat4Type || rt == kBibopFloat4Type, "Unhandled bibopKind");
+                    return f4_eq_i(float4(lhs), float4(rhs)) ? trueAtom : falseAtom;
 #else
                     return trueAtom;
 #endif // VMCFG_FLOAT
@@ -1440,7 +1440,7 @@ return the result of the comparison ToPrimitive(x) == y.
                 if(isFloat(lhs) && isFloat(rhs))
                     return atomToFloat(lhs) == atomToFloat(rhs) ? trueAtom : falseAtom;
                 if(isFloat4(lhs) && isFloat4(rhs))
-                    return f4_eq_i(atomToFloat4(lhs), atomToFloat4(rhs))? trueAtom:falseAtom;
+                    return f4_eq_i(atomToFloat4(lhs), atomToFloat4(rhs))? trueAtom : falseAtom;
                 return falseAtom; // one bibop, other "undefined"
 #else
                 return trueAtom;
