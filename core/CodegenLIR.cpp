@@ -2756,7 +2756,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             break;
         case OP_inclocal:
         case OP_declocal:
-            AvmAssert(type==NUMBER_TYPE FLOAT_ONLY(|| type == FLOAT_TYPE) );
+            AvmAssert(type==NUMBER_TYPE FLOAT_ONLY(|| type == FLOAT_TYPE|| type == FLOAT4_TYPE|| type == OBJECT_TYPE) );
             emit(opcode, imm30, opcode==OP_inclocal ? 1 : -1, type);
             break;
         case OP_inclocal_i:
@@ -3415,7 +3415,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         return promoteFloat4Ins(in, index);
     }
 
-    /** emit code for * -> Float|Number conversion */
+    /** emit code for * -> Float|Float4|Number conversion */
     LIns* CodegenLIR::coerceToNumeric(int index)
     {
         const FrameValue& value = state->value(index);
@@ -7766,19 +7766,16 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             } else if (varPtrArg->isop(LIR_addp)) {
                 analyze_addp_store(varPtrArg, vars, varlivein, taglivein FLOAT_ONLY(, varSize));
             }
+        } else if (ins->callInfo() == FUNCTIONID(makeatom)) {
+            // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
+            LIns* varPtrArg = ins->arg(1);  // varPtrArg == vars, OR addp(vars, index)
+            if (varPtrArg == vars)
+                varlivein.set(0);
+            else if (varPtrArg->isop(LIR_addp))
+                analyze_addp(varPtrArg, vars, varlivein, varSize);
+            else
+                AvmAssert(!"Unexpected use of makeatom");
         } else if (!ins->callInfo()->_isPure) {
-#ifdef VMCFG_FLOAT
-            if (ins->callInfo() == FUNCTIONID(makeatom)) {
-                // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
-                LIns* varPtrArg = ins->arg(1);  // varPtrArg == vars, OR addp(vars, index)
-                if (varPtrArg == vars)
-                    varlivein.set(0);
-                else if (varPtrArg->isop(LIR_addp))
-                    analyze_addp(varPtrArg, vars, varlivein, varSize);
-                else
-                    AvmAssert(false);
-            }
-#endif
             if (catcher) {
                 // non-cse call is like a conditional forward branch to the catcher label.
                 // this could be made more precise by checking whether this call
@@ -7803,16 +7800,6 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 }
             }
 #endif
-        }
-        else if (ins->callInfo() == FUNCTIONID(makeatom)) {
-            // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
-            LIns* varPtrArg = ins->arg(1);  // varPtrArg == vars, OR addp(vars, index)
-            if (varPtrArg == vars)
-                varlivein.set(0);
-            else if (varPtrArg->isop(LIR_addp))
-                analyze_addp(varPtrArg, vars, varlivein FLOAT_ONLY(, varSize));
-            else
-                AvmAssert(false);
         }
         else if (ins->callInfo() == FUNCTIONID(restargHelper)) {
             // restargHelper(Toplevel*, Multiname*, Atom, ArrayObject**, uint32_t, Atom*)
@@ -7881,14 +7868,17 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 case LIR_reti:
                 CASE64(LIR_retq:)
                 case LIR_retd:
-                CASEF(LIR_retf:)
+                case LIR_retf:
+                case LIR_retf4:
                     varlivein.reset();
                     taglivein.reset();
                     break;
                 CASE64(LIR_stq:)
                 case LIR_sti:
                 case LIR_std:
-                CASEF(LIR_stf:)
+                case LIR_std2f:
+                case LIR_stf:
+                case LIR_stf4:
                 case LIR_sti2c:
                     if (i->oprnd2() == vars) {
                         AvmAssert( IS_ALIGNED(i->disp(), IFFLOAT(info->varSize(), VARSIZE)) );
@@ -7911,7 +7901,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 CASE64(LIR_ldq:)
                 case LIR_ldi:
                 case LIR_ldd:
-                CASEF(LIR_ldf:)
+                case LIR_ldf2d:
+                case LIR_ldf:
+                case LIR_ldf4:
                 case LIR_lduc2ui: case LIR_ldc2i:
                     if (i->oprnd1() == vars) {
                         AvmAssert( IS_ALIGNED(i->disp(), IFFLOAT(info->varSize(), VARSIZE)) );
@@ -7950,7 +7942,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 CASE64(LIR_callq:)
                 case LIR_calli:
                 case LIR_calld:
-                CASEF(LIR_callf:)
+                case LIR_callf:
+                case LIR_callf4:
                 case LIR_callv:
                     analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,) FLOAT_ONLY(info->varSize(),)
                             varlivein, varlabels, taglivein, taglabels);
@@ -8004,14 +7997,17 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 case LIR_reti:
                 CASE64(LIR_retq:)
                 case LIR_retd:
-                CASEF(LIR_retf:)
+                case LIR_retf:
+                case LIR_retf4:
                     varlivein.reset();
                     taglivein.reset();
                     break;
                 CASE64(LIR_stq:)
                 case LIR_sti:
                 case LIR_std:
-                CASEF(LIR_stf:)
+                case LIR_std2f:
+                case LIR_stf:
+                case LIR_stf4:
                 case LIR_sti2c:
                     if (i->oprnd2() == vars) {
                         AvmAssert( IS_ALIGNED(i->disp(), IFFLOAT(info->varSize(), VARSIZE)) );
@@ -8043,7 +8039,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 CASE64(LIR_ldq:)
                 case LIR_ldi:
                 case LIR_ldd:
-                CASEF(LIR_ldf:)
+                case LIR_ldf2d:
+                case LIR_ldf:
+                case LIR_ldf4:
                 case LIR_lduc2ui: case LIR_ldc2i:
                     if (i->oprnd1() == vars) {
                         AvmAssert( IS_ALIGNED(i->disp(), IFFLOAT(info->varSize(), VARSIZE)) );
@@ -8082,7 +8080,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 CASE64(LIR_callq:)
                 case LIR_calli:
                 case LIR_calld:
-                CASEF(LIR_callf:)
+                case LIR_callf:
+                case LIR_callf4:
                 case LIR_callv:
                     analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,) FLOAT_ONLY(info->varSize(),)
                             varlivein, varlabels, taglivein, taglabels);

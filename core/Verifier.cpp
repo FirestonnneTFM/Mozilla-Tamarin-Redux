@@ -1291,25 +1291,27 @@ namespace avmplus
             case OP_inclocal:
             case OP_declocal:
             {
+                Traits* retType = NUMBER_TYPE;
+                FrameValue& v = checkLocal(imm30);
+                bool already_coerced = false;
 #ifdef VMCFG_FLOAT
                 if(pool->hasFloatSupport())
                 {
-                    FrameValue& v = checkLocal(imm30);
                     Traits* vt = v.traits;
-                    if(!vt){
-                        vt = OBJECT_TYPE;
-                        emitCoerce(vt,imm30);
+                    if(!vt || !vt->isNumeric() )
+                    {
+                        emitCoerceToNumeric(imm30);
+                        retType = OBJECT_TYPE;
+                        already_coerced = true;
                     }
-                    
-                    coder->write(state, pc, opcode, vt);
-                } else 
-#endif
-                {
-                    //checkStack(0,0);
-                    checkLocal(imm30);
-                    emitCoerce(NUMBER_TYPE, imm30);
-                    coder->write(state, pc, opcode, NUMBER_TYPE);
-                }
+                    else if(vt == FLOAT_TYPE || vt == FLOAT4_TYPE)
+                        retType = vt;
+                    else
+                        retType = NUMBER_TYPE;
+                } else
+#endif // VMCFG_FLOAT
+                emitCoerce(NUMBER_TYPE, imm30);
+                coder->write(state, pc, opcode, retType);
                 break;
             }
 
