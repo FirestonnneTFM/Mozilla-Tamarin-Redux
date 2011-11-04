@@ -850,7 +850,7 @@ package abcdump
                n = readU32()
                floats = [float.NaN]
                for (i=1; i < n; i++)
-                   floats[i] = data.readFloat32()
+                   floats[i] = data.readFloat()
                dumpPool("float", floats)
 
                infoPrint("Cpool floats size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
@@ -860,7 +860,7 @@ package abcdump
                var f4:float4 = float4(float.NaN,float.NaN,float.NaN,float.NaN)
                float4s = [f4]
                for (i=1; i < n; i++){
-                   float4s[i] = new float4(data.readFloat32(),data.readFloat32(),data.readFloat32(),data.readFloat32());
+                   float4s[i] = new float4(data.readFloat(),data.readFloat(),data.readFloat(),data.readFloat());
                }
                dumpPool("float4", float4s)
 
