@@ -136,6 +136,25 @@ namespace avmplus
 #  define W(x)
 #endif
 
+#ifdef VMCFG_FLOAT
+    const AbcOpcodeInfo opcodeInfoNoFloats[] = {
+    #define ABC_OP_F(o,t,s,i,n) ABC_UNUSED_OP(-1, 0, 0, 0, DISABLED_##n)
+    #define ABC_OP(operandCount, canThrow, stack, internalOnly, nameToken)        { operandCount, canThrow, stack W(WOP_##nameToken) N(#nameToken) },
+    #define ABC_UNUSED_OP(operandCount, canThrow, stack, internalOnly, nameToken) { operandCount, canThrow, stack W(0)               N(#nameToken) },
+
+    #include "opcodes.tbl"
+
+    #undef  ABC_OP
+    #undef  ABC_UNUSED_OP
+    #undef  ABC_OP_F
+    };
+
+    #define ABC_OP_F ABC_OP     // rewrite ABC_OP_F to be a regular opcode
+#else
+    const AbcOpcodeInfo opcodeInfoNoFloats[] = { { -1, 0, 0 W(0) N("0") }, };
+    #define ABC_OP_F(o,t,s,i,n) ABC_UNUSED_OP(-1, 0, 0, 0, DISABLED_##n)
+#endif
+
         const AbcOpcodeInfo opcodeInfo[] = {
         // For stack movement ("stk") only constant movement is accounted for; variable movement,
         // as for arguments to CALL, CONSTRUCT, APPLYTYPE, et al, and for run-time parts of
@@ -148,6 +167,7 @@ namespace avmplus
 
         #undef ABC_OP
         #undef ABC_UNUSED_OP
+        #undef ABC_OP_F
         };
 
         // Some static asserts to make sure the opcode enum in ActionBlockConstants.h is in good order.

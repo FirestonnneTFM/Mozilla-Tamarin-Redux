@@ -166,6 +166,7 @@ namespace avmplus
         };
 
         extern const AbcOpcodeInfo opcodeInfo[];
+        extern const AbcOpcodeInfo opcodeInfoNoFloats[];
 
         extern const unsigned char kindToPushOp[];
 

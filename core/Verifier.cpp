@@ -956,7 +956,8 @@ namespace avmplus
             coder->writeFixExceptionsAndLabels(state, pc);
 
             AbcOpcode opcode = (AbcOpcode) *pc;
-            if (opcodeInfo[opcode].operandCount == -1)
+            const AbcOpcodeInfo* opcodeInfoPtr = FLOAT_ONLY(!pool->hasFloatSupport() ? opcodeInfoNoFloats :) opcodeInfo;
+            if (opcodeInfoPtr[opcode].operandCount == -1)
                 verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
 
             state->abc_pc = pc;
@@ -1201,17 +1202,14 @@ namespace avmplus
                 break;
 #ifdef VMCFG_FLOAT
             case OP_pushfloat:
-                if(!pool->hasFloatSupport())
-                    verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
                 checkStack(0,1);
                 if (imm30 == 0 || imm30 >= pool->constantFloatCount)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantFloatCount));
                 coder->write(state, pc, opcode, FLOAT_TYPE);
                 state->push(FLOAT_TYPE, true);
                 break;
+
             case OP_pushfloat4:
-                if(!pool->hasFloatSupport())
-                    verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
                 checkStack(0,1);
                 if (imm30 == 0 || imm30 >= pool->constantFloat4Count)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantFloat4Count));
@@ -1657,8 +1655,6 @@ namespace avmplus
 #ifdef VMCFG_FLOAT
             case OP_convert_f:
             {
-                if(!pool->hasFloatSupport())
-                    verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
                 checkStack(1,1);
                 FrameValue &v = state->value(sp);
                 Traits *type = FLOAT_TYPE;
@@ -1668,8 +1664,6 @@ namespace avmplus
             }
             case OP_convert_f4:
             {
-                if(!pool->hasFloatSupport())
-                    verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
                 checkStack(1,1);
                 FrameValue &v = state->value(sp);
                 Traits *type = FLOAT4_TYPE;
@@ -1679,8 +1673,6 @@ namespace avmplus
             }
             case OP_unplus:
             {
-                if(!pool->hasFloatSupport())
-                    verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
                 checkStack(1,1);
                 FrameValue &v = state->value(sp);
                 Traits *type = v.traits;
