@@ -1453,13 +1453,13 @@ namespace nanojit
             NanoAssertMsg(0, "Unknown branch type in nPatchBranch");
     }
 
+    static RegisterMask  Hints[LIR_sentinel+1]; // effectively const, save for the initialization
+    static bool initialized = nHintsInit(Hints);
     RegisterMask RegAlloc::nHint(LIns* ins)
     {
-        static RegisterMask  Hints[LIR_sentinel+1]; // effectively const, save for the initialization
-        static bool initialized = nHintsInit(Hints); (void)initialized; 
+        NanoAssert(initialized);
 
         RegisterMask prefer = Hints[ins->opcode()];
-
         if(prefer != PREFER_SPECIAL) return prefer;
 
         NanoAssert(ins->isop(LIR_paramp));
