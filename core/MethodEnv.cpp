@@ -713,7 +713,7 @@ namespace avmplus
         }
     }
 
-    int MethodEnv::hasnextproto(Atom& objAtom, int& index) const
+    int32_t MethodEnv::hasnextproto(Atom& objAtom, int& index) const
     {
         if (index < 0)
             return 0;
@@ -742,7 +742,7 @@ namespace avmplus
                 if (AvmCore::isFloat4(objAtom) && index <= 3)
                 {
                     index++;
-                    return 1;   /// TODO: Why?
+                    return 1;   // I.e. "true"; but hasnextproto() traditionally returns int
                 }
                 // Else fall through
 #endif // VMCFG_FLOAT
