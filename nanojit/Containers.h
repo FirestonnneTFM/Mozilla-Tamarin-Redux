@@ -261,8 +261,9 @@ namespace nanojit
     }
 
     template<> inline bool keysEqual<float4_t>(float4_t x, float4_t y) {
-        // f4_eq is no good; we need something that gives 0!=-0, NaN==NaN etc,
-        // so we do a bitwise comparison.
+        // Use a bitwise comparison. We need to distinguish 0 and -0, and
+        // allow NaNs to compare equal.  f4_eq_i compares the vector elements
+        // using IEEE float comparison semantics, which conflates 0 and -0.
         float4_t lx = x, ly = y;
         return VMPI_memcmp(&lx, &ly, sizeof(float4_t)) == 0;
     } 

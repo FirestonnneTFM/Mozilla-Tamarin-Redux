@@ -2966,6 +2966,7 @@ namespace nanojit
 
     uint32_t CseFilter::findImmD(LIns* ins)
     {
+        // Use bitwise (integer) comparison.
         uint32_t k;
         findImmD(ins->immDasQ(), k);
         return k;
@@ -2994,6 +2995,7 @@ namespace nanojit
     {
         NanoAssert(ins->isImmF());
 
+        // Use bitwise (integer) comparison.
         uint32_t k;
         findImmF(ins->immFasI(), k);
         return k;
@@ -3012,8 +3014,7 @@ namespace nanojit
                 return NULL;
             NanoAssert(ins->isImmF4());
             float4_t b = ins->immF4();
-            // We can't use f4_eq_i, since here +0 is different than -0 - i.e. we 
-            // care about bit equality not float equality.
+            // Use bitwise comparison, as we do for floats and doubles.
             if (VMPI_memcmp(&a, &b, sizeof(float4_t))==0)
                 return ins;
             k = (k + n) & bitmask;
@@ -3208,8 +3209,8 @@ namespace nanojit
     LIns* CseFilter::insImmD(double d)
     {
         uint32_t k;
-        // We must pun 'd' as a uint64_t otherwise 0 and -0 will be treated as
-        // equal, which breaks things (see bug 527288).
+        // Doubles must be compared bitwise in order to correctly
+        // distinguish 0 and -0.  See bug 527288.
         union {
             double d;
             uint64_t u64;
@@ -3227,8 +3228,10 @@ namespace nanojit
     LIns* CseFilter::insImmF(float f)
     {
         uint32_t k;
-        // Treat the float as its integer representation, otherwise there are
-        // problems comparing 0 to -0 and NaN with NaN
+        // Floats must be compared bitwise in order to correctly
+        // distinguish 0 and -0.  Also, we wish for NaNs to compare
+        // as equal, though we may in some cases distinguish different
+        // NaN values unnecessarily.
         union {
             float flt;
             int32_t i;
@@ -3253,7 +3256,9 @@ namespace nanojit
         }
 #ifdef DEBUG
         NanoAssert(ins->isop(LIR_immf4));
-        // Can't use f4_eq_i as comparison, because we may have NaN values in the vector...
+        // We must use bitwise comparision here in order
+        // to correctly distinguish 0 and -0.  See also the
+        // remarks for Float.
         float4_t other = ins->immF4();
         NanoAssert(VMPI_memcmp( &f4, &other, sizeof(float4_t)) == 0);
 #endif
