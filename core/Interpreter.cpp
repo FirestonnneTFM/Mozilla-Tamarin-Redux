@@ -420,7 +420,7 @@ namespace avmplus
              IIM(0x52, L_sxi16)
              III(0x53, L_applytype)
 #ifdef VMCFG_FLOAT
-             III(0x54. L_pushfloat4)
+             III(0x54, L_pushfloat4)
 #else
              XXX(0x54)
 #endif             
