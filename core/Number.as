@@ -130,7 +130,7 @@ package
         _dontEnumPrototype(prototype);
     }
 
-   // No instancegc, value is primitive.
+    // No instancegc, value is primitive.
    
     [native(cls="IntClass", classgc="exact", instance="int32_t", methods="auto", construct="override")]
     public final class int
