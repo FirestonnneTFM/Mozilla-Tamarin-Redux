@@ -68,8 +68,8 @@ namespace avmplus
             return core()->float4Atom(argv[1]);
         
         if(argc != 4)
-            toplevel()->argumentErrorClass()->throwError(kWrongArgumentCountError, String::createLatin1(core(),"float4::construct"),
-                                                                                   String::createLatin1(core(),"0,1 or 4"), core()->intToString(argc) );
+            vtable->init->argcError(argc);
+
         return core()->float4ToAtom( fromComponents( AvmCore::singlePrecisionFloat(argv[1]), 
                                                      AvmCore::singlePrecisionFloat(argv[2]), 
                                                      AvmCore::singlePrecisionFloat(argv[3]), 

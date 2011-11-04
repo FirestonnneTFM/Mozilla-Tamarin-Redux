@@ -62,8 +62,8 @@ namespace avmplus
             return core()->floatAtom(zeroIntAtom);
 
         if(argc != 1)
-            toplevel()->argumentErrorClass()->throwError(kWrongArgumentCountError, String::createLatin1(core(),"float::construct"),
-                                                                                   String::createLatin1(core(),"0 or 1"), core()->intToString(argc) );
+            vtable->init->argcError(argc);
+
         return core()->floatAtom(argv[1]);
     }
     
