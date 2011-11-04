@@ -229,7 +229,7 @@ template<int32_t i>
 REALLY_INLINE float f4_ith(float4_t v) { return vgetq_lane_f32(v, i); }
 
 template<int32_t mask>
-REALLY_INLINE float4_t f4_shuffle(float4_t v, int32_t mask)
+REALLY_INLINE float4_t f4_shuffle(float4_t v)
 {
     // TODO: Not implemented.
     (void)mask;
