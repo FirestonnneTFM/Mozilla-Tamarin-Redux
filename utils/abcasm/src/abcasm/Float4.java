@@ -49,11 +49,11 @@ public class Float4 implements Comparable
     public Float x,y,z,w;
     
     public Float4(){
-       x=y=z=w=Float.NaN;    
+       x = y = z = w = Float.NaN;    
     }
     public Float4(Float x, Float y, Float z, Float w)
     {
-        this.x=x; this.y=y; this.z = z; this.w = w;
+        this.x = x; this.y = y; this.z = z; this.w = w;
     }
     
     public String toString()
@@ -67,9 +67,9 @@ public class Float4 implements Comparable
           throw new ClassCastException("A Float4 object expected.");
 
         Float4 o = (Float4) anotherF4;
-        if(x.compareTo(o.x)!=0) return x.compareTo(o.x);
-        if(y.compareTo(o.y)!=0) return y.compareTo(o.y);
-        if(z.compareTo(o.z)!=0) return z.compareTo(o.z);
+        if(x.compareTo(o.x) != 0) return x.compareTo(o.x);
+        if(y.compareTo(o.y) != 0) return y.compareTo(o.y);
+        if(z.compareTo(o.z) != 0) return z.compareTo(o.z);
         return w.compareTo(o.w);
       }    
 
