@@ -326,7 +326,7 @@ const int kBufferPadding = 16;
             kSWF13,             // SWF13 (Flash Player TBD Serrano)
             kSWF14,             // SWF14 (Flash Player TBD Anza)
             kSWF15,             // SWF15 (Flash Player TBD Brannan)
-            kSWF16,             // SWF16 (Flash Player TBD Cyrill)
+            kSWF16,             // SWF16 (Flash Player TBD Cyril)
 
             VersionCount,
 
