@@ -1254,17 +1254,17 @@ namespace nanojit
             case LIR_eqi:
             CASE64(LIR_eqq:)
             case LIR_eqd:
-            CASEF(LIR_eqf:)
-            CASEF(LIR_eqf4:)
+            case LIR_eqf:
+            case LIR_eqf4:
             case LIR_addi:
             CASE64(LIR_addq:)
             case LIR_addd:
-            CASEF(LIR_addf:)
-            CASEF(LIR_addf4:)
+            case LIR_addf:
+            case LIR_addf4:
             case LIR_muli:
             case LIR_muld:
-            CASEF(LIR_mulf:)
-            CASEF(LIR_mulf4:)
+            case LIR_mulf:
+            case LIR_mulf4:
             case LIR_andi:
             CASE64(LIR_andq:)
             case LIR_ori:
@@ -1896,8 +1896,8 @@ namespace nanojit
                 case LIR_immi:
                 CASE64(LIR_immq:)
                 case LIR_immd:
-                CASEF(LIR_immf:)
-                CASEF(LIR_immf4:)
+                case LIR_immf:
+                case LIR_immf4:
                 case LIR_allocp:
                 case LIR_comment:
                     // No operands, do nothing.
@@ -1906,8 +1906,8 @@ namespace nanojit
                 case LIR_ldi:
                 CASE64(LIR_ldq:)
                 case LIR_ldd:
-                CASEF(LIR_ldf:)
-                CASEF(LIR_ldf4:)
+                case LIR_ldf:
+                case LIR_ldf4:
                 case LIR_lduc2ui:
                 case LIR_ldus2ui:
                 case LIR_ldc2i:
@@ -1916,13 +1916,13 @@ namespace nanojit
                 case LIR_reti:
                 CASE64(LIR_retq:)
                 case LIR_retd:
-                CASEF(LIR_retf:)
-                CASEF(LIR_retf4:)
+                case LIR_retf:
+                case LIR_retf4:
                 case LIR_livei:
                 CASE64(LIR_liveq:)
                 case LIR_lived:
-                CASEF(LIR_livef:)
-                CASEF(LIR_livef4:)
+                case LIR_livef:
+                case LIR_livef4:
                 case LIR_xt:
                 case LIR_xf:
                 case LIR_jt:
@@ -1930,8 +1930,8 @@ namespace nanojit
                 case LIR_jtbl:
                 case LIR_negi:
                 case LIR_negd:
-                CASEF(LIR_negf:)
-                CASEF(LIR_negf4:)
+                case LIR_negf:
+                case LIR_negf4:
                 case LIR_noti:
                 CASESF(LIR_dlo2i:)
                 CASESF(LIR_dhi2i:)
@@ -1940,15 +1940,15 @@ namespace nanojit
                 CASE64(LIR_ui2uq:)
                 case LIR_i2d:
                 case LIR_ui2d:
-                CASEF(LIR_i2f:)
-                CASEF(LIR_ui2f:)
-                CASEF(LIR_d2f:)
-                CASEF(LIR_f2d:)
-                CASEF(LIR_f2f4:)
-                CASEF(LIR_f4x:)
-                CASEF(LIR_f4y:)
-                CASEF(LIR_f4z:)
-                CASEF(LIR_f4w:)
+                case LIR_i2f:
+                case LIR_ui2f:
+                case LIR_d2f:
+                case LIR_f2d:
+                case LIR_f2f4:
+                case LIR_f4x:
+                case LIR_f4y:
+                case LIR_f4z:
+                case LIR_f4w:
                 CASE64(LIR_q2i:)
                 case LIR_d2i:
                 CASE64(LIR_dasq:)
@@ -1960,8 +1960,8 @@ namespace nanojit
                 case LIR_sti:
                 CASE64(LIR_stq:)
                 case LIR_std:
-                CASEF(LIR_stf:)
-                CASEF(LIR_stf4:)
+                case LIR_stf:
+                case LIR_stf4:
                 case LIR_sti2c:
                 case LIR_sti2s:
                 case LIR_std2f:
@@ -1979,12 +1979,12 @@ namespace nanojit
                 case LIR_gtd:
                 case LIR_led:
                 case LIR_ged:
-                CASEF(LIR_eqf:)
-                CASEF(LIR_ltf:)
-                CASEF(LIR_gtf:)
-                CASEF(LIR_lef:)
-                CASEF(LIR_gef:)
-                CASEF(LIR_eqf4:)
+                case LIR_eqf:
+                case LIR_ltf:
+                case LIR_gtf:
+                case LIR_lef:
+                case LIR_gef:
+                case LIR_eqf4:
                 CASE64(LIR_eqq:)
                 CASE64(LIR_ltq:)
                 CASE64(LIR_gtq:)
@@ -2014,14 +2014,14 @@ namespace nanojit
                 case LIR_subd:
                 case LIR_muld:
                 case LIR_divd:
-                CASEF(LIR_addf:)
-                CASEF(LIR_subf:)
-                CASEF(LIR_mulf:)
-                CASEF(LIR_divf:)
-                CASEF(LIR_addf4:)
-                CASEF(LIR_subf4:)
-                CASEF(LIR_mulf4:)
-                CASEF(LIR_divf4:)
+                case LIR_addf:
+                case LIR_subf:
+                case LIR_mulf:
+                case LIR_divf:
+                case LIR_addf4:
+                case LIR_subf4:
+                case LIR_mulf4:
+                case LIR_divf4:
                 CASE64(LIR_addq:)
                 CASE64(LIR_subq:)
                 CASE64(LIR_addjovq:)
@@ -2042,8 +2042,8 @@ namespace nanojit
                 case LIR_cmovi:
                 CASE64(LIR_cmovq:)
                 case LIR_cmovd:
-                CASEF(LIR_cmovf:)
-                CASEF(LIR_cmovf4:)
+                case LIR_cmovf:
+                case LIR_cmovf4:
                     live.add(ins->oprnd1(), 0);
                     live.add(ins->oprnd2(), 0);
                     live.add(ins->oprnd3(), 0);
@@ -2053,8 +2053,8 @@ namespace nanojit
                 case LIR_calli:
                 CASE64(LIR_callq:)
                 case LIR_calld:
-                CASEF(LIR_callf:)
-                CASEF(LIR_callf4:)
+                case LIR_callf:
+                case LIR_callf4:
                     for (int i = 0, argc = ins->argc(); i < argc; i++)
                         live.add(ins->arg(i), 0);
                     break;
@@ -2338,8 +2338,8 @@ namespace nanojit
             case LIR_calli:
             CASE64(LIR_callq:)
             case LIR_calld: 
-            CASEF(LIR_callf:)
-            CASEF(LIR_callf4:)
+            case LIR_callf:
+            case LIR_callf4:
             {
                 const CallInfo* call = i->callInfo();
                 int32_t argc = i->argc();
@@ -2410,31 +2410,31 @@ namespace nanojit
 
             case LIR_livei:
             case LIR_lived:
-            CASEF(LIR_livef:)
-            CASEF(LIR_livef4:)
+            case LIR_livef:
+            case LIR_livef4:
             CASE64(LIR_liveq:)
             case LIR_reti:
             CASE64(LIR_retq:)
             case LIR_retd:
-            CASEF(LIR_retf:)
-            CASEF(LIR_retf4:)
+            case LIR_retf:
+            case LIR_retf4:
                 VMPI_snprintf(s, n, "%s %s", lirNames[op], formatRef(&b1, i->oprnd1()));
                 break;
 
             CASESF(LIR_hcalli:)
             case LIR_negi:
             case LIR_negd:
-            CASEF(LIR_negf:)
-            CASEF(LIR_negf4:)
+            case LIR_negf:
+            case LIR_negf4:
             case LIR_i2d:
             case LIR_ui2d:
-            CASEF(LIR_i2f:)
-            CASEF(LIR_ui2f:)
-            CASEF(LIR_f4x:)
-            CASEF(LIR_f4y:)
-            CASEF(LIR_f4z:)
-            CASEF(LIR_f4w:)
-            CASEF(LIR_f2f4:)
+            case LIR_i2f:
+            case LIR_ui2f:
+            case LIR_f4x:
+            case LIR_f4y:
+            case LIR_f4z:
+            case LIR_f4w:
+            case LIR_f2f4:
             CASESF(LIR_dlo2i:)
             CASESF(LIR_dhi2i:)
             case LIR_noti:
@@ -2443,9 +2443,9 @@ namespace nanojit
             CASE64(LIR_ui2uq:)
             CASE64(LIR_q2i:)
             case LIR_d2i:
-            CASEF(LIR_d2f:)
-            CASEF(LIR_f2d:)
-            CASEF(LIR_f2i:)
+            case LIR_d2f:
+            case LIR_f2d:
+            case LIR_f2i:
             CASE64(LIR_dasq:)
             CASE64(LIR_qasd:)
                 VMPI_snprintf(s, n, "%s = %s %s", formatRef(&b1, i), lirNames[op],
@@ -2484,14 +2484,14 @@ namespace nanojit
             case LIR_subd:
             case LIR_muld:
             case LIR_divd:
-            CASEF(LIR_addf:)
-            CASEF(LIR_subf:)
-            CASEF(LIR_mulf:)
-            CASEF(LIR_divf:)
-            CASEF(LIR_addf4:)
-            CASEF(LIR_subf4:)
-            CASEF(LIR_mulf4:)
-            CASEF(LIR_divf4:)
+            case LIR_addf:
+            case LIR_subf:
+            case LIR_mulf:
+            case LIR_divf:
+            case LIR_addf4:
+            case LIR_subf4:
+            case LIR_mulf4:
+            case LIR_divf4:
             case LIR_andi:       CASE64(LIR_andq:)
             case LIR_ori:        CASE64(LIR_orq:)
             case LIR_xori:       CASE64(LIR_xorq:)
@@ -2512,12 +2512,12 @@ namespace nanojit
             case LIR_led:
             case LIR_gtd:
             case LIR_ged:
-            CASEF(LIR_eqf4:)
-            CASEF(LIR_eqf:)
-            CASEF(LIR_ltf:)
-            CASEF(LIR_lef:)
-            CASEF(LIR_gtf:)
-            CASEF(LIR_gef:)
+            case LIR_eqf4:
+            case LIR_eqf:
+            case LIR_ltf:
+            case LIR_lef:
+            case LIR_gtf:
+            case LIR_gef:
 #if NJ_SOFTFLOAT_SUPPORTED
             case LIR_ii2d:
 #endif
@@ -2529,8 +2529,8 @@ namespace nanojit
             CASE64(LIR_cmovq:)
             case LIR_cmovi:
             case LIR_cmovd:
-            CASEF(LIR_cmovf:)
-            CASEF(LIR_cmovf4:)
+            case LIR_cmovf:
+            case LIR_cmovf4:
                 VMPI_snprintf(s, n, "%s = %s %s ? %s : %s", formatRef(&b1, i), lirNames[op],
                     formatRef(&b2, i->oprnd1()),
                     formatRef(&b3, i->oprnd2()),
@@ -2540,8 +2540,8 @@ namespace nanojit
             case LIR_ldi:
             CASE64(LIR_ldq:)
             case LIR_ldd:
-            CASEF(LIR_ldf:)
-            CASEF(LIR_ldf4:)
+            case LIR_ldf:
+            case LIR_ldf4:
             case LIR_lduc2ui:
             case LIR_ldus2ui:
             case LIR_ldc2i:
@@ -2563,8 +2563,8 @@ namespace nanojit
             case LIR_sti:
             CASE64(LIR_stq:)
             case LIR_std:
-            CASEF(LIR_stf:)
-            CASEF(LIR_stf4:)
+            case LIR_stf:
+            case LIR_stf4:
             case LIR_sti2c:
             case LIR_sti2s:
             case LIR_std2f:
@@ -3596,12 +3596,12 @@ namespace nanojit
         case LIR_led:
         case LIR_gtd:
         case LIR_ged:
-        CASEF(LIR_eqf4:)
-        CASEF(LIR_eqf:)
-        CASEF(LIR_ltf:)
-        CASEF(LIR_lef:)
-        CASEF(LIR_gtf:)
-        CASEF(LIR_gef:)
+        case LIR_eqf4:
+        case LIR_eqf:
+        case LIR_ltf:
+        case LIR_lef:
+        case LIR_gtf:
+        case LIR_gef:
             return Interval(0, 1);
 
         CASE32(LIR_paramp:)
@@ -3615,7 +3615,7 @@ namespace nanojit
         case LIR_reti:
         CASE64(LIR_q2i:)
         case LIR_d2i:
-        CASEF(LIR_f2i:)
+        case LIR_f2i:
         CASESF(LIR_dlo2i:)
         CASESF(LIR_dhi2i:)
         CASESF(LIR_hcalli:)
@@ -3986,8 +3986,8 @@ namespace nanojit
         case LIR_ldc2i:
         case LIR_lds2i:
         case LIR_ldf2d:
-        CASEF(LIR_ldf:)
-        CASEF(LIR_ldf4:)
+        case LIR_ldf:
+        case LIR_ldf4:
         CASE64(LIR_ldq:)
             break;
         default:
@@ -4068,8 +4068,8 @@ namespace nanojit
         case LIR_noti:
         case LIR_i2d:
         case LIR_ui2d:
-        CASEF(LIR_i2f:)
-        CASEF(LIR_ui2f:)
+        case LIR_i2f:
+        case LIR_ui2f:
         case LIR_livei:
         case LIR_reti:
             formals[0] = LTy_I;
@@ -4114,7 +4114,7 @@ namespace nanojit
         case LIR_retd:
         case LIR_lived:
         case LIR_d2i:
-        CASEF(LIR_d2f:)
+        case LIR_d2f:
         CASE64(LIR_dasq:)
             formals[0] = LTy_D;
             break;
