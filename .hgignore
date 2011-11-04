@@ -8,7 +8,6 @@ stale.xml
 .buildbot-sourcedata
 *.exe
 *.bat
-*.jar
 *.pyc
 *~
 *.mode1*
