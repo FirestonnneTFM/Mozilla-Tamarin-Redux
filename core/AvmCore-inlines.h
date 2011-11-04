@@ -596,16 +596,8 @@ REALLY_INLINE Atom AvmCore::allocFloat(float n)
 REALLY_INLINE Atom AvmCore::allocFloat4(float4_t n)
 {
     float4_t *f = (float4_t*) GetGC()->AllocFloat4();
-// Note: VMCFG_UNALIGNED_FP_ACCESS doesn't seem to apply to float4_t* pointers, too... 
-    if( (((uintptr_t) f) & 0xf) != 0 )
-    {
-        AvmAssert(  (((uintptr_t)f) & 0x7) ==0);
-        VMPI_memcpy(f, &n, sizeof(float4_t));
-    }
-    else
-    {
-        *f = n;
-    } 
+    AvmAssert( ((uintptr_t)f) & 0xf == 0);
+    *f = n;
     return kSpecialBibopType | (uintptr_t)f;
 }
 #endif // VMCFG_FLOAT
