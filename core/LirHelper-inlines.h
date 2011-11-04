@@ -119,11 +119,6 @@ REALLY_INLINE LIns* LirHelper::f2dIns(LIns* v)
     return lirout->ins1(LIR_f2d, v);
 }
 
-REALLY_INLINE LIns* LirHelper::f2f4Ins(LIns* v)
-{
-    return lirout->ins1(LIR_f2d, v);
-}
-
 REALLY_INLINE LIns* LirHelper::f4tofIns(LIns* v,eFloat4Component comp)
 {
     switch(comp){

@@ -911,7 +911,7 @@ namespace avmplus
             verifyFailed(kNoScopeError, core->toErrorString(info));
         }
 
-        state = mmfx_new( FrameState(ms FLOAT_ONLY(, info)) );
+        state = mmfx_new( FrameState(ms, info));
 
         // initialize method param types.
         // We already verified param_count is a legal register so
@@ -959,18 +959,6 @@ namespace avmplus
             if (opcodeInfo[opcode].operandCount == -1)
                 verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
 
-#ifdef VMCFG_FLOAT
-            if(!pool->hasFloatSupport()){
-                switch(opcode){
-                case OP_convert_f:
-                case OP_convert_f4:
-                case OP_unplus:
-                case OP_pushfloat:
-                case OP_pushfloat4:
-                    verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
-                }
-            }
-#endif
             state->abc_pc = pc;
 
             // test for the start of a new block
@@ -1213,6 +1201,8 @@ namespace avmplus
                 break;
 #ifdef VMCFG_FLOAT
             case OP_pushfloat:
+                if(!pool->hasFloatSupport())
+                    verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
                 checkStack(0,1);
                 if (imm30 == 0 || imm30 >= pool->constantFloatCount)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantFloatCount));
@@ -1220,6 +1210,8 @@ namespace avmplus
                 state->push(FLOAT_TYPE, true);
                 break;
             case OP_pushfloat4:
+                if(!pool->hasFloatSupport())
+                    verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
                 checkStack(0,1);
                 if (imm30 == 0 || imm30 >= pool->constantFloat4Count)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantFloat4Count));
@@ -1665,6 +1657,8 @@ namespace avmplus
 #ifdef VMCFG_FLOAT
             case OP_convert_f:
             {
+                if(!pool->hasFloatSupport())
+                    verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
                 checkStack(1,1);
                 FrameValue &v = state->value(sp);
                 Traits *type = FLOAT_TYPE;
@@ -1674,6 +1668,8 @@ namespace avmplus
             }
             case OP_convert_f4:
             {
+                if(!pool->hasFloatSupport())
+                    verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
                 checkStack(1,1);
                 FrameValue &v = state->value(sp);
                 Traits *type = FLOAT4_TYPE;
@@ -1683,6 +1679,8 @@ namespace avmplus
             }
             case OP_unplus:
             {
+                if(!pool->hasFloatSupport())
+                    verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
                 checkStack(1,1);
                 FrameValue &v = state->value(sp);
                 Traits *type = v.traits;
@@ -3286,7 +3284,7 @@ namespace avmplus
             }
             if (!blockStates)
                 blockStates = new (core->GetGC()) BlockStatesType(core->GetGC());
-            targetState = mmfx_new( FrameState(ms FLOAT_ONLY(,info)) );
+            targetState = mmfx_new(FrameState(ms, info));
             targetState->abc_pc = target;
             blockStates->map.put(target, targetState);
 

@@ -1992,7 +1992,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     {
         // Compiling an OSR entry point; save FrameState at the OSR loop header,
         // for later use by adjust_frame().
-        FrameState* osr_state = mmfx_new(FrameState(ms FLOAT_ONLY(,info) ));
+        FrameState* osr_state = mmfx_new(FrameState(ms, info));
         const FrameState* loop_state = driver->getFrameState(osr->osrPc());
         AvmAssert(loop_state->targetOfBackwardsBranch);
         osr_state->init(loop_state);
@@ -2053,14 +2053,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         switch (bt(type)) {
 #ifdef VMCFG_FLOAT
         case BUILTIN_float: 
-            arg = loadIns(LIR_ldf, offset,apArg, ACCSET_OTHER, LOAD_CONST);
+            arg = loadIns(LIR_ldf, offset, apArg, ACCSET_OTHER, LOAD_CONST);
             offset += sizeof(Atom); // float is 4 bytes; but on x64, it takes up 8 bytes too, just like any int.
             break;
         case BUILTIN_float4: 
-            // float4 is passed inline [i.e. not as a pointer to the value !! ] //
-            arg = loadIns(LIR_ldf4, offset, apArg //0, 
-                         //  loadIns(LIR_ldp, offset, apArg, ACCSET_OTHER, LOAD_CONST)                          
-                           , ACCSET_OTHER, LOAD_CONST);
+            // float4 is passed inline [i.e. not as a pointer to the value !! ]
+            arg = loadIns(LIR_ldf4, offset, apArg, ACCSET_OTHER, LOAD_CONST);
             offset += sizeof(float4_t);
             break;
 #endif // VMCFG_FLOAT

@@ -5597,7 +5597,7 @@ return the result of the comparison ToPrimitive(x) == y.
             bugzilla661330 = 1;     // Array.length behavior doesn't follow ECMA262 near 2^32-1
         }
 
-        if (v >= kSWF16)    /* Cyrill */
+        if (v >= kSWF16)    /* Cyril */
         {
         }
         
