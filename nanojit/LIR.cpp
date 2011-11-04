@@ -1240,10 +1240,10 @@ namespace nanojit
             }
         }
         else if (oprnd1->isImmF4() && oprnd2->isImmF4()) {
-            // The operands are both single-precision float immediates.
+            // The operands are both vectors of four singe-precision float immediates.
             float4_t c1 = oprnd1->immF4();
             float4_t c2 = oprnd2->immF4();
-            if(v==LIR_eqf4)  return insImmI( f4_eq_i(c1,c2) );
+            if(v==LIR_eqf4) return insImmI(f4_eq_i(c1, c2));
         }
         
         //-------------------------------------------------------------------
@@ -2278,7 +2278,8 @@ namespace nanojit
         else if (ref->isImmF4() && showImmValue) { // float4 is printed as an array of 4 double values
             RefBuf bufx, bufy, bufz, bufw;
             float4_t v = ref->immF4();
-            VMPI_snprintf(buf->buf, buf->len, "%s/*%s,%s,%s,%s*/", name, formatImmD(&bufx,f4_x(v)), formatImmD(&bufy,f4_y(v)), formatImmD(&bufz,f4_z(v)), formatImmD(&bufw,f4_w(v)) );
+            VMPI_snprintf(buf->buf, buf->len, "%s/*%s,%s,%s,%s*/", name, formatImmD(&bufx,f4_x(v)),
+                          formatImmD(&bufy,f4_y(v)), formatImmD(&bufz,f4_z(v)), formatImmD(&bufw,f4_w(v)));
         }
         else {
             VMPI_snprintf(buf->buf, buf->len, "%s", name);
@@ -3013,7 +3014,7 @@ namespace nanojit
             float4_t b = ins->immF4();
             // We can't use f4_eq_i, since here +0 is different than -0 - i.e. we 
             // care about bit equality not float equality.
-            if ( VMPI_memcmp(&a,&b,sizeof(float4_t))==0 )
+            if (VMPI_memcmp(&a, &b, sizeof(float4_t))==0)
                 return ins;
             k = (k + n) & bitmask;
             n += 1;
@@ -3253,8 +3254,8 @@ namespace nanojit
 #ifdef DEBUG
         NanoAssert(ins->isop(LIR_immf4));
         // Can't use f4_eq_i as comparison, because we may have NaN values in the vector...
-        float4_t f4_2 = ins->immF4();
-        NanoAssert( VMPI_memcmp( &f4, &f4_2, sizeof(float4_t)) == 0 );
+        float4_t other = ins->immF4();
+        NanoAssert(VMPI_memcmp( &f4, &other, sizeof(float4_t)) == 0);
 #endif
         return ins;
     }
