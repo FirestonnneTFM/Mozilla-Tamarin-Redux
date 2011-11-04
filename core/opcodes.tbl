@@ -57,10 +57,13 @@
  */
 
 //--------------------------------------------------------------------------------------------------------
-#ifdef VMCFG_FLOAT
-#   define ABC_OP_F ABC_OP
-#else
-#   define ABC_OP_F(o,t,s,i,n) ABC_UNUSED_OP(-1, 0, 0, 0, DISABLED_##n)
+#ifndef ABC_OP_F
+#   ifdef VMCFG_FLOAT
+#       define ABC_OP_F ABC_OP
+#    else
+#       define ABC_OP_F(o,t,s,i,n) ABC_UNUSED_OP(-1, 0, 0, 0, DISABLED_##n)
+#    endif
+#    define ABC_OP_F_DEFINED
 #endif
 
 //              opCount  throw  stack  internal  name                   hex      
@@ -320,4 +323,7 @@ ABC_UNUSED_OP(  -1,      0,     0,     0,        0xFC)                  // 0xFC
 ABC_UNUSED_OP(  -1,      0,     0,     0,        0xFD)                  // 0xFD  
 ABC_UNUSED_OP(  -1,      0,     0,     0,        0xFE)                  // 0xFE  
 ABC_UNUSED_OP(  -1,      0,     0,     0,        0xFF)                  // 0xFF  
-#undef ABC_OP_F
+#ifdef ABC_OP_F_DEFINED
+#   undef ABC_OP_F
+#   undef ABC_OP_F_DEFINED
+#endif
