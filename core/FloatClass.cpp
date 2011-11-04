@@ -69,12 +69,12 @@ namespace avmplus
     
     float FloatClass::reciprocal(float x)
     {
-        return 1/x;
+        return 1 / x;
     }
     
     float FloatClass::rsqrt(float x)
     {
-        return 1/sqrtf(x);
+        return 1 / sqrtf(x);
     }
 
     // volatile externals to keep the constant propagator from outsmarting us.
@@ -135,7 +135,7 @@ namespace avmplus
         AvmCore* core = this->core();
 
         if (radix == 10 || MathUtils::isInfinite(fVal) || MathUtils::isNaN(fVal))
-            return core->doubleToString(fVal); // the spec says we shoulc call doubleToString
+            return core->doubleToString(fVal); // the spec says we should call doubleToString
 
         if (radix < 2 || radix > 36)
             toplevel()->throwRangeError(kInvalidRadixError, core->toErrorString(radix));
