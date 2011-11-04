@@ -233,7 +233,6 @@ REALLY_INLINE float4_t f4_shuffle(float4_t v)
 {
     // TODO: Not implemented.
     (void)mask;
-    AvmAssert(false);
     return v;
 }
 
