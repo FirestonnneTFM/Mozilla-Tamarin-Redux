@@ -83,8 +83,8 @@ AddTestCase("zerof === -0.0", true, (zerof === -0.0));
 AddTestCase("0.0 === -zerof", true, (0.0 === -zerof));
 AddTestCase("zerof === -zerof", true, (zerof === -zerof));
 AddTestCase("-zerof === zerof", true, (-zerof === zerof));
-AddTestCase("nf === Number(nf)", true, (nf === Number(nf)));
-AddTestCase("nf_down === Number(nf_down)", true, (nf_down === Number(nf_down)));
+AddTestCase("nf === Number(nf)", false, (nf === Number(nf)));
+AddTestCase("nf_down === Number(nf_down)", false, (nf_down === Number(nf_down)));
 AddTestCase("float.MIN_VALUE === float.MIN_VALUE-zerof", true, (float.MIN_VALUE === float.MIN_VALUE-zerof));
 AddTestCase("float.MAX_VALUE === float.MIN_VALUE+float.MAX_VALUE", true, (float.MAX_VALUE === float.MIN_VALUE+float.MAX_VALUE));
 AddTestCase("float.NEGATIVE_INFINITY === -float.POSITIVE_INFINITY", true, (float.NEGATIVE_INFINITY === -float.POSITIVE_INFINITY));
@@ -97,7 +97,7 @@ AddTestCase("null === zerof", false, (null === zerof));
 AddTestCase("zerof === undefined", false, (zerof === undefined));
 
 var nvo = new MyValueAlteringObject(nf);
-AddTestCase("Evaluation order: '===' ", true,(zerof+nvo) === (nvo-1));
+AddTestCase("Evaluation order: '===' ", true, (zerof+nvo) === (nvo-1f));
 
 test();
 
