@@ -170,6 +170,8 @@
 		079DFB2E0F3A98E60031D1B4 /* OSDepUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFB2B0F3A98E60031D1B4 /* OSDepUnix.cpp */; };
 		079DFB680F3A9C350031D1B4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFB670F3A9C350031D1B4 /* libz.dylib */; };
 		079DFC980F3AB9640031D1B4 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
+		07C029FD14650C7100D02A66 /* SIMD.as in Sources */ = {isa = PBXBuildFile; fileRef = 07C029FC14650C7100D02A66 /* SIMD.as */; };
+		07C029FE14650C7100D02A66 /* SIMD.as in Sources */ = {isa = PBXBuildFile; fileRef = 07C029FC14650C7100D02A66 /* SIMD.as */; };
 		07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		07E7976513BC99EC00E25990 /* d2a.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07E7976313BC99EC00E25990 /* d2a.cpp */; };
 		07E7976613BC99EC00E25990 /* d2a.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07E7976313BC99EC00E25990 /* d2a.cpp */; };
@@ -832,6 +834,7 @@
 		07A8D2F10F5EEAB00005E66C /* GC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GC.h; path = ../../../MMgc/GC.h; sourceTree = SOURCE_ROOT; };
 		07AE842D134DA5C200598B23 /* ExactGCTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ExactGCTests.h; path = ../../../core/ExactGCTests.h; sourceTree = SOURCE_ROOT; };
 		07B1D9C21288521400685347 /* WriteBarrier-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "WriteBarrier-inlines.h"; path = "../../../MMgc/WriteBarrier-inlines.h"; sourceTree = SOURCE_ROOT; };
+		07C029FC14650C7100D02A66 /* SIMD.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = SIMD.as; path = ../../../core/SIMD.as; sourceTree = SOURCE_ROOT; };
 		07C0F7BE0FDE897100B0E09A /* BasicList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BasicList.h; path = ../../../MMgc/BasicList.h; sourceTree = SOURCE_ROOT; };
 		07C2E83B10A193FC00C773C6 /* SymbianDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SymbianDebugUtils.cpp; path = ../../../VMPI/SymbianDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
 		07C2E83C10A193FC00C773C6 /* SymbianPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SymbianPortUtils.cpp; path = ../../../VMPI/SymbianPortUtils.cpp; sourceTree = SOURCE_ROOT; };
@@ -1129,10 +1132,6 @@
 		079DF7B00F3A86D50031D1B4 /* core */ = {
 			isa = PBXGroup;
 			children = (
-				0638CA1B141F36630047FB4F /* Float4Class.cpp */,
-				0638CA1C141F36630047FB4F /* Float4Class.h */,
-				0638CA1D141F36630047FB4F /* FloatClass.cpp */,
-				0638CA1E141F36630047FB4F /* FloatClass.h */,
 				F68C246513A82E8B00152279 /* atom-inlines.h */,
 				F68C246613A82E8B00152279 /* atom.cpp */,
 				F68C246713A82E8B00152279 /* atom.h */,
@@ -1342,6 +1341,10 @@
 				079DF8B60F3A88950031D1B4 /* ErrorClass.h */,
 				079DF8B70F3A88950031D1B4 /* ErrorConstants.cpp */,
 				079DF8B80F3A88950031D1B4 /* ErrorConstants.h */,
+				0638CA1B141F36630047FB4F /* Float4Class.cpp */,
+				0638CA1C141F36630047FB4F /* Float4Class.h */,
+				0638CA1D141F36630047FB4F /* FloatClass.cpp */,
+				0638CA1E141F36630047FB4F /* FloatClass.h */,
 				079DF8B90F3A88950031D1B4 /* FunctionClass.cpp */,
 				079DF8BA0F3A88950031D1B4 /* FunctionClass.h */,
 				079DF8BB0F3A88950031D1B4 /* IntClass.cpp */,
@@ -1475,6 +1478,7 @@
 				079DF9170F3A88EA0031D1B4 /* Object.as */,
 				D914C1EB1367955B00CD302D /* Proxy.as */,
 				079DF9180F3A88EA0031D1B4 /* RegExp.as */,
+				07C029FC14650C7100D02A66 /* SIMD.as */,
 				079DF9190F3A88EA0031D1B4 /* String.as */,
 				079DF91A0F3A88EA0031D1B4 /* Vector.as */,
 				079DF91B0F3A88EA0031D1B4 /* VectorImpl.as */,
@@ -2092,6 +2096,7 @@
 				07E7976613BC99EC00E25990 /* d2a.cpp in Sources */,
 				0638CA1F141F36630047FB4F /* Float4Class.cpp in Sources */,
 				0638CA20141F36630047FB4F /* FloatClass.cpp in Sources */,
+				07C029FE14650C7100D02A66 /* SIMD.as in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2287,6 +2292,7 @@
 				07E7976513BC99EC00E25990 /* d2a.cpp in Sources */,
 				0638CA21141F36630047FB4F /* Float4Class.cpp in Sources */,
 				0638CA22141F36630047FB4F /* FloatClass.cpp in Sources */,
+				07C029FD14650C7100D02A66 /* SIMD.as in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
