@@ -288,6 +288,20 @@ public class ByteArray implements IDataInput, IDataOutput
     public native function writeFloat(value:Number):void;
 
     /**
+     * Writes a quadruple of IEEE 754 single-precision (32-bit) floating-point numbers to the byte stream.
+     *
+     * @param Number A float4 datum: a quadruple of single-precision (32-bit) floating-point numbers.
+     * @playerversion Flash Player Cyril
+     * @langversion 3.0
+     * @helpid
+     * @refpath
+     * @keyword ByteArray, ByteArray.writeFloat4, writeFloat4
+     */
+    [API(CONFIG::SWF_16)]
+    CONFIG::VMCFG_FLOAT
+    public native function writeFloat4(value:float4):void;
+
+    /**
      * Writes an IEEE 754 double-precision (64-bit) floating-point number to the byte stream.
      *
      * @param Number A double-precision (64-bit) floating-point number.
@@ -493,6 +507,22 @@ public class ByteArray implements IDataInput, IDataOutput
      * @playerversion Lite 4
      */
     public native function readFloat():Number;
+
+    /**
+     * Reads an quadruple of IEEE 754 single-precision (32-bit) floating-point numbers from the byte stream.
+     *
+     * @throws EOFError There is not sufficient data available to read.
+     * @return  A quadruple of single-precision (32-bit) floating-point numbers in the form of a float4.
+     *
+     * @playerversion Flash Player Cyril
+     * @langversion 3.0
+     * @helpid
+     * @refpath
+     * @keyword ByteArray, ByteArray.readFloat4, readFloat4
+     */
+    [API(CONFIG::SWF_16)]
+    CONFIG::VMCFG_FLOAT
+    public native function readFloat4():float4;
 
     /**
      * Reads an IEEE 754 double-precision (64-bit) floating-point number from the byte stream.

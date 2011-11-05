@@ -862,7 +862,7 @@ namespace avmplus
 
     REALLY_INLINE uint32_t ByteArrayObject::read32()
     {
-        uint8_t *b = m_byteArray.requestBytesForShortRead(4);
+        uint8_t* b = m_byteArray.requestBytesForShortRead(4);
         if (m_byteArray.GetEndian() == m_byteArray.GetNativeEndian())  // GetNativeEndian expands to a constant
         {
 #if defined VMCFG_UNALIGNED_INT_ACCESS
@@ -908,14 +908,13 @@ namespace avmplus
     // on native endianness - gcc may emit code that loads directly
     // to the ARM VFP register, and that requires VMCFG_UNALIGNED_FP_ACCESS.
 
-    double ByteArrayObject::readFloat()
+    REALLY_INLINE float ByteArrayObject::readFloat(uint8_t* b)
     {
         union {
             uint32_t word;
             float    fval;
         } u;
         
-        uint8_t *b = m_byteArray.requestBytesForShortRead(4);
         if (m_byteArray.GetEndian() == m_byteArray.GetNativeEndian())  // GetNativeEndian expands to a constant
         {
 #if defined VMCFG_UNALIGNED_FP_ACCESS
@@ -938,8 +937,27 @@ namespace avmplus
             u.word = ((uint32_t)b[0] << 24) | ((uint32_t)b[1] << 16) | ((uint32_t)b[2] << 8) | (uint32_t)b[3]; // read big-endian
 #endif
             return u.fval;
-        }
+        }    }
+    
+    double ByteArrayObject::readFloat()
+    {
+        return readFloat(m_byteArray.requestBytesForShortRead(4));
     }
+
+#ifdef VMCFG_FLOAT
+    // There will be four endianness checks here but one hopes the compiler will
+    // common them after inlining.
+    float4_t ByteArrayObject::readFloat4()
+    {
+        uint8_t *b = m_byteArray.requestBytesForShortRead(16);
+        float x = readFloat(b);
+        float y = readFloat(b+4);
+        float z = readFloat(b+8);
+        float w = readFloat(b+12);
+        float4_t v = { x, y, z, w };
+        return v;
+    }
+#endif
 
     // Bugzilla 569691/685441: Do not try to be clever here by loading from
     // '*(uint32_t*)b' into 'u.word[i]', even if VMCFG_UNALIGNED_INT_ACCESS and
@@ -1087,26 +1105,25 @@ namespace avmplus
     // on native endianness - gcc will emit code that stores directly
     // from the ARM VFP register, and that requires VMCFG_UNALIGNED_FP_ACCESS.
 
-    void ByteArrayObject::writeFloat(double value)
+    REALLY_INLINE void ByteArrayObject::writeFloat(float value, uint8_t* b)
     {
         union {
             uint32_t word;
             float    fval;
         } u;
-        uint8_t *b = m_byteArray.requestBytesForShortWrite(4);
         if (m_byteArray.GetEndian() == m_byteArray.GetNativeEndian())   // GetNativeEndian expands to a constant
         {
 #if defined VMCFG_UNALIGNED_FP_ACCESS
-            *(float*)b = (float)value;
+            *(float*)b = value;
 #elif defined VMCFG_BIG_ENDIAN
-            u.fval = (float)value;
+            u.fval = value;
             uint32_t w = u.word;
             b[0] = (w >> 24);   // write
             b[1] = (w >> 16);   //   big
             b[2] = (w >> 8);    //     endian
             b[3] = w;
 #else
-            u.fval = (float)value;
+            u.fval = value;
             uint32_t w = u.word;
             b[3] = (w >> 24);   // write
             b[2] = (w >> 16);   //   little
@@ -1116,7 +1133,7 @@ namespace avmplus
         }
         else
         {
-            u.fval = (float)value;
+            u.fval = value;
 #if defined VMCFG_UNALIGNED_INT_ACCESS && defined HAVE_BYTESWAP32
             *(uint32_t*)b = byteSwap32(u.word);
 #elif defined VMCFG_BIG_ENDIAN
@@ -1135,6 +1152,24 @@ namespace avmplus
         }
     }
 
+    void ByteArrayObject::writeFloat(double value)
+    {
+        writeFloat((float)value, m_byteArray.requestBytesForShortWrite(4));
+    }
+
+#ifdef VMCFG_FLOAT
+    // There will be four endianness checks here but one hopes the compiler will
+    // common them after inlining.
+    void ByteArrayObject::writeFloat4(float4_t v)
+    {
+        uint8_t* b = m_byteArray.requestBytesForShortWrite(16);
+        writeFloat(f4_x(v), b);
+        writeFloat(f4_y(v), b+4);
+        writeFloat(f4_z(v), b+8);
+        writeFloat(f4_w(v), b+12);
+    }
+#endif
+    
     // Bugzilla 569691/685441: Do not try to be clever here by storing from
     // 'u.word[i]' into '*(uint32_t*)b', even if both VMCFG_UNALIGNED_INT_ACCESS and
     // on native endianness - gcc will emit code that stores directly

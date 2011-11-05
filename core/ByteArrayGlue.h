@@ -301,6 +301,9 @@ namespace avmplus
         void writeInt(int value);
         void writeUnsignedInt(uint32_t value);
         void writeFloat(double value);
+#ifdef VMCFG_FLOAT
+        void writeFloat4(float4_t value);
+#endif
         void writeDouble(double value);
         void writeMultiByte(String* value, String* charSet);
         void writeUTF(String* value);
@@ -314,6 +317,9 @@ namespace avmplus
         int readInt();
         uint32_t readUnsignedInt();
         double readFloat();
+#ifdef VMCFG_FLOAT
+        float4_t readFloat4();
+#endif
         double readDouble();
         String* readMultiByte(uint32_t length, String* charSet);
         String* readUTF();
@@ -346,6 +352,8 @@ namespace avmplus
         // REALLY_INLINE helpers for fast reading and writing, without code duplication.
         uint32_t read32();
         uint32_t read16();
+        float readFloat(uint8_t* b);
+        void writeFloat(float value, uint8_t* b);
         void write32(uint32_t value);
 
         ByteArray::CompressionAlgorithm algorithmToEnum(String* algorithm);
