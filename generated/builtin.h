@@ -148,9 +148,9 @@ const uint32_t abcclass_Function = 2;
 const uint32_t abcclass_Namespace = 3;
 const uint32_t abcclass_Boolean = 4;
 const uint32_t abcclass_Number = 5;
-const uint32_t abcclass_float = 6;
-const uint32_t abcclass_int = 7;
-const uint32_t abcclass_uint = 8;
+const uint32_t abcclass_int = 6;
+const uint32_t abcclass_uint = 7;
+const uint32_t abcclass_float = 8;
 const uint32_t abcclass_float4 = 9;
 const uint32_t abcclass_String = 10;
 const uint32_t abcclass_Array = 11;
@@ -223,11 +223,11 @@ const uint32_t Namespace_uri_get = 58;
 const uint32_t Number_private__numberToString = 74;
 const uint32_t Number_private__convert = 75;
 const uint32_t Number_private__minValue = 76;
-const uint32_t float_reciprocal = 105;
-const uint32_t float_rsqrt = 106;
-const uint32_t float_private__minValue = 109;
-const uint32_t float_private__floatToString = 110;
-const uint32_t float_private__convert = 111;
+const uint32_t float_reciprocal = 129;
+const uint32_t float_rsqrt = 130;
+const uint32_t float_private__minValue = 133;
+const uint32_t float_private__floatToString = 134;
+const uint32_t float_private__convert = 135;
 const uint32_t float4_isGreater = 145;
 const uint32_t float4_isGreaterOrEqual = 146;
 const uint32_t float4_isLess = 147;
@@ -1474,123 +1474,6 @@ private:
 //-----------------------------------------------------------
 
 //-----------------------------------------------------------
-// float$
-//-----------------------------------------------------------
-class avmplus_FloatClassSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmplus::FloatClass;
-private:
-    float m_NaN;
-    float m_NEGATIVE_INFINITY;
-    float m_POSITIVE_INFINITY;
-    float m_MIN_VALUE;
-    float m_MAX_VALUE;
-    float m_E;
-    float m_LN10;
-    float m_LN2;
-    float m_LOG2E;
-    float m_PI;
-    float m_SQRT1_2;
-    float m_SQRT2;
-    int32_t m_private_DTOSTR_FIXED;
-    int32_t m_private_DTOSTR_PRECISION;
-    int32_t m_private_DTOSTR_EXPONENTIAL;
-    int32_t m_length;
-#define GC_TRIVIAL_TRACER_FloatClass
-};
-#define DECLARE_SLOTS_FloatClass \
-    public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
-    public: \
-        virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
-    private: \
-        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
-    public: \
-        REALLY_INLINE bool isType(avmplus::Atom value) \
-        { \
-            return isTypeImpl(value); \
-        } \
-        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            return isTypeImpl(value->atom()); \
-        } \
-        REALLY_INLINE float asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return avmplus::AvmCore::singlePrecisionFloat(result); \
-        } \
-        REALLY_INLINE float asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return avmplus::AvmCore::singlePrecisionFloat(result); \
-        } \
-        REALLY_INLINE float coerceToType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value); \
-            return avmplus::AvmCore::singlePrecisionFloat(result); \
-        } \
-        REALLY_INLINE float coerceToType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
-            return avmplus::AvmCore::singlePrecisionFloat(result); \
-        } \
-    private: \
-        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    public: \
-        REALLY_INLINE float get_NaN() const { return m_slots_FloatClass.m_NaN; } \
-        REALLY_INLINE void setconst_NaN(float newVal) { m_slots_FloatClass.m_NaN = newVal; } \
-    public: \
-        REALLY_INLINE float get_NEGATIVE_INFINITY() const { return m_slots_FloatClass.m_NEGATIVE_INFINITY; } \
-        REALLY_INLINE void setconst_NEGATIVE_INFINITY(float newVal) { m_slots_FloatClass.m_NEGATIVE_INFINITY = newVal; } \
-    public: \
-        REALLY_INLINE float get_POSITIVE_INFINITY() const { return m_slots_FloatClass.m_POSITIVE_INFINITY; } \
-        REALLY_INLINE void setconst_POSITIVE_INFINITY(float newVal) { m_slots_FloatClass.m_POSITIVE_INFINITY = newVal; } \
-    public: \
-        REALLY_INLINE float get_MIN_VALUE() const { return m_slots_FloatClass.m_MIN_VALUE; } \
-        REALLY_INLINE void setconst_MIN_VALUE(float newVal) { m_slots_FloatClass.m_MIN_VALUE = newVal; } \
-    public: \
-        REALLY_INLINE float get_MAX_VALUE() const { return m_slots_FloatClass.m_MAX_VALUE; } \
-        REALLY_INLINE void setconst_MAX_VALUE(float newVal) { m_slots_FloatClass.m_MAX_VALUE = newVal; } \
-    public: \
-        REALLY_INLINE float get_E() const { return m_slots_FloatClass.m_E; } \
-        REALLY_INLINE void setconst_E(float newVal) { m_slots_FloatClass.m_E = newVal; } \
-    public: \
-        REALLY_INLINE float get_LN10() const { return m_slots_FloatClass.m_LN10; } \
-        REALLY_INLINE void setconst_LN10(float newVal) { m_slots_FloatClass.m_LN10 = newVal; } \
-    public: \
-        REALLY_INLINE float get_LN2() const { return m_slots_FloatClass.m_LN2; } \
-        REALLY_INLINE void setconst_LN2(float newVal) { m_slots_FloatClass.m_LN2 = newVal; } \
-    public: \
-        REALLY_INLINE float get_LOG2E() const { return m_slots_FloatClass.m_LOG2E; } \
-        REALLY_INLINE void setconst_LOG2E(float newVal) { m_slots_FloatClass.m_LOG2E = newVal; } \
-    public: \
-        REALLY_INLINE float get_PI() const { return m_slots_FloatClass.m_PI; } \
-        REALLY_INLINE void setconst_PI(float newVal) { m_slots_FloatClass.m_PI = newVal; } \
-    public: \
-        REALLY_INLINE float get_SQRT1_2() const { return m_slots_FloatClass.m_SQRT1_2; } \
-        REALLY_INLINE void setconst_SQRT1_2(float newVal) { m_slots_FloatClass.m_SQRT1_2 = newVal; } \
-    public: \
-        REALLY_INLINE float get_SQRT2() const { return m_slots_FloatClass.m_SQRT2; } \
-        REALLY_INLINE void setconst_SQRT2(float newVal) { m_slots_FloatClass.m_SQRT2 = newVal; } \
-    protected: \
-        REALLY_INLINE int32_t get_DTOSTR_FIXED() const { return m_slots_FloatClass.m_private_DTOSTR_FIXED; } \
-        REALLY_INLINE void setconst_DTOSTR_FIXED(int32_t newVal) { m_slots_FloatClass.m_private_DTOSTR_FIXED = newVal; } \
-    protected: \
-        REALLY_INLINE int32_t get_DTOSTR_PRECISION() const { return m_slots_FloatClass.m_private_DTOSTR_PRECISION; } \
-        REALLY_INLINE void setconst_DTOSTR_PRECISION(int32_t newVal) { m_slots_FloatClass.m_private_DTOSTR_PRECISION = newVal; } \
-    protected: \
-        REALLY_INLINE int32_t get_DTOSTR_EXPONENTIAL() const { return m_slots_FloatClass.m_private_DTOSTR_EXPONENTIAL; } \
-        REALLY_INLINE void setconst_DTOSTR_EXPONENTIAL(int32_t newVal) { m_slots_FloatClass.m_private_DTOSTR_EXPONENTIAL = newVal; } \
-    public: \
-        REALLY_INLINE int32_t get_length() const { return m_slots_FloatClass.m_length; } \
-        REALLY_INLINE void setconst_length(int32_t newVal) { m_slots_FloatClass.m_length = newVal; } \
-    private: \
-        avmplus::NativeID::avmplus_FloatClassSlots m_slots_FloatClass \
-
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
 // int$
 //-----------------------------------------------------------
 class avmplus_IntClassSlots
@@ -1717,6 +1600,123 @@ private:
         REALLY_INLINE void setconst_length(int32_t newVal) { m_slots_UIntClass.m_length = newVal; } \
     private: \
         avmplus::NativeID::avmplus_UIntClassSlots m_slots_UIntClass \
+
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// float$
+//-----------------------------------------------------------
+class avmplus_FloatClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::FloatClass;
+private:
+    float m_NaN;
+    float m_NEGATIVE_INFINITY;
+    float m_POSITIVE_INFINITY;
+    float m_MIN_VALUE;
+    float m_MAX_VALUE;
+    float m_E;
+    float m_LN10;
+    float m_LN2;
+    float m_LOG2E;
+    float m_PI;
+    float m_SQRT1_2;
+    float m_SQRT2;
+    int32_t m_private_DTOSTR_FIXED;
+    int32_t m_private_DTOSTR_PRECISION;
+    int32_t m_private_DTOSTR_EXPONENTIAL;
+    int32_t m_length;
+#define GC_TRIVIAL_TRACER_FloatClass
+};
+#define DECLARE_SLOTS_FloatClass \
+    public: \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
+    public: \
+        virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE bool isType(avmplus::Atom value) \
+        { \
+            return isTypeImpl(value); \
+        } \
+        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            return isTypeImpl(value->atom()); \
+        } \
+        REALLY_INLINE float asType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value); \
+            return avmplus::AvmCore::singlePrecisionFloat(result); \
+        } \
+        REALLY_INLINE float asType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value->atom()); \
+            return avmplus::AvmCore::singlePrecisionFloat(result); \
+        } \
+        REALLY_INLINE float coerceToType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value); \
+            return avmplus::AvmCore::singlePrecisionFloat(result); \
+        } \
+        REALLY_INLINE float coerceToType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
+            return avmplus::AvmCore::singlePrecisionFloat(result); \
+        } \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    public: \
+        REALLY_INLINE float get_NaN() const { return m_slots_FloatClass.m_NaN; } \
+        REALLY_INLINE void setconst_NaN(float newVal) { m_slots_FloatClass.m_NaN = newVal; } \
+    public: \
+        REALLY_INLINE float get_NEGATIVE_INFINITY() const { return m_slots_FloatClass.m_NEGATIVE_INFINITY; } \
+        REALLY_INLINE void setconst_NEGATIVE_INFINITY(float newVal) { m_slots_FloatClass.m_NEGATIVE_INFINITY = newVal; } \
+    public: \
+        REALLY_INLINE float get_POSITIVE_INFINITY() const { return m_slots_FloatClass.m_POSITIVE_INFINITY; } \
+        REALLY_INLINE void setconst_POSITIVE_INFINITY(float newVal) { m_slots_FloatClass.m_POSITIVE_INFINITY = newVal; } \
+    public: \
+        REALLY_INLINE float get_MIN_VALUE() const { return m_slots_FloatClass.m_MIN_VALUE; } \
+        REALLY_INLINE void setconst_MIN_VALUE(float newVal) { m_slots_FloatClass.m_MIN_VALUE = newVal; } \
+    public: \
+        REALLY_INLINE float get_MAX_VALUE() const { return m_slots_FloatClass.m_MAX_VALUE; } \
+        REALLY_INLINE void setconst_MAX_VALUE(float newVal) { m_slots_FloatClass.m_MAX_VALUE = newVal; } \
+    public: \
+        REALLY_INLINE float get_E() const { return m_slots_FloatClass.m_E; } \
+        REALLY_INLINE void setconst_E(float newVal) { m_slots_FloatClass.m_E = newVal; } \
+    public: \
+        REALLY_INLINE float get_LN10() const { return m_slots_FloatClass.m_LN10; } \
+        REALLY_INLINE void setconst_LN10(float newVal) { m_slots_FloatClass.m_LN10 = newVal; } \
+    public: \
+        REALLY_INLINE float get_LN2() const { return m_slots_FloatClass.m_LN2; } \
+        REALLY_INLINE void setconst_LN2(float newVal) { m_slots_FloatClass.m_LN2 = newVal; } \
+    public: \
+        REALLY_INLINE float get_LOG2E() const { return m_slots_FloatClass.m_LOG2E; } \
+        REALLY_INLINE void setconst_LOG2E(float newVal) { m_slots_FloatClass.m_LOG2E = newVal; } \
+    public: \
+        REALLY_INLINE float get_PI() const { return m_slots_FloatClass.m_PI; } \
+        REALLY_INLINE void setconst_PI(float newVal) { m_slots_FloatClass.m_PI = newVal; } \
+    public: \
+        REALLY_INLINE float get_SQRT1_2() const { return m_slots_FloatClass.m_SQRT1_2; } \
+        REALLY_INLINE void setconst_SQRT1_2(float newVal) { m_slots_FloatClass.m_SQRT1_2 = newVal; } \
+    public: \
+        REALLY_INLINE float get_SQRT2() const { return m_slots_FloatClass.m_SQRT2; } \
+        REALLY_INLINE void setconst_SQRT2(float newVal) { m_slots_FloatClass.m_SQRT2 = newVal; } \
+    protected: \
+        REALLY_INLINE int32_t get_DTOSTR_FIXED() const { return m_slots_FloatClass.m_private_DTOSTR_FIXED; } \
+        REALLY_INLINE void setconst_DTOSTR_FIXED(int32_t newVal) { m_slots_FloatClass.m_private_DTOSTR_FIXED = newVal; } \
+    protected: \
+        REALLY_INLINE int32_t get_DTOSTR_PRECISION() const { return m_slots_FloatClass.m_private_DTOSTR_PRECISION; } \
+        REALLY_INLINE void setconst_DTOSTR_PRECISION(int32_t newVal) { m_slots_FloatClass.m_private_DTOSTR_PRECISION = newVal; } \
+    protected: \
+        REALLY_INLINE int32_t get_DTOSTR_EXPONENTIAL() const { return m_slots_FloatClass.m_private_DTOSTR_EXPONENTIAL; } \
+        REALLY_INLINE void setconst_DTOSTR_EXPONENTIAL(int32_t newVal) { m_slots_FloatClass.m_private_DTOSTR_EXPONENTIAL = newVal; } \
+    public: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_FloatClass.m_length; } \
+        REALLY_INLINE void setconst_length(int32_t newVal) { m_slots_FloatClass.m_length = newVal; } \
+    private: \
+        avmplus::NativeID::avmplus_FloatClassSlots m_slots_FloatClass \
 
 //-----------------------------------------------------------
 

@@ -58,13 +58,27 @@ export shell_debug=${shell_debug_64}
 export shell_release_debugger=${shell_release_debugger_64}
 export shell_debug_debugger=${shell_debug_debugger_64}
 
-export bullseyedir="c:/tools/BullseyeCoverage/bin"
+if [ "$bullseyedir" == "" ]
+then
+    export bullseyedir="c:/tools/BullseyeCoverage/bin"
+fi
 
-VS_HOME_PATH="/c/Program Files (x86)/Microsoft Visual Studio 9.0"
-VS_HOME="c:\Program Files (x86)\Microsoft Visual Studio 9.0"
+if [ "$VS_HOME" == "" ]
+then
+    VS_HOME="C:\Program Files (x86)\Microsoft Visual Studio 9.0"
+fi
+VS_HOME_PATH=`cygpath -a "$VS_HOME"`
+echo VS_HOME: $VS_HOME
+echo VS_HOME_PATH: $VS_HOME_PATH
 
-export PATH="${PREPATH}:$VS_HOME_PATH/Common7/IDE:$VS_HOME_PATH/VC/bin/amd64:$VS_HOME_PATH\Common7\Tools:$VS_HOME_PATH/VC/VCPackages:$PATH"
-export INCLUDE="${INCLUDE};C:\Program Files\Microsoft SDKs\Windows\v6.0\Include;$VS_HOME\VC\atlmfc\include;$VS_HOME\VC\include;"
-export LIB="${LIB};C:\Program Files\Microsoft SDKs\Windows\v6.0\Lib\x64;$VS_HOME\VC\atlmfc\lib\amd64;$VS_HOME\VC\lib\amd64;"
-export LIBPATH="${LIBPATH};C:\Program Files\Microsoft SDKs\Windows\v6.0\Lib\x64;$VS_HOME\VC\atlmfc\lib\amd64;$VS_HOME\VC\lib\amd64;"
+if [ "$WINDOWS_SDK" == "" ]
+then
+    WINDOWS_SDK="c:\Program Files\Microsoft SDKs\Windows\v6.0A"
+fi
+
+# todo: who is using prepath?
+export PATH="$PREPATH:$VS_HOME_PATH/Common7/IDE:$VS_HOME_PATH/VC/bin/amd64:$VS_HOME_PATH\Common7\Tools:$VS_HOME_PATH/VC/VCPackages:$PATH"
+export INCLUDE="$WINDOWS_SDK\Include;$VS_HOME\VC\atlmfc\include;$VS_HOME\VC\include;"
+export LIB="$WINDOWS_SDK\Lib\x64;$VS_HOME\VC\atlmfc\lib\amd64;$VS_HOME\VC\lib\amd64;"
+export LIBPATH="$WINDOWS_SDK\Lib\x64;$VS_HOME\VC\atlmfc\lib\amd64;$VS_HOME\VC\lib\amd64;"
 

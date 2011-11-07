@@ -145,7 +145,7 @@
   /****************Start Class RayTracer*************/
     /**
    * Create and initialize the scene for the rendering picture.
-   * 
+   *
    * @return The scene just created
    */
 
@@ -167,7 +167,7 @@
         for (var k:int = 0; k < nz; k++) {
           var xx:Number = 20.0 / (nx - 1) * i - 10.0;
           var yy:Number = 20.0 / (ny - 1) * j - 10.0;
-          var zz:Number = 20.0 / (nz - 1) * k - 10.0;         
+          var zz:Number = 20.0 / (nz - 1) * k - 10.0;
           p = new Sphere(new Vec(xx, yy, zz), 3);
           
           // p.setColor(i/(double) (nx-1), j/(double)(ny-1),
@@ -194,7 +194,7 @@
      * v.from = new Vec(x, y, -30); v.at = new Vec(x, y, -15); v.up = new
      * Vec(0, 1, 0); v.angle = 35.0 * 3.14159265 / 180.0; v.aspect = 1.0;
      * v.dist = 1.0;
-     * 
+     *
      */
     scene.setView(v);
 
@@ -335,7 +335,7 @@
 
   /**
    * Checks if there is a shadow
-   * 
+   *
    * @param r
    *            The ray
    * @return Returns 1 if there is a shadow, 0 if there isn't
@@ -348,7 +348,7 @@
 
   /**
    * Return the Vector's reflection direction
-   * 
+   *
    * @return The specular direction
    */
   function SpecularDirection( I:Vec,  N:Vec):Vec {
@@ -378,7 +378,7 @@
 
   /**
    * Returns the shaded color
-   * 
+   *
    * @return The color in Vec form (rgb)
    */
   function shade( level:int,  weight:Number,  P:Vec,  N:Vec,  I:Vec,  hit:Isect):Vec{
@@ -738,7 +738,7 @@ class Vec {
   
   /**
    * Constructor
-   * 
+   *
    * @param a
    *            the x coordinate
    * @param b
@@ -761,7 +761,7 @@ class Vec {
   }
   /**
    * Add a vector to the current vector
-   * 
+   *
    * @param: a The vector to be added
    */
   function add( a:Vec):void {
@@ -779,7 +779,7 @@ class Vec {
 
   /**
    * Adds vector such as: this+=sB
-   * 
+   *
    * @param: s The multiplier
    * @param: b The vector to be added
    */
@@ -900,12 +900,12 @@ function Vector(inc) {
     inc = 100;
   }
   
-  // Properties 
+  // Properties
   this.data = new Array(inc);
   this.increment = inc;
   this.size = 0;
   
-  // Methods 
+  // Methods
   this.getCapacity = getCapacity;
   this.getSize = getSize;
   this.isEmpty = isEmpty;
@@ -959,10 +959,10 @@ function getFirstElement() {
 function getElementAt(i) {
   try {
     return this.data[i];
-  } 
+  }
   catch (e) {
-    return "Exception " + e + " occured when accessing " + i; 
-  } 
+    return "Exception " + e + " occured when accessing " + i;
+  }
 }
 
 // addElement() -- adds a element at the end of the Vector
@@ -1007,7 +1007,7 @@ function removeElementAt(index) {
   catch(e) {
     return "Invalid index " + index;
   }
-} 
+}
 
 // removeAllElements() -- removes all elements in the Vector
 function removeAllElements() {
@@ -1059,7 +1059,7 @@ function trimToSize() {
   }
   this.size = temp.length - 1;
   this.data = temp;
-} 
+}
 
 // sort() - sorts the collection based on a field name - f
 function sort(f) {
@@ -1083,8 +1083,8 @@ function sort(f) {
       if (j >=0) {
         compareObj = this.data[j];
         compareValue = compareObj[f];
-      }       
-    } 
+      }
+    }
     this.data[j+1] = currentObj;
   }
 }
@@ -1113,7 +1113,7 @@ function toString() {
       str += "\tObject." + prop + " = " + obj[prop] + "\n";
     }
   }
-  return str; 
+  return str;
 }
 
 // overwriteElementAt() - overwrites the element with an object at the specific index.

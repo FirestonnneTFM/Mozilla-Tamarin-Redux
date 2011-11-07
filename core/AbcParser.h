@@ -157,21 +157,21 @@ namespace avmplus
         double readDouble(const uint8_t* &p) const;
 
         /** 
-         *   If floatSupport is set (introduced in Cyrill) then:
+         *   If floatSupport is set (introduced in Cyril) then:
          *
          *  - The ABC contains a pool of float values and a pool of float4 values
          *  - OP_pushfloat is an instruction
          *  - OP_pushfloat4 is an instruction
          *  - OP_coerce_f is an instruction
          *  - OP_coerce_f4 is an instruction
-         *  - OP_unplus is an instruction (unary plus; "coerce to numeric"
-         *  - The type of OP_add is (Number|String|float|float4) while the type
-         *    of OP_subtract, OP_multiply, OP_divide, OP_modulo, OP_negate,
-         *    OP_increment, OP_inclocal, OP_decrement, and OP_declocal is
-         *    (Number|float|float4).  In older content they were (Number|String)
-         *    and (Number) respectively.
+         *  - OP_unplus is an instruction (unary plus; "coerce to numeric")
+         *  - The type of OP_add is (Number|String|XMLList|float|float4) while
+         *    the type of OP_subtract, OP_multiply, OP_divide, OP_modulo, 
+         *    OP_negate, OP_increment, OP_inclocal, OP_decrement, and
+         *    OP_declocal is (Number|float|float4).  In older content they
+         *    were (Number|String|XMLList) and (Number) respectively.
          *
-         * (Subject to revision)
+         *   See ABC Extensions Spec for complete/up-to-date information
          */
 #ifdef VMCFG_FLOAT
         /**

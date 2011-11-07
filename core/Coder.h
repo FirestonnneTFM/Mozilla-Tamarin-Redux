@@ -71,6 +71,7 @@ namespace avmplus
         virtual void writeNip(const FrameState* state, const uint8_t *pc);
         virtual void writeCheckNull(const FrameState* state, uint32_t index);
         virtual void writeCoerce(const FrameState* state, uint32_t index, Traits* type);
+        virtual void writeCoerceToNumeric(const FrameState* state, uint32_t index);
         virtual void writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver*);
         virtual void writeEpilogue(const FrameState* state);
         virtual void writeBlockStart(const FrameState* state);
@@ -99,6 +100,7 @@ namespace avmplus
         void writeNip(const FrameState* state, const uint8_t *pc);
         void writeCheckNull(const FrameState* state, uint32_t index);
         void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
+        void writeCoerceToNumeric(const FrameState* state, uint32_t index);
         void writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver*);
         void writeEpilogue(const FrameState* state);
         void writeBlockStart(const FrameState* state);
@@ -120,6 +122,7 @@ namespace avmplus
         void writeMethodCall(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, MethodInfo*, uintptr_t disp_id, uint32_t argc, Traits* type);
         void writeNip(const FrameState* state, const uint8_t *pc);
         void writeCheckNull(const FrameState* state, uint32_t index);
+        void writeCoerceToNumeric(const FrameState* state, uint32_t index);
         void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
         void writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver*);
         void writeEpilogue(const FrameState* state);

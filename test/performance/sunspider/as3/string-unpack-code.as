@@ -20,7 +20,7 @@
  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 // This test case unpacks the compressed code for the MochiKit,
@@ -109,7 +109,7 @@ package {
            - By Lunarmedia, 06 August, 2006
            - Available at (and packed with) JavascriptCompressor.com
           
-          Please note this version is missing the selector.js component of the full Prototype library. 
+          Please note this version is missing the selector.js component of the full Prototype library.
           You can get the compressed version of selector at JavascriptCompressor.com
           
           */

@@ -55,17 +55,17 @@ class C {
 function pushloop():uint {
     var a:C = new C;
     for ( var i:int=0 ; i < 100000 ; i+=10 ) {
-	a.length = 0;
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
+        a.length = 0;
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
     }
     return a.length;
 }

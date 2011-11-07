@@ -41,7 +41,7 @@ var DESC = "early-bindable class and method that use optimizable arguments objec
 
 class C {
     function push():void {
-	x = arguments[0];
+        x = arguments[0];
     }
     function get length(): uint { return 0 }
     function set length(n: uint): void { }
@@ -51,17 +51,17 @@ class C {
 function pushloop():uint {
     var a:C = new C;
     for ( var i:int=0 ; i < 100000 ; i+=10 ) {
-	a.length = 0;
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
+        a.length = 0;
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
     }
     return a.length;
 }

@@ -30,7 +30,7 @@
 // benchmark from:
 //
 //    http://www.cl.cam.ac.uk/~mr10/Bench.html
-// 
+//
 // The benchmark was originally implemented in BCPL by
 // Martin Richards.
 
@@ -616,7 +616,7 @@ package richards {
     } // class Packet
     
     // if running individually, start the Benchmark suite.
-    try { 
+    try {
       runSuite
     } catch (e:ReferenceError) {
       BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,

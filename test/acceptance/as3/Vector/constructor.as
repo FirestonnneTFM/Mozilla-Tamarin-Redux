@@ -100,9 +100,6 @@ AddTestCase( "constructor type int", -10, v11[0]);
 var v12=new Vector.<Number>();
 v12.push(3.14);
 AddTestCase( "constructor type Number", 3.14, v12[0]);
-var v12_f=new Vector.<float>();
-v12_f.push(3.15);
-AddTestCase( "constructor type float", float(3.15), v12_f[0]); // todo: use float literals
 var v13=new Vector.<Boolean>();
 v13.push(true);
 AddTestCase( "constructor type Boolean", true, v13[0]);
@@ -143,19 +140,9 @@ function bug449468() {
     return v;
 }
 
-function bug449468_f() {
-    var v : Vector.<Vector.<float>> = new Vector.<Vector.<float>>(4);
-    return v;
-}
-
 AddTestCase("Bug 449468: Crash with vector constructor in interp mode",
             "null,null,null,null",
             bug449468().toString()
-            );
-
-AddTestCase("Replicating bug 449468 testcase on float: Crash with vector constructor in interp mode",
-            "null,null,null,null",
-            bug449468_f().toString()
             );
 
 test();

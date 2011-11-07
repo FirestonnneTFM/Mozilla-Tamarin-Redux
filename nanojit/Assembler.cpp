@@ -262,14 +262,12 @@ namespace nanojit
                 NanoAssert(_entries[i + 1]==ins);
                 i += 1; // skip high word
             }
-#ifdef VMCFG_FLOAT
             else if (ins->isF4()) {
                 NanoAssert(_entries[i + 1]==ins);
                 NanoAssert(_entries[i + 2]==ins);
                 NanoAssert(_entries[i + 3]==ins);
                 i += 3; // skip high words
             }
-#endif
             else {
                 NanoAssertMsg(arIndex == i, "Stack record index mismatch");
             }
@@ -519,12 +517,9 @@ namespace nanojit
 
     int Assembler::findMemFor(LIns *ins)
     {
-#if NJ_USES_IMMD_POOL
-        NanoAssert(!ins->isImmD() FLOAT_ONLY( && !ins->isImmF()) ); 
-#endif
-#if NJ_USES_IMMF4_POOL
-        NanoAssert(!ins->isImmF4());
-#endif
+        NanoAssert(!NJ_USES_IMMD_POOL || !(ins->isImmD() || ins->isImmF()));
+        NanoAssert(!NJ_USES_IMMF4_POOL || !ins->isImmF4());
+
         if (!ins->isInAr()) {
             uint32_t const arIndex = arReserve(ins);
             ins->setArIndex(arIndex);
@@ -613,17 +608,12 @@ namespace nanojit
                           if (_logc->lcbits & LC_Native) {
                              setOutputForEOL("  <= spill %s",
                              _thisfrag->lirbuf->printer->formatRef(&b, ins)); } )
-#ifdef VMCFG_FLOAT
             int8_t nWords = ins->isF4() ? 4 : 
                         ( ins->isQorD() ? 2 : 1 );
-#else
-            bool nWords = ins->isQorD(); // Kinda' ugly naming (should be "quad"), but it's temporary anyway.
-#endif
 #ifdef NANOJIT_IA32
-            asm_spill(r, d, pop FLOAT_ONLY(, nWords)); (void)nWords;
+            asm_spill(r, d, pop, nWords);
 #else
-            (void)pop;
-            asm_spill(r, d, nWords);
+            asm_spill(r, d, nWords); (void) pop;
 #endif
             return true;
         }
@@ -1466,8 +1456,8 @@ namespace nanojit
                 case LIR_livei:
                 CASE64(LIR_liveq:)
                 case LIR_lived:
-                CASEF(LIR_livef:)
-                CASEF(LIR_livef4:)
+                case LIR_livef:
+                case LIR_livef4:
                 {
                     countlir_live();
                     LIns* op1 = ins->oprnd1();
@@ -1493,8 +1483,8 @@ namespace nanojit
                 case LIR_reti:
                 CASE64(LIR_retq:)
                 case LIR_retd:
-                CASEF(LIR_retf:)
-                CASEF(LIR_retf4:)
+                case LIR_retf:
+                case LIR_retf4:
                     countlir_ret();
                     ins->oprnd1()->setResultLive();
                     asm_ret(ins);
@@ -1534,7 +1524,6 @@ namespace nanojit
                     }
                     break;
 
-#ifdef VMCFG_FLOAT
                case LIR_immf:
                     countlir_imm();
                     if (ins->isExtant()) {
@@ -1548,7 +1537,6 @@ namespace nanojit
                        asm_immf4(ins);
                    }
                    break;
-#endif
 
                 case LIR_paramp:
                     countlir_param();
@@ -1604,8 +1592,8 @@ namespace nanojit
                 case LIR_cmovi:
                 CASE64(LIR_cmovq:)
                 case LIR_cmovd:
-                CASEF(LIR_cmovf:)
-                CASEF(LIR_cmovf4:)
+                case LIR_cmovf:
+                case LIR_cmovf4:
                     countlir_cmov();
                     ins->oprnd1()->setResultLive();
                     ins->oprnd2()->setResultLive();
@@ -1630,7 +1618,7 @@ namespace nanojit
                 CASE64(LIR_ldq:)
                 case LIR_ldd:
                 case LIR_ldf2d:
-                CASEF(LIR_ldf:) // Ok, ldf is not really 64-bits, but it's still more natural to 
+                case LIR_ldf: // Ok, ldf is not really 64-bits, but it's still more natural to
                                // handle it in load64 than in load32 (which basically deals with ints)
                     countlir_ldq();
                     ins->oprnd1()->setResultLive();
@@ -1639,7 +1627,6 @@ namespace nanojit
                     }
                     break;
 
-#ifdef VMCFG_FLOAT
                 case LIR_ldf4: 
                     countlir_ldf4();
                     ins->oprnd1()->setResultLive();
@@ -1647,7 +1634,6 @@ namespace nanojit
                         asm_load128(ins);
                     }
                     break;
-#endif // VMCFG_FLOAT
 
                 case LIR_negi:
                 case LIR_noti:
@@ -1704,8 +1690,8 @@ namespace nanojit
                     break;
 #endif
 
-                CASEF(LIR_negf:)
-                CASEF(LIR_negf4:)
+                case LIR_negf:
+                case LIR_negf4:
                 case LIR_negd:
                     countlir_fpu();
                     ins->oprnd1()->setResultLive();
@@ -1714,15 +1700,14 @@ namespace nanojit
                     }
                     break;
 
-                CASEF(LIR_addf:)
-                CASEF(LIR_subf:)
-                CASEF(LIR_mulf:)
-                CASEF(LIR_divf:)
-
-                CASEF(LIR_addf4:)
-                CASEF(LIR_subf4:)
-                CASEF(LIR_mulf4:)
-                CASEF(LIR_divf4:)
+                case LIR_addf:
+                case LIR_subf:
+                case LIR_mulf:
+                case LIR_divf:
+                case LIR_addf4:
+                case LIR_subf4:
+                case LIR_mulf4:
+                case LIR_divf4:
 
                 case LIR_addd:
                 case LIR_subd:
@@ -1752,7 +1737,6 @@ namespace nanojit
                     }
                     break;
 
-#ifdef VMCFG_FLOAT
                 case LIR_i2f:
                     countlir_fpu();
                     ins->oprnd1()->setResultLive();
@@ -1760,6 +1744,7 @@ namespace nanojit
                         asm_i2f(ins);
                     }
                     break;
+
                 case LIR_ui2f:
                     countlir_fpu();
                     ins->oprnd1()->setResultLive();
@@ -1767,6 +1752,7 @@ namespace nanojit
                         asm_ui2f(ins);
                     }
                     break;
+
                 case LIR_f2i:
                     countlir_fpu();
                     ins->oprnd1()->setResultLive();
@@ -1774,6 +1760,7 @@ namespace nanojit
                         asm_f2i(ins);
                     }
                     break;
+
                 case LIR_f2f4:
                     countlir_fpu();
                     ins->oprnd1()->setResultLive();
@@ -1781,6 +1768,7 @@ namespace nanojit
                         asm_f2f4(ins);
                     }
                     break;
+
                 case LIR_f4x:
                 case LIR_f4y:
                 case LIR_f4z:
@@ -1791,6 +1779,7 @@ namespace nanojit
                         asm_f4comp(ins);
                     }
                     break;
+
                 case LIR_d2f:
                     countlir_fpu();
                     ins->oprnd1()->setResultLive();
@@ -1798,6 +1787,7 @@ namespace nanojit
                         asm_d2f(ins);
                     }
                     break;
+
                 case LIR_f2d:
                     countlir_fpu();
                     ins->oprnd1()->setResultLive();
@@ -1805,7 +1795,7 @@ namespace nanojit
                         asm_f2d(ins);
                     }
                     break;
-#endif // VMCFG_FLOAT
+
                 case LIR_d2i:
                     countlir_fpu();
                     ins->oprnd1()->setResultLive();
@@ -1859,7 +1849,7 @@ namespace nanojit
 
                 CASE64(LIR_stq:)
                 case LIR_std:
-                CASEF(LIR_stf:)
+                case LIR_stf:
                 case LIR_std2f: {
                     countlir_stq();
                     ins->oprnd1()->setResultLive();
@@ -1882,7 +1872,6 @@ namespace nanojit
                     break;
                 }
 
-#ifdef VMCFG_FLOAT
                 case LIR_stf4: {
                     countlir_stf4();
                     ins->oprnd1()->setResultLive();
@@ -1893,7 +1882,6 @@ namespace nanojit
                     asm_store128(op, value, dr, base);
                     break;
                 }
-#endif 
 
                 case LIR_j:
                     asm_jmp(ins, pending_lives);
@@ -2049,24 +2037,30 @@ namespace nanojit
                     break;
 #endif
 
-                CASEF(LIR_eqf:)
-                CASEF(LIR_lef:)
-                CASEF(LIR_ltf:)
-                CASEF(LIR_gtf:)
-                CASEF(LIR_gef:)
-
+                case LIR_eqf:
+                case LIR_lef:
+                case LIR_ltf:
+                case LIR_gtf:
+                case LIR_gef:
                 case LIR_eqd:
                 case LIR_led:
                 case LIR_ltd:
                 case LIR_gtd:
                 case LIR_ged:
-
-                CASEF(LIR_eqf4:)
                     countlir_fpu();
                     ins->oprnd1()->setResultLive();
                     ins->oprnd2()->setResultLive();
                     if (ins->isExtant()) {
-                        FLOAT_ONLY(op==LIR_eqf4? asm_condf4(ins):) asm_condd(ins);
+                        asm_condd(ins);
+                    }
+                    break;
+
+                case LIR_eqf4:
+                    countlir_fpu();
+                    ins->oprnd1()->setResultLive();
+                    ins->oprnd2()->setResultLive();
+                    if (ins->isExtant()) {
+                        asm_condf4(ins);
                     }
                     break;
 
@@ -2100,8 +2094,8 @@ namespace nanojit
                 case LIR_calli:
                 CASE64(LIR_callq:)
                 case LIR_calld:
-                CASEF(LIR_callf:)
-                CASEF(LIR_callf4:)
+                case LIR_callf:
+                case LIR_callf4:
                     countlir_call();
                     for (int i = 0, argc = ins->argc(); i < argc; i++)
                         ins->arg(i)->setResultLive();
@@ -2213,40 +2207,39 @@ namespace nanojit
             LIns *ins = p->head;
             NanoAssert(isLiveOpcode(ins->opcode()));
             LIns *op1 = ins->oprnd1();
-            // Must findMemFor even if we're going to findRegFor; loop-carried
-            // operands may spill on another edge, and we need them to always
-            // spill to the same place.
-#if NJ_USES_IMMD_POOL
-            // Exception: if float constants are true constants, we should
-            // never call findMemFor on those ops.
-            if (!op1->isImmD() FLOAT_ONLY( && !op1->isImmF() ) )
-#endif
-#if NJ_USES_IMMF4_POOL
-            if (!op1->isImmF4() )
-#endif 
-            {
-                    findMemFor(op1);
+
+            if (NJ_USES_IMMD_POOL && (op1->isImmD() || op1->isImmF())) {
+                // don't force immediate double or float values to spill
+                // since we can rematerialize them.
+            } else if (NJ_USES_IMMF4_POOL && op1->isImmF4()) {
+                // don't force immediate float4 values to spill since we can
+                // rematerialize them.
+            } else {
+                // Must findMemFor even if we're going to findRegFor; loop-carried
+                // operands may spill on another edge, and we need them to always
+                // spill to the same place.
+                findMemFor(op1);
             }
+
             if (!op1->isImmAny()){
                 RegisterMask allowed = 0;
-                // Tamarin itself  never generates LIR_lived(or LIR_livef/LIR_livef4), 
+                // Tamarin itself never generates LIR_lived(or LIR_livef/LIR_livef4),
                 // but in nanojit it may be used through TraceMonkey or lirasm
                 switch (ins->opcode()) {
-                    case LIR_lived:
-                        allowed = FpDRegs;
-                        break;    
-#ifdef VMCFG_FLOAT
-                    case LIR_livef:
-                        allowed = FpSRegs;
-                        break;
-                    case LIR_livef4:
-                        allowed = FpQRegs;
-                        break;
-#endif                        
-                    default:
-                        NanoAssert(ins->isop(LIR_livei) || ins->isop(LIR_livep));
-                        allowed = GpRegs;
-                        break;
+                default: NanoAssert(!"bad LIR_live opcode");
+                case LIR_lived:
+                    allowed = FpDRegs;
+                    break;
+                case LIR_livef:
+                    allowed = FpSRegs;
+                    break;
+                case LIR_livef4:
+                    allowed = FpQRegs;
+                    break;
+                case LIR_livei:
+                CASE64(LIR_liveq:)
+                    allowed = GpRegs;
+                    break;
                 }
                 findRegFor(op1, allowed); 
             }
@@ -2363,12 +2356,12 @@ namespace nanojit
         }
         else
         {
-            // alloc larger block on 8byte boundary.
-            // except float4 values which need to be aligned on a 16-byte boundary */
-            uint32_t const extraStackSlots = FLOAT_ONLY( ins->isF4() ? ( (4 - (nStackSlots & 3)) & 3):   )// 16-byte align 
-                                                           ( nStackSlots & 1) ;             // 8-byte align
+            // alloc larger block on 8-byte boundary.
+            // except float4 values which need to be aligned on a 16-byte boundary
+            uint32_t const extraStackSlots = ins->isF4() ? ((4 - (nStackSlots & 3)) & 3): // 16-byte align
+                                                           (nStackSlots & 1);             // 8-byte align
             uint32_t const start = nStackSlots + extraStackSlots; 
-            uint32_t increment = FLOAT_ONLY( ins->isF4() ? 4 :) 2;
+            uint32_t increment = ins->isF4() ? 4 : 2;
             for (uint32_t i = start; i <= _highWaterMark; i += increment)
             {
                 if (isEmptyRange(i, nStackSlots))
@@ -2386,9 +2379,9 @@ namespace nanojit
 
             // Be sure to account for any 8/16-byte-round-up when calculating spaceNeeded.
             uint32_t const spaceLeft = NJ_MAX_STACK_ENTRY - _highWaterMark - 1;
-            uint32_t const extraSpaceForAlignment = FLOAT_ONLY( ins->isF4()?
-                                                          ( (4 - (_highWaterMark & 3)) & 3): ) // 16-byte align
-                                                          ( _highWaterMark & 1);               // 8-byte align
+            uint32_t const extraSpaceForAlignment = ins->isF4() ?
+                                                          ((4 - (_highWaterMark & 3)) & 3):   // 16-byte align
+                                                          (_highWaterMark & 1);               // 8-byte align
             uint32_t const spaceNeeded = nStackSlots + extraSpaceForAlignment;
             if (spaceLeft >= spaceNeeded)
             {
@@ -2456,7 +2449,7 @@ namespace nanojit
         for (Register r = lsReg(evict_set); evict_set; r = nextLsReg(evict_set, r)) {
             LIns *ins = regs->getActive(r);
             Register r1 = ins->getReg();
-            NanoAssert( (rmask(r1) & rmask(r)) == rmask(r) ); // r must be strlictly included in r1
+            NanoAssert( (rmask(r1) & rmask(r)) == rmask(r) ); // r must be strictly included in r1
             r = r1;
             if (RegAlloc::canRemat(ins)) {
                 evict(ins);

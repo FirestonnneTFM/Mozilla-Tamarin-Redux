@@ -244,6 +244,22 @@ REALLY_INLINE /*static*/ bool AvmCore::isFloat4(Atom atom)
 REALLY_INLINE /*static*/ bool AvmCore::isNumber(Atom atom)
 {
     MMGC_STATIC_ASSERT(kIntptrType == 6 && kDoubleType == 7);
+    return (atom&6) == kIntptrType;
+}
+
+REALLY_INLINE /*static*/ bool AvmCore::isNumeric(Atom atom)
+{
+    MMGC_STATIC_ASSERT(kIntptrType == 6 && kDoubleType == 7 && kSpecialBibopType == 4 && kBooleanType == 5);
+    MMGC_STATIC_ASSERT(trueAtom == 13 && falseAtom == 5 && undefinedAtom == 4);
+    /* the assumption here is that the value "12" is never a legal (bibop) atom */
+    /* the second assumption is that all kSpecialBibopTypes, except undefinedAtom, are numeric */
+    /* Finally, the third assumption is that the Boolean type has only two values: trueAtom and falseAtom */
+    return isNumber(atom) || ((atom > trueAtom) && (atom & kSpecialBibopType));
+}
+
+REALLY_INLINE /*static*/ bool AvmCore::isNumberOrFloat(Atom atom)
+{
+    MMGC_STATIC_ASSERT(kIntptrType == 6 && kDoubleType == 7);
     return (atom&6) == kIntptrType || (atomKind(atom)==kSpecialBibopType && atom!=AtomConstants::undefinedAtom && bibopKind(atom)==kBibopFloatType);
 }
 
@@ -332,10 +348,7 @@ REALLY_INLINE /*static*/ double AvmCore::number_d(Atom a)
     if (atomIsIntptr(a))
         return (double)atomGetIntptr(a);
     else
-        // TODO is the float handling correct?? Should floats even get here?
-        // I suspect it may not be right ... double-check transition from JIT to interpreted in case of float
-        return IFFLOAT( isDouble(a) ? atomToDouble(a) : atomToFloat(a)
-                       , atomToDouble(a));
+        return atomToDouble(a);
 }
 
 REALLY_INLINE Atom AvmCore::intAtom(Atom atom)
@@ -583,16 +596,8 @@ REALLY_INLINE Atom AvmCore::allocFloat(float n)
 REALLY_INLINE Atom AvmCore::allocFloat4(float4_t n)
 {
     float4_t *f = (float4_t*) GetGC()->AllocFloat4();
-// Note: VMCFG_UNALIGNED_FP_ACCESS doesn't seem to apply to float4_t* pointers, too... 
-    if( (((uintptr_t) f) & 0xf) != 0 )
-    {
-        AvmAssert(  (((uintptr_t)f) & 0x7) ==0);
-        VMPI_memcpy(f, &n, sizeof(float4_t));
-    }
-    else
-    {
-        *f = n;
-    } 
+    AvmAssert( (((uintptr_t)f) & 0xf) == 0);
+    *f = n;
     return kSpecialBibopType | (uintptr_t)f;
 }
 #endif // VMCFG_FLOAT

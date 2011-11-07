@@ -226,10 +226,10 @@ AddTestCase("no != nd", true, (no != nd));
 
 
 //"float != String; ToFloat called on String (round_up test)";
-AddTestCase("nf != ns", false, (nf != ns));
+AddTestCase("nf != ns", true, (nf != ns));
 //"float != String; ToFloat called on String (round_down test)";
-AddTestCase(" ns_down != nf_down", false, ( ns_down != nf_down));
-AddTestCase(" nf_down != ns_down", false, ( nf_down != ns_down));
+AddTestCase(" ns_down != nf_down", true, ( ns_down != nf_down));
+AddTestCase(" nf_down != ns_down", true, ( nf_down != ns_down));
 
 
 /// some last extra tests
@@ -260,7 +260,9 @@ AddTestCase("new MyObject(float(0xFFFFFF00)) != 0xFFFFFF01)", true, (new MyObjec
 // Weirdo case
 var v3 = new MyObject(float(0xFFFFFF00));
 var v4 = "4294967041"; // i.e. 0xFFFFFF01
-AddTestCase("Weirdo spec behaviour: Object!=String, when ToPrimitive(Object)=float", false, v3!=v4);
+// typeof v3.valueOf() -> float
+// but v4 is a string so it will be a Number
+AddTestCase("Weirdo spec behaviour: Object!=String, when ToPrimitive(Object)=float", true, v3!=v4);
 v3++;
 v4++;
 // After post-increment, these should become Nubmer, and no longer equal

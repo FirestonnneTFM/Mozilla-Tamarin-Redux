@@ -66,7 +66,6 @@ tracing
 
 namespace nanojit
 {
-    const Register RegAlloc::retRegs[] = { RAX };
 #ifdef _WIN64
     const Register RegAlloc::argRegs[] = { RCX, RDX, R8, R9 };
     const static int maxArgRegs = 4;
@@ -989,21 +988,19 @@ namespace nanojit
         Register rr, ra, rb = UnspecifiedReg;   // init to shut GCC up
         beginOp2Regs(ins, FpRegs, rr, ra, rb);
         switch (ins->opcode()) {
-        default:       TODO(asm_fop);
-        case LIR_divd: DIVSD(rr, rb); break;
-        case LIR_muld: MULSD(rr, rb); break;
-        case LIR_addd: ADDSD(rr, rb); break;
-        case LIR_subd: SUBSD(rr, rb); break;
-#ifdef VMCFG_FLOAT
-        case LIR_divf: DIVSS(rr, rb); break;
-        case LIR_mulf: MULSS(rr, rb); break;
-        case LIR_addf: ADDSS(rr, rb); break;
-        case LIR_subf: SUBSS(rr, rb); break;
+        default:        TODO(asm_fop);
+        case LIR_divd:  DIVSD(rr, rb); break;
+        case LIR_muld:  MULSD(rr, rb); break;
+        case LIR_addd:  ADDSD(rr, rb); break;
+        case LIR_subd:  SUBSD(rr, rb); break;
+        case LIR_divf:  DIVSS(rr, rb); break;
+        case LIR_mulf:  MULSS(rr, rb); break;
+        case LIR_addf:  ADDSS(rr, rb); break;
+        case LIR_subf:  SUBSS(rr, rb); break;
         case LIR_divf4: DIVPS(rr, rb); break;
         case LIR_mulf4: MULPS(rr, rb); break;
         case LIR_addf4: ADDPS(rr, rb); break;
         case LIR_subf4: SUBPS(rr, rb); break;
-#endif
         }
         if (rr != ra) {
             asm_nongp_copy(rr, ra);
@@ -1028,7 +1025,7 @@ namespace nanojit
 
     void Assembler::asm_call(LIns *ins) {
         if (!ins->isop(LIR_callv)) {
-            Register rr = ( ins->isop(LIR_calld) FLOAT_ONLY(|| ins->isop(LIR_callf) || ins->isop(LIR_callf4) ) ? XMM0 : RegAlloc::retRegs[0] );
+            Register rr = (ins->isop(LIR_calld) || ins->isop(LIR_callf) || ins->isop(LIR_callf4)) ? XMM0 : RAX;
             prepareResultReg(ins, rmask(rr));
             evictScratchRegsExcept(rmask(rr));
         } else {
@@ -1084,23 +1081,20 @@ namespace nanojit
                 arg_index++;
             }
         #ifdef _WIN64
-            else if ( (ty == ARGTYPE_D FLOAT_ONLY(|| ty == ARGTYPE_F) ) 
-                        && arg_index < NumArgRegs) {
-                // double&float goes in XMM reg # based on overall arg_index
+            else if ((ty == ARGTYPE_D || ty == ARGTYPE_F) && arg_index < NumArgRegs) {
+                // double and float go in XMM register # based on overall arg_index
                 Register rxi = XMM0 + arg_index;
                 asm_regarg(ty, arg, rxi);
                 arg_index++;
             }
-         #ifdef VMCFG_FLOAT
             else if ((ty == ARGTYPE_F4) && arg_index < NumArgRegs) {
                 // first 4 parameters passed as pointers in RCX
                 asm_ptrarg(ty, arg, RegAlloc::argRegs[arg_index]);
                 arg_index++;
             }
-         #endif
         #else
-            else if ( (ty == ARGTYPE_D FLOAT_ONLY(|| ty == ARGTYPE_F || ty == ARGTYPE_F4 )) && fr < XMM8) {
-                // double, float & float4 go in next available XMM register
+            else if ((ty == ARGTYPE_D || ty == ARGTYPE_F || ty == ARGTYPE_F4) && fr < XMM8) {
+                // double, float, and float4 go in next available XMM register
                 asm_regarg(ty, arg, fr);
                 fr = fr + 1;
             }
@@ -1116,7 +1110,6 @@ namespace nanojit
             max_stk_used = stk_used;
     }
 
-#ifdef VMCFG_FLOAT
     void Assembler::asm_ptrarg(ArgType ty, LIns *p, Register r) {
         NanoAssert(ty==ARGTYPE_F4);(void)ty;
         NanoAssert(IsGpReg(r));
@@ -1133,7 +1126,6 @@ namespace nanojit
             LEAQRM(r, d, FP);
         }
     }
-#endif        
 
     void Assembler::asm_regarg(ArgType ty, LIns *p, Register r) {
         if (ty == ARGTYPE_I) {
@@ -1186,16 +1178,14 @@ namespace nanojit
             Register r = findRegFor(p, FpRegs);
             // TODO!! MOVQSPX(stk_off, r);    // movsd [rsp+d8], xmm
             MOVSDSPR(r, stk_off);
-#ifdef VMCFG_FLOAT
-        } else if ( ty == ARGTYPE_F ){
+        } else if (ty == ARGTYPE_F) {
             Register r = findRegFor(p, FpRegs);
             MOVSSSPR(r, stk_off);
-        } else if ( ty == ARGTYPE_F4 ){
+        } else if (ty == ARGTYPE_F4) {
             // We need to pass on stack a pointer to the float4 value
             Register r = _allocator.allocTempReg(GpRegs);
             MOVQSPR(stk_off, r);    // movq [rsp+d8], r
             asm_ptrarg(ty,p,r);
-#endif
         } else {
             verbose_only({
                 char str[1000];sprintf(str,"ArgType %x Opcode %x\n",ty, p->opcode());
@@ -1275,7 +1265,6 @@ namespace nanojit
         freeResourcesOf(ins);
     }
 
-#ifdef VMCFG_FLOAT
     void Assembler::asm_ui2f(LIns *ins) {
         LIns *a = ins->oprnd1();
         NanoAssert(ins->isF() && a->isI());
@@ -1356,7 +1345,7 @@ namespace nanojit
         XORPS(rr);          // xorps xmmr,xmmr to break dependency chains
         freeResourcesOf(ins);
     }
-#endif
+
     void Assembler::asm_d2i(LIns *ins) {
         LIns *a = ins->oprnd1();
         NanoAssert(ins->isI() && a->isD());
@@ -1374,11 +1363,11 @@ namespace nanojit
         NanoAssert(cond->isCmp());
         NanoAssert((ins->isop(LIR_cmovi) && iftrue->isI() && iffalse->isI())  ||
                    (ins->isop(LIR_cmovq) && iftrue->isQ() && iffalse->isQ())  ||
-FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
-                   (ins->isop(LIR_cmovf4)&& iftrue->isF4()&& iffalse->isF4()) || )
+                   (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
+                   (ins->isop(LIR_cmovf4)&& iftrue->isF4()&& iffalse->isF4()) ||
                    (ins->isop(LIR_cmovd) && iftrue->isD() && iffalse->isD())  );
 
-        bool isFloatOp = ins->isD() FLOAT_ONLY( ||ins->isF()||ins->isF4());
+        bool isFloatOp = ins->isD() || ins->isF() || ins->isF4();
         RegisterMask allow = isFloatOp ? FpRegs : GpRegs;
 
         Register rr = prepareResultReg(ins, allow);
@@ -1473,7 +1462,8 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
             onFalse = !onFalse;
         }
 
-        return isCmpDOpcode(cond->opcode()) FLOAT_ONLY(|| isCmpFOpcode(cond->opcode()) )  /* note: float4 is handled by the "branchi" path */
+        // float4 is handled by the "branchi" path
+        return isCmpDOpcode(cond->opcode()) || isCmpFOpcode(cond->opcode())
              ? asm_branchd_helper(onFalse, cond, target)
              : asm_branchi_helper(onFalse, cond, target);
     }
@@ -1485,7 +1475,7 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
         if (target && isTargetWithinS8(target)) {
             if (onFalse) {
                 switch (condop) {
-                CASEF(LIR_eqf4:) 
+                case LIR_eqf4:
                 case LIR_eqi:  case LIR_eqq:    JNE8( 8, target); break;
                 case LIR_lti:  case LIR_ltq:    JNL8( 8, target); break;
                 case LIR_gti:  case LIR_gtq:    JNG8( 8, target); break;
@@ -1499,7 +1489,7 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
                 }
             } else {
                 switch (condop) {
-                CASEF(LIR_eqf4:)
+                case LIR_eqf4:
                 case LIR_eqi:  case LIR_eqq:    JE8( 8, target);  break;
                 case LIR_lti:  case LIR_ltq:    JL8( 8, target);  break;
                 case LIR_gti:  case LIR_gtq:    JG8( 8, target);  break;
@@ -1515,7 +1505,7 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
         } else {
             if (onFalse) {
                 switch (condop) {
-                CASEF(LIR_eqf4:)
+                case LIR_eqf4:
                 case LIR_eqi:  case LIR_eqq:    JNE( 8, target);  break;
                 case LIR_lti:  case LIR_ltq:    JNL( 8, target);  break;
                 case LIR_gti:  case LIR_gtq:    JNG( 8, target);  break;
@@ -1529,7 +1519,7 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
                 }
             } else {
                 switch (condop) {
-                CASEF(LIR_eqf4:)
+                case LIR_eqf4:
                 case LIR_eqi:  case LIR_eqq:    JE( 8, target);   break;
                 case LIR_lti:  case LIR_ltq:    JL( 8, target);   break;
                 case LIR_gti:  case LIR_gtq:    JG( 8, target);   break;
@@ -1557,12 +1547,12 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
     }
 
     void Assembler::asm_cmp(LIns *cond) {
-    (
-#ifdef VMCFG_FLOAT
-        isCmpF4Opcode(cond->opcode()) ) ? asm_cmpf4(cond):
-    (   isCmpFOpcode(cond->opcode()) ||
-#endif
-        isCmpDOpcode(cond->opcode()))   ? asm_cmpd(cond) : asm_cmpi(cond);
+      if (isCmpF4Opcode(cond->opcode()))
+          asm_cmpf4(cond);
+      else if (isCmpFOpcode(cond->opcode()) || isCmpDOpcode(cond->opcode()))
+          asm_cmpd(cond);
+      else
+          asm_cmpi(cond);
     }
 
     // WARNING: this function cannot generate code that will affect the
@@ -1634,10 +1624,9 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
         LOpcode condop = cond->opcode();
         NIns *patch1 = NULL;
         NIns *patch2 = NULL;
-#ifdef VMCFG_FLOAT
-        if(isCmpFOpcode(condop)) condop = getCmpDOpcode(condop);
-        NanoAssert(condop != LIR_eqf4); // handled elsewhere
-#endif
+        if (isCmpFOpcode(condop))
+            condop = getCmpDOpcode(condop);
+        NanoAssert(condop != LIR_eqf4); // handled in asm_branchi_helper
         if (condop == LIR_eqd) {
             if (onFalse) {
                 // branch if unordered or !=
@@ -1674,9 +1663,8 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
 
     void Assembler::asm_condd(LIns *ins) {
         LOpcode op = ins->opcode();
-#ifdef VMCFG_FLOAT
-        if(isCmpFOpcode(op)) op = getCmpDOpcode(op); // the only difference between float/double is in asm_cmpd
-#endif
+        if (isCmpFOpcode(op))
+          op = getCmpDOpcode(op); // the only difference between float/double is in asm_cmpd
         if (op == LIR_eqd) {
             // result = ZF & !PF, must do logic on flags
             // r = al|bl|cl|dl, can only use rh without rex prefix
@@ -1711,12 +1699,9 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
     // See asm_cmpi() for more details.
     void Assembler::asm_cmpd(LIns *cond) {
         LOpcode opcode = cond->opcode();
-#ifdef VMCFG_FLOAT
         bool singlePrecision = isCmpFOpcode(opcode);
-
-        if( singlePrecision)
+        if (singlePrecision)
            opcode = getCmpDOpcode(opcode);
-#endif
         LIns* a = cond->oprnd1();
         LIns* b = cond->oprnd2();
         // First, we convert (a < b) into (b > a), and (a <= b) into (b >= a).
@@ -1730,16 +1715,12 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
         }
         Register ra, rb;
         findRegFor2(FpRegs, a, ra, FpRegs, b, rb);
-#ifdef VMCFG_FLOAT
-        if(singlePrecision) 
+        if (singlePrecision)
             UCOMISS(ra, rb);
         else 
-#endif
             UCOMISD(ra, rb);
-        
     }
 
-#ifdef VMCFG_FLOAT
     void Assembler::asm_condf4(LIns *cond) {
         NanoAssert(cond->opcode() == LIR_eqf4);
         // unlike x86-32, with a rex prefix we can use any GP register as an 8bit target
@@ -1779,7 +1760,7 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
            asm_nongp_copy(rt,ra);
 
     }
-#endif
+
     // Return true if we can generate code for this instruction that neither
     // sets CCs nor clobbers any input register.
     // LEA is the only native instruction that fits those requirements.
@@ -1824,14 +1805,12 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
         else if (ins->isImmD()) {
             asm_immd(r, ins->immDasQ(), /*canClobberCCs*/false);
         }
-#ifdef VMCFG_FLOAT
         else if (ins->isImmF()) {
             asm_immf(r, ins->immFasI(), /*canClobberCCs*/false);
         }
         else if (ins->isImmF4()) {
             asm_immf4(r, ins->immF4(), /*canClobberCCs*/false);
         }
-#endif
         else if (canRematLEA(ins)) {
             Register lhsReg = ins->oprnd1()->getReg();
             if (ins->isop(LIR_addq))
@@ -1847,14 +1826,12 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
             } else if (ins->isQ()) {
                 NanoAssert(IsGpReg(r));
                 MOVQRM(r, d, FP);
-#ifdef VMCFG_FLOAT
             } else if (ins->isF()) {
                 NanoAssert(IsFpReg(r));
                 MOVSSRM(r, d, FP);
             } else if (ins->isF4()) {
                 NanoAssert(IsFpReg(r));
                 MOVUPSRM(r, d, FP);
-#endif
             } else {
                 NanoAssert(ins->isI());
                 MOVLRM(r, d, FP);
@@ -1906,7 +1883,7 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
         releaseRegisters();
         assignSavedRegs();
         LIns *value = ins->oprnd1();
-        Register r = ins->isop(LIR_retd) FLOAT_ONLY(|| ins->isop(LIR_retf)|| ins->isop(LIR_retf4)) ? XMM0 : RAX;
+        Register r = ins->isop(LIR_retd) || ins->isop(LIR_retf) || ins->isop(LIR_retf4) ? XMM0 : RAX;
         findSpecificRegFor(value, r);
     }
 
@@ -1956,13 +1933,11 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
                 NanoAssert(IsFpReg(rr));
                 MOVSDRM(rr, dr, rb);    // load 64bits into XMM
                 break;
-#ifdef VMCFG_FLOAT
             case LIR_ldf:
                 beginLoadRegs(ins, FpRegs, rr, dr, rb);
                 NanoAssert(IsFpReg(rr));
                 MOVSSRM(rr, dr, rb);
                 break;
-#endif
             case LIR_ldf2d:
                 beginLoadRegs(ins, FpRegs, rr, dr, rb);
                 NanoAssert(IsFpReg(rr));
@@ -1976,7 +1951,6 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
         endLoadRegs(ins);
     }
 
-#ifdef VMCFG_FLOAT
     void Assembler::asm_load128(LIns *ins) {
         Register rr, rb;
         int32_t dr;
@@ -1987,7 +1961,6 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
         MOVUPSRM(rr,dr,rb);
         endLoadRegs(ins);
     }
-#endif
 
     void Assembler::asm_load32(LIns *ins) {
         NanoAssert(ins->isI());
@@ -2018,7 +1991,6 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
         endLoadRegs(ins);
     }
 
-#ifdef VMCFG_FLOAT
     void Assembler::asm_immf(Register r, uint32_t v, bool canClobberCCs) {
         NanoAssert(IsFpReg(r));
         if (v == 0 && canClobberCCs) {
@@ -2074,11 +2046,11 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
         Register r = findRegFor(value, FpRegs);
         MOVUPSMR(r, d, b);
     }
-#endif
 
     void Assembler::asm_store64(LOpcode op, LIns *value, int d, LIns *base) {
-        NanoAssert( (value->isQorD() FLOAT_ONLY( && (op!=LIR_stf) )) 
-         FLOAT_ONLY(|| ((op==LIR_stf)&& value->isF() ))              );
+        // This function also handles stf (store-float-32) because its more
+        // convenient to do it here than asm_store32, which only handles GP registers.
+        NanoAssert(op == LIR_stf ? value->isF() : value->isQorD());
 
         switch (op) {
             case LIR_stq: {
@@ -2101,14 +2073,12 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
                 MOVSDMR(r, d, b);   // xmm store
                 break;
             }
-#ifdef VMCFG_FLOAT
             case LIR_stf:{
                 Register b = getBaseReg(base, d, BaseRegs);
                 Register r = findRegFor(value, FpRegs);
                 MOVSSMR(r, d, b);   // store
                 break;
             }
-#endif            
             case LIR_std2f: {
                 Register b = getBaseReg(base, d, BaseRegs);
                 Register r = findRegFor(value, FpRegs);
@@ -2171,7 +2141,7 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
         asm_immd(r, ins->immDasQ(), /*canClobberCCs*/true);
         freeResourcesOf(ins);
     }
-#ifdef VMCFG_FLOAT
+
     void Assembler::asm_immf(LIns *ins) {
         Register r = prepareResultReg(ins, FpRegs);
         asm_immf(r, ins->immFasI(), /*canClobberCCs*/true);
@@ -2183,7 +2153,7 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
         asm_immf4(r, ins->immF4(), /*canClobberCCs*/true);
         freeResourcesOf(ins);
     }
-#endif
+
     void Assembler::asm_immi(Register r, int32_t v, bool canClobberCCs) {
         NanoAssert(IsGpReg(r));
         if (v == 0 && canClobberCCs) {
@@ -2298,25 +2268,23 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
          }
     }
 
-    static const AVMPLUS_ALIGN16(int64_t) negateMask[] = {0x8000000000000000LL,0};
-#ifdef VMCFG_FLOAT
-    static const AVMPLUS_ALIGN16(int32_t) negateMaskFlt[]  = {0x80000000,0,0,0};
-    static const AVMPLUS_ALIGN16(int32_t) negateMaskFlt4[] = {0x80000000,0x80000000,0x80000000,0x80000000};
-#endif
+    static const AVMPLUS_ALIGN16(int64_t) negateMaskD[]  = { 0x8000000000000000LL, 0 };
+    static const AVMPLUS_ALIGN16(int32_t) negateMaskF[]  = { 0x80000000, 0, 0, 0 };
+    static const AVMPLUS_ALIGN16(int32_t) negateMaskF4[] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
 
     void Assembler::asm_fneg(LIns *ins) {
         Register rr, ra;
-        FLOAT_ONLY( NanoAssert( ins->opcode() == LIR_negf || ins->opcode() == LIR_negf4|| ins->opcode() == LIR_negd ) );
+        NanoAssert(ins->isop(LIR_negf) || ins->isop(LIR_negf4) || ins->isop(LIR_negd));
         beginOp1Regs(ins, FpRegs, rr, ra);
-        uintptr_t mask = (uintptr_t) negateMask;
-#ifdef VMCFG_FLOAT
-        switch(ins->opcode()){
-        case LIR_negf:    mask = (uintptr_t) negateMaskFlt;break;
-        case LIR_negf4:   mask = (uintptr_t) negateMaskFlt4;break;
-        case LIR_negd:    mask = (uintptr_t) negateMask;break;
-        default: TODO(asm_fneg);break;
+        uintptr_t mask;
+
+        switch (ins->opcode()) {
+        default: NanoAssert(!"bad opcode for asm_fneg"); mask = 0; break;
+        case LIR_negf:    mask = (uintptr_t) negateMaskF;  break;
+        case LIR_negf4:   mask = (uintptr_t) negateMaskF4; break;
+        case LIR_negd:    mask = (uintptr_t) negateMaskD;     break;
         }
-#endif
+
         if (isS32(mask)) {
             // builtin code is in bottom or top 2GB addr space, use absolute addressing
             XORPSA(rr, (int32_t)mask);
@@ -2326,7 +2294,7 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
         } else {
             // This is just hideous - can't use RIP-relative load, can't use
             // absolute-address load, and cant move imm64 const to XMM.
-            // Solution: move negateMask into a temp GP register, then copy to
+            // Solution: move negateMaskD into a temp GP register, then copy to
             // a temp XMM register.
             // Nb: we don't want any F64 values to end up in a GpReg, nor any
             // I64 values to end up in an FpReg.
@@ -2343,50 +2311,44 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
             Register rt = _allocator.allocTempReg(FpRegs & ~(rmask(ra)|rmask(rr)));
             Register gt = _allocator.allocTempReg(GpRegs);
             XORPS(rr, rt);
-#ifdef VMCFG_FLOAT
-            if(ins->opcode()==LIR_negf || ins->opcode()==LIR_negf4 ){
-                if(ins->opcode()==LIR_negf4){
+
+            if (ins->isop(LIR_negf) || ins->isop(LIR_negf4)) {
+                if (ins->isop(LIR_negf4))
                     PSHUFD(rt,rt,0);    // copy mask in all 4 components of the float4 vector 
-                }
                 MOVDXR(rt, gt);
-                asm_immi(gt, negateMaskFlt[0], /*canClobberCCs*/true); 
-            } else // else, LIR_negd
-#endif
-            { 
+                asm_immi(gt, negateMaskF[0], /*canClobberCCs*/true); 
+            } else {
+                // LIR_negd
                 MOVQXR(rt, gt);
-                asm_immq(gt, negateMask[0], /*canClobberCCs*/true);
+                asm_immq(gt, negateMaskD[0], /*canClobberCCs*/true);
             }
         }
         if (ra != rr)
             asm_nongp_copy(rr,ra);
         endOpRegs(ins, rr, ra);
     }
-    void Assembler::asm_spill(Register rr, int d, IFFLOAT(int8_t nWords, bool quad) ) {
+
+    void Assembler::asm_spill(Register rr, int d, int8_t nWords) {
         NanoAssert(d);
-        IFFLOAT( , const int8_t nWords = quad ? 2 : 1);
-        NanoAssert(nWords == 1 || nWords == 2 FLOAT_ONLY(|| nWords == 4) );
         if (!IsFpReg(rr)) {
-            NanoAssert(nWords<4);
-            FLOAT_ONLY(bool quad = nWords == 2);
-            if (quad)
+            NanoAssert(nWords == 1 || nWords == 2);
+            if (nWords == 2)
                 MOVQMR(rr, d, FP);
             else
                 MOVLMR(rr, d, FP);
         } else {
-#ifndef VMCFG_FLOAT            
-            NanoAssert(nWords==2);
-#endif            
-            switch(nWords){
-            case 1:  // single-precision float; store 32bits from XMM to memory
+            NanoAssert(nWords == 1 || nWords == 2 || nWords == 4);
+            switch (nWords) {
+            default: NanoAssert(!"bad nWords");
+            case 1:  // single-precision float: store 32bits from XMM to memory
                 MOVSSMR(rr, d, FP);
                 break;
-            case 2:  // store 64bits from XMM to memory
-            MOVSDMR(rr, d, FP);
+            case 2:  // double: store 64bits from XMM to memory
+                MOVSDMR(rr, d, FP);
                 break;
-            case 4:  // store 64bits from XMM to memory
+            case 4:  // float4: store 128bits from XMM to memory
                 MOVUPSMR(rr, d, FP);
                 break;
-            default: TODO(asm_spill);
             }
         }
     }
@@ -2512,16 +2474,14 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
     }
 
     const RegisterMask PREFER_SPECIAL = ~ ((RegisterMask)0);
+
     // Init per-opcode register hint table.  
-    static bool nHintsInit(RegisterMask Hints[])
-    {
+    static bool nHintsInit(RegisterMask Hints[]) {
         VMPI_memset(Hints,0,sizeof(RegisterMask)*LIR_sentinel );
-        Hints[LIR_calli]  = rmask(RegAlloc::retRegs[0]);
+        Hints[LIR_calli]  = rmask(RAX);
         Hints[LIR_calld]  = rmask(XMM0);
-#ifdef VMCFG_FLOAT        
         Hints[LIR_callf]  = rmask(XMM0);
         Hints[LIR_callf4] = rmask(XMM0);
-#endif        
         Hints[LIR_paramp] = PREFER_SPECIAL;
         return true;
     }
@@ -2577,7 +2537,8 @@ FLOAT_ONLY(        (ins->isop(LIR_cmovf) && iftrue->isF() && iffalse->isF())  ||
 
         RegisterMask prefer = Hints[ins->opcode()];
 
-        if(prefer != PREFER_SPECIAL) return prefer;
+        if (prefer != PREFER_SPECIAL)
+          return prefer;
 
         NanoAssert(ins->isop(LIR_paramp));
         uint8_t arg = ins->paramArg();

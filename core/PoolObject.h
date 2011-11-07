@@ -220,12 +220,10 @@ namespace avmplus
 
         int32_t version;
         
-        static const int32_t kVERSION_NoExceptionHandlers = 0x002E000F;// (46<<16|15), i.e. major v.46, minor v.15
 #ifdef VMCFG_FLOAT
-        static const int32_t kVERSION_FloatSupport        = 0x002F0010;// (47<<16|16), i.e. Cyrill, major v.47, minor v.16
-        bool hasFloatSupport() const        { return version >= kVERSION_FloatSupport; }
+        bool hasFloatSupport() const        { return version >= 0x002F0010; /* (47<<16|16), i.e. Cyril, major v.47, minor v.16 */ }
 #endif 
-        bool hasExceptionSupport() const    { return version != kVERSION_NoExceptionHandlers; }
+        bool hasExceptionSupport() const    { return version != 0x002E000F; /* (46<<16|15), i.e. major v.46, minor v.15 */ }
 
         ScriptBuffer code();
         bool isCodePointer(const uint8_t* pos);

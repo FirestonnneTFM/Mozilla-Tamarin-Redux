@@ -46,15 +46,8 @@ var TITLE   = "The operation ToNumber";
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
-
-var expected: Array = DoubleRawBits(Number.NaN);
-var actual:Array = DoubleRawBits(float.NaN);
-AddTestCase("ToNumber(float.NaN) 0", expected[0], actual[0]);
-AddTestCase("ToNumber(float.NaN) 1", expected[1], actual[1]);
-
-
-expected = DoubleRawBits(Number.POSITIVE_INFINITY);
-actual   = DoubleRawBits(float.POSITIVE_INFINITY);
+var expected:Array = DoubleRawBits(Number.POSITIVE_INFINITY);
+var actual:Array = DoubleRawBits(float.POSITIVE_INFINITY);
 AddTestCase("ToNumber(float.POSITIVE_INFINITY) 0", expected[0], actual[0]);
 AddTestCase("ToNumber(float.POSITIVE_INFINITY) 1", expected[1], actual[1]);
 

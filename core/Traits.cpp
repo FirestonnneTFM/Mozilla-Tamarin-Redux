@@ -69,7 +69,6 @@ namespace avmplus
                 const SlotInfo* src = &_base->getSlots()[0];
                 SlotInfo* dst = &tb->getSlots()[0];
                 VMPI_memcpy(dst, src, _base->slotCount * sizeof(SlotInfo));
-                FLOAT_ONLY( AvmAssert(_owner != _owner->core->traits.numeric_itraits) );
                 AvmAssert(((_owner->isMachineType()) || (tb->owner->m_sizeofInstance >= _base->owner->m_sizeofInstance)));
             }
             if (_base->methodCount)
@@ -1956,7 +1955,9 @@ namespace avmplus
                     break;
                 case BUILTIN_namespace:
                 case BUILTIN_string:
-                CASEF(BUILTIN_float4:) // FIXME: probably wrong but don't know what to do here.
+#ifdef VMCFG_FLOAT
+                case BUILTIN_float4: // FIXME: probably wrong but don't know what to do here.
+#endif
                 default:
                     if (AvmCore::isNull(value))
                         continue;

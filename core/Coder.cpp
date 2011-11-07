@@ -89,6 +89,12 @@ namespace avmplus
         coder2->writeCheckNull(state, index);
     }
 
+    void TeeWriter::writeCoerceToNumeric(const FrameState* state, uint32_t index)
+    {
+        coder1->writeCoerceToNumeric(state, index);
+        coder2->writeCoerceToNumeric(state, index);
+    }
+
     void TeeWriter::writeCoerce(const FrameState* state, uint32_t index, Traits *type)
     {
         coder1->writeCoerce(state, index, type);
@@ -165,6 +171,11 @@ namespace avmplus
     void NullWriter::writeCheckNull(const FrameState* state, uint32_t index)
     {
         coder->writeCheckNull(state, index);
+    }
+
+    void NullWriter::writeCoerceToNumeric(const FrameState* state, uint32_t index)
+    {
+        coder->writeCoerceToNumeric(state, index);
     }
 
     void NullWriter::writeCoerce(const FrameState* state, uint32_t index, Traits *type)
@@ -260,6 +271,9 @@ namespace avmplus
     { }
 
     void CodeWriter::writeCheckNull(const FrameState*, uint32_t)
+    { }
+
+    void CodeWriter::writeCoerceToNumeric(const FrameState*, uint32_t)
     { }
 
     void CodeWriter::writeCoerce(const FrameState*, uint32_t, Traits*)

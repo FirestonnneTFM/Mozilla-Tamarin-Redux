@@ -52,7 +52,7 @@ namespace avmplus
     MMGC_STATIC_ASSERT(sizeof(GCDouble) == sizeof(double));
 #ifdef VMCFG_FLOAT
    // same for float4_t/GCFloat4
-    MMGC_STATIC_ASSERT(sizeof(GCFloat4) == sizeof(float4_t) && sizeof(GCFloat4)%8 == 0 );
+    MMGC_STATIC_ASSERT(sizeof(GCFloat4) == sizeof(float4_t) && sizeof(GCFloat4)%16 == 0 );
     // GCFLoat is trickier: allocations in heap are 8-byte aligned.
     // The static assertions here will verify that
     // GCFloat's size is greater than float, 8-byte aligned, and
@@ -248,7 +248,7 @@ namespace avmplus
 
 #ifdef VMCFG_FLOAT
             case BUILTIN_float:
-                return AvmCore::isNumber(value);
+                return AvmCore::isFloat(value);
 
             case BUILTIN_float4:
                 return AvmCore::isFloat4(value);

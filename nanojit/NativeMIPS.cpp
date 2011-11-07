@@ -1751,17 +1751,16 @@ namespace nanojit
     }
 
     void
-    Assembler::asm_spill(Register rr, int d, IFFLOAT(int8_t nWords, bool quad) )
+    Assembler::asm_spill(Register rr, int d, int8_t nWords)
     {
-        FLOAT_ONLY(bool quad = nWords==2);
-        USE(quad);
+        USE(nWords);
         NanoAssert(d);
         if (IsFpReg(rr)) {
-            NanoAssert(quad);
+            NanoAssert(nWords == 2);
             asm_ldst64(true, rr, d, FP);
         }
         else {
-            NanoAssert(!quad);
+            NanoAssert(nWords == 1);
             asm_ldst(OP_SW, rr, d, FP);
         }
         TAG("asm_spill(rr=%d, d=%d, quad=%d)", rr, d, quad);

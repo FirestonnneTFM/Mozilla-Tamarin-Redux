@@ -766,7 +766,7 @@ public class Planner {
         while (todo.size() > 0) {
             var v = todo.removeFirst();
             for (var i = 0; i < v.constraints.size(); i++) {
-                var c = v.constraints.at(i); 
+                var c = v.constraints.at(i);
                 if (!c.isSatisfied())
                     unsatisfied.add(c);
             }

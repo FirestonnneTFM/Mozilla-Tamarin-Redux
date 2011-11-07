@@ -61,7 +61,7 @@ namespace avmplus
         // argN = argv[argc]
         Atom call(int argc, Atom* argv)
         {
-            // Note: SpiderMonkey returns 0 for Float() with no args
+            // Note: Tamarin returns 0 for Float() with no args
             return construct(argc,argv);
         }
         

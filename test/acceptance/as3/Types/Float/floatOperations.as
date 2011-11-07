@@ -180,76 +180,76 @@ function TestSection(section , initTests ){
 
 function initFltAnyTests(){
    var obj:IFloatOps = new FltAnyOps(3.14f);
-   STEP="ADD";   EQ(34.54f, obj.add(31.4f));
-   STEP="SUB";   EQ(28.26f, obj.sub(31.4f));
-   STEP="MUL";   EQ(98.596f, obj.mul(31.4f));
-   STEP="DIV";   EQ(10f, obj.div(31.4f));
-   STEP="MOD";   EQ(3.14f, obj.mod(31.4f));
-   STEP="UMINUS";EQ(-3.14f, obj.uminus());
-   STEP="UPLUS"; EQ(3.14f, obj.uplus());
-   STEP="GT";    EQ(false, obj.gt(31.4f));EQ(false, obj.gt(3.14f));EQ(true, obj.gt(.314f));
-   STEP="GTE";   EQ(true, obj.gte(31.4f));EQ(true, obj.gte(3.14f));EQ(false, obj.gte(.314f));
-   STEP="LT";    EQ(false, obj.lt(31.4f));EQ(false, obj.lt(3.14f));EQ(true, obj.lt(.314f));
-   STEP="LTE";   EQ(true, obj.lte(31.4f));EQ(true, obj.lte(3.14f));EQ(false, obj.lte(.314f));
-   STEP="EQ";    EQ(false, obj.eq(31.4f));EQ(true, obj.eq(3.14f));
-   STEP="SEQ";    EQ(false, obj.seq(31.4f));EQ(true, obj.seq(3.14f));
-   STEP="NEQ";    EQ(true, obj.neq(31.4f));EQ(false, obj.neq(3.14f));
-   STEP="sneq";   EQ(true, obj.sneq(31.4f));EQ(false, obj.sneq(3.14f));
+   STEP="FltAnyOps ADD";   EQ(34.54f, obj.add(31.4f));
+   STEP="FltAnyOps SUB";   EQ(28.26f, obj.sub(31.4f));
+   STEP="FltAnyOps MUL";   EQ(98.596f, obj.mul(31.4f));
+   STEP="FltAnyOps DIV";   EQ(10f, obj.div(31.4f));
+   STEP="FltAnyOps MOD";   EQ(3.14f, obj.mod(31.4f));
+   STEP="FltAnyOps UMINUS";EQ(-3.14f, obj.uminus());
+   STEP="FltAnyOps UPLUS"; EQ(3.14f, obj.uplus());
+   STEP="FltAnyOps GT";    EQ(false, obj.gt(31.4f));EQ(false, obj.gt(3.14f));EQ(true, obj.gt(.314f));
+   STEP="FltAnyOps GTE";   EQ(true, obj.gte(31.4f));EQ(true, obj.gte(3.14f));EQ(false, obj.gte(.314f));
+   STEP="FltAnyOps LT";    EQ(false, obj.lt(31.4f));EQ(false, obj.lt(3.14f));EQ(true, obj.lt(.314f));
+   STEP="FltAnyOps LTE";   EQ(true, obj.lte(31.4f));EQ(true, obj.lte(3.14f));EQ(false, obj.lte(.314f));
+   STEP="FltAnyOps EQ";    EQ(false, obj.eq(31.4f));EQ(true, obj.eq(3.14f));
+   STEP="FltAnyOps SEQ";    EQ(false, obj.seq(31.4f));EQ(true, obj.seq(3.14f));
+   STEP="FltAnyOps NEQ";    EQ(true, obj.neq(31.4f));EQ(false, obj.neq(3.14f));
+   STEP="FltAnyOps SNEQ";   EQ(true, obj.sneq(31.4f));EQ(false, obj.sneq(3.14f));
 }
 function initFltFltTests(){
    var obj:IFloatOps = new FltFltOps(3.14f);
-   STEP="ADD";   EQ(34.54f, obj.add(31.4f));
-   STEP="SUB";   EQ(-28.26f, obj.sub(31.4f));
-   STEP="MUL";   EQ(98.596f, obj.mul(31.4f));
-   STEP="DIV";   EQ(0.1f, obj.div(31.4f));
-   STEP="MOD";   EQ(3.13999867f, obj.mod(31.4f));
-   STEP="UMINUS";EQ(-3.14f, obj.uminus());
-   STEP="UPLUS"; EQ(3.14f, obj.uplus());
-   STEP="GT";    EQ(true, obj.gt(31.4f));EQ(false, obj.gt(3.14f));EQ(false, obj.gt(.314f));
-   STEP="GTE";   EQ(false, obj.gte(31.4f));EQ(true, obj.gte(3.14f));EQ(true, obj.gte(.314f));
-   STEP="LT";    EQ(true, obj.lt(31.4f));EQ(false, obj.lt(3.14f));EQ(false, obj.lt(.314f));
-   STEP="LTE";   EQ(false, obj.lte(31.4f));EQ(true, obj.lte(3.14f));EQ(true, obj.lte(.314f));
-   STEP="EQ";    EQ(false, obj.eq(31.4f));EQ(true, obj.eq(3.14f));
-   STEP="SEQ";    EQ(false, obj.seq(31.4f));EQ(true, obj.seq(3.14f));
-   STEP="NEQ";    EQ(true, obj.neq(31.4f));EQ(false, obj.neq(3.14f));
-   STEP="SNEQ";   EQ(true, obj.sneq(31.4f));EQ(false, obj.sneq(3.14f));
+   STEP="FltFltOps ADD";   EQ(34.54f, obj.add(31.4f));
+   STEP="FltFltOps SUB";   EQ(-28.26f, obj.sub(31.4f));
+   STEP="FltFltOps MUL";   EQ(98.596f, obj.mul(31.4f));
+   STEP="FltFltOps DIV";   EQ(0.1f, obj.div(31.4f));
+   STEP="FltFltOps MOD";   EQ(3.13999867f, obj.mod(31.4f));
+   STEP="FltFltOps UMINUS"; EQ(-3.14f, obj.uminus());
+   STEP="FltFltOps UPLUS"; EQ(3.14f, obj.uplus());
+   STEP="FltFltOps GT";    EQ(true, obj.gt(31.4f));EQ(false, obj.gt(3.14f));EQ(false, obj.gt(.314f));
+   STEP="FltFltOps GTE";   EQ(false, obj.gte(31.4f));EQ(true, obj.gte(3.14f));EQ(true, obj.gte(.314f));
+   STEP="FltFltOps LT";    EQ(true, obj.lt(31.4f));EQ(false, obj.lt(3.14f));EQ(false, obj.lt(.314f));
+   STEP="FltFltOps LTE";   EQ(false, obj.lte(31.4f));EQ(true, obj.lte(3.14f));EQ(true, obj.lte(.314f));
+   STEP="FltFltOps EQ";    EQ(false, obj.eq(31.4f));EQ(true, obj.eq(3.14f));
+   STEP="FltFltOps SEQ";    EQ(false, obj.seq(31.4f));EQ(true, obj.seq(3.14f));
+   STEP="FltFltOps NEQ";    EQ(true, obj.neq(31.4f));EQ(false, obj.neq(3.14f));
+   STEP="FltFltOps SNEQ";   EQ(true, obj.sneq(31.4f));EQ(false, obj.sneq(3.14f));
 }
 
 function initFltNumTests(){
    var obj:IFloatOps = new FltNumOps(3.14);
-   STEP="ADD";   EQ(34.54f, obj.add(31.4f));
-   STEP="SUB";   EQ(28.26f, obj.sub(31.4f));
-   STEP="MUL";   EQ(98.596f, obj.mul(31.4f));
-   STEP="DIV";   EQ(10f, obj.div(31.4f));
-   STEP="MOD";   EQ(3.14f, obj.mod(31.4f));
-   STEP="UMINUS";EQ(-3.14f, obj.uminus());
-   STEP="UPLUS"; EQ(3.14f, obj.uplus());
-   STEP="GT";    EQ(false, obj.gt(31.4f));EQ(false, obj.gt(3.14f));EQ(true, obj.gt(.314f));
-   STEP="GTE";   EQ(true, obj.gte(31.4f));EQ(true, obj.gte(3.14f));EQ(false, obj.gte(.314f));
-   STEP="LT";    EQ(false, obj.lt(31.4f));EQ(false, obj.lt(3.14f));EQ(true, obj.lt(.314f));
-   STEP="LTE";   EQ(true, obj.lte(31.4f));EQ(true, obj.lte(3.14f));EQ(false, obj.lte(.314f));
-   STEP="EQ";    EQ(false, obj.eq(31.4f));EQ(false, obj.eq(3.14f));
-   STEP="SEQ";    EQ(false, obj.seq(31.4f));EQ(false, obj.seq(3.14f));
-   STEP="NEQ";    EQ(true, obj.neq(31.4f));EQ(true, obj.neq(3.14f));
-   STEP="SNEQ";   EQ(true, obj.sneq(31.4f));EQ(true, obj.sneq(3.14f));
+   STEP="FltNumOps ADD";   EQ(34.54f, obj.add(31.4f));
+   STEP="FltNumOps SUB";   EQ(28.26f, obj.sub(31.4f));
+   STEP="FltNumOps MUL";   EQ(98.596f, obj.mul(31.4f));
+   STEP="FltNumOps DIV";   EQ(10f, obj.div(31.4f));
+   STEP="FltNumOps MOD";   EQ(3.14f, obj.mod(31.4f));
+   STEP="FltNumOps UMINUS";EQ(-3.14f, obj.uminus());
+   STEP="FltNumOps UPLUS"; EQ(3.14f, obj.uplus());
+   STEP="FltNumOps GT";    EQ(false, obj.gt(31.4f));EQ(false, obj.gt(3.14f));EQ(true, obj.gt(.314f));
+   STEP="FltNumOps GTE";   EQ(true, obj.gte(31.4f));EQ(true, obj.gte(3.14f));EQ(false, obj.gte(.314f));
+   STEP="FltNumOps LT";    EQ(false, obj.lt(31.4f));EQ(false, obj.lt(3.14f));EQ(true, obj.lt(.314f));
+   STEP="FltNumOps LTE";   EQ(true, obj.lte(31.4f));EQ(true, obj.lte(3.14f));EQ(false, obj.lte(.314f));
+   STEP="FltNumOps EQ";    EQ(false, obj.eq(31.4f));EQ(false, obj.eq(3.14f));
+   STEP="FltNumOps SEQ";    EQ(false, obj.seq(31.4f));EQ(false, obj.seq(3.14f));
+   STEP="FltNumOps NEQ";    EQ(true, obj.neq(31.4f));EQ(true, obj.neq(3.14f));
+   STEP="FltNumOps SNEQ";   EQ(true, obj.sneq(31.4f));EQ(true, obj.sneq(3.14f));
 }
 function initFltAnyTests2(){
    var obj:IFloatOps = new FltAnyOps(3.14); /*NOTE: not float! */
-   STEP="ADD";   EQ(34.54f, obj.add(31.4f));
-   STEP="SUB";   EQ(28.26f, obj.sub(31.4f));
-   STEP="MUL";   EQ(98.596f, obj.mul(31.4f));
-   STEP="DIV";   EQ(10f, obj.div(31.4f));
-   STEP="MOD";   EQ(3.14f, obj.mod(31.4f));
-   STEP="UMINUS";EQ(-3.14f, obj.uminus());
-   STEP="UPLUS"; EQ(3.14f, obj.uplus());
-   STEP="GT";    EQ(false, obj.gt(31.4f));EQ(false, obj.gt(3.14f));EQ(true, obj.gt(.314f));
-   STEP="GTE";   EQ(true, obj.gte(31.4f));EQ(true, obj.gte(3.14f));EQ(false, obj.gte(.314f));
-   STEP="LT";    EQ(false, obj.lt(31.4f));EQ(false, obj.lt(3.14f));EQ(true, obj.lt(.314f));
-   STEP="LTE";   EQ(true, obj.lte(31.4f));EQ(true, obj.lte(3.14f));EQ(false, obj.lte(.314f));
-   STEP="EQ";    EQ(false, obj.eq(31.4f));EQ(false, obj.eq(3.14f));
-   STEP="SEQ";    EQ(false, obj.seq(31.4f));EQ(false, obj.seq(3.14f));
-   STEP="NEQ";    EQ(true, obj.neq(31.4f));EQ(true, obj.neq(3.14f));
-   STEP="SNEQ";   EQ(true, obj.sneq(31.4f));EQ(true, obj.sneq(3.14f));
+   STEP="FltAnyOps ADD";   EQ(34.54f, obj.add(31.4f));
+   STEP="FltAnyOps SUB";   EQ(28.26f, obj.sub(31.4f));
+   STEP="FltAnyOps MUL";   EQ(98.596f, obj.mul(31.4f));
+   STEP="FltAnyOps DIV";   EQ(10f, obj.div(31.4f));
+   STEP="FltAnyOps MOD";   EQ(3.14f, obj.mod(31.4f));
+   STEP="FltAnyOps UMINUS";EQ(-3.14f, obj.uminus());
+   STEP="FltAnyOps UPLUS"; EQ(3.14f, obj.uplus());
+   STEP="FltAnyOps GT";    EQ(false, obj.gt(31.4f));EQ(false, obj.gt(3.14f));EQ(true, obj.gt(.314f));
+   STEP="FltAnyOps GTE";   EQ(true, obj.gte(31.4f));EQ(true, obj.gte(3.14f));EQ(false, obj.gte(.314f));
+   STEP="FltAnyOps LT";    EQ(false, obj.lt(31.4f));EQ(false, obj.lt(3.14f));EQ(true, obj.lt(.314f));
+   STEP="FltAnyOps LTE";   EQ(true, obj.lte(31.4f));EQ(true, obj.lte(3.14f));EQ(false, obj.lte(.314f));
+   STEP="FltAnyOps EQ";    EQ(false, obj.eq(31.4f));EQ(false, obj.eq(3.14f));
+   STEP="FltAnyOps SEQ";    EQ(false, obj.seq(31.4f));EQ(false, obj.seq(3.14f));
+   STEP="FltAnyOps NEQ";    EQ(true, obj.neq(31.4f));EQ(true, obj.neq(3.14f));
+   STEP="FltAnyOps SNEQ";   EQ(true, obj.sneq(31.4f));EQ(true, obj.sneq(3.14f));
 }
 
 
@@ -257,22 +257,22 @@ function initFltIntTests(){
    var result:float;
    var epsilon:float=0.0001f;
    var obj:IFloatOps = new FltIntOps(3);
-   STEP="ADD";   EQ(34.4f, obj.add(31.4f));
-   STEP="SUB";   EQ(-28.4f, obj.sub(31.4f));
-   STEP="MUL";   EQ(94.2f,obj.mul(31.4f));
-   STEP="DIV";   EQ(0.0955414013f, obj.div(31.4f));
-   STEP="MOD";   result = 1.4f - obj.mod(31.4f);if(result<0) result=-result;
+   STEP="FltIntOps ADD";   EQ(34.4f, obj.add(31.4f));
+   STEP="FltIntOps SUB";   EQ(-28.4f, obj.sub(31.4f));
+   STEP="FltIntOps MUL";   EQ(94.2f,obj.mul(31.4f));
+   STEP="FltIntOps DIV";   EQ(0.0955414013f, obj.div(31.4f));
+   STEP="FltIntOps MOD";   result = 1.4f - obj.mod(31.4f);if(result<0) result=-result;
                 EQ(true,result<epsilon);
-   STEP="UMINUS";EQ(-3f, obj.uminus());
-   STEP="UPLUS"; EQ(3f, obj.uplus());
-   STEP="GT";    EQ(true, obj.gt(3.0001f));EQ(false, obj.gt(3f));EQ(false, obj.gt(2.999f));
-   STEP="GTE";   EQ(false, obj.gte(3.0001f));EQ(true, obj.gte(3f));EQ(true, obj.gte(2.999f));
-   STEP="LT";    EQ(true, obj.lt(3.0001f));EQ(false, obj.lt(3f));EQ(false, obj.lt(2.999f));
-   STEP="LTE";   EQ(false, obj.lte(3.0001f));EQ(true, obj.lte(3f));EQ(true, obj.lte(2.999f));
-   STEP="EQ";    EQ(false, obj.eq(3.0001f));EQ(true, obj.eq(3f));
-   STEP="SEQ";    EQ(false, obj.seq(3.0001f));EQ(true, obj.seq(3f));
-   STEP="NEQ";    EQ(true, obj.neq(3.0001f));EQ(false, obj.neq(3f));
-   STEP="SNEQ";   EQ(true, obj.sneq(3.0001f));EQ(false, obj.sneq(3f));
+   STEP="FltIntOps UMINUS";EQ(-3f, obj.uminus());
+   STEP="FltIntOps UPLUS"; EQ(3f, obj.uplus());
+   STEP="FltIntOps GT";    EQ(true, obj.gt(3.0001f));EQ(false, obj.gt(3f));EQ(false, obj.gt(2.999f));
+   STEP="FltIntOps GTE";   EQ(false, obj.gte(3.0001f));EQ(true, obj.gte(3f));EQ(true, obj.gte(2.999f));
+   STEP="FltIntOps LT";    EQ(true, obj.lt(3.0001f));EQ(false, obj.lt(3f));EQ(false, obj.lt(2.999f));
+   STEP="FltIntOps LTE";   EQ(false, obj.lte(3.0001f));EQ(true, obj.lte(3f));EQ(true, obj.lte(2.999f));
+   STEP="FltIntOps EQ";    EQ(false, obj.eq(3.0001f));EQ(true, obj.eq(3f));
+   STEP="FltIntOps SEQ";    EQ(false, obj.seq(3.0001f));EQ(false, obj.seq(3f));
+   STEP="FltIntOps NEQ";    EQ(true, obj.neq(3.0001f));EQ(false, obj.neq(3f));
+   STEP="FltIntOps SNEQ";   EQ(true, obj.sneq(3.0001f));EQ(true, obj.sneq(3f));
 }
 
 function initFltAr(){
@@ -414,9 +414,9 @@ function initFltAr(){
       cmpres="x2!=z2";
   else
   if(x2!==Number(z2) )
-      cmpres="x2!==z2";
+      cmpres="OK";
   else
-     cmpres="OK";
+     cmpres="x2!==z2";
   }
 
   AddTestCase("Any-typed comparisons with mixed types ", "OK",cmpres);

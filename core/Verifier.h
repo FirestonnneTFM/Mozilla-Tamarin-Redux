@@ -263,6 +263,7 @@ namespace avmplus
         void parseExceptionHandlers();
         void emitCoerceArgs(MethodInfo* m, int argc);
         void emitCoerce(Traits* target, int i);
+        void emitCoerceToNumeric(int i);
         void emitCheckNull(int index);
         Traits* checkTypeName(uint32_t name_index);
         Traits* readBinding(Traits* traits, Binding b) const;

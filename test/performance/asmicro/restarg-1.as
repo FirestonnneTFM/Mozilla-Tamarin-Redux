@@ -41,7 +41,7 @@ var DESC = "restarg baseline: early-bindable class and method that doesn't use r
 
 class C {
     function push(v:*):void {
-	x = v;
+        x = v;
     }
     function get length(): uint { return 0 }
     function set length(n: uint): void { }
@@ -51,17 +51,17 @@ class C {
 function pushloop():uint {
     var a:C = new C;
     for ( var i:int=0 ; i < 100000 ; i+=10 ) {
-	a.length = 0;
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
-	a.push(i);
+        a.length = 0;
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
+        a.push(i);
     }
     return a.length;
 }

@@ -20,7 +20,7 @@
  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 // 3D Cube Rotation
 // http://www.speich.net/computer/moztesting/3d.htm
@@ -60,7 +60,7 @@ package {
     public var NumPx:Number;
     public var Normal:Vector.<Vector.<Number>>;
     public var Line:Vector.<Boolean>;
-    public var Edge:Vector.<Vector.<Number>>;    
+    public var Edge:Vector.<Vector.<Number>>;
     public function Qt() {
       elements=new Vector.<Point>(4);
     }
@@ -86,7 +86,7 @@ package {
     var x:Number = x1;
     var y:Number = y1;
     var IncX1:Number, IncY1:Number;
-    var IncX2:Number, IncY2:Number;  
+    var IncX2:Number, IncY2:Number;
     var Den:Number;
     var Num:Number;
     var NumAdd:Number;
@@ -140,14 +140,14 @@ package {
 
   public function CalcNormal(V0:Vector.<Number>, V1:Vector.<Number>, V2:Vector.<Number>):Vector.<Number> {
     //print("CalcNormal "+new Date());
-    var A:Vector.<Number> = new Vector.<Number>(4);   var B:Vector.<Number> = new Vector.<Number>(4); 
+    var A:Vector.<Number> = new Vector.<Number>(4);   var B:Vector.<Number> = new Vector.<Number>(4);
     var i:int;
     for (i = 0; i < 3; i++) {
       A[i] = V0[i] - V1[i];
       B[i] = V2[i] - V1[i];
     }
     A = CalcCross(A, B);
-    var Length:Number = Math.sqrt(A[0]*A[0] + A[1]*A[1] + A[2]*A[2]); 
+    var Length:Number = Math.sqrt(A[0]*A[0] + A[1]*A[1] + A[2]*A[2]);
     for (i = 0; i < 3; i++) A[i] = A[i] / Length;
     A[3] = 1;
     return A;

@@ -91,6 +91,7 @@ namespace avmplus
         void writeNip(const FrameState* state, const uint8_t *pc);
         void writeCheckNull(const FrameState* state, uint32_t index);
         void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
+        void writeCoerceToNumeric(const FrameState* state, uint32_t index);
         void writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver*);
         void writeEpilogue(const FrameState* state);
         void writeBlockStart(const FrameState* state);
