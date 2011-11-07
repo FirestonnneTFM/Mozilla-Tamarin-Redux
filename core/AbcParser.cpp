@@ -1322,21 +1322,22 @@ namespace avmplus
             pool->constantFloat4Count = 0;
 
         }
-        
 #endif // VMCFG_FLOAT
 
-        // If the numeric pools are sized to make element zero available then initialize that element.
+        // In principle, if the numeric pools are sized to make element zero available then initialize that element.
+        //
+        // Note that for int, uint, and double above we still throw VerifyError in the Verifier but that should change.
+        //
+        // In practice, the Debugger may actually access these values if they are referenced even in content that
+        // does not verify, so make them available always.  Bugzilla 520888.
 
-        if (pool->constantIntCount > 0)
-            pool->cpool_int.set(0, 0);
-        if (pool->constantUIntCount > 0)
-            pool->cpool_uint.set(0, 0);
-        if (pool->constantDoubleCount > 0)
-            pool->cpool_double.set(0, (GCDouble*) atomPtr(core->kNaN));
-        if (pool->constantFloatCount > 0)
-            pool->cpool_float.set(0,  (GCFloat*)  atomPtr(core->kFltNaN));
-        if (pool->constantFloat4Count > 0)
-            pool->cpool_float4.set(0, (GCFloat4*) atomPtr(core->kFlt4NaN));
+        pool->cpool_int.set(0, 0);
+        pool->cpool_uint.set(0, 0);
+        pool->cpool_double.set(0, (GCDouble*) atomPtr(core->kNaN));
+#ifdef VMCFG_FLOAT
+        pool->cpool_float.set(0,  (GCFloat*)  atomPtr(core->kFltNaN));
+        pool->cpool_float4.set(0, (GCFloat4*) atomPtr(core->kFlt4NaN));
+#endif
 
         uint32_t string_count = readU30(pos);
         if (string_count > (uint32_t)(abcEnd - pos))
