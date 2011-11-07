@@ -1179,7 +1179,8 @@ namespace avmplus
 
             case OP_pushint:
                 checkStack(0,1);
-                if (imm30 >= pool->constantIntCount)
+                // FIXME: zero check is incorrect
+                if (imm30 == 0 || imm30 >= pool->constantIntCount)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantIntCount));
                 coder->write(state, pc, opcode, INT_TYPE);
                 state->push(INT_TYPE,true);
@@ -1187,7 +1188,8 @@ namespace avmplus
 
             case OP_pushuint:
                 checkStack(0,1);
-                if (imm30 >= pool->constantUIntCount)
+                // FIXME: zero check is incorrect
+                if (imm30 == 0 || imm30 >= pool->constantUIntCount)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantUIntCount));
                 coder->write(state, pc, opcode, UINT_TYPE);
                 state->push(UINT_TYPE,true);
@@ -1195,7 +1197,8 @@ namespace avmplus
 
             case OP_pushdouble:
                 checkStack(0,1);
-                if (imm30 >= pool->constantDoubleCount)
+                // FIXME: zero check is incorrect
+                if (imm30 == 0 || imm30 >= pool->constantDoubleCount)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantDoubleCount));
                 coder->write(state, pc, opcode, NUMBER_TYPE);
                 state->push(NUMBER_TYPE, true);
