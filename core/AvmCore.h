@@ -550,10 +550,9 @@ const int kBufferPadding = 16;
         ApiVersionSeries const  m_activeApiVersionSeries;
         uint32_t const          m_activeApiVersionSeriesMask;
 
-#ifdef VMCFG_LOOKUP_CACHE
         // Saturating counter.
         uint32_t lookup_cache_timestamp;
-#endif
+
 #ifdef VMCFG_NANOJIT
         // when set, we flush all binding caches at the end of the next gc sweep.
         bool m_flushBindingCachesNextSweep;
@@ -1922,12 +1921,10 @@ const int kBufferPadding = 16;
         // fills the area with nullObjectAtom
         static void decrementAtomRegion_null(Atom *ar, int length);
 
-#ifdef VMCFG_LOOKUP_CACHE
     public:
         uint32_t lookupCacheTimestamp() const;
         bool lookupCacheIsValid(uint32_t t) const;
         void invalidateLookupCache();
-#endif
 
 #ifdef VMCFG_NANOJIT
     public:

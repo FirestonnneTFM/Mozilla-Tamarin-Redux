@@ -334,9 +334,7 @@ namespace avmplus
         , livePools(NULL)
         , m_activeApiVersionSeries(apiVersionSeries)
         , m_activeApiVersionSeriesMask(1 << apiVersionSeries)
-#ifdef VMCFG_LOOKUP_CACHE
         , lookup_cache_timestamp(1)
-#endif
 #ifdef VMCFG_NANOJIT
         , m_flushBindingCachesNextSweep(false)
 #endif
