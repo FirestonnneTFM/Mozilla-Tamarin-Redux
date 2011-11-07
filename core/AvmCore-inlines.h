@@ -254,7 +254,7 @@ REALLY_INLINE /*static*/ bool AvmCore::isNumeric(Atom atom)
     /* the assumption here is that the value "12" is never a legal (bibop) atom */
     /* the second assumption is that all kSpecialBibopTypes, except undefinedAtom, are numeric */
     /* Finally, the third assumption is that the Boolean type has only two values: trueAtom and falseAtom */
-    return isNumber(atom) || ((atom > trueAtom) && (atom & kSpecialBibopType));
+    return isNumber(atom) || (((uintptr_t)atom > (uintptr_t)trueAtom) && (atom & kSpecialBibopType));
 }
 
 REALLY_INLINE /*static*/ bool AvmCore::isNumberOrFloat(Atom atom)

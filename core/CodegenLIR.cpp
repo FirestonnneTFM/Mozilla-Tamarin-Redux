@@ -7067,13 +7067,20 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
     LIns* CodegenLIR::cmpEq(const CallInfo *fid, int lhsi, int rhsi)
     {
-        LIns *result = cmpOptimization(lhsi, rhsi, LIR_eqi, LIR_eqi, LIR_eqd);
-        if (result) {
-            return result;
-        }
-
+        bool isStrict = fid == FUNCTIONID(stricteq);
         Traits* lht = state->value(lhsi).traits;
         Traits* rht = state->value(rhsi).traits;
+
+        if(isStrict && (lht != rht) && (!(lht && lht->isNumberType()) || !(rht && rht->isNumberType()))){
+            /* Special case this: comparing values of different types will yield "false", except when both are 
+               direct subtypes of number (i.e. int, uint or Number). In particular, comparing a float with a number
+               will yield false on strict equality comparison even if both of them have the same valeu */
+            return eqp(InsConstAtom(trueAtom),InsConstAtom(falseAtom));
+        }
+
+        LIns *result = cmpOptimization(lhsi, rhsi, LIR_eqi, LIR_eqi, LIR_eqd);
+        if (result )
+            return result;
 
         // There are various conditions we can check for that simplify our equality check down
         // to a ptr comparison:
@@ -7104,7 +7111,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         LIns* lhs = loadAtomRep(lhsi);
         LIns* rhs = loadAtomRep(rhsi);
         LIns* out;
-        if (fid == FUNCTIONID(stricteq))
+        if (isStrict)
             out = callIns(fid, 2, lhs, rhs);
         else
             out = callIns(fid, 3, coreAddr, lhs, rhs);
