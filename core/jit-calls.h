@@ -1170,22 +1170,6 @@
     METHOD(VECTORFLOATADDR(FloatVectorObject::_setNativeDoubleProperty), SIG3(V,P,D,F), FloatVectorObject_setNativeDoubleProperty)
 #endif
 
-#ifdef VMCFG_FLOAT
-    METHOD(ENVADDR(MethodEnv::setpropertylate_f), SIG4(V,P,A,F,A), setpropertylate_f)
-    METHOD(ARRAYADDR(ArrayObject::_setFloatProperty), SIG3(V,P,F,A), ArrayObject_setFloatProperty)
-    METHOD(VECTOROBJADDR(ObjectVectorObject::_setFloatProperty), SIG3(V,P,F,A), ObjectVectorObject_setFloatProperty)
-    METHOD(VECTOROBJADDR(ObjectVectorObject::_setKnownFloatProperty), SIG3(V,P,F,A), ObjectVectorObject_setKnownFloatProperty)
-    METHOD(VECTOROBJADDR(ObjectVectorObject::_setKnownFloatPropertyWithPointer), SIG3(V,P,F,A), ObjectVectorObject_setKnownFloatPropertyWithPointer)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_setFloatProperty), SIG3(V,P,F,A), UIntVectorObject_setFloatProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_setNativeFloatProperty), SIG3(V,P,F,U), UIntVectorObject_setNativeFloatProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_setFloatProperty), SIG3(V,P,F,A), IntVectorObject_setFloatProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_setNativeFloatProperty), SIG3(V,P,F,I), IntVectorObject_setNativeFloatProperty)
-    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setFloatProperty), SIG3(V,P,F,A), DoubleVectorObject_setFloatProperty)
-    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setNativeFloatProperty), SIG3(V,P,F,D), DoubleVectorObject_setNativeFloatProperty)
-    METHOD(VECTORFLOATADDR(FloatVectorObject::_setFloatProperty), SIG3(V,P,F,A), FloatVectorObject_setFloatProperty)
-    METHOD(VECTORFLOATADDR(FloatVectorObject::_setNativeFloatProperty), SIG3(V,P,F,F), FloatVectorObject_setNativeFloatProperty)
-#endif
-
     METHOD(ENVADDR(MethodEnv::getpropertylate_u), SIG3(A,P,A,U), getpropertylate_u)
     METHOD(ARRAYADDR(ArrayObject::_getUintProperty), SIG2(A,P,U), ArrayObject_getUintProperty)
     METHOD(VECTOROBJADDR(ObjectVectorObject::_getUintProperty), SIG2(A,P,U), ObjectVectorObject_getUintProperty)
@@ -1226,20 +1210,6 @@
 #ifdef VMCFG_FLOAT
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getDoubleProperty), SIG2(F,P,D), FloatVectorObject_getDoubleProperty)
     METHOD(VECTORFLOATADDRF(FloatVectorObject::_getNativeDoubleProperty), SIG2(F,P,D), FloatVectorObject_getNativeDoubleProperty)
-#endif
-
-#ifdef VMCFG_FLOAT
-    METHOD(ENVADDR(MethodEnv::getpropertylate_f), SIG3(A,P,A,F), getpropertylate_f)
-    METHOD(ARRAYADDR(ArrayObject::_getFloatProperty), SIG2(A,P,F), ArrayObject_getFloatProperty)
-    METHOD(VECTOROBJADDR(ObjectVectorObject::_getFloatProperty), SIG2(A,P,F), ObjectVectorObject_getFloatProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_getFloatProperty), SIG2(I,P,F), IntVectorObject_getFloatProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_getNativeFloatProperty), SIG2(I,P,F), IntVectorObject_getNativeFloatProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_getFloatProperty), SIG2(U,P,F), UIntVectorObject_getFloatProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_getNativeFloatProperty), SIG2(U,P,F), UIntVectorObject_getNativeFloatProperty)
-    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getFloatProperty), SIG2(D,P,F), DoubleVectorObject_getFloatProperty)
-    METHOD(VECTORDOUBLEADDRD(DoubleVectorObject::_getNativeFloatProperty), SIG2(D,P,F), DoubleVectorObject_getNativeFloatProperty)
-    METHOD(VECTORFLOATADDR(FloatVectorObject::_getFloatProperty), SIG2(F,P,F), FloatVectorObject_getFloatProperty)
-    METHOD(VECTORFLOATADDRF(FloatVectorObject::_getNativeFloatProperty), SIG2(F,P,F), FloatVectorObject_getNativeFloatProperty)
 #endif
 
     METHOD(ENVADDR(MethodEnv::haspropertylate_u), SIG3(I,P,A,U), haspropertylate_u)
