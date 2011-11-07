@@ -565,10 +565,6 @@ namespace avmplus
         void _setNativeUintProperty(uint32_t index, typename TLIST::TYPE value);
         typename TLIST::TYPE _getNativeDoubleProperty(double index) const;
         void _setNativeDoubleProperty(double index, typename TLIST::TYPE value);
-#ifdef VMCFG_FLOAT
-        typename TLIST::TYPE _getNativeFloatProperty(float index) const;
-        void _setNativeFloatProperty(float index, typename TLIST::TYPE value);
-#endif
         bool _hasUintProperty(uint32_t index) const;
         Atom _getUintProperty(uint32_t index) const;
         void _setUintProperty(uint32_t index, Atom value);
@@ -584,9 +580,6 @@ namespace avmplus
         void _setKnownUintProperty(uint32_t index, Atom value);             // ObjectType <: VectorBaseType
         void _setKnownIntProperty(int32_t index, Atom value);               // ditto
         void _setKnownDoubleProperty(double index, Atom value);             // ditto
-#ifdef VMCFG_FLOAT
-        void _setKnownFloatProperty(float index, Atom value);               // ditto
-#endif
 
 #ifdef DEBUGGER
         virtual uint64_t bytesUsed() const;
@@ -804,15 +797,6 @@ namespace avmplus
             m_list.setPointer(index, (AtomList::TYPE)tmp);
         }
 
-#ifdef VMCFG_FLOAT
-        void _setKnownFloatPropertyWithPointer(float index_f, Atom value)
-        {
-            uint32_t index = checkWriteIndex_f(index_f);
-            AtomList::OPAQUE_TYPE tmp;
-            atomToValueKnown(value, tmp);
-            m_list.setPointer(index, (AtomList::TYPE)tmp);
-        }
-#endif // VMCFG_FLOAT
 
         // AS3 native function implementations
         ObjectVectorObject* newThisType();

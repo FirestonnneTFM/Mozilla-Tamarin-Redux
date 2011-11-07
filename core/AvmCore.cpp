@@ -1326,7 +1326,7 @@ return the result of the comparison ToPrimitive(x) == y.
                 return atomToDouble(lhs) == ((double)atomGetIntptr(rhs)) ? trueAtom : falseAtom;
 
 #ifdef VMCFG_FLOAT
-            if(isNumeric(lhs) && isNumeric(rhs)) // float with Number comparison, because other cases were treated above.
+            if(isNumberOrFloat(lhs) && isNumberOrFloat(rhs))
             {
                 AvmAssert(isFloat(lhs) || isFloat(rhs));
                 return number(lhs) == number(rhs) ? trueAtom : falseAtom;
