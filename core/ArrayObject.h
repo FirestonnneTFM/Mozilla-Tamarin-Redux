@@ -127,10 +127,6 @@ namespace avmplus
         void _setIntProperty(int32_t index, Atom value);
         Atom _getDoubleProperty(double index) const;
         void _setDoubleProperty(double index, Atom value);
-#ifdef VMCFG_FLOAT
-        Atom _getFloatProperty(float index) const;
-        void _setFloatProperty(float index, Atom value);
-#endif
         
 #ifdef VMCFG_AOT
         Atom *getDenseCopy() const;

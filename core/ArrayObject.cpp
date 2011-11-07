@@ -326,21 +326,6 @@ namespace avmplus
             return getStringProperty(core()->internDouble(d));
     }
 
-#ifdef VMCFG_FLOAT
-    Atom ArrayObject::_getFloatProperty(float f) const
-    {
-        uint32_t index = uint32_t(f);
-        if (float(index) == f)
-              // this is a hot function; explicitly call the force-inlined
-            // implementation to ensure we don't tail-call to _getUintProperty
-            return getUintPropertyImpl(index);
-        else
-            // float is non-integral, negative, or too large to be a valid index, so intern it.
-        return getStringProperty(core()->internFloat(f));
-    }
-#endif
-
-
 #ifdef VMCFG_AOT
     Atom *ArrayObject::getDenseCopy() const
     {
@@ -560,18 +545,6 @@ convert_and_set_sparse:
             // Number is non-integral, negative, or too large to be a valid index, so intern it.
             setStringProperty(core()->internDouble(d), value);
     }
-
-#ifdef VMCFG_FLOAT
-    void ArrayObject::_setFloatProperty(float f, Atom value)
-    {
-        uint32_t index = uint32_t(f);
-        if (float(index) == f)
-            _setUintProperty(index, value);
-        else
-            // float is non-integral, negative, or too large to be a valid index, so intern it.
-            setStringProperty(core()->internFloat(f), value);
-    }
-#endif
 
     // ----------------- "del" methods
 

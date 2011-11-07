@@ -284,7 +284,7 @@ namespace avmplus
     // index suitable for indexing a vector of accessor function ids.  This
     // is presently used only for an argument to CodegenLIR::emitGetIndexedProperty()
     // and CodegenLIR::emitSetIndexedProperty().
-    typedef enum { VI_UINT, VI_INT, VI_DOUBLE, FLOAT_ONLY(VI_FLOAT,) VI_SIZE } IndexKind;
+    typedef enum { VI_UINT, VI_INT, VI_DOUBLE, VI_SIZE } IndexKind;
 
     /**
      * CodegenLIR is a kitchen sink class containing all state for all passes
