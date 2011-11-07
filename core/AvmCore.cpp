@@ -1317,8 +1317,11 @@ return the result of the comparison ToPrimitive(x) == y.
             if (isNullOrUndefined(lhs) && isNullOrUndefined(rhs))
                 return trueAtom;
 #ifdef VMCFG_FLOAT
-            if( isFloat4(lhs) || isFloat4(rhs) )
+            if( isFloat4(lhs) || isFloat4(rhs) ){
+                if (isNullOrUndefined(lhs) || isNullOrUndefined(rhs))
+                    return falseAtom;
                 return f4_eq_i(float4(lhs), float4(rhs) ) ? trueAtom : falseAtom;
+            }
 #endif
             if (ltype == kIntptrType && rtype == kDoubleType)
                 return ((double)atomGetIntptr(lhs)) == atomToDouble(rhs) ? trueAtom : falseAtom;
