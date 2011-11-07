@@ -170,7 +170,6 @@
 		079DFB2E0F3A98E60031D1B4 /* OSDepUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFB2B0F3A98E60031D1B4 /* OSDepUnix.cpp */; };
 		079DFB680F3A9C350031D1B4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFB670F3A9C350031D1B4 /* libz.dylib */; };
 		079DFC980F3AB9640031D1B4 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
-		07C029FD14650C7100D02A66 /* SIMD.as in Sources */ = {isa = PBXBuildFile; fileRef = 07C029FC14650C7100D02A66 /* SIMD.as */; };
 		07C029FE14650C7100D02A66 /* SIMD.as in Sources */ = {isa = PBXBuildFile; fileRef = 07C029FC14650C7100D02A66 /* SIMD.as */; };
 		07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		07E7976513BC99EC00E25990 /* d2a.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07E7976313BC99EC00E25990 /* d2a.cpp */; };
@@ -2292,7 +2291,6 @@
 				07E7976513BC99EC00E25990 /* d2a.cpp in Sources */,
 				0638CA21141F36630047FB4F /* Float4Class.cpp in Sources */,
 				0638CA22141F36630047FB4F /* FloatClass.cpp in Sources */,
-				07C029FD14650C7100D02A66 /* SIMD.as in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
