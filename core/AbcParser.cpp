@@ -1261,10 +1261,11 @@ namespace avmplus
         }
 
 #ifdef VMCFG_FLOAT
-        if(pool->hasFloatSupport()){
+        if(pool->hasFloatSupport())
+        {
             // read float constant pool
             uint32_t float_count = readU30(pos);
-            if (float_count> (uint32_t)(abcEnd - pos))
+            if (float_count > (uint32_t)(abcEnd - pos))
                 toplevel->throwVerifyError(kCorruptABCError);
 
             GCList<GCFloat>& cpool_float = pool->cpool_float;
@@ -1290,7 +1291,7 @@ namespace avmplus
 
             // read float4 constant pool
             uint32_t float4_count = readU30(pos);
-            if (float4_count> (uint32_t)(abcEnd - pos))
+            if (float4_count > (uint32_t)(abcEnd - pos))
                 toplevel->throwVerifyError(kCorruptABCError);
 
             GCList<GCFloat4>& cpool_float4 = pool->cpool_float4;
@@ -1314,21 +1315,28 @@ namespace avmplus
                 }
 #endif
             }
-        } else {
-            // reserve 1 entry - for the "NaN" values
-            pool->constantFloatCount = 1; 
-            pool->cpool_float.ensureCapacity(1);
-            pool->constantFloat4Count = 1;
-            pool->cpool_float4.ensureCapacity(1);
+        }
+        else
+        {
+            pool->constantFloatCount = 0; 
+            pool->constantFloat4Count = 0;
 
         }
-        pool->cpool_int.set(0, 0);
-        pool->cpool_uint.set(0, 0);
-        pool->cpool_double.set(0, (GCDouble*) atomPtr(core->kNaN));
-        pool->cpool_float.set(0,  (GCFloat*)  atomPtr(core->kFltNaN));
-        pool->cpool_float4.set(0, (GCFloat4*) atomPtr(core->kFlt4NaN));
+        
 #endif // VMCFG_FLOAT
 
+        // If the numeric pools are sized to make element zero available then initialize that element.
+
+        if (pool->constantIntCount > 0)
+            pool->cpool_int.set(0, 0);
+        if (pool->constantUIntCount > 0)
+            pool->cpool_uint.set(0, 0);
+        if (pool->constantDoubleCount > 0)
+            pool->cpool_double.set(0, (GCDouble*) atomPtr(core->kNaN));
+        if (pool->constantFloatCount > 0)
+            pool->cpool_float.set(0,  (GCFloat*)  atomPtr(core->kFltNaN));
+        if (pool->constantFloat4Count > 0)
+            pool->cpool_float4.set(0, (GCFloat4*) atomPtr(core->kFlt4NaN));
 
         uint32_t string_count = readU30(pos);
         if (string_count > (uint32_t)(abcEnd - pos))

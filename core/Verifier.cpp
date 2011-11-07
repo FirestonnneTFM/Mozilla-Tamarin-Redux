@@ -1179,7 +1179,7 @@ namespace avmplus
 
             case OP_pushint:
                 checkStack(0,1);
-                if (imm30 == 0 || imm30 >= pool->constantIntCount)
+                if (imm30 >= pool->constantIntCount)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantIntCount));
                 coder->write(state, pc, opcode, INT_TYPE);
                 state->push(INT_TYPE,true);
@@ -1187,7 +1187,7 @@ namespace avmplus
 
             case OP_pushuint:
                 checkStack(0,1);
-                if (imm30 == 0 || imm30 >= pool->constantUIntCount)
+                if (imm30 >= pool->constantUIntCount)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantUIntCount));
                 coder->write(state, pc, opcode, UINT_TYPE);
                 state->push(UINT_TYPE,true);
@@ -1195,15 +1195,16 @@ namespace avmplus
 
             case OP_pushdouble:
                 checkStack(0,1);
-                if (imm30 == 0 || imm30 >= pool->constantDoubleCount)
+                if (imm30 >= pool->constantDoubleCount)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantDoubleCount));
                 coder->write(state, pc, opcode, NUMBER_TYPE);
                 state->push(NUMBER_TYPE, true);
                 break;
+
 #ifdef VMCFG_FLOAT
             case OP_pushfloat:
                 checkStack(0,1);
-                if (imm30 == 0 || imm30 >= pool->constantFloatCount)
+                if (imm30 >= pool->constantFloatCount)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantFloatCount));
                 coder->write(state, pc, opcode, FLOAT_TYPE);
                 state->push(FLOAT_TYPE, true);
@@ -1211,12 +1212,13 @@ namespace avmplus
 
             case OP_pushfloat4:
                 checkStack(0,1);
-                if (imm30 == 0 || imm30 >= pool->constantFloat4Count)
+                if (imm30 >= pool->constantFloat4Count)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantFloat4Count));
                 coder->write(state, pc, opcode, FLOAT4_TYPE);
                 state->push(FLOAT4_TYPE, true);
                 break;
 #endif
+
             case OP_pushnamespace:
                 checkStack(0,1);
                 if (imm30 == 0 || imm30 >= pool->constantNsCount)
