@@ -94,13 +94,9 @@ namespace nanojit
 #define NJ_SOFTFLOAT_SUPPORTED          1
 #define NJ_DIVI_SUPPORTED               0
 
-#ifndef VMCFG_FLOAT
-#   define RA_PREFERS_MSREG                1
-#else
-#   define RA_REGISTERS_OVERLAP            1
-#   define firstAvailableReg               getAvailableReg
-#   define getFatherReg                    _allocator.getSuitableRegFor
-#endif
+#define RA_REGISTERS_OVERLAP            1
+#define firstAvailableReg               getAvailableReg
+#define getFatherReg                    _allocator.getSuitableRegFor
 
 #define NJ_CONSTANT_POOLS
 const int NJ_MAX_CPOOL_OFFSET = 4096;
@@ -133,28 +129,6 @@ static const Register
     LR  = { 14 },
     PC  = { 15 },
 
-#ifndef VMCFG_FLOAT
-    // VFP regs (we currently only use D0-D7 and S0)
-    D0 = { 16 },
-    D1 = { 17 },
-    D2 = { 18 },
-    D3 = { 19 },
-    D4 = { 20 },
-    D5 = { 21 },
-    D6 = { 22 },
-    D7 = { 23 },
-    // D8-D15 are caller-saved registers that we don't currently handle.
-
-    FirstFloatReg = D0,
-    LastFloatReg = D7,
-
-    UnspecifiedReg = { 32 },
-    deprecated_UnknownReg = { 32 },     // XXX: remove eventually, see bug 538924
-
-    // S0 overlaps with D0 and is hard-coded into i2d and u2f operations
-    S0 = { 24 },
-
-#else
     // VFP regs
     S0  = { 16 },
     S1  = S0 + 1,
@@ -246,7 +220,7 @@ static const Register
 
     UnspecifiedReg = { 128 },
     deprecated_UnknownReg = { 128 },     // XXX: remove eventually, see bug 538924
-#endif
+
     SBZ = { 0 } ;   // Used for 'should-be-zero' fields in instructions with
                     // unused register fields.
 
@@ -293,13 +267,10 @@ typedef enum {
 // meaning.
 #define OppositeCond(cc)  ((ConditionCode)((unsigned int)(cc)^0x1))
 
-#ifdef VMCFG_FLOAT
-    typedef uint64_t RegisterMask;
-#   define rmask(r) ARM_REG_MASKS[REGNUM(r)]
-    extern const RegisterMask ARM_REG_MASKS[LastRegNum+1];
-#else
-    typedef uint32_t RegisterMask;
-#endif 
+
+typedef uint64_t RegisterMask;
+#define rmask(r) ARM_REG_MASKS[REGNUM(r)]
+extern const RegisterMask ARM_REG_MASKS[LastRegNum+1];
 
 typedef struct _FragInfo {
     RegisterMask    needRestoring;
@@ -320,62 +291,33 @@ typedef struct _ParameterRegisters {
 #define init_params(a,b,c) { (a), (b) }
 #endif
 
-#ifdef VMCFG_FLOAT
-const RegisterMask SavedFpRegs = 0x0000ffff00000000LL; // S16,S17,S18,S19,S20,S21,S22,S23,S23,S25,S26,S27,S28,S29,S30,S31; or Q4-Q7, or D8-D15
-const RegisterMask SavedRegs = SavedFpRegs | 0x7f0; // R4, R5, R6, R7, R8, R9, R10, SAVED_FPREGS_LIST
-const int NumSavedRegs = 23;
+// The saved FP register mask should include  S16-31, aliased to Q4-Q7 and D8-D15.
+// Unfortunately, our current implementation of callee-saved registers cannot handle
+// floating-point registers, so we simply restrict the set of allocatable FP registers
+// to those that need not be saved.
 
-const RegisterMask FpSRegs = 0x0000ffffffff0000LL; // S0,S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14,S15,S16,S17,S18,S19,S20,S21,S22,S23,S24,S25,S26,S27,S28,S29,S30,S31
-const RegisterMask FpDRegs = 0xffffffffffff0000LL; //  D0,D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31;
-const RegisterMask FpQRegs = 0xffffffffffff0000LL; // Q0,Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8,Q9,Q10,Q11,Q12,Q13,Q14,Q15 
-const RegisterMask GpRegs  = 0xffff; // R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,FP,IP,SP,LR,PC
-const RegisterMask AllowableFlagRegs = 0x07ff; // R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10 
-#else
-// D0-D7 are not saved; D8-D15 are, but we don't use those,
-// so we don't have to worry about saving/restoring them
 static const RegisterMask SavedFpRegs = 0;
 static const RegisterMask SavedRegs = 1<<R4 | 1<<R5 | 1<<R6 | 1<<R7 | 1<<R8 | 1<<R9 | 1<<R10;
 static const int NumSavedRegs = 7;
 
-static const RegisterMask FpRegs = 1<<D0 | 1<<D1 | 1<<D2 | 1<<D3 | 1<<D4 | 1<<D5 | 1<<D6 | 1<<D7;
-static const RegisterMask GpRegs = 0xFFFF;
-static const RegisterMask AllowableFlagRegs = 1<<R0 | 1<<R1 | 1<<R2 | 1<<R3 | 1<<R4 | 1<<R5 | 1<<R6 | 1<<R7 | 1<<R8 | 1<<R9 | 1<<R10;
-#define FpDRegs FpRegs
-#define FpSRegs 1 << S0   // Not implemented
-#define FpQRegs 0         // Not implemented
-#endif // VMCFG_FLOAT
+const RegisterMask FpSRegs = 0x0000ffffffff0000LL; // S0-S31
+const RegisterMask FpDRegs = 0xffffffffffff0000LL; // D0-D31
+const RegisterMask FpQRegs = 0xffffffffffff0000LL; // Q0-Q15
+const RegisterMask GpRegs  = 0xffff;               // R0-R10,FP,IP,SP,LR,PC
+const RegisterMask AllowableFlagRegs = 0x07ff;     // R0-R10
 
 #define isU12(offs) (((offs) & 0xfff) == (offs))
 
-#ifdef VMCFG_FLOAT
-    inline bool IsFpSReg(Register _r) { return _r >=FirstSFloatReg && _r < FirstDFloatReg; }
-    inline bool IsFpDReg(Register _r) { return _r >=FirstDFloatReg && _r < FirstQFloatReg; }
-    inline bool IsFpQReg(Register _r) { return _r >=FirstQFloatReg && _r <= Q15; }
-    inline bool IsGpReg(Register _r) { return _r < FirstSFloatReg; }
-#   define FpSRegNum(_fpr)  (REGNUM(_fpr) - FirstSFloatReg )
-#   define FpDRegNum(_fpr)  ( (REGNUM(_fpr) - FirstDFloatReg) ^ 16 ) // mind the reversed order of the banks
-#   define FpQRegNum(_fpr)  (REGNUM(_fpr) - FirstQFloatReg )
-#   define SReg(num)  (FirstSFloatReg + (num) )
-#   define DReg(num)  (FirstDFloatReg + ((num) ^ 16))  // mind the reversed order of the register banks
-#   define QReg(num)  (FirstQFloatReg + (num) )
-
-#else
-    // True if this is a GP register (i.e. R0-R10 SP FP IP LR PC in our case)
-    inline bool IsGpReg(Register _r) { return (rmask(_r) & GpRegs) != 0; }
-    // True if single-precision FP register (i.e. Sn)
-    inline bool IsFpSReg(Register _r){ return _r == S0; } 
-    // True if this is a (managed) FP register (i.e. Dn in our case)
-    inline bool IsFpReg(Register _r) { return (rmask(_r) & FpRegs) != 0; }
-#   define IsFpDReg IsFpReg
-    inline bool IsFpQReg(Register _r) { (void)_r;return false; }
-#   define FpRegNum(_fpr)   ((_fpr) - FirstFloatReg)
-#   define FpDRegNum        FpRegNum
-#   define FpQRegNum(_fpr)  0
-#   define FpSRegNum(_fpr)  0
-#   define SReg(num)        S0
-#   define DReg(num)        (FirstFloatReg + (num) )
-#   define QReg(num)        UnspecifiedReg
-#endif
+inline bool IsFpSReg(Register _r) { return _r >=FirstSFloatReg && _r < FirstDFloatReg; }
+inline bool IsFpDReg(Register _r) { return _r >=FirstDFloatReg && _r < FirstQFloatReg; }
+inline bool IsFpQReg(Register _r) { return _r >=FirstQFloatReg && _r <= Q15; }
+inline bool IsGpReg(Register _r) { return _r < FirstSFloatReg; }
+#define FpSRegNum(_fpr)  (REGNUM(_fpr) - FirstSFloatReg )
+#define FpDRegNum(_fpr)  ( (REGNUM(_fpr) - FirstDFloatReg) ^ 16 ) // mind the reversed order of the banks
+#define FpQRegNum(_fpr)  (REGNUM(_fpr) - FirstQFloatReg )
+#define SReg(num)  (FirstSFloatReg + (num) )
+#define DReg(num)  (FirstDFloatReg + ((num) ^ 16))  // mind the reversed order of the register banks
+#define QReg(num)  (FirstQFloatReg + (num) )
 
 #define firstreg()      R0
 
