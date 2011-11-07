@@ -2455,9 +2455,7 @@ bool LivePoolNode::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 const uint32_t MethodEnv::gcTracePointerOffsets[] = {
     offsetof(MethodEnv, _scope),
     offsetof(MethodEnv, activationOrMCTable),
-#if defined(VMCFG_LOOKUP_CACHE)
     offsetof(MethodEnv, lookup_cache),
-#endif
     offsetof(MethodEnv, method),
     0};
 
@@ -2480,9 +2478,7 @@ bool MethodEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     (void)(avmplus_MethodEnvProcHolder_isExactInterlock != 0);
     gc->TraceLocation(&_scope);
     gc->TraceConservativeLocation(&activationOrMCTable);
-#if defined(VMCFG_LOOKUP_CACHE)
     gc->TraceLocation(&lookup_cache);
-#endif
     gc->TraceLocation(&method);
     return false;
 }

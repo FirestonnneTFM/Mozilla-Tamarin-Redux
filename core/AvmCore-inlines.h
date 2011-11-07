@@ -529,7 +529,6 @@ REALLY_INLINE Atom AvmCore::allocDouble(double n)
     return kDoubleType | (uintptr_t)d;
 }
 
-#ifdef VMCFG_LOOKUP_CACHE
 REALLY_INLINE uint32_t AvmCore::lookupCacheTimestamp() const
 {
     return lookup_cache_timestamp == ~0U ? 0 : lookup_cache_timestamp;
@@ -545,7 +544,6 @@ REALLY_INLINE void AvmCore::invalidateLookupCache()
     if (lookup_cache_timestamp != ~0U)
         ++lookup_cache_timestamp;
 }
-#endif // VMCFG_LOOKUP_CACHE
 
 #ifdef VMCFG_NANOJIT
 REALLY_INLINE void AvmCore::flushBindingCachesNextSweep()

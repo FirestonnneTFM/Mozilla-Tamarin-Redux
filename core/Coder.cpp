@@ -202,7 +202,6 @@ namespace avmplus
         coder->cleanup();
     }
 
-#ifdef VMCFG_LOOKUP_CACHE
     LookupCacheBuilder::LookupCacheBuilder()
     {
         this->next_cache = 0;
@@ -239,7 +238,6 @@ namespace avmplus
         caches[next_cache] = imm30;
         return next_cache++;
     }
-#endif // VMCFG_LOOKUP_CACHE
 
     CodeWriter::~CodeWriter()
     { }
