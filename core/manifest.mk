@@ -142,7 +142,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
 # Use of '%' [to force a pattern-rule] instead of '$(curdir)/..' or
 # '$(topsrcdir)' [which would then not be a pattern-rule] is crucial
 # (ie "deliberate", ie "hack"); see Bug 632086
-%/generated/builtin.h %/generated/builtin.cpp: $(topsrcdir)/core/builtin.as
+%/generated/builtin.h %/generated/builtin.cpp: $(topsrcdir)/core/*.as
 	cd $(topsrcdir)/core; python builtin.py
 
 # 1. Use of '$(topsrcdir)/generated' is deliberate; we use absolute

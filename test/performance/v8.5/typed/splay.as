@@ -52,7 +52,7 @@ package {
             this.string=string;
             this.left=left;
             this.right=right;
-        }        
+        }
     }
 // Configuration.
     public class Splayer {
@@ -125,7 +125,7 @@ package {
                 var greatest:Node = splayTree.findGreatestLessThan(key);
                 if (greatest == null) splayTree.remove(key);
                 else splayTree.remove(greatest.key);
-            }    
+            }
         }
     }
 /**

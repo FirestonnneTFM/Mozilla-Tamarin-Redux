@@ -20,7 +20,7 @@
  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package {
 
@@ -86,7 +86,7 @@ function scale(v:Array, scale:Number):Array {
 }
 
 function cross(v1:Array, v2:Array):Array {
-    return [v1[1] * v2[2] - v1[2] * v2[1], 
+    return [v1[1] * v2[2] - v1[2] * v2[1],
             v1[2] * v2[0] - v1[0] * v2[2],
             v1[0] * v2[1] - v1[1] * v2[0]];
 
@@ -143,13 +143,13 @@ public function Triangle(p1:Array, p2:Array, p3:Array):void {
     var normal:Array = cross(edge1, edge2);
     if (Math.abs(normal[0]) > Math.abs(normal[1]))
         if (Math.abs(normal[0]) > Math.abs(normal[2]))
-            this.axis = 0; 
-        else 
+            this.axis = 0;
+        else
             this.axis = 2;
     else
-        if (Math.abs(normal[1]) > Math.abs(normal[2])) 
+        if (Math.abs(normal[1]) > Math.abs(normal[2]))
             this.axis = 1;
-        else 
+        else
             this.axis = 2;
     var u:int = (this.axis + 1) % 3;
     var v:int = (this.axis + 2) % 3;
@@ -164,11 +164,11 @@ public function Triangle(p1:Array, p2:Array, p3:Array):void {
     this.nd = dot(normal, p1) / normal[this.axis];
     var det:int = u1 * v2 - v1 * u2;
     this.eu = p1[u];
-    this.ev = p1[v]; 
+    this.ev = p1[v];
     this.nu1 = u1 / det;
     this.nv1 = -v1 / det;
     this.nu2 = v2 / det;
-    this.nv2 = -u2 / det; 
+    this.nv2 = -u2 / det;
     this.material = [0.7, 0.7, 0.7];
 }
 
@@ -182,13 +182,13 @@ public function intersect(orig:Array, dir:Array, near:Number, far:Number):* {   
     var Pu:uint = orig[u] + t * dir[u] - this.eu;
     var Pv:uint = orig[v] + t * dir[v] - this.ev;
     var a2:uint = Pv * this.nu1 + Pu * this.nv1;
-    if (a2 < 0) 
+    if (a2 < 0)
         return null;
     var a3:uint = Pu * this.nu2 + Pv * this.nv2;
-    if (a3 < 0) 
+    if (a3 < 0)
         return null;
 
-    if ((a2 + a3) > 1) 
+    if ((a2 + a3) > 1)
         return null;
     return t;
 }
@@ -267,7 +267,7 @@ public function blocked(O:Array, D:Array, far:Number):Boolean {
     var near:Number = 0.0001;
     var closest:Array = null;
     for (var i:uint = 0; i < this.triangles.length; i++) {
-        var triangle = this.triangles[i];   
+        var triangle = this.triangles[i];
         var d:* = triangle.intersect(O, D, near, far);
         if (d == null || d > far || d < near)
             continue;
@@ -393,7 +393,7 @@ function raytraceScene():Array
             // angle *= angle;
             //grey.reflection = angle;
             return grey;
-        } else 
+        } else
             return green;
     }
     var ffl:Array = createVector(-1000, -30, -1000);

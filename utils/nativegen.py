@@ -139,6 +139,7 @@ NATIVE              = 0x20
 HAS_ParamNames      = 0x80
 
 CONSTANT_Utf8               = 0x01
+CONSTANT_Float              = 0x02
 CONSTANT_Int                = 0x03
 CONSTANT_UInt               = 0x04
 CONSTANT_PrivateNs          = 0x05
@@ -166,6 +167,7 @@ CONSTANT_StaticProtectedNs  = 0x1A
 CONSTANT_MultinameL         = 0x1B
 CONSTANT_MultinameLA        = 0x1C
 CONSTANT_TypeName           = 0x1D
+CONSTANT_Float4             = 0x1E
 
 TRAIT_Slot          = 0x00
 TRAIT_Method        = 0x01
@@ -251,6 +253,19 @@ def is_neg_inf(val):
     # [-]1.#INF on Windows in Python 2.5.2!
     strValLower = str(val).lower()
     return strValLower.endswith("inf") and strValLower.startswith("-")
+
+class Float4:
+    x = kNaN
+    y = kNaN
+    z = kNaN
+    w = kNaN
+    def __init__(self, x, y, z, w):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.w = w
+    def __str__(self):
+        return str(self.x)+','+str(self.y)+','+str(self.z)+','+str(self.w)
 
 class Error(Exception):
     nm = ""
@@ -991,6 +1006,16 @@ class ByteArray:
         self.pos += 8
         return r
 
+    def readFloat(self):
+        r = unpack_from("<f", self.data, self.pos)[0]
+        self.pos += 4
+        return r
+
+    def readFloat4(self):
+        r = unpack_from("<4f", self.data, self.pos)[0]
+        self.pos += 16
+        return r
+
     def readBytes(self, lenbytes):
         r = self.data[self.pos:self.pos+lenbytes]
         self.pos += lenbytes
@@ -1023,6 +1048,8 @@ class Abc:
     ints = None
     uints = None
     doubles = None
+    floats = None
+    float4s = None
     strings = None
     namespaces = None
     nssets = None
@@ -1034,10 +1061,12 @@ class Abc:
     classes = None
     scripts = None
     scriptName = ""
+    
     publicNs = Namespace("", CONSTANT_Namespace)
     anyNs = Namespace("*", CONSTANT_Namespace)
     versioned_uris = {}
     is_vm_builtin = False
+    is_float_enabled = False
 
     magic = 0
 
@@ -1048,8 +1077,11 @@ class Abc:
         self.scriptName = scriptName
         self.data = ByteArray(data)
 
-        if self.data.readU16() != 16 or self.data.readU16() != 46:
-            raise Error("Bad Abc Version")
+        self.magic =  self.data.readU16()  | (self.data.readU16()<<16);
+        if (self.magic != ((46<<16)|16)) and (self.magic != ((47<<16)|16)):
+            raise Error("Bad Abc Version "+ str(self.magic))
+        
+        self.is_float_enabled = self.magic >= (47<<16)|16;
 
         self.parseCpool()
 
@@ -1058,6 +1090,10 @@ class Abc:
         self.defaults[CONSTANT_Int] = (self.ints, CTYPE_INT)
         self.defaults[CONSTANT_UInt] = (self.uints, CTYPE_UINT)
         self.defaults[CONSTANT_Double] = (self.doubles, CTYPE_DOUBLE)
+        if(self.is_float_enabled):
+            self.defaults[CONSTANT_Float] = (self.floats, CTYPE_FLOAT)
+            self.defaults[CONSTANT_Float4] = (self.float4s, CTYPE_FLOAT4)
+
         self.defaults[CONSTANT_False] = ({ CONSTANT_False: False }, CTYPE_BOOLEAN)
         self.defaults[CONSTANT_True] = ({ CONSTANT_True: True }, CTYPE_BOOLEAN)
         self.defaults[CONSTANT_Namespace] = (self.namespaces, CTYPE_NAMESPACE)
@@ -1136,6 +1172,14 @@ class Abc:
             elif float(val) >= 0.0 and float(val) <= 4294967295.0 and float(val) == floor(float(val)):
                 ct = CTYPE_UINT
                 val = "%.0fU" % float(val)
+        elif ct == CTYPE_FLOAT:
+            # Python apparently doesn't have isNaN, isInf
+            if is_nan(val):
+                val = "(float)MathUtils::kNaN"
+            elif is_neg_inf(val):
+                val = "(float)MathUtils::kNegInfinity"
+            elif is_pos_inf(val):
+                val = "(float)MathUtils::kInfinity"
         elif ct == CTYPE_STRING:
             for i in range(0, len(self.strings)):
                 if (self.strings[i] == str(val)):
@@ -1147,10 +1191,8 @@ class Abc:
                 val = "false"
             else:
                 val = "true"
-        elif ct == CTYPE_FLOAT:
-            val = "!!! ERROR, float not handled !!!"
         elif ct == CTYPE_FLOAT4:
-            val = "!!! ERROR, float4 not handled !!!"
+            val = "!!! ERROR, float4 not handled !!!"  # @todo: fix float4 default parameters
         if str(val) == "None":
             val = "nullObjectAtom"
         return ct,val,rawval
@@ -1176,6 +1218,16 @@ class Abc:
         for i in range(1, n):
             self.doubles[i] = self.data.readDouble()
 
+        if self.is_float_enabled:
+            n = self.data.readU30()
+            self.floats = [ kNaN ] * max(1,n)
+            for i in range(1, n):
+                self.floats[i] = self.data.readFloat()
+            n = self.data.readU30()
+            self.float4s = [ (kNaN,kNaN,kNaN,kNaN) ] * max(1,n)
+            for i in range(1, n):
+                self.float4s[i] = self.data.readFloat4()
+            
         n = self.data.readU30()
         self.strings = [""] * max(1,n)
         for i in range(1, n):
@@ -1850,7 +1902,7 @@ class AbcThunkGen:
                 classNS = t.cppns()
                 glueClassName = t.cppname()
                 # special hack because the metadata for the class Math says its instance data is of type double
-                if glueClassName != "double" and glueClassName != "float" :
+                if glueClassName != "double" :
                     cppNamespaceToGlueClasses.setdefault(classNS, set()).add(glueClassName)
                     key = classNS + '::' + glueClassName
                     if not key in glueClassToTraits:

@@ -55,28 +55,28 @@
  * structures must be garbage collected.
  */
 
-package 
+package
 {
     import avmplus.*;
 
     function fib(n, pp) {
-		var p = { parent: pp };
-		if (n < 2)
-			return p;
-		else {
-			p.x = fib(n-1, p);
-			p.y = fib(n-2, p);
-			return p;
-		}
+                var p = { parent: pp };
+                if (n < 2)
+                        return p;
+                else {
+                        p.x = fib(n-1, p);
+                        p.y = fib(n-2, p);
+                        return p;
+                }
     }
     var iters = 70;
     if (System.argv.length > 0)
-		iters = parseInt(System.argv[0]);
+                iters = parseInt(System.argv[0]);
     print("Iterations: " + iters);
     var then = new Date();
     var res = new Array;
     for ( var i=0 ; i < iters ; i++ )
-		res[i%20] = fib(20, null);
+                res[i%20] = fib(20, null);
     var now = new Date();
     print("metric time " + (now - then));
 }

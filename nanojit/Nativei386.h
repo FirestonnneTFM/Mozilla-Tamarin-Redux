@@ -208,11 +208,9 @@ namespace nanojit
         void nativePageSetup();\
         void underrunProtect(int);\
         bool hardenNopInsertion(const Config& c) { return c.harden_nop_insertion; } \
-FLOAT_ONLY(\
         void asm_cmpf4(LIns *cond);  \
         void asm_immf(Register r, int32_t i, float f, bool canClobberCCs); \
         void asm_immf4(Register r, const float4_t& f4, bool canClobberCCs);\
-)\
         void asm_immi(Register r, int32_t val, bool canClobberCCs);\
         void asm_stkarg(LIns* p, int32_t& stkd);\
         void asm_farg(LIns*, int32_t& stkd);\
@@ -431,7 +429,6 @@ FLOAT_ONLY(\
         void SSEs(int32_t c, Register d, Register s); \
         void SSEsib(int32_t c, Register rr, int32_t d, Register rb, Register ri, int32_t scale); \
         void LDSDm(Register r, const double* addr); \
-FLOAT_ONLY(\
 		void SSEu8(int32_t c, Register d, Register s, uint8_t imm); \
 		void SSEsu8(int32_t c, Register d, Register s, uint8_t imm); \
 		void SSEsm(int32_t c, Register r, int32_t d, Register b); \
@@ -470,7 +467,6 @@ FLOAT_ONLY(\
 		void FSUBR32dm(const float* dm); \
 		void FMUL32dm( const float* dm); \
 		void FDIVR32dm(const float* dm); \
-)\
         void SSE_LDQ( Register r, int32_t d, Register b); \
         void SSE_LDSS(Register r, int32_t d, Register b); \
         void SSE_LDQsib(Register r, int32_t d, Register rb, Register ri, int32_t scale); \

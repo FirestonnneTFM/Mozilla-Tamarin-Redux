@@ -20,7 +20,7 @@
  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package {
@@ -47,13 +47,13 @@ package {
         var normal:Array = cross(edge1, edge2);
         if (Math.abs(normal[0]) > Math.abs(normal[1]))
             if (Math.abs(normal[0]) > Math.abs(normal[2]))
-                this.axis = 0; 
-            else 
+                this.axis = 0;
+            else
                 this.axis = 2;
         else
-            if (Math.abs(normal[1]) > Math.abs(normal[2])) 
+            if (Math.abs(normal[1]) > Math.abs(normal[2]))
                 this.axis = 1;
-            else 
+            else
                 this.axis = 2;
         var u:Number = (this.axis + 1) % 3;
         var v:Number = (this.axis + 2) % 3;
@@ -68,11 +68,11 @@ package {
         this.nd = dot(normal, p1) / normal[this.axis];
         var det:Number = u1 * v2 - v1 * u2;
         this.eu = p1[u];
-        this.ev = p1[v]; 
+        this.ev = p1[v];
         this.nu1 = u1 / det;
         this.nv1 = -v1 / det;
         this.nu2 = v2 / det;
-        this.nv2 = -u2 / det; 
+        this.nv2 = -u2 / det;
         this.material = [0.7, 0.7, 0.7];
     }
 
@@ -86,13 +86,13 @@ package {
         var Pu:Number = orig[u] + t * dir[u] - this.eu;
         var Pv:Number = orig[v] + t * dir[v] - this.ev;
         var a2:Number = Pv * this.nu1 + Pu * this.nv1;
-        if (a2 < 0) 
+        if (a2 < 0)
             return NaN;
         var a3:Number = Pu * this.nu2 + Pv * this.nv2;
-        if (a3 < 0) 
+        if (a3 < 0)
             return NaN;
 
-        if ((a2 + a3) > 1) 
+        if ((a2 + a3) > 1)
             return NaN;
         return t;
     }
@@ -115,7 +115,7 @@ package {
     public function intersect(origin:Array, dir:Array, near:Number=undefined, far:Number=undefined):Array {
         var closest:Triangle = undefined;
         for (var i:int = 0; i < this.triangles.length; i++) {
-            var triangle:Triangle = this.triangles[i];   
+            var triangle:Triangle = this.triangles[i];
             var d:Number = triangle.intersect(origin, dir, near, far);
             if (isNaN(d) || d > far || d < near)
                 continue;
@@ -127,7 +127,7 @@ package {
             return [this.background[0],this.background[1],this.background[2]];
             
         var normal:Array = closest.normal;
-        var hit:Array = add(origin, scale(dir, far)); 
+        var hit:Array = add(origin, scale(dir, far));
         if (dot(dir, normal) > 0)
             normal = [-normal[0], -normal[1], -normal[2]];
         
@@ -171,7 +171,7 @@ package {
         var near:Number = 0.0001;
         var closest:Object = undefined;
         for (var i:int = 0; i < this.triangles.length; i++) {
-            var triangle:Triangle = this.triangles[i];   
+            var triangle:Triangle = this.triangles[i];
             var d = triangle.intersect(O, D, near, far);
             if (isNaN(d) || d > far || d < near)
                 continue;
@@ -306,7 +306,7 @@ package {
   }
 
   function cross(v1:Array, v2:Array):Array {
-      return [v1[1] * v2[2] - v1[2] * v2[1], 
+      return [v1[1] * v2[2] - v1[2] * v2[1],
               v1[2] * v2[0] - v1[0] * v2[2],
               v1[0] * v2[1] - v1[1] * v2[0]];
 
@@ -330,8 +330,8 @@ package {
       var tx:Number = -self[3];
       var ty:Number = -self[7];
       var tz:Number = -self[11];
-      for (var h:int = 0; h < 3; h++) 
-          for (var v:int = 0; v < 3; v++) 
+      for (var h:int = 0; h < 3; h++)
+          for (var v:int = 0; v < 3; v++)
               temp[h + v * 4] = self[v + h * 4];
       for (var i:int = 0; i < 11; i++)
           self[i] = temp[i];
@@ -403,7 +403,7 @@ package {
               // angle *= angle;
               //grey.reflection = angle;
               return grey;
-          } else 
+          } else
               return green;
       }
       var ffl:Array = createVector(-1000, -30, -1000);

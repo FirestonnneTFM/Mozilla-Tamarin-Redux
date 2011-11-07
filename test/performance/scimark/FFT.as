@@ -11,7 +11,7 @@ include "scimarkutil/Matrix.as";
   * <P>
   *
   * @author Bruce R. Miller bruce.miller@nist.gov,
-  * @author Derived from GSL (Gnu Scientific Library), 
+  * @author Derived from GSL (Gnu Scientific Library),
   * @author GSL's FFT Code by Brian Gough bjg@vvv.lanl.gov
   */
 
@@ -22,10 +22,10 @@ public class FFT {
 
   public static  function num_flops(N:uint):Number
   {
-	 var Nd:Number = N;
-	 var logN:Number = log2(N);
+         var Nd:Number = N;
+         var logN:Number = log2(N);
 
-	 return (5.0*Nd-2)*logN + 2*(Nd+1);
+         return (5.0*Nd-2)*logN + 2*(Nd+1);
    }
 
 
@@ -35,7 +35,7 @@ public class FFT {
 
   /** Compute Inverse Fast Fourier Transform of (complex) data, in place.*/
   public static function inverse (data:Array):void {
-    transform_internal(data, +1);  
+    transform_internal(data, +1);
     // Normalize
     var nd:uint=data.length;
     var n:uint =nd/2;
@@ -50,8 +50,8 @@ public class FFT {
     var nd:uint = data.length;
     // Make duplicate for comparison
     var copy:Array = new Array(nd);
-	for(var i:Number=0; i<nd;i++)
-		copy[i] = data[i];
+        for(var i:Number=0; i<nd;i++)
+                copy[i] = data[i];
 
     // Transform & invert
     transform(data);
@@ -81,8 +81,8 @@ public class FFT {
     return log; }
 
    static function transform_internal (data:Array, direction:Number):void {
-	if (data.length == 0) return;    
-	var n:uint = data.length/2;
+        if (data.length == 0) return;
+        var n:uint = data.length/2;
     if (n == 1) return;         // Identity operation!
     var logn:uint = log2(n);
 
@@ -90,7 +90,7 @@ public class FFT {
     bitreverse(data) ;
 
     /* apply fft recursion */
-	/* this loop executed log2(N) times */
+        /* this loop executed log2(N) times */
     for (var bit:Number = 0, dual = 1; bit < logn; bit++, dual *= 2) {
       var w_real:Number = 1.0;
       var w_imag:Number = 0.0;
@@ -146,9 +146,9 @@ public class FFT {
    static function bitreverse(data:Array):void {
     /* This is the Goldrader bit-reversal algorithm */
     var n:uint = data.length / 2;
-	var nm1:uint = n-1;
-	var i:Number=0; 
-	var j:Number=0;
+        var nm1:uint = n-1;
+        var i:Number=0;
+        var j:Number=0;
     for (; i < nm1; i++) {
 
       //int ii = 2*i;
@@ -168,14 +168,14 @@ public class FFT {
         data[jj]   = tmp_real;
         data[jj+1] = tmp_imag; }
 
-      while (k <= j) 
-	  {
+      while (k <= j)
+          {
         //j = j - k ;
-		j -= k;
+                j -= k;
 
-        //k = k / 2 ; 
-        k >>= 1 ; 
-	  }
+        //k = k / 2 ;
+        k >>= 1 ;
+          }
       j += k ;
     }
   }
@@ -194,8 +194,8 @@ var R:Random = new Random(Constants.RANDOM_SEED, 0, 1);
 var N:int = Constants.FFT_SIZE;
 var x:Array = RandomVector(2*N, R);
 for (var i:uint=0; i<cycles; i++){
-	FFT.transform(x); // forward transform
-	FFT.inverse(x); // backward transform
+        FFT.transform(x); // forward transform
+        FFT.inverse(x); // backward transform
 }
 
 

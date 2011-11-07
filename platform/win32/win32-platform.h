@@ -220,25 +220,6 @@ typedef unsigned __int16    uint16_t;
 typedef unsigned __int32    uint32_t;
 typedef unsigned __int64    uint64_t;
 
-
-#ifdef VMCFG_FLOAT
-#include <xmmintrin.h>
-#include <emmintrin.h>
-typedef __m128              float4_t;
-
-#define f4_mul              _mm_mul_ps
-#define f4_add              _mm_add_ps
-#define f4_sub              _mm_sub_ps
-#define f4_div              _mm_div_ps
-#define f4_eq_i(a,b)        ( _mm_movemask_epi8( _mm_castps_si128 (_mm_cmpneq_ps( (a) , (b)))  ) == 0 )
-#define f4_x(v)            _mm_cvtss_f32(v)
-#define f4_y(v)            _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(1,1,1,1)))
-#define f4_z(v)            _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(2,2,2,2)))
-#define f4_w(v)            _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(3,3,3,3)))
-#define f4_ith(v,i)        _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(i,i,i,i)))
-#define f4_shuffle(v,i)    _mm_shuffle_ps(v,v,i)
-#endif // VMCFG_FLOAT
-
 // This must come after all the include files
 #if defined _MSC_VER && !defined DEBUG
     #pragma intrinsic(memcmp)
@@ -271,6 +252,28 @@ typedef __m128              float4_t;
 #if defined(_MSC_VER) && _MSC_VER < 1400 && defined(VMCFG_NANOJIT)
     #define NJ_NO_VARIADIC_MACROS
 #endif
+
+/**
+ * Float and Float4 support.
+ */
+#include <xmmintrin.h>
+#include <emmintrin.h>
+typedef __m128  float4_t;
+
+#define f4_add  _mm_add_ps
+#define f4_sub  _mm_sub_ps
+#define f4_mul  _mm_mul_ps
+#define f4_div  _mm_div_ps
+
+REALLY_INLINE int32_t f4_eq_i(float4_t a, float4_t b)
+{
+    return (_mm_movemask_epi8(_mm_castps_si128(_mm_cmpneq_ps(a, b))) == 0);
+}
+
+REALLY_INLINE float f4_x(float4_t v) { return _mm_cvtss_f32(v); }
+REALLY_INLINE float f4_y(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 1, 1, 1))); }
+REALLY_INLINE float f4_z(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(2, 2, 2, 2))); }
+REALLY_INLINE float f4_w(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(3, 3, 3, 3))); }
 
 /**
 * Type defintion for an opaque data type representing platform-defined spin lock

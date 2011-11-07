@@ -69,6 +69,7 @@ namespace avmplus
         float get_z() { const float* v = reinterpret_cast<const float*>(this); return  v[2]; };
         float get_w() { const float* v = reinterpret_cast<const float*>(this); return  v[3]; };
 
+        static float4_t fromComponents(float x, float y, float z, float w);
         float4_t isGreater(float4_t x, float4_t y);
         float4_t isGreaterOrEqual(float4_t x, float4_t y);
         float4_t isLess(float4_t x, float4_t y);
@@ -97,6 +98,7 @@ namespace avmplus
         float4_t tan(float4_t x);
         float4_t normalize(float4_t x);
         float4_t cross(float4_t x, float4_t y);
+        float4_t _swizzle(float4_t val, int32_t how);
         float    dot(float4_t x, float4_t y);
         float    dot2(float4_t x, float4_t y);
         float    dot3(float4_t x, float4_t y);
@@ -106,8 +108,6 @@ namespace avmplus
         float    distance(float4_t x, float4_t y);
         float    distance2(float4_t x, float4_t y);
         float    distance3(float4_t x, float4_t y);
- static float4_t fromComponents(float x, float y, float z, float w);
-        float4_t _swizzle(float4_t val, int32_t how);
 
         // ------------------------ DATA SECTION BEGIN
     private:    

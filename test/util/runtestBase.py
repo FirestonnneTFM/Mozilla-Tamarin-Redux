@@ -1403,15 +1403,37 @@ class RuntestBase(object):
         if outputCalls != None:
             outputCalls.append((self.verbose_print,(cmd,)))
         try:
+            outFile = tempfile.SpooledTemporaryFile()
+            errFile = tempfile.SpooledTemporaryFile()
             self.lock.acquire()
             try:
-                p = Popen((cmd), shell=self.useShell, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=envVars)
+                p = Popen((cmd), shell=self.useShell, stdout=outFile, stderr=errFile, env=envVars)
                 self.currentPids.append(p)
             finally:
                 self.lock.release()
 
             starttime=time()
-            (output, err) = p.communicate()
+            output=err=[]
+            while True:
+                if p.poll() is None:
+                    if self.testTimeOut>-1 and time()-starttime>self.testTimeOut:
+                        attempts=0
+                        while p.poll() is None and attempts<10:
+                            p.terminate()
+                            sleep(1)
+                            attempts+=1
+                        output=""
+                        err=""
+                        break
+                    sleep(0.05)
+                else:
+                    outFile.seek(0)
+                    output=outFile.read()
+                    errFile.seek(0)
+                    err=errFile.read()
+                    break
+            outFile.close()
+            errFile.close()
             if output:
                 output = output.decode('latin_1','replace')
                 output = output.split('\n')
@@ -1431,7 +1453,7 @@ class RuntestBase(object):
             exitCode = p.returncode
 
             if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
-                return ('', err, exitCode)
+                return (['process timed out after %ds' % self.testTimeOut], err, exitCode)
 
             self.lock.acquire()
             try:

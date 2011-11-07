@@ -38,6 +38,7 @@
 * ***** END LICENSE BLOCK ***** */
 
 #include "VMPI.h"
+#include "VMAssert.h"
 
 #include <stdlib.h>
 #include <sys/time.h>
@@ -196,6 +197,28 @@ void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void
     CallWithRegistersSaved3(fn, &arg, &buf);    // Probably prevents the previous call from being a tail call
 }
 
+// We must check for AVMPLUS_MAC before __GNUC__, because macs use gcc.
+#elif defined AVMPLUS_MAC
+
+void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
+{
+#if defined MMGC_IA32
+    void* buf = NULL;
+    __builtin_unwind_init();                    // Save registers - GCC intrinsic.  Not reliable on 10.4 PPC or 64-bit
+#else
+    // jmp_buf is int[] which may not be ptr-aligned, so force it to be, then
+    // assert that it is.  GC only reads pointers from aligned addresses.
+    union {
+        intptr_t force_align;
+        jmp_buf buf;
+    };
+    assert((intptr_t(&buf) & (sizeof(void*)-1)) == 0); (void) force_align;
+    VMPI_setjmpNoUnwind(buf);                   // Save registers in jmp_buf.
+#endif
+    CallWithRegistersSaved2(fn, arg, &buf);     // Computes the stack pointer, calls fn
+    CallWithRegistersSaved3(fn, &arg, &buf);    // Probably prevents the previous call from being a tail call
+}
+
 #elif defined linux || defined __GNUC__ // Assume gcc for Linux
 
 void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
@@ -205,21 +228,6 @@ void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void
     CallWithRegistersSaved3(fn, &arg, NULL);    // Probably prevents the previous call from being a tail call
 }
 
-#elif defined(AVMPLUS_MAC)
-
-void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
-{
-#if defined MMGC_IA32
-    void* buf = NULL;
-    __builtin_unwind_init();                    // Save registers - GCC intrinsic.  Not reliable on 10.4 PPC or 64-bit
-#else
-    jmp_buf buf;
-    VMPI_setjmpNoUnwind(buf);                   // Save registers - not always reliable
-#endif
-    CallWithRegistersSaved2(fn, arg, &buf);     // Computes the stack pointer, calls fn
-    CallWithRegistersSaved3(fn, &arg, &buf);    // Probably prevents the previous call from being a tail call
-}
-
 #else
 
 // Is getcontext() reliably available on POSIX systems?  If so it would be good
@@ -227,7 +235,13 @@ void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void
 
 void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
 {
-    jmp_buf buf;
+    // jmp_buf is someimtes typedef int[K] which may not be ptr-aligned, so force
+    // it to be, then assert that it is.
+    union {
+        intptr_t force_align;
+        jmp_buf buf;
+    };
+    assert((jmp_buf & (sizeof(void*)-1)) == 0);
     VMPI_setjmpNoUnwind(buf);                   // Save registers
     CallWithRegistersSaved2(fn, arg, &buf);     // Computes the stack pointer, calls fn
     CallWithRegistersSaved3(fn, &arg, &buf);    // Probably prevents the previous call from being a tail call

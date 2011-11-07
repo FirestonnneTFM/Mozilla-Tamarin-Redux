@@ -59,7 +59,7 @@ Prototype 1.5 rc0
  - By Lunarmedia, 06 August, 2006
  - Available at (and packed with) JavascriptCompressor.com
 
-Please note this version is missing the selector.js component of the full Prototype library. 
+Please note this version is missing the selector.js component of the full Prototype library.
 You can get the compressed version of selector at JavascriptCompressor.com
 
 */

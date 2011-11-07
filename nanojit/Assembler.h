@@ -158,10 +158,8 @@ namespace nanojit
         } else {
             switch (ins->retType()) {
             case LTy_I:   n = 1;          break;
-#ifdef VMCFG_FLOAT
             case LTy_F:   n = 1;          break; 
             case LTy_F4:  n = 4;          break; 
-#endif
             CASE64(LTy_Q:)
             case LTy_D:   n = 2;          break;
             case LTy_V:   NanoAssert(0);  break;
@@ -210,24 +208,18 @@ namespace nanojit
 #endif
 #if NJ_USES_IMMF4_POOL
     #if defined(_WIN32) && !defined(NANOJIT_X64) //AVMSYSTEM_32BIT
-        class float4_ref{
+        class float4_key{
         private: 
            float _val[4];
         public:
-            float4_ref(float4_t& p) { _val[0]=f4_x(p); _val[1]=f4_y(p); _val[2]=f4_z(p); _val[3]=f4_w(p); }
+            float4_key(float4_t& p) { _val[0]=f4_x(p); _val[1]=f4_y(p); _val[2]=f4_z(p); _val[3]=f4_w(p); }
             operator float4_t() const { float4_t ret = { _val[0],_val[1],_val[2],_val[3]}; return ret;}
             const void* operator&() { return &_val[0]; }
         };
-        NanoStaticAssert(sizeof(float4_ref) == sizeof(float4_t));
-        template<> inline bool keysEqual<float4_ref>(float4_ref x,float4_ref y){return VMPI_memcmp(&x,&y,sizeof(float4_t)) == 0;}
-        template<> struct DefaultHash<float4_ref> {
-            static size_t hash(const float4_ref k) {
-                // (const void*) cast is required by ARM RVCT 2.2
-                return murmurhash((const void*) &k, sizeof(float4_t));
-            }
-        };
+        NanoStaticAssert(sizeof(float4_key) == sizeof(float4_t));
+        template<> inline bool keysEqual<float4_key>(float4_key x,float4_key y){return VMPI_memcmp(&x,&y,sizeof(float4_t)) == 0;}
 
-        typedef HashMap<float4_ref, float4_t*> ImmF4PoolMap;
+        typedef HashMap<float4_key, float4_t*> ImmF4PoolMap;
     #else // other compilers will hopefully support a direct hashmap
         typedef HashMap<float4_t, float4_t*> ImmF4PoolMap;
     #endif
@@ -380,12 +372,10 @@ namespace nanojit
             void        getBaseReg2(RegisterMask allowValue, LIns* value, Register& rv,
                                     RegisterMask allowBase, LIns* base, Register& rb, int &d);
 #if NJ_USES_IMMD_POOL
-            const uint64_t*
-                        findImmDFromPool(uint64_t q);
+            const uint64_t* findImmDFromPool(uint64_t q);
 #endif
 #if NJ_USES_IMMF4_POOL
-            const float4_t*
-                        findImmF4FromPool(float4_t q);
+            const float4_t* findImmF4FromPool(float4_t q);
 #endif
 
             int         findMemFor(LIns* ins);
@@ -484,13 +474,9 @@ namespace nanojit
             bool        asm_maybe_spill(LIns* ins, bool pop);
 
 #ifdef NANOJIT_IA32
-    #define ASM_SPILL_RESTARGS  bool pop FLOAT_ONLY(, int8_t nWords)
+    #define ASM_SPILL_RESTARGS  bool pop, int8_t nWords
 #else
-    #ifdef VMCFG_FLOAT
     #define ASM_SPILL_RESTARGS  int8_t nWords
-    #else
-    #define ASM_SPILL_RESTARGS  bool quad
-    #endif
 #endif
             void        asm_spill(Register rr, int d, ASM_SPILL_RESTARGS);
 
@@ -524,7 +510,6 @@ namespace nanojit
             void        asm_dasq(LIns *ins);
             void        asm_qasd(LIns *ins);
 #endif
-#ifdef VMCFG_FLOAT
             void        asm_mmi(Register rd, int dd, Register rs, int ds);
             void        asm_store128(LOpcode op, LIns *val, int d, LIns *base);
             void        asm_load128(LIns* ins);
@@ -538,7 +523,7 @@ namespace nanojit
             void        asm_f2d(LIns* ins);
             void        asm_f2f4(LIns* ins);
             void        asm_f4comp(LIns* ins);
-#endif
+
             void        asm_nongp_copy(Register r, Register s);
             void        asm_call(LIns*);
             Register    asm_binop_rhs_reg(LIns* ins);

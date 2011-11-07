@@ -537,7 +537,7 @@ Atom op_add(AvmCore* core, Atom lhs, Atom rhs)
         return core->allocDouble(double(atomGetIntptr(lhs) + atomGetIntptr(rhs)));
     }
 
-    if (AvmCore::isNumber(lhs) && AvmCore::isNumber(rhs))
+    if (AvmCore::isNumeric(lhs) && AvmCore::isNumeric(rhs))
     {
         // C++ porting note. if either side is undefined NaN then result must be NaN,
         // which is assumed to be taken care of by IEEE 748 double add.

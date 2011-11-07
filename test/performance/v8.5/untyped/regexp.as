@@ -536,7 +536,7 @@ package regexp {
                 re36.exec('anzr');
                 /e/.exec('9.0  e115');
             }
-        }        
+        }
         var re57 = /##yv4##/gi;
         var re58 = /##yv16##/gi;
         var re59 = /##yv19##/gi;

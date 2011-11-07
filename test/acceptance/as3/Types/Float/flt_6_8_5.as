@@ -47,9 +47,9 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 var onef:float = 1f;
-var zerof:float = 0.0;
-var onen:float = 1;
-var zeron:float = 0.0;
+var zerof:float = 0.0f;
+var onen:Number = 1;
+var zeron:Number = 0.0;
 var nd:Number = 1.111111111119;
 var nf:float = nd; // rounds up
 var ns:String = "1.111111111119";
@@ -63,27 +63,27 @@ function strictNotEquals(val1, val2)
     return (val1 !== val2);
 }
 
-// 2 (a) If Type(x) is float and Type(y) is Number, return the result of the comparison ToNumber(x) == y.
-AddTestCase("1f !== 1", false, (onef !== onen));
+// Let type1=Type(val1) and type2=Type(val2), If type1 is not the same as type2 then return false
+AddTestCase("1f !== 1", true, (onef !== onen));
 AddTestCase("1f FloatLiteral !== 1 NumberLiteral", false, (1f !== 1));
-AddTestCase("strictNotEquals() 1f FloatLiteral !== 1 NumberLiteral", false, strictNotEquals(1f, 1));
+AddTestCase("strictNotEquals() 1f FloatLiteral !== 1 NumberLiteral", true, strictNotEquals(1f, 1));
 AddTestCase("1.1f !== 1.1", true, (1.1f !== 1.1));
 AddTestCase("strictNotEquals() 1.1f !== 1.1", true, strictNotEquals(1.1f, 1.1));
 AddTestCase("float.NaN !== NaN", true, (float.NaN !== NaN));
 AddTestCase("zerof !== -0.0", false, (zerof !== -0.0));
-AddTestCase("nf !== Number(nf)", false, (nf !== Number(nf)));
-AddTestCase("nf_down !== Number(nf_down)", false, (nf_down !== Number(nf_down)));
+AddTestCase("nf !== Number(nf)", true, (nf !== Number(nf)));
+AddTestCase("nf_down !== Number(nf_down)", true, (nf_down !== Number(nf_down)));
 
-// 2 (b) If Type(x) is Number and Type(y) is float, return the result of the comparison x == ToNumber(y).
-AddTestCase("1 !== 1f", false, (onen !== onef));
+// Let type1=Type(val1) and type2=Type(val2), If type1 is not the same as type2 then return false
+AddTestCase("1 !== 1f", true, (onen !== onef));
 AddTestCase("1 NumberLiteral !== 1f FloatLiteral", false, (1 !== 1f));
-AddTestCase("strictNotEquals() 1 NumberLiteral !== 1f FloatLiteral", false, strictNotEquals(1, 1f));
+AddTestCase("strictNotEquals() 1 NumberLiteral !== 1f FloatLiteral", true, strictNotEquals(1, 1f));
 AddTestCase("1.1 !== 1.1f", true, (1.1 !== 1.1f));
 AddTestCase("strictNotEquals() 1.1 !== 1.1f", true, strictNotEquals(1.1, 1.1f));
 AddTestCase("Number.NaN !== float.NaN", true, (Number.NaN !== float.NaN));
 AddTestCase("0.0 !== -zerof", false, (0.0 !== -zerof));
-AddTestCase("Number(nf) !== nf", false, (Number(nf) !== nf));
-AddTestCase("Number(nf_down) !== nf_down", false, (Number(nf_down) !== nf_down));
+AddTestCase("Number(nf) !== nf", true, (Number(nf) !== nf));
+AddTestCase("Number(nf_down) !== nf_down", true, (Number(nf_down) !== nf_down));
 
 
 // 2 (c) If type1 is different from type2: return false
@@ -138,7 +138,7 @@ var var1 = new MyObject(1f);
 AddTestCase("var1  !== var1", false, (var1  !== var1));
 
 var nvo = new MyValueAlteringObject(nf);
-AddTestCase(" '!==' , evaluation order", false,(nvo+1) !== (zerof+nvo) );
+AddTestCase(" '!==' , evaluation order", false,(nvo+1f) !== (zerof+nvo) );
 
 test();
 

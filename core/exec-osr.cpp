@@ -268,8 +268,8 @@ namespace avmplus
 
         // zero out stack area for unused scopes:
         if (scopeTop < stackBase) {
-            void* p = ((char*) jitFramePointer + scopeTop * IFFLOAT(env->MethodEnv->varSize(), VARSIZE) );
-            size_t nbytes = (stackBase - scopeTop) * IFFLOAT(env->MethodEnv->varSize(), VARSIZE);
+            void* p = ((char*) jitFramePointer + scopeTop * IFFLOAT(env->method->varSize(), VARSIZE) );
+            size_t nbytes = (stackBase - scopeTop) * IFFLOAT(env->method->varSize(), VARSIZE);
             VMPI_memset(p, 0, nbytes);
         }
 
@@ -398,6 +398,16 @@ namespace avmplus
         return BaseExecMgr::interpFPR(env, argc, ap);
     }
 
+#ifdef VMCFG_FLOAT
+    // intercept call to interpreter increment invocation counter
+    float4_t OSR::osrInterpVECR(MethodEnv* env, int argc, uint32_t *ap)
+    {
+        if (countInvoke(env))
+            return (*env->_implVECR)(env, argc, ap);
+        return BaseExecMgr::interpVECR(env, argc, ap);
+    }
+#endif
+
     // intercept call to interpreter increment invocation counter
     Atom OSR::osrInvokeInterp(MethodEnv* env, int argc, Atom* argv)
     {
@@ -421,6 +431,16 @@ namespace avmplus
             return (*env->_implFPR)(env, argc, ap);
         return BaseExecMgr::initInterpFPR(env, argc, ap);
     }
+
+#ifdef VMCFG_FLOAT
+    // OSR tramp for invoking a constructor that returns a FPR
+    float4_t OSR::osrInitInterpVECR(MethodEnv* env, int argc, uint32_t *ap)
+    {
+        if (countInvoke(env))
+            return (*env->_implVECR)(env, argc, ap);
+        return BaseExecMgr::initInterpVECR(env, argc, ap);
+    }
+#endif
 
     // intercept call to interpreter increment invocation counter
     Atom OSR::osrInitInvokeInterp(MethodEnv* env, int argc, Atom* argv)
