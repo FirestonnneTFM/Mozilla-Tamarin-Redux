@@ -66,9 +66,9 @@ const char* shiftNames[] = { "lsl", "lsl", "lsr", "lsr", "asr", "asr", "ror", "r
 
 const Register RegAlloc::argRegs[] = { R0, R1, R2, R3 };
 const Register RegAlloc::retRegs[] = { R0, R1 };
-const Register RegAlloc::savedRegs[] = { R4, R5, R6, R7, R8, R9, R10 ,
-                             FLOAT_ONLY( S16,S17,S18,S19,S20,S21,S22,S23,S24,S25,S26,S27,S28,S29,S30,S31 )
-                                        };
+// FIXME: We neither use nor save callee-saved FP registers.
+const Register RegAlloc::savedRegs[] = { R4, R5, R6, R7, R8, R9, R10 };
+
 #ifdef VMCFG_FLOAT
 const RegisterMask FpArgRegs=      (RegisterMask)0x00000000ffff0000LL; // Q0,Q1,Q2,Q3; or D0-D7, or S0-S15
 const RegisterMask LowBankFPMask = (RegisterMask)0x0000ffffffff0000LL; // Q0,Q1,Q2,Q3,Q4,Q5,Q6,Q7
@@ -1164,9 +1164,8 @@ getSuitableRegFor(Register r, enum LTy insType)
 Register 
 RegAlloc::getSuitableRegFor(Register r,LIns* ins)
 {
-    NanoAssert(ins); if(!ins) return r;
-    
-    if(ins->opcode() == LIR_parami && IsFpSReg(r)) return nanojit::getSuitableRegFor(r,LTy_F); // FIXME:remove hack
+    NanoAssert(ins);
+    if(!ins) return r;
     return nanojit::getSuitableRegFor(r,ins->retType());
 }
 
@@ -1185,8 +1184,6 @@ RegAlloc::getAvailableReg(LIns* ins, Register regClass, RegisterMask m)
     }
     bool isInt = ins->isI() || IsGpReg(regClass);
     if(isInt){
-        if (m & AllowableFlagRegs)
-           m &= AllowableFlagRegs; // hack for parami
         NanoAssert(m!=0);
         Register ret = msReg(m);
         return ret;
