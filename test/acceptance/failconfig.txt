@@ -386,7 +386,6 @@ as3/Types/Float4/flt4_5_8_2:^float4\(1f. 2f. 3f. 4f\) \|\| float4\(-1f. -2f. -3f
 as3/Types/Float4/flt4_5_8_2:^float4\(1f. 2f. 3f. 4f\) \|\| float4\(0f. -2f. -3f. -4f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
 as3/Types/Float4/flt4_5_8_2:^float4\(1f. 2f. -0f. 4f\) \|\| float4\(-1f. -2f. -3f. -4f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
 
-as3/Types/Float4/flt4_4_6_5_1:float4Array\.join\(\)   , .* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700038
 
 as3/Types/Float/flt_6_8_3:^nf === Number\(nf\) , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
 as3/Types/Float/flt_6_8_3:^nf_down === Number\(nf_down\)  , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
@@ -405,33 +404,3 @@ as3/Types/Float/flt_6_8_5:^Number\(nf_down\) !== nf_down  , .*-Ojit  , , expecte
 as3/Types/Float/floatOperations:>> FltIntOps SEQ  , .* , -Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
 as3/Types/Float/floatOperations:>> FltIntOps SNEQ  , .* , -Dinterp  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
 
-## Bug https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-# All modes
-as3/Types/Float/floatOperations:^Any-typed comparisons with mixed types  = x2!=z2 , x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_4_5_17:^Ensure that float\.asin\(-0\) returns -0 , x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_4_5_18:^Ensure that float\.atan\(-0\) returns -0 , x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_4_5_20:^Ensure that float\.ceil\(-0\) returns -0 , x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_4_5_20:^Ensure that float\.ceil\(-0\.1f\) returns -0 , x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_4_5_24:^float\.log\(1\.0e-6f\) (?!.*FloatLiteral.*), x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_1:^nf == no , x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_1:^nf == new MyObject\(Number\(nf\)\) , x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_1:^no == nf , x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_1:^new MyObject\(Number\(nf\)\) == nf , x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_2:^nf != no , x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_2:^nf == new MyObject\(Number\(nf\)\) , x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_2:^no != nf , x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_2:^new MyObject\(Number\(nf\)\) != nf , x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_2:^new MyObject\(Number\(nf\)\) == nf , x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/Vector/every:^every: float vector does contain a zero , x86-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-# Interp and Hybrid failures
-as3/Types/Float/flt_6_8_1:^nf == Number\(nf\) , x86-lnx.* , -Ojit , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_1:^Number\(nf_down\) == nf_down , x86-lnx.* , -Ojit , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_1:^Number\(nf\) == nf , x86-lnx.* , -Ojit , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_1:^Number\(nf_down\) == nf_down , x86-lnx.* , -Ojit , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_2:^nf != Number\(nf\) , x86-lnx.* , -Ojit , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_2:^Number\(nf_down\) != nf_down , x86-lnx.* , -Ojit , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_2:^Number\(nf\) != nf , x86-lnx.* , -Ojit , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/flt_6_8_2:^Number\(nf_down\) != nf_down , x86-lnx.* , -Ojit , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-# Interp only
-as3/Types/Float/floatOperations:^>> FltIntOps EQ , x86-lnx.*-Dinterp ,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
-as3/Types/Float/floatOperations:^>> FltIntOps NEQ , x86-lnx.*-Dinterp ,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700258
