@@ -406,7 +406,7 @@ namespace avmplus
         LIns* cmpEq(const CallInfo *fid, int lhsi, int rhsi);
         LIns* cmpLt(int lhsi, int rhsi);
         LIns* cmpLe(int lhsi, int rhsi);
-        LIns* cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp);
+        LIns* cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp, bool strictOperation = false);
         debug_only( bool isPointer(int i); )
         void emitSetPc(const uint8_t* pc);
         void emitSampleCheck();

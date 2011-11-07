@@ -6911,7 +6911,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     }
 
     // Faster compares for int, uint, double, boolean
-    LIns* CodegenLIR::cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp)
+    LIns* CodegenLIR::cmpOptimization( int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp, bool strictOperation /*=false*/ )
     {
         Traits* lht = state->value(lhsi).traits;
         Traits* rht = state->value(rhsi).traits;
@@ -6996,10 +6996,13 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     return binaryIns(ucmp, lhs, rhs);
             #endif
             }
-            /* NOTE: this assumes that comparisons between two floats, performed as doubles, work just as well */
-            LIns* lhs = promoteNumberIns(lht, lhsi);
-            LIns* rhs = promoteNumberIns(rht, rhsi);
-            return binaryIns(fcmp, lhs, rhs);
+            if(!strictOperation || lht->isNumberType() || rht->isNumberType() ){
+                /* NOTE: this assumes that comparisons between two floats, performed as doubles, work just as well */
+                /* but for float vs. number, we can't do strict equality tests, this way, since the types are assumed to be different */
+                LIns* lhs = promoteNumberIns(lht, lhsi);
+                LIns* rhs = promoteNumberIns(rht, rhsi);
+                return binaryIns(fcmp, lhs, rhs);
+            }
         }
 
         if (lht == STRING_TYPE && rht == STRING_TYPE) {
@@ -7068,19 +7071,14 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     LIns* CodegenLIR::cmpEq(const CallInfo *fid, int lhsi, int rhsi)
     {
         bool isStrict = fid == FUNCTIONID(stricteq);
-        Traits* lht = state->value(lhsi).traits;
-        Traits* rht = state->value(rhsi).traits;
 
-        if(isStrict && (lht != rht) && (!(lht && lht->isNumberType()) || !(rht && rht->isNumberType()))){
-            /* Special case this: comparing values of different types will yield "false", except when both are 
-               direct subtypes of number (i.e. int, uint or Number). In particular, comparing a float with a number
-               will yield false on strict equality comparison even if both of them have the same valeu */
-            return eqp(InsConstAtom(trueAtom),InsConstAtom(falseAtom));
-        }
-
-        LIns *result = cmpOptimization(lhsi, rhsi, LIR_eqi, LIR_eqi, LIR_eqd);
+        LIns *result = cmpOptimization(lhsi, rhsi, LIR_eqi, LIR_eqi, LIR_eqd, isStrict);
+        
         if (result )
             return result;
+
+        Traits* lht = state->value(lhsi).traits;
+        Traits* rht = state->value(rhsi).traits;
 
         // There are various conditions we can check for that simplify our equality check down
         // to a ptr comparison:

@@ -1452,7 +1452,7 @@ return the result of the comparison ToPrimitive(x) == y.
             {
             case kSpecialBibopType:
 #ifdef VMCFG_FLOAT
-                if(lhs == ltype && rhs == rtype) // here we check for "undefined" in fact.
+                if(lhs == undefinedAtom && rhs == undefinedAtom) 
                     return trueAtom;
                 if(isFloat(lhs) && isFloat(rhs))
                     return atomToFloat(lhs) == atomToFloat(rhs) ? trueAtom : falseAtom;
