@@ -86,7 +86,7 @@ package
                 expected = "NaN number";
             }
         }
-        else if (expected !== actual)
+        if (expected !== actual)
             FAIL("STRICTEQ: "+name, typeof expected+"["+expected+"]", typeof actual+"["+actual+"]");
         else
             PASS(name);
