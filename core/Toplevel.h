@@ -83,9 +83,10 @@ namespace avmplus
         GCRef<ErrorClass> errorClass() const;
         GCRef<EvalErrorClass> evalErrorClass() const;
 #ifdef VMCFG_FLOAT
-         GCRef<FloatClass> floatClass() const;
-         GCRef<Float4Class> float4Class() const;
-         GCRef<FloatVectorClass> floatVectorClass() const;
+        GCRef<FloatClass> floatClass() const;
+        GCRef<Float4Class> float4Class() const;
+        GCRef<FloatVectorClass> floatVectorClass() const;
+        GCRef<Float4VectorClass> float4VectorClass() const;
 #endif        
         GCRef<FunctionClass> functionClass() const;
         GCRef<IntClass> intClass() const;

@@ -807,6 +807,7 @@ const int kBufferPadding = 16;
         GCMember<String> kVectorNumber; // 'Vector.<Number>'
 #ifdef VMCFG_FLOAT
         GCMember<String> kVectorFloat;  // 'Vector.<float>'
+        GCMember<String> kVectorFloat4; // 'Vector.<float4>'
 #endif
         GCMember<String> kVectorint;    // 'Vector.<int>'
         GCMember<String> kVectoruint;   // 'Vector.<uint>'

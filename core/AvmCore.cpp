@@ -517,6 +517,7 @@ namespace avmplus
         kClassS = internConstantStringLatin1("Class$");
 #ifdef VMCFG_FLOAT
         kVectorFloat = internConstantStringLatin1("Vector.<float>");
+        kVectorFloat4 = internConstantStringLatin1("Vector.<float4>");
 #endif
         kVectorNumber = internConstantStringLatin1("Vector.<Number>");
         kVectorint = internConstantStringLatin1("Vector.<int>");

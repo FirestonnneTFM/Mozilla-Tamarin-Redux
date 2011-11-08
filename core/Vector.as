@@ -62,7 +62,7 @@ package __AS3__.vec
         
         // Bugzilla 573452, Type-specialized Vector methods: specialize Push.
         //
-        // NOTE FOUR ALMOST-DUPLICATED COPIES OF THIS FUNCTION IN THE FILE.
+        // NOTE SIX ALMOST-DUPLICATED COPIES OF THIS FUNCTION IN THE FILE.
 
         prototype.push = function (...args) // rest args are efficient
         {
@@ -169,7 +169,7 @@ package __AS3__.vec
 
         // Bugzilla 573452, Type-specialized Vector methods: specialize Push.
         //
-        // NOTE FOUR ALMOST-DUPLICATED COPIES OF THIS FUNCTION IN THE FILE.
+        // NOTE SIX ALMOST-DUPLICATED COPIES OF THIS FUNCTION IN THE FILE.
 
         prototype.push = function (...args)  // rest args are efficient
         {
@@ -275,7 +275,7 @@ package __AS3__.vec
 
         // Bugzilla 573452, Type-specialized Vector methods: specialize Push.
         //
-        // NOTE FOUR ALMOST-DUPLICATED COPIES OF THIS FUNCTION IN THE FILE.
+        // NOTE SIX ALMOST-DUPLICATED COPIES OF THIS FUNCTION IN THE FILE.
 
         prototype.push = function (...args)  // rest args are efficient
         {
@@ -381,7 +381,7 @@ package __AS3__.vec
 
         // Bugzilla 573452, Type-specialized Vector methods: specialize Push.
         //
-        // NOTE FOUR ALMOST-DUPLICATED COPIES OF THIS FUNCTION IN THE FILE.
+        // NOTE SIX ALMOST-DUPLICATED COPIES OF THIS FUNCTION IN THE FILE.
 
         prototype.push = function (...args)  // rest args are efficient
         {
@@ -486,6 +486,39 @@ package __AS3__.vec
 
         private native function newThisType() : Vector$float;
 
+        // Bugzilla 573452, Type-specialized Vector methods: specialize Push.
+        //
+        // NOTE SIX ALMOST-DUPLICATED COPIES OF THIS FUNCTION IN THE FILE.
+
+        prototype.push = function (...args)  // rest args are efficient
+        {
+            // Type check - Vector methods are not generic.
+            castToThisType(this);
+
+            // making it type specialized, otherwise compiler treats 'this' as untyped
+            var v:Vector$float = this;
+
+            // FP 10.1 throws this error specifically, the setting of the element in the
+            // loop below will generate error 1125 instead.
+            if (v.fixed)
+                Error.throwError(RangeError, 1126);
+
+            // The loop is correct because Tamarin (as of June 2010) has a 4GB object limit.
+            // Thus at most 1G elements can be accommodated in a Vector, and the index never
+            // wraps around.
+            var n:uint = v.length;
+            var i:uint=0;
+            var argc:uint=args.length;
+            while (i < argc) 
+            {
+                v[n] = args[i];
+                i++;
+                n++;
+            }
+            v.length = n;
+            return n;
+        }        
+
         // Include most of the vector implementation.
         include "VectorImpl.as";
 
@@ -522,7 +555,7 @@ package __AS3__.vec
             return this._splice(start, deleteCount, items);
         }
 
-        AS3 function indexOf(value:float, from:int=0): float {
+        AS3 function indexOf(value:float, from:int=0): Number {
             var start:uint = clamp( from, length );
             for ( var i:uint=start, limit:uint=length ; i < limit ; i++ )
                 if (this[i] === value)
@@ -530,7 +563,114 @@ package __AS3__.vec
             return -1;
         }
 
-        AS3 function lastIndexOf(value:float, from: int=0x7fffffff): float {
+        AS3 function lastIndexOf(value:float, from: int=0x7fffffff): Number {
+            var start:uint = clamp( from, length );
+            if( start == length )
+                --start;
+            for ( var i:int=start ; i >= 0 ; i-- ) {
+                if (this[i] === value)
+                    return i;
+            }
+            return -1;
+        }
+    }
+
+    [native(cls="Float4VectorClass", gc="exact", instance="Float4VectorObject", methods="auto", construct="override")]
+    [API(CONFIG::SWF_16)]
+    CONFIG::VMCFG_FLOAT
+    dynamic final class Vector$float4
+    {
+        // Dummy constructor -- actual code is in construct()
+        public function Vector$float4(length:uint=0, fixed:Boolean=false)
+        {
+        }
+
+        // Private helper methods.  These allow most of the implementation to be abstracted into
+        // a file that is included from the implementation of the different Vector types.
+        private static function castToThisType(item) : Vector$float4 {
+            return item;
+        }
+
+        private native function newThisType() : Vector$float4;
+
+        // Bugzilla 573452, Type-specialized Vector methods: specialize Push.
+        //
+        // NOTE SIX ALMOST-DUPLICATED COPIES OF THIS FUNCTION IN THE FILE.
+
+        prototype.push = function (...args)  // rest args are efficient
+        {
+            // Type check - Vector methods are not generic.
+            castToThisType(this);
+
+            // making it type specialized, otherwise compiler treats 'this' as untyped
+            var v:Vector$float4 = this;
+
+            // FP 10.1 throws this error specifically, the setting of the element in the
+            // loop below will generate error 1125 instead.
+            if (v.fixed)
+                Error.throwError(RangeError, 1126);
+
+            // The loop is correct because Tamarin (as of June 2010) has a 4GB object limit.
+            // Thus at most 1G elements can be accommodated in a Vector, and the index never
+            // wraps around.
+            var n:uint = v.length;
+            var i:uint=0;
+            var argc:uint=args.length;
+            while (i < argc) 
+            {
+                v[n] = args[i];
+                i++;
+                n++;
+            }
+            v.length = n;
+            return n;
+        }        
+
+        // Include most of the vector implementation.
+        include "VectorImpl.as";
+
+        // Methods with the specific type in their sig.  Can't be in the impl file since it doesn't
+        // know what "type" vector this is (int, uint, Number, Object)
+        // Most of these just call generic versions in impl, but some small ones are implemented here.
+        AS3 function concat(...items) : Vector$float4 {
+            return _concat(items);
+        }
+
+        AS3 function filter(checker:Function, thisObj: Object=null): Vector$float4 {
+            return _filter(checker, thisObj);
+        }
+
+        AS3 native function pop(): float4 ;
+
+        AS3 function reverse() : Vector$float4 {
+            this._reverse();
+            return this;
+        }
+
+        AS3 native function shift():float4;
+
+        AS3 function slice(start:int=0, end:int=0x7fffffff): Vector$float4 {
+            return this._slice(start, end);
+        }
+
+        AS3 function sort(comparefn): Vector$float4 {
+            var a : Array = [comparefn];
+            _sort(this, a);
+            return this;
+        }
+        AS3 function splice(start: int, deleteCount: uint, ...items): Vector$float4 {
+            return this._splice(start, deleteCount, items);
+        }
+
+        AS3 function indexOf(value:float4, from:int=0): Number {
+            var start:uint = clamp( from, length );
+            for ( var i:uint=start, limit:uint=length ; i < limit ; i++ )
+                if (this[i] === value)
+                    return i;
+            return -1;
+        }
+
+        AS3 function lastIndexOf(value:float4, from: int=0x7fffffff): Number {
             var start:uint = clamp( from, length );
             if( start == length )
                 --start;

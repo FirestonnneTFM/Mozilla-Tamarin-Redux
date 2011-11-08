@@ -751,6 +751,10 @@ Atom* FASTCALL BaseExecMgr::coerceUnbox1(MethodEnv* env, Atom atom, Traits* t, A
         case BUILTIN_vectordouble:
         case BUILTIN_vectorint:
         case BUILTIN_vectoruint:
+#ifdef VMCFG_FLOAT
+        case BUILTIN_vectorfloat:
+        case BUILTIN_vectorfloat4:
+#endif
         case BUILTIN_xml:
         case BUILTIN_xmlList:
             // A few intrinsic final classes can skip subtypeof calls.
