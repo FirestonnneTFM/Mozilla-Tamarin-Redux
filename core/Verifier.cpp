@@ -1303,9 +1303,10 @@ namespace avmplus
                         retType = vt;
                     else
                         retType = NUMBER_TYPE;
-                } else
+                }
 #endif // VMCFG_FLOAT
-                emitCoerce(NUMBER_TYPE, imm30);
+                if(!already_coerced)
+                    emitCoerce(retType, imm30);
                 coder->write(state, pc, opcode, retType);
                 break;
             }
@@ -2363,6 +2364,7 @@ namespace avmplus
                 {
                 checkStack(1,1);
                 Traits* retType = NUMBER_TYPE;
+                bool already_coerced = false;
 #ifdef VMCFG_FLOAT
                 if(pool->hasFloatSupport()){
                     FrameValue& v = state->peek(1);
@@ -2377,8 +2379,8 @@ namespace avmplus
                         retType = NUMBER_TYPE;
                 }
 #endif
-                if(retType == NUMBER_TYPE)
-                    emitCoerce(NUMBER_TYPE, sp);
+                if(!already_coerced)
+                    emitCoerce(retType, sp);
                 coder->write(state, pc, opcode, retType);
                 break;
                 }
@@ -2388,6 +2390,7 @@ namespace avmplus
                 {
                 checkStack(1,1);
                 Traits* retType = NUMBER_TYPE;
+                bool already_coerced = false;
 #ifdef VMCFG_FLOAT
                 if(pool->hasFloatSupport())
                 {
@@ -2397,6 +2400,7 @@ namespace avmplus
                     {
                         emitCoerceToNumeric(sp);
                         retType = OBJECT_TYPE;
+                        already_coerced = true;
                     }
                     else if(vt == FLOAT_TYPE || vt == FLOAT4_TYPE)
                         retType = vt;
@@ -2404,8 +2408,8 @@ namespace avmplus
                         retType = NUMBER_TYPE;
                 }
 #endif // VMCFG_FLOAT
-                if(retType == NUMBER_TYPE)
-                    emitCoerce(NUMBER_TYPE, sp);
+                if(!already_coerced)
+                    emitCoerce(retType, sp);
                 coder->write(state, pc, opcode, retType);
                 break;
                 }
