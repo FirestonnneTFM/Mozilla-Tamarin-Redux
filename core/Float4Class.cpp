@@ -137,60 +137,7 @@ namespace avmplus
         return result;
     }
 
-    float4_t Float4Class::acos(float4_t x)
-    {
-        float4_t result = F4OP1(x, acosf);
-        return result;
-    }
-
-    float4_t Float4Class::asin(float4_t x)
-    {
-        float4_t result = F4OP1(x, asinf);
-        return result;
-    }
-
-    float4_t Float4Class::atan(float4_t x)
-    {
-        float4_t result = F4OP1(x, atanf);
-        return result;
-    }
-
-    float4_t Float4Class::atan2(float4_t y, float4_t x)
-    {
-        float4_t result = F4OP2(y, x, atan2f);
-        return result;
-    }
-
-    float4_t Float4Class::ceil(float4_t x)
-    {
-        float4_t result = F4OP1(x, ceilf);
-        return result;
-    }
-
-    float4_t Float4Class::cos(float4_t x)
-    {
-        float4_t result = F4OP1(x, cosf);
-        return result;
-    }
     
-    float4_t Float4Class::exp(float4_t x)
-    {
-        float4_t result = F4OP1(x, expf);
-        return result;
-    }
-
-    float4_t Float4Class::floor(float4_t x)
-    {
-        float4_t result = F4OP1(x, floorf);
-        return result;
-    }
-
-    float4_t Float4Class::log(float4_t x)
-    {
-        float4_t result = F4OP1(x, logf);
-        return result;
-    }
-
     // FIXME: Probably not right for either NaN nor -0 vs +0
     float4_t Float4Class::min(float4_t x, float4_t y)
     {
@@ -205,23 +152,11 @@ namespace avmplus
         return result;
     }
 
-    float4_t Float4Class::pow(float4_t x, float p)
-    {
-        float4_t result = F4OP1(x, powf, , p);
-        return result;
-    }
-
    // FIXME: Here we allow reduced precision so we almost certainly want to delegate to the
     // native SIMD implementation to get consistent interpreter/JIT behavior.
     float4_t Float4Class::reciprocal(float4_t x)
     {
         float4_t result = F4OP1(x, 1.0f/);
-        return result;
-    }
-
-    float4_t Float4Class::round(float4_t x)
-    {
-        float4_t result = F4OP1(x, floorf, +0.5f);
         return result;
     }
 
@@ -231,21 +166,9 @@ namespace avmplus
         return result;
     }
 
-    float4_t Float4Class::sin(float4_t x)
-    {
-        float4_t result = F4OP1(x, sinf);
-        return result;
-    }
-
     float4_t Float4Class::sqrt(float4_t x)
     {
         float4_t result = F4OP1(x, sqrtf);
-        return result;
-    }
-
-    float4_t Float4Class::tan(float4_t x)
-    {
-        float4_t result = F4OP1(x, tanf);
         return result;
     }
 

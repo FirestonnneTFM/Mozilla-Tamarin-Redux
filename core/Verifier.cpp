@@ -1293,7 +1293,7 @@ namespace avmplus
                 if(pool->hasFloatSupport())
                 {
                     Traits* vt = v.traits;
-                    if(!vt || !vt->isNumeric() )
+                    if(!vt || !vt->isNumeric())
                     {
                         emitCoerceToNumeric(imm30);
                         retType = OBJECT_TYPE;
@@ -1682,7 +1682,7 @@ namespace avmplus
                 checkStack(1,1);
                 FrameValue &v = state->value(sp);
                 Traits *type = v.traits;
-                if( !type || !type->isNumeric() )
+                if(!type || !type->isNumeric())
                     emitCoerceToNumeric(sp);
                 else if(type != FLOAT_TYPE && type != FLOAT4_TYPE)
                     emitCoerce(NUMBER_TYPE, sp);
@@ -2340,7 +2340,7 @@ namespace avmplus
                             type = FLOAT_TYPE;
                         else if(lhst == FLOAT4_TYPE || rhst == FLOAT4_TYPE)
                             type = FLOAT4_TYPE;
-                        else if( (lhst && lhst->isNumberType()) || (rhst && rhst->isNumberType()) )
+                        else if((lhst && lhst->isNumberType()) || (rhst && rhst->isNumberType()))
                             type = NUMBER_TYPE;
                         else
                         {
@@ -2366,10 +2366,12 @@ namespace avmplus
                 Traits* retType = NUMBER_TYPE;
                 bool already_coerced = false;
 #ifdef VMCFG_FLOAT
-                if(pool->hasFloatSupport()){
+                if(pool->hasFloatSupport())
+                {
                     FrameValue& v = state->peek(1);
                     Traits* vt = v.traits;
-                    if( !vt || !vt->isNumeric() ){
+                    if(!vt || !vt->isNumeric())
+                    {
                         emitCoerceToNumeric(sp);
                         retType = OBJECT_TYPE;
                     }
@@ -2396,7 +2398,7 @@ namespace avmplus
                 {
                     FrameValue& v = state->peek(1);
                     Traits* vt = v.traits;
-                    if(!vt || !vt->isNumeric() )
+                    if(!vt || !vt->isNumeric())
                     {
                         emitCoerceToNumeric(sp);
                         retType = OBJECT_TYPE;
