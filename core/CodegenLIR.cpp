@@ -6996,7 +6996,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     return binaryIns(ucmp, lhs, rhs);
             #endif
             }
-            if(!strictOperation || lht->isNumberType() || rht->isNumberType() ){
+            if(!strictOperation && (lht->isNumberType() || rht->isNumberType()) ){
                 /* NOTE: this assumes that comparisons between two floats, performed as doubles, work just as well */
                 /* but for float vs. number, we can't do strict equality tests, this way, since the types are assumed to be different */
                 LIns* lhs = promoteNumberIns(lht, lhsi);
