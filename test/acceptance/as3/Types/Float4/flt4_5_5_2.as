@@ -47,6 +47,7 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 var pi_float4:Object = new float4(3.14f);
+var pi_float:Object = new float(3.14f);
 var three:float4 = float4(3f);
 var minus_three:float4 = float4(-3f);
 var zero:float4 = float4(0f);
@@ -62,7 +63,7 @@ AddErrorTest("AS: TypeError if datatype is not Class", TYPEERROR, function(){ re
 
 AddStrictTestCase("float4(3.14f) as float4", float4(3.14), pi_float4 as float4);
 AddStrictTestCase("float4(3.14f) as Number", null, pi_float4 as Number);
-AddStrictTestCase("float(2.1f) as Object", float4(2.1), float4(2.1) as Object);
+AddStrictTestCase("float4(2.1f) as Object", float4(2.1), float4(2.1) as Object);
 AddTestCase("float4(3.14f) as int", null, pi_float4 as int);
 AddStrictTestCase("float4(3f) as int", null, three as int);
 AddTestCase("float4(-3f) as int", null, minus_three as int);
@@ -73,17 +74,8 @@ AddTestCase("float4(0f) as String", null, zero as String);
 AddTestCase("float4(0f) as Boolean", null, zero as Boolean);
 AddTestCase("float4(0f) as Error", null, zero as Error);
 AddTestCase("Number.NaN as float4", null, Number.NaN as float4);
-
-AddTestCase("float4.MIN_VALUE as float4", float4.MIN_VALUE, float4.MIN_VALUE as float4);
-AddTestCase("float4.MAX_VALUE as float4", float4.MAX_VALUE, float4.MAX_VALUE as float4);
-AddTestCase("float4.POSITIVE_INFINITY as float4", float4.POSITIVE_INFINITY, float4.POSITIVE_INFINITY as float4);
-AddTestCase("float4.NEGATIVE_INFINITY as float4", float4.NEGATIVE_INFINITY, float4.NEGATIVE_INFINITY as float4);
-AddTestCase("float4.NaN as float4", float4.NaN, float4.NaN as float4);
-
-AddStrictTestCase("Number(float4.MAX_VALUE) as float4", null, (new Number(float4.MAX_VALUE)) as float4);
-AddStrictTestCase("Number(float4.MIN_VALUE) as float4", null, (new Number(float4.MIN_VALUE)) as float4);
-
-AddStrictTestCase("float4(Number.MAX_VALUE) as float4 is float4(Infinity)", float4(Infinity), (new float4(Number.MAX_VALUE)) as float4);
+AddTestCase("float(3.14f) as float4", null, float(3.14f) as float4);
+AddTestCase("float var as float4", null, pi_float as float4);
 
 AddStrictTestCase("2.01 as float4 (null)", null, 2.01 as float4);
 
