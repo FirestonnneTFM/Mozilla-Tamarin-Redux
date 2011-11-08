@@ -80,6 +80,8 @@ public:
     uint32_t addInt(int32_t i);
     uint32_t addUInt(uint32_t u);
     uint32_t addDouble(double d);
+    uint32_t addFloat(float f);
+    uint32_t addFloat4(float4_t f);
     uint32_t addString(Str* s);
     uint32_t addString(const char* s);
     uint32_t addNamespace(uint8_t kind, uint32_t ns);
@@ -117,6 +119,8 @@ private:
     uint32_t intCount;
     uint32_t uintCount;
     uint32_t doubleCount;
+    uint32_t floatCount;
+    uint32_t float4Count;
     uint32_t stringCount;
     uint32_t namespaceCount;
     uint32_t nssetCount;
@@ -131,6 +135,8 @@ private:
     ByteBuffer intBuf;
     ByteBuffer uintBuf;
     ByteBuffer doubleBuf;
+    ByteBuffer floatBuf;
+    ByteBuffer float4Buf;
     ByteBuffer stringBuf;
     ByteBuffer namespaceBuf;
     ByteBuffer nssetBuf;

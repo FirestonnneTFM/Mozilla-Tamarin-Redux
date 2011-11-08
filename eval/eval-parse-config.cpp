@@ -146,6 +146,7 @@ namespace avmplus
                 case TAG_literalUInt:
                 case TAG_literalInt:
                 case TAG_literalDouble:
+                case TAG_literalFloat:
                 case TAG_literalBoolean:
                     return e;
                 case TAG_simpleName: {
@@ -294,6 +295,7 @@ namespace avmplus
                                 case TAG_literalUInt:
                                 case TAG_literalInt:
                                 case TAG_literalDouble:    return boxString("number");
+                                case TAG_literalFloat:     return boxString("number");
                                 case TAG_literalBoolean:   return boxString("boolean");
                                 default:
                                     failNonConstant(opd);
@@ -338,6 +340,7 @@ namespace avmplus
         }
         
         Expr* Parser::boxDouble(double n)      { return ALLOC(LiteralDouble, (n, 0)); }
+        Expr* Parser::boxFloat(float n)        { return ALLOC(LiteralFloat, (n, 0)); }
         Expr* Parser::boxUInt(uint32_t n)      { return ALLOC(LiteralUInt, (n, 0)); }
         Expr* Parser::boxInt(int32_t n)        { return ALLOC(LiteralInt, (n, 0)); }
         Expr* Parser::boxBoolean(bool b)       { return ALLOC(LiteralBoolean, (b, 0)); }
@@ -379,6 +382,7 @@ namespace avmplus
                 case TAG_literalNull:      return 0.0;
                 case TAG_literalBoolean:   return ((LiteralBoolean*)e)->value ? 1.0 : 0.0;
                 case TAG_literalDouble:    return ((LiteralDouble*)e)->value;
+                case TAG_literalFloat:     return ((LiteralFloat*)e)->value;        // FIXME?
                 case TAG_literalInt:       return (double)(((LiteralInt*)e)->value);
                 case TAG_literalUInt:      return (double)(((LiteralUInt*)e)->value);
                 case TAG_literalString:    return strToDouble(((LiteralString*)e)->value);
@@ -395,6 +399,7 @@ namespace avmplus
                 case TAG_literalNull:      return false;
                 case TAG_literalBoolean:   return ((LiteralBoolean*)e)->value;
                 case TAG_literalDouble:    { double v = ((LiteralDouble*)e)->value; return !MathUtils::isNaN(v) && v != 0.0; }
+                case TAG_literalFloat:     { double v = ((LiteralFloat*)e)->value; return !MathUtils::isNaN(v) && v != 0.0; }
                 case TAG_literalInt:       return ((LiteralInt*)e)->value != 0;
                 case TAG_literalUInt:      return ((LiteralUInt*)e)->value != 0;
                 case TAG_literalString:    return ((LiteralString*)e)->value->length > 0;
@@ -411,6 +416,7 @@ namespace avmplus
                 case TAG_literalNull:      return compiler->intern("null");
                 case TAG_literalBoolean:   return ((LiteralBoolean*)e)->value ? compiler->intern("true") : compiler->intern("false");
                 case TAG_literalDouble:    return doubleToStr(((LiteralDouble*)e)->value);
+                case TAG_literalFloat:     return doubleToStr(((LiteralFloat*)e)->value);
                 case TAG_literalInt:       return doubleToStr(((LiteralInt*)e)->value);
                 case TAG_literalUInt:      return doubleToStr(((LiteralUInt*)e)->value);
                 case TAG_literalString:    return ((LiteralString*)e)->value;

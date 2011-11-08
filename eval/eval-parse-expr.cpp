@@ -161,6 +161,10 @@ namespace avmplus
                     name = doubleToStr(doubleValue());
                     break;
                     
+                case T_FloatLiteral:
+                    name = doubleToStr((double)floatValue());
+                    break;
+                    
                 case T_Identifier: {
                     if (hd2() != T_DoubleColon) {
                         name = identValue();
@@ -306,6 +310,12 @@ namespace avmplus
                     return ALLOC(LiteralDouble, (d, pos));
                 }
 
+                case T_FloatLiteral: {
+                    float f = floatValue();
+                    next();
+                    return ALLOC(LiteralFloat, (f, pos));
+                }
+                    
                 case T_StringLiteral: {
                     Str* s = stringValue();
                     next();
