@@ -71,6 +71,8 @@ uint8_t* emitU30(uint8_t* out, uint32_t val);
 uint8_t* emitS32(uint8_t* out, int32_t val);
 uint8_t* emitS24(uint8_t* out, int32_t val);
 uint8_t* emitDouble(uint8_t* out, double d);
+uint8_t* emitFloat(uint8_t* out, float f);
+uint8_t* emitFloat4(uint8_t* out, float4_t f4);
 uint8_t* emitUtf8(uint8_t* out, Str* s);
 
 int32_t readS24(uint8_t* in);
@@ -200,6 +202,8 @@ public:
     void emitS32(int32_t val);
     void emitS24(int32_t val);
     void emitDouble(double d);
+    void emitFloat(float f);
+    void emitFloat4(float4_t f);
     void emitUtf8(uint32_t nbytes, Str* s);
     
 private:

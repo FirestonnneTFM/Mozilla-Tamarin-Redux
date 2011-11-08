@@ -84,16 +84,23 @@ namespace avmplus
         ABCChunk::~ABCChunk()
         {
         }
-        
+
         ABCFile::ABCFile(Compiler* compiler)
+#ifdef VMCFG_FLOAT
+            : major_version(47)
+            , minor_version(16)
+#else
             : major_version(46)
             , minor_version(16)
+#endif
             , NO_VALUE(~0U)
             , compiler(compiler)
             , allocator(compiler->allocator)
             , intCount(1)       // entry 0 not present
             , uintCount(1)      // entry 0 not present
             , doubleCount(1)    // entry 0 not present
+            , floatCount(1)     // entry 0 not present
+            , float4Count(1)    // entry 0 not present
             , stringCount(1)    // entry 0 not present
             , namespaceCount(1) // entry 0 not present
             , nssetCount(1)     // entry 0 not present
@@ -107,6 +114,8 @@ namespace avmplus
             , intBuf(allocator, 16)
             , uintBuf(allocator, 16)
             , doubleBuf(allocator, 32)
+            , floatBuf(allocator, 32)
+            , float4Buf(allocator, 32)
             , stringBuf(allocator)
             , namespaceBuf(allocator, 16)
             , nssetBuf(allocator, 16)
@@ -122,25 +131,37 @@ namespace avmplus
             , bodies(allocator)
         {
         }
-        
+
         uint32_t ABCFile::addInt(int32_t i)
         {
             intBuf.emitS32(i);
             return intCount++;
         }
-        
+
         uint32_t ABCFile::addUInt(uint32_t u)
         {
             uintBuf.emitU32(u);
             return uintCount++;
         }
-        
+
         uint32_t ABCFile::addDouble(double d)
         {
             doubleBuf.emitDouble(d);
             return doubleCount++;
         }
-        
+
+        uint32_t ABCFile::addFloat(float f)
+        {
+            floatBuf.emitFloat(f);
+            return floatCount++;
+        }
+
+        uint32_t ABCFile::addFloat4(float4_t f4)
+        {
+            float4Buf.emitFloat4(f4);
+            return float4Count++;
+        }
+
         uint32_t ABCFile::addString(Str* s)
         {
             if (s->ident == ~0U) {
@@ -151,7 +172,7 @@ namespace avmplus
             }
             return s->ident;
         }
-        
+
         uint32_t ABCFile::addString(const char* s)
         {
             return addString(compiler->intern(s));
@@ -175,7 +196,7 @@ namespace avmplus
             uint32_t length = 0;
             uint32_t i, j;
             Seq<uint32_t>* tmp;
-            
+
             for ( tmp=nss ; tmp != NULL ; tmp=tmp->tl)
                 length++;
 
@@ -196,7 +217,7 @@ namespace avmplus
                 info->ns[j] = tmp->hd;
                 nssetBuf.emitU30(tmp->hd);
             }
-            
+
             return nssetCount++;
         }
 
@@ -204,7 +225,7 @@ namespace avmplus
         {
             Seq<ABCMultinameInfo*>* mns;
             uint32_t i;
-            
+
             for ( mns = multinames.get(), i=1 ; mns != NULL ; mns = mns->tl, i++ )
                 if (mns->hd->kind == kind && mns->hd->ns_or_nsset == ns_or_nsset && mns->hd->name == name)
                     return i;
@@ -216,22 +237,22 @@ namespace avmplus
                     multinameBuf.emitU30(ns_or_nsset);
                     multinameBuf.emitU30(name);
                     break;
-                    
+
                 case CONSTANT_RTQnameA:
                 case CONSTANT_RTQname:
                     multinameBuf.emitU30(name);
                     break;
-                    
+
                 case CONSTANT_RTQnameLA:
                 case CONSTANT_RTQnameL:
                     break;
-                    
+
                 case CONSTANT_MultinameA:
                 case CONSTANT_Multiname:
                     multinameBuf.emitU30(name);
                     multinameBuf.emitU30(ns_or_nsset);
                     break;
-                    
+
                 case CONSTANT_MultinameLA:
                 case CONSTANT_MultinameL:
                     multinameBuf.emitU30(ns_or_nsset);
@@ -254,7 +275,7 @@ namespace avmplus
         ABCMultinameInfo* ABCFile::getMultiname(uint32_t index)
         {
             Seq<ABCMultinameInfo*>* mns;
-            
+
             for ( mns = multinames.get() ; index > 1 ; mns = mns->tl, index-- )
                 ;
             return mns->hd;
@@ -272,7 +293,7 @@ namespace avmplus
                     return false;
             }
         }
-        
+
         bool ABCFile::hasRTName(uint32_t index)
         {
             switch (getMultiname(index)->kind) {
@@ -291,7 +312,7 @@ namespace avmplus
             AvmAssert(scriptCount != 0);
             AvmAssert(methodCount != 0);
             AvmAssert(classCount == instanceCount);
-            
+
             uint32_t method_size = computeSize(methods.get());
             uint32_t metadata_size = computeSize(metadatas.get());
             uint32_t instance_size = computeSize(instances.get());
@@ -303,6 +324,10 @@ namespace avmplus
                              lenU30(intCount) + intBuf.size() +
                              lenU30(uintCount) + uintBuf.size() +
                              lenU30(doubleCount) + doubleBuf.size() +
+#ifdef VMCFG_FLOAT
+                             lenU30(floatCount) + floatBuf.size() +
+                             lenU30(float4Count) + float4Buf.size() +
+#endif
                              lenU30(stringCount) + stringBuf.size() +
                              lenU30(namespaceCount) + namespaceBuf.size() +
                              lenU30(nssetCount) + nssetBuf.size() +
@@ -320,13 +345,19 @@ namespace avmplus
             DEBUG_ONLY( uint8_t* b0 = b; )
             b = emitU16(b, minor_version);
             b = emitU16(b, major_version);
-                
+
             b = emitU30(b, intCount);
             b = emitBytes(b, &intBuf);
             b = emitU30(b, uintCount);
             b = emitBytes(b, &uintBuf);
             b = emitU30(b, doubleCount);
             b = emitBytes(b, &doubleBuf);
+#ifdef VMCFG_FLOAT
+            b = emitU30(b, floatCount);
+            b = emitBytes(b, &floatBuf);
+            b = emitU30(b, float4Count);
+            b = emitBytes(b, &float4Buf);
+#endif
             b = emitU30(b, stringCount);
             b = emitBytes(b, &stringBuf);
             b = emitU30(b, namespaceCount);
@@ -362,7 +393,7 @@ namespace avmplus
             reported_size = lenU30(traitsCount) + computeSize(traits.get());
             return reported_size;
         }
-        
+
         uint8_t* ABCTraitsTable::serialize(uint8_t* b)
         {
             DEBUG_ONLY( uint8_t* b0 = b; )
@@ -371,7 +402,7 @@ namespace avmplus
             AvmAssert( b == b0 + reported_size );
             return b;
         }
-        
+
         uint32_t ABCTrait::size()
         {
             // no provision for metadata
@@ -380,7 +411,7 @@ namespace avmplus
                              dataSize());
             return reported_size;
         }
-        
+
         uint8_t *ABCTrait::serialize(uint8_t* b)
         {
             DEBUG_ONLY( uint8_t* b0 = b; )
@@ -391,7 +422,7 @@ namespace avmplus
             AvmAssert( b == b0 + reported_size );
             return b;
         }
-        
+
         uint32_t ABCSlotTrait::dataSize()
         {
             uint32_t slot_id = 0, vindex = 0;
@@ -400,7 +431,7 @@ namespace avmplus
                     lenU30(vindex) +
                     (vindex != 0 ? 1 : 0));
         }
-        
+
         uint8_t* ABCSlotTrait::serializeData(uint8_t *b)
         {
             uint32_t slot_id = 0, vindex = 0, vkind = 0;
@@ -411,13 +442,13 @@ namespace avmplus
                 *b++ = (uint8_t)vkind;
             return b;
         }
-        
+
         uint32_t ABCMethodTrait::dataSize()
         {
             uint32_t disp_id = 0;
             return (lenU30(disp_id) + lenU30(method_info));
         }
-        
+
         uint8_t* ABCMethodTrait::serializeData(uint8_t* b)
         {
             uint32_t disp_id = 0;
@@ -444,13 +475,13 @@ namespace avmplus
             , traits(traits)
         {
         }
-        
+
         uint32_t ABCScriptInfo::size()
         {
             reported_size = (lenU30(init_method->index) + traits->size());
             return reported_size;
         }
-        
+
         uint8_t *ABCScriptInfo::serialize(uint8_t* b)
         {
             DEBUG_ONLY( uint8_t* b0 = b; )
@@ -469,7 +500,7 @@ namespace avmplus
         {
             compiler->abc.addMethodBody(this);
         }
-    
+
         uint32_t ABCMethodBodyInfo::size()
         {
             if (is_empty)
@@ -486,7 +517,7 @@ namespace avmplus
                                  (traits ? traits->size() : lenU30(0)));
             return reported_size;
         }
-        
+
         uint8_t* ABCMethodBodyInfo::serialize(uint8_t* b)
         {
             DEBUG_ONLY( uint8_t* b0 = b; )
@@ -504,7 +535,7 @@ namespace avmplus
             AvmAssert( b == b0 + reported_size );
             return b;
         }
-        
+
         ABCMethodInfo::ABCMethodInfo(Compiler* compiler,
                                      uint32_t name,
                                      uint32_t param_count,
@@ -543,7 +574,7 @@ namespace avmplus
                              0 /* param_names */);
             return reported_size;
         }
-        
+
         uint8_t* ABCMethodInfo::serialize(uint8_t* b)
         {
             DEBUG_ONLY( uint8_t* b0 = b; )
@@ -568,7 +599,7 @@ namespace avmplus
             AvmAssert( b == b0 + reported_size );
             return b;
         }
-        
+
         ABCExceptionTable::ABCExceptionTable(Compiler* compiler)
             : exceptionCount(0)
             , exceptions(compiler->allocator)
@@ -582,7 +613,7 @@ namespace avmplus
                 reported_size += exceptions->hd->size();
             return reported_size;
         }
-        
+
         uint8_t* ABCExceptionTable::serialize(uint8_t* b)
         {
             DEBUG_ONLY( uint8_t* b0 = b; )
@@ -601,7 +632,7 @@ namespace avmplus
             , var_name(var_name)
         {
         }
-        
+
         uint32_t ABCExceptionInfo::size()
         {
             reported_size = (lenU30(from) +
@@ -611,7 +642,7 @@ namespace avmplus
                              lenU30(var_name));
             return reported_size;
         }
-        
+
         uint8_t* ABCExceptionInfo::serialize(uint8_t* b)
         {
             DEBUG_ONLY( uint8_t* b0 = b; )

@@ -420,6 +420,7 @@ enum Tag {
     TAG_literalInt,
     TAG_literalUInt,
     TAG_literalDouble,
+    TAG_literalFloat,
     TAG_literalRegExp,
     TAG_literalFunction,
     TAG_commonNamespace,
@@ -620,6 +621,14 @@ public:
     virtual void cogen(Cogen* cogen, Ctx* ctx);
     virtual Tag tag() const { return TAG_literalDouble; }
     const double value;
+};
+
+class LiteralFloat : public Expr {
+public:
+    LiteralFloat(float value, uint32_t pos) : Expr(pos), value(value) {}
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
+    virtual Tag tag() const { return TAG_literalFloat; }
+    const float value;
 };
 
 class LiteralBoolean : public Expr {
@@ -1379,6 +1388,7 @@ private:
     // Utilities used by constant evaluator, pretty general but not used elsewhere.
 
     Expr* boxDouble(double n);
+    Expr* boxFloat(float n);
     Expr* boxUInt(uint32_t n);
     Expr* boxInt(int32_t n);
     Expr* boxBoolean(bool b);
@@ -1434,6 +1444,7 @@ private:
     int32_t intValue();
     uint32_t uintValue();
     double doubleValue();
+    float floatValue();
     
     // Mapping from subset of tokens to attributes and operator values
     static const struct TokenMapping {

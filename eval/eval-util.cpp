@@ -392,6 +392,45 @@ namespace avmplus
             return out + 8;
         }
         
+        uint8_t* emitFloat(uint8_t* out, float f)
+        {
+            float_overlay v(f);
+            out[0] = uint8_t(v.word);
+            out[1] = uint8_t(v.word >> 8);
+            out[2] = uint8_t(v.word >> 16);
+            out[3] = uint8_t(v.word >> 24);
+            return out + 4;
+        }
+        
+        uint8_t* emitFloat4(uint8_t* out, float4_t f4)
+        {
+            float_overlay x(f4_x(f4));
+            out[0] = uint8_t(x.word);
+            out[1] = uint8_t(x.word >> 8);
+            out[2] = uint8_t(x.word >> 16);
+            out[3] = uint8_t(x.word >> 24);
+
+            float_overlay y(f4_y(f4));
+            out[0] = uint8_t(y.word);
+            out[1] = uint8_t(y.word >> 8);
+            out[2] = uint8_t(y.word >> 16);
+            out[3] = uint8_t(y.word >> 24);
+            
+            float_overlay z(f4_z(f4));
+            out[0] = uint8_t(z.word);
+            out[1] = uint8_t(z.word >> 8);
+            out[2] = uint8_t(z.word >> 16);
+            out[3] = uint8_t(z.word >> 24);
+            
+            float_overlay w(f4_z(f4));
+            out[0] = uint8_t(w.word);
+            out[1] = uint8_t(w.word >> 8);
+            out[2] = uint8_t(w.word >> 16);
+            out[3] = uint8_t(w.word >> 24);
+            
+            return out + 16;
+        }
+        
         uint8_t* emitS24(uint8_t* out, int32_t s)
         {
             *out++ = (s & 255);

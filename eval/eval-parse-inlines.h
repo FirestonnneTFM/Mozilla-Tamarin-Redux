@@ -97,6 +97,12 @@ inline double Parser::doubleValue()
     return V0.d;
 }
 
+inline float Parser::floatValue() 
+{
+    AvmAssert(T0 == T_FloatLiteral);
+    return V0.f;
+}
+
 inline bool Parser::isOpAssign(Token t)
 {
     return t < T_OPERATOR_SENTINEL && tokenMapping[t].isOpAssign;

@@ -184,6 +184,7 @@ enum Token {
     T_IntLiteral,
     T_UIntLiteral,
     T_DoubleLiteral,
+    T_FloatLiteral,
     T_RegexpLiteral,
     T_StringLiteral,
     T_XmlCDATA,                 //  "<![CDATA[...]]>"  (including the punctuation, ditto for the three following tokens)
@@ -210,6 +211,7 @@ enum Token {
 
 union TokenValue {
     double    d;                // T_DoubleLiteral
+    float     f;                // T_FloatLiteral
     int32_t   i;                // T_IntLiteral
     uint32_t  u;                // T_UintLiteral
     Str      *s;                // T_StringLiteral, T_RegexpLiteral, T_Identifier
@@ -372,7 +374,7 @@ private:
     Token numberLiteral();
     Token integerLiteral(int base);
     Token floatingLiteral();
-    void checkNextCharForNumber();
+    bool checkNextCharForNumber(bool allowFloat);
     bool numberLiteralPrime();
     void numberFraction(bool has_leading_digits);
     void numberExponent();
@@ -381,6 +383,7 @@ private:
     bool hexDigits(int k);
     bool digits(int k, int mask);
     double parseDouble();
+    float parseFloat();
     double parseInt(int base);
     
     bool notPartOfIdent(int c);

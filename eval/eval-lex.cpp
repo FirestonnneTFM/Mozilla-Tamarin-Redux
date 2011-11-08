@@ -53,7 +53,7 @@ namespace avmplus
 #define LTR CHAR_ATTR_LETTER
 #define DLR CHAR_ATTR_DOLLAR
 #define UBR CHAR_ATTR_UNDERBAR
-        
+
         const uint8_t Lexer::char_attrs[128] = {
         /*   0 -  15 */   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
         /*  16 -  31 */   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -64,7 +64,7 @@ namespace avmplus
         /*  96 - 111 */   0, HEX, HEX, HEX, HEX, HEX, HEX, LTR, LTR, LTR, LTR, LTR, LTR, LTR, LTR, LTR,
         /* 112 - 127 */ LTR, LTR, LTR, LTR, LTR, LTR, LTR, LTR, LTR, LTR, LTR,   0,   0,   0,   0,   0
         };
-        
+
 #undef OCT
 #undef DEC
 #undef HEX
@@ -91,7 +91,7 @@ namespace avmplus
         {
             AvmAssert(*limit == 0);
         }
-        
+
         /* Read slash-delimited string plus following flags; return as one string.
          * The initial '/' has been consumed.
          *
@@ -169,18 +169,18 @@ namespace avmplus
             }
         end_loop:
             s.append('/');
-            
+
             // Flags
             while (isUnicodeIdentifierPart(c = *idx)) {
                 idx++;
                 s.append(c);
             }
-            
+
             val.s = s.str();
             DEBUG_ONLY(last_token = T_RegexpLiteral);
             return T_RegexpLiteral;
         }
-        
+
         Token Lexer::divideOperatorImpl()
         {
             AvmAssert(last_token == T_BreakSlash);
@@ -188,12 +188,12 @@ namespace avmplus
                 case '=':
                     idx++;
                     return T_DivideAssign;
-                    
+
                 default :
                     return T_Divide;
             }
         }
-        
+
         Token Lexer::rightAngleImpl()
         {
             AvmAssert(last_token == T_BreakRightAngle);
@@ -213,14 +213,14 @@ namespace avmplus
                 case '=':
                     idx++;
                     return T_GreaterThanOrEqual;
-                    
+
                 case '>':
                     idx++;
                     switch (*idx) {
                         case '=':
                             idx++;
                             return T_RightShiftAssign;
-                            
+
                         case '>':
                             idx++;
                             if (*idx == '=') {
@@ -228,11 +228,11 @@ namespace avmplus
                                 return T_UnsignedRightShiftAssign;
                             }
                             return T_UnsignedRightShift;
-                            
+
                         default:
                             return T_RightShift;
                     }
-                    
+
                 default:
                     return T_GreaterThan;
             }
@@ -245,7 +245,7 @@ namespace avmplus
                 case '=':
                     idx++;
                     return T_LessThanOrEqual;
-                    
+
                 case '<':
                     idx++;
                     if (*idx == '=') {
@@ -253,12 +253,12 @@ namespace avmplus
                         return T_LeftShiftAssign;
                     }
                     return T_LeftShift;
-                    
+
                 default:
                     return T_LessThan;
             }
         }
-        
+
         /* Get the next token.
          *
          * How end-of-input is detected without checking explicitly: We
@@ -281,53 +281,53 @@ namespace avmplus
                             return compiler->parser.onEOS(&lineno, &val);
                         }
                         compiler->syntaxError(lineno, SYNTAXERR_ILLEGALCHAR_NUL);
-                        
+
                     case '\n' :
                         lineno++;
                         continue;
-                        
+
                     case '\r' :
                         if (*idx == '\n')
                             idx++;
                         lineno++;
                         continue;
-                        
+
                     case ' ' :
                     case '\t' :
                     case '\v' :
                     case '\f' :
                         continue;
-                        
+
                     case '(':
                         return T_LeftParen;
-                        
+
                     case ')':
                         return T_RightParen;
-                        
+
                     case ',':
                         return T_Comma;
-                        
+
                     case ';':
                         return T_Semicolon;
-                        
+
                     case '?':
                         return T_Question;
-                        
+
                     case '[':
                         return T_LeftBracket;
-                        
+
                     case ']':
                         return T_RightBracket;
-                        
+
                     case '{':
                         return T_LeftBrace;
-                        
+
                     case '}':
                         return T_RightBrace;
-                        
+
                     case '~':
                         return T_BitwiseNot;
-                        
+
                     case '/':
                         switch (*idx) {
                             case '/':
@@ -339,16 +339,16 @@ namespace avmplus
                                 idx++;
                                 blockComment();
                                 continue;
-                                
+
                             default:
                                 DEBUG_ONLY(last_token = T_BreakSlash);
                                 return T_BreakSlash;
                         }
-                        
+
                     case '\'':
                     case '"':
                         return stringLiteral(idx[-1]);
-                        
+
                     case '.':
                         switch (*idx) {
                             case '.':
@@ -358,11 +358,11 @@ namespace avmplus
                                 }
                                 idx++;
                                 return T_DoubleDot;
-                                
+
                             case '<':
                                 idx++;
                                 return T_LeftDotAngle;
-                                
+
                             case '0':
                             case '1':
                             case '2':
@@ -375,25 +375,25 @@ namespace avmplus
                             case '9':
                                 mark = --idx;
                                 return numberLiteral();
-                                
+
                             default:
                                 return T_Dot;
                         }
-                        
+
                     case '-':
                         switch (*idx) {
                             case '-':
                                 idx++;
                                 return T_MinusMinus;
-                                
+
                             case '=':
                                 idx++;
                                 return T_MinusAssign;
-                                
+
                             default:
                                 return T_Minus;
                         }
-                        
+
                     case '!':
                         if (*idx == '=') {
                             idx++;
@@ -404,20 +404,20 @@ namespace avmplus
                             return T_NotEqual;
                         }
                         return T_Not;
-                        
+
                     case '%':
                         if (*idx == '=') {
                             idx++;
                             return T_RemainderAssign;
                         }
                         return T_Remainder;
-                        
+
                     case '&':
                         switch (*idx) {
                             case '=':
                                 idx++;
                                 return T_BitwiseAndAssign;
-                                
+
                             case '&':
                                 idx++;
                                 if (*idx == '=') {
@@ -425,38 +425,38 @@ namespace avmplus
                                     return T_LogicalAndAssign;
                                 }
                                 return T_LogicalAnd;
-                                
+
                             default:
                                 return T_BitwiseAnd;
                         }
-                        
+
                     case '*':
                         if (*idx == '=') {
                             idx++;
                             return T_MultiplyAssign;
                         }
                         return T_Multiply;
-                        
+
                     case ':':
                         if (*idx == ':') {
                             idx++;
                             return T_DoubleColon;
                         }
                         return T_Colon;
-                        
+
                     case '^':
                         if (*idx == '=') {
                             idx++;
                             return T_BitwiseXorAssign;
                         }
                         return T_BitwiseXor;
-                        
+
                     case '|':
                         switch (*idx) {
                             case '=':
                                 idx++;
                                 return T_BitwiseOrAssign;
-                                
+
                             case '|':
                                 idx++;
                                 if (*idx == '=') {
@@ -464,29 +464,29 @@ namespace avmplus
                                     return T_LogicalOrAssign;
                                 }
                                 return T_LogicalOr;
-                                
+
                             default:
                                 return T_BitwiseOr;
                         }
-                        
+
                     case '+':
                         switch (*idx) {
                             case '+':
                                 idx++;
                                 return T_PlusPlus;
-                                
+
                             case '=':
                                 idx++;
                                 return T_PlusAssign;
-                                
+
                             default:
                                 return T_Plus;
                         }
-                      
+
                     case '<':
                         DEBUG_ONLY(last_token = T_BreakLeftAngle);
                         return T_BreakLeftAngle;
-                        
+
                     case '=':
                         if (*idx == '=') {
                             idx++;
@@ -497,17 +497,17 @@ namespace avmplus
                             return T_Equal;
                         }
                         return T_Assign;
-                        
+
                     case '>':
                         DEBUG_ONLY(last_token = T_BreakRightAngle);
                         return T_BreakRightAngle;
-                        
+
                     case '@':
                         return T_AtSign;
-                        
+
                     case '`':
                         return identifier();
-                        
+
                         // Begin generated code
                     case 'a':
                         if (idx[0] == 's' &&
@@ -1076,15 +1076,15 @@ namespace avmplus
                             default:
                                 goto bigswitch_end;
                         }
-                        
+
                         // End generated code
-                        
+
                     case '\\':
                         // In ES3, the only way backslash can appear in the input in
                         // this position is as the first character of an identifier,
                         // represented as a character escape.  So break out.
                         goto bigswitch_end;
-                        
+
                     case '0':
                     case '1':
                     case '2':
@@ -1097,24 +1097,24 @@ namespace avmplus
                     case '9':
                         mark = --idx;
                         return numberLiteral();
-                        
+
                     default: {
-                        
+
                         // Check for Unicode space characters and line
                         // terminators here in order to avoid inhibiting
                         // switch optimization on less-capable compilers.
-                        
+
                         int c = idx[-1];
-                        
+
                         // No-break space.
-                        
+
                         if (c == 0x00A0)
                             continue;
-                        
+
                         // Quick check that saves us from the tedious
                         // testing most of the time, also another hack to
                         // get around poor switch code generation.
-                        
+
                         if (c >= UNICHAR_LOWEST_ODDSPACE) {
                             switch (c) {
                                 case UNICHAR_Zs1:
@@ -1141,14 +1141,14 @@ namespace avmplus
                                     continue;
                             }
                         }
-                        
+
                         goto bigswitch_end;
                     }
                 }
-                
+
             bigswitch_end:
                 // end of bigswitch.
-                
+
                 // Identifiers are handled here (and only here).
                 //
                 // It is never necessary to check whether an
@@ -1159,25 +1159,25 @@ namespace avmplus
                 // notPartOfIdentifier logic works, but since the X is
                 // not an identifier constituent there will be an
                 // immediate syntax error.  That's good enough for me.
-                
+
                 // If the scanner is used to re-check whether an identifier
                 // containing a backslash sequence looks like a keyword then
                 // we can stop here.
-                
+
                 if (keyword_or_ident) {
                     DEBUG_ONLY(last_token = T_Identifier);
                     return T_Identifier;
                 }
-                
+
                 --idx;
                 return identifier();
-                
+
             }
         }
-        
+
         // All number literals start here without having consumed any
         // input.
-        
+
         Token Lexer::numberLiteral()
         {
             switch (*idx) {
@@ -1191,18 +1191,18 @@ namespace avmplus
                             if (!hexDigits(-1))
                                 compiler->syntaxError(lineno, SYNTAXERR_ILLEGAL_NUMBER);
                             return integerLiteral(16);
-                            
+
                         case '.':
                             idx += 2;
                             numberFraction(true);
                             return floatingLiteral();
-                            
+
                         case 'E':
                         case 'e':
                             idx += 2;
                             numberExponent();
                             return floatingLiteral();
-                            
+
                         default: {
                             if (!compiler->octal_literals)
                                 break;
@@ -1223,22 +1223,30 @@ namespace avmplus
                         }
                     }
                     break;
-                    
+
                 case '.':
                     idx++;
                     numberFraction(false);
                     return floatingLiteral();
             }
-            
+
             if (numberLiteralPrime())
                 return floatingLiteral();
             else
                 return integerLiteral(10);
         }
-        
+
         Token Lexer::integerLiteral(int base)
         {
-            checkNextCharForNumber();
+            bool isFloat = checkNextCharForNumber(base == 10);
+            if (isFloat)
+            {
+                val.f = parseFloat();
+                DEBUG_ONLY(last_token = T_FloatLiteral);
+                return T_FloatLiteral;
+            }
+            else
+            {
             double n = parseInt(base);
             if (n >= (-0x7fffffff - 1) && n <= 0x7FFFFFFF) {
                 val.i = (int32_t)n;
@@ -1254,61 +1262,84 @@ namespace avmplus
             DEBUG_ONLY(last_token = T_DoubleLiteral);
             return T_DoubleLiteral;
         }
+        }
 
         Token Lexer::floatingLiteral()
         {
-            checkNextCharForNumber();
+            bool isFloat = checkNextCharForNumber(true);
+            if (isFloat)
+            {
+                val.f = parseFloat();
+                DEBUG_ONLY(last_token = T_FloatLiteral);
+                return T_FloatLiteral;
+            }
+            else
+            {
             val.d = parseDouble();
             DEBUG_ONLY(last_token = T_DoubleLiteral);
             return T_DoubleLiteral;
         }
+        }
 
         // Check that the next character allows a number to end at the current
-        // location.  Note that the identifierStart condition also handles
-        // hexadecimal digits properly.
+        // location, and error out if not.  Note that the identifierStart condition
+        // also handles hexadecimal digits properly.
+        //
+        // If allowFloat is true, then allow a trailing 'f', and if the trailing 'f'
+        // is present then return true.
 
-        void Lexer::checkNextCharForNumber()
+        bool Lexer::checkNextCharForNumber(bool allowFloat)
         {
             int c = *idx;
+            bool isFloat = false;
+#ifdef VMCFG_FLOAT
+            if (allowFloat && (c == 'f' || c == 'F'))
+            {
+                isFloat = true;
+                idx++;
+                c = *idx;
+            }
+#endif
             if ((c >= '0' && c <= '9') || isUnicodeIdentifierStart(c))
                 compiler->syntaxError(lineno, SYNTAXERR_ILLEGALCHAR_POSTNUMBER, c);
+            return isFloat;
         }
-        
+
         // Returns true iff the literal contains a decimal point or an
         // exponent marker, otherwise false.
-        
+
         bool Lexer::numberLiteralPrime()
         {
             if (!decimalDigits(-1))
                 compiler->syntaxError(lineno, SYNTAXERR_ILLEGAL_NUMBER);
-            
+
             switch (*idx) {
                 case '.':
                     idx++;
                     numberFraction (true);
                     return true;
-                    
+
                 case 'e':
                 case 'E':
                     idx++;
                     numberExponent ();
                     return true;
-                    
+
                 default:
                     return false;
             }
         }
-        
+
         // The '.' has been consumed.
         //
         // has_leading_digits should be true if digits have been seen
         // before the '.'.
-        
+
         void Lexer::numberFraction(bool has_leading_digits)
         {
             if (!decimalDigits (-1) && !has_leading_digits)
                 compiler->syntaxError(lineno, SYNTAXERR_ILLEGAL_NUMBER);
-            
+
             switch (*idx) {
                 case 'e':
                 case 'E':
@@ -1317,9 +1348,9 @@ namespace avmplus
                     break;
             }
         }
-        
+
         // The 'e' has been consumed...
-        
+
         void Lexer::numberExponent()
         {
             switch (*idx) {
@@ -1331,7 +1362,7 @@ namespace avmplus
             if (!decimalDigits(-1))
                 compiler->syntaxError(lineno, SYNTAXERR_ILLEGAL_NUMBER);
         }
-        
+
         bool Lexer::digits(int k, int attrmask)
         {
             const wchar* startIndex = idx;
@@ -1342,7 +1373,7 @@ namespace avmplus
             }
             return idx > startIndex && k <= 0;
         }
-        
+
         void Lexer::lineComment()
         {
             for (;;) {
@@ -1357,7 +1388,7 @@ namespace avmplus
                 }
             }
         }
-        
+
         void Lexer::blockComment()
         {
             for (;;) {
@@ -1392,22 +1423,22 @@ namespace avmplus
                 lineno++;
             }
         }
-        
+
         Token Lexer::identifier()
         {
             // The common case here is that an identifier is a sequence of simple ASCII
             // characters, followed by a non-identifier-constituent ASCII character.  We
             // optimize for this.
-            
+
             int c;
             const wchar* start = idx;
-            
+
             if ((c = *idx) < 128 && (char_attrs[c] & CHAR_ATTR_INITIAL) != 0) {
                 idx++;
                 while ((c = *idx) < 128 && (char_attrs[c] & CHAR_ATTR_SUBSEQUENT) != 0)
                     idx++;
             }
-            
+
             if (notPartOfIdent(c) && c != '\\') {
                 if (idx == start)
                     compiler->syntaxError(lineno, SYNTAXERR_ILLEGALCHAR, *idx);
@@ -1415,11 +1446,11 @@ namespace avmplus
                 DEBUG_ONLY(last_token = T_Identifier);
                 return T_Identifier;
             }
-            
+
             // Slow case.
             //
             // If at first we fail then try and try again...
-            
+
             StringBuilder s(compiler);
             bool has_backslashes = false;
             for (;;) {
@@ -1442,7 +1473,7 @@ namespace avmplus
                 }
                 s.append(c);
             }
-            
+
             if (has_backslashes && !compiler->liberal_idents) {
                 // The ES3 spec requires that identifiers constructed
                 // with escape sequences must be checked after the
@@ -1461,7 +1492,7 @@ namespace avmplus
                     compiler->syntaxError(lineno, SYNTAXERR_IDENT_IS_KWD);
                 AvmAssert(subscan.lex(&l, &v) == T_EOS);
             }
-            
+
             if (s.length() == 0)
                 compiler->syntaxError(lineno, SYNTAXERR_ILLEGALCHAR, *idx);
 
@@ -1469,24 +1500,24 @@ namespace avmplus
             DEBUG_ONLY(last_token = T_Identifier);
             return T_Identifier;
         }
-        
+
         Token Lexer::stringLiteral(int delimiter)
         {
             StringBuilder s(compiler);
             int c;
-            
+
             // The common case here is that the string contains unproblematic ASCII characters.
             //
             // OPTIMIZEME: for the common case we should not need to accumulate data in a StringBuilder,
             // we should be able to go straight to a Str, as for the identifier case.  (Probably
             // less critical here though.)
-            
+
             for (;;) {
                 const wchar* start = idx;
-                
+
                 // OPTIMIZEME: too many conditions in this test now.  Should bias for ASCII
                 // and use table lookup to test for delimiters, NUL, and line endings.
-                
+
                 while ((c = *idx) != delimiter &&
                        c != '\\' &&
                        c != 0 &&
@@ -1497,7 +1528,7 @@ namespace avmplus
                        c != UNICHAR_BOM)
                     idx++;
                 s.append(start, idx);
-                
+
                 switch (*idx) {
                     case '\'':
                     case '"':
@@ -1511,7 +1542,7 @@ namespace avmplus
 
                     case '\\':
                         idx++;
-                        
+
                         switch (*idx) {
                             case '\r':
                                 idx++;
@@ -1519,24 +1550,24 @@ namespace avmplus
                                     idx++;
                                 lineno++;
                                 continue;
-                                
+
                             case UNICHAR_LS:
                             case UNICHAR_PS:
                             case '\n':
                                 idx++;
                                 lineno++;
                                 continue;
-                                
+
                             default:
                                 s.append(escapeSequence());
                                 continue;
                         }
-                        
+
                     case UNICHAR_BOM:
                         s.append(' ');
                         idx++;
                         continue;
-                        
+
                     case 0:
                         if (idx < limit) {
                             s.append(0);
@@ -1545,11 +1576,11 @@ namespace avmplus
                         }
                         break;  // syntax error
                 }
-                
+
                 compiler->syntaxError(lineno, SYNTAXERR_UNTERMINATED_STRING);
             }
         }
-        
+
         int Lexer::escapeSequence()
         {
             switch (*idx) {
@@ -1562,7 +1593,7 @@ namespace avmplus
                 case  '6':
                 case  '7':
                     return octalOrNulEscape ();
-                    
+
                 case 'x':
                     idx++;
                     // Note, handle \x<whatever> as "x" followed by <whatever> when <whatever> is not two hex digits
@@ -1573,7 +1604,7 @@ namespace avmplus
                     }
                     idx = mark;
                     return 'x';
-                    
+
                 case 'u':
                     idx++;
                     // Note, handle \u<whatever> as "u" followed by <whatever> when <whatever> is not two four digits
@@ -1588,55 +1619,55 @@ namespace avmplus
                 case 'b':
                     idx++;
                     return '\b';
-                    
+
                 case 'f':
                     idx++;
                     return '\f';
-                    
+
                 case 'n':
                     idx++;
                     return '\n';
-                    
+
                 case 'r':
                     idx++;
                     return '\r';
-                    
+
                 case 't':
                     idx++;
                     return '\t';
-                    
+
                 case 'v':
                     idx++;
                     return '\v';
-                    
+
                 case  '\'':
                 case  '"':
                 case  '\\':
                     return *idx++;
-                    
+
                 case 0:
                     if (idx+1 >= limit)
                         compiler->syntaxError(lineno, SYNTAXERR_EOI_IN_ESC);
                     idx++;
                     return 0;
-                    
+
                 case     '\n':
                 case     '\r':
                 case UNICHAR_LS:
                 case UNICHAR_PS:
                     compiler->syntaxError(lineno, SYNTAXERR_EOL_IN_ESC);
-                    
+
                 default:
                     return *idx++;
             }
         }
-        
+
         int Lexer::octalOrNulEscape()
         {
             int c;
             if ((c = *idx) >= 128 || (char_attrs[c] & CHAR_ATTR_OCTAL) == 0)
                 compiler->syntaxError(lineno, SYNTAXERR_ILLEGAL_NUMBER);
-            
+
             if (c == '0') {
                 idx++;
                 if ((c = *idx) < 128 && (char_attrs[c] & CHAR_ATTR_OCTAL) != 0)
@@ -1644,23 +1675,23 @@ namespace avmplus
                 else
                     return 0;
             }
-            
+
             if (c <= '3')
                 return octalEscape(3);
-            
+
             return octalEscape(2);
         }
-        
+
         int Lexer::octalEscape(int n)
         {
             mark = idx;
             octalDigits(n);                 // Ignore result
             return (int)parseInt(8);
         }
-        
+
         // Any leading x or u has been consumed.  n is the number of
         // digits to consume and require.
-        
+
         int Lexer::hexEscape(int n)
         {
             mark = idx;
@@ -1668,9 +1699,9 @@ namespace avmplus
                 compiler->syntaxError(lineno, SYNTAXERR_ILLEGAL_NUMBER);
             return (int)parseInt(16);
         }
-        
+
         // Any leading u has been consumed.
-        
+
         int Lexer::unicodeEscape()
         {
             if (*idx == '{') {
@@ -1684,7 +1715,7 @@ namespace avmplus
             }
             return hexEscape(4);
         }
-        
+
         // Parses string of digits in the index in the range [mark,idx) in the given base.
         // Reliably returns Infinity on overflow.
 
@@ -1722,7 +1753,7 @@ namespace avmplus
                         scale += 3;
                     }
                     goto bits_and_scale;
-                    
+
                 case 16:
                     for ( const wchar* i=mark ; i < idx ; i++ ) {
                         if (k < 16) {
@@ -1732,7 +1763,7 @@ namespace avmplus
                         scale += 4;
                     }
                     goto bits_and_scale;
-                    
+
                 case 10:
                     return parseDouble();
 
@@ -1760,7 +1791,7 @@ namespace avmplus
             uint64_t lost = bits & 0xFFF;
             bits >>= 12;
             scale--;
-            
+
             // Round to even
             // FIXME: it would seem necessary to re-normalize following rounding.
             if (lost > 0x800)
@@ -1776,6 +1807,20 @@ namespace avmplus
             bits |= (uint64_t)(1023 + scale) << 52;
             double_overlay d(bits);
             return d.value;
+        }
+
+        float Lexer::parseFloat()
+        {
+            bool adjust = false;
+            if (idx[-1] == 'f')
+            {
+                adjust = true;
+                idx--;
+            }
+            float f = (float)parseDouble();
+            if (adjust)
+                idx++;
+            return f;
         }
 
         double Lexer::parseDouble()
@@ -1813,9 +1858,9 @@ namespace avmplus
             else
                 return isNonASCIIIdentifierSubsequent((wchar)c);
         }
-        
+
 #ifdef DEBUG
-    
+
         void Lexer::print(Token t, uint32_t/* l*/, TokenValue v)
         {
             char buf[200];
@@ -1842,14 +1887,17 @@ namespace avmplus
                 case T_DoubleLiteral:
                     VMPI_sprintf(buf, "d %g", v.d);
                     break;
+                case T_FloatLiteral:
+                    VMPI_sprintf(buf, "d %g", (double)v.f);
+                    break;
                 default:
                     break;
             }
             printf("%d %s\n", (int)t, buf);
         }
-    
+
 #endif // DEBUG
-    
+
     }
 }
 

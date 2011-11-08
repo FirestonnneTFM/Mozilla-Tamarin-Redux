@@ -360,6 +360,7 @@ public:
     void I_pushbyte(int8_t b);
     void I_pushfalse();
     void I_pushdouble(uint32_t index);
+    void I_pushfloat(uint32_t index);
     void I_pushint(uint32_t index);
     void I_pushnamespace(uint32_t index);
     void I_pushnan();
@@ -392,6 +393,7 @@ public:
     uint32_t emitInt(int32_t value);    // cpool index
     uint32_t emitUInt(uint32_t value);  // cpool index
     uint32_t emitDouble(double value);  // cpool index
+    uint32_t emitFloat(float value);    // cpool index
     uint32_t emitNamespace(NameComponent* ns);
     uint32_t emitNamespace(uint32_t name);
     uint32_t emitSlotTrait(uint32_t name, uint32_t type);

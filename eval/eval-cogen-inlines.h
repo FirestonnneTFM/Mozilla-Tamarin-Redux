@@ -53,6 +53,7 @@ inline uint32_t FinallyCtx::addReturnLabel(Label* l)
 inline uint32_t Cogen::emitInt(int32_t i) { return abc->addInt(i); }
 inline uint32_t Cogen::emitUInt(uint32_t u) { return abc->addUInt(u); }
 inline uint32_t Cogen::emitDouble(double d) { return abc->addDouble(d); }
+inline uint32_t Cogen::emitFloat(float f) { return abc->addFloat(f); }
 inline uint32_t Cogen::emitString(Str* str) { return abc->addString(str); }
 inline uint32_t Cogen::emitSlotTrait(uint32_t name, uint32_t type) { return traits->addTrait(ALLOC(ABCSlotTrait, (name, type, TRAIT_Slot))); }
 inline uint32_t Cogen::emitConstTrait(uint32_t name, uint32_t type) { return traits->addTrait(ALLOC(ABCSlotTrait, (name, type, TRAIT_Const))); }
@@ -169,6 +170,7 @@ inline void Cogen::I_not() { emitOp(OP_not); }
 inline void Cogen::I_pop() { emitOp(OP_pop); }
 inline void Cogen::I_popscope() { emitOp(OP_popscope); }
 inline void Cogen::I_pushdouble(uint32_t index) { emitOpU30(OP_pushdouble, index); }
+inline void Cogen::I_pushfloat(uint32_t index) { emitOpU30(OP_pushfloat, index); }
 inline void Cogen::I_pushfalse() { emitOp(OP_pushfalse); }
 inline void Cogen::I_pushint(uint32_t index) { emitOpU30(OP_pushint, index); }
 inline void Cogen::I_pushnamespace(uint32_t index) { emitOpU30(OP_pushnamespace, index); }

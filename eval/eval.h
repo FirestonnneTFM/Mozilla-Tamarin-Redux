@@ -181,6 +181,7 @@ namespace avmplus
         class LiteralBoolean;
         class LiteralDouble;
         class LiteralField;
+        class LiteralFloat;
         class LiteralFunction;
         class LiteralInt;
         class LiteralNull;

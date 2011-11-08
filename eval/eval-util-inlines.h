@@ -143,6 +143,18 @@ inline void ByteBuffer::emitDouble(double v)
     out = avmplus::RTC::emitDouble(out, v);
 }
 
+inline void ByteBuffer::emitFloat(float v)
+{
+    makeRoom(4);
+    out = avmplus::RTC::emitFloat(out, v);
+}
+
+inline void ByteBuffer::emitFloat4(float4_t v)
+{
+    makeRoom(16);
+    out = avmplus::RTC::emitFloat4(out, v);
+}
+
 inline void ByteBuffer::emitUtf8(uint32_t nbytes, Str* str)
 {
     makeRoom(nbytes);
