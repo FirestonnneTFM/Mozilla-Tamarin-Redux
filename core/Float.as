@@ -192,21 +192,6 @@ package
         // {ReadOnly, DontDelete, DontEnum }
         public static const length             :int   = 4;
 
-        // E262 {DontEnum, DontDelete, ReadOnly}
-        public static const MAX_VALUE         :float4 = float4(float.MAX_VALUE, float.MAX_VALUE, float.MAX_VALUE, float.MAX_VALUE);
-        public static const MIN_VALUE         :float4 = float4(float.MIN_VALUE, float.MIN_VALUE, float.MIN_VALUE, float.MIN_VALUE);
-        public static const NaN               :float4 = float4(float.NaN, float.NaN, float.NaN, float.NaN);
-        public static const NEGATIVE_INFINITY :float4 = float4(float.NEGATIVE_INFINITY, float.NEGATIVE_INFINITY, float.NEGATIVE_INFINITY, float.NEGATIVE_INFINITY);
-        public static const POSITIVE_INFINITY :float4 = float4(float.POSITIVE_INFINITY, float.POSITIVE_INFINITY, float.POSITIVE_INFINITY, float.POSITIVE_INFINITY);
-        public static const E                 :float4 = float4(float.E, float.E, float.E, float.E);
-        public static const LN10              :float4 = float4(float.LN10, float.LN10, float.LN10, float.LN10);
-        public static const LN2               :float4 = float4(float.LN2, float.LN2, float.LN2, float.LN2);
-        public static const LOG2E             :float4 = float4(float.LOG2E, float.LOG2E, float.LOG2E, float.LOG2E);
-        public static const LOG10E            :float4 = float4(float.LOG10E, float.LOG10E, float.LOG10E, float.LOG10E);
-        public static const PI                :float4 = float4(float.PI, float.PI, float.PI, float.PI);
-        public static const SQRT1_2           :float4 = float4(float.SQRT1_2, float.SQRT1_2, float.SQRT1_2, float.SQRT1_2);
-        public static const SQRT2             :float4 = float4(float.SQRT2, float.SQRT2, float.SQRT2, float.SQRT2);
-
         // comparison functions
         public static native function isGreater        (arg1:float4, arg2:float4) : float4 ;
         public static native function isGreaterOrEqual (arg1:float4, arg2:float4) : float4 ;
@@ -217,24 +202,11 @@ package
        
         // math and geometric functions
         public static native function abs              (arg:float4)               : float4 ;
-        public static native function acos             (arg:float4)               : float4 ;
-        public static native function asin             (arg:float4)               : float4 ;
-        public static native function atan             (arg:float4)               : float4 ;
-        public static native function atan2            (arg1:float4, arg2:float4) : float4 ;
-        public static native function ceil             (arg:float4)               : float4 ;
-        public static native function cos              (arg:float4)               : float4 ;
-        public static native function exp              (arg:float4)               : float4 ;
-        public static native function floor            (arg:float4)               : float4 ;
-        public static native function log              (arg:float4)               : float4 ;
         public static native function max              (arg1:float4, arg2:float4) : float4 ;
         public static native function min              (arg1:float4, arg2:float4) : float4 ;
-        public static native function pow              (arg1:float4, arg2:float)  : float4 ;
         public static native function reciprocal       (arg:float4)               : float4 ;
-        public static native function round            (arg:float4)               : float4 ;
         public static native function rsqrt            (arg:float4)               : float4 ;
-        public static native function sin              (arg:float4)               : float4 ;
         public static native function sqrt             (arg:float4)               : float4 ;
-        public static native function tan              (arg:float4)               : float4 ;
         public static native function normalize        (arg:float4)               : float4 ;
         public static native function cross            (arg1:float4, arg2:float4) : float4 ;
         public static native function dot              (arg1:float4, arg2:float4) : float  ;
@@ -246,8 +218,6 @@ package
         public static native function distance         (arg1:float4, arg2:float4) : float  ;
         public static native function distance3        (arg1:float4, arg2:float4) : float  ;
         public static native function distance2        (arg1:float4, arg2:float4) : float  ;
-        public static function random                  ()                         : float4
-        { return float4(Math.random(), Math.random(), Math.random(), Math.random());       };
  
         // component accesses
         private static native function _swizzle        (v:float4, arg:int)        : float4 ;
