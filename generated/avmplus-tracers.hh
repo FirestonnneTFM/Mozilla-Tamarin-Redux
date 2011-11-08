@@ -594,6 +594,62 @@ bool Float4Class::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 #if defined(VMCFG_FLOAT)
 
 #ifdef DEBUG
+MMgc::GCTracerCheckResult Float4VectorClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = TypedVectorClass<Float4VectorObject>::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
+
+bool Float4VectorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_Float4VectorClass
+    m_slots_Float4VectorClass.gcTracePrivateProperties(gc);
+#endif
+    TypedVectorClass<Float4VectorObject>::gcTrace(gc, 0);
+    (void)(avmplus_TypedVectorClassXFloat4VectorObjectX_isExactInterlock != 0);
+    return false;
+}
+
+#endif // defined(VMCFG_FLOAT)
+
+#if defined(VMCFG_FLOAT)
+
+#ifdef DEBUG
+MMgc::GCTracerCheckResult Float4VectorObject::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = TypedVectorObject< DataList<float4_t> >::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
+
+bool Float4VectorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_Float4VectorObject
+    m_slots_Float4VectorObject.gcTracePrivateProperties(gc);
+#endif
+    TypedVectorObject< DataList<float4_t> >::gcTrace(gc, 0);
+    (void)(avmplus_TypedVectorObjectXDataListXfloat4_tXX_isExactInterlock != 0);
+    return false;
+}
+
+#endif // defined(VMCFG_FLOAT)
+
+#if defined(VMCFG_FLOAT)
+
+#ifdef DEBUG
 MMgc::GCTracerCheckResult FloatClass::gcTraceOffsetIsTraced(uint32_t off) const
 {
     MMgc::GCTracerCheckResult result;

@@ -1942,6 +1942,7 @@ class AbcThunkGen:
         out.println("friend class avmplus::IntVectorClass;")
         out.println("friend class avmplus::UIntVectorClass;")
         out.println("FLOAT_ONLY(friend class avmplus::FloatVectorClass;)")
+        out.println("FLOAT_ONLY(friend class avmplus::Float4VectorClass;)")
         out.println("friend class avmplus::DoubleVectorClass;")
         out.println("friend class avmplus::ObjectVectorClass;")
         out.indent -= 1

@@ -221,6 +221,17 @@ namespace avmplus
         AvmAssert(m_data->len == 0);
     }
 
+#ifdef VMCFG_FLOAT
+    template<>
+    int32_t ListImpl<float4_t,DataListHelper<float4_t> >::indexOf(float4_t value) const
+    {
+        for (uint32_t i = 0, n = m_data->len; i < n; i++)
+            if (f4_eq_i(DataListHelper<float4_t>::load(m_data, i), value))
+                return int32_t(i);
+        return -1;
+    }
+#endif
+
     template<class T, class ListHelper>
     int32_t ListImpl<T,ListHelper>::indexOf(T value) const
     {
@@ -229,6 +240,17 @@ namespace avmplus
                 return int32_t(i);
         return -1;
     }
+
+#ifdef VMCFG_FLOAT
+    template<>
+    int32_t ListImpl<float4_t,DataListHelper<float4_t> >::lastIndexOf(float4_t value) const
+    {
+        for (uint32_t i = m_data->len; i > 0; i--)
+            if (f4_eq_i(DataListHelper<float4_t>::load(m_data, i-1), value))
+                return int32_t(i);
+        return -1;
+    }
+#endif
 
     template<class T, class ListHelper>
     int32_t ListImpl<T,ListHelper>::lastIndexOf(T value) const
@@ -416,6 +438,16 @@ namespace avmplus
             }
         }
     }
+
+#ifdef VMCFG_FLOAT
+    template<>
+    uint32_t ListImpl<float4_t,DataListHelper<float4_t> >::removeNullItems()
+    {
+        // For float4 lists this has no utility at present, so do nothing.  float4 values
+        // are non-nullable and removeNullItems is only used on lists with references
+        return 0;
+    }
+#endif
 
     template<class T, class ListHelper>
     uint32_t ListImpl<T,ListHelper>::removeNullItems()

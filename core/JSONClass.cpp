@@ -1142,6 +1142,10 @@ namespace avmplus
              traits->subtypeof(core()->traits.vectordouble_itraits) ||
              traits->subtypeof(core()->traits.vectorint_itraits)    ||
              traits->subtypeof(core()->traits.vectoruint_itraits)   ||
+#ifdef VMCFG_FLOAT
+             traits->subtypeof(core()->traits.vectorfloat_itraits)    ||
+             traits->subtypeof(core()->traits.vectorfloat4_itraits)   ||
+#endif
 #if 0
              traits->subtypeof(core()->traits.vector_itraits)       ||
 #endif

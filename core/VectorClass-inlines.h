@@ -46,11 +46,13 @@ namespace avmplus
     // For some hand-written tracers that are used by generated tracers.
 
 #define avmplus_TypedVectorClassXFloatVectorObjectX_isExactInterlock 1
+#define avmplus_TypedVectorClassXFloat4VectorObjectX_isExactInterlock 1
 #define avmplus_TypedVectorClassXDoubleVectorObjectX_isExactInterlock 1
 #define avmplus_TypedVectorClassXIntVectorObjectX_isExactInterlock 1
 #define avmplus_TypedVectorClassXUIntVectorObjectX_isExactInterlock 1
 #define avmplus_TypedVectorClassXObjectVectorObjectX_isExactInterlock 1
 #define avmplus_TypedVectorObjectXDataListXfloatXX_isExactInterlock 1
+#define avmplus_TypedVectorObjectXDataListXfloat4_tXX_isExactInterlock 1
 #define avmplus_TypedVectorObjectXDataListXdoubleXX_isExactInterlock 1
 #define avmplus_TypedVectorObjectXDataListXint32_tXX_isExactInterlock 1
 #define avmplus_TypedVectorObjectXDataListXuint32_tXX_isExactInterlock 1
@@ -86,6 +88,16 @@ namespace avmplus
     {
         return 0;
     }
+
+#ifdef VMCFG_FLOAT
+    template<>
+    REALLY_INLINE float4_t TypedVectorConstants<float4_t>::undefinedValue()
+    {
+        float4_t zero = { 0,0,0,0 };
+        return zero;
+    }
+#endif
+
     template<class T>
     REALLY_INLINE T TypedVectorConstants<T>::undefinedValue()
     {
@@ -174,6 +186,21 @@ namespace avmplus
     REALLY_INLINE Atom VectorBaseObject::valueToAtom(const float& value) const
     {
         return core()->floatToAtom(value);
+    }
+
+    REALLY_INLINE void VectorBaseObject::atomToValue(Atom atom, float4_t& value)
+    {
+        value = AvmCore::float4(atom);
+    }
+    
+    REALLY_INLINE void VectorBaseObject::atomToValueKnown(Atom atom, float4_t& value)
+    {
+        value = AvmCore::float4(atom);
+    }
+    
+    REALLY_INLINE Atom VectorBaseObject::valueToAtom(const float4_t& value) const
+    {
+        return core()->float4ToAtom(value);
     }
 #endif
 
@@ -292,15 +319,6 @@ namespace avmplus
         return 0;
     }
 
-#ifdef VMCFG_FLOAT
-    template<class TLIST>
-    REALLY_INLINE uint32_t TypedVectorObject<TLIST>::checkReadIndex_f(float index) const
-    {
-        // just use the corresponding double version, until proven wrong
-        return checkReadIndex_d(index);
-    }
-#endif // VMCFG_FLOAT
-
     template<class TLIST>
     REALLY_INLINE void TypedVectorObject<TLIST>::checkWriteIndex_u(uint32_t index) const
     {
@@ -349,15 +367,6 @@ namespace avmplus
         return 0;
     }
 
-#ifdef VMCFG_FLOAT
-    template<class TLIST>
-    REALLY_INLINE uint32_t TypedVectorObject<TLIST>::checkWriteIndex_f(float index) const
-    {
-        // just use the corresponding double version, until proven wrong
-        return checkWriteIndex_d(index);
-    }
-#endif // VMCFG_FLOAT
-    
 
     // ----------------------------
 

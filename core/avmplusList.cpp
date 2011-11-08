@@ -56,6 +56,7 @@ namespace avmplus
     template class ListImpl< uint32_t, DataListHelper<uint32_t> >;
     template class ListImpl< uint64_t, DataListHelper<uint64_t> >;
     template class ListImpl< float, DataListHelper<float> >;
+    template class ListImpl< float4_t, DataListHelper<float4_t> >;
     template class ListImpl< double, DataListHelper<double> >;
     template class ListImpl< char, DataListHelper<char> >;
 }

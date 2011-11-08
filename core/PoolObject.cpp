@@ -699,7 +699,7 @@ range_error:
                     r = core->traits.vectorfloat_itraits;
                     break;
                 case BUILTIN_float4: 
-                    AvmAssertMsg(false, "vector<float4> not implemented yet");
+                    r = core->traits.vectorfloat4_itraits;
                     break;
 #endif
                 case BUILTIN_number:

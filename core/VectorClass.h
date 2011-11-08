@@ -381,6 +381,7 @@ namespace avmplus
     };
 
     // ----------------------------
+
 #ifdef VMCFG_FLOAT
     class GC_AS3_EXACT(FloatVectorClass, TypedVectorClass<FloatVectorObject>)
     {
@@ -394,9 +395,25 @@ namespace avmplus
 
         GC_NO_DATA(FloatVectorClass)
 
-            DECLARE_SLOTS_FloatVectorClass;
+        DECLARE_SLOTS_FloatVectorClass;
+    };
+
+    class GC_AS3_EXACT(Float4VectorClass, TypedVectorClass<Float4VectorObject>)
+    {
+    private:
+        explicit Float4VectorClass(VTable* vtable);
+    public:
+        REALLY_INLINE static Float4VectorClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) Float4VectorClass(cvtable);
+        }
+        
+        GC_NO_DATA(Float4VectorClass)
+        
+        DECLARE_SLOTS_Float4VectorClass;
     };
 #endif
+
     // ----------------------------
 
     class GC_AS3_EXACT(ObjectVectorClass, TypedVectorClass<ObjectVectorObject>)
@@ -482,6 +499,10 @@ namespace avmplus
         void atomToValue(Atom atom, float& value);
         void atomToValueKnown(Atom atom, float& value);
         Atom valueToAtom(const float& value) const;
+
+        void atomToValue(Atom atom, float4_t& value);
+        void atomToValueKnown(Atom atom, float4_t& value);
+        Atom valueToAtom(const float4_t& value) const;
 #endif // VMCFG_FLOAT
 
         void atomToValue(Atom atom, OpaqueAtom& value);
@@ -594,15 +615,9 @@ namespace avmplus
         void     checkReadIndex_u(uint32_t index) const;
         uint32_t checkReadIndex_i(int32_t index) const;
         uint32_t checkReadIndex_d(double index) const;
-#ifdef VMCFG_FLOAT
-        uint32_t checkReadIndex_f(float index) const;
-#endif
         void     checkWriteIndex_u(uint32_t index) const;
         uint32_t checkWriteIndex_i(int32_t index) const;
         uint32_t checkWriteIndex_d(double index) const;
-#ifdef VMCFG_FLOAT
-        uint32_t checkWriteIndex_f(float index) const;
-#endif
 
         // variant of _spliceHelper with explicit array of Atom.
         // (Not exposed to AS3.)
@@ -728,6 +743,7 @@ namespace avmplus
     typedef VectorAccessor< DataList<double> > DoubleVectorAccessor;
 
     // ----------------------------
+
 #ifdef VMCFG_FLOAT
     class GC_AS3_EXACT(FloatVectorObject, TypedVectorObject< DataList<float> >)
     {
@@ -751,7 +767,31 @@ namespace avmplus
         // ------------------------ DATA SECTION END
     };
     typedef VectorAccessor< DataList<float> > FloatVectorAccessor;
-#endif 
+
+    class GC_AS3_EXACT(Float4VectorObject, TypedVectorObject< DataList<float4_t> >)
+    {
+    protected:
+        explicit Float4VectorObject(VTable* ivtable, ScriptObject* delegate);
+        
+    public:
+        REALLY_INLINE static Float4VectorObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate)
+        {
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) Float4VectorObject(ivtable, delegate);
+        }
+        
+        // AS3 native function implementations
+        Float4VectorObject* newThisType();
+        
+        // ------------------------ DATA SECTION BEGIN
+    private:
+        GC_NO_DATA(Float4VectorObject)
+        
+        DECLARE_SLOTS_Float4VectorObject;
+        // ------------------------ DATA SECTION END
+    };
+    typedef VectorAccessor< DataList<float> > Float4VectorAccessor;
+#endif
+
     // ----------------------------
 
     class GC_AS3_EXACT(ObjectVectorObject, TypedVectorObject< AtomList >)

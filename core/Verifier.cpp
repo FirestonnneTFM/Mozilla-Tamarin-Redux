@@ -1442,15 +1442,27 @@ namespace avmplus
                     break;
                 }
 
-                if( obj.traits == VECTORINT_TYPE  || obj.traits == VECTORUINT_TYPE ||
-                    obj.traits == VECTORDOUBLE_TYPE FLOAT_ONLY(|| obj.traits == VECTORFLOAT_TYPE) )
+                if(obj.traits == VECTORINT_TYPE
+                   || obj.traits == VECTORUINT_TYPE
+                   || obj.traits == VECTORDOUBLE_TYPE 
+#ifdef VMCFG_FLOAT
+                   || obj.traits == VECTORFLOAT_TYPE
+                   || obj.traits == VECTORFLOAT4_TYPE
+#endif
+                   )
                 {
                     bool attr = multiname.isAttr();
                     Traits* indexType = state->value(state->sp()-1).traits;
 
                     // NOTE a dynamic name should have the same version as the current pool
                     bool maybeIntegerIndex = !attr && multiname.isRtname() && multiname.containsAnyPublicNamespace();
-                    if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE || indexType == NUMBER_TYPE  FLOAT_ONLY(|| indexType == FLOAT_TYPE) ) )
+                    if( maybeIntegerIndex && (indexType == UINT_TYPE
+                                              || indexType == INT_TYPE
+                                              || indexType == NUMBER_TYPE
+#ifdef VMCFG_FLOAT
+                                              || indexType == FLOAT_TYPE   // float indices are always absorbed by the vector
+#endif
+                                              ) )
                     {
                         if(obj.traits == VECTORINT_TYPE)
                             emitCoerce(INT_TYPE, state->sp());
@@ -1461,6 +1473,8 @@ namespace avmplus
 #ifdef VMCFG_FLOAT
                         else if(obj.traits == VECTORFLOAT_TYPE)
                             emitCoerce(FLOAT_TYPE, state->sp());
+                        else if(obj.traits == VECTORFLOAT4_TYPE)
+                            emitCoerce(FLOAT4_TYPE, state->sp());
 #endif
                     }
                 }
@@ -2921,14 +2935,26 @@ namespace avmplus
         }
         if( !propType )
         {
-            if( obj.traits == VECTORINT_TYPE  || obj.traits == VECTORUINT_TYPE ||
-                obj.traits == VECTORDOUBLE_TYPE  FLOAT_ONLY(|| obj.traits == VECTORFLOAT_TYPE) )
+            if (obj.traits == VECTORINT_TYPE
+                || obj.traits == VECTORUINT_TYPE
+                || obj.traits == VECTORDOUBLE_TYPE
+#ifdef VMCFG_FLOAT
+                || obj.traits == VECTORFLOAT_TYPE
+                || obj.traits == VECTORFLOAT4_TYPE
+#endif
+                )
             {
                 bool attr = multiname.isAttr();
                 Traits* indexType = state->value(state->sp()).traits;
                 // NOTE a dynamic name should have the same version as the current pool
                 bool maybeIntegerIndex = !attr && multiname.isRtname() && multiname.containsAnyPublicNamespace();
-                if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE || indexType == NUMBER_TYPE  FLOAT_ONLY(|| indexType == FLOAT_TYPE)) )
+                if( maybeIntegerIndex && (indexType == UINT_TYPE
+                                          || indexType == INT_TYPE
+                                          || indexType == NUMBER_TYPE
+#ifdef VMCFG_FLOAT
+                                          || indexType == FLOAT_TYPE
+#endif
+                                          ) )
                 {
                     if(obj.traits == VECTORINT_TYPE)
                         propType = INT_TYPE;
@@ -2939,6 +2965,8 @@ namespace avmplus
 #ifdef VMCFG_FLOAT
                     else if(obj.traits == VECTORFLOAT_TYPE)
                         propType = FLOAT_TYPE;
+                    else if(obj.traits == VECTORFLOAT4_TYPE)
+                        propType = FLOAT4_TYPE;
 #endif // VMCFG_FLOAT
                 }
             }
@@ -2957,7 +2985,13 @@ namespace avmplus
                 Traits* indexType = state->value(state->sp()).traits;
                 // NOTE a dynamic name should have the same version as the current pool
                 bool maybeIntegerIndex = !attr && multiname.isRtname() && multiname.containsAnyPublicNamespace();
-                if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE || indexType == NUMBER_TYPE) )
+                if( maybeIntegerIndex && (indexType == UINT_TYPE
+                                          || indexType == INT_TYPE
+                                          || indexType == NUMBER_TYPE
+#ifdef VMCFG_FLOAT
+                                          || indexType == FLOAT_TYPE
+#endif
+                                          ) )
                 {
                     propType = obj.traits->m_paramTraits;
                 }

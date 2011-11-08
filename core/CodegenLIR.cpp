@@ -5152,12 +5152,17 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_FLOAT
         else if (objType == VECTORFLOAT_TYPE) {
             if (result == FLOAT_TYPE) {
+                // FIXME: optimize Vector.<float> access
                 getter = getFloatVectorNativeHelpers[idxKind];
                 valIsAtom = false;
             }
             else {
                 getter = getFloatVectorHelpers[idxKind];
             }
+        }
+        else if (objType == VECTORFLOAT4_TYPE) {
+            // FIXME: implement Vector.<float4> access
+            getter = NULL;
         }
 #endif
 
@@ -5350,6 +5355,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_FLOAT
         else if (objType == VECTORFLOAT_TYPE) {
             if (valueType == FLOAT_TYPE) {
+                // FIXME: optimize Vector.<float> access
                 value = localGetf(valIndexOnStack);
                 setter = setFloatVectorNativeHelpers[idxKind];
             }
@@ -5358,11 +5364,11 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 setter = setFloatVectorHelpers[idxKind];
             }
         }
-#endif // VMCFG_FLOAT
-        else {
-             AvmAssert(setter==NULL);
-             // Or in other words: if we got here, we'll use a generic helper.
+        else if (objType == VECTORFLOAT4_TYPE) {
+            // FIXME: implement Vector.<float4> access
+            setter = NULL;
         }
+#endif // VMCFG_FLOAT
 
         if (setter) {
             callIns(setter, 3, localGetp(objIndexOnStack), index, value);
