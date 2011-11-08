@@ -47,6 +47,7 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 var pi_float4:Object = new float4(3.14f);
+var pi_float:Object = new float(3.14f);
 AddErrorTest("TypeError if datatype is not Class", TYPEERROR, function(){ return pi_float4 is "float4"; });
 
 AddTestCase("float4(3.14f) is float", true, pi_float4 is float4);
@@ -54,32 +55,26 @@ AddTestCase("float4(3.14f) is NOT Number", false, pi_float4 is Number);
 AddTestCase("float4(3.14f) is Object", true, pi_float4 is Object);
 AddTestCase("float4(3.14f) is NOT int", false, pi_float4 is int);
 
-
-AddTestCase("float4.MIN_VALUE is float4", true, float4.MIN_VALUE is float4);
-AddTestCase("float4.MAX_VALUE is float4", true, float4.MAX_VALUE is float4);
-AddTestCase("float4.POSITIVE_INFINITY is float4", true, float4.POSITIVE_INFINITY is float4);
-AddTestCase("float4.NEGATIVE_INFINITY is float4", true, float4.NEGATIVE_INFINITY is float4);
-AddTestCase("float4.NaN is float4", true, float4.NaN is float4);
+AddTestCase("float(3.14f) is NOT float4", false, float(3.14f) is float4);
+AddTestCase("float var is NOT float4", false, pi_float is float4);
 
 var three:float4 = float4(3f);
 AddTestCase("float4(3f) is NOT int", false, three is int);
 
 var minus_three:float4 = float4(-3f);
 AddTestCase("float4(-3f) is NOT int", false, minus_three is int);
-AddTestCase("float(3.14f) is NOT uint", false, pi_float4 is uint);
+AddTestCase("float4(3.14f) is NOT uint", false, pi_float4 is uint);
 var zero:float4 = float4(0f);
 var neg_zero:float4 = float4(-0f);
-AddTestCase("float(0f) is NOT uint", false, zero is uint);
-AddTestCase("float(-0f) is NOT uint", false, neg_zero is uint);
+AddTestCase("float4(0f) is NOT uint", false, zero is uint);
+AddTestCase("float4(-0f) is NOT uint", false, neg_zero is uint);
 
-AddTestCase("float(0f) is NOT String,", false, zero is String);
-AddTestCase("float(0f) is NOT Boolean", false, zero is Boolean);
-AddTestCase("float(0f) is NOT Error", false, zero is Error);
+AddTestCase("float4(0f) is NOT String,", false, zero is String);
+AddTestCase("float4(0f) is NOT Boolean", false, zero is Boolean);
+AddTestCase("float4(0f) is NOT Error", false, zero is Error);
 AddTestCase("Number.NaN is NOT float4", false, Number.NaN is float4);
 
 
-AddTestCase("Number(float4.MAX_VALUE) is NOT float4", false, (new Number(float4.MAX_VALUE)) is float4);
-AddTestCase("Number(float4.MIN_VALUE) is NOT float4", false, (new Number(float4.MIN_VALUE)) is float4);
 AddTestCase("Number(Infinity) is NOT float4", false, (new Number(Infinity)) is float4);
 
 /* FIXME: https://bugzilla.mozilla.org/show_bug.cgi?id=696641

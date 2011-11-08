@@ -386,21 +386,3 @@ as3/Types/Float4/flt4_5_8_2:^float4\(1f. 2f. 3f. 4f\) \|\| float4\(-1f. -2f. -3f
 as3/Types/Float4/flt4_5_8_2:^float4\(1f. 2f. 3f. 4f\) \|\| float4\(0f. -2f. -3f. -4f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
 as3/Types/Float4/flt4_5_8_2:^float4\(1f. 2f. -0f. 4f\) \|\| float4\(-1f. -2f. -3f. -4f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
 
-
-as3/Types/Float/flt_6_8_3:^nf === Number\(nf\) , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-as3/Types/Float/flt_6_8_3:^nf_down === Number\(nf_down\)  , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-as3/Types/Float/flt_6_8_4:^1f === 1  , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-as3/Types/Float/flt_6_8_4:^nf === Number\(nf\)  , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-as3/Types/Float/flt_6_8_4:^nf_down === Number\(nf_down\)  , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-as3/Types/Float/flt_6_8_4:^1 === 1f  , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-as3/Types/Float/flt_6_8_4:^Number\(nf\) === nf  , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-as3/Types/Float/flt_6_8_4:^Number\(nf_down\) === nf_down  , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-as3/Types/Float/flt_6_8_5:^1f !== 1  , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-as3/Types/Float/flt_6_8_5:^nf !== Number\(nf\)  , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-as3/Types/Float/flt_6_8_5:^nf_down !== Number\(nf_down\)  , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-as3/Types/Float/flt_6_8_5:^1 !== 1f  , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-as3/Types/Float/flt_6_8_5:^Number\(nf\) !== nf  , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-as3/Types/Float/flt_6_8_5:^Number\(nf_down\) !== nf_down  , .*-Ojit  , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-as3/Types/Float/floatOperations:>> FltIntOps SEQ  , .* , -Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-as3/Types/Float/floatOperations:>> FltIntOps SNEQ  , .* , -Dinterp  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700043
-
