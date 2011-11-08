@@ -87,7 +87,7 @@ package
             }
         }
         if (expected !== actual)
-            FAIL(name, expected, actual);
+            FAIL("STRICTEQ: "+name, typeof expected+"["+expected+"]", typeof actual+"["+actual+"]");
         else
             PASS(name);
     }
