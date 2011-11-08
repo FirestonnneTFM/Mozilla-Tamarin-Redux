@@ -260,13 +260,36 @@ namespace nanojit
         return x == y;
     }
 
+    /** Float, Float4, and Double comparisons are performed bitwise.
+     *  We need to distinguish 0 and -0, and allow NaNs to compare equal,
+     *  unlike normal IEEE floating-point comparisions. Aside from this,
+     *  the default hash function assumes bitwise equality semantics.
+     */
+
+    template<> inline bool keysEqual<float>(float x, float y) {
+        union {
+            float f;
+            uint32_t i;
+        } u, v;
+        u.f = x;
+        v.f = y;
+        return u.i == v.i;
+    }
+
+    template<> inline bool keysEqual<double>(double x, double y) {
+        union {
+            double d;
+            uint64_t q;
+        } u, v;
+        u.d = x;
+        v.d = y;
+        return u.q == v.q;
+    }
+
     template<> inline bool keysEqual<float4_t>(float4_t x, float4_t y) {
-        // Use a bitwise comparison. We need to distinguish 0 and -0, and
-        // allow NaNs to compare equal.  f4_eq_i compares the vector elements
-        // using IEEE float comparison semantics, which conflates 0 and -0.
         float4_t lx = x, ly = y;
         return VMPI_memcmp(&lx, &ly, sizeof(float4_t)) == 0;
-    } 
+    }
 
     /** Bucket hashtable with a fixed # of buckets (never rehash)
      *  Intended for use when a reasonable # of buckets can be estimated ahead of time.
