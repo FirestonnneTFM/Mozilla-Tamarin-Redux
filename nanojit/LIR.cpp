@@ -1240,10 +1240,19 @@ namespace nanojit
             }
         }
         else if (oprnd1->isImmF4() && oprnd2->isImmF4()) {
-            // The operands are both vectors of four singe-precision float immediates.
+            // The operands are both vectors of four single-precision float immediates.
             float4_t c1 = oprnd1->immF4();
             float4_t c2 = oprnd2->immF4();
-            if(v==LIR_eqf4) return insImmI(f4_eq_i(c1, c2));
+            switch (v) {
+                case LIR_eqf4:  return insImmI(f4_eq_i(c1, c2));
+                    
+                case LIR_addf4: return insImmF4(f4_add(c1, c2));
+                case LIR_subf4: return insImmF4(f4_sub(c1, c2));
+                case LIR_mulf4: return insImmF4(f4_mul(c1, c2));
+                case LIR_divf4: return insImmF4(f4_div(c1, c2));
+
+                default:        break;
+            }
         }
         
         //-------------------------------------------------------------------
