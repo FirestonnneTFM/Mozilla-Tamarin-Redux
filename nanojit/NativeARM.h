@@ -43,7 +43,6 @@
 #ifndef __nanojit_NativeARM__
 #define __nanojit_NativeARM__
 
-
 #ifdef PERFM
 #include "../vprof/vprof.h"
 #define count_instr() _nvprof("arm",1)
@@ -225,8 +224,7 @@ static const Register
                     // unused register fields.
 
 static const uint32_t FirstRegNum = 0; /* R0 */
-static const uint32_t LastRegNum = IFFLOAT( 95; /* Q15 */ 
-                                          , 23; /* D7 */ )
+static const uint32_t LastRegNum = 95; /* Q15 */ 
 }
 
 #define NJ_USE_UINT32_REGISTER 1
@@ -281,7 +279,7 @@ typedef struct _ParameterRegisters {
     int stkd;
     Register r;
 #ifdef NJ_ARM_EABI_HARD_FLOAT
-    IFFLOAT( RegisterMask float_r, Register float_r);
+    RegisterMask float_r;
 #endif
 } ParameterRegisters;
 
@@ -332,11 +330,8 @@ verbose_only( extern const char* shiftNames[]; )
 
 #define DECLARE_PLATFORM_REGALLOC()                                     \
     const static Register argRegs[4], retRegs[2];                       \
-FLOAT_ONLY(                                                             \
     Register getAvailableReg(LIns* ins, Register regClass, RegisterMask allow);\
     Register getSuitableRegFor(Register r, LIns* curins);               \
-)
-
 
 #ifdef DEBUG
 # define DECLARE_PLATFORM_ASSEMBLER_DEBUG()                             \
@@ -380,12 +375,10 @@ FLOAT_ONLY(                                                             \
     inline bool     encOp2Imm(uint32_t literal, uint32_t * enc);                \
     inline uint32_t CountLeadingZeroes(uint32_t data);                          \
                                                                                 \
-FLOAT_ONLY(                                                                     \
     void        asm_immf_nochk(Register, int32_t);                              \
     void        asm_cmpf4(LIns *cond);                                          \
     Register    getAvailableReg(LIns* ins, RegisterMask m, Register regClass)   \
                { return _allocator.getAvailableReg(ins, m, regClass); }         \
-)                                                                               \
                                                                                 \
     int *       _nSlot;                                                         \
     int *       _nExitSlot;                                                     \
