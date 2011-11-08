@@ -2813,7 +2813,7 @@ namespace avmplus
             INSTR(convert_u) {
             ABC_CODE_ONLY( convert_u_impl: )
                 a1 = sp[0];
-                if (!IS_INTEGER(a1) || a1 < 0) {
+                if (!IS_INTEGER(a1) || !atomCanBeUint32(a1)) {
                     SAVE_EXPC;
                     sp[0] = core->uintAtom(a1);
                 }
