@@ -256,46 +256,54 @@ namespace nanojit
         }
     };
 
-    template<class K> inline bool keysEqual(K x,K y) {
-        return x == y;
-    }
-
-    /** Float, Float4, and Double comparisons are performed bitwise.
-     *  We need to distinguish 0 and -0, and allow NaNs to compare equal,
-     *  unlike normal IEEE floating-point comparisions. Aside from this,
-     *  the default hash function assumes bitwise equality semantics.
+    /** The default hash function assumes bitwise equality,
+     *  so that is what we implement here.  Note that float,
+     *  double, and float4 types would not normally compare
+     *  bitwise (due to 0 vs. -0 and NaNs), but that we want
+     *  bitwise semantics for CSE and pools, for example.
      */
 
-    template<> inline bool keysEqual<float>(float x, float y) {
-        union {
-            float f;
-            uint32_t i;
-        } u, v;
-        u.f = x;
-        v.f = y;
-        return u.i == v.i;
-    }
+    template <class K> struct DefaultKeysEqual {
+        static bool keysEqual(const K& x, const K& y) {
+            return VMPI_memcmp(&x, &y, sizeof(K)) == 0;
+        }
+    };
 
-    template<> inline bool keysEqual<double>(double x, double y) {
-        union {
-            double d;
-            uint64_t q;
-        } u, v;
-        u.d = x;
-        v.d = y;
-        return u.q == v.q;
-    }
+    template <class K> struct DefaultKeysEqual<K*> {
+        static bool keysEqual(K* x, K* y) {
+            return x == y;
+        }
+    };
 
-    template<> inline bool keysEqual<float4_t>(float4_t x, float4_t y) {
-        float4_t lx = x, ly = y;
-        return VMPI_memcmp(&lx, &ly, sizeof(float4_t)) == 0;
-    }
+    template <> struct DefaultKeysEqual<int32_t> {
+        static bool keysEqual(int32_t x, int32_t y) {
+            return x == y;
+        }
+    };
+
+    template <> struct DefaultKeysEqual<uint32_t> {
+        static bool keysEqual(uint32_t x, uint32_t y) {
+            return x == y;
+        }
+    };
+
+    template <> struct DefaultKeysEqual<int64_t> {
+        static bool keysEqual(int64_t x, int64_t y) {
+            return x == y;
+        }
+    };
+
+    template <> struct DefaultKeysEqual<uint64_t> {
+        static bool keysEqual(uint64_t x, uint64_t y) {
+            return x == y;
+        }
+    };
 
     /** Bucket hashtable with a fixed # of buckets (never rehash)
      *  Intended for use when a reasonable # of buckets can be estimated ahead of time.
      *  Note that operator== is used to compare keys.
      */
-    template<class K, class T, class H=DefaultHash<K> > class HashMap {
+    template<class K, class T, class H=DefaultHash<K>, class E=DefaultKeysEqual<K> > class HashMap {
         Allocator& allocator;
         size_t nbuckets;
         class Node {
@@ -310,7 +318,7 @@ namespace nanojit
         Node* find(K k, size_t &i) {
             i = H::hash(k) % nbuckets;
             for (Seq<Node>* p = buckets[i]; p != NULL; p = p->tail) {
-                if (keysEqual(p->head.key, k))
+                if (E::keysEqual(p->head.key, k))
                     return &p->head;
             }
             return NULL;
@@ -361,7 +369,7 @@ namespace nanojit
             size_t i = H::hash(k) % nbuckets;
             Seq<Node>** prev = &buckets[i];
             for (Seq<Node>* p = buckets[i]; p != NULL; p = p->tail) {
-                if (p->head.key == k) {
+                if (E::keysEqual(p->head.key, k)) {
                     (*prev) = p->tail;
                     return;
                 }
