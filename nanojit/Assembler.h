@@ -208,19 +208,30 @@ namespace nanojit
 #endif
 #if NJ_USES_IMMF4_POOL
     #if defined(_WIN32) && !defined(NANOJIT_X64) //AVMSYSTEM_32BIT
-        class float4_key{
+        // The Win32 compiler for i386 provides only 8-byte alignment for the stack,
+        // thus the required 16-byte alignment for float4_t cannot be guaranteed.
+        // Unfortunately, HashMap members pass the key as a value parameter in several
+        // places, causing compilation errors.  As a workaround, we encapsulate the
+        // key value in a "proxy" class whose instances need not themselves be aligned,
+        // but are coercible to properly-aligned copy of the underlying float4_t value.
+        class float4_key {
         private: 
-           float _val[4];
+            float _val[4];
         public:
-            float4_key(float4_t& p) { _val[0]=f4_x(p); _val[1]=f4_y(p); _val[2]=f4_z(p); _val[3]=f4_w(p); }
-            operator float4_t() const { float4_t ret = { _val[0],_val[1],_val[2],_val[3]}; return ret;}
-            const void* operator&() { return &_val[0]; }
+            float4_key(const float4_t& p) { _val[0] = f4_x(p); _val[1] = f4_y(p); _val[2] = f4_z(p); _val[3] = f4_w(p); }
+            operator float4_t() const { float4_t f4value = { _val[0], _val[1], _val[2], _val[3] }; return f4value; }
+            bool keyEquals(const float4_key& other) const {  return VMPI_memcmp(_val, other._val, sizeof(_val)) == 0; }
         };
-        NanoStaticAssert(sizeof(float4_key) == sizeof(float4_t));
-        template<> inline bool keysEqual<float4_key>(float4_key x,float4_key y){return VMPI_memcmp(&x,&y,sizeof(float4_t)) == 0;}
+
+        template <> struct DefaultKeysEqual<float4_key> {
+            static bool keysEqual(const float4_key& x, const float4_key& y) {
+                return x.keyEquals(y);
+            }
+        };
 
         typedef HashMap<float4_key, float4_t*> ImmF4PoolMap;
-    #else // other compilers will hopefully support a direct hashmap
+    #else
+        // Other supported compilers provide for the necessary stack alignment.
         typedef HashMap<float4_t, float4_t*> ImmF4PoolMap;
     #endif
 #endif //NJ_USES_IMMF4_POOL
