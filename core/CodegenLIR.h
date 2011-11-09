@@ -484,10 +484,6 @@ namespace avmplus
                                    LIns* index,
                                    size_t arrayDataOffset, size_t lenOffset, size_t entriesOffset, int scale, LOpcode load_item,
                                    const CallInfo* helper);
-        LIns* emitInlineSpeculativeArrayRead(int objIndexOnStack,
-                                             LIns* index,
-                                             const CallInfo* helper);
-
         void emitInlineVectorWrite(int objIndexOnStack, 
                                    LIns* index,
                                    LIns* value,

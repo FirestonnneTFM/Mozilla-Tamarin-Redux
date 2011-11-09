@@ -42,6 +42,30 @@
 
 namespace avmplus
 {
+    REALLY_INLINE bool ArrayObject::isSparse() const
+    {
+        return m_denseStart == IS_SPARSE;
+    }
+    
+    REALLY_INLINE bool ArrayObject::isDense() const
+    {
+        return int32_t(m_denseStart) >= 0;
+    }
+    
+    REALLY_INLINE bool ArrayObject::isDynamic() const
+    {
+         return int32_t(m_denseStart) >= -1;
+    }
+
+#ifdef DEBUG_ARRAY_VERIFY
+    // declared out-of-line
+#else
+    REALLY_INLINE void ArrayObject::verify() const
+    {
+        // nothing
+    }
+#endif
+    
     REALLY_INLINE Atom ArrayObject::pop()
     {
         return AS3_pop();
@@ -102,6 +126,12 @@ namespace avmplus
     REALLY_INLINE void ArrayObject::set_length(uint32_t newLength)
     {
         setLength(newLength);
+    }
+
+    /*virtual*/
+    REALLY_INLINE uint32_t ArrayObject::getLength() const
+    {
+        return m_length;
     }
 
 } // namespace avmplus

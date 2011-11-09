@@ -1331,12 +1331,12 @@ namespace avmplus
 
     ArrayObject* ArrayClass::newarray(Atom* argv, int argc)
     {
-        return ArrayObject::createSimple(core()->GetGC(), ivtable(), prototypePtr(), argv, argc);
+        return ArrayObject::create(core()->GetGC(), ivtable(), prototypePtr(), argv, argc);
     }
 
     ArrayObject* ArrayClass::newArray(uint32_t capacity)
     {
-        return ArrayObject::createSimple(core()->GetGC(), ivtable(), prototypePtr(), capacity);
+        return ArrayObject::create(core()->GetGC(), ivtable(), prototypePtr(), capacity);
     }
 
 #ifdef VMCFG_AOT
@@ -1345,7 +1345,7 @@ namespace avmplus
     {
         uint32_t argc = argDescArgCount(argDesc);
         AvmAssert(argc >= 0);
-        return ArrayObject::createSimple<ADT>(core()->GetGC(), ivtable(), prototypePtr(), env, argDesc, argc, ap);
+        return ArrayObject::create<ADT>(core()->GetGC(), ivtable(), prototypePtr(), env, argDesc, argc, ap);
     }
 
     template ArrayObject* ArrayClass::newArray(MethodEnv *env, uint32_t argDesc, va_list ap);
@@ -1562,15 +1562,4 @@ namespace avmplus
         }
         return a->getLengthProperty();
     }
-
-    /*static*/ FASTCALL
-    ScriptObject* ArrayClass::createUnsubclassedInstanceProc(ClassClosure* cls)
-    {
-        return new (cls->gc(), MMgc::kExact, cls->getExtraSize())
-            ArrayObject(cls->ivtable(),
-                        cls->prototypePtr(),
-                        /*capacity = */0,
-                        /*simple   = */true);
-    }
-
 }
