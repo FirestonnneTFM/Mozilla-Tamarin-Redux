@@ -43,6 +43,11 @@
 
 namespace avmplus
 {
+    // When DEBUG_ARRAY_VERIFY is defined, we do extra verification that is very
+    // slow, even in debug builds; thus normally this is disabled unless you
+    // are running tests for Array-specific changes.
+    #define NO_DEBUG_ARRAY_VERIFY
+
     /**
      * an instance of class Array.  constructed with "new Array" or
      * an array literal [...].   We need this class to support Array's
@@ -51,17 +56,16 @@ namespace avmplus
      */
     class GC_AS3_EXACT(ArrayObject, ScriptObject)
     {
-        friend class ArrayClass;
     private:
         // forcibly-inlined version used by various hot methods to ensure inlining;
         // see definition for more info.
         Atom getUintPropertyImpl(uint32_t index) const;
 
     protected:
-        ArrayObject(VTable* ivtable, ScriptObject *delegate, uint32_t capacity=0, bool simple=false);
-        ArrayObject(VTable* ivtable, ScriptObject *delegate, Atom *argv, int argc, bool simple=false);
+        ArrayObject(VTable* ivtable, ScriptObject *delegate, uint32_t capacity=0);
+        ArrayObject(VTable* ivtable, ScriptObject *delegate, Atom *argv, int argc);
 #ifdef VMCFG_AOT
-        template <typename ADT> ArrayObject(VTable* ivtable, ScriptObject *delegate, MethodEnv *env, ADT argDesc, uint32_t argc, va_list ap, bool simple=false);
+        template <typename ADT> ArrayObject(VTable* ivtable, ScriptObject *delegate, MethodEnv *env, ADT argDesc, uint32_t argc, va_list ap);
 #endif
 
     public:
@@ -75,24 +79,12 @@ namespace avmplus
             return new (gc, MMgc::kExact, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, argv, argc);
         }
 
-    private:
-        REALLY_INLINE static ArrayObject* createSimple(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, uint32_t capacity = 0)
-        {
-            return new (gc, MMgc::kExact, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, capacity, true);
-        }
-
-        REALLY_INLINE static ArrayObject* createSimple(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, Atom *argv, int argc)
-        {
-            return new (gc, MMgc::kExact, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, argv, argc, true);
-        }
-
 #ifdef VMCFG_AOT
-        template <typename ADT> static ArrayObject* createSimple(MMgc::GC* gc, VTable* ivtable, ScriptObject *delegate, MethodEnv *env, ADT argDesc, uint32_t argc, va_list ap)
+        template <typename ADT> static ArrayObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject *delegate, MethodEnv *env, ADT argDesc, uint32_t argc, va_list ap)
         {
-            return new (gc, MMgc::kExact, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, env, argDesc, argc, ap, true);
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, env, argDesc, argc, ap);
         }
 #endif
-    public:
 
         ~ArrayObject();
 
@@ -184,6 +176,7 @@ namespace avmplus
         // how dense arrays are implemented can be concentrated here
         // rather than bleeding into other classes (even one as
         // friendly to us as our class).
+        friend class ArrayClass;
         
         bool try_concat(ArrayObject* that);
         bool try_reverse();
@@ -218,21 +211,6 @@ namespace avmplus
         uint32_t              m_denseStart;
         uint32_t              m_denseUsed;
         uint32_t              m_length;
-
-        // Simple Arrays are:
-        // - not-subclassed,
-        // - dense (as in isSparse() false),
-        // - start at index 0,
-        // - contiguous (have no holes).
-
-        // m_lengthIfSimple non-zero implies m_canBeSimple (see below) and
-        //   that m_lengthIfSimple == m_denseArray length.
-        uint32_t              m_lengthIfSimple;
-
-        // m_canBeSimple true implies m_lengthIfSimple == m_denseArray length;
-        //     the two lengths may be zero.
-        // m_canBeSimple false implies m_lengthIfSimple == 0.
-        bool                  m_canBeSimple;
 
         GC_DATA_END(ArrayObject)
 

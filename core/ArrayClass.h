@@ -125,10 +125,6 @@ namespace avmplus
     private:
         static void array_concat(Toplevel* toplevel, ArrayObject* a, ArrayObject* b);
 
-    private:
-        friend class ClassClosure;
-        static ScriptObject* FASTCALL createUnsubclassedInstanceProc(ClassClosure* cls);
-
     // ------------------------ DATA SECTION BEGIN
     private:
         GC_NO_DATA(ArrayClass)
