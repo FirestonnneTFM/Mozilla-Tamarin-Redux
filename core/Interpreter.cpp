@@ -1362,7 +1362,7 @@ namespace avmplus
 #ifdef VMCFG_FLOAT
                 if(pool->hasFloatSupport() ){
                     SAVE_EXPC;
-                    a1 = op_negate(core, a1);
+                    sp[0] = op_negate(core, a1);
                     NEXT;
                 }
 #endif
