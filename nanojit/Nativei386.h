@@ -104,9 +104,7 @@ namespace nanojit
     #define NJ_MAX_PARAMETERS               1
 
     #define NJ_USES_IMMD_POOL               1
-#ifdef VMCFG_FLOAT
     #define NJ_USES_IMMF4_POOL              1
-#endif    
 
     #define NJ_JTBL_SUPPORTED               1
     #define NJ_EXPANDED_LOADSTORE_SUPPORTED 1

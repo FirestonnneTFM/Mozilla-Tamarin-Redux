@@ -62,9 +62,7 @@ namespace nanojit
 
     #define TODO(x) do{ verbose_only(outputf(#x);) NanoAssertMsgf(false, "%s", #x); } while(0)
 
-#ifdef VMCFG_FLOAT
     const Register argRegsF4[] = { XMM0, XMM1, XMM2 }; // don't make it part of the assembler, it's specific to i386
-#endif    
     const Register RegAlloc::argRegs[] = { rECX, rEDX };
     const Register RegAlloc::retRegs[] = { rEAX, rEDX };
     const Register RegAlloc::savedRegs[] = { rEBX, rESI, rEDI };
@@ -674,7 +672,6 @@ namespace nanojit
         asm_output("movsd %s,(%p) // =%f", gpn(r), (void*)addr, *addr);
     }
     
-#ifdef VMCFG_FLOAT
     // sse instructions
     inline void Assembler::SSEsm(I32 c, R r,  I32 d, R b) {
         underrunProtect(8);
@@ -850,7 +847,6 @@ namespace nanojit
     inline void Assembler::FSUBR32dm(const float* dm) { count_ldq(); FPUdm(0xd805, (const double* const) dm); asm_output("fsubr32 (%p)", (void*)dm); }
     inline void Assembler::FMUL32dm( const float* dm) { count_ldq(); FPUdm(0xd801, (const double* const) dm); asm_output("fmul32 (%p)", (void*)dm); }
     inline void Assembler::FDIVR32dm(const float* dm) { count_ldq(); FPUdm(0xd807, (const double* const) dm); asm_output("fdivr32 (%p)", (void*)dm); }
-#endif // VMCFG_FLOAT
 
     inline void Assembler::SSE_LDQ( R r, I32 d, R b) { count_ldq(); SSEm(0xf30f7e, r, d, b); asm_output("movq %s,%d(%s)", gpn(r), d, gpn(b)); }
     inline void Assembler::SSE_LDSS(R r, I32 d, R b) { count_ld();  SSEm(0xf30f10, r, d, b); asm_output("movss %s,%d(%s)", gpn(r), d, gpn(b)); }
@@ -1207,8 +1203,7 @@ namespace nanojit
 
         return  _nIns;
     }
-    
-#ifdef VMCFG_FLOAT
+
     static inline uint32_t compute_pushsize(const CallInfo* ci, uint32_t max_iregs){
         uint32_t iargs = ci->count_int32_args();
         uint32_t fargs = ci->count_32bitfloat_args();
@@ -1263,7 +1258,6 @@ namespace nanojit
             return pushsize;
         }
     }
-#endif
 
     /* Just as a recap, here's how the calling convention works on x86/32bit :
     I:PARAMETER PASSING
@@ -1301,25 +1295,7 @@ namespace nanojit
         int32_t extra = 0;
         uint32_t align = NJ_ALIGN_STACK;
 
-#ifdef VMCFG_FLOAT
         const int32_t pushsize = compute_pushsize(call, max_regs);
-#else
-        // must be signed, not unsigned
-        uint32_t iargs = call->count_int32_args();
-        int32_t fargs = call->count_args() - iargs;
-
-        if (indirect) {
-            // target arg isn't pushed, its consumed in the call
-            iargs --;
-        }
-
-        if (max_regs > iargs)
-            max_regs = iargs;
-
-        int32_t istack = iargs-max_regs;  // first 2 4B args are in registers
-        const int32_t pushsize = 4*istack + 8*fargs; // actual stack space used
-
-#endif
 
         NanoAssert( (align & 7) == 0);  // Alignment should always be at least 8
 
@@ -1378,7 +1354,6 @@ namespace nanojit
                 stkd = 0;
         }
 
-#ifdef VMCFG_FLOAT
         uint32_t nf4 = 0;
         /* Careful here! 
            If we take the normal flow, the instructions that (temporarily) load float/double parameters in regs may inadvertently
@@ -1399,23 +1374,18 @@ namespace nanojit
             NanoAssert( stkd == 0 );
         }
         nf4 = 0; 
-#endif  // now proceed with the normal flow 
 
         for (uint32_t i = 0; i < argc; i++)
         {
             uint32_t j = argc-i-1;
             ArgType ty = argTypes[j];
             Register r = UnspecifiedReg;
-#ifdef VMCFG_FLOAT
-            if( ty == ARGTYPE_F4 ){
-                if(nf4 < NJ_MAX_F4ARGS_IN_REGS ){
+            if (ty == ARGTYPE_F4) {
+                if(nf4 < NJ_MAX_F4ARGS_IN_REGS) {
                     nf4++; // Already assigned!!
                     continue;
                 }
-
-            } else
-#endif            
-            if (n < max_regs && ty != ARGTYPE_D && ty != ARGTYPE_F) {
+            } else if (n < max_regs && ty != ARGTYPE_D && ty != ARGTYPE_F) {
                 r = RegAlloc::argRegs[n++]; // tell asm_arg what reg to use
             }
             
@@ -1515,12 +1485,10 @@ namespace nanojit
 
         } else if (ins->isImmD()) {
             asm_immd(r, ins->immDasQ(), ins->immD(), /*canClobberCCs*/false);
-#ifdef VMCFG_FLOAT
         } else if (ins->isImmF()) {
             asm_immf(r, ins->immFasI(), ins->immF(), /*canClobberCCs*/false);
         } else if (ins->isImmF4()) {
             asm_immf4(r, ins->immF4(), /*canClobberCCs*/false);
-#endif
         } else if (ins->isop(LIR_paramp) && ins->paramKind() == 0 &&
             (arg = ins->paramArg()) >= (abi_regcount = max_abi_regs[_thisfrag->lirbuf->abi])) {
             // Incoming arg is on stack, can restore it from there instead of spilling.
@@ -1550,7 +1518,6 @@ namespace nanojit
             if (ins->isI()) {
                 NanoAssert(rmask(r) & GpRegs);
                 LD(r, d, FP);
-#ifdef VMCFG_FLOAT
             } else if(ins->isF()) {
                 if (rmask(r) & XmmRegs) {
                     SSE_LDSS(r, d, FP);
@@ -1561,7 +1528,6 @@ namespace nanojit
             } else if(ins->isF4()) {
                 NanoAssert(rmask(r) & XmmRegs);
                  SSE_LDUPS(r, d, FP);
-#endif // VMCFG_FLOAT
             }
             else {
                 NanoAssert(ins->isD());
@@ -1669,7 +1635,6 @@ namespace nanojit
         }
     }
 
-#ifdef VMCFG_FLOAT
     void Assembler::asm_load128(LIns* ins)
     {
         NanoAssert(_config.i386_sse2);
@@ -1697,7 +1662,6 @@ namespace nanojit
         }
         freeResourcesOf(ins);
     }
-#endif // VMCFG_FLOAT
 
     void Assembler::asm_load64(LIns* ins)
     {
@@ -1773,12 +1737,10 @@ namespace nanojit
                 // Don't use an fpu reg to simply load & store the value.
                 asm_mmq(FP, dr, rb, d);
                 break;
-#ifdef VMCFG_FLOAT
             case LIR_ldf:
                 // move just 32 bits
                 asm_mmi(FP, dr, rb, d);
                 break;
-#endif 
             case LIR_ldf2d:
                 // Need to use fpu to expand 32->64.
                 FSTPQ(dr, FP);
@@ -1863,7 +1825,6 @@ namespace nanojit
         }
     }
 
-#ifdef VMCFG_FLOAT
     void Assembler::asm_store128(LOpcode op, LIns *value, int d, LIns *base) {
         NanoAssert((value->isF4() && (op==LIR_stf4)) ); (void) op;
         NanoAssert(_config.i386_sse2 );
@@ -1883,7 +1844,6 @@ namespace nanojit
         ST(rd, dd, t);
         LD(t, ds, rs);
     }
-#endif
 
     // Copy 64 bits: (rd+dd) <- (rs+ds).
     //
@@ -2069,7 +2029,6 @@ namespace nanojit
         }
     }
 
-#ifdef VMCFG_FLOAT
     void Assembler::asm_condf4(LIns *cond) {
         NanoAssert(cond->opcode() == LIR_eqf4);
         NanoAssert(_config.i386_sse2);
@@ -2081,16 +2040,15 @@ namespace nanojit
         freeResourcesOf(cond);
         asm_cmpf4(cond);
     }
-#endif 
 
     void Assembler::asm_condd(LIns* ins)
     {
         LOpcode opcode = ins->opcode();
         Register r = prepareResultReg(ins, AllowableByteRegs);
 
-#ifdef VMCFG_FLOAT
-        if(isCmpFOpcode(opcode)) opcode = getCmpDOpcode(opcode);
-#endif 
+        if (isCmpFOpcode(opcode))
+          opcode = getCmpDOpcode(opcode);
+
         // SETcc only sets low 8 bits, so extend
         MOVZX8(r,r);
 
@@ -2628,7 +2586,6 @@ namespace nanojit
             LDi(r, val);
     }
 
-#ifdef VMCFG_FLOAT
     void Assembler::asm_immf(Register r, int32_t i, float f, bool canClobberCCs)
     {
         // Floats require non-standard handling. There is no load-32-bit-immediate
@@ -2703,7 +2660,6 @@ namespace nanojit
 
         freeResourcesOf(ins);
     }    
-#endif
 
     void Assembler::asm_immd(Register r, uint64_t q, double d, bool canClobberCCs)
     {
@@ -2758,7 +2714,7 @@ namespace nanojit
         freeResourcesOf(ins);
     }
 
-    // negateMask is used by asm_fneg.
+    // negateMaskD is used by asm_fneg.
 #if defined __SUNPRO_CC
     // From Sun Studio C++ Readme: #pragma align inside namespace requires mangled names.
     // Initialize here to avoid multithreading contention issues during initialization.
@@ -2768,29 +2724,29 @@ namespace nanojit
 
     static uint32_t* negateMaskInit()
     {
-        uint32_t* negateMask = (uint32_t*) alignUp(negateMask_temp, 16);
-        negateMask[1] = 0x80000000;
-        return negateMask;
+        uint32_t* negateMaskD = (uint32_t*) alignUp(negateMask_temp, 16);
+        negateMaskD[1] = 0x80000000;
+        return negateMaskD;
     }
     static uint32_t* fNegateMaskInit(uint32_t mask[], bool isFloat4 )
     {
-        uint32_t* negateMask = (uint32_t*) alignUp(mask, 16);
-        negateMask[0] = 0x80000000;
+        uint32_t* negateMaskD = (uint32_t*) alignUp(mask, 16);
+        negateMaskD[0] = 0x80000000;
         if(isFloat4){ 
-            negateMask[1] = 0x80000000;
-            negateMask[2] = 0x80000000;
-            negateMask[3] = 0x80000000;
+            negateMaskD[1] = 0x80000000;
+            negateMaskD[2] = 0x80000000;
+            negateMaskD[3] = 0x80000000;
         }
-        return negateMask;
+        return negateMaskD;
     }
 
-    static uint32_t *negateMask     = negateMaskInit();
-    static uint32_t *negateMaskFlt  = fNegateMaskInit(fNegateMask_temp,  false);
-    static uint32_t *negateMaskFlt4 = fNegateMaskInit(fNegateMask4_temp, true);
+    static uint32_t *negateMaskD     = negateMaskInit();
+    static uint32_t *negateMaskF  = fNegateMaskInit(fNegateMask_temp,  false);
+    static uint32_t *negateMaskF4 = fNegateMaskInit(fNegateMask4_temp, true);
 #else
-    static const AVMPLUS_ALIGN16(uint32_t) negateMask[]     = {0,0x80000000,0,0};
-    static const AVMPLUS_ALIGN16(uint32_t) negateMaskFlt[]  = {0x80000000,0,0,0};// single-percision negation mask
-    static const AVMPLUS_ALIGN16(uint32_t) negateMaskFlt4[] = {0x80000000,0x80000000,0x80000000,0x80000000};
+    static const AVMPLUS_ALIGN16(uint32_t) negateMaskD[]  = {0,0x80000000,0,0};
+    static const AVMPLUS_ALIGN16(uint32_t) negateMaskF[]  = {0x80000000,0,0,0};// single-percision negation mask
+    static const AVMPLUS_ALIGN16(uint32_t) negateMaskF4[] = {0x80000000,0x80000000,0x80000000,0x80000000};
 #endif
 
     void Assembler::asm_fneg(LIns* ins)
@@ -2813,29 +2769,24 @@ namespace nanojit
                 ra = lhs->getReg();
             }
 
-            uint32_t* mask = (uint32_t*) negateMask;
-#ifdef VMCFG_FLOAT
+            uint32_t* mask = (uint32_t*) negateMaskD;
+
             bool floatVal = true;
             switch(ins->opcode()){
-            case LIR_negf:    mask = (uint32_t*) negateMaskFlt;  break;
-            case LIR_negf4:   mask = (uint32_t*) negateMaskFlt4; break;
-            case LIR_negd:    floatVal = false;                  break;
+            case LIR_negf:    mask = (uint32_t*) negateMaskF;  break;
+            case LIR_negf4:   mask = (uint32_t*) negateMaskF4; break;
+            case LIR_negd:    floatVal = false;                break;
             default: TODO(asm_fneg);break;
             }
-            if(floatVal)
+            if (floatVal)
                 SSE_XORPS(rr, mask);
             else
-#endif // VMCFG_FLOAT
-
                 SSE_XORPD(rr, mask);
 
-
-            if (rr != ra){
-#ifdef VMCFG_FLOAT
+            if (rr != ra) {
                 if(floatVal)
                     SSE_MOVAPS(rr, ra);
                 else
-#endif 
                     SSE_MOVSD(rr, ra);
             }
 
@@ -2844,7 +2795,6 @@ namespace nanojit
                 NanoAssert(ra == rr);
                 findSpecificRegForUnallocated(lhs, ra);
             }
-
         } else {
             debug_only( Register rr = ) prepareResultReg(ins, x87Regs);
             NanoAssert(ins->opcode() != LIR_negf4);
@@ -3028,7 +2978,6 @@ namespace nanojit
             case LIR_subd:  SSE_SUBSD(rr, rb);  break;
             case LIR_muld:  SSE_MULSD(rr, rb);  break;
             case LIR_divd:  SSE_DIVSD(rr, rb);  break;
-#ifdef VMCFG_FLOAT
             case LIR_addf:  SSE_ADDSS(rr, rb);  break;
             case LIR_subf:  SSE_SUBSS(rr, rb);  break;
             case LIR_mulf:  SSE_MULSS(rr, rb);  break;
@@ -3037,7 +2986,6 @@ namespace nanojit
             case LIR_subf4: SSE_SUBPS(rr, rb);  break;
             case LIR_mulf4: SSE_MULPS(rr, rb);  break;
             case LIR_divf4: SSE_DIVPS(rr, rb);  break;
-#endif 
             default:        NanoAssertMsgf(false,"Unhandled op %d",op);
             }
 
@@ -3071,9 +3019,7 @@ namespace nanojit
                 case LIR_divd:  FDIVRdm((const double*)p);  break;
                 default:        NanoAssert(0);
                 }
-            } else
-#ifdef VMCFG_FLOAT
-            if (rhs->isImmF()) {
+            } else if (rhs->isImmF()) {
                 const uint64_t* p = findImmDFromPool(rhs->immFasI());
 
                 switch (op) {
@@ -3083,9 +3029,7 @@ namespace nanojit
                 case LIR_divf:  FDIVR32dm((const float*)p);  break;
                 default:        NanoAssert(0);
                 }
-            } else 
-#endif
-            {
+            } else {
                 int db = findMemFor(rhs);
 
                 switch (op) {
@@ -3093,12 +3037,10 @@ namespace nanojit
                 case LIR_subd:  FSUBR(db, FP);  break;
                 case LIR_muld:  FMUL( db, FP);  break;
                 case LIR_divd:  FDIVR(db, FP);  break;
-#ifdef VMCFG_FLOAT
                 case LIR_addf:  FADD32( db, FP);  break;
                 case LIR_subf:  FSUBR32(db, FP);  break;
                 case LIR_mulf:  FMUL32( db, FP);  break;
                 case LIR_divf:  FDIVR32(db, FP);  break;
-#endif
                 default:        NanoAssert(0);
                 }
             }
@@ -3182,7 +3124,6 @@ namespace nanojit
         freeResourcesOf(ins);
     }
 
-#ifdef VMCFG_FLOAT
     void Assembler::asm_i2f(LIns* ins)
     {
         LIns* lhs = ins->oprnd1();
@@ -3296,7 +3237,6 @@ namespace nanojit
         
         freeResourcesOf(ins);
     }
-#endif // VMCFG_FLOAT
     
     void Assembler::asm_d2i(LIns* ins)
     {
@@ -3421,7 +3361,6 @@ namespace nanojit
         return Branches(patch1, patch2);
     }
 
-#ifdef VMCFG_FLOAT
     // WARNING: This function cannot generate any code that will affect the
     // condition codes prior to the generation of the
     // ucomisd/fcompp/fcmop/fcom.  See asm_cmpi() for more details.
@@ -3448,7 +3387,6 @@ namespace nanojit
        if(ra!=rt)
            asm_nongp_copy(rt,ra);
     }
-#endif // VMCFG_FLOAT
 
     // WARNING: This function cannot generate any code that will affect the
     // condition codes prior to the generation of the
@@ -3509,11 +3447,10 @@ namespace nanojit
 
             Register ra, rb;
             findRegFor2(XmmRegs, lhs, ra, XmmRegs, rhs, rb);
-#ifdef VMCFG_FLOAT
-            if(singlePrecision) 
+
+            if (singlePrecision)
                 SSE_UCOMISS(ra,rb); 
             else 
-#endif
                 SSE_UCOMISD(ra, rb);
 
         } else {
@@ -3591,39 +3528,32 @@ namespace nanojit
             } else {
                 TEST_AH(mask);
                 FNSTSW_AX();        // requires rEAX to be free
-                
-                if (rhs->isImmAny()){
+                if (rhs->isImmAny()) {
                     const uint64_t* p;
-#ifdef VMCFG_FLOAT
-                    if(singlePrecision){
+                    if (singlePrecision) {
                         NanoAssert(rhs->isImmF());
-                        union{
+                        union {
                             double d;
                             uint64_t q;
-                        }u;
+                        } u;
                         u.d = rhs->immF();//  convert to double, to avoid adding a findImmFFromPool + a FCOMdm32 instruction
                         p = findImmDFromPool(u.q); 
-                    } else 
-#endif 
-                    {
+                    } else {
                         NanoAssert(rhs->isImmD());
                         p =findImmDFromPool(rhs->immDasQ());
                     }
                     FCOMdm(pop, (const double*)p);
                 } else {
                     int d = findMemFor(rhs);
-#ifdef VMCFG_FLOAT
-                    if(singlePrecision) 
+                    if (singlePrecision)
                         FCOM32(pop,d,FP);
                     else
-#endif 
                         FCOM(pop, d, FP);
                 }
             }
         }
     }
 
-#ifdef VMCFG_FLOAT
     void Assembler::asm_f2f4(LIns *ins) {
         LIns *a = ins->oprnd1();
         NanoAssert(ins->isF4() && a->isF());
@@ -3640,16 +3570,15 @@ namespace nanojit
         NanoAssert(ins->isF() && a->isF4());
         Register rr = prepareResultReg(ins, XmmRegs);
         Register rb = findRegFor(a, XmmRegs);
-        switch(ins->opcode()){
+        switch (ins->opcode()) {
         default: TODO(asm_f4comp); break;
-        case LIR_f4x: SSE_PSHUFD(rr,rb,_MM_SHUFFLE(0,0,0,0)); break;
-        case LIR_f4y: SSE_PSHUFD(rr,rb,_MM_SHUFFLE(1,1,1,1)); break;
-        case LIR_f4z: SSE_PSHUFD(rr,rb,_MM_SHUFFLE(2,2,2,2)); break;
-        case LIR_f4w: SSE_PSHUFD(rr,rb,_MM_SHUFFLE(3,3,3,3)); break;
+        case LIR_f4x: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(0,0,0,0)); break;
+        case LIR_f4y: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(1,1,1,1)); break;
+        case LIR_f4z: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(2,2,2,2)); break;
+        case LIR_f4w: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(3,3,3,3)); break;
         }
         freeResourcesOf(ins);
     }
-#endif // VMCFG_FLOAT
 
     // Increment the 32-bit profiling counter at pCtr, without
     // changing any registers.
