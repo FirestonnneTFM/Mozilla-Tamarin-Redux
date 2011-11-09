@@ -2094,6 +2094,11 @@ namespace avmplus
                     AvmAssert(atomPtr(a) != NULL);
                     gc->TracePointer(atomPtr(a) HEAP_GRAPH_ARG((uintptr_t*)p));
                 }
+                else if (atomKind(a) == avmplus::AtomConstants::kSpecialBibopType && a != undefinedAtom)
+                {   
+                    AvmAssert(bibopKind(a) == avmplus::AtomConstants::kBibopFloatType || bibopKind(a) == avmplus::AtomConstants::kBibopFloat4Type);
+                    gc->TracePointer(atomPtr(a) HEAP_GRAPH_ARG((uintptr_t*)p));
+                }
             }
             p++;
         }
