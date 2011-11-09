@@ -193,7 +193,7 @@ void coerceobj_atom(MethodEnv* env, Atom atom, Traits*);
  */
 Atom op_add(AvmCore*, Atom lhs, Atom rhs);
 #ifdef VMCFG_FLOAT
-Atom op_add_legacy(AvmCore*, Atom lhs, Atom rhs);
+Atom op_add_nofloat(AvmCore*, Atom lhs, Atom rhs);
 Atom op_multiply(AvmCore*, Atom lhs, Atom rhs);
 Atom op_subtract(AvmCore*, Atom lhs, Atom rhs);
 Atom op_modulo(AvmCore*, Atom lhs, Atom rhs);
@@ -211,11 +211,11 @@ Atom op_add_a_ia(AvmCore* core, int32_t lhs, Atom rhs);
 Atom op_add_a_ad(AvmCore* core, Atom lhs, double rhs);
 Atom op_add_a_da(AvmCore* core, double lhs, Atom rhs);
 #ifdef VMCFG_FLOAT
-Atom op_add_a_aa_legacy(AvmCore* core, Atom lhs, Atom rhs);
-Atom op_add_a_ai_legacy(AvmCore* core, Atom lhs, int32_t rhs);
-Atom op_add_a_ia_legacy(AvmCore* core, int32_t lhs, Atom rhs);
-Atom op_add_a_ad_legacy(AvmCore* core, Atom lhs, double rhs);
-Atom op_add_a_da_legacy(AvmCore* core, double lhs, Atom rhs);
+Atom op_add_a_aa_nofloat(AvmCore* core, Atom lhs, Atom rhs);
+Atom op_add_a_ai_nofloat(AvmCore* core, Atom lhs, int32_t rhs);
+Atom op_add_a_ia_nofloat(AvmCore* core, int32_t lhs, Atom rhs);
+Atom op_add_a_ad_nofloat(AvmCore* core, Atom lhs, double rhs);
+Atom op_add_a_da_nofloat(AvmCore* core, double lhs, Atom rhs);
 #endif
 #endif
 

@@ -205,15 +205,6 @@ REALLY_INLINE Atom Toplevel::atom() const
     return _mainEntryPoint->global->atom();
 }
 
-REALLY_INLINE Atom Toplevel::add2(Atom val1, Atom val2  FLOAT_ONLY(, bool enableFloats) )
-{
-#ifdef VMCFG_FLOAT
-    if(!enableFloats)
-        return avmplus::op_add_legacy(this->core(), val1, val2);
-#endif 
-    return avmplus::op_add(this->core(), val1, val2);
-}
-
 REALLY_INLINE void Toplevel::init_mainEntryPoint(ScriptEnv* main, builtinClassManifest* builtins)
 {
     AvmAssert(_mainEntryPoint == NULL);

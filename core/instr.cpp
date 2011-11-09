@@ -463,7 +463,7 @@ template<> float4_t __subtract<float4_t>(float4_t a, float4_t b) { return f4_sub
            return core->float4ToAtom( __##name( AvmCore::float4(lhs), AvmCore::float4(rhs)) );\
         }\
         if(AvmCore::isFloat(lhs) && AvmCore::isFloat(rhs))\
-            return core->floatToAtom( __##name(AvmCore::singlePrecisionFloat(lhs),AvmCore::singlePrecisionFloat(rhs)));\
+            return core->floatToAtom( __##name(AvmCore::atomToFloat(lhs),AvmCore::atomToFloat(rhs)));\
         else\
             return core->doubleToAtom(__##name( AvmCore::number(lhs), AvmCore::number(rhs)) );\
     }
@@ -478,7 +478,7 @@ Atom op_negate(AvmCore* core, Atom val) {
     val = AvmCore::primitive(val); // slow, but let's get over this...
         
     if(AvmCore::isFloat(val)){
-        return core->floatToAtom(-AvmCore::singlePrecisionFloat(val));
+        return core->floatToAtom(-AvmCore::atomToFloat(val));
     }
 
     if(AvmCore::isFloat4(val)){
@@ -501,7 +501,7 @@ Atom op_negate(AvmCore* core, Atom val) {
 #endif
 
 #ifdef VMCFG_FLOAT
-inline Atom op_add_impl(AvmCore* core, Atom lhs, Atom rhs, bool float_enabled)
+template<bool float_enabled> Atom op_add_impl(AvmCore* core, Atom lhs, Atom rhs)
 #else
 Atom op_add(AvmCore* core, Atom lhs, Atom rhs)
 #endif // VMCFG_FLOAT
@@ -609,12 +609,12 @@ add_numbers:
 #ifdef VMCFG_FLOAT
 Atom op_add(AvmCore* core, Atom lhs, Atom rhs)
 {
-   return op_add_impl( core, lhs, rhs, true );
+   return op_add_impl<true>(core, lhs, rhs);
 }
 
-Atom op_add_legacy(AvmCore* core, Atom lhs, Atom rhs)
+Atom op_add_nofloat(AvmCore* core, Atom lhs, Atom rhs)
 {
-   return op_add_impl( core, lhs, rhs, false );
+   return op_add_impl<false>( core, lhs, rhs);
 }
 #endif // VMCFG_FLOAT
 
@@ -644,7 +644,7 @@ static bool addIntptrOverflow(intptr_t lhs, intptr_t rhs)
 
 // atom + atom => atom
 #ifdef VMCFG_FLOAT
-inline Atom op_add_a_aa_impl(AvmCore* core, Atom lhs, Atom rhs, bool floatSupport)
+template<bool float_support> Atom op_add_a_aa_impl(AvmCore* core, Atom lhs, Atom rhs)
 #else
 Atom op_add_a_aa(AvmCore* core, Atom lhs, Atom rhs)
 #endif // VMCFG_FLOAT
@@ -723,7 +723,7 @@ Atom op_add_a_aa(AvmCore* core, Atom lhs, Atom rhs)
     if (!(AvmCore::isString(lhs) || AvmCore::isString(rhs)))
     {
 #ifdef VMCFG_FLOAT
-        if(floatSupport){
+        if(float_support){
             if(AvmCore::isFloat4(lhs) || AvmCore::isFloat4(rhs))
                 return core->float4ToAtom( f4_add( AvmCore::float4(lhs), AvmCore::float4(rhs)) );
             if(AvmCore::isFloat(lhs) && AvmCore::isFloat(rhs))
@@ -739,7 +739,7 @@ concat_strings:
 
 // atom + int => atom
 #ifdef VMCFG_FLOAT
-inline Atom op_add_a_ai_impl(AvmCore* core, Atom lhs, int32_t rhs, bool floatSupport)
+template<bool float_support> Atom op_add_a_ai_impl(AvmCore* core, Atom lhs, int32_t rhs)
 #else
 Atom op_add_a_ai(AvmCore* core, Atom lhs, int32_t rhs)
 #endif // VMCFG_FLOAT
@@ -788,7 +788,7 @@ Atom op_add_a_ai(AvmCore* core, Atom lhs, int32_t rhs)
     if (!AvmCore::isString(lhs))
     {
 #ifdef VMCFG_FLOAT
-        if(floatSupport && AvmCore::isFloat4(lhs)) {
+        if(float_support && AvmCore::isFloat4(lhs)) {
             float4_t op2 = {(float)rhs, (float)rhs, (float)rhs, (float)rhs};
             return core->float4ToAtom( f4_add( AvmCore::atomToFloat4(lhs), op2) );
         }
@@ -804,7 +804,7 @@ Atom op_add_a_ai(AvmCore* core, Atom lhs, int32_t rhs)
 
 // int + atom => atom
 #ifdef VMCFG_FLOAT
-inline Atom op_add_a_ia_impl(AvmCore* core, int32_t lhs, Atom rhs, bool floatSupport)
+template<bool float_support> Atom op_add_a_ia_impl(AvmCore* core, int32_t lhs, Atom rhs)
 #else
 Atom op_add_a_ia(AvmCore* core, int32_t lhs, Atom rhs)
 #endif // VMCFG_FLOAT
@@ -853,7 +853,7 @@ Atom op_add_a_ia(AvmCore* core, int32_t lhs, Atom rhs)
     if (!AvmCore::isString(rhs))
     {
 #ifdef VMCFG_FLOAT
-        if( floatSupport && AvmCore::isFloat4(rhs)) {
+        if( float_support && AvmCore::isFloat4(rhs)) {
             float4_t op1 = {(float)lhs, (float)lhs, (float)lhs, (float)lhs};
             return core->float4ToAtom( f4_add( op1, AvmCore::atomToFloat4(rhs)) );
         }
@@ -869,7 +869,7 @@ concat_strings:
 
 // atom + double => atom
 #ifdef VMCFG_FLOAT
-inline Atom op_add_a_ad_impl(AvmCore* core, Atom lhs, double rhs, bool floatSupport)
+template<bool float_support> Atom op_add_a_ad_impl(AvmCore* core, Atom lhs, double rhs)
 #else
 Atom op_add_a_ad(AvmCore* core, Atom lhs, double rhs)
 #endif // VMCFG_FLOAT
@@ -890,7 +890,7 @@ Atom op_add_a_ad(AvmCore* core, Atom lhs, double rhs)
     if (!AvmCore::isString(lhs))
     {
 #ifdef VMCFG_FLOAT
-        if(floatSupport && AvmCore::isFloat4(lhs)) {
+        if(float_support && AvmCore::isFloat4(lhs)) {
             float4_t op2 = {(float)rhs, (float)rhs, (float)rhs, (float)rhs};
             return core->float4ToAtom( f4_add( AvmCore::atomToFloat4(lhs), op2) );
         }
@@ -906,7 +906,7 @@ concat_strings:
 
 // double + atom => atom
 #ifdef VMCFG_FLOAT
-inline Atom op_add_a_da_impl(AvmCore* core, double lhs, Atom rhs, bool floatSupport)
+template<bool float_support> Atom op_add_a_da_impl(AvmCore* core, double lhs, Atom rhs)
 #else
 Atom op_add_a_da(AvmCore* core, double lhs, Atom rhs)
 #endif
@@ -927,7 +927,7 @@ Atom op_add_a_da(AvmCore* core, double lhs, Atom rhs)
     if (!AvmCore::isString(rhs))
     {
 #ifdef VMCFG_FLOAT
-        if(floatSupport && AvmCore::isFloat4(rhs)) {
+        if(float_support && AvmCore::isFloat4(rhs)) {
             float4_t op1 = {(float)lhs, (float)lhs, (float)lhs, (float)lhs};
             return core->float4ToAtom( f4_add( op1, AvmCore::atomToFloat4(rhs)) );
         }
@@ -943,19 +943,36 @@ concat_strings:
 
 
 #ifdef VMCFG_FLOAT
-#define DECLARE_OPADD_VERSION(ver,T1,T2)                                   \
-Atom op_add_a_##ver(AvmCore* core, T1 lhs, T2 rhs){                        \
-    return op_add_a_##ver##_impl(core,lhs,rhs,true);                       \
-}                                                                          \
-Atom op_add_a_##ver##_legacy(AvmCore* core, T1 lhs, T2 rhs){               \
-    return op_add_a_##ver##_impl(core,lhs,rhs,false);                      \
+Atom op_add_a_aa(AvmCore* core, Atom lhs, Atom rhs){
+    return op_add_a_aa_impl<true>(core, lhs, rhs);
 }
-
-DECLARE_OPADD_VERSION(aa, Atom, Atom);
-DECLARE_OPADD_VERSION(ai, Atom, int32_t);
-DECLARE_OPADD_VERSION(ia, int32_t, Atom);
-DECLARE_OPADD_VERSION(ad, Atom, double);
-DECLARE_OPADD_VERSION(da, double, Atom);
+Atom op_add_a_aa_nofloat(AvmCore* core, Atom lhs, Atom rhs){
+    return op_add_a_aa_impl<false>(core, lhs, rhs);                     
+}
+Atom op_add_a_ai(AvmCore* core, Atom lhs, int32_t rhs){
+    return op_add_a_ai_impl<true>(core, lhs, rhs);
+}
+Atom op_add_a_ai_nofloat(AvmCore* core, Atom lhs, int32_t rhs){
+    return op_add_a_ai_impl<false>(core, lhs, rhs);                     
+}
+Atom op_add_a_ia(AvmCore* core, int32_t lhs, Atom rhs){
+    return op_add_a_ia_impl<true>(core, lhs, rhs);
+}
+Atom op_add_a_ia_nofloat(AvmCore* core, int32_t lhs, Atom rhs){
+    return op_add_a_ia_impl<false>(core, lhs, rhs);                     
+}
+Atom op_add_a_ad(AvmCore* core, Atom lhs, double rhs){
+    return op_add_a_ad_impl<true>(core, lhs, rhs);
+}
+Atom op_add_a_ad_nofloat(AvmCore* core, Atom lhs, double rhs){
+    return op_add_a_ad_impl<false>(core, lhs, rhs);                     
+}
+Atom op_add_a_da(AvmCore* core, double lhs, Atom rhs){
+    return op_add_a_da_impl<true>(core, lhs, rhs);
+}
+Atom op_add_a_da_nofloat(AvmCore* core, double lhs, Atom rhs){
+    return op_add_a_da_impl<false>(core, lhs, rhs);                     
+}
 #endif /* VMCFG_FLOAT */
 
 #endif /* VMCFG_FASTPATH_ADD */
