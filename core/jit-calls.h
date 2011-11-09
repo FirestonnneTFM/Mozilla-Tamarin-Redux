@@ -1100,12 +1100,12 @@
 #endif
     FUNCTION(FUNCADDR(op_add), SIG3(A,P,A,A), op_add)
 #ifdef VMCFG_FLOAT
-    FUNCTION(FUNCADDR(op_add_legacy), SIG3(A,P,A,A), op_add_legacy)
-    FUNCTION(FUNCADDR(op_add_a_aa_legacy), SIG3(A,P,A,A), op_add_a_aa_legacy)
-    FUNCTION(FUNCADDR(op_add_a_ai_legacy), SIG3(A,P,A,I), op_add_a_ai_legacy)
-    FUNCTION(FUNCADDR(op_add_a_ia_legacy), SIG3(A,P,I,A), op_add_a_ia_legacy)
-    FUNCTION(FUNCADDR(op_add_a_ad_legacy), SIG3(A,P,A,D), op_add_a_ad_legacy)
-    FUNCTION(FUNCADDR(op_add_a_da_legacy), SIG3(A,P,D,A), op_add_a_da_legacy)
+    FUNCTION(FUNCADDR(op_add_nofloat), SIG3(A,P,A,A), op_add_nofloat)
+    FUNCTION(FUNCADDR(op_add_a_aa_nofloat), SIG3(A,P,A,A), op_add_a_aa_nofloat)
+    FUNCTION(FUNCADDR(op_add_a_ai_nofloat), SIG3(A,P,A,I), op_add_a_ai_nofloat)
+    FUNCTION(FUNCADDR(op_add_a_ia_nofloat), SIG3(A,P,I,A), op_add_a_ia_nofloat)
+    FUNCTION(FUNCADDR(op_add_a_ad_nofloat), SIG3(A,P,A,D), op_add_a_ad_nofloat)
+    FUNCTION(FUNCADDR(op_add_a_da_nofloat), SIG3(A,P,D,A), op_add_a_da_nofloat)
 #endif
 
 #ifdef VMCFG_FLOAT

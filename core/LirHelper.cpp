@@ -364,7 +364,7 @@ LIns* LirHelper::IncrementLIREmitter::operator()(enum BuiltinType bt,LIns* oper)
     case BUILTIN_any:  
         {
             /* Note: we add with 1.0f/-1.0f, to make sure that  the results stays float if operand is float */
-            const CallInfo* addfunc = _lh->pool->hasFloatSupport() ? FUNCTIONID(op_add): FUNCTIONID(op_add_legacy);
+            const CallInfo* addfunc = _lh->pool->hasFloatSupport() ? FUNCTIONID(op_add) : FUNCTIONID(op_add_nofloat);
             return _lh->callIns( addfunc, 3, _lh->coreAddr, oper, _lh->InsConstAtom(_shouldDecrement? _lh->core->kFltMinusOne:_lh->core->kFltOne ));
         }
     default: return TODO("Unexpected builtin type in IncrementLIREmitter");

@@ -1478,7 +1478,7 @@ namespace avmplus
         NEXT; \
     } \
 FLOAT_ONLY(\
-    else if (pool-> hasFloatSupport() ) { \
+    else if (pool->hasFloatSupport() ) { \
        if ( IS_BOTH_FLOAT(a1, a2) ) {\
             dest = core->floatToAtom(FLOAT_VALUE(a1) + FLOAT_VALUE(a2)); \
             NEXT; \
@@ -1487,13 +1487,17 @@ FLOAT_ONLY(\
             float4_t x = AvmCore::float4(a1);\
             float4_t y = AvmCore::float4(a2);\
             \
-            sp[0] = core->float4ToAtom( f4_add(x,y) ); \
+            dest = core->float4ToAtom( f4_add(x,y) ); \
             NEXT;\
        }\
-    } \
+    } else { /* pool doesn't have float support */ \
+        SAVE_EXPC; \
+        dest = op_add_nofloat(core, a1, a2);\
+        NEXT;\
+    }\
 )\
     SAVE_EXPC; \
-    dest = toplevel->add2(a1, a2 FLOAT_ONLY(, pool-> hasFloatSupport()) ); \
+    dest = op_add(core, a1, a2);\
     NEXT
 
 // Subtract 1 from a1 if a1 is a fixnum and computation does not overflow.

@@ -2304,7 +2304,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         LIns* rhs = loadAtomRep(j);
         LIns* lhs = localGet(i);
         FLOAT_ONLY(const bool floatSupport = pool->hasFloatSupport();)
-        const CallInfo* addFunction = IFFLOAT(floatSupport? FUNCTIONID(op_add_a_ia):FUNCTIONID(op_add_a_ia_legacy),FUNCTIONID(op_add_a_ia));
+        const CallInfo* addFunction = IFFLOAT(floatSupport ? FUNCTIONID(op_add_a_ia) : FUNCTIONID(op_add_a_ia_nofloat), FUNCTIONID(op_add_a_ia));
 
         #ifdef VMCFG_FASTPATH_ADD_INLINE
         if (inlineFastpath) {
@@ -2337,7 +2337,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         LIns* lhs = localGetd(i);
 #ifdef VMCFG_FLOAT
         const bool floatSupport = pool->hasFloatSupport();
-        const CallInfo* addFunction = floatSupport? FUNCTIONID(op_add_a_da):FUNCTIONID(op_add_a_da_legacy);
+        const CallInfo* addFunction = floatSupport ? FUNCTIONID(op_add_a_da) : FUNCTIONID(op_add_a_da_nofloat);
 #else 
         const CallInfo* addFunction = FUNCTIONID(op_add_a_da);
 #endif // VMCFG_FLOAT
@@ -2362,7 +2362,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         LIns* rhs = localGet(j);
 #ifdef VMCFG_FLOAT
         const bool floatSupport = pool->hasFloatSupport();
-        const CallInfo* addFunction = floatSupport? FUNCTIONID(op_add_a_ai):FUNCTIONID(op_add_a_ai_legacy);
+        const CallInfo* addFunction = floatSupport ? FUNCTIONID(op_add_a_ai) : FUNCTIONID(op_add_a_ai_nofloat);
 #else
         const CallInfo* addFunction = FUNCTIONID(op_add_a_ai);
 #endif // VMCFG_FLOAT
@@ -2398,7 +2398,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         LIns* rhs = localGetd(j);
 #ifdef VMCFG_FLOAT
         const bool floatSupport = pool->hasFloatSupport();
-        const CallInfo* addFunction = floatSupport? FUNCTIONID(op_add_a_ad):FUNCTIONID(op_add_a_ad_legacy);
+        const CallInfo* addFunction = floatSupport ? FUNCTIONID(op_add_a_ad) : FUNCTIONID(op_add_a_ad_nofloat);
 #else
         const CallInfo* addFunction = FUNCTIONID(op_add_a_ad);
 #endif // VMCFG_FLOAT
@@ -2450,7 +2450,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         LIns* rhs = loadAtomRep(j);
 #ifdef VMCFG_FLOAT
         const bool floatSupport = pool->hasFloatSupport();
-        const CallInfo* addFunction = floatSupport? FUNCTIONID(op_add_a_aa):FUNCTIONID(op_add_a_aa_legacy);
+        const CallInfo* addFunction = floatSupport ? FUNCTIONID(op_add_a_aa) : FUNCTIONID(op_add_a_aa_nofloat);
 #else
         const CallInfo* addFunction = FUNCTIONID(op_add_a_aa);
 #endif // VMCFG_FLOAT
@@ -2501,13 +2501,14 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     {
         LIns* lhs = loadAtomRep(i);
         LIns* rhs = loadAtomRep(j);
-        LIns* out;
+        
 #ifdef VMCFG_FLOAT
-        if(!pool->hasFloatSupport())
-            out = callIns(FUNCTIONID(op_add_legacy), 3, coreAddr, lhs, rhs);
-        else 
-#endif // float is disabled, we have no "legacy" function, it's the op_add that has the "legacy" behaviour
-           out = callIns(FUNCTIONID(op_add), 3, coreAddr, lhs, rhs);
+        const bool floatSupport = pool->hasFloatSupport();
+        const CallInfo* addFunction = floatSupport ? FUNCTIONID(op_add) : FUNCTIONID(op_add_nofloat);
+#else
+        const CallInfo* addFunction = FUNCTIONID(op_add);
+#endif // VMCFG_FLOAT
+        LIns* out = callIns(addFunction, 3, coreAddr, lhs, rhs);
         localSet(i, atomToNativeRep(type, out), type);
         JIT_EVENT(jit_add);
     }

@@ -275,11 +275,6 @@ namespace avmplus
         void setproperty_b(Atom obj, const Multiname* multiname, Atom value, VTable* vtable, Binding b) const;
 
         /**
-         * operator +
-         */
-        Atom add2(Atom lhs, Atom rhs FLOAT_ONLY(, bool enableFloats) );
-
-        /**
          * Implements the GetDefaultNamespace API as specified in E4X 12.1.1, pg 59
          *
          */

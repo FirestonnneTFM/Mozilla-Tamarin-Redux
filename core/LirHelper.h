@@ -255,7 +255,7 @@ namespace avmplus
     extern const CallInfo ci_mod;
     extern const CallInfo ci_op_modulo;
     extern const CallInfo ci_op_add;
-    extern const CallInfo ci_op_add_legacy;
+    extern const CallInfo ci_op_add_nofloat;
     extern const CallInfo ci_op_subtract;
     extern const CallInfo ci_op_multiply;
     extern const CallInfo ci_op_divide;
