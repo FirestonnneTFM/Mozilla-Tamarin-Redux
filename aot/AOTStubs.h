@@ -2023,9 +2023,9 @@ rt abcOP_add(MethodEnv *env DOUBLE_ALLOCA_DEF, t1 a, t2 b) {
 		return demote_numeric<rt>::convert(promote_numeric<rt, t1>::convert(a) + promote_numeric<rt, t2>::convert(b));
 	
 #ifdef VMCFG_OPTIMISTIC_DOUBLE_ATOM
-    return abcOP_unbox<rt>(env, env->toplevel()->add2(doubleAlloca, (Atom)abcOP_box<LLVMAtom, t1>(env, a), (Atom)abcOP_box<LLVMAtom, t2>(env, b)));
+    return abcOP_unbox<rt>(env, op_add(env->core(), doubleAlloca, (Atom)abcOP_box<LLVMAtom, t1>(env, a), (Atom)abcOP_box<LLVMAtom, t2>(env, b)));
 #else
-    return abcOP_unbox<rt> (env, env->toplevel()->add2((Atom) abcOP_box<LLVMAtom, t1> (env, a), (Atom) abcOP_box<LLVMAtom, t2> (env, b)));
+    return abcOP_unbox<rt> (env, op_add(env->core(), (Atom) abcOP_box<LLVMAtom, t1> (env, a), (Atom) abcOP_box<LLVMAtom, t2> (env, b)));
 #endif
 }
 
@@ -2035,7 +2035,7 @@ rt abcOP_add(MethodEnv *env, t1 a, t2 b) {
 	if(both_numeric<t1, t2>::yes && is_numeric<rt>::yes)
 		return demote_numeric<rt>::convert(promote_numeric<rt, t1>::convert(a) + promote_numeric<rt, t2>::convert(b));
 	
-    return abcOP_unbox<rt> (env, env->toplevel()->add2((Atom) abcOP_box<LLVMAtom, t1> (env, a), (Atom) abcOP_box<LLVMAtom, t2> (env, b)));
+    return abcOP_unbox<rt> (env, op_add(env->core(), (Atom) abcOP_box<LLVMAtom, t1> (env, a), (Atom) abcOP_box<LLVMAtom, t2> (env, b)));
 }
 #endif
 

@@ -469,6 +469,15 @@ var FEATURES =
     <defines> FEATURE_NANOJIT </defines> <!-- referenced by nanojit module only -->
   </feature>
 
+
+  <feature>
+    <desc> Enables the types 'float' and 'float4' in the VM. </desc>
+    <name> AVMFEATURE_FLOAT  </name>
+    <requires> AVMFEATURE_SWF16 </requires>
+    <defines> VMCFG_FLOAT  </defines>
+    <precludes> AVMFEATURE_AOT </precludes> <!--  -->
+  </feature>
+
   <feature>
     <desc> Enables delayed JIT-compilation with on-stack replacement.
            The default OSR compilation strategy either compiles a method eagerly
@@ -591,6 +600,13 @@ var FEATURES =
          in the future if necessary -->
     <name> AVMFEATURE_AOT </name>
     <name> AVMFEATURE_WORDCODE_INTERP </name>
+  </at-most-one>
+
+  <at-most-one>
+    <!-- AOT currently implies no float support; this will presumably be fixed
+         in the future. -->
+    <name> AVMFEATURE_AOT </name>
+    <name> AVMFEATURE_FLOAT </name>
   </at-most-one>
 
   <feature>
@@ -748,7 +764,6 @@ var FEATURES =
     <desc> Enabling this will support SWF16 / ABC version 47.16 </desc>
     <name> AVMFEATURE_SWF16 </name>
     <defines> VMCFG_SWF16 </defines>
-    <defines> VMCFG_FLOAT </defines> 
     <requires> AVMFEATURE_SWF15 </requires>
   </feature>
 

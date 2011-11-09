@@ -1344,7 +1344,7 @@ namespace avmplus
     ArrayObject* ArrayClass::newArray(MethodEnv *env, ADT argDesc, va_list ap)
     {
         uint32_t argc = argDescArgCount(argDesc);
-        AvmAssert(argc >= 0);
+        // removed assert, argc is unsigned!
         return ArrayObject::create<ADT>(core()->GetGC(), ivtable(), prototypePtr(), env, argDesc, argc, ap);
     }
 

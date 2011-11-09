@@ -119,6 +119,9 @@ const char * const avmfeatures = ""
   #if AVMFEATURE_JIT
     "AVMFEATURE_JIT;"
   #endif
+  #if AVMFEATURE_FLOAT
+    "AVMFEATURE_FLOAT;"
+  #endif
   #if AVMFEATURE_OSR
     "AVMFEATURE_OSR;"
   #endif

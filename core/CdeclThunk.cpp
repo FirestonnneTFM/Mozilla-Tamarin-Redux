@@ -196,7 +196,6 @@ namespace avmplus
         kVECTORINT,
         kVECTORUINT,
         kVECTORDOUBLE,
-        kVECTORFLOAT,
         kVECTOROBJ,
         
         
@@ -225,7 +224,6 @@ namespace avmplus
         case kVECTORINT: return VECTORINT_TYPE;
         case kVECTORUINT: return VECTORUINT_TYPE;
         case kVECTORDOUBLE: return VECTORDOUBLE_TYPE;
-        case kVECTORFLOAT: return VECTORFLOAT_TYPE;
         case kVECTOROBJ: return VECTOROBJ_TYPE;
         }
         AvmAssert(false); // shouldn't happen...
@@ -573,10 +571,6 @@ namespace avmplus
             case BUILTIN_number:
                 l.doubleArg();
                 break;
-            case BUILTIN_float:
-            case BUILTIN_float4:
-                AvmAssertMsg(false,"Not implemented yet!");
-                break;
             default:
                 l.ptrArg();
                 break;
@@ -621,10 +615,6 @@ namespace avmplus
                 break;
             case BUILTIN_number:
                 size += sizeof(double);
-                break;
-            case BUILTIN_float:
-            case BUILTIN_float4:
-                AvmAssertMsg(false,"Not implemented yet!");
                 break;
             default:
                 size += sizeof(void*);
