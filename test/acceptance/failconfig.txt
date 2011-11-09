@@ -362,7 +362,6 @@ as3/Types/Float4/flt4_4_6_3:float4\[i\] 4, .*, -Dinterp , expectedfail, https://
 as3/Types/Float/flt_4_5_15:float\.INFINITY/float.abs\('0'\), , -Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=606561
 as3/Types/Float/flt_4_5_15:float\.INFINITY/float.abs\(0\.0f\), , -Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=606561
 
-as3/Types/Float4/flt4_5_1_3:unary minus on float4\(0f\)\.(x|y|z|w) sign check, x86-win , -Ojit , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=
 as3/Types/Float4/flt4_4_4_16_8:float4\.exp\(1f. 1f. 1f. 1f\) , x86-win-tvm-release ,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=
 
 as3/Types/Float4/flt4_5_5_3:\'(0|1|2|3)\' in float4, .* , ,   expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=696644
