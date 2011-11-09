@@ -1361,16 +1361,9 @@ namespace avmplus
                 SAVE_EXPC;
 #ifdef VMCFG_FLOAT
                 if(pool->hasFloatSupport() ){
-                    a1 = core->numericAtom(a1);
-                    if(IS_FLOAT(a1)){
-                        sp[0] = core->floatToAtom(-AvmCore::atomToFloat(a1));
-                        NEXT;
-                    }
-                    if(IS_FLOAT4(a1)){
-                        float4_t Zero = {-0.0,-0.0,-0.0,-0.0};
-                        sp[0] = core->float4ToAtom( f4_sub( Zero, AvmCore::atomToFloat4(a1) ) );
-                        NEXT;
-                    }
+                    SAVE_EXPC;
+                    a1 = op_negate(core, a1);
+                    NEXT;
                 }
 #endif
                 sp[0] = core->doubleToAtom(-AvmCore::number(a1));
