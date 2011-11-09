@@ -750,7 +750,7 @@ namespace avmplus
         if (method->needActivation()) {
             Traits* activationTraits = method->activationTraits();
             AvmAssert(activationTraits != NULL);
-            AvmAssert(method->method_id() < aotInfo->nActivationTraits);
+            AvmAssert(method->method_id() < (int)aotInfo->nActivationTraits);
             aotInfo->activationTraits[method->method_id()] = activationTraits;
             if (aotInfo->activationInfo[method->method_id()].initHandler != NULL) {
                 // NativeMethodInfo.handler is a union of

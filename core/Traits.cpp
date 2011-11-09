@@ -1768,7 +1768,7 @@ namespace avmplus
         const AOTInfo* aotInfo = m->pool()->aotInfo;
         Traits* activationTraits = m->activationTraits();
         AvmAssert(activationTraits != NULL);
-        AvmAssert(m->method_id() < aotInfo->nActivationTraits);
+        AvmAssert(m->method_id() < (int)aotInfo->nActivationTraits);
         AvmAssert(aotInfo->activationTraits != NULL);
         AvmAssert(aotInfo->activationTraits[m->method_id()] == activationTraits);
         AvmAssert(aotInfo->activationInfo != NULL);

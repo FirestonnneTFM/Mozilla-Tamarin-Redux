@@ -1287,11 +1287,11 @@ namespace avmplus
             case OP_declocal:
             {
                 Traits* retType = NUMBER_TYPE;
-                FrameValue& v = checkLocal(imm30);
                 bool already_coerced = false;
 #ifdef VMCFG_FLOAT
                 if(pool->hasFloatSupport())
                 {
+                    FrameValue& v = checkLocal(imm30);
                     Traits* vt = v.traits;
                     if(!vt || !vt->isNumeric())
                     {

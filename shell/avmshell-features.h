@@ -246,6 +246,10 @@
   #define AVMFEATURE_SWF16 1
 #endif
 
+#ifndef AVMFEATURE_FLOAT
+  #define AVMFEATURE_FLOAT 1
+#endif
+
 #ifndef AVMFEATURE_SWF17
   #define AVMFEATURE_SWF17 0
 #endif

@@ -137,7 +137,7 @@ namespace avmplus
                 // create the structure representing the ABC
                 AbcFile* abc = AbcFile::create(core->GetGC(), core, 0);
 
-                for(int n = 0; n < aotInfo->nABCMethods; n++)
+                for(int n = 0; n < (int)aotInfo->nABCMethods; n++)
                 {
                     MethodInfo *f = pool->getMethodInfo(n);
 

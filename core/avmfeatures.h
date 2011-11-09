@@ -87,6 +87,7 @@
 #undef VMCFG_NANOJIT
 #undef VMCFG_LOOKUP_CACHE
 #undef FEATURE_NANOJIT
+#undef VMCFG_FLOAT
 #undef VMCFG_OSR
 #undef VMCFG_COMPILEPOLICY
 #undef VMCFG_AOT
@@ -118,7 +119,6 @@
 #undef VMCFG_SWF14
 #undef VMCFG_SWF15
 #undef VMCFG_SWF16
-#undef VMCFG_FLOAT
 #undef VMCFG_SWF17
 #undef VMCFG_SWF18
 #undef VMCFG_SWF19
@@ -425,6 +425,15 @@
  */
 #if !defined AVMFEATURE_JIT || AVMFEATURE_JIT != 0 && AVMFEATURE_JIT != 1
 #  error "AVMFEATURE_JIT must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_FLOAT
+ *
+ * Enables the types 'float' and 'float4' in the VM.
+ */
+#if !defined AVMFEATURE_FLOAT || AVMFEATURE_FLOAT != 0 && AVMFEATURE_FLOAT != 1
+#  error "AVMFEATURE_FLOAT must be defined and 0 or 1 (only)."
 #endif
 
 
@@ -882,6 +891,14 @@
 #endif
 
 #endif
+#if AVMFEATURE_FLOAT
+#  if !AVMFEATURE_SWF16
+#    error "AVMFEATURE_SWF16 is required for AVMFEATURE_FLOAT"
+#  endif
+#  if AVMFEATURE_AOT
+#    error "AVMFEATURE_AOT is precluded for AVMFEATURE_FLOAT"
+#  endif
+#endif
 #if AVMFEATURE_OSR
 #  if !AVMFEATURE_JIT
 #    error "AVMFEATURE_JIT is required for AVMFEATURE_OSR"
@@ -994,6 +1011,9 @@
 #endif
 #if AVMFEATURE_AOT+AVMFEATURE_WORDCODE_INTERP > 1
 #  error "At most one of AVMFEATURE_AOT,AVMFEATURE_WORDCODE_INTERP must be defined."
+#endif
+#if AVMFEATURE_AOT+AVMFEATURE_FLOAT > 1
+#  error "At most one of AVMFEATURE_AOT,AVMFEATURE_FLOAT must be defined."
 #endif
 #if AVMTWEAK_EXACT_TRACING+AVMTWEAK_SELECTABLE_EXACT_TRACING > 1
 #  error "At most one of AVMTWEAK_EXACT_TRACING,AVMTWEAK_SELECTABLE_EXACT_TRACING must be defined."
@@ -1138,6 +1158,9 @@
 #if AVMFEATURE_JIT
 #  define FEATURE_NANOJIT
 #endif
+#if AVMFEATURE_FLOAT
+#  define VMCFG_FLOAT
+#endif
 #if AVMFEATURE_OSR
 #  define VMCFG_OSR
 #endif
@@ -1230,9 +1253,6 @@
 #endif
 #if AVMFEATURE_SWF16
 #  define VMCFG_SWF16
-#endif
-#if AVMFEATURE_SWF16
-#  define VMCFG_FLOAT
 #endif
 #if AVMFEATURE_SWF17
 #  define VMCFG_SWF17
