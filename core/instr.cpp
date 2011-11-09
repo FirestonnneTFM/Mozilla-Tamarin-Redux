@@ -140,7 +140,6 @@ VTable* toVTable(E env, Atom atom)
             return toplevel->numberClass()->ivtable();
 #ifdef VMCFG_FLOAT
         case kSpecialBibopType:
-            AvmAssert(atom != AtomConstants::undefinedAtom);
             if( bibopKind(atom) == kBibopFloatType )
                 return toplevel->floatClass()->ivtable();
             if( bibopKind(atom) == kBibopFloat4Type )
@@ -431,11 +430,11 @@ template<typename T> T __subtract(T a, T b){ return a - b; }
 static double __modulo(double a, double b){ return MathUtils::mod(a,b); }
 static float __modulo(float a, float b){ return (float) MathUtils::mod(a,b); }
 static float4_t __modulo(float4_t a, float4_t b){ 
-    float x= __modulo( (float) f4_x(a),f4_x(b));
-    float y= __modulo( (float) f4_y(a),f4_y(b));
-    float z= __modulo( (float) f4_z(a),f4_z(b));
-    float w= __modulo( (float) f4_w(a),f4_w(b));
-    float4_t res = {x,y,z,w};
+    float x= __modulo(f4_x(a), f4_x(b));
+    float y= __modulo(f4_y(a), f4_y(b));
+    float z= __modulo(f4_z(a), f4_z(b));
+    float w= __modulo(f4_w(a), f4_w(b));
+    float4_t res = {x, y, z, w};
     return res;
 }
 template<> float4_t __multiply<float4_t>(float4_t a, float4_t b) { return f4_mul(a,b);}
@@ -482,13 +481,10 @@ Atom op_negate(AvmCore* core, Atom val) {
     }
 
     if(AvmCore::isFloat4(val)){
-        const static float4_t Zero = {0,0,0,0};
+        const static float4_t Zero = {-0.0, -0.0, -0.0, -0.0};
         return core->float4ToAtom( f4_sub(Zero, AvmCore::float4(val)) );
     
     }
-
-    AvmAssert(false); // AFAICT, only "float" and "float4" may get here....
-
     if(atomIsIntptr(val)){
         double res = - INTPTRASDOUBLE(val);
         intptr_t res_int = intptr_t(res);
