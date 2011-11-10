@@ -52,7 +52,7 @@
    Grammar for feature definitions.
 
        features           ::= "<features>" feature* at-least-one* at-most-one* exactly-one* "</features>"
-       feature            ::= "<feature>" desc name defines+ precludes* requires* "</feature>"
+       feature            ::= "<feature>" desc name defines+ precludes* requires* build-flags* "</feature>"
                             | "<tweak>" desc name default defines+ precludes* requires* "</tweak>"
        desc               ::= "<desc>" TEXT "</desc>"
        name               ::= "<name>" TEXT "</name>"
@@ -60,6 +60,7 @@
        defines            ::= "<defines>" TEXT "</defines>"
        precludes          ::= "<precludes>" TEXT "</precludes>"
        requires           ::= "<requires>" TEXT | at-most-one | at-least-one | exactly-one "</requires>"
+       build-flags        ::= <build-flags type="boolean"|"onoff"> TEXT </build-flags>
        at-least-one       ::= "<at-least-one>" name+ "</at-least-one>"
        at-most-one        ::= "<at-most-one>" name+ "</at-most-one>"
        exactly-one        ::= "<exactly-one>" name+ "</exactly-one>"
@@ -108,6 +109,15 @@
        multiple macros; this allows discrimination internally in the
        module to be organized differently than feature definition
        externally.
+
+       A BUILD-FLAGS clause in a FEATURE names a flag that will be passed
+       to the script that compiles the builtins. There are two types of
+       flags that may be passed - "boolean" and "onoff":
+           - A "boolean" flag will always be passed to the compilation script,
+           in the form "TEXT=true" (if the feature is enabled) or "TEXT=false"
+           (if the feature is disabled)
+           - An "onoff" flag will only be passed to the compilation script if
+           the feature is enabled (nothing will be passed if it is disabled)
 
        An AT-LEAST-ONE clause adds a constraint that at least one of
        the features has been turned on.
@@ -478,7 +488,7 @@ var FEATURES =
     <build-flags type="boolean"> -config CONFIG::VMCFG_FLOAT </build-flags>
     <build-flags type="onoff"> -abcfuture </build-flags>
     <build-flags type="onoff"> Float.as </build-flags>
-    <precludes> AVMFEATURE_AOT </precludes> <!--  -->
+    <precludes> AVMFEATURE_AOT </precludes> <!-- AOT + float doesn't work yet, byt that will change eventually -->
   </feature>
 
   <feature>
