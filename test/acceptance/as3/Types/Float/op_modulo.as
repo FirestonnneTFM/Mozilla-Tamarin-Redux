@@ -63,7 +63,9 @@ AddTestCase("FloatLiteral modulo result", float(7.874126434326171875e-01), 1.234
     (it has a "FPREM" instruction)
     Bottom line is - the C runtimelibrary makes no diffeernce (not on x86 and x64, Mac/Win, at least)
    */
-AddTestCase("modulo on float & number should yield different results", true, (Number(f1)%Number(f2)) != (f1%f2) );
+
+// ABC Extension spec states that Float modulo can happen in double precision
+AddTestCase("modulo on float & number should yield different results", true, (Number(f1)%Number(f2)) == (f1%f2) );
 AddTestCase("modulo of 2 floats returns a float", "float", getQualifiedClassName(f1%f2));
 
 var onef:float = 1f;
