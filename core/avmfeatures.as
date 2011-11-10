@@ -475,6 +475,9 @@ var FEATURES =
     <name> AVMFEATURE_FLOAT  </name>
     <requires> AVMFEATURE_SWF16 </requires>
     <defines> VMCFG_FLOAT  </defines>
+    <build-flags type="boolean"> -config CONFIG::VMCFG_FLOAT </build-flags>
+    <build-flags type="onoff"> -abcfuture </build-flags>
+    <build-flags type="onoff"> Float.as </build-flags>
     <precludes> AVMFEATURE_AOT </precludes> <!--  -->
   </feature>
 
@@ -512,6 +515,7 @@ var FEATURES =
       <name> AVMSYSTEM_ARM </name>
      </exactly-one>
     </requires>
+    
     <defines> VMCFG_AOT </defines>
     <defines> VMCFG_AOTSHELL </defines>
     <defines> VMCFG_CDECL </defines>
@@ -602,13 +606,6 @@ var FEATURES =
     <name> AVMFEATURE_WORDCODE_INTERP </name>
   </at-most-one>
 
-  <at-most-one>
-    <!-- AOT currently implies no float support; this will presumably be fixed
-         in the future. -->
-    <name> AVMFEATURE_AOT </name>
-    <name> AVMFEATURE_FLOAT </name>
-  </at-most-one>
-
   <feature>
    <desc> AVMFEATURE_SELFTEST enables the built-in selftests.  These can be run by -Dselftest
           at the shell or by calling the global function avmplus::selftests(), see extensions/Selftest.h.
@@ -626,6 +623,7 @@ var FEATURES =
 
     <name> AVMFEATURE_EVAL </name>
     <defines> VMCFG_EVAL </defines>
+    <precludes> AVMFEATURE_AOT </precludes>
   </feature>
 
   <feature>
@@ -929,6 +927,14 @@ function main() {
         s += configureFeature(feature);
     s += "    return args\n";
 
+    s += "\ndef builtinBuildFlags(o):\n";
+    s += "    buildFlags = \"\"\n";
+    for each ( feature in FEATURES.feature )
+        s += featureFlags(feature);
+    for each ( feature in FEATURES.tweak )
+        s += featureFlags(feature);
+    s += "    return buildFlags\n";
+
     print('writing ../build/avmfeatures.py');
     File.write("../build/avmfeatures.py", s);
 }
@@ -1148,6 +1154,40 @@ function configureFeature(feature) {
                 "        args += \"" + enable + dependent + "\"\n");
     }
     return "";
+}
+
+function featureFlags(feature) {
+    var len = 0;
+    if (feature.name.indexOf("AVMFEATURE_") == 0)
+        len = 11;
+    else if (feature.name.indexOf("AVMTWEAK_") == 0)
+        len = 9;
+
+    if(len <= 0) return "";
+    if(String(feature["build-flags"]).length <= 0)
+        return "";
+
+    var featureName = feature.name.substring(len).toLowerCase().replace(/_/g,"-");
+    var enable= [];
+    var disable=[];
+    for each ( d in feature["build-flags"]){
+        if(d.@type=="onoff"){
+            enable.push(d);
+        } else if(d.@type == "boolean"){
+            enable.push(d + "=true");
+            disable.push(d + "=false");
+        } else {
+            fail("Unknown build flag type [" + d.@type + "] in feature "+ featureName);
+        }
+    }
+
+    var retval = "    arg = o.getBoolArg(\"" + featureName + "\", False, False)\n" +
+                 "    if (arg == True):\n" +
+                 "        buildFlags += \"" + enable.join(" ") + "\"\n" +
+                 "    if (arg == False):\n" +
+                 "        buildFlags += \"" + disable.join(" ") + "\"\n"
+
+    return retval;
 }
 
 function groupConstraint(x, tagname, condition, english_condition) {

@@ -2118,6 +2118,7 @@ class shell_toplevelClassManifest : public avmplus::ClassManifestBase
     friend class avmplus::IntVectorClass;
     friend class avmplus::UIntVectorClass;
     FLOAT_ONLY(friend class avmplus::FloatVectorClass;)
+    FLOAT_ONLY(friend class avmplus::Float4VectorClass;)
     friend class avmplus::DoubleVectorClass;
     friend class avmplus::ObjectVectorClass;
 private:

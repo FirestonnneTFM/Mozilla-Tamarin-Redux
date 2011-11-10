@@ -143,7 +143,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
 # '$(topsrcdir)' [which would then not be a pattern-rule] is crucial
 # (ie "deliberate", ie "hack"); see Bug 632086
 %/generated/builtin.h %/generated/builtin.cpp: $(topsrcdir)/core/*.as
-	cd $(topsrcdir)/core; python builtin.py
+	cd $(topsrcdir)/core; python builtin.py $(avmplus_BUILTINFLAGS)
 
 # 1. Use of '$(topsrcdir)/generated' is deliberate; we use absolute
 #    paths for code being generated outside build dir.

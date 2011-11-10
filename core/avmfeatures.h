@@ -933,7 +933,11 @@
 #  endif
 #endif
 
-
+#if AVMFEATURE_EVAL
+#  if AVMFEATURE_AOT
+#    error "AVMFEATURE_AOT is precluded for AVMFEATURE_EVAL"
+#  endif
+#endif
 
 
 
@@ -1011,9 +1015,6 @@
 #endif
 #if AVMFEATURE_AOT+AVMFEATURE_WORDCODE_INTERP > 1
 #  error "At most one of AVMFEATURE_AOT,AVMFEATURE_WORDCODE_INTERP must be defined."
-#endif
-#if AVMFEATURE_AOT+AVMFEATURE_FLOAT > 1
-#  error "At most one of AVMFEATURE_AOT,AVMFEATURE_FLOAT must be defined."
 #endif
 #if AVMTWEAK_EXACT_TRACING+AVMTWEAK_SELECTABLE_EXACT_TRACING > 1
 #  error "At most one of AVMTWEAK_EXACT_TRACING,AVMTWEAK_SELECTABLE_EXACT_TRACING must be defined."

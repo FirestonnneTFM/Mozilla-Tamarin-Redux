@@ -48,7 +48,7 @@ include "Function.as"
 include "Namespace.as"
 include "Boolean.as"
 include "Number.as"
-include "Float.as"
+// Float.as not included here explicitly, since we can't avoid parse errors with float disabled
 include "String.as"
 include "Array.as"
 include "actionscript.lang.as"

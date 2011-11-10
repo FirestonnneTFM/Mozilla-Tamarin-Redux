@@ -1205,7 +1205,7 @@ namespace avmplus
 #endif
         return lirout->insLoad(LIR_ldf, vars, i * info->varSize(), ACCSET_VARS);
 #else
-        toplevel->throwError(kNotImplementedError);
+        toplevel->throwError(kNotImplementedError); (void)i;
         return NULL;
 #endif
     }
@@ -3845,7 +3845,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     {
         this->state = state;
         emitSetPc(state->abc_pc);
-        localSet(loc, coerceToNumeric(loc), OBJECT_TYPE);
+        localSet(loc, IFFLOAT(coerceToNumeric(loc), coerceToNumber(loc)), OBJECT_TYPE);
     }
 
     void CodegenLIR::writeCoerce(const FrameState* state, uint32_t loc, Traits* result)
@@ -4138,8 +4138,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             }
             else if (in == NUMBER_TYPE FLOAT_ONLY(|| in ==FLOAT_TYPE) )
             {
-                bool singlePrecision = IFFLOAT(in==FLOAT_TYPE, false);
-                LIns* ins = singlePrecision? f2dIns(localGetf(loc)):localGetd(loc);
+                LIns* ins = FLOAT_ONLY( in == FLOAT_TYPE ? f2dIns(localGetf(loc)):)
+                                                                  localGetd(loc);
                 expr = callIns(FUNCTIONID(doubleToBool), 1, ins);
             }
             else if (in == INT_TYPE || in == UINT_TYPE)
@@ -7772,7 +7772,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             if (varPtrArg == vars)
                 varlivein.set(0);
             else if (varPtrArg->isop(LIR_addp))
-                analyze_addp(varPtrArg, vars, varlivein, varSize);
+                analyze_addp(varPtrArg, vars, varlivein FLOAT_ONLY(, varSize));
             else
                 AvmAssert(!"Unexpected use of makeatom");
         } else if (!ins->callInfo()->_isPure) {
