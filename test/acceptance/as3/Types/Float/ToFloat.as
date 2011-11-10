@@ -61,8 +61,8 @@ result = float(false);
 AddTestCase("ToFloat(false)", 0, FloatRawBits(result) );  // Note: if the result is -0.0f, FloatRawBits would return -2147483648 (0x80000000)
 AddTestCase("ToFloat(false) return type", "float", getQualifiedClassName(result));
 
-AddTestCase("ToFloat(Number.NaN)", 2147483647, FloatRawBits(float(Number.NaN)) ); // 2147483647 ==0x7FFFFFFF= float.nan
-// Above test is an overkill; it works in practice but theoretically it can fail as long as the number is still a NaN
+var flt_nan_mask:int = 0x7f800000; // (FloatRawBits(float.NaN) & 0x7f800000) == 0x7f800000
+AddTestCase("ToFloat(Number.NaN)", flt_nan_mask, (FloatRawBits(float(Number.NaN)) & flt_nan_mask) );
 
 var inf_int:int = 2139095040; //  0x7f800000 - positive infinity
 var large_poz:float = Number.MAX_VALUE;

@@ -337,17 +337,23 @@ spidermonkey/js1_5/Exceptions/regress-121658 , AOT,, skip, Need to follow up as 
 spidermonkey/js1_5/Regress/regress-398085-01 , AOT,, skip, Need to follow up as this hangs when AOT compiled
 
 ####################
-# Float/Float4
+# Float
 ####################
 as3/Types/Float/floatAcceptanceTests:Add\ Math\ object\ tests, .*,, expectedfail, Spec not finalized
-as3/Types/Float/flt_6_7_6:Order\ of\ evaluation, .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=640052
-as3/Types/Float/flt_6_7_7:Order\ of\ evaluation, .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=640052
-as3/Types/Float/flt_4_5_29: sign check , .*, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=686708
-as3/Types/Float/flt_6_4_3:modulo on float, .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=688744
-as3/Types/Float/flt_9_2:ToFloat\(Number\.NaN\), .*,, expectedfail, This test probably should be removed see comment in media
-as3/Types/Float/flt_9_8:ToString\(float\.MAX_VALUE\) , .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=699463
+as3/Types/Float/round: sign check , .*, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=686708
+
+as3/Types/Float/op_greaterthan:Order\ of\ evaluation, .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=640052
+as3/Types/Float/op_lessthanorequal:Order\ of\ evaluation, .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=640052
+as3/Types/Float/ToString:ToString\(float\.MAX_VALUE\) , .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=699463
 
 
+as3/Types/Float/loadLegacyCode, arm , ,  expectedfail, need to update runner script
+as3/Types/Float/as3_toPrecision, .*diff , , skip, skip for differential testing
+as3/Types/Float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
+
+####################
+# Float4
+####################
 as3/Types/Float4/flt4_4_4_16_3:float4\.asin\(1f, .*mac.* ,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=694844
 as3/Types/Float4/flt4_4_4_16_7:float4\.cos\(1f, .*mac.* ,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=694844
 as3/Types/Float4/flt4_4_4_16_18:float4\.sin\(1f. 1f. 1f. 1f\), (x64|arm)-lnx, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=694844
@@ -359,23 +365,6 @@ as3/Types/Float4/flt4_4_6_3:float4\[i\] -1, .*, , expectedfail, https://bugzilla
 as3/Types/Float4/flt4_4_6_3:float4\[4\], .*, -Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695055
 as3/Types/Float4/flt4_4_6_3:float4\[i\] 4, .*, -Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695055
 
-as3/Types/Float/flt_4_5_15:float\.INFINITY/float.abs\('0'\), , -Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=606561
-as3/Types/Float/flt_4_5_15:float\.INFINITY/float.abs\(0\.0f\), , -Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=606561
-
-as3/Types/Float4/flt4_4_4_16_8:float4\.exp\(1f. 1f. 1f. 1f\) , x86-win-tvm-release ,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=
-
-as3/Types/Float4/flt4_5_5_3:\'(0|1|2|3)\' in float4, .* , ,   expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=696644
-as3/Types/Float4/flt4_5_5_3:^(0|1|2|3) in float4, -Ojit , ,   expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=696644
-
-as3/Types/Float/loadLegacyCode, arm , ,  expectedfail, need to update runner script
-
-as3/Types/Float/flt_4_7_5, .*diff , , skip, skip for differential testing
-as3/Types/Float4/flt4_4_4_16_8, .*diff , , skip, skip for differential testing
-
-as3/Types/Float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
-as3/Types/Float4/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
-
-
 as3/Types/Float4/flt4_5_8_1:^float4\(1f\) && float4\(0f\), .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
 as3/Types/Float4/flt4_5_8_1:^float4\(1f. 2f. 3f. 4f\) && float4\(-1f. -2f. -3f. -4f\) , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
 as3/Types/Float4/flt4_5_8_1:^float4\(1f. 2f. 3f. 4f\) && float4\(0f. -2f. -3f. -4f\) , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
@@ -384,4 +373,13 @@ as3/Types/Float4/flt4_5_8_2:^float4\(1f\) \|\| float4\(0f\)  , .* , , expectedfa
 as3/Types/Float4/flt4_5_8_2:^float4\(1f. 2f. 3f. 4f\) \|\| float4\(-1f. -2f. -3f. -4f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
 as3/Types/Float4/flt4_5_8_2:^float4\(1f. 2f. 3f. 4f\) \|\| float4\(0f. -2f. -3f. -4f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
 as3/Types/Float4/flt4_5_8_2:^float4\(1f. 2f. -0f. 4f\) \|\| float4\(-1f. -2f. -3f. -4f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
+
+as3/Types/Float4/flt4_4_4_16_8:float4\.exp\(1f. 1f. 1f. 1f\) , x86-win-tvm-release ,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=
+
+as3/Types/Float4/flt4_5_5_3:\'(0|1|2|3)\' in float4, .* , ,   expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=696644
+as3/Types/Float4/flt4_5_5_3:^(0|1|2|3) in float4, -Ojit , ,   expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=696644
+
+as3/Types/Float4/flt4_4_4_16_8, .*diff , , skip, skip for differential testing
+as3/Types/Float4/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
+
 
