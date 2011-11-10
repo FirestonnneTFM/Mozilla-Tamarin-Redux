@@ -158,3 +158,4 @@ echo:
 	@echo avmplus_CXXOBJS = $(avmplus_CXXOBJS)
 	@echo avmplus_OBJS = $(avmplus_OBJS)
 	@echo avmplus_NAME = $(avmplus_NAME)
+	@echo avmplus_BUILTINFLAGS = $(avmplus_BUILTINFLAGS)

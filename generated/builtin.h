@@ -152,45 +152,45 @@ const uint32_t abcclass_Boolean = 4;
 const uint32_t abcclass_Number = 5;
 const uint32_t abcclass_int = 6;
 const uint32_t abcclass_uint = 7;
-const uint32_t abcclass_float = 8;
-const uint32_t abcclass_float4 = 9;
-const uint32_t abcclass_String = 10;
-const uint32_t abcclass_Array = 11;
-const uint32_t abcclass___AS3___vec_Vector = 12;
-const uint32_t abcclass___AS3___vec_Vector_object = 13;
-const uint32_t abcclass___AS3___vec_Vector_int = 14;
-const uint32_t abcclass___AS3___vec_Vector_uint = 15;
-const uint32_t abcclass___AS3___vec_Vector_double = 16;
-const uint32_t abcclass___AS3___vec_Vector_float = 17;
-const uint32_t abcclass___AS3___vec_Vector_float4 = 18;
-const uint32_t abcclass_private_MethodClosure = 19;
-const uint32_t abcclass_Math = 20;
-const uint32_t abcclass_Error = 21;
-const uint32_t abcclass_DefinitionError = 22;
-const uint32_t abcclass_EvalError = 23;
-const uint32_t abcclass_RangeError = 24;
-const uint32_t abcclass_ReferenceError = 25;
-const uint32_t abcclass_SecurityError = 26;
-const uint32_t abcclass_SyntaxError = 27;
-const uint32_t abcclass_TypeError = 28;
-const uint32_t abcclass_URIError = 29;
-const uint32_t abcclass_VerifyError = 30;
-const uint32_t abcclass_UninitializedError = 31;
-const uint32_t abcclass_ArgumentError = 32;
-const uint32_t abcclass_flash_errors_IOError = 33;
-const uint32_t abcclass_flash_errors_MemoryError = 34;
-const uint32_t abcclass_flash_errors_IllegalOperationError = 35;
-const uint32_t abcclass_flash_errors_EOFError = 36;
-const uint32_t abcclass_Date = 37;
-const uint32_t abcclass_RegExp = 38;
-const uint32_t abcclass_JSON = 39;
-const uint32_t abcclass_Walker = 40;
-const uint32_t abcclass_XML = 41;
-const uint32_t abcclass_XMLList = 42;
-const uint32_t abcclass_QName = 43;
-const uint32_t abcclass_flash_utils_IDataInput = 44;
-const uint32_t abcclass_flash_utils_IDataOutput = 45;
-const uint32_t abcclass_flash_utils_Proxy = 46;
+const uint32_t abcclass_String = 8;
+const uint32_t abcclass_Array = 9;
+const uint32_t abcclass___AS3___vec_Vector = 10;
+const uint32_t abcclass___AS3___vec_Vector_object = 11;
+const uint32_t abcclass___AS3___vec_Vector_int = 12;
+const uint32_t abcclass___AS3___vec_Vector_uint = 13;
+const uint32_t abcclass___AS3___vec_Vector_double = 14;
+const uint32_t abcclass___AS3___vec_Vector_float = 15;
+const uint32_t abcclass___AS3___vec_Vector_float4 = 16;
+const uint32_t abcclass_private_MethodClosure = 17;
+const uint32_t abcclass_Math = 18;
+const uint32_t abcclass_Error = 19;
+const uint32_t abcclass_DefinitionError = 20;
+const uint32_t abcclass_EvalError = 21;
+const uint32_t abcclass_RangeError = 22;
+const uint32_t abcclass_ReferenceError = 23;
+const uint32_t abcclass_SecurityError = 24;
+const uint32_t abcclass_SyntaxError = 25;
+const uint32_t abcclass_TypeError = 26;
+const uint32_t abcclass_URIError = 27;
+const uint32_t abcclass_VerifyError = 28;
+const uint32_t abcclass_UninitializedError = 29;
+const uint32_t abcclass_ArgumentError = 30;
+const uint32_t abcclass_flash_errors_IOError = 31;
+const uint32_t abcclass_flash_errors_MemoryError = 32;
+const uint32_t abcclass_flash_errors_IllegalOperationError = 33;
+const uint32_t abcclass_flash_errors_EOFError = 34;
+const uint32_t abcclass_Date = 35;
+const uint32_t abcclass_RegExp = 36;
+const uint32_t abcclass_JSON = 37;
+const uint32_t abcclass_Walker = 38;
+const uint32_t abcclass_XML = 39;
+const uint32_t abcclass_XMLList = 40;
+const uint32_t abcclass_QName = 41;
+const uint32_t abcclass_flash_utils_IDataInput = 42;
+const uint32_t abcclass_flash_utils_IDataOutput = 43;
+const uint32_t abcclass_flash_utils_Proxy = 44;
+const uint32_t abcclass_float = 45;
+const uint32_t abcclass_float4 = 46;
 const uint32_t abcclass_flash_utils_CompressionAlgorithm = 47;
 const uint32_t abcclass_flash_utils_ByteArray = 48;
 
@@ -226,387 +226,387 @@ const uint32_t Namespace_uri_get = 58;
 const uint32_t Number_private__numberToString = 74;
 const uint32_t Number_private__convert = 75;
 const uint32_t Number_private__minValue = 76;
-const uint32_t float_reciprocal = 129;
-const uint32_t float_rsqrt = 130;
-const uint32_t float_private__minValue = 133;
-const uint32_t float_private__floatToString = 134;
-const uint32_t float_private__convert = 135;
-const uint32_t float4_isGreater = 145;
-const uint32_t float4_isGreaterOrEqual = 146;
-const uint32_t float4_isLess = 147;
-const uint32_t float4_isLessOrEqual = 148;
-const uint32_t float4_isEqual = 149;
-const uint32_t float4_isNotEqual = 150;
-const uint32_t float4_abs = 151;
-const uint32_t float4_max = 152;
-const uint32_t float4_min = 153;
-const uint32_t float4_reciprocal = 154;
-const uint32_t float4_rsqrt = 155;
-const uint32_t float4_sqrt = 156;
-const uint32_t float4_normalize = 157;
-const uint32_t float4_cross = 158;
-const uint32_t float4_dot = 159;
-const uint32_t float4_dot2 = 160;
-const uint32_t float4_dot3 = 161;
-const uint32_t float4_magnitude = 162;
-const uint32_t float4_magnitude3 = 163;
-const uint32_t float4_magnitude2 = 164;
-const uint32_t float4_distance = 165;
-const uint32_t float4_distance3 = 166;
-const uint32_t float4_distance2 = 167;
-const uint32_t float4_private__swizzle = 168;
-const uint32_t float4_x_get = 170;
-const uint32_t float4_y_get = 171;
-const uint32_t float4_z_get = 172;
-const uint32_t float4_w_get = 173;
-const uint32_t String_AS3_fromCharCode = 451;
-const uint32_t String_private__match = 452;
-const uint32_t String_private__replace = 453;
-const uint32_t String_private__search = 454;
-const uint32_t String_private__split = 455;
-const uint32_t String_length_get = 456;
-const uint32_t String_private__indexOf = 457;
-const uint32_t String_AS3_indexOf = 458;
-const uint32_t String_private__lastIndexOf = 459;
-const uint32_t String_AS3_lastIndexOf = 460;
-const uint32_t String_AS3_charAt = 461;
-const uint32_t String_AS3_charCodeAt = 462;
-const uint32_t String_AS3_localeCompare = 464;
-const uint32_t String_private__slice = 468;
-const uint32_t String_AS3_slice = 469;
-const uint32_t String_private__substring = 471;
-const uint32_t String_AS3_substring = 472;
-const uint32_t String_private__substr = 473;
-const uint32_t String_AS3_substr = 474;
-const uint32_t String_AS3_toLowerCase = 475;
-const uint32_t String_AS3_toUpperCase = 477;
-const uint32_t Array_private__pop = 504;
-const uint32_t Array_private__reverse = 505;
-const uint32_t Array_private__concat = 506;
-const uint32_t Array_private__shift = 507;
-const uint32_t Array_private__slice = 508;
-const uint32_t Array_private__unshift = 509;
-const uint32_t Array_private__splice = 510;
-const uint32_t Array_private__sort = 511;
-const uint32_t Array_private__sortOn = 512;
-const uint32_t Array_private__indexOf = 513;
-const uint32_t Array_private__lastIndexOf = 514;
-const uint32_t Array_private__every = 515;
-const uint32_t Array_private__filter = 516;
-const uint32_t Array_private__forEach = 517;
-const uint32_t Array_private__map = 518;
-const uint32_t Array_private__some = 519;
-const uint32_t Array_length_get = 520;
-const uint32_t Array_length_set = 521;
-const uint32_t Array_AS3_pop = 525;
-const uint32_t Array_AS3_push = 526;
-const uint32_t Array_AS3_unshift = 531;
-const uint32_t __AS3___vec_Vector_object_private__every = 565;
-const uint32_t __AS3___vec_Vector_object_private__forEach = 566;
-const uint32_t __AS3___vec_Vector_object_private__some = 567;
-const uint32_t __AS3___vec_Vector_object_private__sort = 568;
-const uint32_t __AS3___vec_Vector_object_private_newThisType = 570;
-const uint32_t __AS3___vec_Vector_object_length_get = 571;
-const uint32_t __AS3___vec_Vector_object_length_set = 572;
-const uint32_t __AS3___vec_Vector_object_fixed_set = 573;
-const uint32_t __AS3___vec_Vector_object_fixed_get = 574;
-const uint32_t __AS3___vec_Vector_object_AS3_push = 582;
-const uint32_t __AS3___vec_Vector_object_private__reverse = 583;
-const uint32_t __AS3___vec_Vector_object_private__spliceHelper = 587;
-const uint32_t __AS3___vec_Vector_object_AS3_unshift = 588;
-const uint32_t __AS3___vec_Vector_object_private__filter = 589;
-const uint32_t __AS3___vec_Vector_object_private__map = 590;
-const uint32_t __AS3___vec_Vector_object_AS3_pop = 594;
-const uint32_t __AS3___vec_Vector_object_AS3_shift = 596;
-const uint32_t __AS3___vec_Vector_int_private__every = 623;
-const uint32_t __AS3___vec_Vector_int_private__forEach = 624;
-const uint32_t __AS3___vec_Vector_int_private__some = 625;
-const uint32_t __AS3___vec_Vector_int_private__sort = 626;
-const uint32_t __AS3___vec_Vector_int_private_newThisType = 628;
-const uint32_t __AS3___vec_Vector_int_length_get = 629;
-const uint32_t __AS3___vec_Vector_int_length_set = 630;
-const uint32_t __AS3___vec_Vector_int_fixed_set = 631;
-const uint32_t __AS3___vec_Vector_int_fixed_get = 632;
-const uint32_t __AS3___vec_Vector_int_AS3_push = 640;
-const uint32_t __AS3___vec_Vector_int_private__reverse = 641;
-const uint32_t __AS3___vec_Vector_int_private__spliceHelper = 645;
-const uint32_t __AS3___vec_Vector_int_AS3_unshift = 646;
-const uint32_t __AS3___vec_Vector_int_private__filter = 647;
-const uint32_t __AS3___vec_Vector_int_private__map = 648;
-const uint32_t __AS3___vec_Vector_int_AS3_pop = 652;
-const uint32_t __AS3___vec_Vector_int_AS3_shift = 654;
-const uint32_t __AS3___vec_Vector_uint_private__every = 681;
-const uint32_t __AS3___vec_Vector_uint_private__forEach = 682;
-const uint32_t __AS3___vec_Vector_uint_private__some = 683;
-const uint32_t __AS3___vec_Vector_uint_private__sort = 684;
-const uint32_t __AS3___vec_Vector_uint_private_newThisType = 686;
-const uint32_t __AS3___vec_Vector_uint_length_get = 687;
-const uint32_t __AS3___vec_Vector_uint_length_set = 688;
-const uint32_t __AS3___vec_Vector_uint_fixed_set = 689;
-const uint32_t __AS3___vec_Vector_uint_fixed_get = 690;
-const uint32_t __AS3___vec_Vector_uint_AS3_push = 698;
-const uint32_t __AS3___vec_Vector_uint_private__reverse = 699;
-const uint32_t __AS3___vec_Vector_uint_private__spliceHelper = 703;
-const uint32_t __AS3___vec_Vector_uint_AS3_unshift = 704;
-const uint32_t __AS3___vec_Vector_uint_private__filter = 705;
-const uint32_t __AS3___vec_Vector_uint_private__map = 706;
-const uint32_t __AS3___vec_Vector_uint_AS3_pop = 710;
-const uint32_t __AS3___vec_Vector_uint_AS3_shift = 712;
-const uint32_t __AS3___vec_Vector_double_private__every = 739;
-const uint32_t __AS3___vec_Vector_double_private__forEach = 740;
-const uint32_t __AS3___vec_Vector_double_private__some = 741;
-const uint32_t __AS3___vec_Vector_double_private__sort = 742;
-const uint32_t __AS3___vec_Vector_double_private_newThisType = 744;
-const uint32_t __AS3___vec_Vector_double_length_get = 745;
-const uint32_t __AS3___vec_Vector_double_length_set = 746;
-const uint32_t __AS3___vec_Vector_double_fixed_set = 747;
-const uint32_t __AS3___vec_Vector_double_fixed_get = 748;
-const uint32_t __AS3___vec_Vector_double_AS3_push = 756;
-const uint32_t __AS3___vec_Vector_double_private__reverse = 757;
-const uint32_t __AS3___vec_Vector_double_private__spliceHelper = 761;
-const uint32_t __AS3___vec_Vector_double_AS3_unshift = 762;
-const uint32_t __AS3___vec_Vector_double_private__filter = 763;
-const uint32_t __AS3___vec_Vector_double_private__map = 764;
-const uint32_t __AS3___vec_Vector_double_AS3_pop = 768;
-const uint32_t __AS3___vec_Vector_double_AS3_shift = 770;
-const uint32_t __AS3___vec_Vector_float_private__every = 797;
-const uint32_t __AS3___vec_Vector_float_private__forEach = 798;
-const uint32_t __AS3___vec_Vector_float_private__some = 799;
-const uint32_t __AS3___vec_Vector_float_private__sort = 800;
-const uint32_t __AS3___vec_Vector_float_private_newThisType = 802;
-const uint32_t __AS3___vec_Vector_float_length_get = 803;
-const uint32_t __AS3___vec_Vector_float_length_set = 804;
-const uint32_t __AS3___vec_Vector_float_fixed_set = 805;
-const uint32_t __AS3___vec_Vector_float_fixed_get = 806;
-const uint32_t __AS3___vec_Vector_float_AS3_push = 814;
-const uint32_t __AS3___vec_Vector_float_private__reverse = 815;
-const uint32_t __AS3___vec_Vector_float_private__spliceHelper = 819;
-const uint32_t __AS3___vec_Vector_float_AS3_unshift = 820;
-const uint32_t __AS3___vec_Vector_float_private__filter = 821;
-const uint32_t __AS3___vec_Vector_float_private__map = 822;
-const uint32_t __AS3___vec_Vector_float_AS3_pop = 826;
-const uint32_t __AS3___vec_Vector_float_AS3_shift = 828;
-const uint32_t __AS3___vec_Vector_float4_private__every = 855;
-const uint32_t __AS3___vec_Vector_float4_private__forEach = 856;
-const uint32_t __AS3___vec_Vector_float4_private__some = 857;
-const uint32_t __AS3___vec_Vector_float4_private__sort = 858;
-const uint32_t __AS3___vec_Vector_float4_private_newThisType = 860;
-const uint32_t __AS3___vec_Vector_float4_length_get = 861;
-const uint32_t __AS3___vec_Vector_float4_length_set = 862;
-const uint32_t __AS3___vec_Vector_float4_fixed_set = 863;
-const uint32_t __AS3___vec_Vector_float4_fixed_get = 864;
-const uint32_t __AS3___vec_Vector_float4_AS3_push = 872;
-const uint32_t __AS3___vec_Vector_float4_private__reverse = 873;
-const uint32_t __AS3___vec_Vector_float4_private__spliceHelper = 877;
-const uint32_t __AS3___vec_Vector_float4_AS3_unshift = 878;
-const uint32_t __AS3___vec_Vector_float4_private__filter = 879;
-const uint32_t __AS3___vec_Vector_float4_private__map = 880;
-const uint32_t __AS3___vec_Vector_float4_AS3_pop = 884;
-const uint32_t __AS3___vec_Vector_float4_AS3_shift = 886;
-const uint32_t Math_private__min = 898;
-const uint32_t Math_private__max = 899;
-const uint32_t Math_abs = 900;
-const uint32_t Math_acos = 901;
-const uint32_t Math_asin = 902;
-const uint32_t Math_atan = 903;
-const uint32_t Math_ceil = 904;
-const uint32_t Math_cos = 905;
-const uint32_t Math_exp = 906;
-const uint32_t Math_floor = 907;
-const uint32_t Math_log = 908;
-const uint32_t Math_round = 909;
-const uint32_t Math_sin = 910;
-const uint32_t Math_sqrt = 911;
-const uint32_t Math_tan = 912;
-const uint32_t Math_atan2 = 913;
-const uint32_t Math_pow = 914;
-const uint32_t Math_max = 915;
-const uint32_t Math_min = 916;
-const uint32_t Math_random = 917;
-const uint32_t Error_getErrorMessage = 922;
-const uint32_t Error_getStackTrace = 926;
-const uint32_t Date_parse = 1002;
-const uint32_t Date_UTC = 1003;
-const uint32_t Date_AS3_valueOf = 1004;
-const uint32_t Date_private__toString = 1005;
-const uint32_t Date_private__setTime = 1006;
-const uint32_t Date_private__get = 1007;
-const uint32_t Date_AS3_getUTCFullYear = 1016;
-const uint32_t Date_AS3_getUTCMonth = 1017;
-const uint32_t Date_AS3_getUTCDate = 1018;
-const uint32_t Date_AS3_getUTCDay = 1019;
-const uint32_t Date_AS3_getUTCHours = 1020;
-const uint32_t Date_AS3_getUTCMinutes = 1021;
-const uint32_t Date_AS3_getUTCSeconds = 1022;
-const uint32_t Date_AS3_getUTCMilliseconds = 1023;
-const uint32_t Date_AS3_getFullYear = 1024;
-const uint32_t Date_AS3_getMonth = 1025;
-const uint32_t Date_AS3_getDate = 1026;
-const uint32_t Date_AS3_getDay = 1027;
-const uint32_t Date_AS3_getHours = 1028;
-const uint32_t Date_AS3_getMinutes = 1029;
-const uint32_t Date_AS3_getSeconds = 1030;
-const uint32_t Date_AS3_getMilliseconds = 1031;
-const uint32_t Date_AS3_getTimezoneOffset = 1032;
-const uint32_t Date_AS3_getTime = 1033;
-const uint32_t Date_private__setFullYear = 1034;
-const uint32_t Date_private__setMonth = 1035;
-const uint32_t Date_private__setDate = 1036;
-const uint32_t Date_private__setHours = 1037;
-const uint32_t Date_private__setMinutes = 1038;
-const uint32_t Date_private__setSeconds = 1039;
-const uint32_t Date_private__setMilliseconds = 1040;
-const uint32_t Date_private__setUTCFullYear = 1041;
-const uint32_t Date_private__setUTCMonth = 1042;
-const uint32_t Date_private__setUTCDate = 1043;
-const uint32_t Date_private__setUTCHours = 1044;
-const uint32_t Date_private__setUTCMinutes = 1045;
-const uint32_t Date_private__setUTCSeconds = 1046;
-const uint32_t Date_private__setUTCMilliseconds = 1047;
-const uint32_t RegExp_source_get = 1101;
-const uint32_t RegExp_global_get = 1102;
-const uint32_t RegExp_ignoreCase_get = 1103;
-const uint32_t RegExp_multiline_get = 1104;
-const uint32_t RegExp_lastIndex_get = 1105;
-const uint32_t RegExp_lastIndex_set = 1106;
-const uint32_t RegExp_dotall_get = 1107;
-const uint32_t RegExp_extended_get = 1108;
-const uint32_t RegExp_AS3_exec = 1109;
-const uint32_t JSON_private_parseCore = 1114;
-const uint32_t JSON_private_stringifySpecializedToString = 1115;
-const uint32_t XML_ignoreComments_get = 1167;
-const uint32_t XML_ignoreComments_set = 1168;
-const uint32_t XML_ignoreProcessingInstructions_get = 1169;
-const uint32_t XML_ignoreProcessingInstructions_set = 1170;
-const uint32_t XML_ignoreWhitespace_get = 1171;
-const uint32_t XML_ignoreWhitespace_set = 1172;
-const uint32_t XML_prettyPrinting_get = 1173;
-const uint32_t XML_prettyPrinting_set = 1174;
-const uint32_t XML_prettyIndent_get = 1175;
-const uint32_t XML_prettyIndent_set = 1176;
-const uint32_t XML_AS3_toString = 1180;
-const uint32_t XML_AS3_hasOwnProperty = 1181;
-const uint32_t XML_AS3_propertyIsEnumerable = 1182;
-const uint32_t XML_AS3_addNamespace = 1183;
-const uint32_t XML_AS3_appendChild = 1184;
-const uint32_t XML_AS3_attribute = 1185;
-const uint32_t XML_AS3_attributes = 1186;
-const uint32_t XML_AS3_child = 1187;
-const uint32_t XML_AS3_childIndex = 1188;
-const uint32_t XML_AS3_children = 1189;
-const uint32_t XML_AS3_comments = 1190;
-const uint32_t XML_AS3_contains = 1191;
-const uint32_t XML_AS3_copy = 1192;
-const uint32_t XML_AS3_descendants = 1193;
-const uint32_t XML_AS3_elements = 1194;
-const uint32_t XML_AS3_hasComplexContent = 1195;
-const uint32_t XML_AS3_hasSimpleContent = 1196;
-const uint32_t XML_AS3_inScopeNamespaces = 1197;
-const uint32_t XML_AS3_insertChildAfter = 1198;
-const uint32_t XML_AS3_insertChildBefore = 1199;
-const uint32_t XML_AS3_localName = 1201;
-const uint32_t XML_AS3_name = 1202;
-const uint32_t XML_private__namespace = 1203;
-const uint32_t XML_AS3_namespaceDeclarations = 1205;
-const uint32_t XML_AS3_nodeKind = 1206;
-const uint32_t XML_AS3_normalize = 1207;
-const uint32_t XML_AS3_parent = 1208;
-const uint32_t XML_AS3_processingInstructions = 1209;
-const uint32_t XML_AS3_prependChild = 1210;
-const uint32_t XML_AS3_removeNamespace = 1211;
-const uint32_t XML_AS3_replace = 1212;
-const uint32_t XML_AS3_setChildren = 1213;
-const uint32_t XML_AS3_setLocalName = 1214;
-const uint32_t XML_AS3_setName = 1215;
-const uint32_t XML_AS3_setNamespace = 1216;
-const uint32_t XML_AS3_text = 1217;
-const uint32_t XML_AS3_toXMLString = 1218;
-const uint32_t XML_AS3_notification = 1219;
-const uint32_t XML_AS3_setNotification = 1220;
-const uint32_t XMLList_AS3_toString = 1264;
-const uint32_t XMLList_AS3_hasOwnProperty = 1266;
-const uint32_t XMLList_AS3_propertyIsEnumerable = 1267;
-const uint32_t XMLList_AS3_attribute = 1268;
-const uint32_t XMLList_AS3_attributes = 1269;
-const uint32_t XMLList_AS3_child = 1270;
-const uint32_t XMLList_AS3_children = 1271;
-const uint32_t XMLList_AS3_comments = 1272;
-const uint32_t XMLList_AS3_contains = 1273;
-const uint32_t XMLList_AS3_copy = 1274;
-const uint32_t XMLList_AS3_descendants = 1275;
-const uint32_t XMLList_AS3_elements = 1276;
-const uint32_t XMLList_AS3_hasComplexContent = 1277;
-const uint32_t XMLList_AS3_hasSimpleContent = 1278;
-const uint32_t XMLList_AS3_length = 1279;
-const uint32_t XMLList_AS3_name = 1280;
-const uint32_t XMLList_AS3_normalize = 1281;
-const uint32_t XMLList_AS3_parent = 1282;
-const uint32_t XMLList_AS3_processingInstructions = 1283;
-const uint32_t XMLList_AS3_text = 1284;
-const uint32_t XMLList_AS3_toXMLString = 1285;
-const uint32_t XMLList_AS3_addNamespace = 1286;
-const uint32_t XMLList_AS3_appendChild = 1287;
-const uint32_t XMLList_AS3_childIndex = 1288;
-const uint32_t XMLList_AS3_inScopeNamespaces = 1289;
-const uint32_t XMLList_AS3_insertChildAfter = 1290;
-const uint32_t XMLList_AS3_insertChildBefore = 1291;
-const uint32_t XMLList_AS3_nodeKind = 1292;
-const uint32_t XMLList_private__namespace = 1293;
-const uint32_t XMLList_AS3_localName = 1295;
-const uint32_t XMLList_AS3_namespaceDeclarations = 1296;
-const uint32_t XMLList_AS3_prependChild = 1297;
-const uint32_t XMLList_AS3_removeNamespace = 1298;
-const uint32_t XMLList_AS3_replace = 1299;
-const uint32_t XMLList_AS3_setChildren = 1300;
-const uint32_t XMLList_AS3_setLocalName = 1301;
-const uint32_t XMLList_AS3_setName = 1302;
-const uint32_t XMLList_AS3_setNamespace = 1303;
-const uint32_t QName_localName_get = 1308;
-const uint32_t QName_uri_get = 1309;
-const uint32_t flash_utils_Proxy_flash_proxy_isAttribute = 1365;
-const uint32_t flash_utils_ByteArray_defaultObjectEncoding_get = 1372;
-const uint32_t flash_utils_ByteArray_defaultObjectEncoding_set = 1373;
-const uint32_t flash_utils_ByteArray_readBytes = 1375;
-const uint32_t flash_utils_ByteArray_writeBytes = 1376;
-const uint32_t flash_utils_ByteArray_writeBoolean = 1377;
-const uint32_t flash_utils_ByteArray_writeByte = 1378;
-const uint32_t flash_utils_ByteArray_writeShort = 1379;
-const uint32_t flash_utils_ByteArray_writeInt = 1380;
-const uint32_t flash_utils_ByteArray_writeUnsignedInt = 1381;
-const uint32_t flash_utils_ByteArray_writeFloat = 1382;
-const uint32_t flash_utils_ByteArray_writeFloat4 = 1383;
-const uint32_t flash_utils_ByteArray_writeDouble = 1384;
-const uint32_t flash_utils_ByteArray_writeMultiByte = 1385;
-const uint32_t flash_utils_ByteArray_writeUTF = 1386;
-const uint32_t flash_utils_ByteArray_writeUTFBytes = 1387;
-const uint32_t flash_utils_ByteArray_readBoolean = 1388;
-const uint32_t flash_utils_ByteArray_readByte = 1389;
-const uint32_t flash_utils_ByteArray_readUnsignedByte = 1390;
-const uint32_t flash_utils_ByteArray_readShort = 1391;
-const uint32_t flash_utils_ByteArray_readUnsignedShort = 1392;
-const uint32_t flash_utils_ByteArray_readInt = 1393;
-const uint32_t flash_utils_ByteArray_readUnsignedInt = 1394;
-const uint32_t flash_utils_ByteArray_readFloat = 1395;
-const uint32_t flash_utils_ByteArray_readFloat4 = 1396;
-const uint32_t flash_utils_ByteArray_readDouble = 1397;
-const uint32_t flash_utils_ByteArray_readMultiByte = 1398;
-const uint32_t flash_utils_ByteArray_readUTF = 1399;
-const uint32_t flash_utils_ByteArray_readUTFBytes = 1400;
-const uint32_t flash_utils_ByteArray_length_get = 1401;
-const uint32_t flash_utils_ByteArray_length_set = 1402;
-const uint32_t flash_utils_ByteArray_writeObject = 1403;
-const uint32_t flash_utils_ByteArray_readObject = 1404;
-const uint32_t flash_utils_ByteArray_private__compress = 1406;
-const uint32_t flash_utils_ByteArray_private__uncompress = 1409;
-const uint32_t flash_utils_ByteArray_private__toString = 1412;
-const uint32_t flash_utils_ByteArray_bytesAvailable_get = 1413;
-const uint32_t flash_utils_ByteArray_position_get = 1414;
-const uint32_t flash_utils_ByteArray_position_set = 1415;
-const uint32_t flash_utils_ByteArray_objectEncoding_get = 1416;
-const uint32_t flash_utils_ByteArray_objectEncoding_set = 1417;
-const uint32_t flash_utils_ByteArray_endian_get = 1418;
-const uint32_t flash_utils_ByteArray_endian_set = 1419;
-const uint32_t flash_utils_ByteArray_clear = 1420;
+const uint32_t String_AS3_fromCharCode = 126;
+const uint32_t String_private__match = 127;
+const uint32_t String_private__replace = 128;
+const uint32_t String_private__search = 129;
+const uint32_t String_private__split = 130;
+const uint32_t String_length_get = 131;
+const uint32_t String_private__indexOf = 132;
+const uint32_t String_AS3_indexOf = 133;
+const uint32_t String_private__lastIndexOf = 134;
+const uint32_t String_AS3_lastIndexOf = 135;
+const uint32_t String_AS3_charAt = 136;
+const uint32_t String_AS3_charCodeAt = 137;
+const uint32_t String_AS3_localeCompare = 139;
+const uint32_t String_private__slice = 143;
+const uint32_t String_AS3_slice = 144;
+const uint32_t String_private__substring = 146;
+const uint32_t String_AS3_substring = 147;
+const uint32_t String_private__substr = 148;
+const uint32_t String_AS3_substr = 149;
+const uint32_t String_AS3_toLowerCase = 150;
+const uint32_t String_AS3_toUpperCase = 152;
+const uint32_t Array_private__pop = 179;
+const uint32_t Array_private__reverse = 180;
+const uint32_t Array_private__concat = 181;
+const uint32_t Array_private__shift = 182;
+const uint32_t Array_private__slice = 183;
+const uint32_t Array_private__unshift = 184;
+const uint32_t Array_private__splice = 185;
+const uint32_t Array_private__sort = 186;
+const uint32_t Array_private__sortOn = 187;
+const uint32_t Array_private__indexOf = 188;
+const uint32_t Array_private__lastIndexOf = 189;
+const uint32_t Array_private__every = 190;
+const uint32_t Array_private__filter = 191;
+const uint32_t Array_private__forEach = 192;
+const uint32_t Array_private__map = 193;
+const uint32_t Array_private__some = 194;
+const uint32_t Array_length_get = 195;
+const uint32_t Array_length_set = 196;
+const uint32_t Array_AS3_pop = 200;
+const uint32_t Array_AS3_push = 201;
+const uint32_t Array_AS3_unshift = 206;
+const uint32_t __AS3___vec_Vector_object_private__every = 240;
+const uint32_t __AS3___vec_Vector_object_private__forEach = 241;
+const uint32_t __AS3___vec_Vector_object_private__some = 242;
+const uint32_t __AS3___vec_Vector_object_private__sort = 243;
+const uint32_t __AS3___vec_Vector_object_private_newThisType = 245;
+const uint32_t __AS3___vec_Vector_object_length_get = 246;
+const uint32_t __AS3___vec_Vector_object_length_set = 247;
+const uint32_t __AS3___vec_Vector_object_fixed_set = 248;
+const uint32_t __AS3___vec_Vector_object_fixed_get = 249;
+const uint32_t __AS3___vec_Vector_object_AS3_push = 257;
+const uint32_t __AS3___vec_Vector_object_private__reverse = 258;
+const uint32_t __AS3___vec_Vector_object_private__spliceHelper = 262;
+const uint32_t __AS3___vec_Vector_object_AS3_unshift = 263;
+const uint32_t __AS3___vec_Vector_object_private__filter = 264;
+const uint32_t __AS3___vec_Vector_object_private__map = 265;
+const uint32_t __AS3___vec_Vector_object_AS3_pop = 269;
+const uint32_t __AS3___vec_Vector_object_AS3_shift = 271;
+const uint32_t __AS3___vec_Vector_int_private__every = 298;
+const uint32_t __AS3___vec_Vector_int_private__forEach = 299;
+const uint32_t __AS3___vec_Vector_int_private__some = 300;
+const uint32_t __AS3___vec_Vector_int_private__sort = 301;
+const uint32_t __AS3___vec_Vector_int_private_newThisType = 303;
+const uint32_t __AS3___vec_Vector_int_length_get = 304;
+const uint32_t __AS3___vec_Vector_int_length_set = 305;
+const uint32_t __AS3___vec_Vector_int_fixed_set = 306;
+const uint32_t __AS3___vec_Vector_int_fixed_get = 307;
+const uint32_t __AS3___vec_Vector_int_AS3_push = 315;
+const uint32_t __AS3___vec_Vector_int_private__reverse = 316;
+const uint32_t __AS3___vec_Vector_int_private__spliceHelper = 320;
+const uint32_t __AS3___vec_Vector_int_AS3_unshift = 321;
+const uint32_t __AS3___vec_Vector_int_private__filter = 322;
+const uint32_t __AS3___vec_Vector_int_private__map = 323;
+const uint32_t __AS3___vec_Vector_int_AS3_pop = 327;
+const uint32_t __AS3___vec_Vector_int_AS3_shift = 329;
+const uint32_t __AS3___vec_Vector_uint_private__every = 356;
+const uint32_t __AS3___vec_Vector_uint_private__forEach = 357;
+const uint32_t __AS3___vec_Vector_uint_private__some = 358;
+const uint32_t __AS3___vec_Vector_uint_private__sort = 359;
+const uint32_t __AS3___vec_Vector_uint_private_newThisType = 361;
+const uint32_t __AS3___vec_Vector_uint_length_get = 362;
+const uint32_t __AS3___vec_Vector_uint_length_set = 363;
+const uint32_t __AS3___vec_Vector_uint_fixed_set = 364;
+const uint32_t __AS3___vec_Vector_uint_fixed_get = 365;
+const uint32_t __AS3___vec_Vector_uint_AS3_push = 373;
+const uint32_t __AS3___vec_Vector_uint_private__reverse = 374;
+const uint32_t __AS3___vec_Vector_uint_private__spliceHelper = 378;
+const uint32_t __AS3___vec_Vector_uint_AS3_unshift = 379;
+const uint32_t __AS3___vec_Vector_uint_private__filter = 380;
+const uint32_t __AS3___vec_Vector_uint_private__map = 381;
+const uint32_t __AS3___vec_Vector_uint_AS3_pop = 385;
+const uint32_t __AS3___vec_Vector_uint_AS3_shift = 387;
+const uint32_t __AS3___vec_Vector_double_private__every = 414;
+const uint32_t __AS3___vec_Vector_double_private__forEach = 415;
+const uint32_t __AS3___vec_Vector_double_private__some = 416;
+const uint32_t __AS3___vec_Vector_double_private__sort = 417;
+const uint32_t __AS3___vec_Vector_double_private_newThisType = 419;
+const uint32_t __AS3___vec_Vector_double_length_get = 420;
+const uint32_t __AS3___vec_Vector_double_length_set = 421;
+const uint32_t __AS3___vec_Vector_double_fixed_set = 422;
+const uint32_t __AS3___vec_Vector_double_fixed_get = 423;
+const uint32_t __AS3___vec_Vector_double_AS3_push = 431;
+const uint32_t __AS3___vec_Vector_double_private__reverse = 432;
+const uint32_t __AS3___vec_Vector_double_private__spliceHelper = 436;
+const uint32_t __AS3___vec_Vector_double_AS3_unshift = 437;
+const uint32_t __AS3___vec_Vector_double_private__filter = 438;
+const uint32_t __AS3___vec_Vector_double_private__map = 439;
+const uint32_t __AS3___vec_Vector_double_AS3_pop = 443;
+const uint32_t __AS3___vec_Vector_double_AS3_shift = 445;
+const uint32_t __AS3___vec_Vector_float_private__every = 472;
+const uint32_t __AS3___vec_Vector_float_private__forEach = 473;
+const uint32_t __AS3___vec_Vector_float_private__some = 474;
+const uint32_t __AS3___vec_Vector_float_private__sort = 475;
+const uint32_t __AS3___vec_Vector_float_private_newThisType = 477;
+const uint32_t __AS3___vec_Vector_float_length_get = 478;
+const uint32_t __AS3___vec_Vector_float_length_set = 479;
+const uint32_t __AS3___vec_Vector_float_fixed_set = 480;
+const uint32_t __AS3___vec_Vector_float_fixed_get = 481;
+const uint32_t __AS3___vec_Vector_float_AS3_push = 489;
+const uint32_t __AS3___vec_Vector_float_private__reverse = 490;
+const uint32_t __AS3___vec_Vector_float_private__spliceHelper = 494;
+const uint32_t __AS3___vec_Vector_float_AS3_unshift = 495;
+const uint32_t __AS3___vec_Vector_float_private__filter = 496;
+const uint32_t __AS3___vec_Vector_float_private__map = 497;
+const uint32_t __AS3___vec_Vector_float_AS3_pop = 501;
+const uint32_t __AS3___vec_Vector_float_AS3_shift = 503;
+const uint32_t __AS3___vec_Vector_float4_private__every = 530;
+const uint32_t __AS3___vec_Vector_float4_private__forEach = 531;
+const uint32_t __AS3___vec_Vector_float4_private__some = 532;
+const uint32_t __AS3___vec_Vector_float4_private__sort = 533;
+const uint32_t __AS3___vec_Vector_float4_private_newThisType = 535;
+const uint32_t __AS3___vec_Vector_float4_length_get = 536;
+const uint32_t __AS3___vec_Vector_float4_length_set = 537;
+const uint32_t __AS3___vec_Vector_float4_fixed_set = 538;
+const uint32_t __AS3___vec_Vector_float4_fixed_get = 539;
+const uint32_t __AS3___vec_Vector_float4_AS3_push = 547;
+const uint32_t __AS3___vec_Vector_float4_private__reverse = 548;
+const uint32_t __AS3___vec_Vector_float4_private__spliceHelper = 552;
+const uint32_t __AS3___vec_Vector_float4_AS3_unshift = 553;
+const uint32_t __AS3___vec_Vector_float4_private__filter = 554;
+const uint32_t __AS3___vec_Vector_float4_private__map = 555;
+const uint32_t __AS3___vec_Vector_float4_AS3_pop = 559;
+const uint32_t __AS3___vec_Vector_float4_AS3_shift = 561;
+const uint32_t Math_private__min = 573;
+const uint32_t Math_private__max = 574;
+const uint32_t Math_abs = 575;
+const uint32_t Math_acos = 576;
+const uint32_t Math_asin = 577;
+const uint32_t Math_atan = 578;
+const uint32_t Math_ceil = 579;
+const uint32_t Math_cos = 580;
+const uint32_t Math_exp = 581;
+const uint32_t Math_floor = 582;
+const uint32_t Math_log = 583;
+const uint32_t Math_round = 584;
+const uint32_t Math_sin = 585;
+const uint32_t Math_sqrt = 586;
+const uint32_t Math_tan = 587;
+const uint32_t Math_atan2 = 588;
+const uint32_t Math_pow = 589;
+const uint32_t Math_max = 590;
+const uint32_t Math_min = 591;
+const uint32_t Math_random = 592;
+const uint32_t Error_getErrorMessage = 597;
+const uint32_t Error_getStackTrace = 601;
+const uint32_t Date_parse = 677;
+const uint32_t Date_UTC = 678;
+const uint32_t Date_AS3_valueOf = 679;
+const uint32_t Date_private__toString = 680;
+const uint32_t Date_private__setTime = 681;
+const uint32_t Date_private__get = 682;
+const uint32_t Date_AS3_getUTCFullYear = 691;
+const uint32_t Date_AS3_getUTCMonth = 692;
+const uint32_t Date_AS3_getUTCDate = 693;
+const uint32_t Date_AS3_getUTCDay = 694;
+const uint32_t Date_AS3_getUTCHours = 695;
+const uint32_t Date_AS3_getUTCMinutes = 696;
+const uint32_t Date_AS3_getUTCSeconds = 697;
+const uint32_t Date_AS3_getUTCMilliseconds = 698;
+const uint32_t Date_AS3_getFullYear = 699;
+const uint32_t Date_AS3_getMonth = 700;
+const uint32_t Date_AS3_getDate = 701;
+const uint32_t Date_AS3_getDay = 702;
+const uint32_t Date_AS3_getHours = 703;
+const uint32_t Date_AS3_getMinutes = 704;
+const uint32_t Date_AS3_getSeconds = 705;
+const uint32_t Date_AS3_getMilliseconds = 706;
+const uint32_t Date_AS3_getTimezoneOffset = 707;
+const uint32_t Date_AS3_getTime = 708;
+const uint32_t Date_private__setFullYear = 709;
+const uint32_t Date_private__setMonth = 710;
+const uint32_t Date_private__setDate = 711;
+const uint32_t Date_private__setHours = 712;
+const uint32_t Date_private__setMinutes = 713;
+const uint32_t Date_private__setSeconds = 714;
+const uint32_t Date_private__setMilliseconds = 715;
+const uint32_t Date_private__setUTCFullYear = 716;
+const uint32_t Date_private__setUTCMonth = 717;
+const uint32_t Date_private__setUTCDate = 718;
+const uint32_t Date_private__setUTCHours = 719;
+const uint32_t Date_private__setUTCMinutes = 720;
+const uint32_t Date_private__setUTCSeconds = 721;
+const uint32_t Date_private__setUTCMilliseconds = 722;
+const uint32_t RegExp_source_get = 776;
+const uint32_t RegExp_global_get = 777;
+const uint32_t RegExp_ignoreCase_get = 778;
+const uint32_t RegExp_multiline_get = 779;
+const uint32_t RegExp_lastIndex_get = 780;
+const uint32_t RegExp_lastIndex_set = 781;
+const uint32_t RegExp_dotall_get = 782;
+const uint32_t RegExp_extended_get = 783;
+const uint32_t RegExp_AS3_exec = 784;
+const uint32_t JSON_private_parseCore = 789;
+const uint32_t JSON_private_stringifySpecializedToString = 790;
+const uint32_t XML_ignoreComments_get = 842;
+const uint32_t XML_ignoreComments_set = 843;
+const uint32_t XML_ignoreProcessingInstructions_get = 844;
+const uint32_t XML_ignoreProcessingInstructions_set = 845;
+const uint32_t XML_ignoreWhitespace_get = 846;
+const uint32_t XML_ignoreWhitespace_set = 847;
+const uint32_t XML_prettyPrinting_get = 848;
+const uint32_t XML_prettyPrinting_set = 849;
+const uint32_t XML_prettyIndent_get = 850;
+const uint32_t XML_prettyIndent_set = 851;
+const uint32_t XML_AS3_toString = 855;
+const uint32_t XML_AS3_hasOwnProperty = 856;
+const uint32_t XML_AS3_propertyIsEnumerable = 857;
+const uint32_t XML_AS3_addNamespace = 858;
+const uint32_t XML_AS3_appendChild = 859;
+const uint32_t XML_AS3_attribute = 860;
+const uint32_t XML_AS3_attributes = 861;
+const uint32_t XML_AS3_child = 862;
+const uint32_t XML_AS3_childIndex = 863;
+const uint32_t XML_AS3_children = 864;
+const uint32_t XML_AS3_comments = 865;
+const uint32_t XML_AS3_contains = 866;
+const uint32_t XML_AS3_copy = 867;
+const uint32_t XML_AS3_descendants = 868;
+const uint32_t XML_AS3_elements = 869;
+const uint32_t XML_AS3_hasComplexContent = 870;
+const uint32_t XML_AS3_hasSimpleContent = 871;
+const uint32_t XML_AS3_inScopeNamespaces = 872;
+const uint32_t XML_AS3_insertChildAfter = 873;
+const uint32_t XML_AS3_insertChildBefore = 874;
+const uint32_t XML_AS3_localName = 876;
+const uint32_t XML_AS3_name = 877;
+const uint32_t XML_private__namespace = 878;
+const uint32_t XML_AS3_namespaceDeclarations = 880;
+const uint32_t XML_AS3_nodeKind = 881;
+const uint32_t XML_AS3_normalize = 882;
+const uint32_t XML_AS3_parent = 883;
+const uint32_t XML_AS3_processingInstructions = 884;
+const uint32_t XML_AS3_prependChild = 885;
+const uint32_t XML_AS3_removeNamespace = 886;
+const uint32_t XML_AS3_replace = 887;
+const uint32_t XML_AS3_setChildren = 888;
+const uint32_t XML_AS3_setLocalName = 889;
+const uint32_t XML_AS3_setName = 890;
+const uint32_t XML_AS3_setNamespace = 891;
+const uint32_t XML_AS3_text = 892;
+const uint32_t XML_AS3_toXMLString = 893;
+const uint32_t XML_AS3_notification = 894;
+const uint32_t XML_AS3_setNotification = 895;
+const uint32_t XMLList_AS3_toString = 939;
+const uint32_t XMLList_AS3_hasOwnProperty = 941;
+const uint32_t XMLList_AS3_propertyIsEnumerable = 942;
+const uint32_t XMLList_AS3_attribute = 943;
+const uint32_t XMLList_AS3_attributes = 944;
+const uint32_t XMLList_AS3_child = 945;
+const uint32_t XMLList_AS3_children = 946;
+const uint32_t XMLList_AS3_comments = 947;
+const uint32_t XMLList_AS3_contains = 948;
+const uint32_t XMLList_AS3_copy = 949;
+const uint32_t XMLList_AS3_descendants = 950;
+const uint32_t XMLList_AS3_elements = 951;
+const uint32_t XMLList_AS3_hasComplexContent = 952;
+const uint32_t XMLList_AS3_hasSimpleContent = 953;
+const uint32_t XMLList_AS3_length = 954;
+const uint32_t XMLList_AS3_name = 955;
+const uint32_t XMLList_AS3_normalize = 956;
+const uint32_t XMLList_AS3_parent = 957;
+const uint32_t XMLList_AS3_processingInstructions = 958;
+const uint32_t XMLList_AS3_text = 959;
+const uint32_t XMLList_AS3_toXMLString = 960;
+const uint32_t XMLList_AS3_addNamespace = 961;
+const uint32_t XMLList_AS3_appendChild = 962;
+const uint32_t XMLList_AS3_childIndex = 963;
+const uint32_t XMLList_AS3_inScopeNamespaces = 964;
+const uint32_t XMLList_AS3_insertChildAfter = 965;
+const uint32_t XMLList_AS3_insertChildBefore = 966;
+const uint32_t XMLList_AS3_nodeKind = 967;
+const uint32_t XMLList_private__namespace = 968;
+const uint32_t XMLList_AS3_localName = 970;
+const uint32_t XMLList_AS3_namespaceDeclarations = 971;
+const uint32_t XMLList_AS3_prependChild = 972;
+const uint32_t XMLList_AS3_removeNamespace = 973;
+const uint32_t XMLList_AS3_replace = 974;
+const uint32_t XMLList_AS3_setChildren = 975;
+const uint32_t XMLList_AS3_setLocalName = 976;
+const uint32_t XMLList_AS3_setName = 977;
+const uint32_t XMLList_AS3_setNamespace = 978;
+const uint32_t QName_localName_get = 983;
+const uint32_t QName_uri_get = 984;
+const uint32_t flash_utils_Proxy_flash_proxy_isAttribute = 1040;
+const uint32_t float_reciprocal = 1065;
+const uint32_t float_rsqrt = 1066;
+const uint32_t float_private__minValue = 1069;
+const uint32_t float_private__floatToString = 1070;
+const uint32_t float_private__convert = 1071;
+const uint32_t float4_isGreater = 1081;
+const uint32_t float4_isGreaterOrEqual = 1082;
+const uint32_t float4_isLess = 1083;
+const uint32_t float4_isLessOrEqual = 1084;
+const uint32_t float4_isEqual = 1085;
+const uint32_t float4_isNotEqual = 1086;
+const uint32_t float4_abs = 1087;
+const uint32_t float4_max = 1088;
+const uint32_t float4_min = 1089;
+const uint32_t float4_reciprocal = 1090;
+const uint32_t float4_rsqrt = 1091;
+const uint32_t float4_sqrt = 1092;
+const uint32_t float4_normalize = 1093;
+const uint32_t float4_cross = 1094;
+const uint32_t float4_dot = 1095;
+const uint32_t float4_dot2 = 1096;
+const uint32_t float4_dot3 = 1097;
+const uint32_t float4_magnitude = 1098;
+const uint32_t float4_magnitude3 = 1099;
+const uint32_t float4_magnitude2 = 1100;
+const uint32_t float4_distance = 1101;
+const uint32_t float4_distance3 = 1102;
+const uint32_t float4_distance2 = 1103;
+const uint32_t float4_private__swizzle = 1104;
+const uint32_t float4_x_get = 1106;
+const uint32_t float4_y_get = 1107;
+const uint32_t float4_z_get = 1108;
+const uint32_t float4_w_get = 1109;
+const uint32_t flash_utils_ByteArray_defaultObjectEncoding_get = 1373;
+const uint32_t flash_utils_ByteArray_defaultObjectEncoding_set = 1374;
+const uint32_t flash_utils_ByteArray_readBytes = 1376;
+const uint32_t flash_utils_ByteArray_writeBytes = 1377;
+const uint32_t flash_utils_ByteArray_writeBoolean = 1378;
+const uint32_t flash_utils_ByteArray_writeByte = 1379;
+const uint32_t flash_utils_ByteArray_writeShort = 1380;
+const uint32_t flash_utils_ByteArray_writeInt = 1381;
+const uint32_t flash_utils_ByteArray_writeUnsignedInt = 1382;
+const uint32_t flash_utils_ByteArray_writeFloat = 1383;
+const uint32_t flash_utils_ByteArray_writeFloat4 = 1384;
+const uint32_t flash_utils_ByteArray_writeDouble = 1385;
+const uint32_t flash_utils_ByteArray_writeMultiByte = 1386;
+const uint32_t flash_utils_ByteArray_writeUTF = 1387;
+const uint32_t flash_utils_ByteArray_writeUTFBytes = 1388;
+const uint32_t flash_utils_ByteArray_readBoolean = 1389;
+const uint32_t flash_utils_ByteArray_readByte = 1390;
+const uint32_t flash_utils_ByteArray_readUnsignedByte = 1391;
+const uint32_t flash_utils_ByteArray_readShort = 1392;
+const uint32_t flash_utils_ByteArray_readUnsignedShort = 1393;
+const uint32_t flash_utils_ByteArray_readInt = 1394;
+const uint32_t flash_utils_ByteArray_readUnsignedInt = 1395;
+const uint32_t flash_utils_ByteArray_readFloat = 1396;
+const uint32_t flash_utils_ByteArray_readFloat4 = 1397;
+const uint32_t flash_utils_ByteArray_readDouble = 1398;
+const uint32_t flash_utils_ByteArray_readMultiByte = 1399;
+const uint32_t flash_utils_ByteArray_readUTF = 1400;
+const uint32_t flash_utils_ByteArray_readUTFBytes = 1401;
+const uint32_t flash_utils_ByteArray_length_get = 1402;
+const uint32_t flash_utils_ByteArray_length_set = 1403;
+const uint32_t flash_utils_ByteArray_writeObject = 1404;
+const uint32_t flash_utils_ByteArray_readObject = 1405;
+const uint32_t flash_utils_ByteArray_private__compress = 1407;
+const uint32_t flash_utils_ByteArray_private__uncompress = 1410;
+const uint32_t flash_utils_ByteArray_private__toString = 1413;
+const uint32_t flash_utils_ByteArray_bytesAvailable_get = 1414;
+const uint32_t flash_utils_ByteArray_position_get = 1415;
+const uint32_t flash_utils_ByteArray_position_set = 1416;
+const uint32_t flash_utils_ByteArray_objectEncoding_get = 1417;
+const uint32_t flash_utils_ByteArray_objectEncoding_set = 1418;
+const uint32_t flash_utils_ByteArray_endian_get = 1419;
+const uint32_t flash_utils_ByteArray_endian_set = 1420;
+const uint32_t flash_utils_ByteArray_clear = 1421;
 
 extern double Math_private__min_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double Math_private__max_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -769,6 +769,39 @@ extern avmplus::Atom XMLList_AS3_setNamespace_thunk(MethodEnv* env, uint32_t arg
 extern avmplus::Atom QName_localName_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom QName_uri_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_utils_Proxy_flash_proxy_isAttribute_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_reciprocal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_rsqrt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_private__minValue_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom float_private__floatToString_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom float_private__convert_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float4_t float4_isGreater_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float4_t float4_isGreaterOrEqual_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float4_t float4_isLess_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float4_t float4_isLessOrEqual_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float4_t float4_isEqual_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float4_t float4_isNotEqual_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float4_t float4_abs_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float4_t float4_max_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float4_t float4_min_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float4_t float4_reciprocal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float4_t float4_rsqrt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float4_t float4_sqrt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float4_t float4_normalize_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float4_t float4_cross_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float4_dot_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float4_dot2_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float4_dot3_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float4_magnitude_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float4_magnitude3_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float4_magnitude2_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float4_distance_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float4_distance3_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float4_distance2_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float4_t float4_private__swizzle_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float4_x_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float4_y_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float4_z_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float4_w_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_utils_ByteArray_defaultObjectEncoding_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_utils_ByteArray_defaultObjectEncoding_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_utils_ByteArray_readBytes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -828,39 +861,6 @@ extern avmplus::Atom Namespace_uri_get_thunk(MethodEnv* env, uint32_t argc, Atom
 extern avmplus::Atom Number_private__numberToString_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom Number_private__convert_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double Number_private__minValue_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float_reciprocal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float_rsqrt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float_private__minValue_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom float_private__floatToString_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom float_private__convert_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float4_t float4_isGreater_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float4_t float4_isGreaterOrEqual_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float4_t float4_isLess_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float4_t float4_isLessOrEqual_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float4_t float4_isEqual_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float4_t float4_isNotEqual_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float4_t float4_abs_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float4_t float4_max_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float4_t float4_min_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float4_t float4_reciprocal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float4_t float4_rsqrt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float4_t float4_sqrt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float4_t float4_normalize_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float4_t float4_cross_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float4_dot_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float4_dot2_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float4_dot3_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float4_magnitude_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float4_magnitude3_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float4_magnitude2_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float4_distance_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float4_distance3_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float4_distance2_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float4_t float4_private__swizzle_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float4_x_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float4_y_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float4_z_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern float float4_w_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom String_AS3_fromCharCode_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom String_private__match_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom String_private__replace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -1611,180 +1611,6 @@ private:
         REALLY_INLINE void setconst_length(int32_t newVal) { m_slots_UIntClass.m_length = newVal; } \
     private: \
         avmplus::NativeID::avmplus_UIntClassSlots m_slots_UIntClass \
-
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
-// float$
-//-----------------------------------------------------------
-class avmplus_FloatClassSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmplus::FloatClass;
-private:
-    float m_NaN;
-    float m_NEGATIVE_INFINITY;
-    float m_POSITIVE_INFINITY;
-    float m_MIN_VALUE;
-    float m_MAX_VALUE;
-    float m_E;
-    float m_LN10;
-    float m_LN2;
-    float m_LOG2E;
-    float m_PI;
-    float m_SQRT1_2;
-    float m_SQRT2;
-    int32_t m_private_DTOSTR_FIXED;
-    int32_t m_private_DTOSTR_PRECISION;
-    int32_t m_private_DTOSTR_EXPONENTIAL;
-    int32_t m_length;
-#define GC_TRIVIAL_TRACER_FloatClass
-};
-#define DECLARE_SLOTS_FloatClass \
-    public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
-    public: \
-        virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
-    private: \
-        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
-    public: \
-        REALLY_INLINE bool isType(avmplus::Atom value) \
-        { \
-            return isTypeImpl(value); \
-        } \
-        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            return isTypeImpl(value->atom()); \
-        } \
-        REALLY_INLINE float asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return avmplus::AvmCore::singlePrecisionFloat(result); \
-        } \
-        REALLY_INLINE float asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return avmplus::AvmCore::singlePrecisionFloat(result); \
-        } \
-        REALLY_INLINE float coerceToType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value); \
-            return avmplus::AvmCore::singlePrecisionFloat(result); \
-        } \
-        REALLY_INLINE float coerceToType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
-            return avmplus::AvmCore::singlePrecisionFloat(result); \
-        } \
-    private: \
-        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    public: \
-        REALLY_INLINE float get_NaN() const { return m_slots_FloatClass.m_NaN; } \
-        REALLY_INLINE void setconst_NaN(float newVal) { m_slots_FloatClass.m_NaN = newVal; } \
-    public: \
-        REALLY_INLINE float get_NEGATIVE_INFINITY() const { return m_slots_FloatClass.m_NEGATIVE_INFINITY; } \
-        REALLY_INLINE void setconst_NEGATIVE_INFINITY(float newVal) { m_slots_FloatClass.m_NEGATIVE_INFINITY = newVal; } \
-    public: \
-        REALLY_INLINE float get_POSITIVE_INFINITY() const { return m_slots_FloatClass.m_POSITIVE_INFINITY; } \
-        REALLY_INLINE void setconst_POSITIVE_INFINITY(float newVal) { m_slots_FloatClass.m_POSITIVE_INFINITY = newVal; } \
-    public: \
-        REALLY_INLINE float get_MIN_VALUE() const { return m_slots_FloatClass.m_MIN_VALUE; } \
-        REALLY_INLINE void setconst_MIN_VALUE(float newVal) { m_slots_FloatClass.m_MIN_VALUE = newVal; } \
-    public: \
-        REALLY_INLINE float get_MAX_VALUE() const { return m_slots_FloatClass.m_MAX_VALUE; } \
-        REALLY_INLINE void setconst_MAX_VALUE(float newVal) { m_slots_FloatClass.m_MAX_VALUE = newVal; } \
-    public: \
-        REALLY_INLINE float get_E() const { return m_slots_FloatClass.m_E; } \
-        REALLY_INLINE void setconst_E(float newVal) { m_slots_FloatClass.m_E = newVal; } \
-    public: \
-        REALLY_INLINE float get_LN10() const { return m_slots_FloatClass.m_LN10; } \
-        REALLY_INLINE void setconst_LN10(float newVal) { m_slots_FloatClass.m_LN10 = newVal; } \
-    public: \
-        REALLY_INLINE float get_LN2() const { return m_slots_FloatClass.m_LN2; } \
-        REALLY_INLINE void setconst_LN2(float newVal) { m_slots_FloatClass.m_LN2 = newVal; } \
-    public: \
-        REALLY_INLINE float get_LOG2E() const { return m_slots_FloatClass.m_LOG2E; } \
-        REALLY_INLINE void setconst_LOG2E(float newVal) { m_slots_FloatClass.m_LOG2E = newVal; } \
-    public: \
-        REALLY_INLINE float get_PI() const { return m_slots_FloatClass.m_PI; } \
-        REALLY_INLINE void setconst_PI(float newVal) { m_slots_FloatClass.m_PI = newVal; } \
-    public: \
-        REALLY_INLINE float get_SQRT1_2() const { return m_slots_FloatClass.m_SQRT1_2; } \
-        REALLY_INLINE void setconst_SQRT1_2(float newVal) { m_slots_FloatClass.m_SQRT1_2 = newVal; } \
-    public: \
-        REALLY_INLINE float get_SQRT2() const { return m_slots_FloatClass.m_SQRT2; } \
-        REALLY_INLINE void setconst_SQRT2(float newVal) { m_slots_FloatClass.m_SQRT2 = newVal; } \
-    protected: \
-        REALLY_INLINE int32_t get_DTOSTR_FIXED() const { return m_slots_FloatClass.m_private_DTOSTR_FIXED; } \
-        REALLY_INLINE void setconst_DTOSTR_FIXED(int32_t newVal) { m_slots_FloatClass.m_private_DTOSTR_FIXED = newVal; } \
-    protected: \
-        REALLY_INLINE int32_t get_DTOSTR_PRECISION() const { return m_slots_FloatClass.m_private_DTOSTR_PRECISION; } \
-        REALLY_INLINE void setconst_DTOSTR_PRECISION(int32_t newVal) { m_slots_FloatClass.m_private_DTOSTR_PRECISION = newVal; } \
-    protected: \
-        REALLY_INLINE int32_t get_DTOSTR_EXPONENTIAL() const { return m_slots_FloatClass.m_private_DTOSTR_EXPONENTIAL; } \
-        REALLY_INLINE void setconst_DTOSTR_EXPONENTIAL(int32_t newVal) { m_slots_FloatClass.m_private_DTOSTR_EXPONENTIAL = newVal; } \
-    public: \
-        REALLY_INLINE int32_t get_length() const { return m_slots_FloatClass.m_length; } \
-        REALLY_INLINE void setconst_length(int32_t newVal) { m_slots_FloatClass.m_length = newVal; } \
-    private: \
-        avmplus::NativeID::avmplus_FloatClassSlots m_slots_FloatClass \
-
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
-// float4$
-//-----------------------------------------------------------
-class avmplus_Float4ClassSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmplus::Float4Class;
-private:
-    int32_t m_length;
-#define GC_TRIVIAL_TRACER_Float4Class
-};
-#define DECLARE_SLOTS_Float4Class \
-    public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
-    public: \
-        virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
-    private: \
-        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
-    public: \
-        REALLY_INLINE bool isType(avmplus::Atom value) \
-        { \
-            return isTypeImpl(value); \
-        } \
-        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            return isTypeImpl(value->atom()); \
-        } \
-        REALLY_INLINE float4_t asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return avmplus::AvmCore::float4(result); \
-        } \
-        REALLY_INLINE float4_t asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return avmplus::AvmCore::float4(result); \
-        } \
-        REALLY_INLINE float4_t coerceToType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value); \
-            return avmplus::AvmCore::float4(result); \
-        } \
-        REALLY_INLINE float4_t coerceToType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
-            return avmplus::AvmCore::float4(result); \
-        } \
-    private: \
-        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    public: \
-        REALLY_INLINE int32_t get_length() const { return m_slots_Float4Class.m_length; } \
-        REALLY_INLINE void setconst_length(int32_t newVal) { m_slots_Float4Class.m_length = newVal; } \
-    private: \
-        avmplus::NativeID::avmplus_Float4ClassSlots m_slots_Float4Class \
 
 //-----------------------------------------------------------
 
@@ -4670,6 +4496,180 @@ class avmplus_ProxyObjectSlots
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// float$
+//-----------------------------------------------------------
+class avmplus_FloatClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::FloatClass;
+private:
+    float m_NaN;
+    float m_NEGATIVE_INFINITY;
+    float m_POSITIVE_INFINITY;
+    float m_MIN_VALUE;
+    float m_MAX_VALUE;
+    float m_E;
+    float m_LN10;
+    float m_LN2;
+    float m_LOG2E;
+    float m_PI;
+    float m_SQRT1_2;
+    float m_SQRT2;
+    int32_t m_private_DTOSTR_FIXED;
+    int32_t m_private_DTOSTR_PRECISION;
+    int32_t m_private_DTOSTR_EXPONENTIAL;
+    int32_t m_length;
+#define GC_TRIVIAL_TRACER_FloatClass
+};
+#define DECLARE_SLOTS_FloatClass \
+    public: \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
+    public: \
+        virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE bool isType(avmplus::Atom value) \
+        { \
+            return isTypeImpl(value); \
+        } \
+        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            return isTypeImpl(value->atom()); \
+        } \
+        REALLY_INLINE float asType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value); \
+            return avmplus::AvmCore::singlePrecisionFloat(result); \
+        } \
+        REALLY_INLINE float asType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value->atom()); \
+            return avmplus::AvmCore::singlePrecisionFloat(result); \
+        } \
+        REALLY_INLINE float coerceToType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value); \
+            return avmplus::AvmCore::singlePrecisionFloat(result); \
+        } \
+        REALLY_INLINE float coerceToType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
+            return avmplus::AvmCore::singlePrecisionFloat(result); \
+        } \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    public: \
+        REALLY_INLINE float get_NaN() const { return m_slots_FloatClass.m_NaN; } \
+        REALLY_INLINE void setconst_NaN(float newVal) { m_slots_FloatClass.m_NaN = newVal; } \
+    public: \
+        REALLY_INLINE float get_NEGATIVE_INFINITY() const { return m_slots_FloatClass.m_NEGATIVE_INFINITY; } \
+        REALLY_INLINE void setconst_NEGATIVE_INFINITY(float newVal) { m_slots_FloatClass.m_NEGATIVE_INFINITY = newVal; } \
+    public: \
+        REALLY_INLINE float get_POSITIVE_INFINITY() const { return m_slots_FloatClass.m_POSITIVE_INFINITY; } \
+        REALLY_INLINE void setconst_POSITIVE_INFINITY(float newVal) { m_slots_FloatClass.m_POSITIVE_INFINITY = newVal; } \
+    public: \
+        REALLY_INLINE float get_MIN_VALUE() const { return m_slots_FloatClass.m_MIN_VALUE; } \
+        REALLY_INLINE void setconst_MIN_VALUE(float newVal) { m_slots_FloatClass.m_MIN_VALUE = newVal; } \
+    public: \
+        REALLY_INLINE float get_MAX_VALUE() const { return m_slots_FloatClass.m_MAX_VALUE; } \
+        REALLY_INLINE void setconst_MAX_VALUE(float newVal) { m_slots_FloatClass.m_MAX_VALUE = newVal; } \
+    public: \
+        REALLY_INLINE float get_E() const { return m_slots_FloatClass.m_E; } \
+        REALLY_INLINE void setconst_E(float newVal) { m_slots_FloatClass.m_E = newVal; } \
+    public: \
+        REALLY_INLINE float get_LN10() const { return m_slots_FloatClass.m_LN10; } \
+        REALLY_INLINE void setconst_LN10(float newVal) { m_slots_FloatClass.m_LN10 = newVal; } \
+    public: \
+        REALLY_INLINE float get_LN2() const { return m_slots_FloatClass.m_LN2; } \
+        REALLY_INLINE void setconst_LN2(float newVal) { m_slots_FloatClass.m_LN2 = newVal; } \
+    public: \
+        REALLY_INLINE float get_LOG2E() const { return m_slots_FloatClass.m_LOG2E; } \
+        REALLY_INLINE void setconst_LOG2E(float newVal) { m_slots_FloatClass.m_LOG2E = newVal; } \
+    public: \
+        REALLY_INLINE float get_PI() const { return m_slots_FloatClass.m_PI; } \
+        REALLY_INLINE void setconst_PI(float newVal) { m_slots_FloatClass.m_PI = newVal; } \
+    public: \
+        REALLY_INLINE float get_SQRT1_2() const { return m_slots_FloatClass.m_SQRT1_2; } \
+        REALLY_INLINE void setconst_SQRT1_2(float newVal) { m_slots_FloatClass.m_SQRT1_2 = newVal; } \
+    public: \
+        REALLY_INLINE float get_SQRT2() const { return m_slots_FloatClass.m_SQRT2; } \
+        REALLY_INLINE void setconst_SQRT2(float newVal) { m_slots_FloatClass.m_SQRT2 = newVal; } \
+    protected: \
+        REALLY_INLINE int32_t get_DTOSTR_FIXED() const { return m_slots_FloatClass.m_private_DTOSTR_FIXED; } \
+        REALLY_INLINE void setconst_DTOSTR_FIXED(int32_t newVal) { m_slots_FloatClass.m_private_DTOSTR_FIXED = newVal; } \
+    protected: \
+        REALLY_INLINE int32_t get_DTOSTR_PRECISION() const { return m_slots_FloatClass.m_private_DTOSTR_PRECISION; } \
+        REALLY_INLINE void setconst_DTOSTR_PRECISION(int32_t newVal) { m_slots_FloatClass.m_private_DTOSTR_PRECISION = newVal; } \
+    protected: \
+        REALLY_INLINE int32_t get_DTOSTR_EXPONENTIAL() const { return m_slots_FloatClass.m_private_DTOSTR_EXPONENTIAL; } \
+        REALLY_INLINE void setconst_DTOSTR_EXPONENTIAL(int32_t newVal) { m_slots_FloatClass.m_private_DTOSTR_EXPONENTIAL = newVal; } \
+    public: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_FloatClass.m_length; } \
+        REALLY_INLINE void setconst_length(int32_t newVal) { m_slots_FloatClass.m_length = newVal; } \
+    private: \
+        avmplus::NativeID::avmplus_FloatClassSlots m_slots_FloatClass \
+
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// float4$
+//-----------------------------------------------------------
+class avmplus_Float4ClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::Float4Class;
+private:
+    int32_t m_length;
+#define GC_TRIVIAL_TRACER_Float4Class
+};
+#define DECLARE_SLOTS_Float4Class \
+    public: \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
+    public: \
+        virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE bool isType(avmplus::Atom value) \
+        { \
+            return isTypeImpl(value); \
+        } \
+        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            return isTypeImpl(value->atom()); \
+        } \
+        REALLY_INLINE float4_t asType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value); \
+            return avmplus::AvmCore::float4(result); \
+        } \
+        REALLY_INLINE float4_t asType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value->atom()); \
+            return avmplus::AvmCore::float4(result); \
+        } \
+        REALLY_INLINE float4_t coerceToType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value); \
+            return avmplus::AvmCore::float4(result); \
+        } \
+        REALLY_INLINE float4_t coerceToType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
+            return avmplus::AvmCore::float4(result); \
+        } \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    public: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_Float4Class.m_length; } \
+        REALLY_INLINE void setconst_length(int32_t newVal) { m_slots_Float4Class.m_length = newVal; } \
+    private: \
+        avmplus::NativeID::avmplus_Float4ClassSlots m_slots_Float4Class \
 
 //-----------------------------------------------------------
 

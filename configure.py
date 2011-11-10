@@ -210,6 +210,8 @@ if 'VALGRIND_HOME' in os.environ:
     valinc = os.environ['VALGRIND_HOME'] + '/include'
 APP_CPPFLAGS += '-I' + valinc + ' '
 
+# builtinBuildFlags() must be called first, featureSettings() will clear the features!
+config.subst("BUILTIN_BUILDFLAGS",build.avmfeatures.builtinBuildFlags(o));
 # See build/avmfeatures.py for the code that processes switches for
 # standard feature names.
 APP_CPPFLAGS += build.avmfeatures.featureSettings(o)

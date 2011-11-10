@@ -63,12 +63,9 @@ asc = javacmd+" macromedia.asc.embedding.ScriptCompiler "
 print("ASC="+classpath)
 print("Building builtins...")
 
-VMCFG_FLOAT = os.environ.get('VMCFG_FLOAT')
-if VMCFG_FLOAT == None:
-    VMCFG_FLOAT = "true"
-configs = "-config CONFIG::VMCFG_FLOAT="+VMCFG_FLOAT
+configs = " ".join(sys.argv[1:])
 
-os.system(asc+"-abcfuture -builtin "+configs+" -apiversioning -out builtin builtin.as Math.as Error.as Date.as RegExp.as JSON.as XML.as IDataInput.as IDataOutput.as ByteArray.as Proxy.as ")
+os.system(asc+" -builtin -apiversioning -out builtin builtin.as Math.as Error.as Date.as RegExp.as JSON.as XML.as IDataInput.as IDataOutput.as ByteArray.as Proxy.as "+configs)
 
 rm("builtin.h")
 rm("builtin.cpp")

@@ -39,8 +39,9 @@
 
 package
 {
-    // No instancegc, value is primitive.
+    include "api-versions.as"
 
+    // No instancegc, value is primitive.
     [native(cls="FloatClass", classgc="exact", instance="float", methods="auto", construct="override")]
     [API(CONFIG::SWF_16)]
     CONFIG::VMCFG_FLOAT
