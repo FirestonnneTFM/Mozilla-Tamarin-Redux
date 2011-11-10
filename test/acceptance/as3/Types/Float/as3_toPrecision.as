@@ -75,7 +75,7 @@ test_num = test_flt;
 AddTestCase("test float.AS3::toPrecision(2) float literal", test_num.AS3::toPrecision(2), 2.7182818284e5f.AS3::toPrecision(2));
 
 var expectedRangeErr:String = "???";
-try{ test_flt.AS3::toPrecision(0); } catch(e:RangeError){ expectedRangeErr = e; }
+try{ test_flt.AS3::toPrecision(0); } catch(e:RangeError){ expectedRangeErr = rangeError(e.toString()); }
 AddErrorTest("float.AS3::toPrecision() == float.AS3::toPrecision(0)", expectedRangeErr, function(){ return test_flt.AS3::toPrecision();});
 
 test_num = test_flt;

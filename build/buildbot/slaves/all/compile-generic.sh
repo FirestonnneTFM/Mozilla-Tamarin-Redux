@@ -115,8 +115,8 @@ cd objdir
 echo ""
 echo "*******************************************************************************"
 echo "configure.py call:"
-echo "../configure.py $config"
-python ../configure.py $config
+echo "../configure.py --enable-float $config"
+python ../configure.py --enable-float $config
 echo ""
 echo "*******************************************************************************"
 
