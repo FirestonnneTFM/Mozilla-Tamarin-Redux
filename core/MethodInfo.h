@@ -281,7 +281,7 @@ namespace avmplus
         void update_max_stack(int32_t max_stack);
 #ifdef VMCFG_FLOAT
         void forceLargeVarSize();
-        int32_t varSize();
+        int32_t varShift();  // effectively, log2(varSize), i.e. 3 or 4. See exec.h for details.
 #endif // VMCFG_FLOAT
 
         /**
