@@ -639,7 +639,7 @@ namespace avmplus
 #ifdef DEBUG
         jit_sst[i] = uint16_t(1 << sst); 
 #endif
-        lirout->insStore(o, vars, i * IFFLOAT(info->varSize(), VARSIZE) , ACCSET_VARS);
+        lirout->insStore(o, vars, i << VARSHIFT(info) , ACCSET_VARS);
         lirout->insStore(LIR_sti2c, InsConst(sst), tags, i, ACCSET_TAGS);
     }
 
@@ -810,7 +810,7 @@ namespace avmplus
         LIns* vars;                     // LIns that defines the vars[] array
         LIns* tags;                     // LIns that defines the tags[] array
         const int nvar;                 // this method's frame size.
-        FLOAT_ONLY(const int varSize;)  // the size of a frame variable in bytes (8 or 16)
+        const int varShift;              // the size of a frame variable in bytes (8 or 16)
         const int scopeBase;            // index of first local scope
         const int stackBase;            // index of first stack slot
         int restLocal;                  // -1 or, if it's lazily allocated, the local holding the rest array
@@ -835,13 +835,13 @@ namespace avmplus
 
     public:
         VarTracker(MethodInfo* info, Allocator& alloc, LirWriter *out,
-                int nvar, FLOAT_ONLY(int varSize,) int scopeBase, int stackBase, int restLocal,
+                int nvar, int scopeBase, int stackBase, int restLocal,
                 uint32_t code_len)
             : LirWriter(out), alloc(alloc),
-              vars(NULL), tags(NULL),
-              nvar(nvar), FLOAT_ONLY(varSize(varSize),) scopeBase(scopeBase), stackBase(stackBase),
-              restLocal(restLocal), reachable(true),
-              has_backedges(false)
+              vars(NULL), tags(NULL), nvar(nvar), 
+              varShift(VARSHIFT(info)), scopeBase(scopeBase), 
+              stackBase(stackBase), restLocal(restLocal),
+              reachable(true), has_backedges(false)
 #ifdef DEBUGGER
             , haveDebugger(info->pool()->core->debugger() != NULL)
 #endif
@@ -1069,8 +1069,8 @@ namespace avmplus
         }
 
         REALLY_INLINE int varOffsetToIndex(int offset) {
-            AvmAssert(IS_ALIGNED(offset, IFFLOAT(varSize,VARSIZE)));
-            return offset / IFFLOAT(varSize,VARSIZE);
+            AvmAssert(IS_ALIGNED(offset, 1 << varShift));
+            return offset >> varShift;
         }
 
         // keep track of the value stored in var d and update notnull
@@ -1107,7 +1107,7 @@ namespace avmplus
                 LIns *val = varTracker[i];
                 if (!val) {
                     val = out->insLoad(op, base, d, accSet, loadQual);
-                    FLOAT_ONLY(AvmAssert(!val->isF4() || varSize==16));
+                    FLOAT_ONLY(AvmAssert(!val->isF4() || varShift == 4));
                     trackVarLoad(val, i);
                 }
                 return val;
@@ -1129,7 +1129,7 @@ namespace avmplus
         LIns *insStore(LOpcode op, LIns *value, LIns *base, int32_t d, AccSet accSet) {
             if (base == vars)
             {
-                FLOAT_ONLY(AvmAssert(!value->isF4() || varSize == 16));
+                FLOAT_ONLY(AvmAssert(!value->isF4() || varShift == 4));
                 trackVarStore(value, varOffsetToIndex(d));
             }
             else if (base == tags)
@@ -1194,7 +1194,7 @@ namespace avmplus
                   (v.sst_mask == (1 << SST_uint32) && v.traits == UINT_TYPE) ||
                   (v.sst_mask == (1 << SST_bool32) && v.traits == BOOLEAN_TYPE));
 #endif
-        return lirout->insLoad(LIR_ldi, vars, i * IFFLOAT(info->varSize(), VARSIZE) , ACCSET_VARS);
+        return lirout->insLoad(LIR_ldi, vars, i << VARSHIFT(info) , ACCSET_VARS);
     }
 
     LIns* CodegenLIR::localGetf(int i) {
@@ -1203,7 +1203,7 @@ namespace avmplus
         const FrameValue& v = state->value(i);
         AvmAssert(v.sst_mask == (1<<SST_float) && v.traits == FLOAT_TYPE);
 #endif
-        return lirout->insLoad(LIR_ldf, vars, i * info->varSize(), ACCSET_VARS);
+        return lirout->insLoad(LIR_ldf, vars, i << VARSHIFT(info), ACCSET_VARS);
 #else
         toplevel->throwError(kNotImplementedError); (void)i;
         return NULL;
@@ -1215,7 +1215,7 @@ namespace avmplus
         const FrameValue& v = state->value(i);
         AvmAssert((v.sst_mask == (1<<SST_double) && v.traits == NUMBER_TYPE));
 #endif
-        return lirout->insLoad(LIR_ldd, vars, i * IFFLOAT(info->varSize(), VARSIZE) , ACCSET_VARS);
+        return lirout->insLoad(LIR_ldd, vars, i << VARSHIFT(info) , ACCSET_VARS);
     }
 
 #ifdef VMCFG_FLOAT
@@ -1223,9 +1223,9 @@ namespace avmplus
 #ifdef DEBUG
         const FrameValue& v = state->value(i);
         AvmAssert(v.sst_mask == (1<<SST_float4) && v.traits == FLOAT4_TYPE);
-        AvmAssert(info->varSize() == 16);
+        AvmAssert(VARSHIFT(info) == 4);
 #endif
-        return lirout->insLoad(LIR_ldf4, vars, i * info->varSize(), ACCSET_VARS);
+        return lirout->insLoad(LIR_ldf4, vars, i << VARSHIFT(info), ACCSET_VARS);
     }
 #endif
 
@@ -1243,12 +1243,12 @@ namespace avmplus
 FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYPE)   &&
                       !(v.sst_mask == (1 << SST_float4) && v.traits == FLOAT4_TYPE)  && )
                       !(v.sst_mask == (1 << SST_double) && v.traits == NUMBER_TYPE));
-            ins = lirout->insLoad(LIR_ldp, vars, i * IFFLOAT(info->varSize(),VARSIZE) , ACCSET_VARS);
+            ins = lirout->insLoad(LIR_ldp, vars, i << VARSHIFT(info) , ACCSET_VARS);
         } else {
             // more than one representation is possible: convert to atom using tag found at runtime.
             AvmAssert(bt(v.traits) == BUILTIN_any || bt(v.traits) == BUILTIN_object);
             LIns* tag = lirout->insLoad(LIR_lduc2ui, tags, i, ACCSET_TAGS);
-            LIns* varAddr = leaIns( i * IFFLOAT(info->varSize(), VARSIZE) , vars);
+            LIns* varAddr = leaIns( i << VARSHIFT(info) , vars);
             ins = callIns(FUNCTIONID(makeatom), 3, coreAddr, varAddr, tag);
         }
         if (v.notNull)
@@ -1305,10 +1305,10 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         LIns *vars;
         LIns *tags;
         int nvar;
-        int varSize;
+        int varShift;
     public:
-        DebuggerCheck(AvmCore* core, Allocator& alloc, LirWriter *out, int nvar, int varSize)
-            : LirWriter(out), core(core), vars(NULL), tags(NULL), nvar(nvar), varSize(varSize)
+        DebuggerCheck(AvmCore* core, Allocator& alloc, LirWriter *out, int nvar, int varShift)
+            : LirWriter(out), core(core), vars(NULL), tags(NULL), nvar(nvar), varShift(varShift)
         {
             varTracker = new (alloc) LIns*[nvar];
             tagTracker = new (alloc) LIns*[nvar];
@@ -1321,9 +1321,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         }
 
         void trackVarStore(LIns *value, int d) {
-            AvmAssert(IS_ALIGNED(d, varSize));
-            FLOAT_ONLY(AvmAssert(varSize==16 || !value->isF4());)
-            int i = d / varSize;
+            AvmAssert(IS_ALIGNED(d, 1 << varShift));
+            FLOAT_ONLY(AvmAssert(varShift == 4 || !value->isF4());)
+            int i = d >> varShift;
             if (i >= nvar)
                 return;
             varTracker[i] = value;
@@ -1656,7 +1656,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         #ifdef DEBUG
         DebuggerCheck *checker = NULL;
         if (haveDebugger) {
-            checker = new (*alloc1) DebuggerCheck(core, *alloc1, lirout, dbg_framesize, IFFLOAT(info->varSize(),VARSIZE));
+            checker = new (*alloc1) DebuggerCheck(core, *alloc1, lirout, dbg_framesize, VARSHIFT(info));
             lirout = checker;
         }
         #endif // DEBUG
@@ -1666,7 +1666,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
         // add the VarTracker filter last because we want it to be first in line.
         lirout = varTracker = new (*alloc1) VarTracker(info, *alloc1, lirout,
-                framesize, FLOAT_ONLY(info->varSize(),) ms->scope_base(), ms->stack_base(), restLocal, codeLength);
+                framesize, ms->scope_base(), ms->stack_base(), restLocal, codeLength);
 
         // last pc value that we generated a store for
         lastPcSave = NULL;
@@ -1714,7 +1714,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         #endif
 
         // allocate room for our local variables
-        vars = insAlloc(framesize * IFFLOAT(info->varSize(),VARSIZE));   // room for double|Atom|int|pointer, and float4 if used 
+        vars = insAlloc(framesize << VARSHIFT(info));   // room for double|Atom|int|pointer, and float4 if used 
         tags = insAlloc(framesize);             // one tag byte per var
         prolog_buf->sp = vars;
         varTracker->init(vars, tags);
@@ -3274,7 +3274,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                                 loadEnvToplevel(),
                                 InsConstPtr(multiname),
                                 loadAtomRep(state->sp()),
-                                leaIns(restLocal * IFFLOAT(info->varSize(), VARSIZE) , vars),
+                                leaIns(restLocal << VARSHIFT(info) , vars),
                                 restArgc,
                                 (info->needRest() ?
                                     binaryIns(LIR_addp, ap_param, InsConstPtr((void*)(ms->rest_offset()))) :
@@ -4754,34 +4754,34 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             switch (bt(paramType)) {
 #ifdef VMCFG_FLOAT
             case BUILTIN_float: 
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldf, vars, index * info->varSize(), ACCSET_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldf, vars, index << VARSHIFT(info), ACCSET_VARS);
                 stf(v, ap, disp, ACCSET_OTHER);
                 disp += sizeof(intptr_t); // same size as an 'int' ! (64 bits on x64)
                 break;
             case BUILTIN_float4: 
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldf4, vars, index * info->varSize(), ACCSET_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldf4, vars, index << VARSHIFT(info), ACCSET_VARS);
                 stf4(v, ap, disp, ACCSET_OTHER);
                 disp += sizeof(float4_t); 
                 break;
 #endif
             case BUILTIN_number:
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldd, vars, index * IFFLOAT(info->varSize(), VARSIZE), ACCSET_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldd, vars, index << VARSHIFT(info), ACCSET_VARS);
                 std(v, ap, disp, ACCSET_OTHER);
                 disp += sizeof(double);
                 break;
             case BUILTIN_int:
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldi, vars, index * IFFLOAT(info->varSize(), VARSIZE), ACCSET_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldi, vars, index << VARSHIFT(info), ACCSET_VARS);
                 stp(i2p(v), ap, disp, ACCSET_OTHER);
                 disp += sizeof(intptr_t);
                 break;
             case BUILTIN_uint:
             case BUILTIN_boolean:
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldi, vars, index * IFFLOAT(info->varSize(), VARSIZE), ACCSET_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldi, vars, index << VARSHIFT(info), ACCSET_VARS);
                 stp(ui2p(v), ap, disp, ACCSET_OTHER);
                 disp += sizeof(uintptr_t);
                 break;
             default:
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldp, vars, index * IFFLOAT(info->varSize(), VARSIZE), ACCSET_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldp, vars, index << VARSHIFT(info), ACCSET_VARS);
                 stp(v, ap, disp, ACCSET_OTHER);
                 disp += sizeof(void*);
                 break;
@@ -7164,7 +7164,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             // _ef.beginCatch()
             int stackBase = ms->stack_base();
             LIns* pc = loadIns(LIR_ldp, 0, _save_eip, ACCSET_OTHER);
-            LIns* slotAddr = leaIns(stackBase * IFFLOAT(info->varSize(), VARSIZE) , vars);
+            LIns* slotAddr = leaIns(stackBase << VARSHIFT(info) , vars);
             LIns* tagAddr = leaIns(stackBase, tags);
             LIns* handler_ordinal = callIns(FUNCTIONID(beginCatch), 6, coreAddr, _ef, InsConstPtr(info), pc, slotAddr, tagAddr);
 
@@ -7728,32 +7728,30 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
     // Treat addp(vars, const) as a load from vars[const]
     // for the sake of dead store analysis.
-    void analyze_addp(LIns* ins, LIns* vars, nanojit::BitSet& varlivein FLOAT_ONLY(, const size_t varSize))
+    void analyze_addp(LIns* ins, LIns* vars, nanojit::BitSet& varlivein, const size_t varShift)
     {
-        IFFLOAT(/*nothing*/,const int varSize = VARSIZE);
         AvmAssert(ins->isop(LIR_addp));
         if (ins->oprnd1() == vars && ins->oprnd2()->isImmP()) {
-            AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), varSize));
-            int d = int(uintptr_t(ins->oprnd2()->immP()) / varSize);
+            AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), 1 << varShift));
+            int d = int(uintptr_t(ins->oprnd2()->immP()) >> varShift);
             varlivein.set(d);
         }
     }
 
     // Treat the calculated address of addp(vars, const) as the target
     // of a store to the variable pointed to, as well as its associated tag.
-    void analyze_addp_store(LIns* ins, LIns* vars, nanojit::BitSet& varlivein, nanojit::BitSet& taglivein FLOAT_ONLY(, const size_t varSize))
+    void analyze_addp_store(LIns* ins, LIns* vars, nanojit::BitSet& varlivein, nanojit::BitSet& taglivein, const size_t varShift)
     {
-        IFFLOAT(/*nothing*/,const int varSize = VARSIZE);
         AvmAssert(ins->isop(LIR_addp));
         if (ins->oprnd1() == vars && ins->oprnd2()->isImmP()) {
-            AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), varSize));
-            int d = int(uintptr_t(ins->oprnd2()->immP()) / varSize);
+            AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), 1 << varShift));
+            int d = int(uintptr_t(ins->oprnd2()->immP()) >> varShift);
             varlivein.clear(d);
             taglivein.clear(d);
         }
     }
 
-    void analyze_call(LIns* ins, LIns* catcher, LIns* vars, DEBUGGER_ONLY(bool haveDebugger, int dbg_framesize,) FLOAT_ONLY(const size_t varSize,)
+    void analyze_call(LIns* ins, LIns* catcher, LIns* vars, DEBUGGER_ONLY(bool haveDebugger, int dbg_framesize,) const size_t varShift,
             nanojit::BitSet& varlivein, LabelBitSet& varlabels,
             nanojit::BitSet& taglivein, LabelBitSet& taglabels)
     {
@@ -7764,7 +7762,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 varlivein.clear(0);
                 taglivein.clear(0);
             } else if (varPtrArg->isop(LIR_addp)) {
-                analyze_addp_store(varPtrArg, vars, varlivein, taglivein FLOAT_ONLY(, varSize));
+                analyze_addp_store(varPtrArg, vars, varlivein, taglivein, varShift);
             }
         } else if (ins->callInfo() == FUNCTIONID(makeatom)) {
             // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
@@ -7772,7 +7770,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             if (varPtrArg == vars)
                 varlivein.set(0);
             else if (varPtrArg->isop(LIR_addp))
-                analyze_addp(varPtrArg, vars, varlivein FLOAT_ONLY(, varSize));
+                analyze_addp(varPtrArg, vars, varlivein, varShift);
             else
                 AvmAssert(!"Unexpected use of makeatom");
         } else if (!ins->callInfo()->_isPure) {
@@ -7808,7 +7806,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             if (varPtrArg == vars)
                 varlivein.set(0);
             else if (varPtrArg->isop(LIR_addp))
-                analyze_addp(varPtrArg, vars, varlivein FLOAT_ONLY(, varSize));
+                analyze_addp(varPtrArg, vars, varlivein, varShift);
         }
     }
 
@@ -7881,8 +7879,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 case LIR_stf4:
                 case LIR_sti2c:
                     if (i->oprnd2() == vars) {
-                        AvmAssert( IS_ALIGNED(i->disp(), IFFLOAT(info->varSize(), VARSIZE)) );
-                        int d = i->disp() / IFFLOAT(info->varSize(), VARSIZE);
+                        AvmAssert( IS_ALIGNED(i->disp(), (1 << VARSHIFT(info))) );
+                        int d = i->disp() >> VARSHIFT(info);
                         varlivein.clear(d);
                     } else if (i->oprnd2() == tags) {
                         int d = i->disp(); // 1 byte per tag
@@ -7896,7 +7894,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     // that the address will be used for a read rather than a store,
                     // other than that to do so would break the deadvars analysis
                     // because of the dodgy assumption made here.
-                    analyze_addp(i, vars, varlivein FLOAT_ONLY(, info->varSize()) );
+                    analyze_addp(i, vars, varlivein, VARSHIFT(info));
                     break;
                 CASE64(LIR_ldq:)
                 case LIR_ldi:
@@ -7906,8 +7904,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 case LIR_ldf4:
                 case LIR_lduc2ui: case LIR_ldc2i:
                     if (i->oprnd1() == vars) {
-                        AvmAssert( IS_ALIGNED(i->disp(), IFFLOAT(info->varSize(), VARSIZE)) );
-                        int d = i->disp() / IFFLOAT(info->varSize(), VARSIZE);
+                        AvmAssert( IS_ALIGNED(i->disp(), (1 << VARSHIFT(info))) );
+                        int d = i->disp() >> VARSHIFT(info);
                         varlivein.set(d);
                     }
                     else if (i->oprnd1() == tags) {
@@ -7945,7 +7943,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 case LIR_callf:
                 case LIR_callf4:
                 case LIR_callv:
-                    analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,) FLOAT_ONLY(info->varSize(),)
+                    analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,) VARSHIFT(info),
                             varlivein, varlabels, taglivein, taglabels);
                     break;
                 }
@@ -8010,8 +8008,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 case LIR_stf4:
                 case LIR_sti2c:
                     if (i->oprnd2() == vars) {
-                        AvmAssert( IS_ALIGNED(i->disp(), IFFLOAT(info->varSize(), VARSIZE)) );
-                        int d = i->disp() / IFFLOAT(info->varSize(), VARSIZE);
+                        AvmAssert( IS_ALIGNED(i->disp(), (1 << VARSHIFT(info))) );
+                        int d = i->disp() >> VARSHIFT(info);
                         if (!varlivein.get(d)) {
                             eraseIns(i, in.peek());
                             continue;
@@ -8034,7 +8032,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     break;
                 case LIR_addp:
                     // treat pointer calculations into vars as a read from vars
-                    analyze_addp(i, vars, varlivein FLOAT_ONLY(,info->varSize()));
+                    analyze_addp(i, vars, varlivein, VARSHIFT(info));
                     break;
                 CASE64(LIR_ldq:)
                 case LIR_ldi:
@@ -8044,8 +8042,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 case LIR_ldf4:
                 case LIR_lduc2ui: case LIR_ldc2i:
                     if (i->oprnd1() == vars) {
-                        AvmAssert( IS_ALIGNED(i->disp(), IFFLOAT(info->varSize(), VARSIZE)) );
-                        int d = i->disp() / IFFLOAT(info->varSize(), VARSIZE);
+                        AvmAssert( IS_ALIGNED(i->disp(), (1 << VARSHIFT(info))) );
+                        int d = i->disp() >> VARSHIFT(info);
                         varlivein.set(d);
                     }
                     else if (i->oprnd1() == tags) {
@@ -8083,7 +8081,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 case LIR_callf:
                 case LIR_callf4:
                 case LIR_callv:
-                    analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,) FLOAT_ONLY(info->varSize(),)
+                    analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,) VARSHIFT(info),
                             varlivein, varlabels, taglivein, taglabels);
                     break;
             }

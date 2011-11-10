@@ -102,13 +102,13 @@ REALLY_INLINE uint32_t MethodInfo::hasExceptions() const
  * locals or not - it is the verifier who will set the flag.
  */
 
-REALLY_INLINE int32_t MethodInfo::varSize(){
-    static const size_t VARSIZE = 8;
-    static const size_t LARGEVARSIZE = 16;
+REALLY_INLINE int32_t MethodInfo::varShift(){
+    static const size_t _VARSHIFT = 3;
+    static const size_t _LARGEVARSHIFT = 4;
     if(_has128bitLocals) 
-        return LARGEVARSIZE; 
+        return _LARGEVARSHIFT; 
     else 
-        return VARSIZE;
+        return _VARSHIFT;
 }
 #endif // VMCFG_FLOAT
 

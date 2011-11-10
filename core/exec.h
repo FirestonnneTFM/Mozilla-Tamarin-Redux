@@ -116,10 +116,16 @@ typedef GprImtThunkProcRetType (*GprImtThunkProc)(class ImtThunkEnv*,
  * This is an aspect of the JIT implementation, but is defined here because
  * the debugger boxing/unboxing code in MethodInfo needs to know it.
  * Note: for VMCFG_FLOAT we use a function call, to decide the size of a variable
- * per method (if method uses float4, then 16 bytes; otherwise, 8 bytes
+ * per method (if method uses float4, then 16 bytes; otherwise, 8 bytes)
+ * Also: instead of actually defining VARSIZE, we define VARSHIFT (either 3 or 4)
+ * because shifts are faster than multiplications/divisions, when the second 
+ * operand is a variable (and it's trivial to derive 'size' from 'shift', and 
+ * we only actually need VARSIZE in asserts - everywhere else we just shift).
  */
-#ifndef VMCFG_FLOAT
-static const size_t VARSIZE = 8;
+#ifdef VMCFG_FLOAT
+#define VARSHIFT(ptr) ptr->varShift()
+#else
+#define VARSHIFT(ptr) 3
 #endif
 
 /**
