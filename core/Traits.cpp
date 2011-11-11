@@ -593,7 +593,8 @@ namespace avmplus
     }
 
 #ifdef VMCFG_FLOAT
-    static bool is16ByteSlot(Traits* slotTE){
+    static bool is16ByteSlot(Traits* slotTE)
+    {
         return Traits::getBuiltinType(slotTE) == BUILTIN_float4;
     }
 #endif // VMCFG_FLOAT
@@ -601,7 +602,7 @@ namespace avmplus
     static bool is8ByteSlot(Traits* slotTE)
     {
         #ifdef AVMPLUS_64BIT
-        const uint32_t BIG_TYPE_MASK = ~((1U<<BUILTIN_int) | (1U<<BUILTIN_uint) | (1U<<BUILTIN_boolean) FLOAT_ONLY(| (1U<<BUILTIN_float) | (1U<<BUILTIN_float4)) ); 
+        const uint32_t BIG_TYPE_MASK = (~(NUMERIC_TYPE_MASK | (1U<<BUILTIN_boolean))) | (1U<<BUILTIN_number); // number, plus all non-numeric, non-boolean types (i.e. pointers, essentially)
         #else
         const uint32_t BIG_TYPE_MASK = (1U<<BUILTIN_number);
         #endif
@@ -671,7 +672,7 @@ namespace avmplus
         AvmAssert(bt != BUILTIN_void);
 
         MMGC_STATIC_ASSERT(BUILTIN_COUNT < (sizeof(int) * 8));
-        int const IS_POINTER = ~((1<<BUILTIN_int)|(1<<BUILTIN_uint)|(1<<BUILTIN_number)|(1<<BUILTIN_boolean) FLOAT_ONLY(|(1<<BUILTIN_float)|(1<<BUILTIN_float4)));
+        int const IS_POINTER = ~(NUMERIC_TYPE_MASK | (1<<BUILTIN_boolean));
 
         return ((1 << bt) & IS_POINTER) != 0;
     }
@@ -1926,42 +1927,49 @@ namespace avmplus
                 Atom value = pool->getLegalDefaultValue(toplevel, value_index, kind, slotType);
                 switch (Traits::getBuiltinType(slotType))
                 {
-                case BUILTIN_any:
-                case BUILTIN_object:
-                    if (value == 0)
-                        continue;
-                    break;
-#ifdef VMCFG_FLOAT
-                case BUILTIN_float:
-                        if (AvmCore::atomToFloat(value)==0) {
+                    case BUILTIN_any:
+                    case BUILTIN_object:
+                        if (value == 0)
                             continue;
-                        }
                         break;
-#endif // VMCFG_FLOAT
-                case BUILTIN_number:
-                    if (AvmCore::number_d(value) == 0)
-                        continue;
-                    break;
-                case BUILTIN_boolean:
-                    AvmAssert((uintptr_t(falseAtom)>>3) == 0);
-                    if (value == falseAtom)
-                        continue;
-                    AvmAssert(value == trueAtom);
-                    break;
-                case BUILTIN_uint:
-                case BUILTIN_int:
-                    if (value == (zeroIntAtom))
-                        continue;
-                    break;
-                case BUILTIN_namespace:
-                case BUILTIN_string:
 #ifdef VMCFG_FLOAT
-                case BUILTIN_float4: // FIXME: probably wrong but don't know what to do here.
+                    case BUILTIN_float:
+                        if (*(int32_t*)atomPtr(value) == 0)
+                            continue;
+                        break;
+                    case BUILTIN_float4:
+                    {   
+                        int32_t * fptr = (int32_t*)atomPtr(value);
+                        if (fptr[0] == 0 && fptr[1] == 0 && fptr[2] == 0 && fptr[3] == 0)
+                            continue;
+                        break;
+                    }
+#endif // VMCFG_FLOAT
+                    case BUILTIN_number:{
+                        double val = AvmCore::number_d(value);
+                        if ( val == 0 && !MathUtils::isNegZero(val))
+                            continue;
+                        break;
+                    }
+                    case BUILTIN_boolean:
+                        AvmAssert((uintptr_t(falseAtom)>>3) == 0);
+                        if (value == falseAtom)
+                            continue;
+                        AvmAssert(value == trueAtom);
+                        break;
+                    case BUILTIN_uint:
+                    case BUILTIN_int:
+                        if (value == zeroIntAtom)
+                            continue;
+                        break;
+                    case BUILTIN_namespace:
+                    case BUILTIN_string:
+#ifdef VMCFG_FLOAT
 #endif
-                default:
-                    if (AvmCore::isNull(value))
-                        continue;
-                    break;
+                    default:
+                        if (AvmCore::isNull(value))
+                            continue;
+                        break;
                 }
                 visitor->defaultVal(value, slotid, slotType);
                 break;
