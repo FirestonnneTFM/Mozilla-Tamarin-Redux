@@ -4756,7 +4756,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             case BUILTIN_float: 
                 v = (i == 0) ? obj : lirout->insLoad(LIR_ldf, vars, index << VARSHIFT(info), ACCSET_VARS);
                 stf(v, ap, disp, ACCSET_OTHER);
-                disp += sizeof(intptr_t); // same size as an 'int' ! (64 bits on x64)
+                disp += sizeof(intptr_t); // only 4 bytes needed, but on X64 we use at least 8 bytes anyway - same as "int" and "uint"
                 break;
             case BUILTIN_float4: 
                 v = (i == 0) ? obj : lirout->insLoad(LIR_ldf4, vars, index << VARSHIFT(info), ACCSET_VARS);
@@ -4823,10 +4823,10 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             switch (rbt) {
 #ifdef VMCFG_FLOAT
             case BUILTIN_float: 
-                fid = FUNCTIONID(fcallimt);// TODO: Test this!!!
+                fid = FUNCTIONID(fcallimt);
                 break;
             case BUILTIN_float4: 
-                fid = FUNCTIONID(vfcallimt);// TODO: Test this!!!
+                fid = FUNCTIONID(vfcallimt);
                 break;
 #endif
             case BUILTIN_number:

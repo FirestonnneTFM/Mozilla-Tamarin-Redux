@@ -199,12 +199,19 @@ function initFltAnyTests(){
 function initFltFltTests(){
    var obj:IFloatOps = new FltFltOps(3.14f);
    STEP="FltFltOps ADD";   EQ(34.54f, obj.add(31.4f));
+   STEP="FltFltOps ADD2";  EQ(34.54f, obj.add(31.4f));
    STEP="FltFltOps SUB";   EQ(-28.26f, obj.sub(31.4f));
+   STEP="FltFltOps SUB2";  EQ(-28.26f, obj.sub(31.4f));
    STEP="FltFltOps MUL";   EQ(98.596f, obj.mul(31.4f));
+   STEP="FltFltOps MUL2";  EQ(98.596f, obj.mul(31.4f));
    STEP="FltFltOps DIV";   EQ(0.1f, obj.div(31.4f));
+   STEP="FltFltOps DIV2";  EQ(0.1f, obj.div(31.4f));
    STEP="FltFltOps MOD";   EQ(3.13999867f, obj.mod(31.4f));
-   STEP="FltFltOps UMINUS"; EQ(-3.14f, obj.uminus());
+   STEP="FltFltOps MOD2";  EQ(3.13999867f, obj.mod(31.4f));
+   STEP="FltFltOps UMINUS";EQ(-3.14f, obj.uminus());
+   STEP="FltFltOps UMINU2";EQ(-3.14f, obj.uminus());
    STEP="FltFltOps UPLUS"; EQ(3.14f, obj.uplus());
+   STEP="FltFltOps UPLUS2";EQ(3.14f, obj.uplus());
    STEP="FltFltOps GT";    EQ(true, obj.gt(31.4f));EQ(false, obj.gt(3.14f));EQ(false, obj.gt(.314f));
    STEP="FltFltOps GTE";   EQ(false, obj.gte(31.4f));EQ(true, obj.gte(3.14f));EQ(true, obj.gte(.314f));
    STEP="FltFltOps LT";    EQ(true, obj.lt(31.4f));EQ(false, obj.lt(3.14f));EQ(false, obj.lt(.314f));
@@ -235,13 +242,20 @@ function initFltNumTests(){
 }
 function initFltAnyTests2(){
    var obj:IFloatOps = new FltAnyOps(3.14); /*NOTE: not float! */
-   STEP="FltAnyOps ADD";   EQ(34.54f, obj.add(31.4f));
+   STEP="FltAnyOps ADD";   EQ(34.54f, obj.add(31.4f)); 
+   STEP="FltAnyOps ADD2";  EQ(34.54f, obj.add(31.4f)); 
    STEP="FltAnyOps SUB";   EQ(28.26f, obj.sub(31.4f));
+   STEP="FltAnyOps SUB2";  EQ(28.26f, obj.sub(31.4f));
    STEP="FltAnyOps MUL";   EQ(98.596f, obj.mul(31.4f));
+   STEP="FltAnyOps MUL2";  EQ(98.596f, obj.mul(31.4f));
    STEP="FltAnyOps DIV";   EQ(10f, obj.div(31.4f));
+   STEP="FltAnyOps DIV2";  EQ(10f, obj.div(31.4f));
    STEP="FltAnyOps MOD";   EQ(3.14f, obj.mod(31.4f));
+   STEP="FltAnyOps MOD2";  EQ(3.14f, obj.mod(31.4f));
    STEP="FltAnyOps UMINUS";EQ(-3.14f, obj.uminus());
+   STEP="FltAnyOps UMINU2";EQ(-3.14f, obj.uminus());
    STEP="FltAnyOps UPLUS"; EQ(3.14f, obj.uplus());
+   STEP="FltAnyOps UPLUS2";EQ(3.14f, obj.uplus());
    STEP="FltAnyOps GT";    EQ(false, obj.gt(31.4f));EQ(false, obj.gt(3.14f));EQ(true, obj.gt(.314f));
    STEP="FltAnyOps GTE";   EQ(true, obj.gte(31.4f));EQ(true, obj.gte(3.14f));EQ(false, obj.gte(.314f));
    STEP="FltAnyOps LT";    EQ(false, obj.lt(31.4f));EQ(false, obj.lt(3.14f));EQ(true, obj.lt(.314f));
