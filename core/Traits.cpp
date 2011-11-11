@@ -1950,7 +1950,8 @@ namespace avmplus
                         break;
                     }
 #endif // VMCFG_FLOAT
-                    case BUILTIN_number:{
+                    case BUILTIN_number:
+                    {
                         double val = AvmCore::number_d(value);
                         if ( val == 0 && !MathUtils::isNegZero(val))
                             continue;
@@ -1969,8 +1970,6 @@ namespace avmplus
                         break;
                     case BUILTIN_namespace:
                     case BUILTIN_string:
-#ifdef VMCFG_FLOAT
-#endif
                     default:
                         if (AvmCore::isNull(value))
                             continue;

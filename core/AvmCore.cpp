@@ -1984,27 +1984,21 @@ return the result of the comparison ToPrimitive(x) == y.
     {
         if (!isNull(atom))
         {
-            double value=0.0;
             switch (atomKind(atom))
             {
             case kSpecialBibopType:
+#ifdef VMCFG_FLOAT
                 if(atom == undefinedAtom)
                     return kNaN;
                 if(!newTypes2Double) 
-                    return atom;
-#ifdef VMCFG_FLOAT
+                    return atom; // Float or Float4; stays unchanged in toNumeric
                 if(isFloat(atom))
-                    value = atomToFloat(atom);
-                else 
-                {
-                    AvmAssert(isFloat4(atom));
-                    value = MathUtils::kNaN;
-                }
+                    return doubleToAtom(atomToFloat(atom));
+                AvmAssert(isFloat4(atom));
 #endif // VMCFG_FLOAT
-                break;
+                return kNaN;
             case kStringType:
-                value = atomToString(atom)->toNumber();
-                break;
+                return doubleToAtom(atomToString(atom)->toNumber());
             default:
                 AvmAssert(false);
             case kBooleanType:
@@ -2014,18 +2008,13 @@ return the result of the comparison ToPrimitive(x) == y.
                 return atom;
             case kNamespaceType:
                 // return ToNumber(namespace->uri)
-                value = number(atomToNamespace(atom)->getURI()->atom());
-                break;
+                return numberAtom(atomToNamespace(atom)->getURI()->atom());
             case kObjectType:
                 return numericAtomImpl<newTypes2Double>(
                         atomToScriptObject(atom)->defaultValue());
             }
-            return doubleToAtom(value);
         }
-        else
-        {
-            return zeroIntAtom;
-        }
+        return zeroIntAtom;
     }
 
     /*static*/ double AvmCore::number(Atom atom)
