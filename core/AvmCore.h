@@ -816,7 +816,8 @@ const int kBufferPadding = 16;
         Atom kNaN;
 #ifdef VMCFG_FLOAT
         Atom kFltNaN;
-        Atom kFltOne, kFltMinusOne;     // needed for increment/decrement
+        Atom kFltOne;                   // needed for increment
+        Atom kFltMinusOne;              // needed for decrement
         Atom kFlt4NaN;
 #endif
         
@@ -1370,7 +1371,7 @@ const int kBufferPadding = 16;
         static float singlePrecisionFloat(Atom atom);
 
        /**
-         * Converts the passed atom to 4 32-bit float numbers (a __m128 struct).
+         * Converts the passed atom to 4 32-bit float numbers (a float4_t).
          * If the atom is already an float4, it is simply
          * decoded.  Otherwise, it is coerced to the float4 type
          * and returned.  
@@ -1577,13 +1578,11 @@ const int kBufferPadding = 16;
         /** OP_tonumber; ES3 ToNumber */
         Atom numberAtom(Atom atom);
 
-#ifdef VMCFG_FLOAT
-        /** AS3 ToNumeric */
+        /** AS3 ToNumeric             */
         Atom numericAtom(Atom atom);
-        // actual implementation is template - avoids code duplication
-        // toNumeric has two behaviours, for "new ABC" and for "legacy ABC"(where it's simply toNumber). 
-        template<bool> Atom numericAtomImpl(Atom atom ); 
-#endif // VMCFG_FLOAT
+
+        // actual implementation for numberAtom/numericAtom - avoids code duplication
+        template<bool> Atom numericAtomImpl(Atom atom); 
 
         /**
          * ES3's internal ToNumber() function for internal use

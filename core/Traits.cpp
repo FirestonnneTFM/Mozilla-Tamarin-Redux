@@ -613,27 +613,19 @@ namespace avmplus
     // Sun compilers don't allow static and REALLY_INLINE
     /*static*/ REALLY_INLINE int32_t pad8(int32_t nextSlotOffset)
     {
-        // 8-aligned, 8-byte field
-        if (nextSlotOffset & 7)
-        {
-            AvmAssert((nextSlotOffset % 4) == 0);   // should always be a multiple of 4
-            nextSlotOffset += 4;
-        }
-        int32_t slotOffset = nextSlotOffset;
-        nextSlotOffset += 8;
-        return slotOffset;
+        AvmAssert((nextSlotOffset % 4) == 0);   // should always be a multiple of 4
+        nextSlotOffset += 7;
+        nextSlotOffset &= ~7;
+        return nextSlotOffset;
     }
 
 #ifdef VMCFG_FLOAT
     // Sun compilers don't allow static and REALLY_INLINE
     /*static*/ REALLY_INLINE int32_t pad16(int32_t nextSlotOffset)
     {
-        // 16-aligned, 16-byte field
-        if (nextSlotOffset & 0xf)
-        {
-            AvmAssert((nextSlotOffset % 4) == 0);   // should always be a multiple of 4
-            nextSlotOffset += 16 - (nextSlotOffset & 0xf);
-        };
+        AvmAssert((nextSlotOffset % 4) == 0);   // should always be a multiple of 4
+        nextSlotOffset += 0xf;
+        nextSlotOffset &= ~0xf;
         return nextSlotOffset;
     }
 #endif // VMCFG_FLOAT
@@ -987,34 +979,47 @@ namespace avmplus
         struct GlueClassTest_Slots
         {
             int32_t m_intSlot;
-            double m_numberSlot;
+            double  m_numberSlot;
             int32_t m_otherIntSlot;
-            void* m_ptrSlot;
+            void*   m_ptrSlot;
         };
         static const bool align8ByteSlots = (offsetof(GlueClassTest_Slots, m_numberSlot) == 8);
         static const bool alignPointersTo8Bytes = (offsetof(GlueClassTest_Slots, m_ptrSlot) == 24);
         static const bool is64Bit = sizeof(void*) == 8;
 #ifdef VMCFG_FLOAT
-        struct GlueClassTest128_Slots{
+        struct GlueClassTest128_Slots
+        {
             int32_t m_intSlot;
             float4_t m_float4Slot;
         };
-        static const bool align16ByteSlots = offsetof(GlueClassTest128_Slots , m_float4Slot) >=8;
+        static const bool align16ByteSlots = offsetof(GlueClassTest128_Slots, m_float4Slot) >= 8;
 #ifdef _DEBUG
-        struct AlmostStaticAsserts {
-            AlmostStaticAsserts(){
-                AvmAssert( ( offsetof(GlueClassTest_Slots , m_numberSlot) == 4 ) || ( offsetof(GlueClassTest_Slots , m_numberSlot) == 8 ) );
-                AvmAssert( ( offsetof(GlueClassTest_Slots , m_otherIntSlot) == 12 ) || ( offsetof(GlueClassTest_Slots , m_otherIntSlot) == 16 ) );
-                AvmAssert( ( offsetof(GlueClassTest_Slots , m_ptrSlot) == 16 ) || ( offsetof(GlueClassTest_Slots , m_ptrSlot) == 20 ) || ( offsetof(GlueClassTest_Slots , m_ptrSlot) == 24 ) );
-                AvmAssert( ( offsetof(GlueClassTest128_Slots , m_float4Slot) == 4 ) || ( offsetof(GlueClassTest128_Slots , m_float4Slot) == 16 )|| ( offsetof(GlueClassTest128_Slots , m_float4Slot) == 8 ) );
+        struct AlmostStaticAsserts 
+        {
+            AlmostStaticAsserts()
+            {
+                AvmAssert((offsetof(GlueClassTest_Slots, m_numberSlot) == 4)     || 
+                          (offsetof(GlueClassTest_Slots, m_numberSlot) == 8)     );
+                
+                AvmAssert((offsetof(GlueClassTest_Slots, m_otherIntSlot) == 12)  ||
+                          (offsetof(GlueClassTest_Slots, m_otherIntSlot) == 16)  );
+                
+                AvmAssert((offsetof(GlueClassTest_Slots, m_ptrSlot) == 16)       ||
+                          (offsetof(GlueClassTest_Slots , m_ptrSlot) == 20)      ||
+                          (offsetof(GlueClassTest_Slots, m_ptrSlot) == 24)       );
+                
+                AvmAssert((offsetof(GlueClassTest128_Slots, m_float4Slot) == 4)  ||
+                          (offsetof(GlueClassTest128_Slots, m_float4Slot) == 16) ||
+                          (offsetof(GlueClassTest128_Slots, m_float4Slot) == 8)  );
                 /* Is it EVER the case that pointers are 8-byte aligned, but doubles are not? 
                    We currently assume "no", but let's double-test this assumption */
-                struct GlueClassTestPtr_Slots{
+                struct GlueClassTestPtr_Slots
+                {
                     int32_t m_intSlot;
-                    void* m_ptrSlot;
+                    void*   m_ptrSlot;
                 };
-                AvmAssert( ((offsetof(GlueClassTestPtr_Slots , m_ptrSlot) == 8) && alignPointersTo8Bytes) 
-                        || ((offsetof(GlueClassTestPtr_Slots , m_ptrSlot) == 4) && !alignPointersTo8Bytes) );
+                AvmAssert( ((offsetof(GlueClassTestPtr_Slots, m_ptrSlot) == 8) && alignPointersTo8Bytes) ||
+                           ((offsetof(GlueClassTestPtr_Slots, m_ptrSlot) == 4) && !alignPointersTo8Bytes));
             }
         } __unused_var;
 #endif
