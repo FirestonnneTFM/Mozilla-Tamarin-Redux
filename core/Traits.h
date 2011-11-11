@@ -84,7 +84,7 @@ namespace avmplus
     const uint32_t NUMBER_TYPE_MASK  = (1<<BUILTIN_int) | (1<<BUILTIN_uint) | (1<<BUILTIN_number);
     const uint32_t XML_TYPE_MASK = (1<<BUILTIN_xml) | (1<<BUILTIN_xmlList);
 #ifdef VMCFG_AOT
-    // TODO: AOT support for VMCFG_FLOAT
+    // FIXME: add AOT support on VMCFG_FLOAT
     const uint32_t SSTOBJECT_TYPE_MASK = ~ ((1<<BUILTIN_int) | (1<<BUILTIN_uint) | (1<<BUILTIN_number) | (1<<BUILTIN_boolean) | (1<<BUILTIN_any) | (1<<BUILTIN_object) | (1<<BUILTIN_string) | (1<<BUILTIN_namespace));
     const uint32_t SSTATOM_TYPE_MASK = (1<<BUILTIN_object) | (1<<BUILTIN_any);
 #endif

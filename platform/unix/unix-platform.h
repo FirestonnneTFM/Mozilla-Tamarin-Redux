@@ -513,13 +513,13 @@ REALLY_INLINE void VMPI_memoryBarrier()
 
 #endif // USE_CUTILS_ATOMICS
 
-#elif 1 /* here the test should be for VMCFG_ARM; but see comment on the "else" branch */
+#elif 1 // FIXME:here the test should be for VMCFG_ARM; but see comment on the "else" branch, and bug 701638.
 //FIXME: bug 609810 VMPI atomic primitives for ARM require inline-asm implementations
 #define EMULATE_ATOMICS_WITH_PTHREAD_MUTEX
 
 #else /* FIXME: the code below appears to not have been tested; it is supposed to be compiled if
         !defined(ANDROID) && !defined(VMCFG_ARM). However, enabling this branch results in lots of
-        build errors */
+        build errors. See bug https://bugzilla.mozilla.org/show_bug.cgi?id=701638 */
 
 #if !defined(SOLARIS)
     #if defined(__GNUC__) && defined(__GNUC_MINOR__) && (__GNUC__ >= 4)
