@@ -406,7 +406,7 @@ namespace avmplus
         // if we are running jit then the types are native and we need to box them.
         if (_isJitImpl)
         {
-            src = FramePtr(uintptr_t(src) + srcPos << VARSHIFT(this));
+            src = FramePtr(uintptr_t(src) + (srcPos << VARSHIFT(this)));
             AvmAssert(sstArr != NULL);
             return nativeLocalToAtom(this->pool()->core, src, (SlotStorageType)sstArr[srcPos]);
         }
@@ -449,7 +449,7 @@ namespace avmplus
         if (_isJitImpl)
         {
             AvmAssert(sstArr != NULL);
-            dst = FramePtr(uintptr_t(dst) + dstPos << VARSHIFT(this) );
+            dst = FramePtr(uintptr_t(dst) + (dstPos << VARSHIFT(this)));
             switch ((SlotStorageType)sstArr[dstPos])
             {
                 case SST_double:
