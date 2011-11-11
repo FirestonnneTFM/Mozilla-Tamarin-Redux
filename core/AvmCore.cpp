@@ -1046,15 +1046,13 @@ namespace avmplus
     }
 
     Atom AvmCore::handleActionPool(PoolObject* pool,
-                                          Toplevel* toplevel,
-                                          CodeContext* codeContext)
+                                   Toplevel* toplevel,
+                                   CodeContext* codeContext)
     {
         AvmAssert(toplevel != NULL);
 
         if (pool->scriptCount() == 0)
-        {
             toplevel->throwVerifyError(kMissingEntryPointError);
-        }
 
         AvmAssert(codeContext != NULL);
         AvmAssert(codeContext->domainEnv() != NULL);
@@ -1064,7 +1062,7 @@ namespace avmplus
         ScriptEnv* main = initAllScripts(toplevel, abcEnv);
 
 #ifdef VMCFG_VERIFYALL
-        AvmAssert(config.verifyonly ? true : toplevel->objectClass != NULL);
+        AvmAssert(config.verifyonly || toplevel->objectClass != NULL);
 #else
         AvmAssert(toplevel->objectClass != NULL);
 #endif
@@ -1452,17 +1450,15 @@ return the result of the comparison ToPrimitive(x) == y.
             switch (ltype)
             {
             case kSpecialBibopType:
-#ifdef VMCFG_FLOAT
                 if(lhs == undefinedAtom && rhs == undefinedAtom) 
                     return trueAtom;
+#ifdef VMCFG_FLOAT
                 if(isFloat(lhs) && isFloat(rhs))
                     return atomToFloat(lhs) == atomToFloat(rhs) ? trueAtom : falseAtom;
                 if(isFloat4(lhs) && isFloat4(rhs))
-                    return f4_eq_i(atomToFloat4(lhs), atomToFloat4(rhs))? trueAtom:falseAtom;
-                return falseAtom; // one bibop, other "undefined"
-#else
-                return trueAtom;
+                    return f4_eq_i(atomToFloat4(lhs), atomToFloat4(rhs)) ? trueAtom : falseAtom;
 #endif // VMCFG_FLOAT
+                return falseAtom; // one bibop, other "undefined"; or one float, the other float4.
             case kStringType:
                 return (lhs==rhs || *atomToString(lhs) == *atomToString(rhs)) ? trueAtom : falseAtom;
             case kBooleanType:
@@ -1904,64 +1900,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
     /*static*/ Atom AvmCore::booleanAtom(Atom atom)
     {
-        if (!AvmCore::isNullOrUndefined(atom))
-        {
-            switch (atomKind(atom))
-            {
-            case kIntptrType:
-                {
-                    return atomGetIntptr(atom) ? trueAtom : falseAtom;
-                }
-            case kBooleanType:
-                return atom;
-            case kObjectType:
-            case kNamespaceType:
-                return isNull(atom) ? falseAtom : trueAtom;
-            case kStringType:
-                if (isNull(atom)) return falseAtom;
-                return (atomToString(atom)->length() > 0) ? trueAtom : falseAtom;
-            case kSpecialBibopType:
-#ifdef VMCFG_FLOAT
-                if(atom == undefinedAtom)
-                    return falseAtom;
-                else if (bibopKind(atom) == kBibopFloatType)
-                {
-                    float f = atomToFloat(atom);
-                    return (!MathUtils::isNaN(f) && f!=0.0) ? trueAtom:falseAtom ;
-                }
-                else if (bibopKind(atom) == kBibopFloat4Type)
-                {
-                    float4_t f4 = atomToFloat4(atom);
-                    float f4x = f4_x(f4),f4y = f4_y(f4),f4z = f4_z(f4),f4w = f4_w(f4);
-                    bool result = false;
-                    
-                    if (!MathUtils::isNaN(f4x) && f4x != 0.0f)
-                        result = true;
-                    else if (!MathUtils::isNaN(f4y) && f4y != 0.0f)
-                        result = true;
-                    else if (!MathUtils::isNaN(f4z) && f4z != 0.0f)
-                        result = true;
-                    else if (!MathUtils::isNaN(f4w) && f4w != 0.0f)
-                        result = true;
-                    return result ? trueAtom : falseAtom;
-                }
-                else
-                {
-                    assert(!"Unknown bibop kind");
-                    return falseAtom;
-                }
-#endif
-            default:
-                {
-                    double d = atomToDouble(atom);
-                    return !MathUtils::isNaN(d) && d != 0.0 ? trueAtom : falseAtom;
-                }
-            }
-        }
-        else
-        {
-            return falseAtom;
-        }
+        return boolean(atom) == 0 ? falseAtom : trueAtom;
     }
 
     /*static*/ int AvmCore::boolean(Atom atom)
@@ -2033,7 +1972,6 @@ return the result of the comparison ToPrimitive(x) == y.
     }
 
     Atom AvmCore::numberAtom(Atom atom)
-#ifdef VMCFG_FLOAT
     {
         return numericAtomImpl<true>(atom);
     }
@@ -2043,29 +1981,27 @@ return the result of the comparison ToPrimitive(x) == y.
     }
 
     template<bool newTypes2Double> Atom AvmCore::numericAtomImpl(Atom atom )
-#endif // VMCFG_FLOAT
     {
         if (!isNull(atom))
         {
-            double value;
+            double value=0.0;
             switch (atomKind(atom))
             {
             case kSpecialBibopType:
-#ifdef VMCFG_FLOAT
-                if(atom==undefinedAtom)
+                if(atom == undefinedAtom)
                     return kNaN;
                 if(!newTypes2Double) 
                     return atom;
-                if( isFloat(atom) ){
+#ifdef VMCFG_FLOAT
+                if(isFloat(atom))
                     value = atomToFloat(atom);
-                } else {
+                else 
+                {
                     AvmAssert(isFloat4(atom));
                     value = MathUtils::kNaN;
                 }
-                break;
-#else
-                return kNaN;
 #endif // VMCFG_FLOAT
+                break;
             case kStringType:
                 value = atomToString(atom)->toNumber();
                 break;
@@ -2081,13 +2017,8 @@ return the result of the comparison ToPrimitive(x) == y.
                 value = number(atomToNamespace(atom)->getURI()->atom());
                 break;
             case kObjectType:
-#ifdef VMCFG_FLOAT
-                if(!newTypes2Double)
-                    return numericAtom(atomToScriptObject(atom)->defaultValue());
-                else 
-#endif
-                    value = number(atomToScriptObject(atom)->defaultValue());
-                break;
+                return numericAtomImpl<newTypes2Double>(
+                        atomToScriptObject(atom)->defaultValue());
             }
             return doubleToAtom(value);
         }
@@ -4189,12 +4120,9 @@ return the result of the comparison ToPrimitive(x) == y.
 #ifdef VMCFG_FLOAT
     Stringp AvmCore::internFloat(float f)
     {
-        return internString(floatToString(f));
-        // NOTE/WARNING:
-        // internDouble calls convertDoubleToString with implicit values for the last two parameters.
-        // internFloat instead calls floatToString, which now calls doubleToString, which calls
-        // convertDoubleToString with explicit values for all parameters (MathUtils::DTOSTR_NORMAL,15 for the last two);
-        // Today, the net effect is identical; but there's a chance this may change in the future.
+        // we call internDouble, because according to the spec, 
+        // we must match the behaviour of Number. 
+        return internDouble(f);
     }
 
     Stringp AvmCore::internFloat4(float4_t f4)
@@ -4831,9 +4759,8 @@ return the result of the comparison ToPrimitive(x) == y.
 
     /*static*/ float4_t AvmCore::float4(Atom atom)
     {
-        if(atomKind(atom)==kSpecialBibopType && atom!= AtomConstants::undefinedAtom && bibopKind(atom)==kBibopFloat4Type){
+        if(isFloat4(atom))
             return atomToFloat4(atom);
-        }
 
         float f = singlePrecisionFloat(atom);
         float4_t f4 = {f,f,f,f};
