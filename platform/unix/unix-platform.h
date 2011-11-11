@@ -231,17 +231,17 @@ REALLY_INLINE float f4_w(float4_t v) { return vgetq_lane_f32(v, 3); }
 typedef struct{ float x, y, z, t; } float4_t;
 
 // All of these are stubs that do not return a useful value.
-REALLY_INLINE float4_t f4_add(float4_t a, float4_t b) { (void)a; return b; }
-REALLY_INLINE float4_t f4_sub(float4_t a, float4_t b) { (void)a; return b; }
-REALLY_INLINE float4_t f4_mul(float4_t a, float4_t b) { (void)a; return b; }
-REALLY_INLINE float4_t f4_div(float4_t a, float4_t b) { (void)a; return b; }
+REALLY_INLINE float4_t f4_add(float4_t a, float4_t b) { (void)a; VMPI_abort(); return b; }
+REALLY_INLINE float4_t f4_sub(float4_t a, float4_t b) { (void)a; VMPI_abort(); return b; }
+REALLY_INLINE float4_t f4_mul(float4_t a, float4_t b) { (void)a; VMPI_abort(); return b; }
+REALLY_INLINE float4_t f4_div(float4_t a, float4_t b) { (void)a; VMPI_abort(); return b; }
 
-REALLY_INLINE int32_t f4_eq_i(float4_t a, float4_t b) { (void)a; (void)b; return true; }
+REALLY_INLINE int32_t f4_eq_i(float4_t a, float4_t b) { (void)a; (void)b; VMPI_abort(); return true; }
 
-REALLY_INLINE float f4_x(float4_t v) { (void)v; return 1.0f; }
-REALLY_INLINE float f4_y(float4_t v) { (void)v; return 1.0f; }
-REALLY_INLINE float f4_z(float4_t v) { (void)v; return 1.0f; }
-REALLY_INLINE float f4_w(float4_t v) { (void)v; return 1.0f; }
+REALLY_INLINE float f4_x(float4_t v) { (void)v; VMPI_abort(); return 1.0f; }
+REALLY_INLINE float f4_y(float4_t v) { (void)v; VMPI_abort(); return 1.0f; }
+REALLY_INLINE float f4_z(float4_t v) { (void)v; VMPI_abort(); return 1.0f; }
+REALLY_INLINE float f4_w(float4_t v) { (void)v; VMPI_abort(); return 1.0f; }
 
 #else  /* GNU/Linux, x86 */
 
@@ -513,11 +513,13 @@ REALLY_INLINE void VMPI_memoryBarrier()
 
 #endif // USE_CUTILS_ATOMICS
 
-#elif defined(AVMSYSTEM_ARM) // TODO!!! THIS IS DEFINITELY A BUG, BUT IF I CHANGE TO "IF" THEN LOTS OF PLATFORMS FAIL TO COMPILE!!!
+#elif 1 /* here the test should be for VMCFG_ARM; but see comment on the "else" branch */
 //FIXME: bug 609810 VMPI atomic primitives for ARM require inline-asm implementations
 #define EMULATE_ATOMICS_WITH_PTHREAD_MUTEX
 
-#else
+#else /* FIXME: the code below appears to not have been tested; it is supposed to be compiled if
+        !defined(ANDROID) && !defined(VMCFG_ARM). However, enabling this branch results in lots of
+        build errors */
 
 #if !defined(SOLARIS)
     #if defined(__GNUC__) && defined(__GNUC_MINOR__) && (__GNUC__ >= 4)

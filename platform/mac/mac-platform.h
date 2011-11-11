@@ -194,17 +194,17 @@ typedef pthread_t vmpi_thread_t;
 typedef struct { float x, y, z, w; } float4_t;
 
 // All of these are stubs that do not return a useful value.
-REALLY_INLINE float4_t f4_add(float4_t a, float4_t b) { (void)a; return b; }
-REALLY_INLINE float4_t f4_sub(float4_t a, float4_t b) { (void)a; return b; }
-REALLY_INLINE float4_t f4_mul(float4_t a, float4_t b) { (void)a; return b; }
-REALLY_INLINE float4_t f4_div(float4_t a, float4_t b) { (void)a; return b; }
+REALLY_INLINE float4_t f4_add(float4_t a, float4_t b) { (void)a; VMPI_abort(); return b; }
+REALLY_INLINE float4_t f4_sub(float4_t a, float4_t b) { (void)a; VMPI_abort(); return b; }
+REALLY_INLINE float4_t f4_mul(float4_t a, float4_t b) { (void)a; VMPI_abort(); return b; }
+REALLY_INLINE float4_t f4_div(float4_t a, float4_t b) { (void)a; VMPI_abort(); return b; }
 
-REALLY_INLINE int32_t f4_eq_i(float4_t a, float4_t b) { (void)a; (void)b; return true; }
+REALLY_INLINE int32_t f4_eq_i(float4_t a, float4_t b) { (void)a; (void)b; VMPI_abort(); return true; }
 
-REALLY_INLINE float f4_x(float4_t v) { (void)v; return 1.0f; }
-REALLY_INLINE float f4_y(float4_t v) { (void)v; return 1.0f; }
-REALLY_INLINE float f4_z(float4_t v) { (void)v; return 1.0f; }
-REALLY_INLINE float f4_w(float4_t v) { (void)v; return 1.0f; }
+REALLY_INLINE float f4_x(float4_t v) { (void)v; VMPI_abort(); return 1.0f; }
+REALLY_INLINE float f4_y(float4_t v) { (void)v; VMPI_abort(); return 1.0f; }
+REALLY_INLINE float f4_z(float4_t v) { (void)v; VMPI_abort(); return 1.0f; }
+REALLY_INLINE float f4_w(float4_t v) { (void)v; VMPI_abort(); return 1.0f; }
 
 #else
 
