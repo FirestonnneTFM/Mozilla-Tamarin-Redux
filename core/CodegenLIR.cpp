@@ -200,6 +200,7 @@ namespace avmplus
         #define VECTORDOUBLEADDRD(f) vectorDoubleAddrD((double (DoubleVectorObject::*)())(&f))
         #define VECTORFLOATADDR(f) vectorFloatAddr((int (FloatVectorObject::*)())(&f))
         #define VECTORFLOATADDRF(f) vectorFloatAddrF((float (FloatVectorObject::*)())(&f))
+        #define VECTORFLOAT4ADDR(f) vectorFloat4Addr((int (Float4VectorObject::*)())(&f))
         #define VECTOROBJADDR(f) vectorObjAddr((int (ObjectVectorObject::*)())(&f))
         #define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
         #define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
@@ -261,9 +262,15 @@ namespace avmplus
         {
             RETURN_METHOD_PTR(FloatVectorObject, f);
         }
+
         intptr_t vectorFloatAddrF(float (FloatVectorObject::*f)())
         {
             RETURN_METHOD_PTR_F(FloatVectorObject, f);
+        }
+
+        intptr_t vectorFloat4Addr(int (Float4VectorObject::*f)())
+        {
+            RETURN_METHOD_PTR(Float4VectorObject, f);
         }
 #endif // VMCFG_FLOAT
         intptr_t vectorObjAddr(int (ObjectVectorObject::*f)())
@@ -5227,6 +5234,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
     static const CallInfo* setFloatVectorHelpers[VI_SIZE] =
         { FUNCTIONID(FloatVectorObject_setUintProperty), FUNCTIONID(FloatVectorObject_setIntProperty), FUNCTIONID(FloatVectorObject_setDoubleProperty) };
+
+    static const CallInfo* setFloat4VectorNativeHelpers[VI_SIZE] =
+        { FUNCTIONID(Float4VectorObject_setNativeUintProperty), FUNCTIONID(Float4VectorObject_setNativeIntProperty), FUNCTIONID(Float4VectorObject_setNativeDoubleProperty) };
+    
+    static const CallInfo* setFloat4VectorHelpers[VI_SIZE] =
+        { FUNCTIONID(Float4VectorObject_setUintProperty), FUNCTIONID(Float4VectorObject_setIntProperty), FUNCTIONID(Float4VectorObject_setDoubleProperty) };
 #endif
 
     static const CallInfo* setGenericHelpers[VI_SIZE] =
@@ -5395,8 +5408,15 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             }
         }
         else if (objType == VECTORFLOAT4_TYPE) {
-            // FIXME: implement Vector.<float4> access
-            setter = NULL;
+            if (valueType == FLOAT4_TYPE) {
+                // FIXME: inline optimization
+                value = localGetf4(valIndexOnStack);
+                setter = setFloat4VectorNativeHelpers[idxKind];
+            }
+            else {
+                value = loadAtomRep(valIndexOnStack);
+                setter = setFloat4VectorHelpers[idxKind];
+            }
         }
 #endif // VMCFG_FLOAT
 

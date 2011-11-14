@@ -1136,6 +1136,8 @@
 #ifdef VMCFG_FLOAT
     METHOD(VECTORFLOATADDR(FloatVectorObject::_setUintProperty), SIG3(V,P,U,A), FloatVectorObject_setUintProperty)
     METHOD(VECTORFLOATADDR(FloatVectorObject::_setNativeUintProperty), SIG3(V,P,U,F), FloatVectorObject_setNativeUintProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_setUintProperty), SIG3(V,P,U,A), Float4VectorObject_setUintProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_setNativeUintProperty), SIG3(V,P,U,F4), Float4VectorObject_setNativeUintProperty)
 #endif
 
     METHOD(ENVADDR(MethodEnv::setpropertylate_i), SIG4(V,P,A,I,A), setpropertylate_i)
@@ -1152,6 +1154,8 @@
 #ifdef VMCFG_FLOAT
     METHOD(VECTORFLOATADDR(FloatVectorObject::_setIntProperty), SIG3(V,P,I,A), FloatVectorObject_setIntProperty)
     METHOD(VECTORFLOATADDR(FloatVectorObject::_setNativeIntProperty), SIG3(V,P,I,F), FloatVectorObject_setNativeIntProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_setIntProperty), SIG3(V,P,I,A), Float4VectorObject_setIntProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_setNativeIntProperty), SIG3(V,P,I,F4), Float4VectorObject_setNativeIntProperty)
 #endif
 
     METHOD(ENVADDR(MethodEnv::setpropertylate_d), SIG4(V,P,A,D,A), setpropertylate_d)
@@ -1168,6 +1172,8 @@
 #ifdef VMCFG_FLOAT
     METHOD(VECTORFLOATADDR(FloatVectorObject::_setDoubleProperty), SIG3(V,P,D,A), FloatVectorObject_setDoubleProperty)
     METHOD(VECTORFLOATADDR(FloatVectorObject::_setNativeDoubleProperty), SIG3(V,P,D,F), FloatVectorObject_setNativeDoubleProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_setDoubleProperty), SIG3(V,P,D,A), Float4VectorObject_setDoubleProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_setNativeDoubleProperty), SIG3(V,P,D,F4), Float4VectorObject_setNativeDoubleProperty)
 #endif
 
     METHOD(ENVADDR(MethodEnv::getpropertylate_u), SIG3(A,P,A,U), getpropertylate_u)
