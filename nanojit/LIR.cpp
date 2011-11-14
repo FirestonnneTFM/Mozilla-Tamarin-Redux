@@ -807,6 +807,14 @@ namespace nanojit
         return ins;
     }
 
+    LIns* LirBufWriter::insSwz(LIns* a, uint8_t mask)
+    {
+        LInsOp1b* ins1b = (LInsOp1b*)_buf->makeRoom(sizeof(LInsOp1b));
+        LIns*  ins  = ins1b->getLIns();
+        ins->initLInsOp1b(LIR_swzf4, a, mask);
+        return ins;
+    }
+
     LOpcode arithOpcodeD2I(LOpcode op)
     {
         switch (op) {
@@ -1643,6 +1651,14 @@ namespace nanojit
             return out->insLoad(op, insImmP((void*)p), 0, accSet, loadQual);
         }
         return out->insLoad(op, base, off, accSet, loadQual);
+    }
+
+    LIns* ExprFilter::insSwz(LIns* a, uint8_t mask) {
+        if (a->isop(LIR_swzf4) && a->oprnd1()->mask() == (0<<0|1<<2|2<<4|3<<6)) {
+            // swzf4(a, 0|1|2|3) => a
+            return a;
+        }
+        return out->insSwz(a, mask);
     }
 
     LIns* LirWriter::insStore(LIns* value, LIns* base, int32_t d, AccSet accSet)
@@ -2589,6 +2605,15 @@ namespace nanojit
                 VMPI_snprintf(s, n, "------------------------------ # %s", (char*)i->oprnd1());
                 break;
 
+            case LIR_swzf4:
+                VMPI_snprintf(s, n, "%s %s, %d|%d|%d|%d", lirNames[LIR_swzf4],
+                              formatRef(&b1, i->oprnd1()),
+                              i->mask() >> 0 & 3,
+                              i->mask() >> 2 & 3,
+                              i->mask() >> 4 & 3,
+                              i->mask() >> 6 & 3);
+                break;
+
             default:
                 NanoAssertMsgf(0, "Can't handle opcode %s\n", lirNames[op]);
                 break;
@@ -3481,6 +3506,12 @@ namespace nanojit
         NanoAssert(ins->isCall() && ins->callInfo() == ci && argsmatch(ins, argc, args));
         NanoAssert(!ins->isInReg());
         return ins;
+    }
+
+    LIns* CseFilter::insSwz(LIns* a, uint8_t mask) {
+        NanoAssert(isCseOpcode(LIR_swzf4));
+        // todo: add hashtable for swizzle ops.
+        return out->insSwz(a, mask);
     }
 
     // Interval analysis can be done much more accurately than we do here.
@@ -4598,6 +4629,13 @@ namespace nanojit
         return ins;
     }
 
+    LIns* ValidateWriter::insSwz(LIns* a, uint8_t mask)
+    {
+        LTy formals[] = { LTy_F4 };
+        LIns* args[] = { a };
+        typeCheckArgs(LIR_swzf4, 1, formals, args);
+        return out->insSwz(a, mask);
+    }
 #endif
 #endif
 
