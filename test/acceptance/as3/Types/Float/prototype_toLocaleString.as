@@ -48,26 +48,26 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 var test_flt:float = 3.14131211f;
 AddTestCase("float.prototype.toLocaleString = function", true, float.prototype.toLocaleString is Function );
-AddTestCase("float.prototype.toLocaleString returns a String", "String", getQualifiedClassName(test_flt.toLocaleString()));
+AddTestCase("float.prototype.toLocaleString returns a String", "String", getQualifiedClassName(test_flt.public::toLocaleString()));
 
 var orig_tostr = Object.prototype.toString;
 Object.prototype.toLocaleString = float.prototype.toLocaleString;
 var test_obj:Object = {};
-AddErrorTest("float.prototype.toLocaleString() on Object throws TypeError ", TYPEERROR, function(){ test_obj.toLocaleString();});
+AddErrorTest("float.prototype.toLocaleString() on Object throws TypeError ", TYPEERROR, function(){ test_obj.public::toLocaleString();});
 // we test that it throws TypeError, not RangeError
-AddErrorTest("float.prototype.toLocaleString(357) on Object throws TypeError", TYPEERROR, function(){ test_obj.toLocaleString(357);});
+AddErrorTest("float.prototype.toLocaleString(357) on Object throws TypeError", TYPEERROR, function(){ test_obj.public::toLocaleString(357);});
 Object.prototype.toLocaleString = orig_tostr;
 
 var orig_tostr = Number.prototype.toLocaleString;
 var test_num:Number = 3.14131211;
 Number.prototype.toLocaleString = float.prototype.toLocaleString;
 /// there is no AS3::toLocaleString, this should always throw type error
-AddErrorTest("float.prototype.toLocaleString() non-generic= throws TypeError", TYPEERROR, function(){ test_num.toLocaleString();});
-AddErrorTest("float.prototype.toLocaleString(357) non-generic= throws TypeError", TYPEERROR, function(){ test_num.toLocaleString(357);});
+AddErrorTest("float.prototype.toLocaleString() non-generic= throws TypeError", TYPEERROR, function(){ test_num.public::toLocaleString();});
+AddErrorTest("float.prototype.toLocaleString(357) non-generic= throws TypeError", TYPEERROR, function(){ test_num.public::toLocaleString(357);});
 Number.prototype.toLocaleString = orig_tostr;
 
-AddTestCase("float.prototype.toLocaleString = invokes AS3::toString", test_flt.AS3::toString(), test_flt.toLocaleString());
-AddTestCase("float.prototype.toLocaleString(25) = invokes AS3::toString(25)", test_flt.AS3::toString(25), test_flt.toLocaleString(25));
+AddTestCase("float.prototype.toLocaleString = invokes AS3::toString", test_flt.AS3::toString(), test_flt.public::toLocaleString());
+AddTestCase("float.prototype.toLocaleString(25) = invokes AS3::toString(25)", test_flt.AS3::toString(25), test_flt.public::toLocaleString(25));
 
 AddTestCase("float.prototype.toLocaleString - DontEnum", "", getFloatProtoProp("toLocaleString"));
 AddTestCase("float.prototype.toLocaleString is not enumerable", false, float.prototype.propertyIsEnumerable("toLocaleString"));
@@ -82,7 +82,7 @@ AddTestCase("float.prototype.toLocaleString - Deletable", true, delete(float.pro
 AddTestCase("float.prototype.toLocaleString should now be Object.prototype.toLocaleString", Object.prototype.toLocaleString, float.prototype.toLocaleString);
 float.prototype.toLocaleString = orig_tostr;
 
-AddTestCase("float.prototype.toLocaleString: implicit radix is 10", test_flt.toLocaleString(10), test_flt.toLocaleString());
+AddTestCase("float.prototype.toLocaleString: implicit radix is 10", test_flt.public::toLocaleString(10), test_flt.public::toLocaleString());
 
 test();
 
