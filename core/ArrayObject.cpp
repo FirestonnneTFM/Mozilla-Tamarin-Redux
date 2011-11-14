@@ -637,14 +637,17 @@ convert_and_set_sparse:
         {
             m_denseArray.replace(denseIdx, atomNotFound);
             m_denseUsed--;
-            
+
+            // Arrays with holes are non-simple; mark it as such.
+            m_canBeSimple = false;
+            m_lengthIfSimple = 0;
+
             // If deleting the last dense item, revert to like-new.
             if (m_denseUsed == 0)
             {
                 // Use set_length(0) rather than clear(), so that
                 // we don't discard allocated capacity.
                 m_denseArray.set_length(0);
-                m_lengthIfSimple = 0;
                 m_denseStart = 0;
             }
         }
@@ -1238,6 +1241,7 @@ unshift_sparse:
             {
                 AvmAssert(that_length == that->m_lengthIfSimple);
                 AvmAssert(that_length == that->m_denseArray.length());
+                AvmAssert(extraHoles == 0);
             }
 
             // OPTIMIZEME, there's a way to add a list to the end of another,
