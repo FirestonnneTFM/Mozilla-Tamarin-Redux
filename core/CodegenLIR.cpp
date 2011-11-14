@@ -3728,6 +3728,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
                 int32_t arrayDataOffset = -1;
                 int32_t lenOffset = -1;
+#ifdef VMCFG_FLOAT
+                LOpcode f4_getter = LIR_skip;
+#endif
 
                 MethodInfo* getter_info = obj.traits->getTraitsBindings()->getMethod(AvmCore::bindingToGetterId(b));
                 switch (getter_info->method_id())
@@ -3748,6 +3751,20 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                         arrayDataOffset = int32_t(offsetof(UIntVectorObject, m_list.m_data));
                         lenOffset = int32_t(offsetof(DataListHelper<uint32_t>::LISTDATA, len));
                         goto vector_length;
+#ifdef VMCFG_FLOAT
+                    case avmplus::NativeID::float4_x_get:
+                        f4_getter = LIR_f4x;
+                        goto float4_element;
+                    case avmplus::NativeID::float4_y_get:
+                        f4_getter = LIR_f4y;
+                        goto float4_element;
+                    case avmplus::NativeID::float4_z_get:
+                        f4_getter = LIR_f4z;
+                        goto float4_element;
+                    case avmplus::NativeID::float4_w_get:
+                        f4_getter = LIR_f4w;
+                        goto float4_element;
+#endif
 
                     // Add more specializations here
 
@@ -3755,6 +3772,13 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                         goto invoke_getter;
                 }
                 
+#ifdef VMCFG_FLOAT
+            float4_element: {
+                localSet(sp, lirout->ins1(f4_getter, localGetf4(sp)), type);
+                break;
+            }
+#endif
+
             vector_length: {
                 LIns *arrayData = loadIns(LIR_ldp, arrayDataOffset, localGetp(sp), ACCSET_OTHER, LOAD_NORMAL);
                 LIns *arrayLen  = loadIns(LIR_ldi, lenOffset, arrayData, ACCSET_OTHER, LOAD_NORMAL);
