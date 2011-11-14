@@ -63,6 +63,15 @@ asc = javacmd+" macromedia.asc.embedding.ScriptCompiler "
 print("ASC="+classpath)
 print("Building builtins...")
 
+# https://bugzilla.mozilla.org/show_bug.cgi?id=697977
+if len(sys.argv) == 1:
+    print('To build the float/float4 enabled builtins pass the following:');
+    print('    >$ ./builtin.py -config CONFIG::VMCFG_FLOAT=true -abcfuture Float.as');
+    print('');
+    print('To compile the builtins without float/float4 support:');
+    print('    >$ ./buitin.py -config CONFIG::VMCFG_FLOAT=false');
+    exit(1);
+    
 configs = " ".join(sys.argv[1:])
 
 os.system(asc+" -builtin -apiversioning -out builtin builtin.as Math.as Error.as Date.as RegExp.as JSON.as XML.as IDataInput.as IDataOutput.as ByteArray.as Proxy.as "+configs)

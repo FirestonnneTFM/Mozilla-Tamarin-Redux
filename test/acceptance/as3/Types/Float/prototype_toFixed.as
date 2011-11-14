@@ -56,7 +56,7 @@ var test_str:String = "3.14131211";
 AddTestCase("float.prototype.toFixed() - does NOT throw TypeError", test_flt.public::toFixed(), test_str.public::toFixed());
 AddTestCase("float.prototype.toFixed(7) - does NOT throw TypeError", test_flt.public::toFixed(7), test_str.public::toFixed(7));
 // shouldn't throw according to Note
-AddTestCase("float.prototype.toFixed - accepts 'undefined' for fractionDigits", test_flt.public::toFixed(undefined), test_strpublic::.toFixed(undefined));
+AddTestCase("float.prototype.toFixed - accepts 'undefined' for fractionDigits", test_flt.public::toFixed(undefined), test_str.public::toFixed(undefined));
 String.prototype.toFixed = orig_tofixed;
 
 
