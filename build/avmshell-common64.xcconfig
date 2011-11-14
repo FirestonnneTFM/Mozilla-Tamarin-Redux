@@ -36,4 +36,4 @@
 // ***** END LICENSE BLOCK *****
 
 SDKROOT = macosx10.5
-ARCHS=x86_64 ppc64
+ARCHS=x86_64
