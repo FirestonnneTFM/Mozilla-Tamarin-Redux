@@ -850,11 +850,7 @@ package abcdump
                n = readU32()
                floats = [float.NaN]
                for (i=1; i < n; i++)
-<<<<<<< /Users/lhansen/work/tr-float/utils/abcdump.as
-                   floats[i] = data.readFloat()
-=======
                    floats[i] = float(data.readFloat())
->>>>>>> /var/folders/-h/-hVVxQzFFziHstx+JMs+BE+++TI/-Tmp-/abcdump.as~other.kPWfk_
                dumpPool("float", floats)
 
                infoPrint("Cpool floats size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
