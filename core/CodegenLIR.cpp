@@ -5082,11 +5082,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         }
         else if (objType != NULL && objType->subtypeof(VECTOROBJ_TYPE)) {
             if (idxKind == VI_INT || idxKind == VI_UINT) {
+                typedef ListData<Atom, 0> STORAGE;
                 return atomToNativeRep(result, emitInlineVectorRead(objIndexOnStack, 
                                                                     index,
                                                                     offsetof(ObjectVectorObject, m_list.m_data),
                                                                     offsetof(AtomListHelper::LISTDATA, len),
-                                                                    offsetof(ListData<Atom>, entries),
+                                                                    offsetof(STORAGE, entries),
                                                                     sizeof(void*) == 8 ? 3 : 2,
                                                                     LIR_ldp,
                                                                     getObjectVectorHelpers[idxKind]));
@@ -5096,11 +5097,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         else if (objType == VECTORINT_TYPE) {
             if (result == INT_TYPE) {
                 if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    typedef ListData<int32_t, 0> STORAGE;
                     return emitInlineVectorRead(objIndexOnStack, 
                                                 index,
                                                 offsetof(IntVectorObject, m_list.m_data),
                                                 offsetof(DataListHelper<int32_t>::LISTDATA, len),
-                                                offsetof(ListData<int32_t>, entries),
+                                                offsetof(STORAGE, entries),
                                                 2,
                                                 LIR_ldi,
                                                 getIntVectorNativeHelpers[idxKind]);
@@ -5115,11 +5117,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         else if (objType == VECTORUINT_TYPE) {
             if (result == UINT_TYPE) {
                 if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    typedef ListData<uint32_t, 0> STORAGE;
                     return emitInlineVectorRead(objIndexOnStack, 
                                                 index,
                                                 offsetof(UIntVectorObject, m_list.m_data),
                                                 offsetof(DataListHelper<uint32_t>::LISTDATA, len),
-                                                offsetof(ListData<uint32_t>, entries),
+                                                offsetof(STORAGE, entries),
                                                 2,
                                                 LIR_ldi,
                                                 getUIntVectorNativeHelpers[idxKind]);
@@ -5134,11 +5137,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         else if (objType == VECTORDOUBLE_TYPE) {
             if (result == NUMBER_TYPE) {
                 if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    typedef ListData<double, 0> STORAGE;
                     return emitInlineVectorRead(objIndexOnStack, 
                                                 index,
                                                 offsetof(DoubleVectorObject, m_list.m_data),
                                                 offsetof(DataListHelper<double>::LISTDATA, len),
-                                                offsetof(ListData<double>, entries),
+                                                offsetof(STORAGE, entries),
                                                 3,
                                                 LIR_ldd,
                                                 getDoubleVectorNativeHelpers[idxKind]);
@@ -5290,12 +5294,13 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         else if (objType == VECTORINT_TYPE) {
             if (valueType == INT_TYPE) {
                 if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    typedef ListData<int32_t, 0> STORAGE;
                     emitInlineVectorWrite(objIndexOnStack, 
                                           index,
                                           localGet(valIndexOnStack),
                                           offsetof(IntVectorObject, m_list.m_data),
                                           offsetof(DataListHelper<int32_t>::LISTDATA, len),
-                                          offsetof(ListData<int32_t>, entries),
+                                          offsetof(STORAGE, entries),
                                           2,
                                           LIR_sti,
                                           setIntVectorNativeHelpers[idxKind]);
@@ -5312,12 +5317,13 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         else if (objType == VECTORUINT_TYPE) {
             if (valueType == UINT_TYPE) {
                 if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    typedef ListData<uint32_t, 0> STORAGE;
                     emitInlineVectorWrite(objIndexOnStack, 
                                           index,
                                           localGet(valIndexOnStack),
                                           offsetof(UIntVectorObject, m_list.m_data),
                                           offsetof(DataListHelper<uint32_t>::LISTDATA, len),
-                                          offsetof(ListData<uint32_t>, entries),
+                                          offsetof(STORAGE, entries),
                                           2,
                                           LIR_sti,
                                           setUIntVectorNativeHelpers[idxKind]);
@@ -5334,12 +5340,13 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         else if (objType == VECTORDOUBLE_TYPE) {
             if (valueType == NUMBER_TYPE) {
                 if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    typedef ListData<double, 0> STORAGE;
                     emitInlineVectorWrite(objIndexOnStack, 
                                           index,
                                           localGetd(valIndexOnStack),
                                           offsetof(DoubleVectorObject, m_list.m_data),
                                           offsetof(DataListHelper<double>::LISTDATA, len),
-                                          offsetof(ListData<double>, entries),
+                                          offsetof(STORAGE, entries),
                                           3,
                                           LIR_std,
                                           setDoubleVectorNativeHelpers[idxKind]);

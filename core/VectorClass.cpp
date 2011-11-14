@@ -62,7 +62,7 @@ namespace avmplus
     template class TypedVectorObject< DataList<double> >;
 #ifdef VMCFG_FLOAT
     template class TypedVectorObject< DataList<float> >;
-    template class TypedVectorObject< DataList<float4_t> >;
+    template class TypedVectorObject< DataList<float4_t, 16> >;
 #endif
     template class TypedVectorObject< AtomList >;
 }
@@ -450,7 +450,7 @@ namespace avmplus
     }
 
     Float4VectorObject::Float4VectorObject(VTable* ivtable, ScriptObject* delegate)
-        : TypedVectorObject< DataList<float4_t> >(ivtable, delegate)
+        : TypedVectorObject< DataList<float4_t, 16> >(ivtable, delegate)
     {
     }
     

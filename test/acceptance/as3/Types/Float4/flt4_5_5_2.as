@@ -93,13 +93,12 @@ AddStrictTestCase("large int as float4 (if it ends in lots of zeroes - i.e. requ
 
 AddStrictTestCase("large unsigned int as float4 (if it ends in lots of zeroes - i.e. requires less than 23bits of mantissa)", null, large_uint as float4);
 
-/* FIXME: https://bugzilla.mozilla.org/show_bug.cgi?id=696641
 var vf = new Vector.<float4>();
 vf = new Vector.<*>();
 vf.push(float4.MAX_VALUE);
 AddTestCase("Vector.<*> value as Vector.<float4>", null, vf as Vector.<float4>);
 vf = new Vector.<float4>();
-AddTestCase("Vector.<float4> value as Vector.<float>", vf, vf as Vector.<float>);
+AddTestCase("Vector.<float4> value as Vector.<float>", null, vf as Vector.<float>);
 AddTestCase("Vector.<float4> value as Object", vf, vf as Object);
 AddTestCase("Vector.<float4> value as Vector.<Number>", null ,vf as Vector.<Number>);
 AddTestCase("Vector.<float4> value as Vector.<Object>", null ,vf as Vector.<Object>);
@@ -115,7 +114,7 @@ vf = new Vector.<int>();
 AddTestCase("Vector.<int> value as NOT Vector.<float4>", null, vf as Vector.<float4>);
 vf = new Vector.<uint>();
 AddTestCase("Vector.<uint> value as NOT Vector.<float4>", null, vf as Vector.<float4>);
-*/
+
 AddTestCase("String as float", null, "twelve" as float4);
 var myObject:Object = {};
 AddTestCase("Object as float4", null, myObject as float4);

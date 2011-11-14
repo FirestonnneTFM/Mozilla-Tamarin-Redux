@@ -77,7 +77,6 @@ AddTestCase("Number.NaN is NOT float4", false, Number.NaN is float4);
 
 AddTestCase("Number(Infinity) is NOT float4", false, (new Number(Infinity)) is float4);
 
-/* FIXME: https://bugzilla.mozilla.org/show_bug.cgi?id=696641
 var vf = new Vector.<float4>();
 AddTestCase("Vector.<float4> value is Vector.<float4>", true, vf is Vector.<float4>);
 AddTestCase("Vector.<float4> value is Object", true, vf is Object);
@@ -98,7 +97,7 @@ vf = new Vector.<int>();
 AddTestCase("Vector.<int> value is NOT Vector.<float4>", false, vf is Vector.<float4>);
 vf = new Vector.<uint>();
 AddTestCase("Vector.<uint> value is NOT Vector.<float4>", false, vf is Vector.<float4>);
-*/
+
 AddTestCase("String is NOT float4", false, "twelve" is float4);
 var myObject:Object = {};
 AddTestCase("Object is NOT float4", false, myObject is float4);

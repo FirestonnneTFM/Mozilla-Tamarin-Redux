@@ -220,7 +220,7 @@ namespace avmplus
     class XMLParser;
     class XMLTag;
 
-    template<class TLIST> class VectorAccessor;
+    template<class TLIST, uintptr_t align> class VectorAccessor;
 
     struct WordOpcodeAttr;
 
