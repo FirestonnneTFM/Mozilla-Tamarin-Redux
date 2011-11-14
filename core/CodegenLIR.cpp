@@ -2798,6 +2798,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             break;
         }
 
+#ifdef VMCFG_FLOAT
+        case OP_unplus:
+            AvmAssert(type && (type == OBJECT_TYPE || type->isNumeric()));
+            /* Don't do anything; the coercion already happened */
+            break;
+#endif
         case OP_coerce:
         case OP_coerce_b:
         case OP_convert_b:
@@ -2817,7 +2823,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
             AvmAssert( FLOAT_ONLY(
                     (opcode == OP_convert_f && type == FLOAT_TYPE)   ||  
-                    (opcode == OP_convert_f4 && type == FLOAT4_TYPE) ||)
+                    (opcode == OP_convert_f4&& type == FLOAT4_TYPE)  ||)
                     (opcode == OP_coerce    && type != NULL)         ||
                     (opcode == OP_coerce_b  && type == BOOLEAN_TYPE) ||
                     (opcode == OP_convert_b && type == BOOLEAN_TYPE) ||
