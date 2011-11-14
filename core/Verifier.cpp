@@ -1292,15 +1292,15 @@ namespace avmplus
                 if(pool->hasFloatSupport())
                 {
                     FrameValue& v = checkLocal(imm30);
-                    Traits* vt = v.traits;
-                    if(!vt || !vt->isNumeric())
+                    BuiltinType bt = Traits::getBuiltinType(v.traits);
+                    if(bt == BUILTIN_any || bt == BUILTIN_object)
                     {
                         emitCoerceToNumeric(imm30);
                         retType = OBJECT_TYPE;
                         already_coerced = true;
                     }
-                    else if(vt == FLOAT_TYPE || vt == FLOAT4_TYPE)
-                        retType = vt;
+                    else if(bt == BUILTIN_float || bt == BUILTIN_float4)
+                        retType = v.traits;
                     else
                         retType = NUMBER_TYPE;
                 }
@@ -1695,11 +1695,20 @@ namespace avmplus
             {
                 checkStack(1,1);
                 FrameValue &v = state->value(sp);
-                Traits *type = v.traits;
-                if(!type || !type->isNumeric())
+                BuiltinType bt = Traits::getBuiltinType(v.traits);
+                Traits* type = v.traits;
+                if(bt == BUILTIN_any || bt == BUILTIN_object)
+                {
                     emitCoerceToNumeric(sp);
-                else if(type != FLOAT_TYPE && type != FLOAT4_TYPE)
+                    type = OBJECT_TYPE;
+                }
+                else if(bt != BUILTIN_float && bt != BUILTIN_float4)
+                {
                     emitCoerce(NUMBER_TYPE, sp);
+                    type = NUMBER_TYPE;
+                }
+                coder->write(state, pc, opcode, type);
+                state->setType(sp, type, true);
                 break;
             }
 #endif   // VMCFG_FLOAT
@@ -2344,17 +2353,17 @@ namespace avmplus
                     {
                         FrameValue& rhs = state->peek(1);
                         FrameValue& lhs = state->peek(2);
-                        Traits* lhst = lhs.traits;
-                        Traits* rhst = rhs.traits;
+                        BuiltinType lhst = Traits::getBuiltinType(lhs.traits);
+                        BuiltinType rhst = Traits::getBuiltinType(rhs.traits);
                         /* If both are floats, operate on float. 
                            If any is float4, operate on float4.
-                           If any is number, operate on number.
+                           If both types are known (and not Object), operate on number.
                            Otherwise - convert to numeric */
-                        if(lhst == FLOAT_TYPE && rhst == FLOAT_TYPE)
+                        if(lhst == BUILTIN_float && rhst == BUILTIN_float)
                             type = FLOAT_TYPE;
-                        else if(lhst == FLOAT4_TYPE || rhst == FLOAT4_TYPE)
+                        else if(lhst == BUILTIN_float4 || rhst == BUILTIN_float4)
                             type = FLOAT4_TYPE;
-                        else if((lhst && lhst->isNumberType()) || (rhst && rhst->isNumberType()))
+                        else if(lhst != BUILTIN_object && lhst != BUILTIN_any && rhst != BUILTIN_object && rhst != BUILTIN_any)
                             type = NUMBER_TYPE;
                         else
                         {
@@ -2374,33 +2383,8 @@ namespace avmplus
                     state->pop_push(2, type);
                     break;
                 }
-            case OP_negate:
-                {
-                checkStack(1,1);
-                Traits* retType = NUMBER_TYPE;
-                bool already_coerced = false;
-#ifdef VMCFG_FLOAT
-                if(pool->hasFloatSupport())
-                {
-                    FrameValue& v = state->peek(1);
-                    Traits* vt = v.traits;
-                    if(!vt || !vt->isNumeric())
-                    {
-                        emitCoerceToNumeric(sp);
-                        retType = OBJECT_TYPE;
-                    }
-                    else if (vt == FLOAT4_TYPE || vt == FLOAT_TYPE) 
-                        retType = vt;
-                    else
-                        retType = NUMBER_TYPE;
-                }
-#endif
-                if(!already_coerced)
-                    emitCoerce(retType, sp);
-                coder->write(state, pc, opcode, retType);
-                break;
-                }
 
+            case OP_negate:
             case OP_increment:
             case OP_decrement:
                 {
@@ -2411,19 +2395,19 @@ namespace avmplus
                 if(pool->hasFloatSupport())
                 {
                     FrameValue& v = state->peek(1);
-                    Traits* vt = v.traits;
-                    if(!vt || !vt->isNumeric())
+                    BuiltinType bt = Traits::getBuiltinType(v.traits);
+                    if(bt == BUILTIN_any || bt == BUILTIN_object)
                     {
                         emitCoerceToNumeric(sp);
-                        retType = OBJECT_TYPE;
                         already_coerced = true;
+                        retType = OBJECT_TYPE;
                     }
-                    else if(vt == FLOAT_TYPE || vt == FLOAT4_TYPE)
-                        retType = vt;
+                    else if (bt == BUILTIN_float || bt == BUILTIN_float4) 
+                        retType = v.traits;
                     else
                         retType = NUMBER_TYPE;
                 }
-#endif // VMCFG_FLOAT
+#endif
                 if(!already_coerced)
                     emitCoerce(retType, sp);
                 coder->write(state, pc, opcode, retType);
