@@ -40,6 +40,15 @@
 #ifndef __avmshell_core__
 #define __avmshell_core__
 
+// Ugly, ugly hack
+namespace avmplus
+{
+    namespace ST_avmplus_vector_accessors
+    {
+        class ST_avmplus_vector_accessors;
+    }
+}
+
 namespace avmshell
 {
     /**
@@ -122,6 +131,7 @@ namespace avmshell
     {
     friend class SystemClass;
         friend class avmplus::DomainObject;
+        friend class avmplus::ST_avmplus_vector_accessors::ST_avmplus_vector_accessors;
     public:
         /**
          * Create a new core with the given GC (one gc per core).

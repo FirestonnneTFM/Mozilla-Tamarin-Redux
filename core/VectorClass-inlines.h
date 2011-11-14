@@ -58,6 +58,9 @@ namespace avmplus
 #define avmplus_TypedVectorObjectXDataListXuint32_tXX_isExactInterlock 1
 #define avmplus_TypedVectorObjectXAtomListX_isExactInterlock 1
     
+    // To deal with a typedef workaround
+#define avmplus_Float4VectorObjectBaseClass_isExactInterlock 1
+    
     // ----------------------------
 
     REALLY_INLINE TypedVectorClassBase::TypedVectorClassBase(VTable* vtable)
@@ -370,19 +373,23 @@ namespace avmplus
 
     // ----------------------------
 
-    template<class TLIST>
-    REALLY_INLINE VectorAccessor<TLIST>::VectorAccessor(TypedVectorObject<TLIST>* v) : m_vector(v)
+    template<class TLIST, uintptr_t align>
+    REALLY_INLINE VectorAccessor<TLIST, align>::VectorAccessor(TypedVectorObject<TLIST>* v) : m_vector(v)
     {
     }
     
-    template<class TLIST>
-    REALLY_INLINE typename TLIST::TYPE* VectorAccessor<TLIST>::addr()
+    template<class TLIST, uintptr_t align>
+    REALLY_INLINE typename TLIST::TYPE* VectorAccessor<TLIST, align>::addr()
     {
-        return (m_vector != NULL) ? m_vector->m_list.m_data->entries : (typename TLIST::TYPE*)NULL;
+        if (m_vector == NULL)
+            return (typename TLIST::TYPE*)NULL;
+        if (align == 0)
+            return m_vector->m_list.m_data->entries;
+        return (typename TLIST::TYPE*)((uintptr_t(m_vector->m_list.m_data->entries) + (align-1)) & ~(align-1));
     }
 
-    template<class TLIST>
-    REALLY_INLINE uint32_t VectorAccessor<TLIST>::length()
+    template<class TLIST, uintptr_t align>
+    REALLY_INLINE uint32_t VectorAccessor<TLIST, align>::length()
     {
         return (m_vector != NULL) ? m_vector->m_list.length() : 0;
     }

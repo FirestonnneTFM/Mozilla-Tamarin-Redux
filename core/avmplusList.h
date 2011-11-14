@@ -108,7 +108,11 @@ namespace avmplus
     // this is probably safe enough.
     //
     // ListData *always* allocates via FixedMalloc.
-    template<class STORAGE>
+    //
+    // For an elucidation of the meaning of "slop" in create() and getSize(): see 
+    // the documentation on DataListHelper.
+
+    template<class STORAGE, uint32_t slop>
     struct ListData
     {
         uint32_t    len;            // Invariant: Must *never* exceed kListMaxLength
@@ -121,16 +125,16 @@ namespace avmplus
         REALLY_INLINE MMgc::GC* gc() { return _gc; }
         REALLY_INLINE void set_gc(MMgc::GC* g) { _gc = g; }
 
-        REALLY_INLINE static ListData<STORAGE>* create(MMgc::GC* gc, size_t totalElements)
+        REALLY_INLINE static ListData<STORAGE, slop>* create(MMgc::GC* gc, size_t totalElements)
         {
             using namespace MMgc;
             
             FixedMalloc* const fm = FixedMalloc::GetFixedMalloc();
-            void* mem = fm->Alloc(GCHeap::CheckForAllocSizeOverflow(sizeof(ListData<STORAGE>),
+            void* mem = fm->Alloc(GCHeap::CheckForAllocSizeOverflow(sizeof(ListData<STORAGE, slop>) + slop,
                                                                     GCHeap::CheckForCallocSizeOverflow(totalElements-1, sizeof(STORAGE))),
                                   kNone);
             gc->SignalDependentAllocation(fm->Size(mem));
-            return ::new (mem) ListData<STORAGE>();
+            return ::new (mem) ListData<STORAGE, slop>();
         }
 
         REALLY_INLINE static void free(MMgc::GC* gc, void* mem)
@@ -143,8 +147,8 @@ namespace avmplus
         REALLY_INLINE static size_t getSize(void* mem)
         {
             MMgc::FixedMalloc* const fm = MMgc::FixedMalloc::GetFixedMalloc();
-            return fm->Size(mem);
-        }        
+            return fm->Size(mem) - slop;
+        } 
     };
 
     // TracedListData *always* allocates via GC.
@@ -178,8 +182,24 @@ namespace avmplus
     };
     
     // ----------------------------
-    // ----------------------------
-    template<class T>
+
+    // The "align" parameter is a hack precipitated by Vector.<float4>, which requires
+    // elements to be 16-byte aligned.  When it is zero it has no impact, but when it is
+    // non-zero it has two impacts:
+    //
+    //  - We over-allocate the storage by "align" bytes (inside ListData::create), at
+    //    zero extra run-time cost; ListData::getSize accounts for the over-allocation.
+    //
+    //  - We may skip the first few bytes of the "elements" array of the list in order to
+    //    get to a aligned boundary (inside the DataListHelper methods), at the cost of
+    //    an extra ADD and AND pair per access at run-time.
+    //
+    // An "align" that's not a power of two and at least 8 is unlikely to be a good idea.
+    //
+    // It is possible to avoid the alignment hack in various ways; as we will probably
+    // reengineer the Vector representation before long anyway, and take it into account then.
+
+    template<class T, uintptr_t align=0>
     class DataListHelper
     {
     public:
@@ -196,7 +216,7 @@ namespace avmplus
         typedef T STORAGE;
         
         // (syntactic sugar)
-        typedef ListData<STORAGE> LISTDATA;
+        typedef ListData<STORAGE, align> LISTDATA;
 
         // Store the data at the address, using WB if necessary.
         // Any pointer already stored there will be overwritten (but not freed); the caller
@@ -311,8 +331,8 @@ namespace avmplus
     {
         friend class CodegenLIR;
         friend class AtomList;
-        template<class TLIST> friend class VectorAccessor;
-        template<class T2> friend class DataListAccessor;
+        template<class TLIST, uintptr_t align> friend class VectorAccessor;
+        template<class T2, uintptr_t align> friend class DataListAccessor;
 
     public:
         typedef T TYPE;
@@ -730,11 +750,11 @@ namespace avmplus
     };
     
     // ----------------------------
-    template<class T>
-    class DataList : public ListImpl< T, DataListHelper<T> >
+    template<class T, uintptr_t align=0>
+    class DataList : public ListImpl< T, DataListHelper<T, align> >
     {
     private:
-        typedef ListImpl< T, DataListHelper<T> > BASE;
+        typedef ListImpl< T, DataListHelper<T, align> > BASE;
 
     public:
         typedef T TYPE;
@@ -745,11 +765,11 @@ namespace avmplus
                           const T* args = NULL);
 
     private:
-        DataList<T>& operator=(const DataList<T>& other);       // unimplemented
-        explicit DataList(const DataList<T>& other);            // unimplemented
-        void* operator new(size_t size);                        // unimplemented, use HeapList instead
+        DataList<T>& operator=(const DataList<T, align>& other);       // unimplemented
+        explicit DataList(const DataList<T, align>& other);            // unimplemented
+        void* operator new(size_t size);                               // unimplemented, use HeapList instead
     };
-
+    
     // ----------------------------
 
     // Some code internal to Flash/AIR needs to directly get/set the contents of DataLists;
@@ -762,16 +782,16 @@ namespace avmplus
     // without intermediate copying). Note that it is explicitly legal to pass
     // a NULL DataList to the ctor (which will cause addr() to also return NULL
     // and length() to return 0). This class must be used only on the stack.
-    template<class T>
+    template<class T, uintptr_t align=0>
     class DataListAccessor
     {
     public:
-        explicit DataListAccessor(DataList<T>* v);
+        explicit DataListAccessor(DataList<T, align>* v);
         T* addr();
         uint32_t length();
 
     private:
-        DataList<T>* m_list;
+        DataList<T, align>* m_list;
 
     private:
         void* operator new(size_t size);                                    // unimplemented

@@ -1,4 +1,4 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* -*- c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 /* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -17,7 +17,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2011
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -37,28 +37,54 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include "avmplus.h"
+var SECTION = "5.5.2";
+var VERSION = "AS3";
+var TITLE   = "Vector.<float4> smoketest";
 
-#include "avmplusList-impl.h"
+startTest();
+writeHeaderToLog( SECTION + " "+ TITLE);
 
-namespace avmplus
-{
-    // Force explicit instantiations for various non-inlined ListImpl methods;
-    // some compilers don't need this, but some do. (I'm looking at you, XCode.)
+// Vector.<float4> smoketest.  Tests that vectors are initialized to
+// zero, that reading and writing works, that the data written can be
+// read again, and that we're not scribbling on memory.
+//
+// Run this with -Ojit and -Dinterp in a Debug build; the debugging
+// functionality in MMgc will catch memory overwrites, should they
+// occur.
+//
+// We test for a lot of different vector lengths, and with and without
+// type information, in order to test more JIT and runtime paths.
 
-    template class ListImpl<MMgc::GCObject*, GCListHelper>;
-    template class ListImpl<MMgc::RCObject*, RCListHelper>;
-    template class ListImpl<MMgc::GCObject*, WeakRefListHelper>;
-    template class ListImpl<Atom, AtomListHelper>;
-    template class ListImpl< UnmanagedPointer, DataListHelper<UnmanagedPointer> >;
-    template class ListImpl< uint8_t, DataListHelper<uint8_t> >;
-    template class ListImpl< int32_t, DataListHelper<int32_t> >;
-    template class ListImpl< uint32_t, DataListHelper<uint32_t> >;
-    template class ListImpl< uint64_t, DataListHelper<uint64_t> >;
-#ifdef VMCFG_FLOAT
-    template class ListImpl< float, DataListHelper<float> >;
-    template class ListImpl< float4_t, DataListHelper<float4_t, 16> >;
-#endif    
-    template class ListImpl< double, DataListHelper<double> >;
-    template class ListImpl< char, DataListHelper<char> >;
+// Global code, no annotations 
+
+for ( var i=0 ; i < 100 ; i++ ) {
+	var w = new Vector.<float4>(i);
+	AddTestCase("Global: length", i, w.length);
+	for ( var j=0 ; j < i ; j++ )
+		AddTestCase("Global: zero", float4(0,0,0,0), w[j]);
+	for ( var j=0 ; j < i ; j++ )
+		w[j] = float4(1000+i, 2000+i, 3000+i, 4000+i);
+	for ( var j=0 ; j < i ; j++ )
+		AddTestCase("Global: read", float4(1000+i, 2000+i, 3000+i, 4000+i), w[j]);
 }
+
+// Function code, full annotations
+
+function f(): void 
+{
+	for ( var i:int=0 ; i < 100 ; i++ ) {
+		var w:Vector.<float4> = new Vector.<float4>(i);
+		var j:int;
+		AddTestCase("Local: length", i, w.length);
+		for ( j=0 ; j < i ; j++ )
+			AddTestCase("Local: zero", float4(0,0,0,0), w[j]);
+		for ( j=0 ; j < i ; j++ )
+			w[j] = float4(1000+i, 2000+i, 3000+i, 4000+i);
+		for ( j=0 ; j < i ; j++ )
+			AddTestCase("Local: read", float4(1000+i, 2000+i, 3000+i, 4000+i), w[j]);
+	}
+}
+
+f();
+
+test();

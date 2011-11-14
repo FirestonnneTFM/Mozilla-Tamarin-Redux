@@ -88,54 +88,80 @@ namespace avmplus
 
     // ----------------------------
 
-    template<class T>
-    REALLY_INLINE /*static*/ void DataListHelper<T>::wbData(const void* /*container*/, LISTDATA** address, LISTDATA* data)
+    // For information about "align", see the doc block at class DataListHelper.
+    
+    template<class T, uintptr_t align>
+    REALLY_INLINE /*static*/ void DataListHelper<T, align>::wbData(const void* /*container*/, LISTDATA** address, LISTDATA* data)
     {
         *address = data;
     }
 
-    template<class T>
-    REALLY_INLINE /*static*/ typename DataListHelper<T>::TYPE DataListHelper<T>::load(LISTDATA* data, uint32_t index)
+    template<class T, uintptr_t align>
+    REALLY_INLINE /*static*/ typename DataListHelper<T, align>::TYPE DataListHelper<T, align>::load(LISTDATA* data, uint32_t index)
     {
+        typedef typename DataListHelper<T, align>::TYPE VAL;
         AvmAssert(data != NULL);
-        return data->entries[index];
+        if (align == 0)
+            return data->entries[index];
+        else
+            return ((VAL*)((uintptr_t(data->entries) + (align-1)) & ~(align-1)))[index];
     }
 
-    template<class T>
-    REALLY_INLINE /*static*/ void DataListHelper<T>::store(LISTDATA* data, uint32_t index, TYPE value)
+    template<class T, uintptr_t align>
+    REALLY_INLINE /*static*/ void DataListHelper<T, align>::store(LISTDATA* data, uint32_t index, TYPE value)
     {
+        typedef typename DataListHelper<T, align>::TYPE VAL;
         AvmAssert(data != NULL);
-        data->entries[index] = value;
+        if (align == 0)
+            data->entries[index] = value;
+        else
+            ((VAL*)((uintptr_t(data->entries) + (align-1)) & ~(align-1)))[index] = value;
     }
 
-    template<class T>
-    REALLY_INLINE /*static*/ void DataListHelper<T>::storeInEmpty(LISTDATA* data, uint32_t index, TYPE value)
+    template<class T, uintptr_t align>
+    REALLY_INLINE /*static*/ void DataListHelper<T, align>::storeInEmpty(LISTDATA* data, uint32_t index, TYPE value)
     {
-        AvmAssert(data != NULL);
+        typedef typename DataListHelper<T, align>::TYPE VAL;
         // This is commented out because it's not necessary for safety of a DataList,
         // and it can generate an assert in List::insert(), which uses storeInEmpty() for efficiency;
         // since DataListHelper::moveRange doesn't zero out the cleared space we could get this
         // assertion firing. Better to neuter this assertion than add a unnecessary zeroing-out
         // to moveRange() just to pacify it.
         // AvmAssert(data->entries[index] == 0);
-        data->entries[index] = value;
+        AvmAssert(data != NULL);
+        if (align == 0)
+            data->entries[index] = value;
+        else
+            ((VAL*)((uintptr_t(data->entries) + (align-1)) & ~(align-1)))[index] = value;
     }
 
-    template<class T>
-    REALLY_INLINE /*static*/ void DataListHelper<T>::clearRange(LISTDATA* data, uint32_t start, uint32_t count)
+    template<class T, uintptr_t align>
+    REALLY_INLINE /*static*/ void DataListHelper<T, align>::clearRange(LISTDATA* data, uint32_t start, uint32_t count)
     {
+        typedef typename DataListHelper<T, align>::TYPE VAL;
         AvmAssert(count > 0);
-        VMPI_memset(&data->entries[start], 0, count*sizeof(T));
+        VAL* base;
+        if (align == 0)
+            base = data->entries;
+        else
+            base = ((VAL*)((uintptr_t(data->entries) + (align-1)) & ~(align-1)));
+        VMPI_memset((base + start), 0, count*sizeof(T));
     }
-
-    template<class T>
-    REALLY_INLINE /*static*/ void DataListHelper<T>::moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count)
+    
+    template<class T, uintptr_t align>
+    REALLY_INLINE /*static*/ void DataListHelper<T, align>::moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count)
     {
-        VMPI_memmove(&data->entries[dstStart], &data->entries[srcStart], count * sizeof(T));
+        typedef typename DataListHelper<T, align>::TYPE VAL;
+        VAL* base;
+        if (align == 0)
+            base = data->entries;
+        else
+            base = ((VAL*)((uintptr_t(data->entries) + (align-1)) & ~(align-1)));
+        VMPI_memmove((base + dstStart), (base + srcStart), count * sizeof(T));
     }
 
-    template<class T>
-    REALLY_INLINE /*static*/ void DataListHelper<T>::gcTrace(MMgc::GC* gc, LISTDATA** loc)
+    template<class T, uintptr_t align>
+    REALLY_INLINE /*static*/ void DataListHelper<T, align>::gcTrace(MMgc::GC* gc, LISTDATA** loc)
     {
         AvmAssert(!gc->IsPointerToGCPage(*loc));
         (void)gc; (void)loc;
@@ -1251,9 +1277,9 @@ namespace avmplus
 
     // ----------------------------
 
-    template<class T>
-    REALLY_INLINE DataList<T>::DataList(MMgc::GC* gc, uint32_t capacity, const T* args)
-        : ListImpl< T, DataListHelper<T> >(gc, capacity, args)
+    template<class T, uintptr_t align>
+    REALLY_INLINE DataList<T, align>::DataList(MMgc::GC* gc, uint32_t capacity, const T* args)
+        : ListImpl< T, DataListHelper<T, align> >(gc, capacity, args)
     {
         // We must not be a pointer type.
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isNonPointer::value == true);
@@ -1269,19 +1295,23 @@ namespace avmplus
 
     // ----------------------------
 
-    template<class T>
-    REALLY_INLINE DataListAccessor<T>::DataListAccessor(DataList<T>* v) : m_list(v)
+    template<class T, uintptr_t align>
+    REALLY_INLINE DataListAccessor<T, align>::DataListAccessor(DataList<T, align>* v) : m_list(v)
     {
     }
     
-    template<class T>
-    REALLY_INLINE T* DataListAccessor<T>::addr()
+    template<class T, uintptr_t align>
+    REALLY_INLINE T* DataListAccessor<T, align>::addr()
     {
-        return (m_list != NULL) ? m_list->m_data->entries : (T*)NULL;
+        if (m_list == NULL)
+            return (T*)NULL;
+        if (align == 0)
+            return m_list->m_data->entries;
+        return (T*)((uintptr_t(m_list->m_data->entries) + (align-1)) & ~(align-1));
     }
 
-    template<class T>
-    REALLY_INLINE uint32_t DataListAccessor<T>::length()
+    template<class T, uintptr_t align>
+    REALLY_INLINE uint32_t DataListAccessor<T, align>::length()
     {
         return (m_list != NULL) ? m_list->length() : 0;
     }

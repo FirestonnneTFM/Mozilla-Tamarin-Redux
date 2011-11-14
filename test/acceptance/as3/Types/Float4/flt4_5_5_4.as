@@ -56,10 +56,8 @@ AddTestCase("float4 class is instanceof Class", true, float4 instanceof Class);
 AddTestCase("float4 class is not instanceof Function", false, float4 instanceof Function);
 AddTestCase("float4 instance is instanceof Object", true, onef instanceof Object);
 
-/* FIXME: https://bugzilla.mozilla.org/show_bug.cgi?id=696641
 var vf = new Vector.<float>();
 AddTestCase("Vector.<float> is not instanceof float", false, vf instanceof float);
-*/
 
 AddTestCase("float4 class is not instanceof Number", false, float4 instanceof Number);
 AddTestCase("float4 instance is not instanceof Number", false, onef instanceof Number);

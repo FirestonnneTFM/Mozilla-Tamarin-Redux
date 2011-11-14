@@ -532,7 +532,7 @@ namespace avmplus
         friend class CodegenLIR;
         friend class ObjectVectorObject;
         template<class OBJ> friend class TypedVectorClass;
-        template<class TLISTVA> friend class VectorAccessor;
+        template<class TLISTVA, uintptr_t align> friend class VectorAccessor;
 
     public:
         typedef TLIST LIST;
@@ -652,7 +652,7 @@ namespace avmplus
     // without intermediate copying). Note that it is explicitly legal to pass
     // a NULL VectorObject to the ctor (which will cause addr() to also return NULL
     // and length() to return 0). This class must be used only on the stack.
-    template<class TLIST>
+    template<class TLIST, uintptr_t align=0>
     class VectorAccessor
     {
     public:
@@ -768,7 +768,10 @@ namespace avmplus
     };
     typedef VectorAccessor< DataList<float> > FloatVectorAccessor;
 
-    class GC_AS3_EXACT(Float4VectorObject, TypedVectorObject< DataList<float4_t> >)
+    // Macros and templates don't mix
+    typedef TypedVectorObject< DataList<float4_t, 16> > Float4VectorObjectBaseClass;
+    
+    class GC_AS3_EXACT(Float4VectorObject, Float4VectorObjectBaseClass)
     {
     protected:
         explicit Float4VectorObject(VTable* ivtable, ScriptObject* delegate);
@@ -789,7 +792,7 @@ namespace avmplus
         DECLARE_SLOTS_Float4VectorObject;
         // ------------------------ DATA SECTION END
     };
-    typedef VectorAccessor< DataList<float> > Float4VectorAccessor;
+    typedef VectorAccessor< DataList<float4_t, 16>, 16 > Float4VectorAccessor;
 #endif
 
     // ----------------------------
