@@ -53,7 +53,7 @@ AddErrorTest("float4.rsqrt() with no args", ARGUMENTERROR+1063,  function(){ flo
 
 
 var flt_rsqrt:float = float.rsqrt(1f);
-AddStrictTestCase("float4.reciprocal(1f, 1f, 1f, 1f)", new float4(flt_rsqrt), float4.rsqrt(flt4));
+AddStrictTestCase("float4.rsqrt(1f, 1f, 1f, 1f)", new float4(flt_rsqrt), float4.rsqrt(flt4));
 
 test();
 

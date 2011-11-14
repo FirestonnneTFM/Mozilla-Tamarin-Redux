@@ -39,26 +39,42 @@
 include "floatUtil.as";
 
 
-var SECTION = "4.2.2";
+var SECTION = "4.4.15.1";
 var VERSION = "AS3";
-var TITLE   = "The float4 method called as a function float4 (x, y, z, w)";
+var TITLE   = "Comparison methods public function float4.isGreater(arg1:float4 , arg2:float4):float4";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
+var flt4_a:float4 = new float4(1f, 1f, 1f, 1f);
+var flt4_b:float4 = new float4(2f, 2f, 2f, 2f);
+AddTestCase("float4.isGreater() returns a float4", "float4", getQualifiedClassName(float4.isGreater(flt4_a, flt4_b)));
 
-var result = float4(1f, 1f, 1f, 1f);
-AddTestCase("float4(1f, 1f, 1f, 1f)", "float4", getQualifiedClassName(result));
+flt4_a = new float4(1f, 1f, 1f, 1f);
+flt4_b = new float4(2f, 2f, 2f, 2f);
+AddStrictTestCase("float4.isGreater((1f, 1f, 1f, 1f), (2f, 2f, 2f, 2f))", new float4(0f, 0f, 0f, 0f), float4.isGreater(flt4_a, flt4_b));
+AddStrictTestCase("float4.isGreater((2f, 2f, 2f, 2f), (1f, 1f, 1f, 1f))", new float4(1f, 1f, 1f, 1f), float4.isGreater(flt4_b, flt4_a));
 
-var result = float4(1, 1, 1, 1);
-AddTestCase("float4(1, 1, 1, 1)", "float4", getQualifiedClassName(result));
+flt4_a = new float4(1f, 1f, 1f, 1f);
+flt4_b = new float4(2f, 0f, 0f, 0f);
+AddStrictTestCase("float4.isGreater((1f, 1f, 1f, 1f), (2f, 0f, 0f, 0f))", new float4(0f, 1f, 1f, 1f), float4.isGreater(flt4_a, flt4_b));
+flt4_a = new float4(1f, 1f, 1f, 1f);
+flt4_b = new float4(0f, 2f, 0f, 0f);
+AddStrictTestCase("float4.isGreater((1f, 1f, 1f, 1f), (0f, 2f, 0f, 0f))", new float4(1f, 0f, 1f, 1f), float4.isGreater(flt4_a, flt4_b));
+flt4_a = new float4(1f, 1f, 1f, 1f);
+flt4_b = new float4(0f, 0f, 2f, 0f);
+AddStrictTestCase("float4.isGreater((1f, 1f, 1f, 1f), (0f, 0f, 2f, 0f))", new float4(1f, 1f, 0f, 1f), float4.isGreater(flt4_a, flt4_b));
+flt4_a = new float4(1f, 1f, 1f, 1f);
+flt4_b = new float4(0f, 0f, 0f, 2f);
+AddStrictTestCase("float4.isGreater((1f, 1f, 1f, 1f), (0f, 0f, 0f, 2f))", new float4(1f, 1f, 1f, 0f), float4.isGreater(flt4_a, flt4_b));
 
+flt4_a = new float4(1f, 1f, 1f, 1f);
+AddStrictTestCase("float4.isGreater((1f, 1f, 1f, 1f), (1f, 1f, 1f, 1f))", new float4(0f, 0f, 0f, 0f), float4.isGreater(flt4_a, flt4_a));
 
-// FIXME: https://bugs.adobe.com/jira/browse/ASC-4359
-/*
-AddErrorTest("float4() with 2 args", ARGUMENTERROR, function(){ result = float4(1, 2);});
-AddErrorTest("float4() with 3 args", ARGUMENTERROR, function(){ result = float4(1, 2, 3);});
-AddErrorTest("float4() with 5 args", ARGUMENTERROR, function(){ result = float4(1, 2, 3, 4, 5);});
-*/
+flt4_a = new float4(-0f);
+flt4_b = new float4(0f);
+AddStrictTestCase("float4.isGreater((-0f), (0f))", new float4(0f), float4.isGreater(flt4_a, flt4_b));
+AddStrictTestCase("float4.isGreater((0f), (-0f))", new float4(0f), float4.isGreater(flt4_b, flt4_a));
+
 test();
 

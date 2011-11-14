@@ -39,48 +39,24 @@
 include "floatUtil.as";
 
 
-var SECTION = "4.2.1";
+var SECTION = "4.2.2";
 var VERSION = "AS3";
-var TITLE   = "The float4 method called as a function float4 (x)";
+var TITLE   = "The float4 method called as a function float4 (x, y, z, w)";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-var result = float4();
-AddTestCase("Float4 with no args", "float4", getQualifiedClassName(result));
+var result = float4(1f, 1f, 1f, 1f);
+AddTestCase("float4(1f, 1f, 1f, 1f)", "float4", getQualifiedClassName(result));
 
-var undefined_float4 = float4(undefined);
-AddTestCase("Float4 as function, with 'undefined' arg", "float4", getQualifiedClassName(undefined_float4));
+var result = float4(1, 1, 1, 1);
+AddTestCase("float4(1, 1, 1, 1)", "float4", getQualifiedClassName(result));
 
-var null_float4 = float4(null);
-AddTestCase("Float4 as function, with 'null' arg", "float4", getQualifiedClassName(null_float4));
 
-// FIXME: https://bugs.adobe.com/jira/browse/ASC-4358
-//var boolean_float4 = float4(true);
-//AddTestCase("Float4 as function, with 'boolean' arg", "float4", getQualifiedClassName(boolean_float4));
-
-var dble_float4 = float4(3.14);
-AddTestCase("Float4 as function, with 'double' arg", "float4", getQualifiedClassName(dble_float4));
-
-var int_float4 = float4(3);
-AddTestCase("Float4 as function, with 'int' arg", "float4", getQualifiedClassName(int_float4));
-
-// FIXME: https://bugs.adobe.com/jira/browse/ASC-4358
-//var string_float4 = float4("3.14");
-//AddTestCase("Float4 as function, with 'String' arg", "float4", getQualifiedClassName(string_float4));
-
-var myObject:Object = {1:1};
-var object_float4 = float4(myObject);
-AddTestCase("Float4 as function, with 'Object' arg", "float4", getQualifiedClassName(object_float4));
-
-var literal_float4 = float4(3.14f);
-AddTestCase("Float4 as function, with 'FloatLiteral' arg", "float4", getQualifiedClassName(literal_float4));
-
-var flt4 = float4(1f, 1f, 1f, 1f);
-var flt4_flt4 = float4(flt4);
-AddTestCase("Float4 as a function with float4 arg", "float4", getQualifiedClassName(flt4_flt4));
-AddStrictTestCase("Return x if x is a float4, float4(x)", true, flt4 === flt4_flt4);
+AddErrorTest("float4() with 2 args", ARGUMENTERROR, function(){ result = float4(1, 2);});
+AddErrorTest("float4() with 3 args", ARGUMENTERROR, function(){ result = float4(1, 2, 3);});
+AddErrorTest("float4() with 5 args", ARGUMENTERROR, function(){ result = float4(1, 2, 3, 4, 5);});
 
 test();
 

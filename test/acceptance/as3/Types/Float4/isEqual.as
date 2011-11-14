@@ -39,29 +39,42 @@
 include "floatUtil.as";
 
 
-var SECTION = "5.1.5";
+var SECTION = "4.4.15.5";
 var VERSION = "AS3";
-var TITLE   = "The bitwise not ! operator";
+var TITLE   = "Comparison methods public function float4.isEqual(arg1:float4 , arg2:float4):float4";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
+var flt4_a:float4 = new float4(1f, 1f, 1f, 1f);
+var flt4_b:float4 = new float4(2f, 2f, 2f, 2f);
+AddTestCase("float4.isEqual() returns a float4", "float4", getQualifiedClassName(float4.isEqual(flt4_a, flt4_b)));
 
-// The result is false if the  ToBoolean  conversions of all four elements
-// are false; the result is true otherwise (float4 spec section 8.8)
+flt4_a = new float4(1f, 1f, 1f, 1f);
+flt4_b = new float4(2f, 2f, 2f, 2f);
+AddStrictTestCase("float4.isEqual((1f, 1f, 1f, 1f), (2f, 2f, 2f, 2f))", new float4(0f, 0f, 0f, 0f), float4.isEqual(flt4_a, flt4_b));
+AddStrictTestCase("float4.isEqual((2f, 2f, 2f, 2f), (1f, 1f, 1f, 1f))", new float4(0f, 0f, 0f, 0f), float4.isEqual(flt4_b, flt4_a));
 
-var flt4:float4 = new float4(1f);
-AddStrictTestCase("!float4(1f) all values convert to true", false, !flt4);
+flt4_a = new float4(1f, 1f, 1f, 1f);
+flt4_b = new float4(1f, 0f, 0f, 0f);
+AddStrictTestCase("float4.isEqual((1f, 1f, 1f, 1f), (1f, 0f, 0f, 0f))", new float4(1f, 0f, 0f, 0f), float4.isEqual(flt4_a, flt4_b));
+flt4_a = new float4(1f, 1f, 1f, 1f);
+flt4_b = new float4(0f, 1f, 0f, 0f);
+AddStrictTestCase("float4.isEqual((1f, 1f, 1f, 1f), (0f, 1f, 0f, 0f))", new float4(0f, 1f, 0f, 0f), float4.isEqual(flt4_a, flt4_b));
+flt4_a = new float4(1f, 1f, 1f, 1f);
+flt4_b = new float4(0f, 0f, 1f, 0f);
+AddStrictTestCase("float4.isEqual((1f, 1f, 1f, 1f), (0f, 0f, 1f, 0f))", new float4(0f, 0f, 1f, 0f), float4.isEqual(flt4_a, flt4_b));
+flt4_a = new float4(1f, 1f, 1f, 1f);
+flt4_b = new float4(0f, 0f, 0f, 1f);
+AddStrictTestCase("float4.isEqual((1f, 1f, 1f, 1f), (0f, 0f, 0f, 1f))", new float4(0f, 0f, 0f, 1f), float4.isEqual(flt4_a, flt4_b));
 
-flt4 = new float4(0f);
-AddStrictTestCase("!float4(0f) all values convert to false", true, !flt4);
+flt4_a = new float4(1f, 1f, 1f, 1f);
+AddStrictTestCase("float4.isEqual((1f, 1f, 1f, 1f), (1f, 1f, 1f, 1f))", new float4(1f, 1f, 1f, 1f), float4.isEqual(flt4_a, flt4_a));
 
-flt4 = new float4(9.125f, 0f, 6.234f, 1f);
-AddStrictTestCase("!float4(9.125f, 0f, 6.234f, 1f) not all values are false, so convert to true", false, !flt4);
-
-var u = !flt4;
-AddTestCase("returns a boolean", "boolean", typeof(u));
-
+flt4_a = new float4(-0f);
+flt4_b = new float4(0f);
+AddStrictTestCase("float4.isEqual((-0f), (0f))", new float4(1f), float4.isEqual(flt4_a, flt4_b));
+AddStrictTestCase("float4.isEqual((0f), (-0f))", new float4(1f), float4.isEqual(flt4_b, flt4_a));
 
 test();
 
