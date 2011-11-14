@@ -311,8 +311,8 @@ namespace avmplus
             argDescArgsToAtomList(m_denseArray, argDesc, env, ap);
     }
 
-    template ArrayObject::ArrayObject(VTable*, ScriptObject*, MethodEnv*, uint32_t, uint32_t, va_list);
-    template ArrayObject::ArrayObject(VTable*, ScriptObject*, MethodEnv*, char*, uint32_t, va_list);
+    template ArrayObject::ArrayObject(VTable*, ScriptObject*, MethodEnv*, uint32_t, uint32_t, va_list, bool simple/*=false*/);
+    template ArrayObject::ArrayObject(VTable*, ScriptObject*, MethodEnv*, char*, uint32_t, va_list, bool simple/*=false*/);
 #endif // VMCFG_AOT
 
     // ----------------- "get" methods
