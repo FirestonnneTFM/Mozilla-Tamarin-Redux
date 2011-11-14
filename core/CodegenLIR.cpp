@@ -109,39 +109,44 @@ return *((intptr_t*)&_method);
 #endif
 
 #ifdef AVMPLUS_ARM
-#ifdef _MSC_VER
-#define RETURN_METHOD_PTR_D(_class, _method) \
-return *((int*)&_method);
-#else
-#define RETURN_METHOD_PTR_DF_HELPER(_class, _method, _type) \
-union { \
-    _type (_class::*bar)(); \
-    int foo[2]; \
-}; \
-bar = _method; \
-return foo[0];
-#define RETURN_METHOD_PTR_D(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,double)
-#define RETURN_METHOD_PTR_F(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,float)
-#endif
-
+    #ifdef _MSC_VER
+        #define RETURN_METHOD_PTR_D(_class, _method) \
+            return *((int*)&_method);
+    #else
+        #define RETURN_METHOD_PTR_DF_HELPER(_class, _method, _type) \
+            union { \
+                _type (_class::*bar)(); \
+                int foo[2]; \
+            }; \
+            bar = _method; \
+            return foo[0];
+        #define RETURN_METHOD_PTR_D(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,double)
+        #define RETURN_METHOD_PTR_F(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,float)
+        #define RETURN_METHOD_PTR_F4(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,float4_t)
+    #endif
 #elif defined __GNUC__
-#define RETURN_METHOD_PTR_DF_HELPER(_class, _method, _type) \
-union { \
-    _type (_class::*bar)(); \
-    intptr_t foo; \
-}; \
-bar = _method; \
-return foo;
+    #define RETURN_METHOD_PTR_DF_HELPER(_class, _method, _type) \
+        union { \
+            _type (_class::*bar)(); \
+            intptr_t foo; \
+        }; \
+        bar = _method; \
+        return foo;
 
-#define RETURN_METHOD_PTR_D(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,double)
-#define RETURN_METHOD_PTR_F(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,float)
+    #define RETURN_METHOD_PTR_D(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,double)
+    #define RETURN_METHOD_PTR_F(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,float)
+    #define RETURN_METHOD_PTR_F4(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,float4_t)
 #else
-#define RETURN_METHOD_PTR_D(_class, _method) \
-return *((intptr_t*)&_method);
+    #define RETURN_METHOD_PTR_D(_class, _method) \
+        return *((intptr_t*)&_method);
 #endif
 
 #ifndef RETURN_METHOD_PTR_F
-#define RETURN_METHOD_PTR_F RETURN_METHOD_PTR_D
+    #define RETURN_METHOD_PTR_F RETURN_METHOD_PTR_D
+#endif
+
+#ifndef RETURN_METHOD_PTR_F4
+    #define RETURN_METHOD_PTR_F4 RETURN_METHOD_PTR_D
 #endif
 
 #ifdef PERFM
@@ -201,6 +206,7 @@ namespace avmplus
         #define VECTORFLOATADDR(f) vectorFloatAddr((int (FloatVectorObject::*)())(&f))
         #define VECTORFLOATADDRF(f) vectorFloatAddrF((float (FloatVectorObject::*)())(&f))
         #define VECTORFLOAT4ADDR(f) vectorFloat4Addr((int (Float4VectorObject::*)())(&f))
+        #define VECTORFLOAT4ADDRF4(f) vectorFloat4AddrF4((float4_t (Float4VectorObject::*)())(&f))
         #define VECTOROBJADDR(f) vectorObjAddr((int (ObjectVectorObject::*)())(&f))
         #define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
         #define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
@@ -271,6 +277,11 @@ namespace avmplus
         intptr_t vectorFloat4Addr(int (Float4VectorObject::*f)())
         {
             RETURN_METHOD_PTR(Float4VectorObject, f);
+        }
+    
+        intptr_t vectorFloat4AddrF4(float4_t (Float4VectorObject::*f)())
+        {
+            RETURN_METHOD_PTR_F4(Float4VectorObject, f);
         }
 #endif // VMCFG_FLOAT
         intptr_t vectorObjAddr(int (ObjectVectorObject::*f)())
@@ -5043,6 +5054,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
     static const CallInfo* getFloatVectorHelpers[VI_SIZE] =
         { FUNCTIONID(FloatVectorObject_getUintProperty), FUNCTIONID(FloatVectorObject_getIntProperty), FUNCTIONID(FloatVectorObject_getDoubleProperty) };
+
+    static const CallInfo* getFloat4VectorNativeHelpers[VI_SIZE] =
+        { FUNCTIONID(Float4VectorObject_getNativeUintProperty), FUNCTIONID(Float4VectorObject_getNativeIntProperty), FUNCTIONID(Float4VectorObject_getNativeDoubleProperty) };
+    
+    static const CallInfo* getFloat4VectorHelpers[VI_SIZE] =
+        { FUNCTIONID(Float4VectorObject_getUintProperty), FUNCTIONID(Float4VectorObject_getIntProperty), FUNCTIONID(Float4VectorObject_getDoubleProperty) };
 #endif
 
     static const CallInfo* getGenericHelpers[VI_SIZE] =
@@ -5189,8 +5206,14 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             }
         }
         else if (objType == VECTORFLOAT4_TYPE) {
-            // FIXME: implement Vector.<float4> access
-            getter = NULL;
+            if (result == FLOAT4_TYPE) {
+                // FIXME: inline access
+                getter = getFloat4VectorNativeHelpers[idxKind];
+                valIsAtom = false;
+            }
+            else {
+                getter = getFloat4VectorHelpers[idxKind];
+            }
         }
 #endif
 
