@@ -46,18 +46,33 @@ var TITLE   = "The == operator augmented by float4 values";
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
+function check(param1:*, param2:*):* { return param1 == param2; }
 
 AddTestCase("float4(1f) == float4(1f)", true, float4(1f) == float4(1f));
 AddTestCase("float4(0f) == float4(0f)", true, float4(0f) == float4(0f));
-AddTestCase("float4(0f) == float4(-0f)", false, float4(0f) == float4(-0f));
-AddTestCase("float4(0f) == float4(-0f)", false, float4(-0f) == float4(0f));
+AddTestCase("float4(0f) == float4(-0f)", true, float4(0f) == float4(-0f));
+AddTestCase("float4(-0f) == float4(0f)", true, float4(-0f) == float4(0f));
 AddTestCase("float4(1f) == float4(2f)", false, float4(1f) == float4(2f));
 AddTestCase("float4(2f) == float4(1f)", false, float4(2f) == float4(1f));
+
+AddTestCase("function float4(1f) == float4(1f)", true, check(float4(1f), float4(1f)));
+AddTestCase("function float4(0f) == float4(0f)", true, check(float4(0f), float4(0f)));
+AddTestCase("function float4(0f) == float4(-0f)", true, check(float4(0f), float4(-0f)));
+AddTestCase("function float4(0f) == float4(-0f)", true, check(float4(-0f), float4(0f)));
+AddTestCase("function float4(1f) == float4(2f)", false, check(float4(1f), float4(2f)));
+AddTestCase("function float4(2f) == float4(1f)", false, check(float4(2f), float4(1f)));
+
 
 AddTestCase("float4(1f, 2f, 3f, 4f) == float4(0f, 2f, 3f, 4f)", false, float4(1f, 2f, 3f, 4f) == float4(0f, 2f, 3f, 4f));
 AddTestCase("float4(1f, 1f, 3f, 4f) == float4(0f, 2f, 3f, 4f)", false, float4(1f, 2f, 3f, 4f) == float4(1f, 1f, 3f, 4f));
 AddTestCase("float4(1f, 2f, 2f, 4f) == float4(0f, 2f, 3f, 4f)", false, float4(1f, 2f, 3f, 4f) == float4(1f, 2f, 2f, 4f));
 AddTestCase("float4(1f, 2f, 3f, 5f) == float4(0f, 2f, 3f, 4f)", false, float4(1f, 2f, 3f, 4f) == float4(1f, 2f, 3f, 5f));
+
+AddTestCase("function float4(1f, 2f, 3f, 4f) == float4(0f, 2f, 3f, 4f)", false, check(float4(1f, 2f, 3f, 4f), float4(0f, 2f, 3f, 4f)));
+AddTestCase("function float4(1f, 1f, 3f, 4f) == float4(0f, 2f, 3f, 4f)", false, check(float4(1f, 2f, 3f, 4f), float4(1f, 1f, 3f, 4f)));
+AddTestCase("function float4(1f, 2f, 2f, 4f) == float4(0f, 2f, 3f, 4f)", false, check(float4(1f, 2f, 3f, 4f), float4(1f, 2f, 2f, 4f)));
+AddTestCase("function float4(1f, 2f, 3f, 5f) == float4(0f, 2f, 3f, 4f)", false, check(float4(1f, 2f, 3f, 4f), float4(1f, 2f, 3f, 5f)));
+
 
 test();
 
