@@ -71,6 +71,10 @@ AddStrictTestCase("float4.isGreaterOrEqual((1f, 1f, 1f, 1f), (0f, 0f, 0f, 2f))",
 flt4_a = new float4(1f, 1f, 1f, 1f);
 AddStrictTestCase("float4.isGreaterOrEqual((1f, 1f, 1f, 1f), (1f, 1f, 1f, 1f))", new float4(1f, 1f, 1f, 1f), float4.isGreaterOrEqual(flt4_a, flt4_a));
 
+flt4_a = new float4(-0f);
+flt4_b = new float4(0f);
+AddStrictTestCase("float4.isGreaterOrEqual((-0f), (0f))", new float4(1f), float4.isGreaterOrEqual(flt4_a, flt4_b));
+AddStrictTestCase("float4.isGreaterOrEqual((0f), (-0f))", new float4(1f), float4.isGreaterOrEqual(flt4_b, flt4_a));
 
 test();
 

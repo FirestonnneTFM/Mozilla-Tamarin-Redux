@@ -39,38 +39,42 @@
 include "floatUtil.as";
 
 
-var SECTION = "4.4.15.6";
+var SECTION = "4.4.15.4";
 var VERSION = "AS3";
-var TITLE   = "Comparison methods public function float4.isNotEqual(arg1:float4 , arg2:float4):float4";
+var TITLE   = "Comparison methods public function float4.isLessOrEqual(arg1:float4 , arg2:float4):float4";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 var flt4_a:float4 = new float4(1f, 1f, 1f, 1f);
 var flt4_b:float4 = new float4(2f, 2f, 2f, 2f);
-AddTestCase("float4.isNotEqual() returns a float4", "float4", getQualifiedClassName(float4.isNotEqual(flt4_a, flt4_b)));
+AddTestCase("float4.isLessOrEqual() returns a float4", "float4", getQualifiedClassName(float4.isLessOrEqual(flt4_a, flt4_b)));
 
 flt4_a = new float4(1f, 1f, 1f, 1f);
 flt4_b = new float4(2f, 2f, 2f, 2f);
-AddStrictTestCase("float4.isNotEqual((1f, 1f, 1f, 1f), (2f, 2f, 2f, 2f))", new float4(1f, 1f, 1f, 1f), float4.isNotEqual(flt4_a, flt4_b));
-AddStrictTestCase("float4.isNotEqual((2f, 2f, 2f, 2f), (1f, 1f, 1f, 1f))", new float4(1f, 1f, 1f, 1f), float4.isNotEqual(flt4_b, flt4_a));
+AddStrictTestCase("float4.isLessOrEqual((1f, 1f, 1f, 1f), (2f, 2f, 2f, 2f))", new float4(1f, 1f, 1f, 1f), float4.isLessOrEqual(flt4_a, flt4_b));
+AddStrictTestCase("float4.isLessOrEqual((2f, 2f, 2f, 2f), (1f, 1f, 1f, 1f))", new float4(0f, 0f, 0f, 0f), float4.isLessOrEqual(flt4_b, flt4_a));
 
 flt4_a = new float4(1f, 1f, 1f, 1f);
-flt4_b = new float4(1f, 0f, 0f, 0f);
-AddStrictTestCase("float4.isNotEqual((1f, 1f, 1f, 1f), (1f, 0f, 0f, 0f))", new float4(0f, 1f, 1f, 1f), float4.isNotEqual(flt4_a, flt4_b));
+flt4_b = new float4(2f, 0f, 0f, 0f);
+AddStrictTestCase("float4.isLessOrEqual((1f, 1f, 1f, 1f), (2f, 0f, 0f, 0f))", new float4(1f, 0f, 0f, 0f), float4.isLess(flt4_a, flt4_b));
 flt4_a = new float4(1f, 1f, 1f, 1f);
-flt4_b = new float4(0f, 1f, 0f, 0f);
-AddStrictTestCase("float4.isNotEqual((1f, 1f, 1f, 1f), (0f, 1f, 0f, 0f))", new float4(1f, 0f, 1f, 1f), float4.isNotEqual(flt4_a, flt4_b));
+flt4_b = new float4(0f, 2f, 0f, 0f);
+AddStrictTestCase("float4.isLessOrEqual((1f, 1f, 1f, 1f), (0f, 2f, 0f, 0f))", new float4(0f, 1f, 0f, 0f), float4.isLessOrEqual(flt4_a, flt4_b));
 flt4_a = new float4(1f, 1f, 1f, 1f);
-flt4_b = new float4(0f, 0f, 1f, 0f);
-AddStrictTestCase("float4.isNotEqual((1f, 1f, 1f, 1f), (0f, 0f, 1f, 0f))", new float4(1f, 1f, 0f, 1f), float4.isNotEqual(flt4_a, flt4_b));
+flt4_b = new float4(0f, 0f, 2f, 0f);
+AddStrictTestCase("float4.isLessOrEqual((1f, 1f, 1f, 1f), (0f, 0f, 2f, 0f))", new float4(0f, 0f, 1f, 0f), float4.isLessOrEqual(flt4_a, flt4_b));
 flt4_a = new float4(1f, 1f, 1f, 1f);
-flt4_b = new float4(0f, 0f, 0f, 1f);
-AddStrictTestCase("float4.isNotEqual((1f, 1f, 1f, 1f), (0f, 0f, 0f, 1f))", new float4(1f, 1f, 1f, 0f), float4.isNotEqual(flt4_a, flt4_b));
+flt4_b = new float4(0f, 0f, 0f, 2f);
+AddStrictTestCase("float4.isLessOrEqual((1f, 1f, 1f, 1f), (0f, 0f, 0f, 2f))", new float4(0f, 0f, 0f, 1f), float4.isLessOrEqual(flt4_a, flt4_b));
 
 flt4_a = new float4(1f, 1f, 1f, 1f);
-AddStrictTestCase("float4.isNotEqual((1f, 1f, 1f, 1f), (1f, 1f, 1f, 1f))", new float4(0f, 0f, 0f, 0f), float4.isNotEqual(flt4_a, flt4_a));
+AddStrictTestCase("float4.isLessOrEqual((1f, 1f, 1f, 1f), (1f, 1f, 1f, 1f))", new float4(1f, 1f, 1f, 1f), float4.isLessOrEqual(flt4_a, flt4_a));
 
+flt4_a = new float4(-0f);
+flt4_b = new float4(0f);
+AddStrictTestCase("float4.isLessOrEqual((-0f), (0f))", new float4(1f), float4.isLessOrEqual(flt4_a, flt4_b));
+AddStrictTestCase("float4.isLessOrEqual((0f), (-0f))", new float4(1f), float4.isLessOrEqual(flt4_b, flt4_a));
 
 test();
 

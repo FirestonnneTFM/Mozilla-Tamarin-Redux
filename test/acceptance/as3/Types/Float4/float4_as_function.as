@@ -39,38 +39,46 @@
 include "floatUtil.as";
 
 
-var SECTION = "4.4.15.1";
+var SECTION = "4.2.1";
 var VERSION = "AS3";
-var TITLE   = "Comparison methods public function float4.isGreater(arg1:float4 , arg2:float4):float4";
+var TITLE   = "The float4 method called as a function float4 (x)";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
-var flt4_a:float4 = new float4(1f, 1f, 1f, 1f);
-var flt4_b:float4 = new float4(2f, 2f, 2f, 2f);
-AddTestCase("float4.isGreater() returns a float4", "float4", getQualifiedClassName(float4.isGreater(flt4_a, flt4_b)));
 
-flt4_a = new float4(1f, 1f, 1f, 1f);
-flt4_b = new float4(2f, 2f, 2f, 2f);
-AddStrictTestCase("float4.isGreater((1f, 1f, 1f, 1f), (2f, 2f, 2f, 2f))", new float4(0f, 0f, 0f, 0f), float4.isGreater(flt4_a, flt4_b));
-AddStrictTestCase("float4.isGreater((2f, 2f, 2f, 2f), (1f, 1f, 1f, 1f))", new float4(1f, 1f, 1f, 1f), float4.isGreater(flt4_b, flt4_a));
+var result = float4();
+AddTestCase("Float4 with no args", "float4", getQualifiedClassName(result));
 
-flt4_a = new float4(1f, 1f, 1f, 1f);
-flt4_b = new float4(2f, 0f, 0f, 0f);
-AddStrictTestCase("float4.isGreater((1f, 1f, 1f, 1f), (2f, 0f, 0f, 0f))", new float4(0f, 1f, 1f, 1f), float4.isGreater(flt4_a, flt4_b));
-flt4_a = new float4(1f, 1f, 1f, 1f);
-flt4_b = new float4(0f, 2f, 0f, 0f);
-AddStrictTestCase("float4.isGreater((1f, 1f, 1f, 1f), (0f, 2f, 0f, 0f))", new float4(1f, 0f, 1f, 1f), float4.isGreater(flt4_a, flt4_b));
-flt4_a = new float4(1f, 1f, 1f, 1f);
-flt4_b = new float4(0f, 0f, 2f, 0f);
-AddStrictTestCase("float4.isGreater((1f, 1f, 1f, 1f), (0f, 0f, 2f, 0f))", new float4(1f, 1f, 0f, 1f), float4.isGreater(flt4_a, flt4_b));
-flt4_a = new float4(1f, 1f, 1f, 1f);
-flt4_b = new float4(0f, 0f, 0f, 2f);
-AddStrictTestCase("float4.isGreater((1f, 1f, 1f, 1f), (0f, 0f, 0f, 2f))", new float4(1f, 1f, 1f, 0f), float4.isGreater(flt4_a, flt4_b));
+var undefined_float4 = float4(undefined);
+AddTestCase("Float4 as function, with 'undefined' arg", "float4", getQualifiedClassName(undefined_float4));
 
-flt4_a = new float4(1f, 1f, 1f, 1f);
-AddStrictTestCase("float4.isGreater((1f, 1f, 1f, 1f), (1f, 1f, 1f, 1f))", new float4(0f, 0f, 0f, 0f), float4.isGreater(flt4_a, flt4_a));
+var null_float4 = float4(null);
+AddTestCase("Float4 as function, with 'null' arg", "float4", getQualifiedClassName(null_float4));
 
+var boolean_float4 = float4(true);
+AddTestCase("Float4 as function, with 'boolean' arg", "float4", getQualifiedClassName(boolean_float4));
+
+var dble_float4 = float4(3.14);
+AddTestCase("Float4 as function, with 'double' arg", "float4", getQualifiedClassName(dble_float4));
+
+var int_float4 = float4(3);
+AddTestCase("Float4 as function, with 'int' arg", "float4", getQualifiedClassName(int_float4));
+
+var string_float4 = float4("3.14");
+AddTestCase("Float4 as function, with 'String' arg", "float4", getQualifiedClassName(string_float4));
+
+var myObject:Object = {1:1};
+var object_float4 = float4(myObject);
+AddTestCase("Float4 as function, with 'Object' arg", "float4", getQualifiedClassName(object_float4));
+
+var literal_float4 = float4(3.14f);
+AddTestCase("Float4 as function, with 'FloatLiteral' arg", "float4", getQualifiedClassName(literal_float4));
+
+var flt4 = float4(1f, 1f, 1f, 1f);
+var flt4_flt4 = float4(flt4);
+AddTestCase("Float4 as a function with float4 arg", "float4", getQualifiedClassName(flt4_flt4));
+AddStrictTestCase("Return x if x is a float4, float4(x)", true, flt4 === flt4_flt4);
 
 test();
 
