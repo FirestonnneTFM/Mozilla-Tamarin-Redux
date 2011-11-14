@@ -48,28 +48,23 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 var test_flt4:float4 = new float4(3.14131211f);
 AddTestCase("float4.prototype.valueOf = function", true, float4.prototype.valueOf is Function );
-AddErrorTest("float4.prototype.valueOf(357) throws ArgumentError", ARGUMENTERROR, function(){ test_flt4.valueOf(357);});
 
 var orig_valof = Object.prototype.valueOf;
 Object.prototype.valueOf = float4.prototype.valueOf;
 var test_obj:Object = {};
-AddErrorTest("float4.prototype.valueOf() on Object throws TypeError ", TYPEERROR, function(){ test_obj.valueOf();});
-// we test that it throws TypeError, not RangeError
-AddErrorTest("float4.prototype.valueOf(357) on Object throws TypeError", TYPEERROR, function(){ test_obj.valueOf(357);});
+AddErrorTest("float4.prototype.valueOf() on Object throws TypeError ", TYPEERROR, function(){ test_obj.public::valueOf();});
 Object.prototype.valueOf = orig_valof;
 
-/* https://bugzilla.mozilla.org/show_bug.cgi?id=686862
 var orig_valof = Number.prototype.valueOf;
 Number.prototype.valueOf = float4.prototype.valueOf;
 var test_num:Number = 3.14131211;
-AddErrorTest("float4.prototype.valueOf() on Number throws TypeError", TYPEERROR, function(){ test_num.valueOf();});
+AddErrorTest("float4.prototype.valueOf() on Number throws TypeError", TYPEERROR, function(){ test_num.public::valueOf();});
 // we test that it throws TypeError, not ArgumentError
-AddErrorTest("float4.prototype.valueOf(357) on Number throws TypeError", TYPEERROR, function(){ test_num.toLocaleString(357);});
+AddErrorTest("float4.prototype.valueOf(357) on Number throws TypeError", TYPEERROR, function(){ test_num.public::valueOf(357);});
 Number.prototype.valueOf = orig_valof;
-*/
 
-AddTestCase("float4.prototype.valueOf returns a float4", "float4", typeof(test_flt4.valueOf()));
-AddTestCase("float4.prototype.valueOf - returns this float4", test_flt4, test_flt4.valueOf());
+AddTestCase("float4.prototype.valueOf returns a float4", "float4", typeof(test_flt4.public::valueOf()));
+AddTestCase("float4.prototype.valueOf - returns this float4", test_flt4, test_flt4.public::valueOf());
 
 AddTestCase("float4.prototype.valueOf - DontEnum", "", getFloat4ProtoProp("valueOf"));
 AddTestCase("float4.prototype.valueOf is not enumerable", false, float4.prototype.propertyIsEnumerable("valueOf"));

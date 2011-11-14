@@ -48,20 +48,20 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 var test_flt:float = 3.14131211f;
 AddTestCase("float.prototype.toFixed = function", true, float.prototype.toFixed is Function );
-AddTestCase("float.prototype.toFixed returns a String", "String", getQualifiedClassName(test_flt.toFixed()));
+AddTestCase("float.prototype.toFixed returns a String", "String", getQualifiedClassName(test_flt.public::toFixed()));
 
 var orig_tofixed = String.prototype.toFixed;
 String.prototype.toFixed = float.prototype.toFixed;
 var test_str:String = "3.14131211";
-AddTestCase("float.prototype.toFixed() - does NOT throw TypeError", test_flt.toFixed(), test_str.toFixed());
-AddTestCase("float.prototype.toFixed(7) - does NOT throw TypeError", test_flt.toFixed(7), test_str.toFixed(7));
+AddTestCase("float.prototype.toFixed() - does NOT throw TypeError", test_flt.public::toFixed(), test_str.public::toFixed());
+AddTestCase("float.prototype.toFixed(7) - does NOT throw TypeError", test_flt.public::toFixed(7), test_str.public::toFixed(7));
 // shouldn't throw according to Note
-AddTestCase("float.prototype.toFixed - accepts 'undefined' for fractionDigits", test_flt.toFixed(undefined), test_str.toFixed(undefined));
+AddTestCase("float.prototype.toFixed - accepts 'undefined' for fractionDigits", test_flt.public::toFixed(undefined), test_strpublic::.toFixed(undefined));
 String.prototype.toFixed = orig_tofixed;
 
 
-AddTestCase("float.prototype.toFixed = invokes AS3::toFixed", test_flt.AS3::toFixed(), test_flt.toFixed());
-AddTestCase("float.prototype.toFixed = invokes AS3::toFixed", test_flt.AS3::toFixed(7), test_flt.toFixed(7));
+AddTestCase("float.prototype.toFixed = invokes AS3::toFixed", test_flt.AS3::toFixed(), test_flt.public::toFixed());
+AddTestCase("float.prototype.toFixed = invokes AS3::toFixed", test_flt.AS3::toFixed(7), test_flt.public::toFixed(7));
 
 AddTestCase("float.prototype.toFixed - DontEnum", "", getFloatProtoProp("toFixed"));
 AddTestCase("float.prototype.toFixed is not enumerable", false, float.prototype.propertyIsEnumerable("toFixed"));
@@ -75,7 +75,7 @@ AddTestCase("float.prototype.toFixed - Deletable", true, delete(float.prototype.
 AddTestCase("float.prototype.toFixed should now be undefined", undefined, float.prototype.toFixed);
 float.prototype.toFixed = orig_tofixed;
 
-AddTestCase("float.prototype.toFixed default fractionDigits 0", test_flt.toFixed(0), test_flt.toFixed());
+AddTestCase("float.prototype.toFixed default fractionDigits 0", test_flt.public::toFixed(0), test_flt.public::toFixed());
 
 test();
 

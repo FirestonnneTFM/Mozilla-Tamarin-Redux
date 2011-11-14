@@ -53,9 +53,9 @@ AddTestCase("float.prototype.toString returns a String", "String", getQualifiedC
 var orig_tostr = Object.prototype.toString;
 Object.prototype.toString = float.prototype.toString;
 var test_obj:Object = {};
-AddErrorTest("float.prototype.toString() on Object throws TypeError ", TYPEERROR, function(){ test_obj.toString();});
+AddErrorTest("float.prototype.toString() on Object throws TypeError ", TYPEERROR, function(){ test_obj.public::toString();});
 // we test that it throws TypeError, not RangeError
-AddErrorTest("float.prototype.toString(357) on Object throws TypeError", TYPEERROR, function(){ test_obj.toString(357);});
+AddErrorTest("float.prototype.toString(357) on Object throws TypeError", TYPEERROR, function(){ test_obj.public::toString(357);});
 Object.prototype.toString = orig_tostr;
 
 
@@ -70,8 +70,8 @@ AddErrorTest("float.prototype.toString() on Number throws TypeError", TYPEERROR,
 Number.prototype.toString = orig_tostr;
 
 
-AddTestCase("float.prototype.toString = invokes AS3::toString", test_flt.AS3::toString(), test_flt.toString());
-AddTestCase("float.prototype.toString(5) = invokes AS3::toString(5)", test_flt.AS3::toString(5), test_flt.toString(5));
+AddTestCase("float.prototype.toString = invokes AS3::toString", test_flt.AS3::toString(), test_flt.public::toString());
+AddTestCase("float.prototype.toString(5) = invokes AS3::toString(5)", test_flt.AS3::toString(5), test_flt.public::toString(5));
 
 AddTestCase("float.prototype.toString - DontEnum", "", getFloatProtoProp("toString"));
 AddTestCase("float.prototype.toString is not enumerable", false, float.prototype.propertyIsEnumerable("toString"));
@@ -86,7 +86,7 @@ AddTestCase("float.prototype.toString - Deletable", true, delete(float.prototype
 AddTestCase("float.prototype.toString should now be Object.prototype.toString", Object.prototype.toString, float.prototype.toString);
 float.prototype.toString = orig_tostr;
 
-AddTestCase("float.prototype.toString: implicit radix is 10", test_flt.toString(10), test_flt.toString());
+AddTestCase("float.prototype.toString: implicit radix is 10", test_flt.public::toString(10), test_flt.public::toString());
 
 
 test();

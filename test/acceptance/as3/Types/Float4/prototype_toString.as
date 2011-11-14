@@ -53,9 +53,9 @@ AddTestCase("float4.prototype.toString returns a String", "String", getQualified
 var orig_tostr = Object.prototype.toString;
 Object.prototype.toString = float4.prototype.toString;
 var test_obj:Object = {};
-AddErrorTest("float4.prototype.toString() on Object throws TypeError ", TYPEERROR, function(){ test_obj.toString();});
+AddErrorTest("float4.prototype.toString() on Object throws TypeError ", TYPEERROR, function(){ test_obj.public::toString();});
 // we test that it throws TypeError, not RangeError
-AddErrorTest("float4.prototype.toString(357) on Object throws TypeError", TYPEERROR, function(){ test_obj.toString(357);});
+AddErrorTest("float4.prototype.toString(357) on Object throws TypeError", TYPEERROR, function(){ test_obj.public::toString(357);});
 Object.prototype.toString = orig_tostr;
 
 var orig_tostr = Number.prototype.toString;
@@ -68,8 +68,8 @@ AddErrorTest("float4.prototype.toString(357) on Number throws TypeError", TYPEER
 AddErrorTest("float4.prototype.toString() on Number throws TypeError", TYPEERROR, function(){ Number.prototype.toString.AS3::call(test_num);});
 Number.prototype.toString = orig_tostr;
 
-AddTestCase("float4.prototype.toString = invokes AS3::toString", test_flt4.AS3::toString(), test_flt4.toString());
-AddTestCase("float4.prototype.toString(5) = invokes AS3::toString(5)", test_flt4.AS3::toString(5), test_flt4.toString(5));
+AddTestCase("float4.prototype.toString = invokes AS3::toString", test_flt4.AS3::toString(), test_flt4.public::toString());
+AddTestCase("float4.prototype.toString(5) = invokes AS3::toString(5)", test_flt4.AS3::toString(5), test_flt4.public::toString(5));
 
 AddTestCase("float4.prototype.toString - DontEnum", "", getFloat4ProtoProp("toString"));
 AddTestCase("float4.prototype.toString is not enumerable", false, float4.prototype.propertyIsEnumerable("toString"));
@@ -84,7 +84,7 @@ AddTestCase("float4.prototype.toString - Deletable", true, delete(float4.prototy
 AddTestCase("float4.prototype.toString should now be Object.prototype.toString", Object.prototype.toString, float4.prototype.toString);
 float4.prototype.toString = orig_tostr;
 
-AddTestCase("float4.prototype.toString: implicit radix is 10", test_flt4.toString(10), test_flt4.toString());
+AddTestCase("float4.prototype.toString: implicit radix is 10", test_flt4.public::toString(10), test_flt4.public::toString());
 
 
 test();
