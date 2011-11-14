@@ -100,7 +100,10 @@ AddStrictTestCase("Number(float.MIN_VALUE) as float", null, (new Number(float.MI
 
 AddStrictTestCase("float(Number.MAX_VALUE) as float is float(Infinity)", float(Infinity), (new float(Number.MAX_VALUE)) as float);
 
-AddStrictTestCase("2.01 as float (null)", null, 2.01 as float);
+AddStrictTestCase("2.01 as float", null, 2.01 as float);
+AddStrictTestCase("2.01 as float check()", null, check(2.01, float));
+AddStrictTestCase("3 as float", null, 3 as float);
+AddStrictTestCase("3 as float check()", null, check(3, float));
 
 AddStrictTestCase("int.length (1) as  float ", null, int.length as float);
 
