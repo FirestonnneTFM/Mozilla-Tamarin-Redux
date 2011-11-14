@@ -5157,7 +5157,17 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_FLOAT
         else if (objType == VECTORFLOAT_TYPE) {
             if (result == FLOAT_TYPE) {
-                // FIXME: optimize Vector.<float> access
+                if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    typedef ListData<float, 0> STORAGE;
+                    return emitInlineVectorRead(objIndexOnStack, 
+                                                index,
+                                                offsetof(FloatVectorObject, m_list.m_data),
+                                                offsetof(DataListHelper<float>::LISTDATA, len),
+                                                offsetof(STORAGE, entries),
+                                                2,
+                                                LIR_ldf,
+                                                getFloatVectorNativeHelpers[idxKind]);
+                }
                 getter = getFloatVectorNativeHelpers[idxKind];
                 valIsAtom = false;
             }
@@ -5363,7 +5373,19 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_FLOAT
         else if (objType == VECTORFLOAT_TYPE) {
             if (valueType == FLOAT_TYPE) {
-                // FIXME: optimize Vector.<float> access
+                if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    typedef ListData<float, 0> STORAGE;
+                    emitInlineVectorWrite(objIndexOnStack, 
+                                          index,
+                                          localGetd(valIndexOnStack),
+                                          offsetof(FloatVectorObject, m_list.m_data),
+                                          offsetof(DataListHelper<float>::LISTDATA, len),
+                                          offsetof(STORAGE, entries),
+                                          2,
+                                          LIR_stf,
+                                          setFloatVectorNativeHelpers[idxKind]);
+                    return;
+                }
                 value = localGetf(valIndexOnStack);
                 setter = setFloatVectorNativeHelpers[idxKind];
             }
