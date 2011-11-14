@@ -46,6 +46,8 @@ var TITLE   = "The is operator augmented by float values";
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
+function check(var1:*, var2:*):* { return var1 is var2; }
+
 var pi_float:Object = new float(3.14);
 AddErrorTest("TypeError if datatype is not Class", TYPEERROR, function(){ return pi_float is "float"; });
 
@@ -111,7 +113,10 @@ AddTestCase("Number(float.MAX_VALUE) is NOT float", false, (new Number(float.MAX
 AddTestCase("Number(float.MIN_VALUE) is NOT float", false, (new Number(float.MIN_VALUE)) is float);
 AddTestCase("Number(Infinity) is NOT float", false, (new Number(Infinity)) is float);
 
-AddTestCase("2.01 is NOT float (not identical on conversion)", false, 2.01 is float);
+AddStrictTestCase("2.01 is float", false, 2.01 is float);
+AddStrictTestCase("2.01 is float check()", false, check(2.01, float));
+AddStrictTestCase("3 is float", false, 3 is float);
+AddStrictTestCase("3 is float check()", false, check(3, float));
 
 AddTestCase("int.length (1) is NOT float", false, int.length is float);
 
