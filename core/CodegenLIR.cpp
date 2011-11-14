@@ -5074,11 +5074,19 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
         // index is "int" or "uint".
         //
+        // The basic code is this:
+        //
         // arrayData = *(array+arrayDataOffset)                  ; array->data
         // arrayLen  = *(arrayData + lenOffset)                  ; array->data->len
         // if ((unsigned)index >= (unsigned)arrayLen)
         //   call(helper, array, index)
         // value = *(arrayData + (index<<scale) + entriesOffset) ; value = array->data->entries[index]
+        //
+        // In the case of float4 the (arrayData + entriesOffset) has to be rounded up to a 16-byte
+        // boundary at run-time to conform to alignment restrictions.
+        // It would be better to have a different vector representation and a guarantee about
+        // alignment from the storage manager, so that we could avoid the adjustment, but that's
+        // a future improvement.
         //
         // The "(unsigned)index" compare trick works because vectors are shorter than 2^31 elements,
         // that fact is verified statically in the vector code, see eg checkReadIndex_i.
@@ -5094,10 +5102,30 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         callIns(helper, 2, localGetp(objIndexOnStack), index);
         emitLabel(begin_label);
         resumeCSE();
-        LIns* valOffset = binaryIns(LIR_addp, arrayData, ui2p(binaryIns(LIR_lshi, index, InsConst(scale))));
-        LIns* value = loadIns(load_item, int32_t(entriesOffset), valOffset, ACCSET_OTHER, LOAD_NORMAL);
-
-        return value;
+        switch (load_item)
+        {
+            case LIR_ldf4:
+            {
+                LIns* base = binaryIns(LIR_addp, arrayData, InsConstPtr((const void*)(uintptr_t(entriesOffset) + 15))); // arrayData + entries + 15
+                LIns* baseRounded = binaryIns(LIR_andp, base, InsConstPtr((const void*)~uintptr_t(15)));                // & ~15
+                LIns* element = ui2p(binaryIns(LIR_lshi, index, InsConst(scale)));
+                LIns* effectiveAddress = binaryIns(LIR_addp, baseRounded, element);
+                return loadIns(load_item, 0, effectiveAddress, ACCSET_OTHER, LOAD_NORMAL);
+            }
+#ifdef VMCFG_64BIT
+            case LIR_ldp:
+#endif
+            case LIR_ldd:
+            case LIR_ldi:
+            case LIR_ldf:
+            {
+                LIns* valOffset = binaryIns(LIR_addp, arrayData, ui2p(binaryIns(LIR_lshi, index, InsConst(scale))));
+                return loadIns(load_item, int32_t(entriesOffset), valOffset, ACCSET_OTHER, LOAD_NORMAL);
+            }
+            default:
+                AvmAssert(!"Bad inline vector access");
+                return NULL;
+        }
     }
 
     // Generate code for get obj[index] where index is a signed or unsigned integer type, or double type.
@@ -5207,7 +5235,18 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         }
         else if (objType == VECTORFLOAT4_TYPE) {
             if (result == FLOAT4_TYPE) {
-                // FIXME: inline access
+                if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    typedef ListData<float4_t, 16> STORAGE;
+                    typedef DataListHelper<float4_t, 16>::LISTDATA LISTDATA;
+                    return emitInlineVectorRead(objIndexOnStack, 
+                                                index,
+                                                offsetof(Float4VectorObject, m_list.m_data),
+                                                offsetof(LISTDATA, len),
+                                                offsetof(STORAGE, entries),
+                                                4,
+                                                LIR_ldf4,
+                                                getFloat4VectorNativeHelpers[idxKind]);
+                }
                 getter = getFloat4VectorNativeHelpers[idxKind];
                 valIsAtom = false;
             }
@@ -5287,12 +5326,20 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         
         // index is "int" or "uint".
         //
+        // The basic  code is this:
+        //
         // arrayData = *(array+arrayDataOffset)                    ; array->data
         // arrayLen  = *(arrayData + lenOffset)                    ; array->data->len
         // if ((unsigned)index >= (unsigned)arrayLen)
         //   call(helper, array, index, value)
         // else
         //   *(arrayData + (index<<scale) + entriesOffset) = value ; array->data->entries[index] = value
+        //
+        // In the case of float4 the (arrayData + entriesOffset) has to be rounded up to a 16-byte
+        // boundary at run-time to conform to alignment restrictions.
+        // It would be better to have a different vector representation and a guarantee about
+        // alignment from the storage manager, so that we could avoid the adjustment, but that's
+        // a future improvement.
         //
         // The "(unsigned)index" compare trick works because vectors are shorter than 2^31 elements,
         // that fact is verified statically in the vector code, see eg checkReadIndex_i.
@@ -5308,8 +5355,31 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         callIns(helper, 3, localGetp(objIndexOnStack), index, value);
         branchToLabel(LIR_j, NULL, end_label);
         emitLabel(begin_label);
-        LIns *valOffset = binaryIns(LIR_addp, arrayData, ui2p(binaryIns(LIR_lshi, index, InsConst(scale))));
-        storeIns(store_item, value, int32_t(entriesOffset), valOffset, ACCSET_OTHER);
+        switch (store_item)
+        {
+            case LIR_stf4:
+            {
+                LIns* base = binaryIns(LIR_addp, arrayData, InsConstPtr((const void*)(uintptr_t(entriesOffset) + 15))); // arrayData + entries + 15
+                LIns* baseRounded = binaryIns(LIR_andp, base, InsConstPtr((const void*)~uintptr_t(15)));                // & ~15
+                LIns* element = ui2p(binaryIns(LIR_lshi, index, InsConst(scale)));
+                LIns* effectiveAddress = binaryIns(LIR_addp, baseRounded, element);
+                storeIns(store_item, value, 0, effectiveAddress, ACCSET_OTHER);
+                break;
+            }
+#ifdef VMCFG_64BIT
+            case LIR_stp:
+#endif
+            case LIR_std:
+            case LIR_sti:
+            case LIR_stf:
+            {
+                LIns *valOffset = binaryIns(LIR_addp, arrayData, ui2p(binaryIns(LIR_lshi, index, InsConst(scale))));
+                storeIns(store_item, value, int32_t(entriesOffset), valOffset, ACCSET_OTHER);
+                break;
+            }
+            default:
+                AvmAssert(!"Bad inline vector access");
+        }
         emitLabel(end_label);
         resumeCSE();
     }
@@ -5419,7 +5489,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     typedef ListData<float, 0> STORAGE;
                     emitInlineVectorWrite(objIndexOnStack, 
                                           index,
-                                          localGetd(valIndexOnStack),
+                                          localGetf(valIndexOnStack),
                                           offsetof(FloatVectorObject, m_list.m_data),
                                           offsetof(DataListHelper<float>::LISTDATA, len),
                                           offsetof(STORAGE, entries),
@@ -5438,7 +5508,19 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         }
         else if (objType == VECTORFLOAT4_TYPE) {
             if (valueType == FLOAT4_TYPE) {
-                // FIXME: inline optimization
+                if (idxKind == VI_INT || idxKind == VI_UINT) {
+                    typedef ListData<float4_t, 16> STORAGE;
+                    typedef DataListHelper<float4_t, 16>::LISTDATA LISTDATA;
+                    emitInlineVectorWrite(objIndexOnStack, 
+                                          index,
+                                          localGetf4(valIndexOnStack),
+                                          offsetof(Float4VectorObject, m_list.m_data),
+                                          offsetof(LISTDATA, len),
+                                          offsetof(STORAGE, entries),
+                                          4,
+                                          LIR_stf4,
+                                          setFloat4VectorNativeHelpers[idxKind]);
+                }
                 value = localGetf4(valIndexOnStack);
                 setter = setFloat4VectorNativeHelpers[idxKind];
             }
