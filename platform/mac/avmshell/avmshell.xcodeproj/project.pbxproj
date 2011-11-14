@@ -2333,6 +2333,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
 			};
 			name = Debug_Debugger;
@@ -2362,6 +2363,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
 			};
 			name = Release_Debugger;
@@ -2376,6 +2378,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
 			};
 			name = Debug;
@@ -2388,6 +2391,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
 			};
 			name = Release;
@@ -2433,6 +2437,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
 			};
 			name = Debug;
@@ -2450,6 +2455,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
 			};
 			name = Debug_Debugger;
@@ -2465,6 +2471,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
 				ZERO_LINK = NO;
 			};
@@ -2481,6 +2488,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
 				ZERO_LINK = NO;
 			};
