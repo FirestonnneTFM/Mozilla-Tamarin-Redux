@@ -1475,14 +1475,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         virtual LIns* insImmD(double d) {
             return lastIns = out->insImmD(d);
         }
-#ifdef VMCFG_FLOAT
         virtual LIns* insImmF(float f) {
             return lastIns = out->insImmF(f);
         }
         virtual LIns* insImmF4(float4_t f) {
             return lastIns = out->insImmF4(f);
         }
-#endif // VMCFG_FLOAT
         virtual LIns* insLoad(LOpcode op, LIns* base, int32_t d, AccSet accSet, LoadQual loadQual) {
             return lastIns = out->insLoad(op, base, d, accSet, loadQual);
         }
@@ -1500,7 +1498,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         virtual LIns* insJtbl(LIns* index, uint32_t size) {
             return lastIns = out->insJtbl(index, size);
         }
-
+        virtual LIns* insSwz(LIns* a, uint8_t mask) {
+            return lastIns = out->insSwz(a, mask);
+        }
     };
 
     #if defined(VMCFG_OSR) && defined(DEBUG)

@@ -641,6 +641,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         // LRK_XYZ corresponds to class LInsXYZ.
         LRK_Op0,
         LRK_Op1,
+        LRK_Op1b,
         LRK_Op2,
         LRK_Op3,
         LRK_Ld,
@@ -657,6 +658,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
 
     class LInsOp0;
     class LInsOp1;
+    class LInsOp1b;
     class LInsOp2;
     class LInsOp3;
     class LInsLd;
@@ -716,15 +718,16 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         }
 
         // LIns-to-LInsXYZ converters.
-        inline LInsOp0* toLInsOp0() const;
-        inline LInsOp1* toLInsOp1() const;
-        inline LInsOp2* toLInsOp2() const;
-        inline LInsOp3* toLInsOp3() const;
-        inline LInsLd*  toLInsLd()  const;
-        inline LInsSt*  toLInsSt()  const;
-        inline LInsSk*  toLInsSk()  const;
-        inline LInsC*   toLInsC()   const;
-        inline LInsP*   toLInsP()   const;
+        inline LInsOp0*  toLInsOp0()  const;
+        inline LInsOp1*  toLInsOp1()  const;
+        inline LInsOp1b* toLInsOp1b() const;
+        inline LInsOp2*  toLInsOp2()  const;
+        inline LInsOp3*  toLInsOp3()  const;
+        inline LInsLd*   toLInsLd()   const;
+        inline LInsSt*   toLInsSt()   const;
+        inline LInsSk*   toLInsSk()   const;
+        inline LInsC*    toLInsC()    const;
+        inline LInsP*    toLInsP()    const;
         inline LInsIorF* toLInsIorF() const;
         inline LInsQorD* toLInsQorD() const;
         inline LInsJtbl* toLInsJtbl() const;
@@ -736,6 +739,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         // LIns initializers.
         inline void initLInsOp0(LOpcode opcode);
         inline void initLInsOp1(LOpcode opcode, LIns* oprnd1);
+        inline void initLInsOp1b(LOpcode opcode, LIns* oprnd1, uint8_t mask);
         inline void initLInsOp2(LOpcode opcode, LIns* oprnd1, LIns* oprnd2);
         inline void initLInsOp3(LOpcode opcode, LIns* oprnd1, LIns* oprnd2, LIns* oprnd3);
         inline void initLInsLd(LOpcode opcode, LIns* val, int32_t d, AccSet accSet, LoadQual loadQual);
@@ -903,6 +907,9 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         inline LIns* getTarget(uint32_t index) const;
         inline void setTarget(uint32_t index, LIns* label) const;
 
+        // For LInsOp1b.
+        inline uint8_t mask() const;
+
         // isLInsXYZ() returns true if the instruction has the LInsXYZ form.
         // Note that there is some overlap with other predicates, eg.
         // isStore()==isLInsSt(), isCall()==isLInsC(), but that's ok;  these
@@ -916,6 +923,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         bool isLInsOp1() const {
             NanoAssert(LRK_None != repKinds[opcode()]);
             return LRK_Op1 == repKinds[opcode()];
+        }
+        bool isLInsOp1b() const {
+            NanoAssert(LRK_None != repKinds[opcode()]);
+            return LRK_Op1b == repKinds[opcode()];
         }
         bool isLInsOp2() const {
             NanoAssert(LRK_None != repKinds[opcode()]);
@@ -1152,6 +1163,22 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* getLIns() { return &ins; };
     };
 
+    // 1-operand form, plus an immediate byte.  Used for LIR_swzf4, which
+    // is a unary operator with an immediate byte specifying a shuffle operation.
+    class LInsOp1b
+    {
+    private:
+        friend class LIns;
+
+        uint8_t     mask;
+        LIns*       oprnd_1;
+
+        LIns        ins;
+
+    public:
+        LIns* getLIns() { return &ins; };
+    };
+
     // 2-operand form.  Used for guards, branches, comparisons, binary
     // arithmetic/logic ops, etc.
     class LInsOp2
@@ -1354,6 +1381,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
 
     LInsOp0*  LIns::toLInsOp0()  const { return (LInsOp0* )(uintptr_t(this+1) - sizeof(LInsOp0 )); }
     LInsOp1*  LIns::toLInsOp1()  const { return (LInsOp1* )(uintptr_t(this+1) - sizeof(LInsOp1 )); }
+    LInsOp1b* LIns::toLInsOp1b() const { return (LInsOp1b*)(uintptr_t(this+1) - sizeof(LInsOp1b)); }
     LInsOp2*  LIns::toLInsOp2()  const { return (LInsOp2* )(uintptr_t(this+1) - sizeof(LInsOp2 )); }
     LInsOp3*  LIns::toLInsOp3()  const { return (LInsOp3* )(uintptr_t(this+1) - sizeof(LInsOp3 )); }
     LInsLd*   LIns::toLInsLd()   const { return (LInsLd*  )(uintptr_t(this+1) - sizeof(LInsLd  )); }
@@ -1374,6 +1402,12 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         initSharedFields(opcode);
         toLInsOp1()->oprnd_1 = oprnd1;
         NanoAssert(isLInsOp1());
+    }
+    void LIns::initLInsOp1b(LOpcode opcode, LIns* oprnd1, uint8_t mask) {
+        initSharedFields(opcode);
+        toLInsOp1b()->mask = mask;
+        toLInsOp1b()->oprnd_1 = oprnd1;
+        NanoAssert(isLInsOp1b());
     }
     void LIns::initLInsOp2(LOpcode opcode, LIns* oprnd1, LIns* oprnd2) {
         initSharedFields(opcode);
@@ -1454,7 +1488,8 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
     }
 
     LIns* LIns::oprnd1() const {
-        NanoAssert(isLInsOp1() || isLInsOp2() || isLInsOp3() || isLInsLd() || isLInsSt() || isLInsJtbl());
+        NanoAssert(isLInsOp1() || isLInsOp1b() || isLInsOp2() || isLInsOp3() ||
+                   isLInsLd() || isLInsSt() || isLInsJtbl());
         return toLInsOp2()->oprnd_1;
     }
     LIns* LIns::oprnd2() const {
@@ -1636,6 +1671,11 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         return toLInsJtbl()->size;
     }
 
+    uint8_t LIns::mask() const {
+        NanoAssert(isLInsOp1b());
+        return toLInsOp1b()->mask;
+    }
+
     class LirWriter
     {
     public:
@@ -1713,6 +1753,9 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         }
         virtual LIns* insSkip(LIns* skipTo) {
             return out->insSkip(skipTo);
+        }
+        virtual LIns* insSwz(LIns* a, uint8_t mask) {
+            return out->insSwz(a, mask);
         }
 
         // convenience functions
@@ -2032,16 +2075,17 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* insImmF(float f) {
             return add(out->insImmF(f));
         }
-
         LIns* insImmF4(float4_t f4) {
             return add(out->insImmF4(f4));
         }
         LIns* insImmD(double d) {
             return add(out->insImmD(d));
         }
-
         LIns* insComment(const char* str) {
             return add_flush(out->insComment(str));
+        }
+        LIns* insSwz(LIns* a, uint8_t mask) {
+            return add(out->insSwz(a, mask));
         }
     };
 #endif /* NJ_VERBOSE */
@@ -2058,6 +2102,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* insBranch(LOpcode, LIns* cond, LIns* target);
         LIns* insBranchJov(LOpcode, LIns* a, LIns* b, LIns* target);
         LIns* insLoad(LOpcode op, LIns* base, int32_t off, AccSet accSet, LoadQual loadQual);
+        LIns* insSwz(LIns* a, uint8_t mask);
     private:
         LIns* simplifyOverflowArith(LOpcode op, LIns** opnd1, LIns** opnd2);
     };
@@ -2243,6 +2288,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* insCall(const CallInfo *call, LIns* args[]);
         LIns* insGuard(LOpcode op, LIns* cond, GuardRecord *gr);
         LIns* insGuardXov(LOpcode op, LIns* a, LIns* b, GuardRecord *gr);
+        LIns* insSwz(LIns* a, uint8_t mask);
 
         // These functions provide control over CSE in the face of control
         // flow.  A suspend()/resume() pair may be put around a synthetic
@@ -2326,6 +2372,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
             LIns*   insJtbl(LIns* index, uint32_t size);
             LIns*   insComment(const char* str);
             LIns*   insSkip(LIns* skipTo);
+            LIns*   insSwz(LIns* a, uint8_t mask);
     };
 
     class LirFilter
@@ -2588,6 +2635,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* insBranchJov(LOpcode v, LIns* a, LIns* b, LIns* to);
         LIns* insAlloc(int32_t size);
         LIns* insJtbl(LIns* index, uint32_t size);
+        LIns* insSwz(LIns* a, uint8_t mask);
     };
 
     // This just checks things that aren't possible to check in
