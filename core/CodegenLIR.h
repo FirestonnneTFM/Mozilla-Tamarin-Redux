@@ -514,6 +514,7 @@ namespace avmplus
         LIns* coerceToFloat(int i);
         LIns* coerceToFloat4(int i);
         LIns* coerceToNumeric(int i);
+        bool matchShuffler(MethodInfo* m, uint8_t* shuffle_mask);
 #endif // VMCFG_FLOAT
         LIns* loadFromSlot(int ptr_index, int slot, Traits* slotType);
         LIns* coerceToType(int i, Traits*);
@@ -560,10 +561,6 @@ namespace avmplus
         void emitStringLength(Traits* result);
 
         LIns *optimizeIndexArgumentType(int32_t sp, Traits** indexType);
-
-#ifdef VMCFG_FLOAT
-        bool matchShuffler(MethodInfo* m, uint8_t* shuffle_mask);
-#endif
 
     public:
         ~CodegenLIR();

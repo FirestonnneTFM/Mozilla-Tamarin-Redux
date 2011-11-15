@@ -3884,34 +3884,6 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         }
     }
 
-#ifdef VMCFG_FLOAT
-    bool CodegenLIR::matchShuffler(MethodInfo* m, uint8_t* mask)
-    {
-        AvmAssert(m->pool() == core->builtinPool);
-
-        uint32_t id = m->method_id();
-        if (id < NativeID::float4_xxxx_get || id > NativeID::float4_wwww_get)
-            return false;
-        id -= NativeID::float4_xxxx_get;
-        int x = (id >> 6) & 3;
-        int y = (id >> 4) & 3;
-        int z = (id >> 2) & 3;
-        int w = (id >> 0) & 3;
-        *mask = uint8_t(w << 6 | z << 4 | y << 2 | x << 0);
-#ifndef VMCFG_IA32
-        return false; // FIXME: these architectures need back-end support for the swizzle instruction
-#else
-        
-        return true;
-#endif
-
-        // We are counting on xxxx, xxxy, ... wwww being in order.
-        NanoStaticAssert(NativeID::float4_xxxy_get - NativeID::float4_xxxx_get == 1);
-        // todo: put the rest of them here.
-        NanoStaticAssert(NativeID::float4_wwww_get - NativeID::float4_xxxx_get == 255);
-    }
-#endif
-
     void CodegenLIR::emitIntConst(int index, int32_t c, Traits* type)
     {
         localSet(index, lirout->insImmI(c), type);
@@ -3932,10 +3904,41 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     {
         localSet(index, lirout->insImmF(f), FLOAT_TYPE);
     }
-    
+
     void CodegenLIR::emitFloat4Const(int index, const float4_t* f4)
     {
         localSet(index, lirout->insImmF4(AvmThunkUnbox_float4_impl((const Atom* )f4)), FLOAT4_TYPE);
+    }
+
+    /**
+     * If m is a float4 shuffle getter, e.g. xyxy(), then return true and
+     * the shuffle mask to use with the LIR_swzf4 instruction.
+     */
+    bool CodegenLIR::matchShuffler(MethodInfo* m, uint8_t* mask)
+    {
+        using namespace avmplus::NativeID;
+        AvmAssert(m->pool() == core->builtinPool);
+
+        uint32_t id = m->method_id();
+        if (id < float4_xxxx_get || id > float4_wwww_get)
+            return false;
+        id -= float4_xxxx_get;
+        int x = (id >> 6) & 3;
+        int y = (id >> 4) & 3;
+        int z = (id >> 2) & 3;
+        int w = (id >> 0) & 3;
+        *mask = uint8_t(w << 6 | z << 4 | y << 2 | x << 0);
+#if defined VMCFG_IA32 || defined VMCFG_AMD64
+        return true;
+#else
+        // FIXME: implement LIR_swz64 on other cpus
+        return false;
+#endif
+
+        // We are counting on xxxx, xxxy, ... wwww being in order.
+        NanoStaticAssert(float4_xxxy_get - float4_xxxx_get == 1);
+        // todo: put the rest of them here.
+        NanoStaticAssert(float4_wwww_get - float4_xxxx_get == 255);
     }
 #endif // VMCFG_FLOAT
     
