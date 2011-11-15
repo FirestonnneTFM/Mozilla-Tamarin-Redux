@@ -1,0 +1,3 @@
+p = immf 123.456
+n = negf p
+retf n

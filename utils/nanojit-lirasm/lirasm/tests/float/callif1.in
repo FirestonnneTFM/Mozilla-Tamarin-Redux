@@ -1,0 +1,10 @@
+i = immi -1;
+j = immi 3;
+k = immi 6;
+x = immf 1.1;
+y = immf 3.3;
+z = immf 4.4;
+
+res = callf callif1 cdecl i x y j k z
+retf res
+
