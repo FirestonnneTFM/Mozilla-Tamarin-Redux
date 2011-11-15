@@ -359,6 +359,7 @@ as3/Types/Float4/component_access:float4\[i\] 4, .*, -Dinterp , expectedfail, ht
 as3/Types/Float4/component_access:^float4\.(xxxx|yyyy|zzzz|wwww|xyzw|wzyx), arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 as3/Types/Float4/component_access:^float4\['(xxxx|yyyy|zzzz|wwww|xyzw|wzyx)'\], arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 as3/Types/Float4/component_access_swizzle, arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
+as3/Types/Float4/float4Operations:Flt4(Any|Flt4)Ops Xyzzy, arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 as3/Types/Float4/float4Operations, arm-.*debug.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=702598
 as3/Types/Float4/float4Operations:Flt4(Any|Flt4)Ops DIV, arm-.*Dinterp , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=702632
 
