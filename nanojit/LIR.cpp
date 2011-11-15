@@ -89,58 +89,38 @@ namespace nanojit
 
     #endif /* NANOJIT_VERBOSE */
 
-    uint32_t CallInfo::count_args() const
-    {
-        uint32_t argc = 0;
-        uint32_t argt = _typesig;
-        argt >>= TYPESIG_FIELDSZB;      // remove retType
-        while (argt) {
-            argc++;
-            argt >>= TYPESIG_FIELDSZB;
-        }
-        return argc;
-    }
-
-    uint32_t CallInfo::count_int32_args() const
-    {
+    template <class FILTER> uint32_t CallInfo::countArgs() const {
         uint32_t argc = 0;
         uint32_t argt = _typesig;
         argt >>= TYPESIG_FIELDSZB;      // remove retType
         while (argt) {
             ArgType a = ArgType(argt & TYPESIG_FIELDMASK);
-            if (a == ARGTYPE_I || a == ARGTYPE_UI)
+            if (FILTER::doCount(a))
                 argc++;
             argt >>= TYPESIG_FIELDSZB;
         }
         return argc;
     }
 
-    uint32_t CallInfo::count_32bitfloat_args() const
-    {
-        uint32_t argc = 0;
-        uint32_t argt = _typesig;
-        argt >>= TYPESIG_FIELDSZB;      // remove retType
-        while (argt) {
-            ArgType a = ArgType(argt & TYPESIG_FIELDMASK);
-            if (a == ARGTYPE_F)
-                argc++;
-            argt >>= TYPESIG_FIELDSZB;
-        }
-        return argc;
+    struct AllArgs    { static bool doCount(ArgType)   { return true; } };
+    struct IntArgs    { static bool doCount(ArgType a) { return a == ARGTYPE_I || a == ARGTYPE_UI; } };
+    struct FloatArgs  { static bool doCount(ArgType a) { return a == ARGTYPE_F; } };
+    struct Float4Args { static bool doCount(ArgType a) { return a == ARGTYPE_F4; } };
+
+    uint32_t CallInfo::count_args() const {
+        return countArgs<AllArgs>();
+    }
+
+    uint32_t CallInfo::count_int_args() const {
+        return countArgs<IntArgs>();
+    }
+
+    uint32_t CallInfo::count_float_args() const {
+        return countArgs<FloatArgs>();
     }
     
-    uint32_t CallInfo::count_128bitfloat_args() const
-    {
-        uint32_t argc = 0;
-        uint32_t argt = _typesig;
-        argt >>= TYPESIG_FIELDSZB;      // remove retType
-        while (argt) {
-            ArgType a = ArgType(argt & TYPESIG_FIELDMASK);
-            if (a == ARGTYPE_F4)
-                argc++;
-            argt >>= TYPESIG_FIELDSZB;
-        }
-        return argc;
+    uint32_t CallInfo::count_float4_args() const {
+        return countArgs<Float4Args>();
     }
 
     uint32_t CallInfo::getArgTypes(ArgType* argTypes) const
