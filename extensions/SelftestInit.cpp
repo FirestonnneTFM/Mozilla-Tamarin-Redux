@@ -105,6 +105,9 @@ extern void create_mmgc_threads(AvmCore* core);
 namespace ST_mmgc_weakref {
 extern void create_mmgc_weakref(AvmCore* core);
 }
+namespace ST_nanojit_codealloc {
+extern void create_nanojit_codealloc(AvmCore* core);
+}
 namespace ST_vmbase_concurrency {
 extern void create_vmbase_concurrency(AvmCore* core);
 }
@@ -146,6 +149,7 @@ ST_mmgc_mmfx_array::create_mmgc_mmfx_array(core);
 ST_mmgc_threads::create_mmgc_threads(core);
 #endif
 ST_mmgc_weakref::create_mmgc_weakref(core);
+ST_nanojit_codealloc::create_nanojit_codealloc(core);
 ST_vmbase_concurrency::create_vmbase_concurrency(core);
 #if defined VMCFG_SAFEPOINTS
 ST_vmbase_safepoints::create_vmbase_safepoints(core);
