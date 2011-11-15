@@ -392,6 +392,7 @@ namespace avmplus
             return out + 8;
         }
         
+#ifdef VMCFG_FLOAT
         uint8_t* emitFloat(uint8_t* out, float f)
         {
             float_overlay v(f);
@@ -430,7 +431,8 @@ namespace avmplus
             
             return out + 16;
         }
-        
+#endif
+
         uint8_t* emitS24(uint8_t* out, int32_t s)
         {
             *out++ = (s & 255);

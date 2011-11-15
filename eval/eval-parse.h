@@ -623,6 +623,7 @@ public:
     const double value;
 };
 
+#ifdef VMCFG_FLOAT
 class LiteralFloat : public Expr {
 public:
     LiteralFloat(float value, uint32_t pos) : Expr(pos), value(value) {}
@@ -630,6 +631,7 @@ public:
     virtual Tag tag() const { return TAG_literalFloat; }
     const float value;
 };
+#endif
 
 class LiteralBoolean : public Expr {
 public:

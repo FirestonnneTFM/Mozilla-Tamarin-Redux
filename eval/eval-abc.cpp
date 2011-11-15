@@ -150,6 +150,7 @@ namespace avmplus
             return doubleCount++;
         }
 
+#ifdef VMCFG_FLOAT
         uint32_t ABCFile::addFloat(float f)
         {
             floatBuf.emitFloat(f);
@@ -161,6 +162,7 @@ namespace avmplus
             float4Buf.emitFloat4(f4);
             return float4Count++;
         }
+#endif
 
         uint32_t ABCFile::addString(Str* s)
         {
