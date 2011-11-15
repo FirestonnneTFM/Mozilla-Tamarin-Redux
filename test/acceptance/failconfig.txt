@@ -357,7 +357,7 @@ as3/Types/Float4/component_access:float4\[4\], .*, -Dinterp , expectedfail, http
 as3/Types/Float4/component_access:float4\[i\] 4, .*, -Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695055
 
 as3/Types/Float4/component_access:^float4\.(xxxx|yyyy|zzzz|wwww|xyzw|wzyx), arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
-as3/Types/Float4/component_access:^float4['(xxxx|yyyy|zzzz|wwww|xyzw|wzyx)'], arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
+as3/Types/Float4/component_access:^float4\['(xxxx|yyyy|zzzz|wwww|xyzw|wzyx)'\], arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 as3/Types/Float4/component_access_swizzle, arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 
 as3/Types/Float4/op_binary_logical_and:^float4\(1f\) && float4\(0f\), .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
