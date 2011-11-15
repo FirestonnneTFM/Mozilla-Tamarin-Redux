@@ -3928,12 +3928,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         int z = (id >> 2) & 3;
         int w = (id >> 0) & 3;
         *mask = uint8_t(w << 6 | z << 4 | y << 2 | x << 0);
-#if defined VMCFG_IA32 || defined VMCFG_AMD64
         return true;
-#else
-        // FIXME: implement LIR_swz64 on other cpus
-        return false;
-#endif
 
         // We are counting on xxxx, xxxy, ... wwww being in order.
         NanoStaticAssert(float4_xxxy_get - float4_xxxx_get == 1);

@@ -65,8 +65,8 @@ const Register RegAlloc::retRegs[] = { R0, R1 };
 // FIXME: We neither use nor save callee-saved FP registers.
 const Register RegAlloc::savedRegs[] = { R4, R5, R6, R7, R8, R9, R10 };
 
-const RegisterMask FpArgRegs=      (RegisterMask)0x00000000ffff0000LL; // Q0,Q1,Q2,Q3; or D0-D7, or S0-S15
-const RegisterMask LowBankFPMask = (RegisterMask)0x0000ffffffff0000LL; // Q0,Q1,Q2,Q3,Q4,Q5,Q6,Q7
+const RegisterMask FpArgRegs=      (RegisterMask)0x00000000ffff0000LL; // Q0-3, D0-D7, or S0-S15
+const RegisterMask LowBankFPMask = FpSRegs; // Q0-7, D0-D15, or S0-S31
 const RegisterMask ARM_REG_MASKS[] = {
     0x0000000000000001LL , // r0, 
     0x0000000000000002LL , // r1, 
@@ -1138,33 +1138,30 @@ Register
 RegAlloc::getAvailableReg(LIns* ins, Register regClass, RegisterMask m)
 {
     NanoAssert(!ins || ins->opcode()==LIR_label || !ins->isV());
-    if(m==0) return UnspecifiedReg;
-    if(!ins){
+    if (m == 0)
+        return UnspecifiedReg;
+    if (!ins) {
         Register ret = msReg(m);
         return ret;
     }
-    bool isInt = ins->isI() || IsGpReg(regClass);
-    if(isInt){
-        NanoAssert(m!=0);
-        Register ret = msReg(m);
-        return ret;
+    if (ins->isI() || IsGpReg(regClass)) {
+        NanoAssert(m != 0);
+        return msReg(m);
     }
-    bool isFloat = ins->isF() || IsFpSReg(regClass);
-    bool isDouble= ins->isD() || IsFpDReg(regClass);
-    bool isFloat4= ins->isF4()|| IsFpQReg(regClass);
-    NanoAssert( ( isFloat && !isDouble && !isFloat4 ) ||
-                (!isFloat &&  isDouble && !isFloat4 ) ||
-                (!isFloat && !isDouble &&  isFloat4 ) ); (void)isDouble;
-    enum LTy insType = isFloat? LTy_F: isFloat4? LTy_F4: LTy_D;
-    while(m!=0){
-        Register reg = msReg(m) ;
+    enum LTy insType = (ins->isF()  || IsFpSReg(regClass)) ? LTy_F :
+                       (ins->isD()  || IsFpDReg(regClass)) ? LTy_D :
+                       (ins->isF4() || IsFpQReg(regClass)) ? LTy_F4 :
+                       LTy_V;
+    NanoAssert(insType != LTy_V);
+    while (m != 0) {
+        Register reg = msReg(m);
         reg = nanojit::getSuitableRegFor(reg, insType);
         RegisterMask rm = rmask(reg);
         if ((m & rm) == rm)
             return reg;
         m &= ~rm;
     }
-    NanoAssert(isDouble || isFloat4); // shouldn't get here with non-composite registers
+    NanoAssert(insType != LTy_F); // shouldn't get here with non-composite registers
     return UnspecifiedReg;
 }
 
@@ -2623,23 +2620,51 @@ void Assembler::asm_f2f4(LIns *ins) {
     
 void Assembler::asm_f4comp(LIns *ins) {
     LIns *a = ins->oprnd1();
-    NanoAssert(ins->isF() && a->isF4());
-    Register rd = prepareResultReg(ins, FpSRegs);
-    Register rs = findRegFor(a, LowBankFPMask );
-    int idx = 0;
-    switch(ins->opcode()){
-        default: NanoAssertMsg(0,"unsupported opcode in asm_f4comp"); break;
-        case LIR_f4x: idx = 0; break;
-        case LIR_f4y: idx = 1; break;
-        case LIR_f4z: idx = 2; break;
-        case LIR_f4w: idx = 3; break;
+    if (!ins->isop(LIR_swzf4)) {
+        // LIR_f4x,f4y,f4z,f4w
+        NanoAssert(ins->isF() && a->isF4());
+        Register rd = prepareResultReg(ins, FpSRegs);
+        Register rs = findRegFor(a, LowBankFPMask);
+        int idx = 0;
+        switch (ins->opcode()) {
+            default: NanoAssertMsg(0,"unsupported opcode in asm_f4comp"); break;
+            case LIR_f4x: idx = 0; break;
+            case LIR_f4y: idx = 1; break;
+            case LIR_f4z: idx = 2; break;
+            case LIR_f4w: idx = 3; break;
+        }
+        
+        rs = SReg(4 * FpQRegNum(rs)) + idx;
+        NanoAssert(IsFpSReg(rs));
+        FCPYS(rd, rs);
+        freeResourcesOf(ins);
+    } else {
+        // LIR_swzf4:
+        // Emit four single-precision moves, according to mask.  Since
+        // the mask can implement swap and rotates, rd and rs cannot be
+        // the same register.
+        NanoAssert(ins->isF4() && a->isF4());
+        Register rd = prepareResultReg(ins, LowBankFPMask);
+        Register rs = findRegFor(a, LowBankFPMask & ~rmask(rd));
+        int mask = ins->mask();
+        // source component registers; choose based on mask.
+        Register rs0 = SReg(4 * FpQRegNum(rs)) + ((mask >> 0) & 3);
+        Register rs1 = SReg(4 * FpQRegNum(rs)) + ((mask >> 2) & 3);
+        Register rs2 = SReg(4 * FpQRegNum(rs)) + ((mask >> 4) & 3);
+        Register rs3 = SReg(4 * FpQRegNum(rs)) + ((mask >> 6) & 3);
+        // dest register components: hard coded 0,1,2,3
+        Register rd0 = SReg(4 * FpQRegNum(rd)) + 0;
+        Register rd1 = rd0 + 1;
+        Register rd2 = rd0 + 2;
+        Register rd3 = rd0 + 3;
+        // emit four copies
+        FCPYS(rd0, rs0);
+        FCPYS(rd1, rs1);
+        FCPYS(rd2, rs2);
+        FCPYS(rd3, rs3);
+        // done.
+        freeResourcesOf(ins);
     }
-    
-    rs = SReg(4* FpQRegNum(rs)) + idx;
-    NanoAssert(IsFpSReg(rs));
-    FCPYS(rd,rs);
-
-    freeResourcesOf(ins);
 }
     
 void Assembler::asm_condf4(LIns *ins) {
