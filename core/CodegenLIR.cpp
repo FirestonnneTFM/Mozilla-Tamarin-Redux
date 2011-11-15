@@ -3889,10 +3889,6 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     {
         AvmAssert(m->pool() == core->builtinPool);
 
-#ifndef VMCFG_IA32
-        return false; // FIXME: these architectures need back-end support for the swizzle instruction
-#endif
-
         uint32_t id = m->method_id();
         if (id < NativeID::float4_xxxx_get || id > NativeID::float4_wwww_get)
             return false;
@@ -3902,7 +3898,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         int z = (id >> 2) & 3;
         int w = (id >> 0) & 3;
         *mask = uint8_t(w << 6 | z << 4 | y << 2 | x << 0);
+#ifndef VMCFG_IA32
+        return false; // FIXME: these architectures need back-end support for the swizzle instruction
+#else
+        
         return true;
+#endif
 
         // We are counting on xxxx, xxxy, ... wwww being in order.
         NanoStaticAssert(NativeID::float4_xxxy_get - NativeID::float4_xxxx_get == 1);
