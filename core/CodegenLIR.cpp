@@ -3728,6 +3728,16 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     //
                     //    The verifier has computed that the return type of the "length" 
                     //    getter is uint, so we can just load "len" here: it is a uint32_t.
+                    //
+                    // -  Optimize access to float4's x, y, z, and w elements.
+                    //
+                    //    These are statically known to produce float, so a simple load
+                    //    will suffice.
+                    //
+                    // -  Optimize access to float4 swizzlers.
+                    //
+                    //    These are statically known to produce float4, the swizzling compiles
+                    //    down to a single LIR instruction.
 
                     int32_t arrayDataOffset = -1;
                     int32_t lenOffset = -1;
