@@ -561,7 +561,9 @@ namespace avmplus
 
         LIns *optimizeIndexArgumentType(int32_t sp, Traits** indexType);
 
+#ifdef VMCFG_FLOAT
         bool matchShuffler(MethodInfo* m, uint8_t* shuffle_mask);
+#endif
 
     public:
         ~CodegenLIR();

@@ -310,12 +310,14 @@ namespace avmplus
                     return ALLOC(LiteralDouble, (d, pos));
                 }
 
+#ifdef VMCFG_FLOAT
                 case T_FloatLiteral: {
                     float f = floatValue();
                     next();
                     return ALLOC(LiteralFloat, (f, pos));
                 }
-                    
+#endif
+
                 case T_StringLiteral: {
                     Str* s = stringValue();
                     next();

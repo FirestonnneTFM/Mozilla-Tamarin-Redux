@@ -1290,6 +1290,7 @@ namespace avmplus
 
         bool Lexer::checkNextCharForNumber(bool allowFloat)
         {
+            (void)allowFloat;
             int c = *idx;
             bool isFloat = false;
 #ifdef VMCFG_FLOAT

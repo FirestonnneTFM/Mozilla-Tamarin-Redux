@@ -387,10 +387,12 @@ namespace avmplus
                             ct = CONSTANT_Double;
                             cv = abc->addDouble(((LiteralDouble*)dv)->value);
                             break;
+#ifdef VMCFG_FLOAT
                         case TAG_literalFloat:
                             ct = CONSTANT_Float;
                             cv = abc->addFloat(((LiteralFloat*)dv)->value);
                             break;
+#endif
                         case TAG_literalBoolean:
                             if (((LiteralBoolean*)dv)->value)
                                 ct = CONSTANT_True;

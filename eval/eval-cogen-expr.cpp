@@ -641,6 +641,7 @@ namespace avmplus
                 cogen->I_pushdouble(cogen->emitDouble(value));
         }
         
+#ifdef VMCFG_FLOAT
         void LiteralFloat::cogen(Cogen* cogen, Ctx* ctx)
         {
             (void)ctx;
@@ -649,6 +650,7 @@ namespace avmplus
             else
                 cogen->I_pushfloat(cogen->emitFloat(value));
         }
+#endif
 
         void LiteralBoolean::cogen(Cogen* cogen, Ctx* ctx)
         {

@@ -170,7 +170,9 @@ inline void Cogen::I_not() { emitOp(OP_not); }
 inline void Cogen::I_pop() { emitOp(OP_pop); }
 inline void Cogen::I_popscope() { emitOp(OP_popscope); }
 inline void Cogen::I_pushdouble(uint32_t index) { emitOpU30(OP_pushdouble, index); }
+#ifdef VMCFG_FLOAT
 inline void Cogen::I_pushfloat(uint32_t index) { emitOpU30(OP_pushfloat, index); }
+#endif
 inline void Cogen::I_pushfalse() { emitOp(OP_pushfalse); }
 inline void Cogen::I_pushint(uint32_t index) { emitOpU30(OP_pushint, index); }
 inline void Cogen::I_pushnamespace(uint32_t index) { emitOpU30(OP_pushnamespace, index); }

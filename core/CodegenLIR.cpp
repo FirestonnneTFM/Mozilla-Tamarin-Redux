@@ -3719,79 +3719,84 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             // early bind accessor
             if (AvmCore::hasGetterBinding(b))
             {
-                // Inline certain blessed and possibly-hot accessors.
-                //
-                // -  Optimize access to vector's "length", which is final.
-                //
-                //    The verifier has computed that the return type of the "length" 
-                //    getter is uint, so we can just load "len" here: it is a uint32_t.
-
-                int32_t arrayDataOffset = -1;
-                int32_t lenOffset = -1;
-
                 MethodInfo* getter_info = obj.traits->getTraitsBindings()->getMethod(AvmCore::bindingToGetterId(b));
+                if (getter_info->pool() == core->builtinPool)
+                {
+                    // Inline certain blessed and possibly-hot accessors.
+                    //
+                    // -  Optimize access to vector's "length", which is final.
+                    //
+                    //    The verifier has computed that the return type of the "length" 
+                    //    getter is uint, so we can just load "len" here: it is a uint32_t.
+
+                    int32_t arrayDataOffset = -1;
+                    int32_t lenOffset = -1;
+
 #ifdef VMCFG_FLOAT
-                uint8_t shuffle_mask = 0;
-                if (matchShuffler(getter_info, &shuffle_mask)) {
-                    NanoAssert(bt(type) == BUILTIN_float4);
-                    localSet(sp, lirout->insSwz(localGetf4(sp), shuffle_mask), type);
+                    uint8_t shuffle_mask = 0;
+                    if (matchShuffler(getter_info, &shuffle_mask)) {
+                        NanoAssert(bt(type) == BUILTIN_float4);
+                        localSet(sp, lirout->insSwz(localGetf4(sp), shuffle_mask), type);
+                        break;
+                    }
+                    LOpcode f4_getter = LIR_skip;
+#endif
+
+                    switch (getter_info->method_id())
+                    {
+                        case avmplus::NativeID::__AS3___vec_Vector_object_length_get:
+                            arrayDataOffset = int32_t(offsetof(ObjectVectorObject, m_list.m_data));
+                            lenOffset = int32_t(offsetof(AtomListHelper::LISTDATA, len));
+                            goto vector_length;
+                        case avmplus::NativeID::__AS3___vec_Vector_double_length_get:
+                            arrayDataOffset = int32_t(offsetof(DoubleVectorObject, m_list.m_data));
+                            lenOffset = int32_t(offsetof(DataListHelper<double>::LISTDATA, len));
+                            goto vector_length;
+                        case avmplus::NativeID::__AS3___vec_Vector_int_length_get:
+                            arrayDataOffset = int32_t(offsetof(IntVectorObject, m_list.m_data));
+                            lenOffset = int32_t(offsetof(DataListHelper<int32_t>::LISTDATA, len));
+                            goto vector_length;
+                        case avmplus::NativeID::__AS3___vec_Vector_uint_length_get:
+                            arrayDataOffset = int32_t(offsetof(UIntVectorObject, m_list.m_data));
+                            lenOffset = int32_t(offsetof(DataListHelper<uint32_t>::LISTDATA, len));
+                            goto vector_length;
+#ifdef VMCFG_FLOAT
+                        case avmplus::NativeID::float4_x_get:
+                            f4_getter = LIR_f4x;
+                            goto float4_element;
+                        case avmplus::NativeID::float4_y_get:
+                            f4_getter = LIR_f4y;
+                            goto float4_element;
+                        case avmplus::NativeID::float4_z_get:
+                            f4_getter = LIR_f4z;
+                            goto float4_element;
+                        case avmplus::NativeID::float4_w_get:
+                            f4_getter = LIR_f4w;
+                            goto float4_element;
+#endif
+
+                        // Add more specializations here
+
+                        default:
+                            goto invoke_getter;
+                    }
+                    
+#ifdef VMCFG_FLOAT
+                float4_element: {
+                    NanoAssert(bt(type) == BUILTIN_float);
+                    localSet(sp, lirout->ins1(f4_getter, localGetf4(sp)), type);
                     break;
                 }
-                LOpcode f4_getter = LIR_skip;
-#endif
-                switch (getter_info->method_id())
-                {
-                    case avmplus::NativeID::__AS3___vec_Vector_object_length_get:
-                        arrayDataOffset = int32_t(offsetof(ObjectVectorObject, m_list.m_data));
-                        lenOffset = int32_t(offsetof(AtomListHelper::LISTDATA, len));
-                        goto vector_length;
-                    case avmplus::NativeID::__AS3___vec_Vector_double_length_get:
-                        arrayDataOffset = int32_t(offsetof(DoubleVectorObject, m_list.m_data));
-                        lenOffset = int32_t(offsetof(DataListHelper<double>::LISTDATA, len));
-                        goto vector_length;
-                    case avmplus::NativeID::__AS3___vec_Vector_int_length_get:
-                        arrayDataOffset = int32_t(offsetof(IntVectorObject, m_list.m_data));
-                        lenOffset = int32_t(offsetof(DataListHelper<int32_t>::LISTDATA, len));
-                        goto vector_length;
-                    case avmplus::NativeID::__AS3___vec_Vector_uint_length_get:
-                        arrayDataOffset = int32_t(offsetof(UIntVectorObject, m_list.m_data));
-                        lenOffset = int32_t(offsetof(DataListHelper<uint32_t>::LISTDATA, len));
-                        goto vector_length;
-#ifdef VMCFG_FLOAT
-                    case avmplus::NativeID::float4_x_get:
-                        f4_getter = LIR_f4x;
-                        goto float4_element;
-                    case avmplus::NativeID::float4_y_get:
-                        f4_getter = LIR_f4y;
-                        goto float4_element;
-                    case avmplus::NativeID::float4_z_get:
-                        f4_getter = LIR_f4z;
-                        goto float4_element;
-                    case avmplus::NativeID::float4_w_get:
-                        f4_getter = LIR_f4w;
-                        goto float4_element;
 #endif
 
-                    // Add more specializations here
-
-                    default:
-                        goto invoke_getter;
+                vector_length: {
+                    LIns *arrayData = loadIns(LIR_ldp, arrayDataOffset, localGetp(sp), ACCSET_OTHER, LOAD_NORMAL);
+                    LIns *arrayLen  = loadIns(LIR_ldi, lenOffset, arrayData, ACCSET_OTHER, LOAD_NORMAL);
+                    localSet(sp, arrayLen, type);
+                    break;
                 }
-                
-#ifdef VMCFG_FLOAT
-            float4_element: {
-                NanoAssert(bt(type) == BUILTIN_float);
-                localSet(sp, lirout->ins1(f4_getter, localGetf4(sp)), type);
-                break;
-            }
-#endif
 
-            vector_length: {
-                LIns *arrayData = loadIns(LIR_ldp, arrayDataOffset, localGetp(sp), ACCSET_OTHER, LOAD_NORMAL);
-                LIns *arrayLen  = loadIns(LIR_ldi, lenOffset, arrayData, ACCSET_OTHER, LOAD_NORMAL);
-                localSet(sp, arrayLen, type);
-                break;
-            }
+                } // inlining blessed getters
 
             invoke_getter:
                 // Default case: Invoke the getter
@@ -3869,16 +3874,15 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         }
     }
 
+#ifdef VMCFG_FLOAT
     bool CodegenLIR::matchShuffler(MethodInfo* m, uint8_t* mask)
     {
-        // Generated table with this python snippet:
+        AvmAssert(m->pool() == core->builtinPool);
 
 #ifndef VMCFG_IA32
-        return false; // todo
+        return false; // FIXME: these architectures need back-end support for the swizzle instruction
 #endif
 
-        if (m->pool() != core->builtinPool)
-            return false;
         uint32_t id = m->method_id();
         if (id < NativeID::float4_xxxx_get || id > NativeID::float4_wwww_get)
             return false;
@@ -3895,6 +3899,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         // todo: put the rest of them here.
         NanoStaticAssert(NativeID::float4_wwww_get - NativeID::float4_xxxx_get == 255);
     }
+#endif
 
     void CodegenLIR::emitIntConst(int index, int32_t c, Traits* type)
     {
