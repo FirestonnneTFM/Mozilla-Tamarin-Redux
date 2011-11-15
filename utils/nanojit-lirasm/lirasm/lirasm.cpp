@@ -56,7 +56,7 @@
 #include <ctype.h>
 #include <assert.h>
 
-#include "nanojit/nanojit.h"
+#include "nanojit.h"
 
 using namespace nanojit;
 using namespace std;
@@ -2691,7 +2691,7 @@ Lirasm::Lirasm(bool verbose, Config& config) :
     // Populate the mOpMap table.
 #define OP___(op, repKind, retType, isCse) \
     mOpMap[#op] = LIR_##op;
-#include "nanojit/LIRopcode.tbl"
+#include "LIRopcode.tbl"
 #undef OP___
 
     // XXX: could add more pointer-sized synonyms here
