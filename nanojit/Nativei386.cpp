@@ -1204,14 +1204,15 @@ namespace nanojit
         return  _nIns;
     }
 
-    static inline uint32_t compute_pushsize(const CallInfo* ci, uint32_t max_iregs){
-        uint32_t iargs = ci->count_int32_args();
-        uint32_t fargs = ci->count_32bitfloat_args();
-        uint32_t f4args = ci->count_128bitfloat_args();
+    static inline uint32_t compute_pushsize(const CallInfo* ci, uint32_t max_iregs)
+    {
+        uint32_t iargs = ci->count_int_args();
+        uint32_t fargs = ci->count_float_args();
+        uint32_t f4args = ci->count_float4_args();
         int32_t dargs = ci->count_args() - fargs - f4args - iargs;
         bool indirect = ci->isIndirect();
 
-        if(f4args<= NJ_MAX_F4ARGS_IN_REGS){
+        if (f4args <= NJ_MAX_F4ARGS_IN_REGS) {
             if (indirect) {
                 // target arg isn't pushed, its consumed in the call - i.e one less iarg on stack (potentially)
                 iargs --;
@@ -1224,16 +1225,15 @@ namespace nanojit
             /* this is tricky; since float4s on stack *must* be aligned, we can't just add values - it depends on the parameter order */
             ArgType argTypes[MAXARGS];
             uint32_t argc = ci->getArgTypes(argTypes);
-        if (indirect) {
+            if (indirect) {
                 // target arg isn't pushed, its consumed in the call - i.e ignore the last argument when computing stack space
                 argc--;
                 NanoAssert(argTypes[argc]== ARGTYPE_P); // should be a pointer to the called function; otherwise, something's wrong!
             }
             int32_t pushsize = 0;
             int32_t max_f4regs = NJ_MAX_F4ARGS_IN_REGS;
-            for (uint32_t i = 0; i < argc; i++)
-            {
-                switch(argTypes[i]){
+            for (uint32_t i = 0; i < argc; i++) {
+                switch(argTypes[i]) {
                 case ARGTYPE_I:
                 case ARGTYPE_UI:
                     if( max_iregs > 0 )

@@ -357,6 +357,8 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         static const int TYPESIG_FIELDSZB = 3;
         static const int TYPESIG_FIELDMASK = 7;
 
+        template <class FILTER> uint32_t countArgs() const;
+
     public:
         uintptr_t   _address;
         uint32_t    _typesig:27;     // 9 3-bit fields indicating arg type, by ARGTYPE above (including ret type): a1 a2 a3 a4 a5 ret
@@ -407,9 +409,9 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         }
 
         uint32_t count_args() const;
-        uint32_t count_int32_args() const;
-        uint32_t count_32bitfloat_args() const;
-        uint32_t count_128bitfloat_args() const;
+        uint32_t count_int_args() const;
+        uint32_t count_float_args() const;
+        uint32_t count_float4_args() const;
 
         // Nb: uses right-to-left order, eg. sizes[0] is the size of the right-most arg.
         // XXX: See bug 525815 for fixing this.
