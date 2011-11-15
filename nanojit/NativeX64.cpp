@@ -542,8 +542,13 @@ namespace nanojit
     void Assembler::MOVLHPS( R l, R r)  { emitrr(X64_movlhps, l,r);  asm_output("movlhps %s, %s", RQ(l),RQ(r)); }
     void Assembler::PMOVMSKB(R l, R r)  { emitprr(X64_pmovmskb,l,r); asm_output("pmovmskb %s, %s",RQ(l),RQ(r)); }
     void Assembler::CMPNEQPS(R l, R r)  { emitrr_imm8(X64_cmppsr,l,r,4); asm_output("cmpneqps %s, %s", RL(l),RL(r)); }
-    void Assembler::PSHUFD(R l, R r, I m)  { uint8_t mode = (uint8_t) m; NanoAssert(m>=0 && m<256); 
-                                             emitprr_imm8(X64_pshufd,l,r,mode); asm_output("PSHUFD  %s, %s, %x",RQ(l),RQ(r),m); }
+
+    void Assembler::PSHUFD(R l, R r, I m) {
+        NanoAssert(isU8(m));
+        uint8_t mode = uint8_t(m);
+        emitprr_imm8(X64_pshufd, l, r, mode);
+        asm_output("pshufd  %s, %s, %x", RQ(l), RQ(r), m);
+    }
 
     // MOVI must not affect condition codes!
     void Assembler::MOVI(  R r, I32 i32)    { emitr_imm(X64_movi,  r,i32); asm_output("movl %s, %d",RL(r),i32); }
@@ -1310,16 +1315,24 @@ namespace nanojit
     }
 
     void Assembler::asm_f4comp(LIns *ins) {
+        NanoAssert(ins->isop(LIR_swzf4) ? ins->isF4() : ins->isF());
+        NanoAssert(ins->oprnd1()->isF4());
         LIns *a = ins->oprnd1();
-        NanoAssert(ins->isF() && a->isF4());
         Register rr = prepareResultReg(ins, FpRegs);
         Register rb = findRegFor(a, FpRegs);
-        switch(ins->opcode()){
-        default: TODO(asm_f4comp); break;
-        case LIR_f4x: PSHUFD(rr,rb,_MM_SHUFFLE(0,0,0,0)); break;
-        case LIR_f4y: PSHUFD(rr,rb,_MM_SHUFFLE(1,1,1,1)); break;
-        case LIR_f4z: PSHUFD(rr,rb,_MM_SHUFFLE(2,2,2,2)); break;
-        case LIR_f4w: PSHUFD(rr,rb,_MM_SHUFFLE(3,3,3,3)); break;
+        switch (ins->opcode()) {
+        default: NanoAssert(!"bad opcode for asm_f4comp()"); break;
+        case LIR_f4x: PSHUFD(rr, rb, _MM_SHUFFLE(0, 0, 0, 0)); break;
+        case LIR_f4y: PSHUFD(rr, rb, _MM_SHUFFLE(1, 1, 1, 1)); break;
+        case LIR_f4z: PSHUFD(rr, rb, _MM_SHUFFLE(2, 2, 2, 2)); break;
+        case LIR_f4w: PSHUFD(rr, rb, _MM_SHUFFLE(3, 3, 3, 3)); break;
+        case LIR_swzf4: {
+            uint8_t mask = ins->mask();
+            PSHUFD(rr, rb, _MM_SHUFFLE((mask >> 6) & 3,
+                                       (mask >> 4) & 3,
+                                       (mask >> 2) & 3,
+                                       (mask >> 0) & 3));
+        }
         }
         freeResourcesOf(ins);
     }
