@@ -100,12 +100,12 @@ namespace nanojit
 
             r = firstAvailableReg(ins,regClass, set); // Note: some platforms prefer lsReg, others msReg
 #ifdef RA_REGISTERS_OVERLAP
-            if ( r == UnspecifiedReg ) {
+            if (r == UnspecifiedReg) {
                 //we may get here for composite regs, if the "prefered" set leaves only single regs; try again
-                r = firstAvailableReg(ins,regClass, setA_F_);
+                r = firstAvailableReg(ins, regClass, setA_F_);
             }
 #else
-            NanoAssert(r !=  UnspecifiedReg ); // we should always find one; but if we still don't, allow fall thru to evict other insts
+            NanoAssert(r !=  UnspecifiedReg); // we should always find one; but if we still don't, allow fall thru to evict other insts
 #endif
             if(r != UnspecifiedReg)
                 return allocSpecificReg(ins, r);
@@ -113,15 +113,15 @@ namespace nanojit
         /* else */
         // Nothing free, steal one register.
         // LSRA says pick the one with the furthest use.
-        LIns* vic = findVictim(setA___,ins, regClass);
+        LIns* vic = findVictim(setA___, ins, regClass);
         NanoAssert(vic->isInReg());
         r = vic->getReg();
         NanoAssert(_assembler);
         _assembler->evict(vic);
 #ifdef RA_REGISTERS_OVERLAP
         // r may actually be wider than we need
-        SET_REG_IN_MASK(r,setA_F_);
-        r = firstAvailableReg(ins,regClass,setA_F_);
+        SET_REG_IN_MASK(r, setA_F_);
+        r = firstAvailableReg(ins, regClass, setA_F_);
         NanoAssert(r !=  UnspecifiedReg );
 #endif
         allocSpecificReg(ins, r);
