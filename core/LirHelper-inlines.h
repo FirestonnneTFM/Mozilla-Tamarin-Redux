@@ -312,6 +312,10 @@ REALLY_INLINE bool exactlyOneBit(uint32_t m)
     return (m & (m-1)) == 0;
 }
 
+REALLY_INLINE LIns* LirHelper::InsConstDbl(double d)
+{
+    return lirout->insImmD(d);
+}
 #ifdef VMCFG_FLOAT
 REALLY_INLINE LIns* LirHelper::InsConstFlt(float f)
 {

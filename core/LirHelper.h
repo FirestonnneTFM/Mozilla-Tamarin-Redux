@@ -141,6 +141,7 @@ namespace avmplus
         LIns* InsConst(int32_t c);
         LIns* InsConstPtr(const void *p);
         LIns* InsConstAtom(Atom c);
+        LIns* InsConstDbl(double d);
         LIns* callIns(const CallInfo *, uint32_t argc, ...);
         LIns* vcallIns(const CallInfo *, uint32_t argc, va_list args);
         LIns* eqp(LIns* a, Atom b);

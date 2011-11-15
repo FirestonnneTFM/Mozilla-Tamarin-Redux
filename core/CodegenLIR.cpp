@@ -7687,18 +7687,19 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     LIns* CodegenLIR::promoteNumberIns(Traits* t, int i)
     {
         if (t == NUMBER_TYPE)
-        {
             return localGetd(i);
-        }
         if (t == INT_TYPE || t == BOOLEAN_TYPE)
-        {
             return i2dIns(localGet(i));
-        }
-        if (t != UINT_TYPE){
-            AvmAssert( IFFLOAT( t == FLOAT_TYPE, false) );
-            FLOAT_ONLY(return f2dIns(localGetf(i));)
-        }
-        return ui2dIns(localGet(i));
+        if (t == UINT_TYPE)
+            return ui2dIns(localGet(i));
+#ifdef VMCFG_FLOAT
+        if(t == FLOAT_TYPE)
+            return f2dIns(localGetf(i));
+        AvmAssert(t == FLOAT4_TYPE);
+#else
+        AvmAssert(!"Unhandled type in promoteNumberIns");
+#endif
+        return InsConstDbl(MathUtils::kNaN);
     }
 
 #ifdef VMCFG_FLOAT
