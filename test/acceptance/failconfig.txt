@@ -373,5 +373,5 @@ as3/Types/Float4/op_in:\'(0|1|2|3)\' in float4, .* , ,   expectedfail, https://b
 as3/Types/Float4/op_in:^(0|1|2|3) in float4, -Ojit , ,   expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=696644
 
 as3/Types/Float4/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
-
+abcasm/coverage/float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
 
