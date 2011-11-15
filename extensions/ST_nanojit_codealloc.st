@@ -179,7 +179,10 @@ typedef CodeAllocDriver::AllocationProfile AllocationProfile;
 static CodeListProfile cp = { 5, 1, 1*1024, 1, 16*1024 };
 
 static AllocationProfile ap[] = { { 0,     2 },
+                                  #ifndef NANOJIT_64BIT
+                                  // 128-byte minimum is too small on 64-bit platorms.
                                   { 128,   2 },
+                                  #endif
                                   { 512,   2 },
                                   { 1024,  2 },
                                   { 2048,  2 },
