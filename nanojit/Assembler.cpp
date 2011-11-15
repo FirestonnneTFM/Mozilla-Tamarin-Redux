@@ -1773,6 +1773,7 @@ namespace nanojit
                 case LIR_f4y:
                 case LIR_f4z:
                 case LIR_f4w:
+                case LIR_swzf4:
                     countlir_fpu();
                     ins->oprnd1()->setResultLive();
                     if (ins->isExtant()) {

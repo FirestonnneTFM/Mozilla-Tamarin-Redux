@@ -561,6 +561,8 @@ namespace avmplus
 
         LIns *optimizeIndexArgumentType(int32_t sp, Traits** indexType);
 
+        bool matchShuffler(MethodInfo* m, uint8_t* shuffle_mask);
+
     public:
         ~CodegenLIR();
         CodegenLIR(MethodInfo* info, MethodSignaturep ms, Toplevel* toplevel,

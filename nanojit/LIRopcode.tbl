@@ -382,7 +382,7 @@ OP___(f4x,      Op1,  F,    1)  // extract first float from a float4
 OP___(f4y,      Op1,  F,    1)  // extract second float from a float4 
 OP___(f4z,      Op1,  F,    1)  // extract third float from a float4 
 OP___(f4w,      Op1,  F,    1)  // extract fourth float from a float4 
-OP___(swzf4,    Op1, F4,    1)  // swizzle float4 according to 8-bit selector
+OP___(swzf4,    Op1b,F4,    1)  // swizzle float4 according to 8-bit selector
 
 OP_64(dasq,     Op1,  Q,    1)  // interpret the bits of a double as a quad
 OP_64(qasd,     Op1,  D,    1)  // interpret the bits of a quad as a double

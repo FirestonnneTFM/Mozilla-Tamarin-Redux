@@ -2102,7 +2102,6 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* insBranch(LOpcode, LIns* cond, LIns* target);
         LIns* insBranchJov(LOpcode, LIns* a, LIns* b, LIns* target);
         LIns* insLoad(LOpcode op, LIns* base, int32_t off, AccSet accSet, LoadQual loadQual);
-        LIns* insSwz(LIns* a, uint8_t mask);
     private:
         LIns* simplifyOverflowArith(LOpcode op, LIns** opnd1, LIns** opnd2);
     };

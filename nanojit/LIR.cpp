@@ -1653,14 +1653,6 @@ namespace nanojit
         return out->insLoad(op, base, off, accSet, loadQual);
     }
 
-    LIns* ExprFilter::insSwz(LIns* a, uint8_t mask) {
-        if (a->isop(LIR_swzf4) && a->oprnd1()->mask() == (0<<0|1<<2|2<<4|3<<6)) {
-            // swzf4(a, 0|1|2|3) => a
-            return a;
-        }
-        return out->insSwz(a, mask);
-    }
-
     LIns* LirWriter::insStore(LIns* value, LIns* base, int32_t d, AccSet accSet)
     {
         // Determine which kind of store should be used for 'value' based on
@@ -1974,6 +1966,7 @@ namespace nanojit
                 case LIR_f4y:
                 case LIR_f4z:
                 case LIR_f4w:
+                case LIR_swzf4:
                 CASE64(LIR_q2i:)
                 case LIR_d2i:
                 CASE64(LIR_dasq:)
