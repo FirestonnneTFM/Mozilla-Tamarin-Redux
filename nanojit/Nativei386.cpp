@@ -3565,17 +3565,27 @@ namespace nanojit
         freeResourcesOf(ins);
     }
     
-    void Assembler::asm_f4comp(LIns *ins) {
+    void Assembler::asm_f4comp(LIns* ins) {
+        NanoAssert(ins->isop(LIR_swzf4) ? ins->isF4() : ins->isF());
+        NanoAssert(ins->oprnd1()->isF4());
+        NanoAssert(_config.i386_sse2);
         LIns *a = ins->oprnd1();
-        NanoAssert(ins->isF() && a->isF4());
         Register rr = prepareResultReg(ins, XmmRegs);
         Register rb = findRegFor(a, XmmRegs);
         switch (ins->opcode()) {
-        default: TODO(asm_f4comp); break;
+        default: NanoAssert(!"bad opcode for asm_f4comp()"); break;
         case LIR_f4x: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(0,0,0,0)); break;
         case LIR_f4y: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(1,1,1,1)); break;
         case LIR_f4z: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(2,2,2,2)); break;
         case LIR_f4w: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(3,3,3,3)); break;
+        case LIR_swzf4: {
+          uint8_t mask = ins->mask();
+          SSE_PSHUFD(rr, rb, _MM_SHUFFLE((mask >> 6) & 3,
+                                         (mask >> 4) & 3,
+                                         (mask >> 2) & 3,
+                                         (mask >> 0) & 3));
+          break;
+        }
         }
         freeResourcesOf(ins);
     }

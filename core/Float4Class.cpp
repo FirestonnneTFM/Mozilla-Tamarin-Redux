@@ -280,10 +280,9 @@ default: return _mm_set1_ps(0); // make all compilers happy
         float4_t retval;
         float* retp = reinterpret_cast<float*>(&retval);
         float* valp = reinterpret_cast<float*>(&val);
-        for(int i = 0; i < 4; ++i)
-        {
-            int idx = how & 3; how >>= 2;
-            *retp++ = valp[idx];
+        for (int i = 0; i < 4; ++i) {
+            *retp++ = valp[how & 3];
+            how >>= 2;
         }
         return retval;
 #endif 

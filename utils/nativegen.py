@@ -609,11 +609,10 @@ class MethodInfo(MemberInfo):
     def assign_names(self, traits, prefix):
         self.receiver = traits
 
-        if not self.isNative():
-            return
-
         if self == traits.init:
-            raise Error("ctors cannot be native")
+            if self.isNative():
+                raise Error("ctors cannot be native")
+            return
 
         assert(isinstance(self.name, QName))
         self.native_id_name = prefix + ns_prefix(self.name.ns, False) + self.name.name
@@ -1681,11 +1680,8 @@ class AbcThunkGen:
             m = self.abc.methods[i]
             if m.native_id_name != None:
                 assert(m.id == i)
-                if m.isNative():
-                    out.println("const uint32_t "+m.native_id_name+" = "+str(m.id)+";");
-                else:
-                    # not sure if we want to expose method id's for non-native methods; emit as comments for now
-                    out.println("/* const uint32_t "+m.native_id_name+" = "+str(m.id)+"; */");
+                out.println("const uint32_t %s = %s; // %s" % (m.native_id_name, m.id, \
+                    "native" if m.isNative() else "abc"))
         out.println('')
 
         for receiver,m in self.all_thunks:

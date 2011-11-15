@@ -3728,11 +3728,17 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
                 int32_t arrayDataOffset = -1;
                 int32_t lenOffset = -1;
-#ifdef VMCFG_FLOAT
-                LOpcode f4_getter = LIR_skip;
-#endif
 
                 MethodInfo* getter_info = obj.traits->getTraitsBindings()->getMethod(AvmCore::bindingToGetterId(b));
+#ifdef VMCFG_FLOAT
+                uint8_t shuffle_mask = 0;
+                if (matchShuffler(getter_info, &shuffle_mask)) {
+                    NanoAssert(bt(type) == BUILTIN_float4);
+                    localSet(sp, lirout->insSwz(localGetf4(sp), shuffle_mask), type);
+                    break;
+                }
+                LOpcode f4_getter = LIR_skip;
+#endif
                 switch (getter_info->method_id())
                 {
                     case avmplus::NativeID::__AS3___vec_Vector_object_length_get:
@@ -3774,6 +3780,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 
 #ifdef VMCFG_FLOAT
             float4_element: {
+                NanoAssert(bt(type) == BUILTIN_float);
                 localSet(sp, lirout->ins1(f4_getter, localGetf4(sp)), type);
                 break;
             }
@@ -3860,6 +3867,33 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             AvmAssert(false);
             break;
         }
+    }
+
+    bool CodegenLIR::matchShuffler(MethodInfo* m, uint8_t* mask)
+    {
+        // Generated table with this python snippet:
+
+#ifndef VMCFG_IA32
+        return false; // todo
+#endif
+
+        if (m->pool() != core->builtinPool)
+            return false;
+        uint32_t id = m->method_id();
+        if (id < NativeID::float4_xxxx_get || id > NativeID::float4_wwww_get)
+            return false;
+        id -= NativeID::float4_xxxx_get;
+        int x = (id >> 6) & 3;
+        int y = (id >> 4) & 3;
+        int z = (id >> 2) & 3;
+        int w = (id >> 0) & 3;
+        *mask = uint8_t(w << 6 | z << 4 | y << 2 | x << 0);
+        return true;
+
+        // We are counting on xxxx, xxxy, ... wwww being in order.
+        NanoStaticAssert(NativeID::float4_xxxy_get - NativeID::float4_xxxx_get == 1);
+        // todo: put the rest of them here.
+        NanoStaticAssert(NativeID::float4_wwww_get - NativeID::float4_xxxx_get == 255);
     }
 
     void CodegenLIR::emitIntConst(int index, int32_t c, Traits* type)
