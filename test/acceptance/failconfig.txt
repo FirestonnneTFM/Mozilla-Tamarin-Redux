@@ -378,3 +378,5 @@ as3/Types/Float4/op_in:^(0|1|2|3) in float4, -Ojit , ,   expectedfail, https://b
 as3/Types/Float4/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
 abcasm/coverage/float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
 
+ecma3/TypeConversion/e9_3_1_3_rt:^var z = 0. print\(1/-z\), -Dinterp , ,   expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703035
+
