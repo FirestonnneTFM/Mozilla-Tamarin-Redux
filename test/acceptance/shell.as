@@ -228,6 +228,14 @@ function getTestCaseResult(expect,actual) {
             passed = "true";
         }
         }
+        // If both objects are float, check that the values are the same
+        // within 7 digits of precision.
+        // log_10(2^24) ie 24 bits gives 7.2 digits of decimal precision
+        if (typeof(actual) == "float" && typeof(expect) == "float") {
+            if ( float.abs(actual-expect) < 0.000001 ) {
+                passed = "true";
+            }
+        }
     }
     return passed;
 }
