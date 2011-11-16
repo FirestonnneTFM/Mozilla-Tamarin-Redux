@@ -71,7 +71,6 @@ AddErrorTest("float4.AS3::toString: range errors toString(float.NaN)", RANGEERRO
 AddErrorTest("float4.AS3::toString: range errors toString(Infinity)", RANGEERROR, function(){test_flt4.AS3::toString(Infinity)});
 AddErrorTest("float4.AS3::toString: range errors toString(-Infinity)", RANGEERROR, function(){test_flt4.AS3::toString(-Infinity)});
 
-// FIXME: Continue once this bug is fixed https://bugzilla.mozilla.org/show_bug.cgi?id=694990
 test_flt4 = new float4(2.7182818284e5f);
 AddTestCase("float4.AS3::toString: base 36", "5tqs,5tqs,5tqs,5tqs", test_flt4.AS3::toString(36)); // should go on to convert only the integral part
 AddTestCase("float4.AS3::toString: base 2", "1000010010111010100,1000010010111010100,1000010010111010100,1000010010111010100", test_flt4.AS3::toString(2)); // should go on to convert only the integral part
