@@ -48,29 +48,59 @@ namespace avmplus
         return ::fabs(value);
     }
 
+    REALLY_INLINE float MathUtils::absf(float value)
+    {
+        return ::fabsf(value);
+    }
+    
     REALLY_INLINE double MathUtils::acos(double value)
     {
         return ::acos(value);
     }
 
+    REALLY_INLINE float MathUtils::acosf(float value)
+    {
+        return ::acosf(value);
+    }
+    
     REALLY_INLINE double MathUtils::asin(double value)
     {
         return ::asin(value);
     }
 
+    REALLY_INLINE float MathUtils::asinf(float value)
+    {
+        return ::asinf(value);
+    }
+    
     REALLY_INLINE double MathUtils::atan(double value)
     {
         return ::atan(value);
     }
 
+    REALLY_INLINE float MathUtils::atanf(float value)
+    {
+        return ::atanf(value);
+    }
+    
     REALLY_INLINE double MathUtils::atan2(double y, double x)
     {
         return ::atan2(y, x);
     }
 
+    REALLY_INLINE float MathUtils::atan2f(float y, float x)
+    {
+        return ::atan2f(y, x);
+    }
+    
     REALLY_INLINE double MathUtils::ceil(double value)
     {
         return ::ceil(value);
+    }
+
+    REALLY_INLINE float MathUtils::ceilf(float value)
+    {
+        return ::ceilf(value);
     }
 
     REALLY_INLINE double MathUtils::cos(double value)
@@ -78,16 +108,31 @@ namespace avmplus
         return ::cos(value);
     }
 
+    REALLY_INLINE float MathUtils::cosf(float value)
+    {
+        return ::cosf(value);
+    }
+    
     REALLY_INLINE double MathUtils::exp(double value)
     {
         return ::exp(value);
     }
 
+    REALLY_INLINE float MathUtils::expf(float value)
+    {
+        return ::expf(value);
+    }
+    
     REALLY_INLINE double MathUtils::floor(double value)
     {
         return ::floor(value);
     }
 
+    REALLY_INLINE float MathUtils::floorf(float value)
+    {
+        return ::floorf(value);
+    }
+    
     REALLY_INLINE uint64_t MathUtils::frexp(double value, int *eptr)
     {
         double fracMantissa = ::frexp(value, eptr);
@@ -103,11 +148,21 @@ namespace avmplus
         return ::log(value);
     }
 
+    REALLY_INLINE float MathUtils::logf(float value)
+    {
+        return ::logf(value);
+    }
+    
     REALLY_INLINE double MathUtils::mod(double x, double y)
     {
         return ::fmod(x, y);
     }
 
+    REALLY_INLINE float MathUtils::modf(float x, float y)
+    {
+        return ::fmodf(x, y);
+    }
+    
     REALLY_INLINE double MathUtils::powInternal(double x, double y)
     {
         return ::pow(x, y);
@@ -118,14 +173,28 @@ namespace avmplus
         return ::sin(value);
     }
 
+    REALLY_INLINE float MathUtils::sinf(float value)
+    {
+        return ::sinf(value);
+    }
+    
     REALLY_INLINE double MathUtils::sqrt(double value)
     {
         return ::sqrt(value);
     }
 
+    REALLY_INLINE float MathUtils::sqrtf(float value)
+    {
+        return ::sqrtf(value);
+    }
+    
     REALLY_INLINE double MathUtils::tan(double value)
     {
         return ::tan(value);
     }
 
+    REALLY_INLINE float MathUtils::tanf(float value)
+    {
+        return ::tanf(value);
+    }
 }
