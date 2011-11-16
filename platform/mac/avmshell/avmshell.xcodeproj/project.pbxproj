@@ -40,7 +40,6 @@
 		072EA0F40F4C1CE9009F11E6 /* eval-parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E30F4C1CE9009F11E6 /* eval-parse.cpp */; };
 		072EA0F50F4C1CE9009F11E6 /* eval-unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E50F4C1CE9009F11E6 /* eval-unicode.cpp */; };
 		072EA0F60F4C1CE9009F11E6 /* eval-util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E70F4C1CE9009F11E6 /* eval-util.cpp */; };
-		073890B01473AD7B002A2A98 /* Float.as in Sources */ = {isa = PBXBuildFile; fileRef = 073890AE1473AD7B002A2A98 /* Float.as */; };
 		07591FBE122BEA8F00D60F63 /* GCPolicyManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07591FBD122BEA8F00D60F63 /* GCPolicyManager.cpp */; };
 		075920A7122E51EF00D60F63 /* GCPolicyManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07591FBD122BEA8F00D60F63 /* GCPolicyManager.cpp */; };
 		07689AA0101DC28000BC72AA /* ZCT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07689A9E101DC28000BC72AA /* ZCT.cpp */; };
@@ -2095,7 +2094,6 @@
 				07E7976613BC99EC00E25990 /* d2a.cpp in Sources */,
 				0638CA1F141F36630047FB4F /* Float4Class.cpp in Sources */,
 				0638CA20141F36630047FB4F /* FloatClass.cpp in Sources */,
-				073890B01473AD7B002A2A98 /* Float.as in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
