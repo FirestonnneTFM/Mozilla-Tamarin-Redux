@@ -53,12 +53,5 @@ AddTestCase("float4(1f, 1f, 1f, 1f)", "float4", getQualifiedClassName(result));
 var result = new float4(1, 1, 1, 1);
 AddTestCase("float4(1, 1, 1, 1)", "float4", getQualifiedClassName(result));
 
-
-/* FIXME: Move to compiler testing as this will never compile
-AddErrorTest("float4() with 2 args", ARGUMENTERROR, function(){ var result2 = new float4(1, 2);});
-AddErrorTest("float4() with 3 args", ARGUMENTERROR, function(){ var result3 = new float4(1, 2, 3);});
-AddErrorTest("float4() with 5 args", ARGUMENTERROR, function(){ var result5 = new float4(1, 2, 3, 4, 5);});
-*/
-
 test();
 
