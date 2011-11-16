@@ -40,6 +40,7 @@
 		072EA0F40F4C1CE9009F11E6 /* eval-parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E30F4C1CE9009F11E6 /* eval-parse.cpp */; };
 		072EA0F50F4C1CE9009F11E6 /* eval-unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E50F4C1CE9009F11E6 /* eval-unicode.cpp */; };
 		072EA0F60F4C1CE9009F11E6 /* eval-util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E70F4C1CE9009F11E6 /* eval-util.cpp */; };
+		073890B01473AD7B002A2A98 /* Float.as in Sources */ = {isa = PBXBuildFile; fileRef = 073890AE1473AD7B002A2A98 /* Float.as */; };
 		07591FBE122BEA8F00D60F63 /* GCPolicyManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07591FBD122BEA8F00D60F63 /* GCPolicyManager.cpp */; };
 		075920A7122E51EF00D60F63 /* GCPolicyManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07591FBD122BEA8F00D60F63 /* GCPolicyManager.cpp */; };
 		07689AA0101DC28000BC72AA /* ZCT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07689A9E101DC28000BC72AA /* ZCT.cpp */; };
@@ -495,6 +496,7 @@
 		072EA1090F4C1D1B009F11E6 /* smoketest2.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest2.as; path = ../../../eval/smoketest2.as; sourceTree = SOURCE_ROOT; };
 		072EA10A0F4C1D1B009F11E6 /* smoketest3.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest3.as; path = ../../../eval/smoketest3.as; sourceTree = SOURCE_ROOT; };
 		073739F112A65F5F00F888F6 /* MultinameHashtable-impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MultinameHashtable-impl.h"; path = "../../../core/MultinameHashtable-impl.h"; sourceTree = SOURCE_ROOT; };
+		073890AE1473AD7B002A2A98 /* Float.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = Float.as; path = ../../../core/Float.as; sourceTree = SOURCE_ROOT; };
 		073AC650116A5DC000215772 /* ST_mmgc_gcheap.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_gcheap.st; path = ../../../extensions/ST_mmgc_gcheap.st; sourceTree = SOURCE_ROOT; };
 		075300A510C55E0700D67DA9 /* pcre_avmplus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pcre_avmplus.h; path = ../../../pcre/pcre_avmplus.h; sourceTree = SOURCE_ROOT; };
 		07553E0D1099FB2800F72FB0 /* AbcEnv-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AbcEnv-inlines.h"; path = "../../../core/AbcEnv-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -1465,6 +1467,7 @@
 				079DF9100F3A88EA0031D1B4 /* DescribeType.as */,
 				079DF9110F3A88EA0031D1B4 /* Error.as */,
 				079DF9120F3A88EA0031D1B4 /* ErrorConstants.as */,
+				073890AE1473AD7B002A2A98 /* Float.as */,
 				079DF9130F3A88EA0031D1B4 /* Function.as */,
 				D939B10B126E356500522895 /* IDataInput.as */,
 				D939B10C126E356500522895 /* IDataOutput.as */,
@@ -2092,6 +2095,7 @@
 				07E7976613BC99EC00E25990 /* d2a.cpp in Sources */,
 				0638CA1F141F36630047FB4F /* Float4Class.cpp in Sources */,
 				0638CA20141F36630047FB4F /* FloatClass.cpp in Sources */,
+				073890B01473AD7B002A2A98 /* Float.as in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
