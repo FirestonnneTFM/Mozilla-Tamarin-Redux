@@ -49,6 +49,7 @@ namespace avmplus
     FloatClass::FloatClass(VTable* cvtable)
     : ClassClosure(cvtable)
     {
+        MathUtils::initRandom(&seed);
         toplevel()->_floatClass = this;
         // prototype objects are always vanilla objects.
         createVanillaPrototype();
@@ -67,14 +68,95 @@ namespace avmplus
         return core()->floatAtom(argv[1]);
     }
     
+    
+    float FloatClass::abs(float x)
+    {
+        return MathUtils::absf(x);
+    }
+    
+    float FloatClass::acos(float x)
+    {
+        return MathUtils::acosf(x);
+    }
+    
+    float FloatClass::asin(float x)
+    {
+        return MathUtils::asinf(x);
+    }
+    
+    float FloatClass::atan(float x)
+    {
+        return MathUtils::atanf(x);
+    }
+    
+    float FloatClass::atan2(float y, float x)
+    {
+        return MathUtils::atan2f(y, x);
+    }
+    
+    float FloatClass::ceil(float x)
+    {
+        return MathUtils::ceilf(x);
+    }
+    
+    float FloatClass::cos(float x)
+    {
+        return MathUtils::cosf(x);
+    }
+    
+    float FloatClass::exp(float x)
+    {
+        return MathUtils::expf(x);
+    }
+    
+    float FloatClass::floor(float x)
+    {
+        return MathUtils::floorf(x);
+    }
+    
+    float FloatClass::log(float x)
+    {
+        return MathUtils::logf(x);
+    }
+    
+    float FloatClass::pow(float x, float y)
+    {
+        return (float)MathUtils::pow((double)x, (double)y);
+    }
+    
+    float FloatClass::random()
+    {
+        return (float)MathUtils::random(&seed);
+    }
+    
     float FloatClass::reciprocal(float x)
     {
-        return 1 / x;
+        return 1 / x;                   // FIXME: This must use the intrinsic
+    }
+    
+    float FloatClass::round(float x)
+    {
+        return MathUtils::roundf(x);
     }
     
     float FloatClass::rsqrt(float x)
     {
-        return 1 / sqrtf(x);
+        return 1 / MathUtils::sqrtf(x); // FIXME: this must use the intrinsic
+    }
+
+    float FloatClass::sin(float x)
+    {
+        return MathUtils::sinf(x);
+    }
+    
+    float FloatClass::sqrt(float x)
+    {
+        return MathUtils::sqrtf(x);
+    }
+    
+    float FloatClass::tan(float x)
+    {
+        return MathUtils::tanf(x);
     }
 
     // volatile externals to keep the constant propagator from outsmarting us.

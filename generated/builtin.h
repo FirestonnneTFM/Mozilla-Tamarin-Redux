@@ -823,22 +823,22 @@ const uint32_t flash_utils_Proxy_flash_proxy_nextNameIndex = 1037; // abc
 const uint32_t flash_utils_Proxy_flash_proxy_nextName = 1038; // abc
 const uint32_t flash_utils_Proxy_flash_proxy_nextValue = 1039; // abc
 const uint32_t flash_utils_Proxy_flash_proxy_isAttribute = 1040; // native
-const uint32_t float_abs = 1049; // abc
-const uint32_t float_acos = 1050; // abc
-const uint32_t float_asin = 1051; // abc
-const uint32_t float_atan = 1052; // abc
-const uint32_t float_atan2 = 1053; // abc
-const uint32_t float_ceil = 1054; // abc
-const uint32_t float_cos = 1055; // abc
-const uint32_t float_exp = 1056; // abc
-const uint32_t float_floor = 1057; // abc
-const uint32_t float_log = 1058; // abc
-const uint32_t float_pow = 1059; // abc
-const uint32_t float_random = 1060; // abc
-const uint32_t float_round = 1061; // abc
-const uint32_t float_sin = 1062; // abc
-const uint32_t float_sqrt = 1063; // abc
-const uint32_t float_tan = 1064; // abc
+const uint32_t float_abs = 1049; // native
+const uint32_t float_acos = 1050; // native
+const uint32_t float_asin = 1051; // native
+const uint32_t float_atan = 1052; // native
+const uint32_t float_atan2 = 1053; // native
+const uint32_t float_ceil = 1054; // native
+const uint32_t float_cos = 1055; // native
+const uint32_t float_exp = 1056; // native
+const uint32_t float_floor = 1057; // native
+const uint32_t float_log = 1058; // native
+const uint32_t float_pow = 1059; // native
+const uint32_t float_random = 1060; // native
+const uint32_t float_round = 1061; // native
+const uint32_t float_sin = 1062; // native
+const uint32_t float_sqrt = 1063; // native
+const uint32_t float_tan = 1064; // native
 const uint32_t float_reciprocal = 1065; // native
 const uint32_t float_rsqrt = 1066; // native
 const uint32_t float_max = 1067; // abc
@@ -1347,6 +1347,22 @@ extern avmplus::Atom XMLList_AS3_setNamespace_thunk(MethodEnv* env, uint32_t arg
 extern avmplus::Atom QName_localName_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom QName_uri_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_utils_Proxy_flash_proxy_isAttribute_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_abs_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_acos_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_asin_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_atan_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_atan2_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_ceil_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_cos_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_exp_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_floor_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_log_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_pow_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_random_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_round_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_sin_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_sqrt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern float float_tan_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern float float_reciprocal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern float float_rsqrt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern float float_private__minValue_thunk(MethodEnv* env, uint32_t argc, Atom* argv);

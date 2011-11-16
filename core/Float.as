@@ -69,24 +69,24 @@ package
         // E262 {ReadOnly, DontDelete, DontEnum }
         public static const length:int = 1
 
-        public static        function abs        (x:float)        :float  { return float( Math.abs(x) );     }
-        public static        function acos       (x:float)        :float  { return float( Math.acos(x) );    }
-        public static        function asin       (x:float)        :float  { return float( Math.asin(x) );    }
-        public static        function atan       (x:float)        :float  { return float( Math.atan(x) );    }
-        public static        function atan2      (y:float,x:float):float  { return float( Math.atan2(y,x) ); }
-        public static        function ceil       (x:float)        :float  { return float( Math.ceil(x) );    }
-        public static        function cos        (x:float)        :float  { return float( Math.cos(x) );     }
-        public static        function exp        (x:float)        :float  { return float( Math.exp(x) );     }
-        public static        function floor      (x:float)        :float  { return float( Math.floor(x) );   }
-        public static        function log        (x:float)        :float  { return float( Math.log(x) );     }
-        public static        function pow        (x:float,y:float):float  { return float( Math.pow(x,y) );   }
-        public static        function random     ()               :float  { return float( Math.random() );   }
-        public static        function round      (x:float)        :float  { return float( Math.round(x) );   }
-        public static        function sin        (x:float)        :float  { return float( Math.sin(x) );     }
-        public static        function sqrt       (x:float)        :float  { return float( Math.sqrt(x) );    }
-        public static        function tan        (x:float)        :float  { return float( Math.tan(x) );     }
-        public static native function reciprocal (arg:float)      :float;
-        public static native function rsqrt      (arg:float)      :float;
+        public native static function abs        (x:float)        :float;
+        public native static function acos       (x:float)        :float;
+        public native static function asin       (x:float)        :float;
+        public native static function atan       (x:float)        :float;
+        public native static function atan2      (y:float,x:float):float;
+        public native static function ceil       (x:float)        :float;
+        public native static function cos        (x:float)        :float;
+        public native static function exp        (x:float)        :float;
+        public native static function floor      (x:float)        :float;
+        public native static function log        (x:float)        :float;
+        public native static function pow        (x:float,y:float):float;
+        public native static function random     ()               :float;
+        public native static function round      (x:float)        :float;
+        public native static function sin        (x:float)        :float;
+        public native static function sqrt       (x:float)        :float;
+        public native static function tan        (x:float)        :float;
+        public native static function reciprocal (arg:float)      :float;
+        public native static function rsqrt      (arg:float)      :float;
 
         public static function max( ...xs ) : float  
         {

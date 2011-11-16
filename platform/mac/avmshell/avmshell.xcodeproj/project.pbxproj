@@ -494,6 +494,8 @@
 		072EA1080F4C1D1B009F11E6 /* smoketest.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest.as; path = ../../../eval/smoketest.as; sourceTree = SOURCE_ROOT; };
 		072EA1090F4C1D1B009F11E6 /* smoketest2.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest2.as; path = ../../../eval/smoketest2.as; sourceTree = SOURCE_ROOT; };
 		072EA10A0F4C1D1B009F11E6 /* smoketest3.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest3.as; path = ../../../eval/smoketest3.as; sourceTree = SOURCE_ROOT; };
+		073408DE1473D0D3004B5E76 /* MathUtilsWin-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MathUtilsWin-inlines.h"; path = "../../win32/MathUtilsWin-inlines.h"; sourceTree = SOURCE_ROOT; };
+		073408DF1473D0D3004B5E76 /* MathUtilsWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MathUtilsWin.cpp; path = ../../win32/MathUtilsWin.cpp; sourceTree = SOURCE_ROOT; };
 		073739F112A65F5F00F888F6 /* MultinameHashtable-impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MultinameHashtable-impl.h"; path = "../../../core/MultinameHashtable-impl.h"; sourceTree = SOURCE_ROOT; };
 		073890AE1473AD7B002A2A98 /* Float.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = Float.as; path = ../../../core/Float.as; sourceTree = SOURCE_ROOT; };
 		073AC650116A5DC000215772 /* ST_mmgc_gcheap.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_gcheap.st; path = ../../../extensions/ST_mmgc_gcheap.st; sourceTree = SOURCE_ROOT; };
@@ -1120,6 +1122,8 @@
 		077494B60F8E2D9B00230F6D /* Non-Mac */ = {
 			isa = PBXGroup;
 			children = (
+				073408DE1473D0D3004B5E76 /* MathUtilsWin-inlines.h */,
+				073408DF1473D0D3004B5E76 /* MathUtilsWin.cpp */,
 				0709B6C90F98DFD8001A6E61 /* symbian-platform.h */,
 				077494B80F8E2DC900230F6D /* unix-platform.h */,
 				077494B70F8E2DBA00230F6D /* win32-platform.h */,

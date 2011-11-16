@@ -211,6 +211,85 @@ namespace avmplus
 #endif /* X86_MATH */
     }
 
+    // TODO: Optimize the float versions, but only if benchmarking shows it to be useful to do so.
+
+    REALLY_INLINE float MathUtils::absf(float value)
+    {
+        return ::fabsf(value);
+    }
+    
+    REALLY_INLINE float MathUtils::acosf(float value)
+    {
+        return ::acosf(value);
+    }
+    
+    REALLY_INLINE float MathUtils::asinf(float value)
+    {
+        return ::asinf(value);
+    }
+    
+    REALLY_INLINE float MathUtils::atanf(float value)
+    {
+        return ::atanf(value);
+    }
+    
+    REALLY_INLINE float MathUtils::atan2f(float y, float x)
+    {
+        return ::atan2f(y, x);
+    }
+    
+    REALLY_INLINE float MathUtils::ceilf(float value)
+    {
+        return ::ceilf(value);
+    }
+    
+    REALLY_INLINE float MathUtils::cosf(float value)
+    {
+#if defined(VMCFG_TWEAK_SIN_COS_NONFINITE)
+        if (isNaNf(value) || isInfinitef(value))
+            return kFltNaN;
+#endif
+        return ::cosf(value);
+    }
+    
+    REALLY_INLINE float MathUtils::expf(float value)
+    {
+        return ::expf(value);
+    }
+    
+    REALLY_INLINE float MathUtils::floorf(float value)
+    {
+        return ::floorf(value);
+    }
+    
+    REALLY_INLINE float MathUtils::logf(float value)
+    {
+        return ::logf(value);
+    }
+    
+    REALLY_INLINE float MathUtils::modf(float x, float y)
+    {
+        return ::fmodf(x, y);
+    }
+    
+    REALLY_INLINE float MathUtils::sinf(float value)
+    {
+#if defined(VMCFG_TWEAK_SIN_COS_NONFINITE)
+        if (isNaNf(value) || isInfinitef(value))
+            return kFltNaN;
+#endif
+        return ::sinf(value);
+    }
+    
+    REALLY_INLINE float MathUtils::sqrtf(float value)
+    {
+        return ::sqrtf(value);
+    }
+    
+    REALLY_INLINE float MathUtils::tanf(float value)
+    {
+        return ::tanf(value);
+    }
 }
 
 // Restore the prevailing floating-point model.
