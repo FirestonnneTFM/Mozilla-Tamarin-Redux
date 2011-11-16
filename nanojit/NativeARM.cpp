@@ -2866,6 +2866,7 @@ Assembler::asm_branch(bool branchOnFalse, LIns* cond, NIns* targ)
         // Floating-point conditions. Note that the VFP LT/LE conditions
         // require use of the unsigned condition codes, even though
         // float-point comparisons are always signed.
+        case LIR_eqf4:
         case LIR_eqd: case LIR_eqf:   cc = EQ;    fp_cond = true;     break;
         case LIR_ltd: case LIR_ltf:   cc = LO;    fp_cond = true;     break;
         case LIR_led: case LIR_lef:   cc = LS;    fp_cond = true;     break;

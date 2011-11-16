@@ -202,18 +202,6 @@ typedef float32x4_t  float4_t;
 #define f4_sub       vsubq_f32
 #define f4_mul       vmulq_f32
 
-REALLY_INLINE float4_t f4_div(float4_t a, float4_t b)
-{
-      // Get an initial estimate of 1/b.
-      float4_t reciprocal = vrecpeq_f32(b); 
-      // Use two Newton-Raphson steps to refine the estimate.
-      reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
-      reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
-      // Finally, compute a/b = a*(1/b) .
-      float4_t result = vmulq_f32(a, reciprocal);
-      return result;
-}
-
 REALLY_INLINE int32_t f4_eq_i(float4_t a, float4_t b)
 {
     uint32x2_t res = vreinterpret_u32_u16(vmovn_u32(vceqq_f32(a, b)));
@@ -224,6 +212,13 @@ REALLY_INLINE float f4_x(float4_t v) { return vgetq_lane_f32(v, 0); }
 REALLY_INLINE float f4_y(float4_t v) { return vgetq_lane_f32(v, 1); }
 REALLY_INLINE float f4_z(float4_t v) { return vgetq_lane_f32(v, 2); }
 REALLY_INLINE float f4_w(float4_t v) { return vgetq_lane_f32(v, 3); }
+
+REALLY_INLINE float4_t f4_div(float4_t a, float4_t b)
+{
+    float4_t result = { f4_x(a) / f4_x(b), f4_y(a) / f4_y(b), f4_z(a) / f4_z(b), f4_w(a) / f4_w(b) };
+    return result;
+}
+
 
 #elif defined VMCFG_MIPS
 
