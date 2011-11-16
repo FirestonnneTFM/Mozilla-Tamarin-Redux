@@ -924,10 +924,10 @@ namespace avmshell
             currentToken = commandLine;
 
             char *command = nextToken();
-            int cmd = commandFor(command);
 
             TRY(core, avmplus::kCatchAction_Ignore)
             {
+            int cmd = commandFor(command);
             switch (cmd) {
             case -1:
                 // ambiguous, we already printed error message
