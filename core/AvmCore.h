@@ -177,7 +177,6 @@ const int kBufferPadding = 16;
         uint64_t bits64;
     };
 
-#ifdef VMCFG_FLOAT
     union float_overlay
     {
         float_overlay() {}
@@ -187,7 +186,8 @@ const int kBufferPadding = 16;
         float value;
         uint32_t word;
     };
-
+    
+#ifdef VMCFG_FLOAT
     union float4_overlay
     {
         float4_overlay() {}

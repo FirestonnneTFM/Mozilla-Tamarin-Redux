@@ -86,41 +86,71 @@ namespace avmplus
         static const double kNaN;
         static const double kInfinity;
         static const double kNegInfinity;
+        static const float  kFltNaN;
     public:
+        // The use of the "f" suffix on float functions is really unfortunate
+        // but unavoidable, the JIT's method tables cannot deal with overloaded
+        // method names.
         static double abs(double value);
+        
+        static float  absf(float value);
+        static float  acosf(float value);
+        static float  asinf(float value);
+        static float  atanf(float value);
+        static float  atan2f(float y, float x);
+        static float  ceilf(float value);
+        static float  cosf(float value);
+        static bool   equalsf(float x, float y);
+        static float  expf(float value);
+        static float  floorf(float value);
+        static int32_t isInfinitef(float value);
+        static bool   isNaNf(float value);
+        static bool   isNegZerof(float x);
+        static float  logf(float value);
+        static float  maxf(float x, float y);
+        static float  minf(float x, float y);
+        static float  modf(float x, float y);
+        static float  roundf(float value);
+        static float  sinf(float value);
+        static float  sqrtf(float value);
+        static float  tanf(float value);
+        static float  toIntf(float value);
+
         static double acos(double value);
         static double asin(double value);
         static double atan(double value);
         static double atan2(double y, double x);
         static double ceil(double value);
         static double cos(double value);
-        static bool equals(double x, double y);
+        static bool   equals(double x, double y);
         static double exp(double value);
         static double floor(double value);
         static uint64_t  frexp(double x, int32_t *eptr);
-        REALLY_INLINE static double infinity();
-        REALLY_INLINE static double neg_infinity();
         /// Return 1 if value is +Infinity, -1 if -Infinity, 0 otherwise.
         static int32_t isInfinite(double value);
-        REALLY_INLINE static bool isNaNInline(double value); // only for time critical routines
-        static bool isNaN(double value);
-        static bool isNegZero(double x);
+        static bool   isNaNInline(double value); // only for time critical routines
+        static bool   isNaN(double value);
+        static bool   isNegZero(double x);
         static double log(double value);
-        REALLY_INLINE static double max(double x, double y);
-        REALLY_INLINE static double min(double x, double y);
+        static double max(double x, double y);
+        static double min(double x, double y);
         static double mod(double x, double y);
-        REALLY_INLINE static double nan();
-        static int32_t nextPowerOfTwo(int32_t n);
-        static double parseInt(Stringp s, int32_t radix=10, bool strict=true);
         static double pow(double x, double y);
         static double powInternal(double x, double y);
-        static void initRandom(TRandomFast *seed);
+        static void   initRandom(TRandomFast *seed);
         static double random(TRandomFast *seed);
         static double round(double value);
         static double sin(double value);
         static double sqrt(double value);
         static double tan(double value);
         static double toInt(double value);
+
+        static double parseInt(Stringp s, int32_t radix=10, bool strict=true);
+        static int32_t nextPowerOfTwo(int32_t n);
+
+        static double nan();
+        static double infinity();
+        static double neg_infinity();
 
         /**
          * Enumeration values for the minimum buffer size required to convert

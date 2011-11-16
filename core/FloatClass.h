@@ -56,6 +56,15 @@ namespace avmplus
             return new (gc, MMgc::kExact, cvtable->getExtraSize()) FloatClass(cvtable);
         }
                 
+#ifdef DRC_TRIVIAL_DESTRUCTOR
+        ~FloatClass()
+        {
+            seed.uValue = 0;
+            seed.uXorMask = 0;
+            seed.uSequenceLength = 0;
+        }
+#endif
+        
         // this = argv[0]
         // arg1 = argv[1]
         // argN = argv[argc]
@@ -65,8 +74,24 @@ namespace avmplus
             return construct(argc,argv);
         }
         
+        float abs(float x);
+        float acos(float x);
+        float asin(float x);
+        float atan(float x);
+        float atan2(float y, float x);
+        float ceil(float x);
+        float cos(float x);
+        float exp(float x);
+        float floor(float x);
+        float log(float x);
+        float pow(float x, float y);
+        float random();
         float reciprocal(float x);
+        float round(float x);
         float rsqrt(float x);
+        float sin(float x);
+        float sqrt(float x);
+        float tan(float x);
         float _minValue();
         Stringp _convert(float n, int precision, int mode);
         Stringp _floatToString(float n, int radix);
@@ -74,6 +99,8 @@ namespace avmplus
         // ------------------------ DATA SECTION BEGIN
     private:    
         GC_NO_DATA(FloatClass)
+        
+        TRandomFast seed;
         
         DECLARE_SLOTS_FloatClass;
         // ------------------------ DATA SECTION END
