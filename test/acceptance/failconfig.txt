@@ -350,12 +350,10 @@ as3/Types/Float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 
 ####################
 # Float4
 ####################
-as3/Types/Float4/component_access:^float4\.(xxxx|yyyy|zzzz|wwww|xyzw|wzyx), arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 as3/Types/Float4/component_access:^float4\['(xxxx|yyyy|zzzz|wwww|xyzw|wzyx)'\], arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
-as3/Types/Float4/component_access_swizzle, arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
+as3/Types/Float4/component_access_swizzle:^float4\['(x|y|z|w){4}'\], arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 as3/Types/Float4/float4Operations:Flt4(Any|Flt4)Ops Xyzzy, arm-lnx.*-Dinterp , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 as3/Types/Float4/float4Operations:Flt4(Any|Flt4)Ops (?!.*EQ).*, arm-.*debug.* , -Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700642
-
 
 as3/Types/Float4/op_binary_logical_and:^float4\(1f\) && float4\(0f\), .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
 as3/Types/Float4/op_binary_logical_and:^float4\(1f. 2f. 3f. 4f\) && float4\(-1f. -2f. -3f. -4f\) , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
@@ -376,3 +374,7 @@ ecma3/Date/e15_9_5_10_3:\(new Date\([2-9]\d{9}\)\), x64-.* , -Dinterp ,   expect
 
 as3/Types/Float/exp:^float\.exp\(float\.(POSITIVE|NEGATIVE)_INFINITY\), x86-win.*-release.*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
 as3/Types/Float/atan2:^float\.atan2\(float\.(POSITIVE|NEGATIVE)_INFINITY. float\.(POSITIVE|NEGATIVE)_INFINITY\) , x86-win.*-debug.*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
+
+as3/Types/Float/exp, .*diff,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
+as3/Types/Float/atan2, .*diff,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
+
