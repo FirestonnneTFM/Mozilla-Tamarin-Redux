@@ -457,26 +457,20 @@ namespace avmplus
         bool has_interned = false;
         if (!AvmCore::isDictionaryLookup(nameatom, obj))
         {
-            Stringp name;
-            bool is_float4 = IFFLOAT( AvmCore::isFloat4(obj), false);
-            
             if (avmplus::atomIsIntptr(nameatom) &&
                 avmplus::atomCanBeUint32(nameatom))
             {
+#ifdef VMCFG_FLOAT
+                if (AvmCore::isFloat4(obj))
+                {
+                    uint32_t index = uint32_t(avmplus::atomGetIntptr(nameatom));
+                    if (index != 4294967295U)
+                        return (index <= 3 ? trueAtom : falseAtom);
+                }
+#endif
                 ScriptObject* o;
                 if (atomKind(obj) != kObjectType)
-                {
-#ifdef VMCFG_FLOAT
-                    // See FIXME in Toplevel::getproperty for why this is "correct".
-                    if (is_float4)
-                    {
-                        uint32_t index;
-                        if (AvmCore::getIndexFromAtom(nameatom, &index))
-                            return (index <= 3 ? trueAtom : falseAtom);
-                    }
-#endif
                     o = this->toPrototype(obj);
-                }
                 else
                     o = AvmCore::atomToScriptObject(obj);
                 
@@ -485,11 +479,8 @@ namespace avmplus
                     falseAtom;
             }
 
-            name = core->intern(nameatom);
+            Stringp name = core->intern(nameatom);
             has_interned = true;
-
-            if (is_float4 && name == core->klength)  // TODO: is this test really necessary?
-                return trueAtom;
 
             // ISSUE should we try this on each object on the proto chain or just the first?
             TraitsBindingsp td = t->getTraitsBindings();
@@ -500,6 +491,16 @@ namespace avmplus
             nameatom = name->atom();
         }
 
+#ifdef VMCFG_FLOAT
+        if (AvmCore::isFloat4(obj))
+        {
+            uint32_t index;
+            // getIndexFromAtom is not defined on negative values
+            if (AvmCore::getIndexFromAtom(nameatom, &index))
+                return (index <= 3 ? trueAtom : falseAtom);
+        }
+#endif
+        
         ScriptObject* o = atomKind(obj)==kObjectType ?
                 AvmCore::atomToScriptObject(obj) :
                 this->toPrototype(obj);
