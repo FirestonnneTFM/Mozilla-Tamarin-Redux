@@ -132,7 +132,6 @@ namespace avmplus
         void cleanup();
     };
 
-#ifdef VMCFG_LOOKUP_CACHE
     /**
      * helper class for building the layout of a lookup cache, used during
      * jit compilation or wordcode translation.
@@ -157,6 +156,5 @@ namespace avmplus
 
         void cleanup();
     };
-#endif
 }
 #endif  /* __avmplus_Coder__ */

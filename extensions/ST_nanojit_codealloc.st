@@ -43,6 +43,11 @@
 
 %%prefix
 
+// This conditionalization is clumsy, but we don't seem to have any other
+// mechanism to enable a selftest conditionally upon the configuration.
+
+#ifdef VMCFG_NANOJIT
+
 using nanojit::NIns;
 using nanojit::CodeList;
 using nanojit::CodeAlloc;
@@ -171,7 +176,11 @@ void CodeAllocDriver::run(uint32_t iterations)
     mmfx_delete_array(codelists);
 }
 
+#endif /* VMCFG_NANOJIT */
+
 %%methods
+
+#ifdef VMCFG_NANOJIT
 
 typedef CodeAllocDriver::CodeListProfile CodeListProfile;
 typedef CodeAllocDriver::AllocationProfile AllocationProfile;
@@ -179,7 +188,10 @@ typedef CodeAllocDriver::AllocationProfile AllocationProfile;
 static CodeListProfile cp = { 5, 1, 1*1024, 1, 16*1024 };
 
 static AllocationProfile ap[] = { { 0,     2 },
+                                  #ifndef NANOJIT_64BIT
+                                  // 128-byte minimum is too small on 64-bit platorms.
                                   { 128,   2 },
+                                  #endif
                                   { 512,   2 },
                                   { 1024,  2 },
                                   { 2048,  2 },
@@ -187,12 +199,20 @@ static AllocationProfile ap[] = { { 0,     2 },
 
 static uint32_t n_ap = sizeof(ap) / sizeof(AllocationProfile);
 
+#endif /* VMCFG_NANOJIT */
+
 %%test allocfree
+
+#ifdef VMCFG_NANOJIT
+
 for (uint32_t i = 0; i < n_ap; i++) {
     CodeAllocDriver* driver = mmfx_new(CodeAllocDriver(20, cp, ap[i]));
     driver->run(20000);
     mmfx_delete(driver);
  }
+
+#endif /* VMCFG_NANOJIT */
+
 // We pass if we don't crash or assert.
 %%verify true
 

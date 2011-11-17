@@ -185,6 +185,12 @@ namespace avmshell
 
     }
 
+    double SystemClass::getNanosecondTimer()
+    {
+        return ((VMPI_getPerformanceCounter() - initialTime) * 1e9)
+            / VMPI_getPerformanceFrequency();
+    }
+
     int SystemClass::user_argc;
     char **SystemClass::user_argv;
 

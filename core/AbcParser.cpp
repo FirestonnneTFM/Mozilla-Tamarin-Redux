@@ -380,10 +380,9 @@ namespace avmplus
 
     PoolObject* AbcParser::parse(ApiVersion apiVersion)
     {
-#ifdef VMCFG_LOOKUP_CACHE
         // Loading a new ABC file always invalidates the lookup cache
         core->invalidateLookupCache();
-#endif
+
         // Loading a new ABC file always invalidates the traits cache(s)
         core->tbCache()->flush();
         core->tmCache()->flush();
