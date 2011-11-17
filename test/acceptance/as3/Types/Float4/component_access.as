@@ -92,10 +92,10 @@ AddErrorTest("float4[2] as a setter", REFERENCEERROR, function(){ flt4[2] = 12f 
 AddErrorTest("float4[3] as a setter", REFERENCEERROR, function(){ flt4[3] = 12f });
 
 // Access outside of valid index ranges section 4.6.3.2.b
-AddErrorTest("float4[-1]", RANGEERROR, function(){ flt4[-1]; });
+AddErrorTest("float4[-1]", REFERENCEERROR, function(){ flt4[-1]; });
 AddErrorTest("float4[4]", RANGEERROR, function(){ flt4[4]; });
 var i:Number = -1;
-AddErrorTest("float4[i] -1", RANGEERROR, function(){ flt4[i]; });
+AddErrorTest("float4[i] -1", REFERENCEERROR, function(){ flt4[i]; });
 i = 4;
 AddErrorTest("float4[i] 4", RANGEERROR, function(){ flt4[i]; });
 
