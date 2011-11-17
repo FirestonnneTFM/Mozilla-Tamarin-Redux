@@ -282,6 +282,18 @@ Atom constructprop(Toplevel* toplevel, const Multiname* multiname, int argc, Ato
         }
         else
         {
+#ifdef VMCFG_FLOAT
+            if (AvmCore::isFloat4(obj))
+            {
+                // See FIXME in Toplevel::getproperty for why this is "correct".
+                if (multiname->isValidDynamicName())
+                {
+                    uint32_t index;
+                    if (AvmCore::getIndexFromAtom(multiname->getName()->atom(), &index))
+                        toplevel->throwTypeError(kConstructOfNonFunctionError);
+                }
+            }
+#endif
             // primitive types are not dynamic, so we can go directly
             // to their __proto__ object
             o = toplevel->toPrototype(obj);

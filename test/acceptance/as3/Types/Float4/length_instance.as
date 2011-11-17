@@ -49,7 +49,7 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 var flt4:float4 = new float4(1f);
 AddTestCase("flt4.length is int", "int", getQualifiedClassName(flt4.length));
 AddTestCase("flt4.length is 4", 4, flt4.length);
-AddErrorTest("flt4.length set", REFERENCEERROR+1056,  function(){ flt4.length = 12; });
+AddErrorTest("flt4.length set", REFERENCEERROR+1074,  function(){ flt4.length = 12; });
 
 test();
 
