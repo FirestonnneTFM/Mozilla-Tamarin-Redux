@@ -334,9 +334,7 @@ namespace avmplus
         , livePools(NULL)
         , m_activeApiVersionSeries(apiVersionSeries)
         , m_activeApiVersionSeriesMask(1 << apiVersionSeries)
-#ifdef VMCFG_LOOKUP_CACHE
         , lookup_cache_timestamp(1)
-#endif
 #ifdef VMCFG_NANOJIT
         , m_flushBindingCachesNextSweep(false)
 #endif
@@ -5040,12 +5038,25 @@ return the result of the comparison ToPrimitive(x) == y.
     {
         for (MethodFrame* f = currentMethodFrame; f != NULL; f = f->next)
         {
-            MethodEnv* env = f->env();
-            if (env && !env->method->pool()->isBuiltin)  // FIXME is the isBuiltin check necessary?
+            CodeContext* cc = f->cc();
+            if (cc)
             {
-                ApiVersion const apiVersion = env->method->pool()->getApiVersion();
+                // There is no user code on the stack, but we entered actionscript on behalf of some toplevel,
+                // so use its version. There might be user code below an EnterCodeContext, but it would be
+                // irrelevant because it represents an entirely different entry into the VM.
+                ApiVersion apiVersion = cc->domainEnv()->toplevel()->abcEnv()->pool()->getApiVersion();
                 AvmAssert(isValidApiVersion(apiVersion));
                 return apiVersion;
+            }
+            else
+            {
+                MethodEnv* env = f->env();
+                if (env && !env->method->pool()->isBuiltin)
+                {
+                    ApiVersion apiVersion = env->method->pool()->getApiVersion();
+                    AvmAssert(isValidApiVersion(apiVersion));
+                    return apiVersion;
+                }
             }
         }
         ApiVersion const apiVersion = this->getDefaultAPI();

@@ -273,7 +273,6 @@ namespace avmplus
 #endif
         VTable* vtable() const;
 
-#ifdef VMCFG_LOOKUP_CACHE
     public:
         // LookupCache is part of an ExactStructContainer<> array, hence the gcTrace method.
         class LookupCache
@@ -293,7 +292,6 @@ namespace avmplus
         
         // Clear out the lookup cache elements
         static void cleanLookupCache(ExactStructContainer<LookupCache>* self);
-#endif
 
     // ------------------------ DATA SECTION BEGIN
         GC_DATA_BEGIN(MethodEnv)
@@ -306,9 +304,7 @@ namespace avmplus
     private:
         uintptr_t                   GC_CONSERVATIVE(activationOrMCTable);
     public:
-#ifdef VMCFG_LOOKUP_CACHE
         GCMember<ExactStructContainer<LookupCache> > GC_POINTER(lookup_cache);
-#endif
 
         GC_DATA_END(MethodEnv)
     // ------------------------ DATA SECTION END

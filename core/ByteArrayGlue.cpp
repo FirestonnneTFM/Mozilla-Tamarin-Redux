@@ -988,8 +988,8 @@ namespace avmplus
             u.words[second] = ((uint32_t)b[4] << 24) | ((uint32_t)b[5] << 16) | ((uint32_t)b[6] << 8) | (uint32_t)b[7]; //   big-endian
             return u.dval;
 #else
-            u.words[first] = ((uint32_t)b[7] << 24) | ((uint32_t)b[6] << 16) | ((uint32_t)b[5] << 8) | (uint32_t)b[4]; // read
-            u.words[second] = ((uint32_t)b[3] << 24) | ((uint32_t)b[2] << 16) | ((uint32_t)b[1] << 8) | (uint32_t)b[0]; //   little-endian
+            u.words[first] = ((uint32_t)b[3] << 24) | ((uint32_t)b[2] << 16) | ((uint32_t)b[1] << 8) | (uint32_t)b[0]; // read
+            u.words[second] = ((uint32_t)b[7] << 24) | ((uint32_t)b[6] << 16) | ((uint32_t)b[5] << 8) | (uint32_t)b[4]; //   little-endian
             return u.dval;
 #endif
         }
@@ -1211,15 +1211,15 @@ namespace avmplus
             uint32_t w;
             u.dval = value;
             w = u.words[first];
-            b[7] = (w >> 24);   // write
-            b[6] = (w >> 16);   //   little
-            b[5] = (w >> 8);    //     endian
-            b[4] = w;
-            w = u.words[second];
             b[3] = (w >> 24);   // write
             b[2] = (w >> 16);   //   little
             b[1] = (w >> 8);    //     endian
             b[0] = w;
+            w = u.words[second];
+            b[7] = (w >> 24);   // write
+            b[6] = (w >> 16);   //   little
+            b[5] = (w >> 8);    //     endian
+            b[4] = w;
 #endif
         }
         else

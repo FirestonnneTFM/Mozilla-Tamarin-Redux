@@ -76,6 +76,12 @@ namespace avmplus
                 // we might be a dynamic subclass of a non-dynamic subclass of Array.
                 if (proc == SemiSealedArrayObject::createInstanceProc)
                     proc = ArrayClass::createInstanceProc;
+
+                // Bugzilla 688486: don't use unsubclassed-specialized
+                // instance creator to create subclassed instances.
+                if (proc == ArrayClass::createUnsubclassedInstanceProc)
+                    proc = ArrayClass::createInstanceProc;
+
                 return proc;
             }
         }
@@ -97,6 +103,12 @@ create_normal:
                 {
                     return SemiSealedArrayObject::createInstanceProc;
                 }
+            }
+
+            // Bugzilla 688486: if this is unsubclassed array, let it be simple.
+            if (itraits == itraits->core->traits.array_itraits)
+            {
+                return ArrayClass::createUnsubclassedInstanceProc;
             }
 
             Traits* base = itraits->base;

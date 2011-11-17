@@ -4047,6 +4047,11 @@ void create_mmgc_weakref(AvmCore* core) { new ST_mmgc_weakref(core); }
 namespace avmplus {
 namespace ST_nanojit_codealloc {
 
+// This conditionalization is clumsy, but we don't seem to have any other
+// mechanism to enable a selftest conditionally upon the configuration.
+
+#ifdef VMCFG_NANOJIT
+
 using nanojit::NIns;
 using nanojit::CodeList;
 using nanojit::CodeAlloc;
@@ -4175,6 +4180,8 @@ void CodeAllocDriver::run(uint32_t iterations)
     mmfx_delete_array(codelists);
 }
 
+#endif /* VMCFG_NANOJIT */
+
 class ST_nanojit_codealloc : public Selftest {
 public:
 ST_nanojit_codealloc(AvmCore* core);
@@ -4195,13 +4202,18 @@ case 0: test0(); return;
 }
 }
 
+#ifdef VMCFG_NANOJIT
+
 typedef CodeAllocDriver::CodeListProfile CodeListProfile;
 typedef CodeAllocDriver::AllocationProfile AllocationProfile;
 
 static CodeListProfile cp = { 5, 1, 1*1024, 1, 16*1024 };
 
 static AllocationProfile ap[] = { { 0,     2 },
+                                  #ifndef NANOJIT_64BIT
+                                  // 128-byte minimum is too small on 64-bit platorms.
                                   { 128,   2 },
+                                  #endif
                                   { 512,   2 },
                                   { 1024,  2 },
                                   { 2048,  2 },
@@ -4209,14 +4221,22 @@ static AllocationProfile ap[] = { { 0,     2 },
 
 static uint32_t n_ap = sizeof(ap) / sizeof(AllocationProfile);
 
+#endif /* VMCFG_NANOJIT */
+
 void ST_nanojit_codealloc::test0() {
+
+#ifdef VMCFG_NANOJIT
+
 for (uint32_t i = 0; i < n_ap; i++) {
     CodeAllocDriver* driver = mmfx_new(CodeAllocDriver(20, cp, ap[i]));
     driver->run(20000);
     mmfx_delete(driver);
  }
+
+#endif /* VMCFG_NANOJIT */
+
 // We pass if we don't crash or assert.
-// line 197 "ST_nanojit_codealloc.st"
+// line 217 "ST_nanojit_codealloc.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 

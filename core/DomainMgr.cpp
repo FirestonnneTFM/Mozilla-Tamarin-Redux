@@ -408,10 +408,8 @@ void DomainMgr::addNamedScriptEnvs(AbcEnv* abcEnv, const GCList<ScriptEnv>& envs
 
     delete ht;
 
-#ifdef VMCFG_LOOKUP_CACHE
     // Adding scripts to a domain always invalidates the lookup cache.
     core->invalidateLookupCache();
-#endif
 }
 
 ScriptEnv* DomainMgr::mapScriptToScriptEnv(DomainEnv* domainEnv, MethodInfo* mi)
