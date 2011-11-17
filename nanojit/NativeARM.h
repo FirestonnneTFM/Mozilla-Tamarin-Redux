@@ -298,10 +298,10 @@ static const RegisterMask SavedFpRegs = 0;
 static const RegisterMask SavedRegs = 1<<R4 | 1<<R5 | 1<<R6 | 1<<R7 | 1<<R8 | 1<<R9 | 1<<R10;
 static const int NumSavedRegs = 7;
 
-const RegisterMask FpSRegs = 0x0000ffffffff0000LL; // S0-S31
-const RegisterMask FpDRegs = 0xffffffffffff0000LL; // D0-D31
-const RegisterMask FpQRegs = 0xffffffffffff0000LL; // Q0-Q15
-const RegisterMask GpRegs  = 0xffff;               // R0-R10,FP,IP,SP,LR,PC
+const RegisterMask FpSRegs = 0x00000000ffff0000LL; // S0-S15
+const RegisterMask FpDRegs = 0xffff0000ffff0000LL; // D0-D7,D16-D31
+const RegisterMask FpQRegs = 0xffff0000ffff0000LL; // Q0-Q3,Q8-Q15
+const RegisterMask GpRegs  = 0x000000000000ffffLL; // R0-R10,FP,IP,SP,LR,PC
 const RegisterMask AllowableFlagRegs = 0x07ff;     // R0-R10
 
 #define isU12(offs) (((offs) & 0xfff) == (offs))
@@ -310,9 +310,9 @@ inline bool IsFpSReg(Register _r) { return _r >=FirstSFloatReg && _r < FirstDFlo
 inline bool IsFpDReg(Register _r) { return _r >=FirstDFloatReg && _r < FirstQFloatReg; }
 inline bool IsFpQReg(Register _r) { return _r >=FirstQFloatReg && _r <= Q15; }
 inline bool IsGpReg(Register _r) { return _r < FirstSFloatReg; }
-#define FpSRegNum(_fpr)  (REGNUM(_fpr) - FirstSFloatReg )
-#define FpDRegNum(_fpr)  ( (REGNUM(_fpr) - FirstDFloatReg) ^ 16 ) // mind the reversed order of the banks
-#define FpQRegNum(_fpr)  (REGNUM(_fpr) - FirstQFloatReg )
+#define FpSRegNum(_fpr)  (REGNUM(_fpr) - FirstSFloatReg)
+#define FpDRegNum(_fpr)  ((REGNUM(_fpr) - FirstDFloatReg) ^ 16) // mind the reversed order of the banks
+#define FpQRegNum(_fpr)  (REGNUM(_fpr) - FirstQFloatReg)
 #define SReg(num)  (FirstSFloatReg + (num) )
 #define DReg(num)  (FirstDFloatReg + ((num) ^ 16))  // mind the reversed order of the register banks
 #define QReg(num)  (FirstQFloatReg + (num) )
