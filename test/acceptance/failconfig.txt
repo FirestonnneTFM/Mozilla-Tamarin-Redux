@@ -350,8 +350,6 @@ as3/Types/Float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 
 ####################
 # Float4
 ####################
-as3/Types/Float4/component_access_numeric_index, -Ojit, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=696070
-
 as3/Types/Float4/component_access:^float4\.(xxxx|yyyy|zzzz|wwww|xyzw|wzyx), arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 as3/Types/Float4/component_access:^float4\['(xxxx|yyyy|zzzz|wwww|xyzw|wzyx)'\], arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 as3/Types/Float4/component_access_swizzle, arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
@@ -378,3 +376,5 @@ ecma3/TypeConversion/e9_3_1_3_rt:^var z = 0. print\(1/-z\), -Dinterp , ,   expec
 ecma3/Date/e15_9_5_10_3:\(new Date\(\d{11}\)\), x64-.* , -Dinterp ,   expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703238
 ecma3/Date/e15_9_5_10_3:\(new Date\([2-9]\d{9}\)\), x64-.* , -Dinterp ,   expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703238
 
+as3/Types/Float/exp:^float\.exp\(float\.(POSITIVE|NEGATIVE)_INFINITY\), x86-win.*-release.*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
+as3/Types/Float/atan2:^float\.atan2\(float\.(POSITIVE|NEGATIVE)_INFINITY. float\.(POSITIVE|NEGATIVE)_INFINITY\) , x86-win.*-debug.*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
