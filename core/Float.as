@@ -501,6 +501,8 @@ package
         public function        get wwww() : float4               { return _swizzle(this,(3) | (3<<2) | (3<<4) | (3<<6)); }
         //////////////////////////////////////////////////////////////////////////////////////
 
+        public function get length(): uint { return 4; }
+
         AS3 function toString(radix=10):String {
             return this.x.toString(radix) + "," + this.y.toString(radix) + "," + this.z.toString(radix) + "," + this.w.toString(radix);
         }

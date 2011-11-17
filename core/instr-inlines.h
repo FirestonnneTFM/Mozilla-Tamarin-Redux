@@ -95,6 +95,22 @@ Atom call_obj_dynamic(Atom base, const Multiname* name, int argc, Atom* atomv)
 template <class E> REALLY_INLINE
 Atom call_prim_dynamic(E env, Atom val, const Multiname* name, int argc, Atom* args)
 {
+#ifdef VMCFG_FLOAT
+    if (AvmCore::isFloat4(val))
+    {
+        // See FIXME in Toplevel::getproperty for why this is "correct".
+        uint32_t index;
+        if (AvmCore::getIndexFromAtom(name->getName()->atom(), &index))
+        {
+            float val = 0.0f;
+            if (index <= 3) {
+                float4_overlay f4(AvmCore::atomToFloat4(val));
+                val = f4.floats[index];
+            }
+            return op_call(env, env->core()->floatToAtom(val), argc, args);
+        }
+    }
+#endif
     // primitive types are not dynamic, so we can go directly
     // to their __proto__ object
     ScriptObject* proto = env->toplevel()->toPrototype(val);
