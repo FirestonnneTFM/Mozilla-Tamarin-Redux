@@ -468,7 +468,7 @@ namespace avmplus
         {
             float4_overlay f4(AvmCore::atomToFloat4(obj));
             if (index >= 0 && index <= 3)
-                return f4.floats[index];
+                return core()->floatToAtom(f4.floats[index]);
             // See FIXME in Toplevel::getproperty() - do not absorb non-integer values outside
             // the range [0,2^32-2], but let them pass through to the prototype lookup.
             if (index >= 0)
@@ -501,7 +501,7 @@ namespace avmplus
         {
             float4_overlay f4(AvmCore::atomToFloat4(obj));
             if (index <= 3)
-                return f4.floats[index];
+                return core()->floatToAtom(f4.floats[index]);
             // See FIXME in Toplevel::getproperty() - do not absorb non-integer values outside
             // the range [0,2^32-2], but let them pass through to the prototype lookup.
             if (index != 4294967295U)
@@ -546,16 +546,16 @@ namespace avmplus
         else if (AvmCore::isFloat4(obj))
         {
             float4_overlay f4(AvmCore::atomToFloat4(obj));
-            if (index == 0.0) return f4.floats[0];
-            if (index == 1.0) return f4.floats[1];
-            if (index == 2.0) return f4.floats[2];
-            if (index == 3.0) return f4.floats[3];
+            if (index == 0.0) return core()->floatToAtom(f4.floats[0]);
+            if (index == 1.0) return core()->floatToAtom(f4.floats[1]);
+            if (index == 2.0) return core()->floatToAtom(f4.floats[2]);
+            if (index == 3.0) return core()->floatToAtom(f4.floats[3]);
             // See FIXME in Toplevel::getproperty() - do not absorb non-integer values outside
             // the range [0,2^32-2], but let them pass through to the prototype lookup.
             if (index >= 0.0 && index <= 4294967294.0) {
                 uint32_t u = uint32_t(index);
                 if (double(u) == index) 
-                    toplevel()->throwRangeError(kOutOfRangeError, this->core()->internInt(index));
+                    toplevel()->throwRangeError(kOutOfRangeError, this->core()->internDouble(index));
             }
         }
 #endif
