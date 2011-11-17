@@ -983,6 +983,14 @@ namespace nanojit
             if (oprnd->isop(LIR_subf))
                 return out->ins2(LIR_subf, oprnd->oprnd2(), oprnd->oprnd1());
             goto involution;
+        case LIR_negf4:
+            if (oprnd->isImmF4()) {
+                float4_t zero = { 0, 0, 0, 0 };
+                return insImmF4(f4_sub(zero, oprnd->immF4()));
+            }
+            if (oprnd->isop(LIR_subf4))
+                return out->ins2(LIR_subf4, oprnd->oprnd2(), oprnd->oprnd1());
+            goto involution;
         case LIR_i2d:
             if (oprnd->isImmI())
                 return insImmD(oprnd->immI());
