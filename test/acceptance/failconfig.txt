@@ -351,8 +351,6 @@ as3/Types/Float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 
 # Float4
 ####################
 as3/Types/Float4/component_access_numeric_index, -Ojit, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=696070
-as3/Types/Float4/component_access:float4\[-1\], .*, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695055
-as3/Types/Float4/component_access:float4\[i\] -1, .*, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695055
 
 as3/Types/Float4/component_access:^float4\.(xxxx|yyyy|zzzz|wwww|xyzw|wzyx), arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 as3/Types/Float4/component_access:^float4\['(xxxx|yyyy|zzzz|wwww|xyzw|wzyx)'\], arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
