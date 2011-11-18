@@ -188,6 +188,9 @@ typedef pthread_t vmpi_thread_t;
 /**
  * Float and Float4 support.
  */
+
+#define SOFT_FLOAT4
+#if 0
 #if AVMSYSTEM_PPC
 
 // Just make the build work, we don't really support Mac-PPC.
@@ -228,6 +231,7 @@ REALLY_INLINE float f4_z(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v,
 REALLY_INLINE float f4_w(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(3, 3, 3, 3))); }
 
 #endif /* AVMSYSTEM_PPC */
+#endif
 
 /**
 * Type defintion for an opaque data type representing platform-defined spin lock

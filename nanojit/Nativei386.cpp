@@ -732,6 +732,7 @@ namespace nanojit
         asm_output("movups %s,%d(%s+%s*%c)", gpn(rr), d, gpn(rb), gpn(ri), SIBIDX(scale));
     }
 
+    inline uint8_t PSHUFD_COMPONENT_MASK(int i) { NanoAssert(i>=0 && i<=3); const uint8_t retval[4] = { 0, 0x55, 0xAA, 0xFF }; return retval[i & 3]; }
     inline void Assembler::SSE_STUPS(I32 d, R b, R r) { count_stf4(); SSEsm(0x0f11, r, d, b); asm_output("movups %d(%s),%s", d, gpn(b), gpn(r)); }
     inline void Assembler::SSE_PSHUFD(R rd, R rs, uint8_t imm) { count_fpu(); SSEu8(0x660f70, rd,rs,imm); asm_output("pshufd %s,%s,%x", gpn(rd), gpn(rs), imm); }
     inline void Assembler::SSE_CMPNEQPS(R rd, R rs) { count_fpu(); SSEsu8(0x0fc2, rd,rs,4); asm_output("cmpneqps %s,%s", gpn(rd), gpn(rs)); }
@@ -3561,7 +3562,7 @@ namespace nanojit
 
         Register rr = prepareResultReg(ins, XmmRegs);
         Register rb = findRegFor(a, XmmRegs);
-        SSE_PSHUFD(rr, rb, 0); 
+        SSE_PSHUFD(rr, rb, PSHUFD_COMPONENT_MASK(0)); 
         freeResourcesOf(ins);
     }
     
@@ -3574,16 +3575,13 @@ namespace nanojit
         Register rb = findRegFor(a, XmmRegs);
         switch (ins->opcode()) {
         default: NanoAssert(!"bad opcode for asm_f4comp()"); break;
-        case LIR_f4x: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(0,0,0,0)); break;
-        case LIR_f4y: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(1,1,1,1)); break;
-        case LIR_f4z: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(2,2,2,2)); break;
-        case LIR_f4w: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(3,3,3,3)); break;
+        case LIR_f4x: SSE_PSHUFD(rr, rb, PSHUFD_COMPONENT_MASK(0)); break;
+        case LIR_f4y: SSE_PSHUFD(rr, rb, PSHUFD_COMPONENT_MASK(1)); break;
+        case LIR_f4z: SSE_PSHUFD(rr, rb, PSHUFD_COMPONENT_MASK(2)); break;
+        case LIR_f4w: SSE_PSHUFD(rr, rb, PSHUFD_COMPONENT_MASK(3)); break;
         case LIR_swzf4: {
           uint8_t mask = ins->mask();
-          SSE_PSHUFD(rr, rb, _MM_SHUFFLE((mask >> 6) & 3,
-                                         (mask >> 4) & 3,
-                                         (mask >> 2) & 3,
-                                         (mask >> 0) & 3));
+          SSE_PSHUFD(rr, rb, mask);
           break;
         }
         }

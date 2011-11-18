@@ -106,16 +106,6 @@ public:
     {
         return isTypeImpl(value->atom());
     }
-    REALLY_INLINE GCRef<avmplus::IOErrorObject> asType(avmplus::Atom value)
-    {
-        avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::IOErrorObject>((avmplus::IOErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
-    }
-    REALLY_INLINE GCRef<avmplus::IOErrorObject> asType(GCRef<avmplus::ScriptObject> value)
-    {
-        avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::IOErrorObject>((avmplus::IOErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
-    }
     REALLY_INLINE GCRef<avmplus::IOErrorObject> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
@@ -199,16 +189,6 @@ public:
     REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
     {
         return isTypeImpl(value->atom());
-    }
-    REALLY_INLINE GCRef<avmplus::MemoryErrorObject> asType(avmplus::Atom value)
-    {
-        avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::MemoryErrorObject>((avmplus::MemoryErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
-    }
-    REALLY_INLINE GCRef<avmplus::MemoryErrorObject> asType(GCRef<avmplus::ScriptObject> value)
-    {
-        avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::MemoryErrorObject>((avmplus::MemoryErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::MemoryErrorObject> coerceToType(avmplus::Atom value)
     {
@@ -294,16 +274,6 @@ public:
     {
         return isTypeImpl(value->atom());
     }
-    REALLY_INLINE GCRef<avmplus::IllegalOperationErrorObject> asType(avmplus::Atom value)
-    {
-        avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::IllegalOperationErrorObject>((avmplus::IllegalOperationErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
-    }
-    REALLY_INLINE GCRef<avmplus::IllegalOperationErrorObject> asType(GCRef<avmplus::ScriptObject> value)
-    {
-        avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::IllegalOperationErrorObject>((avmplus::IllegalOperationErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
-    }
     REALLY_INLINE GCRef<avmplus::IllegalOperationErrorObject> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
@@ -387,16 +357,6 @@ public:
     REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
     {
         return isTypeImpl(value->atom());
-    }
-    REALLY_INLINE GCRef<avmplus::EOFErrorObject> asType(avmplus::Atom value)
-    {
-        avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::EOFErrorObject>((avmplus::EOFErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
-    }
-    REALLY_INLINE GCRef<avmplus::EOFErrorObject> asType(GCRef<avmplus::ScriptObject> value)
-    {
-        avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::EOFErrorObject>((avmplus::EOFErrorObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::EOFErrorObject> coerceToType(avmplus::Atom value)
     {
@@ -494,16 +454,6 @@ public:
     REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
     {
         return isTypeImpl(value->atom());
-    }
-    REALLY_INLINE GCRef<avmplus::WalkerObject> asType(avmplus::Atom value)
-    {
-        avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::WalkerObject>((avmplus::WalkerObject*)(avmplus::AvmCore::atomToScriptObject(result)));
-    }
-    REALLY_INLINE GCRef<avmplus::WalkerObject> asType(GCRef<avmplus::ScriptObject> value)
-    {
-        avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::WalkerObject>((avmplus::WalkerObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::WalkerObject> coerceToType(avmplus::Atom value)
     {
@@ -689,16 +639,6 @@ public:
     {
         return isTypeImpl(value->atom());
     }
-    REALLY_INLINE GCRef<avmplus::IDataInputInterface> asType(avmplus::Atom value)
-    {
-        avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::IDataInputInterface>((avmplus::IDataInputInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
-    }
-    REALLY_INLINE GCRef<avmplus::IDataInputInterface> asType(GCRef<avmplus::ScriptObject> value)
-    {
-        avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::IDataInputInterface>((avmplus::IDataInputInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
-    }
     REALLY_INLINE GCRef<avmplus::IDataInputInterface> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
@@ -746,16 +686,6 @@ public:
     REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
     {
         return isTypeImpl(value->atom());
-    }
-    REALLY_INLINE GCRef<avmplus::IDataOutputInterface> asType(avmplus::Atom value)
-    {
-        avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::IDataOutputInterface>((avmplus::IDataOutputInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
-    }
-    REALLY_INLINE GCRef<avmplus::IDataOutputInterface> asType(GCRef<avmplus::ScriptObject> value)
-    {
-        avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::IDataOutputInterface>((avmplus::IDataOutputInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::IDataOutputInterface> coerceToType(avmplus::Atom value)
     {
@@ -826,16 +756,6 @@ public:
     REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
     {
         return isTypeImpl(value->atom());
-    }
-    REALLY_INLINE GCRef<avmplus::CompressionAlgorithmObject> asType(avmplus::Atom value)
-    {
-        avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::CompressionAlgorithmObject>((avmplus::CompressionAlgorithmObject*)(avmplus::AvmCore::atomToScriptObject(result)));
-    }
-    REALLY_INLINE GCRef<avmplus::CompressionAlgorithmObject> asType(GCRef<avmplus::ScriptObject> value)
-    {
-        avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::CompressionAlgorithmObject>((avmplus::CompressionAlgorithmObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::CompressionAlgorithmObject> coerceToType(avmplus::Atom value)
     {
