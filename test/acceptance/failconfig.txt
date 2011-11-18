@@ -367,9 +367,6 @@ as3/Types/Float4/op_binary_logical_or:^float4\(1f. 2f. -0f. 4f\) \|\| float4\(-1
 as3/Types/Float4/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
 abcasm/coverage/float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
 
-ecma3/Date/e15_9_5_10_3:\(new Date\(\d{11}\)\), x64-.* , -Dinterp ,   expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703238
-ecma3/Date/e15_9_5_10_3:\(new Date\([2-9]\d{9}\)\), x64-.* , -Dinterp ,   expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703238
-
 as3/Types/Float/exp:^float\.exp\(float\.(POSITIVE|NEGATIVE)_INFINITY\), x86-win.*-release.*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
 as3/Types/Float/atan2:^float\.atan2\(float\.(POSITIVE|NEGATIVE)_INFINITY. float\.(POSITIVE|NEGATIVE)_INFINITY\) , x86-win.*-debug.*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
 

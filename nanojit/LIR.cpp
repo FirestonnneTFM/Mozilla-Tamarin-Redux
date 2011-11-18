@@ -996,11 +996,21 @@ namespace nanojit
                 return insImmD(oprnd->immI());
             // Nb: i2d(d2i(x)) != x
             break;
+#if defined NANOJIT_64BIT
+        case LIR_q2d:
+            if (oprnd->isImmQ())
+                return insImmD(double(oprnd->immQ()));
+            break;
+#endif
         case LIR_d2i:
             if (oprnd->isImmD())
                 return insImmI(int32_t(oprnd->immD()));
             if (oprnd->isop(LIR_i2d))
                 return oprnd->oprnd1();
+#if defined NANOJIT_64BIT
+            if (oprnd->isop(LIR_q2d))
+                return insImmI(int32_t(oprnd->immQ()));
+#endif
             break;
         case LIR_ui2d:
             if (oprnd->isImmI())
@@ -1944,6 +1954,7 @@ namespace nanojit
                 CASE64(LIR_i2q:)
                 CASE64(LIR_ui2uq:)
                 case LIR_i2d:
+                CASE64(LIR_q2d:)
                 case LIR_ui2d:
                 case LIR_i2f:
                 case LIR_ui2f:
@@ -2434,6 +2445,7 @@ namespace nanojit
             case LIR_negf:
             case LIR_negf4:
             case LIR_i2d:
+            CASE64(LIR_q2d:)
             case LIR_ui2d:
             case LIR_i2f:
             case LIR_ui2f:
@@ -3741,6 +3753,9 @@ namespace nanojit
         memset(opmap, 0, sizeof(opmap));
         opmap[LIR_d2i] = &d2i_ci;
         opmap[LIR_i2d] = &i2d_ci;
+#if defined NANOJIT_64BIT
+        omap[LIR_q2d] = &q2d_ci;        // Will need to be implemented...
+#endif
         opmap[LIR_ui2d] = &ui2d_ci;
         opmap[LIR_negd] = &negd_ci;
         opmap[LIR_addd] = &addd_ci;
@@ -4108,6 +4123,7 @@ namespace nanojit
             formals[0] = LTy_I;
             break;
 
+        case LIR_q2d:
         case LIR_q2i:
         case LIR_qasd:
         case LIR_retq:

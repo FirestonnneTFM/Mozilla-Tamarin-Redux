@@ -1271,6 +1271,19 @@ namespace nanojit
         freeResourcesOf(ins);
     }
 
+    // As for i2d
+
+    void Assembler::asm_q2d(LIns *ins) {
+        LIns *a = ins->oprnd1();
+        NanoAssert(ins->isD() && a->isQ());
+        
+        Register rr = prepareResultReg(ins, FpRegs);
+        Register ra = findRegFor(a, GpRegs);
+        CVTSQ2SD(rr, ra);   // cvtsq2sd xmmr, b  only writes xmm:0:64
+        XORPS(rr);          // xorps xmmr,xmmr to break dependency chains
+        freeResourcesOf(ins);
+    }
+    
     void Assembler::asm_ui2d(LIns *ins) {
         LIns *a = ins->oprnd1();
         NanoAssert(ins->isD() && a->isI());
