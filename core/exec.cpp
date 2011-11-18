@@ -41,9 +41,11 @@
 #include "../vprof/vprof.h"
 #include "Interpreter.h"
 
-extern void* verifyEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap); // Hack: that's not really the prototype, but that's the point, we can't specify the real prototype.
-extern void* debugEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap); // Hack: that's not really the prototype, but that's the point, we can't specify the real prototype.
-extern float4_t thunkEnterVECR_adapter(void* thunk, avmplus::MethodEnv* env, int32_t argc, avmplus::Atom* argv);
+extern "C" {
+void* verifyEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap); // Hack: that's not really the prototype, but that's the point, we can't specify the real prototype.
+void* debugEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap); // Hack: that's not really the prototype, but that's the point, we can't specify the real prototype.
+float4_t thunkEnterVECR_adapter(void* thunk, avmplus::MethodEnv* env, int32_t argc, avmplus::Atom* argv);
+}
 
 namespace avmplus {
 
