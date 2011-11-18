@@ -68,13 +68,15 @@ namespace nanojit
         postReset();
     }
 
-    void* Allocator::allocSlow(size_t nbytes, bool fallible)
+    char* Allocator::allocSlow(size_t nbytes, size_t align_mask, bool fallible)
     {
-        NanoAssert((nbytes & 7) == 0);
-        if (fill(nbytes, fallible)) {
-            NanoAssert(current_top + nbytes <= current_limit);
-            void* p = current_top;
-            current_top += nbytes;
+        // We don't know how much padding will be needed for alignment
+        // until the new chunk is allocated and we know its address,
+        // thus we assume the worst here.
+        if (fill(nbytes + align_mask, fallible)) {
+            char* p = (char*)(((uintptr_t)current_top + align_mask) & ~align_mask);
+            NanoAssert(p + nbytes <= current_limit);
+            current_top = p + nbytes;
             return p;
         }
         return NULL;
