@@ -207,7 +207,13 @@ static uint32_t n_ap = sizeof(ap) / sizeof(AllocationProfile);
 
 for (uint32_t i = 0; i < n_ap; i++) {
     CodeAllocDriver* driver = mmfx_new(CodeAllocDriver(20, cp, ap[i]));
+#if defined(DEBUG) && !(defined(VMCFG_IA32) || defined(VMCFG_AMD64))
+    // This test is very slow in debug builds, due to the calls to sanity_check().
+    // Run an abbreviated version of the test except on desktop platforms.
+    driver->run(200);
+#else
     driver->run(20000);
+#endif
     mmfx_delete(driver);
  }
 
