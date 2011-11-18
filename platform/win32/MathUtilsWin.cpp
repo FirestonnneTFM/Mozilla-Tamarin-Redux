@@ -53,19 +53,39 @@
 
 namespace avmplus
 {
-#ifdef AVMPLUS_ARM
-
     const static double PI = 3.141592653589793;
     const static double PI3_BY_4 = 3*PI/4;
     const static double PI_BY_4 = PI/4;
     const static double PI2 = 2*PI;
 
+#ifdef AVMPLUS_ARM
     // 0=no, 1=+0, -1=-0
     static int32_t isZero(double v)
     {
         int32_t r = (MathUtils::isNegZero(v)) ? -1 : (v==0.0)? 1 : 0;
         return r;
     }
+#endif
+
+    const static float PI_f = float(PI);
+    const static float PI3_BY_4_f = float(PI3_BY_4);
+    const static float PI_BY_4_f = float(PI_BY_4);
+    const static float PI2_f = float(PI2);
+
+    // 0=no, 1=+0, -1=-0
+    static int32_t isZerof(float v)
+    {
+        int32_t r = (MathUtils::isNegZerof(v)) ? -1 : (v==0.0)? 1 : 0;
+        return r;
+    }
+
+    static bool isFiniteAndNonzerof(float x)
+    {
+        float_overlay u(x);
+        return ((u.word & 0x7fffffffL) != 0x7F800000L) && ((u.word & 0x7FFFFFFFL) != 0);
+    }
+
+#ifdef AVMPLUS_ARM
 
     // sin, cos, tan all function incorrectly when called with really large values on windows mobile
     // they all start failing at different values, but all start failing somewhere with values
@@ -118,6 +138,36 @@ namespace avmplus
         return r;
     }
 #endif /* AVMPLUS_ARM */
+
+    float MathUtils::atan2f(float y, float x)
+    {
+        // MSDN docs appear to state that Infinity is in the domain for atan2f, but
+        // that does not appear to be true.  So implement the whole mess here.
+
+        // Easy cases are handled by the libc function.
+        if (isFiniteAndNonzerof(y) && isFiniteAndNonzerof(x))
+            return ::atan2f(y, x);
+
+        if (isNaNf(x)) return x;
+        if (isNaNf(y)) return y;
+        if (isInfinitef(y))
+        {
+            if (!isInfinitef(x)) return (y > 0 ? (PI_f / 2) : -(PI_f / 2));
+            float r = (x > 0 ? (PI_f / 4) : (3 * PI_f / 4));
+            return (y > 0 ? r : -r);
+        }
+        if (y != 0 && x == 0)
+        {
+            return y > 0 ? (PI_f / 2) : -(PI_f / 2);
+        }
+        else // y == 0
+        {
+            int32_t zx = isZerof(x);
+            int32_t zy = isZerof(y);
+            float r = (x > 0 || zx == 1) ? 0 : PI_f;
+            return (zy > 0) ? r : -r;
+        }
+    }
 
 #ifdef X86_MATH
     double MathUtils::ceil(double value)

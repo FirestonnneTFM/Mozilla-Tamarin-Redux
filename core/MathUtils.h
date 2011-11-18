@@ -87,6 +87,8 @@ namespace avmplus
         static const double kInfinity;
         static const double kNegInfinity;
         static const float  kFltNaN;
+        static const float  kFltInfinity;
+        static const float  kFltNegInfinity;
     public:
         // The use of the "f" suffix on float functions is really unfortunate
         // but unavoidable, the JIT's method tables cannot deal with overloaded

@@ -126,9 +126,11 @@ namespace avmplus
 
 
     /*static*/ const double MathUtils::kNaN = _nan();
-    /*static*/ const float  MathUtils::kFltNaN = float(_nan());
     /*static*/ const double MathUtils::kInfinity = _infinity();
     /*static*/ const double MathUtils::kNegInfinity = _neg_infinity();
+    /*static*/ const float  MathUtils::kFltNaN = float(_nan());
+    /*static*/ const float  MathUtils::kFltInfinity = float(_infinity());
+    /*static*/ const float  MathUtils::kFltNegInfinity = float(_neg_infinity());
 
 #ifdef UNIX
     // This code exists to support platforms that have no "long long" constants.
