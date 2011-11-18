@@ -1045,16 +1045,6 @@ namespace nanojit
     void Assembler::asm_call(LIns *ins) {
         if (!ins->isop(LIR_callv)) {
             Register rr = (ins->isop(LIR_calld) || ins->isop(LIR_callf) || ins->isop(LIR_callf4)) ? XMM0 : RAX;
-#ifdef SOFT_FLOAT4__old
-            if(ins->isop(LIR_callf4)){
-#ifdef _WIN64
-                rr = RAX;
-#else
-                NanoAssert(!_allocator.getActive(XMM1));
-                SHUFPD(XMM0,XMM1,0);
-#endif            
-            }
-#endif
             prepareResultReg(ins, rmask(rr));
             evictScratchRegsExcept(rmask(rr));
         } else {
@@ -1126,15 +1116,6 @@ namespace nanojit
                 // double, float, and float4 go in next available XMM register
                 asm_regarg(ty, arg, fr);
                 fr = fr + 1;
-                #ifdef SOFT_FLOAT4__old // in soft_float4, a float4 takes two regs
-                if(ty == ARGTYPE_F4){
-                    NanoAssert(fr<XMM8);
-                    NanoAssert(!_allocator.getActive(fr));
-                    Register prev = { REGNUM(fr) - 1};
-                    PSHUFD(fr,prev , PSHUFD_MASK(2,3,2,3));
-                    fr = fr + 1;
-                }
-                #endif
             }
         #endif
             else {
@@ -1927,13 +1908,6 @@ namespace nanojit
         assignSavedRegs();
         LIns *value = ins->oprnd1();
         Register r = ins->isop(LIR_retd) || ins->isop(LIR_retf) || ins->isop(LIR_retf4) ? XMM0 : RAX;
-#ifdef SOFT_FLOAT4__old
-        if(ins->isop(LIR_retf4)){
-            /* we need to move the upper half of XMM0 to the lower half of XMM1 */
-            NanoAssert(!_allocator.getActive(XMM1));
-            PSHUFD(XMM1,XMM0,PSHUFD_MASK(2, 3, 2, 3));
-        }
-#endif
         findSpecificRegFor(value, r);
     }
 

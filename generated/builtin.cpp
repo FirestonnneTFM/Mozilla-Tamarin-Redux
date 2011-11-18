@@ -62,14 +62,17 @@ float4_ret_t debugEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint3
     retval.f4 = avmplus::BaseExecMgr::debugEnterExitWrapperV(env, argc, ap);
     return retval.f4_jit;
 }
+typedef float4_ret_t (*VecrThunk)(avmplus::MethodEnv* env, int32_t argc, avmplus::Atom* argv);
 float4_t thunkEnterVECR_adapter(void* thunk_p, avmplus::MethodEnv* env, int32_t argc, avmplus::Atom* argv){
     union {
         float4_ret_t f4_jit;
         float4_t f4;
+        int boo;
     } retval;
-    typedef float4_ret_t (*VecrThunk)(avmplus::MethodEnv* env, int32_t argc, avmplus::Atom* argv);
-    VecrThunk thunk = (VecrThunk) thunk_p;
-    retval.f4_jit = thunk(env, argc, argv);
+    if( thunk_p)
+        retval.f4_jit = ((VecrThunk) thunk_p)(env, argc, argv);
+    else
+        retval.boo = 0; // prevent CSE in GCC, it crashes otherwise
     return retval.f4;
 }
 #endif
