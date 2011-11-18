@@ -109,7 +109,6 @@
 
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
-#ifdef SOFT_FLOAT4
 /**
  * Float4 support, no intrinsics
  */
@@ -160,7 +159,6 @@ REALLY_INLINE float f4_x(const float4_t& v) { return v.x; }
 REALLY_INLINE float f4_y(const float4_t& v) { return v.y; }
 REALLY_INLINE float f4_z(const float4_t& v) { return v.z; }
 REALLY_INLINE float f4_w(const float4_t& v) { return v.w; }
-#endif
 
 /**
  * This method is used to get the size of the memory page of the system
