@@ -64,62 +64,36 @@ namespace nanojit
         void reset();
 
         /** alloc memory, never return null. */
-        void* alloc(size_t nbytes) {
-            void* p;
-            nbytes = (nbytes + 7) & ~7; // round up
-            if (current_top + nbytes <= current_limit) {
-                p = current_top;
-                current_top += nbytes;
-            } else {
-                p = allocSlow(nbytes, /* fallible = */false);
-                NanoAssert(p);
-            }
-            return p;
-        }
-
-        void* alloc(size_t nbytes, size_t align ) {
-            void* p;
+        void* alloc(size_t nbytes, size_t align = 8) {
             const size_t align_mask = align - 1;
-            NanoAssert( (align & align_mask) == 0 ); // check alignment is power of 2
-            nbytes = (nbytes + 7) & ~7; // round up
-            size_t albytes = ((uintptr_t)current_top) & align_mask;
-            if(albytes) albytes = align - albytes;
-
-            if (current_top + nbytes + albytes <= current_limit) {
-                p = current_top + albytes;
-                current_top += nbytes + albytes;
+            NanoAssert((align & align_mask) == 0); // check alignment is power of 2
+            char* p = (char*)(((uintptr_t)current_top + align_mask) & ~align_mask);
+            if (p + nbytes <= current_limit) {
+                current_top = p + nbytes;
             } else {
-                p = allocSlow(nbytes, /* fallible = */false);
+                p = allocSlow(nbytes, align_mask, /* fallible = */false);
                 NanoAssert(p);
-                albytes = ((uintptr_t)p) & align_mask;
-                if(albytes){
-                    char* cp = (char*)p;
-                    albytes = align - albytes;
-                    NanoAssert( current_top + albytes <= current_limit );
-                    cp += albytes; current_top += albytes;
-                    p = cp;
-                }
             }
-            return p;
+            return (void*)p;
         }
 
         /** alloc memory, maybe return null. */
-        void* fallibleAlloc(size_t nbytes) {
-            void* p;
-            nbytes = (nbytes + 7) & ~7; // round up
-            if (current_top + nbytes <= current_limit) {
-                p = current_top;
-                current_top += nbytes;
+        void* fallibleAlloc(size_t nbytes, size_t align = 8) {
+            const size_t align_mask = align - 1;
+            NanoAssert((align & align_mask) == 0); // check alignment is power of 2
+            char* p = (char*)(((uintptr_t)current_top + align_mask) & ~align_mask);
+            if (p + nbytes <= current_limit) {
+                current_top = p + nbytes;
             } else {
-                p = allocSlow(nbytes, /* fallible = */true);
+                p = allocSlow(nbytes, align_mask, /* fallible = */true);
             }
-            return p;
+            return (void*)p;
         }
 
         size_t getBytesAllocated(size_t(*my_malloc_usable_size)(void *));
 
     protected:
-        void* allocSlow(size_t nbytes, bool fallible = false);
+        char* allocSlow(size_t nbytes, size_t align_mask, bool fallible = false);
         bool fill(size_t minbytes, bool fallible);
 
         class Chunk {
