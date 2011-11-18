@@ -1729,6 +1729,16 @@ namespace nanojit
                     }
                     break;
 
+#if defined NANOJIT_64BIT
+                case LIR_q2d:
+                    countlir_fpu();
+                    ins->oprnd1()->setResultLive();
+                    if (ins->isExtant()) {
+                        asm_q2d(ins);
+                    }
+                    break;
+#endif
+
                 case LIR_ui2d:
                     countlir_fpu();
                     ins->oprnd1()->setResultLive();

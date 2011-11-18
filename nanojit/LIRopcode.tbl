@@ -341,6 +341,7 @@ OP___(cmovf4,   Op3, F4,    1)  // conditional move float4
 OP_64(i2q,      Op1,  Q,    1)  // sign-extend int to quad
 OP_64(ui2uq,    Op1,  Q,    1)  // zero-extend unsigned int to unsigned quad
 OP_64(q2i,      Op1,  I,    1)  // truncate quad to int (removes the high 32 bits)
+OP_64(q2d,      Op1,  D,    1)  // convert quad to double
 
 OP___(i2d,      Op1,  D,    1)  // convert int to double
 OP___(i2f,      Op1,  F,    1)  // convert int to float

@@ -89,10 +89,7 @@ REALLY_INLINE LIns* LirHelper::p2i(LIns *i)
 REALLY_INLINE LIns* LirHelper::p2dIns(LIns* v)
 {
 #ifdef NANOJIT_64BIT
-    // Not yet implemented on 64-bit platforms.
-    (void)v;
-    AvmAssert(false);
-    return NULL;
+    return lirout->ins1(LIR_q2d, v);
 #else
     return lirout->ins1(LIR_i2d, v);
 #endif
