@@ -233,11 +233,6 @@ namespace avmplus
         return ::atanf(value);
     }
     
-    REALLY_INLINE float MathUtils::atan2f(float y, float x)
-    {
-        return ::atan2f(y, x);
-    }
-    
     REALLY_INLINE float MathUtils::ceilf(float value)
     {
         return ::ceilf(value);
@@ -254,6 +249,12 @@ namespace avmplus
     
     REALLY_INLINE float MathUtils::expf(float value)
     {
+        // MSDN docs: Infinity is not in the domain for expf().
+        int32_t x = isInfinitef(value);
+        if (x < 0)
+            return 0;
+        if (x > 0)
+            return kFltInfinity;
         return ::expf(value);
     }
     
