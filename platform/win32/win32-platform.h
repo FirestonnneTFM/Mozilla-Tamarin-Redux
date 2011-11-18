@@ -253,8 +253,10 @@ typedef unsigned __int64    uint64_t;
     #define NJ_NO_VARIADIC_MACROS
 #endif
 
+#define SOFT_FLOAT4
+#if 0
 /**
- * Float and Float4 support.
+ * Float4 support.
  */
 #include <xmmintrin.h>
 #include <emmintrin.h>
@@ -274,7 +276,7 @@ REALLY_INLINE float f4_x(float4_t v) { return _mm_cvtss_f32(v); }
 REALLY_INLINE float f4_y(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 1, 1, 1))); }
 REALLY_INLINE float f4_z(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(2, 2, 2, 2))); }
 REALLY_INLINE float f4_w(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(3, 3, 3, 3))); }
-
+#endif
 /**
 * Type defintion for an opaque data type representing platform-defined spin lock
 * @see VMPI_lockInit(), VMPI_lockAcquire()

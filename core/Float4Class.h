@@ -69,32 +69,32 @@ namespace avmplus
         float get_z() { const float* v = reinterpret_cast<const float*>(this); return  v[2]; };
         float get_w() { const float* v = reinterpret_cast<const float*>(this); return  v[3]; };
 
-        static float4_t fromComponents(float x, float y, float z, float w);
-        float4_t isGreater(float4_t x, float4_t y);
-        float4_t isGreaterOrEqual(float4_t x, float4_t y);
-        float4_t isLess(float4_t x, float4_t y);
-        float4_t isLessOrEqual(float4_t x, float4_t y);
-        float4_t isEqual(float4_t x, float4_t y);
-        float4_t isNotEqual(float4_t x, float4_t y);
-        float4_t abs(float4_t x);
-        float4_t min(float4_t x, float4_t y);
-        float4_t max(float4_t x, float4_t y);
-        float4_t reciprocal(float4_t x);
-        float4_t rsqrt(float4_t x);
-        float4_t sqrt(float4_t x);
-        float4_t normalize(float4_t x);
-        float4_t cross(float4_t x, float4_t y);
-        float4_t _swizzle(float4_t val, int32_t how);
-        float    dot(float4_t x, float4_t y);
-        float    dot2(float4_t x, float4_t y);
-        float    dot3(float4_t x, float4_t y);
-        float    magnitude(float4_t x);
-        float    magnitude2(float4_t x);
-        float    magnitude3(float4_t x);
-        float    distance(float4_t x, float4_t y);
-        float    distance2(float4_t x, float4_t y);
-        float    distance3(float4_t x, float4_t y);
+        void     isGreater(float4_t& ret, const float4_t& x, const float4_t& y);
+        void     isGreaterOrEqual(float4_t& ret, const float4_t& x, const float4_t& y);
+        void     isLess(float4_t& ret, const float4_t& x, const float4_t& y);
+        void     isLessOrEqual(float4_t& ret, const float4_t& x, const float4_t& y);
+        void     isEqual(float4_t& ret, const float4_t& x, const float4_t& y);
+        void     isNotEqual(float4_t& ret, const float4_t& x, const float4_t& y);
+        void     abs(float4_t& ret, const float4_t& x);
+        void     min(float4_t& ret, const float4_t& x, const float4_t& y);
+        void     max(float4_t& ret, const float4_t& x, const float4_t& y);
+        void     reciprocal(float4_t& ret, const float4_t& x);
+        void     rsqrt(float4_t& ret, const float4_t& x);
+        void     sqrt(float4_t& ret, const float4_t& x);
+        void     normalize(float4_t& ret, const float4_t& x);
+        void     cross(float4_t& ret, const float4_t& x, const float4_t& y);
+        void     _swizzle(float4_t& ret, const float4_t& val, int32_t how);
+        float    dot(const float4_t& x, const float4_t& y);
+        float    dot2(const float4_t& x, const float4_t& y);
+        float    dot3(const float4_t& x, const float4_t& y);
+        float    magnitude(const float4_t& x);
+        float    magnitude2(const float4_t& x);
+        float    magnitude3(const float4_t& x);
+        float    distance(const float4_t& x, const float4_t& y);
+        float    distance2(const float4_t& x, const float4_t& y);
+        float    distance3(const float4_t& x, const float4_t& y);
 
+        static void fromComponents(float4_t& ret, float x, float y, float z, float w);
         // ------------------------ DATA SECTION BEGIN
     private:    
         GC_NO_DATA(Float4Class)

@@ -543,11 +543,25 @@ namespace nanojit
     void Assembler::PMOVMSKB(R l, R r)  { emitprr(X64_pmovmskb,l,r); asm_output("pmovmskb %s, %s",RQ(l),RQ(r)); }
     void Assembler::CMPNEQPS(R l, R r)  { emitrr_imm8(X64_cmppsr,l,r,4); asm_output("cmpneqps %s, %s", RL(l),RL(r)); }
 
+    inline uint8_t PSHUFD_MASK(int x, int y, int z, int w) { 
+        NanoAssert(x>=0 && x<=3);
+        NanoAssert(y>=0 && y<=3);
+        NanoAssert(z>=0 && z<=3);
+        NanoAssert(w>=0 && w<=3);
+        return x | (y<<2) | (z<<4) | (w<<6); 
+    }
     void Assembler::PSHUFD(R l, R r, I m) {
         NanoAssert(isU8(m));
         uint8_t mode = uint8_t(m);
         emitprr_imm8(X64_pshufd, l, r, mode);
         asm_output("pshufd  %s, %s, %x", RQ(l), RQ(r), m);
+    }
+    void Assembler::SHUFPD(R l, R r, I m)  {
+        NanoAssert(m>=0 && m<256);
+        NanoAssert(isU8(m));
+        uint8_t mode = (uint8_t) m;
+        emitprr_imm8(X64_shufpd,l,r,mode);
+        asm_output("shufpd  %s, %s, %x", RQ(l), RQ(r), m);
     }
 
     // MOVI must not affect condition codes!
@@ -1031,6 +1045,16 @@ namespace nanojit
     void Assembler::asm_call(LIns *ins) {
         if (!ins->isop(LIR_callv)) {
             Register rr = (ins->isop(LIR_calld) || ins->isop(LIR_callf) || ins->isop(LIR_callf4)) ? XMM0 : RAX;
+#ifdef SOFT_FLOAT4__old
+            if(ins->isop(LIR_callf4)){
+#ifdef _WIN64
+                rr = RAX;
+#else
+                NanoAssert(!_allocator.getActive(XMM1));
+                SHUFPD(XMM0,XMM1,0);
+#endif            
+            }
+#endif
             prepareResultReg(ins, rmask(rr));
             evictScratchRegsExcept(rmask(rr));
         } else {
@@ -1085,7 +1109,7 @@ namespace nanojit
                 asm_regarg(ty, arg, RegAlloc::argRegs[arg_index]);
                 arg_index++;
             }
-        #ifdef _WIN64
+        #if defined(_WIN64)
             else if ((ty == ARGTYPE_D || ty == ARGTYPE_F) && arg_index < NumArgRegs) {
                 // double and float go in XMM register # based on overall arg_index
                 Register rxi = XMM0 + arg_index;
@@ -1093,7 +1117,7 @@ namespace nanojit
                 arg_index++;
             }
             else if ((ty == ARGTYPE_F4) && arg_index < NumArgRegs) {
-                // first 4 parameters passed as pointers in RCX
+                // first 4 parameters passed as pointers
                 asm_ptrarg(ty, arg, RegAlloc::argRegs[arg_index]);
                 arg_index++;
             }
@@ -1102,6 +1126,15 @@ namespace nanojit
                 // double, float, and float4 go in next available XMM register
                 asm_regarg(ty, arg, fr);
                 fr = fr + 1;
+                #ifdef SOFT_FLOAT4__old // in soft_float4, a float4 takes two regs
+                if(ty == ARGTYPE_F4){
+                    NanoAssert(fr<XMM8);
+                    NanoAssert(!_allocator.getActive(fr));
+                    Register prev = { REGNUM(fr) - 1};
+                    PSHUFD(fr,prev , PSHUFD_MASK(2,3,2,3));
+                    fr = fr + 1;
+                }
+                #endif
             }
         #endif
             else {
@@ -1310,7 +1343,7 @@ namespace nanojit
 
         Register rr = prepareResultReg(ins, FpRegs);
         Register rb = findRegFor(a, FpRegs);
-        PSHUFD(rr, rb, 0); 
+        PSHUFD(rr, rb, PSHUFD_MASK(0, 0, 0, 0)); 
         freeResourcesOf(ins);
     }
 
@@ -1322,16 +1355,13 @@ namespace nanojit
         Register rb = findRegFor(a, FpRegs);
         switch (ins->opcode()) {
         default: NanoAssert(!"bad opcode for asm_f4comp()"); break;
-        case LIR_f4x: PSHUFD(rr, rb, _MM_SHUFFLE(0, 0, 0, 0)); break;
-        case LIR_f4y: PSHUFD(rr, rb, _MM_SHUFFLE(1, 1, 1, 1)); break;
-        case LIR_f4z: PSHUFD(rr, rb, _MM_SHUFFLE(2, 2, 2, 2)); break;
-        case LIR_f4w: PSHUFD(rr, rb, _MM_SHUFFLE(3, 3, 3, 3)); break;
+        case LIR_f4x: PSHUFD(rr, rb, PSHUFD_MASK(0, 0, 0, 0)); break;
+        case LIR_f4y: PSHUFD(rr, rb, PSHUFD_MASK(1, 1, 1, 1)); break;
+        case LIR_f4z: PSHUFD(rr, rb, PSHUFD_MASK(2, 2, 2, 2)); break;
+        case LIR_f4w: PSHUFD(rr, rb, PSHUFD_MASK(3, 3, 3, 3)); break;
         case LIR_swzf4: {
             uint8_t mask = ins->mask();
-            PSHUFD(rr, rb, _MM_SHUFFLE((mask >> 6) & 3,
-                                       (mask >> 4) & 3,
-                                       (mask >> 2) & 3,
-                                       (mask >> 0) & 3));
+            PSHUFD(rr, rb, mask);
         }
         }
         freeResourcesOf(ins);
@@ -1897,6 +1927,13 @@ namespace nanojit
         assignSavedRegs();
         LIns *value = ins->oprnd1();
         Register r = ins->isop(LIR_retd) || ins->isop(LIR_retf) || ins->isop(LIR_retf4) ? XMM0 : RAX;
+#ifdef SOFT_FLOAT4__old
+        if(ins->isop(LIR_retf4)){
+            /* we need to move the upper half of XMM0 to the lower half of XMM1 */
+            NanoAssert(!_allocator.getActive(XMM1));
+            PSHUFD(XMM1,XMM0,PSHUFD_MASK(2, 3, 2, 3));
+        }
+#endif
         findSpecificRegFor(value, r);
     }
 
@@ -2327,7 +2364,7 @@ namespace nanojit
 
             if (ins->isop(LIR_negf) || ins->isop(LIR_negf4)) {
                 if (ins->isop(LIR_negf4))
-                    PSHUFD(rt,rt,0);    // copy mask in all 4 components of the float4 vector 
+                    PSHUFD(rt,rt,PSHUFD_MASK(0, 0, 0, 0));    // copy mask in all 4 components of the float4 vector 
                 MOVDXR(rt, gt);
                 asm_immi(gt, negateMaskF[0], /*canClobberCCs*/true); 
             } else {
