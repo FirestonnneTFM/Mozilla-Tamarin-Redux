@@ -497,7 +497,7 @@ Atom op_negate(AvmCore* core, Atom val) {
         return core->float4ToAtom( f4_sub(Zero, AvmCore::float4(val)) );
     
     }
-    if(atomIsIntptr(val)){
+    if(atomIsIntptr(val) && val != zeroIntAtom){
         double res = - INTPTRASDOUBLE(val);
         intptr_t res_int = intptr_t(res);
         if( atomIsValidIntptrValue(res_int) && res == (double)res_int)
