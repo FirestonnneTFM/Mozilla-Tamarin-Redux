@@ -1633,6 +1633,14 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             }
         }
 
+#if defined(NANOJIT_ARM) && defined(VMCFG_FLOAT)
+        // The LIR instructions for float and float4 are not supported by nanojit
+        // for soft float, and we are planning to rip out soft float entirely.
+        // While this is really a nanojit issue, we've already removed VMCFG_FLOAT
+        // from nanojit, so we put the check here.
+        AvmAssert(!core->config.njconfig.soft_float);
+#endif
+
         if (info->needRestOrArguments() && info->lazyRest())
             restLocal = ms->param_count()+1;
 
