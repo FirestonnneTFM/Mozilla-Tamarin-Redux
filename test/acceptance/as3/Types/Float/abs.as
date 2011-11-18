@@ -47,39 +47,39 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-AddTestCase("float.abs() returns a float", "float", getQualifiedClassName(float.abs(0)));
-AddTestCase("float.abs() length is 1", 1, float.abs.length);
+AddStrictTestCase("float.abs() returns a float", "float", getQualifiedClassName(float.abs(0)));
+AddStrictTestCase("float.abs() length is 1", 1, float.abs.length);
 AddErrorTest("float.abs() with no args", ARGUMENTERROR+1063,  function(){ float.abs(); });
 
 var pi_fl = 3.14f;
-AddTestCase("float.abs(-FloatLiteral)", pi_fl, float.abs(-pi_fl));
-AddTestCase("float.abs(FloatLiteral)", pi_fl, float.abs(pi_fl));
+AddStrictTestCase("float.abs(-FloatLiteral)", pi_fl, float.abs(-pi_fl));
+AddStrictTestCase("float.abs(FloatLiteral)", pi_fl, float.abs(pi_fl));
 var pi_f:float = 3.14f;
-AddTestCase("float.abs(-typed)", pi_f, float.abs(-pi_f));
-AddTestCase("float.abs(typed)", pi_f, float.abs(pi_f));
+AddStrictTestCase("float.abs(-typed)", pi_f, float.abs(-pi_f));
+AddStrictTestCase("float.abs(typed)", pi_f, float.abs(pi_f));
 
 AddTestCase("float.abs(undefined)", float.NaN, float.abs(undefined));
-AddTestCase("float.abs(null)", float(0), float.abs(null));
-AddTestCase("float.abs(true)", float(1), float.abs(true));
-AddTestCase("float.abs(false)", float(0), float.abs(false));
-AddTestCase("float.abs(string)", float.NaN, float.abs("string"));
-AddTestCase("float.abs(float.NaN)", float.NaN, float.abs(float.NaN));
+AddStrictTestCase("float.abs(null)", float(0), float.abs(null));
+AddStrictTestCase("float.abs(true)", float(1), float.abs(true));
+AddStrictTestCase("float.abs(false)", float(0), float.abs(false));
+AddStrictTestCase("float.abs(string)", float.NaN, float.abs("string"));
+AddStrictTestCase("float.abs(float.NaN)", float.NaN, float.abs(float.NaN));
 
-AddTestCase("float.abs('1')", float(1), float.abs('1'));
-AddTestCase("float.abs('0')", float(0), float.abs('0'));
-AddTestCase("float.INFINITY/float.abs('0')", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.abs('0'));
+AddStrictTestCase("float.abs('1')", float(1), float.abs('1'));
+AddStrictTestCase("float.abs('0')", float(0), float.abs('0'));
+AddStrictTestCase("float.INFINITY/float.abs('0')", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.abs('0'));
 
-AddTestCase("float.abs(0.0f)", float(0), float.abs(0.0f));
-AddTestCase("float.INFINITY/float.abs(0.0f)", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.abs(0.0f));
-AddTestCase("float.abs(-0.0f)", float(0), float.abs(-0.0f));
-AddTestCase("float.INFINITY/float.abs(-0.0f)", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.abs(-0.0f));
+AddStrictTestCase("float.abs(0.0f)", float(0), float.abs(0.0f));
+AddStrictTestCase("float.INFINITY/float.abs(0.0f)", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.abs(0.0f));
+AddStrictTestCase("float.abs(-0.0f)", float(0), float.abs(-0.0f));
+AddStrictTestCase("float.INFINITY/float.abs(-0.0f)", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.abs(-0.0f));
 
-AddTestCase("float.abs(float.NEGATIVE_INFINITY)", float.POSITIVE_INFINITY, float.abs(float.NEGATIVE_INFINITY));
-AddTestCase("float.abs(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.abs(float.POSITIVE_INFINITY));
-AddTestCase("float.abs(-float.MIN_VALUE)", float.MIN_VALUE, float.abs(-float.MIN_VALUE));
-AddTestCase("float.abs(-float.MAX_VALUE)", float.MAX_VALUE, float.abs(-float.MAX_VALUE));
-AddTestCase("float.abs(float.MIN_VALUE)", float.MIN_VALUE, float.abs(float.MIN_VALUE));
-AddTestCase("float.abs(float.MAX_VALUE)", float.MAX_VALUE, float.abs(float.MAX_VALUE));
+AddStrictTestCase("float.abs(float.NEGATIVE_INFINITY)", float.POSITIVE_INFINITY, float.abs(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.abs(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.abs(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.abs(-float.MIN_VALUE)", float.MIN_VALUE, float.abs(-float.MIN_VALUE));
+AddStrictTestCase("float.abs(-float.MAX_VALUE)", float.MAX_VALUE, float.abs(-float.MAX_VALUE));
+AddStrictTestCase("float.abs(float.MIN_VALUE)", float.MIN_VALUE, float.abs(float.MIN_VALUE));
+AddStrictTestCase("float.abs(float.MAX_VALUE)", float.MAX_VALUE, float.abs(float.MAX_VALUE));
 
 
 

@@ -47,27 +47,31 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-AddTestCase("float.exp() returns a float", "float", getQualifiedClassName(float.exp(0)));
-AddTestCase("float.exp() length is 1", 1, float.exp.length);
+AddStrictTestCase("float.exp() returns a float", "float", getQualifiedClassName(float.exp(0)));
+AddStrictTestCase("float.exp() length is 1", 1, float.exp.length);
 AddErrorTest("float.exp() with no args", ARGUMENTERROR+1063,  function(){ float.exp(); });
 
-AddTestCase("float.exp(undefined)", float.NaN, float.exp(undefined));
-AddTestCase("float.exp(null)", float(1), float.exp(null));
-AddTestCase("float.exp(true)", float.E, float.exp(true));
-AddTestCase("float.exp(false)", float(1), float.exp(false));
-AddTestCase("float.exp(string)", float.NaN, float.exp("string"));
-AddTestCase("float.exp(float.NaN)", float.NaN, float.exp(float.NaN));
+AddStrictTestCase("float.exp(undefined)", float.NaN, float.exp(undefined));
+AddStrictTestCase("float.exp(null)", float(1), float.exp(null));
+AddStrictTestCase("float.exp(true)", float.E, float.exp(true));
+AddStrictTestCase("float.exp(false)", float(1), float.exp(false));
+AddStrictTestCase("float.exp(string)", float.NaN, float.exp("string"));
+AddStrictTestCase("float.exp(float.NaN)", float.NaN, float.exp(float.NaN));
 
-AddTestCase("float.exp('1')", float.E, float.exp('1'));
-AddTestCase("float.exp('0')", float(1), float.exp('0'));
+AddStrictTestCase("float.exp(0f)", float(1f), float.exp(0f));
+AddStrictTestCase("float.exp(-0f)", float(1f), float.exp(-0f));
 
-AddTestCase("float.exp(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.exp(float.POSITIVE_INFINITY));
-AddTestCase("float.exp(float.NEGATIVE_INFINITY)", float(0), float.exp(float.NEGATIVE_INFINITY));
-AddTestCase("float.exp(float.MIN_VALUE)", float(1), float.exp(float.MIN_VALUE));
-AddTestCase("float.exp(float.MAX_VALUE)", float.POSITIVE_INFINITY, float.exp(float.MAX_VALUE));
+AddStrictTestCase("float.exp('1')", float.E, float.exp('1'));
+AddStrictTestCase("float.exp('0')", float(1), float.exp('0'));
 
-AddTestCase("float.exp(1.0e+3)", float.POSITIVE_INFINITY, float.exp(1.0e+3));
-AddTestCase("float.exp(-1.0e+3)", float(0), float.exp(-1.0e+3));
+AddStrictTestCase("float.exp(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.exp(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.exp(float.NEGATIVE_INFINITY)", float(0), float.exp(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.exp(float.NEGATIVE_INFINITY) sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.exp(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.exp(float.MIN_VALUE)", float(1), float.exp(float.MIN_VALUE));
+AddStrictTestCase("float.exp(float.MAX_VALUE)", float.POSITIVE_INFINITY, float.exp(float.MAX_VALUE));
+
+AddStrictTestCase("float.exp(1.0e+3)", float.POSITIVE_INFINITY, float.exp(1.0e+3));
+AddStrictTestCase("float.exp(-1.0e+3)", float(0), float.exp(-1.0e+3));
 
 test();
 

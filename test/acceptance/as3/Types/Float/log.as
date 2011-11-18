@@ -47,34 +47,40 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-AddTestCase("float.log() returns a float", "float", getQualifiedClassName(float.log(0)));
-AddTestCase("float.log() length is 1", 1, float.log.length);
+AddStrictTestCase("float.log() returns a float", "float", getQualifiedClassName(float.log(0)));
+AddStrictTestCase("float.log() length is 1", 1, float.log.length);
 AddErrorTest("float.log() with no args", ARGUMENTERROR+1063,  function(){ float.log(); });
 
-AddTestCase("float.log(undefined)", float.NaN, float.log(undefined));
-AddTestCase("float.log(null)", float.NEGATIVE_INFINITY, float.log(null));
-AddTestCase("float.log(true)", float(0), float.log(true));
-AddTestCase("float.log(false)", float.NEGATIVE_INFINITY, float.log(false));
-AddTestCase("float.log(string)", float.NaN, float.log("string"));
-AddTestCase("float.log(float.NaN)", float.NaN, float.log(float.NaN));
+AddStrictTestCase("float.log(undefined)", float.NaN, float.log(undefined));
+AddStrictTestCase("float.log(null)", float.NEGATIVE_INFINITY, float.log(null));
+AddStrictTestCase("float.log(true)", float(0), float.log(true));
+AddStrictTestCase("float.log(false)", float.NEGATIVE_INFINITY, float.log(false));
+AddStrictTestCase("float.log(string)", float.NaN, float.log("string"));
+AddStrictTestCase("float.log(float.NaN)", float.NaN, float.log(float.NaN));
 
-AddTestCase("float.log('1')", float(0), float.log('1'));
-AddTestCase("float.log('0')", float.NEGATIVE_INFINITY, float.log('0'));
+AddStrictTestCase("float.log(-0.00124f)", float.NaN, float.log(-0.00124f));
+AddStrictTestCase("float.log(0f)", float.NEGATIVE_INFINITY, float.log(0f));
+AddStrictTestCase("float.log(-0f)", float.NEGATIVE_INFINITY, float.log(-0f));
+AddStrictTestCase("float.log(1f)", float(0f), float.log(1f));
+AddStrictTestCase("float.log(1f) sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.log(1f));
 
-AddTestCase("float.log(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.log(float.POSITIVE_INFINITY));
-AddTestCase("float.log(float.NEGATIVE_INFINITY)", float.NaN, float.log(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.log('1')", float(0), float.log('1'));
+AddStrictTestCase("float.log('0')", float.NEGATIVE_INFINITY, float.log('0'));
+
+AddStrictTestCase("float.log(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.log(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.log(float.NEGATIVE_INFINITY)", float.NaN, float.log(float.NEGATIVE_INFINITY));
 
 var myfloat:float = 1.0e-6f;
-AddTestCase("float.log(-1.0e-6f)", float.NaN, float.log(-myfloat));
-AddTestCase("float.log(1.0e-6f)", -13.8155107498168945, float.log(myfloat));
-AddTestCase("float.log(-1.0e-6f) FloatLiteral", float.NaN, float.log(-1.0e-6f));
-AddTestCase("float.log(1.0e-6f) FloatLiteral", -13.8155107498168945f, float.log(1.0e-6f));
+AddStrictTestCase("float.log(-1.0e-6f)", float.NaN, float.log(-myfloat));
+AddStrictTestCase("float.log(1.0e-6f)", -13.8155107498168945f, float.log(myfloat));
+AddStrictTestCase("float.log(-1.0e-6f) FloatLiteral", float.NaN, float.log(-1.0e-6f));
+AddStrictTestCase("float.log(1.0e-6f) FloatLiteral", -13.8155107498168945f, float.log(1.0e-6f));
 
 var myfloat:float = 1f;
-AddTestCase("float.log(-1f)", float.NaN, float.log(-myfloat));
-AddTestCase("float.log(1f)", 0f, float.log(myfloat));
-AddTestCase("float.log(-1f) FloatLiteral", float.NaN, float.log(-1f));
-AddTestCase("float.log(1f) FloatLiteral", 0f, float.log(1f));
+AddStrictTestCase("float.log(-1f)", float.NaN, float.log(-myfloat));
+AddStrictTestCase("float.log(1f)", 0f, float.log(myfloat));
+AddStrictTestCase("float.log(-1f) FloatLiteral", float.NaN, float.log(-1f));
+AddStrictTestCase("float.log(1f) FloatLiteral", 0f, float.log(1f));
 
 test();
 

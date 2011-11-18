@@ -47,33 +47,36 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-AddTestCase("float.cos() returns a float", "float", getQualifiedClassName(float.cos(0)));
-AddTestCase("float.cos() length is 1", 1, float.cos.length);
+AddStrictTestCase("float.cos() returns a float", "float", getQualifiedClassName(float.cos(0)));
+AddStrictTestCase("float.cos() length is 1", 1, float.cos.length);
 AddErrorTest("float.cos() with no args", ARGUMENTERROR+1063,  function(){ float.cos(); });
 
-AddTestCase("float.cos(undefined)", float.NaN, float.cos(undefined));
-AddTestCase("float.cos(null)", float(1), float.cos(null));
-AddTestCase("float.cos(true)", 0.5403022766113281f, float.cos(true));
-AddTestCase("float.cos(false)", float(1), float.cos(false));
-AddTestCase("float.cos(string)", float.NaN, float.cos("string"));
-AddTestCase("float.cos(float.NaN)", float.NaN, float.cos(float.NaN));
+AddStrictTestCase("float.cos(undefined)", float.NaN, float.cos(undefined));
+AddStrictTestCase("float.cos(null)", float(1), float.cos(null));
+AddStrictTestCase("float.cos(true)", 0.5403022766113281f, float.cos(true));
+AddStrictTestCase("float.cos(false)", float(1), float.cos(false));
+AddStrictTestCase("float.cos(string)", float.NaN, float.cos("string"));
+AddStrictTestCase("float.cos(float.NaN)", float.NaN, float.cos(float.NaN));
 
-AddTestCase("float.cos('0')", float(1), float.cos('0'));
+AddStrictTestCase("float.cos(0)", float(1f), float.cos(0f));
+AddStrictTestCase("float.cos(-0)", float(1f), float.cos(-0f));
 
-AddTestCase("float.cos(float.PI)", -float(1), float.cos(float.PI));
-AddTestCase("float.cos(-float.PI)", -float(1), float.cos(-float.PI));
+AddStrictTestCase("float.cos('0')", float(1), float.cos('0'));
+
+AddStrictTestCase("float.cos(float.PI)", -float(1), float.cos(float.PI));
+AddStrictTestCase("float.cos(-float.PI)", -float(1), float.cos(-float.PI));
 
 var myfloat:float = 3.1415927f;
-AddTestCase("float.cos(3.1415927f)", -float(1), float.cos(myfloat));
-AddTestCase("float.cos(-3.1415927f)", -float(1), float.cos(-myfloat));
+AddStrictTestCase("float.cos(3.1415927f)", -float(1), float.cos(myfloat));
+AddStrictTestCase("float.cos(-3.1415927f)", -float(1), float.cos(-myfloat));
 
-AddTestCase("float.cos(3.1415927f) FloatLiteral", -float(1), float.cos(3.1415927f));
-AddTestCase("float.cos(-3.1415927f) FloatLiteral", -float(1), float.cos(-3.1415927f));
+AddStrictTestCase("float.cos(3.1415927f) FloatLiteral", -float(1), float.cos(3.1415927f));
+AddStrictTestCase("float.cos(-3.1415927f) FloatLiteral", -float(1), float.cos(-3.1415927f));
 
-AddTestCase("float.cos(float.POSITIVE_INFINITY)", float.NaN, float.cos(float.POSITIVE_INFINITY));
-AddTestCase("float.cos(float.NEGATIVE_INFINITY)", float.NaN, float.cos(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.cos(float.POSITIVE_INFINITY)", float.NaN, float.cos(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.cos(float.NEGATIVE_INFINITY)", float.NaN, float.cos(float.NEGATIVE_INFINITY));
 
-AddTestCase("float.cos(float.MIN_VALUE)", float(1), float.cos(float.MIN_VALUE));
+AddStrictTestCase("float.cos(float.MIN_VALUE)", float(1), float.cos(float.MIN_VALUE));
 
 test();
 

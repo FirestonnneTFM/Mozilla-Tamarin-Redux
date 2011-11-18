@@ -47,33 +47,34 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-AddTestCase("float.sin() returns a float", "float", getQualifiedClassName(float.sin(0)));
-AddTestCase("float.sin() length is 1", 1, float.sin.length);
+AddStrictTestCase("float.sin() returns a float", "float", getQualifiedClassName(float.sin(0)));
+AddStrictTestCase("float.sin() length is 1", 1, float.sin.length);
 AddErrorTest("float.sin() with no args", ARGUMENTERROR+1063,  function(){ float.sin(); });
 
-AddTestCase("float.sin(undefined)", float.NaN, float.sin(undefined));
-AddTestCase("float.sin(null)", float(0), float.sin(null));
-AddTestCase("float.sin(true)", float(Math.sin(1)), float.sin(true));
-AddTestCase("float.sin(false)", float(0), float.sin(false));
-AddTestCase("float.sin(string)", float.NaN, float.sin("string"));
-AddTestCase("float.sin(float.NaN)", float.NaN, float.sin(float.NaN));
-AddTestCase("float.sin(float.POSITIVE_INFINITY)", float.NaN, float.sin(float.POSITIVE_INFINITY));
-AddTestCase("float.sin(float.NEGATIVE_INFINITY)", float.NaN, float.sin(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.sin(undefined)", float.NaN, float.sin(undefined));
+AddStrictTestCase("float.sin(null)", float(0), float.sin(null));
+AddStrictTestCase("float.sin(true)", float(Math.sin(1)), float.sin(true));
+AddStrictTestCase("float.sin(false)", float(0), float.sin(false));
+AddStrictTestCase("float.sin(string)", float.NaN, float.sin("string"));
+AddStrictTestCase("float.sin(float.NaN)", float.NaN, float.sin(float.NaN));
+AddStrictTestCase("float.sin(float.POSITIVE_INFINITY)", float.NaN, float.sin(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.sin(float.NEGATIVE_INFINITY)", float.NaN, float.sin(float.NEGATIVE_INFINITY));
 
 var zerof:float = 0f;
-AddTestCase("float.sin(0f)", float(0), float.sin(zerof));
-AddTestCase("float.sin(0f) FloatLiteral", float(0), float.sin(0f));
+AddStrictTestCase("float.sin(0f)", float(0), float.sin(zerof));
+AddStrictTestCase("float.sin(0f) FloatLiteral", float(0), float.sin(0f));
+AddStrictTestCase("float.sin(0f) sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.sin(0f));
 
 var neg_zerof:float = -0f;
-AddTestCase("float.sin(-0f)", float(-0), float.sin(neg_zerof));
-AddTestCase("float.sin(-0f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.sin(neg_zerof));
-AddTestCase("float.sin(-0f) FloatLiteral", float(-0), float.sin(-0f));
-AddTestCase("float.sin(-0f) FloatLiteral sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.sin(-0f));
+AddStrictTestCase("float.sin(-0f)", float(-0), float.sin(neg_zerof));
+AddStrictTestCase("float.sin(-0f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.sin(neg_zerof));
+AddStrictTestCase("float.sin(-0f) FloatLiteral", float(-0), float.sin(-0f));
+AddStrictTestCase("float.sin(-0f) FloatLiteral sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.sin(-0f));
 
-AddTestCase("float.sin(0.7853981633974f)", float(0.7071067811865134), float.sin(0.7853981633974f));
-AddTestCase("float.sin(1.570796326795f)", float(1), float.sin(1.570796326795f));
-AddTestCase("float.sin(2.356194490192f)", float(0.7071067811867916), float.sin(2.356194490192f));
-AddTestCase("float.sin(3.1415927f)", float(-8.74227766e-8), float.sin(3.1415927f));
+AddStrictTestCase("float.sin(0.7853981633974f)", float(0.7071067811865134), float.sin(0.7853981633974f));
+AddStrictTestCase("float.sin(1.570796326795f)", float(1), float.sin(1.570796326795f));
+AddStrictTestCase("float.sin(2.356194490192f)", float(0.7071067811867916), float.sin(2.356194490192f));
+AddStrictTestCase("float.sin(3.1415927f)", float(-8.74227766e-8), float.sin(3.1415927f));
 
 
 test();

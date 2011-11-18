@@ -47,26 +47,26 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-AddTestCase("float.rsqrt() returns a float", "float", getQualifiedClassName(float.rsqrt(12.345f)));
-AddTestCase("float.rsqrt() length is 1", 1, float.rsqrt.length);
+AddStrictTestCase("float.rsqrt() returns a float", "float", getQualifiedClassName(float.rsqrt(12.345f)));
+AddStrictTestCase("float.rsqrt() length is 1", 1, float.rsqrt.length);
 AddErrorTest("float.rsqrt() with no args", ARGUMENTERROR+1063,  function(){ float.rsqrt(); });
 
-AddTestCase("float.rsqrt(64)", float(0.125), float.rsqrt(64));
+AddStrictTestCase("float.rsqrt(64)", float(0.125), float.rsqrt(64));
 
-AddTestCase("float.rsqrt(undefined)", float.NaN, float.rsqrt(undefined));
-AddTestCase("float.rsqrt(null)", float.POSITIVE_INFINITY, float.rsqrt(null));
-AddTestCase("float.rsqrt(true)", float(1), float.rsqrt(true));
-AddTestCase("float.rsqrt(false)", float.POSITIVE_INFINITY, float.rsqrt(false));
-AddTestCase("float.rsqrt(string)", float.NaN, float.rsqrt("string"));
-AddTestCase("float.rsqrt(float.NaN)", float.NaN, float.rsqrt(float.NaN));
+AddStrictTestCase("float.rsqrt(undefined)", float.NaN, float.rsqrt(undefined));
+AddStrictTestCase("float.rsqrt(null)", float.POSITIVE_INFINITY, float.rsqrt(null));
+AddStrictTestCase("float.rsqrt(true)", float(1), float.rsqrt(true));
+AddStrictTestCase("float.rsqrt(false)", float.POSITIVE_INFINITY, float.rsqrt(false));
+AddStrictTestCase("float.rsqrt(string)", float.NaN, float.rsqrt("string"));
+AddStrictTestCase("float.rsqrt(float.NaN)", float.NaN, float.rsqrt(float.NaN));
 
 
-AddTestCase("float.rsqrt(0f)", float.POSITIVE_INFINITY, float.rsqrt(0f));
-AddTestCase("float.rsqrt(-0f)", float.NEGATIVE_INFINITY, float.rsqrt(-0f));
+AddStrictTestCase("float.rsqrt(0f)", float.POSITIVE_INFINITY, float.rsqrt(0f));
+AddStrictTestCase("float.rsqrt(-0f)", float.NEGATIVE_INFINITY, float.rsqrt(-0f));
 
-AddTestCase("float.rsqrt(float.POSITIVE_INFINITY)", float(0), float.rsqrt(float.POSITIVE_INFINITY));
-AddTestCase("float.rsqrt(float.POSITIVE_INFINITY) sign check", float.POSITIVE_INFINITY,  1f/float.rsqrt(float.POSITIVE_INFINITY));
-AddTestCase("float.rsqrt(float.NEGATIVE_INFINITY)", float.NaN, float.rsqrt(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.rsqrt(float.POSITIVE_INFINITY)", float(0), float.rsqrt(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.rsqrt(float.POSITIVE_INFINITY) sign check", float.POSITIVE_INFINITY,  1f/float.rsqrt(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.rsqrt(float.NEGATIVE_INFINITY)", float.NaN, float.rsqrt(float.NEGATIVE_INFINITY));
 
 test();
 

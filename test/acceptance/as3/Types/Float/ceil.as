@@ -47,47 +47,58 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-AddTestCase("float.ceil() returns a float", "float", getQualifiedClassName(float.ceil(0f)));
-AddTestCase("float.ceil() length is 1", 1, float.ceil.length);
+AddStrictTestCase("float.ceil() returns a float", "float", getQualifiedClassName(float.ceil(0f)));
+AddStrictTestCase("float.ceil() length is 1", 1, float.ceil.length);
 AddErrorTest("float.ceil() with no args", ARGUMENTERROR+1063,  function(){ float.ceil(); });
 
-AddTestCase("float.ceil(undefined)", float.NaN, float.ceil(undefined));
-AddTestCase("float.ceil(null)", float(0), float.ceil(null));
-AddTestCase("float.ceil(true)", float(1), float.ceil(true));
-AddTestCase("float.ceil(false)", float(0), float.ceil(false));
-AddTestCase("float.ceil(string)", float.NaN, float.ceil("string"));
-AddTestCase("float.ceil(float.NaN)", float.NaN, float.ceil(float.NaN));
-AddTestCase("float.ceil(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.ceil(float.POSITIVE_INFINITY));
-AddTestCase("float.ceil(float.NEGATIVE_INFINITY)", float.NEGATIVE_INFINITY, float.ceil(float.NEGATIVE_INFINITY));
-AddTestCase("float.ceil(float.MAX_VALUE)", float.MAX_VALUE, float.ceil(float.MAX_VALUE));
-AddTestCase("float.ceil(float.MAX_VALUE+3.40282346638528e+31f)", float.POSITIVE_INFINITY, float.ceil(float.MAX_VALUE+3.40282346638528e+31f));
-AddTestCase("float.ceil(float.MIN_VALUE)", float(1), float.ceil(float.MIN_VALUE));
+AddStrictTestCase("float.ceil(undefined)", float.NaN, float.ceil(undefined));
+AddStrictTestCase("float.ceil(null)", float(0), float.ceil(null));
+AddStrictTestCase("float.ceil(true)", float(1), float.ceil(true));
+AddStrictTestCase("float.ceil(false)", float(0), float.ceil(false));
+AddStrictTestCase("float.ceil(string)", float.NaN, float.ceil("string"));
+AddStrictTestCase("float.ceil(float.NaN)", float.NaN, float.ceil(float.NaN));
+AddStrictTestCase("float.ceil(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.ceil(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.ceil(float.NEGATIVE_INFINITY)", float.NEGATIVE_INFINITY, float.ceil(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.ceil(float.MAX_VALUE)", float.MAX_VALUE, float.ceil(float.MAX_VALUE));
+AddStrictTestCase("float.ceil(float.MAX_VALUE+3.40282346638528e+31f)", float.POSITIVE_INFINITY, float.ceil(float.MAX_VALUE+3.40282346638528e+31f));
+AddStrictTestCase("float.ceil(float.MIN_VALUE)", float(1), float.ceil(float.MIN_VALUE));
 
-AddTestCase("float.ceil('1')", float(1), float.ceil('1'));
-AddTestCase("float.ceil('0')", float(0), float.ceil('0'));
+AddStrictTestCase("float.ceil('1')", float(1), float.ceil('1'));
+AddStrictTestCase("float.ceil('0')", float(0), float.ceil('0'));
+
+AddStrictTestCase("float.ceil(0f)", float(0f), float.ceil(0f));
+AddStrictTestCase("float.ceil(0f) sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.ceil(0f));
+AddStrictTestCase("float.ceil(-0f)", float(-0f), float.ceil(-0f));
+AddStrictTestCase("float.ceil(-0f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.ceil(-0f));
+
 
 var myfloat:float = 1f;
-AddTestCase("float.ceil(1f)", float(1f), float.ceil(myfloat));
+AddStrictTestCase("float.ceil(1f)", float(1f), float.ceil(myfloat));
 myfloat = 0f;
-AddTestCase("float.ceil(0f)", float(0), float.ceil(myfloat));
+AddStrictTestCase("float.ceil(0f)", float(0), float.ceil(myfloat));
 AddTestCase("float.INFINITY/float.ceil(0f)", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.ceil(myfloat));
 myfloat = -0f;
-AddTestCase("float.ceil(-0f)", -float(0), float.ceil(myfloat));
-AddTestCase("float.INFINITY/float.ceil(-0f)", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.ceil(myfloat));
+AddStrictTestCase("float.ceil(-0f)", -float(0), float.ceil(myfloat));
+AddStrictTestCase("float.INFINITY/float.ceil(-0f)", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.ceil(myfloat));
 myfloat = -1f;
-AddTestCase("float.ceil(-1f)", float(-1f), float.ceil(myfloat));
+AddStrictTestCase("float.ceil(-1f)", float(-1f), float.ceil(myfloat));
 
-AddTestCase("float.ceil(1f) FloatLiteral", float(1), float.ceil(1f));
-AddTestCase("float.ceil(0f) FloatLiteral", float(0), float.ceil(0f));
-AddTestCase("float.ceil(-0f) FloatLiteral", -float(0), float.ceil(-0f));
-AddTestCase("float.ceil(-1f) FloatLiteral", -float(1), float.ceil(-1f));
+AddStrictTestCase("float.ceil(1f) FloatLiteral", float(1), float.ceil(1f));
+AddStrictTestCase("float.ceil(0f) FloatLiteral", float(0), float.ceil(0f));
+AddStrictTestCase("float.ceil(-0f) FloatLiteral", -float(0), float.ceil(-0f));
+AddStrictTestCase("float.ceil(-1f) FloatLiteral", -float(1), float.ceil(-1f));
 
-AddTestCase("Ensure that float.ceil(-0) returns -0", float.NEGATIVE_INFINITY, Infinity/float.ceil(-0f));
+AddStrictTestCase("Ensure that float.ceil(-0) returns -0", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.ceil(-0f));
 
-AddTestCase("float.ceil(-0.1f)", float(-0f), float.ceil(-0.1f));
-AddTestCase("Ensure that float.ceil(-0.1f) returns -0", float.NEGATIVE_INFINITY, Infinity/float.ceil(-0.1f));
+AddStrictTestCase("float.ceil(-0.1f)", float(-0f), float.ceil(-0.1f));
+AddStrictTestCase("Ensure that float.ceil(-0.1f) returns -0", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.ceil(-0.1f));
 
-AddTestCase("float.ceil(3.124f) == -float.floor(-3.124f)", -float.floor(-3.124f), float.ceil(3.124f));
+AddStrictTestCase("float.ceil(3.124f) == -float.floor(-3.124f)", -float.floor(-3.124f), float.ceil(3.124f));
+
+AddStrictTestCase("float.ceil(-0.5f)", float(-0f), float.ceil(-0.5f));
+AddStrictTestCase("float.ceil(-0.5f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.ceil(-0.5f));
+AddStrictTestCase("float.ceil(-0.999f)", float(-0f), float.ceil(-0.999f));
+AddStrictTestCase("float.ceil(-0.999f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.ceil(-0.999f));
 
 test();
 

@@ -46,39 +46,47 @@ var TITLE   = "public function asin(x:float):float";
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
+function check(param:float):float { return float.asin(param); }
 
-AddTestCase("float.asin() returns a float", "float", getQualifiedClassName(float.asin(0)));
-AddTestCase("float.asin() length is 1", 1, float.asin.length);
+AddStrictTestCase("float.asin() returns a float", "float", getQualifiedClassName(float.asin(0)));
+AddStrictTestCase("float.asin() length is 1", 1, float.asin.length);
 AddErrorTest("float.asin() with no args", ARGUMENTERROR+1063,  function(){ float.asin(); });
 
-AddTestCase("float.asin(undefined)", float.NaN, float.asin(undefined));
-AddTestCase("float.asin(null)", float(0), float.asin(null));
-AddTestCase("float.asin(true)", float(float.PI/2f), float.asin(true));
-AddTestCase("float.asin(false)", float(0), float.asin(false));
-AddTestCase("float.asin(string)", float.NaN, float.asin("string"));
-AddTestCase("float.asin(float.NaN)", float.NaN, float.asin(float.NaN));
+AddStrictTestCase("float.asin(undefined)", float.NaN, float.asin(undefined));
+AddStrictTestCase("float.asin(null)", float(0), float.asin(null));
+AddStrictTestCase("float.asin(true)", float(float.PI/2f), float.asin(true));
+AddStrictTestCase("float.asin(false)", float(0), float.asin(false));
+AddStrictTestCase("float.asin(string)", float.NaN, float.asin("string"));
+AddStrictTestCase("float.asin(float.NaN)", float.NaN, float.asin(float.NaN));
 
-AddTestCase("float.asin('1')", float(float.PI/2f), float.asin('1'));
-AddTestCase("float.asin('0')", float(0), float.asin('0'));
+AddStrictTestCase("float.asin(1.125f)", float.NaN, float.asin(1.125f));
+AddStrictTestCase("float.asin(-1.125f)", float.NaN, float.asin(-1.125f));
+AddStrictTestCase("check() float.asin(1.125f)", float.NaN, check(1.125f));
+AddStrictTestCase("check() float.asin(-1.125f)", float.NaN, check(-1.125f));
+
+
+AddStrictTestCase("float.asin('1')", float(float.PI/2f), float.asin('1'));
+AddStrictTestCase("float.asin('0')", float(0), float.asin('0'));
 
 var myfloat:float = 1f;
-AddTestCase("float.asin(1f)", float(float.PI/2.0f), float.asin(myfloat));
+AddStrictTestCase("float.asin(1f)", float(float.PI/2.0f), float.asin(myfloat));
 myfloat = 0f;
-AddTestCase("float.asin(0f)", float(0), float.asin(myfloat));
+AddStrictTestCase("float.asin(0f)", float(0), float.asin(myfloat));
 myfloat = -0f;
-AddTestCase("float.asin(-0f)", -float(0), float.asin(myfloat));
+AddStrictTestCase("float.asin(-0f)", -float(0), float.asin(myfloat));
 myfloat = -1f;
-AddTestCase("float.asin(-1f)", -float(float.PI/2.0f), float.asin(myfloat));
+AddStrictTestCase("float.asin(-1f)", -float(float.PI/2.0f), float.asin(myfloat));
 
-AddTestCase("float.asin(1f) FloatLiteral", float(float.PI/2.0f), float.asin(1f));
-AddTestCase("float.asin(0f) FloatLiteral", float(0), float.asin(0f));
-AddTestCase("float.asin(-0f) FloatLiteral", -float(0), float.asin(-0f));
-AddTestCase("float.asin(-1f) FloatLiteral", -float(float.PI/2.0f), float.asin(-1f));
+AddStrictTestCase("float.asin(1f) FloatLiteral", float(float.PI/2.0f), float.asin(1f));
+AddStrictTestCase("float.asin(0f) FloatLiteral", float(0), float.asin(0f));
+AddStrictTestCase("float.asin(-0f) FloatLiteral", -float(0), float.asin(-0f));
+AddStrictTestCase("float.asin(-1f) FloatLiteral", -float(float.PI/2.0f), float.asin(-1f));
 
-AddTestCase("float.asin(float.SQRT1_2)", 0.7853981256484985f, float.asin(float.SQRT1_2));
-AddTestCase("float.asin(-float.SQRT1_2)", -0.7853981256484985f, float.asin(-float.SQRT1_2));
+AddStrictTestCase("float.asin(float.SQRT1_2)", 0.7853981256484985f, float.asin(float.SQRT1_2));
+AddStrictTestCase("float.asin(-float.SQRT1_2)", -0.7853981256484985f, float.asin(-float.SQRT1_2));
 
-AddTestCase("Ensure that float.asin(-0) returns -0", float.NEGATIVE_INFINITY, Infinity/float.asin(-0f));
+AddStrictTestCase("Ensure that float.asin(+0) returns +0", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.asin(0f));
+AddStrictTestCase("Ensure that float.asin(-0) returns -0", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.asin(-0f));
 
 
 test();
