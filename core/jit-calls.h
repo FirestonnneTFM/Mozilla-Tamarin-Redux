@@ -1211,16 +1211,16 @@
     METHOD(ENVADDR(MethodEnv::getpropertylate_d), SIG3(A,P,A,D), getpropertylate_d)
     METHOD(ARRAYADDR(ArrayObject::_getDoubleProperty), SIG2(A,P,D), ArrayObject_getDoubleProperty)
     METHOD(VECTOROBJADDR(ObjectVectorObject::_getDoubleProperty), SIG2(A,P,D), ObjectVectorObject_getDoubleProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_getDoubleProperty), SIG2(I,P,D), IntVectorObject_getDoubleProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_getDoubleProperty), SIG2(A,P,D), IntVectorObject_getDoubleProperty)
     METHOD(VECTORINTADDR(IntVectorObject::_getNativeDoubleProperty), SIG2(I,P,D), IntVectorObject_getNativeDoubleProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_getDoubleProperty), SIG2(U,P,D), UIntVectorObject_getDoubleProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_getDoubleProperty), SIG2(A,P,D), UIntVectorObject_getDoubleProperty)
     METHOD(VECTORUINTADDR(UIntVectorObject::_getNativeDoubleProperty), SIG2(U,P,D), UIntVectorObject_getNativeDoubleProperty)
-    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getDoubleProperty), SIG2(D,P,D), DoubleVectorObject_getDoubleProperty)
+    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getDoubleProperty), SIG2(A,P,D), DoubleVectorObject_getDoubleProperty)
     METHOD(VECTORDOUBLEADDRD(DoubleVectorObject::_getNativeDoubleProperty), SIG2(D,P,D), DoubleVectorObject_getNativeDoubleProperty)
 #ifdef VMCFG_FLOAT
-    METHOD(VECTORFLOATADDR(FloatVectorObject::_getDoubleProperty), SIG2(F,P,D), FloatVectorObject_getDoubleProperty)
+    METHOD(VECTORFLOATADDR(FloatVectorObject::_getDoubleProperty), SIG2(A,P,D), FloatVectorObject_getDoubleProperty)
     METHOD(VECTORFLOATADDRF(FloatVectorObject::_getNativeDoubleProperty), SIG2(F,P,D), FloatVectorObject_getNativeDoubleProperty)
-    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getDoubleProperty), SIG2(F4,P,D), Float4VectorObject_getDoubleProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getDoubleProperty), SIG2(A,P,D), Float4VectorObject_getDoubleProperty)
     METHOD(VECTORFLOAT4ADDRF4(Float4VectorObject::_getNativeDoubleProperty), SIG2(F4,P,D), Float4VectorObject_getNativeDoubleProperty)
 #endif
 
