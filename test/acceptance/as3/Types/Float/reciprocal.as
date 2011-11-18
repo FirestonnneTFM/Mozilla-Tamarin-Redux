@@ -47,27 +47,27 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-AddTestCase("float.reciprocal() returns a float", "float", getQualifiedClassName(float.reciprocal(12.345f)));
-AddTestCase("float.reciprocal() length is 1", 1, float.reciprocal.length);
+AddStrictTestCase("float.reciprocal() returns a float", "float", getQualifiedClassName(float.reciprocal(12.345f)));
+AddStrictTestCase("float.reciprocal() length is 1", 1, float.reciprocal.length);
 AddErrorTest("float.reciprocal() with no args", ARGUMENTERROR+1063,  function(){ float.reciprocal(); });
 
-AddTestCase("float.reciprocal(8)", float(0.125), float.reciprocal(8));
+AddStrictTestCase("float.reciprocal(8)", float(0.125), float.reciprocal(8));
 
-AddTestCase("float.reciprocal(undefined)", float.NaN, float.reciprocal(undefined));
-AddTestCase("float.reciprocal(null)", float.POSITIVE_INFINITY, float.reciprocal(null));
-AddTestCase("float.reciprocal(true)", float(1), float.reciprocal(true));
-AddTestCase("float.reciprocal(false)", float.POSITIVE_INFINITY, float.reciprocal(false));
-AddTestCase("float.reciprocal(string)", float.NaN, float.reciprocal("string"));
-AddTestCase("float.reciprocal(float.NaN)", float.NaN, float.reciprocal(float.NaN));
+AddStrictTestCase("float.reciprocal(undefined)", float.NaN, float.reciprocal(undefined));
+AddStrictTestCase("float.reciprocal(null)", float.POSITIVE_INFINITY, float.reciprocal(null));
+AddStrictTestCase("float.reciprocal(true)", float(1), float.reciprocal(true));
+AddStrictTestCase("float.reciprocal(false)", float.POSITIVE_INFINITY, float.reciprocal(false));
+AddStrictTestCase("float.reciprocal(string)", float.NaN, float.reciprocal("string"));
+AddStrictTestCase("float.reciprocal(float.NaN)", float.NaN, float.reciprocal(float.NaN));
 
 
-AddTestCase("float.reciprocal(0f)", float.POSITIVE_INFINITY, float.reciprocal(0f));
-AddTestCase("float.reciprocal(-0f)", float.NEGATIVE_INFINITY, float.reciprocal(-0f));
+AddStrictTestCase("float.reciprocal(0f)", float.POSITIVE_INFINITY, float.reciprocal(0f));
+AddStrictTestCase("float.reciprocal(-0f)", float.NEGATIVE_INFINITY, float.reciprocal(-0f));
 
-AddTestCase("float.reciprocal(float.POSITIVE_INFINITY)", float(0), float.reciprocal(float.POSITIVE_INFINITY));
-AddTestCase("float.reciprocal(float.POSITIVE_INFINITY) sign check", float.POSITIVE_INFINITY,  1f/float.reciprocal(float.POSITIVE_INFINITY));
-AddTestCase("float.reciprocal(float.NEGATIVE_INFINITY)", float(-0), float.reciprocal(float.NEGATIVE_INFINITY));
-AddTestCase("float.reciprocal(float.NEGATIVE_INFINITY) sign check", float.NEGATIVE_INFINITY,  1f/float.reciprocal(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.reciprocal(float.POSITIVE_INFINITY)", float(0), float.reciprocal(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.reciprocal(float.POSITIVE_INFINITY) sign check", float.POSITIVE_INFINITY,  1f/float.reciprocal(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.reciprocal(float.NEGATIVE_INFINITY)", float(-0), float.reciprocal(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.reciprocal(float.NEGATIVE_INFINITY) sign check", float.NEGATIVE_INFINITY,  1f/float.reciprocal(float.NEGATIVE_INFINITY));
 
 test();
 

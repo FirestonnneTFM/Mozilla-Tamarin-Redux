@@ -47,49 +47,50 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-AddTestCase("float.round() returns a float", "float", getQualifiedClassName(float.round(12.345f)));
-AddTestCase("float.round() length is 1", 1, float.round.length);
+AddStrictTestCase("float.round() returns a float", "float", getQualifiedClassName(float.round(12.345f)));
+AddStrictTestCase("float.round() length is 1", 1, float.round.length);
 AddErrorTest("float.round() with no args", ARGUMENTERROR+1063,  function(){ float.round(); });
 
-AddTestCase("float.round(undefined)", float.NaN, float.round(undefined));
-AddTestCase("float.round(null)", float(0), float.round(null));
-AddTestCase("float.round(true)", float(1), float.round(true));
-AddTestCase("float.round(false)", float(0), float.round(false));
-AddTestCase("float.round(string)", float.NaN, float.round("string"));
-AddTestCase("float.round(float.NaN)", float.NaN, float.round(float.NaN));
+AddStrictTestCase("float.round(undefined)", float.NaN, float.round(undefined));
+AddStrictTestCase("float.round(null)", float(0), float.round(null));
+AddStrictTestCase("float.round(true)", float(1), float.round(true));
+AddStrictTestCase("float.round(false)", float(0), float.round(false));
+AddStrictTestCase("float.round(string)", float.NaN, float.round("string"));
+AddStrictTestCase("float.round(float.NaN)", float.NaN, float.round(float.NaN));
 
-AddTestCase("float.round(0f)", 0f, float.round(0f));
-AddTestCase("float.round(-0f)", -0f, float.round(-0f));
-AddTestCase("float.round(-0f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.round(-0f));
-AddTestCase("float.round(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.round(float.POSITIVE_INFINITY));
-AddTestCase("float.round(float.NEGATIVE_INFINITY)", float.NEGATIVE_INFINITY, float.round(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.round(0f)", 0f, float.round(0f));
+AddStrictTestCase("float.round(0f) is +0", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.round(0f));
+AddStrictTestCase("float.round(-0f)", -0f, float.round(-0f));
+AddStrictTestCase("float.round(-0f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.round(-0f));
+AddStrictTestCase("float.round(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.round(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.round(float.NEGATIVE_INFINITY)", float.NEGATIVE_INFINITY, float.round(float.NEGATIVE_INFINITY));
 
-AddTestCase("float.round(0.49f)", 0f, float.round(0.49f));
-AddTestCase("float.round(0.49999f)", 0f, float.round(0.49999f));
-AddTestCase("float.round(4.9999e-2f)", 0f, float.round(4.9999e-2f));
-AddTestCase("float.round(float.MIN_VALUE)", 0f, float.round(float.MIN_VALUE));
-AddTestCase("float.round(0.5f)", 1f, float.round(0.5f));
-AddTestCase("float.round(5.000001e-1)", 1f, float.round(5.000001e-1));
+AddStrictTestCase("float.round(0.49f)", 0f, float.round(0.49f));
+AddStrictTestCase("float.round(0.49999f)", 0f, float.round(0.49999f));
+AddStrictTestCase("float.round(4.9999e-2f)", 0f, float.round(4.9999e-2f));
+AddStrictTestCase("float.round(float.MIN_VALUE)", 0f, float.round(float.MIN_VALUE));
+AddStrictTestCase("float.round(0.5f)", 1f, float.round(0.5f));
+AddStrictTestCase("float.round(5.000001e-1)", 1f, float.round(5.000001e-1));
 
-AddTestCase("float.round(-0.49f)", -0f, float.round(-0.49f));
-AddTestCase("float.round(-0.49f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.round(-0.49f));
-AddTestCase("float.round(-0.49999f)", -0f, float.round(-0.49999f));
-AddTestCase("float.round(-0.49999f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.round(-0.49999f));
-AddTestCase("float.round(-4.9999e-1f)", -0f, float.round(-4.9999e-1f));
-AddTestCase("float.round(-4.9999e-1f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.round(4.9999e-1f));
-AddTestCase("float.round(-float.MIN_VALUE)", -0f, float.round(-float.MIN_VALUE));
-AddTestCase("float.round(-float.MIN_VALUE) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.round(-float.MIN_VALUE));
-AddTestCase("float.round(-0.5f)", -0f, float.round(-0.5f));
-AddTestCase("float.round(-0.5f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.round(-0.5f));
-AddTestCase("float.round(-5.000001e-1)", -1f, float.round(-5.000001e-1));
+AddStrictTestCase("float.round(-0.49f)", -0f, float.round(-0.49f));
+AddStrictTestCase("float.round(-0.49f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.round(-0.49f));
+AddStrictTestCase("float.round(-0.49999f)", -0f, float.round(-0.49999f));
+AddStrictTestCase("float.round(-0.49999f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.round(-0.49999f));
+AddStrictTestCase("float.round(-4.9999e-1f)", -0f, float.round(-4.9999e-1f));
+AddStrictTestCase("float.round(-4.9999e-1f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.round(4.9999e-1f));
+AddStrictTestCase("float.round(-float.MIN_VALUE)", -0f, float.round(-float.MIN_VALUE));
+AddStrictTestCase("float.round(-float.MIN_VALUE) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.round(-float.MIN_VALUE));
+AddStrictTestCase("float.round(-0.5f)", -0f, float.round(-0.5f));
+AddStrictTestCase("float.round(-0.5f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.round(-0.5f));
+AddStrictTestCase("float.round(-5.000001e-1)", -1f, float.round(-5.000001e-1));
 
-AddTestCase("float.round(3.124f) == float.floor(3.124f + 0.5f)", true, float.round(3.124f) == float.floor(3.124f + 0.5f));
+AddStrictTestCase("float.round(3.124f) == float.floor(3.124f + 0.5f)", true, float.round(3.124f) == float.floor(3.124f + 0.5f));
 
 var myfloat:float = 3.124f;
-AddTestCase("float.round(3.124f)", 3f, float.round(myfloat));
-AddTestCase("float.round(3.124f) FloatLiteral", 3f, float.round(3.124f));
+AddStrictTestCase("float.round(3.124f)", 3f, float.round(myfloat));
+AddStrictTestCase("float.round(3.124f) FloatLiteral", 3f, float.round(3.124f));
 
-AddTestCase("float.round(float.MAX_VALUE)", float.MAX_VALUE, float.round(float.MAX_VALUE));
+AddStrictTestCase("float.round(float.MAX_VALUE)", float.MAX_VALUE, float.round(float.MAX_VALUE));
 
 
 test();

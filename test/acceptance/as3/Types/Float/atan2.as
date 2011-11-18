@@ -47,44 +47,52 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-AddTestCase("float.atan2() returns a float", "float", getQualifiedClassName(float.atan2(0f,0f)));
-AddTestCase("float.atan2() length is 2", 2, float.atan2.length);
+AddStrictTestCase("float.atan2() returns a float", "float", getQualifiedClassName(float.atan2(0f,0f)));
+AddStrictTestCase("float.atan2() length is 2", 2, float.atan2.length);
 AddErrorTest("float.atan2() with no args", ARGUMENTERROR+1063,  function(){ float.atan2(); });
 AddErrorTest("float.atan2(0) with one args", ARGUMENTERROR+1063,  function(){ float.atan2(0); });
 
-AddTestCase("float.atan2(0f, undefined)", float.NaN, float.atan2(0f, undefined));
-AddTestCase("float.atan2(undefined, 0f)", float.NaN, float.atan2(undefined, 0f));
-AddTestCase("float.atan2(0f, string)", float.NaN, float.atan2(0f, "string"));
-AddTestCase("float.atan2(string, 0f)", float.NaN, float.atan2("string", 0f));
+AddStrictTestCase("float.atan2(0f, undefined)", float.NaN, float.atan2(0f, undefined));
+AddStrictTestCase("float.atan2(undefined, 0f)", float.NaN, float.atan2(undefined, 0f));
+AddStrictTestCase("float.atan2(0f, string)", float.NaN, float.atan2(0f, "string"));
+AddStrictTestCase("float.atan2(string, 0f)", float.NaN, float.atan2("string", 0f));
 
-AddTestCase("float.atan2('1', 0f)", float.PI/2f, float.atan2('1', 0f));
-AddTestCase("float.atan2(1f, '0')", float.PI/2f, float.atan2(1f, '0'));
 
-AddTestCase("float.atan2(1f, 0f)", float.PI/2f, float.atan2(1f, 0f));
-AddTestCase("float.atan2(1f, -0f)", float.PI/2f, float.atan2(1f, -0f));
-AddTestCase("float.atan2(0f, 1f)", float(0), float.atan2(0f, 1f));
-AddTestCase("float.atan2(0f, 0f)", float(0), float.atan2(0f, 0f));
-AddTestCase("float.atan2(0f, -0f)", float.PI, float.atan2(0f, -0f));
-AddTestCase("float.atan2(0f, -0.1f)", float.PI, float.atan2(0f, -0.1f));
-AddTestCase("float.atan2(-0f, 0.1f)", float(-0), float.atan2(-0f, 0.1f));
-AddTestCase("float.atan2(-0f, 0.1f) check via Infinity", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.atan2(-0f, 0.1f));
-AddTestCase("float.atan2(-0f, 0f)", float(-0), float.atan2(-0f, 0f));
-AddTestCase("float.atan2(-0f, 0f) check via Infinity", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.atan2(-0f, 0f));
-AddTestCase("float.atan2(-0f, -0f)", -float.PI, float.atan2(-0f, -0f));
-AddTestCase("float.atan2(-0f, -0.1f)", -float.PI, float.atan2(-0f, -0.1f));
-AddTestCase("float.atan2(-0.1f, 0f)", -float.PI/2f, float.atan2(-0.1f, 0f));
-AddTestCase("float.atan2(-0.1f, -0f)", -float.PI/2f, float.atan2(-0.1f, -0f));
-AddTestCase("float.atan2(0.1f, float.POSITIVE_INFINITY)", float(0), float.atan2(0.1f, float.POSITIVE_INFINITY));
-AddTestCase("float.atan2(0.1f, float.NEGATIVE_INFINITY)", float.PI, float.atan2(0.1f, float.NEGATIVE_INFINITY));
-AddTestCase("float.atan2(-0.1f, float.POSITIVE_INFINITY)", -float(0), float.atan2(0.1f, float.POSITIVE_INFINITY));
-AddTestCase("float.atan2(-0.1f, float.POSITIVE_INFINITY)", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.atan2(-0.1f, float.POSITIVE_INFINITY));
-AddTestCase("float.atan2(-0.1f, float.NEGATIVE_INFINITY)", -float.PI, float.atan2(-0.1f, float.NEGATIVE_INFINITY));
-AddTestCase("float.atan2(float.POSITIVE_INFINITY, 0f)", float.PI/2f, float.atan2(float.POSITIVE_INFINITY, 0f));
-AddTestCase("float.atan2(float.NEGATIVE_INFINITY, 0f)", -float.PI/2f, float.atan2(float.NEGATIVE_INFINITY, 0f));
-AddTestCase("float.atan2(float.POSITIVE_INFINITY, float.POSITIVE_INFINITY)", float.PI/4f, float.atan2(float.POSITIVE_INFINITY, float.POSITIVE_INFINITY));
-AddTestCase("float.atan2(float.POSITIVE_INFINITY, float.NEGATIVE_INFINITY)", 3f*float.PI/4f, float.atan2(float.POSITIVE_INFINITY, float.NEGATIVE_INFINITY));
-AddTestCase("float.atan2(float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY)", -float.PI/4f, float.atan2(float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY));
-AddTestCase("float.atan2(float.NEGATIVE_INFINITY, float.NEGATIVE_INFINITY)", -3f*float.PI/4f, float.atan2(float.NEGATIVE_INFINITY, float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.atan2(1f, float.NaN)", float.NaN, float.atan2(1f, float.NaN));
+AddStrictTestCase("float.atan2(float.NaN, 1f)", float.NaN, float.atan2(float.NaN, 1f));
+
+
+AddStrictTestCase("float.atan2('1', 0f)", float.PI/2f, float.atan2('1', 0f));
+AddStrictTestCase("float.atan2(1f, '0')", float.PI/2f, float.atan2(1f, '0'));
+
+AddStrictTestCase("float.atan2(1f, 0f)", float.PI/2f, float.atan2(1f, 0f));
+AddStrictTestCase("float.atan2(1f, -0f)", float.PI/2f, float.atan2(1f, -0f));
+AddStrictTestCase("float.atan2(0f, 1f)", float(0), float.atan2(0f, 1f));
+AddStrictTestCase("float.atan2(0f, 1f) check via Infinity", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.atan2(0f, 1f));
+AddStrictTestCase("float.atan2(0f, 0f)", float(0), float.atan2(0f, 0f));
+AddStrictTestCase("float.atan2(0f, 0f) check via Infinity", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.atan2(0f, 0f));
+AddStrictTestCase("float.atan2(0f, -0f)", float.PI, float.atan2(0f, -0f));
+AddStrictTestCase("float.atan2(0f, -0.1f)", float.PI, float.atan2(0f, -0.1f));
+AddStrictTestCase("float.atan2(-0f, 0.1f)", float(-0), float.atan2(-0f, 0.1f));
+AddStrictTestCase("float.atan2(-0f, 0.1f) check via Infinity", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.atan2(-0f, 0.1f));
+AddStrictTestCase("float.atan2(-0f, 0f)", float(-0), float.atan2(-0f, 0f));
+AddStrictTestCase("float.atan2(-0f, 0f) check via Infinity", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.atan2(-0f, 0f));
+AddStrictTestCase("float.atan2(-0f, -0f)", -float.PI, float.atan2(-0f, -0f));
+AddStrictTestCase("float.atan2(-0f, -0.1f)", -float.PI, float.atan2(-0f, -0.1f));
+AddStrictTestCase("float.atan2(-0.1f, 0f)", -float.PI/2f, float.atan2(-0.1f, 0f));
+AddStrictTestCase("float.atan2(-0.1f, -0f)", -float.PI/2f, float.atan2(-0.1f, -0f));
+AddStrictTestCase("float.atan2(0.1f, float.POSITIVE_INFINITY)", float(0), float.atan2(0.1f, float.POSITIVE_INFINITY));
+AddStrictTestCase("float.atan2(0.1f, float.POSITIVE_INFINITY) check via Infinity",float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.atan2(0.1f, float.POSITIVE_INFINITY));
+AddStrictTestCase("float.atan2(0.1f, float.NEGATIVE_INFINITY)", float.PI, float.atan2(0.1f, float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.atan2(-0.1f, float.POSITIVE_INFINITY)", -float(0), float.atan2(0.1f, float.POSITIVE_INFINITY));
+AddStrictTestCase("float.atan2(-0.1f, float.POSITIVE_INFINITY) check via Infinity", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.atan2(-0.1f, float.POSITIVE_INFINITY));
+AddStrictTestCase("float.atan2(-0.1f, float.NEGATIVE_INFINITY)", -float.PI, float.atan2(-0.1f, float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.atan2(float.POSITIVE_INFINITY, 0f)", float.PI/2f, float.atan2(float.POSITIVE_INFINITY, 0f));
+AddStrictTestCase("float.atan2(float.NEGATIVE_INFINITY, 0f)", -float.PI/2f, float.atan2(float.NEGATIVE_INFINITY, 0f));
+AddStrictTestCase("float.atan2(float.POSITIVE_INFINITY, float.POSITIVE_INFINITY)", float.PI/4f, float.atan2(float.POSITIVE_INFINITY, float.POSITIVE_INFINITY));
+AddStrictTestCase("float.atan2(float.POSITIVE_INFINITY, float.NEGATIVE_INFINITY)", 3f*float.PI/4f, float.atan2(float.POSITIVE_INFINITY, float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.atan2(float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY)", -float.PI/4f, float.atan2(float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY));
+AddStrictTestCase("float.atan2(float.NEGATIVE_INFINITY, float.NEGATIVE_INFINITY)", -3f*float.PI/4f, float.atan2(float.NEGATIVE_INFINITY, float.NEGATIVE_INFINITY));
 
 test();
 

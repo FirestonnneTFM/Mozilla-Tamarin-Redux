@@ -41,7 +41,7 @@ import avmplus.*;
 
 function AddStrictTestCase(desc, expected, actual)
 {
-    if (expected===actual && typeof(expected)==typeof(actual))
+    if (typeof(expected)==typeof(actual))
         AddTestCase(desc, expected, actual);
     else
         AddTestCase(desc, typeof(expected)+"["+expected+"]","(STRICT EQ); "+typeof(actual)+"["+actual+"]");

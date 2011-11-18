@@ -47,8 +47,8 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-AddTestCase("float.random() returns a float", "float", getQualifiedClassName(float.random()));
-AddTestCase("float.random() length is 0", 0, float.random.length);
+AddStrictTestCase("float.random() returns a float", "float", getQualifiedClassName(float.random()));
+AddStrictTestCase("float.random() length is 0", 0, float.random.length);
 AddErrorTest("float.random() with args", ARGUMENTERROR+1063,  function(){ float.random(12); });
 
 var myRandom:float;

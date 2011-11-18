@@ -342,6 +342,7 @@ spidermonkey/js1_5/Regress/regress-398085-01 , AOT,, skip, Need to follow up as 
 as3/Types/Float/round: sign check , .*, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=686708
 as3/Types/Float/op_greaterthan:Order\ of\ evaluation, .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=640052
 as3/Types/Float/op_lessthanorequal:Order\ of\ evaluation, .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=640052
+as3/Types/Float/pow:float\.pow\(float\.NEGATIVE_INFINITY. -2f\) sign check , .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703611
 as3/Types/Float/ToString:ToString\(float\.MAX_VALUE\) , .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=699463
 
 as3/Types/Float/loadLegacyCode, arm , ,  expectedfail, need to update runner script

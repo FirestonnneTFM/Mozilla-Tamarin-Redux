@@ -47,33 +47,34 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-AddTestCase("float.tan() returns a float", "float", getQualifiedClassName(float.tan(0)));
-AddTestCase("float.tan() length is 1", 1, float.tan.length);
+AddStrictTestCase("float.tan() returns a float", "float", getQualifiedClassName(float.tan(0)));
+AddStrictTestCase("float.tan() length is 1", 1, float.tan.length);
 AddErrorTest("float.tan() with no args", ARGUMENTERROR+1063,  function(){ float.tan(); });
 
-AddTestCase("float.tan(undefined)", float.NaN, float.tan(undefined));
-AddTestCase("float.tan(null)", float(0), float.tan(null));
-AddTestCase("float.tan(true)", float(Math.tan(1)), float.tan(true));
-AddTestCase("float.tan(false)", float(0), float.tan(false));
-AddTestCase("float.tan(string)", float.NaN, float.tan("string"));
-AddTestCase("float.tan(float.NaN)", float.NaN, float.tan(float.NaN));
-AddTestCase("float.tan(float.POSITIVE_INFINITY)", float.NaN, float.tan(float.POSITIVE_INFINITY));
-AddTestCase("float.tan(float.NEGATIVE_INFINITY)", float.NaN, float.tan(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.tan(undefined)", float.NaN, float.tan(undefined));
+AddStrictTestCase("float.tan(null)", float(0), float.tan(null));
+AddStrictTestCase("float.tan(true)", float(Math.tan(1)), float.tan(true));
+AddStrictTestCase("float.tan(false)", float(0), float.tan(false));
+AddStrictTestCase("float.tan(string)", float.NaN, float.tan("string"));
+AddStrictTestCase("float.tan(float.NaN)", float.NaN, float.tan(float.NaN));
+AddStrictTestCase("float.tan(float.POSITIVE_INFINITY)", float.NaN, float.tan(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.tan(float.NEGATIVE_INFINITY)", float.NaN, float.tan(float.NEGATIVE_INFINITY));
 
 var zerof:float = 0f;
-AddTestCase("float.tan(0f)", float(0), float.tan(zerof));
-AddTestCase("float.tan(0f) FloatLiteral", float(0), float.tan(0f));
+AddStrictTestCase("float.tan(0f)", float(0), float.tan(zerof));
+AddStrictTestCase("float.tan(0f) FloatLiteral", float(0), float.tan(0f));
+AddStrictTestCase("float.tan(0f) sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.tan(0f));
 
 var neg_zerof:float = -0f;
-AddTestCase("float.tan(-0f)", float(-0), float.tan(neg_zerof));
-AddTestCase("float.tan(-0f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.tan(neg_zerof));
-AddTestCase("float.tan(-0f) FloatLiteral", float(-0), float.tan(-0f));
-AddTestCase("float.tan(-0f) FloatLiteral sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.tan(-0f));
+AddStrictTestCase("float.tan(-0f)", float(-0), float.tan(neg_zerof));
+AddStrictTestCase("float.tan(-0f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.tan(neg_zerof));
+AddStrictTestCase("float.tan(-0f) FloatLiteral", float(-0), float.tan(-0f));
+AddStrictTestCase("float.tan(-0f) FloatLiteral sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.tan(-0f));
 
-AddTestCase("float.tan(float.PI/4f)", float(1), float.tan(float.PI/4f));
-AddTestCase("float.tan(3f*float.PI/4f)", float(-1), float.tan(3f*float.PI/4f));
-AddTestCase("float.tan(float.PI)", -float.sin(float.PI), float.tan(float.PI));
-AddTestCase("float.tan(5f*float.PI/4f)", float(1.0000003576278687), float.tan(5f*float.PI/4f));
+AddStrictTestCase("float.tan(float.PI/4f)", float(1), float.tan(float.PI/4f));
+AddStrictTestCase("float.tan(3f*float.PI/4f)", float(-1), float.tan(3f*float.PI/4f));
+AddStrictTestCase("float.tan(float.PI)", -float.sin(float.PI), float.tan(float.PI));
+AddStrictTestCase("float.tan(5f*float.PI/4f)", float(1.0000003576278687), float.tan(5f*float.PI/4f));
 
 test();
 

@@ -47,45 +47,46 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-AddTestCase("float.sqrt() returns a float", "float", getQualifiedClassName(float.sqrt(0)));
-AddTestCase("float.sqrt() length is 1", 1, float.sqrt.length);
+AddStrictTestCase("float.sqrt() returns a float", "float", getQualifiedClassName(float.sqrt(0)));
+AddStrictTestCase("float.sqrt() length is 1", 1, float.sqrt.length);
 AddErrorTest("float.sqrt() with no args", ARGUMENTERROR+1063,  function(){ float.sqrt(); });
 
-AddTestCase("float.sqrt(undefined)", float.NaN, float.sqrt(undefined));
-AddTestCase("float.sqrt(null)", float(0), float.sqrt(null));
-AddTestCase("float.sqrt(true)", float(1), float.sqrt(true));
-AddTestCase("float.sqrt(false)", float(0), float.sqrt(false));
-AddTestCase("float.sqrt(string)", float.NaN, float.sqrt("string"));
-AddTestCase("float.sqrt(float.NaN)", float.NaN, float.sqrt(float.NaN));
-AddTestCase("float.sqrt(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.sqrt(float.POSITIVE_INFINITY));
-AddTestCase("float.sqrt(float.NEGATIVE_INFINITY)", float.NaN, float.sqrt(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.sqrt(undefined)", float.NaN, float.sqrt(undefined));
+AddStrictTestCase("float.sqrt(null)", float(0), float.sqrt(null));
+AddStrictTestCase("float.sqrt(true)", float(1), float.sqrt(true));
+AddStrictTestCase("float.sqrt(false)", float(0), float.sqrt(false));
+AddStrictTestCase("float.sqrt(string)", float.NaN, float.sqrt("string"));
+AddStrictTestCase("float.sqrt(float.NaN)", float.NaN, float.sqrt(float.NaN));
+AddStrictTestCase("float.sqrt(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.sqrt(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.sqrt(float.NEGATIVE_INFINITY)", float.NaN, float.sqrt(float.NEGATIVE_INFINITY));
 
-AddTestCase("float.sqrt(-0.1f)", float.NaN, float.sqrt(-0.1f));
-AddTestCase("float.sqrt(-float.MIN_VALUE)", float.NaN, float.sqrt(-float.MIN_VALUE));
+AddStrictTestCase("float.sqrt(-0.1f)", float.NaN, float.sqrt(-0.1f));
+AddStrictTestCase("float.sqrt(-float.MIN_VALUE)", float.NaN, float.sqrt(-float.MIN_VALUE));
 
 var zerof:float = 0f;
-AddTestCase("float.sqrt(0f)", float(0), float.sqrt(zerof));
-AddTestCase("float.sqrt(0f) FloatLiteral", float(0), float.sqrt(0f));
+AddStrictTestCase("float.sqrt(0f)", float(0), float.sqrt(zerof));
+AddStrictTestCase("float.sqrt(0f) FloatLiteral", float(0), float.sqrt(0f));
+AddStrictTestCase("float.sqrt(0f) sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.sqrt(0f));
 
 var neg_zerof:float = -0f;
-AddTestCase("float.sqrt(-0f)", float(-0), float.sqrt(neg_zerof));
-AddTestCase("float.sqrt(-0f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.sqrt(neg_zerof));
-AddTestCase("float.sqrt(-0f) FloatLiteral", float(-0), float.sqrt(-0f));
-AddTestCase("float.sqrt(-0f) FloatLiteral sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.sqrt(-0f));
+AddStrictTestCase("float.sqrt(-0f)", float(-0), float.sqrt(neg_zerof));
+AddStrictTestCase("float.sqrt(-0f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.sqrt(neg_zerof));
+AddStrictTestCase("float.sqrt(-0f) FloatLiteral", float(-0), float.sqrt(-0f));
+AddStrictTestCase("float.sqrt(-0f) FloatLiteral sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.sqrt(-0f));
 
 
-AddTestCase("float.sqrt(2f)", float.SQRT2, float.sqrt(2f));
-AddTestCase("float.sqrt(0.5f)", float.SQRT1_2, float.sqrt(0.5f));
+AddStrictTestCase("float.sqrt(2f)", float.SQRT2, float.sqrt(2f));
+AddStrictTestCase("float.sqrt(0.5f)", float.SQRT1_2, float.sqrt(0.5f));
 
 var x:float = 3f;
 for( var i:int = 0; i < 20; i++ )
 {
-    AddTestCase("float.sqrt("+x+")", float(1.73205080756887719318).toFixed(i),  float.sqrt(x).toFixed(i));
+    AddStrictTestCase("float.sqrt("+x+")", float(1.73205080756887719318).toFixed(i),  float.sqrt(x).toFixed(i));
 }
 x = 2f;
 for( var i:int = 0; i < 20; i++ )
 {
-    AddTestCase("float.sqrt("+x+")", float(1.4142135623730951455).toFixed(i),  float.sqrt(x).toFixed(i));
+    AddStrictTestCase("float.sqrt("+x+")", float(1.4142135623730951455).toFixed(i),  float.sqrt(x).toFixed(i));
 }
 
 test();

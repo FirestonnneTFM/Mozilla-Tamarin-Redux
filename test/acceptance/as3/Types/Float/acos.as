@@ -46,38 +46,45 @@ var TITLE   = "public function acos(x:float):float";
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
+function check(param:float):float { return float.acos(param); }
 
-AddTestCase("float.acos() returns a float", "float", getQualifiedClassName(float.acos(0)));
-AddTestCase("float.acos() length is 1", 1, float.acos.length);
+AddStrictTestCase("float.acos() returns a float", "float", getQualifiedClassName(float.acos(0)));
+AddStrictTestCase("float.acos() length is 1", 1, float.acos.length);
 AddErrorTest("float.acos() with no args", ARGUMENTERROR+1063,  function(){ float.acos(); });
 
-AddTestCase("float.acos(undefined)", float.NaN, float.acos(undefined));
-AddTestCase("float.acos(null)", float(float.PI/2.0f), float.acos(null));
-AddTestCase("float.acos(true)", float(0), float.acos(true));
-AddTestCase("float.acos(false)", float(float.PI/2.0f), float.acos(false));
-AddTestCase("float.acos(string)", float.NaN, float.acos("string"));
-AddTestCase("float.acos(float.NaN)", float.NaN, float.acos(float.NaN));
+AddStrictTestCase("float.acos(undefined)", float.NaN, float.acos(undefined));
+AddStrictTestCase("float.acos(null)", float(float.PI/2.0f), float.acos(null));
+AddStrictTestCase("float.acos(true)", float(0), float.acos(true));
+AddStrictTestCase("float.acos(false)", float(float.PI/2.0f), float.acos(false));
+AddStrictTestCase("float.acos(string)", float.NaN, float.acos("string"));
+AddStrictTestCase("float.acos(float.NaN)", float.NaN, float.acos(float.NaN));
 
-AddTestCase("float.acos('1')", float(0), float.acos('1'));
-AddTestCase("float.acos('0')", float(float.PI/2.0f), float.acos('0'));
+AddStrictTestCase("float.acos(1.125f)", float.NaN, float.acos(1.125f));
+AddStrictTestCase("float.acos(-1.125f)", float.NaN, float.acos(-1.125f));
+AddStrictTestCase("check() float.acos(1.125f)", float.NaN, check(1.125f));
+AddStrictTestCase("check() float.acos(-1.125f)", float.NaN, check(-1.125f));
+
+AddStrictTestCase("float.acos('1')", float(0), float.acos('1'));
+AddStrictTestCase("float.acos('0')", float(float.PI/2.0f), float.acos('0'));
 
 var myfloat:float = 0f;
-AddTestCase("float.acos(0f)", float(float.PI/2.0f), float.acos(myfloat));
+AddStrictTestCase("float.acos(0f)", float(float.PI/2.0f), float.acos(myfloat));
 myfloat = 1f;
-AddTestCase("float.acos(1f)", float(0), float.acos(myfloat));
+AddStrictTestCase("float.acos(1f)", float(0), float.acos(myfloat));
 myfloat = -1f;
-AddTestCase("float.acos(-1f)", float.PI, float.acos(myfloat));
+AddStrictTestCase("float.acos(-1f)", float.PI, float.acos(myfloat));
 myfloat = -0f;
-AddTestCase("float.acos(-0f)", float(float.PI/2.0f), float.acos(myfloat));
+AddStrictTestCase("float.acos(-0f)", float(float.PI/2.0f), float.acos(myfloat));
 
-AddTestCase("float.acos(0f) FloatLiteral", float(float.PI/2.0f), float.acos(0f));
-AddTestCase("float.acos(1f) FloatLiteral", float(0), float.acos(1f));
-AddTestCase("float.acos(-1f) FloatLiteral", float.PI, float.acos(-1f));
-AddTestCase("float.acos(-0f) FloatLiteral", float(float.PI/2.0f), float.acos(-0f));
+AddStrictTestCase("float.acos(0f) FloatLiteral", float(float.PI/2.0f), float.acos(0f));
+AddStrictTestCase("float.acos(1f) FloatLiteral", float(0), float.acos(1f));
+AddStrictTestCase("float.acos(-1f) FloatLiteral", float.PI, float.acos(-1f));
+AddStrictTestCase("float.acos(-0f) FloatLiteral", float(float.PI/2.0f), float.acos(-0f));
 
-AddTestCase("float.acos(float.SQRT1_2)", float(float.PI/4.0f), float.acos(float.SQRT1_2));
-AddTestCase("float.acos(-float.SQRT1_2)", float(float.PI/4.0f*3.0f), float.acos(-float.SQRT1_2));
+AddStrictTestCase("float.acos(float.SQRT1_2)", float(float.PI/4.0f), float.acos(float.SQRT1_2));
+AddStrictTestCase("float.acos(-float.SQRT1_2)", float(float.PI/4.0f*3.0f), float.acos(-float.SQRT1_2));
 
+AddStrictTestCase("Ensure that float.acos(1f) returns +0", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.acos(1f));
 
 test();
 
