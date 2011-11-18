@@ -1264,6 +1264,10 @@ namespace nanojit
     }
 
 #ifdef VMCFG_FLOAT
+    void Assembler::asm_q2d(LIns *ins) {
+        (void)ins;
+        NanoAssertMsg(0, "LIR_q2d not yet supported for this architecture");
+    }
     void Assembler::asm_ui2f(LIns *ins) {
         (void)ins;
         NanoAssertMsg(0, "LIR_ui2f not yet supported for this architecture");

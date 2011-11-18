@@ -2159,12 +2159,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
         branchToLabel(LIR_jf, eqp0(xormask), int_op_number);
     // both_integers:
-        // Note that this works on 64bit platforms only if we are careful
-        // to restrict the range of intptr values to those that fit within
-        // the integer range of the double type.
         stp( nativeToAtom(
-                    emitIns(BUILTIN_number, i2dIns(p2i(rshp(val1, AtomConstants::kAtomTypeSize))) 
-                                          , i2dIns(p2i(rshp(val2, AtomConstants::kAtomTypeSize))) ),
+                    emitIns(BUILTIN_number, p2dIns(rshp(val1, AtomConstants::kAtomTypeSize)) 
+                                          , p2dIns(rshp(val2, AtomConstants::kAtomTypeSize)) ),
                     NUMBER_TYPE ),
              result, 0, ACCSET_OTHER);
         JIT_EVENT(jit_numeric2_fast_int);
@@ -2177,7 +2174,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     // v2_is_int: (v1 is number!)
         stp( nativeToAtom(
                 emitIns(BUILTIN_number, ldd(subp(val1, AtomConstants::kDoubleType), 0, ACCSET_OTHER)
-                                      , i2dIns(p2i(rshp(val2, AtomConstants::kAtomTypeSize))) ),
+                                      , p2dIns(rshp(val2, AtomConstants::kAtomTypeSize)) ),
                 NUMBER_TYPE ),
             result, 0, ACCSET_OTHER);
         JIT_EVENT(jit_numeric2_dbl_int);
@@ -2185,7 +2182,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     // v1_is_int: (v2 is number!)
         emitLabel(v1_is_int);
         stp( nativeToAtom(
-                    emitIns(BUILTIN_number, i2dIns(p2i(rshp(val1, AtomConstants::kAtomTypeSize)))
+                    emitIns(BUILTIN_number, p2dIns(rshp(val1, AtomConstants::kAtomTypeSize))
                                           , ldd(subp(val2, AtomConstants::kDoubleType), 0, ACCSET_OTHER) ),
                 NUMBER_TYPE ),
             result, 0, ACCSET_OTHER);
@@ -2227,11 +2224,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         // kIntptrType
         suspendCSE();
         branchToLabel(LIR_jf, eqp(tag, AtomConstants::kIntptrType), not_intptr);
-        // Note that this works on 64bit platforms only if we are careful
-        // to restrict the range of intptr values to those that fit within
-        // the integer range of the double type.
         stp( nativeToAtom(
-            emitIns(BUILTIN_number, i2dIns(p2i(rshp(val, AtomConstants::kAtomTypeSize))) )
+            emitIns(BUILTIN_number, p2dIns(rshp(val, AtomConstants::kAtomTypeSize)) )
             , NUMBER_TYPE
             ) , result, 0, ACCSET_OTHER);
 
