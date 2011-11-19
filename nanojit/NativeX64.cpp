@@ -548,7 +548,7 @@ namespace nanojit
         NanoAssert(y>=0 && y<=3);
         NanoAssert(z>=0 && z<=3);
         NanoAssert(w>=0 && w<=3);
-        return (uint8_t) (x | (y<<2) | (z<<4) | (w<<6)); 
+        return x | (y<<2) | (z<<4) | (w<<6); 
     }
     void Assembler::PSHUFD(R l, R r, I m) {
         NanoAssert(isU8(m));
