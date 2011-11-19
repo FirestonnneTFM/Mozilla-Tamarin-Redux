@@ -377,6 +377,7 @@ namespace avmplus
         LIns* atomToNativeRep(Traits *, LIns *i);
         LIns* ptrToNativeRep(Traits*, LIns*);
         LIns* loadAtomRep(int i);
+        LIns* leaIns(int32_t d, LIns *base);
         LIns* localGet(int i);
         LIns* localGetp(int i);
         LIns* localGetd(int i);

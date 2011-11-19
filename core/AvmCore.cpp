@@ -1260,9 +1260,7 @@ return the result of the comparison ToPrimitive(x) == y.
                     }
 
                     AvmAssertMsg(lt==kBibopFloat4Type || rt == kBibopFloat4Type, "Unhandled bibopKind");
-                    float4_t lhsv, rhsv;
-                    float4(lhsv, lhs); float4(rhsv, rhs);
-                    return f4_eq_i(lhsv, rhsv) ? trueAtom:falseAtom;
+                    return f4_eq_i(float4(lhs), float4(rhs) ) ? trueAtom:falseAtom;
 #else
                     return trueAtom;
 #endif // VMCFG_FLOAT
@@ -1319,9 +1317,7 @@ return the result of the comparison ToPrimitive(x) == y.
             if( isFloat4(lhs) || isFloat4(rhs) ){
                 if (isNullOrUndefined(lhs) || isNullOrUndefined(rhs))
                     return falseAtom;
-                float4_t lhsv, rhsv;
-                float4(lhsv, lhs); float4(rhsv, rhs);
-                return f4_eq_i(lhsv, rhsv) ? trueAtom : falseAtom;
+                return f4_eq_i(float4(lhs), float4(rhs) ) ? trueAtom : falseAtom;
             }
 #endif
             if (ltype == kIntptrType && rtype == kDoubleType)
@@ -4671,7 +4667,7 @@ return the result of the comparison ToPrimitive(x) == y.
         return doubleToString(f);                    
     }
     
-    Stringp AvmCore::float4ToString(const float4_t& f)
+    Stringp AvmCore::float4ToString(float4_t f)
     {
         float x = f4_x(f), y = f4_y(f), z = f4_z(f), w = f4_w(f);
         return floatToString(x)
@@ -4748,24 +4744,14 @@ return the result of the comparison ToPrimitive(x) == y.
         }
     }
 
-    /*static*/ void AvmCore::float4(float4_t& retval, Atom atom)
+    /*static*/ float4_t AvmCore::float4(Atom atom)
     {
-        
         if(isFloat4(atom))
-        {
-            if( (((intptr_t)(&retval)) & 0xf) == 0)
-                retval = atomToFloat4(atom);
-            else 
-            {
-                float4_t val = atomToFloat4(atom);
-                VMPI_memcpy(&retval, &val, sizeof(float4_t));
-            }
-            return;
-        }
+            return atomToFloat4(atom);
 
         float f = singlePrecisionFloat(atom);
         float4_t f4 = {f,f,f,f};
-        retval = f4;
+        return f4;
     }
 #endif // VMCFG_FLOAT
 

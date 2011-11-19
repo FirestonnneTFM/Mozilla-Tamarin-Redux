@@ -106,6 +106,7 @@ namespace avmplus
         friend class CodegenLIR;
         friend class BaseExecMgr;
         friend class OSR;
+
     public:
         enum InitMethodStub { kInitMethodStub };
 

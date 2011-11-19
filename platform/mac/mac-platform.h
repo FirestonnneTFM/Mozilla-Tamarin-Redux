@@ -186,6 +186,50 @@ typedef pthread_t vmpi_thread_t;
 #undef verify
 
 /**
+ * Float and Float4 support.
+ */
+#if AVMSYSTEM_PPC
+
+// Just make the build work, we don't really support Mac-PPC.
+typedef struct { float x, y, z, w; } float4_t;
+
+// All of these are stubs that do not return a useful value.
+REALLY_INLINE float4_t f4_add(float4_t a, float4_t b) { (void)a; VMPI_abort(); return b; }
+REALLY_INLINE float4_t f4_sub(float4_t a, float4_t b) { (void)a; VMPI_abort(); return b; }
+REALLY_INLINE float4_t f4_mul(float4_t a, float4_t b) { (void)a; VMPI_abort(); return b; }
+REALLY_INLINE float4_t f4_div(float4_t a, float4_t b) { (void)a; VMPI_abort(); return b; }
+
+REALLY_INLINE int32_t f4_eq_i(float4_t a, float4_t b) { (void)a; (void)b; VMPI_abort(); return true; }
+
+REALLY_INLINE float f4_x(float4_t v) { (void)v; VMPI_abort(); return 1.0f; }
+REALLY_INLINE float f4_y(float4_t v) { (void)v; VMPI_abort(); return 1.0f; }
+REALLY_INLINE float f4_z(float4_t v) { (void)v; VMPI_abort(); return 1.0f; }
+REALLY_INLINE float f4_w(float4_t v) { (void)v; VMPI_abort(); return 1.0f; }
+
+#else
+
+#include <xmmintrin.h>
+
+typedef __m128  float4_t;
+
+#define f4_add  _mm_add_ps
+#define f4_sub  _mm_sub_ps
+#define f4_mul  _mm_mul_ps
+#define f4_div  _mm_div_ps
+
+REALLY_INLINE int32_t f4_eq_i(float4_t a, float4_t b)
+{
+    return (_mm_movemask_epi8(_mm_castps_si128(_mm_cmpneq_ps(a, b))) == 0);
+}
+
+REALLY_INLINE float f4_x(float4_t v) { return _mm_cvtss_f32(v); }
+REALLY_INLINE float f4_y(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 1, 1, 1))); }
+REALLY_INLINE float f4_z(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(2, 2, 2, 2))); }
+REALLY_INLINE float f4_w(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(3, 3, 3, 3))); }
+
+#endif /* AVMSYSTEM_PPC */
+
+/**
 * Type defintion for an opaque data type representing platform-defined spin lock
 * @see VMPI_lockInit(), VMPI_lockAcquire()
 */

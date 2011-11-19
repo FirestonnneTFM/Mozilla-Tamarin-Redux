@@ -172,12 +172,7 @@ private:
     static uintptr_t verifyEnterGPR(MethodEnv*, int32_t argc, uint32_t* args);
     static double verifyEnterFPR(MethodEnv*, int32_t argc, uint32_t* args);
 #ifdef VMCFG_FLOAT
-public:
     static float4_t verifyEnterVECR(MethodEnv*, int32_t argc, uint32_t* args);
-    static float4_t debugEnterExitWrapperV(MethodEnv* env, int32_t argc, uint32_t* argv);
-    static float4_t interpVECR(MethodEnv* method, int argc, uint32_t *ap);
-    static float4_t initInterpVECR(MethodEnv*, int, uint32_t*);
-private:    
 #endif
     static Atom verifyInvoke(MethodEnv*, int32_t argc, Atom* args);
     static void verifyOnCall(MethodEnv*); // helper called by verify trampolines
@@ -185,6 +180,9 @@ private:
     // Trampolines to call debugEnter/Exit around native methods:
     static uintptr_t debugEnterExitWrapper32(MethodEnv* env, int32_t argc, uint32_t* argv);
     static double debugEnterExitWrapperN(MethodEnv* env, int32_t argc, uint32_t* argv);
+#ifdef VMCFG_FLOAT
+    static float4_t debugEnterExitWrapperV(MethodEnv* env, int32_t argc, uint32_t* argv);
+#endif
 
     // Trampoline to set MethodEnv->impl to MethodInfo->impl on first call.
     static uintptr_t delegateInvoke(MethodEnv* env, int32_t argc, uint32_t* ap);
@@ -193,6 +191,9 @@ private:
     // calls to the interpreter go through one of the invoke_interp variants.
     static uintptr_t interpGPR(MethodEnv* method, int argc, uint32_t *ap);
     static double interpFPR(MethodEnv* method, int argc, uint32_t *ap);
+#ifdef VMCFG_FLOAT
+    static float4_t interpVECR(MethodEnv* method, int argc, uint32_t *ap);
+#endif
 
     /** General purpose interpreter invocation. */
     static Atom invokeInterp(MethodEnv* env, int32_t argc, Atom* argv);
@@ -208,6 +209,9 @@ private:
     // interpreter.  See initObj() in exec.cpp.
     static uintptr_t initInterpGPR(MethodEnv*, int, uint32_t*);
     static double initInterpFPR(MethodEnv*, int, uint32_t*);
+#ifdef VMCFG_FLOAT
+    static float4_t initInterpVECR(MethodEnv*, int, uint32_t*);
+#endif
     static Atom initInvokeInterp(MethodEnv*, int, Atom*);
     static Atom initInvokeInterpNoCoerce(MethodEnv*, int, Atom*);
 

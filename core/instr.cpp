@@ -471,8 +471,7 @@ template<> float4_t __subtract<float4_t>(float4_t a, float4_t b) { return f4_sub
         rhs = AvmCore::primitive(rhs); \
         \
        if(AvmCore::isFloat4(lhs) || AvmCore::isFloat4(rhs)){\
-           float4_t lhsv, rhsv; AvmCore::float4(lhsv, lhs); AvmCore::float4(rhsv, rhs); \
-           return core->float4ToAtom( __##name(lhsv, rhsv) );\
+           return core->float4ToAtom( __##name( AvmCore::float4(lhs), AvmCore::float4(rhs)) );\
         }\
         if(AvmCore::isFloat(lhs) && AvmCore::isFloat(rhs))\
             return core->floatToAtom( __##name(AvmCore::atomToFloat(lhs),AvmCore::atomToFloat(rhs)));\
@@ -495,15 +494,13 @@ Atom op_negate(AvmCore* core, Atom val) {
 
     if(AvmCore::isFloat4(val)){
         const static float4_t Zero = {-0.0, -0.0, -0.0, -0.0};
-        float4_t f4val; AvmCore::float4(f4val, val);
-        return core->float4ToAtom( f4_sub(Zero, f4val) );
+        return core->float4ToAtom( f4_sub(Zero, AvmCore::float4(val)) );
     
     }
     if(atomIsIntptr(val) && val != zeroIntAtom){
         double res = - INTPTRASDOUBLE(val);
         intptr_t res_int = intptr_t(res);
-        /* note: if res_int is 0, given that 'val' was integer, it meas that we should really return '-0' */
-        if( atomIsValidIntptrValue(res_int) && res == (double)res_int && res_int != 0)
+        if( atomIsValidIntptrValue(res_int) && res == (double)res_int)
             return (res_int << 3) | kIntptrType;
     }
 
@@ -609,11 +606,7 @@ add_numbers:
     if(float_enabled)
     {
         if(AvmCore::isFloat4(lhs) || AvmCore::isFloat4(rhs))
-        {
-            float4_t lhsv, rhsv;
-            AvmCore::float4(lhsv, lhs); AvmCore::float4(rhsv, rhs);
-            return core->float4ToAtom( f4_add(lhsv , rhsv));
-        }
+            return core->float4ToAtom( f4_add( AvmCore::float4(lhs), AvmCore::float4(rhs)) );
         if(AvmCore::isFloat(lhs) && AvmCore::isFloat(rhs))
             return core->floatToAtom(AvmCore::singlePrecisionFloat(lhs) + AvmCore::singlePrecisionFloat(rhs));
     }
@@ -740,11 +733,7 @@ Atom op_add_a_aa(AvmCore* core, Atom lhs, Atom rhs)
 #ifdef VMCFG_FLOAT
         if(float_support){
             if(AvmCore::isFloat4(lhs) || AvmCore::isFloat4(rhs))
-            {
-                float4_t lhsv, rhsv;
-                AvmCore::float4(lhsv, lhs); AvmCore::float4(rhsv, rhs);
-                return core->float4ToAtom( f4_add(lhsv, rhsv) );
-            }
+                return core->float4ToAtom( f4_add( AvmCore::float4(lhs), AvmCore::float4(rhs)) );
             if(AvmCore::isFloat(lhs) && AvmCore::isFloat(rhs))
                 return core->floatToAtom(AvmCore::atomToFloat(lhs) + AvmCore::atomToFloat(rhs));
         }

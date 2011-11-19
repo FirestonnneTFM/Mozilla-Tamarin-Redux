@@ -53,10 +53,10 @@ namespace avmplus
         createVanillaPrototype();
     }
 
-    void Float4Class::fromComponents(float4_t& ret, float x, float y, float z, float w)
-    { 
-        float* retp = reinterpret_cast<float*>(&ret);
-        retp[0] = x; retp[1] = y; retp[2] = z; retp[3] = w;
+    float4_t Float4Class::fromComponents(float x, float y, float z, float t)
+    {
+        float4_t retval = {x, y, z, t};
+        return retval;
     }
     
     Atom Float4Class::construct(int argc, Atom* argv)
@@ -72,11 +72,10 @@ namespace avmplus
         if(argc != 4)
             vtable->init->argcError(argc);
 
-        float4_t val = { AvmCore::singlePrecisionFloat(argv[1]), 
-                         AvmCore::singlePrecisionFloat(argv[2]), 
-                         AvmCore::singlePrecisionFloat(argv[3]), 
-                         AvmCore::singlePrecisionFloat(argv[4])};
-        return core()->float4ToAtom(val);
+        return core()->float4ToAtom( fromComponents( AvmCore::singlePrecisionFloat(argv[1]), 
+                                                     AvmCore::singlePrecisionFloat(argv[2]), 
+                                                     AvmCore::singlePrecisionFloat(argv[3]), 
+                                                     AvmCore::singlePrecisionFloat(argv[4])) );
     }
 
     // OPTIMIZEME: These are generic implementations.  Faster MMX/SSE/Neon implementations are
@@ -84,100 +83,112 @@ namespace avmplus
     // from the runtime.  Still, if there are precision differences between the C++ implementations
     // and the native MMX/SSE/Neon implementations then we'd be better off deferring to the
     // intrinsics here so that there's no divergence between jitted and interpreted code.
-#define F4OP2(res,s1,s2,op) fromComponents(res, op( f4_x(s1),f4_x(s2)) , op(f4_y(s1), f4_y(s2)) , op( f4_z(s1), f4_z(s2)) , op(f4_w(s1), f4_w(s2)))
-#define F4OP2SEL(res,s1,s2,op) fromComponents( res,               \
-                             (f4_x(s1) op f4_x(s2)) ? 1.0f : 0.0f , \
-                             (f4_y(s1) op f4_y(s2)) ? 1.0f : 0.0f , \
-                             (f4_z(s1) op f4_z(s2)) ? 1.0f : 0.0f , \
-                             (f4_w(s1) op f4_w(s2)) ? 1.0f : 0.0f )
-#define F4OP2SELe(res,s1,s2,op)  fromComponents( res,                     \
-                             f4_x(s1) op f4_x(s2) ? f4_x(s1) : f4_x(s2) , \
+#define F4OP2(s1,s2,op) { op( f4_x(s1),f4_x(s2)) , op(f4_y(s1), f4_y(s2)) , op( f4_z(s1), f4_z(s2)) , op(f4_w(s1), f4_w(s2)) }
+#define F4OP2SEL(s1,s2,op) { f4_x(s1) op f4_x(s2) ? 1.0f : 0.0f , \
+                             f4_y(s1) op f4_y(s2) ? 1.0f : 0.0f , \
+                             f4_z(s1) op f4_z(s2) ? 1.0f : 0.0f , \
+                             f4_w(s1) op f4_w(s2) ? 1.0f : 0.0f }
+#define F4OP2SELe(s1,s2,op) {f4_x(s1) op f4_x(s2) ? f4_x(s1) : f4_x(s2) , \
                              f4_y(s1) op f4_y(s2) ? f4_y(s1) : f4_y(s2) , \
                              f4_z(s1) op f4_z(s2) ? f4_z(s1) : f4_z(s2) , \
-                             f4_w(s1) op f4_w(s2) ? f4_w(s1) : f4_w(s2) )
+                             f4_w(s1) op f4_w(s2) ? f4_w(s1) : f4_w(s2) }
 
-#define F4OP1(res,s1,op, ... ) fromComponents(res,op(f4_x(s1) __VA_ARGS__), op(f4_y(s1) __VA_ARGS__), op(f4_z(s1) __VA_ARGS__), op(f4_w(s1) __VA_ARGS__))
+#define F4OP1(s1,op, ... ) { op(f4_x(s1) __VA_ARGS__), op(f4_y(s1) __VA_ARGS__), op(f4_z(s1) __VA_ARGS__), op(f4_w(s1) __VA_ARGS__) }
 
-    void Float4Class::isGreater(float4_t& result, const float4_t& x, const float4_t& y)
+    float4_t Float4Class::isGreater(float4_t x, float4_t y)
     {
-        F4OP2SEL(result, x, y, >);
+        float4_t result = F4OP2SEL(x, y, >);
+        return result;
     }
 
-    void Float4Class::isGreaterOrEqual(float4_t& result, const float4_t& x, const float4_t& y)
+    float4_t Float4Class::isGreaterOrEqual(float4_t x, float4_t y)
     {
-        F4OP2SEL(result, x, y, >=);
+        float4_t result = F4OP2SEL(x, y, >=);
+        return result;
     }
 
-    void Float4Class::isLess(float4_t& result, const float4_t& x, const float4_t& y) 
+    float4_t Float4Class::isLess(float4_t x, float4_t y) 
     {
-        F4OP2SEL(result, x, y, <);
+        float4_t result = F4OP2SEL(x, y, <);
+        return result;
     }
     
-    void Float4Class::isLessOrEqual(float4_t& result, const float4_t& x, const float4_t& y)
+    float4_t Float4Class::isLessOrEqual(float4_t x, float4_t y)
     {
-        F4OP2SEL(result, x, y, <=);
+        float4_t result = F4OP2SEL(x, y, <=);
+        return result;
     }
 
-    void Float4Class::isEqual(float4_t& result, const float4_t& x, const float4_t& y)
+    float4_t Float4Class::isEqual(float4_t x, float4_t y)
     {
-        F4OP2SEL(result, x, y, ==);
+        float4_t result = F4OP2SEL(x, y, ==);
+        return result;
     }
 
-    void Float4Class::isNotEqual(float4_t& result, const float4_t& x, const float4_t& y)
+    float4_t Float4Class::isNotEqual(float4_t x, float4_t y)
     {
-        F4OP2SEL(result, x, y, !=);
+        float4_t result = F4OP2SEL(x, y, !=);
+        return result;
     }
 
-    void Float4Class::abs(float4_t& result, const float4_t& x)
+    float4_t Float4Class::abs(float4_t x)
     {
-        F4OP1(result, x,fabsf);
+        float4_t result = F4OP1(x,fabsf);
+        return result;
     }
 
     
     // FIXME: Probably not right for either NaN nor -0 vs +0
-    void Float4Class::min(float4_t& result, const float4_t& x, const float4_t& y)
+    float4_t Float4Class::min(float4_t x, float4_t y)
     {
-        F4OP2SELe(result, x, y, <);
+        float4_t result = F4OP2SELe(x, y, <);
+        return result;
     }
 
     // FIXME: Probably not right for either NaN nor -0 vs +0
-    void Float4Class::max(float4_t& result, const float4_t& x, const float4_t& y)
+    float4_t Float4Class::max(float4_t x, float4_t y)
     {
-        F4OP2SELe(result, x, y, >);
+        float4_t result = F4OP2SELe(x, y, >);
+        return result;
     }
 
    // FIXME: Here we allow reduced precision so we almost certainly want to delegate to the
     // native SIMD implementation to get consistent interpreter/JIT behavior.
-    void Float4Class::reciprocal(float4_t& result, const float4_t& x)
+    float4_t Float4Class::reciprocal(float4_t x)
     {
-        F4OP1(result, x, 1.0f/);
+        float4_t result = F4OP1(x, 1.0f/);
+        return result;
     }
 
-    void Float4Class::rsqrt(float4_t& result, const float4_t& x)
+    float4_t Float4Class::rsqrt(float4_t x)
     {
-        F4OP1(result, x, 1.0f/sqrtf);
+        float4_t result = F4OP1(x, 1.0f/sqrtf);
+        return result;
     }
 
-    void Float4Class::sqrt(float4_t& result, const float4_t& x)
+    float4_t Float4Class::sqrt(float4_t x)
     {
-        F4OP1(result, x, sqrtf);
+        float4_t result = F4OP1(x, sqrtf);
+        return result;
     }
 
-    void Float4Class::normalize(float4_t& result, const float4_t& x)
+    float4_t Float4Class::normalize(float4_t x)
     {
         float m = magnitude(x);
-        F4OP1(result, x, , /m);
+        float4_t result = F4OP1(x, , /m);
+        return result;
     }
 
-    void Float4Class::cross(float4_t& result, const float4_t& a, const float4_t& b)
+    float4_t Float4Class::cross(float4_t a, float4_t b)
     {
-        fromComponents(result, f4_y(a) * f4_z(b) - f4_z(a) * f4_y(b),
-                               f4_z(a) * f4_x(b) - f4_x(a) * f4_z(b),
-                               f4_x(a) * f4_y(b) - f4_y(a) * f4_x(b),
-                               0.0f);
+        float4_t result = { f4_y(a) * f4_z(b) - f4_z(a) * f4_y(b),
+                            f4_z(a) * f4_x(b) - f4_x(a) * f4_z(b),
+                            f4_x(a) * f4_y(b) - f4_y(a) * f4_x(b),
+                            0.0f };
+        return result;
     }
 
-    float Float4Class::dot(const float4_t& a, const float4_t& b)
+    float Float4Class::dot(float4_t a, float4_t b)
     {
         return f4_x(a) * f4_x(b) +
                f4_y(a) * f4_y(b) +
@@ -185,57 +196,57 @@ namespace avmplus
                f4_w(a) * f4_w(b);
     }
 
-    float Float4Class::dot2(const float4_t& a, const float4_t& b)
+    float Float4Class::dot2(float4_t a, float4_t b)
     {
         return f4_x(a) * f4_x(b) +
                f4_y(a) * f4_y(b);
     }
     
-    float Float4Class::dot3(const float4_t& a, const float4_t& b)
+    float Float4Class::dot3(float4_t a, float4_t b)
     {
         return f4_x(a) * f4_x(b) +
                f4_y(a) * f4_y(b) +
                f4_z(a) * f4_z(b);
     }
 
-    float Float4Class::magnitude(const float4_t& x)
+    float Float4Class::magnitude(float4_t x)
     {
         return sqrtf(dot(x, x));
     }
     
-    float Float4Class::magnitude2(const float4_t& x)
+    float Float4Class::magnitude2(float4_t x)
     {
         return sqrtf(dot2(x, x));
     }
 
-    float Float4Class::magnitude3(const float4_t& x)
+    float Float4Class::magnitude3(float4_t x)
     {
         return sqrtf(dot3(x, x));
     }
     
-    float Float4Class::distance(const float4_t& x, const float4_t& y)
+    float Float4Class::distance(float4_t x, float4_t y)
     {
         return magnitude(f4_sub(x, y));
     }
 
-    float Float4Class::distance2(const float4_t& x, const float4_t& y)
+    float Float4Class::distance2(float4_t x, float4_t y)
     {
         return magnitude2(f4_sub(x, y));
     }
 
-    float Float4Class::distance3(const float4_t& x, const float4_t& y)
+    float Float4Class::distance3(float4_t x, float4_t y)
     {
         return magnitude3(f4_sub(x, y));
     }
 
     // "How" is really only one byte that specifies which field to get - two bits for each of the float4 positions.
     // i.e. two bits specify which of the x/y/z/w to return as "x", the next two bits specify what to return as "y" and so on.
-    void Float4Class::_swizzle(float4_t& result, const float4_t& val, int32_t how)
+    float4_t Float4Class::_swizzle(float4_t val, int32_t how)
     {
         AvmAssert(how >= 0 && how < 256);
 #ifdef VMCFG_SSE21
         switch(how){ // must explicitly expand; the "shuffle" intrinsic doesn't take variables. 
-#define CASE(x)  case x: result = _mm_shuffle_ps(val, val, x);
+#define CASE(x)  case x: return _mm_shuffle_ps(val, val, x);
             CASE(0);CASE(1);CASE(2);CASE(3);CASE(4);CASE(5);CASE(6);CASE(7);CASE(8);CASE(9);
             CASE(10);CASE(11);CASE(12);CASE(13);CASE(14);CASE(15);CASE(16);CASE(17);CASE(18);CASE(19);
             CASE(20);CASE(21);CASE(22);CASE(23);CASE(24);CASE(25);CASE(26);CASE(27);CASE(28);CASE(29);
@@ -266,12 +277,14 @@ namespace avmplus
 default: return _mm_set1_ps(0); // make all compilers happy
         }
 #else       // No intrinsic available; do the shuffling "by hand"
-        float* retp = reinterpret_cast<float*>(&result);
-        const float* valp = reinterpret_cast<const float*>(&val);
+        float4_t retval;
+        float* retp = reinterpret_cast<float*>(&retval);
+        float* valp = reinterpret_cast<float*>(&val);
         for (int i = 0; i < 4; ++i) {
             *retp++ = valp[how & 3];
             how >>= 2;
         }
+        return retval;
 #endif 
     }
 }
