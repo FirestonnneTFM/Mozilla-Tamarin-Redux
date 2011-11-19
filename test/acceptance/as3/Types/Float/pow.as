@@ -115,7 +115,7 @@ AddStrictTestCase("float.pow(-0f, -1f)", float.NEGATIVE_INFINITY, float.pow(-0f,
 AddStrictTestCase("float.pow(-0f, -2f)", float.POSITIVE_INFINITY, float.pow(-0f, -2f));
 
 
-AddStrictTestCase("float.pow(1.125f, 2.1f)", 1.2806199789047241f, float.pow(1.125f, 2.1f));
+AddStrictTestCase("float.pow(-1.125f, 2.1f)", float.NaN, float.pow(-1.125f, 2.1f));
 
 var param1:float = 3.14159265f;
 var param2:float = 0.000001f;
