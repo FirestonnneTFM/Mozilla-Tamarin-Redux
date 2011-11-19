@@ -254,6 +254,28 @@ typedef unsigned __int64    uint64_t;
 #endif
 
 /**
+ * Float and Float4 support.
+ */
+#include <xmmintrin.h>
+#include <emmintrin.h>
+typedef __m128  float4_t;
+
+#define f4_add  _mm_add_ps
+#define f4_sub  _mm_sub_ps
+#define f4_mul  _mm_mul_ps
+#define f4_div  _mm_div_ps
+
+REALLY_INLINE int32_t f4_eq_i(float4_t a, float4_t b)
+{
+    return (_mm_movemask_epi8(_mm_castps_si128(_mm_cmpneq_ps(a, b))) == 0);
+}
+
+REALLY_INLINE float f4_x(float4_t v) { return _mm_cvtss_f32(v); }
+REALLY_INLINE float f4_y(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 1, 1, 1))); }
+REALLY_INLINE float f4_z(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(2, 2, 2, 2))); }
+REALLY_INLINE float f4_w(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, _MM_SHUFFLE(3, 3, 3, 3))); }
+
+/**
 * Type defintion for an opaque data type representing platform-defined spin lock
 * @see VMPI_lockInit(), VMPI_lockAcquire()
 */

@@ -369,7 +369,6 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
 
         // The following encode 'r func()' through to 'r func(a1, a2, a3, a4, a5, a6, a7, a8)'.
         static inline uint32_t typeSig0(ArgType r) {
-            NanoAssert(r != ARGTYPE_F4); // We can't return float4_t values, pass an additional pointer arg instead
             return r;
         }
         static inline uint32_t typeSig1(ArgType r, ArgType a1) {

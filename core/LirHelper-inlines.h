@@ -340,10 +340,5 @@ REALLY_INLINE LIns* LirHelper::ldf4(LIns* p, int32_t d, AccSet accSet)
 {
     return lirout->insLoad(LIR_ldf4, p, d, accSet);
 }
-    
-    // address calc instruction
-REALLY_INLINE LIns* LirHelper::lea(int32_t disp, LIns* base) {
-    return lirout->ins2(LIR_addp, base, InsConstPtr((void*)disp));
-}    
 #endif
 } // namespace

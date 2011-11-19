@@ -305,8 +305,7 @@ namespace nanojit
         X64_orqrr   = 0xC00B480000000003LL, // 64bit or r |= b
         X64_popr    = 0x5840000000000002LL, // 64bit pop r <- [rsp++]
         X64_pushr   = 0x5040000000000002LL, // 64bit push r -> [--rsp]
-        X64_pshufd  = 0xC0700F4066000005LL, // 64bit PSHUFD xmm1,xmm2,imm
-        X64_shufpd  = 0xC0C60F4066000005LL, // 64bit SHUFPD xmm1,xmm2,imm
+        X64_pshufd  = 0xC0700F4066000005LL, // 64bit push r -> [--rsp]
         X64_pxor    = 0xC0EF0F4066000005LL, // 128bit xor xmm-r ^= xmm-b
         X64_ret     = 0xC300000000000001LL, // near return from called procedure
         X64_sete    = 0xC0940F4000000004LL, // set byte if equal (ZF == 1)
@@ -680,7 +679,6 @@ namespace nanojit
         void MOVSMI(Register base, int disp, int32_t imm16); \
         void MOVBMI(Register base, int disp, int32_t imm8); \
         void PSHUFD(Register l, Register r, int mode); \
-        void SHUFPD(Register l, Register r, int mode); \
         void asm_ptrarg(ArgType, LIns*, Register);\
         void asm_immf(Register r, uint32_t v, bool canClobberCCs);\
         void asm_immf4(Register r, float4_t v, bool canClobberCCs);

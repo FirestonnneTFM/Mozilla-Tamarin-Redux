@@ -73,12 +73,11 @@ avmplus::Atom avmplus_Domain_private_init_thunk(MethodEnv* env, uint32_t argc, A
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::DomainObject* arg1 = (avmplus::DomainObject*)AvmThunkUnbox_OBJECT(avmplus::DomainObject*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmplus::DomainObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DomainObject*, argv[argoff0]);
     obj->init(
-        arg1
+        (avmplus::DomainObject*)AvmThunkUnbox_OBJECT(avmplus::DomainObject*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -89,13 +88,11 @@ avmplus::Atom avmplus_Domain_loadBytes_thunk(MethodEnv* env, uint32_t argc, Atom
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
         , argoff2 = argoff1 + AvmThunkArgSize_OBJECT
     };
-    avmplus::ByteArrayObject* arg1 = (avmplus::ByteArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ByteArrayObject*, argv[argoff1]);
-    uint32_t arg2 = (argc < 2 ? AvmThunkCoerce_INT_UINT(0) : AvmThunkUnbox_UINT(uint32_t, argv[argoff2]));
     (void)env;
     avmplus::DomainObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DomainObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->loadBytes(
-        arg1
-        , arg2
+        (avmplus::ByteArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ByteArrayObject*, argv[argoff1])
+        , (argc < 2 ? AvmThunkCoerce_INT_UINT(0) : AvmThunkUnbox_UINT(uint32_t, argv[argoff2]))
     );
     return avmplus::Atom(ret);
 }
@@ -105,12 +102,11 @@ avmplus::Atom avmplus_Domain_getClass_thunk(MethodEnv* env, uint32_t argc, Atom*
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::String* arg1 = AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmplus::DomainObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DomainObject*, argv[argoff0]);
     avmplus::ClassClosure* const ret = obj->getClass(
-        arg1
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
     return avmplus::Atom(ret);
 }
@@ -131,12 +127,11 @@ avmplus::Atom avmplus_Domain_domainMemory_set_thunk(MethodEnv* env, uint32_t arg
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::ByteArrayObject* arg1 = (avmplus::ByteArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ByteArrayObject*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmplus::DomainObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DomainObject*, argv[argoff0]);
     obj->set_domainMemory(
-        arg1
+        (avmplus::ByteArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ByteArrayObject*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -212,12 +207,11 @@ avmplus::Atom native_script_function_flash_sampler_sampleInternalAllocs_thunk(Me
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::bool32 arg1 = AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff1]);
     (void)argc;
     (void)env;
     avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     SamplerScript::sampleInternalAllocs(obj
-        , arg1
+        , AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -227,12 +221,11 @@ avmplus::Atom native_script_function_flash_sampler__setSamplerCallback_thunk(Met
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::FunctionObject* arg1 = (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     SamplerScript::_setSamplerCallback(obj
-        , arg1
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -242,12 +235,11 @@ double native_script_function_flash_sampler_getSize_thunk(MethodEnv* env, uint32
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::Atom arg1 = AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]);
     (void)argc;
     (void)env;
     avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     double const ret = SamplerScript::getSize(obj
-        , arg1
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
     return double(ret);
 }
@@ -258,13 +250,11 @@ avmplus::Atom native_script_function_flash_sampler_getMemberNames_thunk(MethodEn
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
         , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
-    avmplus::Atom arg1 = AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]);
-    avmplus::bool32 arg2 = (argc < 2 ? false : AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff2]));
     (void)env;
     avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::Atom const ret = SamplerScript::getMemberNames(obj
-        , arg1
-        , arg2
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (argc < 2 ? false : AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff2]))
     );
     return avmplus::Atom(ret);
 }
@@ -274,12 +264,11 @@ avmplus::Atom native_script_function_flash_sampler__getSamples_thunk(MethodEnv* 
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::ClassClosure* arg1 = (avmplus::ClassClosure*)AvmThunkUnbox_OBJECT(avmplus::ClassClosure*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::Atom const ret = SamplerScript::_getSamples(obj
-        , arg1
+        , (avmplus::ClassClosure*)AvmThunkUnbox_OBJECT(avmplus::ClassClosure*, argv[argoff1])
     );
     return avmplus::Atom(ret);
 }
@@ -302,16 +291,13 @@ double native_script_function_flash_sampler__getInvocationCount_thunk(MethodEnv*
         , argoff2 = argoff1 + AvmThunkArgSize_ATOM
         , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
-    avmplus::Atom arg1 = AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]);
-    avmplus::QNameObject* arg2 = (avmplus::QNameObject*)AvmThunkUnbox_OBJECT(avmplus::QNameObject*, argv[argoff2]);
-    uint32_t arg3 = AvmThunkUnbox_UINT(uint32_t, argv[argoff3]);
     (void)argc;
     (void)env;
     avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     double const ret = SamplerScript::_getInvocationCount(obj
-        , arg1
-        , arg2
-        , arg3
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::QNameObject*)AvmThunkUnbox_OBJECT(avmplus::QNameObject*, argv[argoff2])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff3])
     );
     return double(ret);
 }
@@ -322,14 +308,12 @@ avmplus::Atom native_script_function_flash_sampler_isGetterSetter_thunk(MethodEn
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
         , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
-    avmplus::Atom arg1 = AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]);
-    avmplus::QNameObject* arg2 = (avmplus::QNameObject*)AvmThunkUnbox_OBJECT(avmplus::QNameObject*, argv[argoff2]);
     (void)argc;
     (void)env;
     avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     bool const ret = SamplerScript::isGetterSetter(obj
-        , arg1
-        , arg2
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::QNameObject*)AvmThunkUnbox_OBJECT(avmplus::QNameObject*, argv[argoff2])
     );
     return avmplus::Atom(ret);
 }
@@ -339,12 +323,11 @@ avmplus::Atom native_script_function_flash_sampler_getLexicalScopes_thunk(Method
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::FunctionObject* arg1 = (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::ArrayObject* const ret = SamplerScript::getLexicalScopes(obj
-        , arg1
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
     );
     return avmplus::Atom(ret);
 }
@@ -354,12 +337,11 @@ avmplus::Atom native_script_function_flash_sampler_getSavedThis_thunk(MethodEnv*
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::FunctionObject* arg1 = (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::Atom const ret = SamplerScript::getSavedThis(obj
-        , arg1
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
     );
     return avmplus::Atom(ret);
 }
@@ -369,12 +351,11 @@ avmplus::Atom native_script_function_flash_sampler_getMasterString_thunk(MethodE
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::String* arg1 = AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::String* const ret = SamplerScript::getMasterString(obj
-        , arg1
+        , AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
     return avmplus::Atom(ret);
 }
@@ -385,13 +366,11 @@ avmplus::Atom flash_trace_Trace_setLevel_thunk(MethodEnv* env, uint32_t argc, At
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
         , argoff2 = argoff1 + AvmThunkArgSize_INT
     };
-    int32_t arg1 = AvmThunkUnbox_INT(int32_t, argv[argoff1]);
-    int32_t arg2 = (argc < 2 ? 2 : AvmThunkUnbox_INT(int32_t, argv[argoff2]));
     (void)env;
     avmplus::TraceClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::TraceClass*, argv[argoff0]);
     avmplus::Atom const ret = obj->setLevel(
-        arg1
-        , arg2
+        AvmThunkUnbox_INT(int32_t, argv[argoff1])
+        , (argc < 2 ? 2 : AvmThunkUnbox_INT(int32_t, argv[argoff2]))
     );
     return avmplus::Atom(ret);
 }
@@ -401,11 +380,10 @@ avmplus::Atom flash_trace_Trace_getLevel_thunk(MethodEnv* env, uint32_t argc, At
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    int32_t arg1 = (argc < 1 ? 2 : AvmThunkUnbox_INT(int32_t, argv[argoff1]));
     (void)env;
     avmplus::TraceClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::TraceClass*, argv[argoff0]);
     int32_t const ret = obj->getLevel(
-        arg1
+        (argc < 1 ? 2 : AvmThunkUnbox_INT(int32_t, argv[argoff1]))
     );
     return avmplus::Atom(ret);
 }
@@ -415,12 +393,11 @@ avmplus::Atom flash_trace_Trace_setListener_thunk(MethodEnv* env, uint32_t argc,
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::FunctionObject* arg1 = (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmplus::TraceClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::TraceClass*, argv[argoff0]);
     avmplus::Atom const ret = obj->setListener(
-        arg1
+        (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
     );
     return avmplus::Atom(ret);
 }
@@ -441,12 +418,11 @@ avmplus::Atom flash_utils_Dictionary_private_init_thunk(MethodEnv* env, uint32_t
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::bool32 arg1 = AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff1]);
     (void)argc;
     (void)env;
     avmplus::DictionaryObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DictionaryObject*, argv[argoff0]);
     obj->init(
-        arg1
+        AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -456,12 +432,11 @@ double avmplus_MI_plus_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    double arg1 = AvmThunkUnbox_DOUBLE(double, argv[argoff1]);
     (void)argc;
     (void)env;
     avmshell::MIObject* const obj = AvmThunkUnbox_AvmReceiver(avmshell::MIObject*, argv[argoff0]);
     double const ret = obj->::avmshell::MIObjectImpl::plus(
-        arg1
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
     return double(ret);
 }
@@ -471,12 +446,11 @@ avmplus::Atom avmplus_System_exit_thunk(MethodEnv* env, uint32_t argc, Atom* arg
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    int32_t arg1 = AvmThunkUnbox_INT(int32_t, argv[argoff1]);
     (void)argc;
     (void)env;
     avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     obj->exit(
-        arg1
+        AvmThunkUnbox_INT(int32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -486,12 +460,11 @@ avmplus::Atom avmplus_System_exec_thunk(MethodEnv* env, uint32_t argc, Atom* arg
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::String* arg1 = AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     int32_t const ret = obj->exec(
-        arg1
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
     return avmplus::Atom(ret);
 }
@@ -534,12 +507,11 @@ avmplus::Atom avmplus_System_trace_thunk(MethodEnv* env, uint32_t argc, Atom* ar
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::ArrayObject* arg1 = (avmplus::ArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ArrayObject*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     obj->trace(
-        arg1
+        (avmplus::ArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ArrayObject*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -549,12 +521,11 @@ avmplus::Atom avmplus_System_write_thunk(MethodEnv* env, uint32_t argc, Atom* ar
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::String* arg1 = AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     obj->write(
-        arg1
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -696,12 +667,11 @@ avmplus::Atom avmplus_System_isGlobal_thunk(MethodEnv* env, uint32_t argc, Atom*
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::Atom arg1 = AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]);
     (void)argc;
     (void)env;
     avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     bool const ret = obj->isGlobal(
-        arg1
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
     return avmplus::Atom(ret);
 }
@@ -733,12 +703,11 @@ avmplus::Atom avmplus_System_disposeXML_thunk(MethodEnv* env, uint32_t argc, Ato
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::XMLObject* arg1 = (avmplus::XMLObject*)AvmThunkUnbox_OBJECT(avmplus::XMLObject*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     obj->disposeXML(
-        arg1
+        (avmplus::XMLObject*)AvmThunkUnbox_OBJECT(avmplus::XMLObject*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -748,11 +717,10 @@ avmplus::Atom avmplus_System_pauseForGCIfCollectionImminent_thunk(MethodEnv* env
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    double arg1 = (argc < 1 ? 0.75 : AvmThunkUnbox_DOUBLE(double, argv[argoff1]));
     (void)env;
     avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     obj->pauseForGCIfCollectionImminent(
-        arg1
+        (argc < 1 ? 0.75 : AvmThunkUnbox_DOUBLE(double, argv[argoff1]))
     );
     return undefinedAtom;
 }
@@ -762,12 +730,11 @@ avmplus::Atom avmplus_File_exists_thunk(MethodEnv* env, uint32_t argc, Atom* arg
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::String* arg1 = AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmshell::FileClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::FileClass*, argv[argoff0]);
     bool const ret = obj->exists(
-        arg1
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
     return avmplus::Atom(ret);
 }
@@ -777,12 +744,11 @@ avmplus::Atom avmplus_File_read_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::String* arg1 = AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmshell::FileClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::FileClass*, argv[argoff0]);
     avmplus::String* const ret = obj->read(
-        arg1
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
     return avmplus::Atom(ret);
 }
@@ -793,14 +759,12 @@ avmplus::Atom avmplus_File_write_thunk(MethodEnv* env, uint32_t argc, Atom* argv
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
         , argoff2 = argoff1 + AvmThunkArgSize_STRING
     };
-    avmplus::String* arg1 = AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]);
-    avmplus::String* arg2 = AvmThunkUnbox_STRING(avmplus::String*, argv[argoff2]);
     (void)argc;
     (void)env;
     avmshell::FileClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::FileClass*, argv[argoff0]);
     obj->write(
-        arg1
-        , arg2
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
+        , AvmThunkUnbox_STRING(avmplus::String*, argv[argoff2])
     );
     return undefinedAtom;
 }
@@ -810,12 +774,11 @@ avmplus::Atom avmplus_File_readByteArray_thunk(MethodEnv* env, uint32_t argc, At
         argoff0 = 0
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    avmplus::String* arg1 = AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]);
     (void)argc;
     (void)env;
     avmshell::FileClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::FileClass*, argv[argoff0]);
     avmplus::ByteArrayObject* const ret = obj->readByteArray(
-        arg1
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
     return avmplus::Atom(ret);
 }
@@ -826,14 +789,12 @@ avmplus::Atom avmplus_File_writeByteArray_thunk(MethodEnv* env, uint32_t argc, A
         , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
         , argoff2 = argoff1 + AvmThunkArgSize_STRING
     };
-    avmplus::String* arg1 = AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]);
-    avmplus::ByteArrayObject* arg2 = (avmplus::ByteArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ByteArrayObject*, argv[argoff2]);
     (void)argc;
     (void)env;
     avmshell::FileClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::FileClass*, argv[argoff0]);
     bool const ret = obj->writeByteArray(
-        arg1
-        , arg2
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
+        , (avmplus::ByteArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ByteArrayObject*, argv[argoff2])
     );
     return avmplus::Atom(ret);
 }

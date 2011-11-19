@@ -947,7 +947,7 @@ namespace avmplus
 #ifdef VMCFG_FLOAT
     // There will be four endianness checks here but one hopes the compiler will
     // common them after inlining.
-    void ByteArrayObject::readFloat4(float4_t& retval)
+    float4_t ByteArrayObject::readFloat4()
     {
         uint8_t *b = m_byteArray.requestBytesForShortRead(16);
         float x = readFloat(b);
@@ -955,7 +955,7 @@ namespace avmplus
         float z = readFloat(b+8);
         float w = readFloat(b+12);
         float4_t v = { x, y, z, w };
-        retval = v;
+        return v;
     }
 #endif
 

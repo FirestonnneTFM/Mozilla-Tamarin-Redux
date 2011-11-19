@@ -1375,7 +1375,7 @@ const int kBufferPadding = 16;
          * decoded.  Otherwise, it is coerced to the float4 type
          * and returned.  
          */
-        static void float4(float4_t& retval, Atom atom);
+        static float4_t float4(Atom atom);
 #endif
 
         // convert atom to integer when we know it is already a legal signed-32 bit int value
@@ -1388,7 +1388,7 @@ const int kBufferPadding = 16;
         Atom doubleToAtom(double n);
 #ifdef VMCFG_FLOAT
         Atom floatToAtom(float n);
-        Atom float4ToAtom(const float4_t& n);
+        Atom float4ToAtom(float4_t n);
 #endif
 
 #if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
@@ -1990,7 +1990,7 @@ const int kBufferPadding = 16;
         Stringp doubleToString(double d);
 #ifdef VMCFG_FLOAT
         Stringp floatToString(float f);
-        Stringp float4ToString(const float4_t& f);
+        Stringp float4ToString(float4_t f);
 #endif
         Stringp concatStrings(Stringp s1, Stringp s2);
 

@@ -160,7 +160,6 @@ namespace avmplus
         LIns* jlti(LIns* a, int32_t b);
         LIns* jgti(LIns* a, int32_t b);
         LIns* jnei(LIns* a, int32_t b);
-        LIns* lea(int32_t d, LIns *base);
         LIns* sti(LIns* val, LIns* p, int32_t d, AccSet);
         LIns* stp(LIns* val, LIns* p, int32_t d, AccSet);
         LIns* std(LIns* val, LIns* p, int32_t d, AccSet);
