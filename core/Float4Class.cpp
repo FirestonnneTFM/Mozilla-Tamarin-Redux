@@ -83,6 +83,9 @@ namespace avmplus
     // from the runtime.  Still, if there are precision differences between the C++ implementations
     // and the native MMX/SSE/Neon implementations then we'd be better off deferring to the
     // intrinsics here so that there's no divergence between jitted and interpreted code.
+    //
+    // FIXME: Bugzilla 703605 has more information.
+
 #define F4OP2(s1,s2,op) { op( f4_x(s1),f4_x(s2)) , op(f4_y(s1), f4_y(s2)) , op( f4_z(s1), f4_z(s2)) , op(f4_w(s1), f4_w(s2)) }
 #define F4OP2SEL(s1,s2,op) { f4_x(s1) op f4_x(s2) ? 1.0f : 0.0f , \
                              f4_y(s1) op f4_y(s2) ? 1.0f : 0.0f , \
@@ -138,21 +141,21 @@ namespace avmplus
     }
 
     
-    // FIXME: Probably not right for either NaN nor -0 vs +0
+    // FIXME (Bugzilla 703605): Probably not right for either NaN nor -0 vs +0
     float4_t Float4Class::min(float4_t x, float4_t y)
     {
         float4_t result = F4OP2SELe(x, y, <);
         return result;
     }
 
-    // FIXME: Probably not right for either NaN nor -0 vs +0
+    // FIXME (Bugzilla 703605): Probably not right for either NaN nor -0 vs +0
     float4_t Float4Class::max(float4_t x, float4_t y)
     {
         float4_t result = F4OP2SELe(x, y, >);
         return result;
     }
 
-   // FIXME: Here we allow reduced precision so we almost certainly want to delegate to the
+    // FIXME (Bugzilla 703605): Here we allow reduced precision so we almost certainly want to delegate to the
     // native SIMD implementation to get consistent interpreter/JIT behavior.
     float4_t Float4Class::reciprocal(float4_t x)
     {
@@ -160,6 +163,8 @@ namespace avmplus
         return result;
     }
 
+    // FIXME: (Bugzilla 703605) We want consistent interpreter/jit behavior, so we want to defer to the
+    // machine primitive.
     float4_t Float4Class::rsqrt(float4_t x)
     {
         float4_t result = F4OP1(x, 1.0f/sqrtf);
