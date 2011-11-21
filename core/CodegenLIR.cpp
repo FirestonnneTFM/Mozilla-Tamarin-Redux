@@ -2133,6 +2133,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #ifdef VMCFG_FLOAT
     void CodegenLIR::emitNumericOp2(int32_t op1, int32_t op2, const LIREmitter& emitIns)
     {
+        static_assert(kIntptrType == 6, "You can't change kIntptrType just like that");
+        static_assert(kDoubleType == 7, "You can't change kDoubleType just like that");
+        
         const FrameValue& v1 = state->value(op1); (void) v1;
         const FrameValue& v2 = state->value(op2); (void) v2;
         AvmAssert (v1.traits == OBJECT_TYPE && v2.traits == OBJECT_TYPE && v1.notNull && v2.notNull);
@@ -2151,7 +2154,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         suspendCSE();
         /* NOTE: to make the fast path faster, we're playing with the bits to quickly determine if 
            "both are double", "at least one is not Number" and "both are int"
-           We *RELY* on the Atom TAG scheme, i.e. "kIntPtrType is 6" and "kDoubleType is 7".
+           We rely on the Atom TAG scheme, i.e. "kIntPtrType is 6" and "kDoubleType is 7",
+           see static asserts above.
         */
         branchToLabel(LIR_jt, eqp(tag, AtomConstants::kDoubleType), both_double);
         branchToLabel(LIR_jf, eqp(tag, AtomConstants::kIntptrType), slow_path);
@@ -2235,7 +2239,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         // kDoubleType
         branchToLabel(LIR_jf, eqp(tag, AtomConstants::kDoubleType), not_double);
         stp( nativeToAtom( 
-            emitIns(BUILTIN_number,  ldd(subp(val, AtomConstants::kDoubleType), 0, ACCSET_OTHER) )
+            emitIns(BUILTIN_number,  ldd(val, -AtomConstants::kDoubleType, ACCSET_OTHER) )
             , NUMBER_TYPE
             ) , result, 0, ACCSET_OTHER);
         JIT_EVENT(jit_numeric1_fast_number);
@@ -3471,6 +3475,17 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             branchToLabel(LIR_j, NULL, done);
 
             emitLabel(already_numeric);
+#ifdef DEBUG
+            // Above we assume that every bibop type is numeric.
+            // Add a DEBUG guard in case we introduce future non-numeric bibop types.
+            CodegenLabel really_numeric("_really_numeric_");
+            branchToLabel(LIR_jf, eqp(tag, AtomConstants::kSpecialBibopType), really_numeric);
+            LIns* bibopTag = lirout->insLoad(LIR_lduc2ui, andp(val, (Atom)MMgc::GCHeap::kBlockMask), 0, ACCSET_OTHER);
+            branchToLabel(LIR_jt, binaryIns(LIR_eqi, bibopTag, InsConst(AtomConstants::kBibopFloatType)), really_numeric);
+            branchToLabel(LIR_jt, binaryIns(LIR_eqi, bibopTag, InsConst(AtomConstants::kBibopFloat4Type)), really_numeric);
+            callIns(FUNCTIONID(upe), 1, env_param);
+            emitLabel(really_numeric);
+#endif
             stp(val,result,0, ACCSET_OTHER); 
             JIT_EVENT(jit_atom2numeric_flt);
             emitLabel(done);
