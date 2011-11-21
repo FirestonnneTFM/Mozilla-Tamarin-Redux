@@ -501,7 +501,7 @@ namespace nanojit
     }
 #endif
 #if NJ_USES_IMMF4_POOL
-    const float4_t* Assembler::findImmF4FromPool(float4_t q)
+    const float4_t* Assembler::findImmF4FromPool(const float4_t& q)
     {
         float4_t* p = _immF4Pool.get(q);
         if (!p)

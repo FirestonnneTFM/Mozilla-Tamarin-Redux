@@ -187,20 +187,6 @@ const int kBufferPadding = 16;
         uint32_t word;
     };
     
-#ifdef VMCFG_FLOAT
-    union float4_overlay
-    {
-        float4_overlay() {}
-        float4_overlay(float4_t f4) { value=f4; }
- 
-        float4_t value;
-        struct { float x, y, z, w; } words;
-        uint32_t bits32[4];
-        float    floats[4];
-        uint64_t bits64[2];
-    };
-#endif 
-
     // Regular expression compilation cache.
     //
     // The cache is used by AvmCore and is a cache for compiled regular expressions.
@@ -1944,7 +1930,7 @@ const int kBufferPadding = 16;
         Stringp internInt(int n);
 #ifdef VMCFG_FLOAT
         Stringp internFloat(float f);
-        Stringp internFloat4(float4_t f);
+        Stringp internFloat4(const float4_t& f);
 #endif
         Stringp internDouble(double d);
         Stringp internUint32(uint32_t ui);
@@ -2000,7 +1986,7 @@ const int kBufferPadding = 16;
         Atom allocDouble(double n);
 #ifdef VMCFG_FLOAT
         Atom allocFloat(float n);
-        Atom allocFloat4(float4_t n);
+        Atom allocFloat4(const float4_t& n);
 #endif
 
         void rehashStrings(int newlen);

@@ -762,7 +762,7 @@ namespace nanojit
         return ins;
     }
 
-    LIns* LirBufWriter::insImmF4(float4_t f4)
+    LIns* LirBufWriter::insImmF4(const float4_t& f4)
     {
         LInsF4* insF4 = (LInsF4*)_buf->makeRoom(sizeof(LInsF4));
         LIns*  ins  = insF4->getLIns();
@@ -2750,7 +2750,7 @@ namespace nanojit
         return hashfinish(hash32(0, a));
     }
 
-    inline uint32_t CseFilter::hashImmF4(float4_t a) {
+    inline uint32_t CseFilter::hashImmF4(const float4_t& a) {
         const uint32_t* up = reinterpret_cast<const uint32_t*>(&a);
 
         uint32_t hash = hash32(0, up[0]);
@@ -3028,7 +3028,7 @@ namespace nanojit
         return k;
     }
     
-    inline LIns* CseFilter::findImmF4(float4_t a, uint32_t &k)
+    inline LIns* CseFilter::findImmF4(const float4_t& a, uint32_t &k)
     {
         NLKind nlkind = NLImmF4;
         const uint32_t bitmask = m_capNL[nlkind] - 1;
@@ -3273,7 +3273,7 @@ namespace nanojit
         return ins;
     }
     
-    LIns* CseFilter::insImmF4(float4_t f4)
+    LIns* CseFilter::insImmF4(const float4_t& f4)
     {
         uint32_t k;
         LIns* ins = findImmF4(f4, k);
@@ -4379,7 +4379,7 @@ namespace nanojit
         return out->insImmF(f);
     }
     
-    LIns* ValidateWriter::insImmF4(float4_t f)
+    LIns* ValidateWriter::insImmF4(const float4_t& f)
     {
         return out->insImmF4(f);
     }

@@ -595,7 +595,7 @@ REALLY_INLINE Atom AvmCore::allocFloat(float n)
     return kSpecialBibopType | (uintptr_t)f;
 }
 
-REALLY_INLINE Atom AvmCore::allocFloat4(float4_t n)
+REALLY_INLINE Atom AvmCore::allocFloat4(const float4_t& n)
 {
     float4_t *f = (float4_t*) GetGC()->AllocFloat4();
     AvmAssert( (((uintptr_t)f) & 0xf) == 0);

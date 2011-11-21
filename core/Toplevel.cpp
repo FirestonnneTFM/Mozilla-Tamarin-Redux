@@ -715,9 +715,10 @@ namespace avmplus
                         uint32_t index;
                         if (AvmCore::getIndexFromAtom(multiname->getName()->atom(), &index))
                         {
-                            float4_overlay f4(AvmCore::atomToFloat4(obj));
+                            float4_t f4 = AvmCore::atomToFloat4(obj);
+                            const float* pf4 = reinterpret_cast<const float*>(&f4);
                             if (index <= 3)
-                                return core()->floatToAtom(f4.floats[index]);
+                                return core()->floatToAtom(pf4[index]);
                             throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(4));
                         }
                     }
