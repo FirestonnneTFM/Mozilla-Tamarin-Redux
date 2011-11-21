@@ -533,32 +533,32 @@ class IDataInputInterface : public avmplus::ScriptObject
 public:
     inline uint32_t call_get_bytesAvailable()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1502);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1528);
         avmplus::Atom const result = this->toplevel()->getproperty(this->atom(), mn, this->vtable);
         return avmplus::AvmCore::toUInt32(result);
     }
     inline GCRef<avmplus::String> call_get_endian()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1505);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1531);
         avmplus::Atom const result = this->toplevel()->getproperty(this->atom(), mn, this->vtable);
         return GCRef<avmplus::String>(avmplus::AvmCore::atomToString(result));
     }
     inline uint32_t call_get_objectEncoding()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1504);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1530);
         avmplus::Atom const result = this->toplevel()->getproperty(this->atom(), mn, this->vtable);
         return avmplus::AvmCore::toUInt32(result);
     }
     inline bool call_readBoolean()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1490);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1516);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return ((result) != avmplus::falseAtom);
     }
     inline int32_t call_readByte()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1491);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1517);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::integer(result);
@@ -566,28 +566,28 @@ public:
     inline void call_readBytes(GCRef<avmplus::ByteArrayObject> arg1, uint32_t arg2, uint32_t arg3)
     {
         avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core()));
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1489);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1515);
         avmplus::Atom args[4] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1.reinterpretCast<avmplus::ScriptObject>()->atom(), core->uintToAtom(arg2), core->uintToAtom(arg3) };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 3, args, this->vtable);
         AvmAssert(result == undefinedAtom); (void)result;
     }
     inline double call_readDouble()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1498);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1524);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::number(result);
     }
     inline double call_readFloat()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1497);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1523);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::number(result);
     }
     inline int32_t call_readInt()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1495);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1521);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::integer(result);
@@ -595,28 +595,28 @@ public:
     inline GCRef<avmplus::String> call_readMultiByte(uint32_t arg1, GCRef<avmplus::String> arg2)
     {
         avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core()));
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1499);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1525);
         avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), core->uintToAtom(arg1), arg2->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 2, args, this->vtable);
         return GCRef<avmplus::String>(avmplus::AvmCore::atomToString(result));
     }
     inline avmplus::Atom call_readObject()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1503);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1529);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return result;
     }
     inline int32_t call_readShort()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1493);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1519);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::integer(result);
     }
     inline GCRef<avmplus::String> call_readUTF()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1500);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1526);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return GCRef<avmplus::String>(avmplus::AvmCore::atomToString(result));
@@ -624,35 +624,35 @@ public:
     inline GCRef<avmplus::String> call_readUTFBytes(uint32_t arg1)
     {
         avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core()));
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1501);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1527);
         avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), core->uintToAtom(arg1) };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 1, args, this->vtable);
         return GCRef<avmplus::String>(avmplus::AvmCore::atomToString(result));
     }
     inline uint32_t call_readUnsignedByte()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1492);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1518);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::toUInt32(result);
     }
     inline uint32_t call_readUnsignedInt()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1496);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1522);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::toUInt32(result);
     }
     inline uint32_t call_readUnsignedShort()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1494);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1520);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::toUInt32(result);
     }
     inline void call_set_endian(GCRef<avmplus::String> arg1)
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1505);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1531);
         this->toplevel()->setproperty(this->atom(), mn, arg1->atom(), this->vtable);
         avmplus::Atom const result = undefinedAtom;
         AvmAssert(result == undefinedAtom); (void)result;
@@ -660,7 +660,7 @@ public:
     inline void call_set_objectEncoding(uint32_t arg1)
     {
         avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core()));
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1504);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1530);
         this->toplevel()->setproperty(this->atom(), mn, core->uintToAtom(arg1), this->vtable);
         avmplus::Atom const result = undefinedAtom;
         AvmAssert(result == undefinedAtom); (void)result;

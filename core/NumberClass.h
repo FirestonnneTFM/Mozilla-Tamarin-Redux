@@ -69,6 +69,25 @@ namespace avmplus
         Stringp _numberToString(double n, int radix);
         double _minValue();
 
+        double abs(double x);
+        double acos(double x);
+        double asin(double x);
+        double atan(double x);
+        double atan2(double y, double x);
+        double ceil(double x);
+        double cos(double x);
+        double exp(double x);
+        double floor(double x);
+        double log(double x);
+        double pow(double x, double y);
+        double random();
+        double round(double x);
+        double sin(double x);
+        double sqrt(double x);
+        double tan(double x);
+        double min(double x, double y, const Atom* argv, uint32_t argc);
+        double max(double x, double y, const Atom* argv, uint32_t argc);
+
     // ------------------------ DATA SECTION BEGIN
     private:
         GC_NO_DATA(NumberClass)

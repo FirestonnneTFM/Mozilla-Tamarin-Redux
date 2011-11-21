@@ -97,6 +97,10 @@ namespace avmplus
         double max(double x, double y, const Atom* argv, uint32_t argc);
         double min(double x, double y, const Atom* argv, uint32_t argc);
 
+        // Shared between Math and Number.
+        static double maxImpl(double x, double y, const Atom* argv, uint32_t argc);
+        static double minImpl(double x, double y, const Atom* argv, uint32_t argc);
+
     // ------------------------ DATA SECTION BEGIN
     private:
         GC_NO_DATA(MathClass)
