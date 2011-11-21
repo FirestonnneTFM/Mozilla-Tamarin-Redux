@@ -130,7 +130,7 @@ namespace avmplus
     
     float FloatClass::reciprocal(float x)
     {
-        return 1 / x;                   // FIXME: This must use the intrinsic
+        return 1 / x;                   // FIXME (Bugzilla 704097): This must use the intrinsic
     }
     
     float FloatClass::round(float x)
@@ -140,7 +140,7 @@ namespace avmplus
     
     float FloatClass::rsqrt(float x)
     {
-        return 1 / MathUtils::sqrtf(x); // FIXME: this must use the intrinsic
+        return 1 / MathUtils::sqrtf(x); // FIXME (Bugzilla 704097): this must use the intrinsic
     }
 
     float FloatClass::sin(float x)
