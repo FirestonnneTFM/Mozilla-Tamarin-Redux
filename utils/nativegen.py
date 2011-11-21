@@ -2277,7 +2277,7 @@ class AbcThunkGen:
             out.println("return isTypeImpl(value->atom());")
             out.indent -= 1
             out.println("}")
-            if(ctype != CTYPE_FLOAT4):
+            if(ctype != CTYPE_FLOAT4): # In fact we only need this for one class (ClassClosure? I forget now.); but it's only important that we don't emit it for float4_t
                 out.println("REALLY_INLINE %s coerceToType(avmplus::Atom value)" % ret_typedef)
                 out.println("{")
                 out.indent += 1
@@ -2688,9 +2688,6 @@ class AbcThunkGen:
 
     def argTraits(self, receiver, m):
         argtraits = [ receiver ]
-#        ret_traits = self.lookupTraits(m.returnType)
- #       if ret_traits.ctype == CTYPE_FLOAT4 :
-  #          argtraits.append(self.lookupTraits(m.returnType))
         for i in range(0, len(m.paramTypes)):
             argtraits.append(self.lookupTraits(m.paramTypes[i]))
         return argtraits
