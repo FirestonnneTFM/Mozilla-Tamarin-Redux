@@ -366,7 +366,7 @@ REALLY_INLINE Atom AvmCore::floatToAtom(float n)
     return allocFloat(n);
 }
 
-REALLY_INLINE Atom AvmCore::float4ToAtom(float4_t n)
+REALLY_INLINE Atom AvmCore::float4ToAtom(const float4_t& n)
 {
     return allocFloat4(n);
 }
@@ -378,7 +378,9 @@ REALLY_INLINE Atom AvmCore::floatAtom(Atom atom)
 
 REALLY_INLINE Atom AvmCore::float4Atom(Atom atom)
 {
-    return float4ToAtom(AvmCore::float4(atom));
+    float4_t val;
+    float4(val,atom);
+    return float4ToAtom(val);
 }
 #endif // VMCFG_FLOAT
 
