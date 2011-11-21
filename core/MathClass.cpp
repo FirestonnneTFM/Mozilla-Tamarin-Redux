@@ -128,6 +128,49 @@ namespace avmplus
 
     double MathClass::min(double x, double y, const Atom* argv, uint32_t argc)
     {
+        return minImpl(x,y,argv,argc);
+    }
+
+    double MathClass::max(double x, double y, const Atom* argv, uint32_t argc)
+    {
+        return maxImpl(x,y,argv,argc);
+    }
+    
+    
+    double MathClass::pow(double x, double y)
+    {
+        return MathUtils::pow(x, y);
+    }
+
+    double MathClass::random()
+    {
+        return MathUtils::random(&seed);
+    }
+
+    double MathClass::round(double x)
+    {
+        return MathUtils::round(x);
+    }
+
+    double MathClass::sin(double x)
+    {
+        return MathUtils::sin(x);
+    }
+
+    double MathClass::sqrt(double x)
+    {
+        return MathUtils::sqrt(x);
+    }
+
+    double MathClass::tan(double x)
+    {
+        return MathUtils::tan(x);
+    }
+
+    // minImpl and maxImpl are shared between MathClass and NumberClass.
+    /*static*/
+    double MathClass::minImpl(double x, double y, const Atom* argv, uint32_t argc)
+    {
         if (MathUtils::isNaN(x))
         {
             return x;
@@ -158,18 +201,19 @@ namespace avmplus
             else if (y == x && y == 0.0)
             {
                 /*
-                    Lars: "You can tell -0 from 0 by dividing 1 by the zero, -0 gives -Infinity
-                    and 0 gives Infinity, so if you know x is a zero the test for negative
-                    zero is (1/x < 0)."
-                */
+                 Lars: "You can tell -0 from 0 by dividing 1 by the zero, -0 gives -Infinity
+                 and 0 gives Infinity, so if you know x is a zero the test for negative
+                 zero is (1/x < 0)."
+                 */
                 if ((1.0 / y) < 0.0)
                     x = y;  // pick up negative zero when appropriate
             }
         }
         return x;
     }
-
-    double MathClass::max(double x, double y, const Atom* argv, uint32_t argc)
+    
+    /*static*/
+    double MathClass::maxImpl(double x, double y, const Atom* argv, uint32_t argc)
     {
         if (MathUtils::isNaN(x))
         {
@@ -201,47 +245,17 @@ namespace avmplus
             else if (y == x && y == 0)
             {
                 /*
-                    Lars: "You can tell -0 from 0 by dividing 1 by the zero, -0 gives -Infinity
-                    and 0 gives Infinity, so if you know x is a zero the test for negative
-                    zero is (1/x < 0)."
-                */
+                 Lars: "You can tell -0 from 0 by dividing 1 by the zero, -0 gives -Infinity
+                 and 0 gives Infinity, so if you know x is a zero the test for negative
+                 zero is (1/x < 0)."
+                 */
                 if ((1.0 / y) > 0.0)
                     x = y;  // pick up negative zero when appropriate
             }
         }
         return x;
     }
-
-    double MathClass::pow(double x, double y)
-    {
-        return MathUtils::pow(x, y);
-    }
-
-    double MathClass::random()
-    {
-        return MathUtils::random(&seed);
-    }
-
-    double MathClass::round(double x)
-    {
-        return MathUtils::round(x);
-    }
-
-    double MathClass::sin(double x)
-    {
-        return MathUtils::sin(x);
-    }
-
-    double MathClass::sqrt(double x)
-    {
-        return MathUtils::sqrt(x);
-    }
-
-    double MathClass::tan(double x)
-    {
-        return MathUtils::tan(x);
-    }
-
+    
     double MathClass::_min(double x, double y)
     {
         if (MathUtils::isNaN(x))

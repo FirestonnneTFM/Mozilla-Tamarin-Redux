@@ -49,7 +49,6 @@ namespace avmplus
     FloatClass::FloatClass(VTable* cvtable)
     : ClassClosure(cvtable)
     {
-        MathUtils::initRandom(&seed);
         toplevel()->_floatClass = this;
         // prototype objects are always vanilla objects.
         createVanillaPrototype();
@@ -67,7 +66,6 @@ namespace avmplus
 
         return core()->floatAtom(argv[1]);
     }
-    
     
     float FloatClass::abs(float x)
     {
@@ -126,7 +124,8 @@ namespace avmplus
     
     float FloatClass::random()
     {
-        return (float)MathUtils::random(&seed);
+        // Share the RNG stream between Math and Float.
+        return float(toplevel()->builtinClasses()->get_MathClass()->random());
     }
     
     float FloatClass::reciprocal(float x)

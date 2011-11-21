@@ -56,15 +56,6 @@ namespace avmplus
             return new (gc, MMgc::kExact, cvtable->getExtraSize()) FloatClass(cvtable);
         }
                 
-#ifdef DRC_TRIVIAL_DESTRUCTOR
-        ~FloatClass()
-        {
-            seed.uValue = 0;
-            seed.uXorMask = 0;
-            seed.uSequenceLength = 0;
-        }
-#endif
-        
         // this = argv[0]
         // arg1 = argv[1]
         // argN = argv[argc]
@@ -99,8 +90,6 @@ namespace avmplus
         // ------------------------ DATA SECTION BEGIN
     private:    
         GC_NO_DATA(FloatClass)
-        
-        TRandomFast seed;
         
         DECLARE_SLOTS_FloatClass;
         // ------------------------ DATA SECTION END

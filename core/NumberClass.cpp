@@ -137,4 +137,95 @@ namespace avmplus
 #endif
         return minValue;
     }
+
+    double NumberClass::abs(double x)
+    {
+        return MathUtils::abs(x);
+    }
+    
+    double NumberClass::acos(double x)
+    {
+        return MathUtils::acos(x);
+    }
+    
+    double NumberClass::asin(double x)
+    {
+        return MathUtils::asin(x);
+    }
+    
+    double NumberClass::atan(double x)
+    {
+        return MathUtils::atan(x);
+    }
+    
+    double NumberClass::atan2(double y, double x)
+    {
+        return MathUtils::atan2(y, x);
+    }
+    
+    double NumberClass::ceil(double x)
+    {
+        return MathUtils::ceil(x);
+    }
+    
+    double NumberClass::cos(double x)
+    {
+        return MathUtils::cos(x);
+    }
+    
+    double NumberClass::exp(double x)
+    {
+        return MathUtils::exp(x);
+    }
+    
+    double NumberClass::floor(double x)
+    {
+        return MathUtils::floor(x);
+    }
+    
+    double NumberClass::log(double x)
+    {
+        return MathUtils::log(x);
+    }
+    
+    double NumberClass::pow(double x, double y)
+    {
+        return MathUtils::pow(x, y);
+    }
+    
+    double NumberClass::random()
+    {
+        // Share the RNG stream between Math and Number.
+        return toplevel()->builtinClasses()->get_MathClass()->random();
+    }
+    
+    double NumberClass::round(double x)
+    {
+        return MathUtils::round(x);
+    }
+    
+    double NumberClass::sin(double x)
+    {
+        return MathUtils::sin(x);
+    }
+    
+    double NumberClass::sqrt(double x)
+    {
+        return MathUtils::sqrt(x);
+    }
+    
+    double NumberClass::tan(double x)
+    {
+        return MathUtils::tan(x);
+    }
+    
+    double NumberClass::min(double x, double y, const Atom* argv, uint32_t argc)
+    {
+        return MathClass::minImpl(x,y,argv,argc);
+    }
+
+    double NumberClass::max(double x, double y, const Atom* argv, uint32_t argc)
+    {
+        return MathClass::maxImpl(x,y,argv,argc);
+    }
 }
