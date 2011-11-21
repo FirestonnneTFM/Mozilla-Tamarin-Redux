@@ -281,7 +281,7 @@ namespace avmplus
                     break;
                 }
                 if (bibopKind(atom) == kBibopFloat4Type) {
-                    float4_t v = AvmThunkUnbox_FLOAT4(FLOAT4_TYPE, *(Atom*) atomPtr(atom));
+                    float4_t v = * (float4_t*)atomPtr(atom);
                     *this << ((float)f4_x(v)) << "," << ((float)f4_y(v)) << "," << ((float)f4_z(v)) << "," <<  ((float)f4_w(v));
                     break;
                 }

@@ -1022,7 +1022,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_Debugger|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Full</Optimization>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <AdditionalIncludeDirectories>..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -1039,7 +1039,7 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <OpenMPSupport>false</OpenMPSupport>
       <DisableSpecificWarnings>4201;4131;4127</DisableSpecificWarnings>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <OmitFramePointers>false</OmitFramePointers>
     </ClCompile>
     <Link>

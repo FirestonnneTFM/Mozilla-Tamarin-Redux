@@ -52,6 +52,8 @@
     FUNCTION(CALL_INDIRECT, SIG5(F4,P,P,I,P,P),vfcallimt)
 #endif // VMCFG_FLOAT
 
+#define ARGTYPE_RF4 ARGTYPE_P  // to return a float4, we receive an "output" pointer to a float4 value
+#define ARGTYPE_PF4 ARGTYPE_P             // float4 values are passed by reference
     METHOD(ENVADDR(MethodEnv::newActivation), SIG1(P,P), newActivation)
     METHOD(ENVADDR(MethodEnv::newcatch), SIG2(P,P,P), newcatch)
     METHOD(ENVADDR(MethodEnv::newfunction), SIG3(P,P,P,P), newfunction)
@@ -438,14 +440,14 @@
     PUREMETHOD(COREADDR(AvmCore::doubleToString), SIG2(P,P,D), doubleToString)
 #ifdef VMCFG_FLOAT
     PUREMETHOD(COREADDR(AvmCore::floatToString), SIG2(P,P,F), floatToString)
-    PUREMETHOD(COREADDR(AvmCore::float4ToString), SIG2(P,P,F4), float4ToString)
+    PUREMETHOD(COREADDR(AvmCore::float4ToString), SIG2(P,P,PF4), float4ToString)
 #endif
     PUREMETHOD(COREADDR(AvmCore::uintToString), SIG2(P,P,U), uintToString)
     PUREMETHOD(COREADDR(AvmCore::intToString), SIG2(P,P,I), intToString)
     PUREMETHOD(COREADDR(AvmCore::doubleToAtom), SIG2(A,P,D), doubleToAtom)
 #ifdef VMCFG_FLOAT
     PUREMETHOD(COREADDR(AvmCore::floatToAtom), SIG2(A,P,F), floatToAtom)
-    PUREMETHOD(COREADDR(AvmCore::float4ToAtom), SIG2(A,P,F4), float4ToAtom)
+    PUREMETHOD(COREADDR(AvmCore::float4ToAtom), SIG2(A,P,PF4), float4ToAtom)
     PUREMETHOD(COREADDR(AvmCore::numericAtom), SIG2(A,P,A), numericAtom)
     PUREMETHOD(COREADDR(AvmCore::numberAtom), SIG2(A,P,A), numberAtom)
 #endif
@@ -460,8 +462,8 @@
     PUREFUNCTION(FUNCADDR(AvmCore::number), SIG1(D,A), number)
 #ifdef VMCFG_FLOAT
     PUREFUNCTION(FUNCADDR(AvmCore::singlePrecisionFloat), SIG1(F,A), singlePrecisionFloat)
-    PUREFUNCTION(FUNCADDR(AvmCore::float4), SIG1(F4,A), float4)
-    PUREFUNCTION(FUNCADDR(Float4Class::fromComponents), SIG4(F4,F,F,F,F), float4FromComponents)
+    FUNCTION(FUNCADDR(AvmCore::float4), SIG2(V,RF4,A), float4)
+    FUNCTION(FUNCADDR(Float4Class::fromComponents), SIG5(V,RF4,F,F,F,F), float4FromComponents)
 #endif
     METHOD(ENVADDR(MethodEnv::hasnextproto), SIG3(I,P,P,P), hasnextproto)
 
@@ -742,10 +744,10 @@
     REALLY_INLINE void store_cached_slot(SetCache&, ScriptObject*, float4_t* slot_ptr, Atom val)
     {
         if( (((uintptr_t)slot_ptr) & 0xf) == 0)
-            *slot_ptr = AvmCore::float4(val);
+            AvmCore::float4(*slot_ptr, val);
         else
         {
-            float4_t f4 = AvmCore::float4(val);
+            float4_t f4; AvmCore::float4(f4, val);
 #ifdef ANDROID // Work around an ANDROID NDK compiler bug.
             float* fp = (float*) &f4;
             float* dp = (float*) slot_ptr;
@@ -1137,7 +1139,7 @@
     METHOD(VECTORFLOATADDR(FloatVectorObject::_setUintProperty), SIG3(V,P,U,A), FloatVectorObject_setUintProperty)
     METHOD(VECTORFLOATADDR(FloatVectorObject::_setNativeUintProperty), SIG3(V,P,U,F), FloatVectorObject_setNativeUintProperty)
     METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_setUintProperty), SIG3(V,P,U,A), Float4VectorObject_setUintProperty)
-    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_setNativeUintProperty), SIG3(V,P,U,F4), Float4VectorObject_setNativeUintProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_setNativeUintProperty), SIG3(V,P,U,PF4), Float4VectorObject_setNativeUintProperty)
 #endif
 
     METHOD(ENVADDR(MethodEnv::setpropertylate_i), SIG4(V,P,A,I,A), setpropertylate_i)
@@ -1155,7 +1157,7 @@
     METHOD(VECTORFLOATADDR(FloatVectorObject::_setIntProperty), SIG3(V,P,I,A), FloatVectorObject_setIntProperty)
     METHOD(VECTORFLOATADDR(FloatVectorObject::_setNativeIntProperty), SIG3(V,P,I,F), FloatVectorObject_setNativeIntProperty)
     METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_setIntProperty), SIG3(V,P,I,A), Float4VectorObject_setIntProperty)
-    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_setNativeIntProperty), SIG3(V,P,I,F4), Float4VectorObject_setNativeIntProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_setNativeIntProperty), SIG3(V,P,I,PF4), Float4VectorObject_setNativeIntProperty)
 #endif
 
     METHOD(ENVADDR(MethodEnv::setpropertylate_d), SIG4(V,P,A,D,A), setpropertylate_d)
@@ -1173,7 +1175,7 @@
     METHOD(VECTORFLOATADDR(FloatVectorObject::_setDoubleProperty), SIG3(V,P,D,A), FloatVectorObject_setDoubleProperty)
     METHOD(VECTORFLOATADDR(FloatVectorObject::_setNativeDoubleProperty), SIG3(V,P,D,F), FloatVectorObject_setNativeDoubleProperty)
     METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_setDoubleProperty), SIG3(V,P,D,A), Float4VectorObject_setDoubleProperty)
-    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_setNativeDoubleProperty), SIG3(V,P,D,F4), Float4VectorObject_setNativeDoubleProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_setNativeDoubleProperty), SIG3(V,P,D,PF4), Float4VectorObject_setNativeDoubleProperty)
 #endif
 
     METHOD(ENVADDR(MethodEnv::getpropertylate_u), SIG3(A,P,A,U), getpropertylate_u)
@@ -1189,7 +1191,7 @@
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getUintProperty), SIG2(A,P,U), FloatVectorObject_getUintProperty)
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getNativeUintProperty), SIG2(F,P,U), FloatVectorObject_getNativeUintProperty)
     METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getUintProperty), SIG2(A,P,U), Float4VectorObject_getUintProperty)
-    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getNativeUintProperty), SIG2(F4,P,U), Float4VectorObject_getNativeUintProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getNativeUintProperty), SIG2(PF4,P,U), Float4VectorObject_getNativeUintProperty)
 #endif
 
     METHOD(ENVADDR(MethodEnv::getpropertylate_i), SIG3(A,P,A,I), getpropertylate_i)
@@ -1205,7 +1207,7 @@
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getIntProperty), SIG2(A,P,I), FloatVectorObject_getIntProperty)
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getNativeIntProperty), SIG2(F,P,I), FloatVectorObject_getNativeIntProperty)
     METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getIntProperty), SIG2(A,P,I), Float4VectorObject_getIntProperty)
-    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getNativeIntProperty), SIG2(F4,P,I), Float4VectorObject_getNativeIntProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getNativeIntProperty), SIG3(V,P,P,I), Float4VectorObject_getNativeIntProperty)
 #endif
 
     METHOD(ENVADDR(MethodEnv::getpropertylate_d), SIG3(A,P,A,D), getpropertylate_d)
@@ -1221,7 +1223,7 @@
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getDoubleProperty), SIG2(A,P,D), FloatVectorObject_getDoubleProperty)
     METHOD(VECTORFLOATADDRF(FloatVectorObject::_getNativeDoubleProperty), SIG2(F,P,D), FloatVectorObject_getNativeDoubleProperty)
     METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getDoubleProperty), SIG2(A,P,D), Float4VectorObject_getDoubleProperty)
-    METHOD(VECTORFLOAT4ADDRF4(Float4VectorObject::_getNativeDoubleProperty), SIG2(F4,P,D), Float4VectorObject_getNativeDoubleProperty)
+    METHOD(VECTORFLOAT4ADDRF4(Float4VectorObject::_getNativeDoubleProperty), SIG3(V,RF4,P,D), Float4VectorObject_getNativeDoubleProperty)
 #endif
 
     METHOD(ENVADDR(MethodEnv::haspropertylate_u), SIG3(I,P,A,U), haspropertylate_u)
