@@ -4116,7 +4116,7 @@ return the result of the comparison ToPrimitive(x) == y.
         return internDouble(f);
     }
 
-    Stringp AvmCore::internFloat4(float4_t f4)
+    Stringp AvmCore::internFloat4(const float4_t& f4)
     {
         return internString(float4ToString(f4));
     }

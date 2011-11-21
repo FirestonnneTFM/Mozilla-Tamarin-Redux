@@ -441,7 +441,7 @@ template<typename T> T __divide(T a, T b){ return a / b; }
 template<typename T> T __subtract(T a, T b){ return a - b; }
 static double __modulo(double a, double b){ return MathUtils::mod(a,b); }
 static float __modulo(float a, float b){ return (float) MathUtils::mod(a,b); }
-static float4_t __modulo(float4_t a, float4_t b){ 
+static float4_t __modulo(const float4_t& a, const float4_t& b){ 
     float x= __modulo(f4_x(a), f4_x(b));
     float y= __modulo(f4_y(a), f4_y(b));
     float z= __modulo(f4_z(a), f4_z(b));

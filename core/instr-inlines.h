@@ -102,9 +102,11 @@ Atom call_prim_dynamic(E env, Atom val, const Multiname* name, int argc, Atom* a
         uint32_t index;
         if (AvmCore::getIndexFromAtom(name->getName()->atom(), &index))
         {
-            if (index <= 3) {
-                float4_overlay f4(AvmCore::atomToFloat4(val));
-                val = env->core()->floatToAtom(f4.floats[index]);
+            if (index <= 3)
+            {
+                float4_t f4 = AvmCore::atomToFloat4(val);
+                float* pf4 = reinterpret_cast<float*>(&f4);
+                val = env->core()->floatToAtom(pf4[index]);
             }
             return op_call(env, val, argc, args);
         }

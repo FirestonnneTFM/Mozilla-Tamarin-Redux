@@ -264,7 +264,7 @@
     REALLY_INLINE Atom boxslot(AvmCore* core, double d) { return core->doubleToAtom(d); }
 #ifdef VMCFG_FLOAT
     REALLY_INLINE Atom boxslot(AvmCore* core, float f) { return core->floatToAtom(f); }
-    REALLY_INLINE Atom boxslot(AvmCore* core, float4_t f4) { return core->float4ToAtom(f4); }
+    REALLY_INLINE Atom boxslot(AvmCore* core, const float4_t& f4) { return core->float4ToAtom(f4); }
 #endif
 
     // getting a slot on an object, specialized on slot type to streamline boxing
