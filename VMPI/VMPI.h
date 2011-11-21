@@ -120,11 +120,9 @@
 #error "Unrecognized compiler"
 #endif
 
-typedef  __ALIGN8(
-struct float4_t {
+typedef struct float4_t {
     float x, y, z, w;
-} float4_t);
-#undef __ALIGN8
+} float4_t;
 
 REALLY_INLINE float4_t f4_add(const float4_t& x1, const float4_t& x2) 
 { 
@@ -150,7 +148,7 @@ REALLY_INLINE float4_t f4_div(const float4_t& x1, const float4_t& x2)
     return retval;
 }
 
-REALLY_INLINE int32_t f4_eq_i(const float4_t x1, const float4_t& x2)
+REALLY_INLINE int32_t f4_eq_i(const float4_t& x1, const float4_t& x2)
 {
     return (x1.x == x2.x) && (x1.y == x2.y) && (x1.z == x2.z) && (x1.w == x2.w);
 }

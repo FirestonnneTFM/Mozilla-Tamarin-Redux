@@ -46,35 +46,34 @@
 #define float4_ret_t __m128
 #endif
 
+typedef union {
+   float4_ret_t f4_jit;
+   float4_t f4;
+} rvtype;
+
 extern "C" {
 float4_ret_t verifyEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap){
-    union {
-        float4_ret_t f4_jit;
-        float4_t f4;
-    } retval;
-    retval.f4 = avmplus::BaseExecMgr::verifyEnterVECR(env, argc, ap);
-    return retval.f4_jit;
+    float locals[8];
+    uintptr_t lptr = (uintptr_t)(&locals[0]);
+    rvtype *retval = reinterpret_cast<rvtype*>((lptr + 0xf) & ~0xf);
+    retval->f4 = avmplus::BaseExecMgr::verifyEnterVECR(env, argc, ap);
+    return retval->f4_jit;
 }
 float4_ret_t debugEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap){
-    union {
-        float4_ret_t f4_jit;
-        float4_t f4;
-    } retval;
-    retval.f4 = avmplus::BaseExecMgr::debugEnterExitWrapperV(env, argc, ap);
-    return retval.f4_jit;
+    float locals[8];
+    uintptr_t lptr = (uintptr_t)(&locals[0]);
+    rvtype *retval = reinterpret_cast<rvtype*>((lptr + 0xf) & ~0xf);
+    retval->f4 = avmplus::BaseExecMgr::debugEnterExitWrapperV(env, argc, ap);
+    return retval->f4_jit;
 }
 typedef float4_ret_t (*VecrThunk)(avmplus::MethodEnv* env, int32_t argc, avmplus::Atom* argv);
 float4_t thunkEnterVECR_adapter(void* thunk_p, avmplus::MethodEnv* env, int32_t argc, avmplus::Atom* argv){
-    union {
-        float4_ret_t f4_jit;
-        float4_t f4;
-        int boo;
-    } retval;
-    if( thunk_p)
-        retval.f4_jit = ((VecrThunk) thunk_p)(env, argc, argv);
-    else
-        retval.boo = 0; // prevent CSE in GCC, it crashes otherwise
-    return retval.f4;
+    float locals[8];
+    uintptr_t lptr = (uintptr_t)(&locals[0]);
+    rvtype *retval = reinterpret_cast<rvtype*>((lptr + 0xf) & ~0xf);
+    if( thunk_p)  // prevent ARM GCC from doing CSE, it crashes otherwise
+        retval->f4_jit = ((VecrThunk) thunk_p)(env, argc, argv);
+    return retval->f4;
 }
 }
 #endif

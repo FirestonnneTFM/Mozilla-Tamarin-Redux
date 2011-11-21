@@ -369,7 +369,6 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
 
         // The following encode 'r func()' through to 'r func(a1, a2, a3, a4, a5, a6, a7, a8)'.
         static inline uint32_t typeSig0(ArgType r) {
-            NanoAssert(r != ARGTYPE_F4); // We can't return float4_t values, pass an additional pointer arg instead
             return r;
         }
         static inline uint32_t typeSig1(ArgType r, ArgType a1) {
@@ -755,7 +754,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         inline void initLInsIorF(LOpcode opcode, int32_t immIorF);
         inline void initLInsQorD(LOpcode opcode, uint64_t immQorD);
         inline void initLInsJtbl(LIns* index, uint32_t size, LIns** table);
-        inline void initLInsF4(LOpcode opcode, float4_t immF4);
+        inline void initLInsF4(LOpcode opcode, const float4_t& immF4);
 
         LOpcode opcode() const { 
             NanoAssert(sharedFields.opcode< LIR_sentinel); 
@@ -1480,7 +1479,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         toLInsJtbl()->size = size;
         NanoAssert(isLInsJtbl());
     }
-    void LIns::initLInsF4(LOpcode opcode, float4_t immF4) {
+    void LIns::initLInsF4(LOpcode opcode, const float4_t& immF4) {
         initSharedFields(opcode);
         LInsF4* i = toLInsF4();
         i->immF4[0]= f4_x(immF4); 
@@ -1728,7 +1727,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         virtual LIns* insImmF(float f) {
             return out->insImmF(f);
         }
-        virtual LIns* insImmF4(float4_t f4) {
+        virtual LIns* insImmF4(const float4_t& f4) {
             return out->insImmF4(f4);
         }
         virtual LIns* insImmD(double d) {
@@ -2078,7 +2077,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* insImmF(float f) {
             return add(out->insImmF(f));
         }
-        LIns* insImmF4(float4_t f4) {
+        LIns* insImmF4(const float4_t& f4) {
             return add(out->insImmF4(f4));
         }
         LIns* insImmD(double d) {
@@ -2207,7 +2206,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
 
         static uint32_t hashImmI(int32_t);
         static uint32_t hashImmQorD(uint64_t);     // not NANOJIT_64BIT-only -- used by findImmD()
-        static uint32_t hashImmF4(float4_t);
+        static uint32_t hashImmF4(const float4_t&);
         static uint32_t hash1(LOpcode op, LIns*);
         static uint32_t hash2(LOpcode op, LIns*, LIns*);
         static uint32_t hash3(LOpcode op, LIns*, LIns*, LIns*);
@@ -2221,7 +2220,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* findImmQ(uint64_t a, uint32_t &k);
 #endif
         LIns* findImmF(int32_t f, uint32_t &k);
-        LIns* findImmF4(float4_t f, uint32_t &k);
+        LIns* findImmF4(const float4_t& f, uint32_t &k);
         LIns* findImmD(uint64_t d, uint32_t &k);
         LIns* find1(LOpcode v, LIns* a, uint32_t &k);
         LIns* find2(LOpcode v, LIns* a, LIns* b, uint32_t &k);
@@ -2279,7 +2278,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* insImmQ(uint64_t q);
 #endif
         LIns* insImmF(float f);
-        LIns* insImmF4(float4_t f);
+        LIns* insImmF4(const float4_t& f);
         LIns* insImmD(double d);
         LIns* ins0(LOpcode v);
         LIns* ins1(LOpcode v, LIns*);
@@ -2363,7 +2362,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
             LIns*   insImmQ(uint64_t imm);
 #endif
             LIns*   insImmF(float f);
-            LIns*   insImmF4(float4_t f);
+            LIns*   insImmF4(const float4_t& f);
             LIns*   insImmD(double d);
             LIns*   insCall(const CallInfo *call, LIns* args[]);
             LIns*   insGuard(LOpcode op, LIns* cond, GuardRecord *gr);
@@ -2628,7 +2627,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* insImmQ(uint64_t imm);
 #endif
         LIns* insImmF(float f);
-        LIns* insImmF4(float4_t f4);
+        LIns* insImmF4(const float4_t& f4);
         LIns* insImmD(double d);
         LIns* insCall(const CallInfo *call, LIns* args[]);
         LIns* insGuard(LOpcode v, LIns *c, GuardRecord *gr);

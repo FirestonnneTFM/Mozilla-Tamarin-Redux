@@ -149,7 +149,7 @@ inline void ByteBuffer::emitFloat(float v)
     out = avmplus::RTC::emitFloat(out, v);
 }
 
-inline void ByteBuffer::emitFloat4(float4_t v)
+inline void ByteBuffer::emitFloat4(const float4_t& v)
 {
     makeRoom(16);
     out = avmplus::RTC::emitFloat4(out, v);
