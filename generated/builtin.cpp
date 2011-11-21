@@ -46,6 +46,7 @@
 #define float4_ret_t __m128
 #endif
 
+extern "C" {
 float4_ret_t verifyEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap){
     union {
         float4_ret_t f4_jit;
@@ -74,6 +75,7 @@ float4_t thunkEnterVECR_adapter(void* thunk_p, avmplus::MethodEnv* env, int32_t 
     else
         retval.boo = 0; // prevent CSE in GCC, it crashes otherwise
     return retval.f4;
+}
 }
 #endif
 
