@@ -1160,7 +1160,7 @@ namespace avmplus
 #ifdef VMCFG_FLOAT
     // There will be four endianness checks here but one hopes the compiler will
     // common them after inlining.
-    void ByteArrayObject::writeFloat4(float4_t v)
+    void ByteArrayObject::writeFloat4(const float4_t& v)
     {
         uint8_t* b = m_byteArray.requestBytesForShortWrite(16);
         writeFloat(f4_x(v), b);

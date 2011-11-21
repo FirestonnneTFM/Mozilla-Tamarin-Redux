@@ -466,9 +466,11 @@ namespace avmplus
 #ifdef VMCFG_FLOAT
         else if (AvmCore::isFloat4(obj))
         {
-            float4_overlay f4(AvmCore::atomToFloat4(obj));
-            if (index >= 0 && index <= 3)
-                return core()->floatToAtom(f4.floats[index]);
+            if (index >= 0 && index <= 3){
+                float4_t f4 = AvmCore::atomToFloat4(obj);
+                float* pf4 = reinterpret_cast<float*>(&f4);
+                return core()->floatToAtom(pf4[index]);
+            }
             // See FIXME in Toplevel::getproperty() - do not absorb non-integer values outside
             // the range [0,2^32-2], but let them pass through to the prototype lookup.
             if (index >= 0)
@@ -499,9 +501,12 @@ namespace avmplus
 #ifdef VMCFG_FLOAT
         else if (AvmCore::isFloat4(obj))
         {
-            float4_overlay f4(AvmCore::atomToFloat4(obj));
             if (index <= 3)
-                return core()->floatToAtom(f4.floats[index]);
+            {
+                float4_t f4 = AvmCore::atomToFloat4(obj);
+                float* pf4 = reinterpret_cast<float*>(&f4);
+                return core()->floatToAtom(pf4[index]);
+            }
             // See FIXME in Toplevel::getproperty() - do not absorb non-integer values outside
             // the range [0,2^32-2], but let them pass through to the prototype lookup.
             if (index != 4294967295U)
@@ -545,11 +550,12 @@ namespace avmplus
 #ifdef VMCFG_FLOAT
         else if (AvmCore::isFloat4(obj))
         {
-            float4_overlay f4(AvmCore::atomToFloat4(obj));
-            if (index == 0.0) return core()->floatToAtom(f4.floats[0]);
-            if (index == 1.0) return core()->floatToAtom(f4.floats[1]);
-            if (index == 2.0) return core()->floatToAtom(f4.floats[2]);
-            if (index == 3.0) return core()->floatToAtom(f4.floats[3]);
+            float4_t f4 = AvmCore::atomToFloat4(obj);
+            float* pf4 = reinterpret_cast<float*>(&f4);
+            if (index == 0.0) return core()->floatToAtom(pf4[0]);
+            if (index == 1.0) return core()->floatToAtom(pf4[1]);
+            if (index == 2.0) return core()->floatToAtom(pf4[2]);
+            if (index == 3.0) return core()->floatToAtom(pf4[3]);
             // See FIXME in Toplevel::getproperty() - do not absorb non-integer values outside
             // the range [0,2^32-2], but let them pass through to the prototype lookup.
             if (index >= 0.0 && index <= 4294967294.0) {

@@ -403,7 +403,7 @@ namespace avmplus
             return out + 4;
         }
         
-        uint8_t* emitFloat4(uint8_t* out, float4_t f4)
+        uint8_t* emitFloat4(uint8_t* out, const float4_t& f4)
         {
             float_overlay x(f4_x(f4));
             out[0] = uint8_t(x.word);

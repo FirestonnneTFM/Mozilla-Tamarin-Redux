@@ -81,7 +81,7 @@ public:
     uint32_t addUInt(uint32_t u);
     uint32_t addDouble(double d);
     uint32_t addFloat(float f);
-    uint32_t addFloat4(float4_t f);
+    uint32_t addFloat4(const float4_t& f);
     uint32_t addString(Str* s);
     uint32_t addString(const char* s);
     uint32_t addNamespace(uint8_t kind, uint32_t ns);

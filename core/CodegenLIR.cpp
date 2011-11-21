@@ -1471,7 +1471,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         virtual LIns* insImmF(float f) {
             return lastIns = out->insImmF(f);
         }
-        virtual LIns* insImmF4(float4_t f) {
+        virtual LIns* insImmF4(const float4_t& f) {
             return lastIns = out->insImmF4(f);
         }
         virtual LIns* insLoad(LOpcode op, LIns* base, int32_t d, AccSet accSet, LoadQual loadQual) {
