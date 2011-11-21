@@ -220,6 +220,11 @@ package
         public static native function distance3        (arg1:float4, arg2:float4) : float  ;
         public static native function distance2        (arg1:float4, arg2:float4) : float  ;
  
+        // Boolean abstractors
+        public function get all() : Boolean { return Boolean(x) && Boolean(y) && Boolean(z) && Boolean(w); }
+        public function get any() : Boolean { return Boolean(x) || Boolean(y) || Boolean(z) || Boolean(w); }
+        public function get none() : Boolean { return !(Boolean(x) || Boolean(y) || Boolean(z) || Boolean(w)); }
+
         // component accesses
         private static native function _swizzle        (v:float4, arg:int)        : float4 ;
 
