@@ -539,7 +539,6 @@ namespace avmplus
         void emitIsNaN(Traits* result);
         void emitIntMathMin(Traits* result);
         void emitIntMathMax(Traits* result);
-        void emitMathAbs(Traits* result);
         void emitStringLength(Traits* result);
 
         LIns *optimizeIndexArgumentType(int32_t sp, Traits** indexType);
