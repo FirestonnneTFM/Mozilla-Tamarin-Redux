@@ -985,7 +985,8 @@ namespace nanojit
             goto involution;
         case LIR_negf4:
             if (oprnd->isImmF4()) {
-                float4_t zero = { 0, 0, 0, 0 };
+                // Use -0 here so that negating 0 produces -0.
+                float4_t zero = { -0.0, -0.0, -0.0, -0.0 };
                 return insImmF4(f4_sub(zero, oprnd->immF4()));
             }
             if (oprnd->isop(LIR_subf4))
