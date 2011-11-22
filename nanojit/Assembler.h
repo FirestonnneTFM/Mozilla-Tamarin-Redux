@@ -510,8 +510,9 @@ namespace nanojit
             void        asm_qhi(LIns* ins);
             void        asm_qjoin(LIns *ins);
 #endif
-            void        asm_fneg(LIns* ins);
-            void        asm_fop(LIns* ins);
+            void        asm_neg_abs(LIns* ins); // fpu neg, abs
+            void        asm_recip_sqrt(LIns* ins);  // fpu recip, rsqrt, sqrt
+            void        asm_fop(LIns* ins);     // fpu add, sub, mul, div
             void        asm_i2d(LIns* ins);
             void        asm_ui2d(LIns* ins);
             void        asm_d2i(LIns* ins);

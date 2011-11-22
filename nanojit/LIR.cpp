@@ -1017,6 +1017,12 @@ namespace nanojit
             if (oprnd->isImmI())
                 return insImmD(uint32_t(oprnd->immI()));
             break;
+        case LIR_absd:
+        case LIR_absf:
+        case LIR_absf4:
+            if (oprnd->opcode() == v)
+                return oprnd; // abs(abs(x)) = abs(x)
+            break;
         default:
             ;
         }
@@ -1945,10 +1951,20 @@ namespace nanojit
                 case LIR_jf:
                 case LIR_jtbl:
                 case LIR_negi:
+                case LIR_noti:
                 case LIR_negd:
                 case LIR_negf:
                 case LIR_negf4:
-                case LIR_noti:
+                case LIR_absd:
+                case LIR_absf:
+                case LIR_absf4:
+                case LIR_recipf:
+                case LIR_recipf4:
+                case LIR_rsqrtf:
+                case LIR_rsqrtf4:
+                case LIR_sqrtf:
+                case LIR_sqrtf4:
+                case LIR_sqrtd:
                 CASESF(LIR_dlo2i:)
                 CASESF(LIR_dhi2i:)
                 CASESF(LIR_hcalli:)
@@ -2040,6 +2056,9 @@ namespace nanojit
                 case LIR_subf4:
                 case LIR_mulf4:
                 case LIR_divf4:
+                case LIR_dotf4:
+                case LIR_dotf3:
+                case LIR_dotf2:
                 CASE64(LIR_addq:)
                 CASE64(LIR_subq:)
                 CASE64(LIR_addjovq:)
@@ -2445,6 +2464,16 @@ namespace nanojit
             case LIR_negd:
             case LIR_negf:
             case LIR_negf4:
+            case LIR_absd:
+            case LIR_absf:
+            case LIR_absf4:
+            case LIR_sqrtd:
+            case LIR_sqrtf:
+            case LIR_sqrtf4:
+            case LIR_rsqrtf:
+            case LIR_rsqrtf4:
+            case LIR_recipf:
+            case LIR_recipf4:
             case LIR_i2d:
             CASE64(LIR_q2d:)
             case LIR_ui2d:
@@ -2512,6 +2541,9 @@ namespace nanojit
             case LIR_subf4:
             case LIR_mulf4:
             case LIR_divf4:
+            case LIR_dotf4:
+            case LIR_dotf3:
+            case LIR_dotf2:
             case LIR_andi:       CASE64(LIR_andq:)
             case LIR_ori:        CASE64(LIR_orq:)
             case LIR_xori:       CASE64(LIR_xorq:)
@@ -4155,6 +4187,8 @@ namespace nanojit
 #endif
 
         case LIR_negd:
+        case LIR_absd:
+        case LIR_sqrtd:
         case LIR_retd:
         case LIR_lived:
         case LIR_d2i:
@@ -4164,6 +4198,10 @@ namespace nanojit
             break;
 
         case LIR_negf4:
+        case LIR_absf4:
+        case LIR_recipf4:
+        case LIR_rsqrtf4:
+        case LIR_sqrtf4:
         case LIR_retf4:
         case LIR_livef4:
         case LIR_f4x:
@@ -4174,6 +4212,10 @@ namespace nanojit
             break;
 
         case LIR_negf:
+        case LIR_absf:
+        case LIR_recipf:
+        case LIR_rsqrtf:
+        case LIR_sqrtf:
         case LIR_retf:
         case LIR_livef:
         case LIR_f2i:
@@ -4292,6 +4334,9 @@ namespace nanojit
         case LIR_mulf4:
         case LIR_divf4:
         case LIR_eqf4:
+        case LIR_dotf4:
+        case LIR_dotf3:
+        case LIR_dotf2:
             formals[0] = LTy_F4;
             formals[1] = LTy_F4;
             break;

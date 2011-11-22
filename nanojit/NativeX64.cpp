@@ -2298,14 +2298,14 @@ namespace nanojit
     static const AVMPLUS_ALIGN16(int32_t) negateMaskF[]  = { 0x80000000, 0, 0, 0 };
     static const AVMPLUS_ALIGN16(int32_t) negateMaskF4[] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
 
-    void Assembler::asm_fneg(LIns *ins) {
+    void Assembler::asm_neg_abs(LIns *ins) {
         Register rr, ra;
         NanoAssert(ins->isop(LIR_negf) || ins->isop(LIR_negf4) || ins->isop(LIR_negd));
         beginOp1Regs(ins, FpRegs, rr, ra);
         uintptr_t mask;
 
         switch (ins->opcode()) {
-        default: NanoAssert(!"bad opcode for asm_fneg"); mask = 0; break;
+        default: NanoAssert(!"bad opcode for asm_neg_abs"); mask = 0; break;
         case LIR_negf:    mask = (uintptr_t) negateMaskF;  break;
         case LIR_negf4:   mask = (uintptr_t) negateMaskF4; break;
         case LIR_negd:    mask = (uintptr_t) negateMaskD;     break;
@@ -2352,6 +2352,10 @@ namespace nanojit
         if (ra != rr)
             asm_nongp_copy(rr,ra);
         endOpRegs(ins, rr, ra);
+    }
+
+    void Assembler::asm_recip_sqrt(LIns*) {
+        NanoAssert(!"not implemented");
     }
 
     void Assembler::asm_spill(Register rr, int d, int8_t nWords) {

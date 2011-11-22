@@ -1690,15 +1690,31 @@ namespace nanojit
                     break;
 #endif
 
+                case LIR_negd:
                 case LIR_negf:
                 case LIR_negf4:
-                case LIR_negd:
+                case LIR_absd:
+                case LIR_absf:
+                case LIR_absf4:
                     countlir_fpu();
                     ins->oprnd1()->setResultLive();
                     if (ins->isExtant()) {
-                        asm_fneg(ins);
+                        asm_neg_abs(ins);
                     }
                     break;
+
+                case LIR_recipf:
+                case LIR_recipf4:
+                case LIR_rsqrtf:
+                case LIR_rsqrtf4:
+                case LIR_sqrtf:
+                case LIR_sqrtf4:
+                  countlir_fpu();
+                  ins->oprnd1()->setResultLive();
+                  if (ins->isExtant()) {
+                      asm_recip_sqrt(ins);
+                  }
+                  break;
 
                 case LIR_addf:
                 case LIR_subf:
@@ -1708,11 +1724,13 @@ namespace nanojit
                 case LIR_subf4:
                 case LIR_mulf4:
                 case LIR_divf4:
-
                 case LIR_addd:
                 case LIR_subd:
                 case LIR_muld:
                 case LIR_divd:
+                case LIR_dotf4:
+                case LIR_dotf3:
+                case LIR_dotf2:
                     countlir_fpu();
                     ins->oprnd1()->setResultLive();
                     ins->oprnd2()->setResultLive();

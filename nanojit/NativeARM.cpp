@@ -2710,7 +2710,7 @@ void Assembler::asm_cmpf4(LIns *ins) {
 }
 
 void
-Assembler::asm_fneg(LIns* ins)
+Assembler::asm_neg_abs(LIns* ins)
 {
     LIns* lhs = ins->oprnd1();
     NanoAssert((lhs->isD()  && ins->isD())  ||

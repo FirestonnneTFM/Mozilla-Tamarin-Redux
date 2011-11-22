@@ -793,7 +793,7 @@ namespace nanojit
         asm_li(rr, ins->immI());
     }
 
-    void Assembler::asm_fneg(LIns *ins) {
+    void Assembler::asm_neg_abs(LIns *ins) {
         Register rr = deprecated_prepResultReg(ins, FpRegs);
         LIns* lhs = ins->oprnd1();
         // We can clobber the result register for "free."
