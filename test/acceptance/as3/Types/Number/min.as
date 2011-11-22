@@ -75,7 +75,7 @@ AddTestCase("Number.min(Number.NaN, 2.1, 3.2)", NaN, Number.min(Number.NaN, 2.1,
 AddTestCase("Number.min(2.1, Number.NaN, 3.2)", NaN, Number.min(2.1, Number.NaN, 3.2));
 AddTestCase("Number.min(2.1, 3.2, Number.NaN)", NaN, Number.min(2.1, 3.2, Number.NaN));
 
-//The comparison of values to determine the largest value is done as in 11.8.5 except that +0 is considered to be larger than 0.
+// The comparison of values to determine the largest value is done as in 11.8.5 except that +0 is considered to be larger than -0.
 AddTestCase("Number.min(1, 1)", 1, Number.min(1, 1));
 AddTestCase("Number.min(1, 0)", 0, Number.min(1, 0));
 AddTestCase("Number.min(0, 1)", 0, Number.min(0, 1));

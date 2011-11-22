@@ -46,28 +46,43 @@ var TITLE   = "public function reciprocal(x:float):float";
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
+function check(param:float):float { return float.reciprocal(param); }
 
 AddStrictTestCase("float.reciprocal() returns a float", "float", getQualifiedClassName(float.reciprocal(12.345f)));
 AddStrictTestCase("float.reciprocal() length is 1", 1, float.reciprocal.length);
 AddErrorTest("float.reciprocal() with no args", ARGUMENTERROR+1063,  function(){ float.reciprocal(); });
 
-AddStrictTestCase("float.reciprocal(8)", float(0.125), float.reciprocal(8));
-
+// If x is NaN, the result is NaN
 AddStrictTestCase("float.reciprocal(undefined)", float.NaN, float.reciprocal(undefined));
-AddStrictTestCase("float.reciprocal(null)", float.POSITIVE_INFINITY, float.reciprocal(null));
-AddStrictTestCase("float.reciprocal(true)", float(1), float.reciprocal(true));
-AddStrictTestCase("float.reciprocal(false)", float.POSITIVE_INFINITY, float.reciprocal(false));
 AddStrictTestCase("float.reciprocal(string)", float.NaN, float.reciprocal("string"));
 AddStrictTestCase("float.reciprocal(float.NaN)", float.NaN, float.reciprocal(float.NaN));
+AddStrictTestCase("float.reciprocal(float.NaN) check()", float.NaN, check(float.NaN));
 
-
-AddStrictTestCase("float.reciprocal(0f)", float.POSITIVE_INFINITY, float.reciprocal(0f));
-AddStrictTestCase("float.reciprocal(-0f)", float.NEGATIVE_INFINITY, float.reciprocal(-0f));
-
+// If x is +Infinity, the result is +0
 AddStrictTestCase("float.reciprocal(float.POSITIVE_INFINITY)", float(0), float.reciprocal(float.POSITIVE_INFINITY));
 AddStrictTestCase("float.reciprocal(float.POSITIVE_INFINITY) sign check", float.POSITIVE_INFINITY,  1f/float.reciprocal(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.reciprocal(float.POSITIVE_INFINITY) check()", float(0), float.reciprocal(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.reciprocal(float.POSITIVE_INFINITY) check() sign check", float.POSITIVE_INFINITY, 1f/check(float.POSITIVE_INFINITY));
+
+// If x is -Infinity, the results is -0
 AddStrictTestCase("float.reciprocal(float.NEGATIVE_INFINITY)", float(-0), float.reciprocal(float.NEGATIVE_INFINITY));
 AddStrictTestCase("float.reciprocal(float.NEGATIVE_INFINITY) sign check", float.NEGATIVE_INFINITY,  1f/float.reciprocal(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.reciprocal(float.NEGATIVE_INFINITY) check()", float(-0), check(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.reciprocal(float.NEGATIVE_INFINITY) check() sign check", float.NEGATIVE_INFINITY,  1f/check(float.NEGATIVE_INFINITY));
+
+// If x is +0, the result is +Infinity
+AddStrictTestCase("float.reciprocal(0f)", float.POSITIVE_INFINITY, float.reciprocal(0f));
+AddStrictTestCase("float.reciprocal(0f) check()", float.POSITIVE_INFINITY, check(0f));
+AddStrictTestCase("float.reciprocal(false)", float.POSITIVE_INFINITY, float.reciprocal(false));
+
+// If x us -0, the result is -Infinity
+AddStrictTestCase("float.reciprocal(-0f)", float.NEGATIVE_INFINITY, float.reciprocal(-0f));
+AddStrictTestCase("float.reciprocal(-0f) check", float.NEGATIVE_INFINITY, check(-0f));
+
+
+AddStrictTestCase("float.reciprocal(8)", float(0.125), float.reciprocal(8));
+AddStrictTestCase("float.reciprocal(null)", float.POSITIVE_INFINITY, float.reciprocal(null));
+AddStrictTestCase("float.reciprocal(true)", float(1), float.reciprocal(true));
 
 test();
 

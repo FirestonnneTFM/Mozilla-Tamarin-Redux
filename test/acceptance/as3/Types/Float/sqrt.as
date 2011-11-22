@@ -38,6 +38,9 @@
  * ***** END LICENSE BLOCK ***** */
 include "floatUtil.as";
 
+/*
+Returns an implementation-dependent approximation to the square root of x.
+*/
 
 var SECTION = "4.5.31";
 var VERSION = "AS3";
@@ -46,35 +49,49 @@ var TITLE   = "public function sqrt(x:float):float";
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
+function check(param:float):float { return float.sqrt(param); }
 
 AddStrictTestCase("float.sqrt() returns a float", "float", getQualifiedClassName(float.sqrt(0)));
 AddStrictTestCase("float.sqrt() length is 1", 1, float.sqrt.length);
 AddErrorTest("float.sqrt() with no args", ARGUMENTERROR+1063,  function(){ float.sqrt(); });
 
+// If x is NaN, the result is NaN.
 AddStrictTestCase("float.sqrt(undefined)", float.NaN, float.sqrt(undefined));
-AddStrictTestCase("float.sqrt(null)", float(0), float.sqrt(null));
-AddStrictTestCase("float.sqrt(true)", float(1), float.sqrt(true));
-AddStrictTestCase("float.sqrt(false)", float(0), float.sqrt(false));
 AddStrictTestCase("float.sqrt(string)", float.NaN, float.sqrt("string"));
 AddStrictTestCase("float.sqrt(float.NaN)", float.NaN, float.sqrt(float.NaN));
-AddStrictTestCase("float.sqrt(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.sqrt(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.sqrt(float.NaN) check()", float.NaN, check(float.NaN));
+
+// If x is less than 0, the result is NaN.
+AddStrictTestCase("float.sqrt(-0.1f)", float.NaN, float.sqrt(-0.1f));
+AddStrictTestCase("float.sqrt(-0.1f) check()", float.NaN, check(-0.1f));
+AddStrictTestCase("float.sqrt(-float.MIN_VALUE)", float.NaN, float.sqrt(-float.MIN_VALUE));
 AddStrictTestCase("float.sqrt(float.NEGATIVE_INFINITY)", float.NaN, float.sqrt(float.NEGATIVE_INFINITY));
 
-AddStrictTestCase("float.sqrt(-0.1f)", float.NaN, float.sqrt(-0.1f));
-AddStrictTestCase("float.sqrt(-float.MIN_VALUE)", float.NaN, float.sqrt(-float.MIN_VALUE));
-
-var zerof:float = 0f;
-AddStrictTestCase("float.sqrt(0f)", float(0), float.sqrt(zerof));
-AddStrictTestCase("float.sqrt(0f) FloatLiteral", float(0), float.sqrt(0f));
+// If x is +0, the result is +0.
+var zero:float = 0f;
+AddStrictTestCase("float.sqrt(zero=0f)", 0f, float.sqrt(zero));
+AddStrictTestCase("float.sqrt(0f) FloatLiteral", 0f, float.sqrt(0f));
 AddStrictTestCase("float.sqrt(0f) sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.sqrt(0f));
+AddStrictTestCase("float.sqrt(0f) check()", 0f, check(0f));
+AddStrictTestCase("float.sqrt(0f) check() sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/check(0f));
+AddStrictTestCase("float.sqrt(null)", 0f, float.sqrt(null));
+AddStrictTestCase("float.sqrt(false)", 0f, float.sqrt(false));
 
-var neg_zerof:float = -0f;
-AddStrictTestCase("float.sqrt(-0f)", float(-0), float.sqrt(neg_zerof));
-AddStrictTestCase("float.sqrt(-0f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.sqrt(neg_zerof));
-AddStrictTestCase("float.sqrt(-0f) FloatLiteral", float(-0), float.sqrt(-0f));
-AddStrictTestCase("float.sqrt(-0f) FloatLiteral sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.sqrt(-0f));
+// If x is -0, the result is -0.
+var neg_zero:float = 0f;
+AddStrictTestCase("float.sqrt(neg_zero=-0f)", -0f, float.sqrt(neg_zero));
+AddStrictTestCase("float.sqrt(-0f) FloatLiteral", -0f, float.sqrt(-0f));
+AddStrictTestCase("float.sqrt(-0f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.sqrt(-0f));
+AddStrictTestCase("float.sqrt(-0f) check()", -0f, check(-0f));
+AddStrictTestCase("float.sqrt(-0f) check() sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/check(-0f));
 
 
+// If x is +Infinity, the result is +Infinity.
+AddStrictTestCase("float.sqrt(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.sqrt(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.sqrt(float.POSITIVE_INFINITY) check()", float.POSITIVE_INFINITY, check(float.POSITIVE_INFINITY));
+
+
+AddStrictTestCase("float.sqrt(true)", 1f, float.sqrt(true));
 AddStrictTestCase("float.sqrt(2f)", float.SQRT2, float.sqrt(2f));
 AddStrictTestCase("float.sqrt(0.5f)", float.SQRT1_2, float.sqrt(0.5f));
 

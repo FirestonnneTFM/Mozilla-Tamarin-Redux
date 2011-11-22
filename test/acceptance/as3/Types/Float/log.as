@@ -38,6 +38,9 @@
  * ***** END LICENSE BLOCK ***** */
 include "floatUtil.as";
 
+/*
+Returns an implementation-dependent approximation to the natural logarithm of x.
+*/
 
 var SECTION = "4.5.24";
 var VERSION = "AS3";
@@ -46,29 +49,42 @@ var TITLE   = "public function log(x:float):float";
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
+function check(param:float):float { return float.log(param); }
 
 AddStrictTestCase("float.log() returns a float", "float", getQualifiedClassName(float.log(0)));
 AddStrictTestCase("float.log() length is 1", 1, float.log.length);
 AddErrorTest("float.log() with no args", ARGUMENTERROR+1063,  function(){ float.log(); });
 
+// If x is NaN, the result is NaN.
 AddStrictTestCase("float.log(undefined)", float.NaN, float.log(undefined));
-AddStrictTestCase("float.log(null)", float.NEGATIVE_INFINITY, float.log(null));
-AddStrictTestCase("float.log(true)", float(0), float.log(true));
-AddStrictTestCase("float.log(false)", float.NEGATIVE_INFINITY, float.log(false));
 AddStrictTestCase("float.log(string)", float.NaN, float.log("string"));
-AddStrictTestCase("float.log(float.NaN)", float.NaN, float.log(float.NaN));
+AddStrictTestCase("float.log(NaN)", float.NaN, float.log(float.NaN));
+AddStrictTestCase("float.log(NaN) check()", float.NaN, check(float.NaN));
 
-AddStrictTestCase("float.log(-0.00124f)", float.NaN, float.log(-0.00124f));
-AddStrictTestCase("float.log(0f)", float.NEGATIVE_INFINITY, float.log(0f));
-AddStrictTestCase("float.log(-0f)", float.NEGATIVE_INFINITY, float.log(-0f));
-AddStrictTestCase("float.log(1f)", float(0f), float.log(1f));
-AddStrictTestCase("float.log(1f) sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.log(1f));
-
-AddStrictTestCase("float.log('1')", float(0), float.log('1'));
-AddStrictTestCase("float.log('0')", float.NEGATIVE_INFINITY, float.log('0'));
-
-AddStrictTestCase("float.log(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.log(float.POSITIVE_INFINITY));
+// If x is less than 0, the result is NaN.
+AddStrictTestCase("float.log(-1f)", float.NaN, float.log(-1f));
+AddStrictTestCase("float.log(-1f) check()", float.NaN, check(-1f));
 AddStrictTestCase("float.log(float.NEGATIVE_INFINITY)", float.NaN, float.log(float.NEGATIVE_INFINITY));
+AddStrictTestCase("float.log(float.NEGATIVE_INFINITY) check()", float.NaN, check(float.NEGATIVE_INFINITY));
+
+// If x is +0 or -0, the result is -Infinity.
+AddStrictTestCase("float.log(0f)", float.NEGATIVE_INFINITY, float.log(0f));
+AddStrictTestCase("float.log(0f) check()", float.NEGATIVE_INFINITY, check(0f));
+AddStrictTestCase("float.log(-0f)", float.NEGATIVE_INFINITY, float.log(-0f));
+AddStrictTestCase("float.log(-0f) check()", float.NEGATIVE_INFINITY, check(-0f));
+AddStrictTestCase("float.log(false)", float.NEGATIVE_INFINITY, float.log(false));
+
+// If x is 1, the result is +0.
+AddStrictTestCase("float.log(1f)", 0f, float.log(1f));
+AddStrictTestCase("float.log(1f) check()", 0f, check(1f));
+AddStrictTestCase("float.log(1f) is +0f", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.log(1f));
+AddStrictTestCase("float.log(1f) is +0f check()", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/check(1f));
+AddStrictTestCase("float.log(true)", float(0), float.log(true));
+
+// If x is +Infinity, the result is +Infinity.
+AddStrictTestCase("float.log(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.log(float.POSITIVE_INFINITY));
+AddStrictTestCase("float.log(float.POSITIVE_INFINITY) check()", float.POSITIVE_INFINITY, check(float.POSITIVE_INFINITY));
+
 
 var myfloat:float = 1.0e-6f;
 AddStrictTestCase("float.log(-1.0e-6f)", float.NaN, float.log(-myfloat));
@@ -76,11 +92,12 @@ AddStrictTestCase("float.log(1.0e-6f)", -13.8155107498168945f, float.log(myfloat
 AddStrictTestCase("float.log(-1.0e-6f) FloatLiteral", float.NaN, float.log(-1.0e-6f));
 AddStrictTestCase("float.log(1.0e-6f) FloatLiteral", -13.8155107498168945f, float.log(1.0e-6f));
 
-var myfloat:float = 1f;
+myfloat = 1f;
 AddStrictTestCase("float.log(-1f)", float.NaN, float.log(-myfloat));
 AddStrictTestCase("float.log(1f)", 0f, float.log(myfloat));
 AddStrictTestCase("float.log(-1f) FloatLiteral", float.NaN, float.log(-1f));
 AddStrictTestCase("float.log(1f) FloatLiteral", 0f, float.log(1f));
+
 
 test();
 

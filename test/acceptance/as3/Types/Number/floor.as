@@ -95,7 +95,7 @@ AddTestCase("Number.floor(0.5) sign check", Number.POSITIVE_INFINITY, Number.POS
 AddTestCase("Number.floor(0.999)", 0, Number.floor(0.999));
 AddTestCase("Number.floor(0.999) sign check", Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY/Number.floor(0.999));
 AddTestCase("Number.floor(0.5) check()", 0, check(0.5));
-AddTestCase("Number.floor(0.5) checK() sign check", Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY/check(0.5));
+AddTestCase("Number.floor(0.5) check() sign check", Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY/check(0.5));
 
 // The value of Number.floor(x) is the same as the value of -Number.ceil(-x).
 AddTestCase("Number.floor(3.124) == -Number.ceil(-3.124)", -Number.ceil(-3.124), Number.floor(3.124));
