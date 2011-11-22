@@ -66,6 +66,7 @@ class AcceptanceRuntest(RuntestBase):
     androiddevices = []
     verifyonly = False
     swfversions = [9,10,11,12,13,14,15,16]
+    apiversions = [12,13,14,15,16]
 
     def __init__(self):
         # Set threads to # of available cpus/cores
@@ -303,6 +304,7 @@ class AcceptanceRuntest(RuntestBase):
             avm_args_file = open('%s.avm_args' % ast,'r')
             index = 0
             uses_swfversion = re.compile('uses_swfversion', re.IGNORECASE)
+            uses_apiversion = re.compile('uses_apiversion', re.IGNORECASE)
             for line in avm_args_file:
                 line = line.strip()
                 if line.startswith('#'):
@@ -315,6 +317,18 @@ class AcceptanceRuntest(RuntestBase):
                         line = uses_swfversion.sub('', line)
                         line, extraVmArgs, abcargs, multiabc = self.process_avm_args_line(line, dir)
                         extraVmArgs += ' -swfversion %s ' % swf_ver
+                        outputCalls.extend(self.runTest(
+                            ast, root, testName, '%s.%s' % (testnum, index),
+                            settings, extraVmArgs, abcargs))
+                        index += 1
+                    continue
+                # uses_apiversion
+                if uses_apiversion.search(line):
+                    # run avm with all api versions
+                    for api_ver in self.apiversions:
+                        line = uses_apiversion.sub('', line)
+                        line, extraVmArgs, abcargs, multiabc = self.process_avm_args_line(line, dir)
+                        extraVmArgs += ' -api SWF_%s ' % api_ver
                         outputCalls.extend(self.runTest(
                             ast, root, testName, '%s.%s' % (testnum, index),
                             settings, extraVmArgs, abcargs))
