@@ -38,6 +38,12 @@
  * ***** END LICENSE BLOCK ***** */
 include "floatUtil.as";
 
+/*
+Returns a float value with positive sign, greater than or equal to 0 but less
+than 1, chosen randomly or pseudo randomly with approximately uniform distribution
+over that range, using an implementation-dependent algorithm or strategy. This
+function takes no arguments.
+*/
 
 var SECTION = "4.5.28";
 var VERSION = "AS3";

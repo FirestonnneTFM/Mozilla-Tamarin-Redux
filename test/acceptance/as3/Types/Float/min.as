@@ -38,6 +38,10 @@
  * ***** END LICENSE BLOCK ***** */
 include "floatUtil.as";
 
+/*
+Given zero or more arguments, calls ToFloat on each of the arguments and
+returns the smallest of the resulting values.
+*/
 
 var SECTION = "4.5.26";
 var VERSION = "AS3";
@@ -46,12 +50,16 @@ var TITLE   = "public function min(...xs):float";
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
+function checkEmpty():float { return float.min(); }
 
 AddStrictTestCase("float.min() returns a float", "float", getQualifiedClassName(float.min(0)));
 AddStrictTestCase("float.min() length is 0", 0, float.min.length);
 
+// If no arguments are given, the result is +Infinity.
 AddStrictTestCase("float.min()", float.POSITIVE_INFINITY, float.min());
+AddStrictTestCase("float.min() checkEmpty()", float.POSITIVE_INFINITY, checkEmpty());
 
+// If any value is NaN, the result is NaN.
 // undefined, "String", Number.NaN, float.NaN, in first, second and in rest args should return float.NaN
 AddStrictTestCase("float.min(undefined, 2.1f, 3.2f)", float.NaN, float.min(undefined, 2.1f, 3.2f));
 AddStrictTestCase("float.min(2.1f, undefined, 3.2f)", float.NaN, float.min(2.1f, undefined, 3.2f));
@@ -69,18 +77,37 @@ AddStrictTestCase("float.min(float.NaN, 2.1f, 3.2f)", float.NaN, float.min(float
 AddStrictTestCase("float.min(2.1f, float.NaN, 3.2f)", float.NaN, float.min(2.1f, float.NaN, 3.2f));
 AddStrictTestCase("float.min(2.1f, 3.2f, float.NaN)", float.NaN, float.min(2.1f, 3.2f, float.NaN));
 
+
+// The comparison of values to determine the largest value is done as in 11.8.5 except that +0 is considered to be larger than -0.
+AddStrictTestCase("float.min(1f, 1f)", 1f, float.min(1f, 1f));
+AddStrictTestCase("float.min(1f, 0f)", 0f, float.min(1f, 0f));
+AddStrictTestCase("float.min(0f, 1f)", 0f, float.min(0f, 1f));
+
+/*
+Do the following combinations, treating 1=0 and 0=-0. This will check that handling -0 is correct
+for both x and y, PLUS that the rest args are checked properly.
+    1, 1
+    0, 0
+    1, 0
+    0, 1
+*/
+// The comparison of values to determine the largest value is done as in 11.8.5 except that +0 is considered to be larger than -0.
+function isPositive(param:float):Boolean
+{
+    return float.POSITIVE_INFINITY/param == float.POSITIVE_INFINITY;
+}
+AddStrictTestCase("float.min( 0f,  0f)", 0f, float.min(0f, 0f));
+AddStrictTestCase("float.min( 0f,  0f) check sign", true, isPositive(float.min(0f, 0f)));
+AddStrictTestCase("float.min(-0f, -0f)", -0f, float.min(-0f, -0f));
+AddStrictTestCase("float.min(-0f, -0f) check sign", false, isPositive(float.min(-0f, -0f)));
+AddStrictTestCase("float.min( 0f, -0f)", 0f, float.min(0f, -0f));
+AddStrictTestCase("float.min( 0f, -0f) check sign", false, isPositive(float.min(0f, -0f)));
+AddStrictTestCase("float.min(-0f,  0f)", 0f, float.min(-0f, 0f));
+AddStrictTestCase("float.min(-0f,  0f) check sign", false, isPositive(float.min(-0f, 0f)));
+
 AddStrictTestCase("float.min(null, 1f)", 0f, float.min(null, 1f));
-AddStrictTestCase("float.POSITIVE_INFINITY/float.min(null, 1f)", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.min(null, 1f));
 AddStrictTestCase("float.min(-1f, null)", -1f, float.min(-1f, null));
 AddStrictTestCase("float.min(false, true)", 0f, float.min(false, true));
-AddStrictTestCase("float.POSITIVE_INFINITY/float.min(false, true)", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.min(false, true));
-
-AddStrictTestCase("float.min(0f, -0f)", -0f, float.min(0f, -0f));
-AddStrictTestCase("float.min(0f, -0f) confirm negative", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.min(0f, -0f));
-AddStrictTestCase("float.min(-0f, 0f)", -0f, float.min(-0f, 0f));
-AddStrictTestCase("float.min(-0f, 0f) confirm negative", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.min(-0f, 0f));
-AddStrictTestCase("float.min(-0f, -0f)", -0f, float.min(-0f, -0f));
-AddStrictTestCase("float.min(-0f, -0f) confirm negative", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.min(-0f, -0f));
 
 AddStrictTestCase("float.min(float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY)", float.NEGATIVE_INFINITY, float.min(float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY));
 AddStrictTestCase("float.min(float.POSITIVE_INFINITY, float.NEGATIVE_INFINITY)", float.NEGATIVE_INFINITY, float.min(float.POSITIVE_INFINITY, float.NEGATIVE_INFINITY));

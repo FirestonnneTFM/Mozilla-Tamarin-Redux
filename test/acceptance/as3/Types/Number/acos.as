@@ -61,6 +61,7 @@ AddErrorTest("Number.acos() with no args", ARGUMENTERROR+1063,  function(){ Numb
 AddTestCase("Number.acos(undefined)", NaN, Number.acos(undefined));
 AddTestCase("Number.acos(string)", NaN, Number.acos("string"));
 AddTestCase("Number.acos(NaN)", NaN, Number.acos(NaN));
+AddTestCase("Number.acos(NaN) check()", NaN, check(NaN));
 
 // If x is greater than 1, the result is NaN.
 AddTestCase("Number.acos(1.125)", NaN, Number.acos(1.125));

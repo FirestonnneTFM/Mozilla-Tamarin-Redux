@@ -60,7 +60,7 @@ AddErrorTest("Number.sin() with no args", ARGUMENTERROR+1063,  function(){ Numbe
 // If x is NaN, the result is NaN.
 AddTestCase("Number.sin(undefined)", NaN, Number.sin(undefined));
 AddTestCase("Number.sin(string)", NaN, Number.sin("string"));
-AddTestCase("Number.sin(at.NaN)", NaN, Number.sin(NaN));
+AddTestCase("Number.sin(NaN)", NaN, Number.sin(NaN));
 AddTestCase("Number.sin(NaN) check()", NaN, check(NaN));
 
 

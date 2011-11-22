@@ -38,6 +38,10 @@
  * ***** END LICENSE BLOCK ***** */
 include "floatUtil.as";
 
+/*
+Returns an implementation-dependent approximation to the sine of x. The argument
+is expressed in radians.
+*/
 
 var SECTION = "4.5.30";
 var VERSION = "AS3";
@@ -46,36 +50,49 @@ var TITLE   = "public function sin(x:float):float";
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
+function check(param:float):float { return float.sin(param); }
 
 AddStrictTestCase("float.sin() returns a float", "float", getQualifiedClassName(float.sin(0)));
 AddStrictTestCase("float.sin() length is 1", 1, float.sin.length);
 AddErrorTest("float.sin() with no args", ARGUMENTERROR+1063,  function(){ float.sin(); });
 
+// If x is NaN, the result is NaN.
 AddStrictTestCase("float.sin(undefined)", float.NaN, float.sin(undefined));
-AddStrictTestCase("float.sin(null)", float(0), float.sin(null));
-AddStrictTestCase("float.sin(true)", float(Math.sin(1)), float.sin(true));
-AddStrictTestCase("float.sin(false)", float(0), float.sin(false));
 AddStrictTestCase("float.sin(string)", float.NaN, float.sin("string"));
 AddStrictTestCase("float.sin(float.NaN)", float.NaN, float.sin(float.NaN));
+AddStrictTestCase("float.sin(float.NaN) check()", float.NaN, check(float.NaN));
+
+
+// If x is +0, the result is +0.
+var zero:float = 0f;
+AddStrictTestCase("float.sin(zero=0f)", 0f, float.sin(zero));
+AddStrictTestCase("float.sin(zero=0f) sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.sin(zero));
+AddStrictTestCase("float.sin(0f)", 0f, float.sin(0f));
+AddStrictTestCase("float.sin(0f) sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.sin(0f));
+AddStrictTestCase("float.sin(0f) check()", 0f, check(0f));
+AddStrictTestCase("float.sin(0f) check() sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/check(0f));
+AddStrictTestCase("float.sin('0')", 0f, float.sin('0'));
+AddStrictTestCase("float.sin(null)", 0f, float.sin(null));
+AddStrictTestCase("float.sin(false)", 0f, float.sin(false));
+
+// If x is -0, the result is -0.
+var neg_zero:float = -0;
+AddStrictTestCase("float.sin(zero=-0f)", -0f, float.sin(neg_zero));
+AddStrictTestCase("float.sin(zero=-0f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.sin(neg_zero));
+AddStrictTestCase("float.sin(-0f) FloatLiteral", -0f, float.sin(-0f));
+AddStrictTestCase("float.sin(-0f) FloatLiteral sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.sin(-0f));
+AddStrictTestCase("float.sin(-0f) check()", -0f, check(-0f));
+AddStrictTestCase("float.sin(-0f) check() sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/check(-0f));
+
+
+// If x is +Infinity or -Infinity, the result is NaN.
 AddStrictTestCase("float.sin(float.POSITIVE_INFINITY)", float.NaN, float.sin(float.POSITIVE_INFINITY));
 AddStrictTestCase("float.sin(float.NEGATIVE_INFINITY)", float.NaN, float.sin(float.NEGATIVE_INFINITY));
 
-var zerof:float = 0f;
-AddStrictTestCase("float.sin(0f)", float(0), float.sin(zerof));
-AddStrictTestCase("float.sin(0f) FloatLiteral", float(0), float.sin(0f));
-AddStrictTestCase("float.sin(0f) sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.sin(0f));
-
-var neg_zerof:float = -0f;
-AddStrictTestCase("float.sin(-0f)", float(-0), float.sin(neg_zerof));
-AddStrictTestCase("float.sin(-0f) sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.sin(neg_zerof));
-AddStrictTestCase("float.sin(-0f) FloatLiteral", float(-0), float.sin(-0f));
-AddStrictTestCase("float.sin(-0f) FloatLiteral sign check", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.sin(-0f));
-
-AddStrictTestCase("float.sin(0.7853981633974f)", float(0.7071067811865134), float.sin(0.7853981633974f));
-AddStrictTestCase("float.sin(1.570796326795f)", float(1), float.sin(1.570796326795f));
+AddStrictTestCase("float.sin(float.PI/4f)", 0.7071067811865134f, float.sin(float.PI/4f));
+AddStrictTestCase("float.sin(float.PI/2f)", 1f, float.sin(float.PI/2f));
 AddStrictTestCase("float.sin(2.356194490192f)", float(0.7071067811867916), float.sin(2.356194490192f));
-AddStrictTestCase("float.sin(3.1415927f)", float(-8.74227766e-8), float.sin(3.1415927f));
-
+AddStrictTestCase("float.sin(float.PIf)", -8.74227766e-8f, float.sin(float.PI));
 
 test();
 

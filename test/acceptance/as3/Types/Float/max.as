@@ -38,6 +38,10 @@
  * ***** END LICENSE BLOCK ***** */
 include "floatUtil.as";
 
+/*
+Given zero or more arguments, calls ToFloat on each of the arguments and
+returns the largest of the resulting values.
+*/
 
 var SECTION = "4.5.25";
 var VERSION = "AS3";
@@ -46,12 +50,18 @@ var TITLE   = "public function max(...xs):float";
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
+function checkEmpty():float { return float.max(); }
 
 AddStrictTestCase("float.max() returns a float", "float", getQualifiedClassName(float.max(0)));
 AddStrictTestCase("float.max() length is 0", 0, float.max.length);
 
 AddStrictTestCase("float.max()", float.NEGATIVE_INFINITY, float.max());
 
+// If no arguments are given, the result is -Infinity.
+AddStrictTestCase("float.max()", float.NEGATIVE_INFINITY, float.max());
+AddStrictTestCase("float.max() checkEmpty()", float.NEGATIVE_INFINITY, checkEmpty());
+
+// If any value is NaN, the result is NaN.
 // undefined, "String", Number.NaN, float.NaN, in first, second and in rest args should return float.NaN
 AddStrictTestCase("float.max(undefined, 2.1f, 3.2f)", float.NaN, float.max(undefined, 2.1f, 3.2f));
 AddStrictTestCase("float.max(2.1f, undefined, 3.2f)", float.NaN, float.max(2.1f, undefined, 3.2f));
@@ -69,21 +79,43 @@ AddStrictTestCase("float.max(float.NaN, 2.1f, 3.2f)", float.NaN, float.max(float
 AddStrictTestCase("float.max(2.1f, float.NaN, 3.2f)", float.NaN, float.max(2.1f, float.NaN, 3.2f));
 AddStrictTestCase("float.max(2.1f, 3.2f, float.NaN)", float.NaN, float.max(2.1f, 3.2f, float.NaN));
 
-AddStrictTestCase("float.max(null, 1f)", 1f, float.max(null, 1f));
-AddStrictTestCase("float.max(-1f, null)", 0f, float.max(-1f, null));
-AddStrictTestCase("float.POSITIVE_INFINITY/float.max(-1f, null)", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.max(-1f, null));
+// The comparison of values to determine the largest value is done as in 11.8.5 except that +0 is considered to be larger than -0.
+AddStrictTestCase("float.max(1f, 1f)", 1f, float.max(1f, 1f));
+AddStrictTestCase("float.max(1f, 0f)", 1f, float.max(1f, 0f));
+AddStrictTestCase("float.max(0f, 1f)", 1f, float.max(0f, 1f));
+
+/*
+Do the following combinations, treating 1=0 and 0=-0. This will check that handling -0 is correct
+for both x and y, PLUS that the rest args are checked properly.
+    1, 1
+    0, 0
+    1, 0
+    0, 1
+*/
+// The comparison of values to determine the largest value is done as in 11.8.5 except that +0 is considered to be larger than -0.
+function isPositive(param:float):Boolean
+{
+    return float.POSITIVE_INFINITY/param == float.POSITIVE_INFINITY;
+}
+AddStrictTestCase("float.max( 0f,  0f)", 0f, float.max(0f, 0f));
+AddStrictTestCase("float.max( 0f,  0f) check sign", true, isPositive(float.max(0f, 0f)));
+AddStrictTestCase("float.max(-0f, -0f)", -0f, float.max(-0f, -0f));
+AddStrictTestCase("float.max(-0f, -0f) check sign", false, isPositive(float.max(-0f, -0f)));
+AddStrictTestCase("float.max( 0f, -0f)", 0f, float.max(0f, -0f));
+AddStrictTestCase("float.max( 0f, -0f) check sign", true, isPositive(float.max(0f, -0f)));
+AddStrictTestCase("float.max(-0f,  0f)", 0f, float.max(-0f, 0f));
+AddStrictTestCase("float.max(-0f,  0f) check sign", true, isPositive(float.max(-0f, 0f)));
+
+
+AddStrictTestCase("float.max(null, 1)", 1f, float.max(null, 1f));
+AddStrictTestCase("float.max(-1, null)", 0f, float.max(-1f, null));
 AddStrictTestCase("float.max(false, true)", 1f, float.max(false, true));
 
-AddStrictTestCase("float.max(0f, -0f)", 0f, float.max(0f, -0f));
-AddStrictTestCase("float.max(0f, -0f) confirm not negative", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.max(0f, -0f));
-AddStrictTestCase("float.max(-0f, 0f)", 0f, float.max(-0f, 0f));
-AddStrictTestCase("float.max(-0f, 0f) confirm not negative", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.max(-0f, 0f));
-AddStrictTestCase("float.max(-0f, -0f)", -0f, float.max(-0f, -0f));
-AddStrictTestCase("float.max(-0f, -0f) confirm negative", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY/float.max(-0f, -0f));
 
 AddStrictTestCase("float.max(float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.max(float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY));
 AddStrictTestCase("float.max(float.POSITIVE_INFINITY, float.NEGATIVE_INFINITY)", float.POSITIVE_INFINITY, float.max(float.POSITIVE_INFINITY, float.NEGATIVE_INFINITY));
 AddStrictTestCase("float.max(float.MIN_VALUE, 0f)", float.MIN_VALUE, float.max(float.MIN_VALUE, 0f));
+
 AddStrictTestCase("float.max(float.MIN_VALUE, 1.401298464324816e-45f)", float.MIN_VALUE, float.max(float.MIN_VALUE, 1.401298464324816e-45f));
 AddStrictTestCase("float.max(float.MIN_VALUE, 1.401298464324818e-45f)", float.MIN_VALUE, float.max(float.MIN_VALUE, 1.401298464324818e-45f));
 
