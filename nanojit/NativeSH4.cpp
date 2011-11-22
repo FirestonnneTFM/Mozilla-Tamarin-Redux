@@ -578,7 +578,7 @@ namespace nanojit
         asm_cond(inst);
     }
 
-    void Assembler::asm_fneg(LIns *inst) {
+    void Assembler::asm_neg_abs(LIns *inst) {
         Register result_reg  = prepareResultReg(inst, FpRegs);
         Register operand_reg = findRegFor(inst->oprnd1(), FpRegs);
 

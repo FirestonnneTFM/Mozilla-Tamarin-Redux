@@ -307,10 +307,13 @@ OP_64(rshq,     Op2,  Q,    1)  // right shift quad;          2nd operand is an 
 OP_64(rshuq,    Op2,  Q,    1)  // right shift unsigned quad; 2nd operand is an int
 
 OP___(negd,     Op1,  D,    1)  // negate double
+OP___(absd,     Op1,  D,    1)  // absolute value of double
+OP___(sqrtd,    Op1,  D,    1)  // sqrt double
 OP___(addd,     Op2,  D,    1)  // add double
 OP___(subd,     Op2,  D,    1)  // subtract double
 OP___(muld,     Op2,  D,    1)  // multiply double
 OP___(divd,     Op2,  D,    1)  // divide double
+
 // LIR_modd is just a place-holder opcode, ie. the back-ends cannot generate
 // code for it.  It's used in TraceMonkey briefly but is always demoted to a
 // LIR_modl or converted to a function call before Nanojit has to do anything
@@ -318,16 +321,34 @@ OP___(divd,     Op2,  D,    1)  // divide double
 OP___(modd,     Op2,  D,    1)  // modulo double
 
 OP___(negf,     Op1,  F,    1)  // negate float
+OP___(absf,     Op1,  F,    1)  // absolute value of float
+OP___(sqrtf,    Op1,  F,    1)  // sqrt float
 OP___(addf,     Op2,  F,    1)  // add float
 OP___(subf,     Op2,  F,    1)  // subtract float
 OP___(mulf,     Op2,  F,    1)  // multiply float
 OP___(divf,     Op2,  F,    1)  // divide float
 
 OP___(negf4,    Op1, F4,    1)  // negate float4
+OP___(absf4,    Op1, F4,    1)  // absolute value of float4
+OP___(sqrtf4,   Op1, F4,    1)  // sqrt float4
 OP___(addf4,    Op2, F4,    1)  // add float4
 OP___(subf4,    Op2, F4,    1)  // subtract float4
 OP___(mulf4,    Op2, F4,    1)  // multiply float4
 OP___(divf4,    Op2, F4,    1)  // divide float4
+
+OP___(recipf,   Op1,  F,    1)  // float reciprocal
+OP___(rsqrtf,   Op1,  F,    1)  // float reciprocal square root
+OP___(minf,     Op2,  F,    1)  // float min
+OP___(maxf,     Op2,  F,    1)  // float max
+
+OP___(recipf4,  Op1, F4,    1)  // float4 reciprocal
+OP___(rsqrtf4,  Op1, F4,    1)  // float4 reciprocal square root
+OP___(minf4,    Op2, F4,    1)  // float4 min
+OP___(maxf4,    Op2, F4,    1)  // float4 max
+
+OP___(dotf4,    Op2,  F,    1)  // 4-component dot product
+OP___(dotf3,    Op2,  F,    1)  // 3-component dot product
+OP___(dotf2,    Op2,  F,    1)  // 2-component dot product
 
 OP___(cmovi,    Op3,  I,    1)  // conditional move int
 OP_64(cmovq,    Op3,  Q,    1)  // conditional move quad

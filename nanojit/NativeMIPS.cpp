@@ -670,7 +670,7 @@ namespace nanojit
         TAG("asm_fop(ins=%p{%s})", ins, lirNames[ins->opcode()]);
     }
 
-    void Assembler::asm_fneg(LIns *ins)
+    void Assembler::asm_neg_abs(LIns *ins)
     {
         NanoAssert(cpu_has_fpu);
         if (cpu_has_fpu) {
@@ -681,7 +681,7 @@ namespace nanojit
                             : lhs->deprecated_getReg() );
             NEG_D(rr, sr);
         }
-        TAG("asm_fneg(ins=%p{%s})", ins, lirNames[ins->opcode()]);
+        TAG("asm_neg_abs(ins=%p{%s})", ins, lirNames[ins->opcode()]);
     }
 
     void Assembler::asm_immd(LIns *ins)

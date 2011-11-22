@@ -254,6 +254,12 @@ namespace nanojit
             *(--_nIns) = uint8_t(opc3 >> 8); \
             *(--_nIns) = uint8_t(opc3 >> 16); \
         } \
+        void OPCODE4(int32_t opc4) { /* Length: 4 bytes.  */ \
+            *(--_nIns) = uint8_t(opc4); \
+            *(--_nIns) = uint8_t(opc4 >> 8); \
+            *(--_nIns) = uint8_t(opc4 >> 16); \
+            *(--_nIns) = uint8_t(opc4 >> 24); \
+        } \
         void MODRM(int32_t mod, int32_t ro, int32_t rm) { /* Length: 1 byte. */ \
             NanoAssert(unsigned(mod) < 4 && unsigned(ro) < 8 && unsigned(rm) < 8); \
             *(--_nIns) = uint8_t(mod << 6 | ro << 3 | rm); \
@@ -427,8 +433,9 @@ namespace nanojit
         void SSEs(int32_t c, Register d, Register s); \
         void SSEsib(int32_t c, Register rr, int32_t d, Register rb, Register ri, int32_t scale); \
         void LDSDm(Register r, const double* addr); \
-		void SSEu8(int32_t c, Register d, Register s, uint8_t imm); \
-		void SSEsu8(int32_t c, Register d, Register s, uint8_t imm); \
+    void SSEu8_4(int32_t c, Register d, Register s, uint8_t imm); \
+    void SSEu8_3(int32_t c, Register d, Register s, uint8_t imm); \
+		void SSEu8_2(int32_t c, Register d, Register s, uint8_t imm); \
 		void SSEsm(int32_t c, Register r, int32_t d, Register b); \
 		void SSEssib(int32_t c, Register rr, int32_t d, Register rb, Register ri, int32_t scale); \
 		void LDSSm(Register r, const float* addr); \
@@ -448,10 +455,19 @@ namespace nanojit
 		void SSE_SUBPS(Register rd, Register rs); \
 		void SSE_MULPS(Register rd, Register rs); \
 		void SSE_DIVPS(Register rd, Register rs); \
+    void SSE_RCPPS(Register rd, Register rs); \
+    void SSE_RCPSS(Register rd, Register rs); \
+    void SSE_RSQRTPS(Register rd, Register rs); \
+    void SSE_RSQRTSS(Register rd, Register rs); \
+    void SSE_SQRTPS(Register rd, Register rs); \
+    void SSE_SQRTSS(Register rd, Register rs); \
+    void SSE_SQRTSD(Register rd, Register rs); \
+    void SSE_DPPS(Register rd, Register rs, uint8_t imm); \
 		void SSE_PSHUFD(Register rd, Register rs, uint8_t imm); \
 		void SSE_UCOMISS(Register rl, Register rr); \
 		void SSE_CMPNEQPS(Register rl, Register rr); \
 		void SSE_XORPS(Register r, const uint32_t* maskaddr); \
+		void SSE_ANDPS(Register r, const uint32_t* maskaddr); \
 \
 		void FCOM32(bool p, int32_t d, Register b); \
 		void FLD32sm(const float* dm); \
@@ -489,6 +505,7 @@ namespace nanojit
         void SSE_DIVSD(Register rd, Register rs); \
         void SSE_UCOMISD(Register rl, Register rr); \
         void SSE_XORPD(Register r, const uint32_t* maskaddr); \
+        void SSE_ANDPD(Register r, const uint32_t* maskaddr); \
         void SSE_XORPDr(Register rd, Register rs); \
         void fpu_push(); \
         void fpu_pop(); \

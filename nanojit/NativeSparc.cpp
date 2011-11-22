@@ -1421,7 +1421,7 @@ namespace nanojit
             }
     }
 
-    void Assembler::asm_fneg(LIns* ins)
+    void Assembler::asm_neg_abs(LIns* ins)
     {
         underrunProtect(4);
         Register rr = deprecated_prepResultReg(ins, FpRegs);

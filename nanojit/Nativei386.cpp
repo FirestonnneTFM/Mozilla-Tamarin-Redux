@@ -679,18 +679,25 @@ namespace nanojit
         OPCODE2(c);
     }
 
-    inline void Assembler::SSEu8(I32 opc3, R d, R s, uint8_t i) {
+    inline void Assembler::SSEu8_4(I32 opc4, R d, R s, uint8_t i) {
+        underrunProtect(6);
+        IMM8(i);
+        MODRMr(REGNUM(d)&7, REGNUM(s)&7);
+        OPCODE4(opc4);
+    }
+
+    inline void Assembler::SSEu8_3(I32 opc3, R d, R s, uint8_t i) {
         underrunProtect(5);
         IMM8(i);
         MODRMr(REGNUM(d)&7, REGNUM(s)&7);
         OPCODE3(opc3);
     }
 
-    inline void Assembler::SSEsu8(I32 opc3, R d, R s, uint8_t i) {
+    inline void Assembler::SSEu8_2(I32 opc2, R d, R s, uint8_t i) {
         underrunProtect(4);
         IMM8(i);
         MODRMr(REGNUM(d)&7, REGNUM(s)&7);
-        OPCODE2(opc3);
+        OPCODE2(opc2);
     }
 
     inline void Assembler::SSEssib(I32 opc2, R rr, I32 d, R rb, R ri, I32 scale) {
@@ -725,16 +732,26 @@ namespace nanojit
 
     inline void Assembler::SSE_LDUPS(R r, I32 d, R b) { count_ld();  SSEsm(0x0f10, r, d, b); asm_output("movups %s,%d(%s)", gpn(r), d, gpn(b)); }
 
-    inline void Assembler::SSE_LDUPSsib(R rr, I32 d, R rb, R ri, I32 scale)
-    {
+    inline void Assembler::SSE_LDUPSsib(R rr, I32 d, R rb, R ri, I32 scale) {
         count_ld();
         SSEssib(0x0f10, rr, d, rb, ri, scale);
         asm_output("movups %s,%d(%s+%s*%c)", gpn(rr), d, gpn(rb), gpn(ri), SIBIDX(scale));
     }
 
+    inline void Assembler::SSE_PSHUFD(R rd, R rs, uint8_t imm) {
+        count_fpu();
+        SSEu8_3(0x660f70, rd, rs, imm);
+        asm_output("pshufd %s,%s,%x", gpn(rd), gpn(rs), imm);
+    }
+
+    inline void Assembler::SSE_DPPS(R rd, R rs, uint8_t imm) {
+        count_fpu();
+        SSEu8_4(0x660f3a40, rd, rs, imm);
+        asm_output("dpps %s,%s,%x", gpn(rd), gpn(rs), imm);
+    }
+
     inline void Assembler::SSE_STUPS(I32 d, R b, R r) { count_stf4(); SSEsm(0x0f11, r, d, b); asm_output("movups %d(%s),%s", d, gpn(b), gpn(r)); }
-    inline void Assembler::SSE_PSHUFD(R rd, R rs, uint8_t imm) { count_fpu(); SSEu8(0x660f70, rd,rs,imm); asm_output("pshufd %s,%s,%x", gpn(rd), gpn(rs), imm); }
-    inline void Assembler::SSE_CMPNEQPS(R rd, R rs) { count_fpu(); SSEsu8(0x0fc2, rd,rs,4); asm_output("cmpneqps %s,%s", gpn(rd), gpn(rs)); }
+    inline void Assembler::SSE_CMPNEQPS(R rd, R rs) { count_fpu(); SSEu8_2(0x0fc2, rd,rs,4); asm_output("cmpneqps %s,%s", gpn(rd), gpn(rs)); }
     inline void Assembler::SSE_CVTSI2SS(R xr, R gr)  { count_fpu(); SSE(0xf30f2a, xr, gr); asm_output("cvtsi2ss %s,%s", gpn(xr), gpn(gr)); }
     inline void Assembler::SSE_CVTTSS2SI(R gr, R xr) { count_fpu(); SSE(0xf30f2c, gr, xr); asm_output("cvttss2si %s,%s",gpn(gr), gpn(xr)); }
 
@@ -789,6 +806,34 @@ namespace nanojit
         asm_output("divss %s,%s", gpn(rd), gpn(rs));
     }
 
+    inline void Assembler::SSE_RCPSS(R rd, R rs) {
+        count_fpu();
+        NanoAssert(IsXmmReg(rd) && IsXmmReg(rs));
+        SSE(0xf30f53, rd, rs);
+        asm_output("rpcss %s,%s", gpn(rd), gpn(rs));
+    }
+
+    inline void Assembler::SSE_RSQRTSS(R rd, R rs) {
+        count_fpu();
+        NanoAssert(IsXmmReg(rd) && IsXmmReg(rs));
+        SSE(0xf30f52, rd, rs);
+        asm_output("rsqrtss %s,%s", gpn(rd), gpn(rs));
+    }
+
+    inline void Assembler::SSE_SQRTSS(R rd, R rs) {
+        count_fpu();
+        NanoAssert(IsXmmReg(rd) && IsXmmReg(rs));
+        SSE(0xf30f51, rd, rs);
+        asm_output("sqrtss %s,%s", gpn(rd), gpn(rs));
+    }
+
+    inline void Assembler::SSE_SQRTSD(R rd, R rs) {
+        count_fpu();
+        NanoAssert(IsXmmReg(rd) && IsXmmReg(rs));
+        SSE(0xf20f51, rd, rs);
+        asm_output("sqrtsd %s,%s", gpn(rd), gpn(rs));
+    }
+
     inline void Assembler::SSE_SUBPS(R rd, R rs) {
         count_fpu();
         NanoAssert(IsXmmReg(rd) && IsXmmReg(rs));
@@ -810,6 +855,27 @@ namespace nanojit
         asm_output("divps %s,%s", gpn(rd), gpn(rs));
     }
 
+    inline void Assembler::SSE_RCPPS(R rd, R rs) {
+        count_fpu();
+        NanoAssert(IsXmmReg(rd) && IsXmmReg(rs));
+        SSEs(0x0f53, rd, rs);
+        asm_output("rcpps %s,%s", gpn(rd), gpn(rs));
+    }
+
+    inline void Assembler::SSE_RSQRTPS(R rd, R rs) {
+        count_fpu();
+        NanoAssert(IsXmmReg(rd) && IsXmmReg(rs));
+        SSEs(0x0f52, rd, rs);
+        asm_output("rsqrtps %s,%s", gpn(rd), gpn(rs));
+    }
+
+    inline void Assembler::SSE_SQRTPS(R rd, R rs) {
+        count_fpu();
+        NanoAssert(IsXmmReg(rd) && IsXmmReg(rs));
+        SSEs(0x0f51, rd, rs);
+        asm_output("sqrtps %s,%s", gpn(rd), gpn(rs));
+    }
+
     inline void Assembler::SSE_UCOMISS(R rl, R rr) {
         count_fpu();
         NanoAssert(IsXmmReg(rl) && IsXmmReg(rr));
@@ -825,6 +891,16 @@ namespace nanojit
         *(--_nIns) = 0x57;
         *(--_nIns) = 0x0f;
         asm_output("xorps %s,(%p)", gpn(r), (void*)maskaddr);
+    }
+
+    inline void Assembler::SSE_ANDPS(R r, const uint32_t* maskaddr) {
+        count_fpuld();
+        underrunProtect(8);
+        IMM32(int32_t(maskaddr));
+        MODRM(0, REGNUM(r) & 7, 5);     // amode == maskaddr(r)
+        *(--_nIns) = 0x54;
+        *(--_nIns) = 0x0f;
+        asm_output("andps %s,(%p)", gpn(r), (void*)maskaddr);
     }
 
     inline void Assembler::FCOM32(bool p, I32 d, R b) {
@@ -965,6 +1041,17 @@ namespace nanojit
         IMM32(int32_t(maskaddr));
         MODRM(0, REGNUM(r) & 7, 5);     // amode == maskaddr(r)
         OPCODE(0x57);
+        OPCODE(0x0f);
+        OPCODE(0x66);
+        asm_output("xorpd %s,(%p)", gpn(r), (void*)maskaddr);
+    }
+
+    inline void Assembler::SSE_ANDPD(R r, const uint32_t* maskaddr) {
+        count_fpuld();
+        underrunProtect(8);
+        IMM32(int32_t(maskaddr));
+        MODRM(0, REGNUM(r) & 7, 5);     // amode == maskaddr(r)
+        OPCODE(0x54);
         OPCODE(0x0f);
         OPCODE(0x66);
         asm_output("xorpd %s,(%p)", gpn(r), (void*)maskaddr);
@@ -2714,99 +2801,136 @@ namespace nanojit
         freeResourcesOf(ins);
     }
 
-    // negateMaskD is used by asm_fneg.
+    // negateMaskD,F,F4 are used by asm_neg_abs.
 #if defined __SUNPRO_CC
     // From Sun Studio C++ Readme: #pragma align inside namespace requires mangled names.
     // Initialize here to avoid multithreading contention issues during initialization.
-    static uint32_t negateMask_temp[]  = {0, 0, 0, 0, 0, 0, 0};
-    static uint32_t fNegateMask_temp[] = {0, 0, 0, 0, 0, 0, 0};
-    static uint32_t fNegateMask4_temp[]= {0, 0, 0, 0, 0, 0, 0};
+    // each array must be big enough to hold a 128 bit 16-byte aligned value inside.
+    // static writable arrays start as zerod memory.
+    static uint32_t negateMaskD_temp[8];
+    static uint32_t negateMaskF_temp[8];
+    static uint32_t negateMaskF4_temp[8];
+    static uint32_t absMaskD_temp[8];
+    static uint32_t absMaskF_temp[8];
+    static uint32_t absMaskF4_temp[8];
 
-    static uint32_t* negateMaskInit()
-    {
-        uint32_t* negateMaskD = (uint32_t*) alignUp(negateMask_temp, 16);
-        negateMaskD[1] = 0x80000000;
-        return negateMaskD;
-    }
-    static uint32_t* fNegateMaskInit(uint32_t mask[], bool isFloat4 )
-    {
-        uint32_t* negateMaskD = (uint32_t*) alignUp(mask, 16);
-        negateMaskD[0] = 0x80000000;
-        if(isFloat4){ 
-            negateMaskD[1] = 0x80000000;
-            negateMaskD[2] = 0x80000000;
-            negateMaskD[3] = 0x80000000;
-        }
-        return negateMaskD;
+    static uint32_t* initMaskD(uint32_t mask_temp[], uint32_t upper, uint32_t lower) {
+        uint32_t* mask = (uint32_t*) alignUp(mask_temp, 16);
+        mask[0] = lower;
+        mask[1] = upper;
+        return mask;
     }
 
-    static uint32_t *negateMaskD     = negateMaskInit();
-    static uint32_t *negateMaskF  = fNegateMaskInit(fNegateMask_temp,  false);
-    static uint32_t *negateMaskF4 = fNegateMaskInit(fNegateMask4_temp, true);
+    static uint32_t* initMaskF(uint32_t mask_temp[], uint32_t value) {
+        uint32_t* mask = (uint32_t*) alignUp(mask_temp, 16);
+        mask[0] = value;
+        return mask;
+    }
+
+    static uint32_t* initMaskF4(uint32_t mask_temp[], uint32_t value) {
+        uint32_t* mask = (uint32_t*) alignUp(mask_temp, 16);
+        mask[0] = mask[1] = mask[2] = mask[3] = value;
+        return mask;
+    }
+
+    static uint32_t *negateMaskD  = initMaskD(negateMaskD_temp,   0x80000000, 0);
+    static uint32_t *negateMaskF  = initMaskF(negateMaskF_temp,   0x80000000);
+    static uint32_t *negateMaskF4 = initMaskF4(negateMaskF4_temp, 0x80000000);
+    static uint32_t *absMaskD     = initMaskD(absMaskD_temp,      0x7FFFFFFF, 0xFFFFFFFF);
+    static uint32_t *absMaskF     = initMaskF(absMaskF_temp,      0x7FFFFFFF);
+    static uint32_t *absMaskF4    = initMaskF4(absMaskF4_temp,    0x7FFFFFFF);
 #else
-    static const AVMPLUS_ALIGN16(uint32_t) negateMaskD[]  = {0,0x80000000,0,0};
-    static const AVMPLUS_ALIGN16(uint32_t) negateMaskF[]  = {0x80000000,0,0,0};// single-percision negation mask
-    static const AVMPLUS_ALIGN16(uint32_t) negateMaskF4[] = {0x80000000,0x80000000,0x80000000,0x80000000};
+    static const AVMPLUS_ALIGN16(uint32_t) negateMaskD[]  = { 0,          0x80000000, 0,          0 };
+    static const AVMPLUS_ALIGN16(uint32_t) negateMaskF[]  = { 0x80000000, 0,          0,          0 };
+    static const AVMPLUS_ALIGN16(uint32_t) negateMaskF4[] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
+    static const AVMPLUS_ALIGN16(uint32_t) absMaskD[]     = { 0xFFFFFFFF, 0x7FFFFFFF, 0,          0 };
+    static const AVMPLUS_ALIGN16(uint32_t) absMaskF[]     = { 0x7FFFFFFF, 0,          0,          0 };
+    static const AVMPLUS_ALIGN16(uint32_t) absMaskF4[]    = { 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF };
 #endif
 
-    void Assembler::asm_fneg(LIns* ins)
+    void Assembler::asm_neg_abs(LIns* ins)
     {
-        LIns *lhs = ins->oprnd1();
+        LIns *arg = ins->oprnd1();
 
         if (_config.i386_sse2) {
             Register rr = prepareResultReg(ins, XmmRegs);
-
-            // If 'lhs' isn't in a register, it can be clobbered by 'ins'.
+            // If 'arg' isn't in a register, it can be clobbered
             Register ra;
-            if (!lhs->isInReg()) {
+            if (!arg->isInReg()) {
                 ra = rr;
-            } else if (!(rmask(lhs->getReg()) & XmmRegs)) {
-                // We need to evict lhs from x87Regs, which then puts us in
+            } else if (!(rmask(arg->getReg()) & XmmRegs)) {
+                // We need to evict arg from x87Regs, which then puts us in
                 // the same situation as the !isInReg() case.
-                evict(lhs);
+                evict(arg);
                 ra = rr;
             } else {
-                ra = lhs->getReg();
+                ra = arg->getReg();
             }
 
-            uint32_t* mask = (uint32_t*) negateMaskD;
-
-            bool floatVal = true;
-            switch(ins->opcode()){
-            case LIR_negf:    mask = (uint32_t*) negateMaskF;  break;
-            case LIR_negf4:   mask = (uint32_t*) negateMaskF4; break;
-            case LIR_negd:    floatVal = false;                break;
-            default: TODO(asm_fneg);break;
-            }
-            if (floatVal)
-                SSE_XORPS(rr, mask);
-            else
-                SSE_XORPD(rr, mask);
-
-            if (rr != ra) {
-                if(floatVal)
-                    SSE_MOVAPS(rr, ra);
-                else
+            if (ins->retType() == LTy_D) {
+                switch (ins->opcode()) {
+                default: NanoAssert(!"bad opcode");
+                case LIR_negd: SSE_XORPD(rr, negateMaskD); break;
+                case LIR_absd: SSE_ANDPD(rr, absMaskD); break;
+                }
+                if (rr != ra)
                     SSE_MOVSD(rr, ra);
+            } else {
+                switch (ins->opcode()) {
+                default: NanoAssert(!"bad opcode");
+                case LIR_negf:  SSE_XORPS(rr, negateMaskF); break;
+                case LIR_negf4: SSE_XORPS(rr, negateMaskF4); break;
+                case LIR_absf:  SSE_ANDPS(rr, absMaskF); break;
+                case LIR_absf4: SSE_ANDPS(rr, absMaskF4); break;
+                }
+                if (rr != ra)
+                    SSE_MOVAPS(rr, ra);
             }
 
             freeResourcesOf(ins);
-            if (!lhs->isInReg()) {
+            if (!arg->isInReg()) {
                 NanoAssert(ra == rr);
-                findSpecificRegForUnallocated(lhs, ra);
+                findSpecificRegForUnallocated(arg, ra);
             }
         } else {
-            debug_only( Register rr = ) prepareResultReg(ins, x87Regs);
-            NanoAssert(ins->opcode() != LIR_negf4);
+            Register rr = prepareResultReg(ins, x87Regs); (void)rr;
+            NanoAssert(ins->opcode() == LIR_negd);
             NanoAssert(FST0 == rr);
-
-            NanoAssert(!lhs->isInReg() || FST0 == lhs->getReg());
+            NanoAssert(!arg->isInReg() || FST0 == arg->getReg());
 
             FCHS();
 
             freeResourcesOf(ins);
-            if (!lhs->isInReg())
-                findSpecificRegForUnallocated(lhs, FST0);
+            if (!arg->isInReg())
+                findSpecificRegForUnallocated(arg, FST0);
+        }
+    }
+
+    void Assembler::asm_recip_sqrt(LIns* ins)
+    {
+        NanoAssert(_config.i386_sse2);
+        LIns* lhs = ins->oprnd1();
+
+        Register rr = prepareResultReg(ins, XmmRegs);
+
+        // If 'lhs' isn't in a register, it can be clobbered by 'ins'.
+        Register ra = lhs->isInReg() ? lhs->getReg() : rr;
+
+        switch (ins->opcode()) {
+        default: NanoAssert("!bad opcode");
+        case LIR_recipf:  SSE_RCPSS  (rr, ra); break;
+        case LIR_recipf4: SSE_RCPPS  (rr, ra); break;
+        case LIR_rsqrtf:  SSE_RSQRTSS(rr, ra); break;
+        case LIR_rsqrtf4: SSE_RSQRTPS(rr, ra); break;
+        case LIR_sqrtf:   SSE_SQRTSS (rr, ra); break;
+        case LIR_sqrtf4:  SSE_SQRTPS (rr, ra); break;
+        case LIR_sqrtd:   SSE_SQRTSD (rr, ra); break;
+        }
+
+        freeResourcesOf(ins);
+        if (!lhs->isInReg()) {
+            NanoAssert(ra == rr);
+            findSpecificRegForUnallocated(lhs, ra);
         }
     }
 
@@ -2956,7 +3080,6 @@ namespace nanojit
             Register ra;
             if (!lhs->isInReg()) {
                 ra = rr;
-
             } else if (!(rmask(lhs->getReg()) & XmmRegs)) {
                 NanoAssert(lhs->getReg() == FST0);
 
@@ -2964,7 +3087,6 @@ namespace nanojit
                 // the same situation as the !isInReg() case.
                 evict(lhs);
                 ra = rr;
-
             } else {
                 ra = lhs->getReg();
                 NanoAssert(rmask(ra) & XmmRegs);
@@ -2986,6 +3108,9 @@ namespace nanojit
             case LIR_subf4: SSE_SUBPS(rr, rb);  break;
             case LIR_mulf4: SSE_MULPS(rr, rb);  break;
             case LIR_divf4: SSE_DIVPS(rr, rb);  break;
+            case LIR_dotf4: SSE_DPPS(rr, rb, 0xF1); break;
+            case LIR_dotf3: SSE_DPPS(rr, rb, 0x71); break;
+            case LIR_dotf2: SSE_DPPS(rr, rb, 0x31); break;
             default:        NanoAssertMsgf(false,"Unhandled op %d",op);
             }
 
@@ -3187,7 +3312,7 @@ namespace nanojit
     
     void Assembler::asm_f2i(LIns* ins)
     {
-        if(!_config.i386_sse2) {
+        if (!_config.i386_sse2) {
             return asm_d2i(ins);
         }
         
