@@ -641,6 +641,10 @@ namespace nanojit
         (void)op; (void)value;(void)dr;(void)base;
         NanoAssertMsg(0, "asm_store128 not yet supported for this architecture");
     }
+
+    void Assembler::asm_recip_sqrt(LIns*) {
+        NanoAssert(!"not implemented");
+    }
 #endif // VMCFG_FLOAT
 
 
