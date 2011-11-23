@@ -98,6 +98,7 @@ as3/Number/e15_7_4_6_1:Section C , .* ,diff , expectedfail, bug https://bugzilla
 ecma3/Number/e15_7_1:Number\('1\.797693134862316e\+308'\), .*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=692402
 ecma3/Number/e15_7_2:Number\('1\.797693134862316e\+308'\), .*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=692402
 
+as3/Types/Number/cos:Number\.cos\(Number\.MAX_VALUE\), x86-(win|lnx).*, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=704813
 as3/Types/Number/round: sign check , .*, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=686708
 as3/Types/Number/round:Number\.round\(x\) != Number\.floor, .*, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=686708
 as3/Types/Number/pow:Number\.pow\(Number\.NEGATIVE_INFINITY. -2\) sign check , .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703611
@@ -375,6 +376,7 @@ as3/Types/Float4/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4
 abcasm/coverage/float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
 
 as3/Types/Float/atan2:^float\.atan2\(0\.1f. float\.POSITIVE_INFINITY\) check via Infinity, .*-win.*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
+as3/Types/Float/atan2:^float\.atan2\(0\.1f. float\.POSITIVE_INFINITY\) check() check via Infinity, .*-win.*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
 as3/Types/Float/atan2:^float\.atan2\(0\.1f. float\.NEGATIVE_INFINITY\), .*-win.*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
 
 as3/Types/Float/exp, .*diff,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=703259

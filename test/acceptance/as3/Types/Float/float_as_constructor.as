@@ -81,6 +81,9 @@ AddTestCase("Float constructor, with 'Object' arg", "float", getQualifiedClassNa
 var literal_float = new float(3.14f);
 AddTestCase("Float constructor, with 'FloatLiteral' arg", "float", getQualifiedClassName(literal_float));
 
+AddErrorTest("Float constructor, with more than 1 arg", ARGUMENTERROR+1063,  function(){ var float_wrongargs = new float(3.14f, 1.0f); });
+
+
 
 test();
 
