@@ -2732,6 +2732,10 @@ Assembler::asm_neg_abs(LIns* ins)
     }
 }
 
+void Assembler::asm_recip_sqrt(LIns*) {
+    NanoAssert(!"not implemented");
+}
+
 void
 Assembler::asm_fop(LIns* ins)
 {
