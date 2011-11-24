@@ -738,6 +738,7 @@ namespace nanojit
         asm_output("movups %s,%d(%s+%s*%c)", gpn(rr), d, gpn(rb), gpn(ri), SIBIDX(scale));
     }
 
+    inline uint8_t PSHUFD_COMPONENT_MASK(int i) { NanoAssert(i>=0 && i<=3); const uint8_t retval[4] = { 0, 0x55, 0xAA, 0xFF }; return retval[i & 3]; }
     inline void Assembler::SSE_PSHUFD(R rd, R rs, uint8_t imm) {
         count_fpu();
         SSEu8_3(0x660f70, rd, rs, imm);
@@ -2825,7 +2826,7 @@ namespace nanojit
         uint32_t* mask = (uint32_t*) alignUp(mask_temp, 16);
         mask[0] = value;
         return mask;
-    }
+        }
 
     static uint32_t* initMaskF4(uint32_t mask_temp[], uint32_t value) {
         uint32_t* mask = (uint32_t*) alignUp(mask_temp, 16);
@@ -2840,9 +2841,9 @@ namespace nanojit
     static uint32_t *absMaskF     = initMaskF(absMaskF_temp,      0x7FFFFFFF);
     static uint32_t *absMaskF4    = initMaskF4(absMaskF4_temp,    0x7FFFFFFF);
 #else
-    static const AVMPLUS_ALIGN16(uint32_t) negateMaskD[]  = { 0,          0x80000000, 0,          0 };
+    static const AVMPLUS_ALIGN16(uint32_t) negateMaskD[]  = {0,0x80000000,0,0};
     static const AVMPLUS_ALIGN16(uint32_t) negateMaskF[]  = { 0x80000000, 0,          0,          0 };
-    static const AVMPLUS_ALIGN16(uint32_t) negateMaskF4[] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
+    static const AVMPLUS_ALIGN16(uint32_t) negateMaskF4[] = {0x80000000,0x80000000,0x80000000,0x80000000};
     static const AVMPLUS_ALIGN16(uint32_t) absMaskD[]     = { 0xFFFFFFFF, 0x7FFFFFFF, 0,          0 };
     static const AVMPLUS_ALIGN16(uint32_t) absMaskF[]     = { 0x7FFFFFFF, 0,          0,          0 };
     static const AVMPLUS_ALIGN16(uint32_t) absMaskF4[]    = { 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF };
@@ -2876,13 +2877,13 @@ namespace nanojit
                 if (rr != ra)
                     SSE_MOVSD(rr, ra);
             } else {
-                switch (ins->opcode()) {
+            switch(ins->opcode()){
                 default: NanoAssert(!"bad opcode");
                 case LIR_negf:  SSE_XORPS(rr, negateMaskF); break;
                 case LIR_negf4: SSE_XORPS(rr, negateMaskF4); break;
                 case LIR_absf:  SSE_ANDPS(rr, absMaskF); break;
                 case LIR_absf4: SSE_ANDPS(rr, absMaskF4); break;
-                }
+            }
                 if (rr != ra)
                     SSE_MOVAPS(rr, ra);
             }
@@ -2927,7 +2928,7 @@ namespace nanojit
         case LIR_sqrtd:   SSE_SQRTSD (rr, ra); break;
         }
 
-        freeResourcesOf(ins);
+            freeResourcesOf(ins);
         if (!lhs->isInReg()) {
             NanoAssert(ra == rr);
             findSpecificRegForUnallocated(lhs, ra);
@@ -3312,7 +3313,7 @@ namespace nanojit
     
     void Assembler::asm_f2i(LIns* ins)
     {
-        if (!_config.i386_sse2) {
+        if(!_config.i386_sse2) {
             return asm_d2i(ins);
         }
         
@@ -3686,7 +3687,7 @@ namespace nanojit
 
         Register rr = prepareResultReg(ins, XmmRegs);
         Register rb = findRegFor(a, XmmRegs);
-        SSE_PSHUFD(rr, rb, 0); 
+        SSE_PSHUFD(rr, rb, PSHUFD_COMPONENT_MASK(0)); 
         freeResourcesOf(ins);
     }
     
@@ -3699,16 +3700,13 @@ namespace nanojit
         Register rb = findRegFor(a, XmmRegs);
         switch (ins->opcode()) {
         default: NanoAssert(!"bad opcode for asm_f4comp()"); break;
-        case LIR_f4x: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(0,0,0,0)); break;
-        case LIR_f4y: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(1,1,1,1)); break;
-        case LIR_f4z: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(2,2,2,2)); break;
-        case LIR_f4w: SSE_PSHUFD(rr, rb, _MM_SHUFFLE(3,3,3,3)); break;
+        case LIR_f4x: SSE_PSHUFD(rr, rb, PSHUFD_COMPONENT_MASK(0)); break;
+        case LIR_f4y: SSE_PSHUFD(rr, rb, PSHUFD_COMPONENT_MASK(1)); break;
+        case LIR_f4z: SSE_PSHUFD(rr, rb, PSHUFD_COMPONENT_MASK(2)); break;
+        case LIR_f4w: SSE_PSHUFD(rr, rb, PSHUFD_COMPONENT_MASK(3)); break;
         case LIR_swzf4: {
           uint8_t mask = ins->mask();
-          SSE_PSHUFD(rr, rb, _MM_SHUFFLE((mask >> 6) & 3,
-                                         (mask >> 4) & 3,
-                                         (mask >> 2) & 3,
-                                         (mask >> 0) & 3));
+          SSE_PSHUFD(rr, rb, mask);
           break;
         }
         }

@@ -157,7 +157,7 @@ namespace avmplus
             return floatCount++;
         }
 
-        uint32_t ABCFile::addFloat4(float4_t f4)
+        uint32_t ABCFile::addFloat4(const float4_t& f4)
         {
             float4Buf.emitFloat4(f4);
             return float4Count++;

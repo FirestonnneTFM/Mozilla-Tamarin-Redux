@@ -302,7 +302,7 @@ namespace avmplus
         void writeUnsignedInt(uint32_t value);
         void writeFloat(double value);
 #ifdef VMCFG_FLOAT
-        void writeFloat4(float4_t value);
+        void writeFloat4(const float4_t& value);
 #endif
         void writeDouble(double value);
         void writeMultiByte(String* value, String* charSet);
@@ -318,7 +318,7 @@ namespace avmplus
         uint32_t readUnsignedInt();
         double readFloat();
 #ifdef VMCFG_FLOAT
-        float4_t readFloat4();
+        void readFloat4(float4_t&);
 #endif
         double readDouble();
         String* readMultiByte(uint32_t length, String* charSet);

@@ -625,10 +625,6 @@ namespace avmplus
      * ---------------------------------
      */
 
-    // address calc instruction
-    LIns* CodegenLIR::leaIns(int32_t disp, LIns* base) {
-        return lirout->ins2(LIR_addp, base, InsConstPtr((void*)disp));
-    }
 
     LIns* CodegenLIR::localCopy(int i)
     {
@@ -1266,7 +1262,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             // more than one representation is possible: convert to atom using tag found at runtime.
             AvmAssert(bt(v.traits) == BUILTIN_any || bt(v.traits) == BUILTIN_object);
             LIns* tag = lirout->insLoad(LIR_lduc2ui, tags, i, ACCSET_TAGS);
-            LIns* varAddr = leaIns( i << VARSHIFT(info) , vars);
+            LIns* varAddr = lea( i << VARSHIFT(info) , vars);
             ins = callIns(FUNCTIONID(makeatom), 3, coreAddr, varAddr, tag);
         }
         if (v.notNull)
@@ -1478,7 +1474,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         virtual LIns* insImmF(float f) {
             return lastIns = out->insImmF(f);
         }
-        virtual LIns* insImmF4(float4_t f) {
+        virtual LIns* insImmF4(const float4_t& f) {
             return lastIns = out->insImmF4(f);
         }
         virtual LIns* insLoad(LOpcode op, LIns* base, int32_t d, AccSet accSet, LoadQual loadQual) {
@@ -1998,7 +1994,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
             // Exception* setjmpResult = setjmp(_ef.jmpBuf);
             // ISSUE this needs to be a cdecl call
-            LIns* jmpbuf = leaIns(offsetof(ExceptionFrame, jmpbuf), _ef);
+            LIns* jmpbuf = lea(offsetof(ExceptionFrame, jmpbuf), _ef);
             setjmpResult = callIns(FUNCTIONID(fsetjmp), 2, jmpbuf, InsConst(0));
 
             // If (setjmp() != 0) goto catch dispatcher, which we generate in the epilog.
@@ -3304,7 +3300,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                                 loadEnvToplevel(),
                                 InsConstPtr(multiname),
                                 loadAtomRep(state->sp()),
-                                leaIns(restLocal << VARSHIFT(info) , vars),
+                                lea(restLocal << VARSHIFT(info) , vars),
                                 restArgc,
                                 (info->needRest() ?
                                     binaryIns(LIR_addp, ap_param, InsConstPtr((void*)(ms->rest_offset()))) :
@@ -3338,7 +3334,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         case BUILTIN_float: 
                 return callIns(FUNCTIONID(floatToString),2,coreAddr,localGetf(index));
         case BUILTIN_float4: 
-            return callIns(FUNCTIONID(float4ToString),2,coreAddr,localGetf4(index));
+                return callIns(FUNCTIONID(float4ToString), 2, coreAddr, lea(index << 4, vars)); 
 #endif
         case BUILTIN_number:
             return callIns(FUNCTIONID(doubleToString), 2, coreAddr, localGetd(index));
@@ -3921,7 +3917,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
     void CodegenLIR::emitFloat4Const(int index, const float4_t* f4)
     {
-        localSet(index, lirout->insImmF4(AvmThunkUnbox_float4_impl((const Atom* )f4)), FLOAT4_TYPE);
+        localSet(index, lirout->insImmF4(*(const float4_t*)f4), FLOAT4_TYPE);
     }
 
     /**
@@ -4902,7 +4898,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         ap->setSize(disp);
 
         LIns* target = loadIns(LIR_ldp, offsetof(MethodEnvProcHolder,_implGPR), method, ACCSET_OTHER);
-        LIns* apAddr = leaIns(pad, ap);
+        LIns* apAddr = lea(pad, ap);
 
         LIns *out;
         BuiltinType rbt = bt(result);
@@ -5050,7 +5046,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             callIns(wbAddr, 4,
                     InsConstPtr(core->GetGC()),
                     unoffsetPtr,
-                    leaIns(offset, ptr),
+                    lea(offset, ptr),
                     value);
         }
 #ifdef VMCFG_FLOAT
@@ -5373,7 +5369,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 getter = getFloatVectorHelpers[idxKind];
             }
         }
-        else if (objType == VECTORFLOAT4_TYPE) {
+        else if (false) { // was: objType == VECTORFLOAT4_TYPE
             if (result == FLOAT4_TYPE) {
                 if (idxKind == VI_INT || idxKind == VI_UINT) {
                     typedef ListData<float4_t, 16> STORAGE;
@@ -5646,7 +5642,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 setter = setFloatVectorHelpers[idxKind];
             }
         }
-        else if (objType == VECTORFLOAT4_TYPE) {
+        else if (false) { // was: objType == VECTORFLOAT4_TYPE
             if (valueType == FLOAT4_TYPE) {
                 if (idxKind == VI_INT || idxKind == VI_UINT) {
                     typedef ListData<float4_t, 16> STORAGE;
@@ -6099,9 +6095,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     LIns* oz = callIns(FUNCTIONID(mod), 2,f4z,g4z);
                     LIns* f4w = f2dIns(lirout->ins1(LIR_f4w, f4)), *g4w = f2dIns(lirout->ins1(LIR_f4w, g4));
                     LIns* ow = callIns(FUNCTIONID(mod), 2,f4w,g4w);
-                    LIns* out = callIns(FUNCTIONID(float4FromComponents), 4,
+                    
+                    callIns(FUNCTIONID(float4FromComponents), 5, lea((sp-1) << 4, vars),
                                          d2fIns(ox), d2fIns(oy), d2fIns(oz), d2fIns(ow) );
-                    localSet(sp-1,  out, result);
                 } else if(result == NUMBER_TYPE){
                     AvmAssert(state->value(sp-1).traits == NUMBER_TYPE);
                     AvmAssert(state->value(sp).traits == NUMBER_TYPE);
@@ -6455,7 +6451,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 LIns* ap = storeAtomArgs(2*argc, arg0);
 
                 LIns* i3 = callIns(FUNCTIONID(op_newobject), 3,
-                    env_param, leaIns(sizeof(Atom)*(2*argc-1), ap), InsConst(argc));
+                    env_param, lea(sizeof(Atom)*(2*argc-1), ap), InsConst(argc));
                 liveAlloc(ap);
 
                 localSet(dest, ptrToNativeRep(result, i3), result);
@@ -6569,7 +6565,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 }
                 else
                 {
-                    withBase = leaIns(state->withBase*sizeof(Atom), ap);
+                    withBase = lea(state->withBase*sizeof(Atom), ap);
                 }
 
                 //      return env->findproperty(outer, argv, extraScopes, name, strict);
@@ -7235,7 +7231,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             LIns* rhs = localGet(rhsi);
             return binaryIns(ucmp, lhs, rhs);
         }
-    #ifdef VMCFG_FLOAT
+#ifdef VMCFG_FLOAT
         else if (lht == rht && lht == FLOAT_TYPE)
         {
             LIns* lhs = localGetf(lhsi);
@@ -7265,7 +7261,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                         return InsConst(0);
                     LIns* lhs = localGetf4(lhsi);
                     LIns* rhs = Ins(LIR_f2f4, localGetf(rhsi));
-                    return binaryIns(LIR_eqf4, lhs, rhs);
+                return binaryIns(LIR_eqf4, lhs, rhs);
                 } else
                     // Punt to out-of-line handler.
                     return NULL;
@@ -7273,7 +7269,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 // Comparison with NaN, always false.
                 return InsConst(0);
         }
-    #endif // VMCFG_FLOAT
+#endif // VMCFG_FLOAT
         else if (lht && lht->isNumeric() && rht && rht->isNumeric())
         {
             // Comparing the result of a call returning a Number to another int value.
@@ -7326,7 +7322,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     return binaryIns(ucmp, lhs, rhs);
             #endif
             }
-            if (!strictOperation && (lht->isNumberType() || rht->isNumberType())){
+            if(!strictOperation && (lht->isNumberType() || rht->isNumberType()) ){
                 // NOTE: This assumes that comparisons between two floats works just as
                 // well performed on doubles.  For float vs. number, we can't do strict
                 // equality tests this way, since the types are assumed to be different.
@@ -7488,8 +7484,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             // _ef.beginCatch()
             int stackBase = ms->stack_base();
             LIns* pc = loadIns(LIR_ldp, 0, _save_eip, ACCSET_OTHER);
-            LIns* slotAddr = leaIns(stackBase << VARSHIFT(info) , vars);
-            LIns* tagAddr = leaIns(stackBase, tags);
+            LIns* slotAddr = lea(stackBase << VARSHIFT(info) , vars);
+            LIns* tagAddr = lea(stackBase, tags);
             LIns* handler_ordinal = callIns(FUNCTIONID(beginCatch), 6, coreAddr, _ef, InsConstPtr(info), pc, slotAddr, tagAddr);
 
             int handler_count = info->abc_exceptions()->exception_count;
@@ -7827,7 +7823,11 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             case BUILTIN_float4: 
                 return localGetf4(i);
             default:
-                return callIns(FUNCTIONID(float4), 1, loadAtomRep(i));
+            {
+                LIns* retval = lirout->insAlloc(sizeof(float4_t));
+                callIns(FUNCTIONID(float4), 2, lea(0, retval), loadAtomRep(i));
+                return ldf4(retval,0,ACCSET_OTHER);
+            }
         }
     }
 #endif // VMCFG_FLOAT

@@ -426,16 +426,6 @@ class avmshell_MIClassSlots
         { \
             return isTypeImpl(value->atom()); \
         } \
-        REALLY_INLINE GCRef<avmshell::MIObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmshell::MIObject>((avmshell::MIObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmshell::MIObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmshell::MIObject>((avmshell::MIObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
         REALLY_INLINE GCRef<avmshell::MIObject> coerceToType(avmplus::Atom value) \
         { \
             avmplus::Atom const result = coerceToTypeImpl(value); \
@@ -500,16 +490,6 @@ public:
         { \
             return isTypeImpl(value->atom()); \
         } \
-        REALLY_INLINE GCRef<avmplus::SystemObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmplus::SystemObject>((avmplus::SystemObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::SystemObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmplus::SystemObject>((avmplus::SystemObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
         REALLY_INLINE GCRef<avmplus::SystemObject> coerceToType(avmplus::Atom value) \
         { \
             avmplus::Atom const result = coerceToTypeImpl(value); \
@@ -565,16 +545,6 @@ class avmshell_FileClassSlots
         { \
             return isTypeImpl(value->atom()); \
         } \
-        REALLY_INLINE GCRef<avmplus::FileObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmplus::FileObject>((avmplus::FileObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::FileObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmplus::FileObject>((avmplus::FileObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
         REALLY_INLINE GCRef<avmplus::FileObject> coerceToType(avmplus::Atom value) \
         { \
             avmplus::Atom const result = coerceToTypeImpl(value); \
@@ -625,16 +595,6 @@ class avmshell_AbstractBaseClassSlots
         REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
         { \
             return isTypeImpl(value->atom()); \
-        } \
-        REALLY_INLINE GCRef<avmshell::AbstractBaseObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmshell::AbstractBaseObject>((avmshell::AbstractBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmshell::AbstractBaseObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmshell::AbstractBaseObject>((avmshell::AbstractBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
         } \
         REALLY_INLINE GCRef<avmshell::AbstractBaseObject> coerceToType(avmplus::Atom value) \
         { \
@@ -704,16 +664,6 @@ class avmshell_RestrictedBaseClassSlots
         { \
             return isTypeImpl(value->atom()); \
         } \
-        REALLY_INLINE GCRef<avmshell::RestrictedBaseObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmshell::RestrictedBaseObject>((avmshell::RestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmshell::RestrictedBaseObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmshell::RestrictedBaseObject>((avmshell::RestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
         REALLY_INLINE GCRef<avmshell::RestrictedBaseObject> coerceToType(avmplus::Atom value) \
         { \
             avmplus::Atom const result = coerceToTypeImpl(value); \
@@ -772,16 +722,6 @@ class avmshell_AbstractRestrictedBaseClassSlots
         REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
         { \
             return isTypeImpl(value->atom()); \
-        } \
-        REALLY_INLINE GCRef<avmshell::AbstractRestrictedBaseObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmshell::AbstractRestrictedBaseObject>((avmshell::AbstractRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmshell::AbstractRestrictedBaseObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmshell::AbstractRestrictedBaseObject>((avmshell::AbstractRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
         } \
         REALLY_INLINE GCRef<avmshell::AbstractRestrictedBaseObject> coerceToType(avmplus::Atom value) \
         { \
@@ -852,16 +792,6 @@ class avmshell_CheckBaseClassSlots
         { \
             return isTypeImpl(value->atom()); \
         } \
-        REALLY_INLINE GCRef<avmshell::CheckBaseObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmshell::CheckBaseObject>((avmshell::CheckBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmshell::CheckBaseObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmshell::CheckBaseObject>((avmshell::CheckBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
         REALLY_INLINE GCRef<avmshell::CheckBaseObject> coerceToType(avmplus::Atom value) \
         { \
             avmplus::Atom const result = coerceToTypeImpl(value); \
@@ -929,16 +859,6 @@ class avmshell_NativeBaseClassSlots
         REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
         { \
             return isTypeImpl(value->atom()); \
-        } \
-        REALLY_INLINE GCRef<avmshell::NativeBaseObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmshell::NativeBaseObject>((avmshell::NativeBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmshell::NativeBaseObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmshell::NativeBaseObject>((avmshell::NativeBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
         } \
         REALLY_INLINE GCRef<avmshell::NativeBaseObject> coerceToType(avmplus::Atom value) \
         { \
@@ -1341,16 +1261,6 @@ class avmshell_NativeSubclassOfAbstractBaseClassSlots
         { \
             return isTypeImpl(value->atom()); \
         } \
-        REALLY_INLINE GCRef<avmshell::NativeSubclassOfAbstractBaseObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmshell::NativeSubclassOfAbstractBaseObject>((avmshell::NativeSubclassOfAbstractBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmshell::NativeSubclassOfAbstractBaseObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmshell::NativeSubclassOfAbstractBaseObject>((avmshell::NativeSubclassOfAbstractBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
         REALLY_INLINE GCRef<avmshell::NativeSubclassOfAbstractBaseObject> coerceToType(avmplus::Atom value) \
         { \
             avmplus::Atom const result = coerceToTypeImpl(value); \
@@ -1441,16 +1351,6 @@ class avmshell_NativeSubclassOfRestrictedBaseClassSlots
         { \
             return isTypeImpl(value->atom()); \
         } \
-        REALLY_INLINE GCRef<avmshell::NativeSubclassOfRestrictedBaseObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmshell::NativeSubclassOfRestrictedBaseObject>((avmshell::NativeSubclassOfRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmshell::NativeSubclassOfRestrictedBaseObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmshell::NativeSubclassOfRestrictedBaseObject>((avmshell::NativeSubclassOfRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
         REALLY_INLINE GCRef<avmshell::NativeSubclassOfRestrictedBaseObject> coerceToType(avmplus::Atom value) \
         { \
             avmplus::Atom const result = coerceToTypeImpl(value); \
@@ -1540,16 +1440,6 @@ class avmshell_NativeSubclassOfAbstractRestrictedBaseClassSlots
         REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
         { \
             return isTypeImpl(value->atom()); \
-        } \
-        REALLY_INLINE GCRef<avmshell::NativeSubclassOfAbstractRestrictedBaseObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmshell::NativeSubclassOfAbstractRestrictedBaseObject>((avmshell::NativeSubclassOfAbstractRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmshell::NativeSubclassOfAbstractRestrictedBaseObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmshell::NativeSubclassOfAbstractRestrictedBaseObject>((avmshell::NativeSubclassOfAbstractRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
         } \
         REALLY_INLINE GCRef<avmshell::NativeSubclassOfAbstractRestrictedBaseObject> coerceToType(avmplus::Atom value) \
         { \
@@ -1690,16 +1580,6 @@ class avmplus_DomainClassSlots
         REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
         { \
             return isTypeImpl(value->atom()); \
-        } \
-        REALLY_INLINE GCRef<avmplus::DomainObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmplus::DomainObject>((avmplus::DomainObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::DomainObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmplus::DomainObject>((avmplus::DomainObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
         } \
         REALLY_INLINE GCRef<avmplus::DomainObject> coerceToType(avmplus::Atom value) \
         { \
@@ -1863,16 +1743,6 @@ class avmplus_NewObjectSampleClassSlots
         { \
             return isTypeImpl(value->atom()); \
         } \
-        REALLY_INLINE GCRef<avmplus::NewObjectSampleObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmplus::NewObjectSampleObject>((avmplus::NewObjectSampleObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::NewObjectSampleObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmplus::NewObjectSampleObject>((avmplus::NewObjectSampleObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
         REALLY_INLINE GCRef<avmplus::NewObjectSampleObject> coerceToType(avmplus::Atom value) \
         { \
             avmplus::Atom const result = coerceToTypeImpl(value); \
@@ -1974,16 +1844,6 @@ private:
         { \
             return isTypeImpl(value->atom()); \
         } \
-        REALLY_INLINE GCRef<avmplus::TraceObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmplus::TraceObject>((avmplus::TraceObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::TraceObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmplus::TraceObject>((avmplus::TraceObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
         REALLY_INLINE GCRef<avmplus::TraceObject> coerceToType(avmplus::Atom value) \
         { \
             avmplus::Atom const result = coerceToTypeImpl(value); \
@@ -2072,16 +1932,6 @@ class avmplus_DictionaryClassSlots
         REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
         { \
             return isTypeImpl(value->atom()); \
-        } \
-        REALLY_INLINE GCRef<avmplus::DictionaryObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::DictionaryObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
         } \
         REALLY_INLINE GCRef<avmplus::DictionaryObject> coerceToType(avmplus::Atom value) \
         { \

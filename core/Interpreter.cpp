@@ -1473,8 +1473,8 @@ FLOAT_ONLY(\
             NEXT; \
        }\
        if(IS_BOTH_FLOAT4(a1,a2)){\
-            float4_t x = AvmCore::float4(a1);\
-            float4_t y = AvmCore::float4(a2);\
+            float4_t x; AvmCore::float4(x, a1);\
+            float4_t y; AvmCore::float4(y, a2);\
             \
             dest = core->float4ToAtom( f4_add(x,y) ); \
             NEXT;\
@@ -1671,8 +1671,8 @@ FLOAT_ONLY(\
                         NEXT;
                     }
                     if(AvmCore::isFloat4(a1) || AvmCore::isFloat4(a2)){
-                        float4_t x = AvmCore::float4(a1);
-                        float4_t y = AvmCore::float4(a2);
+                        float4_t x; AvmCore::float4(x, a1);
+                        float4_t y; AvmCore::float4(y, a2);
 
                         sp[0] = core->float4ToAtom( f4_sub(x,y) ); 
                         NEXT;
@@ -1731,8 +1731,8 @@ FLOAT_ONLY(\
                         NEXT;
                     }
                     if(AvmCore::isFloat4(a1) || AvmCore::isFloat4(a2)){
-                        float4_t x = AvmCore::float4(a1);
-                        float4_t y = AvmCore::float4(a2);
+                        float4_t x; AvmCore::float4(x, a1);
+                        float4_t y; AvmCore::float4(y,a2);
 
                         sp[0] = core->float4ToAtom( f4_mul(x,y) ); 
                         NEXT;
@@ -1779,8 +1779,8 @@ FLOAT_ONLY(\
                         NEXT;
                     }
                     if(AvmCore::isFloat4(a1) || AvmCore::isFloat4(a2)){
-                        float4_t x = AvmCore::float4(a1);
-                        float4_t y = AvmCore::float4(a2);
+                        float4_t x; AvmCore::float4(x, a1);
+                        float4_t y; AvmCore::float4(y, a2);
 
                         sp[0] = core->float4ToAtom( f4_div(x,y) ); 
                         NEXT;
@@ -1824,8 +1824,8 @@ FLOAT_ONLY(\
                         NEXT;
                     }
                     if(AvmCore::isFloat4(a1) || AvmCore::isFloat4(a2)){
-                        float4_t x = AvmCore::float4(a1);
-                        float4_t y = AvmCore::float4(a2);
+                        float4_t x; AvmCore::float4(x, a1);
+                        float4_t y; AvmCore::float4(y, a2);
                         float rx = (float) MathUtils::mod(f4_x(x), f4_x(y));
                         float ry = (float) MathUtils::mod(f4_y(x), f4_y(y));
                         float rz = (float) MathUtils::mod(f4_z(x), f4_z(y));

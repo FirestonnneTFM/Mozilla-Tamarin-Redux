@@ -501,7 +501,7 @@ namespace nanojit
     }
 #endif
 #if NJ_USES_IMMF4_POOL
-    const float4_t* Assembler::findImmF4FromPool(float4_t q)
+    const float4_t* Assembler::findImmF4FromPool(const float4_t& q)
     {
         float4_t* p = _immF4Pool.get(q);
         if (!p)
@@ -1709,12 +1709,12 @@ namespace nanojit
                 case LIR_rsqrtf4:
                 case LIR_sqrtf:
                 case LIR_sqrtf4:
-                  countlir_fpu();
-                  ins->oprnd1()->setResultLive();
-                  if (ins->isExtant()) {
+                    countlir_fpu();
+                    ins->oprnd1()->setResultLive();
+                    if (ins->isExtant()) {
                       asm_recip_sqrt(ins);
-                  }
-                  break;
+                    }
+                    break;
 
                 case LIR_addf:
                 case LIR_subf:

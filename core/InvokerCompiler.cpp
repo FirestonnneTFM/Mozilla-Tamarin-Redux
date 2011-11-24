@@ -440,8 +440,8 @@ namespace avmplus
             native = callIns(FUNCTIONID(singlePrecisionFloat), 1, atom); 
             break;
         case BUILTIN_float4: 
-            native = callIns(FUNCTIONID(float4), 1, atom);
-            break;
+            callIns(FUNCTIONID(float4), 2, lea(offset, args_out), atom);
+            return; // not break! float4 does the "store", too.
 #endif            
         case BUILTIN_boolean:
             {

@@ -110,6 +110,55 @@
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
 /**
+ * Float4 support, no intrinsics
+ */
+#if defined(_MSC_VER)
+#define __ALIGN8(...) __declspec(align(8)) __VA_ARGS__
+#elif defined(__GNUC__)
+#define __ALIGN8(...) __VA_ARGS__ __attribute__ ((aligned (8)))
+#else
+#error "Unrecognized compiler"
+#endif
+
+typedef struct float4_t {
+    float x, y, z, w;
+} float4_t;
+
+REALLY_INLINE float4_t f4_add(const float4_t& x1, const float4_t& x2) 
+{ 
+    float4_t retval = { x1.x + x2.x, x1.y + x2.y, x1.z + x2.z, x1.w + x2.w };
+    return retval;
+}
+
+REALLY_INLINE float4_t f4_sub(const float4_t& x1, const float4_t& x2) 
+{ 
+    float4_t retval = { x1.x - x2.x, x1.y - x2.y, x1.z - x2.z, x1.w - x2.w };
+    return retval;
+}
+
+REALLY_INLINE float4_t f4_mul(const float4_t& x1, const float4_t& x2) 
+{ 
+    float4_t retval = { x1.x * x2.x, x1.y * x2.y, x1.z * x2.z, x1.w * x2.w };
+    return retval;
+}
+
+REALLY_INLINE float4_t f4_div(const float4_t& x1, const float4_t& x2) 
+{ 
+    float4_t retval = { x1.x / x2.x, x1.y / x2.y, x1.z / x2.z, x1.w / x2.w };
+    return retval;
+}
+
+REALLY_INLINE int32_t f4_eq_i(const float4_t& x1, const float4_t& x2)
+{
+    return (x1.x == x2.x) && (x1.y == x2.y) && (x1.z == x2.z) && (x1.w == x2.w);
+}
+
+REALLY_INLINE float f4_x(const float4_t& v) { return v.x; }
+REALLY_INLINE float f4_y(const float4_t& v) { return v.y; }
+REALLY_INLINE float f4_z(const float4_t& v) { return v.z; }
+REALLY_INLINE float f4_w(const float4_t& v) { return v.w; }
+
+/**
  * This method is used to get the size of the memory page of the system
  * @return return the size, if bytes, of memory page
  */
