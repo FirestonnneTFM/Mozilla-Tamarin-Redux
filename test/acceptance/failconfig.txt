@@ -376,7 +376,7 @@ as3/Types/Float4/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4
 abcasm/coverage/float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
 
 as3/Types/Float/atan2:^float\.atan2\(0\.1f. float\.POSITIVE_INFINITY\) check via Infinity, .*-win.*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
-as3/Types/Float/atan2:^float\.atan2\(0\.1f. float\.POSITIVE_INFINITY\) check() check via Infinity, .*-win.*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
+as3/Types/Float/atan2:^float\.atan2\(0\.1f. float\.POSITIVE_INFINITY\) check\(\) check via Infinity, .*-win.*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
 as3/Types/Float/atan2:^float\.atan2\(0\.1f. float\.NEGATIVE_INFINITY\), .*-win.*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
 
 as3/Types/Float/exp, .*diff,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=703259
