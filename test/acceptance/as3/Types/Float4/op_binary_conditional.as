@@ -54,21 +54,22 @@ var onef:* = float4(1f);
 
 function check(val:*, t:*, f:*):* { return val ? t : f; }
 
-AddTestCase("float4(1f) ? 'PASSED':'FAILED'", "PASSED", float4(1f) ? 'PASSED':'FAILED');
-AddTestCase("float4(-1f) ? 'PASSED':'FAILED'", "PASSED", float4(-1f) ? 'PASSED':'FAILED');
+// Float4 converts to false always in a boolean context
+
+AddTestCase("float4(1f) ? 'FAILED':'PASSED'", "PASSED", float4(1f) ? 'FAILED':'PASSED');
+AddTestCase("float4(-1f) ? 'FAILED':'PASSED'", "PASSED", float4(-1f) ? 'FAILED':'PASSED');
 AddTestCase("float4(0f) ? 'FAILED':'PASSED'", "PASSED", float4(0f) ? 'FAILED':'PASSED');
 AddTestCase("float4(-0f) ? 'FAILED':'PASSED'", "PASSED", float4(-0f) ? 'FAILED':'PASSED');
 AddTestCase("float4(float.NaN) ? 'FAILED':'PASSED'", "PASSED", float4(float.NaN) ? 'FAILED':'PASSED');
-AddTestCase("float4(float.NaN, 0f, -0f, 1f) ? 'PASSED':'FAILED'", "PASSED", float4(float.NaN, 0f, -0f, 1f) ? 'PASSED':'FAILED');
+AddTestCase("float4(float.NaN, 0f, -0f, 1f) ? 'FAILED':'PASSED'", "PASSED", float4(float.NaN, 0f, -0f, 1f) ? 'FAILED':'PASSED');
 AddTestCase("float4(float.NaN, 0f, -0f, 0f) ? 'FAILED':'PASSED'", "PASSED", float4(float.NaN, 0f, -0f, 0f) ? 'FAILED':'PASSED');
 
-AddTestCase("check(float4(1f), 'PASSED', 'FAILED')", "PASSED", check(float4(1f), 'PASSED', 'FAILED'));
-AddTestCase("check(float4(-1f), 'PASSED', 'FAILED')", "PASSED", check(float4(-1f), 'PASSED', 'FAILED'));
-AddTestCase("check(float4(0f), 'PASSED', 'FAILED')", "PASSED", check(float4(0f), 'FAILED', 'PASSED'));
-AddTestCase("check(float4(-0f), 'PASSED', 'FAILED')", "PASSED", check(float4(-0f), 'FAILED', 'PASSED'));
+AddTestCase("check(float4(1f), 'FAILED', 'PASSED')", "PASSED", check(float4(1f), 'FAILED', 'PASSED'));
+AddTestCase("check(float4(-1f), 'FAILED', 'PASSED')", "PASSED", check(float4(-1f), 'FAILED', 'PASSED'));
+AddTestCase("check(float4(0f), 'FAILED', 'PASSED')", "PASSED", check(float4(0f), 'FAILED', 'PASSED'));
+AddTestCase("check(float4(-0f), 'FAILED', 'PASSED')", "PASSED", check(float4(-0f), 'FAILED', 'PASSED'));
 AddTestCase("check(float4(float.NaN), 'PASSED', 'FAILED')", "PASSED", check(float4(float.NaN), 'FAILED', 'PASSED'));
-AddTestCase("check(float4(float.NaN, 0f, -0f, 1f), 'PASSED', 'FAILED')", "PASSED", check( float4(float.NaN, 0f, -0f, 1f), 'PASSED', 'FAILED'));
+AddTestCase("check(float4(float.NaN, 0f, -0f, 1f), 'FAILED', 'PASSED')", "PASSED", check( float4(float.NaN, 0f, -0f, 1f), 'FAILED', 'PASSED'));
 AddTestCase("check(float4(float.NaN, 0f, -0f, 0f), 'FAILED', 'PASSED')", "PASSED", check(float4(float.NaN, 0f, -0f, 0f), 'FAILED', 'PASSED'));
 
 test();
-

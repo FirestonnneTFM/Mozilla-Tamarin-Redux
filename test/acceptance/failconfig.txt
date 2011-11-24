@@ -363,15 +363,6 @@ as3/Types/Float4/component_access_swizzle:^float4\['(x|y|z|w){4}'\], arm-lnx.* ,
 as3/Types/Float4/float4Operations:Flt4(Any|Flt4)Ops Xyzzy, arm-lnx.*-Dinterp , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 as3/Types/Float4/float4Operations:Flt4(Any|Flt4)Ops (?!.*EQ).*, arm-.*debug.* , -Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700642
 
-as3/Types/Float4/op_binary_logical_and:^float4\(1f\) && float4\(0f\), .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
-as3/Types/Float4/op_binary_logical_and:^float4\(1f. 2f. 3f. 4f\) && float4\(-1f. -2f. -3f. -4f\) , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
-as3/Types/Float4/op_binary_logical_and:^float4\(1f. 2f. 3f. 4f\) && float4\(0f. -2f. -3f. -4f\) , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
-as3/Types/Float4/op_binary_logical_and:^float4\(1f. 2f. -0f. 4f\) && float4\(-1f. -2f. -3f. -4f\) , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
-as3/Types/Float4/op_binary_logical_or:^float4\(1f\) \|\| float4\(0f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
-as3/Types/Float4/op_binary_logical_or:^float4\(1f. 2f. 3f. 4f\) \|\| float4\(-1f. -2f. -3f. -4f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
-as3/Types/Float4/op_binary_logical_or:^float4\(1f. 2f. 3f. 4f\) \|\| float4\(0f. -2f. -3f. -4f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
-as3/Types/Float4/op_binary_logical_or:^float4\(1f. 2f. -0f. 4f\) \|\| float4\(-1f. -2f. -3f. -4f\)  , .* , , expectedfail, ASC jumping ahead of the spec for converting ToBoolean(float4)
-
 as3/Types/Float4/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
 abcasm/coverage/float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
 

@@ -645,10 +645,8 @@ namespace avmplus
         void LiteralFloat::cogen(Cogen* cogen, Ctx* ctx)
         {
             (void)ctx;
-            if (MathUtils::isNaN(value))
-                cogen->I_pushnan();
-            else
-                cogen->I_pushfloat(cogen->emitFloat(value));
+            // Handle NaN same as other values
+            cogen->I_pushfloat(cogen->emitFloat(value));
         }
 #endif
 

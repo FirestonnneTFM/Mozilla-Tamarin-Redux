@@ -215,7 +215,7 @@ namespace avmplus
     {
         AvmCore* core = this->core();
 
-        if (radix == 10 || MathUtils::isInfinite(fVal) || MathUtils::isNaN(fVal))
+        if (radix == 10 || MathUtils::isInfinitef(fVal) || MathUtils::isNaNf(fVal))
             return core->doubleToString(fVal); // the spec says we should call doubleToString
 
         if (radix < 2 || radix > 36)
