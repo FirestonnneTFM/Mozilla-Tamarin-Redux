@@ -314,7 +314,7 @@ TYPEMAP_THUNKRETTYPE = {
     CTYPE_UINT:         "avmplus::Atom(%s)",
     CTYPE_DOUBLE:       "double(%s)",
     CTYPE_FLOAT:        "float(%s)",
-    CTYPE_FLOAT4:       "float4_t(%s)",
+    CTYPE_FLOAT4:       "%s",
     CTYPE_STRING:       "avmplus::Atom(%s)",
     CTYPE_NAMESPACE:    "avmplus::Atom(%s)",
 }
@@ -1727,6 +1727,49 @@ class AbcThunkGen:
         out.println("/* machine generated file -- do not edit */");
         out.println('')
 
+        if name == 'builtin' :
+            out.println('#ifdef VMCFG_FLOAT')
+            out.println('#ifdef VMCFG_ARM')
+            out.println('#include <arm_neon.h>')
+            out.println('#define float4_ret_t float32x4_t')
+            out.println('#elif defined VMCFG_SSE2')        
+            out.println('#include <xmmintrin.h>')
+            out.println('#define float4_ret_t __m128')
+            out.println('#endif')
+            out.println('')
+            out.println('typedef union {')
+            out.println('   float4_ret_t f4_jit;')
+            out.println('   float4_t f4;')
+            out.println('} rvtype;')
+            out.println('')
+            out.println('extern "C" {')
+            out.println('float4_ret_t verifyEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap){')
+            out.println('    float locals[8];')
+            out.println('    uintptr_t lptr = (uintptr_t)(&locals[0]);')
+            out.println('    rvtype *retval = reinterpret_cast<rvtype*>((lptr + 0xf) & ~0xf);')
+            out.println('    retval->f4 = avmplus::BaseExecMgr::verifyEnterVECR(env, argc, ap);')
+            out.println('    return retval->f4_jit;')
+            out.println('}')
+            out.println('float4_ret_t debugEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap){')
+            out.println('    float locals[8];')
+            out.println('    uintptr_t lptr = (uintptr_t)(&locals[0]);')
+            out.println('    rvtype *retval = reinterpret_cast<rvtype*>((lptr + 0xf) & ~0xf);')
+            out.println('    retval->f4 = avmplus::BaseExecMgr::debugEnterExitWrapperV(env, argc, ap);')
+            out.println('    return retval->f4_jit;')
+            out.println('}')
+            out.println('typedef float4_ret_t (*VecrThunk)(avmplus::MethodEnv* env, int32_t argc, avmplus::Atom* argv);')
+            out.println('float4_t thunkEnterVECR_adapter(void* thunk_p, avmplus::MethodEnv* env, int32_t argc, avmplus::Atom* argv){')
+            out.println('    float locals[8];')
+            out.println('    uintptr_t lptr = (uintptr_t)(&locals[0]);')
+            out.println('    rvtype *retval = reinterpret_cast<rvtype*>((lptr + 0xf) & ~0xf);')
+            out.println('    if( thunk_p)  // prevent ARM GCC from doing CSE, it crashes otherwise')
+            out.println('        retval->f4_jit = ((VecrThunk) thunk_p)(env, argc, argv);')
+            out.println('    return retval->f4;')
+            out.println('}')
+            out.println('}')
+            out.println('#endif')
+            out.println('')
+
         nativeIDNamespaces = opts.nativeIDNS.split('::')
         out.println(' '.join(map(lambda ns: 'namespace %s {' % ns, nativeIDNamespaces)))
         out.println('')
@@ -2234,34 +2277,21 @@ class AbcThunkGen:
             out.println("return isTypeImpl(value->atom());")
             out.indent -= 1
             out.println("}")
-            out.println("REALLY_INLINE %s asType(avmplus::Atom value)" % ret_typedef)
-            out.println("{")
-            out.indent += 1
-            out.println("avmplus::Atom const result = asTypeImpl(value);")
-            out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ctype]("result",t.itraits))
-            out.indent -= 1
-            out.println("}")
-            out.println("REALLY_INLINE %s asType(GCRef<avmplus::ScriptObject> value)" % ret_typedef)
-            out.println("{")
-            out.indent += 1
-            out.println("avmplus::Atom const result = asTypeImpl(value->atom());")
-            out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ctype]("result",t.itraits))
-            out.indent -= 1
-            out.println("}")
-            out.println("REALLY_INLINE %s coerceToType(avmplus::Atom value)" % ret_typedef)
-            out.println("{")
-            out.indent += 1
-            out.println("avmplus::Atom const result = coerceToTypeImpl(value);")
-            out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ctype]("result",t.itraits))
-            out.indent -= 1
-            out.println("}")
-            out.println("REALLY_INLINE %s coerceToType(GCRef<avmplus::ScriptObject> value)" % ret_typedef)
-            out.println("{")
-            out.indent += 1
-            out.println("avmplus::Atom const result = coerceToTypeImpl(value->atom());")
-            out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ctype]("result",t.itraits))
-            out.indent -= 1
-            out.println("}")
+            if(ctype != CTYPE_FLOAT4): # In fact we only need this for one class (ClassClosure? I forget now.); but it's only important that we don't emit it for float4_t
+                out.println("REALLY_INLINE %s coerceToType(avmplus::Atom value)" % ret_typedef)
+                out.println("{")
+                out.indent += 1
+                out.println("avmplus::Atom const result = coerceToTypeImpl(value);")
+                out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ctype]("result",t.itraits))
+                out.indent -= 1
+                out.println("}")
+                out.println("REALLY_INLINE %s coerceToType(GCRef<avmplus::ScriptObject> value)" % ret_typedef)
+                out.println("{")
+                out.indent += 1
+                out.println("avmplus::Atom const result = coerceToTypeImpl(value->atom());")
+                out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ctype]("result",t.itraits))
+                out.indent -= 1
+                out.println("}")
             out.indent -= 1
 
         # "cpp_vis" is used to sort the visibility of the cpp wrapper functions.
@@ -2668,22 +2698,24 @@ class AbcThunkGen:
         if m.kind == TRAIT_Setter:
             ret_ctype = CTYPE_VOID
         # for return types of thunks, everything but double maps to Atom
-        if ret_ctype != CTYPE_DOUBLE and ret_ctype!= CTYPE_FLOAT and ret_ctype!= CTYPE_FLOAT4 :
+        if ret_ctype != CTYPE_DOUBLE and ret_ctype != CTYPE_FLOAT and ret_ctype != CTYPE_FLOAT4:
             thunk_ret_ctype = CTYPE_ATOM
         else:
             thunk_ret_ctype = ret_ctype
-        decl = "%s %s_thunk(MethodEnv* env, uint32_t argc, Atom* argv)" % (TYPEMAP_RETTYPE[thunk_ret_ctype], m.native_id_name)
+        rettype_str = "float4_ret_t" if CTYPE_FLOAT4 == ret_ctype else TYPEMAP_RETTYPE[thunk_ret_ctype]
+        decl = "%s %s_thunk(MethodEnv* env, uint32_t argc, Atom* argv)" % (rettype_str, m.native_id_name)
         return ret_traits,ret_ctype,thunk_ret_ctype,decl
 
     def emitThunkProto(self, out, receiver, m):
         ret_traits,ret_ctype,thunk_ret_ctype,decl = self.thunkInfo(m)
-        out.println('extern ' + decl + ";");
+        if(thunk_ret_ctype != CTYPE_FLOAT4):
+            out.println('extern ' + decl + ";");
 
     def emitThunkBody(self, out, receiver, m):
         ret_traits,ret_ctype,thunk_ret_ctype,decl = self.thunkInfo(m)
 
         unbox_receiver = self.calc_unbox_this(m)
-
+        
         out.println(decl);
         out.println("{");
         out.indent += 1;
@@ -2745,7 +2777,8 @@ class AbcThunkGen:
                     coercename = argtraits[i].fqcppname()
                     if coercename != None:
                         val = "(%s*)%s" % (coercename, val)
-            args.append((val, arg_typedef))
+            out.println("%s arg%d = %s;" % (arg_typedef, i, val))
+            args.append(("arg%d"%i, arg_typedef))
 
         if m.needRest():
             args.append(("(argc <= "+str(param_count)+" ? NULL : argv + argoffV)", "Atom*"))
@@ -2761,8 +2794,10 @@ class AbcThunkGen:
             rec_type = m.receiver.cpp_argument_name()
         out.println("%s const obj = %s;" % (rec_type, args[0][0]))
 
-        if ret_ctype != CTYPE_VOID:
+        if ret_ctype != CTYPE_VOID and ret_ctype != CTYPE_FLOAT4:
             out.prnt("%s const ret = " % ret_traits.cpp_return_name())
+        elif ret_ctype != CTYPE_VOID: # i.e., is float4
+            out.println("float4_ret_t ret;")
 
         if m.receiver == None:
             out.prnt("%s(obj" % m.native_method_name)
@@ -2775,6 +2810,9 @@ class AbcThunkGen:
             out.prnt("obj->%s(" % native_method_name)
             need_comma = False
 
+        if(ret_ctype == CTYPE_FLOAT4):
+            out.prnt("*(float4_t*)&ret")
+            need_comma = True
         if len(args) > 1:
             out.println("")
             out.indent += 1

@@ -777,18 +777,8 @@ namespace avmplus
         }
         else if (sst == SST_float4)
         {
-            if( ((uintptr_t)p) & 0xf){
-                AvmAssert( (((uintptr_t)p)&7) == 0);
-                float4_overlay fo;
-                fo.value = AvmCore::float4(value);
-
-                uint64_t* ptr = reinterpret_cast<uint64_t*>(p);
-                ptr[0] = fo.bits64[0];
-                ptr[1] = fo.bits64[1];
-            } else{
-                float4_t* ptr = reinterpret_cast<float4_t*>(p);
-                *ptr = AvmCore::float4(value);
-            }
+            float4_t* ptr = reinterpret_cast<float4_t*>(p);
+            AvmCore::float4(*ptr, value);
         }
 #endif // VMCFG_FLOAT
         else if (sst == SST_int32)

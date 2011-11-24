@@ -193,12 +193,12 @@ namespace avmplus
 
     REALLY_INLINE void VectorBaseObject::atomToValue(Atom atom, float4_t& value)
     {
-        value = AvmCore::float4(atom);
+        AvmCore::float4(value, atom);
     }
     
     REALLY_INLINE void VectorBaseObject::atomToValueKnown(Atom atom, float4_t& value)
     {
-        value = AvmCore::float4(atom);
+        AvmCore::float4(value, atom);
     }
     
     REALLY_INLINE Atom VectorBaseObject::valueToAtom(const float4_t& value) const

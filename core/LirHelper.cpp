@@ -131,7 +131,11 @@ LIns* LirHelper::nativeToAtom(LIns* native, Traits* t)
             return callIns(FUNCTIONID(floatToAtom), 2, coreAddr, native);
 
     case BUILTIN_float4: 
-        return callIns(FUNCTIONID(float4ToAtom), 2, coreAddr, native);
+        {
+            LIns* local = lirout->insAlloc(sizeof(float4_t));
+            stf4(native, local, 0, ACCSET_OTHER);
+            return callIns(FUNCTIONID(float4ToAtom), 2, coreAddr, lea(0, local));
+        }
 #endif
 
     case BUILTIN_number:
@@ -189,11 +193,12 @@ LIns* LirHelper::atomToNative(BuiltinType bt, LIns* atom)
     case BUILTIN_float4:
         if (atom->isImmP())
         {
-            float4_t f4val = AvmCore::float4((Atom)atom->immP());
+            float4_t f4val;
+            AvmCore::float4(f4val, (Atom)atom->immP());
             return lirout->insImmF4(f4val);
         }
         else
-            return callIns(FUNCTIONID(float4), 1, atom);   // TODO: AFAICT, this should be replaceable with a single ldf4() (set offset = -kBibopSpecialUndefined)
+            return ldf4(atom, -AtomConstants::kSpecialBibopType, ACCSET_OTHER);
 
     case BUILTIN_float:
         if (atom->isImmP())

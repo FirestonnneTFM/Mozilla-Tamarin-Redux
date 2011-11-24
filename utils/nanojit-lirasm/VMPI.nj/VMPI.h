@@ -138,9 +138,9 @@ extern void VMPI_setPageProtection(void *address,
 #pragma warning(disable:4291)       // presence of a 'new' operator in nanojit/Allocator.h without matching 'delete'
 #endif
 
-#define _MM_SHUFFLE(z, y, x, w)  ((z << 6) | (y << 4) | (x << 2) | w)
+#define _MM_SHUFFLE(x, y, z, w)  ((w << 6) | (z << 4) | (y << 2) | x)
 
-//#define SOFT_FLOAT4
+#define SOFT_FLOAT4
 #define REALLY_INLINE inline
 #ifdef SOFT_FLOAT4
 #include <math.h>

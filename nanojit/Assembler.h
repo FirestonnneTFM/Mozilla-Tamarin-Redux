@@ -386,7 +386,7 @@ namespace nanojit
             const uint64_t* findImmDFromPool(uint64_t q);
 #endif
 #if NJ_USES_IMMF4_POOL
-            const float4_t* findImmF4FromPool(float4_t q);
+            const float4_t* findImmF4FromPool(const float4_t& q);
 #endif
 
             int         findMemFor(LIns* ins);
