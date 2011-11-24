@@ -1422,8 +1422,9 @@ return the result of the comparison ToPrimitive(x) == y.
         }
 
         // numeric compare
-        // NOTE: we only do float comparison if both LHS and RHS are floats; but in this case, float & double comparison are identical.
-        // Also note: float4s are compared as Numbers (i.e. converted to NaN)
+        // We only do float comparison if both LHS and RHS are floats,
+        // but in this case, float and double comparison are identical.
+        // Float4s are compared as Numbers (i.e. converted to NaN).
         double     dx = number(lhs);
         double     dy = number(rhs);
 
