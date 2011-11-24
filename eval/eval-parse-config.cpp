@@ -404,7 +404,7 @@ namespace avmplus
                 case TAG_literalBoolean:   return ((LiteralBoolean*)e)->value;
                 case TAG_literalDouble:    { double v = ((LiteralDouble*)e)->value; return !MathUtils::isNaN(v) && v != 0.0; }
 #ifdef VMCFG_FLOAT
-                case TAG_literalFloat:     { double v = ((LiteralFloat*)e)->value; return !MathUtils::isNaN(v) && v != 0.0; }
+                case TAG_literalFloat:     { float v = ((LiteralFloat*)e)->value; return !MathUtils::isNaNf(v) && v != 0.0f; }
 #endif
                 case TAG_literalInt:       return ((LiteralInt*)e)->value != 0;
                 case TAG_literalUInt:      return ((LiteralUInt*)e)->value != 0;

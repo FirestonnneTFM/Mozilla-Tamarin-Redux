@@ -48,33 +48,36 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(val1:*, val2:*):* { return (val1 && val2); }
 
+// Float4 converts to false always in a boolean context, so in && the
+// first float4 value to be encountered is always returned.
+
 AddTestCase("float4(1f) && float4(1f)", float4(1f), float4(1f) && float4(1f));
-AddTestCase("float4(1f) && float4(0f)", float4(0f), float4(1f) && float4(0f));
+AddTestCase("float4(1f) && float4(0f)", float4(1f), float4(1f) && float4(0f));
 AddTestCase("float4(0f) && float4(1f)", float4(0f), float4(0f) && float4(1f));
 AddTestCase("float4(-0f) && float4(1f)", float4(-0f), float4(-0f) && float4(1f));
 AddTestCase("float4(float.NaN) && float4(1f)", float4(float.NaN), float4(float.NaN) && float4(1f));
 AddTestCase("check(float4(1f), float4(1f))", float4(1f), check(float4(1f), float4(1f)));
-AddTestCase("check(float4(1f), float4(0f))", float4(0f), check(float4(1f), float4(0f)));
+AddTestCase("check(float4(1f), float4(0f))", float4(1f), check(float4(1f), float4(0f)));
 AddTestCase("check(float4(0f), float4(1f))", float4(0f), check(float4(0f), float4(1f)));
 AddTestCase("check(float4(-0f), float4(1f))", float4(-0f), check(float4(-0f), float4(1f)));
 AddTestCase("check(float4(float.NaN), float4(1f))", float4(float.NaN), check(float4(float.NaN), float4(1f)));
 
-AddTestCase("float4(1f, 2f, 3f, 4f) && float4(-1f, -2f, -3f, -4f)", float4(-1f, -2f, -3f, -4f), float4(1f, 2f, 3f, 4f) && float4(-1f, -2f, -3f, -4f));
-AddTestCase("check(float4(1f, 2f, 3f, 4f), float4(-1f, -2f, -3f, -4f))", float4(-1f, -2f, -3f, -4f), check(float4(1f, 2f, 3f, 4f), float4(-1f, -2f, -3f, -4f)));
+AddTestCase("float4(1f, 2f, 3f, 4f) && float4(-1f, -2f, -3f, -4f)", float4(1f, 2f, 3f, 4f), float4(1f, 2f, 3f, 4f) && float4(-1f, -2f, -3f, -4f));
+AddTestCase("check(float4(1f, 2f, 3f, 4f), float4(-1f, -2f, -3f, -4f))", float4(1f, 2f, 3f, 4f), check(float4(1f, 2f, 3f, 4f), float4(-1f, -2f, -3f, -4f)));
 
-AddTestCase("float4(1f, 2f, 3f, float.NaN) && float4(-1f, -2f, -3f, -4f)", float4(-1f, -2f, -3f, -4f), float4(1f, 2f, 3f, float.NaN) && float4(-1f, -2f, -3f, -4f));
-AddTestCase("float4(1f, 2f, 3f, 4f) && float4(0f, -2f, -3f, -4f)", float4(0f, -2f, -3f, -4f), float4(1f, 2f, 3f, 4f) && float4(0f, -2f, -3f, -4f));
-AddTestCase("float4(1f, 2f, -0f, 4f) && float4(-1f, -2f, -3f, -4f)", float4(-1f, -2f, -3f, -4f), float4(1f, 2f, -0f, 4f) && float4(-1f, -2f, -3f, -4f));
+AddTestCase("float4(1f, 2f, 3f, float.NaN) && float4(-1f, -2f, -3f, -4f)", float4(1f, 2f, 3f, float.NaN), float4(1f, 2f, 3f, float.NaN) && float4(-1f, -2f, -3f, -4f));
+AddTestCase("float4(1f, 2f, 3f, 4f) && float4(0f, -2f, -3f, -4f)", float4(1f, 2f, 3f, 4f), float4(1f, 2f, 3f, 4f) && float4(0f, -2f, -3f, -4f));
+AddTestCase("float4(1f, 2f, -0f, 4f) && float4(-1f, -2f, -3f, -4f)", float4(1f, 2f, -0f, 4f), float4(1f, 2f, -0f, 4f) && float4(-1f, -2f, -3f, -4f));
 AddTestCase("float4(0f, -0f, float.NaN, 0f) && float4(1f)", float4(0f, -0f, float.NaN, 0f), float4(0f, -0f, float.NaN, 0f) && float4(1f));
 
 AddTestCase("check(float4(1f, 2f, 3f, float.NaN), float4(-1f, -2f, -3f, -4f))",
-            float4(-1f, -2f, -3f, -4f),
+            float4(1f, 2f, 3f, float.NaN),
             check(float4(1f, 2f, 3f, float.NaN), float4(-1f, -2f, -3f, -4f)));
 AddTestCase("check(float4(1f, 2f, 3f, 4f), float4(0f, -2f, -3f, -4f))",
-            float4(0f, -2f, -3f, -4f),
+            float4(1f, 2f, 3f, 4f),
             check(float4(1f, 2f, 3f, 4f), float4(0f, -2f, -3f, -4f)));
 AddTestCase("check(float4(1f, 2f, -0f, 4f), float4(-1f, -2f, -3f, -4f))",
-            float4(-1f, -2f, -3f, -4f),
+            float4(1f, 2f, -0f, 4f),
             check(float4(1f, 2f, -0f, 4f), float4(-1f, -2f, -3f, -4f)));
 
 

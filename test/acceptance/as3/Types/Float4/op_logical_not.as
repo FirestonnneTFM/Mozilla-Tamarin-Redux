@@ -47,17 +47,16 @@ startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-// The result is false if the  ToBoolean  conversions of all four elements
-// are false; the result is true otherwise (float4 spec section 8.8)
+// Float4 converts to false always in a boolean context.
 
 var flt4:float4 = new float4(1f);
-AddStrictTestCase("!float4(1f) all values convert to true", false, !flt4);
+AddStrictTestCase("!float4(1f) all values convert to true", true, !flt4);
 
 flt4 = new float4(0f);
 AddStrictTestCase("!float4(0f) all values convert to false", true, !flt4);
 
 flt4 = new float4(9.125f, 0f, 6.234f, 1f);
-AddStrictTestCase("!float4(9.125f, 0f, 6.234f, 1f) not all values are false, so convert to true", false, !flt4);
+AddStrictTestCase("!float4(9.125f, 0f, 6.234f, 1f) not all values are false, so convert to true", true, !flt4);
 
 var u = !flt4;
 AddTestCase("returns a boolean", "boolean", typeof(u));
