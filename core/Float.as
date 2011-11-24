@@ -48,18 +48,18 @@ package
     public final class float
     {
         // E262 {DontEnum, DontDelete, ReadOnly}
-        public static const NaN               :float = 0f/0f
-        public static const NEGATIVE_INFINITY :float = -1f/0f
-        public static const POSITIVE_INFINITY :float = 1f/0f
+        public static const NaN               :float = float(0/0)
+        public static const NEGATIVE_INFINITY :float = float(-1/0)
+        public static const POSITIVE_INFINITY :float = float(1/0)
         public static const MIN_VALUE         :float = _minValue() // 1.175494351e-38 
-        public static const MAX_VALUE         :float = 3.4028235e+38f; // exact value: 340282346638528859811704183484516925440, bit pattern: 0x7f7fffff
-        public static const E                 :float = 2.7182818f;
-        public static const LN10              :float = 2.30258509f;
-        public static const LN2               :float = 0.693147181f;
-        public static const LOG2E             :float = 1.44269504f;
-        public static const PI                :float = 3.1415927f;
-        public static const SQRT1_2           :float = 7.0710677e-1f;
-        public static const SQRT2             :float = 1.4142135f;
+        public static const MAX_VALUE         :float = float(3.4028235e+38); // exact value: 340282346638528859811704183484516925440, bit pattern: 0x7f7fffff
+        public static const E                 :float = float(2.7182818);
+        public static const LN10              :float = float(2.30258509);
+        public static const LN2               :float = float(0.693147181);
+        public static const LOG2E             :float = float(1.44269504);
+        public static const PI                :float = float(3.1415927);
+        public static const SQRT1_2           :float = float(7.0710677e-1);
+        public static const SQRT2             :float = float(1.4142135);
         // these must match the same constants in MathUtils
         private static const DTOSTR_FIXED:int = 1
         private static const DTOSTR_PRECISION:int = 2
@@ -96,7 +96,7 @@ package
                 var p: float = float(xs[i]);
                 if(isNaN(p)) return p;
                 if(p > result) result = p;
-                else if( p == result && p == 0f && (1f/result)<0f ) result = p; // replace "-0" with "+0". 
+                else if( p == result && p == float(0) && (float(1)/result)<float(0) ) result = p; // replace "-0" with "+0". 
             }
             return result;
         }
@@ -109,7 +109,7 @@ package
                 var p: float = float(xs[i]);
                 if(isNaN(p)) return p;
                 if(p < result) result = p;
-                else if( p == result && p == 0f && (1f/result)>0f ) result = p; // replace "+0" with "-0". 
+                else if( p == result && p == float(0) && (float(1)/result)>float(0) ) result = p; // replace "+0" with "-0". 
             }
             return result;
         }
@@ -187,7 +187,7 @@ package
     {
         // Dummy constructor function - This is neccessary so the compiler can do arg # checking for the ctor in strict mode
         // The code for the actual ctor is in Float4Class::construct in the avmplus
-        public function float4(x:float = 0f, y:float = 0f, z:float = 0f, w:float = 0f)     {}
+        public function float4(x:float = 0, y:float = 0, z:float = 0, w:float = 0)     {}
 
         // float4.length = 4 per float4 spec
         // {ReadOnly, DontDelete, DontEnum }
