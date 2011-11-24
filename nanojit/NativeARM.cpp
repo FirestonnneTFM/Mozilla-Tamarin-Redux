@@ -1508,7 +1508,10 @@ Assembler::asm_restore(LIns* i, Register r)
         // memory.
         int d = findMemFor(i);
         if (ARM_VFP && IsFpDReg(r)) {
-            if (isU8(d/4) || isU8(-d/4)) {
+            if (d % 4 != 0) {
+                FLDD(r, IP, 0);
+                asm_add_imm(IP, FP, d);
+            } else if (isU8(d/4) || isU8(-d/4)) {
                 FLDD(r, FP, d);
             } else {
                 FLDD(r, IP, d%1024);
@@ -1548,7 +1551,10 @@ Assembler::asm_spill(Register rr, int d, int8_t /*nWords*/)
         if (IsFpQReg(rr)) {
             VSTQR(rr, IP);
             asm_add_imm(IP, FP, d);
-        } else if (isU8(d / 4) || isU8(-d / 4)) {
+        } else if (d % 4 != 0) {
+            VSTR(rr, IP, 0);
+            asm_add_imm(IP, FP, d);
+        } else if (isU8(d/4) || isU8(-d/4)) {
             VSTR(rr, FP, d);
         } else {
             VSTR(rr, IP, d%1024);
@@ -1613,7 +1619,10 @@ Assembler::asm_load64(LIns* ins)
             dd = ins->isD()? D0:S0;
             // VFP can only do loads and stores with a range of ±1020, so we
             // might need to do some arithmetic to extend its range.
-            if (isU8(d/4) || isU8(-d/4)) {
+            if (d % 4 != 0) {
+                VSTR(dd, IP, 0);
+                asm_add_imm(IP, FP, d);
+            } else if (isU8(d/4) || isU8(-d/4)) {
                 VSTR(dd, FP, d);
             } else {
                 VSTR(dd, IP, d%1024);
@@ -1624,7 +1633,10 @@ Assembler::asm_load64(LIns* ins)
         switch (ins->opcode()) {
             case LIR_ldf:
             case LIR_ldd:
-                if (isU8(offset/4) || isU8(-offset/4)) {
+                if (offset % 4 != 0) {
+                    VLDR(dd, IP, 0);
+                    asm_add_imm(IP, rn, offset);
+                } else if (isU8(offset/4) || isU8(-offset/4)) {
                     VLDR(dd, rn, offset);
                 } else {
                     VLDR(dd, IP, offset%1024);
@@ -1634,7 +1646,10 @@ Assembler::asm_load64(LIns* ins)
             case LIR_ldf2d:
                 evictIfActive(D0);
                 FCVTDS(dd, S0);
-                if (isU8(offset/4) || isU8(-offset/4)) {
+                if (offset % 4 != 0) {
+                    FLDS(S0, IP, 0);
+                    asm_add_imm(IP, rn, offset);
+                } else if (isU8(offset/4) || isU8(-offset/4)) {
                     FLDS(S0, rn, offset);
                 } else {
                     FLDS(S0, IP, offset%1024);
@@ -1699,7 +1714,10 @@ Assembler::asm_store64(LOpcode op, LIns* value, int dr, LIns* base)
             case LIR_std:
                 // VFP can only do stores with a range of ±1020, so we might
                 // need to do some arithmetic to extend its range.
-                if (isU8(dr/4) || isU8(-dr/4)) {
+                if (dr % 4 != 0) {
+                    VSTR(dd, IP, 0); // FSTS or FSTD
+                    asm_add_imm(IP, rn, dr);
+                } else if (isU8(dr/4) || isU8(-dr/4)) {
                     VSTR(dd, rn, dr);      // FSTS or FSTD
                 } else {
                     VSTR(dd, IP, dr%1024); // FSTS or FSTD
@@ -1711,7 +1729,10 @@ Assembler::asm_store64(LOpcode op, LIns* value, int dr, LIns* base)
                 // VFP can only do stores with a range of ±1020, so we might
                 // need to do some arithmetic to extend its range.
                 Register tmp = _allocator.allocTempReg(FpSRegs,S0);
-                if (isU8(dr/4) || isU8(-dr/4)) {
+                if (dr % 4 != 0) {
+                    FSTS(tmp, IP, 0);
+                    asm_add_imm(IP, rn, dr);
+                } else if (isU8(dr/4) || isU8(-dr/4)) {
                     FSTS(tmp, rn, dr);
                 } else {
                     FSTS(tmp, IP, dr%1024);
@@ -2153,10 +2174,13 @@ Assembler::asm_ldr_chk(Register d, Register b, int32_t off, bool chk)
             VLDQR(d, IP);
             asm_add_imm(IP, b, off);
         } else {
-            if (isU8(off / 4) || isU8(-off / 4)) {
-                VLDR_chk(d,b,off,chk);     // this can handle Dn and Sn registers
+            if (off % 4 == 0) {
+                VLDR_chk(d, IP, 0, chk);
+                asm_add_imm(IP, FP, off);
+            } else if (isU8(off/4) || isU8(-off/4)) {
+                VLDR_chk(d, b, off, chk);  // this can handle Dn and Sn registers
             } else {
-                VLDR_chk(d, IP, off%1024,chk);
+                VLDR_chk(d, IP, off%1024, chk);
                 asm_add_imm(IP, FP, off-(off%1024));
             }
         }
