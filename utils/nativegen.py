@@ -2278,6 +2278,20 @@ class AbcThunkGen:
             out.indent -= 1
             out.println("}")
             if(ctype != CTYPE_FLOAT4): # In fact we only need this for one class (ClassClosure? I forget now.); but it's only important that we don't emit it for float4_t
+                out.println("REALLY_INLINE %s asType(avmplus::Atom value)" % ret_typedef)
+                out.println("{")
+                out.indent += 1
+                out.println("avmplus::Atom const result = asTypeImpl(value);")
+                out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ctype]("result",t.itraits))
+                out.indent -= 1
+                out.println("}")
+                out.println("REALLY_INLINE %s asType(GCRef<avmplus::ScriptObject> value)" % ret_typedef)
+                out.println("{")
+                out.indent += 1
+                out.println("avmplus::Atom const result = asTypeImpl(value->atom());")
+                out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ctype]("result",t.itraits))
+                out.indent -= 1
+                out.println("}")
                 out.println("REALLY_INLINE %s coerceToType(avmplus::Atom value)" % ret_typedef)
                 out.println("{")
                 out.indent += 1
