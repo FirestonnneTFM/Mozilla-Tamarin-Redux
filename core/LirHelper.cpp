@@ -194,7 +194,7 @@ LIns* LirHelper::atomToNative(BuiltinType bt, LIns* atom)
         if (atom->isImmP())
         {
             float4_t f4val;
-            AvmCore::float4(f4val, (Atom)atom->immP());
+            AvmCore::float4(&f4val, (Atom)atom->immP());
             return lirout->insImmF4(f4val);
         }
         else

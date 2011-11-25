@@ -1361,7 +1361,8 @@ const int kBufferPadding = 16;
          * decoded.  Otherwise, it is coerced to the float4 type
          * and returned.  
          */
-        static void float4(float4_t& retval, Atom atom);
+        static void float4(float4_t* retval, Atom atom);
+#define float4_decl_v(var) float4_t var##v; AvmCore::float4(&var##v,var);        
 #endif
 
         // convert atom to integer when we know it is already a legal signed-32 bit int value

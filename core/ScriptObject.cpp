@@ -778,7 +778,7 @@ namespace avmplus
         else if (sst == SST_float4)
         {
             float4_t* ptr = reinterpret_cast<float4_t*>(p);
-            AvmCore::float4(*ptr, value);
+            AvmCore::float4(ptr, value);
         }
 #endif // VMCFG_FLOAT
         else if (sst == SST_int32)

@@ -69,7 +69,6 @@
 
 
 #define AVMPLUS_STRING_DELETED ((Stringp)(1))
-
 namespace avmplus
 {
     using namespace MMgc;
@@ -1260,8 +1259,8 @@ return the result of the comparison ToPrimitive(x) == y.
                     }
 
                     AvmAssertMsg(lt==kBibopFloat4Type || rt == kBibopFloat4Type, "Unhandled bibopKind");
-                    float4_t lhsv, rhsv;
-                    float4(lhsv, lhs); float4(rhsv, rhs);
+                    float4_decl_v(lhs);
+                    float4_decl_v(rhs);
                     return f4_eq_i(lhsv, rhsv) ? trueAtom:falseAtom;
 #else
                     return trueAtom;
@@ -1319,8 +1318,8 @@ return the result of the comparison ToPrimitive(x) == y.
             if( isFloat4(lhs) || isFloat4(rhs) ){
                 if (isNullOrUndefined(lhs) || isNullOrUndefined(rhs))
                     return falseAtom;
-                float4_t lhsv, rhsv;
-                float4(lhsv, lhs); float4(rhsv, rhs);
+                float4_decl_v(lhs);
+                float4_decl_v(rhs);
                 return f4_eq_i(lhsv, rhsv) ? trueAtom : falseAtom;
             }
 #endif
@@ -4744,24 +4743,18 @@ return the result of the comparison ToPrimitive(x) == y.
         }
     }
 
-    /*static*/ void AvmCore::float4(float4_t& retval, Atom atom)
+    /*static*/ void AvmCore::float4(float4_t* retval, Atom atom)
     {
         
         if(isFloat4(atom))
         {
-            if( (((intptr_t)(&retval)) & 0xf) == 0)
-                retval = atomToFloat4(atom);
-            else 
-            {
-                float4_t val = atomToFloat4(atom);
-                VMPI_memcpy(&retval, &val, sizeof(float4_t));
-            }
+            *retval = atomToFloat4(atom);
             return;
         }
 
         float f = singlePrecisionFloat(atom);
         float4_t f4 = {f,f,f,f};
-        retval = f4;
+        *retval = f4;
     }
 #endif // VMCFG_FLOAT
 

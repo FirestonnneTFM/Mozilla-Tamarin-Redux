@@ -26,6 +26,8 @@
 		0638CA20141F36630047FB4F /* FloatClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0638CA1D141F36630047FB4F /* FloatClass.cpp */; };
 		0638CA21141F36630047FB4F /* Float4Class.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0638CA1B141F36630047FB4F /* Float4Class.cpp */; };
 		0638CA22141F36630047FB4F /* FloatClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0638CA1D141F36630047FB4F /* FloatClass.cpp */; };
+		0684BA2714801585002B92CA /* float4Support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0684BA2614801585002B92CA /* float4Support.cpp */; };
+		0684BA2814801585002B92CA /* float4Support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0684BA2614801585002B92CA /* float4Support.cpp */; };
 		0715396D0F507325004E398F /* eval-avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0715396B0F507325004E398F /* eval-avmplus.cpp */; };
 		072EA0EA0F4C1CE9009F11E6 /* eval-abc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0D20F4C1CE9009F11E6 /* eval-abc.cpp */; };
 		072EA0EB0F4C1CE9009F11E6 /* eval-cogen-expr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0D50F4C1CE9009F11E6 /* eval-cogen-expr.cpp */; };
@@ -447,6 +449,7 @@
 		0638CA1C141F36630047FB4F /* Float4Class.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Float4Class.h; path = ../../../core/Float4Class.h; sourceTree = SOURCE_ROOT; };
 		0638CA1D141F36630047FB4F /* FloatClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FloatClass.cpp; path = ../../../core/FloatClass.cpp; sourceTree = SOURCE_ROOT; };
 		0638CA1E141F36630047FB4F /* FloatClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FloatClass.h; path = ../../../core/FloatClass.h; sourceTree = SOURCE_ROOT; };
+		0684BA2614801585002B92CA /* float4Support.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = float4Support.cpp; path = ../../../AVMPI/float4Support.cpp; sourceTree = SOURCE_ROOT; };
 		0709B6490F9733B0001A6E61 /* avmshell-features.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmshell-features.h"; path = "../../../shell/avmshell-features.h"; sourceTree = SOURCE_ROOT; };
 		0709B64A0F9733B0001A6E61 /* avmshellUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmshellUnix.cpp; path = ../../../shell/avmshellUnix.cpp; sourceTree = SOURCE_ROOT; };
 		0709B64B0F9733B0001A6E61 /* avmshellWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmshellWin.cpp; path = ../../../shell/avmshellWin.cpp; sourceTree = SOURCE_ROOT; };
@@ -1796,6 +1799,7 @@
 				F68C244E13A82C8D00152279 /* PosixMMgcPortUtils.cpp */,
 				F68C243213A82B9800152279 /* SpyUtilsPosix.cpp */,
 				F68C243513A82B9800152279 /* MMgcPortMac.cpp */,
+				0684BA2614801585002B92CA /* float4Support.cpp */,
 				F68C243713A82B9800152279 /* AVMPI.h */,
 				F68C243813A82B9800152279 /* AvmAssert.h */,
 				F68C243913A82B9800152279 /* AvmAssert.cpp */,
@@ -2098,6 +2102,7 @@
 				07E7976613BC99EC00E25990 /* d2a.cpp in Sources */,
 				0638CA1F141F36630047FB4F /* Float4Class.cpp in Sources */,
 				0638CA20141F36630047FB4F /* FloatClass.cpp in Sources */,
+				0684BA2714801585002B92CA /* float4Support.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2293,6 +2298,7 @@
 				07E7976513BC99EC00E25990 /* d2a.cpp in Sources */,
 				0638CA21141F36630047FB4F /* Float4Class.cpp in Sources */,
 				0638CA22141F36630047FB4F /* FloatClass.cpp in Sources */,
+				0684BA2814801585002B92CA /* float4Support.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

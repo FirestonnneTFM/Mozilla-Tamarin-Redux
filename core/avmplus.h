@@ -288,6 +288,9 @@ namespace avmplus
 #include "Sampler.h"
 #include "../nanojit/njconfig.h"
 #include "Coder.h"
+#ifdef VMCFG_FLOAT
+#include "../AVMPI/float4Support.h"
+#endif
 #include "exec.h"
 #include "api-versions.h"
 #include "AvmCore.h"
