@@ -128,6 +128,14 @@ typedef GprImtThunkProcRetType (*GprImtThunkProc)(class ImtThunkEnv*,
 #define VARSHIFT(ptr) 3
 #endif
 
+#ifdef VMCFG_GENERIC_FLOAT4
+typedef float4_t (*VecrThunkProc)(void* thunk, MethodEnv* env, int32_t argc, uint32_t* argv);
+
+extern const VecrMethodProc verifyEnterVECR_adapter;
+extern const VecrMethodProc debugEnterVECR_adapter;
+extern const VecrThunkProc thunkEnterVECR_adapter;
+#endif
+    
 /**
  * Compute number of bytes needed for the unboxed representation
  * of this argument value when passed on the stack.

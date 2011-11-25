@@ -45,37 +45,6 @@
 #include <xmmintrin.h>
 #define float4_ret_t __m128
 #endif
-
-typedef union {
-   float4_ret_t f4_jit;
-   float4_t f4;
-} rvtype;
-
-extern "C" {
-float4_ret_t verifyEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap){
-    float locals[8];
-    uintptr_t lptr = (uintptr_t)(&locals[0]);
-    rvtype *retval = reinterpret_cast<rvtype*>((lptr + 0xf) & ~0xf);
-    retval->f4 = avmplus::BaseExecMgr::verifyEnterVECR(env, argc, ap);
-    return retval->f4_jit;
-}
-float4_ret_t debugEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap){
-    float locals[8];
-    uintptr_t lptr = (uintptr_t)(&locals[0]);
-    rvtype *retval = reinterpret_cast<rvtype*>((lptr + 0xf) & ~0xf);
-    retval->f4 = avmplus::BaseExecMgr::debugEnterExitWrapperV(env, argc, ap);
-    return retval->f4_jit;
-}
-typedef float4_ret_t (*VecrThunk)(avmplus::MethodEnv* env, int32_t argc, avmplus::Atom* argv);
-float4_t thunkEnterVECR_adapter(void* thunk_p, avmplus::MethodEnv* env, int32_t argc, avmplus::Atom* argv){
-    float locals[8];
-    uintptr_t lptr = (uintptr_t)(&locals[0]);
-    rvtype *retval = reinterpret_cast<rvtype*>((lptr + 0xf) & ~0xf);
-    if( thunk_p)  // prevent ARM GCC from doing CSE, it crashes otherwise
-        retval->f4_jit = ((VecrThunk) thunk_p)(env, argc, argv);
-    return retval->f4;
-}
-}
 #endif
 
 namespace avmplus { namespace NativeID {
@@ -2602,7 +2571,7 @@ float4_ret_t float4_isGreater_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     (void)env;
     avmplus::Float4Class* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4Class*, argv[argoff0]);
     float4_ret_t ret;
-    obj->isGreater(*(float4_t*)&ret
+    obj->isGreater((float4_t*)&ret
         , arg1
         , arg2
     );
@@ -2621,7 +2590,7 @@ float4_ret_t float4_isGreaterOrEqual_thunk(MethodEnv* env, uint32_t argc, Atom* 
     (void)env;
     avmplus::Float4Class* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4Class*, argv[argoff0]);
     float4_ret_t ret;
-    obj->isGreaterOrEqual(*(float4_t*)&ret
+    obj->isGreaterOrEqual((float4_t*)&ret
         , arg1
         , arg2
     );
@@ -2640,7 +2609,7 @@ float4_ret_t float4_isLess_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     (void)env;
     avmplus::Float4Class* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4Class*, argv[argoff0]);
     float4_ret_t ret;
-    obj->isLess(*(float4_t*)&ret
+    obj->isLess((float4_t*)&ret
         , arg1
         , arg2
     );
@@ -2659,7 +2628,7 @@ float4_ret_t float4_isLessOrEqual_thunk(MethodEnv* env, uint32_t argc, Atom* arg
     (void)env;
     avmplus::Float4Class* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4Class*, argv[argoff0]);
     float4_ret_t ret;
-    obj->isLessOrEqual(*(float4_t*)&ret
+    obj->isLessOrEqual((float4_t*)&ret
         , arg1
         , arg2
     );
@@ -2678,7 +2647,7 @@ float4_ret_t float4_isEqual_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     (void)env;
     avmplus::Float4Class* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4Class*, argv[argoff0]);
     float4_ret_t ret;
-    obj->isEqual(*(float4_t*)&ret
+    obj->isEqual((float4_t*)&ret
         , arg1
         , arg2
     );
@@ -2697,7 +2666,7 @@ float4_ret_t float4_isNotEqual_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     (void)env;
     avmplus::Float4Class* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4Class*, argv[argoff0]);
     float4_ret_t ret;
-    obj->isNotEqual(*(float4_t*)&ret
+    obj->isNotEqual((float4_t*)&ret
         , arg1
         , arg2
     );
@@ -2714,7 +2683,7 @@ float4_ret_t float4_abs_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     (void)env;
     avmplus::Float4Class* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4Class*, argv[argoff0]);
     float4_ret_t ret;
-    obj->abs(*(float4_t*)&ret
+    obj->abs((float4_t*)&ret
         , arg1
     );
     return ret;
@@ -2732,7 +2701,7 @@ float4_ret_t float4_max_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     (void)env;
     avmplus::Float4Class* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4Class*, argv[argoff0]);
     float4_ret_t ret;
-    obj->max(*(float4_t*)&ret
+    obj->max((float4_t*)&ret
         , arg1
         , arg2
     );
@@ -2751,7 +2720,7 @@ float4_ret_t float4_min_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     (void)env;
     avmplus::Float4Class* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4Class*, argv[argoff0]);
     float4_ret_t ret;
-    obj->min(*(float4_t*)&ret
+    obj->min((float4_t*)&ret
         , arg1
         , arg2
     );
@@ -2768,7 +2737,7 @@ float4_ret_t float4_reciprocal_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     (void)env;
     avmplus::Float4Class* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4Class*, argv[argoff0]);
     float4_ret_t ret;
-    obj->reciprocal(*(float4_t*)&ret
+    obj->reciprocal((float4_t*)&ret
         , arg1
     );
     return ret;
@@ -2784,7 +2753,7 @@ float4_ret_t float4_rsqrt_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     (void)env;
     avmplus::Float4Class* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4Class*, argv[argoff0]);
     float4_ret_t ret;
-    obj->rsqrt(*(float4_t*)&ret
+    obj->rsqrt((float4_t*)&ret
         , arg1
     );
     return ret;
@@ -2800,7 +2769,7 @@ float4_ret_t float4_sqrt_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     (void)env;
     avmplus::Float4Class* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4Class*, argv[argoff0]);
     float4_ret_t ret;
-    obj->sqrt(*(float4_t*)&ret
+    obj->sqrt((float4_t*)&ret
         , arg1
     );
     return ret;
@@ -2816,7 +2785,7 @@ float4_ret_t float4_normalize_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     (void)env;
     avmplus::Float4Class* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4Class*, argv[argoff0]);
     float4_ret_t ret;
-    obj->normalize(*(float4_t*)&ret
+    obj->normalize((float4_t*)&ret
         , arg1
     );
     return ret;
@@ -2834,7 +2803,7 @@ float4_ret_t float4_cross_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     (void)env;
     avmplus::Float4Class* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4Class*, argv[argoff0]);
     float4_ret_t ret;
-    obj->cross(*(float4_t*)&ret
+    obj->cross((float4_t*)&ret
         , arg1
         , arg2
     );
@@ -3006,7 +2975,7 @@ float4_ret_t float4_private__swizzle_thunk(MethodEnv* env, uint32_t argc, Atom* 
     (void)env;
     avmplus::Float4Class* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4Class*, argv[argoff0]);
     float4_ret_t ret;
-    obj->_swizzle(*(float4_t*)&ret
+    obj->_swizzle((float4_t*)&ret
         , arg1
         , arg2
     );
@@ -3387,7 +3356,7 @@ float4_ret_t flash_utils_ByteArray_readFloat4_thunk(MethodEnv* env, uint32_t arg
     (void)env;
     avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     float4_ret_t ret;
-    obj->readFloat4(*(float4_t*)&ret);
+    obj->readFloat4((float4_t*)&ret);
     return ret;
 }
 double flash_utils_ByteArray_readDouble_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
@@ -6638,7 +6607,7 @@ float4_ret_t __AS3___vec_Vector_float4_AS3_pop_thunk(MethodEnv* env, uint32_t ar
     (void)env;
     avmplus::Float4VectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4VectorObject*, argv[argoff0]);
     float4_ret_t ret;
-    obj->AS3_pop(*(float4_t*)&ret);
+    obj->AS3_pop((float4_t*)&ret);
     return ret;
 }
 float4_ret_t __AS3___vec_Vector_float4_AS3_shift_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
@@ -6650,7 +6619,7 @@ float4_ret_t __AS3___vec_Vector_float4_AS3_shift_thunk(MethodEnv* env, uint32_t 
     (void)env;
     avmplus::Float4VectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Float4VectorObject*, argv[argoff0]);
     float4_ret_t ret;
-    obj->AS3_shift(*(float4_t*)&ret);
+    obj->AS3_shift((float4_t*)&ret);
     return ret;
 }
 avmplus::Atom native_script_function_avmplus_describeTypeJSON_thunk(MethodEnv* env, uint32_t argc, Atom* argv)

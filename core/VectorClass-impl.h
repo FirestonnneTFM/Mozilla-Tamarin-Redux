@@ -436,10 +436,10 @@ namespace avmplus
     }
 
     template<class TLIST>
-    void TypedVectorObject<TLIST>::AS3_pop(typename TLIST::TYPE& retval)
+    void TypedVectorObject<TLIST>::AS3_pop(typename TLIST::TYPE* retval)
     {
         checkFixed();
-        retval = m_list.isEmpty() ?
+        *retval = m_list.isEmpty() ?
         (typename TLIST::TYPE)TypedVectorConstants<typename TLIST::OPAQUE_TYPE>::undefinedValue() :
         m_list.removeLast();
     }
@@ -454,10 +454,10 @@ namespace avmplus
     }
 
     template<class TLIST>
-    void TypedVectorObject<TLIST>::AS3_shift(typename TLIST::TYPE& retval)
+    void TypedVectorObject<TLIST>::AS3_shift(typename TLIST::TYPE* retval)
     {
         checkFixed();
-        retval = m_list.isEmpty() ?
+        *retval = m_list.isEmpty() ?
         (typename TLIST::TYPE)TypedVectorConstants<typename TLIST::OPAQUE_TYPE>::undefinedValue() :
         m_list.removeFirst();
     }

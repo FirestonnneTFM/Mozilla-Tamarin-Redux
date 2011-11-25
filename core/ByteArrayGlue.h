@@ -318,7 +318,7 @@ namespace avmplus
         uint32_t readUnsignedInt();
         double readFloat();
 #ifdef VMCFG_FLOAT
-        void readFloat4(float4_t&);
+        void readFloat4(float4_t*);
 #endif
         double readDouble();
         String* readMultiByte(uint32_t length, String* charSet);

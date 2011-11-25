@@ -379,7 +379,7 @@ REALLY_INLINE Atom AvmCore::floatAtom(Atom atom)
 REALLY_INLINE Atom AvmCore::float4Atom(Atom atom)
 {
     float4_t val;
-    float4(val,atom);
+    float4(&val,atom);
     return float4ToAtom(val);
 }
 #endif // VMCFG_FLOAT

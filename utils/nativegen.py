@@ -1736,37 +1736,6 @@ class AbcThunkGen:
             out.println('#include <xmmintrin.h>')
             out.println('#define float4_ret_t __m128')
             out.println('#endif')
-            out.println('')
-            out.println('typedef union {')
-            out.println('   float4_ret_t f4_jit;')
-            out.println('   float4_t f4;')
-            out.println('} rvtype;')
-            out.println('')
-            out.println('extern "C" {')
-            out.println('float4_ret_t verifyEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap){')
-            out.println('    float locals[8];')
-            out.println('    uintptr_t lptr = (uintptr_t)(&locals[0]);')
-            out.println('    rvtype *retval = reinterpret_cast<rvtype*>((lptr + 0xf) & ~0xf);')
-            out.println('    retval->f4 = avmplus::BaseExecMgr::verifyEnterVECR(env, argc, ap);')
-            out.println('    return retval->f4_jit;')
-            out.println('}')
-            out.println('float4_ret_t debugEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap){')
-            out.println('    float locals[8];')
-            out.println('    uintptr_t lptr = (uintptr_t)(&locals[0]);')
-            out.println('    rvtype *retval = reinterpret_cast<rvtype*>((lptr + 0xf) & ~0xf);')
-            out.println('    retval->f4 = avmplus::BaseExecMgr::debugEnterExitWrapperV(env, argc, ap);')
-            out.println('    return retval->f4_jit;')
-            out.println('}')
-            out.println('typedef float4_ret_t (*VecrThunk)(avmplus::MethodEnv* env, int32_t argc, avmplus::Atom* argv);')
-            out.println('float4_t thunkEnterVECR_adapter(void* thunk_p, avmplus::MethodEnv* env, int32_t argc, avmplus::Atom* argv){')
-            out.println('    float locals[8];')
-            out.println('    uintptr_t lptr = (uintptr_t)(&locals[0]);')
-            out.println('    rvtype *retval = reinterpret_cast<rvtype*>((lptr + 0xf) & ~0xf);')
-            out.println('    if( thunk_p)  // prevent ARM GCC from doing CSE, it crashes otherwise')
-            out.println('        retval->f4_jit = ((VecrThunk) thunk_p)(env, argc, argv);')
-            out.println('    return retval->f4;')
-            out.println('}')
-            out.println('}')
             out.println('#endif')
             out.println('')
 
@@ -2277,7 +2246,7 @@ class AbcThunkGen:
             out.println("return isTypeImpl(value->atom());")
             out.indent -= 1
             out.println("}")
-            if(ctype != CTYPE_FLOAT4): # In fact we only need this for one class (ClassClosure? I forget now.); but it's only important that we don't emit it for float4_t
+            if(ctype != CTYPE_FLOAT4): # we can't emit these for float4_t, but fortunately we don't need them.
                 out.println("REALLY_INLINE %s asType(avmplus::Atom value)" % ret_typedef)
                 out.println("{")
                 out.indent += 1
@@ -2825,7 +2794,7 @@ class AbcThunkGen:
             need_comma = False
 
         if(ret_ctype == CTYPE_FLOAT4):
-            out.prnt("*(float4_t*)&ret")
+            out.prnt("(float4_t*)&ret")
             need_comma = True
         if len(args) > 1:
             out.println("")

@@ -1239,7 +1239,16 @@ namespace avmplus
         AvmAssert(v.sst_mask == (1<<SST_float4) && v.traits == FLOAT4_TYPE);
         AvmAssert(VARSHIFT(info) == 4);
 #endif
-        return lirout->insLoad(LIR_ldf4, vars, i << VARSHIFT(info), ACCSET_VARS);
+        return lirout->insLoad(LIR_ldf4, vars, i << 4, ACCSET_VARS);
+    }
+
+    LIns* CodegenLIR::localGetf4Addr(int i) {
+#ifdef DEBUG
+        const FrameValue& v = state->value(i);
+        AvmAssert(v.sst_mask == (1<<SST_float4) && v.traits == FLOAT4_TYPE);
+        AvmAssert(VARSHIFT(info) == 4);
+#endif
+        return lea(i << 4, vars);
     }
 #endif
 
@@ -3334,7 +3343,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         case BUILTIN_float: 
                 return callIns(FUNCTIONID(floatToString),2,coreAddr,localGetf(index));
         case BUILTIN_float4: 
-                return callIns(FUNCTIONID(float4ToString), 2, coreAddr, lea(index << 4, vars)); 
+                return callIns(FUNCTIONID(float4ToString), 2, coreAddr, localGetf4Addr(index)); 
 #endif
         case BUILTIN_number:
             return callIns(FUNCTIONID(doubleToString), 2, coreAddr, localGetd(index));
@@ -5369,7 +5378,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 getter = getFloatVectorHelpers[idxKind];
             }
         }
-        else if (false) { // was: objType == VECTORFLOAT4_TYPE
+        else if (false) { // FIXME: We are disabling Vector.float4 optimization since it doesn't work with float4_t-as-struct
+                          // (original test was: objType == VECTORFLOAT4_TYPE)
             if (result == FLOAT4_TYPE) {
                 if (idxKind == VI_INT || idxKind == VI_UINT) {
                     typedef ListData<float4_t, 16> STORAGE;
@@ -5642,7 +5652,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 setter = setFloatVectorHelpers[idxKind];
             }
         }
-        else if (false) { // was: objType == VECTORFLOAT4_TYPE
+        else if (false) { // FIXME: We are disabling Vector.float4 optimization since it doesn't work with float4_t-as-struct
+                          // (original test was: objType == VECTORFLOAT4_TYPE)
             if (valueType == FLOAT4_TYPE) {
                 if (idxKind == VI_INT || idxKind == VI_UINT) {
                     typedef ListData<float4_t, 16> STORAGE;
@@ -6096,7 +6107,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     LIns* f4w = f2dIns(lirout->ins1(LIR_f4w, f4)), *g4w = f2dIns(lirout->ins1(LIR_f4w, g4));
                     LIns* ow = callIns(FUNCTIONID(mod), 2,f4w,g4w);
                     
-                    callIns(FUNCTIONID(float4FromComponents), 5, lea((sp-1) << 4, vars),
+                    callIns(FUNCTIONID(float4FromComponents), 5, localGetf4Addr(sp-1),
                                          d2fIns(ox), d2fIns(oy), d2fIns(oz), d2fIns(ow) );
                 } else if(result == NUMBER_TYPE){
                     AvmAssert(state->value(sp-1).traits == NUMBER_TYPE);

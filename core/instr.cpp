@@ -471,7 +471,8 @@ template<> float4_t __subtract<float4_t>(float4_t a, float4_t b) { return f4_sub
         rhs = AvmCore::primitive(rhs); \
         \
        if(AvmCore::isFloat4(lhs) || AvmCore::isFloat4(rhs)){\
-           float4_t lhsv, rhsv; AvmCore::float4(lhsv, lhs); AvmCore::float4(rhsv, rhs); \
+           float4_decl_v(lhs);\
+           float4_decl_v(rhs);\
            return core->float4ToAtom( __##name(lhsv, rhsv) );\
         }\
         if(AvmCore::isFloat(lhs) && AvmCore::isFloat(rhs))\
@@ -495,8 +496,8 @@ Atom op_negate(AvmCore* core, Atom val) {
 
     if(AvmCore::isFloat4(val)){
         const static float4_t Zero = {-0.0, -0.0, -0.0, -0.0};
-        float4_t f4val; AvmCore::float4(f4val, val);
-        return core->float4ToAtom( f4_sub(Zero, f4val) );
+        float4_decl_v(val);
+        return core->float4ToAtom( f4_sub(Zero, valv) );
     
     }
     if(atomIsIntptr(val) && val != zeroIntAtom){
@@ -610,8 +611,8 @@ add_numbers:
     {
         if(AvmCore::isFloat4(lhs) || AvmCore::isFloat4(rhs))
         {
-            float4_t lhsv, rhsv;
-            AvmCore::float4(lhsv, lhs); AvmCore::float4(rhsv, rhs);
+            float4_decl_v(lhs);
+            float4_decl_v(rhs);
             return core->float4ToAtom( f4_add(lhsv , rhsv));
         }
         if(AvmCore::isFloat(lhs) && AvmCore::isFloat(rhs))
@@ -741,8 +742,8 @@ Atom op_add_a_aa(AvmCore* core, Atom lhs, Atom rhs)
         if(float_support){
             if(AvmCore::isFloat4(lhs) || AvmCore::isFloat4(rhs))
             {
-                float4_t lhsv, rhsv;
-                AvmCore::float4(lhsv, lhs); AvmCore::float4(rhsv, rhs);
+                float4_decl_v(lhs);
+                float4_decl_v(rhs);
                 return core->float4ToAtom( f4_add(lhsv, rhsv) );
             }
             if(AvmCore::isFloat(lhs) && AvmCore::isFloat(rhs))

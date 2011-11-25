@@ -744,16 +744,16 @@
     REALLY_INLINE void store_cached_slot(SetCache&, ScriptObject*, float4_t* slot_ptr, Atom val)
     {
         if( (((uintptr_t)slot_ptr) & 0xf) == 0)
-            AvmCore::float4(*slot_ptr, val);
+            AvmCore::float4(slot_ptr, val);
         else
         {
-            float4_t f4; AvmCore::float4(f4, val);
+            float4_decl_v(val)
 #ifdef ANDROID // Work around an ANDROID NDK compiler bug.
-            float* fp = (float*) &f4;
+            float* fp = (float*) &valv;
             float* dp = (float*) slot_ptr;
             dp[0]=fp[0];dp[1]=fp[1];dp[2]=fp[2];dp[3]=fp[3];
 #else               
-            VMPI_memcpy(slot_ptr, &f4, sizeof(float4_t));
+            VMPI_memcpy(slot_ptr, &valv, sizeof(float4_t));
 #endif
         }
     }

@@ -53,9 +53,9 @@ namespace avmplus
         createVanillaPrototype();
     }
 
-    void Float4Class::fromComponents(float4_t& ret, float x, float y, float z, float w)
+    void Float4Class::fromComponents(float4_t* ret, float x, float y, float z, float w)
     {
-        float* retp = reinterpret_cast<float*>(&ret);
+        float* retp = reinterpret_cast<float*>(ret);
         retp[0] = x; retp[1] = y; retp[2] = z; retp[3] = w;
     }
     
@@ -101,80 +101,80 @@ namespace avmplus
 
 #define F4OP1(res,s1,op, ... ) fromComponents(res,op(f4_x(s1) __VA_ARGS__), op(f4_y(s1) __VA_ARGS__), op(f4_z(s1) __VA_ARGS__), op(f4_w(s1) __VA_ARGS__))
 
-    void Float4Class::isGreater(float4_t& result, const float4_t& x, const float4_t& y)
+    void Float4Class::isGreater(float4_t* result, const float4_t& x, const float4_t& y)
     {
         F4OP2SEL(result, x, y, >);
     }
 
-    void Float4Class::isGreaterOrEqual(float4_t& result, const float4_t& x, const float4_t& y)
+    void Float4Class::isGreaterOrEqual(float4_t* result, const float4_t& x, const float4_t& y)
     {
         F4OP2SEL(result, x, y, >=);
     }
 
-    void Float4Class::isLess(float4_t& result, const float4_t& x, const float4_t& y) 
+    void Float4Class::isLess(float4_t* result, const float4_t& x, const float4_t& y) 
     {
         F4OP2SEL(result, x, y, <);
     }
     
-    void Float4Class::isLessOrEqual(float4_t& result, const float4_t& x, const float4_t& y)
+    void Float4Class::isLessOrEqual(float4_t* result, const float4_t& x, const float4_t& y)
     {
         F4OP2SEL(result, x, y, <=);
     }
 
-    void Float4Class::isEqual(float4_t& result, const float4_t& x, const float4_t& y)
+    void Float4Class::isEqual(float4_t* result, const float4_t& x, const float4_t& y)
     {
         F4OP2SEL(result, x, y, ==);
     }
 
-    void Float4Class::isNotEqual(float4_t& result, const float4_t& x, const float4_t& y)
+    void Float4Class::isNotEqual(float4_t* result, const float4_t& x, const float4_t& y)
     {
         F4OP2SEL(result, x, y, !=);
     }
 
-    void Float4Class::abs(float4_t& result, const float4_t& x)
+    void Float4Class::abs(float4_t* result, const float4_t& x)
     {
         F4OP1(result, x,fabsf);
     }
 
     
     // FIXME (Bugzilla 703605): Probably not right for either NaN nor -0 vs +0
-    void Float4Class::min(float4_t& result, const float4_t& x, const float4_t& y)
+    void Float4Class::min(float4_t* result, const float4_t& x, const float4_t& y)
     {
         F4OP2SELe(result, x, y, <);
     }
 
     // FIXME (Bugzilla 703605): Probably not right for either NaN nor -0 vs +0
-    void Float4Class::max(float4_t& result, const float4_t& x, const float4_t& y)
+    void Float4Class::max(float4_t* result, const float4_t& x, const float4_t& y)
     {
         F4OP2SELe(result, x, y, >);
     }
 
    // FIXME: Here we allow reduced precision so we almost certainly want to delegate to the
     // native SIMD implementation to get consistent interpreter/JIT behavior.
-    void Float4Class::reciprocal(float4_t& result, const float4_t& x)
+    void Float4Class::reciprocal(float4_t* result, const float4_t& x)
     {
         F4OP1(result, x, 1.0f/);
     }
 
     // FIXME: (Bugzilla 703605) We want consistent interpreter/jit behavior, so we want to defer to the
     // machine primitive.
-    void Float4Class::rsqrt(float4_t& result, const float4_t& x)
+    void Float4Class::rsqrt(float4_t* result, const float4_t& x)
     {
         F4OP1(result, x, 1.0f/sqrtf);
     }
 
-    void Float4Class::sqrt(float4_t& result, const float4_t& x)
+    void Float4Class::sqrt(float4_t* result, const float4_t& x)
     {
         F4OP1(result, x, sqrtf);
     }
 
-    void Float4Class::normalize(float4_t& result, const float4_t& x)
+    void Float4Class::normalize(float4_t* result, const float4_t& x)
     {
         float m = magnitude(x);
         F4OP1(result, x, , /m);
     }
 
-    void Float4Class::cross(float4_t& result, const float4_t& a, const float4_t& b)
+    void Float4Class::cross(float4_t* result, const float4_t& a, const float4_t& b)
     {
         fromComponents(result, f4_y(a) * f4_z(b) - f4_z(a) * f4_y(b),
                             f4_z(a) * f4_x(b) - f4_x(a) * f4_z(b),
@@ -235,7 +235,7 @@ namespace avmplus
 
     // "How" is really only one byte that specifies which field to get - two bits for each of the float4 positions.
     // i.e. two bits specify which of the x/y/z/w to return as "x", the next two bits specify what to return as "y" and so on.
-    void Float4Class::_swizzle(float4_t& result, const float4_t& val, int32_t how)
+    void Float4Class::_swizzle(float4_t* result, const float4_t& val, int32_t how)
     {
         AvmAssert(how >= 0 && how < 256);
 #ifdef VMCFG_SSE21

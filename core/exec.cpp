@@ -41,12 +41,6 @@
 #include "../vprof/vprof.h"
 #include "Interpreter.h"
 
-extern "C" {
-void* verifyEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap); // Hack: that's not really the prototype, but that's the point, we can't specify the real prototype.
-void* debugEnterVECR_adapter(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap); // Hack: that's not really the prototype, but that's the point, we can't specify the real prototype.
-float4_t thunkEnterVECR_adapter(void* thunk, avmplus::MethodEnv* env, int32_t argc, avmplus::Atom* argv);
-}
-
 namespace avmplus {
 
 // Computes the size in bytes of an argument of type t, when passed
@@ -192,7 +186,7 @@ void BaseExecMgr::notifyMethodResolved(MethodInfo* m, MethodSignaturep ms)
             m->_implFPR = verifyEnterFPR;
             break;
         case kSIMDRetType:
-            m->_implVECR = (VecrMethodProc) verifyEnterVECR_adapter;
+            m->_implVECR = verifyEnterVECR_adapter;
             break;
         }
 #else
@@ -358,7 +352,7 @@ float4_t BaseExecMgr::verifyEnterVECR(MethodEnv* env, int32_t argc, uint32_t* ap
 {
     verifyOnCall(env);
     STACKADJUST(); // align stack for 32-bit Windows and MSVC compiler
-    float4_t f4 = thunkEnterVECR_adapter((void*)env->method->_implVECR, env, argc, (Atom*)ap);
+    float4_t f4 = thunkEnterVECR_adapter((void*)env->method->_implVECR, env, argc, ap);
     STACKRESTORE();
     return f4;
 }
@@ -501,7 +495,7 @@ float4_t BaseExecMgr::debugEnterExitWrapperV(MethodEnv* env, int32_t argc, uint3
 {
     CallStackNode csn(CallStackNode::kEmpty);
     env->debugEnter(/*frame_sst*/NULL, &csn, /*framep*/NULL, /*eip*/NULL);
-    const float4_t result = thunkEnterVECR_adapter((void*) env->method->_native.thunker, env, argc, (Atom*)argv);
+    const float4_t result = thunkEnterVECR_adapter((void*) env->method->_native.thunker, env, argc, argv);
     env->debugExit(&csn);
     return result;
 }
@@ -706,7 +700,7 @@ Atom* FASTCALL BaseExecMgr::coerceUnbox1(MethodEnv* env, Atom atom, Traits* t, A
                 Atom a[nAtoms];
             };
             AvmAssert(sizeof(float4_t)%sizeof(Atom)==0);
-            AvmCore::float4(f4, atom);
+            AvmCore::float4(&f4, atom);
             int i;
             for(i=0;i<nAtoms-1;i++)
                 *args++ = a[i];
@@ -880,7 +874,7 @@ Atom BaseExecMgr::endCoerce(MethodEnv* env, int32_t argc, uint32_t *ap, MethodSi
     case BUILTIN_float4:
         {
             STACKADJUST(); // align stack for 32-bit Windows and MSVC compiler
-            float4_t f4 = thunkEnterVECR_adapter((void*)env->method->_implVECR, env, argc, (Atom*) ap);
+            float4_t f4 = thunkEnterVECR_adapter((void*)env->method->_implVECR, env, argc, ap);
             STACKRESTORE();
             return core->float4ToAtom(f4);
         }
