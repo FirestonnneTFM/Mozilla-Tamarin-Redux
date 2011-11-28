@@ -116,7 +116,10 @@ namespace avmplus
         static float  sinf(float value);
         static float  sqrtf(float value);
         static float  tanf(float value);
+        static float  powf(float x, float y);
         static float  toIntf(float value);
+        static float  as3_minf(float x, float y);
+        static float  as3_maxf(float x, float y);
 
         static double acos(double value);
         static double asin(double value);

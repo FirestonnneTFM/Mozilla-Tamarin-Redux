@@ -1269,6 +1269,26 @@
     PUREMETHOD(ENVADDR(MethodEnv::createRestHelper), SIG3(P,P,I,P), createRestHelper)
     PUREMETHOD(ENVADDR(MethodEnv::createArgumentsHelper), SIG3(P,P,I,P), createArgumentsHelper)
 
+#ifdef VMCFG_FLOAT
+    PUREFUNCTION(FUNCADDR(MathUtils::absf), SIG1(F,F), float_abs)
+    PUREFUNCTION(FUNCADDR(MathUtils::acosf), SIG1(F,F), float_acos)
+    PUREFUNCTION(FUNCADDR(MathUtils::asinf), SIG1(F,F), float_asin)
+    PUREFUNCTION(FUNCADDR(MathUtils::atanf), SIG1(F,F), float_atan)
+    PUREFUNCTION(FUNCADDR(MathUtils::ceilf), SIG1(F,F), float_ceil)
+    PUREFUNCTION(FUNCADDR(MathUtils::cosf), SIG1(F,F), float_cos)
+    PUREFUNCTION(FUNCADDR(MathUtils::expf), SIG1(F,F), float_exp)
+    PUREFUNCTION(FUNCADDR(MathUtils::floorf), SIG1(F,F), float_floor)
+    PUREFUNCTION(FUNCADDR(MathUtils::logf), SIG1(F,F), float_log)
+    PUREFUNCTION(FUNCADDR(MathUtils::roundf), SIG1(F,F), float_round)
+    PUREFUNCTION(FUNCADDR(MathUtils::sinf), SIG1(F,F), float_sin)
+    PUREFUNCTION(FUNCADDR(MathUtils::sqrtf), SIG1(F,F), float_sqrt)
+    PUREFUNCTION(FUNCADDR(MathUtils::tanf), SIG1(F,F), float_tan)
+    PUREFUNCTION(FUNCADDR(MathUtils::atan2f), SIG2(F,F,F), float_atan2)
+    PUREFUNCTION(FUNCADDR(MathUtils::powf), SIG2(F,F,F), float_pow)
+    PUREFUNCTION(FUNCADDR(MathUtils::as3_maxf), SIG2(F,F,F), float_max2)
+    PUREFUNCTION(FUNCADDR(MathUtils::as3_minf), SIG2(F,F,F), float_min2)
+#endif
+
     void initMultinameLate(AvmCore* core, Multiname& name, Atom index)
     {
         if (AvmCore::isObject(index))
