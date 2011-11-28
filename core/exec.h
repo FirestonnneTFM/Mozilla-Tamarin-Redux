@@ -131,8 +131,10 @@ typedef GprImtThunkProcRetType (*GprImtThunkProc)(class ImtThunkEnv*,
 #ifdef VMCFG_GENERIC_FLOAT4
 typedef float4_t (*VecrThunkProc)(void* thunk, MethodEnv* env, int32_t argc, uint32_t* argv);
 
-extern const VecrMethodProc verifyEnterVECR_adapter;
+#ifdef DEBUGGER
 extern const VecrMethodProc debugEnterVECR_adapter;
+#endif
+extern const VecrMethodProc verifyEnterVECR_adapter;
 extern const VecrThunkProc thunkEnterVECR_adapter;
 #endif
     
