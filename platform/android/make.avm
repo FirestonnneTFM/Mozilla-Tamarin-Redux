@@ -178,6 +178,7 @@ AVMPLUS_SRCS := \
     eval-unicode.cpp \
     eval-util.cpp \
 	atom.cpp \
+	float4Support.cpp \
 	AvmAssert.cpp \
 	ProxyGlue.cpp 
 
