@@ -256,6 +256,38 @@ namespace avmplus
         return f.word == 0x80000000UL;
     }
     
+    float MathUtils::as3_minf(float x, float y)
+    {
+        if (MathUtils::isNaNf(x))
+            return x;
+        if (MathUtils::isNaNf(y))
+            return y;
+        if (x < y)
+            return x;
+        if (x == y && x == 0.0f && 1.0f/x < 0.0f)
+            return x;  // -0
+        return y;
+    }
+    
+    float MathUtils::as3_maxf(float x, float y)
+    {
+        if (MathUtils::isNaNf(x))
+            return x;
+        if (MathUtils::isNaNf(y))
+            return y;
+        if (x > y)
+            return x;
+        if (x == y && x == 0.0f && 1.0f/x > 0.0f)
+            return x; // +0
+        return y;
+    }
+    
+    float MathUtils::powf(float x, float y)
+    {
+        // We can do better
+        return float(pow(double(x), double(y)));
+    }
+
     int32_t MathUtils::nextPowerOfTwo(int32_t n)
     {
         int32_t i = 2;
