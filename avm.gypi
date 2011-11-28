@@ -177,6 +177,7 @@
                 'pcre/pcre_version.cpp',
                 'pcre/pcre_xclass.cpp',
                 'AVMPI/AvmAssert.cpp',
+                'AVMPI/float4Support.cpp',
                 'core/AvmLog.cpp',
                 'core/Coder.cpp'
             ],

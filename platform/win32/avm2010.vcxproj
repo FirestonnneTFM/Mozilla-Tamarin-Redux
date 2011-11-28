@@ -35,6 +35,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\AVMPI\float4Support.cpp" />
     <ClCompile Include="..\..\AVMPI\AvmAssert.cpp" />
     <ClCompile Include="..\..\AVMPI\MMgcPortWin.cpp" />
     <ClCompile Include="..\..\AVMPI\SpyUtilsWin.cpp" />
@@ -350,6 +351,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\AVMPI\float4Support.h" />
     <ClInclude Include="..\..\AVMPI\AvmAssert.h" />
     <ClInclude Include="..\..\core\AbcEnv-inlines.h" />
     <ClInclude Include="..\..\core\AbcEnv.h" />
