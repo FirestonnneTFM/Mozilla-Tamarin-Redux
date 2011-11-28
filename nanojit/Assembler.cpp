@@ -1731,6 +1731,8 @@ namespace nanojit
                 case LIR_dotf4:
                 case LIR_dotf3:
                 case LIR_dotf2:
+                case LIR_minf4:
+                case LIR_maxf4:
                     countlir_fpu();
                     ins->oprnd1()->setResultLive();
                     ins->oprnd2()->setResultLive();

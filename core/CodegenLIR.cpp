@@ -4415,6 +4415,74 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         localSet(op1, ptr, result);
     }
 
+#ifdef VMCFG_FLOAT
+    void CodegenLIR::emitFloat4unary(Traits* result, LOpcode op) {
+        int sp = state->sp();
+        localSet(sp - 1, lirout->ins1(op, localGetf4(sp)), result);
+    }
+
+    void CodegenLIR::emitFloat4abs(Traits* result)        { emitFloat4unary(result, LIR_absf4); }
+    void CodegenLIR::emitFloat4reciprocal(Traits* result) { emitFloat4unary(result, LIR_recipf4); }
+    void CodegenLIR::emitFloat4rsqrt(Traits* result)      { emitFloat4unary(result, LIR_rsqrtf4); }
+    void CodegenLIR::emitFloat4sqrt(Traits* result)       { emitFloat4unary(result, LIR_sqrtf4); }
+
+    // magnitudeK(x) = sqrt(dotK(x, x))
+    LIns* CodegenLIR::magnitude(LOpcode dot_op, LIns* x) {
+        return lirout->ins1(LIR_sqrtf, lirout->ins2(dot_op, x, x));
+    }
+
+    /** normalize(x:float4) = x / magnitude(x) = x / sqrt(dot(x,x)) */
+    void CodegenLIR::emitFloat4normalize(Traits* result) {
+        int sp = state->sp();
+        LIns* x = localGetf4(sp);
+        LIns* mag4 = lirout->ins1(LIR_f2f4, magnitude(LIR_dotf4, x));
+        LIns* normalize = lirout->ins2(LIR_divf4, x, mag4);
+        localSet(sp - 1, normalize, result);
+    }
+
+    /** cross(a:float4, b:float4) = a.yzx0 * b.zxy0 - a.zxy0 * b.yzx0 */
+    void CodegenLIR::emitFloat4cross(Traits* result) {
+        AvmAssert(!"not implemented.  how to set w=0?"); (void) result;
+    }
+
+    void CodegenLIR::emitFloat4binary(Traits* result, LOpcode op) {
+        int sp = state->sp();
+        LIns* x = localGetf4(sp - 1);
+        LIns* y = localGetf4(sp);
+        localSet(sp - 2, lirout->ins2(op, x, y), result);
+    }
+
+    void CodegenLIR::emitFloat4max(Traits* result)        { emitFloat4binary(result, LIR_maxf4); }
+    void CodegenLIR::emitFloat4min(Traits* result)        { emitFloat4binary(result, LIR_minf4); }
+    void CodegenLIR::emitFloat4dot(Traits* result)        { emitFloat4binary(result, LIR_dotf4); }
+    void CodegenLIR::emitFloat4dot2(Traits* result)       { emitFloat4binary(result, LIR_dotf2); }
+    void CodegenLIR::emitFloat4dot3(Traits* result)       { emitFloat4binary(result, LIR_dotf3); }
+
+    void CodegenLIR::emitMagnitude(Traits* result, LOpcode dot_op) {
+        int sp = state->sp();
+        LIns* x = localGetf4(sp);
+        localSet(sp - 1, magnitude(dot_op, x), result);
+    }
+
+    void CodegenLIR::emitFloat4magnitude(Traits* result)  { emitMagnitude(result, LIR_dotf4); }
+    void CodegenLIR::emitFloat4magnitude2(Traits* result) { emitMagnitude(result, LIR_dotf2); }
+    void CodegenLIR::emitFloat4magnitude3(Traits* result) { emitMagnitude(result, LIR_dotf3); }
+
+    // distanceK(x,y) = magnitudeK(x - y)
+    void CodegenLIR::emitDistance(Traits* result, LOpcode dot_op) {
+        int sp = state->sp();
+        LIns* x = localGetf4(sp - 1);
+        LIns* y = localGetf4(sp);
+        LIns* diff = lirout->ins2(LIR_subf4, x, y);
+        localSet(sp - 2, magnitude(dot_op, diff), result);
+    }
+
+    void CodegenLIR::emitFloat4distance(Traits* result)  { emitDistance(result, LIR_dotf4); }
+    void CodegenLIR::emitFloat4distance2(Traits* result) { emitDistance(result, LIR_dotf2); }
+    void CodegenLIR::emitFloat4distance3(Traits* result) { emitDistance(result, LIR_dotf3); }
+
+#endif
+
     // Determine a mask for our argument that indicates to which types it may be trivially converted
     // without insertion of additional instructions and without loss.  This information may allow us
     // to substitute a numeric operation on a more specific type than that inferred by the verifier.
@@ -4607,6 +4675,27 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
         // We would like to inline abs(), but the obvious implementation does not work, as both 0.0 and -0.0 compare as the same.
         { avmplus::NativeID::Math_abs,                     1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(Math_abs), 0},
+
+#if defined VMCFG_FLOAT && defined VMCFG_IA32
+        // float4
+        { avmplus::NativeID::float4_abs,                   1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4abs},
+        { avmplus::NativeID::float4_max,                   2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4max},
+        { avmplus::NativeID::float4_min,                   2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4min},
+        { avmplus::NativeID::float4_reciprocal,            1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4reciprocal},
+        { avmplus::NativeID::float4_rsqrt,                 1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4rsqrt},
+        { avmplus::NativeID::float4_sqrt,                  1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4sqrt},
+        { avmplus::NativeID::float4_normalize,             1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4normalize},
+        //{ avmplus::NativeID::float4_cross,                 2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4cross},
+        { avmplus::NativeID::float4_dot,                   2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4dot},
+        { avmplus::NativeID::float4_dot2,                  2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4dot2},
+        { avmplus::NativeID::float4_dot3,                  2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4dot3},
+        { avmplus::NativeID::float4_magnitude,             1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4magnitude},
+        { avmplus::NativeID::float4_magnitude3,            1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4magnitude3},
+        { avmplus::NativeID::float4_magnitude2,            1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4magnitude2},
+        { avmplus::NativeID::float4_distance,              2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4distance},
+        { avmplus::NativeID::float4_distance2,             2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4distance2},
+        { avmplus::NativeID::float4_distance3,             2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4distance3},
+#endif
 
         { avmplus::NativeID::Math_min,                     2, {BUILTIN_int,    BUILTIN_int},    0, &CodegenLIR::emitIntMathMin},
         { avmplus::NativeID::Math_max,                     2, {BUILTIN_int,    BUILTIN_int},    0, &CodegenLIR::emitIntMathMax},

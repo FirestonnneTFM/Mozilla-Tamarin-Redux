@@ -741,13 +741,13 @@ namespace nanojit
     inline void Assembler::SSE_PSHUFD(R rd, R rs, uint8_t imm) {
         count_fpu();
         SSEu8_3(0x660f70, rd, rs, imm);
-        asm_output("pshufd %s,%s,%x", gpn(rd), gpn(rs), imm);
+        asm_output("pshufd %s,%s,0x%x", gpn(rd), gpn(rs), imm);
     }
 
     inline void Assembler::SSE_DPPS(R rd, R rs, uint8_t imm) {
         count_fpu();
         SSEu8_4(0x660f3a40, rd, rs, imm);
-        asm_output("dpps %s,%s,%x", gpn(rd), gpn(rs), imm);
+        asm_output("dpps %s,%s,0x%x", gpn(rd), gpn(rs), imm);
     }
 
     inline void Assembler::SSE_STUPS(I32 d, R b, R r) { count_stf4(); SSEsm(0x0f11, r, d, b); asm_output("movups %d(%s),%s", d, gpn(b), gpn(r)); }
@@ -874,6 +874,20 @@ namespace nanojit
         NanoAssert(IsXmmReg(rd) && IsXmmReg(rs));
         SSEs(0x0f51, rd, rs);
         asm_output("sqrtps %s,%s", gpn(rd), gpn(rs));
+    }
+
+    inline void Assembler::SSE_MAXPS(R rd, R rs) {
+      count_fpu();
+      NanoAssert(IsXmmReg(rd) && IsXmmReg(rs));
+      SSEs(0x0f5f, rd, rs);
+      asm_output("maxps %s,%s", gpn(rd), gpn(rs));
+    }
+
+    inline void Assembler::SSE_MINPS(R rd, R rs) {
+      count_fpu();
+      NanoAssert(IsXmmReg(rd) && IsXmmReg(rs));
+      SSEs(0x0f5d, rd, rs);
+      asm_output("minps %s,%s", gpn(rd), gpn(rs));
     }
 
     inline void Assembler::SSE_UCOMISS(R rl, R rr) {
@@ -3108,6 +3122,8 @@ namespace nanojit
             case LIR_subf4: SSE_SUBPS(rr, rb);  break;
             case LIR_mulf4: SSE_MULPS(rr, rb);  break;
             case LIR_divf4: SSE_DIVPS(rr, rb);  break;
+            case LIR_minf4: SSE_MINPS(rr, rb);  break;
+            case LIR_maxf4: SSE_MAXPS(rr, rb);  break;
             case LIR_dotf4: SSE_DPPS(rr, rb, 0xF1); break;
             case LIR_dotf3: SSE_DPPS(rr, rb, 0x71); break;
             case LIR_dotf2: SSE_DPPS(rr, rb, 0x31); break;

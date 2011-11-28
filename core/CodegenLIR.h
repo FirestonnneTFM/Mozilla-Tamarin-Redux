@@ -561,8 +561,35 @@ namespace avmplus
         void emitIsNaN(Traits* result);
         void emitIntMathMin(Traits* result);
         void emitIntMathMax(Traits* result);
-        void emitMathAbs(Traits* result);
         void emitStringLength(Traits* result);
+
+#ifdef VMCFG_FLOAT
+        // helpers
+        void emitFloat4unary(Traits*, LOpcode opcode);
+        void emitFloat4binary(Traits*, LOpcode opcode);
+        LIns* magnitude(LOpcode dot_op, LIns* x);
+        void emitMagnitude(Traits* result, LOpcode dot_op);
+        void emitDistance(Traits* result, LOpcode dot_op);
+
+        // emitters for inline float/float4 functions
+        void emitFloat4abs(Traits* result);
+        void emitFloat4max(Traits* result);
+        void emitFloat4min(Traits* result);
+        void emitFloat4reciprocal(Traits* result);
+        void emitFloat4rsqrt(Traits* result);
+        void emitFloat4sqrt(Traits* result);
+        void emitFloat4normalize(Traits* result);
+        void emitFloat4cross(Traits* result);
+        void emitFloat4dot(Traits* result);
+        void emitFloat4dot2(Traits* result);
+        void emitFloat4dot3(Traits* result);
+        void emitFloat4magnitude(Traits* result);
+        void emitFloat4magnitude2(Traits* result);
+        void emitFloat4magnitude3(Traits* result);
+        void emitFloat4distance(Traits* result);
+        void emitFloat4distance2(Traits* result);
+        void emitFloat4distance3(Traits* result);
+#endif
 
         LIns *optimizeIndexArgumentType(int32_t sp, Traits** indexType);
 
