@@ -49,6 +49,12 @@ args=$3
 test "$shell" = "" && shell=$shell_release_debugger
 test "$args" = "" && args="--quiet"
 
+if [ "$shell" = "avmshell_sd" -o "$shell" = "avmshell_sd_64" ]
+then
+    knownerrors=knownerrors-debug.txt
+else
+    knownerrors=knownerrors.txt
+fi
 
 # calculate the revision number to test
 . ../all/util-calculate-change.sh $revision
@@ -70,7 +76,7 @@ echo "Download avmglue.abc"
 echo "Download runtests.py"
 ../all/util-download.sh $BRIGHTSPOT/runtests.py $basedir/test/brightspot/runtests.py
 echo "Download knownerrors.txt"
-../all/util-download.sh $BRIGHTSPOT/knownerrors.txt $basedir/test/brightspot/knownerrors.txt
+../all/util-download.sh $BRIGHTSPOT/$knownerrors $basedir/test/brightspot/knownerrors.txt
 
 cd $basedir/test/brightspot
 chmod +x ./runtests.py

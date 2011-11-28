@@ -647,7 +647,7 @@ namespace nanojit
         // This needs to be optimized better at some point, but this works.
         // we also need to get the MCRXR out of here for POWER4+.
         //underrunProtect() XXX
-        BGTCTR(cr,0); 
+        BGTCTR(cr,0);
         MTCTR(R0);
         MCRXR(7);
         if (!targ || !isU32(uintptr_t(targ))) {
@@ -1590,7 +1590,7 @@ namespace nanojit
             NIns *after = _nIns;
             verbose_only(if (_logc->lcbits & LC_Native) outputf("%p:",after);)
             FMR(rr,rf);
-            
+
             NanoAssert(isS24(after - (_nIns-1)));
             asm_branch_near(false, condval, after);
 
@@ -1757,7 +1757,7 @@ namespace nanojit
         Register rd = R0; // for now
         // rewrite our branch instruction into a bcctr using this one
         if ((branch[0] & (63<<25)) == PPC_b) { // trivial case
-            branch[3] = PPC_bcctr | (branch[0] | 1); // preserve link bit    
+            branch[3] = PPC_bcctr | (branch[0] | 1); // preserve link bit
         } else { // PPC_bc, I assume
             branch[0] &= ((0x3ff << 16) | 1); // preserve bo, bi, link
             branch[3] = PPC_bcctr | branch[0];
@@ -1991,7 +1991,8 @@ namespace nanojit
     }
 
     void Assembler::asm_label() {
-        // do nothing right now
+        // disable swapping for the next instruction; it's a branch point.
+        _lastOpcode.reg1 = NoSwap;
     }
 
 } // namespace nanojit

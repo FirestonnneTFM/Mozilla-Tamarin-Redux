@@ -320,7 +320,8 @@ namespace nanojit {
 // This is a bit hacky...
 #define TRAMP(ins, fmt, ...) do {                                       \
         verbose_only(                                                   \
-                     NIns *save_nIns = _nIns; _nIns = _nSlot;           \
+            NIns *save_nIns = _nIns; _nIns = _nSlot;                    \
+            NIns *save_nInsAfter = _nInsAfter; _nInsAfter = _nSlot+1;   \
                      )                                                  \
         *_nSlot = (NIns)ins;                                            \
         debug_only(codegenBreak(_nSlot);)                               \
@@ -328,7 +329,8 @@ namespace nanojit {
         verbose_only(setOutputForEOL("<= trampoline");)                 \
         asm_output(fmt, ##__VA_ARGS__);                                 \
         verbose_only(                                                   \
-                     _nIns = save_nIns;                                 \
+            _nIns = save_nIns;                                          \
+            _nInsAfter = save_nInsAfter;                                \
                      )                                                  \
     } while (0)
 
@@ -385,6 +387,7 @@ namespace nanojit {
 // COP1X: bits 5..0
 #define COP1X_LDXC1     0x01
 #define COP1X_SDXC1     0x09
+#define COP1X_MOVCF     0x11
 
 // SPECIAL: bits 5..0
 #define SPECIAL_SLL     0x00
@@ -396,6 +399,7 @@ namespace nanojit {
 #define SPECIAL_SRAV    0x07
 #define SPECIAL_JR      0x08
 #define SPECIAL_JALR    0x09
+#define SPECIAL_MOVZ    0x0a
 #define SPECIAL_MOVN    0x0b
 #define SPECIAL_MFHI    0x10
 #define SPECIAL_MFLO    0x12
@@ -593,6 +597,10 @@ namespace nanojit {
     do { count_alu(); EMIT(R_FORMAT(OP_SPECIAL, GPR(rs), GPR(rt), GPR(rd), 0, SPECIAL_MOVN), \
                            "movn %s, %s, %s", gpn(rd), gpn(rs), gpn(rt)); } while (0)
 
+#define MOVZ(rd, rs, rt)                                                \
+    do { count_alu(); EMIT(R_FORMAT(OP_SPECIAL, GPR(rs), GPR(rt), GPR(rd), 0, SPECIAL_MOVZ), \
+                           "movz %s, %s, %s", gpn(rd), gpn(rs), gpn(rt)); } while (0)
+
 #define NEGU(rd, rt)                                                    \
     do { count_alu(); EMIT(R_FORMAT(OP_SPECIAL, GPR(ZERO), GPR(rt), GPR(rd), 0, SPECIAL_SUBU), \
                            "negu %s, %s", gpn(rd), gpn(rt)); } while (0)
@@ -699,6 +707,8 @@ namespace nanojit {
 #define ADD_D(fd, fs, ft)       NanoAssertMsg(0, "softfloat ADD_D")
 #define DIV_D(fd, fs, ft)       NanoAssertMsg(0, "softfloat DIV_D")
 #define MOV_D(fd, fs)           NanoAssertMsg(0, "softfloat MOV_D")
+#define MOVF_D(fd, fs, cc)      NanoAssertMsg(0, "softfloat MOVF_D")
+#define MOVT_D(fd, fs, cc)      NanoAssertMsg(0, "softfloat MOVT_D")
 #define MUL_D(fd, fs, ft)       NanoAssertMsg(0, "softfloat MUL_D")
 #define NEG_D(fd, fs)           NanoAssertMsg(0, "softfloat NEG_D")
 #define SUB_D(fd, fs, ft)       NanoAssertMsg(0, "softfloat SUB_D")
@@ -733,6 +743,14 @@ namespace nanojit {
 #define MOVF(rd, rs, cc)                                                \
     do { count_fpu(); EMIT(R_FORMAT(OP_SPECIAL, GPR(rs), (cc)<<2, GPR(rd), 0, SPECIAL_MOVCI), \
                            "movf %s, %s, $fcc%d", gpn(rd), gpn(rs), cc); } while (0)
+
+#define MOVF_D(fs, fd, cc)                                              \
+    do { count_fpu(); EMIT(F_FORMAT(OP_COP1, FMT_D, ((cc)<<2)|0, FPR(fs), FPR(fd), COP1X_MOVCF), \
+                           "movf.d %s, %s, $fcc%d", fpn(fd), fpn(fs), cc); } while (0)
+
+#define MOVT_D(fs, fd, cc)                                              \
+    do { count_fpu(); EMIT(F_FORMAT(OP_COP1, FMT_D, ((cc)<<2)|1, FPR(fs), FPR(fd), COP1X_MOVCF), \
+                           "movt.d %s, %s, $fcc%d", fpn(fd), fpn(fs), cc); } while (0)
 
 #define CVT_D_S(fd, fs)                                                 \
     do { count_fpu(); EMIT(F_FORMAT(OP_COP1, FMT_S, FPR(F0), FPR(fs), FPR(fd), COP1_CVTD), \
