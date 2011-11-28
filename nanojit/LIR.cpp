@@ -2059,6 +2059,8 @@ namespace nanojit
                 case LIR_dotf4:
                 case LIR_dotf3:
                 case LIR_dotf2:
+                case LIR_minf4:
+                case LIR_maxf4:
                 CASE64(LIR_addq:)
                 CASE64(LIR_subq:)
                 CASE64(LIR_addjovq:)
@@ -2544,6 +2546,8 @@ namespace nanojit
             case LIR_dotf4:
             case LIR_dotf3:
             case LIR_dotf2:
+            case LIR_minf4:
+            case LIR_maxf4:
             case LIR_andi:       CASE64(LIR_andq:)
             case LIR_ori:        CASE64(LIR_orq:)
             case LIR_xori:       CASE64(LIR_xorq:)
@@ -4337,6 +4341,8 @@ namespace nanojit
         case LIR_dotf4:
         case LIR_dotf3:
         case LIR_dotf2:
+        case LIR_maxf4:
+        case LIR_minf4:
             formals[0] = LTy_F4;
             formals[1] = LTy_F4;
             break;
