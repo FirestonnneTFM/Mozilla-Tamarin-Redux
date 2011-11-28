@@ -91,8 +91,8 @@ ecma3/Number/e15_7_4_7_1:Section R-1 , .*, diff, expectedfail, bug https://bugzi
 # The AS3 file here is a dup of the corresponding ECMA3 file, it had to be moved because compatibility testing
 # is not possible under rules for the ecma3 directory.  The ecma3 edition is unversioned and correct in new code.
 # The as3 edition expects wrong answers for old swf versions.
-as3/Number/e15_7_4_6_1:Section R-(18|19) .* , .* , diff, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478796
-as3/Number/e15_7_4_6_1:Section C , .* ,diff , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478804
+as3/Types/Number/e15_7_4_6_1:Section R-(18|19) .* , .* , diff, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478796
+as3/Types/Number/e15_7_4_6_1:Section C , .* ,diff , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478804
 
 
 ecma3/Number/e15_7_1:Number\('1\.797693134862316e\+308'\), .*,  , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=692402

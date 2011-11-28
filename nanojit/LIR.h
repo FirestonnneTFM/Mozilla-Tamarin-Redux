@@ -2418,7 +2418,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         // Invariant: never returns a skip.
         LIns* read()
         {
-            const uint8_t insReadSizes[] = {
+            static const uint8_t insReadSizes[] = {
             // LIR_start is treated specially -- see below.  We intentionally
             // do not use the global insSizes[] because of this customization.
         #define OP___(op, repKind, retType, isCse) \
