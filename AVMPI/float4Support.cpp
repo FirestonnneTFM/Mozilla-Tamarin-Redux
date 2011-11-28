@@ -74,12 +74,6 @@ float4_ret_t verifyEnterVECR_adapter_impl(avmplus::MethodEnv* env, int32_t argc,
     return retval->f4_jit;
 }
 
-float4_ret_t debugEnterVECR_adapter_impl(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap){
-    DECLARE_ALIGNED_FLOAT4_PTR(retval);
-    retval->f4 = avmplus::BaseExecMgr::debugEnterExitWrapperV(env, argc, ap);
-    return retval->f4_jit;
-}
-
 float4_t thunkEnterVECR_adapter_impl(void* thunk_p, MethodEnv* env, int32_t argc, uint32_t* argv){
     typedef float4_ret_t (*VecrThunk)(avmplus::MethodEnv* env, int32_t argc, uint32_t* argv);
     DECLARE_ALIGNED_FLOAT4_PTR(retval);
@@ -87,9 +81,16 @@ float4_t thunkEnterVECR_adapter_impl(void* thunk_p, MethodEnv* env, int32_t argc
         retval->f4_jit = ((VecrThunk) thunk_p)(env, argc, argv);
     return retval->f4;
 }
+#ifdef DEBUGGER
+float4_ret_t debugEnterVECR_adapter_impl(avmplus::MethodEnv* env, int32_t argc, uint32_t* ap){
+    DECLARE_ALIGNED_FLOAT4_PTR(retval);
+    retval->f4 = avmplus::BaseExecMgr::debugEnterExitWrapperV(env, argc, ap);
+    return retval->f4_jit;
+}
+const VecrMethodProc debugEnterVECR_adapter = (VecrMethodProc) debugEnterVECR_adapter_impl;
+#endif
 
 const VecrMethodProc verifyEnterVECR_adapter = (VecrMethodProc) verifyEnterVECR_adapter_impl;
-const VecrMethodProc debugEnterVECR_adapter = (VecrMethodProc) debugEnterVECR_adapter_impl;
 const VecrThunkProc thunkEnterVECR_adapter = thunkEnterVECR_adapter_impl;
 
 }
