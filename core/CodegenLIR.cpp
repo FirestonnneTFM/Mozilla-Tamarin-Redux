@@ -4618,6 +4618,29 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
         // Unsupported because it uses MathClass::seed
         //{ avmplus::NativeID::Math_random,                  0, {BUILTIN_none,   BUILTIN_none},   FUNCTIONID(Math_random), 0},
+
+#ifdef VMCFG_FLOAT
+        { avmplus::NativeID::float_acos,                    1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_acos), 0},
+        { avmplus::NativeID::float_asin,                    1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_asin), 0},
+        { avmplus::NativeID::float_atan,                    1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_atan), 0},
+        { avmplus::NativeID::float_ceil,                    1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_ceil), 0},
+        { avmplus::NativeID::float_cos,                     1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_cos), 0},
+        { avmplus::NativeID::float_exp,                     1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_exp), 0},
+        { avmplus::NativeID::float_floor,                   1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_floor), 0},
+        { avmplus::NativeID::float_log,                     1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_log), 0},
+        { avmplus::NativeID::float_round,                   1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_round), 0},
+        { avmplus::NativeID::float_sin,                     1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_sin), 0},
+        { avmplus::NativeID::float_sqrt,                    1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_sqrt), 0},
+        { avmplus::NativeID::float_tan,                     1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_tan), 0},
+        
+        { avmplus::NativeID::float_atan2,                   2, {BUILTIN_float, BUILTIN_float}, FUNCTIONID(float_atan2), 0},
+        { avmplus::NativeID::float_pow,                     2, {BUILTIN_float, BUILTIN_float}, FUNCTIONID(float_pow), 0},
+
+        { avmplus::NativeID::float_abs,                     1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_abs), 0},
+        
+        { avmplus::NativeID::float_min,                     2, {BUILTIN_float, BUILTIN_float}, FUNCTIONID(float_min2), 0},
+        { avmplus::NativeID::float_max,                     2, {BUILTIN_float, BUILTIN_float}, FUNCTIONID(float_max2), 0},
+#endif
     };
 
     static uint32_t genFunctionKey (int32_t methodId, int32_t argCount)
