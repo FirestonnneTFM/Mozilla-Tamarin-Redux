@@ -484,9 +484,9 @@ var FEATURES =
     <name> AVMFEATURE_FLOAT  </name>
     <requires> AVMFEATURE_SWF16 </requires>
     <defines> VMCFG_FLOAT  </defines>
+    <defines> VMCFG_GENERIC_FLOAT4 </defines>
     <build-flags type="boolean"> -config CONFIG::VMCFG_FLOAT </build-flags>
     <build-flags type="onoff"> -abcfuture </build-flags>
-    <build-flags type="onoff"> Float.as </build-flags>
     <precludes> AVMFEATURE_AOT </precludes> <!-- AOT + float doesn't work yet, byt that will change eventually -->
   </feature>
 

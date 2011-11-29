@@ -72,9 +72,9 @@ namespace avmplus
         if(argc != 4)
             vtable->init->argcError(argc);
 
-        float4_t val = { AvmCore::singlePrecisionFloat(argv[1]), 
-                                                     AvmCore::singlePrecisionFloat(argv[2]), 
-                                                     AvmCore::singlePrecisionFloat(argv[3]), 
+        float4_t val = { AvmCore::singlePrecisionFloat(argv[1]),
+                         AvmCore::singlePrecisionFloat(argv[2]),
+                         AvmCore::singlePrecisionFloat(argv[3]),
                          AvmCore::singlePrecisionFloat(argv[4])};
         return core()->float4ToAtom(val);
     }
@@ -149,7 +149,7 @@ namespace avmplus
         F4OP2SELe(result, x, y, >);
     }
 
-   // FIXME: Here we allow reduced precision so we almost certainly want to delegate to the
+   // FIXME (Bugzilla 703605): Here we allow reduced precision so we almost certainly want to delegate to the
     // native SIMD implementation to get consistent interpreter/JIT behavior.
     void Float4Class::reciprocal(float4_t* result, const float4_t& x)
     {

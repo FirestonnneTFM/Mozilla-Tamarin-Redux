@@ -503,8 +503,9 @@ Atom op_negate(AvmCore* core, Atom val) {
     if(atomIsIntptr(val) && val != zeroIntAtom){
         double res = - INTPTRASDOUBLE(val);
         intptr_t res_int = intptr_t(res);
-        /* note: if res_int is 0, given that 'val' was integer, it meas that we should really return '-0' */
-        if( atomIsValidIntptrValue(res_int) && res == (double)res_int && res_int != 0)
+        // note: we can't negate "0" as integer, but we should've guarded against that case with the zeroIntAtom test
+        AvmAssert(res_int != 0);
+        if( atomIsValidIntptrValue(res_int) && res == (double)res_int)
             return (res_int << 3) | kIntptrType;
     }
 

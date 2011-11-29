@@ -233,7 +233,7 @@ def builtinBuildFlags(o):
     buildFlags = ""
     arg = o.getBoolArg("float", False, False)
     if (arg == True):
-        buildFlags += "-config CONFIG::VMCFG_FLOAT=true -abcfuture Float.as"
+        buildFlags += "-config CONFIG::VMCFG_FLOAT=true -abcfuture"
     if (arg == False):
         buildFlags += "-config CONFIG::VMCFG_FLOAT=false"
     return buildFlags

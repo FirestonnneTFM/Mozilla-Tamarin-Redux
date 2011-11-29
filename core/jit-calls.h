@@ -1191,7 +1191,7 @@
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getUintProperty), SIG2(A,P,U), FloatVectorObject_getUintProperty)
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getNativeUintProperty), SIG2(F,P,U), FloatVectorObject_getNativeUintProperty)
     METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getUintProperty), SIG2(A,P,U), Float4VectorObject_getUintProperty)
-    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getNativeUintProperty), SIG2(PF4,P,U), Float4VectorObject_getNativeUintProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getNativeUintProperty), SIG3(V,RF4,P,U), Float4VectorObject_getNativeUintProperty)
 #endif
 
     METHOD(ENVADDR(MethodEnv::getpropertylate_i), SIG3(A,P,A,I), getpropertylate_i)

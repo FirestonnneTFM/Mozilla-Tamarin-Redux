@@ -42,7 +42,7 @@
 export vmbuilds=ftp://10.60.48.47/
 #export ascbuilds=ftp://ftp.mozilla.org/pub/js/tamarin/builds/asc/latest
 export ascbuilds=http://10.60.48.47/hg/asc-float/raw-file/tip/lib/
-export BUILTIN_BUILDFLAGS='-config CONFIG::VMCFG_FLOAT=true -abcfuture Float.as'
+export BUILTIN_BUILDFLAGS='-config CONFIG::VMCFG_FLOAT=true -abcfuture'
 
 ## Used by performance slaves for locking
 export sleeptime=`expr $RANDOM % 60 + 60`
