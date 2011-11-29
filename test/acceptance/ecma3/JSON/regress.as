@@ -49,6 +49,10 @@ AddTestCase("JSON.stringify('mn\\u0001op\\u0002qr\\u0003st')",
             '"mn\\u0001op\\u0002qr\\u0003st"',
             JSON.stringify('mn\u0001op\u0002qr\u0003st'));
 
+// Bugzilla 672484: The string literal "\u000FF " *is* valid JSON input.
+AddTestCase("JSON.parse('\"\\u000FF \"')", "\u000FF ", JSON.parse('"\\u000FF "'));
+AddTestCase("JSON.parse('\"\\u0061F \"')", "aF ", JSON.parse('"\\u0061F "'));
+
 // Another problem: the JSON.parse and JSON.stringify routines
 // are written as recursive procedures.  How do they handle
 // inputs where the recursion must descend deep into the structure?
