@@ -533,32 +533,32 @@ class IDataInputInterface : public avmplus::ScriptObject
 public:
     inline uint32_t call_get_bytesAvailable()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1381);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1383);
         avmplus::Atom const result = this->toplevel()->getproperty(this->atom(), mn, this->vtable);
         return avmplus::AvmCore::toUInt32(result);
     }
     inline GCRef<avmplus::String> call_get_endian()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1384);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1386);
         avmplus::Atom const result = this->toplevel()->getproperty(this->atom(), mn, this->vtable);
         return GCRef<avmplus::String>(avmplus::AvmCore::atomToString(result));
     }
     inline uint32_t call_get_objectEncoding()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1383);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1385);
         avmplus::Atom const result = this->toplevel()->getproperty(this->atom(), mn, this->vtable);
         return avmplus::AvmCore::toUInt32(result);
     }
     inline bool call_readBoolean()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1369);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1371);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return ((result) != avmplus::falseAtom);
     }
     inline int32_t call_readByte()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1370);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1372);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::integer(result);
@@ -566,28 +566,28 @@ public:
     inline void call_readBytes(GCRef<avmplus::ByteArrayObject> arg1, uint32_t arg2, uint32_t arg3)
     {
         avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core()));
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1368);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1370);
         avmplus::Atom args[4] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1.reinterpretCast<avmplus::ScriptObject>()->atom(), core->uintToAtom(arg2), core->uintToAtom(arg3) };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 3, args, this->vtable);
         AvmAssert(result == undefinedAtom); (void)result;
     }
     inline double call_readDouble()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1377);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1379);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::number(result);
     }
     inline double call_readFloat()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1376);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1378);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::number(result);
     }
     inline int32_t call_readInt()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1374);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1376);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::integer(result);
@@ -595,28 +595,28 @@ public:
     inline GCRef<avmplus::String> call_readMultiByte(uint32_t arg1, GCRef<avmplus::String> arg2)
     {
         avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core()));
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1378);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1380);
         avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), core->uintToAtom(arg1), arg2->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 2, args, this->vtable);
         return GCRef<avmplus::String>(avmplus::AvmCore::atomToString(result));
     }
     inline avmplus::Atom call_readObject()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1382);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1384);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return result;
     }
     inline int32_t call_readShort()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1372);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1374);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::integer(result);
     }
     inline GCRef<avmplus::String> call_readUTF()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1379);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1381);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return GCRef<avmplus::String>(avmplus::AvmCore::atomToString(result));
@@ -624,35 +624,35 @@ public:
     inline GCRef<avmplus::String> call_readUTFBytes(uint32_t arg1)
     {
         avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core()));
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1380);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1382);
         avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), core->uintToAtom(arg1) };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 1, args, this->vtable);
         return GCRef<avmplus::String>(avmplus::AvmCore::atomToString(result));
     }
     inline uint32_t call_readUnsignedByte()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1371);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1373);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::toUInt32(result);
     }
     inline uint32_t call_readUnsignedInt()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1375);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1377);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::toUInt32(result);
     }
     inline uint32_t call_readUnsignedShort()
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1373);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1375);
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
         return avmplus::AvmCore::toUInt32(result);
     }
     inline void call_set_endian(GCRef<avmplus::String> arg1)
     {
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1384);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1386);
         this->toplevel()->setproperty(this->atom(), mn, arg1->atom(), this->vtable);
         avmplus::Atom const result = undefinedAtom;
         AvmAssert(result == undefinedAtom); (void)result;
@@ -660,7 +660,7 @@ public:
     inline void call_set_objectEncoding(uint32_t arg1)
     {
         avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core()));
-        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1383);
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1385);
         this->toplevel()->setproperty(this->atom(), mn, core->uintToAtom(arg1), this->vtable);
         avmplus::Atom const result = undefinedAtom;
         AvmAssert(result == undefinedAtom); (void)result;
@@ -776,6 +776,201 @@ private:
     void operator=(const IDataOutputClass&); // unimplemented
 };
 
+//-----------------------------------------------------------
+// flash.net::IDynamicPropertyOutput
+//-----------------------------------------------------------
+class IDynamicPropertyOutputInterface : public avmplus::ScriptObject
+{
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::IDynamicPropertyOutputClass;
+    REALLY_INLINE explicit IDynamicPropertyOutputInterface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit IDynamicPropertyOutputInterface(const IDynamicPropertyOutputInterface&); // unimplemented
+    void operator=(const IDynamicPropertyOutputInterface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// flash.net::IDynamicPropertyOutput$
+//-----------------------------------------------------------
+class IDynamicPropertyOutputClass : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::IDynamicPropertyOutputInterface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::IDynamicPropertyOutputInterface>((avmplus::IDynamicPropertyOutputInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IDynamicPropertyOutputInterface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::IDynamicPropertyOutputInterface>((avmplus::IDynamicPropertyOutputInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IDynamicPropertyOutputInterface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::IDynamicPropertyOutputInterface>((avmplus::IDynamicPropertyOutputInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IDynamicPropertyOutputInterface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::IDynamicPropertyOutputInterface>((avmplus::IDynamicPropertyOutputInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit IDynamicPropertyOutputClass(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit IDynamicPropertyOutputClass(const IDynamicPropertyOutputClass&); // unimplemented
+    void operator=(const IDynamicPropertyOutputClass&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// flash.net::IDynamicPropertyWriter
+//-----------------------------------------------------------
+class IDynamicPropertyWriterInterface : public avmplus::ScriptObject
+{
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::IDynamicPropertyWriterClass;
+    REALLY_INLINE explicit IDynamicPropertyWriterInterface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit IDynamicPropertyWriterInterface(const IDynamicPropertyWriterInterface&); // unimplemented
+    void operator=(const IDynamicPropertyWriterInterface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// flash.net::IDynamicPropertyWriter$
+//-----------------------------------------------------------
+class IDynamicPropertyWriterClass : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::IDynamicPropertyWriterInterface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::IDynamicPropertyWriterInterface>((avmplus::IDynamicPropertyWriterInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IDynamicPropertyWriterInterface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::IDynamicPropertyWriterInterface>((avmplus::IDynamicPropertyWriterInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IDynamicPropertyWriterInterface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::IDynamicPropertyWriterInterface>((avmplus::IDynamicPropertyWriterInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IDynamicPropertyWriterInterface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::IDynamicPropertyWriterInterface>((avmplus::IDynamicPropertyWriterInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit IDynamicPropertyWriterClass(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit IDynamicPropertyWriterClass(const IDynamicPropertyWriterClass&); // unimplemented
+    void operator=(const IDynamicPropertyWriterClass&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// flash.utils::IExternalizable
+//-----------------------------------------------------------
+class IExternalizableInterface : public avmplus::ScriptObject
+{
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::IExternalizableClass;
+    REALLY_INLINE explicit IExternalizableInterface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit IExternalizableInterface(const IExternalizableInterface&); // unimplemented
+    void operator=(const IExternalizableInterface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// flash.utils::IExternalizable$
+//-----------------------------------------------------------
+class IExternalizableClass : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::IExternalizableInterface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::IExternalizableInterface>((avmplus::IExternalizableInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IExternalizableInterface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::IExternalizableInterface>((avmplus::IExternalizableInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IExternalizableInterface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::IExternalizableInterface>((avmplus::IExternalizableInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IExternalizableInterface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::IExternalizableInterface>((avmplus::IExternalizableInterface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit IExternalizableClass(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit IExternalizableClass(const IExternalizableClass&); // unimplemented
+    void operator=(const IExternalizableClass&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// flash.net::ObjectEncoding
+//-----------------------------------------------------------
+class ObjectEncodingObject : public avmplus::ScriptObject
+{
+    GC_DECLARE_EXACT_METHODS
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::ObjectEncodingClass;
+    REALLY_INLINE explicit ObjectEncodingObject(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit ObjectEncodingObject(const ObjectEncodingObject&); // unimplemented
+    void operator=(const ObjectEncodingObject&); // unimplemented
+};
+
+#define avmplus_ObjectEncodingObject_isExactInterlock 1
 //-----------------------------------------------------------
 // flash.utils::CompressionAlgorithm
 //-----------------------------------------------------------

@@ -183,12 +183,14 @@ class Errors
         public static const kNullArgumentError                = 1507;
         public static const kInvalidArgumentError             = 1508;
         public static const kArrayFilterNonNullObjectError    = 1510;
+        public static const kInvalidParamError                = 2004;
         public static const kParamRangeError                  = 2006;
         public static const kNullPointerError                 = 2007;
         public static const kInvalidEnumError                 = 2008;
         public static const kCantInstantiateError             = 2012;
         public static const kEOFError                         = 2030;
         public static const kCompressedDataError              = 2058;
+        public static const kEmptyStringError                 = 2085;
         public static const kProxyGetPropertyError            = 2088;
         public static const kProxySetPropertyError            = 2089;
         public static const kProxyCallPropertyError           = 2090;
@@ -199,4 +201,5 @@ class Errors
         public static const kProxyNextNameError               = 2106;
         public static const kProxyNextValueError              = 2107;
         public static const kInvalidArrayLengthError          = 2108;
+        public static const kReadExternalNotImplementedError  = 2173;
 };

@@ -131,6 +131,8 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/instr.cpp \
   $(curdir)/ProxyGlue.cpp \
   $(curdir)/DictionaryGlue.cpp \
+  $(curdir)/ObjectIO.cpp \
+  $(curdir)/AvmSerializer.cpp \
   $(NULL)
 
 #  $(curdir)/avmplus.cpp \
