@@ -59,8 +59,6 @@ namespace avmplus
         int version;
         int result = canParse(code, &version);
 
-        if(version>= (47<<16))
-            apiVersion = kApiVersion_SWF_16;
 #ifdef AVMPLUS_VERBOSE
         if (core->isVerbose(VB_parse))
             core->console << "major=" << (version&0xFFFF) << " minor=" << (version>>16) << "\n";
