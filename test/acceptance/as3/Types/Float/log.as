@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
 /*
 Returns an implementation-dependent approximation to the natural logarithm of x.
@@ -53,11 +52,9 @@ function check(param:float):float { return float.log(param); }
 
 AddStrictTestCase("float.log() returns a float", "float", getQualifiedClassName(float.log(0)));
 AddStrictTestCase("float.log() length is 1", 1, float.log.length);
-AddErrorTest("float.log() with no args", ARGUMENTERROR+1063,  function(){ float.log(); });
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.log(undefined)", float.NaN, float.log(undefined));
-AddStrictTestCase("float.log(string)", float.NaN, float.log("string"));
 AddStrictTestCase("float.log(NaN)", float.NaN, float.log(float.NaN));
 AddStrictTestCase("float.log(NaN) check()", float.NaN, check(float.NaN));
 
@@ -72,14 +69,12 @@ AddStrictTestCase("float.log(0f)", float.NEGATIVE_INFINITY, float.log(0f));
 AddStrictTestCase("float.log(0f) check()", float.NEGATIVE_INFINITY, check(0f));
 AddStrictTestCase("float.log(-0f)", float.NEGATIVE_INFINITY, float.log(-0f));
 AddStrictTestCase("float.log(-0f) check()", float.NEGATIVE_INFINITY, check(-0f));
-AddStrictTestCase("float.log(false)", float.NEGATIVE_INFINITY, float.log(false));
 
 // If x is 1, the result is +0.
 AddStrictTestCase("float.log(1f)", 0f, float.log(1f));
 AddStrictTestCase("float.log(1f) check()", 0f, check(1f));
 AddStrictTestCase("float.log(1f) is +0f", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.log(1f));
 AddStrictTestCase("float.log(1f) is +0f check()", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/check(1f));
-AddStrictTestCase("float.log(true)", float(0), float.log(true));
 
 // If x is +Infinity, the result is +Infinity.
 AddStrictTestCase("float.log(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY, float.log(float.POSITIVE_INFINITY));

@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
 /*
 Returns an implementation-dependent approximation to the arc cosine of x.
@@ -54,11 +53,9 @@ function check(param:float):float { return float.acos(param); }
 
 AddStrictTestCase("float.acos() returns a float", "float", getQualifiedClassName(float.acos(0)));
 AddStrictTestCase("float.acos() length is 1", 1, float.acos.length);
-AddErrorTest("float.acos() with no args", ARGUMENTERROR+1063,  function(){ float.acos(); });
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.acos(undefined)", float.NaN, float.acos(undefined));
-AddStrictTestCase("float.acos(string)", float.NaN, float.acos("string"));
 AddStrictTestCase("float.acos(float.NaN)", float.NaN, float.acos(float.NaN));
 AddStrictTestCase("float.acos(float.NaN) check()", float.NaN, check(float.NaN));
 
@@ -76,11 +73,7 @@ AddStrictTestCase("Ensure that float.acos(1f) returns +0", float.POSITIVE_INFINI
 
 
 AddStrictTestCase("float.acos(null)", float.PI/2.0f, float.acos(null));
-AddStrictTestCase("float.acos(true)", 0f, float.acos(true));
-AddStrictTestCase("float.acos(false)", float.PI/2.0f, float.acos(false));
 
-AddStrictTestCase("float.acos('1')", 0f, float.acos('1'));
-AddStrictTestCase("float.acos('0')", float.PI/2.0f, float.acos('0'));
 
 var myfloat:float = 0f;
 AddStrictTestCase("float.acos(myfloat=0f)", float(float.PI/2.0f), float.acos(myfloat));

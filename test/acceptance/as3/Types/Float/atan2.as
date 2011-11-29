@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
 /*
 Returns an implementation-dependent approximation to the arc tangent of the
@@ -58,14 +57,10 @@ function check(param1:float, param2:float):float { return float.atan2(param1, pa
 
 AddStrictTestCase("float.atan2() returns a float", "float", getQualifiedClassName(float.atan2(0f,0f)));
 AddStrictTestCase("float.atan2() length is 2", 2, float.atan2.length);
-AddErrorTest("float.atan2() with no args", ARGUMENTERROR+1063,  function(){ float.atan2(); });
-AddErrorTest("float.atan2(0) with one args", ARGUMENTERROR+1063,  function(){ float.atan2(0); });
 
 // If either x or y is NaN, the result is NaN.
 AddStrictTestCase("float.atan2(0f, undefined)", float.NaN, float.atan2(0f, undefined));
 AddStrictTestCase("float.atan2(undefined, 0f)", float.NaN, float.atan2(undefined, 0f));
-AddStrictTestCase("float.atan2(0f, string)", float.NaN, float.atan2(0f, "string"));
-AddStrictTestCase("float.atan2(string, 0f)", float.NaN, float.atan2("string", 0f));
 AddStrictTestCase("float.atan2(1f, float.NaN)", float.NaN, float.atan2(1f, float.NaN));
 AddStrictTestCase("float.atan2(float.NaN, 1f)", float.NaN, float.atan2(float.NaN, 1f));
 AddStrictTestCase("float.atan2(1f, float.NaN) check()", float.NaN, check(1f, float.NaN));
@@ -74,12 +69,10 @@ AddStrictTestCase("float.atan2(float.NaN, 1f) check()", float.NaN, check(float.N
 // If y>0 and x is +0, the result is an implementation-dependent approximation to +PI/2.
 AddStrictTestCase("float.atan2(1f, 0f)", float.PI/2f, float.atan2(1f, 0f));
 AddStrictTestCase("float.atan2(1f, 0f) check", float.PI/2f, check(1f, 0f));
-AddStrictTestCase("float.atan2('1', '0')", float.PI/2f, float.atan2('1', '0'));
 
 // If y>0 and x is -0, the result is an implementation-dependent approximation to +PI/2.
 AddStrictTestCase("float.atan2(1f, -0f)", float.PI/2f, float.atan2(1f, -0f));
 AddStrictTestCase("float.atan2(1f, -0f) check", float.PI/2f, check(1f, -0f));
-AddStrictTestCase("float.atan2('1', '-0')", float.PI/2f, float.atan2('1', '-0'));
 
 // If y is +0 and x>0, the result is +0.
 AddTestCase("float.atan2(0f, 1f)", 0f, float.atan2(0f, 1f));

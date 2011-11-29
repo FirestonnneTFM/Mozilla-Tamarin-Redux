@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
 /*
 Returns a float value with positive sign, greater than or equal to 0 but less
@@ -55,7 +54,6 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 AddStrictTestCase("float.random() returns a float", "float", getQualifiedClassName(float.random()));
 AddStrictTestCase("float.random() length is 0", 0, float.random.length);
-AddErrorTest("float.random() with args", ARGUMENTERROR+1063,  function(){ float.random(12); });
 
 var myRandom:float;
 for (var x:int = 0; x < 1000; x++)

@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "6.10";
 var VERSION = "AS3";
@@ -52,14 +50,14 @@ var onef:float = 1f;
 var ninef:float = 9f;
 var tenf:float = 10f;
 
-AddTestCase("void 0 && 1f", undefined, void 0 && onef );
-AddTestCase("void 0 && 1f FloatLiteral", undefined, void 0 && 1f );
-AddTestCase("null && 1f", null, null && onef );
-AddTestCase("null && 1f FloatLiteral", null, null && 1f );
-AddTestCase("1f && void 0", undefined, onef && void 0 );
-AddTestCase("1f FloatLiteral && void 0", undefined, 1f && void 0 );
-AddTestCase("1f && null", null, onef && null );
-AddTestCase("1f FloatLiteral && null", null, 1f && null );
+AddStrictTestCase("void 0 && 1f", undefined, void 0 && onef );
+AddStrictTestCase("void 0 && 1f FloatLiteral", undefined, void 0 && 1f );
+AddStrictTestCase("null && 1f", null, null && onef );
+AddStrictTestCase("null && 1f FloatLiteral", null, null && 1f );
+AddStrictTestCase("1f && void 0", undefined, onef && void 0 );
+AddStrictTestCase("1f FloatLiteral && void 0", undefined, 1f && void 0 );
+AddStrictTestCase("1f && null", null, onef && null );
+AddStrictTestCase("1f FloatLiteral && null", null, 1f && null );
 
 AddStrictTestCase("0f && 0f", 0f, zerof && zerof );
 AddStrictTestCase("0f FloatLiteral && 0f FloatLiteral", 0f, 0f && 0f );
@@ -100,14 +98,14 @@ AddTestCase("float.POSITIVE_INFINITY && float.NaN", float.NaN,  float.POSITIVE_I
 
 
 
-AddTestCase("void 0 || 1f", 1f, void 0 || onef );
-AddTestCase("void 0 || 1f FloatLiteral", 1f, void 0 || 1f );
-AddTestCase("null || 1f", 1f, null || onef );
-AddTestCase("null || 1f FloatLiteral", 1f, null || 1f );
-AddTestCase("1f || void 0", 1f, onef || void 0 );
-AddTestCase("1f FloatLiteral || void 0", 1f, 1f || void 0 );
-AddTestCase("1f || null", 1f, onef || null );
-AddTestCase("1f FloatLiteral || null", 1f, 1f || null );
+AddStrictTestCase("void 0 || 1f", 1f, void 0 || onef );
+AddStrictTestCase("void 0 || 1f FloatLiteral", 1f, void 0 || 1f );
+AddStrictTestCase("null || 1f", 1f, null || onef );
+AddStrictTestCase("null || 1f FloatLiteral", 1f, null || 1f );
+AddStrictTestCase("1f || void 0", 1f, onef || void 0 );
+AddStrictTestCase("1f FloatLiteral || void 0", 1f, 1f || void 0 );
+AddStrictTestCase("1f || null", 1f, onef || null );
+AddStrictTestCase("1f FloatLiteral || null", 1f, 1f || null );
 
 AddStrictTestCase("0f || 0f", 0f, zerof || zerof );
 AddStrictTestCase("0f FloatLiteral || 0f FloatLiteral", 0f, 0f || 0f );
@@ -142,9 +140,9 @@ AddStrictTestCase("-1f || true", -1f, neg_onef || true );
 AddStrictTestCase("-1f FloatLiteral || true", -1f, -1f || true );
 AddStrictTestCase("true || float.POSITIVE_INFINITY", true, true || float.POSITIVE_INFINITY );
 AddStrictTestCase("float.NEGATIVE_INFINITY || true", float.NEGATIVE_INFINITY, float.NEGATIVE_INFINITY || true );
-AddTestCase("float.NaN || float.NaN", float.NaN,  float.NaN || float.NaN );
-AddTestCase("float.NaN || 0f", 0f,  float.NaN || 0f );
-AddTestCase("0f || float.NaN", float.NaN,  0f || float.NaN );
+AddStrictTestCase("float.NaN || float.NaN", float.NaN,  float.NaN || float.NaN );
+AddStrictTestCase("float.NaN || 0f", 0f,  float.NaN || 0f );
+AddStrictTestCase("0f || float.NaN", float.NaN,  0f || float.NaN );
 AddStrictTestCase("flaot.NaN || float.POSITIVE_INFINITY", float.POSITIVE_INFINITY,  float.NaN || float.POSITIVE_INFINITY );
 AddStrictTestCase("float.POSITIVE_INFINITY || float.NaN", float.POSITIVE_INFINITY,  float.POSITIVE_INFINITY || float.NaN );
 

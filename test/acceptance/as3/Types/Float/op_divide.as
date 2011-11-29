@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "6.4.2";
 var VERSION = "AS3";
@@ -53,8 +51,6 @@ var f2:float = 6.543210987; // TODO: use float literals
 // c float  188679200
 AddStrictTestCase("float division result", float(1.886792e+08), f1/f2);
 AddStrictTestCase("FloatLiteral division result", float(1.886792e+08), 1.2345678e9f/6.543210987f);
-AddTestCase("division on float & number should yield different results", true, (f1/f2) != (1.2345678e9/6.543210987) );
-AddTestCase("division on float & number should yield different results", true, (f1/f2) != (Number(f1)/Number(f2)) );
 AddTestCase("division of 2 floats returns a float", "float", getQualifiedClassName(f1/f2));
 
 

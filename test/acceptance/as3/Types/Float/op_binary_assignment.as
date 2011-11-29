@@ -59,8 +59,6 @@ package
     }
 }
 
-include "floatUtil.as";
-
 var SECTION = "6.12";
 var VERSION = "AS3";
 var TITLE   = "The assignment operators augmented by float values";

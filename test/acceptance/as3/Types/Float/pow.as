@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
 /*
 Returns an implementation-dependent approximation to the result of raising x to the power y.
@@ -53,18 +52,14 @@ function check(param1:float, param2:float):float { return float.pow(param1, para
 
 AddStrictTestCase("float.pow() returns a float", "float", getQualifiedClassName(float.pow(0,1)));
 AddStrictTestCase("float.pow() length is 2", 2, float.pow.length);
-AddErrorTest("float.pow() with no args", ARGUMENTERROR+1063,  function(){ float.pow(); });
-AddErrorTest("float.pow() with one args", ARGUMENTERROR+1063,  function(){ float.pow(1); });
 
 // If y is NaN, the result is NaN.
 AddStrictTestCase("float.pow(1.0f, undefined)", float.NaN, float.pow(1.0f, undefined));
-AddStrictTestCase("float.pow(1.0f, string)", float.NaN, float.pow(1.0f, "string"));
 AddStrictTestCase("float.pow(1.0f, float.NaN)", float.NaN, float.pow(1.0f, float.NaN));
 AddStrictTestCase("float.pow(1.0f, floatNaN) check()", float.NaN, check(1.0f, float.NaN));
 
 // If y is +0, the result is 1, even if x is NaN.
 AddStrictTestCase("float.pow(undefined, 0f)", 1f, float.pow(undefined, 0f));
-AddStrictTestCase("float.pow(string, 0f)", 1f, float.pow("string", 0f));
 AddStrictTestCase("float.pow(float.NaN, 0f)", 1f, float.pow(float.NaN, 0f));
 AddStrictTestCase("float.pow(1.2f, 0f)", 1f, float.pow(1.2f, 0f));
 AddStrictTestCase("float.pow(float.NaN, 0f) check()", 1f, check(float.NaN, 0f));
@@ -72,7 +67,6 @@ AddStrictTestCase("float.pow(1.2f, 0f) check()", 1f, check(1.2f, 0f));
 
 // If y is -0, the result is 1, even if x is NaN.
 AddStrictTestCase("float.pow(undefined, -0f)", 1f, float.pow(undefined, -0f));
-AddStrictTestCase("float.pow(string, -0f)", 1f, float.pow("string", -0f));
 AddStrictTestCase("float.pow(float.NaN, -0f)", 1f, float.pow(NaN, -0f));
 AddStrictTestCase("float.pow(1.2f, -0f)", 1f, float.pow(1.2f, -0f));
 AddStrictTestCase("float.pow(float.NaN, -0f) check()", 1f, check(float.NaN, -0f));
@@ -80,7 +74,6 @@ AddStrictTestCase("float.pow(1.2f, -0f) check()", 1f, check(1.2f, -0f));
 
 // If x is NaN and y is nonzero, the result is NaN.
 AddStrictTestCase("float.pow(undefined, 1f)", float.NaN, float.pow(undefined, 1f));
-AddStrictTestCase("float.pow(string, 1f)", float.NaN, float.pow("string", 1f));
 AddStrictTestCase("float.pow(float.NaN, 1f)", float.NaN, float.pow(float.NaN, 1f));
 AddStrictTestCase("float.pow(float.NaN, 1f) check()", float.NaN, check(float.NaN, 1f));
 

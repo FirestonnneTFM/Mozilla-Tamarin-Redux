@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "4.3";
 var VERSION = "AS3";
@@ -51,8 +49,6 @@ When the float class object is called as a function, it performs a type conversi
 value.
 */
 
-var result = float();
-AddTestCase("Float with no args", "float", getQualifiedClassName(result));
 
 var undefined_float = float(undefined);
 AddTestCase("Float as function, with 'undefined' arg", "float", getQualifiedClassName(undefined_float));

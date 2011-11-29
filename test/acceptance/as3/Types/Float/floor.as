@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
 /*
 Returns the greatest (closest to +Infinity) float value that is not greater
@@ -55,11 +54,9 @@ function check(param:float):float { return float.floor(param); }
 
 AddStrictTestCase("float.floor() returns a float", "float", getQualifiedClassName(float.floor(0)));
 AddStrictTestCase("float.floor() length is 1", 1, float.floor.length);
-AddErrorTest("float.floor() with no args", ARGUMENTERROR+1063,  function(){ float.floor(); });
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.floor(undefined)", float.NaN, float.floor(undefined));
-AddStrictTestCase("float.floor(string)", float.NaN, float.floor("string"));
 AddStrictTestCase("float.floor(NaN)", float.NaN, float.floor(float.NaN));
 AddStrictTestCase("float.floor(NaN)", float.NaN, check(float.NaN));
 
@@ -69,9 +66,6 @@ AddStrictTestCase("float.floor(0f) sign check", float.POSITIVE_INFINITY, float.P
 AddStrictTestCase("float.floor(0f) check()", 0f, check(0f));
 AddStrictTestCase("float.floor(0f) check() sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/check(0f));
 AddStrictTestCase("float.floor(null)", 0f, float.floor(null));
-AddStrictTestCase("float.floor(false)", 0f, float.floor(false));
-AddStrictTestCase("float.floor('0')", 0f, float.floor('0'));
-AddStrictTestCase("float.INFINITY/float.floor('0')", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.floor('0'));
 
 // If x is -0, the result is -0.
 AddStrictTestCase("float.floor(-0f)", -0f, float.floor(-0f));
@@ -99,10 +93,6 @@ AddStrictTestCase("float.floor(0.5f) check() sign check", float.POSITIVE_INFINIT
 // The value of float.floor(x) is the same as the value of -float.ceil(-x).
 AddStrictTestCase("float.floor(3.124f) == -float.ceil(-3.124f)", -float.ceil(-3.124f), float.floor(3.124f));
 
-
-
-AddStrictTestCase("float.floor(true)", 1f, float.floor(true));
-AddStrictTestCase("float.floor('1')", 1f, float.floor('1'));
 
 AddStrictTestCase("float.floor(-float.MIN_VALUE)", -1f, float.floor(-float.MIN_VALUE));
 AddStrictTestCase("float.floor(float.MAX_VALUE)", float.MAX_VALUE, float.floor(float.MAX_VALUE));

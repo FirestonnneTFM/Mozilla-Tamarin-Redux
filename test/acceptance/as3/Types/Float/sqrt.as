@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
 /*
 Returns an implementation-dependent approximation to the square root of x.
@@ -53,11 +52,9 @@ function check(param:float):float { return float.sqrt(param); }
 
 AddStrictTestCase("float.sqrt() returns a float", "float", getQualifiedClassName(float.sqrt(0)));
 AddStrictTestCase("float.sqrt() length is 1", 1, float.sqrt.length);
-AddErrorTest("float.sqrt() with no args", ARGUMENTERROR+1063,  function(){ float.sqrt(); });
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.sqrt(undefined)", float.NaN, float.sqrt(undefined));
-AddStrictTestCase("float.sqrt(string)", float.NaN, float.sqrt("string"));
 AddStrictTestCase("float.sqrt(float.NaN)", float.NaN, float.sqrt(float.NaN));
 AddStrictTestCase("float.sqrt(float.NaN) check()", float.NaN, check(float.NaN));
 
@@ -75,7 +72,6 @@ AddStrictTestCase("float.sqrt(0f) sign check", float.POSITIVE_INFINITY, float.PO
 AddStrictTestCase("float.sqrt(0f) check()", 0f, check(0f));
 AddStrictTestCase("float.sqrt(0f) check() sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/check(0f));
 AddStrictTestCase("float.sqrt(null)", 0f, float.sqrt(null));
-AddStrictTestCase("float.sqrt(false)", 0f, float.sqrt(false));
 
 // If x is -0, the result is -0.
 var neg_zero:float = 0f;
@@ -91,7 +87,6 @@ AddStrictTestCase("float.sqrt(float.POSITIVE_INFINITY)", float.POSITIVE_INFINITY
 AddStrictTestCase("float.sqrt(float.POSITIVE_INFINITY) check()", float.POSITIVE_INFINITY, check(float.POSITIVE_INFINITY));
 
 
-AddStrictTestCase("float.sqrt(true)", 1f, float.sqrt(true));
 AddStrictTestCase("float.sqrt(2f)", float.SQRT2, float.sqrt(2f));
 AddStrictTestCase("float.sqrt(0.5f)", float.SQRT1_2, float.sqrt(0.5f));
 

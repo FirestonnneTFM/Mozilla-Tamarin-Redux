@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
 /*
 Returns an implementation-dependent approximation to the tangent of x. The
@@ -54,11 +53,9 @@ function check(param:float):float { return float.tan(param); }
 
 AddStrictTestCase("float.tan() returns a float", "float", getQualifiedClassName(float.tan(0)));
 AddStrictTestCase("float.tan() length is 1", 1, float.tan.length);
-AddErrorTest("float.tan() with no args", ARGUMENTERROR+1063,  function(){ float.tan(); });
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.tan(undefined)", float.NaN, float.tan(undefined));
-AddStrictTestCase("float.tan(string)", float.NaN, float.tan("string"));
 AddStrictTestCase("float.tan(float.NaN)", float.NaN, float.tan(float.NaN));
 AddStrictTestCase("float.tan(float.NaN) check()", float.NaN, check(float.NaN));
 
@@ -70,7 +67,6 @@ AddStrictTestCase("float.tan(0f) sign check", float.POSITIVE_INFINITY, float.POS
 AddStrictTestCase("float.tan(0f) check()", 0f, check(0f));
 AddStrictTestCase("float.tan(0f) check() sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/check(0f));
 AddStrictTestCase("float.tan(null)", 0f, float.tan(null));
-AddStrictTestCase("float.tan(false)", 0f, float.tan(false));
 
 // If x is -0, the result is -0.
 var neg_zero:float = -0f;

@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "6.3.6";
 var VERSION = "AS3";
@@ -58,8 +56,8 @@ AddStrictTestCase("bitwise not on float", ~3, ~flt);
 // bitwise NOT of 13       11111111 11111111 11111111 11110011
 // int value of memory     -13
 flt = 12.375f;
-AddTestCase("ToInt32 of float value instead of float memory representation", true, ~flt != -1095106561);
-AddTestCase("~12.375f ", ~12, ~flt);
+AddStrictTestCase("ToInt32 of float value instead of float memory representation", true, Number(~flt) != -1095106561);
+AddStrictTestCase("~12.375f ", ~12, ~flt);
 
 test();
 

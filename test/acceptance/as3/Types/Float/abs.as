@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
 /*
 Returns the absolute value of x; the result has the same magnitude as x but has positive sign.
@@ -53,12 +52,10 @@ function check(param:float):float { return float.abs(param); }
 
 AddStrictTestCase("float.abs() returns a float", "float", getQualifiedClassName(float.abs(0)));
 AddStrictTestCase("float.abs() length is 1", 1, float.abs.length);
-AddErrorTest("float.abs() with no args", ARGUMENTERROR+1063,  function(){ float.abs(); });
 
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.abs(undefined)", float.NaN, float.abs(undefined));
-AddStrictTestCase("float.abs(string)", float.NaN, float.abs("string"));
 AddStrictTestCase("float.abs(float.NaN)", float.NaN, float.abs(float.NaN));
 AddStrictTestCase("float.abs(flaot.NaN) check()", float.NaN, check(float.NaN));
 
@@ -87,12 +84,6 @@ AddStrictTestCase("float.abs(-typed) check()", pif, check(-pif));
 AddStrictTestCase("float.abs(typed) check()", pif, check(pif));
 
 AddStrictTestCase("float.abs(null)", 0f, float.abs(null));
-AddStrictTestCase("float.abs(true)", 1f, float.abs(true));
-AddStrictTestCase("float.abs(false)", 0f, float.abs(false));
-
-AddStrictTestCase("float.abs('1')", 1f, float.abs('1'));
-AddStrictTestCase("float.abs('0')", 0f, float.abs('0'));
-AddStrictTestCase("float.NEGATIVE_INFINITY/float.abs('0')", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.abs('0'));
 
 AddStrictTestCase("float.abs(-float.MIN_VALUE)", float.MIN_VALUE, float.abs(-float.MIN_VALUE));
 AddStrictTestCase("float.abs(-float.MAX_VALUE)", float.MAX_VALUE, float.abs(-float.MAX_VALUE));

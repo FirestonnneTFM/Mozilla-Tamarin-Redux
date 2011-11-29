@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
 /*
 Returns an implementation-dependent approximation to the exponential function
@@ -54,22 +53,18 @@ function check(param:float):float { return float.exp(param); }
 
 AddStrictTestCase("float.exp() returns a float", "float", getQualifiedClassName(float.exp(0)));
 AddStrictTestCase("float.exp() length is 1", 1, float.exp.length);
-AddErrorTest("float.exp() with no args", ARGUMENTERROR+1063,  function(){ float.exp(); });
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.exp(undefined)", float.NaN, float.exp(undefined));
-AddStrictTestCase("float.exp(string)", float.NaN, float.exp("string"));
 AddStrictTestCase("float.exp(NaN)", float.NaN, float.exp(float.NaN));
 AddStrictTestCase("float.exp(NaN) check()", float.NaN, check(float.NaN));
 
 // If x is +0, the result is 1.
 AddStrictTestCase("float.exp(0f)", 1f, float.exp(0f));
-AddStrictTestCase("float.exp('0')", 1f, float.exp('0'));
 AddStrictTestCase("float.exp(0f) check()", 1f, check(0f));
 
 // If x is -0, the result is 1.
 AddStrictTestCase("float.exp(-0f)", 1f, float.exp(-0f));
-AddStrictTestCase("float.exp('-0')", 1f, float.exp('-0'));
 AddStrictTestCase("float.exp(-0f) check()", 1f, check(-0f));
 
 // If x is +Infinity, the result is +Infinity.
@@ -84,12 +79,9 @@ AddStrictTestCase("float.exp(float.NEGATIVE_INFINITY) check() sign check", float
 
 
 AddStrictTestCase("float.exp(null)", 1f, float.exp(null));
-AddStrictTestCase("float.exp(false)", 1f, float.exp(false));
 
 AddStrictTestCase("float.exp(1)", float.E, float.exp(1f));
 AddStrictTestCase("float.exp(1) check()", float.E, check(1f));
-AddStrictTestCase("float.exp('1')", float.E, float.exp('1'));
-AddStrictTestCase("float.exp(true)", float.E, float.exp(true));
 
 AddStrictTestCase("float.exp(float.MIN_VALUE)", 1f, float.exp(float.MIN_VALUE));
 AddStrictTestCase("float.exp(float.MAX_VALUE)", float.POSITIVE_INFINITY, float.exp(float.MAX_VALUE));

@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "4.4";
 var VERSION = "AS3";
@@ -80,9 +78,6 @@ AddTestCase("Float constructor, with 'Object' arg", "float", getQualifiedClassNa
 
 var literal_float = new float(3.14f);
 AddTestCase("Float constructor, with 'FloatLiteral' arg", "float", getQualifiedClassName(literal_float));
-
-AddErrorTest("Float constructor, with more than 1 arg", ARGUMENTERROR+1063,  function(){ var float_wrongargs = new float(3.14f, 1.0f); });
-
 
 
 test();
