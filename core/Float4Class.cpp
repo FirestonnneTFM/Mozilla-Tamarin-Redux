@@ -238,9 +238,13 @@ namespace avmplus
     void Float4Class::_swizzle(float4_t* result, const float4_t& val, int32_t how)
     {
         AvmAssert(how >= 0 && how < 256);
-#ifdef VMCFG_SSE21
-        switch(how){ // must explicitly expand; the "shuffle" intrinsic doesn't take variables. 
+#ifndef VMCFG_GENERIC_FLOAT4
+#ifdef(VMCFG_SSE2)
 #define CASE(x)  case x: result = _mm_shuffle_ps(val, val, x);
+#else
+#error Unknown target for swizzle!
+#endif
+        switch(how){ // must explicitly expand; the "shuffle" intrinsic doesn't take variables. 
             CASE(0);CASE(1);CASE(2);CASE(3);CASE(4);CASE(5);CASE(6);CASE(7);CASE(8);CASE(9);
             CASE(10);CASE(11);CASE(12);CASE(13);CASE(14);CASE(15);CASE(16);CASE(17);CASE(18);CASE(19);
             CASE(20);CASE(21);CASE(22);CASE(23);CASE(24);CASE(25);CASE(26);CASE(27);CASE(28);CASE(29);
@@ -271,7 +275,7 @@ namespace avmplus
 default: return _mm_set1_ps(0); // make all compilers happy
         }
 #else       // No intrinsic available; do the shuffling "by hand"
-        float* retp = reinterpret_cast<float*>(&result);
+        float* retp = reinterpret_cast<float*>(result);
         const float* valp = reinterpret_cast<const float*>(&val);
         for (int i = 0; i < 4; ++i) {
             *retp++ = valp[how & 3];
