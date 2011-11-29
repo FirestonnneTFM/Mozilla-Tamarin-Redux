@@ -462,6 +462,8 @@ namespace nanojit
     void SSE_SQRTPS(Register rd, Register rs); \
     void SSE_SQRTSS(Register rd, Register rs); \
     void SSE_SQRTSD(Register rd, Register rs); \
+    void SSE_MINPS(Register rd, Register rs); \
+    void SSE_MAXPS(Register rd, Register rs); \
     void SSE_DPPS(Register rd, Register rs, uint8_t imm); \
 		void SSE_PSHUFD(Register rd, Register rs, uint8_t imm); \
 		void SSE_UCOMISS(Register rl, Register rr); \
