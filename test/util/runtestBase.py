@@ -63,7 +63,6 @@ import shutil
 import traceback
 from . import which
 from . import threadpool
-from . import convertAcceptanceToJunit
 
 # runtestUtils must be imported after "from os.path import *" as walk is overridden
 from . import runtestUtils
@@ -105,15 +104,12 @@ class RuntestBase(object):
     # list of args to remove defined using -no-argname format in --ascargs
     asc_negative_args = []
     atsDir = 'ATS_SWFS'
-    ascversion = ''
     avm = ''
     avmce = ''
     avmversion = ''
     avm_features = ''
     builtinabc = ''
     config = ''
-    junitlog = None
-    junitlogname = None
     
     # directives are used in the config files to indicate special test behavior
     directives = None
@@ -243,8 +239,6 @@ class RuntestBase(object):
         print('    --addtoconfig   add string to default config')
         print(' -q --quiet         display minimum output during testrun')
         print(' -l --log           also log all output to given logfile')
-        print('    --logjunit      log to junit output format')
-        print('    --logjunitname  specify the toplevel name for to junit output (e.g. windows-hybrid-acceptance')
         print('    --valgrind      run tests under valgrind')
         print('    --summaryonly   only display final summary')
         print('    --rebuildtests  rebuild the tests only - do not run against VM')
@@ -278,7 +272,7 @@ class RuntestBase(object):
                    'timeout=','testtimeout=', 'rebuildtests','quiet','notimecheck',
                    'showtimes','java=','html','random', 'seed=', 'playerglobalabc=', 'toplevelabc=',
                    'javaargs=', 'summaryonly', 'log=', 'valgrind', 'addtoconfig=',
-                   'writeresult','logjunit=','logjunitname='
+                   'writeresult'
                    ]
 
     def parseOptions(self):
@@ -312,7 +306,6 @@ class RuntestBase(object):
                 self.timestamps = False
             elif o in ('-f', '--forcerebuild'):
                 self.forcerebuild = True
-                self.ascversion = self.getAscVersion(self.asc)
             elif o in ('-c', '--config'):
                 self.config = v
             elif o in ('--addtoconfig',):
@@ -343,7 +336,6 @@ class RuntestBase(object):
             elif o in ('--rebuildtests',):
                 self.rebuildtests = True
                 self.forcerebuild = True
-                self.ascversion = self.getAscVersion(self.asc)
             elif o in ('-q', '--quiet'):
                 self.quiet = True
             elif o in ('--summaryonly',):
@@ -353,14 +345,6 @@ class RuntestBase(object):
                 self.js_output = v
                 self.logFileType = 'txt'
                 self.createOutputFile()
-            elif o in ('--logjunit'):
-                self.junitlog = v
-                if self.js_output == '':
-                    self.js_output = v+'.txt'
-                    self.logFileType = 'txt'
-                self.createOutputFile()
-            elif o in ('--logjunitname'):
-                self.junitlogname=v
             elif o in ('--valgrind',):
                 self.valgrind = True
             elif o in ('--html',):
@@ -1406,42 +1390,20 @@ class RuntestBase(object):
         if outputCalls != None:
             outputCalls.append((self.verbose_print,(cmd,)))
         try:
-            outFile = tempfile.SpooledTemporaryFile()
-            errFile = tempfile.SpooledTemporaryFile()
             self.lock.acquire()
             try:
-                p = Popen((cmd), shell=self.useShell, stdout=outFile, stderr=errFile, env=envVars)
+                p = Popen((cmd), shell=self.useShell, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=envVars)
                 self.currentPids.append(p)
             finally:
                 self.lock.release()
 
             starttime=time()
-            output=err=""
-            while True:
-                if p.poll() is None:
-                    if self.testTimeOut>-1 and time()-starttime>self.testTimeOut:
-                        attempts=0
-                        while p.poll() is None and attempts<10:
-                            p.terminate()
-                            sleep(1)
-                            attempts+=1
-                        output=""
-                        err=""
-                        break
-                    sleep(0.05)
-                else:
-                    outFile.seek(0)
-                    output=outFile.read()
-                    errFile.seek(0)
-                    err=errFile.read()
-                    break
-            outFile.close()
-            errFile.close()
+            (output, err) = p.communicate()
             if output:
                 output = output.decode('latin_1','replace')
                 output = output.split('\n')
             else:
-                output=[]
+                output = []
             if len(output)>0 and output[-1].strip() == '': # strip empty line at end
                 output = output[:-1]
 
@@ -1454,13 +1416,9 @@ class RuntestBase(object):
                 err = err[:-1]
 
             exitCode = p.returncode
-            msg=''
-            if exitCode == None:
-                msg=' ,WARNING: could not terminate avmshell process'
-                exitCode = -1
 
             if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
-                return (['process timed out after %ds%s' % (self.testTimeOut,msg)], err, exitCode)
+                return ('', err, exitCode)
 
             self.lock.acquire()
             try:
@@ -1509,10 +1467,10 @@ class RuntestBase(object):
     def preProcessTests(self):  # don't need AVM if rebuilding tests
         self.js_print('current configuration: %s' % self.config, overrideQuiet=True)
         self.verbose_print(self.avm_features)
-        if self.avmversion:
-            self.js_print('avm version: %s' % self.avmversion)
-        if self.ascversion:
-            self.js_print('asc version: %s' % self.ascversion)
+        self.js_print('avm: %s' % self.avm)
+        self.js_print('avm version: %s' % self.avmversion)
+        self.js_print('asc: %s' % self.asc)
+        self.js_print('asc version: %s' % self.getAscVersion(self.asc))
         self.js_print('thread count: %d' % self.threads)
         self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True)
 
@@ -1662,19 +1620,20 @@ class RuntestBase(object):
             if self.js_output:
                 print('Results were written to %s' % self.js_output)
 
+            self.js_print('')
+            self.js_print('configuration: %s' % self.config, overrideQuiet=True)
+            self.js_print('avm: %s' % self.avm)
+            self.js_print('avm version: %s' % self.avmversion)
+            self.js_print('asc: %s' % self.asc)
+            #self.js_print('asc version: %s' % self.getAscVersion(self.asc))
+            self.js_print('')
+
         if self.writeResultProperties:
             logfile = open('result.properties', 'w')
             if self.allfails>0:
               logfile.write("failures=%d" % self.allfails)
             else:
               logfile.write("no failures")
-
-        if self.junitlog!=None:
-            if self.junitlogname==None:
-                self.junitlogname=self.config
-            convertAcceptanceToJunit.convertAcceptanceToJunit(self.js_output,self.junitlog,self.junitlogname)
-            if os.path.exists(self.junitlog+'.txt'):
-                os.unlink(self.junitlog+'.txt')
 
         if self.ashErrors:
             exit(1)
