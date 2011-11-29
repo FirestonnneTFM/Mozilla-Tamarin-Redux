@@ -214,7 +214,12 @@ namespace MMgc
     template<>
     REALLY_INLINE void* GC::AllocBibopType<avmplus::AtomConstants::kBibopFloat4Type>()
     {
-        return AllocBibop(bibopAllocFloat4);
+        void* p = AllocBibop(bibopAllocFloat4);
+#if defined VMCFG_FLOAT && (defined DEBUG || 0) /* Change 0 to 1 to enable the test in release builds */
+        if (uintptr_t(p) & 15)
+            GCHeap::GetGCHeap()->Abort();
+#endif
+        return p;
     }
 
     // For AllocExtra the trick is that we can compute (size|extra) quickly without risk of overflow

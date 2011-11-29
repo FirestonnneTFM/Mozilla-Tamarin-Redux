@@ -1164,15 +1164,28 @@ namespace MMgc
 
 // end user servicable parts
 
+    // This returns a constant so I don't know why it can't be inline somewhere.
     size_t DebugSize()
     {
-    #ifdef MMGC_64BIT
-        // Our writeback pointer is 8 bytes so we need to round up to the next 8 byte
-        // size.  (only 5 DWORDS are used)
-        return 6 * sizeof(int32_t);
-    #else
-        return 4 * sizeof(int32_t);
-    #endif
+        // Debug padding, note word == 32 bits:
+        //
+        // 1 word of size                      )
+        // 1 word of stack trace index         )-- USER_POINTER_WORDS
+        // 2 words of padding, for VMCFG_FLOAT )
+        // (object goes here)
+        // 1 word of poison
+        // 1 writeback pointer (1 or 2 words)  (may be obsolete information)
+        // 1 word of padding on 64-bit systems (ie round up to even number of 32-bit words)
+        //
+        // The 2 words of padding for VMCFG_FLOAT is there to get 16-byte alignment
+        // for float4 boxes.  It's not ideal, but it's acceptable.  We will probably
+        // reengineer it, see bugzilla 697672.
+
+        const size_t poison_words = 1;
+        const size_t writeback_pointer_words = sizeof(void*)/sizeof(int32_t);
+        const size_t words = USER_POINTER_WORDS + poison_words + writeback_pointer_words;
+        const size_t words_rounded = (words + 1) & ~1;
+        return words_rounded * sizeof(int32_t);
     }
 
     /*
@@ -1197,14 +1210,15 @@ namespace MMgc
 
         int32_t *mem = (int32_t*)item;
         // set up the memory
-        *mem++ = (int32_t)size;
-        *mem++ = 0;
+        mem[0] = (int32_t)size;
+        mem[1] = 0;
+        mem += USER_POINTER_WORDS;
         mem += (size>>2);
-        *mem++ = int32_t(GCHeap::GCEndOfObjectPoison);
-        *mem = 0;
+        mem[0] = int32_t(GCHeap::GCEndOfObjectPoison);
+        mem[1] = 0;
     #ifdef MMGC_64BIT
-        *(mem+1) = 0;
-        *(mem+2) = 0;
+        mem[2] = 0;
+        mem[3] = 0;
     #endif
     }
 
@@ -1213,7 +1227,7 @@ namespace MMgc
         uint32_t *ip = (uint32_t*) item;
         if (actualFree) {
             uint32_t size = *ip;
-            uint32_t *endMarker = ip + 2 + (size>>2);
+            uint32_t *endMarker = ip + USER_POINTER_WORDS + (size>>2);
 
             // this can be called twice on some memory in inc gc
             if(size == 0)
@@ -1232,7 +1246,7 @@ namespace MMgc
 
         // clean up
         *ip = 0;
-        ip += 2;
+        ip += USER_POINTER_WORDS;
 
         // size is the non-Debug size, so add 4 to get last 4 bytes, don't
         // touch write back pointer space
