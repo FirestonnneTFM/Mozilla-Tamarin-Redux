@@ -1,0 +1,90 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is [Open Source Virtual Machine.].
+ *
+ * The Initial Developer of the Original Code is
+ * Adobe System Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2004-2011
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Adobe AS3 Team
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+/*! \page applytype 
+
+\addindex applytype
+
+\section applytype applytype
+
+\subsection operation Operation
+
+Instantiate a parameterized factory type.
+
+\subsection format Format
+
+\code
+applytype 
+arg_count
+\endcode
+
+\subsection forms Forms
+\code
+add = 83 (0x53)
+\endcode
+\subsection stack Stack
+
+\code
+ ..., factory, parameter1, ..., parametern => ..., newclass
+\endcode
+
+\subsection description Description
+
+arg_count is a u30 that is the number of type parameters present on
+the stack.
+
+Pop the parameters and the factory off of the stack and apply the
+factory to the parameters, yielding an instantiation of the factory
+with the parameters in the form of a class object.
+
+Push newclass onto the stack.
+
+\subsection rt_execeptions Runtime exceptions
+
+A TypeError is thrown if factory is not a Factory object or if the
+number of parameters accepted by the factory does not correspond to
+the number of parameters passed.
+
+A VerifyError is thrown if the parameters are not class objects.
+
+\subsection notes Notes
+
+The only Factory type in Tamarin as of the time of writing is __AS3__.vec::Vector.
+
+The use of VerifyError is a bug; see Bugzilla 686746.
+
+*/
+
