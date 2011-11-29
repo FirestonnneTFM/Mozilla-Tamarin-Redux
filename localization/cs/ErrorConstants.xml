@@ -671,12 +671,14 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">Pokud je argument zpětného volání metodou třídy, volitelný argument musí být null.</error>
+  <error id="2004" label="kInvalidParamError">Jeden z parametrů je neplatný.</error>
   <error id="2006" label="kParamRangeError">Poskytnutý index je mimo rozsah.</error>
   <error id="2007" label="kNullPointerError">Parametr %1 nesmí být null.</error>
   <error id="2008" label="kInvalidEnumError">Parametr %1 musí být jedna z akceptovaných hodnot.</error>
   <error id="2012" label="kCantInstantiateError">Pro třídu %1 nelze vytvořit instanci.</error>
   <error id="2030" label="kEOFError">Bylo dosaženo konce souboru.</error>
   <error id="2058" label="kCompressedDataError">Při dekomprimování dat došlo k chybě.</error>
+  <error id="2085" label="kEmptyStringError">Parametr %1 musí být neprázdný řetězec.</error>
   <error id="2088" label="kProxyGetPropertyError">Třída Proxy neimplementuje funkci getProperty. Musí být přepsána podtřídou.</error>
   <error id="2089" label="kProxySetPropertyError">Třída Proxy neimplementuje funkci setProperty. Musí být přepsána podtřídou.</error>
   <error id="2090" label="kProxyCallPropertyError">Třída Proxy neimplementuje funkci callProperty. Musí být přepsána podtřídou.</error>
@@ -686,4 +688,5 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Třída Proxy neimplementuje funkci nextNameIndex. Musí být přepsána podtřídou.</error>
   <error id="2106" label="kProxyNextNameError">Třída Proxy neimplementuje funkci nextName. Musí být přepsána podtřídou.</error>
   <error id="2107" label="kProxyNextValueError">Třída Proxy neimplementuje funkci nextValue. Musí být přepsána podtřídou.</error>
+  <error id="2173" label="kReadExternalNotImplementedError">Nelze načíst objekt ve streamu.  Třída %1 neimplementuje rozhraní flash.utils.IExternalizable je však přesměrována na třídu externalizable.</error>
 </errors>

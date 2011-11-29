@@ -2334,6 +2334,7 @@ const char* const shell_toplevel_versioned_uris[] = {
     "avmplus", // [660]
     "avmshell", // [660, 661, 662, 663, 664, 665, 666]
     "flash.errors", // [660]
+    "flash.net", // [660]
     "flash.sampler", // [660]
     "flash.system", // [660]
     "flash.trace", // [660]

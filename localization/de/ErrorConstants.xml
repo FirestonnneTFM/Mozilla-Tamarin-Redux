@@ -760,12 +760,14 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">Wenn das callback-Argument eine Methode einer Klasse ist, muss das optionale this-Argument null sein.</error>
+  <error id="2004" label="kInvalidParamError">Einer der Parameter ist ungültig.</error>
   <error id="2006" label="kParamRangeError">Der angegebene Index liegt außerhalb des zulässigen Bereichs.</error>
   <error id="2007" label="kNullPointerError">Parameter %1 darf nicht 'null' sein.</error>
   <error id="2008" label="kInvalidEnumError">Parameter %1 muss einen zulässigen Wert haben.</error>
   <error id="2012" label="kCantInstantiateError">%1-Klasse kann nicht instanziiert werden.</error>
   <error id="2030" label="kEOFError">Das Dateiende wurde erkannt.</error>
   <error id="2058" label="kCompressedDataError">Fehler beim Dekomprimieren der Daten.</error>
+  <error id="2085" label="kEmptyStringError">Parameter %1 darf kein leerer String sein.</error>
   <error id="2088" label="kProxyGetPropertyError">Die Proxy-Klasse implementiert getProperty nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
   <error id="2089" label="kProxySetPropertyError">Die Proxy-Klasse implementiert setProperty nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
   <error id="2090" label="kProxyCallPropertyError">Die Proxy-Klasse implementiert callProperty nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
@@ -775,4 +777,5 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Die Proxy-Klasse implementiert nextNameIndex nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
   <error id="2106" label="kProxyNextNameError">Die Proxy-Klasse implementiert nextName nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
   <error id="2107" label="kProxyNextValueError">Die Proxy-Klasse implementiert nextValue nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
+  <error id="2173" label="kReadExternalNotImplementedError">Das Objekt im Stream kann nicht gelesen werden.  Die %1-Klasse implementiert flash.utils.IExternalizable nicht, es erfolgt aber ein Aliasing in eine externalisierbare Klasse.</error>
 </errors>

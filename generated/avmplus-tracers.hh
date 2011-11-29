@@ -505,6 +505,58 @@ bool DoubleVectorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 
 
 #ifdef DEBUG
+MMgc::GCTracerCheckResult DynamicPropertyOutputClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = ClassClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
+
+bool DynamicPropertyOutputClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_DynamicPropertyOutputClass
+    m_slots_DynamicPropertyOutputClass.gcTracePrivateProperties(gc);
+#endif
+    ClassClosure::gcTrace(gc, 0);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
+}
+
+
+
+#ifdef DEBUG
+MMgc::GCTracerCheckResult DynamicPropertyOutputObject::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = ScriptObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
+
+bool DynamicPropertyOutputObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_DynamicPropertyOutputObject
+    m_slots_DynamicPropertyOutputObject.gcTracePrivateProperties(gc);
+#endif
+    ScriptObject::gcTrace(gc, 0);
+    (void)(avmplus_ScriptObject_isExactInterlock != 0);
+    return false;
+}
+
+
+
+#ifdef DEBUG
 MMgc::GCTracerCheckResult ErrorClass::gcTraceOffsetIsTraced(uint32_t off) const
 {
     MMgc::GCTracerCheckResult result;
@@ -934,6 +986,141 @@ bool ObjectClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 #endif
     ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
+}
+
+
+
+#ifdef DEBUG
+const uint32_t ObjectEncodingClass::gcTracePointerOffsets[] = {
+    offsetof(ObjectEncodingClass, m_writer),
+    0};
+
+MMgc::GCTracerCheckResult ObjectEncodingClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = ClassClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,1);
+}
+#endif // DEBUG
+
+bool ObjectEncodingClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_ObjectEncodingClass
+    m_slots_ObjectEncodingClass.gcTracePrivateProperties(gc);
+#endif
+    ClassClosure::gcTrace(gc, 0);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    gc->TraceLocation(&m_writer);
+    return false;
+}
+
+
+
+#ifdef DEBUG
+MMgc::GCTracerCheckResult ObjectInputClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = ClassClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
+
+bool ObjectInputClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_ObjectInputClass
+    m_slots_ObjectInputClass.gcTracePrivateProperties(gc);
+#endif
+    ClassClosure::gcTrace(gc, 0);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
+}
+
+
+
+#ifdef DEBUG
+MMgc::GCTracerCheckResult ObjectInputObject::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = ScriptObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
+
+bool ObjectInputObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_ObjectInputObject
+    m_slots_ObjectInputObject.gcTracePrivateProperties(gc);
+#endif
+    ScriptObject::gcTrace(gc, 0);
+    (void)(avmplus_ScriptObject_isExactInterlock != 0);
+    return false;
+}
+
+
+
+#ifdef DEBUG
+MMgc::GCTracerCheckResult ObjectOutputClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = ClassClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
+
+bool ObjectOutputClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_ObjectOutputClass
+    m_slots_ObjectOutputClass.gcTracePrivateProperties(gc);
+#endif
+    ClassClosure::gcTrace(gc, 0);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
+}
+
+
+
+#ifdef DEBUG
+MMgc::GCTracerCheckResult ObjectOutputObject::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = ScriptObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
+
+bool ObjectOutputObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_ObjectOutputObject
+    m_slots_ObjectOutputObject.gcTracePrivateProperties(gc);
+#endif
+    ScriptObject::gcTrace(gc, 0);
+    (void)(avmplus_ScriptObject_isExactInterlock != 0);
     return false;
 }
 
@@ -3163,6 +3350,7 @@ bool TextE4XNode::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 #ifdef DEBUG
 const uint32_t Toplevel::gcTracePointerOffsets[] = {
     offsetof(Toplevel, _abcEnv),
+    offsetof(Toplevel, _aliasToClassClosureMap),
     offsetof(Toplevel, _booleanClass),
     offsetof(Toplevel, _builtinClasses),
     offsetof(Toplevel, _classClass),
@@ -3172,6 +3360,7 @@ const uint32_t Toplevel::gcTracePointerOffsets[] = {
     offsetof(Toplevel, _namespaceClass),
     offsetof(Toplevel, _numberClass),
     offsetof(Toplevel, _stringClass),
+    offsetof(Toplevel, _traitsToAliasMap),
     offsetof(Toplevel, _uintClass),
     offsetof(Toplevel, objectClass),
     0};
@@ -3181,7 +3370,10 @@ MMgc::GCTracerCheckResult Toplevel::gcTraceOffsetIsTraced(uint32_t off) const
     MMgc::GCTracerCheckResult result;
     (void)off;
     (void)result;
-    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,12);
+    if((result = _traitsToAliasMap.gcTraceOffsetIsTraced(off - offsetof(Toplevel,_traitsToAliasMap))) != MMgc::kOffsetNotFound) {
+        return result;
+    }
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,14);
 }
 #endif // DEBUG
 
@@ -3190,6 +3382,7 @@ bool Toplevel::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     (void)gc;
     (void)_xact_cursor;
     gc->TraceLocation(&_abcEnv);
+    gc->TraceLocation(&_aliasToClassClosureMap);
     gc->TraceLocation(&_booleanClass);
     gc->TraceLocation(&_builtinClasses);
     gc->TraceLocation(&_classClass);
@@ -3199,6 +3392,7 @@ bool Toplevel::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     gc->TraceLocation(&_namespaceClass);
     gc->TraceLocation(&_numberClass);
     gc->TraceLocation(&_stringClass);
+    _traitsToAliasMap.gcTrace(gc);
     gc->TraceLocation(&_uintClass);
     gc->TraceLocation(&objectClass);
     return false;

@@ -671,12 +671,14 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">Geri çağırma değişkeni bir sınıfın yöntemi ise, isteğe bağlı olan bu değişken boş olmalıdır.</error>
+  <error id="2004" label="kInvalidParamError">Parametrelerden biri geçersiz.</error>
   <error id="2006" label="kParamRangeError">Sağlanan dizin sınırların dışındadır.</error>
   <error id="2007" label="kNullPointerError">%1 parametresi boş olmamalıdır.</error>
   <error id="2008" label="kInvalidEnumError">%1 parametresi kabul edilen değerlerden biridir.</error>
   <error id="2012" label="kCantInstantiateError">%1 sınıfı örneklendirilemiyor.</error>
   <error id="2030" label="kEOFError">Dosya sonuyla karşılaşıldı.</error>
   <error id="2058" label="kCompressedDataError">Veri açılırken hata oluştu.</error>
+  <error id="2085" label="kEmptyStringError">%1 parametresi boş olmayan dizgi olmalıdır.</error>
   <error id="2088" label="kProxyGetPropertyError">Proxy sınıfı getProperty uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
   <error id="2089" label="kProxySetPropertyError">Proxy sınıfı setProperty uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
   <error id="2090" label="kProxyCallPropertyError">Proxy sınıfı callProperty uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
@@ -686,4 +688,5 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Proxy sınıfı nextNameIndex uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
   <error id="2106" label="kProxyNextNameError">Proxy sınıfı nextName uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
   <error id="2107" label="kProxyNextValueError">Proxy sınıfı nextValue uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
+  <error id="2173" label="kReadExternalNotImplementedError">Akıştaki nesne okunamıyor.  %1 sınıfı, flash.utils.IExternalizable öğesini uygulamıyor, ancak haricileştirebilir bir sınıfın adıyla biliniyor.</error>
 </errors>

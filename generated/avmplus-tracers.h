@@ -65,6 +65,8 @@
 #define avmplus_DomainEnv_isExactInterlock 1
 #define avmplus_DoubleVectorClass_isExactInterlock 1
 #define avmplus_DoubleVectorObject_isExactInterlock 1
+#define avmplus_DynamicPropertyOutputClass_isExactInterlock 1
+#define avmplus_DynamicPropertyOutputObject_isExactInterlock 1
 #define avmplus_E4XNode_isExactInterlock 1
 #define avmplus_E4XNodeAux_isExactInterlock 1
 #define avmplus_ElementE4XNode_isExactInterlock 1
@@ -99,6 +101,11 @@
 #define avmplus_NativeErrorClass_isExactInterlock 1
 #define avmplus_NumberClass_isExactInterlock 1
 #define avmplus_ObjectClass_isExactInterlock 1
+#define avmplus_ObjectEncodingClass_isExactInterlock 1
+#define avmplus_ObjectInputClass_isExactInterlock 1
+#define avmplus_ObjectInputObject_isExactInterlock 1
+#define avmplus_ObjectOutputClass_isExactInterlock 1
+#define avmplus_ObjectOutputObject_isExactInterlock 1
 #define avmplus_ObjectVectorClass_isExactInterlock 1
 #define avmplus_ObjectVectorObject_isExactInterlock 1
 #define avmplus_PIE4XNode_isExactInterlock 1
