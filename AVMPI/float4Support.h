@@ -128,7 +128,7 @@ REALLY_INLINE float4_t f4_div(float4_t a, float4_t b)
     return result;
 }
 #else
-#error Hardware-accellerated float4 support not implemented for the current system! The generic mode should've been activated.
+#error Hardware-accellerated float4 support not implemented for the current system! The generic mode should have been activated.
 #endif
 
 #endif // VMCFG_GENERIC_FLOAT4
