@@ -66,7 +66,7 @@ print("Building builtins...")
 # https://bugzilla.mozilla.org/show_bug.cgi?id=697977
 if len(sys.argv) == 1:
     print('To build the float/float4 enabled builtins pass the following:');
-    print('    >$ ./builtin.py -config CONFIG::VMCFG_FLOAT=true -abcfuture Float.as');
+    print('    >$ ./builtin.py -config CONFIG::VMCFG_FLOAT=true -abcfuture');
     print('');
     print('To compile the builtins without float/float4 support:');
     print('    >$ ./buitin.py -config CONFIG::VMCFG_FLOAT=false');

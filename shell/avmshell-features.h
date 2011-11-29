@@ -248,7 +248,6 @@
 
 #ifndef AVMFEATURE_FLOAT
   #define AVMFEATURE_FLOAT 1
-  #define VMCFG_GENERIC_FLOAT4 // todo: this should be selected from the avmfeatures system!
 #endif
 
 #ifndef AVMFEATURE_SWF17
