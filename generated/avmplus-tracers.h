@@ -59,6 +59,8 @@
 #define avmplus_DebuggerMethodInfo_isExactInterlock 1
 #define avmplus_DefinitionErrorClass_isExactInterlock 1
 #define avmplus_DefinitionErrorObject_isExactInterlock 1
+#define avmplus_DictionaryClass_isExactInterlock 1
+#define avmplus_DictionaryObject_isExactInterlock 1
 #define avmplus_Domain_isExactInterlock 1
 #define avmplus_DomainEnv_isExactInterlock 1
 #define avmplus_DoubleVectorClass_isExactInterlock 1
