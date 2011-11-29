@@ -48,7 +48,7 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    array[item++] = new TestCase( "SECTION", "with MyObject, eval should return square of " );
+    array[item++] = new TestCase( "SECTION", "with MyObject, eval should return square of ", "", "" );
 
     for ( tc=0; tc < array.length; tc++ ) {
         var MYOBJECT = new MyObject();

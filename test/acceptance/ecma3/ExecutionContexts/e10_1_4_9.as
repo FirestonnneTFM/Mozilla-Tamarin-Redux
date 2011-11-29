@@ -47,7 +47,7 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    array[item++] = new TestCase( SECTION, "with MyObject, NEW_PROPERTY" );
+    array[item++] = new TestCase( SECTION, "with MyObject, NEW_PROPERTY", "", "" );
 
     for ( tc=0; tc < array.length; tc++ ) {
 
