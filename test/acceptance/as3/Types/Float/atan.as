@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
 /*
 Returns an implementation-dependent approximation to the arc tangent of x.
@@ -54,11 +53,9 @@ function check(param:float):float { return float.atan(param); }
 
 AddStrictTestCase("float.atan() returns a float", "float", getQualifiedClassName(float.atan(0)));
 AddStrictTestCase("float.atan() length is 1", 1, float.atan.length);
-AddErrorTest("float.atan() with no args", ARGUMENTERROR+1063,  function(){ float.atan(); });
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.atan(undefined)", float.NaN, float.atan(undefined));
-AddStrictTestCase("float.atan(string)", float.NaN, float.atan("string"));
 AddStrictTestCase("float.atan(NaN)", float.NaN, float.atan(float.NaN));
 AddStrictTestCase("float.atan(NaN) check()", float.NaN, check(float.NaN));
 
@@ -85,12 +82,6 @@ AddStrictTestCase("float.atan(float.NEGATIVE_INFINITY) check()", -float.PI/2f, c
 
 
 AddStrictTestCase("float.atan(null)", 0f, float.atan(null));
-AddStrictTestCase("float.atan(true)", float.PI/4f, float.atan(true));
-AddStrictTestCase("float.atan(false)", 0f, float.atan(false));
-
-
-AddStrictTestCase("float.atan('1')", float.PI/4f, float.atan('1'));
-AddStrictTestCase("float.atan('0')", 0f, float.atan('0'));
 
 var myfloat:float = 1f;
 AddStrictTestCase("float.atan(myfloat=1f)", float(float.PI/4.0f), float.atan(myfloat));

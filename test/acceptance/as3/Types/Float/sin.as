@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
 /*
 Returns an implementation-dependent approximation to the sine of x. The argument
@@ -54,11 +53,9 @@ function check(param:float):float { return float.sin(param); }
 
 AddStrictTestCase("float.sin() returns a float", "float", getQualifiedClassName(float.sin(0)));
 AddStrictTestCase("float.sin() length is 1", 1, float.sin.length);
-AddErrorTest("float.sin() with no args", ARGUMENTERROR+1063,  function(){ float.sin(); });
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.sin(undefined)", float.NaN, float.sin(undefined));
-AddStrictTestCase("float.sin(string)", float.NaN, float.sin("string"));
 AddStrictTestCase("float.sin(float.NaN)", float.NaN, float.sin(float.NaN));
 AddStrictTestCase("float.sin(float.NaN) check()", float.NaN, check(float.NaN));
 
@@ -71,9 +68,7 @@ AddStrictTestCase("float.sin(0f)", 0f, float.sin(0f));
 AddStrictTestCase("float.sin(0f) sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.sin(0f));
 AddStrictTestCase("float.sin(0f) check()", 0f, check(0f));
 AddStrictTestCase("float.sin(0f) check() sign check", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/check(0f));
-AddStrictTestCase("float.sin('0')", 0f, float.sin('0'));
 AddStrictTestCase("float.sin(null)", 0f, float.sin(null));
-AddStrictTestCase("float.sin(false)", 0f, float.sin(false));
 
 // If x is -0, the result is -0.
 var neg_zero:float = -0;

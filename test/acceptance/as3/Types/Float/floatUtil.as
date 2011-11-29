@@ -52,8 +52,8 @@ var isAS3:Boolean = dummy_number.toString == dummy_number.AS3::toString;
 
 function getFloatProp(name):String
 {
-   string = '';
-   for ( prop in float )
+   var string = '';
+   for ( var prop in float )
    {
        string += ( prop == name ) ? prop : '';
    }
@@ -62,8 +62,8 @@ function getFloatProp(name):String
 
 function getFloatProtoProp(name):String
 {
-   string = '';
-   for ( prop in float.prototype )
+   var string = '';
+   for ( var prop in float.prototype )
    {
        string += ( prop == name ) ? prop : '';
    }

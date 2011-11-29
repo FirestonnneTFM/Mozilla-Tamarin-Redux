@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
 /*
 Returns an implementation-dependent approximation to the arc sine of x.
@@ -54,11 +53,9 @@ function check(param:float):float { return float.asin(param); }
 
 AddStrictTestCase("float.asin() returns a float", "float", getQualifiedClassName(float.asin(0)));
 AddStrictTestCase("float.asin() length is 1", 1, float.asin.length);
-AddErrorTest("float.asin() with no args", ARGUMENTERROR+1063,  function(){ float.asin(); });
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.asin(undefined)", float.NaN, float.asin(undefined));
-AddStrictTestCase("float.asin(float.string)", float.NaN, float.asin("string"));
 AddStrictTestCase("float.asin(float.NaN)", float.NaN, float.asin(float.NaN));
 AddStrictTestCase("float.asin(float.NaN) check()", float.NaN, check(float.NaN));
 
@@ -85,11 +82,6 @@ AddStrictTestCase("Ensure that float.asin(-0f) returns -0f check()", float.NEGAT
 
 
 AddStrictTestCase("float.asin(null)", 0f, float.asin(null));
-AddStrictTestCase("float.asin(true)", float.PI/2f, float.asin(true));
-AddStrictTestCase("float.asin(false)", 0f, float.asin(false));
-
-AddStrictTestCase("float.asin('1')", float.PI/2f, float.asin('1'));
-AddStrictTestCase("float.asin('0')", 0f, float.asin('0'));
 
 var myfloat:float = 1f;
 AddStrictTestCase("float.asin(myfloat=1f)", float(float.PI/2.0f), float.asin(myfloat));

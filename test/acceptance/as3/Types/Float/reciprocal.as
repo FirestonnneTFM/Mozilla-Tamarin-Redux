@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "4.5.29";
 var VERSION = "AS3";
@@ -50,11 +48,9 @@ function check(param:float):float { return float.reciprocal(param); }
 
 AddStrictTestCase("float.reciprocal() returns a float", "float", getQualifiedClassName(float.reciprocal(12.345f)));
 AddStrictTestCase("float.reciprocal() length is 1", 1, float.reciprocal.length);
-AddErrorTest("float.reciprocal() with no args", ARGUMENTERROR+1063,  function(){ float.reciprocal(); });
 
 // If x is NaN, the result is NaN
 AddStrictTestCase("float.reciprocal(undefined)", float.NaN, float.reciprocal(undefined));
-AddStrictTestCase("float.reciprocal(string)", float.NaN, float.reciprocal("string"));
 AddStrictTestCase("float.reciprocal(float.NaN)", float.NaN, float.reciprocal(float.NaN));
 AddStrictTestCase("float.reciprocal(float.NaN) check()", float.NaN, check(float.NaN));
 
@@ -73,7 +69,6 @@ AddStrictTestCase("float.reciprocal(float.NEGATIVE_INFINITY) check() sign check"
 // If x is +0, the result is +Infinity
 AddStrictTestCase("float.reciprocal(0f)", float.POSITIVE_INFINITY, float.reciprocal(0f));
 AddStrictTestCase("float.reciprocal(0f) check()", float.POSITIVE_INFINITY, check(0f));
-AddStrictTestCase("float.reciprocal(false)", float.POSITIVE_INFINITY, float.reciprocal(false));
 
 // If x us -0, the result is -Infinity
 AddStrictTestCase("float.reciprocal(-0f)", float.NEGATIVE_INFINITY, float.reciprocal(-0f));
@@ -82,7 +77,6 @@ AddStrictTestCase("float.reciprocal(-0f) check", float.NEGATIVE_INFINITY, check(
 
 AddStrictTestCase("float.reciprocal(8)", float(0.125), float.reciprocal(8));
 AddStrictTestCase("float.reciprocal(null)", float.POSITIVE_INFINITY, float.reciprocal(null));
-AddStrictTestCase("float.reciprocal(true)", float(1), float.reciprocal(true));
 
 test();
 

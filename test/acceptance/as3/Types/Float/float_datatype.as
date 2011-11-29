@@ -79,8 +79,6 @@ Note(5): The rest of this specification will use the term "float value" synonymo
 "instance of the float class".
 */
 
-include "floatUtil.as";
-
 
 var SECTION = "4.1";
 var VERSION = "AS3";
@@ -166,13 +164,6 @@ catch(e)
     flt_class_name = "Exception: "+ new String(e);
 }
 AddTestCase("Class name for type float", "float", flt_class_name);
-
-/* check that float instance is immutable - at the very least, we can't write new properties to it */
-var expectedError = 1056;
-if (as3Enabled)
-    expectedError = 1037;
-
-AddErrorTest("float instance is immutable", REFERENCEERROR+expectedError, function(){   (new float(1)).valueOf = function(){return 0;};  } );
 
 test();
 

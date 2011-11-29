@@ -41,6 +41,7 @@ test/**.abc
 test/acceptance/test.*
 test/acceptance/test2.*
 test/util/emulator_files/**
+test/util/atsrunner/**
 test/util/flashrunner/working/**
 test/acceptance/*.html
 test/acceptance/ATS_SWFS/**

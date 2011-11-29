@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "4.5.21";
 var VERSION = "AS3";
@@ -49,19 +47,14 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 AddStrictTestCase("float.cos() returns a float", "float", getQualifiedClassName(float.cos(0)));
 AddStrictTestCase("float.cos() length is 1", 1, float.cos.length);
-AddErrorTest("float.cos() with no args", ARGUMENTERROR+1063,  function(){ float.cos(); });
+
 
 AddStrictTestCase("float.cos(undefined)", float.NaN, float.cos(undefined));
 AddStrictTestCase("float.cos(null)", float(1), float.cos(null));
-AddStrictTestCase("float.cos(true)", 0.5403022766113281f, float.cos(true));
-AddStrictTestCase("float.cos(false)", float(1), float.cos(false));
-AddStrictTestCase("float.cos(string)", float.NaN, float.cos("string"));
 AddStrictTestCase("float.cos(float.NaN)", float.NaN, float.cos(float.NaN));
 
 AddStrictTestCase("float.cos(0)", float(1f), float.cos(0f));
 AddStrictTestCase("float.cos(-0)", float(1f), float.cos(-0f));
-
-AddStrictTestCase("float.cos('0')", float(1), float.cos('0'));
 
 AddStrictTestCase("float.cos(float.PI)", -float(1), float.cos(float.PI));
 AddStrictTestCase("float.cos(-float.PI)", -float(1), float.cos(-float.PI));

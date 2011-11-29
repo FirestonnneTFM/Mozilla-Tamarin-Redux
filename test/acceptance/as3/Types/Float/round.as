@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
 /*
 Returns the float value that is closest to x and is equal to a mathematical
@@ -56,11 +55,9 @@ function check(param:float):float { return float.round(param); }
 
 AddStrictTestCase("float.round() returns a float", "float", getQualifiedClassName(float.round(12.345f)));
 AddStrictTestCase("float.round() length is 1", 1, float.round.length);
-AddErrorTest("float.round() with no args", ARGUMENTERROR+1063,  function(){ float.round(); });
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.round(undefined)", float.NaN, float.round(undefined));
-AddStrictTestCase("float.round(string)", float.NaN, float.round("string"));
 AddStrictTestCase("float.round(NaN)", float.NaN, float.round(float.NaN));
 AddStrictTestCase("float.round(NaN) check()", float.NaN, check(float.NaN));
 
@@ -70,7 +67,6 @@ AddStrictTestCase("float.round(0f) is +0f", float.POSITIVE_INFINITY, float.POSIT
 AddStrictTestCase("float.round(0f) check()", 0f, check(0f));
 AddStrictTestCase("float.round(0f) is +0f check()", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/check(0f));
 AddStrictTestCase("float.round(null)", 0f, float.round(null));
-AddStrictTestCase("float.round(false)", 0f, float.round(false));
 
 // If x is -0, the result is -0.
 AddStrictTestCase("float.round(-0f)", -0f, float.round(-0f));
@@ -131,7 +127,6 @@ AddStrictTestCase("x=-0.49f float.round(x) != float.floor(x+0.5f)", true, resRou
 */
 
 AddStrictTestCase("float.round(-5.000001e-1f)", -1f, float.round(-5.000001e-1f));
-AddStrictTestCase("float.round(truef)", 1f, float.round(true));
 AddStrictTestCase("float.round(0.5f)", 1f, float.round(0.5f));
 AddStrictTestCase("float.round(5.000001e-1f)", 1f, float.round(5.000001e-1f));
 

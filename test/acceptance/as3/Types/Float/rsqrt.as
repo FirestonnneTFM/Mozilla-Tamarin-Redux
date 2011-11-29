@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
 /*
 Returns reciprocal square root of scalars.
@@ -54,11 +53,9 @@ function check(param:float):float { return float.rsqrt(param); }
 
 AddStrictTestCase("float.rsqrt() returns a float", "float", getQualifiedClassName(float.rsqrt(12.345f)));
 AddStrictTestCase("float.rsqrt() length is 1", 1, float.rsqrt.length);
-AddErrorTest("float.rsqrt() with no args", ARGUMENTERROR+1063,  function(){ float.rsqrt(); });
 
 // If x is NaN, the result is NaN. (1/NaN == NaN)
 AddStrictTestCase("float.rsqrt(undefined)", float.NaN, float.rsqrt(undefined));
-AddStrictTestCase("float.rsqrt(string)", float.NaN, float.rsqrt("string"));
 AddStrictTestCase("float.rsqrt(float.NaN)", float.NaN, float.rsqrt(float.NaN));
 AddStrictTestCase("float.rsqrt(float.NaN) check()", float.NaN, check(float.NaN));
 
@@ -72,7 +69,6 @@ AddStrictTestCase("float.rsqrt(float.NEGATIVE_INFINITY) check()", float.NaN, che
 AddStrictTestCase("float.rsqrt(0f)", float.POSITIVE_INFINITY, float.rsqrt(0f));
 AddStrictTestCase("float.rsqrt(0f) check()", float.POSITIVE_INFINITY, check(0f));
 AddStrictTestCase("float.rsqrt(null)", float.POSITIVE_INFINITY, float.rsqrt(null));
-AddStrictTestCase("float.rsqrt(false)", float.POSITIVE_INFINITY, float.rsqrt(false));
 
 // If x is -0, the result is -0. (1/-0 == -Infinity)
 AddStrictTestCase("float.rsqrt(-0f)", float.NEGATIVE_INFINITY, float.rsqrt(-0f));
@@ -94,9 +90,6 @@ var x:float = 3.124f;
 AddStrictTestCase("x=3.124f float.rsqrt(x) == 1f/float.sqrt(x)", 1f/float.sqrt(x), float.rsqrt(x));
 
 AddStrictTestCase("float.rsqrt(64)", float(0.125), float.rsqrt(64));
-AddStrictTestCase("float.rsqrt(true)", float(1), float.rsqrt(true));
-
-
 
 test();
 

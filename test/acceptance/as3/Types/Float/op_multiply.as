@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "6.4.1";
 var VERSION = "AS3";
@@ -52,7 +50,6 @@ var f2:float = 6.543210987;
 
 AddStrictTestCase("float multiplication result", float(8.078037504e+09), f1*f2);
 AddStrictTestCase("FloatLiteral multiplication result", float(8.078037504e+09), 1.2345678e9f*6.543210987f);
-AddTestCase("multiplication on float & number should yield different results", true, (Number(f1)*Number(f2)) != (f1*f2) );
 AddTestCase("multiplication of 2 floats returns a float", "float", getQualifiedClassName(f1*f2));
 
 

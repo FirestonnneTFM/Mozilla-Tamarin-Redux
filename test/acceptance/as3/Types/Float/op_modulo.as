@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "6.4.3";
 var VERSION = "AS3";
@@ -65,7 +63,6 @@ AddTestCase("FloatLiteral modulo result", float(7.874126434326171875e-01), 1.234
    */
 
 // ABC Extension spec states that Float modulo can happen in double precision
-AddTestCase("modulo on float & number should yield different results", true, (Number(f1)%Number(f2)) == (f1%f2) );
 AddTestCase("modulo of 2 floats returns a float", "float", getQualifiedClassName(f1%f2));
 
 var onef:float = 1f;

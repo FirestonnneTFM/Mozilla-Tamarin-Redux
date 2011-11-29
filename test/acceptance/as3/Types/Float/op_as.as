@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "6.7.2";
 var VERSION = "AS3";
@@ -59,9 +57,6 @@ var large_uint:uint = 268435456;
 var vf = new Vector.<float>();
 
 function check(var1:*, var2:*):* { return var1 as var2; }
-
-
-AddErrorTest("AS: TypeError if datatype is not Class", TYPEERROR, function(){ return pi_float as "float"; });
 
 AddStrictTestCase("3.14f as float", float(3.14), pi_float as float);
 AddStrictTestCase("3.14f FloatLiteral as float", float(3.14), 3.14f as float);

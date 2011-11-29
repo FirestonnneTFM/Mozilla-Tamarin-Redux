@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "4.3.1";
 var VERSION = "AS3";
@@ -55,15 +53,6 @@ Note: float(n) is equivalent to new float(n), and both are equivalent to n if n 
 Implementation note:The ABC format has been revised to provide a new convert_f instruction that
 implements ToFloat.
 */
-
-
-var result = float();
-AddTestCase("float as function default value +0.0f", 0 , FloatRawBits(result));
-AddTestCase("float as function default value is NOT -0.0f", true , FloatRawBits(result) != FloatRawBits(-0.0f)); // FloatRawBits(-0.0f) is not 0.
-
-var resultf:float = float();
-AddTestCase("typed float as function default value +0.0f", 0 , FloatRawBits(resultf));
-AddTestCase("typed float as function default value is NOT -0.0f", true , FloatRawBits(resultf) != FloatRawBits(-0.0f)); // FloatRawBits(-0.0f) is not 0.
 
 var pi_float = float(3.14);
 var pi_float_expected1 = 3.14f;
