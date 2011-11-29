@@ -48,7 +48,7 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    array[item++] = new TestCase( "SECTION", "MYOBJECT.toString()" );
+    array[item++] = new TestCase( "SECTION", "MYOBJECT.toString()", "", "" );
 
     for ( tc=0; tc < array.length; tc++ ) {
         var VALUE = 12345;

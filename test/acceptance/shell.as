@@ -48,6 +48,8 @@ var playerType:String = Capabilities.playerType;
 var completed = false;
 var testcases;
 var tc = 0;
+var fileName;
+var ATS;
 
 // SECTION and VERSION cannot be 'var' because this file is included into
 // test cases where SECTION and VERSION are redefined with 'var'; ASC
@@ -118,7 +120,14 @@ function AddTestCase( description, expect, actual ) {
 //  TestCase constructor
 
 
-function TestCase( n, d, e, a ) {
+class TestCase{
+    var name;
+    var description;
+    var expect;
+    var actual;
+    var passed;
+    var reason;
+    function TestCase( n, d, e, a ) {
     this.name        = n;
     this.description = d;
     this.expect      = e;
@@ -131,6 +140,7 @@ function TestCase( n, d, e, a ) {
     if ( DEBUG ) {
         writeLineToLog( "added " + this.description );
     }
+	}
 }
 
 
@@ -164,7 +174,7 @@ function test(... rest:Array) {
 
     if( rest.length == 0 ){
         // no args sent, use default test
-        for ( tc=0; tc < testcases.length; tc++ ) {
+        for ( var tc=0; tc < testcases.length; tc++ ) {
             testcases[tc].passed = writeTestCaseResult(
                     testcases[tc].expect,
                     testcases[tc].actual,
@@ -174,7 +184,7 @@ function test(... rest:Array) {
     } else {
         // we need to use a specialized call to writeTestCaseResult
         if( rest[0] == "no actual" ){
-            for ( tc=0; tc < testcases.length; tc++ ) {
+            for ( var tc=0; tc < testcases.length; tc++ ) {
                 testcases[tc].passed = writeTestCaseResult(
                                     testcases[tc].expect,
                                     testcases[tc].actual,
@@ -232,7 +242,7 @@ function getTestCaseResult(expect,actual) {
         // within 7 digits of precision.
         // log_10(2^24) ie 24 bits gives 7.2 digits of decimal precision
         if (typeof(actual) == "float" && typeof(expect) == "float") {
-            if ( float.abs(actual-expect) < 0.000001 ) {
+            if ( float.abs(actual-expect) < float(0.000001) ) {
                 passed = "true";
             }
         }
@@ -357,6 +367,24 @@ var TIME_NOW = now.valueOf();
 
 //  Date test "ResultArrays" are hard-coded for Pacific Standard Time.
 //  We must adjust them for the tester's own timezone -
+var TIME;
+var UTC_YEAR;
+var UTC_MONTH;
+var UTC_DATE;
+var UTC_DAY;
+var UTC_HOURS;
+var UTC_MINUTES;
+var UTC_SECONDS;
+var UTC_MS;
+
+var YEAR;
+var MONTH;
+var DATE;
+var DAY;
+var HOURS;
+var MINUTES;
+var SECONDS;
+var MS;
 
 function adjustResultArray(ResultArray, msMode)
 {
@@ -426,7 +454,7 @@ function DaysInYear( y ) {
         return 366;
     } else {
         _print("ERROR: DaysInYear(" + y + ") case not covered");
-        return Math.NaN; //"ERROR: DaysInYear(" + y + ") case not covered";
+        return Number.NaN; //"ERROR: DaysInYear(" + y + ") case not covered";
     }
 }
 function TimeInYear( y ) {
@@ -670,13 +698,13 @@ function GetSecondSundayInMarch(t ) {
     var year = YearFromTime(t);
     var leap = InLeapYear(t);
     var march = TimeFromYear(year) + TimeInMonth(0,leap) +  TimeInMonth(1,leap)-LocalTZA()+2*msPerHour;
-        
-    for ( var first_sunday = march; WeekDay(first_sunday) >0;
+    var first_sunday;
+    for ( first_sunday = march; WeekDay(first_sunday) >0;
         first_sunday +=msPerDay )
     {
         ;
     }
-    second_sunday=first_sunday+7*msPerDay;
+    var second_sunday=first_sunday+7*msPerDay;
     return second_sunday;
 }
 
@@ -829,7 +857,7 @@ function compareDate(d1, d2) {
     //Dates may be off by a second
     if (d1 == d2) {
         return true;
-    } else if (Math.abs(new Date(d1) - new Date(d2)) <= 1000) {
+    } else if (Math.abs(new Date(d1).getTime() - new Date(d2).getTime()) <= 1000) {
         return true;
     } else {
         return false;
@@ -902,7 +930,7 @@ function BUG(bug)
 
 function reportFailure (section, msg)
 {
-    print(FAILED + inSection(section)+"\n"+msg);
+    _print(FAILED + inSection(section)+"\n"+msg);
     /*var lines = msg.split ("\n");
     for (var i=0; i<lines.length; i++)
         print(FAILED + lines[i]);
@@ -940,7 +968,7 @@ function TEST_XML(section, expected, actual)
 
     TEST(section, String(expected), actual.toXMLString());
   } else {
-    reportFailure ("Bad TEST_XML usage: type of expected is "+expected_t+", should be number or string");
+    reportFailure ("", "Bad TEST_XML usage: type of expected is "+expected_t+", should be number or string");
   }
 }
 
@@ -993,7 +1021,7 @@ function grabError(err, str) {
 }
 
 function AddErrorTest(desc:String, expectedErr:String, testFunc:Function) {
-    actualErr = "No errors. None. Nada. All worked fine. Really.";
+    var actualErr = "No errors. None. Nada. All worked fine. Really.";
     try {
         testFunc();
     } catch (e) {
@@ -1298,7 +1326,7 @@ function toSource(arr)
   var elt = '';
   var ret = '';
   var len = arr.length;
-
+  var i;
   for (i=0; i<len; i++)
   {
     elt = arr[i];
@@ -1347,6 +1375,7 @@ function removeExceptionDetail(s:String) {
 
 function sortObject(o:Object) {
     var keys=[];
+    var key;
     for ( key in o ) {
         if (o==undefined) {
            continue;
@@ -1355,7 +1384,8 @@ function sortObject(o:Object) {
     }
     keys.sort();
     var ret="{";
-    for (i in keys) {
+    var value;
+    for (var i in keys) {
         key=keys[i];
         value=o[key];
         if (value is String) {

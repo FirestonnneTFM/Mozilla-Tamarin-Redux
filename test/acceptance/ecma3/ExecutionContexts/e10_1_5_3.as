@@ -47,7 +47,7 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    array[0] = new TestCase( "SECTION", "Function Code check" );
+    array[0] = new TestCase( "SECTION", "Function Code check", "", "" );
 
     if ( Object == null ) {
         array[0].reason += " Object == null" ;

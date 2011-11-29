@@ -48,7 +48,7 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    array[0] = new TestCase( "SECTION", "Anonymous Code check" );
+    array[0] = new TestCase( "SECTION", "Anonymous Code check", "", "" );
 
     var EVAL_STRING = 'if ( Object == null ) { array[0].reason += " Object == null" ; }' +
         'if ( Function == null ) { array[0].reason += " Function == null"; }' +
