@@ -6242,9 +6242,10 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     LIns* oz = callIns(FUNCTIONID(mod), 2,f4z,g4z);
                     LIns* f4w = f2dIns(lirout->ins1(LIR_f4w, f4)), *g4w = f2dIns(lirout->ins1(LIR_f4w, g4));
                     LIns* ow = callIns(FUNCTIONID(mod), 2,f4w,g4w);
-                    
-                    callIns(FUNCTIONID(float4FromComponents), 5, localGetf4Addr(sp-1),
+                    LIns* f4addr = localGetf4Addr(sp - 1);
+                    callIns(FUNCTIONID(float4FromComponents), 5, f4addr,
                                          d2fIns(ox), d2fIns(oy), d2fIns(oz), d2fIns(ow) );
+                    varTracker->trackVarStore( ldf4(f4addr, 0 ,ACCSET_VARS), sp - 1); // Announce that a store is taking place/ the local var is modified
                 } else if(result == NUMBER_TYPE){
                     AvmAssert(state->value(sp-1).traits == NUMBER_TYPE);
                     AvmAssert(state->value(sp).traits == NUMBER_TYPE);
