@@ -281,6 +281,18 @@ namespace avmplus
 #endif
         return ::sinf(value);
     }
+
+    REALLY_INLINE float MathUtils::recipf(float value)
+    {
+        // FIXME (Bugzilla 704097): this must use the intrinsic
+        return 1 / value;
+    }
+
+    REALLY_INLINE float MathUtils::rsqrtf(float value)
+    {
+        // FIXME (Bugzilla 704097): this must use the intrinsic
+        return 1 / ::sqrtf(value);
+    }
     
     REALLY_INLINE float MathUtils::sqrtf(float value)
     {

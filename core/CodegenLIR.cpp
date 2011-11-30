@@ -4421,6 +4421,16 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     }
 
 #ifdef VMCFG_FLOAT
+    void CodegenLIR::emitFloatUnary(Traits* result, LOpcode op) {
+        int sp = state->sp();
+        localSet(sp - 1, lirout->ins1(op, localGetf(sp)), result);
+    }
+
+    void CodegenLIR::emitFloatAbs(Traits* result)        { emitFloatUnary(result, LIR_absf);   }
+    void CodegenLIR::emitFloatReciprocal(Traits* result) { emitFloatUnary(result, LIR_recipf); }
+    void CodegenLIR::emitFloatRsqrt(Traits* result)      { emitFloatUnary(result, LIR_rsqrtf); }
+    void CodegenLIR::emitFloatSqrt(Traits* result)       { emitFloatUnary(result, LIR_sqrtf);  }
+
     void CodegenLIR::emitFloat4unary(Traits* result, LOpcode op) {
         int sp = state->sp();
         localSet(sp - 1, lirout->ins1(op, localGetf4(sp)), result);
@@ -4485,7 +4495,6 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     void CodegenLIR::emitFloat4distance(Traits* result)  { emitDistance(result, LIR_dotf4); }
     void CodegenLIR::emitFloat4distance2(Traits* result) { emitDistance(result, LIR_dotf2); }
     void CodegenLIR::emitFloat4distance3(Traits* result) { emitDistance(result, LIR_dotf3); }
-
 #endif
 
     // Determine a mask for our argument that indicates to which types it may be trivially converted
@@ -4714,6 +4723,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         //{ avmplus::NativeID::Math_random,                  0, {BUILTIN_none,   BUILTIN_none},   FUNCTIONID(Math_random), 0},
 
 #ifdef VMCFG_FLOAT
+        // float
         { avmplus::NativeID::float_acos,                    1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_acos), 0},
         { avmplus::NativeID::float_asin,                    1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_asin), 0},
         { avmplus::NativeID::float_atan,                    1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_atan), 0},
@@ -4722,18 +4732,32 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         { avmplus::NativeID::float_exp,                     1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_exp), 0},
         { avmplus::NativeID::float_floor,                   1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_floor), 0},
         { avmplus::NativeID::float_log,                     1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_log), 0},
-        { avmplus::NativeID::float_round,                   1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_round), 0},
         { avmplus::NativeID::float_sin,                     1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_sin), 0},
-        { avmplus::NativeID::float_sqrt,                    1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_sqrt), 0},
         { avmplus::NativeID::float_tan,                     1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_tan), 0},
         
         { avmplus::NativeID::float_atan2,                   2, {BUILTIN_float, BUILTIN_float}, FUNCTIONID(float_atan2), 0},
         { avmplus::NativeID::float_pow,                     2, {BUILTIN_float, BUILTIN_float}, FUNCTIONID(float_pow), 0},
 
-        { avmplus::NativeID::float_abs,                     1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_abs), 0},
-        
-        { avmplus::NativeID::float_min,                     2, {BUILTIN_float, BUILTIN_float}, FUNCTIONID(float_min2), 0},
+        // We would like to inline this on x86, but need SSE 4.1 to use ROUNDSS. A CVTSS2SI; CVTSI2SS sequence should work for SSE2,
+        // but only with the correct rounding mode, which we cannot guarantee.  It would be possible to inline the MathUtils::roundf
+        // function, which seems the best we can do.
+        { avmplus::NativeID::float_round,                   1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_round), 0},
+        // We would like to inline these on x86, but the MINSS and MAXSS instructions do not handle signed zero as required.
         { avmplus::NativeID::float_max,                     2, {BUILTIN_float, BUILTIN_float}, FUNCTIONID(float_max2), 0},
+        { avmplus::NativeID::float_min,                     2, {BUILTIN_float, BUILTIN_float}, FUNCTIONID(float_min2), 0},
+
+    #ifdef VMCFG_IA32
+        { avmplus::NativeID::float_abs,                     1, {BUILTIN_float, BUILTIN_none},  0, &CodegenLIR::emitFloatAbs},
+        { avmplus::NativeID::float_reciprocal,              1, {BUILTIN_float, BUILTIN_none},  0, &CodegenLIR::emitFloatReciprocal},
+        { avmplus::NativeID::float_rsqrt,                   1, {BUILTIN_float, BUILTIN_none},  0, &CodegenLIR::emitFloatRsqrt},
+        { avmplus::NativeID::float_sqrt,                    1, {BUILTIN_float, BUILTIN_none},  0, &CodegenLIR::emitFloatSqrt},
+    #else
+        { avmplus::NativeID::float_abs,                     1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_abs), 0},
+        { avmplus::NativeID::float_reciprocal,              1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_reciprocal), 0},
+        { avmplus::NativeID::float_rsqrt,                   1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_rsqrt), 0},
+        { avmplus::NativeID::float_sqrt,                    1, {BUILTIN_float, BUILTIN_none},  FUNCTIONID(float_sqrt), 0},
+    #endif
+
 #endif
     };
 

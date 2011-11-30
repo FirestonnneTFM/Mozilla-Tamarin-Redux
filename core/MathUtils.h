@@ -112,7 +112,9 @@ namespace avmplus
         static float  maxf(float x, float y);
         static float  minf(float x, float y);
         static float  modf(float x, float y);
+        static float  recipf(float value);
         static float  roundf(float value);
+        static float  rsqrtf(float value);
         static float  sinf(float value);
         static float  sqrtf(float value);
         static float  tanf(float value);
