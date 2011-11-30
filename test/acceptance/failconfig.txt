@@ -355,6 +355,10 @@ as3/Types/Float/nonstrict/ToString:ToString\(float\.MAX_VALUE\) , .*,, expectedf
 as3/Types/Float/loadLegacyCode, arm , ,  expectedfail, need to update runner script
 as3/Types/Float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
 
+as3/Types/Float4/compound_assignment:flt4 %= , .*-release-Ojit, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=706454
+as3/Types/Float4/op_modulo:float.* % float (?!.*check).* , .*-release-Ojit, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=706454
+as3/Types/Float4/op_modulo:float.* % float4 (?!.*check).* , .*-release-Ojit, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=706454
+
 ####################
 # Float4
 ####################
