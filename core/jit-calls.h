@@ -553,7 +553,10 @@
         case SST_float:
             return core->floatToAtom(native->f);
         case SST_float4:
-            return core->float4ToAtom(AvmThunkUnbox_FLOAT4(float4_t, native->atom));
+            {
+                const float4_t* pf4 = reinterpret_cast<const float4_t*> (&(native->atom));
+                return core->float4ToAtom(*pf4);
+            }
 #endif // VMCFG_FLOAT
         }
     }
