@@ -823,6 +823,7 @@
 		079DFC970F3AB9640031D1B4 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		07A8D2DD0F5EEA2B0005E66C /* OOM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OOM.h; path = ../../../MMgc/OOM.h; sourceTree = SOURCE_ROOT; };
 		07A8D2F10F5EEAB00005E66C /* GC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GC.h; path = ../../../MMgc/GC.h; sourceTree = SOURCE_ROOT; };
+		07AC9F941486B95E0012F09D /* ST_mmgc_externalalloc.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_externalalloc.st; path = ../../../extensions/ST_mmgc_externalalloc.st; sourceTree = SOURCE_ROOT; };
 		07AE842D134DA5C200598B23 /* ExactGCTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ExactGCTests.h; path = ../../../core/ExactGCTests.h; sourceTree = SOURCE_ROOT; };
 		07B1D9C21288521400685347 /* WriteBarrier-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "WriteBarrier-inlines.h"; path = "../../../MMgc/WriteBarrier-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07C0F7BE0FDE897100B0E09A /* BasicList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BasicList.h; path = ../../../MMgc/BasicList.h; sourceTree = SOURCE_ROOT; };
@@ -1095,6 +1096,7 @@
 		074CF4F30F3AD6A300558A5F /* sources */ = {
 			isa = PBXGroup;
 			children = (
+				07AC9F941486B95E0012F09D /* ST_mmgc_externalalloc.st */,
 				CB13ECD11358E06B00A09CBE /* ST_avmplus_builtins.st */,
 				0772CCF20F3C3084008DDBB6 /* ST_avmplus_basics.st */,
 				0772CCF30F3C3084008DDBB6 /* ST_avmplus_peephole.st */,
