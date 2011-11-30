@@ -17,7 +17,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2010
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -37,47 +37,37 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var DESC = "Compute float.abs of a large Vector.<float>";
+include "driver.as"
 
-#ifndef __avmplus_MathUtils_inlines__
-#define __avmplus_MathUtils_inlines__
-
-namespace avmplus
+function float_abs(iter: int, a: Vector.<float>): float
 {
-    // These methods appear to be unused
-    // The implementations of max, min, maxf, and minf do not follow the spec
-    // in some cases with signed zero arguments.
-    // BEGIN
-    REALLY_INLINE double MathUtils::infinity() { return kInfinity; }
-    REALLY_INLINE double MathUtils::neg_infinity() { return kNegInfinity; }
-    REALLY_INLINE double MathUtils::max(double x, double y) { return (x > y) ? x : y; }
-    REALLY_INLINE double MathUtils::min(double x, double y) { return (x < y) ? x : y; }
-    REALLY_INLINE double MathUtils::nan() { return kNaN; }
-
-    REALLY_INLINE float  MathUtils::maxf(float x, float y) { return (x > y) ? x : y; }
-    REALLY_INLINE float  MathUtils::minf(float x, float y) { return (x < y) ? x : y; }
-    // END
-
-#if !defined(WIN32) || !defined(AVMPLUS_IA32)
-    REALLY_INLINE double MathUtils::round(double value)
-    {
-        return MathUtils::floor(value + 0.5);
+    // Please do not change or remove the type annotation
+    // Please do not change the indexing expressions or updates.
+    var tmp1:float;
+    var tmp2:float;
+    var tmp3:float;
+    var tmp4:float;
+    var tmp5:float;
+    for ( var i:int = 0 ; i < iter ; i++ ) {
+        for ( var j:int = 0 ; j < 1000 ; ) {
+            tmp1 = a[j];  tmp1 = float.abs(tmp1); j++;
+            tmp2 = a[j];  tmp2 = float.abs(tmp2); j++;
+            tmp3 = a[j];  tmp3 = float.abs(tmp3); j++;
+            tmp4 = a[j];  tmp4 = float.abs(tmp4); j++;
+            tmp5 = a[j];  tmp5 = float.abs(tmp5); j++;
+        }
     }
-#endif // !defined(WIN32) || !defined(AVMPLUS_IA32)
-
-    REALLY_INLINE float MathUtils::roundf(float value)
-    {
-        return MathUtils::floorf(value + 0.5f);
-    }
-
-    REALLY_INLINE bool MathUtils::isNaNInline(double d)
-    {
-#if defined(AVMPLUS_IA32) && !defined(AVMPLUS_SSE2_ALWAYS)
-        double_overlay u(d);
-        return ((u.bits64 & ~0x8000000000000000ULL) > 0x7ff0000000000000ULL);
-#else
-        return (d != d);
-#endif
-    }
+    return tmp1+tmp2+tmp3+tmp4+tmp5;
 }
 
-#endif /* __avmplus__MathUtils__ */
+function init() {
+    var v:Vector.<float> = new Vector.<float>(1000)
+    for (var i:uint = 0, len:uint = v.length; i < len; ++i)
+        v[i] = float((i & 1) ? i : -i);
+    return v
+}
+
+var v: Vector.<float> = init()
+
+TEST(function () { float_abs(1000, v); }, "float-abs");

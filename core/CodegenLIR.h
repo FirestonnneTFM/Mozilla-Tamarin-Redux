@@ -565,6 +565,7 @@ namespace avmplus
 
 #ifdef VMCFG_FLOAT
         // helpers
+        void emitFloatUnary(Traits* result, LOpcode op);
         void emitFloat4unary(Traits*, LOpcode opcode);
         void emitFloat4binary(Traits*, LOpcode opcode);
         LIns* magnitude(LOpcode dot_op, LIns* x);
@@ -572,6 +573,10 @@ namespace avmplus
         void emitDistance(Traits* result, LOpcode dot_op);
 
         // emitters for inline float/float4 functions
+        void emitFloatAbs(Traits* result);
+        void emitFloatReciprocal(Traits* result);
+        void emitFloatRsqrt(Traits* result);
+        void emitFloatSqrt(Traits* result);
         void emitFloat4abs(Traits* result);
         void emitFloat4max(Traits* result);
         void emitFloat4min(Traits* result);

@@ -193,6 +193,18 @@ namespace avmplus
         return ::pow(x, y);
     }
 
+    REALLY_INLINE float MathUtils::recipf(float value)
+    {
+        // FIXME (Bugzilla 704097): this must use the intrinsic
+        return 1 / value;
+    }
+
+    REALLY_INLINE float MathUtils::rsqrtf(float value)
+    {
+        // FIXME (Bugzilla 704097): this must use the intrinsic
+        return 1 / ::sqrtf(value);
+    }
+
     REALLY_INLINE double MathUtils::sin(double value)
     {
 #if defined(VMCFG_TWEAK_SIN_COS_NONFINITE)
