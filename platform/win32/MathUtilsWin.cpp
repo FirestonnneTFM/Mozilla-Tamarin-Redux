@@ -152,13 +152,18 @@ namespace avmplus
         if (isNaNf(y)) return y;
         if (isInfinitef(y))
         {
-            if (!isInfinitef(x)) return (y > 0 ? (PI_f / 2) : -(PI_f / 2));
+            if (!isInfinitef(x))
+                return (y > 0 ? (PI_f / 2) : -(PI_f / 2));
             float r = (x > 0 ? (PI_f / 4) : (3 * PI_f / 4));
             return (y > 0 ? r : -r);
         }
-        if (y != 0 && x == 0)
+        else if (y != 0)
         {
-            return y > 0 ? (PI_f / 2) : -(PI_f / 2);
+            if (x == 0)
+                return (y > 0 ? (PI_f / 2) : -(PI_f / 2));
+            assert(isInfinite(x));
+            float r = (x > 0 ? 0.0f : PI_f);
+            return (y > 0 ? r : -r); 
         }
         else // y == 0
         {
