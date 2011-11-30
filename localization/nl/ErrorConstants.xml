@@ -671,12 +671,14 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">Wanneer het callback-argument een methode of een klasse is, moet het optionele argument this null zijn.</error>
+  <error id="2004" label="kInvalidParamError">Een van de parameters is ongeldig.</error>
   <error id="2006" label="kParamRangeError">De opgegeven index is buiten de grenzen.</error>
   <error id="2007" label="kNullPointerError">Parameter %1 mag niet null zijn.</error>
   <error id="2008" label="kInvalidEnumError">Parameter %1 moet een van de toegestane waarden zijn.</error>
   <error id="2012" label="kCantInstantiateError">Klasse %1 kan niet worden geïnstantieerd.</error>
   <error id="2030" label="kEOFError">Einde van bestand is bereikt.</error>
   <error id="2058" label="kCompressedDataError">Er is een fout opgetreden bij het decomprimeren van gegevens.</error>
+  <error id="2085" label="kEmptyStringError">Parameter %1 mag geen lege tekenreeks zijn.</error>
   <error id="2088" label="kProxyGetPropertyError">De klasse Proxy implementeert getProperty niet. Het moet worden overschreven door een subklasse.</error>
   <error id="2089" label="kProxySetPropertyError">De klasse Proxy implementeert setProperty niet. Het moet worden overschreven door een subklasse.</error>
   <error id="2090" label="kProxyCallPropertyError">De klasse Proxy implementeert callProperty niet. Het moet worden overschreven door een subklasse.</error>
@@ -686,4 +688,5 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">De klasse Proxy implementeert nextNameIndex niet. Het moet worden overschreven door een subklasse.</error>
   <error id="2106" label="kProxyNextNameError">De klasse Proxy implementeert nextName niet. Het moet worden overschreven door een subklasse.</error>
   <error id="2107" label="kProxyNextValueError">De klasse Proxy implementeert nextValue niet. Het moet worden overschreven door een subklasse.</error>
+  <error id="2173" label="kReadExternalNotImplementedError">Kan object in stream niet lezen.  De klasse %1 implementeert flash.utils.IExternalizable niet, maar heeft een externaliseerbare klasse als alias.</error>
 </errors>

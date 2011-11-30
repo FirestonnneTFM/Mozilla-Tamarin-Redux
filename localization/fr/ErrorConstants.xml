@@ -760,12 +760,14 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">Lorsque l’argument du rappel correspond à une méthode de classe, l’argument facultatif 'this' doit être null.</error>
+  <error id="2004" label="kInvalidParamError">L'un des paramètres n'est pas valide.</error>
   <error id="2006" label="kParamRangeError">L'index indiqué sort des limites.</error>
   <error id="2007" label="kNullPointerError">Le paramètre %1 ne doit pas être nul.</error>
   <error id="2008" label="kInvalidEnumError">Le paramètre %1 doit être l'une des valeurs acceptées.</error>
   <error id="2012" label="kCantInstantiateError">Impossible d'instancier la classe %1.</error>
   <error id="2030" label="kEOFError">Fin de fichier détectée.</error>
   <error id="2058" label="kCompressedDataError">Une erreur s'est produite lors de la décompression des données.</error>
+  <error id="2085" label="kEmptyStringError">Le paramètre %1 doit être une chaîne non vide.</error>
   <error id="2088" label="kProxyGetPropertyError">La classe Proxy ne met pas en oeuvre getProperty. Elle doit être remplacée par une sous-classe.</error>
   <error id="2089" label="kProxySetPropertyError">La classe Proxy ne met pas en oeuvre setProperty. Elle doit être remplacée par une sous-classe.</error>
   <error id="2090" label="kProxyCallPropertyError">La classe Proxy ne met pas en oeuvre callProperty. Elle doit être remplacée par une sous-classe.</error>
@@ -775,4 +777,5 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">La classe Proxy ne met pas en oeuvre nextNameIndex. Elle doit être remplacée par une sous-classe.</error>
   <error id="2106" label="kProxyNextNameError">La classe Proxy ne met pas en oeuvre nextName. Elle doit être remplacée par une sous-classe.</error>
   <error id="2107" label="kProxyNextValueError">La classe Proxy ne met pas en oeuvre nextValue. Elle doit être remplacée par une sous-classe.</error>
+  <error id="2173" label="kReadExternalNotImplementedError">Impossible de lire l'objet dans le flux. La classe %1 n'implémente pas flash.utils.IExternalizable, mais est aliasée vers une classe externalisable.</error>
 </errors>

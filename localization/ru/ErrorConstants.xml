@@ -671,12 +671,14 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">Если аргумент "callback" является методом класса, дополнительный аргумент "this" должен быть "null".</error>
+  <error id="2004" label="kInvalidParamError">Один из параметров указан неверно.</error>
   <error id="2006" label="kParamRangeError">Предоставленный индекс выходит за допустимые пределы.</error>
   <error id="2007" label="kNullPointerError">Параметр %1 не должен быть равен нулю.</error>
   <error id="2008" label="kInvalidEnumError">Параметр %1 должен быть одним из принятых значений.</error>
   <error id="2012" label="kCantInstantiateError">Класс %1 не может быть создан.</error>
   <error id="2030" label="kEOFError">Обнаружен конец файла.</error>
   <error id="2058" label="kCompressedDataError">Ошибка при распаковке данных.</error>
+  <error id="2085" label="kEmptyStringError">Параметр %1 должен быть не пустой строкой.</error>
   <error id="2088" label="kProxyGetPropertyError">Класс Proxy не поддерживает getProperty. Он должен быть заменен на подкласс.</error>
   <error id="2089" label="kProxySetPropertyError">Класс Proxy не поддерживает setProperty. Он должен быть заменен на подкласс.</error>
   <error id="2090" label="kProxyCallPropertyError">Класс Proxy не поддерживает callProperty. Он должен быть заменен на подкласс.</error>
@@ -686,4 +688,5 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Класс Proxy не поддерживает nextNameIndex. Он должен быть заменен на подкласс.</error>
   <error id="2106" label="kProxyNextNameError">Класс Proxy не поддерживает nextName. Он должен быть заменен на подкласс.</error>
   <error id="2107" label="kProxyNextValueError">Класс Proxy не поддерживает nextValue. Он должен быть заменен на подкласс.</error>
+  <error id="2173" label="kReadExternalNotImplementedError">Не удается прочитать объект в потоке. В классе %1 не реализован интерфейс flash.utils.Iexternalizable, но в качестве его псевдонима используется класс с поддержкой внешних связей.</error>
 </errors>

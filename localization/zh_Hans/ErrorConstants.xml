@@ -760,12 +760,14 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">如果回调参数是某个类的方法，则可选参数“this”必须为空。</error>
+  <error id="2004" label="kInvalidParamError">某个参数无效。</error>
   <error id="2006" label="kParamRangeError">提供的索引超出范围。</error>
   <error id="2007" label="kNullPointerError">参数 %1 不能为空。</error>
   <error id="2008" label="kInvalidEnumError">参数 %1 必须是某个可接受的值。</error>
   <error id="2012" label="kCantInstantiateError">无法实例化 %1 类。</error>
   <error id="2030" label="kEOFError">遇到文件尾。</error>
   <error id="2058" label="kCompressedDataError">解压缩数据时出错。</error>
+  <error id="2085" label="kEmptyStringError">参数 %1 必须为非空字符串。</error>
   <error id="2088" label="kProxyGetPropertyError">Proxy 类不实现 getProperty。它必须由一个子类覆盖。</error>
   <error id="2089" label="kProxySetPropertyError">Proxy 类不实现 setProperty。它必须由一个子类覆盖。</error>
   <error id="2090" label="kProxyCallPropertyError">Proxy 类不实现 callProperty。它必须由一个子类覆盖。</error>
@@ -775,4 +777,5 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Proxy 类不实现 nextNameIndex。它必须由一个子类覆盖。</error>
   <error id="2106" label="kProxyNextNameError">Proxy 类不实现 nextName。它必须由一个子类覆盖。</error>
   <error id="2107" label="kProxyNextValueError">Proxy 类不实现 nextValue。它必须由一个子类覆盖。</error>
+  <error id="2173" label="kReadExternalNotImplementedError">无法读取流中的对象。类 %1 虽未实现 flash.utils.IExternalizable，但由其别名可得知它为 externalizable 类。</error>
 </errors>

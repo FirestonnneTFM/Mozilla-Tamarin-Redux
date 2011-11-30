@@ -216,6 +216,14 @@ namespace avmplus
     class QNameObject;
     class XMLParser;
     class XMLTag;
+    class DictionaryClass;
+    class DictionaryObject;
+    class ObjectOutputClass;
+    class ObjectOutputObject;
+    class ObjectInputClass;
+    class ObjectInputObject;
+    class DynamicPropertyOutputClass;
+    class DynamicPropertyOutputObject;
 
     template<class TLIST> class VectorAccessor;
 
@@ -343,6 +351,9 @@ namespace avmplus
 #endif
 #include "ByteArrayGlue.h"
 #include "ProxyGlue.h"
+#include "DictionaryGlue.h"
+#include "ObjectIO.h"
+#include "AvmSerializer.h"
 
 // Some unusual test cases for the exact-tracer script
 

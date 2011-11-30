@@ -66,7 +66,7 @@ print("Building shell_toplevel...")
 configs = ""
 
 # compile builtins
-os.system(asc+" -abcfuture -import ../generated/builtin.abc -builtin "+configs+"-apiversioning -out shell_toplevel shell_toplevel.as Domain.as ../extensions/Sampler.as ../extensions/Trace.as ../extensions/Dictionary.as Endian.as")
+os.system(asc+" -abcfuture -import ../generated/builtin.abc -builtin "+configs+"-apiversioning -out shell_toplevel shell_toplevel.as Domain.as ../extensions/Sampler.as ../extensions/Trace.as Endian.as")
 
 rm("shell_toplevel.h")
 rm("shell_toplevel.cpp")

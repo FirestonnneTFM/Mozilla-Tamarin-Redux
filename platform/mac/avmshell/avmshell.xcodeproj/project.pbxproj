@@ -130,7 +130,6 @@
 		079DF97D0F3A89C50031D1B4 /* DomainClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9740F3A89C50031D1B4 /* DomainClass.cpp */; };
 		079DF97E0F3A89C50031D1B4 /* FileClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9760F3A89C50031D1B4 /* FileClass.cpp */; };
 		079DF9800F3A89C50031D1B4 /* SystemClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF97A0F3A89C50031D1B4 /* SystemClass.cpp */; };
-		079DF9930F3A8A320031D1B4 /* DictionaryGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF98D0F3A8A320031D1B4 /* DictionaryGlue.cpp */; };
 		079DF9950F3A8A320031D1B4 /* SamplerScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9910F3A8A320031D1B4 /* SamplerScript.cpp */; };
 		079DF9A40F3A8AAB0031D1B4 /* Selftest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF99D0F3A8AAB0031D1B4 /* Selftest.cpp */; };
 		079DF9A50F3A8AAB0031D1B4 /* SelftestInit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9A00F3A8AAB0031D1B4 /* SelftestInit.cpp */; };
@@ -285,7 +284,6 @@
 		7E87D0B2122C5B980005FEAF /* DomainClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9740F3A89C50031D1B4 /* DomainClass.cpp */; };
 		7E87D0B3122C5B980005FEAF /* FileClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9760F3A89C50031D1B4 /* FileClass.cpp */; };
 		7E87D0B4122C5B980005FEAF /* SystemClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF97A0F3A89C50031D1B4 /* SystemClass.cpp */; };
-		7E87D0B5122C5B980005FEAF /* DictionaryGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF98D0F3A8A320031D1B4 /* DictionaryGlue.cpp */; };
 		7E87D0B7122C5B980005FEAF /* SamplerScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9910F3A8A320031D1B4 /* SamplerScript.cpp */; };
 		7E87D0B8122C5B980005FEAF /* Selftest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF99D0F3A8AAB0031D1B4 /* Selftest.cpp */; };
 		7E87D0B9122C5B980005FEAF /* SelftestInit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9A00F3A8AAB0031D1B4 /* SelftestInit.cpp */; };
@@ -377,6 +375,12 @@
 		D939B112126E358400522895 /* DataIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D939B10F126E358400522895 /* DataIO.cpp */; };
 		D939B113126E358400522895 /* ByteArrayGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D939B10D126E358400522895 /* ByteArrayGlue.cpp */; };
 		D939B114126E358400522895 /* DataIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D939B10F126E358400522895 /* DataIO.cpp */; };
+		D942196513DF3686002A4723 /* DictionaryGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D942196213DF3686002A4723 /* DictionaryGlue.cpp */; };
+		D942196713DF3686002A4723 /* DictionaryGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D942196213DF3686002A4723 /* DictionaryGlue.cpp */; };
+		D942197613DF38D7002A4723 /* AvmSerializer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D942197213DF38D7002A4723 /* AvmSerializer.cpp */; };
+		D942197713DF38D7002A4723 /* ObjectIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D942197413DF38D7002A4723 /* ObjectIO.cpp */; };
+		D942197813DF38D7002A4723 /* AvmSerializer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D942197213DF38D7002A4723 /* AvmSerializer.cpp */; };
+		D942197913DF38D7002A4723 /* ObjectIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D942197413DF38D7002A4723 /* ObjectIO.cpp */; };
 		D94236990F8ACAE400F97706 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */; };
 		D942369B0F8ACAE400F97706 /* PosixPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */; };
 		D987E32311C19E5700474022 /* DomainMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D987E32011C19E5700474022 /* DomainMgr.cpp */; };
@@ -752,11 +756,8 @@
 		079DF9890F3A89E60031D1B4 /* Endian.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Endian.as; path = ../../../shell/Endian.as; sourceTree = SOURCE_ROOT; };
 		079DF98A0F3A89E60031D1B4 /* Java.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Java.as; path = ../../../shell/Java.as; sourceTree = SOURCE_ROOT; };
 		079DF98B0F3A89E60031D1B4 /* shell_toplevel.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = shell_toplevel.as; path = ../../../shell/shell_toplevel.as; sourceTree = SOURCE_ROOT; };
-		079DF98D0F3A8A320031D1B4 /* DictionaryGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DictionaryGlue.cpp; path = ../../../extensions/DictionaryGlue.cpp; sourceTree = SOURCE_ROOT; };
-		079DF98E0F3A8A320031D1B4 /* DictionaryGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DictionaryGlue.h; path = ../../../extensions/DictionaryGlue.h; sourceTree = SOURCE_ROOT; };
 		079DF9910F3A8A320031D1B4 /* SamplerScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SamplerScript.cpp; path = ../../../extensions/SamplerScript.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9920F3A8A320031D1B4 /* SamplerScript.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SamplerScript.h; path = ../../../extensions/SamplerScript.h; sourceTree = SOURCE_ROOT; };
-		079DF9990F3A8A7C0031D1B4 /* Dictionary.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Dictionary.as; path = ../../../extensions/Dictionary.as; sourceTree = SOURCE_ROOT; };
 		079DF99A0F3A8A7D0031D1B4 /* Sampler.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Sampler.as; path = ../../../extensions/Sampler.as; sourceTree = SOURCE_ROOT; };
 		079DF99B0F3A8A7D0031D1B4 /* Trace.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Trace.as; path = ../../../extensions/Trace.as; sourceTree = SOURCE_ROOT; };
 		079DF99D0F3A8AAB0031D1B4 /* Selftest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Selftest.cpp; path = ../../../extensions/Selftest.cpp; sourceTree = SOURCE_ROOT; };
@@ -938,6 +939,21 @@
 		D939B10E126E358400522895 /* ByteArrayGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ByteArrayGlue.h; path = ../../../core/ByteArrayGlue.h; sourceTree = SOURCE_ROOT; };
 		D939B10F126E358400522895 /* DataIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataIO.cpp; path = ../../../core/DataIO.cpp; sourceTree = SOURCE_ROOT; };
 		D939B110126E358400522895 /* DataIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataIO.h; path = ../../../core/DataIO.h; sourceTree = SOURCE_ROOT; };
+		D942196113DF3686002A4723 /* Dictionary.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = Dictionary.as; path = ../../../core/Dictionary.as; sourceTree = SOURCE_ROOT; };
+		D942196213DF3686002A4723 /* DictionaryGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DictionaryGlue.cpp; path = ../../../core/DictionaryGlue.cpp; sourceTree = SOURCE_ROOT; };
+		D942196313DF3686002A4723 /* DictionaryGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DictionaryGlue.h; path = ../../../core/DictionaryGlue.h; sourceTree = SOURCE_ROOT; };
+		D942197213DF38D7002A4723 /* AvmSerializer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmSerializer.cpp; path = ../../../core/AvmSerializer.cpp; sourceTree = SOURCE_ROOT; };
+		D942197313DF38D7002A4723 /* AvmSerializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmSerializer.h; path = ../../../core/AvmSerializer.h; sourceTree = SOURCE_ROOT; };
+		D942197413DF38D7002A4723 /* ObjectIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ObjectIO.cpp; path = ../../../core/ObjectIO.cpp; sourceTree = SOURCE_ROOT; };
+		D942197513DF38D7002A4723 /* ObjectIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ObjectIO.h; path = ../../../core/ObjectIO.h; sourceTree = SOURCE_ROOT; };
+		D942197A13DF38FD002A4723 /* DynamicPropertyOutput.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = DynamicPropertyOutput.as; path = ../../../core/DynamicPropertyOutput.as; sourceTree = SOURCE_ROOT; };
+		D942197B13DF38FD002A4723 /* flash_net_classes.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = flash_net_classes.as; path = ../../../core/flash_net_classes.as; sourceTree = SOURCE_ROOT; };
+		D942197C13DF38FD002A4723 /* IDynamicPropertyOutput.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = IDynamicPropertyOutput.as; path = ../../../core/IDynamicPropertyOutput.as; sourceTree = SOURCE_ROOT; };
+		D942197D13DF38FD002A4723 /* IDynamicPropertyWriter.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = IDynamicPropertyWriter.as; path = ../../../core/IDynamicPropertyWriter.as; sourceTree = SOURCE_ROOT; };
+		D942197E13DF38FD002A4723 /* IExternalizable.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = IExternalizable.as; path = ../../../core/IExternalizable.as; sourceTree = SOURCE_ROOT; };
+		D942197F13DF38FD002A4723 /* ObjectEncoding.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = ObjectEncoding.as; path = ../../../core/ObjectEncoding.as; sourceTree = SOURCE_ROOT; };
+		D942198013DF38FD002A4723 /* ObjectInput.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = ObjectInput.as; path = ../../../core/ObjectInput.as; sourceTree = SOURCE_ROOT; };
+		D942198113DF38FD002A4723 /* ObjectOutput.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = ObjectOutput.as; path = ../../../core/ObjectOutput.as; sourceTree = SOURCE_ROOT; };
 		D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MacDebugUtils.cpp; path = ../../../VMPI/MacDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixPortUtils.cpp; path = ../../../VMPI/PosixPortUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D942369C0F8ACB0600F97706 /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../VMPI/manifest.mk; sourceTree = SOURCE_ROOT; };
@@ -1121,6 +1137,12 @@
 		079DF7B00F3A86D50031D1B4 /* core */ = {
 			isa = PBXGroup;
 			children = (
+				D942197213DF38D7002A4723 /* AvmSerializer.cpp */,
+				D942197313DF38D7002A4723 /* AvmSerializer.h */,
+				D942197413DF38D7002A4723 /* ObjectIO.cpp */,
+				D942197513DF38D7002A4723 /* ObjectIO.h */,
+				D942196213DF3686002A4723 /* DictionaryGlue.cpp */,
+				D942196313DF3686002A4723 /* DictionaryGlue.h */,
 				F68C246513A82E8B00152279 /* atom-inlines.h */,
 				F68C246613A82E8B00152279 /* atom.cpp */,
 				F68C246713A82E8B00152279 /* atom.h */,
@@ -1461,6 +1483,14 @@
 				079DF9150F3A88EA0031D1B4 /* Namespace.as */,
 				079DF9160F3A88EA0031D1B4 /* Number.as */,
 				079DF9170F3A88EA0031D1B4 /* Object.as */,
+				D942197A13DF38FD002A4723 /* DynamicPropertyOutput.as */,
+				D942197B13DF38FD002A4723 /* flash_net_classes.as */,
+				D942197C13DF38FD002A4723 /* IDynamicPropertyOutput.as */,
+				D942197D13DF38FD002A4723 /* IDynamicPropertyWriter.as */,
+				D942197E13DF38FD002A4723 /* IExternalizable.as */,
+				D942197F13DF38FD002A4723 /* ObjectEncoding.as */,
+				D942198013DF38FD002A4723 /* ObjectInput.as */,
+				D942198113DF38FD002A4723 /* ObjectOutput.as */,
 				D914C1EB1367955B00CD302D /* Proxy.as */,
 				079DF9180F3A88EA0031D1B4 /* RegExp.as */,
 				079DF9190F3A88EA0031D1B4 /* String.as */,
@@ -1468,6 +1498,7 @@
 				079DF91B0F3A88EA0031D1B4 /* VectorImpl.as */,
 				079DF91C0F3A88EA0031D1B4 /* XML.as */,
 				079DF90A0F3A88B10031D1B4 /* actionscript.lang.as */,
+				D942196113DF3686002A4723 /* Dictionary.as */,
 			);
 			name = AS;
 			sourceTree = "<group>";
@@ -1476,8 +1507,6 @@
 			isa = PBXGroup;
 			children = (
 				079DF9860F3A89CA0031D1B4 /* AS */,
-				079DF98D0F3A8A320031D1B4 /* DictionaryGlue.cpp */,
-				079DF98E0F3A8A320031D1B4 /* DictionaryGlue.h */,
 				079DF9740F3A89C50031D1B4 /* DomainClass.cpp */,
 				079DF9750F3A89C50031D1B4 /* DomainClass.h */,
 				079DF9760F3A89C50031D1B4 /* FileClass.cpp */,
@@ -1493,7 +1522,6 @@
 		079DF9860F3A89CA0031D1B4 /* AS */ = {
 			isa = PBXGroup;
 			children = (
-				079DF9990F3A8A7C0031D1B4 /* Dictionary.as */,
 				079DF99A0F3A8A7D0031D1B4 /* Sampler.as */,
 				079DF99B0F3A8A7D0031D1B4 /* Trace.as */,
 				079DF9880F3A89E60031D1B4 /* Domain.as */,
@@ -1982,7 +2010,6 @@
 				7E87D0B2122C5B980005FEAF /* DomainClass.cpp in Sources */,
 				7E87D0B3122C5B980005FEAF /* FileClass.cpp in Sources */,
 				7E87D0B4122C5B980005FEAF /* SystemClass.cpp in Sources */,
-				7E87D0B5122C5B980005FEAF /* DictionaryGlue.cpp in Sources */,
 				7E87D0B7122C5B980005FEAF /* SamplerScript.cpp in Sources */,
 				7E87D0B8122C5B980005FEAF /* Selftest.cpp in Sources */,
 				7E87D0B9122C5B980005FEAF /* SelftestInit.cpp in Sources */,
@@ -2079,6 +2106,9 @@
 				F68C247113A82EF800152279 /* GenericPortUtils.cpp in Sources */,
 				F68C247213A82EF800152279 /* MacPortUtils.cpp in Sources */,
 				07E7976613BC99EC00E25990 /* d2a.cpp in Sources */,
+				D942196713DF3686002A4723 /* DictionaryGlue.cpp in Sources */,
+				D942197813DF38D7002A4723 /* AvmSerializer.cpp in Sources */,
+				D942197913DF38D7002A4723 /* ObjectIO.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2175,7 +2205,6 @@
 				079DF97D0F3A89C50031D1B4 /* DomainClass.cpp in Sources */,
 				079DF97E0F3A89C50031D1B4 /* FileClass.cpp in Sources */,
 				079DF9800F3A89C50031D1B4 /* SystemClass.cpp in Sources */,
-				079DF9930F3A8A320031D1B4 /* DictionaryGlue.cpp in Sources */,
 				079DF9950F3A8A320031D1B4 /* SamplerScript.cpp in Sources */,
 				079DF9A40F3A8AAB0031D1B4 /* Selftest.cpp in Sources */,
 				079DF9A50F3A8AAB0031D1B4 /* SelftestInit.cpp in Sources */,
@@ -2272,6 +2301,9 @@
 				F68C246F13A82EF800152279 /* GenericPortUtils.cpp in Sources */,
 				F68C247013A82EF800152279 /* MacPortUtils.cpp in Sources */,
 				07E7976513BC99EC00E25990 /* d2a.cpp in Sources */,
+				D942196513DF3686002A4723 /* DictionaryGlue.cpp in Sources */,
+				D942197613DF38D7002A4723 /* AvmSerializer.cpp in Sources */,
+				D942197713DF38D7002A4723 /* ObjectIO.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

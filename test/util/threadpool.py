@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+#!/usr/bin/env python
 """Easy to use object-oriented thread pool framework.
 
 A thread pool is an object that maintains a pool of worker threads to perform
@@ -160,7 +160,6 @@ class WorkerThread(threading.Thread):
                     self._results_queue.put((request, result))
                 except:
                     request.exception = True
-                    self._results_queue.put((request, sys.exc_info()))
 
     def dismiss(self):
         """Sets a flag to tell the thread to exit when done with current job."""
