@@ -703,16 +703,18 @@ class RuntestBase(object):
                 tests += [(d+'/'+f) for f in files if self.istest(f, fileExtentions)]
                 # utilDirs contains all dirs that hold support files, and therefore
                 # are excluded from the tests list
-                # There are two kinds of util directories:
+                # There are three kinds of util directories:
                 # 1. directory with the same name as the test: all files in that dir
                 #    are included when compiling the test
                 # 2. directory with the same name as the test + _support (string is defined in self.supportFolderExt):
                 #    all files in that dir are compiled, but not run - these files are
                 #    normally passed in as args to the test itself
+                # 3. directory with the name "includes": all files in that dir
+                #    are manually included in test media and will not be compiled or run
                 utilDirs = [ud for ud in dirs if (ud+self.sourceExt in files) or
                          (ud.endswith(self.supportFolderExt) and
                           ud[:-len(self.supportFolderExt)]+self.sourceExt in files)
-                         ]
+                         or ud=="includes"]
                 for x in [x for x in self.exclude+utilDirs if x in dirs]:
                     dirs.remove(x)
                     if x.endswith(self.supportFolderExt):
