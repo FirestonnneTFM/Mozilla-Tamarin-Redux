@@ -1,3 +1,5 @@
+/* -*- c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -15,7 +17,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2010
+ * Portions created by the Initial Developer are Copyright (C) 2004-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,8 +37,22 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/* machine generated file via utils/exactgc.as -- do not edit */
+package flash.net
+{
 
-#define avmplus_DomainClass_isExactInterlock 1
-#define avmplus_DomainObject_isExactInterlock 1
+/**
+ * This class is internal to flash.net, so it does not require ASDoc's
+ *
+ * When static ObjectEncoding.dynamicPropertyWriter is set with a non-null
+ * IDynamicPropertyWriter, the native code will construct a DynamicPropertyOutput
+ * to use as the parameter to IDynamicPropertyWriter.writeDynamicProperties().
+ *
+ */
+        
+    [native(cls="DynamicPropertyOutputClass", gc="exact", instance="DynamicPropertyOutputObject", methods="auto", construct="native")]
+    internal class DynamicPropertyOutput implements IDynamicPropertyOutput
+    {
+        public native function writeDynamicProperty(name:String, value:*):void;
+    }
 
+}

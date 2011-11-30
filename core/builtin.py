@@ -65,7 +65,7 @@ print("Building builtins...")
 
 configs = ""
 
-os.system(asc+" -builtin "+configs+" -apiversioning -out builtin builtin.as Math.as Error.as Date.as RegExp.as JSON.as XML.as IDataInput.as IDataOutput.as ByteArray.as Proxy.as ")
+os.system(asc+" -builtin "+configs+" -apiversioning -out builtin builtin.as Math.as Error.as Date.as RegExp.as JSON.as XML.as IDataInput.as IDataOutput.as ByteArray.as Proxy.as flash_net_classes.as Dictionary.as IDynamicPropertyOutput.as IDynamicPropertyWriter.as DynamicPropertyOutput.as ObjectInput.as ObjectOutput.as IExternalizable.as ObjectEncoding.as")
 
 rm("builtin.h")
 rm("builtin.cpp")

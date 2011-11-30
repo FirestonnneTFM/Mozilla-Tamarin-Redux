@@ -760,12 +760,14 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">コールバック引数がクラスのメソッドのとき、任意指定の引数 'this' は null でなければなりません。</error>
+  <error id="2004" label="kInvalidParamError">パラメーターの 1 つが無効です。</error>
   <error id="2006" label="kParamRangeError">指定したインデックスが境界外です。</error>
   <error id="2007" label="kNullPointerError">パラメーター %1 は null 以外でなければなりません。</error>
   <error id="2008" label="kInvalidEnumError">パラメーター %1 は承認された値の 1 つでなければなりません。</error>
   <error id="2012" label="kCantInstantiateError">%1 クラスをインスタンス化することはできません。</error>
   <error id="2030" label="kEOFError">ファイルの終端 (EOF) が検出されました。</error>
   <error id="2058" label="kCompressedDataError">圧縮データの解凍時にエラーが発生しました。</error>
+  <error id="2085" label="kEmptyStringError">パラメーター %1 は空白以外の文字列でなければなりません。</error>
   <error id="2088" label="kProxyGetPropertyError">Proxy クラスは、getProperty を実装しません。サブクラスでオーバーライドする必要があります。</error>
   <error id="2089" label="kProxySetPropertyError">Proxy クラスは、setProperty を実装しません。サブクラスでオーバーライドする必要があります。</error>
   <error id="2090" label="kProxyCallPropertyError">Proxy クラスは、callProperty を実装しません。サブクラスでオーバーライドする必要があります。</error>
@@ -775,4 +777,5 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Proxy クラスは、nextNameIndex を実装しません。サブクラスでオーバーライドする必要があります。</error>
   <error id="2106" label="kProxyNextNameError">Proxy クラスは、nextName を実装しません。サブクラスでオーバーライドする必要があります。</error>
   <error id="2107" label="kProxyNextValueError">Proxy クラスは、nextValue を実装しません。サブクラスでオーバーライドする必要があります。</error>
+  <error id="2173" label="kReadExternalNotImplementedError">ストリーム内のオブジェクトを読み取れません。クラス %1 は flash.utils.IExternalizable を実装しませんが、外部化可能なクラスにエイリアス処理されます。</error>
 </errors>
