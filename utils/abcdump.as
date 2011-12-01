@@ -418,21 +418,21 @@ package abcdump
                     {
                         case OP_debugfile:
                         case OP_pushstring:
-                            s += '"' + abc.strings[readU32()].replace(/\n/g,"\\n").replace(/\t/g,"\\t") + '"'
+                            s += '"' + abc.stringFromU32().replace(/\n/g,"\\n").replace(/\t/g,"\\t") + '"'
                             break
                         case OP_pushnamespace:
-                            s += abc.namespaces[readU32()]
+                            s += abc.namespaceFromU32()
                             break
                         case OP_pushint:
-                            var i:int = abc.ints[readU32()]
+                            var i:int = abc.intFromU32()
                             s += i + "\t// 0x" + i.toString(16)
                             break
                         case OP_pushuint:
-                            var u:uint = abc.uints[readU32()]
+                            var u:uint = abc.uintFromU32()
                             s += u + "\t// 0x" + u.toString(16)
                             break;
                         case OP_pushdouble:
-                            s += abc.doubles[readU32()]
+                            s += abc.doubleFromU32()
                             break;
                         case OP_getsuper:
                         case OP_setsuper:
@@ -448,7 +448,7 @@ package abcdump
                         case OP_coerce:
                         case OP_astype:
                         case OP_getdescendants:
-                            s += abc.names[readU32()]
+                            s += abc.nameFromU32()
                             break;
                         case OP_constructprop:
                         case OP_callproperty:
@@ -456,7 +456,7 @@ package abcdump
                         case OP_callsuper:
                         case OP_callsupervoid:
                         case OP_callpropvoid:
-                            s += abc.names[readU32()]
+                            s += abc.nameFromU32()
                             s += " (" + readU32() + ")"
                             break;
                         case OP_newfunction: {
@@ -465,11 +465,11 @@ package abcdump
                             break;
                         }
                         case OP_callstatic:
-                            s += abc.methods[readU32()]
+                            s += abc.methodFromU32()
                             s += " (" + readU32() + ")"
                             break;
                         case OP_newclass:
-                            s += abc.instances[readU32()]
+                            s += abc.instanceFromU32()
                             break;
                         case OP_lookupswitch:
                             var pos = code.position-1;
@@ -801,6 +801,61 @@ package abcdump
             return   result & 0x0fffffff | data.readUnsignedByte()<<28;
         }
 
+        function classFromU32()
+        {
+            return classes[readU32()]
+        }
+
+        function doubleFromU32()
+        {
+            return doubles[readU32()]
+        }
+
+        function intFromU32()
+        {
+            return ints[readU32()]
+        }
+
+        function uintFromU32()
+        {
+            return uints[readU32()]
+        }
+
+        function instanceFromU32()
+        {
+            return instances[readU32()]
+        }
+
+        function metadataFromU32()
+        {
+            return metadata[readU32()]
+        }
+
+        function methodFromU32()
+        {
+            return methods[readU32()]
+        }
+
+        function nameFromU32()
+        {
+            return names[readU32()]
+        }
+
+        function namespaceFromU32()
+        {
+            return namespaces[readU32()]
+        }
+
+        function nssetFromU32()
+        {
+            return nssets[readU32()]
+        }
+
+        function stringFromU32()
+        {
+            return strings[readU32()]
+        }
+
         function dumpPool(name:String, pool:Array)
         {
             if(!doDumpPools)
@@ -873,7 +928,7 @@ package abcdump
                 case CONSTANT_StaticProtectedNs:
                 case CONSTANT_StaticProtectedNs2:
                 {
-                    namespaces[i] = new ABCNamespace(strings[readU32()], nskind)
+                    namespaces[i] = new ABCNamespace(stringFromU32(), nskind)
                     break;
                 }
                 case CONSTANT_PrivateNs:
@@ -919,12 +974,12 @@ package abcdump
                 {
                 case CONSTANT_Qname:
                 case CONSTANT_QnameA:
-                    names[i] = new QualifiedName(namespaces[readU32()], strings[readU32()])
+                    names[i] = new QualifiedName(namespaceFromU32(), stringFromU32())
                     break;
 
                 case CONSTANT_RTQname:
                 case CONSTANT_RTQnameA:
-                    names[i] = new QualifiedName(null, strings[readU32()])
+                    names[i] = new QualifiedName(null, stringFromU32())
                     break;
 
                 case CONSTANT_RTQnameL:
@@ -939,21 +994,21 @@ package abcdump
 
                 case CONSTANT_Multiname:
                 case CONSTANT_MultinameA:
-                    var name = strings[readU32()]
-                    names[i] = Multiname.createMultiname(nssets[readU32()], name, doDumpAPI)
+                    var name = stringFromU32()
+                    names[i] = Multiname.createMultiname(nssetFromU32(), name, doDumpAPI)
                     break;
 
                 case CONSTANT_MultinameL:
                 case CONSTANT_MultinameLA:
-                    names[i] = Multiname.createMultiname(nssets[readU32()], null, doDumpAPI)
+                    names[i] = Multiname.createMultiname(nssetFromU32(), null, doDumpAPI)
                     break;
 
                 case CONSTANT_TypeName:
-                    var name = names[readU32()];
+                    var name = nameFromU32();
                     var count = readU32();
                     var types = [];
                     for( var t=0; t < count; ++t )
-                        types.push(names[readU32()]);
+                        types.push(nameFromU32());
                     names[i] = new TypeName(name, types);
                     break;
 
@@ -982,11 +1037,11 @@ package abcdump
                 var m = methods[i] = new MethodInfo()
                 m.method_id = i
                 var param_count:int = readU32()
-                m.returnType = names[readU32()]
+                m.returnType = nameFromU32()
                 m.paramTypes = []
                 for (var j:int=0; j < param_count; j++)
-                    m.paramTypes[j] = names[readU32()]
-                m.debugName = strings[readU32()]
+                    m.paramTypes[j] = nameFromU32()
+                m.debugName = stringFromU32()
                 m.flags = data.readByte()
                 if (m.flags & HAS_OPTIONAL)
                 {
@@ -1032,16 +1087,16 @@ package abcdump
             {
                 // MetadataInfo
                 var m = metadata[i] = new MetaData()
-                m.name = strings[readU32()];
+                m.name = stringFromU32();
                 var values_count:int = readU32();
                 var names:Array = []
                 var keys:Array = []
                 var values:Array = []
 
                 for(var q:int = 0; q < values_count; ++q)
-                    keys[q] = strings[readU32()]
+                    keys[q] = stringFromU32()
                 for(var q:int = 0; q < values_count; ++q)
-                    values[q] = strings[readU32()]
+                    values[q] = stringFromU32()
 
                 for(var q:int = 0; q < values_count; ++q)
                     m.addPair(keys[q], values[q])
@@ -1060,15 +1115,15 @@ package abcdump
             for (var i:int=0; i < count; i++)
             {
                 var t = instances[i] = new Traits()
-                t.name = names[readU32()]
-                t.base = names[readU32()]
+                t.name = nameFromU32()
+                t.base = nameFromU32()
                 t.flags = data.readByte()
                 if (t.flags & 8)
-                    t.protectedNs = namespaces[readU32()]
+                    t.protectedNs = namespaceFromU32()
                 var interface_count = readU32()
                 for (var j:int=0; j < interface_count; j++)
-                    t.interfaces[j] = names[readU32()]
-                var m = t.init = methods[readU32()]
+                    t.interfaces[j] = nameFromU32()
+                var m = t.init = methodFromU32()
                 m.name = t.name
                 m.kind = TRAIT_Method
                 m.id = -1
@@ -1082,7 +1137,7 @@ package abcdump
             var namecount = readU32()
             for (var i:int=0; i < namecount; i++)
             {
-                var name = names[readU32()]
+                var name = nameFromU32()
                 var tag = data.readByte()
                 var kind = tag & 0xf
                 var member
@@ -1095,21 +1150,21 @@ package abcdump
                     t.slots[slot.id] = slot
                     if (kind==TRAIT_Slot || kind==TRAIT_Const)
                     {
-                        slot.type = names[readU32()]
+                        slot.type = nameFromU32()
                         var index=readU32()
                         if (index)
                             slot.value = defaults[data.readByte()][index]
                     }
                     else // (kind == TRAIT_Class)
                     {
-                        slot.value = classes[readU32()]
+                        slot.value = classFromU32()
                     }
                     break;
                 case TRAIT_Method:
                 case TRAIT_Getter:
                 case TRAIT_Setter:
                     var disp_id = readU32()
-                    var method = member = methods[readU32()]
+                    var method = member = methodFromU32()
                     t.methods[disp_id] = method
                     method.id = disp_id
                     //print("\t",traitKinds[kind],name,disp_id,method,"// disp_id", disp_id)
@@ -1137,7 +1192,7 @@ package abcdump
             for (var i:int=0; i < count; i++)
             {
                 var t:Traits = classes[i] = new Traits()
-                t.init = methods[readU32()]
+                t.init = methodFromU32()
                 t.base = "Class"
                 t.itraits = instances[i]
                 t.name = t.itraits.name + "$"
@@ -1159,7 +1214,7 @@ package abcdump
                 scripts[i] = t
                 t.name = "script" + i
                 t.base = names[0] // Object
-                t.init = methods[readU32()]
+                t.init = methodFromU32()
                 t.init.name = t.name + "$init"
                 t.init.kind = TRAIT_Method
                 parseTraits(t)
@@ -1173,7 +1228,7 @@ package abcdump
             var count:int = readU32()
             for (var i:int=0; i < count; i++)
             {
-                var m = methods[readU32()]
+                var m = methodFromU32()
                 m.max_stack = readU32()
                 m.local_count = readU32()
                 var initScopeDepth = readU32()
@@ -1197,10 +1252,10 @@ package abcdump
                         ex.from = readU32()
                         ex.to = readU32()
                         ex.target = readU32()
-                        ex.type = names[readU32()]
+                        ex.type = nameFromU32()
                         //print("magic " + magic.toString(16))
                         //if (magic >= (46<<16|16))
-                            ex.name = names[readU32()];
+                            ex.name = nameFromU32();
                         //infoPrint("exception method_id=" + i + " [" + ex.from + ", " + ex.to + "] " + ex.type + " -> " + ex.target)
                     }
                 }
