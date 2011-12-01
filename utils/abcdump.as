@@ -325,6 +325,11 @@ package abcdump
         var name
     }
 
+    class ByteArrayExhaustedError extends Error
+    {
+        function ByteArrayExhaustedError(e) { super(e); }
+    }
+
     class MethodInfo extends MemberInfo
     {
         var method_id:int
@@ -399,7 +404,7 @@ package abcdump
                     var start:int = code.position
                     var s = indent + start
                     while (s.length < 12) s += ' ';
-                    var opcode = code.readUnsignedByte()
+                    var opcode = code_readUnsignedByte()
 
                     if (opcode == OP_label || ((code.position-1) in labels)) {
                         dumpPrint(indent)
@@ -511,9 +516,9 @@ package abcdump
                             s += readU32()
                             break
                         case OP_debug:
-                            s += code.readUnsignedByte()
+                            s += code_readUnsignedByte()
                             s += " " + readU32()
-                            s += " " + code.readUnsignedByte()
+                            s += " " + code_readUnsignedByte()
                             s += " " + readU32()
                             break;
                         case OP_newobject:
@@ -530,7 +535,7 @@ package abcdump
                             break;
                         case OP_pushbyte:
                         case OP_getscopeobject:
-                            s += code.readByte()
+                            s += code_readByte()
                             break;
                         case OP_hasnext2:
                             s += readU32() + " " + readU32()
@@ -558,27 +563,43 @@ package abcdump
 
         function readU32():int
         {
-            var result:int = code.readUnsignedByte();
+            var result:int = code_readUnsignedByte();
             if (!(result & 0x00000080))
                 return result;
-            result = result & 0x0000007f | code.readUnsignedByte()<<7;
+            result = result & 0x0000007f | code_readUnsignedByte()<<7;
             if (!(result & 0x00004000))
                 return result;
-            result = result & 0x00003fff | code.readUnsignedByte()<<14;
+            result = result & 0x00003fff | code_readUnsignedByte()<<14;
             if (!(result & 0x00200000))
                 return result;
-            result = result & 0x001fffff | code.readUnsignedByte()<<21;
+            result = result & 0x001fffff | code_readUnsignedByte()<<21;
             if (!(result & 0x10000000))
                 return result;
-            return   result & 0x0fffffff | code.readUnsignedByte()<<28;
+            return   result & 0x0fffffff | code_readUnsignedByte()<<28;
         }
 
         function readS24():int
         {
-            var b:int = code.readUnsignedByte()
-            b |= code.readUnsignedByte()<<8
-            b |= code.readByte()<<16
+            var b:int = code_readUnsignedByte()
+            b |= code_readUnsignedByte()<<8
+            b |= code_readByte()<<16
             return b
+        }
+
+        function code_readUnsignedByte():int
+        {
+            if (code.bytesAvailable > 0)
+                return code.readUnsignedByte();
+            else
+                throw new ByteArrayExhaustedError("code exhausted");
+        }
+
+        function code_readByte():int
+        {
+            if (code.bytesAvailable > 0)
+                return code.readByte();
+            else
+                throw new ByteArrayExhaustedError("code exhausted");
         }
     }
 
