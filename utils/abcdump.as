@@ -1164,6 +1164,7 @@ package abcdump
                 if (code_length > 0) {
                     m.code_offset = data.position;
                     data.readBytes(m.code, 0, code_length)
+                    m.code_length = code_length;
                 }
                 var ex_count = readU32()
                 if (ex_count > 0) {
