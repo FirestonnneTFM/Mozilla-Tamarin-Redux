@@ -1198,8 +1198,14 @@ package abcdump
 
             for each (var m in methods)
             {
-                if (!m.dumped)
-                    m.dump(this,indent)
+                if (!m.dumped) {
+                    try {
+                        m.dump(this,indent)
+                    } catch (e:Error) {
+                        print(m.format())
+                        throw e
+                    }
+                }
             }
 
             infoPrint(align(14,"OPCODE",' ',"left")+"\tCOUNT\t SIZE\t% OF "+totalSize)
