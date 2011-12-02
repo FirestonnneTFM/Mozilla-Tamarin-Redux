@@ -52,6 +52,7 @@ AddErrorTest("float.log() with no args", ARGUMENTERROR+1063,  function(){ float.
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.log(string)", float.NaN, float.log("string"));
+AddStrictTestCase("float.log(undefined)", float.NaN, float.log(undefined));
 
 // If x is +0 or -0, the result is -Infinity.
 AddStrictTestCase("float.log(false)", float.NEGATIVE_INFINITY, float.log(false));

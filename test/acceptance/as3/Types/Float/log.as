@@ -54,7 +54,6 @@ AddStrictTestCase("float.log() returns a float", "float", getQualifiedClassName(
 AddStrictTestCase("float.log() length is 1", 1, float.log.length);
 
 // If x is NaN, the result is NaN.
-AddStrictTestCase("float.log(undefined)", float.NaN, float.log(undefined));
 AddStrictTestCase("float.log(NaN)", float.NaN, float.log(float.NaN));
 AddStrictTestCase("float.log(NaN) check()", float.NaN, check(float.NaN));
 

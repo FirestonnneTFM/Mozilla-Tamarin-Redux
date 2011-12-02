@@ -46,6 +46,7 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 AddErrorTest("float.cos() with no args", ARGUMENTERROR+1063,  function(){ float.cos(); });
 
+AddStrictTestCase("float.cos(undefined)", float.NaN, float.cos(undefined));
 AddStrictTestCase("float.cos(true)", 0.5403022766113281f, float.cos(true));
 AddStrictTestCase("float.cos(false)", float(1), float.cos(false));
 AddStrictTestCase("float.cos(string)", float.NaN, float.cos("string"));

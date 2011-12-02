@@ -54,6 +54,7 @@ AddErrorTest("float.acos() with no args", ARGUMENTERROR+1063,  function(){ float
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.acos(string)", float.NaN, float.acos("string"));
 
+AddStrictTestCase("float.acos(undefined)", float.NaN, float.acos(undefined));
 
 AddStrictTestCase("float.acos(true)", 0f, float.acos(true));
 AddStrictTestCase("float.acos(false)", float.PI/2.0f, float.acos(false));

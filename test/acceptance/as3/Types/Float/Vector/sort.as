@@ -72,7 +72,7 @@ var myFloatSortFunction:Function = function (x,y):float {
         return float(-Infinity);  // TODO: a float literal for "-Infinity"?
     if (x.val > y.val)
         return float.MAX_VALUE;
-    return undefined;
+    return float.NaN;
 }
 
 AddTestCase("Custom vector sort using sort function with non-standard (float) values",

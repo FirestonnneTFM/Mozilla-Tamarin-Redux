@@ -55,7 +55,6 @@ AddStrictTestCase("float.sin() returns a float", "float", getQualifiedClassName(
 AddStrictTestCase("float.sin() length is 1", 1, float.sin.length);
 
 // If x is NaN, the result is NaN.
-AddStrictTestCase("float.sin(undefined)", float.NaN, float.sin(undefined));
 AddStrictTestCase("float.sin(float.NaN)", float.NaN, float.sin(float.NaN));
 AddStrictTestCase("float.sin(float.NaN) check()", float.NaN, check(float.NaN));
 

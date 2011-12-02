@@ -59,8 +59,6 @@ AddStrictTestCase("float.atan2() returns a float", "float", getQualifiedClassNam
 AddStrictTestCase("float.atan2() length is 2", 2, float.atan2.length);
 
 // If either x or y is NaN, the result is NaN.
-AddStrictTestCase("float.atan2(0f, undefined)", float.NaN, float.atan2(0f, undefined));
-AddStrictTestCase("float.atan2(undefined, 0f)", float.NaN, float.atan2(undefined, 0f));
 AddStrictTestCase("float.atan2(1f, float.NaN)", float.NaN, float.atan2(1f, float.NaN));
 AddStrictTestCase("float.atan2(float.NaN, 1f)", float.NaN, float.atan2(float.NaN, 1f));
 AddStrictTestCase("float.atan2(1f, float.NaN) check()", float.NaN, check(1f, float.NaN));

@@ -53,6 +53,7 @@ AddErrorTest("float.sin() with no args", ARGUMENTERROR+1063,  function(){ float.
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.sin(string)", float.NaN, float.sin("string"));
+AddStrictTestCase("float.sin(undefined)", float.NaN, float.sin(undefined));
 
 // If x is +0, the result is +0.
 AddStrictTestCase("float.sin('0')", 0f, float.sin('0'));

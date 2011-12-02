@@ -53,6 +53,7 @@ AddErrorTest("float.rsqrt() with no args", ARGUMENTERROR+1063,  function(){ floa
 
 // If x is NaN, the result is NaN. (1/NaN == NaN)
 AddStrictTestCase("float.rsqrt(string)", float.NaN, float.rsqrt("string"));
+AddStrictTestCase("float.rsqrt(undefined)", float.NaN, float.rsqrt(undefined));
 
 // If x is +0, the result is +0. (1/0 == Infinity)
 AddStrictTestCase("float.rsqrt(false)", float.POSITIVE_INFINITY, float.rsqrt(false));

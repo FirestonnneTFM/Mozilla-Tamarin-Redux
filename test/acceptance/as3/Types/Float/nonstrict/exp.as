@@ -54,6 +54,8 @@ AddErrorTest("float.exp() with no args", ARGUMENTERROR+1063,  function(){ float.
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.exp(string)", float.NaN, float.exp("string"));
 
+AddStrictTestCase("float.exp(undefined)", float.NaN, float.exp(undefined));
+
 // If x is +0, the result is 1.
 AddStrictTestCase("float.exp('0')", 1f, float.exp('0'));
 

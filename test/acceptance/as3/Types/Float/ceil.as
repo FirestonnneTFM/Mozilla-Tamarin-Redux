@@ -55,7 +55,6 @@ AddStrictTestCase("float.ceil() returns a float", "float", getQualifiedClassName
 AddStrictTestCase("float.ceil() length is 1", 1, float.ceil.length);
 
 // If x is NaN, the result is NaN.
-AddStrictTestCase("float.ceil(undefined)", float.NaN, float.ceil(undefined));
 AddStrictTestCase("float.ceil(NaN)", float.NaN, float.ceil(float.NaN));
 AddStrictTestCase("float.ceil(NaN) check()", float.NaN, check(float.NaN));
 

@@ -55,7 +55,6 @@ AddStrictTestCase("float.tan() returns a float", "float", getQualifiedClassName(
 AddStrictTestCase("float.tan() length is 1", 1, float.tan.length);
 
 // If x is NaN, the result is NaN.
-AddStrictTestCase("float.tan(undefined)", float.NaN, float.tan(undefined));
 AddStrictTestCase("float.tan(float.NaN)", float.NaN, float.tan(float.NaN));
 AddStrictTestCase("float.tan(float.NaN) check()", float.NaN, check(float.NaN));
 

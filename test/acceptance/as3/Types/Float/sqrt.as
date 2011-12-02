@@ -54,7 +54,6 @@ AddStrictTestCase("float.sqrt() returns a float", "float", getQualifiedClassName
 AddStrictTestCase("float.sqrt() length is 1", 1, float.sqrt.length);
 
 // If x is NaN, the result is NaN.
-AddStrictTestCase("float.sqrt(undefined)", float.NaN, float.sqrt(undefined));
 AddStrictTestCase("float.sqrt(float.NaN)", float.NaN, float.sqrt(float.NaN));
 AddStrictTestCase("float.sqrt(float.NaN) check()", float.NaN, check(float.NaN));
 

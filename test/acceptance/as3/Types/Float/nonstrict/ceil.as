@@ -54,6 +54,7 @@ AddErrorTest("float.ceil() with no args", ARGUMENTERROR+1063,  function(){ float
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.ceil(string)", float.NaN, float.ceil("string"));
 
+AddStrictTestCase("float.ceil(undefined)", float.NaN, float.ceil(undefined));
 
 AddStrictTestCase("float.ceil(true)", 1f, float.ceil(true));
 AddStrictTestCase("float.ceil(false)", 0f, float.ceil(false));

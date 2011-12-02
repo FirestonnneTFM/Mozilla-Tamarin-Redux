@@ -51,6 +51,7 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 AddErrorTest("float.asin() with no args", ARGUMENTERROR+1063,  function(){ float.asin(); });
 
+AddStrictTestCase("float.asin(undefined)", float.NaN, float.asin(undefined));
 AddStrictTestCase("float.asin(true)", float.PI/2f, float.asin(true));
 AddStrictTestCase("float.asin(false)", 0f, float.asin(false));
 

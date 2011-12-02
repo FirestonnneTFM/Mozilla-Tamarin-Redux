@@ -48,8 +48,6 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 AddStrictTestCase("float.cos() returns a float", "float", getQualifiedClassName(float.cos(0)));
 AddStrictTestCase("float.cos() length is 1", 1, float.cos.length);
 
-
-AddStrictTestCase("float.cos(undefined)", float.NaN, float.cos(undefined));
 AddStrictTestCase("float.cos(null)", float(1), float.cos(null));
 AddStrictTestCase("float.cos(float.NaN)", float.NaN, float.cos(float.NaN));
 
