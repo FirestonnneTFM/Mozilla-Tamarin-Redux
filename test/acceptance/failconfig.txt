@@ -352,11 +352,11 @@ as3/Types/Float/pow:float\.pow\(float\.NEGATIVE_INFINITY. -2f\) sign check , .*,
 as3/Types/Float/pow:float\.pow\(float\.NEGATIVE_INFINITY. -2f\) check\(\) sign check , .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703611
 as3/Types/Float/nonstrict/ToString:ToString\(float\.MAX_VALUE\) , .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=699463
 
-as3/Types/Float/reciprocal:float\.reciprocal\(8\)  , x86-.*-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=707158
-as3/Types/Float/rsqrt:x=3\.124f float\.rsqrt\(x\)   , x86-.*-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=707158
-as3/Types/Float/rsqrt:float.rsqrt\(64\)   , x86-.*-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=707158
-as3/Types/Float/nonstrict/reciprocal:float\.reciprocal\(true\)   , x86-.*-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=707158
-as3/Types/Float/nonstrict/rsqrt:float\.rsqrt\(true\)   , x86-.*-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=707158
+as3/Types/Float/reciprocal:float\.reciprocal\(8\)  , x86-.*(release|debug)-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=707158
+as3/Types/Float/rsqrt:x=3\.124f float\.rsqrt\(x\)   , x86-.*(release|debug)-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=707158
+as3/Types/Float/rsqrt:float.rsqrt\(64\)   , x86-.*(release|debug)-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=707158
+as3/Types/Float/nonstrict/reciprocal:float\.reciprocal\(true\)   , x86-.*(release|debug)-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=707158
+as3/Types/Float/nonstrict/rsqrt:float\.rsqrt\(true\)   , x86-.*(release|debug)-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=707158
 
 as3/Types/Float/loadLegacyCode, arm , ,  expectedfail, need to update runner script
 as3/Types/Float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
