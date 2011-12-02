@@ -421,7 +421,7 @@ package abcdump
                             s += '"' + abc.strings[readU32()].replace(/\n/g,"\\n").replace(/\t/g,"\\t") + '"'
                             break
                         case OP_pushnamespace:
-                            s += abc.namespaces[read32()]
+                            s += abc.namespaces[readU32()]
                             break
                         case OP_pushint:
                             var i:int = abc.ints[readU32()]
