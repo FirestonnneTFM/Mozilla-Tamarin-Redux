@@ -418,21 +418,21 @@ package abcdump
                     {
                         case OP_debugfile:
                         case OP_pushstring:
-                            s += '"' + abc.stringFromU32().replace(/\n/g,"\\n").replace(/\t/g,"\\t") + '"'
+                            s += '"' + abc.strings[readU32()].replace(/\n/g,"\\n").replace(/\t/g,"\\t") + '"'
                             break
                         case OP_pushnamespace:
                             s += abc.namespaceFromU32()
                             break
                         case OP_pushint:
-                            var i:int = abc.intFromU32()
+                            var i:int = abc.ints[readU32()]
                             s += i + "\t// 0x" + i.toString(16)
                             break
                         case OP_pushuint:
-                            var u:uint = abc.uintFromU32()
+                            var u:uint = abc.uints[readU32()]
                             s += u + "\t// 0x" + u.toString(16)
                             break;
                         case OP_pushdouble:
-                            s += abc.doubleFromU32()
+                            s += abc.doubles[readU32()]
                             break;
                         case OP_getsuper:
                         case OP_setsuper:
@@ -448,7 +448,7 @@ package abcdump
                         case OP_coerce:
                         case OP_astype:
                         case OP_getdescendants:
-                            s += abc.nameFromU32()
+                            s += abc.names[readU32()]
                             break;
                         case OP_constructprop:
                         case OP_callproperty:
@@ -456,7 +456,7 @@ package abcdump
                         case OP_callsuper:
                         case OP_callsupervoid:
                         case OP_callpropvoid:
-                            s += abc.nameFromU32()
+                            s += abc.names[readU32()]
                             s += " (" + readU32() + ")"
                             break;
                         case OP_newfunction: {
@@ -465,11 +465,11 @@ package abcdump
                             break;
                         }
                         case OP_callstatic:
-                            s += abc.methodFromU32()
+                            s += abc.methods[readU32()]
                             s += " (" + readU32() + ")"
                             break;
                         case OP_newclass:
-                            s += abc.instanceFromU32()
+                            s += abc.instances[readU32()]
                             break;
                         case OP_lookupswitch:
                             var pos = code.position-1;
