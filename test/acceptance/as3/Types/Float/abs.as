@@ -55,7 +55,6 @@ AddStrictTestCase("float.abs() length is 1", 1, float.abs.length);
 
 
 // If x is NaN, the result is NaN.
-AddStrictTestCase("float.abs(undefined)", float.NaN, float.abs(undefined));
 AddStrictTestCase("float.abs(float.NaN)", float.NaN, float.abs(float.NaN));
 AddStrictTestCase("float.abs(flaot.NaN) check()", float.NaN, check(float.NaN));
 

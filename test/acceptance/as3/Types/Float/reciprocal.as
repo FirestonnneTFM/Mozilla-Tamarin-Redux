@@ -50,7 +50,6 @@ AddStrictTestCase("float.reciprocal() returns a float", "float", getQualifiedCla
 AddStrictTestCase("float.reciprocal() length is 1", 1, float.reciprocal.length);
 
 // If x is NaN, the result is NaN
-AddStrictTestCase("float.reciprocal(undefined)", float.NaN, float.reciprocal(undefined));
 AddStrictTestCase("float.reciprocal(float.NaN)", float.NaN, float.reciprocal(float.NaN));
 AddStrictTestCase("float.reciprocal(float.NaN) check()", float.NaN, check(float.NaN));
 

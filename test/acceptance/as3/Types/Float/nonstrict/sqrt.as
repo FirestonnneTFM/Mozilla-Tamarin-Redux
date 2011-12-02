@@ -52,6 +52,7 @@ AddErrorTest("float.sqrt() with no args", ARGUMENTERROR+1063,  function(){ float
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.sqrt(string)", float.NaN, float.sqrt("string"));
+AddStrictTestCase("float.sqrt(undefined)", float.NaN, float.sqrt(undefined));
 
 // If x is +0, the result is +0.
 AddStrictTestCase("float.sqrt(false)", 0f, float.sqrt(false));

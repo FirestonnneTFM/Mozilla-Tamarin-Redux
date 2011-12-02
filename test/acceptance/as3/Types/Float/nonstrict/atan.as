@@ -57,7 +57,7 @@ AddErrorTest("float.atan() with no args", ARGUMENTERROR+1063,  function(){ float
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.atan(string)", float.NaN, float.atan("string"));
-
+AddStrictTestCase("float.atan(undefined)", float.NaN, float.atan(undefined));
 AddStrictTestCase("float.atan(true)", float.PI/4f, float.atan(true));
 AddStrictTestCase("float.atan(false)", 0f, float.atan(false));
 

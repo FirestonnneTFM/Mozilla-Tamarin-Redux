@@ -1377,7 +1377,7 @@ function sortObject(o:Object) {
     var keys=[];
     var key;
     for ( key in o ) {
-        if (o==undefined) {
+        if (o[key]===undefined) {
            continue;
         }
         keys[keys.length]=key;

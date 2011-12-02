@@ -53,15 +53,19 @@ AddErrorTest("float.pow() with one args", ARGUMENTERROR+1063,  function(){ float
 
 // If y is NaN, the result is NaN.
 AddStrictTestCase("float.pow(1.0f, string)", float.NaN, float.pow(1.0f, "string"));
+AddStrictTestCase("float.pow(1.0f, undefined)", float.NaN, float.pow(1.0f, undefined));
 
 // If y is +0, the result is 1, even if x is NaN.
 AddStrictTestCase("float.pow(string, 0f)", 1f, float.pow("string", 0f));
+AddStrictTestCase("float.pow(undefined, 0f)", 1f, float.pow(undefined, 0f));
 
 // If y is -0, the result is 1, even if x is NaN.
 AddStrictTestCase("float.pow(string, -0f)", 1f, float.pow("string", -0f));
+AddStrictTestCase("float.pow(undefined, -0f)", 1f, float.pow(undefined, -0f));
 
 // If x is NaN and y is nonzero, the result is NaN.
 AddStrictTestCase("float.pow(string, 1f)", float.NaN, float.pow("string", 1f));
+AddStrictTestCase("float.pow(undefined, 1f)", float.NaN, float.pow(undefined, 1f));
 
 test();
 

@@ -48,6 +48,7 @@ AddErrorTest("float.reciprocal() with no args", ARGUMENTERROR+1063,  function(){
 
 // If x is NaN, the result is NaN
 AddStrictTestCase("float.reciprocal(string)", float.NaN, float.reciprocal("string"));
+AddStrictTestCase("float.reciprocal(undefined)", float.NaN, float.reciprocal(undefined));
 
 // If x is +0, the result is +Infinity
 AddStrictTestCase("float.reciprocal(false)", float.POSITIVE_INFINITY, float.reciprocal(false));

@@ -62,6 +62,9 @@ AddErrorTest("float.atan2(0) with one args", ARGUMENTERROR+1063,  function(){ fl
 AddStrictTestCase("float.atan2(0f, string)", float.NaN, float.atan2(0f, "string"));
 AddStrictTestCase("float.atan2(string, 0f)", float.NaN, float.atan2("string", 0f));
 
+AddStrictTestCase("float.atan2(0f, undefined)", float.NaN, float.atan2(0f, undefined));
+AddStrictTestCase("float.atan2(undefined, 0f)", float.NaN, float.atan2(undefined, 0f));
+
 // If y>0 and x is +0, the result is an implementation-dependent approximation to +PI/2.
 AddStrictTestCase("float.atan2('1', '0')", float.PI/2f, float.atan2('1', '0'));
 

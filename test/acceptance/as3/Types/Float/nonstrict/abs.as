@@ -50,6 +50,7 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 AddErrorTest("float.abs() with no args", ARGUMENTERROR+1063,  function(){ float.abs(); });
 
+AddStrictTestCase("float.abs(undefined)", float.NaN, float.abs(undefined));
 AddStrictTestCase("float.abs(true)", 1f, float.abs(true));
 AddStrictTestCase("float.abs(false)", 0f, float.abs(false));
 

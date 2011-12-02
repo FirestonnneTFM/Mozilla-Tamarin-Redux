@@ -55,7 +55,6 @@ AddStrictTestCase("float.acos() returns a float", "float", getQualifiedClassName
 AddStrictTestCase("float.acos() length is 1", 1, float.acos.length);
 
 // If x is NaN, the result is NaN.
-AddStrictTestCase("float.acos(undefined)", float.NaN, float.acos(undefined));
 AddStrictTestCase("float.acos(float.NaN)", float.NaN, float.acos(float.NaN));
 AddStrictTestCase("float.acos(float.NaN) check()", float.NaN, check(float.NaN));
 

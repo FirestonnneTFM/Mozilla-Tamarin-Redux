@@ -55,6 +55,7 @@ AddErrorTest("float.round() with no args", ARGUMENTERROR+1063,  function(){ floa
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.round(string)", float.NaN, float.round("string"));
+AddStrictTestCase("float.round(undefined)", float.NaN, float.round(undefined));
 
 // If x is +0, the result is +0.
 AddStrictTestCase("float.round(false)", 0f, float.round(false));

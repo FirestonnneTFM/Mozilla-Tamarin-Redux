@@ -54,6 +54,7 @@ AddErrorTest("float.floor() with no args", ARGUMENTERROR+1063,  function(){ floa
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.floor(string)", float.NaN, float.floor("string"));
+AddStrictTestCase("float.floor(undefined)", float.NaN, float.floor(undefined));
 
 // If x is +0, the result is +0.
 AddStrictTestCase("float.floor(false)", 0f, float.floor(false));

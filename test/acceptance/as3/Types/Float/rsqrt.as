@@ -55,7 +55,6 @@ AddStrictTestCase("float.rsqrt() returns a float", "float", getQualifiedClassNam
 AddStrictTestCase("float.rsqrt() length is 1", 1, float.rsqrt.length);
 
 // If x is NaN, the result is NaN. (1/NaN == NaN)
-AddStrictTestCase("float.rsqrt(undefined)", float.NaN, float.rsqrt(undefined));
 AddStrictTestCase("float.rsqrt(float.NaN)", float.NaN, float.rsqrt(float.NaN));
 AddStrictTestCase("float.rsqrt(float.NaN) check()", float.NaN, check(float.NaN));
 

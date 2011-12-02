@@ -53,6 +53,7 @@ AddErrorTest("float.tan() with no args", ARGUMENTERROR+1063,  function(){ float.
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.tan(string)", float.NaN, float.tan("string"));
+AddStrictTestCase("float.tan(undefined)", float.NaN, float.tan(undefined));
 
 // If x is +0, the result is +0.
 AddStrictTestCase("float.tan(false)", 0f, float.tan(false));

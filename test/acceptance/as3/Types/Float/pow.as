@@ -54,26 +54,22 @@ AddStrictTestCase("float.pow() returns a float", "float", getQualifiedClassName(
 AddStrictTestCase("float.pow() length is 2", 2, float.pow.length);
 
 // If y is NaN, the result is NaN.
-AddStrictTestCase("float.pow(1.0f, undefined)", float.NaN, float.pow(1.0f, undefined));
 AddStrictTestCase("float.pow(1.0f, float.NaN)", float.NaN, float.pow(1.0f, float.NaN));
 AddStrictTestCase("float.pow(1.0f, floatNaN) check()", float.NaN, check(1.0f, float.NaN));
 
 // If y is +0, the result is 1, even if x is NaN.
-AddStrictTestCase("float.pow(undefined, 0f)", 1f, float.pow(undefined, 0f));
 AddStrictTestCase("float.pow(float.NaN, 0f)", 1f, float.pow(float.NaN, 0f));
 AddStrictTestCase("float.pow(1.2f, 0f)", 1f, float.pow(1.2f, 0f));
 AddStrictTestCase("float.pow(float.NaN, 0f) check()", 1f, check(float.NaN, 0f));
 AddStrictTestCase("float.pow(1.2f, 0f) check()", 1f, check(1.2f, 0f));
 
 // If y is -0, the result is 1, even if x is NaN.
-AddStrictTestCase("float.pow(undefined, -0f)", 1f, float.pow(undefined, -0f));
 AddStrictTestCase("float.pow(float.NaN, -0f)", 1f, float.pow(NaN, -0f));
 AddStrictTestCase("float.pow(1.2f, -0f)", 1f, float.pow(1.2f, -0f));
 AddStrictTestCase("float.pow(float.NaN, -0f) check()", 1f, check(float.NaN, -0f));
 AddStrictTestCase("float.pow(1.2f, -0f) check()", 1f, check(1.2f, -0f));
 
 // If x is NaN and y is nonzero, the result is NaN.
-AddStrictTestCase("float.pow(undefined, 1f)", float.NaN, float.pow(undefined, 1f));
 AddStrictTestCase("float.pow(float.NaN, 1f)", float.NaN, float.pow(float.NaN, 1f));
 AddStrictTestCase("float.pow(float.NaN, 1f) check()", float.NaN, check(float.NaN, 1f));
 
