@@ -1,7 +1,46 @@
 #!/usr/bin/env python
+# -*- Mode: Python; indent-tabs-mode: nil; tab-width: 4 -*-
+# vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5)
+#
+# ***** BEGIN LICENSE BLOCK *****
+# Version: MPL 1.1/GPL 2.0/LGPL 2.1
+#
+# The contents of this file are subject to the Mozilla Public License Version
+# 1.1 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+# http://www.mozilla.org/MPL/
+#
+# Software distributed under the License is distributed on an "AS IS" basis,
+# WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+# for the specific language governing rights and limitations under the
+# License.
+#
+# The Original Code is [Open Source Virtual Machine.].
+#
+# The Initial Developer of the Original Code is
+# Adobe System Incorporated.
+# Portions created by the Initial Developer are Copyright (C) 2011
+# the Initial Developer. All Rights Reserved.
+#
+# Contributor(s):
+#   Adobe AS3 Team
+#
+# Alternatively, the contents of this file may be used under the terms of
+# either the GNU General Public License Version 2 or later (the "GPL"), or
+# the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+# in which case the provisions of the GPL or the LGPL are applicable instead
+# of those above. If you wish to allow use of your version of this file only
+# under the terms of either the GPL or the LGPL, and not to allow others to
+# use your version of this file under the terms of the MPL, indicate your
+# decision by deleting the provisions above and replace them with the notice
+# and other provisions required by the GPL or the LGPL. If you do not delete
+# the provisions above, a recipient may use your version of this file under
+# the terms of any one of the MPL, the GPL or the LGPL.
+#
+# ***** END LICENSE BLOCK ***** */
+#
 
-import getopt,sys,socket,re,os,platform,string
-
+import getopt,sys,socket,re,os,platform,string,datetime,string
 
 def fixForXmlEscape(str):
     str=str.replace('&','&amp;')
@@ -15,7 +54,7 @@ def fixForXmlCdata(str):
     str=str.strip()
     if len(str)>0:
         # change ]]> in source string
-        str=str.replace(']]>','] ]>')
+        str=str.replace(']]>','] ]>') 
         # remove invalid unicode chars
         str=re.sub(b'[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]','',str)
         str="<![CDATA[%s]]>" % str
@@ -130,6 +169,75 @@ def convertPerformanceToJunit(infile,outfile,toplevel):
         contents+='<system-out>%s</system-out>\n<system-err>%s</system-err>\n</testsuite>' % (fixForXmlCdata(systemout),fixForXmlCdata(systemerr))
         open(outfile,'w').write(contents)
     return outfile
+
+def convertPlayerToJunit(infile,outfile,toplevel):
+    properties={}
+    lines=open(infile).read().split('\n')
+    hostname=socket.gethostname()
+    name=toplevel
+    currentTest=None
+    passes=0
+    allpasses=0
+    fails=0
+    allfails=0
+    errors=0
+    skips=0
+    time="0"
+    timestamp=datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    results={}
+    tests=[]
+    for line in lines:
+        if currentTest==None:
+            tokens=line.split(':')
+            if len(tokens)==2 and tokens[1]!='' and tokens[0]!='test':
+                properties[tokens[0].strip()]=tokens[1].strip()
+        if line.startswith('test:'):
+            if currentTest!=None:
+                if len(results[currentTest]['failures'])>0:
+                    fails+=1
+                else:
+                    passes+=1
+            out=''
+            if lastline.find('PASSED!')==-1 and lastline.find('FAILED!')==-1 and currentTest!=None:
+                results[currentTest]['output']=string.join(results[currentTest]['output'].split('\n')[0:-2],'\n')
+                out=lastline
+            currentTest=line[5:].strip()
+            tests.append(currentTest)
+            results[currentTest]={'output':out,'passes':[],'failures':[]}
+        elif line.find('PASSED!')>0 and currentTest!=None:
+            results[currentTest]['passes'].append(line)
+            allpasses+=1
+        elif line.find('FAILED!')>0 and currentTest!=None:
+            results[currentTest]['failures'].append(line)
+            allfails+=1
+        if currentTest!=None:
+            results[currentTest]['output']+=line+'\n'
+        lastline=line
+    contents='<?xml version="1.0" encoding="UTF-8" ?>\n'
+    contents+='<testsuite skip="%s" errors="%s" failures="%d" hostname="%s" name="%s" tests="%d" time="%s" timestamp="%s">\n' % (skips,errors,fails,hostname,name,passes+fails,time,timestamp)
+    contents+='<properties>\n'
+    contents+='<property name="passes" value="%s"/>\n' % (passes)
+    contents+='<property name="failures" value="%s"/>\n' % (fails)
+    contents+='<property name="testpasses" value="%s"/>\n' % (allpasses)
+    contents+='<property name="testfailures" value="%s"/>\n' % (allfails)
+    for prop in properties.keys():
+        contents+='<property name="%s" value="%s"/>\n' % (prop,properties[prop])
+    contents+="</properties>\n"
+    for test in tests:
+        contents+='<testcase classname="%s.%s" name="%s" time="%s">\n' % (toplevel,'ats',test,'0')
+        if len(results[test]['failures'])>0:
+            contents+='<failure message="FAILED!" type="failure">'
+            failout=''
+            for fail in results[test]['failures']:
+                failout+=fail+'\n'
+            contents+=fixForXmlCdata(failout)
+            contents+='</failure>\n'
+        if results[test]['output']!='':
+            contents+="<system-out>%s</system-out>\n" % fixForXmlCdata(results[test]['output'])
+        contents+='</testcase>\n'
+    contents+='<system-out></system-out><system-err></system-err>\n</testsuite>\n'
+    open(outfile,'w').write(contents)
+            
 def convertAcceptanceToJunit(infile,outfile,toplevel):
     skips=0
     errors='0'
@@ -261,10 +369,11 @@ if __name__ == '__main__':
     infile='runtests.txt'
     outfile='runtests.xml'
     toplevel='acceptance'
-    usage='--ifile=input file --ofile=junit xml file'
+    type='player'
+    usage='--type=runtests|player|performance --ifile=input file --ofile=junit xml file'
         
     try:
-        opts, args = getopt.getopt(sys.argv[1:], '', ['ofile=','ifile=','toplevel='])
+        opts, args = getopt.getopt(sys.argv[1:], '', ['ofile=','ifile=','toplevel=','type='])
     except:
         print(sys.argv)
         print('error parsing options\n%s' % usage)
@@ -277,12 +386,20 @@ if __name__ == '__main__':
             outfile=v
         elif o=='--toplevel':
             toplevel=v
+        elif o=='--type':
+            type=v
     
     if os.path.exists(infile)==False:
         print('error: file %s does not exist' % infile)
         sys.exit(1)
     
     print("converting file '%s' to '%s' toplevel is '%s'" % (infile,outfile,toplevel))
-    convertAcceptanceToJunit(infile,outfile,toplevel)
+    if type=='acceptance':
+        convertAcceptanceToJunit(infile,outfile,toplevel)
+    elif type=='player':
+        convertPlayerToJunit(infile,outfile,toplevel)
+    elif type=='performance':
+        convertPerformanceToJunit(infile,outfile,toplevel)
+        
     print("created file '%s'" % outfile)
 

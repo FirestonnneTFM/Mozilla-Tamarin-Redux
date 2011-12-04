@@ -56,7 +56,7 @@
 #include <ctype.h>
 #include <assert.h>
 
-#include "nanojit.h"
+#include "nanojit/nanojit.h"
 
 using namespace nanojit;
 using namespace std;

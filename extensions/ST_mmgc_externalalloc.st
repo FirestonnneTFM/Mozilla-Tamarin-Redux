@@ -82,6 +82,6 @@ private:
     MMgc::GCHeap::SignalExternalDeallocation(1024*1024);
     %%verify cb->status==MMgc::kMemNormal
     GCHeap::GetGCHeap()->Config().heapSoftLimit = softlimit;
-    softlimit = NULL;
+    softlimit = 0;
 
 

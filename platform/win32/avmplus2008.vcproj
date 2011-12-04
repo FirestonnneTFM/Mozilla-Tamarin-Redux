@@ -1747,6 +1747,14 @@
 				RelativePath="..\..\core\AvmPlusScriptableObject.cpp"
 				>
 			</File>
+  			<File
+ 				RelativePath="..\..\core\AvmSerializer.cpp"
+ 				>
+ 			</File>
+ 			<File
+ 				RelativePath="..\..\core\AvmSerializer.h"
+ 				>
+ 			</File>
 			<File
 				RelativePath="..\..\core\BigInteger.cpp"
 				>
@@ -1883,6 +1891,14 @@
 				RelativePath="..\..\core\DescribeTypeClass.h"
 				>
 			</File>
+  			<File
+ 				RelativePath="..\..\core\DictionaryGlue.cpp"
+ 				>
+ 			</File>
+ 			<File
+ 				RelativePath="..\..\core\DictionaryGlue.h"
+ 				>
+ 			</File>
 			<File
 				RelativePath="..\..\core\Domain.cpp"
 				>
@@ -2207,6 +2223,14 @@
 				RelativePath="..\..\core\ObjectClass.h"
 				>
 			</File>
+  			<File
+ 				RelativePath="..\..\core\ObjectIO.cpp"
+ 				>
+ 			</File>
+ 			<File
+ 				RelativePath="..\..\core\ObjectIO.h"
+ 				>
+ 			</File>
 			<File
 				RelativePath="..\..\core\OSDep.h"
 				>
@@ -2936,10 +2960,18 @@
 				RelativePath="..\..\core\DescribeType.as"
 				>
 			</File>
+ 			<File
+ 				RelativePath="..\..\core\DynamicPropertyOutput.as"
+ 				>
+ 			</File>
 			<File
 				RelativePath="..\..\core\Error.as"
 				>
 			</File>
+  			<File
+ 				RelativePath="..\..\core\flash_net_classes.as"
+ 				>
+ 			</File>
 			<File
 				RelativePath="..\..\core\Function.as"
 				>
@@ -2952,6 +2984,18 @@
 				RelativePath="..\..\core\IDataOutput.as"
 				>
 			</File>
+  			<File
+ 				RelativePath="..\..\core\IDynamicPropertyOutput.as"
+ 				>
+ 			</File>
+ 			<File
+ 				RelativePath="..\..\core\IDynamicPropertyWriter.as"
+ 				>
+ 			</File>
+ 			<File
+ 				RelativePath="..\..\core\IExternalizable.as"
+ 				>
+ 			</File>
 			<File
 				RelativePath="..\..\core\JSON.as"
 				>

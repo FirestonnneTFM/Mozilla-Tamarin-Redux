@@ -671,12 +671,14 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">När ett callback-argument är en metod i en klass måste det valfria this-argumentet vara null.</error>
+  <error id="2004" label="kInvalidParamError">En av parametrarna är ogiltig.</error>
   <error id="2006" label="kParamRangeError">Det angivna indexvärdet är utanför intervallet.</error>
   <error id="2007" label="kNullPointerError">Parametern %1 får inte vara null.</error>
   <error id="2008" label="kInvalidEnumError">Parametern %1 måste ha ett av de godkända värdena.</error>
   <error id="2012" label="kCantInstantiateError">Det går inte att skapa en förekomst av klassen %1.</error>
   <error id="2030" label="kEOFError">Filens slut påträffades.</error>
   <error id="2058" label="kCompressedDataError">Ett fel uppstod vid dekomprimering av data.</error>
+  <error id="2085" label="kEmptyStringError">Parametern %1 får inte vara en tom sträng.</error>
   <error id="2088" label="kProxyGetPropertyError">Klassen Proxy implementerar inte getProperty. Den måste åsidosättas av en underordnad klass.</error>
   <error id="2089" label="kProxySetPropertyError">Klassen Proxy implementerar inte setProperty. Den måste åsidosättas av en underordnad klass.</error>
   <error id="2090" label="kProxyCallPropertyError">Klassen Proxy implementerar inte callProperty. Den måste åsidosättas av en underordnad klass.</error>
@@ -686,4 +688,5 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Klassen Proxy implementerar inte nextNameIndex. Den måste åsidosättas av en underordnad klass.</error>
   <error id="2106" label="kProxyNextNameError">Klassen Proxy implementerar inte nextName. Den måste åsidosättas av en underordnad klass.</error>
   <error id="2107" label="kProxyNextValueError">Klassen Proxy implementerar inte nextValue. Den måste åsidosättas av en underordnad klass.</error>
+  <error id="2173" label="kReadExternalNotImplementedError">Det gick inte att läsa objektet i flödet. Klassen %1 implementerar inte flash.utils.IExternalizable men har en extern klass som alias.</error>
 </errors>

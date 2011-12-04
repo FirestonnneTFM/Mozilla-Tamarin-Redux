@@ -838,6 +838,21 @@ namespace avmplus
         }
     }
 
+    Atom Toplevel::getpropname(Atom objectAtom, Stringp name)
+    {
+        GCRef<ScriptObject> object =  core()->atomToScriptObject(objectAtom);
+        Multiname tempname(core()->findPublicNamespace(), name);
+        return object->toplevel()->getproperty(objectAtom, &tempname, object->vtable);
+    }
+
+    void Toplevel::setpropname(Atom objectAtom, Stringp name, Atom value)
+    {
+        GCRef<ScriptObject> object =  core()->atomToScriptObject(objectAtom);
+        Multiname tempname(core()->findPublicNamespace(), name);
+        object->toplevel()->setproperty(objectAtom, &tempname, value, object->vtable);
+    }
+
+
     // E4X 12.1.1, pg 59
     Namespace* Toplevel::getDefaultNamespace()
     {
@@ -1506,15 +1521,31 @@ namespace avmplus
     }
 
     //  -------------------------------------------------------
-    Atom Toplevel::readObject(ObjectEncoding /*encoding*/, DataInput* /*input*/)
+    Atom Toplevel::readObject(ObjectEncoding encoding, DataInput* input)
     {
-        throwArgumentError(kInvalidArgumentError, "objectEncoding");
+        if (encoding >= kAMF3)
+        {
+            AvmInputWrapper wrapper(this, input);
+            return wrapper.AvmPlusObjectInput::ReadAtom();
+        }
+        else
+        {
+            throwArgumentError(kInvalidArgumentError, "objectEncoding");
+        }
         return undefinedAtom;
     }
 
-    void Toplevel::writeObject(ObjectEncoding /*encoding*/, DataOutput* /*output*/, Atom /*a*/)
+    void Toplevel::writeObject(ObjectEncoding encoding, DataOutput* output, Atom a)
     {
-        throwArgumentError(kInvalidArgumentError, "objectEncoding");
+        if (encoding >= kAMF3)
+        {
+            AvmOutputWrapper wrapper(this, output);
+            wrapper.WriteAtom(a);
+        }
+        else
+        {
+            throwArgumentError(kInvalidArgumentError, "objectEncoding");
+        }
     }
 
     //  -------------------------------------------------------
@@ -1522,4 +1553,167 @@ namespace avmplus
     void Toplevel::byteArrayCreated(ByteArrayObject* /*byteArrayObject*/)
     {
     }
+
+    void Toplevel::addAliasedClassClosure(Atom name, Atom context, ClassClosure* cc, bool isDomainEnv)
+    {
+        GCRef<HeapHashtable> map = _aliasToClassClosureMap;
+        Atom val = map->get(name);
+        if (val == undefinedAtom)
+        {
+            // first entry, so create a new DomainEnv => ClassClosure hashtable
+            val = AvmCore::genericObjectToAtom( WeakValueHashtable::create(core()->GetGC()) );
+            map->add(name, val);
+        }
+
+        map = (HeapHashtable*) AvmCore::atomToGenericObject(val);  // the DomainEnv => ClassClosure WeakValueHashtable
+        val = cc->atom();
+        Atom key = context;
+        if (isDomainEnv)
+        {
+            GCRef<DomainEnv> env = (DomainEnv*) AvmCore::atomToGenericObject(context);
+            GCRef<MMgc::GCWeakRef> domainEnvWeakRef = core()->GetGC()->GetWeakRef(env);
+            key = AvmCore::genericObjectToAtom(domainEnvWeakRef);
+        }
+        map->add(key,val);
+    }
+
+    Atom Toplevel::getClassClosureAtomFromAlias(Atom name, bool checkContextDomainOnly)
+    {
+        GCRef<HeapHashtable> map = _aliasToClassClosureMap;
+        Atom val = map->get(name);
+        if (val == undefinedAtom)
+            return val; // no entries at all
+
+        // we have an entry so lookup ClassClosure based on CodeContext's DomainEnv
+        map = (HeapHashtable*) AvmCore::atomToGenericObject(val);
+        val = undefinedAtom;
+        
+        CodeContext *cc = (CodeContext*)core()->codeContext();
+        if (cc)
+        {
+            GCRef<DomainEnv> env = cc->domainEnv();
+            GCRef<MMgc::GCWeakRef> domainEnvWeakRef = core()->GetGC()->GetWeakRef(env);
+            while (val == undefinedAtom && env)
+            {
+                Atom key = AvmCore::genericObjectToAtom(domainEnvWeakRef);
+                val = map->get(key);
+                env = env->base();   // check if parent has it
+                if (checkContextDomainOnly)
+                    break;
+            }
+        }
+
+        // Either no code context (e.g. deserialize can bring us here see bug 2536419)
+        // or we didn't find a match. So we fall back to old-school rules which did not distinguish between DomainEnv's
+        // and do the lookup with key=(name,'this') which picks up the most recent registration (see registerClassByAlias)
+        if (!checkContextDomainOnly && (val == undefinedAtom))
+        {
+            Atom key = AvmCore::genericObjectToAtom(this);
+            val = map->get(key);
+        }
+        return val;
+    }
+
+    Stringp Toplevel::getAliasFromTraits(Traitsp traits)
+    {
+        // Hashtable keys cannot be 0x0 (EMPTY) or 0x0B (DELETED).
+        // By making using genericObjectToAtom the write barrier will be applied correctly
+        Atom key = AvmCore::genericObjectToAtom(traits);
+        Atom name = _traitsToAliasMap.get(key);
+
+        if (name != undefinedAtom) 
+        {
+            return core()->atomToString(name);
+        } 
+        else 
+        {
+            // Output object without a name.
+            return core()->kEmptyString;
+        }
+    }
+
+    ClassClosure* Toplevel::getClassClosureFromAlias(Stringp name)
+    {
+        AvmAssert(name->isInterned());
+        Atom val = getClassClosureAtomFromAlias(name->atom(), /*checkContextDomainOnly*/false);
+        if (val != undefinedAtom) 
+        {
+            return (ClassClosure *) AvmCore::atomToScriptObject(val);
+        } 
+        else 
+        {
+            // Create an anonymous object for unknown classes
+            return objectClass;
+        }
+    }
+
+    
+
+    /*static*/ void Toplevel::registerClassAlias(ScriptObject *script, String *aliasName, ClassClosure *cc)
+    {
+        AvmCore* core = (AvmCore*) script->core();
+        Toplevel* toplevel = (Toplevel*) script->toplevel();
+        toplevel->checkNull(cc, "classObject");
+        toplevel->checkNull(aliasName, "aliasName");
+        if (core->internString(aliasName) == core->kEmptyString) 
+        {
+            toplevel->argumentErrorClass()->throwError(kEmptyStringError, core->toErrorString("aliasName"));
+        }
+
+        // Registration should normally occur in the toplevel where the class is defined
+        // namely, cc->ivtable()->base->toplevel(), otherwise the caller may bind the class
+        // from one toplevel to another toplevel.   We didn't prevent this in prior players
+        // and there are some convincing use cases for this so we continue to let it occur.
+        //if (toplevel != cc_tl) {
+        //    toplevel->argumentErrorClass()->throwError("can't register a class outside your ApplicationDomain family")
+        //}
+        core = (AvmCore*)cc->core();
+        Atom name = core->internString(aliasName)->atom();
+        Atom val = toplevel->getClassClosureAtomFromAlias(name, /*checkContextDomainOnly*/true);  // restrict lookup to current DomainEnv
+        if (val != undefinedAtom)
+        {
+            // remove traits mapping , we don't need to remove name mapping since we'll overwrite it
+            ClassClosure* reg_cc = (ClassClosure *) AvmCore::atomToScriptObject(val);
+            toplevel->_traitsToAliasMap.remove(AvmCore::genericObjectToAtom(reg_cc->traits()->itraits));
+        }
+
+        // add key=(name,domainEnv) value=cc tuple to table.
+        toplevel->addAliasedClassClosure(name, AvmCore::genericObjectToAtom(toplevel->domainEnv()), cc, /*isDomainEnv*/true);
+        toplevel->_traitsToAliasMap.add(AvmCore::genericObjectToAtom(cc->traits()->itraits), name);
+
+        // add key=(name,'this') value=cc tuple to be used when code context is null (see getClassClosureAtomFromAlias)
+        toplevel->addAliasedClassClosure(name, AvmCore::genericObjectToAtom(toplevel), cc, /*isDomainEnv*/false);
+    }
+
+    /*static*/ ClassClosure* Toplevel::getClassByAlias(ScriptObject* script, String *aliasName)
+    {
+        AvmCore* core = (AvmCore*) script->core();
+        Toplevel* toplevel = (Toplevel*) script->toplevel();
+
+        toplevel->checkNull(aliasName, "aliasName");
+        if (core->internString(aliasName) == core->kEmptyString) 
+        {
+            toplevel->argumentErrorClass()->throwError(kEmptyStringError, core->toErrorString("aliasName"));
+        }
+
+        if (aliasName == NULL) 
+        {
+            toplevel->argumentErrorClass()->throwError(kNullArgumentError, core->toErrorString("aliasName"));
+        }
+            
+        String* ialiasName = core->internString(aliasName);
+        Atom atom = toplevel->getClassClosureAtomFromAlias(ialiasName->atom(), /*checkContextDomainOnly*/false);
+        if (atom != undefinedAtom)
+        {
+            if (AvmCore::istype(atom, core->traits.class_itraits))
+            {
+                return (ClassClosure*)AvmCore::atomToScriptObject(atom);
+            }
+        }
+        
+        Multiname multiname(core->findPublicNamespace(), ialiasName);
+        toplevel->referenceErrorClass()->throwError(kClassNotFoundError, core->toErrorString(&multiname));
+        return NULL;    // just to make the compiler happy.
+    }
+
 }

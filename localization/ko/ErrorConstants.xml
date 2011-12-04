@@ -760,12 +760,14 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">콜백 인수가 클래스의 메서드인 경우 선택적 인수 'this'는 null이어야 합니다.</error>
+  <error id="2004" label="kInvalidParamError">매개 변수 중 하나가 유효하지 않습니다.</error>
   <error id="2006" label="kParamRangeError">제공된 인덱스가 범위를 벗어났습니다.</error>
   <error id="2007" label="kNullPointerError">매개 변수 %1은(는) null이 아니어야 합니다.</error>
   <error id="2008" label="kInvalidEnumError">매개 변수 %1은(는) 허용된 값 중 하나여야 합니다.</error>
   <error id="2012" label="kCantInstantiateError">%1 클래스를 인스턴스화할 수 없습니다.</error>
   <error id="2030" label="kEOFError">파일의 끝입니다.</error>
   <error id="2058" label="kCompressedDataError">데이터의 압축을 푸는 동안 오류가 발생했습니다.</error>
+  <error id="2085" label="kEmptyStringError">매개 변수 %1은(는) 비어 있지 않은 문자열이어야 합니다.</error>
   <error id="2088" label="kProxyGetPropertyError">Proxy 클래스는 getProperty를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
   <error id="2089" label="kProxySetPropertyError">Proxy 클래스는 setProperty를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
   <error id="2090" label="kProxyCallPropertyError">Proxy 클래스는 callProperty를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
@@ -775,4 +777,5 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Proxy 클래스는 nextNameIndex를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
   <error id="2106" label="kProxyNextNameError">Proxy 클래스는 nextName을 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
   <error id="2107" label="kProxyNextValueError">Proxy 클래스는 nextValue를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
+  <error id="2173" label="kReadExternalNotImplementedError">스트림에서 객체를 읽을 수 없습니다.  클래스 %1은(는) flash.utils.IExternalizable을 구현하지 않지만 외부화할 수 있는 클래스에 앨리어스됩니다.</error>
 </errors>

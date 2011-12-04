@@ -309,7 +309,7 @@ namespace avmplus
             else
             {
                 compiler->internalError(t->pos, "Should not happen");
-                return NULL;
+                return 0;
             }
         }
     

@@ -51,8 +51,6 @@ namespace avmplus {
     class ClassFactoryObject; // flash.sampler::ClassFactory
     class DeleteObjectSampleClass; // flash.sampler::DeleteObjectSample$
     class DeleteObjectSampleObject; // flash.sampler::DeleteObjectSample
-    class DictionaryClass; // flash.utils::Dictionary$
-    class DictionaryObject; // flash.utils::Dictionary
     class DomainClass; // avmplus::Domain$
     class DomainObject; // avmplus::Domain
     class EndianClass; // flash.utils::Endian$
@@ -211,8 +209,7 @@ const uint32_t abcclass_flash_sampler_ClassFactory = 45;
 const uint32_t abcclass_flash_sampler_NewObjectSample = 46;
 const uint32_t abcclass_flash_sampler_DeleteObjectSample = 47;
 const uint32_t abcclass_flash_trace_Trace = 48;
-const uint32_t abcclass_flash_utils_Dictionary = 49;
-const uint32_t abcclass_flash_utils_Endian = 50;
+const uint32_t abcclass_flash_utils_Endian = 49;
 
 /* methods */
 const uint32_t avmplus_ITest_avmplus_ITest_test = 37; // abc
@@ -309,7 +306,6 @@ const uint32_t flash_trace_Trace_setLevel = 232; // native
 const uint32_t flash_trace_Trace_getLevel = 233; // native
 const uint32_t flash_trace_Trace_setListener = 234; // native
 const uint32_t flash_trace_Trace_getListener = 235; // native
-const uint32_t flash_utils_Dictionary_private_init = 240; // native
 
 extern avmplus::Atom avmplus_Domain_currentDomain_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -339,7 +335,6 @@ extern avmplus::Atom flash_trace_Trace_setLevel_thunk(MethodEnv* env, uint32_t a
 extern avmplus::Atom flash_trace_Trace_getLevel_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_trace_Trace_setListener_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_trace_Trace_getListener_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_utils_Dictionary_private_init_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double avmplus_MI_plus_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom avmplus_System_exit_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom avmplus_System_exec_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -2034,90 +2029,6 @@ class avmplus_TraceObjectSlots
 //-----------------------------------------------------------
 
 //-----------------------------------------------------------
-// flash.utils::Dictionary$
-//-----------------------------------------------------------
-class avmplus_DictionaryClassSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmplus::DictionaryClass;
-#define GC_TRIVIAL_TRACER_DictionaryClass
-};
-#define DECLARE_SLOTS_DictionaryClass \
-    public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
-    public: \
-        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
-    public: \
-        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
-    private: \
-        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
-    public: \
-        inline GCRef<avmplus::DictionaryObject> constructObject(bool arg1) \
-        { \
-            avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), ((arg1) ? trueAtom : falseAtom) }; \
-            avmplus::Atom const result = this->construct(1, args); \
-            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        inline GCRef<avmplus::DictionaryObject> constructObject() \
-        { \
-            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
-            avmplus::Atom const result = this->construct(0, args); \
-            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-    public: \
-        REALLY_INLINE bool isType(avmplus::Atom value) \
-        { \
-            return isTypeImpl(value); \
-        } \
-        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            return isTypeImpl(value->atom()); \
-        } \
-        REALLY_INLINE GCRef<avmplus::DictionaryObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::DictionaryObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::DictionaryObject> coerceToType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value); \
-            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::DictionaryObject> coerceToType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
-            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-    private: \
-        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
-// flash.utils::Dictionary
-//-----------------------------------------------------------
-class avmplus_DictionaryObjectSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmplus::DictionaryObject;
-#define GC_TRIVIAL_TRACER_DictionaryObject
-};
-#define DECLARE_SLOTS_DictionaryObject \
-    public: \
-        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
-    private: \
-        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
-    private: \
-        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
 // flash.utils::Endian$
 //-----------------------------------------------------------
 class avmplus_EndianClassSlots
@@ -2160,8 +2071,8 @@ class shell_toplevelClassManifest : public avmplus::ClassManifestBase
     friend class avmplus::DoubleVectorClass;
     friend class avmplus::ObjectVectorClass;
 private:
-    REALLY_INLINE shell_toplevelClassManifest(avmplus::ScriptEnv* e) : ClassManifestBase(51, e) { }
-    REALLY_INLINE static shell_toplevelClassManifest* create(avmplus::ScriptEnv* e) { return new (MMgc::GC::GetGC(e), MMgc::kExact, sizeof(ClassClosure*)*50) shell_toplevelClassManifest(e); }
+    REALLY_INLINE shell_toplevelClassManifest(avmplus::ScriptEnv* e) : ClassManifestBase(50, e) { }
+    REALLY_INLINE static shell_toplevelClassManifest* create(avmplus::ScriptEnv* e) { return new (MMgc::GC::GetGC(e), MMgc::kExact, sizeof(ClassClosure*)*49) shell_toplevelClassManifest(e); }
 public:
     REALLY_INLINE GCRef<avmshell::AbstractBaseClass> get_AbstractBaseClass() { return (avmshell::AbstractBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_AbstractBase)); }
     REALLY_INLINE GCRef<avmshell::AbstractRestrictedBaseClass> get_AbstractRestrictedBaseClass() { return (avmshell::AbstractRestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_AbstractRestrictedBase)); }
@@ -2170,7 +2081,6 @@ public:
     REALLY_INLINE GCRef<avmshell::CheckBaseClass> get_CheckBaseClass() { return (avmshell::CheckBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_CheckBase)); }
     REALLY_INLINE GCRef<avmplus::ClassFactoryClass> get_ClassFactoryClass() { return (avmplus::ClassFactoryClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_sampler_ClassFactory)); }
     REALLY_INLINE GCRef<avmplus::DeleteObjectSampleClass> get_DeleteObjectSampleClass() { return (avmplus::DeleteObjectSampleClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_sampler_DeleteObjectSample)); }
-    REALLY_INLINE GCRef<avmplus::DictionaryClass> get_DictionaryClass() { return (avmplus::DictionaryClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_Dictionary)); }
     REALLY_INLINE GCRef<avmplus::DomainClass> get_DomainClass() { return (avmplus::DomainClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_Domain)); }
     REALLY_INLINE GCRef<avmplus::EndianClass> get_EndianClass() { return (avmplus::EndianClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_Endian)); }
     REALLY_INLINE GCRef<avmshell::FileClass> get_FileClass() { return (avmshell::FileClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_File)); }

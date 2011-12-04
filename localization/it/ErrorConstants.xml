@@ -760,12 +760,14 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">Quando l'argomento callback è il metodo di una classe, l'argomento opzionale this deve essere null.</error>
+  <error id="2004" label="kInvalidParamError">Uno dei parametri non è valido.</error>
   <error id="2006" label="kParamRangeError">L'indice fornito è fuori intervallo.</error>
   <error id="2007" label="kNullPointerError">Il valore del parametro %1 deve essere diverso da null.</error>
   <error id="2008" label="kInvalidEnumError">Il valore del parametro %1 deve essere uno dei valori accettati.</error>
   <error id="2012" label="kCantInstantiateError">Impossibile creare un'istanza della classe %1.</error>
   <error id="2030" label="kEOFError">È stata raggiunta la fine del file.</error>
   <error id="2058" label="kCompressedDataError">Si è verificato un errore durante la decompressione dei dati.</error>
+  <error id="2085" label="kEmptyStringError">Il parametro %1 deve essere una stringa non vuota.</error>
   <error id="2088" label="kProxyGetPropertyError">La classe Proxy non implementa getProperty. Deve essere sostituita da una sottoclasse.</error>
   <error id="2089" label="kProxySetPropertyError">La classe Proxy non implementa setProperty. Deve essere sostituita da una sottoclasse.</error>
   <error id="2090" label="kProxyCallPropertyError">La classe Proxy non implementa callProperty. Deve essere sostituita da una sottoclasse.</error>
@@ -775,4 +777,5 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">La classe Proxy non implementa nextNameIndex. Deve essere sostituita da una sottoclasse.</error>
   <error id="2106" label="kProxyNextNameError">La classe Proxy non implementa nextName. Deve essere sostituita da una sottoclasse.</error>
   <error id="2107" label="kProxyNextValueError">La classe Proxy non implementa nextValue. Deve essere sostituita da una sottoclasse.</error>
+  <error id="2173" label="kReadExternalNotImplementedError">Impossibile leggere l'oggetto nel flusso.  La classe %1 non implementa flash.utils.IExternalizable ma è impostata come alias di una classe esternalizzabile.</error>
 </errors>

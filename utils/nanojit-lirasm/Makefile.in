@@ -94,7 +94,7 @@ OUTS := $(filter-out random.out random-opt.out, $(notdir $(INS:.in=.out)))
 LIRASM := bin/lirasm$(EXE_SUFFIX)
 
 CPPFLAGS += $(DEFS)
-CPPFLAGS += -I. -I$(srcdir) -I$(srcdir)/VMPI.nj -I$(srcdir)/../../nanojit
+CPPFLAGS += -I. -I$(srcdir)/VMPI.nj -I$(srcdir)/../.. -I$(srcdir)/../../nanojit
 
 #############
 # Build rules

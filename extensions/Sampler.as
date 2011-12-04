@@ -171,7 +171,7 @@ package flash.sampler
         public native function get object():*;
 
         /**
-         * The NewObjectSample object size. If the object has been garbagecollected, this property is
+         * The NewObjectSample object size. If the object has been garbage collected, this property is
          * undefined and a corresponding DeleteObjectSample exists. For FlashPlayer debugger version only.
          * @playerversion Flash 9.0.115.0
          * @langversion 3.0

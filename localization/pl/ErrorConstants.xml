@@ -671,12 +671,14 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">Jeśli argument wywołania zwrotnego jest metodą klasy, argument opcjonalny musi mieć wartość null.</error>
+  <error id="2004" label="kInvalidParamError">Jeden z parametrów jest nieprawidłowy.</error>
   <error id="2006" label="kParamRangeError">Określony indeks wychodzi poza zakres.</error>
   <error id="2007" label="kNullPointerError">Parametr %1 musi mieć wartość inną niż null.</error>
   <error id="2008" label="kInvalidEnumError">Parametr %1 musi być jedną z akceptowanych wartości.</error>
   <error id="2012" label="kCantInstantiateError">Nie można utworzyć instancji klasy %1.</error>
   <error id="2030" label="kEOFError">Napotkano koniec pliku.</error>
   <error id="2058" label="kCompressedDataError">Podczas dekompresji danych wystąpił błąd.</error>
+  <error id="2085" label="kEmptyStringError">Parametr %1 musi być niepustym ciągiem.</error>
   <error id="2088" label="kProxyGetPropertyError">Klasa Proxy nie implementuje metody getProperty. Należy ją przesłonić w podklasie.</error>
   <error id="2089" label="kProxySetPropertyError">Klasa Proxy nie implementuje metody setProperty. Należy ją przesłonić w podklasie.</error>
   <error id="2090" label="kProxyCallPropertyError">Klasa Proxy nie implementuje metody callProperty. Należy ją przesłonić w podklasie.</error>
@@ -686,4 +688,5 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Klasa Proxy nie implementuje metody nextNameIndex. Należy ją przesłonić w podklasie.</error>
   <error id="2106" label="kProxyNextNameError">Klasa Proxy nie implementuje metody nextName. Należy ją przesłonić w podklasie.</error>
   <error id="2107" label="kProxyNextValueError">Klasa Proxy nie implementuje metody nextValue. Należy ją przesłonić w podklasie.</error>
+  <error id="2173" label="kReadExternalNotImplementedError">Nie można odczytać obiektu w strumieniu.  Klasa %1 nie implementuje metody flash.utils.IExternalizable, ale ma alias dla klasy możliwej do uzewnętrznienia.</error>
 </errors>

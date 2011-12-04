@@ -11,15 +11,14 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is [Open Source Virtual Machine.].
+ * The Original Code is [Open Source Virtual Machine].
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2010
+ * Portions created by the Initial Developer are Copyright (C) 2011
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Adobe AS3 Team
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -33,10 +32,44 @@
  * the provisions above, a recipient may use your version of this file under
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
- * ***** END LICENSE BLOCK ***** */
+ * ***** END LICENSE BLOCK *****
+ *
+ */
 
-/* machine generated file via utils/exactgc.as -- do not edit */
+var SECTION = "regress_513020";
+var VERSION = "AS3";
+var TITLE   = "[Regexp] String.match with global flag does not return null when nothing is found";
+var bug = "513020";
 
-#define avmplus_DomainClass_isExactInterlock 1
-#define avmplus_DomainObject_isExactInterlock 1
+startTest();
+writeHeaderToLog(SECTION + " " + TITLE);
 
+import avmplus.System;
+
+var line:String = "aaa";
+var pattern:RegExp = /bbb/gi;
+
+function MyMatch(myPattern:RegExp)
+{
+    var result = line.match(myPattern); // removing pattern does properly return null as documentation states
+    if(result == null)
+        return "null";
+    else
+        return "not null";
+}
+
+
+if (System.swfVersion >= 15) {
+    AddTestCase(
+        "regex non-match correctly returns null",
+        "null",
+        MyMatch(pattern));
+} else {
+    AddTestCase(
+        "Bug compatibility - regex non-match returns not null",
+        "not null",
+        MyMatch(pattern));
+}
+
+
+test();

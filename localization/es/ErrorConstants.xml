@@ -760,12 +760,14 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">Si el argumento de la función de repetición de llamada es un método de la clase, el argumento opcional debe ser null.</error>
+  <error id="2004" label="kInvalidParamError">Uno de los parámetros no es válido.</error>
   <error id="2006" label="kParamRangeError">El índice proporcionado está fuera de los límites.</error>
   <error id="2007" label="kNullPointerError">El valor del parámetro %1 debe ser distinto de null.</error>
   <error id="2008" label="kInvalidEnumError">El parámetro %1 debe tener uno de los valores aceptados.</error>
   <error id="2012" label="kCantInstantiateError">No se puede crear una instancia de la clase %1.</error>
   <error id="2030" label="kEOFError">Se alcanzó el final del archivo.</error>
   <error id="2058" label="kCompressedDataError">Se produjo un error al descomprimir los datos.</error>
+  <error id="2085" label="kEmptyStringError">El parámetro %1 debe ser una cadena no vacía.</error>
   <error id="2088" label="kProxyGetPropertyError">La clase Proxy no implementa getProperty. Debe sustituirse por una subclase.</error>
   <error id="2089" label="kProxySetPropertyError">La clase Proxy no implementa setProperty. Debe sustituirse por una subclase.</error>
   <error id="2090" label="kProxyCallPropertyError">La clase Proxy no implementa callProperty. Debe sustituirse por una subclase.</error>
@@ -775,4 +777,5 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">La clase Proxy no implementa nextNameIndex. Debe sustituirse por una subclase.</error>
   <error id="2106" label="kProxyNextNameError">La clase Proxy no implementa nextName. Debe sustituirse por una subclase.</error>
   <error id="2107" label="kProxyNextValueError">La clase Proxy no implementa nextValue. Debe sustituirse por una subclase.</error>
+  <error id="2173" label="kReadExternalNotImplementedError">No se puede leer el objeto del flujo.  La clase %1 no implementa flash.utils.IExternalizable pero está asociada a una clase externalizable.</error>
 </errors>
