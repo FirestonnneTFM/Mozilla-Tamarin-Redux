@@ -273,6 +273,16 @@ namespace avmplus
 
         void setproperty(Atom obj, const Multiname* multiname, Atom value, VTable* vtable) const;
         void setproperty_b(Atom obj, const Multiname* multiname, Atom value, VTable* vtable, Binding b) const;
+        /**
+        * @param name The property to set.  This string MUST be interned.
+        */
+        Atom getpropname(Atom object, Stringp name);
+
+        /**
+        * @param name The property to set.  This string MUST be interned.
+        */
+        void setpropname(Atom object, Stringp name, Atom value);
+
 
         /**
          * Implements the GetDefaultNamespace API as specified in E4X 12.1.1, pg 59
@@ -440,6 +450,19 @@ namespace avmplus
 
         //  -------------------------------------------------------
 
+    private:
+        Atom getClassClosureAtomFromAlias(Atom name, bool checkContextDomainOnly);
+        void addAliasedClassClosure(Atom key1, Atom key2, ClassClosure* cc, bool isDomainEnv);
+
+    public:
+        String* getAliasFromTraits(Traits* traits);
+        ClassClosure* getClassClosureFromAlias(String* name);
+        /**
+         * Native methods from the flash.net package
+         */
+        static void registerClassAlias(ScriptObject *script, String *aliasName, ClassClosure *cc);
+        static ClassClosure* getClassByAlias(ScriptObject* script, String *aliasName);
+
 
     protected:
         ClassClosure* findClassInScriptEnv(int class_id, ScriptEnv* env);
@@ -460,6 +483,7 @@ namespace avmplus
         GC_DATA_BEGIN(Toplevel)
 
     private:
+        WeakKeyHashtable               GC_STRUCTURE(_traitsToAliasMap);   // maps Traits -> aliasName
         GCMember<AbcEnv>               GC_POINTER(_abcEnv);
         GCMember<ScriptEnv>            GC_POINTER(_mainEntryPoint);
         GCMember<builtinClassManifest> GC_POINTER(_builtinClasses);
@@ -503,9 +527,11 @@ namespace avmplus
         GCMember<IntClass>          GC_POINTER(_intClass);
         GCMember<UIntClass>         GC_POINTER(_uintClass);
         GCMember<StringClass>       GC_POINTER(_stringClass);
+        GCMember<HeapHashtable>     GC_POINTER(_aliasToClassClosureMap);  // maps aliasName -> ClassClosure
 
         GC_DATA_END(Toplevel)
     // ------------------------ DATA SECTION END
+    //
     };
 }
 

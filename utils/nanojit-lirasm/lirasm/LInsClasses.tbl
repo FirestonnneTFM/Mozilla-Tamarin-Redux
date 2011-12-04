@@ -113,9 +113,9 @@ CL_64(  LOP_Q_D,        1)  // 68%  LIR_dasq
 CL_64(  LOP_D_Q,        1)  // 69%  LIR_qasd
 CL___(  LOP_D_II,       1)  // 70%  LIR_qjoin
 
-CL___(  LLD_I,          3)  // 73%  LIR_ld, LIR_ldc, LIR_ld*b, LIR_ld*s
-CL_64(  LLD_Q,          2)  // 75%  LIR_ldq, LIR_ldqc
-CL___(  LLD_D,          3)  // 78%  LIR_ldd, LIR_ldfc
+CL___(  LLD_I,          3)  // 73%  LIR_ld, LIR_ld*b, LIR_ld*s
+CL_64(  LLD_Q,          2)  // 75%  LIR_ldq
+CL___(  LLD_D,          3)  // 78%  LIR_ldd
 
 CL___(  LST_I,          5)  // 83%  LIR_sti
 CL_64(  LST_Q,          4)  // 87%  LIR_stqi

@@ -671,12 +671,14 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">Quando o argumento de retorno de chamada for um método de uma classe, o opcional deste argumento deverá ser nulo.</error>
+  <error id="2004" label="kInvalidParamError">Um dos parâmetros é inválido.</error>
   <error id="2006" label="kParamRangeError">O índice fornecido está fora dos limites.</error>
   <error id="2007" label="kNullPointerError">O parâmetro %1 não deve ser nulo.</error>
   <error id="2008" label="kInvalidEnumError">O parâmetro %1 deve ser um dos valores aceitos.</error>
   <error id="2012" label="kCantInstantiateError">A classe %1 não pode ser instanciada.</error>
   <error id="2030" label="kEOFError">O fim do arquivo foi encontrado.</error>
   <error id="2058" label="kCompressedDataError">Erro ao descompactar os dados.</error>
+  <error id="2085" label="kEmptyStringError">O parâmetro %1 não deve ser uma string vazia.</error>
   <error id="2088" label="kProxyGetPropertyError">A classe Proxy não implementa getProperty. Ela deve ser substituída por uma subclasse.</error>
   <error id="2089" label="kProxySetPropertyError">A classe Proxy não implementa setProperty. Ela deve ser substituída por uma subclasse.</error>
   <error id="2090" label="kProxyCallPropertyError">A classe Proxy não implementa callProperty. Ela deve ser substituída por uma subclasse.</error>
@@ -686,4 +688,5 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">A classe Proxy não implementa nextNameIndex. Ela deve ser substituída por uma subclasse.</error>
   <error id="2106" label="kProxyNextNameError">A classe Proxy não implementa nextName. Ela deve ser substituída por uma subclasse.</error>
   <error id="2107" label="kProxyNextValueError">A classe Proxy não implementa nextValue. Ela deve ser substituída por uma subclasse.</error>
+  <error id="2173" label="kReadExternalNotImplementedError">Impossível ler o objeto em um fluxo. A classe %1 não implementa flash.utils.IExternalizable mas recebeu como alias uma classe externalizável.</error>
 </errors>

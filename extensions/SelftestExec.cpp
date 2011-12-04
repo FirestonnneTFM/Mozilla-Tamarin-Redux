@@ -2416,7 +2416,7 @@ verifyPass(cb->status==MMgc::kMemSoftLimit, "cb->status==MMgc::kMemSoftLimit", _
 // line 83 "ST_mmgc_externalalloc.st"
 verifyPass(cb->status==MMgc::kMemNormal, "cb->status==MMgc::kMemNormal", __FILE__, __LINE__);
     GCHeap::GetGCHeap()->Config().heapSoftLimit = softlimit;
-    softlimit = NULL;
+    softlimit = 0;
 
 
 

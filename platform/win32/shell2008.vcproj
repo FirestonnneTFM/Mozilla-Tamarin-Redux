@@ -1809,10 +1809,6 @@
 			Name="AS3 Files"
 			>
 			<File
-				RelativePath="..\..\extensions\Dictionary.as"
-				>
-			</File>
-			<File
 				RelativePath="..\..\shell\Domain.as"
 				>
 			</File>

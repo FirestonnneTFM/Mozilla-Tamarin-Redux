@@ -430,7 +430,7 @@ namespace MMgc
                     GCAssert(cached_leaf_bytes != NULL);
                     heap->Free(cached_leaf_bytes);
                     cached_leaf_bytes = NULL;
-                    cached_addr_prefix = NULL;
+                    cached_addr_prefix = 0;
                 }
             } else {
                 // resort to standard free.

@@ -42,7 +42,7 @@
 # ***** END LICENSE BLOCK ***** */
 #
 
-import os, sys, getopt, datetime, pipes, glob, itertools
+import os, sys, getopt, datetime, pipes, glob, itertools,socket
 import tempfile, string, re, platform, traceback
 import subprocess, math, types
 from os.path import *
@@ -53,11 +53,11 @@ from sys import argv, exit
 from getopt import getopt
 from itertools import count
 from time import time
-from socket import *
 
 # add parent dir to python module search path
 sys.path.append('..')
 
+from util.convertAcceptanceToJunit import *
 try:
     from util.runtestBase import RuntestBase
     from util.runtestUtils import *
@@ -94,10 +94,12 @@ class PerformanceRuntest(RuntestBase):
     tmpfile = None
     osName = ''
     logresults = False
+    logConfigAppend = ''
     socketlogFile = None
+    socketlogFailure = False
     serverHost = '10.60.48.47'
     serverPort = 1188
-    finalexitcode=0
+    finalexitcode = 0
     
     # testData structure:
     # { testName : { metric : { results1/2 : [], best1/2 : num, avg1/2 : num, spdup : num }}}
@@ -168,6 +170,9 @@ class PerformanceRuntest(RuntestBase):
             self.printScoreSummary()
         if self.saveIndex:
             self.outputTestIndexFile()
+        if self.junitlog:
+            outfile=convertPerformanceToJunit(self.junitlog+'.txt',self.junitlog+'.xml',self.junitlogname)
+            print("wrote results in junit format to %s" % outfile)
         #self.cleanup()
 
     def getTestsList(self, args):
@@ -224,6 +229,7 @@ class PerformanceRuntest(RuntestBase):
         print("    --saveindex=    save results to given index file name")
         print("    --fullpath      print out full path for each test")
         print("    --repo=         repository url (used when logging to performance db)")
+        print("    --logConfigAppend= string to append to the config string that is logged to the database along with vmargs")
         exit(c)
 
     def setOptions(self):
@@ -233,7 +239,7 @@ class PerformanceRuntest(RuntestBase):
                                  'runtime=','memory','metrics=','larger','vmversion=', 'vm2version=',
                                  'vmargs2=','nooptimize', 'score', 'saveindex=', 'index=',
                                  'perfm','csv=', 'csvappend','prettyprint', 'detail', 'raw',
-                                 'fullpath', 'repo='])
+                                 'fullpath', 'repo=', 'logConfigAppend='])
 
     def parseOptions(self):
         opts = RuntestBase.parseOptions(self)
@@ -295,7 +301,9 @@ class PerformanceRuntest(RuntestBase):
                 self.fullpath = True
             elif o in ('--repo',):
                 self.repo = v
-        
+            elif o in ('--logConfigAppend',):
+                self.logConfigAppend = v
+
         self.avmname = self.avmname or self.avmDefaultName
         self.avm2name = self.avm2name or self.avm2DefaultName
 
@@ -335,19 +343,23 @@ class PerformanceRuntest(RuntestBase):
                 file = "socketlog-%s-%s.txt" % (self.avmversion,ctr)
             self.socketlogFile=file
         open(self.socketlogFile,'a').write(msg)
-        try:
-            s = socket(AF_INET, SOCK_STREAM)    # create a TCP socket
-            s.connect((self.serverHost, self.serverPort)) # connect to server on the port
-            s.send("%s;exit\r\n" % msg)         # send the data
-            data = s.recv(1024)
-            #print('Sent: %s' % msg)
-            #print('Received: %s \n\n' % data)
-            #s.shutdown(SHUT_RDWR)
-            s.close()
-        except :
-            print("Socket error occured:")
-            print(sys.exc_info())
-            print('buildbot_status: WARNINGS')
+        if self.socketlogFailure == False:
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    # create a TCP socket
+                s.settimeout(10) # set socket timeout to 10s
+                s.connect((self.serverHost, self.serverPort)) # connect to server on the port
+                s.send("%s;exit\r\n" % msg)         # send the data
+                data = s.recv(1024)
+                #print('Sent: %s' % msg)
+                #print('Received: %s \n\n' % data)
+                #s.shutdown(SHUT_RDWR)
+                s.close()
+            except :
+                print("ERROR: Socket error occured:")
+                print(sys.exc_info())
+                print('buildbot_status: WARNINGS')
+                self.socketlogFailure = True
+                self.finalexitcode = 1
 
     def loadMetricInfo(self):
         '''load metric information from metricinfo.py'''
@@ -379,7 +391,8 @@ class PerformanceRuntest(RuntestBase):
             if self.log_config.find("-memlimit")>-1:
                 self.log_config=self.log_config[0:self.log_config.find("-memlimit")]
             self.log_config = self.log_config.replace("-memstats","")
-
+            self.log_config += self.logConfigAppend
+            
         if not self.aotsdk:
             self.checkExecutable(self.avm, 'AVM environment variable or --avm must be set to avmplus')
             if not self.avmversion:
@@ -752,49 +765,73 @@ class PerformanceRuntest(RuntestBase):
         if self.memory and len(self.vmargs2)>0 and self.vmargs2.find("-memstats")==-1:
             self.vmargs2="%s -memstats" % self.vmargs2
 
-        for i in range(self.iterations):
-            if self.aotsdk and self.aotout:
-                progname = testName.replace(".as", "")
-                progname = progname.replace("/", ".")
-                (f1,err,exitcode) = self.run_pipe(os.path.join(self.aotout, progname))
-                # print("about to execute: " + os.path.join(self.aotout, progname))
-                exitcode = 0 # hack!
-            else:
-                (f1,err,exitcode) = self.run_pipe("%s %s %s" % (self.avm, self.vmargs, abc))
-                self.debug_print("%s %s %s" % (self.avm, self.vmargs, abc))
-                self.debug_print(f1)
-            if self.avm2:
-                (f2,err2,exitcode2) = self.run_pipe("%s %s %s" % (self.avm2, self.vmargs2 if self.vmargs2 else self.vmargs, abc))
-                self.debug_print("%s %s %s" % (self.avm2, self.vmargs2 if self.vmargs2 else self.vmargs, abc))
-                self.debug_print(f2)
-            try:
-                if exitcode!=0:
-                    self.finalexitcode=1
-                    self.js_print("%-50s %7s %s" % (testName,'Avm1 Error: Test Exited with exit code:', exitcode))
-                    return
+        scriptargs=[['','']]
+        if os.path.exists("%s.script_args" % testName):
+            lines=open("%s.script_args" % testName).read().split('\n')
+            scriptargs=[]
+            for line in lines:
+                if len(line.strip())==0 or line.strip().startswith('#'):
+                    continue
+                tokens=line.split(',')
+                args=tokens[0]
+                if args.startswith('-- ')==False:
+                    args='-- %s' % args
+                if len(tokens)>0:
+                    desc=tokens[1]
                 else:
-                    self.parsePerfTestOutput(f1, resultsDict1)
+                    desc=args.replace(' ','_')
+                scriptargs.append([args,desc])
+            if len(scriptargs)==0:
+                scriptargs=['','']
+
+        for arg in scriptargs:
+            scriptArg=arg[0]
+            testNameDesc=testName+arg[1]
+            resultsDict1 = {}
+            resultsDict2 = {}
+            for i in range(self.iterations):
+                if self.aotsdk and self.aotout:
+                    progname = testName.replace(".as", "")
+                    progname = progname.replace("/", ".")
+                    (f1,err,exitcode) = self.run_pipe(os.path.join(self.aotout, progname))
+                    # print("about to execute: " + os.path.join(self.aotout, progname))
+                    exitcode = 0 # hack!
+                else:
+                    (f1,err,exitcode) = self.run_pipe("%s %s %s %s" % (self.avm, self.vmargs, abc, scriptArg))
+                    self.debug_print("%s %s %s %s" % (self.avm, self.vmargs, abc, scriptArg))
+                    self.debug_print(f1)
                 if self.avm2:
-                    if exitcode2!=0:
+                    (f2,err2,exitcode2) = self.run_pipe("%s %s %s %s" % (self.avm2, self.vmargs2 if self.vmargs2 else self.vmargs, abc, scriptArg))
+                    self.debug_print("%s %s %s %s" % (self.avm2, self.vmargs2 if self.vmargs2 else self.vmargs, abc, scriptArg))
+                    self.debug_print(f2)
+                try:
+                    if exitcode!=0:
                         self.finalexitcode=1
-                        self.js_print("%-50s %7s %s" % (testName,'Avm2 Error: Test Exited with exit code:', exitcode))
+                        self.js_print("%-50s %7s %s" % (testName,'Avm1 Error: Test Exited with exit code:', exitcode))
                         return
                     else:
-                        self.parsePerfTestOutput(f2, resultsDict2)
-            except:
-                traceback.print_exc()
-                exit(-1)
-        # end for i in range(iterations)
+                        self.parsePerfTestOutput(f1, resultsDict1)
+                    if self.avm2:
+                        if exitcode2!=0:
+                            self.finalexitcode=1
+                            self.js_print("%-50s %7s %s" % (testName,'Avm2 Error: Test Exited with exit code:', exitcode))
+                            return
+                        else:
+                            self.parsePerfTestOutput(f2, resultsDict2)
+                except:
+                    traceback.print_exc()
+                    exit(-1)
+            # end for i in range(iterations)
 
-        if not self.validResultsDictionary('avm', resultsDict1, testName, f1):
-            return
-        if self.avm2 and not self.validResultsDictionary('avm2', resultsDict2, testName, f2):
-            return
+            if not self.validResultsDictionary('avm', resultsDict1, testName, f1):
+                return
+            if self.avm2 and not self.validResultsDictionary('avm2', resultsDict2, testName, f2):
+                return
         
-        # calculate best results and store to self.testData
-        self.calculateSpeedup(testName, resultsDict1, resultsDict2)
+            # calculate best results and store to self.testData
+            self.calculateSpeedup(testNameDesc, resultsDict1, resultsDict2)
 
-        self.printTestResults(testName)
+            self.printTestResults(testNameDesc)
     
     def validResultsDictionary(self, avmName, resultsDict, testName, output):
         '''Make sure that the results dictionary has valid number of results for each metric

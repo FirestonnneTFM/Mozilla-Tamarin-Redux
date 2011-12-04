@@ -56,8 +56,12 @@ namespace avmplus {
     class DateObject; // Date
     class DefinitionErrorClass; // DefinitionError$
     class DefinitionErrorObject; // DefinitionError
+    class DictionaryClass; // flash.utils::Dictionary$
+    class DictionaryObject; // flash.utils::Dictionary
     class DoubleVectorClass; // __AS3__.vec::Vector$double$
     class DoubleVectorObject; // __AS3__.vec::Vector$double
+    class DynamicPropertyOutputClass; // flash.net::DynamicPropertyOutput$
+    class DynamicPropertyOutputObject; // flash.net::DynamicPropertyOutput
     class EOFErrorClass; // flash.errors::EOFError$
     class EOFErrorObject; // flash.errors::EOFError
     class ErrorClass; // Error$
@@ -76,6 +80,12 @@ namespace avmplus {
     class IDataInputInterface; // flash.utils::IDataInput
     class IDataOutputClass; // flash.utils::IDataOutput$
     class IDataOutputInterface; // flash.utils::IDataOutput
+    class IDynamicPropertyOutputClass; // flash.net::IDynamicPropertyOutput$
+    class IDynamicPropertyOutputInterface; // flash.net::IDynamicPropertyOutput
+    class IDynamicPropertyWriterClass; // flash.net::IDynamicPropertyWriter$
+    class IDynamicPropertyWriterInterface; // flash.net::IDynamicPropertyWriter
+    class IExternalizableClass; // flash.utils::IExternalizable$
+    class IExternalizableInterface; // flash.utils::IExternalizable
     class IOErrorClass; // flash.errors::IOError$
     class IOErrorObject; // flash.errors::IOError
     class IllegalOperationErrorClass; // flash.errors::IllegalOperationError$
@@ -94,6 +104,12 @@ namespace avmplus {
     class NamespaceClass; // Namespace$
     class NumberClass; // Number$
     class ObjectClass; // Object$
+    class ObjectEncodingClass; // flash.net::ObjectEncoding$
+    class ObjectEncodingObject; // flash.net::ObjectEncoding
+    class ObjectInputClass; // flash.utils::ObjectInput$
+    class ObjectInputObject; // flash.utils::ObjectInput
+    class ObjectOutputClass; // flash.utils::ObjectOutput$
+    class ObjectOutputObject; // flash.utils::ObjectOutput
     class ObjectVectorClass; // __AS3__.vec::Vector$object$
     class ObjectVectorObject; // __AS3__.vec::Vector
     class ObjectVectorObject; // __AS3__.vec::Vector$object
@@ -191,8 +207,16 @@ const uint32_t abcclass_QName = 43;
 const uint32_t abcclass_flash_utils_IDataInput = 44;
 const uint32_t abcclass_flash_utils_IDataOutput = 45;
 const uint32_t abcclass_flash_utils_Proxy = 46;
-const uint32_t abcclass_flash_utils_CompressionAlgorithm = 47;
-const uint32_t abcclass_flash_utils_ByteArray = 48;
+const uint32_t abcclass_flash_utils_Dictionary = 47;
+const uint32_t abcclass_flash_net_IDynamicPropertyOutput = 48;
+const uint32_t abcclass_flash_net_IDynamicPropertyWriter = 49;
+const uint32_t abcclass_flash_utils_IExternalizable = 50;
+const uint32_t abcclass_flash_net_ObjectEncoding = 51;
+const uint32_t abcclass_flash_utils_ObjectInput = 52;
+const uint32_t abcclass_flash_utils_CompressionAlgorithm = 53;
+const uint32_t abcclass_flash_utils_ByteArray = 54;
+const uint32_t abcclass_flash_utils_ObjectOutput = 55;
+const uint32_t abcclass_flash_net_DynamicPropertyOutput = 56;
 
 /* methods */
 const uint32_t native_script_function_avmplus_getQualifiedSuperclassName = 0; // native
@@ -880,334 +904,381 @@ const uint32_t __AS3___vec_Vector_float4_AS3_indexOf = 912; // abc
 const uint32_t __AS3___vec_Vector_float4_AS3_lastIndexOf = 913; // abc
 const uint32_t private_MethodClosure_prototype_get = 915; // abc
 const uint32_t private_MethodClosure_prototype_set = 916; // abc
-const uint32_t Math_private__min = 920; // native
-const uint32_t Math_private__max = 921; // native
-const uint32_t Math_abs = 922; // native
-const uint32_t Math_acos = 923; // native
-const uint32_t Math_asin = 924; // native
-const uint32_t Math_atan = 925; // native
-const uint32_t Math_ceil = 926; // native
-const uint32_t Math_cos = 927; // native
-const uint32_t Math_exp = 928; // native
-const uint32_t Math_floor = 929; // native
-const uint32_t Math_log = 930; // native
-const uint32_t Math_round = 931; // native
-const uint32_t Math_sin = 932; // native
-const uint32_t Math_sqrt = 933; // native
-const uint32_t Math_tan = 934; // native
-const uint32_t Math_atan2 = 935; // native
-const uint32_t Math_pow = 936; // native
-const uint32_t Math_max = 937; // native
-const uint32_t Math_min = 938; // native
-const uint32_t Math_random = 939; // native
-const uint32_t Error_getErrorMessage = 944; // native
-const uint32_t Error_throwError = 946; // abc
-const uint32_t Error_getStackTrace = 948; // native
-const uint32_t Error_errorID_get = 949; // abc
-const uint32_t Date_parse = 1024; // native
-const uint32_t Date_UTC = 1025; // native
-const uint32_t Date_AS3_valueOf = 1026; // native
-const uint32_t Date_private__toString = 1027; // native
-const uint32_t Date_private__setTime = 1028; // native
-const uint32_t Date_private__get = 1029; // native
-const uint32_t Date_AS3_setTime = 1030; // abc
-const uint32_t Date_AS3_toString = 1031; // abc
-const uint32_t Date_AS3_toDateString = 1032; // abc
-const uint32_t Date_AS3_toTimeString = 1033; // abc
-const uint32_t Date_AS3_toLocaleString = 1034; // abc
-const uint32_t Date_AS3_toLocaleDateString = 1035; // abc
-const uint32_t Date_AS3_toLocaleTimeString = 1036; // abc
-const uint32_t Date_AS3_toUTCString = 1037; // abc
-const uint32_t Date_AS3_getUTCFullYear = 1038; // native
-const uint32_t Date_AS3_getUTCMonth = 1039; // native
-const uint32_t Date_AS3_getUTCDate = 1040; // native
-const uint32_t Date_AS3_getUTCDay = 1041; // native
-const uint32_t Date_AS3_getUTCHours = 1042; // native
-const uint32_t Date_AS3_getUTCMinutes = 1043; // native
-const uint32_t Date_AS3_getUTCSeconds = 1044; // native
-const uint32_t Date_AS3_getUTCMilliseconds = 1045; // native
-const uint32_t Date_AS3_getFullYear = 1046; // native
-const uint32_t Date_AS3_getMonth = 1047; // native
-const uint32_t Date_AS3_getDate = 1048; // native
-const uint32_t Date_AS3_getDay = 1049; // native
-const uint32_t Date_AS3_getHours = 1050; // native
-const uint32_t Date_AS3_getMinutes = 1051; // native
-const uint32_t Date_AS3_getSeconds = 1052; // native
-const uint32_t Date_AS3_getMilliseconds = 1053; // native
-const uint32_t Date_AS3_getTimezoneOffset = 1054; // native
-const uint32_t Date_AS3_getTime = 1055; // native
-const uint32_t Date_private__setFullYear = 1056; // native
-const uint32_t Date_private__setMonth = 1057; // native
-const uint32_t Date_private__setDate = 1058; // native
-const uint32_t Date_private__setHours = 1059; // native
-const uint32_t Date_private__setMinutes = 1060; // native
-const uint32_t Date_private__setSeconds = 1061; // native
-const uint32_t Date_private__setMilliseconds = 1062; // native
-const uint32_t Date_private__setUTCFullYear = 1063; // native
-const uint32_t Date_private__setUTCMonth = 1064; // native
-const uint32_t Date_private__setUTCDate = 1065; // native
-const uint32_t Date_private__setUTCHours = 1066; // native
-const uint32_t Date_private__setUTCMinutes = 1067; // native
-const uint32_t Date_private__setUTCSeconds = 1068; // native
-const uint32_t Date_private__setUTCMilliseconds = 1069; // native
-const uint32_t Date_AS3_setFullYear = 1070; // abc
-const uint32_t Date_AS3_setMonth = 1071; // abc
-const uint32_t Date_AS3_setDate = 1072; // abc
-const uint32_t Date_AS3_setHours = 1073; // abc
-const uint32_t Date_AS3_setMinutes = 1074; // abc
-const uint32_t Date_AS3_setSeconds = 1075; // abc
-const uint32_t Date_AS3_setMilliseconds = 1076; // abc
-const uint32_t Date_AS3_setUTCFullYear = 1077; // abc
-const uint32_t Date_AS3_setUTCMonth = 1078; // abc
-const uint32_t Date_AS3_setUTCDate = 1079; // abc
-const uint32_t Date_AS3_setUTCHours = 1080; // abc
-const uint32_t Date_AS3_setUTCMinutes = 1081; // abc
-const uint32_t Date_AS3_setUTCSeconds = 1082; // abc
-const uint32_t Date_AS3_setUTCMilliseconds = 1083; // abc
-const uint32_t Date_fullYear_get = 1084; // abc
-const uint32_t Date_fullYear_set = 1085; // abc
-const uint32_t Date_month_get = 1086; // abc
-const uint32_t Date_month_set = 1087; // abc
-const uint32_t Date_date_get = 1088; // abc
-const uint32_t Date_date_set = 1089; // abc
-const uint32_t Date_hours_get = 1090; // abc
-const uint32_t Date_hours_set = 1091; // abc
-const uint32_t Date_minutes_get = 1092; // abc
-const uint32_t Date_minutes_set = 1093; // abc
-const uint32_t Date_seconds_get = 1094; // abc
-const uint32_t Date_seconds_set = 1095; // abc
-const uint32_t Date_milliseconds_get = 1096; // abc
-const uint32_t Date_milliseconds_set = 1097; // abc
-const uint32_t Date_fullYearUTC_get = 1098; // abc
-const uint32_t Date_fullYearUTC_set = 1099; // abc
-const uint32_t Date_monthUTC_get = 1100; // abc
-const uint32_t Date_monthUTC_set = 1101; // abc
-const uint32_t Date_dateUTC_get = 1102; // abc
-const uint32_t Date_dateUTC_set = 1103; // abc
-const uint32_t Date_hoursUTC_get = 1104; // abc
-const uint32_t Date_hoursUTC_set = 1105; // abc
-const uint32_t Date_minutesUTC_get = 1106; // abc
-const uint32_t Date_minutesUTC_set = 1107; // abc
-const uint32_t Date_secondsUTC_get = 1108; // abc
-const uint32_t Date_secondsUTC_set = 1109; // abc
-const uint32_t Date_millisecondsUTC_get = 1110; // abc
-const uint32_t Date_millisecondsUTC_set = 1111; // abc
-const uint32_t Date_time_get = 1112; // abc
-const uint32_t Date_time_set = 1113; // abc
-const uint32_t Date_timezoneOffset_get = 1114; // abc
-const uint32_t Date_day_get = 1115; // abc
-const uint32_t Date_dayUTC_get = 1116; // abc
-const uint32_t RegExp_source_get = 1123; // native
-const uint32_t RegExp_global_get = 1124; // native
-const uint32_t RegExp_ignoreCase_get = 1125; // native
-const uint32_t RegExp_multiline_get = 1126; // native
-const uint32_t RegExp_lastIndex_get = 1127; // native
-const uint32_t RegExp_lastIndex_set = 1128; // native
-const uint32_t RegExp_dotall_get = 1129; // native
-const uint32_t RegExp_extended_get = 1130; // native
-const uint32_t RegExp_AS3_exec = 1131; // native
-const uint32_t RegExp_AS3_test = 1132; // abc
-const uint32_t JSON_private_parseCore = 1136; // native
-const uint32_t JSON_private_stringifySpecializedToString = 1137; // native
-const uint32_t JSON_parse = 1138; // abc
-const uint32_t JSON_stringify = 1139; // abc
-const uint32_t JSON_private_computePropertyList = 1140; // abc
-const uint32_t Walker_walk = 1144; // abc
-const uint32_t XML_ignoreComments_get = 1189; // native
-const uint32_t XML_ignoreComments_set = 1190; // native
-const uint32_t XML_ignoreProcessingInstructions_get = 1191; // native
-const uint32_t XML_ignoreProcessingInstructions_set = 1192; // native
-const uint32_t XML_ignoreWhitespace_get = 1193; // native
-const uint32_t XML_ignoreWhitespace_set = 1194; // native
-const uint32_t XML_prettyPrinting_get = 1195; // native
-const uint32_t XML_prettyPrinting_set = 1196; // native
-const uint32_t XML_prettyIndent_get = 1197; // native
-const uint32_t XML_prettyIndent_set = 1198; // native
-const uint32_t XML_AS3_settings = 1199; // abc
-const uint32_t XML_AS3_setSettings = 1200; // abc
-const uint32_t XML_AS3_defaultSettings = 1201; // abc
-const uint32_t XML_AS3_toString = 1202; // native
-const uint32_t XML_AS3_hasOwnProperty = 1203; // native
-const uint32_t XML_AS3_propertyIsEnumerable = 1204; // native
-const uint32_t XML_AS3_addNamespace = 1205; // native
-const uint32_t XML_AS3_appendChild = 1206; // native
-const uint32_t XML_AS3_attribute = 1207; // native
-const uint32_t XML_AS3_attributes = 1208; // native
-const uint32_t XML_AS3_child = 1209; // native
-const uint32_t XML_AS3_childIndex = 1210; // native
-const uint32_t XML_AS3_children = 1211; // native
-const uint32_t XML_AS3_comments = 1212; // native
-const uint32_t XML_AS3_contains = 1213; // native
-const uint32_t XML_AS3_copy = 1214; // native
-const uint32_t XML_AS3_descendants = 1215; // native
-const uint32_t XML_AS3_elements = 1216; // native
-const uint32_t XML_AS3_hasComplexContent = 1217; // native
-const uint32_t XML_AS3_hasSimpleContent = 1218; // native
-const uint32_t XML_AS3_inScopeNamespaces = 1219; // native
-const uint32_t XML_AS3_insertChildAfter = 1220; // native
-const uint32_t XML_AS3_insertChildBefore = 1221; // native
-const uint32_t XML_AS3_length = 1222; // abc
-const uint32_t XML_AS3_localName = 1223; // native
-const uint32_t XML_AS3_name = 1224; // native
-const uint32_t XML_private__namespace = 1225; // native
-const uint32_t XML_AS3_namespace = 1226; // abc
-const uint32_t XML_AS3_namespaceDeclarations = 1227; // native
-const uint32_t XML_AS3_nodeKind = 1228; // native
-const uint32_t XML_AS3_normalize = 1229; // native
-const uint32_t XML_AS3_parent = 1230; // native
-const uint32_t XML_AS3_processingInstructions = 1231; // native
-const uint32_t XML_AS3_prependChild = 1232; // native
-const uint32_t XML_AS3_removeNamespace = 1233; // native
-const uint32_t XML_AS3_replace = 1234; // native
-const uint32_t XML_AS3_setChildren = 1235; // native
-const uint32_t XML_AS3_setLocalName = 1236; // native
-const uint32_t XML_AS3_setName = 1237; // native
-const uint32_t XML_AS3_setNamespace = 1238; // native
-const uint32_t XML_AS3_text = 1239; // native
-const uint32_t XML_AS3_toXMLString = 1240; // native
-const uint32_t XML_AS3_notification = 1241; // native
-const uint32_t XML_AS3_setNotification = 1242; // native
-const uint32_t XML_AS3_toJSON = 1243; // abc
-const uint32_t XML_AS3_valueOf = 1245; // abc
-const uint32_t XMLList_AS3_toString = 1286; // native
-const uint32_t XMLList_AS3_valueOf = 1287; // abc
-const uint32_t XMLList_AS3_hasOwnProperty = 1288; // native
-const uint32_t XMLList_AS3_propertyIsEnumerable = 1289; // native
-const uint32_t XMLList_AS3_attribute = 1290; // native
-const uint32_t XMLList_AS3_attributes = 1291; // native
-const uint32_t XMLList_AS3_child = 1292; // native
-const uint32_t XMLList_AS3_children = 1293; // native
-const uint32_t XMLList_AS3_comments = 1294; // native
-const uint32_t XMLList_AS3_contains = 1295; // native
-const uint32_t XMLList_AS3_copy = 1296; // native
-const uint32_t XMLList_AS3_descendants = 1297; // native
-const uint32_t XMLList_AS3_elements = 1298; // native
-const uint32_t XMLList_AS3_hasComplexContent = 1299; // native
-const uint32_t XMLList_AS3_hasSimpleContent = 1300; // native
-const uint32_t XMLList_AS3_length = 1301; // native
-const uint32_t XMLList_AS3_name = 1302; // native
-const uint32_t XMLList_AS3_normalize = 1303; // native
-const uint32_t XMLList_AS3_parent = 1304; // native
-const uint32_t XMLList_AS3_processingInstructions = 1305; // native
-const uint32_t XMLList_AS3_text = 1306; // native
-const uint32_t XMLList_AS3_toXMLString = 1307; // native
-const uint32_t XMLList_AS3_addNamespace = 1308; // native
-const uint32_t XMLList_AS3_appendChild = 1309; // native
-const uint32_t XMLList_AS3_childIndex = 1310; // native
-const uint32_t XMLList_AS3_inScopeNamespaces = 1311; // native
-const uint32_t XMLList_AS3_insertChildAfter = 1312; // native
-const uint32_t XMLList_AS3_insertChildBefore = 1313; // native
-const uint32_t XMLList_AS3_nodeKind = 1314; // native
-const uint32_t XMLList_private__namespace = 1315; // native
-const uint32_t XMLList_AS3_namespace = 1316; // abc
-const uint32_t XMLList_AS3_localName = 1317; // native
-const uint32_t XMLList_AS3_namespaceDeclarations = 1318; // native
-const uint32_t XMLList_AS3_prependChild = 1319; // native
-const uint32_t XMLList_AS3_removeNamespace = 1320; // native
-const uint32_t XMLList_AS3_replace = 1321; // native
-const uint32_t XMLList_AS3_setChildren = 1322; // native
-const uint32_t XMLList_AS3_setLocalName = 1323; // native
-const uint32_t XMLList_AS3_setName = 1324; // native
-const uint32_t XMLList_AS3_setNamespace = 1325; // native
-const uint32_t XMLList_AS3_toJSON = 1326; // abc
-const uint32_t QName_localName_get = 1330; // native
-const uint32_t QName_uri_get = 1331; // native
-const uint32_t QName_AS3_valueOf = 1332; // abc
-const uint32_t QName_AS3_toString = 1333; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readBytes = 1337; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readBoolean = 1338; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readByte = 1339; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readUnsignedByte = 1340; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readShort = 1341; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readUnsignedShort = 1342; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readInt = 1343; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readUnsignedInt = 1344; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readFloat = 1345; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readDouble = 1346; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readMultiByte = 1347; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readUTF = 1348; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readUTFBytes = 1349; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_bytesAvailable_get = 1350; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readObject = 1351; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_objectEncoding_get = 1352; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_objectEncoding_set = 1353; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_endian_get = 1354; // abc
-const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_endian_set = 1355; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeBytes = 1359; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeBoolean = 1360; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeByte = 1361; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeShort = 1362; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeInt = 1363; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeUnsignedInt = 1364; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeFloat = 1365; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeDouble = 1366; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeMultiByte = 1367; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeUTF = 1368; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeUTFBytes = 1369; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeObject = 1370; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_objectEncoding_get = 1371; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_objectEncoding_set = 1372; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_endian_get = 1373; // abc
-const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_endian_set = 1374; // abc
-const uint32_t flash_utils_Proxy_flash_proxy_getProperty = 1378; // abc
-const uint32_t flash_utils_Proxy_flash_proxy_setProperty = 1379; // abc
-const uint32_t flash_utils_Proxy_flash_proxy_callProperty = 1380; // abc
-const uint32_t flash_utils_Proxy_flash_proxy_hasProperty = 1381; // abc
-const uint32_t flash_utils_Proxy_flash_proxy_deleteProperty = 1382; // abc
-const uint32_t flash_utils_Proxy_flash_proxy_getDescendants = 1383; // abc
-const uint32_t flash_utils_Proxy_flash_proxy_nextNameIndex = 1384; // abc
-const uint32_t flash_utils_Proxy_flash_proxy_nextName = 1385; // abc
-const uint32_t flash_utils_Proxy_flash_proxy_nextValue = 1386; // abc
-const uint32_t flash_utils_Proxy_flash_proxy_isAttribute = 1387; // native
-const uint32_t flash_utils_ByteArray_defaultObjectEncoding_get = 1394; // native
-const uint32_t flash_utils_ByteArray_defaultObjectEncoding_set = 1395; // native
-const uint32_t flash_utils_ByteArray_readBytes = 1397; // native
-const uint32_t flash_utils_ByteArray_writeBytes = 1398; // native
-const uint32_t flash_utils_ByteArray_writeBoolean = 1399; // native
-const uint32_t flash_utils_ByteArray_writeByte = 1400; // native
-const uint32_t flash_utils_ByteArray_writeShort = 1401; // native
-const uint32_t flash_utils_ByteArray_writeInt = 1402; // native
-const uint32_t flash_utils_ByteArray_writeUnsignedInt = 1403; // native
-const uint32_t flash_utils_ByteArray_writeFloat = 1404; // native
-const uint32_t flash_utils_ByteArray_writeFloat4 = 1405; // native
-const uint32_t flash_utils_ByteArray_writeDouble = 1406; // native
-const uint32_t flash_utils_ByteArray_writeMultiByte = 1407; // native
-const uint32_t flash_utils_ByteArray_writeUTF = 1408; // native
-const uint32_t flash_utils_ByteArray_writeUTFBytes = 1409; // native
-const uint32_t flash_utils_ByteArray_readBoolean = 1410; // native
-const uint32_t flash_utils_ByteArray_readByte = 1411; // native
-const uint32_t flash_utils_ByteArray_readUnsignedByte = 1412; // native
-const uint32_t flash_utils_ByteArray_readShort = 1413; // native
-const uint32_t flash_utils_ByteArray_readUnsignedShort = 1414; // native
-const uint32_t flash_utils_ByteArray_readInt = 1415; // native
-const uint32_t flash_utils_ByteArray_readUnsignedInt = 1416; // native
-const uint32_t flash_utils_ByteArray_readFloat = 1417; // native
-const uint32_t flash_utils_ByteArray_readFloat4 = 1418; // native
-const uint32_t flash_utils_ByteArray_readDouble = 1419; // native
-const uint32_t flash_utils_ByteArray_readMultiByte = 1420; // native
-const uint32_t flash_utils_ByteArray_readUTF = 1421; // native
-const uint32_t flash_utils_ByteArray_readUTFBytes = 1422; // native
-const uint32_t flash_utils_ByteArray_length_get = 1423; // native
-const uint32_t flash_utils_ByteArray_length_set = 1424; // native
-const uint32_t flash_utils_ByteArray_writeObject = 1425; // native
-const uint32_t flash_utils_ByteArray_readObject = 1426; // native
-const uint32_t flash_utils_ByteArray_deflate = 1427; // abc
-const uint32_t flash_utils_ByteArray_private__compress = 1428; // native
-const uint32_t flash_utils_ByteArray_compress = 1429; // abc
-const uint32_t flash_utils_ByteArray_inflate = 1430; // abc
-const uint32_t flash_utils_ByteArray_private__uncompress = 1431; // native
-const uint32_t flash_utils_ByteArray_uncompress = 1432; // abc
-const uint32_t flash_utils_ByteArray_toString = 1433; // abc
-const uint32_t flash_utils_ByteArray_private__toString = 1434; // native
-const uint32_t flash_utils_ByteArray_bytesAvailable_get = 1435; // native
-const uint32_t flash_utils_ByteArray_position_get = 1436; // native
-const uint32_t flash_utils_ByteArray_position_set = 1437; // native
-const uint32_t flash_utils_ByteArray_objectEncoding_get = 1438; // native
-const uint32_t flash_utils_ByteArray_objectEncoding_set = 1439; // native
-const uint32_t flash_utils_ByteArray_endian_get = 1440; // native
-const uint32_t flash_utils_ByteArray_endian_set = 1441; // native
-const uint32_t flash_utils_ByteArray_clear = 1442; // native
+const uint32_t native_script_function_flash_net_getClassByAlias = 919; // native
+const uint32_t native_script_function_flash_net_registerClassAlias = 920; // native
+const uint32_t Math_private__min = 923; // native
+const uint32_t Math_private__max = 924; // native
+const uint32_t Math_abs = 925; // native
+const uint32_t Math_acos = 926; // native
+const uint32_t Math_asin = 927; // native
+const uint32_t Math_atan = 928; // native
+const uint32_t Math_ceil = 929; // native
+const uint32_t Math_cos = 930; // native
+const uint32_t Math_exp = 931; // native
+const uint32_t Math_floor = 932; // native
+const uint32_t Math_log = 933; // native
+const uint32_t Math_round = 934; // native
+const uint32_t Math_sin = 935; // native
+const uint32_t Math_sqrt = 936; // native
+const uint32_t Math_tan = 937; // native
+const uint32_t Math_atan2 = 938; // native
+const uint32_t Math_pow = 939; // native
+const uint32_t Math_max = 940; // native
+const uint32_t Math_min = 941; // native
+const uint32_t Math_random = 942; // native
+const uint32_t Error_getErrorMessage = 947; // native
+const uint32_t Error_throwError = 949; // abc
+const uint32_t Error_getStackTrace = 951; // native
+const uint32_t Error_errorID_get = 952; // abc
+const uint32_t Date_parse = 1027; // native
+const uint32_t Date_UTC = 1028; // native
+const uint32_t Date_AS3_valueOf = 1029; // native
+const uint32_t Date_private__toString = 1030; // native
+const uint32_t Date_private__setTime = 1031; // native
+const uint32_t Date_private__get = 1032; // native
+const uint32_t Date_AS3_setTime = 1033; // abc
+const uint32_t Date_AS3_toString = 1034; // abc
+const uint32_t Date_AS3_toDateString = 1035; // abc
+const uint32_t Date_AS3_toTimeString = 1036; // abc
+const uint32_t Date_AS3_toLocaleString = 1037; // abc
+const uint32_t Date_AS3_toLocaleDateString = 1038; // abc
+const uint32_t Date_AS3_toLocaleTimeString = 1039; // abc
+const uint32_t Date_AS3_toUTCString = 1040; // abc
+const uint32_t Date_AS3_getUTCFullYear = 1041; // native
+const uint32_t Date_AS3_getUTCMonth = 1042; // native
+const uint32_t Date_AS3_getUTCDate = 1043; // native
+const uint32_t Date_AS3_getUTCDay = 1044; // native
+const uint32_t Date_AS3_getUTCHours = 1045; // native
+const uint32_t Date_AS3_getUTCMinutes = 1046; // native
+const uint32_t Date_AS3_getUTCSeconds = 1047; // native
+const uint32_t Date_AS3_getUTCMilliseconds = 1048; // native
+const uint32_t Date_AS3_getFullYear = 1049; // native
+const uint32_t Date_AS3_getMonth = 1050; // native
+const uint32_t Date_AS3_getDate = 1051; // native
+const uint32_t Date_AS3_getDay = 1052; // native
+const uint32_t Date_AS3_getHours = 1053; // native
+const uint32_t Date_AS3_getMinutes = 1054; // native
+const uint32_t Date_AS3_getSeconds = 1055; // native
+const uint32_t Date_AS3_getMilliseconds = 1056; // native
+const uint32_t Date_AS3_getTimezoneOffset = 1057; // native
+const uint32_t Date_AS3_getTime = 1058; // native
+const uint32_t Date_private__setFullYear = 1059; // native
+const uint32_t Date_private__setMonth = 1060; // native
+const uint32_t Date_private__setDate = 1061; // native
+const uint32_t Date_private__setHours = 1062; // native
+const uint32_t Date_private__setMinutes = 1063; // native
+const uint32_t Date_private__setSeconds = 1064; // native
+const uint32_t Date_private__setMilliseconds = 1065; // native
+const uint32_t Date_private__setUTCFullYear = 1066; // native
+const uint32_t Date_private__setUTCMonth = 1067; // native
+const uint32_t Date_private__setUTCDate = 1068; // native
+const uint32_t Date_private__setUTCHours = 1069; // native
+const uint32_t Date_private__setUTCMinutes = 1070; // native
+const uint32_t Date_private__setUTCSeconds = 1071; // native
+const uint32_t Date_private__setUTCMilliseconds = 1072; // native
+const uint32_t Date_AS3_setFullYear = 1073; // abc
+const uint32_t Date_AS3_setMonth = 1074; // abc
+const uint32_t Date_AS3_setDate = 1075; // abc
+const uint32_t Date_AS3_setHours = 1076; // abc
+const uint32_t Date_AS3_setMinutes = 1077; // abc
+const uint32_t Date_AS3_setSeconds = 1078; // abc
+const uint32_t Date_AS3_setMilliseconds = 1079; // abc
+const uint32_t Date_AS3_setUTCFullYear = 1080; // abc
+const uint32_t Date_AS3_setUTCMonth = 1081; // abc
+const uint32_t Date_AS3_setUTCDate = 1082; // abc
+const uint32_t Date_AS3_setUTCHours = 1083; // abc
+const uint32_t Date_AS3_setUTCMinutes = 1084; // abc
+const uint32_t Date_AS3_setUTCSeconds = 1085; // abc
+const uint32_t Date_AS3_setUTCMilliseconds = 1086; // abc
+const uint32_t Date_fullYear_get = 1087; // abc
+const uint32_t Date_fullYear_set = 1088; // abc
+const uint32_t Date_month_get = 1089; // abc
+const uint32_t Date_month_set = 1090; // abc
+const uint32_t Date_date_get = 1091; // abc
+const uint32_t Date_date_set = 1092; // abc
+const uint32_t Date_hours_get = 1093; // abc
+const uint32_t Date_hours_set = 1094; // abc
+const uint32_t Date_minutes_get = 1095; // abc
+const uint32_t Date_minutes_set = 1096; // abc
+const uint32_t Date_seconds_get = 1097; // abc
+const uint32_t Date_seconds_set = 1098; // abc
+const uint32_t Date_milliseconds_get = 1099; // abc
+const uint32_t Date_milliseconds_set = 1100; // abc
+const uint32_t Date_fullYearUTC_get = 1101; // abc
+const uint32_t Date_fullYearUTC_set = 1102; // abc
+const uint32_t Date_monthUTC_get = 1103; // abc
+const uint32_t Date_monthUTC_set = 1104; // abc
+const uint32_t Date_dateUTC_get = 1105; // abc
+const uint32_t Date_dateUTC_set = 1106; // abc
+const uint32_t Date_hoursUTC_get = 1107; // abc
+const uint32_t Date_hoursUTC_set = 1108; // abc
+const uint32_t Date_minutesUTC_get = 1109; // abc
+const uint32_t Date_minutesUTC_set = 1110; // abc
+const uint32_t Date_secondsUTC_get = 1111; // abc
+const uint32_t Date_secondsUTC_set = 1112; // abc
+const uint32_t Date_millisecondsUTC_get = 1113; // abc
+const uint32_t Date_millisecondsUTC_set = 1114; // abc
+const uint32_t Date_time_get = 1115; // abc
+const uint32_t Date_time_set = 1116; // abc
+const uint32_t Date_timezoneOffset_get = 1117; // abc
+const uint32_t Date_day_get = 1118; // abc
+const uint32_t Date_dayUTC_get = 1119; // abc
+const uint32_t RegExp_source_get = 1126; // native
+const uint32_t RegExp_global_get = 1127; // native
+const uint32_t RegExp_ignoreCase_get = 1128; // native
+const uint32_t RegExp_multiline_get = 1129; // native
+const uint32_t RegExp_lastIndex_get = 1130; // native
+const uint32_t RegExp_lastIndex_set = 1131; // native
+const uint32_t RegExp_dotall_get = 1132; // native
+const uint32_t RegExp_extended_get = 1133; // native
+const uint32_t RegExp_AS3_exec = 1134; // native
+const uint32_t RegExp_AS3_test = 1135; // abc
+const uint32_t JSON_private_parseCore = 1139; // native
+const uint32_t JSON_private_stringifySpecializedToString = 1140; // native
+const uint32_t JSON_parse = 1141; // abc
+const uint32_t JSON_stringify = 1142; // abc
+const uint32_t JSON_private_computePropertyList = 1143; // abc
+const uint32_t Walker_walk = 1147; // abc
+const uint32_t XML_ignoreComments_get = 1192; // native
+const uint32_t XML_ignoreComments_set = 1193; // native
+const uint32_t XML_ignoreProcessingInstructions_get = 1194; // native
+const uint32_t XML_ignoreProcessingInstructions_set = 1195; // native
+const uint32_t XML_ignoreWhitespace_get = 1196; // native
+const uint32_t XML_ignoreWhitespace_set = 1197; // native
+const uint32_t XML_prettyPrinting_get = 1198; // native
+const uint32_t XML_prettyPrinting_set = 1199; // native
+const uint32_t XML_prettyIndent_get = 1200; // native
+const uint32_t XML_prettyIndent_set = 1201; // native
+const uint32_t XML_AS3_settings = 1202; // abc
+const uint32_t XML_AS3_setSettings = 1203; // abc
+const uint32_t XML_AS3_defaultSettings = 1204; // abc
+const uint32_t XML_AS3_toString = 1205; // native
+const uint32_t XML_AS3_hasOwnProperty = 1206; // native
+const uint32_t XML_AS3_propertyIsEnumerable = 1207; // native
+const uint32_t XML_AS3_addNamespace = 1208; // native
+const uint32_t XML_AS3_appendChild = 1209; // native
+const uint32_t XML_AS3_attribute = 1210; // native
+const uint32_t XML_AS3_attributes = 1211; // native
+const uint32_t XML_AS3_child = 1212; // native
+const uint32_t XML_AS3_childIndex = 1213; // native
+const uint32_t XML_AS3_children = 1214; // native
+const uint32_t XML_AS3_comments = 1215; // native
+const uint32_t XML_AS3_contains = 1216; // native
+const uint32_t XML_AS3_copy = 1217; // native
+const uint32_t XML_AS3_descendants = 1218; // native
+const uint32_t XML_AS3_elements = 1219; // native
+const uint32_t XML_AS3_hasComplexContent = 1220; // native
+const uint32_t XML_AS3_hasSimpleContent = 1221; // native
+const uint32_t XML_AS3_inScopeNamespaces = 1222; // native
+const uint32_t XML_AS3_insertChildAfter = 1223; // native
+const uint32_t XML_AS3_insertChildBefore = 1224; // native
+const uint32_t XML_AS3_length = 1225; // abc
+const uint32_t XML_AS3_localName = 1226; // native
+const uint32_t XML_AS3_name = 1227; // native
+const uint32_t XML_private__namespace = 1228; // native
+const uint32_t XML_AS3_namespace = 1229; // abc
+const uint32_t XML_AS3_namespaceDeclarations = 1230; // native
+const uint32_t XML_AS3_nodeKind = 1231; // native
+const uint32_t XML_AS3_normalize = 1232; // native
+const uint32_t XML_AS3_parent = 1233; // native
+const uint32_t XML_AS3_processingInstructions = 1234; // native
+const uint32_t XML_AS3_prependChild = 1235; // native
+const uint32_t XML_AS3_removeNamespace = 1236; // native
+const uint32_t XML_AS3_replace = 1237; // native
+const uint32_t XML_AS3_setChildren = 1238; // native
+const uint32_t XML_AS3_setLocalName = 1239; // native
+const uint32_t XML_AS3_setName = 1240; // native
+const uint32_t XML_AS3_setNamespace = 1241; // native
+const uint32_t XML_AS3_text = 1242; // native
+const uint32_t XML_AS3_toXMLString = 1243; // native
+const uint32_t XML_AS3_notification = 1244; // native
+const uint32_t XML_AS3_setNotification = 1245; // native
+const uint32_t XML_AS3_toJSON = 1246; // abc
+const uint32_t XML_AS3_valueOf = 1248; // abc
+const uint32_t XMLList_AS3_toString = 1289; // native
+const uint32_t XMLList_AS3_valueOf = 1290; // abc
+const uint32_t XMLList_AS3_hasOwnProperty = 1291; // native
+const uint32_t XMLList_AS3_propertyIsEnumerable = 1292; // native
+const uint32_t XMLList_AS3_attribute = 1293; // native
+const uint32_t XMLList_AS3_attributes = 1294; // native
+const uint32_t XMLList_AS3_child = 1295; // native
+const uint32_t XMLList_AS3_children = 1296; // native
+const uint32_t XMLList_AS3_comments = 1297; // native
+const uint32_t XMLList_AS3_contains = 1298; // native
+const uint32_t XMLList_AS3_copy = 1299; // native
+const uint32_t XMLList_AS3_descendants = 1300; // native
+const uint32_t XMLList_AS3_elements = 1301; // native
+const uint32_t XMLList_AS3_hasComplexContent = 1302; // native
+const uint32_t XMLList_AS3_hasSimpleContent = 1303; // native
+const uint32_t XMLList_AS3_length = 1304; // native
+const uint32_t XMLList_AS3_name = 1305; // native
+const uint32_t XMLList_AS3_normalize = 1306; // native
+const uint32_t XMLList_AS3_parent = 1307; // native
+const uint32_t XMLList_AS3_processingInstructions = 1308; // native
+const uint32_t XMLList_AS3_text = 1309; // native
+const uint32_t XMLList_AS3_toXMLString = 1310; // native
+const uint32_t XMLList_AS3_addNamespace = 1311; // native
+const uint32_t XMLList_AS3_appendChild = 1312; // native
+const uint32_t XMLList_AS3_childIndex = 1313; // native
+const uint32_t XMLList_AS3_inScopeNamespaces = 1314; // native
+const uint32_t XMLList_AS3_insertChildAfter = 1315; // native
+const uint32_t XMLList_AS3_insertChildBefore = 1316; // native
+const uint32_t XMLList_AS3_nodeKind = 1317; // native
+const uint32_t XMLList_private__namespace = 1318; // native
+const uint32_t XMLList_AS3_namespace = 1319; // abc
+const uint32_t XMLList_AS3_localName = 1320; // native
+const uint32_t XMLList_AS3_namespaceDeclarations = 1321; // native
+const uint32_t XMLList_AS3_prependChild = 1322; // native
+const uint32_t XMLList_AS3_removeNamespace = 1323; // native
+const uint32_t XMLList_AS3_replace = 1324; // native
+const uint32_t XMLList_AS3_setChildren = 1325; // native
+const uint32_t XMLList_AS3_setLocalName = 1326; // native
+const uint32_t XMLList_AS3_setName = 1327; // native
+const uint32_t XMLList_AS3_setNamespace = 1328; // native
+const uint32_t XMLList_AS3_toJSON = 1329; // abc
+const uint32_t QName_localName_get = 1333; // native
+const uint32_t QName_uri_get = 1334; // native
+const uint32_t QName_AS3_valueOf = 1335; // abc
+const uint32_t QName_AS3_toString = 1336; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readBytes = 1340; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readBoolean = 1341; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readByte = 1342; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readUnsignedByte = 1343; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readShort = 1344; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readUnsignedShort = 1345; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readInt = 1346; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readUnsignedInt = 1347; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readFloat = 1348; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readDouble = 1349; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readMultiByte = 1350; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readUTF = 1351; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readUTFBytes = 1352; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_bytesAvailable_get = 1353; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_readObject = 1354; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_objectEncoding_get = 1355; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_objectEncoding_set = 1356; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_endian_get = 1357; // abc
+const uint32_t flash_utils_IDataInput_flash_utils_IDataInput_endian_set = 1358; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeBytes = 1362; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeBoolean = 1363; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeByte = 1364; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeShort = 1365; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeInt = 1366; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeUnsignedInt = 1367; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeFloat = 1368; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeDouble = 1369; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeMultiByte = 1370; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeUTF = 1371; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeUTFBytes = 1372; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_writeObject = 1373; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_objectEncoding_get = 1374; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_objectEncoding_set = 1375; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_endian_get = 1376; // abc
+const uint32_t flash_utils_IDataOutput_flash_utils_IDataOutput_endian_set = 1377; // abc
+const uint32_t flash_utils_Proxy_flash_proxy_getProperty = 1381; // abc
+const uint32_t flash_utils_Proxy_flash_proxy_setProperty = 1382; // abc
+const uint32_t flash_utils_Proxy_flash_proxy_callProperty = 1383; // abc
+const uint32_t flash_utils_Proxy_flash_proxy_hasProperty = 1384; // abc
+const uint32_t flash_utils_Proxy_flash_proxy_deleteProperty = 1385; // abc
+const uint32_t flash_utils_Proxy_flash_proxy_getDescendants = 1386; // abc
+const uint32_t flash_utils_Proxy_flash_proxy_nextNameIndex = 1387; // abc
+const uint32_t flash_utils_Proxy_flash_proxy_nextName = 1388; // abc
+const uint32_t flash_utils_Proxy_flash_proxy_nextValue = 1389; // abc
+const uint32_t flash_utils_Proxy_flash_proxy_isAttribute = 1390; // native
+const uint32_t flash_utils_Dictionary_private_init = 1395; // native
+const uint32_t flash_net_IDynamicPropertyOutput_flash_net_IDynamicPropertyOutput_writeDynamicProperty = 1399; // abc
+const uint32_t flash_net_IDynamicPropertyWriter_flash_net_IDynamicPropertyWriter_writeDynamicProperties = 1403; // abc
+const uint32_t flash_utils_IExternalizable_flash_utils_IExternalizable_writeExternal = 1407; // abc
+const uint32_t flash_utils_IExternalizable_flash_utils_IExternalizable_readExternal = 1408; // abc
+const uint32_t flash_net_ObjectEncoding_dynamicPropertyWriter_get = 1412; // native
+const uint32_t flash_net_ObjectEncoding_dynamicPropertyWriter_set = 1413; // native
+const uint32_t flash_utils_ObjectInput_readBytes = 1417; // native
+const uint32_t flash_utils_ObjectInput_readBoolean = 1418; // native
+const uint32_t flash_utils_ObjectInput_readByte = 1419; // native
+const uint32_t flash_utils_ObjectInput_readUnsignedByte = 1420; // native
+const uint32_t flash_utils_ObjectInput_readShort = 1421; // native
+const uint32_t flash_utils_ObjectInput_readUnsignedShort = 1422; // native
+const uint32_t flash_utils_ObjectInput_readInt = 1423; // native
+const uint32_t flash_utils_ObjectInput_readUnsignedInt = 1424; // native
+const uint32_t flash_utils_ObjectInput_readFloat = 1425; // native
+const uint32_t flash_utils_ObjectInput_readDouble = 1426; // native
+const uint32_t flash_utils_ObjectInput_readMultiByte = 1427; // native
+const uint32_t flash_utils_ObjectInput_readUTF = 1428; // native
+const uint32_t flash_utils_ObjectInput_readUTFBytes = 1429; // native
+const uint32_t flash_utils_ObjectInput_bytesAvailable_get = 1430; // native
+const uint32_t flash_utils_ObjectInput_readObject = 1431; // native
+const uint32_t flash_utils_ObjectInput_objectEncoding_get = 1432; // native
+const uint32_t flash_utils_ObjectInput_objectEncoding_set = 1433; // native
+const uint32_t flash_utils_ObjectInput_endian_get = 1434; // native
+const uint32_t flash_utils_ObjectInput_endian_set = 1435; // native
+const uint32_t flash_utils_ByteArray_defaultObjectEncoding_get = 1442; // native
+const uint32_t flash_utils_ByteArray_defaultObjectEncoding_set = 1443; // native
+const uint32_t flash_utils_ByteArray_readBytes = 1445; // native
+const uint32_t flash_utils_ByteArray_writeBytes = 1446; // native
+const uint32_t flash_utils_ByteArray_writeBoolean = 1447; // native
+const uint32_t flash_utils_ByteArray_writeByte = 1448; // native
+const uint32_t flash_utils_ByteArray_writeShort = 1449; // native
+const uint32_t flash_utils_ByteArray_writeInt = 1450; // native
+const uint32_t flash_utils_ByteArray_writeUnsignedInt = 1451; // native
+const uint32_t flash_utils_ByteArray_writeFloat = 1452; // native
+const uint32_t flash_utils_ByteArray_writeFloat4 = 1453; // native
+const uint32_t flash_utils_ByteArray_writeDouble = 1454; // native
+const uint32_t flash_utils_ByteArray_writeMultiByte = 1455; // native
+const uint32_t flash_utils_ByteArray_writeUTF = 1456; // native
+const uint32_t flash_utils_ByteArray_writeUTFBytes = 1457; // native
+const uint32_t flash_utils_ByteArray_readBoolean = 1458; // native
+const uint32_t flash_utils_ByteArray_readByte = 1459; // native
+const uint32_t flash_utils_ByteArray_readUnsignedByte = 1460; // native
+const uint32_t flash_utils_ByteArray_readShort = 1461; // native
+const uint32_t flash_utils_ByteArray_readUnsignedShort = 1462; // native
+const uint32_t flash_utils_ByteArray_readInt = 1463; // native
+const uint32_t flash_utils_ByteArray_readUnsignedInt = 1464; // native
+const uint32_t flash_utils_ByteArray_readFloat = 1465; // native
+const uint32_t flash_utils_ByteArray_readFloat4 = 1466; // native
+const uint32_t flash_utils_ByteArray_readDouble = 1467; // native
+const uint32_t flash_utils_ByteArray_readMultiByte = 1468; // native
+const uint32_t flash_utils_ByteArray_readUTF = 1469; // native
+const uint32_t flash_utils_ByteArray_readUTFBytes = 1470; // native
+const uint32_t flash_utils_ByteArray_length_get = 1471; // native
+const uint32_t flash_utils_ByteArray_length_set = 1472; // native
+const uint32_t flash_utils_ByteArray_writeObject = 1473; // native
+const uint32_t flash_utils_ByteArray_readObject = 1474; // native
+const uint32_t flash_utils_ByteArray_deflate = 1475; // abc
+const uint32_t flash_utils_ByteArray_private__compress = 1476; // native
+const uint32_t flash_utils_ByteArray_compress = 1477; // abc
+const uint32_t flash_utils_ByteArray_inflate = 1478; // abc
+const uint32_t flash_utils_ByteArray_private__uncompress = 1479; // native
+const uint32_t flash_utils_ByteArray_uncompress = 1480; // abc
+const uint32_t flash_utils_ByteArray_toString = 1481; // abc
+const uint32_t flash_utils_ByteArray_private__toString = 1482; // native
+const uint32_t flash_utils_ByteArray_bytesAvailable_get = 1483; // native
+const uint32_t flash_utils_ByteArray_position_get = 1484; // native
+const uint32_t flash_utils_ByteArray_position_set = 1485; // native
+const uint32_t flash_utils_ByteArray_objectEncoding_get = 1486; // native
+const uint32_t flash_utils_ByteArray_objectEncoding_set = 1487; // native
+const uint32_t flash_utils_ByteArray_endian_get = 1488; // native
+const uint32_t flash_utils_ByteArray_endian_set = 1489; // native
+const uint32_t flash_utils_ByteArray_clear = 1490; // native
+const uint32_t flash_utils_ObjectOutput_writeBytes = 1493; // native
+const uint32_t flash_utils_ObjectOutput_writeBoolean = 1494; // native
+const uint32_t flash_utils_ObjectOutput_writeByte = 1495; // native
+const uint32_t flash_utils_ObjectOutput_writeShort = 1496; // native
+const uint32_t flash_utils_ObjectOutput_writeInt = 1497; // native
+const uint32_t flash_utils_ObjectOutput_writeUnsignedInt = 1498; // native
+const uint32_t flash_utils_ObjectOutput_writeFloat = 1499; // native
+const uint32_t flash_utils_ObjectOutput_writeDouble = 1500; // native
+const uint32_t flash_utils_ObjectOutput_writeMultiByte = 1501; // native
+const uint32_t flash_utils_ObjectOutput_writeUTF = 1502; // native
+const uint32_t flash_utils_ObjectOutput_writeUTFBytes = 1503; // native
+const uint32_t flash_utils_ObjectOutput_writeObject = 1504; // native
+const uint32_t flash_utils_ObjectOutput_objectEncoding_get = 1505; // native
+const uint32_t flash_utils_ObjectOutput_objectEncoding_set = 1506; // native
+const uint32_t flash_utils_ObjectOutput_endian_get = 1507; // native
+const uint32_t flash_utils_ObjectOutput_endian_set = 1508; // native
+const uint32_t flash_net_DynamicPropertyOutput_writeDynamicProperty = 1512; // native
 
+extern avmplus::Atom native_script_function_flash_net_registerClassAlias_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_net_getClassByAlias_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double Math_private__min_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double Math_private__max_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double Math_abs_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -1369,6 +1440,28 @@ extern avmplus::Atom XMLList_AS3_setNamespace_thunk(MethodEnv* env, uint32_t arg
 extern avmplus::Atom QName_localName_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom QName_uri_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_utils_Proxy_flash_proxy_isAttribute_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_Dictionary_private_init_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_net_ObjectEncoding_dynamicPropertyWriter_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_net_ObjectEncoding_dynamicPropertyWriter_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_readBytes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_readBoolean_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_readByte_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_readUnsignedByte_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_readShort_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_readUnsignedShort_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_readInt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_readUnsignedInt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double flash_utils_ObjectInput_readFloat_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double flash_utils_ObjectInput_readDouble_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_readMultiByte_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_readUTF_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_readUTFBytes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_bytesAvailable_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_readObject_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_objectEncoding_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_objectEncoding_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_endian_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectInput_endian_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_utils_ByteArray_defaultObjectEncoding_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_utils_ByteArray_defaultObjectEncoding_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_utils_ByteArray_readBytes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -1411,6 +1504,23 @@ extern avmplus::Atom flash_utils_ByteArray_objectEncoding_set_thunk(MethodEnv* e
 extern avmplus::Atom flash_utils_ByteArray_endian_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_utils_ByteArray_endian_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_utils_ByteArray_clear_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_writeBytes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_writeBoolean_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_writeByte_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_writeShort_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_writeInt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_writeUnsignedInt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_writeFloat_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_writeDouble_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_writeMultiByte_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_writeUTF_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_writeUTFBytes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_writeObject_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_objectEncoding_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_objectEncoding_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_endian_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_ObjectOutput_endian_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_net_DynamicPropertyOutput_writeDynamicProperty_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom Object_private__hasOwnProperty_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom Object_private__propertyIsEnumerable_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom Object_protected__setPropertyIsEnumerable_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -5302,6 +5412,249 @@ class avmplus_ProxyObjectSlots
 //-----------------------------------------------------------
 
 //-----------------------------------------------------------
+// flash.utils::Dictionary$
+//-----------------------------------------------------------
+class avmplus_DictionaryClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::DictionaryClass;
+#define GC_TRIVIAL_TRACER_DictionaryClass
+};
+#define DECLARE_SLOTS_DictionaryClass \
+    public: \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        inline GCRef<avmplus::DictionaryObject> constructObject(bool arg1) \
+        { \
+            avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), ((arg1) ? trueAtom : falseAtom) }; \
+            avmplus::Atom const result = this->construct(1, args); \
+            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        inline GCRef<avmplus::DictionaryObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+    public: \
+        REALLY_INLINE bool isType(avmplus::Atom value) \
+        { \
+            return isTypeImpl(value); \
+        } \
+        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            return isTypeImpl(value->atom()); \
+        } \
+        REALLY_INLINE GCRef<avmplus::DictionaryObject> asType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value); \
+            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::DictionaryObject> asType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value->atom()); \
+            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::DictionaryObject> coerceToType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value); \
+            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::DictionaryObject> coerceToType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
+            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// flash.utils::Dictionary
+//-----------------------------------------------------------
+class avmplus_DictionaryObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::DictionaryObject;
+#define GC_TRIVIAL_TRACER_DictionaryObject
+};
+#define DECLARE_SLOTS_DictionaryObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// flash.net::ObjectEncoding$
+//-----------------------------------------------------------
+class avmplus_ObjectEncodingClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::ObjectEncodingClass;
+private:
+    uint32_t m_AMF0;
+    uint32_t m_AMF3;
+    uint32_t m_DEFAULT;
+#define GC_TRIVIAL_TRACER_ObjectEncodingClass
+};
+#define DECLARE_SLOTS_ObjectEncodingClass \
+    public: \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE bool isType(avmplus::Atom value) \
+        { \
+            return isTypeImpl(value); \
+        } \
+        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            return isTypeImpl(value->atom()); \
+        } \
+        REALLY_INLINE GCRef<avmplus::ObjectEncodingObject> asType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value); \
+            return GCRef<avmplus::ObjectEncodingObject>((avmplus::ObjectEncodingObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::ObjectEncodingObject> asType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value->atom()); \
+            return GCRef<avmplus::ObjectEncodingObject>((avmplus::ObjectEncodingObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::ObjectEncodingObject> coerceToType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value); \
+            return GCRef<avmplus::ObjectEncodingObject>((avmplus::ObjectEncodingObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::ObjectEncodingObject> coerceToType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
+            return GCRef<avmplus::ObjectEncodingObject>((avmplus::ObjectEncodingObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    public: \
+        REALLY_INLINE uint32_t get_AMF0() const { return m_slots_ObjectEncodingClass.m_AMF0; } \
+        REALLY_INLINE void setconst_AMF0(uint32_t newVal) { m_slots_ObjectEncodingClass.m_AMF0 = newVal; } \
+    public: \
+        REALLY_INLINE uint32_t get_AMF3() const { return m_slots_ObjectEncodingClass.m_AMF3; } \
+        REALLY_INLINE void setconst_AMF3(uint32_t newVal) { m_slots_ObjectEncodingClass.m_AMF3 = newVal; } \
+    public: \
+        REALLY_INLINE uint32_t get_DEFAULT() const { return m_slots_ObjectEncodingClass.m_DEFAULT; } \
+        REALLY_INLINE void setconst_DEFAULT(uint32_t newVal) { m_slots_ObjectEncodingClass.m_DEFAULT = newVal; } \
+    private: \
+        avmplus::NativeID::avmplus_ObjectEncodingClassSlots m_slots_ObjectEncodingClass \
+
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// flash.net::ObjectEncoding
+//-----------------------------------------------------------
+class avmplus_ObjectEncodingObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::ObjectEncodingObject;
+#define GC_TRIVIAL_TRACER_ObjectEncodingObject
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// flash.utils::ObjectInput$
+//-----------------------------------------------------------
+class avmplus_ObjectInputClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::ObjectInputClass;
+#define GC_TRIVIAL_TRACER_ObjectInputClass
+};
+#define DECLARE_SLOTS_ObjectInputClass \
+    public: \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        inline GCRef<avmplus::ObjectInputObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmplus::ObjectInputObject>((avmplus::ObjectInputObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+    public: \
+        REALLY_INLINE bool isType(avmplus::Atom value) \
+        { \
+            return isTypeImpl(value); \
+        } \
+        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            return isTypeImpl(value->atom()); \
+        } \
+        REALLY_INLINE GCRef<avmplus::ObjectInputObject> asType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value); \
+            return GCRef<avmplus::ObjectInputObject>((avmplus::ObjectInputObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::ObjectInputObject> asType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value->atom()); \
+            return GCRef<avmplus::ObjectInputObject>((avmplus::ObjectInputObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::ObjectInputObject> coerceToType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value); \
+            return GCRef<avmplus::ObjectInputObject>((avmplus::ObjectInputObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::ObjectInputObject> coerceToType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
+            return GCRef<avmplus::ObjectInputObject>((avmplus::ObjectInputObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// flash.utils::ObjectInput
+//-----------------------------------------------------------
+class avmplus_ObjectInputObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::ObjectInputObject;
+#define GC_TRIVIAL_TRACER_ObjectInputObject
+};
+#define DECLARE_SLOTS_ObjectInputObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::IDataInputInterface> as_IDataInputInterface() \
+        { \
+            return GCRef<avmplus::IDataInputInterface>((avmplus::IDataInputInterface*)this); \
+        } \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
 // flash.utils::CompressionAlgorithm$
 //-----------------------------------------------------------
 class avmplus_CompressionAlgorithmClassSlots
@@ -5425,6 +5778,172 @@ class avmplus_ByteArrayObjectSlots
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
+// flash.utils::ObjectOutput$
+//-----------------------------------------------------------
+class avmplus_ObjectOutputClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::ObjectOutputClass;
+#define GC_TRIVIAL_TRACER_ObjectOutputClass
+};
+#define DECLARE_SLOTS_ObjectOutputClass \
+    public: \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        inline GCRef<avmplus::ObjectOutputObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmplus::ObjectOutputObject>((avmplus::ObjectOutputObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+    public: \
+        REALLY_INLINE bool isType(avmplus::Atom value) \
+        { \
+            return isTypeImpl(value); \
+        } \
+        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            return isTypeImpl(value->atom()); \
+        } \
+        REALLY_INLINE GCRef<avmplus::ObjectOutputObject> asType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value); \
+            return GCRef<avmplus::ObjectOutputObject>((avmplus::ObjectOutputObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::ObjectOutputObject> asType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value->atom()); \
+            return GCRef<avmplus::ObjectOutputObject>((avmplus::ObjectOutputObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::ObjectOutputObject> coerceToType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value); \
+            return GCRef<avmplus::ObjectOutputObject>((avmplus::ObjectOutputObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::ObjectOutputObject> coerceToType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
+            return GCRef<avmplus::ObjectOutputObject>((avmplus::ObjectOutputObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// flash.utils::ObjectOutput
+//-----------------------------------------------------------
+class avmplus_ObjectOutputObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::ObjectOutputObject;
+#define GC_TRIVIAL_TRACER_ObjectOutputObject
+};
+#define DECLARE_SLOTS_ObjectOutputObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::IDataOutputInterface> as_IDataOutputInterface() \
+        { \
+            return GCRef<avmplus::IDataOutputInterface>((avmplus::IDataOutputInterface*)this); \
+        } \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// flash.net::DynamicPropertyOutput$
+//-----------------------------------------------------------
+class avmplus_DynamicPropertyOutputClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::DynamicPropertyOutputClass;
+#define GC_TRIVIAL_TRACER_DynamicPropertyOutputClass
+};
+#define DECLARE_SLOTS_DynamicPropertyOutputClass \
+    public: \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        inline GCRef<avmplus::DynamicPropertyOutputObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct_native(avmplus::DynamicPropertyOutputClass::createInstanceProc, 0, args); \
+            return GCRef<avmplus::DynamicPropertyOutputObject>((avmplus::DynamicPropertyOutputObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+    public: \
+        REALLY_INLINE bool isType(avmplus::Atom value) \
+        { \
+            return isTypeImpl(value); \
+        } \
+        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            return isTypeImpl(value->atom()); \
+        } \
+        REALLY_INLINE GCRef<avmplus::DynamicPropertyOutputObject> asType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value); \
+            return GCRef<avmplus::DynamicPropertyOutputObject>((avmplus::DynamicPropertyOutputObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::DynamicPropertyOutputObject> asType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = asTypeImpl(value->atom()); \
+            return GCRef<avmplus::DynamicPropertyOutputObject>((avmplus::DynamicPropertyOutputObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::DynamicPropertyOutputObject> coerceToType(avmplus::Atom value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value); \
+            return GCRef<avmplus::DynamicPropertyOutputObject>((avmplus::DynamicPropertyOutputObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+        REALLY_INLINE GCRef<avmplus::DynamicPropertyOutputObject> coerceToType(GCRef<avmplus::ScriptObject> value) \
+        { \
+            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
+            return GCRef<avmplus::DynamicPropertyOutputObject>((avmplus::DynamicPropertyOutputObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
+        } \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// flash.net::DynamicPropertyOutput
+//-----------------------------------------------------------
+class avmplus_DynamicPropertyOutputObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::DynamicPropertyOutputObject;
+#define GC_TRIVIAL_TRACER_DynamicPropertyOutputObject
+};
+#define DECLARE_SLOTS_DynamicPropertyOutputObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::IDynamicPropertyOutputInterface> as_IDynamicPropertyOutputInterface() \
+        { \
+            return GCRef<avmplus::IDynamicPropertyOutputInterface>((avmplus::IDynamicPropertyOutputInterface*)this); \
+        } \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+
+//-----------------------------------------------------------
+
 } }
 namespace avmplus {
 
@@ -5438,8 +5957,8 @@ class builtinClassManifest : public avmplus::ClassManifestBase
     friend class avmplus::DoubleVectorClass;
     friend class avmplus::ObjectVectorClass;
 private:
-    REALLY_INLINE builtinClassManifest(avmplus::ScriptEnv* e) : ClassManifestBase(49, e) { }
-    REALLY_INLINE static builtinClassManifest* create(avmplus::ScriptEnv* e) { return new (MMgc::GC::GetGC(e), MMgc::kExact, sizeof(ClassClosure*)*48) builtinClassManifest(e); }
+    REALLY_INLINE builtinClassManifest(avmplus::ScriptEnv* e) : ClassManifestBase(57, e) { }
+    REALLY_INLINE static builtinClassManifest* create(avmplus::ScriptEnv* e) { return new (MMgc::GC::GetGC(e), MMgc::kExact, sizeof(ClassClosure*)*56) builtinClassManifest(e); }
 public:
     REALLY_INLINE GCRef<avmplus::ArgumentErrorClass> get_ArgumentErrorClass() { return (avmplus::ArgumentErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_ArgumentError)); }
     REALLY_INLINE GCRef<avmplus::ArrayClass> get_ArrayClass() { return (avmplus::ArrayClass*)(lazyInitClass(avmplus::NativeID::abcclass_Array)); }
@@ -5449,12 +5968,17 @@ public:
     REALLY_INLINE GCRef<avmplus::CompressionAlgorithmClass> get_CompressionAlgorithmClass() { return (avmplus::CompressionAlgorithmClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_CompressionAlgorithm)); }
     REALLY_INLINE GCRef<avmplus::DateClass> get_DateClass() { return (avmplus::DateClass*)(lazyInitClass(avmplus::NativeID::abcclass_Date)); }
     REALLY_INLINE GCRef<avmplus::DefinitionErrorClass> get_DefinitionErrorClass() { return (avmplus::DefinitionErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_DefinitionError)); }
+    REALLY_INLINE GCRef<avmplus::DictionaryClass> get_DictionaryClass() { return (avmplus::DictionaryClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_Dictionary)); }
+    REALLY_INLINE GCRef<avmplus::DynamicPropertyOutputClass> get_DynamicPropertyOutputClass() { return (avmplus::DynamicPropertyOutputClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_net_DynamicPropertyOutput)); }
     REALLY_INLINE GCRef<avmplus::EOFErrorClass> get_EOFErrorClass() { return (avmplus::EOFErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_errors_EOFError)); }
     REALLY_INLINE GCRef<avmplus::ErrorClass> get_ErrorClass() { return (avmplus::ErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_Error)); }
     REALLY_INLINE GCRef<avmplus::EvalErrorClass> get_EvalErrorClass() { return (avmplus::EvalErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_EvalError)); }
     REALLY_INLINE GCRef<avmplus::FunctionClass> get_FunctionClass() { return (avmplus::FunctionClass*)(lazyInitClass(avmplus::NativeID::abcclass_Function)); }
     REALLY_INLINE GCRef<avmplus::IDataInputClass> get_IDataInputClass() { return (avmplus::IDataInputClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_IDataInput)); }
     REALLY_INLINE GCRef<avmplus::IDataOutputClass> get_IDataOutputClass() { return (avmplus::IDataOutputClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_IDataOutput)); }
+    REALLY_INLINE GCRef<avmplus::IDynamicPropertyOutputClass> get_IDynamicPropertyOutputClass() { return (avmplus::IDynamicPropertyOutputClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_net_IDynamicPropertyOutput)); }
+    REALLY_INLINE GCRef<avmplus::IDynamicPropertyWriterClass> get_IDynamicPropertyWriterClass() { return (avmplus::IDynamicPropertyWriterClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_net_IDynamicPropertyWriter)); }
+    REALLY_INLINE GCRef<avmplus::IExternalizableClass> get_IExternalizableClass() { return (avmplus::IExternalizableClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_IExternalizable)); }
     REALLY_INLINE GCRef<avmplus::IOErrorClass> get_IOErrorClass() { return (avmplus::IOErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_errors_IOError)); }
     REALLY_INLINE GCRef<avmplus::IllegalOperationErrorClass> get_IllegalOperationErrorClass() { return (avmplus::IllegalOperationErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_errors_IllegalOperationError)); }
     REALLY_INLINE GCRef<avmplus::JSONClass> get_JSONClass() { return (avmplus::JSONClass*)(lazyInitClass(avmplus::NativeID::abcclass_JSON)); }
@@ -5464,6 +5988,9 @@ public:
     REALLY_INLINE GCRef<avmplus::NamespaceClass> get_NamespaceClass() { return (avmplus::NamespaceClass*)(lazyInitClass(avmplus::NativeID::abcclass_Namespace)); }
     REALLY_INLINE GCRef<avmplus::NumberClass> get_NumberClass() { return (avmplus::NumberClass*)(lazyInitClass(avmplus::NativeID::abcclass_Number)); }
     REALLY_INLINE GCRef<avmplus::ObjectClass> get_ObjectClass() { return (avmplus::ObjectClass*)(lazyInitClass(avmplus::NativeID::abcclass_Object)); }
+    REALLY_INLINE GCRef<avmplus::ObjectEncodingClass> get_ObjectEncodingClass() { return (avmplus::ObjectEncodingClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_net_ObjectEncoding)); }
+    REALLY_INLINE GCRef<avmplus::ObjectInputClass> get_ObjectInputClass() { return (avmplus::ObjectInputClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_ObjectInput)); }
+    REALLY_INLINE GCRef<avmplus::ObjectOutputClass> get_ObjectOutputClass() { return (avmplus::ObjectOutputClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_ObjectOutput)); }
     REALLY_INLINE GCRef<avmplus::ProxyClass> get_ProxyClass() { return (avmplus::ProxyClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_Proxy)); }
     REALLY_INLINE GCRef<avmplus::QNameClass> get_QNameClass() { return (avmplus::QNameClass*)(lazyInitClass(avmplus::NativeID::abcclass_QName)); }
     REALLY_INLINE GCRef<avmplus::RangeErrorClass> get_RangeErrorClass() { return (avmplus::RangeErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_RangeError)); }
