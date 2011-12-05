@@ -80,8 +80,6 @@ for (i = 1; i<5; i++)
     AddTestCase("flt4 -= "+i, float4(tracker), flt4);
 }
 
-flt4 = new float4(1f);
-print(flt4 += float4(2f));
 
 /*
 AddTestCase("float4(1f) & float4(1f)", 0, float4(1f) & float4(1f));
