@@ -2038,9 +2038,9 @@ return the result of the comparison ToPrimitive(x) == y.
                 return atomToString(atom)->toNumber();
             case kSpecialBibopType:
 #ifdef VMCFG_FLOAT
-                if(atom==undefinedAtom)
+                if (atom == undefinedAtom)
                     return MathUtils::kNaN;
-                 if( bibopKind(atom) == kBibopFloatType )
+                if (bibopKind(atom) == kBibopFloatType)
                     return atomToFloat(atom);
                 AvmAssert(isFloat4(atom));
 #endif
@@ -2051,7 +2051,7 @@ return the result of the comparison ToPrimitive(x) == y.
                 atom = atomToNamespace(atom)->getURI()->atom();
                 break;  // continue loop, effectively a tailcall
             case kObjectType:
-                atom  = AvmCore::atomToScriptObject(atom)->defaultValue();
+                atom = AvmCore::atomToScriptObject(atom)->defaultValue();
                 break;  // continue loop, effectively a tailcall
             }
         }
