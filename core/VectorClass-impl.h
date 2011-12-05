@@ -473,6 +473,7 @@ namespace avmplus
     template<class TLIST>
     typename TLIST::TYPE TypedVectorObject<TLIST>::_getNativeIntProperty(int32_t index_i) const
     {
+        AvmAssertMsg(!IS_FLOAT4_TYPE(TLIST::TYPE), "wrong _getNativeIntProperty helper used for Vector.<float4>");
         uint32_t const index = checkReadIndex_i(index_i);
         return m_list.get(index);
     }
@@ -480,6 +481,7 @@ namespace avmplus
     template<class TLIST>
     void TypedVectorObject<TLIST>::_setNativeIntProperty(int32_t index_i, typename TLIST::TYPE value)
     {
+        AvmAssertMsg(!IS_FLOAT4_TYPE(TLIST::TYPE), "wrong _setNativeIntProperty helper used for Vector.<float4>");
         uint32_t const index = checkWriteIndex_i(index_i);
         m_list.set(index, value);
     }
@@ -487,6 +489,7 @@ namespace avmplus
     template<class TLIST>
     typename TLIST::TYPE TypedVectorObject<TLIST>::_getNativeUintProperty(uint32_t index) const
     {
+        AvmAssertMsg(!IS_FLOAT4_TYPE(TLIST::TYPE), "wrong _getNativeUIntProperty helper used for Vector.<float4>");
         checkReadIndex_u(index);
         return m_list.get(index);
     }
@@ -494,6 +497,7 @@ namespace avmplus
     template<class TLIST>
     void TypedVectorObject<TLIST>::_setNativeUintProperty(uint32_t index, typename TLIST::TYPE value)
     {
+        AvmAssertMsg(!IS_FLOAT4_TYPE(TLIST::TYPE), "wrong _setNativeUIntProperty helper used for Vector.<float4>");
         checkWriteIndex_u(index);
         m_list.set(index, value);
     }
@@ -501,6 +505,7 @@ namespace avmplus
     template<class TLIST>
     typename TLIST::TYPE TypedVectorObject<TLIST>::_getNativeDoubleProperty(double index_d) const
     {
+        AvmAssertMsg(!IS_FLOAT4_TYPE(TLIST::TYPE), "wrong _getNativeDoubleProperty helper used for Vector.<float4>");
         uint32_t const index = checkReadIndex_d(index_d);
         return m_list.get(index);
     }
@@ -508,9 +513,66 @@ namespace avmplus
     template<class TLIST>
     void TypedVectorObject<TLIST>::_setNativeDoubleProperty(double index_d, typename TLIST::TYPE value)
     {
+        AvmAssertMsg(!IS_FLOAT4_TYPE(TLIST::TYPE), "wrong _setNativeDoubleProperty helper used for Vector.<float4>");
         uint32_t const index = checkWriteIndex_d(index_d);
         m_list.set(index, value);
     }
+
+#ifdef VMCFG_FLOAT
+    template<class TLIST>
+    void TypedVectorObject<TLIST>::_getFloat4IntProperty(typename TLIST::TYPE* result, int32_t index_i) const
+    {
+        AvmAssertMsg(IS_FLOAT4_TYPE(TLIST::TYPE), "wrong _getNativeIntProperty helper used for Vector.<*>");
+        uint32_t const index = checkReadIndex_i(index_i);
+        if(result) 
+            *result = m_list.get(index);
+        return;
+    }
+    
+    template<class TLIST>
+    void TypedVectorObject<TLIST>::_setFloat4IntProperty(int32_t index_i, const typename TLIST::TYPE& value)
+    {
+        AvmAssertMsg(IS_FLOAT4_TYPE(TLIST::TYPE), "wrong _setNativeIntProperty helper used for Vector.<*>");
+        uint32_t const index = checkWriteIndex_i(index_i);
+        m_list.set(index, value);
+    }
+
+    template<class TLIST>
+    void TypedVectorObject<TLIST>::_getFloat4UintProperty(typename TLIST::TYPE* result, uint32_t index) const
+    {
+        AvmAssertMsg(IS_FLOAT4_TYPE(TLIST::TYPE), "wrong _getNativeUIntProperty helper used for Vector.<*>");
+        checkReadIndex_u(index);
+        if(result) 
+            *result = m_list.get(index);
+        return;
+    }
+
+    template<class TLIST>
+    void TypedVectorObject<TLIST>::_setFloat4UintProperty(uint32_t index, const typename TLIST::TYPE& value)
+    {
+        AvmAssertMsg(IS_FLOAT4_TYPE(TLIST::TYPE), "wrong _setNativeUIntProperty helper used for Vector.<*>");
+        checkWriteIndex_u(index);
+        m_list.set(index, value);
+    }
+
+    template<class TLIST>
+    void TypedVectorObject<TLIST>::_getFloat4DoubleProperty(typename TLIST::TYPE* result, double index_d) const
+    {
+        AvmAssertMsg(IS_FLOAT4_TYPE(TLIST::TYPE), "wrong _getNativeDoubleProperty helper used for Vector.<*>");
+        uint32_t const index = checkReadIndex_d(index_d);
+        if(result) 
+            *result = m_list.get(index);
+        return;
+    }
+
+    template<class TLIST>
+    void TypedVectorObject<TLIST>::_setFloat4DoubleProperty(double index_d, const typename TLIST::TYPE& value)
+    {
+        AvmAssertMsg(IS_FLOAT4_TYPE(TLIST::TYPE), "wrong _setNativeDoubleProperty helper used for Vector.<*>");
+        uint32_t const index = checkWriteIndex_d(index_d);
+        m_list.set(index, value); // needed to compile for most types; hopefully the useless call will be optimized-away.
+    }
+#endif
 
     template<class TLIST>
     bool TypedVectorObject<TLIST>::_hasUintProperty(uint32_t index) const

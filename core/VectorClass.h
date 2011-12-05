@@ -452,6 +452,25 @@ namespace avmplus
 
     // ----------------------------
 
+#ifdef VMCFG_FLOAT
+    template<typename T>
+    struct typeIsFloat4
+    {
+        const static bool value = false;
+    };
+
+    template<>
+    struct typeIsFloat4<float4_t>
+    {
+        const static bool value = true;
+    };
+#define IS_FLOAT4_TYPE(T) typeIsFloat4<T>::value
+#else
+#define IS_FLOAT4_TYPE(T) false
+#endif 
+
+    // ----------------------------
+
     class GC_CPP_EXACT(VectorBaseObject, ScriptObject)
     {
     protected:
@@ -595,6 +614,18 @@ namespace avmplus
         void _setIntProperty(int32_t index, Atom value);
         Atom _getDoubleProperty(double index) const;
         void _setDoubleProperty(double index, Atom value);
+
+#ifdef VMCFG_FLOAT
+        /* Float4 helpers; these  helpers are only used for float4 values (i.e. when TLIST::TYPE is float4_t). 
+           This is asserted in the implementations. */
+        void _getFloat4IntProperty(typename TLIST::TYPE* retval, int32_t index) const;
+        void _setFloat4IntProperty(int32_t index, const typename TLIST::TYPE& value);
+        void _getFloat4UintProperty(typename TLIST::TYPE* retval, uint32_t index) const;
+        void _setFloat4UintProperty(uint32_t index, const typename TLIST::TYPE& value);
+        void _getFloat4DoubleProperty(typename TLIST::TYPE* retval, double index) const;
+        void _setFloat4DoubleProperty(double index, const typename TLIST::TYPE& value);
+        /* asserts used in the implementation, to verify that these helpers are used properly */
+#endif
         
         // Optimized setters used by various JIT optimizations.  It is possible that
         // these ought to be moved into ObjectVectorObject in the manner of

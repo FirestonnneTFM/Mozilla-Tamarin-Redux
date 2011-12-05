@@ -327,9 +327,6 @@
     <ClCompile Include="..\..\eval\eval-util.cpp">
       <Filter>eval</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\extensions\DictionaryGlue.cpp">
-      <Filter>extensions</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\extensions\SamplerScript.cpp">
       <Filter>extensions</Filter>
     </ClCompile>
@@ -662,6 +659,16 @@
       <Filter>VMPI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\core\Float4Class.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AVMPI\float4Support.cpp" />
+    <ClCompile Include="..\..\core\DictionaryGlue.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\AvmSerializer.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\ObjectIO.cpp">
       <Filter>core</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1062,9 +1069,6 @@
     <ClInclude Include="..\..\eval\eval-util-inlines.h">
       <Filter>eval</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\extensions\DictionaryGlue.h">
-      <Filter>extensions</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\extensions\SamplerScript.h">
       <Filter>extensions</Filter>
     </ClInclude>
@@ -1394,6 +1398,16 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\core\atom-inlines.h" />
+    <ClInclude Include="..\..\AVMPI\float4Support.h" />
+    <ClInclude Include="..\..\core\DictionaryGlue.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\AvmSerializer.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\ObjectIO.h">
+      <Filter>core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="win64setjmp.asm">
