@@ -159,6 +159,11 @@ as3/sampling/ProcessSampling ,  .* ,,  skip , https://bugzilla.mozilla.org/show_
 as3/sampling/Callback:Callback: callback called.*, .*, -ES, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=603814
 
 ####################
+#  --verify skips
+####################
+ecma3/JSON/e15_12_1, .*,, verify_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=707700
+
+####################
 #  --verifyonly
 ####################
 regress/bug_498979, -Dverifyonly,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=585128
