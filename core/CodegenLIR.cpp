@@ -5591,7 +5591,16 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 LIns* baseRounded = binaryIns(LIR_andp, base, InsConstPtr((const void*)~uintptr_t(15)));                // & ~15
                 LIns* element = ui2p(binaryIns(LIR_lshi, index, InsConst(scale)));
                 LIns* effectiveAddress = binaryIns(LIR_addp, baseRounded, element);
-                storeIns(store_item, ldf4(value, 0 , ACCSET_OTHER) , 0, effectiveAddress, ACCSET_OTHER); // FIXME: suboptimal! we should load the float4 directly.
+                
+                if( (value->opcode() == LIR_addp) && (value->oprnd1() == vars) ){
+                    AvmAssert(value->oprnd2()->isImmP());
+                    int32_t v_offset = (int32_t) value->oprnd2()->immP();
+                    value = ldf4(vars, v_offset, ACCSET_VARS);
+                } else {
+                    value = ldf4(value, 0 , ACCSET_OTHER);
+                }
+
+                storeIns(store_item, value, 0, effectiveAddress, ACCSET_OTHER);
                 break;
             }
 #ifdef VMCFG_64BIT
