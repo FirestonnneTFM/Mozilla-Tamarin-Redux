@@ -5594,7 +5594,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 
                 if( (value->opcode() == LIR_addp) && (value->oprnd1() == vars) ){
                     AvmAssert(value->oprnd2()->isImmP());
-                    int32_t v_offset = (int32_t) value->oprnd2()->immP();
+                    int32_t v_offset = (int32_t) (intptr_t) value->oprnd2()->immP();
                     value = ldf4(vars, v_offset, ACCSET_VARS);
                 } else {
                     value = ldf4(value, 0 , ACCSET_OTHER);
