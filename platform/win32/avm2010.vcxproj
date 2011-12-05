@@ -46,11 +46,14 @@
     <ClCompile Include="..\..\core\ArrayClass.cpp" />
     <ClCompile Include="..\..\core\ArrayObject.cpp" />
     <ClCompile Include="..\..\core\atom.cpp" />
+    <ClCompile Include="..\..\core\AvmSerializer.cpp" />
     <ClCompile Include="..\..\core\d2a.cpp" />
+    <ClCompile Include="..\..\core\DictionaryGlue.cpp" />
     <ClCompile Include="..\..\core\Float4Class.cpp" />
     <ClCompile Include="..\..\core\FloatClass.cpp" />
     <ClCompile Include="..\..\core\InvokerCompiler.cpp" />
     <ClCompile Include="..\..\core\JSONClass.cpp" />
+    <ClCompile Include="..\..\core\ObjectIO.cpp" />
     <ClCompile Include="..\..\core\ProxyGlue.cpp" />
     <ClCompile Include="..\..\eval\eval-parse-config.cpp" />
     <ClCompile Include="..\..\extensions\SelftestExec.cpp" />
@@ -169,7 +172,6 @@
     <ClCompile Include="..\..\eval\eval-parse.cpp" />
     <ClCompile Include="..\..\eval\eval-unicode.cpp" />
     <ClCompile Include="..\..\eval\eval-util.cpp" />
-    <ClCompile Include="..\..\extensions\DictionaryGlue.cpp" />
     <ClCompile Include="..\..\extensions\SamplerScript.cpp" />
     <ClCompile Include="..\..\extensions\Selftest.cpp" />
     <ClCompile Include="..\..\extensions\SelftestInit.cpp" />
@@ -364,11 +366,14 @@
     <ClInclude Include="..\..\core\ArrayObject.h" />
     <ClInclude Include="..\..\core\atom-inlines.h" />
     <ClInclude Include="..\..\core\atom.h" />
+    <ClInclude Include="..\..\core\AvmSerializer.h" />
     <ClInclude Include="..\..\core\d2a.h" />
+    <ClInclude Include="..\..\core\DictionaryGlue.h" />
     <ClInclude Include="..\..\core\Float4Class.h" />
     <ClInclude Include="..\..\core\FloatClass.h" />
     <ClInclude Include="..\..\core\InvokerCompiler.h" />
     <ClInclude Include="..\..\core\JSONClass.h" />
+    <ClInclude Include="..\..\core\ObjectIO.h" />
     <ClInclude Include="..\..\core\ProxyGlue.h" />
     <ClInclude Include="..\..\MMgc\GCPolicyManager.h" />
     <ClInclude Include="..\..\MMgc\PageMap.h" />
@@ -507,7 +512,6 @@
     <ClInclude Include="..\..\eval\eval-util-inlines.h" />
     <ClInclude Include="..\..\eval\eval-util.h" />
     <ClInclude Include="..\..\eval\eval.h" />
-    <ClInclude Include="..\..\extensions\DictionaryGlue.h" />
     <ClInclude Include="..\..\extensions\SamplerScript.h" />
     <ClInclude Include="..\..\extensions\Selftest.h" />
     <ClInclude Include="..\..\extensions\SelftestClasses.h" />

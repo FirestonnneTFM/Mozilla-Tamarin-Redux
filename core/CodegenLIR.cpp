@@ -108,47 +108,6 @@ return foo;
 return *((intptr_t*)&_method);
 #endif
 
-#ifdef AVMPLUS_ARM
-    #ifdef _MSC_VER
-        #define RETURN_METHOD_PTR_D(_class, _method) \
-            return *((int*)&_method);
-    #else
-        #define RETURN_METHOD_PTR_DF_HELPER(_class, _method, _type) \
-            union { \
-                _type (_class::*bar)(); \
-                int foo[2]; \
-            }; \
-            bar = _method; \
-            return foo[0];
-        #define RETURN_METHOD_PTR_D(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,double)
-        #define RETURN_METHOD_PTR_F(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,float)
-        #define RETURN_METHOD_PTR_F4(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,float4_t)
-    #endif
-#elif defined __GNUC__
-    #define RETURN_METHOD_PTR_DF_HELPER(_class, _method, _type) \
-        union { \
-            _type (_class::*bar)(); \
-            intptr_t foo; \
-        }; \
-        bar = _method; \
-        return foo;
-
-    #define RETURN_METHOD_PTR_D(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,double)
-    #define RETURN_METHOD_PTR_F(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,float)
-    #define RETURN_METHOD_PTR_F4(a,b) RETURN_METHOD_PTR_DF_HELPER(a,b,float4_t)
-#else
-    #define RETURN_METHOD_PTR_D(_class, _method) \
-        return *((intptr_t*)&_method);
-#endif
-
-#ifndef RETURN_METHOD_PTR_F
-    #define RETURN_METHOD_PTR_F RETURN_METHOD_PTR_D
-#endif
-
-#ifndef RETURN_METHOD_PTR_F4
-    #define RETURN_METHOD_PTR_F4 RETURN_METHOD_PTR_D
-#endif
-
 #ifdef PERFM
 #define DOPROF
 #endif /* PERFM */
@@ -202,11 +161,8 @@ namespace avmplus
         #define VECTORINTADDR(f) vectorIntAddr((int (IntVectorObject::*)())(&f))
         #define VECTORUINTADDR(f) vectorUIntAddr((int (UIntVectorObject::*)())(&f))
         #define VECTORDOUBLEADDR(f) vectorDoubleAddr((int (DoubleVectorObject::*)())(&f))
-        #define VECTORDOUBLEADDRD(f) vectorDoubleAddrD((double (DoubleVectorObject::*)())(&f))
         #define VECTORFLOATADDR(f) vectorFloatAddr((int (FloatVectorObject::*)())(&f))
-        #define VECTORFLOATADDRF(f) vectorFloatAddrF((float (FloatVectorObject::*)())(&f))
         #define VECTORFLOAT4ADDR(f) vectorFloat4Addr((int (Float4VectorObject::*)())(&f))
-        #define VECTORFLOAT4ADDRF4(f) vectorFloat4AddrF4((float4_t (Float4VectorObject::*)())(&f))
         #define VECTOROBJADDR(f) vectorObjAddr((int (ObjectVectorObject::*)())(&f))
         #define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
         #define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
@@ -259,31 +215,17 @@ namespace avmplus
             RETURN_METHOD_PTR(DoubleVectorObject, f);
         }
 
-        intptr_t vectorDoubleAddrD(double (DoubleVectorObject::*f)())
-        {
-            RETURN_METHOD_PTR_D(DoubleVectorObject, f);
-        }
 #ifdef VMCFG_FLOAT
         intptr_t vectorFloatAddr(int (FloatVectorObject::*f)())
         {
             RETURN_METHOD_PTR(FloatVectorObject, f);
         }
 
-        intptr_t vectorFloatAddrF(float (FloatVectorObject::*f)())
-        {
-            RETURN_METHOD_PTR_F(FloatVectorObject, f);
-        }
-
         intptr_t vectorFloat4Addr(int (Float4VectorObject::*f)())
         {
             RETURN_METHOD_PTR(Float4VectorObject, f);
         }
-    
-        intptr_t vectorFloat4AddrF4(float4_t (Float4VectorObject::*f)())
-        {
-            RETURN_METHOD_PTR_F4(Float4VectorObject, f);
-        }
-#endif // VMCFG_FLOAT
+    #endif // VMCFG_FLOAT
         intptr_t vectorObjAddr(int (ObjectVectorObject::*f)())
         {
             RETURN_METHOD_PTR(ObjectVectorObject, f);
@@ -5326,7 +5268,10 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         LIns* cmp = binaryIns(LIR_geui, index, arrayLen);
         suspendCSE();
         branchToLabel(LIR_jf, cmp, begin_label);
-        callIns(helper, 2, localGetp(objIndexOnStack), index);
+        if(load_item == LIR_ldf4)
+            callIns(helper, 3, InsConstPtr(NULL), localGetp(objIndexOnStack), index);  // we don't really need the returned arg, hence we pass null.
+        else
+            callIns(helper, 2, localGetp(objIndexOnStack), index);
         emitLabel(begin_label);
         resumeCSE();
         switch (load_item)
@@ -5514,8 +5459,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 getter = getFloatVectorHelpers[idxKind];
             }
         }
-        else if (false) { // FIXME: We are disabling Vector.float4 optimization since it doesn't work with float4_t-as-struct
-                          // (original test was: objType == VECTORFLOAT4_TYPE)
+        else if (objType == VECTORFLOAT4_TYPE) {
             if (result == FLOAT4_TYPE) {
                 if (idxKind == VI_INT || idxKind == VI_UINT) {
                     typedef ListData<float4_t, 16> STORAGE;
@@ -5529,8 +5473,10 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                                                 LIR_ldf4,
                                                 getFloat4VectorNativeHelpers[idxKind]);
                 }
-                getter = getFloat4VectorNativeHelpers[idxKind];
-                valIsAtom = false;
+                /* handle here the case of native helpers, it is different than all the others */
+                LIns* retval = lirout->insAlloc(sizeof(float4_t));
+                callIns(getFloat4VectorNativeHelpers[idxKind], 3, lea(0, retval), localGetp(objIndexOnStack), index);
+                return ldf4(retval, 0, ACCSET_OTHER);
             }
             else {
                 getter = getFloat4VectorHelpers[idxKind];
@@ -5645,7 +5591,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 LIns* baseRounded = binaryIns(LIR_andp, base, InsConstPtr((const void*)~uintptr_t(15)));                // & ~15
                 LIns* element = ui2p(binaryIns(LIR_lshi, index, InsConst(scale)));
                 LIns* effectiveAddress = binaryIns(LIR_addp, baseRounded, element);
-                storeIns(store_item, value, 0, effectiveAddress, ACCSET_OTHER);
+                storeIns(store_item, ldf4(value, 0 , ACCSET_OTHER) , 0, effectiveAddress, ACCSET_OTHER); // FIXME: suboptimal! we should load the float4 directly.
                 break;
             }
 #ifdef VMCFG_64BIT
@@ -5788,15 +5734,15 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 setter = setFloatVectorHelpers[idxKind];
             }
         }
-        else if (false) { // FIXME: We are disabling Vector.float4 optimization since it doesn't work with float4_t-as-struct
-                          // (original test was: objType == VECTORFLOAT4_TYPE)
+        else if (objType == VECTORFLOAT4_TYPE) { 
+                          
             if (valueType == FLOAT4_TYPE) {
                 if (idxKind == VI_INT || idxKind == VI_UINT) {
                     typedef ListData<float4_t, 16> STORAGE;
                     typedef DataListHelper<float4_t, 16>::LISTDATA LISTDATA;
                     emitInlineVectorWrite(objIndexOnStack, 
                                           index,
-                                          localGetf4(valIndexOnStack),
+                                          localGetf4Addr(valIndexOnStack),
                                           offsetof(Float4VectorObject, m_list.m_data),
                                           offsetof(LISTDATA, len),
                                           offsetof(STORAGE, entries),
@@ -5804,7 +5750,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                                           LIR_stf4,
                                           setFloat4VectorNativeHelpers[idxKind]);
                 }
-                value = localGetf4(valIndexOnStack);
+                value = localGetf4Addr(valIndexOnStack);
                 setter = setFloat4VectorNativeHelpers[idxKind];
             }
             else {
