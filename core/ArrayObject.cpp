@@ -846,7 +846,8 @@ convert_and_set_sparse:
             // Delete all items between size and newLength
             if (isDense())
             {
-                if (m_denseArray.length() == 0 && oldLength == 0)
+                uint32_t oldDenseLength = m_denseArray.length();
+                if (oldDenseLength == 0 && oldLength == 0)
                 {
                     // We are "dense" but actually empty; we usually get
                     // here when constructing a new array with an initial length.
@@ -892,8 +893,9 @@ convert_and_set_sparse:
                     }
                     else
                     {
-                        m_denseArray.set_length(newLength - m_denseStart);
-                        for (uint32_t i = oldLength - m_denseStart, n = m_denseArray.length(); i < n; ++i)
+                        uint32_t newDenseLength  = newLength - m_denseStart;
+                        m_denseArray.set_length(newDenseLength);
+                        for (uint32_t i = oldDenseLength; i < newDenseLength; ++i)
                             m_denseArray.replace(i, atomNotFound);
                     }
                 }
