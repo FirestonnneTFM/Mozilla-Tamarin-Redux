@@ -4076,17 +4076,13 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         // using the CVTTSD2SI instruction.  If we get a 0x80000000 return
         // value, our double is outside the valid integer range we fallback
         // to calling doubleToInt32.
-#if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
-#ifndef AVMPLUS_AMD64
-        SSE2_ONLY(if(core->config.njconfig.i386_sse2))
-#endif // AVMPLUS_AMD64
-        {
+        if (haveSSE2()) {
             suspendCSE();
             CodegenLabel skip_label("goodint");
             LIns* intResult = insAlloc(sizeof(int32_t));
             LIns* fastd2i = lirout->ins1(LIR_d2i, arg);
             sti(fastd2i, intResult, 0, ACCSET_STORE_ANY);      // int32_t index
-            LIns *c = binaryIns(LIR_eqi, fastd2i, InsConst(1L << 31));
+            LIns *c = binaryIns(LIR_eqi, fastd2i, InsConst(0x80000000));
             branchToLabel(LIR_jf, c, skip_label);
             LIns *funcCall = callIns(FUNCTIONID(doubleToInt32), 1, arg);
             sti(funcCall, intResult, 0, ACCSET_STORE_ANY);      // int32_t index
@@ -4095,13 +4091,42 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             resumeCSE();
             return result;
         }
-#endif // AVMPLUS_IA32 || AVMPLUS_AMD64
-
-#ifndef AVMPLUS_AMD64
-         return callIns(FUNCTIONID(integer_d), 1, arg);
-#endif // AVMPLUS_AMD64
+        return callIns(FUNCTIONID(integer_d), 1, arg);
     }
 
+#ifdef VMCFG_FLOAT
+    LIns* CodegenLIR::coerceFloatToInt(int loc)
+    {
+        LIns *arg = localGetf(loc);
+        if (arg->isop(LIR_immf))
+            return InsConst(AvmCore::integer_d((double)arg->immF()));
+
+        // fixme: Bug 707644; emperically, calling the helper is fastest.
+        const bool use_cvttss2si = false;
+
+        // For SSE capable machines, inline our float to integer conversion
+        // using the CVTTSS2SI instruction.  If we get a 0x80000000 return
+        // value, our float is outside the valid integer range we fallback
+        // to calling doubleToInt32.
+        if (use_cvttss2si && haveSSE2()) {
+            suspendCSE();
+            CodegenLabel skip_label("goodint");
+            LIns* intResult = insAlloc(sizeof(int32_t));
+            LIns* fastf2i = lirout->ins1(LIR_f2i, arg);
+            sti(fastf2i, intResult, 0, ACCSET_STORE_ANY);      // int32_t index
+            LIns *c = binaryIns(LIR_eqi, fastf2i, InsConst(0x80000000));
+            branchToLabel(LIR_jf, c, skip_label);
+            LIns *funcCall = callIns(FUNCTIONID(doubleToInt32), 1, f2dIns(arg));
+            sti(funcCall, intResult, 0, ACCSET_STORE_ANY);      // int32_t index
+            emitLabel(skip_label);
+            LIns *result = loadIns(LIR_ldi, 0, intResult, ACCSET_LOAD_ANY);
+            resumeCSE();
+            return result;
+        }
+        // fallback: promote float->double, then convert double->int
+        return callIns(FUNCTIONID(integer_d), 1, f2dIns(arg));
+    }
+#endif
 
     LIns* CodegenLIR::coerceToType(int loc, Traits* result)
     {
@@ -4164,6 +4189,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 // narrowing conversion number->int
                 expr = coerceNumberToInt(loc);
             }
+#ifdef VMCFG_FLOAT
+            else if (in == FLOAT_TYPE)
+            {
+                expr = coerceFloatToInt(loc);
+            }
+#endif
             else
             {
                 // * -> int
@@ -4181,6 +4212,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             {
                 expr = coerceNumberToInt(loc);
             }
+#ifdef VMCFG_FLOAT
+            else if (in == FLOAT_TYPE)
+            {
+                expr = coerceFloatToInt(loc);
+            }
+#endif
             else
             {
                 // * -> uint

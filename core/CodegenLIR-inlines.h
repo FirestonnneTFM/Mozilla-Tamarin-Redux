@@ -112,4 +112,19 @@ REALLY_INLINE C* CacheBuilder<C>::allocateCacheSlot(const Multiname* name)
     return c;
 }
 
+REALLY_INLINE bool CodegenLIR::haveSSE2() const
+{
+#if defined AVMPLUS_IA32
+#  ifdef VMCFG_SSE2
+    return core->config.njconfig.i386_sse2; // sse2 based on cpuid & config
+#  else // !VMCFG_SSE2
+    return true; // x86-32 with SSE2 guaranteed
+#endif
+#elif defined AVMPLUS_AMD64
+    return true;  // x86-64 has SSE2
+#else
+    return false; // non-x86 family
+#endif
+}
+
 } // namespace

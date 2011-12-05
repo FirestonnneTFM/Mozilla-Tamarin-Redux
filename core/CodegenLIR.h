@@ -425,6 +425,7 @@ namespace avmplus
                 nanojit::BitSet& varlivein, LabelBitSet& varlabels,
                 nanojit::BitSet& taglivein, LabelBitSet& taglabels);
         void copyParam(int i, int &offset);
+        bool haveSSE2() const;
 
         /**
          * Overwrite the given instruction with a LIR_skip and adjust
@@ -518,6 +519,7 @@ namespace avmplus
         LIns* coerceToFloat(int i);
         LIns* coerceToFloat4(int i);
         LIns* coerceToNumeric(int i);
+        LIns* coerceFloatToInt(int i);
         bool matchShuffler(MethodInfo* m, uint8_t* shuffle_mask);
 #endif // VMCFG_FLOAT
         LIns* loadFromSlot(int ptr_index, int slot, Traits* slotType);
