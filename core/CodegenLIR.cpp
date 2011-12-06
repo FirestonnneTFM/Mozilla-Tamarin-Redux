@@ -6250,10 +6250,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     LIns* oz = callIns(FUNCTIONID(mod), 2,f4z,g4z);
                     LIns* f4w = f2dIns(lirout->ins1(LIR_f4w, f4)), *g4w = f2dIns(lirout->ins1(LIR_f4w, g4));
                     LIns* ow = callIns(FUNCTIONID(mod), 2,f4w,g4w);
-                    LIns* f4addr = localGetf4Addr(sp - 1);
-                    callIns(FUNCTIONID(float4FromComponents), 5, f4addr,
-                                         d2fIns(ox), d2fIns(oy), d2fIns(oz), d2fIns(ow) );
-                    varTracker->trackVarStore( ldf4(f4addr, 0 ,ACCSET_VARS), sp - 1); // Announce that a store is taking place/ the local var is modified
+                    localSet(sp - 1, lirout->ins4(LIR_ffff2f4,d2fIns(ow), d2fIns(oz), d2fIns(oy), d2fIns(ox)), result);
                 } else if(result == NUMBER_TYPE){
                     AvmAssert(state->value(sp-1).traits == NUMBER_TYPE);
                     AvmAssert(state->value(sp).traits == NUMBER_TYPE);
@@ -8236,25 +8233,70 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             nanojit::BitSet& varlivein, LabelBitSet& varlabels,
             nanojit::BitSet& taglivein, LabelBitSet& taglabels)
     {
-        if (ins->callInfo() == FUNCTIONID(beginCatch)) {
-            // beginCatch(core, ef, info, pc, &vars[i], &tags[i]) => store to &vars[i] and &tag[i]
-            LIns* varPtrArg = ins->arg(4);  // varPtrArg == vars, OR addp(vars, index)
-            if (varPtrArg == vars) {
-                varlivein.clear(0);
-                taglivein.clear(0);
-            } else if (varPtrArg->isop(LIR_addp)) {
-                analyze_addp_store(varPtrArg, vars, varlivein, taglivein, varShift);
+        typedef struct FuncLiveInfo{
+            const CallInfo* info;
+            uint32_t arguments;
+            uint32_t isStore;
+        } FuncLiveInfo;
+
+#define ARGSTORE(i) (1 << i), (1 << i)
+#define ARGLOAD(i)  (1 << i), 0
+#define INFO1(A,B) A,B
+#define ARGINFO1(A) INFO1(A)
+        
+        FuncLiveInfo varPtrFunctions[] = {
+            { FUNCTIONID(beginCatch),     ARGINFO1(ARGSTORE(4)) }, // beginCatch(core, ef, info, pc, &vars[i], &tags[i]) => store to &vars[i] and &tag[i]
+            { FUNCTIONID(makeatom),       ARGINFO1(ARGLOAD(1))  }, // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
+            { FUNCTIONID(restargHelper),  ARGINFO1(ARGLOAD(3))  }, // restargHelper(Toplevel*, Multiname*, Atom, ArrayObject**, uint32_t, Atom*)
+                                                                    // The ArrayObject** is a reference to a var
+            { FUNCTIONID(float4),         ARGINFO1(ARGSTORE(0)) }, 
+            { FUNCTIONID(float4FromComponents),                       ARGINFO1(ARGSTORE(0)) }, 
+            { FUNCTIONID(Float4VectorObject_getNativeUintProperty),   ARGINFO1(ARGSTORE(0)) },
+            { FUNCTIONID(Float4VectorObject_getNativeIntProperty),    ARGINFO1(ARGSTORE(0)) },
+            { FUNCTIONID(Float4VectorObject_getNativeDoubleProperty), ARGINFO1(ARGSTORE(0)) },
+            { FUNCTIONID(Float4VectorObject_setNativeUintProperty),   ARGINFO1(ARGLOAD(2)) },
+            { FUNCTIONID(Float4VectorObject_setNativeIntProperty),    ARGINFO1(ARGLOAD(2)) },
+            { FUNCTIONID(Float4VectorObject_setNativeDoubleProperty), ARGINFO1(ARGLOAD(2)) },
+        };
+        const int varPtrFunctionsNum = (int) (sizeof(varPtrFunctions) / sizeof(FuncLiveInfo));
+        
+        const CallInfo* ci = ins->callInfo();
+        for(int i=0;i < varPtrFunctionsNum; i++ ){
+            if(ci == varPtrFunctions[i].info){
+                uint32_t argIdx = 0;
+                uint32_t argInfo = varPtrFunctions[i].arguments;
+                uint32_t argStoreInfo = varPtrFunctions[i].isStore;
+                while (argInfo) {
+                    if((argInfo & 1) == 1) {
+                        LIns* varPtrArg = ins->arg(ins->argc()-argIdx-1);  // varPtrArg == vars, OR addp(vars, index)
+                        if (varPtrArg == vars) {
+                            if((argStoreInfo & 1) == 1){
+                                varlivein.clear(0);
+                                taglivein.clear(0);
+                            } else {
+                                varlivein.set(0);
+                            } 
+                        } else 
+                        if (varPtrArg->isop(LIR_addp)) {
+                                if((argStoreInfo & 1) == 1)
+                                    analyze_addp_store(varPtrArg, vars, varlivein, taglivein, varShift);
+                                else 
+                                    analyze_addp(varPtrArg, vars, varlivein, varShift);
+                        } else {
+                            if(ci == FUNCTIONID(makeatom))
+                                AvmAssert(!"Unexpected use of makeatom");
+                        }
+
+                    }
+                    argInfo >>= 1;
+                    argStoreInfo >>= 1;
+                    argIdx++;
+                }
+                return;
             }
-        } else if (ins->callInfo() == FUNCTIONID(makeatom)) {
-            // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
-            LIns* varPtrArg = ins->arg(1);  // varPtrArg == vars, OR addp(vars, index)
-            if (varPtrArg == vars)
-                varlivein.set(0);
-            else if (varPtrArg->isop(LIR_addp))
-                analyze_addp(varPtrArg, vars, varlivein, varShift);
-            else
-                AvmAssert(!"Unexpected use of makeatom");
-        } else if (!ins->callInfo()->_isPure) {
+        }
+        
+        if (!ins->callInfo()->_isPure) {
             if (catcher) {
                 // non-cse call is like a conditional forward branch to the catcher label.
                 // this could be made more precise by checking whether this call
@@ -8279,15 +8321,6 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 }
             }
 #endif
-        }
-        else if (ins->callInfo() == FUNCTIONID(restargHelper)) {
-            // restargHelper(Toplevel*, Multiname*, Atom, ArrayObject**, uint32_t, Atom*)
-            // The ArrayObject** is a reference to a var
-            LIns* varPtrArg = ins->arg(3);  // varPtrArg == vars, OR addp(vars, index)
-            if (varPtrArg == vars)
-                varlivein.set(0);
-            else if (varPtrArg->isop(LIR_addp))
-                analyze_addp(varPtrArg, vars, varlivein, varShift);
         }
     }
 
