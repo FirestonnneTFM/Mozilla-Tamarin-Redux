@@ -73,6 +73,27 @@ AddTestCase("function float4(1f, 1f, 3f, 4f) == float4(0f, 2f, 3f, 4f)", false, 
 AddTestCase("function float4(1f, 2f, 2f, 4f) == float4(0f, 2f, 3f, 4f)", false, check(float4(1f, 2f, 3f, 4f), float4(1f, 2f, 2f, 4f)));
 AddTestCase("function float4(1f, 2f, 3f, 5f) == float4(0f, 2f, 3f, 4f)", false, check(float4(1f, 2f, 3f, 4f), float4(1f, 2f, 3f, 5f)));
 
+// Bug 698365 - float4 mixed-representation equality incorrect
+// https://bugzilla.mozilla.org/show_bug.cgi?id=698365
+AddStrictTestCase("float4(1,1,1,1) == 1", true, float4(1,1,1,1) == 1);
+AddStrictTestCase("float4(1,1,1,1) == 1 check()", true, check(float4(1,1,1,1), 1));
+var one = 1;
+AddStrictTestCase("float4(1,1,1,1) == one", true, float4(1,1,1,1) == one);
+AddStrictTestCase("float4(1,1,1,1) == one check()", true, check(float4(1,1,1,1), one));
+
+AddStrictTestCase("float4(2.125, 2.125, 2.125, 2.125) == 2.125", true, float4(2.125, 2.125, 2.125, 2.125) == 2.125);
+AddStrictTestCase("float4(2.125, 2.125, 2.125, 2.125) == 2.125 check()", true, check(float4(2.125, 2.125, 2.125, 2.125), 2.125));
+AddStrictTestCase("2.125 == float4(2.125, 2.125, 2.125, 2.125)", true, 2.125 == float4(2.125, 2.125, 2.125, 2.125));
+AddStrictTestCase("2.125 == float4(2.125, 2.125, 2.125, 2.125) check()", true, check(2.125, float4(2.125, 2.125, 2.125, 2.125)));
+
+// FIXME: https://bugzilla.mozilla.org/show_bug.cgi?id=698365
+// Uncomment the following testcase once the above bug is fixed.
+// AddStrictTestCase("float4(1,1,1,1) == true", true, float4(1,1,1,1) == true);
+AddStrictTestCase("float4(1,1,1,1) == true check()", true, check(float4(1,1,1,1), true));
+var _true = true;
+AddStrictTestCase("float4(1,1,1,1) == _true", true, float4(1,1,1,1) == _true);
+AddStrictTestCase("float4(1,1,1,1) == _true check()", true, check(float4(1,1,1,1), _true));
+
 
 test();
 
