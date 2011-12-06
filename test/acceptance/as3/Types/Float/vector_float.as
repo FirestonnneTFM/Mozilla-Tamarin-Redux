@@ -65,5 +65,11 @@ AddTestCase("vecflt[3] value", f4, vecFlt[3]);
 AddTestCase("vecflt[3] typeof", "float", typeof vecFlt[3]);
 
 
+// Bug 697741 - Vector optimizations for float are miss using type information
+var v:Vector.<float> = new <float> [1,1,1,1];
+AddStrictTestCase("v[0] value", 1f, v[0]);
+foo(v);
+function foo(vec:Vector.<float>){ AddStrictTestCase("v[0] value", 1f, vec[0]); }
+
 test();
 
