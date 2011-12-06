@@ -197,6 +197,7 @@ ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA, Dgreedy,, skip, skip slow te
 ecma3/Unicode/u5000_CJKUnifiedIdeographs, Dgreedy,, skip, skip slow test in -Dgreedy mode
 ecma3/Unicode/u6000_CJKUnifiedIdeographs, Dgreedy,, skip, skip slow test in -Dgreedy mode
 ecma3/Unicode/u7000_CJKUnifiedIdeographs, Dgreedy,, skip, skip slow test in -Dgreedy mode
+ecma3/Unicode/u8000_CJKUnifiedIdeographs, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907 and 512738)
 ecma3/Unicode/u9000_CJKUnifiedIdeographs, Dgreedy,, skip, skip slow test in -Dgreedy mode
 ecma3/Unicode/uE000_PrivateUseArea, Dgreedy,, skip, skip slow test in -Dgreedy mode
 ecma3/Unicode/uAC00_HangulSyllables, Dgreedy,, skip, skip slow test in -Dgreedy mode
