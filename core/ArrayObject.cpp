@@ -317,7 +317,8 @@ namespace avmplus
 
     // ----------------- "get" methods
 
-    Atom ArrayObject::getAtomProperty(Atom name) const
+    bool ArrayObject::isAtomPropertyLengthOrInDenseArea(Atom name,
+                                                        Atom *recv) const
     {
         uint32_t index;
         if (AvmCore::getIndexFromAtom(name, &index))
@@ -326,18 +327,47 @@ namespace avmplus
             if (denseIdx < m_denseArray.length())
             {
                 Atom result = m_denseArray.get(denseIdx);
-                if (result != atomNotFound)
-                    return result;
+                if (result != atomNotFound) {
+                    *recv = result;
+                    return true;
+                }
             }
-            // else, outside dense area, or a hole in the dense area:
-            // must fall thru and search the proto chain
+            // else, outside dense area, or a hole in the dense area;
+            // let caller select fallback reaction.
+            return false;
         }
         else if (isDynamic() && name == core()->klength->atom())
         {
-            return core()->intToAtom(getLength());
+            *recv = core()->intToAtom(getLength());
+            return true;
         }
+        else
+        {
+            return false;
+        }
+    }
 
-        return ScriptObject::getAtomProperty(name);
+    bool ArrayObject::isOwnAtomPropertyHere(Atom name, Atom *recv) const
+    {
+        if (isAtomPropertyLengthOrInDenseArea(name, recv))
+            return true;
+        else
+            // fallback: search hash table of sparse values.
+            return ScriptObject::isOwnAtomPropertyHere(name, recv);
+    }
+
+    Atom ArrayObject::getAtomProperty(Atom name) const
+    {
+        Atom result;
+        if (isAtomPropertyLengthOrInDenseArea(name, &result))
+        {
+            return result;
+        }
+        else
+        {
+            // fallback: search hash table and then proto chain.
+            return ScriptObject::getAtomProperty(name);
+        }
     }
 
     bool ArrayObject::getAtomPropertyIsEnumerable(Atom name) const

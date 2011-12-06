@@ -176,6 +176,13 @@ namespace avmplus
         uint32_t calcDenseUsed() const;
 
     protected:
+        // Bug 687838: override prototype chain query operator.
+        virtual bool isOwnAtomPropertyHere(Atom name, Atom *recv) const;
+    private:
+        // If name is "length" or dense-index, sets *recv to this[name] and
+        // returns true; else returns false.
+        bool isAtomPropertyLengthOrInDenseArea(Atom name, Atom *recv) const;
+    protected:
         // Helper methods used only by ArrayClass, as special-case
         // optimizations for various "generic" optimizations that
         // can be done on dense arrays. These optimizations used

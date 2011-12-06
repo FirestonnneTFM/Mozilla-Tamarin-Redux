@@ -227,6 +227,12 @@ namespace avmplus
     protected:
         
         Atom getAtomPropertyFromProtoChain(Atom name, ScriptObject* protochain, Traits *origObjTraits) const;
+
+        // If name defined in this (not its prototype chain), sets
+        // *recv to this[name] and returns true.  Else returns false.
+        // (Assumes this is dynamic; do not call on sealed instances.)
+        virtual bool isOwnAtomPropertyHere(Atom name, Atom *recv) const;
+
         void throwWriteSealedError(Atom name);
         void throwWriteSealedError(const Multiname& name);
     
