@@ -2798,7 +2798,7 @@ namespace avmplus
             FrameValue v = state->stackTop();
             // NOTE writeNip is necessary until lir optimizes the "nip"
             // case to avoid the extra copies that result from swap+pop
-            coder->writeNip(state, pc, argc);
+            coder->writeNip(state, pc, (uint8_t) argc);
             state->pop(argc + 1);
             state->push(v);
         }
