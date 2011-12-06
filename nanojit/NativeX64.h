@@ -267,6 +267,7 @@ namespace nanojit
         X64_movi    = 0xB840000000000002LL, // 32bit mov r <- immI
         X64_movqi32 = 0xC0C7480000000003LL, // 64bit mov r <- int64(immI)
         X64_movapsr = 0xC0280F4000000004LL, // 128bit mov xmm <- xmm
+        X64_unpcklps= 0xC0140F4000000004LL, // 128bit unpack low xmm part
         X64_movqrx  = 0xC07E0F4866000005LL, // 64bit mov b <- xmm-r (reverses the usual r/b order)
         X64_movqxr  = 0xC06E0F4866000005LL, // 64bit mov b -> xmm-r
         X64_movdxr  = 0xC06E0F4066000005LL, // 32bit mov b -> xmm-r
@@ -514,6 +515,7 @@ namespace nanojit
         void CMPQR(Register l, Register r);\
         void MOVQR(Register l, Register r);\
         void MOVAPSR(Register l, Register r);\
+        void UNPCKLPS(Register l, Register r);\
         void CMOVNO(Register l, Register r);\
         void CMOVNE(Register l, Register r);\
         void CMOVNL(Register l, Register r);\

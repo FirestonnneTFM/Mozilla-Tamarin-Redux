@@ -987,6 +987,13 @@ namespace nanojit
         asm_output("movd %s,%s", gpn(d), gpn(s));
     }
 
+    inline void Assembler::SSE_UNPCKLPS(R rd, R rs) {
+        count_mov();
+        NanoAssert(IsXmmReg(rd) && IsXmmReg(rs));
+        SSEs(0x0f14, rd, rs);
+        asm_output("unpcklps %s,%s", gpn(rd), gpn(rs));
+    }
+    
     inline void Assembler::SSE_MOVAPS(R rd, R rs) {
         count_mov();
         NanoAssert(IsXmmReg(rd) && IsXmmReg(rs));
@@ -3704,6 +3711,27 @@ namespace nanojit
         Register rr = prepareResultReg(ins, XmmRegs);
         Register rb = findRegFor(a, XmmRegs);
         SSE_PSHUFD(rr, rb, PSHUFD_COMPONENT_MASK(0)); 
+        freeResourcesOf(ins);
+    }
+    
+    void Assembler::asm_ffff2f4(LIns *ins) {
+        LIns *x = ins->oprnd1();
+        LIns *y = ins->oprnd2();
+        LIns *z = ins->oprnd3();
+        LIns *w = ins->oprnd4();
+        NanoAssert(ins->isF4() && x->isF() && y->isF() && z->isF() && w->isF());
+        NanoAssert(_config.i386_sse2);
+        
+        Register rr = prepareResultReg(ins, XmmRegs);
+        Register rw = findRegFor(w, XmmRegs);
+        if (rw != rr) 
+            SSE_MOVAPS(rr, rw);
+        Register rz = findRegFor(z, XmmRegs & ~rmask(rw));
+        SSE_UNPCKLPS(rw,rz);// x y z w 
+        Register rx = findRegFor(x, XmmRegs & ~(rmask(rw) | rmask(rz)));
+        SSE_UNPCKLPS(rz,rx);// * * x z 
+        Register ry = findRegFor(y, XmmRegs & ~rmask(rw));
+        SSE_UNPCKLPS(rw,ry);// * * y w
         freeResourcesOf(ins);
     }
     

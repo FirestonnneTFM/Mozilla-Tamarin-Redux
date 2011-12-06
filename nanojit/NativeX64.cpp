@@ -480,6 +480,7 @@ namespace nanojit
     void Assembler::CMPQR(  R l, R r)   { emitrr(X64_cmpqr,  l,r); asm_output("cmpq %s, %s",  RQ(l),RQ(r)); }
     void Assembler::MOVQR(  R l, R r)   { emitrr(X64_movqr,  l,r); asm_output("movq %s, %s",  RQ(l),RQ(r)); }
     void Assembler::MOVAPSR(R l, R r)   { emitrr(X64_movapsr,l,r); asm_output("movaps %s, %s",RQ(l),RQ(r)); }
+    void Assembler::UNPCKLPS(R l, R r)  { emitrr(X64_unpcklps,l,r);asm_output("unpcklps %s, %s",RQ(l),RQ(r));}
 
     void Assembler::CMOVNO( R l, R r)   { emitrr(X64_cmovno, l,r); asm_output("cmovlno %s, %s",  RL(l),RL(r)); }
     void Assembler::CMOVNE( R l, R r)   { emitrr(X64_cmovne, l,r); asm_output("cmovlne %s, %s",  RL(l),RL(r)); }
@@ -1341,6 +1342,26 @@ namespace nanojit
         freeResourcesOf(ins);
     }
 
+    void Assembler::asm_ffff2f4(LIns *ins) {
+        LIns *x = ins->oprnd1();
+        LIns *y = ins->oprnd2();
+        LIns *z = ins->oprnd3();
+        LIns *w = ins->oprnd4();
+        NanoAssert(ins->isF4() && x->isF() && y->isF() && z->isF() && w->isF());
+        
+        Register rr = prepareResultReg(ins, FpRegs);
+        Register rw = findRegFor(w, FpRegs);
+        if (rw != rr) 
+            MOVAPSR(rr, rw);
+        Register rz = findRegFor(z, FpRegs & ~rmask(rw));
+        UNPCKLPS(rw,rz);// x y z w 
+        Register rx = findRegFor(x, FpRegs & ~(rmask(rw) | rmask(rz)));
+        UNPCKLPS(rz,rx);// * * x z 
+        Register ry = findRegFor(y, FpRegs & ~rmask(rw));
+        UNPCKLPS(rw,ry);// * * y w
+        freeResourcesOf(ins);
+    }
+    
     void Assembler::asm_f4comp(LIns *ins) {
         NanoAssert(ins->isop(LIR_swzf4) ? ins->isF4() : ins->isF());
         NanoAssert(ins->oprnd1()->isF4());

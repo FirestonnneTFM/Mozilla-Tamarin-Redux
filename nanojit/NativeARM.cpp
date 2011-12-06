@@ -2641,6 +2641,20 @@ void Assembler::asm_f2f4(LIns *ins) {
     VDUP(qd, rs);
     freeResourcesOf(ins);
 }
+
+void Assembler::asm_ffff2f4(LIns *ins) {
+    NanoAssert(ARM_VFP);
+    Register qd = prepareResultReg(ins, LowBankFPMask );
+    Register rx = findRegFor(ins->oprnd1(),FpSRegs & ~ rmask(qd));
+    FCPYS( SReg((FpQRegNum(qd) << 2) + 3), rx);
+    Register ry = findRegFor(ins->oprnd2(),FpSRegs & ~ rmask(qd));
+    FCPYS( SReg((FpQRegNum(qd) << 2) + 2), ry);
+    Register rz = findRegFor(ins->oprnd3(),FpSRegs & ~ rmask(qd));
+    FCPYS( SReg((FpQRegNum(qd) << 2) + 1), rz);
+    Register rw = findRegFor(ins->oprnd4(),FpSRegs & ~ rmask(qd));
+    FCPYS( SReg((FpQRegNum(qd) << 2) + 0), rw);
+    freeResourcesOf(ins);
+}
     
 void Assembler::asm_f4comp(LIns *ins) {
     LIns *a = ins->oprnd1();

@@ -498,6 +498,7 @@ namespace nanojit
         void SSE_CVTSS2SD(Register xr, Register gr); \
         void SSE_CVTDQ2PD(Register d, Register r); \
         void SSE_MOVD(Register d, Register s); \
+        void SSE_UNPCKLPS(Register rd, Register rs); \
         void SSE_MOVAPS(Register rd, Register rs); \
         void SSE_MOVSD(Register rd, Register rs); \
         void SSE_ADDSD(Register rd, Register rs); \

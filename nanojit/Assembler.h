@@ -535,6 +535,7 @@ namespace nanojit
             void        asm_d2f(LIns* ins);
             void        asm_f2d(LIns* ins);
             void        asm_f2f4(LIns* ins);
+            void        asm_ffff2f4(LIns* ins);
             void        asm_f4comp(LIns* ins);
 
             void        asm_nongp_copy(Register r, Register s);
