@@ -614,10 +614,11 @@ namespace avmplus
         void writeOp1(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, Traits* type);
         void writeOp2(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
         void writeMethodCall(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, MethodInfo*, uintptr_t disp_id, uint32_t argc, Traits* type);
-        void writeNip(const FrameState* state, const uint8_t *pc);
+        void writeNip(const FrameState* state, const uint8_t *pc, uint8_t offset);
         void writeCheckNull(const FrameState* state, uint32_t index);
         void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
         void writeCoerceToNumeric(const FrameState* state, uint32_t index);
+        void writeCoerceToFloat4(const FrameState* state, uint32_t index1, uint32_t index2, uint32_t index3, uint32_t index4);
         void writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver*);
         void writeEpilogue(const FrameState* state);
         void writeBlockStart(const FrameState* state);

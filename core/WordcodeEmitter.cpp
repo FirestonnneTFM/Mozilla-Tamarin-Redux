@@ -443,10 +443,13 @@ namespace avmplus
         }
     }
 
-    void WordcodeEmitter::writeNip(const FrameState* state, const uint8_t *pc)
+    void WordcodeEmitter::writeNip(const FrameState* state, const uint8_t *pc, uint8_t offset)
     {
-        write(state, pc, OP_swap);
-        write(state, pc, OP_pop);
+        while(offset--)
+        {
+            write(state, pc, OP_swap);
+            write(state, pc, OP_pop);
+        }
     }
 
     void WordcodeEmitter::writeCheckNull(const FrameState*, uint32_t)
@@ -736,7 +739,9 @@ namespace avmplus
     {}
 
     void WordcodeEmitter::writeCoerceToNumeric(const FrameState*, uint32_t)
-    { /* FIXME: implement CoerceToNumeric in the wordcode interpreter */ }
+    { AvmAssert(!"FIXME: implement CoerceToNumeric in the wordcode interpreter"); }
+    void WordcodeEmitter::writeCoerceToFloat4(const FrameState*, uint32_t, uint32_t, uint32_t, uint32_t) 
+    { AvmAssert(!"FIXME: implement CoerceToFloat4 in the wordcode interpreter"); }
 
     void WordcodeEmitter::emitOp1(const uint8_t *pc, WordOpcode opcode)
     {

@@ -646,6 +646,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LRK_Op1b,
         LRK_Op2,
         LRK_Op3,
+        LRK_Op4,
         LRK_Ld,
         LRK_St,
         LRK_Sk,
@@ -663,6 +664,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
     class LInsOp1b;
     class LInsOp2;
     class LInsOp3;
+    class LInsOp4;
     class LInsLd;
     class LInsSt;
     class LInsSk;
@@ -725,6 +727,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         inline LInsOp1b* toLInsOp1b() const;
         inline LInsOp2*  toLInsOp2()  const;
         inline LInsOp3*  toLInsOp3()  const;
+        inline LInsOp4*  toLInsOp4()  const;
         inline LInsLd*   toLInsLd()   const;
         inline LInsSt*   toLInsSt()   const;
         inline LInsSk*   toLInsSk()   const;
@@ -744,6 +747,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         inline void initLInsOp1b(LOpcode opcode, LIns* oprnd1, uint8_t mask);
         inline void initLInsOp2(LOpcode opcode, LIns* oprnd1, LIns* oprnd2);
         inline void initLInsOp3(LOpcode opcode, LIns* oprnd1, LIns* oprnd2, LIns* oprnd3);
+        inline void initLInsOp4(LOpcode opcode, LIns* oprnd1, LIns* oprnd2, LIns* oprnd3, LIns* oprnd4);
         inline void initLInsLd(LOpcode opcode, LIns* val, int32_t d, AccSet accSet, LoadQual loadQual);
         inline void initLInsSt(LOpcode opcode, LIns* val, LIns* base, int32_t d, AccSet accSet);
         inline void initLInsSk(LIns* prevLIns);
@@ -853,6 +857,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         inline LIns*    oprnd1() const;
         inline LIns*    oprnd2() const;
         inline LIns*    oprnd3() const;
+        inline LIns*    oprnd4() const;
 
         // For branches.
         inline LIns*    getTarget() const;
@@ -937,6 +942,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         bool isLInsOp3() const {
             NanoAssert(LRK_None != repKinds[opcode()]);
             return LRK_Op3 == repKinds[opcode()];
+        }
+        bool isLInsOp4() const {
+            NanoAssert(LRK_None != repKinds[opcode()]);
+            return LRK_Op4 == repKinds[opcode()];
         }
         bool isLInsLd() const {
             NanoAssert(LRK_None != repKinds[opcode()]);
@@ -1216,6 +1225,26 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* getLIns() { return &ins; };
     };
 
+    // 4-operand form.  Used for constructing float4 values
+    class LInsOp4
+    {
+    private:
+        friend class LIns;
+        
+        LIns*       oprnd_4;
+
+        LIns*       oprnd_3;
+        
+        LIns*       oprnd_2;
+        
+        LIns*       oprnd_1;
+        
+        LIns        ins;
+        
+    public:
+        LIns* getLIns() { return &ins; };
+    };
+    
     // Used for all loads.
     class LInsLd
     {
@@ -1386,6 +1415,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
     LInsOp1b* LIns::toLInsOp1b() const { return (LInsOp1b*)(uintptr_t(this+1) - sizeof(LInsOp1b)); }
     LInsOp2*  LIns::toLInsOp2()  const { return (LInsOp2* )(uintptr_t(this+1) - sizeof(LInsOp2 )); }
     LInsOp3*  LIns::toLInsOp3()  const { return (LInsOp3* )(uintptr_t(this+1) - sizeof(LInsOp3 )); }
+    LInsOp4*  LIns::toLInsOp4()  const { return (LInsOp4* )(uintptr_t(this+1) - sizeof(LInsOp4 )); }
     LInsLd*   LIns::toLInsLd()   const { return (LInsLd*  )(uintptr_t(this+1) - sizeof(LInsLd  )); }
     LInsSt*   LIns::toLInsSt()   const { return (LInsSt*  )(uintptr_t(this+1) - sizeof(LInsSt  )); }
     LInsSk*   LIns::toLInsSk()   const { return (LInsSk*  )(uintptr_t(this+1) - sizeof(LInsSk  )); }
@@ -1423,6 +1453,14 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         toLInsOp3()->oprnd_2 = oprnd2;
         toLInsOp3()->oprnd_3 = oprnd3;
         NanoAssert(isLInsOp3());
+    }
+    void LIns::initLInsOp4(LOpcode opcode, LIns* oprnd1, LIns* oprnd2, LIns* oprnd3, LIns* oprnd4) {
+        initSharedFields(opcode);
+        toLInsOp3()->oprnd_1 = oprnd1;
+        toLInsOp3()->oprnd_2 = oprnd2;
+        toLInsOp3()->oprnd_3 = oprnd3;
+        toLInsOp4()->oprnd_4 = oprnd4;
+        NanoAssert(isLInsOp4());
     }
     void LIns::initLInsLd(LOpcode opcode, LIns* val, int32_t d, AccSet accSet, LoadQual loadQual) {
         initSharedFields(opcode);
@@ -1491,18 +1529,22 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
 
     LIns* LIns::oprnd1() const {
         NanoAssert(isLInsOp1() || isLInsOp1b() || isLInsOp2() || isLInsOp3() ||
-                   isLInsLd() || isLInsSt() || isLInsJtbl());
+                   isLInsLd() || isLInsSt() || isLInsJtbl() || isLInsOp4());
         return toLInsOp2()->oprnd_1;
     }
     LIns* LIns::oprnd2() const {
-        NanoAssert(isLInsOp2() || isLInsOp3() || isLInsSt());
+        NanoAssert(isLInsOp2() || isLInsOp3() || isLInsSt() || isLInsOp4());
         return toLInsOp2()->oprnd_2;
     }
     LIns* LIns::oprnd3() const {
-        NanoAssert(isLInsOp3());
+        NanoAssert(isLInsOp3() || isLInsOp4());
         return toLInsOp3()->oprnd_3;
     }
-
+    LIns* LIns::oprnd4() const {
+        NanoAssert(isLInsOp4());
+        return toLInsOp4()->oprnd_4;
+    }
+    
     LIns* LIns::getTarget() const {
         NanoAssert(isBranch() && !isop(LIR_jtbl));
         if (isJov())
@@ -1698,6 +1740,9 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         }
         virtual LIns* ins3(LOpcode v, LIns* a, LIns* b, LIns* c) {
             return out->ins3(v, a, b, c);
+        }
+        virtual LIns* ins4(LOpcode v, LIns* a, LIns* b, LIns* c, LIns* d) {
+            return out->ins4(v, a, b, c, d);
         }
         virtual LIns* insGuard(LOpcode v, LIns *c, GuardRecord *gr) {
             return out->insGuard(v, c, gr);
@@ -2051,6 +2096,9 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* ins3(LOpcode v, LIns* a, LIns* b, LIns* c) {
             return add(out->ins3(v, a, b, c));
         }
+        LIns* ins4(LOpcode v, LIns* a, LIns* b, LIns* c, LIns* d) {
+            return add(out->ins4(v, a, b, c, d));
+        }
         LIns* insCall(const CallInfo *call, LIns* args[]) {
             return add_flush(out->insCall(call, args));
         }
@@ -2099,6 +2147,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* ins1(LOpcode v, LIns* a);
         LIns* ins2(LOpcode v, LIns* a, LIns* b);
         LIns* ins3(LOpcode v, LIns* a, LIns* b, LIns* c);
+        LIns* ins4(LOpcode v, LIns* a, LIns* b, LIns* c, LIns* d);
         LIns* insGuard(LOpcode, LIns* cond, GuardRecord *);
         LIns* insGuardXov(LOpcode, LIns* a, LIns* b, GuardRecord *);
         LIns* insBranch(LOpcode, LIns* cond, LIns* target);
@@ -2121,9 +2170,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
             NL1         = 4,
             NL2         = 5,
             NL3         = 6,
-            NLCall      = 7,
-            NLImmF      = 8,
-            NLImmF4     = 9,
+            NL4         = 7,
+            NLCall      = 8,
+            NLImmF      = 9,
+            NLImmF4     = 10,
             // Need a value after "last" to outsmart compilers that insist last+1 is impossible.
             NLInvalid,
             NLFirst = 0,
@@ -2210,6 +2260,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         static uint32_t hash1(LOpcode op, LIns*);
         static uint32_t hash2(LOpcode op, LIns*, LIns*);
         static uint32_t hash3(LOpcode op, LIns*, LIns*, LIns*);
+        static uint32_t hash4(LOpcode op, LIns*, LIns*, LIns*, LIns*);
         static uint32_t hashLoad(LOpcode op, LIns*, int32_t);
         static uint32_t hashCall(const CallInfo *call, uint32_t argc, LIns* args[]);
 
@@ -2225,6 +2276,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* find1(LOpcode v, LIns* a, uint32_t &k);
         LIns* find2(LOpcode v, LIns* a, LIns* b, uint32_t &k);
         LIns* find3(LOpcode v, LIns* a, LIns* b, LIns* c, uint32_t &k);
+        LIns* find4(LOpcode v, LIns* a, LIns* b, LIns* c, LIns* d, uint32_t &k);
         LIns* findLoad(LOpcode v, LIns* a, int32_t b, MiniAccSet miniAccSet, LoadQual loadQual,
                        uint32_t &k);
         LIns* findCall(const CallInfo *call, uint32_t argc, LIns* args[], uint32_t &k);
@@ -2243,6 +2295,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         uint32_t find1(LIns* ins);
         uint32_t find2(LIns* ins);
         uint32_t find3(LIns* ins);
+        uint32_t find4(LIns* ins);
         uint32_t findCall(LIns* ins);
         uint32_t findLoad(LIns* ins);
 
@@ -2284,6 +2337,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* ins1(LOpcode v, LIns*);
         LIns* ins2(LOpcode v, LIns*, LIns*);
         LIns* ins3(LOpcode v, LIns*, LIns*, LIns*);
+        LIns* ins4(LOpcode v, LIns*, LIns*, LIns*, LIns*);
         LIns* insLoad(LOpcode op, LIns* base, int32_t d, AccSet accSet, LoadQual loadQual);
         LIns* insStore(LOpcode op, LIns* value, LIns* base, int32_t d, AccSet accSet);
         LIns* insCall(const CallInfo *call, LIns* args[]);
@@ -2356,6 +2410,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
             LIns*   ins1(LOpcode op, LIns* o1);
             LIns*   ins2(LOpcode op, LIns* o1, LIns* o2);
             LIns*   ins3(LOpcode op, LIns* o1, LIns* o2, LIns* o3);
+            LIns*   ins4(LOpcode op, LIns* o1, LIns* o2, LIns* o3, LIns* o4);
             LIns*   insParam(int32_t i, int32_t kind);
             LIns*   insImmI(int32_t imm);
 #ifdef NANOJIT_64BIT
@@ -2621,6 +2676,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* ins1(LOpcode v, LIns* a);
         LIns* ins2(LOpcode v, LIns* a, LIns* b);
         LIns* ins3(LOpcode v, LIns* a, LIns* b, LIns* c);
+        LIns* ins4(LOpcode v, LIns* a, LIns* b, LIns* c, LIns* d);
         LIns* insParam(int32_t arg, int32_t kind);
         LIns* insImmI(int32_t imm);
 #ifdef NANOJIT_64BIT

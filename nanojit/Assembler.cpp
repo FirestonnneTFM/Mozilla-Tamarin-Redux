@@ -1799,6 +1799,17 @@ namespace nanojit
                     }
                     break;
 
+                case LIR_ffff2f4:
+                    countlir_fpu();
+                    ins->oprnd1()->setResultLive();
+                    ins->oprnd2()->setResultLive();
+                    ins->oprnd3()->setResultLive();
+                    ins->oprnd4()->setResultLive();
+                    if (ins->isExtant()) {
+                        asm_ffff2f4(ins);
+                    }
+                    break;
+                    
                 case LIR_f4x:
                 case LIR_f4y:
                 case LIR_f4z:

@@ -2707,13 +2707,18 @@ namespace avmplus
 
     bool Verifier::emitCallpropertySlot(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32_t argc, const uint8_t *pc)
     {
-        if (!AvmCore::isSlotBinding(b) || argc != 1)
+        if (!AvmCore::isSlotBinding(b))
+            return false;
+        if ((argc != 1) && (argc != 4))
             return false;
 
         const TraitsBindingsp tb = t->getTraitsBindings();
 
         int slot_id = AvmCore::bindingToSlotId(b);
         Traits* slotType = tb->getSlotTraits(slot_id);
+
+        if ((argc == 4) && (slotType != core->traits.float4_ctraits))
+            return false;
 
         if (slotType == core->traits.int_ctraits)
         {
@@ -2742,8 +2747,15 @@ namespace avmplus
         else
         if (slotType == core->traits.float4_ctraits)
         {
-            coder->write(state, pc, OP_convert_f4, FLOAT4_TYPE);
-            state->setType(sp, FLOAT4_TYPE, true);
+            if(argc == 1) {
+                coder->write(state, pc, OP_convert_f4, FLOAT4_TYPE);
+                state->setType(sp, FLOAT4_TYPE, true);
+            } else {
+                AvmAssert(argc == 4);
+                AvmAssert(opcode != OP_callpropvoid);
+                coder->writeCoerceToFloat4(state, sp, sp-1, sp-2, sp-3);
+                state->setType(sp, FLOAT4_TYPE, true);
+            }
         }
         else
 #endif
@@ -2776,6 +2788,7 @@ namespace avmplus
 
         if (opcode == OP_callpropvoid)
         {
+            AvmAssert(argc == 1);
             coder->write(state, pc, OP_pop);  // result
             coder->write(state, pc, OP_pop);  // function
             state->pop(2);
@@ -2785,8 +2798,8 @@ namespace avmplus
             FrameValue v = state->stackTop();
             // NOTE writeNip is necessary until lir optimizes the "nip"
             // case to avoid the extra copies that result from swap+pop
-            coder->writeNip(state, pc);
-            state->pop(2);
+            coder->writeNip(state, pc, argc);
+            state->pop(argc + 1);
             state->push(v);
         }
         return true;

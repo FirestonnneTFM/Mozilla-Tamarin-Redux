@@ -564,7 +564,7 @@ namespace nanojit
         // Make sure the size is ok
         NanoAssert(0 == szB % sizeof(void*));
 #ifdef NANOJIT_64BIT
-        NanoAssert(sizeof(LIns) <= szB && szB <= sizeof(LInsSt));  // LInsSt is the biggest one
+        NanoAssert(sizeof(LIns) <= szB && szB <= sizeof(LInsOp4));  // LInsOp4 is the biggest one
 #else
         NanoAssert(sizeof(LIns) <= szB && szB <= sizeof(LInsF4));  // LInsF4 is the biggest one
 #endif
@@ -648,7 +648,15 @@ namespace nanojit
         ins->initLInsOp3(op, o1, o2, o3);
         return ins;
     }
-
+    
+    LIns* LirBufWriter::ins4(LOpcode op, LIns* o1, LIns* o2, LIns* o3, LIns* o4)
+    {
+        LInsOp4* insOp4 = (LInsOp4*)_buf->makeRoom(sizeof(LInsOp4));
+        LIns*    ins    = insOp4->getLIns();
+        ins->initLInsOp4(op, o1, o2, o3, o4);
+        return ins;
+    }
+    
     LIns* LirBufWriter::insLoad(LOpcode op, LIns* base, int32_t d, AccSet accSet, LoadQual loadQual)
     {
         if (isS16(d)) {
@@ -1497,6 +1505,15 @@ namespace nanojit
         return out->ins3(v, oprnd1, oprnd2, oprnd3);
     }
 
+    LIns* ExprFilter::ins4(LOpcode v, LIns* oprnd1, LIns* oprnd2, LIns* oprnd3, LIns* oprnd4)
+    {
+        NanoAssert(oprnd1 && oprnd2 && oprnd3 && oprnd4);
+        NanoAssert(v == LIR_ffff2f4);
+        if(oprnd1 == oprnd2 && oprnd1 == oprnd3 && oprnd1 == oprnd4)
+            return out->ins1(LIR_f2f4, oprnd1); 
+        return out->ins4(v, oprnd1, oprnd2, oprnd3, oprnd4);
+    }        
+    
     LIns* ExprFilter::insGuard(LOpcode v, LIns* c, GuardRecord *gr)
     {
         if (v == LIR_xt || v == LIR_xf) {
@@ -2087,7 +2104,13 @@ namespace nanojit
                     live.add(ins->oprnd2(), 0);
                     live.add(ins->oprnd3(), 0);
                     break;
-
+                case LIR_ffff2f4:
+                    live.add(ins->oprnd1(), 0);
+                    live.add(ins->oprnd2(), 0);
+                    live.add(ins->oprnd3(), 0);
+                    live.add(ins->oprnd4(), 0);
+                    break;
+                        
                 case LIR_callv:
                 case LIR_calli:
                 CASE64(LIR_callq:)
@@ -2331,7 +2354,7 @@ namespace nanojit
     {
         char *s = buf->buf;
         size_t n = buf->len;
-        RefBuf b1, b2, b3, b4;
+        RefBuf b1, b2, b3, b4, b5;
         LOpcode op = i->opcode();
         switch (op)
         {
@@ -2593,6 +2616,14 @@ namespace nanojit
                     formatRef(&b4, i->oprnd3()));
                 break;
 
+            case LIR_ffff2f4:
+                VMPI_snprintf(s, n, "%s =(%s)= %s %s %s %s", formatRef(&b1, i), lirNames[op],
+                              formatRef(&b2, i->oprnd1()),
+                              formatRef(&b3, i->oprnd2()),
+                              formatRef(&b4, i->oprnd3()),
+                              formatRef(&b5, i->oprnd4()));
+                break;
+                
             case LIR_ldi:
             CASE64(LIR_ldq:)
             case LIR_ldd:
@@ -2672,6 +2703,7 @@ namespace nanojit
         m_findNL[NL1]         = &CseFilter::find1;
         m_findNL[NL2]         = &CseFilter::find2;
         m_findNL[NL3]         = &CseFilter::find3;
+        m_findNL[NL4]         = &CseFilter::find4;
         m_findNL[NLCall]      = &CseFilter::findCall;
         m_findNL[NLImmF4]     = &CseFilter::findImmF4;
 
@@ -2683,6 +2715,7 @@ namespace nanojit
         m_capNL[NL1]          = 256;
         m_capNL[NL2]          = 512;
         m_capNL[NL3]          = 16;
+        m_capNL[NL4]          = 16;
         m_capNL[NLCall]       = 64;
         m_capNL[NLImmF4]      = 16; 
 
@@ -2821,6 +2854,14 @@ namespace nanojit
         return hashfinish(hashptr(hash, c));
     }
 
+    inline uint32_t CseFilter::hash4(LOpcode op, LIns* a, LIns* b, LIns* c, LIns* d) {
+        uint32_t hash = hash8(0, uint8_t(op));
+        hash = hashptr(hash, a);
+        hash = hashptr(hash, b);
+        hash = hashptr(hash, c);
+        return hashfinish(hashptr(hash, d));
+    }
+    
     // Nb: no need to hash the load's MiniAccSet because each every load goes
     // into a table where all the loads have the same MiniAccSet.
     inline uint32_t CseFilter::hashLoad(LOpcode op, LIns* a, int32_t d) {
@@ -3167,6 +3208,30 @@ namespace nanojit
         return k;
     }
 
+    inline LIns* CseFilter::find4(LOpcode op, LIns* a, LIns* b, LIns* c, LIns* d, uint32_t &k)
+    {
+        NLKind nlkind = NL4;
+        const uint32_t bitmask = m_capNL[nlkind] - 1;
+        k = hash4(op, a, b, c, d) & bitmask;
+        uint32_t n = 1;
+        while (true) {
+            LIns* ins = m_listNL[nlkind][k];
+            if (!ins)
+                return NULL;
+            if (ins->isop(op) && ins->oprnd1() == a && ins->oprnd2() == b && ins->oprnd3() == c && ins->oprnd4() == d)
+                return ins;
+            k = (k + n) & bitmask;
+            n += 1;
+        }
+    }
+    
+    uint32_t CseFilter::find4(LIns* ins)
+    {
+        uint32_t k;
+        find4(ins->opcode(), ins->oprnd1(), ins->oprnd2(), ins->oprnd3(), ins->oprnd4(), k);
+        return k;
+    }
+        
     inline LIns* CseFilter::findLoad(LOpcode op, LIns* a, int32_t d, MiniAccSet miniAccSet,
                                      LoadQual loadQual, uint32_t &k)
     {
@@ -3389,6 +3454,19 @@ namespace nanojit
         return ins;
     }
 
+    LIns* CseFilter::ins4(LOpcode op, LIns* a, LIns* b, LIns* c, LIns* d)
+    {
+        NanoAssert(isCseOpcode(op));
+        uint32_t k;
+        LIns* ins = find4(op, a, b, c, d, k);
+        if (!ins) {
+            ins = out->ins4(op, a, b, c, d);
+            addNL(NL4, ins, k);
+        }
+        NanoAssert(ins->isop(op) && ins->oprnd1() == a && ins->oprnd2() == b && ins->oprnd3() == c && ins->oprnd4() == d);
+        return ins;
+    }
+    
     LIns* CseFilter::insLoad(LOpcode op, LIns* base, int32_t disp, AccSet accSet, LoadQual loadQual)
     {
         LIns* ins;
@@ -4404,6 +4482,16 @@ namespace nanojit
         return out->ins3(op, a, b, c);
     }
 
+    LIns* ValidateWriter::ins4(LOpcode op, LIns* a, LIns* b, LIns* c, LIns* d)
+    {
+        int nArgs = 4;
+        LTy formals[4] = { LTy_F, LTy_F, LTy_F, LTy_F };   // LTy_V gets overwritten
+        LIns* args[4] = { a, b, c, d };
+        NanoAssert(op == LIR_ffff2f4);
+        typeCheckArgs(op, nArgs, formals, args);
+        return out->ins4(op, a, b, c, d);
+    }
+        
     LIns* ValidateWriter::insParam(int32_t arg, int32_t kind)
     {
         return out->insParam(arg, kind);

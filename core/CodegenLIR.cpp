@@ -1400,6 +1400,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         virtual LIns* ins3(LOpcode v, LIns* a, LIns* b, LIns* c) {
             return lastIns = out->ins3(v, a, b, c);
         }
+        virtual LIns* ins4(LOpcode v, LIns* a, LIns* b, LIns* c, LIns* d) {
+            return lastIns = out->ins4(v, a, b, c, d);
+        }
         virtual LIns* insGuard(LOpcode v, LIns *c, GuardRecord *gr) {
             return lastIns = out->insGuard(v, c, gr);
         }
@@ -3509,11 +3512,11 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         return localGetp(index);
      }
 
-    void CodegenLIR::writeNip(const FrameState* state, const uint8_t *pc)
+    void CodegenLIR::writeNip(const FrameState* state, const uint8_t *pc, uint8_t offset)
     {
         this->state = state;
         emitSetPc(pc);
-        emitCopy(state->sp(), state->sp()-1);
+        emitCopy(state->sp(), state->sp() - offset);
     }
 
     void CodegenLIR::writeMethodCall(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, MethodInfo* m, uintptr_t disp_id, uint32_t argc, Traits *type)
@@ -3903,6 +3906,19 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         this->state = state;
         emitSetPc(state->abc_pc);
         localSet(loc, IFFLOAT(coerceToNumeric(loc), coerceToNumber(loc)), OBJECT_TYPE);
+    }
+
+    void CodegenLIR::writeCoerceToFloat4(const FrameState* state, uint32_t index1, uint32_t index2, uint32_t index3, uint32_t index4)
+    {
+#ifdef VMCFG_FLOAT
+        this->state = state;
+        emitSetPc(state->abc_pc);
+        LIns* val = lirout->ins4(LIR_ffff2f4, coerceToFloat(index1), coerceToFloat(index2), coerceToFloat(index3), coerceToFloat(index4));
+        localSet(index1, val, FLOAT4_TYPE);
+#else
+        (void) index1; (void)index2; (void)index3; (void)index4; (void) state;
+        AvmAssert(!"coerceToFloat4 encountered in CodegenLIR, with VMCFG_FLOAT turned off!!!");
+#endif
     }
 
     void CodegenLIR::writeCoerce(const FrameState* state, uint32_t loc, Traits* result)
