@@ -295,3 +295,8 @@ as3/ByteArray/ByteArray_bug662851 , x86-mac-tvm-releasedebugger-air,, skip , sys
 ###########
 e4x/XML/setNotification , .*-ES , , skip, Testcase does not work with -ES
 
+###########
+# Helper files
+###########
+as3/asc/import-with-float4-helper , .* , , skip , Not a test on its own
+
