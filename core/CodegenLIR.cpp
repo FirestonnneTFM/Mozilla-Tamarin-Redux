@@ -3908,15 +3908,16 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         localSet(loc, IFFLOAT(coerceToNumeric(loc), coerceToNumber(loc)), OBJECT_TYPE);
     }
 
-    void CodegenLIR::writeCoerceToFloat4(const FrameState* state, uint32_t index1, uint32_t index2, uint32_t index3, uint32_t index4)
+    void CodegenLIR::writeCoerceToFloat4(const FrameState* state, uint32_t index)
     {
 #ifdef VMCFG_FLOAT
+        AvmAssert(index >= 3);
         this->state = state;
         emitSetPc(state->abc_pc);
-        LIns* val = lirout->ins4(LIR_ffff2f4, coerceToFloat(index1), coerceToFloat(index2), coerceToFloat(index3), coerceToFloat(index4));
-        localSet(index1, val, FLOAT4_TYPE);
+        LIns* val = lirout->ins4(LIR_ffff2f4, coerceToFloat(index-3), coerceToFloat(index-2), coerceToFloat(index-1), coerceToFloat(index));
+        localSet(index, val, FLOAT4_TYPE);
 #else
-        (void) index1; (void)index2; (void)index3; (void)index4; (void) state;
+        (void) index; (void) state;
         AvmAssert(!"coerceToFloat4 encountered in CodegenLIR, with VMCFG_FLOAT turned off!!!");
 #endif
     }
@@ -6250,7 +6251,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     LIns* oz = callIns(FUNCTIONID(mod), 2,f4z,g4z);
                     LIns* f4w = f2dIns(lirout->ins1(LIR_f4w, f4)), *g4w = f2dIns(lirout->ins1(LIR_f4w, g4));
                     LIns* ow = callIns(FUNCTIONID(mod), 2,f4w,g4w);
-                    localSet(sp - 1, lirout->ins4(LIR_ffff2f4,d2fIns(ow), d2fIns(oz), d2fIns(oy), d2fIns(ox)), result);
+                    localSet(sp - 1, lirout->ins4(LIR_ffff2f4,d2fIns(ox), d2fIns(oy), d2fIns(oz), d2fIns(ow)), result);
                 } else if(result == NUMBER_TYPE){
                     AvmAssert(state->value(sp-1).traits == NUMBER_TYPE);
                     AvmAssert(state->value(sp).traits == NUMBER_TYPE);
@@ -8204,29 +8205,30 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         }
     }
 
-    // Treat addp(vars, const) as a load from vars[const]
-    // for the sake of dead store analysis.
-    void analyze_addp(LIns* ins, LIns* vars, nanojit::BitSet& varlivein, const size_t varShift)
+    REALLY_INLINE void update_var_liveness(nanojit::BitSet* varlivein, nanojit::BitSet* taglivein, int varIdx, const bool isVarStore)
     {
-        AvmAssert(ins->isop(LIR_addp));
-        if (ins->oprnd1() == vars && ins->oprnd2()->isImmP()) {
-            AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), 1 << varShift));
-            int d = int(uintptr_t(ins->oprnd2()->immP()) >> varShift);
-            varlivein.set(d);
+        if(isVarStore) {
+            varlivein->clear(varIdx);
+            if(taglivein) taglivein->clear(varIdx);
+        } else {
+            varlivein->set(varIdx);
+            if(taglivein) taglivein->set(varIdx);
         }
+        
     }
-
+    
     // Treat the calculated address of addp(vars, const) as the target
-    // of a store to the variable pointed to, as well as its associated tag.
-    void analyze_addp_store(LIns* ins, LIns* vars, nanojit::BitSet& varlivein, nanojit::BitSet& taglivein, const size_t varShift)
+    // of a load(or store) from/to the variable pointed to, as well as its associated tag (if a tag bitset is passed).
+    bool analyze_addp(LIns* ins, LIns* vars, nanojit::BitSet* varlivein, nanojit::BitSet* taglivein, const size_t varShift, const bool isStore)
     {
         AvmAssert(ins->isop(LIR_addp));
         if (ins->oprnd1() == vars && ins->oprnd2()->isImmP()) {
             AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), 1 << varShift));
             int d = int(uintptr_t(ins->oprnd2()->immP()) >> varShift);
-            varlivein.clear(d);
-            taglivein.clear(d);
+            update_var_liveness(varlivein, taglivein, d, isStore);
+            return true;
         }
+        return false;
     }
 
     void analyze_call(LIns* ins, LIns* catcher, LIns* vars, DEBUGGER_ONLY(bool haveDebugger, int dbg_framesize,) const size_t varShift,
@@ -8234,65 +8236,52 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             nanojit::BitSet& taglivein, LabelBitSet& taglabels)
     {
         typedef struct FuncLiveInfo{
-            const CallInfo* info;
-            uint32_t arguments;
-            uint32_t isStore;
+            const CallInfo* callinfo;
+            int32_t var_argument; /* NOTE! arguments are counted from the end! */
+            bool isStore;
+            bool tagAccess;
+            bool mustBeVarAccess;
         } FuncLiveInfo;
 
-#define ARGSTORE(i) (1 << i), (1 << i)
-#define ARGLOAD(i)  (1 << i), 0
-#define INFO1(A,B) A,B
-#define ARGINFO1(A) INFO1(A)
-        
         FuncLiveInfo varPtrFunctions[] = {
-            { FUNCTIONID(beginCatch),     ARGINFO1(ARGSTORE(4)) }, // beginCatch(core, ef, info, pc, &vars[i], &tags[i]) => store to &vars[i] and &tag[i]
-            { FUNCTIONID(makeatom),       ARGINFO1(ARGLOAD(1))  }, // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
-            { FUNCTIONID(restargHelper),  ARGINFO1(ARGLOAD(3))  }, // restargHelper(Toplevel*, Multiname*, Atom, ArrayObject**, uint32_t, Atom*)
-                                                                    // The ArrayObject** is a reference to a var
-            { FUNCTIONID(float4),         ARGINFO1(ARGSTORE(0)) }, 
-            { FUNCTIONID(float4FromComponents),                       ARGINFO1(ARGSTORE(0)) }, 
-            { FUNCTIONID(Float4VectorObject_getNativeUintProperty),   ARGINFO1(ARGSTORE(1)) },  // Float4Vector::_getNativeUintProperty(this, result, index)
-            { FUNCTIONID(Float4VectorObject_getNativeIntProperty),    ARGINFO1(ARGSTORE(1)) },  // Float4Vector::_getNativeIntProperty(this, result, index)
-            { FUNCTIONID(Float4VectorObject_getNativeDoubleProperty), ARGINFO1(ARGSTORE(1)) },  // Float4Vector::_getNativeDoubleProperty(this, result, index)
-            { FUNCTIONID(Float4VectorObject_setNativeUintProperty),   ARGINFO1(ARGLOAD(2)) },
-            { FUNCTIONID(Float4VectorObject_setNativeIntProperty),    ARGINFO1(ARGLOAD(2)) },
-            { FUNCTIONID(Float4VectorObject_setNativeDoubleProperty), ARGINFO1(ARGLOAD(2)) },
+            // beginCatch(core, ef, info, pc, &vars[i], &tags[i]) => store to &vars[i] and &tag[i]
+            { FUNCTIONID(beginCatch),                                1, true,  true,  true  }, 
+            // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
+            { FUNCTIONID(makeatom),                                  1, false, false, true  }, 
+            // restargHelper(Toplevel*, Multiname*, Atom, ArrayObject**, uint32_t, Atom*) => arrayObject** might be reference to a var
+            { FUNCTIONID(restargHelper),                             2, false, false, false }, 
+            // float4(float4_t* result, Atom val) => result might point to a local var.
+            { FUNCTIONID(float4),                                    1, true, false, false  },  
+            // Float4VectorObject::_getNativeUintProperty(this, result, index) => result might point to a local var.
+            { FUNCTIONID(Float4VectorObject_getNativeUintProperty),  1, true, false, false  },  
+            // Float4VectorObject::_getNativeIntProperty(this, result, index) => result might point to a local var.
+            { FUNCTIONID(Float4VectorObject_getNativeIntProperty),   1, true, false, false  },  
+            // Float4VectorObject::_getNativeDoubleProperty(this, result, index) => result might point to a local var.
+            { FUNCTIONID(Float4VectorObject_getNativeDoubleProperty),1, true, false, false  },  
+            // Float4VectorObject::_setFloat4UintProperty(this, index, value) => value might point to a local var.            
+            { FUNCTIONID(Float4VectorObject_setNativeUintProperty),  0, false, false, false },  
+            // Float4VectorObject::_setFloat4IntProperty(this, index, value) => value might point to a local var.            
+            { FUNCTIONID(Float4VectorObject_setNativeIntProperty),   0, false, false, false },  
+            // Float4VectorObject::_setFloat4DoubleProperty(this, index, value) => value might point to a local var.            
+            { FUNCTIONID(Float4VectorObject_setNativeDoubleProperty),0, false, false, false },
         };
         const int varPtrFunctionsNum = (int) (sizeof(varPtrFunctions) / sizeof(FuncLiveInfo));
         
         const CallInfo* ci = ins->callInfo();
-        for(int i=0;i < varPtrFunctionsNum; i++ ){
-            if(ci == varPtrFunctions[i].info){
-                uint32_t argIdx = 0;
-                uint32_t argInfo = varPtrFunctions[i].arguments;
-                uint32_t argStoreInfo = varPtrFunctions[i].isStore;
-                while (argInfo) {
-                    if((argInfo & 1) == 1) {
-                        LIns* varPtrArg = ins->arg(ins->argc()-argIdx-1);  // varPtrArg == vars, OR addp(vars, index)
-                        if (varPtrArg == vars) {
-                            if((argStoreInfo & 1) == 1){
-                                varlivein.clear(0);
-                                taglivein.clear(0);
-                            } else {
-                                varlivein.set(0);
-                            } 
-                        } else 
-                        if (varPtrArg->isop(LIR_addp)) {
-                                if((argStoreInfo & 1) == 1)
-                                    analyze_addp_store(varPtrArg, vars, varlivein, taglivein, varShift);
-                                else 
-                                    analyze_addp(varPtrArg, vars, varlivein, varShift);
-                        } else {
-                            if(ci == FUNCTIONID(makeatom))
-                                AvmAssert(!"Unexpected use of makeatom");
-                        }
-
-                    }
-                    argInfo >>= 1;
-                    argStoreInfo >>= 1;
-                    argIdx++;
-                }
-                return;
+        for(int i=0;i < varPtrFunctionsNum; i++ ) {
+            if(ci == varPtrFunctions[i].callinfo) {
+                uint32_t argIdx = varPtrFunctions[i].var_argument;
+                bool updated = false;;
+                LIns* varPtrArg = ins->arg(argIdx);  // varPtrArg == vars, OR addp(vars, index)
+                if (varPtrArg == vars) {
+                    update_var_liveness(&varlivein, varPtrFunctions[i].tagAccess? &taglivein : NULL, 0, varPtrFunctions[i].isStore);
+                    updated = true;
+                } else 
+                if (varPtrArg->isop(LIR_addp)) {
+                    updated = analyze_addp(varPtrArg, vars, &varlivein, varPtrFunctions[i].tagAccess? &taglivein : NULL, varShift, varPtrFunctions[i].isStore);
+                } 
+                AvmAssert(updated || !varPtrFunctions[i].mustBeVarAccess);
+                return; // don't continue, we handled the call. 
             }
         }
         
@@ -8408,7 +8397,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     // that the address will be used for a read rather than a store,
                     // other than that to do so would break the deadvars analysis
                     // because of the dodgy assumption made here.
-                    analyze_addp(i, vars, varlivein, VARSHIFT(info));
+                    analyze_addp(i, vars, &varlivein, NULL, VARSHIFT(info), false);
                     break;
                 CASE64(LIR_ldq:)
                 case LIR_ldi:
@@ -8546,7 +8535,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     break;
                 case LIR_addp:
                     // treat pointer calculations into vars as a read from vars
-                    analyze_addp(i, vars, varlivein, VARSHIFT(info));
+                    analyze_addp(i, vars, &varlivein, NULL, VARSHIFT(info), false);
                     break;
                 CASE64(LIR_ldq:)
                 case LIR_ldi:

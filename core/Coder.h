@@ -72,7 +72,7 @@ namespace avmplus
         virtual void writeCheckNull(const FrameState* state, uint32_t index);
         virtual void writeCoerce(const FrameState* state, uint32_t index, Traits* type);
         virtual void writeCoerceToNumeric(const FrameState* state, uint32_t index);
-        virtual void writeCoerceToFloat4(const FrameState* state, uint32_t index1, uint32_t index2, uint32_t index3, uint32_t index4);
+        virtual void writeCoerceToFloat4(const FrameState* state, uint32_t index);
         virtual void writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver*);
         virtual void writeEpilogue(const FrameState* state);
         virtual void writeBlockStart(const FrameState* state);
@@ -102,7 +102,7 @@ namespace avmplus
         void writeCheckNull(const FrameState* state, uint32_t index);
         void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
         void writeCoerceToNumeric(const FrameState* state, uint32_t index);
-        void writeCoerceToFloat4(const FrameState* state, uint32_t index1, uint32_t index2, uint32_t index3, uint32_t index4);
+        void writeCoerceToFloat4(const FrameState* state, uint32_t index);
         void writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver*);
         void writeEpilogue(const FrameState* state);
         void writeBlockStart(const FrameState* state);
@@ -125,7 +125,7 @@ namespace avmplus
         void writeNip(const FrameState* state, const uint8_t *pc, uint8_t offset);
         void writeCheckNull(const FrameState* state, uint32_t index);
         void writeCoerceToNumeric(const FrameState* state, uint32_t index);
-        void writeCoerceToFloat4(const FrameState* state, uint32_t index1, uint32_t index2, uint32_t index3, uint32_t index4);
+        void writeCoerceToFloat4(const FrameState* state, uint32_t index1);
         void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
         void writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver*);
         void writeEpilogue(const FrameState* state);
