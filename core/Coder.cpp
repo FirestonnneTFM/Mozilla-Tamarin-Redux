@@ -95,10 +95,10 @@ namespace avmplus
         coder2->writeCoerceToNumeric(state, index);
     }
 
-    void TeeWriter::writeCoerceToFloat4(const FrameState* state, uint32_t index1, uint32_t index2, uint32_t index3, uint32_t index4);
+    void TeeWriter::writeCoerceToFloat4(const FrameState* state, uint32_t index);
     {
-        coder1->writeCoerceToFloat4(state, index1, index2, index3, index4);
-        coder2->writeCoerceToFloat4(state, index1, index2, index3, index4);
+        coder1->writeCoerceToFloat4(state, index);
+        coder2->writeCoerceToFloat4(state, index);
     }
 
     void TeeWriter::writeCoerce(const FrameState* state, uint32_t index, Traits *type)
@@ -184,9 +184,9 @@ namespace avmplus
         coder->writeCoerceToNumeric(state, index);
     }
 
-    void NullWriter::writeCoerceToFloat4(const FrameState* state, uint32_t index1, uint32_t index2, uint32_t index3, uint32_t index4)
+    void NullWriter::writeCoerceToFloat4(const FrameState* state, uint32_t index)
     {
-        coder->writeCoerceToFloat4(state, index1, index2, index3, index4);
+        coder->writeCoerceToFloat4(state, index);
     }
     
     void NullWriter::writeCoerce(const FrameState* state, uint32_t index, Traits *type)
@@ -285,7 +285,7 @@ namespace avmplus
     void CodeWriter::writeCoerceToNumeric(const FrameState*, uint32_t)
     { }
 
-    void CodeWriter::writeCoerceToFloat4(const FrameState*, uint32_t, uint32_t, uint32_t, uint32_t)
+    void CodeWriter::writeCoerceToFloat4(const FrameState*, uint32_t)
     { }
 
     void CodeWriter::writeCoerce(const FrameState*, uint32_t, Traits*)

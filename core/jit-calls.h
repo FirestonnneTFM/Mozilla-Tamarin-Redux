@@ -463,7 +463,6 @@
 #ifdef VMCFG_FLOAT
     PUREFUNCTION(FUNCADDR(AvmCore::singlePrecisionFloat), SIG1(F,A), singlePrecisionFloat)
     FUNCTION(FUNCADDR(AvmCore::float4), SIG2(V,RF4,A), float4)
-    FUNCTION(FUNCADDR(Float4Class::fromComponents), SIG5(V,RF4,F,F,F,F), float4FromComponents)
 #endif
     METHOD(ENVADDR(MethodEnv::hasnextproto), SIG3(I,P,P,P), hasnextproto)
 

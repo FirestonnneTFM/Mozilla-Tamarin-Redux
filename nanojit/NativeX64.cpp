@@ -1350,15 +1350,15 @@ namespace nanojit
         NanoAssert(ins->isF4() && x->isF() && y->isF() && z->isF() && w->isF());
         
         Register rr = prepareResultReg(ins, FpRegs);
-        Register rw = findRegFor(w, FpRegs);
-        if (rw != rr) 
-            MOVAPSR(rr, rw);
-        Register rz = findRegFor(z, FpRegs & ~rmask(rw));
-        UNPCKLPS(rw,rz);// x y z w 
-        Register rx = findRegFor(x, FpRegs & ~(rmask(rw) | rmask(rz)));
-        UNPCKLPS(rz,rx);// * * x z 
-        Register ry = findRegFor(y, FpRegs & ~rmask(rw));
-        UNPCKLPS(rw,ry);// * * y w
+        Register rx = findRegFor(x, FpRegs);
+        if (rx != rr) 
+            MOVAPSR(rr, rx);
+        Register ry = findRegFor(y, FpRegs & ~rmask(rx));
+        UNPCKLPS(rx,ry);// x y z w 
+        Register rw = findRegFor(w, FpRegs & ~(rmask(rx) | rmask(ry)));
+        UNPCKLPS(ry,rw);// y w y w 
+        Register rz = findRegFor(z, FpRegs & ~rmask(rx));
+        UNPCKLPS(rx,rz);// x z x z
         freeResourcesOf(ins);
     }
     

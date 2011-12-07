@@ -618,7 +618,7 @@ namespace avmplus
         void writeCheckNull(const FrameState* state, uint32_t index);
         void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
         void writeCoerceToNumeric(const FrameState* state, uint32_t index);
-        void writeCoerceToFloat4(const FrameState* state, uint32_t index1, uint32_t index2, uint32_t index3, uint32_t index4);
+        void writeCoerceToFloat4(const FrameState* state, uint32_t index);
         void writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver*);
         void writeEpilogue(const FrameState* state);
         void writeBlockStart(const FrameState* state);
