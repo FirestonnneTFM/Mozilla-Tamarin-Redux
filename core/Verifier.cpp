@@ -2753,7 +2753,7 @@ namespace avmplus
             } else {
                 AvmAssert(argc == 4);
                 AvmAssert(opcode != OP_callpropvoid);
-                coder->writeCoerceToFloat4(state, sp, sp-1, sp-2, sp-3);
+                coder->writeCoerceToFloat4(state, sp);
                 state->setType(sp, FLOAT4_TYPE, true);
             }
         }

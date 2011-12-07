@@ -3723,15 +3723,15 @@ namespace nanojit
         NanoAssert(_config.i386_sse2);
         
         Register rr = prepareResultReg(ins, XmmRegs);
-        Register rw = findRegFor(w, XmmRegs);
-        if (rw != rr) 
-            SSE_MOVAPS(rr, rw);
-        Register rz = findRegFor(z, XmmRegs & ~rmask(rw));
-        SSE_UNPCKLPS(rw,rz);// x y z w 
-        Register rx = findRegFor(x, XmmRegs & ~(rmask(rw) | rmask(rz)));
-        SSE_UNPCKLPS(rz,rx);// * * x z 
-        Register ry = findRegFor(y, XmmRegs & ~rmask(rw));
-        SSE_UNPCKLPS(rw,ry);// * * y w
+        Register rx = findRegFor(x, XmmRegs);
+        if (rx != rr) 
+            SSE_MOVAPS(rr, rx);
+        Register ry = findRegFor(y, XmmRegs & ~rmask(rx));
+        SSE_UNPCKLPS(rx,ry);// x y z w 
+        Register rw = findRegFor(w, XmmRegs & ~(rmask(rx) | rmask(ry)));
+        SSE_UNPCKLPS(ry,rw);// y w y w 
+        Register rz = findRegFor(z, XmmRegs & ~rmask(rx));
+        SSE_UNPCKLPS(rx,rz);// x z x z
         freeResourcesOf(ins);
     }
     
