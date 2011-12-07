@@ -1194,7 +1194,7 @@
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getUintProperty), SIG2(A,P,U), FloatVectorObject_getUintProperty)
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getNativeUintProperty), SIG2(F,P,U), FloatVectorObject_getNativeUintProperty)
     METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getUintProperty), SIG2(A,P,U), Float4VectorObject_getUintProperty)
-    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getFloat4UintProperty), SIG3(V,RF4,P,U), Float4VectorObject_getNativeUintProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getFloat4UintProperty), SIG3(V,P,RF4,U), Float4VectorObject_getNativeUintProperty)
 #endif
 
     METHOD(ENVADDR(MethodEnv::getpropertylate_i), SIG3(A,P,A,I), getpropertylate_i)
@@ -1210,7 +1210,7 @@
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getIntProperty), SIG2(A,P,I), FloatVectorObject_getIntProperty)
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getNativeIntProperty), SIG2(F,P,I), FloatVectorObject_getNativeIntProperty)
     METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getIntProperty), SIG2(A,P,I), Float4VectorObject_getIntProperty)
-    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getFloat4IntProperty), SIG3(V,RF4,P,I), Float4VectorObject_getNativeIntProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getFloat4IntProperty), SIG3(V,P,RF4,I), Float4VectorObject_getNativeIntProperty)
 #endif
 
     METHOD(ENVADDR(MethodEnv::getpropertylate_d), SIG3(A,P,A,D), getpropertylate_d)
@@ -1226,7 +1226,7 @@
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getDoubleProperty), SIG2(A,P,D), FloatVectorObject_getDoubleProperty)
     METHOD(VECTORFLOATADDR(FloatVectorObject::_getNativeDoubleProperty), SIG2(F,P,D), FloatVectorObject_getNativeDoubleProperty)
     METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getDoubleProperty), SIG2(A,P,D), Float4VectorObject_getDoubleProperty)
-    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getFloat4DoubleProperty), SIG3(V,RF4,P,D), Float4VectorObject_getNativeDoubleProperty)
+    METHOD(VECTORFLOAT4ADDR(Float4VectorObject::_getFloat4DoubleProperty), SIG3(V,P,RF4,D), Float4VectorObject_getNativeDoubleProperty)
 #endif
 
     METHOD(ENVADDR(MethodEnv::haspropertylate_u), SIG3(I,P,A,U), haspropertylate_u)

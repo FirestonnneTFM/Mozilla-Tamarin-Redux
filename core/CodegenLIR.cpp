@@ -5322,7 +5322,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         suspendCSE();
         branchToLabel(LIR_jf, cmp, begin_label);
         if(load_item == LIR_ldf4)
-            callIns(helper, 3, InsConstPtr(NULL), localGetp(objIndexOnStack), index);  // we don't really need the returned arg, hence we pass null.
+            callIns(helper, 3, localGetp(objIndexOnStack), InsConstPtr(NULL), index);  // we don't really need the returned arg, hence we pass null.
         else
             callIns(helper, 2, localGetp(objIndexOnStack), index);
         emitLabel(begin_label);
@@ -5528,7 +5528,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 }
                 /* handle here the case of native helpers, it is different than all the others */
                 LIns* retval = lirout->insAlloc(sizeof(float4_t));
-                callIns(getFloat4VectorNativeHelpers[idxKind], 3, lea(0, retval), localGetp(objIndexOnStack), index);
+                callIns(getFloat4VectorNativeHelpers[idxKind], 3, localGetp(objIndexOnStack), lea(0, retval), index);
                 return ldf4(retval, 0, ACCSET_OTHER);
             }
             else {
@@ -8251,9 +8251,9 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                                                                     // The ArrayObject** is a reference to a var
             { FUNCTIONID(float4),         ARGINFO1(ARGSTORE(0)) }, 
             { FUNCTIONID(float4FromComponents),                       ARGINFO1(ARGSTORE(0)) }, 
-            { FUNCTIONID(Float4VectorObject_getNativeUintProperty),   ARGINFO1(ARGSTORE(0)) },
-            { FUNCTIONID(Float4VectorObject_getNativeIntProperty),    ARGINFO1(ARGSTORE(0)) },
-            { FUNCTIONID(Float4VectorObject_getNativeDoubleProperty), ARGINFO1(ARGSTORE(0)) },
+            { FUNCTIONID(Float4VectorObject_getNativeUintProperty),   ARGINFO1(ARGSTORE(1)) },  // Float4Vector::_getNativeUintProperty(this, result, index)
+            { FUNCTIONID(Float4VectorObject_getNativeIntProperty),    ARGINFO1(ARGSTORE(1)) },  // Float4Vector::_getNativeIntProperty(this, result, index)
+            { FUNCTIONID(Float4VectorObject_getNativeDoubleProperty), ARGINFO1(ARGSTORE(1)) },  // Float4Vector::_getNativeDoubleProperty(this, result, index)
             { FUNCTIONID(Float4VectorObject_setNativeUintProperty),   ARGINFO1(ARGLOAD(2)) },
             { FUNCTIONID(Float4VectorObject_setNativeIntProperty),    ARGINFO1(ARGLOAD(2)) },
             { FUNCTIONID(Float4VectorObject_setNativeDoubleProperty), ARGINFO1(ARGLOAD(2)) },
