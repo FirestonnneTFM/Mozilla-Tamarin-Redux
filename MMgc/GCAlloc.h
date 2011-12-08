@@ -106,7 +106,7 @@ namespace MMgc
      * If the size managed by the allocator is divisible by 2^k and k >= 3 then
      * the alignment of an object returned by Alloc is on a 2^k byte boundary.
      *
-     * Note that any space for Debug headers is added outside GCAlloc, and that 
+     * Note that any space for Debug headers is added outside GCAlloc, and that
      * GC::Alloc has a weaker invariant in Debug builds, guaranteeing at most
      * 16 bytes of alignment for k >= 4.
      *
@@ -178,7 +178,7 @@ namespace MMgc
         // Return the actual size of items managed by this allocator (includes debugging overheads)
         REALLY_INLINE uint32_t GetItemSize() { return m_itemSize; }
         
-        // Return the number of live objects owned by this allocator in *numAlloc and 
+        // Return the number of live objects owned by this allocator in *numAlloc and
         // the number of objects (live and free) owned by this allocator in *maxAlloc.
         void GetAllocStats(int& numAlloc, int& maxAlloc) const;
 
@@ -347,8 +347,8 @@ namespace MMgc
 #endif
 
         // NOTE that GetObjectIndex and GetBitsIndex are not the same if MMGC_FASTBITS
-        // is defined.  That is an efficiency concern; the representation of the bits 
-        // table allows the bits index to be computed more quickly, and that shortens 
+        // is defined.  That is an efficiency concern; the representation of the bits
+        // table allows the bits index to be computed more quickly, and that shortens
         // the hot control paths.  Both functions are very hot.
 
         // Compute the offset within the block of the given object.
