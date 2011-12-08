@@ -739,9 +739,9 @@ namespace avmplus
     {}
 
     void WordcodeEmitter::writeCoerceToNumeric(const FrameState*, uint32_t)
-    { AvmAssert(!"FIXME: implement CoerceToNumeric in the wordcode interpreter"); }
+    { AvmAssert(!"FIXME: implement CoerceToNumeric in the wordcode interpreter"); GCHeap::Abort(); }
     void WordcodeEmitter::writeCoerceToFloat4(const FrameState*, uint32_t) 
-    { AvmAssert(!"FIXME: implement CoerceToFloat4 in the wordcode interpreter"); }
+    { AvmAssert(!"FIXME: implement CoerceToFloat4 in the wordcode interpreter"); GCHeap::Abort(); }
 
     void WordcodeEmitter::emitOp1(const uint8_t *pc, WordOpcode opcode)
     {
