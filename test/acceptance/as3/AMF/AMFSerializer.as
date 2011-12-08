@@ -55,204 +55,204 @@ writeHeaderToLog( SECTION + " "+ TITLE );
 
 class CustomDynamicPropertyWriter implements IDynamicPropertyWriter {
 
-	public function CustomDynamicPropertyWriter() {
-		// constructor code
-	}
-	
-	public function writeDynamicProperties(obj:Object, output:IDynamicPropertyOutput):void
-	{
-		for(var prop:* in obj)
-		{
-			if(prop != "notforserializing") {
-				output.writeDynamicProperty(prop, obj[prop]);
-			}
-		}
-	}
+    public function CustomDynamicPropertyWriter() {
+        // constructor code
+    }
+    
+    public function writeDynamicProperties(obj:Object, output:IDynamicPropertyOutput):void
+    {
+        for(var prop:* in obj)
+        {
+            if(prop != "notforserializing") {
+                output.writeDynamicProperty(prop, obj[prop]);
+            }
+        }
+    }
 
 }
 
 class SimpleIExternalizable implements IExternalizable {
 
-		public var stringtest:String = "Sample";
-	
-		 public function writeExternal(output:IDataOutput):void {
-				 output.writeObject("IExternalizable String");
-		}
-		 public function readExternal(input:IDataInput):void {
-				stringtest = input.readObject();
-	}
+        public var stringtest:String = "Sample";
+    
+         public function writeExternal(output:IDataOutput):void {
+                 output.writeObject("IExternalizable String");
+        }
+         public function readExternal(input:IDataInput):void {
+                stringtest = input.readObject();
+    }
 }
 
 dynamic class UDefDynClassWithDynamicAttrs {
 
-	public var obj_DynamicVar:Object;
-	public function UDefDynClassWithDynamicAttrs() {
-		// constructor code
-		obj_DynamicVar = new Object();
-	}
+    public var obj_DynamicVar:Object;
+    public function UDefDynClassWithDynamicAttrs() {
+        // constructor code
+        obj_DynamicVar = new Object();
+    }
 
 }
 
 class UserDefClassAllTypes {
-	
-	//Null
-	public var null_Obj;
-	//Boolean - True
-	public var bool_True_Obj:Boolean;
-	//Boolean - False
-	public var bool_False_Obj:Boolean;
-	//Integer - Positive
-	public var int_Positive_type:int;
-	//Unsigned Integer - Value
-	public var uint_Value_type:uint;
-	//Number - Positive Value
-	public var num_Positive_Obj:Number;
-	//Number - Min Value
-	public var num_Min_Obj:Number;
-	//String - title case
-	public var str_Title_Obj:String;
-	//Date - 18/07/2011 9:10:01:10 AM
-	public var dt_Fixed_Obj:Date;
-	//Array - Index : int Value: String
-	public var arr_IntStr_Obj:Array;
-	//Array - Index : Mixed Value: Mixed
-	public var arr_MixMix_Obj:Array;
-	//XML
-	public var xml_Obj:XML;
-	//Vector int typed
-	public var vct_int_Obj:Vector.<int>;
-	//Vector object typed
-	public var obj_Test3:Object;
-	public var obj_Test4:Object;
-	public var vct_obj_Obj:Vector.<Object>;
-	public var dict_StrStr_Obj:Dictionary 
-	//ByteArray - Empty
-	public var ba_Empty_Obj:ByteArray;
-	//ByteArray - String
-	public var ba_Str_Obj:ByteArray;
-	
+    
+    //Null
+    public var null_Obj;
+    //Boolean - True
+    public var bool_True_Obj:Boolean;
+    //Boolean - False
+    public var bool_False_Obj:Boolean;
+    //Integer - Positive
+    public var int_Positive_type:int;
+    //Unsigned Integer - Value
+    public var uint_Value_type:uint;
+    //Number - Positive Value
+    public var num_Positive_Obj:Number;
+    //Number - Min Value
+    public var num_Min_Obj:Number;
+    //String - title case
+    public var str_Title_Obj:String;
+    //Date - 18/07/2011 9:10:01:10 AM
+    public var dt_Fixed_Obj:Date;
+    //Array - Index : int Value: String
+    public var arr_IntStr_Obj:Array;
+    //Array - Index : Mixed Value: Mixed
+    public var arr_MixMix_Obj:Array;
+    //XML
+    public var xml_Obj:XML;
+    //Vector int typed
+    public var vct_int_Obj:Vector.<int>;
+    //Vector object typed
+    public var obj_Test3:Object;
+    public var obj_Test4:Object;
+    public var vct_obj_Obj:Vector.<Object>;
+    public var dict_StrStr_Obj:Dictionary
+    //ByteArray - Empty
+    public var ba_Empty_Obj:ByteArray;
+    //ByteArray - String
+    public var ba_Str_Obj:ByteArray;
+    
 
-	public function UserDefClassAllTypes() {
-		// constructor code
-	}
+    public function UserDefClassAllTypes() {
+        // constructor code
+    }
 
-	public function Init():void {
-		//Null
-		null_Obj = null;
-		//Boolean - True
-		bool_True_Obj = true;
-		//Boolean - False
-		bool_False_Obj = false;
-		//Integer - Positive
-		int_Positive_type = 100;
-		//Unsigned Integer - Value
-		uint_Value_type = 2000;
-		//Number - Positive Value
-		num_Positive_Obj = new Number(100);
-		//Number - Min Value
-		num_Min_Obj = new Number(Number.MIN_VALUE);
-		//String - title case
-		str_Title_Obj = new String("A Quick Brown Fox Jumps Over A Lazy Dog");
-		//Date - 18/07/2011 9:10:01:10 AM
-		dt_Fixed_Obj = new Date(2011,07,18,9,10,01,10);
-		//Array - Index : int Value: String
-		arr_IntStr_Obj = new Array("TEST1", "TEST2", "TEST3", "TEST4");
-		//Array - Index : Mixed Value: Mixed
-		arr_MixMix_Obj = new Array();
-		arr_MixMix_Obj["TEST1"] = 1;
-		arr_MixMix_Obj[2] = "Search Engine 2";
-		arr_MixMix_Obj[3] = "Search Engine 3";
-		arr_MixMix_Obj["TEST2"] = 4;
-		//XML
-		xml_Obj = <employee><name>XANDER</name><id>xan007</id><address>#5, Salarpuria Infinity, Bannerghatta Road, Bangalore</address></employee>;
-		//Vector int typed
-		vct_int_Obj = new <int>[-1,100, 200, -200, 0, int.MIN_VALUE, int.MAX_VALUE];
-		//Vector object typed
-		obj_Test3 = new Object();
-		obj_Test3.value = "VALUE 1";
-		obj_Test4 = new Object();
-		obj_Test4.value = "VALUE 2";
-		vct_obj_Obj = new <Object>[obj_Test3, obj_Test4]
-		//Vector object
-		dict_StrStr_Obj= new Dictionary();
-		dict_StrStr_Obj["key1"] = "value1";
-		dict_StrStr_Obj["key2"] = "value2";
-		//ByteArray - String
-		ba_Str_Obj = new ByteArray();
-		ba_Str_Obj.writeObject("BYTE ARRAY TEST");
-	}
+    public function Init():void {
+        //Null
+        null_Obj = null;
+        //Boolean - True
+        bool_True_Obj = true;
+        //Boolean - False
+        bool_False_Obj = false;
+        //Integer - Positive
+        int_Positive_type = 100;
+        //Unsigned Integer - Value
+        uint_Value_type = 2000;
+        //Number - Positive Value
+        num_Positive_Obj = new Number(100);
+        //Number - Min Value
+        num_Min_Obj = new Number(Number.MIN_VALUE);
+        //String - title case
+        str_Title_Obj = new String("A Quick Brown Fox Jumps Over A Lazy Dog");
+        //Date - 18/07/2011 9:10:01:10 AM
+        dt_Fixed_Obj = new Date(2011,07,18,9,10,01,10);
+        //Array - Index : int Value: String
+        arr_IntStr_Obj = new Array("TEST1", "TEST2", "TEST3", "TEST4");
+        //Array - Index : Mixed Value: Mixed
+        arr_MixMix_Obj = new Array();
+        arr_MixMix_Obj["TEST1"] = 1;
+        arr_MixMix_Obj[2] = "Search Engine 2";
+        arr_MixMix_Obj[3] = "Search Engine 3";
+        arr_MixMix_Obj["TEST2"] = 4;
+        //XML
+        xml_Obj = <employee><name>XANDER</name><id>xan007</id><address>#5, Salarpuria Infinity, Bannerghatta Road, Bangalore</address></employee>;
+        //Vector int typed
+        vct_int_Obj = new <int>[-1,100, 200, -200, 0, int.MIN_VALUE, int.MAX_VALUE];
+        //Vector object typed
+        obj_Test3 = new Object();
+        obj_Test3.value = "VALUE 1";
+        obj_Test4 = new Object();
+        obj_Test4.value = "VALUE 2";
+        vct_obj_Obj = new <Object>[obj_Test3, obj_Test4]
+        //Vector object
+        dict_StrStr_Obj= new Dictionary();
+        dict_StrStr_Obj["key1"] = "value1";
+        dict_StrStr_Obj["key2"] = "value2";
+        //ByteArray - String
+        ba_Str_Obj = new ByteArray();
+        ba_Str_Obj.writeObject("BYTE ARRAY TEST");
+    }
 
 }
 
 dynamic class UserDefinedDynamicClass {
 
-	public var strPubString:String;
-	private var strPrivString:String;
-	protected var strProtString:String;
-	public const strPubConstString:String = new String("User Defined Dynamic Class Public Constant Variable");
+    public var strPubString:String;
+    private var strPrivString:String;
+    protected var strProtString:String;
+    public const strPubConstString:String = new String("User Defined Dynamic Class Public Constant Variable");
 
-	
-	public function UserDefinedDynamicClass() {
-		strPubString = new String("User Defined Dynamic Class Public Variable");
-		strPrivString = new String("User Defined Dynamic Class Private Variable");
-		strProtString = new String("User Defined Dynamic Class Protected Variable"); 
-	}
-	
-	public function getPrivString()
-	{
-		return strPrivString;
-	}
-	
-	public function getProtString()
-	{
-		return strProtString;
-	}
-	
-	public function setPrivString(str:String)
-	{
-		strPrivString = str;
-	}
-	
-	public function setProtString(str:String)
-	{
-		strProtString = str;
-	}
+    
+    public function UserDefinedDynamicClass() {
+        strPubString = new String("User Defined Dynamic Class Public Variable");
+        strPrivString = new String("User Defined Dynamic Class Private Variable");
+        strProtString = new String("User Defined Dynamic Class Protected Variable");
+    }
+    
+    public function getPrivString()
+    {
+        return strPrivString;
+    }
+    
+    public function getProtString()
+    {
+        return strProtString;
+    }
+    
+    public function setPrivString(str:String)
+    {
+        strPrivString = str;
+    }
+    
+    public function setProtString(str:String)
+    {
+        strProtString = str;
+    }
 }
 
 
 final class UserDefinedFinalClass {
-	
-	public var strPubString:String;
-	private var strPrivString:String;
-	protected var strProtString:String;
-	public const strPubConstString:String = new String("User Defined Final Class Public Constant Variable");
-	
-	public function UserDefinedFinalClass() {
-		// constructor code
-		strPubString = new String("User Defined Final Class Public Variable");
-		strPrivString = new String("User Defined Final Class Private Variable");
-		strProtString = new String("User Defined Final Class Protected Variable"); 
-	}
-	
-	public function getPrivString()
-	{
-		return strPrivString;
-	}
-	
-	public function getProtString()
-	{
-		return strProtString;
-	}
-	
-	public function setPrivString(str:String)
-	{
-		strPrivString = str;
-	}
-	
-	public function setProtString(str:String)
-	{
-		strProtString = str;
-	}
+    
+    public var strPubString:String;
+    private var strPrivString:String;
+    protected var strProtString:String;
+    public const strPubConstString:String = new String("User Defined Final Class Public Constant Variable");
+    
+    public function UserDefinedFinalClass() {
+        // constructor code
+        strPubString = new String("User Defined Final Class Public Variable");
+        strPrivString = new String("User Defined Final Class Private Variable");
+        strProtString = new String("User Defined Final Class Protected Variable");
+    }
+    
+    public function getPrivString()
+    {
+        return strPrivString;
+    }
+    
+    public function getProtString()
+    {
+        return strProtString;
+    }
+    
+    public function setPrivString(str:String)
+    {
+        strPrivString = str;
+    }
+    
+    public function setProtString(str:String)
+    {
+        strProtString = str;
+    }
 
 }
 
@@ -440,7 +440,7 @@ AddTestCase("Object with Dynamic Properties : Prop 3 (1)", obj_dyn_Obj.testvalue
 
 //Undefined Value
 var obj_Undefined = undefined;
-//Testing Undefined - Starts 
+//Testing Undefined - Starts
 ba_TestObject = new ByteArray();
 ba_TestObject.writeObject(obj_Undefined);
 ba_TestObject.position = 0;
@@ -509,368 +509,368 @@ compareUserDefTypes("User Defined Class", userdef_Obj, ba_TestObject.readObject(
 
 function buildBAnCallAddTC(strTitle:String, input:*)
 {
-	var ba_test_Obj:ByteArray = new ByteArray();
-	ba_test_Obj.writeObject(input);
-	ba_test_Obj.position = 0;
-	AddTestCase(strTitle, input, ba_test_Obj.readObject());
+    var ba_test_Obj:ByteArray = new ByteArray();
+    ba_test_Obj.writeObject(input);
+    ba_test_Obj.position = 0;
+    AddTestCase(strTitle, input, ba_test_Obj.readObject());
 }
 
 function testNaN(strTitle:String, input:Number)
 {
-	var ba_test_Obj:ByteArray = new ByteArray();
-	ba_test_Obj.writeObject(input);
-	ba_test_Obj.position = 0;
-	
-	AddTestCase(strTitle, isNaN(input), isNaN(ba_test_Obj.readObject()));
+    var ba_test_Obj:ByteArray = new ByteArray();
+    ba_test_Obj.writeObject(input);
+    ba_test_Obj.position = 0;
+    
+    AddTestCase(strTitle, isNaN(input), isNaN(ba_test_Obj.readObject()));
 }
 
 function testDate(strTitle:String, input:Date)
 {
-	var ba_test_Obj:ByteArray = new ByteArray();
-	ba_test_Obj.writeObject(input);
-	ba_test_Obj.position = 0;
-	compareDates(strTitle, input, ba_test_Obj.readObject());
+    var ba_test_Obj:ByteArray = new ByteArray();
+    ba_test_Obj.writeObject(input);
+    ba_test_Obj.position = 0;
+    compareDates(strTitle, input, ba_test_Obj.readObject());
 }
 
 function compareDates(strTitle:String, input:Date, actual:Date)
 {
-	AddTestCase(strTitle, input.getTime(), actual.getTime());
+    AddTestCase(strTitle, input.getTime(), actual.getTime());
 }
 
 function testArrayTypes(strTitle:String, input:Array)
 {
-	var ba_test_Obj:ByteArray = new ByteArray();
-	ba_test_Obj.writeObject(input);
-	ba_test_Obj.position = 0;
-	var actual:Array = ba_test_Obj.readObject();
-	compareArrays(strTitle, input, actual);
+    var ba_test_Obj:ByteArray = new ByteArray();
+    ba_test_Obj.writeObject(input);
+    ba_test_Obj.position = 0;
+    var actual:Array = ba_test_Obj.readObject();
+    compareArrays(strTitle, input, actual);
 }
 
 function compareArrays(strTitle:String, input:Array, actual:Array)
 {
-	var propInput:Array = new Array();
-	for (var p:* in input) {
-		propInput.push(p);
-	}
-	propInput = propInput.sort();
+    var propInput:Array = new Array();
+    for (var p:* in input) {
+        propInput.push(p);
+    }
+    propInput = propInput.sort();
 
 
-	var propActual:Array = new Array();
-	for (var p1:* in input) {
-		propActual.push(p1);
-	}
-	propActual = propActual.sort();
+    var propActual:Array = new Array();
+    for (var p1:* in input) {
+        propActual.push(p1);
+    }
+    propActual = propActual.sort();
 
 
-	for each (var prop:* in propInput)
-	{
-		if(input[prop] is UserDefClassAllTypes && actual[prop] is UserDefClassAllTypes)
-		{
-			compareUserDefTypes(strTitle, input[prop], actual[prop]);
-		}
-		else
-		{
-			AddTestCase(strTitle + " value check EXP vs ACT: " + prop, input[prop], actual[prop]);
-		}
-	}
-	for each (var prop1:* in propActual)
-	{
-		if(input[prop1] is UserDefClassAllTypes && actual[prop1] is UserDefClassAllTypes)
-		{
-			compareUserDefTypes(strTitle, input[prop1], actual[prop1]);
-		}
-		else
-		{
-			AddTestCase(strTitle + " value check ACT vs EXP: " + prop1, actual[prop1], input[prop1]);
-		}
-	}
+    for each (var prop:* in propInput)
+    {
+        if(input[prop] is UserDefClassAllTypes && actual[prop] is UserDefClassAllTypes)
+        {
+            compareUserDefTypes(strTitle, input[prop], actual[prop]);
+        }
+        else
+        {
+            AddTestCase(strTitle + " value check EXP vs ACT: " + prop, input[prop], actual[prop]);
+        }
+    }
+    for each (var prop1:* in propActual)
+    {
+        if(input[prop1] is UserDefClassAllTypes && actual[prop1] is UserDefClassAllTypes)
+        {
+            compareUserDefTypes(strTitle, input[prop1], actual[prop1]);
+        }
+        else
+        {
+            AddTestCase(strTitle + " value check ACT vs EXP: " + prop1, actual[prop1], input[prop1]);
+        }
+    }
 }
 
 function testXMLTypes(strTitle:String, input:XML)
 {
-	var ba_test_Obj:ByteArray = new ByteArray();
-	ba_test_Obj.writeObject(input);
-	ba_test_Obj.position = 0;
-	compareXMLS(strTitle, input, ba_test_Obj.readObject());
+    var ba_test_Obj:ByteArray = new ByteArray();
+    ba_test_Obj.writeObject(input);
+    ba_test_Obj.position = 0;
+    compareXMLS(strTitle, input, ba_test_Obj.readObject());
 }
 
 function compareXMLS(strTitle:String, input:XML, actual:XML)
 {
-	AddTestCase(strTitle, input.toString(), actual.toString());
+    AddTestCase(strTitle, input.toString(), actual.toString());
 }
 
 function compareObjects(strTitle:String, input:Object, actual:Object)
 {
-	var propInput:Array = new Array();
-	var propActual:Array = new Array();
-	for (var p:* in input)
-	{
-		propInput.push(p);
-	}
+    var propInput:Array = new Array();
+    var propActual:Array = new Array();
+    for (var p:* in input)
+    {
+        propInput.push(p);
+    }
 
-	propInput = propInput.sort();
+    propInput = propInput.sort();
 
-	for (var p1:* in actual)
-	{
-		propActual.push(p1); 
-	}
+    for (var p1:* in actual)
+    {
+        propActual.push(p1);
+    }
 
-	propActual = propActual.sort();
+    propActual = propActual.sort();
 
-	for each (var prop:* in propInput)
-	{
-		AddTestCase(strTitle, input[prop], actual[prop]);
-	}
-	for each (var prop1:* in propActual)
-	{
-		AddTestCase(strTitle, actual[prop1], input[prop1]);
-	}
-	
+    for each (var prop:* in propInput)
+    {
+        AddTestCase(strTitle, input[prop], actual[prop]);
+    }
+    for each (var prop1:* in propActual)
+    {
+        AddTestCase(strTitle, actual[prop1], input[prop1]);
+    }
+    
 }
 
 function testVectorTypesInt(strTitle:String, input:Vector.<int>)
 {
-	var ba_test_Obj:ByteArray = new ByteArray();
-	ba_test_Obj.writeObject(input);
-	ba_test_Obj.position = 0;
-	compareVectorsInt(strTitle, input, ba_test_Obj.readObject());
+    var ba_test_Obj:ByteArray = new ByteArray();
+    ba_test_Obj.writeObject(input);
+    ba_test_Obj.position = 0;
+    compareVectorsInt(strTitle, input, ba_test_Obj.readObject());
 }
 
 function compareVectorsInt(strTitle:String, input:Vector.<int>, actual:Vector.<int>)
 {
-	var inputlen:int = input.length;
-	var actuallen:int = actual.length;
-	
-	AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
-	if(inputlen == actuallen)
-	{
-		for (var i:int; i < inputlen; i++)
-		{
-			AddTestCase(strTitle, input[i], actual[i]);
-		}
-	}
+    var inputlen:int = input.length;
+    var actuallen:int = actual.length;
+    
+    AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
+    if(inputlen == actuallen)
+    {
+        for (var i:int; i < inputlen; i++)
+        {
+            AddTestCase(strTitle, input[i], actual[i]);
+        }
+    }
 }
 
 function testVectorTypesUInt(strTitle:String, input:Vector.<uint>)
 {
-	var ba_test_Obj:ByteArray = new ByteArray();
-	ba_test_Obj.writeObject(input);
-	ba_test_Obj.position = 0;
-	compareVectorsUInt(strTitle, input, ba_test_Obj.readObject());
+    var ba_test_Obj:ByteArray = new ByteArray();
+    ba_test_Obj.writeObject(input);
+    ba_test_Obj.position = 0;
+    compareVectorsUInt(strTitle, input, ba_test_Obj.readObject());
 }
 
 function compareVectorsUInt(strTitle:String, input:Vector.<uint>, actual:Vector.<uint>)
 {
-	var inputlen:int = input.length;
-	var actuallen:int = actual.length;
-	
-	AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
-	if(inputlen == actuallen)
-	{
-		for (var i:int; i < inputlen; i++)
-		{
-			AddTestCase(strTitle, input[i], actual[i]);
-			
-		}
-	}
+    var inputlen:int = input.length;
+    var actuallen:int = actual.length;
+    
+    AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
+    if(inputlen == actuallen)
+    {
+        for (var i:int; i < inputlen; i++)
+        {
+            AddTestCase(strTitle, input[i], actual[i]);
+            
+        }
+    }
 }
 
 function testVectorTypesNumber(strTitle:String, input:Vector.<Number>)
 {
-	var ba_test_Obj:ByteArray = new ByteArray();
-	ba_test_Obj.writeObject(input);
-	ba_test_Obj.position = 0;
-	compareVectorsNumber(strTitle, input, ba_test_Obj.readObject());
+    var ba_test_Obj:ByteArray = new ByteArray();
+    ba_test_Obj.writeObject(input);
+    ba_test_Obj.position = 0;
+    compareVectorsNumber(strTitle, input, ba_test_Obj.readObject());
 }
 
 function compareVectorsNumber(strTitle:String, input:Vector.<Number>, actual:Vector.<Number>)
 {
-	var inputlen:int = input.length;
-	var actuallen:int = actual.length;
-	
-	AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
-	if(inputlen == actuallen)
-	{
-		for (var i:int; i < inputlen; i++)
-		{
-			AddTestCase(strTitle, input[i], actual[i]);
-		}
-	}
+    var inputlen:int = input.length;
+    var actuallen:int = actual.length;
+    
+    AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
+    if(inputlen == actuallen)
+    {
+        for (var i:int; i < inputlen; i++)
+        {
+            AddTestCase(strTitle, input[i], actual[i]);
+        }
+    }
 }
 
 function testVectorTypesObject(strTitle:String, input:Vector.<Object>)
 {
-	var ba_test_Obj:ByteArray = new ByteArray();
-	ba_test_Obj.writeObject(input);
-	ba_test_Obj.position = 0;
-	compareVectorsObject(strTitle, input, ba_test_Obj.readObject());
+    var ba_test_Obj:ByteArray = new ByteArray();
+    ba_test_Obj.writeObject(input);
+    ba_test_Obj.position = 0;
+    compareVectorsObject(strTitle, input, ba_test_Obj.readObject());
 }
 
 function compareVectorsObject(strTitle:String, input:Vector.<Object>, actual:Vector.<Object>)
 {
-	var inputlen:int = input.length;
-	var actuallen:int = actual.length;
-	
-	AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
-	if(inputlen == actuallen)
-	{
-		for (var i:int; i < inputlen; i++)
-		{
-			if (input[i] is String && actual[i] is String)
-			{
-				AddTestCase(strTitle, input[i], actual[i]);
-			}
-			else if (input[i] is int && actual[i] is int)
-			{
-				AddTestCase(strTitle, input[i], actual[i]);
-			}
-			else
-			{
-				compareObjects(strTitle, input[i], actual[i]);
-			}
-			
-		}
-	}
+    var inputlen:int = input.length;
+    var actuallen:int = actual.length;
+    
+    AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
+    if(inputlen == actuallen)
+    {
+        for (var i:int; i < inputlen; i++)
+        {
+            if (input[i] is String && actual[i] is String)
+            {
+                AddTestCase(strTitle, input[i], actual[i]);
+            }
+            else if (input[i] is int && actual[i] is int)
+            {
+                AddTestCase(strTitle, input[i], actual[i]);
+            }
+            else
+            {
+                compareObjects(strTitle, input[i], actual[i]);
+            }
+            
+        }
+    }
 }
 
 function testVectorTypesUDef(strTitle:String, input:Vector.<UserDefClassAllTypes>)
 {
-	var ba_test_Obj:ByteArray = new ByteArray();
-	ba_test_Obj.writeObject(input);
-	ba_test_Obj.position = 0;
-	compareVectorsUDef(strTitle, input, ba_test_Obj.readObject());
+    var ba_test_Obj:ByteArray = new ByteArray();
+    ba_test_Obj.writeObject(input);
+    ba_test_Obj.position = 0;
+    compareVectorsUDef(strTitle, input, ba_test_Obj.readObject());
 }
 
 function compareVectorsUDef(strTitle:String, input:Vector.<UserDefClassAllTypes>, actual:Vector.<UserDefClassAllTypes>)
 {
-	var inputlen:int = input.length;
-	var actuallen:int = actual.length;
-	AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
-	if(inputlen == actuallen)
-	{
-		for (var i:int; i < inputlen; i++)
-		{
-			compareUserDefTypes(strTitle, input[i], actual[i]);
-		}
-	}
+    var inputlen:int = input.length;
+    var actuallen:int = actual.length;
+    AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
+    if(inputlen == actuallen)
+    {
+        for (var i:int; i < inputlen; i++)
+        {
+            compareUserDefTypes(strTitle, input[i], actual[i]);
+        }
+    }
 }
 
 
 function testByteArrayTypes(strTitle:String, input:ByteArray)
 {
-	var ba_test_Obj:ByteArray = new ByteArray();
-	ba_test_Obj.writeObject(input);
-	ba_test_Obj.position = 0;
-	compareByteArray(strTitle, input, ba_test_Obj.readObject());
+    var ba_test_Obj:ByteArray = new ByteArray();
+    ba_test_Obj.writeObject(input);
+    ba_test_Obj.position = 0;
+    compareByteArray(strTitle, input, ba_test_Obj.readObject());
 }
 
 function compareByteArray(strTitle:String, input:ByteArray, actual:ByteArray)
 {
-	input.position = 0;	
-	actual.position = 0;
-	AddTestCase(strTitle, input.readObject(), actual.readObject());
+    input.position = 0;
+    actual.position = 0;
+    AddTestCase(strTitle, input.readObject(), actual.readObject());
 }
 
 function testDictionaryTypes(strTitle:String, input:Dictionary)
 {
-	var ba_test_Obj:ByteArray = new ByteArray();
-	ba_test_Obj.writeObject(input);
-	ba_test_Obj.position = 0;
-	compareDictionary(strTitle, input, ba_test_Obj.readObject());
+    var ba_test_Obj:ByteArray = new ByteArray();
+    ba_test_Obj.writeObject(input);
+    ba_test_Obj.position = 0;
+    compareDictionary(strTitle, input, ba_test_Obj.readObject());
 }
 
 function compareDictionary(strTitle:String, input:Dictionary, actual:Dictionary)
 {
 
-	var propInput:Array = new Array();
-	for (var p:* in input)
-	{
-		propInput.push(p);
-	}
+    var propInput:Array = new Array();
+    for (var p:* in input)
+    {
+        propInput.push(p);
+    }
 
-	propInput = propInput.sort();
+    propInput = propInput.sort();
 
-	for each (var prop:* in propInput)
-	{
-		if ( input[prop] is UserDefClassAllTypes)
-		{
-			compareUserDefTypes(strTitle + " User Defined ", input[prop], actual[prop]);
-		}
-		else if (input [prop] is Array)
-		{
-			compareArrays(strTitle + " Array ", input[prop], actual[prop]);
-		}
-		else if (input[prop] is Vector.<Number>)
-		{
-			compareVectorsNumber(strTitle + " Vector ", input[prop], actual[prop]);			
-		}
-		else if (input[prop] is XML)
-		{
-			compareXMLS(strTitle + " XML ", input[prop], actual[prop]);			
-		}
-		else if (input[prop] is Date)
-		{
-			compareDates(strTitle + " Dates ", input[prop], actual[prop]);
-		}
-		else if (input[prop] is Boolean)
-		{
-			AddTestCase(strTitle + " Boolean ", input[prop], actual[prop]);			
-		}
-		else if (input[prop] is  String)
-		{
-			AddTestCase(strTitle + " String ", input[prop], actual[prop]);
-		}
-		else if (input[prop] is int)
-		{
-			AddTestCase(strTitle + " int ", input[prop], actual[prop]);
-		}
-		else if (input[prop] is uint)
-		{
-			AddTestCase(strTitle + " uint ", input[prop], actual[prop]);
-		}
-		else if (input[prop] is Number)
-		{
-			AddTestCase(strTitle + " Number ", input[prop], actual[prop]);
-		}
-		else if (input[prop] is ByteArray)
-		{
-			compareByteArray(strTitle + " Byte Array ", input[prop], actual[prop]);
-		}
-		else
-		{
-			AddTestCase(strTitle + " Object ", input[prop], actual[prop]);
-		}
-	}
+    for each (var prop:* in propInput)
+    {
+        if ( input[prop] is UserDefClassAllTypes)
+        {
+            compareUserDefTypes(strTitle + " User Defined ", input[prop], actual[prop]);
+        }
+        else if (input [prop] is Array)
+        {
+            compareArrays(strTitle + " Array ", input[prop], actual[prop]);
+        }
+        else if (input[prop] is Vector.<Number>)
+        {
+            compareVectorsNumber(strTitle + " Vector ", input[prop], actual[prop]);
+        }
+        else if (input[prop] is XML)
+        {
+            compareXMLS(strTitle + " XML ", input[prop], actual[prop]);
+        }
+        else if (input[prop] is Date)
+        {
+            compareDates(strTitle + " Dates ", input[prop], actual[prop]);
+        }
+        else if (input[prop] is Boolean)
+        {
+            AddTestCase(strTitle + " Boolean ", input[prop], actual[prop]);
+        }
+        else if (input[prop] is  String)
+        {
+            AddTestCase(strTitle + " String ", input[prop], actual[prop]);
+        }
+        else if (input[prop] is int)
+        {
+            AddTestCase(strTitle + " int ", input[prop], actual[prop]);
+        }
+        else if (input[prop] is uint)
+        {
+            AddTestCase(strTitle + " uint ", input[prop], actual[prop]);
+        }
+        else if (input[prop] is Number)
+        {
+            AddTestCase(strTitle + " Number ", input[prop], actual[prop]);
+        }
+        else if (input[prop] is ByteArray)
+        {
+            compareByteArray(strTitle + " Byte Array ", input[prop], actual[prop]);
+        }
+        else
+        {
+            AddTestCase(strTitle + " Object ", input[prop], actual[prop]);
+        }
+    }
 }
 
 
 function testUserDefTypes(strTitle:String, input:UserDefClassAllTypes)
 {
-	var ba_test_Obj:ByteArray = new ByteArray();
-	ba_test_Obj.writeObject(input);
-	ba_test_Obj.position = 0;
-	compareUserDefTypes(strTitle, input, ba_test_Obj.readObject());
+    var ba_test_Obj:ByteArray = new ByteArray();
+    ba_test_Obj.writeObject(input);
+    ba_test_Obj.position = 0;
+    compareUserDefTypes(strTitle, input, ba_test_Obj.readObject());
 }
 
 function compareUserDefTypes(strTitle:String, input:UserDefClassAllTypes, actual:UserDefClassAllTypes)
 {
-	AddTestCase(strTitle  + " User Defined null ", input.null_Obj, actual.null_Obj);
-	AddTestCase(strTitle  + " User Defined boolean True ", input.bool_True_Obj, actual.bool_True_Obj);
-	AddTestCase(strTitle  + " User Defined boolean False " , input.bool_False_Obj, actual.bool_False_Obj);
-	AddTestCase(strTitle  + " User Defined int" , input.int_Positive_type, actual.int_Positive_type);
-	AddTestCase(strTitle  + " User Defined uint" , input.uint_Value_type, actual.uint_Value_type);
-	AddTestCase(strTitle  + " User Defined  Number min" , input.num_Min_Obj, actual.num_Min_Obj);
-	AddTestCase(strTitle  + " User Defined  Number Positive" , input.num_Positive_Obj, actual.num_Positive_Obj);
-	AddTestCase(strTitle  + " User Defined  Number Positive" , input.num_Positive_Obj, actual.num_Positive_Obj);
-	AddTestCase(strTitle  + " User Defined String " , input.str_Title_Obj, actual.str_Title_Obj);
-	compareDates(strTitle  + " User Defined Date " , input.dt_Fixed_Obj, actual.dt_Fixed_Obj);
-	compareArrays(strTitle  + " User Defined Array Index:Int Value:String", input.arr_IntStr_Obj, actual.arr_IntStr_Obj);
-	compareArrays(strTitle  + " User Defined Array Index:Mixed Value:Mixed", input.arr_MixMix_Obj, actual.arr_MixMix_Obj);
-	compareObjects(strTitle + " User Defined Object " , input.obj_Test3, actual.obj_Test3);
-	compareObjects(strTitle + " User Defined Object " , input.obj_Test4, actual.obj_Test4);
-	compareVectorsInt(strTitle + " User Defined Vector ", input.vct_int_Obj,	actual.vct_int_Obj);
-	compareDictionary(strTitle + " User Defined Dictionary", input.dict_StrStr_Obj,	actual.dict_StrStr_Obj);
-	compareByteArray(strTitle + " User Defined ByteArray (String)", input.ba_Str_Obj, actual.ba_Str_Obj);
+    AddTestCase(strTitle  + " User Defined null ", input.null_Obj, actual.null_Obj);
+    AddTestCase(strTitle  + " User Defined boolean True ", input.bool_True_Obj, actual.bool_True_Obj);
+    AddTestCase(strTitle  + " User Defined boolean False " , input.bool_False_Obj, actual.bool_False_Obj);
+    AddTestCase(strTitle  + " User Defined int" , input.int_Positive_type, actual.int_Positive_type);
+    AddTestCase(strTitle  + " User Defined uint" , input.uint_Value_type, actual.uint_Value_type);
+    AddTestCase(strTitle  + " User Defined  Number min" , input.num_Min_Obj, actual.num_Min_Obj);
+    AddTestCase(strTitle  + " User Defined  Number Positive" , input.num_Positive_Obj, actual.num_Positive_Obj);
+    AddTestCase(strTitle  + " User Defined  Number Positive" , input.num_Positive_Obj, actual.num_Positive_Obj);
+    AddTestCase(strTitle  + " User Defined String " , input.str_Title_Obj, actual.str_Title_Obj);
+    compareDates(strTitle  + " User Defined Date " , input.dt_Fixed_Obj, actual.dt_Fixed_Obj);
+    compareArrays(strTitle  + " User Defined Array Index:Int Value:String", input.arr_IntStr_Obj, actual.arr_IntStr_Obj);
+    compareArrays(strTitle  + " User Defined Array Index:Mixed Value:Mixed", input.arr_MixMix_Obj, actual.arr_MixMix_Obj);
+    compareObjects(strTitle + " User Defined Object " , input.obj_Test3, actual.obj_Test3);
+    compareObjects(strTitle + " User Defined Object " , input.obj_Test4, actual.obj_Test4);
+    compareVectorsInt(strTitle + " User Defined Vector ", input.vct_int_Obj,    actual.vct_int_Obj);
+    compareDictionary(strTitle + " User Defined Dictionary", input.dict_StrStr_Obj, actual.dict_StrStr_Obj);
+    compareByteArray(strTitle + " User Defined ByteArray (String)", input.ba_Str_Obj, actual.ba_Str_Obj);
 }
 
 test();
