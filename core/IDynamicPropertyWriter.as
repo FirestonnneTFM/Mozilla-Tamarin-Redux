@@ -54,7 +54,7 @@ package flash.net
      *  @playerversion Lite 4
      */
 
-    public interface IDynamicPropertyWriter 
+    public interface IDynamicPropertyWriter
     {
         /**
          * Writes the name and value of an IDynamicPropertyOutput object to an object with
