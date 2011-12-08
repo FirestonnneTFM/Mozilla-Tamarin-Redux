@@ -783,6 +783,8 @@ const int kBufferPadding = 16;
         GCMember<String> kindex;
         GCMember<String> kinput;
         GCMember<String> kemptyCtor;
+        GCMember<String> kMath;
+        GCMember<String> kNumber;
 
         GCMember<String> kAsterisk;     // '*'
         GCMember<String> kColon;        // ':'
