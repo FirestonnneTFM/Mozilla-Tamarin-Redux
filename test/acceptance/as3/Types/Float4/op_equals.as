@@ -86,9 +86,7 @@ AddStrictTestCase("float4(2.125, 2.125, 2.125, 2.125) == 2.125 check()", true, c
 AddStrictTestCase("2.125 == float4(2.125, 2.125, 2.125, 2.125)", true, 2.125 == float4(2.125, 2.125, 2.125, 2.125));
 AddStrictTestCase("2.125 == float4(2.125, 2.125, 2.125, 2.125) check()", true, check(2.125, float4(2.125, 2.125, 2.125, 2.125)));
 
-// FIXME: https://bugzilla.mozilla.org/show_bug.cgi?id=698365
-// Uncomment the following testcase once the above bug is fixed.
-// AddStrictTestCase("float4(1,1,1,1) == true", true, float4(1,1,1,1) == true);
+AddStrictTestCase("float4(1,1,1,1) == true", true, float4(1,1,1,1) == true);
 AddStrictTestCase("float4(1,1,1,1) == true check()", true, check(float4(1,1,1,1), true));
 var _true = true;
 AddStrictTestCase("float4(1,1,1,1) == _true", true, float4(1,1,1,1) == _true);
