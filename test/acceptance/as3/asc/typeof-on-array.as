@@ -37,27 +37,25 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Bugzilla 698365
+// Bugzilla 705830
 
 var SECTION = "ASC";
 var VERSION = "AS3";
-var TITLE   = "Allow float4 to be compared to Boolean and Number";
+var TITLE   = "Strict: Computed type of typeof";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 // -- begin test
 
-print(float4(1,1,1,1) == true);   // This caused ASC to crash
+// The bug here was that the type of "typeof foo", which is always String, was being
+// confused with the type of "foo".
+
+var foo:Array;
+var x:String = typeof(foo);
 
 // -- end test
 
 AddTestCase("Trivially true", true, true);
-
-// -- same bug, but a run-time failure before, then a compile-time failure (strict mode) later
-
-AddTestCase("Widening comparison", true, float4(1,1,1,1) == 1);
-
-// -- end test
 
 test();
