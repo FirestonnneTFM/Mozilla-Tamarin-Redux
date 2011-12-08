@@ -3914,7 +3914,11 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         AvmAssert(index >= 3);
         this->state = state;
         emitSetPc(state->abc_pc);
-        LIns* val = lirout->ins4(LIR_ffff2f4, coerceToFloat(index-3), coerceToFloat(index-2), coerceToFloat(index-1), coerceToFloat(index));
+        LIns* x = coerceToFloat(index-3);
+        LIns* y = coerceToFloat(index-2);
+        LIns* z = coerceToFloat(index-1);
+        LIns* w = coerceToFloat(index);
+        LIns* val = lirout->ins4(LIR_ffff2f4, x, y, z, w);
         localSet(index, val, FLOAT4_TYPE);
 #else
         (void) index; (void) state;
