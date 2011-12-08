@@ -227,7 +227,7 @@ namespace MMgc
     typedef ObjectPopulationProfiler<AllocationSiteHandler> AllocationSiteProfiler;
     
 #ifdef MMGC_WEAKREF_PROFILER
-    class WeakRefAllocationSiteProfiler : public ObjectPopulationProfiler<AllocationSiteHandler> 
+    class WeakRefAllocationSiteProfiler : public ObjectPopulationProfiler<AllocationSiteHandler>
     {
     public:
         WeakRefAllocationSiteProfiler(GC* gc, const char* profileName);
@@ -381,7 +381,7 @@ namespace MMgc
     // the userptr.
     //
     // Traditionally USER_POINTER_WORDS is 2.  For proper alignment of float4 boxes
-    // we require USER_POINTER_WORDS to be 4, however.  See comments in GC::GC for 
+    // we require USER_POINTER_WORDS to be 4, however.  See comments in GC::GC for
     // more about that, bugzilla 697672 for a discussion, and comments on GCAlloc::Alloc
     // for an interesting invariant that depends on USER_POINTER_WORDS.
 #ifdef VMCFG_FLOAT
