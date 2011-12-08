@@ -2911,8 +2911,23 @@ namespace avmplus
         // early bind slot
         if (AvmCore::isSlotBinding(b))
         {
+            // Bugzilla 705756: If we can mark known-notnull definitions as 
+            // notnull then finddef calls will be removed by the optimizer.
+            //
+            // *** DO NOT MERGE TO TAMARIN-REDUX WITHOUT CONSULTING FELIX ***
+            bool notNull = false;
+            if (obj.traits->pool == core->builtinPool)
+            {
+                // Global object holding the built-in types
+                Stringp nm = multiname.getName();
+                if (nm == core->kfloat4 || nm == core->kfloat || nm == core->kMath || nm == core->kNumber)
+                {
+                    // We know those bindings not to be null values
+                    notNull = true;
+                }
+            }
             coder->writeOp1(state, pc, OP_getslot, AvmCore::bindingToSlotId(b), propType);
-            state->pop_push(n, propType);
+            state->pop_push(n, propType, notNull);
             return;
         }
 

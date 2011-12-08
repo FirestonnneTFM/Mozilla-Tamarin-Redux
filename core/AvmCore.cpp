@@ -505,6 +505,8 @@ namespace avmplus
         kindex = internConstantStringLatin1("index");
         kinput = internConstantStringLatin1("input");
         kemptyCtor = internConstantStringLatin1("emptyCtor");
+        kMath = internConstantStringLatin1("Math");
+        kNumber = internConstantStringLatin1("Number");
 
         kAsterisk = internConstantStringLatin1("*");
         kColon = internConstantStringLatin1(":");
