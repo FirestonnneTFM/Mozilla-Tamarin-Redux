@@ -40,7 +40,7 @@
 namespace avmplus
 {
 
-REALLY_INLINE Toplevel::Toplevel(AbcEnv* abcEnv) 
+REALLY_INLINE Toplevel::Toplevel(AbcEnv* abcEnv)
     : _traitsToAliasMap(abcEnv->core()->GetGC())
     , _abcEnv(abcEnv)
     , _aliasToClassClosureMap(HeapHashtable::create(abcEnv->core()->GetGC()))

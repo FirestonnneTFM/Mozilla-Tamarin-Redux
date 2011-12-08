@@ -132,9 +132,9 @@ namespace avmplus
     }
 
 
-    String *ObjectInput::StringListFind(uint32_t i) 
+    String *ObjectInput::StringListFind(uint32_t i)
     {
-        if (i >= m_listString.length()) 
+        if (i >= m_listString.length())
         {
             ThrowRangeError();
         }
@@ -142,9 +142,9 @@ namespace avmplus
         return m_listString.get(i);
     }
 
-    GCRef<ScriptObject> ObjectInput::ObjectListFind(uint32_t i) 
+    GCRef<ScriptObject> ObjectInput::ObjectListFind(uint32_t i)
     {
-        if (i >= m_listObject.length()) 
+        if (i >= m_listObject.length())
         {
             ThrowRangeError();
         }
@@ -152,9 +152,9 @@ namespace avmplus
         return GCREF_CASTFROMVOID(ScriptObject, m_listObject.get(i));
     }
 
-    ClassInfo *ObjectInput::ClassInfoListFind(uint32_t i) 
+    ClassInfo *ObjectInput::ClassInfoListFind(uint32_t i)
     {
-        if (i >= m_listClassInfo.length()) 
+        if (i >= m_listClassInfo.length())
         {
             ThrowRangeError();
         }
@@ -208,7 +208,7 @@ namespace avmplus
 
     void AvmPlusObjectOutput::WriteString(String *str) {
 
-        if (str->length() == 0) 
+        if (str->length() == 0)
         {
             // don't create a reference for the empty string,
             // as it's represented by the one byte value 1
@@ -222,12 +222,12 @@ namespace avmplus
 
         int32_t ref = StringTableFind(str);
 
-        if (ref >= 0) 
+        if (ref >= 0)
         {
             // this is a duplicate of a previous String, so write a reference.
             WriteReference(ref << 1);
-        } 
-        else 
+        }
+        else
         {
             StringTableAdd(str);
 
@@ -242,34 +242,34 @@ namespace avmplus
 
     void AvmPlusObjectOutput::WriteAtom(Atom value)
     {
-        if (handleAdditionalAtom(value)) 
+        if (handleAdditionalAtom(value))
             return; //Handled by a sub-class implementation. Nothing to be done here
             
         GCRef<Toplevel> toplevel = this->toplevel();
         GCRef<AvmCore> core = toplevel->core();
         GCRef<builtinClassManifest> builtinClasses = toplevel->builtinClasses();
 
-        if (AvmCore::isUndefined(value)) 
+        if (AvmCore::isUndefined(value))
         {
             WriteType(kUndefinedAtomType);
-        } 
-        else if (AvmCore::isNull(value)) 
+        }
+        else if (AvmCore::isNull(value))
         {
             WriteType(kNullAtomType);
-        } 
-        else if (AvmCore::isBoolean(value)) 
+        }
+        else if (AvmCore::isBoolean(value))
         {
-            if (value == trueAtom) 
+            if (value == trueAtom)
             {
                 WriteType(kTrueAtomType);
-            } 
-            else 
+            }
+            else
             {
                 WriteType(kFalseAtomType);
             }
 
-        } 
-        else if (atomIsIntptr(value)) 
+        }
+        else if (atomIsIntptr(value))
         {
             intptr_t const val = atomGetIntptr(value);
             // Does our integer fit into 29 bits?
@@ -285,29 +285,29 @@ namespace avmplus
                 WriteType(kDoubleAtomType);
                 WriteDouble((double)val);
             }
-        } 
-        else if (AvmCore::isDouble(value)) 
+        }
+        else if (AvmCore::isDouble(value))
         {
             WriteType(kDoubleAtomType);
             WriteDouble(AvmCore::number(value));
-        } 
-        else if (AvmCore::isString(value)) 
+        }
+        else if (AvmCore::isString(value))
         {
             WriteType(kStringAtomType);
             WriteString(core->string(value));
-        } 
-        else if (core->isFunction(value)) 
+        }
+        else if (core->isFunction(value))
         {
             // don't serialize functions
             WriteType(kUndefinedAtomType);
-        } 
-        else if (!AvmCore::isObject(value)) 
+        }
+        else if (!AvmCore::isObject(value))
         {
             // We've enumerated everything we know but object,
             // so if it isn't an object, it's something we cannot serialize.
             ThrowArgumentError();
-        } 
-        else 
+        }
+        else
         {
             GCRef<ScriptObject> obj = AvmCore::atomToScriptObject(value);
 
@@ -316,39 +316,39 @@ namespace avmplus
             //     handle XMLList.  We'll write a generic Object type in that case (see default below),
             //     workaround is to wrap your XMLList value in an XML wrapper.
 
-            if (AvmCore::istype(value, core->traits.xml_itraits)) 
+            if (AvmCore::istype(value, core->traits.xml_itraits))
             {
                 WriteType(kAvmPlusXmlAtomType);
                 WriteXML(obj,true);
-            } 
-            else if (AvmCore::istype(value, core->traits.date_itraits)) 
+            }
+            else if (AvmCore::istype(value, core->traits.date_itraits))
             {
                 WriteType(kDateAtomType);
                 WriteDate(obj.staticCast<DateObject>());
-            } 
-            else if (AvmCore::istype(value, core->traits.array_itraits)) 
+            }
+            else if (AvmCore::istype(value, core->traits.array_itraits))
             {
                 WriteType(kArrayAtomType);
                 WriteArray(obj.staticCast<ArrayObject>());
-            } 
-            else if (builtinClasses->get_ByteArrayClass()->isType(value)) 
+            }
+            else if (builtinClasses->get_ByteArrayClass()->isType(value))
             {
                 WriteType(kByteArrayAtomType);
                 WriteByteArray(obj.staticCast<ByteArrayObject>());
-            } 
-            else if (builtinClasses->get_DictionaryClass()->isType(value)) 
+            }
+            else if (builtinClasses->get_DictionaryClass()->isType(value))
             {
                 WriteDictionary(obj.staticCast<DictionaryObject>());
-            } 
+            }
             else if (AvmCore::istype(value, VECTORINT_TYPE) ||
                         AvmCore::istype(value, VECTORUINT_TYPE) ||
                         AvmCore::istype(value, VECTORDOUBLE_TYPE) ||
-                        AvmCore::istype(value, VECTOROBJ_TYPE)) 
+                        AvmCore::istype(value, VECTOROBJ_TYPE))
             {
                 // We assume vectors can only be created from within SWF10 files.
                 WriteTypedVector(value);
-            } 
-            else 
+            }
+            else
             {
                 WriteType(kObjectAtomType);
                 WriteScriptObject(obj);
@@ -360,24 +360,24 @@ namespace avmplus
     {
         int32_t ref = ObjectTableFind(obj);
 
-        if (ref >= 0) 
+        if (ref >= 0)
         {
             // output already contains object. Save a reference to previous instance.
             WriteReference(ref << 1);
             return;
-        } 
+        }
 
         ObjectTableAdd(obj);
 
         String* str = NULL;
         // cn:  XML's toString() will skip the tags if the content is simple (i.e. <f>hi</f>.toString() == "hi")
         //        use toXMLString instead.
-        if (isAS3XML) 
+        if (isAS3XML)
         {
             XMLObject* x = obj.staticCast<XMLObject>();
             str = x->toXMLString();
-        } 
-        else 
+        }
+        else
         {
             str = obj->toString();
         }
@@ -394,7 +394,7 @@ namespace avmplus
     {
         int32_t ref = ObjectTableFind(obj);
 
-        if (ref >= 0) 
+        if (ref >= 0)
         {
             // output already contains object. Save a reference to previous instance.
             WriteReference(ref << 1);
@@ -413,7 +413,7 @@ namespace avmplus
     {
         int32_t ref = ObjectTableFind(obj);
 
-        if (ref >= 0) 
+        if (ref >= 0)
         {
             // output already contains object. Save a reference to previous instance.
             WriteReference(ref << 1);
@@ -446,7 +446,7 @@ namespace avmplus
     {
         int32_t ref = ObjectTableFind(obj);
 
-        if (ref >= 0) 
+        if (ref >= 0)
         {
             // output already contains object. Save a reference to previous instance.
             WriteReference(ref << 1);
@@ -465,9 +465,9 @@ namespace avmplus
         // to be written in slightly different form (ie with more name/value pairs), but that's
         // OK, just suboptimal.)
         uint32_t denseLen = obj->getLength();
-        for (uint32_t i = 0, n = denseLen; i < n; ++i) 
+        for (uint32_t i = 0, n = denseLen; i < n; ++i)
         {
-            if (!obj->hasUintProperty(i)) 
+            if (!obj->hasUintProperty(i))
             {
                 denseLen = i;
                 break;
@@ -484,12 +484,12 @@ namespace avmplus
         // create an undefined element, and so we scan this dense portion
         // searching for functions, and contract the length to exclude them.
 
-        for (i = 0, index = 0, len = denseLen; (i < len); i++) 
+        for (i = 0, index = 0, len = denseLen; (i < len); i++)
         {
             index = obj->nextNameIndex(index);
             Atom value = obj->nextValue(index);
 
-            if (AvmCore::istype(value, core()->traits.function_itraits)) 
+            if (AvmCore::istype(value, core()->traits.function_itraits))
             {
                 len = i;
                 break;
@@ -504,12 +504,12 @@ namespace avmplus
         // the server will create a Map.
         //
         // Therefore, it's easier for the server if we write out the non-dense portion first.
-        while ((index = obj->nextNameIndex(index)) != 0) 
+        while ((index = obj->nextNameIndex(index)) != 0)
         {
             Atom name = obj->nextName(index);
             Atom value = obj->nextValue(index);
 
-            if (AvmCore::istype(value, core()->traits.function_itraits)) 
+            if (AvmCore::istype(value, core()->traits.function_itraits))
             {
                 continue;
             }
@@ -522,7 +522,7 @@ namespace avmplus
         WriteString(core()->kEmptyString);
 
         // Write out the dense portion of the array
-        for (i = 0, index = 0; i < len; i++) 
+        for (i = 0, index = 0; i < len; i++)
         {
             index = obj->nextNameIndex(index);
             WriteAtom(obj->nextValue(index));
@@ -535,7 +535,7 @@ namespace avmplus
 
         WriteType(kDictionaryObject);
 
-        if (ref >= 0) 
+        if (ref >= 0)
         {
             // output already contains object. Save a reference to previous instance.
             WriteReference(ref << 1);
@@ -550,12 +550,12 @@ namespace avmplus
         
         WriteBoolean(obj->isUsingWeakKeys());
         
-        for (uint32_t c = h->next(0); c ; c = h->next(c)) 
+        for (uint32_t c = h->next(0); c ; c = h->next(c))
         {
             Atom key = h->keyAt(c);
             // The dictionary class converts keys to integers if possible
             // so convert it back to a string if neccessary.
-            if (atomIsIntptr(key)) 
+            if (atomIsIntptr(key))
             {
                 key = MathUtils::convertIntegerToStringRadix(core(), atomGetIntptr(key), 10, MathUtils::kTreatAsSigned)->atom();
             }
@@ -574,26 +574,26 @@ namespace avmplus
 
         uint8_t vec_type = 0;
         // Write out the type - have to do this before we write out the reference
-        if (AvmCore::istype(atom, VECTORINT_TYPE)) 
+        if (AvmCore::istype(atom, VECTORINT_TYPE))
         {
             vec_type = kTypedVectorInt;
-        } 
-        else if (AvmCore::istype(atom, VECTORUINT_TYPE)) 
+        }
+        else if (AvmCore::istype(atom, VECTORUINT_TYPE))
         {
             vec_type = kTypedVectorUint;
-        } 
-        else if (AvmCore::istype(atom, VECTORDOUBLE_TYPE)) 
+        }
+        else if (AvmCore::istype(atom, VECTORDOUBLE_TYPE))
         {
             vec_type = kTypedVectorDouble;
-        } 
-        else 
+        }
+        else
         {
             vec_type = kTypedVectorObject;
         }
         
         WriteType(vec_type);
 
-        if (ref >= 0) 
+        if (ref >= 0)
         {
             // output already contains object. Save a reference to previous instance.
             WriteReference(ref << 1);
@@ -602,7 +602,7 @@ namespace avmplus
         
         ObjectTableAdd(obj);
 
-        if (vec_type == kTypedVectorInt) 
+        if (vec_type == kTypedVectorInt)
         {
             IntVectorObject *v = obj.staticCast<IntVectorObject>();
             WriteReference((v->get_length()<<1)|1);
@@ -616,8 +616,8 @@ namespace avmplus
                 WriteU32(uint32_t(data[c]));
             }
             
-        } 
-        else if (vec_type == kTypedVectorUint) 
+        }
+        else if (vec_type == kTypedVectorUint)
         {
             UIntVectorObject *v = obj.staticCast<UIntVectorObject>();
             WriteReference((v->get_length()<<1)|1);
@@ -626,13 +626,13 @@ namespace avmplus
             UIntVectorAccessor va(v);
             const uint32_t* data = va.addr();
             uint32_t len = va.length();
-            for (uint32_t c=0; c<len; c++) 
+            for (uint32_t c=0; c<len; c++)
             {
                 WriteU32(data[c]);
             }
             
-        } 
-        else if (vec_type == kTypedVectorDouble) 
+        }
+        else if (vec_type == kTypedVectorDouble)
         {
             DoubleVectorObject *v = obj.staticCast<DoubleVectorObject>();
             WriteReference((v->get_length()<<1)|1);
@@ -641,12 +641,12 @@ namespace avmplus
             DoubleVectorAccessor va(v);
             const double* data = va.addr();
             uint32_t len = va.length();
-            for (uint32_t c=0; c<len; c++) 
+            for (uint32_t c=0; c<len; c++)
             {
                 WriteDouble(data[c]);
             }
-        } 
-        else 
+        }
+        else
         {
             ObjectVectorObject *v = obj.staticCast<ObjectVectorObject>();
             WriteReference((v->get_length()<<1)|1);
@@ -667,7 +667,7 @@ namespace avmplus
 
             // Write contents
             uint32_t len = v->get_length();
-            for (uint32_t c=0; c<len; c++) 
+            for (uint32_t c=0; c<len; c++)
             {
                 WriteAtom(v->getUintProperty(c));
             }
@@ -678,7 +678,7 @@ namespace avmplus
     {
         int32_t ref = ObjectTableFind(obj);
 
-        if (ref >= 0) 
+        if (ref >= 0)
         {
             // output already contains object. Save a reference to previous instance.
             WriteReference(ref << 1);
@@ -700,7 +700,7 @@ namespace avmplus
         bool externalizable;
 
         ref = TraitsTableFind(traits);
-        if (ref >= 0) 
+        if (ref >= 0)
         {
             // output already contains class info. Save a reference to previous instance.
             WriteReference((ref << 2) | 1);
@@ -708,8 +708,8 @@ namespace avmplus
             count = info->SealedPropCount();
             dynamic = info->dynamic();
             externalizable = info->externalizable();
-        } 
-        else 
+        }
+        else
         {
             // Create class info
             info = new (core->GetGC()) ClassInfo(toplevel, traits);
@@ -729,7 +729,7 @@ namespace avmplus
             info->Write(this);
         }
 
-        if (externalizable) 
+        if (externalizable)
         {
             // ClassInfo's constructor has already verified this, so we don't need to repeat the error handling here
             AvmAssert(obj->traits()->containsInterface(BUILTIN_TRAITS_(flash_utils_IExternalizable)));
@@ -749,42 +749,42 @@ namespace avmplus
             MethodEnv* method = obj->vtable->methods[AvmCore::bindingToMethodId(info->get_functionBinding())];
             method->coerceEnter(argc, argv);
 
-        } 
-        else 
+        }
+        else
         {
             // for each sealed property in the class info, write out its value
-            for (i = 0; i < count; i++) 
+            for (i = 0; i < count; i++)
             {
                 WriteAtom(toplevel->getpropname(obj->atom(), info->SealedProp(i)));
             }
 
-            if (dynamic) 
+            if (dynamic)
             {
                 GCRef<ScriptObject> writer = toplevel->builtinClasses()->get_ObjectEncodingClass()->m_writer;
 
                 if (!writer)
                 {
-                    for (int index = 0; ((index = obj->nextNameIndex(index)) != 0);) 
+                    for (int index = 0; ((index = obj->nextNameIndex(index)) != 0);)
                     {
                         Atom name = obj->nextName(index);
                         Atom value = obj->nextValue(index);
 
-                        if (AvmCore::istype(value, core->traits.function_itraits)) 
+                        if (AvmCore::istype(value, core->traits.function_itraits))
                         {
                             continue;
                         }
 
                         // Empty string is sentinel for end-of-data, so we CANNOT serialize it.
                         String *nameStr = core->string(name);
-                        if (nameStr->length() == 0) 
+                        if (nameStr->length() == 0)
                         {
                             continue;
                         }
                         WriteString(nameStr);
                         WriteAtom(value);
                     }
-                } 
-                else 
+                }
+                else
                 {
                     // invoke ObjectEncoding.dynamicPropertyWriter
                     GCRef<ScriptObject> func =  AvmCore::atomToScriptObject(toplevel->getpropname(writer->atom(), core->internConstantStringLatin1("writeDynamicProperties")));
@@ -814,7 +814,7 @@ namespace avmplus
 //---------------------------------------------------------------------
 // BEGIN class AvmPlusObjectInput
 //
-    uint32_t AvmPlusObjectInput::ReadUint29() 
+    uint32_t AvmPlusObjectInput::ReadUint29()
     {
         // Represent smaller integers with fewer bytes using the most
         // significant bit of each byte. The worst case uses 32-bits
@@ -832,7 +832,7 @@ namespace avmplus
 
         byte = ReadU8();
 
-        if (byte < 128) 
+        if (byte < 128)
         {
             return byte;
         }
@@ -840,7 +840,7 @@ namespace avmplus
         ref = (byte & 0x7F) << 7;
         byte = ReadU8();
 
-        if (byte < 128) 
+        if (byte < 128)
         {
             return (ref | byte);
         }
@@ -848,7 +848,7 @@ namespace avmplus
         ref = (ref | (byte & 0x7F)) << 7;
         byte = ReadU8();
 
-        if (byte < 128) 
+        if (byte < 128)
         {
             return (ref | byte);
         }
@@ -859,7 +859,7 @@ namespace avmplus
         return (ref | byte);
     }
 
-    Atom AvmPlusObjectInput::ReadAtom() 
+    Atom AvmPlusObjectInput::ReadAtom()
     {
         Toplevel* toplevel = this->toplevel();
         AvmCore* core = toplevel->core();
@@ -870,7 +870,7 @@ namespace avmplus
         if (handleAdditionalType(type, retVal))
             return retVal;      // Handled by subclass. Nothing to be done here
 
-        switch (type) 
+        switch (type)
         {
             case kUndefinedAtomType:
                 return undefinedAtom;
@@ -915,7 +915,7 @@ namespace avmplus
     {
         uint32_t ref = ReadReference();
 
-        if ((ref & 1) == 0) 
+        if ((ref & 1) == 0)
         {
             // This is a reference
             return ObjectListFind(ref >> 1).staticCast<DateObject>();
@@ -934,7 +934,7 @@ namespace avmplus
         Toplevel* toplevel = this->toplevel();
         uint32_t ref = ReadReference();
 
-        if ((ref & 1) == 0) 
+        if ((ref & 1) == 0)
         {
             // This is a reference
             return ObjectListFind(ref >> 1).staticCast<ByteArrayObject>();
@@ -956,7 +956,7 @@ namespace avmplus
     {
         uint32_t ref = ReadReference();
 
-        if ((ref & 1) == 0) 
+        if ((ref & 1) == 0)
         {
             // This is a reference
             return StringListFind(ref >> 1);
@@ -965,14 +965,14 @@ namespace avmplus
         // Read the string in
         uint32_t len = (ref >> 1);
 
-        if (len == 0) 
+        if (len == 0)
         {
             // WriteString() special cases the empty string to avoid creating a reference.
             return core()->kEmptyString;
         }
 
         char *buffer = mmfx_new_array_opt(char, len+1, MMgc::kCanFail);
-        if (!buffer) 
+        if (!buffer)
         {
             ThrowMemoryError();
         }
@@ -992,7 +992,7 @@ namespace avmplus
         Toplevel* toplevel = this->toplevel();
         AvmCore* core = toplevel->core();
         char *buffer = mmfx_new_array_opt(char, len+1, MMgc::kCanFail);
-        if (!buffer) 
+        if (!buffer)
         {
             ThrowMemoryError();
         }
@@ -1009,7 +1009,7 @@ namespace avmplus
     {
         uint32_t ref = ReadReference();
 
-        if ((ref & 1) == 0) 
+        if ((ref & 1) == 0)
         {
             // This is a reference
             return ObjectListFind(ref >> 1);
@@ -1035,7 +1035,7 @@ namespace avmplus
     {
         uint32_t ref = ReadReference();
 
-        if ((ref & 1) == 0) 
+        if ((ref & 1) == 0)
         {
             // This is a reference
             return ObjectListFind(ref >> 1).staticCast<DictionaryObject>();
@@ -1049,18 +1049,18 @@ namespace avmplus
         GCRef<DictionaryObject> obj = toplevel->builtinClasses()->get_DictionaryClass()->constructObject(weakKeys);
         ObjectListAdd(obj);
 
-        for (uint32_t c = 0; c<len ; c++) 
+        for (uint32_t c = 0; c<len ; c++)
         {
             // Key can be either an object or an interned string
             Atom key = ReadAtom();
             // Value can be anything
             Atom value = ReadAtom();
-            if (AvmCore::isString(key)) 
+            if (AvmCore::isString(key))
             {
                 // Intern the string if not done already
                 key = core->internString(key)->atom();
-            } 
-            else if (!AvmCore::isObject(key)) 
+            }
+            else if (!AvmCore::isObject(key))
             {
                 // Keys can not be anything else
                 ThrowArgumentError();
@@ -1074,7 +1074,7 @@ namespace avmplus
     {
         uint32_t ref = ReadReference();
 
-        if ((ref & 1) == 0) 
+        if ((ref & 1) == 0)
         {
             // This is a reference
             return ObjectListFind(ref >> 1)->atom();
@@ -1086,48 +1086,48 @@ namespace avmplus
         uint32_t len = ref >> 1;
         bool fixed = ReadBoolean();
         
-        switch (type) 
+        switch (type)
         {
-            case kTypedVectorInt: 
+            case kTypedVectorInt:
             {
                 GCRef<IntVectorObject> v = toplevel->intVectorClass()->newVector(len);
                 ObjectListAdd(v);
                 v->set_fixed(fixed);
                 IntVectorAccessor va(v);
                 int32_t* data = va.addr();
-                for (uint32_t c=0; c<len; c++) 
+                for (uint32_t c=0; c<len; c++)
                 {
                     data[c] = int32_t(ReadU32());
                 }
                 return v->atom();
             }
-            case kTypedVectorUint: 
+            case kTypedVectorUint:
             {
                 GCRef<UIntVectorObject> v = toplevel->uintVectorClass()->newVector(len);
                 ObjectListAdd(v);
                 v->set_fixed(fixed);
                 UIntVectorAccessor va(v);
                 uint32_t* data = va.addr();
-                for (uint32_t c=0; c<len; c++) 
+                for (uint32_t c=0; c<len; c++)
                 {
                     data[c] = ReadU32();
                 }
                 return v->atom();
             }
-            case kTypedVectorDouble: 
+            case kTypedVectorDouble:
             {
                 GCRef<DoubleVectorObject> v = toplevel->doubleVectorClass()->newVector(len);
                 ObjectListAdd(v);
                 v->set_fixed(fixed);
                 DoubleVectorAccessor va(v);
                 double* data = va.addr();
-                for (uint32_t c=0; c<len; c++) 
+                for (uint32_t c=0; c<len; c++)
                 {
                     data[c] = ReadDouble();
                 }
                 return v->atom();
             }
-            case kTypedVectorObject: 
+            case kTypedVectorObject:
             {
                 // Read prototype
                 Stringp classname = core->internString(ReadString());
@@ -1139,7 +1139,7 @@ namespace avmplus
                 v->set_fixed(fixed);
 
                 // Read contents
-                for (uint32_t c=0; c<len; c++) 
+                for (uint32_t c=0; c<len; c++)
                 {
                     v->setUintProperty(c,ReadAtom());
                 }
@@ -1156,7 +1156,7 @@ namespace avmplus
     {
         uint32_t ref = ReadReference();
 
-        if ((ref & 1) == 0) 
+        if ((ref & 1) == 0)
         {
             // This object has already been in input, so (ref >> 1) is an index
             return ObjectListFind(ref >> 1);
@@ -1170,12 +1170,12 @@ namespace avmplus
 
         ClassInfo *info;
 
-        if ((ref & 3) == 1) 
+        if ((ref & 3) == 1)
         {
             // This ClassInfo has already been in input, so (ref >> 2) is an index
             info = ClassInfoListFind(ref >> 2);
-        } 
-        else 
+        }
+        else
         {
             // The ClassInfo has not previously been in input, so we must read it in.
             // dynamic, and the number of multinames to follow have been encoded
@@ -1192,12 +1192,12 @@ namespace avmplus
         GCRef<ScriptObject> obj = info->closure()->constructObject();
         ObjectListAdd(obj);
 
-        if (closure) 
+        if (closure)
         {
             *closure = info->closure();
         }
 
-        if (info->externalizable()) 
+        if (info->externalizable())
         {
             // ClassInfo::Read() has already verified that the class closure registered for this
             // class's alias implements IExternalizable, so there's no need to repeat the error handling here.
@@ -1215,22 +1215,22 @@ namespace avmplus
 
             MethodEnv* method = obj->vtable->methods[AvmCore::bindingToMethodId(info->get_functionBinding())];
             method->coerceEnter(argc, argv);
-        } 
-        else 
+        }
+        else
         {
             // read in the value of each sealed property, and then assign it to the object's member
-            for (int i = 0, len = info->SealedPropCount(); i < len; i++) 
+            for (int i = 0, len = info->SealedPropCount(); i < len; i++)
             {
                 SetObjectProperty(obj->atom(), info->SealedProp(i), ReadAtom());
             }
             
             // if the class is dynamic, read in the remaining properties (if any)
-            if (info->dynamic()) 
+            if (info->dynamic())
             {
-                for (;;) 
+                for (;;)
                 {
                     String* name = ReadString();
-                    if (name->length() == 0) 
+                    if (name->length() == 0)
                         break;
 
                     Atom value = ReadAtom();
@@ -1248,7 +1248,7 @@ namespace avmplus
 
         uint32_t ref = ReadReference();
 
-        if ((ref & 1) == 0) 
+        if ((ref & 1) == 0)
         {
             // This is a reference
             return ObjectListFind(ref >> 1).staticCast<ArrayObject>();
@@ -1262,10 +1262,10 @@ namespace avmplus
         ObjectListAdd(obj);
 
         // read the non-dense portion first, terminated by the empty string
-        for (;;) 
+        for (;;)
         {
             String* name = ReadString();
-            if (name->length() == 0) 
+            if (name->length() == 0)
                 break;
 
             Atom value = ReadAtom();
@@ -1273,7 +1273,7 @@ namespace avmplus
         }
 
         // now read the dense portion.
-        for (i = 0; i < len; i ++) 
+        for (i = 0; i < len; i ++)
         {
             obj->setUintProperty(i, ReadAtom());
         }
@@ -1311,37 +1311,37 @@ namespace avmplus
     bool ClassInfo::isSerializable(Traits * t, Namespace* ns, Binding b)
     {
         // ignore members that are not public and not compatible with the current version
-        if (!ns->isPublic() || !m_toplevel->core()->isNamespaceVisibleToApiVersionFromCallStack(ns)) 
+        if (!ns->isPublic() || !m_toplevel->core()->isNamespaceVisibleToApiVersionFromCallStack(ns))
         {
             return false;
         }
 
-        if (AvmCore::isVarBinding(b)) 
+        if (AvmCore::isVarBinding(b))
         {
             uint32_t slot = AvmCore::bindingToSlotId(b);
-            if (slotContainsTransientMetadata(t, slot)) 
+            if (slotContainsTransientMetadata(t, slot))
             {
                 // exclude slots contain metadata transient
                 return false;
             }
 
-        } 
-        else if (AvmCore::isAccessorBinding(b)) 
+        }
+        else if (AvmCore::isAccessorBinding(b))
         {
-            if (!AvmCore::hasGetterBinding(b) || methodContainsTransientMetadata(t, AvmCore::bindingToGetterId(b))) 
+            if (!AvmCore::hasGetterBinding(b) || methodContainsTransientMetadata(t, AvmCore::bindingToGetterId(b)))
             {
                 // must implement a non-transient get accessor
                 return false;
             }
 
-            if (!AvmCore::hasSetterBinding(b) || methodContainsTransientMetadata(t, AvmCore::bindingToSetterId(b))) 
+            if (!AvmCore::hasSetterBinding(b) || methodContainsTransientMetadata(t, AvmCore::bindingToSetterId(b)))
             {
                 // must implement a non-transient set accessor
                 return false;
             }
 
-        } 
-        else 
+        }
+        else
         {
             // ignore members that aren't variables or accessors
             return false;
@@ -1362,7 +1362,7 @@ namespace avmplus
 
         if (t->containsInterface(BUILTIN_TRAITS_(flash_utils_IExternalizable)))
         {
-            if (m_name->isEmpty()) 
+            if (m_name->isEmpty())
             {
                 // readExternal() does not exist on class Object,
                 // so it is meaningless to writeExternal() without a class name,
@@ -1387,7 +1387,7 @@ namespace avmplus
         // For our purposes, a getter/setter is considered a variable too.
         while (iterator.getNext(name, ns, b))
         {
-            if (isSerializable(t, ns, b)) 
+            if (isSerializable(t, ns, b))
             {
                 m_sealed.add(name);
             }
@@ -1400,7 +1400,7 @@ namespace avmplus
 
         output->WriteString(m_name);
 
-        for (int i = 0; i < len; i++) 
+        for (int i = 0; i < len; i++)
         {
             // write the name:String for each property (SealedPropCount() was encoded in the invalid ref id
             output->WriteString(SealedProp(i));
@@ -1420,9 +1420,9 @@ namespace avmplus
         // initialize m_closure
         info->m_closure = toplevel->getClassClosureFromAlias(info->m_name);
 
-        if (externalizable) 
+        if (externalizable)
         {
-            if (!info->m_closure->traits()->itraits->containsInterface(BUILTIN_TRAITS_(flash_utils_IExternalizable))) 
+            if (!info->m_closure->traits()->itraits->containsInterface(BUILTIN_TRAITS_(flash_utils_IExternalizable)))
             {
                 // object was encoded with writeExternal, but current class does not implement readExternal,
                 // so data is meaningless to us.

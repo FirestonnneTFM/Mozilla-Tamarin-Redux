@@ -319,8 +319,8 @@ namespace avmplus
         setPrototypePtr(toplevel()->objectClass->construct());
     }
 
-    ObjectEncodingClass::~ObjectEncodingClass() 
-    { 
+    ObjectEncodingClass::~ObjectEncodingClass()
+    {
         m_writer = NULL;
     }
 }

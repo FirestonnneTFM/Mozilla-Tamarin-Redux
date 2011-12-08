@@ -1502,11 +1502,11 @@ namespace avmplus
         Atom key = AvmCore::genericObjectToAtom(traits);
         Atom name = _traitsToAliasMap.get(key);
 
-        if (name != undefinedAtom) 
+        if (name != undefinedAtom)
         {
             return core()->atomToString(name);
-        } 
-        else 
+        }
+        else
         {
             // Output object without a name.
             return core()->kEmptyString;
@@ -1517,11 +1517,11 @@ namespace avmplus
     {
         AvmAssert(name->isInterned());
         Atom val = getClassClosureAtomFromAlias(name->atom(), /*checkContextDomainOnly*/false);
-        if (val != undefinedAtom) 
+        if (val != undefinedAtom)
         {
             return (ClassClosure *) AvmCore::atomToScriptObject(val);
-        } 
-        else 
+        }
+        else
         {
             // Create an anonymous object for unknown classes
             return objectClass;
@@ -1536,7 +1536,7 @@ namespace avmplus
         Toplevel* toplevel = (Toplevel*) script->toplevel();
         toplevel->checkNull(cc, "classObject");
         toplevel->checkNull(aliasName, "aliasName");
-        if (core->internString(aliasName) == core->kEmptyString) 
+        if (core->internString(aliasName) == core->kEmptyString)
         {
             toplevel->argumentErrorClass()->throwError(kEmptyStringError, core->toErrorString("aliasName"));
         }
@@ -1572,12 +1572,12 @@ namespace avmplus
         Toplevel* toplevel = (Toplevel*) script->toplevel();
 
         toplevel->checkNull(aliasName, "aliasName");
-        if (core->internString(aliasName) == core->kEmptyString) 
+        if (core->internString(aliasName) == core->kEmptyString)
         {
             toplevel->argumentErrorClass()->throwError(kEmptyStringError, core->toErrorString("aliasName"));
         }
 
-        if (aliasName == NULL) 
+        if (aliasName == NULL)
         {
             toplevel->argumentErrorClass()->throwError(kNullArgumentError, core->toErrorString("aliasName"));
         }
