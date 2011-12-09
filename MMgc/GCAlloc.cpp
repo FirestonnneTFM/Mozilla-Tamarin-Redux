@@ -1161,8 +1161,7 @@ namespace MMgc
 
     void GCAlloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)
     {
-        int numAlloc, maxAlloc;
-        GetAllocStats(numAlloc, maxAlloc);
+        int numAlloc = GetNumAlloc();
         totalAllocated = numAlloc * m_itemSize;
 #ifdef MMGC_MEMORY_PROFILER
         totalAskSize = m_totalAskSize;
@@ -1213,7 +1212,7 @@ namespace MMgc
         GCBlock *b=m_firstBlock;
         while (b)
         {
-            maxAlloc++;
+            maxAlloc += m_itemsPerBlock;
             numAlloc += (m_itemsPerBlock - b->numFree);
             b = Next(b);
         }
