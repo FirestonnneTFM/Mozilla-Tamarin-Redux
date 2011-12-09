@@ -4441,9 +4441,22 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     void CodegenLIR::emitFloat4rsqrt(Traits* result)      { emitFloat4unary(result, LIR_rsqrtf4); }
     void CodegenLIR::emitFloat4sqrt(Traits* result)       { emitFloat4unary(result, LIR_sqrtf4); }
 
+    // Helper to expand dotf4, dotf3, dotf2
+    LIns* CodegenLIR::emitDot(LOpcode dot_op, LIns* a, LIns* b) {
+        if (core->config.njconfig.i386_sse41)
+            return lirout->ins2(dot_op, a, b);
+        LIns* c = lirout->ins2(LIR_mulf4, a, b);
+        LIns* sum = lirout->ins2(LIR_addf, lirout->ins1(LIR_f4x, c), lirout->ins1(LIR_f4y, c));
+        if (dot_op == LIR_dotf3 || dot_op == LIR_dotf4)
+            sum = lirout->ins2(LIR_addf, sum, lirout->ins1(LIR_f4z, c));
+        if (dot_op == LIR_dotf4)
+            sum = lirout->ins2(LIR_addf, sum, lirout->ins1(LIR_f4w, c));
+        return sum;
+    }
+
     // magnitudeK(x) = sqrt(dotK(x, x))
     LIns* CodegenLIR::magnitude(LOpcode dot_op, LIns* x) {
-        return lirout->ins1(LIR_sqrtf, lirout->ins2(dot_op, x, x));
+        return lirout->ins1(LIR_sqrtf, emitDot(dot_op, x, x));
     }
 
     /** normalize(x:float4) = x / magnitude(x) = x / sqrt(dot(x,x)) */
@@ -4469,9 +4482,17 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
     void CodegenLIR::emitFloat4max(Traits* result)        { emitFloat4binary(result, LIR_maxf4); }
     void CodegenLIR::emitFloat4min(Traits* result)        { emitFloat4binary(result, LIR_minf4); }
-    void CodegenLIR::emitFloat4dot(Traits* result)        { emitFloat4binary(result, LIR_dotf4); }
-    void CodegenLIR::emitFloat4dot2(Traits* result)       { emitFloat4binary(result, LIR_dotf2); }
-    void CodegenLIR::emitFloat4dot3(Traits* result)       { emitFloat4binary(result, LIR_dotf3); }
+
+    void CodegenLIR::emitFloat4dot(Traits* result, LOpcode op) {
+        int sp = state->sp();
+        LIns* x = localGetf4(sp - 1);
+        LIns* y = localGetf4(sp);
+        localSet(sp - 2, emitDot(op, x, y), result);
+    }
+
+    void CodegenLIR::emitFloat4dot(Traits* result)        { emitFloat4dot(result, LIR_dotf4); }
+    void CodegenLIR::emitFloat4dot2(Traits* result)       { emitFloat4dot(result, LIR_dotf2); }
+    void CodegenLIR::emitFloat4dot3(Traits* result)       { emitFloat4dot(result, LIR_dotf3); }
 
     void CodegenLIR::emitMagnitude(Traits* result, LOpcode dot_op) {
         int sp = state->sp();
@@ -4698,8 +4719,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         { avmplus::NativeID::float4_reciprocal,            1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4reciprocal},
         { avmplus::NativeID::float4_rsqrt,                 1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4rsqrt},
         { avmplus::NativeID::float4_sqrt,                  1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4sqrt},
-        { avmplus::NativeID::float4_normalize,             1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4normalize},
         //{ avmplus::NativeID::float4_cross,                 2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4cross},
+        { avmplus::NativeID::float4_normalize,             1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4normalize},
         { avmplus::NativeID::float4_dot,                   2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4dot},
         { avmplus::NativeID::float4_dot2,                  2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4dot2},
         { avmplus::NativeID::float4_dot3,                  2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4dot3},

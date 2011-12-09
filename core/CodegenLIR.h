@@ -570,6 +570,7 @@ namespace avmplus
         void emitFloatUnary(Traits* result, LOpcode op);
         void emitFloat4unary(Traits*, LOpcode opcode);
         void emitFloat4binary(Traits*, LOpcode opcode);
+        void emitFloat4dot(Traits*, LOpcode opcode);
         LIns* magnitude(LOpcode dot_op, LIns* x);
         void emitMagnitude(Traits* result, LOpcode dot_op);
         void emitDistance(Traits* result, LOpcode dot_op);
@@ -596,6 +597,7 @@ namespace avmplus
         void emitFloat4distance(Traits* result);
         void emitFloat4distance2(Traits* result);
         void emitFloat4distance3(Traits* result);
+        LIns* emitDot(LOpcode, LIns*, LIns*);
 #endif
 
         LIns *optimizeIndexArgumentType(int32_t sp, Traits** indexType);

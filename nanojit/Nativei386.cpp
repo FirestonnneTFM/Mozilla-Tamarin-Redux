@@ -738,7 +738,11 @@ namespace nanojit
         asm_output("movups %s,%d(%s+%s*%c)", gpn(rr), d, gpn(rb), gpn(ri), SIBIDX(scale));
     }
 
-    inline uint8_t PSHUFD_COMPONENT_MASK(int i) { NanoAssert(i>=0 && i<=3); const uint8_t retval[4] = { 0, 0x55, 0xAA, 0xFF }; return retval[i & 3]; }
+    inline uint8_t PSHUFD_COMPONENT_MASK(int i) {
+        NanoAssert(i>=0 && i<=3);
+        const uint8_t retval[4] = { 0, 0x55, 0xAA, 0xFF };
+        return retval[i & 3];
+    }
     inline void Assembler::SSE_PSHUFD(R rd, R rs, uint8_t imm) {
         count_fpu();
         SSEu8_3(0x660f70, rd, rs, imm);
@@ -746,6 +750,7 @@ namespace nanojit
     }
 
     inline void Assembler::SSE_DPPS(R rd, R rs, uint8_t imm) {
+        NanoAssert(_config.i386_sse41);
         count_fpu();
         SSEu8_4(0x660f3a40, rd, rs, imm);
         asm_output("dpps %s,%s,0x%x", gpn(rd), gpn(rs), imm);
@@ -2862,12 +2867,14 @@ namespace nanojit
     static uint32_t *absMaskF     = initMaskF(absMaskF_temp,      0x7FFFFFFF);
     static uint32_t *absMaskF4    = initMaskF4(absMaskF4_temp,    0x7FFFFFFF);
 #else
-    static const AVMPLUS_ALIGN16(uint32_t) negateMaskD[]  = {0,0x80000000,0,0};
+    static const AVMPLUS_ALIGN16(uint32_t) negateMaskD[]  = { 0,0x80000000,0,0};
     static const AVMPLUS_ALIGN16(uint32_t) negateMaskF[]  = { 0x80000000, 0,          0,          0 };
-    static const AVMPLUS_ALIGN16(uint32_t) negateMaskF4[] = {0x80000000,0x80000000,0x80000000,0x80000000};
+    static const AVMPLUS_ALIGN16(uint32_t) negateMaskF4[] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000};
     static const AVMPLUS_ALIGN16(uint32_t) absMaskD[]     = { 0xFFFFFFFF, 0x7FFFFFFF, 0,          0 };
     static const AVMPLUS_ALIGN16(uint32_t) absMaskF[]     = { 0x7FFFFFFF, 0,          0,          0 };
     static const AVMPLUS_ALIGN16(uint32_t) absMaskF4[]    = { 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF };
+    static const AVMPLUS_ALIGN16(uint32_t) xyzMaskF4[]    = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 };
+    static const AVMPLUS_ALIGN16(uint32_t) xyMaskF4[]     = { 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000, 0x00000000 };
 #endif
 
     void Assembler::asm_neg_abs(LIns* ins)
@@ -2898,13 +2905,13 @@ namespace nanojit
                 if (rr != ra)
                     SSE_MOVSD(rr, ra);
             } else {
-            switch(ins->opcode()){
-                default: NanoAssert(!"bad opcode");
-                case LIR_negf:  SSE_XORPS(rr, negateMaskF); break;
-                case LIR_negf4: SSE_XORPS(rr, negateMaskF4); break;
-                case LIR_absf:  SSE_ANDPS(rr, absMaskF); break;
-                case LIR_absf4: SSE_ANDPS(rr, absMaskF4); break;
-            }
+                switch (ins->opcode()){
+                    default: NanoAssert(!"bad opcode");
+                    case LIR_negf:  SSE_XORPS(rr, negateMaskF); break;
+                    case LIR_negf4: SSE_XORPS(rr, negateMaskF4); break;
+                    case LIR_absf:  SSE_ANDPS(rr, absMaskF); break;
+                    case LIR_absf4: SSE_ANDPS(rr, absMaskF4); break;
+                }
                 if (rr != ra)
                     SSE_MOVAPS(rr, ra);
             }
@@ -3118,6 +3125,7 @@ namespace nanojit
                 rb = ra;
 
             switch (op) {
+            default:        NanoAssertMsgf(false,"Unhandled op %d",op);
             case LIR_addd:  SSE_ADDSD(rr, rb);  break;
             case LIR_subd:  SSE_SUBSD(rr, rb);  break;
             case LIR_muld:  SSE_MULSD(rr, rb);  break;
@@ -3132,13 +3140,21 @@ namespace nanojit
             case LIR_divf4: SSE_DIVPS(rr, rb);  break;
             case LIR_minf4: SSE_MINPS(rr, rb);  break;
             case LIR_maxf4: SSE_MAXPS(rr, rb);  break;
-            case LIR_dotf4: SSE_DPPS(rr, rb, 0xF1); break;
-            case LIR_dotf3: SSE_DPPS(rr, rb, 0x71); break;
-            case LIR_dotf2: SSE_DPPS(rr, rb, 0x31); break;
-            default:        NanoAssertMsgf(false,"Unhandled op %d",op);
+            case LIR_dotf4:
+            case LIR_dotf3:
+            case LIR_dotf2: {
+                // This only works with _config.i386_sse41.  Otherwise the LIR generation
+                // frontend should have expanded into mulf4, swz, add, etc.
+                // dotf4 = ax*bx + ay*by + az*bz + aw*bw
+                // dotf3 = ax*bx + ay*by + az*bz
+                // dotf2 = ax*bx + ay*by
+                static const int masks[] = { /*dot4*/0xF1, /*dot3*/0x71, /*dot2*/0x31 };
+                SSE_DPPS(rr, rb, masks[op - LIR_dotf4]);
+                break;
+            }
             }
 
-            if (rr != ra){
+            if (rr != ra) {
                 SSE_MOVAPS(rr, ra); // doesn't hurt if we move all 128 bits...
             }
 

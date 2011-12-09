@@ -79,6 +79,12 @@ namespace nanojit
         // Can we use SSE2 instructions? (x86-only)
         uint32_t i386_sse2:1;
 
+        // Can we use SSE3 instructions? (x86-only)
+        uint32_t i386_sse3:1;
+
+        // Can we use SSE4.1 instructions? (x86 only)
+        uint32_t i386_sse41:1;
+
         // Can we use cmov instructions? (x86-only)
         uint32_t i386_use_cmov:1;
 
