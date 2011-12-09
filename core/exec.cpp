@@ -72,7 +72,7 @@ BaseExecMgr::BaseExecMgr(AvmCore* core)
     , verifyFunctionQueue(core->gc, 0)
     , verifyTraitsQueue(core->gc, 0)
 #endif
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
     , current_osr(NULL)
 #endif
 {
@@ -82,7 +82,7 @@ BaseExecMgr::BaseExecMgr(AvmCore* core)
 #ifdef VMCFG_COMPILEPOLICY
     prepPolicyRules();
 #endif
-#if defined VMCFG_NANOJIT && defined VMCFG_OSR && defined VMCFG_OSR_ENV_VAR
+#if defined VMCFG_NANOJIT && defined VMCFG_OSR_ENV_VAR
     if (config.osr_threshold == AvmCore::osr_threshold_default) {
         // If osr_threshold hasn't been set, check for OSR environment var.
         const char* osr_config = VMPI_getenv("OSR");
@@ -211,10 +211,6 @@ Atom BaseExecMgr::initInvokeInterpNoCoerce(MethodEnv* env, int argc, Atom* args)
 
 void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms, bool isOsr)
 {
-#ifndef VMCFG_OSR
-    AvmAssert(!isOsr);
-#endif
-
     // Choose an appropriate set of interpreter invocation stubs.
     // * if OSR is enabled, choose a stub that counts invocations to trigger JIT.
     // * if the method is a constructor, choose a stub that initializes
@@ -228,18 +224,12 @@ void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms, bool isOsr)
         BaseExecMgr::initInvokeInterpNoCoerce,    // osr=0, ctor=1, typedargs=0
         BaseExecMgr::initInvokeInterp             // osr=0, ctor=1, typedargs=1
     }}, {{
-#if defined FEATURE_NANOJIT && defined VMCFG_OSR
+#ifdef VMCFG_NANOJIT
         OSR::osrInvokeInterp,                     // osr=1, ctor=0, typedargs=0
         OSR::osrInvokeInterp                      // osr=1, ctor=0, typedargs=1
     }, {
         OSR::osrInitInvokeInterp,                 // osr=1, ctor=1, typedargs=0
         OSR::osrInitInvokeInterp                  // osr=1, ctor=1, typedargs=1
-#else
-        NULL,
-        NULL
-    }, {
-        NULL,
-        NULL
 #endif
     }}};
     int osr = isOsr ? 1 : 0;
@@ -266,19 +256,11 @@ void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms, bool isOsr)
             BaseExecMgr::initInterpGPR,                // osr=0, ctor=1, fpr=0
             (GprMethodProc)BaseExecMgr::initInterpFPR  // osr=0, ctor=1, fpr=1
         }}, {{
-#ifdef VMCFG_OSR
             OSR::osrInterpGPR,                         // osr=1, ctor=0, fpr=0
             (GprMethodProc)OSR::osrInterpFPR           // osr=1, ctor=0, fpr=1
         }, {
             OSR::osrInitInterpGPR,                     // osr=1, ctor=1, fpr=0
             (GprMethodProc)OSR::osrInitInterpFPR       // osr=1, ctor=1, fpr=1
-#else
-            NULL,
-            NULL
-        }, {
-            NULL,
-            NULL
-#endif
         }}};
         int fpr = ms->returnTraitsBT() == BUILTIN_number ? 1 : 0;
         m->_implGPR = impl_stubs[osr][ctor][fpr];
@@ -374,11 +356,7 @@ void BaseExecMgr::verifyInterp(MethodInfo* m, MethodSignaturep ms, Toplevel *top
     if (m->pool()->isVerbose(VB_execpolicy))
         core->console << "execpolicy interp (" << m->unique_method_id() << ") " << m << " jit-available\n";
 # endif
-# ifdef VMCFG_OSR
     setInterp(m, ms, OSR::isSupported(abc_env, m, ms));
-# else
-    setInterp(m, ms, false);
-# endif
 #else
 # ifdef AVMPLUS_VERBOSE
     if (m->pool()->isVerbose(VB_execpolicy))

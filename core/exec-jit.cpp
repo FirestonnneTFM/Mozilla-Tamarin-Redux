@@ -163,12 +163,10 @@ bool BaseExecMgr::shouldJitFirst(const AbcEnv* abc_env, const MethodInfo* m, Met
         {
             willJit = false;
         }
-        #ifdef VMCFG_OSR
         else if (OSR::isSupported(abc_env, m, ms))
         {
             willJit = false;
         }
-        #endif
         else
         {
             willJit = !m->isStaticInit();

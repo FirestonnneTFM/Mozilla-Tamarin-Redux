@@ -72,7 +72,6 @@ REALLY_INLINE uint32_t ImtHolder::hashIID(MethodInfo* m)
     return hashIID(getIID(m));
 }
 
-#ifdef VMCFG_OSR
 REALLY_INLINE bool OSR::countEdge(const MethodEnv* env, MethodInfo* m, MethodSignaturep ms)
 {
     // Decrement and return true if zero and OSR is supported.  If OSR
@@ -81,6 +80,5 @@ REALLY_INLINE bool OSR::countEdge(const MethodEnv* env, MethodInfo* m, MethodSig
     // test isSupported() once every 2^32 invocations.
     return --m->_abc.countdown == 0 && isSupported(env->abcEnv(), m, ms);
 }
-#endif
 
 } // namespace avmplus

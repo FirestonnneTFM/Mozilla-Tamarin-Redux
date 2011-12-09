@@ -1407,7 +1407,7 @@ namespace avmplus
 
     };
 
-    #if defined(VMCFG_OSR) && defined(DEBUG)
+    #ifdef DEBUG
     FUNCTION(FUNCADDR(OSR::checkBugCompatibility), SIG1(V, P), osr_check_bugcompatibility)
     #endif
 
@@ -1626,7 +1626,7 @@ namespace avmplus
         stp(InsConstPtr((void*)(uintptr_t)0xdeadbeef), methodFrame, offsetof(MethodFrame,dxns), ACCSET_OTHER);
         #endif
 
-        #if defined(VMCFG_OSR) && defined(DEBUG)
+        #ifdef DEBUG
         // Check that the BugCompatibility that would be used to OSR this function,
         // whether or not we actually did so, agrees with the value returned from
         // currentBugCompatibility() every time the function is executed.  Note that
@@ -1904,7 +1904,6 @@ namespace avmplus
         verbose_only( if (vbWriter) { vbWriter->flush();} )
     }
 
-#ifdef VMCFG_OSR
     FUNCTION(FUNCADDR(OSR::adjustFrame), SIG4(B, P, P, P, P), osr_adjust_frame)
 
     // Emit code to call OSR::adjust_frame and conditionally enter loop.
@@ -1925,9 +1924,6 @@ namespace avmplus
                 vars, tags);
         branchToAbcPos(LIR_jt, isOSR, osr->osrPc());
     }
-#else
-    void CodegenLIR::emitOsrBranch() { }
-#endif
 
     void CodegenLIR::emitInitializers()
     {

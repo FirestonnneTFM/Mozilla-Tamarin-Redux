@@ -65,8 +65,11 @@
  *
  * The present value has been set based on preliminary startup-time studies on AIR Android.
  */
-#define OSR_THRESHOLD_DEFAULT 17
-
+#ifdef VMCFG_OSR
+static const int OSR_THRESHOLD_DEFAULT = 17; // tuned
+#else
+static const int OSR_THRESHOLD_DEFAULT = 0;  // legacy policy.
+#endif
 
 #define AVMPLUS_STRING_DELETED ((Stringp)(1))
 

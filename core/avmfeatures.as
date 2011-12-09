@@ -456,15 +456,17 @@ var FEATURES =
       <name> AVMSYSTEM_SH4 </name>
      </exactly-one>
     </requires>
+    <requires> AVMFEATURE_ABC_INTERP </requires>
     <defines> VMCFG_NANOJIT  </defines>
     <defines> FEATURE_NANOJIT </defines> <!-- referenced by nanojit module only -->
   </feature>
 
   <feature>
-    <desc> Enables delayed JIT-compilation with on-stack replacement.
-           The default OSR compilation strategy either compiles a method eagerly
-           or interprets it always, thus the OSR invocation threshold must be
-           separately configured at runtime to obtain meaningful results. </desc>
+    <desc> Enables delayed JIT-compilation with on-stack replacement, by default,
+           and supports runtime-disabling of OSR to get the legacy policy (OSR=0).
+           Without this feature, legacy policy is the default: the VM
+           compiles a method eagerly or interprets it always, and the OSR
+           invocation threshold can be enabled at runtime (OSR=K, K>0). </desc>
 
     <name> AVMFEATURE_OSR  </name>
     <requires> AVMFEATURE_JIT </requires>

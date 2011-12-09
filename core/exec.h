@@ -395,7 +395,7 @@ private:
     GCList<MethodInfo> verifyFunctionQueue;
     GCList<Traits> verifyTraitsQueue;
 #endif
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
     // OSR support
     friend class OSR;
     OSR *current_osr;

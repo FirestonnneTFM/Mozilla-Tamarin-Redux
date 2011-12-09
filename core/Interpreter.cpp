@@ -41,7 +41,7 @@
 #include "avmplus.h"
 #include "Interpreter.h"
 
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
 #   include "exec-osr.h"
 #endif
 
@@ -267,7 +267,7 @@ namespace avmplus
 
 #endif // VMCFG_DIRECT_THREADED
 
-#if defined FEATURE_NANOJIT && defined VMCFG_OSR
+#ifdef VMCFG_NANOJIT
 #   define OSR(offset) \
         if (OSR::countEdge(env, info, ms) &&                        \
             OSR::execute(env, framep, ms, pc + (offset), &a1l)) {   \
