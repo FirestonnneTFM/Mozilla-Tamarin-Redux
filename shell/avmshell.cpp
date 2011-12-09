@@ -861,7 +861,6 @@ namespace avmshell
                     settings.policyRulesArg = argv[++i];  // capture the string process it later
                 }
 #endif /* VMCFG_COMPILEPOLICY */
-#ifdef VMCFG_OSR
                 else if (!VMPI_strncmp(arg, "-osr=", 5)) {
                     // parse the commandline threshold
                     int32_t threshold;
@@ -872,7 +871,6 @@ namespace avmshell
                     }
                     settings.osr_threshold = threshold;
                 }
-#endif /* VMCFG_OSR */
 #endif /* VMCFG_NANOJIT */
                 else if (MMgc::GCHeap::GetGCHeap()->Config().IsGCOptionWithParam(arg) && i+1 < argc ) {
                     const char *val = argv[++i];
@@ -1177,9 +1175,8 @@ namespace avmshell
         avmplus::AvmLog("          [-Dnocse]     disable CSE optimization\n");
         avmplus::AvmLog("          [-Dnoinline]  disable speculative inlining\n");
         avmplus::AvmLog("          [-jitharden]  enable jit hardening techniques\n");
-    #ifdef VMCFG_OSR
-        avmplus::AvmLog("          [-osr=T]      enable OSR with invocation threshold T\n");
-    #endif
+        avmplus::AvmLog("          [-osr=T]      enable OSR with invocation threshold T; disable with -osr=0; default is -osr=%d\n",
+                        avmplus::AvmCore::osr_threshold_default);
     #ifdef AVMPLUS_IA32
         avmplus::AvmLog("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
         avmplus::AvmLog("          [-Dfixedesp]  pre-decrement stack for all needed call usage upon method entry\n");

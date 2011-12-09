@@ -95,6 +95,7 @@
                 'core/Exception.cpp',
                 'core/exec.cpp',
                 'core/exec-jit.cpp',
+                'core/exec-osr.cpp',
                 'core/exec-verifyall.cpp',
                 'core/Float4Class.cpp',
                 'core/FloatClass.cpp',
