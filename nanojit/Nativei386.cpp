@@ -3738,17 +3738,21 @@ namespace nanojit
         NanoAssert(ins->isF4() && x->isF() && y->isF() && z->isF() && w->isF());
         NanoAssert(_config.i386_sse2);
         
+        /* we need a temp register because we're not supposed to change the values
+        of the registers associated with input operands. */
         Register rr = prepareResultReg(ins, XmmRegs);
-        Register rx = findRegFor(x, XmmRegs);
+        Register rt = _allocator.allocTempReg(XmmRegs & ~rmask(rr));
+        SSE_UNPCKLPS(rr,rt);// x y z w
+        Register rw = findRegFor(w, XmmRegs & ~(rmask(rt) | rmask(rr)));
+        SSE_UNPCKLPS(rt,rw);// y w y w
+        Register ry = findRegFor(y, XmmRegs & ~(rmask(rt) | rmask(rr)));
+        SSE_MOVAPS(rt, ry);
+        Register rz = findRegFor(z, XmmRegs & ~rmask(rr));
+        SSE_UNPCKLPS(rr,rz);// x z x z
+        freeResourcesOf(ins);
+        Register rx = x->isInReg() ? findRegFor(x, XmmRegs) : findSpecificRegForUnallocated(x, rr);
         if (rx != rr) 
             SSE_MOVAPS(rr, rx);
-        Register ry = findRegFor(y, XmmRegs & ~rmask(rx));
-        SSE_UNPCKLPS(rx,ry);// x y z w 
-        Register rw = findRegFor(w, XmmRegs & ~(rmask(rx) | rmask(ry)));
-        SSE_UNPCKLPS(ry,rw);// y w y w 
-        Register rz = findRegFor(z, XmmRegs & ~rmask(rx));
-        SSE_UNPCKLPS(rx,rz);// x z x z
-        freeResourcesOf(ins);
     }
     
     void Assembler::asm_f4comp(LIns* ins) {
