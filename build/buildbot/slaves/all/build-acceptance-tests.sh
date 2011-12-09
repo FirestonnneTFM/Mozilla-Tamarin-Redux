@@ -61,6 +61,9 @@ echo ""
 cd $basedir/test/acceptance
 echo "Removing old *.abc files"
 find ./ -name "*.abc" -exec rm {} \;
+echo "Revert any changes in the acceptance directory."
+echo "This will allow .abc files to actually be checked in."
+hg revert ./
 
 echo "Rebuilding ABC test media"
 python ./runtests.py --rebuildtests
