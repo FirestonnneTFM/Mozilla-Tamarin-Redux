@@ -55,9 +55,10 @@ var flt4_a:float4 = new float4(1f, 2f, 3f, 4f);
 var flt4_b:float4 = new float4(4f, 3f, 2f, 1f);
 AddStrictTestCase("float4.dot3((1f, 2f, 3f, 4f), (4f, 3f, 2f, 1f))", new float(16f), float4.dot3(flt4_a, flt4_b));
 
-
-
-
+// make sure w is excluded
+flt4_a = new float4(1f, 2f, 3f, 100f);
+flt4_b = new float4(4f, 3f, 2f, 100f);
+AddStrictTestCase("float4.dot3((1f, 2f, 3f, 100f), (4f, 3f, 2f, 100f))", new float(16f), float4.dot3(flt4_a, flt4_b));
 
 test();
 

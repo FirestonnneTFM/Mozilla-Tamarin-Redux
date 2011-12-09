@@ -44,16 +44,18 @@
 namespace nanojit
 {
 #ifdef NANOJIT_IA32
-    static int getCpuFeatures()
+    static void setCpuFeatures(Config* config)
     {
-        int features = 0;
+        int ecx_flags = 0;
+        int edx_flags = 0;
     #if defined _MSC_VER
         __asm
         {
             pushad
             mov eax, 1
             cpuid
-            mov features, edx
+            mov edx_flags, edx
+            mov ecx_flags, ecx
             popad
         }
     #elif defined __GNUC__
@@ -61,8 +63,9 @@ namespace nanojit
             "mov $0x01, %%eax\n"
             "cpuid\n"
             "mov %%edx, %0\n"
+            "mov %%ecx, %1\n"
             "xchg %%esi, %%ebx\n"
-            : "=m" (features)
+            : "=m" (edx_flags), "=m" (ecx_flags)
             : /* We have no inputs */
             : "%eax", "%esi", "%ecx", "%edx"
            );
@@ -71,12 +74,17 @@ namespace nanojit
             "mov $0x01, %%eax\n"
             "cpuid\n"
             "pop %%ebx\n"
-            : "=d" (features)
+            : "=d" (edx_flags), "=c", (ecx_flags)
             : /* We have no inputs */
             : "%eax", "%ecx"
            );
     #endif
-        return features;
+
+        config->i386_sse2 = (edx_flags & (1 << 26)) != 0;
+        config->i386_sse3 = (ecx_flags & (1 << 0)) != 0;
+        config->i386_sse41 = (ecx_flags & (1 << 19)) != 0;
+        config->i386_use_cmov = (edx_flags & (1<<15)) != 0;
+        config->i386_fixed_esp = false;
     }
 #endif
 
@@ -85,17 +93,14 @@ namespace nanojit
         VMPI_memset(this, 0, sizeof(*this));
 
         cseopt = true;
-
-#ifdef NANOJIT_IA32
-        int const features = getCpuFeatures();
-        i386_sse2 = (features & (1<<26)) != 0;
-        i386_use_cmov = (features & (1<<15)) != 0;
-        i386_fixed_esp = false;
-#endif
         harden_function_alignment = false;
         harden_nop_insertion = false;
 
-#if defined(NANOJIT_ARM)
+#ifdef NANOJIT_IA32
+        setCpuFeatures(this);
+#endif
+
+#ifdef NANOJIT_ARM
         NanoStaticAssert(NJ_COMPILER_ARM_ARCH >= 4 && NJ_COMPILER_ARM_ARCH <= 7);
         arm_arch = NJ_COMPILER_ARM_ARCH;
         arm_vfp = (arm_arch >= 7);

@@ -156,6 +156,8 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
     NanoStaticAssert((LIR_ltf^1) == LIR_gtf && (LIR_gtf^1) == LIR_ltf);
     NanoStaticAssert((LIR_lef^1) == LIR_gef && (LIR_gef^1) == LIR_lef);
 
+    NanoStaticAssert(LIR_dotf3 == LIR_dotf4 + 1);
+    NanoStaticAssert(LIR_dotf2 == LIR_dotf4 + 2);
 
     struct GuardRecord;
     struct SideExit;
