@@ -3148,7 +3148,7 @@ namespace nanojit
                 // dotf4 = ax*bx + ay*by + az*bz + aw*bw
                 // dotf3 = ax*bx + ay*by + az*bz
                 // dotf2 = ax*bx + ay*by
-                static const int masks[] = { /*dot4*/0xF1, /*dot3*/0x71, /*dot2*/0x31 };
+                static const uint8_t masks[] = { /*dot4*/0xF1, /*dot3*/0x71, /*dot2*/0x31 };
                 SSE_DPPS(rr, rb, masks[op - LIR_dotf4]);
                 break;
             }
