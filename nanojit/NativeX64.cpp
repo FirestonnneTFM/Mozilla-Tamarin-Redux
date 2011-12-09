@@ -1349,17 +1349,21 @@ namespace nanojit
         LIns *w = ins->oprnd4();
         NanoAssert(ins->isF4() && x->isF() && y->isF() && z->isF() && w->isF());
         
+        /* we need a temp register because we're not supposed to change the values
+        of the registers associated with input operands. */
         Register rr = prepareResultReg(ins, FpRegs);
-        Register rx = findRegFor(x, FpRegs);
+        Register rt = _allocator.allocTempReg(FpRegs & ~rmask(rr) );
+        UNPCKLPS(rr,rt);// x y z w
+        Register rw = findRegFor(w, FpRegs & ~(rmask(rt) | rmask(rr)));
+        UNPCKLPS(rt,rw);// y w y w
+        Register ry = findRegFor(y, FpRegs & ~(rmask(rt) | rmask(rr)));
+        MOVAPSR(rt, ry);
+        Register rz = findRegFor(z, FpRegs & ~rmask(rr));
+        UNPCKLPS(rr,rz);// x z x z
+        freeResourcesOf(ins);
+        Register rx = x->isInReg() ? findRegFor(x, FpRegs) : findSpecificRegForUnallocated(x, rr);
         if (rx != rr) 
             MOVAPSR(rr, rx);
-        Register ry = findRegFor(y, FpRegs & ~rmask(rx));
-        UNPCKLPS(rx,ry);// x y z w 
-        Register rw = findRegFor(w, FpRegs & ~(rmask(rx) | rmask(ry)));
-        UNPCKLPS(ry,rw);// y w y w 
-        Register rz = findRegFor(z, FpRegs & ~rmask(rx));
-        UNPCKLPS(rx,rz);// x z x z
-        freeResourcesOf(ins);
     }
     
     void Assembler::asm_f4comp(LIns *ins) {
