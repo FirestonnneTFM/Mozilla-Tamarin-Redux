@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "4.4.16.29";
 var VERSION = "AS3";
@@ -49,15 +47,10 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 var flt4:float4 = new float4(1f);
 AddTestCase("float4.distance() returns a float", "float", getQualifiedClassName(float4.distance(flt4, flt4)));
 AddTestCase("float4.distance() length is 2", 2, float4.distance.length);
-AddErrorTest("float4.distance() with no args", ARGUMENTERROR+1063,  function(){ float4.distance(); });
 
 var flt4_a:float4 = new float4(1f, 2f, 3f, 4f);
 var flt4_b:float4 = new float4(4f, 3f, 2f, 1f);
 AddStrictTestCase("float4.distance((1f, 2f, 3f, 4f), (4f, 3f, 2f, 1f))", float4.magnitude(flt4_a - flt4_b), float4.distance(flt4_a, flt4_b));
-
-
-
-
 
 test();
 

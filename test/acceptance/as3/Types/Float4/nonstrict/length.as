@@ -36,26 +36,25 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
-
-var SECTION = "5.1.6";
+var SECTION = "4.4.1";
 var VERSION = "AS3";
-var TITLE   = "The prefix ++ operator";
+var TITLE   = "float4.length";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
+AddTestCase("float4.length is 4", 4 , float4.length );
+AddTestCase("float4.length is int", "int" , getQualifiedClassName(float4.length));
 
-var flt4:float4 = new float4(1.125f);
-var flt4_plus_1:float4 = flt4 + float4(1.0f);
+AddTestCase("float4.length - DontDelete", false, delete(float4.length));
+AddTestCase("float4.length is still ok", 4, float4.length);
 
-AddTestCase("prefix ++ on float4", flt4_plus_1, ++flt4);
-AddTestCase("prefix ++ on float4", flt4_plus_1, flt4);
+AddTestCase("float4.length - DontEnum", '', getFloat4Prop('length'));
+AddTestCase("float4.length is not enumerable", false, float4.propertyIsEnumerable('length'));
 
-var u = flt4;
-AddTestCase("prefix ++ on float4 value should produce float4 value", "float4", getQualifiedClassName(++u));
-
+AddErrorTest("float4.length - ReadOnly", REFERENCEERROR+1074, function(){ float4.length = 0; });
+AddTestCase("float4.length is still here", 4 , float4.length );
 
 test();
 

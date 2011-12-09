@@ -36,27 +36,15 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
-
-var SECTION = "4.4.1";
+var SECTION = "4.4.16.29";
 var VERSION = "AS3";
-var TITLE   = "float4.length";
+var TITLE   = "Math and geometric methods public function distance(arg1:float4, arg2:float4):float";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
-AddTestCase("float4.length is 4", 4 , float4.length );
-AddTestCase("float4.length is int", "int" , getQualifiedClassName(float4.length));
-
-AddTestCase("float4.length - DontDelete", false, delete(float4.length));
-AddTestCase("float4.length is still ok", 4, float4.length);
-
-AddTestCase("float4.length - DontEnum", '', getFloat4Prop('length'));
-AddTestCase("float4.length is not enumerable", false, float4.propertyIsEnumerable('length'));
-
-AddErrorTest("float4.length - ReadOnly", REFERENCEERROR+1074, function(){ float4.length = 0; });
-AddTestCase("float4.length is still here", 4 , float4.length );
+AddErrorTest("float4.distance() with no args", ARGUMENTERROR+1063,  function(){ float4.distance(); });
 
 test();
 

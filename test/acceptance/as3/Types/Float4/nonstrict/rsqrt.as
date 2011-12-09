@@ -36,31 +36,15 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
-
-var SECTION = "5.7";
+var SECTION = "4.4.16.17";
 var VERSION = "AS3";
-var TITLE   = "The binary bitwise operators &, ^ and | augmented by float4 values";
+var TITLE   = "Math and geometric methods public function rsqrt(arg:float4):float4";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
-
-AddTestCase("float4(1f) & float4(1f)", 0, float4(1f) & float4(1f));
-AddTestCase("7 & float4(1f)", 0, 7 & float4(1f));
-AddTestCase("float4(1f) & 3", 0, float4(1f) & 3);
-
-
-AddTestCase("float4(1f) | float4(1f)", 0, float4(1f) | float4(1f));
-AddTestCase("7 | float4(1f)", 7, 7 | float4(1f));
-AddTestCase("float4(1f) | 3", 3, float4(1f) | 3);
-
-
-AddTestCase("float4(1f) ^ float4(1f)", 0, float4(1f) ^ float4(1f));
-AddTestCase("7 ^ float4(1f)", 7, 7 ^ float4(1f));
-AddTestCase("float4(1f) ^ 3", 3, float4(1f) ^ 3);
-
+AddErrorTest("float4.rsqrt() with no args", ARGUMENTERROR+1063,  function(){ float4.rsqrt(); });
 
 test();
 

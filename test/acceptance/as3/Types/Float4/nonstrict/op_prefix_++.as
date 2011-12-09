@@ -36,31 +36,24 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
-
-var SECTION = "5.1.8";
+var SECTION = "5.1.6";
 var VERSION = "AS3";
-var TITLE   = "The postfix ++ operator";
+var TITLE   = "The prefix ++ operator";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 
 var flt4:float4 = new float4(1.125f);
-var flt4_plus_1 = flt4 + float4(1.0f);
+var flt4_plus_1:float4 = flt4 + float4(1.0f);
 
-AddStrictTestCase("postfix ++ on float4", flt4, flt4++);
-AddStrictTestCase("postfix ++ on float4", flt4_plus_1, flt4);
+AddTestCase("prefix ++ on float4", flt4_plus_1, ++flt4);
+AddTestCase("prefix ++ on float4", flt4_plus_1, flt4);
 
-flt4 = --flt4;
-var o = new MyObject(flt4);
-var u = o++;
-
-AddTestCase("postfix ++ on Object (that converts to float4 through ToPrimitive)", u, flt4)
-AddTestCase("postfix ++ on Object (that converts to float4 through ToPrimitive)", o, flt4_plus_1)
-AddTestCase("postfix ++ on Object returns a float4", "float4", getQualifiedClassName(u));
-AddTestCase("postfix ++ on Object returns a float4", "float4", getQualifiedClassName(o));
+var u = flt4;
+AddTestCase("prefix ++ on float4 value should produce float4 value", "float4", getQualifiedClassName(++u));
 
 
 test();
+

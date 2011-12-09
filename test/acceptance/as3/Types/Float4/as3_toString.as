@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "4.6.1";
 var VERSION = "AS3";
@@ -102,12 +100,10 @@ AddTestCase("float4.AS3::toString: -float.MIN_VALUE, in base 16",
             "0,0,0,0",
             float4(-float.MIN_VALUE).AS3::toString(16)); // shouldn't be "-0"!
 
-test_flt = Infinity;
 AddTestCase("float.AS3::toString: Infinity, in base 16",
             "Infinity,Infinity,Infinity,Infinity",
             float4(float.POSITIVE_INFINITY).AS3::toString(16)); // base doesn't matter, still prints 'Infinity'
 
-test_flt = -Infinity;
 AddTestCase("float.AS3::toString: -Infinity, in base 16",
             "-Infinity,-Infinity,-Infinity,-Infinity",
             float4(float.NEGATIVE_INFINITY).AS3::toString(16)); // base doesn't matter, still prints '-Infinity'

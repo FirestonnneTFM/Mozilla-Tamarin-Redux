@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "4.4.16.19";
 var VERSION = "AS3";
@@ -49,7 +47,6 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 var flt4:float4 = new float4(9f);
 AddTestCase("float4.sqrt() returns a float4", "float4", getQualifiedClassName(float4.sqrt(flt4)));
 AddTestCase("float4.sqrt() length is 1", 1, float4.sqrt.length);
-AddErrorTest("float4.sqrt() with no args", ARGUMENTERROR+1063,  function(){ float4.sqrt(); });
 
 var flt_sqrt:float = float.sqrt(9f);
 AddStrictTestCase("float4.sqrt(9f, 9f, 9f, 9f)", new float4(flt_sqrt), float4.sqrt(flt4));

@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "5.5.1";
 var VERSION = "AS3";
@@ -48,7 +46,6 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 var pi_float4:Object = new float4(3.14f);
 var pi_float:Object = new float(3.14f);
-AddErrorTest("TypeError if datatype is not Class", TYPEERROR, function(){ return pi_float4 is "float4"; });
 
 AddTestCase("float4(3.14f) is float", true, pi_float4 is float4);
 AddTestCase("float4(3.14f) is NOT Number", false, pi_float4 is Number);
@@ -83,9 +80,6 @@ AddTestCase("Vector.<float4> value is Object", true, vf is Object);
 AddTestCase("Vector.<float4> value is NOT Vector.<Number>", false, vf is Vector.<Number>);
 AddTestCase("Vector.<float4> value is NOT Vector.<Object>", false, vf is Vector.<Object>);
 AddTestCase("Vector.<float4> value is NOT Vector.<*>", false, vf is Vector.<*>);
-vf = new Vector.<*>();
-vf.push(float4.MAX_VALUE);
-AddTestCase("Vector.<*> value is NOT Vector.<float4>", false, vf is Vector.<float4>);
 
 vf = new Vector.<Number>();
 AddTestCase("Vector.<Number> value is NOT Vector.<float4>", false, vf is Vector.<float4>);

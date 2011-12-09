@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "5.5.2";
 var VERSION = "AS3";
@@ -53,13 +51,10 @@ var minus_three:float4 = float4(-3f);
 var zero:float4 = float4(0f);
 var large_int_as_float4:float4 = float4(0x7FFFFF00);
 var large_neg_int_as_float4:float4 = float4(int.MIN_VALUE);
-var large_uint_as_float4:float4 = 0xFFFFFF00;
 var large_neg_int:int = int.MIN_VALUE+1;
 var large_int:int = -268435456;
 var large_uint:uint = 268435456;
 
-
-AddErrorTest("AS: TypeError if datatype is not Class", TYPEERROR, function(){ return pi_float4 as "float4"; });
 
 AddStrictTestCase("float4(3.14f) as float4", float4(3.14), pi_float4 as float4);
 AddStrictTestCase("float4(3.14f) as Number", null, pi_float4 as Number);
@@ -94,9 +89,6 @@ AddStrictTestCase("large int as float4 (if it ends in lots of zeroes - i.e. requ
 AddStrictTestCase("large unsigned int as float4 (if it ends in lots of zeroes - i.e. requires less than 23bits of mantissa)", null, large_uint as float4);
 
 var vf = new Vector.<float4>();
-vf = new Vector.<*>();
-vf.push(float4.MAX_VALUE);
-AddTestCase("Vector.<*> value as Vector.<float4>", null, vf as Vector.<float4>);
 vf = new Vector.<float4>();
 AddTestCase("Vector.<float4> value as Vector.<float>", null, vf as Vector.<float>);
 AddTestCase("Vector.<float4> value as Object", vf, vf as Object);
