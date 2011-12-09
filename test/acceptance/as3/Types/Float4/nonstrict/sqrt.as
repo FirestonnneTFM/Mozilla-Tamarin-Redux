@@ -36,24 +36,15 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
-
-var SECTION = "5.4";
+var SECTION = "4.4.16.19";
 var VERSION = "AS3";
-var TITLE   = "The bitwise shift operators augmented by float4 values";
+var TITLE   = "Math and geometric methods public function sqrt(arg:float4):float4";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
-
-
-var f1:float4 = float4(3f, 6f, 9f, 3f);
-
-AddStrictTestCase("float4<<2", 0, f1<<2);
-AddStrictTestCase("12<<float4", 12, 12<<f1);
-AddStrictTestCase("float4<<float", 0, f1<<float(2f));
-AddStrictTestCase("float<<float4", 3, float(3f)<<f1);
+AddErrorTest("float4.sqrt() with no args", ARGUMENTERROR+1063,  function(){ float4.sqrt(); });
 
 test();
 

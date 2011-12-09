@@ -36,24 +36,20 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
-
-var SECTION = "5.1.4";
+var SECTION = "5.5.1";
 var VERSION = "AS3";
-var TITLE   = "The bitwise not ~ operator";
+var TITLE   = "The is operator augmented by float4 values";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
-var flt4:float4 = new float4(1f);
-AddStrictTestCase("~float4(1f) of any value is always ~+0", ~0, ~flt4);
-flt4 = new float4(9.125f, 0f, 6.234f, 1f);
-AddStrictTestCase("~float4(9.125f, 0f, 6.234f, 1f) of any value is always ~+0", ~0, ~flt4);
+var pi_float4:Object = new float4(3.14f);
+AddErrorTest("TypeError if datatype is not Class", TYPEERROR, function(){ return pi_float4 is "float4"; });
 
-var u = ~flt4;
-AddTestCase("returns a number", "number", typeof(u));
-
+var vf = new Vector.<*>();
+vf.push(float4.MAX_VALUE);
+AddTestCase("Vector.<*> value is NOT Vector.<float4>", false, vf is Vector.<float4>);
 
 test();
 

@@ -36,31 +36,17 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
-
-var SECTION = "5.1.9";
+var SECTION = "4.2.2";
 var VERSION = "AS3";
-var TITLE   = "The postfix -- operator";
+var TITLE   = "The float4 method called as a function float4 (x, y, z, w)";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
-
-var flt4:float4 = new float4(1.125f);
-var flt4_minus_1:float4 = flt4 - float4(1.0f);
-
-AddStrictTestCase("postfix -- on float4", flt4, flt4--);
-AddStrictTestCase("postfix - on float4", flt4_minus_1, flt4);
-
-flt4 = ++flt4;
-var o = new MyObject(flt4);
-var u = o--;
-
-AddTestCase("postfix -- on Object (that converts to float4 through ToPrimitive)", u, flt4)
-AddTestCase("postfix -- on Object (that converts to float4 through ToPrimitive)", o, flt4_minus_1)
-AddTestCase("postfix -- on Object returns a float4", "float4", getQualifiedClassName(u));
-AddTestCase("postfix -- on Object returns a float4", "float4", getQualifiedClassName(o));
-
+AddErrorTest("float4() with 2 args", ARGUMENTERROR, function(){ result = float4(1, 2);});
+AddErrorTest("float4() with 3 args", ARGUMENTERROR, function(){ result = float4(1, 2, 3);});
+AddErrorTest("float4() with 5 args", ARGUMENTERROR, function(){ result = float4(1, 2, 3, 4, 5);});
 
 test();
+

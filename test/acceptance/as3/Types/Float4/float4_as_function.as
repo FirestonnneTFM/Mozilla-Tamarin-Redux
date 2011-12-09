@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "4.2.1";
 var VERSION = "AS3";
@@ -45,10 +43,6 @@ var TITLE   = "The float4 method called as a function float4 (x)";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
-
-
-var result = float4();
-AddTestCase("Float4 with no args", "float4", getQualifiedClassName(result));
 
 var undefined_float4 = float4(undefined);
 AddTestCase("Float4 as function, with 'undefined' arg", "float4", getQualifiedClassName(undefined_float4));

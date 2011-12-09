@@ -36,8 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
-
 
 var SECTION = "ABC Ext 5.3";
 var VERSION = "AS3";

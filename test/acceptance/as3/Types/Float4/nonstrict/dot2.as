@@ -36,23 +36,15 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
-
-var SECTION = "5.1.7";
+var SECTION = "4.4.16.25";
 var VERSION = "AS3";
-var TITLE   = "The prefix -- operator";
+var TITLE   = "Math and geometric methods public function dot2(arg1:float4, arg2:float4):float";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
-
-var flt4:float4 = new float4(1.125f);
-var flt4_minus_1:float4 = flt4 - float4(1.0f);
-AddStrictTestCase("prefix -- on float4", flt4_minus_1, --flt4);
-AddStrictTestCase("prefix -- on float4", flt4_minus_1, flt4);
-var u = flt4;
-AddTestCase("prefix -- on float4 value should produce float4 value", "float4", getQualifiedClassName(--u));
+AddErrorTest("float4.dot2() with no args", ARGUMENTERROR+1063,  function(){ float4.dot2(); });
 
 test();
 

@@ -55,34 +55,34 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 // We test for a lot of different vector lengths, and with and without
 // type information, in order to test more JIT and runtime paths.
 
-// Global code, no annotations 
+// Global code, no annotations
 
 for ( var i=0 ; i < 100 ; i++ ) {
-	var w = new Vector.<float4>(i);
-	AddTestCase("Global: length", i, w.length);
-	for ( var j=0 ; j < i ; j++ )
-		AddTestCase("Global: zero", float4(0,0,0,0), w[j]);
-	for ( var j=0 ; j < i ; j++ )
-		w[j] = float4(1000+i, 2000+i, 3000+i, 4000+i);
-	for ( var j=0 ; j < i ; j++ )
-		AddTestCase("Global: read", float4(1000+i, 2000+i, 3000+i, 4000+i), w[j]);
+    var w = new Vector.<float4>(i);
+    AddTestCase("Global: length", i, w.length);
+    for ( var j=0 ; j < i ; j++ )
+        AddTestCase("Global: zero", float4(0,0,0,0), w[j]);
+    for ( var j=0 ; j < i ; j++ )
+        w[j] = float4(1000+i, 2000+i, 3000+i, 4000+i);
+    for ( var j=0 ; j < i ; j++ )
+        AddTestCase("Global: read", float4(1000+i, 2000+i, 3000+i, 4000+i), w[j]);
 }
 
 // Function code, full annotations
 
-function f(): void 
+function f(): void
 {
-	for ( var i:int=0 ; i < 100 ; i++ ) {
-		var w:Vector.<float4> = new Vector.<float4>(i);
-		var j:int;
-		AddTestCase("Local: length", i, w.length);
-		for ( j=0 ; j < i ; j++ )
-			AddTestCase("Local: zero", float4(0,0,0,0), w[j]);
-		for ( j=0 ; j < i ; j++ )
-			w[j] = float4(1000+i, 2000+i, 3000+i, 4000+i);
-		for ( j=0 ; j < i ; j++ )
-			AddTestCase("Local: read", float4(1000+i, 2000+i, 3000+i, 4000+i), w[j]);
-	}
+    for ( var i:int=0 ; i < 100 ; i++ ) {
+        var w:Vector.<float4> = new Vector.<float4>(i);
+        var j:int;
+        AddTestCase("Local: length", i, w.length);
+        for ( j=0 ; j < i ; j++ )
+            AddTestCase("Local: zero", float4(0,0,0,0), w[j]);
+        for ( j=0 ; j < i ; j++ )
+            w[j] = float4(1000+i, 2000+i, 3000+i, 4000+i);
+        for ( j=0 ; j < i ; j++ )
+            AddTestCase("Local: read", float4(1000+i, 2000+i, 3000+i, 4000+i), w[j]);
+    }
 }
 
 f();

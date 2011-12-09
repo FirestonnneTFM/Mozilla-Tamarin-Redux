@@ -36,35 +36,16 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-include "floatUtil.as";
 
-
-var SECTION = "4.4.2";
+var SECTION = "4.6.4";
 var VERSION = "AS3";
-var TITLE   = "float4.prototype";
+var TITLE   = "const length : int";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
 
-var flt4_proto:Object = float4.prototype;
-AddTestCase("float4 prototype is non-null", false, float4.prototype == null);
-
-AddTestCase("float4 prototype is object", "Object" , getQualifiedClassName(float4.prototype));
-// TODO: what else? (the prototype properties themselves are tested in section 4.6)
-
-AddTestCase("float4 prototype is not Number prototype", false, Number.prototype == float4.prototype);
-
-AddTestCase("Object.prototype is prototype of float4", true, Object.prototype.isPrototypeOf(float4));
-
-AddTestCase("float4.prototype - DontDelete", false, delete(float4.prototype));
-AddTestCase("float4 prototype is still ok", flt4_proto, float4.prototype);
-
-AddTestCase("float4.prototype - DontEnum", '',getFloat4Prop('prototype'));
-AddTestCase("float4.prototype is no enumberable", false, float4.propertyIsEnumerable('prototype'));
-
-AddErrorTest("float4.prototype - ReadOnly", REFERENCEERROR+1074, function(){ float4.prototype = 10; });
-AddTestCase("float4.prototype is still here", flt4_proto , float4.prototype );
-
+var flt4:float4 = new float4(1f);
+AddErrorTest("flt4.length set", REFERENCEERROR+1074,  function(){ flt4.length = 12; });
 
 test();
 
