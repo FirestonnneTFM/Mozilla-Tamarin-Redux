@@ -1544,7 +1544,7 @@ namespace nanojit
     }
     void Assembler::asm_ffff2f4(LIns *ins) {
         (void)ins;
-        NanoAssertMsg(0, "LIR_fff2f4 not yet supported for this architecture");
+        NanoAssertMsg(0, "LIR_ffff2f4 not yet supported for this architecture");
     }
     void Assembler::asm_load128(LIns *ins) {
         (void)ins;
