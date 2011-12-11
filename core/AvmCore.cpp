@@ -1949,6 +1949,9 @@ return the result of the comparison ToPrimitive(x) == y.
             {
             case kStringType:
                 return atomToString(atom)->toNumber();
+            default:
+                AvmAssert(false);
+                // should never get here, but fall through to NaN if we do.
             case kSpecialBibopType:
                 return MathUtils::kNaN;
             case kBooleanType:
@@ -4303,7 +4306,6 @@ return the result of the comparison ToPrimitive(x) == y.
     #endif
 
 #elif defined(_MAC)
-
         // MacTel always has SSE2 available
         int32_t const intval = _mm_cvttsd_si32(_mm_set_sd(n));
         if (atomIsValidIntptrValueAndEqualTo(intval, n))
