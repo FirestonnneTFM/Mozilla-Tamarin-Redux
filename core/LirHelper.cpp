@@ -433,6 +433,4 @@ namespace nanojit
 
 }
 
-
 #endif // VMCFG_NANOJIT
-

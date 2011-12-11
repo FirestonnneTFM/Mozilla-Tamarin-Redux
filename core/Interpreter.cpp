@@ -3251,7 +3251,7 @@ namespace avmplus
             goto L_illegal_op;
 #endif
 
-        }  // TRY
+        }  // End TRY
 
         CATCH (Exception *exception)
         {
@@ -3301,7 +3301,7 @@ namespace avmplus
         L_illegal_op:
             AvmAssert(!"Illegal operation!");
             goto L_illegal_op;
-    }
+    } // end interpBoxed()
 
     // Note, this function is not on the hot path normally, so optimizing it is not urgent.
     //

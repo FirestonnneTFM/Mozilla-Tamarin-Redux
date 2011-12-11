@@ -213,7 +213,7 @@ namespace avmplus
         jmp_buf             jmpbuf;
 #ifdef DEBUG
         // save and restore additional state alongside jmpbuf
-        uint32_t                        contextExtra;
+        uint32_t            contextExtra;
 #endif
         AvmCore*            core;
         ExceptionFrame*     prevFrame;

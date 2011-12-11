@@ -37,10 +37,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
 namespace avmplus
 {
-
     /**
      * type descriptor for a captured scope chain
      *
