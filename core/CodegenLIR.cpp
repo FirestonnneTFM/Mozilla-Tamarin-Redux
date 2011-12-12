@@ -4468,9 +4468,24 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         localSet(sp - 1, normalize, result);
     }
 
-    /** cross(a:float4, b:float4) = a.yzx0 * b.zxy0 - a.zxy0 * b.yzx0 */
+    /** cross(a:float4, b:float4) = a.yzx0 * b.zxy0 - a.zxy0 * b.yzx0 
+        We implement the equivalent:a.yzxw * b.zxyw - a.zxyw * b.yzxw
+    */
     void CodegenLIR::emitFloat4cross(Traits* result) {
-        AvmAssert(!"not implemented.  how to set w=0?"); (void) result;
+        int sp = state->sp();
+        LIns* x = localGetf4(sp - 1);
+        LIns* y = localGetf4(sp);
+
+        LIns* xs1 = lirout->insSwz(x,0xD8);
+        LIns* ys1 = lirout->insSwz(y,0xE1);
+        LIns* m1  = lirout->ins2(LIR_mulf4,xs1,ys1);
+        
+        LIns* xs2 = lirout->insSwz(x,0xE1);
+        LIns* ys2 = lirout->insSwz(y,0xD8);
+        LIns* m2  = lirout->ins2(LIR_mulf4,xs2,ys2);
+
+        LIns* cross = lirout->ins2(LIR_subf4, m1,m2);
+        localSet(sp - 2, cross , result);
     }
 
     void CodegenLIR::emitFloat4binary(Traits* result, LOpcode op) {
@@ -4719,7 +4734,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         { avmplus::NativeID::float4_reciprocal,            1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4reciprocal},
         { avmplus::NativeID::float4_rsqrt,                 1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4rsqrt},
         { avmplus::NativeID::float4_sqrt,                  1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4sqrt},
-        //{ avmplus::NativeID::float4_cross,                 2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4cross},
+        { avmplus::NativeID::float4_cross,                 2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4cross},
         { avmplus::NativeID::float4_normalize,             1, {BUILTIN_float4, BUILTIN_none},   0, &CodegenLIR::emitFloat4normalize},
         { avmplus::NativeID::float4_dot,                   2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4dot},
         { avmplus::NativeID::float4_dot2,                  2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4dot2},
