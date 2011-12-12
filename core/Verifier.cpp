@@ -2717,7 +2717,7 @@ namespace avmplus
         int slot_id = AvmCore::bindingToSlotId(b);
         Traits* slotType = tb->getSlotTraits(slot_id);
 
-        if ((argc == 4) && (slotType != core->traits.float4_ctraits))
+        if ((argc == 4) FLOAT_ONLY(&& (slotType != core->traits.float4_ctraits)))
             return false;
 
         if (slotType == core->traits.int_ctraits)
@@ -2920,7 +2920,7 @@ namespace avmplus
             {
                 // Global object holding the built-in types
                 Stringp nm = multiname.getName();
-                if (nm == core->kfloat4 || nm == core->kfloat || nm == core->kMath || nm == core->kNumber)
+                if (FLOAT_ONLY(nm == core->kfloat4 || nm == core->kfloat ||) nm == core->kMath || nm == core->kNumber)
                 {
                     // We know those bindings not to be null values
                     notNull = true;

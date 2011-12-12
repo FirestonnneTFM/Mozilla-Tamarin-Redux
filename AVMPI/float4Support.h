@@ -42,7 +42,7 @@
 #define __float4Support__
 
 
-#ifdef VMCFG_GENERIC_FLOAT4
+#if defined(VMCFG_GENERIC_FLOAT4) || !defined(VMCFG_FLOAT)
 /**
  * Float4 support, no intrinsics
  */
