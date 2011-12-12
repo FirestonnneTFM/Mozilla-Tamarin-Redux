@@ -1531,11 +1531,11 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
 
     LIns* LIns::oprnd1() const {
         NanoAssert(isLInsOp1() || isLInsOp1b() || isLInsOp2() || isLInsOp3() ||
-                   isLInsLd() || isLInsSt() || isLInsJtbl() || isLInsOp4());
+                   isLInsOp4() || isLInsLd() || isLInsSt() || isLInsJtbl());
         return toLInsOp2()->oprnd_1;
     }
     LIns* LIns::oprnd2() const {
-        NanoAssert(isLInsOp2() || isLInsOp3() || isLInsSt() || isLInsOp4());
+        NanoAssert(isLInsOp2() || isLInsOp3() || isLInsOp4() || isLInsSt());
         return toLInsOp2()->oprnd_2;
     }
     LIns* LIns::oprnd3() const {
