@@ -455,19 +455,20 @@ namespace nanojit
 		void SSE_SUBPS(Register rd, Register rs); \
 		void SSE_MULPS(Register rd, Register rs); \
 		void SSE_DIVPS(Register rd, Register rs); \
-    void SSE_RCPPS(Register rd, Register rs); \
-    void SSE_RCPSS(Register rd, Register rs); \
-    void SSE_RSQRTPS(Register rd, Register rs); \
-    void SSE_RSQRTSS(Register rd, Register rs); \
-    void SSE_SQRTPS(Register rd, Register rs); \
-    void SSE_SQRTSS(Register rd, Register rs); \
-    void SSE_SQRTSD(Register rd, Register rs); \
-    void SSE_MINPS(Register rd, Register rs); \
-    void SSE_MAXPS(Register rd, Register rs); \
-    void SSE_DPPS(Register rd, Register rs, uint8_t imm); \
+        void SSE_RCPPS(Register rd, Register rs); \
+        void SSE_RCPSS(Register rd, Register rs); \
+        void SSE_RSQRTPS(Register rd, Register rs); \
+        void SSE_RSQRTSS(Register rd, Register rs); \
+        void SSE_SQRTPS(Register rd, Register rs); \
+        void SSE_SQRTSS(Register rd, Register rs); \
+        void SSE_SQRTSD(Register rd, Register rs); \
+        void SSE_MINPS(Register rd, Register rs); \
+        void SSE_MAXPS(Register rd, Register rs); \
+        void SSE_DPPS(Register rd, Register rs, uint8_t imm); \
 		void SSE_PSHUFD(Register rd, Register rs, uint8_t imm); \
 		void SSE_UCOMISS(Register rl, Register rr); \
 		void SSE_CMPNEQPS(Register rl, Register rr); \
+        void SSE_CMPPS(Register rl, Register rr, uint8_t imm); \
 		void SSE_XORPS(Register r, const uint32_t* maskaddr); \
 		void SSE_ANDPS(Register r, const uint32_t* maskaddr); \
 \
