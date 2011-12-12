@@ -193,6 +193,35 @@ misc/testJitordieSwitch, .*, arm-(winmobile|lnx), deep, include slow tests in de
 misc/testJitordieSwitch, arm-(winmobile|lnx), , skip, include slow tests in deep phase
 
 # skip slow tests when running in -Dgreedy mode
+e4x/Global/e13_1_2_1, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Date/e15_9_5_10, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Date/e15_9_5_10_11, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Date/e15_9_5_12_1, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Date/e15_9_5_12_4, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Date/e15_9_5_14, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Date/e15_9_5_16, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Date/e15_9_5_18, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Date/e15_9_5_20, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Date/e15_9_5_22_1, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Date/e15_9_5_22_2, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Expressions/e11_10_2, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Expressions/e11_10_3, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Expressions/e11_7_1, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Expressions/e11_7_2, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Expressions/e11_7_3, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Function/apply_001, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/RegExp/multibyte_regress, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+ecma3/Unicode/uA000_YiSyllables, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+mmgc/memlimit, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+mmgc/outofmemory, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+mmgc/pauseForGCIfCollectionImminent, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+spidermonkey/js1_5/Regress/regress-155081-2, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+spidermonkey/js1_5/Regress/regress-155081, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+spidermonkey/js1_5/Regress/regress-244470, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+spidermonkey/js1_5/Regress/regress-256501, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+spidermonkey/js1_5/Regress/regress-280769-2, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+spidermonkey/js1_5/Regress/regress-280769-3, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
+spidermonkey/js1_5/Regress/regress-366122, Dgreedy,, skip, skip slow test in -Dgreedy mode (bugzilla 707907)
 ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA, Dgreedy,, skip, skip slow test in -Dgreedy mode
 ecma3/Unicode/u5000_CJKUnifiedIdeographs, Dgreedy,, skip, skip slow test in -Dgreedy mode
 ecma3/Unicode/u6000_CJKUnifiedIdeographs, Dgreedy,, skip, skip slow test in -Dgreedy mode
