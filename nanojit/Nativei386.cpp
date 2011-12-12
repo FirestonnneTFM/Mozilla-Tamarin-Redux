@@ -757,7 +757,7 @@ namespace nanojit
     }
 
     inline void Assembler::SSE_STUPS(I32 d, R b, R r) { count_stf4(); SSEsm(0x0f11, r, d, b); asm_output("movups %d(%s),%s", d, gpn(b), gpn(r)); }
-    inline void Assembler::SSE_CMPNEQPS(R rd, R rs) { count_fpu(); SSEu8_2(0x0fc2, rd,rs,4); asm_output("cmpneqps %s,%s", gpn(rd), gpn(rs)); }
+    inline void Assembler::SSE_CMPNEQPS(R rd, R rs) { count_fpu(); SSEu8_2(0x0fc2, rd, rs, 4); asm_output("cmpneqps %s,%s", gpn(rd), gpn(rs)); }
     inline void Assembler::SSE_CVTSI2SS(R xr, R gr)  { count_fpu(); SSE(0xf30f2a, xr, gr); asm_output("cvtsi2ss %s,%s", gpn(xr), gpn(gr)); }
     inline void Assembler::SSE_CVTTSS2SI(R gr, R xr) { count_fpu(); SSE(0xf30f2c, gr, xr); asm_output("cvttss2si %s,%s",gpn(gr), gpn(xr)); }
 
@@ -894,6 +894,14 @@ namespace nanojit
       NanoAssert(IsXmmReg(rd) && IsXmmReg(rs));
       SSEs(0x0f5d, rd, rs);
       asm_output("minps %s,%s", gpn(rd), gpn(rs));
+    }
+
+    inline void Assembler::SSE_CMPPS(R rd, R rs, uint8_t imm) {
+        count_fpu();
+        char* ckind[8]={ "eq", "lt", "le", "unord", "neq", "nlt", "nle", "ord" };
+        NanoAssert(IsXmmReg(rd) && IsXmmReg(rs) && imm < 8);
+        SSEu8_2(0x0fc2, rd, rs, imm);
+        asm_output("cmp%sps %s,%s",ckind[imm], gpn(rd), gpn(rs));
     }
 
     inline void Assembler::SSE_UCOMISS(R rl, R rr) {
@@ -2840,6 +2848,7 @@ namespace nanojit
     static uint32_t absMaskD_temp[8];
     static uint32_t absMaskF_temp[8];
     static uint32_t absMaskF4_temp[8];
+    static uint32_t onesMaskF4_temp[8];
 
     static uint32_t* initMaskD(uint32_t mask_temp[], uint32_t upper, uint32_t lower) {
         uint32_t* mask = (uint32_t*) alignUp(mask_temp, 16);
@@ -2866,6 +2875,7 @@ namespace nanojit
     static uint32_t *absMaskD     = initMaskD(absMaskD_temp,      0x7FFFFFFF, 0xFFFFFFFF);
     static uint32_t *absMaskF     = initMaskF(absMaskF_temp,      0x7FFFFFFF);
     static uint32_t *absMaskF4    = initMaskF4(absMaskF4_temp,    0x7FFFFFFF);
+    static uint32_t *onesMaskF4   = initMaskF4(onesMaskF4_temp,   0x3F800000);
 #else
     static const AVMPLUS_ALIGN16(uint32_t) negateMaskD[]  = { 0,0x80000000,0,0};
     static const AVMPLUS_ALIGN16(uint32_t) negateMaskF[]  = { 0x80000000, 0,          0,          0 };
@@ -2875,6 +2885,7 @@ namespace nanojit
     static const AVMPLUS_ALIGN16(uint32_t) absMaskF4[]    = { 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF };
     static const AVMPLUS_ALIGN16(uint32_t) xyzMaskF4[]    = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 };
     static const AVMPLUS_ALIGN16(uint32_t) xyMaskF4[]     = { 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000, 0x00000000 };
+    static const AVMPLUS_ALIGN16(uint32_t) onesMaskF4[]   = { 0x3F800000, 0x3F800000, 0x3F800000, 0x3F800000 };
 #endif
 
     void Assembler::asm_neg_abs(LIns* ins)
@@ -3096,6 +3107,13 @@ namespace nanojit
             LIns *lhs = ins->oprnd1();
             LIns *rhs = ins->oprnd2();
 
+            /* Swap the operands, there is no "gt", we have to use "lt" */
+            if(op == LIR_cmpgtf4 || op == LIR_cmpgef4){
+                LIns* tmp = lhs;
+                lhs = rhs;
+                rhs = tmp;
+            }
+
             RegisterMask allow = XmmRegs;
             Register rb = UnspecifiedReg;
             if (lhs != rhs) {
@@ -3140,6 +3158,12 @@ namespace nanojit
             case LIR_divf4: SSE_DIVPS(rr, rb);  break;
             case LIR_minf4: SSE_MINPS(rr, rb);  break;
             case LIR_maxf4: SSE_MAXPS(rr, rb);  break;
+            case LIR_cmpgtf4:
+            case LIR_cmpltf4: SSE_ANDPS(rr, onesMaskF4);SSE_CMPPS(rr,rb, 1); break;
+            case LIR_cmpgef4:
+            case LIR_cmplef4: SSE_ANDPS(rr, onesMaskF4);SSE_CMPPS(rr,rb, 2); break;
+            case LIR_cmpeqf4: SSE_ANDPS(rr, onesMaskF4);SSE_CMPPS(rr,rb, 0); break;
+            case LIR_cmpnef4: SSE_ANDPS(rr, onesMaskF4);SSE_CMPPS(rr,rb, 4); break;
             case LIR_dotf4:
             case LIR_dotf3:
             case LIR_dotf2: {

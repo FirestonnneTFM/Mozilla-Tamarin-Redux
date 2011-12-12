@@ -341,6 +341,12 @@ OP___(rsqrtf,   Op1,  F,    1)  // float reciprocal square root
 OP___(minf,     Op2,  F,    1)  // float min
 OP___(maxf,     Op2,  F,    1)  // float max
 
+OP___(cmpgtf4,  Op2, F4,    1)  // float4.isGreater
+OP___(cmpltf4,  Op2, F4,    1)  // float4.isLess
+OP___(cmpgef4,  Op2, F4,    1)  // float4.isGreaterOrEqual
+OP___(cmplef4,  Op2, F4,    1)  // float4.isLessOrEqual
+OP___(cmpeqf4,  Op2, F4,    1)  // float4.isEqual
+OP___(cmpnef4,  Op2, F4,    1)  // float4.isNotEqual
 OP___(recipf4,  Op1, F4,    1)  // float4 reciprocal
 OP___(rsqrtf4,  Op1, F4,    1)  // float4 reciprocal square root
 OP___(minf4,    Op2, F4,    1)  // float4 min

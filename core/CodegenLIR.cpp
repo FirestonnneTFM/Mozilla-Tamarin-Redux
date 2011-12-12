@@ -4468,7 +4468,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         localSet(sp - 1, normalize, result);
     }
 
-    /** cross(a:float4, b:float4) = a.yzx0 * b.zxy0 - a.zxy0 * b.yzx0 
+    /** cross(a:float4, b:float4) = a.yzx0 * b.zxy0 - a.zxy0 * b.yzx0
         We implement the equivalent:a.yzxw * b.zxyw - a.zxyw * b.yzxw
     */
     void CodegenLIR::emitFloat4cross(Traits* result) {
@@ -4479,7 +4479,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         LIns* xs1 = lirout->insSwz(x,0xD8);
         LIns* ys1 = lirout->insSwz(y,0xE1);
         LIns* m1  = lirout->ins2(LIR_mulf4,xs1,ys1);
-        
+
         LIns* xs2 = lirout->insSwz(x,0xE1);
         LIns* ys2 = lirout->insSwz(y,0xD8);
         LIns* m2  = lirout->ins2(LIR_mulf4,xs2,ys2);
@@ -4495,8 +4495,14 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         localSet(sp - 2, lirout->ins2(op, x, y), result);
     }
 
-    void CodegenLIR::emitFloat4max(Traits* result)        { emitFloat4binary(result, LIR_maxf4); }
-    void CodegenLIR::emitFloat4min(Traits* result)        { emitFloat4binary(result, LIR_minf4); }
+    void CodegenLIR::emitFloat4max(Traits* result)            { emitFloat4binary(result, LIR_maxf4);   }
+    void CodegenLIR::emitFloat4min(Traits* result)            { emitFloat4binary(result, LIR_minf4);   }
+    void CodegenLIR::emitFloat4Greater(Traits* result)        { emitFloat4binary(result, LIR_cmpgtf4); }
+    void CodegenLIR::emitFloat4GreaterOrEqual(Traits* result) { emitFloat4binary(result, LIR_cmpgef4); }
+    void CodegenLIR::emitFloat4Less(Traits* result)           { emitFloat4binary(result, LIR_cmpltf4); }
+    void CodegenLIR::emitFloat4LessOrEqual(Traits* result)    { emitFloat4binary(result, LIR_cmplef4); }
+    void CodegenLIR::emitFloat4Equal(Traits* result)          { emitFloat4binary(result, LIR_cmpeqf4); }
+    void CodegenLIR::emitFloat4NotEqual(Traits* result)       { emitFloat4binary(result, LIR_cmpnef4); }
 
     void CodegenLIR::emitFloat4dot(Traits* result, LOpcode op) {
         int sp = state->sp();
@@ -4745,6 +4751,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         { avmplus::NativeID::float4_distance,              2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4distance},
         { avmplus::NativeID::float4_distance2,             2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4distance2},
         { avmplus::NativeID::float4_distance3,             2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4distance3},
+        { avmplus::NativeID::float4_isGreater,             2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4Greater},
+        { avmplus::NativeID::float4_isLess,                2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4Less},
+        { avmplus::NativeID::float4_isGreaterOrEqual,      2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4GreaterOrEqual},
+        { avmplus::NativeID::float4_isLessOrEqual,         2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4LessOrEqual},
+        { avmplus::NativeID::float4_isEqual,               2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4Equal},
+        { avmplus::NativeID::float4_isNotEqual,            2, {BUILTIN_float4, BUILTIN_float4}, 0, &CodegenLIR::emitFloat4NotEqual},
 #endif
 
         { avmplus::NativeID::Math_min,                     2, {BUILTIN_int,    BUILTIN_int},    0, &CodegenLIR::emitIntMathMin},

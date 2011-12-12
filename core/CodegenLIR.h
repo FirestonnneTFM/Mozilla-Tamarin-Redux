@@ -598,6 +598,12 @@ namespace avmplus
         void emitFloat4distance2(Traits* result);
         void emitFloat4distance3(Traits* result);
         LIns* emitDot(LOpcode, LIns*, LIns*);
+        void emitFloat4Greater(Traits* result);
+        void emitFloat4GreaterOrEqual(Traits* result);
+        void emitFloat4Less(Traits* result);
+        void emitFloat4LessOrEqual(Traits* result);
+        void emitFloat4Equal(Traits* result);
+        void emitFloat4NotEqual(Traits* result);
 #endif
 
         LIns *optimizeIndexArgumentType(int32_t sp, Traits** indexType);
