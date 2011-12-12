@@ -5691,6 +5691,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         emitLabel(begin_label);
         switch (store_item)
         {
+#ifdef VMCFG_FLOAT
             case LIR_stf4:
             {
                 LIns* base = binaryIns(LIR_addp, arrayData, InsConstPtr((const void*)(uintptr_t(entriesOffset) + 15))); // arrayData + entries + 15
@@ -5709,6 +5710,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 storeIns(store_item, value, 0, effectiveAddress, ACCSET_OTHER);
                 break;
             }
+#endif
 #ifdef VMCFG_64BIT
             case LIR_stp:
 #endif
@@ -8302,6 +8304,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             { FUNCTIONID(makeatom),                                  1, false, false, true  }, 
             // restargHelper(Toplevel*, Multiname*, Atom, ArrayObject**, uint32_t, Atom*) => arrayObject** might be reference to a var
             { FUNCTIONID(restargHelper),                             2, false, false, false }, 
+#ifdef VMCFG_FLOAT
             // float4(float4_t* result, Atom val) => result might point to a local var.
             { FUNCTIONID(float4),                                    1, true, false, false  },  
             // Float4VectorObject::_getNativeUintProperty(this, result, index) => result might point to a local var.
@@ -8316,6 +8319,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             { FUNCTIONID(Float4VectorObject_setNativeIntProperty),   0, false, false, false },  
             // Float4VectorObject::_setFloat4DoubleProperty(this, index, value) => value might point to a local var.            
             { FUNCTIONID(Float4VectorObject_setNativeDoubleProperty),0, false, false, false },
+#endif
         };
         const int varPtrFunctionsNum = (int) (sizeof(varPtrFunctions) / sizeof(FuncLiveInfo));
         

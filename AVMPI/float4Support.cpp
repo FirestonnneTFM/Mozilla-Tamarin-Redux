@@ -44,7 +44,7 @@
 namespace avmplus
 {
 /* Note: This file must be compiled with NEON turned on even for targets that don't have NEON, in order for the adapters to work.
-  But VMCFG_NEON may be undefined, indicated that we don't want fast intrinsic implementation */
+  But VMCFG_NEON may be undefined, indicating that we don't want fast intrinsic implementation */
 #ifdef VMCFG_FLOAT
  #ifdef VMCFG_ARM 
    #include <arm_neon.h>
@@ -55,6 +55,8 @@ namespace avmplus
  #else
    #error Unsupported platform in float4Support.cpp
  #endif
+#else
+
 #endif
 
 typedef union {
@@ -94,6 +96,7 @@ const VecrMethodProc verifyEnterVECR_adapter = (VecrMethodProc) verifyEnterVECR_
 const VecrThunkProc thunkEnterVECR_adapter = thunkEnterVECR_adapter_impl;
 
 }
+#endif
 // TODO: leave these for "#if !defined(VMCFG_NEON) && !defined(VMCFG_SSE2)", add hardware-accellerated versions for NEON and SSE2
 float4_t f4_add(const float4_t& x1, const float4_t& x2) 
 { 
@@ -118,4 +121,3 @@ float4_t f4_div(const float4_t& x1, const float4_t& x2)
     float4_t retval = { x1.x / x2.x, x1.y / x2.y, x1.z / x2.z, x1.w / x2.w };
     return retval;
 }
-#endif
