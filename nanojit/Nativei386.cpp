@@ -898,7 +898,7 @@ namespace nanojit
 
     inline void Assembler::SSE_CMPPS(R rd, R rs, uint8_t imm) {
         count_fpu();
-        char* ckind[8]={ "eq", "lt", "le", "unord", "neq", "nlt", "nle", "ord" };
+        const char* ckind[8]={ "eq", "lt", "le", "unord", "neq", "nlt", "nle", "ord" };
         NanoAssert(IsXmmReg(rd) && IsXmmReg(rs) && imm < 8);
         SSEu8_2(0x0fc2, rd, rs, imm);
         asm_output("cmp%sps %s,%s",ckind[imm], gpn(rd), gpn(rs));
