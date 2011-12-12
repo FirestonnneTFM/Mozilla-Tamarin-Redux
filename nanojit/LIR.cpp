@@ -1509,7 +1509,7 @@ namespace nanojit
     {
         NanoAssert(oprnd1 && oprnd2 && oprnd3 && oprnd4);
         NanoAssert(v == LIR_ffff2f4);
-        if(oprnd1 == oprnd2 && oprnd1 == oprnd3 && oprnd1 == oprnd4)
+        if (oprnd1 == oprnd2 && oprnd1 == oprnd3 && oprnd1 == oprnd4)
             return out->ins1(LIR_f2f4, oprnd1); 
         return out->ins4(v, oprnd1, oprnd2, oprnd3, oprnd4);
     }        
@@ -4502,10 +4502,10 @@ namespace nanojit
 
     LIns* ValidateWriter::ins4(LOpcode op, LIns* a, LIns* b, LIns* c, LIns* d)
     {
+        NanoAssert(op == LIR_ffff2f4);
         int nArgs = 4;
         LTy formals[4] = { LTy_F, LTy_F, LTy_F, LTy_F };   // LTy_V gets overwritten
         LIns* args[4] = { a, b, c, d };
-        NanoAssert(op == LIR_ffff2f4);
         typeCheckArgs(op, nArgs, formals, args);
         return out->ins4(op, a, b, c, d);
     }
