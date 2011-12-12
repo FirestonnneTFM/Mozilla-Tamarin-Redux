@@ -4748,7 +4748,7 @@ return the result of the comparison ToPrimitive(x) == y.
     /*static*/ void AvmCore::float4(float4_t* retval, Atom atom)
     {
         
-        if(isFloat4(atom))
+        if (isFloat4(atom))
         {
             *retval = atomToFloat4(atom);
             return;
