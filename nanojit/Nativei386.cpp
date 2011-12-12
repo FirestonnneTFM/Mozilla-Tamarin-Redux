@@ -898,10 +898,10 @@ namespace nanojit
 
     inline void Assembler::SSE_CMPPS(R rd, R rs, uint8_t imm) {
         count_fpu();
-        const char* ckind[8]={ "eq", "lt", "le", "unord", "neq", "nlt", "nle", "ord" };
+        static const char* ckind[8] = { "eq", "lt", "le", "unord", "neq", "nlt", "nle", "ord" };
         NanoAssert(IsXmmReg(rd) && IsXmmReg(rs) && imm < 8);
         SSEu8_2(0x0fc2, rd, rs, imm);
-        asm_output("cmp%sps %s,%s",ckind[imm], gpn(rd), gpn(rs));
+        asm_output("cmp%sps %s,%s", ckind[imm], gpn(rd), gpn(rs)); (void)ckind;
     }
 
     inline void Assembler::SSE_UCOMISS(R rl, R rr) {
@@ -1547,9 +1547,10 @@ namespace nanojit
 
     static RegisterMask  Hints[LIR_sentinel+1]; // effectively const, save for the initialization
     static bool initialized = nHintsInit(Hints);
+
     RegisterMask RegAlloc::nHint(LIns* ins)
     {
-        NanoAssert(initialized);
+        NanoAssert(initialized); (void)initialized;
 
         RegisterMask prefer = Hints[ins->opcode()];
         if(prefer != PREFER_SPECIAL) return prefer;
