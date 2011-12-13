@@ -800,6 +800,12 @@ const int kBufferPadding = 16;
         GCMember<String> kVectorint;    // 'Vector.<int>'
         GCMember<String> kVectoruint;   // 'Vector.<uint>'
         GCMember<String> kVectorAny;    // 'Vector.<*>'
+#ifdef VMCFG_FLOAT
+        GCMember<String> kx;            // Used
+        GCMember<String> ky;            //   for
+        GCMember<String> kz;            //     JSON
+        GCMember<String> kw;            //       formatting
+#endif
 
         Atom kNaN;
 #ifdef VMCFG_FLOAT

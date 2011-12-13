@@ -53,7 +53,10 @@
 package
 {
 
-    include "api-versions.as"
+    include "api-versions.as";
+
+    CONFIG const NO_VMCFG_FLOAT = !CONFIG::VMCFG_FLOAT;
+
     /**
     * The JSON class lets developers import and export data to and from JavaScript Object Notation (JSON) format. JSON is an industry standard data-interchange
     * format that is described at <a href="http://www.json.org">http://www.json.org</a>.
@@ -164,15 +167,18 @@ package
             if (!(replacer === null || replacer is Function || replacer is Array))
                 Error.throwError( TypeError, 1131 /*kJSONInvalidReplacer*/ );
 
+            CONFIG::VMCFG_FLOAT     const isfloat:Boolean = space is float;
+            CONFIG::NO_VMCFG_FLOAT  const isfloat:Boolean = false;
+                
             // We follow ECMA-262 and silently ignore invalid space parameter.
-            if (!(space === null || space is String || space is Number))
+            if (!(space === null || space is String || space is Number || isfloat))
                 space = null;
 
             var gap = "";
 
             if (space is String)
                 gap = space.length > 10 ? space.AS3::substring(0,10) : space;
-            else if (space is Number)
+            else if (space is Number || isfloat)
                 gap = "          ".AS3::substring(0,Math.min(10,Math.floor(space)));
 
             if (replacer === null) {
@@ -193,9 +199,13 @@ package
                     continue;
                 var v = r[i];
                 var item: String = null;
+
+                CONFIG::VMCFG_FLOAT     const isfloat:Boolean = v is float;
+                CONFIG::NO_VMCFG_FLOAT  const isfloat:Boolean = false;
+
                 if (v is String)
                     item = v;
-                else if (v is Number)
+                else if (v is Number || isfloat)
                     item = String(v);
                 if (item !== null && !alreadyAdded[item]) {
                     alreadyAdded[item] = true;
@@ -225,8 +235,10 @@ package
                 }
             }
             else if (val !== null && !(val is Boolean) && !(val is Number) && !(val is String)) {
-
-                //
+                
+                // Primitive types float and float4 cannot appear in the unfiltered tree so
+                // no need to check for them above.
+                
                 // See earlier note about unsafe for-in enumeration in AS3.
 
                 for (var p:String in val) {
