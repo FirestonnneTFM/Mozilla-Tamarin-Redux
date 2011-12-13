@@ -1295,7 +1295,7 @@ namespace avmplus
                 {
                     FrameValue& v = checkLocal(imm30);
                     BuiltinType bt = Traits::getBuiltinType(v.traits);
-                    if(bt == BUILTIN_any || bt == BUILTIN_object)
+                    if(bt == BUILTIN_none || bt == BUILTIN_any || bt == BUILTIN_object)
                     {
                         emitCoerceToNumeric(imm30);
                         retType = OBJECT_TYPE;
@@ -1699,7 +1699,7 @@ namespace avmplus
                 FrameValue &v = state->value(sp);
                 BuiltinType bt = Traits::getBuiltinType(v.traits);
                 Traits* type = v.traits;
-                if(bt == BUILTIN_any || bt == BUILTIN_object)
+                if(bt == BUILTIN_none || bt == BUILTIN_any || bt == BUILTIN_object)
                 {
                     emitCoerceToNumeric(sp);
                     type = OBJECT_TYPE;
@@ -2365,7 +2365,7 @@ namespace avmplus
                             type = FLOAT_TYPE;
                         else if(lhst == BUILTIN_float4 || rhst == BUILTIN_float4)
                             type = FLOAT4_TYPE;
-                        else if(lhst != BUILTIN_object && lhst != BUILTIN_any && rhst != BUILTIN_object && rhst != BUILTIN_any)
+                        else if(lhst != BUILTIN_none && lhst != BUILTIN_object && lhst != BUILTIN_any && rhst != BUILTIN_none && rhst != BUILTIN_object && rhst != BUILTIN_any)
                             type = NUMBER_TYPE;
                         else
                         {
@@ -2398,7 +2398,7 @@ namespace avmplus
                 {
                     FrameValue& v = state->peek(1);
                     BuiltinType bt = Traits::getBuiltinType(v.traits);
-                    if(bt == BUILTIN_any || bt == BUILTIN_object)
+                    if(bt == BUILTIN_none || bt == BUILTIN_any || bt == BUILTIN_object)
                     {
                         emitCoerceToNumeric(sp);
                         already_coerced = true;
