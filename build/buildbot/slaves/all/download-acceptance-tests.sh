@@ -50,6 +50,9 @@
 cd $basedir/test/acceptance
 echo "Removing old *.abc files"
 find ./ -name "*.abc" -exec rm {} \;
+echo "Revert any changes in the acceptance directory."
+echo "This will allow .abc files to actually be checked in."
+hg revert ./
 
 ## download acceptance test abc zip
 echo "Download acceptance-tests-abcs.zip"
