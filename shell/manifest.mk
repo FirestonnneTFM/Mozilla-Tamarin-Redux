@@ -115,7 +115,7 @@ endif
 # '$(topsrcdir)' [which would then not be a pattern-rule] is crucial
 # (ie "deliberate", ie "hack"); see Bug 632086
 %/generated/shell_toplevel.h %/generated/shell_toplevel.cpp: $(topsrcdir)/shell/shell_toplevel.as $(topsrcdir)/core/api-versions.as
-	cd $(topsrcdir)/shell; python shell_toplevel.py
+	cd $(topsrcdir)/shell; python shell_toplevel.py $(shell_BUILTINFLAGS)
 
 # 1. Use of '$(topsrcdir)/generated' is deliberate; we use absolute
 #    paths for code being generated (or referenced) outside build dir.

@@ -63,10 +63,10 @@ asc = javacmd+" macromedia.asc.embedding.ScriptCompiler "
 print("ASC="+classpath)
 print("Building shell_toplevel...")
 
-configs = ""
+configs = " ".join(sys.argv[1:])
 
 # compile builtins
-os.system(asc+" -abcfuture -import ../generated/builtin.abc -builtin "+configs+"-apiversioning -out shell_toplevel shell_toplevel.as Domain.as ../extensions/Sampler.as ../extensions/Trace.as Endian.as")
+os.system(asc+" -import ../generated/builtin.abc -builtin "+configs+" -apiversioning -out shell_toplevel shell_toplevel.as Domain.as ../extensions/Sampler.as ../extensions/Trace.as Endian.as")
 
 rm("shell_toplevel.h")
 rm("shell_toplevel.cpp")
