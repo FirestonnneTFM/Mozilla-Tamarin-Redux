@@ -1370,6 +1370,43 @@ namespace avmplus
             } else {
                 return kNoOutput;
             }
+#ifdef VMCFG_FLOAT
+        case kSpecialBibopType:
+            if (value != undefinedAtom)
+            {
+                if (AvmCore::isFloat(value))
+                {
+                    committedToEmitFor(key, pendingPrefix, pendingPropnameColon);
+
+                    d = AvmCore::atomToFloat(value);
+                    if (m_toplevel->isFinite(NULL, d))
+                        emit(core()->doubleToString(d));
+                    else
+                        emit("null", 4);
+                    return kSomeOutput;
+                }
+                else if (AvmCore::isFloat4(value))
+                {
+                    committedToEmitFor(key, pendingPrefix, pendingPropnameColon);
+
+                    // OPTIMIZEME: It would be better if this didn't cons a new object with a new
+                    // dynamic property table every time it needed to format a float4.
+
+                    float4_t f = AvmCore::atomToFloat4(value);
+                    const float* floats = reinterpret_cast<const float*>(&f);
+                    ScriptObject* obj = m_toplevel->builtinClasses()->get_ObjectClass()->construct();
+                    const String *names[] = { core()->kx, core()->ky, core()->kz, core()->kw };
+                    for ( int i=0 ; i < 4 ; i++ )
+                    {
+                        Atom val = m_toplevel->isFinite(NULL, floats[i]) ? core()->floatToAtom(floats[i]) : core()->knull->atom();
+                        obj->setAtomProperty(names[i]->atom(), val);
+                    }
+                    return JO(obj);
+                }
+                else
+                    return kNoOutput;
+            }
+#endif
         default:
             return kNoOutput;
         }

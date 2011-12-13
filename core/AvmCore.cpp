@@ -522,6 +522,12 @@ namespace avmplus
         kVectorint = internConstantStringLatin1("Vector.<int>");
         kVectoruint = internConstantStringLatin1("Vector.<uint>");
         kVectorAny = internConstantStringLatin1("Vector.<*>");
+#ifdef VMCFG_FLOAT
+        kx = internConstantStringLatin1("x");
+        ky = internConstantStringLatin1("y");
+        kz = internConstantStringLatin1("z");
+        kw = internConstantStringLatin1("w");
+#endif
 
         for (int i = 0; i < 128; i++)
         {
