@@ -272,7 +272,7 @@ namespace nanojit
         Seq<Node>** buckets;
 
         /** return the node containing K, and the bucket index, or NULL if not found */
-        Node* find(K k, size_t &i) {
+        Node* find(K k, size_t &i) const {
             i = H::hash(k) % nbuckets;
             for (Seq<Node>* p = buckets[i]; p != NULL; p = p->tail) {
                 if (p->head.key == k)
@@ -308,14 +308,14 @@ namespace nanojit
         }
 
         /** return v for element k, or T(0) if k is not present */
-        T get(const K& k) {
+        T get(const K& k) const {
             size_t i;
             Node* n = find(k, i);
             return n ? n->value : 0;
         }
 
         /** returns true if k is in the map. */
-        bool containsKey(const K& k) {
+        bool containsKey(const K& k) const {
             size_t i;
             return find(k, i) != 0;
         }
