@@ -1325,7 +1325,9 @@ namespace avmplus
 
         // In principle, if the numeric pools are sized to make element zero available then initialize that element.
         //
-        // Note that for int, uint, and double above we still throw VerifyError in the Verifier but that should change.
+        // Note that for int, uint, double, float, and float4 we still throw VerifyError in the Verifier if element
+        // zero is referenced from an instruction, but that really should change, the documentation has traditionally
+        // said that they're available.
         //
         // In practice, the Debugger may actually access these values if they are referenced even in content that
         // does not verify, so make them available always.  Bugzilla 520888.
