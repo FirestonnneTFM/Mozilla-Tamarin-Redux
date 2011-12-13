@@ -159,6 +159,17 @@ namespace avmplus
     #endif
     }
 
+    REALLY_INLINE
+    void MethodInfo::_installRefToResolvedMethodSignature(MethodSignature* ms)
+    {
+        AvmAssert(isResolved());
+        AvmAssert(_msref->isNull());
+        _msref = ms->GetWeakRef();
+        PoolObject* pool = this->pool();
+        AvmCore* core = pool->core;
+        core->msCache()->add(ms);
+    }
+
 #ifdef DEBUGGER
     // note that the "local" can be a true local (0..local_count-1)
     // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
@@ -717,9 +728,6 @@ namespace avmplus
         WB(gc, ms, &ms->_returnTraits, returnType);
         WB(gc, ms, &ms->_args[0].paramType, receiverType);
 
-        AvmAssert(_msref->isNull());
-        _msref = ms->GetWeakRef();
-        core->msCache()->add(ms);
         return ms;
     }
 
@@ -731,6 +739,9 @@ namespace avmplus
         // for verification errors, but those will have been caught prior to this) and for
         // abcGen and imtBuilder (since those only need to be done once).
         MethodSignature* ms = _buildMethodSignature(NULL);
+
+        _installRefToResolvedMethodSignature(ms);
+
         return ms;
     }
 
@@ -767,6 +778,8 @@ namespace avmplus
                 _hasMethodBody = 0;
 
             _isResolved = 1;
+            _installRefToResolvedMethodSignature(ms);
+
             pool()->core->exec->notifyMethodResolved(this, ms);
         }
     }
