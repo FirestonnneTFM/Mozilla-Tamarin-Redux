@@ -358,9 +358,6 @@ as3/Types/Float/rsqrt:float.rsqrt\(64\)   , x86-.*(release|debug)-Ojit,, expecte
 as3/Types/Float/nonstrict/reciprocal:float\.reciprocal\(true\)   , x86-.*(release|debug)-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=704097
 as3/Types/Float/nonstrict/rsqrt:float\.rsqrt\(true\)   , x86-.*(release|debug)-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=704097
 as3/Types/Float/rsqrt , .*diff ,, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=704097
-as3/Types/Float/nonstrict/op_negate:unary minus via valueOf, .*-Ojit , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=698367
-as3/Types/Float/nonstrict/op_unplus:unary plus via valueOf, .*-Ojit , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=698367
-
 
 as3/Types/Float/loadLegacyCode, arm , ,  expectedfail, need to update runner script
 as3/Types/Float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
@@ -372,8 +369,6 @@ as3/Types/Float4/component_access:^float4\['(xxxx|yyyy|zzzz|wwww|xyzw|wzyx)'\], 
 as3/Types/Float4/component_access_swizzle:^float4\['(x|y|z|w){4}'\], arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 as3/Types/Float4/float4Operations:Flt4(Any|Flt4)Ops Xyzzy, arm-lnx.*-Dinterp , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 as3/Types/Float4/float4Operations:Flt4(Any|Flt4)Ops (?!.*EQ).*, arm-.*debug.* , -Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700642
-as3/Types/Float4/nonstrict/op_negate:unary minus via valueOf, .*-Ojit , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=698367
-as3/Types/Float4/nonstrict/op_unplus:unary plus via valueOf, .*-Ojit , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=698367
 
 as3/Types/Float4/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
 abcasm/coverage/float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
