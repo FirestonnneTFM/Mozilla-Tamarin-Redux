@@ -103,9 +103,8 @@ typedef Atom (*AtomMethodProc)(MethodEnv*, int, Atom*);
 // Signature for invoking a method early bound via an interface
 // type reference.  JIT code passes in the IID of the interface method
 // to enable searching for the correct concrete method.
-typedef uintptr_t GprImtThunkProcRetType;
-typedef GprImtThunkProcRetType (*GprImtThunkProc)(class ImtThunkEnv*,
-        int argc, uint32_t* args, uintptr_t idd);
+typedef uintptr_t (*GprImtThunkProc)(class ImtThunkEnv*, int argc, uint32_t* args, uintptr_t idd);
+typedef double (*FprImtThunkProc)(class ImtThunkEnv*, int argc, uint32_t* args, uintptr_t idd);
 
 /**
  * Size of a variable in a JIT stack frame, in bytes.  VARSIZE is large
@@ -351,13 +350,10 @@ private:
     static class ImtEntry* buildImtEntries(VTable* vtable, uint32_t slot, uint32_t& count);
 
     /** Trampoline to resolve this IMT slot then invoke the proper handler. */
-    static GprImtThunkProcRetType resolveImt(class ImtThunkEnv* ite,
-                                  int argc, uint32_t* ap, uintptr_t iid);
+    static uintptr_t resolveImt(class ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid);
 
     /** Trampoline which searches for the method with a matching IID. */
-    static GprImtThunkProcRetType dispatchImt(class ImtThunkEnv* ite,
-                                  int argc, uint32_t* ap, uintptr_t iid);
-
+    static uintptr_t dispatchImt(class ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid);
 
     #ifdef VMCFG_COMPILEPOLICY
         /**
