@@ -8301,7 +8301,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             // beginCatch(core, ef, info, pc, &vars[i], &tags[i]) => store to &vars[i] and &tag[i]
             { FUNCTIONID(beginCatch),                                1, true,  true,  true  }, 
             // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
-            { FUNCTIONID(makeatom),                                  1, false, false, true  }, 
+            { FUNCTIONID(makeatom),                                  1, false, true, true  }, 
             // restargHelper(Toplevel*, Multiname*, Atom, ArrayObject**, uint32_t, Atom*) => arrayObject** might be reference to a var
             { FUNCTIONID(restargHelper),                             2, false, false, false }, 
 #ifdef VMCFG_FLOAT
