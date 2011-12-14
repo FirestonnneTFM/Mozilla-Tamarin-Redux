@@ -7040,7 +7040,7 @@ namespace avmplus
     {
         if (ins->callInfo() == FUNCTIONID(beginCatch)) {
             // beginCatch(core, ef, info, pc, &vars[i], &tags[i]) => store to &vars[i] and &tag[i]
-            LIns* varPtrArg = ins->arg(4);  // varPtrArg == vars, OR addp(vars, index)
+            LIns* varPtrArg = ins->arg(1);  // varPtrArg == vars, OR addp(vars, index)
             if (varPtrArg == vars) {
                 varlivein.clear(0);
                 taglivein.clear(0);
@@ -7084,7 +7084,7 @@ namespace avmplus
         else if (ins->callInfo() == FUNCTIONID(restargHelper)) {
             // restargHelper(Toplevel*, Multiname*, Atom, ArrayObject**, uint32_t, Atom*)
             // The ArrayObject** is a reference to a var
-            LIns* varPtrArg = ins->arg(3);  // varPtrArg == vars, OR addp(vars, index)
+            LIns* varPtrArg = ins->arg(2);  // varPtrArg == vars, OR addp(vars, index)
             if (varPtrArg == vars)
                 varlivein.set(0);
             else if (varPtrArg->isop(LIR_addp))
