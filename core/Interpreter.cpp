@@ -661,6 +661,11 @@ namespace avmplus
 #endif
              III(0x135, L_lix8)
              III(0x136, L_lix16)
+#ifdef VMCFG_FLOAT
+             III(0x137, L_float4)
+#else
+             XXX(0x137)
+#endif
 #  if defined GNUC_THREADING
             };
             AvmAssert(opcode_labels[0x18] == &&L_ifge);
@@ -1287,7 +1292,7 @@ namespace avmplus
 
 #ifdef VMCFG_FLOAT
             INSTR(convert_f) {
-                AvmAssertMsg( pool->hasFloatSupport(), "float instruction(convert_f), but float support disabled");
+                // Note the instruction may be generated from the verifier.
                 if (!IS_FLOAT(sp[0])) {
                     SAVE_EXPC;
                     sp[0] = core->floatAtom(sp[0]);
@@ -1296,7 +1301,7 @@ namespace avmplus
             }
 
             INSTR(convert_f4) {
-                AvmAssertMsg( pool->hasFloatSupport(), "float instruction(convert_f4), but float support disabled");
+                // Note the instruction may be generated from the verifier.
                 if (!IS_FLOAT4(sp[0])) {
                     SAVE_EXPC;
                     sp[0] = core->float4Atom(sp[0]);
@@ -1305,7 +1310,7 @@ namespace avmplus
             }                    
        
             INSTR(unplus) {
-                AvmAssertMsg( pool->hasFloatSupport(), "float instruction(unplus), but float support disabled");
+                // Note the instruction may be generated from the verifier.
                 if (!IS_FLOAT(sp[0]) && !IS_FLOAT4(sp[0])) {
                     SAVE_EXPC;
                     sp[0] = core->numericAtom(sp[0]);
@@ -3444,8 +3449,22 @@ FLOAT_ONLY(\
                 }
                 NEXT;
             }
-
+                    
+#ifdef VMCFG_FLOAT
+            INSTR(float4) {
+                // Does not pop its arguments but replaces the top argument by the result,
+                // the stack is cleaned up by subsequent code.  This mess is brought upon
+                // us by Verifier::emitCallpropertySlot(), primarily.
+                float4_t result;
+                result.w = AvmCore::singlePrecisionFloat(sp[0]);
+                result.z = AvmCore::singlePrecisionFloat(sp[-1]);
+                result.y = AvmCore::singlePrecisionFloat(sp[-2]);
+                result.x = AvmCore::singlePrecisionFloat(sp[-3]);
+                sp[0] = core->float4ToAtom(result);
+                NEXT;
+            }
 #endif
+#endif  // VMCFG_WORDCODE
 #if defined SWITCH_DISPATCH
             } // switch
             // illegal instruction or accidental break

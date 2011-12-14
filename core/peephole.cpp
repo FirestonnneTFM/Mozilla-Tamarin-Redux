@@ -192,7 +192,7 @@ const uint16_t WordcodeEmitter::toplevel[] = {
 0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -
 0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -
 0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -
-0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -
+0, 0, 0, 0, 0, 0, 0,    // -                    -                    -                    -                    -                    -                    -
 };
 
 bool WordcodeEmitter::commit(uint32_t action)
