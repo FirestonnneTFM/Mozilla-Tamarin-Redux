@@ -369,13 +369,8 @@ elif config.getCompiler() == 'VS':
             DEBUG_CXXFLAGS = "-Od "
             DEBUG_CFLAGS = "-Od "
         else:
-            # BZ: 697097 disable optimization on windows64 for float until resolved
-            if cpu == 'x86_64':
-                OPT_CXXFLAGS = "-Od -Ob1 -GR- "
-                OPT_CFLAGS = "-Od -Ob1 -GR- "
-            else:
-                OPT_CXXFLAGS = "-O2 -Ob1 -GR- "
-                OPT_CFLAGS = "-O2 -Ob1 -GR- "
+            OPT_CXXFLAGS = "-O2 -Ob1 -GR- "
+            OPT_CFLAGS = "-O2 -Ob1 -GR- "
 
         if memoryProfiler:
             OPT_CXXFLAGS += "-Oy- -Zi "
