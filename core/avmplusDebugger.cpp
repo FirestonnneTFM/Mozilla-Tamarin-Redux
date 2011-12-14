@@ -643,6 +643,22 @@ namespace avmplus
         return AvmCore::atomToDouble(autoAtomAt(frame, index, kind));
     }
 
+#ifdef VMCFG_FLOAT
+    float Debugger::autoVarAsFloat(DebugFrame* frame, int index, AutoVarKind kind) {
+        if (!frame) return (float)MathUtils::kNaN;
+        return AvmCore::atomToFloat(autoAtomAt(frame, index, kind));
+    }
+
+    float4_t Debugger::autoVarAsFloat4(DebugFrame* frame, int index, AutoVarKind kind) {
+        float4_t res;
+        if (!frame) {
+            res.x = res.y = res.z = res.w = (float)MathUtils::kNaN;
+            return res;
+        }
+        return AvmCore::atomToFloat4(autoAtomAt(frame, index, kind));
+    }
+#endif
+
     Stringp Debugger::autoVarName(DebugStackFrame* frame, int index, AutoVarKind kind) {
         if (frame == NULL) return NULL;
         int line;

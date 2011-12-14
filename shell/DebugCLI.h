@@ -295,7 +295,6 @@ namespace avmshell
         void displayLines(int linenum, int count);
 
         char* lineStart(int linenum);
-        avmplus::Atom ease2Atom(const char* to, avmplus::Atom baseline);
 
         void throwUndefinedVarError(const char* name);
 
