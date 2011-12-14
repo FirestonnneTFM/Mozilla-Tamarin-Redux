@@ -7075,6 +7075,8 @@ namespace avmplus
         }
         else if (ins->callInfo() == FUNCTIONID(makeatom)) {
             // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
+            // note: tag[index] is loaded by value, already handled by case LIR_lduc2ui
+            // in deadvars_analyze() and deadvars_kill().
             LIns* varPtrArg = ins->arg(1);  // varPtrArg == vars, OR addp(vars, index)
             if (varPtrArg == vars)
                 varlivein.set(0);
