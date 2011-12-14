@@ -419,7 +419,7 @@ TYPEMAP_ATOM_TO_GCREF = {
     CTYPE_UINT:         lambda val,t: "avmplus::AvmCore::toUInt32(%s)" % val,
     CTYPE_DOUBLE:       lambda val,t: "avmplus::AvmCore::number(%s)" % val,
     CTYPE_FLOAT:        lambda val,t: "avmplus::AvmCore::singlePrecisionFloat(%s)" % val,
-    CTYPE_FLOAT4:       lambda val,t: "avmplus::AvmCore::float4(%s)" % val,
+    # no value for CTYPE_FLOAT4; this is intentional, since the case of float4 is more complex, and needs to be treated separately
     CTYPE_STRING:       lambda val,t: "GCRef<avmplus::String>(avmplus::AvmCore::atomToString(%s))" % val,
     CTYPE_NAMESPACE:    lambda val,t: "GCRef<avmplus::Namespace>(avmplus::AvmCore::atomToNamespace(%s))" % val,
 }
@@ -2223,7 +2223,12 @@ class AbcThunkGen:
                     out.println("avmplus::Atom const result = this->construct_native(%s::createInstanceProc, %d, args);" % (t.fqcppname(), len(args)-1))
                 else:
                     out.println("avmplus::Atom const result = this->construct(%d, args);" % (len(args)-1))
-                out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ctype]("result",t.itraits))
+                if( ctype != CTYPE_FLOAT4):
+                    out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ctype]("result",t.itraits))
+                else:
+                    out.println("float4_t resultf4;")
+                    out.println("avmplus::AvmCore::float4(&resultf4, result);")
+                    out.println("return resultf4;")
                 out.indent -= 1
                 out.println("}")
                 args.pop()
@@ -2364,6 +2369,10 @@ class AbcThunkGen:
                             out.println("avmplus::Atom const result = method->coerceEnter(%d, args);" % (argc))
                     if ret_ctype == CTYPE_VOID:
                         out.println("AvmAssert(result == undefinedAtom); (void)result;")
+                    elif ret_ctype == CTYPE_FLOAT4:
+                        out.println("float4_t resultf4;")
+                        out.println("avmplus::AvmCore::float4(&resultf4, result);")
+                        out.println("return resultf4;")
                     else:
                         out.println("return %s;" % TYPEMAP_ATOM_TO_GCREF[ret_ctype]("result",ret_traits))
                     out.indent -= 1
