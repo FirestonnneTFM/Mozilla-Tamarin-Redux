@@ -41,7 +41,7 @@
 
 var SECTION = "ASC";
 var VERSION = "AS3";
-var TITLE   = "ASC misinterprets default <null> value as \"null\" string value";
+var TITLE   = "ASC misinterprets default <null> value as 'null' string value";
 
 startTest();
 writeHeaderToLog( SECTION + " "+ TITLE);
