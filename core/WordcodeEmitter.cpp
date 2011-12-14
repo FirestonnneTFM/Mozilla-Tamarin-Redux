@@ -519,9 +519,9 @@ namespace avmplus
         switch (opcode) {
         case OP_coerce_a:
         case OP_nop:
-                case OP_bkpt:
-                case OP_bkptline:
-                case OP_timestamp:
+        case OP_bkpt:
+        case OP_bkptline:
+        case OP_timestamp:
             // do nothing, all values on stack are atoms
             break;
         case OP_label:
@@ -738,9 +738,22 @@ namespace avmplus
     {}
 
     void WordcodeEmitter::writeCoerceToNumeric(const FrameState*, uint32_t)
-    { AvmAssert(!"FIXME: implement CoerceToNumeric in the wordcode interpreter"); GCHeap::Abort(); }
-    void WordcodeEmitter::writeCoerceToFloat4(const FrameState*, uint32_t) 
-    { AvmAssert(!"FIXME: implement CoerceToFloat4 in the wordcode interpreter"); GCHeap::Abort(); }
+    {
+#ifdef VMCFG_FLOAT
+        emitOp0(NULL, WOP_unplus);      // NULL is dodgy but happens to work
+#else
+        emitOp0(NULL, WOP_convert_d);   // NULL is dodgy but happens to work
+#endif
+    }
+
+    void WordcodeEmitter::writeCoerceToFloat4(const FrameState*, uint32_t)
+    {
+#ifdef VMCFG_FLOAT
+        emitOp0(NULL, WOP_float4);      // NULL is dodgy but happens to work
+#else
+        AvmAssert(!"Should not happen");
+#endif
+    }
 
     void WordcodeEmitter::emitOp1(const uint8_t *pc, WordOpcode opcode)
     {

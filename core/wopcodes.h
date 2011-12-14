@@ -284,8 +284,9 @@ namespace avmplus
         WOP_debugexit = 0x134,
         WOP_lix8 = 0x135,
         WOP_lix16 = 0x136,
+        WOP_float4 = 0x137,     // Needs four arguments but does not pop any - an abomination brought on by LIR_ffff2f4 and writeNip()
 
-        WOP_LAST = 0x136
+        WOP_LAST = 0x137
     };
 
     struct WordOpcodeAttr
@@ -297,7 +298,7 @@ namespace avmplus
         unsigned calls:1;        // True if the last argument is arg_count
                                  // An 'arg_count' number of extra parameters are pop from the stack
         unsigned pushes:3;       // Number of items pushed on the stack
-        unsigned pops:2;         // Number of items popped from the stack
+        unsigned pops:3;         // Number of items popped from the stack
         unsigned pops_extra:1;   // True if the instruction has extra stack pops, determined by verifier
         unsigned uses_local:1;   // Use local slot
         unsigned defs_local:1;   // Defines local slot
