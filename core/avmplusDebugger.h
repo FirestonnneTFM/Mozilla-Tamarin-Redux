@@ -502,6 +502,10 @@ namespace avmplus
          // returns double, cf AvmCore::number_d, ok for interactive use
         static double autoVarAsInteger(DebugFrame* frame, int localIndex, AutoVarKind kind);
         static double autoVarAsDouble(DebugFrame* frame, int localIndex, AutoVarKind kind);
+#ifdef VMCFG_FLOAT
+        static float autoVarAsFloat(DebugFrame* frame, int localIndex, AutoVarKind kind);
+        static float4_t autoVarAsFloat4(DebugFrame* frame, int localIndex, AutoVarKind kind);
+#endif
         static Stringp autoVarName(DebugStackFrame* frame, int index, AutoVarKind kind);
         static int autoVarCount(DebugStackFrame* frame, AutoVarKind kind);
         static Stringp methodNameAt(DebugStackFrame* frame);
