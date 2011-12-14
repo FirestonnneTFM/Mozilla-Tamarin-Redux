@@ -39,7 +39,9 @@
 
 package flash.utils
 {
-    
+    // Need to include this because IDataInput.as is not included into builtin.as.
+    include "api-versions.as";
+
 /**
 * The IDataInput interface provides a set of methods for reading binary data.
 * This interface is the I/O counterpart to the IDataOutput interface, which
@@ -361,6 +363,26 @@ public interface IDataInput
     function get endian():String;
     [cppcall]
     function set endian(type:String):void;
+}
+
+/**
+ * Like IDataInput but provides readFloat4() additionally.
+ */
+[API(CONFIG::SWF_16)]
+CONFIG::VMCFG_FLOAT
+public interface IDataInput2 extends IDataInput
+{
+    /**
+     * Reads a quadruple of IEEE 754 single-precision (32-bit) floating-point numbers from the byte stream.
+     *
+     * @throws EOFError There is not sufficient data available to read.
+     * @return  A quadruple of single-precision (32-bit) floating-point numbers in the form of a float4.
+     *
+     * @playerversion Flash Player Cyril
+     * @langversion 3.0
+     */
+    [cppcall]
+    function readFloat4(): float4;
 }
 
 /*

@@ -719,6 +719,79 @@ private:
 };
 
 //-----------------------------------------------------------
+// flash.utils::IDataInput2
+//-----------------------------------------------------------
+class IDataInput2Interface : public avmplus::ScriptObject
+{
+public:
+    inline float4_t call_readFloat4()
+    {
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1872);
+        avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
+        avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 0, args, this->vtable);
+        float4_t resultf4;
+        avmplus::AvmCore::float4(&resultf4, result);
+        return resultf4;
+    }
+public:
+    REALLY_INLINE GCRef<avmplus::IDataInputInterface> as_IDataInputInterface()
+    {
+        return GCRef<avmplus::IDataInputInterface>((avmplus::IDataInputInterface*)this);
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::IDataInput2Class;
+    REALLY_INLINE explicit IDataInput2Interface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit IDataInput2Interface(const IDataInput2Interface&); // unimplemented
+    void operator=(const IDataInput2Interface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// flash.utils::IDataInput2$
+//-----------------------------------------------------------
+class IDataInput2Class : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::IDataInput2Interface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::IDataInput2Interface>((avmplus::IDataInput2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IDataInput2Interface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::IDataInput2Interface>((avmplus::IDataInput2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IDataInput2Interface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::IDataInput2Interface>((avmplus::IDataInput2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IDataInput2Interface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::IDataInput2Interface>((avmplus::IDataInput2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit IDataInput2Class(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit IDataInput2Class(const IDataInput2Class&); // unimplemented
+    void operator=(const IDataInput2Class&); // unimplemented
+};
+
+//-----------------------------------------------------------
 // flash.utils::IDataOutput
 //-----------------------------------------------------------
 class IDataOutputInterface : public avmplus::ScriptObject
@@ -774,6 +847,78 @@ protected:
 private:
     explicit IDataOutputClass(const IDataOutputClass&); // unimplemented
     void operator=(const IDataOutputClass&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// flash.utils::IDataOutput2
+//-----------------------------------------------------------
+class IDataOutput2Interface : public avmplus::ScriptObject
+{
+public:
+    inline void call_writeFloat4(float4_t arg1)
+    {
+        avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core()));
+        const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(1894);
+        avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), core->float4ToAtom(arg1) };
+        avmplus::Atom const result = this->toplevel()->callproperty(this->atom(), mn, 1, args, this->vtable);
+        AvmAssert(result == undefinedAtom); (void)result;
+    }
+public:
+    REALLY_INLINE GCRef<avmplus::IDataOutputInterface> as_IDataOutputInterface()
+    {
+        return GCRef<avmplus::IDataOutputInterface>((avmplus::IDataOutputInterface*)this);
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::IDataOutput2Class;
+    REALLY_INLINE explicit IDataOutput2Interface(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit IDataOutput2Interface(const IDataOutput2Interface&); // unimplemented
+    void operator=(const IDataOutput2Interface&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// flash.utils::IDataOutput2$
+//-----------------------------------------------------------
+class IDataOutput2Class : public avmplus::ClassClosure
+{
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::IDataOutput2Interface> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::IDataOutput2Interface>((avmplus::IDataOutput2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IDataOutput2Interface> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::IDataOutput2Interface>((avmplus::IDataOutput2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IDataOutput2Interface> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::IDataOutput2Interface>((avmplus::IDataOutput2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IDataOutput2Interface> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::IDataOutput2Interface>((avmplus::IDataOutput2Interface*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit IDataOutput2Class(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit IDataOutput2Class(const IDataOutput2Class&); // unimplemented
+    void operator=(const IDataOutput2Class&); // unimplemented
 };
 
 //-----------------------------------------------------------

@@ -74,6 +74,18 @@ public final class CompressionAlgorithm
     public static const DEFLATE:String = "deflate";
 };
 
+// Provide dummy definitions here of IDataInput2 and IDataOutput2, because they will
+// not be provided by IDataInput.as and IDataOutput.as if VMCFG_FLOAT is disabled.
+
+CONFIG const NO_VMCFG_FLOAT = !CONFIG::VMCFG_FLOAT;
+
+CONFIG::NO_VMCFG_FLOAT
+internal interface IDataInput2 extends IDataInput {
+}
+
+CONFIG::NO_VMCFG_FLOAT
+internal interface IDataOutput2 extends IDataOutput {
+}
 
 //
 // ByteArray
@@ -128,7 +140,7 @@ public final class CompressionAlgorithm
  */
 
 [native(cls="ByteArrayClass", gc="exact", instance="ByteArrayObject", methods="auto")]
-public class ByteArray implements IDataInput, IDataOutput
+public class ByteArray implements IDataInput2, IDataOutput2
 {
 
     /**
@@ -290,7 +302,7 @@ public class ByteArray implements IDataInput, IDataOutput
     /**
      * Writes a quadruple of IEEE 754 single-precision (32-bit) floating-point numbers to the byte stream.
      *
-     * @param Number A float4 datum: a quadruple of single-precision (32-bit) floating-point numbers.
+     * @param value  A float4 datum: a quadruple of single-precision (32-bit) floating-point numbers.
      * @playerversion Flash Player Cyril
      * @langversion 3.0
      * @helpid
@@ -509,7 +521,7 @@ public class ByteArray implements IDataInput, IDataOutput
     public native function readFloat():Number;
 
     /**
-     * Reads an quadruple of IEEE 754 single-precision (32-bit) floating-point numbers from the byte stream.
+     * Reads a quadruple of IEEE 754 single-precision (32-bit) floating-point numbers from the byte stream.
      *
      * @throws EOFError There is not sufficient data available to read.
      * @return  A quadruple of single-precision (32-bit) floating-point numbers in the form of a float4.

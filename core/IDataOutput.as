@@ -39,7 +39,9 @@
  
 package flash.utils
 {
-    
+    // Need to include this because IDataInput.as is not included into builtin.as.
+    include "api-versions.as";
+
 /**
 * The IDataOutput interface provides a set of methods for writing binary data.
 * This interface is the I/O counterpart to the IDataInput interface, which
@@ -296,6 +298,24 @@ public interface IDataOutput
      */
     function get endian():String;
     function set endian(type:String):void;
+}
+
+/**
+ * Like IDataOutput but provides writeFloat4() additionally.
+ */
+[API(CONFIG::SWF_16)]
+CONFIG::VMCFG_FLOAT
+public interface IDataOutput2 extends IDataOutput
+{
+    /**
+     * Writes a quadruple of IEEE 754 single-precision (32-bit) floating-point numbers to the byte stream.
+     *
+     * @param value  A float4 datum: a quadruple of single-precision (32-bit) floating-point numbers.
+     * @playerversion Flash Player Cyril
+     * @langversion 3.0
+     */
+    [cppcall]
+    function writeFloat4(value:float4):void;
 }
 
 /*

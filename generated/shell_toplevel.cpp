@@ -2375,7 +2375,7 @@ const char* const shell_toplevel_versioned_uris[] = {
     "flash.sampler", // [660]
     "flash.system", // [660]
     "flash.trace", // [660]
-    "flash.utils", // [660]
+    "flash.utils", // [660, 680]
     NULL
 };
 
