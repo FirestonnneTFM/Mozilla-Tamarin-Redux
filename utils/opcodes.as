@@ -85,7 +85,7 @@ final class OpCodes
     
     public static function parse(opCodesText : String) : Array
     {
-        var abcOpCodeRegEx : RegExp = /ABC_(?P<u>(UNUSED_)?)OP\(\s*(?P<oc>-?[0-9]+)\s*,\s*(?P<ct>[01])\s*,\s*(?P<sm>-?[0-9]+)\s*,\s*(?P<internal>[01])\s*,\s*(?P<n>[\S\)]+)\s*\)/g
+        var abcOpCodeRegEx : RegExp = /ABC_(?P<u>(UNUSED_)?)OP(?:_F)?\(\s*(?P<oc>-?[0-9]+)\s*,\s*(?P<ct>[01])\s*,\s*(?P<sm>-?[0-9]+)\s*,\s*(?P<internal>[01])\s*,\s*(?P<n>[\S\)]+)\s*\)/g
         var opCodeValue : uint = 0;
         var match : Object = abcOpCodeRegEx.exec(opCodesText);
         var opCodes : Array = new Array(256);
