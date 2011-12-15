@@ -1163,6 +1163,23 @@ namespace avmplus
                 }
             }
         }
+#ifdef VMCFG_FLOAT
+        else if (AvmCore::isFloat4(obj))
+        {
+            // See FIXME in Toplevel::getproperty() for an explanation of this logic.
+            if (multiname->isValidDynamicName())
+            {
+                uint32_t index;
+                if (AvmCore::getIndexFromAtom(multiname->getName()->atom(), &index))
+                {
+                    if (index <= 3)
+                        return falseAtom;
+                    return trueAtom;
+                }
+            }
+            toplevel->throwReferenceError(kDeleteSealedError, multiname, traits);
+        }
+#endif
         else
         {
             toplevel->throwReferenceError(kDeleteSealedError, multiname, traits);
