@@ -44,7 +44,7 @@ import flash.utils.ByteArray;
 import flash.utils.Dictionary;
 import flash.net.*;
 import flash.utils.ObjectEncoding;
-import avmplus.File
+import avmplus.File;
 
 var SECTION = "AMFSerialization";
 var VERSION = "as3";
@@ -130,6 +130,10 @@ class UserDefClassAllTypes {
 	public var ba_Empty_Obj:ByteArray;
 	//ByteArray - String
 	public var ba_Str_Obj:ByteArray;
+	//float
+	public var flt_Float:float;
+	//float4
+	public var flt_Float4:float4;
 	
 
 	public function UserDefClassAllTypes() {
@@ -180,6 +184,8 @@ class UserDefClassAllTypes {
 		//ByteArray - String
 		ba_Str_Obj = new ByteArray();
 		ba_Str_Obj.writeObject("BYTE ARRAY TEST");
+		flt_Float = -12.375f;
+		flt_Float4 = float4(-1.111f, 1.1f, 2.2f, 3.122f);
 	}
 
 }
@@ -312,6 +318,8 @@ arr_MixMixObj_Obj["HEXAGON"] = 4;
 arr_MixMixObj_Obj[2] = userdef_Obj;
 arr_MixMixObj_Obj[2.222] = 5.555;
 arr_MixMixObj_Obj[3.14] = "pi";
+arr_MixMixObj_Obj[3.14f] = 3.114f;
+arr_MixMixObj_Obj["float4"] = float4(-1.111f, 1.1f, 2.2f, 3.122f);
 testArrayTypes("Array Index:Mixed Value:Mixed" , arr_MixMixObj_Obj);
 
 //XML With Comment and CDATA
@@ -344,6 +352,9 @@ dict_StrStr_Obj["key1"] = "value1";
 dict_StrStr_Obj["key2"] = "value2";
 dict_StrStr_Obj[3] = "value3";
 dict_StrStr_Obj[4] = "value4";
+dict_StrStr_Obj[4.22f] = "value4";
+dict_StrStr_Obj[124.22f] = float.MAX_VALUE;
+dict_StrStr_Obj["float4"] = float4(-1.111f, 1.1f, 2.2f, 3.122f);
 testDictionaryTypes("Dictionary Value: String", dict_StrStr_Obj);
 
 //ByteArray - String
@@ -505,6 +516,109 @@ ba_TestObject = new ByteArray();
 ba_TestObject.writeObject(userdef_Obj);
 ba_TestObject.position = 0;
 compareUserDefTypes("User Defined Class", userdef_Obj, ba_TestObject.readObject());
+
+
+
+var result:float = float();
+buildBAnCallAddTC("Float constructor with no args", result);
+
+var null_float:float = null;
+buildBAnCallAddTC("Float constructor, with 'null' arg", null_float);
+
+var boolean_float:float = true;
+buildBAnCallAddTC("Float constructor, with 'boolean' arg", boolean_float);
+
+var dble_float:float = 3.14;
+buildBAnCallAddTC("Float constructor, with 'double' arg", dble_float);
+
+var int_float:float = new float(3);
+buildBAnCallAddTC("Float constructor, with 'int' arg", int_float);
+
+var string_float:float = new float("3.14");
+buildBAnCallAddTC("Float constructor, with 'String' arg", string_float);
+
+var literal_float:float = new float(3.14f);
+buildBAnCallAddTC("Float constructor, with 'FloatLiteral' arg", literal_float);
+
+buildBAnCallAddTC("Float Max Value", float.MAX_VALUE);
+buildBAnCallAddTC("Float Min Value", float.MIN_VALUE);
+testNaN("Float NaN", float.NaN);
+buildBAnCallAddTC("Float Positive Infinity", float.POSITIVE_INFINITY);
+buildBAnCallAddTC("Float Negative Infinity", float.NEGATIVE_INFINITY);
+buildBAnCallAddTC("Float base of natural logarithms", float.E);
+buildBAnCallAddTC("Float base of natural logarithm of 10", float.LN10);
+buildBAnCallAddTC("Float base of natural logarithms of 2", float.LN2);
+buildBAnCallAddTC("Float base of natural logarithms of e to the base 2", float.LOG2E);
+buildBAnCallAddTC("Float PI", float.PI);
+buildBAnCallAddTC("Float square root of 1/2", float.SQRT1_2);
+buildBAnCallAddTC("Float square root of 2", float.SQRT2);
+
+
+var f1:float = 3.1415f;
+var f2:float = float.MAX_VALUE;
+var f3:float = -0.00032f;
+var f4:float = -12.375f;
+
+var vecFlt:Vector.<float> = new Vector.<float>();
+vecFlt.push(f1);
+vecFlt.push(f2);
+vecFlt.push(f3);
+vecFlt.push(f4);
+testVectorTypesFloat("Float Vector ", vecFlt);
+
+
+
+var result_float4:float4 = float4();
+buildBAnCallAddTC("Float4 with no args",result_float4);
+
+var null_float4:float4 = float4(null);
+buildBAnCallAddTC("Float4 as constructor, with 'null' arg",null_float4);
+
+var boolean_float4:float4 = float4(true);
+buildBAnCallAddTC("Float4 as constructor, with 'boolean' arg",boolean_float4);
+
+var dble_float4:float4 = float4(3.14);
+buildBAnCallAddTC("Float4 as constructor, with 'double' arg",dble_float4);
+
+var int_float4:float4 = float4(3);
+buildBAnCallAddTC("Float4 as constructor, with 'int' arg",int_float4);
+
+var string_float4:float4 = new float4("3.14");
+buildBAnCallAddTC("Float4 as constructor, with 'String' arg",string_float4);
+
+var literal_float4:float4 = float4(3.14f);
+buildBAnCallAddTC("Float4 as constructor, with 'FloatLiteral' arg",literal_float4);
+
+var flt4:float4 = float4(-0.00032f, -0.002012f, -0.1232f, 12445.1234f);
+buildBAnCallAddTC("Float4 as a constructor with float4 arg",flt4);
+
+buildBAnCallAddTC("Float4 Max Value", float4.MAX_VALUE);
+buildBAnCallAddTC("Float4 Min Value", float4.MIN_VALUE);
+testNaN("Float NaN", float.NaN);
+buildBAnCallAddTC("Float4 Positive Infinity", float4.POSITIVE_INFINITY);
+buildBAnCallAddTC("Float4 Negative Infinity", float4.NEGATIVE_INFINITY);
+buildBAnCallAddTC("Float4 base of natural logarithms", float4.E);
+buildBAnCallAddTC("Float4 base of natural logarithm of 10", float4.LN10);
+buildBAnCallAddTC("Float4 base of natural logarithms of 2", float4.LN2);
+buildBAnCallAddTC("Float4 base of natural logarithms of e to the base 2", float4.LOG2E);
+buildBAnCallAddTC("Float4 base of natural logarithms of e to the base 10", float4.LOG10E);
+buildBAnCallAddTC("Float4 PI", float4.PI);
+buildBAnCallAddTC("Float4 square root of 1/2", float4.SQRT1_2);
+buildBAnCallAddTC("Float4 square root of 2", float4.SQRT2);
+
+var flt4_1:float4 = float4(-1f, 1f, 1f, 1f);
+var flt4_2:float4 = float4(-1f, 1.1f, 2.2f, 3.13f);
+var flt4_3:float4 = float4(-1.111f, 1.1f, 2.2f, 3.122f);
+var flt4_4:float4 = float4(9999.596f,1298.296f,-128.596f,-112.596f)
+var flt4_4:float4 = float4(201.334f,123.2236f,-101.111f,-102.121f)
+
+
+var vecFlt_flt4:Vector.<float4> = new Vector.<float4>();
+vecFlt_flt4.push(flt4_1);
+vecFlt_flt4.push(flt4_2);
+vecFlt_flt4.push(flt4_3);
+vecFlt_flt4.push(flt4_4);
+testVectorTypesFloat4("Float Vector ", vecFlt_flt4);
 
 
 function buildBAnCallAddTC(strTitle:String, input:*)
@@ -698,6 +812,53 @@ function compareVectorsNumber(strTitle:String, input:Vector.<Number>, actual:Vec
 	}
 }
 
+
+function testVectorTypesFloat(strTitle:String, input:Vector.<float>)
+{
+	var ba_test_Obj:ByteArray = new ByteArray();
+	ba_test_Obj.writeObject(input);
+	ba_test_Obj.position = 0;
+	compareVectorsFloat(strTitle, input, ba_test_Obj.readObject());
+}
+
+function compareVectorsFloat(strTitle:String, input:Vector.<float>, actual:Vector.<float>)
+{
+	var inputlen:int = input.length;
+	var actuallen:int = actual.length;
+	AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
+	if(inputlen == actuallen)
+	{
+		for (var i:int; i < inputlen; i++)
+		{
+			AddTestCase(strTitle, input[i], actual[i]);
+		}
+	}
+}
+
+
+function testVectorTypesFloat4(strTitle:String, input:Vector.<float4>)
+{
+	var ba_test_Obj:ByteArray = new ByteArray();
+	ba_test_Obj.writeObject(input);
+	ba_test_Obj.position = 0;
+	compareVectorsFloat4(strTitle, input, ba_test_Obj.readObject());
+}
+
+function compareVectorsFloat4(strTitle:String, input:Vector.<float4>, actual:Vector.<float4>)
+{
+	var inputlen:int = input.length;
+	var actuallen:int = actual.length;
+	
+	AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
+	if(inputlen == actuallen)
+	{
+		for (var i:int; i < inputlen; i++)
+		{
+			AddTestCase(strTitle, input[i], actual[i]);
+		}
+	}
+}
+
 function testVectorTypesObject(strTitle:String, input:Vector.<Object>)
 {
 	var ba_test_Obj:ByteArray = new ByteArray();
@@ -832,6 +993,14 @@ function compareDictionary(strTitle:String, input:Dictionary, actual:Dictionary)
 		{
 			AddTestCase(strTitle + " Number ", input[prop], actual[prop]);
 		}
+		else if (input[prop] is float)
+		{
+			AddTestCase(strTitle + " Number ", input[prop], actual[prop]);
+		}		
+		else if (input[prop] is float4)
+		{
+			AddTestCase(strTitle + " Number ", input[prop], actual[prop]);
+		}		
 		else if (input[prop] is ByteArray)
 		{
 			compareByteArray(strTitle + " Byte Array ", input[prop], actual[prop]);
@@ -871,7 +1040,8 @@ function compareUserDefTypes(strTitle:String, input:UserDefClassAllTypes, actual
 	compareVectorsInt(strTitle + " User Defined Vector ", input.vct_int_Obj,	actual.vct_int_Obj);
 	compareDictionary(strTitle + " User Defined Dictionary", input.dict_StrStr_Obj,	actual.dict_StrStr_Obj);
 	compareByteArray(strTitle + " User Defined ByteArray (String)", input.ba_Str_Obj, actual.ba_Str_Obj);
+	AddTestCase(strTitle  + " User Defined Float " , input.flt_Float, actual.flt_Float);
+	AddTestCase(strTitle  + " User Defined Float4 " , input.flt_Float4, actual.flt_Float4);
 }
 
 test();
-

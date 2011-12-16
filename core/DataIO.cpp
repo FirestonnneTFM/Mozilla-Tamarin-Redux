@@ -113,6 +113,17 @@ namespace avmplus
         return f;
     }
 
+    float4_t DataInput::ReadFloat4()
+    {
+        float4_t f4;
+        float* b = reinterpret_cast<float*>(&f4);
+
+        for(int i=0; i < 4; i++)
+            b[i] = ReadFloat();
+
+        return f4;
+    }
+
     double DataInput::ReadDouble()
     {
         union {
@@ -252,6 +263,15 @@ namespace avmplus
         f = value;
         ConvertU32(u);
         Write(b, 4);
+    }
+
+    void DataOutput::WriteFloat4(float4_t value)
+    {
+        float* pval = reinterpret_cast<float*>(&value);
+        for(int i=0;i<4;i++)
+        {
+            WriteFloat(pval[i]);
+        }
     }
 
     void DataOutput::WriteDouble(double value)

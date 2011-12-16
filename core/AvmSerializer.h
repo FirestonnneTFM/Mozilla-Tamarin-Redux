@@ -87,6 +87,10 @@ namespace avmplus
         kTypedVectorDouble      = 15,
         kTypedVectorObject      = 16,
         kDictionaryObject       = 17,
+        kTypedVectorFloat       = 18,
+        kTypedVectorFloat4      = 19,
+        kFloat4AtomType         = 20,
+        kFloatAtomType          = 21,
     };
 
 
