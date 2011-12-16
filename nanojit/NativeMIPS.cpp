@@ -587,7 +587,6 @@ namespace nanojit
         TAG("asm_d2i(ins=%p{%s})", ins, lirNames[ins->opcode()]);
     }
 
-#ifdef VMCFG_FLOAT
     void Assembler::asm_ui2f(LIns *ins) {
         (void)ins;
         NanoAssertMsg(0, "LIR_ui2f not yet supported for this architecture");
@@ -649,8 +648,6 @@ namespace nanojit
     void Assembler::asm_recip_sqrt(LIns*) {
         NanoAssert(!"not implemented");
     }
-#endif // VMCFG_FLOAT
-
 
     void Assembler::asm_fop(LIns *ins)
     {

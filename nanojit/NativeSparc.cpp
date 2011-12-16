@@ -1501,7 +1501,6 @@ namespace nanojit
         freeResourcesOf(ins);
     }
 
-#ifdef VMCFG_FLOAT
     void Assembler::asm_ui2f(LIns *ins) {
         (void)ins;
         NanoAssertMsg(0, "LIR_ui2f not yet supported for this architecture");
@@ -1558,8 +1557,6 @@ namespace nanojit
         (void)rd; (void)rs; (void)dd; (void)ds;
         NanoAssertMsg(0, "asm_mmi not yet supported for this architecture");
     }
-#endif // VMCFG_FLOAT
-
 
     RegisterMask RegAlloc::nRegCopyCandidates(Register r, RegisterMask allow) {
         // SPARC doesn't support any GPR<->FPR moves
