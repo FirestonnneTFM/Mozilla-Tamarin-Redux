@@ -143,7 +143,7 @@ AddTestCase("Number.min(Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY)", Nu
 AddTestCase("Number.min(Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY)", Number.NEGATIVE_INFINITY, Number.min(Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY));
 AddTestCase("Number.min(Number.MIN_VALUE, 0)", 0, Number.min(Number.MIN_VALUE, 0));
 
-AddTestCase("Number.min(Number.POSITIVE_INFINITY, Number.MAX_VALUE)", Number..MAX_VALUE, Number.min(Number.POSITIVE_INFINITY, Number.MAX_VALUE));
+AddTestCase("Number.min(Number.POSITIVE_INFINITY, Number.MAX_VALUE)", Number.MAX_VALUE, Number.min(Number.POSITIVE_INFINITY, Number.MAX_VALUE));
 
 test();
 

@@ -96,7 +96,7 @@ myNum = 1;
 AddTestCase("Number.log(-1)", NaN, Number.log(-myNum));
 AddTestCase("Number.log(1)", 0, Number.log(myNum));
 AddTestCase("Number.log(-1) NumberLiteral", NaN, Number.log(-1));
-AddTestCase("Number.log(1) NumberLiteral", 0f, Number.log(1));
+AddTestCase("Number.log(1) NumberLiteral", 0, Number.log(1));
 
 
 test();
