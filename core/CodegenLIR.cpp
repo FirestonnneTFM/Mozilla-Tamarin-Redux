@@ -3015,7 +3015,14 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             emit(opcode, sp, 0, result);
             break;
         }
-
+#ifdef VMCFG_FLOAT
+        case OP_lf32x4:
+        {
+            emit(opcode, sp, 0, FLOAT4_TYPE);
+            break;
+        }
+#endif
+                
         // stores
         case OP_si8:
         case OP_si16:
@@ -3026,7 +3033,14 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             emit(opcode, 0, 0, VOID_TYPE);
             break;
         }
-
+#ifdef VMCFG_FLOAT
+        case OP_sf32x4:
+        {
+            emit(opcode, 0, 0, FLOAT4_TYPE);
+            break;
+        }
+#endif
+                
         case OP_getglobalscope:
             emitGetGlobalScope(sp+1);
             break;
@@ -6008,6 +6022,19 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 localSet(index, i2, result);
                 break;
             }
+#ifdef VMCFG_FLOAT
+            case OP_lf32x4:
+            {
+                // TODO: inlining.  The appropriate condition is probably *not* VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP.
+                int32_t index = (int32_t) op1;
+                LIns* mopAddr = binaryIns(LIR_andi, localGet(index), InsConst(~15U));
+                LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, sizeof(float4_t), NULL);
+                LIns* retval = insAlloc(sizeof(float4_t));
+                callIns(FUNCTIONID(mop_lf32x4), 2, retval, realAddr);
+                localSet(index, ldf4(retval,0,ACCSET_OTHER), result);
+                break;
+            }
+#endif
 
             // stores
             case OP_si8:
@@ -6045,6 +6072,17 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             #endif
                 break;
             }
+#ifdef VMCFG_FLOAT
+            case OP_sf32x4:
+            {
+                // TODO: inlining.  The appropriate condition is probably *not* VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP.
+                LIns* svalue = localGetf4Addr(sp-1);
+                LIns* mopAddr = binaryIns(LIR_andi, localGet(sp), InsConst(~15U));
+                LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, sizeof(float4_t), NULL);
+                callIns(FUNCTIONID(mop_sf32x4), 2, realAddr, svalue);
+                break;
+            }
+#endif
 
             case OP_jump:
             {

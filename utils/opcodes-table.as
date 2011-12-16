@@ -50,6 +50,8 @@ const OP_dxns : int = 0x06;
 const OP_dxnslate : int = 0x07;
 const OP_kill : int = 0x08;
 const OP_label : int = 0x09;
+const OP_lf32x4 : int = 0x0a;
+const OP_sf32x4 : int = 0x0b;
 const OP_ifnlt : int = 0x0c;
 const OP_ifnle : int = 0x0d;
 const OP_ifngt : int = 0x0e;
@@ -224,8 +226,8 @@ const opNames : Array = [
     "dxnslate      ",
     "kill          ",
     "label         ",
-    "OP_0x0A       ",
-    "OP_0x0B       ",
+    "lf32x4        ",
+    "sf32x4        ",
     "ifnlt         ",
     "ifnle         ",
     "ifngt         ",

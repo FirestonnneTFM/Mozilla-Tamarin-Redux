@@ -234,5 +234,9 @@ void FASTCALL mop_si16(void* addr, int32_t value);
 void FASTCALL mop_si32(void* addr, int32_t value);
 void mop_sf32(void* addr, double value);
 void mop_sf64(void* addr, double value);
+#ifdef VMCFG_FLOAT
+void FASTCALL mop_lf32x4(float4_t* result, const void* addr);
+void mop_sf32x4(void* addr, const float4_t& value);
+#endif
 
 } // namespace avmplus

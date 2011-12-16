@@ -1103,6 +1103,34 @@ double FASTCALL mop_lf64(const void* addr)
     return d.value;
 #endif
 }
+    
+#ifdef VMCFG_FLOAT
+void FASTCALL mop_lf32x4(float4_t* result, const void* addr)
+{
+#if defined(VMCFG_LITTLE_ENDIAN)
+    // Note, this depends on one of three conditions being true:
+    //  - float4_t is a generic structure type that is not mapped directly
+    //    to the SIMD type, and ByteArray storage is 4-byte aligned
+    //  - SIMD loads from unaligned addresses is OK
+    //  - ByteArray storage is 16-byte aligned
+    *result = *(const float4_t*)addr;
+#else
+    // 2011-12-16: This has probably never been tested: there have been no
+    // big-endian systems where VMCFG_FLOAT has been enabled.
+    const uint8_t* u = (const uint8_t*)addr;
+    float4_t result;
+    float_overlay f;
+    f.word = ((uint32_t(u[3]) << 24) | (uint32_t(u[2]) << 16) | (uint32_t([1]) << 8) | uint32_t(u[0]));
+    result->x = f.value;
+    f.word = ((uint32_t(u[7]) << 24) | (uint32_t(u[6]) << 16) | (uint32_t([5]) << 8) | uint32_t(u[4]));
+    result->y = f.value;
+    f.word = ((uint32_t(u[11]) << 24) | (uint32_t(u[10]) << 16) | (uint32_t([9]) << 8) | uint32_t(u[8]));
+    result->z = f.value;
+    f.word = ((uint32_t(u[15]) << 24) | (uint32_t(u[14]) << 16) | (uint32_t([13]) << 8) | uint32_t(u[12]));
+    result->w = f.value;
+#endif
+}
+#endif
 
 void FASTCALL mop_si8(void* addr, int32_t value)
 {
@@ -1178,5 +1206,44 @@ void mop_sf64(void* addr, double value)
     u[7] = uint8_t(d.words.msw >> 24);
 #endif
 }
+
+#ifdef VMCFG_FLOAT
+void mop_sf32x4(void* addr, const float4_t& value)
+{
+#if defined(VMCFG_LITTLE_ENDIAN)
+    // Note, this depends on one of three conditions being true:
+    //  - float4_t is a generic structure type that is not mapped directly
+    //    to the SIMD type, and ByteArray storage is 4-byte aligned
+    //  - SIMD stores to unaligned addresses is OK
+    //  - ByteArray storage is 16-byte aligned
+    *(float4_t*)addr = value;
+#else
+    // 2011-12-16: This has probably never been tested: there have been no
+    // big-endian systems where VMCFG_FLOAT has been enabled.
+    uint8_t* u = (uint8_t*)addr;
+    float_overlay f;
+    f.value = value.x;
+    u[0] = uint8_t(f.word);
+    u[1] = uint8_t(f.word >> 8);
+    u[2] = uint8_t(f.word >> 16);
+    u[3] = uint8_t(f.word >> 24);
+    f.value = value.y;
+    u[4] = uint8_t(f.word);
+    u[5] = uint8_t(f.word >> 8);
+    u[6] = uint8_t(f.word >> 16);
+    u[7] = uint8_t(f.word >> 24);
+    f.value = value.z;
+    u[8] = uint8_t(f.word);
+    u[9] = uint8_t(f.word >> 8);
+    u[10] = uint8_t(f.word >> 16);
+    u[11] = uint8_t(f.word >> 24);
+    f.value = value.w;
+    u[12] = uint8_t(f.word);
+    u[13] = uint8_t(f.word >> 8);
+    u[14] = uint8_t(f.word >> 16);
+    u[15] = uint8_t(f.word >> 24);
+#endif
+}
+#endif
 
 } // namespace avmplus

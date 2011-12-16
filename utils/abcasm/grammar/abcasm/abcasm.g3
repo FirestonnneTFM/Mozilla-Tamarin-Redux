@@ -557,6 +557,15 @@ slot_id
  */
 mops_insn
     : mops_opcode = 
+    (
+        'lf32x4' | 'sf32x4'
+    )
+    {
+        asmCore.floatSupport = true;
+        $decl::method_body_info.insn(mops_opcode);
+    }
+    |
+    mops_opcode =
     ( 
         'li8' | 'li16' | 'li32'
         | 'lf32' | 'lf64'

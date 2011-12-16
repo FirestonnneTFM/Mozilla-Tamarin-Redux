@@ -600,11 +600,17 @@ namespace avmplus
         case OP_li32:
         case OP_lf32:
         case OP_lf64:
+#ifdef VMCFG_FLOAT
+        case OP_lf32x4:
+#endif
         case OP_si8:
         case OP_si16:
         case OP_si32:
         case OP_sf32:
         case OP_sf64:
+#ifdef VMCFG_FLOAT
+        case OP_sf32x4:
+#endif
         case OP_getglobalscope:
         case OP_convert_s:
         case OP_esc_xelem:

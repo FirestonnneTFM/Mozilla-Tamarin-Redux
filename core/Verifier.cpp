@@ -547,6 +547,10 @@ namespace avmplus
             case OP_sxi1:
             case OP_sxi8:
             case OP_sxi16:
+#ifdef VMCFG_FLOAT
+            case OP_lf32x4:
+            case OP_sf32x4:
+#endif
             case OP_pushwith:
             case OP_lookupswitch:
             case OP_increment:
@@ -2581,6 +2585,15 @@ namespace avmplus
                 state->pop_push(1, result);
                 break;
             }
+#ifdef VMCFG_FLOAT
+            case OP_lf32x4: {
+                checkStack(1,1);
+                emitCoerce(INT_TYPE, sp);
+                coder->write(state, pc, opcode);
+                state->pop_push(1, FLOAT4_TYPE);
+                break;
+            }
+#endif
 
             // stores
             case OP_si8:
@@ -2594,7 +2607,17 @@ namespace avmplus
                 coder->write(state, pc, opcode);
                 state->pop(2);
                 break;
-
+#ifdef VMCFG_FLOAT
+            case OP_sf32x4: {
+                checkStack(2,0);
+                emitCoerce(FLOAT4_TYPE, sp-1);
+                emitCoerce(INT_TYPE, sp);
+                coder->write(state, pc, opcode);
+                state->pop(2);
+                break;
+            }
+#endif
+                    
             default:
                 // size was nonzero, but no case handled the opcode.  someone asleep at the wheel!
                 AvmAssertMsg(false, "Unhandled opcode");

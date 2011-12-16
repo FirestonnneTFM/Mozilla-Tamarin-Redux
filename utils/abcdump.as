@@ -550,7 +550,7 @@ package abcdump
                         default:
                             /*if (opNames[opcode] == ("0x"+opcode.toString(16).toUpperCase()))
                                 s += " UNKNOWN OPCODE"*/
-                            break
+                            break;
                     }
                     var size:int = code.position - start
                     totalSize += size

@@ -1345,6 +1345,10 @@ SSE2_ONLY(
     FASTFUNCTION(FUNCADDR(mop_si32), SIG2(V,P,I), mop_si32)
     FUNCTION(FUNCADDR(mop_sf32), SIG2(V,P,D), mop_sf32)
     FUNCTION(FUNCADDR(mop_sf64), SIG2(V,P,D), mop_sf64)
+#ifdef VMCFG_FLOAT
+    FASTFUNCTION(FUNCADDR(mop_lf32x4), SIG2(V,RF4,P), mop_lf32x4);
+    FUNCTION(FUNCADDR(mop_sf32x4), SIG2(V,P,PF4), mop_sf32x4);
+#endif
 
     typedef Atom (*op_call_MethodEnv)(MethodEnv*, Atom, int, Atom*);
     FUNCTION(FUNCADDR((op_call_MethodEnv)&avmplus::op_call<MethodEnv*>), SIG4(A,P,A,I,P), op_call)
