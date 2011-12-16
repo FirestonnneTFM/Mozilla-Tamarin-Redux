@@ -341,8 +341,13 @@ namespace avmplus
              III(0x07, L_dxnslate)
              III(0x08, L_kill)
              XXX(0x09) /* OP_label */
+#ifdef VMCFG_FLOAT
+             III(0x0A, L_lf32x4)
+             III(0x0B, L_sf32x4)
+#else
              XXX(0x0A)
              XXX(0x0B)
+#endif
              III(0x0C, L_ifnlt)
              III(0x0D, L_ifnle)
              III(0x0E, L_ifngt)
@@ -1006,6 +1011,9 @@ namespace avmplus
         int32_t i32l;               // ditto
         float f2l;                  // ditto
         double d2l;                 // ditto
+#ifdef VMCFG_FLOAT
+        float4_t f4l;               // ditto
+#endif
         Atom a1l;                   // ditto
 #ifndef VMCFG_WORDCODE
         register uint32_t tmp_u30;
@@ -2466,7 +2474,36 @@ FLOAT_ONLY(\
             avmplus::mop_##call(envDomain->globalMemoryBase() + (addr), value);
 #endif
 
+#if defined(VMCFG_LITTLE_ENDIAN)
+    // Note, this depends on one of three conditions being true:
+    //  - float4_t is a generic structure type that is not mapped directly
+    //    to the SIMD type, and ByteArray storage is 4-byte aligned
+    //  - SIMD loads/stores to unaligned addresses is OK
+    //  - ByteArray storage is 16-byte aligned
+    #define MOPS_LOAD_F4(addr, call, result) \
+            addr &= ~15; \
+            MOPS_RANGE_CHECK(addr, float4_t); \
+            union { const uint8_t* p8; const float4_t* p; }; \
+            p8 = envDomain->globalMemoryBase() + (addr); \
+            result = *p;
 
+    #define MOPS_STORE_F4(addr, call, value) \
+            addr &= ~15; \
+            MOPS_RANGE_CHECK(addr, float4_t); \
+            union { const uint8_t* p8; float4_t* p; }; \
+            p8 = envDomain->globalMemoryBase() + (addr); \
+            *p = (value);
+#else
+    #define MOPS_LOAD_F4(addr, call, result) \
+            addr &= ~15; \
+            MOPS_RANGE_CHECK(addr, float4_t); \
+            avmplus::mop_##call(&result, envDomain->globalMemoryBase() + (addr));
+
+    #define MOPS_STORE_F4(addr, call, value) \
+            addr &= ~15; \
+            MOPS_RANGE_CHECK(addr, float4_t); \
+            avmplus::mop_##call(envDomain->globalMemoryBase() + (addr), value);
+#endif
 
             // loads
 #ifdef VMCFG_WORDCODE
@@ -2515,10 +2552,19 @@ FLOAT_ONLY(\
 
             INSTR(lf64) {
                 i1 = AvmCore::integer(sp[0]);       // i1 = addr
-                MOPS_LOAD_FP(i1, double, lf64, d2l);        // d2l = addr
+                MOPS_LOAD_FP(i1, double, lf64, d2l);        // d2l = result
                 sp[0] = core->doubleToAtom(d2l);
                 NEXT;
             }
+
+#ifdef VMCFG_FLOAT
+            INSTR(lf32x4) {
+                i1 = AvmCore::integer(sp[0]);       // i1 = addr
+                MOPS_LOAD_F4(i1, lf32x4, f4l);        // f4l = result
+                sp[0] = core->float4ToAtom(f4l);
+                NEXT;
+            }
+#endif
 
             // stores
             INSTR(si8) {
@@ -2561,6 +2607,16 @@ FLOAT_ONLY(\
                 NEXT;
             }
 
+#ifdef VMCFG_FLOAT
+            INSTR(sf32x4) {
+                i1 = AvmCore::integer(sp[0]);
+                AvmCore::float4(&f4l, sp[-1]);
+                MOPS_STORE_F4(i1, sf32x4, f4l);
+                sp -= 2;
+                NEXT;
+            }
+#endif
+                   
             // delete property using multiname
             INSTR(deleteproperty) {
                 SAVE_EXPC;

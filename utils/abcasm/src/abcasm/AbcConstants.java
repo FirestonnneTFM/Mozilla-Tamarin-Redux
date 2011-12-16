@@ -118,6 +118,8 @@ interface AbcConstants {
     int OP_dxnslate = 0x07;
     int OP_kill = 0x08;
     int OP_label = 0x09;
+    int OP_lf32x4 = 0x0A;
+    int OP_sf32x4 = 0x0B;
     int OP_ifnlt = 0x0C;
     int OP_ifnle = 0x0D;
     int OP_ifngt = 0x0E;

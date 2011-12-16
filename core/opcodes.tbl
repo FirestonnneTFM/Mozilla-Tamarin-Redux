@@ -42,7 +42,7 @@
  *   #define ABC_UNUSED_OP(opCount, throw, stack, internal, name) ...  // defines unused op code
  *
  * Selected arguments can then be used within the macro expansions.
- * - opCount        Number of operands.  Uses -1 for "invalid", we can avoid that if necessary
+ * - opCount        Number of operands encoded in the instruction.  Uses -1 for "invalid", we can avoid that if necessary
  * - throw          1 if the operation can throw, 0 otherwise
  * - stack          Stack movement not taking into account run-time names or function arguments
  * - internal       1 if the operation is internal to the VM, 0 otherwise
@@ -77,8 +77,8 @@ ABC_OP(         1,       1,     0,     0,        dxns)                  // 0x06
 ABC_OP(         0,       1,     -1,    0,        dxnslate)              // 0x07  
 ABC_OP(         1,       0,     0,     0,        kill)                  // 0x08  
 ABC_OP(         0,       0,     0,     0,        label)                 // 0x09  
-ABC_UNUSED_OP(  -1,      0,     0,     0,        0x0A)                  // 0x0A  
-ABC_UNUSED_OP(  -1,      0,     0,     0,        0x0B)                  // 0x0B  
+ABC_OP_F(       0,       1,     0,     0,        lf32x4)                // 0x0A  
+ABC_OP_F(       0,       1,     -2,    0,        sf32x4)                // 0x0B  
 ABC_OP(         1,       1,     -2,    0,        ifnlt)                 // 0x0C  
 ABC_OP(         1,       1,     -2,    0,        ifnle)                 // 0x0D  
 ABC_OP(         1,       1,     -2,    0,        ifngt)                 // 0x0E  
