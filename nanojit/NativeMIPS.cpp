@@ -698,7 +698,7 @@ namespace nanojit
 
         if (cpu_has_fpu && deprecated_isKnownReg(rr)) {
             if (d)
-                asm_spill(rr, d, true);
+                asm_spill(rr, d, 2 /*words*/);
             asm_li_d(rr, ins->immDhi(), ins->immDlo());
         }
         else {
@@ -1817,7 +1817,7 @@ namespace nanojit
             NanoAssert(nWords == 1);
             asm_ldst(OP_SW, rr, d, FP);
         }
-        TAG("asm_spill(rr=%d, d=%d, quad=%d)", rr, d, quad);
+        TAG("asm_spill(rr=%d, d=%d, quad=%d)", rr, d, nWords == 2);
     }
 
     RegisterMask 
