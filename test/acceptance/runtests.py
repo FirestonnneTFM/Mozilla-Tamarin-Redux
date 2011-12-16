@@ -225,6 +225,15 @@ class AcceptanceRuntest(RuntestBase):
                                             settings['.*'][key],)))
         self.allskips += 1
         return output_calls
+
+    def exclude_test(self, ast, testnum, settings, key):
+        '''Exclude the given test, returns output_calls'''
+        output_calls = []
+        output_calls.append((self.js_print, ('%d running %s' % (testnum, ast),
+                                             '<b>', '</b><br/>')))
+        output_calls.append((self.js_print,('  excluding... reason: %s' %
+                                            settings['.*'][key],)))
+        return output_calls
      
     def runTestPrep(self, testAndNum):
         ast = testAndNum[0]
@@ -243,6 +252,10 @@ class AcceptanceRuntest(RuntestBase):
         includes = self.includes #list
 
         settings = self.get_test_settings(root)
+
+        # exclude entire test if specified
+        if '.*' in settings and 'exclude' in settings['.*']:
+            return self.exclude_test(ast, testnum, settings, 'exclude')
 
         # skip entire test if specified
         if '.*' in settings and 'skip' in settings['.*']:

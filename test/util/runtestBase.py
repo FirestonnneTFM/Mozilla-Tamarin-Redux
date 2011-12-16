@@ -122,7 +122,7 @@ class RuntestBase(object):
     custom_directives = ['deep', 'performance']
     # note that include is only valid for performance runtests config
     config_directives = ['expectedfail', 'skip', 'ats_skip', 'verify_skip',
-                         'include'] + custom_directives
+                         'include', 'exclude'] + custom_directives
     
     
     escbin = ''
@@ -1102,7 +1102,13 @@ class RuntestBase(object):
                 print('The pexpect module must be installed to generate ats swfs.')
                 exit(1)
             for test in tests:
+                self.js_print('compiling %s' % test)
+                (dir, file) = split(test)
                 (testdir, ext) = splitext(test)
+                settings = self.get_test_settings(testdir)
+                if self.excludeTest(file, settings):
+                    continue
+
                 self.js_print('compiling %s' % test)
                 if self.aotsdk:
                     # We use the test config file to mark abc files that fail to AOT compile,
@@ -1147,6 +1153,12 @@ class RuntestBase(object):
 
             for test in tests:
                 self.js_print('compiling %s' % test)
+                (dir, file) = split(test)
+                (testdir, ext) = splitext(test)
+                settings = self.get_test_settings(testdir)
+                if self.excludeTest(file, settings):
+                    continue
+
                 if test.endswith(self.abcasmExt):
                     self.compile_test(test)
                 elif test.endswith(self.executableExtensions):
@@ -1155,8 +1167,7 @@ class RuntestBase(object):
                 else:
                     arglist = parseArgStringToList(self.ascargs)
 
-                    (dir, file) = split(test)
-                    (testdir, ext) = splitext(test)
+                    
 
                     # Check for a local .java_args file (either dir or file specific)
                     # Not ideal - but we try to load a .java_args file, and if one is loaded, then we revert to compiling
@@ -1271,9 +1282,18 @@ class RuntestBase(object):
     def skipAtsTest(self, file, settings):
         '''Check testconfig if we should skip the given file.  Returns a boolean'''
         if '.*' in settings:
-            for key in ['ats_skip', 'skip', 'expectedfail']:
+            for key in ['ats_skip', 'skip', 'expectedfail', 'exclude']:
                 if key in settings['.*']:
                     self.js_print('ATS Skipping %s ... reason: %s' % (file,settings['.*'][key]))
+                    return True
+        return False
+
+    def excludeTest(self, file, settings):
+        '''Check testconfig if we should exclude the given file.  Returns a boolean'''
+        if '.*' in settings:
+            for key in ['exclude']:
+                if key in settings['.*']:
+                    self.js_print('Excluding %s ... reason: %s' % (file,settings['.*'][key]))
                     return True
         return False
 
