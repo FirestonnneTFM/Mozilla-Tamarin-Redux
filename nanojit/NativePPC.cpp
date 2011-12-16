@@ -1263,7 +1263,6 @@ namespace nanojit
     #endif
     }
 
-#ifdef VMCFG_FLOAT
     void Assembler::asm_q2d(LIns *ins) {
         (void)ins;
         NanoAssertMsg(0, "LIR_q2d not yet supported for this architecture");
@@ -1325,7 +1324,6 @@ namespace nanojit
         (void)op; (void)value;(void)dr;(void)base;
         NanoAssertMsg(0, "asm_store128 not yet supported for this architecture");
     }
-#endif // VMCFG_FLOAT
     
     void Assembler::asm_d2i(LIns* ins) {
     // Like SPARC, PPC fctid/fctiw only handles fpr->mem->gpr ultimately.

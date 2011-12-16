@@ -678,7 +678,6 @@ namespace nanojit
         freeResourcesOf(inst);
     }
 
-#ifdef VMCFG_FLOAT
     void Assembler::asm_ui2f(LIns *ins) {
         (void)ins;
         NanoAssertMsg(0, "LIR_ui2f not yet supported for this architecture");
@@ -736,8 +735,6 @@ namespace nanojit
         (void)op; (void)value;(void)dr;(void)base;
         NanoAssertMsg(0, "asm_store128 not yet supported for this architecture");
     }
-#endif // VMCFG_FLOAT
-
 
     void Assembler::asm_immi(LIns *inst) {
         Register result_reg = prepareResultReg(inst, GpRegs);
