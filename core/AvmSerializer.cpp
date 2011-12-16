@@ -291,6 +291,19 @@ namespace avmplus
             WriteType(kDoubleAtomType);
             WriteDouble(AvmCore::number(value));
         } 
+#ifdef VMCFG_FLOAT
+        else if(AvmCore::isFloat(value))
+        {
+            WriteType(kFloatAtomType);
+            WriteFloat(AvmCore::atomToFloat(value));
+        }
+        else if(AvmCore::isFloat4(value))
+        {
+            float4_t floatVal = AvmCore::atomToFloat4(value);
+            WriteType(kFloat4AtomType);
+            WriteFloat4(floatVal);
+        }
+#endif// VMCFG_FLOAT
         else if (AvmCore::isString(value)) 
         {
             WriteType(kStringAtomType);
@@ -343,6 +356,10 @@ namespace avmplus
             else if (AvmCore::istype(value, VECTORINT_TYPE) ||
                         AvmCore::istype(value, VECTORUINT_TYPE) ||
                         AvmCore::istype(value, VECTORDOUBLE_TYPE) ||
+#ifdef VMCFG_FLOAT
+                        AvmCore::istype(value, VECTORFLOAT_TYPE) ||
+                        AvmCore::istype(value, VECTORFLOAT4_TYPE) ||
+#endif
                         AvmCore::istype(value, VECTOROBJ_TYPE)) 
             {
                 // We assume vectors can only be created from within SWF10 files.
@@ -586,6 +603,16 @@ namespace avmplus
         {
             vec_type = kTypedVectorDouble;
         } 
+#ifdef VMCFG_FLOAT
+        else if(AvmCore::istype(atom, VECTORFLOAT_TYPE))
+        {
+            vec_type = kTypedVectorFloat;
+        }
+        else if(AvmCore::istype(atom, VECTORFLOAT4_TYPE))
+        {
+            vec_type = kTypedVectorFloat4;
+        }
+#endif// VMCFG_FLOAT
         else 
         {
             vec_type = kTypedVectorObject;
@@ -646,6 +673,36 @@ namespace avmplus
                 WriteDouble(data[c]);
             }
         } 
+#ifdef VMCFG_FLOAT
+        else if (vec_type == kTypedVectorFloat) 
+        {
+            FloatVectorObject *v = obj.staticCast<FloatVectorObject>();
+            WriteReference((v->get_length()<<1)|1);
+            WriteBoolean(v->get_fixed());
+
+            FloatVectorAccessor va(v);
+            const float* data = va.addr();
+            uint32_t len = va.length();
+            for (uint32_t c=0; c<len; c++) 
+            {
+                WriteFloat(data[c]);
+            }
+        } 
+        else if (vec_type == kTypedVectorFloat4) 
+        {
+            Float4VectorObject *v = obj.staticCast<Float4VectorObject>();
+            WriteReference((v->get_length()<<1)|1);
+            WriteBoolean(v->get_fixed());
+
+            Float4VectorAccessor va(v);
+            const float4_t* data = va.addr();
+            uint32_t len = va.length();
+            for (uint32_t c=0; c<len; c++) 
+            {
+                WriteFloat4(data[c]);
+            }
+        } 
+#endif // VMCFG_FLOAT
         else 
         {
             ObjectVectorObject *v = obj.staticCast<ObjectVectorObject>();
@@ -885,6 +942,12 @@ namespace avmplus
                 return core->intToAtom(((int)ReadUint29() << 3) >> 3);
             case kDoubleAtomType:
                 return core->doubleToAtom(ReadDouble());
+#ifdef VMCFG_FLOAT
+            case kFloatAtomType:
+                return core->floatToAtom(ReadFloat());
+            case kFloat4AtomType:
+                return core->float4ToAtom(ReadFloat4());
+#endif //VMCFG_FLOAT           
             case kStringAtomType:
                 return ReadString()->atom();
             case kAvmMinusXmlAtomType:  //Even XML minus atoms are read back as XML objects. However handleAdditionalType can override this behavior.
@@ -903,6 +966,8 @@ namespace avmplus
             case kTypedVectorInt:
             case kTypedVectorUint:
             case kTypedVectorDouble:
+            case kTypedVectorFloat:
+            case kTypedVectorFloat4:
             case kTypedVectorObject:
                 return ReadTypedVector(type);
             default:
@@ -1127,6 +1192,34 @@ namespace avmplus
                 }
                 return v->atom();
             }
+#ifdef VMCFG_FLOAT
+            case kTypedVectorFloat: 
+            {
+                GCRef<FloatVectorObject> v = toplevel->floatVectorClass()->newVector(len);
+                ObjectListAdd(v);
+                v->set_fixed(fixed);
+                FloatVectorAccessor va(v);
+                float* data = va.addr();
+                for (uint32_t c=0; c<len; c++) 
+                {
+                    data[c] = ReadFloat();
+                }
+                return v->atom();
+            }
+            case kTypedVectorFloat4: 
+            {
+                GCRef<Float4VectorObject> v = toplevel->float4VectorClass()->newVector(len);
+                ObjectListAdd(v);
+                v->set_fixed(fixed);
+                Float4VectorAccessor va(v);
+                float4_t* data = va.addr();
+                for (uint32_t c=0; c<len; c++) 
+                {
+                    data[c] = ReadFloat4();
+                }
+                return v->atom();
+            }
+#endif // VMCFG_FLOAT
             case kTypedVectorObject: 
             {
                 // Read prototype

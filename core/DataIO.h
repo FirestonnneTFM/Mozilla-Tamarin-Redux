@@ -197,6 +197,7 @@ namespace avmplus
         uint16_t ReadU16();
         uint32_t ReadU32();
         float ReadFloat();
+        float4_t ReadFloat4();
         double ReadDouble();
         String* ReadMultiByte(uint32_t length, String *charSet);
         String* ReadUTF();
@@ -225,6 +226,7 @@ namespace avmplus
         void WriteU16(uint16_t value);
         void WriteU32(uint32_t value);
         void WriteFloat(float value);
+        void WriteFloat4(float4_t value);
         void WriteDouble(double value);
         void WriteMultiByte(String *str, String *charSet);
         void WriteUTF(String *str);
