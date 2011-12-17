@@ -8335,7 +8335,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             bool mustBeVarAccess;
         } FuncLiveInfo;
 
-        FuncLiveInfo varPtrFunctions[] = {
+        static const FuncLiveInfo varPtrFunctions[] = {
             // beginCatch(core, ef, info, pc, &vars[i], &tags[i]) => store to &vars[i] and &tag[i]
             { FUNCTIONID(beginCatch),                                1, true,  true,  true  }, 
             // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
