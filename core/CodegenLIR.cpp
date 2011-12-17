@@ -3511,7 +3511,7 @@ namespace avmplus
     // return NULL.  It is assumed that the replacement function will return
     // an int32 value.
 
-    LIns* CodegenLIR::specializeIntCall(LIns* call, Specialization* specs)
+    LIns* CodegenLIR::specializeIntCall(LIns* call, const Specialization* specs)
     {
         LIns *priorCall = getSpecializedCall(call);
         if (priorCall)
@@ -3556,7 +3556,7 @@ namespace avmplus
         return imm;
     }
 
-    static Specialization coerceDoubleToInt[] = {
+    static const Specialization coerceDoubleToInt[] = {
         { FUNCTIONID(String_charCodeAtDI),    FUNCTIONID(String_charCodeAtIU) },
         { FUNCTIONID(String_charCodeAtDU),    FUNCTIONID(String_charCodeAtIU) },
         { FUNCTIONID(String_charCodeAtDD),    FUNCTIONID(String_charCodeAtID) },
@@ -6195,7 +6195,7 @@ namespace avmplus
     // type or value, if constant, of the other argument.  The function call is normally presumed
     // to be the left-hand argument.  The swap parameter, if true, reverses this convention.
 
-    static Specialization intCmpWithNumber[] = {
+    static const Specialization intCmpWithNumber[] = {
         { FUNCTIONID(String_charCodeAtDI),    FUNCTIONID(String_charCodeAtIU) },
         { FUNCTIONID(String_charCodeAtDU),    FUNCTIONID(String_charCodeAtIU) },
         { FUNCTIONID(String_charCodeAtDD),    FUNCTIONID(String_charCodeAtID) },
@@ -6244,7 +6244,7 @@ namespace avmplus
         return NULL;
     }
 
-    static Specialization stringCmpWithString[] = {
+    static const Specialization stringCmpWithString[] = {
         { FUNCTIONID(String_charAtI),    FUNCTIONID(String_charCodeAtII) },
         { FUNCTIONID(String_charAtU),    FUNCTIONID(String_charCodeAtIU) },
         { FUNCTIONID(String_charAtD),    FUNCTIONID(String_charCodeAtID) },
