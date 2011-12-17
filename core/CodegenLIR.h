@@ -517,7 +517,7 @@ namespace avmplus
 
         LIns* getSpecializedCall(LIns* call);
         LIns* addSpecializedCall(LIns* origCall, LIns* specializedCall);
-        LIns* specializeIntCall(LIns *call, Specialization* specs);
+        LIns* specializeIntCall(LIns *call, const Specialization* specs);
 
         LIns* emitStringCall(int index, const CallInfo* stringCall, bool preserveNull);
 
