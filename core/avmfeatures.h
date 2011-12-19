@@ -438,10 +438,11 @@
 
 /* AVMFEATURE_OSR
  *
- * Enables delayed JIT-compilation with on-stack replacement.
- * The default OSR compilation strategy either compiles a method eagerly
- * or interprets it always, thus the OSR invocation threshold must be
- * separately configured at runtime to obtain meaningful results.
+ * Enables delayed JIT-compilation with on-stack replacement, by default,
+ * and supports runtime-disabling of OSR to get the legacy policy (OSR=0).
+ * Without this feature, legacy policy is the default: the VM
+ * compiles a method eagerly or interprets it always, and the OSR
+ * invocation threshold can be enabled at runtime (OSR=K, K>0).
  */
 #if !defined AVMFEATURE_OSR || AVMFEATURE_OSR != 0 && AVMFEATURE_OSR != 1
 #  error "AVMFEATURE_OSR must be defined and 0 or 1 (only)."
@@ -889,6 +890,9 @@
 #  error "Exactly one of AVMSYSTEM_IA32,AVMSYSTEM_AMD64,AVMSYSTEM_ARM,AVMSYSTEM_PPC,AVMSYSTEM_SPARC,AVMSYSTEM_MIPS,AVMSYSTEM_SH4 must be defined."
 #endif
 
+#  if !AVMFEATURE_ABC_INTERP
+#    error "AVMFEATURE_ABC_INTERP is required for AVMFEATURE_JIT"
+#  endif
 #endif
 #if AVMFEATURE_FLOAT
 #  if !AVMFEATURE_SWF16

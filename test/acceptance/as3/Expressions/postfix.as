@@ -1,5 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -36,49 +34,52 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-
-namespace avmplus
+class Base
 {
-
-REALLY_INLINE MethodEnvProcHolder::MethodEnvProcHolder()
-{}
-
-REALLY_INLINE MethodInfoProcHolder::MethodInfoProcHolder()
-{}
-
-REALLY_INLINE bool BaseExecMgr::isInterpreted(MethodEnv* env)
-{
-    return env->method->isInterpreted() != 0;
+    public var x, y;
+    public var intField:int;
 }
 
-REALLY_INLINE uintptr_t ImtHolder::getIID(MethodInfo* m)
+class TestSuper extends Base
 {
-    AvmAssert(m->declaringTraits()->isInterface());
-#ifdef VMCFG_VERIFYALL
-    // In verifyonly mode, make all IIDs be zero to erase memory layout noise.
-    return m->pool()->core->config.verifyonly ? 0 : (uintptr_t)m;
-#else
-    return (uintptr_t) m;
-#endif
+    public var intField2:int;
+    public function testSuperPostInc()
+    {
+        AddTestCase("typeof super.x++", "number", typeof super.x++);
+        AddTestCase("super.x", Number.NaN, super.x);
+        AddTestCase("super.intField++", 0, super.intField++);
+        AddTestCase("typeof super.intField", "number", typeof super.intField);
+        AddTestCase("super.intField", 1, super.intField);
+        AddTestCase("intField2++", 0, intField2++);
+        AddTestCase("intField2", 1, intField2);
+    }
+
+    public function testSuperPostDec()
+    {
+        AddTestCase("typeof super.x--", "number", typeof super.x--);
+        AddTestCase("super.x", Number.NaN, super.x);
+        AddTestCase("super.intField--", 0, super.intField--);
+        AddTestCase("typeof super.intField", "number", typeof super.intField);
+        AddTestCase("super.intField", -1, super.intField);
+        AddTestCase("intField2--", 0, intField2--);
+        AddTestCase("intField2", -1, intField2);
+    }
 }
 
-REALLY_INLINE uint32_t ImtHolder::hashIID(uintptr_t iid)
-{
-    return iid % IMT_SIZE;
-}
+var SECTION = "Expressions";       // provide a document reference (ie, Actionscript section)
+var VERSION = "AS3";        // Version of ECMAScript or ActionScript
+var TITLE   = "Postfix operators";       // Provide ECMA section title or a description
 
-REALLY_INLINE uint32_t ImtHolder::hashIID(MethodInfo* m)
-{
-    return hashIID(getIID(m));
-}
+/*
+  Note that this test is an extention to the following ecma3 tests:
+  ecma3/Expressions/e11_3_1.as
+  ecma3/Expressions/e11_3_2.as
+*/
 
-REALLY_INLINE bool OSR::countEdge(const MethodEnv* env, MethodInfo* m, MethodSignaturep ms)
-{
-    // Decrement and return true if zero and OSR is supported.  If OSR
-    // is not supported, countEdge will remain 0 without triggering OSR,
-    // until the next count which will wrap around to 0xFFFFFFFF.  So we only
-    // test isSupported() once every 2^32 invocations.
-    return --m->_abc.countdown == 0 && isSupported(env->abcEnv(), m, ms);
-}
+startTest();                // leave this alone
 
-} // namespace avmplus
+new TestSuper().testSuperPostInc();
+new TestSuper().testSuperPostDec();
+
+test();       // leave this alone.  this executes the test cases and
+              // displays results.

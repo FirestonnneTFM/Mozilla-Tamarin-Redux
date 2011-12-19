@@ -1823,6 +1823,8 @@ namespace MMgc
     {
         int inUse, maxAlloc;
         a->GetAllocStats(inUse, maxAlloc);
+        GCAssert(maxAlloc >= inUse);
+
         inUse *= a->GetItemSize();
         maxAlloc *= a->GetItemSize();
 

@@ -76,7 +76,7 @@ BaseExecMgr::BaseExecMgr(AvmCore* core)
     , verifyFunctionQueue(core->gc, 0)
     , verifyTraitsQueue(core->gc, 0)
 #endif
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
     , current_osr(NULL)
 #endif
 {
@@ -86,7 +86,7 @@ BaseExecMgr::BaseExecMgr(AvmCore* core)
 #ifdef VMCFG_COMPILEPOLICY
     prepPolicyRules();
 #endif
-#if defined VMCFG_NANOJIT && defined VMCFG_OSR && defined VMCFG_OSR_ENV_VAR
+#if defined VMCFG_NANOJIT && defined VMCFG_OSR_ENV_VAR
     if (config.osr_threshold == AvmCore::osr_threshold_default) {
         // If osr_threshold hasn't been set, check for OSR environment var.
         const char* osr_config = VMPI_getenv("OSR");
@@ -247,10 +247,6 @@ Atom BaseExecMgr::initInvokeInterpNoCoerce(MethodEnv* env, int argc, Atom* args)
 
 void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms, bool isOsr)
 {
-#ifndef VMCFG_OSR
-    AvmAssert(!isOsr);
-#endif
-
     // Choose an appropriate set of interpreter invocation stubs.
     // * if OSR is enabled, choose a stub that counts invocations to trigger JIT.
     // * if the method is a constructor, choose a stub that initializes
@@ -264,18 +260,12 @@ void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms, bool isOsr)
         BaseExecMgr::initInvokeInterpNoCoerce,    // osr=0, ctor=1, typedargs=0
         BaseExecMgr::initInvokeInterp             // osr=0, ctor=1, typedargs=1
     }}, {{
-#if defined FEATURE_NANOJIT && defined VMCFG_OSR
+#ifdef VMCFG_NANOJIT
         OSR::osrInvokeInterp,                     // osr=1, ctor=0, typedargs=0
         OSR::osrInvokeInterp                      // osr=1, ctor=0, typedargs=1
     }, {
         OSR::osrInitInvokeInterp,                 // osr=1, ctor=1, typedargs=0
         OSR::osrInitInvokeInterp                  // osr=1, ctor=1, typedargs=1
-#else
-        NULL,
-        NULL
-    }, {
-        NULL,
-        NULL
 #endif
     }}};
     int osr = isOsr ? 1 : 0;
@@ -298,26 +288,29 @@ void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms, bool isOsr)
         // * if the return type is float, the stub reuses the double (FPR) 
         //   signature 
 
-#define initStubItem(Base,RowType,ColType) (GprMethodProc)Base::RowType##ColType
-#define initStubLIst(Base,RowType)   \
-    initStubItem(Base, RowType, GPR),      /* rtype = int */   \
-    initStubItem(Base, RowType, FPR),      /* rtype = float */ \
-FLOAT_ONLY(\
-    initStubItem(Base, RowType, VECR),     /* rtype = simd */ \
-)
         static const GprMethodProc impl_stubs[2][2][IFFLOAT(3,2)] = {{{
-            initStubLIst(BaseExecMgr, interp)          // osr=0, ctor=0
+            BaseExecMgr::interpGPR                       // osr=0, ctor=0, fpr=0
+            , (GprMethodProc)BaseExecMgr::interpFPR      // osr=0, ctor=0, fpr=1
+#ifdef VMCFG_FLOAT
+            , (GprMethodProc)BaseExecMgr::interpVECR     // osr=0, ctor=0, fpr=2
+#endif
         }, {
-            initStubLIst(BaseExecMgr, initInterp)      // osr=0, ctor=1
+            BaseExecMgr::initInterpGPR                   // osr=0, ctor=1, fpr=0
+            , (GprMethodProc)BaseExecMgr::initInterpFPR  // osr=0, ctor=1, fpr=1
+#ifdef VMCFG_FLOAT
+            , (GprMethodProc)BaseExecMgr::initInterpVECR // osr=0, ctor=1, fpr=2
+#endif
         }}, {{
-#ifdef VMCFG_OSR
-            initStubLIst(OSR, osrInterp)               // osr=1, ctor=0
+            OSR::osrInterpGPR                            // osr=1, ctor=0, fpr=0
+            , (GprMethodProc)OSR::osrInterpFPR           // osr=1, ctor=0, fpr=1
+#ifdef VMCFG_FLOAT
+            , (GprMethodProc)OSR::osrInterpVECR          // osr=1, ctor=0, fpr=2
+#endif
         }, {
-            initStubLIst(OSR, osrInitInterp)           // osr=1, ctor=1
-#else
-            NULL, NULL FLOAT_ONLY(, NULL)
-        }, {
-            NULL, NULL FLOAT_ONLY(, NULL)
+            OSR::osrInitInterpGPR                        // osr=1, ctor=1, fpr=0
+            , (GprMethodProc)OSR::osrInitInterpFPR       // osr=1, ctor=1, fpr=1
+#ifdef VMCFG_FLOAT
+            , (GprMethodProc)OSR::osrInitInterpVECR      // osr=1, ctor=1, fpr=2
 #endif
         }}};
         int rtype = IFFLOAT( ReturnType(ms),
@@ -426,11 +419,7 @@ void BaseExecMgr::verifyInterp(MethodInfo* m, MethodSignaturep ms, Toplevel *top
     if (m->pool()->isVerbose(VB_execpolicy))
         core->console << "execpolicy interp (" << m->unique_method_id() << ") " << m << " jit-available\n";
 # endif
-# ifdef VMCFG_OSR
     setInterp(m, ms, OSR::isSupported(abc_env, m, ms));
-# else
-    setInterp(m, ms, false);
-# endif
 #else
 # ifdef AVMPLUS_VERBOSE
     if (m->pool()->isVerbose(VB_execpolicy))

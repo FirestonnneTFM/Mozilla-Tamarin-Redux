@@ -39,8 +39,7 @@
 
 #include "avmplus.h"
 
-#ifdef VMCFG_OSR
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
 #include "CodegenLIR.h"
 #include "FrameState.h"
 #include "exec-osr.h"
@@ -464,5 +463,4 @@ namespace avmplus
     }
     #endif
 }
-#endif // VMCFG_OSR
-#endif // FEATURE_NANOJIT
+#endif // VMCFG_NANOJIT

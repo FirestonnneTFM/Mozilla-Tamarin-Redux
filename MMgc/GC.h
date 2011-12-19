@@ -129,7 +129,7 @@
 #define GC_CONSERVATIVE_IFNDEF(field,cond) field
 #define GC_CONSERVATIVE_IF(field,cond) field
 
-// Substructure fields: the field must provide a method 'void gcTrace(MMgc::GC* gc)' 
+// Substructure fields: the field must provide a method 'void gcTrace(MMgc::GC* gc)'
 // that is typically inline.  All List<> fields are substructure fields, and the
 // List<> templates provide the tracing functions.
 #define GC_STRUCTURE(field) field
@@ -315,8 +315,8 @@ namespace MMgc
     };
 
     /**
-     * StackMemory is root memory that is only scanned at the end of GC, not at 
-     * the beginning.  It should be used for heap memory that functions as a stack: 
+     * StackMemory is root memory that is only scanned at the end of GC, not at
+     * the beginning.  It should be used for heap memory that functions as a stack:
      * alloca memory, or the AS1 stack.
      */
     class StackMemory : public GCRoot
@@ -560,7 +560,7 @@ namespace MMgc
         /**
          * validateDefRef is a debugging flag.  It turns on code that does a
          * trace before reaping zero count object and asserting on any objects
-         * that get marked.  Significant space cost. 
+         * that get marked.  Significant space cost.
          */
         bool validateDefRef;
 
@@ -644,7 +644,7 @@ namespace MMgc
          *
          * A pointer returned from Alloc is aligned at least on an 8-byte boundary.
          *
-         * There are at present no useful guarantees about better alignment like that, 
+         * There are at present no useful guarantees about better alignment like that,
          * notably there are no guarantees about 16-byte alignment to benefit float4.
          */
         void *Alloc(size_t size, int flags=0);
@@ -1284,7 +1284,7 @@ namespace MMgc
 
         /**
          * @return a reference to the mark bits for the given realptr.
-         * The realptr must point to the beginning of an object owned 
+         * The realptr must point to the beginning of an object owned
          * by this GC.
          */
         static gcbits_t& GetGCBits(const void* realptr);
@@ -1323,7 +1323,7 @@ namespace MMgc
 
         // Let the contents at *loc be 'obj'.
         // 'obj' is a possibly-null pointer to an object that may or may not be marked or queued and large or small
-        // and may or may not contain pointers.  The object will be marked (if not pointer-containing) or pushed 
+        // and may or may not contain pointers.  The object will be marked (if not pointer-containing) or pushed
         // onto the mark queue (if pointer-containing) if not already marked or queued.
         template <class T>
         void TraceLocation(T* const * loc);
@@ -1449,7 +1449,7 @@ namespace MMgc
 
         GCHashtable weakRefs;
 
-        // If a weak reference in the weakref table points to an unmarked object then 
+        // If a weak reference in the weakref table points to an unmarked object then
         // clear the weak reference and remove it from the weakref table.  If a weak
         // reference in the table points to a marked object and is itself unmarked then
         // mark it.
@@ -1732,7 +1732,7 @@ namespace MMgc
         /**
          * LockObject protects the object against being garbage collected, despite no references to
          * the object being found in a root, the stack, or any other heap object.  The object must
-         * not be NULL.  Locks on an object accumulate: if you lock an object n times you must 
+         * not be NULL.  Locks on an object accumulate: if you lock an object n times you must
          * unlock it n times - call UnlockObject on all the returned locks - to make it collectable
          * again.  Each lock returned is distinct and becomes an invalid object reference the moment
          * it is unlocked.
@@ -1779,7 +1779,7 @@ namespace MMgc
 #endif
 
     public:
-        // Used by the sampler.  Attempt to push the object p, but ignore mark stack 
+        // Used by the sampler.  Attempt to push the object p, but ignore mark stack
         // overflow if it fails.
         void Push_GCObject_MayFail(const void *p);
 

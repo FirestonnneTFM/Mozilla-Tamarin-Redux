@@ -326,7 +326,11 @@ class RuntestBase(object):
             elif o in ('--timeout',):
                 try:
                     self.timeout = int(v)
-                    self.testTimeOut=int(v)
+                    # Bugzilla 707907: timeout should not mean failure
+                    # unless --testtimeout passed.  But, we also do
+                    # not want long-running / infinitely-looping tests
+                    # to hijack --timeout. Below is a hack workaround.
+                    self.testTimeOut=int(v*20)
                 except ValueError:
                     print('Incorrect timeout value: %s\n' % v)
                     self.usage(2)

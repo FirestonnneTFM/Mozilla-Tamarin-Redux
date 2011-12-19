@@ -65,8 +65,11 @@
  *
  * The present value has been set based on preliminary startup-time studies on AIR Android.
  */
-#define OSR_THRESHOLD_DEFAULT 17
-
+#ifdef VMCFG_OSR
+static const int OSR_THRESHOLD_DEFAULT = 17; // tuned
+#else
+static const int OSR_THRESHOLD_DEFAULT = 0;  // legacy policy.
+#endif
 
 #define AVMPLUS_STRING_DELETED ((Stringp)(1))
 namespace avmplus
@@ -2044,6 +2047,9 @@ return the result of the comparison ToPrimitive(x) == y.
             {
             case kStringType:
                 return atomToString(atom)->toNumber();
+            default:
+                AvmAssert(false);
+                // should never get here, but fall through to NaN if we do.
             case kSpecialBibopType:
 #ifdef VMCFG_FLOAT
                 if (atom == undefinedAtom)
@@ -4508,7 +4514,6 @@ return the result of the comparison ToPrimitive(x) == y.
     #endif
 
 #elif defined(_MAC)
-
         // MacTel always has SSE2 available
         int32_t const intval = _mm_cvttsd_si32(_mm_set_sd(n));
         if (atomIsValidIntptrValueAndEqualTo(intval, n))

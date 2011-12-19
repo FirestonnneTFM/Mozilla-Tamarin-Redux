@@ -316,7 +316,7 @@ namespace avmplus
         // The minUCS4 table enforces the security rule that an
         // overlong UTF-8 sequence is forbidden, if a shorter
         // sequence could encode the same character.
-        static uint32_t minUCS4[] = {
+        static const uint32_t minUCS4[] = {
             0x00000000,
             0x00000080,
             0x00000800,

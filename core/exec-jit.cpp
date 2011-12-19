@@ -55,11 +55,11 @@ BaseExecMgr::JitInterpRuleSet::JitInterpRuleSet(MMgc::GC* gc)
 
 BaseExecMgr::JitInterpRuleSet::~JitInterpRuleSet()
 {
-    while(!jit.isEmpty())
-        mmfx_delete( jit.removeLast() );
+    while (!jit.isEmpty())
+        mmfx_delete(jit.removeLast());
 
-    while(!interp.isEmpty())
-        mmfx_delete( interp.removeLast() );
+    while (!interp.isEmpty())
+        mmfx_delete(interp.removeLast());
 }
 
 bool BaseExecMgr::prepPolicyRules()
@@ -163,12 +163,10 @@ bool BaseExecMgr::shouldJitFirst(const AbcEnv* abc_env, const MethodInfo* m, Met
         {
             willJit = false;
         }
-        #ifdef VMCFG_OSR
         else if (OSR::isSupported(abc_env, m, ms))
         {
             willJit = false;
         }
-        #endif
         else
         {
             willJit = !m->isStaticInit();
@@ -610,7 +608,7 @@ REALLY_INLINE MethodEnv* findMethod(ImtThunkEnv* ite, uintptr_t iid, ScriptObjec
 // b) more than one method hashed to this slot.  imt[] is updated to
 //    point to ::dispatchImt(), which uses the incoming iid parameter
 //    to choose which concrete MethodEnv to call.
-/*static*/ GprImtThunkProcRetType BaseExecMgr::resolveImt(ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid)
+/*static*/ uintptr_t BaseExecMgr::resolveImt(ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid)
 {
     ite = BaseExecMgr::resolveImtSlot(ite, iid);
     return (*ite->_implImtGPR)(ite, argc, ap, iid);
@@ -620,11 +618,11 @@ REALLY_INLINE MethodEnv* findMethod(ImtThunkEnv* ite, uintptr_t iid, ScriptObjec
 // indicates which interface method is being called.  This method
 // is installed when more than one concrete method have hashed to the
 // same imt[] slot; this method picks the one matching iid and calls it.
-/*static*/ GprImtThunkProcRetType BaseExecMgr::dispatchImt(ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid)
+/*static*/ uintptr_t BaseExecMgr::dispatchImt(ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid)
 {
     MethodEnv* const env = findMethod(ite, iid, *(ScriptObject**)ap);
     STACKADJUST(); // align stack for 32-bit Windows and MSVC compiler
-    GprImtThunkProcRetType r = (*env->_implGPR)(env, argc, ap);
+    uintptr_t r = (*env->_implGPR)(env, argc, ap);
     STACKRESTORE();
     return r;
 }

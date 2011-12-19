@@ -94,7 +94,7 @@ namespace avmplus
     };
 
 
-    class ObjectOutput : public DataOutput 
+    class ObjectOutput : public DataOutput
     {
     public:
         ObjectOutput(Toplevel *tl);
@@ -130,7 +130,7 @@ namespace avmplus
         HeapHashtable * const   m_htObject;
     };
 
-    class ObjectInput : public DataInput 
+    class ObjectInput : public DataInput
     {
     public:
         ObjectInput(Toplevel *tl);
@@ -185,12 +185,12 @@ namespace avmplus
         Atom ReadTypedVector(uint8_t type);
     };
 
-    class AvmPlusObjectOutput : public ObjectOutput 
+    class AvmPlusObjectOutput : public ObjectOutput
     {
     public:
         AvmPlusObjectOutput(Toplevel *tl) : ObjectOutput(tl) {}
 
-        virtual void WriteDynamicProperty(Stringp name, Atom value) 
+        virtual void WriteDynamicProperty(Stringp name, Atom value)
         {
             toplevel()->checkNull(name, "name");
             WriteString(name);
@@ -216,7 +216,7 @@ namespace avmplus
         void WriteTypedVector(Atom atom);
     };
 
-    class ClassInfo : public MMgc::GCObject 
+    class ClassInfo : public MMgc::GCObject
     {
     public:
         // for output, construct information from Traits
