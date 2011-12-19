@@ -161,13 +161,14 @@ namespace avmplus
     {
         core->exceptionAddr = exception;
 #ifdef VMCFG_AOT
-        if(this->llvmUnwindStyle) {
+        if (this->llvmUnwindStyle) {
             llvm_unwind();
-            return;
+            return; // Not reached.
         }
 #endif
 
         VMPI_longjmpNoUnwind(jmpbuf, 1);
+        // Not reached.
     }
 
     void ExceptionFrame::beginCatch()

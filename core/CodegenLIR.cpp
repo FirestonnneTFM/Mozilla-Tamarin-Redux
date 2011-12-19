@@ -1453,7 +1453,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         }
     };
 
-    #if defined(VMCFG_OSR) && defined(DEBUG)
+    #ifdef DEBUG
     FUNCTION(FUNCADDR(OSR::checkBugCompatibility), SIG1(V, P), osr_check_bugcompatibility)
     #endif
 
@@ -1680,7 +1680,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         stp(InsConstPtr((void*)(uintptr_t)0xdeadbeef), methodFrame, offsetof(MethodFrame,dxns), ACCSET_OTHER);
         #endif
 
-        #if defined(VMCFG_OSR) && defined(DEBUG)
+        #ifdef DEBUG
         // Check that the BugCompatibility that would be used to OSR this function,
         // whether or not we actually did so, agrees with the value returned from
         // currentBugCompatibility() every time the function is executed.  Note that
@@ -1958,7 +1958,6 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         verbose_only( if (vbWriter) { vbWriter->flush();} )
     }
 
-#ifdef VMCFG_OSR
     FUNCTION(FUNCADDR(OSR::adjustFrame), SIG4(B, P, P, P, P), osr_adjust_frame)
 
     // Emit code to call OSR::adjust_frame and conditionally enter loop.
@@ -1979,9 +1978,6 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 vars, tags);
         branchToAbcPos(LIR_jt, isOSR, osr->osrPc());
     }
-#else
-    void CodegenLIR::emitOsrBranch() { }
-#endif
 
     void CodegenLIR::emitInitializers()
     {
@@ -3984,7 +3980,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     // return NULL.  It is assumed that the replacement function will return
     // an int32 value.
 
-    LIns* CodegenLIR::specializeIntCall(LIns* call, Specialization* specs)
+    LIns* CodegenLIR::specializeIntCall(LIns* call, const Specialization* specs)
     {
         LIns *priorCall = getSpecializedCall(call);
         if (priorCall)
@@ -4029,7 +4025,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         return imm;
     }
 
-    static Specialization coerceDoubleToInt[] = {
+    static const Specialization coerceDoubleToInt[] = {
         { FUNCTIONID(String_charCodeAtDI),    FUNCTIONID(String_charCodeAtIU) },
         { FUNCTIONID(String_charCodeAtDU),    FUNCTIONID(String_charCodeAtIU) },
         { FUNCTIONID(String_charCodeAtDD),    FUNCTIONID(String_charCodeAtID) },
@@ -7375,7 +7371,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     // type or value, if constant, of the other argument.  The function call is normally presumed
     // to be the left-hand argument.  The swap parameter, if true, reverses this convention.
 
-    static Specialization intCmpWithNumber[] = {
+    static const Specialization intCmpWithNumber[] = {
         { FUNCTIONID(String_charCodeAtDI),    FUNCTIONID(String_charCodeAtIU) },
         { FUNCTIONID(String_charCodeAtDU),    FUNCTIONID(String_charCodeAtIU) },
         { FUNCTIONID(String_charCodeAtDD),    FUNCTIONID(String_charCodeAtID) },
@@ -7424,7 +7420,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         return NULL;
     }
 
-    static Specialization stringCmpWithString[] = {
+    static const Specialization stringCmpWithString[] = {
         { FUNCTIONID(String_charAtI),    FUNCTIONID(String_charCodeAtII) },
         { FUNCTIONID(String_charAtU),    FUNCTIONID(String_charCodeAtIU) },
         { FUNCTIONID(String_charAtD),    FUNCTIONID(String_charCodeAtID) },
@@ -8323,7 +8319,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         return false;
     }
 
-    void analyze_call(LIns* ins, LIns* catcher, LIns* vars, DEBUGGER_ONLY(bool haveDebugger, int dbg_framesize,) const size_t varShift,
+    void analyze_call(LIns* ins, LIns* catcher, LIns* vars, DEBUGGER_ONLY(bool haveDebugger, int dbg_framesize,)
+            const size_t varShift,
             nanojit::BitSet& varlivein, LabelBitSet& varlabels,
             nanojit::BitSet& taglivein, LabelBitSet& taglabels)
     {
@@ -8365,7 +8362,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         for(int i=0;i < varPtrFunctionsNum; i++ ) {
             if(ci == varPtrFunctions[i].callinfo) {
                 uint32_t argIdx = varPtrFunctions[i].var_argument;
-                bool updated = false;;
+                bool updated = false;
                 LIns* varPtrArg = ins->arg(argIdx);  // varPtrArg == vars, OR addp(vars, index)
                 if (varPtrArg == vars) {
                     update_var_liveness(&varlivein, varPtrFunctions[i].tagAccess? &taglivein : NULL, 0, varPtrFunctions[i].isStore);

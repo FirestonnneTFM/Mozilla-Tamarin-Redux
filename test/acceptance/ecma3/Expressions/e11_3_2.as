@@ -203,6 +203,27 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "var MYVAR=new String('077');MYVAR--;MYVAR",      76,            MYVAR );
     var MYVAR=new String('');MYVAR--;
     array[item++] = new TestCase( SECTION,    "var MYVAR=new String('');MYVAR--;MYVAR",         -1,              MYVAR );
+    
+    // array elements
+    var MYVAR = ["string", null, undefined, 300];
+    MYVAR[0]--;
+    array[item++] = new TestCase( SECTION,    "decrement a string in array", Number.NaN, MYVAR[0]);
+    
+    MYVAR[1]--;
+    array[item++] = new TestCase( SECTION,    "decrement a null in array", -1, MYVAR[1]);
+    
+    MYVAR[2]--;
+    array[item++] = new TestCase( SECTION,    "decrement a undefined in array", Number.NaN, MYVAR[2]);
+    
+    MYVAR[3]--;
+    array[item++] = new TestCase( SECTION,    "decrement a number in array", 299, MYVAR[3]);
+    
+    // object
+    var o = {"num":22};
+    o.x--;
+    array[item++] = new TestCase( SECTION,    "decrement a non-existant object property", Number.NaN, o.x);
+    o.num--;
+    array[item++] = new TestCase( SECTION,    "decrement an object property", 21, o.num);
 
     return ( array );
 }

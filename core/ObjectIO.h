@@ -65,7 +65,7 @@ namespace avmplus
         void writeUnsignedInt(uint32_t value);
         void writeFloat(double value);
         void writeDouble(double value);
-        void writeMultiByte(String *value, String *charSet);        
+        void writeMultiByte(String *value, String *charSet);
         void writeUTF(String *value);
         void writeUTFBytes(String *value);
         void writeObject(Atom value);
@@ -120,7 +120,7 @@ namespace avmplus
         double readDouble();
         String* readMultiByte(uint32_t length, String *charSet);
         String* readUTF();
-        String* readUTFBytes(uint32_t length);        
+        String* readUTFBytes(uint32_t length);
         Atom readObject();
 
         int get_bytesAvailable();

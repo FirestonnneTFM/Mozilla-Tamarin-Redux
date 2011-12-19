@@ -41,7 +41,7 @@
 #include "avmplus.h"
 #include "Interpreter.h"
 
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
 #   include "exec-osr.h"
 #endif
 
@@ -281,7 +281,7 @@ namespace avmplus
 
 #endif // VMCFG_DIRECT_THREADED
 
-#if defined FEATURE_NANOJIT && defined VMCFG_OSR
+#ifdef VMCFG_NANOJIT
 #   define OSR(offset) \
         if (OSR::countEdge(env, info, ms) &&                        \
             OSR::execute(env, framep, ms, pc + (offset), &a1l)) {   \
@@ -3530,7 +3530,7 @@ FLOAT_ONLY(\
             goto L_illegal_op;
 #endif
 
-        }  // TRY
+        }  // End TRY
 
         CATCH (Exception *exception)
         {
@@ -3580,7 +3580,7 @@ FLOAT_ONLY(\
         L_illegal_op:
             AvmAssert(!"Illegal operation!");
             goto L_illegal_op;
-    }
+    } // end interpBoxed()
 
     // Note, this function is not on the hot path normally, so optimizing it is not urgent.
     //

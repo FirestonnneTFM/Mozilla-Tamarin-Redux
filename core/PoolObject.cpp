@@ -113,7 +113,7 @@ namespace avmplus
             delete aotRoot;
         #endif
 #ifdef VMCFG_NANOJIT
-        mmfx_delete( codeMgr );
+        mmfx_delete(codeMgr);
 #endif
     }
 

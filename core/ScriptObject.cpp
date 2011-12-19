@@ -164,6 +164,21 @@ namespace avmplus
         }
     }
 
+    bool ScriptObject::isOwnAtomPropertyHere(Atom name, Atom *recv) const
+    {
+        AvmAssert(this->vtable->traits->getHashtableOffset() != 0);
+        Atom const value = this->getTable()->getNonEmpty(name);
+        if (!InlineHashtable::isEmpty(value))
+        {
+            *recv = value;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     /**
      * traverse the delegate chain looking for a value.
      * [ed] it's okay to look only at the HT's in the delegate chain because
@@ -196,8 +211,9 @@ namespace avmplus
                 // ensure prototype is dynamic
                 if (!o->vtable->traits->getHashtableOffset())
                     continue;
-                Atom const value = o->getTable()->getNonEmpty(name);
-                if (!InlineHashtable::isEmpty(value))
+
+                Atom value;
+                if (o->isOwnAtomPropertyHere(name, &value))
                     return value;
             }
             while ((o = o->delegate) != NULL);
@@ -223,8 +239,8 @@ namespace avmplus
                 // ensure prototype is dynamic
                 if (!o->vtable->traits->getHashtableOffset())
                     continue;
-                Atom const value = o->getTable()->getNonEmpty(searchname);
-                if (!InlineHashtable::isEmpty(value))
+                Atom value;
+                if (o->isOwnAtomPropertyHere(searchname, &value))
                     return value;
             }
             while ((o = o->delegate) != NULL);
@@ -429,8 +445,9 @@ namespace avmplus
                     // ensure prototype is dynamic
                     if (!o->vtable->traits->getHashtableOffset())
                         continue;
-                    Atom const value = o->getTable()->getNonEmpty(name);
-                    if (!InlineHashtable::isEmpty(value))
+
+                    Atom value;
+                    if (o->isOwnAtomPropertyHere(name, &value))
                         return value;
                 }
                 while ((o = o->delegate) != NULL);

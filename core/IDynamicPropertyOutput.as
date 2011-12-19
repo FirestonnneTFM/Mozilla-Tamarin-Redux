@@ -53,7 +53,7 @@ package flash.net
      *  @playerversion Lite 4
      */
 
-    public interface IDynamicPropertyOutput 
+    public interface IDynamicPropertyOutput
     {
         /**
          * Adds a dynamic property to the binary output of a serialized object.

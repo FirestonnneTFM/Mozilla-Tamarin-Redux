@@ -86,32 +86,6 @@ namespace avmplus
         void writeOp2(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2);
     };
 
-#if defined FEATURE_TEEWRITER
-    class TeeWriter : public CodeWriter {
-    public:
-        CodeWriter* coder1;  // deleted elsewhere
-        CodeWriter* coder2;
-
-        TeeWriter(CodeWriter* coder1, CodeWriter* coder2);
-        ~TeeWriter();
-        void write(const FrameState* state, const uint8_t* pc, AbcOpcode opcode, Traits *type);
-        void writeOp1(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, Traits* type);
-        void writeOp2(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
-        void writeMethodCall(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, MethodInfo*, uintptr_t disp_id, uint32_t argc, Traits* type);
-        void writeNip(const FrameState* state, const uint8_t *pc, uint8_t offset);
-        void writeCheckNull(const FrameState* state, uint32_t index);
-        void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
-        void writeCoerceToNumeric(const FrameState* state, uint32_t index);
-        void writeCoerceToFloat4(const FrameState* state, uint32_t index);
-        void writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver*);
-        void writeEpilogue(const FrameState* state);
-        void writeBlockStart(const FrameState* state);
-        void writeOpcodeVerified(const FrameState* state, const uint8_t *pc, AbcOpcode opcode);
-        void writeFixExceptionsAndLabels(const FrameState* state, const uint8_t *pc);
-        void cleanup();
-    };
-#endif // FEATURE_TEEWRITER
-
     class NullWriter : public CodeWriter {
     public:
         CodeWriter* coder;       // the next leg of the pipeline

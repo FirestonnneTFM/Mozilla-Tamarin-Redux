@@ -303,6 +303,8 @@ namespace avmplus
     private:
         MethodSignature* FASTCALL _getMethodSignature();
         MethodSignature* FASTCALL _buildMethodSignature(const Toplevel* toplevel);
+        void _installRefToResolvedMethodSignature(MethodSignature* ms);
+
         bool computeIsTrivial();
 
     private:

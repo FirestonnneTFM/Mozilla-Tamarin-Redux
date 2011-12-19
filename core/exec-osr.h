@@ -41,7 +41,6 @@
 
 namespace avmplus
 {
-#ifdef VMCFG_OSR
     /**
      * "On-Stack_Replacement" of interpreter methods with equivalent
      * JIT compiled versions.
@@ -127,12 +126,6 @@ namespace avmplus
 #endif
         static Atom osrInitInvokeInterp(MethodEnv* env, int32_t argc, Atom* argv);
     };
-
-#else
-
-    class OSR { };       // Dummy class definition for non-OSR builds
-
-#endif // VMCFG_OSR
 }
 
 #endif // __avmplus_OSR__
