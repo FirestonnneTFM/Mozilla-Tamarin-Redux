@@ -329,11 +329,17 @@ e4x/XML/setNotification , .*-ES , , skip, Testcase does not work with -ES
 ####################
 # Float/Float4
 ####################
-# as3/Types/Float/.* , .* ,  .*float.* , exclude , Only valid when float is enabled.
-# as3/Types/Float4/.* , .* , .*float.* , exclude , Only valid when float is enabled.
+as3/Types/Float/.* , .* ,  .*float.* , exclude , Only valid when float is enabled.
+as3/Types/Float4/.* , .* , .*float.* , exclude , Only valid when float is enabled.
+abcasm/coverage/float/.* , .* , .*float.* , exclude , Only valid when float is enabled.
+abcasm/float/.* , .* , .*float.* , exclude , Only valid when float is enabled.
+as3/asc/.* , .* , .*float.* , exclude , Only valid when float is enabled.
+as3/AMF/AMFSerializer_float , .* , .*float.* , exclude , Only valid when float is enabled.
 
 ###########
 # Helper files
 ###########
 as3/asc/import-with-float4-helper , .* , , skip , Not a test on its own
+
+
 
