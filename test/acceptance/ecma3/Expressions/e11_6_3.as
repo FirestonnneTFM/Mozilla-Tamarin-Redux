@@ -95,8 +95,8 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,  "2480.00 + -2480.00",     +0 ,      2480.00 + -2480.00 );
     array[item++] = new TestCase( SECTION,  "-268.05 + 268.05",     +0 ,     -268.05 + 268.05 );
     
-    array[item++] = new TestCase( SECTION,  "Number.MAX_VALUE + 1",     "1.797693134862316e+308",  Number.MAX_VALUE + 1+"");
-    array[item++] = new TestCase( SECTION,  "Number.MAX_VALUE + 99.99",     "1.797693134862316e+308",  Number.MAX_VALUE + 99.99+"" );
+    array[item++] = new TestCase( SECTION,  "Number.MAX_VALUE + 1",     "1.79769313486231e+308",  Number.MAX_VALUE + 1+"");
+    array[item++] = new TestCase( SECTION,  "Number.MAX_VALUE + 99.99",     "1.79769313486231e+308",  Number.MAX_VALUE + 99.99+"" );
     array[item++] = new TestCase( SECTION,  "4324.43 + (-64.000503)",      4260.429497, 4324.43 + (-64.000503) );
     
     

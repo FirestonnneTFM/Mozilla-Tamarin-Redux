@@ -247,7 +247,7 @@
 #endif
 
 #ifndef AVMFEATURE_FLOAT
-  #define AVMFEATURE_FLOAT 1
+  #define AVMFEATURE_FLOAT 0
 #endif
 
 #ifndef AVMFEATURE_SWF17
