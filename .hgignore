@@ -86,3 +86,4 @@ utils/wmremote/wmrunner/Release/**
 *.komodoproject
 platform/win32/*Amplifier*/**
 *.psess
+
