@@ -933,7 +933,7 @@ package abcdump
                start = data.position
                // float4
                n = readU32()
-               var f4:float4 = float4(float.NaN,float.NaN,float.NaN,float.NaN)
+               var f4:* = float4(float.NaN,float.NaN,float.NaN,float.NaN)
                float4s = [f4]
                for (i=1; i < n; i++){
                    float4s[i] = new float4(data.readFloat(),data.readFloat(),data.readFloat(),data.readFloat());
