@@ -578,10 +578,14 @@ namespace avmplus
         void _spliceHelper(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, Atom args, uint32_t offset);
         uint32_t AS3_push(Atom* argv, int argc);
         typename TLIST::TYPE AS3_pop();
+#ifdef VMCFG_FLOAT
         void AS3_pop(typename TLIST::TYPE *);
+#endif
         uint32_t AS3_unshift(Atom* argv, int argc);
         typename TLIST::TYPE AS3_shift();
+#ifdef VMCFG_FLOAT
         void AS3_shift(typename TLIST::TYPE *);
+#endif
 
         // ScriptObject method overrides
         virtual bool hasAtomProperty(Atom name) const;

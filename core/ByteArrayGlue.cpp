@@ -908,7 +908,7 @@ namespace avmplus
     // on native endianness - gcc may emit code that loads directly
     // to the ARM VFP register, and that requires VMCFG_UNALIGNED_FP_ACCESS.
 
-    REALLY_INLINE float ByteArrayObject::readFloat(uint8_t* b)
+    REALLY_INLINE float ByteArrayObject::readFloatHelper(uint8_t* b)
     {
         union {
             uint32_t word;
@@ -941,7 +941,7 @@ namespace avmplus
     
     double ByteArrayObject::readFloat()
     {
-        return readFloat(m_byteArray.requestBytesForShortRead(4));
+        return readFloatHelper(m_byteArray.requestBytesForShortRead(4));
     }
 
 #ifdef VMCFG_FLOAT
@@ -950,10 +950,10 @@ namespace avmplus
     void ByteArrayObject::readFloat4(float4_t* retval)
     {
         uint8_t *b = m_byteArray.requestBytesForShortRead(16);
-        float x = readFloat(b);
-        float y = readFloat(b+4);
-        float z = readFloat(b+8);
-        float w = readFloat(b+12);
+        float x = readFloatHelper(b);
+        float y = readFloatHelper(b+4);
+        float z = readFloatHelper(b+8);
+        float w = readFloatHelper(b+12);
         float4_t v = { x, y, z, w };
         *retval = v;
     }
@@ -1105,7 +1105,7 @@ namespace avmplus
     // on native endianness - gcc will emit code that stores directly
     // from the ARM VFP register, and that requires VMCFG_UNALIGNED_FP_ACCESS.
 
-    REALLY_INLINE void ByteArrayObject::writeFloat(float value, uint8_t* b)
+    REALLY_INLINE void ByteArrayObject::writeFloatHelper(float value, uint8_t* b)
     {
         union {
             uint32_t word;
@@ -1154,7 +1154,7 @@ namespace avmplus
 
     void ByteArrayObject::writeFloat(double value)
     {
-        writeFloat((float)value, m_byteArray.requestBytesForShortWrite(4));
+        writeFloatHelper((float)value, m_byteArray.requestBytesForShortWrite(4));
     }
 
 #ifdef VMCFG_FLOAT
@@ -1163,10 +1163,10 @@ namespace avmplus
     void ByteArrayObject::writeFloat4(const float4_t& v)
     {
         uint8_t* b = m_byteArray.requestBytesForShortWrite(16);
-        writeFloat(f4_x(v), b);
-        writeFloat(f4_y(v), b+4);
-        writeFloat(f4_z(v), b+8);
-        writeFloat(f4_w(v), b+12);
+        writeFloatHelper(f4_x(v), b);
+        writeFloatHelper(f4_y(v), b+4);
+        writeFloatHelper(f4_z(v), b+8);
+        writeFloatHelper(f4_w(v), b+12);
     }
 #endif
     
