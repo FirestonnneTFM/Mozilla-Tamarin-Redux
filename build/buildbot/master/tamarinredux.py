@@ -941,7 +941,7 @@ class tamarinredux:
     mac_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     mac_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     mac_deep_factory.addStep(test_generic(name="Debug-jit", shellname="avmshell_d", vmargs="-Ojit", config="", scriptargs=""))
-    mac_deep_factory.addStep(compile_generic(name="Release-aot", shellname="avmshell_aot", args="--enable-aot --target=i686-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_AOT"))
+    mac_deep_factory.addStep(compile_generic(name="Release-aot", shellname="avmshell_aot", args="--enable-aot --disable-eval --target=i686-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_AOT"))
     # Commenting because of bug 696275 - mac_deep_factory.addStep(compile_generic(name="Debug-aot", shellname="avmshell_d_aot", args="--enable-debug --enable-aot --target=i686-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_AOT"))
     mac_deep_factory.addStep(compile_generic(name="ReleaseHeapGraph", shellname="avmshell_heapgraph", args="--enable-heap-graph --target=i686-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMTWEAK_HEAP_GRAPH"))
     mac_deep_factory.addStep(test_selftest(name="ReleaseHeapGraph", shellname="avmshell_heapgraph"))
