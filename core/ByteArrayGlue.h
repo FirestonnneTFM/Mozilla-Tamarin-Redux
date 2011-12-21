@@ -352,8 +352,8 @@ namespace avmplus
         // REALLY_INLINE helpers for fast reading and writing, without code duplication.
         uint32_t read32();
         uint32_t read16();
-        float readFloat(uint8_t* b);
-        void writeFloat(float value, uint8_t* b);
+        float readFloatHelper(uint8_t* b);                  // ...Helper because AOT hates overloaded names
+        void writeFloatHelper(float value, uint8_t* b);     // ditto
         void write32(uint32_t value);
 
         ByteArray::CompressionAlgorithm algorithmToEnum(String* algorithm);
