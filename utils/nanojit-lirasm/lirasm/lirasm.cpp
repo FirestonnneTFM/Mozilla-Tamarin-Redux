@@ -894,7 +894,7 @@ FragmentAssembler::assemble_load()
     // load opcodes were defined in LIR.
     need(2);
     if (mTokens[1].find("0x") == 0 ||
-        mTokens[1].find("0x") == 0 ||
+        mTokens[1].find("0X") == 0 ||
         mTokens[1].find_first_of("0123456789") == 0) {
         return mLir->insLoad(mOpcode,
                              ref(mTokens[0]),
