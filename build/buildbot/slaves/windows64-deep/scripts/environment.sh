@@ -76,9 +76,9 @@ then
     WINDOWS_SDK="c:\Program Files\Microsoft SDKs\Windows\v6.0A"
 fi
 
-# todo: who is using prepath?
+# PREPATH, INCLUDE, LIB and LIBPATH variables are set by env32|64 when running code coverage scripts
 export PATH="$PREPATH:$VS_HOME_PATH/Common7/IDE:$VS_HOME_PATH/VC/bin/amd64:$VS_HOME_PATH\Common7\Tools:$VS_HOME_PATH/VC/VCPackages:$PATH"
-export INCLUDE="$WINDOWS_SDK\Include;$VS_HOME\VC\atlmfc\include;$VS_HOME\VC\include;"
-export LIB="$WINDOWS_SDK\Lib\x64;$VS_HOME\VC\atlmfc\lib\amd64;$VS_HOME\VC\lib\amd64;"
-export LIBPATH="$WINDOWS_SDK\Lib\x64;$VS_HOME\VC\atlmfc\lib\amd64;$VS_HOME\VC\lib\amd64;"
+export INCLUDE="${INCLUDE};$WINDOWS_SDK\Include;$VS_HOME\VC\atlmfc\include;$VS_HOME\VC\include;"
+export LIB="${LIB};$WINDOWS_SDK\Lib\x64;$VS_HOME\VC\atlmfc\lib\amd64;$VS_HOME\VC\lib\amd64;"
+export LIBPATH="${LIBPATH};$WINDOWS_SDK\Lib\x64;$VS_HOME\VC\atlmfc\lib\amd64;$VS_HOME\VC\lib\amd64;"
 
