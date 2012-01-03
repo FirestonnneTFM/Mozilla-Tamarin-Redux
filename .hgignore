@@ -68,6 +68,7 @@ axscript/vc2008/axtam.vcproj.*.user
 core/*.out
 shell/*.out
 build/buildbot/slaves/scripts/*
+utils/asc.jar
 utils/exactgc.abc
 utils/avmc/build/**
 utils/lastsizereport.txt
