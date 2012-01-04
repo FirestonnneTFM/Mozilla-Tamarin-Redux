@@ -358,22 +358,32 @@ as3/Types/Float/pow:float\.pow\(float\.NEGATIVE_INFINITY. -2f\) sign check , .*,
 as3/Types/Float/pow:float\.pow\(float\.NEGATIVE_INFINITY. -2f\) check\(\) sign check , .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703611
 as3/Types/Float/nonstrict/ToString:ToString\(float\.MAX_VALUE\) , .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=699463
 
-as3/Types/Float/reciprocal:float\.reciprocal\(8\)  , x86-.*(release|debug)-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=704097
-as3/Types/Float/rsqrt:x=3\.124f float\.rsqrt\(x\)   , x86-.*(release|debug)-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=704097
-as3/Types/Float/rsqrt:float.rsqrt\(64\)   , x86-.*(release|debug)-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=704097
-as3/Types/Float/nonstrict/reciprocal:float\.reciprocal\(true\)   , x86-.*(release|debug)-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=704097
-as3/Types/Float/nonstrict/rsqrt:float\.rsqrt\(true\)   , x86-.*(release|debug)-Ojit,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=704097
+as3/Types/Float/reciprocal:float\.reciprocal\(8\)  , x86-.*(release|debug)-Ojit.*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=704097
+as3/Types/Float/rsqrt:x=3\.124f float\.rsqrt\(x\)   , x86-.*(release|debug)-Ojit.*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=704097
+as3/Types/Float/rsqrt:float.rsqrt\(64\)   , x86-.*(release|debug)-Ojit.*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=704097
+as3/Types/Float/nonstrict/reciprocal:float\.reciprocal\(true\)   , x86-.*(release|debug)-Ojit.*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=704097
+as3/Types/Float/nonstrict/rsqrt:float\.rsqrt\(true\)   , x86-.*(release|debug)-Ojit.*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=704097
 as3/Types/Float/rsqrt , .*diff ,, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=704097
 
 as3/Types/Float/loadLegacyCode, arm , ,  expectedfail, need to update runner script
 as3/Types/Float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
+
+ecma3/Expressions/e11_6_3:Number.MAX_VALUE \+ , .*-float, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=686708
+ecma3/LexicalConventions/e7_7_3:^12345678901234567.* , .*-float, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=686708
+ecma3/LexicalConventions/e7_7_3:^-123456789012345671.* , .*-float, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=686708
+ecma3/LexicalConventions/e7_7_3:^-123456789012345672 = , .*-float, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=686708
+ecma3/LexicalConventions/e7_7_3:^-123456789012345672\.01 = , .*-float, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=686708
+ecma3/LexicalConventions/e7_7_3:^-123456789012345672\.0{27} = , .*-float, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=686708
+ecma3/LexicalConventions/e7_7_3:^-123456789012345680.* , .*-float, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=686708
+ecma3/Number/e15_7_2:new Number\('1\.79769313486231e\+308'\) , .*-float, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=686708
+ecma3/Number/e15_7_1:Number\('1\.79769313486231e\+308'\) , .*-float, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=686708
 
 ####################
 # Float4
 ####################
 as3/Types/Float4/component_access:^float4\['(xxxx|yyyy|zzzz|wwww|xyzw|wzyx)'\], arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 as3/Types/Float4/component_access_swizzle:^float4\['(x|y|z|w){4}'\], arm-lnx.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
-as3/Types/Float4/float4Operations:Flt4(Any|Flt4)Ops Xyzzy, arm-lnx.*-Dinterp , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
+as3/Types/Float4/float4Operations:Flt4(Any|Flt4)Ops Xyzzy, arm-lnx.*-Dinterp.* , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=695001
 as3/Types/Float4/float4Operations:Flt4(Any|Flt4)Ops (?!.*EQ).*, arm-.*debug.* , -Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=700642
 
 as3/Types/Float4/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
