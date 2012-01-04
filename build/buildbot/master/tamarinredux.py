@@ -827,6 +827,39 @@ class tamarinredux:
                 name="VTune",
                 workdir="../repo/build/buildbot/slaves/scripts")
     )
+
+    #####################
+    # Start float testing
+    windows_deep_factory.addStep(BuildShellCommand(
+                command=['../all/float-pre.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+                description='prepare for float...',
+                descriptionDone='finished preparing for float',
+                name="Float-pre",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    windows_deep_factory.addStep(compile_generic(name="Release-Float", shellname="avmshell_float", args="--target=i686-windows --enable-float", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_FLOAT"))
+    windows_deep_factory.addStep(compile_generic(name="Debug-Float", shellname="avmshell_d_float", args="--target=i686-windows --enable-float --enable-debug", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_FLOAT"))
+    # Force a recompilation of the test media on the first run of acceptance since media needs to be recompiled
+    windows_deep_factory.addStep(test_generic(name="Release-float", shellname="avmshell_float", vmargs="", config="",
+                                              scriptargs="--ascargs=-abcfuture --addtoconfig=-float -f"))
+    windows_deep_factory.addStep(test_generic(name="Release-float-Ojit", shellname="avmshell_float", vmargs="-Ojit", config="",
+                                              scriptargs="--ascargs=-abcfuture --addtoconfig=-float"))
+    windows_deep_factory.addStep(test_generic(name="Debug-float", shellname="avmshell_d_float", vmargs="", config="",
+                                              scriptargs="--ascargs=-abcfuture --addtoconfig=-float"))
+    windows_deep_factory.addStep(test_generic(name="Debug-float-Ojit", shellname="avmshell_d_float", vmargs="-Ojit", config="",
+                                              scriptargs="--ascargs=-abcfuture --addtoconfig=-float"))
+    windows_deep_factory.addStep(BuildShellCommand(
+                command=['../all/float-post.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+                description='revert from  float...',
+                descriptionDone='finished reverting from float',
+                name="Float-post",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    # End float testing
+    ###################
+
     # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
     windows_deep_factory.addStep(test_generic(name="Release_ES", shellname="avmshell", vmargs="", config="",
                                               scriptargs="--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"))
@@ -959,6 +992,39 @@ class tamarinredux:
     )
     mac_deep_factory.addStep(compile_generic(name="ReleaseDebugger-Valgrind", shellname="avmshell_s_valgrind", args="--enable-debugger --enable-valgrind", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER +AVMFEATURE_VALGRIND"))
     mac_deep_factory.addStep(test_generic(name="ReleaseDebugger-Valgrind", shellname="avmshell_s_valgrind", vmargs="", config="", scriptargs="--valgrind"))
+
+    #####################
+    # Start float testing
+    mac_deep_factory.addStep(BuildShellCommand(
+                command=['../all/float-pre.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+                description='prepare for float...',
+                descriptionDone='finished preparing for float',
+                name="Float-pre",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    mac_deep_factory.addStep(compile_generic(name="Release-Float", shellname="avmshell_float", args="--target=i686-darwin --enable-float", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_FLOAT"))
+    mac_deep_factory.addStep(compile_generic(name="Debug-Float", shellname="avmshell_d_float", args="--target=i686-darwin --enable-float --enable-debug", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_FLOAT"))
+    # Force a recompilation of the test media on the first run of acceptance since media needs to be recompiled
+    mac_deep_factory.addStep(test_generic(name="Release-float", shellname="avmshell_float", vmargs="", config="",
+                                              scriptargs="--ascargs=-abcfuture --addtoconfig=-float -f"))
+    mac_deep_factory.addStep(test_generic(name="Release-float-Ojit", shellname="avmshell_float", vmargs="-Ojit", config="",
+                                              scriptargs="--ascargs=-abcfuture --addtoconfig=-float"))
+    mac_deep_factory.addStep(test_generic(name="Debug-float", shellname="avmshell_d_float", vmargs="", config="",
+                                              scriptargs="--ascargs=-abcfuture --addtoconfig=-float"))
+    mac_deep_factory.addStep(test_generic(name="Debug-float-Ojit", shellname="avmshell_d_float", vmargs="-Ojit", config="",
+                                              scriptargs="--ascargs=-abcfuture --addtoconfig=-float"))
+    mac_deep_factory.addStep(BuildShellCommand(
+                command=['../all/float-post.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+                description='revert from  float...',
+                descriptionDone='finished reverting from float',
+                name="Float-post",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    # End float testing
+    ###################
+
     # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
     mac_deep_factory.addStep(test_generic(name="Release_ES", shellname="avmshell", vmargs="", config="",
                                               scriptargs="--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"))

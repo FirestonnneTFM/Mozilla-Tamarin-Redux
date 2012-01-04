@@ -521,7 +521,7 @@ class RuntestBase(object):
             wordcode = ''
             
         self.config = cputype+'-'+self.osName+'-'+vm_str+'-'+self.vmtype+ \
-                      wordcode+self.addtoconfig+self.vmargs.replace(" ", "")
+                      wordcode+self.vmargs.replace(" ", "")+self.addtoconfig
         
         
 
