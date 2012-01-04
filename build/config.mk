@@ -140,9 +140,11 @@ $$($(1)_COBJS): %.$(OBJ_SUFFIX): %.$(I_SUFFIX) $$(GLOBAL_DEPS)
 	@$(CC) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
 
 $$($(1)_ASMOBJS): %.$(OBJ_SUFFIX): %.armasm $$(GLOBAL_DEPS)
+	@test -d $$(dir $$@) || mkdir -p $$(dir $$@)
 	$(ASM) -o $$@ $$($(1)_ASMFLAGS) $$<
 
 $$($(1)_MASMOBJS): %.$(OBJ_SUFFIX): %.asm $$(GLOBAL_DEPS)
+	@test -d $$(dir $$@) || mkdir -p $$(dir $$@)
 	$(MASM) -Fo $$@ $$($(1)_MASMFLAGS) $$<
 
 $(1).thing.pp: FORCE
