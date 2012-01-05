@@ -453,6 +453,9 @@ namespace avmplus
     private:
         Atom getClassClosureAtomFromAlias(Atom name, bool checkContextDomainOnly);
         void addAliasedClassClosure(Atom key1, Atom key2, ClassClosure* cc, bool isDomainEnv);
+        //Function to be overriden by the player
+        //This hack has been added to fix the bug #715105
+        virtual DomainEnv* getDomainEnvOverridableHook();
 
     public:
         String* getAliasFromTraits(Traits* traits);

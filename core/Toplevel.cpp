@@ -1678,11 +1678,16 @@ namespace avmplus
         }
 
         // add key=(name,domainEnv) value=cc tuple to table.
-        toplevel->addAliasedClassClosure(name, AvmCore::genericObjectToAtom(toplevel->domainEnv()), cc, /*isDomainEnv*/true);
+        toplevel->addAliasedClassClosure(name, AvmCore::genericObjectToAtom(toplevel->getDomainEnvOverridableHook()), cc, /*isDomainEnv*/true);
         toplevel->_traitsToAliasMap.add(AvmCore::genericObjectToAtom(cc->traits()->itraits), name);
 
         // add key=(name,'this') value=cc tuple to be used when code context is null (see getClassClosureAtomFromAlias)
         toplevel->addAliasedClassClosure(name, AvmCore::genericObjectToAtom(toplevel), cc, /*isDomainEnv*/false);
+    }
+    
+    DomainEnv* Toplevel::getDomainEnvOverridableHook()
+    {
+        return domainEnv();
     }
 
     /*static*/ ClassClosure* Toplevel::getClassByAlias(ScriptObject* script, String *aliasName)
