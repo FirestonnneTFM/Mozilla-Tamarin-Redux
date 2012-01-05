@@ -17,7 +17,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2011
+ * Portions created by the Initial Developer are Copyright (C) 2012
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -46,21 +46,6 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 var flt4:float4 = new float4(1,2,3,4);
 
-// In-range deletion - these are not deletable so the result should be false and the element should be there still
-
-AddTestCase("delete an in-range element of a float4", false, delete flt4[2]);
-AddTestCase("delete an in-range element of a float4", false, delete flt4["2"]);
-AddTestCase("deleted element is still there", 3, flt4[2]);
-
-// Out-of-range deletion with an index property - we're working with the "Vector" nature of float4 so the result should be true
-
-AddTestCase("delete an out-of-range element of a float4", true, delete flt4[4]);
-
-// Out-of-range deletion with non-index properties - since it's a sealed object we should throw the customary exception for
-// sealed object deletion attempts.
-
-AddErrorTest("delete an out-of-range element of a float4 (negative)", "ReferenceError: Error #1120", function () { delete flt4[-1] });
-AddErrorTest("delete an out-of-range element of a float4 (non-integer)", "ReferenceError: Error #1120", function () { delete flt4["4.75"] });
-AddErrorTest("delete an out-of-range element of a float4 (non-number)", "ReferenceError: Error #1120", function () { delete flt4["zappa"] });
+AddErrorTest("delete an out-of-range element of a float4 (property)", "ReferenceError: Error #1120", function () { delete flt4.zappa });
 
 test();
