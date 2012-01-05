@@ -60,8 +60,17 @@ AddTestCase("ToString(float.NaN)", "NaN", v);
 v = float.MIN_VALUE;
 AddTestCase("ToString(float.MIN_VALUE)", String(Number(float.MIN_VALUE)), v);
 
+// Bug https://bugzilla.mozilla.org/show_bug.cgi?id=699463
 v = float.MAX_VALUE;
-AddTestCase("ToString(float.MAX_VALUE)", String(Number(float.MAX_VALUE)), v);
+var nMAX_VALUE = String(Number(float.MAX_VALUE));
+var fExponent = v.slice(v.indexOf("+")+1, v.length);
+var nExponent = nMAX_VALUE.slice(nMAX_VALUE.indexOf("+")+1, nMAX_VALUE.length);
+var fFraction = v.slice(0, v.indexOf("e"));
+var nFraction = nMAX_VALUE.slice(0, nMAX_VALUE.indexOf("e"));
+print(fFraction);
+print(nFraction);
+AddTestCase("ToString(float.MAX_VALUE) exponent match", nExponent, fExponent);
+AddTestCase("ToString(float.MAX_VALUE) fraction match", nFraction.slice(0, fFraction.length), fFraction);
 
 v = float(-0.23);// todo:use float literals
 var N:Number = float(-0.23);// todo:use float literals
