@@ -356,7 +356,6 @@ as3/Types/Float/nonstrict/op_greaterthan:Order\ of\ evaluation, .*,, expectedfai
 as3/Types/Float/nonstrict/op_lessthanorequal:Order\ of\ evaluation, .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=640052
 as3/Types/Float/pow:float\.pow\(float\.NEGATIVE_INFINITY. -2f\) sign check , .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703611
 as3/Types/Float/pow:float\.pow\(float\.NEGATIVE_INFINITY. -2f\) check\(\) sign check , .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=703611
-as3/Types/Float/nonstrict/ToString:ToString\(float\.MAX_VALUE\) , .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=699463
 
 as3/Types/Float/reciprocal:float\.reciprocal\(8\)  , x86-.*(release|debug)-Ojit.*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=704097
 as3/Types/Float/rsqrt:x=3\.124f float\.rsqrt\(x\)   , x86-.*(release|debug)-Ojit.*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=704097
