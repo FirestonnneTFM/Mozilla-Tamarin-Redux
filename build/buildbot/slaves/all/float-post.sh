@@ -58,4 +58,5 @@ echo ""
 echo ""
 echo "Revert the builtins to be the normal/non-float versions"
 echo ""
-hg revert $basedir/generated
+cd $basedir
+hg revert generated/
