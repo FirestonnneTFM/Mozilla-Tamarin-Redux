@@ -2427,9 +2427,14 @@ namespace nanojit
 
             // Be sure to account for any 8/16-byte-round-up when calculating spaceNeeded.
             uint32_t const spaceLeft = NJ_MAX_STACK_ENTRY - _highWaterMark - 1;
+            // When 8-byte aligning, pad when exactly one of _highWaterMark
+            // or nStackSlots is odd, so their sum is always even.
+            uint32_t const padding8byteAlign =
+                (_highWaterMark & 1) != (nStackSlots & 1);
+            uint32_t const padding16byteAlign = (4 - (_highWaterMark & 3)) & 3;
             uint32_t const extraSpaceForAlignment = ins->isF4() ?
-                                                          ((4 - (_highWaterMark & 3)) & 3):   // 16-byte align
-                                                          (_highWaterMark & 1);               // 8-byte align
+                                                          padding16byteAlign:
+                                                          padding8byteAlign;
             uint32_t const spaceNeeded = nStackSlots + extraSpaceForAlignment;
             if (spaceLeft >= spaceNeeded)
             {
