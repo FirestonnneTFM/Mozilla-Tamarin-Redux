@@ -2452,6 +2452,7 @@ namespace nanojit
                     NanoAssert(_entries[_highWaterMark-j] == BAD_ENTRY);
                     _entries[_highWaterMark-j] = ins;
                 }
+                NanoAssert(_highWaterMark % 2 == 0);
                 return _highWaterMark;
             }
         }
