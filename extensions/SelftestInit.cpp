@@ -67,6 +67,11 @@ namespace ST_mmgc_bugzilla_580603 {
 extern void create_mmgc_bugzilla_580603(AvmCore* core);
 }
 #endif
+#if defined DEBUGGER
+namespace ST_mmgc_bugzilla_603411 {
+extern void create_mmgc_bugzilla_603411(AvmCore* core);
+}
+#endif
 namespace ST_mmgc_bugzilla_637993 {
 extern void create_mmgc_bugzilla_637993(AvmCore* core);
 }
@@ -134,6 +139,9 @@ ST_mmgc_bugzilla_543560::create_mmgc_bugzilla_543560(core);
 ST_mmgc_bugzilla_575631::create_mmgc_bugzilla_575631(core);
 #if defined AVMPLUS_64BIT && defined DEBUG
 ST_mmgc_bugzilla_580603::create_mmgc_bugzilla_580603(core);
+#endif
+#if defined DEBUGGER
+ST_mmgc_bugzilla_603411::create_mmgc_bugzilla_603411(core);
 #endif
 ST_mmgc_bugzilla_637993::create_mmgc_bugzilla_637993(core);
 ST_mmgc_basics::create_mmgc_basics(core);
