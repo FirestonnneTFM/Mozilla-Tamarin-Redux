@@ -1,0 +1,7 @@
+pi = immf 3.14
+half = immf 0.5
+halfpi1 = mulf pi half
+halfpi = f2d halfpi1
+res = callf sin cdecl halfpi
+resf = d2f res
+retf resf

@@ -1,0 +1,8 @@
+i = immi -1;
+j = immi 3;
+k = immi 6;
+x = immf 8.8;
+
+res = callf callif2 cdecl i j k x
+retf res
+

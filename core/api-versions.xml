@@ -1,0 +1,106 @@
+<!--***** BEGIN LICENSE BLOCK *****
+ - Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ -
+ - The contents of this file are subject to the Mozilla Public License Version
+ - 1.1 (the "License"); you may not use this file except in compliance with
+ - the License. You may obtain a copy of the License at
+ - http://www.mozilla.org/MPL/
+ -
+ - Software distributed under the License is distributed on an "AS IS" basis,
+ - WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ - for the specific language governing rights and limitations under the
+ - License.
+ -
+ - The Original Code is [Open Source Virtual Machine.].
+ -
+ - The Initial Developer of the Original Code is
+ - Adobe System Incorporated.
+ - Portions created by the Initial Developer are Copyright (C) 2009
+ - the Initial Developer. All Rights Reserved.
+ -
+ - Contributor(s):
+ -   Adobe AS3 Team
+ -
+ - Alternatively, the contents of this file may be used under the terms of
+ - either the GNU General Public License Version 2 or later (the "GPL"), or
+ - the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ - in which case the provisions of the GPL or the LGPL are applicable instead
+ - of those above. If you wish to allow use of your version of this file only
+ - under the terms of either the GPL or the LGPL, and not to allow others to
+ - use your version of this file under the terms of the MPL, indicate your
+ - decision by deleting the provisions above and replace them with the notice
+ - and other provisions required by the GPL or the LGPL. If you do not delete
+ - the provisions above, a recipient may use your version of this file under
+ - the terms of any one of the MPL, the GPL or the LGPL.
+ -
+ - ***** END LICENSE BLOCK ***** -->
+
+<!--
+
+This is a strawman for how we specify version compatibility for the player.
+
+Player API versions are associated with the set of attributes that defines
+incompatible changes to that API. At a minimum this set incudes the release
+of the player. In Argo we will likely add two more attributes: product
+(Player and AIR) and profile (Desktop and SmartPhone). This set of attributes
+can change over time. Note however, even if attributes are dropped from
+the specification, they must remain in the compatibility matrix forever.
+
+The list of attributes within its parent defines the compatiblity relationship
+between those attributes. Release 10.1.52 is compatible with 10.1.62, but not
+vice-versa. A particular profile and release of Player is compatible with the
+same profile and release of AIR, but not vice-versa.
+
+The leaf elements are always version specifications. These must be unique
+but do not have to be in any particular order.
+
+From this xml we generate AS code that defines a compatibility matrix.
+This code is embedded in the release of Flash runtime glue and used by
+ASC and AVM to control the visibility of names in the API.
+
+-->
+
+
+<api>
+    <series name="AIR">
+        <version name="AIR_1_0"/>
+        <version name="AIR_1_5"/>
+        <version name="AIR_1_5_1"/>
+        <version name="AIR_1_5_2"/>
+        <version name="AIR_2_0"/>
+        <version name="AIR_2_5"/>
+        <version name="AIR_2_6"/>
+        <version name="AIR_2_7"/>
+        <version name="AIR_3_0"/>
+        <version name="AIR_3_1"/>
+        <version name="AIR_3_2"/>
+        <version name="AIR_3_3"/>
+    </series>
+    <series name="FP">
+        <version name="FP_10_0"/>
+        <!-- note that nothing has ever been tagged with FP_10_0_32, but it needs to
+            remain for acceptance tests to pass -->
+        <version name="FP_10_0_32"/>
+        <!-- note that FP_10_1 is essentially equivalent to FP_10_0_32 and FP_10_0 -->
+        <version name="FP_10_1"/>
+        <version name="FP_10_2"/>
+        <version name="SWF_12"/>
+        <version name="SWF_13"/>
+        <version name="SWF_14"/>
+        <version name="SWF_15"/>
+        <version name="SWF_16"/>
+    </series>
+
+    <!-- this means "every API in sub is also in super" -->
+    <ordering>
+        <set sub="FP_10_0" super="AIR_1_5"/>
+        <set sub="FP_10_0_32" super="AIR_1_5_2"/>
+        <set sub="FP_10_1" super="AIR_2_0"/>
+        <set sub="FP_10_2" super="AIR_2_6"/>
+        <set sub="SWF_12" super="AIR_2_7"/>
+        <set sub="SWF_13" super="AIR_3_0"/>
+        <set sub="SWF_14" super="AIR_3_1"/>
+        <set sub="SWF_15" super="AIR_3_2"/>
+        <set sub="SWF_16" super="AIR_3_3"/>
+    </ordering>
+</api>

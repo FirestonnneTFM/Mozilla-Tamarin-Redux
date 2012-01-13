@@ -1,0 +1,16 @@
+.begin sinpibytwo
+pi = immf 3.14
+half = immf 0.5
+halfpi = mulf pi half
+par = f2d halfpi
+res = calld sin cdecl par
+resf = d2f res
+retf resf
+.end
+
+.begin main
+aa = callf sinpibytwo fastcall
+bb = immf 5.53
+res = addf aa bb
+retf res
+.end
