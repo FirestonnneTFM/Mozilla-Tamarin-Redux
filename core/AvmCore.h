@@ -66,6 +66,13 @@ namespace avmplus
 
 const int kBufferPadding = 16;
 
+#ifdef VMCFG_TELEMETRY
+namespace telemetry
+{
+    class ITelemetry;
+}
+#endif
+
     enum VB_Bits {
         // Output control bits for verbose mode
          VB_builtins     = 1<<31 // display output for builtins (default is to ignore any builtins)
@@ -2020,6 +2027,20 @@ const int kBufferPadding = 16;
 #ifdef VMCFG_NANOJIT
     public:
         void flushBindingCachesNextSweep();
+#endif
+
+#ifdef VMCFG_TELEMETRY
+    public:
+        telemetry::ITelemetry* getTelemetry();
+    protected:
+        void setTelemetry(telemetry::ITelemetry* telemetry);
+    private:
+        telemetry::ITelemetry* m_telemetry; // Owned by the AvmCore subclass which calls SetTelemetry
+#else
+    public:
+        void* getTelemetry();
+    protected:
+        void setTelemetry(void*);
 #endif
 
         // END methods (private/public intermixed)

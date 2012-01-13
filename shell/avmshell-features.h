@@ -85,6 +85,10 @@
   #define AVMFEATURE_JIT               1
 #endif
 
+#ifndef AVMFEATURE_TELEMETRY
+  #define AVMFEATURE_TELEMETRY         0
+#endif
+
 #ifndef AVMFEATURE_OSR
   #define AVMFEATURE_OSR               0
 #endif

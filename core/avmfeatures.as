@@ -637,6 +637,12 @@ var FEATURES =
   </feature>
 
   <feature>
+    <desc> Select support for Telemetry (only interface for now; to be used in player) </desc>
+    <name> AVMFEATURE_TELEMETRY </name>
+    <defines> VMCFG_TELEMETRY </defines>
+  </feature>
+
+  <feature>
     <desc> Makes all JIT code buffers read-only whenever JIT code is executing,
            to reduce the probability of heap overflow attacks. </desc>
     <name> AVMFEATURE_PROTECT_JITMEM </name>

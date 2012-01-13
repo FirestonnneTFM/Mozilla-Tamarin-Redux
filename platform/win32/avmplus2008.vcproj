@@ -2056,6 +2056,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\ITelemetry.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\JSONClass.cpp"
 				>
 			</File>

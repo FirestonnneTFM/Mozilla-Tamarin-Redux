@@ -91,6 +91,27 @@ REALLY_INLINE QCache* AvmCore::msCache()
     return m_msCache;
 }
 
+#ifdef VMCFG_TELEMETRY
+REALLY_INLINE telemetry::ITelemetry* AvmCore::getTelemetry()
+{
+    return m_telemetry;
+}
+
+REALLY_INLINE void AvmCore::setTelemetry(telemetry::ITelemetry* telemetry)
+{
+    m_telemetry = telemetry;
+}
+#else
+REALLY_INLINE void* AvmCore::getTelemetry()
+{
+    return NULL;
+}
+
+REALLY_INLINE void AvmCore::setTelemetry(void* /*telemetry*/)
+{
+}
+#endif
+
 #ifdef VMCFG_NANOJIT // accessors
 
 #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64

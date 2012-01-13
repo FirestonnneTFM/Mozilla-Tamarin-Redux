@@ -934,6 +934,7 @@
 		8DD76F6C0486A84900D96B5E /* avm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = avm; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB13ECD11358E06B00A09CBE /* ST_avmplus_builtins.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_avmplus_builtins.st; path = ../../../extensions/ST_avmplus_builtins.st; sourceTree = SOURCE_ROOT; };
 		CBB55F68134B488E00A4D8A7 /* ST_mmgc_mmfx_array.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_mmfx_array.st; path = ../../../extensions/ST_mmgc_mmfx_array.st; sourceTree = SOURCE_ROOT; };
+		D2B90FF4148E3FFE000E92E2 /* ITelemetry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ITelemetry.h; path = ../../../core/ITelemetry.h; sourceTree = SOURCE_ROOT; };
 		D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadsPosix.cpp; path = ../../../VMPI/ThreadsPosix.cpp; sourceTree = SOURCE_ROOT; };
 		D90A32C2125D24E20039348E /* VectorClass-impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "VectorClass-impl.h"; path = "../../../core/VectorClass-impl.h"; sourceTree = SOURCE_ROOT; };
 		D90A32C3125D24E20039348E /* VectorClass-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "VectorClass-inlines.h"; path = "../../../core/VectorClass-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -1155,6 +1156,7 @@
 		079DF7B00F3A86D50031D1B4 /* core */ = {
 			isa = PBXGroup;
 			children = (
+				D2B90FF4148E3FFE000E92E2 /* ITelemetry.h */,
 				D942197213DF38D7002A4723 /* AvmSerializer.cpp */,
 				D942197313DF38D7002A4723 /* AvmSerializer.h */,
 				D942197413DF38D7002A4723 /* ObjectIO.cpp */,

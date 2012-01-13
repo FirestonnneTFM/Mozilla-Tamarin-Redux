@@ -374,6 +374,7 @@ namespace avmplus
 #include "DictionaryGlue.h"
 #include "ObjectIO.h"
 #include "AvmSerializer.h"
+#include "ITelemetry.h"
 
 // Some unusual test cases for the exact-tracer script
 
