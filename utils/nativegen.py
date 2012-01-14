@@ -2332,7 +2332,15 @@ class AbcThunkGen:
                     arglist = ', '.join(map(lambda (argt, arg_typedef, argname): "%s %s" % (arg_typedef, argname), args[1:]))
                     # "inline" rather than "REALLY_INLINE" -- it's not essential to inline
                     # this, so let the compiler decide to deinline if it so chooses
-                    out.println("inline %s %s%s(%s)" % (ret_typedef, prefixes[mi.kind], mi.name.name, arglist))
+
+                    # for the host glue interface method calling wrappers, the caller needs to provide
+                    # the poolobject as an argument to the callin wrapper
+                    
+                    pool_string = ""
+                    if t.is_interface and (self.abc.scriptName != 'builtin'):
+                        pool_string = "PoolObject* poolObj" + (", " if arglist else "")
+                     
+                    out.println("inline %s %s%s(%s%s)" % (ret_typedef, prefixes[mi.kind], mi.name.name, pool_string, arglist))
                     out.println("{")
                     out.indent += 1
                     # bah, does Python not have an equivalent to JS Array.some?
@@ -2347,7 +2355,14 @@ class AbcThunkGen:
                     if t.is_interface:
                         # for interfaces, must look up by name. we could probably improve this 
                         # by hooking into the IMT cache, but I'm skeptical it's necessary.
-                        out.println("const avmplus::Multiname* const mn = this->traits()->pool->precomputedMultiname(%d);" % mi.name_index)
+
+                        # use the host pool passed by the caller for interface methods in avmglue
+                        if(self.abc.scriptName != 'builtin'):
+                            out.println("PoolObject* pool = poolObj;")
+                            out.println("AvmAssert(pool->isBuiltin && pool != toplevel()->abcEnv()->pool());")
+                        else:
+                            out.println("PoolObject* pool = toplevel()->abcEnv()->pool();")
+                        out.println("const avmplus::Multiname* const mn = pool->precomputedMultiname(%d);" % mi.name_index)
                         if mi.kind == TRAIT_Getter:
                             out.println("avmplus::Atom const result = this->toplevel()->getproperty(this->atom(), mn, this->vtable);")
                         elif mi.kind == TRAIT_Setter:
