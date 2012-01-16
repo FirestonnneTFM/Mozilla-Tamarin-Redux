@@ -285,8 +285,8 @@ void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms, bool isOsr)
         //   the object's fields before executing (init_).
         // * if the return type is double, the stub must have a signature that
         //   returns double. (FPR)
-        // * if the return type is float, the stub reuses the double (FPR) 
-        //   signature 
+        // * if the return type is float, the stub reuses the double (FPR)
+        //   signature
 
         static const GprMethodProc impl_stubs[2][2][IFFLOAT(3,2)] = {{{
             BaseExecMgr::interpGPR                       // osr=0, ctor=0, fpr=0
@@ -608,22 +608,22 @@ Atom* FASTCALL BaseExecMgr::unbox1(Atom atom, Traits* t, Atom* arg0)
             break;
         }
         case BUILTIN_float4:
-		{
-			union{
-				float4_t f4;
-				Atom a[4];
-			};
-			const int nAtoms = sizeof(float4_t)/sizeof(Atom);
+        {
+            union{
+                float4_t f4;
+                Atom a[4];
+            };
+            const int nAtoms = sizeof(float4_t)/sizeof(Atom);
             AvmAssert(sizeof(float4_t)%sizeof(Atom)==0);
-            f4 = AvmCore::atomToFloat4(atom); 
-			int i;
+            f4 = AvmCore::atomToFloat4(atom);
+            int i;
             for(i=0;i<nAtoms-1;i++)
                 *arg0++ = a[i];
             atom = a[i]; // this will be handled below
-			break;
-		}
+            break;
+        }
 #endif
-            
+
         default:
             atom = (Atom)atomPtr(atom);
             break;
@@ -677,7 +677,7 @@ Atom* FASTCALL BaseExecMgr::coerceUnbox1(MethodEnv* env, Atom atom, Traits* t, A
                 float f;
                 Atom a;
             };
-            f = (float) AvmCore::number(atom); 
+            f = (float) AvmCore::number(atom);
             atom = a;
             break;
         }
@@ -851,8 +851,8 @@ Atom BaseExecMgr::endCoerce(MethodEnv* env, int32_t argc, uint32_t *ap, MethodSi
     case BUILTIN_float:
     {
         STACKADJUST(); // align stack for 32-bit Windows and MSVC compiler
-        // WARNING: This assumes that the calling conventions of SinglePrecisionFprMethodProc and FprMethodProc 
-        // are identical, or at least compatible. I.e. the register used to return the "double" value is identical with 
+        // WARNING: This assumes that the calling conventions of SinglePrecisionFprMethodProc and FprMethodProc
+        // are identical, or at least compatible. I.e. the register used to return the "double" value is identical with
         // (or a superset of) the register used to return a float value. This assumption is true for ARM (softfloat, hardfloat ABIs)
         // x86 and x64 (Mac, Windows, Linux) at least. Must double-check for other platforms!! (most notably, TODO: MIPS)
         typedef float (*SinglePrecisionFprMethodProc)(MethodEnv*, int32_t, uint32_t *);
