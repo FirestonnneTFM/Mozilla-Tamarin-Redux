@@ -74,6 +74,7 @@ ASC and AVM to control the visibility of names in the API.
         <version name="AIR_3_0"/>
         <version name="AIR_3_1"/>
         <version name="AIR_3_2"/>
+        <version name="AIR_3_3"/>
     </series>
     <series name="FP">
         <version name="FP_10_0"/>
@@ -100,5 +101,6 @@ ASC and AVM to control the visibility of names in the API.
         <set sub="SWF_13" super="AIR_3_0"/>
         <set sub="SWF_14" super="AIR_3_1"/>
         <set sub="SWF_15" super="AIR_3_2"/>
+        <set sub="SWF_16" super="AIR_3_3"/>
     </ordering>
 </api>
