@@ -227,14 +227,21 @@ namespace avmplus
             m_oldLength = m_owner->m_length;
             m_oldCapacity = m_owner->m_capacity;
 
-            uint8_t* newArray = mmfx_new_array_opt(uint8_t, newCapacity, MMgc::kCanFailAndZero);
+            uint8_t* newArray = mmfx_new_array_opt(uint8_t, newCapacity, MMgc::kCanFail);
             if (!newArray)
                 m_owner->ThrowMemoryError();
 
             // Note that TellGcXXX always expects capacity, not (logical) length.
             m_owner->TellGcNewBufferMemory(newArray, newCapacity);
             if (m_oldArray)
+            {
                 VMPI_memcpy(newArray, m_oldArray, m_oldLength);
+                VMPI_memset(newArray+m_oldLength, 0, newCapacity-m_oldLength);
+            }
+            else
+            {
+                VMPI_memset(newArray, 0, newCapacity);
+            }
 
             m_owner->m_array = newArray;
             m_owner->m_capacity = newCapacity;
