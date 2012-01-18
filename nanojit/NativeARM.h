@@ -298,9 +298,14 @@ static const RegisterMask SavedFpRegs = 0;
 static const RegisterMask SavedRegs = 1<<R4 | 1<<R5 | 1<<R6 | 1<<R7 | 1<<R8 | 1<<R9 | 1<<R10;
 static const int NumSavedRegs = 7;
 
+// Some VFP CPUs (non-NEON) lack the full complement of 32 FP registers, implementing only S0-S15.
+// Since we do not dynamically configure for the ARM variant in use, we must compile for the
+// lowest common denominator among supported targets, currently VFP-D16 (Tegra-2).
+// FIXME: We should identify the architectural variant at runtime. See bugs 718811 and 704111.
+
 const RegisterMask FpSRegs = 0x00000000ffff0000LL; // S0-S15
-const RegisterMask FpDRegs = 0xffff0000ffff0000LL; // D0-D7,D16-D31
-const RegisterMask FpQRegs = 0xffff0000ffff0000LL; // Q0-Q3,Q8-Q15
+const RegisterMask FpDRegs = 0x00000000ffff0000LL; // D0-D7
+const RegisterMask FpQRegs = 0x00000000ffff0000LL; // Q0-Q3
 const RegisterMask GpRegs  = 0x000000000000ffffLL; // R0-R10,FP,IP,SP,LR,PC
 const RegisterMask AllowableFlagRegs = 0x07ff;     // R0-R10
 
