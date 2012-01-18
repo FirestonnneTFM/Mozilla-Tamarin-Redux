@@ -74,6 +74,7 @@
                 'core/avmplusHashtable.cpp',
                 'core/avmplusList.cpp',
                 'core/AvmPlusScriptableObject.cpp',
+                'core/AvmSerializer.cpp',
                 'core/BigInteger.cpp',
                 'core/BooleanClass.cpp',
                 'core/BuiltinTraits.cpp',
@@ -86,6 +87,7 @@
                 'core/DataIO.cpp',
                 'core/DateObject.cpp',
                 'core/DescribeTypeClass.cpp',
+                'core/DictionaryGlue.cpp',
                 'core/Domain.cpp',
                 'core/DomainEnv.cpp',
                 'core/DomainMgr.cpp',
@@ -119,6 +121,7 @@
                 'core/NativeFunction.cpp',
                 'core/NumberClass.cpp',
                 'core/ObjectClass.cpp',
+                'core/ObjectIO.cpp',
                 'core/peephole.cpp',
                 'core/PoolObject.cpp',
                 'core/ProxyGlue.cpp',
@@ -321,7 +324,7 @@
                             'GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO' : 'NO',
                             'GCC_PRECOMPILE_PREFIX_HEADER' : 'YES',
                             'GCC_PREFIX_HEADER' : '<(build_system_dep_root_dir)/flash/platform/osx/avmplus_Prefix.pch',
-                            'GCC_VERSION' : '4.2'
+                            'GCC_VERSION' : 'com.apple.compilers.llvmgcc42'
                         },
                         'configurations':
                         {
