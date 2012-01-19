@@ -105,6 +105,8 @@ class RuntestBase(object):
     # list of args to remove defined using -no-argname format in --ascargs
     asc_negative_args = []
     atsDir = 'ATS_SWFS'
+    ascOutputFilename = 'ascoutput.log'
+    ascOutputFile = None
     ascversion = ''
     avm = ''
     avmce = ''
@@ -171,6 +173,7 @@ class RuntestBase(object):
     verified_executables = set([])
     winceProcesses = []
 
+    ascOutputOnly = False
     csv = False
     cygwin = False
     debug = False
@@ -198,6 +201,7 @@ class RuntestBase(object):
     threads = 1
     timeout = 0 # in seconds
     timeoutStartTime = 0
+    
 
     lock = threadpool.threading.Lock()  # global lock used when threading
 
@@ -251,6 +255,7 @@ class RuntestBase(object):
         print('    --showtimes     shows the time for each test')
         print('    --ascargs       args to pass to asc on rebuild of test files')
         print('                    can also pass in -no-Argname to remove arg')
+        print('    --ascoutput     output the asc commands to ascoutput.log. Does not compile or run any tests.')
         print('    --vmargs        args to pass to vm')
         print('    --timeout       max time to run all tests')
         print('    --testtimeout   max time to let a test run, in sec (default -1 = never timeout)')
@@ -278,7 +283,7 @@ class RuntestBase(object):
                    'timeout=','testtimeout=', 'rebuildtests','quiet','notimecheck',
                    'showtimes','java=','html','random', 'seed=', 'playerglobalabc=', 'toplevelabc=',
                    'javaargs=', 'summaryonly', 'log=', 'valgrind', 'addtoconfig=',
-                   'writeresult','logjunit=','logjunitname='
+                   'writeresult','logjunit=','logjunitname=', 'ascoutput'
                    ]
 
     def parseOptions(self):
@@ -319,6 +324,11 @@ class RuntestBase(object):
                 self.addtoconfig = v
             elif o in ('--ascargs',):
                 self.ascargs = v
+            elif o in ('--ascoutput'):
+                self.ascOutputOnly = True
+                self.rebuildtests = True
+                self.forcerebuild = True
+                self.threads = 1
             elif o in ('--vmargs',):
                 self.vmargs = v
             elif o in ('--ext',):
@@ -1021,7 +1031,7 @@ class RuntestBase(object):
                 self.verbose_print(line.strip())
             return
 
-        if not isfile(asc):
+        if not self.ascOutputOnly and not isfile(asc):
             exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as_file)
 
         (dir, file) = split(as_file)
@@ -1041,6 +1051,10 @@ class RuntestBase(object):
                 cmd += ' -jar %s' %  asc
             else:
                 cmd = asc
+                
+            if self.ascOutputOnly:
+                # asc output is only the args passed to asc
+                cmd = ''
 
             ascargs += ' ' + ' '.join(extraArgs)
             ascArgList = parseArgStringToList(ascargs)
@@ -1082,6 +1096,10 @@ class RuntestBase(object):
             # directly executable file doesn't need to be compiled
             return
         
+        if self.ascOutputOnly:
+            self.ascOutputFile.write('%s %s\n' % (cmd, as_file))
+            return ''
+        
         try:
             (f,err,exitcode) = self.run_pipe('%s %s' % (cmd,as_file),
                                              outputCalls=outputCalls)
@@ -1091,7 +1109,7 @@ class RuntestBase(object):
     
     def compileWithAsh(self, tests):
         self.checkExecutable(self.java, 'java must be on system path or --java must be set to java executable')
-        if not isfile(self.asc):
+        if not self.ascOutputOnly and not isfile(self.asc):
             exit('ERROR: cannot build, ASC environment variable or --asc must be set to asc.jar')
         if not isfile(self.builtinabc):
             exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, '
@@ -1101,19 +1119,17 @@ class RuntestBase(object):
         start_time = datetime.today()
         #print("starting compile of %d tests at %s" % (len(tests),start_time))
         total=len(tests)
-        if not pexpect_module_present:
+        if not pexpect_module_present or self.ascOutputOnly:
             if self.genAtsSwfs:
                 print('The pexpect module must be installed to generate ats swfs.')
                 exit(1)
             for test in tests:
-                self.js_print('compiling %s' % test)
+                total -= 1
                 (dir, file) = split(test)
                 (testdir, ext) = splitext(test)
                 settings = self.get_test_settings(testdir)
                 if self.excludeTest(file, settings):
                     continue
-
-                self.js_print('compiling %s' % test)
                 if self.aotsdk:
                     # We use the test config file to mark abc files that fail to AOT compile,
                     # so we need to take account of that here before we try to compile them.
@@ -1133,10 +1149,11 @@ class RuntestBase(object):
                         self.compile_aot( test )
                         continue
                 if test.endswith(self.executableExtensions):
-                    total -= 1
                     continue
                 self.js_print('%d\tcompiling %s' % (total,test))
                 self.compile_test(test)
+                if self.ascOutputOnly:
+                    continue  # no .abc created
                 if not exists(testdir+".abc"):
                     print("ERROR abc files %s.abc not created" % (testdir))
                     self.ashErrors.append("abc files %s.abc not created" % (testdir))
@@ -1148,7 +1165,6 @@ class RuntestBase(object):
                         if not exists(self.abcasmShell+'.abc'):  # compile abcasmShell with no additional args
                             self.run_pipe('"%s" -jar %s %s' % (self.java, self.asc, self.abcasmShell+'.as'))
                     self.compile_aot(testdir+".abc", extrabcs)
-                total -= 1;
         else:  #pexpect available
             child = pexpect.spawn('"%s" %s -classpath %s macromedia.asc.embedding.Shell' % (self.java, self.javaargs, self.asc))
             child.logfile = None
@@ -1279,7 +1295,7 @@ class RuntestBase(object):
                         os.unlink(binFile)
                     if not isfile(binFile):
                         compileOutput = self.compile_test(f, outputCalls=outputCalls)
-                        if not isfile(binFile):
+                        if not isfile(binFile) and not self.ascOutputOnly:
                             outputCalls.append((self.js_print,('  Error compiling support file: %s' % f,)))
                             outputCalls.append((self.verbose_print, ('   compile output: %s' % compileOutput,)))
 
@@ -1370,6 +1386,9 @@ class RuntestBase(object):
             if not exists(self.atsDir):
                 os.mkdir(self.atsDir)
 
+        if self.ascOutputOnly:
+            self.ascOutputFile = open(self.ascOutputFilename, 'w')
+
         # compile any support dir files first
         if self.support_dirs:
             output_calls = []
@@ -1406,7 +1425,10 @@ class RuntestBase(object):
                 self.lock.acquire()
                 print(sys.exc_info())
                 exit(0)
-
+        
+        if self.ascOutputOnly:
+            self.ascOutputFile.close()
+            
         if self.genAtsSwfs:
             try:
                 os.remove('./ats_temp.as')
