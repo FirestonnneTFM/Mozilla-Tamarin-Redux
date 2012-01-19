@@ -102,6 +102,7 @@
 #undef VMCFG_DIRECT_THREADED
 #undef VMCFG_SELFTEST
 #undef VMCFG_EVAL
+#undef VMCFG_TELEMETRY
 #undef VMCFG_PROTECT_JITMEM
 #undef MMGC_LOCKING
 #undef MMGC_USE_SYSTEM_MALLOC
@@ -537,6 +538,15 @@
 #endif
 
 
+/* AVMFEATURE_TELEMETRY
+ *
+ * Select support for Telemetry (only interface for now; to be used in player)
+ */
+#if !defined AVMFEATURE_TELEMETRY || AVMFEATURE_TELEMETRY != 0 && AVMFEATURE_TELEMETRY != 1
+#  error "AVMFEATURE_TELEMETRY must be defined and 0 or 1 (only)."
+#endif
+
+
 /* AVMFEATURE_PROTECT_JITMEM
  *
  * Makes all JIT code buffers read-only whenever JIT code is executing,
@@ -953,6 +963,7 @@
 
 
 
+
 #if AVMFEATURE_SWF13
 #  if !AVMFEATURE_SWF12
 #    error "AVMFEATURE_SWF12 is required for AVMFEATURE_SWF13"
@@ -1206,6 +1217,9 @@
 #endif
 #if AVMFEATURE_EVAL
 #  define VMCFG_EVAL
+#endif
+#if AVMFEATURE_TELEMETRY
+#  define VMCFG_TELEMETRY
 #endif
 #if AVMFEATURE_PROTECT_JITMEM
 #  define VMCFG_PROTECT_JITMEM
