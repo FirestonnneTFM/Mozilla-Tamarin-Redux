@@ -149,6 +149,9 @@ const char * const avmfeatures = ""
   #if AVMFEATURE_EVAL
     "AVMFEATURE_EVAL;"
   #endif
+  #if AVMFEATURE_TELEMETRY
+    "AVMFEATURE_TELEMETRY;"
+  #endif
   #if AVMFEATURE_PROTECT_JITMEM
     "AVMFEATURE_PROTECT_JITMEM;"
   #endif

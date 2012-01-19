@@ -108,6 +108,11 @@ def featureSettings(o):
         args += "-DAVMFEATURE_EVAL=1 "
     if (arg == False):
         args += "-DAVMFEATURE_EVAL=0 "
+    arg = o.getBoolArg("telemetry")
+    if (arg == True):
+        args += "-DAVMFEATURE_TELEMETRY=1 "
+    if (arg == False):
+        args += "-DAVMFEATURE_TELEMETRY=0 "
     arg = o.getBoolArg("protect-jitmem")
     if (arg == True):
         args += "-DAVMFEATURE_PROTECT_JITMEM=1 "
