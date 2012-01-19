@@ -40,6 +40,13 @@
 #ifndef __avmplus_AvmCore__
 #define __avmplus_AvmCore__
 
+#ifdef VMCFG_TELEMETRY
+namespace telemetry
+{
+    class ITelemetry;
+}
+#endif
+
 namespace avmplus
 {
 
@@ -65,13 +72,6 @@ namespace avmplus
 #define VECTOROBJ_TYPE    (core->traits.vectorobj_itraits)
 
 const int kBufferPadding = 16;
-
-#ifdef VMCFG_TELEMETRY
-namespace telemetry
-{
-    class ITelemetry;
-}
-#endif
 
     enum VB_Bits {
         // Output control bits for verbose mode
