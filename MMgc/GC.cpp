@@ -652,8 +652,10 @@ namespace MMgc
     }
 #endif
 
-    GC::RCRootSegment::RCRootSegment(GC* gc, void* mem, size_t size)
-        : StackMemory(gc, mem, size)
+    GC::RCRootSegment::RCRootSegment(GC* gc, void* mem, size_t size, bool suspendedStackRoot)
+        : StackMemory(gc, mem, size,
+                      /*exactlyTraced=*/false,
+                      suspendedStackRoot)
         , mem(mem)
         , size(size)
         , prev(NULL)
@@ -1546,7 +1548,7 @@ namespace MMgc
     static void DoCreateRootFromCurrentStack(void* stackPointer, void* arg)
     {
         CreateRootFromCurrentStackArgs* context = (CreateRootFromCurrentStackArgs*)arg;
-        MMgc::GC::AutoRCRootSegment root(context->gc, stackPointer, uint32_t((char*)context->gc->GetStackTop() - (char*)stackPointer));
+        MMgc::GC::AutoRCRootSegment root(context->gc, stackPointer, uint32_t((char*)context->gc->GetStackTop() - (char*)stackPointer), true);
         MMgc::GCAutoEnterPause mmgc_enter_pause(context->gc);
         context->fn(context->arg);                      // Should not be a tail call as those stack variables have destructors
     }
@@ -1670,8 +1672,8 @@ namespace MMgc
         return false;
     }
 
-    StackMemory::StackMemory(GC * _gc, const void * _object, size_t _size, bool _isExact)
-        : GCRoot(_gc, _object, _size, true, _isExact)
+    StackMemory::StackMemory(GC * _gc, const void * _object, size_t _size, bool _isExact, bool _suspendedStackRoot)
+        : GCRoot(_gc, _object, _size, !_suspendedStackRoot, _isExact)
     {
     }
     
@@ -3844,8 +3846,8 @@ namespace MMgc
         }
     }
 
-    GC::AutoRCRootSegment::AutoRCRootSegment(GC* gc, void* mem, size_t size)
-        : RCRootSegment(gc, mem, size)
+    GC::AutoRCRootSegment::AutoRCRootSegment(GC* gc, void* mem, size_t size, bool suspendedStackRoot)
+        : RCRootSegment(gc, mem, size, suspendedStackRoot)
     {
         gc->AddRCRootSegment(this);
     }
