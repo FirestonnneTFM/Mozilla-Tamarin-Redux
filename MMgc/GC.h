@@ -318,14 +318,24 @@ namespace MMgc
      * StackMemory is root memory that is only scanned at the end of GC, not at
      * the beginning.  It should be used for heap memory that functions as a stack:
      * alloca memory, or the AS1 stack.
+     *
+     * Bugzilla 719450: We also use this to represent stack memory of
+     * suspended threads; such memory needs to be scanned during
+     * collector invocations on the active (non-suspended) thread,
+     * even if we are skipping the stack-scan for the active thread.
+     * These distinct kinds of stack memory are separate use-cases
+     * that could be teased apart into separate classes.
      */
     class StackMemory : public GCRoot
     {
     public:
         /**
          * Initialize the stack memory.
+         * If suspendedStackRoot is true, then the memory is treated as a
+         * normal root, and will be scanned even if we are otherwise skipping
+         * the stack scan.
          */
-        StackMemory(GC *gc, const void *object, size_t size, bool isExactlyTraced=false);
+        StackMemory(GC *gc, const void *object, size_t size, bool isExactlyTraced=false, bool suspendedStackRoot=false);
 
         /**
          * Return the value of the stack top in the range [0,size].  The GC will scan the memory
@@ -805,7 +815,8 @@ namespace MMgc
         class RCRootSegment : public StackMemory
         {
         public:
-            RCRootSegment(GC* gc, void* mem, size_t size);
+            // suspendedStackRoot: memory treated as normal (non-stack) root.
+            RCRootSegment(GC* gc, void* mem, size_t size, bool suspendedStackRoot=false);
             void*           mem;
             size_t          size;
             RCRootSegment*  prev;
@@ -823,7 +834,8 @@ namespace MMgc
         class AutoRCRootSegment : public RCRootSegment
         {
         public:
-            AutoRCRootSegment(GC* gc, void* mem, size_t size);
+            // suspendedStackRoot: memory treated as normal (non-stack) root.
+            AutoRCRootSegment(GC* gc, void* mem, size_t size, bool suspendedStackRoot=false);
             ~AutoRCRootSegment();
         };
 
