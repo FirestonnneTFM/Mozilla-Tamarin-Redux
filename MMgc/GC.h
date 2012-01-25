@@ -607,7 +607,7 @@ namespace MMgc
          * Causes an immediate stop-the-world garbage collection (or finishes any
          * incremental collection underway). See comments above the Collect(double) method.
          */
-        void Collect(bool scanStack=true, bool okToShrinkHeapTarget=true);
+        void Collect(bool scanNativeStack=true, bool okToShrinkHeapTarget=true);
 
         /**
          * Causes an immediate stop-the-world garbage collection (or finishes any
@@ -954,7 +954,7 @@ namespace MMgc
         // Host API: this should go away but Player code is currently using it.  VM code should not use it.
         GCHeap *GetGCHeap() const;
 
-        void ReapZCT(bool scanStack=true);
+        void ReapZCT(bool scanNativeStack=true);
 
         bool Reaping();
 
@@ -1543,7 +1543,7 @@ namespace MMgc
 
         GCMarkStack m_incrementalWork;
         void StartIncrementalMark();
-        void FinishIncrementalMark(bool scanStack, bool okToShrinkHeapTarget=true);
+        void FinishIncrementalMark(bool scanNativeStack, bool okToShrinkHeapTarget=true);
 
         GCMarkStack m_barrierWork;
         void CheckBarrierWork();
@@ -1643,7 +1643,7 @@ namespace MMgc
         /**
          * Do a full GC mark phase for DRC validation purposes.
          */
-        void DRCValidationTrace(bool scanStack=true);
+        void DRCValidationTrace(bool scanNativeStack=true);
 #endif
 
     private:
@@ -1654,7 +1654,7 @@ namespace MMgc
         void MarkRoots(bool deep, bool stackroots);
         void Mark();
         void Mark(uint32_t count);
-        void MarkQueueAndStack(bool scanStack=true);
+        void MarkQueueAndStack(bool scanNativeStack=true);
         void MarkTopItem_NonGCObject();
         void MarkItem_GCObject(const void* object);
         void MarkItem_ExactObjectTail(const void* object, size_t cursor);
