@@ -109,7 +109,7 @@ namespace MMgc
         void Remove(RCObject *obj REFCOUNT_PROFILING_ARG(bool final=false));
 
         /**
-         * Reap the ZCT: destroy every non-pinned object in the ZCT.  If scanStack
+         * Reap the ZCT: destroy every non-pinned object in the ZCT.  If scanNativeStack
          * is true then the program stack is traversed and objects conservatively
          * referenced from it are pinned.  Auxiliary auto-pinning memory (think of
          * them as ZCT roots; see AllocaStackSegment in GC.h) is always traversed
@@ -120,7 +120,7 @@ namespace MMgc
          * or even earlier.  Reap does not unpin any pinned objects that were not in
          * the ZCT.
          */
-        void Reap(bool scanStack=true);
+        void Reap(bool scanNativeStack=true);
 
         /**
          * Throw away unused memory (discretionary); to be called at the end of
@@ -169,7 +169,7 @@ namespace MMgc
         bool Grow();
 
         // Capture the stack extent; then scan the stack and pin objects from it
-        // only if scanStack is true
+        // (called from Reap, but only if scanNativeStack is true)
         static void DoPinProgramStack(void* stackTop, void* arg);
 
         // Scan the AllocaStackSegments and pin all objects directly reachable from them.

@@ -1511,10 +1511,16 @@ namespace MMgc
         }
     }
 
-    void GC::MarkQueueAndStack(bool scanStack)
+    void GC::MarkQueueAndStack(bool scanNativeStack)
     {
-        if(scanStack) {
-            MarkStackRoots();
+        // Bugzilla 719450: StackMemory are non-native gc roots (with
+        // stack-like operations) associated with GC instance; delay
+        // marking them to FinishIncrementalMark (from
+        // StartIncrementalMark, as discussed in Bugzilla 634651), but
+        // do not skip them here even when scanNativeStack is false.
+
+        MarkStackRoots();
+        if(scanNativeStack) {
             VMPI_callWithRegistersSaved(GC::DoMarkFromStack, this);
         }
         else
@@ -2993,6 +2999,11 @@ namespace MMgc
         // If we iterate several times there may be a performance penalty as a
         // consequence of that, but it's not likely that that will in fact happen,
         // and it's not obvious how to fix it.
+
+        // Bugzilla 719450: Both StackMemory and native stack are part of
+        // repeated restarts.  It would be a waste to lift MarkStackRoots
+        // to a separate loop; HandleMarkStackOverflow should grossly
+        // dominate MarkStackRoots with respect to time.
 
         while (m_markStackOverflow) {
             m_markStackOverflow = false;
