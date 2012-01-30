@@ -1697,7 +1697,6 @@ const int kBufferPadding = 16;
          */
         virtual int determineLanguage();
 
-
         /**
          * Creates a StackTrace from the current executing call stack
          */
