@@ -254,7 +254,7 @@ package abcdump
 
         public function toString()
         {
-            var s : String = name.toString();
+            var s : String = name
             s += ".<"
             for( var i = 0; i < types.length; ++i )
                 s += types[i] != null ? types[i].toString() : "*" + " ";
