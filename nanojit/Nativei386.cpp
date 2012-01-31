@@ -1896,7 +1896,7 @@ namespace nanojit
                     SSE_STSS(d, rb, rv);
                 } else {
                     // need a scratch reg
-                    Register rt = _allocator.allocTempReg(XmmRegs);
+                    Register rt = _allocator.allocTempReg(XmmRegs & ~rmask(rv));
 
                     // cvt to single-precision and store
                     SSE_STSS(d, rb, rt);
