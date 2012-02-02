@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8' standalone='no' ?>
+<?xml version='1.0' encoding='utf-8' standalone='no' ?>
 <!-- -*- Mode: xml; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- -->
 <!-- vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) -->
 <!-- ***** BEGIN LICENSE BLOCK *****
@@ -688,5 +688,6 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Класс Proxy не поддерживает nextNameIndex. Он должен быть заменен на подкласс.</error>
   <error id="2106" label="kProxyNextNameError">Класс Proxy не поддерживает nextName. Он должен быть заменен на подкласс.</error>
   <error id="2107" label="kProxyNextValueError">Класс Proxy не поддерживает nextValue. Он должен быть заменен на подкласс.</error>
+  <error id="2108" label="kInvalidArrayLengthError">Значение %1 не является допустимой длиной массива.</error>
   <error id="2173" label="kReadExternalNotImplementedError">Не удается прочитать объект в потоке. В классе %1 не реализован интерфейс flash.utils.Iexternalizable, но в качестве его псевдонима используется класс с поддержкой внешних связей.</error>
 </errors>

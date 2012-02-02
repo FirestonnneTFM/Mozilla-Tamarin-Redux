@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8' standalone='no' ?>
+<?xml version='1.0' encoding='utf-8' standalone='no' ?>
 <!-- -*- Mode: xml; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- -->
 <!-- vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) -->
 <!-- ***** BEGIN LICENSE BLOCK *****
@@ -688,5 +688,6 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Proxy sınıfı nextNameIndex uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
   <error id="2106" label="kProxyNextNameError">Proxy sınıfı nextName uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
   <error id="2107" label="kProxyNextValueError">Proxy sınıfı nextValue uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
+  <error id="2108" label="kInvalidArrayLengthError">%1 değeri geçerli bir Dizi uzunluğu değil.</error>
   <error id="2173" label="kReadExternalNotImplementedError">Akıştaki nesne okunamıyor.  %1 sınıfı, flash.utils.IExternalizable öğesini uygulamıyor, ancak haricileştirebilir bir sınıfın adıyla biliniyor.</error>
 </errors>

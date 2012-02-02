@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8' standalone='no' ?>
+<?xml version='1.0' encoding='utf-8' standalone='no' ?>
 <!-- -*- Mode: xml; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- -->
 <!-- vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) -->
 <!-- ***** BEGIN LICENSE BLOCK *****
@@ -688,5 +688,6 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Klassen Proxy implementerar inte nextNameIndex. Den måste åsidosättas av en underordnad klass.</error>
   <error id="2106" label="kProxyNextNameError">Klassen Proxy implementerar inte nextName. Den måste åsidosättas av en underordnad klass.</error>
   <error id="2107" label="kProxyNextValueError">Klassen Proxy implementerar inte nextValue. Den måste åsidosättas av en underordnad klass.</error>
+  <error id="2108" label="kInvalidArrayLengthError">Värdet %1 är ingen giltig Array-längd.</error>
   <error id="2173" label="kReadExternalNotImplementedError">Det gick inte att läsa objektet i flödet. Klassen %1 implementerar inte flash.utils.IExternalizable men har en extern klass som alias.</error>
 </errors>

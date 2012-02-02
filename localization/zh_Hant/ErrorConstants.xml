@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8' standalone='no' ?>
+<?xml version='1.0' encoding='utf-8' standalone='no' ?>
 <!-- -*- Mode: xml; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- -->
 <!-- vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) -->
 <!-- ***** BEGIN LICENSE BLOCK *****
@@ -777,5 +777,6 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Proxy 類別不會實作 nextNameIndex。它必須以子類別覆寫。</error>
   <error id="2106" label="kProxyNextNameError">Proxy 類別不會實作 nextName。它必須以子類別覆寫。</error>
   <error id="2107" label="kProxyNextValueError">Proxy 類別不會實作 nextValue。它必須以子類別覆寫。</error>
+  <error id="2108" label="kInvalidArrayLengthError">值 %1 不是有效的陣列長度。</error>
   <error id="2173" label="kReadExternalNotImplementedError">無法讀取串流中的物件。類別 %1 未實作 flash.utils.IExternalizable，卻已別名化為可外部化的類別。</error>
 </errors>

@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8' standalone='no' ?>
+<?xml version='1.0' encoding='utf-8' standalone='no' ?>
 <!-- -*- Mode: xml; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- -->
 <!-- vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) -->
 <!-- ***** BEGIN LICENSE BLOCK *****
@@ -777,5 +777,6 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Die Proxy-Klasse implementiert nextNameIndex nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
   <error id="2106" label="kProxyNextNameError">Die Proxy-Klasse implementiert nextName nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
   <error id="2107" label="kProxyNextValueError">Die Proxy-Klasse implementiert nextValue nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
+  <error id="2108" label="kInvalidArrayLengthError">Der Wert %1 ist keine gültige Arraylänge.</error>
   <error id="2173" label="kReadExternalNotImplementedError">Das Objekt im Stream kann nicht gelesen werden.  Die %1-Klasse implementiert flash.utils.IExternalizable nicht, es erfolgt aber ein Aliasing in eine externalisierbare Klasse.</error>
 </errors>
