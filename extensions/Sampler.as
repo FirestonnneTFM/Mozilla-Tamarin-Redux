@@ -353,6 +353,9 @@ package flash.sampler
      */
     public function getSamples():Object { return _getSamples(ClassFactory); }
 
+    /**
+     * @private
+     */
     [native("SamplerScript::_getSamples")]
     internal native function _getSamples(cf:Class):Object;
 
