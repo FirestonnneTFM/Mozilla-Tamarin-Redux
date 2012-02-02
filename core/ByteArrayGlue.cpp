@@ -1335,7 +1335,9 @@ namespace avmplus
             toplevel()->throwEOFError(kEOFError);
 
         const uint8_t* p = (const uint8_t*)m_byteArray.GetReadableBuffer() + m_byteArray.GetPosition();
-        // Skip UTF8 BOM (but it is still counted in the length we consume).
+
+        uint32_t countBytesConsumed = length;
+        // Skip UTF8 BOM (it is consumed from input, but not part of output).
         if (length >= 3 && p[0] == 0xEFU && p[1] == 0xBBU && p[2] == 0xBFU)
         {
             p += 3;
@@ -1358,7 +1360,7 @@ namespace avmplus
 
         // The position is always updated as if the entire string had been consumed, 
         // even if there was a NUL that made us stop early.
-        m_byteArray.SetPosition(m_byteArray.GetPosition()+length);
+        m_byteArray.SetPosition(m_byteArray.GetPosition()+countBytesConsumed);
 
         return result;
     }
