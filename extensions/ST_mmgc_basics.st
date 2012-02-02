@@ -251,10 +251,10 @@ delete gc;
 //    %%verify (int)gh->GetTotalHeapSize()==128
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
     %%verify (int)gh->GetFreeHeapSize()==startfreeheap
-       void *data = gh->Alloc(10,MMgc::GCHeap::kExpand | MMgc::GCHeap::kZero);
+    void *data = gh->Alloc(10,MMgc::GCHeap::kExpand | MMgc::GCHeap::kZero);
     %%verify (int)gh->GetTotalHeapSize()>startfreeheap
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
-	   gh->FreeNoProfile(data);
+    gh->FreeNoProfile(data);
        
 %%test gcheapAlign
     MMgc::GCHeap *gh=MMgc::GCHeap::GetGCHeap();
