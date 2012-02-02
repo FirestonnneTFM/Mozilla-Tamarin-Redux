@@ -579,7 +579,7 @@ namespace avmplus
                 /*2105,149*/ "Třída Proxy neimplementuje funkci nextNameIndex. Musí být přepsána podtřídou.",
                 /*2106,150*/ "Třída Proxy neimplementuje funkci nextName. Musí být přepsána podtřídou.",
                 /*2107,151*/ "Třída Proxy neimplementuje funkci nextValue. Musí být přepsána podtřídou.",
-                /*2108,152*/ "The value %1 is not a valid Array length.",
+                /*2108,152*/ "Hodnota %1 nepředstavuje platnou délku pole.",
                 /*2173,153*/ "Nelze načíst objekt ve streamu.  Třída %1 neimplementuje rozhraní flash.utils.IExternalizable je však přesměrována na třídu externalizable."
             },
         #endif
@@ -738,7 +738,7 @@ namespace avmplus
                 /*2105,149*/ "Die Proxy-Klasse implementiert nextNameIndex nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.",
                 /*2106,150*/ "Die Proxy-Klasse implementiert nextName nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.",
                 /*2107,151*/ "Die Proxy-Klasse implementiert nextValue nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.",
-                /*2108,152*/ "The value %1 is not a valid Array length.",
+                /*2108,152*/ "Der Wert %1 ist keine gültige Arraylänge.",
                 /*2173,153*/ "Das Objekt im Stream kann nicht gelesen werden.  Die %1-Klasse implementiert flash.utils.IExternalizable nicht, es erfolgt aber ein Aliasing in eine externalisierbare Klasse."
             },
         #endif
@@ -897,7 +897,7 @@ namespace avmplus
                 /*2105,149*/ "La clase Proxy no implementa nextNameIndex. Debe sustituirse por una subclase.",
                 /*2106,150*/ "La clase Proxy no implementa nextName. Debe sustituirse por una subclase.",
                 /*2107,151*/ "La clase Proxy no implementa nextValue. Debe sustituirse por una subclase.",
-                /*2108,152*/ "The value %1 is not a valid Array length.",
+                /*2108,152*/ "El valor %1 no es un valor válido de longitud de conjunto.",
                 /*2173,153*/ "No se puede leer el objeto del flujo.  La clase %1 no implementa flash.utils.IExternalizable pero está asociada a una clase externalizable."
             },
         #endif
@@ -1056,7 +1056,7 @@ namespace avmplus
                 /*2105,149*/ "La classe Proxy ne met pas en oeuvre nextNameIndex. Elle doit être remplacée par une sous-classe.",
                 /*2106,150*/ "La classe Proxy ne met pas en oeuvre nextName. Elle doit être remplacée par une sous-classe.",
                 /*2107,151*/ "La classe Proxy ne met pas en oeuvre nextValue. Elle doit être remplacée par une sous-classe.",
-                /*2108,152*/ "The value %1 is not a valid Array length.",
+                /*2108,152*/ "La valeur %1 n’est pas une valeur de tableau valide.",
                 /*2173,153*/ "Impossible de lire l'objet dans le flux. La classe %1 n'implémente pas flash.utils.IExternalizable, mais est aliasée vers une classe externalisable."
             },
         #endif
@@ -1215,7 +1215,7 @@ namespace avmplus
                 /*2105,149*/ "La classe Proxy non implementa nextNameIndex. Deve essere sostituita da una sottoclasse.",
                 /*2106,150*/ "La classe Proxy non implementa nextName. Deve essere sostituita da una sottoclasse.",
                 /*2107,151*/ "La classe Proxy non implementa nextValue. Deve essere sostituita da una sottoclasse.",
-                /*2108,152*/ "The value %1 is not a valid Array length.",
+                /*2108,152*/ "Il valore %1 non è una lunghezza array valida.",
                 /*2173,153*/ "Impossibile leggere l'oggetto nel flusso.  La classe %1 non implementa flash.utils.IExternalizable ma è impostata come alias di una classe esternalizzabile."
             },
         #endif
@@ -1374,7 +1374,7 @@ namespace avmplus
                 /*2105,149*/ "Proxy クラスは、nextNameIndex を実装しません。サブクラスでオーバーライドする必要があります。",
                 /*2106,150*/ "Proxy クラスは、nextName を実装しません。サブクラスでオーバーライドする必要があります。",
                 /*2107,151*/ "Proxy クラスは、nextValue を実装しません。サブクラスでオーバーライドする必要があります。",
-                /*2108,152*/ "The value %1 is not a valid Array length.",
+                /*2108,152*/ "値 %1 は有効な配列の長さではありません。",
                 /*2173,153*/ "ストリーム内のオブジェクトを読み取れません。クラス %1 は flash.utils.IExternalizable を実装しませんが、外部化可能なクラスにエイリアス処理されます。"
             },
         #endif
@@ -1533,7 +1533,7 @@ namespace avmplus
                 /*2105,149*/ "Proxy 클래스는 nextNameIndex를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.",
                 /*2106,150*/ "Proxy 클래스는 nextName을 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.",
                 /*2107,151*/ "Proxy 클래스는 nextValue를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.",
-                /*2108,152*/ "The value %1 is not a valid Array length.",
+                /*2108,152*/ "값 %1은(는) 유효한 배열 길이가 아닙니다.",
                 /*2173,153*/ "스트림에서 객체를 읽을 수 없습니다.  클래스 %1은(는) flash.utils.IExternalizable을 구현하지 않지만 외부화할 수 있는 클래스에 앨리어스됩니다."
             },
         #endif
@@ -1692,7 +1692,7 @@ namespace avmplus
                 /*2105,149*/ "De klasse Proxy implementeert nextNameIndex niet. Het moet worden overschreven door een subklasse.",
                 /*2106,150*/ "De klasse Proxy implementeert nextName niet. Het moet worden overschreven door een subklasse.",
                 /*2107,151*/ "De klasse Proxy implementeert nextValue niet. Het moet worden overschreven door een subklasse.",
-                /*2108,152*/ "The value %1 is not a valid Array length.",
+                /*2108,152*/ "De waarde %1 is geen geldige Array-lengte.",
                 /*2173,153*/ "Kan object in stream niet lezen.  De klasse %1 implementeert flash.utils.IExternalizable niet, maar heeft een externaliseerbare klasse als alias."
             },
         #endif
@@ -1851,7 +1851,7 @@ namespace avmplus
                 /*2105,149*/ "Klasa Proxy nie implementuje metody nextNameIndex. Należy ją przesłonić w podklasie.",
                 /*2106,150*/ "Klasa Proxy nie implementuje metody nextName. Należy ją przesłonić w podklasie.",
                 /*2107,151*/ "Klasa Proxy nie implementuje metody nextValue. Należy ją przesłonić w podklasie.",
-                /*2108,152*/ "The value %1 is not a valid Array length.",
+                /*2108,152*/ "Wartość %1 nie jest prawidłową długością tablicy.",
                 /*2173,153*/ "Nie można odczytać obiektu w strumieniu.  Klasa %1 nie implementuje metody flash.utils.IExternalizable, ale ma alias dla klasy możliwej do uzewnętrznienia."
             },
         #endif
@@ -1865,7 +1865,7 @@ namespace avmplus
                 /*1004,4*/ "O método %1 foi invocado em um objeto incompatível.",
                 /*1005,5*/ "O índice de matriz não é um inteiro positivo (1%).",
                 /*1006,6*/ "%1 não é uma função.",
-                /*1007,7*/ "Tentativa de instanciação em um não-construtor.",
+                /*1007,7*/ "Tentativa de instanciação em um não construtor.",
                 /*1008,8*/ "%1 é ambíguo. Foi encontrada mais de uma associação correspondente.",
                 /*1009,9*/ "Não é possível acessar uma propriedade ou um método de uma referência de objeto nula.",
                 /*1010,10*/ "Um termo é indefinido e não tem propriedades.",
@@ -1978,7 +1978,7 @@ namespace avmplus
                 /*1124,117*/ "O OP_hasnext2 requer que um objeto e um índice sejam registradores distintos.",
                 /*1125,118*/ "O índice %1 está fora do intervalo %2.",
                 /*1126,119*/ "Não é possível alterar o comprimento de um vetor fixo.",
-                /*1127,120*/ "Tipo de aplicativo tentado de forma não-parametrizada.",
+                /*1127,120*/ "Tipo de aplicativo tentado de forma não parametrizada.",
                 /*1128,121*/ "Número incorreto de parâmetros de tipo para %1. Era esperado %2, mas foi recebido %3.",
                 /*1129,122*/ "Uma estrutura cíclica não pode ser convertida em uma string JSON.",
                 /*1131,123*/ "O argumento Replacer do gerador de string JSON precisa ser uma matriz ou uma função com dois parâmetros.",
@@ -2010,7 +2010,7 @@ namespace avmplus
                 /*2105,149*/ "A classe Proxy não implementa nextNameIndex. Ela deve ser substituída por uma subclasse.",
                 /*2106,150*/ "A classe Proxy não implementa nextName. Ela deve ser substituída por uma subclasse.",
                 /*2107,151*/ "A classe Proxy não implementa nextValue. Ela deve ser substituída por uma subclasse.",
-                /*2108,152*/ "The value %1 is not a valid Array length.",
+                /*2108,152*/ "O valor %1 não é um comprimento de matriz válido.",
                 /*2173,153*/ "Impossível ler o objeto em um fluxo. A classe %1 não implementa flash.utils.IExternalizable mas recebeu como alias uma classe externalizável."
             },
         #endif
@@ -2169,7 +2169,7 @@ namespace avmplus
                 /*2105,149*/ "Класс Proxy не поддерживает nextNameIndex. Он должен быть заменен на подкласс.",
                 /*2106,150*/ "Класс Proxy не поддерживает nextName. Он должен быть заменен на подкласс.",
                 /*2107,151*/ "Класс Proxy не поддерживает nextValue. Он должен быть заменен на подкласс.",
-                /*2108,152*/ "The value %1 is not a valid Array length.",
+                /*2108,152*/ "Значение %1 не является допустимой длиной массива.",
                 /*2173,153*/ "Не удается прочитать объект в потоке. В классе %1 не реализован интерфейс flash.utils.Iexternalizable, но в качестве его псевдонима используется класс с поддержкой внешних связей."
             },
         #endif
@@ -2328,7 +2328,7 @@ namespace avmplus
                 /*2105,149*/ "Klassen Proxy implementerar inte nextNameIndex. Den måste åsidosättas av en underordnad klass.",
                 /*2106,150*/ "Klassen Proxy implementerar inte nextName. Den måste åsidosättas av en underordnad klass.",
                 /*2107,151*/ "Klassen Proxy implementerar inte nextValue. Den måste åsidosättas av en underordnad klass.",
-                /*2108,152*/ "The value %1 is not a valid Array length.",
+                /*2108,152*/ "Värdet %1 är ingen giltig Array-längd.",
                 /*2173,153*/ "Det gick inte att läsa objektet i flödet. Klassen %1 implementerar inte flash.utils.IExternalizable men har en extern klass som alias."
             },
         #endif
@@ -2487,7 +2487,7 @@ namespace avmplus
                 /*2105,149*/ "Proxy sınıfı nextNameIndex uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.",
                 /*2106,150*/ "Proxy sınıfı nextName uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.",
                 /*2107,151*/ "Proxy sınıfı nextValue uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.",
-                /*2108,152*/ "The value %1 is not a valid Array length.",
+                /*2108,152*/ "%1 değeri geçerli bir Dizi uzunluğu değil.",
                 /*2173,153*/ "Akıştaki nesne okunamıyor.  %1 sınıfı, flash.utils.IExternalizable öğesini uygulamıyor, ancak haricileştirebilir bir sınıfın adıyla biliniyor."
             },
         #endif
@@ -2646,7 +2646,7 @@ namespace avmplus
                 /*2105,149*/ "Proxy 类不实现 nextNameIndex。它必须由一个子类覆盖。",
                 /*2106,150*/ "Proxy 类不实现 nextName。它必须由一个子类覆盖。",
                 /*2107,151*/ "Proxy 类不实现 nextValue。它必须由一个子类覆盖。",
-                /*2108,152*/ "The value %1 is not a valid Array length.",
+                /*2108,152*/ "值 %1 不是有效的数组长度。",
                 /*2173,153*/ "无法读取流中的对象。类 %1 虽未实现 flash.utils.IExternalizable，但由其别名可得知它为 externalizable 类。"
             },
         #endif
@@ -2805,7 +2805,7 @@ namespace avmplus
                 /*2105,149*/ "Proxy 類別不會實作 nextNameIndex。它必須以子類別覆寫。",
                 /*2106,150*/ "Proxy 類別不會實作 nextName。它必須以子類別覆寫。",
                 /*2107,151*/ "Proxy 類別不會實作 nextValue。它必須以子類別覆寫。",
-                /*2108,152*/ "The value %1 is not a valid Array length.",
+                /*2108,152*/ "值 %1 不是有效的陣列長度。",
                 /*2173,153*/ "無法讀取串流中的物件。類別 %1 未實作 flash.utils.IExternalizable，卻已別名化為可外部化的類別。"
             }
         #endif
