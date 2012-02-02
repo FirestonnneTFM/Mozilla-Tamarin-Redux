@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8' standalone='no' ?>
+<?xml version='1.0' encoding='utf-8' standalone='no' ?>
 <!-- -*- Mode: xml; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- -->
 <!-- vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) -->
 <!-- ***** BEGIN LICENSE BLOCK *****
@@ -97,7 +97,7 @@
 var big:Sprite = new Sprite();
 var error:int = big.length(); </code></pre>
     ]]></description></error>
-  <error id="1007" label="kConstructOfNonFunctionError">Tentativa de instanciação em um não-construtor.</error>
+  <error id="1007" label="kConstructOfNonFunctionError">Tentativa de instanciação em um não construtor.</error>
   <error id="1008" label="kAmbiguousBindingError">%1 é ambíguo. Foi encontrada mais de uma associação correspondente.</error>
   <error id="1009" label="kConvertNullToObjectError">Não é possível acessar uma propriedade ou um método de uma referência de objeto nula.
 <description><![CDATA[
@@ -624,7 +624,7 @@ class B extends A {
   <error id="1124" label="kInvalidHasNextError">O OP_hasnext2 requer que um objeto e um índice sejam registradores distintos.</error>
   <error id="1125" label="kOutOfRangeError">O índice %1 está fora do intervalo %2.</error>
   <error id="1126" label="kVectorFixedError">Não é possível alterar o comprimento de um vetor fixo.</error>
-  <error id="1127" label="kTypeAppOfNonParamType">Tipo de aplicativo tentado de forma não-parametrizada.</error>
+  <error id="1127" label="kTypeAppOfNonParamType">Tipo de aplicativo tentado de forma não parametrizada.</error>
   <error id="1128" label="kWrongTypeArgCountError">Número incorreto de parâmetros de tipo para %1. Era esperado %2, mas foi recebido %3.</error>
   <error id="1129" label="kJSONCyclicStructure">Uma estrutura cíclica não pode ser convertida em uma string JSON.</error>
   <!-- id 1130 was allocated and later became unnecessary. -->
@@ -688,5 +688,6 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">A classe Proxy não implementa nextNameIndex. Ela deve ser substituída por uma subclasse.</error>
   <error id="2106" label="kProxyNextNameError">A classe Proxy não implementa nextName. Ela deve ser substituída por uma subclasse.</error>
   <error id="2107" label="kProxyNextValueError">A classe Proxy não implementa nextValue. Ela deve ser substituída por uma subclasse.</error>
+  <error id="2108" label="kInvalidArrayLengthError">O valor %1 não é um comprimento de matriz válido.</error>
   <error id="2173" label="kReadExternalNotImplementedError">Impossível ler o objeto em um fluxo. A classe %1 não implementa flash.utils.IExternalizable mas recebeu como alias uma classe externalizável.</error>
 </errors>

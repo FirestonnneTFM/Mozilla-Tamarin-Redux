@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8' standalone='no' ?>
+<?xml version='1.0' encoding='utf-8' standalone='no' ?>
 <!-- -*- Mode: xml; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- -->
 <!-- vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) -->
 <!-- ***** BEGIN LICENSE BLOCK *****
@@ -688,5 +688,6 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Třída Proxy neimplementuje funkci nextNameIndex. Musí být přepsána podtřídou.</error>
   <error id="2106" label="kProxyNextNameError">Třída Proxy neimplementuje funkci nextName. Musí být přepsána podtřídou.</error>
   <error id="2107" label="kProxyNextValueError">Třída Proxy neimplementuje funkci nextValue. Musí být přepsána podtřídou.</error>
+  <error id="2108" label="kInvalidArrayLengthError">Hodnota %1 nepředstavuje platnou délku pole.</error>
   <error id="2173" label="kReadExternalNotImplementedError">Nelze načíst objekt ve streamu.  Třída %1 neimplementuje rozhraní flash.utils.IExternalizable je však přesměrována na třídu externalizable.</error>
 </errors>

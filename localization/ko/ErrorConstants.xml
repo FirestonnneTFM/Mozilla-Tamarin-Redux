@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8' standalone='no' ?>
+<?xml version='1.0' encoding='utf-8' standalone='no' ?>
 <!-- -*- Mode: xml; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- -->
 <!-- vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) -->
 <!-- ***** BEGIN LICENSE BLOCK *****
@@ -777,5 +777,6 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Proxy 클래스는 nextNameIndex를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
   <error id="2106" label="kProxyNextNameError">Proxy 클래스는 nextName을 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
   <error id="2107" label="kProxyNextValueError">Proxy 클래스는 nextValue를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
+  <error id="2108" label="kInvalidArrayLengthError">값 %1은(는) 유효한 배열 길이가 아닙니다.</error>
   <error id="2173" label="kReadExternalNotImplementedError">스트림에서 객체를 읽을 수 없습니다.  클래스 %1은(는) flash.utils.IExternalizable을 구현하지 않지만 외부화할 수 있는 클래스에 앨리어스됩니다.</error>
 </errors>

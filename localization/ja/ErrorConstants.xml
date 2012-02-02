@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8' standalone='no' ?>
+<?xml version='1.0' encoding='utf-8' standalone='no' ?>
 <!-- -*- Mode: xml; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- -->
 <!-- vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) -->
 <!-- ***** BEGIN LICENSE BLOCK *****
@@ -777,5 +777,6 @@ class B extends A {
   <error id="2105" label="kProxyNextNameIndexError">Proxy クラスは、nextNameIndex を実装しません。サブクラスでオーバーライドする必要があります。</error>
   <error id="2106" label="kProxyNextNameError">Proxy クラスは、nextName を実装しません。サブクラスでオーバーライドする必要があります。</error>
   <error id="2107" label="kProxyNextValueError">Proxy クラスは、nextValue を実装しません。サブクラスでオーバーライドする必要があります。</error>
+  <error id="2108" label="kInvalidArrayLengthError">値 %1 は有効な配列の長さではありません。</error>
   <error id="2173" label="kReadExternalNotImplementedError">ストリーム内のオブジェクトを読み取れません。クラス %1 は flash.utils.IExternalizable を実装しませんが、外部化可能なクラスにエイリアス処理されます。</error>
 </errors>
