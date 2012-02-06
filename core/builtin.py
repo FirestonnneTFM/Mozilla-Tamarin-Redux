@@ -69,7 +69,7 @@ if len(sys.argv) == 1:
     print('    >$ ./builtin.py -config CONFIG::VMCFG_FLOAT=true -abcfuture');
     print('');
     print('To compile the builtins without float/float4 support:');
-    print('    >$ ./buitin.py -config CONFIG::VMCFG_FLOAT=false');
+    print('    >$ ./builtin.py -config CONFIG::VMCFG_FLOAT=false');
     exit(1);
     
 configs = " ".join(sys.argv[1:])
