@@ -176,12 +176,6 @@ void AVMPI_releaseAlignedMemory(void* address)
     free(address);
 }
 
-#define state_newline  1
-#define state_skipline  2
-#define state_P 3
-#define state_Pr 4
-#define state_Private 6
-#define state_size 7
 
 // Note: the linux #define provided by the compiler.
 
@@ -189,87 +183,64 @@ void AVMPI_releaseAlignedMemory(void* address)
 
 size_t AVMPI_getPrivateResidentPageCount()
 {
-    char buff[32];
-    VMPI_snprintf(buff, sizeof(buff), "/proc/%d/smaps", getpid());
-    int smap_hndl = open(buff, O_RDONLY);
-    if (smap_hndl == -1)
-        return 0;
+   int fd;
+   ssize_t n;
+   char readData[64];
 
-    size_t priv_pages = 0;
-    size_t pageSize = VMPI_getVMPageSize();
-    uint32_t state = state_newline;
-    char size_buff[16];
-    uint32_t size_idx = 0;
-    int read_size = 0;
-    while( (read_size = read(smap_hndl, buff, 32)) )
-    {
-        int i = 0;
-        while(i < read_size )
-        {
-            char c = buff[i++];
-            switch( state )
-            {
-            case state_newline:
-                if( c == 'P' )
-                    state = state_P;
-                else
-                    state = state_skipline;
-                break;
+   //
+   // Read the line of stats we are interested in.
+   // N.B. We're only interested in the second token on a line formatted by "%d %d %d [snip] %d\n",
+   //      so 64 bytes will always be enough.
+   //
 
-            case state_skipline:
-                if( c == '\n' )
-                    state = state_newline;
-                break;
+   if ((fd = open("/proc/self/statm", O_RDONLY)) == -1)
+       return 0;
 
-            case state_P:
-                if( c == 'r' )
-                    state = state_Pr;
-                else
-                    state = state_skipline;
-                break;
+   n = read(fd, readData, sizeof(readData));
+   close(fd);
+   if (n <= 0)
+       return 0;
 
-            case state_Pr:
-                if( c == 'i' )  // Good enough, nothing else in smaps starts with Pr
-                    state = state_Private;
-                else
-                    state = state_skipline;
-                break;
+   //
+   // Skip first token; bail on unexpected format.
+   //
 
-            case state_Private:
-                if ( c >= '0' && c <= '9' )
-                {
-                    state = state_size;
-                    size_buff[size_idx++] = c;
-                }
-                else if ( c == '\n')
-                    state = state_newline;
-                break;
+   uint32_t i = 0;
+   while (n > 0 && readData[i] >= '0' && readData[i] <= '9')
+   {
+       i++;
+       n--;
+   }
 
-            case state_size:
-                if( c >= '0' && c <= '9' )
-                    size_buff[size_idx++] = c;
-                else
-                {
-                    size_buff[size_idx] = 0;
-                    size_idx = 0;
-                    uint32_t size = VMPI_atoi(size_buff)*1024;
-                    uint32_t blocks = size/pageSize;
-                    if( size % pageSize != 0 )
-                        ++blocks;
-                    priv_pages += blocks;
+   if (n <= 0 || (readData[i] != ' ' && readData[i] != '\t'))
+       return 0;
 
-                    if ( c == '\n' )
-                        state = state_newline;
-                    else
-                        state = state_skipline;
-                }
-                break;
-            }
-        }
-    }
-    close(smap_hndl);
 
-    return priv_pages;
+   //
+   // Skip the space separating the tokens.
+   //
+
+   i++;
+   n--;
+
+   //
+   // Get value of second token; bail on unexpected format.
+   // The token is formatted as '%d', i.e. signed integer.
+   //
+
+   int32_t priv_pages = 0;
+   while (n > 0 && readData[i] >= '0' && readData[i] <= '9')
+   {
+       priv_pages *= 10;
+       priv_pages += readData[i] - '0';
+       i++;
+       n--;
+   }
+   if (n <= 0 || (readData[i] != ' ' && readData[i] != '\t'))
+       return 0;
+
+
+    return (priv_pages > 0) ? priv_pages : 0;
 }
 
 #elif defined SOLARIS
