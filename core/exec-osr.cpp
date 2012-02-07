@@ -213,32 +213,22 @@ namespace avmplus
     }
 
     /**
-     * This function detects if OSR has been requested or if this is a
-     * subsequent normal call.  In the latter case it has no side effect and
-     * returns false and control flow is supposed to proceed normally.
-     * If OSR is in the works, then it fills the JIT frame locals to match the
-     * interpreter frame.  Then it returns true, which indicates to the
-     * generated code to jump to the OSR entry point.
+     * This function is called by JIT code if OSR has been requested
+     * if (exec->current_osr != 0).  This function fills the JIT frame locals
+     * to match the interpreter frame.  The JIT code looks like this:
      *
-     * The JIT code looks like this:
-     *
-     *   if (adjust_frame(...))
+     *   if (*(&exec->current_osr)) {
+     *     adjustFrame(...);
      *     goto loop_entry
+     *   }
      */
-    int32_t OSR::adjustFrame(MethodFrame* jitMethodFrame,
-                             CallStackNode *callStack,
-                             FramePtr jitFramePointer,
-                             uint8_t *jitFrameTags)
+    void OSR::adjustFrame(MethodFrame* jitMethodFrame, CallStackNode *callStack,
+                             FramePtr jitFramePointer,  uint8_t *jitFrameTags)
     {
         MethodEnv* env = jitMethodFrame->env();
         BaseExecMgr* exec = BaseExecMgr::exec(env);
         OSR *osr = exec->current_osr;
-        if (!osr) {
-            // No OSR has been requested.
-            // We are at the beginning of a normal AS method call.
-            // Indicate proceeding with normal control flow.
-            return 0;
-        }
+        AvmAssert(osr && "should not have gotten here");
         Atom* interpFramePointer = osr->interp_frame;
 
         MethodSignaturep ms = env->method->getMethodSignature();
@@ -293,10 +283,6 @@ namespace avmplus
 #else
         (void) callStack;
 #endif
-
-        // Indicate taking a shortcut from the call site
-        // to the OSR entry point instead of normal control flow:
-        return 1;
     }
 
 #ifdef DEBUG
