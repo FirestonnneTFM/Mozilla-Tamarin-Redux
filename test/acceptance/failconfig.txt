@@ -388,3 +388,9 @@ as3/Types/Float4/float4Operations:Flt4(Any|Flt4)Ops (?!.*EQ).*, arm-.*debug.* , 
 as3/Types/Float4/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
 abcasm/coverage/float/.*, mips.* , -Dinterp , skip, MIPS does not have a float/float4 implementation
 
+
+mops/lf32:float written by writeDouble, mips.* ,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=724889
+mops/lf64:load double written by sf32, mips.* ,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=724889
+mops/lf64:load double written by writeFloat, mips.* ,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=724889
+
+
