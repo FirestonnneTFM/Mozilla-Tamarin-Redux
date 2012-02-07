@@ -340,6 +340,7 @@ as3/AMF/AMFSerializer_float , .* , .*float.* , exclude , Only valid when float i
 # Helper files
 ###########
 as3/asc/import-with-float4-helper , .* , , skip , Not a test on its own
+generated/.* , .* , , skip , Not a test on its own
 
 
 
