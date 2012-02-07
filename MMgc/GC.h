@@ -41,6 +41,14 @@
 #ifndef __GC__
 #define __GC__
 
+
+#ifdef VMCFG_TELEMETRY
+namespace telemetry
+{
+    class ITelemetry;
+}
+#endif
+
 #define MMGC_GCENTER(_gc)  MMgc::GCAutoEnter __mmgc_auto_enter(_gc);
 
 // MMGC_GC_ROOT_THREAD is obsolete; the mechanism is not safe.
@@ -1406,6 +1414,18 @@ namespace MMgc
         // shorthand for IsPointerToGCObject && IsRCObject.  Any input
         // is safe, this never crashes or asserts.
         bool IsRCObjectSafe(const void *anyptr);
+
+#ifdef VMCFG_TELEMETRY
+        telemetry::ITelemetry* getTelemetry();
+        void setTelemetry(telemetry::ITelemetry* telemetry);
+    private:
+        telemetry::ITelemetry* m_telemetry;
+#else
+    public:
+        void* getTelemetry();
+    public:
+        void setTelemetry(void*);
+#endif
 
     private:
 

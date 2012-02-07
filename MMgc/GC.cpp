@@ -196,6 +196,9 @@ namespace MMgc
 #ifdef DEBUGGER
         , m_sampler(NULL)
 #endif
+#ifdef VMCFG_TELEMETRY
+        , m_telemetry(NULL)
+#endif
     {
         // sanity check for all our types
         MMGC_STATIC_ASSERT(sizeof(int8_t) == 1);
