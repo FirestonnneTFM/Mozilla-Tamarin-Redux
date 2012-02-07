@@ -102,8 +102,8 @@ namespace avmplus
          * jump into a loop, and populate the JIT stack frame with values
          * from the interpreter stack frame.
          */
-        static int32_t adjustFrame(MethodFrame*, CallStackNode*,
-                FramePtr jitFramePointer, uint8_t *jitFrameTags);
+        static void adjustFrame(MethodFrame*, CallStackNode*,
+                                FramePtr jitFramePointer, uint8_t *jitFrameTags);
 
         #ifdef DEBUG
         // Verify that currentBugCompatibility() is as OSR expected when method is called.

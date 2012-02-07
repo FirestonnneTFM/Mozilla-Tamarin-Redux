@@ -1972,11 +1972,22 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         AvmAssert(loop_state->targetOfBackwardsBranch);
         osr_state->init(loop_state);
         osr->setFrameState(osr_state);
-        LIns *isOSR = callIns(FUNCTIONID(osr_adjust_frame), 4,
-                methodFrame,
-                haveDebugger ? csn : InsConstPtr(0),
-                vars, tags);
-        branchToAbcPos(LIR_jt, isOSR, osr->osrPc());
+        // if (exec->current_osr) {
+        //    adjustFrame(...);
+        //    goto osr_pc;
+        // }
+        BaseExecMgr* exec = (BaseExecMgr*) core->exec;
+        // It is safe to emit &exec->current_osr as a constant here because
+        // it never changes during runtime.
+        LIns* current_osr = ldp(InsConstPtr(&exec->current_osr), 0, ACCSET_OTHER);
+        CodegenLabel &no_osr_label = createLabel("no_osr");
+        suspendCSE();
+        branchToLabel(LIR_jf, current_osr, no_osr_label);
+        callIns(FUNCTIONID(osr_adjust_frame), 4,
+                methodFrame, haveDebugger ? csn : InsConstPtr(0), vars, tags);
+        branchToAbcPos(LIR_j, NULL, osr->osrPc());
+        emitLabel(no_osr_label);
+        resumeCSE();
     }
 
     void CodegenLIR::emitInitializers()

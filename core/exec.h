@@ -425,6 +425,7 @@ private:
 #ifdef VMCFG_NANOJIT
     // OSR support
     friend class OSR;
+    friend class CodegenLIR;
     OSR *current_osr;
 #endif
 };
