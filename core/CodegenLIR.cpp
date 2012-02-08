@@ -1982,7 +1982,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         LIns* current_osr = ldp(InsConstPtr(&exec->current_osr), 0, ACCSET_OTHER);
         CodegenLabel &no_osr_label = createLabel("no_osr");
         suspendCSE();
-        branchToLabel(LIR_jf, current_osr, no_osr_label);
+        branchToLabel(LIR_jt, eqp0(current_osr), no_osr_label);
         callIns(FUNCTIONID(osr_adjust_frame), 4,
                 methodFrame, haveDebugger ? csn : InsConstPtr(0), vars, tags);
         branchToAbcPos(LIR_j, NULL, osr->osrPc());
