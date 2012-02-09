@@ -947,8 +947,28 @@ package abcdump
             // strings
             n = readU32()
             strings = [""]
-            for (i=1; i < n; i++)
-                strings[i] = data.readUTFBytes(readU32())
+            for (i=1; i < n; i++) {
+                var len = readU32();
+                var posPreRead = data.position;
+                strings[i] = data.readUTFBytes(len);
+                // Bugzilla 723448: ByteArray.readUTFBytes deliberately
+                // skips an initial UTF8 BOM in the input.  Compensate
+                // for this here.
+                if (len >= 3 && (data[posPreRead+0] == 0xEF &&
+                                 data[posPreRead+1] == 0xBB &&
+                                 data[posPreRead+2] == 0xBF)) {
+                    // First, double-check that readUTFBytes is still
+                    // compensating for UTF8 BOM.  (Presumed rare and
+                    // thus not worth caching or precomputing.)
+                    var tempByteArray = new ByteArray();
+                    tempByteArray.writeUTFBytes('\ufeff');
+                    tempByteArray.position = 0;
+                    var s = tempByteArray.readUTFBytes(tempByteArray.length);
+                    if (s == "") {
+                        strings[i] = '\ufeff'+strings[i];
+                    }
+                }
+            }
             dumpPool("string", strings)
 
             infoPrint("Cpool strings count "+ n +" size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
