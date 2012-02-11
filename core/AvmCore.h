@@ -2035,11 +2035,6 @@ const int kBufferPadding = 16;
         void setTelemetry(telemetry::ITelemetry* telemetry);
     private:
         telemetry::ITelemetry* m_telemetry; // Owned by the AvmCore subclass which calls SetTelemetry
-#else
-    public:
-        void* getTelemetry();
-    protected:
-        void setTelemetry(void*);
 #endif
 
         // END methods (private/public intermixed)

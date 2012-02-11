@@ -848,15 +848,6 @@ namespace MMgc
     {
         m_telemetry = telemetry;
     }
-#else
-    REALLY_INLINE void* GC::getTelemetry()
-    {
-        return NULL;
-    }
-
-    REALLY_INLINE void GC::setTelemetry(void* /*telemetry*/)
-    {
-    }
 #endif
 
     REALLY_INLINE GC::AllocaAutoPtr::AllocaAutoPtr()

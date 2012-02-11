@@ -101,15 +101,6 @@ REALLY_INLINE void AvmCore::setTelemetry(telemetry::ITelemetry* telemetry)
 {
     m_telemetry = telemetry;
 }
-#else
-REALLY_INLINE void* AvmCore::getTelemetry()
-{
-    return NULL;
-}
-
-REALLY_INLINE void AvmCore::setTelemetry(void* /*telemetry*/)
-{
-}
 #endif
 
 #ifdef VMCFG_NANOJIT // accessors
