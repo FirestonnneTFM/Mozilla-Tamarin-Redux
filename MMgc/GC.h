@@ -1420,11 +1420,6 @@ namespace MMgc
         void setTelemetry(telemetry::ITelemetry* telemetry);
     private:
         telemetry::ITelemetry* m_telemetry;
-#else
-    public:
-        void* getTelemetry();
-    public:
-        void setTelemetry(void*);
 #endif
 
     private:
