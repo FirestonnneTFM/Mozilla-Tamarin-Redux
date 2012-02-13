@@ -463,7 +463,10 @@ class AcceptanceRuntest(RuntestBase):
                 # delete app
                 cmd = "ssh %s@%s rm %s" % (self.remoteuser, self.remoteip, progname)
                 self.run_pipe(cmd, outputCalls=outputCalls)
-            else:
+            elif self.avm: # AVM is set to a script that will handle SSH communications
+                cmd = "%s %s %s %s" % (self.avm, progpath, self.vmargs, extraVmArgs)
+                (f,err,exitcode) = self.run_pipe(cmd, outputCalls=outputCalls, envVars=passByEnv)
+            else: # Execute on OSX
                 cmd = "%s %s" % (progpath, avm_args)
                 # print("about to execute: " + cmd)
                 (f,err,exitcode) = self.run_pipe(cmd, outputCalls=outputCalls)

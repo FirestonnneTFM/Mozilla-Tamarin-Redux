@@ -345,8 +345,13 @@ spidermonkey/js1_5/Array/regress-465980-02, .*, diff,expectedfail, https://bugzi
 ####################
 ecma3/Exceptions/bug127913,         AOT ,, skip, Need to follow up as this hangs when AOT compiled
 spidermonkey/js1_5/Regress/regress-234389,         AOT ,, skip, Need to follow up as this hangs when AOT compiled
-spidermonkey/js1_5/Exceptions/regress-121658 , AOT,, skip, Need to follow up as this hangs when AOT compiled
-spidermonkey/js1_5/Regress/regress-398085-01 , AOT,, skip, Need to follow up as this hangs when AOT compiled
+spidermonkey/js1_5/Exceptions/regress-121658, AOT,, skip, Need to follow up as this hangs when AOT compiled
+spidermonkey/js1_5/Regress/regress-398085-01, AOT,, skip, Need to follow up as this hangs when AOT compiled
+spidermonkey/js1_5/Regress/regress-31255, AOT,, skip, Need to follow up as this hangs when AOT compiled (trbaker)
+spidermonkey/js1_5/Regress/regress-352009, AOT,, skip, Need to follow up as this hangs when AOT compiled (trbaker)
+spidermonkey/js1_5/Regress/regress-191668, AOT,, skip, Need to follow up as this hangs when AOT compiled (trbaker)
+as3/Vector/initializerLargeVector, AOT,, skip, trbaker - many tests have java_args for as
+ecma3/Unicode/uFE70_ArabicPresentationForms_B, AOT,, skip, trbaker - running prints "Illegal instruction" on device.  runtest hangs though you can see the test return in the output with seeming error
 
 ####################
 # Float
