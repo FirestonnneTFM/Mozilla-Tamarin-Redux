@@ -987,12 +987,24 @@ class RuntestBase(object):
     def compile_aot(self, abcfile, extraabcs = []):
         # compile the abc to an executable
         if self.aotsdk:
+            # We use the test config file to mark abc files that fail to AOT compile,
+            # so we need to take account of that here before we try to compile them.
+            self.settings, self.directives = self.parseTestConfig(self.testconfig)
+            failconfig_settings, failconfig_directives = self.parseTestConfig(self.failconfig)
+            self.settings.update(failconfig_settings)
+            (testdir, ext) = splitext(abcfile)
+            settings = self.get_test_settings(testdir)
+            if '.*' in settings and 'skip' in settings['.*']:
+                self.js_print('Skipping -daa %s ... reason: %s' % (abcfile,settings['.*']['skip']))
+                return
             try:
                 output = os.path.dirname(abcfile)
                 if self.aotout:
                     output = self.aotout
 
                 outname = abcfile.replace("./", "")
+                # Replace this before .abc otherwise we won't be able to replace it
+                outname = outname.replace(".abc_", "")
                 outname = outname.replace(".abc", "")
                 outname = outname.replace("/", ".")
                 outabc = os.path.join(output, outname + ".abc")
@@ -1140,11 +1152,8 @@ class RuntestBase(object):
                     if '.*' in settings and 'skip' in settings['.*']:
                         self.js_print('Skipping -daa %s ... reason: %s' % (test,settings['.*']['skip']))
                         continue
+                    # If the testcase is checked in as an abc then we can jump to AOT compilation
                     if test.endswith(self.abcOnlyExt):
-                        #copy the abc
-                        copyFile = test.replace("/", ".")
-                        copyFile = os.path.join( self.aotout, copyFile )
-                        shutil.copy(test, copyFile)
                         #compile the abc
                         self.compile_aot( test )
                         continue
@@ -1157,14 +1166,12 @@ class RuntestBase(object):
                 if not exists(testdir+".abc"):
                     print("ERROR abc files %s.abc not created" % (testdir))
                     self.ashErrors.append("abc files %s.abc not created" % (testdir))
-                else:
-                    extrabcs = []
-                    # print("test: %s" % test)
-                    if test.endswith(self.abcasmExt):
-                        extrabcs = [self.abcasmShell+'.abc']
-                        if not exists(self.abcasmShell+'.abc'):  # compile abcasmShell with no additional args
-                            self.run_pipe('"%s" -jar %s %s' % (self.java, self.asc, self.abcasmShell+'.as'))
-                    self.compile_aot(testdir+".abc", extrabcs)
+                    continue
+
+                if self.aotsdk: # ABC compiled, so now AOT compile
+                    # Need to figure out how to deal with additional required abc files
+                    self.compile_aot(testdir+".abc")
+
         else:  #pexpect available
             child = pexpect.spawn('"%s" %s -classpath %s macromedia.asc.embedding.Shell' % (self.java, self.javaargs, self.asc))
             child.logfile = None
@@ -1181,13 +1188,17 @@ class RuntestBase(object):
 
                 if test.endswith(self.abcasmExt):
                     self.compile_test(test)
+                    if self.aotsdk: # ABC compiled, so now AOT compile
+                        self.compile_aot(testdir+".abc", [self.abcasmShell+'.abc'])
+                    continue
                 elif test.endswith(self.executableExtensions):
                     total -= 1
+                    if self.aotsdk: # ABC precompiled, so now AOT compile
+                        # Need to figure out how to deal with additional required abc files
+                        self.compile_aot(test)
                     continue
                 else:
                     arglist = parseArgStringToList(self.ascargs)
-
-                    
 
                     # Check for a local .java_args file (either dir or file specific)
                     # Not ideal - but we try to load a .java_args file, and if one is loaded, then we revert to compiling
@@ -1202,7 +1213,7 @@ class RuntestBase(object):
                             if isfile(shell):
                                 arglist.append(' -in ' + shell)
                                 break
-                        
+
                         # look for .asc_args files to specify dir / file level compile args
                         arglist = self.loadArgsFile(arglist, dir, test, 'asc_args')
 
@@ -1213,17 +1224,6 @@ class RuntestBase(object):
                                 continue
                             arglist.extend(genAtsArgs(dir,file,self.atstemplate))
 
-                        if self.aotsdk:
-                            # We use the test config file to mark abc files that fail to AOT compile,
-                            # so we need to take account of that here before we try to compile them.
-                            self.settings, self.directives = self.parseTestConfig(self.testconfig)
-                            failconfig_settings, failconfig_directives = self.parseTestConfig(self.failconfig)
-                            self.settings.update(failconfig_settings)
-                            settings = self.get_test_settings(testdir)
-                            if '.*' in settings and 'skip' in settings['.*']:
-                                self.js_print('Skipping -daa %s ... reason: %s' % (test,settings['.*']['skip']))
-                                continue
-                                
                         cmd = "asc -import %s " % (self.builtinabc)
                         for arg in arglist:
                             cmd += ' %s' % arg
@@ -1232,10 +1232,10 @@ class RuntestBase(object):
                         deps.sort()
                         for util in deps + glob(join(dir,"*Util.as")):
                             cmd += " -in %s" % util #no need to prepend \ to $ when using ash
-                        
+
                         if exists(testdir+".abc"):
                             os.unlink(testdir+".abc")
-                        
+
                         if self.genAtsSwfs:
                             if search_file(test+'.avm_args', 'USES_SWFVERSION'):
                                 create_ats_swfversion_copy(test)
@@ -1271,17 +1271,15 @@ class RuntestBase(object):
                             if not exists(testdir+".abc"):
                                 print("ERROR: abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
                                 self.ashErrors.append("abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
-                            else:
-                                extraabcs = []
-                                if test.endswith(self.abcasmExt):
-                                    extraabcs = [self.abcasmShell+'.abc']
-                                    if not exists(self.abcasmShell+'.abc'): # compile abcasmShell with no additional args
-                                        self.run_pipe('%s -jar %s %s' %(self.java, self.asc, self.abcasmShell+'.as'))
-                                self.compile_aot(testdir+".abc", extraabcs)
 
                     total -= 1
 
                     #print("%d remaining, %s" % (total,cmd))
+
+                if self.aotsdk: # ABC compiled, so now AOT compile
+                    # Need to figure out how to deal with additional required abc files
+                    self.compile_aot(testdir+".abc")
+
         end_time = datetime.today()
 
 
@@ -1395,6 +1393,9 @@ class RuntestBase(object):
             for sd in self.support_dirs:
                 self.compile_support_files(sd, output_calls)
             self.printOutput(None, output_calls)
+
+        self.js_print("Precompiling %s" % self.abcasmShell)
+        self.compile_test(self.abcasmShell+'.as')
 
         if self.threads == 1 or platform.system()[:6].upper() == 'CYGWIN':
             self.compileWithAsh(self.tests)
