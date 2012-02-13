@@ -917,9 +917,50 @@ namespace MMgc
 
     void GCAlloc::LazySweepPass()
     {
-        for (GCBlock* b = m_firstBlock; b != NULL; b = Next(b))
+        GCBlock *next = NULL;
+        for (GCBlock* b = m_firstBlock; b != NULL; b = next)
         {
-            if (!b->needsSweeping())
+            // we might unlink block below
+            next = Next(b);
+
+            // Bugzilla 725955: eagerly search for all-free blocks to
+            // tighten allocated memory (and thus reduce estimated
+            // live storage fed into load calcuation).
+
+            GCAssert(kMark == 0x1 && kFinalizable == 0x4 && kHasWeakRef == 0x8);
+
+            bool anyMarkedItems = false;
+            gcbits_t* blockbits = b->bits;
+
+            for ( char *item = b->items, *limit = b->items + m_itemSize * b->GetCount() ; item < limit ; item += m_itemSize )
+            {
+                gcbits_t& marks = blockbits[GetBitsIndex(b,item)];
+                int mq = marks & kFreelist;
+                if(mq == kFreelist)
+                    continue;
+
+                if(mq == kMark) {
+                    anyMarkedItems = true;
+                    break;
+                }
+                GCAssertMsg(!(marks & kHasWeakRef),
+                            "No unmarked object should have a weak ref at this point");
+                GCAssertMsg(!(marks & kFinalizable),
+                            "No LazySweep candidate can have kFinalizable set.");
+            }
+
+            if (!anyMarkedItems) {
+                // Bugzilla 725955: add to list of block to be
+                // returned to the Heap.  We could probably eagerly
+                // free block here (rather than putting on the small
+                // empty block list); for short-term, approximating
+                // prior heap dynamics by matching prior control-flow.
+                if(b->nextFree || b->prevFree || b == m_firstFree)
+                    RemoveFromFreeList(b);
+                UnlinkChunk(b);
+                b->gc->AddToSmallEmptyBlockList(b);
+            }
+            else if (!b->needsSweeping())
             {
                 if(b->nextFree || b->prevFree || b == m_firstFree)
                     RemoveFromFreeList(b);
