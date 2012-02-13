@@ -117,7 +117,7 @@ else
     #   $2...$n aot shell args
     # For $1 we need to strip off all of the path information and just have the filename
     progname=${1##*/}
-    if [ ! -f $progname ]; then
+    if [ ! -f $1 ]; then
         echo "AOT file does not exist: $progname"
         exit 1
     fi

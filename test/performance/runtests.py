@@ -793,9 +793,16 @@ class PerformanceRuntest(RuntestBase):
                 if self.aotsdk and self.aotout:
                     progname = testName.replace(".as", "")
                     progname = progname.replace("/", ".")
-                    (f1,err,exitcode) = self.run_pipe(os.path.join(self.aotout, progname))
-                    # print("about to execute: " + os.path.join(self.aotout, progname))
-                    exitcode = 0 # hack!
+                    progpath = os.path.join(self.aotout, progname)
+                    if not self.avm:
+                        (f1,err,exitcode) = self.run_pipe(os.path.join(self.aotout, progname))
+                        # print("about to execute: " + os.path.join(self.aotout, progname))
+                        exitcode = 0 # hack!
+                    elif self.avm: # AVM is set to a script that will handle SSH communications
+                        cmd = "%s %s %s %s" % (self.avm, progpath, self.vmargs, scriptArg)
+                        (f1,err,exitcode) = self.run_pipe(cmd)
+                        self.debug_print("%s" % (cmd))
+                        self.debug_print(f1)
                 else:
                     (f1,err,exitcode) = self.run_pipe("%s %s %s %s" % (self.avm, self.vmargs, abc, scriptArg))
                     self.debug_print("%s %s %s %s" % (self.avm, self.vmargs, abc, scriptArg))

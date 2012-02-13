@@ -815,7 +815,11 @@ class RuntestBase(object):
         directives = {}
         multi_line = ''
         line_num = 0
-        
+
+        # If the config file doesn't exist, just return
+        if not isfile(config_file):
+            return settings, directives
+
         def print_parse_error(error_type, file_name, line, msg):
             '''Print out parsing errors in config files'''
             print('%s Parsing configuration file %s at line %s:' %
