@@ -113,3 +113,5 @@ v8.*/.*/run ,    .*,, skip, file used to run entire suite at once
 jsmicro/generate-drivers , .* ,, skip , run manually to generate driver files during development
 
 asmicro/driver, .* ,, skip, included by test files
+asmicro/float.*, .*,, skip, skip the float asmicro testcases until float is enabled by default
+
