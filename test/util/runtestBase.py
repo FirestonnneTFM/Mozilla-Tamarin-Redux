@@ -989,47 +989,51 @@ class RuntestBase(object):
     ### ASC / Compiling Functions ###
 
     def compile_aot(self, abcfile, extraabcs = []):
-        # compile the abc to an executable
-        if self.aotsdk:
-            # We use the test config file to mark abc files that fail to AOT compile,
-            # so we need to take account of that here before we try to compile them.
-            self.settings, self.directives = self.parseTestConfig(self.testconfig)
-            failconfig_settings, failconfig_directives = self.parseTestConfig(self.failconfig)
-            self.settings.update(failconfig_settings)
-            (testdir, ext) = splitext(abcfile)
-            settings = self.get_test_settings(testdir)
-            if '.*' in settings and 'skip' in settings['.*']:
-                self.js_print('Skipping -daa %s ... reason: %s' % (abcfile,settings['.*']['skip']))
-                return
-            try:
-                output = os.path.dirname(abcfile)
-                if self.aotout:
-                    output = self.aotout
+        # We use the test config file to mark abc files that fail to AOT compile,
+        # so we need to take account of that here before we try to compile them.
+        self.settings, self.directives = self.parseTestConfig(self.testconfig)
+        failconfig_settings, failconfig_directives = self.parseTestConfig(self.failconfig)
+        self.settings.update(failconfig_settings)
+        (testdir, ext) = splitext(abcfile)
+        settings = self.get_test_settings(testdir)
+        if '.*' in settings and 'skip' in settings['.*']:
+            self.js_print('Skipping -daa %s ... reason: %s' % (abcfile,settings['.*']['skip']))
+            return ['', '', 0]
 
-                outname = abcfile.replace("./", "")
-                # Replace this before .abc otherwise we won't be able to replace it
-                outname = outname.replace(".abc_", "")
-                outname = outname.replace(".abc", "")
-                outname = outname.replace("/", ".")
-                outabc = os.path.join(output, outname + ".abc")
+        output = os.path.dirname(abcfile)
+        if self.aotout:
+            output = self.aotout
 
-                if not os.path.exists(output):
-                    os.mkdir(output)
+        outname = abcfile.replace("./", "")
+        # Replace this before .abc otherwise we won't be able to replace it
+        outname = outname.replace(".abc_", "")
+        outname = outname.replace(".abc", "")
+        outname = outname.replace("/", ".")
+        outabc = os.path.join(output, outname + ".abc")
 
-                shutil.copyfile(abcfile, outabc)
-                self.js_print('AOT compilation of %s' % (outabc))
+        if not os.path.exists(output):
+            os.mkdir(output)
 
-                # t = ("--timeout=%d" % self.testTimeOut) if self.testTimeOut > 0 else ""
-                cmd = '%s -Xshell -Xoutput %s %s %s %s' % (os.path.join(self.aotsdk, 'bin/adt'), output, self.aotextraargs, " ".join(extraabcs), outabc)
-                self.js_print(cmd)
-                (f,err,exitcode) = self.run_pipe(cmd)
+        shutil.copyfile(abcfile, outabc)
+        cmd = '%s -Xshell -Xoutput %s %s %s %s' % (os.path.join(self.aotsdk, 'bin/adt'), output, self.aotextraargs, " ".join(extraabcs), outabc)
+        self.verbose_print(cmd)
 
-                for line in f:
-                    self.js_print(("file '%s'>>> " % abcfile) + line.strip())
-                for line in err:
-                    self.js_print(("file '%s'>>> " % abcfile) + line.strip())
-            except:
-                self.js_print('AOT compilation of %s FAILED' % (abcfile))
+        try:
+            (f,err,exitcode) = self.run_pipe(cmd)
+            if exitcode == 0:
+                # Deal with the fact that adt always returns 0, I have not actually seen it return
+                # anything else even when it says that it failed. So instead of relying on the exitcode
+                # actually look to see if it sucessfully linked a shell.
+                if not isfile(outabc.replace(".abc", "")):
+                    exitcode = 1
+            for line in f:
+                self.verbose_print(line.strip())
+            for line in err:
+                self.verbose_print(line.strip())
+            return (f, err, exitcode)
+        except:
+            raise
+
 
     def compile_test(self, as_file, extraArgs=[], outputCalls = None):
         self.checkExecutable(self.java, 'java must be on system path or --java must be set to java executable')
@@ -1191,15 +1195,24 @@ class RuntestBase(object):
                     continue
 
                 if test.endswith(self.abcasmExt):
+                    total -= 1
                     self.compile_test(test)
                     if self.aotsdk: # ABC compiled, so now AOT compile
+                        self.js_print('AOT compiling %s' % (testdir+".abc"))
                         self.compile_aot(testdir+".abc", [self.abcasmShell+'.abc'])
+                        if exitcode != 0:
+                            print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
+                            self.ashErrors.append("aot compilation of %s failed, %s" % (testdir+".abc", err))
                     continue
                 elif test.endswith(self.executableExtensions):
                     total -= 1
                     if self.aotsdk: # ABC precompiled, so now AOT compile
                         # Need to figure out how to deal with additional required abc files
+                        self.js_print('AOT compiling %s' % (testdir+".abc"))
                         self.compile_aot(test)
+                        if exitcode != 0:
+                            print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
+                            self.ashErrors.append("aot compilation of %s failed, %s" % (testdir+".abc", err))
                     continue
                 else:
                     arglist = parseArgStringToList(self.ascargs)
@@ -1282,7 +1295,13 @@ class RuntestBase(object):
 
                 if self.aotsdk: # ABC compiled, so now AOT compile
                     # Need to figure out how to deal with additional required abc files
-                    self.compile_aot(testdir+".abc")
+                    self.js_print('AOT compiling %s' % (testdir+".abc"))
+                    (f,err,exitcode) = self.compile_aot(testdir+".abc")
+                    if exitcode != 0:
+                        print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
+                        self.ashErrors.append("aot compilation of %s failed, %s" % (testdir+".abc", err))
+
+
 
         end_time = datetime.today()
 
