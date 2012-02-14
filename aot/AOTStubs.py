@@ -236,7 +236,7 @@ def genStubs(name, types, filterFunc=None):
     else:
         for p in perms:
             genCall((p[0], name, ", ".join(p[1:])))
-
+            
 def genCall(params):
     global stubs
     decl = "template %s %s(%s);" % params
@@ -246,6 +246,15 @@ def genPropRelatedWithIntOptDouble(name, retTypes, argTypes = [mosttypes]):
     nameTypes = mosttypes + ["LLVMUnusedParam"]
     legalUintNameTypes = set(("double", "int32_t", "uint32_t", "LLVMAtom"))
     legalUintObjectTypes = set(objecttypes) 
+    # perm: 0:retType, 1: MethodEnv*, 2:multinameIndex, 3:n, 4:ns, 5:obj
+    filterIntPermutations = lambda perms: filter(lambda perm: (perm[2] in multinameIndexTypes) or ((perm[3] in legalUintNameTypes) and (perm[4] == "LLVMUnusedParam") and (perm[5] in legalUintObjectTypes)), perms)
+    genStubs(name, [retTypes, ["MethodEnv* DOUBLE_ALLOCA_DECL"], multinameIndexTypesWithInt, nameTypes, nameTypes] + argTypes, filterIntPermutations)
+
+def genPropRelatedWithVectorOpts(name, retTypes, argTypes):
+    nameTypes = mosttypes + ["LLVMUnusedParam"]
+    legalUintNameTypes = set(("double", "int32_t", "uint32_t", "LLVMAtom"))
+    legalUintObjectTypes = set(objecttypes + vectortypes)
+    # perm: 0:retType, 1: MethodEnv*, 2:multinameIndex, 3:n, 4:ns, 5:obj
     filterIntPermutations = lambda perms: filter(lambda perm: (perm[2] in multinameIndexTypes) or ((perm[3] in legalUintNameTypes) and (perm[4] == "LLVMUnusedParam") and (perm[5] in legalUintObjectTypes)), perms)
     genStubs(name, [retTypes, ["MethodEnv* DOUBLE_ALLOCA_DECL"], multinameIndexTypesWithInt, nameTypes, nameTypes] + argTypes, filterIntPermutations)
 
@@ -253,6 +262,7 @@ def genPropRelatedWithInt(name, retTypes, argTypes = [mosttypes]):
     nameTypes = mosttypes + ["LLVMUnusedParam"]
     legalUintNameTypes = set(("double", "int32_t", "uint32_t", "LLVMAtom"))
     legalUintObjectTypes = set(objecttypes) 
+    # perm: 0:retType, 1: MethodEnv*, 2:multinameIndex, 3:n, 4:ns, 5:obj
     filterIntPermutations = lambda perms: filter(lambda perm: (perm[2] in multinameIndexTypes) or ((perm[3] in legalUintNameTypes) and (perm[4] == "LLVMUnusedParam") and (perm[5] in legalUintObjectTypes)), perms)
     genStubs(name, [retTypes, ["MethodEnv*"], multinameIndexTypesWithInt, nameTypes, nameTypes] + argTypes, filterIntPermutations)
 
@@ -300,10 +310,10 @@ if __name__ == "__main__":
     genStubs("abcOP_sxi16", [["uint32_t", "int32_t", "LLVMAtom"], ["MethodEnv*"], ["uint32_t", "int32_t", "LLVMAtom"]])
 
     genPropRelatedWithInt("abcOP_deleteproperty", ["LLVMBool"])
-    genPropRelatedWithIntOptDouble("abcOP_getproperty", mosttypes)
-    genPropRelatedWithIntOptDouble("abcOP_getproperty_nonc", mosttypes)
-    genPropRelatedWithInt("abcOP_setproperty", ["void"], argTypes = [mosttypes, mosttypes])
-    genPropRelatedWithInt("abcOP_setproperty_nonc", ["void"], argTypes = [mosttypes, mosttypes])
+    genPropRelatedWithVectorOpts("abcOP_getproperty", mosttypes, argTypes = [mosttypes + vectortypes])
+    genPropRelatedWithVectorOpts("abcOP_getproperty_nonc", mosttypes, argTypes = [mosttypes + vectortypes])
+    genPropRelatedWithVectorOpts("abcOP_setproperty", ["void"], argTypes = [mosttypes + vectortypes, mosttypes])
+    genPropRelatedWithVectorOpts("abcOP_setproperty_nonc", ["void"], argTypes = [mosttypes + vectortypes, mosttypes])
     genPropRelated("abcOP_initproperty", ["void"], argTypes = [mosttypes, mosttypes])
     genPropRelated("abcOP_callproperty", alltypes, argTypes = [mosttypes, argdesctypes, ["..."]])
 	
