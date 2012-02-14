@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # -*- Mode: Python; indent-tabs-mode: nil; tab-width: 4 -*-
 # vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5)
 # ***** BEGIN LICENSE BLOCK *****
