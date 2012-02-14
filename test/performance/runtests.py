@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# -*- Mode: Python; indent-tabs-mode: nil -*-
-# vi: set ts=4 sw=4 expandtab:
-
+# -*- Mode: Python; indent-tabs-mode: nil; tab-width: 4 -*-
+# vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5)
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #
@@ -235,7 +233,7 @@ class PerformanceRuntest(RuntestBase):
     def setOptions(self):
         RuntestBase.setOptions(self)
         self.options += 'S:i:lkr:mp'
-        self.longOptions.extend(['avm2=','avmname=','avm2name=','iterations=','log','socketlog',
+        self.longOptions.extend(['avm2=','avmname=','avm2name=','iterations=','log=','socketlog',
                                  'runtime=','memory','metrics=','larger','vmversion=', 'vm2version=',
                                  'vmargs2=','nooptimize', 'score', 'saveindex=', 'index=',
                                  'perfm','csv=', 'csvappend','prettyprint', 'detail', 'raw',
@@ -332,7 +330,8 @@ class PerformanceRuntest(RuntestBase):
         debugoutput = []
         RuntestBase.compile_test(self, as_file, args, debugoutput)
         self.printOutput(None, debugoutput)
-        RuntestBase.compile_aot(self, splitext(as_file)[0] + ".abc")
+        if self.aotsdk and self.aotout:
+            RuntestBase.compile_aot(self, splitext(as_file)[0] + ".abc")
 
     def socketlog(self, msg):
         if not self.socketlogFile:
