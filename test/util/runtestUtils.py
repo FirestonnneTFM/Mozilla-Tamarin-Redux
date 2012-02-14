@@ -155,6 +155,7 @@ def search_file(filename, search_text):
 def splitList(_list, _groups):
     groups = []
     groupSize = int(len(_list) / _groups)
+    groupSize = 1 if groupSize == 0 else groupSize
     startIndex = 0
     for i in range(1, _groups): 
         groups.append(_list[startIndex:i*groupSize])
