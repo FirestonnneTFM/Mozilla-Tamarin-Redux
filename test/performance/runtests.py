@@ -332,7 +332,8 @@ class PerformanceRuntest(RuntestBase):
         RuntestBase.compile_test(self, as_file, args, debugoutput)
         self.printOutput(None, debugoutput)
         if self.aotsdk and self.aotout:
-            RuntestBase.compile_aot(self, splitext(as_file)[0] + ".abc")
+            if isfile(splitext(as_file)[0] + ".abc"):
+                RuntestBase.compile_aot(self, splitext(as_file)[0] + ".abc")
 
     def socketlog(self, msg):
         if not self.socketlogFile:
