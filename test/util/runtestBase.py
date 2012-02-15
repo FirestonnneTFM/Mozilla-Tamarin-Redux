@@ -184,6 +184,7 @@ class RuntestBase(object):
     quiet = False
     random = False
     rebuildtests = False
+    cleanexit = False
     runSource = False # Run the source file (.as, .js) instead of .abc, magically prepend included files
     show_time = False
     summaryonly = False
@@ -252,6 +253,7 @@ class RuntestBase(object):
         print('    --valgrind      run tests under valgrind')
         print('    --summaryonly   only display final summary')
         print('    --rebuildtests  rebuild the tests only - do not run against VM')
+        print('    --cleanexit     when rebuilding media exit with 0 exitcode even if compilation fails')
         print('    --showtimes     shows the time for each test')
         print('    --ascargs       args to pass to asc on rebuild of test files')
         print('                    can also pass in -no-Argname to remove arg')
@@ -280,7 +282,7 @@ class RuntestBase(object):
         self.longOptions = ['verbose','avm=','asc=','globalabc=','builtinabc=','shellabc=',
                    'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
                    'aotsdk=', 'aotout=', 'aotargs=', 'remoteip=', 'remoteuser=',
-                   'timeout=','testtimeout=', 'rebuildtests','quiet','notimecheck',
+                   'timeout=','testtimeout=', 'rebuildtests','cleanexit','quiet','notimecheck',
                    'showtimes','java=','html','random', 'seed=', 'playerglobalabc=', 'toplevelabc=',
                    'javaargs=', 'summaryonly', 'log=', 'valgrind', 'addtoconfig=',
                    'writeresult','logjunit=','logjunitname=', 'ascoutput'
@@ -358,6 +360,8 @@ class RuntestBase(object):
                 self.rebuildtests = True
                 self.forcerebuild = True
                 self.ascversion = self.getAscVersion(self.asc)
+            elif o in ('--cleanexit',):
+                self.cleanexit = True
             elif o in ('-q', '--quiet'):
                 self.quiet = True
             elif o in ('--summaryonly',):
@@ -1197,9 +1201,9 @@ class RuntestBase(object):
                 if test.endswith(self.abcasmExt):
                     total -= 1
                     self.compile_test(test)
-                    if self.aotsdk: # ABC compiled, so now AOT compile
+                    if exists(testdir+".abc") and self.aotsdk: # ABC compiled, so now AOT compile
                         self.js_print('AOT compiling %s' % (testdir+".abc"))
-                        self.compile_aot(testdir+".abc", [self.abcasmShell+'.abc'])
+                        (f,err,exitcode) = self.compile_aot(testdir+".abc", [self.abcasmShell+'.abc'])
                         if exitcode != 0:
                             print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
                             self.ashErrors.append("aot compilation of %s failed, %s" % (testdir+".abc", err))
@@ -1208,11 +1212,11 @@ class RuntestBase(object):
                     total -= 1
                     if self.aotsdk: # ABC precompiled, so now AOT compile
                         # Need to figure out how to deal with additional required abc files
-                        self.js_print('AOT compiling %s' % (testdir+".abc"))
-                        self.compile_aot(test)
+                        self.js_print('AOT compiling %s' % (testdir+".abc_"))
+                        (f,err,exitcode) = self.compile_aot(test)
                         if exitcode != 0:
-                            print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
-                            self.ashErrors.append("aot compilation of %s failed, %s" % (testdir+".abc", err))
+                            print("ERROR: AOT compilation failed for %s" % (testdir+".abc_"))
+                            self.ashErrors.append("aot compilation of %s failed, %s" % (testdir+".abc_", err))
                     continue
                 else:
                     arglist = parseArgStringToList(self.ascargs)
@@ -1696,6 +1700,8 @@ class RuntestBase(object):
             if self.ashErrors:
                 self.js_print('\ntest run FAILED!')
                 self.js_print('')
+                self.js_print('Failed to compile %s testcases' % len(self.ashErrors))
+                self.js_print('')
                 self.js_print('Compile Errors:')
                 for msg in self.ashErrors:
                     self.js_print('\t'+msg)
@@ -1748,7 +1754,7 @@ class RuntestBase(object):
             if os.path.exists(self.junitlog+'.txt'):
                 os.unlink(self.junitlog+'.txt')
 
-        if self.ashErrors:
+        if self.ashErrors and not self.cleanexit:
             exit(1)
 
     ### Misc Functions ###
