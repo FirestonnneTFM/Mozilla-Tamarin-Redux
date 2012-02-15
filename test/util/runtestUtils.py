@@ -153,15 +153,21 @@ def search_file(filename, search_text):
     
 
 def splitList(_list, _groups):
-    groups = []
-    groupSize = int(len(_list) / _groups)
-    groupSize = 1 if groupSize == 0 else groupSize
-    startIndex = 0
-    for i in range(1, _groups): 
-        groups.append(_list[startIndex:i*groupSize])
-        startIndex = i*groupSize
-    # add the remaining elements
-    groups.append(_list[startIndex:])
+    ''' Split the list of tests to compile using round-robin instead of previous method
+    which would just break the number of tests into '_groups' number of large chunks. The
+    thought here is that it is more likely that tests that take a long time to compile or
+    are being excluded are probably grouped together. Previously it was possible to have
+    an entire thread assigned the as3/Types/Float* tests, which are currently excluded
+    (as of 02/14/2012), which means that you have an entire thread that is not going to
+    compile anything.
+    '''
+    groups=[]
+    for x in range(_groups):
+        groups.append([])
+    i=0
+    for test in _list:
+        groups[i].append(test)
+        i = 0 if i >= (_groups-1) else (i+1)
     return groups
 
 ### ATS Support Functions ###
