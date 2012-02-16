@@ -993,11 +993,6 @@ class RuntestBase(object):
     ### ASC / Compiling Functions ###
 
     def compile_aot(self, abcfile, extraabcs = []):
-        # We use the test config file to mark abc files that fail to AOT compile,
-        # so we need to take account of that here before we try to compile them.
-        self.settings, self.directives = self.parseTestConfig(self.testconfig)
-        failconfig_settings, failconfig_directives = self.parseTestConfig(self.failconfig)
-        self.settings.update(failconfig_settings)
         (testdir, ext) = splitext(abcfile)
         settings = self.get_test_settings(testdir)
         if '.*' in settings and 'skip' in settings['.*']:
@@ -1155,11 +1150,6 @@ class RuntestBase(object):
                 if self.excludeTest(file, settings):
                     continue
                 if self.aotsdk:
-                    # We use the test config file to mark abc files that fail to AOT compile,
-                    # so we need to take account of that here before we try to compile them.
-                    self.settings, self.directives = self.parseTestConfig(self.testconfig)
-                    failconfig_settings, failconfig_directives = self.parseTestConfig(self.failconfig)
-                    self.settings.update(failconfig_settings)
                     settings = self.get_test_settings(testdir)
                     if '.*' in settings and 'skip' in settings['.*']:
                         self.js_print('Skipping -daa %s ... reason: %s' % (test,settings['.*']['skip']))
@@ -1423,6 +1413,19 @@ class RuntestBase(object):
 
         self.js_print("Precompiling %s" % self.abcasmShell)
         self.compile_test(self.abcasmShell+'.as')
+        # Seems odd, but it is possible for the AOT compilation to start
+        # before the abcasm helper abc files is actually written out
+        if self.aotsdk:
+            sleep(5)
+            # Make sure that the aot output directory exists before we spawn threads to compile
+            if not os.path.exists(self.aotout):
+                os.mkdir(self.aotout)
+            # We use the test config file to mark abc files that fail to AOT compile,
+            # so we need to take account of that here before we try to compile them.
+            self.settings, self.directives = self.parseTestConfig(self.testconfig)
+            failconfig_settings, failconfig_directives = self.parseTestConfig(self.failconfig)
+            self.settings.update(failconfig_settings)
+
 
         if self.threads == 1 or platform.system()[:6].upper() == 'CYGWIN':
             self.compileWithAsh(self.tests)
