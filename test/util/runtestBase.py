@@ -838,7 +838,8 @@ class RuntestBase(object):
         # 2. exclude configurations
         # 3. directive
         # 4. comment
-        for line in open(config_file, 'r').readlines():
+        conffile = open(config_file, 'r')
+        for line in conffile.readlines():
             line_num += 1
             line = line.strip()
             if line.startswith('#') or not line:
@@ -898,7 +899,7 @@ class RuntestBase(object):
                 # also store test-level settings by directive
                 if testcase == '.*':
                     directives.setdefault(directive, []).append(test)
-            
+        conffile.close()
         return settings, directives
         
 
@@ -1014,7 +1015,20 @@ class RuntestBase(object):
             os.mkdir(output)
 
         shutil.copyfile(abcfile, outabc)
-        cmd = '%s -Xshell -Xoutput %s %s %s %s' % (os.path.join(self.aotsdk, 'bin/adt'), output, self.aotextraargs, " ".join(extraabcs), outabc)
+        copiedExtraAbcs=[]
+        for abc in extraabcs:
+            extraoutname = abc.replace("./", "")
+            # Replace this before .abc otherwise we won't be able to replace it
+            extraoutname = extraoutname.replace(".abc_", "")
+            extraoutname = extraoutname.replace(".abc", "")
+            extraoutname = extraoutname.replace("/", ".")
+            extraoutname = extraoutname+"."+outname
+            extraoutabc = os.path.join(output, extraoutname + ".abc")
+            if isfile(abc): # Safe guard
+                shutil.copyfile(abc, extraoutabc)
+            copiedExtraAbcs.append(output+"/"+extraoutname+".abc")
+
+        cmd = '%s -Xshell -Xoutput %s %s %s %s' % (os.path.join(self.aotsdk, 'bin/adt'), output, self.aotextraargs, " ".join(copiedExtraAbcs), outabc)
         self.verbose_print(cmd)
 
         try:
@@ -1358,6 +1372,7 @@ class RuntestBase(object):
             ascargs = f.readline()
             if (ascargs[0] != '#'):
                 break
+        f.close()
         ascargs = ascargs.split('|')
         ascargs[0] = ascargs[0].strip()
         if (len(ascargs) == 1): #treat no keyword as a merge
@@ -1749,7 +1764,7 @@ class RuntestBase(object):
               logfile.write("failures=%d" % self.allfails)
             else:
               logfile.write("no failures")
-
+            logfile.close()
         if self.junitlog!=None:
             if self.junitlogname==None:
                 self.junitlogname=self.config

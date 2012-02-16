@@ -350,6 +350,7 @@ class AcceptanceRuntest(RuntestBase):
                 line, extraVmArgs, abcargs, multiabc = self.process_avm_args_line(line, dir)
                 outputCalls.extend(self.runTest(ast, root, testName, '%s.%s' % (testnum, index),
                                                 settings, extraVmArgs, abcargs, multiabc))
+            avm_args_file.close()
         else:
             outputCalls.extend(self.runTest(ast, root, testName, testnum, settings))
 
@@ -366,6 +367,7 @@ class AcceptanceRuntest(RuntestBase):
             if not line or line.startswith('#'):
                 continue
             valid_timezones.append(line)
+        tz_file.close()
         
         # windows python time.tzname returns time zone strings instead of
         # abbreviations.  Take the string and condense it so that it matches
@@ -440,7 +442,9 @@ class AcceptanceRuntest(RuntestBase):
         if self.aotsdk and self.aotout:
             avm_args = ""
             if isfile("%s.avm_args" % ast):
-                avm_args = open("%s.avm_args" % ast).readline()
+                avm_args_file = open("%s.avm_args" % ast)
+                avm_args = avm_args_file.readline()
+                avm_args_file.close()
                 if avm_args.find("mops") >= 0:
                     avm_args = ""
             progname = testName.replace(".abc", "")
@@ -721,6 +725,7 @@ class AcceptanceRuntest(RuntestBase):
                             expectedExitcode = int(line)
                         except ValueError:
                             expectedErr = line
+            f.close()
             return expectedErr, expectedExitcode
         except:
             return 'Error reading .err file: %s' % file, 0
