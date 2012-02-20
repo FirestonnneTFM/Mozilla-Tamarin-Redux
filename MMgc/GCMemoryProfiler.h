@@ -416,7 +416,7 @@ namespace MMgc
     inline void *GetUserPointer(const void *item) { return (void*)((uintptr_t) item +  USER_POINTER_WORDS * sizeof(int32_t)); }
 
     /**
-    * Print errorr messsage and stack traces for allocation/free of memory
+    * Print error messsage and stack traces for allocation/free of memory
     * that has been written over after being deleted
     */
     void ReportDeletedMemoryWrite(const void* item);
