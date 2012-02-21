@@ -49,6 +49,8 @@
 #define SAMPLE_CHECK()
 #endif
 
+#include "ITelemetry.h"
+
 namespace MMgc
 {
 #ifdef MMGC_MEMORY_PROFILER
@@ -496,6 +498,7 @@ namespace MMgc
             return;
         }
 
+        TELEMETRY_METHOD(getTelemetry(), ".gc.Collect");
         ReapZCT(scanStack);
 
         if(!marking)
@@ -642,7 +645,7 @@ namespace MMgc
         MarkQueueAndStack(scanStack);
 #ifdef DEBUG
         // If we're doing a mark to validate DRC then also pin
-        // RCObjects here. 
+        // RCObjects here.
         VMPI_callWithRegistersSaved(ZCT::DoPinProgramStack, &zct);
 #endif
         if(m_markStackOverflow) {
@@ -700,6 +703,7 @@ namespace MMgc
         if (nogc)
             return;
 
+        TELEMETRY_METHOD(getTelemetry(), ".gc.CollectionWork");
         if (incremental) {
             // If we're reaping don't do any work, this simplifies policy event timing and improves
             // incrementality.
@@ -1103,6 +1107,7 @@ namespace MMgc
 
     void GC::SweepNeedsSweeping()
     {
+        TELEMETRY_METHOD(getTelemetry(), ".gc.Sweep");
         EstablishSweepInvariants();
 
         // clean up any pages that need sweeping
@@ -1229,6 +1234,7 @@ namespace MMgc
             gclog("[mem] sweep-start\n");
         }
         
+        TELEMETRY_METHOD(getTelemetry(), ".gc.Sweep");
         // 'collecting' must be true because it indicates allocations should
         // start out marked and the write barrier should short-circuit (not
         // record any hits).  We can't rely on write barriers to mark objects
@@ -1882,10 +1888,10 @@ namespace MMgc
         size_t total_overhead = 0;
         size_t total_internal_waste = 0;
         GCAlloc** allocators[] = {
-            containsPointersRCAllocs, 
-            containsPointersNonfinalizedAllocs, 
-            containsPointersFinalizedAllocs, 
-            noPointersNonfinalizedAllocs, 
+            containsPointersRCAllocs,
+            containsPointersNonfinalizedAllocs,
+            containsPointersFinalizedAllocs,
+            noPointersNonfinalizedAllocs,
             noPointersFinalizedAllocs
         };
         for(int j = 0;j<5;j++)
@@ -2071,14 +2077,18 @@ namespace MMgc
         markerGraph.clear();
 #endif
 
-        if (incremental)
-            MarkNonstackRoots();
-
-        policy.signal(GCPolicyManager::END_StartIncrementalMark);
-
+        {
+            if (incremental)
+            {
+                TELEMETRY_METHOD(getTelemetry(), ".gc.Mark");
+                MarkNonstackRoots();
+            }
+            policy.signal(GCPolicyManager::END_StartIncrementalMark);
+        }
+       
         // FIXME (policy): arguably a bug to do this here if StartIncrementalMark has exhausted its quantum
         // doing eager sweeping.
-
+ 
         if (incremental)
             IncrementalMark();
     }
@@ -2884,6 +2894,8 @@ namespace MMgc
         time = 1;
 #endif
 
+        TELEMETRY_METHOD(getTelemetry(), ".gc.Mark");
+        
         SAMPLE_FRAME("[mark]", core());
 
         // Don't force collections to finish if the mark stack is empty;
@@ -2962,60 +2974,65 @@ namespace MMgc
             return;
         }
 
-        // It is possible, probably common, to enter FinishIncrementalMark without the
-        // mark queue being empty.   Clear out the queue synchronously here, we don't
-        // want anything pending when we start marking roots: multiple active root protectors
-        // for the same root is a mess.
-
-        Mark();
-
-        // Force repeated restarts and marking until we're done.  For discussion
-        // of completion, see the comments above HandleMarkStackOverflow.
-
-        while (m_markStackOverflow) {
-            m_markStackOverflow = false;
-            HandleMarkStackOverflow();      // may set
-            FlushBarrierWork();             //    m_markStackOverflow
-            Mark();                         //       to true again
-        }
-
-        // finished in Sweep
-        sweepStart = VMPI_getPerformanceCounter();
-
-        // mark roots again, could have changed (alternative is to put WB's on the roots
-        // which we may need to do if we find FinishIncrementalMark taking too long)
-
-        policy.signal(GCPolicyManager::START_FinalRootAndStackScan);
-
-        GCAssert(!m_markStackOverflow);
-
-        FlushBarrierWork();
-        MarkNonstackRoots();
-        MarkQueueAndStack(scanStack);
-
-        // Force repeated restarts and marking until we're done.  For discussion
-        // of completion, see the comments above HandleMarkStackOverflow.  Note
-        // that we must use MarkQueueAndStack rather than plain Mark because there
-        // is no guarantee that the stack was actually pushed onto the mark stack.
-        // If we iterate several times there may be a performance penalty as a
-        // consequence of that, but it's not likely that that will in fact happen,
-        // and it's not obvious how to fix it.
-
-        // Bugzilla 719450: Both StackMemory and native stack are part of
-        // repeated restarts.  It would be a waste to lift MarkStackRoots
-        // to a separate loop; HandleMarkStackOverflow should grossly
-        // dominate MarkStackRoots with respect to time.
-
-        while (m_markStackOverflow) {
-            m_markStackOverflow = false;
-            HandleMarkStackOverflow();                          // may set
-            FlushBarrierWork();                                 //    m_markStackOverflow
-            MarkQueueAndStack(scanStack);                       //       to true again
-        }
-        ClearMarkStack();               // Frees any cached resources
-        m_barrierWork.Clear();
-        zct.Prune();                            // Frees unused memory
-
+        {
+            TELEMETRY_METHOD(getTelemetry(), ".gc.Mark");
+            
+            // It is possible, probably common, to enter FinishIncrementalMark without the
+            // mark queue being empty.   Clear out the queue synchronously here, we don't
+            // want anything pending when we start marking roots: multiple active root protectors
+            // for the same root is a mess.
+            
+            Mark();
+            
+            // Force repeated restarts and marking until we're done.  For discussion
+            // of completion, see the comments above HandleMarkStackOverflow.
+            
+            while (m_markStackOverflow) {
+                m_markStackOverflow = false;
+                HandleMarkStackOverflow();      // may set
+                FlushBarrierWork();             //    m_markStackOverflow
+                Mark();                         //       to true again
+            }
+            
+            // finished in Sweep
+            sweepStart = VMPI_getPerformanceCounter();
+            
+            // mark roots again, could have changed (alternative is to put WB's on the roots
+            // which we may need to do if we find FinishIncrementalMark taking too long)
+            
+            policy.signal(GCPolicyManager::START_FinalRootAndStackScan);
+            
+            GCAssert(!m_markStackOverflow);
+            
+            FlushBarrierWork();
+            MarkNonstackRoots();
+            MarkQueueAndStack(scanStack);
+            
+            // Force repeated restarts and marking until we're done.  For discussion
+            // of completion, see the comments above HandleMarkStackOverflow.  Note
+            // that we must use MarkQueueAndStack rather than plain Mark because there
+            // is no guarantee that the stack was actually pushed onto the mark stack.
+            // If we iterate several times there may be a performance penalty as a
+            // consequence of that, but it's not likely that that will in fact happen,
+            // and it's not obvious how to fix it.
+            
+            // Bugzilla 719450: Both StackMemory and native stack are part of
+            // repeated restarts.  It would be a waste to lift MarkStackRoots
+            // to a separate loop; HandleMarkStackOverflow should grossly
+            // dominate MarkStackRoots with respect to time.
+            
+            while (m_markStackOverflow) {
+                m_markStackOverflow = false;
+                HandleMarkStackOverflow();                          // may set
+                FlushBarrierWork();                                 //    m_markStackOverflow
+                MarkQueueAndStack(scanStack);                       //       to true again
+            }
+            ClearMarkStack();               // Frees any cached resources
+            m_barrierWork.Clear();
+            zct.Prune();                            // Frees unused memory
+            
+        } // End of Telemetry ".gc.mark" extent
+ 
         policy.signal(GCPolicyManager::END_FinalRootAndStackScan);
 
 #ifdef _DEBUG
@@ -3574,10 +3591,10 @@ namespace MMgc
         size_t allocated;
 
         GCAlloc** allocators[] = {
-            containsPointersRCAllocs, 
-            containsPointersNonfinalizedAllocs, 
-            containsPointersFinalizedAllocs, 
-            noPointersNonfinalizedAllocs, 
+            containsPointersRCAllocs,
+            containsPointersNonfinalizedAllocs,
+            containsPointersFinalizedAllocs,
+            noPointersNonfinalizedAllocs,
             noPointersFinalizedAllocs
         };
         for(int j = 0;j<5;j++)

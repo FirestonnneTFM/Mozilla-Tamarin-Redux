@@ -49,6 +49,8 @@
 #define SAMPLE_CHECK()
 #endif
 
+#include "ITelemetry.h"
+
 //#define ZCT_TESTING                   // Test the handling of a failure to extend the ZCT
 
 namespace MMgc
@@ -328,6 +330,7 @@ namespace MMgc
 #endif
 
         reaping = true;
+        TELEMETRY_METHOD(gc->getTelemetry(), ".gc.Reap");
         gc->policy.signal(GCPolicyManager::START_ReapZCT);
         SAMPLE_FRAME("[reap]", gc->core());
 
