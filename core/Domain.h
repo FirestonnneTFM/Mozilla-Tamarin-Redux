@@ -59,6 +59,8 @@ namespace avmplus
         ClassClosure* getParameterizedType(ClassClosure* type);
         void addParameterizedType(ClassClosure* type, ClassClosure* parameterizedType);
 
+        GCRef<MultinameMethodInfoHashtable> getLoadedScripts() { return m_loadedScripts; }
+
     GC_DATA_BEGIN(Domain)
 
     private:
