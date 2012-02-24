@@ -232,7 +232,8 @@ namespace avmshell
     double SystemClass::get_totalMemory()
     {
         MMgc::GCHeap* gcheap = MMgc::GCHeap::GetGCHeap();
-        return double(gcheap->GetTotalHeapSize() * MMgc::GCHeap::kBlockSize);
+        // Bugzilla 678975: use GetUsedHeapSize for compatibility with Player
+        return double(gcheap->GetUsedHeapSize() * MMgc::GCHeap::kBlockSize);
     }
 
     double SystemClass::get_freeMemory()
