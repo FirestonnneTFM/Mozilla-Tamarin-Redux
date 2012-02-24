@@ -523,8 +523,8 @@ Atom op_add(AvmCore* core, Atom lhs, Atom rhs)
     tagprof("op_add val2", rhs);
 
 #ifdef AVMPLUS_64BIT
-// since 64-bit int atoms expect exactly 53 bits of precision, we want to shift bit 53+3 up into the sign bit and back down
-#  define SIGN_EXTEND(v)       ((intptr_t(v) << 8) >> 8)
+// since 64-bit int atoms expect exactly 54 bits of precision, we want to shift bit 54+3 up into the sign bit and back down
+#  define SIGN_EXTEND(v)       ((intptr_t(v) << (atomSignExtendShift-AtomConstants::kAtomTypeSize)) >> (atomSignExtendShift-AtomConstants::kAtomTypeSize))
 #else
 #  define SIGN_EXTEND(v)       (intptr_t(v))
 #endif

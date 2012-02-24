@@ -40,6 +40,8 @@
  */
 //-----------------------------------------------------------------------------
 
+import avmplus.System;
+
 var SECTION = "561249";
 var VERSION = "";
 var TITLE   = "Specialized Addition Helper Functions";
@@ -57,29 +59,34 @@ function VerifyEquals(actual, expect, a, b, ctx)
     array[item++] = new TestCase(SECTION, status, expect, actual);
 }
 
+function canon(a)
+{
+    return System.canonicalizeNumber(a);
+}
+
 function AddIntToAtom(a:int, b, c)
 {
-    VerifyEquals(a + b, c, a, b, "AddIntToAtom");
+    VerifyEquals(a + canon(b), c, a, b, "AddIntToAtom");
 }
 
 function AddAtomToInt(a, b:int, c)
 {
-    VerifyEquals(a + b, c, a, b, "AddAtomToInt");
+    VerifyEquals(canon(a) + b, c, a, b, "AddAtomToInt");
 }
 
 function AddDoubleToAtom(a:Number, b, c)
 {
-    VerifyEquals(a + b, c, a, b, "AddDoubleToAtom");
+    VerifyEquals(a + canon(b), c, a, b, "AddDoubleToAtom");
 }
 
 function AddAtomToDouble(a, b:Number, c)
 {
-    VerifyEquals(a + b, c, a, b, "AddAtomToDouble");
+    VerifyEquals(canon(a) + b, c, a, b, "AddAtomToDouble");
 }
 
 function AddAtomToAtom(a, b, c)
 {
-    VerifyEquals(a + b, c, a, b, "AddAtomToAtom");
+    VerifyEquals(canon(a) + canon(b), c, a, b, "AddAtomToAtom");
 }
 
 var z = null;

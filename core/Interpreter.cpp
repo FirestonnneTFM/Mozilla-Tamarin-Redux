@@ -112,8 +112,8 @@ namespace avmplus
 // note that the argument to SIGN_EXTEND is expected to be upshifted 3 bits (not a "raw" intptr),
 // but it doesn't expect or require the tag bits to be set properly.
 #ifdef AVMPLUS_64BIT
-// since 64-bit int atoms expect exactly 53 bits of precision, we want to shift bit 53+3 up into the sign bit and back down
-#  define SIGN_EXTEND(v)       ((intptr_t(v) << 8) >> 8)
+// since 64-bit int atoms expect exactly 54 bits of precision, we want to shift bit 54+3 up into the sign bit and back down
+#  define SIGN_EXTEND(v)       ((intptr_t(v) << (atomSignExtendShift-AtomConstants::kAtomTypeSize)) >> (atomSignExtendShift-AtomConstants::kAtomTypeSize))
 #else
 #  define SIGN_EXTEND(v)       (intptr_t(v))
 #endif
@@ -121,7 +121,7 @@ namespace avmplus
 // CLAMP_32 is equivalent to running an int atom thru AvmCore::integer (ie, truncate to int32_t using the right rules),
 // but, like SIGN_EXTEND, it expects the argument to be upshifted 3 bit.
 #ifdef AVMPLUS_64BIT
-#  define CLAMP_32(v)       ((intptr_t(v) << 29) >> 29)
+#  define CLAMP_32(v)       ((intptr_t(v) << (32-AtomConstants::kAtomTypeSize)) >> (32-AtomConstants::kAtomTypeSize))
 #else
 #  define CLAMP_32(v)       (intptr_t(v))
 #endif
