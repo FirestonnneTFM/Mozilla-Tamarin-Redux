@@ -77,10 +77,6 @@
       true,
       System.freeMemory>=0);
 
-    AddTestCase("System.freeMemory <= System.totalMemory",
-      true,
-      System.freeMemory<=System.totalMemory);
-
     AddTestCase("System.totalMemory >0",
       true,
       System.totalMemory>0);
