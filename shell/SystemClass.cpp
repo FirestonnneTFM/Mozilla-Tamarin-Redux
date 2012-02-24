@@ -296,4 +296,35 @@ namespace avmshell
         // can distinguish this from construct="none" in the acceptance tests.
         cls->toplevel()->argumentErrorClass()->throwError(kNotImplementedError, cls->core()->toErrorString(&qname));
     }
+
+    bool SystemClass::is64bit()
+    {
+        #ifdef AVMPLUS_64BIT
+            return true;
+        #else
+            return false;
+        #endif
+    }
+
+    bool SystemClass::isIntptr(avmplus::Atom a)
+    {
+        return atomKind(a) == avmplus::AtomConstants::kIntptrType;
+    }
+
+    avmplus::Atom SystemClass::canonicalizeNumber(avmplus::Atom a)
+    {
+        if (atomKind(a) == avmplus::AtomConstants::kDoubleType) {
+            double val = *((double*)atomPtr(a));
+            intptr_t intval = intptr_t(val);
+            if (double(intval) == val && !(val == 0 && avmplus::MathUtils::isNegZero(val))) {
+                // Atom is double representing an integer value that will fit in intptr_t.
+                if (avmplus::atomIsValidIntptrValue(intval)) {
+                    // The intptr_t value will also fit in kIntptrType atom, with tag.
+                    return avmplus::atomFromIntptrValue(intval);
+                }
+            }
+        }
+        return a;
+    }
+
 }

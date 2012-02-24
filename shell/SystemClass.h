@@ -351,6 +351,20 @@ namespace avmshell
 
         void pauseForGCIfCollectionImminent(double imminence);
 
+        // Support for VM tests that depend on representation of numeric atoms.
+        // These are provided solely for testing purposes, as the semantics of an AS3 program
+        // should not depend on the word size of the platform nor the internal encoding of atoms.
+
+        // Return true if running on a 64-bit platform.
+        bool is64bit();
+
+        // Return true if the argument is an atom with tag kIntptrType.
+        bool isIntptr(avmplus::Atom a);
+
+        // Return argument value as a kIntptrType atom if the argument is a numeric
+        // value that can be so represented, else return the argument unchanged.
+        avmplus::Atom canonicalizeNumber(avmplus::Atom a);
+
         GC_NO_DATA(SystemClass)
 
         DECLARE_SLOTS_SystemClass;

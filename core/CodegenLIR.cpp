@@ -2224,11 +2224,11 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     // FAST_ADD_INT_TO_ATOM(lhs, rhs, result, fallback)
     //    if ((rhs & kAtomTypeMask) != kIntptrType) goto fallback;   # punt if atom argument rhs is not intptr
     //    intptr_t lhsExtended = i;                                  # extend int argument lhs to atom size
-    //    intptr_t lhsShifted = lhsExtended << (kAtomTypeSize+8);    # align lhs with 53-bit payload of rhs (see next step)
-    //    intptr_t rhsShifted = rhs << 8;                            # left-justify 53-bit payload of rhs (note rhs is tagged)
-    //    intptr_t sumShifted = lhsShifted + rhsShifted;             # add aligned values, producing 56-bit tagged sum, left-justified
-    //    if (OVERFLOW) goto fallback;                               # punt on overflow, as sum will not fit in 53-bit field allotted
-    //    intptr_t sum = sumShifted >> 8;                            # right-justify 56-bit tagged value (53 payload bits + 3 tag bits)
+    //    intptr_t lhsShifted = lhsExtended << (kAtomTypeSize+7);    # align lhs with 54-bit payload of rhs (see next step)
+    //    intptr_t rhsShifted = rhs << 7;                            # left-justify 54-bit payload of rhs (note rhs is tagged)
+    //    intptr_t sumShifted = lhsShifted + rhsShifted;             # add aligned values, producing 57-bit tagged sum, left-justified
+    //    if (OVERFLOW) goto fallback;                               # punt on overflow, as sum will not fit in 57-bit field allotted
+    //    intptr_t sum = sumShifted >> 7;                            # right-justify 57-bit tagged value (54 payload bits + 3 tag bits)
     //    result = sum;                                              # result is intptr atom, properly tagged
     //
     // 32-bit:
@@ -2253,12 +2253,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         branchToLabel(LIR_jf, eqp(tag, AtomConstants::kIntptrType), fallback);
         LIns* lhsExtended = i2p(lhs);
         #ifdef AVMPLUS_64BIT
-            // int argument is guaranteed to fit, but must restrict intptr result to 53 bit range
-            // TODO: Consider maintaining 53-bit intptrs in pre-shifted form.
-            LIns* lhsShifted = lshp(lhsExtended, AtomConstants::kAtomTypeSize + 8);
-            LIns* rhsShifted = lshp(rhs, 8);
+            // int argument is guaranteed to fit, but must restrict intptr result to 54 bit range
+            // TODO: Consider maintaining 54-bit intptrs in pre-shifted form.
+            LIns* lhsShifted = lshp(lhsExtended, atomSignExtendShift);
+            LIns* rhsShifted = lshp(rhs, atomSignExtendShift-AtomConstants::kAtomTypeSize);
             LIns* sumShifted = branchJovToLabel(LIR_addjovp, lhsShifted, rhsShifted, fallback);
-            LIns* sum = rshp(sumShifted, 8);
+            LIns* sum = rshp(sumShifted, atomSignExtendShift-AtomConstants::kAtomTypeSize);
         #else
             // verify that int value will fit in intptr
             LIns* lhsShifted = lshp(lhsExtended, AtomConstants::kAtomTypeSize);
@@ -2400,11 +2400,11 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
     //     if (((lhsa ^ kIntptrType) | (rhsa ^ kIntptrType)) & kAtomTypeMask) goto fallback;
     //     # both arguments are intptr atoms
     //     intptr_t lhsStripped = lhsa - kIntptrType;               # zero out tag bits on lhs
-    //     intptr_t lhsShifted = lhsStripped << 8;                  # left-justify 53-bit payload (followed by 0s in tag position)
-    //     intptr_t rhsShifted = rhsa << 8;                         # align rhs payload and tag with left-justified lhs
-    //     intptr_t sumShifted = lhsShifted + rhsShifted;           # add aligned values, producing 53-bit left-justified sum followed by tag
+    //     intptr_t lhsShifted = lhsStripped << 7;                  # left-justify 54-bit payload (followed by 0s in tag position)
+    //     intptr_t rhsShifted = rhsa << 7;                         # align rhs payload and tag with left-justified lhs
+    //     intptr_t sumShifted = lhsShifted + rhsShifted;           # add aligned values, producing 54-bit left-justified sum followed by tag
     //     if (OVERFLOW) goto fallback;
-    //     result = sumShifted >> 8;                                # right-justify tagged sum (53-bit payload + 3-bit tag)
+    //     result = sumShifted >> 7;                                # right-justify tagged sum (54-bit payload + 3-bit tag)
     //     goto done;
     // fallback:
     //     result = op_add_a_aa(coreAddr, lhsa, rhsa);              # handle the general case out-of-line
@@ -2449,12 +2449,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             branchToLabel(LIR_jf, eqp0(t3), fallback);
             LIns* lhsStripped = subp(lhs, AtomConstants::kIntptrType);
             #ifdef AVMPLUS_64BIT
-                // restrict range of intptr result to 53 bits
-                // since 64-bit int atoms expect exactly 53 bits of precision, shift bit 53+3 up into the sign bit
-                LIns* lhsShifted = lshp(lhsStripped, 8);
-                LIns* rhsShifted = lshp(rhs, 8);
+                // restrict range of intptr result to 54 bits
+                // since 64-bit int atoms expect exactly 54 bits of precision, shift bit 54+3 up into the sign bit
+                LIns* lhsShifted = lshp(lhsStripped, atomSignExtendShift-AtomConstants::kAtomTypeSize);
+                LIns* rhsShifted = lshp(rhs, atomSignExtendShift-AtomConstants::kAtomTypeSize);
                 LIns* sumShifted = branchJovToLabel(LIR_addjovp, lhsShifted, rhsShifted, fallback);
-                LIns* sum = rshp(sumShifted, 8);
+                LIns* sum = rshp(sumShifted, atomSignExtendShift-AtomConstants::kAtomTypeSize);
             #else
                 LIns* sum = branchJovToLabel(LIR_addjovp, lhsStripped, rhs, fallback);
             #endif

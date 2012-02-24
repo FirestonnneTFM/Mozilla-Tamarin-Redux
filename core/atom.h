@@ -183,17 +183,27 @@ namespace avmplus
     //  - On 32-bit systems an intptr_t is 32 bits wide so the range is -2^28 .. 2^28-1 (29 bit range).
     //
     //  - On 64-bit systems an intptr_t is 64 bits wide so the value is actually constrained by
-    //    the available bits in a double.  There are 53 bits of unsigned mantissa (including the
-    //    hidden leading 1 bit), in addition to the sign bit, for a total of 54 bits, so the
-    //    range is -2^53-1 .. 2^53-1.  Note the sign+magnitude representation causes the range to be
-    //    symmetric.
+    //    the available bits in a double.  There are 52 bits of unsigned mantissa represented explicitly,
+    //    an implicit leading 1 bit, and a sign bit.  This gives a total of 54 bits in a signed-magnitude
+    //    representation, which would ordinarily allow a range of -2^53-1 .. 2^53-1.  Due to the implicit
+    //    leading 1 bit, however, larger powers of 2 can be represented with an appropriate exponent.
+    //    As a result, the contiguous range of exactly-representable integers is actually extended to
+    //    -2^53 .. 2^53.  When working with integer values in intptr_t form, however, we use a twos-complement
+    //    representation, in which 54 bits provides a range of -2^53 .. 2^53-1.  We represent all integers
+    //    outside this range as doubles.  Being slightly conservative in this way allows us to verify that
+    //    an integer value is in range merely by verifying that it fits in 54 bits in the native twos-complement
+    //    form, without explicit comparison with the bounds.  These bounds should be used consistently, so that
+    //    all integer values have a canonical representation as atoms. NOTE: There is no absolute requirement
+    //    that integers be in canonical form, and correctness must never depend on it.  For performance
+    //    reasons, we sometimes roll over to the double-float  representation at 32 bits in order to exploit a
+    //    cheaper test.  See https://bugzilla.mozilla.org/show_bug.cgi?id=601426#c6 .
     //
     // atomSignExtendShift is the number of bits to shift an untagged intptr_t left and
     // then right in order to properly sign extend it.  (I don't like the 'atom' prefix but
     // it fits in with the pattern of the others.)
 
 #ifdef AVMPLUS_64BIT
-    const intptr_t atomMinIntValue = -((1LL<<53)-1);
+    const intptr_t atomMinIntValue = -(1LL<<53);
     const intptr_t atomMaxIntValue = (1LL<<53)-1;
     const intptr_t atomSignExtendShift = 10;         // 54 significant bits
 #else

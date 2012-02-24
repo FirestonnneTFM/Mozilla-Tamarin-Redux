@@ -132,6 +132,20 @@ package avmplus
          * makes for a smoother user experience.
          */
         public static native function pauseForGCIfCollectionImminent(imminence:Number=0.75): void;
+
+        // Support for VM tests that depend on representation of numeric atoms.
+        // These are provided solely for testing purposes, as the semantics of an AS3 program
+        // should not depend on the word size of the platform nor the internal encoding of atoms.
+
+        // Return true if running on a 64-bit platform.
+        public native static function is64bit(): Boolean;
+
+        // Return true if the argument is an atom with tag kIntptrType.
+        public native static function isIntptr(a:*): Boolean;
+
+        // Return argument value as a kIntptrType atom if the argument is a numeric
+        // value that can be so represented, else return the argument unchanged.
+        public native static function canonicalizeNumber(a:*):*;
     }
 
     [native(cls="::avmshell::FileClass", methods="auto", construct="none")]
