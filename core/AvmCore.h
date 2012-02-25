@@ -1557,16 +1557,19 @@ const int kBufferPadding = 16;
         static Atom astype(Atom atom, Traits* expected);
 
         /**
-         * implementation of OP_increg, decreg, increment, decrement which correspond to
+         * implementation of OP_inclocal, declocal, increment, decrement which correspond to
          * ++ and -- operators in AS.
+         *
+         * This function is now used only on the interpreter slowpath, and has been restricted
+         * to apply only to kIntptrType and kDoubleType atoms.
          */
-        void increment_d(Atom *atom, int delta);
+        Atom increment_number_d(Atom atom, int delta);
 
         /**
-         * implementation of OP_increg, decreg, increment, decrement which correspond to
+         * implementation of OP_inclocal_i, declocal_i, increment_i, decrement_i which correspond to
          * ++ and -- operators in AS.
          */
-        void increment_i(Atom *atom, int delta);
+        Atom increment_i(Atom atom, int delta);
 
         /**
          * ES3's internal ToPrimitive() function

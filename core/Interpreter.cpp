@@ -1446,25 +1446,6 @@ namespace avmplus
                 NEXT;
             }
 
-
-
-// Add 1 to a1 if it is a fixnum and computation does not overflow, or
-// if a1 is a flonum.  On success, store the result in dest, and NEXT.
-
-#define FAST_INC_MAYBE(a1,dest) \
-    if (IS_INTEGER(a1)) { \
-        u1t = a1 ^ kIntptrType; \
-        u3t = SIGN_EXTEND(u1t + (1 << 3)); \
-        if ((intptr_t)u1t < 0 || (intptr_t)(u3t ^ u1t) >= 0) { \
-            dest = CHECK_INT_ATOM(u3t | kIntptrType); \
-            NEXT; \
-        } \
-    } \
-    else if (IS_DOUBLE(a1)) { \
-        dest = core->doubleToAtom(DOUBLE_VALUE(a1) + 1.0); \
-        NEXT; \
-    }
-
 #define ADD_TWO_VALUES_AND_NEXT(a1, a2, dest) \
     if (IS_BOTH_INTEGER(a1, a2)) { \
         u1t = a1 ^ kIntptrType; \
@@ -1502,48 +1483,41 @@ FLOAT_ONLY(\
     dest = op_add(core, a1, a2);\
     NEXT
 
-// Subtract 1 from a1 if a1 is a fixnum and computation does not overflow.
-// On success, store the result in dest, and NEXT.
-#define FAST_DEC_MAYBE(a1,dest) \
-    if (IS_INTEGER(a1)) { \
-        u1t = a1 ^ kIntptrType; \
-        u3t = SIGN_EXTEND(u1t - (1 << 3)); \
-        if ((intptr_t)u1t >= 0 || (intptr_t)(u1t ^ u3t) >= 0) { \
-            dest = CHECK_INT_ATOM(u3t | kIntptrType); \
-            NEXT; \
-        } \
-    } \
-    else if (IS_DOUBLE(a1)) { \
-        dest = core->doubleToAtom(DOUBLE_VALUE(a1) - 1.0); \
-        NEXT; \
-    }
-
             INSTR(increment) {
                 SAVE_EXPC;
                 a2p = sp;
             increment_impl:
                 a1 = *a2p;
-                FAST_INC_MAYBE(a1,*a2p);    // note, *a2p is lvalue here
+                if (IS_INTEGER(a1)) {
+                    i1 = atomGetIntptr(a1);
+                    if (i1 < atomMaxIntValue)
+                        *a2p = CHECK_INT_ATOM((intptr_t)a1 + (1 << 3));
+                    else
+                        *a2p = core->doubleToAtom((double)i1 + 1.0);
+                    NEXT;
+                }
+                if (IS_DOUBLE(a1)) {
+                    *a2p = core->doubleToAtom(DOUBLE_VALUE(a1) + 1.0);
+                    NEXT;
+                }
 #ifdef VMCFG_FLOAT
-                if(pool->hasFloatSupport() ) {
-                    a1 = *a2p = core->numericAtom(a1);
-                    if( IS_FLOAT(a1) ){
-                        *a2p = core->floatToAtom(FLOAT_VALUE(a1) + 1.0f );
+                if (pool->hasFloatSupport()) {
+                    a1 = core->numericAtom(a1);
+                    if (IS_FLOAT(a1)) {
+                        *a2p = core->floatToAtom(FLOAT_VALUE(a1) + 1.0f);
                         NEXT;
                     }
-                    if( IS_FLOAT4(a1) ){
-                        float4_t one = { 1,1,1,1 };
-                        *a2p = core->float4ToAtom( f4_add(AvmCore::atomToFloat4(a1), one ) );
+                    if (IS_FLOAT4(a1)) {
+                        float4_t one = {1, 1, 1, 1};
+                        *a2p = core->float4ToAtom(f4_add(AvmCore::atomToFloat4(a1), one));
                         NEXT;
                     }
-                    AvmAssert( IS_DOUBLE(a1) || IS_INTEGER(a1) );
-                } else 
+                } else
 #endif // VMCFG_FLOAT
                 {
-                    *a2p = core->numberAtom(a1);
+                    a1 = core->numberAtom(a1);
                 }
-
-                core->increment_d(a2p, 1);
+                *a2p = core->increment_number_d(a1, 1);
                 NEXT;
             }
 
@@ -1558,11 +1532,24 @@ FLOAT_ONLY(\
                 a2p = sp;
             increment_i_impl:
                 a1 = *a2p;
-                if (!IS_INTEGER(a1)) {
-                    a1 = core->intAtom(a1);
+                if (IS_INTEGER(a1)) {
+                    #ifdef AVMPLUS_64BIT
+                        // Result always fits 64-bit kIntptrType atom.
+                        *a2p = CHECK_INT_ATOM(CLAMP_32((intptr_t)a1 + (1 << 3)));
+                    #else
+                        i1 = atomGetIntptr(a1);
+                        if (i1 < atomMaxIntValue)
+                            *a2p = CHECK_INT_ATOM((intptr_t)a1 + (1 << 3));
+                        else
+                            *a2p = core->intToAtom((int32_t)i1 + 1);
+                    #endif
+                    NEXT;
                 }
-                FAST_INC_MAYBE(a1,*a2p);    // note, *a2p is lvalue here
-                core->increment_i(a2p, 1);
+                if (IS_DOUBLE(a1)) {
+                    *a2p = core->intToAtom((int32_t)core->atomToDouble(a1) + 1);
+                    NEXT;
+                }
+                *a2p = core->increment_i(a1, 1);
                 NEXT;
             }
 
@@ -1577,26 +1564,36 @@ FLOAT_ONLY(\
                 a2p = sp;
             decrement_impl:
                 a1 = *a2p;
-                FAST_DEC_MAYBE(a1,*a2p);    // note, *a2p is lvalue here
+                if (IS_INTEGER(a1)) {
+                    i1 = atomGetIntptr(a1);
+                    if (i1 > atomMinIntValue)
+                        *a2p = CHECK_INT_ATOM((intptr_t)a1 - (1 << 3));
+                    else
+                        *a2p = core->doubleToAtom((double)i1 - 1.0);
+                    NEXT;
+                }
+                if (IS_DOUBLE(a1)) {
+                    *a2p = core->doubleToAtom(DOUBLE_VALUE(a1) - 1.0);
+                    NEXT;
+                }
 #ifdef VMCFG_FLOAT
-                if( pool->hasFloatSupport() ) {
-                    a1 = *a2p = core->numericAtom(a1);
-                    if( IS_FLOAT(a1) ){
-                        *a2p = core->floatToAtom(FLOAT_VALUE(a1) - 1.0f );
+                if (pool->hasFloatSupport()) {
+                    a1 = core->numericAtom(a1);
+                    if (IS_FLOAT(a1)) {
+                        *a2p = core->floatToAtom(FLOAT_VALUE(a1) - 1.0f);
                         NEXT;
                     }
-                    if( IS_FLOAT4(a1) ){
-                        float4_t one = { 1,1,1,1 };
-                        *a2p = core->float4ToAtom( f4_sub(AvmCore::atomToFloat4(a1), one ) );
+                    if (IS_FLOAT4(a1)) {
+                        float4_t one = {1, 1, 1, 1};
+                        *a2p = core->float4ToAtom(f4_sub(AvmCore::atomToFloat4(a1), one));
                         NEXT;
                     }
-                    AvmAssert( IS_DOUBLE(a1) || IS_INTEGER(a1) );
                 } else
 #endif // VMCFG_FLOAT
                 {
-                    *a2p = core->numberAtom(a1);
+                    a1 = core->numberAtom(a1);
                 }
-                core->increment_d(a2p, -1);
+                *a2p = core->increment_number_d(a1, -1);
                 NEXT;
             }
 
@@ -1611,8 +1608,24 @@ FLOAT_ONLY(\
                 a2p = sp;
             decrement_i_impl:
                 a1 = *a2p;
-                FAST_DEC_MAYBE(a1,*a2p);    // note, *a2p is lvalue here
-                core->increment_i(a2p, -1);
+                if (IS_INTEGER(a1)) {
+                    #ifdef AVMPLUS_64BIT
+                        // Result always fits 64-bit kIntptrType atom.
+                        *a2p = CHECK_INT_ATOM(CLAMP_32((intptr_t)a1 - (1 << 3)));
+                    #else
+                        i1 = atomGetIntptr(a1);
+                        if (i1 > atomMinIntValue)
+                            *a2p = CHECK_INT_ATOM((intptr_t)a1 - (1 << 3));
+                        else
+                            *a2p = core->intToAtom((int32_t)i1 - 1);
+                    #endif
+                    NEXT;
+                }
+                if (IS_DOUBLE(a1)) {
+                    *a2p = core->intToAtom((int32_t)core->atomToDouble(a1) - 1);
+                    NEXT;
+                }
+                *a2p = core->increment_i(a1, -1);
                 NEXT;
             }
 

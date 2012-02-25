@@ -2736,40 +2736,43 @@ return the result of the comparison ToPrimitive(x) == y.
         return NULL;
     }
 
-    void AvmCore::increment_d(Atom *ap, int delta)
+    Atom AvmCore::increment_number_d(Atom a, int delta)
     {
-        AvmAssert(delta==1 || delta ==-1);
-        AvmAssert(isNumber(*ap));
-        if (atomIsIntptr(*ap))
-            *ap = intToAtom(delta + int32_t(atomGetIntptr(*ap)));
-        else
-            *ap = doubleToAtom(atomToDouble(*ap)+delta);
+        // Argument must be a number atom.  Float and Float4 are not legal.
+        AvmAssert(isNumber(a));
+        AvmAssert(delta == 1 || delta == -1);
+
+        if (atomIsIntptr(a)) {
+            // If the value is small enough for kIntptrType representation,
+            // the result of an intptr_t addition is guaranteed not to overflow.
+            intptr_t result = atomGetIntptr(a) + delta;
+            if (atomIsValidIntptrValue(result))
+                return atomFromIntptrValue(result);
+            else
+                return doubleToAtom(double(result));
+        } else
+            return doubleToAtom(atomToDouble(a) + delta);
     }
 
-    void AvmCore::increment_i(Atom *ap, int delta)
+    // The result is always in the int32 range, wrapping if needed.
+    Atom AvmCore::increment_i(Atom a, int delta)
     {
-        switch (atomKind(*ap))
+        switch (atomKind(a))
         {
         case kBooleanType:
-            *ap = intToAtom(delta+(int32_t((intptr_t)*ap>>3)));
-            return;
+            return intToAtom(int32_t((intptr_t)a >> 3) + int32_t(delta));
         case kIntptrType:
-            *ap = intToAtom(delta + int32_t(atomGetIntptr(*ap)));
-            return;
+            return intToAtom(int32_t(atomGetIntptr(a)) + int32_t(delta));
         case kDoubleType:
-            *ap = intToAtom((int)((int32_t)atomToDouble(*ap)+delta));
-            return;
+            return intToAtom(int32_t(atomToDouble(a)) + int32_t(delta));
 #ifdef VMCFG_FLOAT
         case kSpecialBibopType:
-            if(isFloat(*ap)){
-                *ap = intToAtom((int)((int32_t)atomToFloat(*ap)+delta));
-                return;
-            }
+            if (isFloat(a))
+                return intToAtom(int32_t(atomToFloat(a)) + int32_t(delta));
             // fall thru for the other cases of bibopType
 #endif
         default:
-            *ap = intToAtom(integer(*ap)+delta);
-            return;
+            return intToAtom(integer(a) + int32_t(delta));
         }
     }
 
