@@ -100,7 +100,7 @@ for each(var f in fractions) {
         // Bugzilla 678975: 'total' once denoted used+free; now 'total' is used
         var beforeUsed = beforeTotal;
         var afterUsed = afterTotal;
-        if (after < before)
+        if (afterUsed < beforeUsed)
             hits++;
         if (((i + 1) % 100) == 0)
             trace("Hits: " + hits);
