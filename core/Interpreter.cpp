@@ -2581,40 +2581,40 @@ FLOAT_ONLY(\
 
             // stores
             INSTR(si8) {
-                i1 = AvmCore::integer(sp[0]);               // i1 = addr
                 ub2 = (uint8_t)AvmCore::integer(sp[-1]);    // u2 = value
+                i1 = AvmCore::integer(sp[0]);               // i1 = addr
                 MOPS_STORE_INT(i1, uint8_t, si8, ub2);
                 sp -= 2;
                 NEXT;
             }
 
             INSTR(si16) {
-                i1 = AvmCore::integer(sp[0]);       // i1 = addr
                 uh2l = (uint16_t)AvmCore::integer(sp[-1]);  // uh2l = value
+                i1 = AvmCore::integer(sp[0]);       // i1 = addr
                 MOPS_STORE_INT(i1, uint16_t, si16, uh2l);
                 sp -= 2;
                 NEXT;
             }
 
             INSTR(si32) {
-                i1 = AvmCore::integer(sp[0]);       // i1 = addr
                 i32l = AvmCore::integer(sp[-1]);    // i32l = value
+                i1 = AvmCore::integer(sp[0]);       // i1 = addr
                 MOPS_STORE_INT(i1, uint32_t, si32, i32l);
                 sp -= 2;
                 NEXT;
             }
 
             INSTR(sf32) {
-                i1 = AvmCore::integer(sp[0]);       // i1 = addr
                 f2l = (float)AvmCore::number(sp[-1]);       // d2l = value
+                i1 = AvmCore::integer(sp[0]);       // i1 = addr
                 MOPS_STORE_FP(i1, float, sf32, f2l);
                 sp -= 2;
                 NEXT;
             }
 
             INSTR(sf64) {
-                i1 = AvmCore::integer(sp[0]);
                 d2l = AvmCore::number(sp[-1]);
+                i1 = AvmCore::integer(sp[0]);
                 MOPS_STORE_FP(i1, double, sf64, d2l);
                 sp -= 2;
                 NEXT;
@@ -2622,8 +2622,8 @@ FLOAT_ONLY(\
 
 #ifdef VMCFG_FLOAT
             INSTR(sf32x4) {
-                i1 = AvmCore::integer(sp[0]);
                 AvmCore::float4(&f4l, sp[-1]);
+                i1 = AvmCore::integer(sp[0]);
                 MOPS_STORE_F4(i1, sf32x4, f4l);
                 sp -= 2;
                 NEXT;
