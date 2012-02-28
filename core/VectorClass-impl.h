@@ -594,18 +594,18 @@ namespace avmplus
     template<class TLIST>
     void TypedVectorObject<TLIST>::_setUintProperty(uint32_t index, Atom value)
     {
-        checkWriteIndex_u(index);
         typename TLIST::OPAQUE_TYPE tmp;
         atomToValue(value, tmp);
+        checkWriteIndex_u(index);
         m_list.set(index, (typename TLIST::TYPE)tmp);
     }
 
     template<class TLIST>
     void TypedVectorObject<TLIST>::_setKnownUintProperty(uint32_t index, Atom value)
     {
-        checkWriteIndex_u(index);
         typename TLIST::OPAQUE_TYPE tmp;
         atomToValueKnown(value, tmp);
+        checkWriteIndex_u(index);
         m_list.set(index, (typename TLIST::TYPE)tmp);
     }
     
@@ -619,18 +619,18 @@ namespace avmplus
     template<class TLIST>
     void TypedVectorObject<TLIST>::_setIntProperty(int32_t index_i, Atom value)
     {
-        uint32_t index = checkWriteIndex_i(index_i);
         typename TLIST::OPAQUE_TYPE tmp;
         atomToValue(value, tmp);
+        uint32_t index = checkWriteIndex_i(index_i);
         m_list.set(index, (typename TLIST::TYPE)tmp);
     }
 
     template<class TLIST>
     void TypedVectorObject<TLIST>::_setKnownIntProperty(int32_t index_i, Atom value)
     {
-        uint32_t index = checkWriteIndex_i(index_i);
         typename TLIST::OPAQUE_TYPE tmp;
         atomToValueKnown(value, tmp);
+        uint32_t index = checkWriteIndex_i(index_i);
         m_list.set(index, (typename TLIST::TYPE)tmp);
     }
     
@@ -644,18 +644,18 @@ namespace avmplus
     template<class TLIST>
     void TypedVectorObject<TLIST>::_setDoubleProperty(double index_d, Atom value)
     {
-        uint32_t index = checkWriteIndex_d(index_d);
         typename TLIST::OPAQUE_TYPE tmp;
         atomToValue(value, tmp);
+        uint32_t index = checkWriteIndex_d(index_d);
         m_list.set(index, (typename TLIST::TYPE)tmp);
     }
     
     template<class TLIST>
     void TypedVectorObject<TLIST>::_setKnownDoubleProperty(double index_d, Atom value)
     {
-        uint32_t index = checkWriteIndex_d(index_d);
         typename TLIST::OPAQUE_TYPE tmp;
         atomToValueKnown(value, tmp);
+        uint32_t index = checkWriteIndex_d(index_d);
         m_list.set(index, (typename TLIST::TYPE)tmp);
     }
     
