@@ -103,6 +103,7 @@
 #undef VMCFG_SELFTEST
 #undef VMCFG_EVAL
 #undef VMCFG_TELEMETRY
+#undef VMCFG_TELEMETRY_SAMPLER
 #undef VMCFG_PROTECT_JITMEM
 #undef MMGC_LOCKING
 #undef MMGC_USE_SYSTEM_MALLOC
@@ -547,6 +548,16 @@
 #endif
 
 
+/* AVMFEATURE_TELEMETRY_SAMPLER
+ *
+ * Select support for Telemetry based sampler, requires a Telemetry implementation
+ * (to be used in host)
+ */
+#if !defined AVMFEATURE_TELEMETRY_SAMPLER || AVMFEATURE_TELEMETRY_SAMPLER != 0 && AVMFEATURE_TELEMETRY_SAMPLER != 1
+#  error "AVMFEATURE_TELEMETRY_SAMPLER must be defined and 0 or 1 (only)."
+#endif
+
+
 /* AVMFEATURE_PROTECT_JITMEM
  *
  * Makes all JIT code buffers read-only whenever JIT code is executing,
@@ -952,6 +963,11 @@
 #  endif
 #endif
 
+#if AVMFEATURE_TELEMETRY_SAMPLER
+#  if !AVMFEATURE_TELEMETRY
+#    error "AVMFEATURE_TELEMETRY is required for AVMFEATURE_TELEMETRY_SAMPLER"
+#  endif
+#endif
 
 
 
@@ -1220,6 +1236,9 @@
 #endif
 #if AVMFEATURE_TELEMETRY
 #  define VMCFG_TELEMETRY
+#endif
+#if AVMFEATURE_TELEMETRY_SAMPLER
+#  define VMCFG_TELEMETRY_SAMPLER
 #endif
 #if AVMFEATURE_PROTECT_JITMEM
 #  define VMCFG_PROTECT_JITMEM

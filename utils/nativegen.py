@@ -2718,6 +2718,47 @@ class AbcThunkGen:
         if(thunk_ret_ctype != CTYPE_FLOAT4):
             out.println('extern ' + decl + ";");
 
+    def emitThunkCall(self, out, receiver, m, args):
+        ret_traits,ret_ctype,thunk_ret_ctype,decl = self.thunkInfo(m)
+        if ret_ctype != CTYPE_VOID and ret_ctype != CTYPE_FLOAT4:
+            out.prnt("%s const ret = " % ret_traits.cpp_return_name())
+        elif ret_ctype != CTYPE_VOID: # i.e., is float4
+            out.println("float4_ret_t ret;")
+
+        if m.receiver == None:
+            out.prnt("%s(obj" % m.native_method_name)
+            need_comma = True
+        else:
+            if m.receiver.method_map_name != m.receiver.fqcppname():
+                native_method_name = m.receiver.method_map_name + "::" + m.native_method_name
+            else:
+                native_method_name = m.native_method_name
+            out.prnt("obj->%s(" % native_method_name)
+            need_comma = False
+
+        if(ret_ctype == CTYPE_FLOAT4):
+            out.prnt("(float4_t*)&ret")
+            need_comma = True
+        if len(args) > 1:
+            out.println("")
+            out.indent += 1
+            for i in range(1, len(args)):
+                if need_comma:
+                    out.prnt(", ")
+                out.println("%s" % args[i][0]);
+                need_comma = True
+            out.indent -= 1
+        out.println(");")
+
+    def emitReturnStatement(self, out, receiver, m):
+        ret_traits,ret_ctype,thunk_ret_ctype,decl = self.thunkInfo(m)
+
+        if ret_ctype != CTYPE_VOID:
+            ret_result = TYPEMAP_THUNKRETTYPE[ret_ctype] % "ret";
+        else:
+            ret_result = "undefinedAtom";
+        out.println("return %s;" % ret_result)
+
     def emitThunkBody(self, out, receiver, m):
         ret_traits,ret_ctype,thunk_ret_ctype,decl = self.thunkInfo(m)
 
@@ -2801,41 +2842,13 @@ class AbcThunkGen:
             rec_type = m.receiver.cpp_argument_name()
         out.println("%s const obj = %s;" % (rec_type, args[0][0]))
 
-        if ret_ctype != CTYPE_VOID and ret_ctype != CTYPE_FLOAT4:
-            out.prnt("%s const ret = " % ret_traits.cpp_return_name())
-        elif ret_ctype != CTYPE_VOID: # i.e., is float4
-            out.println("float4_ret_t ret;")
+        # added MethodFrame creation, needed by the sampler
+        out.println("MethodFrame frame;")
+        out.println("frame.enter(env->core(), env);")
+        self.emitThunkCall(out, receiver, m, args)
+        out.println("frame.exit(env->core());")
+        self.emitReturnStatement(out, receiver, m)
 
-        if m.receiver == None:
-            out.prnt("%s(obj" % m.native_method_name)
-            need_comma = True
-        else:
-            if m.receiver.method_map_name != m.receiver.fqcppname():
-                native_method_name = m.receiver.method_map_name + "::" + m.native_method_name
-            else:
-                native_method_name = m.native_method_name
-            out.prnt("obj->%s(" % native_method_name)
-            need_comma = False
-
-        if(ret_ctype == CTYPE_FLOAT4):
-            out.prnt("(float4_t*)&ret")
-            need_comma = True
-        if len(args) > 1:
-            out.println("")
-            out.indent += 1
-            for i in range(1, len(args)):
-                if need_comma:
-                    out.prnt(", ")
-                out.println("%s" % args[i][0]);
-                need_comma = True
-            out.indent -= 1
-        out.println(");")
-
-        if ret_ctype != CTYPE_VOID:
-            ret_result = TYPEMAP_THUNKRETTYPE[ret_ctype] % "ret";
-        else:
-            ret_result = "undefinedAtom";
-        out.println("return %s;" % ret_result)
         out.indent -= 1
         out.println("}")
 

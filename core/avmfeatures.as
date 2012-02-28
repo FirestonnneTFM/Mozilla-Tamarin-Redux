@@ -643,6 +643,14 @@ var FEATURES =
   </feature>
 
   <feature>
+    <desc> Select support for Telemetry based sampler, requires a Telemetry implementation
+           (to be used in host) </desc>
+    <name> AVMFEATURE_TELEMETRY_SAMPLER </name>
+    <requires> AVMFEATURE_TELEMETRY </requires>
+    <defines> VMCFG_TELEMETRY_SAMPLER </defines>
+  </feature>
+
+  <feature>
     <desc> Makes all JIT code buffers read-only whenever JIT code is executing,
            to reduce the probability of heap overflow attacks. </desc>
     <name> AVMFEATURE_PROTECT_JITMEM </name>

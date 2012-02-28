@@ -157,6 +157,10 @@ const int kBufferPadding = 16;
 
     class MethodFrame;
 
+#ifdef VMCFG_TELEMETRY_SAMPLER
+    class TelemetrySampler;
+#endif
+
     // Use this for picking apart and putting together double values from constituent
     // words.  "words.msw" is the most significant word, containing sign bit, exponent,
     // and most significant bits of mantissa.  "words.lsw" is the least significant
@@ -445,6 +449,9 @@ const int kBufferPadding = 16;
         friend class ExceptionFrame;
         friend class MethodFrame;
         friend class Traits;
+#ifdef VMCFG_TELEMETRY_SAMPLER
+        friend class TelemetrySampler;
+#endif
 
         ////////////////////////////////////////////////////////////////////
         // BEGIN private data definitions
@@ -548,6 +555,25 @@ const int kBufferPadding = 16;
          */
         MethodFrame*        currentMethodFrame;
 
+#ifdef VMCFG_TELEMETRY_SAMPLER
+        /**
+         * The new telemetry based sampler. This sampler works by inspecting
+         * the MethodFrame stack periodically. It is available in Release
+         * builds as well.
+         */
+        TelemetrySampler*   telemetrySampler;
+#endif
+
+    public:
+#ifdef VMCFG_TELEMETRY_SAMPLER
+        /** the number of ticks that have passed since the last sample */
+        unsigned int    sampleTicks;
+
+        /** indicates whether the sampler is currently enabled or not */
+        bool            samplerEnabled;
+#endif
+
+    private:
         // note, allocated using mmfx_new, *not* gc memory
         LivePoolNode* livePools;
 
@@ -933,6 +959,12 @@ const int kBufferPadding = 16;
 
         /** set the stack limit that will be checked by executing AS3 code. */
         void setStackLimit(uintptr_t p);
+
+#ifdef VMCFG_TELEMETRY_SAMPLER
+        static void FASTCALL takeSampleWrapper(AvmCore *theCore);
+        void FASTCALL takeSample();
+        TelemetrySampler* getSampler();
+#endif
 
         /** called by executing code when stack overflow is detected (sp < minstack) */
         static void FASTCALL handleStackOverflowMethodEnv(MethodEnv* env);

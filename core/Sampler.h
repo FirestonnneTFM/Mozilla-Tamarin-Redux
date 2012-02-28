@@ -40,6 +40,13 @@
 #ifndef __avmplus_Sampler__
 #define __avmplus_Sampler__
 
+#ifdef VMCFG_TELEMETRY_SAMPLER
+namespace telemetry
+{
+    class ITelemetry;
+}
+#endif
+
 namespace avmplus
 {
 #ifdef DEBUGGER
@@ -260,5 +267,101 @@ namespace avmplus
     #define SAMPLE_CHECK()
 
 #endif // DEBUGGER
+
+
+#ifdef VMCFG_TELEMETRY_SAMPLER
+
+    // Used for debug purposes to measure the performance of the sampler timer
+    #undef REPORT_TOTAL_TICKS
+
+    // The samples buffer size, we flush when we fill this buffer
+    #define SAMPLES_BUFFER_SIZE     10000
+
+    // The sampler timer interval in microseconds
+    #define SAMPLER_TIMER_INTERVAL  1000
+
+    // The maximum stack depth the sampler will send. We don't need to handle much higher
+    // than this because even when there is deep recursion, seeing the same stack repeated
+    // over and over is not useful, this condition will be evident by sending the first
+    // part of the stack. We send a stack overflow ID at the end so the client can identify
+    // this condition.
+    #define SAMPLE_MAX_STACK_DEPTH  128
+    const uint32_t SAMPLER_STACK_OVERFLOW_ID = 0xFFFFFFFF;
+
+    /**
+     * Telemetry Based Sampler
+     *
+     * This is the new telemetry based sampler which works on Release builds.
+     * It uses the MethodFrame stack to obtain the stack information, and sends
+     * samples using Telemetry.
+     */
+    class TelemetrySampler
+    {
+        // each sample frame is just a MethodInfo ptr
+        typedef MethodInfo* sample_frame_t;
+
+        // sample definition
+        typedef struct Sample
+        {
+            // the frames, i.e. the stack
+            sample_frame_t frames[SAMPLE_MAX_STACK_DEPTH];
+
+            // number of frames in the stack.
+            // if we have exceeded SAMPLE_MAX_STACK_DEPTH for a particular stack,
+            // this will equal SAMPLE_MAX_STACK_DEPTH + 1
+            unsigned int nFrames;
+
+            // how many ticks since the last sample
+            unsigned int nTicks;
+
+            // the timestamp of this sample
+            uint64_t timestamp;
+        } Sample;
+
+        // the buffer used to hold all samples, when it fills the samples
+        // are flushed.
+        typedef struct SamplesBuffer
+        {
+            Sample samples[SAMPLES_BUFFER_SIZE];
+            unsigned int nSamples;
+        #ifdef REPORT_TOTAL_TICKS
+            unsigned int totalTicks;
+        #endif
+        } SamplesBuffer;
+
+    public:
+        TelemetrySampler(AvmCore* core);
+        virtual ~TelemetrySampler();
+
+        // take a stack sample
+        void takeSample();
+
+        // flush the samples - send them over the telemetry socket
+        void flushSamples();
+
+        // starts up the sampler, will only start is sampler currently is enabled
+        void start();
+
+        // stop sampling, performs cleanup
+        void stop();
+       
+    private:
+        unsigned int takeStackSample(sample_frame_t* outFrameBuffer);
+        Stringp sampleFrameToString(sample_frame_t frame);
+
+        AvmCore* m_core; // the core, one sampler per core
+        telemetry::ITelemetry* m_telemetry; // instance of telemetry
+        SamplesBuffer* m_samplesBuffer;
+        bool m_timerStarted;
+        vmpi_mutex_t m_counterLock;
+        uintptr_t m_timerData;
+
+        // map of <sample_frame_t, unsigned int> key/vaue pairs for the methods we have already mapped and a unique id for each one
+        MMgc::GCHashtableBase<unsigned int, MMgc::GCHashtableKeyHandler, MMgc::GCHashtableAllocHandler_VMPI> m_mappedMethods;
+        unsigned int m_numMappedMethods;
+    };
+
+#endif // VMCFG_TELEMETRY_SAMPLER
+
 }
 #endif // __avmplus_Sampler__

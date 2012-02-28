@@ -89,6 +89,10 @@
   #define AVMFEATURE_TELEMETRY         0
 #endif
 
+#ifndef AVMFEATURE_TELEMETRY_SAMPLER
+  #define AVMFEATURE_TELEMETRY_SAMPLER  0
+#endif
+
 #ifndef AVMFEATURE_OSR
   #define AVMFEATURE_OSR               0
 #endif

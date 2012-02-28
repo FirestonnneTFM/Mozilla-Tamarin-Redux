@@ -159,6 +159,7 @@ namespace telemetry
         virtual void WriteValue(telemetryId id, uint64_t value) = 0;
         virtual void WriteValue(telemetryId id, int64_t value) = 0;
         virtual void WriteValue(telemetryId id, const uint8_t *value, uint32_t len) = 0; // Writes bytearray.
+        virtual void WriteValue(telemetryId id, const uint32_t value[], uint32_t len) = 0; // Writes unsigned integer array
         virtual void WriteSpan(telemetryId id, uint64_t start, bool force, bool fromAS = false) = 0;
         virtual void WriteTime(telemetryId) = 0;    // Writes a time metric with microsecond timestamp.
     protected:

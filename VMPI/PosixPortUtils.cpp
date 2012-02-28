@@ -141,6 +141,67 @@ uint64_t VMPI_getTime()
     return result;
 }
 
+// Timer data, posix specific data
+struct PosixIntWriteTimerData : IntWriteTimerData
+{
+    // platform-specific data
+    pthread_t thread;
+};
+
+extern void Init_IntWriteTimerData(IntWriteTimerData* data, uint32_t micros, unsigned int *addr, vmpi_mutex_t* writeLock);
+extern void UpdateMedianIntervalInfo(IntWriteTimerData *data);
+
+// On posix systems, we use a thread to implement the timer.
+// This timer thread will loop until the timer is stopped.
+void *timerThread(void *arg)
+{
+    IntWriteTimerData *data = (IntWriteTimerData*)arg;
+    uint *addr = data->addr;
+    uint32_t interval = data->interval;
+
+    while(data->addr)
+    {
+        // sleep our interval amount
+        struct timespec ts;
+        ts.tv_sec = 0;
+        ts.tv_nsec = interval * 1000;
+        nanosleep(&ts, 0);
+
+        // update our timer data
+        UpdateMedianIntervalInfo(data);
+
+        // update the timer ticks
+        VMPI_recursiveMutexLock(data->writeLock);
+        *addr = *addr + 1;
+        VMPI_recursiveMutexUnlock(data->writeLock);
+    }
+
+    pthread_exit(NULL);
+    return NULL; // not needed, but may generate compiler warning without
+}
+
+// Starts the interval timer
+uintptr_t VMPI_startIntWriteTimer(uint32_t micros, unsigned int *addr, vmpi_mutex_t* writeLock)
+{
+    pthread_t p;
+    PosixIntWriteTimerData *data = (PosixIntWriteTimerData *) VMPI_alloc(sizeof(PosixIntWriteTimerData));
+    Init_IntWriteTimerData(data, micros, addr, writeLock);
+    pthread_create(&p, NULL, timerThread, data);
+    data->thread = p;
+    return (uintptr_t)data;
+}
+
+// Stops the interval timer
+void VMPI_stopIntWriteTimer(uintptr_t data)
+{
+    PosixIntWriteTimerData *theData = (PosixIntWriteTimerData *) data;
+    if (theData->thread) {
+        // end the timer thread
+        theData->addr = NULL;
+        pthread_join(theData->thread, NULL);
+    }
+    VMPI_free(theData);
+}
 
 void* VMPI_alloc(size_t size)
 {

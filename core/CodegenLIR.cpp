@@ -1667,6 +1667,19 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
         coreAddr = InsConstPtr(core);
 
+        #ifdef VMCFG_TELEMETRY_SAMPLER
+        // Emit the code to take a sample of the MethodFrame stack. This is only
+        // emitted when the sampler is enabled so there is no performance impact
+        // otherwise.
+        if(core->samplerEnabled) {
+            LIns* sampleTicks = loadIns(LIR_ldi, offsetof(AvmCore,sampleTicks), coreAddr, ACCSET_OTHER);
+            CodegenLabel &afterTakeSample_label = createLabel("afterTakeSample");
+            branchToLabel(LIR_jf, sampleTicks, afterTakeSample_label);
+            callIns(FUNCTIONID(takeSampleWrapper), 1, coreAddr);
+            emitLabel(afterTakeSample_label);
+        }
+        #endif
+
         // replicate MethodFrame ctor inline
         LIns* currentMethodFrame = loadIns(LIR_ldp, offsetof(AvmCore,currentMethodFrame), coreAddr, ACCSET_OTHER);
         // save env in MethodFrame.envOrCodeContext
@@ -6177,6 +6190,19 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     // _ef.endTry();
                     callIns(FUNCTIONID(endTry), 1, _ef);
                 }
+
+                #ifdef VMCFG_TELEMETRY_SAMPLER
+                // Emit the code to take a sample of the MethodFrame stack. This is only
+                // emitted when the sampler is enabled so there is no performance impact
+                // otherwise.
+                if(core->samplerEnabled) {
+                    LIns* sampleTicks = loadIns(LIR_ldi, offsetof(AvmCore,sampleTicks), coreAddr, ACCSET_OTHER);
+                    CodegenLabel &afterTakeSampleExit_label = createLabel("afterTakeSampleExit");
+                    branchToLabel(LIR_jf, sampleTicks, afterTakeSampleExit_label);
+                    callIns(FUNCTIONID(takeSampleWrapper), 1, coreAddr);
+                    emitLabel(afterTakeSampleExit_label);
+                }
+                #endif
 
                 // replicate MethodFrame dtor inline -- must come after endTry call (if any)
                 LIns* nextMethodFrame = loadIns(LIR_ldp, offsetof(MethodFrame,next), methodFrame, ACCSET_OTHER);
