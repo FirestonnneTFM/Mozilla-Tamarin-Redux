@@ -249,6 +249,9 @@ namespace avmplus
     extern const CallInfo ci_npe;
     extern const CallInfo ci_upe;
     extern const CallInfo ci_mop_rangeCheckFailed;
+#ifdef VMCFG_TELEMETRY_SAMPLER
+    extern const CallInfo ci_takeSample;
+#endif
     extern const CallInfo ci_handleInterruptMethodEnv;
     extern const CallInfo ci_coerce;
     extern const CallInfo ci_coerce_s;

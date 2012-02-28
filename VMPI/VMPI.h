@@ -210,6 +210,50 @@ extern uint64_t     VMPI_getPerformanceFrequency();
 * @see VMPI_getPerformanceFrequency()
 */extern uint64_t   VMPI_getPerformanceCounter();
 
+/** The number of timer intervals that we have counts for */
+static const uint32_t numTimerIntervals = 10000;
+
+/** The data structure used for the integer timer data */
+typedef struct IntWriteTimerData
+{
+    uint32_t interval; // in microseconds
+    unsigned int *addr; // the address of the integer to increment
+    vmpi_mutex_t *writeLock; // the lock for writing to the integer in addr
+
+    // Data for calculating the median interval
+    uint32_t totalTicks;
+    uint64_t lastTime; // last time interval fired
+    uint64_t lowestTimerInterval;
+    uint32_t timerIntervalCounts[numTimerIntervals];
+} IntWriteTimerData;
+
+/**
+ * Start the interval timer.
+ * @param micros the number of microseconds for the timer interval
+ * @param addr the address of the integer to increment when the timer fires
+ * @param writeLock the lock for writing to the integer in addr
+ * @return the data for this timer, pass this data to the other methods
+ *         to refer to this timer and when stopping the timer.
+ */
+extern uintptr_t    VMPI_startIntWriteTimer(uint32_t micros, unsigned int *addr, vmpi_mutex_t* writeLock);
+
+/**
+ * Stop the interval timer.
+ * @param data the data for this timer, obtained when VMPI_startIntWriteTimer
+ *             was called
+ * @return none
+ */
+extern void         VMPI_stopIntWriteTimer(uintptr_t data);
+
+/**
+ * Calculates the median timer interval. There must have been at least 100
+ * ticks before this makes a calculation.
+ * @param data the data for this timer, obtained when VMPI_startIntWriteTimer
+ *             was called
+ * @return the median timer interval, or zero if could not calculate
+ */
+extern uint64_t     VMPI_calculateMedianTimerInterval(uintptr_t data);
+
 /**
 * Method to create a new instance of vmpi_spin_lock_t
 * This instance will subsequently be passed to acquire/release lock methods

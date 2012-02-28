@@ -103,6 +103,13 @@ REALLY_INLINE void AvmCore::setTelemetry(telemetry::ITelemetry* telemetry)
 }
 #endif
 
+#ifdef VMCFG_TELEMETRY_SAMPLER
+REALLY_INLINE TelemetrySampler* AvmCore::getSampler()
+{
+    return telemetrySampler;
+}
+#endif
+
 #ifdef VMCFG_NANOJIT // accessors
 
 #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
@@ -676,6 +683,12 @@ REALLY_INLINE Namespacep AvmCore::getAnyPublicNamespace()
 // if you make changes here, you may need to make changes there as well.
 REALLY_INLINE void MethodFrame::enter(AvmCore* core, MethodEnv* e)
 {
+    #ifdef VMCFG_TELEMETRY_SAMPLER
+    // check if we should take a sample
+    if (core->sampleTicks)
+        core->takeSample();
+    #endif
+
     AvmAssert(core->codeContextThread == VMPI_currentThread());
     AvmAssert(!(uintptr_t(e) & FLAGS_MASK));
     // implicitly leave IS_EXPLICIT_CODECONTEXT and DXNS_NOT_NULL clear
@@ -689,6 +702,12 @@ REALLY_INLINE void MethodFrame::enter(AvmCore* core, MethodEnv* e)
 
 REALLY_INLINE void MethodFrame::enter(AvmCore* core, CodeContext* cc)
 {
+    #ifdef VMCFG_TELEMETRY_SAMPLER
+    // check if we should take a sample
+    if (core->sampleTicks)
+        core->takeSample();
+    #endif
+
     AvmAssert(core->codeContextThread == VMPI_currentThread());
     AvmAssert(!(uintptr_t(cc) & FLAGS_MASK));
     // set IS_EXPLICIT_CODECONTEXT and leave DXNS_NOT_NULL clear
@@ -702,6 +721,12 @@ REALLY_INLINE void MethodFrame::enter(AvmCore* core, CodeContext* cc)
 
 REALLY_INLINE void MethodFrame::exit(AvmCore* core)
 {
+    #ifdef VMCFG_TELEMETRY_SAMPLER
+    // check if we should take a sample
+    if (core->sampleTicks)
+        core->takeSample();
+    #endif
+
     AvmAssert(core->codeContextThread == VMPI_currentThread());
     AvmAssert(core->currentMethodFrame == this);
     core->currentMethodFrame = this->next;

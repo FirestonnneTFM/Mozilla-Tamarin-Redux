@@ -430,6 +430,9 @@
     }
     FUNCTION(FUNCADDR(getprop_late), SIG3(A,P,A,P), getprop_late)
 
+#ifdef VMCFG_TELEMETRY_SAMPLER
+    FASTFUNCTION(FUNCADDR(AvmCore::takeSampleWrapper), SIG1(V,P), takeSampleWrapper);
+#endif
     FUNCTION(FUNCADDR(AvmCore::handleInterruptMethodEnv), SIG1(V,P), handleInterruptMethodEnv)
     FASTFUNCTION(FUNCADDR(AvmCore::handleStackOverflowMethodEnv), SIG1(V,P), handleStackOverflowMethodEnv)
     METHOD(ENVADDR(MethodEnv::nextname), SIG3(A,P,A,I), nextname)

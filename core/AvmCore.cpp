@@ -332,6 +332,9 @@ namespace avmplus
 #ifdef DEBUGGER
         , _sampler(NULL)
 #endif
+#ifdef VMCFG_TELEMETRY_SAMPLER
+        , sampleTicks(0)
+#endif
         , currentMethodFrame(NULL)
         , livePools(NULL)
         , m_activeApiVersionSeries(apiVersionSeries)
@@ -381,6 +384,12 @@ namespace avmplus
 #else
         MMGC_STATIC_ASSERT(sizeof(intptr_t) == 4);
         MMGC_STATIC_ASSERT(sizeof(uintptr_t) == 4);
+#endif
+
+#ifdef VMCFG_TELEMETRY_SAMPLER
+        // intialize the sampler, off by default
+        samplerEnabled = false;
+        telemetrySampler = new TelemetrySampler(this);
 #endif
 
         // set default mode flags
@@ -581,6 +590,11 @@ namespace avmplus
         _sampler = NULL;
 #endif
 
+#ifdef VMCFG_TELEMETRY_SAMPLER
+        // destroy the telemetry based sampler
+        delete telemetrySampler;
+#endif
+        
         m_tbCache->flush();
         m_tmCache->flush();
         m_msCache->flush();
@@ -5280,6 +5294,22 @@ return the result of the comparison ToPrimitive(x) == y.
         if (interrupted == NotInterrupted)
             minstack = p;
     }
+
+#ifdef VMCFG_TELEMETRY_SAMPLER
+    // Tells the sampler to take a stack sample. This is called only when
+    // the sampler is enabled.
+    void AvmCore::takeSample()
+    {
+        telemetrySampler->takeSample();
+    }
+
+    // A static wrapper for takeSample(), used by the jit.
+    /* static */
+    void AvmCore::takeSampleWrapper(AvmCore *theCore)
+    {
+        theCore->telemetrySampler->takeSample();
+    }
+#endif
 
     /* static */
     void AvmCore::handleStackOverflowMethodEnv(MethodEnv* env)

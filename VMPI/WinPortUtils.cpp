@@ -363,4 +363,53 @@ size_t VMPI_getVMPageSize()
     return pagesize;
 }
 
+// Timer data, Windows specific data
+struct WinIntWriteTimerData : IntWriteTimerData
+{
+    // Platform-specific data
+    unsigned int timerId;
+};
 
+extern void Init_IntWriteTimerData(IntWriteTimerData* data, uint32_t micros, unsigned int *addr, vmpi_mutex_t* writeLock);
+extern void UpdateMedianIntervalInfo(IntWriteTimerData *data);
+
+// The timer callback proc, called when the timer fires
+void CALLBACK intWriteTimerProc(UINT, UINT, DWORD_PTR dwUser, DWORD_PTR, DWORD_PTR)
+{
+    IntWriteTimerData *data = (IntWriteTimerData*)dwUser;
+    unsigned int *addr = data->addr;
+
+    UpdateMedianIntervalInfo(data);
+
+    VMPI_recursiveMutexLock(data->writeLock);
+    *addr = *addr + 1;
+    VMPI_recursiveMutexUnlock(data->writeLock);
+}
+
+// The constant TIME_KILL_SYNCHRONOUS is only available if WINVER >= 0x0501 (== WinXP)
+static const UINT kTimeKillSynchronous = 0x0100;
+
+// Starts the interval timer
+uintptr_t VMPI_startIntWriteTimer(uint32_t micros, unsigned int *addr, vmpi_mutex_t* writeLock)
+{
+    WinIntWriteTimerData *data = (WinIntWriteTimerData *) VMPI_alloc(sizeof(WinIntWriteTimerData));
+    Init_IntWriteTimerData(data, micros, addr, writeLock);
+
+    data->timerId = timeSetEvent(micros / 1000, micros / 1000, (LPTIMECALLBACK)intWriteTimerProc, (DWORD_PTR)data,
+            TIME_PERIODIC | TIME_CALLBACK_FUNCTION
+#ifndef UNDER_CE
+            | kTimeKillSynchronous
+#endif
+            );
+
+    return (uintptr_t)data;
+}
+
+// Stops the interval timer
+void VMPI_stopIntWriteTimer(uintptr_t data)
+{
+    UINT timerId = ((WinIntWriteTimerData *)data)->timerId;
+    if (timerId)
+        timeKillEvent((UINT)timerId);
+    VMPI_free((WinIntWriteTimerData *)data);
+}

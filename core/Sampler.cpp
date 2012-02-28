@@ -707,3 +707,193 @@ namespace avmplus
 
 }
 #endif // DEBUGGER
+
+
+
+#ifdef VMCFG_TELEMETRY_SAMPLER
+
+/**
+ * Telemetry Based Sampler
+ *
+ * This is the new telemetry based sampler which works on Release builds.
+ * It uses the MethodFrame stack to obtain the stack information, and sends
+ * samples using Telemetry.
+ */
+namespace avmplus {
+    
+    TelemetrySampler::TelemetrySampler(AvmCore* core)
+    {
+        m_core = core;
+        m_timerData = NULL;
+        m_samplesBuffer = NULL;
+        m_timerStarted = false;
+        m_numMappedMethods = 1;
+        m_telemetry = m_core->getTelemetry();
+                
+        VMPI_recursiveMutexInit(&m_counterLock);
+    }
+    
+    TelemetrySampler::~TelemetrySampler()
+    {
+        // shut down our timer
+        stop();
+    }
+        
+    void TelemetrySampler::start()
+    {
+        m_telemetry = m_core->getTelemetry();
+        if (m_core->samplerEnabled && !m_timerStarted) {
+            m_samplesBuffer = (SamplesBuffer *) VMPI_alloc(sizeof(SamplesBuffer));
+            m_samplesBuffer->nSamples = 0;
+#ifdef REPORT_TOTAL_TICKS
+            m_samplesBuffer->totalTicks = 0;
+#endif
+            m_timerData = VMPI_startIntWriteTimer(SAMPLER_TIMER_INTERVAL, &m_core->sampleTicks, &m_counterLock);
+            m_timerStarted = true;
+        }
+    }
+    
+    void TelemetrySampler::stop()
+    {
+        if (m_timerStarted) {
+            VMPI_stopIntWriteTimer(m_timerData);
+            m_timerData = NULL;
+            m_timerStarted = false;
+            VMPI_free(m_samplesBuffer);
+            m_samplesBuffer = NULL;
+        }
+    }
+    
+    unsigned int TelemetrySampler::takeStackSample(sample_frame_t* outFrameBuffer)
+    {
+        unsigned int nFramesWritten = 0;
+        
+        for (MethodFrame* curFrame = m_core->currentMethodFrame;
+             curFrame != NULL;
+             curFrame = curFrame->next) {
+            MethodEnv* env = curFrame->env();
+            if (env && env->method) {
+                if (nFramesWritten == SAMPLE_MAX_STACK_DEPTH) {
+                    // more stack frames than SAMPLE_MAX_STACK_DEPTH,
+                    // return 1 greater than the max length so we know there is more..
+                    return ++nFramesWritten;
+                } else {
+                    outFrameBuffer[nFramesWritten++] = env->method;
+                }
+            }
+        }
+        
+        return nFramesWritten;
+    }
+    
+    Stringp TelemetrySampler::sampleFrameToString(sample_frame_t frame)
+    {
+        return frame->getMethodName();
+    }
+    
+    void TelemetrySampler::takeSample()
+    {
+        AvmAssert(m_samplesBuffer != NULL);
+
+        VMPI_recursiveMutexLock(&m_counterLock);
+        unsigned int ticks = m_core->sampleTicks;
+        m_core->sampleTicks = 0;
+        VMPI_recursiveMutexUnlock(&m_counterLock);
+
+#ifdef REPORT_TOTAL_TICKS
+        m_samplesBuffer->totalTicks += ticks;
+#endif
+        uint64_t timestamp = m_telemetry->GetElapsedTime();
+
+        Sample* curSample = m_samplesBuffer->samples + m_samplesBuffer->nSamples;
+        unsigned int nFrames = takeStackSample(curSample->frames);
+        if (nFrames > 0) {
+            curSample->nFrames = nFrames;
+            curSample->timestamp = timestamp;
+            curSample->nTicks = ticks;
+            m_samplesBuffer->nSamples++;
+            
+            if (m_samplesBuffer->nSamples == SAMPLES_BUFFER_SIZE) {
+                flushSamples();
+            }
+        } else {
+            // Skip empty samples
+        }
+    }
+
+    void TelemetrySampler::flushSamples()
+    {
+        // if we haven't created our samples buffer yet or aren't initialized, just return
+        if (m_samplesBuffer == NULL || !m_core || !m_core->samplerEnabled)
+            return;
+
+        avmplus::StringBuffer methodNameMapBuffer(m_core);
+
+        // For each sample...
+        for (unsigned int i = 0; i < m_samplesBuffer->nSamples; i++) {
+
+            Sample* sample = m_samplesBuffer->samples + i;
+
+            // Emit the saved timestamp (since this is deferred)
+            TELEMETRY_DOUBLE(m_telemetry, ".sampler.nextSampleTime", sample->timestamp);
+            TELEMETRY_UINT32(m_telemetry, ".sampler.nextSampleTicks", sample->nTicks);
+
+            unsigned int methodId;
+            sample_frame_t frame;
+            uint32_t* stackArray = mmfx_new_array(uint32_t, sample->nFrames);
+
+            // For each frame on the stack...
+            int numFrames = (sample->nFrames > SAMPLE_MAX_STACK_DEPTH) ? SAMPLE_MAX_STACK_DEPTH : sample->nFrames;
+            for (int j = 0; j < numFrames; j++) {
+                frame = sample->frames[j];
+                methodId = m_mappedMethods.get(frame);
+                if (methodId == 0) {
+                    methodId = m_numMappedMethods++;
+
+                    // add to the method name map
+                    methodNameMapBuffer << methodId;
+                    methodNameMapBuffer << "=";
+                    methodNameMapBuffer << StUTF8String(sampleFrameToString(frame)).c_str();
+                    methodNameMapBuffer << ",";
+
+                    m_mappedMethods.add(frame, methodId);
+                }
+
+                stackArray[j] = methodId;
+            }
+
+            if (sample->nFrames > SAMPLE_MAX_STACK_DEPTH) {
+                // more frames than we allow, send an ID as the last frame so
+                // the client can identify the sampler stack overflow condition.
+                stackArray[SAMPLE_MAX_STACK_DEPTH] = SAMPLER_STACK_OVERFLOW_ID;
+            }
+
+            // Emit the sample
+            if (m_telemetry->IsActive())
+                m_telemetry->WriteValue(".sampler.sample", stackArray, sample->nFrames);
+
+             mmfx_delete_array(stackArray);
+        }
+
+#ifdef REPORT_TOTAL_TICKS
+        TELEMETRY_UINT32(m_telemetry, ".sampler.totalTicks", m_samplesBuffer->totalTicks);
+        m_samplesBuffer->totalTicks = 0;
+#endif
+
+        m_samplesBuffer->nSamples = 0;
+
+        // calculate and send the median timer interval
+        uint64_t interval = VMPI_calculateMedianTimerInterval(m_timerData);
+        if (interval > 0) {
+            TELEMETRY_UINT64(m_telemetry, ".sampler.medianInterval", interval);
+        }
+
+        // Emit new mappings from method ID to method name
+        if (methodNameMapBuffer.length() > 0) {
+            TELEMETRY_STRING(m_telemetry, ".sampler.methodNameMap", methodNameMapBuffer.c_str());
+        }
+    }
+
+} // namespace avmplus
+
+#endif // VMCFG_TELEMETRY_SAMPLER
