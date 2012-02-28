@@ -10,4 +10,4 @@ abcdis is caught up and vetted, we should remove abcdump.
 
 to compile:
 1. set $ASC
-2. 
+2. make curdir=. -f manifest.mk utils
