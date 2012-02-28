@@ -399,3 +399,8 @@ mops/lf64:load double written by sf32, mips.* , .*-(Dinterp|osr=17) , expectedfa
 mops/lf64:load double written by writeFloat, mips.* , .*-(Dinterp|osr=17) , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=724889
 
 
+
+spidermonkey/js1_5/Regress/regress-360969-02 , .*diff,, skip, Testcase outputs an execution time which is not part of the test and can cause a failure INVESTIGATE
+spidermonkey/js1_5/Regress/regress-360969-04 , .*diff,, skip, Testcase outputs an execution time which is not part of the test and can cause a failure INVESTIGATE
+abcasm/bug_554915b, .* , , skip, testcase can cause a timeout INVESTIGATE
+
