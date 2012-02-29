@@ -72,14 +72,6 @@ public final class CompressionAlgorithm
      *
      */
     public static const DEFLATE:String = "deflate";
-    /**
-     * Defines the string to use for the lzma compression algorithm.
-     *
-     * @playerversion AIR 3.3
-     * @langversion 3.0
-     *
-     */
-    public static const LZMA:String = "lzma";    
 };
 
 // Provide dummy definitions here of IDataInput2 and IDataOutput2, because they will

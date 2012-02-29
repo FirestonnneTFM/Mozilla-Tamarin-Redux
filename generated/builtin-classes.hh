@@ -1069,9 +1069,6 @@ public:
 public:
     REALLY_INLINE avmplus::String* get_DEFLATE() const { return m_slots_CompressionAlgorithmClass.m_DEFLATE; }
     REALLY_INLINE void setconst_DEFLATE(avmplus::String* newVal) { m_slots_CompressionAlgorithmClass.m_DEFLATE = newVal; }
-public:
-    REALLY_INLINE avmplus::String* get_LZMA() const { return m_slots_CompressionAlgorithmClass.m_LZMA; }
-    REALLY_INLINE void setconst_LZMA(avmplus::String* newVal) { m_slots_CompressionAlgorithmClass.m_LZMA = newVal; }
 private:
     avmplus::NativeID::avmplus_CompressionAlgorithmClassSlots m_slots_CompressionAlgorithmClass;
 protected:
