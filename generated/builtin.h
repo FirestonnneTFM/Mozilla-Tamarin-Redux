@@ -4865,11 +4865,13 @@ class avmplus_CompressionAlgorithmClassSlots
 private:
     MMgc::GCTraceableObject::GCMember<avmplus::String> m_ZLIB;
     MMgc::GCTraceableObject::GCMember<avmplus::String> m_DEFLATE;
+    MMgc::GCTraceableObject::GCMember<avmplus::String> m_LZMA;
 public:
     REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
     {
         gc->TraceLocation(&m_ZLIB);
         gc->TraceLocation(&m_DEFLATE);
+        gc->TraceLocation(&m_LZMA);
     }
 };
 //-----------------------------------------------------------
