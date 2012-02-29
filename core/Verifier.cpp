@@ -1783,10 +1783,10 @@ namespace avmplus
                     verifyFailed(kDanglingFunctionError, core->toErrorString(m), core->toErrorString(info));
                 }
 
+                emitCheckNull(sp-argc);
                 emitCoerceArgs(m, argc);
 
                 Traits *resultType = mms->returnTraits();
-                emitCheckNull(sp-argc);
                 coder->writeOp2(state, pc, OP_callstatic, (uint32_t)m->method_id(), argc, resultType);
                 state->pop_push(argc+1, resultType);
                 break;
