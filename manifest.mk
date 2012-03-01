@@ -59,6 +59,7 @@ AVM_INCLUDES = \
   -I$(topsrcdir)/eval \
   -I$(topsrcdir)/platform \
   -I$(topsrcdir)/other-licenses/zlib \
+  -I$(topsrcdir)/other-licenses/lzma \
   -I$(topsrcdir)/shell \
   -I$(topsrcdir)/AVMPI \
   -I$(topsrcdir)/generated \
@@ -70,6 +71,7 @@ AVM_INCLUDES = \
 avmplus_INCLUDES += $(AVM_INCLUDES)
 
 $(call RECURSE_DIRS,other-licenses/zlib)
+$(call RECURSE_DIRS,other-licenses/lzma)
 
 # Bug 668442: WinPortUtils.cpp VMPI_getDaylightSavingsTA issue
 # Revision buggy, original breaks gtest; disabling gtest until revision fixed.
