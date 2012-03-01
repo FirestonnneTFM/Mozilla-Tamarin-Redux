@@ -41,6 +41,12 @@
 #ifndef BYTEARRAYGLUE_INCLUDED
 #define BYTEARRAYGLUE_INCLUDED
 
+namespace lzma { extern "C" {
+    #include "../other-licenses/lzma/Alloc.h"
+    #include "../other-licenses/lzma/LzmaDec.h"
+    #include "../other-licenses/lzma/LzmaEnc.h"
+    #include "../other-licenses/lzma/LzmaLib.h"
+}};
 namespace avmplus
 {
     class ByteArray : public DataInput,
@@ -126,7 +132,8 @@ namespace avmplus
         enum CompressionAlgorithm
         {
             k_zlib,
-            k_deflate
+            k_deflate,
+            k_lzma            
         };
 
         void Compress(CompressionAlgorithm algorithm);
@@ -147,7 +154,44 @@ namespace avmplus
         //
         // Precondition: 0 < nbytes < 4096
         uint8_t* requestBytesForShortWrite(uint32_t nbytes);
-        
+
+        enum { kLZMAUnPackSize = 8 };
+         class LzmaEncoder
+         {
+         public:
+             LzmaEncoder(ByteArray* owner)
+             :m_owner(owner)
+             ,m_error(SZ_OK)
+             ,m_first(NULL)
+             ,m_last(NULL)
+             {
+                 
+             }
+             // Encode is used to encode bytearray data with lzma
+             int FASTCALL Encode(void);
+             //
+             // write function is used for storing encoded data which is saved in linked list m_first of DataEntry
+             // and it is called by lzma encoder through MyWrite function
+             // buf  is encoded data buffer
+             // size is encoded data size
+             size_t  FASTCALL Write(const uint8_t *buf, size_t size);
+             ~LzmaEncoder();
+
+             // DataEntry is used to store encoded lzma data
+             typedef struct _DataEntry{
+                 uint32_t  size;    //encoded data size
+                 uint8_t * data;    //encoded data pointer
+                 struct _DataEntry *  next; //next stored data link
+                 }DataEntry;
+                 
+          private:  
+             ByteArray* m_owner;
+             int        m_error;
+             DataEntry* m_first;
+             DataEntry* m_last;
+             uint8_t    m_lzmaProps[LZMA_PROPS_SIZE];
+         }; 
+         
 #ifdef DEBUGGER
     public:
         // Called by the profiler to determine the number of bytes attributed
