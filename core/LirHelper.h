@@ -206,6 +206,7 @@ namespace avmplus
         LIns *coreAddr;
         Allocator* alloc1;    // allocator used in first pass, while writing LIR
         Allocator* lir_alloc; // allocator with LIR buffer lifetime
+        JITObserver* jit_observer;
         bool const use_cmov;
         debug_only(ValidateWriter* validate1;)
         debug_only(ValidateWriter* validate2;)

@@ -47,10 +47,10 @@
 namespace nanojit
 {
     static const bool verbose = false;
-#ifdef VMCFG_VTUNE
-    // vtune jit profiling api can't handle non-contiguous methods,
+#if defined VMCFG_VTUNE || defined VMCFG_SHARK
+    // Profilers get confused by non-contiguous functions,
     // so make the allocation size huge to avoid non-contiguous methods
-    static const int pagesPerAlloc = 128; // 512KB
+    static const int pagesPerAlloc = 256; // 1MB
 #elif defined(NANOJIT_ARM)
     // ARM requires single-page allocations, due to the constant pool that
     // lives on each page that must be reachable by a 4KB pc-relative load.

@@ -2183,7 +2183,14 @@ namespace nanojit
                     }
                     break;
                 }
-               #endif // VMCFG_VTUNE
+                #endif // VMCFG_VTUNE
+
+                case LIR_pc: {
+                    // record the current PC
+                    void **dest = (void **)ins->oprnd1()->immP();
+                    *dest = _nIns;
+                    break;
+                }
 
                 case LIR_comment:
                     // Do nothing.

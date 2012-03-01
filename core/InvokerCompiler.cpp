@@ -308,6 +308,8 @@ namespace avmplus
                 assm->outputf("%s", p->head);
         );
         if (!assm->error()) {
+            if (jit_observer)
+                jit_observer->notifyInvokerJITed(method, assm->codeList);
             if (method->isNative()) {
                 PERFM_NVPROF("C++ invoker bytes", CodeAlloc::size(assm->codeList));
             } else {

@@ -357,10 +357,17 @@ namespace avmplus
         JITNoise noise;
         verbose_only(VerboseWriter *vbWriter;)
         verbose_only(LInsPrinter* vbNames;)
+        JITDebugInfo *jit_debug_info;
+
 #ifdef DEBUGGER
         bool haveDebugger;
 #else
         static const bool haveDebugger = false;
+#endif
+#if defined VMCFG_VTUNE
+        static const bool haveVTune = true;
+#else
+        static const bool haveVTune = false;
 #endif
 #ifdef DEBUG
         /** jit_sst is an array of sst_mask bytes, used to double check that we
@@ -607,6 +614,8 @@ namespace avmplus
 #endif
 
         LIns *optimizeIndexArgumentType(int32_t sp, Traits** indexType);
+
+        JITDebugInfo* initJitDebugInfo();
 
     public:
         ~CodegenLIR();

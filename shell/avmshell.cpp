@@ -871,6 +871,16 @@ namespace avmshell
                     }
                     settings.osr_threshold = threshold;
                 }
+                else if (!VMPI_strncmp(arg, "-prof=", 6)) {
+                    // parse jit profiling level
+                    int32_t level;
+                    if (VMPI_sscanf(arg + 6, "%d", &level) != 1 ||
+                        level < 0 || level > 2) {
+                        avmplus::AvmLog("Bad value to -prof: %s", arg + 6);
+                        usage();
+                    }
+                    settings.jitprof_level = level;
+                }
 #endif /* VMCFG_NANOJIT */
                 else if (MMgc::GCHeap::GetGCHeap()->Config().IsGCOptionWithParam(arg) && i+1 < argc ) {
                     const char *val = argv[++i];
@@ -1177,6 +1187,7 @@ namespace avmshell
         avmplus::AvmLog("          [-jitharden]  enable jit hardening techniques\n");
         avmplus::AvmLog("          [-osr=T]      enable OSR with invocation threshold T; disable with -osr=0; default is -osr=%d\n",
                         avmplus::AvmCore::osr_threshold_default);
+        avmplus::AvmLog("          [-prof=L]     enable jit profile level L; default 0=disabled; 1=function ranges, 2=functions+native asm)\n");
     #ifdef AVMPLUS_IA32
         avmplus::AvmLog("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
         avmplus::AvmLog("          [-Dfixedesp]  pre-decrement stack for all needed call usage upon method entry\n");

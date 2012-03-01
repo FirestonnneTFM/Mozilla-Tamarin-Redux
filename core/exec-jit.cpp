@@ -44,6 +44,10 @@
 #ifdef VMCFG_NANOJIT
 #include "CodegenLIR.h"
 
+#ifdef VMCFG_SHARK
+#include <dlfcn.h> // dl apis for JITLoggingObserver
+#endif
+
 namespace avmplus {
 
 #ifdef VMCFG_COMPILEPOLICY
@@ -734,5 +738,237 @@ void BaseExecMgr::resolveImtSlotFull(VTable* vtable, uint32_t slot)
     }
 }
 
+/**
+ * JITLoggingObserver receives notifications after each function is
+ * JIT-compiled and generates a log file containing symbolic information
+ * that we can then post-process into a symbol-rich library for use with
+ * shark or oprofile.
+ */
+class JITLoggingObserver: public JITObserver
+{
+    FILE *_log;
+    AvmCore *_core;
+    int _logLevel;
+    const void *_curBase;
+
+public:
+    /**
+     * logLevel <= 1    log function names and ranges only
+     * logLevel > 1     include code.
+     */
+    JITLoggingObserver(AvmCore *core, int logLevel);
+    virtual ~JITLoggingObserver();
+
+    // implements JITObserver
+    void notifyMethodJITed(MethodInfo *method, const CodeList *code_info,
+                           JITDebugInfo *debug_info);
+    void notifyInvokerJITed(MethodInfo* method, const CodeList* code_info);
+private:
+    void log(uint32_t tag, size_t byte_count, const void *data);
+    void flush();
+    void updateBase(const void *addr);
+    void logMethod(const char* name, int len, const CodeList* code);
+};
+
+void BaseExecMgr::setupJit(AvmCore* core)
+{
+#ifdef VMCFG_OSR_ENV_VAR
+    if (config.osr_threshold == AvmCore::osr_threshold_default) {
+        // If osr_threshold hasn't been set, check for OSR environment var.
+        const char* osr_config = VMPI_getenv("OSR");
+        if (osr_config) {
+            int threshold = OSR::parseConfig(osr_config);
+            if (threshold != -1) {
+                // A valid threshold was found.
+                core->config.osr_threshold = threshold;
+                core->console << "USING ENV OSR THRESHOLD " << threshold << "\n";
+            }
+        }
+    }
+#endif
+
+#ifdef VMCFG_SHARK
+    // Set up JITObserver
+    if (core->config.jitprof_level)
+        jit_observer = new JITLoggingObserver(core, core->config.jitprof_level);
+#endif
+
+    (void)core;
+}
+
+#ifdef VMCFG_SHARK
+
+JITLoggingObserver::JITLoggingObserver(AvmCore *core, int logLevel)
+: _log(NULL)
+, _core(core)
+, _logLevel(logLevel)
+, _curBase(NULL)
+{
+    char path[256]; // plenty of space because %d produces at most 10 chars.
+    snprintf(path, sizeof(path) - 1, "/tmp/%d-jit.log", getpid());
+    _log = fopen(path, "w");
+}
+
+JITLoggingObserver::~JITLoggingObserver()
+{
+    if (_log)
+        fclose(_log);
+    _log = NULL;
+}
+
+/**
+ * Write and flush one log record formatted as:
+ *   uint32_t tag
+ *   uint32_t byte_count
+ *   uint8_t  bytes[byte_count]
+ */
+void JITLoggingObserver::log(uint32_t tag, size_t byte_count, const void *data)
+{
+    uint32_t size32 = (uint32_t) byte_count;
+    flockfile(_log);
+    fwrite(&tag, sizeof(tag), 1, _log);
+    fwrite(&size32, sizeof(size32), 1, _log);
+    fwrite(data, 1, size32, _log);
+    funlockfile(_log);
+}
+
+void JITLoggingObserver::flush()
+{
+    fflush(_log);
+}
+
+void JITLoggingObserver::updateBase(const void *addr)
+{
+    const void *base = NULL;
+    const char *path = NULL;
+    Dl_info dlInfo;
+    if (dladdr(addr, &dlInfo)) {
+        base = dlInfo.dli_fbase;
+        path = dlInfo.dli_fname;
+    }
+    if (base != _curBase) {
+        struct {
+            uint64_t base;
+            char fileName[4096];
+        } baseInfo = { (uint64_t) base, "" };
+        size_t len = path ? strlen(path) : 0;
+        if (len > sizeof(baseInfo.fileName))
+            len = sizeof(baseInfo.fileName);
+        memcpy(baseInfo.fileName, path, len);
+        log('base', sizeof(baseInfo) - sizeof(baseInfo.fileName) + len, &baseInfo);
+        _curBase = base;
+    }
+}
+
+/**
+ * Log data about jit-compiling this method.  Log record sequence is:
+ *
+ *   meth (blok [code])* (line|file)*
+ */
+void JITLoggingObserver::notifyMethodJITed(MethodInfo *method,
+                                           const CodeList* code_info,
+                                           JITDebugInfo *debug_info)
+{
+    if (!_log)
+        return;
+
+    Stringp name = method->getMethodName();
+    char nameBuf[1024];
+    int len;
+    if (!name) {
+        // anonymous method
+        len = snprintf(nameBuf, sizeof(nameBuf), "{pool=%d:method=%d}",
+                       method->pool()->uniqueId(), method->method_id());
+    } else {
+        // named method
+        StUTF8String name8(name);
+        len = snprintf(nameBuf, sizeof(nameBuf), "%s{pool=%d:method=%d}",
+                       name8.c_str(), method->pool()->uniqueId(),
+                       method->method_id());
+    }
+
+    logMethod(nameBuf, len, code_info);
+
+    for (JITDebugInfo::Info* info = debug_info ? debug_info->info : 0;
+            info != NULL;
+            info = info->next) {
+        switch (info->kind) {
+        case JITDebugInfo::kLine: {
+            struct {
+                uint64_t pc;
+                uint64_t lineNo;
+            } lineInfo = { (uint64_t) info->pc, info->line };
+            log('line', sizeof(lineInfo), &lineInfo);
+            break;
+        }
+        case JITDebugInfo::kFile: {
+            StUTF8String fileName8(method->pool()->getString(info->file));
+            struct {
+                uint64_t pc;
+                char fileName[4096];
+            } fileInfo = { (uint64_t) info->pc, "" };
+            size_t len = fileName8.length();
+            if (len > sizeof(fileInfo.fileName))
+                len = sizeof(fileInfo.fileName);
+            memcpy(fileInfo.fileName, fileName8.c_str(), len);
+            log('file', sizeof(fileInfo) - sizeof(fileInfo.fileName) + len, &fileInfo);
+            break;
+        }
+        default:
+            AvmAssert(false && "bad atom kind for debug info");
+            break;
+        }
+    }
+
+    flush();
+}
+
+void JITLoggingObserver::notifyInvokerJITed(MethodInfo* method,
+                                            const CodeList* code_info)
+{
+    if (!_log)
+        return;
+
+    Stringp name = method->getMethodName();
+    char nameBuf[1024];
+    int len;
+    if (!name) {
+        // anonymous method
+        len = snprintf(nameBuf, sizeof(nameBuf), "invoke {pool=%d:method=%d}",
+                       method->pool()->uniqueId(), method->method_id());
+    } else {
+        // named method
+        StUTF8String name8(name);
+        len = snprintf(nameBuf, sizeof(nameBuf),
+                       "invoke-%s {pool=%d:method=%d}", name8.c_str(),
+                       method->pool()->uniqueId(), method->method_id());
+    }
+
+    logMethod(nameBuf, len, code_info);
+    flush();
+}
+
+void JITLoggingObserver::logMethod(const char* nameBuf, int len,
+                                   const CodeList* code_info)
+{
+    CodeRange r(code_info);
+    log('meth', len, nameBuf);
+    for (; !r.empty(); r.popFront()) {
+        // write out range (and possibly code) for each block of code
+        struct {
+            uint64_t start, end;
+        } block = {
+                (uint64_t) r.frontStart(),
+                (uint64_t) r.frontEnd()
+        };
+        updateBase(r.frontStart());
+        log('blok', sizeof(block), &block);
+        if (_logLevel > 1)
+            log('code', block.end - block.start, (void *)block.start);
+    }
+}
+#endif // VMCFG_SHARK
+
 } // namespace avmplus
+
 #endif // VMCFG_NANOJIT

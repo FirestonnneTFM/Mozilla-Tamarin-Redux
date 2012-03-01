@@ -84,6 +84,7 @@
 #undef AVMPLUS_SAMPLER
 #undef VMCFG_VTUNE
 #undef AVMPLUS_VERBOSE
+#undef VMCFG_SHARK
 #undef VMCFG_NANOJIT
 #undef FEATURE_NANOJIT
 #undef VMCFG_FLOAT
@@ -410,12 +411,23 @@
 
 /* AVMFEATURE_VTUNE
  *
- * Selects vtune profiling of jit'd code.  Requires Windows x86,
+ * Selects VTune profiling of jit'd code.  Requires Windows x86,
  * and could support windows x64 after more testing.
  * turns on AVMPLUS_VERBOSE solely to get method/class names for profiling
  */
 #if !defined AVMFEATURE_VTUNE || AVMFEATURE_VTUNE != 0 && AVMFEATURE_VTUNE != 1
 #  error "AVMFEATURE_VTUNE must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_SHARK
+ *
+ * Selects Shark profiling of jit'd code.  MacOS 10.6.  This technique
+ * should work for oprofile on linux and/or android, with more tweaks.
+ * See README in utils/sharkprof.
+ */
+#if !defined AVMFEATURE_SHARK || AVMFEATURE_SHARK != 0 && AVMFEATURE_SHARK != 1
+#  error "AVMFEATURE_SHARK must be defined and 0 or 1 (only)."
 #endif
 
 
@@ -906,6 +918,11 @@
 #    error "AVMSYSTEM_IA32 is required for AVMFEATURE_VTUNE"
 #  endif
 #endif
+#if AVMFEATURE_SHARK
+#  if !AVMSYSTEM_MAC
+#    error "AVMSYSTEM_MAC is required for AVMFEATURE_SHARK"
+#  endif
+#endif
 #if AVMFEATURE_JIT
 #if AVMSYSTEM_IA32+AVMSYSTEM_AMD64+AVMSYSTEM_ARM+AVMSYSTEM_PPC+AVMSYSTEM_SPARC+AVMSYSTEM_MIPS+AVMSYSTEM_SH4 != 1
 #  error "Exactly one of AVMSYSTEM_IA32,AVMSYSTEM_AMD64,AVMSYSTEM_ARM,AVMSYSTEM_PPC,AVMSYSTEM_SPARC,AVMSYSTEM_MIPS,AVMSYSTEM_SH4 must be defined."
@@ -1179,6 +1196,9 @@
 #endif
 #if AVMFEATURE_VTUNE
 #  define AVMPLUS_VERBOSE
+#endif
+#if AVMFEATURE_SHARK
+#  define VMCFG_SHARK
 #endif
 #if AVMFEATURE_JIT
 #  define VMCFG_NANOJIT

@@ -44,6 +44,10 @@
 
 #include "LirHelper.h"
 
+#ifdef VMCFG_SHARK
+#include <dlfcn.h> // for dlopen and dlsym
+#endif
+
 namespace avmplus
 {
 
@@ -74,6 +78,7 @@ LirHelper::LirHelper(PoolObject* pool) :
     core(pool->core),
     alloc1(mmfx_new(Allocator())),
     lir_alloc(mmfx_new(Allocator())),
+    jit_observer(((BaseExecMgr*)core->exec)->jit_observer),
 #ifdef NANOJIT_IA32
     use_cmov(pool->core->config.njconfig.i386_use_cmov)
 #else
@@ -376,7 +381,8 @@ LIns* LirHelper::IncrementLIREmitter::operator()(enum BuiltinType bt,LIns* oper)
 }
 
 #endif
-}
+
+} // end namespace avmplus
 
 //
 // The following methods implement Service Provider API's defined in
@@ -419,6 +425,78 @@ namespace nanojit
     void Allocator::postReset() {
     }
 
+#ifdef VMCFG_SHARK
+
+#if defined VMCFG_64BIT
+    static const char* JIT_SO_PATH = "/tmp/jit64.so";
+#elif defined VMCFG_32BIT
+    static const char* JIT_SO_PATH = "/tmp/jit32.so";
+#else
+#   error "unsupported system"
+#endif
+
+    // TODO: lock access to these statics.
+    static void *sHandle = NULL;
+    static char *sStart = NULL;
+    static char *sEnd = NULL;
+    static char *sCur = NULL;
+    size_t overage = 0;
+
+    void* CodeAlloc::allocCodeChunk(size_t nbytes)
+    {
+        if (!sHandle) {
+            sHandle = dlopen(JIT_SO_PATH, RTLD_NOW);
+            if (sHandle) {
+                // Get the bounds of the code area by looking for known symbols,
+                // then make that area writable.
+                sStart = (char*) dlsym(sHandle, "_jitStart");
+                sEnd = (char*) dlsym(sHandle, "_jitEnd");
+                if (!mprotect(sStart, sEnd - sStart,
+                              PROT_READ | PROT_WRITE | PROT_EXEC))
+                    sCur = sStart;
+            } else {
+                const char *err = dlerror();
+                fprintf(stderr, "dlopen error: %s\n", err);
+                // will fall through to AVMPI_allocateCodeMemory below.
+            }
+        }
+
+        if (sCur) {
+            char *next = sCur + nbytes;
+            if (next < sEnd) {
+                char *alloc = sCur;
+                sCur = next;
+                return alloc;
+            }
+        }
+
+        // Out of space in jit.so, fall back to AVMPI to get code mem.
+        overage += nbytes;
+        fprintf(stderr, "out of jit.so memory, allocated %luKB from system\n",
+               overage / 1024);
+        char* mem = (char*) AVMPI_allocateCodeMemory(nbytes);
+        mprotect((maddr_ptr) mem, (unsigned int) nbytes,
+                 PROT_EXEC | PROT_READ | PROT_WRITE);
+
+        return mem;
+    }
+
+    void CodeAlloc::freeCodeChunk(void* addr, size_t nbytes)
+    {
+        if (addr < sStart || addr >= sEnd) {
+            // Did not come from DL region.
+            AVMPI_freeCodeMemory(addr, nbytes);
+        }
+    }
+
+    void CodeAlloc::markCodeChunkExec(void* /*addr*/, size_t /*nbytes*/) {
+    }
+
+    void CodeAlloc::markCodeChunkWrite(void* /*addr*/, size_t /*nbytes*/) {
+    }
+
+#else // !VMCFG_SHARK
+
     void* CodeAlloc::allocCodeChunk(size_t nbytes) {
         return AVMPI_allocateCodeMemory(nbytes);
     }
@@ -436,6 +514,7 @@ namespace nanojit
         //printf("unprotect %d %p\n", (int)nbytes, addr);
         AVMPI_makeCodeMemoryExecutable(addr, nbytes, false); // RW
     }
+#endif
 
 #ifdef DEBUG
     // Note this method should only be called during debug builds.
@@ -456,7 +535,7 @@ namespace nanojit
             b = isExec ? buf.Protect == PAGE_EXECUTE_READ
                        : buf.Protect == PAGE_READWRITE;
             NanoAssert(b);
-#elif defined(__MACH30__)
+#elif defined(__MACH30__) && !defined(VMCFG_SHARK)
             /* mach / osx */
             vm_address_t vmaddr = (vm_address_t)addr;
             vm_size_t vmsize = psize;

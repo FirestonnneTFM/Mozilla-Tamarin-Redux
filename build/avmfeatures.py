@@ -65,6 +65,11 @@ def featureSettings(o):
         args += "-DAVMFEATURE_VTUNE=1 "
     if (arg == False):
         args += "-DAVMFEATURE_VTUNE=0 "
+    arg = o.getBoolArg("shark")
+    if (arg == True):
+        args += "-DAVMFEATURE_SHARK=1 "
+    if (arg == False):
+        args += "-DAVMFEATURE_SHARK=0 "
     if o.getBoolArg("jit"):
         args += "-DAVMFEATURE_JIT=1 -DAVMFEATURE_WORDCODE_INTERP=0 -DAVMFEATURE_AOT=0 "
     arg = o.getBoolArg("float")

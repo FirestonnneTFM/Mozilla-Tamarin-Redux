@@ -193,6 +193,7 @@ namespace avmplus
     const bool AvmCore::verifyquiet_default = false;
     const Runmode AvmCore::runmode_default = RM_mixed;
     const uint32_t AvmCore::osr_threshold_default = OSR_THRESHOLD_DEFAULT;
+    const uint32_t AvmCore::jitprof_level_default = 0; // no logging.
     const bool AvmCore::interrupts_default = false;
     const bool AvmCore::jitordie_default = false;
 
@@ -410,6 +411,7 @@ namespace avmplus
         // jit flag forces use of jit-compiler instead of interpreter
         config.runmode = runmode_default;
         config.osr_threshold = osr_threshold_default;
+        config.jitprof_level = jitprof_level_default;
         config.jitordie = jitordie_default;
 
         config.interrupts = interrupts_default;

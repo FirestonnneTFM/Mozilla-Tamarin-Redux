@@ -78,6 +78,7 @@ BaseExecMgr::BaseExecMgr(AvmCore* core)
 #endif
 #ifdef VMCFG_NANOJIT
     , current_osr(NULL)
+    , jit_observer(NULL)
 #endif
 {
 #ifdef SUPERWORD_PROFILING
@@ -86,19 +87,8 @@ BaseExecMgr::BaseExecMgr(AvmCore* core)
 #ifdef VMCFG_COMPILEPOLICY
     prepPolicyRules();
 #endif
-#if defined VMCFG_NANOJIT && defined VMCFG_OSR_ENV_VAR
-    if (config.osr_threshold == AvmCore::osr_threshold_default) {
-        // If osr_threshold hasn't been set, check for OSR environment var.
-        const char* osr_config = VMPI_getenv("OSR");
-        if (osr_config) {
-            int threshold = OSR::parseConfig(osr_config);
-            if (threshold != -1) {
-                // A valid threshold was found.
-                core->config.osr_threshold = threshold;
-                core->console << "USING ENV OSR THRESHOLD " << threshold << "\n";
-            }
-        }
-    }
+#ifdef VMCFG_NANOJIT
+    setupJit(core);
 #endif
 }
 
@@ -106,6 +96,10 @@ BaseExecMgr::~BaseExecMgr()
 {
 #ifdef SUPERWORD_PROFILING
     WordcodeTranslator::swprofStop();
+#endif
+#ifdef VMCFG_NANOJIT
+    delete jit_observer;
+    jit_observer = NULL;
 #endif
 }
 

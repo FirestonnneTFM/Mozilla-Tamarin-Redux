@@ -50,6 +50,7 @@ namespace nanojit
     class CodeList
     {
         friend class CodeAlloc;
+        friend class CodeRange;
 
         /** for making singly linked lists of blocks in any order */
         CodeList* next;
@@ -247,6 +248,39 @@ namespace nanojit
         /** make sure all the higher/lower pointers are correct for every block */
         void sanity_check();
 #endif
+    };
+
+    /** CodeRange is a range-style iterator over CodeList */
+    class CodeRange
+    {
+    public:
+        CodeRange(const CodeList* blocks)
+                : p(blocks) {}
+
+        /** return true if there are no more blocks */
+        bool empty() const {
+            return !p;
+        }
+
+        /** return the start address of the front block */
+        const void *frontStart() const {
+            NanoAssert(!empty());
+            return &p->code[0];
+        }
+
+        /** return the end address of the front block */
+        const void *frontEnd() const {
+            return p->end;
+        }
+
+        /** move to the next block */
+        void popFront() {
+            NanoAssert(!empty());
+            p = p->next;
+        }
+
+    private:
+        const CodeList* p;
     };
 }
 
