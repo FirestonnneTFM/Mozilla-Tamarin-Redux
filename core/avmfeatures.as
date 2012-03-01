@@ -445,7 +445,7 @@ var FEATURES =
   </feature>
 
   <feature>
-    <desc> Selects vtune profiling of jit'd code.  Requires Windows x86,
+    <desc> Selects VTune profiling of jit'd code.  Requires Windows x86,
            and could support windows x64 after more testing.
            turns on AVMPLUS_VERBOSE solely to get method/class names for profiling
     </desc>
@@ -456,6 +456,16 @@ var FEATURES =
     <defines>  VMCFG_VTUNE </defines>
 
     <defines>  AVMPLUS_VERBOSE </defines>
+  </feature>
+
+  <feature>
+    <desc> Selects Shark profiling of jit'd code.  MacOS 10.6.  This technique
+           should work for oprofile on linux and/or android, with more tweaks.
+           See README in utils/sharkprof.
+    </desc>
+    <name>     AVMFEATURE_SHARK  </name>
+    <requires> AVMSYSTEM_MAC </requires>
+    <defines>  VMCFG_SHARK </defines>
   </feature>
 
   <feature>

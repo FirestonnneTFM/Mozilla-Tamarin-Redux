@@ -673,7 +673,8 @@ namespace avmplus
         builtinFunctionOptimizerHashMap(NULL),
         blockLabels(NULL),
         cseFilter(NULL),
-        noise()
+        noise(),
+        jit_debug_info(NULL)
         DEBUGGER_ONLY(, haveDebugger(core->debugger() != NULL) )
     {
         #ifdef AVMPLUS_MAC_CARBON
@@ -2724,15 +2725,53 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         case OP_returnvoid:
             emit(opcode, sp);
             break;
-        case OP_debugfile:
-        {
-#if defined VMCFG_VTUNE
-            emit(opcode, (uintptr_t)pool->getString(imm30));
-#elif defined DEBUGGER
-            if (haveDebugger)
-                emit(opcode, (uintptr_t)pool->getString(imm30));
-#endif
-           break;
+        case OP_debugfile: {
+            if (haveDebugger || haveVTune || jit_observer) {
+              String* filename = pool->getString(imm30); (void)filename;
+#ifdef DEBUGGER
+              if (haveDebugger) {
+                  LIns* debugger = loadIns(LIR_ldp, offsetof(AvmCore, _debugger),
+                                           coreAddr, ACCSET_OTHER, LOAD_CONST);
+                  callIns(FUNCTIONID(debugFile), 2,
+                          debugger,
+                          InsConstPtr(filename));
+              }
+#endif // DEBUGGER
+#ifdef VMCFG_VTUNE
+              Ins(LIR_file, InsConstPtr(filename));
+#endif /* VMCFG_VTUNE */
+              if (jit_observer) {
+                  JITDebugInfo* jdi = initJitDebugInfo();
+                  JITDebugInfo::Info* info = new (*lir_alloc) JITDebugInfo::Info(JITDebugInfo::kFile);
+                  info->file = imm30;
+                  jdi->add(info);
+                  Ins(LIR_pc, InsConstPtr(&info->pc));
+              }
+            }
+            break;
+        }
+        case OP_debugline: {
+            if (haveDebugger || haveVTune || jit_observer) {
+                // we actually do generate code for these, in debugger mode
+#ifdef DEBUGGER
+                if (haveDebugger) {
+                    LIns* debugger = loadIns(LIR_ldp, offsetof(AvmCore, _debugger),
+                                             coreAddr, ACCSET_OTHER, LOAD_CONST);
+                    callIns(FUNCTIONID(debugLine), 2, debugger, InsConst(imm30));
+                }
+#endif // DEBUGGER
+#ifdef VMCFG_VTUNE
+                Ins(LIR_line, InsConst(imm30));
+#endif /* VMCFG_VTUNE */
+                if (jit_observer) {
+                    JITDebugInfo* jdi = initJitDebugInfo();
+                    JITDebugInfo::Info* info = new (*lir_alloc) JITDebugInfo::Info(JITDebugInfo::kLine);
+                    info->line = imm30; // filename pool index
+                    jdi->add(info);
+                    Ins(LIR_pc, InsConstPtr(&info->pc));
+                }
+            }
+            break;
         }
         case OP_dxns:
         {
@@ -2990,18 +3029,6 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             emit(opcode, sp, 0, STRING_TYPE);
             break;
 
-        case OP_debugline:
-        {
-#if defined VMCFG_VTUNE
-            emit(opcode, imm30);
-#elif defined DEBUGGER
-            if (haveDebugger) {
-                // we actually do generate code for these, in debugger mode
-                emit(opcode, imm30);
-            }
-#endif
-           break;
-        }
         case OP_nextvalue:
         case OP_nextname:
             emit(opcode, 0, 0, NULL);
@@ -7258,43 +7285,6 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 break;
             }
 
-            /*
-             * debugger instructions
-             */
-            case OP_debugfile:
-            {
-            #ifdef DEBUGGER
-            if (haveDebugger) {
-                // todo refactor api's so we don't have to pass argv/argc
-                LIns* debugger = loadIns(LIR_ldp, offsetof(AvmCore, _debugger), coreAddr, ACCSET_OTHER, LOAD_CONST);
-                callIns(FUNCTIONID(debugFile), 2,
-                        debugger,
-                        InsConstPtr((String*)op1));
-            }
-            #endif // DEBUGGER
-            #ifdef VMCFG_VTUNE
-                Ins(LIR_file, InsConstPtr((String*)op1));
-            #endif /* VMCFG_VTUNE */
-                break;
-            }
-
-            case OP_debugline:
-            {
-            #ifdef DEBUGGER
-            if (haveDebugger) {
-                // todo refactor api's so we don't have to pass argv/argc
-                LIns* debugger = loadIns(LIR_ldp, offsetof(AvmCore, _debugger), coreAddr, ACCSET_OTHER, LOAD_CONST);
-                callIns(FUNCTIONID(debugLine), 2,
-                        debugger,
-                        InsConst((int32_t)op1));
-            }
-            #endif // DEBUGGER
-            #ifdef VMCFG_VTUNE
-                Ins(LIR_line, InsConst((int32_t)op1));
-            #endif /* VMCFG_VTUNE */
-                break;
-            }
-
             default:
             {
                 AvmAssert(false); // unsupported
@@ -8818,6 +8808,16 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
 #endif
 
+    JITDebugInfo* CodegenLIR::initJitDebugInfo()
+    {
+        // allocate JITDebugInfo for any JITObserver
+        if (!jit_debug_info) {
+            jit_debug_info = new (*lir_alloc) JITDebugInfo();
+            jit_debug_info->info = 0;
+        }
+        return jit_debug_info;
+    }
+
     // return pointer to generated code on success, NULL on failure (frame size too large)
     GprMethodProc CodegenLIR::emitMD()
     {
@@ -8920,6 +8920,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             // save pointer to generated code
             code = (GprMethodProc) frag->code();
             PERFM_NVPROF("JIT method bytes", CodeAlloc::size(assm->codeList));
+            if (jit_observer)
+                jit_observer->notifyMethodJITed(info, assm->codeList, jit_debug_info);
         } else {
             verbose_only (if (pool->isVerbose(VB_execpolicy))
                 AvmLog("execpolicy revert to interp (%d) compiler error %d \n", info->unique_method_id(), assm->error());

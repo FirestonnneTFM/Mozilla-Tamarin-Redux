@@ -81,6 +81,10 @@
   #define AVMFEATURE_VTUNE             0
 #endif
 
+#ifndef AVMFEATURE_SHARK
+  #define AVMFEATURE_SHARK             0
+#endif
+
 #ifndef AVMFEATURE_JIT
   #define AVMFEATURE_JIT               1
 #endif

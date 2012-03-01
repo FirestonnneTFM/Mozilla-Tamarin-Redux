@@ -139,6 +139,7 @@ const int kBufferPadding = 16;
 
         enum Runmode runmode;
         uint32_t osr_threshold;
+        uint32_t jitprof_level;
         const char* compilePolicyRules; // JIT compilation override
 
         /**
@@ -628,6 +629,7 @@ const int kBufferPadding = 16;
         static const bool verifyquiet_default;
         static const Runmode runmode_default;
         static const uint32_t osr_threshold_default;
+        static const uint32_t jitprof_level_default;
         static const bool interrupts_default;
         static const bool jitordie_default;
 

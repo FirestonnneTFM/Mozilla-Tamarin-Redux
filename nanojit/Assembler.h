@@ -172,7 +172,7 @@ namespace nanojit
     inline uint32_t AR::stackSlotsNeeded() const
     {
         // NB: _highWaterMark is an index, not a count
-        return _highWaterMark+1;
+        return _highWaterMark + 1;
     }
 
     #ifndef AVMPLUS_ALIGN16
@@ -437,7 +437,9 @@ namespace nanojit
             // temporarily swap all the code/exit variables below (using
             // swapCodeChunks()).  Afterwards we swap them all back and set
             // _inExit to false again.
+        public:
             CodeList*   codeList;               // finished blocks of code.
+        private:
             bool        _inExit, vpad2[3];
             NIns        *codeStart, *codeEnd;   // current normal code chunk
             NIns        *exitStart, *exitEnd;   // current exit code chunk

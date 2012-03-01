@@ -42,6 +42,10 @@
 
 #include "exec-osr.h"
 
+namespace nanojit {
+  class CodeList; // Forward declaration for JITObserver
+}
+
 namespace avmplus {
 
 /**
@@ -144,6 +148,59 @@ extern const VecrThunkProc thunkEnterVECR_adapter;
 int32_t argSize(Traits*);
 
 class MethodRecognizer;
+
+/**
+ * Associates debugfile/debugline information with locations in JITted code
+ */
+struct JITDebugInfo
+{
+    enum Kind {
+        kLine, kFile
+    };
+    struct Info {
+        Info(Kind kind) : kind(kind) {}
+        const void* pc; // location in native code.
+        Kind kind;      // kLine or kFile
+        union {
+            int line;
+            int file;   // pool index of filename string
+        };
+        Info* next; // next record.
+    };
+
+    JITDebugInfo() : info(0), last(0) {}
+
+    void add(Info* r) {
+        r->next = 0;
+        if (last)
+            last->next = r;
+        else
+            info = r;
+        last = r;
+    }
+
+    Info* info;
+    Info* last;
+};
+
+/** JITObserver is an interface that is notified for each JITted method */
+class JITObserver
+{
+public:
+    virtual ~JITObserver() {}
+    /**
+     * Notify the observer that the given method was just compiled.
+     * codeInfo and debugInfo contain code and debug symbol data about the
+     * method.  After notifyMethodJITted is called, the codeInfo and debugInfo
+     * buffers may be recycled.  The observer must copy out any required info.
+     */
+    virtual void notifyMethodJITed(MethodInfo* method,
+                                   const nanojit::CodeList* code,
+                                   JITDebugInfo *debugInfo) = 0;
+
+    virtual void notifyInvokerJITed(MethodInfo* method,
+                                    const nanojit::CodeList* code) = 0;
+};
 
 /**
  * BaseExecMgr implements for all policies, and encapsulates
@@ -320,6 +377,7 @@ private:
     //
     // Support for JIT Compilation:
     //
+    void setupJit(AvmCore*);
 
     /** Return true if we should eagerly JIT.  False means use interpreter. */
     bool shouldJitFirst(const AbcEnv*, const MethodInfo*, MethodSignaturep) const;
@@ -423,10 +481,11 @@ private:
     GCList<Traits> verifyTraitsQueue;
 #endif
 #ifdef VMCFG_NANOJIT
-    // OSR support
     friend class OSR;
     friend class CodegenLIR;
+    friend class LirHelper;
     OSR *current_osr;
+    JITObserver *jit_observer; // Current JITObserver or NULL if not profiling.
 #endif
 };
 

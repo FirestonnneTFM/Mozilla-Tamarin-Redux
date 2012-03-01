@@ -116,6 +116,9 @@ const char * const avmfeatures = ""
   #if AVMFEATURE_VTUNE
     "AVMFEATURE_VTUNE;"
   #endif
+  #if AVMFEATURE_SHARK
+    "AVMFEATURE_SHARK;"
+  #endif
   #if AVMFEATURE_JIT
     "AVMFEATURE_JIT;"
   #endif

@@ -76,6 +76,7 @@ namespace avmshell
         , njconfig()
         , jitconfig()
         , osr_threshold(avmplus::AvmCore::osr_threshold_default)
+        , jitprof_level(avmplus::AvmCore::jitprof_level_default)
         , policyRulesArg(NULL)
 #endif
         , st_component(NULL)
@@ -416,6 +417,7 @@ namespace avmshell
         config.njconfig = settings.njconfig;
         config.jitconfig = settings.jitconfig;
         config.osr_threshold = settings.osr_threshold;
+        config.jitprof_level = settings.jitprof_level;
         config.compilePolicyRules = settings.policyRulesArg;
 #endif
 
@@ -427,7 +429,6 @@ namespace avmshell
 #endif
         config.runmode = settings.runmode;
 
-#if VMCFG_METHOD_NAMES
         // verbose requires methodnames (in avmshell, anyway), before calling initBuiltinPool.
         if (settings.do_verbose)
             config.methodNames = true;
@@ -436,7 +437,6 @@ namespace avmshell
         if (allowDebugger)
             config.methodNames = true;
     #endif
-#endif // VMCFG_METHOD_NAMES
 
 #ifdef DEBUGGER
         langID = settings.langID;
