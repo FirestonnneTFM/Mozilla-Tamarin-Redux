@@ -390,10 +390,14 @@ if zlib_include_dir is not None:
     AVMSHELL_CPPFLAGS += "-I%s " % zlib_include_dir
 
 zlib_lib = o.getStringArg('zlib-lib')
-if zlib_lib is not None:
-    AVMSHELL_LDFLAGS = zlib_lib
-else:
-    AVMSHELL_LDFLAGS = '$(call EXPAND_LIBNAME,zlib)'
+if zlib_lib is None:
+    zlib_lib = '$(call EXPAND_LIBNAME,zlib)'
+
+lzma_lib = o.getStringArg('lzma-lib')
+if lzma_lib is None:
+    lzma_lib = '$(call EXPAND_LIBNAME,lzma)'
+
+AVMSHELL_LDFLAGS = zlib_lib + ' ' + lzma_lib
 
 sys_root_dir = o.getStringArg('sys-root-dir')
 if sys_root_dir is not None:
