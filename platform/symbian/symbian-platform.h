@@ -126,6 +126,11 @@
 
 typedef pthread_t vmpi_thread_t;
 
+REALLY_INLINE vmpi_thread_t VMPI_nullThread()
+{
+    return NULL;
+}
+
 /**
 * Type defintion for an opaque data type representing platform-defined spin lock
 * @see VMPI_lockInit(), VMPI_lockAcquire()

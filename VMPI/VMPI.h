@@ -340,6 +340,17 @@ extern void* VMPI_tlsGetValue(uintptr_t tlsId);
 extern vmpi_thread_t VMPI_currentThread();
 
 /**
+ * Obtain a platform-specific value that is guaranteed to never be returned
+ * by neither VMPI_currentThread nor VMPI_threadCreate.
+ *
+ * This is meant to serve as a replacement for uses of 'NULL' in code
+ * that assumed vmpi_thread_t has pointer type.
+ *
+ * @return value that no thread id will match.
+ */
+extern vmpi_thread_t VMPI_nullThread();
+
+/**
  * wrapper around getenv function, return's NULL on platforms with no env vars
  * @return value of env var
  */

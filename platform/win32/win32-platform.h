@@ -429,6 +429,11 @@ REALLY_INLINE vmpi_thread_t VMPI_currentThread()
     return (vmpi_thread_t) (uintptr_t)GetCurrentThreadId();
 }
 
+REALLY_INLINE vmpi_thread_t VMPI_nullThread()
+{
+    return NULL;
+}
+
 REALLY_INLINE bool VMPI_tlsSetValue(uintptr_t tlsId, void* value)
 {
     return TlsSetValue((DWORD)tlsId, value) == TRUE;

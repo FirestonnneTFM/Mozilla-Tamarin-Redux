@@ -40,6 +40,8 @@
 #ifndef __avmplus_unix_platform__
 #define __avmplus_unix_platform__
 
+#include <assert.h>
+
 #define VMPI_memcpy         ::memcpy
 #define VMPI_memset         ::memset
 #define VMPI_memcmp         ::memcmp
@@ -591,6 +593,19 @@ REALLY_INLINE void VMPI_spinloopPause()
 #ifdef AVMPLUS_IA32
     __asm__("pause");
 #endif
+}
+
+REALLY_INLINE vmpi_thread_t VMPI_nullThread()
+{
+    vmpi_thread_t rtn;
+#ifdef linux
+    rtn = -1;
+    // Bugzilla 656008: sanity check that VMPI_currentThread will be sane.
+    assert(rtn != pthread_self());
+#else
+    rtn = NULL;
+#endif
+    return rtn;
 }
 
 #include "../VMPI/ThreadsPosix-inlines.h"
