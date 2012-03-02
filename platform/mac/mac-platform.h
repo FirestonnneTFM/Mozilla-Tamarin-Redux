@@ -327,6 +327,11 @@ REALLY_INLINE void VMPI_spinloopPause()
 #endif
 }
 
+REALLY_INLINE vmpi_thread_t VMPI_nullThread()
+{
+    return NULL;
+}
+
 #include "../VMPI/ThreadsPosix-inlines.h"
 
 #endif // __avmplus_mac_platform__

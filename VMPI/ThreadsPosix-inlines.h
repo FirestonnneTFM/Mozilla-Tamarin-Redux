@@ -37,6 +37,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+#include <assert.h>
+
 typedef pthread_mutex_t        vmpi_mutex_t;
 typedef pthread_cond_t         vmpi_condvar_t;
 typedef void*                  vmpi_thread_arg_t; // Argument type for thread start function
@@ -89,7 +91,10 @@ REALLY_INLINE bool VMPI_condVarDestroy(vmpi_condvar_t* condvar)
 
 REALLY_INLINE vmpi_thread_t VMPI_currentThread()
 {
-    return pthread_self();
+    vmpi_thread_t rtn = pthread_self();
+    // Bugzilla 656008: double-checking VMPI_nullThread; must not collide with thread id of self
+    assert(rtn != VMPI_nullThread());
+    return rtn;
 }
 
 REALLY_INLINE bool VMPI_tlsSetValue(uintptr_t tlsId, void* value)

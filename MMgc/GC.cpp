@@ -3800,7 +3800,7 @@ namespace MMgc
             stackEnter = NULL;
             // cleared so we remain thread ambivalent
             rememberedStackTop = NULL;
-            m_gcThread = NULL;
+            m_gcThread = VMPI_nullThread();
             VMPI_lockRelease(&m_gcLock);
         }
     }

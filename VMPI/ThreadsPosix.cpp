@@ -65,7 +65,10 @@ void VMPI_tlsDestroy(uintptr_t tlsId)
 
 bool VMPI_threadCreate(vmpi_thread_t* thread, vmpi_thread_attr_t* attr, vmpi_thread_start_t start_fn, vmpi_thread_arg_t arg)
 {
-    return pthread_create(thread, attr, start_fn, arg) == 0;
+    bool rtn = pthread_create(thread, attr, start_fn, arg) == 0;
+    // Bugzilla 656008: double-checking VMPI_nullThread; must not collide with id of fresh thread
+    assert(*thread != VMPI_nullThread());
+    return rtn;
 }
 
 bool VMPI_threadDetach(vmpi_thread_t thread)
