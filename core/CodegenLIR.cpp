@@ -245,8 +245,13 @@ namespace avmplus
     #else
     #  define SETJMP ((uintptr_t)VMPI_setjmpNoUnwind)
     #endif // _MSC_VER
+} // end namespace avmplus
 
-    #include "../core/jit-calls.h"
+// include this outside any namespace to appease Eclipse CDT indigo C++ indexer.
+#include "../core/jit-calls.h"
+
+namespace avmplus
+{
 
 #if NJ_EXPANDED_LOADSTORE_SUPPORTED && defined(VMCFG_UNALIGNED_INT_ACCESS) && defined(VMCFG_LITTLE_ENDIAN)
     #define VMCFG_MOPS_USE_EXPANDED_LOADSTORE_INT
