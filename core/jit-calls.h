@@ -37,6 +37,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+namespace avmplus
+{
     FUNCTION(CALL_INDIRECT, SIG4(U,P,P,I,P), icalli)
     FUNCTION(CALL_INDIRECT, SIG4(A,P,P,I,P), acalli)
     FUNCTION(CALL_INDIRECT, SIG4(D,P,P,I,P), dcalli)
@@ -1404,3 +1406,4 @@ SSE2_ONLY(
     FUNCTION(FUNCADDR(jitProfileValue32), SIG2(V,P,I), jitProfileValue32)
     FUNCTION(FUNCADDR(jitProfileHist32), SIG2(V,P,I), jitProfileHist32)
 #endif
+} // end namespace avmplus
