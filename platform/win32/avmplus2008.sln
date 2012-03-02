@@ -2,6 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shell", "shell2008.vcproj", "{437E43D2-ED2D-406B-88DB-B5940F838AE9}"
 	ProjectSection(ProjectDependencies) = postProject
+		{D3749430-CDC4-46C2-9428-6276390A4749} = {D3749430-CDC4-46C2-9428-6276390A4749}
 		{7E408248-3BAA-45AE-B65A-5355113A1FF8} = {7E408248-3BAA-45AE-B65A-5355113A1FF8}
 		{5A7E8ACA-065A-4456-BBD0-535691718FD0} = {5A7E8ACA-065A-4456-BBD0-535691718FD0}
 		{B004A8CC-B3A9-4600-A1A9-EF1BBCF2434B} = {B004A8CC-B3A9-4600-A1A9-EF1BBCF2434B}
@@ -18,6 +19,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nanojit", "nanojit2008.vcproj", "{7E408248-3BAA-45AE-B65A-5355113A1FF8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "eval", "eval2008.vcproj", "{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lzma", "lzma2008.vcproj", "{D3749430-CDC4-46C2-9428-6276390A4749}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -258,6 +261,36 @@ Global
 		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.VTune|Windows Mobile 6 Professional SDK (ARMV4I).Deploy.0 = VTune|Windows Mobile 6 Professional SDK (ARMV4I)
 		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.VTune|x64.ActiveCfg = VTune|x64
 		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.VTune|x64.Build.0 = VTune|x64
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Debug_Debugger|Win32.ActiveCfg = Debug|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Debug_Debugger|Win32.Build.0 = Debug|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Debug_Debugger|Windows Mobile 6 Professional SDK (ARMV4I).ActiveCfg = Debug|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Debug_Debugger|x64.ActiveCfg = Debug|x64
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Debug_Debugger|x64.Build.0 = Debug|x64
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Debug|Win32.Build.0 = Debug|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Debug|Windows Mobile 6 Professional SDK (ARMV4I).ActiveCfg = Debug|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Debug|x64.ActiveCfg = Debug|x64
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Debug|x64.Build.0 = Debug|x64
+		{D3749430-CDC4-46C2-9428-6276390A4749}.MemoryProfiler|Win32.ActiveCfg = MemoryProfiler|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.MemoryProfiler|Win32.Build.0 = MemoryProfiler|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.MemoryProfiler|Windows Mobile 6 Professional SDK (ARMV4I).ActiveCfg = MemoryProfiler|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.MemoryProfiler|x64.ActiveCfg = MemoryProfiler|x64
+		{D3749430-CDC4-46C2-9428-6276390A4749}.MemoryProfiler|x64.Build.0 = MemoryProfiler|x64
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Release_Debugger|Win32.ActiveCfg = Release|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Release_Debugger|Win32.Build.0 = Release|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Release_Debugger|Windows Mobile 6 Professional SDK (ARMV4I).ActiveCfg = Release|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Release_Debugger|x64.ActiveCfg = Release|x64
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Release_Debugger|x64.Build.0 = Release|x64
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Release|Win32.ActiveCfg = Release|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Release|Win32.Build.0 = Release|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Release|Windows Mobile 6 Professional SDK (ARMV4I).ActiveCfg = Release|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Release|x64.ActiveCfg = Release|x64
+		{D3749430-CDC4-46C2-9428-6276390A4749}.Release|x64.Build.0 = Release|x64
+		{D3749430-CDC4-46C2-9428-6276390A4749}.VTune|Win32.ActiveCfg = MemoryProfiler|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.VTune|Win32.Build.0 = MemoryProfiler|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.VTune|Windows Mobile 6 Professional SDK (ARMV4I).ActiveCfg = MemoryProfiler|Win32
+		{D3749430-CDC4-46C2-9428-6276390A4749}.VTune|x64.ActiveCfg = Release|x64
+		{D3749430-CDC4-46C2-9428-6276390A4749}.VTune|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
