@@ -443,7 +443,7 @@ namespace avmplus
         }
     }
 
-    void WordcodeEmitter::writeNip(const FrameState* state, const uint8_t *pc, uint8_t offset)
+    void WordcodeEmitter::writeNip(const FrameState* state, const uint8_t *pc, uint32_t count)
     {
         while (offset--) {
             write(state, pc, OP_swap);

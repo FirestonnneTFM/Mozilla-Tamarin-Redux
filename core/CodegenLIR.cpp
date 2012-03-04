@@ -3578,11 +3578,11 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         return localGetp(index);
      }
 
-    void CodegenLIR::writeNip(const FrameState* state, const uint8_t *pc, uint8_t offset)
+    void CodegenLIR::writeNip(const FrameState* state, const uint8_t *pc, uint32_t count)
     {
         this->state = state;
         emitSetPc(pc);
-        emitCopy(state->sp(), state->sp() - offset);
+        emitCopy(state->sp(), state->sp() - count);
     }
 
     void CodegenLIR::writeMethodCall(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, MethodInfo* m, uintptr_t disp_id, uint32_t argc, Traits *type)
