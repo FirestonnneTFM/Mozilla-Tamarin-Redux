@@ -194,6 +194,24 @@
 		19A767AC138AEBB900D93B21 /* InvokerCompiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A767A9138AEBB900D93B21 /* InvokerCompiler.cpp */; };
 		19BB29A00F8119E100C5F1F7 /* swf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BB299F0F8119E100C5F1F7 /* swf.cpp */; };
 		19BDA443100CC20200172A70 /* Allocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BDA441100CC20200172A70 /* Allocator.cpp */; };
+		19BDAD621504DAF100BCD6F7 /* Alloc.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC6C1504DA2000BCD6F7 /* Alloc.c */; };
+		19BDAD631504DB0700BCD6F7 /* Bcj2.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC6E1504DA2000BCD6F7 /* Bcj2.c */; };
+		19BDAD641504DB0700BCD6F7 /* Bra.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC701504DA2000BCD6F7 /* Bra.c */; };
+		19BDAD651504DB0700BCD6F7 /* LzFind.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC741504DA2000BCD6F7 /* LzFind.c */; };
+		19BDAD661504DB0700BCD6F7 /* Lzma2Dec.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC751504DA2000BCD6F7 /* Lzma2Dec.c */; };
+		19BDAD671504DB0700BCD6F7 /* LzmaDec.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC771504DA2000BCD6F7 /* LzmaDec.c */; };
+		19BDAD681504DB0700BCD6F7 /* LzmaEnc.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC791504DA2000BCD6F7 /* LzmaEnc.c */; };
+		19BDAD691504DB0700BCD6F7 /* LzmaLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC7B1504DA2000BCD6F7 /* LzmaLib.c */; };
+		19BDAD771504DB6100BCD6F7 /* liblzma.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19BDAD5D1504DAB700BCD6F7 /* liblzma.a */; };
+		19BDAE4E1504E7A200BCD6F7 /* Alloc.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC6C1504DA2000BCD6F7 /* Alloc.c */; };
+		19BDAE4F1504E7A200BCD6F7 /* Bcj2.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC6E1504DA2000BCD6F7 /* Bcj2.c */; };
+		19BDAE501504E7A200BCD6F7 /* Bra.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC701504DA2000BCD6F7 /* Bra.c */; };
+		19BDAE511504E7A200BCD6F7 /* LzFind.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC741504DA2000BCD6F7 /* LzFind.c */; };
+		19BDAE521504E7A200BCD6F7 /* Lzma2Dec.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC751504DA2000BCD6F7 /* Lzma2Dec.c */; };
+		19BDAE531504E7A200BCD6F7 /* LzmaDec.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC771504DA2000BCD6F7 /* LzmaDec.c */; };
+		19BDAE541504E7A200BCD6F7 /* LzmaEnc.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC791504DA2000BCD6F7 /* LzmaEnc.c */; };
+		19BDAE551504E7A200BCD6F7 /* LzmaLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC7B1504DA2000BCD6F7 /* LzmaLib.c */; };
+		19BDAE5D1504E82100BCD6F7 /* liblzma64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19BDAE5C1504E7A200BCD6F7 /* liblzma64.a */; };
 		3F5B2BCC0F54B223009A93FE /* PosixFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BC80F54B223009A93FE /* PosixFile.cpp */; };
 		3F5B2BCD0F54B223009A93FE /* PosixPartialPlatform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */; };
 		3F5B2BD40F54B271009A93FE /* avmshellMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */; };
@@ -411,6 +429,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		19BDAE731504E9AC00BCD6F7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 19BDAD5C1504DAB700BCD6F7 /* lzma */;
+			remoteInfo = lzma;
+		};
+		19BDAE751504E9B600BCD6F7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 19BDAE4B1504E7A200BCD6F7 /* lzma64 */;
+			remoteInfo = lzma64;
+		};
 		7E87D15B122C617A0005FEAF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -892,6 +924,27 @@
 		19BB299F0F8119E100C5F1F7 /* swf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = swf.cpp; path = ../../../shell/swf.cpp; sourceTree = SOURCE_ROOT; };
 		19BDA441100CC20200172A70 /* Allocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Allocator.cpp; path = ../../../nanojit/Allocator.cpp; sourceTree = SOURCE_ROOT; };
 		19BDA442100CC20200172A70 /* Allocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Allocator.h; path = ../../../nanojit/Allocator.h; sourceTree = SOURCE_ROOT; };
+		19BDAC6C1504DA2000BCD6F7 /* Alloc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Alloc.c; path = "../../../other-licenses/lzma/Alloc.c"; sourceTree = SOURCE_ROOT; };
+		19BDAC6D1504DA2000BCD6F7 /* Alloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Alloc.h; path = "../../../other-licenses/lzma/Alloc.h"; sourceTree = SOURCE_ROOT; };
+		19BDAC6E1504DA2000BCD6F7 /* Bcj2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Bcj2.c; path = "../../../other-licenses/lzma/Bcj2.c"; sourceTree = SOURCE_ROOT; };
+		19BDAC6F1504DA2000BCD6F7 /* Bcj2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Bcj2.h; path = "../../../other-licenses/lzma/Bcj2.h"; sourceTree = SOURCE_ROOT; };
+		19BDAC701504DA2000BCD6F7 /* Bra.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Bra.c; path = "../../../other-licenses/lzma/Bra.c"; sourceTree = SOURCE_ROOT; };
+		19BDAC711504DA2000BCD6F7 /* Bra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Bra.h; path = "../../../other-licenses/lzma/Bra.h"; sourceTree = SOURCE_ROOT; };
+		19BDAC721504DA2000BCD6F7 /* Bra86.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Bra86.c; path = "../../../other-licenses/lzma/Bra86.c"; sourceTree = SOURCE_ROOT; };
+		19BDAC731504DA2000BCD6F7 /* BraIA64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BraIA64.c; path = "../../../other-licenses/lzma/BraIA64.c"; sourceTree = SOURCE_ROOT; };
+		19BDAC741504DA2000BCD6F7 /* LzFind.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LzFind.c; path = "../../../other-licenses/lzma/LzFind.c"; sourceTree = SOURCE_ROOT; };
+		19BDAC751504DA2000BCD6F7 /* Lzma2Dec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Lzma2Dec.c; path = "../../../other-licenses/lzma/Lzma2Dec.c"; sourceTree = SOURCE_ROOT; };
+		19BDAC761504DA2000BCD6F7 /* Lzma2Dec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Lzma2Dec.h; path = "../../../other-licenses/lzma/Lzma2Dec.h"; sourceTree = SOURCE_ROOT; };
+		19BDAC771504DA2000BCD6F7 /* LzmaDec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LzmaDec.c; path = "../../../other-licenses/lzma/LzmaDec.c"; sourceTree = SOURCE_ROOT; };
+		19BDAC781504DA2000BCD6F7 /* LzmaDec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LzmaDec.h; path = "../../../other-licenses/lzma/LzmaDec.h"; sourceTree = SOURCE_ROOT; };
+		19BDAC791504DA2000BCD6F7 /* LzmaEnc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LzmaEnc.c; path = "../../../other-licenses/lzma/LzmaEnc.c"; sourceTree = SOURCE_ROOT; };
+		19BDAC7A1504DA2000BCD6F7 /* LzmaEnc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LzmaEnc.h; path = "../../../other-licenses/lzma/LzmaEnc.h"; sourceTree = SOURCE_ROOT; };
+		19BDAC7B1504DA2000BCD6F7 /* LzmaLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LzmaLib.c; path = "../../../other-licenses/lzma/LzmaLib.c"; sourceTree = SOURCE_ROOT; };
+		19BDAC7C1504DA2000BCD6F7 /* LzmaLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LzmaLib.h; path = "../../../other-licenses/lzma/LzmaLib.h"; sourceTree = SOURCE_ROOT; };
+		19BDAC7D1504DA2000BCD6F7 /* Threads.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Threads.h; path = "../../../other-licenses/lzma/Threads.h"; sourceTree = SOURCE_ROOT; };
+		19BDAC7E1504DA2000BCD6F7 /* Types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Types.h; path = "../../../other-licenses/lzma/Types.h"; sourceTree = SOURCE_ROOT; };
+		19BDAD5D1504DAB700BCD6F7 /* liblzma.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblzma.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		19BDAE5C1504E7A200BCD6F7 /* liblzma64.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblzma64.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		19C97B9D1097822700AE4BEE /* VTable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "VTable-inlines.h"; path = "../../../core/VTable-inlines.h"; sourceTree = SOURCE_ROOT; };
 		19D4054F109610FF00BD696E /* Traits-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Traits-inlines.h"; path = "../../../core/Traits-inlines.h"; sourceTree = SOURCE_ROOT; };
 		19DA6B8B119CA42700688989 /* GCHeap-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCHeap-inlines.h"; path = "../../../MMgc/GCHeap-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -1022,12 +1075,27 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		19BDAD5B1504DAB700BCD6F7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		19BDAE561504E7A200BCD6F7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7E87D10D122C5B980005FEAF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				7E87D10E122C5B980005FEAF /* libz.dylib in Frameworks */,
 				7E87D10F122C5B980005FEAF /* CoreServices.framework in Frameworks */,
+				19BDAE5D1504E82100BCD6F7 /* liblzma64.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1037,6 +1105,7 @@
 			files = (
 				079DFB680F3A9C350031D1B4 /* libz.dylib in Frameworks */,
 				079DFC980F3AB9640031D1B4 /* CoreServices.framework in Frameworks */,
+				19BDAD771504DB6100BCD6F7 /* liblzma.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1769,8 +1838,35 @@
 				D94236920F8ACAAD00F97706 /* VMPI */,
 				079DF7B40F3A87020031D1B4 /* shell */,
 				079DF9710F3A89910031D1B4 /* shell_builtins */,
+				19BDAC691504D9C000BCD6F7 /* lzma */,
 			);
 			name = Source;
+			sourceTree = "<group>";
+		};
+		19BDAC691504D9C000BCD6F7 /* lzma */ = {
+			isa = PBXGroup;
+			children = (
+				19BDAC6C1504DA2000BCD6F7 /* Alloc.c */,
+				19BDAC6D1504DA2000BCD6F7 /* Alloc.h */,
+				19BDAC6E1504DA2000BCD6F7 /* Bcj2.c */,
+				19BDAC6F1504DA2000BCD6F7 /* Bcj2.h */,
+				19BDAC701504DA2000BCD6F7 /* Bra.c */,
+				19BDAC711504DA2000BCD6F7 /* Bra.h */,
+				19BDAC721504DA2000BCD6F7 /* Bra86.c */,
+				19BDAC731504DA2000BCD6F7 /* BraIA64.c */,
+				19BDAC741504DA2000BCD6F7 /* LzFind.c */,
+				19BDAC751504DA2000BCD6F7 /* Lzma2Dec.c */,
+				19BDAC761504DA2000BCD6F7 /* Lzma2Dec.h */,
+				19BDAC771504DA2000BCD6F7 /* LzmaDec.c */,
+				19BDAC781504DA2000BCD6F7 /* LzmaDec.h */,
+				19BDAC791504DA2000BCD6F7 /* LzmaEnc.c */,
+				19BDAC7A1504DA2000BCD6F7 /* LzmaEnc.h */,
+				19BDAC7B1504DA2000BCD6F7 /* LzmaLib.c */,
+				19BDAC7C1504DA2000BCD6F7 /* LzmaLib.h */,
+				19BDAC7D1504DA2000BCD6F7 /* Threads.h */,
+				19BDAC7E1504DA2000BCD6F7 /* Types.h */,
+			);
+			name = lzma;
 			sourceTree = "<group>";
 		};
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
@@ -1778,6 +1874,8 @@
 			children = (
 				8DD76F6C0486A84900D96B5E /* avm */,
 				7E87D11A122C5B980005FEAF /* avm */,
+				19BDAD5D1504DAB700BCD6F7 /* liblzma.a */,
+				19BDAE5C1504E7A200BCD6F7 /* liblzma64.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1878,7 +1976,58 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		19BDAD591504DAB700BCD6F7 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		19BDAE4C1504E7A200BCD6F7 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
+		19BDAD5C1504DAB700BCD6F7 /* lzma */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 19BDAD711504DB1300BCD6F7 /* Build configuration list for PBXNativeTarget "lzma" */;
+			buildPhases = (
+				19BDAD591504DAB700BCD6F7 /* Headers */,
+				19BDAD5A1504DAB700BCD6F7 /* Sources */,
+				19BDAD5B1504DAB700BCD6F7 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = lzma;
+			productName = lzma;
+			productReference = 19BDAD5D1504DAB700BCD6F7 /* liblzma.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		19BDAE4B1504E7A200BCD6F7 /* lzma64 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 19BDAE571504E7A200BCD6F7 /* Build configuration list for PBXNativeTarget "lzma64" */;
+			buildPhases = (
+				19BDAE4C1504E7A200BCD6F7 /* Headers */,
+				19BDAE4D1504E7A200BCD6F7 /* Sources */,
+				19BDAE561504E7A200BCD6F7 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = lzma64;
+			productName = lzma;
+			productReference = 19BDAE5C1504E7A200BCD6F7 /* liblzma64.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 		7E87D055122C5B980005FEAF /* avm64 */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7E87D111122C5B980005FEAF /* Build configuration list for PBXNativeTarget "avm64" */;
@@ -1890,6 +2039,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				19BDAE761504E9B600BCD6F7 /* PBXTargetDependency */,
 			);
 			name = avm64;
 			productInstallPath = "$(HOME)/bin";
@@ -1908,6 +2058,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				19BDAE741504E9AC00BCD6F7 /* PBXTargetDependency */,
 			);
 			name = avm;
 			productInstallPath = "$(HOME)/bin";
@@ -1937,11 +2088,43 @@
 				8DD76F620486A84900D96B5E /* avm */,
 				7E87D055122C5B980005FEAF /* avm64 */,
 				7E87D146122C60C40005FEAF /* avm+avm64 */,
+				19BDAD5C1504DAB700BCD6F7 /* lzma */,
+				19BDAE4B1504E7A200BCD6F7 /* lzma64 */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		19BDAD5A1504DAB700BCD6F7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				19BDAD621504DAF100BCD6F7 /* Alloc.c in Sources */,
+				19BDAD631504DB0700BCD6F7 /* Bcj2.c in Sources */,
+				19BDAD641504DB0700BCD6F7 /* Bra.c in Sources */,
+				19BDAD651504DB0700BCD6F7 /* LzFind.c in Sources */,
+				19BDAD661504DB0700BCD6F7 /* Lzma2Dec.c in Sources */,
+				19BDAD671504DB0700BCD6F7 /* LzmaDec.c in Sources */,
+				19BDAD681504DB0700BCD6F7 /* LzmaEnc.c in Sources */,
+				19BDAD691504DB0700BCD6F7 /* LzmaLib.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		19BDAE4D1504E7A200BCD6F7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				19BDAE4E1504E7A200BCD6F7 /* Alloc.c in Sources */,
+				19BDAE4F1504E7A200BCD6F7 /* Bcj2.c in Sources */,
+				19BDAE501504E7A200BCD6F7 /* Bra.c in Sources */,
+				19BDAE511504E7A200BCD6F7 /* LzFind.c in Sources */,
+				19BDAE521504E7A200BCD6F7 /* Lzma2Dec.c in Sources */,
+				19BDAE531504E7A200BCD6F7 /* LzmaDec.c in Sources */,
+				19BDAE541504E7A200BCD6F7 /* LzmaEnc.c in Sources */,
+				19BDAE551504E7A200BCD6F7 /* LzmaLib.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7E87D056122C5B980005FEAF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2341,6 +2524,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		19BDAE741504E9AC00BCD6F7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 19BDAD5C1504DAB700BCD6F7 /* lzma */;
+			targetProxy = 19BDAE731504E9AC00BCD6F7 /* PBXContainerItemProxy */;
+		};
+		19BDAE761504E9B600BCD6F7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 19BDAE4B1504E7A200BCD6F7 /* lzma64 */;
+			targetProxy = 19BDAE751504E9B600BCD6F7 /* PBXContainerItemProxy */;
+		};
 		7E87D15C122C617A0005FEAF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8DD76F620486A84900D96B5E /* avm */;
@@ -2381,6 +2574,10 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/build/Debug\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
 			};
@@ -2411,8 +2608,160 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/build/Debug\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
+			};
+			name = Release_Debugger;
+		};
+		19BDAD5E1504DAB800BCD6F7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
+				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = lzma;
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Debug;
+		};
+		19BDAD5F1504DAB800BCD6F7 /* Debug_Debugger */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = lzma;
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Debug_Debugger;
+		};
+		19BDAD601504DAB800BCD6F7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = lzma;
+				USER_HEADER_SEARCH_PATHS = "";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		19BDAD611504DAB800BCD6F7 /* Release_Debugger */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = lzma;
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Release_Debugger;
+		};
+		19BDAE581504E7A200BCD6F7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64";
+				CONFIGURATION_TEMP_DIR = "$(PROJECT_TEMP_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64";
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
+				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = lzma64;
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Debug;
+		};
+		19BDAE591504E7A200BCD6F7 /* Debug_Debugger */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = lzma;
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Debug_Debugger;
+		};
+		19BDAE5A1504E7A200BCD6F7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = lzma;
+				USER_HEADER_SEARCH_PATHS = "";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		19BDAE5B1504E7A200BCD6F7 /* Release_Debugger */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = lzma;
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release_Debugger;
 		};
@@ -2426,6 +2775,10 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/build/Debug\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
 			};
@@ -2439,6 +2792,10 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/build/Debug\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
 			};
@@ -2580,6 +2937,28 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		19BDAD711504DB1300BCD6F7 /* Build configuration list for PBXNativeTarget "lzma" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				19BDAD5E1504DAB800BCD6F7 /* Debug */,
+				19BDAD5F1504DAB800BCD6F7 /* Debug_Debugger */,
+				19BDAD601504DAB800BCD6F7 /* Release */,
+				19BDAD611504DAB800BCD6F7 /* Release_Debugger */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		19BDAE571504E7A200BCD6F7 /* Build configuration list for PBXNativeTarget "lzma64" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				19BDAE581504E7A200BCD6F7 /* Debug */,
+				19BDAE591504E7A200BCD6F7 /* Debug_Debugger */,
+				19BDAE5A1504E7A200BCD6F7 /* Release */,
+				19BDAE5B1504E7A200BCD6F7 /* Release_Debugger */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "avm" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
