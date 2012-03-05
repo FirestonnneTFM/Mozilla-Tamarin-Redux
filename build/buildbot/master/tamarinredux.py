@@ -50,9 +50,7 @@ class tamarinredux:
     HG_URL = "http://asteam.macromedia.com/hg/tamarin-redux/"
     BRANCHES = ["tamarin-redux","tamarin-redux-serrano"]
     BRANCHES_DEEP = ["tamarin-redux-deep","tamarin-redux-serrano-deep"]
-    BRANCHES_FRR = ["tamarin-redux-frr","tamarin-redux-serrano-frr"]    
     branch_deep_priorities = [('tamarin-redux-deep', 2), ('tamarin-redux-serrano-deep', 1)]
-    branch_frr_priorities = [('tamarin-redux-frr', 2), ('tamarin-redux-serrano-frr', 1)]
 
     
     ####### SCHEDULERS
@@ -112,13 +110,6 @@ class tamarinredux:
                                   ["linux-mips-test", "linux-mips-smoke"],
                                  ])
 
-    frr = PhaseTwoScheduler(name="frr", branch=BRANCHES_FRR, treeStableTimer=30, properties={'silent':'false'},
-                    fileIsImportant=startCompile, priorities=branch_frr_priorities, changeDir="changes/frr/processed",
-                    builderNames=["windows-frr"],
-                    builderDependencies=[
-                                  ["windows-frr", "windows-test"],
-                                ])
-
     deep = PhaseTwoScheduler(name="deep", branch=BRANCHES_DEEP, treeStableTimer=30, properties={'silent':'false'},
                     fileIsImportant=startCompile, priorities=branch_deep_priorities, changeDir="changes/deep/processed",
                     builderNames=["windows-deep",
@@ -146,7 +137,7 @@ class tamarinredux:
     
 
     
-    schedulers = [compile, smoke, test, frr, deep, promote_build]
+    schedulers = [compile, smoke, test, deep, promote_build]
     
     
 
@@ -1217,37 +1208,6 @@ class tamarinredux:
     }
 
 
-    ##################################
-    #### builder for windows-frr ####
-    ##################################
-    windows_frr_factory = factory.BuildFactory()
-    windows_frr_factory.addStep(BuildShellCommand(
-                command=['./build-frr.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='building frr...',
-                descriptionDone='finished building frr.',
-                name="BuildFRR",
-                workdir="../scripts",
-                timeout=3600)
-    )
-    windows_frr_factory.addStep(BuildShellCommand(
-                command=['./run-frunit.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='running frunit...',
-                descriptionDone='finished running frunit.',
-                name="RunFrunit",
-                workdir="../scripts",
-                timeout=3600)
-    )
-
-    windows_frr_builder = {
-                'name': "windows-frr",
-                'slavename': "windows-frr",
-                'factory': windows_frr_factory,
-                'builddir': './windows-frr',
-    }
-
-    
     ##########################################
     #### builder for promote-build ####
     ##########################################
@@ -1314,8 +1274,6 @@ class tamarinredux:
                 android_test_builder,
                 linux_arm_test_builder,
                 linux_mips_test_builder,
-
-                windows_frr_builder,
 
                 windows_deep_builder,
                 windows_64_deep_builder,                
