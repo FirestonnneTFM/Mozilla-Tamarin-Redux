@@ -445,7 +445,7 @@ namespace avmplus
 
     void WordcodeEmitter::writeNip(const FrameState* state, const uint8_t *pc, uint32_t count)
     {
-        while (offset--) {
+        while (count--) {
             write(state, pc, OP_swap);
             write(state, pc, OP_pop);
         }
