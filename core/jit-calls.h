@@ -464,7 +464,7 @@ namespace avmplus
     // Perhaps surprisingly, coercing an atom to boolean cannot yield a side-effect.
     PUREFUNCTION(FUNCADDR(AvmCore::boolean), SIG1(I,A), boolean)
     // Coercing an atom to a numeric type may yield a side-effect via the valueOf property.
-    FUNCTION(FUNCADDR(AvmCore::number), SIG1(F,A), number)
+    FUNCTION(FUNCADDR(AvmCore::number), SIG1(D,A), number)
     FUNCTION(FUNCADDR(AvmCore::toUInt32), SIG1(U,A), toUInt32)
     FUNCTION(FUNCADDR(AvmCore::integer), SIG1(I,A), integer)
 #ifdef VMCFG_FLOAT
