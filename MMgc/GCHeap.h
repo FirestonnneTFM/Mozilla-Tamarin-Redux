@@ -552,6 +552,13 @@ namespace MMgc
          */
         size_t GetTotalCodeSize() const;
 
+        /**
+         * @return the amount of code memory currently allocated by GCHeap.  GCHeap does not
+         * have a notion of "free" and "used" code memory.
+         *
+         * @see GetTotalCodeSize, SignalCodeMemoryAllocation and SignalCodeMemoryDeallocated
+         */
+        size_t GetTotalGCHeapAllocatedCodeSize() const;
 #ifdef MMGC_POLICY_PROFILING
         /**
          * Returns the peak value for the total amount of space managed by the heap

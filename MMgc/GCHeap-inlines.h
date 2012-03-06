@@ -157,6 +157,10 @@ namespace MMgc
         return gcheapCodeMemory + externalCodeMemory;
     }
 
+    REALLY_INLINE size_t GCHeap::GetTotalGCHeapAllocatedCodeSize() const
+    {
+        return gcheapCodeMemory;
+    }
 #ifdef MMGC_POLICY_PROFILING
     REALLY_INLINE void GCHeap::GetMaxTotalHeapSize(size_t& heapBlocks, size_t& privateBlocks)
     {
