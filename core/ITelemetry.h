@@ -108,7 +108,6 @@
     } } while(0)
 
 
-
 // Use this for writing byte array.
 // v - pointer to any block of memory; const uint8_t*
 // l - length of bytes; uint32_t
