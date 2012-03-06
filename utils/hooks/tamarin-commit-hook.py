@@ -134,10 +134,19 @@
 #   repository.
 
 import sys, re, os
-from mercurial import hg, ui, commands, cmdutil, patch
+from mercurial import hg, ui, commands, patch
 from mercurial.node import hex, short
 from HTMLParser import HTMLParser
 from urllib2 import urlopen
+
+try:
+    # Mercurial 1.9
+    from mercurial import scmutil
+    matchfiles = scmutil.matchfiles
+except ImportError:
+    from mercurial import cmdutil
+    matchfiles = cmdutil.matchfiles
+
 
 class BugType:
     NORMAL = 1
@@ -352,6 +361,10 @@ def diff_check(ui, repo, **kwargs):
         if loc != -1:
             # found security change ifdef
             return True, loc
+        loc = line.find('SECURITYFIX_')
+        if loc != -1:
+            # found security change ifdef
+            return True, loc
         return False, 0
 
     # check for tabs - exit if user chooses to abort
@@ -380,7 +393,7 @@ def checkChangeCtxDiff(ui, repo, changecontexts, testFunc, testDesc, fileEndings
         # Get the diff for each change and file
         for file in [f for f in ctx.files() if f.endswith(fileEndings)]:
             ui.debug('checking change: %s, file: %s\n' % (short(ctx.node()), file))
-            fmatch = cmdutil.matchfiles(repo,[file])
+            fmatch = matchfiles(repo,[file])
             # diff from this nodes parent to current node
             diff = ''.join(patch.diff(repo, ctx.parents()[0].node(), ctx.node(), fmatch)).split('\n')
             for i in range(3, len(diff)):    # start checking after diff header
