@@ -145,7 +145,7 @@ Atom op_in(E caller_env, Atom name, Atom obj);
  * inline-cache enabled finddef.  if the cache for this slot is valid, return
  * the result from calling finddef on this (env,multiname) pair previously.
  */
-ScriptObject* finddef_cache(MethodEnv* env, const Multiname* name, uint32_t slot);
+ScriptObject* FASTCALL finddef_cache(ScriptObject** obj_ptr, MethodFrame* frame);
 
 /**
  * Implementation of OP_constructprop

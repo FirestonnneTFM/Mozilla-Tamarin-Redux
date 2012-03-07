@@ -701,7 +701,6 @@ namespace avmplus
 
     void CodegenLIR::cleanup()
     {
-        finddef_cache_builder.cleanup();
         LirHelper::cleanup();
     }
 
@@ -1383,6 +1382,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         LIns* env_abcenv;
         LIns* env_domainenv;
         LIns* env_toplevel;
+        LIns* env_finddef_table;
 
         PrologWriter(LirWriter *out):
             LirWriter(out),
@@ -1391,7 +1391,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             env_vtable(NULL),
             env_abcenv(NULL),
             env_domainenv(NULL),
-            env_toplevel(NULL)
+            env_toplevel(NULL),
+            env_finddef_table(NULL)
         {}
 
         virtual LIns* ins0(LOpcode v) {
@@ -3296,15 +3297,16 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         {
             // opd1=name index
             // type=script->declaringTraits
-            const Multiname *multiname = pool->precomputedMultiname(opd1);
-            AvmAssert(multiname->isBinding());
+            uint32_t name_id = opd1;
+            AvmAssert(pool->precomputedMultiname(name_id)->isBinding());
             int32_t dest_index = state->sp() + 1;
-            // This allocates a cache slot even if the finddef ultimately becomes dead.
-            // As long as caches tend to be small compared to size of pool data and code,
-            // filtering out dead cache lines isn't worth the complexity.
-            LIns* slot = InsConst(finddef_cache_builder.allocateCacheSlot(opd1));
-            LIns* out = callIns(FUNCTIONID(finddef_cache), 3, env_param, InsConstPtr(multiname), slot);
-            localSet(dest_index, ptrToNativeRep(type, out), type);
+            LIns* table = loadEnvFinddefTable();
+            // We always call out here because inlining the fast path inhibits
+            // dead code limination when this finddef isn't used.
+            LIns* obj_ptr = addp(table, offsetof(FinddefTable, elements) + sizeof(ScriptObject*) * name_id);
+            LIns* obj = callIns(FUNCTIONID(finddef_cache), 2,
+                                obj_ptr, methodFrame);
+            localSet(dest_index, ptrToNativeRep(type, obj), type);
             break;
         }
 
@@ -7801,6 +7803,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         if (prolog->env_abcenv)     livep(prolog->env_abcenv);
         if (prolog->env_domainenv)  livep(prolog->env_domainenv);
         if (prolog->env_toplevel)   livep(prolog->env_toplevel);
+        if (prolog->env_finddef_table) livep(prolog->env_finddef_table);
         if (restArgc) {
             lirout->ins1(LIR_livei, restArgc);
             livep(ap_param);
@@ -7817,8 +7820,6 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         livep(env_param);
         frag->lastIns = livep(coreAddr);
         skip_ins->overwriteWithSkip(prolog->lastIns);
-
-        info->set_lookup_cache_size(finddef_cache_builder.next_cache);
 
         // After CodeWriter::writeEpilogue() is called, driver is invalid
         // and could be destructed.  Null out our pointer as a precaution.
@@ -8001,6 +8002,20 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             verbose_only( if (vbWriter) { vbWriter->flush(); } )
         }
         return toplevel;
+    }
+
+    LIns* CodegenLIR::loadEnvFinddefTable()
+    {
+        LIns* table = prolog->env_finddef_table;
+        if (!table) {
+            LIns* abc = loadEnvAbcEnv();
+            prolog->env_finddef_table = table = prolog->insLoad(LIR_ldp, abc, offsetof(AbcEnv, m_finddef_table), ACCSET_OTHER, LOAD_CONST);
+            verbose_only( if (vbNames) {
+                vbNames->lirNameMap->addName(table, "env_finddef_table");
+            })
+            verbose_only( if (vbWriter) { vbWriter->flush(); } )
+        }
+        return table;
     }
 
     /**

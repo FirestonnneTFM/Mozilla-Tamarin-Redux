@@ -343,7 +343,6 @@ namespace avmplus
 #endif
         int labelCount;
         bool inlineFastpath; // Allow aggressive or speculative inlining, e.g., introducing new labels.
-        LookupCacheBuilder finddef_cache_builder;
         CacheBuilder<CallCache> call_cache_builder;
         CacheBuilder<GetCache> get_cache_builder;
         CacheBuilder<SetCache> set_cache_builder;
@@ -400,6 +399,7 @@ namespace avmplus
         LIns* loadEnvAbcEnv();
         LIns* loadEnvDomainEnv();
         LIns* loadEnvToplevel();
+        LIns* loadEnvFinddefTable();
         LIns* copyMultiname(const Multiname* multiname);
         LIns* initMultiname(const Multiname* multiname, int& csp, bool isDelete =false);
         LIns* storeAtomArgs(int count, int index);

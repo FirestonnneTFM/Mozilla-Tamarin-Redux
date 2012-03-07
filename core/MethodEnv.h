@@ -70,6 +70,7 @@ namespace avmplus
         Toplevel* toplevel() const;
         Stringp traitsName() const;
         Namespacep traitsNs() const;
+        VTable* vtable() const;
 
         /**
          * Coerces an array of actual parameters to the types
@@ -236,6 +237,8 @@ namespace avmplus
         void debugExit(CallStackNode* callstack);
 
         ArrayObject *getLexicalScopes();
+
+        uint64_t invocationCount() const;
 #endif
 
     private:
@@ -258,17 +261,6 @@ namespace avmplus
         ActivationMethodTablePair* getPair() const;
         int32_t getType() const;
         void setActivationOrMCTable(void *ptr, int32_t type);
-
-    public:
-
-#ifdef DEBUGGER
-        uint64_t invocationCount() const;
-#endif
-
-#ifndef VMCFG_AOT
-    protected:
-#endif
-        VTable* vtable() const;
 
     public:
         // LookupCache is part of an ExactStructContainer<> array, hence the gcTrace method.

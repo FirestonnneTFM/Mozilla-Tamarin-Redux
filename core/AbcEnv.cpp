@@ -51,10 +51,12 @@ namespace avmplus
 #endif
         , m_core(_pool->core)
     {
+        MMgc::GC* gc = _pool->core->GetGC();
+        m_finddef_table = FinddefTable::create(gc, NULL /* no finalizer */,
+                                               _pool->cpool_mn_offsets.length());
 #ifdef DEBUGGER
         if (_pool->core->debugger())
         {
-            MMgc::GC* gc = _pool->core->GetGC();
             m_invocationCounts = U64Array::New(gc, _pool->methodCount());
         }
 #endif
