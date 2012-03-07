@@ -65,6 +65,11 @@ REALLY_INLINE CodeContext* AbcEnv::codeContext() const
     return m_codeContext;
 }
 
+REALLY_INLINE FinddefTable* AbcEnv::finddefTable() const
+{
+    return m_finddef_table;
+}
+
 REALLY_INLINE MethodEnv* AbcEnv::getMethod(uint32_t i) const
 {
     return m_methods[i];

@@ -104,6 +104,8 @@ namespace avmplus
         uint32_t _capacity;
         void     (*_finalizer)(ExactStructContainer* self);
         T        elements[1];     // Actually max(1,capacity())
+
+        friend class CodegenLIR; // for offsetof(elements)
     };
 }
 

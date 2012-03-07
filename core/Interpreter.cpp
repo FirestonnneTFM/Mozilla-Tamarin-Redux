@@ -2370,8 +2370,10 @@ FLOAT_ONLY(\
 
             INSTR(finddef) {
                 SAVE_EXPC;
-                GET_MULTINAME_PTR(multiname, U30ARG);
-                *(++sp) = env->finddef(multiname)->atom();
+                u1 = U30ARG;
+                o1 = finddef_cache((ScriptObject**)&(*env->abcEnv()->finddefTable())[(uint32_t)u1],
+                                   &aux_memory->methodFrame);
+                *(++sp) = o1->atom();
                 NEXT;
             }
 

@@ -59,6 +59,12 @@ namespace avmplus
         AbcEnv(PoolObject* _pool, CodeContext * _codeContext);
         
     public:
+        struct FinddefEntry {
+            GCMember<ScriptObject> object;
+            REALLY_INLINE void gcTrace(MMgc::GC* gc) { gc->TraceLocation(&object); }
+        };
+        typedef ExactStructContainer<FinddefEntry> FinddefTable;
+
         static AbcEnv* create(MMgc::GC* gc, PoolObject* builtinPool, CodeContext* builtinCodeContext);
         
         ~AbcEnv();
@@ -67,6 +73,7 @@ namespace avmplus
         PoolObject* pool() const;
         DomainEnv* domainEnv() const;
         CodeContext* codeContext() const;
+        FinddefTable* finddefTable() const;
 
         MethodEnv* getMethod(uint32_t i) const;
         void setMethod(uint32_t i, MethodEnv* env);
@@ -88,6 +95,9 @@ namespace avmplus
         GCMember<U64Array>          m_invocationCounts;    // Actual size will hold pool->methodCount methods, only allocated if debugger exists.
 #endif
         AvmCore* const              m_core;
+    public:
+        GCMember<FinddefTable>      GC_POINTER(m_finddef_table);
+    private:
 #if defined(VMCFG_AOT) && defined(VMCFG_BUFFER_GUARD)
         AOTLazyEvalGuard            m_lazyEvalGuard;
 #endif
@@ -98,6 +108,7 @@ namespace avmplus
     // ------------------------ DATA SECTION END
     };
 
+    typedef AbcEnv::FinddefTable FinddefTable;
 }
 
 #endif // __avmplus_AbcEnv__
