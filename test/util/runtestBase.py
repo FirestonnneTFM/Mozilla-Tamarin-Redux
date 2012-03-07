@@ -133,7 +133,6 @@ class RuntestBase(object):
     java = 'java'
     javaargs = ''
     js_output = ''
-    js_output_f = None
     logFileType = 'html'
     options = ''
     osName = ''
@@ -695,8 +694,8 @@ class RuntestBase(object):
                     break
 
         print('Writing results to %s' % self.js_output)
-        self.js_output_f = open(self.js_output, 'w')
-        self.js_output_f.close()
+        js_output_f = open(self.js_output, 'w')
+        js_output_f.close()
 
     def getTestsList(self, startDir):
         '''Get all possible tests to run, then parse it down depending on
@@ -951,14 +950,14 @@ class RuntestBase(object):
             sys.stdout.flush()
         if self.js_output:
             try:
-                self.js_output_f = open(self.js_output, 'a')
+                js_output_f = open(self.js_output, 'a')
                 if self.logFileType == 'html':
-                    self.js_output_f.write('%s %s %s\n' % (start_tag, m, end_tag))
+                    js_output_f.write('%s %s %s\n' % (start_tag, m, end_tag))
                 else:
-                    self.js_output_f.write('%s\n' % m)
+                    js_output_f.write('%s\n' % m)
             except:
                 pass
-            self.js_output_f.close()
+            js_output_f.close()
 
     def printOutput(self,request, outputCalls=None):
         #execute the outputCalls
@@ -1209,7 +1208,8 @@ class RuntestBase(object):
                         self.js_print('AOT compiling %s' % (testdir+".abc"))
                         (f,err,exitcode) = self.compile_aot(testdir+".abc", [self.abcasmShell+'.abc'])
                         if exitcode != 0:
-                            print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
+                            self.js_print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
+                            self.js_print("aot compilation of %s failed, %s" % (testdir+".abc", err))
                             self.ashErrors.append("aot compilation of %s failed, %s" % (testdir+".abc", err))
                     continue
                 elif test.endswith(self.executableExtensions):
@@ -1219,7 +1219,8 @@ class RuntestBase(object):
                         self.js_print('AOT compiling %s' % (testdir+".abc_"))
                         (f,err,exitcode) = self.compile_aot(test)
                         if exitcode != 0:
-                            print("ERROR: AOT compilation failed for %s" % (testdir+".abc_"))
+                            self.js_print("ERROR: AOT compilation failed for %s" % (testdir+".abc_"))
+                            self.js_print("aot compilation of %s failed, %s" % (testdir+".abc_", err))
                             self.ashErrors.append("aot compilation of %s failed, %s" % (testdir+".abc_", err))
                     continue
                 else:
@@ -1306,7 +1307,8 @@ class RuntestBase(object):
                     self.js_print('AOT compiling %s' % (testdir+".abc"))
                     (f,err,exitcode) = self.compile_aot(testdir+".abc")
                     if exitcode != 0:
-                        print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
+                        self.js_print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
+                        self.js_print("aot compilation of %s failed, %s" % (testdir+".abc", err))
                         self.ashErrors.append("aot compilation of %s failed, %s" % (testdir+".abc", err))
 
 
