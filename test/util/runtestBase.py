@@ -1230,8 +1230,8 @@ class RuntestBase(object):
                             self.js_print('AOT compiling %s time %.1f' % (testdir+".abc",time()-start_time))
                         if exitcode != 0:
                             self.js_print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
-                            self.js_print("aot compilation of %s failed, %s" % (testdir+".abc", err))
-                            self.ashErrors.append("aot compilation of %s failed, %s" % (testdir+".abc", err))
+                            [self.js_print(line) for line in err]
+                            self.ashErrors.append("AOT compilation failed for %s\n\t%s" % (testdir+".abc", '\n'.join(str(x) for x in err)))
                     continue
                 elif test.endswith(self.executableExtensions):
                     total -= 1
@@ -1241,8 +1241,8 @@ class RuntestBase(object):
                         (f,err,exitcode) = self.compile_aot(test)
                         if exitcode != 0:
                             self.js_print("ERROR: AOT compilation failed for %s" % (testdir+".abc_"))
-                            self.js_print("aot compilation of %s failed, %s" % (testdir+".abc_", err))
-                            self.ashErrors.append("aot compilation of %s failed, %s" % (testdir+".abc_", err))
+                            [self.js_print(line) for line in err]
+                            self.ashErrors.append("AOT compilation failed for %s\n\t%s" % (testdir+".abc_", '\n'.join(str(x) for x in err)))
                     continue
                 else:
                     arglist = parseArgStringToList(self.ascargs)
@@ -1334,8 +1334,8 @@ class RuntestBase(object):
                         self.js_print('AOT compiling %s %.1f' % (testdir+".abc",time()-start_time))
                     if exitcode != 0:
                         self.js_print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
-                        self.js_print("aot compilation of %s failed, %s" % (testdir+".abc", err))
-                        self.ashErrors.append("aot compilation of %s failed, %s" % (testdir+".abc", err))
+                        [self.js_print(line) for line in err]
+                        self.ashErrors.append("AOT compilation failed for %s\n\t%s" % (testdir+".abc", '\n'.join(str(x) for x in err)))
 
 
 
