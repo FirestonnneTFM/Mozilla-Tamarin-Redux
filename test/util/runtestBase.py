@@ -1013,6 +1013,22 @@ class RuntestBase(object):
         if not os.path.exists(output):
             os.mkdir(output)
 
+        # Find additional abc files that are required @ runtime:
+        source = abcfile
+        if source.find(".abc_") == -1:
+            source = source.replace(".abc", ".as")
+        if exists(source+".avm_args"):
+            avm_args_file = open('%s.avm_args' % source,'r')
+            for line in avm_args_file:
+                line = line.strip()
+                if line.startswith('#'):
+                    continue
+                line, extraVmArgs, abcargs, multiabc = self.process_avm_args_line(line, os.path.dirname(source))
+                break # AOT does not support runtime switches which could be multiple entries in this
+                      # file, so only parse the first noncomment line to look for additional abc files to load
+            avm_args_file.close()
+            extraabcs = extraabcs + multiabc.split()
+
         shutil.copyfile(abcfile, outabc)
         copiedExtraAbcs=[]
         for abc in extraabcs:
