@@ -1205,8 +1205,13 @@ class RuntestBase(object):
                     total -= 1
                     self.compile_test(test)
                     if exists(testdir+".abc") and self.aotsdk: # ABC compiled, so now AOT compile
-                        self.js_print('AOT compiling %s' % (testdir+".abc"))
+                        if self.show_time:
+                            start_time=time()
+                        else:
+                            self.js_print('AOT compiling %s' % (testdir+'.abc'))
                         (f,err,exitcode) = self.compile_aot(testdir+".abc", [self.abcasmShell+'.abc'])
+                        if self.show_time:
+                            self.js_print('AOT compiling %s time %.1f' % (testdir+".abc",time()-start_time))
                         if exitcode != 0:
                             self.js_print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
                             self.js_print("aot compilation of %s failed, %s" % (testdir+".abc", err))
@@ -1304,8 +1309,13 @@ class RuntestBase(object):
 
                 if self.aotsdk: # ABC compiled, so now AOT compile
                     # Need to figure out how to deal with additional required abc files
-                    self.js_print('AOT compiling %s' % (testdir+".abc"))
+                    if self.show_time:
+                        start_time=time()
+                    else:
+                        self.js_print('AOT compiling %s' % (testdir+".abc"))
                     (f,err,exitcode) = self.compile_aot(testdir+".abc")
+                    if self.show_time:
+                        self.js_print('AOT compiling %s %.1f' % (testdir+".abc",time()-start_time))
                     if exitcode != 0:
                         self.js_print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
                         self.js_print("aot compilation of %s failed, %s" % (testdir+".abc", err))
