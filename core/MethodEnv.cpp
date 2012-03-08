@@ -1145,11 +1145,6 @@ namespace avmplus
             if (b == BIND_NONE)
             {
                 bool b = AvmCore::atomToScriptObject(obj)->deleteMultinameProperty(multiname);
-
-                // Deleting a deletable bound property means deleting a dynamic global property, so
-                // invalidate the lookup cache (because subsequent lookups should fail).
-                if (b)
-                    core()->invalidateLookupCache();
                 return b ? trueAtom : falseAtom;
             }
             else if (AvmCore::isMethodBinding(b))
@@ -1616,19 +1611,6 @@ namespace avmplus
             return getPair()->methodTable;
         }
         return (WeakKeyHashtable*)(activationOrMCTable&~7);
-    }
-
-    void MethodEnv::cleanLookupCache(ExactStructContainer<LookupCache>* self)
-    {
-        for ( uint32_t i=0 ; i < self->capacity() ; i++ )
-            self->get(i).object = NULL;
-    }
-
-    void MethodEnv::createLookupCache()
-    {
-        AvmAssert(lookup_cache == NULL);
-
-        lookup_cache = ExactStructContainer<LookupCache>::create(core()->gc, cleanLookupCache, method->lookup_cache_size());
     }
 
 #ifdef _DEBUG

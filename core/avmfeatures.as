@@ -598,9 +598,8 @@ var FEATURES =
   </at-most-one>
 
   <at-most-one>
-    <!-- The wordcode interpreter and JIT both use a LookupCache, and there can only
-         be one instance of said cache.  We can fix this through some refactoring but
-         the expedient solution is to only ever allow one or the other -->
+    <!-- The wordcode interpreter and JIT should work together in principle but we haven't
+         tested that configuration, and so prevent it here.  -->
     <name> AVMFEATURE_WORDCODE_INTERP </name>
     <name> AVMFEATURE_JIT </name>
   </at-most-one>

@@ -349,18 +349,6 @@ REALLY_INLINE void MethodInfo::set_word_code(MMgc::GC* gc, TranslatedCode* trans
 }
 #endif // VMCFG_WORDCODE
 
-REALLY_INLINE int32_t MethodInfo::lookup_cache_size() const
-{
-    AvmAssert(!isNative());
-    return _abc.lookup_cache_size;
-}
-
-REALLY_INLINE void MethodInfo::set_lookup_cache_size(int32_t s)
-{
-    AvmAssert(!isNative());
-    _abc.lookup_cache_size = s;
-}
-
 REALLY_INLINE int32_t MethodInfo::method_id() const
 {
     return _method_id;

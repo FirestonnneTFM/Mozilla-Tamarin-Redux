@@ -126,7 +126,6 @@ namespace avmplus
 
     void WordcodeEmitter::cleanup()
     {
-        cache_builder.cleanup();
         DELETE_LIST(backpatch_info, backpatches);
         DELETE_LIST(label_info, labels);
         DELETE_LIST(catch_info, exception_fixes);
@@ -419,7 +418,7 @@ namespace avmplus
             break;
         case OP_findpropglobal:
         case OP_findpropglobalstrict:
-            emitOp2(wordCode(opcode), opd1, cache_builder.allocateCacheSlot(opd1));
+            emitOp1(wordCode(opcode), opd1);
             break;
         case OP_pushscope:
         case OP_pushwith:
@@ -991,9 +990,6 @@ namespace avmplus
     {
         AvmAssert(backpatches == NULL);
         AvmAssert(exception_fixes == NULL);
-
-        if (info != NULL)
-            info->set_lookup_cache_size(cache_builder.next_cache);
 
 #ifdef VMCFG_WORDCODE_PEEPHOLE
         peepFlush();

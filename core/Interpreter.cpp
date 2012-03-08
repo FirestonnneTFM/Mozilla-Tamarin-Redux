@@ -741,17 +741,6 @@ namespace avmplus
             core->console << "interp " << info << '\n';
 #endif
 
-#ifdef VMCFG_WORDCODE
-        // OPTIMIZEME - code does not belong here, should be moved off the fast path.
-        //
-        // Should not have to do this on every entry, but the logic that tries to do
-        // it elsewhere is not currently working - at least the verifier installs a trampoline
-        // bypasses delegateInvoke, so the structure is not created on all paths.
-
-        if (info->lookup_cache_size() > 0 && env->lookup_cache == NULL)
-            env->createLookupCache();
-#endif
-
         // always do a stack check; this not only checks true stack overflows
         // but also the stack limit is used to gain control for host interrupts.
         // so this stack check doubles as an interrupt check.
@@ -3495,11 +3484,6 @@ FLOAT_ONLY(\
                 b1 = true;
             findpropglobal_impl:
                 u1 = *pc++;      // multiname_index
-                u2 = *pc++;      // cache_slot
-                if (core->lookupCacheIsValid(env->lookup_cache->get(uint32_t(u2)).timestamp)) {
-                    *(++sp) = env->lookup_cache->get(uint32_t(u2)).object->atom();
-                    NEXT;
-                }
                 SAVE_EXPC;
                 GET_MULTINAME_PTR(multiname, u1);
                 AvmAssert(multiname->isBinding());
@@ -3515,8 +3499,6 @@ FLOAT_ONLY(\
                 else
                 {
                     *(++sp) = a1;
-                    env->lookup_cache->get(uint32_t(u2)).timestamp = core->lookupCacheTimestamp();
-                    WBRC(core->GetGC(), env->lookup_cache, &env->lookup_cache->get(uint32_t(u2)).object, AvmCore::atomToScriptObject(sp[0]));
                 }
                 NEXT;
             }

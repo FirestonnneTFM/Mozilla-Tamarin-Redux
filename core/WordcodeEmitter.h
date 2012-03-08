@@ -228,8 +228,6 @@ namespace avmplus
             return wopAttrs[opcode].width;
         }
 #endif  // VMCFG_WORDCODE_PEEPHOLE
-
-        LookupCacheBuilder cache_builder;
     };
 #endif // AVMPUS_WORD_CODE
 }
