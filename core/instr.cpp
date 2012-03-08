@@ -1251,4 +1251,14 @@ void mop_sf32x4(void* addr, const float4_t& value)
 }
 #endif
 
+template <class E> NO_INLINE
+Atom op_call_error(E env)
+{
+    env->toplevel()->throwTypeErrorWithName(kCallOfNonFunctionError, "value");
+    return unreachableAtom;
+}
+template Atom op_call_error(const MethodEnv*);
+template Atom op_call_error(MethodEnv*);
+template Atom op_call_error(Toplevel*);
+
 } // namespace avmplus

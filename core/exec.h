@@ -113,6 +113,9 @@ typedef Atom (*AtomMethodProc)(MethodEnv*, int, Atom*);
 typedef uintptr_t (*GprImtThunkProc)(class ImtThunkEnv*, int argc, uint32_t* args, uintptr_t idd);
 typedef double (*FprImtThunkProc)(class ImtThunkEnv*, int argc, uint32_t* args, uintptr_t idd);
 
+// Signature for calling a function closure (OP_call)
+typedef Atom (*FunctionProc)(FunctionObject*, int argc, Atom* args);
+
 /**
  * Size of a variable in a JIT stack frame, in bytes.  VARSIZE is large
  * enough to hold double, int, pointers, or Atom on 32-bit or 64-bit cpus.
