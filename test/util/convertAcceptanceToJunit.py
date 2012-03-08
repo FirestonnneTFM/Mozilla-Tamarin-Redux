@@ -238,6 +238,115 @@ def convertPlayerToJunit(infile,outfile,toplevel):
     contents+='<system-out></system-out><system-err></system-err>\n</testsuite>\n'
     open(outfile,'w').write(contents)
             
+def convertAotToJunit(infile,outfile,toplevel):
+    fail=''
+    error=''
+    skip=''
+    out=''
+    hostname=socket.gethostname()
+    name=toplevel
+    tests=''
+    time=''
+    timestamp=''
+    properties={}
+    properties['failures']='0'
+    properties['unexpected passes']='0'
+    properties['expected failures']='0'
+    properties['config']=''
+    testresults=[]
+    systemout=''
+    systemerr=''
+    finishedTests=False
+    lastout=''
+    skips=0
+    tests=0
+    errors=0
+    fails=0
+    totaltime=0
+    skipOutput=True
+    
+    lines=open(infile).read().split('\n')
+    for line in lines:
+        tokens=line.split()
+        if line.startswith('java version'):
+            properties['java.version']=tokens[2]
+        if line=='':
+            continue
+        if line.startswith('thread count:'):
+            properties['threads']=tokens[2]
+        if line.startswith('+ ./runtests.py'):
+            properties['runtests']=line
+        if line.startswith('Tamarin tests started:'):
+            tm=properties['started']=tokens[3]
+            if tm.find('.'):
+                tm=tm[0:tm.find('.')]
+            timestamp='%sT%s' % (tokens[3],tm)
+        if line.startswith('current configuration:'):
+            properties['config']=tokens[2]
+        if line.startswith('asc version:'):
+            properties['asc.version']=tokens[2]
+        if line.startswith('Tests complete at'):
+            properties['endtime']=tokens[3]+' '+tokens[4]
+        if line.startswith('Start Date'):
+            properties['startime']=tokens[2]+' '+tokens[3]
+        if line.startswith('Test Time'):
+            properties['testtime']=tokens[3]
+        if line.startswith('Skipping'):
+            skip=line
+            skips+=1
+        if line.startswith('ERROR:'):
+            error=line
+            errors+=1
+        if line.startswith('AOT compiling'):
+            skipOutput=False
+            test=tokens[2]
+            class1=toplevel+'.'+test[0:test.rfind('/')+1]
+            name=test[test.rfind('/')+1:]
+            tests+=1
+            time=''
+            ctr=2
+            while len(tokens)>ctr+1:
+                if tokens[ctr]=='time':
+                    time=tokens[ctr+1]
+                    totaltime+=float(time)
+                ctr+=1
+            testresults.append({'test':test,'time':time,'out':out,'skip':skip,'fail':fail,'class':class1,'name':name,'failure':error})
+            out=''
+            skip=''
+            error=''
+        else:
+            if line.startswith('test run'):
+                skipOutput=True
+                properties['status']=line
+                break
+            else:
+                if skipOutput==False:
+                    out+=line+'\n'
+    properties['failures']=errors
+    properties['time']=totaltime
+    contents='<?xml version="1.0" encoding="UTF-8" ?>\n'
+    contents+='<testsuite skip="%s" errors="%s" failures="%d" hostname="%s" name="%s-%s" tests="%d" time="%s" timestamp="%s">\n' % (skips,errors,fails,hostname,properties['config'],toplevel,tests,totaltime,timestamp)
+    contents+='  <properties>\n'
+    for key in properties.keys(): 
+        contents+='    <property name="%s" value="%s" />\n' % (key,properties[key])
+    contents+='  </properties>\n'
+    for testresult in testresults:
+        contents+='  <testcase classname="%s.%s-%s" name="%s" time="%s">' % (properties['config'],properties['config'],toplevel,testresult['name'],testresult['time'])
+        if testresult.has_key('out') and testresult['out']!='':
+            out+=testresult['name']+'\n'+testresult['out']+'\n'
+        if testresult.has_key('skip') and testresult['skip']!='':
+            contents+='<skipped message="%s" type="%s">%s</skipped>\n  ' % (fixForXmlEscape(testresult['skip']),'skipped',fixForXmlCdata(testresult['skip']))
+            out+=testresult['skip']+'\n'
+            testresult['out']+=testresult['skip']
+        if testresult.has_key('failure') and testresult['failure']!='':
+            contents+='<failure message="%s" type="%s">%s</failure>\n  ' % (testresult['failure'],'failure',fixForXmlCdata(testresult['failure']))
+        if testresult['out']!='':
+            contents+='<system-out>%s</system-out>' % fixForXmlCdata(testresult['out'])
+        contents+='</testcase>\n'
+    contents+='<system-out>%s</system-out>\n<system-err>%s</system-err>\n</testsuite>' % (fixForXmlCdata(systemout),fixForXmlCdata(systemerr))
+    open(outfile,'w').write(contents)
+    
+
 def convertAcceptanceToJunit(infile,outfile,toplevel):
     skips=0
     errors='0'
@@ -339,7 +448,9 @@ def convertAcceptanceToJunit(infile,outfile,toplevel):
             properties['tests skipped']=tokens[3]
         if line.startswith('unexpected passes'):
             properties['unexpected passes']=tokens[3]
-    
+
+    if properties.has_key('configuration')==False:
+        properties['configuration']=toplevel
     contents='<?xml version="1.0" encoding="UTF-8" ?>\n'
     contents+='<testsuite skip="%s" errors="%s" failures="%d" hostname="%s" name="%s" tests="%d" time="%s" timestamp="%s">\n' % (skips,errors,failedfiles,hostname,name,totalfiles,time,timestamp)
     contents+='  <properties>\n'
@@ -348,7 +459,7 @@ def convertAcceptanceToJunit(infile,outfile,toplevel):
     contents+='  </properties>\n'
     for testresult in testresults:
         out=''
-        contents+='  <testcase classname="%s.%s" name="%s" time="%s">' % (toplevel,testresult['class'],testresult['name'],testresult['time'])
+        contents+='  <testcase classname="%s.%s" name="%s" time="%s">' % (properties['configuration'],toplevel,testresult['name'],testresult['time'])
         if testresult.has_key('out'):
             out+=testresult['out']+'\n'
         if testresult.has_key('skip'):
@@ -370,7 +481,7 @@ if __name__ == '__main__':
     outfile='runtests.xml'
     toplevel='acceptance'
     type='player'
-    usage='--type=runtests|player|performance --ifile=input file --ofile=junit xml file'
+    usage='--type=runtests|player|performance|aot --ifile=input file --ofile=junit xml file'
         
     try:
         opts, args = getopt.getopt(sys.argv[1:], '', ['ofile=','ifile=','toplevel=','type='])
@@ -400,6 +511,8 @@ if __name__ == '__main__':
         convertPlayerToJunit(infile,outfile,toplevel)
     elif type=='performance':
         convertPerformanceToJunit(infile,outfile,toplevel)
+    elif type=='aot':
+        convertAotToJunit(infile,outfile,toplevel)
         
     print("created file '%s'" % outfile)
 

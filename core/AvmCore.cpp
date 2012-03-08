@@ -1939,11 +1939,12 @@ return the result of the comparison ToPrimitive(x) == y.
             {
             case kIntptrType:
                 return atomGetIntptr(atom) != 0;
+            case kDoubleType: {
+                double d = atomToDouble(atom);
+                return !MathUtils::isNaN(d) && d != 0.0;
+            }
             case kBooleanType:
                 return (atom & ~7) != 0;
-            case kObjectType:
-            case kNamespaceType:
-                return !isNull(atom);
             case kStringType:
                 return !isNull(atom) && atomToString(atom)->length() > 0;
 #ifdef VMCFG_FLOAT
@@ -1968,10 +1969,8 @@ return the result of the comparison ToPrimitive(x) == y.
                 }
 #endif // VMCFG_FLOAT
             default:
-                {
-                    double d = atomToDouble(atom);
-                    return !MathUtils::isNaN(d) && d != 0.0;
-                }
+                // kObjectType, kNamespaceType
+                return !isNull(atom);
             }
         }
         else
