@@ -133,7 +133,6 @@ class RuntestBase(object):
     java = 'java'
     javaargs = ''
     js_output = ''
-    js_output_f = None
     logFileType = 'html'
     options = ''
     osName = ''
@@ -695,8 +694,8 @@ class RuntestBase(object):
                     break
 
         print('Writing results to %s' % self.js_output)
-        self.js_output_f = open(self.js_output, 'w')
-        self.js_output_f.close()
+        js_output_f = open(self.js_output, 'w')
+        js_output_f.close()
 
     def getTestsList(self, startDir):
         '''Get all possible tests to run, then parse it down depending on
@@ -951,14 +950,14 @@ class RuntestBase(object):
             sys.stdout.flush()
         if self.js_output:
             try:
-                self.js_output_f = open(self.js_output, 'a')
+                js_output_f = open(self.js_output, 'a')
                 if self.logFileType == 'html':
-                    self.js_output_f.write('%s %s %s\n' % (start_tag, m, end_tag))
+                    js_output_f.write('%s %s %s\n' % (start_tag, m, end_tag))
                 else:
-                    self.js_output_f.write('%s\n' % m)
+                    js_output_f.write('%s\n' % m)
             except:
                 pass
-            self.js_output_f.close()
+            js_output_f.close()
 
     def printOutput(self,request, outputCalls=None):
         #execute the outputCalls
@@ -1013,6 +1012,22 @@ class RuntestBase(object):
 
         if not os.path.exists(output):
             os.mkdir(output)
+
+        # Find additional abc files that are required @ runtime:
+        source = abcfile
+        if source.find(".abc_") == -1:
+            source = source.replace(".abc", ".as")
+        if exists(source+".avm_args"):
+            avm_args_file = open('%s.avm_args' % source,'r')
+            for line in avm_args_file:
+                line = line.strip()
+                if line.startswith('#'):
+                    continue
+                line, extraVmArgs, abcargs, multiabc = self.process_avm_args_line(line, os.path.dirname(source))
+                break # AOT does not support runtime switches which could be multiple entries in this
+                      # file, so only parse the first noncomment line to look for additional abc files to load
+            avm_args_file.close()
+            extraabcs = extraabcs + multiabc.split()
 
         shutil.copyfile(abcfile, outabc)
         copiedExtraAbcs=[]
@@ -1206,11 +1221,17 @@ class RuntestBase(object):
                     total -= 1
                     self.compile_test(test)
                     if exists(testdir+".abc") and self.aotsdk: # ABC compiled, so now AOT compile
-                        self.js_print('AOT compiling %s' % (testdir+".abc"))
+                        if self.show_time:
+                            start_time=time()
+                        else:
+                            self.js_print('AOT compiling %s' % (testdir+'.abc'))
                         (f,err,exitcode) = self.compile_aot(testdir+".abc", [self.abcasmShell+'.abc'])
+                        if self.show_time:
+                            self.js_print('AOT compiling %s time %.1f' % (testdir+".abc",time()-start_time))
                         if exitcode != 0:
-                            print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
-                            self.ashErrors.append("aot compilation of %s failed, %s" % (testdir+".abc", err))
+                            self.js_print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
+                            [self.js_print(line) for line in err]
+                            self.ashErrors.append("AOT compilation failed for %s\n\t%s" % (testdir+".abc", '\n'.join(str(x) for x in err)))
                     continue
                 elif test.endswith(self.executableExtensions):
                     total -= 1
@@ -1219,8 +1240,9 @@ class RuntestBase(object):
                         self.js_print('AOT compiling %s' % (testdir+".abc_"))
                         (f,err,exitcode) = self.compile_aot(test)
                         if exitcode != 0:
-                            print("ERROR: AOT compilation failed for %s" % (testdir+".abc_"))
-                            self.ashErrors.append("aot compilation of %s failed, %s" % (testdir+".abc_", err))
+                            self.js_print("ERROR: AOT compilation failed for %s" % (testdir+".abc_"))
+                            [self.js_print(line) for line in err]
+                            self.ashErrors.append("AOT compilation failed for %s\n\t%s" % (testdir+".abc_", '\n'.join(str(x) for x in err)))
                     continue
                 else:
                     arglist = parseArgStringToList(self.ascargs)
@@ -1303,11 +1325,17 @@ class RuntestBase(object):
 
                 if self.aotsdk: # ABC compiled, so now AOT compile
                     # Need to figure out how to deal with additional required abc files
-                    self.js_print('AOT compiling %s' % (testdir+".abc"))
+                    if self.show_time:
+                        start_time=time()
+                    else:
+                        self.js_print('AOT compiling %s' % (testdir+".abc"))
                     (f,err,exitcode) = self.compile_aot(testdir+".abc")
+                    if self.show_time:
+                        self.js_print('AOT compiling %s %.1f' % (testdir+".abc",time()-start_time))
                     if exitcode != 0:
-                        print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
-                        self.ashErrors.append("aot compilation of %s failed, %s" % (testdir+".abc", err))
+                        self.js_print("ERROR: AOT compilation failed for %s" % (testdir+".abc"))
+                        [self.js_print(line) for line in err]
+                        self.ashErrors.append("AOT compilation failed for %s\n\t%s" % (testdir+".abc", '\n'.join(str(x) for x in err)))
 
 
 

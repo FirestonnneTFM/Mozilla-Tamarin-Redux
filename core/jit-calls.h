@@ -440,6 +440,7 @@ namespace avmplus
     METHOD(ENVADDR(MethodEnv::nextname), SIG3(A,P,A,I), nextname)
     METHOD(ENVADDR(MethodEnv::nextvalue), SIG3(A,P,A,I), nextvalue)
     METHOD(ENVADDR(MethodEnv::hasnext), SIG3(I,P,A,I), hasnext)
+    // Coercion of atom to string may yield a side-effect via toString property.
     METHOD(COREADDR(AvmCore::coerce_s), SIG2(P,P,A), coerce_s)
     METHOD(COREADDR(AvmCore::string), SIG2(P,P,A), string)
     PUREMETHOD(COREADDR(AvmCore::doubleToString), SIG2(P,P,D), doubleToString)
@@ -453,22 +454,30 @@ namespace avmplus
 #ifdef VMCFG_FLOAT
     PUREMETHOD(COREADDR(AvmCore::floatToAtom), SIG2(A,P,F), floatToAtom)
     PUREMETHOD(COREADDR(AvmCore::float4ToAtom), SIG2(A,P,PF4), float4ToAtom)
-    PUREMETHOD(COREADDR(AvmCore::numericAtom), SIG2(A,P,A), numericAtom)
-    PUREMETHOD(COREADDR(AvmCore::numberAtom), SIG2(A,P,A), numberAtom)
+    // These coercions may invoke valueOf or toString.
+    METHOD(COREADDR(AvmCore::numericAtom), SIG2(A,P,A), numericAtom)
+    METHOD(COREADDR(AvmCore::numberAtom), SIG2(A,P,A), numberAtom)
 #endif
     PUREFUNCTION(FUNCADDR(AvmCore::doubleToInt32), SIG1(I,D), doubleToInt32)
-    PUREFUNCTION(FUNCADDR(AvmCore::boolean), SIG1(I,A), boolean)
-    PUREFUNCTION(FUNCADDR(AvmCore::toUInt32), SIG1(U,A), toUInt32)
     PUREFUNCTION(FUNCADDR(AvmCore::integer_d), SIG1(I,D), integer_d)
-    PUREFUNCTION(FUNCADDR(AvmCore::integer_i), SIG1(I,A), integer_i)
-    PUREFUNCTION(FUNCADDR(AvmCore::number_d), SIG1(D,A), number_d)
-    PUREFUNCTION(FUNCADDR(AvmCore::integer_u), SIG1(U,A), integer_u)
-    PUREFUNCTION(FUNCADDR(AvmCore::integer), SIG1(I,A), integer)
-    PUREFUNCTION(FUNCADDR(AvmCore::number), SIG1(D,A), number)
+
+    // Perhaps surprisingly, coercing an atom to boolean cannot yield a side-effect.
+    PUREFUNCTION(FUNCADDR(AvmCore::boolean), SIG1(I,A), boolean)
+    // Coercing an atom to a numeric type may yield a side-effect via the valueOf property.
+    FUNCTION(FUNCADDR(AvmCore::number), SIG1(D,A), number)
+    FUNCTION(FUNCADDR(AvmCore::toUInt32), SIG1(U,A), toUInt32)
+    FUNCTION(FUNCADDR(AvmCore::integer), SIG1(I,A), integer)
 #ifdef VMCFG_FLOAT
-    PUREFUNCTION(FUNCADDR(AvmCore::singlePrecisionFloat), SIG1(F,A), singlePrecisionFloat)
+    FUNCTION(FUNCADDR(AvmCore::singlePrecisionFloat), SIG1(F,A), singlePrecisionFloat)
     FUNCTION(FUNCADDR(AvmCore::float4), SIG2(V,RF4,A), float4)
 #endif
+    // These conversions assume the argument is already a numeric atom, thus no side-effects.
+    // They are called in contexts where the type of the atom has been previously ascertained,
+    // either by preceding program logic or by the verifier.
+    PUREFUNCTION(FUNCADDR(AvmCore::number_d), SIG1(D,A), number_d)
+    PUREFUNCTION(FUNCADDR(AvmCore::integer_i), SIG1(I,A), integer_i)
+    PUREFUNCTION(FUNCADDR(AvmCore::integer_u), SIG1(U,A), integer_u)
+
     METHOD(ENVADDR(MethodEnv::hasnextproto), SIG3(I,P,P,P), hasnextproto)
 
     PUREMETHOD(STRINGADDR(String::_charCodeAtDI),  SIG2(D,P,I), String_charCodeAtDI)
@@ -565,20 +574,10 @@ namespace avmplus
         }
     }
 
-    // TODO/FIXME: makeatom cannot be a PUREFUNCTION, because if it is, CSE assumes that if it is called 
-    // twice with identical parameters, the return value may be reused (which would make sense for a pure function).
-    // Problem is that given the same parameters (i.e. core, native, sst), it may still return a different 
-    // value second time, since "native" is a pointer, and the value it points to may have changed meanwhile.
-    // In other words, it is pure in the programming sense, but not the mathematical sense.
-    //
-    // We should benchmark the impact of this change (from PUREFUNCTION to FUNCTION), and if it is significant, we can try to:
-    // A. leave it as PURE, but disable CSE (questionable whether this will improve performance)
-    // B. Pass the value  rather than the pointer (we'd need to always pass 128 bits, though...)
-#ifdef VMCFG_FLOAT
+    // Superficially, makeatom appears to be a pure function.  The 'native' argument, however,
+    // represents a value passed by read-only reference, and which may change between identical
+    // calls.  These calls are not subject to CSE, and thus makeatom must not be marked pure.
     FUNCTION(FUNCADDR(makeatom), SIG3(A,P,P,I), makeatom)
-#else
-    PUREFUNCTION(FUNCADDR(makeatom), SIG3(A,P,P,I), makeatom)
-#endif
 
     void set_slot_from_atom(Atom atom, Traits* traits, AnyVal* slotPtr, uint8_t* tagPtr)
     {
@@ -1273,6 +1272,10 @@ namespace avmplus
     PUREMETHOD(COREADDR(AvmCore::uintToAtom), SIG2(A,P,U), uintToAtom)
     PUREMETHOD(COREADDR(AvmCore::intToAtom), SIG2(A,P,I), intToAtom)
     FASTFUNCTION(FUNCADDR(AvmCore::compare), SIG2(A,A,A), compare)
+
+    // While it would be incorrect to perform CSE on these, we emit only one call per function.
+    // By making them pure, we allow dead calls to be eliminated.  It is unfortunate that we do
+    // not distinguish the absence of observable side-effects from full referential transparency.
     PUREMETHOD(ENVADDR(MethodEnv::createRestHelper), SIG3(P,P,I,P), createRestHelper)
     PUREMETHOD(ENVADDR(MethodEnv::createArgumentsHelper), SIG3(P,P,I,P), createArgumentsHelper)
 
@@ -1320,9 +1323,6 @@ namespace avmplus
     METHOD(ENVADDR(MethodEnv::initMultinameLateForDelete), SIG3(V,P,P,A), initMultinameLateForDelete)
     PUREFUNCTION(FUNCADDR(MathUtils::doubleToBool), SIG1(I,D), doubleToBool)
 
-FLOAT_ONLY(
-    PUREMETHOD(COREADDR(AvmCore::allocFloat),  SIG2(A,P,F), allocFloat)
-)
 SSE2_ONLY(
     PUREMETHOD(COREADDR(AvmCore::doubleToAtom_sse2), SIG2(A,P,D), doubleToAtom_sse2)
     PUREFUNCTION(FUNCADDR(AvmCore::integer_d_sse2), SIG1(I,D), integer_d_sse2)
@@ -1374,11 +1374,13 @@ SSE2_ONLY(
     typedef Atom (*op_in_MethodEnv)(MethodEnv*, Atom, Atom);
     FUNCTION(FUNCADDR((op_in_MethodEnv)&op_in<MethodEnv*>), SIG3(A,P,A,A), op_in)
 
+    // These coercions may throw an exception.
     FUNCTION(FUNCADDR(&coerceobj_obj), SIG3(V,P,P,P), coerceobj_obj)
     FUNCTION(FUNCADDR(&coerceobj_atom), SIG3(V,P,A,P), coerceobj_atom)
 
+    // Coercion may yield a side-effect via valueOf property.
     typedef Atom (*coerce_MethodEnv)(MethodEnv*, Atom, Traits*);
-    PUREFUNCTION(FUNCADDR((coerce_MethodEnv)&coerce<MethodEnv*>), SIG3(A,P,A,P), coerce)
+    FUNCTION(FUNCADDR((coerce_MethodEnv)&coerce<MethodEnv*>), SIG3(A,P,A,P), coerce)
 
     PUREFASTFUNCTION(FUNCADDR(finddef_cache), SIG2(P,P,P), finddef_cache)
 
