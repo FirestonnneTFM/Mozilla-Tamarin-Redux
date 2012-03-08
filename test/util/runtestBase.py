@@ -996,7 +996,7 @@ class RuntestBase(object):
         (testdir, ext) = splitext(abcfile)
         settings = self.get_test_settings(testdir)
         if '.*' in settings and 'skip' in settings['.*']:
-            self.js_print('Skipping -daa %s ... reason: %s' % (abcfile,settings['.*']['skip']))
+            self.js_print('Skipping %s ... reason: %s' % (abcfile,settings['.*']['skip']))
             return ['', '', 0]
 
         output = os.path.dirname(abcfile)
@@ -1029,7 +1029,10 @@ class RuntestBase(object):
             avm_args_file.close()
             extraabcs = extraabcs + multiabc.split()
 
-        shutil.copyfile(abcfile, outabc)
+        if isfile(abcfile): # Safe guard
+            shutil.copyfile(abcfile, outabc)
+            while not os.path.exists(outabc): # Have had some IO issues with getting to the ADT call
+                time.sleep(.5)                # before the file is actually copied over.
         copiedExtraAbcs=[]
         for abc in extraabcs:
             extraoutname = abc.replace("./", "")
@@ -1041,6 +1044,8 @@ class RuntestBase(object):
             extraoutabc = os.path.join(output, extraoutname + ".abc")
             if isfile(abc): # Safe guard
                 shutil.copyfile(abc, extraoutabc)
+                while not os.path.exists(extraoutabc): # Have had some IO issues with getting to the ADT call
+                    time.sleep(.5)                     # before the file is actually copied over.
             copiedExtraAbcs.append(output+"/"+extraoutname+".abc")
 
         cmd = '%s -Xshell -Xoutput %s %s %s %s' % (os.path.join(self.aotsdk, 'bin/adt'), output, self.aotextraargs, " ".join(copiedExtraAbcs), outabc)
@@ -1181,7 +1186,7 @@ class RuntestBase(object):
                 if self.aotsdk:
                     settings = self.get_test_settings(testdir)
                     if '.*' in settings and 'skip' in settings['.*']:
-                        self.js_print('Skipping -daa %s ... reason: %s' % (test,settings['.*']['skip']))
+                        self.js_print('Skipping %s ... reason: %s' % (test,settings['.*']['skip']))
                         continue
                     # If the testcase is checked in as an abc then we can jump to AOT compilation
                     if test.endswith(self.abcOnlyExt):
