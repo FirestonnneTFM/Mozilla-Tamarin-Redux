@@ -407,9 +407,6 @@ void DomainMgr::addNamedScriptEnvs(AbcEnv* abcEnv, const GCList<ScriptEnv>& envs
     }
 
     delete ht;
-
-    // Adding scripts to a domain always invalidates the lookup cache.
-    core->invalidateLookupCache();
 }
 
 ScriptEnv* DomainMgr::mapScriptToScriptEnv(DomainEnv* domainEnv, MethodInfo* mi)

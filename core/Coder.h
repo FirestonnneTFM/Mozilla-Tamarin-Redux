@@ -109,30 +109,5 @@ namespace avmplus
         void writeFixExceptionsAndLabels(const FrameState* state, const uint8_t *pc);
         void cleanup();
     };
-
-    /**
-     * helper class for building the layout of a lookup cache, used during
-     * jit compilation or wordcode translation.
-     */
-    class LookupCacheBuilder
-    {
-        // entry i has an imm30 value that represents the multiname whose entry in the MethodEnv's lookup cache is 'i'
-        uint32_t* caches;
-
-        // number of entries in 'caches'
-        int num_caches;
-
-    public:
-        // next free entry in 'caches'
-        int next_cache;
-
-    public:
-        LookupCacheBuilder();
-
-        /** allocate a new cache slot or reuse an existing one with the same imm30 */
-        uint32_t allocateCacheSlot(uint32_t imm30);
-
-        void cleanup();
-    };
 }
 #endif  /* __avmplus_Coder__ */

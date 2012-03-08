@@ -123,43 +123,6 @@ namespace avmplus
         coder->cleanup();
     }
 
-    LookupCacheBuilder::LookupCacheBuilder()
-    {
-        this->next_cache = 0;
-        this->caches = NULL;
-        this->num_caches = 0;
-    }
-
-    void LookupCacheBuilder::cleanup()
-    {
-        if (caches) {
-            mmfx_delete_array(caches);
-            caches = NULL;
-        }
-    }
-
-    // The cache structure is expected to be small in the normal case, so use a
-    // linear list.  For some programs, notably classical JS programs, it may however
-    // be larger, and we may need a more sophisticated structure.
-    uint32_t LookupCacheBuilder::allocateCacheSlot(uint32_t imm30)
-    {
-        for ( int i=0 ; i < next_cache ; i++ )
-            if (caches[i] == imm30)
-                return i;
-        if (next_cache == num_caches) {
-            uint32_t newcap = num_caches + num_caches/2 + 5; // 0 5 12 23 39 66 ...
-            uint32_t* new_cache = mmfx_new_array(uint32_t, newcap);
-            if (num_caches > 0) {
-                VMPI_memcpy(new_cache, caches, sizeof(uint32_t)*num_caches);
-                mmfx_delete_array(caches);
-            }
-            caches = new_cache;
-            num_caches = newcap;
-        }
-        caches[next_cache] = imm30;
-        return next_cache++;
-    }
-
     CodeWriter::~CodeWriter()
     { }
 

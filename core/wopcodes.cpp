@@ -398,8 +398,8 @@ namespace avmplus
         {    4,    1,    0,   0,    0,   0,   0,   0,    1,    0         N("ifstricteq_lb") },
         {    4,    1,    0,   0,    0,   0,   0,   0,    1,    0         N("ifstrictne_lb") },
         {    1,    0,    0,   0,    0,   1,   2,   0,    0,    0         N("swap_pop") },        // 0x130
-        {    3,    0,    0,   1,    0,   1,   0,   0,    0,    0         N("findpropglobal") },
-        {    3,    0,    0,   1,    0,   1,   0,   0,    0,    0         N("findpropglobalstrict") },
+        {    2,    0,    0,   1,    0,   1,   0,   0,    0,    0         N("findpropglobal") },
+        {    2,    0,    0,   1,    0,   1,   0,   0,    0,    0         N("findpropglobalstrict") },
         {    1,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("debugenter") },
         {    1,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("debugexit") },
         {    1,    0,    0,   1,    0,   1,   1,   0,    0,    0         N("lix8") },

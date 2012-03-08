@@ -623,23 +623,6 @@ REALLY_INLINE Atom AvmCore::allocFloat4(const float4_t& n)
 }
 #endif // VMCFG_FLOAT
 
-
-REALLY_INLINE uint32_t AvmCore::lookupCacheTimestamp() const
-{
-    return lookup_cache_timestamp == ~0U ? 0 : lookup_cache_timestamp;
-}
-
-REALLY_INLINE bool AvmCore::lookupCacheIsValid(uint32_t t) const
-{
-    return t == lookup_cache_timestamp;
-}
-
-REALLY_INLINE void AvmCore::invalidateLookupCache()
-{
-    if (lookup_cache_timestamp != ~0U)
-        ++lookup_cache_timestamp;
-}
-
 #ifdef VMCFG_NANOJIT
 REALLY_INLINE void AvmCore::flushBindingCachesNextSweep()
 {

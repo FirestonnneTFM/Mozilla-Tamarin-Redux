@@ -260,9 +260,6 @@ namespace avmplus
         void set_word_code(MMgc::GC* gc, TranslatedCode* translated_code);
     #endif
 
-        int32_t lookup_cache_size() const;
-        void set_lookup_cache_size(int32_t s);
-
         int32_t  method_id() const;
         uint32_t unique_method_id() const;
 
@@ -321,7 +318,6 @@ namespace avmplus
             const uint8_t*          body_pos;
             ExceptionHandlerTable*  exceptions;     // we write this once, in Verifier, with an explicit WB.  so no GCMember<>.
             uint32_t                countdown;      // Counts down calls plus backedges.
-            int                     lookup_cache_size;     // Number of items in lookup cache
     #ifdef VMCFG_WORDCODE
             struct
             {
