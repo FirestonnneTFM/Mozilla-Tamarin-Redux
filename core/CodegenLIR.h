@@ -334,6 +334,7 @@ namespace avmplus
         CodegenLabel interrupt_label;
         CodegenLabel mop_rangeCheckFailed_label;
         CodegenLabel catch_label;
+        CodegenLabel nfe_label;
         const uint8_t* lastPcSave;
         LIns *setjmpResult;
         VarTracker *varTracker;

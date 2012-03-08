@@ -2702,7 +2702,7 @@ FLOAT_ONLY(\
                 i1 = (intptr_t)U30ARG; // argc
                 // stack in: function, receiver, arg1, ... argN
                 // stack out: result
-                a1 = toplevel->op_call(sp[-i1-1]/*function*/, (int32_t)i1, sp-i1);
+                a1 = avmplus::op_call(toplevel, sp[-i1-1]/*function*/, (int32_t)i1, sp-i1);
                 *(sp = sp-i1-1) = a1;
                 NEXT;
             }

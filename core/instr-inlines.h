@@ -108,7 +108,7 @@ Atom call_prim_dynamic(E env, Atom val, const Multiname* name, int argc, Atom* a
                 float* pf4 = reinterpret_cast<float*>(&f4);
                 val = env->core()->floatToAtom(pf4[index]);
             }
-            return op_call(env, val, argc, args);
+            return op_call_atom(env, val, argc, args);
         }
     }
 #endif
@@ -131,15 +131,7 @@ Atom op_call(E env, Atom func, int argc, Atom* atomv)
 {
     if (AvmCore::isObject(func))
         return AvmCore::atomToScriptObject(func)->call(argc, atomv);
-
-    // The construction of the multiname and the resulting error string is
-    // delegated because in-lining it here prevents the call to call() from
-    // being a tail call - the address of a local multiname is taken, this
-    // makes GCC (arguably incorrectly, given the scope of the variable)
-    // turn off tail calling.
-
-    env->toplevel()->throwTypeErrorWithName(kCallOfNonFunctionError, "value");
-    return unreachableAtom;
+    return op_call_error(env);
 }
 
 /** specialized op_call when you have a ScriptObject* already for the function */
@@ -148,8 +140,7 @@ Atom op_call(E env, ScriptObject* func, int argc, Atom* atomv)
 {
     if (func)
         return func->call(argc, atomv);
-    env->toplevel()->throwTypeErrorWithName(kCallOfNonFunctionError, "value");
-    return unreachableAtom;
+    return op_call_error(env);
 }
 
 /**

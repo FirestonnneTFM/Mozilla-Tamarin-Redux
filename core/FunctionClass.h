@@ -80,6 +80,9 @@ namespace avmplus
             return new (gc, MMgc::kExact, vtable->getExtraSize()) FunctionObject(vtable, call);
         }
 
+        /** Implements ScriptObject::call called directly via ptr */
+        static Atom callFunction(FunctionObject*, int argc, Atom* argv);
+
         // AS3 native methods
         int32_t get_length();
         Atom AS3_call(Atom thisAtom, Atom *argv, int argc);
@@ -89,18 +92,22 @@ namespace avmplus
 #if defined(DEBUGGER) || defined(VMCFG_AOT)
         virtual MethodEnv* getCallMethodEnv();
 #endif
-        virtual Atom call(int argc, Atom* argv);
+        virtual Atom call(int argc, Atom* argv); // overrides ClassClosure.call, ScriptObject.call
         virtual CodeContext* getFunctionCodeContext() const;
         virtual Stringp implToString() const;
     protected:
-        virtual Atom get_coerced_receiver(Atom a) const;
+        virtual Atom get_coerced_receiver(Atom a) const; // called by AS3_call/apply
+    private:
+        /** Implements get_coerced_receiver specifically for concrete FunctionObject instances */
+        Atom getFunctionReceiver(Atom a) const;
 
     // ------------------------ DATA SECTION BEGIN
-        GC_DATA_BEGIN(FunctionObject)
+    public:
+        FunctionProc m_call_ptr; // stub to directly invoke this function.
 
     protected:
+        GC_DATA_BEGIN(FunctionObject)
         GCMember<MethodEnv> GC_POINTER(m_callEnv);
-
         GC_DATA_END(FunctionObject)
 
     private:

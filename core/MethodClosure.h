@@ -83,11 +83,11 @@ namespace avmplus
     {
     protected:
         REALLY_INLINE MethodClosure(VTable* cvtable, MethodEnv* call, Atom savedThis)
-            : FunctionObject(cvtable, call), m_savedThis(savedThis)
+            : FunctionObject(cvtable, call)
+            , m_savedThis(savedThis) // can be nullAtom from WeakMethodClosure
         {
             AvmAssert(traits()->getSizeOfInstance() == sizeof(MethodClosure));
-            // This is legal: our subclass can hand us nullAtom
-            // AvmAssert(!AvmCore::isNullOrUndefined(savedThis));
+            m_call_ptr = (FunctionProc) MethodClosure::callMethodClosure;
         }
 
     public:
@@ -95,6 +95,12 @@ namespace avmplus
         {
             return new (gc, MMgc::kExact, vtable->getExtraSize()) MethodClosure(vtable, call, savedThis);
         }
+
+        /**
+         * Implements OP_call and ScriptObject::call for concrete MethodClosures.  Can be
+         * invoked directly by jit code or by FunctionObject::call; do not override the latter.
+         */
+        static Atom callMethodClosure(MethodClosure*, int argc, Atom* argv);
 
         // ScriptObject method overrides
         virtual MethodClosure* toMethodClosure() const;
@@ -115,6 +121,7 @@ namespace avmplus
         uintptr_t hashKey() const;
 
     protected:
+        // called by Function.AS3_call/apply
         virtual Atom get_coerced_receiver(Atom a) const;
 
     protected:
@@ -135,18 +142,27 @@ namespace avmplus
     class GC_CPP_EXACT(WeakMethodClosure, MethodClosure)
     {
         friend class MethodClosure;
+
     protected:
         REALLY_INLINE WeakMethodClosure(VTable* cvtable, MethodEnv* call, Atom savedThis)
             : MethodClosure(cvtable, call, nullObjectAtom) // do NOT pass savedThis to the superclass ctor!
             , m_weakSavedThis(AvmCore::atomToScriptObject(savedThis)->GetWeakRef())
         {
             AvmAssert(m_weakSavedThis != NULL);
+            m_call_ptr = (FunctionProc) callWeakMethodClosure;
         }
  
         REALLY_INLINE static WeakMethodClosure* create(MMgc::GC* gc, VTable* vtable, MethodEnv* call, Atom savedThis)
         {
             return new (gc, MMgc::kExact, vtable->getExtraSize()) WeakMethodClosure(vtable, call, savedThis);
         }
+
+    public:
+        /**
+         * Implements OP_call and ScriptObject::call for concrete MethodClosures.  Can be
+         * invoked directly by jit code or by FunctionObject::call; do not override the latter.
+         */
+        static Atom callWeakMethodClosure(WeakMethodClosure*, int argc, Atom* argv);
 
     public:
         // MethodClosure-specific methods
@@ -159,6 +175,7 @@ namespace avmplus
         virtual Atom get_savedThisOrNull() const; // returns nullAtom if invalid, no assert
  
      protected:
+        // called by Function.AS3_call/apply
         virtual Atom get_coerced_receiver(Atom a) const;
     
     private:

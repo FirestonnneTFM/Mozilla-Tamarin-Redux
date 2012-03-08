@@ -82,7 +82,7 @@ namespace avmplus
             }
         }
         argv[0] = atom(); // replace receiver
-        return toplevel()->op_call(f, argc, argv);
+        return avmplus::op_call(toplevel(), f, argc, argv);
     }
 
     Atom XMLListObject::getMultinameProperty(const Multiname* m) const

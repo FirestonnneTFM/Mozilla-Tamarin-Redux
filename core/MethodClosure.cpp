@@ -64,10 +64,8 @@ namespace avmplus
     MethodClosureClass::MethodClosureClass(VTable* cvtable)
         : ClassClosure(cvtable)
     {
-        Toplevel* toplevel = this->toplevel();
-
         AvmAssert(traits()->getSizeOfInstance() == sizeof(MethodClosureClass));
-
+        Toplevel* toplevel = this->toplevel();
         setPrototypePtr(toplevel->functionClass()->call_createEmptyFunction());
     }
 
@@ -187,8 +185,16 @@ namespace avmplus
         return m_savedThis;
     }
 
-    // ---------------------------
+    /**
+     * Call entry point.
+     */
+    /*static*/ Atom MethodClosure::callMethodClosure(MethodClosure* f, int argc, Atom* argv)
+    {
+        argv[0] = f->m_savedThis;
+        return f->m_callEnv->coerceEnter(argc, argv);
+    }
 
+    // ---------------------------
 
     /*virtual*/ bool WeakMethodClosure::isValid() const
     {
@@ -230,6 +236,12 @@ namespace avmplus
     /*virtual*/ Atom WeakMethodClosure::get_coerced_receiver(Atom /*a*/) const
     {
         return _get_savedThis();
+    }
+
+    /*static*/ Atom WeakMethodClosure::callWeakMethodClosure(WeakMethodClosure* f, int argc, Atom* argv)
+    {
+        argv[0] = f->_get_savedThis();
+        return f->m_callEnv->coerceEnter(argc, argv);
     }
 
 }
