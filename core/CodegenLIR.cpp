@@ -3302,7 +3302,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             int32_t dest_index = state->sp() + 1;
             LIns* table = loadEnvFinddefTable();
             // We always call out here because inlining the fast path inhibits
-            // dead code limination when this finddef isn't used.
+            // dead code elimination when this finddef isn't used.
             LIns* obj_ptr = addp(table, offsetof(FinddefTable, elements) + sizeof(ScriptObject*) * name_id);
             LIns* obj = callIns(FUNCTIONID(finddef_cache), 2,
                                 obj_ptr, methodFrame);

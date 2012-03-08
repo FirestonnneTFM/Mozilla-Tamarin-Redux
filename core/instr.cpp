@@ -189,15 +189,23 @@ Atom op_in(E caller_env, Atom name, Atom obj) {
 }
 template Atom op_in(MethodEnv*, Atom, Atom);
 
+/**
+ * finddef_miss handles the uncommon case when finddef_cache finds a null
+ * pointer.  Its a separate function to avoid polluting finddef_cache's
+ * stack frame with spilled registers from the slow path.
+ */
 NO_INLINE
 ScriptObject* FASTCALL finddef_miss(ScriptObject** obj_ptr, MethodFrame* frame) {
     MethodEnv* env = frame->env();
     FinddefTable& table = *env->abcEnv()->finddefTable();
-    // recover name_id by figuring out where obj_ptr points in the table
+    // recover name_id by figuring out where obj_ptr points in the table.
+    // name_id is not passed in so we can comply with FASTCALL's 
+    // limit of two register args.
     ScriptObject** obj0_ptr = (ScriptObject**) &table[0];
     int name_id = int(obj_ptr - obj0_ptr);
     // execute finddef and save the result
-    ScriptObject* obj = env->finddef(env->method->pool()->precomputedMultiname(name_id));
+    const Multiname* name = env->method->pool()->precomputedMultiname(name_id);
+    ScriptObject* obj = env->finddef(name);
     table[name_id].object = obj;
     return obj;
 }
@@ -205,9 +213,12 @@ ScriptObject* FASTCALL finddef_miss(ScriptObject** obj_ptr, MethodFrame* frame) 
 /**
  * called by JIT or Interpreter code for OP_finddef.  The JIT code has a stashed
  * pointer to the whole FinddefTable, and passes in a pointer to the desired
- * element. (we do this to keep this call to 2 parameters).
+ * element. (we do this to keep this call to 2 parameters).  We use 
+ * MethodFrame* here instead of MethodEnv* because its cheaper for the
+ * JIT to rematerialize MethodFrame* than to load MethodEnv*. from stack.
  */
-ScriptObject* FASTCALL finddef_cache(ScriptObject** obj_ptr, MethodFrame* frame) {
+ScriptObject* FASTCALL finddef_cache(ScriptObject** obj_ptr,
+                                     MethodFrame* frame) {
     ScriptObject* obj = *obj_ptr;
     if (obj)
         return obj;
