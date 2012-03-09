@@ -267,7 +267,7 @@ namespace avmplus
         {
             TRY(core(), kCatchAction_Rethrow)
             {
-                *recv = avmplus::op_call(m_toplevel, *method, argc, args);
+                *recv = m_toplevel->op_call(*method, argc, args);
                 return false;
             }
             CATCH(Exception* exception)

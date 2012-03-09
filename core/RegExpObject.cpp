@@ -684,7 +684,8 @@ namespace avmplus
             // ECMA 15.5.4.11: Argument m+3 is string
             argv[captureCount+3] = subject->atom();
 
-            resultBuffer << core()->string(avmplus::op_call(toplevel(), replaceFunction, argc, argv));
+            resultBuffer << core()->string(toplevel()->op_call(replaceFunction->atom(),
+                                                               argc, argv));
 
             int newLastIndex = ovector[0] + (ovector[1] - ovector[0]);
 

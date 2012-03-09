@@ -1112,8 +1112,11 @@ namespace avmplus
         case BKIND_CONST:
         {
             uint32_t slot = AvmCore::bindingToSlotId(b);
-            ScriptObject* function = AvmCore::atomToScriptObject(atomv[0])->getSlotObject(slot);
-            return op_call(this, function, argc, atomv);
+            ScriptObject* method = AvmCore::atomToScriptObject(atomv[0])->getSlotObject(slot);
+            // inlined equivalent of op_call
+            if (!method)
+                toplevel->throwTypeErrorWithName(kCallOfNonFunctionError, "value");
+            return method->call(argc, atomv);
         }
         case BKIND_SET:
         {
@@ -1127,7 +1130,7 @@ namespace avmplus
             int m = AvmCore::bindingToGetterId(b);
             MethodEnv *f = base->methods[m];
             Atom method = f->coerceEnter(atomv[0]);
-            return avmplus::op_call(this, method, argc, atomv);
+            return toplevel->op_call(method, argc, atomv);
         }
         }
     }

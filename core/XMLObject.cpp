@@ -454,7 +454,7 @@ namespace avmplus
             }
         }
         argv[0] = atom(); // replace receiver
-        return avmplus::op_call(toplevel(), f, argc, argv);
+        return toplevel()->op_call(f, argc, argv);
     }
 
     // E4X 9.1.1.1, pg 12 - [[GET]]

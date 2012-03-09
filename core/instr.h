@@ -65,8 +65,6 @@ Binding getBinding(E env, Traits* traits, const Multiname* ref);
 template <class E>
 Binding getBinding(E env, VTable* vtable, const Multiname* ref);
 
-template <class E>
-Atom op_call_error(E env);
 /**
  * implements OP_call, including error handling for non-callable values
  */
@@ -77,7 +75,7 @@ Atom op_call(E env, Atom func, int argc, Atom* atomv);
  * specialized OP_call implementation when you have a ScriptObject*
  * already.  Includes null pointer handling
  */
-template <class E> NO_INLINE
+template <class E>
 Atom op_call(E env, ScriptObject* func, int argc, Atom* atomv);
 
 /**

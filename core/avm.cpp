@@ -40,71 +40,55 @@
 #include "avmplus.h"
 
 namespace avm {
-using avmplus::Atom;
-using avmplus::CodeContext;
-using avmplus::MethodEnv;
-using avmplus::ScriptObject;
-using avmplus::Toplevel;
 
-// you probably don't want to open this namespace.
-// using namespace avmplus;
+    // you probably don't want to open this namespace.
+    // using namespace avmplus;
 
-bool isFunction(const ScriptObject* so)
-{
-    return so && so->core()->isFunction(so->atom());
-}
+    // -------- AvmObject --------
 
-CodeContext* getFunctionCodeContext(const ScriptObject* so)
-{
-    if (!isFunction(so)) {
-        AvmAssert(!"Only Function is legal here.");
-        return NULL;
+    bool isFunction(const avmplus::ScriptObject* so)
+    {
+        return so && so->core()->isFunction(so->atom());
     }
-//  CodeContext* cc = ((avmplus::FunctionObject*)so)->getFunctionCodeContext();
-// getFunctionCodeContext() has been temporarily relocated to ScriptObject, as AIR defines
-// some classes that are subclasses of Function (in AS3) but not of FunctionObject (in C++)...
-    avmplus::CodeContext* cc = ((avmplus::ScriptObject*)so)->getFunctionCodeContext();
-    return cc;
-}
 
-CodeContext* getClassCodeContext(const ScriptObject* so)
-{
-    if (!so)
-        return NULL;
-    if (so->core()->isFunction(so->atom())) {
-        AvmAssert(!"Function or MC is not legal here.");
-        return NULL;
+    avmplus::CodeContext* getFunctionCodeContext(const avmplus::ScriptObject* so)
+    {
+        if (!isFunction(so))
+        {
+            AvmAssert(!"Only Function is legal here.");
+            return NULL;
+        }
+    //  avmplus::CodeContext* cc = ((avmplus::FunctionObject*)so)->getFunctionCodeContext();
+    // getFunctionCodeContext() has been temporarily relocated to ScriptObject, as AIR defines
+    // some classes that are subclasses of Function (in AS3) but not of FunctionObject (in C++)...
+        avmplus::CodeContext* cc = ((avmplus::ScriptObject*)so)->getFunctionCodeContext();
+        return cc;
     }
-    avmplus::TraitsPosType t = so->traits()->posType();
-    if (t == avmplus::TRAITSTYPE_CATCH || t == avmplus::TRAITSTYPE_ACTIVATION) {
-        AvmAssert(!"Activation and Catch objects are not legal here.");
-        return NULL;
+
+    avmplus::CodeContext* getClassCodeContext(const avmplus::ScriptObject* so)
+    {
+        if (!so)
+            return NULL;
+        if (so->core()->isFunction(so->atom()))
+        {
+            AvmAssert(!"Function or MC is not legal here.");
+            return NULL;
+        }
+        avmplus::TraitsPosType t = so->traits()->posType();
+        if (t == avmplus::TRAITSTYPE_CATCH || t == avmplus::TRAITSTYPE_ACTIVATION)
+        {
+            AvmAssert(!"Activation and Catch objects are not legal here.");
+            return NULL;
+        }
+        avmplus::MethodEnv* init = so->vtable->init;
+        if (!init)
+        {
+            AvmAssert(!"init method is null, should not be possible.");
+            return NULL;
+        }
+        avmplus::CodeContext* cc = init->scope()->abcEnv()->codeContext();
+        return cc;
     }
-    MethodEnv* init = so->vtable->init;
-    if (!init) {
-        AvmAssert(!"init method is null, should not be possible.");
-        return NULL;
-    }
-    return init->scope()->abcEnv()->codeContext();
-}
-
-Atom callFunction(Toplevel* toplevel, Atom f, int argc, Atom* args)
-{
-    return avmplus::op_call(toplevel, f, argc, args);
-}
-
-Atom callFunction(ScriptObject* f, int argc, Atom* args)
-{
-    AvmAssertMsg(f != NULL, "f must not be null. Use callFunction(toplevel, atom, ...) form");
-    return f->call(argc, args);
-}
-
-Atom callFunction(ScriptObject* f)
-{
-    AvmAssertMsg(f != NULL, "f must not be null. Use callFunction(toplevel, atom, ...) form");
-    Atom args[] = { nullObjectAtom };
-    return f->call(0, args);
-}
 
 } // namespace avm
 
