@@ -433,14 +433,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 19BDAD5C1504DAB700BCD6F7 /* lzma */;
+			remoteGlobalIDString = 19BDAD5C1504DAB700BCD6F7;
 			remoteInfo = lzma;
 		};
 		19BDAE751504E9B600BCD6F7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 19BDAE4B1504E7A200BCD6F7 /* lzma64 */;
+			remoteGlobalIDString = 19BDAE4B1504E7A200BCD6F7;
 			remoteInfo = lzma64;
 		};
 		7E87D15B122C617A0005FEAF /* PBXContainerItemProxy */ = {
@@ -2610,7 +2610,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/build/Debug\"",
+					"\"$(SRCROOT)/build/Release\"",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
@@ -2646,6 +2646,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
@@ -2665,6 +2666,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
@@ -2682,6 +2684,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
@@ -2794,7 +2797,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/build/Debug\"",
+					"\"$(SRCROOT)/build/Release\"",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
@@ -2842,6 +2845,10 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/build/Debug\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
 			};
@@ -2860,6 +2867,10 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/build/Debug\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
 			};
@@ -2876,6 +2887,10 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/build/Release\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
 				ZERO_LINK = NO;
@@ -2893,6 +2908,10 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/build/Release\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = avm;
 				ZERO_LINK = NO;
