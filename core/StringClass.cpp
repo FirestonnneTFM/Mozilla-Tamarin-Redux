@@ -217,7 +217,8 @@ namespace avmplus
                                  searchString->atom(),
                                  core->uintToAtom(index),
                                  subject->atom() };
-                replacement = core->string(op_call(toplevel(), replaceFunction, 3, argv));
+                replacement = core->string(toplevel()->op_call(replaceFunction->atom(),
+                                                               3, argv));
             }
 
             Stringp out = subject->substring(0, index);

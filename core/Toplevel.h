@@ -169,6 +169,17 @@ namespace avmplus
         Traits*        toTraits(Atom atom);
 
         /**
+         * OP_call.
+         *
+         * this = atomv[0]
+         * arg1 = atomv[1]
+         * argN = atomv[argc]
+         */
+        Atom op_call(Atom method,
+                     int argc,
+                     Atom* atomv);
+
+        /**
          * OP_construct.
          *
          * this = atomv[0] (ignored)

@@ -2102,7 +2102,6 @@ const int kBufferPadding = 16;
         void exit(AvmCore* core);
         CodeContext* cc() const;
         MethodEnv* env() const;
-        Toplevel* toplevel() const;
 
         // Search for a frame that has a default namespace, starting on the given frame.
         static Namespace* findDxns(const MethodFrame* start);

@@ -668,7 +668,6 @@ namespace avmplus
         interrupt_label("interrupt"),
         mop_rangeCheckFailed_label("mop_rangeCheckFailed"),
         catch_label("catch"),
-        nfe_label("nfe"),
         inlineFastpath(false),
         call_cache_builder(*alloc1, *initCodeMgr(pool)),
         get_cache_builder(*alloc1, *pool->codeMgr),
@@ -6617,27 +6616,11 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 int dest = funcDisp;
 
                 // convert args to Atom[] for the call
-                LIns *result_ins, *ap;
-                switch (bt(state->value(funcDisp).traits)) {
-                case BUILTIN_function:
-                case BUILTIN_methodClosure: {
-                    LIns* func = localGetp(funcDisp);
-                    branchToLabel(LIR_jt, eqp0(func), nfe_label);
-                    LIns* call_ptr = ldp(func, offsetof(FunctionObject, m_call_ptr),
-                                          ACCSET_OTHER);
-                    ap = storeAtomArgs(loadAtomRep(funcDisp+1), argc, funcDisp+2);
-                    result_ins = callIns(FUNCTIONID(call_ptr), 4, call_ptr, func, InsConst(argc), ap);
-                    break;
-                }
-                default:
-                    // generic call
-                    LIns* func = loadAtomRep(funcDisp);
-                    ap = storeAtomArgs(loadAtomRep(funcDisp+1), argc, funcDisp+2);
-                    result_ins = callIns(FUNCTIONID(op_call_atom), 4, env_param, func, InsConst(argc), ap);
-                    break;
-                }
+                LIns* func = loadAtomRep(funcDisp);
+                LIns* ap = storeAtomArgs(loadAtomRep(funcDisp+1), argc, funcDisp+2);
+                LIns* i3 = callIns(FUNCTIONID(op_call), 4, env_param, func, InsConst(argc), ap);
                 liveAlloc(ap);
-                localSet(dest, atomToNativeRep(result, result_ins), result);
+                localSet(dest, atomToNativeRep(result, i3), result);
                 break;
             }
 
@@ -6673,7 +6656,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                     // todo if funcValue is already a ScriptObject then don't box it, use a different helper.
                     LIns* funcValue = loadFromSlot(baseDisp, AvmCore::bindingToSlotId(b), slotType);
                     LIns* funcAtom = nativeToAtom(funcValue, slotType);
-                    out = callIns(FUNCTIONID(op_call_atom), 4, env_param, funcAtom, InsConst(argc), ap);
+                    out = callIns(FUNCTIONID(op_call), 4, env_param, funcAtom, InsConst(argc), ap);
                 }
                 else if (!name->isRuntime()) {
                     // use inline cache for late bound call
@@ -7758,12 +7741,6 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             emitLabel(upe_label);
             Ins(LIR_regfence);
             callIns(FUNCTIONID(upe), 1, env_param);
-        }
-
-        if (nfe_label.unpatchedEdges) {
-            emitLabel(nfe_label);
-            Ins(LIR_regfence);
-            callIns(FUNCTIONID(op_call_error), 1, env_param);
         }
 
         if (interrupt_label.unpatchedEdges) {
@@ -8905,7 +8882,6 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 ignore.put(interrupt_label.labelIns, true);
                 ignore.put(mop_rangeCheckFailed_label.labelIns, true);
                 ignore.put(catch_label.labelIns, true);
-                ignore.put(nfe_label.labelIns, true);
             }
 
             // type of cfg graph to produce
