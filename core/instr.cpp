@@ -206,7 +206,7 @@ ScriptObject* FASTCALL finddef_miss(ScriptObject** obj_ptr, MethodFrame* frame) 
     // execute finddef and save the result
     const Multiname* name = env->method->pool()->precomputedMultiname(name_id);
     ScriptObject* obj = env->finddef(name);
-    table[name_id].object = obj;
+    WBRC(env->core()->gc, &table, &table[name_id].object, obj);
     return obj;
 }
 

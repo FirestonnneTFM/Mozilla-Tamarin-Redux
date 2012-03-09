@@ -60,7 +60,7 @@ namespace avmplus
         
     public:
         struct FinddefEntry {
-            GCMember<ScriptObject> object;
+            ScriptObject* object; // written only by explicit WB in finddef_miss().
             REALLY_INLINE void gcTrace(MMgc::GC* gc) { gc->TraceLocation(&object); }
         };
         typedef ExactStructContainer<FinddefEntry> FinddefTable;
