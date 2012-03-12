@@ -242,10 +242,11 @@ def convertAotToJunit(infile,outfile,toplevel):
     fail=''
     error=''
     skip=''
+    skiplist={}
     out=''
     hostname=socket.gethostname()
     name=toplevel
-    tests=''
+    test=None
     time=''
     timestamp=''
     properties={}
@@ -263,7 +264,6 @@ def convertAotToJunit(infile,outfile,toplevel):
     errors=0
     fails=0
     totaltime=0
-    skipOutput=True
     
     lines=open(infile).read().split('\n')
     for line in lines:
@@ -292,36 +292,46 @@ def convertAotToJunit(infile,outfile,toplevel):
         if line.startswith('Test Time'):
             properties['testtime']=tokens[3]
         if line.startswith('Skipping'):
-            skip=line
-            skips+=1
+            skipname=tokens[1]
+            if skipname=='-daa':
+                skipname=tokens[2]
+            skiplist[skipname]=line
         if line.startswith('ERROR:'):
             error=line
             errors+=1
-        if line.startswith('AOT compiling'):
-            skipOutput=False
-            test=tokens[2]
-            class1=toplevel+'.'+test[0:test.rfind('/')+1]
-            name=test[test.rfind('/')+1:]
-            tests+=1
-            time=''
-            ctr=2
-            while len(tokens)>ctr+1:
-                if tokens[ctr]=='time':
-                    time=tokens[ctr+1]
-                    totaltime+=float(time)
-                ctr+=1
-            testresults.append({'test':test,'time':time,'out':out,'skip':skip,'fail':fail,'class':class1,'name':name,'failure':error})
-            out=''
-            skip=''
-            error=''
-        else:
-            if line.startswith('test run'):
-                skipOutput=True
-                properties['status']=line
-                break
+        if line.startswith('AOT compiling') or line.startswith('compiling'):
+            if test!=None:
+                if skiplist.has_key(test):
+                    skip=skiplist[test]
+                    skips+=1
+                else:
+                    skip=''
+                if time=='':
+                    time='0.0'
+                testresults.append({'test':test,'time':time,'out':out,'skip':skip,'fail':fail,'class':class1,'name':name,'failure':error})
+            if line.startswith('AOT compiling'):
+                test=tokens[2]
+                class1=toplevel+'.'+test[0:test.rfind('/')+1]
+                name=test[test.rfind('/')+1:]
+                tests+=1
+                time=''
+                ctr=2
+                while len(tokens)>ctr+1:
+                    if tokens[ctr]=='time':
+                        time=tokens[ctr+1]
+                        totaltime+=float(time)
+                    ctr+=1
+                out=''
+                skip=''
+                error=''
             else:
-                if skipOutput==False:
-                    out+=line+'\n'
+                test=None
+        elif line.startswith('test run'):
+            properties['status']=line
+            break
+        else:
+            if test!=None:
+                out+=line+'\n'
     properties['failures']=errors
     properties['time']=totaltime
     contents='<?xml version="1.0" encoding="UTF-8" ?>\n'
@@ -331,7 +341,7 @@ def convertAotToJunit(infile,outfile,toplevel):
         contents+='    <property name="%s" value="%s" />\n' % (key,properties[key])
     contents+='  </properties>\n'
     for testresult in testresults:
-        contents+='  <testcase classname="%s.%s-%s" name="%s" time="%s">' % (properties['config'],properties['config'],toplevel,testresult['name'],testresult['time'])
+        contents+='  <testcase classname="%s.%s-%s" name="%s" time="%s">' % (properties['config'],properties['config'],testresult['class'],testresult['name'],testresult['time'])
         if testresult.has_key('out') and testresult['out']!='':
             out+=testresult['name']+'\n'+testresult['out']+'\n'
         if testresult.has_key('skip') and testresult['skip']!='':
@@ -459,7 +469,7 @@ def convertAcceptanceToJunit(infile,outfile,toplevel):
     contents+='  </properties>\n'
     for testresult in testresults:
         out=''
-        contents+='  <testcase classname="%s.%s" name="%s" time="%s">' % (properties['configuration'],toplevel,testresult['name'],testresult['time'])
+        contents+='  <testcase classname="%s.%s" name="%s" time="%s">' % (properties['configuration'],testresult['class'],testresult['name'],testresult['time'])
         if testresult.has_key('out'):
             out+=testresult['out']+'\n'
         if testresult.has_key('skip'):
