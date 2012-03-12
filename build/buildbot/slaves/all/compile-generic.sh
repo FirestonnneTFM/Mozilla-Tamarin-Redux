@@ -172,7 +172,7 @@ else
     chmod 777 $shellpath
 fi # end Jenkins check
 
-cp shell/$shell $shellpath/$shellname
+mv shell/$shell $shellpath/$shellname
 chmod 777 $shellpath/$shellname
 
 # Check to see if it is possible to run the generated shell, we could be cross compiling
