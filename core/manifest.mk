@@ -146,14 +146,14 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
 # '$(topsrcdir)' [which would then not be a pattern-rule] is crucial
 # (ie "deliberate", ie "hack"); see Bug 632086
 %/generated/builtin.h %/generated/builtin.cpp: $(topsrcdir)/core/*.as
-	cd $(topsrcdir)/core; python builtin.py $(avmplus_BUILTINFLAGS)
+	$(CMD)cd $(topsrcdir)/core; python builtin.py $(avmplus_BUILTINFLAGS)
 
 .PHONY: core-tracers
 core-tracers:
 ifdef AVM
-	cd $(topsrcdir)/core; python ./builtin-tracers.py
+	$(CMD)cd $(topsrcdir)/core; python ./builtin-tracers.py
 else
-	@echo Skipping core-tracers since AVM unset
+	$(MSG)true "Skipping core-tracers since AVM unset"
 endif
 
 # 1. Use of '$(topsrcdir)/generated' is deliberate; we use absolute
