@@ -60,6 +60,66 @@ ifdef MACOSX_DEPLOYMENT_TARGET
 export MACOSX_DEPLOYMENT_TARGET
 endif
 
+# Bugzilla 615532: The VERBOSE flag to make controls how much output
+# is printed.  By default we set VERBOSE=1 (so that high-level status
+# messages are printed by default -- the ones that start with "true").
+#
+# You can set VERBOSE to 0 to eliminate the status messages (or just
+# pass the "-s" flag to make, the standard way to eliminate command
+# echo'ing before execution; supporting this trick is the reason for
+# our use of 'true' to emit status messages).
+#
+# You can also set VERBOSE to values greater than 1 to see
+# progressively more messages and the command invocations themselves.
+
+VERBOSE ?= 1
+
+ifeq ($(VERBOSE),0)
+VERB_GT0=@
+VERB_GT1=@
+VERB_GT2=@
+VERB_GT3=@
+else ifeq ($(VERBOSE),1) # This is the default case
+VERB_GT0=
+VERB_GT1=@
+VERB_GT2=@
+VERB_GT3=@
+else ifeq ($(VERBOSE),2)
+VERB_GT0=
+VERB_GT1=
+VERB_GT2=@
+VERB_GT3=@
+else ifeq ($(VERBOSE),3)
+VERB_GT0=
+VERB_GT1=
+VERB_GT2=
+VERB_GT3=@
+else ifeq ($(VERBOSE),4)
+VERB_GT0=
+VERB_GT1=
+VERB_GT2=
+VERB_GT3=
+else
+$(error "VERBOSE $(VERBOSE) must be set to integer between 0 and 4")
+endif
+
+MSG=$(VERB_GT0)       # 0: High-level status messages
+MXG=$(VERB_GT1)       # 1: A few extra status messages
+CMD=$(VERB_GT2)       # 2: Main build commands: CC, CXX, link, etc
+NIT=$(VERB_GT3)       # 3: Nitty gritty
+
+ifeq ($(VERBOSE),0)
+CALCDEPS_VERBOSE_OPT=-q
+else ifeq ($(VERBOSE),1)
+CALCDEPS_VERBOSE_OPT=
+else ifeq ($(VERBOSE),2)
+CALCDEPS_VERBOSE_OPT=
+else ifeq ($(VERBOSE),3)
+CALCDEPS_VERBOSE_OPT=
+else ifeq ($(VERBOSE),4)
+CALCDEPS_VERBOSE_OPT=-v
+endif
+
 GLOBAL_DEPS := Makefile
 
 all::
@@ -120,35 +180,39 @@ GARBAGE += \
   $(NULL)
 
 $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)): %.$(II_SUFFIX): %.cpp $$(GLOBAL_DEPS)
-	@test -d $$(dir $$@) || mkdir -p $$(dir $$@)
-	true "Preprocessing $$*"
-	@$(CXX) -E $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) $$< > $$@
-	@$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps < $$@
+	$(NIT)test -d $$(dir $$@) || mkdir -p $$(dir $$@)
+	$(MSG)true "Preprocessing $$*"
+	$(CMD)$(CXX) -E $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) $$< > $$@
+	$(MXG)true "Extracting deps from $$*"
+	$(CMD)$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps < $$@
 
 $$($(1)_CXXOBJS): %.$(OBJ_SUFFIX): %.$(II_SUFFIX) $$(GLOBAL_DEPS)
-	true "Compiling $$*"
-	@$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
+	$(MSG)true "Compiling $$*"
+	$(CMD)$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
 
 $$($(1)_COBJS:.$(OBJ_SUFFIX)=.$(I_SUFFIX)): %.$(I_SUFFIX): %.c $$(GLOBAL_DEPS)
-	@test -d $$(dir $$@) || mkdir -p $$(dir $$@)
-	true "Preprocessing $$*"
-	@$(CC) -E $$($(1)_CPPFLAGS) $$($(1)_CFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) $$< > $$@
-	@$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps < $$@
+	$(NIT)test -d $$(dir $$@) || mkdir -p $$(dir $$@)
+	$(MSG)true "Preprocessing $$*"
+	$(CMD)$(CC) -E $$($(1)_CPPFLAGS) $$($(1)_CFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) $$< > $$@
+	$(CMD)$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps < $$@
 
 $$($(1)_COBJS): %.$(OBJ_SUFFIX): %.$(I_SUFFIX) $$(GLOBAL_DEPS)
-	true "Compiling $$*"
-	@$(CC) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
+	$(MSG)true "Compiling $$*"
+	$(CMD)$(CC) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
 
 $$($(1)_ASMOBJS): %.$(OBJ_SUFFIX): %.armasm $$(GLOBAL_DEPS)
-	@test -d $$(dir $$@) || mkdir -p $$(dir $$@)
-	$(ASM) -o $$@ $$($(1)_ASMFLAGS) $$<
+	$(NIT)test -d $$(dir $$@) || mkdir -p $$(dir $$@)
+	$(MSG)true "Assembling $$*"
+	$(CMD)$(ASM) -o $$@ $$($(1)_ASMFLAGS) $$<
 
 $$($(1)_MASMOBJS): %.$(OBJ_SUFFIX): %.asm $$(GLOBAL_DEPS)
-	@test -d $$(dir $$@) || mkdir -p $$(dir $$@)
-	$(MASM) -Fo $$@ $$($(1)_MASMFLAGS) $$<
+	$(NIT)test -d $$(dir $$@) || mkdir -p $$(dir $$@)
+	$(MSG)true "Assembling $$*"
+	$(CMD)$(MASM) -Fo $$@ $$($(1)_MASMFLAGS) $$<
 
 $(1).thing.pp: FORCE
-	@$(PYTHON) $(topsrcdir)/build/calcdepends.py $$@ $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)) $$($(1)_COBJS:.$(OBJ_SUFFIX)=.$(I_SUFFIX))
+	$(MXG)true "Calculate deps from $$@"
+	$(CMD)$(PYTHON) $(topsrcdir)/build/calcdepends.py $(CALCDEPS_VERBOSE_OPT) $$@ $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)) $$($(1)_COBJS:.$(OBJ_SUFFIX)=.$(I_SUFFIX))
 
 include $(1).thing.pp
 
@@ -160,8 +224,8 @@ define STATIC_LIBRARY_RULES
   $(1)_NAME = $(LIB_PREFIX)$$($(1)_BASENAME).$(LIB_SUFFIX)
 
 $$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_COBJS) $$($(1)_ASMOBJS) $$($(1)_MASMOBJS)
-	true "Library $$*"
-	$(call MKSTATICLIB,$$@) $$($(1)_CXXOBJS) $$($(1)_COBJS) $$($(1)_ASMOBJS) $$($(1)_MASMOBJS)
+	$(MSG)true "Library $$*"
+	$(CMD)$(call MKSTATICLIB,$$@) $$($(1)_CXXOBJS) $$($(1)_COBJS) $$($(1)_ASMOBJS) $$($(1)_MASMOBJS)
 
 GARBAGE += $$($(1)_DIR)$$($(1)_NAME)
 
@@ -188,7 +252,8 @@ define DLL_RULES
     $(NULL)
 
 $$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_COBJS) $$($(1)_DEPS)
-	$(call MKDLL,$$@) $$($(1)_CXXOBJS) $$($(1)_COBJS) \
+	$(MXG)true "Make dynamic-linked shared library $$@"
+	$(CMD)$(call MKDLL,$$@) $$($(1)_CXXOBJS) $$($(1)_COBJS) \
 	  $(LIBPATH). $$(foreach lib,$$($(1)_STATIC_LIBRARIES),$$(call EXPAND_LIBNAME,$$(lib))) \
 	  $$(foreach lib,$$($(1)_DLLS),$$(call EXPAND_DLLNAME,$$(lib))) \
 	  $$($(1)_LDFLAGS)
@@ -218,14 +283,14 @@ define PROGRAM_RULES
     $(NULL)
 
 $$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_DEPS)
-	true "Link $$@"
-	$(call MKPROGRAM,$$@) \
+	$(MSG)true "Link $$@"
+	$(CMD)$(call MKPROGRAM,$$@) \
 	  $$($(1)_CXXOBJS) \
 	  $(LIBPATH). $$(foreach lib,$$($(1)_STATIC_LIBRARIES),$$(call EXPAND_LIBNAME,$$(lib))) \
 	  $$(foreach lib,$$($(1)_DLLS),$$(call EXPAND_DLLNAME,$$(lib))) \
 	  $$($(1)_LDFLAGS)
 	$(ifneq ($POSTMKPROGRAM,''))
-		$(call POSTMKPROGRAM,$$@)
+		$(CMD)$(call POSTMKPROGRAM,$$@)
 
 GARBAGE += $$($(1)_DIR)$$($(1)_NAME)
 

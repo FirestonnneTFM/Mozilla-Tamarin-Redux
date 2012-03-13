@@ -89,7 +89,7 @@ def rebuildNeeded(file, dependencies, verbose):
 
 _fileFromLine = re.compile('^([^:]+): FORCE')
 
-def rebuildsNeeded(files, outfile, verbose):
+def rebuildsNeeded(files, outfile, verbose, quiet):
     """Write a makefile snippet indicating whether object files need to be
     rebuilt.
 
@@ -106,7 +106,8 @@ def rebuildsNeeded(files, outfile, verbose):
                 oldrebuilds[m.group(1)] = None
         istream.close()
     else:
-        print >>sys.stderr, "Writing %s: doesn't exist" % outfile
+        if not quiet:
+            print >>sys.stderr, "Writing %s: doesn't exist" % outfile
         do_write = True
 
     newrebuilds = []
@@ -136,7 +137,8 @@ def rebuildsNeeded(files, outfile, verbose):
                 do_write = True
 
     if do_write or len(oldrebuilds):
-        print "Building %s" % outfile
+        if not quiet:
+            print "Building %s" % outfile
         ostream = open(outfile, "w")
         for objfile in newrebuilds:
             ostream.write(objfile + ": FORCE\n")
@@ -150,10 +152,15 @@ if __name__ == "__main__":
 
     files = {}
     verbose = 'CALCDEPENDS_VERBOSE' in os.environ
+    quiet = False
 
     sys.argv.pop(0)
     if sys.argv[0] in ('-v', '--verbose'):
         verbose = True
+        sys.argv.pop(0)
+
+    elif sys.argv[0] in ('-q', '--quiet'):
+        quiet = True
         sys.argv.pop(0)
 
     outfile = sys.argv.pop(0)
@@ -162,4 +169,4 @@ if __name__ == "__main__":
         depfile = _argExpr.sub(".deps", objfile)
         files[objfile] = depfile
 
-    rebuildsNeeded(files, outfile, verbose)
+    rebuildsNeeded(files, outfile, verbose, quiet)
