@@ -355,7 +355,72 @@ def convertAotToJunit(infile,outfile,toplevel):
         contents+='</testcase>\n'
     contents+='<system-out>%s</system-out>\n<system-err>%s</system-err>\n</testsuite>' % (fixForXmlCdata(systemout),fixForXmlCdata(systemerr))
     open(outfile,'w').write(contents)
-    
+
+def convertSelftestsToJunit(infile,outfile,toplevel):
+    lines=open(infile).read().split('\n')
+    properties={}
+    properties['timestamp']=datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    dir='.'
+    testcontents=''
+    passes=fails=0
+    hostname=socket.gethostname()
+    if toplevel==None or toplevel=='':
+        toplevel=platform.platform()
+    systemout=systemerr=''
+    properties['platform']=toplevel
+    testcaselist=[]
+    testcases={}
+    failures={}
+    test=''
+    for line in lines:
+        if line.startswith('['):
+            line=line[1:]
+            if line.endswith(']'):
+                line=line[:-1]
+            tokens=line.split(',')
+            for i in range(len(tokens)):
+                if tokens[i].startswith("'") and tokens[i].endswith("'"):
+                    tokens[i]=tokens[i][1:-1]
+            if tokens[0]=='pass':
+                test="%s.%s.%s" % (tokens[1],tokens[2],tokens[3])
+                testcaselist.append(test)
+                testcases[test]=''
+                passes+=1
+            elif tokens[0]=='failure':
+                test="%s.%s.%s" % (tokens[1],tokens[2],tokens[3])
+                testcaselist.append(test)
+                testcases[test]=''
+                failures[test]=''
+                for i in range(len(tokens)-3):
+                    failures[test]+=tokens[i]+' '
+                failures[test]+='\n'
+                fails+=1
+        else:
+            testcases[test]+=line+'\n'
+    properties['passes']=passes
+    properties['failures']=fails
+
+    contents='<?xml version="1.0" encoding="UTF-8" ?>\n'
+    contents+='<testsuite skip="%s" errors="%s" failures="%d" hostname="%s" name="selftests-%s" tests="%d" time="%s" timestamp="%s">\n' % (0,0,fails,hostname,toplevel,len(testcaselist),0,properties['timestamp'])
+    contents+='<properties>\n'
+    for key in properties.keys():
+        contents+='<property name="%s" value="%s" />\n' % (key,properties[key])
+    contents+='</properties>\n'
+    for testcase in testcaselist:
+        names=testcase.split('.')
+        classname="%s.%s" % (names[0],names[1])
+        testname=names[2]
+        if failures.has_key(testcase):
+            contents+='<testcase classname="%s" name="%s" time="0">\n<failure message="FAILED" type="failure">\n<![CDATA[%s]]>\n</failure>\n<system-out>\n<![CDATA[\n%s]]>\n</system-out>\n</testcase>\n' % (classname,testname,failures[testcase],testcases[testcase])
+        else:
+            if testcases[testcase].strip()=='':
+                contents+='<testcase classname="%s" name="%s" time="0"/>\n' % (classname,testname)
+            else:
+                contents+='<testcase classname="%s" name="%s" time="0">\n<system-out>\n<![CDATA[\n%s]]>\n</system-out>\n</testcase>\n' % (classname,testname,testcases[testcase])
+    contents+='<system-out>%s</system-out>\n<system-err>%s</system-err>\n</testsuite>' % (fixForXmlCdata(systemout),fixForXmlCdata(systemerr))
+    open(outfile,'w').write(contents)
+    return outfile
+
 
 def convertAcceptanceToJunit(infile,outfile,toplevel):
     skips=0
@@ -491,7 +556,7 @@ if __name__ == '__main__':
     outfile='runtests.xml'
     toplevel='acceptance'
     type='player'
-    usage='--type=runtests|player|performance|aot --ifile=input file --ofile=junit xml file'
+    usage='--type=runtests|player|performance|aot|selftest --ifile=input file --ofile=junit xml file'
         
     try:
         opts, args = getopt.getopt(sys.argv[1:], '', ['ofile=','ifile=','toplevel=','type='])
@@ -523,6 +588,12 @@ if __name__ == '__main__':
         convertPerformanceToJunit(infile,outfile,toplevel)
     elif type=='aot':
         convertAotToJunit(infile,outfile,toplevel)
-        
+    elif type=='selftests':
+        if toplevel=='acceptance':
+            toplevel='selftests'
+        convertSelftestsToJunit(infile,outfile,toplevel)
+    else:
+        print("error: unknown type '%s'. known types are acceptance,player,performance,runtests" % type)
+
     print("created file '%s'" % outfile)
 
