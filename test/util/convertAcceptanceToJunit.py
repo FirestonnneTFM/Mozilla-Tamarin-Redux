@@ -374,11 +374,13 @@ def convertSelftestsToJunit(infile,outfile,toplevel):
     test=''
     for line in lines:
         if line.startswith('['):
+            line=line.strip()
             line=line[1:]
             if line.endswith(']'):
                 line=line[:-1]
             tokens=line.split(',')
             for i in range(len(tokens)):
+                tokens[i]=tokens[i].strip()
                 if tokens[i].startswith("'") and tokens[i].endswith("'"):
                     tokens[i]=tokens[i][1:-1]
             if tokens[0]=='pass':
