@@ -372,14 +372,18 @@ namespace avmplus
 
     bool ArrayObject::getAtomPropertyIsEnumerable(Atom name) const
     {
-        if (isDense())
+        // Bugzilla 733820: {DontEnum} is not supported for index
+        // properties of arrays.  Any index property, if present, is
+        // always enumerable on any array (sparse or dense).
+        uint32_t index;
+        if (AvmCore::getIndexFromAtom(name, &index))
         {
-            // {DontEnum} is not supported on the dense portion
-            // of an array.  Those properties are always enumerable.
-            uint32_t index;
-            return AvmCore::getIndexFromAtom(name, &index) && index < getLength();
+            return hasUintProperty(index);
         }
-        return ScriptObject::getAtomPropertyIsEnumerable(name);
+        else
+        {
+            return ScriptObject::getAtomPropertyIsEnumerable(name);
+        }
     }
 
     Atom ArrayObject::_getIntProperty(int32_t index) const
