@@ -202,7 +202,7 @@ namespace MMgc
 #ifdef MMGC_MEMORY_PROFILER
         size_t GetTotalAskSize() { return m_totalAskSize; }
 #endif
-
+        size_t GetTotalAllocatedBytes() { return m_totalAllocatedBytes; }
     private:
         const static int kBlockSize = 4096;         // This must be the same as GCHeap::kBlockSize, we check it in GCAlloc::GCAlloc
 
@@ -255,6 +255,7 @@ namespace MMgc
         int   m_qBudgetObtained;    // Quick list budget actually obtained from the GC for this allocator
         const uint32_t    m_itemSize;
         const int    m_itemsPerBlock;
+        size_t m_totalAllocatedBytes;
 #ifdef MMGC_FASTBITS
         // Right shift for lower 12 bits of a pointer into the block to obtain
         // the gcbits_t item for that pointer.  Is copied into the block header.

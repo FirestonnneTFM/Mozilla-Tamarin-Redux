@@ -95,6 +95,7 @@ namespace MMgc
         //number as reported by GetBytesInUse()
         void GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated);
 
+        size_t GetTotalAllocatedBytes() { return m_totalAllocatedBytes; }
     private:
         // This can subclass GCBlockHeader because the byte map is not variable length:
         // LargeBlock contains exactly the space we need for the mark bits for
@@ -133,6 +134,7 @@ namespace MMgc
 #endif
 
         bool m_startedFinalize;
+        size_t m_totalAllocatedBytes;
 
 #ifdef _DEBUG
         static bool ConservativeGetMark(const void *item, bool bogusPointerReturnValue);

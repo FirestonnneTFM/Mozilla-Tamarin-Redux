@@ -167,6 +167,7 @@ namespace MMgc
         m_qBudgetObtained(0),
         m_itemSize((_itemSize+7)&~7), // Round itemSize to the nearest boundary of 8
         m_itemsPerBlock((kBlockSize - sizeof(GCBlock)) / m_itemSize),
+        m_totalAllocatedBytes(0),
     #ifdef MMGC_FASTBITS
         m_bitsShift(log2(m_itemSize)),
         m_numBitmapBytes(kBlockSize / (1 << m_bitsShift)),
@@ -363,6 +364,7 @@ namespace MMgc
             Next(b)->prev = b->prev;
         }
 
+        m_totalAllocatedBytes -= (m_itemsPerBlock - b->numFree) * m_itemSize;
         if(b->nextFree || b->prevFree || b == m_firstFree) {
             RemoveFromFreeList(b);
         }
@@ -423,6 +425,7 @@ namespace MMgc
         }
 #endif
 
+        m_totalAllocatedBytes += m_itemSize;
         if (m_qList == NULL) {
 #if defined DEBUG || defined MMGC_MEMORY_PROFILER
             return AllocSlow(askSize, flags);
@@ -632,7 +635,7 @@ namespace MMgc
         // dead object would be marked in turn and would be retained for a GC cycle.
 
         b->bits[bitsindex] |= kFreelist;    // Don't clear the weak ref bit, FreeSlow may inspect it
-
+        m_totalAllocatedBytes -= m_itemSize;
         if (b->slowFlags)   // needs sweeping, or may have weak refs
         {
             FreeSlow(b, bitsindex, item);
@@ -1019,12 +1022,14 @@ namespace MMgc
 
     bool GCAlloc::Sweep(GCBlock *b)
     {
+        int oldNumFree;
         GCAssert(b->needsSweeping());
         GCAssert(m_qList == NULL);
         RemoveFromSweepList(b);
 
+        oldNumFree = b->numFree;
         SweepGuts(b);
-
+        m_totalAllocatedBytes -= (b->numFree - oldNumFree) * m_itemSize;
         if(b->numFree == m_itemsPerBlock)
         {
             UnlinkChunk(b);
@@ -1190,7 +1195,6 @@ namespace MMgc
 #endif
 
         numFree++;
-
         bits[bitsindex] = kFreelist;
 
 #ifndef _DEBUG
