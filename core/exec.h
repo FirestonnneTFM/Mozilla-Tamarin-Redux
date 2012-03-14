@@ -447,31 +447,31 @@ private:
     /** Trampoline which searches for the method with a matching IID. */
     static uintptr_t dispatchImt(class ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid);
 
-    #ifdef VMCFG_COMPILEPOLICY
-        /**
-         * The policy rule objects utilize MethodRecognizers
-         * to determine the policy on per method basis.
-         */
-        typedef UnmanagedPointerList<MethodRecognizer*> PolicyRuleSet;
+#ifdef VMCFG_COMPILEPOLICY
+    /**
+     * The policy rule objects utilize MethodRecognizers
+     * to determine the policy on per method basis.
+     */
+    typedef UnmanagedPointerList<MethodRecognizer*> PolicyRuleSet;
 
-        /**
-         * This RuleSet object houses two sets of rules, one for jit'ing
-         * and one for interp.  No attempt is made to determine if the
-         * rules overlap and/or conflict in any manner.
-         */
-        class JitInterpRuleSet : public MMgc::GCFinalizedObject
-        {
-        public:
-            PolicyRuleSet jit;
-            PolicyRuleSet interp;
+    /**
+     * This RuleSet object houses two sets of rules, one for jit'ing
+     * and one for interp.  No attempt is made to determine if the
+     * rules overlap and/or conflict in any manner.
+     */
+    class JitInterpRuleSet : public MMgc::GCFinalizedObject
+    {
+    public:
+        PolicyRuleSet jit;
+        PolicyRuleSet interp;
 
-            JitInterpRuleSet(MMgc::GC* gc);
-            ~JitInterpRuleSet();
-        };
+        JitInterpRuleSet(MMgc::GC* gc);
+        ~JitInterpRuleSet();
+    };
 
-        bool ruleMatch(PolicyRuleSet* rules, const MethodInfo* m) const;
-        bool prepPolicyRules();
-    #endif
+    bool ruleMatch(PolicyRuleSet* rules, const MethodInfo* m) const;
+    bool prepPolicyRules();
+#endif
 
 private:
     AvmCore* core;
@@ -563,8 +563,8 @@ private:
 
 #ifdef VMCFG_AOT
 public:
-  inline GprMethodProc implGPR() const { return _implGPR; }
-  inline FprMethodProc implFPR() const { return _implFPR; }
+    inline GprMethodProc implGPR() const { return _implGPR; }
+    inline FprMethodProc implFPR() const { return _implFPR; }
 #endif
 
 };
@@ -595,8 +595,7 @@ class ImtHolder : public MMgc::GCInlineObject
     class ImtThunkEnv* entries[IMT_SIZE];
 
 public:
-    void gcTrace(MMgc::GC* gc)
-    {
+    void gcTrace(MMgc::GC* gc) {
         gc->TraceLocations((void**)entries, IMT_SIZE);
     }
 };
