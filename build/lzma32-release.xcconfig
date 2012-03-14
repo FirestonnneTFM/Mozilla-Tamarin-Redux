@@ -15,7 +15,7 @@
 //
 // The Initial Developer of the Original Code is
 // Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2009
+// Portions created by the Initial Developer are Copyright (C) 2012
 // the Initial Developer. All Rights Reserved.
 //
 // Contributor(s):
@@ -35,25 +35,39 @@
 //
 // ***** END LICENSE BLOCK *****
 
-#include "avmshell-common.xcconfig"
-#include "avmshell-common64.xcconfig"
+#include "lzma-common.xcconfig"
+#include "lzma-common32.xcconfig"
 
-GCC_PREPROCESSOR_DEFINITIONS = ${COMMON_PREPROCESSOR_DEFINITIONS} DEBUG _DEBUG
-GCC_OPTIMIZATION_LEVEL = 0
+// Below is lifted as common (or corrected) elements from
+// Release/Release_Debugger transcribed configs below
 
-// Bugzilla 668836: migrated following settings directly out of xcodeproj file.
-// After that migration is completed, as much should be lifted to
-// avmshell-common*.xccoding as possible
 
-ONLY_ACTIVE_ARCH = NO
-CONFIGURATION_BUILD_DIR = $(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64
-CONFIGURATION_TEMP_DIR = $(PROJECT_TEMP_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64
-GCC_VERSION = 4.0
-INSTALL_PATH = /usr/local/bin
-COPY_PHASE_STRIP = NO
-PRODUCT_NAME = avm
+// Below is from Release config
+ARCHS = $(ARCHS_STANDARD_32_64_BIT)
+DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
+INSTALL_PATH = /usr/local/lib
+COPY_PHASE_STRIP = YES
+PREBINDING = NO
+PRODUCT_NAME = lzma
 ALWAYS_SEARCH_USER_PATHS = NO
-LIBRARY_SEARCH_PATHS = $(inherited) "$(SRCROOT)/build/Debug"
-GCC_ENABLE_FIX_AND_CONTINUE = YES
-GCC_DYNAMIC_NO_PIC = NO
+HEADER_SEARCH_PATHS = ../../../other-licenses/lzma
+USER_HEADER_SEARCH_PATHS = 
+GCC_ENABLE_FIX_AND_CONTINUE = NO
 GCC_MODEL_TUNING = G5
+GCC_PRECOMPILE_PREFIX_HEADER = NO
+GCC_PREFIX_HEADER = 
+GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO
+ZERO_LINK = NO
+
+// Below is from Release_Debugger config
+INSTALL_PATH = /usr/local/lib
+PREBINDING = NO
+PRODUCT_NAME = lzma
+ALWAYS_SEARCH_USER_PATHS = NO
+HEADER_SEARCH_PATHS = ../../../other-licenses/lzma
+USER_HEADER_SEARCH_PATHS = 
+GCC_ENABLE_FIX_AND_CONTINUE = YES
+GCC_MODEL_TUNING = G5
+GCC_PRECOMPILE_PREFIX_HEADER = NO
+GCC_PREFIX_HEADER = 
+GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO

@@ -50,4 +50,5 @@ DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
 INSTALL_PATH = /usr/local/bin
 PRODUCT_NAME = avm
 ALWAYS_SEARCH_USER_PATHS = NO
+LIBRARY_SEARCH_PATHS = $(inherited) "$(SRCROOT)/build/Release"
 GCC_MODEL_TUNING = G5
