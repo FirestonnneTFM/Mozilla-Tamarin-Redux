@@ -1,27 +1,29 @@
+# -*- c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- #
+# vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) #
 #!/bin/bash
 #  ***** BEGIN LICENSE BLOCK *****
 #  Version: MPL 1.1/GPL 2.0/LGPL 2.1
-# 
+#
 #  The contents of this file are subject to the Mozilla Public License Version
 #  1.1 (the "License"); you may not use this file except in compliance with
 #  the License. You may obtain a copy of the License at
 #  http://www.mozilla.org/MPL/
-# 
+#
 #  Software distributed under the License is distributed on an "AS IS" basis,
 #  WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
 #  for the specific language governing rights and limitations under the
 #  License.
-# 
+#
 #  The Original Code is [Open Source Virtual Machine.].
-# 
+#
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
 #  Portions created by the Initial Developer are Copyright (C) 2009
 #  the Initial Developer. All Rights Reserved.
-# 
+#
 #  Contributor(s):
 #    Adobe AS3 Team
-# 
+#
 #  Alternatively, the contents of this file may be used under the terms of
 #  either the GNU General Public License Version 2 or later (the "GPL"), or
 #  the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
@@ -33,7 +35,7 @@
 #  and other provisions required by the GPL or the LGPL. If you do not delete
 #  the provisions above, a recipient may use your version of this file under
 #  the terms of any one of the MPL, the GPL or the LGPL.
-# 
+#
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
@@ -129,7 +131,7 @@ echo ""
 echo "*******************************************************************************"
 topsrcdir=`grep topsrcdir= Makefile | awk -F"=" '{print $2}'`
 CXX=`grep CXX= Makefile | awk -F"=" '{print $2}'| sed 's/(/{/' | sed 's/)/}/' | sed 's/-nologo//'`
-echo compiler version: 
+echo compiler version:
 if [ `uname` == "SunOS" ]; then
     eval ${CXX} -V
 else
@@ -177,60 +179,60 @@ chmod 777 $shellpath/$shellname
 
 # Check to see if it is possible to run the generated shell, we could be cross compiling
 # Look for the version string since calling the shell without an ABC will have a non-zero exitcode
+echo ""
+echo "*******************************************************************************"
+echo "shell compiled with these features:"
+avmfeatures=`$shellpath/$shellname -Dversion | grep AVM | sed 's/\;/ /g' | sed 's/features //g'`
+for i in ${avmfeatures}; do
+    echo $i
+done
+echo ""
+failbuild=0
+for i in ${features}; do
+    feature_ok=0
+    if [[ $i == +* ]]; then
+        echo "Make sure that ${i:1} is enabled"
+        for feat in ${avmfeatures}; do
+            if [ "$feat" == "${i:1}" ]; then
+                feature_ok=1
+                break
+            fi
+        done
+        if [ $feature_ok != 1 ]; then
+            echo "---> FAIL"
+            failbuild=1
+        else
+            echo "---> PASS"
+        fi
+    fi
+    if [[ $i == -* ]]; then
+        feature_ok=1
+        echo "Make sure that ${i:1} is NOT enabled"
+        for feat in ${avmfeatures}; do
+            if [ "$feat" == "${i:1}" ]; then
+                feature_ok=0
+                break
+            fi
+        done
+        if [ $feature_ok == 0 ]; then
+            echo "---> FAIL"
+            failbuild=1
+        else
+            echo "---> PASS"
+        fi
+    fi
     echo ""
-    echo "*******************************************************************************"
-    echo "shell compiled with these features:"
-    avmfeatures=`$shellpath/$shellname -Dversion | grep AVM | sed 's/\;/ /g' | sed 's/features //g'`
-    for i in ${avmfeatures}; do
-	echo $i
-    done
-    echo ""
-    failbuild=0
-    for i in ${features}; do
-	feature_ok=0
-	if [[ $i == +* ]]; then
-	    echo "Make sure that ${i:1} is enabled"
-	    for feat in ${avmfeatures}; do
-		if [ "$feat" == "${i:1}" ]; then
-		    feature_ok=1
-		    break		
-		fi
-            done
-	    if [ $feature_ok != 1 ]; then
-		echo "---> FAIL"
-		failbuild=1
-	    else
-		echo "---> PASS"
-	    fi
-	fi
-	if [[ $i == -* ]]; then
-	    feature_ok=1
-	    echo "Make sure that ${i:1} is NOT enabled"
-	    for feat in ${avmfeatures}; do
-		if [ "$feat" == "${i:1}" ]; then
-		    feature_ok=0
-		    break		
-		fi
-            done
-	    if [ $feature_ok == 0 ]; then
-		echo "---> FAIL"
-		failbuild=1
-	    else
-		echo "---> PASS"
-	    fi
-	fi
-	echo ""
-    done
-    if [ $failbuild == 1 ]; then
-	echo "message: feature check FAILED"
-	cd $basedir/core
-	mv avmplusVersion.h.orig avmplusVersion.h
-	# Remove the binary since we have determined that it is NOT valid
-	rm $shellpath/$shellname
-	endSilent
-	exit 1
+done
+if [ $failbuild == 1 ]; then
+    echo "message: feature check FAILED"
+    cd $basedir/core
+    mv avmplusVersion.h.orig avmplusVersion.h
+    # Remove the binary since we have determined that it is NOT valid
+    rm $shellpath/$shellname
+    endSilent
+    exit 1
 fi # end feature check
-    echo "*******************************************************************************"
+echo "*******************************************************************************"
 
 cd $basedir/core
 mv avmplusVersion.h.orig avmplusVersion.h
@@ -241,8 +243,8 @@ if ${upload}; then
     ../all/util-upload-ftp-asteam.sh $shellpath/$shellname $ftp_asteam/$branch/$shellname
     ret=$?
     if [ "$ret" != "0" ]; then
-	echo "Uploading of $platform/$shellname failed"
-	exit 1
+        echo "Uploading of $platform/$shellname failed"
+        exit 1
     fi
 fi
 
