@@ -88,7 +88,6 @@ namespace avmplus
         {
             AvmAssert(traits()->getSizeOfInstance() == sizeof(MethodClosure));
             m_call_ptr = (FunctionProc) MethodClosure::callMethodClosure;
-            magic = 'meth';
         }
 
     public:
@@ -151,7 +150,6 @@ namespace avmplus
         {
             AvmAssert(m_weakSavedThis != NULL);
             m_call_ptr = (FunctionProc) callWeakMethodClosure;
-            magic = 'weak';
         }
  
         REALLY_INLINE static WeakMethodClosure* create(MMgc::GC* gc, VTable* vtable, MethodEnv* call, Atom savedThis)
