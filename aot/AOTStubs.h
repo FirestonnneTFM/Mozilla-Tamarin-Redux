@@ -1670,7 +1670,7 @@ rt abcOP_call(MethodEnv* env, t1 method, adt argDesc, ...) {
     Atom *atomv = (Atom *) VMPI_alloca(env->core(), _atomVBuffer, sizeof(Atom) * argc);
     argDescArgsToAtomv(atomv, argDesc, env, ap);
     AvmAssert(argc > 0);
-    return abcOP_unbox<rt> (env, env->toplevel()->op_call((Atom) abcOP_box<LLVMAtom, t1> (env, method), argc - 1, atomv));
+    return abcOP_unbox<rt> (env, avmplus::op_call(env, (Atom) abcOP_box<LLVMAtom, t1> (env, method), argc - 1, atomv));
 }
 
 template<typename rt>

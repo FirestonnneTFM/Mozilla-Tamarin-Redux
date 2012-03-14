@@ -98,12 +98,25 @@ namespace avmplus
 
     FunctionObject::FunctionObject(VTable* cvtable, MethodEnv* call)
         : ClassClosure(cvtable, ClassClosure::createScriptObjectProc)
+        , m_call_ptr(FunctionObject::callFunction)
         , m_callEnv(call)
     {
         AvmAssert(m_callEnv != NULL);
         // Since FunctionObject is (pseudo)final, we shouldn't need to calculate this every time,
         // but let's reality-check here just in case.
         AvmAssert(calcCreateInstanceProc(cvtable) == ClassClosure::createScriptObjectProc);
+        magic = 'func';
+    }
+
+    REALLY_INLINE Atom FunctionObject::getFunctionReceiver(Atom a) const
+    {
+        if (AvmCore::isNullOrUndefined(a)) {
+            // use callee's global object as this.
+            // see E3 15.3.4.4
+            a = m_callEnv->scope()->getScope(0);
+        }
+        MethodSignaturep ms = m_callEnv->method->getMethodSignature();
+        return toplevel()->coerce(a, ms->paramTraits(0));
     }
 
     /**
@@ -141,6 +154,11 @@ namespace avmplus
         }
     }
 
+    /* virtual */ Atom FunctionObject::get_coerced_receiver(Atom a) const
+    {
+        return getFunctionReceiver(a);
+    }
+
     // this = argv[0] (ignored)
     // arg1 = argv[1]
     // argN = argv[argc]
@@ -175,25 +193,19 @@ namespace avmplus
 
     /*virtual*/ Atom FunctionObject::call(int argc, Atom* argv)
     {
-        argv[0] = get_coerced_receiver(argv[0]);
-        return m_callEnv->coerceEnter(argc, argv);
+        // When called via ScriptObject::call virtual call, use stub.
+        return (*m_call_ptr)(this, argc, argv);
+    }
+
+    /* static */ Atom FunctionObject::callFunction(FunctionObject* f, int argc, Atom* argv)
+    {
+        argv[0] = f->getFunctionReceiver(argv[0]);
+        return f->m_callEnv->coerceEnter(argc, argv);
     }
 
     /*virtual*/ CodeContext* FunctionObject::getFunctionCodeContext() const
     {
         return m_callEnv->scope()->abcEnv()->codeContext();
-    }
-
-    /*virtual*/ Atom FunctionObject::get_coerced_receiver(Atom a) const
-    {
-        if (AvmCore::isNullOrUndefined(a))
-        {
-            // use callee's global object as this.
-            // see E3 15.3.4.4
-            a = m_callEnv->scope()->getScope(0);
-        }
-        MethodSignaturep ms = m_callEnv->method->getMethodSignature();
-        return toplevel()->coerce(a, ms->paramTraits(0));
     }
 
     /*virtual*/ Stringp FunctionObject::implToString() const
@@ -202,5 +214,22 @@ namespace avmplus
         Stringp s = core->concatStrings(core->newConstantStringLatin1("[object Function-"), core->intToString(m_callEnv->method->method_id()));
         return core->concatStrings(s, core->newConstantStringLatin1("]"));
     }
+}
+
+namespace avm {
+using avmplus::FunctionProc;
+
+HostFunctionObject::HostFunctionObject(VTable* vtable, ScriptObject* delegate)
+    : FunctionObject(vtable, NULL /* MethodEnv callee */) {
+    setDelegate(delegate);
+    magic = 'host';
+    m_call_ptr = (FunctionProc) &callHostFunction;
+}
+
+// static
+Atom HostFunctionObject::callHostFunction(HostFunctionObject* f, int argc, Atom* args) {
+    return f->call(argc, args);
+}
 
 }
+

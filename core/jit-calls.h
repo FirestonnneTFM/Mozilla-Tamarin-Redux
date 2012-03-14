@@ -512,6 +512,9 @@ namespace avmplus
     }
     FUNCTION(FUNCADDR(npe), SIG1(V,P), npe)
 
+    typedef Atom (*op_call_error_MethodEnv)(MethodEnv*);
+    FUNCTION(FUNCADDR((op_call_error_MethodEnv)op_call_error<MethodEnv*>), SIG1(A,P), op_call_error)
+
     typedef VTable* (*toVTable_Toplevel)(Toplevel*, Atom);
     PUREFUNCTION(FUNCADDR((toVTable_Toplevel)&toVTable<Toplevel*>), SIG2(P,P,A), toVTable)
 
@@ -1355,8 +1358,11 @@ SSE2_ONLY(
     FUNCTION(FUNCADDR(mop_sf32x4), SIG2(V,P,PF4), mop_sf32x4);
 #endif
 
-    typedef Atom (*op_call_MethodEnv)(MethodEnv*, Atom, int, Atom*);
-    FUNCTION(FUNCADDR((op_call_MethodEnv)&avmplus::op_call<MethodEnv*>), SIG4(A,P,A,I,P), op_call)
+    typedef Atom (*op_call_MethodEnv_Atom)(MethodEnv*, Atom, int, Atom*);
+    FUNCTION(FUNCADDR((op_call_MethodEnv_Atom)&avmplus::op_call<MethodEnv*>), SIG4(A,P,A,I,P), op_call_atom)
+
+    // signature of FunctionProc
+    FUNCTION(CALL_INDIRECT, SIG4(A,P,P,I,P), call_ptr)
 
     typedef Atom (*op_applytype_MethodEnv)(MethodEnv*, Atom, int, Atom*);
     FUNCTION(FUNCADDR((op_applytype_MethodEnv)&avmplus::op_applytype<MethodEnv*>), SIG4(A,P,A,I,P), op_applytype)

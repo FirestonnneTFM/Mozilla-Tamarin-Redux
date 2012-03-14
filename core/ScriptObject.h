@@ -141,7 +141,15 @@ namespace avmplus
         virtual Atom defaultValue();        // ECMA [[DefaultValue]]
         virtual Stringp toString();
 
-        // argv[0] = receiver
+        /**
+         * Implmenets the behavior of this object when called as a function.
+         * This function is only intended to be called by the VM, not from
+         * C++ host code.  For the latter, use one of the avm::callFunction()
+         * wrappers.
+         *
+         * argv[0] is not counted in argc and is the receiver (this) parameter
+         * argc[1+] are the normal arguments
+         */
         virtual Atom call(int argc, Atom* argv);
 
         /**

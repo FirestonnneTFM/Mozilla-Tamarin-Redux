@@ -111,11 +111,6 @@ REALLY_INLINE VTable* Toplevel::toVTable(Atom atom)
     return avmplus::toVTable(this, atom);
 }
 
-REALLY_INLINE Atom Toplevel::op_call(Atom method, int argc, Atom* atomv)
-{
-    return avmplus::op_call(this, method, argc, atomv);
-}
-
 REALLY_INLINE Atom Toplevel::op_construct(Atom ctor, int argc, Atom* atomv)
 {
     return avmplus::op_construct(this, ctor, argc, atomv);
