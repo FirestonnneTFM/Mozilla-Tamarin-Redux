@@ -384,12 +384,12 @@ def convertSelftestsToJunit(infile,outfile,toplevel):
                 if tokens[i].startswith("'") and tokens[i].endswith("'"):
                     tokens[i]=tokens[i][1:-1]
             if tokens[0]=='pass':
-                test="%s.%s.%s" % (tokens[1],tokens[2],tokens[3])
+                test="%s.%s.%s.%s" % (toplevel, tokens[1],tokens[2],tokens[3])
                 testcaselist.append(test)
                 testcases[test]=''
                 passes+=1
             elif tokens[0]=='failure':
-                test="%s.%s.%s" % (tokens[1],tokens[2],tokens[3])
+                test="%s.%s.%s.%s" % (toplevel, tokens[1],tokens[2],tokens[3])
                 testcaselist.append(test)
                 testcases[test]=''
                 failures[test]=''
