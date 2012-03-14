@@ -47,10 +47,10 @@ from commonsteps import *
 
 class tamarinredux:
     
-    HG_URL = "http://asteam.macromedia.com/hg/tamarin-redux/"
-    BRANCHES = ["tamarin-redux","tamarin-redux-serrano"]
-    BRANCHES_DEEP = ["tamarin-redux-deep","tamarin-redux-serrano-deep"]
-    branch_deep_priorities = [('tamarin-redux-deep', 2), ('tamarin-redux-serrano-deep', 1)]
+    HG_URL = "http://asteam.macromedia.com/hg/mirror-tamarin-redux/"
+    BRANCHES = ["tamarin-redux"]
+    BRANCHES_DEEP = ["tamarin-redux-deep"]
+    branch_deep_priorities = [('tamarin-redux-deep', 2)]
 
     
     ####### SCHEDULERS
