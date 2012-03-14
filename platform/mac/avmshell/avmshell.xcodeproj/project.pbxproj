@@ -211,7 +211,7 @@
 		19BDAE531504E7A200BCD6F7 /* LzmaDec.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC771504DA2000BCD6F7 /* LzmaDec.c */; };
 		19BDAE541504E7A200BCD6F7 /* LzmaEnc.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC791504DA2000BCD6F7 /* LzmaEnc.c */; };
 		19BDAE551504E7A200BCD6F7 /* LzmaLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC7B1504DA2000BCD6F7 /* LzmaLib.c */; };
-		19BDAE5D1504E82100BCD6F7 /* liblzma64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19BDAE5C1504E7A200BCD6F7 /* liblzma64.a */; };
+		19BDAE5D1504E82100BCD6F7 /* liblzma.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19BDAE5C1504E7A200BCD6F7 /* liblzma.a */; };
 		3F5B2BCC0F54B223009A93FE /* PosixFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BC80F54B223009A93FE /* PosixFile.cpp */; };
 		3F5B2BCD0F54B223009A93FE /* PosixPartialPlatform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */; };
 		3F5B2BD40F54B271009A93FE /* avmshellMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */; };
@@ -442,6 +442,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 19BDAE4B1504E7A200BCD6F7;
 			remoteInfo = lzma64;
+		};
+		19CE68DE150FA680004B3155 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7E87D055122C5B980005FEAF;
+			remoteInfo = avm64;
 		};
 		7E87D15B122C617A0005FEAF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -944,10 +951,17 @@
 		19BDAC7D1504DA2000BCD6F7 /* Threads.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Threads.h; path = "../../../other-licenses/lzma/Threads.h"; sourceTree = SOURCE_ROOT; };
 		19BDAC7E1504DA2000BCD6F7 /* Types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Types.h; path = "../../../other-licenses/lzma/Types.h"; sourceTree = SOURCE_ROOT; };
 		19BDAD5D1504DAB700BCD6F7 /* liblzma.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblzma.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		19BDAE5C1504E7A200BCD6F7 /* liblzma64.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblzma64.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		19BDAE5C1504E7A200BCD6F7 /* liblzma.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblzma.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		19C97B9D1097822700AE4BEE /* VTable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "VTable-inlines.h"; path = "../../../core/VTable-inlines.h"; sourceTree = SOURCE_ROOT; };
 		19D4054F109610FF00BD696E /* Traits-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Traits-inlines.h"; path = "../../../core/Traits-inlines.h"; sourceTree = SOURCE_ROOT; };
 		19DA6B8B119CA42700688989 /* GCHeap-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCHeap-inlines.h"; path = "../../../MMgc/GCHeap-inlines.h"; sourceTree = SOURCE_ROOT; };
+		19DDE283150FB60D00B3916C /* lzma-common.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "lzma-common.xcconfig"; path = "../../../build/lzma-common.xcconfig"; sourceTree = SOURCE_ROOT; };
+		19DDE284150FB60D00B3916C /* lzma-common32.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "lzma-common32.xcconfig"; path = "../../../build/lzma-common32.xcconfig"; sourceTree = SOURCE_ROOT; };
+		19DDE285150FB60D00B3916C /* lzma-common64.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "lzma-common64.xcconfig"; path = "../../../build/lzma-common64.xcconfig"; sourceTree = SOURCE_ROOT; };
+		19DDE286150FB60D00B3916C /* lzma32-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "lzma32-debug.xcconfig"; path = "../../../build/lzma32-debug.xcconfig"; sourceTree = SOURCE_ROOT; };
+		19DDE287150FB60D00B3916C /* lzma32-release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "lzma32-release.xcconfig"; path = "../../../build/lzma32-release.xcconfig"; sourceTree = SOURCE_ROOT; };
+		19DDE288150FB60D00B3916C /* lzma64-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "lzma64-debug.xcconfig"; path = "../../../build/lzma64-debug.xcconfig"; sourceTree = SOURCE_ROOT; };
+		19DDE289150FB60D00B3916C /* lzma64-release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "lzma64-release.xcconfig"; path = "../../../build/lzma64-release.xcconfig"; sourceTree = SOURCE_ROOT; };
 		19F9615E127730530079C6E9 /* ST_mmgc_580603.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_580603.st; path = ../../../extensions/ST_mmgc_580603.st; sourceTree = SOURCE_ROOT; };
 		3F5B2BC70F54B223009A93FE /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../../../shell/Platform.h; sourceTree = SOURCE_ROOT; };
 		3F5B2BC80F54B223009A93FE /* PosixFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixFile.cpp; path = ../../../shell/PosixFile.cpp; sourceTree = SOURCE_ROOT; };
@@ -1095,7 +1109,7 @@
 			files = (
 				7E87D10E122C5B980005FEAF /* libz.dylib in Frameworks */,
 				7E87D10F122C5B980005FEAF /* CoreServices.framework in Frameworks */,
-				19BDAE5D1504E82100BCD6F7 /* liblzma64.a in Frameworks */,
+				19BDAE5D1504E82100BCD6F7 /* liblzma.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1667,6 +1681,13 @@
 				0772CD180F3C3190008DDBB6 /* avmshell64-debug.xcconfig */,
 				0772CD190F3C3190008DDBB6 /* avmshell64-release-debugger.xcconfig */,
 				0772CD1A0F3C3190008DDBB6 /* avmshell64-release.xcconfig */,
+				19DDE283150FB60D00B3916C /* lzma-common.xcconfig */,
+				19DDE284150FB60D00B3916C /* lzma-common32.xcconfig */,
+				19DDE285150FB60D00B3916C /* lzma-common64.xcconfig */,
+				19DDE286150FB60D00B3916C /* lzma32-debug.xcconfig */,
+				19DDE287150FB60D00B3916C /* lzma32-release.xcconfig */,
+				19DDE288150FB60D00B3916C /* lzma64-debug.xcconfig */,
+				19DDE289150FB60D00B3916C /* lzma64-release.xcconfig */,
 			);
 			name = Config;
 			sourceTree = "<group>";
@@ -1875,7 +1896,7 @@
 				8DD76F6C0486A84900D96B5E /* avm */,
 				7E87D11A122C5B980005FEAF /* avm */,
 				19BDAD5D1504DAB700BCD6F7 /* liblzma.a */,
-				19BDAE5C1504E7A200BCD6F7 /* liblzma64.a */,
+				19BDAE5C1504E7A200BCD6F7 /* liblzma.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2004,6 +2025,7 @@
 			);
 			buildRules = (
 			);
+			comments = "Avoid adding new \"Build\" settings here!\nSettings belong in the xcconfig files if possible.\nSee Bugzilla 668836: Xcode .pbxproj: migrate all build settings to xcconfig files\nhttps://bugzilla.mozilla.org/show_bug.cgi?id=668836\n";
 			dependencies = (
 			);
 			name = lzma;
@@ -2021,11 +2043,12 @@
 			);
 			buildRules = (
 			);
+			comments = "Avoid adding new \"Build\" settings here!\nSettings belong in the xcconfig files if possible.\nSee Bugzilla 668836: Xcode .pbxproj: migrate all build settings to xcconfig files\nhttps://bugzilla.mozilla.org/show_bug.cgi?id=668836\n";
 			dependencies = (
 			);
 			name = lzma64;
 			productName = lzma;
-			productReference = 19BDAE5C1504E7A200BCD6F7 /* liblzma64.a */;
+			productReference = 19BDAE5C1504E7A200BCD6F7 /* liblzma.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		7E87D055122C5B980005FEAF /* avm64 */ = {
@@ -2038,6 +2061,7 @@
 			);
 			buildRules = (
 			);
+			comments = "Avoid adding new \"Build\" settings here!\nSettings belong in the xcconfig files if possible.\nSee Bugzilla 668836: Xcode .pbxproj: migrate all build settings to xcconfig files\nhttps://bugzilla.mozilla.org/show_bug.cgi?id=668836\n";
 			dependencies = (
 				19BDAE761504E9B600BCD6F7 /* PBXTargetDependency */,
 			);
@@ -2057,7 +2081,9 @@
 			);
 			buildRules = (
 			);
+			comments = "Avoid adding new \"Build\" settings here!\nSettings belong in the xcconfig files if possible.\nSee Bugzilla 668836: Xcode .pbxproj: migrate all build settings to xcconfig files\nhttps://bugzilla.mozilla.org/show_bug.cgi?id=668836\n";
 			dependencies = (
+				19CE68DF150FA680004B3155 /* PBXTargetDependency */,
 				19BDAE741504E9AC00BCD6F7 /* PBXTargetDependency */,
 			);
 			name = avm;
@@ -2534,6 +2560,11 @@
 			target = 19BDAE4B1504E7A200BCD6F7 /* lzma64 */;
 			targetProxy = 19BDAE751504E9B600BCD6F7 /* PBXContainerItemProxy */;
 		};
+		19CE68DF150FA680004B3155 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7E87D055122C5B980005FEAF /* avm64 */;
+			targetProxy = 19CE68DE150FA680004B3155 /* PBXContainerItemProxy */;
+		};
 		7E87D15C122C617A0005FEAF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8DD76F620486A84900D96B5E /* avm */;
@@ -2568,10 +2599,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD130F3C3190008DDBB6 /* avmshell32-debug-debugger.xcconfig */;
 			buildSettings = {
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/build/Debug\"",
-				);
 			};
 			name = Debug_Debugger;
 		};
@@ -2596,161 +2623,62 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD150F3C3190008DDBB6 /* avmshell32-release-debugger.xcconfig */;
 			buildSettings = {
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/build/Release\"",
-				);
 			};
 			name = Release_Debugger;
 		};
 		19BDAD5E1504DAB800BCD6F7 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 19DDE286150FB60D00B3916C /* lzma32-debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = "";
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
-				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
-				INSTALL_PATH = /usr/local/lib;
-				PREBINDING = NO;
-				PRODUCT_NAME = lzma;
-				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
 		};
 		19BDAD5F1504DAB800BCD6F7 /* Debug_Debugger */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 19DDE286150FB60D00B3916C /* lzma32-debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = "";
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
-				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
-				INSTALL_PATH = /usr/local/lib;
-				PREBINDING = NO;
-				PRODUCT_NAME = lzma;
-				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug_Debugger;
 		};
 		19BDAD601504DAB800BCD6F7 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 19DDE287150FB60D00B3916C /* lzma32-release.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = "";
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
-				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
-				INSTALL_PATH = /usr/local/lib;
-				PREBINDING = NO;
-				PRODUCT_NAME = lzma;
-				USER_HEADER_SEARCH_PATHS = "";
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
 		19BDAD611504DAB800BCD6F7 /* Release_Debugger */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 19DDE287150FB60D00B3916C /* lzma32-release.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = "";
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
-				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
-				INSTALL_PATH = /usr/local/lib;
-				PREBINDING = NO;
-				PRODUCT_NAME = lzma;
-				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release_Debugger;
 		};
 		19BDAE581504E7A200BCD6F7 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 19DDE288150FB60D00B3916C /* lzma64-debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64";
-				CONFIGURATION_TEMP_DIR = "$(PROJECT_TEMP_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64";
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = "";
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
-				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
-				INSTALL_PATH = /usr/local/lib;
-				PREBINDING = NO;
-				PRODUCT_NAME = lzma64;
-				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
 		};
 		19BDAE591504E7A200BCD6F7 /* Debug_Debugger */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 19DDE288150FB60D00B3916C /* lzma64-debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = "";
-				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
-				INSTALL_PATH = /usr/local/lib;
-				PREBINDING = NO;
-				PRODUCT_NAME = lzma;
-				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug_Debugger;
 		};
 		19BDAE5A1504E7A200BCD6F7 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 19DDE289150FB60D00B3916C /* lzma64-release.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = "";
-				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
-				INSTALL_PATH = /usr/local/lib;
-				PREBINDING = NO;
-				PRODUCT_NAME = lzma;
-				USER_HEADER_SEARCH_PATHS = "";
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
 		19BDAE5B1504E7A200BCD6F7 /* Release_Debugger */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 19DDE289150FB60D00B3916C /* lzma64-release.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = "";
-				HEADER_SEARCH_PATHS = "../../../other-licenses/lzma";
-				INSTALL_PATH = /usr/local/lib;
-				PREBINDING = NO;
-				PRODUCT_NAME = lzma;
-				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release_Debugger;
 		};
@@ -2758,10 +2686,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD140F3C3190008DDBB6 /* avmshell32-debug.xcconfig */;
 			buildSettings = {
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/build/Debug\"",
-				);
 			};
 			name = Debug;
 		};
@@ -2769,10 +2693,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD160F3C3190008DDBB6 /* avmshell32-release.xcconfig */;
 			buildSettings = {
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/build/Release\"",
-				);
 			};
 			name = Release;
 		};
@@ -2808,10 +2728,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD180F3C3190008DDBB6 /* avmshell64-debug.xcconfig */;
 			buildSettings = {
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/build/Debug\"",
-				);
 			};
 			name = Debug;
 		};
@@ -2819,10 +2735,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD170F3C3190008DDBB6 /* avmshell64-debug-debugger.xcconfig */;
 			buildSettings = {
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/build/Debug\"",
-				);
 			};
 			name = Debug_Debugger;
 		};
@@ -2830,10 +2742,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD1A0F3C3190008DDBB6 /* avmshell64-release.xcconfig */;
 			buildSettings = {
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/build/Release\"",
-				);
 			};
 			name = Release;
 		};
@@ -2841,10 +2749,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD190F3C3190008DDBB6 /* avmshell64-release-debugger.xcconfig */;
 			buildSettings = {
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/build/Release\"",
-				);
 			};
 			name = Release_Debugger;
 		};
