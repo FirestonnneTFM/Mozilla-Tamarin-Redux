@@ -2568,18 +2568,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD130F3C3190008DDBB6 /* avmshell32-debug-debugger.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/build/Debug\"",
 				);
-				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = avm;
 			};
 			name = Debug_Debugger;
 		};
@@ -2604,16 +2596,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD150F3C3190008DDBB6 /* avmshell32-release-debugger.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_MODEL_TUNING = G5;
-				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/build/Release\"",
 				);
-				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = avm;
 			};
 			name = Release_Debugger;
 		};
@@ -2772,18 +2758,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD140F3C3190008DDBB6 /* avmshell32-debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/build/Debug\"",
 				);
-				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = avm;
 			};
 			name = Debug;
 		};
@@ -2791,16 +2769,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD160F3C3190008DDBB6 /* avmshell32-release.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_MODEL_TUNING = G5;
-				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/build/Release\"",
 				);
-				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = avm;
 			};
 			name = Release;
 		};
@@ -2836,21 +2808,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD180F3C3190008DDBB6 /* avmshell64-debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64";
-				CONFIGURATION_TEMP_DIR = "$(PROJECT_TEMP_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64";
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_VERSION = 4.0;
-				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/build/Debug\"",
 				);
-				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = avm;
 			};
 			name = Debug;
 		};
@@ -2858,21 +2819,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD170F3C3190008DDBB6 /* avmshell64-debug-debugger.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64";
-				CONFIGURATION_TEMP_DIR = "$(PROJECT_TEMP_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64";
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_VERSION = 4.0;
-				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/build/Debug\"",
 				);
-				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = avm;
 			};
 			name = Debug_Debugger;
 		};
@@ -2880,20 +2830,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD1A0F3C3190008DDBB6 /* avmshell64-release.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64";
-				CONFIGURATION_TEMP_DIR = "$(PROJECT_TEMP_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_MODEL_TUNING = G5;
-				GCC_VERSION = 4.0;
-				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/build/Release\"",
 				);
-				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = avm;
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -2901,20 +2841,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD190F3C3190008DDBB6 /* avmshell64-release-debugger.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64";
-				CONFIGURATION_TEMP_DIR = "$(PROJECT_TEMP_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_MODEL_TUNING = G5;
-				GCC_VERSION = 4.0;
-				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/build/Release\"",
 				);
-				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = avm;
-				ZERO_LINK = NO;
 			};
 			name = Release_Debugger;
 		};

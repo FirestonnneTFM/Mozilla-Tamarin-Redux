@@ -40,3 +40,14 @@
 
 GCC_PREPROCESSOR_DEFINITIONS = ${COMMON_PREPROCESSOR_DEFINITIONS}
 GCC_OPTIMIZATION_LEVEL = 3
+
+// Bugzilla 668836: migrated following settings directly out of xcodeproj file.
+// After that migration is completed, as much should be lifted to
+// avmshell-common*.xccoding as possible
+
+ONLY_ACTIVE_ARCH = NO
+DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
+INSTALL_PATH = /usr/local/bin
+PRODUCT_NAME = avm
+ALWAYS_SEARCH_USER_PATHS = NO
+GCC_MODEL_TUNING = G5
