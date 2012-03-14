@@ -3621,6 +3621,33 @@ namespace MMgc
         totalAllocated += allocated;
     }
 
+    size_t GC::GetBytesInUseFast()
+    {
+        size_t totalAllocated = 0;
+        
+        GCAlloc** allocators[] = {
+            containsPointersRCAllocs,
+            containsPointersNonfinalizedAllocs,
+            containsPointersFinalizedAllocs,
+            noPointersNonfinalizedAllocs,
+            noPointersFinalizedAllocs
+        };
+        for(int j = 0;j<5;j++)
+        {
+            GCAlloc** gc_alloc = allocators[j];
+            for(int i=0; i < kNumSizeClasses; i++)
+            {
+                totalAllocated += gc_alloc[i]->GetTotalAllocatedBytes();
+            }
+        }
+        totalAllocated += bibopAllocFloat->GetTotalAllocatedBytes();
+        totalAllocated += bibopAllocFloat4->GetTotalAllocatedBytes();
+        totalAllocated += largeAlloc->GetTotalAllocatedBytes();
+
+        GCAssert(totalAllocated == GetBytesInUse());
+        return totalAllocated;
+    }
+ 
     void GC::allocaInit()
     {
         top_segment = NULL;

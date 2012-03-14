@@ -41,7 +41,7 @@
 
 namespace MMgc
 {
-    GCLargeAlloc::GCLargeAlloc(GC* gc) : m_gc(gc)
+    GCLargeAlloc::GCLargeAlloc(GC* gc) : m_totalAllocatedBytes(0), m_gc(gc)
     {
         m_blocks = NULL;
         m_startedFinalize = false;
@@ -151,6 +151,7 @@ namespace MMgc
 #endif
             }
 #endif
+            m_totalAllocatedBytes += computedSize;
         }
         return item;
     }
@@ -204,6 +205,7 @@ namespace MMgc
             {
                 *prev = Next(b);
                 size_t numBlocks = b->GetNumBlocks();
+                m_totalAllocatedBytes -= b->size;
                 VALGRIND_MEMPOOL_FREE(b, b);
                 VALGRIND_MEMPOOL_FREE(b, item);
                 VALGRIND_DESTROY_MEMPOOL(b);
@@ -281,6 +283,7 @@ namespace MMgc
 
                 // The block is not empty until now, so now add it.
                 gc->AddToLargeEmptyBlockList(b);
+                m_totalAllocatedBytes -= b->size;
                 continue;
             }
             // clear marks

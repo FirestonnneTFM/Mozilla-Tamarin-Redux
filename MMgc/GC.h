@@ -1852,6 +1852,10 @@ public:
 
         //This method returns the number bytes allocated for GC objects
         size_t GetBytesInUse();
+    
+        //This method returns the number of bytes allocated for GC objects
+        //Also see GetBytesInUse()
+        size_t GetBytesInUseFast();
 
         //This method is for more fine grained allocation details
         //It reports the total number of bytes requested (i.e. ask size) and
