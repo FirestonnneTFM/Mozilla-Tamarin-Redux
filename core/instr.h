@@ -66,6 +66,14 @@ template <class E>
 Binding getBinding(E env, VTable* vtable, const Multiname* ref);
 
 /**
+ * Throw a callOfNonFunction error.  This is factored out of the
+ * op_call functions below to reduce their need to spill callee-saved
+ * registers on the fast-path.
+ */
+template <class E> NO_INLINE
+Atom op_call_error(E env);
+
+/**
  * implements OP_call, including error handling for non-callable values
  */
 template <class E>
