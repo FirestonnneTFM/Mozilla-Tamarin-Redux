@@ -105,7 +105,6 @@ namespace avmplus
         // Since FunctionObject is (pseudo)final, we shouldn't need to calculate this every time,
         // but let's reality-check here just in case.
         AvmAssert(calcCreateInstanceProc(cvtable) == ClassClosure::createScriptObjectProc);
-        magic = 'func';
     }
 
     REALLY_INLINE Atom FunctionObject::getFunctionReceiver(Atom a) const
@@ -222,7 +221,6 @@ using avmplus::FunctionProc;
 HostFunctionObject::HostFunctionObject(VTable* vtable, ScriptObject* delegate)
     : FunctionObject(vtable, NULL /* MethodEnv callee */) {
     setDelegate(delegate);
-    magic = 'host';
     m_call_ptr = (FunctionProc) &callHostFunction;
 }
 

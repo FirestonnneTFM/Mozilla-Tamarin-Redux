@@ -103,7 +103,6 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     public:
-        int magic;
         FunctionProc m_call_ptr; // stub to directly invoke this function.
 
     protected:
