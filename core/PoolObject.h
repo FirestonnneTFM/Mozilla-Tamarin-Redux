@@ -119,6 +119,7 @@ namespace avmplus
     {
         friend class AbcParser;
         friend class ConstantStringContainer;
+        friend class DomainMgr;
 
         PoolObject(AvmCore* core, ScriptBuffer& sb, const uint8_t* startpos, ApiVersion apiVersion);
 
@@ -129,13 +130,77 @@ namespace avmplus
 
         int32_t getAPI();
 
-        // TODO - group the data members of this class, it's a mess.
-
-        GC_DATA_BEGIN(PoolObject)
-
-        AvmCore *core;
-
         ApiVersion getApiVersion();
+
+        void initPrecomputedMultinames();
+        const Multiname* precomputedMultiname(int32_t index);
+
+        static void destroyPrecomputedMultinames(ExactStructContainer<HeapMultiname>* self);
+
+        // search metadata record at meta_pos for name, return true if present
+        bool hasMetadataName(const uint8_t* meta_pos, const String* name);
+        const uint8_t* getMetadataInfoPos(uint32_t index);
+
+        /** deferred parsing */
+        void parseMultiname(const uint8_t *pos, Multiname& m) const;
+
+        Traits* resolveTypeName(uint32_t index, const Toplevel* toplevel, bool allowVoid=false);
+        Traits* resolveTypeName(const uint8_t*& pc, const Toplevel* toplevel, bool allowVoid=false);
+
+        void resolveBindingNameNoCheck(uint32_t index, Multiname &m, const Toplevel* toplevel) const;
+        void resolveBindingNameNoCheck(const uint8_t* &p, Multiname &m, const Toplevel* toplevel) const;
+
+        Traits* resolveParameterizedType(const Toplevel* toplevel, Traits* base, Traits* type_param) const;
+
+        void parseMultiname(Multiname& m, uint32_t index) const;
+
+        Namespacep getNamespace(int32_t index) const;
+        NamespaceSetp getNamespaceSet(int32_t index) const;
+        bool hasString(int32_t index) const;
+        Stringp getString(int32_t index) const;
+
+        Atom getLegalDefaultValue(const Toplevel* toplevel, uint32_t index, CPoolKind kind, Traits* t);
+        static bool isLegalDefaultValue(BuiltinType bt, Atom value);
+        
+#ifdef VMCFG_FLOAT
+        bool hasFloatSupport() const        { return version >= 0x002F0010; /* (47<<16|16), i.e. Cyril, major v.47, minor v.16 */ }
+#endif 
+        bool hasExceptionSupport() const    { return version != 0x002E000F; /* (46<<16|15), i.e. major v.46, minor v.15 */ }
+
+        ScriptBuffer code();
+        bool isCodePointer(const uint8_t* pos);
+
+        int32_t uniqueId() const;
+        void    setUniqueId(int32_t val);
+
+    public:
+        uint32_t classCount() const;
+        Traits* getClassTraits(uint32_t i) const;
+
+        uint32_t scriptCount() const;
+        Traits* getScriptTraits(uint32_t i) const;
+
+        uint32_t methodCount() const;
+        MethodInfo* getMethodInfo(uint32_t i) const;
+#ifdef DEBUGGER
+        DebuggerMethodInfo* getDebuggerMethodInfo(uint32_t i) const;
+#endif
+        Stringp getMethodInfoName(uint32_t i);
+
+        void dynamicizeStrings();
+
+#ifdef AVMPLUS_VERBOSE
+        bool isVerbose(uint32_t flag, MethodInfo* mi=NULL);
+#endif
+
+    private:
+        void setupConstantStrings(uint32_t count);
+
+    // ------------------------ DATA SECTION BEGIN
+    GC_DATA_BEGIN(PoolObject)
+
+    public:
+        AvmCore *core;
 
         /** constants */
         DataList<int32_t>       GC_STRUCTURE(cpool_int);
@@ -143,7 +208,7 @@ namespace avmplus
         GCList<GCDouble>        GC_STRUCTURE(cpool_double);
 #ifdef VMCFG_FLOAT
         GCList<GCFloat>         GC_STRUCTURE(cpool_float); // We allocate 8 bytes/float in heap.
-        GCList<GCFloat4>        GC_STRUCTURE(cpool_float4); 
+        GCList<GCFloat4>        GC_STRUCTURE(cpool_float4);
 #endif
         RCList<Namespace>       GC_STRUCTURE(cpool_ns);
         GCList<NamespaceSet>    GC_STRUCTURE(cpool_ns_set);
@@ -183,72 +248,13 @@ namespace avmplus
         GCMember<ExactStructContainer<HeapMultiname> > GC_POINTER(precompNames);   // a GCFinalizedObject
 
     public:
-        void initPrecomputedMultinames();
-        const Multiname* precomputedMultiname(int32_t index);
-
-        static void destroyPrecomputedMultinames(ExactStructContainer<HeapMultiname>* self);
-
-
-        #ifdef VMCFG_NANOJIT
+#ifdef VMCFG_NANOJIT
         CodeMgr* codeMgr;   // points to unmanaged memory and so, not traced
-        #endif
-
-        // search metadata record at meta_pos for name, return true if present
-        bool hasMetadataName(const uint8_t* meta_pos, const String* name);
-        const uint8_t* getMetadataInfoPos(uint32_t index);
-
-        /** deferred parsing */
-        void parseMultiname(const uint8_t *pos, Multiname& m) const;
-
-        Traits* resolveTypeName(uint32_t index, const Toplevel* toplevel, bool allowVoid=false);
-        Traits* resolveTypeName(const uint8_t*& pc, const Toplevel* toplevel, bool allowVoid=false);
-
-        void resolveBindingNameNoCheck(uint32_t index, Multiname &m, const Toplevel* toplevel) const;
-        void resolveBindingNameNoCheck(const uint8_t* &p, Multiname &m, const Toplevel* toplevel) const;
-
-        Traits* resolveParameterizedType(const Toplevel* toplevel, Traits* base, Traits* type_param) const;
-
-        void parseMultiname(Multiname& m, uint32_t index) const;
-
-        Namespacep getNamespace(int32_t index) const;
-        NamespaceSetp getNamespaceSet(int32_t index) const;
-        bool hasString(int32_t index) const;
-        Stringp getString(int32_t index) const;
-
-        Atom getLegalDefaultValue(const Toplevel* toplevel, uint32_t index, CPoolKind kind, Traits* t);
-        static bool isLegalDefaultValue(BuiltinType bt, Atom value);
-
-        int32_t version;
-        
-#ifdef VMCFG_FLOAT
-        bool hasFloatSupport() const        { return version >= 0x002F0010; /* (47<<16|16), i.e. Cyril, major v.47, minor v.16 */ }
-#endif 
-        bool hasExceptionSupport() const    { return version != 0x002E000F; /* (46<<16|15), i.e. major v.46, minor v.15 */ }
-
-        ScriptBuffer code();
-        bool isCodePointer(const uint8_t* pos);
-
-        int32_t uniqueId() const;
-        void    setUniqueId(int32_t val);
-
-    public:
-        uint32_t classCount() const;
-        Traits* getClassTraits(uint32_t i) const;
-
-        uint32_t scriptCount() const;
-        Traits* getScriptTraits(uint32_t i) const;
-
-        uint32_t methodCount() const;
-        MethodInfo* getMethodInfo(uint32_t i) const;
-#ifdef DEBUGGER
-        DebuggerMethodInfo* getDebuggerMethodInfo(uint32_t i) const;
 #endif
-        Stringp getMethodInfoName(uint32_t i);
-
-        void dynamicizeStrings();
 
     private:
-        friend class DomainMgr;
+        int32_t version;
+
         // "loaded" Traits/Scripts are the Traits/ScriptEnvs that are actually
         // defined in this Domain. "cached" Traits/Scripts are the ones that
         // actually should be used for a given name lookup; the cached versions
@@ -260,7 +266,6 @@ namespace avmplus
         GCMember<MultinameMethodInfoHashtable>      GC_POINTER(m_loadedScripts);
         GCMember<MultinameMethodInfoHashtable>      GC_POINTER(m_cachedScripts);
 
-    private:
         GCMember<ScriptBufferImpl>                  GC_POINTER(_code);
         const uint8_t * const                       _abcStart;
         // start of static ABC string data
@@ -280,13 +285,11 @@ namespace avmplus
         // if negative, an index into cpool_mn.
         // Always safe because those indices are limited to 30 bits.
         DataList<int32_t>                           GC_STRUCTURE(_method_name_indices);
-                void                                setupConstantStrings(uint32_t count);
         ApiVersion const                            _apiVersion;
         int32_t                                     _uniqueId; // _uniqueId + mi->method_id() produces a unique id for methods
 
     public:
     #ifdef AVMPLUS_VERBOSE
-        bool isVerbose(uint32_t flag, MethodInfo* mi=NULL);
         uint32_t                    verbose_vb;
     #endif
         // @todo, privatize & make into bitfield (requires API churn)
@@ -297,7 +300,8 @@ namespace avmplus
         MMgc::GCRoot *aotRoot;
     #endif
 
-        GC_DATA_END(PoolObject)
+    GC_DATA_END(PoolObject)
+    // ------------------------ DATA SECTION END
     };
 }
 
