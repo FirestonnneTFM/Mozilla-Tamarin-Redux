@@ -198,23 +198,14 @@ REALLY_INLINE ScriptObject* Toplevel::global() const
 
 REALLY_INLINE Atom Toplevel::atom() const
 {
-    AvmAssert(_mainEntryPoint != NULL);
-    AvmAssert(_mainEntryPoint->global != NULL);
-    return _mainEntryPoint->global->atom();
+    return global()->atom();
 }
 
 REALLY_INLINE void Toplevel::init_mainEntryPoint(ScriptEnv* main, builtinClassManifest* builtins)
 {
-    AvmAssert(_mainEntryPoint == NULL);
+    AvmAssert(_mainEntryPoint == NULL && _builtinClasses == NULL);
     _mainEntryPoint = main;
-    AvmAssert(_builtinClasses == NULL);
     _builtinClasses = builtins;
-}
-
-REALLY_INLINE ScopeChain* Toplevel::toplevel_scope()
-{
-    AvmAssert(_mainEntryPoint != NULL);
-    return _mainEntryPoint->scope();
 }
 
 } // namespace avmplus
