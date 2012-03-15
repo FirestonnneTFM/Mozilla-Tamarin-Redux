@@ -108,7 +108,7 @@ Atom call_prim_dynamic(E env, Atom val, const Multiname* name, int argc, Atom* a
                 float* pf4 = reinterpret_cast<float*>(&f4);
                 val = env->core()->floatToAtom(pf4[index]);
             }
-            return op_call_atom(env, val, argc, args);
+            return op_call(env, val, argc, args);
         }
     }
 #endif
