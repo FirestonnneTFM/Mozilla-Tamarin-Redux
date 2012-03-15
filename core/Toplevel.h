@@ -340,8 +340,6 @@ namespace avmplus
         // allows but FlashPlayer takes advantage of this.
         virtual bool sampler_trusted(ScriptObject* /*sampler*/);
 
-        ScopeChain* toplevel_scope();
-
         //  -------------------------------------------------------
         
         //
