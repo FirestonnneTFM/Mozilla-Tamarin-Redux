@@ -81,3 +81,11 @@ GCC_WARN_UNUSED_LABEL = YES
 GCC_WARN_UNUSED_PARAMETER = YES
 GCC_WARN_UNUSED_VALUE = YES
 GCC_WARN_UNUSED_VARIABLE = YES
+
+// Bugzilla 668836: thie file is shared amongst all avmshell*.xcconfig
+// Migrate settings out of pbxproj as appropriate.
+
+ONLY_ACTIVE_ARCH = NO
+INSTALL_PATH = /usr/local/bin
+ALWAYS_SEARCH_USER_PATHS = NO
+GCC_MODEL_TUNING = G5
