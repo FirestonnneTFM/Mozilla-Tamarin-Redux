@@ -41,18 +41,9 @@
 GCC_PREPROCESSOR_DEFINITIONS = ${COMMON_PREPROCESSOR_DEFINITIONS}
 GCC_OPTIMIZATION_LEVEL = 3
 
-// Bugzilla 668836: migrated following settings directly out of xcodeproj file.
-// After that migration is completed, as much should be lifted to
-// avmshell-common*.xccoding as possible
+// As many settings as possible should be in xcconfig, not in pbxproj.
+// See Bugzilla 668836, comment 6 for procedure for migration.
 
-ONLY_ACTIVE_ARCH = NO
-CONFIGURATION_BUILD_DIR = $(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64
-CONFIGURATION_TEMP_DIR = $(PROJECT_TEMP_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)64
 DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
-GCC_VERSION = 4.0
-INSTALL_PATH = /usr/local/bin
-PRODUCT_NAME = avm
-ALWAYS_SEARCH_USER_PATHS = NO
 LIBRARY_SEARCH_PATHS = $(inherited) "$(SRCROOT)/build/Release"
-GCC_MODEL_TUNING = G5
 ZERO_LINK = NO

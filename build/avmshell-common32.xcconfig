@@ -37,3 +37,8 @@
 
 SDKROOT = macosx10.5
 ARCHS=i386
+
+// Bugzilla 668836: this file is shared amongst all avmshell32-*.xcconfig
+// Migrate settings out of pbxproj as appropriate.
+
+PRODUCT_NAME = avm
