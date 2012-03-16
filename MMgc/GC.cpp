@@ -154,6 +154,9 @@ namespace MMgc
         sweeps(0),
         sweepStart(0),
         emptyWeakRef(0),
+#ifdef VMCFG_TELEMETRY
+        m_telemetry(NULL),
+#endif
         m_gcThread(0),
         destroying(false),
         marking(false),
@@ -198,9 +201,6 @@ namespace MMgc
 #ifdef DEBUGGER
         , m_sampler(NULL)
 #endif
-#ifdef VMCFG_TELEMETRY
-        , m_telemetry(NULL)
-#endif
     {
         // sanity check for all our types
         MMGC_STATIC_ASSERT(sizeof(int8_t) == 1);
@@ -235,7 +235,10 @@ namespace MMgc
         
         GCAssert(!(greedy && incremental));
         zct.SetGC(this);
-
+       
+#ifdef VMCFG_TELEMETRY
+        VMPI_memset(m_dependentMemory, 0, sizeof(size_t) * typeCount);
+#endif
         VMPI_lockInit(&m_gcLock);
         VMPI_lockInit(&m_rootListLock);
 
@@ -1043,15 +1046,23 @@ namespace MMgc
     //
     // I'm guessing the former is better, for now.
 
-    void GC::SignalDependentAllocation(size_t nbytes)
+    void GC::SignalDependentAllocation(size_t nbytes, DependentMemoryType type)
     {
+        (void)type;
+#ifdef VMCFG_TELEMETRY
+        UpdateDependentAllocation(nbytes, type);
+#endif
         GCAssertMsg(onThread(), "SignalDependentAllocation can only be called on the currently entered GC");
         policy.signalDependentAllocation(nbytes);
         SignalAllocWork(nbytes);
     }
 
-    void GC::SignalDependentDeallocation(size_t nbytes)
+    void GC::SignalDependentDeallocation(size_t nbytes, DependentMemoryType type)
     {
+        (void)type;
+#ifdef VMCFG_TELEMETRY
+        UpdateDependentDeallocation(nbytes, type);
+#endif
         GCAssertMsg(onThread(), "SignalDependentDeallocation can only be called on the currently entered GC");
         policy.signalDependentDeallocation(nbytes);
         SignalFreeWork(nbytes);

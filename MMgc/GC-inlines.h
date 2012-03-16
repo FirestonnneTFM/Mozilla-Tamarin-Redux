@@ -839,6 +839,29 @@ namespace MMgc
 #endif
 
 #ifdef VMCFG_TELEMETRY
+    REALLY_INLINE size_t GC::getDependentMemory(DependentMemoryType memType)
+    {
+        GCAssert(memType < typeCount);
+        if(memType < typeCount)
+            return m_dependentMemory[memType];
+        else
+            return 0;
+    }
+
+    REALLY_INLINE void GC::UpdateDependentAllocation(uint32_t bytes, DependentMemoryType memType)
+    {
+        GCAssert(memType < typeCount);
+        if(memType < typeCount)
+            m_dependentMemory[memType] += bytes;
+    }
+    
+    REALLY_INLINE void GC::UpdateDependentDeallocation(uint32_t bytes, DependentMemoryType memType)
+    {
+        GCAssert(memType < typeCount);
+        if(memType < typeCount)
+            m_dependentMemory[memType] -= bytes;
+    }
+    
     REALLY_INLINE telemetry::ITelemetry* GC::getTelemetry()
     {
         return m_telemetry;
