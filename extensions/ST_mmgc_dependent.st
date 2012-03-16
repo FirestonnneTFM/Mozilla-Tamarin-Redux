@@ -100,3 +100,66 @@ private:
 
 %%verify size_t(gc->policy.queryLoadForHeapsize(double(2*nbytes)) * 2.0 * double(nbytes)) >= maxheap
 
+%%test dependent_memory_total
+#if defined VMCFG_TELEMETRY && defined AVMSHELL_BUILD
+    size_t depMem_start,depMem_end;
+    depMem_start = depMem_end = 0;
+    MMgc::GC* gc = core->gc;
+
+    // Check total dependent memory consistency
+    for(int i = 0; i < MMgc::typeCount; i++)
+        depMem_start += gc->getDependentMemory((MMgc::DependentMemoryType)i);
+    %%verify depMem_start == gc->policy.dependentAllocation
+
+    // Check byteArray type dependent memory
+    avmshell::ShellCore* c = (avmshell::ShellCore*)core;
+    avmshell::ShellToplevel* top = c->shell_toplevel;
+
+    size_t byteArray_bytes1 = gc->getDependentMemory(MMgc::typeByteArray);
+    ByteArrayObject* byteArray = top->byteArrayClass()->constructByteArray();
+    byteArray->writeBoolean(false);
+    byteArray->writeDouble(3.14);
+
+    // Allocate known type dependent memory
+    size_t byteArray_bytes2 = gc->getDependentMemory(MMgc::typeByteArray);
+    %%verify byteArray_bytes2 > byteArray_bytes1
+
+    // Allocate unknown dependent memory
+    DependentAllocHolder* obj = new (gc) DependentAllocHolder();
+
+    size_t byteArray_bytes3 = gc->getDependentMemory(MMgc::typeByteArray);
+    %%verify byteArray_bytes3 == byteArray_bytes2
+    byteArray->clear();
+ 
+    %%verify gc->getDependentMemory(MMgc::typeByteArray) == byteArray_bytes1
+    delete obj;
+
+    // Consistency check
+    for(int i = 0; i < MMgc::typeCount; i++)
+        depMem_end += gc->getDependentMemory((MMgc::DependentMemoryType)i);
+    %%verify depMem_end == gc->policy.dependentAllocation
+    %%verify depMem_end == depMem_start
+
+#if !defined DEBUG && !defined DEBUGGER
+    // Get memory for out of bounds type
+    // getDependentMemory has assert; skip in debug build
+    %%verify gc->getDependentMemory(MMgc::typeCount) == 0
+#endif
+%%verify true
+#endif
+
+%%test dependent_memory_unknown
+#if defined VMCFG_TELEMETRY && defined AVMSHELL_BUILD
+    // Check unknown type dependent memory
+    MMgc::GC* gc = core->gc;
+    size_t unknownDependentMem_start = gc->getDependentMemory(MMgc::typeUnknown);
+    DependentAllocHolder* obj = new (gc) DependentAllocHolder();
+    size_t unknownDependentMem_end = gc->getDependentMemory(MMgc::typeUnknown);
+    %%verify (unknownDependentMem_end - unknownDependentMem_start) == nbytes
+    
+    delete obj;
+    %%verify unknownDependentMem_start == gc->getDependentMemory(MMgc::typeUnknown)
+#else
+%%verify true
+#endif
+

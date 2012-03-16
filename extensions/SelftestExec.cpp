@@ -2292,6 +2292,8 @@ private:
 static const char* ST_names[];
 static const bool ST_explicits[];
 void test0();
+void test1();
+void test2();
 private:
     MMgc::GC *gc;
 
@@ -2299,11 +2301,13 @@ private:
 ST_mmgc_dependent::ST_mmgc_dependent(AvmCore* core)
     : Selftest(core, "mmgc", "dependent", ST_mmgc_dependent::ST_names,ST_mmgc_dependent::ST_explicits)
 {}
-const char* ST_mmgc_dependent::ST_names[] = {"dependent_alloc", NULL };
-const bool ST_mmgc_dependent::ST_explicits[] = {false, false };
+const char* ST_mmgc_dependent::ST_names[] = {"dependent_alloc","dependent_memory_total","dependent_memory_unknown", NULL };
+const bool ST_mmgc_dependent::ST_explicits[] = {false,false,false, false };
 void ST_mmgc_dependent::run(int n) {
 switch(n) {
 case 0: test0(); return;
+case 1: test1(); return;
+case 2: test2(); return;
 }
 }
 void ST_mmgc_dependent::prologue() {
@@ -2336,6 +2340,82 @@ void ST_mmgc_dependent::test0() {
 
 // line 101 "ST_mmgc_dependent.st"
 verifyPass(size_t(gc->policy.queryLoadForHeapsize(double(2*nbytes)) * 2.0 * double(nbytes)) >= maxheap, "size_t(gc->policy.queryLoadForHeapsize(double(2*nbytes)) * 2.0 * double(nbytes)) >= maxheap", __FILE__, __LINE__);
+
+}
+void ST_mmgc_dependent::test1() {
+#if defined VMCFG_TELEMETRY && defined AVMSHELL_BUILD
+    size_t depMem_start,depMem_end;
+    depMem_start = depMem_end = 0;
+    MMgc::GC* gc = core->gc;
+
+    // Check total dependent memory consistency
+    for(int i = 0; i < MMgc::typeCount; i++)
+        depMem_start += gc->getDependentMemory((MMgc::DependentMemoryType)i);
+// line 112 "ST_mmgc_dependent.st"
+verifyPass(depMem_start == gc->policy.dependentAllocation, "depMem_start == gc->policy.dependentAllocation", __FILE__, __LINE__);
+
+    // Check byteArray type dependent memory
+    avmshell::ShellCore* c = (avmshell::ShellCore*)core;
+    avmshell::ShellToplevel* top = c->shell_toplevel;
+
+    size_t byteArray_bytes1 = gc->getDependentMemory(MMgc::typeByteArray);
+    ByteArrayObject* byteArray = top->byteArrayClass()->constructByteArray();
+    byteArray->writeBoolean(false);
+    byteArray->writeDouble(3.14);
+
+    // Allocate known type dependent memory
+    size_t byteArray_bytes2 = gc->getDependentMemory(MMgc::typeByteArray);
+// line 125 "ST_mmgc_dependent.st"
+verifyPass(byteArray_bytes2 > byteArray_bytes1, "byteArray_bytes2 > byteArray_bytes1", __FILE__, __LINE__);
+
+    // Allocate unknown dependent memory
+    DependentAllocHolder* obj = new (gc) DependentAllocHolder();
+
+    size_t byteArray_bytes3 = gc->getDependentMemory(MMgc::typeByteArray);
+// line 131 "ST_mmgc_dependent.st"
+verifyPass(byteArray_bytes3 == byteArray_bytes2, "byteArray_bytes3 == byteArray_bytes2", __FILE__, __LINE__);
+    byteArray->clear();
+ 
+// line 134 "ST_mmgc_dependent.st"
+verifyPass(gc->getDependentMemory(MMgc::typeByteArray) == byteArray_bytes1, "gc->getDependentMemory(MMgc::typeByteArray) == byteArray_bytes1", __FILE__, __LINE__);
+    delete obj;
+
+    // Consistency check
+    for(int i = 0; i < MMgc::typeCount; i++)
+        depMem_end += gc->getDependentMemory((MMgc::DependentMemoryType)i);
+// line 140 "ST_mmgc_dependent.st"
+verifyPass(depMem_end == gc->policy.dependentAllocation, "depMem_end == gc->policy.dependentAllocation", __FILE__, __LINE__);
+// line 141 "ST_mmgc_dependent.st"
+verifyPass(depMem_end == depMem_start, "depMem_end == depMem_start", __FILE__, __LINE__);
+
+#if !defined DEBUG && !defined DEBUGGER
+    // Get memory for out of bounds type
+    // getDependentMemory has assert; skip in debug build
+// line 146 "ST_mmgc_dependent.st"
+verifyPass(gc->getDependentMemory(MMgc::typeCount) == 0, "gc->getDependentMemory(MMgc::typeCount) == 0", __FILE__, __LINE__);
+#endif
+// line 148 "ST_mmgc_dependent.st"
+verifyPass(true, "true", __FILE__, __LINE__);
+#endif
+
+}
+void ST_mmgc_dependent::test2() {
+#if defined VMCFG_TELEMETRY && defined AVMSHELL_BUILD
+    // Check unknown type dependent memory
+    MMgc::GC* gc = core->gc;
+    size_t unknownDependentMem_start = gc->getDependentMemory(MMgc::typeUnknown);
+    DependentAllocHolder* obj = new (gc) DependentAllocHolder();
+    size_t unknownDependentMem_end = gc->getDependentMemory(MMgc::typeUnknown);
+// line 158 "ST_mmgc_dependent.st"
+verifyPass((unknownDependentMem_end - unknownDependentMem_start) == nbytes, "(unknownDependentMem_end - unknownDependentMem_start) == nbytes", __FILE__, __LINE__);
+    
+    delete obj;
+// line 161 "ST_mmgc_dependent.st"
+verifyPass(unknownDependentMem_start == gc->getDependentMemory(MMgc::typeUnknown), "unknownDependentMem_start == gc->getDependentMemory(MMgc::typeUnknown)", __FILE__, __LINE__);
+#else
+// line 163 "ST_mmgc_dependent.st"
+verifyPass(true, "true", __FILE__, __LINE__);
+#endif
 
 
 }

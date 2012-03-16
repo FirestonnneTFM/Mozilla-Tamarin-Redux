@@ -47,6 +47,10 @@ namespace avmplus
     {
         class ST_avmplus_vector_accessors;
     }
+    namespace ST_mmgc_dependent
+    {
+        class ST_mmgc_dependent;
+    }
 }
 
 namespace avmshell
@@ -130,9 +134,10 @@ namespace avmshell
      */
     class ShellCore : public avmplus::AvmCore
     {
-    friend class SystemClass;
+        friend class SystemClass;
         friend class avmplus::DomainObject;
         friend class avmplus::ST_avmplus_vector_accessors::ST_avmplus_vector_accessors;
+        friend class avmplus::ST_mmgc_dependent::ST_mmgc_dependent;
     public:
         /**
          * Create a new core with the given GC (one gc per core).

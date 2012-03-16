@@ -41,6 +41,13 @@
 #ifndef __MMgc_GCPolicyManager__
 #define __MMgc_GCPolicyManager__
 
+#ifdef VMCFG_SELFTEST
+namespace avmplus
+{
+    namespace ST_mmgc_dependent { class ST_mmgc_dependent; }
+}
+#endif
+
 namespace MMgc
 {
     /**
@@ -125,6 +132,9 @@ namespace MMgc
      */
     class GCPolicyManager {
     public:
+#ifdef VMCFG_SELFTEST
+        friend class avmplus::ST_mmgc_dependent::ST_mmgc_dependent;
+#endif
         GCPolicyManager(GC* gc, GCHeap* heap, GCConfig& config);
 
         /**
@@ -148,7 +158,7 @@ namespace MMgc
          * signalBlockAllocation and signalBlockDeallocation.
          */
         size_t blocksOwnedByGC();
-
+        
         /**
          * @return the number of objects reported marked by signalMarkWork, since startup.
          */
