@@ -37,6 +37,7 @@
 # * the terms of any one of the MPL, the GPL or the LGPL.
 # *
 # * ***** END LICENSE BLOCK *****
+(set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
 ABCASM_HOME=`dirname $0`
 ANTLR_HOME=$ABCASM_HOME/../../other-licenses/ANTLR
