@@ -435,7 +435,7 @@ namespace avmplus
     {
         if (buf && numberOfBytes > 0)
         {
-            m_gc->SignalDependentAllocation(numberOfBytes);
+            m_gc->SignalDependentAllocation(numberOfBytes, MMgc::typeByteArray);
         }
     }
 
@@ -446,7 +446,7 @@ namespace avmplus
         // time, Toplevel might have been destroyed before us. So keep a separate GC*.
         if (buf && numberOfBytes > 0)
         {
-            m_gc->SignalDependentDeallocation(numberOfBytes);
+            m_gc->SignalDependentDeallocation(numberOfBytes, MMgc::typeByteArray);
         }
     }
     //MyWrite is passed to LzmaDynamicEncode and called by encoder to pass encoded data packet

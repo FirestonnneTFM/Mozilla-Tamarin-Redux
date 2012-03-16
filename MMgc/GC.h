@@ -198,6 +198,12 @@ namespace MMgc
     const GCNoFinalizeFlag kNoFinalize = 0;
 
     /**
+     * Memory types for dependent memory
+     * @see SignalDependentAllocation, SignalDependentAllocation
+     */
+    enum DependentMemoryType { typeByteArray, typeUnknown, typeCount };
+    
+    /**
      * GCRoot is root in the reachability graph, it contains a pointer a size
      * and will be searched for things.
      */
@@ -726,8 +732,10 @@ namespace MMgc
          *
          * The GC may use this information to drive garbage collection, and may perform
          * GC activity during this call.
+         *
+         * @param type is the type of the dependent memory
          */
-        void SignalDependentAllocation(size_t nbytes);
+        void SignalDependentAllocation(size_t nbytes, DependentMemoryType type=typeUnknown);
 
         /**
          * Signal that client code has performed a deallocation of memory known not to be
@@ -741,9 +749,11 @@ namespace MMgc
          * called for all objects accounted for by SignalDependentAllocation as those
          * objects are being destroyed.  The GC verifies neither of those conditions.
          *
+         * @param type is the type of the dependent memory
+         *
          * @see SignalDependentAllocation
          */
-        void SignalDependentDeallocation(size_t nbytes);
+        void SignalDependentDeallocation(size_t nbytes, DependentMemoryType type=typeUnknown);
 
         /**
          * Move a subarray of pointers to managed objects from within one managed object
@@ -1416,10 +1426,20 @@ namespace MMgc
         bool IsRCObjectSafe(const void *anyptr);
 
 #ifdef VMCFG_TELEMETRY
+        // Given a memory type, returns the total dependent memory
+        // allocated for that memory type
+        //
+        // @see SignalDependentAllocation, SignalDependentDeallocation
+        size_t getDependentMemory(DependentMemoryType memType);
+
         telemetry::ITelemetry* getTelemetry();
         void setTelemetry(telemetry::ITelemetry* telemetry);
     private:
+        size_t m_dependentMemory[typeCount];
         telemetry::ITelemetry* m_telemetry;
+        
+        void UpdateDependentAllocation(uint32_t bytes, DependentMemoryType memType);
+        void UpdateDependentDeallocation(uint32_t bytes, DependentMemoryType memType);
 #endif
 
     private:
