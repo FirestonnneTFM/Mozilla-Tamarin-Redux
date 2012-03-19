@@ -65,18 +65,29 @@ if [[ "$filename" = "" ]]; then
     filename=$shell_release
 fi
 
-## download the desired version of the acceptance-tests-abcs.zip locally
-echo "Download acceptance-tests-abcs.zip"
-if [ ! -f ${buildsdir}/${change}-${changeid}/acceptance-tests-abcs.zip ]
-then
-    $basedir/build/buildbot/slaves/all/util-download.sh $ftp_asteam/builds/$branch/$change-${changeid}/acceptance-tests-abcs.zip ${buildsdir}/${change}-${changeid}/acceptance-tests-abcs.zip 
-    res=$?
-    if [ ! -f "${buildsdir}/${change}-${changeid}/acceptance-tests-abcs.zip" ]
+
+# If running under Jenkins, acceptance media comes from upstream job via the
+# "copy artifact" plugin and should not be downloaded via ftp
+if [ "$JENKINS_HOME" = "" ]; then
+    ## download the desired version of the acceptance-tests-abcs.zip locally
+    echo "Download acceptance-tests-abcs.zip"
+    if [ ! -f ${buildsdir}/${change}-${changeid}/acceptance-tests-abcs.zip ]
     then
-        echo "ERROR: download acceptance-tests-abcs.zip failed" 
-        exit 1
+        $basedir/build/buildbot/slaves/all/util-download.sh $ftp_asteam/builds/$branch/$change-${changeid}/acceptance-tests-abcs.zip ${buildsdir}/${change}-${changeid}/acceptance-tests-abcs.zip
+        res=$?
+        if [ ! -f "${buildsdir}/${change}-${changeid}/acceptance-tests-abcs.zip" ]
+        then
+            echo "ERROR: download acceptance-tests-abcs.zip failed"
+            exit 1
+        fi
     fi
-fi
+
+    export acceptance_zip=${buildsdir}/${change}-${changeid}/acceptance-tests-abcs.zip
+else
+    export acceptance_zip=${basedir}/test/acceptance/acceptance-tests-abcs.zip
+fi # end Jenkins check
+
+
 
 # loop through each ssh client: for count=1 to threadcount, count contains the current client
 while true
@@ -150,7 +161,7 @@ do
     if [ "$baseversion" != "${change}-${changeid}" ]
     then
         # if the version does not match upload the correct version
-        scp ${buildsdir}/${change}-${changeid}/acceptance-tests-abcs.zip $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST:$SSH_SHELL_REMOTE_BASEDIR/acceptance-tests-abcs.zip
+        scp ${acceptance_zip} $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST:$SSH_SHELL_REMOTE_BASEDIR/acceptance-tests-abcs.zip
         if [[ "$?" -ne "0" ]]; then 
             echo "Error copying acceptance-tests-abcs.zip."
             exit 1

@@ -69,17 +69,23 @@ filename=$2
 
 export shell=$filename$shell_extension
 
+# If running under Jenkins, avm and asc come from upstream jobs via the
+# "copy artifact" plugin and should not be downloaded via ftp
+if [ "$JENKINS_HOME" = "" ]; then
+    ##
+    # Download the AVMSHELL if it does not exist
+    ##
+    download_shell $shell
 
-##
-# Download the AVMSHELL if it does not exist
-##
-download_shell $shell
+    export native_shell=${buildsdir}/${change}-${changeid}/${platform}/$shell
+
+fi # end Jenkins check
 
 ## 
 # call ssh-shell-deployer.sh to make sure the remote device is setup
 ##
-echo "setup $branch/${change}-${changeid}"
-../all/ssh-shell-deployer.sh ${change} ${buildsdir}/${change}-${changeid}/${platform}/$shell
+echo "setup ${native_shell}"
+../all/ssh-shell-deployer.sh ${change} ${native_shell}
 res=$?
 test "$res" = "0" || {
     echo "message: setup failed"
@@ -122,7 +128,11 @@ fi
 echo "passes            : $passes"
 echo "failures          : $fails"
 
-rm selftest.out
+# If running in Jenkins, don't delete this file yet, still need
+# to generate a junit report based on it
+if [ "$JENKINS_HOME" = "" ]; then
+    rm selftest.out
+fi
 
 ###
 # check for running avmshell processes
