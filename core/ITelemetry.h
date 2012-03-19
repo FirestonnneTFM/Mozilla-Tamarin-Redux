@@ -178,7 +178,7 @@ namespace telemetry
             Init(telem, id, force);
         }
 
-        ~TelemetryMethod()
+        virtual ~TelemetryMethod()
         {
             if (m_telemetry && m_telemetry->IsActive()) {
                 m_telemetry->WriteSpan(m_id, m_start, m_force);
@@ -197,7 +197,7 @@ namespace telemetry
             }
         }
 
-    private:
+    protected:
         bool m_force;
         telemetryId m_id;
         uint64_t m_start;

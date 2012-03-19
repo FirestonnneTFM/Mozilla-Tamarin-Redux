@@ -113,6 +113,9 @@ void BaseExecMgr::init(MethodInfo* m, const NativeMethodInfo* native_info)
     if (native_info) {
         m->_apply_fastpath = 1;
         m->_native.thunker = native_info->thunker;
+#if defined(VMCFG_TELEMETRY_SAMPLER) && !defined(VMCFG_AOT)
+		m->_native.samplerThunker = native_info->samplerThunker;
+#endif
 #ifdef VMCFG_AOT
         if(!m->isAotCompiled()) {
             m->_native.handler = native_info->handler;
@@ -513,7 +516,12 @@ void BaseExecMgr::verifyNative(MethodInfo* m, MethodSignaturep ms)
 #endif
     {
         (void)ms;
+#if defined(VMCFG_TELEMETRY_SAMPLER) && !defined(VMCFG_AOT)
+		setNative(m, core->samplerEnabled ? (GprMethodProc) m->_native.samplerThunker
+				  : (GprMethodProc) m->_native.thunker);
+#else
         setNative(m, (GprMethodProc) m->_native.thunker);
+#endif
     }
 }
 

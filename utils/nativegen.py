@@ -1686,6 +1686,7 @@ class AbcThunkGen:
 
         for receiver,m in self.all_thunks:
             self.emitThunkProto(out, receiver, m);
+            self.emitSamplerThunkProto(out, receiver, m);
 
         out.println('class SlotOffsetsAndAsserts;')
         self.emitStructDeclarations(out)
@@ -1755,6 +1756,7 @@ class AbcThunkGen:
             out.println('#include "../vprof/vprof.h"')
 
         for receiver,m in self.all_thunks:
+            self.emitSamplerThunkBody(out, receiver, m);
             self.emitThunkBody(out, receiver, m);
 
         out.println("")
@@ -2711,15 +2713,21 @@ class AbcThunkGen:
             thunk_ret_ctype = ret_ctype
         rettype_str = "float4_ret_t" if CTYPE_FLOAT4 == ret_ctype else TYPEMAP_RETTYPE[thunk_ret_ctype]
         decl = "%s %s_thunk(MethodEnv* env, uint32_t argc, Atom* argv)" % (rettype_str, m.native_id_name)
-        return ret_traits,ret_ctype,thunk_ret_ctype,decl
+        sampler_decl = "%s %s_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)" % (rettype_str, m.native_id_name)
+        return ret_traits,ret_ctype,thunk_ret_ctype,decl,sampler_decl
 
     def emitThunkProto(self, out, receiver, m):
-        ret_traits,ret_ctype,thunk_ret_ctype,decl = self.thunkInfo(m)
+        ret_traits,ret_ctype,thunk_ret_ctype,decl,sampler_decl = self.thunkInfo(m)
         if(thunk_ret_ctype != CTYPE_FLOAT4):
             out.println('extern ' + decl + ";");
 
+    def emitSamplerThunkProto(self, out, receiver, m):
+        ret_traits,ret_ctype,thunk_ret_ctype,decl,sampler_decl = self.thunkInfo(m)
+        if(thunk_ret_ctype != CTYPE_FLOAT4):
+            out.println('extern ' + sampler_decl + ";");
+
     def emitThunkCall(self, out, receiver, m, args):
-        ret_traits,ret_ctype,thunk_ret_ctype,decl = self.thunkInfo(m)
+        ret_traits,ret_ctype,thunk_ret_ctype,decl,sampler_decl = self.thunkInfo(m)
         if ret_ctype != CTYPE_VOID and ret_ctype != CTYPE_FLOAT4:
             out.prnt("%s const ret = " % ret_traits.cpp_return_name())
         elif ret_ctype != CTYPE_VOID: # i.e., is float4
@@ -2751,7 +2759,7 @@ class AbcThunkGen:
         out.println(");")
 
     def emitReturnStatement(self, out, receiver, m):
-        ret_traits,ret_ctype,thunk_ret_ctype,decl = self.thunkInfo(m)
+        ret_traits,ret_ctype,thunk_ret_ctype,decl,sampler_decl = self.thunkInfo(m)
 
         if ret_ctype != CTYPE_VOID:
             ret_result = TYPEMAP_THUNKRETTYPE[ret_ctype] % "ret";
@@ -2759,8 +2767,25 @@ class AbcThunkGen:
             ret_result = "undefinedAtom";
         out.println("return %s;" % ret_result)
 
+    def emitSamplerThunkBody(self, out, receiver, m):
+        ret_traits,ret_ctype,thunk_ret_ctype,decl,sampler_decl = self.thunkInfo(m)
+        
+        out.println(sampler_decl);
+        out.println("{");
+        out.indent += 1;
+        
+        out.println("MethodFrame frame;")
+        out.println("frame.enter(env->core(), env);")
+        rettype_str = "float4_ret_t" if CTYPE_FLOAT4 == ret_ctype else TYPEMAP_RETTYPE[thunk_ret_ctype]
+        out.println("%s retVal = %s_thunk(env, argc, argv);" % (rettype_str, m.native_id_name))
+        out.println("frame.exit(env->core());")
+        out.println("return retVal;")
+        
+        out.indent -= 1
+        out.println("}")
+
     def emitThunkBody(self, out, receiver, m):
-        ret_traits,ret_ctype,thunk_ret_ctype,decl = self.thunkInfo(m)
+        ret_traits,ret_ctype,thunk_ret_ctype,decl,sampler_decl = self.thunkInfo(m)
 
         unbox_receiver = self.calc_unbox_this(m)
         
@@ -2842,11 +2867,7 @@ class AbcThunkGen:
             rec_type = m.receiver.cpp_argument_name()
         out.println("%s const obj = %s;" % (rec_type, args[0][0]))
 
-        # added MethodFrame creation, needed by the sampler
-        out.println("MethodFrame frame;")
-        out.println("frame.enter(env->core(), env);")
         self.emitThunkCall(out, receiver, m, args)
-        out.println("frame.exit(env->core());")
         self.emitReturnStatement(out, receiver, m)
 
         out.indent -= 1
