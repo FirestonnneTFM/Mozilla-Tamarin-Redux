@@ -188,17 +188,21 @@ void abcOP_exitMethodFrame(MethodEnv* env, AOTMethodFrame* methodFrame) {
 }
 
 void abcOP_enterMethodFrameWithSampler(MethodEnv* env, AOTMethodFrame* methodFrame) {
+#ifdef VMCFG_TELEMETRY_SAMPLER
     // check if we should take a sample
     if (env->core()->sampleTicks)
         env->core()->takeSample();
+#endif
     
     methodFrame->enter(env->core(), env);
 }
 
 void abcOP_exitMethodFrameWithSampler(MethodEnv* env, AOTMethodFrame* methodFrame) {
+#ifdef VMCFG_TELEMETRY_SAMPLER
     // check if we should take a sample
     if (env->core()->sampleTicks)
         env->core()->takeSample();
+#endif
     
     methodFrame->exit(env->core());
 }
