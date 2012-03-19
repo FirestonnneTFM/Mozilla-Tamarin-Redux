@@ -580,6 +580,7 @@ namespace avmplus
     }    
     void ByteArray::Compress(CompressionAlgorithm algorithm)
     {
+ #if 0   // turn off lzma for Cyril pre-release    
         if(algorithm == k_lzma)
         {
             if(!m_array || !m_length)
@@ -589,6 +590,7 @@ namespace avmplus
             Encoder.Encode();
             return;
         }    
+#endif  
         // Snarf the data and give ourself some empty data
         // (remember, existing data might be copy-on-write so don't dance on it)
         uint8_t* origData                       = m_array;
@@ -658,6 +660,7 @@ namespace avmplus
 
     void ByteArray::Uncompress(CompressionAlgorithm algorithm)
     {
+ #if 0   // turn off lzma for Cyril pre-release    
         if(algorithm ==  k_lzma)
         {
             if(!m_array || m_length < (LZMA_PROPS_SIZE + kLZMAUnPackSize))
@@ -694,7 +697,8 @@ namespace avmplus
                 mmfx_delete_array(newArray);
             }
             return;
-        }    
+        }  
+ #endif       
         // Snarf the data and give ourself some empty data
         // (remember, existing data might be copy-on-write so don't dance on it)
         uint8_t* origData                       = m_array;
