@@ -322,6 +322,7 @@ as3/Vector/initializerLargeVector, AOT ,, skip, fails to compile at this stage
 mmgc/outofmemory , (.*-Dgcthreshold|.*-Dverifyonly) ,, skip , Threshold test takes too long to run out of mem
 mmgc/pauseForGCIfCollectionImminent, arm-android-tvm-debug,, skip, Test takes too long to run on debug android shell
 as3/ByteArray/ByteArray_bug662851 , x86-mac-tvm-releasedebugger-air,, skip , system malloc on mac32 produces stderr for this testcase which trips up the testing framework
+mmgc/outofmemory, .*, , verify_skip, Test takes too long to run when attempting to run with --verify
 
 ###########
 # Running -ES compiled tests
