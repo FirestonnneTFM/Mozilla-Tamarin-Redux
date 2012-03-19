@@ -355,6 +355,7 @@ namespace avmplus
         bool m_timerStarted;
         vmpi_mutex_t m_counterLock;
         uintptr_t m_timerData;
+        uint64_t m_previousInterval;
 
         // map of <sample_frame_t, unsigned int> key/vaue pairs for the methods we have already mapped and a unique id for each one
         MMgc::GCHashtableBase<unsigned int, MMgc::GCHashtableKeyHandler, MMgc::GCHashtableAllocHandler_VMPI> m_mappedMethods;

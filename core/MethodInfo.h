@@ -308,6 +308,9 @@ namespace avmplus
         struct NativeInfo
         {
             GprMethodProc thunker;
+#if defined(VMCFG_TELEMETRY_SAMPLER) && !defined(VMCFG_AOT)
+            GprMethodProc samplerThunker;
+#endif
 #ifdef VMCFG_AOT
             AvmThunkNativeHandler handler;
 #endif

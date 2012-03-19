@@ -728,6 +728,7 @@ namespace avmplus {
         m_samplesBuffer = NULL;
         m_timerStarted = false;
         m_numMappedMethods = 1;
+        m_previousInterval = 0;
         m_telemetry = m_core->getTelemetry();
                 
         VMPI_recursiveMutexInit(&m_counterLock);
@@ -748,6 +749,7 @@ namespace avmplus {
 #ifdef REPORT_TOTAL_TICKS
             m_samplesBuffer->totalTicks = 0;
 #endif
+            m_previousInterval = 0;
             m_timerData = VMPI_startIntWriteTimer(SAMPLER_TIMER_INTERVAL, &m_core->sampleTicks, &m_counterLock);
             m_timerStarted = true;
         }
@@ -824,7 +826,8 @@ namespace avmplus {
     void TelemetrySampler::flushSamples()
     {
         // if we haven't created our samples buffer yet or aren't initialized, just return
-        if (m_samplesBuffer == NULL || !m_core || !m_core->samplerEnabled)
+        // also, if we have no samples to send, just return
+        if (m_samplesBuffer == NULL || !m_core || !m_core->samplerEnabled || !m_samplesBuffer->nSamples)
             return;
 
         avmplus::StringBuffer methodNameMapBuffer(m_core);
@@ -884,8 +887,9 @@ namespace avmplus {
 
         // calculate and send the median timer interval
         uint64_t interval = VMPI_calculateMedianTimerInterval(m_timerData);
-        if (interval > 0) {
+        if (interval > 0 && interval != m_previousInterval) {
             TELEMETRY_UINT64(m_telemetry, ".sampler.medianInterval", interval);
+            m_previousInterval = interval;
         }
 
         // Emit new mappings from method ID to method name

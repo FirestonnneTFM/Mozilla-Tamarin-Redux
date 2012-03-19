@@ -666,9 +666,12 @@ REALLY_INLINE Namespacep AvmCore::getAnyPublicNamespace()
 // if you make changes here, you may need to make changes there as well.
 REALLY_INLINE void MethodFrame::enter(AvmCore* core, MethodEnv* e)
 {
-    #ifdef VMCFG_TELEMETRY_SAMPLER
-    // check if we should take a sample
-    if (core->sampleTicks)
+    #if defined(VMCFG_TELEMETRY_SAMPLER) && !defined(VMCFG_AOT)
+    // Check if we should take a sample.
+    // Don't do this here for AOT builds since this code is executed for all
+    // method calls, which adds overhead, we do this in the AOT stub instead,
+    // and have a specific one that we use when sampling.
+     if (core->sampleTicks)
         core->takeSample();
     #endif
 
@@ -685,8 +688,11 @@ REALLY_INLINE void MethodFrame::enter(AvmCore* core, MethodEnv* e)
 
 REALLY_INLINE void MethodFrame::enter(AvmCore* core, CodeContext* cc)
 {
-    #ifdef VMCFG_TELEMETRY_SAMPLER
-    // check if we should take a sample
+    #if defined(VMCFG_TELEMETRY_SAMPLER) && !defined(VMCFG_AOT)
+    // Check if we should take a sample.
+    // Don't do this here for AOT builds since this code is executed for all
+    // method calls, which adds overhead, we do this in the AOT stub instead,
+    // and have a specific one that we use when sampling.
     if (core->sampleTicks)
         core->takeSample();
     #endif
@@ -704,9 +710,12 @@ REALLY_INLINE void MethodFrame::enter(AvmCore* core, CodeContext* cc)
 
 REALLY_INLINE void MethodFrame::exit(AvmCore* core)
 {
-    #ifdef VMCFG_TELEMETRY_SAMPLER
-    // check if we should take a sample
-    if (core->sampleTicks)
+    #if defined(VMCFG_TELEMETRY_SAMPLER) && !defined(VMCFG_AOT)
+    // Check if we should take a sample.
+    // Don't do this here for AOT builds since this code is executed for all
+    // method calls, which adds overhead, we do this in the AOT stub instead,
+    // and have a specific one that we use when sampling.
+     if (core->sampleTicks)
         core->takeSample();
     #endif
 

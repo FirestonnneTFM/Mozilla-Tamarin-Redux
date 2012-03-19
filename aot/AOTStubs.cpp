@@ -187,6 +187,22 @@ void abcOP_exitMethodFrame(MethodEnv* env, AOTMethodFrame* methodFrame) {
     methodFrame->exit(env->core());
 }
 
+void abcOP_enterMethodFrameWithSampler(MethodEnv* env, AOTMethodFrame* methodFrame) {
+    // check if we should take a sample
+    if (env->core()->sampleTicks)
+        env->core()->takeSample();
+    
+    methodFrame->enter(env->core(), env);
+}
+
+void abcOP_exitMethodFrameWithSampler(MethodEnv* env, AOTMethodFrame* methodFrame) {
+    // check if we should take a sample
+    if (env->core()->sampleTicks)
+        env->core()->takeSample();
+    
+    methodFrame->exit(env->core());
+}
+
 void abcOP_dxns(MethodEnv* env, AOTMethodFrame *methodFrame, uint32_t index) {
     Namespace* dxns = env->core()->newPublicNamespace(env->method->pool()->getString(index));
     methodFrame->set_dxns(dxns);

@@ -176,6 +176,9 @@ namespace avmplus
         AvmThunkNativeHandler handler;
 #endif
         GprMethodProc thunker;
+#if defined(VMCFG_TELEMETRY_SAMPLER) && !defined(VMCFG_AOT)
+		GprMethodProc samplerThunker;
+#endif
         int32_t method_id;
     };
 
@@ -284,8 +287,13 @@ namespace avmplus
     #define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
         { { _NATIVE_METHOD_CAST_PTR(CLS, &IMPL) }, (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
 #else
+#ifdef VMCFG_TELEMETRY_SAMPLER
+	#define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
+		{ (GprMethodProc)avmplus::NativeID::METHID##_thunk, (GprMethodProc)avmplus::NativeID::METHID##_sampler_thunk, avmplus::NativeID::METHID },
+#else
     #define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
         { (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
+#endif
 #endif
 
     #define AVMTHUNK_NATIVE_METHOD(METHID, IMPL) \
@@ -304,10 +312,17 @@ namespace avmplus
     #define AVMTHUNK_END_NATIVE_METHODS() \
         { { NULL }, NULL, -1 } };
 #else
+#ifdef VMCFG_TELEMETRY_SAMPLER
+	#define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
+		{ (GprMethodProc)avmplus::NativeID::METHID##_thunk, (GprMethodProc)avmplus::NativeID::METHID##_sampler_thunk, avmplus::NativeID::METHID },
+	#define AVMTHUNK_END_NATIVE_METHODS() \
+		{ NULL, NULL, -1 } };
+#else
     #define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
         { (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
     #define AVMTHUNK_END_NATIVE_METHODS() \
         { NULL, -1 } };
+#endif    
 #endif
 
     // ---------------
