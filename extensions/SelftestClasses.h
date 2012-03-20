@@ -49,3 +49,9 @@ public:
         child=NULL;
     }
 };
+class MyGCLargeObject : public MMgc::GCObject {
+public:
+    char array[MMgc::GCHeap::kBlockSize];
+    MyGCLargeObject() {}  
+};
+

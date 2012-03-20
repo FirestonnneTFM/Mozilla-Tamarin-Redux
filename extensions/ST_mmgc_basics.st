@@ -426,3 +426,20 @@ delete gc;
 #endif
     %%verify true
 
+%%test get_bytesinusefast
+    MMGC_GCENTER(gc);
+    MyGCObject *mygcobject;
+    mygcobject = (MyGCObject *) new (gc) MyGCObject();
+    %%verify gc->GetBytesInUse() == gc->GetBytesInUseFast()
+    delete mygcobject;
+    %%verify gc->GetBytesInUse() == gc->GetBytesInUseFast()
+    gc->Collect();
+    %%verify gc->GetBytesInUse() == gc->GetBytesInUseFast()
+    MyGCLargeObject *mygclargeobject;
+    mygclargeobject = (MyGCLargeObject *) new (gc) MyGCLargeObject();
+    %%verify gc->GetBytesInUse() == gc->GetBytesInUseFast()
+    delete mygclargeobject;
+    %%verify gc->GetBytesInUse() == gc->GetBytesInUseFast()
+    gc->Collect();
+    %%verify gc->GetBytesInUse() == gc->GetBytesInUseFast() 
+     
