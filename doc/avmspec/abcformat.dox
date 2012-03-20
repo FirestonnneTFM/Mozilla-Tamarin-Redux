@@ -189,28 +189,28 @@ flagged as belonging to the “private” namespace are treated as unique.
 
 \c int_count, \c integer
 
-The value of \c int_count is the number of entries in the \c integer array, plus one. The \c integer array holds
+The value of \c int_count can be zero, or the number of entries in the \c integer array, plus one.  The \c integer array holds
 integer constants referenced by the bytecode. The “0” entry of the \c integer array is not present in the 
 \c abcFile; it represents the zero value for the purposes of providing values for optional parameters and 
 field initialization.
 
 \c uint_count, \c uinteger
 
-The value of \c uint_count is the number of entries in the \c uinteger array, plus one. The \c uinteger 
+The value of \c uint_count can be zero, or the number of entries in the \c uinteger array, plus one. The \c uinteger 
 array holds unsigned integer constants referenced by the bytecode. The “0” entry of the \c uinteger 
 array is not present in the \c abcFile; it represents the zero value for the purposes of providing 
 values for optional parameters and field initialization.
 
 \c double_count, \c double
 
-The value of \c double_count is the number of entries in the \c double array, plus one. The \c double array
+The value of \c double_count can be zero, or the number of entries in the \c double array, plus one. The \c double array
 holds IEEE double-precision floating point constants referenced by the bytecode. The “0” entry of the \c double
 array is not present in the abcFile; it represents the NaN (Not-a-Number) value for the purposes of 
 providing values for optional parameters and field initialization.
 
 \c string_count, \c string
 
-The value of \c string_count is the number of entries in the \c string array, plus one. The \c string array
+The value of \c string_count can be zero, or the number of entries in the \c string array, plus one. The \c string array
 holds UTF-8 encoded strings referenced by the compiled code and by many other parts of the \c abcFile. 
 In addition to describing string constants in programs, string data in the constant pool are used 
 in the description of names of many kinds. Entry “0” of the \c string array is not present in the \c abcFile; 
@@ -219,18 +219,18 @@ it represents the empty string in most contexts but is also used to represent th
 
 \c namespace_count, \c namespace
 
-The value of \c namespace_count is the number of entries in the \c namespace array, plus one. The 
+The value of \c namespace_count can be zero, or the number of entries in the \c namespace array, plus one. The 
 \c namespace array describes the namespaces used by the bytecode and also for names of many kinds. 
 Entry “0” of the \c namespace array is not present in the \c abcFile; it represents the “any” 
 namespace (known as “*” in ActionScript).
 
 \c ns_set_count, \c ns_set
-The value of \c ns_set_count is the number of entries in the \c ns_setarray, plus one. Then \c s_setarray
+The value of \c ns_set_count can be zero, or the number of entries in the \c ns_setarray, plus one. Then \c s_setarray
 describes namespace sets used in the descriptions of multinames. The “0” entry of the \c ns_set array 
 is not present in the abcFile.
 
 \c multiname_count, \c multiname
-The value of \c multiname_count is the number of entries in the \c multiname array, plus one. The 
+The value of \c multiname_count can be zero, or the number of entries in the \c multiname array, plus one. The 
 \c multiname array describes names used by the bytecode. The “0” entry of the \c multiname array is 
 not present in the \c abcFile.
 
