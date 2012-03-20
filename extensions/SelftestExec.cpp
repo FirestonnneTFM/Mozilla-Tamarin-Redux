@@ -1730,6 +1730,7 @@ void test13();
 void test14();
 void test15();
 void test16();
+void test17();
 private:
     MMgc::GC *gc;
     MMgc::FixedAlloc *fa;
@@ -1739,8 +1740,8 @@ private:
 ST_mmgc_basics::ST_mmgc_basics(AvmCore* core)
     : Selftest(core, "mmgc", "basics", ST_mmgc_basics::ST_names,ST_mmgc_basics::ST_explicits)
 {}
-const char* ST_mmgc_basics::ST_names[] = {"create_gc_instance","create_gc_object","get_bytesinuse","collect","getgcheap","fixedAlloc","fixedMalloc","gcheap","gcheapAlign","gcmethods","finalizerAlloc","finalizerDelete","nestedGCs","collectDormantGC","lockObject","regression_551169","blacklisting", NULL };
-const bool ST_mmgc_basics::ST_explicits[] = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false, false };
+const char* ST_mmgc_basics::ST_names[] = {"create_gc_instance","create_gc_object","get_bytesinuse","collect","getgcheap","fixedAlloc","fixedMalloc","gcheap","gcheapAlign","gcmethods","finalizerAlloc","finalizerDelete","nestedGCs","collectDormantGC","lockObject","regression_551169","blacklisting","get_bytesinusefast", NULL };
+const bool ST_mmgc_basics::ST_explicits[] = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false, false };
 void ST_mmgc_basics::run(int n) {
 switch(n) {
 case 0: test0(); return;
@@ -1760,6 +1761,7 @@ case 13: test13(); return;
 case 14: test14(); return;
 case 15: test15(); return;
 case 16: test16(); return;
+case 17: test17(); return;
 }
 }
 void ST_mmgc_basics::prologue() {
@@ -2001,7 +2003,7 @@ verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize(
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
 // line 253 "ST_mmgc_basics.st"
 verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize()==startfreeheap", __FILE__, __LINE__);
-       void *data = gh->Alloc(10,MMgc::GCHeap::kExpand | MMgc::GCHeap::kZero);
+    void *data = gh->Alloc(10,MMgc::GCHeap::kExpand | MMgc::GCHeap::kZero);
 // line 255 "ST_mmgc_basics.st"
 verifyPass((int)gh->GetTotalHeapSize()>startfreeheap, "(int)gh->GetTotalHeapSize()>startfreeheap", __FILE__, __LINE__);
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
@@ -2204,6 +2206,30 @@ void ST_mmgc_basics::test16() {
 // line 427 "ST_mmgc_basics.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
+}
+void ST_mmgc_basics::test17() {
+    MMGC_GCENTER(gc);
+    MyGCObject *mygcobject;
+    mygcobject = (MyGCObject *) new (gc) MyGCObject();
+// line 433 "ST_mmgc_basics.st"
+verifyPass(gc->GetBytesInUse() == gc->GetBytesInUseFast(), "gc->GetBytesInUse() == gc->GetBytesInUseFast()", __FILE__, __LINE__);
+    delete mygcobject;
+// line 435 "ST_mmgc_basics.st"
+verifyPass(gc->GetBytesInUse() == gc->GetBytesInUseFast(), "gc->GetBytesInUse() == gc->GetBytesInUseFast()", __FILE__, __LINE__);
+    gc->Collect();
+// line 437 "ST_mmgc_basics.st"
+verifyPass(gc->GetBytesInUse() == gc->GetBytesInUseFast(), "gc->GetBytesInUse() == gc->GetBytesInUseFast()", __FILE__, __LINE__);
+    MyGCLargeObject *mygclargeobject;
+    mygclargeobject = (MyGCLargeObject *) new (gc) MyGCLargeObject();
+// line 440 "ST_mmgc_basics.st"
+verifyPass(gc->GetBytesInUse() == gc->GetBytesInUseFast(), "gc->GetBytesInUse() == gc->GetBytesInUseFast()", __FILE__, __LINE__);
+    delete mygclargeobject;
+// line 442 "ST_mmgc_basics.st"
+verifyPass(gc->GetBytesInUse() == gc->GetBytesInUseFast(), "gc->GetBytesInUse() == gc->GetBytesInUseFast()", __FILE__, __LINE__);
+    gc->Collect();
+// line 444 "ST_mmgc_basics.st"
+verifyPass(gc->GetBytesInUse() == gc->GetBytesInUseFast() , "gc->GetBytesInUse() == gc->GetBytesInUseFast() ", __FILE__, __LINE__);
+     
 
 }
 void create_mmgc_basics(AvmCore* core) { new ST_mmgc_basics(core); }
