@@ -187,25 +187,23 @@ void abcOP_exitMethodFrame(MethodEnv* env, AOTMethodFrame* methodFrame) {
     methodFrame->exit(env->core());
 }
 
-void abcOP_enterMethodFrameWithSampler(MethodEnv* env, AOTMethodFrame* methodFrame) {
 #ifdef VMCFG_TELEMETRY_SAMPLER
+void abcOP_enterMethodFrameWithSampler(MethodEnv* env, AOTMethodFrame* methodFrame) {
     // check if we should take a sample
     if (env->core()->sampleTicks)
         env->core()->takeSample();
-#endif
-    
+
     methodFrame->enter(env->core(), env);
 }
 
 void abcOP_exitMethodFrameWithSampler(MethodEnv* env, AOTMethodFrame* methodFrame) {
-#ifdef VMCFG_TELEMETRY_SAMPLER
     // check if we should take a sample
     if (env->core()->sampleTicks)
         env->core()->takeSample();
-#endif
-    
+
     methodFrame->exit(env->core());
 }
+#endif
 
 void abcOP_dxns(MethodEnv* env, AOTMethodFrame *methodFrame, uint32_t index) {
     Namespace* dxns = env->core()->newPublicNamespace(env->method->pool()->getString(index));
