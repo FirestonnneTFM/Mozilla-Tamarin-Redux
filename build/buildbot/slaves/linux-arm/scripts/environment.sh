@@ -68,7 +68,6 @@ export ssh_proc_names="avmshell_neon_arm avmshell_neon_arm_d"
 # not on the host machine. Reset this to something that will never be found/killed
 export proc_names="fake_never_find_me"
 
-export PYTHON_RUNTESTS=python3
 export threads=6
 
 export SSH_SHELL_REMOTE_HOST0=asteam-beagle-xM1

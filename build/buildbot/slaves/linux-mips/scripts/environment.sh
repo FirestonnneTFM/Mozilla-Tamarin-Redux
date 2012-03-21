@@ -67,7 +67,6 @@ export MAKE_OPTIONS="-j2"
 # not on the host machine. Reset this to something that will never be found/killed
 export proc_names="fake_never_find_me"
 
-export PYTHON_RUNTESTS=python3
 
 export threads=6
 

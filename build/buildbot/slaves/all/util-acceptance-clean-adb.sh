@@ -66,17 +66,12 @@ done
 echo ""
 sleep 2
 
-echo "========================================="
-echo "restarting adb server..."
-${adb} kill-server
-sleep 10
-${adb} start-server
-echo ""
-
 
 ##
 # get list of connected devices
 ##
+echo "Connected devices:"
+${adb} devices
 devices=`${adb} devices | awk '{ if ( $2  ~ /device/ ) print $1 }'`
 
 
