@@ -592,7 +592,7 @@ class AcceptanceRuntest(RuntestBase):
             outputCalls.append((self.verbose_print, ('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d\n' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
         if self.show_time:
             if self.passthreadid:
-                outputCalls.insert(0,(self.js_print,('%s running %s %s %s threadid=%s time %.1f' % (testnum, ast, extraVmArgs, abcargs, passByEnv['threadid']), time.time()-starttime), '<b>', '</b><br/>')));
+                outputCalls.insert(0,(self.js_print,('%s running %s %s %s threadid=%s time %.1f' % (testnum, ast, extraVmArgs, abcargs, passByEnv['threadid'], time.time()-starttime), '<b>', '</b><br/>')));
             else:
                 outputCalls.insert(0,(self.js_print,('%s running %s %s %s time %.1f' % (testnum, ast, extraVmArgs, abcargs, time.time()-starttime), '<b>', '</b><br/>')));
         else:
