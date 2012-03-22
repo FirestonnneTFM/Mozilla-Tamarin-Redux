@@ -176,7 +176,7 @@ ecma3/Unicode/uE000_PrivateUseArea, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-d
 ecma3/Unicode/uAC00_HangulSyllables, ((sparc-sol|x64-win|x64-lnx|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*),, deep, bug 499685 skip slow tests
 mops/mops, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*),, deep, bug 499685 skip slow tests
 regress/bug_483783, .*,, deep, skip slow tests - https://bugzilla.mozilla.org/show_bug.cgi?id=483783
-
+mmgc/pauseForGCIfCollectionImminent, mips-.*,, deep,  bug 499685 skip slow tests
 misc/catchableTimeout, .*,, deep, skip slow tests
 misc/doubleTimeout, .*,, deep, skip slow tests
 spidermonkey/js1_5/Array/regress-157652, .*,, deep, skip slow tests
