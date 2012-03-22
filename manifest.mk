@@ -82,6 +82,7 @@ $(call RECURSE_DIRS,vmbase)
 
 $(call RECURSE_DIRS,AVMPI)
 $(call RECURSE_DIRS,MMgc)
+$(call RECURSE_DIRS,halfmoon)
 
 ifdef ENABLE_TAMARIN
 $(call RECURSE_DIRS,core pcre vprof)

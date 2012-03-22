@@ -244,6 +244,11 @@ namespace avmplus
     typedef struct FramePtr_* FramePtr;
 }
 
+namespace halfmoon
+{
+    class JitFriend; // Bridge for encapsulating private access from halfmoon
+}
+
 #ifdef VMCFG_AOT
 struct ABCInfo;
 #endif

@@ -64,6 +64,8 @@ namespace nanojit
 
     #define STACK_GRANULARITY        sizeof(void *)
 
+    class MetaDataWriter;
+
     // Basics:
     // - 'entry' records the state of the native machine stack at particular
     //   points during assembly.  Each entry represents four bytes.
@@ -215,9 +217,10 @@ namespace nanojit
         // key value in a "proxy" class whose instances need not themselves be aligned,
         // but are coercible to properly-aligned copy of the underlying float4_t value.
         class float4_key {
-        private: 
+        private:
             float _val[4];
         public:
+            float4_key() {} // for alignof macro, don't call.
             float4_key(const float4_t& p) { _val[0] = f4_x(p); _val[1] = f4_y(p); _val[2] = f4_z(p); _val[3] = f4_w(p); }
             operator float4_t() const { float4_t f4value = { _val[0], _val[1], _val[2], _val[3] }; return f4value; }
             bool keyEquals(const float4_key& other) const {  return VMPI_memcmp(_val, other._val, sizeof(_val)) == 0; }
@@ -333,12 +336,13 @@ namespace nanojit
             void* vtuneHandle;
             #endif
 
-            Assembler(CodeAlloc& codeAlloc, Allocator& dataAlloc, Allocator& alloc, LogControl* logc, const Config& config);
+            Assembler(CodeAlloc& codeAlloc, Allocator& dataAlloc, Allocator& alloc,
+                      LogControl* logc, const Config& config, MetaDataWriter* mdWriter = NULL);
 
             void        compile(Fragment *frag, Allocator& alloc, bool optimize
                                 verbose_only(, LInsPrinter*));
 
-            void        endAssembly(Fragment* frag);
+            CodeList*   endAssembly(Fragment* frag);
             void        assemble(Fragment* frag, LirFilter* reader);
             void        beginAssembly(Fragment *frag);
 
@@ -358,6 +362,13 @@ namespace nanojit
             // support calling out from a fragment ; used to debug the jit
             debug_only( void        resourceConsistencyCheck(); )
             debug_only( void        registerConsistencyCheck(); )
+
+            /**
+             * Force the instruction to a stack slot, and mark it live.
+             * Used for capturing stack slots to be recorded in metatdata
+             * and referenced by the runtime.
+             */
+            int32_t    forceStackIndex(LIns* ins);
 
         private:
             void        gen(LirFilter* toCompile);
@@ -466,6 +477,8 @@ namespace nanojit
 
             AR          _activation;
             RegAlloc    _allocator;
+
+            MetaDataWriter* _mdWriter;
 
             verbose_only( void asm_inc_m32(uint32_t*); )
             void        asm_mmq(Register rd, int dd, Register rs, int ds);
@@ -577,5 +590,34 @@ namespace nanojit
         // even on 64bit cpu's, we allocate stack area in 4byte chunks
         return -4 * int32_t(ins->deprecated_getArIndex());
     }
+
+    /** Abstract class for writing metadata for deoptimization, debugging, etc. */
+    class MetaDataWriter {
+    public:
+        // Report inital address, i.e., the last code byte.
+        virtual void beginAssembly(Assembler* assm, uint8_t* address) = 0;
+
+        // Report assembly of LIR_safe, providing the current code address.
+        virtual void safepointStart(Assembler* assm, void* payload, uint8_t* address) = 0;
+
+        // Report assembly of LIR_endsafe, providing the current code address.
+        virtual void safepointEnd(Assembler* assm, void* payload, uint8_t* address) = 0;
+
+        // Report a non-sequential change in the code address due to chaining
+        // to a new code chunk.
+        virtual void setNativePc(uint8_t* address) = 0;
+
+        // Report final address, i.e., the first code byte.
+        virtual void endAssembly(Assembler* assm, uint8_t* address) = 0;
+
+        // Abandon metadata if assembly has failed.
+        virtual void abandon() = 0;
+
+        // We do not expect to invoke the destructor polymorphically,
+        // but some compilers complain if a class with virtual methods
+        // does not have a virtual destructor.
+        virtual ~MetaDataWriter() {}
+    };
+
 }
 #endif // __nanojit_Assembler__

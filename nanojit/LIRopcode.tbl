@@ -147,6 +147,8 @@ OP___(line,     Op1,  V,    0)  // [VTune] source line number for debug symbols
 OP___(pc,       Op1,  V,    0)  // [Shark] record the machine address of this instruction
 OP_UN(align_comment)
 OP___(comment,  Op1,  V,    0)  // a comment shown, on its own line, in LIR dumps
+OP___(safe,     Safe, V,    0)  // deoptimization safepoint
+OP___(endsafe,  Safe, V,    0)  // deoptimization safepoint
 
 //---------------------------------------------------------------------------
 // Loads and stores

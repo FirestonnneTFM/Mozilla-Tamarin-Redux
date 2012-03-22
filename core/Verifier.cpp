@@ -916,6 +916,7 @@ namespace avmplus
         }
 
         state = mmfx_new( FrameState(ms, info));
+        state->abc_pc = code_pos;
 
         // initialize method param types.
         // We already verified param_count is a legal register so
@@ -3497,16 +3498,11 @@ namespace avmplus
             t2 = temp;
         }
 
-        if (t1 == NULL_TYPE && t2 && !t2->isMachineType())
-        {
-            // okay to merge null with pointer type
+        // okay to merge null with pointer type
+        if (Traits::getBuiltinType(t1) == BUILTIN_null && t2 && !t2->isMachineType())
             return t2;
-        }
-        if (t2 == NULL_TYPE && t1 && !t1->isMachineType())
-        {
-            // okay to merge null with pointer type
+        if (Traits::getBuiltinType(t2) == BUILTIN_null && t1 && !t1->isMachineType())
             return t1;
-        }
 
         // all commonBase flags start out false.  set the cb bits on
         // t1 and its ancestors.

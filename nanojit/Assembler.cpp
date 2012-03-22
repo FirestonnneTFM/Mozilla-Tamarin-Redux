@@ -69,7 +69,7 @@ namespace nanojit
      *
      *    - merging paths ( build a graph? ), possibly use external rep to drive codegen
      */
-    Assembler::Assembler(CodeAlloc& codeAlloc, Allocator& dataAlloc, Allocator& alloc, LogControl* logc, const Config& config)
+    Assembler::Assembler(CodeAlloc& codeAlloc, Allocator& dataAlloc, Allocator& alloc, LogControl* logc, const Config& config, MetaDataWriter* mdWriter)
         : alloc(alloc)
         , _codeAlloc(codeAlloc)
         , _dataAlloc(dataAlloc)
@@ -93,6 +93,7 @@ namespace nanojit
     #ifdef VMCFG_VTUNE
         , vtuneHandle(NULL)
     #endif
+        , _mdWriter(mdWriter)
         , _config(config)
     {
         (void)logc;
@@ -506,7 +507,7 @@ namespace nanojit
         float4_t* p = _immF4Pool.get(q);
         if (!p)
         {
-            p = new (_dataAlloc, sizeof(float4_t)) float4_t;
+            p = new (_dataAlloc, alignof<float4_t>()) float4_t;
 
             *p = q;
             _immF4Pool.put(q, p);
@@ -981,6 +982,14 @@ namespace nanojit
         verbose_only( _nInsAfter = _nIns; )
 
         nBeginAssembly();
+
+        // Report last code address to metadata writer.
+        if (_mdWriter)
+            _mdWriter->beginAssembly(this, (uint8_t*)_nIns);
+
+        #ifdef NANOJIT_EAGER_REGSAVE
+        reserveSavedRegs();
+        #endif
     }
 
     void Assembler::assemble(Fragment* frag, LirFilter* reader)
@@ -1045,16 +1054,19 @@ namespace nanojit
         _codeAlloc.free(codeStart, codeEnd);
         codeList = NULL;
         _codeAlloc.markAllExec(); // expensive but safe, we mark all code pages R-X
+
+        if (_mdWriter)
+            _mdWriter->abandon();
     }
 
-    void Assembler::endAssembly(Fragment* frag)
+    CodeList* Assembler::endAssembly(Fragment* frag)
     {
         // don't try to patch code if we are in an error state since we might have partially
         // overwritten the code cache already
         if (error()) {
             // something went wrong, release all allocated code memory
             cleanupAfterError();
-            return;
+            return NULL;
         }
 
         NIns* fragEntry = genPrologue();
@@ -1093,6 +1105,10 @@ namespace nanojit
         frag->fragEntry = fragEntry;
         frag->setCode(_nIns);
 
+        // Report first code address to metadata writer.
+        if (_mdWriter)
+            _mdWriter->endAssembly(this, (uint8_t*)_nIns);
+
 #ifdef VMCFG_VTUNE
         if (vtuneHandle)
         {
@@ -1109,6 +1125,8 @@ namespace nanojit
 
         debug_only( pageValidate(); )
         NanoAssert(_branchStateMap.isEmpty());
+
+        return codeList;
     }
 
     void Assembler::releaseRegisters()
@@ -1223,6 +1241,26 @@ namespace nanojit
         else {
             // Backwards jump.
             handleLoopCarriedExprs(pending_lives);
+
+            /// HALFMOON typed boids.abc 32 bit platform FIX HERE - MAY BE WRONG
+            /// Halfmoon uses a lived, not livei instruction across an edge to keep a value alive
+            ///
+            /// test case:
+            /// var someNumber:Number = Math.random(); // has to be a number, non const
+            /// for (var i = 0; i <...) { } // someNumber lives across the loop
+            /// print(someNumber); // Use the double here, HAS TO BE A DOUBLE
+            ///
+            /// the lived, on x86-32 platforms, always uses FST0 because its hinted in nativei386.cpp::nInit()
+            /// CodegenLIR does not keep numbers alive on edges, and instead stores, so you won't see this
+            /// without halfmoon.
+            /// the lived on x86-64 uses XMMO instead of FST0, perhaps that's a better fix? make the hint
+            /// for calld on native386 use XMM0?
+            ///
+            /// If we don't have the _fpuStkDepth check, a different assert fails. (assembler.cpp:366).
+            /// Leaving this check here, boids.abc passes no problems... so is this unique to halfmoon?
+#ifdef NANOJIT_IA32
+            debug_only( _fpuStkDepth = (_allocator.getActive(FST0) ? -1 : 0); )
+#endif
             if (!label) {
                 // save empty register state at loop header
                 _labels.add(to, 0, _allocator);
@@ -1447,6 +1485,22 @@ namespace nanojit
             {
                 default:
                     NanoAssertMsgf(false, "unsupported LIR instruction: %d\n", op);
+                    break;
+
+                case LIR_safe:
+                    if (_mdWriter) {
+                        _mdWriter->safepointStart(this, ins->safePayload(), (uint8_t*)_nIns);
+                    } else {
+                        *((NIns**)(ins->safePayload())) = _nIns;
+                    }
+                    break;
+
+                case LIR_endsafe:
+                    if (_mdWriter) {
+                        _mdWriter->safepointEnd(this, ins->safePayload(), (uint8_t*)_nIns);
+                    } else {
+                        *((NIns**)(ins->safePayload())) = _nIns;
+                    }
                     break;
 
                 case LIR_regfence:
@@ -2241,6 +2295,11 @@ namespace nanojit
             LIns *ins = b->savedRegs[i];
             if (ins)
                 findMemFor(ins);
+
+            #ifdef NANOJIT_EAGER_REGSAVE
+            NanoAssert(ins != NULL);
+            NanoAssert(ins->getArIndex()-1 == (unsigned)i);
+            #endif
         }
     }
 
@@ -2257,7 +2316,9 @@ namespace nanojit
     void Assembler::handleLoopCarriedExprs(InsList& pending_lives)
     {
         // ensure that exprs spanning the loop are marked live at the end of the loop
+        #ifndef NANOJIT_EAGER_REGSAVE
         reserveSavedRegs();
+        #endif
         for (Seq<LIns*> *p = pending_lives.get(); p != NULL; p = p->tail) {
             LIns *ins = p->head;
             NanoAssert(isLiveOpcode(ins->opcode()));
@@ -2773,6 +2834,13 @@ namespace nanojit
 
     LabelState* LabelStateMap::get(LIns *label) {
         return labels.get(label);
+    }
+
+    int32_t Assembler::forceStackIndex(LIns* ins)
+    {
+        ins->setResultLive();
+        findMemFor(ins);
+        return ins->getArIndex();
     }
 }
 #endif /* FEATURE_NANOJIT */

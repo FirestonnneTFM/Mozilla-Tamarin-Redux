@@ -118,6 +118,9 @@ package avmplus
 
         public native static function disposeXML(xml:XML):void;
 
+        // DEOPT: Diagnostic scaffolding.
+        public native static function deopt(n:int):void;
+
         /**
          * Suggest to the garbage collector that if collector's imminence
          * exceeds imminence parameter then the collector should finish
@@ -311,6 +314,12 @@ package {
     public function readLine():String
     {
         return System.readLine()
+    }
+
+    // DEOPT: Diagnostic scaffolding.
+    public function deopt(k):void
+    {
+        System.deopt(k);
     }
 }
 

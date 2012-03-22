@@ -39,6 +39,7 @@
 
 
 #include "avmshell.h"
+#include "Deopt.h"
 
 namespace avmshell
 {
@@ -327,4 +328,18 @@ namespace avmshell
         return a;
     }
 
+    // Debug scaffolding for deoptimization.
+    // Deoptimize method invoked in frame K levels above our caller.
+    // Throws if no such frame exists, but is silently ignored if
+    // the method is not currently compiled.
+
+    void SystemClass::deopt(int32_t k)
+    {
+#ifdef VMCFG_HALFMOON
+        using avmplus::Deoptimizer;
+        if (!Deoptimizer::deoptAncestor(core(), k))
+            toplevel()->throwArgumentError(kNullArgumentError, "frame number");
+#endif
+        (void)k;
+    }
 }

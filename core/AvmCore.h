@@ -445,6 +445,8 @@ const int kBufferPadding = 16;
     class AvmCore : public MMgc::GCRoot
     {
         friend class CodegenLIR;
+        friend class halfmoon::JitFriend;
+        friend class Deoptimizer;
         friend class EnterCodeContext;
         friend class EnterMethodEnv;
         friend class ExceptionFrame;
@@ -2070,6 +2072,8 @@ const int kBufferPadding = 16;
         ////////////////////////////////////////////////////////////////////
     };
 
+    class Deoptimizer;
+
     /*
         MethodFrame is a way of maintaining CodeContext and DXNS in a uniform way
         in both Interpreter and JIT modes. CodeContext is a poorly-documented
@@ -2111,10 +2115,17 @@ const int kBufferPadding = 16;
 
     public:
         MethodFrame*    next;
+#ifdef VMCFG_HALFMOON
+        bool            isInterp;  // TODO: We need a more efficient way to represent this.
+#ifdef DEBUG
+        Deoptimizer*    deopt;     // NOTE: This is used only to support an assertion.
+#endif
+#endif
 
     private:
         friend class CodegenLIR;
         friend class OSR;
+        friend class halfmoon::JitFriend;
         enum {
             IS_EXPLICIT_CODECONTEXT = 0x1,
             DXNS_NOT_NULL = 0x2,

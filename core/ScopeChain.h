@@ -96,6 +96,7 @@ namespace avmplus
 #ifdef VMCFG_NANOJIT
         friend class CodegenLIR;
         friend class MopsRangeCheckFilter;
+        friend class halfmoon::JitFriend;
 #endif
     private:
         ScopeChain(VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, Namespacep dxns);

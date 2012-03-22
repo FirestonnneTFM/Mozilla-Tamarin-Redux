@@ -212,6 +212,11 @@ namespace avmplus
 #endif
         RCList<Namespace>       GC_STRUCTURE(cpool_ns);
         GCList<NamespaceSet>    GC_STRUCTURE(cpool_ns_set);
+#ifdef VMCFG_HALFMOON
+        // tables of pinned pointers for compiler-generated constants.
+        GCList<GCDouble>        GC_STRUCTURE(cpool_const_double);
+        RCList<String>          GC_STRUCTURE(cpool_const_string);
+#endif
 
 #ifndef AVMPLUS_64BIT
         // lists to keep int/uint atoms "sticky".

@@ -47,6 +47,7 @@ namespace avmplus
     {
         friend class CodegenLIR;
         friend class BaseExecMgr;
+        friend class halfmoon::JitFriend;
 
     protected:
         MethodEnv(MethodInfo* method, ScopeChain* scope);

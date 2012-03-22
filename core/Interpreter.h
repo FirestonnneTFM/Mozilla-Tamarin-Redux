@@ -42,12 +42,38 @@
 
 namespace avmplus
 {
-    // main interpreter method.  Signature should correspond to AtomMethodProc to allow tail calls to here
+    // main interpreter method.  Signature should correspond to AtomMethodProc to allow tail
+    // calls to here
     Atom interpBoxed(MethodEnv* method, int argc, Atom* ap);
 
-#ifdef VMCFG_DIRECT_THREADED
     void** interpGetOpcodeLabels();
-#endif
+
+    /**
+     * callback interface used by interpreter to set up deoptimized frame.
+     */
+    class FramePopulator {
+    public:
+        virtual void populate(Atom* framep, int *scope_depth, int *stack_depth) = 0;
+        virtual ~FramePopulator() {}
+    };
+
+    /**
+     * Interpret from the given location, initializing the Atom stack frame
+     * from the given values.  This is called by Mason's speculation bailout
+     * code in halfmoon.
+     */
+    Atom interpBoxedAtLocation(int abc_pc, Atom* locals, Atom* operand_stack,
+                               Atom* scope_stack, int sp, int scope_height,
+                               MethodEnv* env);
+
+    /**
+     * Interpreter entry point to begin execution of deoptimized frame.
+     * Called by deoptimization trampolines, but not related to speculation
+     * bailouts.
+     */
+    Atom interpBoxedAtLocation(MethodEnv* env, int abc_pc,
+                               FramePopulator& populator);
+
 }
 
 //#  define LAST_SUPERWORD_OPCODE    ((50<<8) | OP_ext)

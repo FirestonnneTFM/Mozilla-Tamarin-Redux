@@ -89,6 +89,10 @@
   #define AVMFEATURE_JIT               1
 #endif
 
+#ifndef AVMFEATURE_HALFMOON
+  #define AVMFEATURE_HALFMOON          0
+#endif
+
 #ifndef AVMFEATURE_TELEMETRY
   #define AVMFEATURE_TELEMETRY         0
 #endif

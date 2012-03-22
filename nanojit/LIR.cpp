@@ -534,6 +534,7 @@ namespace nanojit
     {
         _unused = (uintptr_t) _allocator.alloc(CHUNK_SZB);
         NanoAssert(_unused != 0); // Allocator.alloc() never returns null. See Allocator.h
+        NanoAssert(0 == _unused % sizeof(void*)); // Require word alignment.
         _limit = _unused + CHUNK_SZB;
     }
 
@@ -555,6 +556,7 @@ namespace nanojit
         LIns*   ins   = insSk->getLIns();
         ins->initLInsSk((LIns*)addrOfLastLInsOnCurrentChunk);
         _unused += sizeof(LInsSk);
+        NanoAssert(0 == _unused % sizeof(void*)); // Require word alignment.
         verbose_only(_stats.lir++);
     }
 
@@ -584,6 +586,7 @@ namespace nanojit
         // the pointer.
         uintptr_t startOfRoom = _unused;
         _unused += szB;
+        NanoAssert(0 == _unused % sizeof(void*)); // Require word alignment.
         verbose_only(_stats.lir++);             // count the instruction
 
         // If there's no more space on this chunk, move to a new one.
@@ -744,6 +747,14 @@ namespace nanojit
         LInsIorF* insIorF = (LInsIorF*)_buf->makeRoom(sizeof(LInsIorF));
         LIns*  ins  = insIorF->getLIns();
         ins->initLInsIorF(LIR_immf, u.i);
+        return ins;
+    }
+
+    LIns* LirBufWriter::insSafe(LOpcode op, void *payload)
+    {
+        LInsSafe* insS = (LInsSafe*)_buf->makeRoom(sizeof(LInsSafe));
+        LIns*  ins  = insS->getLIns();
+        ins->initLInsSafe(op, payload);
         return ins;
     }
 
@@ -2687,6 +2698,11 @@ namespace nanojit
                               i->mask() >> 6 & 3);
                 break;
 
+            case LIR_safe:
+            case LIR_endsafe:
+                VMPI_snprintf(s, n, "%s", (char*)lirNames[op]);
+                break;
+
             default:
                 NanoAssertMsgf(0, "Can't handle opcode %s\n", lirNames[op]);
                 break;
@@ -3331,6 +3347,10 @@ namespace nanojit
         // that we can insert 'ins' into slot 'k'.  Check this.
         NanoAssert(ins->isop(LIR_immi) && ins->immI() == imm);
         return ins;
+    }
+
+    LIns* CseFilter::insSafe(LOpcode op, void *payload) {
+        return out->insSafe(op, payload);
     }
 
 #ifdef NANOJIT_64BIT
@@ -4519,6 +4539,10 @@ namespace nanojit
     LIns* ValidateWriter::insImmI(int32_t imm)
     {
         return out->insImmI(imm);
+    }
+
+    LIns* ValidateWriter::insSafe(LOpcode op, void *payload) {
+        return out->insSafe(op, payload);
     }
 
 #ifdef NANOJIT_64BIT

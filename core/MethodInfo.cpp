@@ -166,18 +166,6 @@ namespace avmplus
         return AvmThunkUnbox_FLOAT4(float4_t,*(const Atom*)src);
     }
 #endif // VMCFG_FLOAT
-    
-    REALLY_INLINE double unpack_double(const void* src)
-    {
-    #if defined(AVMPLUS_64BIT) || defined(VMCFG_UNALIGNED_FP_ACCESS)
-        return *(const double*)src;
-    #else
-        double_overlay u;
-        u.bits32[0] = ((const uint32_t*)src)[0];
-        u.bits32[1] = ((const uint32_t*)src)[1];
-        return u.value;
-    #endif
-    }
 
     REALLY_INLINE
     void MethodInfo::_installRefToResolvedMethodSignature(MethodSignature* ms)
@@ -190,12 +178,11 @@ namespace avmplus
         core->msCache()->add(ms);
     }
 
-#ifdef DEBUGGER
     // note that the "local" can be a true local (0..local_count-1)
     // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
     // FIXME: this is exactly the same as makeatom() in jit-calls.h,
     // except for the decoding of unaligned doubles
-    static Atom nativeLocalToAtom(AvmCore* core, void* src, SlotStorageType sst)
+    Atom nativeLocalToAtom(AvmCore* core, void* src, SlotStorageType sst)
     {
         switch (sst)
         {
@@ -209,6 +196,7 @@ namespace avmplus
 #endif // VMCFG_FLOAT
             default:
                 AvmAssert(false);
+                // fall through.
             case SST_int32:
                 return core->intToAtom(*(const int32_t*)src);
             case SST_uint32:
@@ -225,7 +213,6 @@ namespace avmplus
                 return (*(ScriptObject**)src)->atom();
         }
     }
-#endif
 
     // this looks deceptively similar to nativeLocalToAtom, but is subtly different:
     // for locals, int/uint/bool are always stored as a 32-bit value in the 4 bytes

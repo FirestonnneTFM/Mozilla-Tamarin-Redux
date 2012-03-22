@@ -269,6 +269,14 @@ namespace nanojit
         }
     };
 
+    // use this in a hashmap if you want to compare keys by possibly-
+    // overloaded operator ==.
+    template <class K> struct UseOperEqual {
+        static bool keysEqual(const K& x, const K& y) {
+            return x == y;
+        }
+    };
+
     template <class K> struct DefaultKeysEqual<K*> {
         static bool keysEqual(K* x, K* y) {
             return x == y;
@@ -347,7 +355,7 @@ namespace nanojit
                 n->value = v;
                 return;
             }
-            buckets[i] = new (allocator, sizeof(K)) Seq<Node>(Node(k,v), buckets[i]);
+            buckets[i] = new (allocator, alignof<K>()) Seq<Node>(Node(k,v), buckets[i]);
         }
 
         /** return v for element k, or T(0) if k is not present */
@@ -391,12 +399,13 @@ namespace nanojit
          */
         class Iter {
             friend class HashMap;
-            const HashMap<K,T,H> &map;
+            typedef HashMap<K,T,H,E> MapType;
+            const MapType &map;
             int bucket;
             const Seq<Node>* current;
 
         public:
-            Iter(HashMap<K,T,H>& map) : map(map), bucket((int)map.nbuckets-1), current(NULL)
+            Iter(MapType& map) : map(map), bucket((int)map.nbuckets-1), current(NULL)
             { }
 
             /** return true if more (k,v) remain to be visited */

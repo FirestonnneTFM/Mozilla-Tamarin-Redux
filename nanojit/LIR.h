@@ -658,6 +658,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LRK_QorD,
         LRK_F4,
         LRK_Jtbl,
+        LRK_Safe,
         LRK_None    // this one is used for unused opcode numbers
     };
 
@@ -676,6 +677,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
     class LInsQorD;
     class LInsJtbl;
     class LInsF4;
+    class LInsSafe;
 
     class LIns
     {
@@ -739,6 +741,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         inline LInsQorD* toLInsQorD() const;
         inline LInsJtbl* toLInsJtbl() const;
         inline LInsF4*   toLInsF4()   const;
+        inline LInsSafe* toLInsSafe() const;
 
         void staticSanityCheck();
 
@@ -761,6 +764,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         inline void initLInsQorD(LOpcode opcode, uint64_t immQorD);
         inline void initLInsJtbl(LIns* index, uint32_t size, LIns** table);
         inline void initLInsF4(LOpcode opcode, const float4_t& immF4);
+        inline void initLInsSafe(LOpcode opcode, void* payload);
 
         LOpcode opcode() const { 
             NanoAssert(sharedFields.opcode< LIR_sentinel); 
@@ -888,6 +892,9 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         inline float    immF() const;
         inline int32_t  immFasI() const;
 
+        // For safepoints.
+        inline void*    safePayload() const;
+
         // For LInsQorD.
 #ifdef NANOJIT_64BIT
         inline int32_t  immQlo() const;
@@ -973,6 +980,10 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
             NanoAssert(LRK_None != repKinds[opcode()]);
             return LRK_IorF == repKinds[opcode()];
         }
+        bool isLInsSafe() const {
+            NanoAssert(LRK_None != repKinds[opcode()]);
+            return LRK_Safe == repKinds[opcode()];
+        }
         bool isLInsQorD() const {
             NanoAssert(LRK_None != repKinds[opcode()]);
             return LRK_QorD == repKinds[opcode()];
@@ -1029,6 +1040,12 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         // True if the instruction is a 32-bit integer immediate.
         bool isImmI() const {
             return isop(LIR_immi);
+        }
+        bool isSafe() const {
+            return isop(LIR_safe);
+        }
+        bool isEndsafe() const {
+            return isop(LIR_endsafe);
         }
         // True if the instruction is a 32-bit integer immediate and
         // has the value 'val' when treated as a 32-bit signed integer.
@@ -1406,6 +1423,20 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* getLIns() { return &ins; }
     };
 
+    // Used for LIR_safe and LIR_endsafe.
+    class LInsSafe
+    {
+    private:
+        friend class LIns;
+
+        void*       payload;
+
+        LIns        ins;
+
+    public:
+        LIns* getLIns() { return &ins; };
+    };
+
     // Used only as a placeholder for OP___ macros for unused opcodes in
     // LIRopcode.tbl.
     class LInsNone
@@ -1427,6 +1458,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
     LInsQorD* LIns::toLInsQorD() const { return (LInsQorD*)(uintptr_t(this+1) - sizeof(LInsQorD)); }
     LInsJtbl* LIns::toLInsJtbl() const { return (LInsJtbl*)(uintptr_t(this+1) - sizeof(LInsJtbl)); }
     LInsF4*   LIns::toLInsF4()   const { return (LInsF4*  )(uintptr_t(this+1) - sizeof(LInsF4  )); }
+    LInsSafe* LIns::toLInsSafe() const { return (LInsSafe*)(uintptr_t(this+1) - sizeof(LInsSafe)); }
 
     void LIns::initLInsOp0(LOpcode opcode) {
         initSharedFields(opcode);
@@ -1528,7 +1560,11 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         i->immF4[3]= f4_w(immF4); 
         NanoAssert(isLInsF4());
     }
-
+    void LIns::initLInsSafe(LOpcode opcode, void *payload) {
+        initSharedFields(opcode);
+        toLInsSafe()->payload = payload;
+        NanoAssert(isLInsSafe());
+    }
     LIns* LIns::oprnd1() const {
         NanoAssert(isLInsOp1() || isLInsOp1b() || isLInsOp2() || isLInsOp3() ||
                    isLInsOp4() || isLInsLd() || isLInsSt() || isLInsJtbl());
@@ -1645,6 +1681,11 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         } u;
         u.i = toLInsIorF()->immIorF;
         return u.f;
+    }
+
+    inline void*   LIns::safePayload()  const {
+        NanoAssert(isSafe() || isEndsafe());
+        return toLInsSafe()->payload;
     }
 
 #ifdef NANOJIT_64BIT
@@ -1765,6 +1806,9 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         }
         virtual LIns* insImmI(int32_t imm) {
             return out->insImmI(imm);
+        }
+        virtual LIns* insSafe(LOpcode op, void * payload) {
+            return out->insSafe(op, payload);
         }
 #ifdef NANOJIT_64BIT
         virtual LIns* insImmQ(uint64_t imm) {
@@ -1919,21 +1963,24 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
             bool operator==(const Str& str) const {
                 return (0 == strcmp(this->s, str.s));
             }
-        };
 
-        // Similar to 'struct Str' -- we need to hash the string's contents,
-        // not its pointer.
-        template<class K> struct StrHash {
+            bool operator!=(const Str& str) const {
+                return !(*this == str);
+            }
+
             static size_t hash(const Str &k) {
                 // (const void*) cast is required by ARM RVCT 2.2
                 return murmurhash((const void*)k.s, strlen(k.s));
             }
+
+            // default constructor for compatibiltiy with alignof(), never call.
+            Str() : alloc(*((Allocator*)0)) {}
         };
 
-        template <class Key, class H=DefaultHash<Key> >
-        class CountMap: public HashMap<Key, int, H> {
+        template <class Key, class H=DefaultHash<Key>, class E=DefaultKeysEqual<Key> >
+        class CountMap: public HashMap<Key, int, H, E> {
         public:
-            CountMap(Allocator& alloc) : HashMap<Key, int, H>(alloc, 128) {}
+            CountMap(Allocator& alloc) : HashMap<Key, int, H, E>(alloc, 128) {}
             int add(Key k) {
                 int c = 1;
                 if (this->containsKey(k)) {
@@ -1946,7 +1993,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
 
         CountMap<int> lircounts;
         CountMap<const CallInfo *> funccounts;
-        CountMap<Str, StrHash<Str> > namecounts;
+        CountMap<Str, Str, UseOperEqual<Str> > namecounts;
 
         void addNameWithSuffix(LIns* i, const char *s, int suffix, bool ignoreOneSuffix);
 
@@ -2031,9 +2078,12 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         const char* const prefix;
         bool const always_flush;
     public:
+        bool never_flush;
+    public:
         VerboseWriter(Allocator& alloc, LirWriter *out, LInsPrinter* printer, LogControl* logc,
                       const char* prefix = "", bool always_flush = false)
             : LirWriter(out), code(alloc), printer(printer), logc(logc), prefix(prefix), always_flush(always_flush)
+        , never_flush(false)
         {}
 
         LIns* add(LIns* i) {
@@ -2046,6 +2096,8 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         }
 
         LIns* add_flush(LIns* i) {
+            if (never_flush)
+              return add(i);
             if ((i = add(i)) != 0)
                 flush();
             return i;
@@ -2118,6 +2170,9 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         }
         LIns* insImmI(int32_t imm) {
             return add(out->insImmI(imm));
+        }
+        LIns* insSafe(LOpcode op, void * payload) {
+            return add(out->insSafe(op, payload));
         }
 #ifdef NANOJIT_64BIT
         LIns* insImmQ(uint64_t imm) {
@@ -2329,6 +2384,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         bool initOOM;
 
         LIns* insImmI(int32_t imm);
+        LIns* insSafe(LOpcode op, void *payload);
 #ifdef NANOJIT_64BIT
         LIns* insImmQ(uint64_t q);
 #endif
@@ -2415,6 +2471,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
             LIns*   ins4(LOpcode op, LIns* o1, LIns* o2, LIns* o3, LIns* o4);
             LIns*   insParam(int32_t i, int32_t kind);
             LIns*   insImmI(int32_t imm);
+            LIns*   insSafe(LOpcode op, void *payload);
 #ifdef NANOJIT_64BIT
             LIns*   insImmQ(uint64_t imm);
 #endif
@@ -2681,6 +2738,7 @@ NanoStaticAssert(LIR_start == 0 && LIR_sentinel <= 256); // It's ok if LIR_senti
         LIns* ins4(LOpcode v, LIns* a, LIns* b, LIns* c, LIns* d);
         LIns* insParam(int32_t arg, int32_t kind);
         LIns* insImmI(int32_t imm);
+        LIns* insSafe(LOpcode op, void *payload);
 #ifdef NANOJIT_64BIT
         LIns* insImmQ(uint64_t imm);
 #endif

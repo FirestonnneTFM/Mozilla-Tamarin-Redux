@@ -157,6 +157,7 @@ VTable* toVTable(E env, Atom atom)
     return NULL;
 }
 template VTable* toVTable(Toplevel*, Atom);
+template VTable* toVTable(MethodEnv*, Atom);
 
 template <class E>
 Atom op_applytype(E env, Atom factory, int argc, Atom* args)
@@ -437,6 +438,12 @@ void coerceobj_atom(MethodEnv *env, Atom atom, Traits* t)
     if (!AvmCore::isNullOrUndefined(atom) &&
             (atomKind(atom) != kObjectType || !atomObj(atom)->traits()->subtypeof(t)))
         throwCheckTypeError(env, atom, t);
+}
+
+void coercens_atom(MethodEnv *env, Atom atom)
+{
+    if (!AvmCore::isNullOrUndefined(atom) && atomKind(atom) != kNamespaceType)
+        throwCheckTypeError(env, atom, env->core()->traits.namespace_itraits);
 }
     
 #ifdef VMCFG_FLOAT
