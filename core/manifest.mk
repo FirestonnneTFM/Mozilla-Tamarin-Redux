@@ -65,6 +65,8 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/DateClass.cpp \
   $(curdir)/DateObject.cpp \
   $(curdir)/DescribeTypeClass.cpp \
+  $(curdir)/Deopt.cpp \
+  $(curdir)/Deopt-CL.cpp \
   $(curdir)/Domain.cpp \
   $(curdir)/DomainEnv.cpp \
   $(curdir)/DomainMgr.cpp \

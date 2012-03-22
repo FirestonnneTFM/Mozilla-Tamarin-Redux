@@ -3117,6 +3117,12 @@ const uint32_t PoolObject::gcTracePointerOffsets[] = {
     offsetof(PoolObject, _method_name_indices),
     offsetof(PoolObject, _methods),
     offsetof(PoolObject, _scripts),
+#if defined(VMCFG_HALFMOON)
+    offsetof(PoolObject, cpool_const_double),
+#endif
+#if defined(VMCFG_HALFMOON)
+    offsetof(PoolObject, cpool_const_string),
+#endif
     offsetof(PoolObject, cpool_double),
 #if defined(VMCFG_FLOAT)
     offsetof(PoolObject, cpool_float),
@@ -3166,6 +3172,16 @@ MMgc::GCTracerCheckResult PoolObject::gcTraceOffsetIsTraced(uint32_t off) const
     if((result = _scripts.gcTraceOffsetIsTraced(off - offsetof(PoolObject,_scripts))) != MMgc::kOffsetNotFound) {
         return result;
     }
+#if defined(VMCFG_HALFMOON)
+    if((result = cpool_const_double.gcTraceOffsetIsTraced(off - offsetof(PoolObject,cpool_const_double))) != MMgc::kOffsetNotFound) {
+        return result;
+    }
+#endif
+#if defined(VMCFG_HALFMOON)
+    if((result = cpool_const_string.gcTraceOffsetIsTraced(off - offsetof(PoolObject,cpool_const_string))) != MMgc::kOffsetNotFound) {
+        return result;
+    }
+#endif
     if((result = cpool_double.gcTraceOffsetIsTraced(off - offsetof(PoolObject,cpool_double))) != MMgc::kOffsetNotFound) {
         return result;
     }
@@ -3207,7 +3223,7 @@ MMgc::GCTracerCheckResult PoolObject::gcTraceOffsetIsTraced(uint32_t off) const
     if((result = metadata_infos.gcTraceOffsetIsTraced(off - offsetof(PoolObject,metadata_infos))) != MMgc::kOffsetNotFound) {
         return result;
     }
-    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,24);
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,26);
 }
 #endif // DEBUG
 
@@ -3224,6 +3240,12 @@ bool PoolObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     _method_name_indices.gcTrace(gc);
     _methods.gcTrace(gc);
     _scripts.gcTrace(gc);
+#if defined(VMCFG_HALFMOON)
+    cpool_const_double.gcTrace(gc);
+#endif
+#if defined(VMCFG_HALFMOON)
+    cpool_const_string.gcTrace(gc);
+#endif
     cpool_double.gcTrace(gc);
 #if defined(VMCFG_FLOAT)
     cpool_float.gcTrace(gc);

@@ -83,6 +83,12 @@ public:
 
     /** Invoke a function call-style, with thisArg passed explicitly */
     virtual Atom call(MethodEnv*, Atom thisArg, int32_t argc, Atom* argv) = 0;
+
+#ifdef VMCFG_HALFMOON
+    /** revert compiled method to interpreted state */
+    // TODO: this only makes sense for compiled methods
+    virtual void deoptimize(MethodEnv* env) = 0;
+#endif
 };
 
 /**
@@ -228,6 +234,9 @@ public:
     void notifyAbcPrepared(Toplevel*, AbcEnv*);
     Atom apply(MethodEnv*, Atom thisArg, ArrayObject* a);
     Atom call(MethodEnv*, Atom thisArg, int32_t argc, Atom* argv);
+#ifdef VMCFG_HALFMOON
+    void deoptimize(MethodEnv* env);
+#endif
 
 private:
     // Helpers to simply return the current implementation:
@@ -473,6 +482,20 @@ private:
     bool prepPolicyRules();
 #endif
 
+#ifdef VMCFG_HALFMOON
+public:
+    static void resetMethodInvokers(MethodEnv*);
+    static void setRecompileWithProfileData(MethodEnv* env);
+    static void setRecompileHotMethod(MethodEnv* env);
+    static Atom jitInvokerProfiler(MethodEnv* env, int argc, Atom* args);
+    static Atom jitInvokerWithProfileData(MethodEnv* env, int argc, Atom* args);
+    static Atom executeMethod(MethodEnv*, int argc, Atom* args);
+    static void freeJitCompiledCode(MethodInfo*);
+    bool verifyOptimizeJit(MethodInfo* m, MethodSignaturep ms,
+                           Toplevel*, AbcEnv*, OSR*);
+    void verifyProfilingJit(MethodInfo*, MethodSignaturep, Toplevel*, AbcEnv*);
+#endif
+
 private:
     AvmCore* core;
     const struct Config& config;
@@ -486,6 +509,7 @@ private:
 #ifdef VMCFG_NANOJIT
     friend class OSR;
     friend class CodegenLIR;
+    friend class halfmoon::JitFriend;
     friend class LirHelper;
     OSR *current_osr;
     JITObserver *jit_observer; // Current JITObserver or NULL if not profiling.
@@ -547,6 +571,7 @@ class GC_CPP_EXACT(MethodEnvProcHolder, MMgc::GCTraceableObject)
     friend class CodegenLIR;
     friend class BaseExecMgr;
     friend class OSR;
+    friend class halfmoon::JitFriend;
 
 protected:
     MethodEnvProcHolder();
@@ -577,6 +602,7 @@ class ImtHolder : public MMgc::GCInlineObject
 {
     friend class BaseExecMgr;
     friend class CodegenLIR;
+    friend class halfmoon::JitFriend;
 
     // IMT_SIZE should be a number that is relatively prime to sizeof(MethodInfo)/8
     // since we use the MethodInfo pointer as the interface method id (IID).

@@ -190,6 +190,12 @@ Atom coerce(E env, Atom atom, Traits* expected);
 void coerceobj_obj(MethodEnv* env, ScriptObject* obj, Traits*);
 
 /**
+ * Coerce a value to namespace.  No need to check traits, we can do it just
+ * with atom tag checking.
+ */
+void coercens_atom(MethodEnv* env, Atom atom);
+
+/**
  * generic coerceobj accepting any value and coercing to one of the ScriptObject*
  * types.  If this method returns, caller can safely use (ScriptObject*)atomPtr(atom).
  * (note: result can still be null).

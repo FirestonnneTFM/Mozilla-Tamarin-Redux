@@ -128,6 +128,12 @@ namespace avmshell
             ShellSettings settings;
             parseCommandLine(argc, argv, settings);
 
+#ifdef VMCFG_DEOPT_SAFEPOINT_NATIVE
+            // Stack pointer must remain fixed during method execution in order
+            // to permit straightforward location of a callee's return address.
+            settings.njconfig.i386_fixed_esp = true;
+#endif
+
             {
               // code coverage/cheap test
               MMGC_ENTER_SUSPEND;

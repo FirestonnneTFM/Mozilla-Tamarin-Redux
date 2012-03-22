@@ -3840,6 +3840,7 @@ namespace nanojit
         if (eip - n < codeStart) {
             codeAlloc(codeStart, codeEnd, _nIns verbose_only(, codeBytes));
             JMP(eip);
+            if (_mdWriter) _mdWriter->setNativePc((uint8_t*)eip);
         }
     }
 

@@ -238,7 +238,9 @@ namespace avmplus
         void checkNameOperand(uint32_t index);
         void checkConstantMultiname(uint32_t index, Multiname &m);
         Traits* checkSlot(Traits* traits, int slot_id);
-        Traits* findCommonBase(Traits* t1, Traits* t2);
+    public:
+        static Traits* findCommonBase(Traits* t1, Traits* t2);
+    private:
         void checkEarlySlotBinding(Traits* traits);
         Traits* peekType(Traits* requiredType, int n=1);
         Traits* emitCoerceSuper(int index);

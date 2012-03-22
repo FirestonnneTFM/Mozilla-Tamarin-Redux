@@ -43,9 +43,14 @@
 using namespace MMgc;
 #include "../nanojit/nanojit.h"
 
+namespace halfmoon {
+    class JitManager;
+}
+
 namespace avmplus
 {
     using namespace nanojit;
+    using halfmoon::JitManager;
 
     /**
      * LogControl adapter to print output to AvmCore.console.
@@ -90,6 +95,9 @@ namespace avmplus
                                         // (only for flushing... lifetime is still managed by codeAlloc)
         CodeMgr();
         void flushBindingCaches();      // invalidate all binding caches for this codemgr... needed when AbcEnv is unloaded
+
+        // DEOPT & PROFILER todo: provide some way to free code memory
+        JitManager *jit_mgr;
     };
 
     // AccSet conventions
@@ -237,6 +245,10 @@ namespace avmplus
     extern const CallInfo ci_float4ToAtom;
     extern const CallInfo ci_singlePrecisionFloat;
     extern const CallInfo ci_float4;
+    extern const CallInfo ci_fcalli;
+    extern const CallInfo ci_fcallimt;
+    extern const CallInfo ci_vfcalli;
+    extern const CallInfo ci_vfcallimt;
 #endif
     extern const CallInfo ci_intToAtom;
     extern const CallInfo ci_uintToAtom;
@@ -271,6 +283,27 @@ namespace avmplus
 #ifdef VMCFG_SSE2
     extern const CallInfo ci_doubleToAtom_sse2;
 #endif
+
+    extern const CallInfo ci_acalli;
+    extern const CallInfo ci_icalli;
+    extern const CallInfo ci_dcalli;
+    extern const CallInfo ci_acallimt;
+    extern const CallInfo ci_icallimt;
+    extern const CallInfo ci_dcallimt;
+    extern const CallInfo ci_compare;
+    extern const CallInfo ci_createRestHelper;
+    extern const CallInfo ci_mod;
+    extern const CallInfo ci_string;
+    extern const CallInfo ci_atomWriteBarrier;
+    extern const CallInfo ci_privateWriteBarrierRC;
+    extern const CallInfo ci_createInstanceProc;
+    extern const CallInfo ci_doubleToInt32;
+    extern const CallInfo ci_handleStackOverflowMethodEnv;
+    extern const CallInfo ci_get_cache_handler;
+    extern const CallInfo ci_set_cache_handler;
+    extern const CallInfo ci_call_cache_handler;
+    extern const CallInfo ci_op_add_a_aa;
+    extern const CallInfo ci_hasnextproto;
 
     const ArgType ARGTYPE_U = ARGTYPE_UI; // uint32_t
     const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom

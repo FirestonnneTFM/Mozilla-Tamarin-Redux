@@ -87,6 +87,7 @@
 #undef VMCFG_SHARK
 #undef VMCFG_NANOJIT
 #undef FEATURE_NANOJIT
+#undef VMCFG_HALFMOON
 #undef VMCFG_FLOAT
 #undef VMCFG_GENERIC_FLOAT4
 #undef VMCFG_OSR
@@ -438,6 +439,15 @@
  */
 #if !defined AVMFEATURE_JIT || AVMFEATURE_JIT != 0 && AVMFEATURE_JIT != 1
 #  error "AVMFEATURE_JIT must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_HALFMOON
+ *
+ * Enables the Halfmoon optimizing just-in-time compiler.
+ */
+#if !defined AVMFEATURE_HALFMOON || AVMFEATURE_HALFMOON != 0 && AVMFEATURE_HALFMOON != 1
+#  error "AVMFEATURE_HALFMOON must be defined and 0 or 1 (only)."
 #endif
 
 
@@ -932,6 +942,11 @@
 #    error "AVMFEATURE_ABC_INTERP is required for AVMFEATURE_JIT"
 #  endif
 #endif
+#if AVMFEATURE_HALFMOON
+#  if !AVMFEATURE_JIT
+#    error "AVMFEATURE_JIT is required for AVMFEATURE_HALFMOON"
+#  endif
+#endif
 #if AVMFEATURE_FLOAT
 #  if !AVMFEATURE_SWF16
 #    error "AVMFEATURE_SWF16 is required for AVMFEATURE_FLOAT"
@@ -1205,6 +1220,9 @@
 #endif
 #if AVMFEATURE_JIT
 #  define FEATURE_NANOJIT
+#endif
+#if AVMFEATURE_HALFMOON
+#  define VMCFG_HALFMOON
 #endif
 #if AVMFEATURE_FLOAT
 #  define VMCFG_FLOAT

@@ -174,4 +174,10 @@
 
 #endif
 
+// enable deopt trampolines on halfmon-x86 configurations
+#if defined(VMCFG_HALFMOON) && defined(VMCFG_IA32)
+#  define NANOJIT_FRAMELIB
+#  define NANOJIT_EAGER_REGSAVE
+#endif
+
 #endif /* __avmbuild__ */

@@ -3744,4 +3744,30 @@ FLOAT_ONLY(\
         core->console << '\n';
     }
 #endif // AVMPLUS_VERBOSE
-}
+
+#ifdef VMCFG_HALFMOON
+    Atom interpBoxedAtLocation(MethodEnv* env, int abc_pc,
+                               FramePopulator& populator) {
+        AvmAssert(false && "not implemented yet");
+        (void)env;
+        (void)abc_pc;
+        (void)populator;
+        return unreachableAtom;
+    }
+
+    Atom interpBoxedAtLocation(int abc_pc, Atom* locals, Atom* operand_stack,
+                               Atom* scope_stack, int sp, int scope_height,
+                               MethodEnv* env) {
+        AvmAssert(false && "not implemented yet");
+        (void)abc_pc;
+        (void)locals;
+        (void)operand_stack;
+        (void)scope_stack;
+        (void)sp;
+        (void)scope_height;
+        (void)env;
+        return unreachableAtom;
+    }
+#endif // VMCFG_HALFMOON
+
+} // namespace avmplus

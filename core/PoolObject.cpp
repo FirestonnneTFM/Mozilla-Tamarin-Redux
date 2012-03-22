@@ -73,6 +73,10 @@ namespace avmplus
 #endif
         cpool_ns(core->GetGC(), 0),
         cpool_ns_set(core->GetGC(), 0),
+#ifdef VMCFG_HALFMOON
+        cpool_const_double(core->GetGC(), 0),
+        cpool_const_string(core->GetGC(), 0),
+#endif
 #ifndef AVMPLUS_64BIT
         cpool_int_atoms(core->GetGC(), 0),
         cpool_uint_atoms(core->GetGC(), 0),

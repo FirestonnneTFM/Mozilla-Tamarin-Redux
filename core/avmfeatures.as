@@ -489,6 +489,12 @@ var FEATURES =
     <defines> FEATURE_NANOJIT </defines> <!-- referenced by nanojit module only -->
   </feature>
 
+  <feature>
+    <desc> Enables the Halfmoon optimizing just-in-time compiler. </desc>
+    <name> AVMFEATURE_HALFMOON  </name>
+    <requires> AVMFEATURE_JIT </requires>
+    <defines> VMCFG_HALFMOON  </defines>
+  </feature>
 
   <feature>
     <desc> Enables the types 'float' and 'float4' in the VM. </desc>

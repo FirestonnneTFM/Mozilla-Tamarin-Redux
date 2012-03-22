@@ -95,6 +95,7 @@ namespace avmplus
 #endif
 
     class MethodSignature;
+    class Deoptimizer;
 
     /**
      * MethodInfo is the base class for all functions that
@@ -354,6 +355,17 @@ namespace avmplus
         mutable GCMember<String>  GC_POINTER(_methodName);
 #endif
 
+#ifdef VMCFG_HALFMOON
+    public:
+        // Per function metadata for deoptimization
+        // Should be allocated separtely from MethodInfo, because it need only
+        // exit for functions compiled with speculative code.
+        // TODO: we're only getting away w/o GC here because we never free these.
+        Deoptimizer* _deoptimizer;
+        Deoptimizer* _armed_deoptimizers;
+#endif
+
+    private:
         // -------- FLAGS SECTION
         // (Set in ABC) need arguments[0..argc].
         uint32_t                _needArguments:1;
@@ -606,6 +618,16 @@ namespace avmplus
     private:
         size_t _low, _high;
     };
+
+    /** Utility function for accessing possibly-unaligned doubles */
+    double unpack_double(const void* src);
+
+    /**
+     * Utility function to access values on the stack, then box them as
+     * Atoms, including handling of possibly unaligned double and float/float4
+     * values.  Similar to makeAtom() in jit-calls.h (keep them sync'd).
+     */
+    Atom nativeLocalToAtom(AvmCore* core, void* src, SlotStorageType sst);
 }
 
 #undef verbose_only

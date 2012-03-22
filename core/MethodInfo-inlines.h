@@ -511,4 +511,16 @@ REALLY_INLINE bool MethodSignature::argcOk(int32_t argc) const
             (uint32_t(argc) <= uint32_t(_param_count) || _allowExtraArgs);
 }
 
+REALLY_INLINE double unpack_double(const void* src)
+{
+#if defined(AVMPLUS_64BIT) || defined(VMCFG_UNALIGNED_FP_ACCESS)
+    return *(const double*)src;
+#else
+    double_overlay u;
+    u.bits32[0] = ((const uint32_t*)src)[0];
+    u.bits32[1] = ((const uint32_t*)src)[1];
+    return u.value;
+#endif
+}
+
 } // namespace avmplus

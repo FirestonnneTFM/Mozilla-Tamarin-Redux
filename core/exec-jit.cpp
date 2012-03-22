@@ -250,6 +250,13 @@ Atom BaseExecMgr::jitInvokerNow(MethodEnv* env, int argc, Atom* args)
 void BaseExecMgr::verifyJit(MethodInfo* m, MethodSignaturep ms,
         Toplevel *toplevel, AbcEnv* abc_env, OSR *osr)
 {
+#ifdef VMCFG_HALFMOON
+    if (verifyOptimizeJit(m, ms, toplevel, abc_env, osr))
+        return; // halfmoon jit worked.
+    // hack: force exception table to be re-parsed.
+    m->set_abc_exceptions(core->gc, NULL);
+    // fall through to CodegenLIR JIT logic.
+#endif
     CodegenLIR jit(m, ms, toplevel, osr);
     PERFM_NTPROF_BEGIN("verify & IR gen");
     verifyCommon(m, ms, toplevel, abc_env, &jit);

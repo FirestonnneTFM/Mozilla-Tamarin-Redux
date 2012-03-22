@@ -365,6 +365,9 @@ namespace avmshell
         // value that can be so represented, else return the argument unchanged.
         avmplus::Atom canonicalizeNumber(avmplus::Atom a);
 
+        // DEOPT: Diagnostic scaffolding.
+        void deopt(int32_t k);
+
         GC_NO_DATA(SystemClass)
 
         DECLARE_SLOTS_SystemClass;
