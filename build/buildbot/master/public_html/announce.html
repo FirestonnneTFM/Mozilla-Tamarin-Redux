@@ -114,15 +114,7 @@
             <td width="72%">
                 <table width="100%">
                     <script language="javascript">
-                        var compile = "builder=windows-compile&builder=windows64-compile&builder=mac-intel-10.5-compile&builder=mac64-intel-compile&builder=linux-compile&builder=linux64-compile&builder=android-compile&builder=linux-arm-compile&builder=linux-mips-compile"
-                        var smoke = "builder=windows-smoke&builder=windows64-smoke&builder=mac-intel-10.5-smoke&builder=mac64-intel-smoke&builder=linux-smoke&builder=linux64-smoke&builder=android-smoke&builder=linux-arm-smoke&builder=linux-mips-smoke"
-                        var test = "builder=windows-test&builder=windows64-test&builder=mac-intel-10.5-test&builder=mac64-intel-test&builder=linux-test&builder=linux64-test&builder=android-test&builder=linux-arm-test&builder=linux-mips-test"
-                        
-                       var deep = "builder=windows-deep&builder=windows64-deep&builder=mac-deep&builder=mac64-deep&builder=linux-deep&builder=linux-arm-deep&builder=linux-mips-deep"
-                        
-                        var compile_sandbox = "builder=windows-compile-sandbox&builder=windows64-compile-sandbox&builder=mac-intel-10.5-compile-sandbox&builder=mac64-intel-compile-sandbox&builder=linux-compile-sandbox&builder=linux64-compile-sandbox&builder=android-compile-sandbox&builder=linux-arm-compile-sandbox&builder=linux-mips-compile-sandbox"
-                        var smoke_sandbox = "builder=windows-smoke-sandbox&builder=windows64-smoke-sandbox&builder=mac-intel-10.5-smoke-sandbox&builder=mac64-intel-smoke-sandbox&builder=linux-smoke-sandbox&builder=linux64-smoke-sandbox&builder=android-smoke-sandbox&builder=linux-arm-smoke-sandbox&builder=linux-mips-smoke-sandbox"
-                        var test_sandbox = "builder=windows-test-sandbox&builder=windows64-test-sandbox&builder=mac-intel-10.5-test-sandbox&builder=mac64-intel-test-sandbox&builder=linux-test-sandbox&builder=linux64-test-sandbox&builder=android-test-sandbox&builder=linux-arm-test-sandbox&builder=linux-mips-test-sandbox"
+                      var deep = "builder=windows-deep&builder=windows64-deep&builder=mac-deep&builder=mac64-deep&builder=linux-deep&builder=linux-arm-deep&builder=linux-mips-deep"
 
                         var bar = "./horizontal_one_box_per_builder"
                         var waterfall = "./waterfall"
@@ -139,23 +131,17 @@
                         function DisplayBar(content, name, builder) {
                             document.write("<tr><td><a href='" + GetUrl(waterfall, content) + "'>" + name + "</a></td><td><iframe width='60' height='20' frameborder='0' scrolling='no' src='" + status_url + builder + "'></iframe></td><td width='99%'><iframe width='100%' height='20' frameborder='0' scrolling='no' src='" + GetUrl(bar, content) + "'></iframe></td></tr>\n");
                         }
-                        
-                        DisplayHeader("Main Build Phase 1");
-                        DisplayBar(compile, "Compile", "compile");
-                        DisplayBar(smoke, "Smoke", "smoke");
-                        DisplayBar(test, "Test", "test");
 
+                        DisplayHeader("Main Build Phase 1");
+                        document.write('<tr><td align="center" colspan="3">All builds have moved to <a href="http://tamarin-jenkins.corp.adobe.com/view/Tamarin-Redux/">http://tamarin-jenkins.corp.adobe.com/view/Tamarin-Redux/</a></td></tr>');
                         DisplayHeader("Main Build Phase 2");
                         document.write('<tr><td>Performance</td><td></td><td>Performance builds have been moved to the <a href="http://tamarin-sandbox.corp.adobe.com:8761/waterfall">internal sandbox</a></td></tr>');
                         DisplayBar(deep, "Deep-Test", "deep");
 
                         DisplayHeader("Sandbox Build");
-                        DisplayBar(compile_sandbox, "Sandbox&nbsp;Compile", "compile-sandbox");
-                        DisplayBar(smoke_sandbox, "Sandbox&nbsp;Smoke", "smoke-sandbox");
-                        DisplayBar(test_sandbox, "Sandbox&nbsp;Test", "test-sandbox");
-                        
+                        document.write('<tr><td align="center" colspan="3">All builds have moved to <a href="http://tamarin-jenkins.corp.adobe.com/view/Sandbox/">http://tamarin-jenkins.corp.adobe.com/view/Sandbox/</a></td></tr>');
                     </script>
-                    
+
                 </table>
             </td>
             <td width="3%">
