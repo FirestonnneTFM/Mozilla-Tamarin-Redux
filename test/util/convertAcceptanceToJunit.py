@@ -301,7 +301,7 @@ def convertAotToJunit(infile,outfile,toplevel):
             errors+=1
         if line.startswith('AOT compiling') or line.startswith('compiling'):
             if test!=None:
-                if skiplist.has_key(test):
+                if test in skiplist:
                     skip=skiplist[test]
                     skips+=1
                 else:
@@ -342,13 +342,13 @@ def convertAotToJunit(infile,outfile,toplevel):
     contents+='  </properties>\n'
     for testresult in testresults:
         contents+='  <testcase classname="%s.%s-%s" name="%s" time="%s">' % (properties['config'],properties['config'],testresult['class'],testresult['name'],testresult['time'])
-        if testresult.has_key('out') and testresult['out']!='':
+        if 'out' in testresult and testresult['out']!='':
             out+=testresult['name']+'\n'+testresult['out']+'\n'
-        if testresult.has_key('skip') and testresult['skip']!='':
+        if 'skip' in testresult and testresult['skip']!='':
             contents+='<skipped message="%s" type="%s">%s</skipped>\n  ' % (fixForXmlEscape(testresult['skip']),'skipped',fixForXmlCdata(testresult['skip']))
             out+=testresult['skip']+'\n'
             testresult['out']+=testresult['skip']
-        if testresult.has_key('failure') and testresult['failure']!='':
+        if 'failure' in testresult and testresult['failure']!='':
             contents+='<failure message="%s" type="%s">%s</failure>\n  ' % (testresult['failure'],'failure',fixForXmlCdata(testresult['failure']))
         if testresult['out']!='':
             contents+='<system-out>%s</system-out>' % fixForXmlCdata(testresult['out'])
@@ -412,7 +412,7 @@ def convertSelftestsToJunit(infile,outfile,toplevel):
         names=testcase.split('.')
         classname="%s.%s" % (names[0],names[1])
         testname=names[2]
-        if failures.has_key(testcase):
+        if testcase in failures:
             contents+='<testcase classname="%s" name="%s" time="0">\n<failure message="FAILED" type="failure">\n<![CDATA[%s]]>\n</failure>\n<system-out>\n<![CDATA[\n%s]]>\n</system-out>\n</testcase>\n' % (classname,testname,failures[testcase],testcases[testcase])
         else:
             if testcases[testcase].strip()=='':
@@ -526,7 +526,7 @@ def convertAcceptanceToJunit(infile,outfile,toplevel):
         if line.startswith('unexpected passes'):
             properties['unexpected passes']=tokens[3]
 
-    if properties.has_key('configuration')==False:
+    if ('configuration' in properties)==False:
         properties['configuration']=toplevel
     contents='<?xml version="1.0" encoding="UTF-8" ?>\n'
     contents+='<testsuite skip="%s" errors="%s" failures="%d" hostname="%s" name="%s" tests="%d" time="%s" timestamp="%s">\n' % (skips,errors,failedfiles,hostname,name,totalfiles,time,timestamp)
@@ -537,12 +537,12 @@ def convertAcceptanceToJunit(infile,outfile,toplevel):
     for testresult in testresults:
         out=''
         contents+='  <testcase classname="%s.%s" name="%s" time="%s">' % (properties['configuration'],testresult['class'],testresult['name'],testresult['time'])
-        if testresult.has_key('out'):
+        if 'out' in testresult:
             out+=testresult['out']+'\n'
-        if testresult.has_key('skip'):
+        if 'skip' in testresult:
             contents+='<skipped message="%s" type="%s">%s</skipped>\n  ' % (fixForXmlEscape(testresult['skipmessage']),testresult['skiptype'],fixForXmlCdata(testresult['skipout']))
             out+=testresult['skipout']+'\n'
-        if testresult.has_key('failure'):
+        if 'failure' in testresult:
             contents+='<failure message="%s" type="%s">%s</failure>\n  ' % (testresult['failuremessage'],testresult['failuretype'],fixForXmlCdata(testresult['failureout']))
             out+=testresult['failureout']+'\n'
         if out!='':
