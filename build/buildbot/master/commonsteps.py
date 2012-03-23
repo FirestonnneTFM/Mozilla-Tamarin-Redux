@@ -173,7 +173,7 @@ def sync_clone(url):
 
 sync_clone_sandbox = SandboxClone(
             dest="repo",
-            changeDir="changes/processed",
+            changeDir="changes/deep/processed",
             description='Cloning the source repository...',
             descriptionDone='Finished cloning the source repository',
             name='Source_Clone',
