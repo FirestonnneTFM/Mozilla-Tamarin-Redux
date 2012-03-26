@@ -149,11 +149,18 @@ do
     # verify the deployed shell version if correct
     ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;./avmshell" > /tmp/stdout
     deploy_rev=`cat /tmp/stdout | grep "avmplus shell" | awk '{print $NF}'`
-    if [ "$change" != "${deploy_rev%:*}" ] || [ "$changeid" != "${deploy_rev#*:}" ]; 
+    if [ "$change" != "${deploy_rev%:*}" ] || [ "$changeid" != "${deploy_rev#*:}" ];
     then
-        echo $0 FAILED!!!
-        echo requested build "$change:$changeid" is not what is deployed "${deploy_rev%:*}:${deploy_rev#*:}"
-        exit 1
+        # Could be possible that we are running from the hg mirror repo and using a binary that has a p4 changelist revision
+        # The last line in the description is going to be "CL@12345"
+        # so grab the last line and peel off the perforce changelist
+        cl=`hg log -r $change --template {desc} | tail -n 1 | awk -F@  '{print $2}'`
+        echo "found changelist in description: ${cl}"
+        if [ "${cl}" != "${deploy_rev%:*}" ]; then
+            echo $0 FAILED!!!
+            echo requested build "$change:$changeid" is not what is deployed "${deploy_rev%:*}:${deploy_rev#*:}"
+            exit 1
+        fi
     fi
 
     # check if the base acceptance-tests-abcs.zip is correct version
