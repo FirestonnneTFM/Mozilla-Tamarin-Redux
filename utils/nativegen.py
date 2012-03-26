@@ -1756,8 +1756,8 @@ class AbcThunkGen:
             out.println('#include "../vprof/vprof.h"')
 
         for receiver,m in self.all_thunks:
-            self.emitSamplerThunkBody(out, receiver, m);
             self.emitThunkBody(out, receiver, m);
+            self.emitSamplerThunkBody(out, receiver, m);
 
         out.println("")
         self.printStructAsserts(out, self.abc)
