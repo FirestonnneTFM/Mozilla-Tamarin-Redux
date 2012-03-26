@@ -306,24 +306,23 @@ def convertAotToJunit(infile,outfile,toplevel):
                     skips+=1
                 else:
                     skip=''
-                if time=='':
-                    time='0.0'
-                testresults.append({'test':test,'time':time,'out':out,'skip':skip,'fail':fail,'class':class1,'name':name,'failure':error})
             if line.startswith('AOT compiling'):
                 test=tokens[2]
                 class1=toplevel+'.'+test[0:test.rfind('/')+1]
                 name=test[test.rfind('/')+1:]
                 tests+=1
                 time=''
-                ctr=2
-                while len(tokens)>ctr+1:
-                    if tokens[ctr]=='time':
-                        time=tokens[ctr+1]
-                        totaltime+=float(time)
-                    ctr+=1
+                try:
+                    totaltime+=float(tokens[-1])
+                    time=tokens[-1]
+                except:
+                    True
                 out=''
                 skip=''
                 error=''
+                if time=='':
+                    time='0.0'
+                testresults.append({'test':test,'time':time,'out':out,'skip':skip,'fail':fail,'class':class1,'name':name,'failure':error})
             else:
                 test=None
         elif line.startswith('test run'):
