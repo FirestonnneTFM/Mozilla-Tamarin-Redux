@@ -59,6 +59,7 @@ showhelp ()
     echo "       <upload>       (true|false) upload shell to server"
     echo "       <features>     +<feature> -<feature>, will ensure specified"
     echo "                      features are either enabled(+) or disabled(-)"
+    echo "       <compiledir>   directory to build in (default=objdir)"
     exit 1
 }
 
@@ -84,6 +85,12 @@ test "$upload" = "true" || {
 # Features to confirm being enabled or disabled
 features=$5
 
+compiledir=$6
+test "$compiledir" = "" && {
+    compiledir=objdir
+}
+
+
 # silence output if silent=true (function defined in environment.sh)
 logfile=build-$platform-$filename.log
 beginSilent
@@ -103,14 +110,14 @@ download_asc
 # Make sure that there are no left over directories from previous compile
 ##
 cd $basedir
-test -d objdir && {
-    echo Remove directory $basedir/objdir
-    rm -rf $basedir/objdir
+test -d ${compiledir} && {
+    echo Remove directory $basedir/${compiledir}
+    rm -rf $basedir/${compiledir}
 }
 
-mkdir objdir
+mkdir ${compiledir}
 
-cd objdir
+cd ${compiledir}
 
 echo ""
 echo "*******************************************************************************"
@@ -248,7 +255,7 @@ fi
 
 # only delete if not running under Jenkins
 if [ "$JENKINS_HOME" == "" ]; then
-    rm -rf $basedir/objdir
+    rm -rf $basedir/${compiledir}
 fi # end Jenkins check
 
 echo "build succeeded"
