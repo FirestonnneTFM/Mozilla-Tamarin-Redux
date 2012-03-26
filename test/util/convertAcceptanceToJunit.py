@@ -56,7 +56,7 @@ def fixForXmlCdata(str):
         # change ]]> in source string
         str=str.replace(']]>','] ]>') 
         # remove invalid unicode chars
-        #str=re.sub(b'[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]','',str)
+        str=re.sub('[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]','',str)
         str="<![CDATA[%s]]>" % str
     return str
 
