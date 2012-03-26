@@ -58,9 +58,6 @@ export shell_release=avmshell_mips
 export shell_debug=avmshell_mips_d
 export ssh_proc_names="avmshell_mips avmshell_mips_d avmshell_mips_osr avmshell_mips_aot"
 
-# Override the default MAKE_OPTIONS env variable on the machine
-export MAKE_OPTIONS="-j2"
-
 # Override this, default is avmshell* and since this slave runs on a machine
 # with other slaves, the process cleaner /can/ find avmshell processes, 
 # BUT they will NEVER belong to this slave since the shell is run on a device
