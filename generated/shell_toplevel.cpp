@@ -45,14 +45,6 @@ const uint32_t shell_toplevel_abc_method_count = 246;
 const uint32_t shell_toplevel_abc_length = 15947;
 
 /* thunks (62 total) */
-avmplus::Atom avmplus_Domain_currentDomain_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
-{
-    MethodFrame frame;
-    frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_Domain_currentDomain_get_thunk(env, argc, argv);
-    frame.exit(env->core());
-    return retVal;
-}
 avmplus::Atom avmplus_Domain_currentDomain_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
@@ -64,11 +56,11 @@ avmplus::Atom avmplus_Domain_currentDomain_get_thunk(MethodEnv* env, uint32_t ar
     avmplus::DomainObject* const ret = obj->get_currentDomain();
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_Domain_currentDomain_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_Domain_currentDomain_get_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -83,11 +75,11 @@ avmplus::Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(MethodEnv* env, 
     uint32_t const ret = obj->get_MIN_DOMAIN_MEMORY_LENGTH();
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_Domain_private_init_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_Domain_private_init_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -106,11 +98,11 @@ avmplus::Atom avmplus_Domain_private_init_thunk(MethodEnv* env, uint32_t argc, A
     );
     return undefinedAtom;
 }
-avmplus::Atom avmplus_Domain_loadBytes_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_Domain_private_init_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_Domain_loadBytes_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_Domain_private_init_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -131,11 +123,11 @@ avmplus::Atom avmplus_Domain_loadBytes_thunk(MethodEnv* env, uint32_t argc, Atom
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_Domain_getClass_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_Domain_loadBytes_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_Domain_getClass_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_Domain_loadBytes_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -154,11 +146,11 @@ avmplus::Atom avmplus_Domain_getClass_thunk(MethodEnv* env, uint32_t argc, Atom*
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_Domain_domainMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_Domain_getClass_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_Domain_domainMemory_get_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_Domain_getClass_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -173,11 +165,11 @@ avmplus::Atom avmplus_Domain_domainMemory_get_thunk(MethodEnv* env, uint32_t arg
     avmplus::ByteArrayObject* const ret = obj->get_domainMemory();
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_Domain_domainMemory_set_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_Domain_domainMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_Domain_domainMemory_set_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_Domain_domainMemory_get_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -196,11 +188,11 @@ avmplus::Atom avmplus_Domain_domainMemory_set_thunk(MethodEnv* env, uint32_t arg
     );
     return undefinedAtom;
 }
-avmplus::Atom flash_sampler_NewObjectSample_object_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_Domain_domainMemory_set_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = flash_sampler_NewObjectSample_object_get_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_Domain_domainMemory_set_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -215,11 +207,11 @@ avmplus::Atom flash_sampler_NewObjectSample_object_get_thunk(MethodEnv* env, uin
     avmplus::Atom const ret = obj->get_object();
     return avmplus::Atom(ret);
 }
-double flash_sampler_NewObjectSample_size_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom flash_sampler_NewObjectSample_object_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    double retVal = flash_sampler_NewObjectSample_size_get_thunk(env, argc, argv);
+    avmplus::Atom retVal = flash_sampler_NewObjectSample_object_get_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -234,11 +226,11 @@ double flash_sampler_NewObjectSample_size_get_thunk(MethodEnv* env, uint32_t arg
     double const ret = obj->get_size();
     return double(ret);
 }
-avmplus::Atom native_script_function_flash_sampler_clearSamples_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+double flash_sampler_NewObjectSample_size_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = native_script_function_flash_sampler_clearSamples_thunk(env, argc, argv);
+    double retVal = flash_sampler_NewObjectSample_size_get_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -253,11 +245,11 @@ avmplus::Atom native_script_function_flash_sampler_clearSamples_thunk(MethodEnv*
     SamplerScript::clearSamples(obj);
     return undefinedAtom;
 }
-avmplus::Atom native_script_function_flash_sampler_startSampling_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom native_script_function_flash_sampler_clearSamples_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = native_script_function_flash_sampler_startSampling_thunk(env, argc, argv);
+    avmplus::Atom retVal = native_script_function_flash_sampler_clearSamples_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -272,11 +264,11 @@ avmplus::Atom native_script_function_flash_sampler_startSampling_thunk(MethodEnv
     SamplerScript::startSampling(obj);
     return undefinedAtom;
 }
-avmplus::Atom native_script_function_flash_sampler_stopSampling_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom native_script_function_flash_sampler_startSampling_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = native_script_function_flash_sampler_stopSampling_thunk(env, argc, argv);
+    avmplus::Atom retVal = native_script_function_flash_sampler_startSampling_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -291,11 +283,11 @@ avmplus::Atom native_script_function_flash_sampler_stopSampling_thunk(MethodEnv*
     SamplerScript::stopSampling(obj);
     return undefinedAtom;
 }
-avmplus::Atom native_script_function_flash_sampler_pauseSampling_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom native_script_function_flash_sampler_stopSampling_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = native_script_function_flash_sampler_pauseSampling_thunk(env, argc, argv);
+    avmplus::Atom retVal = native_script_function_flash_sampler_stopSampling_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -310,11 +302,11 @@ avmplus::Atom native_script_function_flash_sampler_pauseSampling_thunk(MethodEnv
     SamplerScript::pauseSampling(obj);
     return undefinedAtom;
 }
-avmplus::Atom native_script_function_flash_sampler_sampleInternalAllocs_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom native_script_function_flash_sampler_pauseSampling_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = native_script_function_flash_sampler_sampleInternalAllocs_thunk(env, argc, argv);
+    avmplus::Atom retVal = native_script_function_flash_sampler_pauseSampling_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -333,11 +325,11 @@ avmplus::Atom native_script_function_flash_sampler_sampleInternalAllocs_thunk(Me
     );
     return undefinedAtom;
 }
-avmplus::Atom native_script_function_flash_sampler__setSamplerCallback_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom native_script_function_flash_sampler_sampleInternalAllocs_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = native_script_function_flash_sampler__setSamplerCallback_thunk(env, argc, argv);
+    avmplus::Atom retVal = native_script_function_flash_sampler_sampleInternalAllocs_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -356,11 +348,11 @@ avmplus::Atom native_script_function_flash_sampler__setSamplerCallback_thunk(Met
     );
     return undefinedAtom;
 }
-double native_script_function_flash_sampler_getSize_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom native_script_function_flash_sampler__setSamplerCallback_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    double retVal = native_script_function_flash_sampler_getSize_thunk(env, argc, argv);
+    avmplus::Atom retVal = native_script_function_flash_sampler__setSamplerCallback_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -379,11 +371,11 @@ double native_script_function_flash_sampler_getSize_thunk(MethodEnv* env, uint32
     );
     return double(ret);
 }
-avmplus::Atom native_script_function_flash_sampler_getMemberNames_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+double native_script_function_flash_sampler_getSize_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = native_script_function_flash_sampler_getMemberNames_thunk(env, argc, argv);
+    double retVal = native_script_function_flash_sampler_getSize_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -404,11 +396,11 @@ avmplus::Atom native_script_function_flash_sampler_getMemberNames_thunk(MethodEn
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom native_script_function_flash_sampler__getSamples_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom native_script_function_flash_sampler_getMemberNames_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = native_script_function_flash_sampler__getSamples_thunk(env, argc, argv);
+    avmplus::Atom retVal = native_script_function_flash_sampler_getMemberNames_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -427,11 +419,11 @@ avmplus::Atom native_script_function_flash_sampler__getSamples_thunk(MethodEnv* 
     );
     return avmplus::Atom(ret);
 }
-double native_script_function_flash_sampler_getSampleCount_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom native_script_function_flash_sampler__getSamples_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    double retVal = native_script_function_flash_sampler_getSampleCount_thunk(env, argc, argv);
+    avmplus::Atom retVal = native_script_function_flash_sampler__getSamples_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -446,11 +438,11 @@ double native_script_function_flash_sampler_getSampleCount_thunk(MethodEnv* env,
     double const ret = SamplerScript::getSampleCount(obj);
     return double(ret);
 }
-double native_script_function_flash_sampler__getInvocationCount_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+double native_script_function_flash_sampler_getSampleCount_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    double retVal = native_script_function_flash_sampler__getInvocationCount_thunk(env, argc, argv);
+    double retVal = native_script_function_flash_sampler_getSampleCount_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -475,11 +467,11 @@ double native_script_function_flash_sampler__getInvocationCount_thunk(MethodEnv*
     );
     return double(ret);
 }
-avmplus::Atom native_script_function_flash_sampler_isGetterSetter_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+double native_script_function_flash_sampler__getInvocationCount_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = native_script_function_flash_sampler_isGetterSetter_thunk(env, argc, argv);
+    double retVal = native_script_function_flash_sampler__getInvocationCount_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -501,11 +493,11 @@ avmplus::Atom native_script_function_flash_sampler_isGetterSetter_thunk(MethodEn
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom native_script_function_flash_sampler_getLexicalScopes_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom native_script_function_flash_sampler_isGetterSetter_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = native_script_function_flash_sampler_getLexicalScopes_thunk(env, argc, argv);
+    avmplus::Atom retVal = native_script_function_flash_sampler_isGetterSetter_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -524,11 +516,11 @@ avmplus::Atom native_script_function_flash_sampler_getLexicalScopes_thunk(Method
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom native_script_function_flash_sampler_getSavedThis_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom native_script_function_flash_sampler_getLexicalScopes_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = native_script_function_flash_sampler_getSavedThis_thunk(env, argc, argv);
+    avmplus::Atom retVal = native_script_function_flash_sampler_getLexicalScopes_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -547,11 +539,11 @@ avmplus::Atom native_script_function_flash_sampler_getSavedThis_thunk(MethodEnv*
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom native_script_function_flash_sampler_getMasterString_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom native_script_function_flash_sampler_getSavedThis_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = native_script_function_flash_sampler_getMasterString_thunk(env, argc, argv);
+    avmplus::Atom retVal = native_script_function_flash_sampler_getSavedThis_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -570,11 +562,11 @@ avmplus::Atom native_script_function_flash_sampler_getMasterString_thunk(MethodE
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom flash_trace_Trace_setLevel_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom native_script_function_flash_sampler_getMasterString_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = flash_trace_Trace_setLevel_thunk(env, argc, argv);
+    avmplus::Atom retVal = native_script_function_flash_sampler_getMasterString_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -595,11 +587,11 @@ avmplus::Atom flash_trace_Trace_setLevel_thunk(MethodEnv* env, uint32_t argc, At
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom flash_trace_Trace_getLevel_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom flash_trace_Trace_setLevel_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = flash_trace_Trace_getLevel_thunk(env, argc, argv);
+    avmplus::Atom retVal = flash_trace_Trace_setLevel_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -617,11 +609,11 @@ avmplus::Atom flash_trace_Trace_getLevel_thunk(MethodEnv* env, uint32_t argc, At
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom flash_trace_Trace_setListener_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom flash_trace_Trace_getLevel_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = flash_trace_Trace_setListener_thunk(env, argc, argv);
+    avmplus::Atom retVal = flash_trace_Trace_getLevel_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -640,11 +632,11 @@ avmplus::Atom flash_trace_Trace_setListener_thunk(MethodEnv* env, uint32_t argc,
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom flash_trace_Trace_getListener_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom flash_trace_Trace_setListener_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = flash_trace_Trace_getListener_thunk(env, argc, argv);
+    avmplus::Atom retVal = flash_trace_Trace_setListener_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -659,11 +651,11 @@ avmplus::Atom flash_trace_Trace_getListener_thunk(MethodEnv* env, uint32_t argc,
     avmplus::FunctionObject* const ret = obj->getListener();
     return avmplus::Atom(ret);
 }
-double avmplus_MI_plus_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom flash_trace_Trace_getListener_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    double retVal = avmplus_MI_plus_thunk(env, argc, argv);
+    avmplus::Atom retVal = flash_trace_Trace_getListener_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -682,11 +674,11 @@ double avmplus_MI_plus_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     );
     return double(ret);
 }
-avmplus::Atom avmplus_System_exit_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+double avmplus_MI_plus_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_exit_thunk(env, argc, argv);
+    double retVal = avmplus_MI_plus_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -705,11 +697,11 @@ avmplus::Atom avmplus_System_exit_thunk(MethodEnv* env, uint32_t argc, Atom* arg
     );
     return undefinedAtom;
 }
-avmplus::Atom avmplus_System_exec_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_exit_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_exec_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_exit_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -728,11 +720,11 @@ avmplus::Atom avmplus_System_exec_thunk(MethodEnv* env, uint32_t argc, Atom* arg
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_System_getAvmplusVersion_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_exec_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_getAvmplusVersion_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_exec_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -747,11 +739,11 @@ avmplus::Atom avmplus_System_getAvmplusVersion_thunk(MethodEnv* env, uint32_t ar
     avmplus::String* const ret = obj->getAvmplusVersion();
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_System_getFeatures_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_getAvmplusVersion_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_getFeatures_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_getAvmplusVersion_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -766,11 +758,11 @@ avmplus::Atom avmplus_System_getFeatures_thunk(MethodEnv* env, uint32_t argc, At
     avmplus::String* const ret = obj->getFeatures();
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_System_getRunmode_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_getFeatures_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_getRunmode_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_getFeatures_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -785,11 +777,11 @@ avmplus::Atom avmplus_System_getRunmode_thunk(MethodEnv* env, uint32_t argc, Ato
     avmplus::String* const ret = obj->getRunmode();
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_System_trace_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_getRunmode_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_trace_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_getRunmode_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -808,11 +800,11 @@ avmplus::Atom avmplus_System_trace_thunk(MethodEnv* env, uint32_t argc, Atom* ar
     );
     return undefinedAtom;
 }
-avmplus::Atom avmplus_System_write_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_trace_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_write_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_trace_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -831,11 +823,11 @@ avmplus::Atom avmplus_System_write_thunk(MethodEnv* env, uint32_t argc, Atom* ar
     );
     return undefinedAtom;
 }
-avmplus::Atom avmplus_System_debugger_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_write_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_debugger_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_write_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -850,11 +842,11 @@ avmplus::Atom avmplus_System_debugger_thunk(MethodEnv* env, uint32_t argc, Atom*
     obj->debugger();
     return undefinedAtom;
 }
-avmplus::Atom avmplus_System_isDebugger_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_debugger_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_isDebugger_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_debugger_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -869,11 +861,11 @@ avmplus::Atom avmplus_System_isDebugger_thunk(MethodEnv* env, uint32_t argc, Ato
     bool const ret = obj->isDebugger();
     return avmplus::Atom(ret);
 }
-double avmplus_System_getNanosecondTimer_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_isDebugger_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    double retVal = avmplus_System_getNanosecondTimer_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_isDebugger_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -888,11 +880,11 @@ double avmplus_System_getNanosecondTimer_thunk(MethodEnv* env, uint32_t argc, At
     double const ret = obj->getNanosecondTimer();
     return double(ret);
 }
-avmplus::Atom avmplus_System_getTimer_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+double avmplus_System_getNanosecondTimer_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_getTimer_thunk(env, argc, argv);
+    double retVal = avmplus_System_getNanosecondTimer_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -907,11 +899,11 @@ avmplus::Atom avmplus_System_getTimer_thunk(MethodEnv* env, uint32_t argc, Atom*
     uint32_t const ret = obj->getTimer();
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_System_private_getArgv_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_getTimer_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_private_getArgv_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_getTimer_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -926,11 +918,11 @@ avmplus::Atom avmplus_System_private_getArgv_thunk(MethodEnv* env, uint32_t argc
     avmplus::ArrayObject* const ret = obj->getArgv();
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_System_readLine_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_private_getArgv_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_readLine_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_private_getArgv_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -945,11 +937,11 @@ avmplus::Atom avmplus_System_readLine_thunk(MethodEnv* env, uint32_t argc, Atom*
     avmplus::String* const ret = obj->readLine();
     return avmplus::Atom(ret);
 }
-double avmplus_System_totalMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_readLine_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    double retVal = avmplus_System_totalMemory_get_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_readLine_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -964,11 +956,11 @@ double avmplus_System_totalMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom*
     double const ret = obj->get_totalMemory();
     return double(ret);
 }
-double avmplus_System_freeMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+double avmplus_System_totalMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    double retVal = avmplus_System_freeMemory_get_thunk(env, argc, argv);
+    double retVal = avmplus_System_totalMemory_get_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -983,11 +975,11 @@ double avmplus_System_freeMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* 
     double const ret = obj->get_freeMemory();
     return double(ret);
 }
-double avmplus_System_privateMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+double avmplus_System_freeMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    double retVal = avmplus_System_privateMemory_get_thunk(env, argc, argv);
+    double retVal = avmplus_System_freeMemory_get_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1002,11 +994,11 @@ double avmplus_System_privateMemory_get_thunk(MethodEnv* env, uint32_t argc, Ato
     double const ret = obj->get_privateMemory();
     return double(ret);
 }
-avmplus::Atom avmplus_System_forceFullCollection_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+double avmplus_System_privateMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_forceFullCollection_thunk(env, argc, argv);
+    double retVal = avmplus_System_privateMemory_get_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1021,11 +1013,11 @@ avmplus::Atom avmplus_System_forceFullCollection_thunk(MethodEnv* env, uint32_t 
     obj->forceFullCollection();
     return undefinedAtom;
 }
-avmplus::Atom avmplus_System_queueCollection_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_forceFullCollection_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_queueCollection_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_forceFullCollection_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1040,11 +1032,11 @@ avmplus::Atom avmplus_System_queueCollection_thunk(MethodEnv* env, uint32_t argc
     obj->queueCollection();
     return undefinedAtom;
 }
-avmplus::Atom avmplus_System_ns_example_nstest_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_queueCollection_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_ns_example_nstest_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_queueCollection_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1059,11 +1051,11 @@ avmplus::Atom avmplus_System_ns_example_nstest_thunk(MethodEnv* env, uint32_t ar
     obj->ns_example_nstest();
     return undefinedAtom;
 }
-avmplus::Atom avmplus_System_isGlobal_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_ns_example_nstest_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_isGlobal_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_ns_example_nstest_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1082,11 +1074,11 @@ avmplus::Atom avmplus_System_isGlobal_thunk(MethodEnv* env, uint32_t argc, Atom*
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_System_swfVersion_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_isGlobal_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_swfVersion_get_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_isGlobal_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1101,11 +1093,11 @@ avmplus::Atom avmplus_System_swfVersion_get_thunk(MethodEnv* env, uint32_t argc,
     int32_t const ret = obj->get_swfVersion();
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_System_apiVersion_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_swfVersion_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_apiVersion_get_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_swfVersion_get_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1120,11 +1112,11 @@ avmplus::Atom avmplus_System_apiVersion_get_thunk(MethodEnv* env, uint32_t argc,
     int32_t const ret = obj->get_apiVersion();
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_System_disposeXML_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_apiVersion_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_disposeXML_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_apiVersion_get_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1143,11 +1135,11 @@ avmplus::Atom avmplus_System_disposeXML_thunk(MethodEnv* env, uint32_t argc, Ato
     );
     return undefinedAtom;
 }
-avmplus::Atom avmplus_System_deopt_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_disposeXML_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_deopt_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_disposeXML_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1166,11 +1158,11 @@ avmplus::Atom avmplus_System_deopt_thunk(MethodEnv* env, uint32_t argc, Atom* ar
     );
     return undefinedAtom;
 }
-avmplus::Atom avmplus_System_pauseForGCIfCollectionImminent_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_deopt_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_pauseForGCIfCollectionImminent_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_deopt_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1188,11 +1180,11 @@ avmplus::Atom avmplus_System_pauseForGCIfCollectionImminent_thunk(MethodEnv* env
     );
     return undefinedAtom;
 }
-avmplus::Atom avmplus_System_is64bit_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_pauseForGCIfCollectionImminent_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_is64bit_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_pauseForGCIfCollectionImminent_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1207,11 +1199,11 @@ avmplus::Atom avmplus_System_is64bit_thunk(MethodEnv* env, uint32_t argc, Atom* 
     bool const ret = obj->is64bit();
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_System_isIntptr_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_is64bit_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_isIntptr_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_is64bit_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1230,11 +1222,11 @@ avmplus::Atom avmplus_System_isIntptr_thunk(MethodEnv* env, uint32_t argc, Atom*
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_System_canonicalizeNumber_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_isIntptr_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_System_canonicalizeNumber_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_isIntptr_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1253,11 +1245,11 @@ avmplus::Atom avmplus_System_canonicalizeNumber_thunk(MethodEnv* env, uint32_t a
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_File_exists_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_System_canonicalizeNumber_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_File_exists_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_System_canonicalizeNumber_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1276,11 +1268,11 @@ avmplus::Atom avmplus_File_exists_thunk(MethodEnv* env, uint32_t argc, Atom* arg
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_File_read_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_File_exists_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_File_read_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_File_exists_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1299,11 +1291,11 @@ avmplus::Atom avmplus_File_read_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_File_write_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_File_read_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_File_write_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_File_read_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1325,11 +1317,11 @@ avmplus::Atom avmplus_File_write_thunk(MethodEnv* env, uint32_t argc, Atom* argv
     );
     return undefinedAtom;
 }
-avmplus::Atom avmplus_File_readByteArray_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_File_write_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_File_readByteArray_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_File_write_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1348,11 +1340,11 @@ avmplus::Atom avmplus_File_readByteArray_thunk(MethodEnv* env, uint32_t argc, At
     );
     return avmplus::Atom(ret);
 }
-avmplus::Atom avmplus_File_writeByteArray_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom avmplus_File_readByteArray_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     MethodFrame frame;
     frame.enter(env->core(), env);
-    avmplus::Atom retVal = avmplus_File_writeByteArray_thunk(env, argc, argv);
+    avmplus::Atom retVal = avmplus_File_readByteArray_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -1373,6 +1365,14 @@ avmplus::Atom avmplus_File_writeByteArray_thunk(MethodEnv* env, uint32_t argc, A
         , arg2
     );
     return avmplus::Atom(ret);
+}
+avmplus::Atom avmplus_File_writeByteArray_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+{
+    MethodFrame frame;
+    frame.enter(env->core(), env);
+    avmplus::Atom retVal = avmplus_File_writeByteArray_thunk(env, argc, argv);
+    frame.exit(env->core());
+    return retVal;
 }
 
 class SlotOffsetsAndAsserts
