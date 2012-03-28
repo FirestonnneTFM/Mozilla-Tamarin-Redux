@@ -270,9 +270,9 @@ class PerformanceRuntest(RuntestBase):
                     self.memory = True
                     del self.displayMetrics[self.displayMetrics.index('memory')]
             elif o in ('--vmversion',):
-                self.avmversion = v
+                self.avmrevision = self.avmversion = v
             elif o in ('--vm2version',):
-                self.avm2version = v
+                self.avm2revision = self.avm2version = v
             elif o in ('--vmargs2',):
                 self.vmargs2 = v
             elif o in ('--nooptimize',):
