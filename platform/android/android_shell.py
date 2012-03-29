@@ -43,7 +43,7 @@
 import os,re,sys,subprocess,killableprocess,datetime,adb_proxy
 
 # Return either the USAGE or the -Dversion information
-if len(sys.argv)==1 or sys.argv[1]=='-Dversion':
+if len(sys.argv)==1 or sys.argv[1]=='-Dversion' or sys.argv[1]=='-Dselftest':
     if len(sys.argv)==1:
         arg=""
     else:
