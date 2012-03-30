@@ -435,6 +435,9 @@ namespace avmplus
 #ifdef VMCFG_TELEMETRY_SAMPLER
     FASTFUNCTION(FUNCADDR(AvmCore::takeSampleWrapper), SIG1(V,P), takeSampleWrapper);
 #endif
+#ifdef VMCFG_STACK_METRICS
+    FASTFUNCTION(FUNCADDR(AvmCore::recordStackPointerWrapper), SIG1(V,P), recordStackPointerWrapper);
+#endif
     FUNCTION(FUNCADDR(AvmCore::handleInterruptMethodEnv), SIG1(V,P), handleInterruptMethodEnv)
     FASTFUNCTION(FUNCADDR(AvmCore::handleStackOverflowMethodEnv), SIG1(V,P), handleStackOverflowMethodEnv)
     METHOD(ENVADDR(MethodEnv::nextname), SIG3(A,P,A,I), nextname)

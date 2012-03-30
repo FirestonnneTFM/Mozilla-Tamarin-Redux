@@ -1773,6 +1773,10 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 vbNames->lirNameMap->addName(csn, "csn");
             })
         }
+        #ifdef VMCFG_STACK_METRICS
+        callIns(FUNCTIONID(recordStackPointerWrapper), 1, coreAddr);        
+        #endif
+
         #endif
 
 #ifdef DEBUG

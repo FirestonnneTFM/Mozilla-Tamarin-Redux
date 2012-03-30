@@ -180,4 +180,7 @@
 #  define NANOJIT_EAGER_REGSAVE
 #endif
 
+// Enable stack metrics API (for development purposes only)
+//#define VMCFG_STACK_METRICS
+
 #endif /* __avmbuild__ */
