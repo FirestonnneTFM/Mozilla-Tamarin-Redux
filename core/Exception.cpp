@@ -101,6 +101,10 @@ namespace avmplus
 
     void ExceptionFrame::beginTry(AvmCore* core)
     {
+#ifdef _DEBUG
+        core->tryHook();
+#endif
+
         this->core = core;
 
         prevFrame = core->exceptionFrame;
@@ -187,5 +191,10 @@ namespace avmplus
         core->currentMethodFrame = savedMethodFrame;
 
         core->gc->allocaPopTo(this->stacktop);
+
+        // Extension hook for host.  For example, it can query the
+        // stack depth to determine when an attempt to recover from
+        // a stack overflow has succeeded.
+        core->catchHook(catchAction);
     }
 }

@@ -40,6 +40,8 @@
 #ifndef __avmplus_AvmCore__
 #define __avmplus_AvmCore__
 
+#include "Exception.h"  // CatchAction
+
 #ifdef VMCFG_TELEMETRY
 namespace telemetry
 {
@@ -576,6 +578,14 @@ const int kBufferPadding = 16;
         bool            samplerEnabled;
 #endif
 
+#ifdef VMCFG_STACK_METRICS
+        /** Smallest stackpointer value sampled since last reset. */
+        uintptr_t		minStack;
+
+        /** Largest stackpointer value sampled since last reset. */
+        uintptr_t		maxStack;
+#endif
+
     private:
         // note, allocated using mmfx_new, *not* gc memory
         LivePoolNode* livePools;
@@ -721,13 +731,6 @@ const int kBufferPadding = 16;
     public:
         RegexCache      m_regexCache;   // Substructure with traceable data
 
-        /**
-         * This method will be invoked when the first exception
-         * frame is set up.  This will be a good point to set
-         * minstack by calling setStackLimit().
-         */
-        virtual void setStackBase();
-
         /** Internal table of strings for boolean type ("true", "false") */
         GCMember<String> booleanStrings[2];
 
@@ -872,6 +875,17 @@ const int kBufferPadding = 16;
         // To be called post-PoolObjects' population to assign it a unique id amongst pools
         void assignPoolId(PoolObject* pool);
 
+        /**
+         * This method will be invoked when the first exception
+         * frame is set up.  This will be a good point to set
+         * minstack by calling setStackLimit().
+         */
+        virtual void setStackBase();
+#ifdef _DEBUG
+        virtual void tryHook();
+#endif
+        virtual void catchHook(CatchAction action);
+
 #ifdef DEBUGGER
     public:
         Debugger* debugger() const;
@@ -965,6 +979,24 @@ const int kBufferPadding = 16;
         static void FASTCALL takeSampleWrapper(AvmCore *theCore);
         void FASTCALL takeSample();
         TelemetrySampler* getSampler();
+#endif
+
+#ifdef VMCFG_STACK_METRICS
+        /** Reset stack metrics. */
+        void initStackMetrics();
+
+        /** Return smallest stackpointer value sampled since last reset. */
+        uintptr_t getMinStack();
+
+        /** Return largest stackpointer value sampled since last reset. */
+        uintptr_t getMaxStack();
+        
+        /**
+         * Record stackpointer sample.  Called internally by the VM at entry to
+         * each Actionscript function, whether interpreted or compiled.
+         */
+        void FASTCALL recordStackPointer();
+        static void FASTCALL recordStackPointerWrapper(AvmCore *theCore);
 #endif
 
         /** called by executing code when stack overflow is detected (sp < minstack) */
@@ -1871,7 +1903,6 @@ const int kBufferPadding = 16;
     private:
         static bool isBuiltinType(Atom atm, BuiltinType bt);
         static bool isBuiltinTypeMask(Atom atm, int btmask);
-
 
     public:
 

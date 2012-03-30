@@ -752,6 +752,9 @@ namespace avmplus
         register const DomainEnv* envDomain = env->domainEnv();
         // I do *not* like making pc 'volatile'; a smart compiler may handle it well
         // and only spill to memory across a call, but a dumb compiler may not ever
+#ifdef VMCFG_STACK_METRICS
+        core->recordStackPointer();
+#endif
         // keep the value in a register at all.
         MethodSignaturep volatile ms = env->method->getMethodSignature();
 #if !defined VMCFG_WORDCODE || defined AVMPLUS_VERBOSE

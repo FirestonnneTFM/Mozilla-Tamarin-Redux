@@ -345,6 +345,10 @@ namespace avmplus
 #endif
         , console(NULL)
         , gc(g)
+#ifdef VMCFG_STACK_METRICS
+        , minStack(~uintptr_t(0))
+        , maxStack(0)
+#endif
 #ifdef _DEBUG
         , codeContextThread(VMPI_currentThread())
 #endif
@@ -723,6 +727,19 @@ namespace avmplus
 
     /*virtual*/ void AvmCore::setStackBase()
     {
+        // nothing
+    }
+
+#ifdef _DEBUG
+    /*virtual*/ void AvmCore::tryHook()
+    {
+        // nothing
+    }
+#endif
+
+    /*virtual*/ void AvmCore::catchHook(CatchAction action)
+    {
+        (void)action;
         // nothing
     }
 
@@ -5331,6 +5348,39 @@ return the result of the comparison ToPrimitive(x) == y.
         // invoke host's stack overflow handler
         core->stackOverflow(toplevel);
     }
+
+#ifdef VMCFG_STACK_METRICS
+    void AvmCore::initStackMetrics()
+    {
+        minStack = ~uintptr_t(0);
+        maxStack = 0;
+    }
+
+    uintptr_t AvmCore::getMinStack()
+    {
+        return minStack;
+    }
+    
+    uintptr_t AvmCore::getMaxStack()
+    {
+        return maxStack;
+    }
+
+    void AvmCore::recordStackPointer()
+    {
+        char* dummy;
+        uintptr_t sp = (uintptr_t)&dummy;
+        if (sp < minStack) minStack = sp;
+        if (sp > maxStack) maxStack = sp;
+    }
+
+    // A static wrapper for recordStackPointer(), used by the jit.
+    /* static */
+    void AvmCore::recordStackPointerWrapper(AvmCore *theCore)
+    {
+        theCore->recordStackPointer();
+    }
+#endif
 
 #ifdef VMCFG_EPOC_EMULATOR
 
