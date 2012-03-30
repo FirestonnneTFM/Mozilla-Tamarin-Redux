@@ -42,6 +42,27 @@
 
 import getopt,sys,socket,re,os,platform,string,datetime,string
 
+def parseName(toplevel,names):
+    fullname=names[0]
+    testname=fullname[fullname.rfind('/')+1:]
+    classname=toplevel+'.'+fullname[0:fullname.rfind('/')]
+    classname=classname.replace('/','.')
+    time=out=''
+    for tok in names[1:]:
+        if tok.startswith('--threadid') or tok.startswith('--androidid'):
+           out+=tok+' '
+        elif tok=='time':
+           continue
+        else:
+           try:
+               float(tok)
+               time=tok
+           except: 
+               testname+=' '+tok
+    if out!='':
+        out=out[0:-1]+'\n'
+    return classname,testname,time,out            
+
 def fixForXmlEscape(str):
     str=str.replace('&','&amp;')
     str=str.replace("'",'&apos;')
@@ -267,9 +288,10 @@ def convertAotToJunit(infile,outfile,toplevel):
     
     lines=open(infile).read().split('\n')
     for line in lines:
+        line=line.strip()
         tokens=line.split()
         if line.startswith('java version'):
-            properties['java.version']=tokens[2]
+            properties['java.version']=tokens[2].replace('"','')
         if line=='':
             continue
         if line.startswith('thread count:'):
@@ -293,38 +315,28 @@ def convertAotToJunit(infile,outfile,toplevel):
             properties['testtime']=tokens[3]
         if line.startswith('Skipping'):
             skipname=tokens[1]
-            if skipname=='-daa':
-                skipname=tokens[2]
             skiplist[skipname]=line
+            continue
         if line.startswith('ERROR:'):
             error=line
             errors+=1
-        if line.startswith('AOT compiling') or line.startswith('compiling'):
+        if line.startswith('compiling') or line.startswith('Excluding'):
+            continue
+        if line.startswith('AOT compiling'):
             if test!=None:
                 if test in skiplist:
                     skip=skiplist[test]
                     skips+=1
                 else:
                     skip=''
-            if line.startswith('AOT compiling'):
-                test=tokens[2]
-                class1=toplevel+'.'+test[0:test.rfind('/')+1]
-                name=test[test.rfind('/')+1:]
-                tests+=1
-                time=''
-                try:
-                    totaltime+=float(tokens[-1])
-                    time=tokens[-1]
-                except:
-                    True
-                out=''
-                skip=''
-                error=''
-                if time=='':
-                    time='0.0'
-                testresults.append({'test':test,'time':time,'out':out,'skip':skip,'fail':fail,'class':class1,'name':name,'failure':error})
-            else:
-                test=None
+                testresults.append({'test':test,'time':time,'out':out,'skip':skip,'fail':fail,'class':classname,'name':testname,'failure':error})
+            error=''
+            test=tokens[2]
+            classname,testname,time,out=parseName(toplevel,tokens[2:])
+            if time=='':
+                time='0.0'
+            totaltime+=float(time)
+            continue
         elif line.startswith('test run'):
             properties['status']=line
             break
@@ -466,20 +478,11 @@ def convertAcceptanceToJunit(infile,outfile,toplevel):
         if finishedTests==False and len(tokens)>2 and re.search('^[0-9.]+',line):
             totalfiles+=1
             if lastout!='' and len(testresults)>0:
-                testresults[len(testresults)-1]['out']=lastout
+                testresults[len(testresults)-1]['out']+=lastout
             lastout=''
             testobj={}
-            fullname=tokens[2]
-            testobj['class']=toplevel+'.'+fullname[0:fullname.rfind('/')+1]
-            testobj['name']=fullname[fullname.rfind('/')+1:]
-            testobj['time']=''
-            ctr=3
-            while ctr<len(tokens):
-                if tokens[ctr]=='time' and len(tokens)>ctr+1:
-                    testobj['time']=tokens[ctr+1]
-                    break
-                testobj['name']+=' %s' % tokens[ctr]
-                ctr+=1
+            fullname=tokens[2:]
+            testobj['class'],testobj['name'],testobj['time'],testobj['out']=parseName(toplevel,fullname)
             testresults.append(testobj)
         elif finishedTests==False:
             if re.search('^\s+skipping...',line) or re.search('^\s+expected failure',line):
