@@ -115,15 +115,6 @@ namespace avmplus
         return (a < b) ? a : b;
     }
 
-    // Rounds a up to nearest integral multiple of b.
-    // requires: T is integral type.
-    // returns r, where r is least integral multiple of b such that r >= a.
-    //
-    // Bugzilla 699176: lift to shared header or specialize to uint64_t.
-    template <typename T> REALLY_INLINE T roundUpTo(T a, T b) {
-        return ((a + (b - 1)) / b) * b;
-    }
-
     //
     // ByteArray
     //
@@ -342,71 +333,19 @@ namespace avmplus
         SetLength(uint32_t(sum));
     }
 
-    // Bugzilla 699176: This threshold controls whether we switch to
-    // large-size handling.  The chosen increment (24 MB) was
-    // suggested by Scott Petersen based on experiments with policy in
-    // Alchemy; the chosen threshold (also 24 MB) was assumed to be an
-    // appropriate value, but it would be worthwhile to check that
-    // assumption when time permits.
-
-    static const uint32_t kHugeGrowthThreshold = 24*1024*1024;
-    static const uint32_t kHugeGrowthIncr = 24*1024*1024;
-
-    void ByteArray::SetLengthCommon(uint32_t newLength, bool calledFromLengthSetter)
+    void FASTCALL ByteArray::SetLength(uint32_t newLength)
     {
         if (m_subscribers.length() > 0 && m_length < DomainEnv::GLOBAL_MEMORY_MIN_SIZE)
             m_toplevel->throwRangeError(kInvalidRangeError);
 
         Grower grower(this);
-        if (!calledFromLengthSetter ||
-            (newLength < kHugeGrowthThreshold &&
-             m_length < kHugeGrowthThreshold))
+        if (newLength > m_capacity)
         {
-            if (newLength > m_capacity)
-            {
-                grower.EnsureWritableCapacity(newLength);
-            }
+            grower.EnsureWritableCapacity(newLength);
         }
-        else
-        {
-            // Bugzilla 699176: Setting the length is different than other
-            // expanding/contracting operations; it represents the client
-            // saying exactly how much (or how little) storage they
-            // anticipate using.
-            //
-            // Thus, when we are (or will be) at a large size:
-            // 1. Call ReallocBackingStore() directly and unconditionally,
-            //    rather than conditionally via EnsureWritableCapacity().
-            // 2. Round capacity up to multiple of kHugeGrowthIncr to
-            //    avoid some pathoglogical cases.
-
-            // (overflow paranoia; see notes above SetLength(uint32_t, uint32_t).
-            uint64_t newCapRoundedUp =
-                roundUpTo(uint64_t(newLength), uint64_t(kHugeGrowthIncr));
-            uint32_t newCap = ((newCapRoundedUp >= MAX_BYTEARRAY_STORE_LENGTH)
-                               ? uint32_t(newCapRoundedUp) : newLength);
-
-            AvmAssert(newCap >= newLength);
-
-            if (newCap != m_capacity)
-            {
-                grower.ReallocBackingStore(newCap);
-            }
-        }
-
         m_length = newLength;
         if (m_position > newLength)
             m_position = newLength;
-    }
-
-    void FASTCALL ByteArray::SetLength(uint32_t newLength)
-    {
-        SetLengthCommon(newLength, false);
-    }
-
-    void FASTCALL ByteArray::SetLengthFromAS3(uint32_t newLength)
-    {
-        SetLengthCommon(newLength, true);
     }
 
     // When we might be reading or writing to ourself, use this function
