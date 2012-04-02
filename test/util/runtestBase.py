@@ -1042,10 +1042,7 @@ class RuntestBase(object):
             extraoutname = extraoutname.replace("/", ".")
             extraoutname = extraoutname+"."+outname
             extraoutabc = os.path.join(output, extraoutname + ".abc")
-            if isfile(abc): # Safe guard
-                shutil.copyfile(abc, extraoutabc)
-                while not os.path.exists(extraoutabc): # Have had some IO issues with getting to the ADT call
-                    time.sleep(.5)                     # before the file is actually copied over.
+            self.copyfile_retry(abc, extraoutabc)
             copiedExtraAbcs.append(output+"/"+extraoutname+".abc")
 
         cmd = '%s -Xshell -Xoutput %s %s %s %s' % (os.path.join(self.aotsdk, 'bin/adt'), output, self.aotextraargs, " ".join(copiedExtraAbcs), outabc)
@@ -1067,6 +1064,22 @@ class RuntestBase(object):
         except:
             raise
 
+    def copyfile_retry(self, src, dest, attempts=3):
+        # Have had problems with AOT compilation randomly failing because not all of the
+        # necessary abc files had been properly copied into the "output" directory. The
+        # problem stems from isfile() returning false when it should be true. Could be related
+        # to the fact that when this happens about 20 threads are starting up and all of them
+        # are accessing abcasm/abs_helper.abc at the same time and randomly some of the threads
+        # will get a false returned by the call to isfile().
+        count = 1
+        while (count <= attempts):
+            if isfile(src): # Safe guard
+                shutil.copyfile(src, dest)
+                return
+            count = count + 1
+            sleep(1)
+        # If we get this far, we will silently fail to copy the file. This will
+        # allow the ADT call to produce its failure of not being able to open the abc file.
 
     def compile_test(self, as_file, extraArgs=[], outputCalls = None):
         self.checkExecutable(self.java, 'java must be on system path or --java must be set to java executable')
