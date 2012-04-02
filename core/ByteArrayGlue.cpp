@@ -97,7 +97,7 @@ REALLY_INLINE uint32_t byteSwap32(uint32_t x)
 #endif // Various architectures with byteswap idioms backed by intrinsics
 
 // MAX_BYTEARRAY_STORE_LENGTH is the largest value that can be taken on by m_length,
-// strictly less than 2^32.  See constraint in ByteArray::Grower::EnsureWritableCapacity().
+// strictly less than 2^32.  See constraint in ByteArray::Grower::ReallocBackingStore().
 //
 // MAX_BYTEARRAY_SHORT_ACCESS_LENGTH is a value no smaller than 4095 and no greater
 // than 2^32-1-MAX_BYTEARRAY_STORE_LENGTH.
@@ -111,6 +111,10 @@ REALLY_INLINE uint32_t byteSwap32(uint32_t x)
 
 namespace avmplus
 {
+    template <typename T> REALLY_INLINE T min(T a, T b) {
+        return (a < b) ? a : b;
+    }
+
     //
     // ByteArray
     //
@@ -194,6 +198,23 @@ namespace avmplus
         
     void FASTCALL ByteArray::Grower::EnsureWritableCapacity(uint32_t minimumCapacity)
     {
+        if (minimumCapacity > (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2))
+            m_owner->ThrowMemoryError();
+
+        if (minimumCapacity > m_owner->m_capacity || m_owner->IsCopyOnWrite())
+        {
+            uint32_t newCapacity = m_owner->m_capacity << 1;
+            if (newCapacity < minimumCapacity)
+                newCapacity = minimumCapacity;
+            if (newCapacity < kGrowthIncr)
+                newCapacity = kGrowthIncr;
+
+            ReallocBackingStore(newCapacity);
+        }
+    }
+
+    void FASTCALL ByteArray::Grower::ReallocBackingStore(uint32_t newCapacity)
+    {
         // The extra check on maximum size is necessary because
         // mmfx_new_array_opt doesn't return NULL but instead Aborts
         // when the size approaches 2^32. We want to be consistent
@@ -212,45 +233,37 @@ namespace avmplus
         static_assert(MAX_BYTEARRAY_STORE_LENGTH == (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2),
                       "Constraint on maximum ByteArray storage size");
 
-        if (minimumCapacity > (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2))
+        if (newCapacity > (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2))
             m_owner->ThrowMemoryError();
 
-        if (minimumCapacity > m_owner->m_capacity || m_owner->IsCopyOnWrite())
+        m_oldArray = m_owner->m_array;
+        m_oldLength = m_owner->m_length;
+        m_oldCapacity = m_owner->m_capacity;
+
+        uint8_t* newArray = mmfx_new_array_opt(uint8_t, newCapacity, MMgc::kCanFail);
+        if (!newArray)
+            m_owner->ThrowMemoryError();
+
+        // Note that TellGcXXX always expects capacity, not (logical) length.
+        m_owner->TellGcNewBufferMemory(newArray, newCapacity);
+        if (m_oldArray)
         {
-            uint32_t newCapacity = m_owner->m_capacity << 1;
-            if (newCapacity < minimumCapacity)
-                newCapacity = minimumCapacity;
-            if (newCapacity < kGrowthIncr)
-                newCapacity = kGrowthIncr;
-
-            m_oldArray = m_owner->m_array;
-            m_oldLength = m_owner->m_length;
-            m_oldCapacity = m_owner->m_capacity;
-
-            uint8_t* newArray = mmfx_new_array_opt(uint8_t, newCapacity, MMgc::kCanFail);
-            if (!newArray)
-                m_owner->ThrowMemoryError();
-
-            // Note that TellGcXXX always expects capacity, not (logical) length.
-            m_owner->TellGcNewBufferMemory(newArray, newCapacity);
-            if (m_oldArray)
-            {
-                VMPI_memcpy(newArray, m_oldArray, m_oldLength);
+            VMPI_memcpy(newArray, m_oldArray, min(newCapacity, m_oldLength));
+            if (newCapacity > m_oldLength)
                 VMPI_memset(newArray+m_oldLength, 0, newCapacity-m_oldLength);
-            }
-            else
-            {
-                VMPI_memset(newArray, 0, newCapacity);
-            }
+        }
+        else
+        {
+            VMPI_memset(newArray, 0, newCapacity);
+        }
 
-            m_owner->m_array = newArray;
-            m_owner->m_capacity = newCapacity;
-            if (m_owner->m_copyOnWriteOwner != NULL)
-            {
-                m_owner->m_copyOnWriteOwner = NULL;
-                // Set this to NULL so we don't attempt to delete it in our dtor.
-                m_oldArray = NULL;
-            }
+        m_owner->m_array = newArray;
+        m_owner->m_capacity = newCapacity;
+        if (m_owner->m_copyOnWriteOwner != NULL)
+        {
+            m_owner->m_copyOnWriteOwner = NULL;
+            // Set this to NULL so we don't attempt to delete it in our dtor.
+            m_oldArray = NULL;
         }
     }
 
@@ -304,7 +317,7 @@ namespace avmplus
     // Set the length to x+y, but check for overflow.
     //
     // MemoryError is the error thrown by SetLength(index), or really by
-    // ByteArray::Grower::EnsureWritableCapacity(), if we try to create a
+    // ByteArray::Grower::ReallocBackingStore(), if we try to create a
     // buffer larger than the buffer limit, so it's the most consistent 
     // error to throw here.
     //
@@ -785,7 +798,7 @@ namespace avmplus
     // limiting the ByteArray size unreasonably.  (Requiring m_length < 2^31 would lead 
     // to further optimizations but that seems unreasonably short.)
     //
-    // Observe that ByteArray::Grower::EnsureWritableCapacity() implements the appropriate
+    // Observe that ByteArray::Grower::ReallocBackingStore() implements the appropriate
     // limit on m_capacity, and that is the only code that allocates memory for ByteArray.
     // Everywhere else we ensure m_length <= m_capacity.
 

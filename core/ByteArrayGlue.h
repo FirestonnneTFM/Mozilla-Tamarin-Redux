@@ -214,6 +214,7 @@ namespace avmplus
             {
             }
             void FASTCALL EnsureWritableCapacity(uint32_t minimumCapacity);
+            void FASTCALL ReallocBackingStore(uint32_t newCapacity);
             ~Grower();
         
             ByteArray*  m_owner;
