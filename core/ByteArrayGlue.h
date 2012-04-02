@@ -52,7 +52,6 @@ namespace avmplus
     class ByteArray : public DataInput,
                       public DataOutput
     {
-        friend class ByteArrayObject;
     public:
         ByteArray(Toplevel* toplevel);
         ~ByteArray();
@@ -73,18 +72,6 @@ namespace avmplus
         // Use Clear() to eliminate existing memory allocations.
         void FASTCALL SetLength(uint32_t newLength);
 
-    private:
-        // Ensure that the capacity of the ByteArray is at least 'newLength',
-        // and set length = max(GetLength(), newLength),
-        // and set position = min(GetPosition(), newLength)
-        //
-        // This is alternative entry point that *only* the length setter
-        // uses; it serves as a hint from client that newLength is
-        // expected maximum length for immediate future.
-        void FASTCALL SetLengthFromAS3(uint32_t newLength);
-        void SetLengthCommon(uint32_t newLength, bool calledFromSetter);
-
-    public:
         // Set the length to x+y, with overflow check.  If x+y overflows a uint32_t then
         // throw a MemoryError (same error that the one-argument variety will throw if
         // trying to create a buffer larger than the buffer limit, which is less than 2^32-1).
@@ -389,7 +376,7 @@ namespace avmplus
         void set_position(uint32_t offset) { m_byteArray.SetPosition(offset); }
 
         uint32_t get_length() { return m_byteArray.GetLength(); }
-        void set_length(uint32_t value) { m_byteArray.SetLengthFromAS3(value); }
+        void set_length(uint32_t value) { m_byteArray.SetLength(value); }
 
         ByteArray& GetByteArray() { return m_byteArray; }
 
