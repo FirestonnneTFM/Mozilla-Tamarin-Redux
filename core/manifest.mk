@@ -147,7 +147,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
 # Use of '%' [to force a pattern-rule] instead of '$(curdir)/..' or
 # '$(topsrcdir)' [which would then not be a pattern-rule] is crucial
 # (ie "deliberate", ie "hack"); see Bug 632086
-%/generated/builtin.h %/generated/builtin.cpp: $(topsrcdir)/core/*.as
+%/generated/builtin.h %/generated/builtin.cpp %/generated/builtin.abc: $(topsrcdir)/core/*.as
 	$(CMD)cd $(topsrcdir)/core; python builtin.py $(avmplus_BUILTINFLAGS)
 
 .PHONY: core-tracers

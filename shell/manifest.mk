@@ -114,7 +114,7 @@ endif
 # Use of '%' [to force a pattern-rule] instead of '$(curdir)/..' or
 # '$(topsrcdir)' [which would then not be a pattern-rule] is crucial
 # (ie "deliberate", ie "hack"); see Bug 632086
-%/generated/shell_toplevel.h %/generated/shell_toplevel.cpp: $(topsrcdir)/shell/shell_toplevel.as $(topsrcdir)/core/api-versions.as
+%/generated/shell_toplevel.h %/generated/shell_toplevel.cpp %/generated/shell_toplevel.abc: $(topsrcdir)/shell/shell_toplevel.as $(topsrcdir)/core/api-versions.as %/generated/builtin.abc
 	cd $(topsrcdir)/shell; python shell_toplevel.py $(shell_BUILTINFLAGS)
 
 .PHONY: shell-tracers
