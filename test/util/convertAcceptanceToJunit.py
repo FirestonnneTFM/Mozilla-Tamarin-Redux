@@ -49,7 +49,7 @@ def parseName(toplevel,names):
     classname=classname.replace('/','.')
     time=out=''
     for tok in names[1:]:
-        if tok.startswith('--threadid') or tok.startswith('--androidid'):
+        if tok.startswith('threadid') or tok.startswith('--threadid') or tok.startswith('--androidid'):
            out+=tok+' '
         elif tok=='time':
            continue
