@@ -146,10 +146,12 @@ shell_PREPROCESSED := $(shell_CXXSRCS:.cpp=.$(II_SUFFIX))
 # regeneration of both to happen before the .h file is read.
 GENERATED_BUILTIN_CODE := \
  $(topsrcdir)/generated/builtin.h \
- $(topsrcdir)/generated/builtin.cpp
+ $(topsrcdir)/generated/builtin.cpp \
+ $(topsrcdir)/generated/builtin.abc
 GENERATED_SHELL_CODE := \
  $(topsrcdir)/generated/shell_toplevel.h \
- $(topsrcdir)/generated/shell_toplevel.cpp
+ $(topsrcdir)/generated/shell_toplevel.cpp \
+ $(topsrcdir)/generated/shell_toplevel.abc
 
 $(MMgc_PREPROCESSED): | core-tracers
 $(avmplus_PREPROCESSED): $(GENERATED_BUILTIN_CODE) | core-tracers
