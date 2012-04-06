@@ -345,15 +345,27 @@ spidermonkey/js1_5/Array/regress-465980-02, .*, diff,expectedfail, https://bugzi
 ####################
 # AOT specific
 ####################
-ecma3/Exceptions/bug127913,         AOT ,, skip, Need to follow up as this hangs when AOT compiled
-spidermonkey/js1_5/Regress/regress-234389,         AOT ,, skip, Need to follow up as this hangs when AOT compiled
-spidermonkey/js1_5/Exceptions/regress-121658, AOT,, skip, Need to follow up as this hangs when AOT compiled
-spidermonkey/js1_5/Regress/regress-398085-01, AOT,, skip, Need to follow up as this hangs when AOT compiled
-spidermonkey/js1_5/Regress/regress-31255, AOT,, skip, Need to follow up as this hangs when AOT compiled (trbaker)
-spidermonkey/js1_5/Regress/regress-352009, AOT,, skip, Need to follow up as this hangs when AOT compiled (trbaker)
-spidermonkey/js1_5/Regress/regress-191668, AOT,, skip, Need to follow up as this hangs when AOT compiled (trbaker)
-as3/Vector/initializerLargeVector, AOT,, skip, trbaker - many tests have java_args for as
-ecma3/Unicode/uFE70_ArabicPresentationForms_B, AOT,, skip, trbaker - running prints "Illegal instruction" on device.  runtest hangs though you can see the test return in the output with seeming error
+ecma3/Exceptions/bug127913,                     AOT ,, skip, Need to follow up as this hangs when AOT compiled
+spidermonkey/js1_5/Regress/regress-234389,      AOT ,, skip, Need to follow up as this hangs when AOT compiled
+spidermonkey/js1_5/Exceptions/regress-121658,   AOT,, skip, Need to follow up as this hangs when AOT compiled
+spidermonkey/js1_5/Regress/regress-398085-01,   AOT,, skip, Need to follow up as this hangs when AOT compiled
+as3/Vector/initializerLargeVector,              AOT,, skip, trbaker - has java_args to u the max heap which isn't yet supported
+#ecma3/Unicode/uFE70_ArabicPresentationForms_B,  AOT,, skip, trbaker - running prints "Illegal instruction" on device.  runtest hangs though you can see the test return in the output with seeming error
+ecma3/Statements/eregress_74474_00.*,            AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3154162
+spidermonkey/js1_5/Regress/regress-155081.*,      AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3153162
+abcasm/coverage/C,                              AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3132682
+regress/bug_544370,                             AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3141008
+#regress/bug_558442a,                            AOT,, skip, brbaker - Compilation failure needs investigation
+mops/.*,                                        AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3132682
+abcasm/bug_555006b,                             AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3141005
+abcasm/funcRedef,                               AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3141008
+abcasm/semanticErrorDuplicateSlotName,          AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3141012
+abcasm/traitsSparseSlots,                       AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3141016
+regress/security/bug_556543,                    AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3141018
+regress/security/bug_555059b,                   AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3141020
+as3/ByteArray/ByteArray:ByteArray readFloat_2 #1, AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3153294
+as3/ByteArray/ByteArrayLzma:ByteArray readFloat_2 #1, AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3153294
+as3/ShellClasses/toplevel:queue a gc collection,      AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3156533
 
 ####################
 # Float
