@@ -151,7 +151,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
 	$(CMD)cd $(topsrcdir)/core; python builtin.py $(avmplus_BUILTINFLAGS)
 
 .PHONY: core-tracers
-core-tracers:
+core-tracers: $(topsrcdir)/generated/builtin.abc $(topsrcdir)/generated/shell_toplevel.abc
 ifdef AVM
 	$(CMD)cd $(topsrcdir)/core; python ./builtin-tracers.py
 else

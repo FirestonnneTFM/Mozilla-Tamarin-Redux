@@ -121,7 +121,7 @@ endif
 # Order dependence on core-tracers is to force a strict ordering
 # because both tracer generation scripts will attempt to recompile
 # exactgc.abc if it is missing.
-shell-tracers: | core-tracers
+shell-tracers: $(topsrcdir)/generated/builtin.abc $(topsrcdir)/generated/shell_toplevel.abc | core-tracers
 ifdef AVM
 	cd $(topsrcdir)/shell; python ./shell_toplevel-tracers.py
 else
