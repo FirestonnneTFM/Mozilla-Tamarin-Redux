@@ -171,11 +171,13 @@ class Configuration:
             'I_SUFFIX': 'i',
             'II_SUFFIX': 'ii',
             'OBJ_SUFFIX': 'o',
+            'PCH_SUFFIX': 'gch',
             'LIB_PREFIX': 'lib',
             'LIB_SUFFIX': 'a',
             'DLL_SUFFIX': 'so',
             'PROGRAM_SUFFIX': '',
             'USE_COMPILER_DEPS': 1,
+            'USE_GCC_PRECOMPILED_HEADERS': 1,
             'EXPAND_LIBNAME' : '-l$(1)',
             'EXPAND_DLLNAME' : '-l$(1)',
             'OUTOPTION' : '-o ',
@@ -185,6 +187,7 @@ class Configuration:
         if self._target[0] == 'windows':
             self._compiler = 'VS'
             del self._acvars['USE_COMPILER_DEPS']
+            del self._acvars['USE_GCC_PRECOMPILED_HEADERS']
             
             static_crt = options.getBoolArg('static-crt')
             self._acvars.update({

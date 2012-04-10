@@ -136,9 +136,9 @@ $(call RECURSE_DIRS,shell)
 
 # Bug 632086: These definitions must come *after* the foo_CXXSRCS
 # variables have been completely populated.
-MMgc_PREPROCESSED := $(MMgc_CXXSRCS:.cpp=.$(II_SUFFIX))
-avmplus_PREPROCESSED := $(avmplus_CXXSRCS:.cpp=.$(II_SUFFIX))
-vmbase_PREPROCESSED := $(vmbase_CXXSRCS:.cpp=.$(II_SUFFIX))
+MMgc_PREPROCESSED := $(MMgc_CXXSRCS:.cpp=.$(II_SUFFIX)) $(MMgc_PCH:.h=.$(II_SUFFIX))
+avmplus_PREPROCESSED := $(avmplus_CXXSRCS:.cpp=.$(II_SUFFIX)) $(avmplus_PCH:.h=.$(II_SUFFIX))
+vmbase_PREPROCESSED := $(vmbase_CXXSRCS:.cpp=.$(II_SUFFIX)) $(vmbase_PCH:.h=.$(II_SUFFIX))
 shell_PREPROCESSED := $(shell_CXXSRCS:.cpp=.$(II_SUFFIX))
 
 # Bug 632086: Tie generated code for .h and .cpp together, so that
@@ -159,6 +159,10 @@ $(vmbase_PREPROCESSED): $(GENERATED_BUILTIN_CODE) | core-tracers
 $(shell_PREPROCESSED): $(GENERATED_BUILTIN_CODE) | core-tracers
 $(shell_PREPROCESSED): $(GENERATED_SHELL_CODE) | shell-tracers
 
+$(avmplus_CXXOBJS): $(vmbase_PCH).$(PCH_SUFFIX) $(MMgc_PCH).$(PCH_SUFFIX) $(avmplus_PCH).$(PCH_SUFFIX)
+$(MMgc_CXXOBJS): $(vmbase_PCH).$(PCH_SUFFIX) $(MMgc_PCH).$(PCH_SUFFIX) $(avmplus_PCH).$(PCH_SUFFIX)
+$(vmbase_CXXOBJS): $(vmbase_PCH).$(PCH_SUFFIX)
+
 echo:
 	@echo avmplus_CXXFLAGS = $(avmplus_CXXFLAGS)
 	@echo avmplus_CXXSRCS = $(avmplus_CXXSRCS)
@@ -166,3 +170,17 @@ echo:
 	@echo avmplus_OBJS = $(avmplus_OBJS)
 	@echo avmplus_NAME = $(avmplus_NAME)
 	@echo avmplus_BUILTINFLAGS = $(avmplus_BUILTINFLAGS)
+	@echo avmplus_PCH_OBJ = $(avmplus_PCH_OBJ)
+	@echo MMgc_CXXSRCS = $(MMgc_CXXSRCS)
+	@echo MMgc_CXXOBJS = $(MMgc_CXXOBJS)
+	@echo MMgc_OBJS = $(MMgc_OBJS)
+	@echo MMgc_NAME = $(MMgc_NAME)
+	@echo MMgc_BUILTINFLAGS = $(MMgc_BUILTINFLAGS)
+	@echo MMgc_PCH = $(MMgc_PCH)
+	@echo MMgc_PCH_OBJ = $(MMgc_PCH_OBJ)
+	@echo vmbase_CXXSRCS = $(vmbase_CXXSRCS)
+	@echo vmbase_CXXOBJS = $(vmbase_CXXOBJS)
+	@echo vmbase_OBJS = $(vmbase_OBJS)
+	@echo vmbase_NAME = $(vmbase_NAME)
+	@echo vmbase_BUILTINFLAGS = $(vmbase_BUILTINFLAGS)
+	@echo vmbase_PCH_OBJ = $(vmbase_PCH_OBJ)

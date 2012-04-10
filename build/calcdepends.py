@@ -124,6 +124,8 @@ def rebuildsNeeded(files, outfile, verbose, quiet):
             d.close()
 
         except IOError:
+            if verbose:
+                print >>sys.stderr, "IOError attempting to check rebuildNeeded %s %s" % (objfile, depfile)
             pass
 
         if rebuild:

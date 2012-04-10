@@ -39,6 +39,11 @@ STATIC_LIBRARIES += vmbase
 vmbase_BUILD_ALL = 1
 vmbase_INCLUDES += $(VMBASE_INCLUDES)
 
+ifdef USE_GCC_PRECOMPILED_HEADERS
+vmbase_PCH_SRC := $(srcdir)/vmbase.h
+vmbase_PCH := $(curdir)/vmbase-precompiled.h
+endif
+
 vmbase_CXXSRCS := $(vmbase_CXXSRCS) \
   $(curdir)/VMThread.cpp \
   $(curdir)/Safepoint.cpp \

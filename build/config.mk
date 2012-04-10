@@ -120,6 +120,8 @@ else ifeq ($(VERBOSE),4)
 CALCDEPS_VERBOSE_OPT=-v
 endif
 
+PCH_SUFFIX ?= gch
+
 GLOBAL_DEPS := Makefile
 
 all::
@@ -168,16 +170,53 @@ $(1)_ASMOBJS = $$($(1)_ASMSRCS:%.armasm=%.$(OBJ_SUFFIX))
 
 $(1)_MASMOBJS = $$($(1)_MASMSRCS:%.asm=%.$(OBJ_SUFFIX))
 
+ifdef $(1)_PCH
+$(1)_PCH_OPTION = -include $$($(1)_PCH)
+$(1)_PCH_OBJ = $$($(1)_PCH:%.h=%.h.$(PCH_SUFFIX))
+$(1)_PCH_CHECK = $$($(1)_PCH:%.h=%.$(OBJ_SUFFIX))
+$(1)_PCH_II = $$($(1)_PCH:%.h=%.$(II_SUFFIX))
+$(1)_PCH_DEPS = $$($(1)_PCH:%.h=%.deps)
+ifndef $(1)_PCH_SRC
+error "must define $(1)_PCH_SRC) alongside $(1)_PCH=$$($(1)_PCH)"
+endif
+else
+$(1)_PCH_OPTION =
+$(1)_PCH_OBJ =
+$(1)_PCH_CHECK =
+$(1)_PCH_II =
+$(1)_PCH_DEPS =
+endif
+
 GARBAGE += \
   $$($(1)_CXXOBJS) \
   $$($(1)_COBJS) \
   $$($(1)_ASMOBJS) \
   $$($(1)_MASMOBJS) \
+  $$($(1)_PCH_OBJ) \
+  $$($(1)_PCH:.h=.$(II_SUFFIX)) \
+  $$($(1)_PCH:.h=.deps) \
   $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)) \
   $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.deps) \
-  $$($(1)_COBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)) \
+  $$($(1)_COBJS:.$(OBJ_SUFFIX)=.$(I_SUFFIX)) \
   $$($(1)_COBJS:.$(OBJ_SUFFIX)=.deps) \
   $(NULL)
+
+$$($(1)_PCH:.h=.$(II_SUFFIX)): $$($(1)_PCH_SRC)
+	$(NIT)test -d $$(dir $$@) || mkdir -p $$(dir $$@)
+	$(MSG)true "Preprocessing $$< to $$@"
+	$(CMD)$(CXX) -E $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) $$< > $$@
+	$(MXG)true "Extracting deps from $$@"
+	$(CMD)$(PYTHON) $(topsrcdir)/build/dependparser.py $$($(1)_PCH_DEPS) < $$@
+
+$$($(1)_PCH).$(PCH_SUFFIX): $$($(1)_PCH_SRC) $$($(1)_PCH:.h=.$(II_SUFFIX))
+	$(NIT)test -d $$(dir $$@) || mkdir -p $$(dir $$@)
+	$(MSG)true "Precompiling $$< to $$@"
+	$(NIT)test -d $$(dir $$@) || mkdir -p $$(dir $$@)
+	$(CMD)$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
+
+$$($(1)_PCH_CHECK): $$($(1)_PCH_OBJ) FORCE
+	$(MXG)true "Checking validity of precompiled header $$<"
+	$(CMD)$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_PCH_OPTION) -x c++ -c - < /dev/null > /dev/null || $(CXX) $(OUTOPTION)$$< $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$($(1)_PCH_SRC)
 
 $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)): %.$(II_SUFFIX): %.cpp $$(GLOBAL_DEPS)
 	$(NIT)test -d $$(dir $$@) || mkdir -p $$(dir $$@)
@@ -186,9 +225,9 @@ $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)): %.$(II_SUFFIX): %.cpp $$(GLOBAL_D
 	$(MXG)true "Extracting deps from $$*"
 	$(CMD)$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps < $$@
 
-$$($(1)_CXXOBJS): %.$(OBJ_SUFFIX): %.$(II_SUFFIX) $$(GLOBAL_DEPS)
+$$($(1)_CXXOBJS): %.$(OBJ_SUFFIX): %.cpp %.$(II_SUFFIX) $$(GLOBAL_DEPS) | $$($(1)_PCH_CHECK) 
 	$(MSG)true "Compiling $$*"
-	$(CMD)$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
+	$(CMD)$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_PCH_OPTION) $$($(1)_INCLUDES) -c $$<
 
 $$($(1)_COBJS:.$(OBJ_SUFFIX)=.$(I_SUFFIX)): %.$(I_SUFFIX): %.c $$(GLOBAL_DEPS)
 	$(NIT)test -d $$(dir $$@) || mkdir -p $$(dir $$@)
@@ -196,7 +235,7 @@ $$($(1)_COBJS:.$(OBJ_SUFFIX)=.$(I_SUFFIX)): %.$(I_SUFFIX): %.c $$(GLOBAL_DEPS)
 	$(CMD)$(CC) -E $$($(1)_CPPFLAGS) $$($(1)_CFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) $$< > $$@
 	$(CMD)$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps < $$@
 
-$$($(1)_COBJS): %.$(OBJ_SUFFIX): %.$(I_SUFFIX) $$(GLOBAL_DEPS)
+$$($(1)_COBJS): %.$(OBJ_SUFFIX): %.c %.$(I_SUFFIX) $$(GLOBAL_DEPS)
 	$(MSG)true "Compiling $$*"
 	$(CMD)$(CC) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
 
@@ -212,7 +251,7 @@ $$($(1)_MASMOBJS): %.$(OBJ_SUFFIX): %.asm $$(GLOBAL_DEPS)
 
 $(1).thing.pp: FORCE
 	$(MXG)true "Calculate deps from $$@"
-	$(CMD)$(PYTHON) $(topsrcdir)/build/calcdepends.py $(CALCDEPS_VERBOSE_OPT) $$@ $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)) $$($(1)_COBJS:.$(OBJ_SUFFIX)=.$(I_SUFFIX))
+	$(CMD)$(PYTHON) $(topsrcdir)/build/calcdepends.py $(CALCDEPS_VERBOSE_OPT) $$@ $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)) $$($(1)_COBJS:.$(OBJ_SUFFIX)=.$(I_SUFFIX)) $$($(1)_PCH:.h=.$(II_SUFFIX))
 
 include $(1).thing.pp
 
