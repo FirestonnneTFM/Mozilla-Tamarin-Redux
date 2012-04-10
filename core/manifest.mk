@@ -37,6 +37,11 @@
 STATIC_LIBRARIES += avmplus
 avmplus_BUILD_ALL = 1
 
+ifdef USE_GCC_PRECOMPILED_HEADERS
+avmplus_PCH_SRC := $(srcdir)/avmplus.h
+avmplus_PCH := $(curdir)/avmplus-precompiled.h
+endif
+
 avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/AbcEnv.cpp \
   $(curdir)/AbcParser.cpp \

@@ -36,6 +36,11 @@
 
 MMgc_INCLUDES += $(AVM_INCLUDES)
 
+ifdef USE_GCC_PRECOMPILED_HEADERS
+MMgc_PCH_SRC := $(srcdir)/MMgc.h
+MMgc_PCH := $(curdir)/MMgc-precompiled.h
+endif
+
 ifdef MMGC_DYNAMIC
 DLLS += MMgc
 MMgc_EXTRA_CPPFLAGS += $(DLL_CFLAGS)

@@ -35,6 +35,10 @@
 #
 # ***** END LICENSE BLOCK *****
 
+ifdef USE_GCC_PRECOMPILED_HEADERS
+eval_PCH := $(curdir)/avmplus-precompiled.h
+endif
+
 shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/eval-abc.cpp \
   $(curdir)/eval-avmplus.cpp \
