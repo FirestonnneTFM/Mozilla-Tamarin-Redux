@@ -225,6 +225,8 @@ namespace avmplus
         uint32_t isAotCompiled() const;
         void setAotCompiled(const AvmThunkNativeHandler& handler);
 #endif
+        uint32_t osrEnabled() const;
+        void setOSR(uint32_t threshold);
 
     public:
 
@@ -469,6 +471,10 @@ namespace avmplus
         // If true, Function.apply & call() use a fast path that only works
         // for JIT and Native code, not interpreted code.
         uint32_t                _apply_fastpath:1;
+
+        // If true, execution policy permits OSR for this method.
+        // This does not guarantee that OSR will apply, however.  See OSR::isSupported() for details.
+        uint32_t                _osr_enabled:1;
 
 #ifdef VMCFG_FLOAT
         // if true, the function operates on float4_t values, and needs a double VARSIZE

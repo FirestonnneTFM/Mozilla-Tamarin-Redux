@@ -127,6 +127,16 @@ void BaseExecMgr::init(MethodInfo* m, const NativeMethodInfo* native_info)
             m->_hasMethodBody = 0;
         #endif
     }
+
+    // Initially, OSR will be allowed if we are in mixed run mode
+    // (interpreter + JIT) and OSR has not been globally disabled.
+    // Note that OSR may still be unspported for a given function
+    // even if enabled here -- see OSR::isSupported().
+    // This setting may be overridden by an explicit ExecPolicy
+    // attribute on the method.  See AbcParser::parseTraits().
+    if (!m->isNative())
+        m->setOSR((config.runmode == RM_mixed && config.osr_enabled) ? config.osr_threshold : 0);
+
     m->_implGPR = NULL;
     m->_invoker = NULL;
     if (m->isResolved() && !config.verifyall) {
@@ -313,8 +323,16 @@ void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms, bool isOsr)
         int rtype = IFFLOAT( ReturnType(ms),
                              ms->returnTraitsBT() == BUILTIN_number ? 1 : 0);
         m->_implGPR = impl_stubs[osr][ctor][rtype];
-        if (isOsr)
-            m->_abc.countdown = config.osr_threshold;
+
+        // The countdown was previously set to config.osr_threshold, the
+        // global default, and then possibly overridden by an explicit
+        // ExecPolicy attribute.  If in fact OSR is not supported, zero
+        // out the countdown here.  This accounts for cases in which OSR
+        // is permitted by policy, but still cannot be supported.
+        // Strictly speaking, this code is not required, but it may avoid
+        // unnecessary invocations of OSR:isSupported() in OSR:countEdge().
+        if (!isOsr)
+            m->_abc.countdown = 0;
     }
 #endif
 }

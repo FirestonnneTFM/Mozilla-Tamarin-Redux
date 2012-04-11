@@ -124,6 +124,7 @@ namespace avmplus
         bool parseScriptInfos();
         void parseMethodBodies();
         void parseCpool(ApiVersion apiVersion);
+        void parseExecPolicyAttributes(const uint8_t* metadata, MethodInfo* m);
         Traits* parseTraits(uint16_t sizeofInstance,
                             uint16_t offsetofSlots,
                             Traits* base,
@@ -219,6 +220,11 @@ namespace avmplus
         RCList<String>              metaNames;
         int32_t                     version;
         uint32_t                    classCount;
+
+        // Since we expect most OSR threshold attributes to be the same on all methods,
+        // cache the result of converting the string value to a number to save conversions.
+        Stringp                     cachedOsrThresholdString;  // Pointer to interned string for threshold value
+        uint32_t                    cachedOsrThresholdValue;   // Numeric value corresponding to the string above
     // ------------------------ DATA SECTION END
     };
 

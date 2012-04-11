@@ -58,17 +58,30 @@
  * TUNABLE PARAMETER: OSR_THRESHOLD_DEFAULT
  *
  * The number of method invocations or loop iterations to trigger compilation when OSR is enabled.
+ *
  * A value of zero is interpreted specially, indicating that static initializers should always
  * be interpreted and other methods compiled eagerly, identical to the policy when AVMFEATURE_OSR
  * is not configured.  The default value may be overridden by runtime configuration, e.g.,
- * the "-osr" option to avmshell.
+ * the "-osr" option to avmshell.  Additionally, the globally-configured threshold may be overridden
+ * on a per-method basis via the ExecPolicy attribute, allowing content to opt-in or opt-out independently
+ * of the default global OSR policy.  For diagnostic purposes, we may wish to definitively suppress OSR
+ * regardless of content opt-in. By special dispensation, the switch "-osr=0" disables OSR globally and
+ * cannot be overridden.  Programmatically, setting config.osr_threshold to zero does not disable opt-in,
+ * rather, it is also necessary to set config.osr_enabled to false.
  *
- * The present value has been set based on preliminary startup-time studies on AIR Android.
+ * The present threshold value has been set based on preliminary startup-time studies on AIR Android.
  */
 #ifdef VMCFG_OSR
-static const int OSR_THRESHOLD_DEFAULT = 17; // tuned
+// All methods subject to OSR (where supported) using a default threshold of 17.
+// Per-method ExecPolicy attributes may alter the threshold, or disable OSR by using threshold 0.
+static const bool OSR_ENABLED_DEFAULT   = true;
+static const int  OSR_THRESHOLD_DEFAULT = 17;    // tuned
 #else
-static const int OSR_THRESHOLD_DEFAULT = 0;  // legacy policy.
+// All methods use threshold 0 by default, which selects the legacy non-OSR compilation policy.
+// Per-method ExecPolicy attributes may set a non-zero threshold, however, allowing content to
+// opt-in to OSR on a per-method basis as desired.
+static const bool OSR_ENABLED_DEFAULT   = true;
+static const int  OSR_THRESHOLD_DEFAULT = 0;     // legacy policy
 #endif
 
 #define AVMPLUS_STRING_DELETED ((Stringp)(1))
@@ -192,6 +205,7 @@ namespace avmplus
     const bool AvmCore::verifyonly_default = false;
     const bool AvmCore::verifyquiet_default = false;
     const Runmode AvmCore::runmode_default = RM_mixed;
+    const bool AvmCore::osr_enabled_default = OSR_ENABLED_DEFAULT;
     const uint32_t AvmCore::osr_threshold_default = OSR_THRESHOLD_DEFAULT;
     const uint32_t AvmCore::jitprof_level_default = 0; // no logging.
     const bool AvmCore::interrupts_default = false;
@@ -413,6 +427,7 @@ namespace avmplus
 
         // jit flag forces use of jit-compiler instead of interpreter
         config.runmode = runmode_default;
+        config.osr_enabled = osr_enabled_default;
         config.osr_threshold = osr_threshold_default;
         config.jitprof_level = jitprof_level_default;
         config.jitordie = jitordie_default;
@@ -545,6 +560,8 @@ namespace avmplus
         kz = internConstantStringLatin1("z");
         kw = internConstantStringLatin1("w");
 #endif
+        kExecPolicy = internConstantStringLatin1("ExecPolicy");
+        kOSR = internConstantStringLatin1("OSR");
 
         for (int i = 0; i < 128; i++)
         {
