@@ -876,6 +876,8 @@ namespace avmshell
                       usage();
                     }
                     settings.osr_threshold = threshold;
+                    if (threshold == 0)
+                        settings.osr_enabled = false;
                 }
                 else if (!VMPI_strncmp(arg, "-prof=", 6)) {
                     // parse jit profiling level

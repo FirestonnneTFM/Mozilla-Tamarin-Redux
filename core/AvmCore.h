@@ -140,7 +140,32 @@ const int kBufferPadding = 16;
         bool oldVectorMethodNames;
 
         enum Runmode runmode;
-        uint32_t osr_threshold;
+
+        /**
+         * Global default OSR threshold.  If there is no OSR threshold specified
+         * for a method in an ExecPolicy attribute, this value will be used.
+         * A threshold value of zero is interpreted specially, meaning that the
+         * legacy non-OSR compilation policy will be in force.  Otherwise, it is the
+         * initial value of a counter that will be decremented upon each entry to
+         * the method or traversal of a backward branch therein, triggering compilation
+         * when the counter reaches zero.
+         *
+         * Note that the policy attribute is orthogonal to the debugging-oriented
+         * compilation override expressed via compilePolicyRules below.  Perhaps some
+         * coordination may be appropriate, e.g., extending compilePolicyRules to
+         * understand OSR as well as legacy and interp-only/jit-only modes.
+         */
+         uint32_t osr_threshold;
+
+        /**
+         * If false, OSR is disabled completely, and the legacy policy applies
+         * regardless of the value of the global OSR threshold default or per-method
+         * overrides via the ExecPolicy attribute.  This provides a way to definitively
+         * suppress OSR even for content that chooses to opt-in via ExecPolicy, thus
+         * facilitating certain diagnostic scenarios.
+         */
+         bool osr_enabled;
+
         uint32_t jitprof_level;
         const char* compilePolicyRules; // JIT compilation override
 
@@ -637,6 +662,7 @@ const int kBufferPadding = 16;
         static const bool verifyonly_default;
         static const bool verifyquiet_default;
         static const Runmode runmode_default;
+        static const bool osr_enabled_default;
         static const uint32_t osr_threshold_default;
         static const uint32_t jitprof_level_default;
         static const bool interrupts_default;
@@ -851,6 +877,8 @@ const int kBufferPadding = 16;
         Atom kFlt4NaN;
 #endif
         
+        GCMember<String> kExecPolicy;   // execution policy attribute
+        GCMember<String> kOSR;          //    OSR threshold
         GCMember<String> cachedChars[128];
         /*@}*/
 

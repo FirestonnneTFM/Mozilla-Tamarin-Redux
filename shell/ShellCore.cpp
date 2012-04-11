@@ -75,6 +75,7 @@ namespace avmshell
 #ifdef VMCFG_NANOJIT
         , njconfig()
         , jitconfig()
+        , osr_enabled(avmplus::AvmCore::osr_enabled_default)
         , osr_threshold(avmplus::AvmCore::osr_threshold_default)
         , jitprof_level(avmplus::AvmCore::jitprof_level_default)
         , policyRulesArg(NULL)

@@ -250,7 +250,9 @@ namespace avmplus
         : instances(core->GetGC(), 0),
           toplevel(toplevel),
           domain(domain),
-          metaNames(core->GetGC(), 0)
+          metaNames(core->GetGC(), 0),
+          cachedOsrThresholdString(NULL),
+          cachedOsrThresholdValue(0)
     {
         this->core = core;
         this->code = code;
@@ -427,6 +429,44 @@ namespace avmplus
     // check to see if we are trying to read past the file end or the beginning.
     #define CHECK_POS(pos) do { if ((pos) < abcStart || (pos) >= abcEnd ) toplevel->throwVerifyError(kCorruptABCError); } while (0)
 
+    void AbcParser::parseExecPolicyAttributes(const uint8_t* metadata, MethodInfo* m)
+    {
+        // The metadata has already been scanned by parseMetadataInfo, thus
+        // there is no need to check for the end of the ABC block or to validate
+        // the range of the indices.  We ignore unrecognized keys, but validate
+        // arguments on keys that we handle.
+
+        const uint8_t* p = metadata;
+        readU30(p);  // Skip index for "ExecPolicy" string.
+
+        int values_count = readU30(p);
+        for (int q = 0; q < values_count; ++q)
+        {
+            Stringp key = pool->getString(readU30(p));
+            Stringp val = pool->getString(readU30(p));
+            if (key == core->kOSR) {
+                uint32_t threshold;
+                if (val == cachedOsrThresholdString) {
+                    threshold = cachedOsrThresholdValue;
+                } else {
+                    // For convenience and consistency, we require the value
+                    // to have the form of an index property, though any string
+                    // recognizable as an unsigned integer could be permitted.
+                    // TODO: Provide a more specific error message.
+                    if (!val->parseIndex(threshold))
+                        toplevel->throwVerifyError(kCorruptABCError);
+                    cachedOsrThresholdString = val;
+                    cachedOsrThresholdValue = threshold;
+                }
+                // Unless OSR is globally disabled, set the OSR threshold for this
+                // method as specified in the attribute and enable OSR if nonzero.
+                // Silently ignore attempts to set an OSR threshold for a native method.
+                if (core->config.osr_enabled && !m->isNative())
+                    m->setOSR(threshold);
+            }
+        }
+    }
+
     /**
      * setting up a traits that extends another one.  Two parser passes are required,
      * one for sizing the traits object and the other for allocating it and filling
@@ -486,6 +526,9 @@ namespace avmplus
             uint32_t value_index = 0;
             uint32_t earlyDispId = 0;
             bool needsDxns = false;
+            // The ABC format restricts the metadata index to a 30-bit
+            // unsigned quantity, so uint32_t(~0) should be safe as a sentinel.
+            uint32_t execpolicy_index = uint32_t(~0);
 #ifdef AVMPLUS_VERBOSE
             Multiname typeName;
 #endif
@@ -535,6 +578,9 @@ namespace avmplus
                     Stringp name = metaNames[index];
                     if (name == core->kNeedsDxns)
                         needsDxns = true;
+                    if (name == core->kExecPolicy) {
+                        execpolicy_index = index;
+                    }
                 }
             }
 
@@ -641,6 +687,8 @@ namespace avmplus
                     f->setOverride();
                 if (needsDxns)
                     f->setNeedsDxns();
+                if (execpolicy_index < uint32_t(~0))
+                    parseExecPolicyAttributes(pool->metadata_infos[execpolicy_index], f);
 
                 // only export one name for an accessor
                 // (note that addNamedScript checks for redundancy internally,

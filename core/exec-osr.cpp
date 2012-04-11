@@ -155,16 +155,13 @@ namespace avmplus
     // non-builtin methods.
     bool OSR::isSupported(const AbcEnv* abc_env, const MethodInfo* m, MethodSignaturep ms)
     {
-        AvmCore* core = abc_env->core();
-
-        AvmAssert(core == m->pool()->core);
+        AvmAssert(abc_env->core() == m->pool()->core);
         AvmAssert(abc_env->pool() == m->pool());
         AvmAssert(abc_env->codeContext() != NULL);
         AvmAssert(abc_env->codeContext()->bugCompatibility() != NULL);
 
-        return (!m->hasExceptions() &&                // method does not have a try block
-                core->config.runmode == RM_mixed &&   // mixed runmode, allowing both interpreter and JIT
-                core->config.osr_threshold != 0 &&    // OSR is enabled (may be disabled by host)
+        return (m->osrEnabled() &&                    // OSR allowed by policy (global or ExecPolicy attribute)
+                !m->hasExceptions() &&                // method does not have a try block
                 !m->hasFailedJit() &&                 // no previous attempt to compile the method has failed
                 !CodegenLIR::jitWillFail(ms) &&       // fast-fail predictor says JIT success is possible
                 !m->pool()->isBuiltin &&              // the method is not a builtin (ABC baked into application)

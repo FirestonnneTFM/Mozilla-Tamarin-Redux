@@ -275,6 +275,26 @@ REALLY_INLINE void MethodInfo::setAotCompiled(const AvmThunkNativeHandler& handl
 }
 #endif
 
+REALLY_INLINE uint32_t MethodInfo::osrEnabled() const
+{
+    return _osr_enabled;
+}
+
+REALLY_INLINE void MethodInfo::setOSR(uint32_t threshold)
+{
+    AvmAssert(!isNative());
+#ifdef AVMPLUS_VERBOSE
+    // TODO: This isn't the best place to put an execpolicy diagnostic,
+    // but it is the choke-point for setting the OSR threshold, and no
+    // execmgr is available at some of the call sites.
+    PoolObject* pool = this->pool();
+    if (pool->isVerbose(VB_execpolicy))
+        pool->core->console << "execpolicy OSR=" << threshold << " (" << method_id() << ") " << this << "\n";
+#endif
+    _abc.countdown = threshold;
+    _osr_enabled = (threshold > 0);
+}
+
 REALLY_INLINE PoolObject* MethodInfo::pool() const
 {
     return _pool;

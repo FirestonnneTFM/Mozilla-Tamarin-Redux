@@ -98,8 +98,9 @@ namespace avmshell
 #ifdef VMCFG_NANOJIT
         nanojit::Config njconfig;       // copy to config
         avmplus::JitConfig jitconfig;   // copy to config
-        uint32_t osr_threshold;         // Invocation count to trigger JIT.
-        uint32_t jitprof_level;          // Log level for jit profiling
+        bool osr_enabled;               // copy to config
+        uint32_t osr_threshold;         // copy to config
+        uint32_t jitprof_level;         // Log level for jit profiling
         const char* policyRulesArg;     // copy to config (raw unprocessed)
 #endif
         avmplus::AvmCore::CacheSizes cacheSizes; // Default to unlimited
