@@ -1534,9 +1534,43 @@ namespace avmplus
         AvmAssert(activationTraits != NULL);
 
         AvmCore* core = this->core();
-        VTable* activation = core->newVTable(activationTraits, NULL, toplevel);
+
+        // Bugzilla 671413 (note below is from Steven Johnson):
+        // This is quite possibly the ugliest hack I've ever inserted into Tamarin.
+        // The problem: at the ABC level, activation objects can be coerced into plain Objects,
+        // but they aren't plain Objects (they are distinct types). If a call to one of Object's
+        // methods (e.g. AS3::hasOwnProperty) is early bound to this, we'll attempt to call
+        // a method using a non-existent MethodEnv on the activation object's VTable -- crashamundo.
+        // The *proper* fix is (arguably) to smarten Verifier to ensure that activation objects
+        // can't be coerced, or leaked into a different structure/function that might coerce them,
+        // but that's tricky to do and a Quick Fix is needed for Wasabi. Hence, the pragmatic approach:
+        // artificially graft the MethodEnvs from Object onto each activation VTable, so that if
+        // such a dubious call happens, it quietly calls the proper Object method. (Arguably, a better
+        // approach would be to call a method that throws a VerifyError, but since this is intended
+        // as a temporary fix for fuzzed/malformed ABC in the first place, I don't think it's worth
+        // the extra effort.)
+        MMgc::GC* gc = core->GetGC();
+        VTable* object_ivtable = toplevel->objectClass->ivtable();
+        Traits* object_itraits = object_ivtable->traits;
+        uint32_t const object_method_count = object_itraits->getTraitsBindings()->methodCount;
+        AvmAssert(object_method_count > 0);
+
+        // activations shouldn't ever have methods.
+        uint32_t const activation_method_count = activationTraits->getTraitsBindings()->methodCount;
+        AvmAssert(activation_method_count == 0);
+        if (activation_method_count > 0)
+            toplevel->throwVerifyError(kCorruptABCError);
+
+        size_t const extraSize = sizeof(MethodEnv*) * (object_method_count-1);
+        VTable* activation = new (gc, MMgc::kExact, extraSize) VTable(activationTraits, NULL, toplevel);
+
         ScopeChain* activationScope = this->scope()->cloneWithNewVTable(core->GetGC(), activation, this->abcEnv(), activationScopeTraits);
         activation->resolveSignatures(activationScope);
+
+        // Bugzilla 671413
+        for (uint32_t i = 0; i < object_method_count; i++)
+            WB(gc, activation, &activation->methods[i], object_ivtable->methods[i]);
+
         return activation;
     }
 
@@ -1577,6 +1611,7 @@ namespace avmplus
         MMgc::GC *gc = core->GetGC();
         SAMPLE_FRAME("[activation-object]", core);
         ScriptObject* obj = ScriptObject::create(gc, vtable, 0/*delegate*/);
+        AvmAssert(obj->getDelegate() == NULL); // activation objects must not have a prototype pointer.
         return obj;
     }
 
@@ -1586,6 +1621,7 @@ namespace avmplus
         MethodEnv *init = obj->vtable->init;
         if (init)
             init->coerceEnter(obj->atom());
+        AvmAssert(obj->getDelegate() == NULL); // activation objects must not have a prototype pointer.
         return obj;
     }
 
