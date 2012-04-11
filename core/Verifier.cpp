@@ -805,6 +805,7 @@ namespace avmplus
         coder = &stubWriter;
 #endif
         parseBodyHeader();          // set code_pos & code_length
+        checkFrameDefinition();
         parseExceptionHandlers();   // resolve catch block types
         checkParams();
         #ifdef AVMPLUS_VERBOSE
@@ -858,6 +859,7 @@ namespace avmplus
         emitPass = true;
         this->coder = coder;
         parseBodyHeader();          // reset code_pos & code_length
+        checkFrameDefinition();
         checkParams();
         coder->writePrologue(state, code_pos, this);
         const uint8_t* end_pos = code_pos;
@@ -894,6 +896,23 @@ namespace avmplus
         // found the start of a new basic block
         coder->writeBlockStart(state);
         return blk->abc_pc;
+    }
+
+    static bool isU30(int32_t v) { return (v & 0xc0000000) == 0; }
+
+    void Verifier::checkFrameDefinition()
+    {
+        // validate rational bounds for frame definition parameters read directly from the abc
+        int32_t locals = ms->local_count();
+        int32_t scope = ms->max_scope();
+        int32_t stack = ms->max_stack();
+        if ( !(isU30(stack) && isU30(locals) && isU30(scope)) )
+            toplevel->throwVerifyError(kCorruptABCError);
+
+        // also ensure that the computed size doesn't overflow (see MethodInfo._buildMethodSignature)
+        int32_t frame = ms->frame_size();
+        if ( (uint32_t)frame > ( 0x7fffffff / sizeof(FrameValue) ) )
+            toplevel->throwVerifyError(kCorruptABCError);
     }
 
     void Verifier::checkParams()
