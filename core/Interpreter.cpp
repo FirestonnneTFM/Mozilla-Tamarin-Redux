@@ -2746,6 +2746,8 @@ FLOAT_ONLY(\
                 env->nullcheck(sp[-i2]);
                 // ISSUE if arg types were checked in verifier, this coerces again.
                 f = env->abcEnv()->getMethod((uint32_t)u1);
+                // ensure the caller matches receiver
+                sp[-i2] = toplevel->coerce(sp[-i2], f->method->getMethodSignature()->paramTraits(0));
                 a1 = f->coerceEnter((int32_t)i2, sp-i2);
                 *(sp -= i2) = a1;
                 NEXT;
