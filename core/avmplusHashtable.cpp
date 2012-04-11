@@ -89,7 +89,7 @@ namespace avmplus
         WB(gc, gc->FindBeginningFast(this), &m_atomsAndFlags, (void*)newVal);
     }
 
-    void InlineHashtable::put(Atom name, Atom value)
+    void InlineHashtable::put(Atom name, Atom value, Toplevel* toplevel)
     {
         AvmAssert(name != EMPTY && value != EMPTY);
         AtomContainer* atomContainer = getAtomContainer();
@@ -97,13 +97,19 @@ namespace avmplus
         int i = find(name, atoms, getCapacity());
         GC *gc = GC::GetGC(atoms);
         if (removeDontEnumMask(atoms[i]) != name) {
+            // Create new entry.
             AvmAssert(!isFull());
             //atoms[i] = name;
             WBATOM(gc, atomContainer, &atoms[i], name);
             m_size++;
+            //atoms[i+1] = value;
+            WBATOM(gc, atomContainer, &atoms[i+1], value);
+            if (isFull()) grow(toplevel);
+        } else {
+            // Update existing entry.
+            //atoms[i+1] = value;
+            WBATOM(gc, atomContainer, &atoms[i+1], value);
         }
-        //atoms[i+1] = value;
-        WBATOM(gc, atomContainer, &atoms[i+1], value);
     }
 
     Atom InlineHashtable::get(Atom name) const
@@ -237,9 +243,7 @@ namespace avmplus
 
     void InlineHashtable::add(Atom name, Atom value, Toplevel* toplevel)
     {
-        if (isFull())
-            grow(toplevel);
-        put(name, value);
+        put(name, value, toplevel);
     }
 
     void InlineHashtable::grow(Toplevel* toplevel)
@@ -647,10 +651,11 @@ namespace avmplus
     /*virtual*/ void WeakKeyHashtable::add(Atom key, Atom value, Toplevel* toplevel)
     {
         if (ht.isFull()) {
+            // Prune dead weak entries, but don't grow yet.
+            // If we're actually adding a new entry, put() will take care of that.
             prune();
-            ht.grow(toplevel);
         }
-        ht.put(getKey(key), value);
+        ht.put(getKey(key), value, toplevel);
     }
 
     void WeakKeyHashtable::prune()
@@ -718,8 +723,9 @@ namespace avmplus
     /*virtual*/ void WeakValueHashtable::add(Atom key, Atom value, Toplevel* toplevel)
     {
         if (ht.isFull()) {
+            // Prune dead weak entries, but don't grow yet.
+            // If we're actually adding a new entry, put() will take care of that.
             prune();
-            ht.grow(toplevel);
         }
         if(AvmCore::isPointer(value)) {
             // Don't know if value is GCObject or GCFinalizedObject so can't go via the
@@ -727,7 +733,7 @@ namespace avmplus
             GCWeakRef *wf = GC::GetWeakRef(atomPtr(value));
             value = AvmCore::genericObjectToAtom(wf);
         }
-        ht.put(key, value);
+        ht.put(key, value, toplevel);
     }
 
     /*virtual*/ Atom WeakValueHashtable::get(Atom key)
