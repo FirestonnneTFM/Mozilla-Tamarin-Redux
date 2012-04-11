@@ -226,6 +226,7 @@ namespace avmplus
         RestArgAnalyzer restArgAnalyzer;
 #endif
 
+        void checkFrameDefinition();
         const uint8_t* verifyBlock(const uint8_t* pc);
         const uint8_t* loadBlockState(FrameState* blk);
         void checkParams();
