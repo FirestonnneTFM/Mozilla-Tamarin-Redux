@@ -630,11 +630,13 @@ namespace avmplus
         for (; argc-- > 0; sp -= 2)
         {
             Atom name = sp[-1];
-            //verifier should ensure names are String
-            //todo have the verifier take care of interning too
-            AvmAssert(AvmCore::isString(name));
+            // verifier has stated this is a String, but we may see nullStringAtom
+            if (!AvmCore::isString(name))
+                toplevel->throwTypeError(kConvertNullToObjectError);
 
-            o->setAtomProperty(core->internString(name)->atom(), sp[0]);
+            //todo have the verifier take care of interning too
+            name = core->internString(name)->atom();
+            o->setAtomProperty(name, sp[0]);
         }
         return o;
     }
