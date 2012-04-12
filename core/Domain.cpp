@@ -71,9 +71,21 @@ namespace avmplus
 
     ClassClosure* Domain::getParameterizedType(ClassClosure* type)
     {
+        ClassClosure* result = NULL;
         AvmAssert(type != NULL);
-        Atom a = type ? m_parameterizedTypes->get(type->atom()) : nullObjectAtom;
-        return AvmCore::isObject(a) ? (ClassClosure*)AvmCore::atomToScriptObject(a) : NULL;
+        if (type)
+        {
+            Atom value = m_parameterizedTypes->get(type->atom());
+            if (AvmCore::isGenericObject(value))
+            {
+                MMgc::GCWeakRef* wr = (MMgc::GCWeakRef*)AvmCore::atomToGenericObject(value);
+                if (wr)
+                {
+                    result = (ClassClosure*)wr->get();
+                }
+            }
+        }
+        return result;
     }
 
     void Domain::addParameterizedType(ClassClosure* type, ClassClosure* parameterizedType)
@@ -82,7 +94,16 @@ namespace avmplus
         if (type && parameterizedType)
         {
             AvmAssert(!m_parameterizedTypes->contains(type->atom()));
-            m_parameterizedTypes->add(type->atom(), parameterizedType->atom());
+            // Note that what we really need here is fixing the problems with our weak tables.
+            // If there exists a cycle in the weak table ('value' indirectly pointing to the weak 'key'),
+            // the weak key will not get collected even if there are no references to 
+            // it from elsewhere and hence the table entry will not be deleted, which
+            // will in turn lead to value not getting collected.
+            // 
+            // As a short term fix, we'll just use WeakKeyHashtable with explicit GCWeakRef usage
+            // for the value.
+            MMgc::GCWeakRef* wr = parameterizedType ? parameterizedType->GetWeakRef() : NULL;
+            m_parameterizedTypes->add(type->atom(), AvmCore::genericObjectToAtom(wr));
         }
     }
 }
