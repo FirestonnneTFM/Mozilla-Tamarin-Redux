@@ -5606,7 +5606,7 @@ return the result of the comparison ToPrimitive(x) == y.
         // Prevent the name table from getting out of sync with the enum.
 
         for ( int i=0 ; i < VersionCount ; i++)
-            assert(kNames[i] != 0);
+            AvmAssert(kNames[i] != 0);
 #endif
 
         // We rely on the fact that we are allocated pre-zeroed by MMgc,
@@ -5661,6 +5661,10 @@ return the result of the comparison ToPrimitive(x) == y.
         if (v >= kSWF16)    /* Cyril */
         {
         }
+
+        if (v >= kSWF17)    /* Dolores */
+        {
+        }
         
     }
 
@@ -5673,6 +5677,7 @@ return the result of the comparison ToPrimitive(x) == y.
         13,
         14,
         15,
-        16
+        16,
+        17
     };
 }

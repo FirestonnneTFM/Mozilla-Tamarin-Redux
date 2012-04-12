@@ -74,11 +74,13 @@ enum ApiVersion {
     kApiVersion_AIR_3_2 = 19,
     kApiVersion_SWF_16 = 20,
     kApiVersion_AIR_3_3 = 21,
-    kApiVersion_VM_INTERNAL = 22
+    kApiVersion_SWF_17 = 22,
+    kApiVersion_AIR_3_4 = 23,
+    kApiVersion_VM_INTERNAL = 24
 };
 
 enum {
-    kApiVersion_count = 23
+    kApiVersion_count = 25
 };
 
 extern const char* const kApiVersionNames[kApiVersion_count];
