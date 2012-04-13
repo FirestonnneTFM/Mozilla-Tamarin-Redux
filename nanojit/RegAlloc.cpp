@@ -98,17 +98,19 @@ namespace nanojit
             else if (setA_FS) set = setA_FS;
             else              set = setA_F_;
 
-            r = firstAvailableReg(ins,regClass, set); // Note: some platforms prefer lsReg, others msReg
+            r = firstAvailableReg(ins, regClass, set); // Note: some platforms prefer lsReg, others msReg
 #ifdef RA_REGISTERS_OVERLAP
             if (r == UnspecifiedReg) {
                 //we may get here for composite regs, if the "prefered" set leaves only single regs; try again
                 r = firstAvailableReg(ins, regClass, setA_F_);
             }
-#else
-            NanoAssert(r !=  UnspecifiedReg); // we should always find one; but if we still don't, allow fall thru to evict other insts
-#endif
-            if(r != UnspecifiedReg)
+            if (r != UnspecifiedReg)
                 return allocSpecificReg(ins, r);
+            // fall through to else case below.
+#else
+            NanoAssert(r != UnspecifiedReg); // we should always find one
+            return allocSpecificReg(ins, r);
+#endif
         } 
         /* else */
         // Nothing free, steal one register.
@@ -148,7 +150,7 @@ namespace nanojit
             int pri = canRemat(ins) ? 0 : getPriority(r);
 #ifdef RA_REGISTERS_OVERLAP
             Register r1 = ins->getReg(); // may be wider than r
-            if(forIns && firstAvailableReg(forIns, regClass, (_free | rmask(r1)) & allow ) == UnspecifiedReg) {
+            if (forIns && firstAvailableReg(forIns, regClass, (_free | rmask(r1)) & allow) == UnspecifiedReg) {
                 // evicting this instruction wouldn't help; find another one
                 continue;
             }
