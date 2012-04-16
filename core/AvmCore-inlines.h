@@ -738,11 +738,6 @@ REALLY_INLINE MethodEnv* MethodFrame::env() const
         : (MethodEnv*)(envOrCodeContext & ~FLAGS_MASK);
 }
 
-REALLY_INLINE Toplevel* MethodFrame::toplevel() const
-{
-    return env()->toplevel();
-}
-
 REALLY_INLINE void MethodFrame::setDxns(Namespace* ns)
 {
     AvmAssert(ns != NULL);
