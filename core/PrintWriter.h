@@ -174,10 +174,7 @@ namespace avmplus
         void writeHexByte(uint8_t value);
         void writeHexWord(uint16_t value);
         void writeHexAddr(uintptr_t value);
-
-        #ifdef AVMPLUS_VERBOSE
         void formatP(const char* format, Stringp arg1=0, Stringp arg2=0, Stringp arg3=0);
-        #endif
 
         AvmCore* core() { return m_core; }
 

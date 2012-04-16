@@ -397,7 +397,6 @@ namespace avmplus
         writeHexByte(uint8_t(value&0xff));
     }
 
-#ifdef AVMPLUS_VERBOSE
     void PrintWriter::formatP(const char* format, Stringp arg1, Stringp arg2, Stringp arg3)
     {
         while (*format)
@@ -430,5 +429,4 @@ namespace avmplus
             format++;
         }
     }
-#endif /* VERBOSE */
 }
