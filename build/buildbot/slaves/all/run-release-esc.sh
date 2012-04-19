@@ -55,15 +55,23 @@
 export scriptsdir=`pwd`
 echo scriptsdir: $scriptsdir
 
-##
-# Download the AVMSHELL if it does not exist
-##
-download_shell $shell_release
+# If running under Jenkins, avm and asc come from upstream jobs via the
+# "copy artifact" plugin and should not be downloaded via ftp
+if [ "$JENKINS_HOME" = "" ]; then
+    ##
+    # Download the AVMSHELL if it does not exist
+    ##
+    download_shell $shell_release
 
-chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release
+    chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release
 
-echo ""
-cp $buildsdir/$change-${changeid}/$platform/$shell_release $basedir/esc/bin/shell${shell_extension}
+    echo ""
+    cp $buildsdir/$change-${changeid}/$platform/$shell_release $basedir/esc/bin/shell${shell_extension}
+else
+    cp $basedir/objdir/shell/$shell_release $basedir/esc/bin/shell${shell_extension}
+fi
+
+
 export AVM=$basedir/esc/bin/shell${shell_extension}
 chmod +x $AVM
 

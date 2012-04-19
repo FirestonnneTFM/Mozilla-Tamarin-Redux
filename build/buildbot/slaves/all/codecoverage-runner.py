@@ -41,7 +41,7 @@
 #
 
 
-import getopt,os,re,subprocess,sys,datetime,shutil,platform
+import getopt,os,re,subprocess,sys,datetime,shutil,platform,shutil
 
 class CodeCoverageRunner:
     compile_csvfile="../all/codecoverage-compile.csv"
@@ -55,7 +55,7 @@ class CodeCoverageRunner:
     exclude_regions=None
     
     options='b:'
-    longOptions=['buildnum=','compilecsv=','testcsv=']
+    longOptions=['buildnum=','compilecsv=','testcsv=','buildsdir=']
     
     def __init__(self):
         self.parseOptions()
@@ -70,12 +70,13 @@ class CodeCoverageRunner:
         self.bullseye_dir=env["bullseyedir"]
         self.exclude_regions=env["coverage_exclude_regions"]
 
-        # Determine the hash of the change, required to know what the build directory is
-        out,exit = self.run_pipe(cmd="hg log -r %s | head -n 1 | awk -F: '{print $3}'" % self.buildnum)
-        if out[0].find("unknown revision")!=-1:
-            print "Unable to determine change has for hg revision %s" % (self.buildnum)
-            sys.exit(1)
-        self.builds_dir="../../../../../builds/%s-%s/%s" % (self.buildnum, out[0], self.platform)
+        if self.builds_dir==None:
+            # Determine the hash of the change, required to know what the build directory is
+            out,exit = self.run_pipe(cmd="hg log -r %s | head -n 1 | awk -F: '{print $3}'" % self.buildnum)
+            if out[0].find("unknown revision")!=-1:
+                print "Unable to determine change has for hg revision %s" % (self.buildnum)
+                sys.exit(1)
+            self.builds_dir="../../../../../builds/%s-%s/%s" % (self.buildnum, out[0], self.platform)
 
         # Convert all relative paths to absolute
         self.builds_dir=os.path.abspath(self.builds_dir)
@@ -145,6 +146,8 @@ class CodeCoverageRunner:
         print('                  defaults to %s' % self.compile_csvfile)
         print('    --testcsv     csv file defining what test to run,')
         print('                  defaults to %s' % self.test_csvfile)
+        print('    --buildsdir   location to store final binaries,')
+        print('                  shell and coverage file')
         sys.exit(c)
 
     def parseOptions(self):
@@ -161,6 +164,8 @@ class CodeCoverageRunner:
                 self.compile_csvfile=v
             if o in ('--testcsv',):
                 self.test_csvfile=v
+            if o in ('--buildsdir',):
+                self.builds_dir=v
             
         if self.buildnum==None:
             print('--buildnum must be set')
@@ -234,7 +239,7 @@ class CodeCoverageRunner:
             print line
 
         # Use the compile-generic script to compile the shell
-        cmd="../all/compile-generic.sh '%s' '%s' '%s' " % (self.buildnum, configure_args, shellname)
+        cmd="../all/compile-generic.sh '%s' '%s' '%s' 'false' '' 'objdir-codecoverage' " % (self.buildnum, configure_args, shellname)
         stdout,exit = self.run_pipe(cmd=cmd, env=env)
         for line in stdout:
             print line
@@ -248,7 +253,11 @@ class CodeCoverageRunner:
         stdout,exit = self.run_pipe(cmd=cmd, env=env)
         for line in stdout:
             print line
-        
+
+        # If running in JENKINS then copy binary to buids_dir
+        if env["JENKINS_HOME"]:
+            shutil.copy('%s/objdir-codecoverage/shell/%s' % (env["WS"], shellname), self.builds_dir)
+
         # Set the environ back to its original state
         for key in env_orig:
             # If there is an original value set it back
@@ -275,12 +284,16 @@ class CodeCoverageRunner:
         env["COVFILE"]="%s/%s-%s.cov" % (self.builds_dir, self.platform, shellname)
 
         if suite=="acceptance":
+             # If running in JENKINS then copy binary to buids_dir
+            if env["JENKINS_HOME"]:
+                env["AVM"]="%s/%s" % (self.builds_dir, shellname)
             print "running acceptance"
             # Use the compile-generic script to compile the shell
             cmd="../all/run-acceptance-generic.sh '%s' '%s' '%s' '%s' '%s'" % (self.buildnum, shellname, vm_args, config_string, script_args)
             stdout,exit = self.run_pipe(cmd=cmd, env=env)
             for line in stdout:
                 print line
+            del env["AVM"]
             
         elif suite=="performance":
             print "running performance"

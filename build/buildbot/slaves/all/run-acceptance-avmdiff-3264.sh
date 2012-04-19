@@ -49,25 +49,36 @@
 . ../all/util-calculate-change.sh $1
 
 
-##
-# Download the AVMSHELL if it does not exist
-##
-download_shell $shell_release_32
-download_shell $shell_release_64
+# If running under Jenkins, avm and asc come from upstream jobs via the
+# "copy artifact" plugin and should not be downloaded via ftp
+if [ "$JENKINS_HOME" = "" ]; then
+    ##
+    # Download the AVMSHELL if it does not exist
+    ##
+    download_shell $shell_release_32
+    download_shell $shell_release_64
 
-##
-# Download the latest asc.jar if it does not exist
-##
-download_asc
+    ##
+    # Download the latest asc.jar if it does not exist
+    ##
+    download_asc
+
+    ## HACK, use the release and debug variables for the 32 and 64 bit shells
+    export shell_release=$buildsdir/$change-${changeid}/$platform/$shell_release_32
+    export shell_debug=$buildsdir/$change-${changeid}/$platform/$shell_release_64
+
+else
+    ## HACK, use the release and debug variables for the 32 and 64 bit shells
+    export shell_release=$WS/objdir/shell/$shell_release_32
+    export shell_debug=$WS/objdir/shell/$shell_release_64
+fi
 
 echo ""
 echo "Missing media will be compiled using the following ASC version:"
 echo "`java -jar $ASC`"
 echo ""
 
-## HACK, use the release and debug variables for the 32 and 64 bit shells
-export shell_release=$buildsdir/$change-${changeid}/$platform/$shell_release_32
-export shell_debug=$buildsdir/$change-${changeid}/$platform/$shell_release_64
+
 
 
 

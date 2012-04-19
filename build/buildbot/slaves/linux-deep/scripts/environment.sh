@@ -49,6 +49,13 @@ export shell_extension=
 
 export platform=linux
 
+export shell_release=${shell_release}_64
+export shell_release_wordcode=${shell_release_wordcode}_64
+export shell_debug=${shell_debug}_64
+export shell_release_debugger=${shell_release_debugger}_64
+export shell_debug_debugger=${shell_debug_debugger}_64
+export shell_selftest=${shell_selftest}_64
+
 export shell_release_cov=avmshell_cov
 export shell_release_debugger_cov=avmshell_s_cov
 export shell_debug_cov=avmshell_d_cov

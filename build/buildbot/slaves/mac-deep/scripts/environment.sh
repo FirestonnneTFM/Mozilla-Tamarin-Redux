@@ -48,9 +48,6 @@ export shell_extension=
 . ../all/environment.sh
 
 export platform=mac
-workdir=`pwd`
-export basedir=`cd ${workdir}/../../../..; pwd`
-export buildsdir=`cd ${basedir}/../builds; pwd`
 
 # List of processes that should NEVER be running when the build is not
 # currently running any tests. This list of process will be killed if the

@@ -59,4 +59,10 @@ echo ""
 echo "Revert the builtins to be the normal/non-float versions"
 echo ""
 cd $basedir
-hg revert generated/
+
+# check to see if we're running under Jenkins
+if [ "$JENKINS_HOME" != "" ]; then
+    p4 sync -f $WS/generated/...
+else
+    hg revert generated/
+fi

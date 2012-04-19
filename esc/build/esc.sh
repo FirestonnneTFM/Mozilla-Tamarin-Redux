@@ -27,6 +27,7 @@
 # esc.sh must be run from $DIR, or you must change the value of
 # $DIR to be the absolute path of the bin directory (that has the
 # shell and the abc files for ESC).
+(set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
 DIR=../bin
 

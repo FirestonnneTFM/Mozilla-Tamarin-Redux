@@ -50,7 +50,12 @@
 . ../all/util-calculate-change.sh $1
 
 errors=""
-covdatadir=$buildsdir/${change}-${changeid}/$platform
+# check to see if we're running under Jenkins
+if [ "$JENKINS_HOME" != "" ]; then
+    covdatadir=$WS/objdir/shell
+else
+    covdatadir=$buildsdir/${change}-${changeid}/$platform
+fi
 for file in $covdatadir/*.cov
 do
     export COVFILE=$file
