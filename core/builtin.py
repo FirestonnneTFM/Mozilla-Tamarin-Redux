@@ -41,7 +41,6 @@
 
 import os
 import shutil
-import stat
 import sys
 
 def mv(oldfile, newfile):
@@ -51,12 +50,6 @@ def mv(oldfile, newfile):
 def rm(file):
     if os.access(file, os.F_OK) == True:
         os.remove(file)
-
-def warn_notwriteable(file):
-    if not os.stat(file).st_mode & stat.S_IWUSR:
-        print("warning: %s is not writeable" % file)
-        return True
-    return False
 
 classpath = os.environ.get('ASC')
 if classpath == None:
@@ -78,9 +71,6 @@ if len(sys.argv) == 1:
     print('To compile the builtins without float/float4 support:');
     print('    >$ ./builtin.py -config CONFIG::VMCFG_FLOAT=false');
     exit(1);
-
-if warn_notwriteable('../generated/builtin.abc'):
-    sys.exit(0)   # exit 0 so build will continue
     
 configs = " ".join(sys.argv[1:])
 
