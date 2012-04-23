@@ -117,7 +117,7 @@ from os import path
 from math import floor
 from sys import stderr
 
-import sys, traceback
+import os, stat, sys, traceback
 
 parser = OptionParser(usage="usage: %prog [importfile [, importfile]...] file...")
 parser.add_option("-v", "--thunkvprof", action="store_true", default=False)
@@ -253,6 +253,12 @@ def is_neg_inf(val):
     # [-]1.#INF on Windows in Python 2.5.2!
     strValLower = str(val).lower()
     return strValLower.endswith("inf") and strValLower.startswith("-")
+
+def warn_notwriteable(file):
+    if not os.stat(file).st_mode & stat.S_IWUSR:
+        print("WARNING: %s is not writeable" % file)
+        return True
+    return False
 
 class Float4:
     x = kNaN
@@ -3036,6 +3042,8 @@ if abcGenFor:
     hfile = None
     clsfile = None
     cppfile = None
+    if warn_notwriteable(abcGenName+".h") | warn_notwriteable(abcGenName+"-classes.hh") | warn_notwriteable(abcGenName+".cpp"):
+        sys.exit(0) # exit 0 so build will continue
     try:
         hfile = open(abcGenName+".h","w")
         clsfile = open(abcGenName+"-classes.hh","w")
