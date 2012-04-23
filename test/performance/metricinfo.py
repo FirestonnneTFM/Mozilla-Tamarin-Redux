@@ -32,6 +32,10 @@ metric_info = {
             'best':max,
             'unit':'k',
         },
+        'size':{
+            'best':min,
+            'unit':'bytes',
+        },
         'v8':   {
             'best':max, 
             'desc': 'custom v8 normalized metric (hardcoded in the test)',

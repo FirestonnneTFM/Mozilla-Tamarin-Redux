@@ -40,6 +40,12 @@
 # acts as a proxy to remotely run abc files via a ssh call to the remote machine
 # usage: ./aot_shell.sh <vmargs> file.abc
 #
+# There is a special vmargs (-AOTSIZE) that you can pass to this script that will
+# then cause the script to append the filesize of the application into the
+# generated output in the form of a performance metric:
+#     metric filesize <filesize>
+# The filesize is reported in bytes.
+#
 
 if [ "$threadid" = "" ]
 then
@@ -126,12 +132,21 @@ else
     args=("$@")
     args=${args[@]:1}
 
+    if [[ "$args" = *AOTSIZE* ]]; then
+        # Strip out the -AOTSIZE since it is NOT a real vm args
+        args=`echo $args | sed 's/-AOTSIZE//g'`
+        filesize=`ls -al $1 | awk '{ print $5 }'`
+    fi
+
     scp $1 $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST:$SSH_SHELL_REMOTE_DIR/$progname
     try_command ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;./aot-shell-runner.sh $progname $args; rm $progname" > ./stdout$id
     ret=`cat ./stdout$id | grep "EXITCODE=" | awk -F= '{printf("%d",$2)}'`
     # remove the EXITCODE from the stdout before returning it so that exact output matching will be fine
     cat ./stdout$id | sed 's/^EXITCODE=[0-9][0-9]*$//g' > ./stdout_clean$id
     cat ./stdout_clean$id
+    if [ "$filesize" != "" ]; then
+        echo metric filesize $filesize
+    fi
     rm -f ./stdout$id ./stdout_clean$id
     exit $ret
 fi
