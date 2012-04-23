@@ -79,26 +79,31 @@ VERB_GT0=@
 VERB_GT1=@
 VERB_GT2=@
 VERB_GT3=@
+ECHO=true
 else ifeq ($(VERBOSE),1) # This is the default case
 VERB_GT0=
 VERB_GT1=@
 VERB_GT2=@
 VERB_GT3=@
+ECHO=echo
 else ifeq ($(VERBOSE),2)
 VERB_GT0=
 VERB_GT1=
 VERB_GT2=@
 VERB_GT3=@
+ECHO=echo
 else ifeq ($(VERBOSE),3)
 VERB_GT0=
 VERB_GT1=
 VERB_GT2=
 VERB_GT3=@
+ECHO=echo
 else ifeq ($(VERBOSE),4)
 VERB_GT0=
 VERB_GT1=
 VERB_GT2=
 VERB_GT3=
+ECHO=echo
 else
 $(error "VERBOSE $(VERBOSE) must be set to integer between 0 and 4")
 endif
@@ -217,7 +222,7 @@ $$($(1)_PCH).$(PCH_SUFFIX): $$($(1)_PCH_SRC) $$($(1)_PCH:.h=.$(II_SUFFIX))
 
 $$($(1)_PCH_CHECK): $$($(1)_PCH_OBJ) FORCE
 	$(MXG)true "Checking validity of precompiled header $$<"
-	$(CMD)$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_PCH_OPTION) -x c++ -c - < /dev/null > /dev/null || $(CXX) $(OUTOPTION)$$< $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$($(1)_PCH_SRC)
+	$(CMD)$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_PCH_OPTION) -x c++ -c - < /dev/null > /dev/null || $(ECHO) "PCH invalid; regenerating precompiled header $$<" && $(CXX) $(OUTOPTION)$$< $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$($(1)_PCH_SRC)
 
 endif # defined(thingname_PCH)
 
