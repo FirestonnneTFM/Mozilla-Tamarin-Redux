@@ -203,7 +203,7 @@ fi
 #############################
 # OSR=17 Release Acceptance
 #############################
-export shell_name=avmshell_neon_arm
+export shell_name=avmshell
 export native_shell="$WS/objdir/shell/$shell_name$shell_suffix"
 export mode="release-osr=17"
 export vmargs="-osr=17"
@@ -220,7 +220,7 @@ fi
 #############################
 # OSR=0 Release Acceptance
 #############################
-export shell_name=avmshell_neon_arm
+export shell_name=avmshell
 export native_shell="$WS/objdir/shell/$shell_name$shell_suffix"
 export mode="release-osr=0"
 export vmargs="-osr=0"
@@ -237,7 +237,7 @@ fi
 #############################
 # OSR=17 Debug Acceptance
 #############################
-export shell_name=avmshell_neon_arm_d
+export shell_name=avmshell_d
 export native_shell="$WS/objdir/shell/$shell_name$shell_suffix"
 export mode="debug-osr=17"
 export vmargs="-osr=17"
@@ -254,7 +254,7 @@ fi
 #############################
 # OSR=0 Debug Acceptance
 #############################
-export shell_name=avmshell_neon_arm_d
+export shell_name=avmshell_d
 export native_shell="$WS/objdir/shell/$shell_name$shell_suffix"
 export mode="debug-osr=0"
 export vmargs="-osr=0"

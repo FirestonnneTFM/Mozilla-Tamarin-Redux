@@ -414,7 +414,7 @@ unset AVM
 cd $WS/build/buildbot/slaves/scripts
 ../all/compile-generic.sh "$rev_id" "$configure_args" "${shell_name}${shell_suffix}" "false" "$features" "$compiledir"
 if [ "$?" != "0" ]; then
-    echo "Wordcode release compilation failure."
+    echo "Valgrind release compilation failure."
     exitcode=1
 fi
 if [ -f $WS/$compiledir/shell/$shell_name$shell_suffix${shell_extension} ]; then
@@ -429,7 +429,7 @@ export AVM="$WS/objdir/shell/$shell_name$shell_suffix"
 export mode="releasedebugger-valgrind"
 export vmargs=""
 cd $WS/build/buildbot/slaves/scripts
-../all/run-acceptance-generic.sh "$rev_id" "$shell_name$shell_suffix" "$vmargs" "" "--valgrind --showtimes --log runtests-$mode.txt --logjunit=acceptance-$mode.xml --threads=$threads --testtimeout=300 $suite"
+../all/run-acceptance-generic.sh "$rev_id" "$shell_name$shell_suffix" "$vmargs" "" "--valgrind --showtimes --log runtests-$mode.txt --logjunit=acceptance-$mode.xml --threads=$threads --testtimeout=600 $suite"
 failures=`grep "^failures" $WS/test/acceptance/runtests-$mode.txt | awk '{print $3}'`
 if [ "$failures" = "0" ]; then
     echo "all tests passed"
