@@ -387,7 +387,8 @@ class PerformanceRuntest(RuntestBase):
 
         if self.logresults:
             # determine current config string for socketlog
-            self.log_config = "%s" % self.vmargs.replace(" ", "")
+            tmpvmargs = self.vmargs.replace("-AOTSIZE", "") # This is a fake vmarg that is used for reporting filesize, do not log to db
+            self.log_config = "%s" % tmpvmargs.replace(" ", "")
             self.log_config = "%s" % self.log_config.replace("\"", "")
             if self.log_config.find("-memlimit")>-1:
                 self.log_config=self.log_config[0:self.log_config.find("-memlimit")]
