@@ -322,7 +322,7 @@ unset AVM
 cd $WS/build/buildbot/slaves/scripts
 ../all/compile-generic.sh "$rev_id" "$configure_args" "${shell_name}${shell_suffix}" "false" "$features" "$compiledir"
 if [ "$?" != "0" ]; then
-    echo "Wordcode release compilation failure."
+    echo "AIR release compilation failure."
     exitcode=1
 fi
 if [ -f $WS/$compiledir/shell/$shell_name$shell_suffix${shell_extension} ]; then
@@ -334,7 +334,7 @@ fi
 #############################
 export shell_name=avmshell_air
 export AVM="$WS/objdir/shell/$shell_name$shell_suffix${shell_extension}"
-export mode="release-wordcode"
+export mode="release-air"
 export vmargs="-Dinterp"
 cd $WS/build/buildbot/slaves/scripts
 ../all/run-acceptance-generic.sh "$rev_id" "$shell_name$shell_suffix" "$vmargs" "" "--showtimes --log runtests-$mode.txt --logjunit=acceptance-$mode.xml --threads=$threads --testtimeout=300 $suite"

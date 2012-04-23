@@ -351,7 +351,7 @@ regress/security/bug_689243b,   AOT,, skip, jit only testcase
 # MMgc
 ###########
 mmgc/outofmemory , (.*-Dgcthreshold|.*-Dverifyonly) ,, skip , Threshold test takes too long to run out of mem
-mmgc/pauseForGCIfCollectionImminent, arm-android-tvm-debug,, skip, Test takes too long to run on debug android shell
+mmgc/pauseForGCIfCollectionImminent, arm-.*-debug,, skip, Test takes too long to run on debug android shell
 as3/ByteArray/ByteArray_bug662851 , (AOT|x86-mac-tvm-releasedebugger-air),, skip , system malloc on mac32 produces stderr for this testcase which trips up the testing framework
 mmgc/outofmemory, .*, , verify_skip, Test takes too long to run when attempting to run with --verify
 
@@ -369,6 +369,11 @@ abcasm/coverage/float/.* , .* , .*float.* , exclude , Only valid when float is e
 abcasm/float/.* , .* , .*float.* , exclude , Only valid when float is enabled.
 as3/asc/.* , .* , .*float.* , exclude , Only valid when float is enabled.
 as3/AMF/AMFSerializer_float , .* , .*float.* , exclude , Only valid when float is enabled.
+
+####################
+# Valgrind
+####################
+ecma3/Unicode/uAC00_HangulSyllables , .*valgrind , , skip , This test takes over 10 minutes to run in valgrind
 
 ###########
 # Helper files
