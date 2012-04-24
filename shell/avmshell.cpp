@@ -46,6 +46,10 @@
 #include "extensions-tracers.hh"
 #include "avmshell-tracers.hh"
 
+#ifdef VMCFG_HALFMOON
+#include "../halfmoon/hm-main.h"  //  halfmoon::enable_mode
+#endif
+
 namespace avmshell
 {
 #ifdef AVMPLUS_WIN32
@@ -833,6 +837,15 @@ namespace avmshell
                         settings.runmode = avmplus::RM_jit_all;
                         settings.jitordie = true;
                     }
+#ifdef VMCFG_HALFMOON
+                    else if (!VMPI_strcmp(arg, "-Dhalfmoon")) {
+                        // FIXME: This is a dirty hack.  (bug 746736)
+                        // Halfmoon is presently configured globally with a bunch
+                        // of static variables.  It should be configured for each
+                        // AvmCore instance using the JitConfig structure or similar.
+                        halfmoon::enable_mode = 4;	// use halfmoon to produce LIR
+                    }
+#endif /* VMCFG_HALFMOON */
 #endif /* VMCFG_NANOJIT */
                     else if (!VMPI_strcmp(arg+2, "interp")) {
                         settings.runmode = avmplus::RM_interp_all;
@@ -1189,6 +1202,9 @@ namespace avmshell
 #ifdef VMCFG_NANOJIT
         avmplus::AvmLog("          [-Dinterp]    do not generate machine code, interpret instead\n");
         avmplus::AvmLog("          [-Ojit]       use jit always, never interp (except when the jit fails)\n");
+#ifdef VMCFG_HALFMOON
+        avmplus::AvmLog("          [-Dhalfmoon   use experimental 'halfmoon' jit (development only)\n");
+#endif
         avmplus::AvmLog("          [-Djitordie]  use jit always, and abort when the jit fails\n");
         avmplus::AvmLog("          [-Dnocse]     disable CSE optimization\n");
         avmplus::AvmLog("          [-Dnoinline]  disable speculative inlining\n");
