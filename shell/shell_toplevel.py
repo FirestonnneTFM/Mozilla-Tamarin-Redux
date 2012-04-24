@@ -41,6 +41,7 @@
 
 import os
 import shutil
+import stat
 import sys
 
 classpath = os.environ.get('ASC')
@@ -57,6 +58,12 @@ def rm(file):
     if os.access(file, os.F_OK) == True:
         os.remove(file)
 
+def warn_notwriteable(file):
+    if os.path.exists(file) and not os.stat(file).st_mode & stat.S_IWUSR:
+        print("warning: %s is not writeable" % file)
+        return True
+    return False
+
 javacmd = "java -ea -DAS3 -DAVMPLUS -classpath "+classpath
 asc = javacmd+" macromedia.asc.embedding.ScriptCompiler "
 
@@ -64,6 +71,9 @@ print("ASC="+classpath)
 print("Building shell_toplevel...")
 
 configs = " ".join(sys.argv[1:])
+
+if warn_notwriteable('../generated/shell_toplevel.abc'):
+    sys.exit(0) # exit 0 so build will continue
 
 # compile builtins
 os.system(asc+" -import ../generated/builtin.abc -builtin "+configs+" -apiversioning -out shell_toplevel shell_toplevel.as Domain.as ../extensions/Sampler.as ../extensions/Trace.as Endian.as")
