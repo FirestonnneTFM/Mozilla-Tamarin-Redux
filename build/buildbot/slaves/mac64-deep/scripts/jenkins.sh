@@ -327,7 +327,7 @@ unset AVM
 cd $WS/build/buildbot/slaves/scripts
 ../all/compile-generic.sh "$rev_id" "$configure_args" "${shell_name}${shell_suffix}" "false" "$features" "$compiledir"
 if [ "$?" != "0" ]; then
-    echo "Wordcode release compilation failure."
+    echo "AIR release-debugger compilation failure."
     exitcode=1
 fi
 if [ -f $WS/$compiledir/shell/$shell_name$shell_suffix${shell_extension} ]; then
@@ -339,8 +339,8 @@ fi
 #############################
 export shell_name=avmshell_air
 export AVM="$WS/objdir/shell/$shell_name$shell_suffix"
-export mode="release-wordcode"
-export vmargs="-Dinterp"
+export mode="releasedebugger-air"
+export vmargs=""
 cd $WS/build/buildbot/slaves/scripts
 ../all/run-acceptance-generic.sh "$rev_id" "$shell_name$shell_suffix" "$vmargs" "" "--showtimes --log runtests-$mode.txt --logjunit=acceptance-$mode.xml --threads=$threads --testtimeout=300 $suite"
 failures=`grep "^failures" $WS/test/acceptance/runtests-$mode.txt | awk '{print $3}'`
@@ -429,7 +429,14 @@ export AVM="$WS/objdir/shell/$shell_name$shell_suffix"
 export mode="releasedebugger-valgrind"
 export vmargs=""
 cd $WS/build/buildbot/slaves/scripts
-../all/run-acceptance-generic.sh "$rev_id" "$shell_name$shell_suffix" "$vmargs" "" "--valgrind --showtimes --log runtests-$mode.txt --logjunit=acceptance-$mode.xml --threads=$threads --testtimeout=600 $suite"
+# NOTE: The machine that this currently runs on is a little slow so we need
+# to increase the timeout for running the valgrind suite:
+#     ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA.as   time 678.3
+#     ecma3/Unicode/uE000_PrivateUseArea.as   time 665.2
+#     mmgc/pauseForGCIfCollectionImminent.as   time 887.2
+#     mops/mops.abc_   time 981.6
+#     mops/mops_basics.as   time 994.1
+../all/run-acceptance-generic.sh "$rev_id" "$shell_name$shell_suffix" "$vmargs" "" "--valgrind --showtimes --log runtests-$mode.txt --logjunit=acceptance-$mode.xml --threads=$threads --testtimeout=1100 $suite"
 failures=`grep "^failures" $WS/test/acceptance/runtests-$mode.txt | awk '{print $3}'`
 if [ "$failures" = "0" ]; then
     echo "all tests passed"
