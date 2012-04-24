@@ -230,20 +230,20 @@ bool canUnwrapToatom(Def* value_in, const Type* to_type, Def** arg_out);
 void init();
 
 // Configuration.
-extern const int enable_welcome;    // Print welcome and options.
-extern const int enable_verbose;    // Generate verbose output.
-extern const int enable_peephole;   // Enable ABC peephole optimizer.
-extern const int enable_gml;        // Enable GML graph output.
-extern const int enable_vmstate;    // Always generate Safepoint instructions.
-extern const int enable_builtins;   // Optimize builtins too.
-extern const int enable_try;        // Enable optimizing try/catch functions.
-extern const int enable_printir;    // Enable printing of final IR
-extern const int enable_mode;       // Which execution mode.
-extern const int enable_trace;      // Enable execution trace.
-extern const int enable_inline;     // Enable inline optimization.
-extern const int enable_profiler;   // Enable runtime profiling
-extern const int enable_typecheck;  // Enable type-check verbosity.
-extern const int enable_optional;   // Enable optional argument support.
+extern int enable_welcome;    // Print welcome and options.
+extern int enable_verbose;    // Generate verbose output.
+extern int enable_peephole;   // Enable ABC peephole optimizer.
+extern int enable_gml;        // Enable GML graph output.
+extern int enable_vmstate;    // Always generate Safepoint instructions.
+extern int enable_builtins;   // Optimize builtins too.
+extern int enable_try;        // Enable optimizing try/catch functions.
+extern int enable_printir;    // Enable printing of final IR
+extern int enable_mode;       // Which execution mode.
+extern int enable_trace;      // Enable execution trace.
+extern int enable_inline;     // Enable inline optimization.
+extern int enable_profiler;   // Enable runtime profiling
+extern int enable_typecheck;  // Enable type-check verbosity.
+extern int enable_optional;   // Enable optional argument support.
 
 /** Halfmoon execution modes */
 enum ExecutionMode {
@@ -260,8 +260,8 @@ enum ScheduleKind {
   kScheduleLate,
   kScheduleMiddle
 };
-extern const ScheduleKind enable_schedule;   // Scheduler. 0=none, 1=
-extern const int enable_deopt;  // Enable deoptimization.
+extern ScheduleKind enable_schedule;   // Scheduler. 0=none, 1=
+extern int enable_deopt;  // Enable deoptimization.
 
 /// A Copier is used for cloning instructions from one IR into another one.
 /// It keeps a map of old instructions to new ones.  Eacy copy() operation

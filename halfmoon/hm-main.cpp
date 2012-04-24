@@ -48,31 +48,49 @@ using avmplus::ScopeTypeChain;
 
 using profiler::MethodProfile;
 
-const int enable_builtins = parseEnv("BUILTINS", 1);
-const int enable_dvn = parseEnv("DVN", 1);
-const int enable_deopt = parseEnv("DEOPT", 0);
-const int enable_gml = parseEnv("GML", 0);
-const int enable_inline = parseEnv("INLINE", 0);
-const int enable_mode = parseEnv("MODE", 4);
-const int enable_optional = parseEnv("OPTIONAL", 1);
-const int enable_peephole = parseEnv("PEEPHOLE", 0);
-const int enable_printir = parseEnv("PRINTIR", 0);
-const int enable_profiler = parseEnv("PROFILER", 0);
-const ScheduleKind enable_schedule = (ScheduleKind)parseEnv("SCHEDULE",
-                                                            kScheduleMiddle);
-const int enable_selftest = parseEnv("SELFTEST", 0);
-const int enable_trace = parseEnv("TRACE", 0);
-const int enable_try = parseEnv("TRY", 0);
-const int enable_typecheck = parseEnv("TYPECHECK", 0);
-const int enable_verbose = parseEnv("VERBOSE", 0);
-const int enable_vmstate = parseEnv("VMSTATE", 0);
-const int enable_welcome = parseEnv("WELCOME", 0);
+int enable_builtins = 1;
+int enable_dvn = 1;
+int enable_deopt = 0;
+int enable_gml = 0;
+int enable_inline = 0;
+int enable_mode = 0;			// disabled by default, use -Dhalfmoon or env var
+int enable_optional = 1;
+int enable_peephole = 0;
+int enable_printir = 0;
+int enable_profiler = 0;
+int enable_selftest = 0;
+int enable_trace = 0;
+int enable_try = 0;
+int enable_typecheck = 0;
+int enable_verbose = 0;
+int enable_vmstate = 0;
+int enable_welcome = 0;
+ScheduleKind enable_schedule = kScheduleMiddle;
 
 void init() {
   static bool first = true;
   if (!first)
     return;
   first = false;
+
+  enable_builtins = parseEnv("BUILTINS", enable_builtins);
+  enable_dvn = parseEnv("DVN", enable_dvn);
+  enable_deopt = parseEnv("DEOPT", enable_deopt);
+  enable_gml = parseEnv("GML", enable_gml);
+  enable_inline = parseEnv("INLINE", enable_inline);
+  enable_mode = parseEnv("MODE", enable_mode);
+  enable_optional = parseEnv("OPTIONAL", enable_optional);
+  enable_peephole = parseEnv("PEEPHOLE", enable_peephole);
+  enable_printir = parseEnv("PRINTIR", enable_printir);
+  enable_profiler = parseEnv("PROFILER", enable_profiler);
+  enable_selftest = parseEnv("SELFTEST", enable_selftest);
+  enable_trace = parseEnv("TRACE", enable_trace);
+  enable_try = parseEnv("TRY", enable_try);
+  enable_typecheck = parseEnv("TYPECHECK", enable_typecheck);
+  enable_verbose = parseEnv("VERBOSE", enable_verbose);
+  enable_vmstate = parseEnv("VMSTATE", enable_vmstate);
+  enable_welcome = parseEnv("WELCOME", enable_welcome);
+  enable_schedule = (ScheduleKind)parseEnv("SCHEDULE", enable_schedule);
 
   debugInit();
 
