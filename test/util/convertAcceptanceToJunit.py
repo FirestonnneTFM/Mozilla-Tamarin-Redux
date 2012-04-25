@@ -103,6 +103,7 @@ def convertPerformanceToJunit(infile,outfile,toplevel):
     systemout=systemerr=''
     properties['platform']=toplevel
     properties['version']='unknown'
+    multMetrics=False
     measurements=[]
     for line in lines:
         tokens=line.split()
@@ -111,20 +112,26 @@ def convertPerformanceToJunit(infile,outfile,toplevel):
             if tm.find('.'):
                 tm=tm[0:tm.find('.')]
             properties['timestamp']='%sT%s' % (tokens[3],tm)
-        elif line.startswith('avm'):
+        elif line.startswith('avm') and len(tokens)>3:
             properties['avm']=tokens[1]
-            properties['version']=tokens[3]
-        elif line.startswith('iterations'):
+            properties['version']=tokens[-1]
+        elif line.startswith('iterations') and len(tokens)>1:
             properties['iterations']=tokens[1]
-        elif line.startswith('Dir'):
+        elif line.startswith('Dir') and len(tokens)>1:
             dir=tokens[1]
             dir=dir.replace('.','_')
-        elif line.startswith('Metric'):
+        elif line.startswith('Metric') and len(tokens)>1:
             metric=tokens[1]
         elif line.startswith('Executing') or line.startswith("test"):
             pass
-        elif len(tokens)==2 or len(tokens)==4:
+        elif len(tokens)==1:
             name=tokens[0]
+            multMetrics=True
+        elif len(tokens)==2 or len(tokens)==4:
+            if multMetrics:
+                metric=tokens[0]
+            else:
+                name=tokens[0]
             value=tokens[1]
             if value.endswith("M"):
                 value=value[0:-1]
@@ -186,7 +193,18 @@ def convertPerformanceToJunit(infile,outfile,toplevel):
             contents+='<property name="%s" value="%s" />\n' % (key,properties[key])
         contents+='</properties>\n'
         for measurement in measurements:
-            contents+='<testcase classname="%s.%s" name="%s" time="0">\n<system-out>\n<![CDATA[\n<measurement><name>%s</name><value>%s</value></measurement>\n]]>\n</system-out>\n</testcase>\n' % (toplevel,measurement[0],measurement[1],measurement[2],measurement[3])
+            lines=contents.split('\n')
+            found=False
+            newcontents=''
+            for i in range(len(lines)):
+                newcontents+=lines[i]+'\n'
+                if i>2 and re.search('classname="%s.%s".* name="%s"' % (toplevel,measurement[0],measurement[1]),lines[i-2]):
+                   found=True
+                   newcontents+='<measurement><name>%s</name><value>%s</value></measurement>\n' % (measurement[2],measurement[3])
+            if found:
+                contents=newcontents
+            else:   
+                contents+='<testcase classname="%s.%s" name="%s" time="0">\n<system-out>\n<![CDATA[\n<measurement><name>%s</name><value>%s</value></measurement>\n]]>\n</system-out>\n</testcase>\n' % (toplevel,measurement[0],measurement[1],measurement[2],measurement[3])
         contents+='<system-out>%s</system-out>\n<system-err>%s</system-err>\n</testsuite>' % (fixForXmlCdata(systemout),fixForXmlCdata(systemerr))
         open(outfile,'w').write(contents)
     return outfile
