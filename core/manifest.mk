@@ -157,10 +157,11 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
 
 .PHONY: core-tracers
 core-tracers: $(topsrcdir)/generated/builtin.abc $(topsrcdir)/generated/shell_toplevel.abc
-ifdef AVM
-	$(CMD)cd $(topsrcdir)/core; python ./builtin-tracers.py
+ifdef AVMSHELL_TOOL
+	$(MSG)true "Generating core-tracers via AVMSHELL_TOOL=$(AVMSHELL_TOOL)"
+	$(CMD)AVM=$(AVMSHELL_TOOL) ; cd $(topsrcdir)/core; python ./builtin-tracers.py
 else
-	$(MSG)true "Skipping core-tracers since AVM unset"
+	$(MSG)true "Skipping core-tracers generation since AVMSHELL_TOOL unset"
 endif
 
 # 1. Use of '$(topsrcdir)/generated' is deliberate; we use absolute
