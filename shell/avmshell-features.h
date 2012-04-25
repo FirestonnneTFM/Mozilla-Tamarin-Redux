@@ -267,7 +267,7 @@
 #endif
 
 #ifndef AVMFEATURE_SWF17
-  #define AVMFEATURE_SWF17 0
+  #define AVMFEATURE_SWF17 1
 #endif
 
 #ifndef AVMFEATURE_SWF18
