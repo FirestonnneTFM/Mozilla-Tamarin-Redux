@@ -138,6 +138,7 @@ namespace avmplus
 
         m_globalMemoryBase = newBase;
         m_globalMemorySize = newSize;
+		TELEMETRY_UINT32(toplevel()->core()->getTelemetry(), ".mem.bytearray.alchemy",m_globalMemorySize/1024);
     }
 
     bool DomainEnv::globalMemorySubscribe(ByteArrayObject* providerObject)
