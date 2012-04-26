@@ -519,6 +519,88 @@ else
 fi
 
 
+################################################################################
+################################################################################
+#
+#   Halfmoon JIT Compilation and Testing
+#
+################################################################################
+################################################################################
+
+##############################
+# Halfmoon Release compilation
+##############################
+shell_name="avmshell_halfmoon"
+configure_args="${base_configure_args} --enable-halfmoon"
+compiledir="objdir-release-halfmoon"
+features="${base_features} +AVMFEATURE_HALFMOON"
+unset AVM
+cd $WS/build/buildbot/slaves/scripts
+../all/compile-generic.sh "$rev_id" "$configure_args" "${shell_name}${shell_suffix}" "false" "$features" "$compiledir"
+if [ "$?" != "0" ]; then
+    echo "Halfmoon release compilation failure."
+    exitcode=1
+fi
+if [ -f $WS/$compiledir/shell/$shell_name$shell_suffix${shell_extension} ]; then
+    mv $WS/$compiledir/shell/$shell_name$shell_suffix${shell_extension} $WS/objdir/shell/$shell_name$shell_suffix${shell_extension}
+fi
+
+
+##############################
+# Halfmoon Debug-Debugger compilation
+##############################
+shell_name="avmshell_sd_halfmoon"
+configure_args="${base_configure_args} --enable-halfmoon --enable-debug --enable-debugger"
+compiledir="objdir-debugdebugger-halfmoon"
+features="${base_features} +AVMFEATURE_HALFMOON +AVMFEATURE_DEBUGGER"
+unset AVM
+cd $WS/build/buildbot/slaves/scripts
+../all/compile-generic.sh "$rev_id" "$configure_args" "${shell_name}${shell_suffix}" "false" "$features" "$compiledir"
+if [ "$?" != "0" ]; then
+    echo "Halfmoon release compilation failure."
+    exitcode=1
+fi
+if [ -f $WS/$compiledir/shell/$shell_name$shell_suffix${shell_extension} ]; then
+    mv $WS/$compiledir/shell/$shell_name$shell_suffix${shell_extension} $WS/objdir/shell/$shell_name$shell_suffix${shell_extension}
+fi
+
+
+#############################
+# Halfmoon Release Acceptance
+#############################
+export shell_name=avmshell_halfmoon
+export AVM="$WS/objdir/shell/$shell_name$shell_suffix"
+export mode="release-halfmoon"
+export vmargs="-Dhalfmoon"
+cd $WS/build/buildbot/slaves/scripts
+../all/run-acceptance-generic.sh "$rev_id" "$shell_name$shell_suffix" "$vmargs" "" "--showtimes --log runtests-$mode.txt --logjunit=acceptance-$mode.xml --threads=$threads --testtimeout=300 $suite"
+failures=`grep "^failures" $WS/test/acceptance/runtests-$mode.txt | awk '{print $3}'`
+if [ "$failures" = "0" ]; then
+    echo "all tests passed"
+else
+    echo "error: found $failures FAILURES in acceptance tests"
+    exitcode=1
+fi
+
+#############################
+# Halfmoon Debug-Debugger Acceptance
+#############################
+export shell_name=avmshell_sd_halfmoon
+export AVM="$WS/objdir/shell/$shell_name$shell_suffix"
+export mode="debugdebugger-halfmoon"
+export vmargs="-Dhalfmoon"
+cd $WS/build/buildbot/slaves/scripts
+../all/run-acceptance-generic.sh "$rev_id" "$shell_name$shell_suffix" "$vmargs" "" "--showtimes --log runtests-$mode.txt --logjunit=acceptance-$mode.xml --threads=$threads --testtimeout=300 $suite"
+failures=`grep "^failures" $WS/test/acceptance/runtests-$mode.txt | awk '{print $3}'`
+if [ "$failures" = "0" ]; then
+    echo "all tests passed"
+else
+    echo "error: found $failures FAILURES in acceptance tests"
+    exitcode=1
+fi
+
+
+
 # FIXME: disable the float testing for now
 if [ "1" = "0" ]; then
 ################################################################################
