@@ -641,8 +641,6 @@ fi
 
 
 
-# FIXME: disable the code coverage testing for now
-if [ "1" = "0" ]; then
 ################################################################################
 ################################################################################
 #
@@ -675,8 +673,6 @@ if [ "$?" = "0" ]; then
 else
     echo "error: Code coverage processing failed"
     exitcode=1
-fi
-# FIXME: disable the code coverage testing for now
 fi
 
 ################################################################################

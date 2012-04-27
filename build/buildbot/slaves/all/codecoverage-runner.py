@@ -78,11 +78,11 @@ class CodeCoverageRunner:
                 sys.exit(1)
             self.builds_dir="../../../../../builds/%s-%s/%s" % (self.buildnum, out[0], self.platform)
 
-        # Convert all relative paths to absolute
-        self.builds_dir=os.path.abspath(self.builds_dir)
-        self.root_dir=os.path.abspath(self.root_dir)
-        self.script_dir=os.path.abspath(self.script_dir)
-        
+            # Convert all relative paths to absolute
+            self.builds_dir=os.path.abspath(self.builds_dir)
+            self.root_dir=os.path.abspath(self.root_dir)
+            self.script_dir=os.path.abspath(self.script_dir)
+
         if self.platform=='windows':
             self.compile_csvfile=self.convertFromCygwin(self.compile_csvfile)
             self.test_csvfile=self.convertFromCygwin(self.test_csvfile)
