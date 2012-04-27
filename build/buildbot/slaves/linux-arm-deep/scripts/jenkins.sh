@@ -13,7 +13,7 @@ exitcode=0
 
 shell_suffix=""
 shell_extension=""
-base_configure_args="--enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=/home/build/tools/arm-linux/debian5"
+base_configure_args="--enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=$TOOLCHAIN_ARM_LINUX/debian5"
 base_features=""
 
 ##

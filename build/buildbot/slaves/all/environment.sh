@@ -71,11 +71,9 @@ else
     export buildsdir=`cd ${basedir}/../builds; pwd`
 fi
 
-export shellABC=shell_toplevel.abc
-export builtinABC=builtin.abc
 export ASC=$basedir/utils/asc.jar
-export BUILTINABC=$basedir/generated/$builtinABC
-export SHELLABC=$basedir/generated/$shellABC
+export BUILTINABC=$basedir/generated/builtin.abc
+export SHELLABC=$basedir/generated/shell_toplevel.abc
 
 # builds for windows mobile (used by emulator)
 export shell_release_arm=avmshell_arm$shell_extension

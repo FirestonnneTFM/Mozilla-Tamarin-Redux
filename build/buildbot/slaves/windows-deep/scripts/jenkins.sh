@@ -600,9 +600,6 @@ else
 fi
 
 
-
-# FIXME: disable the float testing for now
-if [ "1" = "0" ]; then
 ################################################################################
 ################################################################################
 #
@@ -755,8 +752,6 @@ p4 sync -f $WS/test/acceptance/as3/asc/import-with-float4-helper.abc
 echo "Unzipping compiled test media"
 unzip -o -q acceptance-tests-abcs.zip
 
-# FIXME: disable the float testing for now
-fi
 
 ################################################################################
 ################################################################################
