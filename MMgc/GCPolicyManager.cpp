@@ -382,6 +382,8 @@ namespace MMgc
         double aval = A();
         if(aval > INT_MAX)
             aval = INT_MAX;
+        else if (aval < 1)
+            aval = 1;
         remainingMinorAllocationBudget = int32_t(aval);
         minorAllocationBudget = remainingMinorAllocationBudget;
         GCAssert(minorAllocationBudget > 0);
