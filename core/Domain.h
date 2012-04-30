@@ -58,7 +58,16 @@ namespace avmplus
         // returns NULL if the type doesn't exist yet.
         ClassClosure* getParameterizedType(ClassClosure* type);
         void addParameterizedType(ClassClosure* type, ClassClosure* parameterizedType);
-
+    private:
+        // Returns false only if (getParameterizedType(type) == NULL).
+        // Returns true when 'type' present (but it is weakly held;
+        // later 'getParameterizedType(type)' calls could be null).
+        //
+        // Use when you want to know if the type is present, but do
+        // not want inadvertantly to cause it to be retained by the GC
+        // if it is otherwise reclaimable.
+        bool isParameterizedTypePresent(ClassClosure* type);
+    public:
         GCRef<MultinameMethodInfoHashtable> getLoadedScripts() { return m_loadedScripts; }
 
     GC_DATA_BEGIN(Domain)

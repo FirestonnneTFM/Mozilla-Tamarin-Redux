@@ -88,12 +88,30 @@ namespace avmplus
         return result;
     }
 
+    bool Domain::isParameterizedTypePresent(ClassClosure* type)
+    {
+        bool result = false;
+        if (type)
+        {
+            Atom value = m_parameterizedTypes->get(type->atom());
+            if (AvmCore::isGenericObject(value))
+            {
+                MMgc::GCWeakRef* wr = (MMgc::GCWeakRef*)AvmCore::atomToGenericObject(value);
+                if (wr)
+                {
+                    result = !(wr->isNull());
+                }
+            }
+        }
+        return result;
+    }
+
     void Domain::addParameterizedType(ClassClosure* type, ClassClosure* parameterizedType)
     {
         AvmAssert(type && parameterizedType);
         if (type && parameterizedType)
         {
-            AvmAssert(!m_parameterizedTypes->contains(type->atom()));
+            AvmAssert(!isParameterizedTypePresent(type));
             // Note that what we really need here is fixing the problems with our weak tables.
             // If there exists a cycle in the weak table ('value' indirectly pointing to the weak 'key'),
             // the weak key will not get collected even if there are no references to 
