@@ -159,7 +159,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
 core-tracers: $(topsrcdir)/generated/builtin.abc $(topsrcdir)/generated/shell_toplevel.abc
 ifdef AVMSHELL_TOOL
 	$(MSG)true "Generating core-tracers via AVMSHELL_TOOL=$(AVMSHELL_TOOL)"
-	$(CMD)AVM=$(AVMSHELL_TOOL) ; cd $(topsrcdir)/core; python ./builtin-tracers.py
+	$(CMD)cd $(topsrcdir)/core; AVM=$(AVMSHELL_TOOL) python ./builtin-tracers.py
 else
 	$(MSG)true "Skipping core-tracers generation since AVMSHELL_TOOL unset"
 endif

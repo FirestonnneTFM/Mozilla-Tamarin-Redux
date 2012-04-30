@@ -124,7 +124,7 @@ endif
 shell-tracers: $(topsrcdir)/generated/builtin.abc $(topsrcdir)/generated/shell_toplevel.abc | core-tracers
 ifdef AVMSHELL_TOOL
 	$(MSG)true "Generating shell-tracers via AVMSHELL_TOOL=$(AVMSHELL_TOOL)"
-	$(CMD)AVM=$(AVMSHELL_TOOL) ; cd $(topsrcdir)/shell; python ./shell_toplevel-tracers.py
+	$(CMD)cd $(topsrcdir)/shell; AVM=$(AVMSHELL_TOOL) python ./shell_toplevel-tracers.py
 else
 	$(MSG)true "Skipping shell-tracers generation since AVMSHELL_TOOL unset"
 endif
