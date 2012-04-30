@@ -143,8 +143,8 @@ do
         scp $filename $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST:$SSH_SHELL_REMOTE_BASEDIR/builds/${change}-${changeid}/$exename
     fi
 
-    # copy the shell from the device build directory to the client directory
-    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;${SSH_SETUP}rm avmshell;${SSH_SETUP}cp $SSH_SHELL_REMOTE_BASEDIR/builds/${change}-${changeid}/$exename ./avmshell;chmod 777 ./avmshell"
+    # create a symbolic link to the shell from the device build directory to the client directory
+    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;${SSH_SETUP}rm avmshell;${SSH_SETUP}ln -s $SSH_SHELL_REMOTE_BASEDIR/builds/${change}-${changeid}/$exename ./avmshell;chmod 777 ./avmshell"
 
     # verify the deployed shell version if correct
     ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;./avmshell" > /tmp/stdout
