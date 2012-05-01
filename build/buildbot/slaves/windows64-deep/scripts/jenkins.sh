@@ -653,6 +653,7 @@ fi
 # Code Coverage
 #############################
 unset AVM
+unset vmargs
 cd $WS/build/buildbot/slaves/scripts
 ../all/codecoverage-runner.sh -b $rev_id --compilecsv=../all/codecoverage-compile.csv --testcsv=../all/codecoverage-test.csv --buildsdir=$WS/objdir/shell
 if [ "$?" = "0" ]; then
@@ -666,6 +667,7 @@ fi
 # Code Coverage Process Info
 #############################
 unset AVM
+unset vmargs
 cd $WS/build/buildbot/slaves/scripts
 ../all/codecoverage-process.sh $rev_id
 if [ "$?" = "0" ]; then
@@ -687,6 +689,7 @@ fi
 # ESC Testing
 #############################
 unset AVM
+unset vmargs
 cd $WS/build/buildbot/slaves/scripts
 ../all/run-release-esc.sh "$rev_id"
 if [ "$?" != "0" ]; then
@@ -698,6 +701,8 @@ fi
 #############################
 # Differential Testing
 #############################
+unset AVM
+unset vmargs
 ##
 # Need to get the release 32bit shell from Jenkins
 cd $WS/objdir/shell/
