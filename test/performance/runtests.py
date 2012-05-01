@@ -123,6 +123,9 @@ class PerformanceRuntest(RuntestBase):
     testFieldLen = 27   # field length for test name and path
     resultWidth = 8     # width of result columns
 
+    # dict for storing aot compile times
+    aot_compile_times={}
+
     # Index file header
     testIndexHeaderString = '''
 # The testindex file contains a list of test results that are used to normalize
@@ -333,8 +336,10 @@ class PerformanceRuntest(RuntestBase):
         self.printOutput(None, debugoutput)
         if self.aotsdk and self.aotout:
             if isfile(splitext(as_file)[0] + ".abc"):
+                startTime=time()
                 RuntestBase.compile_aot(self, splitext(as_file)[0] + ".abc")
-
+                self.aot_compile_times[as_file]=time()-startTime
+   
     def socketlog(self, msg):
         if not self.socketlogFile:
             file="socketlog-%s.txt" % self.avmversion
@@ -805,6 +810,8 @@ class PerformanceRuntest(RuntestBase):
                         (f1,err,exitcode) = self.run_pipe(cmd)
                         self.debug_print("%s" % (cmd))
                         self.debug_print(f1)
+                        if testName in self.aot_compile_times:
+                            f1.append('metric compile_time %.2f' % self.aot_compile_times[testName])
                 else:
                     (f1,err,exitcode) = self.run_pipe("%s %s %s %s" % (self.avm, self.vmargs, abc, scriptArg))
                     self.debug_print("%s %s %s %s" % (self.avm, self.vmargs, abc, scriptArg))
