@@ -28,6 +28,10 @@ metric_info = {
             'best':min,
             'unit':'milliseconds',
         },
+        'compile_time': {
+            'best':min,
+            'unit':'seconds',
+        },
         'memory':{
             'best':max,
             'unit':'k',
