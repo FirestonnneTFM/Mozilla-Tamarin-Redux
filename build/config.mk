@@ -125,6 +125,12 @@ else ifeq ($(VERBOSE),4)
 CALCDEPS_VERBOSE_OPT=-v
 endif
 
+ifeq ($(VERB_GT3),) # Bugzilla 750915: keep test-run's stderr for VERBOSE >= 4
+CXX_PCH_PIPE_STDERR=
+else # at VERBOSE < 4: pipe stderr for test run to /dev/null
+CXX_PCH_PIPE_STDERR=  2> /dev/null
+endif
+
 PCH_SUFFIX ?= gch
 
 GLOBAL_DEPS := Makefile
@@ -222,8 +228,7 @@ $$($(1)_PCH).$(PCH_SUFFIX): $$($(1)_PCH_SRC) $$($(1)_PCH:.h=.$(II_SUFFIX))
 
 $$($(1)_PCH_CHECK): $$($(1)_PCH_OBJ) FORCE
 	$(MXG)true "Checking validity of precompiled header $$<"
-	$(CMD)$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_PCH_OPTION) -x c++ -c - < /dev/null > /dev/null || $(ECHO) "PCH invalid; regenerating precompiled header $$<" && $(CXX) $(OUTOPTION)$$< $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$($(1)_PCH_SRC)
-
+	$(CMD)$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_PCH_OPTION) -x c++ -c - < /dev/null $(CXX_PCH_PIPE_STDERR) || $(ECHO) "PCH invalid; regenerating precompiled header $$<" && $(CXX) $(OUTOPTION)$$< $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$($(1)_PCH_SRC)
 endif # defined(thingname_PCH)
 
 $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)): %.$(II_SUFFIX): %.cpp $$(GLOBAL_DEPS)
