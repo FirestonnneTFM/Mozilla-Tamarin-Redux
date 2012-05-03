@@ -558,7 +558,8 @@ else
     exitcode=1
 fi
 
-
+# Bug: bz 750694, halfmoon fails to compile on windows
+if [ "0" == "1" ]; then
 ################################################################################
 ################################################################################
 #
@@ -638,7 +639,8 @@ else
     echo "error: found $failures FAILURES in acceptance tests"
     exitcode=1
 fi
-
+# Bug: bz 750694, halfmoon fails to compile on windows
+fi
 
 
 ################################################################################
