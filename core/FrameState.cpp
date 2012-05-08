@@ -50,6 +50,7 @@ namespace avmplus
           scopeBase(ms->scope_base()),
           stackBase(ms->stack_base()),
           targetOfBackwardsBranch(false),
+          targetOfExceptionBranch(false),
           wl_pending(false)
     {
         locals = (FrameValue*)mmfx_alloc_opt(sizeof(FrameValue) * frameSize, MMgc::kZero);
@@ -66,6 +67,7 @@ namespace avmplus
         stackDepth = other->stackDepth;
         withBase = other->withBase;
         targetOfBackwardsBranch = other->targetOfBackwardsBranch;
+        targetOfExceptionBranch = other->targetOfExceptionBranch;
         VMPI_memcpy(locals, other->locals, frameSize * sizeof(FrameValue));
     }
 }

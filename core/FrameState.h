@@ -87,6 +87,7 @@ namespace avmplus
         const int32_t stackBase;
     public:
         bool targetOfBackwardsBranch; // true if this block is reachable from later code (in linear ABC order)
+        bool targetOfExceptionBranch; // true if this block is reachable from exception dispatch
         bool wl_pending;    // true if this is in verifier->worklist.  Verifier::checkTarget() sets to true.
 
     public:
