@@ -882,7 +882,6 @@ namespace avmplus
     {
         // now load the saved state at this block
         state->init(blk);
-        state->targetOfBackwardsBranch = blk->targetOfBackwardsBranch;
         state->abc_pc = blk->abc_pc;
 
 #ifdef AVMPLUS_VERBOSE
@@ -970,6 +969,7 @@ namespace avmplus
         ExceptionHandlerTable* exTable = info->abc_exceptions();
         bool isLoopHeader = state->targetOfBackwardsBranch;
         state->targetOfBackwardsBranch = false;
+        state->targetOfExceptionBranch = false;
         const uint8_t* code_end = code_pos + code_length;
         for (const uint8_t *pc = start_pos, *nextpc = pc; pc < code_end; pc = nextpc)
         {
@@ -1014,7 +1014,7 @@ namespace avmplus
                         // The thrown value is received as an atom but we will coerce it to
                         // the expected type before handing control to the catch block.
                         state->push(handler->traits);
-                        checkTarget(pc, target);
+                        checkTarget(pc, target, /*isExceptionEdge*/true);
                         state->pop();
 
                         state->stackDepth = saveStackDepth;
@@ -3318,7 +3318,7 @@ namespace avmplus
     // FrameState (getFrameState(target)), and report verify errors.
     // Fixme: Bug 558876 - |current| must not be dereferenced, it could point
     // outside the valid range of bytecodes.  Its only for back-edge detection.
-    void Verifier::checkTarget(const uint8_t* current, const uint8_t* target)
+    void Verifier::checkTarget(const uint8_t* current, const uint8_t* target, bool isExceptionEdge)
     {
         if (emitPass) {
             AvmAssert(hasFrameState(target));
@@ -3385,6 +3385,7 @@ namespace avmplus
             // first time visiting target block
             targetChanged = true;
             AvmAssert(!state->targetOfBackwardsBranch);
+            AvmAssert(!state->targetOfExceptionBranch);
             targetState->init(state);
 
             #ifdef AVMPLUS_VERBOSE
@@ -3403,6 +3404,12 @@ namespace avmplus
         if (targetOfBackwardsBranch != targetState->targetOfBackwardsBranch)
             targetChanged |= true;
         targetState->targetOfBackwardsBranch = targetOfBackwardsBranch;
+
+        bool targetOfExceptionBranch = targetState->targetOfExceptionBranch || isExceptionEdge;
+        if (targetOfExceptionBranch != targetState->targetOfExceptionBranch)
+            targetChanged |= true;
+        targetState->targetOfExceptionBranch = targetOfExceptionBranch;
+
         if (targetChanged && !targetState->wl_pending) {
             targetState->wl_pending = true;
             targetState->wl_next = worklist;
@@ -3769,7 +3776,13 @@ namespace avmplus
             if (i+1 < n)
                 out << ' ';
         }
-        out << ")\n";
+        out << ")";
+
+        // branch target info
+        if (state->targetOfBackwardsBranch) out << " B";
+        if (state->targetOfExceptionBranch) out << " E";
+
+        out << "\n";
     }
 
     /** display contents of a captured scope chain */

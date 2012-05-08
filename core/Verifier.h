@@ -233,7 +233,7 @@ namespace avmplus
         FrameValue& checkLocal(int local);
         MethodInfo* checkMethodInfo(uint32_t method_id);
         Traits* checkClassInfo(uint32_t class_id);
-        void checkTarget(const uint8_t* current, const uint8_t* target);
+        void checkTarget(const uint8_t* current, const uint8_t* target, bool isExceptionEdge = false);
         bool mergeState(FrameState*);
         void checkStringOperand(uint32_t index);
         void checkNameOperand(uint32_t index);
