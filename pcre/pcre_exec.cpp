@@ -266,7 +266,7 @@ argument of match(), which never changes. */
 
 #define RMATCH(ra,rb,rc,rd,re,rf,rg,rw)\
   {\
-  {heapframe *newframe = (heapframe* )(pcre_stack_malloc)(sizeof(heapframe));\
+  {heapframe *newframe = alloc_frame();\
   frame->Xwhere = rw; \
   newframe->Xeptr = ra;\
   newframe->Xecode = rb;\
@@ -287,9 +287,9 @@ argument of match(), which never changes. */
 
 #define RRETURN(ra)\
   {\
-  {heapframe *newframe = frame;\
-  frame = newframe->Xprevframe;\
-  (pcre_stack_free)(newframe);\
+  {heapframe *frame_to_free = frame;\
+  frame = frame_to_free->Xprevframe;\
+  free_frame(frame_to_free);\
   }\
   if (frame != NULL)\
     {\
@@ -357,7 +357,9 @@ typedef struct heapframe {
   int Xsave_capture_last;
   int Xsave_offset1, Xsave_offset2, Xsave_offset3;
   int Xstacksave[REC_STACK_SAVE_MAX];
-  int XoffsetStackSave[REC_STACK_SAVE_MAX];
+  int* XoffsetStackSave;
+  int XoffsetStackSaveMax;
+  int XoffsetStackSaveStg[REC_STACK_SAVE_MAX];
   int XsavedElems;  
 
   eptrblock Xnewptrb;
@@ -365,8 +367,28 @@ typedef struct heapframe {
   /* Where to jump back to */
 
   int Xwhere;
-
 } heapframe;
+
+static heapframe* alloc_frame()
+{
+    heapframe* hf = (heapframe*)(pcre_stack_malloc)(sizeof(heapframe));
+    hf->XoffsetStackSave = hf->XoffsetStackSaveStg;
+    hf->XoffsetStackSaveMax = REC_STACK_SAVE_MAX;
+    return hf;
+}
+static void free_frame(heapframe* hf)
+{
+    if (hf->XoffsetStackSave != hf->XoffsetStackSaveStg)
+    {
+        (pcre_free)(hf->XoffsetStackSave);
+        AvmAssert(hf->XoffsetStackSaveMax > REC_STACK_SAVE_MAX);
+    }
+    else
+    {
+        AvmAssert(hf->XoffsetStackSaveMax == REC_STACK_SAVE_MAX);
+    }
+    (pcre_stack_free)(hf);
+}
 
 #endif
 
@@ -433,7 +455,7 @@ heap storage. Set up the top-level frame here; others are obtained from the
 heap whenever RMATCH() does a "recursion". See the macro definitions above. */
 
 #ifdef NO_RECURSE
-heapframe *frame = (heapframe*)(pcre_stack_malloc)(sizeof(heapframe));
+heapframe *frame = alloc_frame();
 frame->Xprevframe = NULL;            /* Marks the top level */
 
 /* Copy in the original argument variables */
@@ -699,6 +721,20 @@ for (;;)
 	  {							   //  (we only really need to reset all enclosed groups, but covering all groups > this is harmless because
 								   //   we interpret from left to right)
 			savedElems = (offset_top > offset ? offset_top - offset : 2);
+            if (savedElems > frame->XoffsetStackSaveMax)
+            {
+                if (frame->XoffsetStackSave != frame->XoffsetStackSaveStg)
+                {
+                    (pcre_free)(frame->XoffsetStackSave);
+                }
+
+                frame->XoffsetStackSave = (int *)(pcre_malloc)(savedElems * sizeof(int));
+                if (frame->XoffsetStackSave == NULL)
+                {
+                    RRETURN(PCRE_ERROR_NOMEMORY);
+                }
+                frame->XoffsetStackSaveMax = savedElems;
+            }
 			VMPI_memcpy(offsetStackSave, md->offset_vector+offset, (savedElems * sizeof(int)));
 			for(int resetOffset = offset+2; resetOffset < offset_top; resetOffset++)
 				md->offset_vector[resetOffset] = -1;
@@ -730,6 +766,7 @@ for (;;)
 
 	  if (ES3_Compatible_Behavior) 
 	  {
+            AvmAssert(savedElems <= frame->XoffsetStackSaveMax);
 			VMPI_memcpy(md->offset_vector+offset, offsetStackSave, (savedElems * sizeof(int)));
 	  }
 	  else
