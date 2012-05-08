@@ -71,6 +71,10 @@ namespace nanojit
 #define RA_PREFERS_LSREG                1
 #define NJ_USES_IMMF4_POOL              1   // Note: doesn't use IMMD pool!
 
+// exclude R12 because ESP and R12 cannot be used as an index
+// (index=100 in SIB means "none")
+#define NJ_JTBL_ALLOWED_IDX_REGS        (GpRegs & ~rmask(R12))
+
     static const Register RAX = { 0 };      // 1st int return, # of sse varargs
     static const Register RCX = { 1 };      // 4th int arg
     static const Register RDX = { 2 };      // 3rd int arg 2nd return

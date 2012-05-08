@@ -72,6 +72,9 @@ namespace nanojit
 #define NJ_DIVI_SUPPORTED               0
 #define firstAvailableReg(i,c,m)   nRegisterAllocFromSet(m)
 
+#define NJ_JTBL_ALLOWED_IDX_REGS        GpRegs
+
+
     enum ConditionRegister {
         CR0 = 0,
         CR1 = 1,

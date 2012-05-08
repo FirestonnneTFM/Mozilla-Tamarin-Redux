@@ -112,7 +112,8 @@ namespace nanojit
     #define NJ_SOFTFLOAT_SUPPORTED          0
     #define NJ_DIVI_SUPPORTED               1
     #define RA_PREFERS_LSREG                1
-    
+    #define NJ_JTBL_ALLOWED_IDX_REGS        GpRegs
+
         // Preserve a 16-byte stack alignment, to support the use of
         // SSE instructions like MOVDQA (if not by Tamarin itself,
         // then by the C functions it calls).
