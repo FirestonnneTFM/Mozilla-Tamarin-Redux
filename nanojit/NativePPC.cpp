@@ -1954,11 +1954,10 @@ namespace nanojit
         //TAG("nFragExit(guard=%p{%s})", guard, lirNames[guard->opcode()]);
     }
 
-    void Assembler::asm_jtbl(LIns* ins, NIns** native_table)
+    void Assembler::asm_jtbl(NIns** native_table, Register indexreg)
     {
         // R0 = index*4, R2 = table, CTR = computed address to jump to.
         // must ensure no page breaks in here because R2 & CTR can get clobbered.
-        Register indexreg = findRegFor(ins->oprnd1(), GpRegs);
         SwapDisable();
 #ifdef NANOJIT_64BIT
         underrunProtect(9*4);

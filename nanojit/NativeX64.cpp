@@ -2646,11 +2646,8 @@ namespace nanojit
     }
     )
 
-    void Assembler::asm_jtbl(LIns* ins, NIns** table)
+    void Assembler::asm_jtbl(NIns** table, Register indexreg)
     {
-        // exclude R12 because ESP and R12 cannot be used as an index
-        // (index=100 in SIB means "none")
-        Register indexreg = findRegFor(ins->oprnd1(), GpRegs & ~rmask(R12));
         if (isS32((intptr_t)table)) {
             // table is in low 2GB or high 2GB, can use absolute addressing
             // jmpq [indexreg*8 + table]

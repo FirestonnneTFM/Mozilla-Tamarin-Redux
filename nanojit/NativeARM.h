@@ -93,6 +93,8 @@ namespace nanojit
 #define NJ_SOFTFLOAT_SUPPORTED          1
 #define NJ_DIVI_SUPPORTED               0
 
+#define NJ_JTBL_ALLOWED_IDX_REGS        GpRegs
+
 #define RA_REGISTERS_OVERLAP            1
 #define firstAvailableReg               getAvailableReg
 #define getFatherReg                    _allocator.getSuitableRegFor

@@ -2047,9 +2047,8 @@ namespace nanojit
         return _nIns;
     }
 
-    void Assembler::asm_jtbl(LIns* ins, NIns** table)
+    void Assembler::asm_jtbl(NIns** table, Register indexreg)
     {
-        Register indexreg = findRegFor(ins->oprnd1(), GpRegs);
         JMP_indexed(indexreg, 2, table);
     }
 

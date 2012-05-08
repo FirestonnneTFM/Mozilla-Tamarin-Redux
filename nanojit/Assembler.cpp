@@ -1240,7 +1240,7 @@ namespace nanojit
         }
         else {
             // Backwards jump.
-            handleLoopCarriedExprs(pending_lives);
+            handleLoopCarriedExprs(pending_lives, 0);
 
             /// HALFMOON typed boids.abc 32 bit platform FIX HERE - MAY BE WRONG
             /// Halfmoon uses a lived, not livei instruction across an edge to keep a value alive
@@ -1301,7 +1301,7 @@ namespace nanojit
         }
         else {
             // Back edge.
-            handleLoopCarriedExprs(pending_lives);
+            handleLoopCarriedExprs(pending_lives, 0);
             if (!label) {
                 // Evict all registers, most conservative approach.
                 evictAllActiveRegs();
@@ -1337,7 +1337,7 @@ namespace nanojit
         }
         else {
             // back edge.
-            handleLoopCarriedExprs(pending_lives);
+            handleLoopCarriedExprs(pending_lives, 0);
             if (!label) {
                 // evict all registers, most conservative approach.
                 evictAllActiveRegs();
@@ -2030,14 +2030,32 @@ namespace nanojit
                     // any forward edges.
                     NanoAssert( _allocator.activeMask() == 0 );
 
+                    // Unlike the case of LIR_jt/LIR_jf, where we can separate the comparison that
+                    // consumes the registers from the branch itself, we will have no opportunity to
+                    // restore evicted registers between the last use of the jump index and the actual
+                    // transfer of control.  Unlike the case for forward branches, however, code has
+                    // not yet been emitted at the target, and it should simply be sufficient to make
+                    // sure that the captured state reflects the allocation for the index.
+                    Register indexreg = findRegFor(ins->oprnd1(), NJ_JTBL_ALLOWED_IDX_REGS);
+
                     if (has_back_edges) {
-                        handleLoopCarriedExprs(pending_lives);
+                        handleLoopCarriedExprs(pending_lives, rmask(indexreg));
+
+                        // At this point _allocator contains the expected state at each of
+                        // the jump targets; except that indexreg is live.
+                        // As indexreg is a temporary artifact that we've populated in order
+                        // to do the branch (i.e. in LIR one cannot use LIR_jtbl as an input to
+                        // another instruction), we need to remove it from the live list that
+                        // we are about to propagate to the targets.
+                        RegAlloc liveSet(_allocator);
+                        liveSet.retire(indexreg);  // indexreg should be dead at the targets
+
                         // save merged (empty) register state at target labels we haven't seen yet
                         for (uint32_t i = count; i-- > 0;) {
                             LIns* to = ins->getTarget(i);
                             LabelState *lstate = _labels.get(to);
                             if (!lstate) {
-                                _labels.add(to, 0, _allocator);
+                                _labels.add(to, 0, liveSet);
                                 verbose_only( RefBuf b; )
                                 asm_output("   %u: [&%s]", i, _thisfrag->lirbuf->printer->formatRef(&b, to));
                             }
@@ -2049,7 +2067,7 @@ namespace nanojit
                     NIns** native_table = new (_dataAlloc) NIns*[count];
                     asm_output("[%p]:", (void*)native_table);
                     _patches.put((NIns*)native_table, ins);
-                    asm_jtbl(ins, native_table);
+                    asm_jtbl(native_table, indexreg);
                     break;
                 }
                 #endif
@@ -2313,7 +2331,7 @@ namespace nanojit
             findSpecificRegForUnallocated(param1, RegAlloc::argRegs[param1->paramArg()]);
     }
 
-    void Assembler::handleLoopCarriedExprs(InsList& pending_lives)
+    void Assembler::handleLoopCarriedExprs(InsList& pending_lives, RegisterMask reserved)
     {
         // ensure that exprs spanning the loop are marked live at the end of the loop
         #ifndef NANOJIT_EAGER_REGSAVE
@@ -2357,7 +2375,7 @@ namespace nanojit
                     allowed = GpRegs;
                     break;
                 }
-                findRegFor(op1, allowed); 
+                findRegFor(op1, allowed & ~reserved);
             }
         }
 
