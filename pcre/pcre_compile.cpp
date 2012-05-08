@@ -6319,6 +6319,15 @@ if (length > MAX_PATTERN_SIZE)
   goto PCRE_EARLY_ERROR_RETURN;
   }
 
+/* Pre-compile and compile do not necessary start with the same options,
+therefore computing the length during pre-compilation could be less by
+2 bytes for compiling this addtional option. The GC will allocate more
+memory than the requested size because it aligns allocations, which usually
+covers the missing 2 bytes.  When the requested size actually falls within
+the alignment, then memory will be over written. */
+if ((options & PCRE_IMS) != (cd->external_options & PCRE_IMS))
+    length += 2;
+
 /* Compute the size of data block needed and get it, either from malloc or
 externally provided function. Integer overflow should no longer be possible
 because nowadays we limit the maximum value of cd->names_found and
