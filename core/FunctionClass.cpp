@@ -93,6 +93,7 @@ namespace avmplus
 
     int32_t FunctionObject::get_length()
     {
+        AvmAssert(m_callEnv != NULL);
         return m_callEnv->method->getMethodSignature()->param_count();
     }
 
@@ -101,7 +102,9 @@ namespace avmplus
         , m_call_ptr(FunctionObject::callFunction)
         , m_callEnv(call)
     {
-        AvmAssert(m_callEnv != NULL);
+        // Bugzilla 753120: it would be nice to assert
+        // m_callEnv is non-null if we could.
+
         // Since FunctionObject is (pseudo)final, we shouldn't need to calculate this every time,
         // but let's reality-check here just in case.
         AvmAssert(calcCreateInstanceProc(cvtable) == ClassClosure::createScriptObjectProc);
@@ -109,6 +112,7 @@ namespace avmplus
 
     REALLY_INLINE Atom FunctionObject::getFunctionReceiver(Atom a) const
     {
+        AvmAssert(m_callEnv != NULL);
         if (AvmCore::isNullOrUndefined(a)) {
             // use callee's global object as this.
             // see E3 15.3.4.4
@@ -149,6 +153,7 @@ namespace avmplus
         }
         else
         {
+            AvmAssert(m_callEnv != NULL);
             return m_callEnv->coerceEnter(thisArg);
         }
     }
@@ -169,6 +174,7 @@ namespace avmplus
 
         // this is a function
         argv[0] = obj->atom(); // new object is receiver
+        AvmAssert(m_callEnv != NULL);
         Atom result = m_callEnv->coerceEnter(argc, argv);
 
         // for E3 13.2.2 compliance, check result and return it if (Type(result) is Object)
@@ -199,17 +205,20 @@ namespace avmplus
     /* static */ Atom FunctionObject::callFunction(FunctionObject* f, int argc, Atom* argv)
     {
         argv[0] = f->getFunctionReceiver(argv[0]);
+        AvmAssert(f->m_callEnv != NULL);
         return f->m_callEnv->coerceEnter(argc, argv);
     }
 
     /*virtual*/ CodeContext* FunctionObject::getFunctionCodeContext() const
     {
+        AvmAssert(m_callEnv != NULL);
         return m_callEnv->scope()->abcEnv()->codeContext();
     }
 
     /*virtual*/ Stringp FunctionObject::implToString() const
     {
         AvmCore* core = this->core();
+        AvmAssert(m_callEnv != NULL);
         Stringp s = core->concatStrings(core->newConstantStringLatin1("[object Function-"), core->intToString(m_callEnv->method->method_id()));
         return core->concatStrings(s, core->newConstantStringLatin1("]"));
     }
