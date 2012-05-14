@@ -240,6 +240,7 @@ mops/mops, Dgreedy,, skip, skip slow test in -Dgreedy mode
 ####################
 regress/bug_555705, -Dverifyall,, skip, test throws an expected verifyerror that is normally caught by the test itself
 regress/bug_498979, -Dverifyall,, skip, test contains OP_callstatic instruction which can't be verified in -Dverifyall mode
+regress/bug_618215, -Dverifyall,, skip, test contains OP_callstatic instruction which can't be verified in -Dverifyall mode
 
 ####################
 # ATS

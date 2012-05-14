@@ -519,7 +519,7 @@ fi
 #############################
 export shell_name=avmshell_sd
 export AVM="$WS/objdir/shell/$shell_name$shell_suffix${shell_extension}"
-export mode="releasedebugger-verifyall"
+export mode="debugdebugger-verifyall"
 export vmargs="-Dverifyall"
 cd $WS/build/buildbot/slaves/scripts
 ../all/run-acceptance-generic.sh "$rev_id" "$shell_name$shell_suffix" "$vmargs" "" "--showtimes --log runtests-$mode.txt --logjunit=acceptance-$mode.xml --threads=$threads --testtimeout=300 $suite"
