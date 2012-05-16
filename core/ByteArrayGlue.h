@@ -52,17 +52,33 @@ namespace avmplus
     class ByteArray : public DataInput,
                       public DataOutput
     {
-        friend class ByteArrayObject;
+        
     public:
+
+        friend class ByteArrayObject;
+        class Buffer : public FixedHeapRCObject
+        {
+        public:
+            virtual void destroy();
+            virtual ~Buffer();
+            uint8_t* array;
+            uint32_t capacity;
+            uint32_t length;
+        };
+
+
         ByteArray(Toplevel* toplevel);
+        ByteArray(Toplevel* toplevel, const ByteArray& other);
+        ByteArray(Toplevel* toplevel, ByteArray::Buffer* source, bool shared);
+        
         ~ByteArray();
 
         void Clear();
         
-        REALLY_INLINE uint8_t operator[](uint32_t index) const { AvmAssert(index < m_length); return (index < m_length) ? m_array[index] : 0; }
+        REALLY_INLINE uint8_t operator[](uint32_t index) const { AvmAssert(index < m_buffer->length); return (index < m_buffer->length) ? m_buffer->array[index] : 0; }
         uint8_t& operator[](uint32_t index);
 
-        REALLY_INLINE uint32_t GetLength() const { return m_length; }
+        REALLY_INLINE uint32_t GetLength() const { return m_buffer->length; }
 
         // Ensure that the capacity of the ByteArray is at least 'newLength',
         // and set length = max(GetLength(), newLength),
@@ -104,7 +120,7 @@ namespace avmplus
         // which is provided solely for compatibility with existing code paths;
         // it's highly recommend you not use this method for new code.
         //
-        REALLY_INLINE const uint8_t* GetReadableBuffer() const { return m_array; }
+        REALLY_INLINE const uint8_t* GetReadableBuffer() const { return m_buffer->array; }
 
         // You can use this call to get a WRITABLE pointer into the ByteArray.
         // The pointer starts at offset zero (regardless of the value of GetPosition())
@@ -132,11 +148,15 @@ namespace avmplus
         void EnsureCapacity(uint32_t capacity);
 
         // overrides from DataInput
-        /*virtual*/ uint32_t Available() { return (m_position <= m_length) ? (m_length - m_position) : 0; }
+        /*virtual*/ uint32_t Available() { return (m_position <= m_buffer->length) ? (m_buffer->length - m_position) : 0; }
         /*virtual*/ void Read(void* buffer, uint32_t count);
 
         // overrides from DataOutput
         /*virtual*/ void Write(const void* buffer, uint32_t count);
+
+        bool isWorkerLocal();
+        bool setWorkerLocal(bool flag);
+        
              
         bool addSubscriber(DomainEnv* subscriber);
         bool removeSubscriber(DomainEnv* subscriber);
@@ -204,6 +224,10 @@ namespace avmplus
              DataEntry* m_last;
              uint8_t    m_lzmaProps[LZMA_PROPS_SIZE];
          }; 
+
+        
+        bool CAS(uint32_t index, int32_t expected, int32_t next);
+        bool share();
          
 #ifdef DEBUGGER
     public:
@@ -216,25 +240,33 @@ namespace avmplus
         virtual Toplevel* toplevel() const { return m_toplevel; }
 
     private:
-        class Grower
+        class Grower : public vmbase::SafepointTask
         {
         public:
-            Grower(ByteArray* owner)
+            Grower(ByteArray* owner, uint32_t minimumCapacity)
                 : m_owner(owner)
-                , m_oldArray(owner->m_array)
-                , m_oldLength(owner->m_length)
-                , m_oldCapacity(owner->m_capacity)
+                , m_oldArray(owner->m_buffer->array)
+                , m_oldLength(owner->m_buffer->length)
+                , m_oldCapacity(owner->m_buffer->capacity)
+                , m_minimumCapacity(minimumCapacity)
             {
             }
-            void FASTCALL EnsureWritableCapacity(uint32_t minimumCapacity);
-            void FASTCALL ReallocBackingStore(uint32_t newCapacity);
-            ~Grower();
-        
+            void FASTCALL ReallocBackingStore();
+            void FASTCALL EnsureWritableCapacity();
+            void run(); // from SafepointTask
+            virtual ~Grower();
+        private:
+            void growTask();
             ByteArray*  m_owner;
             uint8_t*    m_oldArray;
             uint32_t    m_oldLength;
             uint32_t    m_oldCapacity;
+            uint32_t    m_minimumCapacity;
         };
+    public:
+        
+        Buffer* getUnderlyingBuffer() { return m_buffer; }
+        
 
     private:
         enum { kGrowthIncr = 4096 };
@@ -295,12 +327,14 @@ namespace avmplus
         // avoids using the lower-three-bits-as-flags approach we're trying to eradicate elsewhere,
         // and avoids adding a "bool" field which would expand this struct by an average of 7 bytes
         // due to MMgc alignment rules.
+        // FIXME due to factoring out of the Buffer object alignment may be affected.
         //
         MMgc::GCObject*         m_copyOnWriteOwner;
-        uint8_t*                m_array;
-        uint32_t                m_capacity;
-        uint32_t                m_length;
         uint32_t                m_position;
+        FixedHeapRef<Buffer>    m_buffer;
+        bool                    m_workerLocal;
+    public: // FIXME permissions
+        bool                    m_isLinkWrapper;
     };
 
     //
@@ -328,8 +362,12 @@ namespace avmplus
     class GC_AS3_EXACT(ByteArrayObject, ScriptObject)
     {
         friend class ByteArrayClass;
+        friend class MessageChannelObject; // FIXME Still needed?
     protected:
         ByteArrayObject(VTable* ivtable, ScriptObject* delegate);
+        ByteArrayObject(VTable* ivtable, ScriptObject* delegate, const ByteArray& source);
+    public:
+        ByteArrayObject(VTable* ivtable, ScriptObject* delegate, ByteArray::Buffer* source);
 
     public:
 
@@ -339,6 +377,7 @@ namespace avmplus
         virtual bool hasUintProperty(uint32_t i) const;
         virtual Atom getUintProperty(uint32_t i) const;
         virtual void setUintProperty(uint32_t i, Atom value);
+        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
         Atom getMultinameProperty(const Multiname* name) const;
         void setMultinameProperty(const Multiname* name, Atom value);
         bool hasMultinameProperty(const Multiname* name) const;
@@ -400,6 +439,10 @@ namespace avmplus
         void set_endian(Stringp value);
 
         void clear();
+
+        bool compareAndSwapWordAt(uint32_t index, int32_t expected, int32_t next);
+        bool share();
+
 
 #ifdef DEBUGGER
     public:

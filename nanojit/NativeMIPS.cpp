@@ -1876,6 +1876,36 @@ namespace nanojit
         }
     }
 
+    void 
+    Assembler::asm_pushstate(void)
+    {
+        NanoAssert(false);
+    }
+
+    void 
+    Assembler::asm_popstate(void)
+    {
+        NanoAssert(false);
+    }
+
+    void 
+    Assembler::asm_savepc(void)
+    {
+        NanoAssert(false);
+    }
+
+    void 
+    Assembler::asm_restorepc(void)
+    {
+        NanoAssert(false);
+    }
+
+    void 
+    Assembler::asm_discardpc(void)
+    {
+        NanoAssert(false);
+    }
+
     void
     Assembler::asm_call(LIns* ins)
     {

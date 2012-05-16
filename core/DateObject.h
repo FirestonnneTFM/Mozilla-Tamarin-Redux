@@ -83,6 +83,8 @@ namespace avmplus
             return new (gc, MMgc::kExact, type->ivtable()->getExtraSize()) DateObject(type, date);
         }
         
+        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
+        
         // renamed to avoid hiding ScriptObject::toString
         Stringp _toString(int index);
         double AS3_valueOf();

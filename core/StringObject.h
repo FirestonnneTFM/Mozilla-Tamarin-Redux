@@ -360,6 +360,10 @@ namespace avmplus
         and holds a reference to the original string.
         */
                 Stringp FASTCALL    substring(int32_t start, int32_t end = 0x7fffffff);
+        /**
+         * Make a copy in the target core.
+         */
+            Stringp clone(AvmCore* targetCore);
 
         /**
         Implement String.slice(). The resulting String object points into the original string,

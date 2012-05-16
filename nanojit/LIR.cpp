@@ -1938,6 +1938,11 @@ namespace nanojit
 
                 case LIR_start:
                 case LIR_regfence:
+                case LIR_pushstate:
+                case LIR_popstate:
+                case LIR_savepc:
+                case LIR_discardpc:
+                case LIR_restorepc:
                 case LIR_paramp:
                 case LIR_x:
                 case LIR_xbarrier:
@@ -2411,6 +2416,11 @@ namespace nanojit
 
             case LIR_start:
             case LIR_regfence:
+            case LIR_savepc:
+	        case LIR_pushstate:
+	        case LIR_popstate:
+            case LIR_discardpc:
+            case LIR_restorepc:
                 VMPI_snprintf(s, n, "%s", lirNames[op]);
                 break;
 
@@ -4236,6 +4246,11 @@ namespace nanojit
         case LIR_start:
         case LIR_regfence:
         case LIR_label:
+        case LIR_pushstate:
+        case LIR_popstate:
+        case LIR_savepc:
+        case LIR_restorepc:
+        case LIR_discardpc:
             break;
         default:
             NanoAssert(0);

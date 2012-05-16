@@ -1608,6 +1608,67 @@ namespace nanojit
         return _nIns;
     }
 
+    void Assembler::asm_pushstate()
+    {
+        PUSHR(R15);
+        PUSHR(R14);
+        PUSHR(R13);
+        PUSHR(R12);
+        PUSHR(R11);
+        PUSHR(R10);
+        PUSHR(R9);
+        PUSHR(R8);
+        PUSHR(RDI);
+        PUSHR(RSI);
+        PUSHR(RBP);
+        PUSHR(RBX); // RSP
+        PUSHR(RBX);
+        PUSHR(RDX);
+        PUSHR(RCX);
+        PUSHR(RAX);
+    }
+    
+    void Assembler::asm_popstate()
+    {
+        POPR(RAX);
+        POPR(RCX);
+        POPR(RDX);
+        POPR(RBX);
+        POPR(RBX); // RSP
+        POPR(RBP);
+        POPR(RSI);
+        POPR(RDI);
+        POPR(R8);
+        POPR(R9);
+        POPR(R10);
+        POPR(R11);
+        POPR(R12);
+        POPR(R13);
+        POPR(R14);
+        POPR(R15);
+    }
+    
+    void Assembler::asm_savepc()
+    {
+        emit(X64_call);
+        SUBQRI(RSP, 8);
+        //0xD8F7400000000003LL
+        //emit(0xCC00000000000001LL);
+    }
+
+    void Assembler::asm_restorepc()
+    {
+        // jmp dword ptr [rsp]
+        //0xD8F7400000000003LL
+        emit(0x2424FF0000000003LL); //TODO
+    }
+
+    void Assembler::asm_discardpc()
+    {
+        ADDQRI(RSP, 16);
+    }
+
+
     void Assembler::asm_cmp(LIns *cond) {
       if (isCmpF4Opcode(cond->opcode()))
           asm_cmpf4(cond);

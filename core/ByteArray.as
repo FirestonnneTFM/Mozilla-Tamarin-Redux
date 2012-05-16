@@ -1011,6 +1011,11 @@ public class ByteArray implements IDataInput2, IDataOutput2
 
     // Bug 651641: we do not want toJSON enumerated.
     _dontEnumPrototype(prototype);
+
+
+    public native function compareAndSwapWordAt(i:uint, expected:int, next:int):Boolean;
+    public native function share(): Boolean;
+
 };
 
 

@@ -274,6 +274,11 @@ namespace avmshell
         void exit(int status);
 
         /**
+         * Implementation of System.sleep.
+         */
+        void sleep(int ms);
+
+        /**
          * Implementation of System.getAvmplusVersion
          * AS usage: System.getAvmplusVersion();
          * Returns the current version of AVM+ in the form
@@ -364,9 +369,11 @@ namespace avmshell
         // Return argument value as a kIntptrType atom if the argument is a numeric
         // value that can be so represented, else return the argument unchanged.
         avmplus::Atom canonicalizeNumber(avmplus::Atom a);
+        avmplus::Atom copy(avmplus::Atom source);
 
         // DEOPT: Diagnostic scaffolding.
         void deopt(int32_t k);
+        void runInSafepoint(avmplus::FunctionObject* closure);
 
         GC_NO_DATA(SystemClass)
 

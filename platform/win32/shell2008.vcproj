@@ -106,6 +106,435 @@
 			/>
 		</Configuration>
 		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				FavorSizeOrSpeed="2"
+				AdditionalIncludeDirectories="..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;&quot;..\..\other-licenses\zlib&quot;;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE"
+				StringPooling="true"
+				MinimalRebuild="false"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
+				WarningLevel="4"
+				WarnAsError="true"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="0"
+				DisableSpecificWarnings="4201"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=""
+				AdditionalDependencies="winmm.lib"
+				OutputFile="$(OutDir)/avm.exe"
+				LinkIncremental="1"
+				GenerateDebugInformation="true"
+				GenerateMapFile="true"
+				OptimizeReferences="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="1"
+				ErrorReporting="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release_Debugger|Win32"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				FavorSizeOrSpeed="2"
+				AdditionalIncludeDirectories="..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;&quot;..\..\other-licenses\zlib&quot;;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
+				StringPooling="true"
+				MinimalRebuild="false"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
+				WarningLevel="4"
+				WarnAsError="true"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="0"
+				DisableSpecificWarnings="4201"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=""
+				AdditionalDependencies="winmm.lib"
+				OutputFile="$(OutDir)/avm.exe"
+				LinkIncremental="1"
+				GenerateDebugInformation="true"
+				GenerateMapFile="true"
+				OptimizeReferences="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug_Debugger|Win32"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;&quot;..\..\other-licenses\zlib&quot;;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
+				MinimalRebuild="false"
+				ExceptionHandling="0"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
+				BrowseInformation="1"
+				WarningLevel="4"
+				WarnAsError="true"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+				DisableSpecificWarnings="4201"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="/FIXED:NO"
+				AdditionalDependencies="winmm.lib DbgHelp.lib shlwapi.lib"
+				OutputFile="$(OutDir)/avm.exe"
+				AdditionalLibraryDirectories=""
+				GenerateDebugInformation="true"
+				GenerateMapFile="true"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="VTune|Win32"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				FavorSizeOrSpeed="2"
+				AdditionalIncludeDirectories="..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;&quot;..\..\other-licenses\zlib&quot;;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;AVMFEATURE_VTUNE=1"
+				StringPooling="true"
+				MinimalRebuild="false"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
+				WarningLevel="4"
+				WarnAsError="true"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+				DisableSpecificWarnings="4201"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="/fixed:no"
+				AdditionalDependencies="winmm.lib JitProfiling.lib"
+				OutputFile="$(OutDir)/avm.exe"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\..\..\..\modules\vtune\ia32\libcmt"
+				GenerateDebugInformation="true"
+				GenerateMapFile="true"
+				OptimizeReferences="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="1"
+				ErrorReporting="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="MemoryProfiler|Win32"
+			OutputDirectory="&quot;obj_9/$(ProjectName)/$(ConfigurationName)&quot;"
+			IntermediateDirectory="&quot;obj_9/$(ProjectName)/$(ConfigurationName)&quot;"
+			ConfigurationType="1"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/Oy-"
+				Optimization="3"
+				FavorSizeOrSpeed="2"
+				AdditionalIncludeDirectories="..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;&quot;..\..\other-licenses\zlib&quot;;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;MMGC_MEMORY_PROFILER"
+				StringPooling="true"
+				MinimalRebuild="false"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
+				WarningLevel="4"
+				WarnAsError="true"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+				DisableSpecificWarnings="4201"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=""
+				AdditionalDependencies="winmm.lib"
+				OutputFile="$(OutDir)/avm.exe"
+				LinkIncremental="1"
+				GenerateDebugInformation="true"
+				GenerateMapFile="true"
+				OptimizeReferences="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="1"
+				ErrorReporting="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
 			Name="Debug|x64"
 			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
@@ -169,92 +598,6 @@
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="17"
-				ErrorReporting="0"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release|Win32"
-			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
-			ConfigurationType="1"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;&quot;..\..\other-licenses\zlib&quot;;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE"
-				StringPooling="true"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				ForceConformanceInForLoopScope="false"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="avmshell.h"
-				WarningLevel="4"
-				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="0"
-				DisableSpecificWarnings="4201"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions=""
-				AdditionalDependencies="winmm.lib"
-				OutputFile="$(OutDir)/avm.exe"
-				LinkIncremental="1"
-				GenerateDebugInformation="true"
-				GenerateMapFile="true"
-				OptimizeReferences="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="1"
 				ErrorReporting="0"
 			/>
 			<Tool
@@ -369,91 +712,6 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release_Debugger|Win32"
-			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
-			ConfigurationType="1"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;&quot;..\..\other-licenses\zlib&quot;;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
-				StringPooling="true"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				ForceConformanceInForLoopScope="false"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="avmshell.h"
-				WarningLevel="4"
-				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="0"
-				DisableSpecificWarnings="4201"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions=""
-				AdditionalDependencies="winmm.lib"
-				OutputFile="$(OutDir)/avm.exe"
-				LinkIncremental="1"
-				GenerateDebugInformation="true"
-				GenerateMapFile="true"
-				OptimizeReferences="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
 			Name="Release_Debugger|x64"
 			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
@@ -517,90 +775,6 @@
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="17"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug_Debugger|Win32"
-			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
-			ConfigurationType="1"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;&quot;..\..\other-licenses\zlib&quot;;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				ForceConformanceInForLoopScope="false"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="avmshell.h"
-				BrowseInformation="1"
-				WarningLevel="4"
-				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4201"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/FIXED:NO"
-				AdditionalDependencies="winmm.lib DbgHelp.lib shlwapi.lib"
-				OutputFile="$(OutDir)/avm.exe"
-				AdditionalLibraryDirectories=""
-				GenerateDebugInformation="true"
-				GenerateMapFile="true"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -712,93 +886,6 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="VTune|Win32"
-			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
-			ConfigurationType="1"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;&quot;..\..\other-licenses\zlib&quot;;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;AVMFEATURE_VTUNE=1"
-				StringPooling="true"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				ForceConformanceInForLoopScope="false"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="avmshell.h"
-				WarningLevel="4"
-				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4201"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/fixed:no"
-				AdditionalDependencies="winmm.lib JitProfiling.lib"
-				OutputFile="$(OutDir)/avm.exe"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\modules\vtune\ia32\libcmt"
-				GenerateDebugInformation="true"
-				GenerateMapFile="true"
-				OptimizeReferences="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="1"
-				ErrorReporting="0"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
 			Name="VTune|x64"
 			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
@@ -864,93 +951,6 @@
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="17"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="MemoryProfiler|Win32"
-			OutputDirectory="&quot;obj_9/$(ProjectName)/$(ConfigurationName)&quot;"
-			IntermediateDirectory="&quot;obj_9/$(ProjectName)/$(ConfigurationName)&quot;"
-			ConfigurationType="1"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/Oy-"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\generated;..\..\AVMPI;..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;&quot;..\..\other-licenses\zlib&quot;;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;MMGC_MEMORY_PROFILER"
-				StringPooling="true"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				ForceConformanceInForLoopScope="false"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="avmshell.h"
-				WarningLevel="4"
-				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4201"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions=""
-				AdditionalDependencies="winmm.lib"
-				OutputFile="$(OutDir)/avm.exe"
-				LinkIncremental="1"
-				GenerateDebugInformation="true"
-				GenerateMapFile="true"
-				OptimizeReferences="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="1"
-				ErrorReporting="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -1606,23 +1606,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1638,23 +1622,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug_Debugger|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_Debugger|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1670,7 +1638,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="VTune|x64"
+					Name="MemoryProfiler|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1678,7 +1646,39 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="MemoryProfiler|Win32"
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1719,6 +1719,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\shell\PromiseGlue.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\shell\PromiseGlue.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\extensions\Selftest.cpp"
 				>
 			</File>
@@ -1732,6 +1740,22 @@
 			</File>
 			<File
 				RelativePath="..\..\shell\ShellCore.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\shell\ShellWorkerDomainGlue.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\shell\ShellWorkerDomainGlue.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\shell\ShellWorkerGlue.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\shell\ShellWorkerGlue.h"
 				>
 			</File>
 			<File
@@ -1829,6 +1853,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\shell\Promise.as"
+				>
+			</File>
+			<File
 				RelativePath="..\..\extensions\Sampler.as"
 				>
 			</File>
@@ -1889,25 +1917,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1925,25 +1935,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug_Debugger|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_Debugger|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1961,7 +1953,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="VTune|x64"
+					Name="MemoryProfiler|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1970,7 +1962,43 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="MemoryProfiler|Win32"
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2000,23 +2028,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2032,23 +2044,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug_Debugger|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_Debugger|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2064,7 +2060,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="VTune|x64"
+					Name="MemoryProfiler|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2072,7 +2068,39 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="MemoryProfiler|Win32"
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2101,25 +2129,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2137,25 +2147,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug_Debugger|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_Debugger|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2173,7 +2165,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="VTune|x64"
+					Name="MemoryProfiler|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2182,7 +2174,43 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="MemoryProfiler|Win32"
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2213,25 +2241,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2249,25 +2259,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug_Debugger|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_Debugger|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2285,7 +2277,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="VTune|x64"
+					Name="MemoryProfiler|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2294,7 +2286,43 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="MemoryProfiler|Win32"
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2325,25 +2353,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2361,25 +2371,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug_Debugger|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_Debugger|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2397,7 +2389,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="VTune|x64"
+					Name="MemoryProfiler|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2406,7 +2398,43 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="MemoryProfiler|Win32"
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2437,25 +2465,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2473,25 +2483,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug_Debugger|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_Debugger|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2509,7 +2501,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="VTune|x64"
+					Name="MemoryProfiler|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2518,7 +2510,43 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="MemoryProfiler|Win32"
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2549,25 +2577,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2585,25 +2595,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug_Debugger|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_Debugger|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2621,7 +2613,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="VTune|x64"
+					Name="MemoryProfiler|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2630,7 +2622,43 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="MemoryProfiler|Win32"
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2685,25 +2713,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2721,25 +2731,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug_Debugger|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_Debugger|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2757,7 +2749,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="VTune|x64"
+					Name="MemoryProfiler|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2766,7 +2758,43 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="MemoryProfiler|Win32"
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2797,25 +2825,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2833,25 +2843,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug_Debugger|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_Debugger|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2869,7 +2861,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="VTune|x64"
+					Name="MemoryProfiler|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2878,7 +2870,43 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="MemoryProfiler|Win32"
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2909,25 +2937,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2945,25 +2955,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug_Debugger|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_Debugger|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2981,7 +2973,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="VTune|x64"
+					Name="MemoryProfiler|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2990,7 +2982,43 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="MemoryProfiler|Win32"
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"

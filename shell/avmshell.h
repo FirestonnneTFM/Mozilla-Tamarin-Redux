@@ -91,6 +91,13 @@ namespace avmplus
     class StackFrameObject;
     class NewObjectSampleObject;
     class TraceClass;
+    class Isolate;
+    class PromiseObject;
+    class PromiseClass;
+    class PromiseHelperClass;
+    class RemoteProxyClass;
+    class RemoteProxyObject;
+
 }
 
 #include "shell_toplevel.h"
@@ -98,11 +105,15 @@ namespace avmplus
 namespace avmshell
 {
     class Shell;
+    class ShellIsolate;
     class ShellCodeContext;
     class ShellCore;
     class ShellCoreImpl;
     class ShellSettings;
     class ShellToplevel;
+    class EnvelopeClass;
+    class EnvelopeObject;
+
 }
 
 #include "Selftest.h"
@@ -119,6 +130,9 @@ namespace avmshell
 #include "DictionaryGlue.h"
 #include "SamplerScript.h"
 #include "ShellCore.h"
+#include "PromiseGlue.h"
+#include "ShellWorkerGlue.h"
+#include "ShellWorkerDomainGlue.h"
 
 #include "shell_toplevel-classes.hh"
 
@@ -176,23 +190,36 @@ namespace avmshell
         char st_mem[200];               // Selftest scratch memory.  200 chars ought to be enough for anyone
     };
 
+    class ShellIsolate : public avmplus::Isolate
+    {
+
+    public:
+        ShellIsolate(int32_t desc, int32_t parentDesc, avmplus::Aggregate* aggregate);
+        virtual void doRun();
+        virtual bool copyByteCode(avmplus::ByteArrayObject* ba);
+        virtual bool processProxies(avmplus::Toplevel* toplevel);
+        virtual void registerPromiseOwner(int32_t existingProxyGID, avmplus::Atom resolvedObject, avmplus::Toplevel* toplevel);
+        virtual void eventLoop(avmplus::Toplevel* toplevel);
+    };
+
     /**
      * Shell driver and command line parser.
      */
-    class Shell {
+    class Shell : public avmplus::Aggregate {
+        friend class PrimordialShellIsolate;
+        friend class ShellIsolate;
     public:
         static int run(int argc, char *argv[]);
 
     private:
-        static void singleWorker(ShellSettings& settings);
-        static void singleWorkerHelper(ShellCore* shell, ShellSettings& settings);
 #ifdef VMCFG_WORKERTHREADS
         static void multiWorker(ShellSettings& settings);
 #endif
         static void repl(ShellCore* shellCore);
         static void initializeLogging(const char* basename);
-        static void parseCommandLine(int argc, char* argv[], ShellSettings& settings);
+        void parseCommandLine(int argc, char* argv[]);
         static void usage();
+        ShellSettings settings;
     };
 
 

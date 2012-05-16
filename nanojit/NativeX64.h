@@ -463,6 +463,11 @@ namespace nanojit
         void beginLoadRegs(LIns *ins, RegisterMask allow, Register &rr, int32_t &d, Register &rb);\
         void endLoadRegs(LIns *ins);\
         void dis(NIns *p, int bytes);\
+        void asm_pushstate(); \
+        void asm_popstate(); \
+        void asm_savepc(); \
+        void asm_restorepc(); \
+        void asm_discardpc(); \
         void asm_cmp(LIns*);\
         void asm_cmpi(LIns*);\
         void asm_cmpi_imm(LIns*);\

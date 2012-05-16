@@ -60,6 +60,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/DomainClass.cpp \
   $(curdir)/FileClass.cpp \
   $(curdir)/FileInputStream.cpp \
+  $(curdir)/PromiseGlue.cpp \
   $(curdir)/ShellCore.cpp \
   $(curdir)/SystemClass.cpp \
   $(curdir)/swf.cpp \
@@ -67,6 +68,8 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/../extensions/Selftest.cpp \
   $(curdir)/../extensions/SelftestInit.cpp \
   $(curdir)/../extensions/SelftestExec.cpp \
+  $(curdir)/ShellWorkerGlue.cpp \
+  $(curdir)/ShellWorkerDomainGlue.cpp \
   $(NULL)
 
 ifeq (windows,$(TARGET_OS))

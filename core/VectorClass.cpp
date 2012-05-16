@@ -413,6 +413,22 @@ namespace avmplus
         return (IntVectorObject*)_newVector();
     }
 
+    ScriptObject* IntVectorObject::cloneNonSlots(ClassClosure* targetClosure, Cloner& ) const
+    {
+        IntVectorObject* clone = IntVectorObject::create(targetClosure->gc(), 
+                                                         targetClosure->ivtable(),
+                                                         targetClosure->prototypePtr());
+        clone->m_vecClass = static_cast<TypedVectorClassBase*>(targetClosure);
+        IntVectorAccessor src((IntVectorObject*)this); // FIXME: casting away constness is bad but not modifying 'this'
+        IntVectorAccessor dst(clone);
+        uint32_t length = this->getLength();
+        clone->setLength(length); // set m_fixed after setting length
+        clone->m_fixed = m_fixed;
+        AvmAssert(dst.addr() != src.addr()); 
+        VMPI_memmove(dst.addr(), src.addr(), length * sizeof(int32_t));
+        return clone;
+    }
+
     // ----------------------------
 
     UIntVectorObject::UIntVectorObject(VTable* ivtable, ScriptObject* delegate)
@@ -425,6 +441,24 @@ namespace avmplus
         return (UIntVectorObject*)_newVector();
     }
 
+    ScriptObject* UIntVectorObject::cloneNonSlots(ClassClosure* targetClosure, Cloner& ) const
+    {
+        UIntVectorObject* clone = UIntVectorObject::create(targetClosure->gc(), 
+                                                           targetClosure->ivtable(),
+                                                           targetClosure->prototypePtr());
+        clone->m_vecClass = static_cast<TypedVectorClassBase*>(targetClosure);
+        UIntVectorAccessor src((UIntVectorObject*)this); // FIXME casting away const
+        UIntVectorAccessor dst(clone);
+        uint32_t length = this->getLength();
+        clone->setLength(length);
+        // set m_fixed after setting length
+        clone->m_fixed = m_fixed;
+        AvmAssert(dst.addr() != src.addr()); 
+        VMPI_memmove(dst.addr(), src.addr(), length * sizeof(uint32_t));
+        return clone;
+    }
+
+
     // ----------------------------
 
     DoubleVectorObject::DoubleVectorObject(VTable* ivtable, ScriptObject* delegate)
@@ -435,6 +469,23 @@ namespace avmplus
     DoubleVectorObject* DoubleVectorObject::newThisType()
     {
         return (DoubleVectorObject*)_newVector();
+    }
+
+    ScriptObject* DoubleVectorObject::cloneNonSlots(ClassClosure* targetClosure, Cloner& ) const
+    {
+        DoubleVectorObject* clone = DoubleVectorObject::create(targetClosure->gc(), 
+                                                               targetClosure->ivtable(),
+                                                               targetClosure->prototypePtr());
+        clone->m_vecClass = static_cast<TypedVectorClassBase*>(targetClosure);
+        DoubleVectorAccessor src((DoubleVectorObject*)this); // FIXME casting away const
+        DoubleVectorAccessor dst(clone);
+        uint32_t length = this->getLength();
+        clone->setLength(length);
+        // set m_fixed after setting length
+        clone->m_fixed = m_fixed;
+        AvmAssert(dst.addr() != src.addr()); 
+        VMPI_memmove(dst.addr(), src.addr(), length * sizeof(double));
+        return clone;
     }
 
     // ----------------------------
@@ -470,4 +521,18 @@ namespace avmplus
     {
         return (ObjectVectorObject*)_newVector();
     }
+
+    ScriptObject* ObjectVectorObject::cloneNonSlots(ClassClosure*, Cloner& cloner) const
+    {
+        GCRef<ClassClosure> elementClosure = cloner.target()->getClassClosureFromAlias(getTypeTraits()->name());
+        ObjectVectorObject* clone = cloner.target()->vectorClass()->newVector(elementClosure, getLength());
+        cloner.registerClone(this, clone);
+
+        clone->set_fixed(m_fixed);
+        uint32_t length = this->getLength();
+        for (uint32_t i = 0; i < length; i++)
+            clone->m_list.set(i, cloner.cloneAtom(m_list.get(i))); 
+        return clone;
+    }
+
 }

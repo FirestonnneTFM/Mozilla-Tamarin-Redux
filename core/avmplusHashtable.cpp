@@ -336,17 +336,10 @@ namespace avmplus
         return cap+1;
     }
 
-    // call this method using the previous value returned
-    // by this method starting with 0, until 0 is returned.
-    int InlineHashtable::next(int index)
+    const Atom* InlineHashtable::expandForIterIndex()
     {
-        Atom* atoms = getAtoms();
+        const Atom* atoms = getAtoms();
         int const cap = getCapacity();
-
-        // we need our iter-index fields to iterate.
-        // since most objects don't ever iterate this way,
-        // they aren't always preallocated... if we get here and
-        // they aren't, reallocate first.
         if (!hasIterIndex())
         {
             GC* gc = GC::GetGC(atoms);
@@ -356,12 +349,25 @@ namespace avmplus
             // no need to rehash: size is the same as far as atoms are concerned
             VMPI_memcpy(newAtoms, atoms, cap*sizeof(Atom));
             freeAtoms();
-            atoms = newAtoms;
             m_atomsAndFlags |= kHasIterIndex;
             setAtoms(atomContainer);
+            return newAtoms;
         }
+        return atoms;
+    }
 
+    // call this method using the previous value returned
+    // by this method starting with 0, until 0 is returned.
+    int InlineHashtable::next(int index)
+    {
+        // we need our iter-index fields to iterate.
+        // since most objects don't ever iterate this way,
+        // they aren't always preallocated... if we get here and
+        // they aren't, reallocate first.
+
+        const Atom* atoms = expandForIterIndex();
         AvmAssert(hasIterIndex()); // @todo
+        int const cap = getCapacity();
 
         intptr_t* iterIndices = (intptr_t*)(atoms + cap);
         //

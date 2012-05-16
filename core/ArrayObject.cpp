@@ -778,6 +778,32 @@ convert_and_set_sparse:
         return result;
     }
 
+    ScriptObject* ArrayObject::cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const
+    {
+
+        if (isSparse()) {
+            return ScriptObject::cloneNonSlots(targetClosure, cloner);
+        }
+        else {
+            ArrayObject* newArray = ArrayObject::create(targetClosure->core()->gc, 
+                                                        targetClosure->ivtable(), 
+                                                        targetClosure->prototypePtr(), 
+                                                        m_denseArray.length());
+            newArray->setLength(m_length);
+            newArray->m_denseStart = m_denseStart;
+            newArray->m_denseUsed = m_denseUsed;
+            
+            cloner.registerClone(this, newArray);
+            // FIXME: block copy of dense array?
+            for (unsigned i = 0; i < m_denseArray.length(); i++) {
+                newArray->m_denseArray.set(i, cloner.cloneAtom(this->m_denseArray.get(i)));
+            }
+
+            return newArray;
+        }
+    }
+
+
     // ----------------- "next" methods
 
     Atom ArrayObject::nextName(int index)

@@ -53,6 +53,8 @@
 #define avmplus_ClassClass_isExactInterlock 1
 #define avmplus_ClassClosure_isExactInterlock 1
 #define avmplus_CommentE4XNode_isExactInterlock 1
+#define avmplus_ConditionClass_isExactInterlock 1
+#define avmplus_ConditionObject_isExactInterlock 1
 #define avmplus_DateClass_isExactInterlock 1
 #define avmplus_DateObject_isExactInterlock 1
 #define avmplus_Debugger_isExactInterlock 1
@@ -101,6 +103,8 @@
 #define avmplus_MethodInfo_isExactInterlock 1
 #define avmplus_MethodInfoProcHolder_isExactInterlock 1
 #define avmplus_MethodSignature_isExactInterlock 1
+#define avmplus_MutexClass_isExactInterlock 1
+#define avmplus_MutexObject_isExactInterlock 1
 #define avmplus_Namespace_isExactInterlock 1
 #define avmplus_NamespaceClass_isExactInterlock 1
 #define avmplus_NamespaceSet_isExactInterlock 1
@@ -116,6 +120,8 @@
 #define avmplus_ObjectVectorObject_isExactInterlock 1
 #define avmplus_PIE4XNode_isExactInterlock 1
 #define avmplus_PoolObject_isExactInterlock 1
+#define avmplus_PromiseChannelClass_isExactInterlock 1
+#define avmplus_PromiseChannelObject_isExactInterlock 1
 #define avmplus_ProxyClass_isExactInterlock 1
 #define avmplus_ProxyObject_isExactInterlock 1
 #define avmplus_QCache_isExactInterlock 1
@@ -145,6 +151,7 @@
 #define avmplus_Traits_isExactInterlock 1
 #define avmplus_TraitsBindings_isExactInterlock 1
 #define avmplus_TraitsMetadata_isExactInterlock 1
+#define avmplus_TraitsMorpher_isExactInterlock 1
 #define avmplus_TypeErrorClass_isExactInterlock 1
 #define avmplus_TypeErrorObject_isExactInterlock 1
 #define avmplus_TypedVectorClassBase_isExactInterlock 1

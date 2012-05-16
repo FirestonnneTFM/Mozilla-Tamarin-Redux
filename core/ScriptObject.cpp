@@ -676,13 +676,24 @@ namespace avmplus
         return undefinedAtom;
     }
 
+    ScriptObject* ScriptObject::cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const
+    {
+        bool isDynamic = this->traits()->needsHashtable();
+        ScriptObject* clone = targetClosure->constructObject(); // this will set slots
+        cloner.registerClone(this, clone);
+        if (isDynamic) {
+            cloner.cloneDynamicProperties(this, clone);
+        }
+        return clone;
+    }
+
     Atom ScriptObject::applyTypeArgs(int /*argc*/, Atom* /*argv*/)
     {
         toplevel()->throwTypeError(kTypeAppOfNonParamType);
         return undefinedAtom;
     }
 
-    Atom ScriptObject::getSlotAtom(uint32_t slot)
+    Atom ScriptObject::getSlotAtom(uint32_t slot, AvmCore *core)
     {
         Traits* traits = this->traits();
         const TraitsBindingsp td = traits->getTraitsBindings();
@@ -696,7 +707,7 @@ namespace avmplus
         }
         else if (sst == SST_double)
         {
-            return traits->core->doubleToAtom(*((const double*)p));
+            return core->doubleToAtom(*((const double*)p));
         }
 #ifdef VMCFG_FLOAT
         else if (sst == SST_float)
@@ -710,11 +721,11 @@ namespace avmplus
 #endif // VMCFG_FLOAT
         else if (sst == SST_int32)
         {
-            return traits->core->intToAtom(*((const int32_t*)p));
+            return core->intToAtom(*((const int32_t*)p));
         }
         else if (sst == SST_uint32)
         {
-            return traits->core->uintToAtom(*((const int32_t*)p));
+            return core->uintToAtom(*((const int32_t*)p));
         }
         else if (sst == SST_bool32)
         {
@@ -733,6 +744,11 @@ namespace avmplus
             AvmAssert(sst == SST_scriptobject);
             return (*((const ScriptObject**)p))->atom(); // may be null|kObjectType, copacetic
         }
+    }
+
+    Atom ScriptObject::getSlotAtom(uint32_t slot)
+    {
+        return getSlotAtom(slot, this->traits()->core);
     }
 
     ScriptObject* ScriptObject::getSlotObject(uint32_t slot)

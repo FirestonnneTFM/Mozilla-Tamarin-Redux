@@ -56,8 +56,7 @@ bool neverReturns(const CallInfo* call)
     return call == FUNCTIONID(throwAtom) ||
         call == FUNCTIONID(npe) ||
         call == FUNCTIONID(upe) ||
-        call == FUNCTIONID(mop_rangeCheckFailed) ||
-        call == FUNCTIONID(handleInterruptMethodEnv);
+        call == FUNCTIONID(mop_rangeCheckFailed);
 }
 
 CodeMgr* initCodeMgr(PoolObject *pool)

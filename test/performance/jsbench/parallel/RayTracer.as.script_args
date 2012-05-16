@@ -1,0 +1,8 @@
+# RayTracer.as script arguments, RayTracer.abc -- [number workers] [data size]
+
+0 1,.size=1.workers=0
+1 1,.size=1.workers=1
+2 1,.size=1.workers=2
+4 1,.size=1.workers=4
+5 1,.size=1.workers=5
+9 1,.size=1.workers=9

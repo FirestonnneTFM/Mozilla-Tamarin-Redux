@@ -55,12 +55,13 @@ namespace avmplus
     protected:
         Toplevel(AbcEnv* abcEnv);
     public:
-        static Toplevel* create(MMgc::GC* gc, AbcEnv* abcEnv);
-
         GCRef<builtinClassManifest> builtinClasses() const;
 
         void init_mainEntryPoint(ScriptEnv* main, builtinClassManifest* builtins);
+        void add_scriptEntryPoint(ScriptEnv* main);
 
+        ScriptEnv* scriptEnv(uint32_t index) const;
+        uint32_t scriptEnvCount();
         AbcEnv* abcEnv() const;
         DomainEnv* domainEnv() const;
         AvmCore* core() const;
@@ -110,6 +111,9 @@ namespace avmplus
         GCRef<VerifyErrorClass> verifyErrorClass() const;
         GCRef<XMLClass> xmlClass() const;
         GCRef<XMLListClass> xmlListClass() const;
+        virtual GCRef<ClassClosure> workerClass() const = 0;
+        virtual GCRef<ClassClosure> workerDomainClass() const = 0;
+
 
         void throwVerifyError(int id) const;
         void throwVerifyError(int id, Stringp arg1) const;
@@ -440,6 +444,8 @@ namespace avmplus
     private:
         Atom getClassClosureAtomFromAlias(Atom name, bool checkContextDomainOnly);
         void addAliasedClassClosure(Atom key1, Atom key2, ClassClosure* cc, bool isDomainEnv);
+        TraitsMorpher* addTraitsMorpher(Traits* sourceTraits);
+        
         //Function to be overriden by the player
         //This hack has been added to fix Bugzilla 715105
         virtual DomainEnv* getDomainEnvOverridableHook();
@@ -452,6 +458,12 @@ namespace avmplus
          */
         static void registerClassAlias(ScriptObject *script, String *aliasName, ClassClosure *cc);
         static ClassClosure* getClassByAlias(ScriptObject* script, String *aliasName);
+
+        TraitsMorpher* getTraitsMorpher(Traits* sourceTraits) const;
+
+        virtual void initAliasTable(bool initWorkerClasses);
+        // FIXME finesse the type later
+        GCRef<ScriptObject> lookupInternedObject(int32_t id, GCRef<ScriptObject> addIfMissing);
 
 
     protected:
@@ -473,9 +485,11 @@ namespace avmplus
         GC_DATA_BEGIN(Toplevel)
 
     private:
-        WeakKeyHashtable               GC_STRUCTURE(_traitsToAliasMap);   // maps Traits -> aliasName
+        // Used to be a WeakHashtable but workers need to access it across worker boundary, and weak accesses can allocate memory.
+        HeapHashtable               GC_STRUCTURE(_traitsToAliasMap);   // maps Traits -> aliasName
         GCMember<AbcEnv>               GC_POINTER(_abcEnv);
         GCMember<ScriptEnv>            GC_POINTER(_mainEntryPoint);
+        GCList<ScriptEnv>              GC_STRUCTURE(_scriptEntryPoints);
         GCMember<builtinClassManifest> GC_POINTER(_builtinClasses);
     public:
         // objectClass is still needed for bootstrapping
@@ -519,6 +533,9 @@ namespace avmplus
         GCMember<StringClass>       GC_POINTER(_stringClass);
         GCMember<HeapHashtable>     GC_POINTER(_aliasToClassClosureMap);  // maps aliasName -> ClassClosure
 
+        
+    protected:
+        GCMember<WeakValueHashtable>  GC_POINTER(_workerObjectInternTable);
         GC_DATA_END(Toplevel)
     // ------------------------ DATA SECTION END
     //

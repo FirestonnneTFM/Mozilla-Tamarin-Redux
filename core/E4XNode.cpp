@@ -232,6 +232,43 @@ namespace avmplus
         return true;
     }
 
+    // FIXME avoid code duplication with getQName
+    bool E4XNode::getQNameForeign(AvmCore* core, Multiname *mn, Namespacep publicNS) const
+    {
+        if (!m_nameOrAux)
+            return false;
+
+        uintptr_t nameOrAux = m_nameOrAux;
+        if (AUXBIT & nameOrAux)
+        {
+            E4XNodeAux *aux = (E4XNodeAux *)(nameOrAux & ~AUXBIT);
+            // We can have a notification only aux which won't have a real name
+            if (aux->m_name)
+            {
+                mn->setName (core->internForeignString(aux->m_name));
+                mn->setNamespace (core->internNamespace(core->cloneNamespace(aux->m_ns)));
+                mn->setQName();
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            Stringp str = (String *)(nameOrAux);
+            mn->setName (core->internForeignString(str));
+            mn->setNamespace(core->internNamespace(core->cloneNamespace(publicNS)));
+        }
+
+        if (getClass() == kAttribute)
+            mn->setAttr();
+
+        return true;
+    }
+
+
+
     void E4XNode::setQName (AvmCore *core, Stringp name, Namespace *ns)
     {
         // name can be null!
@@ -681,6 +718,97 @@ namespace avmplus
 
         return x;
     }
+
+    // FIXME: copy and paste
+
+    E4XNode *E4XNode::_deepCopyForeign (AvmCore *core, Toplevel *toplevel, Namespacep publicNS) const
+    {
+        core->stackCheck(toplevel);
+
+        E4XNode *x = 0;
+        switch (this->getClass())
+        {
+        case kAttribute:
+            x = AttributeE4XNode::create(core->GetGC(), 0, getValue()->clone(core));
+            break;
+        case kText:
+            x = TextE4XNode::create(core->GetGC(), 0, getValue()->clone(core));
+            break;
+        case kCDATA:
+            x = CDATAE4XNode::create(core->GetGC(), 0, getValue()->clone(core));
+            break;
+        case kComment:
+            x = CommentE4XNode::create(core->GetGC(), 0, getValue()->clone(core));
+            break;
+        case kProcessingInstruction:
+            x = PIE4XNode::create(core->GetGC(), 0, getValue()->clone(core));
+            break;
+        case kElement:
+            x = ElementE4XNode::create(core->GetGC(), 0);
+            break;
+        }
+
+        Multiname m;
+        if (this->getQNameForeign(core, &m, publicNS))
+        {
+            x->setQName (core, &m);
+        }
+
+        if (x->getClass() == kElement)
+        {
+            ElementE4XNode *y = (ElementE4XNode *) x;
+
+            // step 2 - for each ns in inScopeNamespaces
+            if (numNamespaces())
+            {
+                y->m_namespaces = HeapNamespaceList::create(core->GetGC(), numNamespaces());
+                uint32_t i;
+                for (i = 0; i < numNamespaces(); i++)
+                {
+                    y->m_namespaces->list.add(core->cloneNamespace(getNamespaces()->list.get(i)));
+                }
+            }
+
+            // step 3 - duplicate attribute nodes
+            if (numAttributes())
+            {
+                y->m_attributes = HeapE4XNodeList::create(core->GetGC(), numAttributes());
+                uint32_t i;
+                for (i = 0; i < numAttributes(); i++)
+                {
+                    E4XNode *ax = getAttribute (i);
+                    E4XNode *bx = ax->_deepCopyForeign(core, toplevel, publicNS);
+                    bx->setParent(y);
+                    y->addAttribute(bx);
+                }
+            }
+
+            // step 4 - duplicate children
+            if (numChildren())
+            {
+                AvmAssert(y->m_children == 0);
+                y->m_children = uintptr_t(HeapE4XNodeList::create(core->GetGC(), numChildren()));
+                for (uint32_t k = 0; k < _length(); k++)
+                {
+                    E4XNode *child = _getAt(k);
+                    if (((child->getClass() == E4XNode::kComment) && toplevel->xmlClass()->get_ignoreComments()) ||
+                        ((child->getClass() == E4XNode::kProcessingInstruction) && toplevel->xmlClass()->get_ignoreProcessingInstructions()))
+                    {
+                        continue;
+                    }
+
+                    E4XNode *cx = child->_deepCopyForeign (core, toplevel, publicNS);
+                    cx->setParent (y);
+                    //y->m_children->push (c);
+                    y->_append (cx);
+                }
+            }
+        }
+
+        return x;
+    }
+
+
 
 #if 0
     // E4X 9.1.1.8, page 17

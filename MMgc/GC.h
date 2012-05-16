@@ -259,6 +259,8 @@ namespace MMgc
         bool IsExactlyTraced() const { return (size & kIsExactlyTraced) ? true : false; }
 
         GC *GetGC() const { return gc; }
+        /** only used for late registration of message channels */
+        void Register(GC* _gc);
         /** if your object goes away after the GC is deleted this can be useful */
         void Destroy();
 
@@ -1616,7 +1618,8 @@ namespace MMgc
         PageMap::Uniform pageMap;
 #else
 #ifdef MMGC_64BIT
-        PageMap::DelayT4 pageMap;
+        //PageMap::DelayT4 pageMap;
+        PageMap::Tiered4 pageMap;
 #else
         PageMap::Tiered2 pageMap;
 #endif // MMGC_64BIT
@@ -1872,7 +1875,7 @@ public:
 
         //This method returns the number bytes allocated for GC objects
         size_t GetBytesInUse();
-    
+
         //This method returns the number of bytes allocated for GC objects
         //Also see GetBytesInUse()
         size_t GetBytesInUseFast();

@@ -93,6 +93,23 @@ namespace avmshell
     {
     }
 
+    void ShellToplevel::initAliasTable(bool initWorkerClasses) 
+    {
+        using namespace avmplus;
+        Toplevel::initAliasTable(initWorkerClasses);
+        if (initWorkerClasses) {
+            ScriptObject* ctx = objectClass;
+            ClassClosure* promiseClass = shellClasses->get_PromiseClass();
+            Traits* t = promiseClass->ivtable()->traits;
+            registerClassAlias(ctx, t->name(), promiseClass);
+
+            GCRef<ClassClosure> envelopeClass = shellClasses->get_EnvelopeClass();
+            registerClassAlias(ctx, envelopeClass->ivtable()->traits->name(), envelopeClass);
+
+        }
+    }
+
+
     ShellCore::ShellCore(MMgc::GC* gc, avmplus::ApiVersionSeries apiVersionSeries)
         : avmplus::AvmCore(gc, apiVersionSeries)
     {
@@ -229,6 +246,8 @@ namespace avmshell
             AvmAssert(shell_toplevel->shellClasses->get_ShellCoreFriend2Class()->get_bar() == 101);
         }
 
+        shell_toplevel->initAliasTable(true);
+
         return shell_toplevel;
     }
 
@@ -356,7 +375,7 @@ namespace avmshell
         file.read(code.getBuffer(), abcLength);
 
         ShellCoreSettings settings;
-        return handleArbitraryExecutableContent(settings, code, executablePath);
+        return handleArbitraryExecutableContent(settings.do_testSWFHasAS3, code, executablePath);
     }
 
     /* static */
@@ -388,12 +407,12 @@ namespace avmshell
     }
 #endif
 
-    bool ShellCore::setup(const ShellCoreSettings& settings)
+    ShellToplevel* ShellCore::setup(const ShellCoreSettings& settings)
     {
 #ifdef VMCFG_AOT
         if(nAOTInfos == 0) {
             console << "To run an AOT enabled avmshell you must link in some AOT compiled ABC blocks.\n";
-            return false;
+            return NULL;
         }
 #endif
 
@@ -473,7 +492,8 @@ namespace avmshell
 #ifdef AVMPLUS_VERBOSE
             config.verbose_vb = settings.do_verbose;  // builtins is done, so propagate verbose
 #endif
-            return true;
+
+            return shell_toplevel;
         }
         CATCH(avmplus::Exception *exception)
         {
@@ -488,7 +508,7 @@ namespace avmshell
             // see bug #121382
             console << string(exception->atom) << "\n";
 #endif /* DEBUGGER */
-            return false;
+            return NULL;
         }
         END_CATCH
         END_TRY
@@ -505,7 +525,7 @@ namespace avmshell
     {
 #ifdef VMCFG_AOT
         avmplus::ScriptBuffer dummyScriptBuffer;
-        return handleArbitraryExecutableContent(settings, dummyScriptBuffer, NULL);
+        return handleArbitraryExecutableContent(settings.do_testSWFHasAS3, dummyScriptBuffer, NULL);
 #endif
 
         if (config.interrupts)
@@ -540,16 +560,37 @@ namespace avmshell
         (void)settings.enter_debugger_on_launch;
 #endif
 
-        return handleArbitraryExecutableContent(settings, code, filename);
+        return handleArbitraryExecutableContent(settings.do_testSWFHasAS3, code, filename);
     }
 
-    int ShellCore::handleArbitraryExecutableContent(ShellCoreSettings& settings, avmplus::ScriptBuffer& code, const char * filename)
+    int ShellCore::evaluateScriptBuffer(avmplus::ScriptBuffer& buffer, bool enter_debugger_on_launch)
+    {
+        (void)enter_debugger_on_launch;
+        // FIXME
+        if (config.interrupts)
+            Platform::GetInstance()->setTimer(kScriptTimeout, interruptTimerCallback, this);
+        
+#ifdef DEBUGGER
+        if (enter_debugger_on_launch)
+        {
+            // Activate the debug CLI and stop at
+            // start of program
+            debugCLI()->activate();
+            debugCLI()->stepInto();
+        }
+#endif
+        return handleArbitraryExecutableContent(false, buffer, "<ByteArray buffer>");
+    }
+
+
+    int ShellCore::handleArbitraryExecutableContent(bool do_testSWFHasAS3, avmplus::ScriptBuffer& code, const char * filename)
     {
         setStackLimit();
+        int exitCode = 1;
 
         TRY(this, avmplus::kCatchAction_ReportAsError)
         {
-            if (settings.do_testSWFHasAS3 && !isSwf(code))
+            if (do_testSWFHasAS3 && !isSwf(code))
                 return 1;
 #ifdef VMCFG_AOT
             if (filename == NULL) {
@@ -570,8 +611,8 @@ namespace avmshell
                 if (config.verbose_vb & avmplus::VB_verify)
                     console << "SWF " << filename << "\n";
                 #endif
-                bool result = handleSwf(filename, code, shell_toplevel, user_codeContext, settings.do_testSWFHasAS3);
-                if (settings.do_testSWFHasAS3)
+                bool result = handleSwf(filename, code, shell_toplevel, user_codeContext, do_testSWFHasAS3);
+                if (do_testSWFHasAS3)
                     return int(!result); // "no abc" is "false" but translates to "1" for the exit code, and "true" becomes "0"
             }
             else {
@@ -594,8 +635,14 @@ namespace avmshell
         }
         CATCH(avmplus::Exception *exception)
         {
+            if (!(exception->flags & avmplus::Exception::EXIT_EXCEPTION)) {
+                // uncaught ordinary exception
+                getIsolate()->getAggregate()->stateTransition(getIsolate(), avmplus::Isolate::EXCEPTION);
+            }
+
             TRY(this, avmplus::kCatchAction_ReportAsError)
             {
+                if (!(exception->flags & avmplus::Exception::SUPPRESS_ERROR_REPORT)) {
     #ifdef DEBUGGER
                 if (!(exception->flags & avmplus::Exception::SEEN_BY_DEBUGGER))
                 {
@@ -609,6 +656,18 @@ namespace avmshell
                 // see bug #121382
                 console << string(exception->atom) << "\n";
     #endif /* DEBUGGER */
+                } else { 
+                    avmplus::Atom payload = exception->atom;
+                    if (atomKind(payload) == kObjectType) {
+                        avmplus::ScriptObject* object = AvmCore::atomToScriptObject(payload);
+                        if (object) {
+                            avmplus::Atom code = object->getStringProperty(internStringLatin1("exitCode"));
+                            if (atomKind(code) == kIntptrType) {
+                                exitCode = (int)avmplus::atomGetIntptr(code);
+                            }
+                        }
+                    }
+                }
             }
             CATCH(avmplus::Exception * e2)
             {
@@ -618,7 +677,8 @@ namespace avmshell
             END_CATCH
             END_TRY
 
-            return 1;
+
+            return exitCode;
         }
         END_CATCH
         END_TRY
