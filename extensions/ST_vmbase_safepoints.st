@@ -41,6 +41,7 @@
 %%component vmbase
 %%category  safepoints
 %%ifdef     VMCFG_SAFEPOINTS
+%%ifdef     BUG_754918
 
 %%prefix
 using namespace MMgc;

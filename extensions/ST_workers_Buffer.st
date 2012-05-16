@@ -44,7 +44,6 @@
 %%decls
     MMgc::GC *gc;
     NoSyncSingleItemBuffer *singleItemBuffer;
-    NoSyncMultiItemBuffer *multiItemBuffer;
     NonBlockingMultiItemBuffer *nonBlockMultiItemBuffer;
     Atom *atom;
  
@@ -54,12 +53,10 @@
 	//gc=core->GetGC();
     atom=(Atom *)malloc(100);
     singleItemBuffer=new NoSyncSingleItemBuffer(gc);
-    multiItemBuffer=new NoSyncMultiItemBuffer(gc);
     nonBlockMultiItemBuffer=new NonBlockingMultiItemBuffer(gc);
 
 %%epilogue
     delete singleItemBuffer;
-    delete multiItemBuffer;
     delete nonBlockMultiItemBuffer;
 	delete gc;
     free(atom);
@@ -123,41 +120,3 @@
     %%verify singleItemBuffer->isEmpty()
     %%verify !singleItemBuffer->isFull()
 
-%%test MultiConstructor
-    %%verify multiItemBuffer!=NULL
-
-%%test MultiEmptyBuffer
-    %%verify singleItemBuffer->isEmpty()
-    %%verify !singleItemBuffer->isFull()
-    %%verify !singleItemBuffer->get(atom)
-
-%%test MultiFullBuffer
-    bool result;
-    for (int i=0;i<15;i++) {
-        result=multiItemBuffer->put(String::createLatin1(core,"test string")->atom());
-        %%verify result
-        %%verify !multiItemBuffer->isEmpty()
-        %%verify !multiItemBuffer->isFull()
-    }
-    result=multiItemBuffer->put(String::createLatin1(core,"test string")->atom());
-    %%verify result
-    %%verify !multiItemBuffer->isEmpty()
-    %%verify multiItemBuffer->isFull()
-
-    result=multiItemBuffer->put(String::createLatin1(core,"test string")->atom());
-    %%verify !result
-    %%verify !multiItemBuffer->isEmpty()
-    %%verify multiItemBuffer->isFull()
-
-    for (int i=0;i<15;i++) {
-        %%verify multiItemBuffer->get(atom)
-        %%verify !multiItemBuffer->isEmpty()
-        %%verify !multiItemBuffer->isFull()
-    }
-    %%verify multiItemBuffer->get(atom)
-    %%verify multiItemBuffer->isEmpty()
-    %%verify !multiItemBuffer->isFull()
-
-    %%verify !multiItemBuffer->get(atom)
-    %%verify multiItemBuffer->isEmpty()
-    %%verify !multiItemBuffer->isFull()
