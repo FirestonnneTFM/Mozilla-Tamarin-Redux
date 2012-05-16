@@ -560,7 +560,8 @@ def convertAcceptanceToJunit(infile,outfile,toplevel):
         if 'out' in testresult:
             out+=testresult['out']+'\n'
         if 'skip' in testresult:
-            contents+='<skipped message="%s" type="%s">%s</skipped>\n  ' % (fixForXmlEscape(testresult['skipmessage']),testresult['skiptype'],fixForXmlCdata(testresult['skipout']))
+            if not 'failure' in testresult:
+                contents+='<skipped message="%s" type="%s">%s</skipped>\n  ' % (fixForXmlEscape(testresult['skipmessage']),testresult['skiptype'],fixForXmlCdata(testresult['skipout']))
             out+=testresult['skipout']+'\n'
         if 'failure' in testresult:
             contents+='<failure message="%s" type="%s">%s</failure>\n  ' % (testresult['failuremessage'],testresult['failuretype'],fixForXmlCdata(testresult['failureout']))
