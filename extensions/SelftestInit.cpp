@@ -116,13 +116,22 @@ extern void create_nanojit_codealloc(AvmCore* core);
 namespace ST_vmbase_concurrency {
 extern void create_vmbase_concurrency(AvmCore* core);
 }
-#if defined VMCFG_SAFEPOINTS
+#if defined VMCFG_SAFEPOINTS && defined BUG_754918
 namespace ST_vmbase_safepoints {
 extern void create_vmbase_safepoints(AvmCore* core);
 }
 #endif
 namespace ST_vmpi_threads {
 extern void create_vmpi_threads(AvmCore* core);
+}
+namespace ST_workers_Buffers {
+extern void create_workers_Buffers(AvmCore* core);
+}
+namespace ST_workers_NoSyncSingleItemBuffer {
+extern void create_workers_NoSyncSingleItemBuffer(AvmCore* core);
+}
+namespace ST_workers_Promise {
+extern void create_workers_Promise(AvmCore* core);
 }
 void SelftestRunner::createGeneratedSelftestClasses() {
 ST_avmplus_basics::create_avmplus_basics(core);
@@ -159,10 +168,13 @@ ST_mmgc_threads::create_mmgc_threads(core);
 ST_mmgc_weakref::create_mmgc_weakref(core);
 ST_nanojit_codealloc::create_nanojit_codealloc(core);
 ST_vmbase_concurrency::create_vmbase_concurrency(core);
-#if defined VMCFG_SAFEPOINTS
+#if defined VMCFG_SAFEPOINTS && defined BUG_754918
 ST_vmbase_safepoints::create_vmbase_safepoints(core);
 #endif
 ST_vmpi_threads::create_vmpi_threads(core);
+ST_workers_Buffers::create_workers_Buffers(core);
+ST_workers_NoSyncSingleItemBuffer::create_workers_NoSyncSingleItemBuffer(core);
+ST_workers_Promise::create_workers_Promise(core);
 }
 #endif // VMCFG_SELFTEST
 }

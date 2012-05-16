@@ -67,6 +67,10 @@ public:
     virtual void stackOverflow(Toplevel*) { }
     virtual avmplus::String* readFileForEval(avmplus::String*, avmplus::String*) { return NULL; }
     virtual avmplus::ApiVersion getDefaultAPI() { return kApiVersion_VM_INTERNAL; }
+    virtual avmplus::Toplevel* createTopLevel(avmplus::AbcEnv*)
+    {
+        return NULL;
+    }
     Debugger* createDebugger(int tracelevel) { return new (this->gc) MyDebugger(this, (avmplus::Debugger::_TraceLevel)tracelevel); }
 };
 

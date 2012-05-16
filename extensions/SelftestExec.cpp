@@ -1,4 +1,4 @@
-// Generated from ST_avmplus_basics.st, ST_avmplus_builtins.st, ST_avmplus_peephole.st, ST_avmplus_vector_accessors.st, ST_mmgc_543560.st, ST_mmgc_575631.st, ST_mmgc_580603.st, ST_mmgc_603411.st, ST_mmgc_637993.st, ST_mmgc_basics.st, ST_mmgc_dependent.st, ST_mmgc_exact.st, ST_mmgc_externalalloc.st, ST_mmgc_finalize_uninit.st, ST_mmgc_fixedmalloc_findbeginning.st, ST_mmgc_gcheap.st, ST_mmgc_gcoption.st, ST_mmgc_mmfx_array.st, ST_mmgc_threads.st, ST_mmgc_weakref.st, ST_nanojit_codealloc.st, ST_vmbase_concurrency.st, ST_vmbase_safepoints.st, ST_vmpi_threads.st
+// Generated from ST_avmplus_basics.st, ST_avmplus_builtins.st, ST_avmplus_peephole.st, ST_avmplus_vector_accessors.st, ST_mmgc_543560.st, ST_mmgc_575631.st, ST_mmgc_580603.st, ST_mmgc_603411.st, ST_mmgc_637993.st, ST_mmgc_basics.st, ST_mmgc_dependent.st, ST_mmgc_exact.st, ST_mmgc_externalalloc.st, ST_mmgc_finalize_uninit.st, ST_mmgc_fixedmalloc_findbeginning.st, ST_mmgc_gcheap.st, ST_mmgc_gcoption.st, ST_mmgc_mmfx_array.st, ST_mmgc_threads.st, ST_mmgc_weakref.st, ST_nanojit_codealloc.st, ST_vmbase_concurrency.st, ST_vmbase_safepoints.st, ST_vmpi_threads.st, ST_workers_Buffer.st, ST_workers_NoSyncSingleItemBuffer.st, ST_workers_Promise.st
 // Generated from ST_avmplus_basics.st
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
@@ -1401,10 +1401,9 @@ public:
     virtual void stackOverflow(Toplevel*) { }
     virtual avmplus::String* readFileForEval(avmplus::String*, avmplus::String*) { return NULL; }
     virtual avmplus::ApiVersion getDefaultAPI() { return kApiVersion_VM_INTERNAL; }
-    virtual avmplus::Toplevel* createToplevel(avmplus::AbcEnv*) 
-    {
-        return NULL;
-    }
+	virtual avmplus::Toplevel* createToplevel(avmplus::AbcEnv*) {
+		return NULL;
+	}
     Debugger* createDebugger(int tracelevel) { return new (this->gc) MyDebugger(this, (avmplus::Debugger::_TraceLevel)tracelevel); }
 };
 
@@ -1467,7 +1466,7 @@ void ST_mmgc_bugzilla_603411::test0() {
     testClass = new MyTestClass(testCore);
     testClass->testAvmCoreDelete();
 
-// line 110 "ST_mmgc_603411.st"
+// line 114 "ST_mmgc_603411.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 }
@@ -5065,7 +5064,7 @@ void create_vmbase_concurrency(AvmCore* core) { new ST_vmbase_concurrency(core);
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
-#if defined VMCFG_SAFEPOINTS
+#if defined VMCFG_SAFEPOINTS && defined BUG_754918
 namespace avmplus {
 namespace ST_vmbase_safepoints {
 using namespace MMgc;
@@ -5573,7 +5572,7 @@ void ST_vmbase_safepoints::test0() {
     TestRunner runner(THREAD_QTY!=0);
     SimpleTest test(runner.safepointManager(), ITERATIONS, THREAD_QTY);
     runner.runTest(test);
-// line 528 "ST_vmbase_safepoints.st"
+// line 529 "ST_vmbase_safepoints.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -5583,7 +5582,7 @@ void ST_vmbase_safepoints::test1() {
     TestRunner runner(THREAD_QTY!=0);
     ProducerConsumerTest test(runner.safepointManager(), ITERATIONS, THREAD_QTY);
     runner.runTest(test);
-// line 536 "ST_vmbase_safepoints.st"
+// line 537 "ST_vmbase_safepoints.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -5593,7 +5592,7 @@ void ST_vmbase_safepoints::test2() {
     TestRunner runner(THREAD_QTY!=0);
     NestedProducerConsumerTest test(runner.safepointManager(), ITERATIONS * 100, THREAD_QTY, NESTING_DEPTH);
     runner.runTest(test);
-// line 544 "ST_vmbase_safepoints.st"
+// line 545 "ST_vmbase_safepoints.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS * 100, "test.sharedCounter == THREAD_QTY * ITERATIONS * 100", __FILE__, __LINE__);
 #endif
 
@@ -6174,6 +6173,429 @@ verifyPass(VMPI_threadAttrDestroy(&attr) == true, "VMPI_threadAttrDestroy(&attr)
 
 }
 void create_vmpi_threads(AvmCore* core) { new ST_vmpi_threads(core); }
+}
+}
+#endif
+
+// Generated from ST_workers_Buffer.st
+// -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
+// vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+//
+// ***** BEGIN LICENSE BLOCK *****
+// Version: MPL 1.1/GPL 2.0/LGPL 2.1
+//
+// The contents of this file are subject to the Mozilla Public License Version
+// 1.1 (the "License"); you may not use this file except in compliance with
+// the License. You may obtain a copy of the License at
+// http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis,
+// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+// for the specific language governing rights and limitations under the
+// License.
+//
+// The Original Code is [Open Source Virtual Machine.].
+//
+// The Initial Developer of the Original Code is
+// Adobe System Incorporated.
+// Portions created by the Initial Developer are Copyright (C) 2012
+// the Initial Developer. All Rights Reserved.
+//
+// Contributor(s):
+//   Adobe AS3 Team
+//
+// Alternatively, the contents of this file may be used under the terms of
+// either the GNU General Public License Version 2 or later (the "GPL"), or
+// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+// in which case the provisions of the GPL or the LGPL are applicable instead
+// of those above. If you wish to allow use of your version of this file only
+// under the terms of either the GPL or the LGPL, and not to allow others to
+// use your version of this file under the terms of the MPL, indicate your
+// decision by deleting the provisions above and replace them with the notice
+// and other provisions required by the GPL or the LGPL. If you do not delete
+// the provisions above, a recipient may use your version of this file under
+// the terms of any one of the MPL, the GPL or the LGPL.
+//
+// ***** END LICENSE BLOCK ***** */
+
+#include "avmshell.h"
+#ifdef VMCFG_SELFTEST
+namespace avmplus {
+namespace ST_workers_Buffers {
+class ST_workers_Buffers : public Selftest {
+public:
+ST_workers_Buffers(AvmCore* core);
+virtual void run(int n);
+virtual void prologue();
+virtual void epilogue();
+private:
+static const char* ST_names[];
+static const bool ST_explicits[];
+void test0();
+void test1();
+void test2();
+void test3();
+void test4();
+void test5();
+    MMgc::GC *gc;
+    NoSyncSingleItemBuffer *singleItemBuffer;
+    NonBlockingMultiItemBuffer *nonBlockMultiItemBuffer;
+    Atom *atom;
+ 
+};
+ST_workers_Buffers::ST_workers_Buffers(AvmCore* core)
+    : Selftest(core, "workers", "Buffers", ST_workers_Buffers::ST_names,ST_workers_Buffers::ST_explicits)
+{}
+const char* ST_workers_Buffers::ST_names[] = {"NonBlockMultiItemConstructor","NonBlockMultiItemEmptyBuffer","NonBlockMultiItemFullBuffer","SingleConstructor","SingleEmptyBuffer","SingleFullBuffer", NULL };
+const bool ST_workers_Buffers::ST_explicits[] = {false,false,false,false,false,false, false };
+void ST_workers_Buffers::run(int n) {
+switch(n) {
+case 0: test0(); return;
+case 1: test1(); return;
+case 2: test2(); return;
+case 3: test3(); return;
+case 4: test4(); return;
+case 5: test5(); return;
+}
+}
+void ST_workers_Buffers::prologue() {
+    MMgc::GCConfig config;
+    gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap(), config);
+	//gc=core->GetGC();
+    atom=(Atom *)malloc(100);
+    singleItemBuffer=new NoSyncSingleItemBuffer(gc);
+    nonBlockMultiItemBuffer=new NonBlockingMultiItemBuffer(gc);
+
+}
+void ST_workers_Buffers::epilogue() {
+    delete singleItemBuffer;
+    delete nonBlockMultiItemBuffer;
+	delete gc;
+    free(atom);
+
+}
+void ST_workers_Buffers::test0() {
+// line 65 "ST_workers_Buffer.st"
+verifyPass(nonBlockMultiItemBuffer!=NULL, "nonBlockMultiItemBuffer!=NULL", __FILE__, __LINE__);
+
+}
+void ST_workers_Buffers::test1() {
+// line 68 "ST_workers_Buffer.st"
+verifyPass(nonBlockMultiItemBuffer->isEmpty(), "nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 69 "ST_workers_Buffer.st"
+verifyPass(!nonBlockMultiItemBuffer->isFull(), "!nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
+// line 70 "ST_workers_Buffer.st"
+verifyPass(!nonBlockMultiItemBuffer->get(atom), "!nonBlockMultiItemBuffer->get(atom)", __FILE__, __LINE__);
+
+}
+void ST_workers_Buffers::test2() {
+    bool result;
+    for (int i=0;i<14;i++) {
+        result=nonBlockMultiItemBuffer->put(String::createLatin1(core,"test string")->atom());
+// line 76 "ST_workers_Buffer.st"
+verifyPass(result, "result", __FILE__, __LINE__);
+// line 77 "ST_workers_Buffer.st"
+verifyPass(!nonBlockMultiItemBuffer->isEmpty(), "!nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 78 "ST_workers_Buffer.st"
+verifyPass(!nonBlockMultiItemBuffer->isFull(), "!nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
+    }
+    result=nonBlockMultiItemBuffer->put(String::createLatin1(core,"test string")->atom());
+// line 81 "ST_workers_Buffer.st"
+verifyPass(result, "result", __FILE__, __LINE__);
+// line 82 "ST_workers_Buffer.st"
+verifyPass(!nonBlockMultiItemBuffer->isEmpty(), "!nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 83 "ST_workers_Buffer.st"
+verifyPass(nonBlockMultiItemBuffer->isFull(), "nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
+
+    result=nonBlockMultiItemBuffer->put(String::createLatin1(core,"test string")->atom());
+// line 86 "ST_workers_Buffer.st"
+verifyPass(!result, "!result", __FILE__, __LINE__);
+// line 87 "ST_workers_Buffer.st"
+verifyPass(!nonBlockMultiItemBuffer->isEmpty(), "!nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 88 "ST_workers_Buffer.st"
+verifyPass(nonBlockMultiItemBuffer->isFull(), "nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
+
+    for (int i=0;i<14;i++) {
+// line 91 "ST_workers_Buffer.st"
+verifyPass(nonBlockMultiItemBuffer->get(atom), "nonBlockMultiItemBuffer->get(atom)", __FILE__, __LINE__);
+// line 92 "ST_workers_Buffer.st"
+verifyPass(!nonBlockMultiItemBuffer->isEmpty(), "!nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 93 "ST_workers_Buffer.st"
+verifyPass(!nonBlockMultiItemBuffer->isFull(), "!nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
+    }
+// line 95 "ST_workers_Buffer.st"
+verifyPass(nonBlockMultiItemBuffer->get(atom), "nonBlockMultiItemBuffer->get(atom)", __FILE__, __LINE__);
+// line 96 "ST_workers_Buffer.st"
+verifyPass(nonBlockMultiItemBuffer->isEmpty(), "nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 97 "ST_workers_Buffer.st"
+verifyPass(!nonBlockMultiItemBuffer->isFull(), "!nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
+
+// line 99 "ST_workers_Buffer.st"
+verifyPass(!nonBlockMultiItemBuffer->get(atom), "!nonBlockMultiItemBuffer->get(atom)", __FILE__, __LINE__);
+// line 100 "ST_workers_Buffer.st"
+verifyPass(nonBlockMultiItemBuffer->isEmpty(), "nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 101 "ST_workers_Buffer.st"
+verifyPass(!nonBlockMultiItemBuffer->isFull(), "!nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
+
+}
+void ST_workers_Buffers::test3() {
+// line 104 "ST_workers_Buffer.st"
+verifyPass(singleItemBuffer!=NULL, "singleItemBuffer!=NULL", __FILE__, __LINE__);
+
+}
+void ST_workers_Buffers::test4() {
+// line 107 "ST_workers_Buffer.st"
+verifyPass(singleItemBuffer->isEmpty(), "singleItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 108 "ST_workers_Buffer.st"
+verifyPass(!singleItemBuffer->isFull(), "!singleItemBuffer->isFull()", __FILE__, __LINE__);
+// line 109 "ST_workers_Buffer.st"
+verifyPass(!singleItemBuffer->get(atom), "!singleItemBuffer->get(atom)", __FILE__, __LINE__);
+
+}
+void ST_workers_Buffers::test5() {
+    bool result;
+    result=singleItemBuffer->put(String::createLatin1(core,"test string")->atom());
+// line 114 "ST_workers_Buffer.st"
+verifyPass(result, "result", __FILE__, __LINE__);
+// line 115 "ST_workers_Buffer.st"
+verifyPass(!singleItemBuffer->isEmpty(), "!singleItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 116 "ST_workers_Buffer.st"
+verifyPass(singleItemBuffer->isFull(), "singleItemBuffer->isFull()", __FILE__, __LINE__);
+    result=singleItemBuffer->put(String::createLatin1(core,"test string")->atom());
+// line 118 "ST_workers_Buffer.st"
+verifyPass(!result, "!result", __FILE__, __LINE__);
+// line 119 "ST_workers_Buffer.st"
+verifyPass(singleItemBuffer->get(atom), "singleItemBuffer->get(atom)", __FILE__, __LINE__);
+// line 120 "ST_workers_Buffer.st"
+verifyPass(singleItemBuffer->isEmpty(), "singleItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 121 "ST_workers_Buffer.st"
+verifyPass(!singleItemBuffer->isFull(), "!singleItemBuffer->isFull()", __FILE__, __LINE__);
+
+
+}
+void create_workers_Buffers(AvmCore* core) { new ST_workers_Buffers(core); }
+}
+}
+#endif
+
+// Generated from ST_workers_NoSyncSingleItemBuffer.st
+// -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
+// vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+//
+// ***** BEGIN LICENSE BLOCK *****
+// Version: MPL 1.1/GPL 2.0/LGPL 2.1
+//
+// The contents of this file are subject to the Mozilla Public License Version
+// 1.1 (the "License"); you may not use this file except in compliance with
+// the License. You may obtain a copy of the License at
+// http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis,
+// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+// for the specific language governing rights and limitations under the
+// License.
+//
+// The Original Code is [Open Source Virtual Machine.].
+//
+// The Initial Developer of the Original Code is
+// Adobe System Incorporated.
+// Portions created by the Initial Developer are Copyright (C) 2012
+// the Initial Developer. All Rights Reserved.
+//
+// Contributor(s):
+//   Adobe AS3 Team
+//
+// Alternatively, the contents of this file may be used under the terms of
+// either the GNU General Public License Version 2 or later (the "GPL"), or
+// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+// in which case the provisions of the GPL or the LGPL are applicable instead
+// of those above. If you wish to allow use of your version of this file only
+// under the terms of either the GPL or the LGPL, and not to allow others to
+// use your version of this file under the terms of the MPL, indicate your
+// decision by deleting the provisions above and replace them with the notice
+// and other provisions required by the GPL or the LGPL. If you do not delete
+// the provisions above, a recipient may use your version of this file under
+// the terms of any one of the MPL, the GPL or the LGPL.
+//
+// ***** END LICENSE BLOCK ***** */
+
+#include "avmshell.h"
+#ifdef VMCFG_SELFTEST
+namespace avmplus {
+namespace ST_workers_NoSyncSingleItemBuffer {
+class ST_workers_NoSyncSingleItemBuffer : public Selftest {
+public:
+ST_workers_NoSyncSingleItemBuffer(AvmCore* core);
+virtual void run(int n);
+virtual void prologue();
+virtual void epilogue();
+private:
+static const char* ST_names[];
+static const bool ST_explicits[];
+void test0();
+void test1();
+void test2();
+void test3();
+    MMgc::GC *gc;
+	NoSyncSingleItemBuffer *buffer;
+    Atom *atom;
+ 
+};
+ST_workers_NoSyncSingleItemBuffer::ST_workers_NoSyncSingleItemBuffer(AvmCore* core)
+    : Selftest(core, "workers", "NoSyncSingleItemBuffer", ST_workers_NoSyncSingleItemBuffer::ST_names,ST_workers_NoSyncSingleItemBuffer::ST_explicits)
+{}
+const char* ST_workers_NoSyncSingleItemBuffer::ST_names[] = {"constructor","emptyBuffer","fullBuffer","destroy", NULL };
+const bool ST_workers_NoSyncSingleItemBuffer::ST_explicits[] = {false,false,false,false, false };
+void ST_workers_NoSyncSingleItemBuffer::run(int n) {
+switch(n) {
+case 0: test0(); return;
+case 1: test1(); return;
+case 2: test2(); return;
+case 3: test3(); return;
+}
+}
+void ST_workers_NoSyncSingleItemBuffer::prologue() {
+    gc=core->GetGC();
+    atom=(Atom *)malloc(100);
+    buffer=new NoSyncSingleItemBuffer(gc);
+
+}
+void ST_workers_NoSyncSingleItemBuffer::epilogue() {
+	delete buffer;
+    free(atom);
+	
+}
+
+void ST_workers_NoSyncSingleItemBuffer::test0() {
+// line 61 "ST_workers_NoSyncSingleItemBuffer.st"
+verifyPass(buffer!=NULL, "buffer!=NULL", __FILE__, __LINE__);
+	
+}
+void ST_workers_NoSyncSingleItemBuffer::test1() {
+// line 64 "ST_workers_NoSyncSingleItemBuffer.st"
+verifyPass(buffer->isEmpty(), "buffer->isEmpty()", __FILE__, __LINE__);
+// line 65 "ST_workers_NoSyncSingleItemBuffer.st"
+verifyPass(!buffer->isFull(), "!buffer->isFull()", __FILE__, __LINE__);
+// line 66 "ST_workers_NoSyncSingleItemBuffer.st"
+verifyPass(!buffer->get(atom), "!buffer->get(atom)", __FILE__, __LINE__);
+	
+}
+void ST_workers_NoSyncSingleItemBuffer::test2() {
+    buffer->put(String::createLatin1(core,"test string")->atom());
+// line 70 "ST_workers_NoSyncSingleItemBuffer.st"
+verifyPass(!buffer->isEmpty(), "!buffer->isEmpty()", __FILE__, __LINE__);
+// line 71 "ST_workers_NoSyncSingleItemBuffer.st"
+verifyPass(buffer->isFull(), "buffer->isFull()", __FILE__, __LINE__);
+// line 72 "ST_workers_NoSyncSingleItemBuffer.st"
+verifyPass(buffer->get(atom), "buffer->get(atom)", __FILE__, __LINE__);
+// line 73 "ST_workers_NoSyncSingleItemBuffer.st"
+verifyPass(buffer->isEmpty(), "buffer->isEmpty()", __FILE__, __LINE__);
+// line 74 "ST_workers_NoSyncSingleItemBuffer.st"
+verifyPass(!buffer->isFull(), "!buffer->isFull()", __FILE__, __LINE__);
+	
+}
+void ST_workers_NoSyncSingleItemBuffer::test3() {
+    buffer->unregisterRoot();
+// line 78 "ST_workers_NoSyncSingleItemBuffer.st"
+verifyPass(true, "true", __FILE__, __LINE__);
+
+	
+
+}
+void create_workers_NoSyncSingleItemBuffer(AvmCore* core) { new ST_workers_NoSyncSingleItemBuffer(core); }
+}
+}
+#endif
+
+// Generated from ST_workers_Promise.st
+// -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
+// vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+//
+// ***** BEGIN LICENSE BLOCK *****
+// Version: MPL 1.1/GPL 2.0/LGPL 2.1
+//
+// The contents of this file are subject to the Mozilla Public License Version
+// 1.1 (the "License"); you may not use this file except in compliance with
+// the License. You may obtain a copy of the License at
+// http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis,
+// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+// for the specific language governing rights and limitations under the
+// License.
+//
+// The Original Code is [Open Source Virtual Machine.].
+//
+// The Initial Developer of the Original Code is
+// Adobe System Incorporated.
+// Portions created by the Initial Developer are Copyright (C) 2012
+// the Initial Developer. All Rights Reserved.
+//
+// Contributor(s):
+//   Adobe AS3 Team
+//
+// Alternatively, the contents of this file may be used under the terms of
+// either the GNU General Public License Version 2 or later (the "GPL"), or
+// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+// in which case the provisions of the GPL or the LGPL are applicable instead
+// of those above. If you wish to allow use of your version of this file only
+// under the terms of either the GPL or the LGPL, and not to allow others to
+// use your version of this file under the terms of the MPL, indicate your
+// decision by deleting the provisions above and replace them with the notice
+// and other provisions required by the GPL or the LGPL. If you do not delete
+// the provisions above, a recipient may use your version of this file under
+// the terms of any one of the MPL, the GPL or the LGPL.
+//
+// ***** END LICENSE BLOCK ***** */
+
+#include "avmshell.h"
+#ifdef VMCFG_SELFTEST
+namespace avmplus {
+namespace ST_workers_Promise {
+class ST_workers_Promise : public Selftest {
+public:
+ST_workers_Promise(AvmCore* core);
+virtual void run(int n);
+virtual void prologue();
+private:
+static const char* ST_names[];
+static const bool ST_explicits[];
+void test0();
+    Isolate *main;
+
+};
+ST_workers_Promise::ST_workers_Promise(AvmCore* core)
+    : Selftest(core, "workers", "Promise", ST_workers_Promise::ST_names,ST_workers_Promise::ST_explicits)
+{}
+const char* ST_workers_Promise::ST_names[] = {"MainWorker", NULL };
+const bool ST_workers_Promise::ST_explicits[] = {false, false };
+void ST_workers_Promise::run(int n) {
+switch(n) {
+case 0: test0(); return;
+}
+}
+void ST_workers_Promise::prologue() {
+    main=core->getIsolate();
+
+
+}
+void ST_workers_Promise::test0() {
+    // verify the main worker can be retrieved from AvmCore
+// line 53 "ST_workers_Promise.st"
+verifyPass(main!=NULL, "main!=NULL", __FILE__, __LINE__);
+    uint32_t state=main->getAggregate()->queryState(main);
+    // verify state == RUNNING
+// line 56 "ST_workers_Promise.st"
+verifyPass(state==3, "state==3", __FILE__, __LINE__);
+
+// line 58 "ST_workers_Promise.st"
+verifyPass(main->targetCore() == core, "main->targetCore() == core", __FILE__, __LINE__);
+// line 59 "ST_workers_Promise.st"
+verifyPass(main->isParentOf(main) == false, "main->isParentOf(main) == false", __FILE__, __LINE__);
+
+
+}
+void create_workers_Promise(AvmCore* core) { new ST_workers_Promise(core); }
 }
 }
 #endif
