@@ -141,6 +141,9 @@ namespace avmplus
         uint32_t getDenseLength() const;
 #endif
 
+        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClass, Cloner& cloner) const;
+        
+        
         // Iterator support - for in, for each
         virtual Atom nextName(int index);
         virtual Atom nextValue(int index);

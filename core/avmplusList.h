@@ -133,14 +133,17 @@ namespace avmplus
             void* mem = fm->Alloc(GCHeap::CheckForAllocSizeOverflow(sizeof(ListData<STORAGE, slop>) + slop,
                                                                     GCHeap::CheckForCallocSizeOverflow(totalElements-1, sizeof(STORAGE))),
                                   kNone);
-            gc->SignalDependentAllocation(fm->Size(mem));
+            if (gc)
+            {
+                 gc->SignalDependentAllocation(fm->Size(mem));
+            }
             return ::new (mem) ListData<STORAGE, slop>();
         }
 
         REALLY_INLINE static void free(MMgc::GC* gc, void* mem)
         {
             MMgc::FixedMalloc* const fm = MMgc::FixedMalloc::GetFixedMalloc();
-            gc->SignalDependentDeallocation(fm->Size(mem));
+            if (gc) gc->SignalDependentDeallocation(fm->Size(mem));
             fm->Free(mem);
         }
 

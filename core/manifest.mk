@@ -108,6 +108,8 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/peephole.cpp \
   $(curdir)/PoolObject.cpp \
   $(curdir)/PrintWriter.cpp \
+  $(curdir)/PromiseChannelGlue.cpp \
+  $(curdir)/ProxyGlue.cpp \
   $(curdir)/QCache.cpp \
   $(curdir)/RegExpClass.cpp \
   $(curdir)/RegExpObject.cpp \
@@ -142,6 +144,9 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/DictionaryGlue.cpp \
   $(curdir)/ObjectIO.cpp \
   $(curdir)/AvmSerializer.cpp \
+  $(curdir)/Cloner.cpp \
+  $(curdir)/ConcurrencyGlue.cpp \
+  $(curdir)/Isolate.cpp \
   $(NULL)
 
 #  $(curdir)/avmplus.cpp \

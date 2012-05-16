@@ -79,6 +79,7 @@ namespace avmshell
     {
     }
 
+
     /* virtual */
     void ShellCoreImpl::setStackLimit()
     {
@@ -129,31 +130,33 @@ namespace avmshell
 
         {
             MMGC_ENTER_RETURN(OUT_OF_MEMORY);
-            ShellSettings settings;
-            parseCommandLine(argc, argv, settings);
 
-#ifdef VMCFG_DEOPT_SAFEPOINT_NATIVE
-            // Stack pointer must remain fixed during method execution in order
-            // to permit straightforward location of a callee's return address.
-            settings.njconfig.i386_fixed_esp = true;
-#endif
+            Aggregate::initializeGlobals();
 
             {
               // code coverage/cheap test
               MMGC_ENTER_SUSPEND;
             }
 
-            if (settings.do_log)
-              initializeLogging(settings.numfiles > 0 ? settings.filenames[0] : "AVMLOG");
+            avmplus::FixedHeapRef<Shell> instance(mmfx_new(Shell));
+            instance->parseCommandLine(argc, argv);
+
+            if (instance->settings.do_log)
+              initializeLogging(instance->settings.numfiles > 0 ? instance->settings.filenames[0] : "AVMLOG");
 
 #ifdef VMCFG_WORKERTHREADS
-            if (settings.numworkers == 1 && settings.numthreads == 1 && settings.repeats == 1)
-                singleWorker(settings);
+            if (instance->settings.numworkers == 1 && instance->settings.numthreads == 1 && instance->settings.repeats == 1)
+                instance->runIsolate(instance->newIsolate(NULL));
             else
-                multiWorker(settings);
+                instance->multiWorker(instance->settings);
 #else
-            singleWorker(settings);
+            instance->runIsolate(instance->newIsolate(NULL));
 #endif
+            instance->waitUntilNoIsolates();
+            // Shell is refcounted now
+            //mmfx_delete(instance);
+            
+            Aggregate::reclaimGlobals();
         }
 
         MMgc::GCHeap::Destroy();
@@ -161,40 +164,232 @@ namespace avmshell
         return 0;
     }
 
-    // In the single worker case everything is run on the main thread.  This
-    // is where we handler the repl, selftest, and projectors.
+    ShellIsolate::ShellIsolate(int32_t desc, int32_t parentDesc, avmplus::Aggregate* aggregate)
+        : Isolate(desc, parentDesc, aggregate)
+    {}
 
-    /* static */
-    void Shell::singleWorker(ShellSettings& settings)
+
+    bool ShellIsolate::copyByteCode(avmplus::ByteArrayObject* ba)
     {
-        MMgc::GCConfig gcconfig;
-        if (settings.gcthreshold != 0)
-            // (zero means use default value already in gcconfig.)
-            gcconfig.collectionThreshold = settings.gcthreshold;
-        gcconfig.exactTracing = settings.exactgc;
-        gcconfig.markstackAllowance = settings.markstackAllowance;
-        gcconfig.drc = settings.drc;
-        gcconfig.mode = settings.gcMode();
-        gcconfig.validateDRC = settings.drcValidation;
-        MMgc::GC *gc = mmfx_new( MMgc::GC(MMgc::GCHeap::GetGCHeap(), gcconfig) );
-        {
-            MMGC_GCENTER(gc);
-            ShellCore* shell = new ShellCoreImpl(gc, settings, true);
-            Shell::singleWorkerHelper(shell, settings);
-            delete shell;
+        if (ba != NULL) {
+            return Isolate::copyByteCode(ba);
         }
-        mmfx_delete( gc );
+        Shell* shell = static_cast<Shell*> (getAggregate());
+        int numfiles = shell->settings.numfiles;
+        char** filenames = shell->settings.filenames;
+
+        m_code.allocate(numfiles);
+        for (int i = 0; i < numfiles; i++) {
+            char* filename = filenames[i];
+            FileInputStream f(filename);
+            bool isValid = f.valid() && ((uint64_t)f.length() < UINT32_T_MAX); //currently we cannot read files > 4GB
+            if (!isValid) {
+                return false;
+            }
+            
+            // parse new bytecode
+            //avmplus::ScriptBuffer code = targetCore()->newScriptBuffer((size_t)f.available());
+            //(f.read(buf), (size_t)f.available();
+            size_t avail = (size_t)f.available();
+            m_code.values[i].allocate((int)avail);
+            f.read(m_code.values[i].values, avail);
+        }
+        return true;
     }
 
-    /* static */
-    void Shell::singleWorkerHelper(ShellCore* shell, ShellSettings& settings)
+    /*virtual*/ void ShellIsolate::doRun()
     {
-        if (!shell->setup(settings))
+        MMGC_ENTER_VOID;
+        
+        ShellSettings settings;
+        
+        MMgc::GCConfig gcconfig;
+        gcconfig.mode = settings.gcMode();
+        MMgc::GC* gc = mmfx_new(MMgc::GC(MMgc::GCHeap::GetGCHeap(),  gcconfig));
+        avmplus::Aggregate* aggregate = getAggregate();
+        ShellToplevel* toplevel = NULL;
+        {
+            MMGC_GCENTER(gc);
+            
+            ShellCoreImpl* core = new ShellCoreImpl(gc, settings, false);
+
+            aggregate->initializeAndNotify(core, this);
+
+            avmplus::EnterSafepointManager enterSafepointManager(core);
+            
+            toplevel = core->setup(settings);
+            if (toplevel != NULL) { // setup OK
+                avmplus::Isolate::State state = aggregate->queryState(this);
+                if (state == avmplus::Isolate::RUNNING) { 
+                    this->evalCodeBlobs(settings.enter_debugger_on_launch);
+                } else {
+                    // FIXME: this happened probably because we got interrupted, but maybe it's a resource situation?
+                    // so maybe aborted?
+                    aggregate->stateTransition(this, avmplus::Isolate::STOPPED);
+                }
+                toplevel->shellClasses->get_PromiseClass()->destroyRemoteObjects();
+            } 
+            aggregate->beforeCoreDeletion(this);
+            gc->Collect();            
+            
+            delete core;
+        }
+        mmfx_delete(gc);
+        if (toplevel == NULL) {
+            aggregate->stateTransition(this, avmplus::Isolate::ABORTED);
+            // TODO
+            // Harshness: kill the program if setup does not go right.  Are there
+            // alternatives?  Do we even want to contemplate isolate creation
+            // failing?  Recall that start() actually throws an exception if the
+            // process limit is exceeded, but that's a controlled resource exhaustion.
+            // In the case of MMGC_ENTER and ShellCore::setup() we should never fail.
+            avmshell::Platform::GetInstance()->exit(1);
+        }
+        aggregate->afterGCDeletion(this);
+    }
+
+
+    bool ShellIsolate::processProxies(avmplus::Toplevel* toplevel) 
+    {
+        // AvmAssert(m_aggregate->m_commlock.isLockedByCurrentThread());
+        bool wait = true;
+        if (numAdditionalProxies > 0) {
+            wait = false;
+            ShellToplevel* stl = static_cast<ShellToplevel*>(toplevel);
+            GCRef<avmplus::RemoteProxyClass> remoteProxyClass = stl->shellClasses->get_RemoteProxyClass();
+            for (int i = additionalProxiesProcessed; i < numAdditionalProxies; i += 2) {
+                uint32_t existingProxyGID = m_additionalProxyInfo.values[i];
+                uint32_t freshPromiseGID  = m_additionalProxyInfo.values[i+1];
+                avmplus::FixedHeapRef<avmplus::PromiseChannel> incChannel = m_additionalProxyChannels.values[i];
+                avmplus::FixedHeapRef<avmplus::PromiseChannel> outChannel = m_additionalProxyChannels.values[i+1];
+                
+                if (!remoteProxyClass->createAndInsert(outChannel,
+                                                       incChannel,
+                                                       freshPromiseGID,
+                                                       existingProxyGID)) {
+                    additionalProxiesProcessed = i;
+                    return false;
+                }
+            }
+            numAdditionalProxies = 0;
+            additionalProxiesProcessed = 0;
+        }
+        
+        const int numEmptyOwners = numEmptyPromiseOwners;
+        if (numEmptyOwners > 0) {
+            wait = false;
+            GCRef<avmplus::PromiseClass> promiseClass = static_cast<ShellToplevel*>(toplevel)->shellClasses->get_PromiseClass();
+            for (int i = 0; i < numEmptyOwners; i += 2) {
+                uint32_t newGID = m_emptyPromiseInfo.values[i];
+                uint32_t emptyPromiseGID = m_emptyPromiseInfo.values[i+1];
+                avmplus::FixedHeapRef<avmplus::PromiseChannel> incChannel = m_emptyPromiseChannels.values[i];
+                avmplus::FixedHeapRef<avmplus::PromiseChannel> outChannel = m_emptyPromiseChannels.values[i+1];
+                promiseClass->processEmptyPromiseResolution(emptyPromiseGID, newGID, outChannel, incChannel);
+            }
+            numEmptyPromiseOwners = 0;
+        }
+        return wait;
+    }
+
+
+    void ShellIsolate::registerPromiseOwner(int32_t existingProxyGID, avmplus::Atom resolvedObject, avmplus::Toplevel* toplevel)
+    {
+        using namespace avmplus;
+        Isolate *currentIsolate = AvmCore::getActiveCore()->getIsolate();
+        Aggregate* aggregate = getAggregate();
+        
+        int length = m_emptyPromiseInfo.length;
+        if (length == 0) {
+            AvmAssert(m_emptyPromiseChannels.length == 0);
+            length = 4;
+            m_emptyPromiseInfo.allocate(length);
+            m_emptyPromiseChannels.allocate(length);
+        }
+        if (numEmptyPromiseOwners == length) {
+            m_emptyPromiseInfo.resize(length + 4);
+            m_emptyPromiseChannels.resize(length + 4);
+        }
+        FixedHeapRef<PromiseChannel> 
+            outChannel(aggregate->allocatePromiseChannel(currentIsolate->desc, desc));
+        FixedHeapRef<PromiseChannel> 
+            incChannel(aggregate->allocatePromiseChannel(desc, currentIsolate->desc));
+        // create a fresh GID for all instances of
+        // empty promise that are around (they
+        // connect to fresh instances of remote
+        // proxies, all pointing to the same
+        // object, created below)
+        int32_t newGID = aggregate->nextPromiseGID();
+        
+        m_emptyPromiseInfo.values[numEmptyPromiseOwners] = newGID;
+        m_emptyPromiseInfo.values[numEmptyPromiseOwners+1] = existingProxyGID;
+        m_emptyPromiseChannels.values[numEmptyPromiseOwners] = outChannel;
+        m_emptyPromiseChannels.values[numEmptyPromiseOwners+1] = incChannel;
+        numEmptyPromiseOwners += 2;
+        
+        GCRef<RemoteProxyClass> remoteProxyClass = static_cast<ShellToplevel*>(toplevel)->shellClasses->get_RemoteProxyClass();
+        GCRef<RemoteProxyObject> remoteProxy = remoteProxyClass->createWithGID(outChannel, incChannel, newGID);
+        remoteProxy->set_m_resolved(resolvedObject);
+        remoteProxy->set_m_global(false);
+        remoteProxy->setState(remoteProxyClass->get_RECEIVED());
+        remoteProxy->refCount = 0;
+        AvmAssert(AvmCore::isNullOrUndefined(remoteProxyClass->get_m_remote_proxies()->getUintProperty(newGID)));
+        remoteProxyClass->get_m_remote_proxies()->setUintProperty(newGID, remoteProxy->toAtom());
+    }
+
+    void ShellIsolate::eventLoop(avmplus::Toplevel* toplevel)
+    {
+        AvmAssert(toplevel->core() == m_core);
+        m_core->inEventLoop = true;
+        avmplus::RemoteProxyClass* remoteProxyClass = static_cast<ShellToplevel*>(toplevel)->shellClasses->get_RemoteProxyClass();
+        do {
+            if (!remoteProxyClass->checkForCallRequestsInternal())
+                break;
+        } while (true);
+        m_core->inEventLoop = false;
+    }
+
+
+    class PrimordialShellIsolate : public ShellIsolate
+    {
+
+    public:
+        PrimordialShellIsolate(int32_t desc, int32_t parentDesc, avmplus::Aggregate* aggregate)
+            : ShellIsolate(desc, parentDesc, aggregate) {}
+
+        virtual void doRun()
+        {
+            Shell* aggregate = static_cast<Shell*>(getAggregate());
+            ShellSettings& settings = aggregate->settings;
+            MMgc::GCConfig gcconfig;
+            if (settings.gcthreshold != 0)
+                // (zero means use default value already in gcconfig.)
+                gcconfig.collectionThreshold = settings.gcthreshold;
+            gcconfig.exactTracing = settings.exactgc;
+            gcconfig.markstackAllowance = settings.markstackAllowance;
+            gcconfig.drc = settings.drc;
+            gcconfig.mode = settings.gcMode();
+            gcconfig.validateDRC = settings.drcValidation;
+            
+            MMgc::GC *gc = mmfx_new( MMgc::GC(MMgc::GCHeap::GetGCHeap(), gcconfig) );
+            
+            MMGC_GCENTER(gc);
+
+            ShellCore* shell = new ShellCoreImpl(gc, settings, true);
+            this->initialize(shell);
+
+            avmplus::EnterSafepointManager enterSafepointManager(shell);
+            ShellToplevel* toplevel = shell->setup(settings);
+            // inlined singleWorkerHelper
+            if (toplevel == NULL) // FIXME abort?
             Platform::GetInstance()->exit(1);
 
 #ifdef VMCFG_SELFTEST
         if (settings.do_selftest) {
             shell->executeSelftest(settings);
+                aggregate->beforeCoreDeletion(this);
+                delete shell;
+                mmfx_delete( gc );
+                aggregate->afterGCDeletion(this);
             return;
         }
 #endif
@@ -228,9 +423,17 @@ namespace avmshell
 
 #ifdef VMCFG_EVAL
         if (settings.do_repl)
-            repl(shell);
+                Shell::repl(shell);
 #endif
+        static_cast<ShellToplevel*>(toplevel)->shellClasses->get_PromiseClass()->destroyRemoteObjects();
+        aggregate->beforeCoreDeletion(this);
+        delete shell;
+        mmfx_delete( gc );
+        aggregate->afterGCDeletion(this);
     }
+    };
+
+
 
 #ifdef VMCFG_WORKERTHREADS
 
@@ -643,7 +846,6 @@ namespace avmshell
 #endif // VMCFG_EVAL
 
     // open logfile based on a filename
-    /* static */
     void Shell::initializeLogging(const char* basename)
     {
         const char* lastDot = VMPI_strrchr(basename, '.');
@@ -673,7 +875,7 @@ namespace avmshell
     }
 
     /* static */
-    void Shell::parseCommandLine(int argc, char* argv[], ShellSettings& settings)
+    void Shell::parseCommandLine(int argc, char* argv[])
     {
         bool print_version = false;
 
@@ -1273,3 +1475,16 @@ namespace avmshell
         Platform::GetInstance()->exit(1);
     }
 }
+
+namespace avmplus 
+{
+    Isolate* Isolate::newIsolate(int32_t desc, int32_t parentDesc, Aggregate* aggregate)
+    {
+        if (aggregate->isPrimordial(desc)) {
+            return mmfx_new(avmshell::PrimordialShellIsolate(desc, parentDesc, aggregate));
+        } else {
+            return mmfx_new(avmshell::ShellIsolate(desc, parentDesc, aggregate));
+        }
+    }
+}
+

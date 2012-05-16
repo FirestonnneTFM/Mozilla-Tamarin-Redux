@@ -2914,6 +2914,219 @@ private:
 };
 
 #define avmplus_EndianClass_isExactInterlock 1
+//-----------------------------------------------------------
+// flash.system::WorkerEvent
+//-----------------------------------------------------------
+class WorkerEventObject : public avmplus::ScriptObject
+{
+    GC_DECLARE_EXACT_METHODS
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    REALLY_INLINE avmplus::String* get_m_previousState() const { return m_slots_WorkerEventObject.m_private_m_previousState; }
+    REALLY_INLINE void set_m_previousState(avmplus::String* newVal) { m_slots_WorkerEventObject.m_private_m_previousState = newVal; }
+protected:
+    REALLY_INLINE avmplus::String* get_m_currentState() const { return m_slots_WorkerEventObject.m_private_m_currentState; }
+    REALLY_INLINE void set_m_currentState(avmplus::String* newVal) { m_slots_WorkerEventObject.m_private_m_currentState = newVal; }
+protected:
+    REALLY_INLINE avmplus::Atom get_m_target() const { return m_slots_WorkerEventObject.m_flash_system_m_target; }
+    REALLY_INLINE void set_m_target(avmplus::Atom newVal) { m_slots_WorkerEventObject.m_flash_system_m_target = newVal; }
+private:
+    avmplus::NativeID::avmplus_WorkerEventObjectSlots m_slots_WorkerEventObject;
+protected:
+    friend class avmplus::WorkerEventClass;
+    REALLY_INLINE explicit WorkerEventObject(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit WorkerEventObject(const WorkerEventObject&); // unimplemented
+    void operator=(const WorkerEventObject&); // unimplemented
+};
+
+#define avmplus_WorkerEventObject_isExactInterlock 1
+//-----------------------------------------------------------
+// flash.system::WorkerEvent$
+//-----------------------------------------------------------
+class WorkerEventClass : public avmplus::ClassClosure
+{
+    GC_DECLARE_EXACT_METHODS
+public:
+    static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
+public:
+    static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*);
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+public:
+    inline GCRef<avmplus::WorkerEventObject> constructObject(GCRef<avmplus::String> arg1, GCRef<avmplus::String> arg2)
+    {
+        avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1->atom(), arg2->atom() };
+        avmplus::Atom const result = this->construct(2, args);
+        return GCRef<avmplus::WorkerEventObject>((avmplus::WorkerEventObject*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::WorkerEventObject> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::WorkerEventObject>((avmplus::WorkerEventObject*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::WorkerEventObject> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::WorkerEventObject>((avmplus::WorkerEventObject*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::WorkerEventObject> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::WorkerEventObject>((avmplus::WorkerEventObject*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::WorkerEventObject> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::WorkerEventObject>((avmplus::WorkerEventObject*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE avmplus::String* get_WORKER_STATE() const { return m_slots_WorkerEventClass.m_WORKER_STATE; }
+    REALLY_INLINE void setconst_WORKER_STATE(avmplus::String* newVal) { m_slots_WorkerEventClass.m_WORKER_STATE = newVal; }
+private:
+    avmplus::NativeID::avmplus_WorkerEventClassSlots m_slots_WorkerEventClass;
+protected:
+    inline explicit WorkerEventClass(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit WorkerEventClass(const WorkerEventClass&); // unimplemented
+    void operator=(const WorkerEventClass&); // unimplemented
+};
+
+#define avmplus_WorkerEventClass_isExactInterlock 1
+//-----------------------------------------------------------
+// flash.system::PromiseState
+//-----------------------------------------------------------
+class PromiseStateObject : public avmplus::ScriptObject
+{
+    GC_DECLARE_EXACT_METHODS
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::PromiseStateClass;
+    REALLY_INLINE explicit PromiseStateObject(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit PromiseStateObject(const PromiseStateObject&); // unimplemented
+    void operator=(const PromiseStateObject&); // unimplemented
+};
+
+#define avmplus_PromiseStateObject_isExactInterlock 1
+//-----------------------------------------------------------
+// flash.system::PromiseState$
+//-----------------------------------------------------------
+class PromiseStateClass : public avmplus::ClassClosure
+{
+    GC_DECLARE_EXACT_METHODS
+public:
+    static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
+public:
+    static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*);
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+public:
+    inline GCRef<avmplus::PromiseStateObject> constructObject()
+    {
+        avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
+        avmplus::Atom const result = this->construct(0, args);
+        return GCRef<avmplus::PromiseStateObject>((avmplus::PromiseStateObject*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::PromiseStateObject> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::PromiseStateObject>((avmplus::PromiseStateObject*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::PromiseStateObject> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::PromiseStateObject>((avmplus::PromiseStateObject*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::PromiseStateObject> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::PromiseStateObject>((avmplus::PromiseStateObject*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::PromiseStateObject> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::PromiseStateObject>((avmplus::PromiseStateObject*)(avmplus::AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE avmplus::String* get_NEW() const { return m_slots_PromiseStateClass.m_NEW; }
+    REALLY_INLINE void setconst_NEW(avmplus::String* newVal) { m_slots_PromiseStateClass.m_NEW = newVal; }
+public:
+    REALLY_INLINE avmplus::String* get_RECEIVED() const { return m_slots_PromiseStateClass.m_RECEIVED; }
+    REALLY_INLINE void setconst_RECEIVED(avmplus::String* newVal) { m_slots_PromiseStateClass.m_RECEIVED = newVal; }
+public:
+    REALLY_INLINE avmplus::String* get_BROKEN() const { return m_slots_PromiseStateClass.m_BROKEN; }
+    REALLY_INLINE void setconst_BROKEN(avmplus::String* newVal) { m_slots_PromiseStateClass.m_BROKEN = newVal; }
+public:
+    REALLY_INLINE avmplus::String* get_EXCEPTION() const { return m_slots_PromiseStateClass.m_EXCEPTION; }
+    REALLY_INLINE void setconst_EXCEPTION(avmplus::String* newVal) { m_slots_PromiseStateClass.m_EXCEPTION = newVal; }
+private:
+    avmplus::NativeID::avmplus_PromiseStateClassSlots m_slots_PromiseStateClass;
+protected:
+    inline explicit PromiseStateClass(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit PromiseStateClass(const PromiseStateClass&); // unimplemented
+    void operator=(const PromiseStateClass&); // unimplemented
+};
+
+#define avmplus_PromiseStateClass_isExactInterlock 1
+//-----------------------------------------------------------
+// flash.system::PromiseHelper
+//-----------------------------------------------------------
+class PromiseHelperObject : public avmplus::ScriptObject
+{
+    GC_DECLARE_EXACT_METHODS
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::PromiseHelperClass;
+    REALLY_INLINE explicit PromiseHelperObject(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit PromiseHelperObject(const PromiseHelperObject&); // unimplemented
+    void operator=(const PromiseHelperObject&); // unimplemented
+};
+
+#define avmplus_PromiseHelperObject_isExactInterlock 1
 }
 
 #endif // _H_nativegen_classes_shell_toplevel

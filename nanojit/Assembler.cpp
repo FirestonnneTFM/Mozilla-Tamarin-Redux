@@ -1507,6 +1507,22 @@ namespace nanojit
                     evictAllActiveRegs();
                     break;
 
+               case LIR_pushstate:
+                   asm_pushstate();
+                   break;
+               case LIR_popstate:
+                   asm_popstate();
+                   break;
+               case LIR_savepc:
+                   asm_savepc();
+                   break;
+               case LIR_restorepc:
+                   asm_restorepc();
+                   break;
+               case LIR_discardpc:
+                   asm_discardpc();
+                   break;
+
                 case LIR_livei:
                 CASE64(LIR_liveq:)
                 case LIR_lived:

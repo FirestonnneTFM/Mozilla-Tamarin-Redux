@@ -675,7 +675,7 @@ namespace avmplus
             return false;
         }
 
-    private:
+    protected:
         TLIST                           m_list;
     };
 
@@ -704,6 +704,7 @@ namespace avmplus
         void* operator new(size_t size);                                        // unimplemented
     };
 
+
     // ----------------------------
 
     class GC_AS3_EXACT(IntVectorObject, TypedVectorObject< DataList<int32_t> >)
@@ -720,6 +721,7 @@ namespace avmplus
         // AS3 native function implementations
         IntVectorObject* newThisType();
 
+        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
     // ------------------------ DATA SECTION BEGIN
     private:
         GC_NO_DATA(IntVectorObject)
@@ -745,6 +747,8 @@ namespace avmplus
         // AS3 native function implementations
         UIntVectorObject* newThisType();
 
+        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
+
     // ------------------------ DATA SECTION BEGIN
     private:
         GC_NO_DATA(UIntVectorObject)
@@ -769,6 +773,8 @@ namespace avmplus
 
         // AS3 native function implementations
         DoubleVectorObject* newThisType();
+
+        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
 
     // ------------------------ DATA SECTION BEGIN
     private:
@@ -880,6 +886,8 @@ namespace avmplus
 
         // AS3 native function implementations
         ObjectVectorObject* newThisType();
+
+        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
 
     // ------------------------ DATA SECTION BEGIN
     private:

@@ -1400,3 +1400,53 @@ function sortObject(o:Object) {
     ret+="}";
     return ret;
 }
+//-----------------------------------------------------------------------------
+// Helper functions for comparing objects
+//-----------------------------------------------------------------------------
+
+// Comparison Functions
+function compareArguments(desc:String, input, actual) {
+    AddTestCase(desc + " : callee", input.callee, actual.callee);
+    AddTestCase(desc + " : length", input.length, actual.length);
+    compareObjects(desc, input, actual);
+}
+
+function compareArray(desc:String, input, actual) {
+    AddTestCase(desc + " : length", input.length, actual.length);
+    var arraysMatch:Boolean = true;
+    for (var i=0; i < input.length; i++) {
+        // Note that the toString methods are also compared in case the array contains
+        // objects.
+        if (input[i] != actual[i] && input[i].toString() != actual[i].toString()) {
+            AddTestCase(desc + " : Position " + i, input[i], actual[i]);
+            arraysMatch = false;
+        }
+    }
+    if (arraysMatch) {
+        // Add a testcase that passes in order to display the result of the test
+        AddTestCase(desc + " : matches", true, true);
+    }
+}
+
+function compareByteArray(desc:String, input, actual) {
+    // TODO: Once the AMF stuff is moved to tamarin, we can use the
+    // ByteArray.readObject() function to do comparison
+    compareArray(desc, input, actual);
+}
+
+function compareErrors(desc:String, input, actual) {
+    // errorID is read-only so will not be passed
+    // AddTestCase(desc + " : errorID", input.errorID, actual.errorID);
+    AddTestCase(desc + " : message", input.message, actual.message);
+    AddTestCase(desc + " : name", input.name, actual.name);
+    AddTestCase(desc + " : verify type", true, actual is Error)
+}
+
+function compareObjects(desc:String, input:Object, actual:Object) {
+    for (var prop:* in input) {
+        AddTestCase(desc + " : prop: " + prop, input[prop], actual[prop]);
+    }
+    for (var prop1:* in input) {
+        AddTestCase(desc + " : prop: " + prop1, actual[prop1], input[prop1]);
+    }
+}

@@ -406,7 +406,7 @@ namespace vmbase {
 
     private:
         SafepointRecord* m_records;
-        RecursiveMutex m_requestMutex;
+        WaitNotifyMonitor m_requestMutex;
         vmpi_thread_t volatile m_requester;
         const int m_hardwareConcurrency;
     };
@@ -499,6 +499,9 @@ namespace vmbase {
         SafepointRecord* m_managerPrev;   // The previous SafepointRecord on the SafepointManager's linked-list
         SafepointRecord* m_managerNext;   // The next SafepointRecord on the SafepointManager's linked-list
         SafepointManager* m_manager;      // The SafepointManager to which this SafepointRecord is registered
+    public:
+        int*              m_interruptLocation;
+    private:
 
         static VMThreadLocal<SafepointRecord*> m_current;
     };

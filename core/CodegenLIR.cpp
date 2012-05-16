@@ -2588,12 +2588,31 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 #endif
 
         // If this is the target of a backwards branch, generate an interrupt check.
+
+#ifdef VMCFG_INTERRUPT_SAFEPOINT_POLL
+        // Always poll for safepoints, regardless of config settings.
+		if (state->targetOfBackwardsBranch) {
+            Ins(LIR_savepc);
+            LIns* interrupted = loadIns(LIR_ldi, offsetof(AvmCore,interrupted), coreAddr, ACCSET_OTHER, LOAD_VOLATILE);
+            LIns* cond = binaryIns(LIR_eqi, interrupted, InsConst(AvmCore::NotInterrupted));
+            branchToLabel(LIR_jf, cond, interrupt_label);
+
+          /*
+            CodegenLabel not_interrupt_label;
+            branchToLabel(LIR_jt, cond, not_interrupt_label);
+            branchToLabel(LIR_j, NULL, interrupt_label);
+            emitLabel(not_interrupt_label);
+          */
+            Ins(LIR_discardpc);
+        }
+#else 
         if (interruptable && core->config.interrupts && state->targetOfBackwardsBranch) {
             LIns* interrupted = loadIns(LIR_ldi, offsetof(AvmCore,interrupted),
                     coreAddr, ACCSET_OTHER, LOAD_VOLATILE);
             LIns* cond = binaryIns(LIR_eqi, interrupted, InsConst(AvmCore::NotInterrupted));
             branchToLabel(LIR_jf, cond, interrupt_label);
         }
+#endif            
     }
 
     void CodegenLIR::writeOpcodeVerified(const FrameState* state, const uint8_t*, AbcOpcode)
@@ -7762,8 +7781,15 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
         if (interrupt_label.unpatchedEdges) {
             emitLabel(interrupt_label);
+#ifdef VMCFG_INTERRUPT_SAFEPOINT_POLL
+            Ins(LIR_pushstate);
+#endif 
             Ins(LIR_regfence);
             callIns(FUNCTIONID(handleInterruptMethodEnv), 1, env_param);
+#ifdef VMCFG_INTERRUPT_SAFEPOINT_POLL
+            Ins(LIR_popstate);
+            Ins(LIR_restorepc);
+#endif
         }
 
         if (driver->hasReachableExceptions()) {

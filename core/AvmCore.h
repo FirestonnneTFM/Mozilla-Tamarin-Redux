@@ -509,7 +509,10 @@ const int kBufferPadding = 16;
             ScriptTimeout = 1,
 
             // host-defined external interrupt, other than a script timeout.
-            ExternalInterrupt = 2
+            ExternalInterrupt = 2,
+            
+            // Safepoint poll!
+            SafepointPoll = 3
         };
 
         // avoid multiple inheritance issues
@@ -544,6 +547,9 @@ const int kBufferPadding = 16;
             inline CacheSizes() : bindings(DEFAULT_BINDINGS), metadata(DEFAULT_METADATA), methods(DEFAULT_METHODS) {}
         };
 
+        bool enterEventLoop;
+        bool inEventLoop;
+
         // END public data definitions
         ////////////////////////////////////////////////////////////////////
 
@@ -576,8 +582,11 @@ const int kBufferPadding = 16;
          *
          * Set to ScriptTimeout for a timeout interrupt,
          * ExternalInterrupt for an external (i.e., signal handler) interrupt.
+         * SafepointPoll for safepoint poll (interrupt handler will return).
          */
         InterruptReason interrupted;
+        InterruptReason pending_interrupt;
+        friend class EnterSafepointManager; // To access the above field.
 
         /**
          * points to the topmost AS3 frame that's executing and provides
@@ -749,6 +758,8 @@ const int kBufferPadding = 16;
 
         GCMember<UnscannedTraitsArray> _emptySupertypeList; // empty supertype list shared by many Traits
 
+        FixedHeapRef<Isolate> m_isolate;
+
         // END traced private fields
         ////////////////////////////////////////////////////////////////////
 
@@ -877,6 +888,7 @@ const int kBufferPadding = 16;
         Atom kFltMinusOne;              // needed for decrement
         Atom kFlt4NaN;
 #endif
+        GCMember<String> workerStates[9];
         
         GCMember<String> kExecPolicy;   // execution policy attribute
         GCMember<String> kOSR;          //    OSR threshold
@@ -1359,7 +1371,7 @@ const int kBufferPadding = 16;
          * method to create the proper subclass. (AvmCore will never create a
          * a Toplevel directly, it will use this as a factory method.)
          */
-        virtual Toplevel* createToplevel(AbcEnv* abcEnv);
+        virtual Toplevel* createToplevel(AbcEnv* abcEnv) = 0;
 
         /**
          * If a client need to subclass BugCompatibility, it should override this
@@ -1548,6 +1560,9 @@ const int kBufferPadding = 16;
 
         Namespacep internNamespace(Namespacep ns);
 
+        Namespacep cloneNamespace(Namespacep ns);
+
+
         /** Helper function; reads a signed 24-bit integer from pc */
         static int readS24(const uint8_t *pc);
 
@@ -1706,15 +1721,15 @@ const int kBufferPadding = 16;
 
         /**
          * called by AS3 code when the interrupt is detected.  Must
-         * not return!
+         * not return unless it's a safepoint poll interrupt.
          */
         static void handleInterruptMethodEnv(MethodEnv*);
 
         /**
          * called by AS3 code when the interrupt is detected.  Must
-         * not return!
+         * not return unless it's a safepoint poll interrupt.
          */
-        static void handleInterruptToplevel(Toplevel*);
+        static void handleInterruptToplevel(Toplevel*, bool canUnwindStack);
 
         /**
          * This is called when the stack overflows
@@ -2037,6 +2052,7 @@ const int kBufferPadding = 16;
          * @return
          */
         Stringp internString(Stringp s);
+        Stringp internForeignString(Stringp s);
         Stringp internString(Atom atom);
         Stringp internInt(int n);
 #ifdef VMCFG_FLOAT
@@ -2053,6 +2069,8 @@ const int kBufferPadding = 16;
         Stringp internSubstring(Stringp s, int32_t start, int32_t end);
 
         Stringp internIntSlowPath(int value);
+
+        Stringp cloneString(Stringp other);
 
 #ifdef DEBUGGER
         /**
@@ -2127,6 +2145,12 @@ const int kBufferPadding = 16;
     private:
         telemetry::ITelemetry* m_telemetry; // Owned by the AvmCore subclass which calls SetTelemetry
 #endif
+
+    public:
+        void setIsolate(Isolate* isolate);
+        Isolate* getIsolate();
+        virtual int evaluateScriptBuffer(ScriptBuffer& buffer, bool enter_debugger_on_enter);
+
 
         // END methods (private/public intermixed)
         ////////////////////////////////////////////////////////////////////

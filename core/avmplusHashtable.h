@@ -71,6 +71,7 @@ namespace avmplus
         friend class WeakKeyHashtable;
         friend class WeakValueHashtable;
         friend class ScriptEnvMap;
+        friend class Cloner;
 
     public:
         /** kDefaultCapacity must be a power of 2 */
@@ -274,6 +275,7 @@ namespace avmplus
         uint32_t getCapacity() const;
         bool hasDontEnumSupport() const;
         bool hasIterIndex() const;
+        const Atom* expandForIterIndex();
         int publicIterIndexToRealIndex(int i);
         void removeKeyValuePairAtPublicIndex(int i);
 
@@ -318,6 +320,8 @@ namespace avmplus
         
         GC_DATA_END(HeapHashtable)
 
+    public:
+        // Should be protected but there are members inlined in other GCObjects
         /**
          * initialize with a known capacity.  i.e. we can fit minSize
          * elements in without rehashing.
@@ -326,7 +330,7 @@ namespace avmplus
          */
         HeapHashtable(MMgc::GC* gc, int32_t capacity = InlineHashtable::kDefaultCapacity);
 
-    public:
+
         static HeapHashtable* create(MMgc::GC* gc, int32_t capacity = InlineHashtable::kDefaultCapacity);
         virtual ~HeapHashtable();
 

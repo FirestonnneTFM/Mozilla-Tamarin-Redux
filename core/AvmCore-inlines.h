@@ -745,6 +745,17 @@ REALLY_INLINE void MethodFrame::setDxns(Namespace* ns)
     dxns = ns;
 }
 
+inline void AvmCore::setIsolate(Isolate* isolate)
+{
+    AvmAssert(this->m_isolate == NULL || isolate == NULL);
+    this->m_isolate = isolate;
+}
+
+REALLY_INLINE Isolate* AvmCore::getIsolate()
+{
+    return m_isolate;
+}
+
 template<class CLASSMANIFEST>
 CLASSMANIFEST* AvmCore::prepareBuiltinActionPool(PoolObject* pool,
                                       Toplevel* toplevel,

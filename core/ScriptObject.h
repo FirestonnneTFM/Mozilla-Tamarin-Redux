@@ -54,7 +54,7 @@ namespace avmplus
     protected:
         ScriptObject(VTable* vtable, ScriptObject* delegate);
         ScriptObject(VTable* vtable, ScriptObject* delegate, int htCapacity);
-
+        friend class Cloner;
     public:
         REALLY_INLINE static ScriptObject* create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate);
         REALLY_INLINE static ScriptObject* create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate, int htCapacity);
@@ -90,6 +90,8 @@ namespace avmplus
          * Dictionary.
          */
         InlineHashtable* getTableNoInit() const;
+
+        Atom getSlotAtom(uint32_t slot, AvmCore *core);
 
         Atom getSlotAtom(uint32_t slot);
 
@@ -171,6 +173,8 @@ namespace avmplus
          *       construct="override" or construct="instance" is specified in the AS3 file.
          */
         virtual Atom construct(int argc, Atom* argv);
+
+        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
 
         // TODO make this const
         virtual Atom nextName(int index);

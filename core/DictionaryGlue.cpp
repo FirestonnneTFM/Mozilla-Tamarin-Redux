@@ -85,6 +85,16 @@ namespace avmplus
         WB(gc, this, hht, ht);
     }
 
+    ScriptObject* DictionaryObject::cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const
+    {
+        DictionaryObject* clone = static_cast<DictionaryObject*>(targetClosure->newInstance());
+        bool weakKeys = this->isUsingWeakKeys(); // foreignCall to isUsingWeakKeys
+        clone->init(weakKeys); 
+        cloner.cloneDynamicProperties(this, clone, weakKeys == true);
+        return clone;
+    }
+    
+
     Atom FASTCALL DictionaryObject::getKeyFromObject(Atom key) const
     {
         AvmAssert(AvmCore::isObject(key));

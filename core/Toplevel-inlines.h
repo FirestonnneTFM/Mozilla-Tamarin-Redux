@@ -43,13 +43,10 @@ namespace avmplus
 REALLY_INLINE Toplevel::Toplevel(AbcEnv* abcEnv)
     : _traitsToAliasMap(abcEnv->core()->GetGC())
     , _abcEnv(abcEnv)
+    , _scriptEntryPoints(abcEnv->core()->gc, 10)
     , _aliasToClassClosureMap(HeapHashtable::create(abcEnv->core()->GetGC()))
+    , _workerObjectInternTable(WeakValueHashtable::create(abcEnv->core()->GetGC()))
 {
-}
-
-REALLY_INLINE Toplevel* Toplevel::create(MMgc::GC* gc, AbcEnv* abcEnv)
-{
-    return new (gc, MMgc::kExact) Toplevel(abcEnv);
 }
 
 REALLY_INLINE GCRef<builtinClassManifest> Toplevel::builtinClasses() const
@@ -57,6 +54,7 @@ REALLY_INLINE GCRef<builtinClassManifest> Toplevel::builtinClasses() const
     AvmAssert(_builtinClasses != NULL);
     return GCRef<builtinClassManifest>(_builtinClasses);
 }
+
     
 REALLY_INLINE GCRef<ArgumentErrorClass> Toplevel::argumentErrorClass() const { return builtinClasses()->get_ArgumentErrorClass(); }
 REALLY_INLINE GCRef<ArrayClass> Toplevel::arrayClass() const { return builtinClasses()->get_ArrayClass(); }
@@ -169,6 +167,16 @@ REALLY_INLINE void Toplevel::throwVerifyError(int id, Stringp, Stringp) const
 }
 #endif // !DEBUGGER
 
+REALLY_INLINE ScriptEnv* Toplevel::scriptEnv(uint32_t index) const
+{
+    return _scriptEntryPoints.get(index);
+}
+
+REALLY_INLINE uint32_t Toplevel::scriptEnvCount()
+{
+    return _scriptEntryPoints.length();
+}
+
 REALLY_INLINE AbcEnv* Toplevel::abcEnv() const
 {
     return _abcEnv;
@@ -206,6 +214,11 @@ REALLY_INLINE void Toplevel::init_mainEntryPoint(ScriptEnv* main, builtinClassMa
     AvmAssert(_mainEntryPoint == NULL && _builtinClasses == NULL);
     _mainEntryPoint = main;
     _builtinClasses = builtins;
+}
+
+REALLY_INLINE void Toplevel::add_scriptEntryPoint(ScriptEnv* main)
+{
+    _scriptEntryPoints.add(main);
 }
 
 } // namespace avmplus

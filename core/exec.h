@@ -89,6 +89,9 @@ public:
     // TODO: this only makes sense for compiled methods
     virtual void deoptimize(MethodEnv* env) = 0;
 #endif
+    virtual void firstInvocationHook(MethodEnv* env) = 0; // env for context
+    virtual void setFirstInvocationHook(MethodEnv* env) = 0;
+    
 };
 
 /**
@@ -237,6 +240,8 @@ public:
 #ifdef VMCFG_HALFMOON
     void deoptimize(MethodEnv* env);
 #endif
+    void setFirstInvocationHook(MethodEnv* env);
+    void firstInvocationHook(MethodEnv* env);
 
 private:
     // Helpers to simply return the current implementation:
@@ -258,6 +263,7 @@ public:
 private:    
 #endif
     static Atom verifyInvoke(MethodEnv*, int32_t argc, Atom* args);
+    static Atom verifyInvokeWithHook(MethodEnv*, int32_t argc, Atom* args);
     static void verifyOnCall(MethodEnv*); // helper called by verify trampolines
 
     // Trampolines to call debugEnter/Exit around native methods:

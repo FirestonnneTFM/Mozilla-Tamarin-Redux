@@ -1596,7 +1596,11 @@ namespace MMgc
         object = _object;
         size = (_size | (_isExactlyTraced ? kIsExactlyTraced : 0) | (_isStackMemory ? kIsStackMemory : 0));
         markStackSentinel = 0;
-        gc->AddRoot(this);
+        // only used for late registration of message channels
+        if (gc)
+        { 
+            gc->AddRoot(this);
+        }
     }
 
     GCRoot::GCRoot(GC * _gc, const void * _object, size_t _size, bool _isStackMemory, bool _isExactlyTraced)
@@ -1679,6 +1683,13 @@ namespace MMgc
     void GCRoot::ClearMarkStackSentinelPointer()
     {
         markStackSentinel = 0;
+    }
+
+    void GCRoot::Register(GC* _gc)
+    {
+        GCAssert(!gc);
+        gc = _gc;
+        gc->AddRoot(this);
     }
 
     void GCRoot::Destroy()

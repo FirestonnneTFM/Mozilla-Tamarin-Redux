@@ -283,6 +283,11 @@ namespace nanojit {
     void asm_move(Register d, Register s);                              \
     void asm_regarg(ArgType ty, LIns* p, Register r);                   \
     void asm_stkarg(LIns* arg, int stkd);                               \
+    void asm_pushstate(void);                                           \
+    void asm_popstate(void);                                            \
+    void asm_savepc(void);                                              \
+    void asm_restorepc(void);                                           \
+    void asm_discardpc(void);                                           \
     void asm_arg(ArgType ty, LIns* arg, Register& r, Register& fr, int& stkd);     \
     void asm_arg_64(LIns* arg, Register& r, Register& fr, int& stkd);   \
     NIns *asm_branchtarget(NIns*);                                      \

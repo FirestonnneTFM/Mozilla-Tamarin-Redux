@@ -71,7 +71,17 @@ namespace avmshell
 
     void SystemClass::exit(int status)
     {
-        Platform::GetInstance()->exit(status);
+        (void)status;
+        GCRef<avmplus::ClassClosure> workerClass = toplevel()->workerClass();
+        static_cast<ShellWorkerClass*>((avmplus::ClassClosure*)workerClass)->getCurrentWorker()->stop();
+    }
+
+    void SystemClass::sleep(int32_t ms)
+    {
+        // Or do we try to make the all the isolate threads sleep? In a safepoint? and interruptibly?
+        if (ms < 0) 
+            ms = 0;
+        vmbase::VMThread::sleep(ms);
     }
 
     int SystemClass::exec(avmplus::Stringp command)
@@ -290,6 +300,27 @@ namespace avmshell
         core()->GetGC()->Collect(imminence);
     }
     
+    avmplus::Atom SystemClass::copy(avmplus::Atom src)
+    {
+        avmplus::Cloner cloner(toplevel());
+        return cloner.cloneAtom(src);
+    }
+
+    void SystemClass::runInSafepoint(avmplus::FunctionObject* code)
+    {
+        class Task: public vmbase::SafepointTask {
+            avmplus::FunctionObject* m_code;
+        public:
+            Task(avmplus::FunctionObject* code): m_code(code) {}
+            void run() {
+                avmplus::Atom argv[] = {avmplus::nullObjectAtom};
+                m_code->call(0, argv);
+            }
+        };
+        Task task(code);
+        core()->getIsolate()->getAggregate()->safepointManager()->requestSafepointTask(task);
+    }
+
     /*static*/ void FASTCALL CheckBaseClass::preCreateInstanceCheck(avmplus::ClassClosure* cls)
     {
         avmplus::Multiname qname(cls->traits()->ns(), cls->traits()->name());

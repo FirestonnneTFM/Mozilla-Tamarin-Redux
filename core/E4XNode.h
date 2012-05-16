@@ -183,6 +183,7 @@ namespace avmplus
 
     public:
         bool getQName (Multiname *mn, Namespacep publicNS) const;
+        bool getQNameForeign (AvmCore* core, Multiname *mn, Namespacep publicNS) const;
         void setQName (AvmCore *core, Stringp name, Namespace *ns = 0);
         void setQName (AvmCore *core, const Multiname *mn);
 
@@ -253,6 +254,7 @@ namespace avmplus
 
         void _deleteByIndex (uint32_t entry);
         E4XNode *_deepCopy (AvmCore *core, Toplevel *toplevel, Namespacep publicNS) const;
+        E4XNode *_deepCopyForeign (AvmCore *core, Toplevel *toplevel, Namespacep publicNS) const;
         virtual void _insert (AvmCore *core, Toplevel *toplevel, uint32_t entry, Atom value);
         virtual E4XNode* _replace (AvmCore *core, Toplevel *toplevel, uint32_t entry, Atom value, Atom pastValue = 0);
         virtual void _addInScopeNamespace (AvmCore *core, Namespace *ns, Namespacep publicNS);

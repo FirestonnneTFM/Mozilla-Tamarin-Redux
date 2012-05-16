@@ -3550,6 +3550,41 @@ namespace nanojit
         return Branches(patch1, patch2);
     }
 
+    void Assembler::asm_pushstate()
+    {
+        underrunProtect(1);
+        OPCODE(0x60);
+    }
+    
+    void Assembler::asm_popstate()
+    {
+        underrunProtect(1);
+        OPCODE(0x61);
+    }
+
+    void Assembler::asm_savepc()
+    {
+        underrunProtect(5);
+        IMM32(0);
+        OPCODE(0xE8);
+        SUBi(rESP, 12);
+    }
+
+    void Assembler::asm_restorepc()
+    {
+        underrunProtect(3);
+	// TODO probably use MODRM or something
+	// jmp dword ptr [esp]
+        OPCODE(0x24);
+        OPCODE(0x24);
+        OPCODE(0xff);
+    }
+
+    void Assembler::asm_discardpc()
+    {
+        ADDi(rESP, 16);
+    }
+
     // WARNING: This function cannot generate any code that will affect the
     // condition codes prior to the generation of the
     // ucomisd/fcompp/fcmop/fcom.  See asm_cmpi() for more details.

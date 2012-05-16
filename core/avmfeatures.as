@@ -769,6 +769,17 @@ var FEATURES =
     <name> AVMFEATURE_SAFEPOINTS </name>
     <defines> VMCFG_SAFEPOINTS </defines>
   </feature>
+  
+  <feature>
+    <desc> Enables local returns and safepoint polling from interrupt checks </desc>
+    <name> AVMFEATURE_INTERRUPT_SAFEPOINT_POLL </name>
+    <defines> VMCFG_INTERRUPT_SAFEPOINT_POLL </defines>
+    <requires>AVMFEATURE_SAFEPOINTS </requires>
+    <requires> <exactly-one> 
+       <name>AVMSYSTEM_IA32</name> 
+       <name>AVMSYSTEM_AMD64</name> 
+    </exactly-one> </requires>
+  </feature>
 
   <feature>
     <desc> Enabling this will support SWF12 / ABC version 47.12 </desc>

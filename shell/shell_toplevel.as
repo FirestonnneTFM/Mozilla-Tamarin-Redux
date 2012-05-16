@@ -75,7 +75,12 @@ package avmplus
         // thus giving us a test case for metadata parsing in nativegen.py
         [bar(attr="whatever")]
         public native static function exec(command:String):int
-
+	    /**
+	    * Do nothing in this process for some time.
+	    *
+	    * @param ms  A timeout value in milliseconds. Negative values are taken to be zero.
+	    */
+	    public native static function sleep(ms:int): void;
         public native static function getAvmplusVersion():String
         public native static function getFeatures():String
         public native static function getRunmode():String
@@ -142,9 +147,11 @@ package avmplus
 
         // Return true if running on a 64-bit platform.
         public native static function is64bit(): Boolean;
+        public native static function copy(arg:*):*;
 
         // Return true if the argument is an atom with tag kIntptrType.
         public native static function isIntptr(a:*): Boolean;
+        public native static function runInSafepoint(code:Function):void;
 
         // Return argument value as a kIntptrType atom if the argument is a numeric
         // value that can be so represented, else return the argument unchanged.

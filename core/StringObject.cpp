@@ -1368,6 +1368,20 @@ namespace avmplus
         return createDependent(gc, master, start, end - start);
     }
 
+    Stringp String::clone(AvmCore* targetCore)
+    {
+        // FIXME can this work? ensure GC is not running for the duration of this call?
+        // FIXME ensure that client code interns the return value in targetCore appropriately.
+        int32_t len = length();
+        String::Pointers p(this);
+        // hopefully _core() is not used in here
+        if (getWidth() == String::k8) {
+            return createLatin1(targetCore, (const char*) p.p8,  len, String::k8, false);
+        } else {
+            return createUTF16(targetCore, p.p16, len, String::k16, false, false);
+        }
+    }
+
     Stringp String::substr(int32_t start, int32_t len)
     {
         start = (int32_t) NativeObjectHelpers::ClampIndexInt(start, m_length);

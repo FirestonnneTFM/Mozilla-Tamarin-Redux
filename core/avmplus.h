@@ -109,6 +109,7 @@ namespace avmplus
     class AbcEnv;
     class AbcParser;
     class Accessor;
+    class Aggregate;
     class ArrayClass;
     class ArrayObject;
     class Atan2Method;
@@ -123,9 +124,13 @@ namespace avmplus
     class CallStackNode;
     class ClassClass;
     class ClassClosure;
+    class ClonerEntry;
+    class TraitsMorpher;
+    class Cloner;
     class Closure;
     class CodeContext;
     class CompiledRegExp;
+    class ConditionObject;
     class Console;
     class D2A;
     class Date;
@@ -142,6 +147,7 @@ namespace avmplus
     class DomainEnv;
     class DomainMgr;
     class E4XNode;
+    class EnterSafepointManager;
     class ErrorClass;
     class ErrorObject;
     class Exception;
@@ -158,17 +164,24 @@ namespace avmplus
 #ifdef VMCFG_FLOAT
     class FloatVectorObject;
 #endif    
+    class Isolate;
+    class IsolateEventListener;
     class DoubleVectorObject;
     class UIntVectorObject;
     class ObjectVectorObject;
     class JSONClass;
+    class LinkObject;
     class MathClass;
     class MathUtils;
+    class PromiseChannel;
+    class PromiseChannelObject;
+    class PromiseChannelClass;
     class MethodClosure;
     class MethodEnv;
     class MethodInfo;
     class MethodSignature;
     class Multiname;
+    class MutexObject;
     class Namespace;
     class NamespaceSet;
     class NamespaceClass;
@@ -183,6 +196,7 @@ namespace avmplus
     class PoolObject;
     class PrintWriter;
     class Profiler;
+    class PromiseObject;
     class ProxyClass;
     class ProxyObject;
     class RegExpClass;
@@ -304,6 +318,7 @@ namespace avmplus
 #include "../AVMPI/float4Support.h"
 #include "exec.h"
 #include "api-versions.h"
+#include "Isolate.h"
 #include "AvmCore.h"
 #include "avmplusHashtable.h"
 #include "Traits.h"
@@ -380,6 +395,9 @@ namespace avmplus
 #include "ObjectIO.h"
 #include "AvmSerializer.h"
 #include "ITelemetry.h"
+#include "ConcurrencyGlue.h"
+#include "Cloner.h"
+#include "PromiseChannelGlue.h"
 
 // Some unusual test cases for the exact-tracer script
 
@@ -402,6 +420,7 @@ namespace avmplus
 #include "exec-inlines.h"
 #include "FrameState-inlines.h"
 #include "instr-inlines.h"
+#include "Isolate-inlines.h"
 #include "MathUtils-inlines.h"
 #include "MethodEnv-inlines.h"
 #include "MethodInfo-inlines.h"

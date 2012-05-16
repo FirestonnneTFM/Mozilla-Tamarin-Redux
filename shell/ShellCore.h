@@ -139,6 +139,7 @@ namespace avmshell
         friend class avmplus::DomainObject;
         friend class avmplus::ST_avmplus_vector_accessors::ST_avmplus_vector_accessors;
         friend class avmplus::ST_mmgc_dependent::ST_mmgc_dependent;
+        friend class Shell; // access to shell_toplevel
     public:
         /**
          * Create a new core with the given GC (one gc per core).
@@ -153,7 +154,7 @@ namespace avmshell
          *
          * Requires: MMGC_ENTER and MMGC_GCENTER(gc) on the stack.
          */
-        bool setup(const ShellCoreSettings& settings);
+        ShellToplevel* setup(const ShellCoreSettings& settings);
 
         /**
          * Load the contents from the file and run them in the context of this core's
@@ -163,6 +164,9 @@ namespace avmshell
          * Requires: MMGC_ENTER and MMGC_GCENTER(gc) on the stack.
          */
         int evaluateFile(ShellCoreSettings& settings, const char* filename);
+
+        int evaluateScriptBuffer(avmplus::ScriptBuffer& buffer, bool enter_debugger_on_launch);
+
 
 #ifdef VMCFG_EVAL
         /**
@@ -220,7 +224,7 @@ namespace avmshell
         void stackOverflow(avmplus::Toplevel *toplevel);
         void setEnv(avmplus::Toplevel *toplevel, int argc, char *argv[]);
         void initShellPool();
-        int handleArbitraryExecutableContent(ShellCoreSettings& settings, avmplus::ScriptBuffer& code, const char * filename);
+        int handleArbitraryExecutableContent(bool do_testSWFHasAS3, avmplus::ScriptBuffer& code, const char * filename);
 #ifdef VMCFG_EVAL
         avmplus::String* decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate=false);
 #endif // VMCFG_EVAL
@@ -264,6 +268,18 @@ namespace avmshell
         ShellCore* core() const {
             return (ShellCore*)Toplevel::core();
         }
+
+        GCRef<avmplus::ClassClosure> workerClass() const 
+        {
+            return shellClasses->get_WorkerClass();
+        }
+
+        GCRef<avmplus::ClassClosure> workerDomainClass() const 
+        {
+            return shellClasses->get_WorkerDomainClass();
+        }
+
+        void initAliasTable(bool initWorkerClasses);
 
     private:
         GC_DATA_BEGIN(ShellToplevel)

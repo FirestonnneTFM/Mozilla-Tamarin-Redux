@@ -344,6 +344,8 @@ namespace avmplus
         "\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7A\x7B\x7C\x7D\x7E\x7F";
     AvmCore::AvmCore(GC* g, ApiVersionSeries apiVersionSeries)
         : GCRoot(g)
+        , enterEventLoop(false)
+        , inEventLoop(false)
 #ifdef DEBUGGER
         , _sampler(NULL)
 #endif
@@ -458,6 +460,7 @@ namespace avmplus
 #endif
 
         interrupted     = NotInterrupted;
+        pending_interrupt     = NotInterrupted;
 
         strings         = NULL;
         numStrings      = 0;
@@ -571,6 +574,17 @@ namespace avmplus
             // which is a single character with value 0
             cachedChars[i] = internString(String::createLatin1(this, &k_cachedChars[i], 1));
         }
+
+        workerStates[0] = internConstantStringLatin1("none");
+        workerStates[1] = internConstantStringLatin1("new");
+        workerStates[2] = internConstantStringLatin1("starting");
+        workerStates[3] = internConstantStringLatin1("running");
+        workerStates[4] = internConstantStringLatin1("finishing");
+        workerStates[5] = internConstantStringLatin1("stopped");
+        workerStates[6] = internConstantStringLatin1("failed");
+        workerStates[7] = internConstantStringLatin1("aborted");
+        workerStates[8] = internConstantStringLatin1("exception");
+
 
         booleanStrings[0] = kfalse;
         booleanStrings[1] = ktrue;
@@ -882,6 +896,9 @@ namespace avmplus
     {
         main->initGlobal();
 
+
+        if (enterEventLoop && !inEventLoop)
+            exec->setFirstInvocationHook(main);
         Atom result = 0; // init to zero to make GCC happy
 
         #ifndef DEBUGGER
@@ -894,7 +911,12 @@ namespace avmplus
         CATCH(Exception* exception)
         {
             // Re-throw exception
-            this->throwException(exception);
+            Isolate* isolate = getIsolate();
+            if (isolate->getAggregate()->queryState(isolate) == Isolate::FINISHING) {
+                // Don't rethrow, we're finishing and probably not setup to handle the exception.
+            } else {
+                this->throwException(exception);
+            }
         }
         END_CATCH
         END_TRY
@@ -916,7 +938,6 @@ namespace avmplus
         AvmAssert(builtinPool->scriptCount() != 0);
 
         AbcEnv* abcEnv = AbcEnv::create(GetGC(), builtinPool, builtinCodeContext);
-
         Toplevel* toplevel = createToplevel(abcEnv);
 
         // save toplevel since it was initially null
@@ -1033,16 +1054,32 @@ namespace avmplus
 
         // ------------------ run the init-methods for Object$ and Class$
 
+        bool deferredInterrupt = false;
 #ifdef VMCFG_VERIFYALL
         if (!config.verifyonly && !config.verifyall)
 #endif
         {
+            Isolate* isolate = getIsolate();
+            if (isolate != NULL)
+            {
+                Isolate::State state = isolate->getAggregate()->queryState(isolate);
+                if (state == Isolate::STARTING) 
+                {
+                    isolate->getAggregate()->stateTransition(isolate, Isolate::RUNNING);
+                } 
+                else if (isolate->isInterrupted()) 
+                {
+                    // We'll still run the initialization in interrupted state so that
+                    // whe have a properly initialized error object to throw.
+                    deferredInterrupt = true;
+                }
+            }
+            
             object_cvtable->init->coerceEnter(object_class->atom());
             class_cvtable->init->coerceEnter(class_class->atom());
         }
 
         // ------------------ set up the init-method for the global script
-
         ScriptEnv* main = ScriptEnv::create(gc, scriptTraits->init, scriptScope);
         main->global = global;
 
@@ -1123,6 +1160,8 @@ namespace avmplus
 #else
         AvmAssert(toplevel->objectClass != NULL);
 #endif
+        if (enterEventLoop)
+            toplevel->add_scriptEntryPoint(main);
 
         return callScriptEnvEntryPoint(main);
     }
@@ -1192,6 +1231,14 @@ namespace avmplus
                                 ninit,
                                 apiVersion);
         return handleActionPool(pool, toplevel, codeContext);
+    }
+
+    int AvmCore::evaluateScriptBuffer(ScriptBuffer& buffer, bool enter_debugger_on_enter)
+    {
+        (void)buffer;
+        (void)enter_debugger_on_enter;
+        AvmAssert(false); // override me
+        return -1;
     }
 
 #ifdef VMCFG_EVAL
@@ -2189,6 +2236,20 @@ return the result of the comparison ToPrimitive(x) == y.
         // found the namespace, indexing by URI. return the interned copy.
         return namespaces[i];
     }
+
+    Namespacep AvmCore::cloneNamespace(Namespacep ns)
+    {
+        // FIXME things get interesting if ns is from a different AvmCore 
+        // and the core starts moving string internals (e.g., it's dynamicizing)
+        Stringp prefix = ns->hasPrefix() ? internString(AvmCore::atomToString(ns->getPrefix())) : NULL;
+        Stringp uri = ns->getURI();
+        if (uri != NULL) {
+            uri = internString(uri->clone(this));
+        }
+        return Namespace::create(gc, prefix ? prefix->toAtom() : undefinedAtom, uri, ns->getType(), ns->getApiVersion());
+    }
+
+
 
 #ifdef AVMPLUS_VERBOSE
     /* static */
@@ -3614,11 +3675,6 @@ return the result of the comparison ToPrimitive(x) == y.
         }
     }
 
-    Toplevel* AvmCore::createToplevel(AbcEnv* abcEnv)
-    {
-        return Toplevel::create(GetGC(), abcEnv);
-    }
-
     const BugCompatibility* AvmCore::createBugCompatibility(BugCompatibility::Version v)
     {
         return new (GetGC()) BugCompatibility(v);
@@ -4113,6 +4169,36 @@ return the result of the comparison ToPrimitive(x) == y.
             return other;
         }
     }
+
+    // Identical to internString plus clone minus the isInterned() check - for the receiver
+    // it doesn't matter if the string is interned or not.
+    Stringp AvmCore::internForeignString(Stringp o) 
+    {
+        // this can go in parallel 
+        int i = findString(o);
+        Stringp other;
+        if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
+        {
+            if (other == AVMPLUS_STRING_DELETED)
+            {
+                deletedCount--;
+                AvmAssert(deletedCount >= 0);
+            }
+            stringCount++;
+            // Make copy now, an interned string doesn't exist yet
+            o = o->clone(this);
+            // Prevent dependent strings from keeping a huge master in memory
+            o->fixDependentString();
+            o->setInterned();
+            strings[i] = o;
+            return o;
+        }
+        else
+        {
+            return other;
+        }
+    }
+
 
     Stringp AvmCore::internString(Atom atom)
     {
@@ -5358,7 +5444,8 @@ return the result of the comparison ToPrimitive(x) == y.
         // used the stack overflow handler as a way to take control of AS3.
         AvmCore *core = toplevel->core();
         if (core->interrupted) {
-            handleInterruptToplevel(toplevel);
+            AvmAssert(core->interrupted != SafepointPoll);
+            handleInterruptToplevel(toplevel, true);
             // never returns
         }
 
@@ -5444,24 +5531,49 @@ return the result of the comparison ToPrimitive(x) == y.
     void AvmCore::raiseInterrupt(InterruptReason reason)
     {
         AvmAssert(reason != NotInterrupted);
+        AvmAssert(reason != SafepointPoll); // Don't use this for safepoints
         interrupted = reason;
     }
 
     /* static */
     void AvmCore::handleInterruptMethodEnv(MethodEnv *env)
     {
-        handleInterruptToplevel(env->toplevel());
+        handleInterruptToplevel(env->toplevel(), !env->method->isNonInterruptible());
     }
 
     /* static */
-    void AvmCore::handleInterruptToplevel(Toplevel *toplevel)
+    void AvmCore::handleInterruptToplevel(Toplevel *toplevel, bool canUnwindStack)
     {
         AvmCore *core = toplevel->core();
         InterruptReason reason = core->interrupted;
         core->interrupted = NotInterrupted;
-        core->interrupt(toplevel, reason);
-        // interrupt() must not return!
-        AvmAssert(false);
+        if (reason == SafepointPoll)
+        {
+            SAFEPOINT_POLL();
+            if (core->pending_interrupt != NotInterrupted && canUnwindStack) {
+                reason = core->pending_interrupt;
+                core->pending_interrupt = NotInterrupted;
+                core->interrupt(toplevel, reason);
+                // Doesn't return.
+                AvmAssert(false);
+            } else {
+                // No pending interrupt, or there is one, but we can't unwind.
+                // We'll unwind next time we get interrupted and can unwind.
+                return; // This branch does return.
+            }
+
+        } else if (canUnwindStack) {
+            // There might be a pending terminating interrupt but we don't care.
+            core->pending_interrupt = NotInterrupted;
+            core->interrupt(toplevel, reason);
+            // interrupt() must not return from here!
+            AvmAssert(false);
+        } else {
+            // We'll act on the interrupt next time we're in safepoint.
+            core->pending_interrupt = reason;
+            // Interrupted a noninterruptible method and it's not a safepoint poll point.
+            // Ignore and return to caller, interrupt is pending.
+        }
     }
 
     void AvmCore::addVersionedURIs(char const* const* uris)

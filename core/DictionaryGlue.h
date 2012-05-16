@@ -53,6 +53,8 @@ namespace avmplus
 
         void init(bool weakKeys);
 
+        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner&) const;
+
         // multiname and Stringp forms fall through to ScriptObject
         virtual Atom getAtomProperty(Atom name) const;
         virtual bool hasAtomProperty(Atom name) const;

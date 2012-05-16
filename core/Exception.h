@@ -72,6 +72,10 @@ namespace avmplus
              */
             , SEEN_BY_DEBUGGER = 2
 #endif
+            /*
+             * Don't report an error, e.g. exception used for orderly shutdown.
+             */
+            , SUPPRESS_ERROR_REPORT = 4
         };
 
 #ifdef DEBUGGER

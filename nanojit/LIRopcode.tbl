@@ -449,6 +449,13 @@ OP_SF(ii2d,     Op2,  D,    1)  // join two ints (1st arg is low bits, 2nd is hi
 // second operand of a LIR_ii2d.
 OP_SF(hcalli,   Op1,  I,    1)
 
+OP___(savepc, Op0, V, 0)
+OP___(restorepc, Op0, V, 0)
+OP___(discardpc, Op0, V, 0)
+
+OP___(pushstate, Op0, V, 0)
+OP___(popstate, Op0, V, 0)
+
 #undef OP_UN
 #undef OP_32
 #undef OP_64
