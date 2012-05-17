@@ -40,9 +40,9 @@
 #include "avmplus.h"
 #include <math.h>
 
-#ifdef AVMPLUS_IA32
+#if defined(AVMPLUS_IA32)
 #define X86_MATH
-#endif
+#endif //#if defined(AVMPLUS_IA32)
 
 // Avoid unsafe floating-point optimizations, including replacing library calls
 // with inlined x87 instructions.  We will do this explicitly with inline asm

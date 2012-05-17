@@ -738,6 +738,7 @@ namespace avmplus {
     {
         // shut down our timer
         stop();
+		VMPI_recursiveMutexDestroy(&m_counterLock);
     }
         
     void TelemetrySampler::start()

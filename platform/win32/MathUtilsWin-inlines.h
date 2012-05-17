@@ -39,9 +39,9 @@
 
 #include <math.h>
 
-#ifdef AVMPLUS_IA32
+#if defined(AVMPLUS_IA32)
 #define X86_MATH
-#endif
+#endif //#if defined(AVMPLUS_IA32)
 
 // Avoid unsafe floating-point optimizations, including replacing library calls
 // with inlined x87 instructions.  We will do this explicitly with inline asm
@@ -154,7 +154,7 @@ namespace avmplus
     }
 
 #ifndef X86_MATH
-#ifdef UNDER_CE
+#if defined(UNDER_CE)
     REALLY_INLINE double MathUtils::mod(double x, double y)
     {
         if (!y) {
@@ -162,7 +162,7 @@ namespace avmplus
         }
         return ::fmod(x, y);
     }
-#else
+#else //#if defined(UNDER_CE)
     extern "C" {
         // See win64setjmp.asm
         double modInternal(double x, double y);
@@ -175,7 +175,7 @@ namespace avmplus
         }
         return modInternal(x, y);
     }
-#endif /* UNDER_CE */
+#endif //#if defined(UNDER_CE)
 #endif /* X86_MATH */
 
 #ifndef X86_MATH
