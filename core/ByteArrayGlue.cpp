@@ -41,6 +41,9 @@
 #include "avmplus.h"
 #include "zlib.h"
 
+// Bugzilla 729336 followup: fix project files to add lzma to search path
+#include "../other-licenses/lzma/LzmaLib.h"
+
 // Compiler and architecture dependent byte swapping functions.
 //
 // Define HAVE_BYTESWAP32 and/or HAVE_BYTESWAP16 on platforms where there are
@@ -619,6 +622,137 @@ namespace avmplus
 
     void ByteArray::Compress(CompressionAlgorithm algorithm)
     {
+        switch (algorithm) {
+        case k_lzma:
+            CompressViaLzma();
+            break;
+        case k_zlib:
+        default:
+            CompressViaZlibVariant(algorithm);
+            break;
+        }
+    }
+
+    // lzma-compressed data format:
+    // 5 bytes: LZMA properties
+    // 8 bytes: uncompressed size k (little-endian)
+    // k bytes: payload (the compressed data)
+
+    static const uint32_t lzmaHeaderSize = LZMA_PROPS_SIZE + 8;
+
+    struct lzma_compressed {
+        uint8_t lzmaProps[LZMA_PROPS_SIZE];
+        // our max byte array length is 4 bytes but size in lzma
+        // header is 8 bytes; we reflect that here by splitting the
+        // two (and leaving the high bits at zero)
+        uint8_t unpackedSize[4];
+        uint8_t unpackedSizeHighBits[4]; // (not uint32_t; that injects padding)
+        uint8_t compressedPayload[1];    // payload is variable sized.
+    };
+
+    REALLY_INLINE uint32_t umax(uint32_t a, uint32_t b) { return a > b ? a : b; }
+
+    void ByteArray::CompressViaLzma()
+    {
+        // Snarf the data and give ourself some empty data
+        // (remember, existing data might be copy-on-write so don't dance on it)
+        uint8_t* origData                       = m_buffer->array;
+        uint32_t origLen                        = m_buffer->length;
+        uint32_t origCap                        = m_buffer->capacity;
+        MMgc::GCObject* origCopyOnWriteOwner    = m_copyOnWriteOwner;
+        if (!origLen) // empty buffer should give empty result
+            return;
+
+        m_buffer->array             = NULL;
+        m_buffer->length            = 0;
+        m_buffer->capacity          = 0;
+        m_position          = 0;
+        m_copyOnWriteOwner  = NULL;
+
+        // Unlike zlib, lzma does not provide a method for computing
+        // any upper bound on "compressed" size.  So we guess, and
+        // retry if the guess was too aggressive.  The retry is only
+        // needed if the data was incompressible; we compress anyhow
+        // for compatibility with the lzma v1 format (the v1 headers
+        // do not have a way to flag an uncompressed payload).
+
+        uint32_t newCap = umax(origCap, lzmaHeaderSize);
+        size_t lzmaPropsSize = LZMA_PROPS_SIZE;
+        int retcode;
+        struct lzma_compressed *destOverlay;
+        size_t destLen;
+    retry:
+        EnsureCapacity(newCap);
+        destOverlay = (struct lzma_compressed*) m_buffer->array;
+        destLen = m_buffer->capacity - lzmaHeaderSize;
+
+        retcode = LzmaCompress(destOverlay->compressedPayload, &destLen,
+                               origData, origLen,
+                               destOverlay->lzmaProps, &lzmaPropsSize,
+                               9, // -1 would yield default level (5),
+                               1<<20, // 0 would yield default dictSize (1<<24)
+                               -1,  // default lc (3),
+                               -1,  // default lp (0),
+                               -1,  // default pb (2),
+                               -1,  // default fb (32),
+                               1); // -1 would yield default numThreads (2)
+
+        switch (retcode) {
+        case SZ_OK:
+            if (destLen > (m_buffer->capacity - lzmaHeaderSize)) {
+                AvmAssertMsg(false, "LZMA broke its contract.");
+
+                // Belt-and-suspenders: If control gets here,
+                // something is terribly wrong, and LZMA is lying to
+                // us.  Rather than risk establishing a bogus structure,
+                // fail as if lzma returned an error code.
+                goto error_cases;
+            }
+
+            destOverlay->unpackedSize[0] = (uint8_t)((origLen)       & 0xFF);
+            destOverlay->unpackedSize[1] = (uint8_t)((origLen >> 8)  & 0xFF);
+            destOverlay->unpackedSize[2] = (uint8_t)((origLen >> 16) & 0xFF);
+            destOverlay->unpackedSize[3] = (uint8_t)((origLen >> 24) & 0xFF);
+
+            AvmAssert(destOverlay->unpackedSizeHighBits[0] == 0
+                      && destOverlay->unpackedSizeHighBits[1] == 0
+                      && destOverlay->unpackedSizeHighBits[2] == 0
+                      && destOverlay->unpackedSizeHighBits[3] == 0);
+
+            m_buffer->length = uint32_t(lzmaHeaderSize + destLen);
+            break;
+        case SZ_ERROR_OUTPUT_EOF:
+            // Our guessed target length was not conservative enough.
+            // Since this is a compression algorithm, go with linear
+            // growth on failure (rather than e.g. exponential).
+            newCap += origCap;
+
+            goto retry;
+        case SZ_ERROR_MEM:
+        case SZ_ERROR_PARAM:
+        case SZ_ERROR_THREAD:
+        default:
+        error_cases:
+            // On other failures, just give up.
+            m_buffer->length = 0;
+            break;
+        }
+
+        // Analogous to zlib, maintain policy that Compress() sets
+        // position == length (while Uncompress() sets position == 0).
+        m_position = m_buffer->length;
+
+        if (origData && origData != m_buffer->array && origCopyOnWriteOwner == NULL)
+        {
+            // Note that TellGcXXX always expects capacity, not (logical) length.
+            TellGcDeleteBufferMemory(origData, origCap);
+            mmfx_delete_array(origData);
+        }
+
+    }
+
+    void ByteArray::CompressViaZlibVariant(CompressionAlgorithm algorithm)
+    {
         // Snarf the data and give ourself some empty data
         // (remember, existing data might be copy-on-write so don't dance on it)
         uint8_t* origData                       = m_buffer->array;
@@ -687,6 +821,125 @@ namespace avmplus
     }
 
     void ByteArray::Uncompress(CompressionAlgorithm algorithm)
+    {
+        switch (algorithm) {
+        case k_lzma:
+            UncompressViaLzma();
+            break;
+        case k_zlib:
+        default:
+            UncompressViaZlibVariant(algorithm);
+            break;
+        }
+    }
+
+    void ByteArray::UncompressViaLzma()
+    {
+        // Snarf the data and give ourself some empty data
+        // (remember, existing data might be copy-on-write so don't dance on it)
+        uint8_t* origData                       = m_buffer->array;
+        uint32_t origCap                        = m_buffer->capacity;
+        uint32_t origLen                        = m_buffer->length;
+        uint32_t origPos                        = m_position;
+        MMgc::GCObject* origCopyOnWriteOwner    = m_copyOnWriteOwner;
+
+        if (!origLen) // empty buffer should give empty result
+            return;
+
+        if (!m_buffer->array || m_buffer->length < lzmaHeaderSize)
+            return;
+
+        m_buffer->array             = NULL;
+        m_buffer->length            = 0;
+        m_buffer->capacity          = 0;
+        m_position          = 0;
+        m_copyOnWriteOwner  = NULL;
+
+        uint32_t unpackedLen;
+
+        struct lzma_compressed *srcOverlay;
+        srcOverlay = (struct lzma_compressed*)origData;
+
+        size_t srcLen = (origLen - lzmaHeaderSize);
+
+        unpackedLen  =  (uint32_t)srcOverlay->unpackedSize[0];
+        unpackedLen +=  (uint32_t)srcOverlay->unpackedSize[1] << 8;
+        unpackedLen +=  (uint32_t)srcOverlay->unpackedSize[2] << 16;
+        unpackedLen +=  (uint32_t)srcOverlay->unpackedSize[3] << 24;
+
+        if (srcOverlay->unpackedSizeHighBits[0] != 0 ||
+            srcOverlay->unpackedSizeHighBits[1] != 0 ||
+            srcOverlay->unpackedSizeHighBits[2] != 0 ||
+            srcOverlay->unpackedSizeHighBits[3] != 0)
+        {
+            // We can't allocate a byte array of such large size.
+            ThrowMemoryError();
+        }
+
+        // Since we rely on unpackedLen being correct, we do not need
+        // to loop with different trial lengths; either it works on
+        // first try, or it will always fail.
+        EnsureCapacity(unpackedLen);
+
+        int retcode;
+        size_t destLen = unpackedLen;
+
+        retcode = LzmaUncompress(m_buffer->array, &destLen,
+                                 srcOverlay->compressedPayload, &srcLen,
+                                 srcOverlay->lzmaProps, LZMA_PROPS_SIZE);
+        switch (retcode) {
+        case SZ_OK:                // - OK
+            if (destLen != unpackedLen) {
+                // Belt-and-suspenders: If control gets here,
+                // something is terribly wrong, and either LZMA is
+                // lying, or the lzma header in source byte array got
+                // garbled.  Rather than risk establishing a bogus
+                // structure, fail as if lzma returned an error code.
+                goto error_cases;
+            }
+
+            m_buffer->length = uint32_t(destLen);
+
+            // Analogous to zlib, maintain policy that Uncompress() sets
+            // position == 0 (while Compress() sets position == length).
+            // (it was set above)
+
+
+            if (origData && origData != m_buffer->array && origCopyOnWriteOwner == NULL)
+            {
+                // Note that TellGcXXX always expects capacity, not (logical) length.
+                TellGcDeleteBufferMemory(origData, origCap);
+                mmfx_delete_array(origData);
+            }
+
+            break;
+
+        case SZ_ERROR_DATA:        // - Data error
+        case SZ_ERROR_MEM:         // - Memory allocation arror
+        case SZ_ERROR_UNSUPPORTED: // - Unsupported properties
+        case SZ_ERROR_INPUT_EOF:   // - it needs more bytes in input buffer (src)
+        default:
+        error_cases:
+            // In error cases:
+
+            // 1) free the new buffer
+            TellGcDeleteBufferMemory(m_buffer->array, m_buffer->capacity);
+            mmfx_delete_array(m_buffer->array);
+
+            // 2) put the original data back.
+            m_buffer->array = origData;
+            m_buffer->length = origLen;
+            m_buffer->capacity = origCap;
+            m_position = origPos;
+            SetCopyOnWriteOwner(origCopyOnWriteOwner);
+            toplevel()->throwIOError(kCompressedDataError);
+
+            break;
+        }
+
+    }
+
+    void ByteArray::UncompressViaZlibVariant(CompressionAlgorithm algorithm)
     {
         // Snarf the data and give ourself some empty data
         // (remember, existing data might be copy-on-write so don't dance on it)
@@ -1494,6 +1747,10 @@ namespace avmplus
         if (algorithm->equalsLatin1("deflate"))
         {
             return ByteArray::k_deflate;
+        }
+        if( algorithm->equalsLatin1("lzma"))
+        {
+            return ByteArray::k_lzma;
         }
         else
         {

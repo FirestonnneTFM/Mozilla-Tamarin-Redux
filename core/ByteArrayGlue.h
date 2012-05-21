@@ -41,12 +41,6 @@
 #ifndef BYTEARRAYGLUE_INCLUDED
 #define BYTEARRAYGLUE_INCLUDED
 
-namespace lzma { extern "C" {
-    #include "../other-licenses/lzma/Alloc.h"
-    #include "../other-licenses/lzma/LzmaDec.h"
-    #include "../other-licenses/lzma/LzmaEnc.h"
-    #include "../other-licenses/lzma/LzmaLib.h"
-}};
 namespace avmplus
 {
     class ByteArray : public DataInput,
@@ -202,6 +196,13 @@ namespace avmplus
         virtual Toplevel* toplevel() const { return m_toplevel; }
 
     private:
+
+        void CompressViaZlibVariant(CompressionAlgorithm algorithm);
+        void UncompressViaZlibVariant(CompressionAlgorithm algorithm);
+
+        void CompressViaLzma();
+        void UncompressViaLzma();
+
         class Grower : public vmbase::SafepointTask
         {
         public:
