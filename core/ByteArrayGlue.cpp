@@ -616,149 +616,9 @@ namespace avmplus
             m_gc->SignalDependentDeallocation(numberOfBytes, MMgc::typeByteArray);
         }
     }
-    //MyWrite is passed to LzmaDynamicEncode and called by encoder to pass encoded data packet
-    size_t MyWrite(void *pp, const void *buf, size_t size)
-    {
-        lzma::CSeqOutStreamBuf *p = (lzma::CSeqOutStreamBuf *)pp;
-        p->rem += size; // rem is used for encoded data size
-        //CSeqOutStreamBuf.data is not used
-        ByteArray::LzmaEncoder*  pEnc  = (ByteArray::LzmaEncoder*) p->userdata;
-        return  pEnc->Write((const uint8_t*)buf,size);    
-    }    
-    static void *SzAlloc(void *p, size_t size) { p = p; return lzma::MyAlloc(size); }
-    static void SzFree(void *p, void *address) { p = p; lzma::MyFree(address); }
-    static lzma::ISzAlloc Lzma_Alloc = {SzAlloc, SzFree };
-    int FASTCALL ByteArray::LzmaEncoder::Encode(void)
-    {
-        lzma::CLzmaEncProps props;
-        lzma::LzmaEncProps_Init(&props);
-        //use maximum level and default setting. refer to  CLzmaEncProps  in LzmaEnc.h
-        props.level =  9;
-        props.dictSize =  1<<20;
-        props.lc = 3;
-        props.lp = 0;
-        props.pb = 2;
-        props.fb = 32;
-        props.numThreads = 1;
-                
-        lzma::SRes res;
-        size_t encodedprop_size = LZMA_PROPS_SIZE;
-        size_t EncodedLen = 0;
-        res =  LzmaDynamicEncode(MyWrite, this , &EncodedLen, m_owner->m_buffer->array, m_owner->m_buffer->length, &props, m_lzmaProps, &encodedprop_size, 0,  NULL, &Lzma_Alloc,&Lzma_Alloc);
-        if( res == SZ_OK && EncodedLen )
-        {
-            m_owner->TellGcDeleteBufferMemory(m_owner->m_buffer->array, m_owner->m_buffer->capacity );
-            mmfx_delete_array(m_owner->m_buffer->array);
-            m_owner->m_buffer->array = NULL;
-            VMPI_memcpy(m_first->data, m_lzmaProps, LZMA_PROPS_SIZE);
-            for(int i=0; i< 4; i++)
-                m_first->data[LZMA_PROPS_SIZE + i] = (unsigned char)(m_owner->m_buffer->length >> (8*i));
-                                 
-            if(m_first->size == ((uint32_t)EncodedLen + LZMA_PROPS_SIZE + kLZMAUnPackSize))
-            {
-                m_owner->m_buffer->array = m_first->data;
-                m_owner->m_buffer->capacity = m_first->size;
-                m_owner->m_buffer->length  = m_first->size;
-                m_owner->TellGcDeleteBufferMemory((const uint8_t*)m_first, sizeof(DataEntry));
-                mmfx_delete(m_first);
-                m_first = NULL;
-            }
-            else
-            {
-                uint32_t pos = 0;
-                Grower grower(m_owner, (uint32_t)EncodedLen);
-                grower.EnsureWritableCapacity();
-                do
-                {
-                    VMPI_memcpy(m_owner->m_buffer->array+pos, m_first->data, m_first->size);
-                    pos += m_first->size;
-                    m_owner->TellGcDeleteBufferMemory(m_first->data, m_first->size);
-                    mmfx_delete(m_first->data);
-                    m_last = m_first;
-                    m_first = m_first->next;
-                    m_owner->TellGcDeleteBufferMemory((const uint8_t*)m_last, sizeof(DataEntry));
-                    mmfx_delete(m_last);
-                }while(m_first);                
-                m_owner->m_buffer->length = pos;
-            }
-            m_owner->m_position = 0;
-            m_owner->m_copyOnWriteOwner = NULL;           
-        }
-        return res;
-    }
-    
-    size_t  ByteArray::LzmaEncoder::Write(const uint8_t *buf, size_t size)
-    {
-        if( !m_first  )
-        {
-            m_first = m_last = (DataEntry*)mmfx_new(DataEntry);
-            if( !m_first )
-            {
-                m_error = SZ_ERROR_MEM;
-                return 0;
-            }
-            m_owner->TellGcNewBufferMemory((const uint8_t*)m_first, sizeof(DataEntry));
-            m_last->data = mmfx_new_array(uint8_t, (uint32_t)size + LZMA_PROPS_SIZE + kLZMAUnPackSize);
-            if( !m_last->data)
-            {
-                m_error = SZ_ERROR_MEM;
-                return 0;
-            }
-            m_owner->TellGcNewBufferMemory(m_last->data, (uint32_t)size + LZMA_PROPS_SIZE + kLZMAUnPackSize);
-            VMPI_memcpy(m_last->data + LZMA_PROPS_SIZE + kLZMAUnPackSize, buf, (uint32_t)size);
-            m_last->size = LZMA_PROPS_SIZE + kLZMAUnPackSize + (uint32_t)size;
-        }
-        else
-        {
-            m_last->next = (ByteArray::LzmaEncoder::DataEntry*)mmfx_new(DataEntry);
-            m_last = m_last->next;
-            if(!m_last)
-            {
-                m_error = SZ_ERROR_MEM;
-                return 0;
-            }
-            m_owner->TellGcNewBufferMemory((const uint8_t*)m_last, sizeof(DataEntry));
-            m_last->data = mmfx_new_array(uint8_t, (uint32_t)size);
-            if(!m_last->data)
-            {
-                m_error = SZ_ERROR_MEM;
-                return 0;
-            }
-            m_owner->TellGcNewBufferMemory(m_last->data, (uint32_t)size);
-            VMPI_memcpy(m_last->data, buf, (uint32_t)size);
-            m_last->size = (uint32_t)size;          
-        }
-        m_last->next = NULL;
-        return size;
-    }
 
-    ByteArray::LzmaEncoder::~LzmaEncoder()
-    {
-        while(m_first)
-        {
-            m_last = m_first;
-            m_first = m_first->next;
-            m_owner->TellGcDeleteBufferMemory(m_last->data, m_last->size);
-            mmfx_delete(m_last->data);
-            m_owner->TellGcDeleteBufferMemory((const uint8_t*)m_last, sizeof(DataEntry));
-            mmfx_delete(m_last);
-        }
-        if( m_error == SZ_ERROR_MEM )
-            m_owner->ThrowMemoryError();
-    }    
     void ByteArray::Compress(CompressionAlgorithm algorithm)
     {
- #if 0   // turn off lzma for Cyril pre-release    
-        if(algorithm == k_lzma)
-        {
-            if(!m_array || !m_length)
-                return;
-
-            LzmaEncoder  Encoder(this);
-            Encoder.Encode();
-            return;
-        }    
-#endif  
         // Snarf the data and give ourself some empty data
         // (remember, existing data might be copy-on-write so don't dance on it)
         uint8_t* origData                       = m_buffer->array;
@@ -828,45 +688,6 @@ namespace avmplus
 
     void ByteArray::Uncompress(CompressionAlgorithm algorithm)
     {
- #if 0   // turn off lzma for Cyril pre-release    
-        if(algorithm ==  k_lzma)
-        {
-            if(!m_array || m_length < (LZMA_PROPS_SIZE + kLZMAUnPackSize))
-                return;
-                
-            size_t  unpackedLen = 0;
-            size_t  compressLen = m_length - (LZMA_PROPS_SIZE + kLZMAUnPackSize);
-            
-            int err;
-            for(int i=0; i< 4; i++)
-                unpackedLen += (uint32_t)m_array[LZMA_PROPS_SIZE + i] << (i*8);
-            if( unpackedLen == 0 )
-                return;
-            uint8_t* newArray = mmfx_new_array_opt(uint8_t, (uint32_t)unpackedLen , MMgc::kCanFailAndZero);
-            if (!newArray)
-                ThrowMemoryError();
-            TellGcNewBufferMemory(newArray, (uint32_t)unpackedLen);
-               
-            err = lzma::LzmaUncompress(newArray, &unpackedLen, (const unsigned char*)(m_array + LZMA_PROPS_SIZE + kLZMAUnPackSize), &compressLen, m_array, LZMA_PROPS_SIZE);
-            if(err == SZ_OK)
-            {
-                TellGcDeleteBufferMemory(m_array, m_capacity);
-                mmfx_delete_array(m_array);
-
-                m_array = newArray;
-                m_length = (uint32_t)unpackedLen;
-                m_capacity = m_length;
-                m_position = 0;
-                m_copyOnWriteOwner = NULL;
-            }
-            else
-            {
-                TellGcDeleteBufferMemory(newArray, (uint32_t)unpackedLen);
-                mmfx_delete_array(newArray);
-            }
-            return;
-        }  
- #endif       
         // Snarf the data and give ourself some empty data
         // (remember, existing data might be copy-on-write so don't dance on it)
         uint8_t* origData                       = m_buffer->array;
@@ -1674,10 +1495,6 @@ namespace avmplus
         {
             return ByteArray::k_deflate;
         }
-        if( algorithm->equalsLatin1("lzma"))
-        {
-             return ByteArray::k_lzma;
-        }        
         else
         {
             // Unknown format
