@@ -165,6 +165,7 @@ void *timerThread(void *arg)
     }
 
     pthread_exit(NULL);
+    return NULL; // not needed, but may generate compiler warning without
 }
 
 // Starts an interval timer

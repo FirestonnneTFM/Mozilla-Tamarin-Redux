@@ -222,6 +222,7 @@ class VMPI_TimerClient
 public:
     // a function that will be called on every tick.
     virtual void tick() = 0;
+    virtual ~VMPI_TimerClient()  { };
 };
 
 /**
