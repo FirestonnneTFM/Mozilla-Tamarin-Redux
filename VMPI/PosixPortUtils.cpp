@@ -131,7 +131,6 @@ double VMPI_getDaylightSavingsTA(double newtime)
     return 0;
 }
 
-
 uint64_t VMPI_getTime()
 {
     struct timeval tv;
@@ -141,25 +140,20 @@ uint64_t VMPI_getTime()
     return result;
 }
 
-// Timer data, posix specific data
-struct PosixIntWriteTimerData : IntWriteTimerData
+// Platform-specific subclass of VMPI_TimerData.
+struct VMPI_PosixTimerData : VMPI_TimerData
 {
-    // platform-specific data
-    pthread_t thread;
+    pthread_t thread; // our timer thread
 };
-
-extern void Init_IntWriteTimerData(IntWriteTimerData* data, uint32_t micros, unsigned int *addr, vmpi_mutex_t* writeLock);
-extern void UpdateMedianIntervalInfo(IntWriteTimerData *data);
 
 // On posix systems, we use a thread to implement the timer.
 // This timer thread will loop until the timer is stopped.
 void *timerThread(void *arg)
 {
-    IntWriteTimerData *data = (IntWriteTimerData*)arg;
-    uint *addr = data->addr;
+    VMPI_TimerData *data = (VMPI_TimerData*)arg;
     uint32_t interval = data->interval;
 
-    while(data->addr)
+    while(data->interval)
     {
         // sleep our interval amount
         struct timespec ts;
@@ -167,37 +161,30 @@ void *timerThread(void *arg)
         ts.tv_nsec = interval * 1000;
         nanosleep(&ts, 0);
 
-        // update our timer data
-        UpdateMedianIntervalInfo(data);
-
-        // update the timer ticks
-        VMPI_recursiveMutexLock(data->writeLock);
-        *addr = *addr + 1;
-        VMPI_recursiveMutexUnlock(data->writeLock);
+        data->client->tick();
     }
 
     pthread_exit(NULL);
-    return NULL; // not needed, but may generate compiler warning without
 }
 
-// Starts the interval timer
-uintptr_t VMPI_startIntWriteTimer(uint32_t micros, unsigned int *addr, vmpi_mutex_t* writeLock)
+// Starts an interval timer
+uintptr_t VMPI_startTimer(uint32_t micros, VMPI_TimerClient* client)
 {
     pthread_t p;
-    PosixIntWriteTimerData *data = (PosixIntWriteTimerData *) VMPI_alloc(sizeof(PosixIntWriteTimerData));
-    Init_IntWriteTimerData(data, micros, addr, writeLock);
+    VMPI_PosixTimerData *data = (VMPI_PosixTimerData *) VMPI_alloc(sizeof(VMPI_PosixTimerData));
+    data->init(micros, client);
     pthread_create(&p, NULL, timerThread, data);
     data->thread = p;
     return (uintptr_t)data;
 }
 
-// Stops the interval timer
-void VMPI_stopIntWriteTimer(uintptr_t data)
+// Stops an interval timer
+void VMPI_stopTimer(uintptr_t data)
 {
-    PosixIntWriteTimerData *theData = (PosixIntWriteTimerData *) data;
+    VMPI_PosixTimerData *theData = (VMPI_PosixTimerData *) data;
     if (theData->thread) {
         // end the timer thread
-        theData->addr = NULL;
+        theData->interval = 0;
         pthread_join(theData->thread, NULL);
     }
     VMPI_free(theData);
@@ -250,9 +237,9 @@ extern void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), v
 void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
 {
     ucontext_t buf;
-    
+
     FLUSHWIN();
-    
+
     getcontext(&buf);                           // Save registers - POSIX method
     CallWithRegistersSaved2(fn, arg, &buf);     // Computes the stack pointer, calls fn
     CallWithRegistersSaved3(fn, &arg, &buf);    // Probably prevents the previous call from being a tail call

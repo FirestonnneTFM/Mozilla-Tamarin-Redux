@@ -719,64 +719,176 @@ namespace avmplus
  * It uses the MethodFrame stack to obtain the stack information, and sends
  * samples using Telemetry.
  */
+
+// The sampler timer interval in microseconds
+const int SAMPLER_TIMER_INTERVAL = 1000;
+
 namespace avmplus {
-    
+
+    /*
+     * Class "SamplerTimerClient" gathers tick statistics, including
+     * distribution of tick intervals, min/max interval, and the exact timestamp of each tick.
+     */
+
+    // Call this function before starting our VMPI timer.
+    void TelemetrySampler::SamplerTimerClient::start(telemetry::ITelemetry* pTelemetry, TelemetrySampler* pSampler) {
+        m_totalTicks = 0;
+        m_nextTickTimeIndex = 0;
+        m_tickTimes[m_nextTickTimeIndex++] = pTelemetry->GetElapsedTime();
+        m_minInterval = ULLONG_MAX;
+        m_maxIntervalSinceLastFlush = 0;
+        VMPI_memset(m_timerIntervalCounts, 0, INTERVAL_TABLE_SIZE);
+        m_pTelemetry = pTelemetry;
+        m_pSampler = pSampler;
+    }
+
+    // This function is called on each tick.
+    void TelemetrySampler::SamplerTimerClient::tick() {
+        VMPI_recursiveMutexLock(&m_pSampler->m_counterLock);
+
+        // increment the tick counter. this tells the AS interpreter that it's time to take a sample.
+        m_pSampler->m_core->sampleTicks += 1;
+
+        // increment total number of ticks
+        m_totalTicks++;
+
+        // calculate the interval between the last tick and now.
+        uint64_t now = m_pTelemetry->GetElapsedTime();
+        uint64_t thisInterval = now - m_tickTimes[m_nextTickTimeIndex - 1]; // in microseconds
+
+        // record the timestamp for this tick. the timestamps are kept
+        // in a circular buffer 'm_tickTimes'.
+        if (m_nextTickTimeIndex == TICK_TIME_TABLE_SIZE)
+            m_nextTickTimeIndex = 0;
+        m_tickTimes[m_nextTickTimeIndex++] = now;
+
+        // update the min and max intervals
+        if(thisInterval < m_minInterval)
+            m_minInterval = thisInterval;
+        if (thisInterval > m_maxIntervalSinceLastFlush)
+            m_maxIntervalSinceLastFlush = thisInterval;
+
+        // Increment the entry in m_timerIntervalCounts corresponding to "thisInterval".
+        // m_timerIntervalCounts[k] is a count of how many times the interval happened to be k microseconds.
+        // These counters are used later on in calculateMedianTimerInterval().
+        unsigned int intervalIndex =
+            (thisInterval < INTERVAL_TABLE_SIZE) ? (unsigned int)thisInterval : (INTERVAL_TABLE_SIZE - 1);
+        m_timerIntervalCounts[intervalIndex] += 1;
+
+        VMPI_recursiveMutexUnlock(&m_pSampler->m_counterLock);
+    }
+
+    // If we have fewer than this many ticks, we won't actually calculate a median,
+    // so that the calculations are not unduly influenced by early fluctuations.
+    static const uint64_t MIN_TICKS_NEEDED_FOR_RELIABLE_MEDIAN_CALCULATION = 100;
+
+    // Calculates the median value of all the tick intervals that have occurred since the ticker was started.
+    uint64_t TelemetrySampler::SamplerTimerClient::calculateMedianTimerInterval() {
+        if(m_totalTicks <= MIN_TICKS_NEEDED_FOR_RELIABLE_MEDIAN_CALCULATION) {
+            // there is not enough data to calculate a reliable result. Just return the nominal tick interval.
+            return SAMPLER_TIMER_INTERVAL;
+        }
+
+        // m_timerIntervalCounts[k] is a count of how many times the interval happened to be k microseconds.
+        // To find the median value, we'll iterate over the array accumulating the sum of
+        // of the array items. We stop iterating when the sum >= 1/2 the total number of items. The index
+        // we stopped at is the median value.
+        //
+        // In other words, the following code finds the lowest value value N such that
+        //
+        //      sum(m_timerIntervalCounts[j]) for j=0...N is >= 1/2 the total number of items.
+        //
+        // We optimize the algorithm by starting at index=m_minInterval rather than at index=0, because we know
+        // that there are no non-zero items in the array below index=m_minInterval.
+        //
+        // Interval values tend to cluster around the nominal value "SAMPLER_TIMER_INTERVAL", so we probaby
+        // will go around the loop only a few dozen times.
+        uint64_t accumulator = 0;
+        uint64_t halfTotalTicks = m_totalTicks / 2;
+        uint64_t index = m_minInterval;
+        // We know that this loop will exit, and that index will never go off the end of
+        // m_timerIntervalCounts, because functions tick() and start() guarantee that
+        // 1. m_timerIntervalCounts[k] >= 0 for all k
+        // 2. sum(m_timerIntervalCounts[]) == m_totalTicks
+        //
+        while(accumulator < halfTotalTicks) {
+            accumulator += m_timerIntervalCounts[index++];
+        }
+        return index - 1;
+    }
+
+    /*
+     * Class "TelemetrySampler"
+     */
+
     TelemetrySampler::TelemetrySampler(AvmCore* core)
     {
         m_core = core;
-        m_timerData = NULL;
+        m_timerId = NULL;
         m_samplesBuffer = NULL;
-        m_timerStarted = false;
+        m_started = false;
         m_numMappedMethods = 1;
-        m_previousInterval = 0;
+        m_lastReportedMedianInterval = 0;
+        m_lastFlushTime = 0;
+        m_lastFlushTicks = 0;
         m_telemetry = m_core->getTelemetry();
-                
+
         VMPI_recursiveMutexInit(&m_counterLock);
     }
-    
+
     TelemetrySampler::~TelemetrySampler()
     {
-        // shut down our timer
         stop();
 		VMPI_recursiveMutexDestroy(&m_counterLock);
     }
-        
+
     void TelemetrySampler::start()
     {
         m_telemetry = m_core->getTelemetry();
-        if (m_core->samplerEnabled && !m_timerStarted) {
+        if (m_core->samplerEnabled && m_telemetry && !m_started) {
             m_samplesBuffer = (SamplesBuffer *) VMPI_alloc(sizeof(SamplesBuffer));
             m_samplesBuffer->nSamples = 0;
-#ifdef REPORT_TOTAL_TICKS
-            m_samplesBuffer->totalTicks = 0;
-#endif
-            m_previousInterval = 0;
-            m_timerData = VMPI_startIntWriteTimer(SAMPLER_TIMER_INTERVAL, &m_core->sampleTicks, &m_counterLock);
-            m_timerStarted = true;
+            m_samplesBuffer->nTickTimes = 0;
+            m_lastReportedMedianInterval = 0;
+            m_timerClient.start(m_telemetry, this);
+            m_timerId = VMPI_startTimer(SAMPLER_TIMER_INTERVAL, &m_timerClient);
+            m_started = true;
         }
     }
-    
+
     void TelemetrySampler::stop()
     {
-        if (m_timerStarted) {
-            VMPI_stopIntWriteTimer(m_timerData);
-            m_timerData = NULL;
-            m_timerStarted = false;
+        if (m_started) {
+            VMPI_stopTimer(m_timerId);
+            m_timerId = NULL;
+            m_started = false;
             VMPI_free(m_samplesBuffer);
             m_samplesBuffer = NULL;
         }
     }
-    
+
+    // Find out if the current method frame stack is empty
+    bool TelemetrySampler::isMethodFrameStackEmpty() {
+        for (MethodFrame* frame = m_core->currentMethodFrame; frame != NULL; frame = frame->next) {
+            MethodEnv* env = frame->env();
+            if (env && env->method) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Copy the current methodFrame stack into 'outFrameBuffer'. Returns the number of stack frames.
     unsigned int TelemetrySampler::takeStackSample(sample_frame_t* outFrameBuffer)
     {
         unsigned int nFramesWritten = 0;
-        
+
         for (MethodFrame* curFrame = m_core->currentMethodFrame;
              curFrame != NULL;
              curFrame = curFrame->next) {
             MethodEnv* env = curFrame->env();
             if (env && env->method) {
-                if (nFramesWritten == SAMPLE_MAX_STACK_DEPTH) {
+                if (nFramesWritten == Sample::SAMPLE_MAX_STACK_DEPTH) {
                     // more stack frames than SAMPLE_MAX_STACK_DEPTH,
                     // return 1 greater than the max length so we know there is more..
                     return ++nFramesWritten;
@@ -785,69 +897,135 @@ namespace avmplus {
                 }
             }
         }
-        
+
         return nFramesWritten;
     }
-    
+
+    // Find out the function name corresponding to a given stack frame.
     Stringp TelemetrySampler::sampleFrameToString(sample_frame_t frame)
     {
         return frame->getMethodName();
     }
-    
+
+    // Capture one sample into m_samplesBuffer
+    // Note: we do things in an awkward order in order to minimize the time spent with the mutex locked,
+    // to minimize our effect on the timing of the ticker.
     void TelemetrySampler::takeSample()
     {
         AvmAssert(m_samplesBuffer != NULL);
 
+        if (isMethodFrameStackEmpty()) {
+            // The actionscript stack is empty. We will not bother taking a sample.
+            VMPI_recursiveMutexLock(&m_counterLock);
+            m_core->sampleTicks = 0;
+            VMPI_recursiveMutexUnlock(&m_counterLock);
+            return;
+        }
+
+        // Lock out the ticker thread while we capture the ticker's data...
         VMPI_recursiveMutexLock(&m_counterLock);
-        unsigned int ticks = m_core->sampleTicks;
+
+        // ... capture the tick count
+        unsigned int nTicks = m_core->sampleTicks;
         m_core->sampleTicks = 0;
+        AvmAssert(nTicks > 0);
+
+        // ... figure out how many tick times we need to capture
+        unsigned int numTickTimes = (nTicks <= SamplerTimerClient::TICK_TIME_TABLE_SIZE) ? nTicks : SamplerTimerClient::TICK_TIME_TABLE_SIZE;
+
+        if (numTickTimes + m_samplesBuffer->nTickTimes > SamplesBuffer::TICK_TIMES_BUFFER_SIZE) {
+            // we don't have enough room to capture all the tick times. Do a flush.
+
+            // unlock the mutex while we flush, in case we take a long time, we don't want to slow down the ticker.
+            VMPI_recursiveMutexUnlock(&m_counterLock);
+            flushSamples();
+            VMPI_recursiveMutexLock(&m_counterLock);
+
+            // update the captured data in case a tick happened during the flush
+            nTicks += m_core->sampleTicks;
+            m_core->sampleTicks = 0;
+            numTickTimes = (nTicks <= SamplerTimerClient::TICK_TIME_TABLE_SIZE) ? nTicks : SamplerTimerClient::TICK_TIME_TABLE_SIZE;
+        }
+
+        // ... capture the tick times
+        uint32_t nextIndex =  m_timerClient.m_nextTickTimeIndex;
+        AvmAssert(nextIndex <= SamplerTimerClient::TICK_TIME_TABLE_SIZE);
+        AvmAssert(numTickTimes > 0 && numTickTimes <= SamplerTimerClient::TICK_TIME_TABLE_SIZE);
+        AvmAssert(numTickTimes <= SamplesBuffer::TICK_TIMES_BUFFER_SIZE - m_samplesBuffer->nTickTimes);
+        if (numTickTimes <= nextIndex) {
+            // the stuff we want is one contiguous chunk
+            VMPI_memcpy(&m_samplesBuffer->tickTimes[m_samplesBuffer->nTickTimes], &m_timerClient.m_tickTimes[nextIndex - numTickTimes],
+                        sizeof(uint64_t) * numTickTimes);
+        } else {
+            // the stuff we want wraps around from the end of the buffer to beginning of the buffer.
+            // first, grab the older stuff at the end of the buffer.
+            VMPI_memcpy(&m_samplesBuffer->tickTimes[m_samplesBuffer->nTickTimes],
+                        &m_timerClient.m_tickTimes[SamplerTimerClient::TICK_TIME_TABLE_SIZE - (numTickTimes - nextIndex)],
+                        sizeof(uint64_t) * (numTickTimes - nextIndex));
+            // now grab the newer stuff at the beginning of the buffer.
+            VMPI_memcpy(&m_samplesBuffer->tickTimes[m_samplesBuffer->nTickTimes + numTickTimes - nextIndex], &m_timerClient.m_tickTimes[0],
+                        sizeof(uint64_t) * nextIndex);
+        }
+        m_samplesBuffer->nTickTimes += numTickTimes;
+
+        // We're finished capturing the ticker's data. Unlock the mutex.
         VMPI_recursiveMutexUnlock(&m_counterLock);
 
-#ifdef REPORT_TOTAL_TICKS
-        m_samplesBuffer->totalTicks += ticks;
-#endif
-        uint64_t timestamp = m_telemetry->GetElapsedTime();
-
+        // Find the next empty slot in m_samplesBuffer.
         Sample* curSample = m_samplesBuffer->samples + m_samplesBuffer->nSamples;
-        unsigned int nFrames = takeStackSample(curSample->frames);
-        if (nFrames > 0) {
-            curSample->nFrames = nFrames;
-            curSample->timestamp = timestamp;
-            curSample->nTicks = ticks;
-            m_samplesBuffer->nSamples++;
-            
-            if (m_samplesBuffer->nSamples == SAMPLES_BUFFER_SIZE) {
-                flushSamples();
-            }
-        } else {
-            // Skip empty samples
+        m_samplesBuffer->nSamples += 1;
+
+        // Capture the current actionscript stack
+        curSample->nFrames = takeStackSample(curSample->frames);
+        curSample->nTicks = nTicks;
+        AvmAssert(curSample->nFrames > 0);
+        curSample->timestamp = m_telemetry->GetElapsedTime();
+
+        // If our sample buffer is full, force a flush
+        if (m_samplesBuffer->nSamples == SamplesBuffer::SAMPLES_BUFFER_SIZE) {
+            flushSamples();
         }
     }
 
+    // Reports all the data we've accumlated in m_samplesBuffer.
     void TelemetrySampler::flushSamples()
     {
         // if we haven't created our samples buffer yet or aren't initialized, just return
         // also, if we have no samples to send, just return
-        if (m_samplesBuffer == NULL || !m_core || !m_core->samplerEnabled || !m_samplesBuffer->nSamples)
+        if (m_samplesBuffer == NULL || !m_core || !m_core->samplerEnabled || !m_samplesBuffer->nSamples || !m_telemetry)
             return;
 
         avmplus::StringBuffer methodNameMapBuffer(m_core);
+
+        // we use this index to step through m_samplesBuffer->tickTimes
+        unsigned int nextTickTimeIndex = 0;
 
         // For each sample...
         for (unsigned int i = 0; i < m_samplesBuffer->nSamples; i++) {
 
             Sample* sample = m_samplesBuffer->samples + i;
 
-            // Emit the saved timestamp (since this is deferred)
+            // Report the time at which the sample was taken
+            // This should be UINT64, but we use DOUBLE until Monocle bug MBL-250 is fixed. See http://bugs.adobe.com/jira/browse/MBL-250.
             TELEMETRY_DOUBLE(m_telemetry, ".sampler.nextSampleTime", sample->timestamp);
+
+            // Report the number of ticks the sample represents
             TELEMETRY_UINT32(m_telemetry, ".sampler.nextSampleTicks", sample->nTicks);
 
+            // Report the exact time of each tick
+            unsigned int numTickTimes = (sample->nTicks <= SamplerTimerClient::TICK_TIME_TABLE_SIZE) ? sample->nTicks : SamplerTimerClient::TICK_TIME_TABLE_SIZE;
+            for (unsigned int k = 0; k < numTickTimes; k++) {
+                TELEMETRY_DOUBLE(m_telemetry, ".sampler.nextSampleTickTime", m_samplesBuffer->tickTimes[nextTickTimeIndex++]);
+				// This should be UINT64, but we use DOUBLE until Monocle bug MBL-250 is fixed. See http://bugs.adobe.com/jira/browse/MBL-250.
+            }
+
+            // In 'stackArray', gather the ids of all the methods in the stack.
             unsigned int methodId;
             sample_frame_t frame;
             uint32_t* stackArray = mmfx_new_array(uint32_t, sample->nFrames);
 
             // For each frame on the stack...
-            int numFrames = (sample->nFrames > SAMPLE_MAX_STACK_DEPTH) ? SAMPLE_MAX_STACK_DEPTH : sample->nFrames;
+            int numFrames = (sample->nFrames > Sample::SAMPLE_MAX_STACK_DEPTH) ? Sample::SAMPLE_MAX_STACK_DEPTH : sample->nFrames;
             for (int j = 0; j < numFrames; j++) {
                 frame = sample->frames[j];
                 methodId = m_mappedMethods.get(frame);
@@ -866,37 +1044,54 @@ namespace avmplus {
                 stackArray[j] = methodId;
             }
 
-            if (sample->nFrames > SAMPLE_MAX_STACK_DEPTH) {
+            if (sample->nFrames > Sample::SAMPLE_MAX_STACK_DEPTH) {
                 // more frames than we allow, send an ID as the last frame so
                 // the client can identify the sampler stack overflow condition.
-                stackArray[SAMPLE_MAX_STACK_DEPTH] = SAMPLER_STACK_OVERFLOW_ID;
+                stackArray[Sample::SAMPLE_MAX_STACK_DEPTH] = Sample::SAMPLER_STACK_OVERFLOW_ID;
             }
 
-            // Emit the sample
+            // Report the stackframes
             if (m_telemetry->IsActive())
                 m_telemetry->WriteValue(".sampler.sample", stackArray, sample->nFrames);
 
-             mmfx_delete_array(stackArray);
+            mmfx_delete_array(stackArray);
         }
 
-#ifdef REPORT_TOTAL_TICKS
-        TELEMETRY_UINT32(m_telemetry, ".sampler.totalTicks", m_samplesBuffer->totalTicks);
-        m_samplesBuffer->totalTicks = 0;
-#endif
-
+        // Clear out the samples buffer, now that we've reported all the data.
         m_samplesBuffer->nSamples = 0;
+        m_samplesBuffer->nTickTimes = 0;
 
-        // calculate and send the median timer interval
-        uint64_t interval = VMPI_calculateMedianTimerInterval(m_timerData);
-        if (interval > 0 && interval != m_previousInterval) {
-            TELEMETRY_UINT64(m_telemetry, ".sampler.medianInterval", interval);
-            m_previousInterval = interval;
-        }
-
-        // Emit new mappings from method ID to method name
+        // Report any new mappings from method ID to method name
         if (methodNameMapBuffer.length() > 0) {
             TELEMETRY_STRING(m_telemetry, ".sampler.methodNameMap", methodNameMapBuffer.c_str());
         }
+
+        // Report tick interval statistics...
+
+        // ... the median tick interval
+        uint64_t interval = m_timerClient.calculateMedianTimerInterval();
+        if (interval > 0 && interval != m_lastReportedMedianInterval) {
+            // only send the data if it is different from last time
+            TELEMETRY_UINT64(m_telemetry, ".sampler.medianInterval", interval);
+            m_lastReportedMedianInterval = interval;
+        }
+
+        // ... the number of ticks since the last flush
+        uint64_t numberOfTicksSinceLastFlush = m_timerClient.m_totalTicks - m_lastFlushTicks;
+        m_lastFlushTicks = m_timerClient.m_totalTicks;
+
+        // ... the number of microseconds since the last flush
+        uint64_t now = m_telemetry->GetElapsedTime();
+        uint64_t microSecondsSinceLastFlush = now - m_lastFlushTime;
+        m_lastFlushTime = now;
+
+        // ... the average interval since the last flush
+        uint64_t averageIntervalSinceLastFlush = numberOfTicksSinceLastFlush > 0 ? microSecondsSinceLastFlush / numberOfTicksSinceLastFlush : 0;
+        TELEMETRY_UINT64(m_telemetry, ".sampler.averageInterval", averageIntervalSinceLastFlush);
+
+        // ... the longest interval since the last flush
+        TELEMETRY_UINT64(m_telemetry, ".sampler.maxInterval", m_timerClient.m_maxIntervalSinceLastFlush);
+        m_timerClient.m_maxIntervalSinceLastFlush = 0;
     }
 
 } // namespace avmplus

@@ -213,51 +213,33 @@ extern uint64_t     VMPI_getPerformanceFrequency();
 * value that was used as a basis to calculate the frequency returned from VMPI_getPerformanceFrequency()
 * @return 64-bit value indicating the current value of the counter
 * @see VMPI_getPerformanceFrequency()
-*/extern uint64_t   VMPI_getPerformanceCounter();
+*/
+extern uint64_t   VMPI_getPerformanceCounter();
 
-/** The number of timer intervals that we have counts for */
-static const uint32_t numTimerIntervals = 10000;
-
-/** The data structure used for the integer timer data */
-typedef struct IntWriteTimerData
+/* A client of VMPI_startTimer */
+class VMPI_TimerClient
 {
-    uint32_t interval; // in microseconds
-    unsigned int *addr; // the address of the integer to increment
-    vmpi_mutex_t *writeLock; // the lock for writing to the integer in addr
-
-    // Data for calculating the median interval
-    uint32_t totalTicks;
-    uint64_t lastTime; // last time interval fired
-    uint64_t lowestTimerInterval;
-    uint32_t timerIntervalCounts[numTimerIntervals];
-} IntWriteTimerData;
+public:
+    // a function that will be called on every tick.
+    virtual void tick() = 0;
+};
 
 /**
- * Start the interval timer.
- * @param micros the number of microseconds for the timer interval
- * @param addr the address of the integer to increment when the timer fires
- * @param writeLock the lock for writing to the integer in addr
- * @return the data for this timer, pass this data to the other methods
- *         to refer to this timer and when stopping the timer.
+ * Start a timer that will call into a client object periodically. You can create as many
+ * timers as you like.
+ * @param period the number of microseconds between calls. We don't guarantee this,
+ * you might get called early or late, or the actual period may be different from what you wanted.
+ * @param client an object which contains a function that we will call on every tick
+ * @return an id for this timer. You can pass this id to VMPI_stopTimer when you want to stop.
  */
-extern uintptr_t    VMPI_startIntWriteTimer(uint32_t micros, unsigned int *addr, vmpi_mutex_t* writeLock);
+extern uintptr_t    VMPI_startTimer(unsigned int period, VMPI_TimerClient* client);
 
 /**
- * Stop the interval timer.
- * @param data the data for this timer, obtained when VMPI_startIntWriteTimer
- *             was called
+ * Stop a timer.
+ * @param id the id for this timer, obtained when VMPI_startTimer was called
  * @return none
  */
-extern void         VMPI_stopIntWriteTimer(uintptr_t data);
-
-/**
- * Calculates the median timer interval. There must have been at least 100
- * ticks before this makes a calculation.
- * @param data the data for this timer, obtained when VMPI_startIntWriteTimer
- *             was called
- * @return the median timer interval, or zero if could not calculate
- */
-extern uint64_t     VMPI_calculateMedianTimerInterval(uintptr_t data);
+extern void         VMPI_stopTimer(uintptr_t id);
 
 /**
 * Method to create a new instance of vmpi_spin_lock_t
@@ -784,5 +766,17 @@ extern int VMPI_processorQtyAtBoot();
  * Intel 64 and IA-32 Architectures Software Developer's Manual Volume 2B 4-71
  */
 extern void VMPI_spinloopPause();
+
+
+/** The internal data structure used by the VMPI_Timer. */
+/** Note: this class is only used by the VMPI implementations - GenericPortUtils, WinPortUtils, and PosixPortUtils.
+ It doesn't need to be declared in a public header, and should be moved into a private header file. */
+struct VMPI_TimerData
+{
+    void init(uint32_t micros, VMPI_TimerClient *client);
+
+    uint32_t            interval;   // the nominal interval between ticks, in microseconds
+    VMPI_TimerClient    *client;    // a object containing a function we must call on every tick
+};
 
 #endif /* __avmplus_VMPI__ */
