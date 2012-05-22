@@ -54,6 +54,11 @@
     #endif
 #endif
 
+#ifdef NDEBUG
+#undef _DEBUG
+#undef DEBUG
+#endif //#ifdef NDEBUG
+
 /////////
 // TODO: Remove dependency of VMPI on the feature system
 #ifdef AVMSHELL_BUILD
