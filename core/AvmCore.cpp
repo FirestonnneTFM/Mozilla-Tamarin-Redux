@@ -577,13 +577,11 @@ namespace avmplus
 
         workerStates[0] = internConstantStringLatin1("none");
         workerStates[1] = internConstantStringLatin1("new");
-        workerStates[2] = internConstantStringLatin1("starting");
-        workerStates[3] = internConstantStringLatin1("running");
-        workerStates[4] = internConstantStringLatin1("finishing");
-        workerStates[5] = internConstantStringLatin1("stopped");
-        workerStates[6] = internConstantStringLatin1("failed");
-        workerStates[7] = internConstantStringLatin1("aborted");
-        workerStates[8] = internConstantStringLatin1("exception");
+        workerStates[2] = internConstantStringLatin1("running");
+        workerStates[3] = internConstantStringLatin1("terminated");
+        workerStates[4] = internConstantStringLatin1("failed");
+        workerStates[5] = internConstantStringLatin1("aborted");
+        workerStates[6] = internConstantStringLatin1("exception");
 
 
         booleanStrings[0] = kfalse;
@@ -912,9 +910,8 @@ namespace avmplus
         {
             // Re-throw exception
             Isolate* isolate = getIsolate();
-            if (isolate->getAggregate()->queryState(isolate) == Isolate::FINISHING) {
-                // Don't rethrow, we're finishing and probably not setup to handle the exception.
-            } else {
+            if (isolate->getAggregate()->queryState(isolate) == Isolate::RUNNING) {
+                // Only rethrow if we're running
                 this->throwException(exception);
             }
         }
@@ -1062,12 +1059,7 @@ namespace avmplus
             Isolate* isolate = getIsolate();
             if (isolate != NULL)
             {
-                Isolate::State state = isolate->getAggregate()->queryState(isolate);
-                if (state == Isolate::STARTING) 
-                {
-                    isolate->getAggregate()->stateTransition(isolate, Isolate::RUNNING);
-                } 
-                else if (isolate->isInterrupted()) 
+                if (isolate->isInterrupted()) 
                 {
                     // We'll still run the initialization in interrupted state so that
                     // whe have a properly initialized error object to throw.

@@ -127,11 +127,11 @@ namespace avmplus
             Isolate* isolate = m_globals->at(desc);
             if (isolate == NULL) 
                 return false; // FIXME revisit
-            if (isolate->m_state == Isolate::NEW || isolate->m_state > Isolate::FINISHING)
+            if (isolate->m_state == Isolate::NEW || isolate->m_state > Isolate::RUNNING)
                 return false; // not gonna wait 
                 // Interrupt computation and blocking I/O, currently only message receive.
             closeChannelsWithEndpoint(isolate);
-            if (isolate->m_state == Isolate::RUNNING || isolate->m_state == Isolate::STARTING)
+            if (isolate->m_state == Isolate::RUNNING)
                 isolate->interrupt();
                 // Ensure that the write to AvmCore::interrupted is visible to the other thread.
                 // First set interrupted status, then notify 
@@ -450,10 +450,8 @@ namespace avmplus
                 static const char* state_names[] = {
                     "NONE",
                     "NEW",
-                    "STARTING",
                     "RUNNING",
-                    "FINISHING",
-                    "STOPPED",
+                    "TERMINATED",
                     "FAILED",
                     "ABORTED",
                     "EXCEPTION"
@@ -463,10 +461,8 @@ namespace avmplus
                 fprintf(stderr, "%d: %s->%s\n", isolate->desc, state_names[from], state_names[to]);
             }
             isolate->m_state = to;
-            if (to == Isolate::STARTING) {
-                AvmAssert(from == Isolate::NEW);
-            } else if (to == Isolate::RUNNING) {
-                AvmAssert(from < to); // FIXME this can be violated (?)
+            if (to == Isolate::RUNNING) {
+                AvmAssert(from == Isolate::NEW); // FIXME this can be violated (?)
                 AvmAssert(isolate->m_thread != NULL || isolate->desc == 1); // m_thread will be null for giid==1
                 AvmAssert(isolate->m_core != NULL);
             } else if (to == Isolate::EXCEPTION) {
@@ -474,8 +470,8 @@ namespace avmplus
             } else if (to == Isolate::FAILED) {
                 AvmAssert(from == Isolate::NEW);
                 isolate->m_failed = true;
-            } else if (to == Isolate::FINISHING) {
-                AvmAssert(from == Isolate::RUNNING || from == Isolate::STARTING);
+            } else if (to == Isolate::TERMINATED) {
+                AvmAssert(from == Isolate::RUNNING);
                 AvmAssert(isolate->m_thread != NULL);
                 isolate->m_interrupted = true;
                 isolate->stopRunLoop();
@@ -727,7 +723,7 @@ namespace avmplus
     {
         bool wasInterrupted = m_interrupted;
         if (!wasInterrupted) {
-            m_aggregate->stateTransition(this, Isolate::FINISHING);
+            m_aggregate->stateTransition(this, Isolate::TERMINATED);
         }
         return wasInterrupted;
     }
@@ -740,8 +736,7 @@ namespace avmplus
     bool Isolate::isMemoryManagementShutDown()
     {
         AvmAssert(AvmCore::getActiveCore() == m_core);
-        // In the player it can happen when m_state == FINISHING
-        return m_state > FINISHING;
+        return m_state > RUNNING;
     }
         
     bool Isolate::isPrimordial()
@@ -1035,7 +1030,7 @@ namespace avmplus
         // FIXME try-finally?
         //EnterSafepointManager enterSafepointManager(this);
         
-        stateTransition(isolate, Isolate::STARTING);
+        stateTransition(isolate, Isolate::RUNNING);
         // Make sure the isolate survives for the duration of the following call.
         {
             FixedHeapRef<Isolate> handle(isolate);
@@ -1065,7 +1060,7 @@ namespace avmplus
             m_activeIsolateCount --;
             locker.notifyAll();
             if (current->m_state != Isolate::EXCEPTION)
-                stateTransition(current, Isolate::STOPPED); // otherwise it could be Exception
+                stateTransition(current, Isolate::TERMINATED); // otherwise it could be Exception
 
             current->m_core = NULL;
         }

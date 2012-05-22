@@ -225,7 +225,7 @@ namespace avmshell
                 } else {
                     // FIXME: this happened probably because we got interrupted, but maybe it's a resource situation?
                     // so maybe aborted?
-                    aggregate->stateTransition(this, avmplus::Isolate::STOPPED);
+                    aggregate->stateTransition(this, avmplus::Isolate::TERMINATED);
                 }
                 toplevel->shellClasses->get_PromiseClass()->destroyRemoteObjects();
             } 
