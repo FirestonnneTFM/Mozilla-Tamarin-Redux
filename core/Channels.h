@@ -84,6 +84,10 @@ namespace avmplus
         bool get(ChannelItem *outp);
 
     private:
+        //  Lock these up
+        BlockingChannel(const BlockingChannel &copyFrom);
+        BlockingChannel & operator=(const BlockingChannel &assignFrom);
+        
         bool eof;
         BUFFER* buffer;                
         vmbase::WaitNotifyMonitor m_monitor;
