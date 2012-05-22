@@ -497,7 +497,11 @@ namespace avmplus
     uint32_t NoSyncMultiItemBuffer::numItemsInBuffer()
     {
         uint32_t retVal = 0;
-        if (isFull())
+        if (isEmpty())
+        {
+            retVal = 0;
+        }
+        else if (isFull())
         {
             retVal = bufLength;
         }
