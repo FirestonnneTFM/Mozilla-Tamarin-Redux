@@ -55,30 +55,18 @@ include "api-versions.as"
         * but the worker is dormant; no code is executing on its behalf.
         */
         public static const NEW:String = "new";
-        
-        /**
-        * The worker has been started, but it has not reached application code execution yet.
-        */
-        public static const STARTING:String = "starting";
-        
+                
         /**
         * The worker has begun executing application code
         * and it has not been directed to terminate in any way yet.
         */
         public static const RUNNING:String = "running";
-        
-        /**
-        * The worker has been directed to terminate and it is now taking steps to do so.
-        * Meanwhile, it may still be executing supplemental application code,
-        * for instance in finalizers.
-        */
-        public static const FINISHING:String = "finishing";
-        
+                
         /**
         * The worker has been stopped programatically by some other worker 
-        * that invoked the Worker.stop() method on it.
+        * that invoked the Worker.terminate() method on it.
         */
-        public static const STOPPED:String = "stopped";
+        public static const TERMINATED:String = "terminated";
         
         /**
         * The worker could not start due to lack of resources 
@@ -103,13 +91,11 @@ include "api-versions.as"
         public static function code(s:String): int
         {
             if (s == NEW) return 1;
-            else if (s == STARTING) return 2;
-            else if (s == RUNNING) return 3;
-            else if (s == FINISHING) return 4;
-            else if (s == STOPPED) return 5;
-            else if (s == FAILED) return 6;
-            else if (s == ABORTED) return 7;
-            else if (s == EXCEPTION) return 8;
+            else if (s == RUNNING) return 2;
+            else if (s == TERMINATED) return 3;
+            else if (s == FAILED) return 4;
+            else if (s == ABORTED) return 5;
+            else if (s == EXCEPTION) return 6;
             else throw Error("not an enum value: " + s);
         }
 
