@@ -72,48 +72,7 @@ LoggingFunction GetCurrentLogFunction()
     return logFunc;
 }
 
-// Get the current system time
-static uint64_t GetCurrentSystemTime()
-{
-    double time = ((double) (VMPI_getPerformanceCounter()) * 1000000.0 /
-                   (double)VMPI_getPerformanceFrequency());
-    return (uint64_t)time;
-};
-
-// Init the timer data
-void Init_IntWriteTimerData(IntWriteTimerData* data, uint32_t micros, unsigned int *addr, vmpi_mutex_t* writeLock) {
-    data->interval = micros;
-    data->addr = addr;
-    data->writeLock = writeLock;
-    data->totalTicks = 0;
-    data->lastTime = GetCurrentSystemTime();
-    data->lowestTimerInterval = 9999999;
-    VMPI_memset(data->timerIntervalCounts, 0, numTimerIntervals);
-}
-
-// Updates the timer data so that we can determine the median interval
-void UpdateMedianIntervalInfo(IntWriteTimerData *data) {
-    uint64_t thisTime = GetCurrentSystemTime();
-    uint64_t thisInterval = thisTime - data->lastTime; // in microseconds
-    data->lastTime = thisTime;
-    data->totalTicks++;
-    if(thisInterval < data->lowestTimerInterval)
-        data->lowestTimerInterval = thisInterval;
-    data->timerIntervalCounts[
-        (thisInterval < numTimerIntervals) ? thisInterval : (numTimerIntervals - 1)] += 1;
-}
-
-// Calulates and returns the median timer interval
-uint64_t VMPI_calculateMedianTimerInterval(uintptr_t data) {
-    IntWriteTimerData* timerData = (IntWriteTimerData*)data;
-    if(timerData->totalTicks > 100) {
-        uint32_t accumulator = 0;
-        uint32_t halfTotalTicks = timerData->totalTicks / 2;
-        uint64_t interval = timerData->lowestTimerInterval; // max is numTimerIntervals
-        while(accumulator < halfTotalTicks) {
-            accumulator += timerData->timerIntervalCounts[interval++];
-        }
-        return interval - 1;
-    }
-    return 0;
+void VMPI_TimerData::init(uint32_t micros, VMPI_TimerClient* client) {
+    this->interval = micros;
+    this->client = client;
 }
