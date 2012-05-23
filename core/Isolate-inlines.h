@@ -145,11 +145,11 @@ namespace avmplus
     }
 
     template<class T>
-    bool WorkerObjectBase<T>::get_isPrimordial()
+    bool WorkerObjectBase<T>::isPrimordial()
     {
         AvmAssert(this->giid >= 0 && m_isolate != NULL);
             return m_isolate->isPrimordial();
-        }
+	}
 
     template<class T>
     bool WorkerObjectBase<T>::startWithChannels(ArrayObject* channels)
