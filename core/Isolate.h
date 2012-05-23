@@ -431,7 +431,7 @@ namespace avmplus
         bool stopInternal(bool shouldWait);
 
         bool isParentOf(WorkerObjectBase* other);
-        bool get_isPrimordial();
+        bool isPrimordial();
 
         bool startWithChannels(ArrayObject* channels);
         bool internalStartWithChannels(ArrayObject* channels);
