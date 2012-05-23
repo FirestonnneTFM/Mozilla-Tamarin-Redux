@@ -1391,6 +1391,23 @@ public:
 };
 
 
+class MyToplevel: public avmplus::Toplevel 
+{
+    public:
+    MyToplevel(avmplus::AbcEnv* env)
+        : Toplevel(env) {}
+    virtual GCRef<avmplus::ClassClosure> workerClass() const
+    {
+        return NULL;
+    }
+    
+    virtual GCRef<avmplus::ClassClosure> workerDomainClass() const
+    {
+        return NULL;
+    }
+    
+};
+
 class MyAvmCore : public avmplus::AvmCore
 {
 public:
@@ -1401,10 +1418,16 @@ public:
     virtual void stackOverflow(Toplevel*) { }
     virtual avmplus::String* readFileForEval(avmplus::String*, avmplus::String*) { return NULL; }
     virtual avmplus::ApiVersion getDefaultAPI() { return kApiVersion_VM_INTERNAL; }
-	virtual avmplus::Toplevel* createToplevel(avmplus::AbcEnv*) {
-		return NULL;
-	}
+    virtual avmplus::Toplevel* createTopLevel(avmplus::AbcEnv*)
+    {
+        return NULL;
+    }
     Debugger* createDebugger(int tracelevel) { return new (this->gc) MyDebugger(this, (avmplus::Debugger::_TraceLevel)tracelevel); }
+
+    virtual avmplus::Toplevel* createToplevel(avmplus::AbcEnv* env) { 
+        return new (gc) MyToplevel(env);
+    }
+
 };
 
 
@@ -1466,7 +1489,7 @@ void ST_mmgc_bugzilla_603411::test0() {
     testClass = new MyTestClass(testCore);
     testClass->testAvmCoreDelete();
 
-// line 114 "ST_mmgc_603411.st"
+// line 136 "ST_mmgc_603411.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 }
@@ -6237,17 +6260,22 @@ void test2();
 void test3();
 void test4();
 void test5();
+void test6();
+void test7();
+void test8();
     MMgc::GC *gc;
     NoSyncSingleItemBuffer *singleItemBuffer;
+    NoSyncMultiItemBuffer *multiItemBuffer;
     NonBlockingMultiItemBuffer *nonBlockMultiItemBuffer;
     Atom *atom;
+    ChannelItem* itemp;
  
 };
 ST_workers_Buffers::ST_workers_Buffers(AvmCore* core)
     : Selftest(core, "workers", "Buffers", ST_workers_Buffers::ST_names,ST_workers_Buffers::ST_explicits)
 {}
-const char* ST_workers_Buffers::ST_names[] = {"NonBlockMultiItemConstructor","NonBlockMultiItemEmptyBuffer","NonBlockMultiItemFullBuffer","SingleConstructor","SingleEmptyBuffer","SingleFullBuffer", NULL };
-const bool ST_workers_Buffers::ST_explicits[] = {false,false,false,false,false,false, false };
+const char* ST_workers_Buffers::ST_names[] = {"NonBlockMultiItemConstructor","NonBlockMultiItemEmptyBuffer","NonBlockMultiItemFullBuffer","SingleConstructor","SingleEmptyBuffer","SingleFullBuffer","MultiConstructor","MultiEmptyBuffer","MultiFullBuffer", NULL };
+const bool ST_workers_Buffers::ST_explicits[] = {false,false,false,false,false,false,false,false,false, false };
 void ST_workers_Buffers::run(int n) {
 switch(n) {
 case 0: test0(); return;
@@ -6256,6 +6284,9 @@ case 2: test2(); return;
 case 3: test3(); return;
 case 4: test4(); return;
 case 5: test5(); return;
+case 6: test6(); return;
+case 7: test7(); return;
+case 8: test8(); return;
 }
 }
 void ST_workers_Buffers::prologue() {
@@ -6263,28 +6294,32 @@ void ST_workers_Buffers::prologue() {
     gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap(), config);
 	//gc=core->GetGC();
     atom=(Atom *)malloc(100);
+    itemp = new ChannelItem;
     singleItemBuffer=new NoSyncSingleItemBuffer(gc);
+    multiItemBuffer=new NoSyncMultiItemBuffer();
     nonBlockMultiItemBuffer=new NonBlockingMultiItemBuffer(gc);
 
 }
 void ST_workers_Buffers::epilogue() {
     delete singleItemBuffer;
+    delete multiItemBuffer;
     delete nonBlockMultiItemBuffer;
 	delete gc;
+    delete itemp;
     free(atom);
 
 }
 void ST_workers_Buffers::test0() {
-// line 65 "ST_workers_Buffer.st"
+// line 71 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer!=NULL, "nonBlockMultiItemBuffer!=NULL", __FILE__, __LINE__);
 
 }
 void ST_workers_Buffers::test1() {
-// line 68 "ST_workers_Buffer.st"
+// line 74 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer->isEmpty(), "nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 69 "ST_workers_Buffer.st"
+// line 75 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isFull(), "!nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
-// line 70 "ST_workers_Buffer.st"
+// line 76 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->get(atom), "!nonBlockMultiItemBuffer->get(atom)", __FILE__, __LINE__);
 
 }
@@ -6292,85 +6327,154 @@ void ST_workers_Buffers::test2() {
     bool result;
     for (int i=0;i<14;i++) {
         result=nonBlockMultiItemBuffer->put(String::createLatin1(core,"test string")->atom());
-// line 76 "ST_workers_Buffer.st"
+// line 82 "ST_workers_Buffer.st"
 verifyPass(result, "result", __FILE__, __LINE__);
-// line 77 "ST_workers_Buffer.st"
+// line 83 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isEmpty(), "!nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 78 "ST_workers_Buffer.st"
+// line 84 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isFull(), "!nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
     }
     result=nonBlockMultiItemBuffer->put(String::createLatin1(core,"test string")->atom());
-// line 81 "ST_workers_Buffer.st"
+// line 87 "ST_workers_Buffer.st"
 verifyPass(result, "result", __FILE__, __LINE__);
-// line 82 "ST_workers_Buffer.st"
+// line 88 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isEmpty(), "!nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 83 "ST_workers_Buffer.st"
+// line 89 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer->isFull(), "nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
 
     result=nonBlockMultiItemBuffer->put(String::createLatin1(core,"test string")->atom());
-// line 86 "ST_workers_Buffer.st"
+// line 92 "ST_workers_Buffer.st"
 verifyPass(!result, "!result", __FILE__, __LINE__);
-// line 87 "ST_workers_Buffer.st"
+// line 93 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isEmpty(), "!nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 88 "ST_workers_Buffer.st"
+// line 94 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer->isFull(), "nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
 
     for (int i=0;i<14;i++) {
-// line 91 "ST_workers_Buffer.st"
+// line 97 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer->get(atom), "nonBlockMultiItemBuffer->get(atom)", __FILE__, __LINE__);
-// line 92 "ST_workers_Buffer.st"
+// line 98 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isEmpty(), "!nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 93 "ST_workers_Buffer.st"
+// line 99 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isFull(), "!nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
     }
-// line 95 "ST_workers_Buffer.st"
+// line 101 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer->get(atom), "nonBlockMultiItemBuffer->get(atom)", __FILE__, __LINE__);
-// line 96 "ST_workers_Buffer.st"
+// line 102 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer->isEmpty(), "nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 97 "ST_workers_Buffer.st"
+// line 103 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isFull(), "!nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
 
-// line 99 "ST_workers_Buffer.st"
+// line 105 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->get(atom), "!nonBlockMultiItemBuffer->get(atom)", __FILE__, __LINE__);
-// line 100 "ST_workers_Buffer.st"
+// line 106 "ST_workers_Buffer.st"
 verifyPass(nonBlockMultiItemBuffer->isEmpty(), "nonBlockMultiItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 101 "ST_workers_Buffer.st"
+// line 107 "ST_workers_Buffer.st"
 verifyPass(!nonBlockMultiItemBuffer->isFull(), "!nonBlockMultiItemBuffer->isFull()", __FILE__, __LINE__);
 
 }
 void ST_workers_Buffers::test3() {
-// line 104 "ST_workers_Buffer.st"
+// line 110 "ST_workers_Buffer.st"
 verifyPass(singleItemBuffer!=NULL, "singleItemBuffer!=NULL", __FILE__, __LINE__);
 
 }
 void ST_workers_Buffers::test4() {
-// line 107 "ST_workers_Buffer.st"
+// line 113 "ST_workers_Buffer.st"
 verifyPass(singleItemBuffer->isEmpty(), "singleItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 108 "ST_workers_Buffer.st"
+// line 114 "ST_workers_Buffer.st"
 verifyPass(!singleItemBuffer->isFull(), "!singleItemBuffer->isFull()", __FILE__, __LINE__);
-// line 109 "ST_workers_Buffer.st"
+// line 115 "ST_workers_Buffer.st"
 verifyPass(!singleItemBuffer->get(atom), "!singleItemBuffer->get(atom)", __FILE__, __LINE__);
 
 }
 void ST_workers_Buffers::test5() {
     bool result;
     result=singleItemBuffer->put(String::createLatin1(core,"test string")->atom());
-// line 114 "ST_workers_Buffer.st"
+// line 120 "ST_workers_Buffer.st"
 verifyPass(result, "result", __FILE__, __LINE__);
-// line 115 "ST_workers_Buffer.st"
+// line 121 "ST_workers_Buffer.st"
 verifyPass(!singleItemBuffer->isEmpty(), "!singleItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 116 "ST_workers_Buffer.st"
+// line 122 "ST_workers_Buffer.st"
 verifyPass(singleItemBuffer->isFull(), "singleItemBuffer->isFull()", __FILE__, __LINE__);
     result=singleItemBuffer->put(String::createLatin1(core,"test string")->atom());
-// line 118 "ST_workers_Buffer.st"
+// line 124 "ST_workers_Buffer.st"
 verifyPass(!result, "!result", __FILE__, __LINE__);
-// line 119 "ST_workers_Buffer.st"
+// line 125 "ST_workers_Buffer.st"
 verifyPass(singleItemBuffer->get(atom), "singleItemBuffer->get(atom)", __FILE__, __LINE__);
-// line 120 "ST_workers_Buffer.st"
+// line 126 "ST_workers_Buffer.st"
 verifyPass(singleItemBuffer->isEmpty(), "singleItemBuffer->isEmpty()", __FILE__, __LINE__);
-// line 121 "ST_workers_Buffer.st"
+// line 127 "ST_workers_Buffer.st"
 verifyPass(!singleItemBuffer->isFull(), "!singleItemBuffer->isFull()", __FILE__, __LINE__);
 
+}
+void ST_workers_Buffers::test6() {
+// line 130 "ST_workers_Buffer.st"
+verifyPass(multiItemBuffer!=NULL, "multiItemBuffer!=NULL", __FILE__, __LINE__);
+
+}
+void ST_workers_Buffers::test7() {
+// line 133 "ST_workers_Buffer.st"
+verifyPass(singleItemBuffer->isEmpty(), "singleItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 134 "ST_workers_Buffer.st"
+verifyPass(!singleItemBuffer->isFull(), "!singleItemBuffer->isFull()", __FILE__, __LINE__);
+// line 135 "ST_workers_Buffer.st"
+verifyPass(!singleItemBuffer->get(atom), "!singleItemBuffer->get(atom)", __FILE__, __LINE__);
+
+}
+void ST_workers_Buffers::test8() {
+    bool result;
+    for (int i=0;i<15;i++) {
+        ChannelItem item;
+        item.tag = kDoubleType;
+        item.asNumber = 3.14;
+        result=multiItemBuffer->put(item);
+// line 144 "ST_workers_Buffer.st"
+verifyPass(result, "result", __FILE__, __LINE__);
+// line 145 "ST_workers_Buffer.st"
+verifyPass(!multiItemBuffer->isEmpty(), "!multiItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 146 "ST_workers_Buffer.st"
+verifyPass(!multiItemBuffer->isFull(), "!multiItemBuffer->isFull()", __FILE__, __LINE__);
+    }
+    ChannelItem inItem;
+    inItem.asNumber = 3.14;
+    inItem.tag = kDoubleType;
+    result=multiItemBuffer->put(inItem);
+// line 152 "ST_workers_Buffer.st"
+verifyPass(result, "result", __FILE__, __LINE__);
+// line 153 "ST_workers_Buffer.st"
+verifyPass(!multiItemBuffer->isEmpty(), "!multiItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 154 "ST_workers_Buffer.st"
+verifyPass(multiItemBuffer->isFull(), "multiItemBuffer->isFull()", __FILE__, __LINE__);
+
+    result=multiItemBuffer->put(inItem);
+// line 157 "ST_workers_Buffer.st"
+verifyPass(!result, "!result", __FILE__, __LINE__);
+// line 158 "ST_workers_Buffer.st"
+verifyPass(!multiItemBuffer->isEmpty(), "!multiItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 159 "ST_workers_Buffer.st"
+verifyPass(multiItemBuffer->isFull(), "multiItemBuffer->isFull()", __FILE__, __LINE__);
+
+    for (int i=0;i<15;i++) {
+// line 162 "ST_workers_Buffer.st"
+verifyPass(multiItemBuffer->get(itemp), "multiItemBuffer->get(itemp)", __FILE__, __LINE__);
+// line 163 "ST_workers_Buffer.st"
+verifyPass(!multiItemBuffer->isEmpty(), "!multiItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 164 "ST_workers_Buffer.st"
+verifyPass(!multiItemBuffer->isFull(), "!multiItemBuffer->isFull()", __FILE__, __LINE__);
+    }
+// line 166 "ST_workers_Buffer.st"
+verifyPass(multiItemBuffer->get(itemp), "multiItemBuffer->get(itemp)", __FILE__, __LINE__);
+// line 167 "ST_workers_Buffer.st"
+verifyPass(multiItemBuffer->isEmpty(), "multiItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 168 "ST_workers_Buffer.st"
+verifyPass(!multiItemBuffer->isFull(), "!multiItemBuffer->isFull()", __FILE__, __LINE__);
+
+// line 170 "ST_workers_Buffer.st"
+verifyPass(!multiItemBuffer->get(itemp), "!multiItemBuffer->get(itemp)", __FILE__, __LINE__);
+// line 171 "ST_workers_Buffer.st"
+verifyPass(multiItemBuffer->isEmpty(), "multiItemBuffer->isEmpty()", __FILE__, __LINE__);
+// line 172 "ST_workers_Buffer.st"
+verifyPass(!multiItemBuffer->isFull(), "!multiItemBuffer->isFull()", __FILE__, __LINE__);
 
 }
 void create_workers_Buffers(AvmCore* core) { new ST_workers_Buffers(core); }

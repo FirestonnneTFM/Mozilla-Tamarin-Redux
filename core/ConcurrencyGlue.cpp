@@ -44,7 +44,8 @@ namespace avmplus {
     MutexObject::State::State()
         : m_recursion_count(0)
     {
-        VMPI_recursiveMutexInit(&m_mutex);        
+        bool success = VMPI_recursiveMutexInit(&m_mutex);
+        (void)success; // FIXME test the result
     }
 
     void MutexObject::State::destroy()
@@ -90,6 +91,9 @@ namespace avmplus {
     void MutexObject::lock()
     {
         VMPI_recursiveMutexLock(&m_state->m_mutex);
+        //FIXME what if m_ownerThreadID != VMPI_nullThread() && m_ownerThreadID != VMPI_currentThread()
+        if (m_state->m_recursion_count == 0)
+            m_state->m_ownerThreadID = VMPI_currentThread(); 
         m_state->m_recursion_count ++;
         if (m_state->m_recursion_count > MAX_RECURSION) {
             VMPI_recursiveMutexUnlock(&m_state->m_mutex);
@@ -108,6 +112,9 @@ namespace avmplus {
         }
         m_state->m_recursion_count --;
         AvmAssert(m_state->m_recursion_count >= 0);
+        if (m_state->m_recursion_count == 0)
+            m_state->m_ownerThreadID = VMPI_nullThread(); 
+        
         VMPI_recursiveMutexUnlock(&m_state->m_mutex); // This one is internal.
         VMPI_recursiveMutexUnlock(&m_state->m_mutex); // This one is the one requested by user code.
         
@@ -123,6 +130,8 @@ namespace avmplus {
                 Atom args[2] = { nullObjectAtom, core()->newStringUTF8("Lock recursion maximum exceeded!")->atom() }; 
                 core()->throwAtom(toplevel()->errorClass()->construct(1, args));
             }
+            if (m_state->m_recursion_count == 1)
+                m_state->m_ownerThreadID = VMPI_currentThread(); 
         }
         return result;
     }
@@ -145,36 +154,79 @@ namespace avmplus {
     ConditionObject::ConditionObject(VTable* cvtable, ScriptObject* delegate) 
         : ScriptObject(cvtable, delegate)
     {
-        VMPI_condVarInit(&m_condVar);
     }
 
-    void ConditionObject::broadcast()
+    ConditionObject::State::State(MutexObject::State* mutexState)
+        : m_wait_count(0)
+        , m_mutexState(mutexState)
     {
-        VMPI_condVarBroadcast(&m_condVar);
+        bool success = VMPI_condVarInit(&m_condVar);
+        (void)success; // FIXME test the result
     }
 
-    void ConditionObject::signal()
+    void ConditionObject::ctor(MutexObject* mutex)
     {
-        VMPI_condVarSignal(&m_condVar);
+        AvmAssert(mutex != NULL);
+        m_state = mmfx_new(ConditionObject::State(mutex->m_state));
     }
 
-    void ConditionObject::wait(MutexObject* lock)
+    void ConditionObject::notify()
     {
-        // FIXME throw if lock == null
-        VMPI_condVarWait(&m_condVar, &lock->m_state->m_mutex);
+        // FIXME should throw if m_mutex is not held?
+        VMPI_condVarSignal(&m_state->m_condVar);
+    }
+
+    void ConditionObject::notifyAll()
+    {
+        // FIXME should throw if m_mutex is not held?
+        VMPI_condVarBroadcast(&m_state->m_condVar);
+    }
+
+    bool ConditionObject::wait(double timeout)
+    {
+        // FIXME this should throw instead, although reliably (!?)
+        AvmAssert(m_state->m_mutexState->m_ownerThreadID == VMPI_currentThread());
+        // FIXME this should throw, although reliably (!?)
+        AvmAssert(m_state->m_mutexState->m_recursion_count == 1);
+        // FIXME what if other negative values of timeout?
+        if (timeout == -1) {
+            m_state->m_wait_count ++;
+            m_state->m_mutexState->m_recursion_count = 0;
+            VMPI_condVarWait(&m_state->m_condVar, &m_state->m_mutexState->m_mutex);
+            m_state->m_mutexState->m_recursion_count = 1;
+            m_state->m_wait_count --;
+            return true;
+        } else {
+            int32_t millis = int32_t(timeout*1000);
+            m_state->m_wait_count ++;
+            m_state->m_mutexState->m_recursion_count = 0;
+            bool result = VMPI_condVarTimedWait(&m_state->m_condVar, &m_state->m_mutexState->m_mutex, millis) == false;
+            m_state->m_mutexState->m_recursion_count = 1;
+            m_state->m_wait_count --;
+            return result;
+        }
     }
 
     ScriptObject* ConditionObject::cloneNonSlots(ClassClosure* targetClosure, Cloner& ) const
     {
         ConditionObject* clone =   
             new (targetClosure->gc(), MMgc::kExact, targetClosure->ivtable()->getExtraSize()) ConditionObject(targetClosure->ivtable(), targetClosure->prototypePtr());
-        clone->m_condVar = this->m_condVar;
+        clone->m_state = this->m_state;
         return clone;
     }
 
     ConditionObject::~ConditionObject()
     {
+        m_state = NULL;
+    }
+
+
+    void ConditionObject::State::destroy()
+    {
+        // FIXME can we destroy if wait count > 0?
+        m_mutexState = NULL;
         VMPI_condVarDestroy(&m_condVar);
+        mmfx_delete(this);
     }
 
 

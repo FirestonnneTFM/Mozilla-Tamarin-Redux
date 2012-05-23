@@ -44,21 +44,27 @@
 %%decls
     MMgc::GC *gc;
     NoSyncSingleItemBuffer *singleItemBuffer;
+    NoSyncMultiItemBuffer *multiItemBuffer;
     NonBlockingMultiItemBuffer *nonBlockMultiItemBuffer;
     Atom *atom;
+    ChannelItem* itemp;
  
 %%prologue
     MMgc::GCConfig config;
     gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap(), config);
 	//gc=core->GetGC();
     atom=(Atom *)malloc(100);
+    itemp = new ChannelItem;
     singleItemBuffer=new NoSyncSingleItemBuffer(gc);
+    multiItemBuffer=new NoSyncMultiItemBuffer();
     nonBlockMultiItemBuffer=new NonBlockingMultiItemBuffer(gc);
 
 %%epilogue
     delete singleItemBuffer;
+    delete multiItemBuffer;
     delete nonBlockMultiItemBuffer;
 	delete gc;
+    delete itemp;
     free(atom);
 
 %%test NonBlockMultiItemConstructor
@@ -120,3 +126,47 @@
     %%verify singleItemBuffer->isEmpty()
     %%verify !singleItemBuffer->isFull()
 
+%%test MultiConstructor
+    %%verify multiItemBuffer!=NULL
+
+%%test MultiEmptyBuffer
+    %%verify singleItemBuffer->isEmpty()
+    %%verify !singleItemBuffer->isFull()
+    %%verify !singleItemBuffer->get(atom)
+
+%%test MultiFullBuffer
+    bool result;
+    for (int i=0;i<15;i++) {
+        ChannelItem item;
+        item.tag = kDoubleType;
+        item.asNumber = 3.14;
+        result=multiItemBuffer->put(item);
+        %%verify result
+        %%verify !multiItemBuffer->isEmpty()
+        %%verify !multiItemBuffer->isFull()
+    }
+    ChannelItem inItem;
+    inItem.asNumber = 3.14;
+    inItem.tag = kDoubleType;
+    result=multiItemBuffer->put(inItem);
+    %%verify result
+    %%verify !multiItemBuffer->isEmpty()
+    %%verify multiItemBuffer->isFull()
+
+    result=multiItemBuffer->put(inItem);
+    %%verify !result
+    %%verify !multiItemBuffer->isEmpty()
+    %%verify multiItemBuffer->isFull()
+
+    for (int i=0;i<15;i++) {
+        %%verify multiItemBuffer->get(itemp)
+        %%verify !multiItemBuffer->isEmpty()
+        %%verify !multiItemBuffer->isFull()
+    }
+    %%verify multiItemBuffer->get(itemp)
+    %%verify multiItemBuffer->isEmpty()
+    %%verify !multiItemBuffer->isFull()
+
+    %%verify !multiItemBuffer->get(itemp)
+    %%verify multiItemBuffer->isEmpty()
+    %%verify !multiItemBuffer->isFull()

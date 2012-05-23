@@ -54,6 +54,7 @@ namespace avmplus {
             friend class ConditionObject;
             vmpi_mutex_t m_mutex;
             int m_recursion_count;
+            vmpi_thread_t volatile m_ownerThreadID;
         public:
             State();
             virtual void destroy();
@@ -89,15 +90,29 @@ namespace avmplus {
     public:
         ConditionObject(VTable* vtbl, ScriptObject* delegate);
         virtual ~ConditionObject();
+        
+        void ctor(MutexObject* mutex);
+        bool wait(double timeout);
+        void notify();
+        void notifyAll();
 
-        void wait(MutexObject* mutex);
-        void signal();
-        void broadcast();
         virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
 
+        class State: public FixedHeapRCObject 
+        {
+            friend class ConditionObject;
+            vmpi_condvar_t m_condVar;
+            int m_wait_count;
+            FixedHeapRef<MutexObject::State> m_mutexState;
+        public:
+            State(MutexObject::State* mutexState);
+            virtual void destroy();
+        };
+
     private:
-        vmpi_condvar_t m_condVar;
         GC_NO_DATA(ConditionObject)
+        FixedHeapRef<State> m_state;
+        
         DECLARE_SLOTS_ConditionObject;
     };
     

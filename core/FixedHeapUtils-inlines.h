@@ -149,7 +149,7 @@ namespace avmplus
         if (tNew) {
             int32_t count = tNew->IncrementRef();
             if (TAG > 0) 
-                fprintf(stderr, "incr %p tag %d to %d\n", (T*)tNew, TAG, count);
+                AvmLog("incr %p tag %d to %d\n", (T*)tNew, TAG, count);
         }
         T* tOld = this->t;
         // inc/dec membars must force ordering, so that when t == tNew, rc doesn't go to zero 
@@ -157,7 +157,7 @@ namespace avmplus
         if (tOld) {
             int32_t count = tOld->DecrementRef();
             if (TAG > 0) 
-                fprintf(stderr, "decr %p tag %d to %d\n", (T*)tOld, TAG, count);
+                AvmLog("decr %p tag %d to %d\n", (T*)tOld, TAG, count);
         }
     }
 

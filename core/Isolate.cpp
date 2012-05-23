@@ -127,11 +127,11 @@ namespace avmplus
             Isolate* isolate = m_globals->at(desc);
             if (isolate == NULL) 
                 return false; // FIXME revisit
-            if (isolate->m_state == Isolate::NEW || isolate->m_state > Isolate::RUNNING)
+            if (isolate->m_state == Isolate::NEW || isolate->m_state > Isolate::FINISHING)
                 return false; // not gonna wait 
                 // Interrupt computation and blocking I/O, currently only message receive.
             closeChannelsWithEndpoint(isolate);
-            if (isolate->m_state == Isolate::RUNNING)
+            if (isolate->m_state == Isolate::RUNNING || isolate->m_state == Isolate::STARTING)
                 isolate->interrupt();
                 // Ensure that the write to AvmCore::interrupted is visible to the other thread.
                 // First set interrupted status, then notify 
@@ -450,7 +450,9 @@ namespace avmplus
                 static const char* state_names[] = {
                     "NONE",
                     "NEW",
+                    "STARTING",
                     "RUNNING",
+                    "FINISHING",
                     "TERMINATED",
                     "FAILED",
                     "ABORTED",
@@ -461,8 +463,10 @@ namespace avmplus
                 fprintf(stderr, "%d: %s->%s\n", isolate->desc, state_names[from], state_names[to]);
             }
             isolate->m_state = to;
-            if (to == Isolate::RUNNING) {
-                AvmAssert(from == Isolate::NEW); // FIXME this can be violated (?)
+            if (to == Isolate::STARTING) {
+                AvmAssert(from == Isolate::NEW);
+            } else if (to == Isolate::RUNNING) {
+                AvmAssert(from < to); // FIXME this can be violated (?)
                 AvmAssert(isolate->m_thread != NULL || isolate->desc == 1); // m_thread will be null for giid==1
                 AvmAssert(isolate->m_core != NULL);
             } else if (to == Isolate::EXCEPTION) {
@@ -470,8 +474,8 @@ namespace avmplus
             } else if (to == Isolate::FAILED) {
                 AvmAssert(from == Isolate::NEW);
                 isolate->m_failed = true;
-            } else if (to == Isolate::TERMINATED) {
-                AvmAssert(from == Isolate::RUNNING);
+            } else if (to == Isolate::FINISHING) {
+                AvmAssert(from == Isolate::RUNNING || from == Isolate::STARTING);
                 AvmAssert(isolate->m_thread != NULL);
                 isolate->m_interrupted = true;
                 isolate->stopRunLoop();
@@ -528,7 +532,8 @@ namespace avmplus
 
     enum ChannelItemType {
         ChannelItemByteArray = 0x100,
-        ChannelItemMutex = 0x101
+        ChannelItemMutex = 0x101,
+        ChannelItemCondition = 0x102,
     };
     
     void Isolate::StartArgumentMap::DestroyItem(Isolate::StartArgNamep key, ChannelItem item)
@@ -574,8 +579,6 @@ namespace avmplus
         // FIXME implement.
     }
 
-    
-    
     Atom Isolate::extractAtom(Toplevel* toplevel, ChannelItem item)
     {
         switch (item.tag) {
@@ -601,8 +604,8 @@ namespace avmplus
                 // will increment the refcount of buffer
                 return baObject->toAtom();
             }
-        case ChannelItemMutex:
-            {
+         case ChannelItemMutex:
+             {
                 MutexObject::State* state = static_cast<MutexObject::State*>(item.asNative);
                 MutexClass* mutexClass = toplevel->builtinClasses()->get_MutexClass();
                 MutexObject* mutexObj  =   
@@ -611,6 +614,17 @@ namespace avmplus
                 mutexObj->m_state = state;
                 return mutexObj->toAtom();
             }
+        case ChannelItemCondition:
+             {
+                ConditionObject::State* state = static_cast<ConditionObject::State*>(item.asNative);
+                ConditionClass* conditionClass = toplevel->builtinClasses()->get_ConditionClass();
+                ConditionObject* conditionObj  =   
+                    new (toplevel->gc(), MMgc::kExact, conditionClass->ivtable()->getExtraSize()) ConditionObject(conditionClass->ivtable(), conditionClass->prototypePtr());
+                // will increment the refcount of m_state
+                conditionObj->m_state = state;
+                return conditionObj->toAtom();
+            }
+
 
         default:
             AvmAssert(false);
@@ -658,6 +672,11 @@ namespace avmplus
             mutexObj->m_state->IncrementRef();
             item.asNative = mutexObj->m_state;
             item.tag = ChannelItemMutex;
+        } else if (AvmCore::istype(atom, toplevel->builtinClasses()->get_ConditionClass()->ivtable()->traits)) {
+            ConditionObject* conditionObj = static_cast<ConditionObject*>(toplevel->core()->atomToScriptObject(atom));
+            conditionObj->m_state->IncrementRef();
+            item.asNative = conditionObj->m_state;
+            item.tag = ChannelItemCondition;
         } else {
             item.asNative = NULL;
         }
@@ -723,7 +742,7 @@ namespace avmplus
     {
         bool wasInterrupted = m_interrupted;
         if (!wasInterrupted) {
-            m_aggregate->stateTransition(this, Isolate::TERMINATED);
+            m_aggregate->stateTransition(this, Isolate::FINISHING);
         }
         return wasInterrupted;
     }
@@ -736,7 +755,8 @@ namespace avmplus
     bool Isolate::isMemoryManagementShutDown()
     {
         AvmAssert(AvmCore::getActiveCore() == m_core);
-        return m_state > RUNNING;
+        // In the player it can happen when m_state == FINISHING
+        return m_state > FINISHING;
     }
         
     bool Isolate::isPrimordial()
@@ -1030,7 +1050,7 @@ namespace avmplus
         // FIXME try-finally?
         //EnterSafepointManager enterSafepointManager(this);
         
-        stateTransition(isolate, Isolate::RUNNING);
+        stateTransition(isolate, Isolate::STARTING);
         // Make sure the isolate survives for the duration of the following call.
         {
             FixedHeapRef<Isolate> handle(isolate);

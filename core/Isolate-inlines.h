@@ -175,6 +175,14 @@ namespace avmplus
         Aggregate* aggregate = m_isolate->getAggregate();
         Isolate::State code = aggregate->queryState(m_isolate);
         AvmAssert(code >= Isolate::NEW && code <= Isolate::EXCEPTION);
+        if (code == Isolate::STARTING)
+        {
+            code = Isolate::RUNNING;
+        }
+        else if (code == Isolate::FINISHING)
+        {
+            code = Isolate::TERMINATED;
+        }
         return self()->core()->workerStates[code];
      }
     

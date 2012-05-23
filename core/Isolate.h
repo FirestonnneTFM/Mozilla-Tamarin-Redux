@@ -134,11 +134,13 @@ namespace avmplus
         enum State {
             NONE = 0, // sentinel
             NEW = 1, 
-            RUNNING = 2, 
-            TERMINATED = 3, 
-            FAILED = 4, 
-            ABORTED = 5, 
-            EXCEPTION = 6
+            STARTING = 2, 
+            RUNNING = 3, 
+            FINISHING = 4, 
+            TERMINATED = 5, 
+            FAILED = 6, 
+            ABORTED = 7, 
+            EXCEPTION = 8
         };
 
 
