@@ -57,6 +57,23 @@ public:
 };
 
 
+class MyToplevel: public avmplus::Toplevel 
+{
+    public:
+    MyToplevel(avmplus::AbcEnv* env)
+        : Toplevel(env) {}
+    virtual GCRef<avmplus::ClassClosure> workerClass() const
+    {
+        return NULL;
+    }
+    
+    virtual GCRef<avmplus::ClassClosure> workerDomainClass() const
+    {
+        return NULL;
+    }
+    
+};
+
 class MyAvmCore : public avmplus::AvmCore
 {
 public:
@@ -72,6 +89,11 @@ public:
         return NULL;
     }
     Debugger* createDebugger(int tracelevel) { return new (this->gc) MyDebugger(this, (avmplus::Debugger::_TraceLevel)tracelevel); }
+
+    virtual avmplus::Toplevel* createToplevel(avmplus::AbcEnv* env) { 
+        return new (gc) MyToplevel(env);
+    }
+
 };
 
 

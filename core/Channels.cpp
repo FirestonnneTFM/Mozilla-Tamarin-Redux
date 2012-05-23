@@ -461,7 +461,7 @@ namespace avmplus
     }
     
     NoSyncSingleItemBuffer::BufferData::BufferData(MMgc::GC* gc, NoSyncSingleItemBuffer* buf)
-        : GCRoot(gc, MMgc::kExact), buffer(buf) , m_item(0)
+        : GCRoot(gc, MMgc::kExact), m_item(0), buffer(buf) 
     {
     }
 

@@ -5,24 +5,32 @@ include "api-versions.as"
 
 [API(CONFIG::SWF_17)]
 [native(cls="MutexClass",instance="MutexObject",gc="exact")]
-public final class Mutex
+final public class Mutex
 {
     public function Mutex()
     {
         ctor();
     }
-    private native function ctor():void;
-    public native function lock(): void;
-    public native function unlock():void;
-    public native function tryLock():Boolean;
+    private native function ctor() :void;
+    public native function lock() :void;
+    public native function unlock() :void;
+    public native function tryLock() :Boolean;
 }
 
 [API(CONFIG::SWF_17)]
 [native(cls="ConditionClass",instance="ConditionObject",gc="exact")]
-public final class Condition 
+final public class Condition 
 {
-    public native function wait(mutex: Mutex):void;
-    public native function broadcast():void;
-    public native function signal():void;
+    public function Condition(mutex:Mutex)
+    {
+        if (mutex == null)
+           throw new ArgumentError("mutex is null");
+        ctor(mutex);
+    }
+    private native function ctor(mutex:Mutex) :void;
+     public native function wait(timeout:Number = -1) :Boolean;
+    public native function notify() :void;
+    public native function notifyAll() :void;
+
 }
 }

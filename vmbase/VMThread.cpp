@@ -73,7 +73,8 @@ namespace vmbase {
     }
 
     VMThread::VMThread()
-        : m_state(NOT_STARTED)
+        : m_threadID(VMPI_nullThread()) // CID:12562 Uninitialized scalar field
+        , m_state(NOT_STARTED)
         , m_joinerQty(0)
     {
         m_runnable = this;
