@@ -124,12 +124,16 @@ extern void create_vmbase_safepoints(AvmCore* core);
 namespace ST_vmpi_threads {
 extern void create_vmpi_threads(AvmCore* core);
 }
+#if !defined DEBUGGER
 namespace ST_workers_Buffers {
 extern void create_workers_Buffers(AvmCore* core);
 }
+#endif
+#if !defined DEBUGGER
 namespace ST_workers_NoSyncSingleItemBuffer {
 extern void create_workers_NoSyncSingleItemBuffer(AvmCore* core);
 }
+#endif
 namespace ST_workers_Promise {
 extern void create_workers_Promise(AvmCore* core);
 }
@@ -172,8 +176,12 @@ ST_vmbase_concurrency::create_vmbase_concurrency(core);
 ST_vmbase_safepoints::create_vmbase_safepoints(core);
 #endif
 ST_vmpi_threads::create_vmpi_threads(core);
+#if !defined DEBUGGER
 ST_workers_Buffers::create_workers_Buffers(core);
+#endif
+#if !defined DEBUGGER
 ST_workers_NoSyncSingleItemBuffer::create_workers_NoSyncSingleItemBuffer(core);
+#endif
 ST_workers_Promise::create_workers_Promise(core);
 }
 #endif // VMCFG_SELFTEST
