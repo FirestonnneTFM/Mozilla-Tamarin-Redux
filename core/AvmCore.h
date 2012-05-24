@@ -888,7 +888,7 @@ const int kBufferPadding = 16;
         Atom kFltMinusOne;              // needed for decrement
         Atom kFlt4NaN;
 #endif
-        GCMember<String> workerStates[7];
+        GCMember<String> workerStates[9];
         
         GCMember<String> kExecPolicy;   // execution policy attribute
         GCMember<String> kOSR;          //    OSR threshold
