@@ -41,6 +41,9 @@
 %%component workers
 %%category NoSyncSingleItemBuffer
 
+// Bugzilla: https://bugzilla.mozilla.org/show_bug.cgi?id=758260
+%%ifndef DEBUGGER
+
 %%methods
 
 %%decls
