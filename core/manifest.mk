@@ -140,7 +140,6 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/AbcData.cpp \
   $(curdir)/AvmPlusScriptableObject.cpp \
   $(curdir)/instr.cpp \
-  $(curdir)/ProxyGlue.cpp \
   $(curdir)/DictionaryGlue.cpp \
   $(curdir)/ObjectIO.cpp \
   $(curdir)/AvmSerializer.cpp \
