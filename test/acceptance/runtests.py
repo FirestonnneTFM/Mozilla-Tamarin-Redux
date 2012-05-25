@@ -185,6 +185,9 @@ class AcceptanceRuntest(RuntestBase):
 
     def preProcessTests(self):
         RuntestBase.preProcessTests(self)
+        if not isfile(self.abcasmShell+'.abc'):
+            self.js_print("Precompiling %s" % self.abcasmShell)
+            self.compile_test(self.abcasmShell+'.as')
         # Are we running esc - depends on a valid avm
         if self.runESC:
             self.runSource = True
