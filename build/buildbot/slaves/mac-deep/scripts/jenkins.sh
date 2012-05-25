@@ -64,7 +64,7 @@ fi
 #####################################
 shell_name="avmshell_sd_wordcode"
 configure_args="${base_configure_args} --enable-debug --enable-debugger --enable-wordcode-interp"
-compiledir="objdir-debug-wordcode"
+compiledir="objdir-debugdebugger-wordcode"
 features="${base_features} +AVMFEATURE_WORDCODE_INTERP"
 unset AVM
 cd $WS/build/buildbot/slaves/scripts
@@ -99,7 +99,7 @@ fi
 ####################################
 export shell_name=avmshell_sd_wordcode
 export AVM="$WS/objdir/shell/$shell_name$shell_suffix"
-export mode="release-wordcode"
+export mode="debug-debugger-wordcode"
 export vmargs="-Dinterp"
 cd $WS/build/buildbot/slaves/scripts
 ../all/run-acceptance-generic.sh "$rev_id" "$shell_name$shell_suffix" "$vmargs" "" "--showtimes --log runtests-$mode.txt --logjunit=acceptance-$mode.xml --threads=$threads --testtimeout=300 $suite"
@@ -366,7 +366,7 @@ unset AVM
 cd $WS/build/buildbot/slaves/scripts
 ../all/compile-generic.sh "$rev_id" "$configure_args" "${shell_name}${shell_suffix}" "false" "$features" "$compiledir"
 if [ "$?" != "0" ]; then
-    echo "Wordcode release compilation failure."
+    echo "Release heap graph compilation failure."
     exitcode=1
 fi
 if [ -f $WS/$compiledir/shell/$shell_name$shell_suffix${shell_extension} ]; then
