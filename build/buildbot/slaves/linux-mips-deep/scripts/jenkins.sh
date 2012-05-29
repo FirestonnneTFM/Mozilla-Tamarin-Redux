@@ -62,7 +62,7 @@ export native_shell="$WS/objdir/shell/$shell_name$shell_suffix"
 export mode="debug-interp"
 export vmargs="-Dinterp"
 cd $WS/build/buildbot/slaves/scripts
-../all/run-acceptance-generic-ssh.sh "$rev_id" "$shell_name$shell_suffix" "$vmargs" "mips-lnx-tvm-release-Dinterp" "--showtimes --log runtests-$mode.txt --logjunit=acceptance-$mode.xml --testtimeout=300 $suite"
+../all/run-acceptance-generic-ssh.sh "$rev_id" "$shell_name$shell_suffix" "$vmargs" "mips-lnx-tvm-debug-Dinterp" "--showtimes --log runtests-$mode.txt --logjunit=acceptance-$mode.xml --testtimeout=300 $suite"
 failures=`grep "^failures" $WS/test/acceptance/runtests-$mode.txt | awk '{print $3}'`
 if [ "$failures" = "0" ]; then
     echo "all tests passed"
