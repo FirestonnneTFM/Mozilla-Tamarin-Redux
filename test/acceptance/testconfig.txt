@@ -381,6 +381,7 @@ ecma3/Unicode/uAC00_HangulSyllables , .*valgrind , , skip , This test takes over
 ###########
 as3/asc/import-with-float4-helper , .* , , skip , Not a test on its own
 generated/.* , .* , , skip , Not a test on its own
+as3/ByteArray/ByteArrayLzmaThirdParty , arm-android-tvm-,, skip, reads helper files which are not deployed on Android see https://bugzilla.mozilla.org/show_bug.cgi?id=733051
 
 
 
