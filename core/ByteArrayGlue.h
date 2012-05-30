@@ -139,7 +139,15 @@ namespace avmplus
         
         // Ensure that the ByteArray has a capacity of (at least) capacity.
         // This does not affect GetLength() or GetPosition().
+        // If an attempted expansion fails, throws AS3 exception.
         void EnsureCapacity(uint32_t capacity);
+        void EnsureCapacityNoInline(uint32_t capacity); // (same, but NO_INLINE)
+
+        // Ensure that the ByteArray has a capacity of (at least) capacity
+        // and return true, or set exn_recv to the thrown exception and
+        // return false.
+        bool EnsureCapacityOrFail(uint32_t capacity,
+                                  enum CatchAction, Exception **exn_recv);
 
         // overrides from DataInput
         /*virtual*/ uint32_t Available() { return (m_position <= m_buffer->length) ? (m_buffer->length - m_position) : 0; }
