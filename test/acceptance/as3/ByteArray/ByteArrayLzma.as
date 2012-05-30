@@ -49,9 +49,11 @@
 
 import flash.errors.EOFError;
 import flash.errors.IOError;
+import flash.errors.MemoryError;
 import flash.utils.ByteArray;
 import flash.utils.CompressionAlgorithm;
 
+import avmplus.File;
 
 var SECTION = "ByteArrayWithLzmaTemplate";
 var VERSION = "as3";
@@ -98,7 +100,6 @@ function expectIOError(tag, thunk)
     catch (e)          { exn_ok = "Wrong type"; }
     AddTestCase(tag, "OK", exn_ok);
 }
-
 
 function callCompress(byteArray:ByteArray):void
 {
@@ -155,6 +156,56 @@ function nullByteArrayWithLzma()
 
 nullByteArrayWithLzma();
 
+function compressWithZlibUncompressLzma()
+{
+    var byteArray:ByteArray = new ByteArray();
+    byteArray.writeUTF("COMPRESS TEST");
+    
+    var error_status:String = 'no error';
+    try
+    {
+        byteArray.compress(CompressionAlgorithm.ZLIB)
+        byteArray.uncompress(CompressionAlgorithm.LZMA);
+    }
+    catch(error:Error)
+    {
+        error_status ='error';
+    }
+
+    AddTestCase("expecting thrown exception compressWithZlibUncompressLzma", "error", error_status);
+}
+
+compressWithZlibUncompressLzma()
+
+function uncompressWithoutCompressionLzma()
+{
+    var byteArray:ByteArray = new ByteArray();
+    byteArray.writeUTF("UNCOMPRESS TEST");
+    
+    var uncompressedLengthBefore : uint = byteArray.length;
+
+    var error_status:String = 'no error';
+
+    try
+    {
+        byteArray.uncompress(CompressionAlgorithm.LZMA);
+    }
+    catch(error:IOError)
+    {
+        error_status ='error';
+    }
+    catch(error:MemoryError)
+    {
+        error_status ='error';
+    }
+
+    AddTestCase("expecting thrown exception uncompressWithZlibUncompressLzma", "error", error_status);
+
+    AddTestCase("uncompressWithoutCompressionLzma bytearray length matches before uncompress",
+        uncompressedLengthBefore, byteArray.length);
+}
+
+uncompressWithoutCompressionLzma()
 
 function testBooleanWithLzma() 
 {
@@ -870,5 +921,121 @@ function testBOMWithLzma() {
 
 testBOMWithLzma();
 
+    // lzma-compressed data format:
+    // 5 bytes: LZMA properties
+    // 8 bytes: uncompressed size k (little-endian)
+    // k bytes: payload (the compressed data)
+
+function testIllFormedLzmaLowSize():void {
+    var b1:ByteArray = new ByteArray();
+    b1.writeUTF("string");
+    b1.compress(CompressionAlgorithm.LZMA);
+
+    var b2:ByteArray = new ByteArray();
+
+    // muck with low 32 bits of size
+    for (var i:uint=0; i < 4; i++) {
+        b2.clear();
+        b1.position = 0;
+        b1.readBytes(b2);
+
+        b2[5 + i] += 1;
+
+        var result;
+        try {
+            b2.uncompress(CompressionAlgorithm.LZMA);
+            result = "unexpected"
+        } catch (e:IOError) {
+            result = "ioerror on wrong size"
+        }
+
+        AddTestCase("ByteArray.uncompress ill-formed LZMA size "+i+" byte",
+                    "ioerror on wrong size",result);
+    }
+}
+
+testIllFormedLzmaLowSize();
+
+function testIllFormedLzmaHighSize():void {
+    var b1:ByteArray = new ByteArray();
+    b1.writeUTF("string");
+    b1.compress(CompressionAlgorithm.LZMA);
+
+    var b2:ByteArray = new ByteArray();
+
+
+    // muck with high 32 bits of size
+    for (var i:uint=4; i < 8; i++) {
+        b2.clear();
+        b1.position = 0;
+        b1.readBytes(b2);
+
+        b2[5 + i] += 1;
+
+        var result;
+        try {
+            b2.uncompress(CompressionAlgorithm.LZMA);
+            result = "unexpected"
+        } catch (e:MemoryError) {
+            result = "memoryerror on huge size"
+        }
+
+        AddTestCase("ByteArray.uncompress ill-formed LZMA size "+i+" byte",
+                    "memoryerror on huge size",result);
+    }
+}
+
+testIllFormedLzmaHighSize();
+
+// (Below is not necessarily working; in particular Felix would have expected
+//  it to hit the IllFormedLzma cases above, but for some reason it is not.)
+function testFuzzedLzma():void {
+    var b1:ByteArray = new ByteArray();
+    b1.writeUTF("string");
+    b1.compress(CompressionAlgorithm.LZMA);
+
+    var b2:ByteArray = new ByteArray();
+
+    for (var i:uint=0; i < b1.length * 8; i++) {
+        b2.clear();
+        b1.position = 0;
+        print("b1.length A: "+b1.length);
+        b1.readBytes(b2);
+        print("b1.length B: "+b1.length);
+
+        var byteOffset:uint = i / 8;
+        var bitOffset:uint  = i % 8;
+
+        var oldByte:uint = b2[byteOffset];
+        var oldBit:uint  = (oldByte >> bitOffset) & 0x1;
+        var newByte:uint = (oldByte ^ (oldBit << bitOffset)) & 0xFF;
+        b2[byteOffset] = newByte;
+
+        print('b1 ['+Array.prototype.join.call(b1, ',')+']');
+        print('b2 ['+Array.prototype.join.call(b2, ',')+']');
+
+        var result;
+        // This test is largely fishing for segfaults (and striving for code coverage)
+        try {
+            b2.uncompress(CompressionAlgorithm.LZMA);
+
+            // If we get here, then the LZMA algorithm completed and
+            // we have no idea what the resulting byte array contains.
+            result = "expected" // no exn
+        } catch (e:MemoryError) {
+            result = "expected"
+        } catch (e:IOError) {
+            // should also verify that original data was restored
+            result = "expected"
+        }
+        AddTestCase("ByteArray.uncompress fuzzed LZMA input "+i+" bit",
+                    "expected",result);
+    }
+}
+
+// Commenting out test because it is not behaving the way Felix would
+// expect and he does not want to take the time now to debug it.
+
+testFuzzedLzma();
 
 test();
