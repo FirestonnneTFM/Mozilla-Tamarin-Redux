@@ -545,6 +545,43 @@ namespace avmplus
         Grower grower(this, capacity);
         grower.EnsureWritableCapacity();
     }
+
+    NO_INLINE void ByteArray::EnsureCapacityNoInline(uint32_t capacity)
+    {
+        this->EnsureCapacity(capacity);
+    }
+
+    bool ByteArray::EnsureCapacityOrFail(uint32_t newCap,
+                                         enum CatchAction catch_action,
+                                         Exception **exn_recv)
+    {
+        // Argh, even when refactored like so, Android NDK r6b
+        // compiler (in darwin-x86/arm-linux-androideabi/bin/g++, aka
+        // GCC 4.4.3, at -O3 optimization level) continues to issue
+        // warnings (promoted to errors by -Werror) of the form:
+        //
+        //   error: argument 'this' might be clobbered by 'longjmp' or 'vfork'
+        //   error: argument 'newCap' might be clobbered by 'longjmp' or 'vfork'
+        //
+        // A quick survey hints that this is a GNU compiler bug.  The
+        // main work-arounds Felix has identified are to either:
+        // * put 'this' and 'newCap' into volatile locals, or
+        // * keep the call inside the TRY body from being inlined.
+
+        TRY(m_toplevel->core(), catch_action)
+        {
+            EnsureCapacityNoInline(newCap);
+            return true;
+        }
+        CATCH(Exception *exn)
+        {
+            *exn_recv = exn;
+            return false;
+        }
+        END_CATCH
+        END_TRY
+    }
+
     
     void ByteArray::NotifySubscribers()
     {
@@ -659,6 +696,7 @@ namespace avmplus
         uint8_t* origData                       = m_buffer->array;
         uint32_t origLen                        = m_buffer->length;
         uint32_t origCap                        = m_buffer->capacity;
+        uint32_t origPos                        = m_position;
         MMgc::GCObject* origCopyOnWriteOwner    = m_copyOnWriteOwner;
         if (!origLen) // empty buffer should give empty result
             return;
@@ -681,8 +719,22 @@ namespace avmplus
         int retcode;
         struct lzma_compressed *destOverlay;
         size_t destLen;
-    retry:
-        EnsureCapacity(newCap);
+
+    retry_compress:
+        Exception *exn;
+        bool ensured = EnsureCapacityOrFail(newCap, kCatchAction_Rethrow, &exn);
+        if (!ensured)
+        {
+            // clean up when the EnsureCapacity call fails.
+            m_buffer->array = origData;
+            m_buffer->length = origLen;
+            m_buffer->capacity = origCap;
+            m_position = origPos;
+            SetCopyOnWriteOwner(origCopyOnWriteOwner);
+
+            m_toplevel->core()->throwException(exn);
+        }
+
         destOverlay = (struct lzma_compressed*) m_buffer->array;
         destLen = m_buffer->capacity - lzmaHeaderSize;
 
@@ -727,14 +779,20 @@ namespace avmplus
             // growth on failure (rather than e.g. exponential).
             newCap += origCap;
 
-            goto retry;
+            goto retry_compress;
         case SZ_ERROR_MEM:
         case SZ_ERROR_PARAM:
         case SZ_ERROR_THREAD:
         default:
         error_cases:
             // On other failures, just give up.
+
+            // Even though we set length to 0 (effectively clearing
+            // the state), we set array back to origData so that its
+            // memory will be properly managed.
+            m_buffer->array = origData;
             m_buffer->length = 0;
+            m_buffer->capacity = origCap;
             break;
         }
 
@@ -849,24 +907,16 @@ namespace avmplus
         if (!m_buffer->array || m_buffer->length < lzmaHeaderSize)
             return;
 
-        m_buffer->array             = NULL;
-        m_buffer->length            = 0;
-        m_buffer->capacity          = 0;
-        m_position          = 0;
-        m_copyOnWriteOwner  = NULL;
-
-        uint32_t unpackedLen;
-
         struct lzma_compressed *srcOverlay;
         srcOverlay = (struct lzma_compressed*)origData;
 
-        size_t srcLen = (origLen - lzmaHeaderSize);
-
+        uint32_t unpackedLen;
         unpackedLen  =  (uint32_t)srcOverlay->unpackedSize[0];
         unpackedLen +=  (uint32_t)srcOverlay->unpackedSize[1] << 8;
         unpackedLen +=  (uint32_t)srcOverlay->unpackedSize[2] << 16;
         unpackedLen +=  (uint32_t)srcOverlay->unpackedSize[3] << 24;
 
+        // check that size is reasonable before modifying internal structure.
         if (srcOverlay->unpackedSizeHighBits[0] != 0 ||
             srcOverlay->unpackedSizeHighBits[1] != 0 ||
             srcOverlay->unpackedSizeHighBits[2] != 0 ||
@@ -876,10 +926,33 @@ namespace avmplus
             ThrowMemoryError();
         }
 
+        size_t srcLen = (origLen - lzmaHeaderSize);
+
+        m_buffer->array             = NULL;
+        m_buffer->length            = 0;
+        m_buffer->capacity          = 0;
+        m_position          = 0;
+        m_copyOnWriteOwner  = NULL;
+
         // Since we rely on unpackedLen being correct, we do not need
         // to loop with different trial lengths; either it works on
         // first try, or it will always fail.
-        EnsureCapacity(unpackedLen);
+        Exception *exn;
+        bool ensured =
+            EnsureCapacityOrFail(unpackedLen, kCatchAction_Rethrow, &exn);
+        if (!ensured)
+        {
+            // clean up when the EnsureCapacity call fails.
+
+            // (keep in sync with state restoration in error_cases: labelled below)
+            m_buffer->array = origData;
+            m_buffer->length = origLen;
+            m_buffer->capacity = origCap;
+            m_position = origPos;
+            SetCopyOnWriteOwner(origCopyOnWriteOwner);
+
+            m_toplevel->core()->throwException(exn);
+        }
 
         int retcode;
         size_t destLen = unpackedLen;
@@ -927,6 +1000,7 @@ namespace avmplus
             mmfx_delete_array(m_buffer->array);
 
             // 2) put the original data back.
+            // (keep in sync with state restoration above)
             m_buffer->array = origData;
             m_buffer->length = origLen;
             m_buffer->capacity = origCap;
