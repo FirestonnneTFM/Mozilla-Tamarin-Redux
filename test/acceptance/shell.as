@@ -280,7 +280,6 @@ function writeTestCaseResult( expect, actual, string ) {
     return passed;
 }
 
-
 function addToATS(expected, actual, description) {
     // Testcase Description
     this[fileName+"Str"].push(description);
@@ -290,6 +289,9 @@ function addToATS(expected, actual, description) {
 
     // Testcase Expected Values Return
     this[fileName+"Ans"].push(expected);
+
+//  uncomment when running locally to see test results in flashlog.txt
+//    Trace("["+description+"] ["+actual+"]");
 }
 
 

@@ -39,7 +39,7 @@
 
 // General principles for this test suite:
 //
-//  - never write just one, write at least two (to test that position 
+//  - never write just one, write at least two (to test that position
 //    advances correctly and output is placed correctly)
 //  - ditto read
 //  - test both little and big endian for multibyte data
@@ -101,30 +101,28 @@ function expectIOError(tag, thunk)
     AddTestCase(tag, "OK", exn_ok);
 }
 
-function callCompress(byteArray:ByteArray):void
+function callCompress(byteArray:ByteArray,description:String):void
 {
     var error_status:String='no error';
     var len:int = byteArray.length;
     try
     {
-        byteArray.compress(CompressionAlgorithm.LZMA);    
+        byteArray.compress(CompressionAlgorithm.LZMA);
         byteArray.uncompress(CompressionAlgorithm.LZMA);
-        
     }
     catch(error:Error)
     {
-        error_status = error.message;        
+        error_status = error.message;
     }
     byteArray.position = len;
-    AddTestCase("expecting no exception","no error",error_status);
-    AddTestCase("Expecting length no change ",len,byteArray.length);    
+    AddTestCase(description+": expecting no exception","no error",error_status);
+    AddTestCase(description+": expecting length no change ",len,byteArray.length);
 }
 
 function testEmptyByteArrayWithLzma()
 {
     var bytearray:ByteArray = new ByteArray();
-    callCompress(bytearray);
-    
+    callCompress(bytearray,"empty bytearray");
 }
 
 testEmptyByteArrayWithLzma();
@@ -133,7 +131,7 @@ function zeroByteArrayWithLzma()
 {
     var bytearray:ByteArray = new ByteArray();
     bytearray.writeByte(0);
-    callCompress(bytearray);
+    callCompress(bytearray,"zero length bytearray");
 }
 zeroByteArrayWithLzma();
 
@@ -143,12 +141,12 @@ function nullByteArrayWithLzma()
     var error_status:String='no error';
     try
     {
-        byteArray.compress(CompressionAlgorithm.LZMA);            
-        byteArray.uncompress(CompressionAlgorithm.LZMA);        
-    } 
+        byteArray.compress(CompressionAlgorithm.LZMA);
+        byteArray.uncompress(CompressionAlgorithm.LZMA);
+    }
     catch(error:Error)
     {
-        error_status ='error';        
+        error_status ='error';
     }
     AddTestCase("expecting thrown exception","error",error_status);
 
@@ -160,7 +158,6 @@ function compressWithZlibUncompressLzma()
 {
     var byteArray:ByteArray = new ByteArray();
     byteArray.writeUTF("COMPRESS TEST");
-    
     var error_status:String = 'no error';
     try
     {
@@ -181,7 +178,7 @@ function uncompressWithoutCompressionLzma()
 {
     var byteArray:ByteArray = new ByteArray();
     byteArray.writeUTF("UNCOMPRESS TEST");
-    
+
     var uncompressedLengthBefore : uint = byteArray.length;
 
     var error_status:String = 'no error';
@@ -207,35 +204,35 @@ function uncompressWithoutCompressionLzma()
 
 uncompressWithoutCompressionLzma()
 
-function testBooleanWithLzma() 
+function testBooleanWithLzma()
 {
     var bytearray:ByteArray=makeByteArray();
     bytearray.writeBoolean(true);
-    bytearray.writeBoolean(false);    
+    bytearray.writeBoolean(false);
     AddTestCase("ByteArray position after writing Booleans",
         2,
         bytearray.position);
-    callCompress(bytearray);
+    callCompress(bytearray,"boolean bytearray");
     bytearray.position=0;
     AddTestCase(
         "ByteArray move position to 0",
         0,
         bytearray.position);
-    
+
     AddTestCase(
         "ByteArray write/read boolean true",
         true,
         bytearray.readBoolean());
-    
+
     AddTestCase(
         "ByteArray write/read boolean false",
         false,
         bytearray.readBoolean());
 }
 
-testBooleanWithLzma(); 
+testBooleanWithLzma();
 
-function testShortWithLzma() 
+function testShortWithLzma()
 {
     // One endianness or the other
     function readShort_tests1(endian, offset)
@@ -245,7 +242,7 @@ function testShortWithLzma()
         bytearray.position=offset;
         bytearray.writeShort(100);
         bytearray.writeShort(-200);
-        callCompress(bytearray);
+        callCompress(bytearray,"bytearray of short");
         bytearray.position=offset;
         AddTestCase("ByteArray readShort_1 #1 " + endian,
             100,
@@ -257,7 +254,7 @@ function testShortWithLzma()
             4+offset,
             bytearray.position);
     }
-    
+
     // Mixed endianness: write with one, read with the other
     function readShort_tests2(offset)
     {
@@ -266,7 +263,7 @@ function testShortWithLzma()
         bytearray.position=offset;
         bytearray.writeShort(int(0x1234));
         bytearray.writeShort(int(0xFEDC));
-        callCompress(bytearray);
+        callCompress(bytearray,"bytearray of short mixed endianness");
         bytearray.position=offset;
         bytearray.endian = "littleEndian";
         AddTestCase("ByteArray readShort_2 #1",
@@ -279,14 +276,14 @@ function testShortWithLzma()
             4+offset,
             bytearray.position);
     }
-    
+
     // EOF at various offsets and alignments
     function readShort_tests3(offset)
     {
         var bytearray:ByteArray=makeByteArray(offset);  // use offset to create the alignment
         bytearray.writeShort(0x1234);
-        callCompress(bytearray);
-        
+        callCompress(bytearray,"bytearray of shorts with EOFs at various offsets");
+
         for ( var i=0 ; i < 2 ; i++ ) {
             var v;
             expectEOF("ByteArray readShort_3 #1 " + offset + " " + (i+1),
@@ -296,7 +293,7 @@ function testShortWithLzma()
                 }));
         }
     }
-    
+
     for ( var offs=0 ; offs < 4 ; offs++ ) {
         readShort_tests1("bigEndian", offs);
         readShort_tests1("littleEndian", offs);
@@ -307,7 +304,7 @@ function testShortWithLzma()
 
 testShortWithLzma();
 
-function testUnsignedShortWithLzma() 
+function testUnsignedShortWithLzma()
 {
     // One endianness or the other
     function readUShort_tests1(endian, offset)
@@ -317,7 +314,7 @@ function testUnsignedShortWithLzma()
         bytearray.position=offset;
         bytearray.writeShort(100);
         bytearray.writeShort(uint(-200) & 65535);
-        callCompress(bytearray);
+        callCompress(bytearray,"unsigned short");
         bytearray.position=offset;
         AddTestCase("ByteArray readUShort_1 #1 " + endian,
             uint(100),
@@ -329,7 +326,7 @@ function testUnsignedShortWithLzma()
             4+offset,
             bytearray.position);
     }
-    
+
     // Mixed endianness: write with one, read with the other
     function readUShort_tests2(offset)
     {
@@ -338,7 +335,7 @@ function testUnsignedShortWithLzma()
         bytearray.position=offset;
         bytearray.writeShort(uint(0x1234));
         bytearray.writeShort(uint(0xFEDC) & 65535);
-        callCompress(bytearray);
+        callCompress(bytearray,"unsigned short mixed endianness");
         bytearray.position=offset;
         bytearray.endian = "littleEndian";
         AddTestCase("ByteArray readUShort_2 #1",
@@ -351,13 +348,13 @@ function testUnsignedShortWithLzma()
             4+offset,
             bytearray.position);
     }
-    
+
     // EOF at various offsets and alignments
     function readUShort_tests3(offset)
     {
         var bytearray:ByteArray=makeByteArray(offset);  // use offset to create the alignment
         bytearray.writeShort(0x1234);
-        callCompress(bytearray);
+        callCompress(bytearray,"unsigned short eof at various offsets");
         for ( var i=0 ; i < 2 ; i++ ) {
             var v;
             expectEOF("ByteArray readUShort_3 #1 " + offset + " " + (i+1),
@@ -367,7 +364,7 @@ function testUnsignedShortWithLzma()
                 }));
         }
     }
-    
+ 
     for ( var offs=0 ; offs < 4 ; offs++ ) {
         readUShort_tests1("bigEndian", offs);
         readUShort_tests1("littleEndian", offs);
@@ -388,7 +385,7 @@ function testIntWithLzma()
         bytearray.position=offset;
         bytearray.writeInt(100);
         bytearray.writeInt(-200);
-        callCompress(bytearray);
+        callCompress(bytearray,"int endianness");
         bytearray.position=offset;
         AddTestCase("ByteArray readInt_1 #1 " + endian,
             100,
@@ -400,7 +397,7 @@ function testIntWithLzma()
             8+offset,
             bytearray.position);
     }
-    
+
     // Mixed endianness: write with one, read with the other
     function readInt_tests2(offset)
     {
@@ -409,7 +406,7 @@ function testIntWithLzma()
         bytearray.position=offset;
         bytearray.writeInt(int(0x12345678));
         bytearray.writeInt(int(0xFEDCBA98));
-        callCompress(bytearray);
+        callCompress(bytearray,"int mixed endianness");
         bytearray.position=offset;
         bytearray.endian = "littleEndian";
         AddTestCase("ByteArray readInt_2 #1",
@@ -422,71 +419,14 @@ function testIntWithLzma()
             8+offset,
             bytearray.position);
     }
-    
-    
     for ( var offs=0 ; offs < 4 ; offs++ ) {
         readInt_tests1("bigEndian", offs);
         readInt_tests1("littleEndian", offs);
-        readInt_tests2(offs);           
+        readInt_tests2(offs);
     }
 }
 
 testIntWithLzma();
-
-function testUnsignedIntWithLzma()
-{
-    // One endianness or the other
-    function readUInt_tests1(endian, offset)
-    {
-        var bytearray:ByteArray=makeByteArray(offset);
-        bytearray.endian = endian;
-        bytearray.position=offset;
-        bytearray.writeUnsignedInt(100);
-        bytearray.writeUnsignedInt(uint(-200));
-        callCompress(bytearray);
-        bytearray.position=offset;
-        AddTestCase("ByteArray readUnsignedInt_1 #1 " + endian,
-            100,
-            bytearray.readUnsignedInt());
-        AddTestCase("ByteArray readUnsignedInt_1 #2 " + endian,
-            uint(-200),
-            bytearray.readUnsignedInt());
-        AddTestCase("ByteArray readUnsignedInt_1 #3" + endian,
-            8+offset,
-            bytearray.position);
-    }
-    
-    // Mixed endianness: write with one, read with the other
-    function readUInt_tests2(offset)
-    {
-        var bytearray:ByteArray=makeByteArray(offset);
-        bytearray.endian = "bigEndian";
-        bytearray.position=offset;
-        bytearray.writeUnsignedInt(uint(0x12345678));
-        bytearray.writeUnsignedInt(uint(0xFEDCBA98));
-        callCompress(bytearray);
-        bytearray.position=offset;
-        bytearray.endian = "littleEndian";
-        AddTestCase("ByteArray readUnsignedInt_2 #1",
-            uint(0x78563412),
-            bytearray.readUnsignedInt());
-        AddTestCase("ByteArray readUnsignedInt_2 #2",
-            uint(0x98BADCFE),
-            bytearray.readUnsignedInt());
-        AddTestCase("ByteArray readUnsignedInt_2 #3",
-            8+offset,
-            bytearray.position);
-    }
-    
-    
-    for ( var offs=0 ; offs < 4 ; offs++ ) {
-        readUInt_tests1("bigEndian", offs);
-        readUInt_tests1("littleEndian", offs);
-        readUInt_tests2(offs);           
-    }
-}
-
-testUnsignedIntWithLzma();
 
 function testFloatWithLzma()
 {
@@ -498,7 +438,7 @@ function testFloatWithLzma()
         bytearray.position=offset;
         bytearray.writeFloat(1.25);
         bytearray.writeFloat(12345.5);
-        callCompress(bytearray);
+        callCompress(bytearray,"float");
         AddTestCase("ByteArray writeFloat_1 #1 " + endian,
             8+offset,
             bytearray.position);
@@ -525,7 +465,7 @@ function testFloatWithLzma()
         
         bytearray.writeFloat(1.25);    // write big
         bytearray.writeFloat(12345.5); //   endian
-        callCompress(bytearray);
+        callCompress(bytearray,"float mixed endianness");
         bytearray.endian = "littleEndian";
         bytearray.position=offset;
         
@@ -564,7 +504,7 @@ function testDoubleWithLzma()
         bytearray.position=offset;
         bytearray.writeDouble(1.25);
         bytearray.writeDouble(12345.5);
-        callCompress(bytearray);
+        callCompress(bytearray,"double");
         AddTestCase("ByteArray writeDouble_1 #1 " + endian,
             16+offset,
             bytearray.position);
@@ -591,7 +531,7 @@ function testDoubleWithLzma()
         
         bytearray.writeDouble(1.25);    // write big
         bytearray.writeDouble(12345.5); //   endian
-        callCompress(bytearray);
+        callCompress(bytearray,"double mixed endianness");
         bytearray.endian = "littleEndian";
         bytearray.position=offset;
         
@@ -626,7 +566,7 @@ function testByteWithLzma()
     bytearray.position=0;
     bytearray.writeByte(-257);
     bytearray.writeByte(37);
-    callCompress(bytearray);
+    callCompress(bytearray,"byte");
     AddTestCase("testByte: ByteArray position",
         2,
         bytearray.position);
@@ -651,43 +591,12 @@ function testByteWithLzma()
 
 testByteWithLzma();
 
-function testUnsignedByteWithLzma() 
-{
-    var bytearray:ByteArray = makeByteArray();
-    bytearray.position=0;
-    bytearray.writeByte(-259);
-    bytearray.writeByte(37);
-    callCompress(bytearray);
-    AddTestCase("testUnsignedByte: ByteArray position",
-        2,
-        bytearray.position);
-    AddTestCase("testUnsignedByte: ByteArray length",
-        2,
-        bytearray.length);
-    bytearray.position=0;
-    AddTestCase( "ByteArray readUnsignedByte",
-        253,
-        bytearray.readUnsignedByte());
-    AddTestCase( "ByteArray readUnsignedByte",
-        37,
-        bytearray.readUnsignedByte());
-    
-    var v;
-    expectEOF("ByteArray readUnsignedByte EOF",
-        (function () {
-            bytearray.position = bytearray.length;
-            v = bytearray.readUnsignedByte();
-        }));
-}
-
-testUnsignedByteWithLzma();
-
 function testUtfWithLzma() 
 {
     var bytearray:ByteArray = makeByteArray();
     bytearray.position=0;
     bytearray.writeUTF("string");
-    callCompress(bytearray);
+    callCompress(bytearray,"UTF");
     AddTestCase(
         "ByteArray position of utf string",
         8,
@@ -716,7 +625,7 @@ function testUtfWithLzma()
     bytearray.writeByte(97);
     bytearray.writeByte(0);
     bytearray.writeByte(115);
-    callCompress(bytearray);
+    callCompress(bytearray,"bytes");
     bytearray.position = 0;
     AddTestCase("ByteArray readUTF on contents containing NUL: contents",
         "la",
@@ -772,7 +681,7 @@ function testUtfWithLzma()
     bytearray.writeByte(0xBB);
     bytearray.writeByte(0xBF);
     bytearray.writeUTFBytes("string");
-    callCompress(bytearray);
+    callCompress(bytearray,"skip UTF-8 BOM");
     bytearray.position = 0;
     AddTestCase("ByteArray readUTF skips UTF8 BOM after length bytes but includes it in the length",
         "str",
@@ -788,7 +697,7 @@ function testUtfBytesWithLzma()
     var bytearray:ByteArray = makeByteArray();
     bytearray.position=0;
     bytearray.writeUTFBytes("string");
-    callCompress(bytearray);
+    callCompress(bytearray,"UTF bytes");
     bytearray.position=0;
     AddTestCase(
         "ByteArray length of utf bytes string",
@@ -811,7 +720,7 @@ function testUtfBytesWithLzma()
     bytearray.writeByte(97);
     bytearray.writeByte(0);
     bytearray.writeByte(115);
-    callCompress(bytearray);
+    callCompress(bytearray,"bytes contains NULL");
     bytearray.position = 0;
     AddTestCase("ByteArray readUTFBytes on contents containing NUL: contents",
         "la",
@@ -840,7 +749,7 @@ function testUtfBytesWithLzma()
     bytearray.writeByte(0xBB);
     bytearray.writeByte(0xBF);
     bytearray.writeUTFBytes("string");
-    callCompress(bytearray);
+    callCompress(bytearray,"bytes contain high value bytes");
     bytearray.position = 0;
     AddTestCase("ByteArray readUTFBytes skips UTF8 BOM but includes it in the length",
         "str",
@@ -858,7 +767,7 @@ function testBracketSyntaxWithLzma() {
     bytearray.writeByte(10);
     bytearray.writeByte(11);
     bytearray.writeByte(12);
-    callCompress(bytearray);
+    callCompress(bytearray,"bracket syntax");
     bytearray.position = 0;
     
     AddTestCase(
@@ -996,12 +905,13 @@ function testFuzzedLzma():void {
 
     var b2:ByteArray = new ByteArray();
 
+    var errors:String="";
     for (var i:uint=0; i < b1.length * 8; i++) {
         b2.clear();
         b1.position = 0;
-        print("b1.length A: "+b1.length);
+        //        print("b1.length A: "+b1.length);
         b1.readBytes(b2);
-        print("b1.length B: "+b1.length);
+        //        print("b1.length B: "+b1.length);
 
         var byteOffset:uint = i / 8;
         var bitOffset:uint  = i % 8;
@@ -1011,8 +921,8 @@ function testFuzzedLzma():void {
         var newByte:uint = (oldByte ^ (oldBit << bitOffset)) & 0xFF;
         b2[byteOffset] = newByte;
 
-        print('b1 ['+Array.prototype.join.call(b1, ',')+']');
-        print('b2 ['+Array.prototype.join.call(b2, ',')+']');
+        //        print('b1 ['+Array.prototype.join.call(b1, ',')+']');
+        //        print('b2 ['+Array.prototype.join.call(b2, ',')+']');
 
         var result;
         // This test is largely fishing for segfaults (and striving for code coverage)
@@ -1028,9 +938,12 @@ function testFuzzedLzma():void {
             // should also verify that original data was restored
             result = "expected"
         }
-        AddTestCase("ByteArray.uncompress fuzzed LZMA input "+i+" bit",
-                    "expected",result);
+        if (result!="expected") {
+            errors+=" error fuzzing bit "+i+" ";
+        }
     }
+    AddTestCase("ByteArray.uncompress fuzzed LZMA input check for errors",
+                    "",errors);
 }
 
 // Commenting out test because it is not behaving the way Felix would
