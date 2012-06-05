@@ -119,7 +119,8 @@ package {
         System.sleep(250); 
         // FIXME: stop() may kill the background worker before it finishes running its tests, the sleep above tries to reduce the likelihood of that.
         wchild.terminate(); 
-        AddTestCase("child worker: after terminate() state is 'terminated'",WorkerState.TERMINATED,wchild.state);
+        // Disable this test for now: Bugzilla: https://bugzilla.mozilla.org/show_bug.cgi?id=761632
+        //AddTestCase("child worker: after terminate() state is 'terminated'",WorkerState.TERMINATED,wchild.state);
 
         test();
 
