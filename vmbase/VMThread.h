@@ -541,6 +541,9 @@ namespace vmbase {
         static bool compareAndSwap32(int32_t oldValue, int32_t newValue, volatile int32_t* address);
         static bool compareAndSwap32WithBarrier(int32_t oldValue, int32_t newValue, volatile int32_t* address);
 
+
+        static int32_t compareAndSwap32WithBarrierPrev(int32_t oldValue, int32_t newValue, volatile int32_t* address);
+
         /**
          * Performs an atomic in-place bitwise OR.
          *

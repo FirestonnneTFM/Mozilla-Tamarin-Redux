@@ -78,20 +78,20 @@ if (Worker.current.isPrimordial) {
     promise = w.start();
     echoPromise = promise.async.remoteEcho("echo1");
     AddTestCase("(MAIN DOMAIN - FROM BYTE ARRAY) RETURNED ECHO", "echo1", echoPromise.receive());
-    w.stop();
+    w.terminate();
 
     w = WorkerDomain.current.createWorkerFromPrimordial();
     promise = w.start();
     echoPromise = promise.async.remoteEcho("echo2");
     AddTestCase("(MAIN DOMAIN - FROM MAIN) RETURNED ECHO", "echo2", echoPromise.receive());
-    w.stop();
+    w.terminate();
 
     var workerDomain:WorkerDomain = new WorkerDomain();
     w = workerDomain.createWorkerFromByteArray(blob);
     promise = w.start();
     echoPromise = promise.async.remoteEcho("echo3");
     AddTestCase("(NEW DOMAIN - FROM BYTE ARRAY) RETURNED ECHO", "echo3", echoPromise.receive());
-    w.stop();
+    w.terminate();
 
     test();
  }

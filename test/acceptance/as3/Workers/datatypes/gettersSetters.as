@@ -96,7 +96,7 @@ if (Worker.current.isPrimordial) {
     var echoedObj = getEchoedObject(mc);
     AddTestCase("getters/setters handled correctly", 1, echoedObj.c);
     test();
-    w.stop();
+    w.terminate();
     
 } else {
 

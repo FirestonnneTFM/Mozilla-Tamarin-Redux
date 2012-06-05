@@ -53,20 +53,21 @@ public function pr(...args)
     for each (var a in args) {
         newArgs.push(a);
     }
-    System.runInSafepoint(function() {
+    //System.runInSafepoint(function() {
         out=''
         for (arg in args) {
             out+=args[arg]+' '
         }
         output+=out+'\n';
-    });
+    //});
+    print(output);
 }
 
 if (Worker.current.isPrimordial) {
 
     var s:ByteArray = new ByteArray();
     s.length = 1024;
-    s.share();
+    s.shareable = true;
     
     s[index] = 100;
     s[casLoc] = "A".charCodeAt(0);
@@ -86,13 +87,14 @@ if (Worker.current.isPrimordial) {
     for (var i:int = 0; i< 5; i++) {
         tries=0
         while (true) {
-            if (s.compareAndSwapWordAt(casLoc, "A".charCodeAt(0), "B".charCodeAt(0))) {
+            if (s.atomicCompareAndSwapIntAt(casLoc, "A".charCodeAt(0), "B".charCodeAt(0)) == "A".charCodeAt(0)) {
                 pr("(", i, "): A->B");
                 break;
             } else {
-                pr("sender cas failed "+i+" "+tries);
+                // Indeterministic:
+                //pr("sender cas failed "+i+" "+tries);
                 tries+=1;
-                if (tries>10) break;
+                //if (tries>100) break;
             }
         }
     }
@@ -107,7 +109,10 @@ if (Worker.current.isPrimordial) {
     lines=output.split('\n');
     AddTestCase("shared bytearray background worker wrote value","shared storage after requestWrite 111 ",lines[2]);
     AddTestCase("shared bytearray background worker before background swap","sender has 65 ",lines[3]);
-    AddTestCase("shared bytearray background worker after background swap","sender has 65 ",lines[9]);
+
+    // The this byte array read is not fenced so it's indeterministic whether sender will read the value
+    // it wrote or the value written by the receiver.
+    //AddTestCase("shared bytearray background worker after background swap","sender has 65 ",lines[9]);
     for (var j:uint=0;j<5;j++) {
         AddTestCase("shared bytearray background worker writes worked","( "+j+" ): A->B ",lines[4+j]);
     }
@@ -115,7 +120,7 @@ if (Worker.current.isPrimordial) {
     AddTestCase("shared bytearray contains correct value at 42",111,s[42]);
     test();
     //print(output)
-    w.stop();
+    w.terminate();
     
 } else {
     
@@ -138,13 +143,14 @@ if (Worker.current.isPrimordial) {
         for (var i:int = 0; i< 5; i++) {
             tries=0;
             while (true) {
-                if (b.compareAndSwapWordAt(casLoc, "B".charCodeAt(0), "A".charCodeAt(0))) {
+                if (b.atomicCompareAndSwapIntAt(casLoc, "B".charCodeAt(0), "A".charCodeAt(0)) == "B".charCodeAt(0)) {
                     pr("mainLoop (", i, "): B->A");
                     break;
                 } else {
-                    pr("receiver cas failed");
+                    // Indeterministic:
+                    //pr("receiver cas failed");
                     tries+=1;
-                    if (tries>10) break;
+                    //if (tries>100) break;
                 }
             }
         }

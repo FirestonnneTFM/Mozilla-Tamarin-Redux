@@ -60,8 +60,8 @@ package {
 
         // stop a worker not started
         var worker2:Worker=WorkerDomain.current.createWorkerFromPrimordial();
-        var code2:Boolean= worker2.stop();
-        AddTestCase("worker stop returns false if worker not started",false,code2);
+        var code2:Boolean= worker2.terminate();
+        AddTestCase("worker terminate returns false if worker not started",false,code2);
         
         // promise receive on a global promise
         var result1=promise1.receive();
@@ -74,7 +74,7 @@ package {
             AddTestCase("when a promise receive is called twice returns result","test",result2);
         }
         test();
-        worker1.stop();
+        worker1.terminate();
     } else {
         public function echo(o:Object):Object {
             return o;

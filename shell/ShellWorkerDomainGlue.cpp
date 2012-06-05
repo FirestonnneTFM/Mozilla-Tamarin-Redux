@@ -46,7 +46,9 @@ namespace avmshell {
     ShellWorkerObject* ShellWorkerDomainObject::createWorkerFromByteArrayInternal(avmplus::ByteArrayObject* byteArray)
     {
         // Note that the cast to ShellWorkerClass is needed because constructObject is not virtual!
-        GCRef<ShellWorkerObject> shellWorkerObject = toplevel()->workerClass().staticCast<ShellWorkerClass>()->constructObject().staticCast<ShellWorkerObject>();
+
+
+        ShellWorkerObject* shellWorkerObject = toplevel()->workerClass().staticCast<ShellWorkerClass>()->constructObject().staticCast<ShellWorkerObject>();
         shellWorkerObject->setByteCode(byteArray);
         shellWorkerObject->initialize();
         return shellWorkerObject;
@@ -61,6 +63,13 @@ namespace avmshell {
         return clone;
     }
     
+
+    avmplus::ObjectVectorObject* ShellWorkerDomainObject::listWorkers()
+    {
+        return WorkerDomainObjectBase<ShellWorkerDomainObject>::listWorkers();
+    }
+
+
     ShellWorkerDomainClass::ShellWorkerDomainClass(avmplus::VTable *cvtable)
         : avmplus::ClassClosure(cvtable)
     {

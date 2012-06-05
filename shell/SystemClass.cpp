@@ -73,7 +73,7 @@ namespace avmshell
     {
         (void)status;
         GCRef<avmplus::ClassClosure> workerClass = toplevel()->workerClass();
-        static_cast<ShellWorkerClass*>((avmplus::ClassClosure*)workerClass)->getCurrentWorker()->stop();
+        static_cast<ShellWorkerClass*>((avmplus::ClassClosure*)workerClass)->getCurrentWorker()->terminate();
     }
 
     void SystemClass::sleep(int32_t ms)

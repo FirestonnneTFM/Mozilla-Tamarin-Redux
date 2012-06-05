@@ -99,7 +99,7 @@ package {
 
 
         }
-        worker.stop();
+        worker.terminate();
 
         test();
     } else {

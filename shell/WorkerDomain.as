@@ -82,6 +82,8 @@ package flash.system {
 
         private native function createWorkerFromByteArrayInternal(byteArray :ByteArray) :Worker;
 
+        public native function listWorkers():Vector.<Worker>;
+
         private static var m_current :WorkerDomain;
 
     }

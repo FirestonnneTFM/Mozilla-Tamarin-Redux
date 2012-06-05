@@ -84,7 +84,9 @@ namespace avmplus
         // to get our immediate base, even if our base is NULL, thus
         // avoiding a check in the implementation of base().
         uint32_t extra = baseCount * sizeof(DomainEnv*);
-        return new (core->GetGC(), MMgc::kExact, extra) DomainEnv(core, domain, base, baseCount);
+        DomainEnv* domainEnv = new (core->GetGC(), MMgc::kExact, extra) DomainEnv(core, domain, base, baseCount);
+        core->m_domainEnvs.add(domainEnv);
+        return domainEnv;
     }
 
     DomainEnv::~DomainEnv()

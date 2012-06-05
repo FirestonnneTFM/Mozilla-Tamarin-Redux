@@ -98,6 +98,8 @@ namespace avmplus {
     class TraceObject; // flash.trace::Trace
     class WorkerEventClass; // flash.system::WorkerEvent$
     class WorkerEventObject; // flash.system::WorkerEvent
+    class WorkerStateClass; // flash.system::WorkerState$
+    class WorkerStateObject; // flash.system::WorkerState
     class public_classClass; // avmshell::public_class$
     class public_classObject; // avmshell::public_class
     class public_class_AIR_1_0Class; // avmshell::public_class_AIR_1_0$
@@ -230,14 +232,15 @@ const uint32_t abcclass_flash_sampler_NewObjectSample = 46;
 const uint32_t abcclass_flash_sampler_DeleteObjectSample = 47;
 const uint32_t abcclass_flash_trace_Trace = 48;
 const uint32_t abcclass_flash_utils_Endian = 49;
-const uint32_t abcclass_flash_system_Worker = 50;
-const uint32_t abcclass_flash_system_WorkerEvent = 51;
-const uint32_t abcclass_flash_system_WorkerDomain = 52;
-const uint32_t abcclass_flash_system_PromiseState = 53;
-const uint32_t abcclass_flash_system_PromiseHelper = 54;
-const uint32_t abcclass_flash_system_Promise = 55;
-const uint32_t abcclass_flash_system_RemoteProxy = 56;
-const uint32_t abcclass_flash_system_Envelope = 57;
+const uint32_t abcclass_flash_system_WorkerState = 50;
+const uint32_t abcclass_flash_system_Worker = 51;
+const uint32_t abcclass_flash_system_WorkerEvent = 52;
+const uint32_t abcclass_flash_system_WorkerDomain = 53;
+const uint32_t abcclass_flash_system_PromiseState = 54;
+const uint32_t abcclass_flash_system_PromiseHelper = 55;
+const uint32_t abcclass_flash_system_Promise = 56;
+const uint32_t abcclass_flash_system_RemoteProxy = 57;
+const uint32_t abcclass_flash_system_Envelope = 58;
 
 /* methods */
 const uint32_t avmplus_ITest_avmplus_ITest_test = 38; // abc
@@ -341,75 +344,77 @@ const uint32_t flash_trace_Trace_setLevel = 240; // native
 const uint32_t flash_trace_Trace_getLevel = 241; // native
 const uint32_t flash_trace_Trace_setListener = 242; // native
 const uint32_t flash_trace_Trace_getListener = 243; // native
-const uint32_t flash_system_Worker_current_get = 250; // abc
-const uint32_t flash_system_Worker_handleLifecycleEvents = 251; // abc
-const uint32_t flash_system_Worker_pr = 252; // native
-const uint32_t flash_system_Worker_state_get = 254; // native
-const uint32_t flash_system_Worker_startWithChannels = 255; // native
-const uint32_t flash_system_Worker_start = 256; // abc
-const uint32_t flash_system_Worker_private_startInternal = 257; // native
-const uint32_t flash_system_Worker_isParentOf = 258; // native
-const uint32_t flash_system_Worker_isPrimordial_get = 259; // native
-const uint32_t flash_system_Worker_private_newEventChannel = 260; // native
-const uint32_t flash_system_Worker_setStartArgument = 261; // native
-const uint32_t flash_system_Worker_getStartArgument = 262; // native
-const uint32_t flash_system_Worker_stop = 263; // native
-const uint32_t flash_system_Worker_addEventListener = 264; // abc
-const uint32_t flash_system_Worker_private_dispatchEvent = 265; // abc
-const uint32_t flash_system_Worker_descriptor_get = 266; // native
-const uint32_t flash_system_WorkerEvent_currentState_get = 269; // abc
-const uint32_t flash_system_WorkerEvent_previousState_get = 270; // abc
-const uint32_t flash_system_WorkerEvent_target_get = 271; // abc
-const uint32_t flash_system_WorkerDomain_current_get = 274; // abc
-const uint32_t flash_system_WorkerDomain_createWorkerFromByteArray = 276; // abc
-const uint32_t flash_system_WorkerDomain_createWorkerFromPrimordial = 277; // abc
-const uint32_t flash_system_WorkerDomain_private_createWorkerFromByteArrayInternal = 278; // native
-const uint32_t flash_system_PromiseHelper_currentGiid_get = 283; // native
-const uint32_t flash_system_PromiseHelper_getPromiseOwnerGiid = 284; // native
-const uint32_t flash_system_PromiseHelper_setPromiseOwnerGiid = 285; // native
-const uint32_t flash_system_PromiseHelper_getPromiseGid = 286; // native
-const uint32_t flash_system_PromiseHelper_setPromiseGid = 287; // native
-const uint32_t flash_system_PromiseHelper_isPromiseEmpty = 288; // native
-const uint32_t flash_system_PromiseHelper_schedulePromiseCollection = 289; // native
-const uint32_t flash_system_PromiseHelper_retargetIncChannel = 290; // native
-const uint32_t flash_system_PromiseHelper_retargetOutChannel = 291; // native
-const uint32_t flash_system_PromiseHelper_isPromiseCreatedLocally = 292; // abc
-const uint32_t flash_system_PromiseHelper_flash_system_waitForAnySend = 293; // native
-const uint32_t flash_system_PromiseHelper_pr = 294; // native
-const uint32_t flash_system_PromiseHelper_praddr = 295; // native
-const uint32_t flash_system_PromiseHelper_breakOn = 296; // native
-const uint32_t flash_system_Promise_wrap = 299; // abc
-const uint32_t flash_system_Promise_empty = 300; // abc
-const uint32_t flash_system_Promise_private_resolveLocal = 301; // abc
-const uint32_t flash_system_Promise_registerEmptyPromise = 302; // native
-const uint32_t flash_system_Promise_private_printEmptyPromises = 303; // native
-const uint32_t flash_system_Promise_private_create = 304; // native
-const uint32_t flash_system_Promise_private_createLocal = 305; // native
-const uint32_t flash_system_Promise_notifyOwner = 306; // native
-const uint32_t flash_system_Promise_private_notifyEmptyOwners = 307; // native
-const uint32_t flash_system_Promise_isOwnedLocally = 308; // native
-const uint32_t flash_system_Promise_private_callProperty = 309; // abc
-const uint32_t flash_system_Promise_private_getProperty = 310; // abc
-const uint32_t flash_system_Promise_async_get = 311; // abc
-const uint32_t flash_system_Promise_resolve = 312; // abc
-const uint32_t flash_system_Promise_when = 315; // abc
-const uint32_t flash_system_Promise_receive = 316; // abc
-const uint32_t flash_system_Promise_delayCollection = 317; // native
-const uint32_t flash_system_Promise_state_get = 318; // abc
-const uint32_t flash_system_Promise_getPID = 319; // abc
-const uint32_t flash_system_RemoteProxy_create = 322; // native
-const uint32_t flash_system_RemoteProxy_m_workerClass_get = 323; // native
-const uint32_t flash_system_RemoteProxy_callProp = 324; // native
-const uint32_t flash_system_RemoteProxy_getProp = 325; // native
-const uint32_t flash_system_RemoteProxy_checkForCallRequestsConditional = 326; // abc
-const uint32_t flash_system_RemoteProxy_checkForCallRequests = 327; // abc
-const uint32_t flash_system_RemoteProxy_triggerDelayedCollection = 328; // native
-const uint32_t flash_system_RemoteProxy_handleResolution = 329; // abc
-const uint32_t flash_system_RemoteProxy_handleCallback = 330; // abc
-const uint32_t flash_system_RemoteProxy_private_flattenPromise = 331; // abc
-const uint32_t flash_system_RemoteProxy_handleCall = 332; // abc
-const uint32_t flash_system_RemoteProxy_handleGetProp = 333; // abc
-const uint32_t flash_system_Envelope_name_get = 337; // native
+const uint32_t flash_system_WorkerState_code = 250; // abc
+const uint32_t flash_system_Worker_current_get = 253; // abc
+const uint32_t flash_system_Worker_handleLifecycleEvents = 254; // abc
+const uint32_t flash_system_Worker_pr = 255; // native
+const uint32_t flash_system_Worker_state_get = 257; // native
+const uint32_t flash_system_Worker_startWithChannels = 258; // native
+const uint32_t flash_system_Worker_start = 259; // abc
+const uint32_t flash_system_Worker_private_startInternal = 260; // native
+const uint32_t flash_system_Worker_isParentOf = 261; // native
+const uint32_t flash_system_Worker_isPrimordial_get = 262; // native
+const uint32_t flash_system_Worker_private_newEventChannel = 263; // native
+const uint32_t flash_system_Worker_setSharedProperty = 264; // native
+const uint32_t flash_system_Worker_getSharedProperty = 265; // native
+const uint32_t flash_system_Worker_terminate = 266; // native
+const uint32_t flash_system_Worker_addEventListener = 267; // abc
+const uint32_t flash_system_Worker_private_dispatchEvent = 268; // abc
+const uint32_t flash_system_Worker_descriptor_get = 269; // native
+const uint32_t flash_system_WorkerEvent_currentState_get = 272; // abc
+const uint32_t flash_system_WorkerEvent_previousState_get = 273; // abc
+const uint32_t flash_system_WorkerEvent_target_get = 274; // abc
+const uint32_t flash_system_WorkerDomain_current_get = 277; // abc
+const uint32_t flash_system_WorkerDomain_createWorkerFromByteArray = 279; // abc
+const uint32_t flash_system_WorkerDomain_createWorkerFromPrimordial = 280; // abc
+const uint32_t flash_system_WorkerDomain_private_createWorkerFromByteArrayInternal = 281; // native
+const uint32_t flash_system_WorkerDomain_listWorkers = 282; // native
+const uint32_t flash_system_PromiseHelper_currentGiid_get = 287; // native
+const uint32_t flash_system_PromiseHelper_getPromiseOwnerGiid = 288; // native
+const uint32_t flash_system_PromiseHelper_setPromiseOwnerGiid = 289; // native
+const uint32_t flash_system_PromiseHelper_getPromiseGid = 290; // native
+const uint32_t flash_system_PromiseHelper_setPromiseGid = 291; // native
+const uint32_t flash_system_PromiseHelper_isPromiseEmpty = 292; // native
+const uint32_t flash_system_PromiseHelper_schedulePromiseCollection = 293; // native
+const uint32_t flash_system_PromiseHelper_retargetIncChannel = 294; // native
+const uint32_t flash_system_PromiseHelper_retargetOutChannel = 295; // native
+const uint32_t flash_system_PromiseHelper_isPromiseCreatedLocally = 296; // abc
+const uint32_t flash_system_PromiseHelper_flash_system_waitForAnySend = 297; // native
+const uint32_t flash_system_PromiseHelper_pr = 298; // native
+const uint32_t flash_system_PromiseHelper_praddr = 299; // native
+const uint32_t flash_system_PromiseHelper_breakOn = 300; // native
+const uint32_t flash_system_Promise_wrap = 303; // abc
+const uint32_t flash_system_Promise_empty = 304; // abc
+const uint32_t flash_system_Promise_private_resolveLocal = 305; // abc
+const uint32_t flash_system_Promise_registerEmptyPromise = 306; // native
+const uint32_t flash_system_Promise_private_printEmptyPromises = 307; // native
+const uint32_t flash_system_Promise_private_create = 308; // native
+const uint32_t flash_system_Promise_private_createLocal = 309; // native
+const uint32_t flash_system_Promise_notifyOwner = 310; // native
+const uint32_t flash_system_Promise_private_notifyEmptyOwners = 311; // native
+const uint32_t flash_system_Promise_isOwnedLocally = 312; // native
+const uint32_t flash_system_Promise_private_callProperty = 313; // abc
+const uint32_t flash_system_Promise_private_getProperty = 314; // abc
+const uint32_t flash_system_Promise_async_get = 315; // abc
+const uint32_t flash_system_Promise_resolve = 316; // abc
+const uint32_t flash_system_Promise_when = 319; // abc
+const uint32_t flash_system_Promise_receive = 320; // abc
+const uint32_t flash_system_Promise_delayCollection = 321; // native
+const uint32_t flash_system_Promise_state_get = 322; // abc
+const uint32_t flash_system_Promise_getPID = 323; // abc
+const uint32_t flash_system_RemoteProxy_create = 326; // native
+const uint32_t flash_system_RemoteProxy_m_workerClass_get = 327; // native
+const uint32_t flash_system_RemoteProxy_callProp = 328; // native
+const uint32_t flash_system_RemoteProxy_getProp = 329; // native
+const uint32_t flash_system_RemoteProxy_checkForCallRequestsConditional = 330; // abc
+const uint32_t flash_system_RemoteProxy_checkForCallRequests = 331; // abc
+const uint32_t flash_system_RemoteProxy_triggerDelayedCollection = 332; // native
+const uint32_t flash_system_RemoteProxy_handleResolution = 333; // abc
+const uint32_t flash_system_RemoteProxy_handleCallback = 334; // abc
+const uint32_t flash_system_RemoteProxy_private_flattenPromise = 335; // abc
+const uint32_t flash_system_RemoteProxy_handleCall = 336; // abc
+const uint32_t flash_system_RemoteProxy_handleGetProp = 337; // abc
+const uint32_t flash_system_Envelope_name_get = 341; // native
 
 extern avmplus::Atom avmplus_Domain_currentDomain_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom avmplus_Domain_currentDomain_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -481,16 +486,18 @@ extern avmplus::Atom flash_system_Worker_isPrimordial_get_thunk(MethodEnv* env, 
 extern avmplus::Atom flash_system_Worker_isPrimordial_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_Worker_private_newEventChannel_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_Worker_private_newEventChannel_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_setStartArgument_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_setStartArgument_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_getStartArgument_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_getStartArgument_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_stop_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_stop_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_setSharedProperty_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_setSharedProperty_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_getSharedProperty_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_getSharedProperty_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_terminate_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_terminate_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_Worker_descriptor_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_Worker_descriptor_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_WorkerDomain_private_createWorkerFromByteArrayInternal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_WorkerDomain_private_createWorkerFromByteArrayInternal_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_WorkerDomain_listWorkers_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_WorkerDomain_listWorkers_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_PromiseHelper_currentGiid_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_PromiseHelper_currentGiid_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_PromiseHelper_getPromiseOwnerGiid_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -2313,6 +2320,44 @@ class avmplus_EndianObjectSlots
 //-----------------------------------------------------------
 
 //-----------------------------------------------------------
+// flash.system::WorkerState$
+//-----------------------------------------------------------
+class avmplus_WorkerStateClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::WorkerStateClass;
+private:
+    MMgc::GCTraceableObject::GCMember<avmplus::String> m_NEW;
+    MMgc::GCTraceableObject::GCMember<avmplus::String> m_RUNNING;
+    MMgc::GCTraceableObject::GCMember<avmplus::String> m_TERMINATED;
+    MMgc::GCTraceableObject::GCMember<avmplus::String> m_FAILED;
+    MMgc::GCTraceableObject::GCMember<avmplus::String> m_ABORTED;
+    MMgc::GCTraceableObject::GCMember<avmplus::String> m_EXCEPTION;
+public:
+    REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
+    {
+        gc->TraceLocation(&m_NEW);
+        gc->TraceLocation(&m_RUNNING);
+        gc->TraceLocation(&m_TERMINATED);
+        gc->TraceLocation(&m_FAILED);
+        gc->TraceLocation(&m_ABORTED);
+        gc->TraceLocation(&m_EXCEPTION);
+    }
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// flash.system::WorkerState
+//-----------------------------------------------------------
+class avmplus_WorkerStateObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::WorkerStateObject;
+#define GC_TRIVIAL_TRACER_WorkerStateObject
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
 // flash.system::Worker$
 //-----------------------------------------------------------
 class avmshell_ShellWorkerClassSlots
@@ -3039,8 +3084,8 @@ class shell_toplevelClassManifest : public avmplus::ClassManifestBase
     friend class avmplus::DoubleVectorClass;
     friend class avmplus::ObjectVectorClass;
 private:
-    REALLY_INLINE shell_toplevelClassManifest(avmplus::ScriptEnv* e) : ClassManifestBase(58, e) { }
-    REALLY_INLINE static shell_toplevelClassManifest* create(avmplus::ScriptEnv* e) { return new (MMgc::GC::GetGC(e), MMgc::kExact, sizeof(ClassClosure*)*57) shell_toplevelClassManifest(e); }
+    REALLY_INLINE shell_toplevelClassManifest(avmplus::ScriptEnv* e) : ClassManifestBase(59, e) { }
+    REALLY_INLINE static shell_toplevelClassManifest* create(avmplus::ScriptEnv* e) { return new (MMgc::GC::GetGC(e), MMgc::kExact, sizeof(ClassClosure*)*58) shell_toplevelClassManifest(e); }
 public:
     REALLY_INLINE GCRef<avmshell::AbstractBaseClass> get_AbstractBaseClass() { return (avmshell::AbstractBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_AbstractBase)); }
     REALLY_INLINE GCRef<avmshell::AbstractRestrictedBaseClass> get_AbstractRestrictedBaseClass() { return (avmshell::AbstractRestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_AbstractRestrictedBase)); }
@@ -3080,6 +3125,7 @@ public:
     REALLY_INLINE GCRef<avmshell::ShellWorkerClass> get_WorkerClass() { return (avmshell::ShellWorkerClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_system_Worker)); }
     REALLY_INLINE GCRef<avmshell::ShellWorkerDomainClass> get_WorkerDomainClass() { return (avmshell::ShellWorkerDomainClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_system_WorkerDomain)); }
     REALLY_INLINE GCRef<avmplus::WorkerEventClass> get_WorkerEventClass() { return (avmplus::WorkerEventClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_system_WorkerEvent)); }
+    REALLY_INLINE GCRef<avmplus::WorkerStateClass> get_WorkerStateClass() { return (avmplus::WorkerStateClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_system_WorkerState)); }
     REALLY_INLINE GCRef<avmplus::public_classClass> get_public_classClass() { return (avmplus::public_classClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class)); }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_0Class> get_public_class_AIR_1_0Class() { return (avmplus::public_class_AIR_1_0Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_0)); }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_0_FP_10_0Class> get_public_class_AIR_1_0_FP_10_0Class() { return (avmplus::public_class_AIR_1_0_FP_10_0Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_0_FP_10_0)); }

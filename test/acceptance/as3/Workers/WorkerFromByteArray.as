@@ -61,7 +61,7 @@ if (Worker.current.isPrimordial) {
     AddTestCase("remote call from Worker result is correct",result,"test string");
     */
     AddTestCase("Worker creation successful",PromiseState.NEW,ipromise.state);
-    worker.stop();
+    worker.terminate();
 
     /*
     message="no error";

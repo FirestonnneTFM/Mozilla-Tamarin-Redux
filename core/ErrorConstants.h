@@ -284,6 +284,13 @@ namespace avmplus
             kNullArgumentError                              = 1507,
             kInvalidArgumentError                           = 1508,
             kArrayFilterNonNullObjectError                  = 1510,
+            kWorkerAlreadyStarted                           = 1511,
+            kFailedWorkerCannotBeRestarted                  = 1512,
+            kWorkerTerminated                               = 1513,
+            kMutextNotLocked                                = 1514,
+            kConditionInvalidTimeout                        = 1515,
+            kConditionCannotNotify                          = 1516,
+            kConditionCannotNotifyAll                       = 1517,
             kInvalidParamError                              = 2004,
             kParamRangeError                                = 2006,
             kNullPointerError                               = 2007,
@@ -308,7 +315,7 @@ namespace avmplus
         // Error message strings only in non-stubbed DEBUGGER builds.
         #if defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB)
         const int kLanguages = LANG_count;
-        const int kNumErrorConstants = 154;
+        const int kNumErrorConstants = 161;
         extern const char* errorConstants[kLanguages][kNumErrorConstants];
         extern int errorMappingTable[2*kNumErrorConstants];
         extern LangName languageNames[kLanguages];

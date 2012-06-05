@@ -237,6 +237,7 @@ namespace vmbase {
         , m_managerPrev(NULL)
         , m_managerNext(NULL)
         , m_manager(NULL)
+        , m_isolateDesc(-1)
     {
     }
 

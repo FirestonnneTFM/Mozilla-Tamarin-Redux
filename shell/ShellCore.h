@@ -279,6 +279,8 @@ namespace avmshell
             return shellClasses->get_WorkerDomainClass();
         }
 
+        GCRef<avmplus::ScriptObject> constructWorkerObject() const;
+        
         void initAliasTable(bool initWorkerClasses);
 
     private:

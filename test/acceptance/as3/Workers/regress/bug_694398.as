@@ -56,7 +56,7 @@ if (Worker.current.isPrimordial) {
     AddTestCase("can access a getter function on a remote worker",10,res);
     test();
 
-    w.stop();
+    w.terminate();
 } else {
     function get value() {
         return 10;

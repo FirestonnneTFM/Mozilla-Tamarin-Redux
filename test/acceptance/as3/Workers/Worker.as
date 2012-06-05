@@ -97,10 +97,10 @@ package {
         AddTestCase("worker class is final","true",workerxml.@isFinal.toString());
         AddTestCase("worker class is not static","false",workerxml.@isStatic.toString());
         AddTestCase("worker class NEW is defined",true,WorkerState.NEW == "new");
-        AddTestCase("worker class STARTING is defined",true,WorkerState.STARTING == "starting");
+//        AddTestCase("worker class STARTING is defined",true,WorkerState.STARTING == "starting");
         AddTestCase("worker class RUNNING is defined",true,WorkerState.RUNNING == "running");
-        AddTestCase("worker class FINISHING is defined",true,WorkerState.FINISHING == "finishing");
-        AddTestCase("worker class STOPPED is defined",true,WorkerState.STOPPED == "stopped");
+//        AddTestCase("worker class FINISHING is defined",true,WorkerState.FINISHING == "finishing");
+        AddTestCase("worker class TERMINATED is defined",true,WorkerState.TERMINATED == "terminated");
         AddTestCase("worker class FAILED is defined",true,WorkerState.FAILED == "failed");
         AddTestCase("worker class ABORTED is defined",true,WorkerState.ABORTED == "aborted");
         AddTestCase("worker class EXCEPTION is defined",true,WorkerState.EXCEPTION == "exception");
@@ -115,11 +115,11 @@ package {
         var promise:Promise=wchild.start();
         AddTestCase("child worker: state is 'starting' or 'running' (2 or 3) is "+w.state,true,w.state==WorkerState.STARTING||w.state==WorkerState.RUNNING);
 
-        // after stop state is STOPPED
+        // after teminate state is STOPPED
         System.sleep(250); 
         // FIXME: stop() may kill the background worker before it finishes running its tests, the sleep above tries to reduce the likelihood of that.
-        wchild.stop(); 
-        AddTestCase("child worker: after stop() state is 'stopped'",WorkerState.STOPPED,wchild.state);
+        wchild.terminate(); 
+        AddTestCase("child worker: after terminate() state is 'terminated'",WorkerState.TERMINATED,wchild.state);
 
         test();
 

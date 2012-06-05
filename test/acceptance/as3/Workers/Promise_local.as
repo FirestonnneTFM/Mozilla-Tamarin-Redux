@@ -78,7 +78,7 @@ if (Worker.current.isPrimordial)
         else System.sleep(0);
     } while (true);
 
-    w.stop();
+    w.terminate();
 
     test();
 

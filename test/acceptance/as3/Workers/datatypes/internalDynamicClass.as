@@ -269,7 +269,7 @@ if (Worker.current.isPrimordial) {
     
     
     test();
-    w.stop();
+    w.terminate();
 } else {
     // worker
     public function echoObject(o) {

@@ -119,7 +119,7 @@ AddTestCase("variable in global scope precedence over package prefix", 7777, pro
 AddTestCase("variable in global scope takes precedence over package", 77777, promise.async.bar.receive());
 AddTestCase("class static variable in global scope takes precedence over package", 0, promise.async.baz.async.redef.receive());
 
-p.stop();
+p.terminate();
 test();
 
 }

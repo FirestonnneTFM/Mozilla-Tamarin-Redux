@@ -298,7 +298,7 @@ if (Worker.current.isPrimordial) {
     // Worker TODO: create seperate test file
     
     test();
-    w.stop();
+    w.terminate();
     
 } else {
     // worker

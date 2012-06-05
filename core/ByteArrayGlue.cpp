@@ -221,9 +221,14 @@ namespace avmplus
 
     ByteArray::~ByteArray()
     {
-        // no: this can reallocate memory, which is bad to do in a dtor
-        // m_subscribers.clear();
-        _Clear();
+        if (m_workerLocal) {
+            // no: this can reallocate memory, which is bad to do in a dtor
+            // m_subscribers.clear();
+            _Clear();
+        } else {
+            m_copyOnWriteOwner  = NULL;
+            // rely on refcounting, i.e., m_buffer->destroy()
+        }
         m_buffer = NULL;
     }
 
@@ -318,23 +323,28 @@ namespace avmplus
 
         if (m_minimumCapacity > (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2))
             m_owner->ThrowMemoryError();
-
-        if (m_minimumCapacity > m_owner->m_buffer->capacity || m_owner->IsCopyOnWrite())
-        {
-            growTask();
-        }
+        growTask();
     }
 
     void ByteArray::Grower::growTask() {
-        if (!m_owner->m_workerLocal) {
-            vmbase::SafepointManager* tm = m_owner->m_toplevel->core()->getIsolate()->getAggregate()->safepointManager();
-            tm->requestSafepointTask(*this);
-        } else {
+        if (m_owner->m_workerLocal) {
             run();
+        } else {
+            Isolate* isolate = m_owner->m_toplevel->core()->getIsolate();
+            if (isolate) 
+            {
+                isolate->getAggregate()->runHoldingIsolateMapLock(this);
+            }
         }
     }
 
     void ByteArray::Grower::run() {
+
+        if (!(m_minimumCapacity > m_owner->m_buffer->capacity || m_owner->IsCopyOnWrite()))
+        {
+            return;
+        }
+
         uint32_t newCapacity = m_owner->m_buffer->capacity << 1;
         if (newCapacity < m_minimumCapacity)
             newCapacity = m_minimumCapacity;
@@ -344,6 +354,14 @@ namespace avmplus
         m_oldArray = m_owner->m_buffer->array;
         m_oldLength = m_owner->m_buffer->length;
         m_oldCapacity = m_owner->m_buffer->capacity;
+        
+        if (m_onlyIfExpected) {
+            if (m_oldLength != m_expectedLength) {
+                m_succeeded = false;
+                return;
+            }
+        }
+
 
         uint8_t* newArray = mmfx_new_array_opt(uint8_t, newCapacity, MMgc::kCanFail);
         if (!newArray)
@@ -370,6 +388,15 @@ namespace avmplus
             // Set this to NULL so we don't attempt to delete it in our dtor.
             m_oldArray = NULL;
         }
+        m_succeeded = true;
+
+        if (vmbase::SafepointRecord::hasCurrent()) {
+            if (vmbase::SafepointRecord::current()->manager()->inSafepointTask()) {
+                AvmCore::getActiveCore()->getIsolate()->getAggregate()->reloadGlobalMemories();
+            }
+        }
+
+
     }
 
     /*
@@ -448,12 +475,12 @@ namespace avmplus
     static const uint32_t kHugeGrowthThreshold = 24*1024*1024;
     static const uint32_t kHugeGrowthIncr = 24*1024*1024;
 
-    void ByteArray::SetLengthCommon(uint32_t newLength, bool calledFromLengthSetter)
+    uint32_t ByteArray::SetLengthCommon(uint32_t newLength, bool calledFromLengthSetter, bool onlyIfExpected, uint32_t expectedLength)
     {
         if (m_subscribers.length() > 0 && m_buffer->length < DomainEnv::GLOBAL_MEMORY_MIN_SIZE)
             m_toplevel->throwRangeError(kInvalidRangeError);
 
-        Grower grower(this, newLength);
+        Grower grower(this, newLength, onlyIfExpected, expectedLength);
         if (!calledFromLengthSetter ||
             (newLength < kHugeGrowthThreshold &&
              m_buffer->length < kHugeGrowthThreshold))
@@ -489,10 +516,13 @@ namespace avmplus
                 grower.ReallocBackingStore();
             }
         }
-
-        m_buffer->length = newLength;
-        if (m_position > newLength)
-            m_position = newLength;
+        
+        if (grower.m_succeeded) {
+            m_buffer->length = newLength;
+            if (m_position > newLength)
+                m_position = newLength;
+        }
+        return grower.m_oldLength;
     }
 
     void FASTCALL ByteArray::SetLength(uint32_t newLength)
@@ -1147,16 +1177,15 @@ namespace avmplus
         m_position += nbytes;
         return b;
     }
-    
-    bool ByteArray::CAS(uint32_t index, int32_t expected, int32_t next)
+
+    int32_t ByteArray::CAS(uint32_t index, int32_t expected, int32_t next)
     {
-        if (index >= m_buffer->length) // Handle the race. 
+        if (index > (m_buffer->length - sizeof(int32_t))) // Handle the race. 
             m_toplevel->throwRangeError(kInvalidRangeError);
         if (index % sizeof(expected) != 0) // require word alignment
             m_toplevel->throwRangeError(kInvalidRangeError);
-
         uint8_t* wordptr = &m_buffer->array[index];
-        return vmbase::AtomicOps::compareAndSwap32WithBarrier(expected, next, (int32_t*)wordptr);
+        return vmbase::AtomicOps::compareAndSwap32WithBarrierPrev(expected, next, (int32_t*)wordptr);
     }
 
     bool ByteArray::isWorkerLocal()
@@ -1990,17 +2019,24 @@ namespace avmplus
         m_byteArray.SetPosition(0);
     }
 
-    bool ByteArrayObject::compareAndSwapWordAt(uint32_t index, int32_t expected, int32_t next)
+    int32_t ByteArrayObject::atomicCompareAndSwapIntAt(int32_t byteIndex , int32_t expectedValue, int32_t newValue )
     {
-        return m_byteArray.CAS(index, expected, next);
+        return m_byteArray.CAS(byteIndex, expectedValue, newValue);
+    }
+    
+    int32_t ByteArrayObject::atomicCompareAndSwapLength(int32_t expectedLength, int32_t newLength)
+    {
+        return m_byteArray.SetLengthCommon(newLength, true, true, expectedLength);
     }
 
-    bool ByteArrayObject::share()
+    void ByteArrayObject::set_shareable(bool val)
     {
-        if (m_byteArray.isWorkerLocal()) {
-            return m_byteArray.setWorkerLocal(false);
-        } 
-        return m_byteArray.isWorkerLocal() == false;
+        m_byteArray.setWorkerLocal(!val);
+    }
+    
+    bool ByteArrayObject::get_shareable()
+    {
+        return !(m_byteArray.isWorkerLocal());
     }
 
 

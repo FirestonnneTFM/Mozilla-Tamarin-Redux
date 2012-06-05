@@ -48,7 +48,7 @@ if (Worker.current.isPrimordial) {
     counter++;
     if (counter == 2) {
       promise1.async.stopChild().receive();
-      w1.stop();
+      w1.terminate();
       lock.resolve("UNLOCK");
     }
   }
@@ -58,7 +58,7 @@ if (Worker.current.isPrimordial) {
     counter++;
     if (counter == 2) {
       promise1.async.stopChild().receive();
-      w1.stop();      
+      w1.terminate();      
       lock.resolve("UNLOCK");
     }
   }
@@ -68,7 +68,7 @@ if (Worker.current.isPrimordial) {
     counter++;
     if (counter == 2) {
       promise1.async.stopChild().receive();
-      w1.stop();
+      w1.terminate();
       lock.resolve("UNLOCK");
     }
   }
@@ -78,7 +78,7 @@ if (Worker.current.isPrimordial) {
     counter++;
     if (counter == 2) {
       promise1.async.stopChild().receive();
-      w1.stop();      
+      w1.terminate();      
       lock.resolve("UNLOCK");
     }
   }
@@ -109,7 +109,7 @@ if (Worker.current.isPrimordial) {
    var promise2:Promise = w2.start();
 
    public function stopChild() {
-     w2.stop();
+     w2.terminate();
    }
 
    function fbar() {

@@ -61,6 +61,8 @@ namespace avmplus
     };
 
     class IsolateEventListener;
+
+
     /*
      * Represents an isolate in various stages of its lifecycle. There's only one Isolate
      * object per isolate.
@@ -117,6 +119,10 @@ namespace avmplus
         
         bool failed();
 
+        // the type of workerObject is not available here, overwrite.
+        virtual ScriptObject* workerObject(Toplevel* toplevel) =  0;
+
+
         bool interrupt(); // false if already interrupted
         bool isInterrupted();
         // Last phase of termination.
@@ -144,17 +150,17 @@ namespace avmplus
         };
 
 
-        typedef FixedHeapArray<char>* StartArgNamep;
+        typedef FixedHeapArray<char>* SharedPropertyNamep;
 
-        class StartArgumentMap: public FixedHeapHashTable<StartArgNamep, ChannelItem>
+        class SharedPropertyMap: public FixedHeapHashTable<SharedPropertyNamep, ChannelItem>
         {
         public:
-            StartArgumentMap();
-            virtual ~StartArgumentMap();
+            SharedPropertyMap();
+            virtual ~SharedPropertyMap();
         protected:
-            virtual uintptr_t HashKey(StartArgNamep key) const;
-            virtual bool KeysEqual(StartArgNamep key1, const StartArgNamep key2) const;
-            virtual void DestroyItem(StartArgNamep key, ChannelItem);
+            virtual uintptr_t HashKey(SharedPropertyNamep key) const;
+            virtual bool KeysEqual(SharedPropertyNamep key1, const SharedPropertyNamep key2) const;
+            virtual void DestroyItem(SharedPropertyNamep key, ChannelItem);
         };
 
 
@@ -176,6 +182,8 @@ namespace avmplus
 
     protected:
         FixedHeapArray< FixedHeapArray<uint8_t> > m_code;
+        vmbase::WaitNotifyMonitor m_sharedPropertyLock; 
+        
 
     protected: // Access moved to subclass
         FixedHeapArray<int32_t> m_additionalProxyInfo;
@@ -191,17 +199,17 @@ namespace avmplus
     public: 
         // used to initialize channels during worker startup
         FixedHeapArray< FixedHeapRef<PromiseChannel> > m_initialChannels;
+        
 
         // gpid of the promise representing global scope - used during
         // initialization of the main isolate
         uint32_t m_global_gpid;
 
     private:
-        StartArgumentMap m_arguments;
+        SharedPropertyMap m_properties;
     public:
-        void setStartArgument(const char* utf8String, int32_t len, ChannelItem item);
-        bool getStartArgument(const char* utf8String, int32_t len, ChannelItem* outItem);
-        void clearStartArguments();
+        void setSharedProperty(const char* utf8String, int32_t len, ChannelItem item);
+        bool getSharedProperty(const char* utf8String, int32_t len, ChannelItem* outItem);
         virtual Atom extractAtom(Toplevel* toplevel, ChannelItem item);
         virtual ChannelItem makeChannelItem(Toplevel* toplevel, Atom atom);
 
@@ -250,6 +258,10 @@ namespace avmplus
                   , m_emptyPromisesMap(16)
             {}
 
+            ~Globals()
+            {
+            }
+
 
         private:
 
@@ -293,6 +305,7 @@ namespace avmplus
 
             EmptyPromisesMap m_emptyPromisesMap;
 
+
             /**** end data ****/
         }; // Globals
 
@@ -308,6 +321,7 @@ namespace avmplus
         // If parent == NULL, the primordial isolate will be created.
         Isolate* newIsolate(Isolate* parent);
 
+        void addThreadCleanup(vmbase::VMThread* thread);
         bool spawnAndWaitForInitialization(AvmCore* spawningCore, Isolate* isolate);
         void recordSpawnFailure(Isolate* isolate);
 
@@ -352,7 +366,10 @@ namespace avmplus
         void registerEmptyPromise(int32_t emptyPromiseGID, int32_t creatorGiid);
 
         void printEmptyPromises();
-        
+
+        GCRef<ObjectVectorObject> listWorkers(Toplevel* toplevel);
+        void runHoldingIsolateMapLock(vmbase::SafepointTask* task);
+        void reloadGlobalMemories();
 
         Isolate* getIsolate(int32_t desc);
         Isolate::State queryState(Isolate* isolate);
@@ -379,6 +396,9 @@ namespace avmplus
         int32_t m_blockedChannels; // channels waiting for resolution in waitForAnySend()
         vmbase::SafepointManager m_safepointMgr; // Currently for shared byte array only.
         bool m_inShutdown;
+        
+        FixedHeapArray<vmbase::VMThread*> m_threadCleanUps;
+
     };
 
     // Stack allocated, RAII pattern.
@@ -404,6 +424,9 @@ namespace avmplus
     template <class T>
     class WorkerDomainObjectBase
     {
+    public:
+        T* self();
+        ObjectVectorObject* listWorkers();
     };
 
 
@@ -423,14 +446,17 @@ namespace avmplus
         T* self();
     public:
         WorkerObjectBase();
-        void initialize();
-        void setDescriptors(int32_t desc, int32_t parentDesc);
+        //  If "thisIsolate == NULL" then create a new isolate.  Otherwise, use thisIsolate to construct the worker
+        void initialize(Isolate *thisIsolate = NULL);
+
+        GCRef<ScriptObject> setIsolate(Isolate* isolate);
+
         ~WorkerObjectBase();
         int32_t descriptor();
         Stringp get_state();
         bool stopInternal(bool shouldWait);
 
-        bool isParentOf(WorkerObjectBase* other);
+        bool isParentOf(WorkerObjectBase* worker);
         bool isPrimordial();
 
         bool startWithChannels(ArrayObject* channels);
@@ -438,9 +464,8 @@ namespace avmplus
         // obviously candidate for further refactoring
         bool startVeryInternal();
 
-        void setStartArgument(String* key, Atom value);
-        Atom getStartArgument(String* key);
-        void clearStartArguments();
+        void setSharedProperty(String* key, Atom value);
+        Atom getSharedProperty(String* key);
 
         
         PromiseChannelObject* newEventChannel();
@@ -448,10 +473,12 @@ namespace avmplus
         ScriptObject* cloneNonSlots(ClassClosure* classClosure, Cloner& cloner) const;
 
         static void throwError(const char* msgz);        
+    	static void throwIllegalOperationError(int errorID);
 
         int32_t giid; // const
     protected:
         FixedHeapRef<Isolate> m_isolate;
+        
     };
     
 }

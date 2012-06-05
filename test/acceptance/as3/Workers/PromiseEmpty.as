@@ -87,7 +87,7 @@ if (Worker.current.isPrimordial) {
     AddTestCase("Test Unsync empty promise","UNSYNCH",result1);
     AddTestCase("Test Sync empty promise","SYNCH",result2);
     AddTestCase("Test closed empty promise error","an explicitly unresolved promise can be resolved only once",exception);
-    worker.stop();
+    worker.terminate();
     test();
 
  } else {

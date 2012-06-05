@@ -77,7 +77,7 @@ package {
         // compareAndSwapInt: expect failure
         b[0]=65; b[1]=0;
         result=false;
-        result=b.compareAndSwapWordAt(0,97,66);
+        result=b.atomicCompareAndSwapIntAt(0,97,66) == 97;
         AddTestCase("compareAndSwap unsuccessful swap, returns false",false,result);
         AddTestCase("compareAndSwap unsuccessful swap, value is unchanged ["+b[0]+","+b[1]+"]==[65,0]",true,b[0]==65 && b[1]==0);
 
@@ -86,7 +86,7 @@ package {
         b[0]=65; b[1]=0;
         var exc:String='no exception';
         try {
-            result=b.compareAndSwapWordAt(110,97,66);
+            result=b.atomicCompareAndSwapIntAt(110,97,66) == 97;
         } catch (e) {
             exc=e.toString();
         }
@@ -98,16 +98,14 @@ package {
         b[0]=65; b[1]=0; 
         var exc2:String='no exception';
         try {
-            result=b.compareAndSwapWordAt(1,97,66);
+            result=b.atomicCompareAndSwapWordAt(1,97,66) == 97;
         } catch (e) {
             exc2=e.toString();
         }
         AddTestCase("compareAndSwap index not in word alignment throws RangeError","RangeError: Error #1506",removeExceptionDetail(exc2));
         AddTestCase("compareAndSwap index not in word alignment leaves values unchanged ["+b[0]+","+b[1]+"]==[65,0]",true,b[0]==65 && b[1]==0);
 
-
-        AddTestCase("compareAndSwap share() returns true initial call",true,b.share());
-        AddTestCase("compareAndSwap share() returns false after is already shared",false,b.share());
+        
         // write 65 at position 0
         b.writeByte(65);
         // write 97 at position 1, expecting to get overwritten by worker
@@ -141,7 +139,7 @@ package {
         AddTestCase("compareAndSwap exception in background workers returned from receive","RangeError: Error #1506",removeExceptionDetail(exc3));
         test();
 
-        w.stop();
+        w.terminate();
     } else {
         public function modifyByteArray(b1:ByteArray) {
             b1.position=1;
@@ -149,8 +147,8 @@ package {
         }
         public function testCompareAndSwap(b1:ByteArray) {
             var res=[];
-            res.push(b1.compareAndSwapWordAt(0,65,66));
-            res.push(b1.compareAndSwapWordAt(4,97,67));
+            res.push(b1.atomicCompareAndSwapIntAt(0,65,66) == 65);
+            res.push(b1.atomicCompareAndSwapIntAt(4,97,67) == 97);
             return res;
         }
         public function testCompareAndSwapException(b1:ByteArray) {

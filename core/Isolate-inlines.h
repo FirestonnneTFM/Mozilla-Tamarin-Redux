@@ -43,6 +43,7 @@
 #include "FixedHeapUtils-inlines.h"
 #include "Channels-inlines.h"
 
+
 namespace avmplus
 {
     
@@ -72,6 +73,14 @@ namespace avmplus
         Atom error_args[3] = { nullObjectAtom, core->newStringUTF8(msgz)->atom(), core->intToAtom(0) }; 
         core->throwAtom(toplevel->errorClass()->construct(2, error_args));
     }
+    
+    template<class T>
+    void WorkerObjectBase<T>::throwIllegalOperationError(int errorID)
+    {
+        AvmCore* core = AvmCore::getActiveCore();
+        Toplevel* toplevel = core->codeContext()->domainEnv()->toplevel();
+		toplevel->builtinClasses()->get_IllegalOperationErrorClass()->throwError(errorID);
+	}
 
     template <class T>
     WorkerObjectBase<T>::WorkerObjectBase()
@@ -86,38 +95,41 @@ namespace avmplus
     }
 
     template<class T>
-    void WorkerObjectBase<T>::initialize()
+    void WorkerObjectBase<T>::initialize(Isolate *thisIsolate)
     {
-        Isolate* parent = self()->core()->getIsolate();
-        
-        // the following consumes a shared resource (m_globals entry).
-        m_isolate = parent->getAggregate()->newIsolate(parent);
-        // Can isolate have been deallocated in the meantime? No,
-        // because an attempt must be first made to run the isolate
-        // and the current isolate is the only one that knows about
-        // this new isolate so far.
-        // At aggregate termination we'll probably kill all the isolates first.
-        
-        if (m_isolate == NULL)
-            throwError("Worker limit reached");
-        setDescriptors(m_isolate->desc, m_isolate->parentDesc);
+        if (thisIsolate == NULL)
+        {
+            Isolate* parent = self()->core()->getIsolate();
+            
+            // the following consumes a shared resource (m_globals entry).
+            m_isolate = parent->getAggregate()->newIsolate(parent);
+            // Can isolate have been deallocated in the meantime? No,
+            // because an attempt must be first made to run the isolate
+            // and the current isolate is the only one that knows about
+            // this new isolate so far.
+            // At aggregate termination we'll probably kill all the isolates first.
+            
+            if (m_isolate == NULL)
+                throwError("Worker limit reached");
+        } else {
+            m_isolate = thisIsolate;
+        }
+        setIsolate(m_isolate);
     }
 
     template<class T>
-    void WorkerObjectBase<T>::setDescriptors(int32_t desc, int32_t parentDesc)
+    GCRef<ScriptObject> WorkerObjectBase<T>::setIsolate(Isolate* isolate)
     {
-        (void)parentDesc;
         if (m_isolate == NULL) {
-            // This can happen when initializing Worker.current.
-            // FIXME: rename this method, as it does more init now
-            Aggregate* aggregate = static_cast<T*>(this)->core()->getIsolate()->getAggregate();
-            this->m_isolate = aggregate->getIsolate(desc);
+            this->m_isolate = isolate;
+        } else {
+            AvmAssert(m_isolate == isolate);
         }
-        AvmAssert(m_isolate == NULL || parentDesc == m_isolate->parentDesc);
-        this->giid = desc;
-        AvmAssert(self()->toplevel()->lookupInternedObject(this->giid, NULL) == NULL); // always check the intern table first
-        self()->toplevel()->lookupInternedObject(this->giid, self());
+        this->giid = isolate->desc;
+        AvmAssert(self()->toplevel()->lookupInternedObject(m_isolate, NULL) == NULL); // always check the intern table first
+        return self()->toplevel()->lookupInternedObject(m_isolate, self());
     }
+
     
     template<class T>
     int32_t WorkerObjectBase<T>::descriptor()
@@ -132,23 +144,26 @@ namespace avmplus
     }
 
     template<class T>
-    bool WorkerObjectBase<T>::isParentOf(WorkerObjectBase* other)
+    bool WorkerObjectBase<T>::isParentOf(WorkerObjectBase* worker)
     {
-        if (other == NULL) 
-            throwError("argument can't be null");
+        if (worker == NULL)
+			self()->toplevel()->checkNull(worker, "worker");
         if (this->giid == Isolate::INVALID_DESC 
-            || other->giid == Isolate::INVALID_DESC
-            || other->m_isolate == NULL)
-            throwError("can't handle");
+            || worker->giid == Isolate::INVALID_DESC
+            || worker->m_isolate == NULL)
+			self()->toplevel()->throwArgumentError(kInvalidArgumentError);
 
-        return other->m_isolate->parentDesc == this->giid;
+        return worker->m_isolate->parentDesc == this->giid;
     }
 
     template<class T>
     bool WorkerObjectBase<T>::isPrimordial()
     {
-        AvmAssert(this->giid >= 0 && m_isolate != NULL);
-            return m_isolate->isPrimordial();
+        AvmAssert(this->giid >= 0);
+        // if this isolate has had terminate called on it before the run loop
+        // has started then its m_isolate value could be NULL since we may
+        // be calling this method from Worker.current (see setDescriptors)
+        return m_isolate ? m_isolate->isPrimordial() : false;
 	}
 
     template<class T>
@@ -202,7 +217,7 @@ namespace avmplus
     ScriptObject* WorkerObjectBase<T>::cloneNonSlots(ClassClosure* classClosure, Cloner&) const
     {
 
-        ScriptObject* prev = classClosure->toplevel()->lookupInternedObject(this->giid, NULL);
+        ScriptObject* prev = classClosure->toplevel()->lookupInternedObject(m_isolate, NULL);
         if (prev != NULL) {
             return static_cast<T*>(prev);
         }
@@ -219,36 +234,34 @@ namespace avmplus
 
 
     template <class T>
-    void WorkerObjectBase<T>::setStartArgument(String* key, Atom value)
+    void WorkerObjectBase<T>::setSharedProperty(String* key, Atom value)
     {
         StUTF8String buf(key);
         ChannelItem item = m_isolate->makeChannelItem(self()->toplevel(), value);
-        m_isolate->setStartArgument(buf.c_str(), buf.length(), item);
+        m_isolate->setSharedProperty(buf.c_str(), buf.length(), item);
     }
 
     template <class T>
-    Atom WorkerObjectBase<T>::getStartArgument(String* key)
+    Atom WorkerObjectBase<T>::getSharedProperty(String* key)
     {
-        StUTF8String buf(key);
-        ChannelItem item;
-        bool ok = m_isolate->getStartArgument(buf.c_str(), buf.length(), &item);
-        if (!ok) {
-            return undefinedAtom;
+        if (m_isolate)
+        {
+            StUTF8String buf(key);
+            ChannelItem item;
+            bool ok = m_isolate->getSharedProperty(buf.c_str(), buf.length(), &item);
+            if (ok) 
+            {
+                return m_isolate->extractAtom(self()->toplevel(), item);
+            }
         }
-        return m_isolate->extractAtom(self()->toplevel(), item);
-    }
-
-    template <class T>
-    void WorkerObjectBase<T>::clearStartArguments()
-    {
-        m_isolate->clearStartArguments();
+        return undefinedAtom;
     }
 
     template<class T>
     bool WorkerObjectBase<T>::startVeryInternal()
     {
         if (m_isolate->getAggregate()->queryState(m_isolate) != Isolate::NEW)
-            throwError("Worker already started");
+            throwIllegalOperationError(kWorkerAlreadyStarted);
         
         return internalStartWithChannels(NULL);
     }
@@ -256,10 +269,8 @@ namespace avmplus
     template <class T>
     bool WorkerObjectBase<T>::internalStartWithChannels(ArrayObject* channelArray)
     {
-        if (!m_isolate)
-            throwError("Worker not allocated? (internal error)");
         if (m_isolate->failed())
-            throwError("Starting isolates that already failed is not supported");
+            throwIllegalOperationError(kFailedWorkerCannotBeRestarted);
         AvmCore* core = self()->core();
         if (channelArray) {
             FixedHeapArray<FixedHeapRef<PromiseChannel> >&  channels = m_isolate->m_initialChannels;
@@ -294,6 +305,19 @@ namespace avmplus
             return false;
         }
     }
+
+    template <class T>
+    T* WorkerDomainObjectBase<T>::self()
+    {
+        return static_cast<T*>(this);
+    }
+
+    template <class T>
+    ObjectVectorObject* WorkerDomainObjectBase<T>::listWorkers() 
+    {
+        return self()->core()->getIsolate()->getAggregate()->listWorkers(self()->toplevel());
+    }
+
 }
 
 #endif /* __avmplus_Isolate_inlines__ */

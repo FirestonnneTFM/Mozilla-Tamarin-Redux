@@ -1013,9 +1013,96 @@ public class ByteArray implements IDataInput2, IDataOutput2
     _dontEnumPrototype(prototype);
 
 
-    public native function compareAndSwapWordAt(i:uint, expected:int, next:int):Boolean;
-    public native function share(): Boolean;
+    /**
+     * Atomic compare and swap of integer values in adjacent bytes in this byte array.
+     *
+     * Compares an expected value with the actual value in the byte array location
+     * addressed by a start index measured in bytes.
+     * Iff these two values are same,
+     * 'newValue' is placed into the location
+     * and the 'expectedValue' is returned.
+     * Otherwise, the actual value is returned.
+     * All of the above is performed in one atomic hardware transaction.
+     * byteIndex must be a multiple of 4.
+     *
+     * @param byteIndex the (low) index at which the actual value in the byte array begins
+     * @param expectedValue if this value is currently in the addressed location, perform the swap
+     * @param newValue the new value to put into the addressed location
+     * @throws ArgumentError if byteIndex is not a multiple of 4 or negative
+     * @return either 'expectedValue' or the actual value
+     */
+    [API(CONFIG::SWF_17)]
+    public native function atomicCompareAndSwapIntAt(byteIndex :int, expectedValue: int, newValue :int) :int;
 
+    /**
+     * Atomic compare and change the length of this byte array.
+     *
+     * Compares an expected length with the actual length of this the byte array.
+     * Iff these two values are same,
+     * the array length is changed to 'newLength',
+     * allocating a new underlying data buffer
+     * and copying existing data into it if necessary.
+     * In this case 'true' is returned.
+     * Otherwise, 'false' is returned.
+     *
+     * Changing the array's data buffer as needed and assigning the new length to the array and
+     * determining the return value of this call is all done in one atomic action
+     * wrt. all competing calls that may affect the byte array's length.
+     *
+     * @param expectedLength if this value is currently the byte array's length, perform the length change
+     * @param newLength the intended new length of this byte array
+     * @return whether the array length has been changed
+     */
+    [API(CONFIG::SWF_17)]
+    public native function atomicCompareAndSwapLength(expectedLength: int, newLength :int) :int;    
+
+	
+	/**
+	 * Every byte array can either be "non-shareable" or "shareable".
+	 * This flag indicates which is the case for this byte array.
+	 * The initial value is always 'false', indicating "non-shareable".
+	 *
+	 * If this byte array is non-shareable,
+	 * then passing it as an argument to MessageChannel.send to another worker
+	 * or via Worker.setStartArgument()
+	 * will always create a complete byte array copy,
+	 * including the backing storage for the byte array's contents.
+	 *
+	 * If this byte array is shareable,
+	 * then passing it as an argument to MessageChannel.send to another worker
+	 * or via Worker.setStartArgument()
+	 * will result in a byte array object in the remote worker
+	 * which uses the identical underlying storage buffer for it's contents.
+	 * Then both the local and the remote byte array share their content.
+	 *
+	 * Concurrent access to a shared byte array from multiple workers is subject to races.
+	 * For concurrency control, you can use the compare-and-swap facility in this class
+	 * and/or the dedicated mechanisms in package 'flash.concurrent'.
+	 *
+	 * @returns whether this byte array is backed by storage only accessible
+	 * in this worker and whether passing it on to another worker is done by copying
+	 */
+	[API(CONFIG::SWF_17)]
+	public native function get shareable() :Boolean;
+	
+	/**
+	 * Sets the value of the 'shareable' flag described above.
+	 *
+	 * When setting the flag to 'true',
+	 * this merely affects subsequent MessageChannel or Worker.setStartArgument() calls involving
+	 * this byte array as an argument as described above.
+	 * Otherwise there is no effect besides the flag's altered value.
+	 *
+	 * When setting the flag to 'false', if its previous value was 'true',
+	 * the byte array's contents is copied into a new backing storage buffer
+	 * and this buffer is immediately assigned to the byte array
+	 * for use by any subsequent operations.
+	 * Thus the sharing of contents with other workers is terminated and
+	 * subsequent uses of this byte array as MessageChannel call argument lead
+	 * to backing storage buffer copying.
+	 */
+	[API(CONFIG::SWF_17)]
+	public native function set shareable(newValue :Boolean) :void;
 };
 
 

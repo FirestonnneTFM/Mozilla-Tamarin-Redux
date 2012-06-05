@@ -136,7 +136,7 @@ if (Worker.current.isPrimordial) {
                 true, echoedMyClass === echoedMyClass.circularRefObj.aProp.class_instance_ref);
     
     test();
-    w.stop();
+    w.terminate();
 } else {
     // worker
     public function echoObject(o) {

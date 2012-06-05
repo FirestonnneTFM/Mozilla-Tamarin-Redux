@@ -88,7 +88,7 @@ package {
         }
         for (var i2:uint=0;i2<nworkers;i2++) {
             rpromises[i2].receive();
-            workers[i2].stop();
+            workers[i2].terminate();
         }
         contents=File.read('test.txt');
         lines=contents.split('\n');

@@ -257,6 +257,31 @@ namespace vmbase {
         return VMPI_compareAndSwap32WithBarrier(oldValue, newValue, address);
     }
 
+    /* static */ REALLY_INLINE int32_t AtomicOps::compareAndSwap32WithBarrierPrev(int32_t expected, int32_t next, volatile int32_t* wordptr)
+    {
+#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+        uint32_t val;
+        __asm__ __volatile__("lock; cmpxchg %1, (%2);"
+                             :"=a"(val)
+                             :"r"(next), "r"(wordptr), "a"(expected)
+                             :"memory", "cc");
+        return val;
+#elif defined(_MSC_VER) && !defined(_WIN64)
+        // we know that we are dealing with only 32 bit word here and a 32 bit compiler option
+        return ::InterlockedCompareExchange(reinterpret_cast<volatile LONG*>(wordptr), next, expected);
+#else
+        //  THIS IS WRONG!!!!
+        //  the "val" needs to be atomically obtained from "compareAndSwap32WithBuffer"
+        int32_t val = *wordptr;
+        if (!compareAndSwap32WithBarrier(expected, next, wordptr))
+        {
+            return val;
+        }
+        return expected;
+#endif
+
+    }
+
     /* static */REALLY_INLINE int32_t AtomicOps::or32(uint32_t mask, volatile int32_t* address)
     {
         int32_t oldValue;

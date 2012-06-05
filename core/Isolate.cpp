@@ -111,7 +111,9 @@ namespace avmplus
     {}
 
     Aggregate::~Aggregate()
-    {}
+    {
+        m_threadCleanUps.deallocate();
+    }
 
     void Aggregate::destroy()
     {
@@ -264,7 +266,7 @@ namespace avmplus
     {
         AvmCore* core = currentToplevel->core();
         AvmAssert(core->getIsolate()->getAggregate() == this);
-        Stringp errorMessage = core->getErrorMessage(kScriptTerminatedError); // Better exception?
+        Stringp errorMessage = core->getErrorMessage(kWorkerTerminated);
         GCRef<ErrorObject> error = currentToplevel->errorClass()->constructObject(errorMessage->atom(), core->intToAtom(0));
         Exception *exception = new (core->GetGC()) Exception(core, error->atom());
         exception->flags |= Exception::EXIT_EXCEPTION;
@@ -500,11 +502,11 @@ namespace avmplus
     }
 
     
-    Isolate::StartArgumentMap::StartArgumentMap()
+    Isolate::SharedPropertyMap::SharedPropertyMap()
     {
     }
     
-    Isolate::StartArgumentMap::~StartArgumentMap()
+    Isolate::SharedPropertyMap::~SharedPropertyMap()
     {
         Clear();
         // The destructor defined in the parent class will call Clear(), but at that time
@@ -512,12 +514,12 @@ namespace avmplus
         // be called! We'll call Clear() here first, the subsequent Clear() will have nothing to do. 
     }
     
-    uintptr_t Isolate::StartArgumentMap::HashKey(Isolate::StartArgNamep key) const
+    uintptr_t Isolate::SharedPropertyMap::HashKey(Isolate::SharedPropertyNamep key) const
     {
         return String::hashCodeLatin1(key->values, key->length);
     }
     
-    bool Isolate::StartArgumentMap::KeysEqual(Isolate::StartArgNamep k1, const Isolate::StartArgNamep k2) const
+    bool Isolate::SharedPropertyMap::KeysEqual(Isolate::SharedPropertyNamep k1, const Isolate::SharedPropertyNamep k2) const
     {
         if (k1->length != k2->length)
             return false;
@@ -531,12 +533,15 @@ namespace avmplus
     }
 
     enum ChannelItemType {
-        ChannelItemByteArray = 0x100,
-        ChannelItemMutex = 0x101,
-        ChannelItemCondition = 0x102,
+        //ChannelItemLink = 0x100,
+        ChannelItemByteArray = 0x101,
+        ChannelItemSharedByteArray = 0x102,        
+        ChannelItemObject = 0x103,
+        ChannelItemMutex = 0x104,
+        ChannelItemCondition = 0x105,
     };
     
-    void Isolate::StartArgumentMap::DestroyItem(Isolate::StartArgNamep key, ChannelItem item)
+    void Isolate::SharedPropertyMap::DestroyItem(Isolate::SharedPropertyNamep key, ChannelItem item)
     {
         if (item.tag >= 0x100) { 
             FixedHeapRCObject* rcobj = static_cast<FixedHeapRCObject*>(item.asNative);
@@ -547,36 +552,44 @@ namespace avmplus
         
     }
     
-    void Isolate::setStartArgument(const char* utf8String, int32_t len, ChannelItem item)
+    void Isolate::setSharedProperty(const char* utf8String, int32_t len, ChannelItem item)
     {
-        // FIXME: validate state
-        Isolate::StartArgNamep key = mmfx_new(FixedHeapArray<char>());
-        key->length = len;
-        char* values = mmfx_new_array(char, len);
-        VMPI_memcpy(values, utf8String, len* sizeof(char));
-        key->values = values;
-        ChannelItem previous;
-        if (m_arguments.LookupItem(key, &previous)) {
-            m_arguments.RemoveItem(key); // this will dealloc old key
+        SCOPE_LOCK(m_sharedPropertyLock) {
+            // FIXME: validate state
+            Isolate::SharedPropertyNamep key = mmfx_new(FixedHeapArray<char>());
+            key->length = len;
+            char* values = mmfx_new_array(char, len);
+            VMPI_memcpy(values, utf8String, len* sizeof(char));
+            key->values = values;
+            ChannelItem previous;
+            if (m_properties.LookupItem(key, &previous)) {
+                m_properties.RemoveItem(key); // this will dealloc old key
+            }
+            if (item.tag != kSpecialBibopType) {
+                m_properties.InsertItem(key, item);
+            } else {
+                key->deallocate();
+                mmfx_delete(key); // m_properties doesn't own the key
+                // We already removed.
+            }
         }
-        m_arguments.InsertItem(key, item);
         // else the key is owned by the hashmap
     }
 
-    bool Isolate::getStartArgument(const char* utf8String, int32_t len, ChannelItem* item)
+    bool Isolate::getSharedProperty(const char* utf8String, int32_t len, ChannelItem* item)
     {
         // FIXME validate state.
-        Isolate::StartArgNamep key = mmfx_new(FixedHeapArray<char>());
-        key->values = (char*)utf8String; // it's OK, we won't touch it
-        key->length = len;
-        bool ok = m_arguments.LookupItem(key, item);
-        key->values = NULL;
-        mmfx_delete(key);
-        return ok;
-    }
-    void Isolate::clearStartArguments()
-    {
-        // FIXME implement.
+        SCOPE_LOCK(m_sharedPropertyLock) {
+            Isolate::SharedPropertyNamep key = mmfx_new(FixedHeapArray<char>());
+            key->values = (char*)utf8String; // it's OK, we won't touch it
+            key->length = len;
+            bool ok = m_properties.LookupItem(key, item);
+            key->values = NULL;
+            mmfx_delete(key);
+            return ok;
+        }
+        AvmAssert(false);
+        return false; // not reached
     }
 
     Atom Isolate::extractAtom(Toplevel* toplevel, ChannelItem item)
@@ -590,15 +603,11 @@ namespace avmplus
             return atomFromIntptrValue(item.asIntptr);
         case kSpecialBibopType:
             return undefinedAtom;
-        case kObjectType:
-            return nullObjectAtom;
-        case kNamespaceType:
-            return nullNsAtom;
-        case kStringType:
-            return nullStringAtom;
+        case ChannelItemSharedByteArray:
         case ChannelItemByteArray:
             {
                 ByteArray::Buffer* baBuffer = static_cast<ByteArray::Buffer*>(item.asNative);
+                // FIXME should we try to look up in the intern table?
                 ByteArrayClass* baClass = toplevel->byteArrayClass();
                 ByteArrayObject* baObject = new (toplevel->gc(), MMgc::kExact) ByteArrayObject(baClass->ivtable(), baClass->prototypePtr(), baBuffer);
                 // will increment the refcount of buffer
@@ -607,24 +616,38 @@ namespace avmplus
          case ChannelItemMutex:
              {
                 MutexObject::State* state = static_cast<MutexObject::State*>(item.asNative);
-                MutexClass* mutexClass = toplevel->builtinClasses()->get_MutexClass();
-                MutexObject* mutexObj  =   
-                    new (toplevel->gc(), MMgc::kExact, mutexClass->ivtable()->getExtraSize()) MutexObject(mutexClass->ivtable(), mutexClass->prototypePtr());
-                // will increment the refcount of m_state
-                mutexObj->m_state = state;
+                MutexObject* mutexObj = toplevel->lookupInternedObject(state, NULL).staticCast<MutexObject>();
+                if (mutexObj == NULL) 
+                {
+                    MutexClass* mutexClass = toplevel->builtinClasses()->get_MutexClass();
+                    mutexObj = new (toplevel->gc(), MMgc::kExact, mutexClass->ivtable()->getExtraSize()) MutexObject(mutexClass->ivtable(), mutexClass->prototypePtr());
+                    // will increment the refcount of m_state
+                    mutexObj->m_state = state;
+                    toplevel->lookupInternedObject(state, mutexObj);
+                }
                 return mutexObj->toAtom();
             }
         case ChannelItemCondition:
              {
                 ConditionObject::State* state = static_cast<ConditionObject::State*>(item.asNative);
-                ConditionClass* conditionClass = toplevel->builtinClasses()->get_ConditionClass();
-                ConditionObject* conditionObj  =   
-                    new (toplevel->gc(), MMgc::kExact, conditionClass->ivtable()->getExtraSize()) ConditionObject(conditionClass->ivtable(), conditionClass->prototypePtr());
-                // will increment the refcount of m_state
-                conditionObj->m_state = state;
+                ConditionObject* conditionObj  =  toplevel->lookupInternedObject(state, NULL).staticCast<ConditionObject>();
+                if (conditionObj == NULL) {
+                    ConditionClass* conditionClass = toplevel->builtinClasses()->get_ConditionClass();
+                    conditionObj = new (toplevel->gc(), MMgc::kExact, conditionClass->ivtable()->getExtraSize()) ConditionObject(conditionClass->ivtable(), conditionClass->prototypePtr());
+                    // will increment the refcount of m_state
+                    conditionObj->m_state = state;
+                    toplevel->lookupInternedObject(state, conditionObj);
+                }
                 return conditionObj->toAtom();
+             }
+        case ChannelItemObject:
+            {
+                ByteArray::Buffer* buffer = static_cast<ByteArray::Buffer*>(item.asNative);
+                ByteArrayClass* cls = toplevel->byteArrayClass();
+                ByteArrayObject* byteArray = new (toplevel->gc(), MMgc::kExact) ByteArrayObject(cls->ivtable(), cls->prototypePtr(), buffer);
+                Atom result = byteArray->readObject(); // can throw
+                return result;
             }
-
 
         default:
             AvmAssert(false);
@@ -661,12 +684,14 @@ namespace avmplus
                 }
                 copy->IncrementRef(); // It sits in the buffer so it's reachable
                 item.asNative = copy;
+                item.tag = ChannelItemSharedByteArray;
             } else {
                 ByteArray::Buffer* buffer = ba->GetByteArray().getUnderlyingBuffer();
                 buffer->IncrementRef();
                 item.asNative = buffer;
+                item.tag = ChannelItemByteArray;
             }
-            item.tag = ChannelItemByteArray;
+            
         } else if (AvmCore::istype(atom, toplevel->builtinClasses()->get_MutexClass()->ivtable()->traits)) {
             MutexObject* mutexObj = static_cast<MutexObject*>(toplevel->core()->atomToScriptObject(atom));
             mutexObj->m_state->IncrementRef();
@@ -678,7 +703,15 @@ namespace avmplus
             item.asNative = conditionObj->m_state;
             item.tag = ChannelItemCondition;
         } else {
-            item.asNative = NULL;
+            // make new ByteArray
+            ByteArrayObject* byteArray = toplevel->byteArrayClass()->constructByteArray();
+            // its buffer has to survive it, so make it shareable
+            byteArray->set_shareable(true);
+            byteArray->writeObject(atom);
+            ByteArray::Buffer* buffer = byteArray->GetByteArray().getUnderlyingBuffer();
+            buffer->IncrementRef();
+            item.asNative = buffer;
+            item.tag = ChannelItemObject;
         }
         return item;
     }
@@ -804,7 +837,7 @@ namespace avmplus
         destroyListeners();
         if (m_thread != vmbase::VMThread::currentThread()) {
             Aggregate::destroyIsolate(this); // deletes the thread 
-        } else {
+        } else if (m_thread != NULL) {
             // if m_thread == VMThread::currentThread(),the current isolate
             // cannot delete its VMThread object, because the destructor
             // of VMThread will block while the state of the thread is RUNNABLE
@@ -812,7 +845,9 @@ namespace avmplus
             // and blocking on the VMThread destructor.
             // If no other isolate has a reference to this isolate, we'll have
             // a leak, so we have to scavenge - call Aggregate::destroyIsolate()
-            // in waitUntilNoIsolates()
+            // in waitUntilNoIsolates(), put this into the cleanups list
+            getAggregate()->addThreadCleanup(m_thread);
+            m_thread = NULL;
         }
         mmfx_delete(this);
     }
@@ -860,6 +895,18 @@ namespace avmplus
             mmfx_delete(m_globals);
             m_globals = NULL;
         } 
+    }
+
+    void Aggregate::addThreadCleanup(vmbase::VMThread* thread)
+    {
+        SCOPE_LOCK(m_globals->m_lock) {
+            // since we may not be within a GC enter we have to allow the following
+            // allocation to fail, and if it does we will leak the thread, but, if
+            // the allocation fails we have much bigger issues.
+            if (m_threadCleanUps.resize(m_threadCleanUps.length+1, true /*can fail*/)) {
+                m_threadCleanUps.values[m_threadCleanUps.length-1] = thread;
+            }
+        }
     }
 
     bool Aggregate::spawnAndWaitForInitialization(AvmCore* spawningCore, Isolate* isolate)
@@ -1020,7 +1067,9 @@ namespace avmplus
         AvmAssert(AvmCore::getActiveCore() == targetCore);
         SCOPE_LOCK_NAMED(locker, m_globals->m_lock) {
             current->initialize(targetCore);
-            AvmAssert(m_globals->at(current->desc)->m_state > Isolate::NEW);
+            // if terminate is called before we actually start we will not 
+            // have an entry in the global table
+            AvmAssert(m_globals->at(current->desc) == NULL || m_globals->at(current->desc)->m_state > Isolate::NEW);
             m_activeIsolateCount ++;
             locker.notifyAll();
         }
@@ -1032,6 +1081,8 @@ namespace avmplus
         m_safepointMgr = core->getIsolate()->getAggregate()->safepointManager();
         m_safepointMgr->enter(&m_spRecord);
         m_spRecord.m_interruptLocation = (int*)&core->interrupted;
+        m_spRecord.m_isolateDesc = core->getIsolate()->desc;
+
     }
     
     EnterSafepointManager::~EnterSafepointManager()
@@ -1043,6 +1094,7 @@ namespace avmplus
     {
         m_safepointMgr->leave(&m_spRecord);
         m_spRecord.m_interruptLocation = NULL;
+        m_spRecord.m_isolateDesc = -1;
     }
 
     void Aggregate::runIsolate(Isolate* isolate) 
@@ -1062,7 +1114,12 @@ namespace avmplus
         AvmAssert(AvmCore::getActiveCore()->getIsolate() == current);
         
         SCOPE_LOCK(m_globals->m_lock) {
-            AvmAssert(current == m_globals->at(current->desc));
+#ifdef DEBUG
+            {
+                Isolate* checked = m_globals->at(current->desc);
+                AvmAssert(checked == NULL || checked == current);
+            }
+#endif
             // Careful, this will try to grab m_commlock
             // Note that the following will run due to external stop()
             // so may end up running twice.
@@ -1092,28 +1149,10 @@ namespace avmplus
             while (m_activeIsolateCount > 0) {
                 locker.wait();
             }
-
-            class Scavenger: public Globals::IsolateMap::Iterator
+            for (int i=0; i< m_threadCleanUps.length; i++)
             {
-                FixedHeapArray<Isolate*>& m_array;
-            public:
-                Scavenger(FixedHeapArray<Isolate*>& array): m_array(array) {}
-                virtual void each(int32_t, FixedHeapRef<Isolate> isolate) {
-                    // Can't just destroyIsolate(), because that would be a concurrent modification.
-                    // Can't use VMPI_alloca because we don't have a gc heap.
-                    m_array.resize(m_array.length + 1); // suboptimal but good enough for now.
-                    m_array.values[m_array.length - 1] = isolate;
-                }
-            };
-            /*
-            FixedHeapArray<Isolate*> array;
-            Scavenger scavenger(array);
-            m_globals->m_isolateMap.ForEach(scavenger);
-            for (int i = 0; i < array.length; i++) {
-                destroyIsolate(array.values[i]);
+                mmfx_delete(m_threadCleanUps.values[i]);
             }
-            array.deallocate();
-            */
         }
     }
 
@@ -1279,7 +1318,6 @@ namespace avmplus
 
     bool Aggregate::waitForAnySend(Isolate* isolate, Toplevel* toplevel, bool block)
     {
-        // SAFEPOINT_POLL_FAST(m_safepointMgr);
         SCOPE_LOCK_NAMED(lk, m_commlock) {
             if (isolate->isInterrupted())
                 return false;
@@ -1304,6 +1342,83 @@ namespace avmplus
             }
         }
         return !isolate->isInterrupted();
+    }
+    
+    GCRef<ObjectVectorObject> Aggregate::listWorkers(Toplevel* toplevel)
+    {
+        GCRef<ClassClosure> workerClass = toplevel->workerClass();
+        uint32_t size = m_globals->m_isolateMap.GetNumItems();
+        GCRef<ObjectVectorObject> workerVector = toplevel->vectorClass()->newVector(workerClass, size);
+        
+        class IsolateLister: public Globals::IsolateMap::Iterator
+        {
+            Aggregate* m_aggregate;
+            GCRef<ObjectVectorObject> m_workerVector;
+            Toplevel* m_toplevel;
+            int m_index;
+        public:
+            IsolateLister(Aggregate* aggregate, GCRef<ObjectVectorObject> workerVector, Toplevel* toplevel)
+                : m_aggregate(aggregate)
+                , m_workerVector(workerVector)
+                , m_toplevel(toplevel)
+                , m_index(0)
+            {}
+            virtual void each(int32_t, FixedHeapRef<Isolate> isolate) 
+            {
+                GCRef<ScriptObject> interned = m_toplevel->lookupInternedObject(isolate, NULL);
+                if (interned == NULL) {
+                    interned = isolate->workerObject(m_toplevel);
+                }
+                m_workerVector->setUintProperty(m_index++, interned->atom());
+            }
+            virtual ~IsolateLister() {}
+        };
+        
+        IsolateLister lister(this, workerVector, toplevel);
+        SCOPE_LOCK(m_globals->m_isolateMap.m_lock) {
+            m_globals->m_isolateMap.ForEach(lister);
+        }
+        
+        return workerVector;
+    }
+
+
+    void Aggregate::runHoldingIsolateMapLock(vmbase::SafepointTask* task)
+    {
+        SCOPE_LOCK(m_globals->m_isolateMap.m_lock) {
+            safepointManager()->requestSafepointTask(*task);
+        }
+    }
+    
+
+    void Aggregate::reloadGlobalMemories()
+    {
+        // This is a heavyhanded approach and reloads all the global memories
+        // known, because the ByteArray subscriber mechanism can't yet handle
+        // cross-GC-heap references.
+        class Reloader: public Globals::IsolateMap::Iterator
+        {
+            virtual void each(int32_t, FixedHeapRef<Isolate> isolate) 
+            {
+                AvmCore* core = isolate->targetCore();
+                if (!core) return;
+                // FIXME what state should the isolate be in?
+                for (uint32_t i = 0, n = core->m_domainEnvs.length(); i < n; ++i)
+                 {
+                     DomainEnv* domainEnv = core->m_domainEnvs.get(i);
+                     if (domainEnv) {
+                         ByteArrayObject* mem = domainEnv->get_globalMemory();
+                         if (!mem) 
+                             continue;
+                         mem->GetByteArray().NotifySubscribers();
+                     }
+                 }
+            }
+        };
+     
+        AvmAssert(m_globals->m_isolateMap.m_lock.isLockedByCurrentThread());
+        Reloader reloader;
+        m_globals->m_isolateMap.ForEach(reloader);
     }
 
 }

@@ -69,7 +69,7 @@ if (Worker.current.isPrimordial) {
 
     var s1:ByteArray = new ByteArray();
     s1.length = 1024;
-    s1.share();
+    s1.shareable = true;
     
     s1[index] = 100;
     s1[casLoc] = "A".charCodeAt(0);
@@ -79,8 +79,8 @@ if (Worker.current.isPrimordial) {
 
 
     var m1:Mutex = new Mutex();
-    w.setStartArgument("mutex", m1);
-    w.setStartArgument("array", s1);
+    w.setSharedProperty("mutex", m1);
+    w.setSharedProperty("array", s1);
     var tl:Promise = w.start();
     
     pr('started, mutex', m1, 'array', s1.length);
@@ -97,7 +97,6 @@ if (Worker.current.isPrimordial) {
                 } else {
                     //pr('sender found ' + s1[casLoc] + ' retry');
                     m1.unlock();
-                    //System.sleep(4);
                 }
             } else {
                 //pr("sender tryLock failed");
@@ -121,12 +120,14 @@ if (Worker.current.isPrimordial) {
     test();
     //print(output);    
     //print(backoutput);    
-    w.stop();
+    w.terminate();
 
 } else {
+    pr('hello');
     
-    var s:ByteArray = Worker.current.getStartArgument("array");
-    var m:Mutex = Worker.current.getStartArgument("mutex");
+    var s:ByteArray = Worker.current.getSharedProperty("array");
+    var m:Mutex = Worker.current.getSharedProperty("mutex");
+    pr('found in start arguments', s, m);
     s[index] = 111;
     pr('wrote to shared storage at', index, s[index]);
     
@@ -142,7 +143,6 @@ if (Worker.current.isPrimordial) {
                 } else {
                     //pr('receiver found ' + s[casLoc] + ', retry');
                     m.unlock();
-
                 }
             } else {
                 //pr("receiver tryLock failed");

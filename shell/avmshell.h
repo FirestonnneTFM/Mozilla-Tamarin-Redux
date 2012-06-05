@@ -200,6 +200,7 @@ namespace avmshell
         virtual bool processProxies(avmplus::Toplevel* toplevel);
         virtual void registerPromiseOwner(int32_t existingProxyGID, avmplus::Atom resolvedObject, avmplus::Toplevel* toplevel);
         virtual void eventLoop(avmplus::Toplevel* toplevel);
+        virtual avmplus::ScriptObject* workerObject(avmplus::Toplevel* toplevel);
     };
 
     /**

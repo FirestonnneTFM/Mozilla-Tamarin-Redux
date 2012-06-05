@@ -92,7 +92,7 @@ namespace avmplus
         // uses; it serves as a hint from client that newLength is
         // expected maximum length for immediate future.
         void FASTCALL SetLengthFromAS3(uint32_t newLength);
-        void SetLengthCommon(uint32_t newLength, bool calledFromSetter);
+        uint32_t SetLengthCommon(uint32_t newLength, bool calledFromSetter, bool onlyIfExpected = false, uint32_t expectedLength = 0);
 
     public:
         // Set the length to x+y, with overflow check.  If x+y overflows a uint32_t then
@@ -190,7 +190,7 @@ namespace avmplus
         // Precondition: 0 < nbytes < 4096
         uint8_t* requestBytesForShortWrite(uint32_t nbytes);
 
-        bool CAS(uint32_t index, int32_t expected, int32_t next);
+        int32_t CAS(uint32_t index, int32_t expected, int32_t next);
         bool share();
         
 #ifdef DEBUGGER
@@ -213,13 +213,17 @@ namespace avmplus
 
         class Grower : public vmbase::SafepointTask
         {
+            friend class ByteArray;
         public:
-            Grower(ByteArray* owner, uint32_t minimumCapacity)
+            Grower(ByteArray* owner, uint32_t minimumCapacity, bool onlyIfExpected = false, uint32_t expectedLength = 0)
                 : m_owner(owner)
                 , m_oldArray(owner->m_buffer->array)
                 , m_oldLength(owner->m_buffer->length)
                 , m_oldCapacity(owner->m_buffer->capacity)
                 , m_minimumCapacity(minimumCapacity)
+                , m_expectedLength(expectedLength)
+                , m_onlyIfExpected(onlyIfExpected)
+                , m_succeeded(true)
             {
             }
             void FASTCALL ReallocBackingStore();
@@ -233,6 +237,9 @@ namespace avmplus
             uint32_t    m_oldLength;
             uint32_t    m_oldCapacity;
             uint32_t    m_minimumCapacity;
+            uint32_t    m_expectedLength;
+            bool        m_onlyIfExpected;
+            bool        m_succeeded;
         };
     public:
         
@@ -246,9 +253,11 @@ namespace avmplus
 
     private:
         void _Clear();
-
-        void NotifySubscribers();
         
+    public:// FIXME made public for Aggregate::reloadGlobalMemories()
+        void NotifySubscribers();
+    private: // end FIXME
+
         void TellGcNewBufferMemory(const uint8_t* buf, uint32_t numberOfBytes);
         void TellGcDeleteBufferMemory(const uint8_t* buf, uint32_t numberOfBytes);
         
@@ -410,9 +419,11 @@ namespace avmplus
         void set_endian(Stringp value);
 
         void clear();
-
-        bool compareAndSwapWordAt(uint32_t index, int32_t expected, int32_t next);
-        bool share();
+        int32_t atomicCompareAndSwapIntAt(int32_t byteIndex , int32_t expectedValue, int32_t newValue );
+        int32_t atomicCompareAndSwapLength(int32_t expectedLength, int32_t newLength);
+        
+        bool get_shareable();
+        void set_shareable(bool val);
 
 
 #ifdef DEBUGGER

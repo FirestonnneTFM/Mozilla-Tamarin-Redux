@@ -61,7 +61,7 @@ package {
         var p1:Promise=w.start();
         var p2:Promise=p1.async.echo("hello");
         print(p2.receive());
-        w.stop();
+        w.terminate();
         Worker.handleLifecycleEvents();
         
         AddTestCase("Listener received all events",4,events.length);

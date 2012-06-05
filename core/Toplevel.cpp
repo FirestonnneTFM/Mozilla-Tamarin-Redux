@@ -1830,17 +1830,14 @@ namespace avmplus
         registerClassAlias(ctx, t->name(), verifyErrorClass);
     }
 
-
-    GCRef<ScriptObject> Toplevel::lookupInternedObject(int32_t id, GCRef<ScriptObject> toAddIfMissing)
+    // Yes the API is dumb, will fix.
+    GCRef<ScriptObject> Toplevel::lookupInternedObject(const FixedHeapRCObject* rep, GCRef<ScriptObject> toAddIfMissing)
     {
-#ifndef AVMPLUS_64BIT
-        AvmAssert(id < atomMaxIntValue); // FIXME make into a runtime error
-#endif
-        Atom key = atomFromIntptrValue(id);
-        Atom value = _workerObjectInternTable->get(key);
+        Atom key = (Atom)((intptr_t)rep|kIntptrType);
+        Atom value = _workerInternTable->get(key);
         if (value == undefinedAtom) {
             if (toAddIfMissing  != NULL) {
-                _workerObjectInternTable->add(key, toAddIfMissing->toAtom(), this);
+                _workerInternTable->add(key, toAddIfMissing->toAtom(), this);
             }
             return toAddIfMissing;
         } else {

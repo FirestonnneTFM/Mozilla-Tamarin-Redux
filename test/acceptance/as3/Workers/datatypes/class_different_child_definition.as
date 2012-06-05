@@ -106,6 +106,6 @@ AddTestCase("echoedObj.b[2]", 0.0001, echoedObj.b[2]);
 AddTestCase("echoedObj is MyClass", false, echoedObj is MyClass);
 
 test();
-w.stop();
+w.terminate();
 
 }
