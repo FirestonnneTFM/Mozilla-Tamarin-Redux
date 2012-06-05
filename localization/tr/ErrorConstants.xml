@@ -671,6 +671,15 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">Geri çağırma değişkeni bir sınıfın yöntemi ise, isteğe bağlı olan bu değişken boş olmalıdır.</error>
+  <error id="1511" label="kWorkerAlreadyStarted">Worker is already started.</error>
+  <error id="1512" label="kFailedWorkerCannotBeRestarted">Starting a worker that already failed is not supported.</error>
+  <error id="1513" label="kWorkerTerminated">Worker has terminated."</error>
+  <error id="1514" label="kMutextNotLocked">unlock() with no preceding matching lock().</error>
+  <error id="1515" label="kConditionInvalidTimeout">Invalid condition timeout value: %1.</error>
+  <error id="1516" label="kConditionCannotNotify">Condition cannot notify if associated mutex is not owned.</error>
+  <error id="1517" label="kConditionCannotNotifyAll">Condition cannot notifyAll if associated mutex is not owned.</error>
+
+
   <error id="2004" label="kInvalidParamError">Parametrelerden biri geçersiz.</error>
   <error id="2006" label="kParamRangeError">Sağlanan dizin sınırların dışındadır.</error>
   <error id="2007" label="kNullPointerError">%1 parametresi boş olmamalıdır.</error>
@@ -690,4 +699,5 @@ class B extends A {
   <error id="2107" label="kProxyNextValueError">Proxy sınıfı nextValue uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
   <error id="2108" label="kInvalidArrayLengthError">%1 değeri geçerli bir Dizi uzunluğu değil.</error>
   <error id="2173" label="kReadExternalNotImplementedError">Akıştaki nesne okunamıyor.  %1 sınıfı, flash.utils.IExternalizable öğesini uygulamıyor, ancak haricileştirebilir bir sınıfın adıyla biliniyor.</error>
+
 </errors>

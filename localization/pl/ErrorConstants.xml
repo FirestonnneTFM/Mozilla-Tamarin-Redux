@@ -671,6 +671,15 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">Jeśli argument wywołania zwrotnego jest metodą klasy, argument opcjonalny musi mieć wartość null.</error>
+  <error id="1511" label="kWorkerAlreadyStarted">Worker is already started.</error>
+  <error id="1512" label="kFailedWorkerCannotBeRestarted">Starting a worker that already failed is not supported.</error>
+  <error id="1513" label="kWorkerTerminated">Worker has terminated."</error>
+  <error id="1514" label="kMutextNotLocked">unlock() with no preceding matching lock().</error>
+  <error id="1515" label="kConditionInvalidTimeout">Invalid condition timeout value: %1.</error>
+  <error id="1516" label="kConditionCannotNotify">Condition cannot notify if associated mutex is not owned.</error>
+  <error id="1517" label="kConditionCannotNotifyAll">Condition cannot notifyAll if associated mutex is not owned.</error>
+
+
   <error id="2004" label="kInvalidParamError">Jeden z parametrów jest nieprawidłowy.</error>
   <error id="2006" label="kParamRangeError">Określony indeks wychodzi poza zakres.</error>
   <error id="2007" label="kNullPointerError">Parametr %1 musi mieć wartość inną niż null.</error>
@@ -690,4 +699,5 @@ class B extends A {
   <error id="2107" label="kProxyNextValueError">Klasa Proxy nie implementuje metody nextValue. Należy ją przesłonić w podklasie.</error>
   <error id="2108" label="kInvalidArrayLengthError">Wartość %1 nie jest prawidłową długością tablicy.</error>
   <error id="2173" label="kReadExternalNotImplementedError">Nie można odczytać obiektu w strumieniu.  Klasa %1 nie implementuje metody flash.utils.IExternalizable, ale ma alias dla klasy możliwej do uzewnętrznienia.</error>
+
 </errors>
