@@ -842,13 +842,16 @@ namespace avmplus
             syncNotNull(notnull, state);
         }
 
-        // We're at the start of an AS3 basic block; syncronize our
+        // We're at the start of an AS3 basic block; synchronize our
         // notnull bits for that block with ones from the driver.
         void syncNotNull(nanojit::BitSet* bits, const FrameState* state) {
             int scopeTop = scopeBase + state->scopeDepth;
             int stackTop = stackBase + state->stackDepth;
-            if (state->targetOfBackwardsBranch) {
+            if (state->targetOfBackwardsBranch || state->targetOfExceptionBranch) {
                 // Clear any notNull bits that are not set in FrameState.
+                // This is done at both targets of backward branches and at exception handlers,
+                // as we cannot be assured of having seen all branches, thus the varTracker info
+                // may not be complete.  This limitation arises from the one-pass algorithm.
                 for (int i=0, n=nvar; i < n; i++) {
                     const FrameValue& v = state->value(i);
                     bool stateNotNull = v.notNull && isNullable(v.traits);
@@ -879,9 +882,9 @@ namespace avmplus
         }
 
         // Model a control flow edge by merging our current state with the state
-        // saved at the target.  Used for forward branches and exception edges.
-        void trackForwardEdge(CodegenLabel& target, bool isExceptionEdge) {
-            AvmAssert(target.labelIns == NULL);  // illegal to call trackEdge on backedge
+        // saved at the target.  Used for forward, non-exceptional branches only.
+        void trackForwardEdge(CodegenLabel& target) {
+            AvmAssert(target.labelIns == NULL);  // illegal to call trackForwardEdge on backedge
 
             // Merge varTracker/tagTracker state with state at target label.
             // Due to hidden internal control flow in exception dispatch, state may not be
@@ -892,16 +895,8 @@ namespace avmplus
                 // Allocate state vectors for target label upon first encounter.
                 target.varTracker = new (alloc) LIns*[nvar];
                 target.tagTracker = new (alloc) LIns*[nvar];
-                if (isExceptionEdge) {
-                    VMPI_memset(target.varTracker, 0, nvar*sizeof(LIns*));
-                    VMPI_memset(target.tagTracker, 0, nvar*sizeof(LIns*));
-                } else {
                 VMPI_memcpy(target.varTracker, varTracker, nvar*sizeof(LIns*));
                 VMPI_memcpy(target.tagTracker, tagTracker, nvar*sizeof(LIns*));
-                }
-            } else if (isExceptionEdge) {
-                VMPI_memset(target.varTracker, 0, nvar*sizeof(LIns*));
-                VMPI_memset(target.tagTracker, 0, nvar*sizeof(LIns*));
             } else {
                 for (int i=0, n=nvar; i < n; i++) {
                     if (varTracker[i] != target.varTracker[i])
@@ -988,14 +983,17 @@ namespace avmplus
         // merge our state with it.  then initialize from the new merged state.
         void trackLabel(CodegenLabel& label, const FrameState* state) {
             if (reachable)
-                trackForwardEdge(label, false); // model the fall-through path as an edge
+                trackForwardEdge(label); // model the fall-through path as an edge
+
             clearState();
             label.labelIns = out->ins0(LIR_label);
 
             // Load varTracker/tagTracker state accumulated from forward branches.
             // Do not load if there are any backward branches, as the tracker state may
             // not be accurate.  Just switch the pointers -- no need to copy the arrays.
-            if (!state->targetOfBackwardsBranch && label.varTracker) {
+            // Exception branches are assumed to be backward, as lowering to LIR may have
+            // introduced backward control flow that was not present in the original ABC.
+            if (!state->targetOfBackwardsBranch && label.varTracker && !state->targetOfExceptionBranch) {
                 varTracker = label.varTracker;
                 tagTracker = label.tagTracker;
             }
@@ -1229,28 +1227,12 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 
     LIns* CodegenLIR::callIns(const CallInfo *ci, uint32_t argc, ...)
     {
-        const uint8_t* pc = state->abc_pc;
-
-        // Each exception edge needs to be tracked to make sure we correctly
-        // model the notnull state at the starts of catch blocks.  Treat any function
-        // with side effects as possibly throwing an exception.
-
-        // We must ignore catch blocks that the driver has determined are not reachable,
-        // because we emit a call to debugExit (modeled as possibly throwing) as part of
-        // OP_returnvoid/returnvalue, which ordinarily don't throw.
-        if (!ci->_isPure && pc >= try_from && pc < try_to) {
-            // inside exception handler range, calling a function that could throw
-            ExceptionHandlerTable *exTable = info->abc_exceptions();
-            for (int i=0, n=exTable->exception_count; i < n; i++) {
-                ExceptionHandler* handler = &exTable->exceptions[i];
-                const uint8_t* from   = code_pos + handler->from;
-                const uint8_t* to     = code_pos + handler->to;
-                const uint8_t* target = code_pos + handler->target;
-                if (pc >= from && pc < to && driver->hasFrameState(target))
-                    varTracker->trackForwardEdge(getCodegenLabel(target), true);
-            }
-        }
-
+        // A LIR_call that throws an exception may not appear in the same position
+        // with respect to the handler as did the ABC instruction that notionally
+        // performed the throw.  As a result, the backwards-branch information
+        // collected by the verifier is not reliable for exception edges.  We thus
+        // do not attempt to model exceptions in the VarTracker, but conservatively
+        // treat all exception handlers as if they were backward branch targets.
         va_list ap;
         va_start(ap, argc);
         LIns* ins = LirHelper::vcallIns(ci, argc, ap);
@@ -2605,7 +2587,8 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         memset(jit_sst, 0, framesize * sizeof(uint16_t));
 #endif
 
-         // If this is the target of a backwards branch, generate an interrupt check.
+        // If this is the target of a backwards branch, generate an interrupt check.
+
 #ifdef VMCFG_INTERRUPT_SAFEPOINT_POLL
         // Always poll for safepoints, regardless of config settings.
 		if (state->targetOfBackwardsBranch) {
@@ -7768,6 +7751,10 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         this->state = state;
         this->labelCount = driver->getBlockCount();
 
+        // LIR_regfence instructions are used below to reduce register pressure.
+        // The cost of reloading is not an issue for these exceptional cases.
+        // A notable exception is the 'catch_label' block, where correctness
+        // requires a regfence for an unrelated reason.
         if (mop_rangeCheckFailed_label.unpatchedEdges) {
             emitLabel(mop_rangeCheckFailed_label);
             Ins(LIR_regfence);
@@ -7843,10 +7830,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                         lirout->insBranch(LIR_j, NULL, label.labelIns);
                     } else {
                         LIns* cond = binaryIns(LIR_eqi, handler_ordinal, InsConst(j));
-                        // Don't use branchToLabel() here because we don't want to check null bits;
-                        // this backedge is internal to exception handling and doesn't affect user
-                        // variable dataflow.
-                        lirout->insBranch(LIR_jt, cond, label.labelIns);
+                        branchToLabel(LIR_jt, cond, label);
                     }
                 }
             }
@@ -8250,7 +8234,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 varTracker->checkBackEdge(label, state);
             } else {
                 label.unpatchedEdges = new (*alloc1) Seq<InEdge>(InEdge(br), label.unpatchedEdges);
-                varTracker->trackForwardEdge(label, false);
+                varTracker->trackForwardEdge(label);
             }
         } else {
             // branch was optimized away.  do nothing.
@@ -8266,7 +8250,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
                 varTracker->checkBackEdge(label, state);
             } else {
                 label.unpatchedEdges = new (*alloc1) Seq<InEdge>(InEdge(result), label.unpatchedEdges);
-                varTracker->trackForwardEdge(label, false);
+                varTracker->trackForwardEdge(label);
             }
         } else {
             // The root operator of the expression has been eliminated via
@@ -8330,7 +8314,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             varTracker->checkBackEdge(target, state);
         } else {
             target.unpatchedEdges = new (*alloc1) Seq<InEdge>(InEdge(jtbl, index), target.unpatchedEdges);
-            varTracker->trackForwardEdge(target, false);
+            varTracker->trackForwardEdge(target);
         }
     }
 
@@ -8341,7 +8325,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
             varTracker->checkBackEdge(target, state);
         } else {
             target.unpatchedEdges = new (*alloc1) Seq<InEdge>(InEdge(br), target.unpatchedEdges);
-            varTracker->trackForwardEdge(target, false);
+            varTracker->trackForwardEdge(target);
         }
     }
 
@@ -9038,3 +9022,4 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
 }
 
 #endif // VMCFG_NANOJIT
+
