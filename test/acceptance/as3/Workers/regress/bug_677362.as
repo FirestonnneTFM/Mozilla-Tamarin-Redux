@@ -90,7 +90,7 @@ if (Worker.current.isPrimordial) {
 
     test();
     
-    w.stop();
+    w.terminate();
     
 } else {
     

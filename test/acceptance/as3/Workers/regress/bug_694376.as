@@ -59,7 +59,7 @@ package test {
         AddTestCase("public global functions in a package can be called on a remote worker","test1",res);
         test();
 
-        worker.stop();
+        worker.terminate();
 
     } else {
 

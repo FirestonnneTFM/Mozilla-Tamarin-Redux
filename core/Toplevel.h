@@ -114,7 +114,6 @@ namespace avmplus
         virtual GCRef<ClassClosure> workerClass() const = 0;
         virtual GCRef<ClassClosure> workerDomainClass() const = 0;
 
-
         void throwVerifyError(int id) const;
         void throwVerifyError(int id, Stringp arg1) const;
         void throwVerifyError(int id, Stringp arg1, Stringp arg2) const;
@@ -463,7 +462,7 @@ namespace avmplus
 
         virtual void initAliasTable(bool initWorkerClasses);
         // FIXME finesse the type later
-        GCRef<ScriptObject> lookupInternedObject(int32_t id, GCRef<ScriptObject> addIfMissing);
+        GCRef<ScriptObject> lookupInternedObject(const FixedHeapRCObject* rep, GCRef<ScriptObject> addIfMissing);
 
 
     protected:
@@ -535,7 +534,7 @@ namespace avmplus
 
         
     protected:
-        GCMember<WeakValueHashtable>  GC_POINTER(_workerObjectInternTable);
+        GCMember<WeakValueHashtable>  GC_POINTER(_workerInternTable);
         GC_DATA_END(Toplevel)
     // ------------------------ DATA SECTION END
     //

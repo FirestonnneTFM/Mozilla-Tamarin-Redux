@@ -54,23 +54,30 @@ namespace avmplus
 
 
     template <typename TYPE>
-    void FixedHeapArray<TYPE>::allocate(int length)
+    bool FixedHeapArray<TYPE>::allocate(int length, bool canFail)
     {
         AvmAssert(values == NULL);
         this->length = length;
-        this->values = mmfx_new_array(TYPE, length);
+        this->values = mmfx_new_array_opt(TYPE, length, canFail ? MMgc::kCanFail : MMgc::kNone);
+        return this->values != NULL;
     }
 
     template <typename TYPE>
-    void FixedHeapArray<TYPE>::resize(int newLength) {
+    bool FixedHeapArray<TYPE>::resize(int newLength, bool canFail) {
         TYPE* oldValues = this->values;
-        this->values = mmfx_new_array(TYPE, newLength);
+        this->values = mmfx_new_array_opt(TYPE, newLength, canFail ? MMgc::kCanFail : MMgc::kNone);
+        if (canFail && this->values == NULL)
+            return false;
+
         for (int i=0; i<this->length; i++) {
             this->values[i] = oldValues[i];
         }
         this->length = newLength;
+
         if (oldValues != NULL) // if resize used on uninitialized array
             mmfx_delete_array(oldValues);
+
+        return true;
     }
 
     template <typename TYPE>

@@ -501,6 +501,7 @@ namespace vmbase {
         SafepointManager* m_manager;      // The SafepointManager to which this SafepointRecord is registered
     public:
         int*              m_interruptLocation;
+        int               m_isolateDesc;
     private:
 
         static VMThreadLocal<SafepointRecord*> m_current;

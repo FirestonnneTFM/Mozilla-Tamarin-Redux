@@ -348,6 +348,12 @@ namespace avmshell
         m_core->inEventLoop = false;
     }
 
+    avmplus::ScriptObject* ShellIsolate::workerObject(avmplus::Toplevel* toplevel)
+    {
+        GCRef<ShellWorkerObject> workerObject 
+            = toplevel->workerClass().staticCast<ShellWorkerClass>()->constructObject().staticCast<ShellWorkerObject>();
+        return workerObject->setIsolate(this);
+    }
 
     class PrimordialShellIsolate : public ShellIsolate
     {

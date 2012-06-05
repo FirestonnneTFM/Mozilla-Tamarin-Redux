@@ -587,6 +587,7 @@ const int kBufferPadding = 16;
         InterruptReason interrupted;
         InterruptReason pending_interrupt;
         friend class EnterSafepointManager; // To access the above field.
+        
 
         /**
          * points to the topmost AS3 frame that's executing and provides
@@ -743,6 +744,11 @@ const int kBufferPadding = 16;
         QCache*         m_tmCache;
         QCache*         m_msCache;
         DomainMgr*      m_domainMgr;
+    public:
+        // FIXME props
+        WeakRefList<DomainEnv> m_domainEnvs;
+    private:
+
 
         // hash set containing intern'ed strings
         GCMember<String> * strings;

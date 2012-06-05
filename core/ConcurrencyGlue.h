@@ -53,7 +53,7 @@ namespace avmplus {
             friend class MutexObject;
             friend class ConditionObject;
             vmpi_mutex_t m_mutex;
-            int m_recursion_count;
+            int64_t m_recursion_count; // generous to avoid wraparound.
             vmpi_thread_t volatile m_ownerThreadID;
         public:
             State();
@@ -64,8 +64,8 @@ namespace avmplus {
         MutexObject(VTable* vtbl, ScriptObject* delegate);
         virtual ~MutexObject();
         void lock();
-        void unlock();
         bool tryLock();
+        bool unlockImpl();
         void ctor();
         virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
         
@@ -90,11 +90,13 @@ namespace avmplus {
     public:
         ConditionObject(VTable* vtbl, ScriptObject* delegate);
         virtual ~ConditionObject();
+
+        MutexObject* get_mutex();
         
         void ctor(MutexObject* mutex);
-        bool wait(double timeout);
-        void notify();
-        void notifyAll();
+        bool waitImpl(double timeout);
+        bool notifyImpl();
+        bool notifyAllImpl();
 
         virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
 
@@ -102,7 +104,7 @@ namespace avmplus {
         {
             friend class ConditionObject;
             vmpi_condvar_t m_condVar;
-            int m_wait_count;
+            int32_t m_wait_count;
             FixedHeapRef<MutexObject::State> m_mutexState;
         public:
             State(MutexObject::State* mutexState);
@@ -125,6 +127,15 @@ namespace avmplus {
         DECLARE_SLOTS_ConditionClass;
     };
 
+    class ConcurrentMemory
+    {
+    private:
+        explicit ConcurrentMemory(); // never construct
+
+    public:
+        static void mfence(ScriptObject *obj);
+        static int32_t casi32(ScriptObject *obj, int32_t addr, int32_t expectedVal, int32_t newVal);
+    };
 
 }
 

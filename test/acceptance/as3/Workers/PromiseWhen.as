@@ -75,7 +75,7 @@ package {
         AddTestCase("Promise receive after when returns correct value","test1",result3);
         AddTestCase("Promise faultHandler returns thrown error","Error: thrown error",errorResult.toString());
         test();
-        w.stop();
+        w.terminate();
 
     } else {
         public function test1() {

@@ -183,6 +183,13 @@ class Errors
         public static const kNullArgumentError                = 1507;
         public static const kInvalidArgumentError             = 1508;
         public static const kArrayFilterNonNullObjectError    = 1510;
+        public static const kWorkerAlreadyStarted             = 1511;
+        public static const kFailedWorkerCannotBeRestarted    = 1512;
+        public static const kWorkerTerminated                 = 1513;
+        public static const kMutextNotLocked                  = 1514;
+        public static const kConditionInvalidTimeout          = 1515;
+        public static const kConditionCannotNotify            = 1516;
+        public static const kConditionCannotNotifyAll         = 1517;
         public static const kInvalidParamError                = 2004;
         public static const kParamRangeError                  = 2006;
         public static const kNullPointerError                 = 2007;

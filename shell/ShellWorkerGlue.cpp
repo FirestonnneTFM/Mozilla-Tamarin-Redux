@@ -59,7 +59,7 @@ namespace avmshell {
         return get_m_byteCode();
     }
 
-    bool ShellWorkerObject::stop()
+    bool ShellWorkerObject::terminate()
     {
         return stopInternal(true);
     }
@@ -128,7 +128,7 @@ namespace avmshell {
         
         ShellWorkerObject* current = (ShellWorkerObject*)constructObject();
         set_m_current(current);
-        current->setDescriptors(ent->desc, ent->parentDesc);
+        current->setIsolate(ent);
     }
     
     void ShellWorkerClass::pr(avmplus::Stringp s)

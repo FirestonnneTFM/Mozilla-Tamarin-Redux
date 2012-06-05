@@ -383,6 +383,7 @@ namespace avmplus
         , m_tmCache(QCache::create(CacheSizes::DEFAULT_METADATA, g))
         , m_msCache(QCache::create(CacheSizes::DEFAULT_METHODS, g))
         , m_domainMgr(NULL)
+        , m_domainEnvs(gc, 1) 
 #ifdef AVMPLUS_VERBOSE
         , _verboseRestrictedTo(gc,0)
 #endif
@@ -580,7 +581,7 @@ namespace avmplus
         workerStates[2] = internConstantStringLatin1("starting");
         workerStates[3] = internConstantStringLatin1("running");
         workerStates[4] = internConstantStringLatin1("finishing");
-        workerStates[5] = internConstantStringLatin1("stopped");
+        workerStates[5] = internConstantStringLatin1("terminated");
         workerStates[6] = internConstantStringLatin1("failed");
         workerStates[7] = internConstantStringLatin1("aborted");
         workerStates[8] = internConstantStringLatin1("exception");
@@ -5549,7 +5550,10 @@ return the result of the comparison ToPrimitive(x) == y.
         core->interrupted = NotInterrupted;
         if (reason == SafepointPoll)
         {
-            SAFEPOINT_POLL();
+            // expended SAFEPOINT_POLL()
+            if (vmbase::SafepointRecord::current()->manager()->hasRequest()) {
+                vmbase::SafepointGate::gateWithRegistersSaved();
+            }
             if (core->pending_interrupt != NotInterrupted && canUnwindStack) {
                 reason = core->pending_interrupt;
                 core->pending_interrupt = NotInterrupted;

@@ -1405,6 +1405,11 @@ class MyToplevel: public avmplus::Toplevel
     {
         return NULL;
     }
+
+    virtual GCRef<avmplus::ScriptObject> constructWorkerObject() const
+    {
+        return NULL;
+    }
     
 };
 
@@ -1489,7 +1494,7 @@ void ST_mmgc_bugzilla_603411::test0() {
     testClass = new MyTestClass(testCore);
     testClass->testAvmCoreDelete();
 
-// line 136 "ST_mmgc_603411.st"
+// line 141 "ST_mmgc_603411.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 }

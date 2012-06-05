@@ -60,7 +60,7 @@ public function startFirstTest():void
     var wrappedPromise:Promise = Promise.wrap("From first.as");
     var wrappedPassingResult:Promise = promise.async.testWrappedPassing(wrappedPromise);
     wrappedPassingResult.receive(); // wait for completion
-    p.stop();
+    p.terminate();
 }
 
 }

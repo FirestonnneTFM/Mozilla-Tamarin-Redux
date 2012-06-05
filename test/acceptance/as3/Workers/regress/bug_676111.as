@@ -87,7 +87,7 @@ if (Worker.current.isPrimordial) {
     AddTestCase("XMLList data returned is type XMLList",true,echoed is XMLList);
     
     test();
-    w.stop();
+    w.terminate();
    
     
 } else {

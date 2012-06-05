@@ -49,6 +49,6 @@ package {
 
     // This will shutdown the shell
     var w:Worker=Worker.current;
-    w.stop();
+    w.terminate();
 
 }

@@ -61,6 +61,6 @@ var promise:Promise = p.start();
 var startFirstTestResult:Promise = promise.async.startFirstTest();
 startFirstTestResult.receive();
 
-p.stop();
+p.terminate();
 
 }

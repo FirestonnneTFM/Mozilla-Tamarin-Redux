@@ -70,8 +70,8 @@ package {
             AddTestCase("WorkerDomain createWorkerFromByteArray loads a worker from the same class when the bytearray is null",res2,"in WorkerDomainCreateWorker.as");
         }
 
-        worker1.stop();
-        worker2.stop();
+        worker1.terminate();
+        worker2.terminate();
 
         test();
     } else {

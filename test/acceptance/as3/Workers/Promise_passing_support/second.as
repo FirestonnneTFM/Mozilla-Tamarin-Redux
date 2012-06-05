@@ -59,7 +59,7 @@ public function testWrappedPassing(wrappedPromise:Promise):void
 {
     var printWrappedResult:Promise = promise.async.printWrapped(wrappedPromise);
     printWrappedResult.receive(); // wait for completion
-    p.stop();
+    p.terminate();
 }
 
 }

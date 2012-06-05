@@ -45,7 +45,7 @@ REALLY_INLINE Toplevel::Toplevel(AbcEnv* abcEnv)
     , _abcEnv(abcEnv)
     , _scriptEntryPoints(abcEnv->core()->gc, 10)
     , _aliasToClassClosureMap(HeapHashtable::create(abcEnv->core()->GetGC()))
-    , _workerObjectInternTable(WeakValueHashtable::create(abcEnv->core()->GetGC()))
+    , _workerInternTable(WeakValueHashtable::create(abcEnv->core()->GetGC()))
 {
 }
 

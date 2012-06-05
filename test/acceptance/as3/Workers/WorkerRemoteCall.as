@@ -55,7 +55,7 @@ if (Worker.current.isPrimordial) {
     var p3:Promise=p.async.var1;
     AddTestCase("call remote variable","var",p3.receive());
     test();    
-    w.stop();
+    w.terminate();
 } else {
     gettervalue="getter";
     var var1="var";

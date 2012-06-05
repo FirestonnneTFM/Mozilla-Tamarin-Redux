@@ -66,6 +66,6 @@ AddTestCase("Resolve undefined function", expected, result.substring(0,expected.
 
 test();
 
-w.stop();
+w.terminate();
 
 }

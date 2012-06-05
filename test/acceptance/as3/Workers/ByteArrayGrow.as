@@ -77,7 +77,7 @@ if (Worker.current.isPrimordial) {
 
     var b:ByteArray = new ByteArray();
     b.length = 32;
-    b.share();
+    b.shareable = true;
     
     b[baseLoc] = CAP_A;
     
@@ -111,7 +111,7 @@ if (Worker.current.isPrimordial) {
     AddTestCase("background worker read succeeded","2:reader done ",backout.split('\n')[0]);
     AddTestCase("verify shared bytearray has new value",CAP_A,b[2996]);
     test();
-    w.stop();
+    w.terminate();
     
 } else {
     var s:ByteArray = null;

@@ -52,8 +52,8 @@ namespace avmplus
         FixedHeapArray(TYPE* values, int length);
         FixedHeapArray();
         
-        void allocate(int length);
-        void resize(int newLength);
+        bool allocate(int length, bool canFail = false);
+        bool resize(int newLength, bool canFail = false);
         void initialize(const TYPE* source);
         void deallocate();
     };

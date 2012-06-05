@@ -54,9 +54,9 @@ public function pr(...args)
     for each (var a in args) {
         out+=a+' ';
     }
-    System.runInSafepoint(function() {
+//    System.runInSafepoint(function() {
         output+=out+'\n';
-    });
+//    });
 }
 
 if (Worker.current.isPrimordial) {
@@ -68,7 +68,7 @@ if (Worker.current.isPrimordial) {
 
     var s1:ByteArray = new ByteArray();
     s1.length = 1024;
-    s1.share();
+    s1.shareable = true;
     
     s1[index] = 100;
     s1[casLoc] = "A".charCodeAt(0);
@@ -120,7 +120,7 @@ if (Worker.current.isPrimordial) {
     test();
     //print(output);    
     //print(backoutput);    
-    w.stop();
+    w.terminate();
 
 } else {
     

@@ -71,6 +71,11 @@ class MyToplevel: public avmplus::Toplevel
     {
         return NULL;
     }
+
+    virtual GCRef<avmplus::ScriptObject> constructWorkerObject() const
+    {
+        return NULL;
+    }
     
 };
 

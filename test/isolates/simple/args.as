@@ -17,26 +17,34 @@ import flash.net.registerClassAlias;
     {
         var w:Worker = WorkerDomain.current.createWorkerFromPrimordial();
         //link = Worker.current.newLinkTo(w);
-        w.setStartArgument("arg1", 10);
-        w.setStartArgument("arg1", 11);
+        w.setSharedProperty("arg1", 10);
+        w.setSharedProperty("arg1", 11);
 
-        w.setStartArgument("arg2", 1.20);
-        w.setStartArgument("arg3", true);
+        w.setSharedProperty("arg2", 1.20);
+        w.setSharedProperty("arg3", true);
         var obj = new ByteArray();
         obj.writeObject({ hello: "World"});
-        w.setStartArgument("arg4", obj);
+        w.setSharedProperty("arg4", obj);
         obj = new ByteArray();
         obj.writeObject({ hello: "World"});
-        w.setStartArgument("arg4", obj);
-        w.setStartArgument("arg5", null);
+        w.setSharedProperty("arg4", obj);
+        w.setSharedProperty("arg5", null);
+        w.setSharedProperty("arg6", {bye: "Cruel World"});
+        w.setSharedProperty("arg7", <hello><world/></hello>);
+        w.setSharedProperty("arg8", new Date());
+
 
         var top:Promise = w.start();
         
     } else {
-        for (var i = 1; i <= 5; i++) {
-            print(Worker.current.getStartArgument("arg" + i));
+        for (var i = 1; i <= 8; i++) {
+            print(i +":", Worker.current.getSharedProperty("arg" + i));
         }
-        Worker.current.stop();
+        Worker.current.setSharedProperty("arg1", undefined);
+        print("arg1:", Worker.current.getSharedProperty("arg1"));
+        print("arg10:", Worker.current.getSharedProperty("arg10"));
+
+        Worker.current.terminate();
     }
 
 }

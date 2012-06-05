@@ -3737,7 +3737,7 @@ const uint32_t Toplevel::gcTracePointerOffsets[] = {
     offsetof(Toplevel, _stringClass),
     offsetof(Toplevel, _traitsToAliasMap),
     offsetof(Toplevel, _uintClass),
-    offsetof(Toplevel, _workerObjectInternTable),
+    offsetof(Toplevel, _workerInternTable),
     offsetof(Toplevel, objectClass),
     0};
 
@@ -3780,7 +3780,7 @@ bool Toplevel::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     gc->TraceLocation(&_stringClass);
     _traitsToAliasMap.gcTrace(gc);
     gc->TraceLocation(&_uintClass);
-    gc->TraceLocation(&_workerObjectInternTable);
+    gc->TraceLocation(&_workerInternTable);
     gc->TraceLocation(&objectClass);
     return false;
 }

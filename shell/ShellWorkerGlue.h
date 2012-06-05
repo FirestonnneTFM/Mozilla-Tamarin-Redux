@@ -66,7 +66,7 @@ namespace avmshell {
         avmplus::PromiseObject* startInternal();
 
         
-        bool stop();
+        bool terminate();
 
         // not in FP
         int32_t get_descriptor() const;

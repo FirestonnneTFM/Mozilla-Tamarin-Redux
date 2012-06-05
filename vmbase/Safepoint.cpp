@@ -111,6 +111,11 @@ namespace vmbase {
                                 // Thread in safepoint, probably because another thread also requested a safepoint
                                 // while this thread was sitting in locker.wait()
                             }
+                        } else {
+                            /*
+                            fprintf(stderr, "requested safepoint thru record of worker %d safe? %d\n", safepointRecord->m_isolateDesc, 
+                                    safepointRecord->m_status == SafepointRecord::SP_SAFE); 
+                            */
                         }
                     }
                     safepointRecord = safepointRecord->m_managerNext;

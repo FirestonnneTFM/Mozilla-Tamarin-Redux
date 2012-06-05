@@ -93,7 +93,7 @@ package {
 
         test();
 
-        bckworker.stop();
+        bckworker.terminate();
 
     } else {
         public function sendString() {
