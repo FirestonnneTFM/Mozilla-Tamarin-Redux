@@ -427,8 +427,8 @@ abcasm/bug_554915b, .* , , skip, testcase can cause a timeout INVESTIGATE
 as3/Workers/datatypes/basicDataTypes:Passing a function is not supported, .*,, expectedfail, Functions are not passed as undefined
 as3/Workers/regress/bug_676111, .*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=676111
 as3/Workers/datatypes/class_different_child_definition, .*,, expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=677939
-#as3/Workers/ByteArrayCAS,.*,,skip,https://bugzilla.mozilla.org/show_bug.cgi?id=740776
-#as3/Workers/ByteArrayGrow,.*,,skip,https://bugzilla.mozilla.org/show_bug.cgi?id=740776
+as3/Workers/ByteArrayCAS,.*,,skip,https://bugzilla.mozilla.org/show_bug.cgi?id=740776
+as3/Workers/ByteArrayGrow,.*,,skip,https://bugzilla.mozilla.org/show_bug.cgi?id=740776
 as3/Workers/promise_flatten,.*,,skip,https://bugzilla.mozilla.org/show_bug.cgi?id=740776
 as3/Workers/datatypes/gettersSetters:getters/setters handled correctly, .*,, expectedfail, Getters/setters not implemented
 as3/Workers/Safepoint, .*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=751364 Safepoint test hangs shell
