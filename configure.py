@@ -448,6 +448,13 @@ elif the_os == "windows" or the_os == "cygwin":
         else:
             APP_CPPFLAGS += "-DARMV5 -QRarch5t "
         OS_LIBS.append('mmtimer corelibc coredll')
+    elif cpu == "thumb2": 
+        APP_CPPFLAGS += "-DARMv7 -D_ARM_ -DUNICODE -DUNDER_RT=1 -DWIN32_LEAN_AND_MEAN -D_CONSOLE -D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE "
+        # No JIT at the moment
+        APP_CPPFLAGS += "-DAVMFEATURE_JIT=0 "
+        OS_LIBS.append('winmm')
+        OS_LIBS.append('shlwapi')
+        OS_LIBS.append('AdvAPI32')
     else:
         APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -D_CONSOLE "
         OS_LIBS.append('winmm')
@@ -506,6 +513,9 @@ elif cpu == "ppc64":
 elif cpu == "sparc":
     APP_CPPFLAGS += "-DAVMPLUS_SPARC "
 elif cpu == "x86_64":
+    # we detect this in core/avmbuild.h and MMgc/*build.h
+    None
+elif cpu == "thumb2":
     # we detect this in core/avmbuild.h and MMgc/*build.h
     None
 elif cpu == "arm":

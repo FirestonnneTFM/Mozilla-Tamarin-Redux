@@ -94,6 +94,8 @@ def _configSub(ostest, cputest):
         cpu = 'sparc'
     elif re.search('arm', cputest):
         cpu = 'arm'
+    elif re.search('thumb2', cputest):
+        cpu = 'thumb2'
     elif re.search('mips', cputest):
         cpu = 'mips'
     elif re.search('sh4', cputest):
@@ -213,6 +215,13 @@ class Configuration:
                 'OUTOPTION' : '-Fo',
                 'LIBPATH'   : '-LIBPATH:'
                 })
+	    if self._target[1] == "thumb2":
+                    self._acvars.update({'LDFLAGS' : '-NODEFAULTLIB:"oldnames.lib"'})
+                    if sys.platform.startswith('cygwin'):
+                        self._acvars.update({'ASM' : '$(topsrcdir)/build/cygwin-wrapper.sh armasm.exe -nologo -arch 7T'})
+                    else:
+                        self._acvars.update({'ASM' : 'armasm.exe -nologo -arch 7T'})
+
             if self._target[1] == "arm":
                 self._acvars.update({'LDFLAGS' : '-NODEFAULTLIB:"oldnames.lib" -ENTRY:"mainWCRTStartup"'})
                 if sys.platform.startswith('cygwin'):
@@ -222,9 +231,9 @@ class Configuration:
 
             if self._target[1] == "x86_64":
                 if sys.platform.startswith('cygwin'):
-                    self._acvars.update({'MASM' : '$(topsrcdir)/build/cygwin-wrapper.sh ml64.exe -nologo -c '})
+                   self._acvars.update({'MASM' : '$(topsrcdir)/build/cygwin-wrapper.sh ml64.exe -nologo -c '})
                 else:
-                    self._acvars.update({'MASM' : 'ml64.exe -nologo -c '})
+                   self._acvars.update({'MASM' : 'ml64.exe -nologo -c '})
 
             if sys.platform.startswith('cygwin'):
                 self._acvars.update({'CXX'          : '$(topsrcdir)/build/cygwin-wrapper.sh cl.exe -nologo'})
