@@ -1613,11 +1613,11 @@ namespace avmplus
 #if defined VMCFG_UNALIGNED_INT_ACCESS
             *(int16_t*)b = (int16_t)value;
 #elif defined VMCFG_BIG_ENDIAN
-            b[0] = (value >> 8);  // write
-            b[1] = value;         //   big-endian
+            b[0] = (uint8_t)(value >> 8);  // write
+            b[1] = (uint8_t)value;         //   big-endian
 #else
-            b[1] = (value >> 8);  // write
-            b[0] = value;         //   little-endian
+            b[1] = (uint8_t)(value >> 8);  // write
+            b[0] = (uint8_t)value;         //   little-endian
 #endif
         }
         else
@@ -1625,11 +1625,11 @@ namespace avmplus
 #if defined VMCFG_UNALIGNED_INT_ACCESS && defined HAVE_BYTESWAP16
             *(int16_t*)b = byteSwap16((uint16_t)value);
 #elif defined VMCFG_BIG_ENDIAN
-            b[1] = (value >> 8);  // write
-            b[0] = value;         //   little-endian
+            b[1] = (uint8_t)(value >> 8);  // write
+            b[0] = (uint8_t)value;         //   little-endian
 #else
-            b[0] = (value >> 8);  // write
-            b[1] = value;         //   big-endian
+            b[0] = (uint8_t)(value >> 8);  // write
+            b[1] = (uint8_t)value;         //   big-endian
 #endif
         }
     }
@@ -1642,15 +1642,15 @@ namespace avmplus
 #if defined VMCFG_UNALIGNED_INT_ACCESS
             *(uint32_t*)b = value;
 #elif defined VMCFG_BIG_ENDIAN
-            b[0] = (value >> 24);   // write
-            b[1] = (value >> 16);   //   big
-            b[2] = (value >> 8);    //     endian
-            b[3] = value;
+            b[0] = (uint8_t)(value >> 24);   // write
+            b[1] = (uint8_t)(value >> 16);   //   big
+            b[2] = (uint8_t)(value >> 8);    //     endian
+            b[3] = (uint8_t)value;
 #else
-            b[3] = (value >> 24);   // write
-            b[2] = (value >> 16);   //   little
-            b[1] = (value >> 8);    //     endian
-            b[0] = value;
+            b[3] = (uint8_t)(value >> 24);   // write
+            b[2] = (uint8_t)(value >> 16);   //   little
+            b[1] = (uint8_t)(value >> 8);    //     endian
+            b[0] = (uint8_t)value;
 #endif
         }
         else
@@ -1658,15 +1658,15 @@ namespace avmplus
 #if defined VMCFG_UNALIGNED_INT_ACCESS && defined HAVE_BYTESWAP32
             *(uint32_t*)b = byteSwap32(value);
 #elif defined VMCFG_BIG_ENDIAN
-            b[3] = (value >> 24);   // write
-            b[2] = (value >> 16);   //   little
-            b[1] = (value >> 8);    //     endian
-            b[0] = value;
+            b[3] = (uint8_t)(value >> 24);   // write
+            b[2] = (uint8_t)(value >> 16);   //   little
+            b[1] = (uint8_t)(value >> 8);    //     endian
+            b[0] = (uint8_t)value;
 #else
-            b[0] = (value >> 24);   // write
-            b[1] = (value >> 16);   //   big
-            b[2] = (value >> 8);    //     endian
-            b[3] = value;
+            b[0] = (uint8_t)(value >> 24);   // write
+            b[1] = (uint8_t)(value >> 16);   //   big
+            b[2] = (uint8_t)(value >> 8);    //     endian
+            b[3] = (uint8_t)value;
 #endif
         }
     }
@@ -1699,17 +1699,17 @@ namespace avmplus
 #elif defined VMCFG_BIG_ENDIAN
             u.fval = value;
             uint32_t w = u.word;
-            b[0] = (w >> 24);   // write
-            b[1] = (w >> 16);   //   big
-            b[2] = (w >> 8);    //     endian
-            b[3] = w;
+            b[0] = (uint8_t)(w >> 24);   // write
+            b[1] = (uint8_t)(w >> 16);   //   big
+            b[2] = (uint8_t)(w >> 8);    //     endian
+            b[3] = (uint8_t)w;
 #else
             u.fval = value;
             uint32_t w = u.word;
-            b[3] = (w >> 24);   // write
-            b[2] = (w >> 16);   //   little
-            b[1] = (w >> 8);    //     endian
-            b[0] = w;
+            b[3] = (uint8_t)(w >> 24);   // write
+            b[2] = (uint8_t)(w >> 16);   //   little
+            b[1] = (uint8_t)(w >> 8);    //     endian
+            b[0] = (uint8_t)w;
 #endif
         }
         else
@@ -1719,16 +1719,16 @@ namespace avmplus
             *(uint32_t*)b = byteSwap32(u.word);
 #elif defined VMCFG_BIG_ENDIAN
             uint32_t w = u.word;
-            b[3] = (w >> 24);   // write
-            b[2] = (w >> 16);   //   little
-            b[1] = (w >> 8);    //     endian
-            b[0] = w;
+            b[3] = (uint8_t)(w >> 24);   // write
+            b[2] = (uint8_t)(w >> 16);   //   little
+            b[1] = (uint8_t)(w >> 8);    //     endian
+            b[0] = (uint8_t)w;
 #else
             uint32_t w = u.word;
-            b[0] = (w >> 24);   // write
-            b[1] = (w >> 16);   //   big
-            b[2] = (w >> 8);    //     endian
-            b[3] = w;
+            b[0] = (uint8_t)(w >> 24);   // write
+            b[1] = (uint8_t)(w >> 16);   //   big
+            b[2] = (uint8_t)(w >> 8);    //     endian
+            b[3] = (uint8_t)w;
 #endif
         }
     }
@@ -1779,28 +1779,28 @@ namespace avmplus
             uint32_t w;
             u.dval = value;
             w = u.words[first];
-            b[0] = (w >> 24);   // write
-            b[1] = (w >> 16);   //   big
-            b[2] = (w >> 8);    //     endian
-            b[3] = w;
+            b[0] = (uint8_t)(w >> 24);   // write
+            b[1] = (uint8_t)(w >> 16);   //   big
+            b[2] = (uint8_t)(w >> 8);    //     endian
+            b[3] = (uint8_t)w;
             w = u.words[second];
-            b[4] = (w >> 24);   // write
-            b[5] = (w >> 16);   //   big
-            b[6] = (w >> 8);    //     endian
-            b[7] = w;
+            b[4] = (uint8_t)(w >> 24);   // write
+            b[5] = (uint8_t)(w >> 16);   //   big
+            b[6] = (uint8_t)(w >> 8);    //     endian
+            b[7] = (uint8_t)w;
 #else
             uint32_t w;
             u.dval = value;
             w = u.words[first];
-            b[3] = (w >> 24);   // write
-            b[2] = (w >> 16);   //   little
-            b[1] = (w >> 8);    //     endian
-            b[0] = w;
+            b[3] = (uint8_t)(w >> 24);   // write
+            b[2] = (uint8_t)(w >> 16);   //   little
+            b[1] = (uint8_t)(w >> 8);    //     endian
+            b[0] = (uint8_t)w;
             w = u.words[second];
-            b[7] = (w >> 24);   // write
-            b[6] = (w >> 16);   //   little
-            b[5] = (w >> 8);    //     endian
-            b[4] = w;
+            b[7] = (uint8_t)(w >> 24);   // write
+            b[6] = (uint8_t)(w >> 16);   //   little
+            b[5] = (uint8_t)(w >> 8);    //     endian
+            b[4] = (uint8_t)w;
 #endif
         }
         else
@@ -1813,28 +1813,28 @@ namespace avmplus
             uint32_t w;
             u.dval = value;
             w = u.words[first];
-            b[7] = (w >> 24);   // write
-            b[6] = (w >> 16);   //   little
-            b[5] = (w >> 8);    //     endian
-            b[4] = w;
+            b[7] = (uint8_t)(w >> 24);   // write
+            b[6] = (uint8_t)(w >> 16);   //   little
+            b[5] = (uint8_t)(w >> 8);    //     endian
+            b[4] = (uint8_t)w;
             w = u.words[second];
-            b[3] = (w >> 24);   // write
-            b[2] = (w >> 16);   //   little
-            b[1] = (w >> 8);    //     endian
-            b[0] = w;
+            b[3] = (uint8_t)(w >> 24);   // write
+            b[2] = (uint8_t)(w >> 16);   //   little
+            b[1] = (uint8_t)(w >> 8);    //     endian
+            b[0] = (uint8_t)w;
 #else
             uint32_t w;
             u.dval = value;
             w = u.words[second];
-            b[0] = (w >> 24);   // write
-            b[1] = (w >> 16);   //   big
-            b[2] = (w >> 8);    //     endian
-            b[3] = w;
+            b[0] = (uint8_t)(w >> 24);   // write
+            b[1] = (uint8_t)(w >> 16);   //   big
+            b[2] = (uint8_t)(w >> 8);    //     endian
+            b[3] = (uint8_t)w;
             w = u.words[first];
-            b[4] = (w >> 24);   // write
-            b[5] = (w >> 16);   //   big
-            b[6] = (w >> 8);    //     endian
-            b[7] = w;
+            b[4] = (uint8_t)(w >> 24);   // write
+            b[5] = (uint8_t)(w >> 16);   //   big
+            b[6] = (uint8_t)(w >> 8);    //     endian
+            b[7] = (uint8_t)w;
 #endif
         }
     }
