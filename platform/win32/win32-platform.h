@@ -202,13 +202,13 @@ typedef void *maddr_ptr;
   #ifndef InterlockedBitTestAndSet
     #include <intrin.h>
   #endif
-  #ifndef _ARM_
   #include <emmintrin.h>
-  #endif
+
   #ifdef VMCFG_VTUNE
     #include "JITProfiling.h"
   #endif
 #endif
+
 
 // Windows doesn't support inttypes.h or most C99 types directly
 typedef __int8              int8_t;

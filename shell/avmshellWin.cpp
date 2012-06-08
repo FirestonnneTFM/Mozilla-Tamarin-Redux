@@ -290,7 +290,7 @@ avmshell::Platform* avmshell::Platform::GetInstance()
 
 #endif /* !AVMPLUS_ARM */
 
-#if defined (UNDER_CE) || defined (UNDER_RT)
+#if defined (UNDER_CE)
 
     // TODO this is a hack until we learn how to determine stack top
     // in ARM
