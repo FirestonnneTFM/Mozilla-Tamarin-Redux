@@ -432,6 +432,7 @@ as3/Workers/ByteArrayGrow,.*,,skip,https://bugzilla.mozilla.org/show_bug.cgi?id=
 as3/Workers/promise_flatten,.*,,skip,https://bugzilla.mozilla.org/show_bug.cgi?id=740776
 as3/Workers/datatypes/gettersSetters:getters/setters handled correctly, .*,, expectedfail, Getters/setters not implemented
 as3/Workers/Safepoint, .*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=751364 Safepoint test hangs shell
+as3/Workers/WorkerFromByteArray, x64-win-tvm-debug ,,skip,https://bugzilla.mozilla.org/show_bug.cgi?id=763564
 as3/Workers/WorkerErrors, .*,, skip, investigating...
 as3/Workers/SharedByteArray, .*, , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=740776
 as3/Workers/Worker_primordial_stop:exitcode, .*, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=754275
