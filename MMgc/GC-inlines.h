@@ -885,7 +885,7 @@ namespace MMgc
             gc->allocaPopTo(unwindPtr);
     }
 
-    REALLY_INLINE Cleaner::Cleaner()
+    REALLY_INLINE Cleaner::Cleaner(): v(0), size(0)
     {
     }
 
