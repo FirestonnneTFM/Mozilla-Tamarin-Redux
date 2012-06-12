@@ -338,31 +338,18 @@ namespace avmplus
         }
     }
 
-    void ByteArray::Grower::SetNewCapacityExplicitly(uint32_t newCap)
-    {
-        AvmAssert(newCap != 0);
-        this->m_newCap = newCap;
-    }
-
     void ByteArray::Grower::run() {
 
-        bool newCapExplicitlySet = (m_newCap != 0);
-        uint32_t newCapacity = ( newCapExplicitlySet
-                                 ? m_newCap
-                                 : m_owner->m_buffer->capacity << 1 );
-        if (newCapacity < m_minimumCapacity)
-            newCapacity = m_minimumCapacity;
-        if (newCapacity < kGrowthIncr)
-            newCapacity = kGrowthIncr;
-
-        bool newCapIsLargerOrExplicitlySet =
-            (newCapacity > m_owner->m_buffer->capacity) || newCapExplicitlySet;
-
-        if (!(newCapIsLargerOrExplicitlySet || m_owner->IsCopyOnWrite()))
+        if (!(m_minimumCapacity > m_owner->m_buffer->capacity || m_owner->IsCopyOnWrite()))
         {
             return;
         }
 
+        uint32_t newCapacity = m_owner->m_buffer->capacity << 1;
+        if (newCapacity < m_minimumCapacity)
+            newCapacity = m_minimumCapacity;
+        if (newCapacity < kGrowthIncr)
+            newCapacity = kGrowthIncr;
         
         m_oldArray = m_owner->m_buffer->array;
         m_oldLength = m_owner->m_buffer->length;
@@ -526,7 +513,6 @@ namespace avmplus
 
             if (newCap != m_buffer->capacity)
             {
-                grower.SetNewCapacityExplicitly(newCap);
                 grower.ReallocBackingStore();
             }
         }
