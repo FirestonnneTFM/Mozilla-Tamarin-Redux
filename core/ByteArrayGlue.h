@@ -222,12 +222,14 @@ namespace avmplus
                 , m_oldCapacity(owner->m_buffer->capacity)
                 , m_minimumCapacity(minimumCapacity)
                 , m_expectedLength(expectedLength)
+                , m_newCap(0)
                 , m_onlyIfExpected(onlyIfExpected)
                 , m_succeeded(true)
             {
             }
             void FASTCALL ReallocBackingStore();
             void FASTCALL EnsureWritableCapacity();
+            void SetNewCapacityExplicitly(uint32_t newCap);
             void run(); // from SafepointTask
             virtual ~Grower();
         private:
@@ -238,6 +240,7 @@ namespace avmplus
             uint32_t    m_oldCapacity;
             uint32_t    m_minimumCapacity;
             uint32_t    m_expectedLength;
+            uint32_t    m_newCap; /* 0 unless it was explicitly provided */
             bool        m_onlyIfExpected;
             bool        m_succeeded;
         };
