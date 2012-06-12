@@ -296,12 +296,11 @@ namespace avmplus
             if (newCapacity < kGrowthIncr)
                 newCapacity = kGrowthIncr;
 
-            m_minimumCapacity = newCapacity;
-            ReallocBackingStore();
+            ReallocBackingStore(newCapacity);
         }
     }
 
-    void FASTCALL ByteArray::Grower::ReallocBackingStore()
+    void FASTCALL ByteArray::Grower::ReallocBackingStore(uint32_t newCapacity)
     {
         // The extra check on maximum size is necessary because
         // mmfx_new_array_opt doesn't return NULL but instead Aborts
@@ -321,15 +320,20 @@ namespace avmplus
         static_assert(MAX_BYTEARRAY_STORE_LENGTH == (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2),
                       "Constraint on maximum ByteArray storage size");
 
-        if (m_minimumCapacity > (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2))
+        if (newCapacity > (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2))
             m_owner->ThrowMemoryError();
 
-        if (!(m_minimumCapacity > m_owner->m_buffer->capacity || m_owner->IsCopyOnWrite()))
+        // Bugzilla 699176, 763519: EnsureWritableCapacity passes a
+        // newCapacity that is strictly larger than our existing one,
+        // but Grower::SetLengthCommon, when called from length
+        // setter, can pass a newCapacity that is smaller (by design).
+        // Therefore, eagerly return here only when the old and new
+        // capacities are equal (or if the owner is copy-on-write).
+        if (!(newCapacity != m_owner->m_buffer->capacity || m_owner->IsCopyOnWrite()))
         {
             return;
         }
 
-        uint32_t newCapacity = m_owner->m_buffer->capacity << 1;
         if (newCapacity < m_minimumCapacity)
             newCapacity = m_minimumCapacity;
         if (newCapacity < kGrowthIncr)
@@ -520,7 +524,7 @@ namespace avmplus
 
             if (newCap != m_owner->m_buffer->capacity)
             {
-                ReallocBackingStore();
+                ReallocBackingStore(newCap);
             } else {
                 m_succeeded = m_onlyIfExpected ? m_expectedLength == m_oldLength : true;
 

@@ -226,7 +226,7 @@ namespace avmplus
                 , m_succeeded(true)
             {
             }
-            void FASTCALL ReallocBackingStore();
+            void FASTCALL ReallocBackingStore(uint32_t newCapacity);
             void FASTCALL EnsureWritableCapacity();
             uint32_t SetLengthCommon(uint32_t newLength, bool calledFromLengthSetter);
 
