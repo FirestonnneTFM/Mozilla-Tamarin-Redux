@@ -57,7 +57,6 @@
     gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap(), config);
 	//gc=core->GetGC();
     atom=(Atom *)malloc(100);
-    itemp = new ChannelItem;
     singleItemBuffer=new NoSyncSingleItemBuffer(gc);
     multiItemBuffer=new NoSyncMultiItemBuffer();
     nonBlockMultiItemBuffer=new NonBlockingMultiItemBuffer(gc);
@@ -67,7 +66,6 @@
     delete multiItemBuffer;
     delete nonBlockMultiItemBuffer;
 	delete gc;
-    delete itemp;
     free(atom);
 
 %%test NonBlockMultiItemConstructor
@@ -162,16 +160,4 @@
 //    %%verify !multiItemBuffer->isEmpty()
 //    %%verify multiItemBuffer->isFull()
 //
-//    for (int i=0;i<15;i++) {
-//        %%verify multiItemBuffer->get(itemp)
-//        %%verify !multiItemBuffer->isEmpty()
-//        %%verify !multiItemBuffer->isFull()
-//    }
-//    %%verify multiItemBuffer->get(itemp)
-//    %%verify multiItemBuffer->isEmpty()
-//    %%verify !multiItemBuffer->isFull()
-//
-//    %%verify !multiItemBuffer->get(itemp)
-//    %%verify multiItemBuffer->isEmpty()
-//    %%verify !multiItemBuffer->isFull()
 
