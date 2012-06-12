@@ -235,7 +235,7 @@ namespace avmplus
     public:
         virtual MethodEnv* getCallMethodEnv();
 #endif
-
+	
     protected:
         
         Atom getAtomPropertyFromProtoChain(Atom name, ScriptObject* protochain, Traits *origObjTraits) const;

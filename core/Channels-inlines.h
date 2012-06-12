@@ -114,7 +114,7 @@ namespace avmplus
     }
 
     template<class BUFFER>
-    bool BlockingChannel<BUFFER>::put(const ChannelItem &in)
+    bool BlockingChannel<BUFFER>::put(const ChannelItem* in)
     {
         SCOPE_LOCK_NAMED(lk, m_monitor) {
             while (!buffer->put(in)) {
@@ -130,7 +130,7 @@ namespace avmplus
     }
         
     template<class BUFFER>
-    bool BlockingChannel<BUFFER>::get(ChannelItem *outp)
+    bool BlockingChannel<BUFFER>::get(const ChannelItem** outp)
     {
         SCOPE_LOCK_NAMED(lk, m_monitor) {
             while (buffer->isEmpty() && !eof)

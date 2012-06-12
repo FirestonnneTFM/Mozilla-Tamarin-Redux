@@ -190,6 +190,7 @@ class Errors
         public static const kConditionInvalidTimeout          = 1515;
         public static const kConditionCannotNotify            = 1516;
         public static const kConditionCannotNotifyAll         = 1517;
+        public static const kConditionCannotWait              = 1518;
         public static const kInvalidParamError                = 2004;
         public static const kParamRangeError                  = 2006;
         public static const kNullPointerError                 = 2007;

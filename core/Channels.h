@@ -44,15 +44,11 @@ namespace avmplus
 #define NOT_REACHED AvmAssert(false); return NULL;
 
 
-    struct ChannelItem 
+    class ChannelItem 
     {
-        int32_t tag;
-        union {
-            void* asNative;
-            double asNumber;
-            bool asBoolean;
-            intptr_t asIntptr;
-        };
+    public:
+        virtual ~ChannelItem() {};
+        virtual Atom getAtom(Toplevel* toplevel) const = 0;
     };
 
     /*
@@ -80,8 +76,8 @@ namespace avmplus
         bool isFull();
         bool available();
         uint32_t numItemsInBuffer();
-        bool put(const ChannelItem &in);
-        bool get(ChannelItem *outp);
+        bool put(const ChannelItem* in);
+        bool get(const ChannelItem** outp);
 
     private:
         //  Lock these up
@@ -277,8 +273,8 @@ namespace avmplus
 
         bool isEmpty();
         bool isFull();
-        bool put(const ChannelItem &in);
-        bool get(ChannelItem *outp);
+        bool put(const ChannelItem* in);
+        bool get(const ChannelItem** outp);
         uint32_t numItemsInBuffer();
 
     protected:
@@ -286,7 +282,7 @@ namespace avmplus
     private:
         static const int BUF_LENGTH = 16;
 
-		ChannelItem *m_items;
+		const ChannelItem** m_items;
 		
         int head;
         int tail;

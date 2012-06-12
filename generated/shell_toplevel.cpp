@@ -5113,6 +5113,7 @@ const uint8_t shell_toplevel_abc_data[30466] = {
 /* versioned_uris */
 const char* const shell_toplevel_versioned_uris[] = {
     "__AS3__.vec", // [660]
+    "avm2.intrinsics.memory", // [682]
     "avmplus", // [660]
     "avmplus:ITest", // [660]
     "avmshell", // [660, 661, 662, 663, 664, 665, 666]

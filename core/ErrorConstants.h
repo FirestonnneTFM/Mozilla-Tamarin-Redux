@@ -291,6 +291,7 @@ namespace avmplus
             kConditionInvalidTimeout                        = 1515,
             kConditionCannotNotify                          = 1516,
             kConditionCannotNotifyAll                       = 1517,
+            kConditionCannotWait                            = 1518,
             kInvalidParamError                              = 2004,
             kParamRangeError                                = 2006,
             kNullPointerError                               = 2007,
@@ -315,7 +316,7 @@ namespace avmplus
         // Error message strings only in non-stubbed DEBUGGER builds.
         #if defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB)
         const int kLanguages = LANG_count;
-        const int kNumErrorConstants = 161;
+        const int kNumErrorConstants = 162;
         extern const char* errorConstants[kLanguages][kNumErrorConstants];
         extern int errorMappingTable[2*kNumErrorConstants];
         extern LangName languageNames[kLanguages];
