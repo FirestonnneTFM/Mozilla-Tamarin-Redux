@@ -323,22 +323,6 @@ namespace avmplus
 
         if (m_minimumCapacity > (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2))
             m_owner->ThrowMemoryError();
-        growTask();
-    }
-
-    void ByteArray::Grower::growTask() {
-        if (m_owner->m_workerLocal) {
-            run();
-        } else {
-            Isolate* isolate = m_owner->m_toplevel->core()->getIsolate();
-            if (isolate) 
-            {
-                isolate->getAggregate()->runHoldingIsolateMapLock(this);
-            }
-        }
-    }
-
-    void ByteArray::Grower::run() {
 
         if (!(m_minimumCapacity > m_owner->m_buffer->capacity || m_owner->IsCopyOnWrite()))
         {
@@ -361,7 +345,6 @@ namespace avmplus
                 return;
             }
         }
-
 
         uint8_t* newArray = mmfx_new_array_opt(uint8_t, newCapacity, MMgc::kCanFail);
         if (!newArray)
@@ -395,8 +378,6 @@ namespace avmplus
                 AvmCore::getActiveCore()->getIsolate()->getAggregate()->reloadGlobalMemories();
             }
         }
-
-
     }
 
     /*
@@ -481,13 +462,39 @@ namespace avmplus
             m_toplevel->throwRangeError(kInvalidRangeError);
 
         Grower grower(this, newLength, onlyIfExpected, expectedLength);
-        if (!calledFromLengthSetter ||
-            (newLength < kHugeGrowthThreshold &&
-             m_buffer->length < kHugeGrowthThreshold))
-        {
-            if (newLength > m_buffer->capacity)
+        return grower.SetLengthCommon(newLength, calledFromLengthSetter);
+    }
+
+    uint32_t ByteArray::Grower::SetLengthCommon(uint32_t newLength, bool calledFromLengthSetter)
+    {
+        
+        this->m_newLength = newLength;
+        this->m_calledFromLengthSetter = calledFromLengthSetter;
+        if (m_owner->m_workerLocal) {
+            run();
+        } else {
+            Isolate* isolate = m_owner->m_toplevel->core()->getIsolate();
+            if (isolate) 
             {
-                grower.EnsureWritableCapacity();
+                isolate->getAggregate()->runHoldingIsolateMapLock(this);
+            }
+        }
+        return m_oldLength;
+    }
+
+    void ByteArray::Grower::run() {
+
+        if (!m_calledFromLengthSetter ||
+            (m_newLength < kHugeGrowthThreshold &&
+             m_owner->m_buffer->length < kHugeGrowthThreshold))
+        {
+            if (m_newLength > m_owner->m_buffer->capacity)
+            {
+                EnsureWritableCapacity();
+            } 
+            else
+            {
+                m_succeeded = m_onlyIfExpected ? m_expectedLength == m_oldLength : true;
             }
         }
         else
@@ -505,25 +512,28 @@ namespace avmplus
 
             // (overflow paranoia; see notes above SetLength(uint32_t, uint32_t).
             uint64_t newCapRoundedUp =
-                roundUpTo(uint64_t(newLength), uint64_t(kHugeGrowthIncr));
+                roundUpTo(uint64_t(m_newLength), uint64_t(kHugeGrowthIncr));
             uint32_t newCap = ((newCapRoundedUp <= MAX_BYTEARRAY_STORE_LENGTH)
-                               ? uint32_t(newCapRoundedUp) : newLength);
+                               ? uint32_t(newCapRoundedUp) : m_newLength);
 
-            AvmAssert(newCap >= newLength);
+            AvmAssert(newCap >= m_newLength);
 
-            if (newCap != m_buffer->capacity)
+            if (newCap != m_owner->m_buffer->capacity)
             {
-                grower.ReallocBackingStore();
+                ReallocBackingStore();
+            } else {
+                m_succeeded = m_onlyIfExpected ? m_expectedLength == m_oldLength : true;
+
             }
         }
         
-        if (grower.m_succeeded) {
-            m_buffer->length = newLength;
-            if (m_position > newLength)
-                m_position = newLength;
+        if (m_succeeded) {
+            m_owner->m_buffer->length = m_newLength;
+            if (m_owner->m_position > m_newLength)
+                m_owner->m_position = m_newLength;
         }
-        return grower.m_oldLength;
     }
+
 
     void FASTCALL ByteArray::SetLength(uint32_t newLength)
     {
@@ -1180,6 +1190,8 @@ namespace avmplus
 
     int32_t ByteArray::CAS(uint32_t index, int32_t expected, int32_t next)
     {
+		if (m_buffer->length == 0)
+			m_toplevel->throwRangeError(kInvalidRangeError);
         if (index > (m_buffer->length - sizeof(int32_t))) // Handle the race. 
             m_toplevel->throwRangeError(kInvalidRangeError);
         if (index % sizeof(expected) != 0) // require word alignment
@@ -2039,7 +2051,60 @@ namespace avmplus
         return !(m_byteArray.isWorkerLocal());
     }
 
+	ChannelItem* ByteArrayObject::makeChannelItem()
+	{
+        class ByteArrayChannelItem: public ChannelItem
+        {
+        public:
+            ByteArrayChannelItem(ByteArray::Buffer* value)
+            {
+                m_value = value;
+            }
 
+            void intern(ByteArrayObject* ba) const
+            {
+                Toplevel* tl = ba->toplevel();
+                tl->internObject(m_value, ba);
+            }
+
+            Atom getAtom(Toplevel* toplevel) const
+            {
+		        ByteArrayObject* baObject = toplevel->getInternedObject(m_value).staticCast<ByteArrayObject>();
+		        if (baObject == NULL) 
+		        {
+			        ByteArrayClass* baClass = toplevel->byteArrayClass();
+			        baObject = new (toplevel->gc(), MMgc::kExact) ByteArrayObject(baClass->ivtable(), baClass->prototypePtr(), m_value);
+			        toplevel->internObject(m_value, baObject);
+		        }
+		        return baObject->toAtom();
+            }
+
+        private:
+            FixedHeapRef<ByteArray::Buffer> m_value;
+        };
+
+        ByteArrayChannelItem* item = NULL;
+		ByteArray::Buffer* buffer = GetByteArray().getUnderlyingBuffer();
+		if (GetByteArray().isWorkerLocal()) {
+			ByteArray::Buffer* copy = mmfx_new(ByteArray::Buffer);
+			copy->capacity = buffer->capacity;
+			copy->length = buffer->length;
+			if (buffer->array) {
+				copy->array = mmfx_new_array_opt(uint8_t, buffer->capacity, MMgc::kCanFailAndZero);
+                if (copy->array) {
+				    VMPI_memcpy(copy->array, buffer->array, buffer->length);
+                }
+			} else {
+				copy->array = NULL;
+			}
+            item = mmfx_new(ByteArrayChannelItem(copy));
+		} else {
+            item = mmfx_new(ByteArrayChannelItem(buffer));
+		}
+        item->intern(this);
+        return item;
+	}
+	
 #ifdef DEBUGGER
     uint64_t ByteArrayObject::bytesUsed() const
     {

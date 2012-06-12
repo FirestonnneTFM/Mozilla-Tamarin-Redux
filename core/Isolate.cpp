@@ -245,6 +245,8 @@ namespace avmplus
                             // FIXME revisit why we can possibly take this branch.
                         }
                     }
+                    // avoid leaking if there is a circular reference to this isolate via sharedProperties
+                    isolate->clearSharedProperties();
                 }
                 virtual ~IsolateKiller() {}
             };
@@ -481,7 +483,10 @@ namespace avmplus
                 AvmAssert(isolate->m_thread != NULL);
                 isolate->m_interrupted = true;
                 isolate->stopRunLoop();
-            }
+            } else if (to == Isolate::TERMINATED) {
+                AvmAssert(from == Isolate::RUNNING || from == Isolate::STARTING || from == Isolate::FINISHING || from == Isolate::NEW);
+				isolate->m_interrupted = true;
+			}
 
             intptr_t changeCode = (((intptr_t)from) << 16) | ((intptr_t)to);
             
@@ -532,27 +537,16 @@ namespace avmplus
         return true;
     }
 
-    enum ChannelItemType {
-        //ChannelItemLink = 0x100,
-        ChannelItemByteArray = 0x101,
-        ChannelItemSharedByteArray = 0x102,        
-        ChannelItemObject = 0x103,
-        ChannelItemMutex = 0x104,
-        ChannelItemCondition = 0x105,
-    };
     
-    void Isolate::SharedPropertyMap::DestroyItem(Isolate::SharedPropertyNamep key, ChannelItem item)
+    void Isolate::SharedPropertyMap::DestroyItem(Isolate::SharedPropertyNamep key, ChannelItem* item)
     {
-        if (item.tag >= 0x100) { 
-            FixedHeapRCObject* rcobj = static_cast<FixedHeapRCObject*>(item.asNative);
-            rcobj->DecrementRef();
-        }
+        mmfx_delete(item);
         key->deallocate(); 
         mmfx_delete(key);
         
     }
     
-    void Isolate::setSharedProperty(const char* utf8String, int32_t len, ChannelItem item)
+    void Isolate::setSharedProperty(const char* utf8String, int32_t len, ChannelItem* item)
     {
         SCOPE_LOCK(m_sharedPropertyLock) {
             // FIXME: validate state
@@ -561,11 +555,11 @@ namespace avmplus
             char* values = mmfx_new_array(char, len);
             VMPI_memcpy(values, utf8String, len* sizeof(char));
             key->values = values;
-            ChannelItem previous;
+            ChannelItem* previous;
             if (m_properties.LookupItem(key, &previous)) {
                 m_properties.RemoveItem(key); // this will dealloc old key
             }
-            if (item.tag != kSpecialBibopType) {
+            if (item) {
                 m_properties.InsertItem(key, item);
             } else {
                 key->deallocate();
@@ -576,7 +570,7 @@ namespace avmplus
         // else the key is owned by the hashmap
     }
 
-    bool Isolate::getSharedProperty(const char* utf8String, int32_t len, ChannelItem* item)
+    bool Isolate::getSharedProperty(const char* utf8String, int32_t len, ChannelItem** item)
     {
         // FIXME validate state.
         SCOPE_LOCK(m_sharedPropertyLock) {
@@ -592,126 +586,107 @@ namespace avmplus
         return false; // not reached
     }
 
-    Atom Isolate::extractAtom(Toplevel* toplevel, ChannelItem item)
+    ChannelItem* Isolate::makeChannelItem(Toplevel* toplevel, Atom atom)
     {
-        switch (item.tag) {
-        case kDoubleType:
-            return toplevel->core()->doubleToAtom(item.asNumber);
-        case kBooleanType:
-            return item.asBoolean ? trueAtom : falseAtom;
-        case kIntptrType:
-            return atomFromIntptrValue(item.asIntptr);
-        case kSpecialBibopType:
-            return undefinedAtom;
-        case ChannelItemSharedByteArray:
-        case ChannelItemByteArray:
+        class DoubleChannelItem: public ChannelItem
+        {
+        public:
+            DoubleChannelItem(double value) : m_value(value) {}
+
+            Atom getAtom(Toplevel* toplevel) const
             {
-                ByteArray::Buffer* baBuffer = static_cast<ByteArray::Buffer*>(item.asNative);
-                // FIXME should we try to look up in the intern table?
-                ByteArrayClass* baClass = toplevel->byteArrayClass();
-                ByteArrayObject* baObject = new (toplevel->gc(), MMgc::kExact) ByteArrayObject(baClass->ivtable(), baClass->prototypePtr(), baBuffer);
-                // will increment the refcount of buffer
-                return baObject->toAtom();
+                return toplevel->core()->doubleToAtom(m_value);
             }
-         case ChannelItemMutex:
-             {
-                MutexObject::State* state = static_cast<MutexObject::State*>(item.asNative);
-                MutexObject* mutexObj = toplevel->lookupInternedObject(state, NULL).staticCast<MutexObject>();
-                if (mutexObj == NULL) 
-                {
-                    MutexClass* mutexClass = toplevel->builtinClasses()->get_MutexClass();
-                    mutexObj = new (toplevel->gc(), MMgc::kExact, mutexClass->ivtable()->getExtraSize()) MutexObject(mutexClass->ivtable(), mutexClass->prototypePtr());
-                    // will increment the refcount of m_state
-                    mutexObj->m_state = state;
-                    toplevel->lookupInternedObject(state, mutexObj);
-                }
-                return mutexObj->toAtom();
-            }
-        case ChannelItemCondition:
-             {
-                ConditionObject::State* state = static_cast<ConditionObject::State*>(item.asNative);
-                ConditionObject* conditionObj  =  toplevel->lookupInternedObject(state, NULL).staticCast<ConditionObject>();
-                if (conditionObj == NULL) {
-                    ConditionClass* conditionClass = toplevel->builtinClasses()->get_ConditionClass();
-                    conditionObj = new (toplevel->gc(), MMgc::kExact, conditionClass->ivtable()->getExtraSize()) ConditionObject(conditionClass->ivtable(), conditionClass->prototypePtr());
-                    // will increment the refcount of m_state
-                    conditionObj->m_state = state;
-                    toplevel->lookupInternedObject(state, conditionObj);
-                }
-                return conditionObj->toAtom();
-             }
-        case ChannelItemObject:
+
+        private:
+            double m_value;
+        };
+
+        class IntPtrChannelItem: public ChannelItem
+        {
+        public:
+            IntPtrChannelItem(intptr_t value):m_value(value) {}
+
+            Atom getAtom(Toplevel* toplevel) const
             {
-                ByteArray::Buffer* buffer = static_cast<ByteArray::Buffer*>(item.asNative);
+                (void)toplevel;
+                return atomFromIntptrValue(m_value);
+            }
+
+        private:
+            intptr_t m_value;
+        };
+
+        class BooleanChannelItem: public ChannelItem
+        {
+        public:
+            BooleanChannelItem(bool value):m_value(value) {}
+
+            Atom getAtom(Toplevel* toplevel) const
+            {
+                (void)toplevel;
+                return m_value ? trueAtom : falseAtom;
+            }
+
+        private:
+            bool m_value;
+        };
+
+        class ScriptObjectChannelItem: public ChannelItem
+        {
+        public:
+            ScriptObjectChannelItem(Toplevel* toplevel, Atom value)
+            {
+                ByteArrayObject* ba = toplevel->byteArrayClass()->constructByteArray();
+                ba->writeObject(value);
+		        ByteArray::Buffer* buffer = ba->GetByteArray().getUnderlyingBuffer();
+			    ByteArray::Buffer* copy = mmfx_new(ByteArray::Buffer);
+			    copy->capacity = buffer->capacity;
+			    copy->length = buffer->length;
+			    if (buffer->array) {
+				    copy->array = mmfx_new_array_opt(uint8_t, buffer->capacity, MMgc::kCanFailAndZero);
+                    if (copy->array) {
+				        VMPI_memcpy(copy->array, buffer->array, buffer->length);
+                    }
+			    } else {
+				    copy->array = NULL;
+			    }
+                m_value = copy;
+            }
+
+            Atom getAtom(Toplevel* toplevel) const
+            {
                 ByteArrayClass* cls = toplevel->byteArrayClass();
-                ByteArrayObject* byteArray = new (toplevel->gc(), MMgc::kExact) ByteArrayObject(cls->ivtable(), cls->prototypePtr(), buffer);
-                Atom result = byteArray->readObject(); // can throw
-                return result;
+		        ByteArrayObject* byteArray = new (toplevel->gc(), MMgc::kExact) ByteArrayObject(cls->ivtable(), cls->prototypePtr(), m_value);
+                return byteArray->readObject();
             }
 
-        default:
-            AvmAssert(false);
-            return unreachableAtom;
-        }
-    }
+        private:
+            FixedHeapRef<ByteArray::Buffer> m_value;
+        };
 
-    ChannelItem Isolate::makeChannelItem(Toplevel* toplevel, Atom atom)
-    {
-        ChannelItem item;
+        ChannelItem* item = NULL;
         Atom kind = atomKind(atom);
-        item.tag = int32_t(kind);
             
         if (kind == kDoubleType) {
-            item.asNumber = toplevel->core()->atomToDouble(atom);
+            item = mmfx_new(DoubleChannelItem(toplevel->core()->atomToDouble(atom)));
         } else if (kind == kIntptrType) {
-            item.asIntptr = atomGetIntptr(atom);
+            item = mmfx_new(IntPtrChannelItem(atomGetIntptr(atom)));
         } else if (kind == kBooleanType) {
-            item.asBoolean = atom == trueAtom ? true : false;
+            item = mmfx_new(BooleanChannelItem(atom == trueAtom ? true : false));
         } else if (kind == kSpecialBibopType) {
             // no value
         } else if (AvmCore::istype(atom, toplevel->byteArrayClass()->ivtable()->traits)) {
             ByteArrayObject* ba = static_cast<ByteArrayObject*>(toplevel->core()->atomToScriptObject(atom));
-            if (ba->GetByteArray().isWorkerLocal()) {
-                ByteArray::Buffer* buffer = ba->GetByteArray().getUnderlyingBuffer();
-                ByteArray::Buffer* copy = mmfx_new(ByteArray::Buffer);
-                copy->capacity = buffer->capacity;
-                copy->length = buffer->length;
-                if (buffer->array) {
-                    copy->array = mmfx_new_array_opt(uint8_t, buffer->capacity, MMgc::kCanFailAndZero);
-                    VMPI_memcpy(copy->array, buffer->array, buffer->length);
-                } else {
-                    copy->array = NULL;
-                }
-                copy->IncrementRef(); // It sits in the buffer so it's reachable
-                item.asNative = copy;
-                item.tag = ChannelItemSharedByteArray;
-            } else {
-                ByteArray::Buffer* buffer = ba->GetByteArray().getUnderlyingBuffer();
-                buffer->IncrementRef();
-                item.asNative = buffer;
-                item.tag = ChannelItemByteArray;
-            }
-            
+			item = ba->makeChannelItem();
         } else if (AvmCore::istype(atom, toplevel->builtinClasses()->get_MutexClass()->ivtable()->traits)) {
             MutexObject* mutexObj = static_cast<MutexObject*>(toplevel->core()->atomToScriptObject(atom));
-            mutexObj->m_state->IncrementRef();
-            item.asNative = mutexObj->m_state;
-            item.tag = ChannelItemMutex;
+			item = mutexObj->makeChannelItem();
         } else if (AvmCore::istype(atom, toplevel->builtinClasses()->get_ConditionClass()->ivtable()->traits)) {
             ConditionObject* conditionObj = static_cast<ConditionObject*>(toplevel->core()->atomToScriptObject(atom));
-            conditionObj->m_state->IncrementRef();
-            item.asNative = conditionObj->m_state;
-            item.tag = ChannelItemCondition;
+			item = conditionObj->makeChannelItem();
         } else {
-            // make new ByteArray
-            ByteArrayObject* byteArray = toplevel->byteArrayClass()->constructByteArray();
-            // its buffer has to survive it, so make it shareable
-            byteArray->set_shareable(true);
-            byteArray->writeObject(atom);
-            ByteArray::Buffer* buffer = byteArray->GetByteArray().getUnderlyingBuffer();
-            buffer->IncrementRef();
-            item.asNative = buffer;
-            item.tag = ChannelItemObject;
+        	item = mmfx_new(ScriptObjectChannelItem(toplevel, atom));
         }
         return item;
     }
@@ -1111,7 +1086,8 @@ namespace avmplus
     }
 
     void Aggregate::beforeCoreDeletion(Isolate* current) {
-        AvmAssert(AvmCore::getActiveCore()->getIsolate() == current);
+        // if we terminate before the core is running we may not have one
+        AvmAssert(AvmCore::getActiveCore() == NULL || AvmCore::getActiveCore()->getIsolate() == current);
         
         SCOPE_LOCK(m_globals->m_lock) {
 #ifdef DEBUG
@@ -1220,16 +1196,20 @@ namespace avmplus
 
             int count = 0;
             MMgc::GC::AllocaAutoPtr _autoAlloca;
-            PromiseChannel** toDelete = (PromiseChannel**) VMPI_alloca(AvmCore::getActiveCore(), _autoAlloca, 
-                                                                       sizeof(PromiseChannel*)*m_globals->m_channelMap.GetNumItems());
-            
-            // Goes through the all the channels, good enough for now.
-            CloseEndpoint closeEndpoint(endpoint, toDelete, count);
-            SCOPE_LOCK(m_globals->m_channelMap.m_lock) {
-                // FIXME review what protection is needed by CloseEndpoint?
-                m_globals->m_channelMap.ForEach(closeEndpoint);
-                for (int i = 0; i < count; i++) {
-                    destroyPromiseChannel(toDelete[i]);
+            // in some situations (corrupt swf) we can exit before we get an active core
+            if (AvmCore::getActiveCore())
+            {
+                PromiseChannel** toDelete = (PromiseChannel**) VMPI_alloca(AvmCore::getActiveCore(), _autoAlloca, 
+                                                                           sizeof(PromiseChannel*)*m_globals->m_channelMap.GetNumItems());
+                
+                // Goes through the all the channels, good enough for now.
+                CloseEndpoint closeEndpoint(endpoint, toDelete, count);
+                SCOPE_LOCK(m_globals->m_channelMap.m_lock) {
+                    // FIXME review what protection is needed by CloseEndpoint?
+                    m_globals->m_channelMap.ForEach(closeEndpoint);
+                    for (int i = 0; i < count; i++) {
+                        destroyPromiseChannel(toDelete[i]);
+                    }
                 }
             }
         }
@@ -1365,7 +1345,7 @@ namespace avmplus
             {}
             virtual void each(int32_t, FixedHeapRef<Isolate> isolate) 
             {
-                GCRef<ScriptObject> interned = m_toplevel->lookupInternedObject(isolate, NULL);
+                GCRef<ScriptObject> interned = m_toplevel->getInternedObject(isolate);
                 if (interned == NULL) {
                     interned = isolate->workerObject(m_toplevel);
                 }

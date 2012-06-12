@@ -69,6 +69,9 @@ namespace avmplus {
         void ctor();
         virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
         
+	public:
+		ChannelItem* makeChannelItem();
+		
     private:
         GC_NO_DATA(MutexObject)
         DECLARE_SLOTS_MutexObject;
@@ -94,12 +97,17 @@ namespace avmplus {
         MutexObject* get_mutex();
         
         void ctor(MutexObject* mutex);
-        bool waitImpl(double timeout);
+
+        // -1: mutex not owned. 0 - timeout, 1 -notified 
+        int waitImpl(double timeout);
         bool notifyImpl();
         bool notifyAllImpl();
 
         virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
 
+	public:
+		ChannelItem* makeChannelItem();
+		
         class State: public FixedHeapRCObject 
         {
             friend class ConditionObject;

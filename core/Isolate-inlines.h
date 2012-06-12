@@ -115,6 +115,7 @@ namespace avmplus
             m_isolate = thisIsolate;
         }
         setIsolate(m_isolate);
+		self()->toplevel()->addWorker(self());
     }
 
     template<class T>
@@ -126,8 +127,9 @@ namespace avmplus
             AvmAssert(m_isolate == isolate);
         }
         this->giid = isolate->desc;
-        AvmAssert(self()->toplevel()->lookupInternedObject(m_isolate, NULL) == NULL); // always check the intern table first
-        return self()->toplevel()->lookupInternedObject(m_isolate, self());
+        AvmAssert(self()->toplevel()->getInternedObject(m_isolate) == NULL); // always check the intern table first
+        self()->toplevel()->internObject(m_isolate, self());
+		return self();
     }
 
     
@@ -217,7 +219,7 @@ namespace avmplus
     ScriptObject* WorkerObjectBase<T>::cloneNonSlots(ClassClosure* classClosure, Cloner&) const
     {
 
-        ScriptObject* prev = classClosure->toplevel()->lookupInternedObject(m_isolate, NULL);
+        ScriptObject* prev = classClosure->toplevel()->getInternedObject(m_isolate);
         if (prev != NULL) {
             return static_cast<T*>(prev);
         }
@@ -237,7 +239,7 @@ namespace avmplus
     void WorkerObjectBase<T>::setSharedProperty(String* key, Atom value)
     {
         StUTF8String buf(key);
-        ChannelItem item = m_isolate->makeChannelItem(self()->toplevel(), value);
+        ChannelItem* item = m_isolate->makeChannelItem(self()->toplevel(), value);
         m_isolate->setSharedProperty(buf.c_str(), buf.length(), item);
     }
 
@@ -247,11 +249,11 @@ namespace avmplus
         if (m_isolate)
         {
             StUTF8String buf(key);
-            ChannelItem item;
+            ChannelItem* item;
             bool ok = m_isolate->getSharedProperty(buf.c_str(), buf.length(), &item);
             if (ok) 
             {
-                return m_isolate->extractAtom(self()->toplevel(), item);
+                return item->getAtom(self()->toplevel());
             }
         }
         return undefinedAtom;

@@ -3730,6 +3730,7 @@ const uint32_t Toplevel::gcTracePointerOffsets[] = {
 #endif
     offsetof(Toplevel, _functionClass),
     offsetof(Toplevel, _intClass),
+    offsetof(Toplevel, _isolateInternedObjects),
     offsetof(Toplevel, _mainEntryPoint),
     offsetof(Toplevel, _namespaceClass),
     offsetof(Toplevel, _numberClass),
@@ -3737,7 +3738,7 @@ const uint32_t Toplevel::gcTracePointerOffsets[] = {
     offsetof(Toplevel, _stringClass),
     offsetof(Toplevel, _traitsToAliasMap),
     offsetof(Toplevel, _uintClass),
-    offsetof(Toplevel, _workerInternTable),
+    offsetof(Toplevel, _workerList),
     offsetof(Toplevel, objectClass),
     0};
 
@@ -3752,7 +3753,10 @@ MMgc::GCTracerCheckResult Toplevel::gcTraceOffsetIsTraced(uint32_t off) const
     if((result = _traitsToAliasMap.gcTraceOffsetIsTraced(off - offsetof(Toplevel,_traitsToAliasMap))) != MMgc::kOffsetNotFound) {
         return result;
     }
-    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,18);
+    if((result = _workerList.gcTraceOffsetIsTraced(off - offsetof(Toplevel,_workerList))) != MMgc::kOffsetNotFound) {
+        return result;
+    }
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,19);
 }
 #endif // DEBUG
 
@@ -3773,6 +3777,7 @@ bool Toplevel::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 #endif
     gc->TraceLocation(&_functionClass);
     gc->TraceLocation(&_intClass);
+    gc->TraceLocation(&_isolateInternedObjects);
     gc->TraceLocation(&_mainEntryPoint);
     gc->TraceLocation(&_namespaceClass);
     gc->TraceLocation(&_numberClass);
@@ -3780,7 +3785,7 @@ bool Toplevel::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     gc->TraceLocation(&_stringClass);
     _traitsToAliasMap.gcTrace(gc);
     gc->TraceLocation(&_uintClass);
-    gc->TraceLocation(&_workerInternTable);
+    _workerList.gcTrace(gc);
     gc->TraceLocation(&objectClass);
     return false;
 }

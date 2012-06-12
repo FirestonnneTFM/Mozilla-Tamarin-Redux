@@ -461,9 +461,11 @@ namespace avmplus
         TraitsMorpher* getTraitsMorpher(Traits* sourceTraits) const;
 
         virtual void initAliasTable(bool initWorkerClasses);
-        // FIXME finesse the type later
-        GCRef<ScriptObject> lookupInternedObject(const FixedHeapRCObject* rep, GCRef<ScriptObject> addIfMissing);
 
+ 		void internObject (const FixedHeapRCObject* rep, GCRef<ScriptObject> obj);
+        GCRef<ScriptObject> getInternedObject (const FixedHeapRCObject* rep) const;
+		
+		void addWorker (GCRef<ScriptObject> worker);
 
     protected:
         ClassClosure* findClassInScriptEnv(int class_id, ScriptEnv* env);
@@ -534,7 +536,8 @@ namespace avmplus
 
         
     protected:
-        GCMember<WeakValueHashtable>  GC_POINTER(_workerInternTable);
+        GCMember<WeakValueHashtable>  GC_POINTER(_isolateInternedObjects);
+		WeakRefList<ScriptObject>	GC_STRUCTURE(_workerList);
         GC_DATA_END(Toplevel)
     // ------------------------ DATA SECTION END
     //

@@ -477,11 +477,16 @@ namespace avmplus
     NoSyncMultiItemBuffer::NoSyncMultiItemBuffer()
         : m_hasData(false), head(0), tail(0), bufLength(BUF_LENGTH)
     {
-        m_items = mmfx_new_array_opt(ChannelItem, bufLength, MMgc::kZero);
+        m_items = mmfx_new_array_opt(const ChannelItem*, bufLength, MMgc::kZero);
     }
     
     NoSyncMultiItemBuffer::~NoSyncMultiItemBuffer()
     {
+        const ChannelItem* p = NULL;
+        while(get(&p))
+        {
+            mmfx_delete((ChannelItem*)p);
+        }
         mmfx_delete_array(m_items);
     }
                 
@@ -517,13 +522,13 @@ namespace avmplus
         return retVal;
     }
     
-    bool NoSyncMultiItemBuffer::put(const ChannelItem &in)
+    bool NoSyncMultiItemBuffer::put(const ChannelItem* in)
     {
         if (isFull())
 		{
 			//  Increase by BUF_LENGTH
 			uint32_t newLength = bufLength + BUF_LENGTH;
-			ChannelItem *newBuf = mmfx_new_array_opt(ChannelItem, newLength, MMgc::kZero);
+			const ChannelItem** newBuf = mmfx_new_array_opt(const ChannelItem*, newLength, MMgc::kZero);
 			uint32_t it = 0;
 			//  Copy the old buffer into this one
 			while (get(&newBuf[it]))
@@ -542,11 +547,12 @@ namespace avmplus
         return true;
     }
         
-    bool NoSyncMultiItemBuffer::get(ChannelItem *outp)
+    bool NoSyncMultiItemBuffer::get(const ChannelItem** outp)
     {
         if (isEmpty())
             return false;
         *outp = m_items[tail];
+        m_items[tail] = NULL;
         tail = (tail + 1) % bufLength;
         if (tail == head)
             m_hasData = false;

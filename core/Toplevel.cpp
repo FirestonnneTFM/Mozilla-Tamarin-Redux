@@ -1830,19 +1830,33 @@ namespace avmplus
         registerClassAlias(ctx, t->name(), verifyErrorClass);
     }
 
-    // Yes the API is dumb, will fix.
-    GCRef<ScriptObject> Toplevel::lookupInternedObject(const FixedHeapRCObject* rep, GCRef<ScriptObject> toAddIfMissing)
-    {
-        Atom key = (Atom)((intptr_t)rep|kIntptrType);
-        Atom value = _workerInternTable->get(key);
-        if (value == undefinedAtom) {
-            if (toAddIfMissing  != NULL) {
-                _workerInternTable->add(key, toAddIfMissing->toAtom(), this);
-            }
-            return toAddIfMissing;
-        } else {
-            return AvmCore::atomToScriptObject(value);
+	void Toplevel::internObject (const FixedHeapRCObject* rep, GCRef<ScriptObject> obj)
+	{
+		Atom key = (Atom)((intptr_t)rep|kIntptrType);
+		Atom value = _isolateInternedObjects->get(key);
+        if (value == undefinedAtom) 
+		{
+			_isolateInternedObjects->add(key, obj->toAtom(), this);
+		}
+	}
+	
+	GCRef<ScriptObject> Toplevel::getInternedObject(const FixedHeapRCObject* rep) const
+	{
+		Atom key = (Atom)((intptr_t)rep|kIntptrType);
+		Atom value = _isolateInternedObjects->get(key);
+        if (value == undefinedAtom) 
+		{
+			return NULL;
+		}
+		else
+		{
+			return AvmCore::atomToScriptObject(value);
         }
-    }
+	}
+
+	void Toplevel::addWorker (GCRef<ScriptObject> worker)
+	{
+		_workerList.add(worker);
+	}
 
 }

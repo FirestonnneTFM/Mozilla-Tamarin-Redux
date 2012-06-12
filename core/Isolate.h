@@ -152,7 +152,7 @@ namespace avmplus
 
         typedef FixedHeapArray<char>* SharedPropertyNamep;
 
-        class SharedPropertyMap: public FixedHeapHashTable<SharedPropertyNamep, ChannelItem>
+        class SharedPropertyMap: public FixedHeapHashTable<SharedPropertyNamep, ChannelItem*>
         {
         public:
             SharedPropertyMap();
@@ -160,7 +160,7 @@ namespace avmplus
         protected:
             virtual uintptr_t HashKey(SharedPropertyNamep key) const;
             virtual bool KeysEqual(SharedPropertyNamep key1, const SharedPropertyNamep key2) const;
-            virtual void DestroyItem(SharedPropertyNamep key, ChannelItem);
+            virtual void DestroyItem(SharedPropertyNamep key, ChannelItem* value);
         };
 
 
@@ -206,12 +206,13 @@ namespace avmplus
         uint32_t m_global_gpid;
 
     private:
+        void clearSharedProperties() { m_properties.Clear(); }
         SharedPropertyMap m_properties;
+
     public:
-        void setSharedProperty(const char* utf8String, int32_t len, ChannelItem item);
-        bool getSharedProperty(const char* utf8String, int32_t len, ChannelItem* outItem);
-        virtual Atom extractAtom(Toplevel* toplevel, ChannelItem item);
-        virtual ChannelItem makeChannelItem(Toplevel* toplevel, Atom atom);
+        void setSharedProperty(const char* utf8String, int32_t len, ChannelItem* item);
+        bool getSharedProperty(const char* utf8String, int32_t len, ChannelItem** outItem);
+        virtual ChannelItem* makeChannelItem(Toplevel* toplevel, Atom atom);
 
     protected:
         AvmCore* m_core;

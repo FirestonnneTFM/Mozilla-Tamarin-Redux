@@ -942,5 +942,4 @@ namespace avmplus
         Atom lenAtm = core->uintToAtom(newLen);
         toplevel->setproperty(this->atom(), &mname, lenAtm, this->vtable);
     }
-
 }

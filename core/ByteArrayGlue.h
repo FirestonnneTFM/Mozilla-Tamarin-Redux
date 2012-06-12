@@ -228,18 +228,21 @@ namespace avmplus
             }
             void FASTCALL ReallocBackingStore();
             void FASTCALL EnsureWritableCapacity();
+            uint32_t SetLengthCommon(uint32_t newLength, bool calledFromLengthSetter);
+
             void run(); // from SafepointTask
             virtual ~Grower();
         private:
-            void growTask();
             ByteArray*  m_owner;
             uint8_t*    m_oldArray;
             uint32_t    m_oldLength;
             uint32_t    m_oldCapacity;
             uint32_t    m_minimumCapacity;
             uint32_t    m_expectedLength;
+            uint32_t    m_newLength;
             bool        m_onlyIfExpected;
             bool        m_succeeded;
+            bool        m_calledFromLengthSetter;
         };
     public:
         
@@ -425,6 +428,8 @@ namespace avmplus
         bool get_shareable();
         void set_shareable(bool val);
 
+	public:
+		ChannelItem* makeChannelItem();
 
 #ifdef DEBUGGER
     public:

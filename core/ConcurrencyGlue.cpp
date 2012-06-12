@@ -78,11 +78,11 @@ namespace avmplus {
     void MutexObject::ctor() 
     {
         m_state = mmfx_new(MutexObject::State());
-        ScriptObject* prev = toplevel()->lookupInternedObject(m_state, NULL);
+        ScriptObject* prev = toplevel()->getInternedObject(m_state);
         if (prev) {
             AvmAssert(false); 
         } else {
-            toplevel()->lookupInternedObject(m_state, this);
+            toplevel()->internObject(m_state, this);
         }
     }
 
@@ -169,10 +169,42 @@ namespace avmplus {
         }
         return result;
     }
+	
+	ChannelItem* MutexObject::makeChannelItem()
+	{
+        class MutexChannelItem: public ChannelItem
+        {
+        public:
+            MutexChannelItem(MutexObject::State* value)
+            {
+                m_value = value;
+            }
 
+            Atom getAtom(Toplevel* toplevel) const
+            {
+		        MutexObject* mutexObj = toplevel->getInternedObject(m_value).staticCast<MutexObject>();
+		        if (mutexObj == NULL) 
+		        {
+			        MutexClass* mutexClass = toplevel->builtinClasses()->get_MutexClass();
+			        mutexObj = new (toplevel->gc(), MMgc::kExact, mutexClass->ivtable()->getExtraSize()) MutexObject(mutexClass->ivtable(), mutexClass->prototypePtr());
+			        // will increment the refcount of m_state
+			        mutexObj->m_state = m_value;
+			        toplevel->internObject(m_value, mutexObj);
+		        }
+		        return mutexObj->toAtom();
+            }
+
+        private:
+            FixedHeapRef<MutexObject::State> m_value;
+        };
+
+        MutexChannelItem* item = mmfx_new(MutexChannelItem(m_state));
+		return item;
+	}
+	
     ScriptObject* MutexObject::cloneNonSlots(ClassClosure* targetClosure, Cloner&) const
     {
-        MutexObject* clone = targetClosure->toplevel()->lookupInternedObject(m_state, NULL).staticCast<MutexObject>();
+        MutexObject* clone = targetClosure->toplevel()->getInternedObject(m_state).staticCast<MutexObject>();
         if (clone == NULL) {
             clone = new (targetClosure->gc(), MMgc::kExact, targetClosure->ivtable()->getExtraSize()) MutexObject(targetClosure->ivtable(), targetClosure->prototypePtr());
             clone->m_state = this->m_state;
@@ -203,11 +235,11 @@ namespace avmplus {
     {
         AvmAssert(mutex != NULL);
         m_state = mmfx_new(ConditionObject::State(mutex->m_state));
-        ScriptObject* prev = toplevel()->lookupInternedObject(m_state, NULL);
+        ScriptObject* prev = toplevel()->getInternedObject(m_state);
         if (prev) {
             AvmAssert(false); 
         } else {
-            toplevel()->lookupInternedObject(m_state, this);
+            toplevel()->internObject(m_state, this);
         }
     }
 
@@ -232,7 +264,38 @@ namespace avmplus {
         return true;
     }
 
-    /**
+	ChannelItem* ConditionObject::makeChannelItem()
+	{
+        class ConditionChannelItem: public ChannelItem
+        {
+        public:
+            ConditionChannelItem(ConditionObject::State* value)
+            {
+                m_value = value;
+            }
+
+            Atom getAtom(Toplevel* toplevel) const
+            {
+		        ConditionObject* conditionObj  =  toplevel->getInternedObject(m_value).staticCast<ConditionObject>();
+		        if (conditionObj == NULL) {
+			        ConditionClass* conditionClass = toplevel->builtinClasses()->get_ConditionClass();
+			        conditionObj = new (toplevel->gc(), MMgc::kExact, conditionClass->ivtable()->getExtraSize()) ConditionObject(conditionClass->ivtable(), conditionClass->prototypePtr());
+			        // will increment the refcount of m_state
+			        conditionObj->m_state = m_value;
+			        toplevel->internObject(m_value, conditionObj);
+		        }
+		        return conditionObj->toAtom();		
+            }
+
+        private:
+            FixedHeapRef<ConditionObject::State> m_value;
+        };
+
+        ConditionChannelItem* item = mmfx_new(ConditionChannelItem(m_state));
+        return item;
+	}
+	
+	/**
      * Wraps calls to VMPI_condVarWait with a register flush and safepoint gate
      */
     class SafepointHelper_VMPIWait
@@ -277,13 +340,13 @@ namespace avmplus {
     };
 
 
-
-    bool ConditionObject::waitImpl(double timeout)
+    
+    int ConditionObject::waitImpl(double timeout)
     {
         // See comments in unlockImpl for correctness of reading m_ownerThreadID
         if (m_state->m_mutexState->m_ownerThreadID != VMPI_currentThread())
         {
-            return false;
+            return -1;
         }
         m_state->m_mutexState->m_ownerThreadID = VMPI_nullThread();
         // So we own the mutex.
@@ -305,7 +368,7 @@ namespace avmplus {
 
     ScriptObject* ConditionObject::cloneNonSlots(ClassClosure* targetClosure, Cloner& ) const
     {
-        ConditionObject* clone = targetClosure->toplevel()->lookupInternedObject(m_state, NULL).staticCast<ConditionObject>();
+        ConditionObject* clone = targetClosure->toplevel()->getInternedObject(m_state).staticCast<ConditionObject>();
         if (clone == NULL) {
             clone = new (targetClosure->gc(), MMgc::kExact, targetClosure->ivtable()->getExtraSize()) ConditionObject(targetClosure->ivtable(), targetClosure->prototypePtr());
             clone->m_state = this->m_state;
@@ -333,14 +396,14 @@ namespace avmplus {
 
     MutexObject* ConditionObject::get_mutex()
     {
-        ScriptObject* prev = toplevel()->lookupInternedObject(m_state->m_mutexState, NULL);
+        ScriptObject* prev = toplevel()->getInternedObject(m_state->m_mutexState);
         if (prev) {
             return static_cast<MutexObject*>(prev);
         } else {
             MutexClass* cls = toplevel()->builtinClasses()->get_MutexClass();
             MutexObject* mutex = new (gc(), MMgc::kExact, cls->ivtable()->getExtraSize()) MutexObject(cls->ivtable(), cls->prototypePtr());
             mutex->m_state = m_state->m_mutexState;
-            toplevel()->lookupInternedObject(m_state->m_mutexState, mutex);
+            toplevel()->internObject(m_state->m_mutexState, mutex);
             return mutex;
         }
     }

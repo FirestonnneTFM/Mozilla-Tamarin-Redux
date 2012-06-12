@@ -75,9 +75,11 @@ include "api-versions.as"
     final public class Condition 
     {
     	private static const kNullPointerError:uint = 2007;
-    	private static const kConditionInvalidTimeoutError:uint = 1414;
-    	private static const kConditionCannotNotifyError:uint = 1515;
-    	private static const kConditionCannotNotifyAll:uint = 1515;
+    	private static const kConditionInvalidTimeoutError:uint = 1415;
+    	private static const kConditionCannotNotifyError:uint = 1516;
+    	private static const kConditionCannotNotifyAllError:uint = 1517;
+    	private static const kConditionCannotWaitError:uint = 1518;
+
     	
         public native function get mutex():Mutex;
 
@@ -93,11 +95,14 @@ include "api-versions.as"
         {
             if (timeout < 0 && timeout != -1) {
                 Error.throwError(ArgumentError, kConditionInvalidTimeoutError);
-                throw new ArgumentError("invalid timeout value: " + timeout);
             }
-            return waitImpl(Math.ceil(timeout));
+            var result:int =  waitImpl(Math.ceil(timeout));
+            if (result == -1) {
+                Error.throwError(IllegalOperationError, kConditionCannotWaitError);
+            }
+            return result == 1;
         }
-        private native function waitImpl(timeout:Number) :Boolean;
+        private native function waitImpl(timeout:Number) :int;
 
         public function notify() :void
         {
