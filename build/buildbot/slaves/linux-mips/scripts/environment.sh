@@ -64,8 +64,7 @@ export ssh_proc_names="avmshell_mips avmshell_mips_d avmshell_mips_osr avmshell_
 # not on the host machine. Reset this to something that will never be found/killed
 export proc_names="fake_never_find_me"
 
-#export threads=10
-export threads=8
+export threads=10
 
 export SSH_SHELL_REMOTE_HOST0=asteammips5
 export SSH_SHELL_REMOTE_USER0=root
@@ -97,23 +96,22 @@ export SSH_SHELL_REMOTE_USER5=root
 export SSH_SHELL_REMOTE_BASEDIR5=/root
 export SSH_SHELL_REMOTE_DIR5=/root/app2
 
-#export SSH_SHELL_REMOTE_HOST6=asteammips8
-#export SSH_SHELL_REMOTE_USER6=root
-#export SSH_SHELL_REMOTE_BASEDIR6=/root
-#export SSH_SHELL_REMOTE_DIR6=/root/app1
-
-#export SSH_SHELL_REMOTE_HOST7=asteammips8
-#export SSH_SHELL_REMOTE_USER7=root
-#export SSH_SHELL_REMOTE_BASEDIR7=/root
-#export SSH_SHELL_REMOTE_DIR7=/root/app2
-
-export SSH_SHELL_REMOTE_HOST6=asteammips9
+export SSH_SHELL_REMOTE_HOST6=asteammips8
 export SSH_SHELL_REMOTE_USER6=root
 export SSH_SHELL_REMOTE_BASEDIR6=/root
 export SSH_SHELL_REMOTE_DIR6=/root/app1
 
-export SSH_SHELL_REMOTE_HOST7=asteammips9
+export SSH_SHELL_REMOTE_HOST7=asteammips8
 export SSH_SHELL_REMOTE_USER7=root
 export SSH_SHELL_REMOTE_BASEDIR7=/root
 export SSH_SHELL_REMOTE_DIR7=/root/app2
 
+export SSH_SHELL_REMOTE_HOST8=asteammips9
+export SSH_SHELL_REMOTE_USER8=root
+export SSH_SHELL_REMOTE_BASEDIR8=/root
+export SSH_SHELL_REMOTE_DIR8=/root/app1
+
+export SSH_SHELL_REMOTE_HOST9=asteammips9
+export SSH_SHELL_REMOTE_USER9=root
+export SSH_SHELL_REMOTE_BASEDIR9=/root
+export SSH_SHELL_REMOTE_DIR9=/root/app2
