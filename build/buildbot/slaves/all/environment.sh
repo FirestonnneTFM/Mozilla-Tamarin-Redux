@@ -39,7 +39,8 @@
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
 #export vmbuilds=ftp://ftp.mozilla.org/pub/js/tamarin/builds
-export vmbuilds=ftp://10.60.48.47/
+export ftp_host=10.60.48.47
+export vmbuilds=ftp://${ftp_host}/
 #export ascbuilds=ftp://ftp.mozilla.org/pub/js/tamarin/builds/asc/latest
 export ascbuilds=ftp://10.60.48.47/asc/latest/
 export BUILTIN_BUILDFLAGS='-config CONFIG::VMCFG_FLOAT=false'
