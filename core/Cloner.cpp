@@ -211,7 +211,7 @@ namespace avmplus {
         void* p;
         const SlotStorageType sst = td->calcSlotAddrAndSST((uint32_t)slotId, (void*)obj, p);
         // compare with ScriptObject::getSlotAtom()
-        Atom value;
+        Atom value = NULL;
         if (sst == SST_atom)
         {
             value = cloner.cloneAtom(*((const Atom*)p));        
