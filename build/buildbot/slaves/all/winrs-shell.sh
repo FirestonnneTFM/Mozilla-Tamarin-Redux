@@ -39,6 +39,7 @@
 # usage: ./winrs_shell.sh <vmargs> file.abc
 # assumes the shell is deployed to $WINRS_SHELL_REMOTE_DIR/avmshell
 #
+(set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
 if [ "$THREADID" == "" ]
 then
