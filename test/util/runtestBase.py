@@ -1060,9 +1060,23 @@ class RuntestBase(object):
                 self.verbose_print(line.strip())
             for line in err:
                 self.verbose_print(line.strip())
-            return (f, err, exitcode)
         except:
-            raise
+            raise Exception()
+
+        # Need to do ad-hoc code signing of the executable
+        cmd = '%s -fs "-" %s' % ('codesign', ("%s/%s" % (output, outname)))
+        self.verbose_print(cmd)
+        (f_s,err_s,exitcode_s) = self.run_pipe(cmd)
+        # If this fails raise an exception, not much we can do
+        if exitcode_s != 0:
+            for line in f_s:
+                print(line.strip())
+            for line in err_s:
+                print(line.strip())
+
+            raise Exception()
+
+        return (f, err, exitcode)
 
     def copyfile_retry(self, src, dest, attempts=3):
         # Have had problems with AOT compilation randomly failing because not all of the
