@@ -94,6 +94,8 @@ else:
 
 
 class RuntestBase(object):
+    REGEX_CHARS = '( ) . * ? | [ ] \\'.split()
+    
     abcOnlyExt = '.abc_' # only run, don't compile these abc files - underscore is used so that tests are not deleted when removing old abc files
     abcasmExt = '.abs'
     abcasmRunner = 'bash ../../utils/abcasm/abcasm.sh'
@@ -792,7 +794,19 @@ class RuntestBase(object):
         # return settings for this test
         settings = {}
         for k in self.settings.keys():
-            if re.search('^'+k+'$', root):
+            match = False
+            if k == root:
+                match = True
+            elif k.endswith('.*'):
+                # only need to match start of string, faster to use startswith
+                if root.startswith(k[:-2]):
+                    match = True
+            elif any(regex_char in k for regex_char in self.REGEX_CHARS):
+                # do a regex search if there are regex chars in the key
+                if re.search('^'+k+'$', root):
+                    match = True
+                
+            if match:
                 for k2 in self.settings[k].keys():
                     if k2 in settings:
                         settings[k2].update(self.settings[k][k2])
