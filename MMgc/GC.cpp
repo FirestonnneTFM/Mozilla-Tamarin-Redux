@@ -1550,10 +1550,18 @@ namespace MMgc
     {
         GC* gc = (GC*)arg;
         char* stackBase = (char*)gc->GetStackTop();
+        // The logic for maintaining rememberedStackTop assumes that
+        // the stack grows "downwards" (i.e., from higher to lower
+        // addresses). Let's check that this is the case. If it's not,
+        // we'll have to slightly tweak the logic below.
+        GCAssert((uintptr_t) stackPointer <= AVMPI_getThreadStackBase());
 
-        // this is where we will clear to when CleanStack is called
-        if(gc->rememberedStackTop < stackPointer)
+        // We will clear up to rememberedStackTop when CleanStack is
+        // called. We assume that the stack grows "downwards", so we
+        // keep track of the lowest address we observe stackPointer to reach.
+        if (gc->rememberedStackTop == NULL || stackPointer < gc->rememberedStackTop) {
             gc->rememberedStackTop = stackPointer;
+        }
 
         // Push the stack onto the mark stack and then mark synchronously until
         // everything reachable from the stack has been marked.
