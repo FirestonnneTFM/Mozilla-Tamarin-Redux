@@ -347,6 +347,7 @@ regress/printpassed,            AOT ,, skip, used by bug_555568
 regress/bug_558442a,            AOT,, skip, negative test that expects a verify error http://watsonexp.corp.adobe.com/#bug=3156646
 regress/security/bug_689243b,   AOT,, skip, jit only testcase
 as3/ByteArray/ByteArrayLzmaThirdParty, AOT,, skip, test attempts to load a lzma compressed file which can't be done on iOS
+regress/bug_618215, AOT,, skip, test attempts to load loads a fuzzed binary .abc using Domain.load which can't be done on iOS
 
 ###########
 # MMgc
