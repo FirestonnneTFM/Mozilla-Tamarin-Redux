@@ -583,10 +583,21 @@ namespace MMgc
 
     REALLY_INLINE uintptr_t GC::GetStackTop() const
     {
+
+        // Bugzilla 754281: stackEnter is going to be assumed untrustworthy
+        // until we can to prove otherwise, i.e. by switching to a better
+        // protocol or by verifying on target-by-target basis.
+        // Note: It is entirely possible that we would first remove the need
+        // for stackEnter entirely.
+
+#ifdef MMGC_HAS_TRUSTWORTHY_GET_STACK_ENTER
         // temporary crutch until we're moved over to the MMGC_GCENTER system
         if(stackEnter == NULL)
             return AVMPI_getThreadStackBase();
         return GetStackEnter();
+#else
+        return AVMPI_getThreadStackBase();
+#endif // MMGC_HAS_TRUSTWORTHY_GET_STACK_ENTER
     }
 
     REALLY_INLINE uintptr_t GC::GetStackEnter() const

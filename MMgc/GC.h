@@ -1559,6 +1559,13 @@ namespace MMgc
         // tracked and cleaned.
         bool stackCleaned;
         const void *rememberedStackTop;
+
+        // Bugzilla 754281: Tracks the stack entry point according to
+        // the most recently constructed GCAutoEnter.  Used for
+        // 1. Heuristic stack-cleaning (see GC::CleanStack()), and
+        // 2. Precise bounds for stack-scanning when determining GC
+        //    root set (only if MMGC_HAS_TRUSTWORTHY_GET_STACK_ENTER
+        //    is defined; see GC::GetStackTop()).
         GCAutoEnter* stackEnter;
         uint32_t enterCount;
 

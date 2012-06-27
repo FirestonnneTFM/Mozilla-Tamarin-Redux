@@ -186,6 +186,27 @@
     #define MEMORY_INFO_ARG(x)
 #endif
 
+
+// Bugzilla 754281: MMGC_HAS_TRUSTWORTHY_GET_STACK_ENTER,
+// when defined, tells the GC that we can use GC::GetStackEnter()
+// (whose state is maintained by the GCAutoEnter ctor/dtor via the
+// MMGC_GCENTER macros) as the basis for GC::GetStackTop().  When
+// undefined, the GC will unconditionally resort to the more
+// conservative (and expensive) AVMPI_getThreadStackBase().
+//
+// Note: If you are seeing time- or space-regressions injected
+// by the more conservative AVMPI_getThreadStackBase(), then
+// it may be feasible to turn MMGC_HAS_TRUSTWORTHY_GET_STACK_ENTER
+// back on for your target.  However, before committing to that
+// approach, you should:
+// 1.) Carefully review the notes/discussion on Bugzilla 754281,
+// 2.) Verify that your target always lays out stack-allocated objects in the
+//     order that they are declared in the code, *and*
+// 3.) Discuss the change with the MMgc team.
+
+//#define MMGC_HAS_TRUSTWORTHY_GET_STACK_ENTER
+
+
 // MMGC_FASTBITS enables a potentially faster representation of the per-block bit table. 
 // The representation is fairly well hidden from most of the GC code; only GC::GetGCBits
 // and GCAlloc / GCLargeAlloc take it into account.
