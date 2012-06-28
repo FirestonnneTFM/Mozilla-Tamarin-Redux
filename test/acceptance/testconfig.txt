@@ -290,38 +290,36 @@ abcasm/bug_655118, .*-Dverifyonly.*,, skip, uncaught ReferenceError test
 ####################
 # AOT specific
 ####################
-as3/sampling/.*,                   AOT ,, skip, AOT does not yet support profiling
-as3/ShellClasses/Domain,        AOT ,, skip, AOT does not support loadBytes()
-regress/vector_domain_bug,      AOT ,, skip, AOT does not support loadBytes()
-versioning/.*,                  AOT ,, skip, AOT does not support versioning yet
+abcasm/bug_481171,              AOT ,, skip, unlabled backwards branches aren't errors with the GO
+abcasm/bug_554915a,             AOT ,, skip, AOT'ed apps don't support script timeout
+abcasm/bug_554915b,             AOT ,, skip, AOT'ed apps don't support script timeout
+abcasm/bug_555006a,             AOT ,, skip, AOT catches Verify errors at compile time 
+abcasm/bug_612641,              AOT ,, skip, AOT does not support -Djitordie switch
 abcasm/bug_678952,              AOT ,, skip, AOT does not support versioning yet
 as3/Array/regress_524122,       AOT ,, skip, AOT does not support versioning yet
+as3/ByteArray/ByteArray_bug763519, AOT,, skip, test allocates too much memory and gets a kill -9  from the OS
+as3/ByteArray/ByteArrayLzmaThirdParty, AOT,, skip, test attempts to load a lzma compressed file which can't be done on iOS
+as3/Definitions/FunctionAccessors/InfRec,   AOT ,, skip, AOT'ed apps don't support script timeout
 as3/GlobalObject/parseFloat_513018, AOT ,, skip, AOT does not support versioning yet
 as3/RuntimeErrors/Error1115NotAConstructor, AOT ,, skip, AOT does not support versioning yet
+as3/sampling/.*,                AOT ,, skip, AOT does not yet support profiling
+as3/ShellClasses/Domain,        AOT ,, skip, AOT does not support loadBytes()
 as3/String/localeCompare_585791, AOT ,, skip, AOT does not support versioning yet
 as3/Types/Number/e15_7_4_6_1,   AOT ,, skip, AOT does not support versioning yet
-as3/Vector/nonindexproperty,    AOT ,, skip, AOT does not support versioning yet
+as3/Types/Number/visibility,    AOT ,, skip, AOT does not support versioning yet
 as3/Vector/bug504525/bug504525, AOT ,, skip, AOT does not support versioning yet
+as3/Vector/nonindexproperty,    AOT ,, skip, AOT does not support versioning yet
 as3/Vector/vectorIndexRangeExceptions, AOT ,, skip, AOT does not support versioning yet
 e4x/XML/e13_4_4_29,             AOT ,, skip, AOT does not support versioning yet
 e4x/XML/e13_4_4_3,              AOT ,, skip, AOT does not support versioning yet
 e4x/XML/e13_4_4_32,             AOT ,, skip, AOT does not support versioning yet
-misc/bug_526662,                AOT ,, skip, AOT does not support versioning yet
-regress/bug_551587_2,           AOT ,, skip, AOT does not support versioning yet
-regress/bug_558863,             AOT ,, skip, AOT does not support versioning yet
-regress/bug_654807,             AOT ,, skip, AOT does not support versioning yet
-regress/bug_609416,             AOT ,, skip, AOT does not support versioning yet
-as3/Types/Number/visibility,    AOT ,, skip, AOT does not support versioning yet
 ecma3/JSON/versioned,           AOT ,, skip, AOT does not support versioning yet
+misc/bug_526662,                AOT ,, skip, AOT does not support versioning yet
 misc/invalid_opcodes,           AOT ,, skip, Handled by the GO
-as3/Definitions/FunctionAccessors/InfRec,   AOT ,, skip, AOT'ed apps don't support script timeout
-abcasm/bug_481171,              AOT ,, skip, unlabled backwards branches aren't errors with the GO
-abcasm/bug_555006a,             AOT ,, skip, AOT catches Verify errors at compile time 
-abcasm/bug_554915b,             AOT ,, skip, AOT'ed apps don't support script timeout
-abcasm/bug_554915a,             AOT ,, skip, AOT'ed apps don't support script timeout
 regress/bug_498979,             AOT ,, skip, AOT catches Verify errors at compile time 
 regress/bug_520888,             AOT ,, skip, AOT catches Verify errors at compile time
 regress/bug_548684,             AOT ,, skip, AOT catches Verify errors at compile time
+regress/bug_551587_2,           AOT ,, skip, AOT does not support versioning yet
 regress/bug_555045,             AOT ,, skip, AOT catches Verify errors at compile time
 regress/bug_555048,             AOT ,, skip, AOT catches Verify errors at compile time
 regress/bug_555053,             AOT ,, skip, AOT catches Verify errors at compile time
@@ -330,24 +328,26 @@ regress/bug_555097b,            AOT ,, skip, AOT catches Verify errors at compil
 regress/bug_555097c,            AOT ,, skip, AOT catches Verify errors at compile time
 regress/bug_555102,             AOT ,, skip, AOT catches Verify errors at compile time
 regress/bug_555542,             AOT ,, skip, AOT catches Verify errors at compile time
+regress/bug_555568,             AOT ,, skip, Needs additional abc files at compile time
+regress/bug_555612,             AOT ,, skip, AOT catches Verify errors at compile time
 regress/bug_555614,             AOT ,, skip, AOT catches Verify errors at compile time
 regress/bug_555705,             AOT ,, skip, AOT catches Verify errors at compile time
-regress/bug_555612,             AOT ,, skip, AOT catches Verify errors at compile time
-regress/bug_558442b,            AOT ,, skip, AOT catches Verify errors at compile time
-regress/security/bug_441280,    AOT ,, skip, AOT catches Verify errors at compile time
-regress/security/bug_556543,    AOT ,, skip, AOT catches Verify errors at compile time
-regress/security/bug_555059a,   AOT ,, skip, AOT catches Verify errors at compile time
-regress/security/bug_555059b,   AOT ,, skip, AOT catches Verify errors at compile time
 regress/bug_558442a,            AOT ,, skip, negative test that expects a verify error http://watsonexp.corp.adobe.com/#bug=3156646
-abcasm/bug_612641,              AOT ,, skip, AOT does not support -Djitordie switch
-regress/security/bug567284,     AOT ,, skip, attempts to load additional abc file at runtime
-regress/bug_555568,             AOT ,, skip, Needs additional abc files at compile time
+regress/bug_558442b,            AOT ,, skip, AOT catches Verify errors at compile time
+regress/bug_558863,             AOT ,, skip, AOT does not support versioning yet
+regress/bug_609416,             AOT ,, skip, AOT does not support versioning yet
+regress/bug_618215, AOT,, skip, test attempts to load loads a fuzzed binary .abc using Domain.load which can't be done on iOS
+regress/bug_654807,             AOT ,, skip, AOT does not support versioning yet
 regress/patch_ByteArray_readFile, AOT ,, skip, used by bug_555568
 regress/printpassed,            AOT ,, skip, used by bug_555568
-regress/bug_558442a,            AOT,, skip, negative test that expects a verify error http://watsonexp.corp.adobe.com/#bug=3156646
-regress/security/bug_689243b,   AOT,, skip, jit only testcase
-as3/ByteArray/ByteArrayLzmaThirdParty, AOT,, skip, test attempts to load a lzma compressed file which can't be done on iOS
-regress/bug_618215, AOT,, skip, test attempts to load loads a fuzzed binary .abc using Domain.load which can't be done on iOS
+regress/security/bug_441280,    AOT ,, skip, AOT catches Verify errors at compile time
+regress/security/bug_555059a,   AOT ,, skip, AOT catches Verify errors at compile time
+regress/security/bug_555059b,   AOT ,, skip, AOT catches Verify errors at compile time
+regress/security/bug_556543,    AOT ,, skip, AOT catches Verify errors at compile time
+regress/security/bug_689243b,   AOT ,, skip, jit only testcase
+regress/security/bug567284,     AOT ,, skip, attempts to load additional abc file at runtime
+regress/vector_domain_bug,      AOT ,, skip, AOT does not support loadBytes()
+versioning/.*,                  AOT ,, skip, AOT does not support versioning yet
 
 ###########
 # MMgc
