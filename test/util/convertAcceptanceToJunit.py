@@ -492,7 +492,8 @@ def convertAcceptanceToJunit(infile,outfile,toplevel):
             properties['threadcount']=tokens[2]
         if line.startswith('Executing'):
             tests=tokens[1]
-            properties['shell']=tokens[5]
+            if len(tokens)>5:
+               properties['shell']=tokens[5]
         if finishedTests==False and len(tokens)>2 and re.search('^[0-9.]+',line):
             totalfiles+=1
             if lastout!='' and len(testresults)>0:
