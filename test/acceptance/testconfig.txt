@@ -346,6 +346,7 @@ regress/security/bug_555059b,   AOT ,, skip, AOT catches Verify errors at compil
 regress/security/bug_556543,    AOT ,, skip, AOT catches Verify errors at compile time
 regress/security/bug_689243b,   AOT ,, skip, jit only testcase
 regress/security/bug567284,     AOT ,, skip, attempts to load additional abc file at runtime
+regress/security/bug636565,     AOT ,, skip, attempts to load additional abc file at runtime
 regress/vector_domain_bug,      AOT ,, skip, AOT does not support loadBytes()
 versioning/.*,                  AOT ,, skip, AOT does not support versioning yet
 
