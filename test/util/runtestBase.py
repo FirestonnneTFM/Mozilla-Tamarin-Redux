@@ -1077,18 +1077,19 @@ class RuntestBase(object):
         except:
             raise Exception()
 
-        # Need to do ad-hoc code signing of the executable
-        cmd = '%s -fs "-" %s' % ('codesign', ("%s/%s" % (output, outname)))
-        self.verbose_print(cmd)
-        (f_s,err_s,exitcode_s) = self.run_pipe(cmd)
-        # If this fails raise an exception, not much we can do
-        if exitcode_s != 0:
-            for line in f_s:
-                print(line.strip())
-            for line in err_s:
-                print(line.strip())
-
-            raise Exception()
+        # Only attempt code signing if the AOT compilation is clean up to this point
+        if exitcode == 0:
+            # Need to do ad-hoc code signing of the executable
+            cmd = '%s -fs "-" %s' % ('codesign', ("%s/%s" % (output, outname)))
+            self.verbose_print(cmd)
+            (f_s,err_s,exitcode_s) = self.run_pipe(cmd)
+            # If this fails raise an exception, not much we can do
+            if exitcode_s != 0:
+                for line in f_s:
+                    print(line.strip())
+                for line in err_s:
+                    print(line.strip())
+                raise Exception()
 
         return (f, err, exitcode)
 
