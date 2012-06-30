@@ -141,7 +141,18 @@ namespace avmplus
     {
         return m_savedThis;
     }
-    
+
+    REALLY_INLINE GCRef<MethodEnv> WeakMethodClosure::_get_callEnv() const
+    {
+        MethodEnv* callEnv = (MethodEnv*) m_weakCallEnv->get();
+        return callEnv;
+    }
+
+    /*virtual*/ GCRef<MethodEnv> WeakMethodClosure::get_callEnv() const
+    {
+        return _get_callEnv();
+    }
+
     /*virtual*/ MethodClosure* MethodClosure::weaken() const
     {
         // no need to weaken if savedThis isn't an Object.
