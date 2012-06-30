@@ -116,7 +116,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
     PrintWriter& MethodClosure::print(PrintWriter& prw) const
     {
-        return prw << "MC{" << asAtom(get_savedThis()) << " " << m_callEnv->method << "}@" << asAtomHex(atom());
+        return prw << "MC{" << asAtom(get_savedThis()) << " " << get_callEnv()->method << "}@" << asAtomHex(atom());
     }
 #endif
 
@@ -147,7 +147,7 @@ namespace avmplus
         // no need to weaken if savedThis isn't an Object.
         if (!AvmCore::isObject(m_savedThis))
             return const_cast<MethodClosure*>(this);
-        return WeakMethodClosure::create(gc(), this->vtable, m_callEnv, m_savedThis);
+        return WeakMethodClosure::create(gc(), this->vtable, get_callEnv(), m_savedThis);
     }
     
     bool MethodClosure::equals(const MethodClosure* that) const
@@ -157,7 +157,7 @@ namespace avmplus
         // AvmAssert(this->isValid());
         // AvmAssert(that != NULL && that->isValid());
         return that != NULL &&
-                this->m_callEnv == that->m_callEnv &&
+                this->get_callEnv() == that->get_callEnv() &&
                 this->get_savedThisOrNull() == that->get_savedThisOrNull();
     }
 
@@ -165,7 +165,7 @@ namespace avmplus
     {
         // Don't assert: just use the null result to form the hashKey.
         // AvmAssert(isValid());
-        return ((uintptr_t((MethodEnv*)m_callEnv) << 8) | (uintptr_t(get_savedThisOrNull()) >> 3));
+        return ((uintptr_t((MethodEnv*)get_callEnv()) << 8) | (uintptr_t(get_savedThisOrNull()) >> 3));
     }
 
     // this = argv[0] (ignored)
@@ -176,7 +176,7 @@ namespace avmplus
         // can't invoke method closure as constructor:
         //     m = o.m;
         //     new m(); // error
-        toplevel()->throwTypeError(kCannotCallMethodAsConstructor, core()->toErrorString(m_callEnv->method));
+        toplevel()->throwTypeError(kCannotCallMethodAsConstructor, core()->toErrorString(get_callEnv()->method));
         return undefinedAtom;
     }
 
@@ -191,7 +191,7 @@ namespace avmplus
     /*static*/ Atom MethodClosure::callMethodClosure(MethodClosure* f, int argc, Atom* argv)
     {
         argv[0] = f->m_savedThis;
-        return f->m_callEnv->coerceEnter(argc, argv);
+        return f->get_callEnv()->coerceEnter(argc, argv);
     }
 
     // ---------------------------
@@ -241,7 +241,7 @@ namespace avmplus
     /*static*/ Atom WeakMethodClosure::callWeakMethodClosure(WeakMethodClosure* f, int argc, Atom* argv)
     {
         argv[0] = f->_get_savedThis();
-        return f->m_callEnv->coerceEnter(argc, argv);
+        return f->get_callEnv()->coerceEnter(argc, argv);
     }
 
 }

@@ -93,8 +93,8 @@ namespace avmplus
 
     int32_t FunctionObject::get_length()
     {
-        AvmAssert(m_callEnv != NULL);
-        return m_callEnv->method->getMethodSignature()->param_count();
+        AvmAssert(get_callEnv() != NULL);
+        return get_callEnv()->method->getMethodSignature()->param_count();
     }
 
     FunctionObject::FunctionObject(VTable* cvtable, MethodEnv* call)
@@ -102,8 +102,10 @@ namespace avmplus
         , m_call_ptr(FunctionObject::callFunction)
         , m_callEnv(call)
     {
-        // Bugzilla 753120: it would be nice to assert
-        // m_callEnv is non-null if we could.
+        // Bugzilla 753120, 767410: it would be nice to assert
+        // m_callEnv is non-null, at least for classes that require it
+        // be non-null.  (For now, WeakMethodClosure and
+        // HostFunctionObject require we allow null m_callEnv.)
 
         // Since FunctionObject is (pseudo)final, we shouldn't need to calculate this every time,
         // but let's reality-check here just in case.
@@ -112,13 +114,13 @@ namespace avmplus
 
     REALLY_INLINE Atom FunctionObject::getFunctionReceiver(Atom a) const
     {
-        AvmAssert(m_callEnv != NULL);
+        AvmAssert(get_callEnv() != NULL);
         if (AvmCore::isNullOrUndefined(a)) {
             // use callee's global object as this.
             // see E3 15.3.4.4
-            a = m_callEnv->scope()->getScope(0);
+            a = get_callEnv()->scope()->getScope(0);
         }
-        MethodSignaturep ms = m_callEnv->method->getMethodSignature();
+        MethodSignaturep ms = get_callEnv()->method->getMethodSignature();
         return toplevel()->coerce(a, ms->paramTraits(0));
     }
 
@@ -128,7 +130,7 @@ namespace avmplus
     Atom FunctionObject::AS3_call(Atom thisArg, Atom *argv, int argc)
     {
         thisArg = get_coerced_receiver(thisArg);
-        return core()->exec->call(m_callEnv, thisArg, argc, argv);
+        return core()->exec->call(get_callEnv(), thisArg, argc, argv);
     }
 
     /**
@@ -149,12 +151,12 @@ namespace avmplus
             if (!AvmCore::istype(argArray, ARRAY_TYPE))
                 toplevel()->throwTypeError(kApplyError);
 
-            return core->exec->apply(m_callEnv, thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));
+            return core->exec->apply(get_callEnv(), thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));
         }
         else
         {
-            AvmAssert(m_callEnv != NULL);
-            return m_callEnv->coerceEnter(thisArg);
+            AvmAssert(get_callEnv() != NULL);
+            return get_callEnv()->coerceEnter(thisArg);
         }
     }
 
@@ -174,8 +176,8 @@ namespace avmplus
 
         // this is a function
         argv[0] = obj->atom(); // new object is receiver
-        AvmAssert(m_callEnv != NULL);
-        Atom result = m_callEnv->coerceEnter(argc, argv);
+        AvmAssert(get_callEnv() != NULL);
+        Atom result = get_callEnv()->coerceEnter(argc, argv);
 
         // for E3 13.2.2 compliance, check result and return it if (Type(result) is Object)
 
@@ -192,7 +194,7 @@ namespace avmplus
 #if defined(DEBUGGER) || defined(VMCFG_AOT)
     /*virtual*/ MethodEnv* FunctionObject::getCallMethodEnv()
     {
-        return m_callEnv;
+        return get_callEnv();
     }
 #endif
 
@@ -205,21 +207,21 @@ namespace avmplus
     /* static */ Atom FunctionObject::callFunction(FunctionObject* f, int argc, Atom* argv)
     {
         argv[0] = f->getFunctionReceiver(argv[0]);
-        AvmAssert(f->m_callEnv != NULL);
-        return f->m_callEnv->coerceEnter(argc, argv);
+        AvmAssert(f->get_callEnv() != NULL);
+        return f->get_callEnv()->coerceEnter(argc, argv);
     }
 
     /*virtual*/ CodeContext* FunctionObject::getFunctionCodeContext() const
     {
-        AvmAssert(m_callEnv != NULL);
-        return m_callEnv->scope()->abcEnv()->codeContext();
+        AvmAssert(get_callEnv() != NULL);
+        return get_callEnv()->scope()->abcEnv()->codeContext();
     }
 
     /*virtual*/ Stringp FunctionObject::implToString() const
     {
         AvmCore* core = this->core();
-        AvmAssert(m_callEnv != NULL);
-        Stringp s = core->concatStrings(core->newConstantStringLatin1("[object Function-"), core->intToString(m_callEnv->method->method_id()));
+        AvmAssert(get_callEnv() != NULL);
+        Stringp s = core->concatStrings(core->newConstantStringLatin1("[object Function-"), core->intToString(get_callEnv()->method->method_id()));
         return core->concatStrings(s, core->newConstantStringLatin1("]"));
     }
 }
