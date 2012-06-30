@@ -145,7 +145,10 @@ namespace avmplus
 
     protected:
         REALLY_INLINE WeakMethodClosure(VTable* cvtable, MethodEnv* call, Atom savedThis)
-            : MethodClosure(cvtable, call, nullObjectAtom) // do NOT pass savedThis to the superclass ctor!
+            // Bugzilla 500538, 767410: do NOT pass savedThis nor the
+            // call MethodEnv to the superclass ctor!
+            : MethodClosure(cvtable, NULL, nullObjectAtom)
+            , m_weakCallEnv(call->GetWeakRef())
             , m_weakSavedThis(AvmCore::atomToScriptObject(savedThis)->GetWeakRef())
         {
             AvmAssert(m_weakSavedThis != NULL);
@@ -177,14 +180,18 @@ namespace avmplus
      protected:
         // called by Function.AS3_call/apply
         virtual Atom get_coerced_receiver(Atom a) const;
+
+        virtual GCRef<MethodEnv> get_callEnv() const;
     
     private:
+        GCRef<MethodEnv> _get_callEnv() const;
         Atom _get_savedThis() const;
 
     // ------------------------ DATA SECTION BEGIN
         GC_DATA_BEGIN(WeakMethodClosure)
 
     private:
+        GCMember<MMgc::GCWeakRef> GC_POINTER(m_weakCallEnv);    // WeakRef to a MethodEnv*
         GCMember<MMgc::GCWeakRef> GC_POINTER(m_weakSavedThis);  // WeakRef to a ScriptObject*
 
         GC_DATA_END(WeakMethodClosure)
