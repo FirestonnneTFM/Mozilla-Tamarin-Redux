@@ -97,6 +97,10 @@ namespace avmplus
         virtual Stringp implToString() const;
     protected:
         virtual Atom get_coerced_receiver(Atom a) const; // called by AS3_call/apply
+    protected:
+        // returns MethodEnv to use for call, or null if none present.
+        // (see e.g. WeakMethodClosure for example overrides.)
+        virtual GCRef<MethodEnv> get_callEnv() const { return m_callEnv; }
     private:
         /** Implements get_coerced_receiver specifically for concrete FunctionObject instances */
         Atom getFunctionReceiver(Atom a) const;
@@ -107,7 +111,8 @@ namespace avmplus
 
     protected:
         GC_DATA_BEGIN(FunctionObject)
-        GCMember<MethodEnv> GC_POINTER(m_callEnv);
+    private:
+        GCMember<MethodEnv> GC_POINTER(m_callEnv); // can be null (e.g. WeakMethodClosure)
         GC_DATA_END(FunctionObject)
 
     private:

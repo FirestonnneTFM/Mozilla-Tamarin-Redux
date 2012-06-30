@@ -128,7 +128,7 @@ namespace avmplus
         GC_DATA_BEGIN(MethodClosure)
         
         // Note: this field is not used by the Weak subclass
-        ATOM_WB GC_ATOM(m_savedThis);
+        ATOM_WB GC_ATOM(m_savedThis); // can be null (e.g. WeakMethodClosure)
         
         GC_DATA_END(MethodClosure)
 
