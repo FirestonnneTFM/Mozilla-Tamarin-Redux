@@ -263,10 +263,11 @@ namespace avmplus
             start = m_pos;
             while (!String::isSpace(ch) && ch != '=' && ch != '>')
             {
+                m_pos++;
                 if (atEnd())
                     // Premature end!
                     return XMLParser::kMalformedElement;
-                ch = m_str[++m_pos];
+                ch = m_str[m_pos];
             }
             if (start == m_pos)
                 // Empty attribute name?
