@@ -597,6 +597,7 @@ const int kBufferPadding = 16;
         MethodFrame*        currentMethodFrame;
 
 #ifdef VMCFG_TELEMETRY_SAMPLER
+    protected:
         /**
          * The new telemetry based sampler. This sampler works by inspecting
          * the MethodFrame stack periodically. It is available in Release

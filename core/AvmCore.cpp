@@ -410,7 +410,7 @@ namespace avmplus
 #ifdef VMCFG_TELEMETRY_SAMPLER
         // intialize the sampler, off by default
         samplerEnabled = false;
-        telemetrySampler = new TelemetrySampler(this);
+        telemetrySampler = NULL;
 #endif
 
         // set default mode flags
@@ -628,10 +628,13 @@ namespace avmplus
 #endif
 
 #ifdef VMCFG_TELEMETRY_SAMPLER
-        // destroy the telemetry based sampler
-        delete telemetrySampler;
+        if (telemetrySampler)
+        {
+            // destroy the telemetry based sampler
+            delete telemetrySampler;
+        }
 #endif
-        
+
         m_tbCache->flush();
         m_tmCache->flush();
         m_msCache->flush();
