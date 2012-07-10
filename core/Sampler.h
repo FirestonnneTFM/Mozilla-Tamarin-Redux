@@ -173,6 +173,8 @@ namespace avmplus
 
         // Called when a new ScriptObject based object has been allocated.
         virtual void recordNewObjectAllocation(AvmPlusScriptableObject *obj, avmplus::SamplerObjectType sot) = 0;
+
+        virtual ~IMemorySampler() {}
     };
 
     // Set the current memory sampler. A memory sampler is tied to a particular GC/core pair.    

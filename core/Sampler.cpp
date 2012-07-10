@@ -156,8 +156,8 @@ namespace avmplus
     }
 
     Sampler::Sampler(AvmCore* _core) :
-        IMemorySampler(),
         GCRoot(_core->GetGC()),
+        IMemorySampler(),
         sampleIteratorVTable(NULL),
         slotIteratorVTable(NULL),
         core(_core),
