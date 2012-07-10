@@ -40,7 +40,7 @@
 #include "MMgc.h"
 #include <float.h>
 
-#ifdef AVMPLUS_SAMPLER
+#if defined(AVMPLUS_SAMPLER) || (defined(VMCFG_TELEMETRY_SAMPLER) && defined(DEBUGGER))
 namespace avmplus
 {
     void recordAllocationSample(const void* item, size_t size);
@@ -2331,7 +2331,7 @@ namespace MMgc
 #ifdef MMGC_MEMORY_INFO
         DebugDecorate(item, gotSize);
 #endif
-#ifdef AVMPLUS_SAMPLER
+#if defined(AVMPLUS_SAMPLER) || (defined(VMCFG_TELEMETRY_SAMPLER) && defined(DEBUGGER))
         avmplus::recordAllocationSample(item, gotSize);
 #endif
     }
@@ -2344,7 +2344,7 @@ namespace MMgc
             profiler->RecordDeallocation(item, size);
 #endif
 
-#ifdef AVMPLUS_SAMPLER
+#if defined(AVMPLUS_SAMPLER) || (defined(VMCFG_TELEMETRY_SAMPLER) && defined(DEBUGGER))
         avmplus::recordDeallocationSample(item, size);
 #endif
     }

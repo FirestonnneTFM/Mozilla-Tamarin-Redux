@@ -103,7 +103,7 @@ namespace avmplus
     // applications we do not use a thread-local variable to hold the sampler,
     // but attach it directly to the GC, which we pick up from the EnterFrame.
 
-    void AttachSampler(avmplus::Sampler* sampler)
+    void AttachSampler(IMemorySampler* sampler)
     {
         GCHeap* heap = GCHeap::GetGCHeap();     // May be NULL during OOM shutdown
         if (heap)
@@ -112,13 +112,16 @@ namespace avmplus
             if (ef)
             {
                 GC* gc = ef->GetActiveGC();
-                if (gc)
-                    gc->SetAttachedSampler(sampler);
+                if (gc) {
+                    // Don't remove an already attached sampler
+                    if (sampler == NULL || gc->GetAttachedSampler() == NULL)
+                        gc->SetAttachedSampler(sampler);
+                }
             }
         }
     }
 
-    avmplus::Sampler* GetSampler()
+    IMemorySampler* GetSampler()
     {
         GCHeap* heap = GCHeap::GetGCHeap();     // May be NULL during OOM shutdown
         if (heap)
@@ -128,7 +131,7 @@ namespace avmplus
             {
                 GC* gc = ef->GetActiveGC();
                 if (gc)
-                    return (avmplus::Sampler*)gc->GetAttachedSampler();
+                    return (IMemorySampler*)gc->GetAttachedSampler();
             }
         }
         return NULL;
@@ -137,20 +140,23 @@ namespace avmplus
     /* static */
     void recordAllocationSample(const void* item, size_t size)
     {
-        avmplus::Sampler* sampler = GetSampler();
-        if (sampler && sampler->sampling())
-            sampler->recordAllocationSample(item, size);
+        IMemorySampler *sampler = GetSampler();
+        if (sampler) {
+            sampler->recordAllocation(item, size);
+        }
     }
 
     /* static */
     void recordDeallocationSample(const void* item, size_t size)
     {
-        avmplus::Sampler* sampler = GetSampler();
-        if( sampler /*&& sampler->sampling*/ )
-            sampler->recordDeallocationSample(item, size);
+        IMemorySampler *sampler = GetSampler();
+        if (sampler) {
+            sampler->recordDeallocation(item, size);
+        }
     }
 
     Sampler::Sampler(AvmCore* _core) :
+        IMemorySampler(),
         GCRoot(_core->GetGC()),
         sampleIteratorVTable(NULL),
         slotIteratorVTable(NULL),
@@ -182,7 +188,8 @@ namespace avmplus
     Sampler::~Sampler()
     {
         stopSampling();
-        AttachSampler(NULL);
+        if (GetSampler() == this)
+            AttachSampler(NULL);
     }
 
     void Sampler::init(bool sampling, bool autoStart)
@@ -387,6 +394,24 @@ namespace avmplus
                 read(p, s.size);
             }
         }
+    }
+
+    void Sampler::recordAllocation(const void *item, size_t size)
+    {
+        if (sampling())
+            recordAllocationSample(item, size);
+    }
+
+    void Sampler::recordDeallocation(const void *item, size_t size)
+    {
+        /*if (sampling())*/
+            recordDeallocationSample(item, size);
+    }
+
+    void Sampler::recordNewObjectAllocation(AvmPlusScriptableObject *obj, avmplus::SamplerObjectType sot)
+    {
+        if (sampling())
+            recordAllocationInfo(obj, sot);
     }
 
     uint64_t Sampler::recordAllocationSample(const void* item, uint64_t size, bool callback_ok, bool forceWrite)
@@ -1006,8 +1031,7 @@ namespace avmplus {
             Sample* sample = m_samplesBuffer->samples + i;
 
             // Report the time at which the sample was taken
-            // This should be UINT64, but we use DOUBLE until Monocle bug MBL-250 is fixed. See http://bugs.adobe.com/jira/browse/MBL-250.
-            TELEMETRY_DOUBLE(m_telemetry, ".sampler.nextSampleTime", sample->timestamp);
+            TELEMETRY_UINT64(m_telemetry, ".sampler.nextSampleTime", sample->timestamp);
 
             // Report the number of ticks the sample represents
             TELEMETRY_UINT32(m_telemetry, ".sampler.nextSampleTicks", sample->nTicks);
@@ -1015,45 +1039,18 @@ namespace avmplus {
             // Report the exact time of each tick
             unsigned int numTickTimes = (sample->nTicks <= SamplerTimerClient::TICK_TIME_TABLE_SIZE) ? sample->nTicks : SamplerTimerClient::TICK_TIME_TABLE_SIZE;
             for (unsigned int k = 0; k < numTickTimes; k++) {
-                TELEMETRY_DOUBLE(m_telemetry, ".sampler.nextSampleTickTime", m_samplesBuffer->tickTimes[nextTickTimeIndex++]);
-				// This should be UINT64, but we use DOUBLE until Monocle bug MBL-250 is fixed. See http://bugs.adobe.com/jira/browse/MBL-250.
+                TELEMETRY_UINT64(m_telemetry, ".sampler.nextSampleTickTime", m_samplesBuffer->tickTimes[nextTickTimeIndex++]);
             }
 
-            // In 'stackArray', gather the ids of all the methods in the stack.
-            unsigned int methodId;
-            sample_frame_t frame;
+            // Get the stack array IDs and new method map names
             uint32_t* stackArray = mmfx_new_array(uint32_t, sample->nFrames);
-
-            // For each frame on the stack...
-            int numFrames = (sample->nFrames > Sample::SAMPLE_MAX_STACK_DEPTH) ? Sample::SAMPLE_MAX_STACK_DEPTH : sample->nFrames;
-            for (int j = 0; j < numFrames; j++) {
-                frame = sample->frames[j];
-                methodId = m_mappedMethods.get(frame);
-                if (methodId == 0) {
-                    methodId = m_numMappedMethods++;
-
-                    // add to the method name map
-                    methodNameMapBuffer << methodId;
-                    methodNameMapBuffer << "=";
-                    methodNameMapBuffer << StUTF8String(sampleFrameToString(frame)).c_str();
-                    methodNameMapBuffer << ",";
-
-                    m_mappedMethods.add(frame, methodId);
-                }
-
-                stackArray[j] = methodId;
-            }
-
-            if (sample->nFrames > Sample::SAMPLE_MAX_STACK_DEPTH) {
-                // more frames than we allow, send an ID as the last frame so
-                // the client can identify the sampler stack overflow condition.
-                stackArray[Sample::SAMPLE_MAX_STACK_DEPTH] = Sample::SAMPLER_STACK_OVERFLOW_ID;
-            }
+            getSampleStackArray(sample, stackArray, methodNameMapBuffer);
 
             // Report the stackframes
             if (m_telemetry->IsActive())
                 m_telemetry->WriteValue(".sampler.sample", stackArray, sample->nFrames);
 
+            // Delete the stack array
             mmfx_delete_array(stackArray);
         }
 
@@ -1092,6 +1089,42 @@ namespace avmplus {
         // ... the longest interval since the last flush
         TELEMETRY_UINT64(m_telemetry, ".sampler.maxInterval", m_timerClient.m_maxIntervalSinceLastFlush);
         m_timerClient.m_maxIntervalSinceLastFlush = 0;
+    }
+
+    void TelemetrySampler::getSampleStackArray(Sample* sample, uint32_t* stackArray, avmplus::StringBuffer& methodNameMapBuffer)
+    {
+        // In 'stackArray', gather the ids of all the methods in the stack.
+        
+        assert(stackArray != NULL);
+        
+        unsigned int methodId;
+        sample_frame_t frame;
+
+        // For each frame on the stack...
+        int numFrames = (sample->nFrames > Sample::SAMPLE_MAX_STACK_DEPTH) ? Sample::SAMPLE_MAX_STACK_DEPTH : sample->nFrames;
+        for (int j = 0; j < numFrames; j++) {
+            frame = sample->frames[j];
+            methodId = m_mappedMethods.get(frame);
+            if (methodId == 0) {
+                methodId = m_numMappedMethods++;
+
+                // add to the method name map
+                methodNameMapBuffer << methodId;
+                methodNameMapBuffer << "=";
+                methodNameMapBuffer << StUTF8String(sampleFrameToString(frame)).c_str();
+                methodNameMapBuffer << ",";
+
+                m_mappedMethods.add(frame, methodId);
+            }
+
+            stackArray[j] = methodId;
+        }
+
+        if (sample->nFrames > Sample::SAMPLE_MAX_STACK_DEPTH) {
+            // more frames than we allow, send an ID as the last frame so
+            // the client can identify the sampler stack overflow condition.
+            stackArray[Sample::SAMPLE_MAX_STACK_DEPTH] = Sample::SAMPLER_STACK_OVERFLOW_ID;
+        }
     }
 
 } // namespace avmplus

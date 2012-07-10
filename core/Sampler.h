@@ -160,7 +160,28 @@ namespace avmplus
         uint64_t alloc_size; // size for new mem sample
     };
 
-    class Sampler : public MMgc::GCRoot
+    // The abstract interface for a memory sampler. Use the AttachSampler() method to attach an
+    // IMemorySampler based class to MMgc for getting called back when allocations/deallocations occur. 
+    class IMemorySampler
+    {
+    public:
+        // Called when a new auxiliary memory allocation occurs.
+        virtual void recordAllocation(const void *item, size_t size) = 0;
+
+        // Called when a memory deallocation occurs.
+        virtual void recordDeallocation(const void *item, size_t size) = 0;
+
+        // Called when a new ScriptObject based object has been allocated.
+        virtual void recordNewObjectAllocation(AvmPlusScriptableObject *obj, avmplus::SamplerObjectType sot) = 0;
+    };
+
+    // Set the current memory sampler. A memory sampler is tied to a particular GC/core pair.    
+    void AttachSampler(IMemorySampler* sampler);
+    
+    // Get the current memory sampler.
+    IMemorySampler* GetSampler();
+
+    class Sampler : public MMgc::GCRoot, public IMemorySampler
     {
     public:
         Sampler(AvmCore*);
@@ -183,6 +204,9 @@ namespace avmplus
         void init(bool sampling, bool autoStart);
         void sampleCheck() { if(takeSample) sample(); }
 
+        void recordAllocation(const void *item, size_t size);
+        void recordDeallocation(const void *item, size_t size);
+        void recordNewObjectAllocation(AvmPlusScriptableObject *obj, avmplus::SamplerObjectType sot);
         uint64_t recordAllocationInfo(AvmPlusScriptableObject *obj, SamplerObjectType sot);
         uint64_t recordAllocationSample(const void* item, uint64_t size, bool callback_ok = true, bool forceWrite = false);
         void recordDeallocationSample(const void* item, uint64_t size);
@@ -290,7 +314,7 @@ namespace avmplus
      */
     class TelemetrySampler
     {
-    private:
+    protected:
         // Each sample frame is just a MethodInfo ptr
         typedef MethodInfo* sample_frame_t;
 
@@ -320,13 +344,14 @@ namespace avmplus
             uint64_t timestamp;
         };
 
+    private:
         // The buffer used to hold all samples, when it fills the samples
         // are flushed.
         struct SamplesBuffer
         {
             // An array of all the samples that have been collected by takeSample() and not
             // yet reported by flushSamples()
-            static const int SAMPLES_BUFFER_SIZE = 10000;
+            static const int SAMPLES_BUFFER_SIZE = 1000;
             Sample          samples[SAMPLES_BUFFER_SIZE];
             unsigned int    nSamples;
 
@@ -380,18 +405,18 @@ namespace avmplus
         virtual ~TelemetrySampler();
 
         // Take a stack sample
-        void takeSample();
+        virtual void takeSample();
 
         // Flush the samples - send them to our client via telemetry
-        void flushSamples();
+        virtual void flushSamples();
 
         // Starts up the sampler, will only start if sampler currently is enabled
-        void start();
+        virtual void start();
 
         // Stop sampling, performs cleanup
-        void stop();
+        virtual void stop();
 
-    private:
+    protected:
         // Copy the current method frame stack to outFrameBuffer
         unsigned int takeStackSample(sample_frame_t* outFrameBuffer);
 
@@ -401,9 +426,18 @@ namespace avmplus
         // Get the string representation of a stack frame. This is typically a fully-qualified function name.
         Stringp sampleFrameToString(sample_frame_t frame);
 
+        // Get the stack array and method names for the given sample. The stack array is returned in the buffer
+        // passed in to stackArray, with a method ID in the array corresponding to each stack frame in sample. 
+        // Each method has a unique method ID, if a method appears more than once in the stack, the same method
+        // ID is used. The method name for each stack frame is added to methodNameMapBuffer if that method name 
+        // has not already been mapped. The buffer passed in to stackArray must be large enough for the number
+        // of samples in sample, as determined by sample->nFrames.
+        void getSampleStackArray(Sample* sample, uint32_t* stackArray, avmplus::StringBuffer& methodNameMapBuffer);
+
         AvmCore* m_core; // the core, one sampler per core
         telemetry::ITelemetry* m_telemetry; // instance of telemetry
 
+    private:
         // Where we keep all the samples
         SamplesBuffer* m_samplesBuffer;
 
