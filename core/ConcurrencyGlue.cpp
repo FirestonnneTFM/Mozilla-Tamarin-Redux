@@ -111,6 +111,7 @@ namespace avmplus {
         using namespace vmbase;
 
         if (!this->tryLock()) {
+			TELEMETRY_METHOD_NO_THRESHOLD(core()->getTelemetry(),".player.mutex.lock");
             AvmAssert(SafepointRecord::hasCurrent());
             SafepointHelper_VMPIMutex::lock(&m_state->m_mutex);
         } else {
@@ -348,6 +349,8 @@ namespace avmplus {
         {
             return -1;
         }
+		TELEMETRY_METHOD_NO_THRESHOLD(core()->getTelemetry(),".player.condition.wait");
+ 		
         m_state->m_mutexState->m_ownerThreadID = VMPI_nullThread();
         // So we own the mutex.
         int64_t saved_recursion_count = m_state->m_mutexState->m_recursion_count;
