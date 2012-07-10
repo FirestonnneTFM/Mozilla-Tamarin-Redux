@@ -147,7 +147,7 @@ def gen(prefix,inputfiles,outputdir,srcdir=os.getcwd(),ns=''):
         
     success = True
     if ret != 0:
-        print "Invoking avmshell on exactgc script failed"
+        print "Invoking avmshell on exactgc script failed with command:", exactgccmd
         success = False
 
     tmpfile.close()

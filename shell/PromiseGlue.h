@@ -117,7 +117,6 @@ namespace avmplus
         
     private:
         //GC_DATA_BEGIN(PromiseClass)
-        DECLARE_SLOTS_PromiseClass;
         GCMember<MethodEnv> GC_POINTER(m_getProperty);
         GCMember<MethodEnv> GC_POINTER(m_callProperty);
         // stores references to out channels of local promises
@@ -139,6 +138,7 @@ namespace avmplus
         // collection of which promises is delayed
         GCMember<ArrayObject> GC_POINTER(gcDelayedPromises);
         //GC_DATA_END(PromiseClass)
+        DECLARE_SLOTS_PromiseClass;
     };
 
 
@@ -205,9 +205,9 @@ namespace avmplus
         Atom getProp(Atom receiver, avmshell::EnvelopeObject* envelope);
 
         //GC_DATA_BEGIN(RemoteProxyClass);
-        DECLARE_SLOTS_RemoteProxyClass;
         GCMember<MethodEnv> GC_POINTER(m_checkForCallRequests); // The player needs it
         //GC_DATA_END(RemoteProxyClass);
+        DECLARE_SLOTS_RemoteProxyClass;
     };
 
 
