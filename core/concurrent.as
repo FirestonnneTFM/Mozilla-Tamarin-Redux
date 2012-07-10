@@ -42,88 +42,189 @@ package flash.concurrent
 
 import flash.errors.IllegalOperationError;
 include "api-versions.as"
-    
-    [API(CONFIG::SWF_17)]
-    [native(cls="MutexClass",instance="MutexObject",gc="exact")]
-    final public class Mutex
+
+/**
+ * A Mutex is an object that facilitates "mutual exclusion"
+ * of competing threads of execution in critical sections.
+ *
+ * At any given time there can be at most one thread of execution
+ * which has ownership of a given mutex.
+ * Transitions between who owns a mutex and who does not are always atomic.
+ * The methods of this class are such that a critical section can be guarded
+ * by acquiring and then releasing a mutex at its boundaries.
+ *
+ * Every new running worker contains at least one new thread of execution.
+ * Mutexes treat all threads the same, irrespective of the workers they are in.
+ * Thus mutexes can be used to control concurrency between workers as a whole
+ * as well as threads within and across them.
+ *
+ * When a mutex is transported to another worker via an argument of a 
+ * MessageChannel call or via Worker.setSharedProperty()
+ * then the remote copy of the mutex will continue to use
+ * the identical underlying lock handling data structures.
+ * This makes the original mutex effectively shared between workers,
+ * which can thus create critical sections that exclude each other.
+ *
+ * Note that locking and unlocking are not lexically paired.
+ * Also note that these mutexes are recursive,
+ * i.e. repeated locking increases an internal lock count
+ * and only an equal amount of unlock calls finally releases a mutex.
+ * Otherwise it stays locked.
+ *
+ * Any attempt to unlock a mutex that is not owned by the caller throws an error.
+ */
+[API(CONFIG::SWF_17)]
+[native(cls="MutexClass",instance="MutexObject",gc="exact")]
+final public class Mutex
+{
+    /**
+     * The constructor for mutexes.
+     *
+     * The initial internal lock count of every new mutex is zero.
+     */
+    public function Mutex()
     {
-    	private static const kMutextNotLockedError:uint = 1514;
-    	
-        public function Mutex()
-        {
-            ctor();
-        }
-        private native function ctor() :void;
-
-        public native function lock() :void
-
-        public native function tryLock() :Boolean;
-
-        public function unlock() :void
-        {
-            var success:Boolean = unlockImpl();
-            if (!success) {
-            	Error.throwError(IllegalOperationError, kMutextNotLockedError);
-            }
-        }
-        private native function unlockImpl():Boolean;
-
+        ctor();
     }
+
+    /**
+     * Wait until this mutex is available and then take exclusive ownership,
+     * increase the mutex's lock count by one, and proceed.
+     * This is also known as "acquiring" this mutex.
+     *
+     * If a thread already owns a mutex when this call is made to lock it,
+     * then its internal lock count is increased and no other action occurs.
+     *
+     *
+     */
+    public native function lock() :void
+
+    /**
+     * Attempt to acquire ownership of this mutex.
+     *
+     * If and only if the mutex is available, acquire it,
+     * increase its lock count, and immediately return true.
+     * Otherwise, do not acquire the mutex and immediately return false.
+     * Do all of the above atomically.
+     *
+     * If the mutex is already owned by the current thread/worker,
+     * the lock count is increased and no other action occurs.
+     *
+     * @return true if the lock was acquired, false otherwise.
+     */
+    public native function tryLock() :Boolean;
+
+    /**
+     * Release ownership of this mutex,
+     * allowing any thread/worker to acquire it and proceed.
+     *
+     * This mutex must be locked and owned by the current thread/worker.
+     * Otherwise an error is thrown.
+     *
+     * @throws IllegalOperationException when the current thread doesn't own the mutex.
+     */
+    native public function unlock():void;
+
+    private native function ctor() :void;
+}
     
-    [API(CONFIG::SWF_17)]
-    [native(cls="ConditionClass",instance="ConditionObject",gc="exact")]
-    final public class Condition 
+/**
+ * A Condition (aka condition variable) is a synchronization primitive that facilitates
+ * making threads of execution wait until a particular condition occurs.
+ *
+ * A condition is always associated with a mutex.
+ * It can only be manipulated in conjunction with that mutex.
+ * This ensures atomic state transitions for all involved threads of execution.
+ */
+[API(CONFIG::SWF_17)]
+[native(cls="ConditionClass",instance="ConditionObject",gc="exact")]
+final public class Condition 
+{
+    /**
+     * The constructor for condition variables.
+     *
+     * @param mutex the mutex associated with the condition
+     */
+    public function Condition(mutex:Mutex)
     {
-    	private static const kNullPointerError:uint = 2007;
-    	private static const kConditionInvalidTimeoutError:uint = 1415;
-    	private static const kConditionCannotNotifyError:uint = 1516;
-    	private static const kConditionCannotNotifyAllError:uint = 1517;
-    	private static const kConditionCannotWaitError:uint = 1518;
-
-    	
-        public native function get mutex():Mutex;
-
-        public function Condition(mutex:Mutex)
-        {
-            if (mutex == null)
-            	Error.throwError(ArgumentError, kNullPointerError, "mutex");
-            ctor(mutex);
-        }
-        private native function ctor(mutex:Mutex) :void;
-
-        public function wait(timeout:Number = -1) :Boolean
-        {
-            if (timeout < 0 && timeout != -1) {
-                Error.throwError(ArgumentError, kConditionInvalidTimeoutError);
-            }
-            var result:int =  waitImpl(Math.ceil(timeout));
-            if (result == -1) {
-                Error.throwError(IllegalOperationError, kConditionCannotWaitError);
-            }
-            return result == 1;
-        }
-        private native function waitImpl(timeout:Number) :int;
-
-        public function notify() :void
-        {
-            if (!notifyImpl()) {
-            	Error.throwError(IllegalOperationError, kConditionCannotNotifyError);
-            }
-        }
-        public native function notifyImpl() :Boolean;
-
-        public function notifyAll() :void
-        {
-            if (!notifyAllImpl()) {
-            	Error.throwError(IllegalOperationError, kConditionCannotNotifyAllError);
-            }
-        }
-
-        public native function notifyAllImpl() :Boolean;
-
-
-        
+        if (mutex == null)
+        	Error.throwError(ArgumentError, kNullPointerError, "mutex");
+        ctor(mutex);
     }
+
+    /**
+     * Provides readonly access to mutex associated with this condition
+     */
+     public native function get mutex():Mutex;
+
+
+    /**
+     * Releases the condition's mutex and then suspends the current thread/worker
+     * until it is awoken by 'notify()' or 'notifyAll()'. If the mutex is owned recursively,
+     * the recursion count will be restored upon return from wait.
+     *
+     * The current thread/worker must "own" the condition's mutex when making this call.
+     * Otherwise an exception is thrown and the mutex and the condition remain unaffected.
+     * @throws IllegalOperationException when the mutex is not owned by the current thread.
+     * @param timeout timeout in milliseconds, -1 if no timeout, fractional values will be rounded up to the nearest millisecond.
+     * @return false if wait() returned due to timeout, otherwise true.
+     */
+    public function wait(timeout:Number = -1) :Boolean
+    {
+        if (timeout < 0 && timeout != -1) {
+            Error.throwError(ArgumentError, kConditionInvalidTimeoutError);
+        }
+        return waitImpl(Math.ceil(timeout));
+    }
+
+    /**
+     * Wakes up one of the threads/workers waiting on this condition, if any, 
+     * and releases its mutex.
+     * The awoken thread/worker acquires the mutex and then starts executing.
+     * All of the above happens atomically.
+     *
+     * The current thread/worker must "own" the condition's mutex when making this call.
+     * Otherwise an exception is thrown and the mutex and the condition remain unaffected.
+     * @throws IllegalOperationError if the condition's mutex is not owned by the current thread.
+     */
+    public function notify() :void
+    {
+        if (!notifyImpl()) {
+        	Error.throwError(IllegalOperationError, kConditionCannotNotifyError);
+        }
+    }
+
+    /**
+     * Wakes up all threads/workers waiting on this condition, and releases its mutex.
+     * If any threads have been waiting, then one of them acquires the mutex and then 
+     * starts executing.
+     * All of the above happens atomically.
+     *
+     * The awoken threads acquire the mutex and proceed one by one, in wait order.
+     * Each thread continues to wait until its predecessor releases the mutex
+     * (by calling Mutex.unlock or Condition.wait().
+     *
+     * The current thread/worker must "own" the condition's mutex when making this call.
+     * Otherwise an exception is thrown and the mutex and the condition remain unaffected.
+     * @throws IllegalOperationError if the condition's mutex is not owned by the current thread.
+     */
+    public function notifyAll() :void
+    {
+        if (!notifyAllImpl()) {
+        	Error.throwError(IllegalOperationError, kConditionCannotNotifyAllError);
+        }
+    }
+
+    private native function ctor(mutex:Mutex) :void;
+    private native function notifyImpl() :Boolean;
+    private native function notifyAllImpl() :Boolean;
+    private native function waitImpl(timeout:Number) :int;
+
+	private static const kNullPointerError:uint = 2007;
+	private static const kConditionInvalidTimeoutError:uint = 1415;
+	private static const kConditionCannotNotifyError:uint = 1516;
+	private static const kConditionCannotNotifyAllError:uint = 1517;
+}
 }
 
 package avm2.intrinsics.memory

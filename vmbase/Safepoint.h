@@ -500,7 +500,7 @@ namespace vmbase {
         SafepointRecord* m_managerNext;   // The next SafepointRecord on the SafepointManager's linked-list
         SafepointManager* m_manager;      // The SafepointManager to which this SafepointRecord is registered
     public:
-        int*              m_interruptLocation;
+        volatile int*              m_interruptLocation;
         int               m_isolateDesc;
     private:
 

@@ -377,11 +377,6 @@ namespace avmplus
         }
         m_succeeded = true;
 
-        if (vmbase::SafepointRecord::hasCurrent()) {
-            if (vmbase::SafepointRecord::current()->manager()->inSafepointTask()) {
-                AvmCore::getActiveCore()->getIsolate()->getAggregate()->reloadGlobalMemories();
-            }
-        }
     }
 
     /*
@@ -417,11 +412,44 @@ namespace avmplus
         }
     }
 
+    // FIXME add common base class for SafepointTasks in ByteArray
+    class ByteArrayGetWritableBufferTask: public vmbase::SafepointTask
+    {
+
+        ByteArray* m_byteArray;
+        uint8_t* m_result;
+
+    public:
+        ByteArrayGetWritableBufferTask(ByteArray* byteArray)
+            : m_byteArray(byteArray)
+        {}
+        void run()  //inherited
+        {
+            ByteArray::Grower grower(m_byteArray, m_byteArray->getUnderlyingBuffer()->capacity);
+            grower.EnsureWritableCapacity();
+            m_result = m_byteArray->getUnderlyingBuffer()->array;
+        }
+        
+        uint8_t* exec(bool isLocal)
+        {
+            if (isLocal) {
+                run();
+            } else {
+                Isolate* isolate = m_byteArray->toplevel()->core()->getIsolate();
+                if (isolate) 
+                    isolate->getAggregate()->runHoldingIsolateMapLock(this);
+                else 
+                    run();
+            }
+            return m_result;
+        }
+
+    };
+
     uint8_t* FASTCALL ByteArray::GetWritableBuffer()
     {
-        Grower grower(this, m_buffer->capacity);
-        grower.EnsureWritableCapacity();
-        return m_buffer->array;
+        ByteArrayGetWritableBufferTask task(this);
+        return task.exec(m_workerLocal);
     }
 
     uint8_t& ByteArray::operator[](uint32_t index)
@@ -460,39 +488,65 @@ namespace avmplus
     static const uint32_t kHugeGrowthThreshold = 24*1024*1024;
     static const uint32_t kHugeGrowthIncr = 24*1024*1024;
 
+    class ByteArraySetLengthTask: public vmbase::SafepointTask
+    {
+        uint32_t m_result;
+        ByteArray* m_byteArray;
+        uint32_t m_newLength;
+        bool m_onlyIfExpected;
+        bool m_calledFromLengthSetter;
+        uint32_t m_expectedLength;
+        
+
+    public:
+        ByteArraySetLengthTask(ByteArray* ba, uint32_t newLength, bool calledFromLengthSetter, bool onlyIfExpected, uint32_t expectedLength)
+            : m_byteArray(ba)
+            , m_newLength(newLength)
+            , m_onlyIfExpected(onlyIfExpected)
+            , m_calledFromLengthSetter(calledFromLengthSetter)
+            , m_expectedLength(expectedLength)
+        {}
+        void run()  //inherited
+        {
+            ByteArray::Grower grower(m_byteArray, m_newLength, m_onlyIfExpected, m_expectedLength);
+            m_result = grower.SetLengthCommon(m_newLength, m_calledFromLengthSetter);
+        }
+        
+        uint32_t exec(bool isLocal)
+        {
+            if (isLocal) {
+                run();
+            } else {
+                Isolate* isolate = m_byteArray->toplevel()->core()->getIsolate();
+                if (isolate) { 
+                    isolate->getAggregate()->runHoldingIsolateMapLock(this);
+                }
+                else { 
+                    run();
+                }
+            }
+            return m_result;
+        }
+
+    };
+
     uint32_t ByteArray::SetLengthCommon(uint32_t newLength, bool calledFromLengthSetter, bool onlyIfExpected, uint32_t expectedLength)
     {
         if (m_subscribers.length() > 0 && m_buffer->length < DomainEnv::GLOBAL_MEMORY_MIN_SIZE)
             m_toplevel->throwRangeError(kInvalidRangeError);
-
-        Grower grower(this, newLength, onlyIfExpected, expectedLength);
-        return grower.SetLengthCommon(newLength, calledFromLengthSetter);
+        
+        ByteArraySetLengthTask task(this, newLength, calledFromLengthSetter, onlyIfExpected, expectedLength);
+        return task.exec(m_workerLocal);
     }
+
 
     uint32_t ByteArray::Grower::SetLengthCommon(uint32_t newLength, bool calledFromLengthSetter)
     {
-        
-        this->m_newLength = newLength;
-        this->m_calledFromLengthSetter = calledFromLengthSetter;
-        if (m_owner->m_workerLocal) {
-            run();
-        } else {
-            Isolate* isolate = m_owner->m_toplevel->core()->getIsolate();
-            if (isolate) 
-            {
-                isolate->getAggregate()->runHoldingIsolateMapLock(this);
-            }
-        }
-        return m_oldLength;
-    }
-
-    void ByteArray::Grower::run() {
-
-        if (!m_calledFromLengthSetter ||
-            (m_newLength < kHugeGrowthThreshold &&
+        if (!calledFromLengthSetter ||
+            (newLength < kHugeGrowthThreshold &&
              m_owner->m_buffer->length < kHugeGrowthThreshold))
         {
-            if (m_newLength > m_owner->m_buffer->capacity)
+            if (newLength > m_owner->m_buffer->capacity)
             {
                 EnsureWritableCapacity();
             } 
@@ -516,11 +570,11 @@ namespace avmplus
 
             // (overflow paranoia; see notes above SetLength(uint32_t, uint32_t).
             uint64_t newCapRoundedUp =
-                roundUpTo(uint64_t(m_newLength), uint64_t(kHugeGrowthIncr));
+                roundUpTo(uint64_t(newLength), uint64_t(kHugeGrowthIncr));
             uint32_t newCap = ((newCapRoundedUp <= MAX_BYTEARRAY_STORE_LENGTH)
-                               ? uint32_t(newCapRoundedUp) : m_newLength);
+                               ? uint32_t(newCapRoundedUp) : newLength);
 
-            AvmAssert(newCap >= m_newLength);
+            AvmAssert(newCap >= newLength);
 
             if (newCap != m_owner->m_buffer->capacity)
             {
@@ -532,10 +586,24 @@ namespace avmplus
         }
         
         if (m_succeeded) {
-            m_owner->m_buffer->length = m_newLength;
-            if (m_owner->m_position > m_newLength)
-                m_owner->m_position = m_newLength;
+            if (false) fprintf(stderr, "from %u expected: %u to %u (eq?%s) return %d in %d\n", m_owner->m_buffer->length, 
+                               m_expectedLength,
+                               newLength, 
+                               (m_owner->m_buffer->length == newLength) ? "true" : "false",
+                               m_oldLength,
+                               AvmCore::getActiveCore()->getIsolate()->desc);
+            m_owner->m_buffer->length = newLength;
+            
+            if (m_owner->m_position > newLength)
+                m_owner->m_position = newLength;
+
+            if (vmbase::SafepointRecord::hasCurrent()) {
+                if (vmbase::SafepointRecord::current()->manager()->inSafepointTask()) {
+                    AvmCore::getActiveCore()->getIsolate()->getAggregate()->reloadGlobalMemories();
+                }
+            }
         }
+        return m_oldLength;
     }
 
 
@@ -571,23 +639,91 @@ namespace avmplus
         m_position += count;
     }
 
+
+    class ByteArrayWriteTask: public vmbase::SafepointTask
+    {
+        ByteArray* m_byteArray;
+        const void* m_buffer;
+        uint32_t m_count;
+        uint32_t m_writeEnd;
+
+    public:
+        ByteArrayWriteTask(ByteArray* ba, const void* buffer, uint32_t count, uint32_t writeEnd)
+            : m_byteArray(ba)
+            , m_buffer(buffer)
+            , m_count(count)
+            , m_writeEnd(writeEnd)
+        {}
+
+        void run();  //inherited
+        
+        void exec(bool isLocal)
+        {
+            if (isLocal) {
+                run();
+            } else {
+                Isolate* isolate = m_byteArray->toplevel()->core()->getIsolate();
+                if (isolate) 
+                    isolate->getAggregate()->runHoldingIsolateMapLock(this);
+                else 
+                    run();
+            }
+        }
+    };
+
+
     void ByteArray::Write(const void* buffer, uint32_t count)
     {
         uint32_t writeEnd = m_position + count;
-        
-        Grower grower(this, writeEnd);
+        ByteArrayWriteTask task(this, buffer, count, writeEnd);
+        return task.exec(m_workerLocal);
+    }
+    
+    void ByteArrayWriteTask::run() {
+        ByteArray::Grower grower(m_byteArray, m_writeEnd);
         grower.EnsureWritableCapacity();
         
-        move_or_copy(m_buffer->array + m_position, buffer, count);
-        m_position += count;
-        if (m_buffer->length < m_position)
-            m_buffer->length = m_position;
+        move_or_copy(m_byteArray->getUnderlyingBuffer()->array + m_byteArray->GetPosition(), m_buffer, m_count);
+        m_byteArray->SetPosition(m_byteArray->GetPosition() + m_count);
+        if (m_byteArray->getUnderlyingBuffer()->length < m_byteArray->GetPosition())
+            m_byteArray->getUnderlyingBuffer()->length = m_byteArray->GetPosition();
     }
+
+
+    class ByteArrayEnsureCapacityTask: public vmbase::SafepointTask
+    {
+        ByteArray* m_byteArray;
+        uint32_t m_capacity;
+    public:
+        ByteArrayEnsureCapacityTask(ByteArray* byteArray, uint32_t capacity)
+            : m_byteArray(byteArray)
+            , m_capacity(capacity)
+        {}
+
+        void run()
+        {
+            ByteArray::Grower grower(m_byteArray, m_capacity);
+            grower.EnsureWritableCapacity();
+        }
+        
+        void exec(bool isLocal)
+        {
+            if (isLocal) {
+                run();
+            } else {
+                Isolate* isolate = m_byteArray->toplevel()->core()->getIsolate();
+                if (isolate) 
+                    isolate->getAggregate()->runHoldingIsolateMapLock(this);
+                else 
+                    run();
+            }
+        }
+    };
 
     void ByteArray::EnsureCapacity(uint32_t capacity)
     {
-        Grower grower(this, capacity);
-        grower.EnsureWritableCapacity();
+        ByteArrayEnsureCapacityTask task(this, capacity);
+        task.exec(m_workerLocal);
     }
 
     NO_INLINE void ByteArray::EnsureCapacityNoInline(uint32_t capacity)

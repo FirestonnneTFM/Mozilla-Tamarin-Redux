@@ -191,6 +191,9 @@ class Errors
         public static const kConditionCannotNotify            = 1516;
         public static const kConditionCannotNotifyAll         = 1517;
         public static const kConditionCannotWait              = 1518;
+        public static const kConditionCannotBeInitialized     = 1519;
+        public static const kMutexCannotBeInitialized         = 1520;
+        public static const kWorkerIllegalCallToStart         = 1521;
         public static const kInvalidParamError                = 2004;
         public static const kParamRangeError                  = 2006;
         public static const kNullPointerError                 = 2007;

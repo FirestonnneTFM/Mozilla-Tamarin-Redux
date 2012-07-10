@@ -2155,7 +2155,9 @@ const int kBufferPadding = 16;
 
     public:
         void setIsolate(Isolate* isolate);
-        Isolate* getIsolate();
+        Isolate* getIsolate() const;
+        virtual int getIsolateDesc () const;
+		virtual vmbase::SafepointManager* getSafepointManager ();
         virtual int evaluateScriptBuffer(ScriptBuffer& buffer, bool enter_debugger_on_enter);
 
 

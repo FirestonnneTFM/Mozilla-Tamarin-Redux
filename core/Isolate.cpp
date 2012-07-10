@@ -127,17 +127,24 @@ namespace avmplus
         bool result = false;
         SCOPE_LOCK_NAMED(locker, m_globals->m_lock) {
             Isolate* isolate = m_globals->at(desc);
-            if (isolate == NULL) 
-                return false; // FIXME revisit
-            if (isolate->m_state == Isolate::NEW || isolate->m_state > Isolate::FINISHING)
+            // if the isolate isn't found in the global table terminate 
+            // has been called previously, and we can skip the rest.
+            if (isolate == NULL) { 
+                return false; 
+            }
+
+            if (isolate->m_state == Isolate::NEW || isolate->m_state > Isolate::FINISHING) {
                 return false; // not gonna wait 
-                // Interrupt computation and blocking I/O, currently only message receive.
+            }
+            // Interrupt computation and blocking I/O, currently only message receive.
             closeChannelsWithEndpoint(isolate);
-            if (isolate->m_state == Isolate::RUNNING || isolate->m_state == Isolate::STARTING)
+
+            if (isolate->m_state == Isolate::RUNNING || isolate->m_state == Isolate::STARTING) {
                 isolate->interrupt();
-                // Ensure that the write to AvmCore::interrupted is visible to the other thread.
-                // First set interrupted status, then notify 
-                // there may be some isolates waiting for the call requests
+            }
+            // Ensure that the write to AvmCore::interrupted is visible to the other thread.
+            // First set interrupted status, then notify 
+            // there may be some isolates waiting for the call requests
             SCOPE_LOCK_NAMED(lk, m_commlock) {
                 lk.notifyAll();
             }
@@ -159,6 +166,7 @@ namespace avmplus
                 core->raiseInterrupt(AvmCore::ExternalInterrupt);
                 // Hope for the best? the thread being interrupted won't necessarily fence
                 vmbase::MemoryBarrier::readWrite();
+                isolate->signalActiveWaitRecord();
             }
             if (shouldWait) {
                 while (isolate->m_core != NULL) {
@@ -219,11 +227,12 @@ namespace avmplus
             }
             
             
-            class IsolateKiller: public Globals::IsolateMap::Iterator
+            // this iterator intterupts every isolate's core
+            class IsolateCoreInterrupt: public Globals::IsolateMap::Iterator
             {
                 Aggregate* m_aggregate;
             public:
-                IsolateKiller(Aggregate* aggregate): m_aggregate(aggregate) {}
+                IsolateCoreInterrupt(Aggregate* aggregate): m_aggregate(aggregate) {}
                 virtual void each(int32_t giid, FixedHeapRef<Isolate> isolate) 
                 {
                     (void) giid;
@@ -232,28 +241,50 @@ namespace avmplus
                     if (isolate->m_state > Isolate::NEW) { // or is it m_core == NULL
                         if (isolate->isInterrupted())
                             return;
-                        AvmCore* core = isolate->m_core;
-                        // Ensure that the write to AvmCore::interrupted is visible to the other thread.
-                        // Use safepoints for that? 
 
-                        isolate->interrupt();
-                        if (core) {
+                        if (isolate->m_state < Isolate::FAILED) {
+                            AvmCore* core = isolate->m_core;
+                            // Ensure that the write to AvmCore::interrupted is visible to the other thread.
+                            // Use safepoints for that? 
+                            
+                            AvmAssert(core != NULL);
                             core->raiseInterrupt(AvmCore::ExternalInterrupt);
                             // Hope for the best? the thread being interrupted won't necessarily fence
                             vmbase::MemoryBarrier::readWrite();
-                        } else {
-                            // FIXME revisit why we can possibly take this branch.
+                            isolate->interrupt();
                         }
                     }
-                    // avoid leaking if there is a circular reference to this isolate via sharedProperties
-                    isolate->clearSharedProperties();
                 }
-                virtual ~IsolateKiller() {}
+                virtual ~IsolateCoreInterrupt() {}
             };
             
-            IsolateKiller iKiller(this);
+            // this iterator intterupts every isolate's core
+            class ReleaseResources: public Globals::IsolateMap::Iterator
+            {
+                Aggregate* m_aggregate;
+            public:
+                ReleaseResources(Aggregate* aggregate): m_aggregate(aggregate) {}
+                virtual void each(int32_t giid, FixedHeapRef<Isolate> isolate) 
+                {
+                    (void) giid;
+                    if (m_aggregate != isolate->m_aggregate)
+                        return;
+
+                    isolate->releaseActiveResources();
+                }
+                virtual ~ReleaseResources() {}
+            };
+            // we need to make two passes here 
+            //  (1) needs to make sure that all cores are interrupted so that the very next
+            //      thing they do is unwind, we don't want to continue executing if they could
+            //      possibly be in an ideteriminate state (get unblocked from a Mutex or Condition
+            //      when the condition hasn't been met.
+            //  (2) needs to release resources (unlock any held Mutex or Condition, clear shared properties, etc)
+            IsolateCoreInterrupt iInterrupt(this);
+            ReleaseResources iRelease(this);
             SCOPE_LOCK(m_globals->m_isolateMap.m_lock) {
-                m_globals->m_isolateMap.ForEach(iKiller);
+                m_globals->m_isolateMap.ForEach(iInterrupt);
+                m_globals->m_isolateMap.ForEach(iRelease);
             }
             SCOPE_LOCK_NAMED(lk, m_commlock) {
                 // Wake up isolates in waitForAnySend()
@@ -434,6 +465,7 @@ namespace avmplus
         , numEmptyPromiseOwners(0)
         , m_global_gpid(0)
         , m_core(NULL)
+        , m_activeWaitRecord(NULL)
         , m_aggregate(aggregate)
         , m_thread(NULL)
         , m_state(Isolate::NEW)
@@ -441,6 +473,19 @@ namespace avmplus
         , m_interrupted(false)
         , m_listeners(NULL, 0)
     {
+    }
+
+    Isolate::WaitRecord::WaitRecord()
+    {
+        isValid = VMPI_condVarInit(&condVar) && VMPI_recursiveMutexInit(&privateMutex);
+    }
+
+    Isolate::WaitRecord::~WaitRecord()
+    {
+        if (isValid) {
+            VMPI_condVarDestroy(&condVar);
+            VMPI_recursiveMutexDestroy(&privateMutex);
+        }
     }
 
     void Aggregate::stateTransition(Isolate* isolate, Isolate::State to)
@@ -471,7 +516,7 @@ namespace avmplus
                 AvmAssert(from == Isolate::NEW);
             } else if (to == Isolate::RUNNING) {
                 AvmAssert(from < to); // FIXME this can be violated (?)
-                AvmAssert(isolate->m_thread != NULL || isolate->desc == 1); // m_thread will be null for giid==1
+                AvmAssert(isolate->m_thread != NULL || isolate->desc == m_primordialGiid); // m_thread will be null for primordial
                 AvmAssert(isolate->m_core != NULL);
             } else if (to == Isolate::EXCEPTION) {
                 AvmAssert(from > Isolate::NEW);
@@ -480,7 +525,7 @@ namespace avmplus
                 isolate->m_failed = true;
             } else if (to == Isolate::FINISHING) {
                 AvmAssert(from == Isolate::RUNNING || from == Isolate::STARTING);
-                AvmAssert(isolate->m_thread != NULL);
+                AvmAssert(isolate->m_thread != NULL || m_primordialGiid == isolate->desc);
                 isolate->m_interrupted = true;
                 isolate->stopRunLoop();
             } else if (to == Isolate::TERMINATED) {
@@ -538,6 +583,19 @@ namespace avmplus
     }
 
     
+    void Isolate::releaseActiveResources()
+    {
+        // make sure that we don't hold a reference to something that could prevent 
+        // resources from being collected and released, like a locked Mutex, waiting Condition, 
+        // or a reference to ourself 
+        m_properties.Clear();
+        
+        // if we have any active Mutexes or Conditions release them.
+        // this is safe because we have already interrupted our core and the very next execution
+        // point should be to throw an external interrupt error
+        signalActiveWaitRecord();
+    }
+
     void Isolate::SharedPropertyMap::DestroyItem(Isolate::SharedPropertyNamep key, ChannelItem* item)
     {
         mmfx_delete(item);
@@ -691,7 +749,45 @@ namespace avmplus
         return item;
     }
 
-    
+    void Isolate::setActiveWaitRecord(WaitRecord* record)
+    {
+        SCOPE_LOCK(m_activeRecordLock) {
+            m_activeWaitRecord = record;
+        }
+    }
+
+    // this method is used to determine if a currently active
+    // wait record should be reactivated. reactivating a waiting
+    // record should only happen if the signal occured because 
+    // the debugger needs to get a call stack.
+    bool Isolate::retryActiveWaitRecord()
+    {
+        return false;
+    }
+
+    bool Isolate::signalActiveWaitRecord()
+    {
+        SCOPE_LOCK(m_activeRecordLock) {
+            if (m_activeWaitRecord) {
+                VMPI_condVarSignal(&m_activeWaitRecord->condVar);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // this method should be used when interrupting a blocked
+    // isolate that will throw on the next execution of 
+    // ActionScript byte code.
+    void Isolate::abortActiveWaitRecord()
+    {
+        SCOPE_LOCK(m_activeRecordLock) {
+            if (m_activeWaitRecord) {
+                targetCore()->raiseInterrupt(AvmCore::ExternalInterrupt);
+                signalActiveWaitRecord();
+            }
+        }
+    }
 
     void Isolate::initialize(AvmCore* core) 
     {
@@ -793,6 +889,7 @@ namespace avmplus
     // Caution, can be triggered by GC sweep or incremental collection.
     void Isolate::destroy()
     {
+        AvmAssert(m_activeWaitRecord == NULL);
         AvmAssert(RefCount() == 0);
         if (m_code.length > 0) {
             for (int i = 0; i < m_code.length; i++)
@@ -1053,10 +1150,10 @@ namespace avmplus
 
     EnterSafepointManager::EnterSafepointManager(AvmCore* core)
     {
-        m_safepointMgr = core->getIsolate()->getAggregate()->safepointManager();
+        m_safepointMgr = core->getSafepointManager();
         m_safepointMgr->enter(&m_spRecord);
         m_spRecord.m_interruptLocation = (int*)&core->interrupted;
-        m_spRecord.m_isolateDesc = core->getIsolate()->desc;
+        m_spRecord.m_isolateDesc = core->getIsolateDesc();
 
     }
     
@@ -1101,8 +1198,9 @@ namespace avmplus
             // so may end up running twice.
             closeChannelsWithEndpoint(current);
 
-            if (current->m_core)
+            if (current->m_core) {
                 current->m_core->setIsolate(NULL);
+            }
         }
     }
 
@@ -1112,8 +1210,9 @@ namespace avmplus
             AvmAssert(current->isPrimordial() || current->m_thread != NULL); 
             m_activeIsolateCount --;
             locker.notifyAll();
-            if (current->m_state != Isolate::EXCEPTION)
+            if (current->m_state != Isolate::EXCEPTION) {
                 stateTransition(current, Isolate::TERMINATED); // otherwise it could be Exception
+            }
 
             current->m_core = NULL;
         }
@@ -1327,8 +1426,7 @@ namespace avmplus
     GCRef<ObjectVectorObject> Aggregate::listWorkers(Toplevel* toplevel)
     {
         GCRef<ClassClosure> workerClass = toplevel->workerClass();
-        uint32_t size = m_globals->m_isolateMap.GetNumItems();
-        GCRef<ObjectVectorObject> workerVector = toplevel->vectorClass()->newVector(workerClass, size);
+        GCRef<ObjectVectorObject> workerVector = toplevel->vectorClass()->newVector(workerClass);
         
         class IsolateLister: public Globals::IsolateMap::Iterator
         {
@@ -1345,11 +1443,15 @@ namespace avmplus
             {}
             virtual void each(int32_t, FixedHeapRef<Isolate> isolate) 
             {
-                GCRef<ScriptObject> interned = m_toplevel->getInternedObject(isolate);
-                if (interned == NULL) {
-                    interned = isolate->workerObject(m_toplevel);
+                //  Only list workers that are in the RUNNING state
+                if (isolate->m_state == Isolate::RUNNING)
+                {
+                    GCRef<ScriptObject> interned = m_toplevel->getInternedObject(isolate);
+                    if (interned == NULL) {
+                        interned = isolate->workerObject(m_toplevel);
+                    }
+                    m_workerVector->setUintProperty(m_index++, interned->atom());
                 }
-                m_workerVector->setUintProperty(m_index++, interned->atom());
             }
             virtual ~IsolateLister() {}
         };
@@ -1381,8 +1483,10 @@ namespace avmplus
             virtual void each(int32_t, FixedHeapRef<Isolate> isolate) 
             {
                 AvmCore* core = isolate->targetCore();
-                if (!core) return;
-                // FIXME what state should the isolate be in?
+                if (isolate->m_state < Isolate::RUNNING || isolate->m_state >= Isolate::FINISHING) {
+                    // running in a safepoint, so no potection for m_state needed
+                    return;
+                }
                 for (uint32_t i = 0, n = core->m_domainEnvs.length(); i < n; ++i)
                  {
                      DomainEnv* domainEnv = core->m_domainEnvs.get(i);

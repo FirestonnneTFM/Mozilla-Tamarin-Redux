@@ -94,7 +94,6 @@ namespace avmplus
         virtual void destroy();
         virtual ~Isolate();
 
-
         AvmCore* targetCore()
         {
             return m_core;
@@ -182,7 +181,7 @@ namespace avmplus
 
     protected:
         FixedHeapArray< FixedHeapArray<uint8_t> > m_code;
-        vmbase::WaitNotifyMonitor m_sharedPropertyLock; 
+        vmbase::RecursiveMutex m_sharedPropertyLock; 
         
 
     protected: // Access moved to subclass
@@ -197,6 +196,22 @@ namespace avmplus
         int numEmptyPromiseOwners;
         
     public: 
+        // 
+        // this structure is used to block threads
+        // that call wait on the AS condition object
+        // we keep this data here to allow us to 
+        // interrupt any thread waiting on a condition
+        // 
+        struct WaitRecord
+        {
+            WaitRecord();
+            virtual ~WaitRecord();
+            vmpi_condvar_t condVar;
+            vmpi_mutex_t privateMutex;
+            bool isValid;
+        };
+
+
         // used to initialize channels during worker startup
         FixedHeapArray< FixedHeapRef<PromiseChannel> > m_initialChannels;
         
@@ -206,17 +221,28 @@ namespace avmplus
         uint32_t m_global_gpid;
 
     private:
-        void clearSharedProperties() { m_properties.Clear(); }
+        virtual void releaseActiveResources();
         SharedPropertyMap m_properties;
 
     public:
         void setSharedProperty(const char* utf8String, int32_t len, ChannelItem* item);
         bool getSharedProperty(const char* utf8String, int32_t len, ChannelItem** outItem);
         virtual ChannelItem* makeChannelItem(Toplevel* toplevel, Atom atom);
+        void setActiveWaitRecord(WaitRecord* record);
+        bool signalActiveWaitRecord();
+        virtual bool retryActiveWaitRecord();
 
     protected:
+        void abortActiveWaitRecord();
         AvmCore* m_core;
+
     private:
+        // when an isolate is blocked from ActionScript either due to a 
+        // condition.wait or a mutex.lock this holds the active wait record
+        // from that call. 
+        vmbase::RecursiveMutex m_activeRecordLock;
+        WaitRecord* m_activeWaitRecord;
+
         FixedHeapRef<Aggregate> m_aggregate;
         // VMThread objects have to be reclaimed after the threads
         // represented by them have terminated, but there's generally
@@ -233,6 +259,35 @@ namespace avmplus
 
         // *** end data ***
     };
+
+    /*
+     * InterruptableState provides basic management 
+     * for any objects running within an isolate that 
+     * need to enter a blocking state and be 
+     * interruptable to support termination, debugging, 
+     * and script-timeouts
+     */ 
+    class InterruptableState: public FixedHeapRCObject 
+    {
+    public:
+        InterruptableState();
+        virtual void destroy();
+        void notify();
+        void notifyAll();
+
+    protected:
+        Isolate::WaitRecord* enterWait(Isolate* isolate);
+        bool wait(Isolate::WaitRecord* record, Isolate* isolate, int32_t millis);
+        void exitWait(Isolate* isolate, Isolate::WaitRecord* record);
+#ifdef DEBUG
+        virtual bool lockIsHeld() = 0;
+#endif // DEABUG
+
+    private:
+        // list of all isolate threads currently waiting on this state
+        MMgc::BasicList<Isolate::WaitRecord*> m_waitList;
+    };
+
 
     /* An aggregate is a collection of isolates that have been transitively created from 
      * a single isolate (the primordial isolate).

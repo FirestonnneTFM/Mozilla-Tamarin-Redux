@@ -58,7 +58,6 @@ namespace avmplus
         GCRef<builtinClassManifest> builtinClasses() const;
 
         void init_mainEntryPoint(ScriptEnv* main, builtinClassManifest* builtins);
-        void add_scriptEntryPoint(ScriptEnv* main);
 
         ScriptEnv* scriptEnv(uint32_t index) const;
         uint32_t scriptEnvCount();
@@ -78,6 +77,7 @@ namespace avmplus
         GCRef<ClassClass> classClass() const;
         GCRef<EOFErrorClass> eofErrorClass() const;
         GCRef<IOErrorClass> ioErrorClass() const;
+        GCRef<IllegalOperationErrorClass> illegalOperationErrorClass() const;
         GCRef<MemoryErrorClass> memoryErrorClass() const;
         GCRef<DateClass> dateClass() const;
         GCRef<DoubleVectorClass> doubleVectorClass() const;
@@ -161,6 +161,7 @@ namespace avmplus
         void FASTCALL throwMemoryError(int id);
         void FASTCALL throwIOError(int id);
         void FASTCALL throwEOFError(int id);
+        void FASTCALL throwIllegalOperationError(int id);
 
         //
         // methods that used to be on AvmCore but depend on the caller's environment
