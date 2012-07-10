@@ -119,6 +119,10 @@ namespace vmbase {
                         }
                     }
                     safepointRecord = safepointRecord->m_managerNext;
+
+                    if (safepointRecord == NULL) {
+                        restart = false;
+                    }
                 }
             } while (restart == true);
 

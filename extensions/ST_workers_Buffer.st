@@ -50,7 +50,6 @@
     NoSyncMultiItemBuffer *multiItemBuffer;
     NonBlockingMultiItemBuffer *nonBlockMultiItemBuffer;
     Atom *atom;
-    ChannelItem* itemp;
  
 %%prologue
     MMgc::GCConfig config;

@@ -200,7 +200,7 @@ namespace avmplus
         virtual uint64_t bytesUsed() const;
 #endif
 
-    protected:
+        /*protected: */
         virtual Toplevel* toplevel() const { return m_toplevel; }
 
     private:
@@ -211,7 +211,8 @@ namespace avmplus
         void CompressViaLzma();
         void UncompressViaLzma();
 
-        class Grower : public vmbase::SafepointTask
+    public: // Tasks need it
+        class Grower
         {
             friend class ByteArray;
         public:
@@ -239,10 +240,8 @@ namespace avmplus
             uint32_t    m_oldCapacity;
             uint32_t    m_minimumCapacity;
             uint32_t    m_expectedLength;
-            uint32_t    m_newLength;
             bool        m_onlyIfExpected;
             bool        m_succeeded;
-            bool        m_calledFromLengthSetter;
         };
     public:
         

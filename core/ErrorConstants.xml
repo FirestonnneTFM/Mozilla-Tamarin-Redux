@@ -679,6 +679,9 @@ class B extends A {
   <error id="1516" label="kConditionCannotNotify">Condition cannot notify if associated mutex is not owned.</error>
   <error id="1517" label="kConditionCannotNotifyAll">Condition cannot notifyAll if associated mutex is not owned.</error>
   <error id="1518" label="kConditionCannotWait">Condition cannot wait if associated mutex is not owned.</error>
+  <error id="1519" label="kConditionCannotBeInitialized">Condition cannot be initialized.</error>
+  <error id="1520" label="kMutexCannotBeInitialized">Mutex cannot be initialized.</error>
+  <error id="1521" label="kWorkerIllegalCallToStart">Only the worker's parent may call start.</error>
 
   <error id="2004" label="kInvalidParamError">One of the parameters is invalid.</error>
   <error id="2006" label="kParamRangeError">The supplied index is out of bounds.</error>

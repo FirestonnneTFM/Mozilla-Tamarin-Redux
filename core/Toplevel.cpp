@@ -1458,6 +1458,11 @@ namespace avmplus
         eofErrorClass()->throwError(id);
     }
 
+    void FASTCALL Toplevel::throwIllegalOperationError(int id)
+    {
+        illegalOperationErrorClass()->throwError(id);
+    }
+
     void Toplevel::throwReferenceError(int id, String* name, const Traits* traits) const
     {
         Multiname mn(core()->findPublicNamespace(), name);

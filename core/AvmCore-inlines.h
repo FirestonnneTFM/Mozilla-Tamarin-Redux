@@ -751,9 +751,20 @@ inline void AvmCore::setIsolate(Isolate* isolate)
     this->m_isolate = isolate;
 }
 
-REALLY_INLINE Isolate* AvmCore::getIsolate()
+REALLY_INLINE Isolate* AvmCore::getIsolate() const
 {
     return m_isolate;
+}
+	
+REALLY_INLINE vmbase::SafepointManager* AvmCore::getSafepointManager ()
+{
+	return getIsolate()->getAggregate()->safepointManager();
+}
+
+
+REALLY_INLINE int AvmCore::getIsolateDesc () const
+{
+	return getIsolate()->desc;
 }
 
 template<class CLASSMANIFEST>

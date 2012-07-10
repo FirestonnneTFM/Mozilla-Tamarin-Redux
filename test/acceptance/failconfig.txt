@@ -423,6 +423,7 @@ abcasm/bug_554915b, .* , , skip, testcase can cause a timeout INVESTIGATE
 ####################
 # Workers
 ####################
+as3/Workers/.*, .* ,,skip, Workers testcases are being rewritten
 as3/Workers/datatypes/basicDataTypes:Passing a function is not supported, .*,, expectedfail, Functions are not passed as undefined
 as3/Workers/regress/bug_676111, .*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=676111
 as3/Workers/datatypes/class_different_child_definition, .*,, expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=677939

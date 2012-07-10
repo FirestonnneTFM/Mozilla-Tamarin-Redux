@@ -43,39 +43,136 @@
 
 namespace avmplus {
 
+    //
+    // Mutexes in ActionScript are composed of a OS level
+    // vmpi condition and vmpi mutex. this composition is 
+    // created to allow easy interrupt of a blocked isolate 
+    // to support script timeout, flashbuilder and fdb debugger 
+    // call stack aquisition for a blocked isolate thread, termination, 
+    // and the ability to add aid for deadlock detection. this data
+    // can be sent over the debugger protocol allowing for 
+    // more sophisticated IDEs to provide helpful UI.
+    // 
     class GC_AS3_EXACT(MutexObject, ScriptObject)
     {
         friend class ConditionObject;
         friend class Isolate;
-    public:
-        class State: public FixedHeapRCObject 
-        {
-            friend class MutexObject;
-            friend class ConditionObject;
-            vmpi_mutex_t m_mutex;
-            int64_t m_recursion_count; // generous to avoid wraparound.
-            vmpi_thread_t volatile m_ownerThreadID;
-        public:
-            State();
-            virtual void destroy();
-        };
 
     public:
         MutexObject(VTable* vtbl, ScriptObject* delegate);
         virtual ~MutexObject();
         void lock();
         bool tryLock();
-        bool unlockImpl();
+        void unlock();
         void ctor();
         virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
-        
-	public:
 		ChannelItem* makeChannelItem();
+        
+        class State;
 		
     private:
         GC_NO_DATA(MutexObject)
         DECLARE_SLOTS_MutexObject;
         FixedHeapRef<State> m_state;
+    };
+    
+    //
+    // Conditions in ActionScript are also composed of a OS level
+    // vmpi condition and vmpi mutex. this composition is 
+    // created to allow easy interrupt of a blocked isolate 
+    // to support script timeout, flashbuilder and fdb debugger 
+    // call stack aquisition for a blocked isolate thread, termination, 
+    // and the ability to add aid for deadlock detection. this data
+    // can be sent over the debugger protocol allowing for 
+    // more sophisticated IDEs to provide helpful UI.
+    // 
+    class GC_AS3_EXACT(ConditionObject, ScriptObject)
+    {
+        friend class MutexObject;
+    public:
+        ConditionObject(VTable* vtbl, ScriptObject* delegate);
+        virtual ~ConditionObject();
+
+        GCRef<MutexObject> get_mutex();
+        
+        void ctor(GCRef<MutexObject> mutex);
+        bool waitImpl(double timeout);
+        bool notifyImpl();
+        bool notifyAllImpl();
+
+        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
+
+		ChannelItem* makeChannelItem();
+        
+        class State;
+		
+    private:
+        GC_NO_DATA(ConditionObject)
+        FixedHeapRef<State> m_state;
+        
+        DECLARE_SLOTS_ConditionObject;
+    };
+
+    //
+    // this stores the state of the ActionScript Mutex 
+    // object with a reference count.  this is done to allow
+    // ActionScript Mutex objects to be passed between
+    // isolates allowing multiple isolates to use the same
+    // OS level Mutex for coordination.
+    // 
+    // InterruptableState manages the list of WaitRecords
+    // for this Mutex allowing blocking operations like lock()
+    // to be interrupted for termination, debugging, or script timeout
+    //
+    class MutexObject::State: public InterruptableState
+    {
+        friend class MutexObject;
+        friend class ConditionObject;
+        friend class ConditionObject::State;
+        vmpi_mutex_t m_mutex;
+        vmbase::RecursiveMutex m_listLock;
+        int64_t m_recursion_count; // generous to avoid wraparound.
+        vmpi_thread_t volatile m_ownerThreadID;
+        bool m_isValid;
+    public:
+        State();
+        virtual void destroy();
+        bool tryLock();
+        bool unlock();
+
+#ifdef DEBUG
+    public:
+        bool m_lockIsHeld; 
+    protected:
+        bool lockIsHeld();
+#endif // DEBUG
+    };
+    
+    //
+    // this stores the state of the ActionScript Condition 
+    // object with a reference count.  this is done to allow
+    // ActionScript Condition objects to be passed between
+    // isolates allowing multiple isolates to use the same
+    // OS level condition for coordination.
+    // 
+    // InterruptableState manages the list of WaitRecords
+    // for this Condition allowing blocking operations like wait()
+    // to be interrupted for termination, debugging, or script timeout
+    //
+    class ConditionObject::State: public InterruptableState
+    {
+        friend class ConditionObject;
+
+        FixedHeapRef<MutexObject::State> m_mutexState;
+        
+    public:
+        State(MutexObject::State* mutexState);
+        bool wait(int32_t millis, Isolate* isolate, Toplevel* toplevel);
+        virtual void destroy();
+#ifdef DEBUG
+    protected:
+        bool lockIsHeld();
+#endif // DEBUG
     };
     
     class GC_AS3_EXACT(MutexClass, ClassClosure)
@@ -87,44 +184,6 @@ namespace avmplus {
         DECLARE_SLOTS_MutexClass;
     };
 
-    class GC_AS3_EXACT(ConditionObject, ScriptObject)
-    {
-        friend class MutexObject;
-    public:
-        ConditionObject(VTable* vtbl, ScriptObject* delegate);
-        virtual ~ConditionObject();
-
-        MutexObject* get_mutex();
-        
-        void ctor(MutexObject* mutex);
-
-        // -1: mutex not owned. 0 - timeout, 1 -notified 
-        int waitImpl(double timeout);
-        bool notifyImpl();
-        bool notifyAllImpl();
-
-        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
-
-	public:
-		ChannelItem* makeChannelItem();
-		
-        class State: public FixedHeapRCObject 
-        {
-            friend class ConditionObject;
-            vmpi_condvar_t m_condVar;
-            int32_t m_wait_count;
-            FixedHeapRef<MutexObject::State> m_mutexState;
-        public:
-            State(MutexObject::State* mutexState);
-            virtual void destroy();
-        };
-
-    private:
-        GC_NO_DATA(ConditionObject)
-        FixedHeapRef<State> m_state;
-        
-        DECLARE_SLOTS_ConditionObject;
-    };
     
     class GC_AS3_EXACT(ConditionClass, ClassClosure)
     {

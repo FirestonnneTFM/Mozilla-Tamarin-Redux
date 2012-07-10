@@ -64,6 +64,7 @@ REALLY_INLINE GCRef<ByteArrayClass> Toplevel::byteArrayClass() const { return bu
 REALLY_INLINE GCRef<ClassClass> Toplevel::classClass() const { return builtinClasses()->get_ClassClass(); }
 REALLY_INLINE GCRef<EOFErrorClass> Toplevel::eofErrorClass() const { return builtinClasses()->get_EOFErrorClass(); }
 REALLY_INLINE GCRef<IOErrorClass> Toplevel::ioErrorClass() const { return builtinClasses()->get_IOErrorClass(); }
+REALLY_INLINE GCRef<IllegalOperationErrorClass> Toplevel::illegalOperationErrorClass() const { return builtinClasses()->get_IllegalOperationErrorClass(); }
 REALLY_INLINE GCRef<MemoryErrorClass> Toplevel::memoryErrorClass() const { return builtinClasses()->get_MemoryErrorClass(); }
 REALLY_INLINE GCRef<DateClass> Toplevel::dateClass() const { return builtinClasses()->get_DateClass(); }
 REALLY_INLINE GCRef<DoubleVectorClass> Toplevel::doubleVectorClass() const { return builtinClasses()->get_Vector_doubleClass(); }
@@ -215,11 +216,6 @@ REALLY_INLINE void Toplevel::init_mainEntryPoint(ScriptEnv* main, builtinClassMa
     AvmAssert(_mainEntryPoint == NULL && _builtinClasses == NULL);
     _mainEntryPoint = main;
     _builtinClasses = builtins;
-}
-
-REALLY_INLINE void Toplevel::add_scriptEntryPoint(ScriptEnv* main)
-{
-    _scriptEntryPoints.add(main);
 }
 
 } // namespace avmplus

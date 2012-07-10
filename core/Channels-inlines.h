@@ -117,6 +117,7 @@ namespace avmplus
     bool BlockingChannel<BUFFER>::put(const ChannelItem* in)
     {
         SCOPE_LOCK_NAMED(lk, m_monitor) {
+            if (eof) return false;
             while (!buffer->put(in)) {
                 if (eof) {
                     return false;

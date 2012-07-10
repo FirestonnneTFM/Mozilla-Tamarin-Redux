@@ -1164,10 +1164,8 @@ namespace avmplus
 #else
         AvmAssert(toplevel->objectClass != NULL);
 #endif
-        if (enterEventLoop)
-            toplevel->add_scriptEntryPoint(main);
 
-        return callScriptEnvEntryPoint(main);
+		return callScriptEnvEntryPoint(main);
     }
 
     PoolObject* AvmCore::parseActionBlock(ScriptBuffer code,

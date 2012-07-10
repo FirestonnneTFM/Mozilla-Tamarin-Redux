@@ -194,11 +194,11 @@ namespace avmplus
         AvmAssert(code >= Isolate::NEW && code <= Isolate::EXCEPTION);
         if (code == Isolate::STARTING)
         {
-            code = Isolate::RUNNING;
+            code = Isolate::NEW;
         }
         else if (code == Isolate::FINISHING)
         {
-            code = Isolate::TERMINATED;
+            code = Isolate::RUNNING;
         }
         return self()->core()->workerStates[code];
      }
@@ -265,6 +265,9 @@ namespace avmplus
         if (m_isolate->getAggregate()->queryState(m_isolate) != Isolate::NEW)
             throwIllegalOperationError(kWorkerAlreadyStarted);
         
+        if (m_isolate->parentDesc != AvmCore::getActiveCore()->getIsolate()->desc)
+            throwIllegalOperationError(kWorkerIllegalCallToStart);
+
         return internalStartWithChannels(NULL);
     }
     
