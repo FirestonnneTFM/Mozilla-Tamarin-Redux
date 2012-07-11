@@ -439,7 +439,7 @@ as3/Workers/Worker_primordial_stop:exitcode, .*, , expectedfail, https://bugzill
 as3/Workers/Worker:child worker. after stop.. state is, .*, , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=754296
 as3/Workers/WorkerExperimental:Listener 4th Event, .*, , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=754296
 as3/ShellClasses/toplevel:exitcode, .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=698855 System.exit(n) always exits 1
-as3/Workers/.*, .*(android|arm-lnx), , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=755345
+as3/Workers/.*, .*(AOT|android|arm-lnx), , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=755345
 as3/Workers/PromiseEmpty,.*,,skip,https://bugzilla.mozilla.org/show_bug.cgi?id=755300
 regress/.*243b,(x86-lnx-tvm-release-Dinterp|arm-android-tvm-release-Dinterp|arm-android-tvm-release-Dinterp|x86-win-tvm-release-Dinterp), , expectedfail, bug 
 as3/Workers/regress/bug_677333,x64-win, , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=677333
