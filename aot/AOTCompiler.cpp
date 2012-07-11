@@ -67,6 +67,7 @@ extern "C" {
     const AOTInfo avmglue_aotInfo = EMPTY_AOTInfo;
     const uint32_t abcNVectorInstances = 0;
     __attribute__ ((visibility("default"))) LLVMVectorInstance abcVectorInstances[] = {};
+    const uint32_t g_aotSamplerEnabled = 0;
     LLVMUnusedParam const g_unusedParam = 0;
 }
 
