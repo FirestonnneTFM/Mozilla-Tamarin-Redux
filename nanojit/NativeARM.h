@@ -1010,15 +1010,17 @@ enum {
         DdEnc = (Vd<<12) | (D<<22);                                 
 #define DFlag(_Dd) ( IsFpDReg(_Dd) ? (1 << 8) : 0 )
     
-#define encodeRegM(...) __encodeRegM(__VA_ARGS__)        
-#define encodeRegN(...) __encodeRegN(__VA_ARGS__)        
-#define encodeRegD(...) __encodeRegD(__VA_ARGS__)        
+//#define encodeRegM(...) __encodeRegM(__VA_ARGS__)        
+//#define encodeRegN(...) __encodeRegN(__VA_ARGS__)        
+//#define encodeRegD(...) __encodeRegD(__VA_ARGS__)        
+#define encodeRegM(a,b,c,d) __encodeRegM(a,b,c,d)        
+#define encodeRegN(a,b,c,d) __encodeRegN(a,b,c,d)        
+#define encodeRegD(a,b,c,d) __encodeRegD(a,b,c,d)        
 
-
-#define SD_  true , true , false
-#define S__  true , false, false
-#define _D_  false, true , false
-#define __Q  false, false, true
+//#define SD_  true , true , false
+//#define S__  true , false, false
+//#define _D_  false, true , false
+//#define __Q  false, false, true
     
 /*
  * VFP, instructions
@@ -1028,7 +1030,7 @@ enum {
         underrunProtect(4);                                             \
         NanoAssert(ARM_VFP);                                            \
         NanoAssert(IsGpReg(_Rd) && IsGpReg(_Rn));                       \
-        int DmEnc; encodeRegM(_Dm,_D_);                                 \
+        int DmEnc; encodeRegM(_Dm,false, true , false);                                 \
         *(--_nIns) = (NIns)( COND_AL | (0xC4<<20) | ((_Rn)<<16) | ((_Rd)<<12) | (0xB1<<4) | DmEnc ); \
         asm_output("fmdrr %s,%s,%s", gpn(_Dm), gpn(_Rd), gpn(_Rn));     \
     } while (0)
@@ -1037,7 +1039,7 @@ enum {
         underrunProtect(4);                                             \
         NanoAssert(ARM_VFP);                                            \
         NanoAssert(IsGpReg(_Rd) && IsGpReg(_Rn));                       \
-        int DmEnc; encodeRegM(_Dm,_D_);                                 \
+        int DmEnc; encodeRegM(_Dm,false, true , false);                                 \
         *(--_nIns) = (NIns)( COND_AL | (0xC5<<20) | ((_Rn)<<16) | ((_Rd)<<12) | (0xB1<<4) | DmEnc ); \
         asm_output("fmrrd %s,%s,%s", gpn(_Rd), gpn(_Rn), gpn(_Dm));     \
     } while (0)
@@ -1046,7 +1048,7 @@ enum {
         underrunProtect(4);                                             \
         NanoAssert(ARM_VFP);                                            \
         NanoAssert(IsGpReg(_Rd) );                                      \
-        int DnEnc; encodeRegN(_Dn,_D_);                                 \
+        int DnEnc; encodeRegN(_Dn,false, true , false);                                 \
         *(--_nIns) = (NIns)( COND_AL | (0xE3<<20) | DnEnc | ((_Rd)<<12) | 0xB10 ); \
         asm_output("fmrdh %s,%s", gpn(_Rd), gpn(_Dn));                  \
     } while (0)
@@ -1055,7 +1057,7 @@ enum {
         underrunProtect(4);                                             \
         NanoAssert(ARM_VFP);                                            \
         NanoAssert(IsGpReg(_Rd));                                       \
-        int DnEnc; encodeRegN(_Dn,DnEnc,_D_);                           \
+        int DnEnc; encodeRegN(_Dn,DnEnc,false, true , false);                           \
         *(--_nIns) = (NIns)( COND_AL | (0xE1<<20) | DnEnc | ((_Rd)<<12) | 0xB10 ); \
         asm_output("fmrdh %s,%s", gpn(_Rd), gpn(_Dn));                  \
     } while (0)
@@ -1068,7 +1070,7 @@ enum {
         NanoAssert( IsGpReg(_Rn));                                      \
         int negflag = 1<<23;                                            \
         int dflag = DFlag(_Dd);                                         \
-        int DdEnc; encodeRegD(_Dd,SD_);                                 \
+        int DdEnc; encodeRegD(_Dd,true , true , false);                                 \
         intptr_t offs = (_offs);                                        \
         if (_offs < 0) {                                                \
             negflag = 0<<23;                                            \
@@ -1082,7 +1084,7 @@ enum {
         underrunProtect(4);                                             \
         NanoAssert(ARM_VFP);                                            \
         NanoAssert( IsGpReg(_Rn));                                      \
-        int DdEnc; encodeRegD(_Qd,__Q);                                 \
+        int DdEnc; encodeRegD(_Qd,false, false, true);                                 \
         *(--_nIns) = (NIns)( COND_AL | (0xC9<<20) | ((_Rn)<<16) | DdEnc | 0xB04 );        \
         asm_output("vldm <d%d,d%d>,%s // i.e. %s",  Vd+D*16,Vd+D*16+1,gpn(_Rn),gpn(_Qd)); \
     } while (0)
@@ -1101,7 +1103,7 @@ enum {
         NanoAssert(isU8((_offs)/4) || isU8(-(_offs)/4));                \
         NanoAssert( IsGpReg(_Rn));                                      \
         int dflag = DFlag(_Dd);                                         \
-        int DdEnc; encodeRegD(_Dd,SD_);                                 \
+        int DdEnc; encodeRegD(_Dd,true , true , false);                                 \
         int negflag = 1<<23;                                            \
         intptr_t offs = (_offs);                                        \
         if (_offs < 0) {                                                \
@@ -1117,7 +1119,7 @@ enum {
         underrunProtect(4);                                             \
         NanoAssert(ARM_VFP);                                            \
         NanoAssert( IsGpReg(_Rn));                                      \
-        int DdEnc; encodeRegD(_Qd,__Q);                                 \
+        int DdEnc; encodeRegD(_Qd,false, false, true);                                 \
         *(--_nIns) = (NIns)( COND_AL | (0xC8<<20) | ((_Rn)<<16) | DdEnc | 0xB04 );        \
         asm_output("vstm %s,<d%d,d%d> // i.e. %s", gpn(_Rn), Vd+D*16,Vd+D*16+1,gpn(_Qd)); \
      } while (0)
@@ -1128,8 +1130,8 @@ enum {
         underrunProtect(4);                                             \
         NanoAssert(ARM_VFP);                                            \
         int dflag = DFlag(_Dd); NanoAssert(dflag==DFlag(_Dm));          \
-        int DdEnc; encodeRegD(_Dd,SD_);                                 \
-        int DmEnc; encodeRegM(_Dm,SD_);                                 \
+        int DdEnc; encodeRegD(_Dd,true , true , false);                                 \
+        int DmEnc; encodeRegM(_Dm,true , true , false);                                 \
         *(--_nIns) = (NIns)( COND_AL | (0xEB10A40) | DdEnc | DmEnc | dflag ); \
         asm_output("fneg%c %s,%s",dflag?'d':'s', gpn(_Dd), gpn(_Dm));   \
      } while (0)
@@ -1137,8 +1139,8 @@ enum {
 #define VNEGneon(_Qd,_Qm) do {                                          \
         underrunProtect(4);                                             \
         NanoAssert(ARM_VFP);                                            \
-        int DdEnc; encodeRegD(_Qd,__Q);                                 \
-        int DmEnc; encodeRegM(_Qm,__Q);                                 \
+        int DdEnc; encodeRegD(_Qd,false, false, true);                                 \
+        int DmEnc; encodeRegM(_Qm,false, false, true);                                 \
         *(--_nIns) = (NIns)( 0xF3B907C0 | DdEnc | DmEnc );              \
         asm_output("fnegq %s,%s", gpn(_Qd), gpn(_Qm));                  \
      } while (0)
@@ -1148,9 +1150,9 @@ enum {
         underrunProtect(4);                                             \
         NanoAssert(ARM_VFP);                                            \
         int dflag = DFlag(_Dd); NanoAssert(dflag==DFlag(_Dm));NanoAssert(dflag==DFlag(_Dn)); \
-        int DdEnc; encodeRegD(_Dd,SD_);                                 \
-        int DmEnc; encodeRegM(_Dm,SD_);                                 \
-        int DnEnc; encodeRegN(_Dn,SD_);                                 \
+        int DdEnc; encodeRegD(_Dd,true , true , false);                                 \
+        int DmEnc; encodeRegM(_Dm,true , true , false);                                 \
+        int DnEnc; encodeRegN(_Dn,true , true , false);                                 \
         *(--_nIns) = (NIns)( COND_AL | SPECIFIC_ENC | DnEnc | DdEnc | DmEnc | dflag);        \
         asm_output(#NAME"%c %s,%s,%s",dflag?'d':'s', gpn(_Dd), gpn(_Dn), gpn(_Dm));          \
      } while (0)
@@ -1158,9 +1160,9 @@ enum {
 #define GenericNeon(NAME,_Qd,_Qn,_Qm,SPECIFIC_ENC) do {                 \
         underrunProtect(4);                                             \
         NanoAssert(ARM_VFP);                                            \
-        int DdEnc; encodeRegD(_Qd,__Q);                                 \
-        int DmEnc; encodeRegM(_Qm,__Q);                                 \
-        int DnEnc; encodeRegN(_Qn,__Q);                                 \
+        int DdEnc; encodeRegD(_Qd,false, false, true);                                 \
+        int DmEnc; encodeRegM(_Qm,false, false, true);                                 \
+        int DnEnc; encodeRegN(_Qn,false, false, true);                                 \
         *(--_nIns) = (NIns)( (0xF2 << 24) | (SPECIFIC_ENC) | DdEnc | DnEnc| DmEnc );         \
         asm_output(#NAME" %s,%s,%s", gpn(_Qd), gpn(_Qn), gpn(_Qm));     \
     } while (0)
@@ -1196,8 +1198,8 @@ enum {
 #define VMOVN(_Dd,_Qm)  do { \
         underrunProtect(4);                                             \
         NanoAssert(ARM_VFP);                                            \
-        int DdEnc; encodeRegD(_Dd,_D_);                                 \
-        int DmEnc; encodeRegM(_Qm,__Q);                                 \
+        int DdEnc; encodeRegD(_Dd,false, true , false);                                 \
+        int DmEnc; encodeRegM(_Qm,false, false, true);                                 \
         *(--_nIns) = (NIns)( 0xF3B60200 | DdEnc | DmEnc );              \
         asm_output("vmovn.i32 %s,%s", gpn(_Dd), gpn(_Qm));              \
     } while (0)
@@ -1205,8 +1207,8 @@ enum {
 #define VMVN(_Dd,_Dm)  do { \
         underrunProtect(4);                                             \
         NanoAssert(ARM_VFP);                                            \
-        int DdEnc; encodeRegD(_Dd,_D_);                                 \
-        int DmEnc; encodeRegM(_Dm,_D_);                                 \
+        int DdEnc; encodeRegD(_Dd,false, true , false);                                 \
+        int DmEnc; encodeRegM(_Dm,false, true , false);                                 \
         *(--_nIns) = (NIns)( 0xF3B00580 | DdEnc | DmEnc );              \
         asm_output("vmvn %s,%s", gpn(_Dd), gpn(_Dm));                   \
     } while (0)
@@ -1214,9 +1216,9 @@ enum {
 #define VPMINU16(_Dd,_Dn,_Dm)  do { \
         underrunProtect(4);                                             \
         NanoAssert(ARM_VFP);                                            \
-        int DdEnc; encodeRegD(_Dd,_D_);                                 \
-        int DmEnc; encodeRegM(_Dm,_D_);                                 \
-        int DnEnc; encodeRegN(_Dn,_D_);                                 \
+        int DdEnc; encodeRegD(_Dd,false, true , false);                                 \
+        int DmEnc; encodeRegM(_Dm,false, true , false);                                 \
+        int DnEnc; encodeRegN(_Dn,false, true , false);                                 \
         *(--_nIns) = (NIns)( 0xF3100A10 | DnEnc | DdEnc | DmEnc );      \
         asm_output("vpmin.u16 %s,%s,%s", gpn(_Dd), gpn(_Dn), gpn(_Dm)); \
     } while (0)
@@ -1224,7 +1226,7 @@ enum {
 #define VDUP(_Qd,_Sm) do {\
         underrunProtect(4);                                                   \
         NanoAssert(ARM_VFP);                                                  \
-        int DdEnc; encodeRegD(_Qd,__Q);                                       \
+        int DdEnc; encodeRegD(_Qd,false, false, true);                                       \
         int M,Vm; NanoAssert(IsFpSReg(_Sm));                                  \
         split_sreg_enc(_Sm,M,Vm);                                             \
    /* M is part of th 'imm4' encoding; the first bit. the rest is 0x4 (100)*/ \
@@ -1245,8 +1247,8 @@ enum {
         underrunProtect(4);                                                 \
         NanoAssert(ARM_VFP);                                                \
         int dflag = DFlag(_Dd); NanoAssert(dflag==DFlag(_Dm));              \
-        int DdEnc; encodeRegD(_Dd,SD_);                                     \
-        int DmEnc; encodeRegM(_Dm,SD_);                                     \
+        int DdEnc; encodeRegD(_Dd,true , true , false);                                     \
+        int DmEnc; encodeRegM(_Dm,true , true , false);                                     \
         NanoAssert(((_E)==0) || ((_E)==1));                                 \
         *(--_nIns) = (NIns)( COND_AL | (0xEB4<<16) | DdEnc | 0xA40 | ((_E)<<7) | dflag | DmEnc ); \
         asm_output("fcmp%s%c %s,%s", (((_E)==1)?"e":""),dflag?'d':'s', gpn(_Dd), gpn(_Dm));       \
@@ -1255,7 +1257,7 @@ enum {
 #define VCMPZ(_Dd) do {                                                     \
         underrunProtect(4);                                                 \
         NanoAssert(ARM_VFP);                                                \
-        int DdEnc; encodeRegD(_Dd,_D_);                                     \
+        int DdEnc; encodeRegD(_Dd,false, true , false);                                     \
         *(--_nIns) = (NIns)( COND_AL | (0xEB5<<16) | DdEnc | 0xBC0 );       \
         asm_output("vcmpz %s", gpn(_Dd) );                                  \
     } while (0)
@@ -1265,8 +1267,8 @@ enum {
         NanoAssert(ARM_VFP);                                                \
         NanoAssert(IsCond(_cond));                                          \
         int dflag = DFlag(_Dd); NanoAssert(dflag==DFlag(_Dm));              \
-        int DdEnc; encodeRegD(_Dd,SD_);                                     \
-        int DmEnc; encodeRegM(_Dm,SD_);                                     \
+        int DdEnc; encodeRegD(_Dd,true , true , false);                                     \
+        int DmEnc; encodeRegM(_Dm,true , true , false);                                     \
         *(--_nIns) = (NIns)( ((_cond)<<28) | (0xEB0<<16) | DdEnc | 0xA40 | DmEnc | dflag );       \
         asm_output("fcpy%c%s %s,%s", dflag?'d':'s', condNames[_cond], gpn(_Dd), gpn(_Dm));        \
      } while (0)
@@ -1277,9 +1279,9 @@ enum {
 #define FCPYQ(_Qd,_Qm)  do {                                                \
         underrunProtect(4);                                                 \
         NanoAssert(ARM_VFP); /*NEON!*/                                      \
-        int DdEnc; encodeRegD(_Qd,__Q);                                     \
-        int DmEnc; encodeRegM(_Qm,__Q);                                     \
-        int DnEnc; encodeRegN(_Qm,__Q);                                     \
+        int DdEnc; encodeRegD(_Qd,false, false, true);                                     \
+        int DmEnc; encodeRegM(_Qm,false, false, true);                                     \
+        int DnEnc; encodeRegN(_Qm,false, false, true);                                     \
         *(--_nIns) = (NIns)( (0xF2200150) | DdEnc  | DmEnc  | DnEnc );      \
         asm_output("fcpyq %s,%s", gpn(_Qd), gpn(_Qm));                      \
     } while (0)
@@ -1288,7 +1290,7 @@ enum {
         underrunProtect(4);                                                 \
         NanoAssert(ARM_VFP);                                                \
         NanoAssert( IsGpReg(_Rd) );                                         \
-        int DnEnc; encodeRegN(_Sn,S__);                                     \
+        int DnEnc; encodeRegN(_Sn,true , false, false);                                     \
         *(--_nIns) = (NIns)( COND_AL | (0xE0<<20) |((_Rd)<<12) | 0xA10 | DnEnc ); \
         asm_output("fmsr %s,%s", gpn(_Sn), gpn(_Rd));                       \
     } while (0)
@@ -1297,7 +1299,7 @@ enum {
         underrunProtect(4);                                                 \
         NanoAssert(ARM_VFP);                                                \
         NanoAssert( IsGpReg(_Rd) );                                         \
-        int DnEnc; encodeRegN(_Sn,S__);                                     \
+        int DnEnc; encodeRegN(_Sn,true , false, false);                                     \
         *(--_nIns) = (NIns)( COND_AL | (0xE1<<20) |((_Rd)<<12) | 0xA10 | DnEnc ); \
         asm_output("fmrs %s,%s", gpn(_Rd), gpn(_Sn));                       \
     } while (0)
@@ -1309,8 +1311,8 @@ enum {
         underrunProtect(4);                                                 \
         NanoAssert(ARM_VFP);                                                \
         int dflag = DFlag((check_dst?_Rd:_Rm));                             \
-        int DdEnc; encodeRegD(_Rd,SD_);                                     \
-        int DmEnc; encodeRegM(_Rm,SD_);                                     \
+        int DdEnc; encodeRegD(_Rd,true , true , false);                                     \
+        int DmEnc; encodeRegM(_Rm,true , true , false);                                     \
         *(--_nIns) = (NIns)( COND_AL | (0xEB<<20) | SPECIFIC_ENC | dflag | DdEnc | DmEnc ); \
         asm_output(#NAME" %s,%s",gpn(_Rd), gpn(_Rm));                       \
     } while(0)

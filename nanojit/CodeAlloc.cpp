@@ -308,6 +308,14 @@ extern  "C" void sync_instruction_memory(caddr_t v, u_int len);
         VALGRIND_DISCARD_TRANSLATIONS(start, len);
     }
 
+#elif defined NANOJIT_ARM && ( defined UNDER_CE || defined WIN32 )
+    // On arm/winmo, just flush the whole icache. The
+    // WinCE docs indicate that this function actually ignores its
+    // 2nd and 3rd arguments, and wants them to be NULL.
+    void CodeAlloc::flushICache(void *, size_t) {
+        FlushInstructionCache(GetCurrentProcess(), NULL, NULL);
+    }
+
 #elif defined NANOJIT_ARM && defined DARWIN
     void CodeAlloc::flushICache(void *, size_t) {
         VMPI_debugBreak();
