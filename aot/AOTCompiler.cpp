@@ -295,19 +295,6 @@ uintptr_t *AOTLazyEvalGuard::redirectLoad(uintptr_t *faultAddr)
 }
 #endif
 
-// UGLY Hack to avoid the pthread_setspecific overhead with exceptions in ARM-GCC-4.0.1
-// TODO: remove this once we have a good way of disabling exceptions 
-extern "C" {
-    void _Unwind_SjLj_Register() {
-    }
-
-    void _Unwind_SjLj_Resume() {
-    }
-
-    void _Unwind_SjLj_Unregister() {
-    }
-}
-
 extern "C" void llvm_unwind() {
     // This implementation gets replaced by one generated
     // by the LLVM Emitter. It exists simply to make it
