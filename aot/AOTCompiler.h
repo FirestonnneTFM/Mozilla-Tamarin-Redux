@@ -176,6 +176,7 @@ extern "C" {
     extern __attribute__ ((visibility("default"))) const AOTInfo avmglue_aotInfo;
     extern __attribute__ ((visibility("default"))) const uint32_t abcNVectorInstances;
     extern __attribute__ ((visibility("default"))) LLVMVectorInstance abcVectorInstances[];
+    extern __attribute__ ((visibility("default"))) const uint32_t g_aotSamplerEnabled;
     extern __attribute__ ((visibility("default"))) const LLVMUnusedParam g_unusedParam;
 }
 
