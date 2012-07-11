@@ -293,6 +293,12 @@ namespace avmplus
                     s = core->concatStrings(s, core->intToString(e->linenum()));
                     s = s->appendLatin1("]");
                 }
+                if(e->info()->file() && e->info()->file()->getName())
+                {
+                    s = s->appendLatin1(" <");
+                    s = core->concatStrings(s, e->info()->file()->getName());
+                    s = s->appendLatin1(">");
+                }
             }
             stringRep = s;
         }

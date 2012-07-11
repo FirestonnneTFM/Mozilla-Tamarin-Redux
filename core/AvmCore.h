@@ -1121,7 +1121,8 @@ const int kBufferPadding = 16;
                                      Toplevel* toplevel,
                                      Domain* domain,
                                      const NativeInitializer* ninit,
-                                     ApiVersion apiVersion);
+                                     ApiVersion apiVersion,
+                                     Stringp name = NULL);
 
         // This is equivalent to a call to parseActionBlock,
         // followed by a call to the now-defunct prepareActionPool.
@@ -1155,7 +1156,8 @@ const int kBufferPadding = 16;
                                     Toplevel* toplevel,
                                     const NativeInitializer* ninit,
                                     CodeContext *codeContext,
-                                    ApiVersion apiVersion);
+                                    ApiVersion apiVersion,
+                                    Stringp name = NULL);
 
 #ifdef VMCFG_AOT
         /**

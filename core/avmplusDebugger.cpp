@@ -358,7 +358,7 @@ namespace avmplus
      * This method builds a list of source files
      * and methods, etc from the given abc file.
      */
-    void Debugger::processAbc(PoolObject* pool, ScriptBuffer code)
+    void Debugger::processAbc(PoolObject* pool, ScriptBuffer code, Stringp abcname)
     {
 #ifdef VMCFG_AOT
         if(pool2abcIndex.get(pool) != NULL)
@@ -367,7 +367,8 @@ namespace avmplus
 
         // first off we build an AbcInfo object
         AbcFile* abc = AbcFile::create(core->GetGC(), core, (int)code.getSize());
-
+        abc->setName(abcname);
+        
         // now let's scan the abc resources pulling out what we need
         scanResources(abc, pool);
 
