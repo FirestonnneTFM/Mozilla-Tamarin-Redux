@@ -443,3 +443,24 @@ as3/Workers/.*, .*(android|arm-lnx), , skip, bug https://bugzilla.mozilla.org/sh
 as3/Workers/PromiseEmpty,.*,,skip,https://bugzilla.mozilla.org/show_bug.cgi?id=755300
 regress/.*243b,(x86-lnx-tvm-release-Dinterp|arm-android-tvm-release-Dinterp|arm-android-tvm-release-Dinterp|x86-win-tvm-release-Dinterp), , expectedfail, bug 
 as3/Workers/regress/bug_677333,x64-win, , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=677333
+
+as3/Workers/Promise_passing,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/Promise_local,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/WorkerDomainCreateWorker,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/WorkerExperimental,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/WorkerDomain_create,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/ByteArrayMutexStartArgs,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/WorkerRemoteCall,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/package_caller,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/datatypes/circular_ref,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/datatypes/basicDataTypes,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/PromiseWrap,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/datatypes/internalDynamicClass,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/regress/bug_677362,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/regress/bug_694376,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/regress/bug_694376_2,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/regress/bug_694398,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/Promise,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/PromiseWhen,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/ByteArrayMutex,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/Workers/datatypes/gettersSetters,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
