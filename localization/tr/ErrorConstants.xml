@@ -679,6 +679,9 @@ class B extends A {
   <error id="1516" label="kConditionCannotNotify">İlgili mutex sahipsizse koşul notify olamaz.</error>
   <error id="1517" label="kConditionCannotNotifyAll">İlgili mutex sahipsizse koşul notifyAll olamaz.</error>
   <error id="1518" label="kConditionCannotWait">İlgili mutex sahipsizse condition wait olamaz.</error>
+  <error id="1519" label="kConditionCannotBeInitialized">Condition cannot be initialized.</error>
+  <error id="1520" label="kMutexCannotBeInitialized">Mutex cannot be initialized.</error>
+  <error id="1521" label="kWorkerIllegalCallToStart">Only the worker's parent may call start.</error>
 
   <error id="2004" label="kInvalidParamError">Parametrelerden biri geçersiz.</error>
   <error id="2006" label="kParamRangeError">Sağlanan dizin sınırların dışındadır.</error>

@@ -679,6 +679,9 @@ class B extends A {
   <error id="1516" label="kConditionCannotNotify">Объект Condition не может отправить событие notify, если связанный объект mutex не имеет владельца.</error>
   <error id="1517" label="kConditionCannotNotifyAll">Объект Condition не может отправить событие notifyAll, если связанный объект mutex не имеет владельца.</error>
   <error id="1518" label="kConditionCannotWait">Объект Condition не может ждать, если связанный объект mutex не имеет владельца.</error>
+  <error id="1519" label="kConditionCannotBeInitialized">Condition cannot be initialized.</error>
+  <error id="1520" label="kMutexCannotBeInitialized">Mutex cannot be initialized.</error>
+  <error id="1521" label="kWorkerIllegalCallToStart">Only the worker's parent may call start.</error>
 
   <error id="2004" label="kInvalidParamError">Один из параметров указан неверно.</error>
   <error id="2006" label="kParamRangeError">Предоставленный индекс выходит за допустимые пределы.</error>

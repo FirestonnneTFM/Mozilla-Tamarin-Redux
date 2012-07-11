@@ -679,6 +679,9 @@ class B extends A {
   <error id="1516" label="kConditionCannotNotify">Objekt condition nemůže provést metodu notify, pokud nevlastní přidružený objekt mutex.</error>
   <error id="1517" label="kConditionCannotNotifyAll">Objekt condition nemůže provést metodu notifyAll, pokud nevlastní přidružený objekt mutex.</error>
   <error id="1518" label="kConditionCannotWait">Objekt condition nemůže čekat, pokud nevlastní přidružený objekt mutex.</error>
+  <error id="1519" label="kConditionCannotBeInitialized">Condition cannot be initialized.</error>
+  <error id="1520" label="kMutexCannotBeInitialized">Mutex cannot be initialized.</error>
+  <error id="1521" label="kWorkerIllegalCallToStart">Only the worker's parent may call start.</error>
 
   <error id="2004" label="kInvalidParamError">Jeden z parametrů je neplatný.</error>
   <error id="2006" label="kParamRangeError">Poskytnutý index je mimo rozsah.</error>
