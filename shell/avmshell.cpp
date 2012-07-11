@@ -411,6 +411,11 @@ namespace avmshell
 
 #ifdef VMCFG_AOT
         int exitCode = shell->evaluateFile(settings, NULL);
+        aggregate->beforeCoreDeletion(this);
+        delete shell;
+        mmfx_delete( gc );
+        aggregate->afterGCDeletion(this);
+        
         if (exitCode != 0)
             Platform::GetInstance()->exit(exitCode);
         return;
