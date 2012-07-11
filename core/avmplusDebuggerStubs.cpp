@@ -115,7 +115,7 @@ namespace avmplus
     {
     }
 
-    void Debugger::processAbc(PoolObject* pool, ScriptBuffer code)
+    void Debugger::processAbc(PoolObject* pool, ScriptBuffer code, Stringp abcname)
     {
     }
 
