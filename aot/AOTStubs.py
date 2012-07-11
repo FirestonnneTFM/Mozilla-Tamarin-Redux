@@ -341,6 +341,8 @@ if __name__ == "__main__":
     genStubs("abcOP_construct", [mosttypes, ["MethodEnv*"], mosttypes, argdesctypes, ["..."]])
     
     genStubs("abcOP_getglobalscope", [mosttypes, ["MethodEnv*"]])
+
+    genStubs("abcOP_findInterfaceBinding", [["int32_t"], ["int32_t"], ["const uint32_t*", "const uint16_t*"]])
     
     genStubs("abcOP_not", [["LLVMBool", "LLVMAtom"], ["MethodEnv*"], mosttypes])
     genStubs("abcOP_increment", [["double", "LLVMAtom"], ["MethodEnv*"], mosttypes])

@@ -258,7 +258,7 @@ namespace MMgc
         bool IsStackMemory() const { return (size & kIsStackMemory) ? true : false; }
         bool IsExactlyTraced() const { return (size & kIsExactlyTraced) ? true : false; }
 
-        GC *GetGC() const { return gc; }
+        GC *GetGC() const;
         /** only used for late registration of message channels */
         void Register(GC* _gc);
         /** if your object goes away after the GC is deleted this can be useful */
@@ -1625,8 +1625,7 @@ namespace MMgc
         PageMap::Uniform pageMap;
 #else
 #ifdef MMGC_64BIT
-        //PageMap::DelayT4 pageMap;
-        PageMap::Tiered4 pageMap;
+        PageMap::DelayT4 pageMap;
 #else
         PageMap::Tiered2 pageMap;
 #endif // MMGC_64BIT

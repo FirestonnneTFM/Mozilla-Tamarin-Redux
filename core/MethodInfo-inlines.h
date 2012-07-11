@@ -295,10 +295,12 @@ REALLY_INLINE void MethodInfo::setOSR(uint32_t threshold)
     _osr_enabled = (threshold > 0);
 }
 
+#ifndef VMCFG_AOT   // Avoid premature inlining for AOT; it prevents CSE
 REALLY_INLINE PoolObject* MethodInfo::pool() const
 {
     return _pool;
 }
+#endif
 
 #ifdef VMCFG_AOT
 REALLY_INLINE AvmThunkNativeMethodHandler MethodInfo::handler_method() const

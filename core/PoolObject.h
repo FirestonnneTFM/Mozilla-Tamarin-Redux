@@ -200,7 +200,7 @@ namespace avmplus
     GC_DATA_BEGIN(PoolObject)
 
     public:
-        AvmCore *core;
+        AvmCore * const core;
 
         /** constants */
         DataList<int32_t>       GC_STRUCTURE(cpool_int);

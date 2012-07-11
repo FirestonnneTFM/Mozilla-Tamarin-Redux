@@ -180,4 +180,10 @@ extern "C" {
     extern __attribute__ ((visibility("default"))) const LLVMUnusedParam g_unusedParam;
 }
 
+avmplus::PoolObject* aotGetPool(const avmplus::MethodEnv* env) __attribute__((const));
+
+MMgc::GC* aotGetGC(const avmplus::MethodEnv* env) __attribute__((const));
+
+avmplus::String* aotGetString(const avmplus::MethodEnv* env, int32_t index) __attribute__((const));
+
 #endif

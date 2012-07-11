@@ -76,10 +76,12 @@ REALLY_INLINE ScopeChain::ScopeChain(VTable* vtable, AbcEnv* abcEnv, const Scope
     : _vtable(vtable), _abcEnv(abcEnv), _scopeTraits(scopeTraits), _defaultXmlNamespace(dxns)
 { }
 
+#ifndef VMCFG_AOT  // Avoid premature inlining for AOT; it prevents CSE
 REALLY_INLINE VTable* ScopeChain::vtable() const
 {
     return _vtable;
 }
+#endif
 
 REALLY_INLINE AbcEnv* ScopeChain::abcEnv() const
 {

@@ -65,6 +65,10 @@ namespace MMgc
         fm->OutOfLineFree(object);
     }
 
+#ifndef VMCFG_AOT
+    REALLY_INLINE GC *GCRoot::GetGC() const { return gc; }
+#endif
+
     // GC
 
     REALLY_INLINE void *GC::GetGCContextVariable(int var) const
