@@ -154,7 +154,7 @@ namespace avmplus
     }
 
 #ifndef X86_MATH
-#if defined(UNDER_CE)
+#if defined(UNDER_CE) || defined(_WIN8_ARM_SLOWDOWN_)
     REALLY_INLINE double MathUtils::mod(double x, double y)
     {
         if (!y) {

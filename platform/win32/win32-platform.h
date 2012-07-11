@@ -196,7 +196,7 @@ typedef void *maddr_ptr;
     #define VMPI_longjmpNoUnwind    ::longjmp
 #endif
 
-#ifndef UNDER_CE
+#if !defined(UNDER_CE) && !defined(_ARM_)
   // Newer versions of the Windows SDK set up the intrinsics slightly differently
   // than VC8. Only include intrin.h if the SDK doesn't declare it.
   #ifndef InterlockedBitTestAndSet

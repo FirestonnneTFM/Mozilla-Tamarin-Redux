@@ -47,7 +47,7 @@
 #include "exec-osr.h"
 
 #if defined(WIN32) && defined(AVMPLUS_ARM)
-#include <cmnintrin.h>
+#include <intrin.h>
 #endif
 
 #ifdef VMCFG_VTUNE
