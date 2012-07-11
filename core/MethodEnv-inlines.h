@@ -50,10 +50,12 @@ REALLY_INLINE AbcEnv* MethodEnv::abcEnv() const
     return _scope->abcEnv();
 }
 
+#ifndef VMCFG_AOT  // Avoid premature inlining for AOT; it prevents CSE
 REALLY_INLINE AvmCore* MethodEnv::core() const
 {
     return method->pool()->core;
 }
+#endif
 
 REALLY_INLINE CodeContext* MethodEnv::codeContext() const
 {
@@ -65,10 +67,12 @@ REALLY_INLINE DomainEnv* MethodEnv::domainEnv() const
     return abcEnv()->domainEnv();
 }
 
+#ifndef VMCFG_AOT  // Avoid premature inlining for AOT; it prevents CSE
 REALLY_INLINE ScopeChain* MethodEnv::scope() const
 {
     return _scope;
 }
+#endif
 
 REALLY_INLINE MethodEnv* MethodEnv::super_init() const
 {
@@ -76,10 +80,12 @@ REALLY_INLINE MethodEnv* MethodEnv::super_init() const
     return vtable()->base->init;
 }
 
+#ifndef VMCFG_AOT  // Avoid premature inlining for AOT; it prevents CSE
 REALLY_INLINE Toplevel* MethodEnv::toplevel() const
 {
     return vtable()->toplevel();
 }
+#endif
 
 REALLY_INLINE Stringp MethodEnv::traitsName() const
 {
@@ -118,10 +124,12 @@ REALLY_INLINE void MethodEnv::setActivationOrMCTable(void *ptr, int32_t type)
     WB(core()->GetGC(), this, &activationOrMCTable, (uintptr_t)ptr | type);
 }
 
+#ifndef VMCFG_AOT  // Avoid premature inlining for AOT; it prevents CSE
 REALLY_INLINE VTable* MethodEnv::vtable() const
 {
     return _scope->vtable();
 }
+#endif
 
 REALLY_INLINE MethodSignaturep MethodEnv::get_ms()
 {

@@ -547,8 +547,10 @@ template <> inline bool isNullOrUndefined(MethodEnv*, uint32_t) { return false; 
 template <> inline bool isNullOrUndefined(MethodEnv*, double) { return false; } 
 template <> inline bool isNullOrUndefined(MethodEnv*, LLVMAtom v) { return AvmCore::isNullOrUndefined((Atom)v); } 
 
-void throwNull(MethodEnv* env) __attribute__((noreturn));
-void throwNullOrUndefined(MethodEnv*, Atom atom) __attribute__((noreturn));
+// Never inline these since they're rarely actually called, and we'd prefer smaller code.
+// We also prefer to pass a MethodEnv argument which is always handy, unlike a Toplevel which often is not.
+void throwNull(MethodEnv* env) __attribute__((noreturn, noinline));
+void throwNullOrUndefined(MethodEnv*, Atom atom) __attribute__((noreturn, noinline));
 
 template<typename T> inline void nullcheck(MethodEnv* env, T v) {
     if (isNullOrUndefined(env, v))
@@ -695,7 +697,7 @@ const Multiname *abcOP_setup_multiname(MethodEnv *env, Multiname &multiname, tNa
         else
             multiname = *multinamep; // runtime? copy it
     } else {
-        env->method->pool()->parseMultiname(multiname, (int) multinameIndex); // TODO should be using conversion<>
+        aotGetPool(env)->parseMultiname(multiname, (int) multinameIndex); // TODO should be using conversion<>
     }
 
     AvmCore *core = env->core();
@@ -891,7 +893,7 @@ rt abcOP_newactivation(MethodEnv *env) {
     if (init) {
         MethodInfo* initMI = init->method;
         AvmAssert(initMI->method_id() >= 0);
-        AvmAssert(initMI->pool() == env->method->pool());
+        AvmAssert(initMI->pool() == aotGetPool(env));
         const AOTInfo* aotInfo = initMI->pool()->aotInfo;
         AvmAssert(env->method->method_id() >= 0);
         AvmAssert(env->method->method_id() < aotInfo->nActivationTraits);
@@ -942,7 +944,7 @@ rt abcOP_newcatch(MethodEnv *env, int32_t nameindex, char *u30typeindex) {
         t = OBJECT_TYPE;
     } else {
         Multiname mn;
-        PoolObject *pool = env->method->pool();
+        PoolObject *pool = aotGetPool(env);
         pool->parseMultiname(mn, nameindex);
         t = Traits::newCatchTraits(env->toplevel(), pool, (TraitsPosPtr) u30typeindex, mn.getName(), mn.getNamespace());
     }
@@ -952,7 +954,7 @@ rt abcOP_newcatch(MethodEnv *env, int32_t nameindex, char *u30typeindex) {
 template<typename rt>
 rt abcOP_newfunction(MethodEnv *env, Traits** idForDeclaringTraits, Traits*** scopeTraitIds, uint32_t nScopeTraits, uint32_t nStateWithTraits, LLVMAtom *scopes_masked, uint32_t methodindex) {
     Atom *scopes = (Atom*) scopes_masked;
-    PoolObject *pool = env->method->pool();
+    PoolObject *pool = aotGetPool(env);
     AvmAssert(pool->methodCount() > methodindex);
     MethodInfo *body = pool->getMethodInfo(methodindex);
     AvmAssert(scopeTraitIds != NULL || (scopeTraitIds == NULL && nScopeTraits == 0));
@@ -966,7 +968,7 @@ rt abcOP_newfunction(MethodEnv *env, Traits** idForDeclaringTraits, Traits*** sc
         for (uint32_t i = 0; i < nScopeTraits; ++i)
             scopeTraits[i] = scopeTraitIds[i] ? *(scopeTraitIds[i]) : NULL;
 
-        const ScopeTypeChain* scopeTypeChain = ScopeTypeChain::create(env->core()->GetGC(), env->core()->traits.function_itraits, env->method->declaringScope(), scopeTraits, nScopeTraits, nStateWithTraits, NULL, NULL);
+        const ScopeTypeChain* scopeTypeChain = ScopeTypeChain::create(aotGetGC(env), env->core()->traits.function_itraits, env->method->declaringScope(), scopeTraits, nScopeTraits, nStateWithTraits, NULL, NULL);
         body->makeIntoPrototypeFunction(toplevel, scopeTypeChain);
         Traits* declTraits = body->declaringTraits();
         *idForDeclaringTraits = declTraits;
@@ -982,7 +984,7 @@ rt abcOP_newfunction(MethodEnv *env, Traits** idForDeclaringTraits, Traits*** sc
                 compiledMethodInfo.thunker = aotThunker;
                 AvmThunkNativeHandler nhandler;
                 nhandler.function = handler;
-                atraits->init = MethodInfo::create(env->core()->GetGC(), MethodInfo::kInitMethodStub, body->activationTraits(), &compiledMethodInfo, nhandler, aotInfo->activationInfo[methodindex].initMethodId);
+                atraits->init = MethodInfo::create(aotGetGC(env), MethodInfo::kInitMethodStub, body->activationTraits(), &compiledMethodInfo, nhandler, aotInfo->activationInfo[methodindex].initMethodId);
             }
 
             // ---------------------------------------------------------------------------
@@ -990,7 +992,7 @@ rt abcOP_newfunction(MethodEnv *env, Traits** idForDeclaringTraits, Traits*** sc
             const ScopeTypeChain *scope = body->activationScope();
             if (scope == NULL) {
                 AvmAssert(atraits == body->activationTraits());
-                scope = body->declaringScope()->cloneWithNewTraits(env->core()->GetGC(), atraits);
+                scope = body->declaringScope()->cloneWithNewTraits(aotGetGC(env), atraits);
                 atraits->setDeclaringScopes(scope);
                 body->init_activationScope(scope);
             }
@@ -1015,7 +1017,7 @@ rt abcOP_newclass(MethodEnv *env,
         uint32_t classindex)
 {
     Atom *scopes = (Atom*) scopes_masked;
-    Traits* ctraits = env->method->pool()->getClassTraits(classindex);
+    Traits* ctraits = aotGetPool(env)->getClassTraits(classindex);
     AvmAssert(idForCTraits != 0);
     AvmAssert(idForITraits != 0);
     AvmAssert(scopeTraitIds != 0);
@@ -1023,7 +1025,7 @@ rt abcOP_newclass(MethodEnv *env,
         Traits* itraits = ctraits->itraits;
         AvmAssert(itraits != 0);
 
-        const AOTInfo* aotInfo = env->method->pool()->aotInfo;
+        const AOTInfo* aotInfo = aotGetPool(env)->aotInfo;
         AvmAssert(itraits->m_interfaceBindingFunction == NULL);
         itraits->m_interfaceBindingFunction = aotInfo->interfaceBindingFunctions[classindex];
 
@@ -1034,9 +1036,9 @@ rt abcOP_newclass(MethodEnv *env,
             scopeTraits[i] = *(scopeTraitIds[i]);
         }
 
-        const ScopeTypeChain* cscope = ScopeTypeChain::create(env->core()->GetGC(), ctraits, env->method->declaringScope(), scopeTraits, nScopeTraits, nStateWithTraits, NULL, ctraits);
+        const ScopeTypeChain* cscope = ScopeTypeChain::create(aotGetGC(env), ctraits, env->method->declaringScope(), scopeTraits, nScopeTraits, nStateWithTraits, NULL, ctraits);
         AvmAssert((nScopeTraits == 0) || ((*(scopeTraitIds[nScopeTraits - 1])) && ((*(scopeTraitIds[nScopeTraits - 1]))->itraits == itraits->base)));
-        const ScopeTypeChain* iscope = ScopeTypeChain::create(env->core()->GetGC(), itraits, cscope, NULL, ctraits, itraits);
+        const ScopeTypeChain* iscope = ScopeTypeChain::create(aotGetGC(env), itraits, cscope, NULL, ctraits, itraits);
         Toplevel* toplevel = env->toplevel();
         ctraits->resolveSignatures(toplevel);
         itraits->resolveSignatures(toplevel);
@@ -1150,8 +1152,20 @@ VTable *abcOP_toVTable(MethodEnv *env, objt objp)
     return vtable;
 }
 
-// getproperty is willing to do conversion or int, uint, or Number as part of its operation
+// getproperty is willing to do conversion to int, uint, or Number as part of its operation
 // doing conversions of this sort is currently unique to getproperty
+template<typename rt>
+rt convertForGetProperty(MethodEnv* env, Atom a)
+{
+    if(conversion<rt, int32_t>::eq)
+        return abcOP_convert_i<rt, LLVMAtom>(env, (LLVMAtom)a);
+    if(conversion<rt, uint32_t>::eq)
+        return abcOP_convert_u<rt, LLVMAtom>(env, (LLVMAtom)a);
+    if(conversion<rt, double>::eq)
+        return abcOP_convert_d<rt, LLVMAtom>(env, (LLVMAtom)a);
+    return abcOP_unbox<rt>(env, a);
+}
+
 template <bool nc, LLVMSelectGetSetDelHasProperty select, typename rt, typename t1, typename t2>
 rt abcOP_get_set_del_has_property_impl(MethodEnv* env, const Multiname& multiname, t1 obj, t2 val) {
     Toplevel *toplevel = env->toplevel();
@@ -1159,14 +1173,7 @@ rt abcOP_get_set_del_has_property_impl(MethodEnv* env, const Multiname& multinam
     VTable* vtable = abcOP_toVTable<nc, t1>(env, obj);
     if (select == LLVMSelectGet)
     {
-        Atom a = toplevel->getproperty(objAtom, &multiname, vtable);
-        if(conversion<rt, int32_t>::eq)
-            return abcOP_convert_i<rt, LLVMAtom>(env, (LLVMAtom)a);
-        if(conversion<rt, uint32_t>::eq)
-            return abcOP_convert_u<rt, LLVMAtom>(env, (LLVMAtom)a);
-        if(conversion<rt, double>::eq)
-            return abcOP_convert_d<rt, LLVMAtom>(env, (LLVMAtom)a);
-        return abcOP_unbox<rt>(env, a);
+        return convertForGetProperty<rt>(env, toplevel->getproperty(objAtom, &multiname, vtable));
     }
     else if (select == LLVMSelectSet) {
         toplevel->setproperty(objAtom, &multiname, (Atom) abcOP_box<LLVMAtom, t2> (env, val), vtable);
@@ -1426,7 +1433,7 @@ rt abcOP_get_set_del_has_property(MethodEnv* env DOUBLE_ALLOCA_DEF, tNameIndex m
         multiname = *multinamep;
 
     if (select == LLVMSelectGet) {
-        return abcOP_unbox<rt> (env, env->getpropertyHelper(objAtom, &multiname, objVTable, nameAtom));
+        return convertForGetProperty<rt> (env, env->getpropertyHelper(objAtom, &multiname, objVTable, nameAtom));
     } else if (select == LLVMSelectSet) {
         env->setpropertyHelper(objAtom, &multiname, (Atom) abcOP_box<LLVMAtom, t4> (env, val), objVTable, nameAtom);
         return conversion<rt, LLVMUnusedParam>::convert(g_unusedParam);
@@ -2296,9 +2303,40 @@ enum math_ops {
     math_add_i
 };
 
+template <typename T> 
+inline double toDouble(T v) { return double(v); }
+
+template <>
+inline double toDouble(LLVMBool v) { return double(uint(v)); }
+
+
+/* 
+ * When comparing same types that correspond to machine type, compare works fine, 
+ * but when comparing different types it promotes to a type (double) capable of 
+ * representing the entire domain of both types
+ */
 template<cmp_ops op, typename t1, typename t2>
-bool cmp_func(t1 a, t2 b) {
+bool cmp_func(t1 a_in, t2 b_in) {
     AvmAssert((both_numeric<t1, t2>::yes) || (both_boolean<t1, t2>::yes));
+	
+    double a = toDouble(a_in);
+    double b = toDouble(b_in);
+    switch(op){
+    case cmp_lt:       return a < b;
+    case cmp_gt:       return a > b;
+    case cmp_lteq:     return a <= b;
+    case cmp_gteq:     return a >= b;
+    case cmp_eq:
+    case cmp_stricteq: return a == b;
+    default:
+        AvmAssert(false);
+        return false;
+    }
+}
+
+template<cmp_ops op, typename t>
+bool cmp_func(t a, t b) {
+    AvmAssert((is_numeric<t>::yes) || (conversion<t, LLVMBool>::eq));
     switch(op){
     case cmp_lt:       return a < b;
     case cmp_gt:       return a > b;
@@ -2454,7 +2492,7 @@ rt abcOP_astype(MethodEnv *env, tNameIndex multinameIndex, t1 a) {
     // Copied from Verifier::checkTypeName() TODO: refactor so we can share this code
     Toplevel *toplevel = env->toplevel();
     AvmCore *core = env->core();
-    PoolObject *pool = env->method->pool();
+    PoolObject *pool = aotGetPool(env);
     Traits* t = core->domainMgr()->findTraitsInPoolByMultiname(pool, *multinamep);
 
     if (t == NULL)
@@ -2598,7 +2636,7 @@ rt abcOP_loadfalse(MethodEnv* env) {
 
 template<typename rt>
 rt abcOP_loadstring(MethodEnv* env, uint32_t index) {
-    return abcOP_box<rt> (env, env->method->pool()->getString(index));
+    return abcOP_box<rt> (env, aotGetString(env, index));
 }
 
 //------------------------------------------------------------------------------
@@ -2607,7 +2645,7 @@ rt abcOP_loadstring(MethodEnv* env, uint32_t index) {
 
 template<typename rt>
 rt abcOP_loadnamespace(MethodEnv* env, uint32_t index) {
-    return abcOP_unbox<rt, Atom> (env, env->method->pool()->cpool_ns[index]->atom());
+    return abcOP_unbox<rt, Atom> (env, aotGetPool(env)->cpool_ns[index]->atom());
 }
 
 //------------------------------------------------------------------------------
@@ -2676,9 +2714,9 @@ void abcOP_setslot_impl(MethodEnv* env, char* slotAddr, t1 obj, t2 val) {
     if (super_sub_class_ptr<ScriptObject*, t1>::result) {
         t2* slotPtr = abcOP_getSlotPtr<t2, t1> (env, slotAddr, obj);
         if ((super_sub_class_ptr<ScriptObject*, t2>::result) || (conversion<String*, t2>::eq) || (conversion<Namespace*, t2>::eq)) {
-            WBRC(env->core()->GetGC(), obj, slotAddr, toVoidStar(val));
+            WBRC(aotGetGC(env), obj, slotAddr, toVoidStar(val));
         } else if (conversion<LLVMAtom, t2>::eq) {
-            WBATOM(env->core()->GetGC(), obj, ((Atom*) slotAddr), ((Atom) conversion<LLVMAtom, t2>::convert(val)));
+            WBATOM(aotGetGC(env), obj, ((Atom*) slotAddr), ((Atom) conversion<LLVMAtom, t2>::convert(val)));
         } else {
             AvmAssert((conversion<LLVMBool, t2>::eq || conversion<int32_t, t2>::eq || conversion<uint32_t, t2>::eq || conversion<double, t2>::eq));
             *slotPtr = val;
@@ -2934,6 +2972,27 @@ rt abcOP_sxi16(MethodEnv* env, t1 a) {
 #ifdef VMCFG_OPTIMISTIC_DOUBLE_ATOM
 LLVMAtom abcOP_promoteOptimisticAtom(MethodEnv *env, LLVMAtom a);
 #endif
+
+//------------------------------------------------------------------------------
+// Interface binding lookup
+// bindings are represented as a series of length-prefixed runs of an interface
+// id (minus the last interface's id if any) followed by a the run's "dispids"
+//------------------------------------------------------------------------------
+
+template<typename t1>
+int32_t abcOP_findInterfaceBinding(int32_t iid, t1 rle) {
+    while (true) {
+        uint32_t runLength = *rle++;
+        if (runLength == 0)
+            return 0;
+        iid -= *rle++;
+        if (iid < 0)
+            return 0;
+        if (iid < runLength)
+            return int32_t(rle[iid]);
+        rle += runLength;
+    }
+}
 
 //------------------------------------------------------------------------------
 // OP_throw / exception stuff
@@ -3422,5 +3481,6 @@ rt abcOP_String_toUpperCase(MethodEnv *env, t1 a) {
     Stringp instance = abcOP_convert_s<Stringp, t1> (env, a);
     return abcOP_box<rt> (env, instance->toUpperCase());
 }
+
 
 #pragma GCC visibility pop

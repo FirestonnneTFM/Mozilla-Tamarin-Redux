@@ -85,6 +85,9 @@ extern "C" __attribute__ ((visibility("default"))) const struct
     const char* n_uint;
     uint32_t* m_uint;
 
+    const char* n_ushort;
+    uint16_t* m_ushort;
+    
     const char* n_MethodEnv;
     MethodEnv* m_MethodEnv;
 
@@ -193,6 +196,7 @@ extern "C" __attribute__ ((visibility("default"))) const struct
     "Boolean", 0,
     "int", 0,
     "uint", 0,
+    "ushort", 0,
     "MethodEnv", 0,
     "AbcEnv", 0,
     "Multiname", 0,
@@ -304,6 +308,78 @@ extern "C" void llvm_unwind() {
 
     printf("Error: this should never be called.\n");
     AvmAssert(false);
+}
+
+//
+// Provide "noinline" definitions of these common values.
+// The idea here is to delay inlining until AFTER the stubs are inlined.
+// Then LLVM can recognize the opportunity to CSE them up to the top of the function
+// and then reuse the values rather than fetching them from scratch each time.
+// A final pass marks them inline and inlines them.
+//
+__attribute__((noinline)) AvmCore* MethodEnv::core() const
+{
+    return method->pool()->core;
+}
+
+__attribute__((noinline)) ScopeChain* MethodEnv::scope() const
+{
+    return _scope;
+}
+
+__attribute__((noinline)) Toplevel* MethodEnv::toplevel() const
+{
+    return vtable()->toplevel();
+}
+
+__attribute__((noinline)) VTable* MethodEnv::vtable() const
+{
+    return _scope->vtable();
+}
+
+__attribute__((noinline)) PoolObject* MethodInfo::pool() const
+{
+    return _pool;
+}
+
+__attribute__((noinline)) MMgc::GC* VTable::gc() const
+{
+    return traits->core->GetGC();
+}
+
+__attribute__((noinline)) AvmCore* VTable::core() const
+{
+    return traits->core;
+}
+
+__attribute__((noinline)) Toplevel* VTable::toplevel() const
+{
+    return _toplevel;
+}
+
+__attribute__((noinline)) VTable* ScopeChain::vtable() const
+{
+    return _vtable;
+}
+
+__attribute__((noinline)) MMgc::GC *MMgc::GCRoot::GetGC() const
+{
+    return gc;
+}
+
+__attribute__((noinline)) PoolObject* aotGetPool(const MethodEnv* env)
+{
+    return env->method->pool();
+}
+
+__attribute__((noinline)) MMgc::GC* aotGetGC(const MethodEnv* env)
+{
+    return env->core()->GetGC();
+}
+
+__attribute__((noinline)) String* aotGetString(const MethodEnv* env, int32_t index)
+{
+    return aotGetPool(env)->getString(index);
 }
 
 #endif //VMCFG_AOT
