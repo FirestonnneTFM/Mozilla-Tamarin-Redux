@@ -679,6 +679,9 @@ class B extends A {
   <error id="1516" label="kConditionCannotNotify">Obiekt Condition nie może użyć metody notify, jeśli nie jest właścicielem skojarzonego obiektu Mutex.</error>
   <error id="1517" label="kConditionCannotNotifyAll">Obiekt Condition nie może użyć metody notifyAll, jeśli nie jest właścicielem skojarzonego obiektu Mutex.</error>
   <error id="1518" label="kConditionCannotWait">Obiekt Condition nie może użyć metody wait, jeśli nie jest właścicielem skojarzonego obiektu Mutex.</error>
+  <error id="1519" label="kConditionCannotBeInitialized">Condition cannot be initialized.</error>
+  <error id="1520" label="kMutexCannotBeInitialized">Mutex cannot be initialized.</error>
+  <error id="1521" label="kWorkerIllegalCallToStart">Only the worker's parent may call start.</error>
 
   <error id="2004" label="kInvalidParamError">Jeden z parametrów jest nieprawidłowy.</error>
   <error id="2006" label="kParamRangeError">Określony indeks wychodzi poza zakres.</error>

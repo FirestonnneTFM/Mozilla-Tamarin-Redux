@@ -768,6 +768,9 @@ class B extends A {
   <error id="1516" label="kConditionCannotNotify">如果未拥有关联的 mutex，条件无法 notify。</error>
   <error id="1517" label="kConditionCannotNotifyAll">如果未拥有关联的 mutex，条件无法 notifyAll。</error>
   <error id="1518" label="kConditionCannotWait">如果未拥有关联的 mutex，条件无法执行 wait。</error>
+  <error id="1519" label="kConditionCannotBeInitialized">Condition cannot be initialized.</error>
+  <error id="1520" label="kMutexCannotBeInitialized">Mutex cannot be initialized.</error>
+  <error id="1521" label="kWorkerIllegalCallToStart">Only the worker's parent may call start.</error>
 
   <error id="2004" label="kInvalidParamError">某个参数无效。</error>
   <error id="2006" label="kParamRangeError">提供的索引超出范围。</error>

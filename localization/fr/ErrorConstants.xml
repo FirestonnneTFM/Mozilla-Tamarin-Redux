@@ -768,6 +768,9 @@ class B extends A {
   <error id="1516" label="kConditionCannotNotify">L’objet Condition ne peut pas utiliser la méthode notify si l’objet Mutex associé n’existe pas.</error>
   <error id="1517" label="kConditionCannotNotifyAll">L’objet Condition ne peut pas utiliser la méthode notifyAll si l’objet Mutex associé n’existe pas.</error>
   <error id="1518" label="kConditionCannotWait">L’objet Condition ne peut pas attendre si l’objet Mutex associé n’existe pas.</error>
+  <error id="1519" label="kConditionCannotBeInitialized">Condition cannot be initialized.</error>
+  <error id="1520" label="kMutexCannotBeInitialized">Mutex cannot be initialized.</error>
+  <error id="1521" label="kWorkerIllegalCallToStart">Only the worker's parent may call start.</error>
 
   <error id="2004" label="kInvalidParamError">L'un des paramètres n'est pas valide.</error>
   <error id="2006" label="kParamRangeError">L'index indiqué sort des limites.</error>

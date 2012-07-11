@@ -768,6 +768,9 @@ class B extends A {
   <error id="1516" label="kConditionCannotNotify">関連する mutex が所有されていない場合、条件は notify を実行できません。</error>
   <error id="1517" label="kConditionCannotNotifyAll">関連する mutex が所有されていない場合、条件は notifyAll を実行できません。</error>
   <error id="1518" label="kConditionCannotWait">関連する mutex が所有されていない場合、条件は wait を実行できません。</error>
+  <error id="1519" label="kConditionCannotBeInitialized">Condition cannot be initialized.</error>
+  <error id="1520" label="kMutexCannotBeInitialized">Mutex cannot be initialized.</error>
+  <error id="1521" label="kWorkerIllegalCallToStart">Only the worker's parent may call start.</error>
 
   <error id="2004" label="kInvalidParamError">パラメーターの 1 つが無効です。</error>
   <error id="2006" label="kParamRangeError">指定したインデックスが境界外です。</error>

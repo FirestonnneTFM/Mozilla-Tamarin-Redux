@@ -679,6 +679,9 @@ class B extends A {
   <error id="1516" label="kConditionCannotNotify">Villkoret kan inte utföra notify om associerad mutex inte ägs.</error>
   <error id="1517" label="kConditionCannotNotifyAll">Villkoret kan inte utföra notifyAll om associerad mutex inte ägs.</error>
   <error id="1518" label="kConditionCannotWait">Villkoret kan inte utföra wait om associerad mutex inte ägs.</error>
+  <error id="1519" label="kConditionCannotBeInitialized">Condition cannot be initialized.</error>
+  <error id="1520" label="kMutexCannotBeInitialized">Mutex cannot be initialized.</error>
+  <error id="1521" label="kWorkerIllegalCallToStart">Only the worker's parent may call start.</error>
 
   <error id="2004" label="kInvalidParamError">En av parametrarna är ogiltig.</error>
   <error id="2006" label="kParamRangeError">Det angivna indexvärdet är utanför intervallet.</error>
