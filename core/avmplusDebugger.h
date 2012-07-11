@@ -337,7 +337,7 @@ namespace avmplus
          * This method builds a list of source files
          * and methods, etc from the given abc file.
          */
-        virtual void processAbc(PoolObject* pool, ScriptBuffer code);
+        virtual void processAbc(PoolObject* pool, ScriptBuffer code, Stringp abcname = NULL);
 
         /**
          * --------------------------------------------------
@@ -612,6 +612,12 @@ namespace avmplus
          * Number of bytes in the abc file.
          */
         int size() const;
+        
+        /**
+         * Get/Set the ABC's name
+         */
+        void setName(GCRef<String> name) { abcname = name; };
+        GCRef<String> getName() const { return abcname; };
 
         /**
          * Add source file to list; no check for uniqueness
@@ -628,6 +634,7 @@ namespace avmplus
 
     protected:
         AvmCore*                core;
+        GCMember<String>        GC_POINTER(abcname);    // filename of the ABC or abc name from SWF
         GCMember<HeapHashtable> GC_POINTER(sourcemap);  // maps filename to that file's index in "sources"
         GCList<SourceFile>      GC_STRUCTURE(source);   // all source files used in this abc file
         int                     byteCount;              // # bytes of bytecode

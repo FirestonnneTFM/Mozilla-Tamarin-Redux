@@ -1173,8 +1173,11 @@ namespace avmplus
                                           Toplevel* toplevel,
                                           Domain* domain,
                                           const NativeInitializer* ninit,
-                                          ApiVersion apiVersion)
+                                          ApiVersion apiVersion,
+                                          Stringp name)
     {
+        (void)name;
+        
         // parse constants and attributes.
         PoolObject* pool = AbcParser::decodeAbc(this,
                                                 code,
@@ -1186,7 +1189,7 @@ namespace avmplus
         #ifdef DEBUGGER
         if (_debugger)
         {
-            _debugger->processAbc(pool, code);
+            _debugger->processAbc(pool, code, name);
         }
         #endif
 
@@ -1218,7 +1221,8 @@ namespace avmplus
                                          Toplevel* toplevel,
                                          const NativeInitializer* ninit,
                                          CodeContext *codeContext,
-                                         ApiVersion apiVersion)
+                                         ApiVersion apiVersion,
+                                         Stringp name)
     {
         AvmAssert(codeContext != NULL);
         AvmAssert(toplevel != NULL);
@@ -1231,7 +1235,8 @@ namespace avmplus
                                 toplevel,
                                 domain,
                                 ninit,
-                                apiVersion);
+                                apiVersion,
+                                name);
         return handleActionPool(pool, toplevel, codeContext);
     }
 
