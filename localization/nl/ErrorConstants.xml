@@ -679,9 +679,9 @@ class B extends A {
   <error id="1516" label="kConditionCannotNotify">Voorwaarde kan geen melding 'notify' geven als de gekoppelde mutex geen eigenaar heeft.</error>
   <error id="1517" label="kConditionCannotNotifyAll">Voorwaarde kan geen melding 'notifyAll' geven als de gekoppelde mutex geen eigenaar heeft.</error>
   <error id="1518" label="kConditionCannotWait">Voorwaarde kan geen melding 'wait' geven als de gekoppelde mutex geen eigenaar heeft.</error>
-  <error id="1519" label="kConditionCannotBeInitialized">Condition cannot be initialized.</error>
-  <error id="1520" label="kMutexCannotBeInitialized">Mutex cannot be initialized.</error>
-  <error id="1521" label="kWorkerIllegalCallToStart">Only the worker's parent may call start.</error>
+  <error id="1519" label="kConditionCannotBeInitialized">Kan de voorwaarde niet initialiseren.</error>
+  <error id="1520" label="kMutexCannotBeInitialized">Kan de mutex niet initialiseren.</error>
+  <error id="1521" label="kWorkerIllegalCallToStart">Alleen de bovenliggende entiteit van de worker mag start aanroepen.</error>
 
   <error id="2004" label="kInvalidParamError">Een van de parameters is ongeldig.</error>
   <error id="2006" label="kParamRangeError">De opgegeven index is buiten de grenzen.</error>
