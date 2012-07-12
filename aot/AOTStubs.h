@@ -1340,19 +1340,29 @@ rt abcOP_get_set_del_has_property(MethodEnv* env DOUBLE_ALLOCA_DEF, tNameIndex m
                     if(isDoubleVector(obj))
                     {
                         double res = conversion<double, t4>::convert(val);
-                        ((DoubleVectorObject *)so)->_setNativeIntProperty(intIndex, res);
+                       	if(((DoubleVectorObject *)so)->canTakeFastPath(intIndex))
+							((DoubleVectorObject *)so)->_setNativeIntPropertyFast(intIndex,res);
+						else
+							((DoubleVectorObject *)so)->_setNativeIntPropertySlow(intIndex, res);
                         return conversion<rt, LLVMUnusedParam>::convert(g_unusedParam);
                     }
                     if(isIntVector(obj))
                     {
                         int32_t res = conversion<int32_t, t4>::convert(val);
-                        ((IntVectorObject *)so)->_setNativeIntProperty(intIndex, res);
+                        	if(((IntVectorObject *)so)->canTakeFastPath(intIndex))
+							((IntVectorObject *)so)->_setNativeIntPropertyFast(intIndex,res);
+						else
+							((IntVectorObject *)so)->_setNativeIntPropertySlow(intIndex, res);
+						
                         return conversion<rt, LLVMUnusedParam>::convert(g_unusedParam);
                     }
                     if(isUIntVector(obj))
                     {
                         uint32_t res = conversion<uint32_t, t4>::convert(val);
-                        ((UIntVectorObject *)so)->_setNativeIntProperty(intIndex, res);
+						if(((UIntVectorObject *)so)->canTakeFastPath(intIndex))
+							((UIntVectorObject *)so)->_setNativeIntPropertyFast(intIndex,res);
+						else
+							((UIntVectorObject *)so)->_setNativeIntPropertySlow(intIndex, res);
                         return conversion<rt, LLVMUnusedParam>::convert(g_unusedParam);
                     }
                 }
