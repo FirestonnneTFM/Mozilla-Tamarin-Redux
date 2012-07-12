@@ -607,6 +607,10 @@ namespace avmplus
         // (declared public only to avoid a painful 'friend' declaration)
         typename TLIST::TYPE _getNativeIntProperty(int32_t index) const;
         void _setNativeIntProperty(int32_t index, typename TLIST::TYPE value);
+#ifdef VMCFG_AOT
+		void _setNativeIntPropertyFast(int32_t index, typename TLIST::TYPE value);
+		void _setNativeIntPropertySlow(int32_t index, typename TLIST::TYPE value);
+#endif
         typename TLIST::TYPE _getNativeUintProperty(uint32_t index) const;
         void _setNativeUintProperty(uint32_t index, typename TLIST::TYPE value);
         typename TLIST::TYPE _getNativeDoubleProperty(double index) const;
@@ -642,7 +646,9 @@ namespace avmplus
 #ifdef DEBUGGER
         virtual uint64_t bytesUsed() const;
 #endif
-
+#ifdef VMCFG_AOT
+		bool canTakeFastPath(int32_t index) const;
+#endif
     private:
 
         void FASTCALL throwRangeError_u(uint32_t index) const;

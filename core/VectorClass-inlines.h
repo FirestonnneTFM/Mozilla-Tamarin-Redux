@@ -337,6 +337,27 @@ namespace avmplus
         }
     }
 
+#ifdef VMCFG_AOT
+    template<class TLIST>
+    REALLY_INLINE void TypedVectorObject<TLIST>::_setNativeIntPropertyFast(int32_t index_i, typename TLIST::TYPE value)
+    {
+        AvmAssertMsg(!IS_FLOAT4_TYPE(typename TLIST::TYPE), "wrong _setNativeIntProperty helper used for Vector.<float4>");
+		m_list.replace((uint32_t)index_i, value);
+    }
+
+	template<class TLIST>
+    REALLY_INLINE bool TypedVectorObject<TLIST>::canTakeFastPath(int32_t index) const
+    {
+				
+		uint32_t const length = m_list.length();
+		if (uint32_t(index) >= length)      // See comment above checkReadIndex_i
+        {
+			return false;
+        }
+		return true;
+	}
+#endif
+
     template<class TLIST>
     REALLY_INLINE uint32_t TypedVectorObject<TLIST>::checkWriteIndex_i(int32_t index) const
     {

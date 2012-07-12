@@ -475,7 +475,7 @@ namespace avmplus
     }
 
     template<class TLIST>
-    typename TLIST::TYPE TypedVectorObject<TLIST>::_getNativeIntProperty(int32_t index_i) const
+    REALLY_INLINE typename TLIST::TYPE TypedVectorObject<TLIST>::_getNativeIntProperty(int32_t index_i) const
     {
         AvmAssertMsg(!IS_FLOAT4_TYPE(typename TLIST::TYPE), "wrong _getNativeIntProperty helper used for Vector.<float4>");
         uint32_t const index = checkReadIndex_i(index_i);
@@ -487,8 +487,22 @@ namespace avmplus
     {
         AvmAssertMsg(!IS_FLOAT4_TYPE(typename TLIST::TYPE), "wrong _setNativeIntProperty helper used for Vector.<float4>");
         uint32_t const index = checkWriteIndex_i(index_i);
-        m_list.set(index, value);
+       	m_list.set(index, value);
     }
+
+#ifdef VMCFG_AOT
+    template<class TLIST>
+    NO_INLINE void TypedVectorObject<TLIST>::_setNativeIntPropertySlow(int32_t index_i, typename TLIST::TYPE value)
+    {
+        uint32_t const length = m_list.length();
+        AvmAssert(uint32_t(index_i) >= length);
+        uint32_t const limit = length + 1 - uint32_t(m_fixed);
+        if (uint32_t(index_i) >= limit)
+            throwRangeError_i(index_i);
+        AvmAssertMsg(!IS_FLOAT4_TYPE(typename TLIST::TYPE), "wrong _setNativeIntProperty helper used for Vector.<float4>");
+		m_list.set((uint32_t)index_i, value);
+    }
+#endif
 
     template<class TLIST>
     typename TLIST::TYPE TypedVectorObject<TLIST>::_getNativeUintProperty(uint32_t index) const
