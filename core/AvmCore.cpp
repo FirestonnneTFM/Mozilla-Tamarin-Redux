@@ -349,9 +349,6 @@ namespace avmplus
 #ifdef DEBUGGER
         , _sampler(NULL)
 #endif
-#ifdef VMCFG_TELEMETRY_SAMPLER
-        , sampleTicks(0)
-#endif
         , currentMethodFrame(NULL)
         , livePools(NULL)
         , m_activeApiVersionSeries(apiVersionSeries)
@@ -410,7 +407,8 @@ namespace avmplus
 #ifdef VMCFG_TELEMETRY_SAMPLER
         // intialize the sampler, off by default
         samplerEnabled = false;
-        telemetrySampler = NULL;
+        sampler = NULL;
+        sampleTicks = 0;
 #endif
 
         // set default mode flags
@@ -625,14 +623,6 @@ namespace avmplus
         }
         delete _sampler;
         _sampler = NULL;
-#endif
-
-#ifdef VMCFG_TELEMETRY_SAMPLER
-        if (telemetrySampler)
-        {
-            // destroy the telemetry based sampler
-            delete telemetrySampler;
-        }
 #endif
 
         m_tbCache->flush();
@@ -5427,14 +5417,65 @@ return the result of the comparison ToPrimitive(x) == y.
     // the sampler is enabled.
     void AvmCore::takeSample()
     {
-        telemetrySampler->takeSample();
+        if (sampler) sampler->takeSample();
     }
 
     // A static wrapper for takeSample(), used by the jit.
     /* static */
     void AvmCore::takeSampleWrapper(AvmCore *theCore)
     {
-        theCore->telemetrySampler->takeSample();
+        if (theCore->sampler) theCore->sampler->takeSample();
+    }
+
+    void AvmCore::enableSampler(telemetry::ISampler* pSampler) {
+        sampler = pSampler;
+        samplerEnabled = pSampler != 0;
+        sampleTicks = 0;
+    }
+
+    void AvmCore::requestSample() {
+        sampleTicks = 1;
+    }
+
+    void AvmCore::clearSampleRequest() {
+        sampleTicks = 0;
+    }
+
+    bool AvmCore::isCallStackEmpty() {
+        for (MethodFrame* frame = currentMethodFrame; frame != NULL; frame = frame->next) {
+            MethodEnv* env = frame->env();
+            if (env && env->method) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    unsigned int AvmCore::recordCallStack(telemetry::FunctionHandle* outFrameBuffer, unsigned int maxDepth)
+    {
+        unsigned int nFramesWritten = 0;
+
+        for (MethodFrame* curFrame = currentMethodFrame;
+             curFrame != NULL;
+             curFrame = curFrame->next) {
+            MethodEnv* env = curFrame->env();
+            if (env && env->method) {
+                if (nFramesWritten == maxDepth) {
+                    // more stack frames than maxDepth.
+                    // return 1 greater than the max length so we know there is more..
+                    return ++nFramesWritten;
+                } else {
+                    outFrameBuffer[nFramesWritten++] = env->method;
+                }
+            }
+        }
+
+        return nFramesWritten;
+    }
+
+    avmplus::Stringp AvmCore::functionHandleToString(telemetry::FunctionHandle handle)
+    {
+        return ((MethodInfo*)handle)->getMethodName();
     }
 #endif
 

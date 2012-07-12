@@ -185,10 +185,6 @@ const int kBufferPadding = 16;
 
     class MethodFrame;
 
-#ifdef VMCFG_TELEMETRY_SAMPLER
-    class TelemetrySampler;
-#endif
-
     // Use this for picking apart and putting together double values from constituent
     // words.  "words.msw" is the most significant word, containing sign bit, exponent,
     // and most significant bits of mantissa.  "words.lsw" is the least significant
@@ -480,9 +476,6 @@ const int kBufferPadding = 16;
         friend class ExceptionFrame;
         friend class MethodFrame;
         friend class Traits;
-#ifdef VMCFG_TELEMETRY_SAMPLER
-        friend class TelemetrySampler;
-#endif
 
         ////////////////////////////////////////////////////////////////////
         // BEGIN private data definitions
@@ -597,30 +590,78 @@ const int kBufferPadding = 16;
         MethodFrame*        currentMethodFrame;
 
 #ifdef VMCFG_TELEMETRY_SAMPLER
-    protected:
-        /**
-         * The new telemetry based sampler. This sampler works by inspecting
-         * the MethodFrame stack periodically. It is available in Release
-         * builds as well.
-         */
-        TelemetrySampler*   telemetrySampler;
-#endif
-
     public:
-#ifdef VMCFG_TELEMETRY_SAMPLER
-        /** the number of ticks that have passed since the last sample */
+        /*
+          Sampler functionality - used by the host application to do periodic sampling of the
+          actionscript call stack. It works like this:
+          - the host app tells the VM to enable sampling
+          - the host app then periodically requests the VM to take a sample
+          - at the next available opportunity, the VM will pause script
+            execution and call the host's takeSample function().
+          - from within takeSample(), the host can fetch the current call stack, in the
+            form of an array of MethodInfo (which is an opaque token whose details are known
+            only to the VM).
+          - from time to time, the host may call functionHandleToString() to fetch the
+            human-readable string corresponding to a MethodInfo.
+        */
+
+        // Enable/disable the sampler. The parameter is a callback object which
+        // provides the host's takeSample() function. Sampling becomes enabled if the parameter
+        // is non-null. A null parameter disables sampling.
+        void enableSampler(telemetry::ISampler*);
+
+        // Request the VM to call ISampler::takeSample() as soon as possible, from within the VM's execution
+        // thread. requestSample() can be called from any thread. This function will only
+        // be called when sampling is enabled. Multiple calls to this function have the same effect as a single call.
+        void requestSample();
+
+        // Clear the request that was set by requestSample(). The host will always call this from
+        // within takeSample(), and perhaps at other times as well.
+        void clearSampleRequest();
+
+        // Find out if the current call stack is empty. This function will only ever be called from
+        // within ISampler::takeSample(), as called from the VM.
+        bool isCallStackEmpty();
+
+        // Copy the current call stack into 'stackBuffer'. Returns the number of stack items.
+        // This function will only ever be called from within ISampler::takeSample(),
+        // as called from the VM. If the stack is deeper than maxDepth, we fill stackBuffer
+        // to the maximum and then return maxDepth+1. The deepest stack frame should appear
+        // first in the buffer.
+        unsigned int recordCallStack(telemetry::FunctionHandle* stackBuffer, unsigned int maxDepth);
+
+        // Find out the function name corresponding to a given call stack item.
+        // We retain ownership of the object pointed to by the returned pointer.
+        // This function can be called from the host at any time, not only from inside takeSample().
+        avmplus::Stringp functionHandleToString(telemetry::FunctionHandle item);
+
+        /*
+          Functions and data that support sampling.
+        */
+
+        /** if non-zero, it means that the VM should call takeSample() or takeSampleWrapper() as soon as possible. */
         unsigned int    sampleTicks;
 
-        /** indicates whether the sampler is currently enabled or not */
+        /** whether or not the sampler is currently enabled */
         bool            samplerEnabled;
+
+        /** one of these functions is called by the executing actionscript code,
+            whenever that code notices that sampleTicks != 0. They just call sampler->takeSample() */
+        static void FASTCALL takeSampleWrapper(AvmCore *theCore);
+        void FASTCALL takeSample();
+
+    private:
+        /** the sampler object */
+        telemetry::ISampler* sampler;
 #endif
 
 #ifdef VMCFG_STACK_METRICS
+    public: 
         /** Smallest stackpointer value sampled since last reset. */
-        uintptr_t		minStack;
+        uintptr_t       minStack;
 
         /** Largest stackpointer value sampled since last reset. */
-        uintptr_t		maxStack;
+        uintptr_t       maxStack;
 #endif
 
     private:
@@ -1022,12 +1063,6 @@ const int kBufferPadding = 16;
 
         /** set the stack limit that will be checked by executing AS3 code. */
         void setStackLimit(uintptr_t p);
-
-#ifdef VMCFG_TELEMETRY_SAMPLER
-        static void FASTCALL takeSampleWrapper(AvmCore *theCore);
-        void FASTCALL takeSample();
-        TelemetrySampler* getSampler();
-#endif
 
 #ifdef VMCFG_STACK_METRICS
         /** Reset stack metrics. */
