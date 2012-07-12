@@ -679,9 +679,9 @@ class B extends A {
   <error id="1516" label="kConditionCannotNotify">A condição não pode notify se o mutex associado não possui proprietário.</error>
   <error id="1517" label="kConditionCannotNotifyAll">A condição não pode notifyAll se o mutex associado não possui proprietário.</error>
   <error id="1518" label="kConditionCannotWait">A condição não pode wait se o mutex associado não possui proprietário.</error>
-  <error id="1519" label="kConditionCannotBeInitialized">Condition cannot be initialized.</error>
-  <error id="1520" label="kMutexCannotBeInitialized">Mutex cannot be initialized.</error>
-  <error id="1521" label="kWorkerIllegalCallToStart">Only the worker's parent may call start.</error>
+  <error id="1519" label="kConditionCannotBeInitialized">Não é possível iniciar a condição.</error>
+  <error id="1520" label="kMutexCannotBeInitialized">Não é possível inicializar o Mutex.</error>
+  <error id="1521" label="kWorkerIllegalCallToStart">Apenas o pai do worker pode chamar start.</error>
 
   <error id="2004" label="kInvalidParamError">Um dos parâmetros é inválido.</error>
   <error id="2006" label="kParamRangeError">O índice fornecido está fora dos limites.</error>
