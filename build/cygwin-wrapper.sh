@@ -7,7 +7,6 @@
 # do basically the same thing
 #
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
-
 prog=$1
 shift
 if test -z "$prog"; then

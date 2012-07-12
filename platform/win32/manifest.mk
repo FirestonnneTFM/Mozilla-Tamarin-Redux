@@ -54,3 +54,12 @@ avmplus_MASMSRCS := $(avmplus_MASMSRCS) \
   $(NULL)
 endif
 endif
+
+
+ifeq (thumb2,$(TARGET_CPU))
+ifeq (windows,$(TARGET_OS))
+avmplus_ASMSRCS := $(avmplus_ASMSRCS) \
+  $(curdir)/win32armsetjmp.armasm
+  $(NULL)
+endif
+endif

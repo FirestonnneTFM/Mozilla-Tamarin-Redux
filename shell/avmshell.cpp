@@ -1381,7 +1381,7 @@ namespace avmshell
         avmplus::AvmLog("                        en,de,es,fr,it,ja,ko,zh-CN,zh-TW\n");
 #endif
 #ifdef AVMPLUS_VERBOSE
-        avmplus::AvmLog("          [-Dverbose[=[parse,verify,interp,traits,builtins,minaddr,memstats,sweep,occupancy,execpolicy"
+        avmplus::AvmLog("          [-Dverbose[=[parse,verify,interp,traits,builtins,memstats,sweep,occupancy,execpolicy"
 #  ifdef VMCFG_NANOJIT
                ",jit,opt,regs,raw,bytes,lir,lircfg[-bb|-ins]"
 #  endif

@@ -56,6 +56,8 @@
 
 #ifdef NANOJIT_IA32
 #include "Nativei386.h"
+#elif defined(NANOJIT_THUMB2)
+#include "NativeThumb2.h"
 #elif defined(NANOJIT_ARM)
 #include "NativeARM.h"
 #elif defined(NANOJIT_PPC)
@@ -172,6 +174,7 @@ namespace nanojit {
         // with the address of the current native instruction.
         #define asm_output(...) do {                                            \
             if (_logc->lcbits & LC_Native) {                                    \
+                maybe_disassemble();                                            \
                 outline[0]='\0';                                                \
                 VMPI_sprintf(outline, "%p  ", _nIns);                           \
                 if (_logc->lcbits & LC_Bytes) {                                 \

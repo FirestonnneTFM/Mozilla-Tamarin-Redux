@@ -58,7 +58,7 @@ namespace avmplus
     const static double PI_BY_4 = PI/4;
     const static double PI2 = 2*PI;
 
-#ifdef AVMPLUS_ARM
+#ifdef UNDER_CE
     // 0=no, 1=+0, -1=-0
     static int32_t isZero(double v)
     {
@@ -85,7 +85,7 @@ namespace avmplus
         return ((u.word & 0x7fffffffL) != 0x7F800000L) && ((u.word & 0x7FFFFFFFL) != 0);
     }
 
-#ifdef AVMPLUS_ARM
+#ifdef UNDER_CE
 
     // sin, cos, tan all function incorrectly when called with really large values on windows mobile
     // they all start failing at different values, but all start failing somewhere with values
@@ -115,9 +115,9 @@ namespace avmplus
         return v;
     }
 
-#endif /* AVMPLUS_ARM */
+#endif /* UNDER_CE */
 
-#ifdef AVMPLUS_ARM
+#ifdef UNDER_CE
     double MathUtils::atan2(double y, double x)
     {
         int32_t zx = isZero(x);
@@ -137,7 +137,7 @@ namespace avmplus
         }
         return r;
     }
-#endif /* AVMPLUS_ARM */
+#endif /* UNDER_CE */
 
     float MathUtils::atan2f(float y, float x)
     {
@@ -191,7 +191,7 @@ namespace avmplus
     }
 #endif /* X86_MATH */
 
-#ifdef AVMPLUS_ARM
+#ifdef UNDER_CE
     double MathUtils::cos(double value)
     {
         if( broken_trig_funcs && (value > AVMPLUS_TRIG_FUNC_MAX || value < -AVMPLUS_TRIG_FUNC_MAX) )
@@ -203,7 +203,7 @@ namespace avmplus
             return ::cos(value);
         }
     }
-#endif AVMPLUS_ARM
+#endif /* UNDER_CE */
 
 #ifdef X86_MATH
     // Utility function, this module only.
@@ -399,7 +399,7 @@ namespace avmplus
     }
 #endif /* X86_MATH */
 
-#ifdef AVMPLUS_ARM
+#ifdef UNDER_CE
     double MathUtils::sin(double value)
     {
         if( broken_trig_funcs && (value > AVMPLUS_TRIG_FUNC_MAX || value < -AVMPLUS_TRIG_FUNC_MAX) )
@@ -423,5 +423,5 @@ namespace avmplus
             return ::tan(value);
         }
     }
-#endif /* AVMPLUS_ARM */
+#endif /* UNDER_CE */
 }

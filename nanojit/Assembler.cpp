@@ -64,6 +64,119 @@ using namespace vtune;
 
 namespace nanojit
 {
+
+// #if defined(NANOJIT_THUMB2) && defined(NJ_VERBOSE) && defined(AVMPLUS_UNIX)
+#if 0
+#include <dlfcn.h>
+
+//
+/* convenience typedefs */
+typedef void* (*decode_instructions_event_callback_ftype)  (void*, const char*, void*);
+typedef int   (*decode_instructions_printf_callback_ftype) (void*, const char*, ...);
+typedef void* (*decode_instructions_ftype) (void* start, void* end,
+                                            decode_instructions_event_callback_ftype event_callback,
+                                            void* event_stream,
+                                            decode_instructions_printf_callback_ftype printf_callback,
+                                            void* printf_stream,
+                                            const char* options);
+
+#define DECODE_INSTRUCTIONS_NAME "decode_instructions"
+#define HSDIS_NAME               "hsdis"
+#define LIBARCH "arm"
+#define LIB_EXT ".so"
+
+    static void* decode_instructions_pv = 0;
+    static const char* hsdis_path[] = {
+        HSDIS_NAME"-"LIBARCH LIB_EXT,
+        "./" HSDIS_NAME"-"LIBARCH LIB_EXT,
+        NULL
+    };
+    
+    static const char* load_decode_instructions() {
+        void* dllib = NULL;
+        const char* *next_in_path = hsdis_path;
+        while (1) {
+            decode_instructions_pv = dlsym(dllib, DECODE_INSTRUCTIONS_NAME);
+            if (decode_instructions_pv != NULL)
+                return NULL;
+            if (dllib != NULL)
+                return "plugin does not defined "DECODE_INSTRUCTIONS_NAME;
+            for (dllib = NULL; dllib == NULL; ) {
+                const char* next_lib = (*next_in_path++);
+                if (next_lib == NULL)
+                    return "cannot find plugin "HSDIS_NAME LIB_EXT;
+                dllib = dlopen(next_lib, RTLD_LAZY);
+            }
+        }
+    }
+    
+    /* does the event match the tag, followed by a null, space, or slash? */
+#define MATCH(event, tag)                 \
+    (!strncmp(event, tag, sizeof(tag)-1) &&                         \
+     (!event[sizeof(tag)-1] || strchr(" /", event[sizeof(tag)-1])))
+    
+    int Assembler::disassembler_printf(void* arg, const char* format, ...) {
+        nanojit::Assembler* assembler = (nanojit::Assembler*)arg;
+        va_list args;
+        va_start(args, format);
+        
+        vsprintf(assembler->outline + strlen(assembler->outline), format, args);
+        return 0;
+    }
+    
+    void* Assembler::disassembler_event(void* cookie, const char* event, void* arg) {
+        nanojit::Assembler* assembler = (nanojit::Assembler*)cookie;
+
+        if (MATCH(event, "insn")) {
+            sprintf(assembler->outline + strlen(assembler->outline), "%p ", arg);
+            if (assembler->_logc->lcbits & LC_Bytes) {
+                unsigned char* bytes = (unsigned char*)arg;
+                sprintf(assembler->outline + strlen(assembler->outline), " %02x %02x %02x %02x",
+                        bytes[0], bytes[1], bytes[2], bytes[3]);
+            }
+            sprintf(assembler->outline + strlen(assembler->outline), "                      ");
+
+        } else if (MATCH(event, "/insn")) {
+        } else if (MATCH(event, "mach")) {
+        } else if (MATCH(event, "addr")) {
+        }
+
+        /* null return is always safe; can mean "I ignored it" */
+        return NULL;
+    }
+
+    void Assembler::disassemble(void* from, void* to) {
+        from = (void*)(((intptr_t)from) & ~1);
+        to   = (void*)(((intptr_t)to) & ~1);
+
+        const char* options = "force-thumb,reg-names-std";
+
+        const char* err = load_decode_instructions();
+        if (err != NULL) {
+            static int once = 0;
+            if (!once) {
+                printf("%s: %s\n", err, dlerror());
+                once = 1;
+            }
+            return;
+        }
+        
+        outline[0] = '\0';
+        decode_instructions_ftype decode_instructions
+            = (decode_instructions_ftype) decode_instructions_pv;
+        void* res = (*decode_instructions)(from, to,
+                                           disassembler_event,  (void*)this,
+                                           disassembler_printf, (void*)this,
+                                           options);
+
+        output();
+        if (res != to)
+            printf("*** Error while disassembling: %p!\n", res);
+    }
+
+#endif //defined(NANOJIT_THUMB2) && defined(NJ_VERBOSE)
+
+
     /**
      * Need the following:
      *
@@ -1025,7 +1138,11 @@ namespace nanojit
                         LabelState* lstate = _labels.get(jtbl->getTarget(i));
                         NIns* ntarget = lstate->addr;
                         if (ntarget) {
+#ifdef NANOJIT_THUMB2
+                            native_table[i] = (NIns*)((uintptr_t)ntarget | 0x1);
+#else
                             native_table[i] = ntarget;
+#endif
                         } else {
                             setError(UnknownBranch);
                             break;
@@ -1076,7 +1193,8 @@ namespace nanojit
 
         NanoAssert(!_inExit);
         // save used parts of current block on fragment's code list, free the rest
-#if defined(NANOJIT_ARM) || defined(NANOJIT_MIPS)
+        //### FIXME: NANOJIT_THUMB2 is presently a dirty hack.
+#if (defined(NANOJIT_ARM) && !defined(NANOJIT_THUMB2)) || defined(NANOJIT_MIPS)
         // [codeStart, _nSlot) ... gap ... [_nIns, codeEnd)
         if (_nExitIns) {
             _codeAlloc.addRemainder(codeList, exitStart, exitEnd, _nExitSlot, _nExitIns);
@@ -2858,6 +2976,15 @@ namespace nanojit
 
         outlineEOL[0] = '\0';
         vsprintf(outlineEOL, format, args);
+    }
+
+    void Assembler::maybe_disassemble() {
+// #if defined(NANOJIT_THUMB2) && defined(NJ_VERBOSE) && defined(AVMPLUS_UNIX)
+#if 0
+        if (_nIns != _nInsAfter) {
+            disassemble(_nIns, _nInsAfter);
+        }
+#endif
     }
 #endif // NJ_VERBOSE
 

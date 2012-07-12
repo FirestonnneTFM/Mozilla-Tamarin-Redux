@@ -182,33 +182,43 @@ typedef void *maddr_ptr;
 // jump (MSVC likes to do this by default).
 //#define VMPI_longjmpNoUnwind ::longjmp
 
-#ifdef VMCFG_64BIT
+#ifdef UNDER_RT
     #include <setjmpex.h>
     extern "C"
     {
-        _int64 __cdecl longjmp64(jmp_buf jmpbuf, _int64 arg);
+        void __cdecl longjmp_arm(jmp_buf jmpbuf, int arg);
     }
     #define VMPI_setjmpNoUnwind     ::setjmp
-    #define VMPI_longjmpNoUnwind    ::longjmp64
+    #define VMPI_longjmpNoUnwind    ::longjmp_arm
 #else
-    #include <setjmp.h>
-    #define VMPI_setjmpNoUnwind     ::setjmp
-    #define VMPI_longjmpNoUnwind    ::longjmp
+	#ifdef VMCFG_64BIT
+		#include <setjmpex.h>
+		extern "C"
+		{
+			_int64 __cdecl longjmp64(jmp_buf jmpbuf, _int64 arg);
+		}
+		#define VMPI_setjmpNoUnwind     ::setjmp
+		#define VMPI_longjmpNoUnwind    ::longjmp64
+	#else
+		#include <setjmp.h>
+		#define VMPI_setjmpNoUnwind     ::setjmp
+		#define VMPI_longjmpNoUnwind    ::longjmp
+	#endif
 #endif
 
-#if !defined(UNDER_CE) && !defined(_ARM_)
+#if !defined(UNDER_CE)
   // Newer versions of the Windows SDK set up the intrinsics slightly differently
   // than VC8. Only include intrin.h if the SDK doesn't declare it.
   #ifndef InterlockedBitTestAndSet
     #include <intrin.h>
   #endif
+  #ifndef _ARM_
   #include <emmintrin.h>
-
+  #endif
   #ifdef VMCFG_VTUNE
     #include "JITProfiling.h"
   #endif
 #endif
-
 
 // Windows doesn't support inttypes.h or most C99 types directly
 typedef __int8              int8_t;

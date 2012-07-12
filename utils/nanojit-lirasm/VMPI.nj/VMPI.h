@@ -97,6 +97,10 @@ typedef unsigned __int64 uint64_t;
 #define VMPI_isdigit isdigit
 #define VMPI_getDate()
 
+#define REALLY_INLINE inline
+
+#include "AVMPI/float4Support.h"
+
 extern size_t VMPI_getVMPageSize();
 
 extern void VMPI_setPageProtection(void *address,
@@ -137,124 +141,5 @@ extern void VMPI_setPageProtection(void *address,
 #ifdef _MSC_VER
 #pragma warning(disable:4291)       // presence of a 'new' operator in nanojit/Allocator.h without matching 'delete'
 #endif
-
-#define _MM_SHUFFLE(x, y, z, w)  ((w << 6) | (z << 4) | (y << 2) | x)
-
-#define SOFT_FLOAT4
-#define REALLY_INLINE inline
-#ifdef SOFT_FLOAT4
-#include <math.h>
-/**
- * Float4 support, no intrinsics
- */
-typedef 
-struct float4_t {
-    float x, y, z, w;
-} float4_t;
-
-REALLY_INLINE float4_t f4_add(const float4_t& x1, const float4_t& x2) 
-{ 
-    float4_t retval = { x1.x + x2.x, x1.y + x2.y, x1.z + x2.z, x1.w + x2.w };
-    return retval;
-}
-
-REALLY_INLINE float4_t f4_sub(const float4_t& x1, const float4_t& x2) 
-{ 
-    float4_t retval = { x1.x - x2.x, x1.y - x2.y, x1.z - x2.z, x1.w - x2.w };
-    return retval;
-}
-
-REALLY_INLINE float4_t f4_mul(const float4_t& x1, const float4_t& x2) 
-{ 
-    float4_t retval = { x1.x * x2.x, x1.y * x2.y, x1.z * x2.z, x1.w * x2.w };
-    return retval;
-}
-
-REALLY_INLINE float4_t f4_div(const float4_t& x1, const float4_t& x2) 
-{ 
-    float4_t retval = { x1.x / x2.x, x1.y / x2.y, x1.z / x2.z, x1.w / x2.w };
-    return retval;
-}
-
-REALLY_INLINE int32_t f4_eq_i(const float4_t x1, const float4_t& x2)
-{
-    return (x1.x == x2.x) && (x1.y == x2.y) && (x1.z == x2.z) && (x1.w == x2.w);
-}
-
-// in hardware: vdupq_n_f32/ _mm_set_ps1
-REALLY_INLINE float4_t f4_setall(float v) 
-{ 
-    float4_t retval = {v, v, v, v};
-    return retval;
-}
-
-// in hardware: vdupq_n_f32, or _mm_sqrt_ps
-REALLY_INLINE float4_t f4_sqrt(const float4_t& v) 
-{ 
-    float4_t retval = { sqrtf(v.x), sqrtf(v.y), sqrtf(v.z), sqrtf(v.w)};
-    return retval;
-}
-
-REALLY_INLINE float f4_x(const float4_t& v) { return v.x; }
-REALLY_INLINE float f4_y(const float4_t& v) { return v.y; }
-REALLY_INLINE float f4_z(const float4_t& v) { return v.z; }
-REALLY_INLINE float f4_w(const float4_t& v) { return v.w; }
-
-#elif defined AVMPLUS_ARM 
-#include <arm_neon.h>
-
-typedef float32x4_t              float4_t;
-
-#define f4_mul              vmulq_f32
-#define f4_add              vaddq_f32
-#define f4_sub              vsubq_f32
-inline float32x4_t f4_div(float32x4_t a,float32x4_t b)  {
-      /* get an initial estimate of 1/b.*/     
-      float32x4_t reciprocal = vrecpeq_f32(b); 
-
-      /* use a couple Newton-Raphson steps to refine the estimate. */
-      reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
-      reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
-       /* and finally, compute a/b = a*(1/b)*/
-      float32x4_t result = vmulq_f32(a,reciprocal);
-      return result;
-}
-
-inline bool f4_eq_i(float32x4_t a, float32x4_t b){
-    uint32x2_t res = vreinterpret_u32_u16( vmovn_u32(vceqq_f32(a, b)) );
-    return vget_lane_u32(res, 0) == 0xffffffff && vget_lane_u32(res, 1) == 0xffffffff;
-}
-#define f4_x(v)            ((float)vgetq_lane_f32(v,0))
-#define f4_y(v)            ((float)vgetq_lane_f32(v,1))
-#define f4_z(v)            ((float)vgetq_lane_f32(v,2))
-#define f4_w(v)            ((float)vgetq_lane_f32(v,3))
-#define f4_ith(v,i)        ((float)vgetq_lane_f32(v,i))
-#define f4_shuffle(v,i)    v;(void)i;AvmAssert(false);  // TODO! fix/implement shuffle
-
-///////// LIRASM_ONLY INTINSICS ////////
-#define f4_sqrt vsqrtq_f32
-#define f4_setall       vdupq_n_f32
-#else
-#include <xmmintrin.h>
-#include <emmintrin.h>
-
-typedef __m128 float4_t;
-#define f4_mul              _mm_mul_ps
-#define f4_add              _mm_add_ps
-#define f4_sub              _mm_sub_ps
-#define f4_div              _mm_div_ps
-#define f4_eq_i(a,b)        ( _mm_movemask_epi8( _mm_castps_si128 (_mm_cmpneq_ps( (a) , (b)))  ) == 0 )
-#define f4_x(v)            _mm_cvtss_f32(v)
-#define f4_y(v)            _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(1,1,1,1)))
-#define f4_z(v)            _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(2,2,2,2)))
-#define f4_w(v)            _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(3,3,3,3)))
-#define f4_ith(v,i)        _mm_cvtss_f32(_mm_shuffle_ps(v,v,_MM_SHUFFLE(i,i,i,i)))
-#define f4_shuffle(v,i)    _mm_shuffle_ps(v,v,i)
-
-
-#define f4_setall             _mm_set_ps1
-#define f4_sqrt 	_mm_sqrt_ps
-#endif // SOFTFLOAT/ARM/x86
-
 
 #endif

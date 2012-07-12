@@ -307,6 +307,9 @@ namespace nanojit
             void outputf(const char* format, ...);
 
         private:
+            static int disassembler_printf(void* arg, const char* fmt, ...);
+            static void* disassembler_event(void* cookie, const char* event, void* arg);
+
             // Log controller object.  Contains what-stuff-should-we-print
             // bits, and a sink function for debug printing.
             LogControl* _logc;
@@ -323,6 +326,9 @@ namespace nanojit
             // Output goes to '_outputCache' if it's non-NULL, or is printed
             // directly via '_logc'.
             void output();
+
+            void maybe_disassemble();
+            void disassemble(void* from, void* to);
 
             // Sets 'outlineEOL'.
             void setOutputForEOL(const char* format, ...);

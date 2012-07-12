@@ -59,8 +59,12 @@ namespace nanojit
         public:
             Fragment(const void*
                      verbose_only(, uint32_t profFragID));
-
+//### FIXME
+#ifdef NANOJIT_THUMB2
+            NIns*           code()                          { return (NIns*)((uintptr_t)_code | 0x1); }
+#else
             NIns*           code()                          { return _code; }
+#endif
             void            setCode(NIns* codee)            { _code = codee; }
             int32_t&        hits()                          { return _hits; }
 

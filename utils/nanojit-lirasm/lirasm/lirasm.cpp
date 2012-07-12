@@ -61,141 +61,42 @@
 using namespace nanojit;
 using namespace std;
 
+#ifdef AVMPLUS_ARM
+float4_t vsqrtq_f32( float4_t q_x )
+{
+    const float4_t q_step_0 = vrsqrteq_f32( q_x );
+    // step
+    const float4_t q_step_parm0 = vmulq_f32( q_x, q_step_0 );
+    const float4_t q_step_result0 = vrsqrtsq_f32( q_step_parm0, q_step_0 );
+    // step
+    const float4_t q_step_1 = vmulq_f32( q_step_0, q_step_result0 );
+    const float4_t q_step_parm1 = vmulq_f32( q_x, q_step_1 );
+    const float4_t q_step_result1 = vrsqrtsq_f32( q_step_parm1, q_step_1 );
+    // take the res
+    const float4_t q_step_2 = vmulq_f32( q_step_1, q_step_result1 );
+    // mul by x to get sqrt, not rsqrt
+    return vmulq_f32( q_x, q_step_2 );
+}
+#endif
+
+// FIXME: work around hard float coutn printing bug
+static std::ostream& print_float(float f) {
+    cout << flush;
+    printf("%g", f);
+    return cout;
+}
+
+static std::ostream& print_double(double f) {
+    cout << flush;
+    printf("%g", f);
+    return cout;
+}
+
 /* Macro to print floating point special vals. consistently across platforms */
 #ifdef _MSC_VER
 #define print(x) (_isnan(x)? cout<<"NAN": _finite(x)?cout<<x: (x>0)? cout<<"INF":cout<<"-INF")
 #else
-#define print(x) (isnan(x)? cout<<"NAN": (x==INFINITY)?cout<<"INF":(x==-INFINITY)?cout<<"-INF":cout<<x)
-#endif
-#if AVMPLUS_ARM
-static float32x4_t vsqrtq_f32( float32x4_t q_x )
-{
-    const float32x4_t q_step_0 = vrsqrteq_f32( q_x );
-    // step
-    const float32x4_t q_step_parm0 = vmulq_f32( q_x, q_step_0 );
-    const float32x4_t q_step_result0 = vrsqrtsq_f32( q_step_parm0, q_step_0 );
-    // step
-    const float32x4_t q_step_1 = vmulq_f32( q_step_0, q_step_result0 );
-    const float32x4_t q_step_parm1 = vmulq_f32( q_x, q_step_1 );
-    const float32x4_t q_step_result1 = vrsqrtsq_f32( q_step_parm1, q_step_1 );
-    // take the res
-    const float32x4_t q_step_2 = vmulq_f32( q_step_1, q_step_result1 );
-    // mul by x to get sqrt, not rsqrt
-    return vmulq_f32( q_x, q_step_2 );
-}
-
-void q0() __attribute__((naked));
-void q0()
-{ asm volatile
-     ("fmrrd r0,r1,d0\n\t"
-	  "fmrrd r2,r3,d1\n\t"
-	  "bx lr\n\t");
-}
-void q1() __attribute__((naked));
-void q1()
-{ asm volatile
-     ("fmrrd r0,r1,d2\n\t"
-	  "fmrrd r2,r3,d3\n\t"
-	  "bx lr\n\t");
-}
-void q2() __attribute__((naked));
-void q2()
-{ asm volatile
-     ("fmrrd r0,r1,d4\n\t"
-	  "fmrrd r2,r3,d5\n\t"
-	  "bx lr\n\t");
-}
-void q3() __attribute__((naked));
-void q3()
-{ asm volatile
-     ("fmrrd r0,r1,d6\n\t"
-	  "fmrrd r2,r3,d7\n\t"
-	  "bx lr\n\t");
-}
-void q4() __attribute__((naked));
-void q4()
-{ asm volatile
-     ("fmrrd r0,r1,d8\n\t"
-	  "fmrrd r2,r3,d9\n\t"
-	  "bx lr\n\t");
-}
-void q5() __attribute__((naked));
-void q5()
-{ asm volatile
-     ("fmrrd r0,r1,d10\n\t"
-	  "fmrrd r2,r3,d11\n\t"
-	  "bx lr\n\t");
-}
-void q6() __attribute__((naked));
-void q6()
-{ asm volatile
-     ("fmrrd r0,r1,d12\n\t"
-	  "fmrrd r2,r3,d13\n\t"
-	  "bx lr\n\t");
-}
-void q7() __attribute__((naked));
-void q7()
-{ asm volatile
-     ("fmrrd r0,r1,d14\n\t"
-	  "fmrrd r2,r3,d15\n\t"
-	  "bx lr\n\t");
-}
-void q8() __attribute__((naked));
-void q8()
-{ asm volatile
-     ("fmrrd r0,r1,d16\n\t"
-	  "fmrrd r2,r3,d17\n\t"
-	  "bx lr\n\t");
-}
-void q9() __attribute__((naked));
-void q9()
-{ asm volatile
-     ("fmrrd r0,r1,d18\n\t"
-	  "fmrrd r2,r3,d19\n\t"
-	  "bx lr\n\t");
-}
-void q10() __attribute__((naked));
-void q10()
-{ asm volatile
-     ("fmrrd r0,r1,d20\n\t"
-	  "fmrrd r2,r3,d21\n\t"
-	  "bx lr\n\t");
-}
-void q11() __attribute__((naked));
-void q11()
-{ asm volatile
-     ("fmrrd r0,r1,d22\n\t"
-	  "fmrrd r2,r3,d23\n\t"
-	  "bx lr\n\t");
-}
-void q12() __attribute__((naked));
-void q12()
-{ asm volatile
-     ("fmrrd r0,r1,d24\n\t"
-	  "fmrrd r2,r3,d25\n\t"
-	  "bx lr\n\t");
-}
-void q13() __attribute__((naked));
-void q13()
-{ asm volatile
-     ("fmrrd r0,r1,d26\n\t"
-	  "fmrrd r2,r3,d27\n\t"
-	  "bx lr\n\t");
-}
-void q14() __attribute__((naked));
-void q14()
-{ asm volatile
-     ("fmrrd r0,r1,d28\n\t"
-	  "fmrrd r2,r3,d29\n\t"
-	  "bx lr\n\t");
-}
-void q15() __attribute__((naked));
-void q15()
-{ asm volatile
-     ("fmrrd r0,r1,d30\n\t"
-	  "fmrrd r2,r3,d31\n\t"
-	  "bx lr\n\t");
-}
+#define print(x) (isnan(x)? cout<<"NAN": (x==INFINITY)?cout<<"INF":(x==-INFINITY)?cout<<"-INF":print_float(x))
 #endif
 
 /* Allocator SPI implementation. */
@@ -2683,7 +2584,7 @@ Lirasm::Lirasm(bool verbose, Config& config) :
     mLirbuf = new (mAlloc) LirBuffer(mAlloc);
 #ifdef DEBUG
     if (mVerbose) {
-        mLogc.lcbits = LC_ReadLIR | LC_AfterDCE | LC_Native | LC_RegAlloc | LC_Activation;
+        mLogc.lcbits = LC_ReadLIR | LC_AfterDCE | LC_Native | LC_RegAlloc | LC_Activation | LC_Bytes;
         mLirbuf->printer = new (mAlloc) LInsPrinter(mAlloc, LIRASM_NUM_USED_ACCS);
     }
 #endif
@@ -2950,7 +2851,7 @@ processCmdLine(int argc, char **argv, CmdLineOptions& opts)
                 "i386";
 #elif defined NANOJIT_X64
                 "X64";
-#elif defined NANOJIT_ARM
+#elif defined(NANOJIT_ARM) || defined(NANOJIT_THUMB2)
                 "arm";
 #elif defined NANOJIT_PPC
                 "ppc";
@@ -3077,7 +2978,8 @@ executeFragment(const LirasmFragment& fragment, int skip)
 #endif
           case RT_DOUBLE: {
             double res = fragment.rdouble();
-            cout << "Output is: " << res << endl;
+            cout << "Output is: ";
+            print_double(res) << endl;
             break;
           }
           case RT_FLOAT: {

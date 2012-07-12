@@ -65,6 +65,20 @@ REALLY_INLINE int32_t f4_eq_i(const float4_t& x1, const float4_t& x2)
     return (x1.x == x2.x) && (x1.y == x2.y) && (x1.z == x2.z) && (x1.w == x2.w);
 }
 
+// in hardware: vdupq_n_f32/ _mm_set_ps1
+REALLY_INLINE float4_t f4_setall(float v) 
+{ 
+    float4_t retval = {v, v, v, v};
+    return retval;
+}
+
+// in hardware: vdupq_n_f32, or _mm_sqrt_ps
+REALLY_INLINE float4_t f4_sqrt(const float4_t& v) 
+{ 
+    float4_t retval = { sqrtf(v.x), sqrtf(v.y), sqrtf(v.z), sqrtf(v.w)};
+    return retval;
+}
+
 REALLY_INLINE float f4_x(const float4_t& v) { return v.x; }
 REALLY_INLINE float f4_y(const float4_t& v) { return v.y; }
 REALLY_INLINE float f4_z(const float4_t& v) { return v.z; }
@@ -86,10 +100,12 @@ REALLY_INLINE float f4_w(const float4_t& v) { return v.w; }
 
 typedef __m128  float4_t;
 
-#define f4_add  _mm_add_ps
-#define f4_sub  _mm_sub_ps
-#define f4_mul  _mm_mul_ps
-#define f4_div  _mm_div_ps
+#define f4_add    _mm_add_ps
+#define f4_sub    _mm_sub_ps
+#define f4_mul    _mm_mul_ps
+#define f4_div    _mm_div_ps
+#define f4_setall _mm_set_ps1
+#define f4_sqrt   _mm_sqrt_ps
 
 REALLY_INLINE int32_t f4_eq_i(float4_t a, float4_t b)
 {
@@ -101,7 +117,6 @@ REALLY_INLINE float f4_y(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v,
 REALLY_INLINE float f4_z(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, 0xAA)); }
 REALLY_INLINE float f4_w(float4_t v) { return _mm_cvtss_f32(_mm_shuffle_ps(v, v, 0xFF)); }
 
-
 #elif defined VMCFG_NEON // FIXME: nobody defines VMCFG_NEON currently... this should change.
 #include <arm_neon.h>
 
@@ -110,6 +125,8 @@ typedef float32x4_t  float4_t;
 #define f4_add       vaddq_f32
 #define f4_sub       vsubq_f32
 #define f4_mul       vmulq_f32
+#define f4_sqrt      vsqrtq_f32
+#define f4_setall       vdupq_n_f32
 
 REALLY_INLINE int32_t f4_eq_i(float4_t a, float4_t b)
 {
