@@ -103,13 +103,6 @@ REALLY_INLINE void AvmCore::setTelemetry(telemetry::ITelemetry* telemetry)
 }
 #endif
 
-#ifdef VMCFG_TELEMETRY_SAMPLER
-REALLY_INLINE TelemetrySampler* AvmCore::getSampler()
-{
-    return telemetrySampler;
-}
-#endif
-
 #ifdef VMCFG_NANOJIT // accessors
 
 #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64

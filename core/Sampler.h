@@ -40,13 +40,6 @@
 #ifndef __avmplus_Sampler__
 #define __avmplus_Sampler__
 
-#ifdef VMCFG_TELEMETRY_SAMPLER
-namespace telemetry
-{
-    class ITelemetry;
-}
-#endif
-
 namespace avmplus
 {
 #ifdef DEBUGGER
@@ -293,183 +286,23 @@ namespace avmplus
     #define SAMPLE_CHECK()
 
 #endif // DEBUGGER
-
+}
 
 #ifdef VMCFG_TELEMETRY_SAMPLER
-
-    /**
-     * Telemetry Based Sampler
-     *
-     * This is the new telemetry based sampler which works on Release builds.
-     * It uses the MethodFrame stack to obtain the stack information, and sends
-     * samples using Telemetry. The sampler is driven by a periodic timer
-     * provided by the VMPI_Timer feature of VMPI.h. Whenever this timer
-     * fires (or "ticks"), two things happen:
-     * - the variable m_core->sampleTicks gets incremented. A non-zero value in
-     *   this variable informs the actionscript interpreter and JIT'ed code that
-     *   it is time to take a sample, which is implemented in takeSample(). Samples
-     *   are accumulated in a SamplesBuffer, and periodically flushed to an
-     *   external client app via telemetry.
-     * - the function SamplerTimerClient.tick() gets called. This collects
-     *   statistics about the distribution of values of tick times. This information
-     *   can be used by a client application to better analyze sampler results.
-     */
-    class TelemetrySampler
+namespace telemetry
+{
+    /* An interface that lets the VM call into the host when it's time to take a sample.
+       See the sampler description in AvmCore.h for more details. */
+    struct ISampler
     {
-    protected:
-        // Each sample frame is just a MethodInfo ptr
-        typedef MethodInfo* sample_frame_t;
-
-        // Sample definition
-        struct Sample
-        {
-            // The maximum stack depth the sampler will record. We don't need to handle much higher
-            // than this because even when there is deep recursion, seeing the same stack repeated
-            // over and over is not useful, this condition will be evident by sending the first
-            // part of the stack. We send a stack overflow ID at the end so the client can identify
-            // this condition.
-            static const int SAMPLE_MAX_STACK_DEPTH = 128;
-            static const uint32_t SAMPLER_STACK_OVERFLOW_ID = 0xFFFFFFFF;
-
-            // the frames, i.e. the stack
-            sample_frame_t frames[SAMPLE_MAX_STACK_DEPTH];
-
-            // number of frames in the stack.
-            // if we have exceeded SAMPLE_MAX_STACK_DEPTH for a particular stack,
-            // this will equal SAMPLE_MAX_STACK_DEPTH + 1
-            unsigned int nFrames;
-
-            // how many ticks since the last sample
-            unsigned int nTicks;
-
-            // the time at which the sample was taken
-            uint64_t timestamp;
-        };
-
-    private:
-        // The buffer used to hold all samples, when it fills the samples
-        // are flushed.
-        struct SamplesBuffer
-        {
-            // An array of all the samples that have been collected by takeSample() and not
-            // yet reported by flushSamples()
-            static const int SAMPLES_BUFFER_SIZE = 1000;
-            Sample          samples[SAMPLES_BUFFER_SIZE];
-            unsigned int    nSamples;
-
-            // There is one item in this array for each tick of each entry in 'samples'.
-            static const int TICK_TIMES_BUFFER_SIZE = 10000;
-            uint64_t        tickTimes[TICK_TIMES_BUFFER_SIZE];
-            unsigned int    nTickTimes;
-        };
-
-        // The sampler's implementation of TimerClient. This object's tick() function
-        // is invoked on every sampler tick, to collect statistics on tick timings.
-        class SamplerTimerClient : public VMPI_TimerClient {
-        public:
-            // number of sampler ticks since the timer was started
-            uint64_t    m_totalTicks;
-
-            // the lowest interval value ever
-            uint64_t    m_minInterval;
-
-            // highest interval value since the last flush
-            uint64_t    m_maxIntervalSinceLastFlush;
-
-            // statistics on the distribution of interval times.
-            // the k'th item in this array is a count of how many times the interval happened to be k microseconds
-            static const uint32_t INTERVAL_TABLE_SIZE = 5000;
-            uint64_t    m_timerIntervalCounts[INTERVAL_TABLE_SIZE];
-
-            // the microsecond timestamp of the most recent ticks, stored as a circular buffer.
-            static const uint32_t TICK_TIME_TABLE_SIZE = 10000;
-            uint64_t    m_tickTimes[TICK_TIME_TABLE_SIZE];
-
-            // next available spot in m_tickTimes
-            uint32_t    m_nextTickTimeIndex;
-
-            // Initializes our data. This must be called before any calls to tick() or calculateMedianTimerInterval().
-            void start(telemetry::ITelemetry* pTelemetry, TelemetrySampler* pSampler);
-
-            // This function gets called by the ticker on each tick
-            void tick();
-
-            // Compute the median tick interval since the timer was started
-            uint64_t calculateMedianTimerInterval();
-
-        private:
-            telemetry::ITelemetry*  m_pTelemetry;
-            TelemetrySampler*       m_pSampler;
-        };
-
-    public:
-        TelemetrySampler(AvmCore* core);
-        virtual ~TelemetrySampler();
-
-        // Take a stack sample
-        virtual void takeSample();
-
-        // Flush the samples - send them to our client via telemetry
-        virtual void flushSamples();
-
-        // Starts up the sampler, will only start if sampler currently is enabled
-        virtual void start();
-
-        // Stop sampling, performs cleanup
-        virtual void stop();
-
-    protected:
-        // Copy the current method frame stack to outFrameBuffer
-        unsigned int takeStackSample(sample_frame_t* outFrameBuffer);
-
-        // Find out if the method frame stack is currently empty
-        bool isMethodFrameStackEmpty();
-
-        // Get the string representation of a stack frame. This is typically a fully-qualified function name.
-        Stringp sampleFrameToString(sample_frame_t frame);
-
-        // Get the stack array and method names for the given sample. The stack array is returned in the buffer
-        // passed in to stackArray, with a method ID in the array corresponding to each stack frame in sample. 
-        // Each method has a unique method ID, if a method appears more than once in the stack, the same method
-        // ID is used. The method name for each stack frame is added to methodNameMapBuffer if that method name 
-        // has not already been mapped. The buffer passed in to stackArray must be large enough for the number
-        // of samples in sample, as determined by sample->nFrames.
-        void getSampleStackArray(Sample* sample, uint32_t* stackArray, avmplus::StringBuffer& methodNameMapBuffer);
-
-        AvmCore* m_core; // the core, one sampler per core
-        telemetry::ITelemetry* m_telemetry; // instance of telemetry
-
-    private:
-        // Where we keep all the samples
-        SamplesBuffer* m_samplesBuffer;
-
-        // Whether the sampler is started or stopped
-        bool m_started;
-
-        // A lock to control access to the data shared by tick() (on a timer thread) and takeSample() (on the AS execution thread)
-        vmpi_mutex_t m_counterLock;
-
-        // The id of the VMPI timer that generates our ticks
-        uintptr_t m_timerId;
-
-        // The last median interval value we reported. We only report this value when it changes.
-        uint64_t m_lastReportedMedianInterval;
-
-        // The time when we last flushed
-        uint64_t m_lastFlushTime;
-
-        // The value of "totalTicks" last time we flushed
-        uint64_t m_lastFlushTicks;
-
-        // The object that receives tick() calls from our VMPI timer, and records information about tick intervals and times.
-        SamplerTimerClient m_timerClient;
-
-        // map of <sample_frame_t, unsigned int> key/vaue pairs for the methods we have already mapped and a unique id for each one
-        MMgc::GCHashtableBase<unsigned int, MMgc::GCHashtableKeyHandler, MMgc::GCHashtableAllocHandler_VMPI> m_mappedMethods;
-        unsigned int m_numMappedMethods;
+        virtual void takeSample() = 0;
     };
-
+	
+    /* An opaque handle that represents a function on a call stack. A given function should have the same handle for
+	 the entire duration of a run. */
+    typedef avmplus::MethodInfo* FunctionHandle;
+}
 #endif // VMCFG_TELEMETRY_SAMPLER
 
-}
 #endif // __avmplus_Sampler__
+
