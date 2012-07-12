@@ -768,9 +768,9 @@ class B extends A {
   <error id="1516" label="kConditionCannotNotify">Condition non può eseguire notify senza la titolarità del mutex associato.</error>
   <error id="1517" label="kConditionCannotNotifyAll">Condition non può eseguire notifyAll senza la titolarità del mutex associato.</error>
   <error id="1518" label="kConditionCannotWait">Condition non può attendere senza la titolarità del mutex associato.</error>
-  <error id="1519" label="kConditionCannotBeInitialized">Condition cannot be initialized.</error>
-  <error id="1520" label="kMutexCannotBeInitialized">Mutex cannot be initialized.</error>
-  <error id="1521" label="kWorkerIllegalCallToStart">Only the worker's parent may call start.</error>
+  <error id="1519" label="kConditionCannotBeInitialized">Impossibile inizializzare Condition.</error>
+  <error id="1520" label="kMutexCannotBeInitialized">Impossibile inizializzare il mutex.</error>
+  <error id="1521" label="kWorkerIllegalCallToStart">Solo il livello superiore di worker può effettuare la chiamata a start.</error>
 
   <error id="2004" label="kInvalidParamError">Uno dei parametri non è valido.</error>
   <error id="2006" label="kParamRangeError">L'indice fornito è fuori intervallo.</error>

@@ -768,9 +768,9 @@ class B extends A {
   <error id="1516" label="kConditionCannotNotify">연결된 mutex가 소유되지 않은 경우 condition이 notify를 수행할 수 없습니다.</error>
   <error id="1517" label="kConditionCannotNotifyAll">연결된 mutex가 소유되지 않은 경우 condition이 notifyAll을 수행할 수 없습니다.</error>
   <error id="1518" label="kConditionCannotWait">연결된 mutex가 소유되지 않은 경우 condition이 wait를 수행할 수 없습니다.</error>
-  <error id="1519" label="kConditionCannotBeInitialized">Condition cannot be initialized.</error>
-  <error id="1520" label="kMutexCannotBeInitialized">Mutex cannot be initialized.</error>
-  <error id="1521" label="kWorkerIllegalCallToStart">Only the worker's parent may call start.</error>
+  <error id="1519" label="kConditionCannotBeInitialized">조건을 초기화할 수 없습니다.</error>
+  <error id="1520" label="kMutexCannotBeInitialized">mutex를 초기화할 수 없습니다.</error>
+  <error id="1521" label="kWorkerIllegalCallToStart">worker(작업자)의 부모만 시작을 호출할 수 있습니다.</error>
 
   <error id="2004" label="kInvalidParamError">매개 변수 중 하나가 유효하지 않습니다.</error>
   <error id="2006" label="kParamRangeError">제공된 인덱스가 범위를 벗어났습니다.</error>
