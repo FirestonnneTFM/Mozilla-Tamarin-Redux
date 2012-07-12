@@ -264,7 +264,7 @@
     // GCC and RealView usually define __ARM_ARCH__,
     // otherwise try well-known GCC flags ( see http://gcc.gnu.org/onlinedocs/gcc/ARM-Options.html )
     #if __ARM_ARCH__ >= 7 ||  defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) ||  defined(__ARM_ARCH_7M__) || \
-        defined(__ARM_ARCH_7R__) || defined(_ARM_ARCH_7)
+        defined(__ARM_ARCH_7R__) || defined(_ARM_ARCH_7) || defined(UNDER_RT)
 
       #define AVMSYSTEM_UNALIGNED_INT_ACCESS 1
     #else

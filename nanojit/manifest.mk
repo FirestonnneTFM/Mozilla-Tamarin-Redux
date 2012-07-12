@@ -57,6 +57,10 @@ ifeq (arm,$(TARGET_CPU))
 nanojit_cpu_cxxsrc := NativeARM.cpp
 endif
 
+ifeq (thumb2,$(TARGET_CPU))
+nanojit_cpu_cxxsrc := NativeThumb2.cpp
+endif
+
 ifeq (sparc,$(TARGET_CPU))
 nanojit_cpu_cxxsrc := NativeSparc.cpp
 endif

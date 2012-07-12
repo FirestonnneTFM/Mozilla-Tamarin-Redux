@@ -48,7 +48,11 @@
 #if defined AVMPLUS_IA32
     #define NANOJIT_IA32
 #elif defined AVMPLUS_ARM
-    #define NANOJIT_ARM
+    #if defined(TARGET_THUMB2) || defined(UNDER_RT)
+         #define NANOJIT_THUMB2
+    #else
+         #define NANOJIT_ARM
+    #endif
 #elif defined AVMPLUS_PPC
     #define NANOJIT_PPC
 #elif defined AVMPLUS_SPARC
@@ -166,9 +170,15 @@ namespace nanojit
 
 #define isS8(i)  ( int32_t(i) == int8_t(i) )
 #define isU8(i)  ( int32_t(i) == uint8_t(i) )
+//### FIXME: Revisit these for types of argument and sign-correctness.
+//### Should make them inlines.
+#define isU12(i) ( ((i) & 0xfff) == (i) )
 #define isS16(i) ( int32_t(i) == int16_t(i) )
 #define isU16(i) ( int32_t(i) == uint16_t(i) )
+#define isS20(i) ( (int32_t((i)<<12)>>12) == (i) )
+#define isS21(i) ( (int32_t((i)<<11)>>11) == (i) )
 #define isS24(i) ( (int32_t((i)<<8)>>8) == (i) )
+#define isS25(i) ( (int32_t((i)<<7)>>7) == (i) )
 
 static inline bool isS32(intptr_t i) {
     return int32_t(i) == i;

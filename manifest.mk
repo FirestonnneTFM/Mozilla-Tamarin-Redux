@@ -99,6 +99,9 @@ endif
 ifeq (x86_64,$(TARGET_CPU))
 $(call RECURSE_DIRS,nanojit)
 endif
+ifeq (thumb2,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
 ifeq (arm,$(TARGET_CPU))
 $(call RECURSE_DIRS,nanojit)
 endif

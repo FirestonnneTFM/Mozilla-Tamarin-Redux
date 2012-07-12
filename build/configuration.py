@@ -63,12 +63,12 @@ def writeFileIfChanged(path, contents):
 # Do cross-compilation in the future, which will require HOST_OS and perhaps
 # other settings
 
-def _configGuess():
+def _configGuess(options):
     ostest = sys.platform
     cputest = build.process.run_for_output(['uname', '-m'])
-    return _configSub(ostest, cputest)
+    return _configSub(ostest, cputest, options)
 
-def _configSub(ostest, cputest):
+def _configSub(ostest, cputest, options):
     if ostest.startswith('win') or ostest.startswith('cygwin'):
         os = 'windows'
     elif ostest.startswith('darwin') or ostest.startswith('apple-darwin'):
@@ -93,7 +93,12 @@ def _configSub(ostest, cputest):
     elif re.search('sun', cputest):
         cpu = 'sparc'
     elif re.search('arm', cputest):
-        cpu = 'arm'
+        if options.getBoolArg("arm-thumb",False):
+          cpu = 'thumb2'
+        else:
+          cpu = 'arm'
+    elif re.search('thumb2', cputest):
+        cpu = 'thumb2'
     elif re.search('mips', cputest):
         cpu = 'mips'
     elif re.search('sh4', cputest):
@@ -114,7 +119,7 @@ class Configuration:
 
         self._optimize = optimize
         self._debug = debug
-        self._host = _configGuess()
+        self._host = _configGuess(options)
         self._target = self._host
 
         if sourcefile:
@@ -142,11 +147,11 @@ class Configuration:
 
             if options.host:
                 hostcpu, hostos = options.host.split('-', 1)
-                self._host = _configSub(hostos, hostcpu)
+                self._host = _configSub(hostos, hostcpu, options)
 
             if options.target:
                 targetcpu, targetos = options.target.split('-', 1)
-                self._target = _configSub(targetos, targetcpu)
+                self._target = _configSub(targetos, targetcpu, options)
 
         self._acvars = {
             # Bug 606989: GNU make forms like VPATH treat spaces as
@@ -213,6 +218,13 @@ class Configuration:
                 'OUTOPTION' : '-Fo',
                 'LIBPATH'   : '-LIBPATH:'
                 })
+	    if self._target[1] == "thumb2":
+                    self._acvars.update({'LDFLAGS' : '-NODEFAULTLIB:"oldnames.lib"'})
+                    if sys.platform.startswith('cygwin'):
+                        self._acvars.update({'ASM' : '$(topsrcdir)/build/cygwin-wrapper.sh armasm.exe -nologo'})
+                    else:
+                        self._acvars.update({'ASM' : 'armasm.exe -nologo'})
+
             if self._target[1] == "arm":
                 self._acvars.update({'LDFLAGS' : '-NODEFAULTLIB:"oldnames.lib" -ENTRY:"mainWCRTStartup"'})
                 if sys.platform.startswith('cygwin'):
@@ -222,9 +234,9 @@ class Configuration:
 
             if self._target[1] == "x86_64":
                 if sys.platform.startswith('cygwin'):
-                    self._acvars.update({'MASM' : '$(topsrcdir)/build/cygwin-wrapper.sh ml64.exe -nologo -c '})
+                   self._acvars.update({'MASM' : '$(topsrcdir)/build/cygwin-wrapper.sh ml64.exe -nologo -c '})
                 else:
-                    self._acvars.update({'MASM' : 'ml64.exe -nologo -c '})
+                   self._acvars.update({'MASM' : 'ml64.exe -nologo -c '})
 
             if sys.platform.startswith('cygwin'):
                 self._acvars.update({'CXX'          : '$(topsrcdir)/build/cygwin-wrapper.sh cl.exe -nologo'})

@@ -46,6 +46,7 @@ _yes = re.compile("^(t|true|yes|y|1)$", re.I)
 _no = re.compile("^(f|false|no|n|0)$", re.I)
 _help = re.compile("^(-h|--help)$")
 _sdk = re.compile("^--mac-sdk=(.*)$")
+_xcode = re.compile("^--mac-xcode=(.*)$")
 _arm_arch = re.compile("^--arm-arch=(.*)$")
 
 class Options:
@@ -57,6 +58,7 @@ class Options:
         self.help = False
         self._allargs = {}
         self.mac_sdk_version = None
+        self.mac_xcode_version = None
         self.arm_arch = "armv7-a"
 
         # These arguments don't go in _allargs, and they aren't standard
@@ -66,7 +68,8 @@ class Options:
                 "target",                   \
                 "host",                     \
                 "ignore_unknown_flags",     \
-                "mac_sdk_version",          \
+                "mac_sdk",                  \
+                "mac_xcode",                \
                 "arm_arch"                  \
                 )
 
@@ -85,6 +88,11 @@ class Options:
             m = _sdk.search(arg)
             if m:
                 self.mac_sdk_version = m.group(1)
+                continue
+
+            m = _xcode.search(arg)
+            if m:
+                self.mac_xcode_version = m.group(1)
                 continue
 
             m = _arm_arch.search(arg)

@@ -51,7 +51,7 @@ namespace nanojit
     // Profilers get confused by non-contiguous functions,
     // so make the allocation size huge to avoid non-contiguous methods
     static const int pagesPerAlloc = 256; // 1MB
-#elif defined(NANOJIT_ARM)
+#elif defined(NANOJIT_ARM) || defined(NANOJIT_THUMB2)
     // ARM requires single-page allocations, due to the constant pool that
     // lives on each page that must be reachable by a 4KB pc-relative load.
     static const int pagesPerAlloc = 1; // 4KB
@@ -267,7 +267,7 @@ namespace nanojit
             flushICache(b->start(), b->size());
     }
 
-#if defined(AVMPLUS_UNIX) && defined(NANOJIT_ARM)
+#if defined(AVMPLUS_UNIX) && (defined(NANOJIT_ARM) || defined(NANOJIT_THUMB2))
 #if defined(__APPLE__)
 #include <libkern/OSCacheControl.h>
 #else
@@ -307,13 +307,9 @@ extern  "C" void sync_instruction_memory(caddr_t v, u_int len);
         (void)len;
         VALGRIND_DISCARD_TRANSLATIONS(start, len);
     }
-
-#elif defined NANOJIT_ARM && ( defined UNDER_CE || defined WIN32 )
-    // On arm/winmo, just flush the whole icache. The
-    // WinCE docs indicate that this function actually ignores its
-    // 2nd and 3rd arguments, and wants them to be NULL.
-    void CodeAlloc::flushICache(void *, size_t) {
-        FlushInstructionCache(GetCurrentProcess(), NULL, NULL);
+#elif (defined(NANOJIT_ARM) || defined(NANOJIT_THUMB2)) && defined WIN32
+    void CodeAlloc::flushICache(void *start, size_t len) {
+        FlushInstructionCache(GetCurrentProcess(), start, len);
     }
 
 #elif defined NANOJIT_ARM && defined DARWIN

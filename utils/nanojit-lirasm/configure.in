@@ -329,7 +329,38 @@ if test "$GNU_CC"; then
     if test "$ac_has_wno_variadic_macros" = "yes"; then
         _WARNINGS_CXXFLAGS="${_WARNINGS_CXXFLAGS} ${_COMPILER_PREFIX}-Wno-variadic-macros"
     fi
+
+    AC_MSG_CHECKING([whether the compiler supports -Wno-psabi])
+    AC_LANG_SAVE
+    AC_LANG_CPLUSPLUS
+    _SAVE_CXXFLAGS="$CXXFLAGS"
+    CXXFLAGS="$CXXFLAGS ${_COMPILER_PREFIX}-Wno-psabi"
+    AC_TRY_COMPILE([],
+                   [return(0);],
+                   ac_has_wno_psabi="yes",
+                   ac_has_wno_psabi="no")
+    CXXFLAGS="$_SAVE_CXXFLAGS"
+    AC_LANG_RESTORE
+    AC_MSG_RESULT($ac_has_wno_psabi)
+
+    if test "$ac_has_wno_psabi" = "yes"; then
+        _WARNINGS_CXXFLAGS="${_WARNINGS_CXXFLAGS} ${_COMPILER_PREFIX}-Wno-psabi"
+    fi
 fi
+
+dnl ========================================================
+dnl --enable-thumb2
+dnl ========================================================
+
+AC_ARG_ENABLE(thumb2,
+[  --enable-thumb2         enable Thumb2 ARM build ],
+[ if test "$enableval" != "no"; then
+    VMCFG_THUMB2=1
+  else
+    VMCFG_FLOAT=
+  fi ],
+  [VMCFG_FLOAT=
+  ])
 
 dnl ========================================================
 dnl platform-specific stuff
@@ -340,19 +371,31 @@ case "$target" in
 i?86-*)
     NANOJIT_ARCH=i386
     AC_DEFINE(AVMPLUS_IA32)
+    AC_DEFINE(VMCFG_SSE2)
     ;;
 x86_64*-*)
     NANOJIT_ARCH=X64
     AC_DEFINE(AVMPLUS_AMD64)
     AC_DEFINE(AVMPLUS_64BIT)
+    AC_DEFINE(VMCFG_SSE2)
     ;;
 arm*-*)
-    NANOJIT_ARCH=ARM
-    AC_DEFINE(AVMPLUS_ARM)
-	if test "${VMCFG_FLOAT}" = "1" ; then
-       CXXFLAGS="$CXXFLAGS  -mfloat-abi=softfp -mfpu=neon"
-       CFLAGS="$CFLAGS  -mfloat-abi=softfp -mfpu=neon"
-	fi
+	if test "${VMCFG_THUMB2}" = "1" ; then
+       NANOJIT_ARCH=Thumb2
+       AC_DEFINE(AVMPLUS_ARM)
+       AC_DEFINE(VMCFG_NEON)
+	   if test "${VMCFG_FLOAT}" = "1" ; then
+          CXXFLAGS="$CXXFLAGS  -mthumb -mtune=cortex-a8 -mfloat-abi=hard -march=armv7-a -mfpu=neon -DTARGET_THUMB2"
+          CFLAGS="$CFLAGS  -mthumb -mtune=cortex-a8 -mfloat-abi=hard -march=armv7-a -mfpu=neon -DTARGET_THUMB2"
+	   fi
+    else
+       NANOJIT_ARCH=ARM
+       AC_DEFINE(AVMPLUS_ARM)
+	   if test "${VMCFG_FLOAT}" = "1" ; then
+          CXXFLAGS="$CXXFLAGS  -mfloat-abi=softfp -mfpu=neon"
+          CFLAGS="$CFLAGS  -mfloat-abi=softfp -mfpu=neon"
+	   fi
+    fi
     ;;
 sparc*-*)
     NANOJIT_ARCH=Sparc

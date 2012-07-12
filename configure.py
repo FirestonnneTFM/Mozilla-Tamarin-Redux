@@ -59,6 +59,7 @@ import os.path
 import sys
 import build.process
 import re
+import string
 import subprocess
 
 thisdir = os.path.dirname(os.path.abspath(__file__))
@@ -72,29 +73,52 @@ import build.avmfeatures
 
 
 # Used to set the mac SDK parameters
-def _setSDKParams(sdk_version,os_ver):
-        
+
+def _setSDKParams(sdk_version, os_ver, xcode_version):
+    if sdk_version is None:
+        # Infer SDK version from the current OS version
+        if os_ver == '10.4':
+            sdk_version = '104u'
+        else:
+            sdk_version = os_ver.translate(None, string.punctuation)
     # On 10.5/6 systems, and only if "--mac-sdk=104u" is passed in, compile for the 10.4u SDK and override CC/CXX (set in configuration.py) to use gcc/gxx 4.0.x
+    # Infer xcode version from the SDK version if not directly specified
     if sdk_version == '104u':
         os_ver,sdk_number = '10.4','10.4u'
         config._acvars['CXX'] = 'g++-4.0'
         config._acvars['CC']  = 'gcc-4.0'
+        if xcode_version is None:
+            xcode_version = '3'
     elif sdk_version == '105':
         os_ver,sdk_number = '10.5','10.5'
+        if xcode_version is None:
+            xcode_version = '3'
     elif sdk_version == '106':
         os_ver,sdk_number = '10.6','10.6'
-    # For future expansion
-    #elif sdk_version == '107':
-        #os_ver,sdk_number = '10.7','10.7'
+        if xcode_version is None:
+            xcode_version = '3'
+    elif sdk_version == '107':
+        os_ver,sdk_number = '10.7','10.7'
+        if xcode_version is None:
+            xcode_version = '4'
     else:
-        print'Unknown SDK version -> %s. Expected values are 104u, 105 or 106.' % sdk_version
+        print'Unknown SDK version -> %s. Expected values are 104u, 105, 106 or 107.' % sdk_version
         sys.exit(2)
 
-    if not os.path.exists("/Developer/SDKs/MacOSX%s.sdk" % sdk_number):
-        print'Could not find /Developer/SDKs/MacOSX%s.sdk' % sdk_number
+    sdk_prefix = None
+    if xcode_version is not None:
+       xcode_major_version = xcode_version.split(".")[0]
+       if int(xcode_major_version) >= 4:
+          sdk_prefix = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX"
+    if sdk_prefix is None:
+       sdk_prefix = "/Developer/SDKs/MacOSX"
+
+    sdk_path = sdk_prefix + sdk_number + ".sdk"
+    if not os.path.exists(sdk_path):
+        print'Could not find %s' % sdk_path
         sys.exit(2)
     else:
-        return os_ver,sdk_number
+        return os_ver,sdk_path
 
 def _setGCCVersionedFlags(FLAGS, MAJOR_VERSION, MINOR_VERSION, current_cpu):
     # warnings have been updated to try to include all those enabled by current Flash/AIR builds -- disable with caution, or risk integration pain
@@ -106,8 +130,12 @@ def _setGCCVersionedFlags(FLAGS, MAJOR_VERSION, MINOR_VERSION, current_cpu):
             # Bugzilla 654996: -Werror for gcc prior to 4.3 can _usually_ be
             # turned on; see core/manifest.mk for Interpreter.cpp workaround.
             FLAGS += "-Wstrict-aliasing=0 -Werror "
-        else: # gcc 4.3 or later
+        elif (MAJOR_VERSION == 4 and MINOR_VERSION == 4): # 4.4
+            FLAGS += "-Werror -Wempty-body -Wno-logical-op -Wmissing-field-initializers -Wstrict-aliasing=0 -Wno-array-bounds -Wno-clobbered -Wstrict-overflow=0 -funit-at-a-time  "
+        else: # gcc 4.5 or later
             FLAGS += "-Werror -Wempty-body -Wno-logical-op -Wmissing-field-initializers -Wstrict-aliasing=3 -Wno-array-bounds -Wno-clobbered -Wstrict-overflow=0 -funit-at-a-time  "
+            if (MAJOR_VERSION == 4 and MINOR_VERSION == 6): # 4.6
+                FLAGS += "-Wno-psabi -Wno-unused-variable -Wno-unused-but-set-variable "
 
     return FLAGS
 
@@ -116,9 +144,19 @@ o = build.getopt.Options()
 config = Configuration(thisdir, options = o,
                        sourcefile = 'core/avmplus.h')
 
-arm_fpu = o.getBoolArg("arm-fpu",False)
-arm_neon = o.getBoolArg("arm-neon",False)
+the_os, cpu = config.getTarget()
+
+arm_fpu = o.getBoolArg("arm-fpu", False)
+arm_neon = o.getBoolArg("arm-neon", False)
+arm_thumb = False
+if cpu == "thumb2":
+    arm_thumb = True
+else:
+    arm_thumb = o.getBoolArg("arm-thumb",False)
+arm_hard_float = o.getBoolArg("arm-hard-float", False)
 arm_arch = o.arm_arch
+if arm_arch == None and cpu == "thumb2":
+    arm_arch = "armv7-a"
 
 buildTamarin = o.getBoolArg('tamarin', True)
 if buildTamarin:
@@ -132,7 +170,6 @@ buildAot = o.peekBoolArg("aot", False)
 if buildAot:
     config.subst("ENABLE_AOT", 1)
 
-the_os, cpu = config.getTarget()
 APP_CPPFLAGS = "-DAVMSHELL_BUILD "
 APP_CXXFLAGS = ""
 APP_CFLAGS = ""
@@ -323,17 +360,36 @@ if config.getCompiler() == 'GCC':
     if cpu == 'sh4':
         APP_CXXFLAGS += "-mieee -Wno-cast-align "
 
+    if cpu == 'arm' or cpu == 'thumb2':
+        APP_CXXFLAGS += "-Wno-cast-align "
+        APP_CFLAGS += "-Wno-cast-align "
+
+    FLOAT_ABI = None;
+    EXTRA_CFLAGS = "";
     if arm_fpu:
-        ARM_FPU_FLAGS = "-mfloat-abi=softfp -mfpu=vfp -march=%s -Wno-cast-align " % arm_arch # compile to use hardware fpu
-        OPT_CXXFLAGS += ARM_FPU_FLAGS
-        DEBUG_CXXFLAGS += ARM_FPU_FLAGS
+        FLOAT_ABI = "-mfloat-abi=softfp "
+        EXTRA_CFLAGS = "-mfpu=vfp -march=%s " % arm_arch # compile to use hardware fpu
+    if arm_hard_float:
+        FLOAT_ABI = "-mfloat-abi=hard -march=%s " % arm_arch # compile to use neon vfp
+        AVMSHELL_LDFLAGS += "-static "
     if arm_neon:
-        ARM_NEON_FLAGS = "-mfloat-abi=softfp -mfpu=neon -march=%s -Wno-cast-align -DTARGET_NEON " % arm_arch # compile to use neon vfp
-        OPT_CXXFLAGS += ARM_NEON_FLAGS
-        DEBUG_CXXFLAGS += ARM_NEON_FLAGS
+        if FLOAT_ABI == None:
+            FLOAT_ABI = "-mfloat-abi=softfp "
+        EXTRA_CFLAGS = "-mfpu=neon -march=%s -DTARGET_NEON " % arm_arch # compile to use neon vfp
+    if arm_thumb:
+        EXTRA_CFLAGS += "-mthumb -DTARGET_THUMB2 "
+    if arm_thumb != False and arm_arch == "armv7-a":
+        EXTRA_CFLAGS += "-mtune=cortex-a8 "
     #if arm_arch:
         #OPT_CXXFLAGS += "-march=%s " % arm_arch
         #DEBUG_CXXFLAGS += "-march=%s " % arm_arch
+    if EXTRA_CFLAGS != None:
+        APP_CXXFLAGS += EXTRA_CFLAGS
+        APP_CFLAGS += EXTRA_CFLAGS
+    if FLOAT_ABI != None:
+        APP_CXXFLAGS += FLOAT_ABI
+        APP_CFLAGS += FLOAT_ABI
+        AVMSHELL_LDFLAGS += FLOAT_ABI
 
     if config.getDebug():
         APP_CXXFLAGS += ""
@@ -356,7 +412,7 @@ elif config.getCompiler() == 'VS':
             OPT_CXXFLAGS += "-QRfpe- " # compile to use hardware fpu
     else:
         APP_CXXFLAGS = "-W4 -WX -wd4291 -GF -GS- -Zc:wchar_t- "
-        APP_CFLAGS = "-W4 -WX -wd4291 -GF -GS- -Zc:wchar_t- "
+        APP_CFLAGS = "-W3 -WX -wd4291 -GF -GS- -Zc:wchar_t- "
 
         if cpu == 'x86_64':
             pass # 64 bit VC does NaN comparisons incorrectly with fp:fast
@@ -397,7 +453,7 @@ lzma_lib = o.getStringArg('lzma-lib')
 if lzma_lib is None:
     lzma_lib = '$(call EXPAND_LIBNAME,lzma)'
 
-AVMSHELL_LDFLAGS = zlib_lib + ' ' + lzma_lib
+AVMSHELL_LDFLAGS += zlib_lib + ' ' + lzma_lib
 
 sys_root_dir = o.getStringArg('sys-root-dir')
 if sys_root_dir is not None:
@@ -420,12 +476,8 @@ if the_os == "darwin":
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks "
 
     # If an sdk is selected align OS and gcc/g++ versions to it
-    if o.mac_sdk_version is not None:
-        os_ver,sdk_number = _setSDKParams(o.mac_sdk_version, os_ver)
-        APP_CXXFLAGS += "-mmacosx-version-min=%s -isysroot /Developer/SDKs/MACOSX%s.sdk " % (os_ver,sdk_number)
-    else:
-        APP_CXXFLAGS += "-mmacosx-version-min=%s " % os_ver
-
+    os_ver,sdk_path = _setSDKParams(o.mac_sdk_version, os_ver, o.mac_xcode_version)
+    APP_CXXFLAGS += "-mmacosx-version-min=%s -isysroot %s " % (os_ver,sdk_path)
     config.subst("MACOSX_DEPLOYMENT_TARGET",os_ver)
 
     if cpu == 'ppc64':
@@ -448,6 +500,11 @@ elif the_os == "windows" or the_os == "cygwin":
         else:
             APP_CPPFLAGS += "-DARMV5 -QRarch5t "
         OS_LIBS.append('mmtimer corelibc coredll')
+    elif cpu == "thumb2": 
+        APP_CPPFLAGS += "-DARMv7 -D_ARM_ -DTARGET_THUMB2 -DUNICODE -DUNDER_RT=1 -DWIN32_LEAN_AND_MEAN -D_CONSOLE -D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE "
+        OS_LIBS.append('winmm')
+        OS_LIBS.append('shlwapi')
+        OS_LIBS.append('AdvAPI32')
     else:
         APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -D_CONSOLE "
         OS_LIBS.append('winmm')
@@ -508,6 +565,9 @@ elif cpu == "sparc":
 elif cpu == "x86_64":
     # we detect this in core/avmbuild.h and MMgc/*build.h
     None
+elif cpu == "thumb2":
+    # we detect this in core/avmbuild.h and MMgc/*build.h
+    None
 elif cpu == "arm":
     # we detect this in core/avmbuild.h and MMgc/*build.h
     None
@@ -547,6 +607,7 @@ APP_CPPFLAGS += ''.join(val is None and ('-D%s ' % var) or ('-D%s=%s ' % (var, v
 
 config.subst("APP_CPPFLAGS", APP_CPPFLAGS)
 config.subst("APP_CXXFLAGS", APP_CXXFLAGS)
+config.subst("APP_CFLAGS", APP_CFLAGS)
 config.subst("OPT_CPPFLAGS", OPT_CPPFLAGS)
 config.subst("OPT_CXXFLAGS", OPT_CXXFLAGS)
 config.subst("DEBUG_CPPFLAGS", DEBUG_CPPFLAGS)

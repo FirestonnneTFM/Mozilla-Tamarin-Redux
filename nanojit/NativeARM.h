@@ -311,7 +311,6 @@ const RegisterMask FpQRegs = 0x00000000ffff0000LL; // Q0-Q3
 const RegisterMask GpRegs  = 0x000000000000ffffLL; // R0-R10,FP,IP,SP,LR,PC
 const RegisterMask AllowableFlagRegs = 0x07ff;     // R0-R10
 
-#define isU12(offs) (((offs) & 0xfff) == (offs))
 
 inline bool IsFpSReg(Register _r) { return _r >=FirstSFloatReg && _r < FirstDFloatReg; }
 inline bool IsFpDReg(Register _r) { return _r >=FirstDFloatReg && _r < FirstQFloatReg; }

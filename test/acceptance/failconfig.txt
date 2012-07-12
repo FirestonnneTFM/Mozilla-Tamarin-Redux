@@ -419,6 +419,7 @@ spidermonkey/js1_5/Regress/regress-360969-02 , .*diff,, skip, Testcase outputs a
 spidermonkey/js1_5/Regress/regress-360969-04 , .*diff,, skip, Testcase outputs an execution time which is not part of the test and can cause a failure INVESTIGATE
 abcasm/bug_554915b, .* , , skip, testcase can cause a timeout INVESTIGATE
 
+regress/security/bug_689243b:Correct exception thrown , (x86|arm)-.*-Dinterp , , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=689243
 
 ####################
 # Workers

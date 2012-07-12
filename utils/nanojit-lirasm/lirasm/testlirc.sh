@@ -1,11 +1,22 @@
 #!/bin/bash
 
-set -eu
+#set -eu
 
 exitcode=0
 
+execute=1
+
+if [ "$1" = "--asm" ]; then
+  execute=0
+  shift
+fi
+
 LIRASM=$1
+if [ $# -gt 1 ]; then
 TESTFLOAT=$2
+else
+  TESTFLOAT=float
+fi
 
 TESTS_DIR=`dirname "$0"`/tests
 
@@ -38,11 +49,34 @@ function runtest {
     fi
 }
 
+function emitasm {
+    local infile=$1
+    local options=${2-}
+
+    # Catch a request for the random tests.
+    if [[ $infile == --random* ]] ; then
+        local outfile=$TESTS_DIR/random.out
+    else
+        local outfile=`echo $infile | sed 's/\.in/\.out/'`
+    fi
+
+    if [[ ! -e "$outfile" ]] ; then
+        echo "$0: error: no out file $outfile"
+        exit 1
+    fi
+
+    $LIRASM $options --verbose $infile 
+}
+
 function runtests {
     local testdir=$1
     local options=${2-}
     for infile in "$TESTS_DIR"/"$testdir"/*.in ; do
+        if [ "$execute" -eq 1 ]; then
         runtest $infile "$options"
+        else
+            emitasm $infile "$options"
+        fi
     done
     if [[ $TESTFLOAT == float ]] ; then
         if [[ -e "$TESTS_DIR"/"$testdir"/float ]] ; then
@@ -89,24 +123,6 @@ elif [[ $($LIRASM --show-arch 2>/dev/null) == "arm" ]] ; then
     runtests "littleendian"
     runtest "--random 1000000"
     runtest "--random 1000000" "--optimize"
-
-    # ARMv6 with VFP.  ARMv6 without VFP doesn't seem worth testing.
-    # Random tests are reduced.
-    runtests "."              "--arch 6"
-    runtests "hardfloat"      "--arch 6"
-    runtests "32-bit"         "--arch 6"
-    runtests "littleendian"   "--arch 6"
-    runtest "--random 100000" "--arch 6"
-
-    if [[ $TESTFLOAT != float ]] ; then
-        # ARMv5 without VFP.  ARMv5 with VFP doesn't seem worth testing.
-        # Random tests are reduced.
-        runtests "."              "--arch 5 --novfp"
-        runtests "softfloat"      "--arch 5 --novfp"
-        runtests "32-bit"         "--arch 5 --novfp"
-        runtests "littleendian"   "--arch 5 --novfp"
-        runtest "--random 100000" "--arch 5 --novfp"
-    fi
 
 elif [[ $($LIRASM --show-arch 2>/dev/null) == "ppc" ]] ; then
     # PPC is bi-endian but usually configured as big-endian.

@@ -71,7 +71,7 @@ namespace avmplus
         _asm fld [x];
         _asm fpatan;
     }
-#elif !defined(AVMPLUS_ARM)
+#elif !defined(UNDER_CE)
     REALLY_INLINE double MathUtils::atan2(double y, double x)
     {
         return ::atan2(y,x);
@@ -120,12 +120,12 @@ namespace avmplus
 // results expected by the ECMAscript test suite for sin, cos, and tan.
 // Use the standard library instead on Win32 as well as Win64. See bug 521245.
 
-#ifndef AVMPLUS_ARM
+#ifndef UNDER_CE
     REALLY_INLINE double MathUtils::cos(double value)
     {
         return ::cos(value);
     }
-#endif /* AVMPLUS_ARM */
+#endif /* UNDER_CE */
 
 #ifndef X86_MATH
     REALLY_INLINE double MathUtils::exp(double value)
@@ -154,7 +154,8 @@ namespace avmplus
     }
 
 #ifndef X86_MATH
-#if defined(UNDER_CE) || defined(_WIN8_ARM_SLOWDOWN_)
+#if defined(UNDER_CE) || defined(UNDER_RT)
+// TODO: FIXME: _WIN8_ARM_SLOWDOWN_ here. Open ToFix
     REALLY_INLINE double MathUtils::mod(double x, double y)
     {
         if (!y) {
@@ -189,7 +190,7 @@ namespace avmplus
 // results expected by the ECMAscript test suite for sin, cos, and tan.
 // Use the standard library instead on Win32 as well as Win64. See bug 521245.
 
-#ifndef AVMPLUS_ARM
+#ifndef UNDER_CE
     REALLY_INLINE double MathUtils::sin(double value)
     {
         return ::sin(value);
@@ -199,7 +200,7 @@ namespace avmplus
     {
         return ::tan(value);
     }
-#endif /* AVMPLUS_ARM */
+#endif /* UNDER_CE */
 
     REALLY_INLINE double MathUtils::sqrt(double value)
     {

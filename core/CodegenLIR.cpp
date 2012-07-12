@@ -50,6 +50,12 @@
 #include <intrin.h>
 #endif
 
+// Workaround GCC 4.6 offsetof bug
+#if (__GNUC__ == 4) && (__GNUC_MINOR__ == 6)
+#undef offsetof
+#define offsetof(a,b) ((int)(&(((a*)(0))->b)))
+#endif
+
 #ifdef VMCFG_VTUNE
 namespace vtune {
     using namespace avmplus;
@@ -66,7 +72,7 @@ using namespace vtune;
 #endif
 
 #ifdef _MSC_VER
-    #if !defined (AVMPLUS_ARM)
+    #if !defined (AVMPLUS_ARM) || defined(UNDER_RT)
     extern "C"
     {
         int __cdecl _setjmp3(jmp_buf jmpbuf, int arg);

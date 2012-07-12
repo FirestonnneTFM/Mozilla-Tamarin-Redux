@@ -100,7 +100,8 @@ namespace nanojit
         setCpuFeatures(this);
 #endif
 
-#ifdef NANOJIT_ARM
+//### FIXME: Thumb2 requires V7+.
+#if defined(NANOJIT_ARM) || defined(NANOJIT_THUMB2)
         NanoStaticAssert(NJ_COMPILER_ARM_ARCH >= 4 && NJ_COMPILER_ARM_ARCH <= 7);
         arm_arch = NJ_COMPILER_ARM_ARCH;
         arm_vfp = (arm_arch >= 7);
