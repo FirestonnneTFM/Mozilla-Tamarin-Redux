@@ -77,7 +77,6 @@ namespace avmplus
         int32_t get_receiver();
         double channelGuid(); // debugging
         bool isClosed();
-        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
         void throwError(const char* msg);
         void throwChannelClosedError();
 

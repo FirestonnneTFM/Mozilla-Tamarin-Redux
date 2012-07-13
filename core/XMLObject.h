@@ -270,7 +270,6 @@ namespace avmplus
         // E4X support routines
         void __toXMLString(PrintWriter &s, NamespaceList& AncestorNamespace, int indentLevel = 0, bool includeChildren = true) const;
         XMLObject* _deepCopy () const;
-        ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
 
         Namespace* GenerateUniquePrefix(Namespace* ns, const NamespaceList& namespaces) const;
 

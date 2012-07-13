@@ -676,17 +676,6 @@ namespace avmplus
         return undefinedAtom;
     }
 
-    ScriptObject* ScriptObject::cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const
-    {
-        bool isDynamic = this->traits()->needsHashtable();
-        ScriptObject* clone = targetClosure->constructObject(); // this will set slots
-        cloner.registerClone(this, clone);
-        if (isDynamic) {
-            cloner.cloneDynamicProperties(this, clone);
-        }
-        return clone;
-    }
-
     Atom ScriptObject::applyTypeArgs(int /*argc*/, Atom* /*argv*/)
     {
         toplevel()->throwTypeError(kTypeAppOfNonParamType);

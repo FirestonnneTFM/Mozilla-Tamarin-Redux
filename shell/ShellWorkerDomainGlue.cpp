@@ -55,15 +55,6 @@ namespace avmshell {
     }
     
 
-    avmplus::ScriptObject* ShellWorkerDomainObject::cloneNonSlots(avmplus::ClassClosure* classClosure, avmplus::Cloner&) const
-    {
-        ShellWorkerDomainObject* clone = new (classClosure->gc(), 
-                                              classClosure->ivtable()->getExtraSize()) 
-            ShellWorkerDomainObject(classClosure->ivtable(), classClosure->prototypePtr());
-        return clone;
-    }
-    
-
     avmplus::ObjectVectorObject* ShellWorkerDomainObject::listWorkers()
     {
         return WorkerDomainObjectBase<ShellWorkerDomainObject>::listWorkers();

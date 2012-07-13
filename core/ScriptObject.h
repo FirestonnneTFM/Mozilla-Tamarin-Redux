@@ -174,8 +174,6 @@ namespace avmplus
          */
         virtual Atom construct(int argc, Atom* argv);
 
-        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
-
         // TODO make this const
         virtual Atom nextName(int index);
 

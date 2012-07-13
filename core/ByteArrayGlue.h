@@ -359,7 +359,6 @@ namespace avmplus
         virtual bool hasUintProperty(uint32_t i) const;
         virtual Atom getUintProperty(uint32_t i) const;
         virtual void setUintProperty(uint32_t i, Atom value);
-        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
         Atom getMultinameProperty(const Multiname* name) const;
         void setMultinameProperty(const Multiname* name, Atom value);
         bool hasMultinameProperty(const Multiname* name) const;

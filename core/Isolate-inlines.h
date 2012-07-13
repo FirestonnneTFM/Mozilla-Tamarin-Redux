@@ -215,25 +215,6 @@ namespace avmplus
         }
     }
     
-    template <class T>
-    ScriptObject* WorkerObjectBase<T>::cloneNonSlots(ClassClosure* classClosure, Cloner&) const
-    {
-
-        ScriptObject* prev = classClosure->toplevel()->getInternedObject(m_isolate);
-        if (prev != NULL) {
-            return static_cast<T*>(prev);
-        }
-
-        WorkerObjectBase<T>* clone = new (classClosure->gc(), 
-                                   classClosure->ivtable()->getExtraSize())
-            T(classClosure->ivtable(), classClosure->prototypePtr());
-        clone->giid = giid;
-        //clone->clearBlobs();
-        clone->m_isolate = m_isolate;
-        // FIXME assert that Worker is final or else this is wrong
-        return clone->self();
-    }
-
 
     template <class T>
     void WorkerObjectBase<T>::setSharedProperty(String* key, Atom value)

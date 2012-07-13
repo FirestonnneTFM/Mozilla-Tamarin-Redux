@@ -727,7 +727,6 @@ namespace avmplus
         // AS3 native function implementations
         IntVectorObject* newThisType();
 
-        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
     // ------------------------ DATA SECTION BEGIN
     private:
         GC_NO_DATA(IntVectorObject)
@@ -753,7 +752,6 @@ namespace avmplus
         // AS3 native function implementations
         UIntVectorObject* newThisType();
 
-        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
 
     // ------------------------ DATA SECTION BEGIN
     private:
@@ -779,8 +777,6 @@ namespace avmplus
 
         // AS3 native function implementations
         DoubleVectorObject* newThisType();
-
-        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
 
     // ------------------------ DATA SECTION BEGIN
     private:
@@ -892,8 +888,6 @@ namespace avmplus
 
         // AS3 native function implementations
         ObjectVectorObject* newThisType();
-
-        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
 
     // ------------------------ DATA SECTION BEGIN
     private:

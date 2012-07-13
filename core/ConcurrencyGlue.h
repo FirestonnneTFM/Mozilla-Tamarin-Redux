@@ -65,7 +65,6 @@ namespace avmplus {
         bool tryLock();
         void unlock();
         void ctor();
-        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
 		ChannelItem* makeChannelItem();
         
         class State;
@@ -100,14 +99,14 @@ namespace avmplus {
         bool notifyImpl();
         bool notifyAllImpl();
 
-        virtual ScriptObject* cloneNonSlots(ClassClosure* targetClosure, Cloner& cloner) const;
-
 		ChannelItem* makeChannelItem();
         
         class State;
 		
     private:
-        GC_NO_DATA(ConditionObject)
+        GC_DATA_BEGIN(ConditionObject)
+        GCMember<MutexObject> m_mutex;
+        GC_DATA_END(ConditionObject)
         FixedHeapRef<State> m_state;
         
         DECLARE_SLOTS_ConditionObject;

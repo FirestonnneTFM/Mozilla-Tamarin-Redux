@@ -237,6 +237,7 @@ namespace vmbase {
         , m_managerPrev(NULL)
         , m_managerNext(NULL)
         , m_manager(NULL)
+        , m_interruptLocation(NULL)
         , m_isolateDesc(-1)
     {
     }
@@ -266,6 +267,14 @@ namespace vmbase {
     {
         m_current.set(record);
     }
+
+	REALLY_INLINE void SafepointRecord::setLocationAndDesc (int32_t* location, int desc)
+	{
+		assert(m_manager == NULL);		// this record should not be on a SafepointManager list
+
+		m_isolateDesc = desc;
+		m_interruptLocation = location;
+	}
 
     REALLY_INLINE SafepointManager::RecordIterator::RecordIterator(SafepointManager& manager)
         : m_next(manager.m_records)

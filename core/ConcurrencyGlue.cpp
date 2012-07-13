@@ -416,16 +416,6 @@ namespace avmplus {
 		return item;
 	}
 	
-    ScriptObject* MutexObject::cloneNonSlots(ClassClosure* targetClosure, Cloner&) const
-    {
-        MutexObject* clone = targetClosure->toplevel()->getInternedObject(m_state).staticCast<MutexObject>();
-        if (clone == NULL) {
-            clone = new (targetClosure->gc(), MMgc::kExact, targetClosure->ivtable()->getExtraSize()) MutexObject(targetClosure->ivtable(), targetClosure->prototypePtr());
-            clone->m_state = this->m_state;
-        }
-        return clone;
-    }
-
     MutexClass::MutexClass(VTable* cvtable)
         : ClassClosure(cvtable)
     {
@@ -434,6 +424,8 @@ namespace avmplus {
 
     ConditionObject::ConditionObject(VTable* cvtable, ScriptObject* delegate) 
         : ScriptObject(cvtable, delegate)
+        , m_mutex(NULL)
+        , m_state(NULL)
     {
     }
 
@@ -497,6 +489,7 @@ namespace avmplus {
         AvmAssert(mutex != NULL);
         m_state = mmfx_new(ConditionObject::State(mutex->m_state));
 
+        m_mutex = mutex;
         ScriptObject* prev = toplevel()->getInternedObject(m_state);
         if (prev) {
             AvmAssert(false); 
@@ -578,16 +571,6 @@ namespace avmplus {
         return m_state->wait(millis, isolate, toplevel());
     }
 
-    ScriptObject* ConditionObject::cloneNonSlots(ClassClosure* targetClosure, Cloner& ) const
-    {
-        ConditionObject* clone = targetClosure->toplevel()->getInternedObject(m_state).staticCast<ConditionObject>();
-        if (clone == NULL) {
-            clone = new (targetClosure->gc(), MMgc::kExact, targetClosure->ivtable()->getExtraSize()) ConditionObject(targetClosure->ivtable(), targetClosure->prototypePtr());
-            clone->m_state = this->m_state;
-        }
-        return clone;
-    }
-
     ConditionObject::~ConditionObject()
     {
         // we are going away which cannot happen if we are
@@ -610,16 +593,20 @@ namespace avmplus {
 
     GCRef<MutexObject> ConditionObject::get_mutex()
     {
-        ScriptObject* prev = toplevel()->getInternedObject(m_state->m_mutexState);
-        if (prev) {
-            return static_cast<MutexObject*>(prev);
-        } else {
-            MutexClass* cls = toplevel()->builtinClasses()->get_MutexClass();
-            MutexObject* mutex = new (gc(), MMgc::kExact, cls->ivtable()->getExtraSize()) MutexObject(cls->ivtable(), cls->prototypePtr());
-            mutex->m_state = m_state->m_mutexState;
-            toplevel()->internObject(m_state->m_mutexState, mutex);
-            return mutex;
+        if (m_mutex == NULL)
+        {
+            ScriptObject* prev = toplevel()->getInternedObject(m_state->m_mutexState);
+            if (prev) {
+                m_mutex = static_cast<MutexObject*>(prev);
+            } else {
+                MutexClass* cls = toplevel()->builtinClasses()->get_MutexClass();
+                MutexObject* mutex = new (gc(), MMgc::kExact, cls->ivtable()->getExtraSize()) MutexObject(cls->ivtable(), cls->prototypePtr());
+                mutex->m_state = m_state->m_mutexState;
+                toplevel()->internObject(m_state->m_mutexState, mutex);
+                m_mutex = mutex;
+            }
         }
+        return m_mutex;
     }
 
 

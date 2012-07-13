@@ -59,7 +59,6 @@ namespace avmshell {
         
         public:
         ShellWorkerObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype); 
-        virtual avmplus::ScriptObject* cloneNonSlots(avmplus::ClassClosure* classClosure, avmplus::Cloner& cloner) const;
         void clearByteCode();
         avmplus::ByteArrayObject* getByteCode();
         void setByteCode(avmplus::ByteArrayObject* byteCode);
