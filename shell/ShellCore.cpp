@@ -93,23 +93,6 @@ namespace avmshell
     {
     }
 
-    void ShellToplevel::initAliasTable(bool initWorkerClasses) 
-    {
-        using namespace avmplus;
-        Toplevel::initAliasTable(initWorkerClasses);
-        if (initWorkerClasses) {
-            ScriptObject* ctx = objectClass;
-            ClassClosure* promiseClass = shellClasses->get_PromiseClass();
-            Traits* t = promiseClass->ivtable()->traits;
-            registerClassAlias(ctx, t->name(), promiseClass);
-
-            GCRef<ClassClosure> envelopeClass = shellClasses->get_EnvelopeClass();
-            registerClassAlias(ctx, envelopeClass->ivtable()->traits->name(), envelopeClass);
-
-        }
-    }
-
-
     ShellCore::ShellCore(MMgc::GC* gc, avmplus::ApiVersionSeries apiVersionSeries)
         : avmplus::AvmCore(gc, apiVersionSeries)
     {
@@ -245,8 +228,6 @@ namespace avmshell
             AvmAssert(shell_toplevel->shellClasses->get_ShellCoreFriend1Class()->get_foo() == 42);
             AvmAssert(shell_toplevel->shellClasses->get_ShellCoreFriend2Class()->get_bar() == 101);
         }
-
-        shell_toplevel->initAliasTable(true);
 
         return shell_toplevel;
     }

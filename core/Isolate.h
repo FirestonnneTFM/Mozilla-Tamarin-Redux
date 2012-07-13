@@ -71,7 +71,6 @@ namespace avmplus
     {
         friend class Aggregate;
         friend class WorkerObject;
-        friend class PromiseHelperClass;
         
     public:
 
@@ -131,9 +130,6 @@ namespace avmplus
         
         void destroyListeners();
 
-        virtual void eventLoop(Toplevel* toplevel);
-        virtual bool processProxies(Toplevel* toplevel);
-        virtual void registerPromiseOwner(int32_t existingProxyGID, Atom resolvedObject, Toplevel* toplevel);
 
         // keep in sync with constants in Worker
         enum State {
@@ -183,18 +179,6 @@ namespace avmplus
         FixedHeapArray< FixedHeapArray<uint8_t> > m_code;
         vmbase::RecursiveMutex m_sharedPropertyLock; 
         
-
-    protected: // Access moved to subclass
-        FixedHeapArray<int32_t> m_additionalProxyInfo;
-        // used to create new promises during promise info argument passing
-        FixedHeapArray< FixedHeapRef<PromiseChannel> > m_additionalProxyChannels;
-        int numAdditionalProxies;
-        int additionalProxiesProcessed;
-        FixedHeapArray<int32_t> m_emptyPromiseInfo;
-        // used to initialize empty promises after their target has been resolved
-        FixedHeapArray< FixedHeapRef<PromiseChannel> > m_emptyPromiseChannels;
-        int numEmptyPromiseOwners;
-        
     public: 
         // 
         // this structure is used to block threads
@@ -208,18 +192,18 @@ namespace avmplus
             virtual ~WaitRecord();
             vmpi_condvar_t condVar;
             vmpi_mutex_t privateMutex;
+            bool notified;
+#ifdef DEBUG
+            vmpi_thread_t threadID;
+#endif // DEBUG
             bool isValid;
+            //WaitRecord* next;
         };
 
 
         // used to initialize channels during worker startup
         FixedHeapArray< FixedHeapRef<PromiseChannel> > m_initialChannels;
         
-
-        // gpid of the promise representing global scope - used during
-        // initialization of the main isolate
-        uint32_t m_global_gpid;
-
     private:
         virtual void releaseActiveResources();
         SharedPropertyMap m_properties;
@@ -277,17 +261,41 @@ namespace avmplus
         void notify();
         void notifyAll();
 
-    protected:
-        Isolate::WaitRecord* enterWait(Isolate* isolate);
-        bool wait(Isolate::WaitRecord* record, Isolate* isolate, int32_t millis);
-        void exitWait(Isolate* isolate, Isolate::WaitRecord* record);
-#ifdef DEBUG
-        virtual bool lockIsHeld() = 0;
-#endif // DEABUG
+        //
+        // this is intended as a stack based helper for waiting
+        // on an interruptable state object
+        //
+        class EnterWait
+        {
+        public:
+            EnterWait(Isolate* isolate, InterruptableState* state);
+            bool failed;
+            bool interrupted;
+        };
 
-    private:
+        vmbase::RecursiveMutex m_lock;
         // list of all isolate threads currently waiting on this state
         MMgc::BasicList<Isolate::WaitRecord*> m_waitList;
+        // 
+        // there is a race condition between notifyXXX() calls
+        // and when a wait record gets into the wait list
+        // if the wait list is empty and a notifyXXX() call is
+        // made this value will be set to true. when there are no
+        // records in the wait list and a record is added it's 
+        // notified property will be updated to reflect this value
+        // updates to this value are protected by the lock for the
+        // wait list.
+        // 
+        bool notified;
+#ifdef DEBUG
+        int32_t gid;
+#endif // DEBUG
+
+    private:
+#ifdef DEBUG
+        static int32_t globalId; // global id counter
+#endif // DEBUG
+        //Isolate::WaitRecord* m_waitList;
     };
 
 
@@ -299,13 +307,11 @@ namespace avmplus
     class Aggregate : public FixedHeapRCObject
     { 
         friend void Isolate::destroyListeners();
-        friend class PromiseHelperClass;
     private:
         // singleton
         class Globals 
         {
             friend class Aggregate;
-            friend class PromiseHelperClass;
         public:
             Globals()
                   : m_nextGlobalIsolateId(1) 
@@ -313,7 +319,6 @@ namespace avmplus
                   , m_isolateMap(16)
                   , m_channelMap(32)
                   , m_nextChannelGuid(1)
-                  , m_emptyPromisesMap(16)
             {}
 
             ~Globals()
@@ -354,16 +359,6 @@ namespace avmplus
 
             int64_t m_nextChannelGuid;
 
-            class EmptyPromisesMap: public FixedHeapHashTable<int32_t, FixedHeapHashTable<int32_t, int32_t>* >
-            {
-            public:
-                EmptyPromisesMap(int initialSize);
-                virtual ~EmptyPromisesMap();
-            };
-
-            EmptyPromisesMap m_emptyPromisesMap;
-
-
             /**** end data ****/
         }; // Globals
 
@@ -373,8 +368,6 @@ namespace avmplus
         virtual void destroy();
 
         bool isPrimordial(int32_t giid);
-
-        uint32_t nextPromiseGID();
 
         // If parent == NULL, the primordial isolate will be created.
         Isolate* newIsolate(Isolate* parent);
@@ -408,22 +401,8 @@ namespace avmplus
         bool beginChannelOp(PromiseChannel* channel, bool item_sent);
         void endChannelOp(PromiseChannel* channel, bool item_received);
 
-        bool waitForAnySend(Isolate* isolate, Toplevel* toplevel, bool block);
-
         virtual void selfExit(Toplevel* toplevel);
 
-        // false if failure, e.g., worker inactive.
-        bool registerAdditionalRemoteProxy(uint32_t resolvedPromiseGID,
-                                           uint32_t freshPromiseGID,
-                                           PromiseChannelObject* out,
-                                           PromiseChannelObject* inc);
-        
-        // false if failure
-        bool notifyEmptyOwners(int32_t emptyPromiseGID, Atom resolvedObject, Toplevel* toplevel);
-
-        void registerEmptyPromise(int32_t emptyPromiseGID, int32_t creatorGiid);
-
-        void printEmptyPromises();
 
         GCRef<ObjectVectorObject> listWorkers(Toplevel* toplevel);
         void runHoldingIsolateMapLock(vmbase::SafepointTask* task);

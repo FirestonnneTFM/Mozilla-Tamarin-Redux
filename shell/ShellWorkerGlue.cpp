@@ -74,7 +74,7 @@ namespace avmshell {
         return avmplus::WorkerObjectBase<ShellWorkerObject>::newEventChannel();
     }
 
-    avmplus::PromiseObject* ShellWorkerObject::startInternal()
+    bool ShellWorkerObject::startInternal()
     {
 
         using namespace avmplus;
@@ -90,23 +90,7 @@ namespace avmshell {
         AvmAssert(incChannel->gc() == NULL);
         channels.values[0] = outChannel;
         channels.values[1] = incChannel;
-
-        uint32_t global_gpid = aggregate->nextPromiseGID();
-        m_isolate->m_global_gpid = global_gpid;
-        bool success = startVeryInternal();
-        if (!success) 
-            return false;
-        ShellToplevel* tl = static_cast<ShellToplevel*>(toplevel());
-        avmplus::PromiseClass* promiseClass = tl->shellClasses->get_PromiseClass();
-        PromiseObject* result = promiseClass->createWithGID(outChannel,
-                                                     incChannel,
-                                                     true, // global
-                                                     global_gpid);
-        // Promise representing the global scope should not keep the scope
-        // object alive.
-        GCRef<PromiseHelperClass> promiseHelperClass = tl->shellClasses->get_PromiseHelperClass();
-        promiseHelperClass->schedulePromiseCollection(result);
-        return result;        
+        return startVeryInternal();
     }
 
 

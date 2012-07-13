@@ -444,8 +444,6 @@ namespace avmplus
     private:
         Atom getClassClosureAtomFromAlias(Atom name, bool checkContextDomainOnly);
         void addAliasedClassClosure(Atom key1, Atom key2, ClassClosure* cc, bool isDomainEnv);
-        TraitsMorpher* addTraitsMorpher(Traits* sourceTraits);
-        
         //Function to be overriden by the player
         //This hack has been added to fix Bugzilla 715105
         virtual DomainEnv* getDomainEnvOverridableHook();
@@ -458,10 +456,6 @@ namespace avmplus
          */
         static void registerClassAlias(ScriptObject *script, String *aliasName, ClassClosure *cc);
         static ClassClosure* getClassByAlias(ScriptObject* script, String *aliasName);
-
-        TraitsMorpher* getTraitsMorpher(Traits* sourceTraits) const;
-
-        virtual void initAliasTable(bool initWorkerClasses);
 
  		void internObject (const FixedHeapRCObject* rep, GCRef<ScriptObject> obj);
         GCRef<ScriptObject> getInternedObject (const FixedHeapRCObject* rep) const;

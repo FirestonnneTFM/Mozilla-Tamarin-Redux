@@ -124,9 +124,6 @@ namespace avmplus
     class CallStackNode;
     class ClassClass;
     class ClassClosure;
-    class ClonerEntry;
-    class TraitsMorpher;
-    class Cloner;
     class Closure;
     class CodeContext;
     class CompiledRegExp;
@@ -196,7 +193,6 @@ namespace avmplus
     class PoolObject;
     class PrintWriter;
     class Profiler;
-    class PromiseObject;
     class ProxyClass;
     class ProxyObject;
     class RegExpClass;

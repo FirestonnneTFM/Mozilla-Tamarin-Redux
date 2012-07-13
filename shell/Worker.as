@@ -147,12 +147,12 @@ package flash.system
         * Run the code blobs passed into the constructor in order and enter the event loop.
         * @return proxy to the remote worker.
         */
-        public function start() :Promise
+        public function start() :void
         {
-            return startInternal();
+            startInternal();
         }
 
-        private native function startInternal() :Promise;
+        private native function startInternal() :void;
 
         public native function isParentOf(other: Worker): Boolean;
 

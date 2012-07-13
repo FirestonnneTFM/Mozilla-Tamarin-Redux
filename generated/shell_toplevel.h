@@ -70,14 +70,6 @@ namespace avmplus {
     class NewObjectSampleObject; // flash.sampler::NewObjectSample
     class ObjectVectorObject; // __AS3__.vec::Vector$object
     class PromiseChannelObject; // flash.system::PromiseChannel
-    class PromiseClass; // flash.system::Promise$
-    class PromiseHelperClass; // flash.system::PromiseHelper$
-    class PromiseHelperObject; // flash.system::PromiseHelper
-    class PromiseObject; // flash.system::Promise
-    class PromiseStateClass; // flash.system::PromiseState$
-    class PromiseStateObject; // flash.system::PromiseState
-    class RemoteProxyClass; // flash.system::RemoteProxy$
-    class RemoteProxyObject; // flash.system::RemoteProxy
     class SampleClass; // flash.sampler::Sample$
     class SampleObject; // flash.sampler::Sample
     class ShellCoreFriend1Class; // avmshell::ShellCoreFriend1$
@@ -149,8 +141,6 @@ namespace avmshell {
     class AbstractRestrictedBaseObject; // avmshell::AbstractRestrictedBase
     class CheckBaseClass; // avmshell::CheckBase$
     class CheckBaseObject; // avmshell::CheckBase
-    class EnvelopeClass; // flash.system::Envelope$
-    class EnvelopeObject; // flash.system::Envelope
     class FileClass; // avmplus::File$
     class MIClass; // avmplus::MI$
     class MIObject; // avmplus::MI
@@ -236,44 +226,38 @@ const uint32_t abcclass_flash_system_WorkerState = 50;
 const uint32_t abcclass_flash_system_Worker = 51;
 const uint32_t abcclass_flash_system_WorkerEvent = 52;
 const uint32_t abcclass_flash_system_WorkerDomain = 53;
-const uint32_t abcclass_flash_system_PromiseState = 54;
-const uint32_t abcclass_flash_system_PromiseHelper = 55;
-const uint32_t abcclass_flash_system_Promise = 56;
-const uint32_t abcclass_flash_system_RemoteProxy = 57;
-const uint32_t abcclass_flash_system_Envelope = 58;
 
 /* methods */
-const uint32_t avmplus_ITest_avmplus_ITest_test = 38; // abc
-const uint32_t avmplus_CTest_test = 41; // abc
-const uint32_t avmplus_MI_plus = 44; // native
-const uint32_t avmplus_System_exit = 47; // native
-const uint32_t avmplus_System_exec = 48; // native
-const uint32_t avmplus_System_sleep = 49; // native
-const uint32_t avmplus_System_getAvmplusVersion = 50; // native
-const uint32_t avmplus_System_getFeatures = 51; // native
-const uint32_t avmplus_System_getRunmode = 52; // native
-const uint32_t avmplus_System_trace = 53; // native
-const uint32_t avmplus_System_write = 54; // native
-const uint32_t avmplus_System_debugger = 55; // native
-const uint32_t avmplus_System_isDebugger = 56; // native
-const uint32_t avmplus_System_getNanosecondTimer = 57; // native
-const uint32_t avmplus_System_getTimer = 58; // native
-const uint32_t avmplus_System_private_getArgv = 59; // native
-const uint32_t avmplus_System_readLine = 60; // native
-const uint32_t avmplus_System_totalMemory_get = 61; // native
-const uint32_t avmplus_System_freeMemory_get = 62; // native
-const uint32_t avmplus_System_privateMemory_get = 63; // native
-const uint32_t avmplus_System_forceFullCollection = 64; // native
-const uint32_t avmplus_System_queueCollection = 65; // native
-const uint32_t avmplus_System_ns_example_nstest = 66; // native
-const uint32_t avmplus_System_isGlobal = 67; // native
-const uint32_t avmplus_System_swfVersion_get = 68; // native
-const uint32_t avmplus_System_apiVersion_get = 69; // native
-const uint32_t avmplus_System_disposeXML = 70; // native
-const uint32_t avmplus_System_deopt = 71; // native
-const uint32_t avmplus_System_pauseForGCIfCollectionImminent = 72; // native
-const uint32_t avmplus_System_is64bit = 73; // native
-const uint32_t avmplus_System_copy = 74; // native
+const uint32_t avmplus_ITest_avmplus_ITest_test = 39; // abc
+const uint32_t avmplus_CTest_test = 42; // abc
+const uint32_t avmplus_MI_plus = 45; // native
+const uint32_t avmplus_System_exit = 48; // native
+const uint32_t avmplus_System_exec = 49; // native
+const uint32_t avmplus_System_sleep = 50; // native
+const uint32_t avmplus_System_getAvmplusVersion = 51; // native
+const uint32_t avmplus_System_getFeatures = 52; // native
+const uint32_t avmplus_System_getRunmode = 53; // native
+const uint32_t avmplus_System_trace = 54; // native
+const uint32_t avmplus_System_write = 55; // native
+const uint32_t avmplus_System_debugger = 56; // native
+const uint32_t avmplus_System_isDebugger = 57; // native
+const uint32_t avmplus_System_getNanosecondTimer = 58; // native
+const uint32_t avmplus_System_getTimer = 59; // native
+const uint32_t avmplus_System_private_getArgv = 60; // native
+const uint32_t avmplus_System_readLine = 61; // native
+const uint32_t avmplus_System_totalMemory_get = 62; // native
+const uint32_t avmplus_System_freeMemory_get = 63; // native
+const uint32_t avmplus_System_privateMemory_get = 64; // native
+const uint32_t avmplus_System_forceFullCollection = 65; // native
+const uint32_t avmplus_System_queueCollection = 66; // native
+const uint32_t avmplus_System_ns_example_nstest = 67; // native
+const uint32_t avmplus_System_isGlobal = 68; // native
+const uint32_t avmplus_System_swfVersion_get = 69; // native
+const uint32_t avmplus_System_apiVersion_get = 70; // native
+const uint32_t avmplus_System_disposeXML = 71; // native
+const uint32_t avmplus_System_deopt = 72; // native
+const uint32_t avmplus_System_pauseForGCIfCollectionImminent = 73; // native
+const uint32_t avmplus_System_is64bit = 74; // native
 const uint32_t avmplus_System_isIntptr = 75; // native
 const uint32_t avmplus_System_runInSafepoint = 76; // native
 const uint32_t avmplus_System_canonicalizeNumber = 77; // native
@@ -369,53 +353,79 @@ const uint32_t flash_system_WorkerDomain_createWorkerFromByteArray = 279; // abc
 const uint32_t flash_system_WorkerDomain_createWorkerFromPrimordial = 280; // abc
 const uint32_t flash_system_WorkerDomain_private_createWorkerFromByteArrayInternal = 281; // native
 const uint32_t flash_system_WorkerDomain_listWorkers = 282; // native
-const uint32_t flash_system_PromiseHelper_currentGiid_get = 287; // native
-const uint32_t flash_system_PromiseHelper_getPromiseOwnerGiid = 288; // native
-const uint32_t flash_system_PromiseHelper_setPromiseOwnerGiid = 289; // native
-const uint32_t flash_system_PromiseHelper_getPromiseGid = 290; // native
-const uint32_t flash_system_PromiseHelper_setPromiseGid = 291; // native
-const uint32_t flash_system_PromiseHelper_isPromiseEmpty = 292; // native
-const uint32_t flash_system_PromiseHelper_schedulePromiseCollection = 293; // native
-const uint32_t flash_system_PromiseHelper_retargetIncChannel = 294; // native
-const uint32_t flash_system_PromiseHelper_retargetOutChannel = 295; // native
-const uint32_t flash_system_PromiseHelper_isPromiseCreatedLocally = 296; // abc
-const uint32_t flash_system_PromiseHelper_flash_system_waitForAnySend = 297; // native
-const uint32_t flash_system_PromiseHelper_pr = 298; // native
-const uint32_t flash_system_PromiseHelper_praddr = 299; // native
-const uint32_t flash_system_PromiseHelper_breakOn = 300; // native
-const uint32_t flash_system_Promise_wrap = 303; // abc
-const uint32_t flash_system_Promise_empty = 304; // abc
-const uint32_t flash_system_Promise_private_resolveLocal = 305; // abc
-const uint32_t flash_system_Promise_registerEmptyPromise = 306; // native
-const uint32_t flash_system_Promise_private_printEmptyPromises = 307; // native
-const uint32_t flash_system_Promise_private_create = 308; // native
-const uint32_t flash_system_Promise_private_createLocal = 309; // native
-const uint32_t flash_system_Promise_notifyOwner = 310; // native
-const uint32_t flash_system_Promise_private_notifyEmptyOwners = 311; // native
-const uint32_t flash_system_Promise_isOwnedLocally = 312; // native
-const uint32_t flash_system_Promise_private_callProperty = 313; // abc
-const uint32_t flash_system_Promise_private_getProperty = 314; // abc
-const uint32_t flash_system_Promise_async_get = 315; // abc
-const uint32_t flash_system_Promise_resolve = 316; // abc
-const uint32_t flash_system_Promise_when = 319; // abc
-const uint32_t flash_system_Promise_receive = 320; // abc
-const uint32_t flash_system_Promise_delayCollection = 321; // native
-const uint32_t flash_system_Promise_state_get = 322; // abc
-const uint32_t flash_system_Promise_getPID = 323; // abc
-const uint32_t flash_system_RemoteProxy_create = 326; // native
-const uint32_t flash_system_RemoteProxy_m_workerClass_get = 327; // native
-const uint32_t flash_system_RemoteProxy_callProp = 328; // native
-const uint32_t flash_system_RemoteProxy_getProp = 329; // native
-const uint32_t flash_system_RemoteProxy_checkForCallRequestsConditional = 330; // abc
-const uint32_t flash_system_RemoteProxy_checkForCallRequests = 331; // abc
-const uint32_t flash_system_RemoteProxy_triggerDelayedCollection = 332; // native
-const uint32_t flash_system_RemoteProxy_handleResolution = 333; // abc
-const uint32_t flash_system_RemoteProxy_handleCallback = 334; // abc
-const uint32_t flash_system_RemoteProxy_private_flattenPromise = 335; // abc
-const uint32_t flash_system_RemoteProxy_handleCall = 336; // abc
-const uint32_t flash_system_RemoteProxy_handleGetProp = 337; // abc
-const uint32_t flash_system_Envelope_name_get = 341; // native
 
+extern double avmplus_MI_plus_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double avmplus_MI_plus_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_exit_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_exit_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_exec_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_exec_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_sleep_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_sleep_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_getAvmplusVersion_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_getAvmplusVersion_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_getFeatures_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_getFeatures_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_getRunmode_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_getRunmode_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_trace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_trace_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_write_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_write_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_debugger_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_debugger_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_isDebugger_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_isDebugger_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double avmplus_System_getNanosecondTimer_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double avmplus_System_getNanosecondTimer_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_getTimer_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_getTimer_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_private_getArgv_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_private_getArgv_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_readLine_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_readLine_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double avmplus_System_totalMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double avmplus_System_totalMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double avmplus_System_freeMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double avmplus_System_freeMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double avmplus_System_privateMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double avmplus_System_privateMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_forceFullCollection_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_forceFullCollection_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_queueCollection_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_queueCollection_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_ns_example_nstest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_ns_example_nstest_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_isGlobal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_isGlobal_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_swfVersion_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_swfVersion_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_apiVersion_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_apiVersion_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_disposeXML_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_disposeXML_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_deopt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_deopt_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_pauseForGCIfCollectionImminent_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_pauseForGCIfCollectionImminent_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_is64bit_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_is64bit_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_isIntptr_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_isIntptr_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_runInSafepoint_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_runInSafepoint_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_canonicalizeNumber_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_canonicalizeNumber_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_File_exists_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_File_exists_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_File_read_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_File_read_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_File_write_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_File_write_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_File_readByteArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_File_readByteArray_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_File_writeByteArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_File_writeByteArray_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom avmplus_Domain_currentDomain_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom avmplus_Domain_currentDomain_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -498,134 +508,6 @@ extern avmplus::Atom flash_system_WorkerDomain_private_createWorkerFromByteArray
 extern avmplus::Atom flash_system_WorkerDomain_private_createWorkerFromByteArrayInternal_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_WorkerDomain_listWorkers_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_system_WorkerDomain_listWorkers_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_currentGiid_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_currentGiid_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_getPromiseOwnerGiid_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_getPromiseOwnerGiid_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_setPromiseOwnerGiid_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_setPromiseOwnerGiid_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_getPromiseGid_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_getPromiseGid_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_setPromiseGid_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_setPromiseGid_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_isPromiseEmpty_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_isPromiseEmpty_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_schedulePromiseCollection_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_schedulePromiseCollection_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_retargetIncChannel_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_retargetIncChannel_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_retargetOutChannel_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_retargetOutChannel_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_flash_system_waitForAnySend_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_flash_system_waitForAnySend_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_pr_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_pr_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_praddr_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_praddr_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_breakOn_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_PromiseHelper_breakOn_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_registerEmptyPromise_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_registerEmptyPromise_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_private_printEmptyPromises_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_private_printEmptyPromises_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_private_create_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_private_create_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_private_createLocal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_private_createLocal_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_notifyOwner_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_notifyOwner_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_private_notifyEmptyOwners_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_private_notifyEmptyOwners_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_isOwnedLocally_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_isOwnedLocally_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_delayCollection_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Promise_delayCollection_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_RemoteProxy_create_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_RemoteProxy_create_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_RemoteProxy_m_workerClass_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_RemoteProxy_m_workerClass_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_RemoteProxy_callProp_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_RemoteProxy_callProp_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_RemoteProxy_getProp_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_RemoteProxy_getProp_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_RemoteProxy_triggerDelayedCollection_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_RemoteProxy_triggerDelayedCollection_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Envelope_name_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Envelope_name_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double avmplus_MI_plus_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double avmplus_MI_plus_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_exit_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_exit_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_exec_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_exec_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_sleep_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_sleep_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_getAvmplusVersion_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_getAvmplusVersion_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_getFeatures_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_getFeatures_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_getRunmode_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_getRunmode_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_trace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_trace_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_write_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_write_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_debugger_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_debugger_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_isDebugger_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_isDebugger_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double avmplus_System_getNanosecondTimer_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double avmplus_System_getNanosecondTimer_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_getTimer_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_getTimer_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_private_getArgv_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_private_getArgv_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_readLine_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_readLine_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double avmplus_System_totalMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double avmplus_System_totalMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double avmplus_System_freeMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double avmplus_System_freeMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double avmplus_System_privateMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double avmplus_System_privateMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_forceFullCollection_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_forceFullCollection_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_queueCollection_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_queueCollection_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_ns_example_nstest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_ns_example_nstest_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_isGlobal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_isGlobal_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_swfVersion_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_swfVersion_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_apiVersion_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_apiVersion_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_disposeXML_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_disposeXML_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_deopt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_deopt_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_pauseForGCIfCollectionImminent_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_pauseForGCIfCollectionImminent_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_is64bit_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_is64bit_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_copy_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_copy_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_isIntptr_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_isIntptr_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_runInSafepoint_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_runInSafepoint_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_canonicalizeNumber_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_System_canonicalizeNumber_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_File_exists_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_File_exists_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_File_read_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_File_read_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_File_write_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_File_write_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_File_readByteArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_File_readByteArray_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_File_writeByteArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_File_writeByteArray_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 class SlotOffsetsAndAsserts;
 //-----------------------------------------------------------
 // avmplus::CTest$
@@ -2580,497 +2462,6 @@ class avmshell_ShellWorkerDomainObjectSlots
 
 //-----------------------------------------------------------
 
-//-----------------------------------------------------------
-// flash.system::PromiseState$
-//-----------------------------------------------------------
-class avmplus_PromiseStateClassSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmplus::PromiseStateClass;
-private:
-    MMgc::GCTraceableObject::GCMember<avmplus::String> m_NEW;
-    MMgc::GCTraceableObject::GCMember<avmplus::String> m_RECEIVED;
-    MMgc::GCTraceableObject::GCMember<avmplus::String> m_BROKEN;
-    MMgc::GCTraceableObject::GCMember<avmplus::String> m_EXCEPTION;
-public:
-    REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
-    {
-        gc->TraceLocation(&m_NEW);
-        gc->TraceLocation(&m_RECEIVED);
-        gc->TraceLocation(&m_BROKEN);
-        gc->TraceLocation(&m_EXCEPTION);
-    }
-};
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
-// flash.system::PromiseState
-//-----------------------------------------------------------
-class avmplus_PromiseStateObjectSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmplus::PromiseStateObject;
-#define GC_TRIVIAL_TRACER_PromiseStateObject
-};
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
-// flash.system::PromiseHelper$
-//-----------------------------------------------------------
-class avmplus_PromiseHelperClassSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmplus::PromiseHelperClass;
-private:
-    uint32_t m_CALL_REQUEST;
-    uint32_t m_RESOLUTION_REQUEST;
-    uint32_t m_CALLBACK_REQUEST;
-    uint32_t m_GETPROP_REQUEST;
-    uint32_t m_DESTROY_REQUEST;
-    uint32_t m_DESTROY_DELAYED_REQUEST;
-    uint32_t m_SUCCESS_RESPONSE;
-    uint32_t m_EXCEPTION_RESPONSE;
-    MMgc::GCTraceableObject::GCMember<avmplus::ArrayObject> m_m_empty_promises;
-    MMgc::GCTraceableObject::GCMember<avmplus::ObjectVectorObject> m_m_local_requests;
-    MMgc::GCTraceableObject::GCMember<avmplus::ObjectVectorObject> m_m_delayed_requests;
-};
-#define DECLARE_SLOTS_PromiseHelperClass \
-    public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
-    public: \
-        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
-    public: \
-        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
-    private: \
-        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
-    public: \
-        inline GCRef<avmplus::PromiseHelperObject> constructObject() \
-        { \
-            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
-            avmplus::Atom const result = this->construct(0, args); \
-            return GCRef<avmplus::PromiseHelperObject>((avmplus::PromiseHelperObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-    public: \
-        REALLY_INLINE bool isType(avmplus::Atom value) \
-        { \
-            return isTypeImpl(value); \
-        } \
-        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            return isTypeImpl(value->atom()); \
-        } \
-        REALLY_INLINE GCRef<avmplus::PromiseHelperObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmplus::PromiseHelperObject>((avmplus::PromiseHelperObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::PromiseHelperObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmplus::PromiseHelperObject>((avmplus::PromiseHelperObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::PromiseHelperObject> coerceToType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value); \
-            return GCRef<avmplus::PromiseHelperObject>((avmplus::PromiseHelperObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::PromiseHelperObject> coerceToType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
-            return GCRef<avmplus::PromiseHelperObject>((avmplus::PromiseHelperObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-    private: \
-        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    public: \
-        REALLY_INLINE uint32_t get_CALL_REQUEST() const { return m_slots_PromiseHelperClass.m_CALL_REQUEST; } \
-        REALLY_INLINE void setconst_CALL_REQUEST(uint32_t newVal) { m_slots_PromiseHelperClass.m_CALL_REQUEST = newVal; } \
-    public: \
-        REALLY_INLINE uint32_t get_RESOLUTION_REQUEST() const { return m_slots_PromiseHelperClass.m_RESOLUTION_REQUEST; } \
-        REALLY_INLINE void setconst_RESOLUTION_REQUEST(uint32_t newVal) { m_slots_PromiseHelperClass.m_RESOLUTION_REQUEST = newVal; } \
-    public: \
-        REALLY_INLINE uint32_t get_CALLBACK_REQUEST() const { return m_slots_PromiseHelperClass.m_CALLBACK_REQUEST; } \
-        REALLY_INLINE void setconst_CALLBACK_REQUEST(uint32_t newVal) { m_slots_PromiseHelperClass.m_CALLBACK_REQUEST = newVal; } \
-    public: \
-        REALLY_INLINE uint32_t get_GETPROP_REQUEST() const { return m_slots_PromiseHelperClass.m_GETPROP_REQUEST; } \
-        REALLY_INLINE void setconst_GETPROP_REQUEST(uint32_t newVal) { m_slots_PromiseHelperClass.m_GETPROP_REQUEST = newVal; } \
-    public: \
-        REALLY_INLINE uint32_t get_DESTROY_REQUEST() const { return m_slots_PromiseHelperClass.m_DESTROY_REQUEST; } \
-        REALLY_INLINE void setconst_DESTROY_REQUEST(uint32_t newVal) { m_slots_PromiseHelperClass.m_DESTROY_REQUEST = newVal; } \
-    public: \
-        REALLY_INLINE uint32_t get_DESTROY_DELAYED_REQUEST() const { return m_slots_PromiseHelperClass.m_DESTROY_DELAYED_REQUEST; } \
-        REALLY_INLINE void setconst_DESTROY_DELAYED_REQUEST(uint32_t newVal) { m_slots_PromiseHelperClass.m_DESTROY_DELAYED_REQUEST = newVal; } \
-    public: \
-        REALLY_INLINE uint32_t get_SUCCESS_RESPONSE() const { return m_slots_PromiseHelperClass.m_SUCCESS_RESPONSE; } \
-        REALLY_INLINE void setconst_SUCCESS_RESPONSE(uint32_t newVal) { m_slots_PromiseHelperClass.m_SUCCESS_RESPONSE = newVal; } \
-    public: \
-        REALLY_INLINE uint32_t get_EXCEPTION_RESPONSE() const { return m_slots_PromiseHelperClass.m_EXCEPTION_RESPONSE; } \
-        REALLY_INLINE void setconst_EXCEPTION_RESPONSE(uint32_t newVal) { m_slots_PromiseHelperClass.m_EXCEPTION_RESPONSE = newVal; } \
-    public: \
-        REALLY_INLINE avmplus::ArrayObject* get_m_empty_promises() const { return m_slots_PromiseHelperClass.m_m_empty_promises; } \
-        REALLY_INLINE void set_m_empty_promises(avmplus::ArrayObject* newVal) { m_slots_PromiseHelperClass.m_m_empty_promises = newVal; } \
-    public: \
-        REALLY_INLINE avmplus::ObjectVectorObject* get_m_local_requests() const { return m_slots_PromiseHelperClass.m_m_local_requests; } \
-        REALLY_INLINE void set_m_local_requests(avmplus::ObjectVectorObject* newVal) { m_slots_PromiseHelperClass.m_m_local_requests = newVal; } \
-    public: \
-        REALLY_INLINE avmplus::ObjectVectorObject* get_m_delayed_requests() const { return m_slots_PromiseHelperClass.m_m_delayed_requests; } \
-        REALLY_INLINE void set_m_delayed_requests(avmplus::ObjectVectorObject* newVal) { m_slots_PromiseHelperClass.m_m_delayed_requests = newVal; } \
-    private: \
-        avmplus::NativeID::avmplus_PromiseHelperClassSlots m_slots_PromiseHelperClass \
-
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
-// flash.system::PromiseHelper
-//-----------------------------------------------------------
-class avmplus_PromiseHelperObjectSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmplus::PromiseHelperObject;
-#define GC_TRIVIAL_TRACER_PromiseHelperObject
-};
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
-// flash.system::Promise$
-//-----------------------------------------------------------
-class avmplus_PromiseClassSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmplus::PromiseClass;
-private:
-    uint32_t m_NEW;
-    uint32_t m_RECEIVED;
-    uint32_t m_BROKEN;
-    uint32_t m_EXCEPTION;
-    uint32_t m_private_DESTROY_REQUEST;
-    uint32_t m_private_DESTROY_DELAYED_REQUEST;
-    MMgc::GCTraceableObject::GCMember<avmplus::ArrayObject> m_private_m_empty_requests;
-};
-#define DECLARE_SLOTS_PromiseClass \
-    public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
-    public: \
-        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
-    public: \
-        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
-    private: \
-        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
-    public: \
-        inline GCRef<avmplus::PromiseObject> constructObject() \
-        { \
-            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
-            avmplus::Atom const result = this->construct_native(avmplus::PromiseClass::createInstanceProc, 0, args); \
-            return GCRef<avmplus::PromiseObject>((avmplus::PromiseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-    public: \
-        REALLY_INLINE bool isType(avmplus::Atom value) \
-        { \
-            return isTypeImpl(value); \
-        } \
-        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            return isTypeImpl(value->atom()); \
-        } \
-        REALLY_INLINE GCRef<avmplus::PromiseObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmplus::PromiseObject>((avmplus::PromiseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::PromiseObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmplus::PromiseObject>((avmplus::PromiseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::PromiseObject> coerceToType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value); \
-            return GCRef<avmplus::PromiseObject>((avmplus::PromiseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::PromiseObject> coerceToType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
-            return GCRef<avmplus::PromiseObject>((avmplus::PromiseObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-    private: \
-        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    public: \
-        REALLY_INLINE uint32_t get_NEW() const { return m_slots_PromiseClass.m_NEW; } \
-        REALLY_INLINE void setconst_NEW(uint32_t newVal) { m_slots_PromiseClass.m_NEW = newVal; } \
-    public: \
-        REALLY_INLINE uint32_t get_RECEIVED() const { return m_slots_PromiseClass.m_RECEIVED; } \
-        REALLY_INLINE void setconst_RECEIVED(uint32_t newVal) { m_slots_PromiseClass.m_RECEIVED = newVal; } \
-    public: \
-        REALLY_INLINE uint32_t get_BROKEN() const { return m_slots_PromiseClass.m_BROKEN; } \
-        REALLY_INLINE void setconst_BROKEN(uint32_t newVal) { m_slots_PromiseClass.m_BROKEN = newVal; } \
-    public: \
-        REALLY_INLINE uint32_t get_EXCEPTION() const { return m_slots_PromiseClass.m_EXCEPTION; } \
-        REALLY_INLINE void setconst_EXCEPTION(uint32_t newVal) { m_slots_PromiseClass.m_EXCEPTION = newVal; } \
-    protected: \
-        REALLY_INLINE uint32_t get_DESTROY_REQUEST() const { return m_slots_PromiseClass.m_private_DESTROY_REQUEST; } \
-        REALLY_INLINE void setconst_DESTROY_REQUEST(uint32_t newVal) { m_slots_PromiseClass.m_private_DESTROY_REQUEST = newVal; } \
-    protected: \
-        REALLY_INLINE uint32_t get_DESTROY_DELAYED_REQUEST() const { return m_slots_PromiseClass.m_private_DESTROY_DELAYED_REQUEST; } \
-        REALLY_INLINE void setconst_DESTROY_DELAYED_REQUEST(uint32_t newVal) { m_slots_PromiseClass.m_private_DESTROY_DELAYED_REQUEST = newVal; } \
-    protected: \
-        REALLY_INLINE avmplus::ArrayObject* get_m_empty_requests() const { return m_slots_PromiseClass.m_private_m_empty_requests; } \
-        REALLY_INLINE void set_m_empty_requests(avmplus::ArrayObject* newVal) { m_slots_PromiseClass.m_private_m_empty_requests = newVal; } \
-    private: \
-        avmplus::NativeID::avmplus_PromiseClassSlots m_slots_PromiseClass \
-
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
-// flash.system::Promise
-//-----------------------------------------------------------
-class avmplus_PromiseObjectSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmplus::PromiseObject;
-private:
-    avmplus::bool32 m_private_m_global;
-    uint32_t m_flash_system_intern_m_state;
-    avmplus::bool32 m_private_m_empty;
-    MMgc::GCTraceableObject::GCMember<avmplus::PromiseChannelObject> m_flash_system_m_out;
-    MMgc::GCTraceableObject::GCMember<avmplus::PromiseChannelObject> m_flash_system_m_inc;
-    avmplus::AtomWB m_flash_system_intern_m_resolved;
-    MMgc::GCTraceableObject::GCMember<avmplus::PromiseObject> m_private_m_async;
-};
-#define DECLARE_SLOTS_PromiseObject \
-    public: \
-        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
-    private: \
-        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
-    private: \
-        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
-        REALLY_INLINE bool get_m_global() const { return m_slots_PromiseObject.m_private_m_global != 0; } \
-        REALLY_INLINE void set_m_global(avmplus::bool32 newVal) { m_slots_PromiseObject.m_private_m_global = newVal; } \
-    protected: \
-        REALLY_INLINE uint32_t get_m_state() const { return m_slots_PromiseObject.m_flash_system_intern_m_state; } \
-        REALLY_INLINE void set_m_state(uint32_t newVal) { m_slots_PromiseObject.m_flash_system_intern_m_state = newVal; } \
-    protected: \
-        REALLY_INLINE bool get_m_empty() const { return m_slots_PromiseObject.m_private_m_empty != 0; } \
-        REALLY_INLINE void set_m_empty(avmplus::bool32 newVal) { m_slots_PromiseObject.m_private_m_empty = newVal; } \
-    protected: \
-        REALLY_INLINE avmplus::PromiseChannelObject* get_m_out() const { return m_slots_PromiseObject.m_flash_system_m_out; } \
-        REALLY_INLINE void set_m_out(avmplus::PromiseChannelObject* newVal) { m_slots_PromiseObject.m_flash_system_m_out = newVal; } \
-    protected: \
-        REALLY_INLINE avmplus::PromiseChannelObject* get_m_inc() const { return m_slots_PromiseObject.m_flash_system_m_inc; } \
-        REALLY_INLINE void set_m_inc(avmplus::PromiseChannelObject* newVal) { m_slots_PromiseObject.m_flash_system_m_inc = newVal; } \
-    protected: \
-        REALLY_INLINE avmplus::Atom get_m_resolved() const { return m_slots_PromiseObject.m_flash_system_intern_m_resolved; } \
-        REALLY_INLINE void set_m_resolved(avmplus::Atom newVal) { m_slots_PromiseObject.m_flash_system_intern_m_resolved = newVal; } \
-    protected: \
-        REALLY_INLINE avmplus::PromiseObject* get_m_async() const { return m_slots_PromiseObject.m_private_m_async; } \
-        REALLY_INLINE void set_m_async(avmplus::PromiseObject* newVal) { m_slots_PromiseObject.m_private_m_async = newVal; } \
-    private: \
-        avmplus::NativeID::avmplus_PromiseObjectSlots m_slots_PromiseObject \
-
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
-// flash.system::RemoteProxy$
-//-----------------------------------------------------------
-class avmplus_RemoteProxyClassSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmplus::RemoteProxyClass;
-private:
-    uint32_t m_NEW;
-    uint32_t m_RECEIVED;
-    uint32_t m_BROKEN;
-    uint32_t m_EXCEPTION;
-    MMgc::GCTraceableObject::GCMember<avmplus::ArrayObject> m_m_remote_proxies;
-};
-#define DECLARE_SLOTS_RemoteProxyClass \
-    public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
-    public: \
-        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
-    public: \
-        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
-    private: \
-        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
-    public: \
-        inline GCRef<avmplus::RemoteProxyObject> constructObject() \
-        { \
-            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
-            avmplus::Atom const result = this->construct_native(avmplus::RemoteProxyClass::createInstanceProc, 0, args); \
-            return GCRef<avmplus::RemoteProxyObject>((avmplus::RemoteProxyObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-    public: \
-        REALLY_INLINE bool isType(avmplus::Atom value) \
-        { \
-            return isTypeImpl(value); \
-        } \
-        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            return isTypeImpl(value->atom()); \
-        } \
-        REALLY_INLINE GCRef<avmplus::RemoteProxyObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmplus::RemoteProxyObject>((avmplus::RemoteProxyObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::RemoteProxyObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmplus::RemoteProxyObject>((avmplus::RemoteProxyObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::RemoteProxyObject> coerceToType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value); \
-            return GCRef<avmplus::RemoteProxyObject>((avmplus::RemoteProxyObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmplus::RemoteProxyObject> coerceToType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
-            return GCRef<avmplus::RemoteProxyObject>((avmplus::RemoteProxyObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-    private: \
-        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    public: \
-        REALLY_INLINE uint32_t get_NEW() const { return m_slots_RemoteProxyClass.m_NEW; } \
-        REALLY_INLINE void setconst_NEW(uint32_t newVal) { m_slots_RemoteProxyClass.m_NEW = newVal; } \
-    public: \
-        REALLY_INLINE uint32_t get_RECEIVED() const { return m_slots_RemoteProxyClass.m_RECEIVED; } \
-        REALLY_INLINE void setconst_RECEIVED(uint32_t newVal) { m_slots_RemoteProxyClass.m_RECEIVED = newVal; } \
-    public: \
-        REALLY_INLINE uint32_t get_BROKEN() const { return m_slots_RemoteProxyClass.m_BROKEN; } \
-        REALLY_INLINE void setconst_BROKEN(uint32_t newVal) { m_slots_RemoteProxyClass.m_BROKEN = newVal; } \
-    public: \
-        REALLY_INLINE uint32_t get_EXCEPTION() const { return m_slots_RemoteProxyClass.m_EXCEPTION; } \
-        REALLY_INLINE void setconst_EXCEPTION(uint32_t newVal) { m_slots_RemoteProxyClass.m_EXCEPTION = newVal; } \
-    public: \
-        REALLY_INLINE avmplus::ArrayObject* get_m_remote_proxies() const { return m_slots_RemoteProxyClass.m_m_remote_proxies; } \
-        REALLY_INLINE void set_m_remote_proxies(avmplus::ArrayObject* newVal) { m_slots_RemoteProxyClass.m_m_remote_proxies = newVal; } \
-    private: \
-        avmplus::NativeID::avmplus_RemoteProxyClassSlots m_slots_RemoteProxyClass \
-
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
-// flash.system::RemoteProxy
-//-----------------------------------------------------------
-class avmplus_RemoteProxyObjectSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmplus::RemoteProxyObject;
-private:
-    uint32_t m_m_gpid;
-    avmplus::bool32 m_m_global;
-    uint32_t m_m_state;
-    MMgc::GCTraceableObject::GCMember<avmplus::PromiseChannelObject> m_m_out;
-    MMgc::GCTraceableObject::GCMember<avmplus::PromiseChannelObject> m_m_inc;
-    avmplus::AtomWB m_m_resolved;
-};
-#define DECLARE_SLOTS_RemoteProxyObject \
-    public: \
-        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
-    private: \
-        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
-    private: \
-        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    public: \
-        REALLY_INLINE uint32_t get_m_gpid() const { return m_slots_RemoteProxyObject.m_m_gpid; } \
-        REALLY_INLINE void set_m_gpid(uint32_t newVal) { m_slots_RemoteProxyObject.m_m_gpid = newVal; } \
-    public: \
-        REALLY_INLINE bool get_m_global() const { return m_slots_RemoteProxyObject.m_m_global != 0; } \
-        REALLY_INLINE void set_m_global(avmplus::bool32 newVal) { m_slots_RemoteProxyObject.m_m_global = newVal; } \
-    public: \
-        REALLY_INLINE uint32_t get_m_state() const { return m_slots_RemoteProxyObject.m_m_state; } \
-        REALLY_INLINE void set_m_state(uint32_t newVal) { m_slots_RemoteProxyObject.m_m_state = newVal; } \
-    public: \
-        REALLY_INLINE avmplus::PromiseChannelObject* get_m_out() const { return m_slots_RemoteProxyObject.m_m_out; } \
-        REALLY_INLINE void set_m_out(avmplus::PromiseChannelObject* newVal) { m_slots_RemoteProxyObject.m_m_out = newVal; } \
-    public: \
-        REALLY_INLINE avmplus::PromiseChannelObject* get_m_inc() const { return m_slots_RemoteProxyObject.m_m_inc; } \
-        REALLY_INLINE void set_m_inc(avmplus::PromiseChannelObject* newVal) { m_slots_RemoteProxyObject.m_m_inc = newVal; } \
-    public: \
-        REALLY_INLINE avmplus::Atom get_m_resolved() const { return m_slots_RemoteProxyObject.m_m_resolved; } \
-        REALLY_INLINE void set_m_resolved(avmplus::Atom newVal) { m_slots_RemoteProxyObject.m_m_resolved = newVal; } \
-    private: \
-        avmplus::NativeID::avmplus_RemoteProxyObjectSlots m_slots_RemoteProxyObject \
-
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
-// flash.system::Envelope$
-//-----------------------------------------------------------
-class avmshell_EnvelopeClassSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmshell::EnvelopeClass;
-};
-#define DECLARE_SLOTS_EnvelopeClass \
-    public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
-    public: \
-        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
-    public: \
-        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
-    private: \
-        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
-    public: \
-        inline GCRef<avmshell::EnvelopeObject> constructObject(uint32_t arg1) \
-        { \
-            avmplus::AvmCore* const core = ((avmplus::AvmCore*)(this->core())); \
-            avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), core->uintToAtom(arg1) }; \
-            avmplus::Atom const result = this->construct(1, args); \
-            return GCRef<avmshell::EnvelopeObject>((avmshell::EnvelopeObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-    public: \
-        REALLY_INLINE bool isType(avmplus::Atom value) \
-        { \
-            return isTypeImpl(value); \
-        } \
-        REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            return isTypeImpl(value->atom()); \
-        } \
-        REALLY_INLINE GCRef<avmshell::EnvelopeObject> asType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value); \
-            return GCRef<avmshell::EnvelopeObject>((avmshell::EnvelopeObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmshell::EnvelopeObject> asType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = asTypeImpl(value->atom()); \
-            return GCRef<avmshell::EnvelopeObject>((avmshell::EnvelopeObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmshell::EnvelopeObject> coerceToType(avmplus::Atom value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value); \
-            return GCRef<avmshell::EnvelopeObject>((avmshell::EnvelopeObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-        REALLY_INLINE GCRef<avmshell::EnvelopeObject> coerceToType(GCRef<avmplus::ScriptObject> value) \
-        { \
-            avmplus::Atom const result = coerceToTypeImpl(value->atom()); \
-            return GCRef<avmshell::EnvelopeObject>((avmshell::EnvelopeObject*)(avmplus::AvmCore::atomToScriptObject(result))); \
-        } \
-    private: \
-        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-
-//-----------------------------------------------------------
-
-//-----------------------------------------------------------
-// flash.system::Envelope
-//-----------------------------------------------------------
-class avmshell_EnvelopeObjectSlots
-{
-    friend class SlotOffsetsAndAsserts;
-    friend class avmshell::EnvelopeObject;
-};
-#define DECLARE_SLOTS_EnvelopeObject \
-    public: \
-        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
-    private: \
-        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
-    private: \
-        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-
-//-----------------------------------------------------------
-
 } }
 namespace avmplus {
 
@@ -3084,8 +2475,8 @@ class shell_toplevelClassManifest : public avmplus::ClassManifestBase
     friend class avmplus::DoubleVectorClass;
     friend class avmplus::ObjectVectorClass;
 private:
-    REALLY_INLINE shell_toplevelClassManifest(avmplus::ScriptEnv* e) : ClassManifestBase(59, e) { }
-    REALLY_INLINE static shell_toplevelClassManifest* create(avmplus::ScriptEnv* e) { return new (MMgc::GC::GetGC(e), MMgc::kExact, sizeof(ClassClosure*)*58) shell_toplevelClassManifest(e); }
+    REALLY_INLINE shell_toplevelClassManifest(avmplus::ScriptEnv* e) : ClassManifestBase(54, e) { }
+    REALLY_INLINE static shell_toplevelClassManifest* create(avmplus::ScriptEnv* e) { return new (MMgc::GC::GetGC(e), MMgc::kExact, sizeof(ClassClosure*)*53) shell_toplevelClassManifest(e); }
 public:
     REALLY_INLINE GCRef<avmshell::AbstractBaseClass> get_AbstractBaseClass() { return (avmshell::AbstractBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_AbstractBase)); }
     REALLY_INLINE GCRef<avmshell::AbstractRestrictedBaseClass> get_AbstractRestrictedBaseClass() { return (avmshell::AbstractRestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_AbstractRestrictedBase)); }
@@ -3096,7 +2487,6 @@ public:
     REALLY_INLINE GCRef<avmplus::DeleteObjectSampleClass> get_DeleteObjectSampleClass() { return (avmplus::DeleteObjectSampleClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_sampler_DeleteObjectSample)); }
     REALLY_INLINE GCRef<avmplus::DomainClass> get_DomainClass() { return (avmplus::DomainClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_Domain)); }
     REALLY_INLINE GCRef<avmplus::EndianClass> get_EndianClass() { return (avmplus::EndianClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_Endian)); }
-    REALLY_INLINE GCRef<avmshell::EnvelopeClass> get_EnvelopeClass() { return (avmshell::EnvelopeClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_system_Envelope)); }
     REALLY_INLINE GCRef<avmshell::FileClass> get_FileClass() { return (avmshell::FileClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_File)); }
     REALLY_INLINE GCRef<avmplus::ITestClass> get_ITestClass() { return (avmplus::ITestClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_ITest)); }
     REALLY_INLINE GCRef<avmshell::MIClass> get_MIClass() { return (avmshell::MIClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_MI)); }
@@ -3108,10 +2498,6 @@ public:
     REALLY_INLINE GCRef<avmshell::NativeSubclassOfAbstractRestrictedBaseClass> get_NativeSubclassOfAbstractRestrictedBaseClass() { return (avmshell::NativeSubclassOfAbstractRestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_NativeSubclassOfAbstractRestrictedBase)); }
     REALLY_INLINE GCRef<avmshell::NativeSubclassOfRestrictedBaseClass> get_NativeSubclassOfRestrictedBaseClass() { return (avmshell::NativeSubclassOfRestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_NativeSubclassOfRestrictedBase)); }
     REALLY_INLINE GCRef<avmplus::NewObjectSampleClass> get_NewObjectSampleClass() { return (avmplus::NewObjectSampleClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_sampler_NewObjectSample)); }
-    REALLY_INLINE GCRef<avmplus::PromiseClass> get_PromiseClass() { return (avmplus::PromiseClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_system_Promise)); }
-    REALLY_INLINE GCRef<avmplus::PromiseHelperClass> get_PromiseHelperClass() { return (avmplus::PromiseHelperClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_system_PromiseHelper)); }
-    REALLY_INLINE GCRef<avmplus::PromiseStateClass> get_PromiseStateClass() { return (avmplus::PromiseStateClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_system_PromiseState)); }
-    REALLY_INLINE GCRef<avmplus::RemoteProxyClass> get_RemoteProxyClass() { return (avmplus::RemoteProxyClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_system_RemoteProxy)); }
     REALLY_INLINE GCRef<avmshell::RestrictedBaseClass> get_RestrictedBaseClass() { return (avmshell::RestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_RestrictedBase)); }
     REALLY_INLINE GCRef<avmplus::SampleClass> get_SampleClass() { return (avmplus::SampleClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_sampler_Sample)); }
     REALLY_INLINE GCRef<avmplus::ShellCoreFriend1Class> get_ShellCoreFriend1Class() { return (avmplus::ShellCoreFriend1Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_ShellCoreFriend1)); }

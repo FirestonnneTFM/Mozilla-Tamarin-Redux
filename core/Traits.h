@@ -120,9 +120,6 @@ namespace avmplus
     {
         friend class Traits;
         friend class StTraitsBindingsIterator;
-        friend class TraitsMorpher;
-        friend class PromiseClass;
-        friend class Cloner;
 
     private:
         struct SlotInfo
@@ -616,7 +613,6 @@ namespace avmplus
     private:    GCMember<Namespace>     GC_POINTER(_ns);                // The namespace of the class described by this traits object
     private:    GCMember<String>        GC_POINTER(_name);              // The name of the class described by this traits object
     public:     GCMember<Namespace>     GC_POINTER(protectedNamespace); // protected namespace, if any
-    public:     GCMember<TraitsMorpher> GC_POINTER(morpher);
     public:     GCMember<MethodInfo>    GC_POINTER(init);               // not a call/init union b/c smart pointers and union's don't mix
     private:    CreateClassClosureProc  m_createClassClosure;
     private:    const TraitsPosPtr      m_traitsPos;                    // ptr into our ABC definition, depending on m_posType

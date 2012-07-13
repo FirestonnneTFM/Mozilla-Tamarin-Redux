@@ -322,6 +322,10 @@ bool ConditionClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 
 
 #ifdef DEBUG
+const uint32_t ConditionObject::gcTracePointerOffsets[] = {
+    offsetof(ConditionObject, m_mutex),
+    0};
+
 MMgc::GCTracerCheckResult ConditionObject::gcTraceOffsetIsTraced(uint32_t off) const
 {
     MMgc::GCTracerCheckResult result;
@@ -329,7 +333,7 @@ MMgc::GCTracerCheckResult ConditionObject::gcTraceOffsetIsTraced(uint32_t off) c
     (void)result;
     if((result = ScriptObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
         return result;
-    return MMgc::kOffsetNotFound;
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,1);
 }
 #endif // DEBUG
 
@@ -342,6 +346,7 @@ bool ConditionObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 #endif
     ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
+    gc->TraceLocation(&m_mutex);
     return false;
 }
 
@@ -3809,7 +3814,6 @@ const uint32_t Traits::gcTracePointerOffsets[] = {
     offsetof(Traits, m_supertype_cache),
     offsetof(Traits, m_tbref),
     offsetof(Traits, m_tmref),
-    offsetof(Traits, morpher),
     offsetof(Traits, pool),
     offsetof(Traits, protectedNamespace),
     0};
@@ -3822,7 +3826,7 @@ MMgc::GCTracerCheckResult Traits::gcTraceOffsetIsTraced(uint32_t off) const
     if((result = m_slotDestroyInfo.gcTraceOffsetIsTraced(off - offsetof(Traits,m_slotDestroyInfo))) != MMgc::kOffsetNotFound) {
         return result;
     }
-    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,16);
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,15);
 }
 #endif // DEBUG
 
@@ -3845,7 +3849,6 @@ bool Traits::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     gc->TraceLocation(&m_supertype_cache);
     gc->TraceLocation(&m_tbref);
     gc->TraceLocation(&m_tmref);
-    gc->TraceLocation(&morpher);
     gc->TraceLocation(&pool);
     gc->TraceLocation(&protectedNamespace);
     gc->TraceLocations((m_primary_supertypes+0), MAX_PRIMARY_SUPERTYPE);
@@ -3912,36 +3915,6 @@ bool TraitsMetadata::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     (void)(avmplus_QCachedItem_isExactInterlock != 0);
     gc->TraceLocation(&base);
     gc->TraceLocation(&residingPool);
-    return false;
-}
-
-
-
-#ifdef DEBUG
-const uint32_t TraitsMorpher::gcTracePointerOffsets[] = {
-    offsetof(TraitsMorpher, m_mostRecentCode),
-    offsetof(TraitsMorpher, m_retainedTBs),
-    offsetof(TraitsMorpher, m_retainedTraitsMetadata),
-    offsetof(TraitsMorpher, m_targetTraits),
-    0};
-
-MMgc::GCTracerCheckResult TraitsMorpher::gcTraceOffsetIsTraced(uint32_t off) const
-{
-    MMgc::GCTracerCheckResult result;
-    (void)off;
-    (void)result;
-    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,4);
-}
-#endif // DEBUG
-
-bool TraitsMorpher::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
-{
-    (void)gc;
-    (void)_xact_cursor;
-    gc->TraceLocation(&m_mostRecentCode);
-    gc->TraceLocation(&m_retainedTBs);
-    gc->TraceLocation(&m_retainedTraitsMetadata);
-    gc->TraceLocation(&m_targetTraits);
     return false;
 }
 
@@ -4083,6 +4056,7 @@ bool WeakKeyHashtable::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 
 #ifdef DEBUG
 const uint32_t WeakMethodClosure::gcTracePointerOffsets[] = {
+    offsetof(WeakMethodClosure, m_weakCallEnv),
     offsetof(WeakMethodClosure, m_weakSavedThis),
     0};
 
@@ -4093,7 +4067,7 @@ MMgc::GCTracerCheckResult WeakMethodClosure::gcTraceOffsetIsTraced(uint32_t off)
     (void)result;
     if((result = MethodClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
         return result;
-    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,1);
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,2);
 }
 #endif // DEBUG
 
@@ -4103,6 +4077,7 @@ bool WeakMethodClosure::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     (void)_xact_cursor;
     MethodClosure::gcTrace(gc, 0);
     (void)(avmplus_MethodClosure_isExactInterlock != 0);
+    gc->TraceLocation(&m_weakCallEnv);
     gc->TraceLocation(&m_weakSavedThis);
     return false;
 }

@@ -1687,8 +1687,6 @@ namespace avmplus
         // add key=(name,'this') value=cc tuple to be used when code context is null (see getClassClosureAtomFromAlias)
         toplevel->addAliasedClassClosure(name, AvmCore::genericObjectToAtom(toplevel), cc, /*isDomainEnv*/false);
 
-        toplevel->addTraitsMorpher(cc->traits()->itraits);
-
     }
     
     DomainEnv* Toplevel::getDomainEnvOverridableHook()
@@ -1725,114 +1723,6 @@ namespace avmplus
         Multiname multiname(core->findPublicNamespace(), ialiasName);
         toplevel->referenceErrorClass()->throwError(kClassNotFoundError, core->toErrorString(&multiname));
         return NULL;    // just to make the compiler happy.
-    }
-
-        
-    TraitsMorpher* Toplevel::getTraitsMorpher(Traits* targetTraits) const
-    {
-
-        //Atom morpher = _traitsToMorpher->get(AvmCore::genericObjectToAtom(targetTraits));
-        //return (TraitsMorpher*)AvmCore::atomToGenericObject(morpher);
-        return targetTraits->morpher;
-    }
-
-    TraitsMorpher* Toplevel::addTraitsMorpher(Traits* targetTraits) 
-    {
-        TraitsMorpher* morpher = TraitsMorpher::create(core()->gc, targetTraits);
-        //_traitsToMorpher->add(AvmCore::genericObjectToAtom(targetTraits), AvmCore::genericObjectToAtom(morpher));
-        targetTraits->morpher = morpher;
-        return morpher;
-    }
-
-    void Toplevel::initAliasTable(bool initWorkerClasses) 
-    {
-        ScriptObject* ctx = objectClass;
-        //_traitsToMorpher = HeapHashtable::create(core()->gc);
-
-        addTraitsMorpher(objectClass->traits()->itraits);
-        addTraitsMorpher(xmlClass()->ivtable()->traits);
-        addTraitsMorpher(dateClass()->ivtable()->traits);
-        addTraitsMorpher(intVectorClass()->ivtable()->traits);
-        addTraitsMorpher(uintVectorClass()->ivtable()->traits);
-        addTraitsMorpher(doubleVectorClass()->ivtable()->traits);
-        addTraitsMorpher(objectVectorClass()->ivtable()->traits);
-        addTraitsMorpher(builtinClasses()->get_DictionaryClass()->ivtable()->traits);
-
-
-        
-        ClassClosure* definedObjectVectorClass = vectorClass()->getTypedVectorClass(objectClass); // Vector.<Object>, i.e., never undefined
-        registerClassAlias(ctx, definedObjectVectorClass->ivtable()->traits->name(), definedObjectVectorClass);
-        AvmAssert(definedObjectVectorClass != vectorClass());
-        AvmAssert(definedObjectVectorClass != objectVectorClass());
-
-
-        Traits* t;
-        if (initWorkerClasses) {
-            t = workerClass()->ivtable()->traits;
-            registerClassAlias(ctx, t->name(), workerClass());
-            
-            ClassClosure* promiseChannelClass = builtinClasses()->get_PromiseChannelClass();
-            t = promiseChannelClass->ivtable()->traits;
-            registerClassAlias(ctx, t->name(), promiseChannelClass);
-            
-        }
-
-        ClassClosure* mutexClass = builtinClasses()->get_MutexClass();
-        t = mutexClass->ivtable()->traits;
-        registerClassAlias(ctx, t->name(), mutexClass);
-
-        ClassClosure* conditionClass = builtinClasses()->get_ConditionClass();
-        t = conditionClass->ivtable()->traits;
-        registerClassAlias(ctx, t->name(), conditionClass);
-        
-        ClassClosure* errorClass = builtinClasses()->get_ErrorClass();
-        t = errorClass->ivtable()->traits;
-        registerClassAlias(ctx, t->name(), errorClass);
-
-        ClassClosure* argumentErrorClass = builtinClasses()->get_ArgumentErrorClass();
-        t = argumentErrorClass->ivtable()->traits;
-        registerClassAlias(ctx, t->name(), argumentErrorClass);
-
-
-        ClassClosure* definitionErrorClass = builtinClasses()->get_DefinitionErrorClass();
-        t = definitionErrorClass->ivtable()->traits;
-        registerClassAlias(ctx, t->name(), definitionErrorClass);
-
-        ClassClosure* evalErrorClass = builtinClasses()->get_EvalErrorClass();
-        t = evalErrorClass->ivtable()->traits;
-        registerClassAlias(ctx, t->name(), evalErrorClass);
-
-        ClassClosure* rangeErrorClass = builtinClasses()->get_RangeErrorClass();
-        t = rangeErrorClass->ivtable()->traits;
-        registerClassAlias(ctx, t->name(), rangeErrorClass);
-
-        ClassClosure* referenceErrorClass = builtinClasses()->get_ReferenceErrorClass();
-        t = referenceErrorClass->ivtable()->traits;
-        registerClassAlias(ctx, t->name(), referenceErrorClass);
-
-        ClassClosure* securityErrorClass = builtinClasses()->get_SecurityErrorClass();
-        t = securityErrorClass->ivtable()->traits;
-        registerClassAlias(ctx, t->name(), securityErrorClass);
-
-        ClassClosure* syntaxErrorClass = builtinClasses()->get_SyntaxErrorClass();
-        t = syntaxErrorClass->ivtable()->traits;
-        registerClassAlias(ctx, t->name(), syntaxErrorClass);
-
-        ClassClosure* typeErrorClass = builtinClasses()->get_TypeErrorClass();
-        t = typeErrorClass->ivtable()->traits;
-        registerClassAlias(ctx, t->name(), typeErrorClass);
-
-        ClassClosure* uninitializedErrorClass = builtinClasses()->get_UninitializedErrorClass();
-        t = uninitializedErrorClass->ivtable()->traits;
-        registerClassAlias(ctx, t->name(), uninitializedErrorClass);
-
-        ClassClosure* uriErrorClass = builtinClasses()->get_URIErrorClass();
-        t = uriErrorClass->ivtable()->traits;
-        registerClassAlias(ctx, t->name(), uriErrorClass);
-
-        ClassClosure* verifyErrorClass = builtinClasses()->get_VerifyErrorClass();
-        t = verifyErrorClass->ivtable()->traits;
-        registerClassAlias(ctx, t->name(), verifyErrorClass);
     }
 
 	void Toplevel::internObject (const FixedHeapRCObject* rep, GCRef<ScriptObject> obj)

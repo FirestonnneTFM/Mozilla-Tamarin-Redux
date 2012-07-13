@@ -40,74 +40,8 @@
 #ifndef __avmplus_Cloner__
 #define __avmplus_Cloner__
 
+// Contents removed, file stays for now (adding and removing files is hard).
 
-namespace avmplus {
-
-    class GC_CPP_EXACT(TraitsMorpher, MMgc::GCTraceableObject)
-    {
-    protected:
-        TraitsMorpher(Traits* targetTraits)
-            : m_targetTraits(targetTraits)
-            , m_retainedTBs(targetTraits->getTraitsBindings())
-            , m_retainedTraitsMetadata(targetTraits->getTraitsMetadata())
-            , m_mostRecentSourceTraits(NULL)
-            , m_mostRecentCodeLength(0) 
-            {
-                WB_NULL(&m_mostRecentCode);
-            }
-    public:
-        REALLY_INLINE static TraitsMorpher* create(MMgc::GC* gc, GCRef<Traits> targetTraits)
-        {
-            AvmAssert(gc == targetTraits->core->gc);
-            return new (gc, MMgc::kExact) TraitsMorpher(targetTraits);
-        }
-
-        bool compile(Traits* traits, Traits* newTraits, Toplevel* toplevel, Toplevel* newToplevel);
-        void morph(Cloner& cloner, MMgc::GC* gc, const ScriptObject* obj, ScriptObject* newObj);
-        bool containsTransientMetadata(PoolObject* pool, const uint8_t* meta_pos);
-        bool slotContainsTransientMetadata(Traits *traits, int index);
-        bool isSerializable(Traits * t, Namespace* ns, Binding b, AvmCore* currentCore);
-
-    private:
-        GC_DATA_BEGIN(TraitsMorpher)
-        GCMember<Traits> m_targetTraits;
-        GCMember<const TraitsBindings> m_retainedTBs; // Only here to prevent reconstruction via the QCache mechansim.
-        GCMember<const TraitsMetadata> m_retainedTraitsMetadata; // Only here to prevent reconstruction via the QCache mechansim.
-        void* m_mostRecentSourceTraits; // Opaque, not GC'd.
-        intptr_t* GC_POINTER(m_mostRecentCode);
-        int m_mostRecentCodeLength;
-        GC_DATA_END(TraitsMorpher)
-    };
-
-    class Cloner { // stack allocaed
-    public:
-        Cloner(Toplevel* target);
-        Toplevel* target();
-        void cloneDynamicProperties(const ScriptObject* fromObject, ScriptObject* toObject, bool onlyValueKeys = false);
-        void registerClone(const ScriptObject* original, ScriptObject* clone);
-        bool interrupted;
-        Atom cloneAtom(Atom a);
-        const ScriptObject* cloneScriptObject(const ScriptObject* obj);
-        Atom cloneDoubleAtom(Atom prop);
-        String* cloneString(String* str);
-        Namespace* cloneNamespace(Namespace* ns);
-        void cloneMultiname(AvmCore* sourceCore, const HeapMultiname& src, HeapMultiname& dst);
-        static bool canCoerce(Toplevel* fromTl, Traits* fromTraits, Toplevel* toTl, Traits* toTraits);
-        static Traits* typeAt(Traits* traits, int slotId);
-        Atom restoreGetterResult(ScriptObject* obj, int dispid); 
-        void saveGetterResult(ScriptObject* obj, int dispid, Atom value);
-        void destroy();
-        
-      private:
-        ClassClosure* targetClosureFor(Toplevel* sourceToplevel, Traits* sourceTraits);
-        void* operator new(size_t); // Declared but undefined, on the stack.
-        Toplevel* m_target;
-        FixedHeapHashTable<const AvmPlusScriptableObject*, const AvmPlusScriptableObject*> m_map;
-
-    };
-    
-
-}
 #endif
 
 

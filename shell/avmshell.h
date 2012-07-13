@@ -92,11 +92,6 @@ namespace avmplus
     class NewObjectSampleObject;
     class TraceClass;
     class Isolate;
-    class PromiseObject;
-    class PromiseClass;
-    class PromiseHelperClass;
-    class RemoteProxyClass;
-    class RemoteProxyObject;
 
 }
 
@@ -197,9 +192,6 @@ namespace avmshell
         ShellIsolate(int32_t desc, int32_t parentDesc, avmplus::Aggregate* aggregate);
         virtual void doRun();
         virtual bool copyByteCode(avmplus::ByteArrayObject* ba);
-        virtual bool processProxies(avmplus::Toplevel* toplevel);
-        virtual void registerPromiseOwner(int32_t existingProxyGID, avmplus::Atom resolvedObject, avmplus::Toplevel* toplevel);
-        virtual void eventLoop(avmplus::Toplevel* toplevel);
         virtual avmplus::ScriptObject* workerObject(avmplus::Toplevel* toplevel);
     };
 

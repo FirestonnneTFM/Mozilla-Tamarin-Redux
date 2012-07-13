@@ -281,8 +281,6 @@ namespace avmshell
 
         GCRef<avmplus::ScriptObject> constructWorkerObject() const;
         
-        void initAliasTable(bool initWorkerClasses);
-
     private:
         GC_DATA_BEGIN(ShellToplevel)
 

@@ -373,23 +373,6 @@ Atom BaseExecMgr::verifyInvoke(MethodEnv* env, int argc, Atom* args)
     return (*env->method->_invoker)(env, argc, args);
 }
 
-Atom BaseExecMgr::verifyInvokeWithHook(MethodEnv* env, int argc, Atom* args)
-{
-    Atom result = verifyInvoke(env, argc, args);
-    env->core()->exec->firstInvocationHook(env);
-    return result;
-}
-
-void BaseExecMgr::firstInvocationHook(MethodEnv* env) {
-    env->core()->getIsolate()->eventLoop(env->toplevel());
-}
-    
-void BaseExecMgr::setFirstInvocationHook(MethodEnv* env)
-{
-    AvmAssert(env->method->_invoker == verifyInvoke);
-    env->method->_invoker = verifyInvokeWithHook;
-}
-
 void BaseExecMgr::verifyOnCall(MethodEnv* env)
 {
     BaseExecMgr *exec = BaseExecMgr::exec(env);

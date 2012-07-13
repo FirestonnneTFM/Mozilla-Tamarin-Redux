@@ -68,10 +68,6 @@ namespace avmplus
         void retargetReceiver(int32_t receiverGiid);
         void initializeWithChannel(PromiseChannel* channel);
         void close();
-        // @return success
-        bool sendCondThrow(Atom value, bool dothrow);
-        bool send(Atom value);
-        Atom m_receive(bool onlyIfAvailable);
         bool available();
         int32_t get_sender();
         int32_t get_receiver();

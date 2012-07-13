@@ -37,24 +37,31 @@
 
 package {
 
-    import flash.system.*
+    import flash.system.Worker
+    import flash.system.WorkerDomain
+
     if (Worker.current.isPrimordial) {
-        var SECTION = "concurrency";
-        var VERSION = "AS3";
-        var TITLE   = "Test Worker create too many workers.";
+        var SECTION = "Workers";
+        var VERSION = "as3";
+        var TITLE   = "Test Worker creating large number of workers.";
         startTest();
         writeHeaderToLog( SECTION + " "+ TITLE);
 
         var max=50;
         var exception="no exception";
         var workers=new Array();
-        for (var i=0;i<max;i++) {
+        var i:uint;
+        for (i=0;i<max;i++) {
             try {
                 var worker:Worker=WorkerDomain.current.createWorkerFromPrimordial();
+                worker.start();
                 workers.push(worker);
             } catch (e) {            
                 exception=e.toString();
             }
+        }
+        for (i=0;i<max;i++) {
+            workers[i].terminate();
         }
         AddTestCase("Exception is not thrown when 50 workers are created","no exception",exception);
         AddTestCase("Maxium number of workers was not exceeded",50,workers.length);

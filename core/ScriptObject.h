@@ -54,7 +54,6 @@ namespace avmplus
     protected:
         ScriptObject(VTable* vtable, ScriptObject* delegate);
         ScriptObject(VTable* vtable, ScriptObject* delegate, int htCapacity);
-        friend class Cloner;
     public:
         REALLY_INLINE static ScriptObject* create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate);
         REALLY_INLINE static ScriptObject* create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate, int htCapacity);

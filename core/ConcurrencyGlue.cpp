@@ -41,6 +41,13 @@
 
 namespace avmplus {
 
+#define DEBUG_CONDITION_MUTEX
+#if defined(DEBUG) && defined(DEBUG_CONDITION_MUTEX)
+    #define DEBUG_STATE(_x_) do { AvmLog _x_; } while(0)
+#else
+    #define DEBUG_STATE(_x_) do { } while(0)
+#endif
+
     class SafepointHelper_VMPIMutex
     {
     private:
@@ -103,22 +110,75 @@ namespace avmplus {
     //
     // InterruptableState 
     //
-    InterruptableState::InterruptableState()
+#ifdef DEBUG
+    int InterruptableState::globalId = 0;
+#endif // DEBUG
+
+
+    InterruptableState::EnterWait::EnterWait(Isolate* isolate, InterruptableState* state)
+        : interrupted(false)
     {
+        Isolate::WaitRecord record;
+        SCOPE_LOCK(state->m_lock) {
+            state->m_waitList.Add(&record);
+            DEBUG_STATE(("thread %d added to (%d) list\n", VMPI_currentThread(), state->gid));
+            failed = !record.isValid;
+
+            /*
+            if (m_state->m_waitList) {
+                m_record->next = m_state->m_waitList;
+                m_state->m_waitList->next = m_record;
+            }
+            else {
+                m_state->m_waitList = m_record;
+            }
+            */
+
+            if (!failed && isolate) {
+                isolate->setActiveWaitRecord(&record);
+            }
+        }
+             
+        if (!failed) {
+            // we loop to allow the debugger to wake us up and get a 
+            // call stack then go back to a waiting state
+            if (record.isValid) {
+                do {
+                    VMPI_recursiveMutexLock(&record.privateMutex);
+                    if (!record.notified) {
+                        DEBUG_STATE(("thread %d sleeping\n", VMPI_currentThread(), state->gid));
+                        avmplus::SafepointHelper_VMPIWait::wait(&record.condVar, &record.privateMutex, -1);
+                    }
+                    VMPI_recursiveMutexUnlock(&record.privateMutex);
+                }
+                while(isolate && isolate->retryActiveWaitRecord());
+            }
+        }
+
+        DEBUG_STATE(("thread %d now awake\n", VMPI_currentThread()));
+        interrupted = isolate ? isolate->isInterrupted() : false;
+        SCOPE_LOCK(state->m_lock) {
+            state->m_waitList.Remove(&record);
+            if (isolate) {
+                isolate->setActiveWaitRecord(NULL);
+            }
+        }
+    }
+
+    InterruptableState::InterruptableState()
+        //: m_waitList(NULL)
+    {
+#ifdef DEBUG
+        gid = ++globalId;
+#endif // DEBUG
+        notified = false;
     }
 
     void InterruptableState::destroy()
     {
         // no one could be waiting on any record in the list or we wouldn't
         // be in the destroy method (everyone's ref to this state is NULL).
-        // if a wait was interrupted there can be some WaitRecords 
-        // remaining in the list.  
-        while(m_waitList.Count())
-        {
-            Isolate::WaitRecord* record = m_waitList.Get(0);
-            m_waitList.Remove(record);
-            mmfx_delete(record);
-        }
+        AvmAssert(m_waitList.Count() == 0);
         m_waitList.Destroy();
     }
 
@@ -126,103 +186,111 @@ namespace avmplus {
     {
         // get the first WaitRecord in the list and notify it
         // the list is currently protected by the associated mutex 
-        // is is possible that no other thread is waiting on this condition
+        // it is possible that no other thread is waiting on this condition
         // as seen with the following example:
         //    mutex.lock();
         //    condition.notify();
-        AvmAssert(lockIsHeld() == true);
-        if (m_waitList.Count() > 0)
-        {
-            Isolate::WaitRecord* record = m_waitList.Get(0);
-            VMPI_condVarSignal(&record->condVar);
+        SCOPE_LOCK(m_lock) {
+            DEBUG_STATE(("thread %d is calling (%d) state->notify with %d waiting threads\n", VMPI_currentThread(), gid, m_waitList.Count()));
+            if (m_waitList.Count()) {
+                Isolate::WaitRecord* record = m_waitList.Get(0);
+                VMPI_recursiveMutexLock(&record->privateMutex);
+                record->notified = true;
+                VMPI_recursiveMutexUnlock(&record->privateMutex);
+                VMPI_condVarSignal(&record->condVar);
+            }
+            else {
+                notified = true;
+            }
         }
     }
 
     void InterruptableState::notifyAll()
     {
         // the list is currently protected by the associated mutex
-        AvmAssert(lockIsHeld() == true);
-        if (m_waitList.Count()) {
-            // notify all waiting records in the list
-            MMgc::BasicListIterator<Isolate::WaitRecord*> iter(m_waitList);
-            Isolate::WaitRecord* record = iter.next();
-            while(record)
-            {
-                VMPI_condVarSignal(&record->condVar);
-                record = iter.next();
+        SCOPE_LOCK(m_lock) {
+            DEBUG_STATE(("thread %d is calling (%d) state->notifyAll with %d waiting threads\n", VMPI_currentThread(), gid, m_waitList.Count()));
+            if (m_waitList.Count()) {
+                // notify all waiting records in the list
+                MMgc::BasicListIterator<Isolate::WaitRecord*> iter(m_waitList);
+                Isolate::WaitRecord* record = iter.next();
+                while(record) {
+                    AvmAssert(record->isValid == true);
+                    VMPI_recursiveMutexLock(&record->privateMutex); 
+                    record->notified = true;
+                    DEBUG_STATE(("thread %d is notifying thread %d\n", VMPI_currentThread(), record->threadID));
+                    VMPI_condVarSignal(&record->condVar);
+                    VMPI_recursiveMutexUnlock(&record->privateMutex);
+                    record = iter.next();
+                }
+            }
+            else {
+                notified = true;
             }
         }
     }
 
-    Isolate::WaitRecord* InterruptableState::enterWait(Isolate* isolate)
+    MutexObject::State::EnterWait::EnterWait(Isolate* isolate, State* state)
+        : interrupted(false)
+        , result(false)
     {
-        // update list of waiting threads with this one
-        Isolate::WaitRecord* record = mmfx_new(Isolate::WaitRecord());
+        Isolate::WaitRecord record;
+        SCOPE_LOCK(state->m_lock) {
+            if (state->notified && state->m_waitList.Count() == 0) {
+                record.notified = true;
+                state->notified = false;
+            }
 
-        // if the record isn't valid we need to return early
-        if (!record->isValid) {
-            return record;
+            state->m_waitList.Add(&record);
+            DEBUG_STATE(("thread %d added to (%d) list\n", VMPI_currentThread(), state->gid));
+            // if the record isn't valid we need to return early
+            failed = !record.isValid;
+
+            /*
+            if (m_state->m_waitList) {
+                m_record->next = m_state->m_waitList;
+                m_state->m_waitList->next = m_record;
+            }
+            else {
+                m_state->m_waitList = m_record;
+            }
+            */
+            if (!failed && isolate) {
+                isolate->setActiveWaitRecord(&record);
+            }
+        }
+             
+        if (!failed) {
+            // we loop to allow the debugger to wake us up and get a 
+            // call stack then go back to a waiting state
+            result = false;
+            if (record.isValid) {
+                do {
+                    VMPI_recursiveMutexLock(&record.privateMutex);
+                    if (!record.notified) {
+                        DEBUG_STATE(("thread %d sleeping\n", VMPI_currentThread(), state->gid));
+                        result = avmplus::SafepointHelper_VMPIWait::wait(&record.condVar, &record.privateMutex, -1) == false;
+                    }
+                    VMPI_recursiveMutexUnlock(&record.privateMutex);
+                }
+                while(isolate && isolate->retryActiveWaitRecord());
+            }
         }
 
-        AvmAssert(lockIsHeld() == true);
-        // this list is protected by the Mutex currently held
-        m_waitList.Add(record);
-        if (isolate) {
-            isolate->setActiveWaitRecord(record);
+        interrupted = isolate ? isolate->isInterrupted() : false;
+        DEBUG_STATE(("thread %d now awake\n", VMPI_currentThread()));
+        SCOPE_LOCK(state->m_lock) {
+            state->m_waitList.Remove(&record);
+            if (isolate) {
+                isolate->setActiveWaitRecord(NULL);
+            }
         }
-        return record;
     }
-
-    bool InterruptableState::wait(Isolate::WaitRecord* record, Isolate* isolate, int32_t millis)
-    {
-        // we loop to allow the debugger to wake us up and get a 
-        // call stack then go back to a waiting state
-        bool result = false;
-        do {
-            VMPI_recursiveMutexLock(&record->privateMutex);
-            result = avmplus::SafepointHelper_VMPIWait::wait(&record->condVar, &record->privateMutex, millis) == false;
-            VMPI_recursiveMutexUnlock(&record->privateMutex);
-        }
-        while(isolate && isolate->retryActiveWaitRecord());
-        return result;
-    }
-
-    void InterruptableState::exitWait(Isolate* isolate, Isolate::WaitRecord* record)
-    {
-        AvmAssert(lockIsHeld() == true);
-        m_waitList.Remove(record);
-        if (isolate) {
-            isolate->setActiveWaitRecord(NULL);
-        }
-        mmfx_delete(record);
-    }
-
-#ifdef DEBUG
-    class EnterMutexStateLock
-    {
-    public:
-        EnterMutexStateLock(MutexObject::State* state)
-            : m_state(state)
-        {
-            m_state->m_lockIsHeld = true;
-        }
-
-        ~EnterMutexStateLock()
-        {
-            m_state->m_lockIsHeld = false;
-        }
-    private:
-        MutexObject::State* m_state;
-    };
-#endif // DEBUG
 
     MutexObject::State::State()
         : InterruptableState()
         , m_recursion_count(0)
         , m_ownerThreadID(VMPI_nullThread())
-#ifdef DEBUG
-        , m_lockIsHeld(false)
-#endif // DEBUG
     {
         m_isValid = VMPI_recursiveMutexInit(&m_mutex);
     }
@@ -241,6 +309,7 @@ namespace avmplus {
                     VMPI_recursiveMutexUnlock(&m_mutex);
                 }
                 VMPI_recursiveMutexDestroy(&m_mutex);
+                DEBUG_STATE(("thread %d acquired lock (%d) during destroy\n", VMPI_currentThread(), gid));
             } else {
                 // It's locked by a thread but not reachable through GC objecs.
                 // The native mutex will be orphaned, but otherwise the memory will be released.
@@ -253,6 +322,7 @@ namespace avmplus {
     {
         bool result = VMPI_recursiveMutexTryLock(&m_mutex);
         if (result == true) {
+            DEBUG_STATE(("thread %d acquired (%d) lock\n", VMPI_currentThread(), gid));
             if (m_recursion_count == 0) {
                 AvmAssert(m_ownerThreadID == VMPI_nullThread());
                 m_ownerThreadID = VMPI_currentThread(); 
@@ -266,6 +336,7 @@ namespace avmplus {
 
     bool MutexObject::State::unlock()
     {
+        DEBUG_STATE(("thread %d calling unlock (%d)\n", VMPI_currentThread(), gid));
         if (m_ownerThreadID != VMPI_currentThread())
         {
             // Non-fenced read of the m_ownerThreadID field possibly outside of a critical section.
@@ -285,23 +356,11 @@ namespace avmplus {
             AvmAssert(m_ownerThreadID == VMPI_currentThread());
             m_ownerThreadID = VMPI_nullThread(); 
         } 
-        VMPI_recursiveMutexUnlock(&m_mutex); // This one is the one requested by user code.
 
-        SCOPE_LOCK(m_listLock) {
-#ifdef DEBUG
-            EnterMutexStateLock enter(this);
-#endif // DEBUG
-            notifyAll();
-        }
+        VMPI_recursiveMutexUnlock(&m_mutex); // This one is the one requested by user code.
+        notifyAll();
         return true;
     }
-
-#ifdef DEBUG
-    bool MutexObject::State::lockIsHeld()
-    {
-        return m_lockIsHeld;
-    }
-#endif // DEBUG
 
     MutexObject::MutexObject(VTable* cvtable, ScriptObject* delegate) 
         : ScriptObject(cvtable, delegate)
@@ -337,43 +396,29 @@ namespace avmplus {
   
     void MutexObject::lock()
     {
+        DEBUG_STATE(("thread %d calling Mutex(%d).lock()\n", VMPI_currentThread(), m_state->gid));
         // we continue to try and get the lock until
         // we are terminated or acquire it
         while(!m_state->tryLock()) {
-            Isolate* isolate = core()->getIsolate();
+            DEBUG_STATE(("thread %d lock (%d) not acquired\n", VMPI_currentThread(), m_state->gid));
             // if we don't get the lock then we have to wait
-            Isolate::WaitRecord* record = NULL;
-            SCOPE_LOCK(m_state->m_listLock) {
-#ifdef DEBUG
-                EnterMutexStateLock enter(m_state);
-#endif // DEBUG
-                record = m_state->enterWait(isolate);
-                if (!record->isValid) {
-                    toplevel()->throwError(kMutexCannotBeInitialized);
-                }
+            State::EnterWait wait(core()->getIsolate(), m_state);
+            if (wait.failed) {
+                toplevel()->throwError(kMutexCannotBeInitialized);
             }
-            
-            m_state->wait(record, isolate, -1);
-
             // if we are terminated then unset the active wait record and exit
             // when the state is destroyed it will clean up all current records.
-            if ((isolate && isolate->isInterrupted()) || core()->interruptCheckReason(AvmCore::ExternalInterrupt)) {
-                isolate->setActiveWaitRecord(NULL);
+            if (wait.interrupted || core()->interruptCheckReason(AvmCore::ExternalInterrupt)) {
                 break;
             }
-
-            SCOPE_LOCK(m_state->m_listLock) {
-#ifdef DEBUG
-                EnterMutexStateLock enter(m_state);
-#endif // DEBUG
-                m_state->exitWait(isolate, record);
-            }
+            DEBUG_STATE(("thread %d attempting lock (%d) again\n", VMPI_currentThread(), m_state->gid));
         }
     	TELEMETRY_METHOD_NO_THRESHOLD(core()->getTelemetry(),".player.mutex.lock");
     }
     
     void MutexObject::unlock()
     {
+        DEBUG_STATE(("thread %d is calling Mutex(%d).unlock()\n", VMPI_currentThread(), m_state->gid));
         if (!m_state->unlock()) {
             toplevel()->illegalOperationErrorClass()->throwError(kMutextNotLocked);
         }
@@ -429,49 +474,105 @@ namespace avmplus {
     {
     }
 
+    ConditionObject::State::EnterWait::EnterWait(Isolate* isolate, State* state, int32_t millis, MutexObject::State* mutexState, vmpi_mutex_t* mutex)
+        : interrupted(false)
+        , result(false)
+    {
+        Isolate::WaitRecord record;
+        SCOPE_LOCK(state->m_lock) {
+            if (state->notified && state->m_waitList.Count() == 0) {
+                record.notified = true;
+                state->notified = false;
+            }
+
+            state->m_waitList.Add(&record);
+            DEBUG_STATE(("thread %d added to (%d) list\n", VMPI_currentThread(), state->gid));
+            // if the record isn't valid we need to return early
+            failed = !record.isValid;
+
+            /*
+            if (m_state->m_waitList) {
+                m_record->next = m_state->m_waitList;
+                m_state->m_waitList->next = m_record;
+            }
+            else {
+                m_state->m_waitList = m_record;
+            }
+            */
+
+            if (!failed) {
+                if (isolate) {
+                    isolate->setActiveWaitRecord(&record);
+                }
+
+                VMPI_recursiveMutexUnlock(mutex);
+                DEBUG_STATE(("thread %d releasing (%d) lock\n", VMPI_currentThread(), mutexState->gid));
+                mutexState->notifyAll();
+            }
+        }
+             
+        if (!failed) {
+            // we loop to allow the debugger to wake us up and get a 
+            // call stack then go back to a waiting state
+            result = false;
+            if (record.isValid) {
+                do {
+                    VMPI_recursiveMutexLock(&record.privateMutex);
+                    if (!record.notified) {
+                        DEBUG_STATE(("thread %d sleeping for %d millis (%d)\n", VMPI_currentThread(), millis, state->gid));
+                        result = avmplus::SafepointHelper_VMPIWait::wait(&record.condVar, &record.privateMutex, millis) == false;
+                    }
+                    VMPI_recursiveMutexUnlock(&record.privateMutex);
+                }
+                while(isolate && isolate->retryActiveWaitRecord());
+            }
+        }
+
+        interrupted = isolate ? isolate->isInterrupted() : false;
+        DEBUG_STATE(("thread %d now awake\n", VMPI_currentThread()));
+        SCOPE_LOCK(state->m_lock) {
+            state->m_waitList.Remove(&record);
+            if (isolate) {
+                isolate->setActiveWaitRecord(NULL);
+            }
+        }
+    }
+
     ConditionObject::State::State(MutexObject::State* mutexState)
         : InterruptableState()
         , m_mutexState(mutexState)
     {
     }
 
-#ifdef DEBUG
-    bool ConditionObject::State::lockIsHeld()
-    {
-        return m_mutexState->m_ownerThreadID != VMPI_nullThread();
-    }
-#endif
-
     bool ConditionObject::State::wait(int32_t millis, Isolate* isolate, Toplevel* toplevel)
     {
-        // mutex is currently locked protecting enterWait
-        Isolate::WaitRecord* record = enterWait(isolate);
-        if (!record->isValid) {
+        // we own the mutex.
+        m_mutexState->m_ownerThreadID = VMPI_nullThread();
+        int64_t saved_recursion_count = m_mutexState->m_recursion_count;
+        m_mutexState->m_recursion_count = 0;
+
+        AvmAssert(vmbase::SafepointRecord::hasCurrent());
+
+        EnterWait wait(isolate, this, millis, m_mutexState, &m_mutexState->m_mutex);
+
+        if (wait.failed) {
+            // restore state before throwing
+            m_mutexState->m_ownerThreadID = VMPI_currentThread();
+            m_mutexState->m_recursion_count = saved_recursion_count;
+            VMPI_recursiveMutexLock(&m_mutexState->m_mutex);
             toplevel->throwError(kConditionCannotBeInitialized);
         }
 
-        m_mutexState->m_ownerThreadID = VMPI_nullThread();
-        // So we own the mutex.
-        int64_t saved_recursion_count = m_mutexState->m_recursion_count;
-        m_mutexState->m_recursion_count = 0;
-        AvmAssert(vmbase::SafepointRecord::hasCurrent());
-
-        // unlock public mutex
-        VMPI_recursiveMutexUnlock(&m_mutexState->m_mutex);
-        bool result = InterruptableState::wait(record, isolate, millis);
         // if we have been interrupted do not re-acquire the public lock, just bail
-        // when we are destroyed we will clean up all current records.
-        if (isolate) {
-            if (isolate->isInterrupted() || isolate->targetCore()->interruptCheckReason(AvmCore::ExternalInterrupt)) {
-                isolate->setActiveWaitRecord(NULL);
-                return false;
-            }
+        if (wait.interrupted || 
+           (isolate && isolate->targetCore()->interruptCheckReason(AvmCore::ExternalInterrupt))) 
+        {
+            return false;
         }
         // re-acquire the public mutex in a safepoint
         SafepointHelper_VMPIMutex::lock(&m_mutexState->m_mutex);
         m_mutexState->m_ownerThreadID = VMPI_currentThread();
         m_mutexState->m_recursion_count = saved_recursion_count;
-        exitWait(isolate, record);
 
         if (isolate) {
             // if we are terminating then we should release the public mutex
@@ -481,7 +582,7 @@ namespace avmplus {
                 VMPI_recursiveMutexUnlock(&m_mutexState->m_mutex);
             }
         }
-        return result;
+        return wait.result;
     }
 
     void ConditionObject::ctor(GCRef<MutexObject> mutex)
@@ -505,6 +606,7 @@ namespace avmplus {
             return false;
         }
 
+        DEBUG_STATE(("thread %d calling Condition(%d).notify\n", VMPI_currentThread(), m_state->gid));
         m_state->notify();
         return true;
     }
@@ -516,6 +618,7 @@ namespace avmplus {
         {
             return false;
         }
+        DEBUG_STATE(("thread %d calling Condition(%d).notifyAll\n", VMPI_currentThread(), m_state->gid));
         m_state->notifyAll();
         return true;
     }
@@ -568,6 +671,7 @@ namespace avmplus {
  		
         AvmAssert(timeout == -1 || timeout >= 0);
         int32_t millis = timeout == -1 ? -1 : int32_t(timeout); // as code calls Math.ceil
+        DEBUG_STATE(("thread %d calling Condition(%d).wait(%d)\n", VMPI_currentThread(), m_state->gid, millis));
         return m_state->wait(millis, isolate, toplevel());
     }
 
@@ -585,7 +689,6 @@ namespace avmplus {
 
     void ConditionObject::State::destroy()
     {
-        InterruptableState::destroy();
         m_mutexState = NULL;
         mmfx_delete(this);
     }

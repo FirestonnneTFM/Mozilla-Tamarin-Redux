@@ -64,18 +64,7 @@ include "api-versions.as"
 
         public native function get receiver(): int;
 
-        public native function send(arg:*): Boolean;
-
-        public native function sendCondThrow(arg:*, doThrow:Boolean): Boolean;
-
-        private native function m_receive(onlyIfAvailable:Boolean): *;
-
         public native function available(): Boolean;
-
-        public function receive():*
-        {
-            return m_receive(false);
-        }
 
         public native function close(): void;
 
