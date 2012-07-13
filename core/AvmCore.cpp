@@ -890,9 +890,6 @@ namespace avmplus
     {
         main->initGlobal();
 
-
-        if (enterEventLoop && !inEventLoop)
-            exec->setFirstInvocationHook(main);
         Atom result = 0; // init to zero to make GCC happy
 
         #ifndef DEBUGGER

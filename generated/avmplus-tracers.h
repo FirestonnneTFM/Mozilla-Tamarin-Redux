@@ -151,7 +151,6 @@
 #define avmplus_Traits_isExactInterlock 1
 #define avmplus_TraitsBindings_isExactInterlock 1
 #define avmplus_TraitsMetadata_isExactInterlock 1
-#define avmplus_TraitsMorpher_isExactInterlock 1
 #define avmplus_TypeErrorClass_isExactInterlock 1
 #define avmplus_TypeErrorObject_isExactInterlock 1
 #define avmplus_TypedVectorClassBase_isExactInterlock 1

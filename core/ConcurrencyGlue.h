@@ -128,23 +128,31 @@ namespace avmplus {
         friend class MutexObject;
         friend class ConditionObject;
         friend class ConditionObject::State;
+        friend class EnterWait;
         vmpi_mutex_t m_mutex;
-        vmbase::RecursiveMutex m_listLock;
         int64_t m_recursion_count; // generous to avoid wraparound.
         vmpi_thread_t volatile m_ownerThreadID;
         bool m_isValid;
+
     public:
         State();
         virtual void destroy();
         bool tryLock();
         bool unlock();
 
-#ifdef DEBUG
-    public:
-        bool m_lockIsHeld; 
-    protected:
-        bool lockIsHeld();
-#endif // DEBUG
+    private:
+        //
+        // this is intended as a stack based helper for waiting
+        // on an interruptable state object
+        //
+        class EnterWait
+        {
+        public:
+            EnterWait(Isolate* isolate, State* state);
+            bool failed;
+            bool interrupted;
+            bool result;
+        };
     };
     
     //
@@ -161,17 +169,26 @@ namespace avmplus {
     class ConditionObject::State: public InterruptableState
     {
         friend class ConditionObject;
-
         FixedHeapRef<MutexObject::State> m_mutexState;
         
     public:
         State(MutexObject::State* mutexState);
         bool wait(int32_t millis, Isolate* isolate, Toplevel* toplevel);
         virtual void destroy();
-#ifdef DEBUG
-    protected:
-        bool lockIsHeld();
-#endif // DEBUG
+
+    private:
+        //
+        // this is intended as a stack based helper for waiting
+        // on an interruptable state object
+        //
+        class EnterWait
+        {
+        public:
+            EnterWait(Isolate* isolate, State* condition, int32_t millis, MutexObject::State* mutexState, vmpi_mutex_t* mutex);
+            bool failed;
+            bool interrupted;
+            bool result;
+        };
     };
     
     class GC_AS3_EXACT(MutexClass, ClassClosure)

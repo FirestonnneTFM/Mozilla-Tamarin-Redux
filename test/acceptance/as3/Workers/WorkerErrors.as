@@ -37,25 +37,26 @@
 
 package {
 
-    import flash.system.*
+    import flash.system.Worker
+    import flash.system.WorkerDomain
 
     if (Worker.current.isPrimordial) {
-        var SECTION = "concurrency";
-        var VERSION = "AS3";
+        var SECTION = "Workers";
+        var VERSION = "as3";
         var TITLE   = "Test Worker errors.";
         startTest();
         writeHeaderToLog( SECTION + " "+ TITLE);
 
         // start a worker twice
         var worker1:Worker=WorkerDomain.current.createWorkerFromPrimordial();
-        var promise1:Promise=worker1.start();
+        worker1.start();
         var exception1:String="no exception";
         try {
             worker1.start();
         } catch (e) {
             exception1=e.toString();
         }
-        AddTestCase("exception is thrown when starting a worker already started","Error: Worker already started",exception1);
+        AddTestCase("exception is thrown when starting a worker already started","Error: Error #1511",exception1.substring(0,"Error: Error #1511".length));
 
 
         // stop a worker not started
@@ -63,21 +64,9 @@ package {
         var code2:Boolean= worker2.terminate();
         AddTestCase("worker terminate returns false if worker not started",false,code2);
         
-        // promise receive on a global promise
-        var result1=promise1.receive();
-        AddTestCase("when a global promise receive is called null is returned",null,result1);
-        {
-            //use namespace async;
-            var promise2:Promise=promise1.async.echo("test");
-            promise2.receive();
-            var result2=promise2.receive();
-            AddTestCase("when a promise receive is called twice returns result","test",result2);
-        }
         test();
         worker1.terminate();
     } else {
-        public function echo(o:Object):Object {
-            return o;
-        }
+        trace("in background worker");
     }
 }

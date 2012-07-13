@@ -63,8 +63,6 @@ namespace avmplus
         friend class AbcParser;
         friend class AvmCore;
         friend class Toplevel;
-        friend class PromiseClass;
-        friend class Cloner;
 
         GC_DATA_BEGIN(NamespaceSet)
         

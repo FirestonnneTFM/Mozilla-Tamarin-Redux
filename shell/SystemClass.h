@@ -369,7 +369,6 @@ namespace avmshell
         // Return argument value as a kIntptrType atom if the argument is a numeric
         // value that can be so represented, else return the argument unchanged.
         avmplus::Atom canonicalizeNumber(avmplus::Atom a);
-        avmplus::Atom copy(avmplus::Atom source);
 
         // DEOPT: Diagnostic scaffolding.
         void deopt(int32_t k);

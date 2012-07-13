@@ -94,13 +94,7 @@ namespace avmplus
         mmfx_delete(channel);
     }
     
-    Aggregate::Globals::EmptyPromisesMap::EmptyPromisesMap(int initialSize)
-        : FixedHeapHashTable<int32_t, FixedHeapHashTable<int32_t, int32_t>* >(initialSize)
-    {}
-
-    Aggregate::Globals::EmptyPromisesMap::~EmptyPromisesMap()
-    {}
-
+    
     Aggregate::Aggregate()
         : m_primordialGiid(1) // eventually there will be many of those
         , m_activeIsolateCount(0)
@@ -288,6 +282,7 @@ namespace avmplus
             }
             SCOPE_LOCK_NAMED(lk, m_commlock) {
                 // Wake up isolates in waitForAnySend()
+                // Note: waitForAnySend() removed, remove notification?
                 lk.notifyAll();
             }
 
@@ -307,163 +302,9 @@ namespace avmplus
         core->throwException(exception);
     }
 
-
-    bool Aggregate::registerAdditionalRemoteProxy(uint32_t resolvedPromiseGID,
-                                                  uint32_t freshPromiseGID,
-                                                  PromiseChannelObject* out,
-                                                  PromiseChannelObject* inc)
-    {
-
-        SCOPE_LOCK(m_globals->m_lock) {
-            // out is the channel of the promise -- object's owner
-            // will be receiver of this channel
-            Isolate* owner(m_globals->at(out->get_receiver()));
-            Isolate::State state = queryState(owner);
-            
-            if (state == Isolate::NEW || state > Isolate::RUNNING) {
-                return false;
-            }
-            
-            AvmAssert(owner != NULL);
-            // notify this isolate that it should create a fresh promise
-            // to wait for resolution requests from another worker
-            SCOPE_LOCK_NAMED(lk, m_commlock) {
-                int length = owner->m_additionalProxyInfo.length;
-                if (length == 0) {
-                    AvmAssert(owner->m_additionalProxyChannels.length == 0);
-                    owner->m_additionalProxyInfo.allocate(4);
-                    owner->m_additionalProxyChannels.allocate(4);
-                }
-                else if (owner->numAdditionalProxies == length) {
-                    owner->m_additionalProxyInfo.resize(length + 4);
-                    owner->m_additionalProxyChannels.resize(length + 4);
-                }
-                owner->m_additionalProxyInfo.values[owner->numAdditionalProxies] = resolvedPromiseGID;
-                owner->m_additionalProxyInfo.values[owner->numAdditionalProxies+1] = freshPromiseGID;
-                owner->m_additionalProxyChannels.values[owner->numAdditionalProxies] = out->m_channel;
-                owner->m_additionalProxyChannels.values[owner->numAdditionalProxies+1] = inc->m_channel;
-                owner->numAdditionalProxies+=2;
-                
-                lk.notifyAll();
-            }
-        }
-        return true;
-    }
-
-
-    void Isolate::registerPromiseOwner(int32_t, avmplus::Atom, avmplus::Toplevel*)
-    {
-    }
-
-
-    bool Aggregate::notifyEmptyOwners(int32_t emptyPromiseGID, Atom resolvedObject, Toplevel* toplevel)
-    {
-        bool success = false;
-        SCOPE_LOCK(m_globals->m_lock) {
-
-            class PromiseOwnerRegisterer: public FixedHeapHashTable<int32_t, int32_t>::Iterator
-            {
-                int32_t existingProxyGID; // == emptyPromiseGID (of the now resolved promise)
-                Atom resolvedObject;
-                Aggregate *aggregate;
-                Toplevel* toplevel;
-                
-            public:
-                PromiseOwnerRegisterer(int32_t id, Atom o, Aggregate *a, Toplevel *t) : 
-                    existingProxyGID(id), resolvedObject(o), aggregate(a), toplevel(t) {}
-
-                virtual void each(int32_t giid, int32_t same_giid) 
-                {
-                    (void)same_giid;
-                    Isolate *currentIsolate = AvmCore::getActiveCore()->getIsolate();
-                    if (currentIsolate->desc != giid) {
-                        Isolate* isolate = aggregate->m_globals->at(giid);
-                        if (isolate->m_state == Isolate::RUNNING) {
-                            SCOPE_LOCK(aggregate->m_commlock) {
-                                isolate->registerPromiseOwner(existingProxyGID, resolvedObject, toplevel);
-                            }
-                        }
-                    }
-                }
-            };
-
-            FixedHeapHashTable<int32_t, int32_t> *set = NULL;
-            success = m_globals->m_emptyPromisesMap.LookupItem(emptyPromiseGID, &set);
-            if (success) {
-                // resolution request may not get propagated in time
-                // to the current worker from the one that actually
-                // resolved the promise
-
-                PromiseOwnerRegisterer promiseOwnerRegisterer(emptyPromiseGID, resolvedObject, this, toplevel);
-                set->ForEach(promiseOwnerRegisterer);
-                
-                success = m_globals->m_emptyPromisesMap.RemoveItem(emptyPromiseGID);
-                AvmAssert(success);
-                mmfx_delete(set);            
-                
-                SCOPE_LOCK_NAMED(lk, m_commlock) {
-                    lk.notifyAll();
-                }
-            }
-        }
-        return success;
-    }
-
-
-    void Aggregate::registerEmptyPromise(int32_t emptyPromiseGID, int32_t callerGiid)
-    {
-        SCOPE_LOCK(m_globals->m_lock) {
-            FixedHeapHashTable<int32_t, int32_t> *set;
-            bool found = m_globals->m_emptyPromisesMap.LookupItem(emptyPromiseGID, &set);
-            if (!found) {
-                set = mmfx_new((FixedHeapHashTable<int32_t, int32_t>));
-                m_globals->m_emptyPromisesMap.InsertItem(emptyPromiseGID, set);
-            }
-            int32_t el;
-            (void)el;
-            AvmAssert(!set->LookupItem(callerGiid, &el));
-            set->InsertItem(callerGiid, callerGiid);
-        }
-    }
-
-    void Aggregate::printEmptyPromises()
-    {
-        class EmptyPromisesPrinter: public Globals::EmptyPromisesMap::Iterator
-        {
-        public:
-            virtual void each(int32_t gpid, FixedHeapHashTable<int32_t, int32_t> *set) 
-            {
-
-                class Int32SetPrinter: public FixedHeapHashTable<int32_t, int32_t>::Iterator
-                {
-                public:
-                    virtual void each(int32_t giid, int32_t same_giid) 
-                    {
-                        (void)same_giid;
-                        printf("\t%d\n", giid);
-                    }
-                };
-
-                printf("WORKERS FOR EMPTY PROMISE %d:\n", gpid);
-                Int32SetPrinter setPrinter;
-                set->ForEach(setPrinter);
-
-            }
-            
-        };
-        EmptyPromisesPrinter epPrinter;
-        m_globals->m_emptyPromisesMap.ForEach(epPrinter);
-        printf("\n");
-    }
-
-
     Isolate::Isolate(int32_t desc, int32_t parentDesc, Aggregate* aggregate)
         : desc(desc)
         , parentDesc(parentDesc)
-        , numAdditionalProxies(0)
-        , additionalProxiesProcessed(0)
-        , numEmptyPromiseOwners(0)
-        , m_global_gpid(0)
         , m_core(NULL)
         , m_activeWaitRecord(NULL)
         , m_aggregate(aggregate)
@@ -478,6 +319,11 @@ namespace avmplus
     Isolate::WaitRecord::WaitRecord()
     {
         isValid = VMPI_condVarInit(&condVar) && VMPI_recursiveMutexInit(&privateMutex);
+        notified = false;
+#ifdef DEBUG
+        threadID = VMPI_currentThread();
+#endif
+        //next = NULL;
     }
 
     Isolate::WaitRecord::~WaitRecord()
@@ -876,12 +722,6 @@ namespace avmplus
         m_aggregate->runIsolate(this);
     }
 
-    void Isolate::eventLoop(Toplevel* )
-    {
-        AvmAssert(false);
-        // redefine or don't use me.
-    }
-
     Isolate::~Isolate()
     {
         m_listeners.destroy();
@@ -897,16 +737,6 @@ namespace avmplus
             for (int i = 0; i < m_code.length; i++)
                 m_code.values[i].deallocate();
             m_code.deallocate();
-        }
-        if (m_additionalProxyInfo.length > 0) {
-            AvmAssert(m_additionalProxyChannels.length > 0);
-            m_additionalProxyInfo.deallocate();
-            m_additionalProxyChannels.deallocate();
-        }
-        if (m_emptyPromiseInfo.length > 0) {
-            AvmAssert(m_emptyPromiseChannels.length > 0);
-            m_emptyPromiseInfo.deallocate();
-            m_emptyPromiseChannels.deallocate();
         }
         destroyListeners();
         if (m_thread != vmbase::VMThread::currentThread()) {
@@ -952,20 +782,6 @@ namespace avmplus
     void Aggregate::reclaimGlobals() 
     {
         if (m_globals != NULL) {
-
-            class EmptyPromisesKiller: public Globals::EmptyPromisesMap::Iterator
-            {
-            public:
-                virtual void each(int32_t gpid, FixedHeapHashTable<int32_t, int32_t> *set) 
-                {
-                    (void)gpid;
-                    mmfx_delete(set);
-                }
-                
-            };
-            EmptyPromisesKiller epKiller;
-            m_globals->m_emptyPromisesMap.ForEach(epKiller);
-
             mmfx_delete(m_globals);
             m_globals = NULL;
         } 
@@ -1091,17 +907,6 @@ namespace avmplus
     bool Aggregate::isPrimordial(int32_t giid)
     {
         return giid == m_primordialGiid;
-    }
-
-    uint32_t Aggregate::nextPromiseGID()
-    {
-        uint32_t res = VMPI_atomicIncAndGet32(&m_globals->m_nextGlobalPromiseId);
-        if (res == 0) {
-            // Oops, unsigned integer wraparound.
-            printf("PROMISE GLOBAL ID SPACE EXHAUSTED\n");
-            VMPI_abort();
-        }
-        return res;
     }
 
     Isolate* Aggregate::newIsolate(Isolate* parent)
@@ -1388,41 +1193,6 @@ namespace avmplus
         }
     }
 
-    bool Isolate::processProxies(Toplevel* toplevel) 
-    {
-        (void)toplevel;
-        // No proxy business by default, no need to wait (return true).
-        return false;
-    }
-
-
-    bool Aggregate::waitForAnySend(Isolate* isolate, Toplevel* toplevel, bool block)
-    {
-        SCOPE_LOCK_NAMED(lk, m_commlock) {
-            if (isolate->isInterrupted())
-                return false;
-
-            bool wait = isolate->processProxies(toplevel);
-
-            if (wait && block) {
-                // wait only if no (possible) call requests in transit
-                if (!m_msgInTransit &&
-                    isolate->numAdditionalProxies == 0 &&
-                    isolate->numEmptyPromiseOwners == 0 &&
-                    m_blockedChannels == 0) {
-                    // this prevents two workers going to sleep while
-                    // requests still need to be processed
-                    // (unfortunate sideeffect of past notify not
-                    // preventing future wait on the same condition
-                    // variable)
-                    m_blockedChannels++;
-                    lk.wait();
-                    m_blockedChannels--;
-                }
-            }
-        }
-        return !isolate->isInterrupted();
-    }
     
     GCRef<ObjectVectorObject> Aggregate::listWorkers(Toplevel* toplevel)
     {

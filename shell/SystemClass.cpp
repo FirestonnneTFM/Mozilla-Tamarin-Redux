@@ -300,12 +300,6 @@ namespace avmshell
         core()->GetGC()->Collect(imminence);
     }
     
-    avmplus::Atom SystemClass::copy(avmplus::Atom src)
-    {
-        avmplus::Cloner cloner(toplevel());
-        return cloner.cloneAtom(src);
-    }
-
     void SystemClass::runInSafepoint(avmplus::FunctionObject* code)
     {
         class Task: public vmbase::SafepointTask {

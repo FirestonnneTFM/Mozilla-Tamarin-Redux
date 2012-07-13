@@ -62,7 +62,7 @@ namespace avmshell {
         void clearByteCode();
         avmplus::ByteArrayObject* getByteCode();
         void setByteCode(avmplus::ByteArrayObject* byteCode);
-        avmplus::PromiseObject* startInternal();
+        bool startInternal();
 
         
         bool terminate();

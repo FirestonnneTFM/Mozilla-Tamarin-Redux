@@ -227,7 +227,6 @@ namespace avmshell
                     // so maybe aborted?
                     aggregate->stateTransition(this, avmplus::Isolate::TERMINATED);
                 }
-                toplevel->shellClasses->get_PromiseClass()->destroyRemoteObjects();
             } 
             aggregate->beforeCoreDeletion(this);
             gc->Collect();            
@@ -248,105 +247,6 @@ namespace avmshell
         aggregate->afterGCDeletion(this);
     }
 
-
-    bool ShellIsolate::processProxies(avmplus::Toplevel* toplevel) 
-    {
-        // AvmAssert(m_aggregate->m_commlock.isLockedByCurrentThread());
-        bool wait = true;
-        if (numAdditionalProxies > 0) {
-            wait = false;
-            ShellToplevel* stl = static_cast<ShellToplevel*>(toplevel);
-            GCRef<avmplus::RemoteProxyClass> remoteProxyClass = stl->shellClasses->get_RemoteProxyClass();
-            for (int i = additionalProxiesProcessed; i < numAdditionalProxies; i += 2) {
-                uint32_t existingProxyGID = m_additionalProxyInfo.values[i];
-                uint32_t freshPromiseGID  = m_additionalProxyInfo.values[i+1];
-                avmplus::FixedHeapRef<avmplus::PromiseChannel> incChannel = m_additionalProxyChannels.values[i];
-                avmplus::FixedHeapRef<avmplus::PromiseChannel> outChannel = m_additionalProxyChannels.values[i+1];
-                
-                if (!remoteProxyClass->createAndInsert(outChannel,
-                                                       incChannel,
-                                                       freshPromiseGID,
-                                                       existingProxyGID)) {
-                    additionalProxiesProcessed = i;
-                    return false;
-                }
-            }
-            numAdditionalProxies = 0;
-            additionalProxiesProcessed = 0;
-        }
-        
-        const int numEmptyOwners = numEmptyPromiseOwners;
-        if (numEmptyOwners > 0) {
-            wait = false;
-            GCRef<avmplus::PromiseClass> promiseClass = static_cast<ShellToplevel*>(toplevel)->shellClasses->get_PromiseClass();
-            for (int i = 0; i < numEmptyOwners; i += 2) {
-                uint32_t newGID = m_emptyPromiseInfo.values[i];
-                uint32_t emptyPromiseGID = m_emptyPromiseInfo.values[i+1];
-                avmplus::FixedHeapRef<avmplus::PromiseChannel> incChannel = m_emptyPromiseChannels.values[i];
-                avmplus::FixedHeapRef<avmplus::PromiseChannel> outChannel = m_emptyPromiseChannels.values[i+1];
-                promiseClass->processEmptyPromiseResolution(emptyPromiseGID, newGID, outChannel, incChannel);
-            }
-            numEmptyPromiseOwners = 0;
-        }
-        return wait;
-    }
-
-
-    void ShellIsolate::registerPromiseOwner(int32_t existingProxyGID, avmplus::Atom resolvedObject, avmplus::Toplevel* toplevel)
-    {
-        using namespace avmplus;
-        Isolate *currentIsolate = AvmCore::getActiveCore()->getIsolate();
-        Aggregate* aggregate = getAggregate();
-        
-        int length = m_emptyPromiseInfo.length;
-        if (length == 0) {
-            AvmAssert(m_emptyPromiseChannels.length == 0);
-            length = 4;
-            m_emptyPromiseInfo.allocate(length);
-            m_emptyPromiseChannels.allocate(length);
-        }
-        if (numEmptyPromiseOwners == length) {
-            m_emptyPromiseInfo.resize(length + 4);
-            m_emptyPromiseChannels.resize(length + 4);
-        }
-        FixedHeapRef<PromiseChannel> 
-            outChannel(aggregate->allocatePromiseChannel(currentIsolate->desc, desc));
-        FixedHeapRef<PromiseChannel> 
-            incChannel(aggregate->allocatePromiseChannel(desc, currentIsolate->desc));
-        // create a fresh GID for all instances of
-        // empty promise that are around (they
-        // connect to fresh instances of remote
-        // proxies, all pointing to the same
-        // object, created below)
-        int32_t newGID = aggregate->nextPromiseGID();
-        
-        m_emptyPromiseInfo.values[numEmptyPromiseOwners] = newGID;
-        m_emptyPromiseInfo.values[numEmptyPromiseOwners+1] = existingProxyGID;
-        m_emptyPromiseChannels.values[numEmptyPromiseOwners] = outChannel;
-        m_emptyPromiseChannels.values[numEmptyPromiseOwners+1] = incChannel;
-        numEmptyPromiseOwners += 2;
-        
-        GCRef<RemoteProxyClass> remoteProxyClass = static_cast<ShellToplevel*>(toplevel)->shellClasses->get_RemoteProxyClass();
-        GCRef<RemoteProxyObject> remoteProxy = remoteProxyClass->createWithGID(outChannel, incChannel, newGID);
-        remoteProxy->set_m_resolved(resolvedObject);
-        remoteProxy->set_m_global(false);
-        remoteProxy->setState(remoteProxyClass->get_RECEIVED());
-        remoteProxy->refCount = 0;
-        AvmAssert(AvmCore::isNullOrUndefined(remoteProxyClass->get_m_remote_proxies()->getUintProperty(newGID)));
-        remoteProxyClass->get_m_remote_proxies()->setUintProperty(newGID, remoteProxy->toAtom());
-    }
-
-    void ShellIsolate::eventLoop(avmplus::Toplevel* toplevel)
-    {
-        AvmAssert(toplevel->core() == m_core);
-        m_core->inEventLoop = true;
-        avmplus::RemoteProxyClass* remoteProxyClass = static_cast<ShellToplevel*>(toplevel)->shellClasses->get_RemoteProxyClass();
-        do {
-            if (!remoteProxyClass->checkForCallRequestsInternal())
-                break;
-        } while (true);
-        m_core->inEventLoop = false;
-    }
 
     avmplus::ScriptObject* ShellIsolate::workerObject(avmplus::Toplevel* toplevel)
     {
@@ -436,7 +336,6 @@ namespace avmshell
         if (settings.do_repl)
                 Shell::repl(shell);
 #endif
-        static_cast<ShellToplevel*>(toplevel)->shellClasses->get_PromiseClass()->destroyRemoteObjects();
         aggregate->beforeCoreDeletion(this);
         delete shell;
         mmfx_delete( gc );

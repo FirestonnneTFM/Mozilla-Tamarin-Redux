@@ -147,7 +147,6 @@ package avmplus
 
         // Return true if running on a 64-bit platform.
         public native static function is64bit(): Boolean;
-        public native static function copy(arg:*):*;
 
         // Return true if the argument is an atom with tag kIntptrType.
         public native static function isIntptr(a:*): Boolean;

@@ -57,7 +57,7 @@ namespace avmshell {
 
     avmplus::ObjectVectorObject* ShellWorkerDomainObject::listWorkers()
     {
-        return WorkerDomainObjectBase<ShellWorkerDomainObject>::listWorkers();
+        return avmplus::WorkerDomainObjectBase<ShellWorkerDomainObject>::listWorkers();
     }
 
 

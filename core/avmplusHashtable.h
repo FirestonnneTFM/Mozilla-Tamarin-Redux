@@ -71,7 +71,6 @@ namespace avmplus
         friend class WeakKeyHashtable;
         friend class WeakValueHashtable;
         friend class ScriptEnvMap;
-        friend class Cloner;
 
     public:
         /** kDefaultCapacity must be a power of 2 */
