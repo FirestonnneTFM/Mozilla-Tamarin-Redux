@@ -108,15 +108,6 @@ namespace avmplus {
         return (double)this->m_channel->channelGuid;
     }
     
-    ScriptObject* PromiseChannelObject::cloneNonSlots(avmplus::ClassClosure* targetClosure, Cloner&) const
-    {
-        PromiseChannelObject* clone = PromiseChannelObject::create(targetClosure->gc(), targetClosure->ivtable(), targetClosure->prototypePtr());
-        clone->m_channel = m_channel;
-        clone->m_canSend = true;//FIXME: (senderGiid == current->giid);
-        clone->m_canRecv = true;// FIXME: (receiverGiid == current->giid);
-        return clone;
-    }
-    
     bool PromiseChannelObject::sendCondThrow(Atom value, bool dothrow) 
     {
         if (!m_canSend)

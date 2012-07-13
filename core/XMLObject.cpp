@@ -1102,16 +1102,6 @@ namespace avmplus
         return y;
     }
 
-    ScriptObject* XMLObject::cloneNonSlots(ClassClosure* targetClosure, Cloner& ) const
-    {
-        Toplevel* dest = targetClosure->toplevel();
-        AvmCore* destCore = dest->core();
-        // Lots of happy assumptions here. Do we have pointers into the XMLObject that could be
-        // a part of an object graph and should be preserved?
-        E4XNode* other = m_node->_deepCopyForeign(destCore, dest, destCore->findPublicNamespace());
-        return XMLObject::create(destCore->GetGC(), (XMLClass*)targetClosure, other);
-    }
-
     // E4X 9.1.1.8, page 17
     XMLListObject *XMLObject::AS3_descendants(Atom P) const
     {

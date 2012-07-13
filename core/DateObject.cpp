@@ -51,12 +51,6 @@ namespace avmplus
         return core()->newStringUTF16(buffer, len);
     }
 
-    ScriptObject* DateObject::cloneNonSlots(ClassClosure* targetClosure, Cloner&) const
-    {
-        DateObject* clone = DateObject::create(targetClosure->gc(), (DateClass*)targetClosure, Date(date));
-        return clone;
-    }
-
     double DateObject::AS3_valueOf()
     {
         return date.getTime();

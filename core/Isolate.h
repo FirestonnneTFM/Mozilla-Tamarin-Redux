@@ -231,6 +231,8 @@ namespace avmplus
         void setActiveWaitRecord(WaitRecord* record);
         bool signalActiveWaitRecord();
         virtual bool retryActiveWaitRecord();
+		
+		virtual void uncaughtErrorRaised ()	{}
 
     protected:
         void abortActiveWaitRecord();
@@ -526,8 +528,6 @@ namespace avmplus
         
         PromiseChannelObject* newEventChannel();
         
-        ScriptObject* cloneNonSlots(ClassClosure* classClosure, Cloner& cloner) const;
-
         static void throwError(const char* msgz);        
     	static void throwIllegalOperationError(int errorID);
 

@@ -110,11 +110,6 @@ namespace avmshell {
     }
 
 
-    avmplus::ScriptObject* ShellWorkerObject::cloneNonSlots(avmplus::ClassClosure* classClosure, avmplus::Cloner& cloner) const
-    {
-        return avmplus::WorkerObjectBase<ShellWorkerObject>::cloneNonSlots(classClosure, cloner);
-    }
-    
     ShellWorkerClass::ShellWorkerClass(avmplus::VTable *cvtable)
         : avmplus::ClassClosure(cvtable)
     {

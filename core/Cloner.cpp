@@ -643,7 +643,9 @@ namespace avmplus {
         GCRef<ClassClosure> targetClosure = targetClosureFor(obj->toplevel(), obj->traits());
         GCRef<TraitsMorpher> morpher =  targetClosure->ivtable()->traits->morpher;
 
-        GCRef<ScriptObject> newObj = obj->cloneNonSlots(targetClosure, *this);
+        // intermediate stage while removing Promise code
+        //GCRef<ScriptObject> newObj = obj->cloneNonSlots(targetClosure, *this);
+        GCRef<ScriptObject> newObj = NULL; 
         GCRef<Traits> traits = obj->traits();
         GCRef<Traits> newTraits = newObj->traits();
 

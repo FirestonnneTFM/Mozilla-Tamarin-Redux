@@ -479,6 +479,12 @@ namespace vmbase {
          */
         SafepointManager* manager() const;
 
+		/**
+		 * Sets the interruptLocation and isolateDesc for this record.
+		 */
+
+		void setLocationAndDesc (int32_t* location, int desc);
+
     private:
         /**
          * Sets the calling thread's topmost
@@ -499,11 +505,11 @@ namespace vmbase {
         SafepointRecord* m_managerPrev;   // The previous SafepointRecord on the SafepointManager's linked-list
         SafepointRecord* m_managerNext;   // The next SafepointRecord on the SafepointManager's linked-list
         SafepointManager* m_manager;      // The SafepointManager to which this SafepointRecord is registered
-    public:
-        volatile int*              m_interruptLocation;
-        int               m_isolateDesc;
-    private:
 
+        volatile int32_t*			m_interruptLocation;
+        int							m_isolateDesc;
+
+    private:
         static VMThreadLocal<SafepointRecord*> m_current;
     };
 }

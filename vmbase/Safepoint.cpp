@@ -75,6 +75,7 @@ namespace vmbase {
         // Serialize dispatch of safepoint tasks.
         SCOPE_LOCK_SP_NAMED(locker, m_requestMutex) {
             bool restart = false;
+            const volatile SafepointRecord* safepointRecord = m_records;
             do {
                 SafepointRecord::current()->m_status = SafepointRecord::SP_SAFE;
                 // Threads polling this SafepointManager will pass through a
@@ -82,7 +83,7 @@ namespace vmbase {
                 
                 m_requester = VMPI_currentThread();
                 
-                SafepointRecord* safepointRecord = m_records;
+                safepointRecord = m_records;
                 // Tell every core to interrupt
                 const int SafepointPoll = 3;
                 
@@ -129,7 +130,7 @@ namespace vmbase {
 
             // The current (requesting) thread will busy-wait until it sees all
             // SafepointRecords managed by this SafepointManager as SP_SAFE.
-            const SafepointRecord* safepointRecord = m_records;
+            safepointRecord = m_records;
             if (m_hardwareConcurrency > 1) {
                 // MP-machine spin-wait
                 while (safepointRecord) {

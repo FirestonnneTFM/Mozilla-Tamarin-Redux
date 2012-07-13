@@ -1492,13 +1492,6 @@ namespace avmplus
         return ScriptObject::hasMultinameProperty(name);
     }
 
-    /*virtual*/ 
-    ScriptObject* ByteArrayObject::cloneNonSlots(ClassClosure* targetClass, Cloner&) const
-    {
-        ByteArrayObject* clone = new (targetClass->gc(), MMgc::kExact) ByteArrayObject(targetClass->ivtable(), targetClass->prototypePtr(), m_byteArray);
-        return clone;
-    }
-
     String* ByteArrayObject::_toString()
     {
         uint32_t len = m_byteArray.GetLength();

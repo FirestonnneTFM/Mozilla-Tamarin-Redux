@@ -56,7 +56,6 @@ namespace avmshell {
         
         public:
         ShellWorkerDomainObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype); 
-        virtual avmplus::ScriptObject* cloneNonSlots(avmplus::ClassClosure* classClosure, avmplus::Cloner& cloner) const;
         virtual ShellWorkerObject* createWorkerFromByteArrayInternal(avmplus::ByteArrayObject* byteArray);
 
         avmplus::ObjectVectorObject* listWorkers();

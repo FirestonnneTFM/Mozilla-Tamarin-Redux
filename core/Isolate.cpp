@@ -520,6 +520,8 @@ namespace avmplus
                 AvmAssert(isolate->m_core != NULL);
             } else if (to == Isolate::EXCEPTION) {
                 AvmAssert(from > Isolate::NEW);
+				isolate->m_interrupted = true;
+                isolate->stopRunLoop();
             } else if (to == Isolate::FAILED) {
                 AvmAssert(from == Isolate::NEW);
                 isolate->m_failed = true;
@@ -1151,22 +1153,20 @@ namespace avmplus
     EnterSafepointManager::EnterSafepointManager(AvmCore* core)
     {
         m_safepointMgr = core->getSafepointManager();
-        m_safepointMgr->enter(&m_spRecord);
-        m_spRecord.m_interruptLocation = (int*)&core->interrupted;
-        m_spRecord.m_isolateDesc = core->getIsolateDesc();
+        m_spRecord.setLocationAndDesc( (int32_t*)&core->interrupted, core->getIsolateDesc() ); 
 
+        m_safepointMgr->enter(&m_spRecord);
     }
     
     EnterSafepointManager::~EnterSafepointManager()
     {
         cleanup();
-
     }
+
     void EnterSafepointManager::cleanup() 
     {
         m_safepointMgr->leave(&m_spRecord);
-        m_spRecord.m_interruptLocation = NULL;
-        m_spRecord.m_isolateDesc = -1;
+        m_spRecord.setLocationAndDesc( NULL, -1 );
     }
 
     void Aggregate::runIsolate(Isolate* isolate) 
@@ -1213,6 +1213,7 @@ namespace avmplus
             if (current->m_state != Isolate::EXCEPTION) {
                 stateTransition(current, Isolate::TERMINATED); // otherwise it could be Exception
             }
+			current->releaseActiveResources();
 
             current->m_core = NULL;
         }
