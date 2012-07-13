@@ -441,6 +441,11 @@ verbose_only( extern const char* shiftNames[]; )
     void        asm_immd(Register, int32_t, int32_t);                                                             \
     void        asm_regarg(ArgType, LIns*, Register);                                                             \
     void        asm_stkarg(LIns* p, int stkd);                                                                    \
+    void        asm_pushstate();                                                                                  \
+    void        asm_popstate();                                                                                   \
+    void        asm_savepc();                                                                                     \
+    void        asm_restorepc();                                                                                  \
+    void        asm_discardpc();                                                                                  \
     void        asm_cmpi(Register, int32_t imm);                                                                  \
     void        asm_ldr(Register d, Register b, int32_t off);                                                     \
     int32_t     asm_str(Register rt, Register rr, int32_t off);                                                   \
