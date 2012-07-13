@@ -7,7 +7,6 @@ stale.xml
 .DS_Store
 .buildbot-sourcedata
 *.exe
-*.bat
 *.pyc
 *~
 *.mode1*
