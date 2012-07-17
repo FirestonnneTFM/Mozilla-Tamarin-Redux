@@ -2897,8 +2897,17 @@ rt abcOP_li32(MethodEnv* env, t1 a) {
 template<typename rt, typename t1>
 rt abcOP_lf32(MethodEnv* env, t1 a) {
     int32_t addr = abcOP_convert_i<int32_t, t1> (env, a);
+#ifndef VMCFG_UNALIGNED_FP_ACCESS
+    // On iOS devices at least, VLDR.32 instructions must be aligned,
+    // notwithstanding apparent claims to the contrary in the ARM documentation
+    // (Watson bug #3168241)
+    volatile union { float f; uint32_t u32; } u;
+    MOPS_LOAD(addr, uint32_t, u.u32);
+    float result = u.f;
+#else
     float result = 0;
     MOPS_LOAD(addr, float, result);
+#endif
     MOPS_SWAP_BYTES(&result);
     if (is_numeric<rt>::yes)
         return conversion<rt, double>::convert((double) result);
@@ -2908,8 +2917,18 @@ rt abcOP_lf32(MethodEnv* env, t1 a) {
 template<typename rt, typename t1>
 rt abcOP_lf64(MethodEnv* env, t1 a) {
     int32_t addr = abcOP_convert_i<int32_t, t1> (env, a);
+#ifndef VMCFG_UNALIGNED_FP_ACCESS
+    // On iOS devices at least, VLDR.64 instructions must be aligned,
+    // notwithstanding apparent claims to the contrary in the ARM documentation
+    // (Watson bug #3168241)
+    volatile union { double d; uint64_t u64; } u;
+    MOPS_LOAD(addr, uint64_t, u.u64);
+    double result = u.d;
+#else
     double result = 0;
     MOPS_LOAD(addr, double, result);
+#endif
+    
     MOPS_SWAP_BYTES(&result);
     if (is_numeric<rt>::yes)
         return conversion<rt, double>::convert(result);
@@ -2944,7 +2963,16 @@ void abcOP_sf32(MethodEnv* env, t1 a, t2 b) {
     double value = abcOP_convert_d<double, t1> (env, a);
     int32_t addr = abcOP_convert_i<int32_t, t2> (env, b);
     MOPS_SWAP_BYTES(&value);
+#ifndef VMCFG_UNALIGNED_FP_ACCESS
+    // On iOS at least, VSDR.32 instructions must be aligned,
+    // notwithstanding apparent claims to the contrary in the ARM documentation.
+    // (Watson bug #3168241)
+    volatile union { float f; uint32_t u32; } u;
+    u.f = value;
+    MOPS_STORE(addr, uint32_t, u.u32);
+#else
     MOPS_STORE(addr, float, value);
+#endif
 }
 
 template<typename t1, typename t2>
@@ -2952,7 +2980,16 @@ void abcOP_sf64(MethodEnv* env, t1 a, t2 b) {
     double value = abcOP_convert_d<double, t1> (env, a);
     int32_t addr = abcOP_convert_i<int32_t, t2> (env, b);
     MOPS_SWAP_BYTES(&value);
+#ifndef VMCFG_UNALIGNED_FP_ACCESS
+    // On iOS at least, VSDR.64 instructions must be aligned,
+    // notwithstanding apparent claims to the contrary in the ARM documentation.
+    // (Watson bug #3168241)
+    volatile union { double d; uint64_t u64; } u;
+    u.d = value;
+    MOPS_STORE(addr, uint64_t, u.u64);
+#else
     MOPS_STORE(addr, double, value);
+#endif
 }
 
 template<typename rt, typename t1>
