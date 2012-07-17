@@ -356,7 +356,6 @@ spidermonkey/js1_5/Regress/regress-155081.*,    AOT,, skip, http://watsonexp.cor
 abcasm/coverage/C,                              AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3132682
 regress/bug_544370,                             AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3141008
 #regress/bug_558442a,                           AOT,, skip, brbaker - Compilation failure needs investigation
-mops/.*,                                        AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3132682
 abcasm/bug_555006b,                             AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3141005
 abcasm/funcRedef,                               AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3141008
 abcasm/semanticErrorDuplicateSlotName,          AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3141012
