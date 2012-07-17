@@ -423,44 +423,9 @@ regress/security/bug_689243b:Correct exception thrown , (x86|arm)-.*-Dinterp , ,
 ####################
 # Workers
 ####################
-as3/Workers/.*, .* ,,skip, Workers testcases are being rewritten
-as3/Workers/datatypes/basicDataTypes:Passing a function is not supported, .*,, expectedfail, Functions are not passed as undefined
-as3/Workers/regress/bug_676111, .*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=676111
-as3/Workers/datatypes/class_different_child_definition, .*,, expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=677939
-as3/Workers/ByteArrayCAS,.*,,skip,https://bugzilla.mozilla.org/show_bug.cgi?id=740776
-as3/Workers/ByteArrayGrow,.*,,skip,https://bugzilla.mozilla.org/show_bug.cgi?id=740776
-as3/Workers/promise_flatten,.*,,skip,https://bugzilla.mozilla.org/show_bug.cgi?id=740776
-as3/Workers/datatypes/gettersSetters:getters/setters handled correctly, .*,, expectedfail, Getters/setters not implemented
-as3/Workers/Safepoint, .*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=751364 Safepoint test hangs shell
-as3/Workers/.*, .*-debug(|debugger) ,,skip,https://bugzilla.mozilla.org/show_bug.cgi?id=763564
-as3/Workers/WorkerErrors, .*,, skip, investigating...
-as3/Workers/SharedByteArray, .*, , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=740776
-as3/Workers/Worker_primordial_stop:exitcode, .*, , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=754275
-as3/Workers/Worker:child worker. after stop.. state is, .*, , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=754296
-as3/Workers/WorkerExperimental:Listener 4th Event, .*, , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=754296
-as3/ShellClasses/toplevel:exitcode, .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=698855 System.exit(n) always exits 1
-as3/Workers/.*, .*(AOT|android|arm-lnx), , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=755345
-as3/Workers/PromiseEmpty,.*,,skip,https://bugzilla.mozilla.org/show_bug.cgi?id=755300
 regress/.*243b,(x86-lnx-tvm-release-Dinterp|arm-android-tvm-release-Dinterp|arm-android-tvm-release-Dinterp|x86-win-tvm-release-Dinterp), , expectedfail, bug 
-as3/Workers/regress/bug_677333,x64-win, , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=677333
-
-as3/Workers/Promise_passing,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/Promise_local,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/WorkerDomainCreateWorker,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/WorkerExperimental,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/WorkerDomain_create,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/ByteArrayMutexStartArgs,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/WorkerRemoteCall,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/package_caller,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/datatypes/circular_ref,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/datatypes/basicDataTypes,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/PromiseWrap,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/datatypes/internalDynamicClass,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/regress/bug_677362,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/regress/bug_694376,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/regress/bug_694376_2,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/regress/bug_694398,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/Promise,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/PromiseWhen,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/ByteArrayMutex,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
-as3/Workers/datatypes/gettersSetters,.*,,skip,http://bugzilla.mozilla.org/show_bug.cgi?id=768893
+as3/ShellClasses/toplevel:exitcode, .*,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=698855 System.exit(n) always exits 1
+as3/Workers/(Worker|WorkerErrors|regress/bug774294|regress/bug774302), arm- ,, skip, ARM platforms not supported
+as3/Workers/(ByteArrayWorkers|RemoteCall|WorkerCreateMax), .*, ,skip, https://bugzilla.mozilla.org/show_bug.cgi?id=774332
+as3/Workers/(Worker|WorkerDomain|WorkerCreateMax|regress/bug774294), -debug ,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=774294
+as3/Workers/(ByteArrayWorkers|RemoteCall|WorkerErrors|regress/bug774302), -debug ,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=774302
