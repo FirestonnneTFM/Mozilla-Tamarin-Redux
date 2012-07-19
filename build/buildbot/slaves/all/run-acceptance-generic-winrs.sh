@@ -47,9 +47,13 @@
 # Calculate the change number and change id
 ##
 . ../all/util-calculate-change.sh $1
-
-
-
+# If we are running a sandbox build and the user specifies the build with the revision hash
+# make sure that we stick with using the revision hash downstream as that is where we are
+# going to find the necessary files on asteam, the ftp directory will have been created with the
+# hash so that is how we must access it from the winrs client.
+if [ "$changeid" == "$1" ]; then
+   change=$changeid
+fi
 
 showhelp ()
 {
