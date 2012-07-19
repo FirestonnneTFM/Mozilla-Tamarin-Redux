@@ -51,18 +51,18 @@ fi
 eval WINRS_SHELL_REMOTE_USER=\${WINRS_SHELL_REMOTE_USER$id}
 eval WINRS_SHELL_REMOTE_PASSWD=\${WINRS_SHELL_REMOTE_PASSWD$id}
 eval WINRS_SHELL_REMOTE_HOST=\${WINRS_SHELL_REMOTE_HOST$id}
-eval WINRS_SHELL_REMOTE_DIR=\${WINRS_SHELL_REMOTE_DIR$id}
+eval WINRS_SHELL_REMOTE_BASEDIR=\${WINRS_SHELL_REMOTE_BASEDIR$id}
 
 if [ "$WINRS_SHELL_REMOTE_USER" = "" ] ||
    [ "$WINRS_SHELL_REMOTE_PASSWD" = "" ] ||
    [ "$WINRS_SHELL_REMOTE_HOST" = "" ] ||
-   [ "$WINRS_SHELL_REMOTE_DIR" = "" ];
+   [ "$WINRS_SHELL_REMOTE_BASEDIR" = "" ];
 then
     echo "missing environment variable: "
     echo "WINRS_SHELL_REMOTE_USER" = "$WINRS_SHELL_REMOTE_USER"
     echo "WINRS_SHELL_REMOTE_PASSWD${count}" = "<intentionally blank>"
     echo "WINRS_SHELL_REMOTE_HOST" = "$WINRS_SHELL_REMOTE_HOST"
-    echo "WINRS_SHELL_REMOTE_DIR" = "$WINRS_SHELL_REMOTE_DIR"
+    echo "WINRS_SHELL_REMOTE_BASEDIR" = "$WINRS_SHELL_REMOTE_BASEDIR"
     exit 1
 fi
 
@@ -71,7 +71,12 @@ MAX_RETRIES=5
 filelist=""
 flatfilelist=""
 expectedExitCode=0
-
+if [ "$WINRS_EXE" == "" ]
+then
+    winrs=winrs.exe
+else
+    winrs=$WINRS_EXE
+fi
 function try_command () {
     count=1
     while [ $count -le $MAX_RETRIES ]
@@ -93,6 +98,7 @@ function try_command () {
         else
             echo "Command Failed: $*"
             echo "Exit Code: $ec"
+            echo "Expected Exit Code: $expectedExitCode"
             echo "Try $count of $MAX_RETRIES"
             sleep 3
         fi
@@ -112,12 +118,12 @@ function try_command () {
 if [ "$1" = "" ]
 then
     # running the shell with no args prints the help and exits with exitcode 1
-    expectedExitCode=1
-    try_command winrs -r:$WINRS_SHELL_REMOTE_HOST -u:$WINRS_SHELL_REMOTE_USER -p:$WINRS_SHELL_REMOTE_PASSWD "$WINRS_SHELL_REMOTE_DIR\avmshell"
+    expectedExitCode=0
+    try_command ${winrs} -r:$WINRS_SHELL_REMOTE_HOST -u:$WINRS_SHELL_REMOTE_USER -p:$WINRS_SHELL_REMOTE_PASSWD "$WINRS_SHELL_REMOTE_BASEDIR\\\\avmshell"
 else
-    # assumes all .abc files are on the device in the WINRS_SHELL_REMOTE_DIR
+    # assumes all .abc files are on the device in the WINRS_SHELL_REMOTE_BASEDIR
     # workaround for not returning exit code, run a shell script and print exit code to stdout
-    try_command winrs -r:$WINRS_SHELL_REMOTE_HOST -u:$WINRS_SHELL_REMOTE_USER -p:$WINRS_SHELL_REMOTE_PASSWD "$WINRS_SHELL_REMOTE_DIR\winrs-shell-runner.bat $*" > ./stdout$id
+    try_command ${winrs} -r:$WINRS_SHELL_REMOTE_HOST -u:$WINRS_SHELL_REMOTE_USER -p:$WINRS_SHELL_REMOTE_PASSWD "$WINRS_SHELL_REMOTE_BASEDIR\\\\winrs-shell-runner.bat $*" > ./stdout$id
     ret=`cat ./stdout$id | grep "EXITCODE=" | awk -F= '{printf("%d",$2)}'`
     # remove the EXITCODE from the stdout before returning it so that exact output matching will be fine
     cat ./stdout$id | sed 's/^EXITCODE=[0-9][0-9]*$//g' > ./stdout_clean$id
