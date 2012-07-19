@@ -310,7 +310,7 @@ as3/Types/Number/visibility,    AOT ,, skip, AOT does not support versioning yet
 as3/Vector/bug504525/bug504525, AOT ,, skip, AOT does not support versioning yet
 as3/Vector/nonindexproperty,    AOT ,, skip, AOT does not support versioning yet
 as3/Vector/vectorIndexRangeExceptions, AOT ,, skip, AOT does not support versioning yet
-as3/Workers/*, 			AOT ,, skip, workers feature not yet supported on iOS
+as3/Workers/.*,                 AOT ,, skip, workers feature not yet supported on iOS
 e4x/XML/e13_4_4_29,             AOT ,, skip, AOT does not support versioning yet
 e4x/XML/e13_4_4_3,              AOT ,, skip, AOT does not support versioning yet
 e4x/XML/e13_4_4_32,             AOT ,, skip, AOT does not support versioning yet
