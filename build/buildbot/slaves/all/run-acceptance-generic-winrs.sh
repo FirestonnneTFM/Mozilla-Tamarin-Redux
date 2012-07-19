@@ -60,6 +60,8 @@ showhelp ()
     echo "  <vmargs>     vmargs to be passed or empty quoted string"
     echo "  <config>     custom config string to be passed to runtests.py"
     echo "               or an empty string"
+    echo "  <deployargs> (optional) configuration arguments, 'skipdeploy' to not deploy the shell"
+    echo "               and tests to the device"
     echo "  <scriptargs> (optional) additional runtests.py args to be passed, can be"
     echo "               args and test/directories to run, value is appended to call"
     exit 1
@@ -74,9 +76,9 @@ fi
 filename=$2
 vmargs=$3
 config=$4
-
+deploy=$5
 # assign the remaining positional params to scriptargs
-shift 4
+shift 5
 scriptargs=$*
 
 
@@ -95,14 +97,20 @@ echo "Missing media will be compiled using the following ASC version:"
 echo "`java -jar $ASC`"
 echo ""
 
-echo "setup ${shell}"
-../all/winrs-shell-deployer.sh ${change} ${shell} ${clean}
-res=$?
-test "$res" = "0" || {
-    echo "message: setup failed"
-    exit 1
-}
+if [ "$deploy" == "deploy" ]
+then
 
+    echo "running deploy on shell ${shell}"
+    ../all/winrs-shell-deployer.sh ${change} ${shell} ${clean}
+    res=$?
+    test "$res" = "0" || {
+        echo "message: setup failed"
+        exit 1
+    }
+
+else
+     echo "skipping deploy"
+fi
 
 echo ""
 echo "*******************************************************************************"
