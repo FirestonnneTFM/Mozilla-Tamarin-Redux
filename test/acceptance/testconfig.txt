@@ -317,6 +317,7 @@ e4x/XML/e13_4_4_32,             AOT ,, skip, AOT does not support versioning yet
 ecma3/JSON/versioned,           AOT ,, skip, AOT does not support versioning yet
 misc/bug_526662,                AOT ,, skip, AOT does not support versioning yet
 misc/invalid_opcodes,           AOT ,, skip, Handled by the GO
+mops/mops.abc_,                 AOT ,, skip, precompilation of AOT application currently doesn't handle precompiled abcs
 regress/bug_498979,             AOT ,, skip, AOT catches Verify errors at compile time 
 regress/bug_520888,             AOT ,, skip, AOT catches Verify errors at compile time
 regress/bug_548684,             AOT ,, skip, AOT catches Verify errors at compile time

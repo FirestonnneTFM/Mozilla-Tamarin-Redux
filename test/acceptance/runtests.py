@@ -443,13 +443,6 @@ class AcceptanceRuntest(RuntestBase):
         starttime=time.time()
 
         if self.aotsdk and self.aotout:
-            avm_args = ""
-            if isfile("%s.avm_args" % ast):
-                avm_args_file = open("%s.avm_args" % ast)
-                avm_args = avm_args_file.readline()
-                avm_args_file.close()
-                if avm_args.find("mops") >= 0:
-                    avm_args = ""
             progname = testName.replace(".abc", "")
             progname = progname.replace("/", ".")
             progpath = os.path.join(self.aotout, progname)
@@ -474,7 +467,7 @@ class AcceptanceRuntest(RuntestBase):
                 cmd = "%s %s %s %s" % (self.avm, progpath, self.vmargs, extraVmArgs)
                 (f,err,exitcode) = self.run_pipe(cmd, outputCalls=outputCalls, envVars=passByEnv)
             else: # Execute on OSX
-                cmd = "%s %s" % (progpath, avm_args)
+                cmd = "%s %s %s" % (progpath, self.vmargs, extraVmArgs)
                 # print("about to execute: " + cmd)
                 (f,err,exitcode) = self.run_pipe(cmd, outputCalls=outputCalls)
         elif ast.endswith(self.abcasmExt):
