@@ -125,7 +125,6 @@ namespace avmshell
 #include "DictionaryGlue.h"
 #include "SamplerScript.h"
 #include "ShellCore.h"
-#include "PromiseGlue.h"
 #include "ShellWorkerGlue.h"
 #include "ShellWorkerDomainGlue.h"
 

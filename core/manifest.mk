@@ -143,7 +143,6 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/DictionaryGlue.cpp \
   $(curdir)/ObjectIO.cpp \
   $(curdir)/AvmSerializer.cpp \
-  $(curdir)/Cloner.cpp \
   $(curdir)/ConcurrencyGlue.cpp \
   $(curdir)/Isolate.cpp \
   $(NULL)
@@ -181,7 +180,9 @@ $(curdir)/AbcData.$(II_SUFFIX): $(topsrcdir)/generated/builtin.cpp
 # Bug 654996: use target-specific variable to disable -Werror in these cases
 ifeq ($(TARGET_OS),darwin)
 $(curdir)/Interpreter.$(OBJ_SUFFIX): avmplus_CXXFLAGS += -Wno-error
+$(curdir)/ByteArrayGlue.$(OBJ_SUFFIX): avmplus_CXXFLAGS += -Wno-error
 endif
 ifeq ($(TARGET_OS),android)
 $(curdir)/Interpreter.$(OBJ_SUFFIX): avmplus_CXXFLAGS += -Wno-error
+$(curdir)/ByteArrayGlue.$(OBJ_SUFFIX): avmplus_CXXFLAGS += -Wno-error
 endif

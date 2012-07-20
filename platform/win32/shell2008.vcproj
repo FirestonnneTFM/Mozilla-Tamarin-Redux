@@ -1719,14 +1719,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\shell\PromiseGlue.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\shell\PromiseGlue.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\extensions\Selftest.cpp"
 				>
 			</File>
@@ -1850,10 +1842,6 @@
 			</File>
 			<File
 				RelativePath="..\..\shell\IntArray.as"
-				>
-			</File>
-			<File
-				RelativePath="..\..\shell\Promise.as"
 				>
 			</File>
 			<File

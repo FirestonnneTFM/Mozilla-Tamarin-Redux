@@ -266,7 +266,7 @@ namespace vmbase {
                              :"r"(next), "r"(wordptr), "a"(expected)
                              :"memory", "cc");
         return val;
-#elif defined(_MSC_VER) && !defined(_WIN64)
+#elif defined(_MSC_VER) 
         // we know that we are dealing with only 32 bit word here and a 32 bit compiler option
         return ::InterlockedCompareExchange(reinterpret_cast<volatile LONG*>(wordptr), next, expected);
 #else

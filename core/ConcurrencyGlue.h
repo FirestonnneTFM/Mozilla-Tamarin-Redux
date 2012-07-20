@@ -102,6 +102,7 @@ namespace avmplus {
 		ChannelItem* makeChannelItem();
         
         class State;
+
 		
     private:
         GC_DATA_BEGIN(ConditionObject)
@@ -128,7 +129,6 @@ namespace avmplus {
         friend class MutexObject;
         friend class ConditionObject;
         friend class ConditionObject::State;
-        friend class EnterWait;
         vmpi_mutex_t m_mutex;
         int64_t m_recursion_count; // generous to avoid wraparound.
         vmpi_thread_t volatile m_ownerThreadID;
@@ -139,20 +139,6 @@ namespace avmplus {
         virtual void destroy();
         bool tryLock();
         bool unlock();
-
-    private:
-        //
-        // this is intended as a stack based helper for waiting
-        // on an interruptable state object
-        //
-        class EnterWait
-        {
-        public:
-            EnterWait(Isolate* isolate, State* state);
-            bool failed;
-            bool interrupted;
-            bool result;
-        };
     };
     
     //
@@ -170,25 +156,12 @@ namespace avmplus {
     {
         friend class ConditionObject;
         FixedHeapRef<MutexObject::State> m_mutexState;
+
         
     public:
         State(MutexObject::State* mutexState);
         bool wait(int32_t millis, Isolate* isolate, Toplevel* toplevel);
         virtual void destroy();
-
-    private:
-        //
-        // this is intended as a stack based helper for waiting
-        // on an interruptable state object
-        //
-        class EnterWait
-        {
-        public:
-            EnterWait(Isolate* isolate, State* condition, int32_t millis, MutexObject::State* mutexState, vmpi_mutex_t* mutex);
-            bool failed;
-            bool interrupted;
-            bool result;
-        };
     };
     
     class GC_AS3_EXACT(MutexClass, ClassClosure)

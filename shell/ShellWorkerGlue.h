@@ -69,8 +69,7 @@ namespace avmshell {
 
         // not in FP
         int32_t get_descriptor() const;
-        avmplus::PromiseChannelObject* newEventChannel();
-		
+
 		bool get_isPrimordial ()	{ return isPrimordial(); }
 
         private:

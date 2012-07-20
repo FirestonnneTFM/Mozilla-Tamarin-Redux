@@ -60,7 +60,6 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/DomainClass.cpp \
   $(curdir)/FileClass.cpp \
   $(curdir)/FileInputStream.cpp \
-  $(curdir)/PromiseGlue.cpp \
   $(curdir)/ShellCore.cpp \
   $(curdir)/SystemClass.cpp \
   $(curdir)/swf.cpp \

@@ -48,7 +48,10 @@ namespace avmplus
     {
         
     public:
-
+        friend class ByteArrayCompressViaLzmaTask;
+        friend class ByteArrayCompressViaZlibVariantTask;
+        friend class ByteArrayUncompressViaLzmaTask;
+        friend class ByteArrayUncompressViaZlibVariantTask;
         friend class ByteArrayObject;
         class Buffer : public FixedHeapRCObject
         {

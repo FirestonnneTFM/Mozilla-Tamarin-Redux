@@ -37,47 +37,5 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package flash.system
-{
+// Contents removed, file stays for now (adding and removing files is hard).
 
-include "api-versions.as"
-
-
-    /**
-    * Not intended for general use.
-    * Ideally this class would be internal, but apparently other classes in the flash.system package
-    * won't see it if compiled separately.
-    */
-    [API(CONFIG::SWF_17)]
-    [native(cls="PromiseChannelClass", instance="PromiseChannelObject", gc="exact", methods="auto")]
-    public final class PromiseChannel
-    {
-
-        private native function ctor(sender:int, receiver:int):void;
-
-        function PromiseChannel(sender:int, receiver:int)
-        {
-            ctor(sender, receiver);
-        }
-
-        public native function get sender(): int;
-
-        public native function get receiver(): int;
-
-        public native function available(): Boolean;
-
-        public native function close(): void;
-
-        public native function isClosed(): Boolean;
-
-        private native function channelGuid():Number;
-
-        public function toString(): String
-        {
-            return "[object PromiseChannel " + this.channelGuid() + "]";
-        }
- 
-    }
-
-
-}

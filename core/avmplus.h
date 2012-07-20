@@ -162,7 +162,6 @@ namespace avmplus
     class FloatVectorObject;
 #endif    
     class Isolate;
-    class IsolateEventListener;
     class DoubleVectorObject;
     class UIntVectorObject;
     class ObjectVectorObject;
@@ -170,9 +169,6 @@ namespace avmplus
     class LinkObject;
     class MathClass;
     class MathUtils;
-    class PromiseChannel;
-    class PromiseChannelObject;
-    class PromiseChannelClass;
     class MethodClosure;
     class MethodEnv;
     class MethodInfo;
@@ -392,8 +388,6 @@ namespace avmplus
 #include "AvmSerializer.h"
 #include "ITelemetry.h"
 #include "ConcurrencyGlue.h"
-#include "Cloner.h"
-#include "PromiseChannelGlue.h"
 
 // Some unusual test cases for the exact-tracer script
 

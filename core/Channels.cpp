@@ -632,56 +632,5 @@ namespace avmplus
     }
 
 
-    PromiseChannel::PromiseChannel(int64_t guid, int32_t sender, int32_t receiver, MMgc::GC* gc)
-        : PromiseChannelImpl(gc)
-        , channelGuid(guid)
-        , sender(sender)
-        , receiver(receiver)
-        , m_commInProgress(0)
-    {}
-
-    PromiseChannel::~PromiseChannel()
-    {
-    }
-    
-
-    bool PromiseChannel::isEndpoint(const Isolate* isolate) const
-    {
-        if (sender < 0) {
-            return isolate->desc == -sender || isolate->desc == receiver;
-        } else {
-            return isolate->desc == sender || isolate->desc == receiver;
-        }
-    }
-
-
-    // Only locks the internal blocking channel.
-    bool PromiseChannel::close(int32_t endpoint_giid)
-    {
-        bool success = false;
-        if (endpoint_giid == sender) {
-            // Note that if sender is negative, it shouldn't be closed just because its isolate died.
-            //fprintf(stderr, "detaching %llu %d->%d from gc with rc=%u", channelGuid, sender.giid, receiver.giid, RefCount());
-            unregisterRoot();
-            success = true;
-        }
-        if (endpoint_giid == receiver) {
-            success = true;
-        }
-        if (success)  {
-            PromiseChannelImpl::close();
-        }
-        return success;
-    }
-
-    // Caution, can be triggered by GC sweep or incremental collection.
-    void PromiseChannel::destroy()
-    {
-        AvmAssert(RefCount() == 0);
-        unregisterRoot();
-        Aggregate::destroyPromiseChannel(this);
-    }
-
-
 
 }

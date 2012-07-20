@@ -89,35 +89,33 @@ namespace vmbase {
                 
                 while (safepointRecord) {
                     if (safepointRecord->m_interruptLocation) {
-                        if (!AtomicOps::compareAndSwap32WithBarrier(0, SafepointPoll, safepointRecord->m_interruptLocation)) {
-                            if (*safepointRecord->m_interruptLocation != SafepointPoll) {
-                                // We noticed an unwinding operation request. 
-                                // This is very rare, because the interrupt flag will be cleared promptly.
-                                // More likely the target thread will be in the process of unwinding,
-                                // and will either reach a safepoint (is that possible while unwinding?) 
-                                // or exit the safepoint mgr.
+                        int32_t previous = AtomicOps::compareAndSwap32WithBarrierPrev(0, SafepointPoll, safepointRecord->m_interruptLocation);
+                        if (previous != 0 && previous != SafepointPoll) {
+                            // We noticed an unwinding operation request. 
+                            // This is very rare, because the interrupt flag will be cleared promptly.
+                            // More likely the target thread will be in the process of unwinding,
+                            // and will either reach a safepoint (is that possible while unwinding?) 
+                            // or exit the safepoint mgr.
 
-                                // The thread *should* unwind and utlimately exit the safepoint manager.
-                                // But it'll try to grab m_requestMutex and deadlock there.
-                                // Instead, wait for exit notification then redo the whole iteration,
-                                // because the linked list might have changed.
-                                
-                                // Undo state changes.
-                                SafepointRecord::current()->m_status = SafepointRecord::SP_UNSAFE;
-                                m_requester = (vmpi_thread_t) 0;
-                                locker.wait();
-                                restart = true;
-                                break;
-                            } else {
-                                // Thread in safepoint, probably because another thread also requested a safepoint
-                                // while this thread was sitting in locker.wait()
-                            }
+                            // The thread *should* unwind and utlimately exit the safepoint manager.
+                            // But it'll try to grab m_requestMutex and deadlock there.
+                            // Instead, wait for exit notification then redo the whole iteration,
+                            // because the linked list might have changed.
+                            
+                            // Undo state changes.
+                            SafepointRecord::current()->m_status = SafepointRecord::SP_UNSAFE;
+                            m_requester = (vmpi_thread_t) 0;
+                            restart = true;
+                            break;
                         } else {
-                            /*
-                            fprintf(stderr, "requested safepoint thru record of worker %d safe? %d\n", safepointRecord->m_isolateDesc, 
-                                    safepointRecord->m_status == SafepointRecord::SP_SAFE); 
-                            */
+                            // Thread in safepoint, probably because another thread also requested a safepoint
+                            // while this thread was sitting in locker.wait()
                         }
+                    } else {
+                        /*
+                        fprintf(stderr, "requested safepoint thru record of worker %d safe? %d\n", safepointRecord->m_isolateDesc, 
+                                safepointRecord->m_status == SafepointRecord::SP_SAFE); 
+                        */
                     }
                     safepointRecord = safepointRecord->m_managerNext;
 

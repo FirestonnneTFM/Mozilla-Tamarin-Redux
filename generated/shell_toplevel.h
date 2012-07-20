@@ -52,7 +52,6 @@ namespace avmplus {
     class ClassFactoryObject; // flash.sampler::ClassFactory
     class DeleteObjectSampleClass; // flash.sampler::DeleteObjectSample$
     class DeleteObjectSampleObject; // flash.sampler::DeleteObjectSample
-    class DictionaryObject; // flash.utils::Dictionary
     class DomainClass; // avmplus::Domain$
     class DomainObject; // avmplus::Domain
     class EndianClass; // flash.utils::Endian$
@@ -68,8 +67,6 @@ namespace avmplus {
     class NativeBaseExtender2Object; // avmshell::NativeBaseExtender2
     class NewObjectSampleClass; // flash.sampler::NewObjectSample$
     class NewObjectSampleObject; // flash.sampler::NewObjectSample
-    class ObjectVectorObject; // __AS3__.vec::Vector$object
-    class PromiseChannelObject; // flash.system::PromiseChannel
     class SampleClass; // flash.sampler::Sample$
     class SampleObject; // flash.sampler::Sample
     class ShellCoreFriend1Class; // avmshell::ShellCoreFriend1$
@@ -228,132 +225,208 @@ const uint32_t abcclass_flash_system_WorkerEvent = 52;
 const uint32_t abcclass_flash_system_WorkerDomain = 53;
 
 /* methods */
-const uint32_t avmplus_ITest_avmplus_ITest_test = 39; // abc
-const uint32_t avmplus_CTest_test = 42; // abc
-const uint32_t avmplus_MI_plus = 45; // native
-const uint32_t avmplus_System_exit = 48; // native
-const uint32_t avmplus_System_exec = 49; // native
-const uint32_t avmplus_System_sleep = 50; // native
-const uint32_t avmplus_System_getAvmplusVersion = 51; // native
-const uint32_t avmplus_System_getFeatures = 52; // native
-const uint32_t avmplus_System_getRunmode = 53; // native
-const uint32_t avmplus_System_trace = 54; // native
-const uint32_t avmplus_System_write = 55; // native
-const uint32_t avmplus_System_debugger = 56; // native
-const uint32_t avmplus_System_isDebugger = 57; // native
-const uint32_t avmplus_System_getNanosecondTimer = 58; // native
-const uint32_t avmplus_System_getTimer = 59; // native
-const uint32_t avmplus_System_private_getArgv = 60; // native
-const uint32_t avmplus_System_readLine = 61; // native
-const uint32_t avmplus_System_totalMemory_get = 62; // native
-const uint32_t avmplus_System_freeMemory_get = 63; // native
-const uint32_t avmplus_System_privateMemory_get = 64; // native
-const uint32_t avmplus_System_forceFullCollection = 65; // native
-const uint32_t avmplus_System_queueCollection = 66; // native
-const uint32_t avmplus_System_ns_example_nstest = 67; // native
-const uint32_t avmplus_System_isGlobal = 68; // native
-const uint32_t avmplus_System_swfVersion_get = 69; // native
-const uint32_t avmplus_System_apiVersion_get = 70; // native
-const uint32_t avmplus_System_disposeXML = 71; // native
-const uint32_t avmplus_System_deopt = 72; // native
-const uint32_t avmplus_System_pauseForGCIfCollectionImminent = 73; // native
-const uint32_t avmplus_System_is64bit = 74; // native
-const uint32_t avmplus_System_isIntptr = 75; // native
-const uint32_t avmplus_System_runInSafepoint = 76; // native
-const uint32_t avmplus_System_canonicalizeNumber = 77; // native
-const uint32_t avmplus_File_exists = 80; // native
-const uint32_t avmplus_File_read = 81; // native
-const uint32_t avmplus_File_write = 82; // native
-const uint32_t avmplus_File_readByteArray = 83; // native
-const uint32_t avmplus_File_writeByteArray = 84; // native
-const uint32_t flash_system_Capabilities_playerType_get = 103; // abc
-const uint32_t flash_system_Capabilities_isDebugger_get = 104; // abc
-const uint32_t avmshell_public_class_public_function = 107; // abc
-const uint32_t avmshell_public_class_public_function_AIR_1_0 = 108; // abc
-const uint32_t avmshell_public_class_public_function_FP_10_0 = 109; // abc
-const uint32_t avmshell_public_class_public_function_AIR_1_5 = 110; // abc
-const uint32_t avmshell_public_class_public_function_AIR_1_5_1 = 111; // abc
-const uint32_t avmshell_public_class_public_function_FP_10_0_32 = 112; // abc
-const uint32_t avmshell_public_class_public_function_AIR_1_5_2 = 113; // abc
-const uint32_t avmshell_public_class_public_function_AIR_1_0_FP_10_0 = 114; // abc
-const uint32_t avmshell_public_class_public_function_AIR_1_5_1_FP_10_0_AIR_1_5_2 = 115; // abc
-const uint32_t avmshell_public_class_public_function_FP_10_0_32_AIR_1_0_FP_10_0 = 116; // abc
-const uint32_t avmshell_public_class_public_getset_get = 117; // abc
-const uint32_t avmshell_public_class_public_getset_AIR_1_0_get = 118; // abc
-const uint32_t avmshell_public_class_public_getset_FP_10_0_get = 119; // abc
-const uint32_t avmshell_public_class_public_getset_AIR_1_5_get = 120; // abc
-const uint32_t avmshell_public_class_public_getset_AIR_1_5_1_get = 121; // abc
-const uint32_t avmshell_public_class_public_getset_FP_10_0_32_get = 122; // abc
-const uint32_t avmshell_public_class_public_getset_AIR_1_5_2_get = 123; // abc
-const uint32_t avmshell_public_class_public_getset_AIR_1_0_FP_10_0_get = 124; // abc
-const uint32_t avmshell_public_class_public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2_get = 125; // abc
-const uint32_t avmshell_public_class_public_getset_FP_10_0_32_AIR_1_0_FP_10_0_get = 126; // abc
-const uint32_t avmshell_public_class_public_getset_set = 127; // abc
-const uint32_t avmshell_public_class_public_getset_AIR_1_0_set = 128; // abc
-const uint32_t avmshell_public_class_public_getset_FP_10_0_set = 129; // abc
-const uint32_t avmshell_public_class_public_getset_AIR_1_5_set = 130; // abc
-const uint32_t avmshell_public_class_public_getset_AIR_1_5_1_set = 131; // abc
-const uint32_t avmshell_public_class_public_getset_FP_10_0_32_set = 132; // abc
-const uint32_t avmshell_public_class_public_getset_AIR_1_5_2_set = 133; // abc
-const uint32_t avmshell_public_class_public_getset_AIR_1_0_FP_10_0_set = 134; // abc
-const uint32_t avmshell_public_class_public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2_set = 135; // abc
-const uint32_t avmshell_public_class_public_getset_FP_10_0_32_AIR_1_0_FP_10_0_set = 136; // abc
-const uint32_t avmplus_Domain_currentDomain_get = 194; // native
-const uint32_t avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get = 195; // native
-const uint32_t avmplus_Domain_private_init = 196; // native
-const uint32_t avmplus_Domain_loadBytes = 198; // native
-const uint32_t avmplus_Domain_getClass = 199; // native
-const uint32_t avmplus_Domain_load = 200; // abc
-const uint32_t avmplus_Domain_domainMemory_get = 201; // native
-const uint32_t avmplus_Domain_domainMemory_set = 202; // native
-const uint32_t native_script_function_flash_sampler_getMasterString = 204; // native
-const uint32_t native_script_function_flash_sampler_getSavedThis = 205; // native
-const uint32_t native_script_function_flash_sampler_getLexicalScopes = 206; // native
-const uint32_t native_script_function_flash_sampler_isGetterSetter = 207; // native
-const uint32_t native_script_function_flash_sampler__getInvocationCount = 208; // native
-const uint32_t native_script_function_flash_sampler_getSampleCount = 212; // native
-const uint32_t native_script_function_flash_sampler__getSamples = 213; // native
-const uint32_t native_script_function_flash_sampler_getMemberNames = 215; // native
-const uint32_t native_script_function_flash_sampler_getSize = 216; // native
-const uint32_t native_script_function_flash_sampler__setSamplerCallback = 217; // native
-const uint32_t native_script_function_flash_sampler_sampleInternalAllocs = 220; // native
-const uint32_t native_script_function_flash_sampler_pauseSampling = 221; // native
-const uint32_t native_script_function_flash_sampler_stopSampling = 222; // native
-const uint32_t native_script_function_flash_sampler_startSampling = 223; // native
-const uint32_t native_script_function_flash_sampler_clearSamples = 224; // native
-const uint32_t flash_sampler_StackFrame_toString = 226; // abc
-const uint32_t flash_sampler_NewObjectSample_object_get = 233; // native
-const uint32_t flash_sampler_NewObjectSample_size_get = 234; // native
-const uint32_t flash_trace_Trace_setLevel = 240; // native
-const uint32_t flash_trace_Trace_getLevel = 241; // native
-const uint32_t flash_trace_Trace_setListener = 242; // native
-const uint32_t flash_trace_Trace_getListener = 243; // native
-const uint32_t flash_system_WorkerState_code = 250; // abc
-const uint32_t flash_system_Worker_current_get = 253; // abc
-const uint32_t flash_system_Worker_handleLifecycleEvents = 254; // abc
-const uint32_t flash_system_Worker_pr = 255; // native
-const uint32_t flash_system_Worker_state_get = 257; // native
-const uint32_t flash_system_Worker_startWithChannels = 258; // native
-const uint32_t flash_system_Worker_start = 259; // abc
-const uint32_t flash_system_Worker_private_startInternal = 260; // native
-const uint32_t flash_system_Worker_isParentOf = 261; // native
-const uint32_t flash_system_Worker_isPrimordial_get = 262; // native
-const uint32_t flash_system_Worker_private_newEventChannel = 263; // native
-const uint32_t flash_system_Worker_setSharedProperty = 264; // native
-const uint32_t flash_system_Worker_getSharedProperty = 265; // native
-const uint32_t flash_system_Worker_terminate = 266; // native
-const uint32_t flash_system_Worker_addEventListener = 267; // abc
-const uint32_t flash_system_Worker_private_dispatchEvent = 268; // abc
-const uint32_t flash_system_Worker_descriptor_get = 269; // native
-const uint32_t flash_system_WorkerEvent_currentState_get = 272; // abc
-const uint32_t flash_system_WorkerEvent_previousState_get = 273; // abc
-const uint32_t flash_system_WorkerEvent_target_get = 274; // abc
-const uint32_t flash_system_WorkerDomain_current_get = 277; // abc
-const uint32_t flash_system_WorkerDomain_createWorkerFromByteArray = 279; // abc
-const uint32_t flash_system_WorkerDomain_createWorkerFromPrimordial = 280; // abc
-const uint32_t flash_system_WorkerDomain_private_createWorkerFromByteArrayInternal = 281; // native
-const uint32_t flash_system_WorkerDomain_listWorkers = 282; // native
+const uint32_t avmplus_ITest_avmplus_ITest_test = 38; // abc
+const uint32_t avmplus_CTest_test = 41; // abc
+const uint32_t avmplus_MI_plus = 44; // native
+const uint32_t avmplus_System_exit = 47; // native
+const uint32_t avmplus_System_exec = 48; // native
+const uint32_t avmplus_System_sleep = 49; // native
+const uint32_t avmplus_System_getAvmplusVersion = 50; // native
+const uint32_t avmplus_System_getFeatures = 51; // native
+const uint32_t avmplus_System_getRunmode = 52; // native
+const uint32_t avmplus_System_trace = 53; // native
+const uint32_t avmplus_System_write = 54; // native
+const uint32_t avmplus_System_debugger = 55; // native
+const uint32_t avmplus_System_isDebugger = 56; // native
+const uint32_t avmplus_System_getNanosecondTimer = 57; // native
+const uint32_t avmplus_System_getTimer = 58; // native
+const uint32_t avmplus_System_private_getArgv = 59; // native
+const uint32_t avmplus_System_readLine = 60; // native
+const uint32_t avmplus_System_totalMemory_get = 61; // native
+const uint32_t avmplus_System_freeMemory_get = 62; // native
+const uint32_t avmplus_System_privateMemory_get = 63; // native
+const uint32_t avmplus_System_forceFullCollection = 64; // native
+const uint32_t avmplus_System_queueCollection = 65; // native
+const uint32_t avmplus_System_ns_example_nstest = 66; // native
+const uint32_t avmplus_System_isGlobal = 67; // native
+const uint32_t avmplus_System_swfVersion_get = 68; // native
+const uint32_t avmplus_System_apiVersion_get = 69; // native
+const uint32_t avmplus_System_disposeXML = 70; // native
+const uint32_t avmplus_System_deopt = 71; // native
+const uint32_t avmplus_System_pauseForGCIfCollectionImminent = 72; // native
+const uint32_t avmplus_System_is64bit = 73; // native
+const uint32_t avmplus_System_isIntptr = 74; // native
+const uint32_t avmplus_System_runInSafepoint = 75; // native
+const uint32_t avmplus_System_canonicalizeNumber = 76; // native
+const uint32_t avmplus_File_exists = 79; // native
+const uint32_t avmplus_File_read = 80; // native
+const uint32_t avmplus_File_write = 81; // native
+const uint32_t avmplus_File_readByteArray = 82; // native
+const uint32_t avmplus_File_writeByteArray = 83; // native
+const uint32_t flash_system_Capabilities_playerType_get = 102; // abc
+const uint32_t flash_system_Capabilities_isDebugger_get = 103; // abc
+const uint32_t avmshell_public_class_public_function = 106; // abc
+const uint32_t avmshell_public_class_public_function_AIR_1_0 = 107; // abc
+const uint32_t avmshell_public_class_public_function_FP_10_0 = 108; // abc
+const uint32_t avmshell_public_class_public_function_AIR_1_5 = 109; // abc
+const uint32_t avmshell_public_class_public_function_AIR_1_5_1 = 110; // abc
+const uint32_t avmshell_public_class_public_function_FP_10_0_32 = 111; // abc
+const uint32_t avmshell_public_class_public_function_AIR_1_5_2 = 112; // abc
+const uint32_t avmshell_public_class_public_function_AIR_1_0_FP_10_0 = 113; // abc
+const uint32_t avmshell_public_class_public_function_AIR_1_5_1_FP_10_0_AIR_1_5_2 = 114; // abc
+const uint32_t avmshell_public_class_public_function_FP_10_0_32_AIR_1_0_FP_10_0 = 115; // abc
+const uint32_t avmshell_public_class_public_getset_get = 116; // abc
+const uint32_t avmshell_public_class_public_getset_AIR_1_0_get = 117; // abc
+const uint32_t avmshell_public_class_public_getset_FP_10_0_get = 118; // abc
+const uint32_t avmshell_public_class_public_getset_AIR_1_5_get = 119; // abc
+const uint32_t avmshell_public_class_public_getset_AIR_1_5_1_get = 120; // abc
+const uint32_t avmshell_public_class_public_getset_FP_10_0_32_get = 121; // abc
+const uint32_t avmshell_public_class_public_getset_AIR_1_5_2_get = 122; // abc
+const uint32_t avmshell_public_class_public_getset_AIR_1_0_FP_10_0_get = 123; // abc
+const uint32_t avmshell_public_class_public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2_get = 124; // abc
+const uint32_t avmshell_public_class_public_getset_FP_10_0_32_AIR_1_0_FP_10_0_get = 125; // abc
+const uint32_t avmshell_public_class_public_getset_set = 126; // abc
+const uint32_t avmshell_public_class_public_getset_AIR_1_0_set = 127; // abc
+const uint32_t avmshell_public_class_public_getset_FP_10_0_set = 128; // abc
+const uint32_t avmshell_public_class_public_getset_AIR_1_5_set = 129; // abc
+const uint32_t avmshell_public_class_public_getset_AIR_1_5_1_set = 130; // abc
+const uint32_t avmshell_public_class_public_getset_FP_10_0_32_set = 131; // abc
+const uint32_t avmshell_public_class_public_getset_AIR_1_5_2_set = 132; // abc
+const uint32_t avmshell_public_class_public_getset_AIR_1_0_FP_10_0_set = 133; // abc
+const uint32_t avmshell_public_class_public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2_set = 134; // abc
+const uint32_t avmshell_public_class_public_getset_FP_10_0_32_AIR_1_0_FP_10_0_set = 135; // abc
+const uint32_t avmplus_Domain_currentDomain_get = 193; // native
+const uint32_t avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get = 194; // native
+const uint32_t avmplus_Domain_private_init = 195; // native
+const uint32_t avmplus_Domain_loadBytes = 197; // native
+const uint32_t avmplus_Domain_getClass = 198; // native
+const uint32_t avmplus_Domain_load = 199; // abc
+const uint32_t avmplus_Domain_domainMemory_get = 200; // native
+const uint32_t avmplus_Domain_domainMemory_set = 201; // native
+const uint32_t native_script_function_flash_sampler_getMasterString = 203; // native
+const uint32_t native_script_function_flash_sampler_getSavedThis = 204; // native
+const uint32_t native_script_function_flash_sampler_getLexicalScopes = 205; // native
+const uint32_t native_script_function_flash_sampler_isGetterSetter = 206; // native
+const uint32_t native_script_function_flash_sampler__getInvocationCount = 207; // native
+const uint32_t native_script_function_flash_sampler_getSampleCount = 211; // native
+const uint32_t native_script_function_flash_sampler__getSamples = 212; // native
+const uint32_t native_script_function_flash_sampler_getMemberNames = 214; // native
+const uint32_t native_script_function_flash_sampler_getSize = 215; // native
+const uint32_t native_script_function_flash_sampler__setSamplerCallback = 216; // native
+const uint32_t native_script_function_flash_sampler_sampleInternalAllocs = 219; // native
+const uint32_t native_script_function_flash_sampler_pauseSampling = 220; // native
+const uint32_t native_script_function_flash_sampler_stopSampling = 221; // native
+const uint32_t native_script_function_flash_sampler_startSampling = 222; // native
+const uint32_t native_script_function_flash_sampler_clearSamples = 223; // native
+const uint32_t flash_sampler_StackFrame_toString = 225; // abc
+const uint32_t flash_sampler_NewObjectSample_object_get = 232; // native
+const uint32_t flash_sampler_NewObjectSample_size_get = 233; // native
+const uint32_t flash_trace_Trace_setLevel = 239; // native
+const uint32_t flash_trace_Trace_getLevel = 240; // native
+const uint32_t flash_trace_Trace_setListener = 241; // native
+const uint32_t flash_trace_Trace_getListener = 242; // native
+const uint32_t flash_system_WorkerState_code = 249; // abc
+const uint32_t flash_system_Worker_current_get = 252; // abc
+const uint32_t flash_system_Worker_pr = 253; // native
+const uint32_t flash_system_Worker_state_get = 255; // native
+const uint32_t flash_system_Worker_startWithChannels = 256; // native
+const uint32_t flash_system_Worker_start = 257; // abc
+const uint32_t flash_system_Worker_private_startInternal = 258; // native
+const uint32_t flash_system_Worker_isParentOf = 259; // native
+const uint32_t flash_system_Worker_isPrimordial_get = 260; // native
+const uint32_t flash_system_Worker_setSharedProperty = 261; // native
+const uint32_t flash_system_Worker_getSharedProperty = 262; // native
+const uint32_t flash_system_Worker_terminate = 263; // native
+const uint32_t flash_system_Worker_descriptor_get = 264; // native
+const uint32_t flash_system_WorkerEvent_currentState_get = 267; // abc
+const uint32_t flash_system_WorkerEvent_previousState_get = 268; // abc
+const uint32_t flash_system_WorkerEvent_target_get = 269; // abc
+const uint32_t flash_system_WorkerDomain_current_get = 272; // abc
+const uint32_t flash_system_WorkerDomain_createWorkerFromByteArray = 274; // abc
+const uint32_t flash_system_WorkerDomain_createWorkerFromPrimordial = 275; // abc
+const uint32_t flash_system_WorkerDomain_private_createWorkerFromByteArrayInternal = 276; // native
+const uint32_t flash_system_WorkerDomain_listWorkers = 277; // native
 
+extern avmplus::Atom avmplus_Domain_currentDomain_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_currentDomain_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_private_init_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_private_init_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_loadBytes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_loadBytes_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_getClass_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_getClass_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_domainMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_domainMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_domainMemory_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_domainMemory_set_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_sampler_NewObjectSample_object_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_sampler_NewObjectSample_object_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double flash_sampler_NewObjectSample_size_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double flash_sampler_NewObjectSample_size_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_clearSamples_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_clearSamples_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_startSampling_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_startSampling_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_stopSampling_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_stopSampling_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_pauseSampling_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_pauseSampling_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_sampleInternalAllocs_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_sampleInternalAllocs_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler__setSamplerCallback_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler__setSamplerCallback_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double native_script_function_flash_sampler_getSize_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double native_script_function_flash_sampler_getSize_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_getMemberNames_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_getMemberNames_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler__getSamples_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler__getSamples_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double native_script_function_flash_sampler_getSampleCount_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double native_script_function_flash_sampler_getSampleCount_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double native_script_function_flash_sampler__getInvocationCount_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double native_script_function_flash_sampler__getInvocationCount_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_isGetterSetter_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_isGetterSetter_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_getLexicalScopes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_getLexicalScopes_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_getSavedThis_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_getSavedThis_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_getMasterString_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_getMasterString_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_trace_Trace_setLevel_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_trace_Trace_setLevel_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_trace_Trace_getLevel_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_trace_Trace_getLevel_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_trace_Trace_setListener_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_trace_Trace_setListener_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_trace_Trace_getListener_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_trace_Trace_getListener_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_pr_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_pr_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_state_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_state_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_startWithChannels_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_startWithChannels_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_private_startInternal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_private_startInternal_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_isParentOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_isParentOf_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_isPrimordial_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_isPrimordial_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_setSharedProperty_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_setSharedProperty_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_getSharedProperty_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_getSharedProperty_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_terminate_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_terminate_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_descriptor_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_Worker_descriptor_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_WorkerDomain_private_createWorkerFromByteArrayInternal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_WorkerDomain_private_createWorkerFromByteArrayInternal_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_WorkerDomain_listWorkers_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_system_WorkerDomain_listWorkers_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double avmplus_MI_plus_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double avmplus_MI_plus_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom avmplus_System_exit_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -426,88 +499,6 @@ extern avmplus::Atom avmplus_File_readByteArray_thunk(MethodEnv* env, uint32_t a
 extern avmplus::Atom avmplus_File_readByteArray_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom avmplus_File_writeByteArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom avmplus_File_writeByteArray_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_Domain_currentDomain_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_Domain_currentDomain_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_Domain_private_init_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_Domain_private_init_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_Domain_loadBytes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_Domain_loadBytes_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_Domain_getClass_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_Domain_getClass_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_Domain_domainMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_Domain_domainMemory_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_Domain_domainMemory_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom avmplus_Domain_domainMemory_set_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_sampler_NewObjectSample_object_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_sampler_NewObjectSample_object_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double flash_sampler_NewObjectSample_size_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double flash_sampler_NewObjectSample_size_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_clearSamples_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_clearSamples_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_startSampling_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_startSampling_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_stopSampling_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_stopSampling_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_pauseSampling_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_pauseSampling_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_sampleInternalAllocs_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_sampleInternalAllocs_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler__setSamplerCallback_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler__setSamplerCallback_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double native_script_function_flash_sampler_getSize_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double native_script_function_flash_sampler_getSize_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_getMemberNames_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_getMemberNames_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler__getSamples_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler__getSamples_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double native_script_function_flash_sampler_getSampleCount_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double native_script_function_flash_sampler_getSampleCount_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double native_script_function_flash_sampler__getInvocationCount_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern double native_script_function_flash_sampler__getInvocationCount_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_isGetterSetter_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_isGetterSetter_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_getLexicalScopes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_getLexicalScopes_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_getSavedThis_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_getSavedThis_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_getMasterString_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_getMasterString_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_trace_Trace_setLevel_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_trace_Trace_setLevel_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_trace_Trace_getLevel_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_trace_Trace_getLevel_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_trace_Trace_setListener_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_trace_Trace_setListener_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_trace_Trace_getListener_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_trace_Trace_getListener_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_pr_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_pr_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_state_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_state_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_startWithChannels_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_startWithChannels_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_private_startInternal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_private_startInternal_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_isParentOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_isParentOf_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_isPrimordial_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_isPrimordial_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_private_newEventChannel_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_private_newEventChannel_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_setSharedProperty_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_setSharedProperty_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_getSharedProperty_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_getSharedProperty_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_terminate_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_terminate_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_descriptor_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_Worker_descriptor_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_WorkerDomain_private_createWorkerFromByteArrayInternal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_WorkerDomain_private_createWorkerFromByteArrayInternal_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_WorkerDomain_listWorkers_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_system_WorkerDomain_listWorkers_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 class SlotOffsetsAndAsserts;
 //-----------------------------------------------------------
 // avmplus::CTest$
@@ -2248,7 +2239,6 @@ class avmshell_ShellWorkerClassSlots
     friend class avmshell::ShellWorkerClass;
 private:
     MMgc::GCTraceableObject::GCMember<avmshell::ShellWorkerObject> m_private_m_current;
-    MMgc::GCTraceableObject::GCMember<avmplus::DictionaryObject> m_private_m_eventChannels;
 };
 #define DECLARE_SLOTS_ShellWorkerClass \
     public: \
@@ -2300,9 +2290,6 @@ private:
     protected: \
         REALLY_INLINE avmshell::ShellWorkerObject* get_m_current() const { return m_slots_ShellWorkerClass.m_private_m_current; } \
         REALLY_INLINE void set_m_current(avmshell::ShellWorkerObject* newVal) { m_slots_ShellWorkerClass.m_private_m_current = newVal; } \
-    protected: \
-        REALLY_INLINE avmplus::DictionaryObject* get_m_eventChannels() const { return m_slots_ShellWorkerClass.m_private_m_eventChannels; } \
-        REALLY_INLINE void set_m_eventChannels(avmplus::DictionaryObject* newVal) { m_slots_ShellWorkerClass.m_private_m_eventChannels = newVal; } \
     private: \
         avmplus::NativeID::avmshell_ShellWorkerClassSlots m_slots_ShellWorkerClass \
 
@@ -2317,8 +2304,6 @@ class avmshell_ShellWorkerObjectSlots
     friend class avmshell::ShellWorkerObject;
 private:
     MMgc::GCTraceableObject::GCMember<avmplus::ByteArrayObject> m_private_m_byteCode;
-    MMgc::GCTraceableObject::GCMember<avmplus::PromiseChannelObject> m_private_m_eventChannel;
-    MMgc::GCTraceableObject::GCMember<avmplus::ObjectVectorObject> m_private_m_listeners;
 };
 #define DECLARE_SLOTS_ShellWorkerObject \
     public: \
@@ -2330,12 +2315,6 @@ private:
     protected: \
         REALLY_INLINE avmplus::ByteArrayObject* get_m_byteCode() const { return m_slots_ShellWorkerObject.m_private_m_byteCode; } \
         REALLY_INLINE void set_m_byteCode(avmplus::ByteArrayObject* newVal) { m_slots_ShellWorkerObject.m_private_m_byteCode = newVal; } \
-    protected: \
-        REALLY_INLINE avmplus::PromiseChannelObject* get_m_eventChannel() const { return m_slots_ShellWorkerObject.m_private_m_eventChannel; } \
-        REALLY_INLINE void set_m_eventChannel(avmplus::PromiseChannelObject* newVal) { m_slots_ShellWorkerObject.m_private_m_eventChannel = newVal; } \
-    protected: \
-        REALLY_INLINE avmplus::ObjectVectorObject* get_m_listeners() const { return m_slots_ShellWorkerObject.m_private_m_listeners; } \
-        REALLY_INLINE void set_m_listeners(avmplus::ObjectVectorObject* newVal) { m_slots_ShellWorkerObject.m_private_m_listeners = newVal; } \
     private: \
         avmplus::NativeID::avmshell_ShellWorkerObjectSlots m_slots_ShellWorkerObject \
 

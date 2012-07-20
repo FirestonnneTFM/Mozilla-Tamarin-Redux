@@ -73,28 +73,6 @@ namespace avmplus
     }
 
 
-    Aggregate::Globals::PromiseChannelMap::PromiseChannelMap(int initialSize)
-        : FixedHeapHashTable<int64_t, PromiseChannel*>(initialSize)
-    {}
-
-    Aggregate::Globals::PromiseChannelMap::~PromiseChannelMap()
-    {
-        Clear();
-        // The destructor defined in the parent class will call Clear(), but at that time
-        // the object vtable will be that of the parent, so the overriden DestroyItem() won't 
-        // be called! We'll call Clear() here first, the subsequent Clear() will have nothing to do. 
-    }
-
-    void Aggregate::Globals::PromiseChannelMap::DestroyItem(int64_t guid, PromiseChannel* channel)
-    {
-        AvmAssert(guid >= 0);
-        (void)guid;
-        // a leaf lock is being held, no more locking
-        AvmAssert(channel->RefCount() == 0);
-        mmfx_delete(channel);
-    }
-    
-    
     Aggregate::Aggregate()
         : m_primordialGiid(1) // eventually there will be many of those
         , m_activeIsolateCount(0)
@@ -130,8 +108,6 @@ namespace avmplus
             if (isolate->m_state == Isolate::NEW || isolate->m_state > Isolate::FINISHING) {
                 return false; // not gonna wait 
             }
-            // Interrupt computation and blocking I/O, currently only message receive.
-            closeChannelsWithEndpoint(isolate);
 
             if (isolate->m_state == Isolate::RUNNING || isolate->m_state == Isolate::STARTING) {
                 isolate->interrupt();
@@ -187,40 +163,6 @@ namespace avmplus
                 lk.notifyAll();
             }
 
-            class CloseEveryChannel: public Globals::PromiseChannelMap::Iterator
-            {
-                PromiseChannel** toDelete;
-                int& count;
-                
-            public:
-                CloseEveryChannel(PromiseChannel** toDelete, int& count): toDelete(toDelete), count(count) {}
-                virtual void each(int64_t id, PromiseChannel* channel)
-                {
-                    (void)id;
-                    channel->unregisterRoot();
-                    ((PromiseChannelImpl*)channel)->close();
-                    if (channel->RefCount() == 0) {
-                        toDelete[count++] = channel;
-                    }
-
-                }
-            };
-
-            int count = 0;
-            MMgc::GC::AllocaAutoPtr _autoAlloca;
-            PromiseChannel** toDelete = (PromiseChannel**) VMPI_alloca(AvmCore::getActiveCore(), _autoAlloca, 
-                                                                       sizeof(PromiseChannel*)*m_globals->m_channelMap.GetNumItems());
-            
-            CloseEveryChannel closeEveryChannel(toDelete, count);
-
-            SCOPE_LOCK(m_globals->m_channelMap.m_lock) {
-                m_globals->m_channelMap.ForEach(closeEveryChannel);
-                for (int i = 0; i < count; i++) {
-                    destroyPromiseChannel(toDelete[i]);
-                }
-            }
-            
-            
             // this iterator intterupts every isolate's core
             class IsolateCoreInterrupt: public Globals::IsolateMap::Iterator
             {
@@ -239,10 +181,12 @@ namespace avmplus
                         if (isolate->m_state < Isolate::FAILED) {
                             AvmCore* core = isolate->m_core;
                             // Ensure that the write to AvmCore::interrupted is visible to the other thread.
-                            // Use safepoints for that? 
-                            
-                            AvmAssert(core != NULL);
-                            core->raiseInterrupt(AvmCore::ExternalInterrupt);
+
+                            // in some shutdown cases the core is already NULL so we have to check for
+                            // this situation.
+                            if (core != NULL) {
+                                core->raiseInterrupt(AvmCore::ExternalInterrupt);
+                            }
                             // Hope for the best? the thread being interrupted won't necessarily fence
                             vmbase::MemoryBarrier::readWrite();
                             isolate->interrupt();
@@ -312,7 +256,6 @@ namespace avmplus
         , m_state(Isolate::NEW)
         , m_failed(false)
         , m_interrupted(false)
-        , m_listeners(NULL, 0)
     {
     }
 
@@ -322,8 +265,8 @@ namespace avmplus
         notified = false;
 #ifdef DEBUG
         threadID = VMPI_currentThread();
-#endif
-        //next = NULL;
+#endif // DEBUG
+        next = NULL;
     }
 
     Isolate::WaitRecord::~WaitRecord()
@@ -332,6 +275,12 @@ namespace avmplus
             VMPI_condVarDestroy(&condVar);
             VMPI_recursiveMutexDestroy(&privateMutex);
         }
+#ifdef DEBUG
+        threadID = VMPI_nullThread();
+#endif // DEBUG
+        next = NULL;
+        notified = false;
+        isValid = false;
     }
 
     void Aggregate::stateTransition(Isolate* isolate, Isolate::State to)
@@ -381,21 +330,6 @@ namespace avmplus
 				isolate->m_interrupted = true;
 			}
 
-            intptr_t changeCode = (((intptr_t)from) << 16) | ((intptr_t)to);
-            
-            AvmAssert(!m_commlock.isLockedByCurrentThread());
-            // Always grab m_listenerLock before m_commlock.
-            SCOPE_LOCK(isolate->m_listenerLock) {
-                for (unsigned i = 0; i < isolate->m_listeners.length(); i++) {
-                    IsolateEventListener* listener = isolate->m_listeners.get(i);
-                    // FIXME can this block when over capacity?
-                    if (!beginChannelOp(listener->channel, true)) {
-                    } else {
-                        listener->channel->put(atomFromIntptrValue(changeCode));
-                        endChannelOp(listener->channel, false);
-                    }
-                }
-            }
         }
     }
 
@@ -640,11 +574,6 @@ namespace avmplus
     void Isolate::initialize(AvmCore* core) 
     {
         AvmAssert(AvmCore::getActiveCore() == core);
-        for (int i = 0; i < m_initialChannels.length; i++) {
-            FixedHeapRef<PromiseChannel>& m = m_initialChannels.values[i];
-            if (m->sender == this->desc)
-                m->registerWithGC(core->gc);
-        }        
         this->m_core = core; 
         core->setIsolate(this);
     }
@@ -724,7 +653,6 @@ namespace avmplus
 
     Isolate::~Isolate()
     {
-        m_listeners.destroy();
         m_code.deallocate();
     }
 
@@ -738,7 +666,7 @@ namespace avmplus
                 m_code.values[i].deallocate();
             m_code.deallocate();
         }
-        destroyListeners();
+
         if (m_thread != vmbase::VMThread::currentThread()) {
             Aggregate::destroyIsolate(this); // deletes the thread 
         } else if (m_thread != NULL) {
@@ -762,13 +690,6 @@ namespace avmplus
             isolate->m_thread->join(); // shouldn't block
             mmfx_delete(isolate->m_thread); // can't delete current thread
             isolate->m_thread = NULL;
-        }
-    }
-
-    void Aggregate::destroyPromiseChannel(PromiseChannel* channel) {
-        AvmAssert(channel->RefCount() == 0);
-        SCOPE_LOCK(m_globals->m_channelMap.m_lock) {
-            m_globals->m_channelMap.RemoveItem(channel->channelGuid); 
         }
     }
 
@@ -825,7 +746,7 @@ namespace avmplus
     {
         stateTransition(isolate, Isolate::FAILED);
         SCOPE_LOCK(m_globals->m_lock) { // may be recursive
-            isolate->destroyListeners();
+
             if (isolate->m_thread) {
                 mmfx_delete(isolate->m_thread);
                 isolate->m_thread = NULL;
@@ -833,45 +754,6 @@ namespace avmplus
         }
     }
 
-    void Isolate::destroyListeners()
-    {
-        // Hopefully nobody has a ref to this, so synchronization is not necessary.
-        AvmAssert(!m_aggregate->m_commlock.isLockedByCurrentThread());
-        SCOPE_LOCK(m_listenerLock) {
-            while (!m_listeners.isEmpty()) {
-                mmfx_delete(m_listeners.removeLast());
-            }
-        }
-    }
-
-    IsolateEventListener::IsolateEventListener(Aggregate* aggregate, int32_t sourceGid, int32_t consumerGid)
-        : channel(aggregate->allocatePromiseChannel(sourceGid, consumerGid))
-    {
-    }
-
-    IsolateEventListener* Aggregate::newEventListener(int32_t sourceGid, Isolate* destination)
-    {
-        // note negative value, values are generated by the system, not the isolate itself
-        IsolateEventListener* listener = mmfx_new(IsolateEventListener(this, -sourceGid, destination->desc));
-        bool success = false;
-        SCOPE_LOCK(m_globals->m_lock) {
-            Isolate* isolate = m_globals->at(sourceGid); 
-            if (isolate) {
-                AvmAssert(!m_commlock.isLockedByCurrentThread());
-                SCOPE_LOCK(isolate->m_listenerLock) {
-                    isolate->m_listeners.add(listener);
-                }
-                success = true;
-            }
-        }
-        if (success) {
-            return listener;
-        } else {
-            mmfx_delete(listener);
-            return NULL;
-        }
-    }
-    
     Isolate* Aggregate::getIsolate(int32_t desc)
     {
         SCOPE_LOCK(m_globals->m_lock) {
@@ -998,11 +880,6 @@ namespace avmplus
                 AvmAssert(checked == NULL || checked == current);
             }
 #endif
-            // Careful, this will try to grab m_commlock
-            // Note that the following will run due to external stop()
-            // so may end up running twice.
-            closeChannelsWithEndpoint(current);
-
             if (current->m_core) {
                 current->m_core->setIsolate(NULL);
             }
@@ -1037,163 +914,6 @@ namespace avmplus
         }
     }
 
-    int64_t Aggregate::Globals::newChannelGuid() {
-        AvmAssert(m_lock.isLockedByCurrentThread());
-        // FIXME check wraparound
-        return m_nextChannelGuid ++; 
-    }
-
-    FixedHeapRef<PromiseChannel> Aggregate::allocatePromiseChannel(int32_t senderGiid, int32_t receiverGiid)
-    {
-        SCOPE_LOCK(m_globals->m_lock) {
-            MMgc::GC* gc = NULL;
-            Isolate* isolate = m_globals->at(senderGiid);
-            if (isolate && isolate->targetCore() != NULL)
-                gc = isolate->targetCore()->gc;
-            int64_t guid = m_globals->newChannelGuid();
-
-            FixedHeapRef<PromiseChannel> channel(mmfx_new(PromiseChannel(guid, 
-                                                                         senderGiid, 
-                                                                         receiverGiid, gc)));
-            // m_channelMap is protected by m_globals->m_lock
-            SCOPE_LOCK(m_globals->m_channelMap.m_lock) {
-                m_globals->m_channelMap.InsertItem(guid, channel);
-            }
-            return channel;
-        }
-        // not reached
-        FixedHeapRef<PromiseChannel> dummy;
-        return dummy;
-    }
-
-   
-    void Aggregate::closeChannelsWithEndpoint(Isolate* endpoint)
-    {
-
-        SCOPE_LOCK(m_commlock) { 
-            // FIXME who needs m_commlock ?
-            
-            class CloseEndpoint: public Globals::PromiseChannelMap::Iterator
-            {
-            public:
-                Isolate* endpoint;
-                PromiseChannel** toDelete;
-                int& count;
-                
-                CloseEndpoint(Isolate* endpoint, PromiseChannel** toDelete, int& count): 
-                    endpoint(endpoint), toDelete(toDelete), count(count) {}
-                virtual void each(int64_t guid, PromiseChannel* channel) 
-                {
-                    (void)guid;
-                    if (channel->isEndpoint(endpoint)) {
-                        channel->close(endpoint->desc);
-                    }
-                    
-                    if (channel->RefCount() == 0) {
-                        toDelete[count++] = channel;
-                    }
-                }
-                
-            virtual ~CloseEndpoint() {}
-            };
-            
-            AvmAssert(m_globals->m_lock.isLockedByCurrentThread());
-
-            int count = 0;
-            MMgc::GC::AllocaAutoPtr _autoAlloca;
-            // in some situations (corrupt swf) we can exit before we get an active core
-            if (AvmCore::getActiveCore())
-            {
-                PromiseChannel** toDelete = (PromiseChannel**) VMPI_alloca(AvmCore::getActiveCore(), _autoAlloca, 
-                                                                           sizeof(PromiseChannel*)*m_globals->m_channelMap.GetNumItems());
-                
-                // Goes through the all the channels, good enough for now.
-                CloseEndpoint closeEndpoint(endpoint, toDelete, count);
-                SCOPE_LOCK(m_globals->m_channelMap.m_lock) {
-                    // FIXME review what protection is needed by CloseEndpoint?
-                    m_globals->m_channelMap.ForEach(closeEndpoint);
-                    for (int i = 0; i < count; i++) {
-                        destroyPromiseChannel(toDelete[i]);
-                    }
-                }
-            }
-        }
-    }
-
-    void Aggregate::closePromiseChannel(PromiseChannel* channel, int32_t endpoint_giid)
-    {
-        if (channel->sender < 0) {
-            // event channel
-            SCOPE_LOCK(m_globals->m_lock) {
-                Isolate* isolate = m_globals->at(-channel->sender);
-                AvmAssert(isolate != NULL);
-                if (isolate) {
-                    AvmAssert(!m_commlock.isLockedByCurrentThread());
-                    SCOPE_LOCK(isolate->m_listenerLock) {
-                        unsigned int listenerCount = isolate->m_listeners.length();
-                        for (unsigned int i = 0; i < listenerCount; i++) {
-                            if (isolate->m_listeners.get(i)->channel->channelGuid == channel->channelGuid) {
-                                mmfx_delete(isolate->m_listeners.removeAt(i));
-                                break;
-                            }
-                        }
-                        AvmAssertMsg(listenerCount == isolate->m_listeners.length() + 1, "Channel not found");
-                    }
-                }
-            }
-        }
-        
-        SCOPE_LOCK_NAMED(lk, m_commlock) {
-            // detect
-            if (channel) {
-                // wait for communication only on a given channel to stop
-                while (channel->m_commInProgress > 0) 
-                    lk.wait();
-                AvmAssert(m_commlock.isLockedByCurrentThread());
-                channel->close(endpoint_giid);
-            }
-        }
-    }
-
-    bool Aggregate::beginChannelOp(PromiseChannel* channel, bool item_sent)
-    {
-        bool result = false;
-        SCOPE_LOCK_NAMED(lk, m_commlock) {
-            if (channel == NULL) {
-                result =  false;
-            }
-            else {
-                if (item_sent) m_msgInTransit ++;
-                channel->m_commInProgress ++;
-                m_commInProgress ++;
-                // if no messages were in transit then some workers
-                // waiting for call requests may now be suspended - resume
-                // them
-                if (item_sent && m_msgInTransit == 1)
-                    lk.notifyAll();
-                result = true;
-            }
-        }
-        return result;
-    }
-
-     
-    void Aggregate::endChannelOp(PromiseChannel* channel, bool item_received)
-    {
-        SCOPE_LOCK_NAMED(lk, m_commlock) {
-            AvmAssert(m_commInProgress > 0);
-            AvmAssert(channel->m_commInProgress > 0);
-            AvmAssert(!item_received || m_msgInTransit > 0);
-            if (item_received) m_msgInTransit --;
-            m_commInProgress --;
-            channel->m_commInProgress --;
-            if (m_commInProgress == 0 || m_blockedChannels > 0) {
-                lk.notifyAll();
-            }
-        }
-    }
-
-    
     GCRef<ObjectVectorObject> Aggregate::listWorkers(Toplevel* toplevel)
     {
         GCRef<ClassClosure> workerClass = toplevel->workerClass();

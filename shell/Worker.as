@@ -141,7 +141,7 @@ package flash.system
         * @deprecated
         * @return whether starting has been successful.
         */
-        public native function startWithChannels(channels :Array = null) :Boolean;
+        public native function startWithChannels( ) :Boolean;
 
         /**
         * Run the code blobs passed into the constructor in order and enter the event loop.
@@ -158,7 +158,6 @@ package flash.system
 
         public native function get isPrimordial(): Boolean;
 
-        private native function newEventChannel(): PromiseChannel;
 
         public native function setSharedProperty(key:String, value:*):void;
         public native function getSharedProperty(key:String):*;
@@ -182,54 +181,6 @@ package flash.system
             return m_current;
         }
 
-        // Shell mockup of events
-        public function addEventListener(type:String, listener:Function, useCapture:Boolean = false, priority:int = 0, useWeakReference:Boolean = false):void
-        {
-            if (type != WorkerEvent.WORKER_STATE)
-                return;
-            if (m_eventChannel == null)
-            {
-                m_eventChannel = newEventChannel();
-                m_eventChannels[this] = m_eventChannel;
-                m_listeners = new Vector.<Function>();
-            }
-            m_listeners.push(listener);
-        }
-
-        public static function handleLifecycleEvents() :void
-        {
-            for (var key in m_eventChannels)
-            {
-                if (Object.prototype[key]) {
-                    // Skip enumerable properties up the chain.
-                    continue;
-                }
-                var ch :PromiseChannel = m_eventChannels[key];
-                var w:Worker = key as Worker;
-                if (ch == null)
-                    continue;
-                while (!ch.isClosed() && ch.available())
-                {
-                    var changeCode:uint = ch.receive() as uint;
-                    var oldState:uint = changeCode >> 16;
-                    var newState:uint = changeCode & 0xFFFF;
-                    w.dispatchEvent(new WorkerEvent(oldState, newState));
-                }
-            }
-        }
-
-        private function dispatchEvent(ev:WorkerEvent)
-        {
-            ev.m_target = this;
-            for each (var f:Function in m_listeners)
-            {
-                try {
-                    f(ev);
-                } catch (ex) {
-                }
-            }
-        }
-        
 
         /* 
         * shell only, use for debugging
@@ -242,11 +193,8 @@ package flash.system
         public static native function pr(s :String) :void;
 
         private static var m_current :Worker;
-        private static var m_eventChannels :Dictionary = new Dictionary();
 
         private var m_byteCode :ByteArray;
-        private var m_eventChannel :PromiseChannel;
-        private var m_listeners :Vector.<Function>;
         
 
     }

@@ -1812,14 +1812,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\Cloner.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\Cloner.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\core\CodegenLIR-inlines.h"
 				>
 			</File>
@@ -2297,10 +2289,6 @@
 			</File>
 			<File
 				RelativePath="..\..\core\PrintWriter.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\PromiseChannelGlue.cpp"
 				>
 			</File>
 			<File
