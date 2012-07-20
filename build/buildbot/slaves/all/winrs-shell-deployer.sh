@@ -65,6 +65,7 @@ winrs=$basedir/build/buildbot/slaves/all/winrs-proxy.py
 # make sure that we stick with using the revision hash downstream as that is where we are
 # going to find the necessary files on asteam, the ftp directory will have been created with the
 # hash so that is how we must access it from the winrs client.
+change_for_validation=${change}
 if [ "$changeid" == "$1" ]; then
    change=$changeid
 fi
@@ -148,7 +149,7 @@ do
     echo "verify the deployed shell version if correct"
     ${winrs} -r:${WINRS_SHELL_REMOTE_HOST} -u:${WINRS_SHELL_REMOTE_USER} -p:${WINRS_SHELL_REMOTE_PASSWD} "${WINRS_SHELL_REMOTE_BASEDIR}\\\\winrs-shell-runner.bat" > /tmp/stdout
     deploy_rev=`cat /tmp/stdout | grep "avmplus shell" | awk '{print $NF}'`
-    if [ "$change" != "${deploy_rev%:*}" ] || [ "$changeid" != "${deploy_rev#*:}" ];
+    if [ "$change_for_validation" != "${deploy_rev%:*}" ] || [ "$changeid" != "${deploy_rev#*:}" ];
     then
         # Could be possible that we are running from the hg mirror repo and using a binary that has a p4 changelist revision
         # The last line in the description is going to be "CL@12345"
@@ -157,7 +158,7 @@ do
         echo "found changelist in description: ${cl}"
         if [ "${cl}" != "${deploy_rev%:*}" ]; then
             echo $0 FAILED!!!
-            echo requested build "$change:$changeid" is not what is deployed "${deploy_rev%:*}:${deploy_rev#*:}"
+            echo requested build "$change_for_validation:$changeid" is not what is deployed "${deploy_rev%:*}:${deploy_rev#*:}"
             exit 1
         fi
     fi
