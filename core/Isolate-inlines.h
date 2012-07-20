@@ -169,21 +169,9 @@ namespace avmplus
 	}
 
     template<class T>
-    bool WorkerObjectBase<T>::startWithChannels(ArrayObject* channels)
+    bool WorkerObjectBase<T>::startWithChannels( )
     {
-        return internalStartWithChannels(channels);
-    }
-
-    template<class T>
-    PromiseChannelObject* WorkerObjectBase<T>::newEventChannel()
-    {
-        PromiseChannelClass* promiseChannelClass = self()->toplevel()->builtinClasses()->get_PromiseChannelClass();
-        PromiseChannelObject* channelObj = (PromiseChannelObject*)promiseChannelClass->newInstance();
-        Isolate* current = self()->core()->getIsolate();
-        IsolateEventListener* listener = current->getAggregate()->newEventListener(this->giid, current);
-        // negative value b/c of the convention for event
-        channelObj->initializeWithChannel(listener->channel);
-        return channelObj;
+        return internalStartWithChannels();
     }
 
     template <class T>
@@ -249,32 +237,15 @@ namespace avmplus
         if (m_isolate->parentDesc != AvmCore::getActiveCore()->getIsolate()->desc)
             throwIllegalOperationError(kWorkerIllegalCallToStart);
 
-        return internalStartWithChannels(NULL);
+        return internalStartWithChannels();
     }
     
     template <class T>
-    bool WorkerObjectBase<T>::internalStartWithChannels(ArrayObject* channelArray)
+    bool WorkerObjectBase<T>::internalStartWithChannels( )
     {
         if (m_isolate->failed())
             throwIllegalOperationError(kFailedWorkerCannotBeRestarted);
         AvmCore* core = self()->core();
-        if (channelArray) {
-            FixedHeapArray<FixedHeapRef<PromiseChannel> >&  channels = m_isolate->m_initialChannels;
-            channels.allocate(channelArray->get_length());
-            PromiseChannelClass* promiseChannelClass = self()->toplevel()->builtinClasses()->get_PromiseChannelClass();
-            for (int i = 0; i < channels.length; i++) {
-                Atom entry = channelArray->getUintProperty(i);
-                if (AvmCore::istype(entry, promiseChannelClass->ivtable()->traits)) {
-                    PromiseChannelObject* channelObj = (PromiseChannelObject*)core->atomToScriptObject(entry);
-                    // FIXME how do we guarantee that the PromiseChannel won't get closed and reclaimed?
-                    // We could validate here.
-                    channels.values[i] = channelObj->m_channel;
-                } else {
-                    channels.deallocate();
-                    throwError("not a PromiseChannel");
-                }
-            }
-        } 
         Aggregate* aggregate = m_isolate->getAggregate();
         
         ByteArrayObject* byteCode = self()->getByteCode();

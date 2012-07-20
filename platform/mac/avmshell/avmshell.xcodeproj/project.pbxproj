@@ -212,17 +212,11 @@
 		19BDAE541504E7A200BCD6F7 /* LzmaEnc.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC791504DA2000BCD6F7 /* LzmaEnc.c */; };
 		19BDAE551504E7A200BCD6F7 /* LzmaLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 19BDAC7B1504DA2000BCD6F7 /* LzmaLib.c */; };
 		19BDAE5D1504E82100BCD6F7 /* liblzma.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19BDAE5C1504E7A200BCD6F7 /* liblzma.a */; };
-		2C093BD41550B1CA0047931B /* PromiseChannelGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C093BD31550B1CA0047931B /* PromiseChannelGlue.cpp */; };
-		2C093BEF155196E00047931B /* PromiseChannelGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C093BD31550B1CA0047931B /* PromiseChannelGlue.cpp */; };
-		2C64850E1551F728006DCCC9 /* PromiseGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C093BF51551B4480047931B /* PromiseGlue.cpp */; };
-		2C64850F1551F729006DCCC9 /* PromiseGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C093BF51551B4480047931B /* PromiseGlue.cpp */; };
 		2C723E4E140C173100E74D9B /* ShellWorkerGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C723E4D140C173100E74D9B /* ShellWorkerGlue.cpp */; };
 		2C723E4F140C173100E74D9B /* ShellWorkerGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C723E4D140C173100E74D9B /* ShellWorkerGlue.cpp */; };
 		2CA3679E130310DD0022D580 /* Isolate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2CA3679D130310DD0022D580 /* Isolate.cpp */; };
 		2CDA9357148D69860040F50F /* ConcurrencyGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2CDA9356148D69860040F50F /* ConcurrencyGlue.cpp */; };
 		2CDA9358148D69860040F50F /* ConcurrencyGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2CDA9356148D69860040F50F /* ConcurrencyGlue.cpp */; };
-		2CDD78E9135CCC44001FA8F7 /* Cloner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2CDD78E8135CCC44001FA8F7 /* Cloner.cpp */; };
-		2CDD78EA135CCC44001FA8F7 /* Cloner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2CDD78E8135CCC44001FA8F7 /* Cloner.cpp */; };
 		2CE7277A137898E500558C8E /* Isolate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2CA3679D130310DD0022D580 /* Isolate.cpp */; };
 		3F5B2BCC0F54B223009A93FE /* PosixFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BC80F54B223009A93FE /* PosixFile.cpp */; };
 		3F5B2BCD0F54B223009A93FE /* PosixPartialPlatform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */; };
@@ -977,12 +971,9 @@
 		19DDE288150FB60D00B3916C /* lzma64-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "lzma64-debug.xcconfig"; path = "../../../build/lzma64-debug.xcconfig"; sourceTree = SOURCE_ROOT; };
 		19DDE289150FB60D00B3916C /* lzma64-release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "lzma64-release.xcconfig"; path = "../../../build/lzma64-release.xcconfig"; sourceTree = SOURCE_ROOT; };
 		19F9615E127730530079C6E9 /* ST_mmgc_580603.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_580603.st; path = ../../../extensions/ST_mmgc_580603.st; sourceTree = SOURCE_ROOT; };
-		2C093BD31550B1CA0047931B /* PromiseChannelGlue.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = PromiseChannelGlue.cpp; path = ../../../core/PromiseChannelGlue.cpp; sourceTree = SOURCE_ROOT; };
-		2C093BF51551B4480047931B /* PromiseGlue.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = PromiseGlue.cpp; path = ../../../shell/PromiseGlue.cpp; sourceTree = SOURCE_ROOT; };
 		2C723E4D140C173100E74D9B /* ShellWorkerGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ShellWorkerGlue.cpp; path = ../../../shell/ShellWorkerGlue.cpp; sourceTree = SOURCE_ROOT; };
 		2CA3679D130310DD0022D580 /* Isolate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Isolate.cpp; path = ../../../core/Isolate.cpp; sourceTree = "<group>"; };
 		2CDA9356148D69860040F50F /* ConcurrencyGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConcurrencyGlue.cpp; path = ../../../core/ConcurrencyGlue.cpp; sourceTree = "<group>"; };
-		2CDD78E8135CCC44001FA8F7 /* Cloner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Cloner.cpp; path = ../../../core/Cloner.cpp; sourceTree = "<group>"; };
 		3F5B2BC70F54B223009A93FE /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../../../shell/Platform.h; sourceTree = SOURCE_ROOT; };
 		3F5B2BC80F54B223009A93FE /* PosixFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixFile.cpp; path = ../../../shell/PosixFile.cpp; sourceTree = SOURCE_ROOT; };
 		3F5B2BC90F54B223009A93FE /* PosixFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PosixFile.h; path = ../../../shell/PosixFile.h; sourceTree = SOURCE_ROOT; };
@@ -1262,7 +1253,6 @@
 		079DF7B00F3A86D50031D1B4 /* core */ = {
 			isa = PBXGroup;
 			children = (
-				2C093BD31550B1CA0047931B /* PromiseChannelGlue.cpp */,
 				D2B90FF4148E3FFE000E92E2 /* ITelemetry.h */,
 				D942197213DF38D7002A4723 /* AvmSerializer.cpp */,
 				D942197313DF38D7002A4723 /* AvmSerializer.h */,
@@ -1283,7 +1273,6 @@
 				079DF7BA0F3A882D0031D1B4 /* AbcParser.cpp */,
 				079DF7BB0F3A882D0031D1B4 /* AbcParser.h */,
 				07E65EDF10BC19A7000D1EB6 /* AbcParser-inlines.h */,
-				2CDD78E8135CCC44001FA8F7 /* Cloner.cpp */,
 				079DF7BE0F3A882D0031D1B4 /* ActionBlockConstants.cpp */,
 				079DF7BF0F3A882D0031D1B4 /* ActionBlockConstants.h */,
 				079DF7C40F3A882D0031D1B4 /* AtomWriteBarrier.h */,
@@ -1641,7 +1630,6 @@
 			isa = PBXGroup;
 			children = (
 				77DEAB461423CB9400FA0D25 /* ShellWorkerDomainGlue.cpp */,
-				2C093BF51551B4480047931B /* PromiseGlue.cpp */,
 				77DEAB471423CB9400FA0D25 /* ShellWorkerDomainGlue.h */,
 				77DEAB481423CB9400FA0D25 /* ShellWorkerGlue.h */,
 				079DF9860F3A89CA0031D1B4 /* AS */,
@@ -2378,13 +2366,10 @@
 				D942196713DF3686002A4723 /* DictionaryGlue.cpp in Sources */,
 				D942197813DF38D7002A4723 /* AvmSerializer.cpp in Sources */,
 				D942197913DF38D7002A4723 /* ObjectIO.cpp in Sources */,
-				2CDD78EA135CCC44001FA8F7 /* Cloner.cpp in Sources */,
 				2CE7277A137898E500558C8E /* Isolate.cpp in Sources */,
 				2C723E4F140C173100E74D9B /* ShellWorkerGlue.cpp in Sources */,
 				77DEAB4A1423CB9400FA0D25 /* ShellWorkerDomainGlue.cpp in Sources */,
 				2CDA9358148D69860040F50F /* ConcurrencyGlue.cpp in Sources */,
-				2C093BEF155196E00047931B /* PromiseChannelGlue.cpp in Sources */,
-				2C64850F1551F729006DCCC9 /* PromiseGlue.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2584,12 +2569,9 @@
 				D942197613DF38D7002A4723 /* AvmSerializer.cpp in Sources */,
 				D942197713DF38D7002A4723 /* ObjectIO.cpp in Sources */,
 				2CA3679E130310DD0022D580 /* Isolate.cpp in Sources */,
-				2CDD78E9135CCC44001FA8F7 /* Cloner.cpp in Sources */,
 				2C723E4E140C173100E74D9B /* ShellWorkerGlue.cpp in Sources */,
 				77DEAB491423CB9400FA0D25 /* ShellWorkerDomainGlue.cpp in Sources */,
 				2CDA9357148D69860040F50F /* ConcurrencyGlue.cpp in Sources */,
-				2C093BD41550B1CA0047931B /* PromiseChannelGlue.cpp in Sources */,
-				2C64850E1551F728006DCCC9 /* PromiseGlue.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

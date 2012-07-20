@@ -60,9 +60,6 @@ namespace avmplus
 
     };
 
-    class IsolateEventListener;
-
-
     /*
      * Represents an isolate in various stages of its lifecycle. There's only one Isolate
      * object per isolate.
@@ -128,9 +125,6 @@ namespace avmplus
 
         bool isPrimordial();
         
-        void destroyListeners();
-
-
         // keep in sync with constants in Worker
         enum State {
             NONE = 0, // sentinel
@@ -197,13 +191,10 @@ namespace avmplus
             vmpi_thread_t threadID;
 #endif // DEBUG
             bool isValid;
-            //WaitRecord* next;
+            WaitRecord* next;
         };
 
 
-        // used to initialize channels during worker startup
-        FixedHeapArray< FixedHeapRef<PromiseChannel> > m_initialChannels;
-        
     private:
         virtual void releaseActiveResources();
         SharedPropertyMap m_properties;
@@ -215,8 +206,6 @@ namespace avmplus
         void setActiveWaitRecord(WaitRecord* record);
         bool signalActiveWaitRecord();
         virtual bool retryActiveWaitRecord();
-		
-		virtual void uncaughtErrorRaised ()	{}
 
     protected:
         void abortActiveWaitRecord();
@@ -240,8 +229,6 @@ namespace avmplus
         Isolate::State m_state;
         bool m_failed; // only accessed by the parent isolate.
         bool m_interrupted; 
-        vmbase::WaitNotifyMonitor m_listenerLock; // May eventually protect more state.
-        UnmanagedPointerList<IsolateEventListener*> m_listeners;
 
         // *** end data ***
     };
@@ -257,9 +244,12 @@ namespace avmplus
     {
     public:
         InterruptableState();
+        REALLY_INLINE void addWaitRecord(Isolate::WaitRecord& record, Isolate* isolate, bool ignoreAnyPendingNotify);
+        REALLY_INLINE void removeWaitRecord(Isolate::WaitRecord& record, Isolate* isolate);
         virtual void destroy();
         void notify();
         void notifyAll();
+        REALLY_INLINE bool wait(int32_t timeout, Isolate::WaitRecord& record, Isolate* isolate);
 
         //
         // this is intended as a stack based helper for waiting
@@ -268,34 +258,38 @@ namespace avmplus
         class EnterWait
         {
         public:
-            EnterWait(Isolate* isolate, InterruptableState* state);
+            EnterWait(Isolate* isolate, InterruptableState* state, int32_t timeout=-1, bool ignoreAnyPendingNotify=false);
             bool failed;
             bool interrupted;
+            bool result;
         };
 
-        vmbase::RecursiveMutex m_lock;
-        // list of all isolate threads currently waiting on this state
-        MMgc::BasicList<Isolate::WaitRecord*> m_waitList;
-        // 
-        // there is a race condition between notifyXXX() calls
-        // and when a wait record gets into the wait list
-        // if the wait list is empty and a notifyXXX() call is
-        // made this value will be set to true. when there are no
-        // records in the wait list and a record is added it's 
-        // notified property will be updated to reflect this value
-        // updates to this value are protected by the lock for the
-        // wait list.
-        // 
-        bool notified;
 #ifdef DEBUG
         int32_t gid;
 #endif // DEBUG
 
     private:
+        // locks access to the wait list
+        vmbase::RecursiveMutex m_lock;
+        // 
+        // there is a race condition between notifyXXX() calls
+        // and when a wait record gets into the wait list
+        // if the wait list is empty and a notifyXXX() call is
+        // made this value will be set to the calling thread. 
+        // when there are no records in the wait list and a record is added it's 
+        // notified property will be updated to reflect this value
+        // if the thread id for the record is not the same as the
+        // notified value, this avoids a thread notifying itself. 
+        // this value is protected by the lock for the
+        // wait list.
+        // 
+        vmpi_thread_t notified;
 #ifdef DEBUG
         static int32_t globalId; // global id counter
 #endif // DEBUG
-        //Isolate::WaitRecord* m_waitList;
+        // list of all isolate threads currently waiting on this state
+        Isolate::WaitRecord* m_waitListHead;
+        Isolate::WaitRecord* m_waitListTail;
     };
 
 
@@ -306,7 +300,6 @@ namespace avmplus
      */
     class Aggregate : public FixedHeapRCObject
     { 
-        friend void Isolate::destroyListeners();
     private:
         // singleton
         class Globals 
@@ -315,9 +308,7 @@ namespace avmplus
         public:
             Globals()
                   : m_nextGlobalIsolateId(1) 
-                  , m_nextGlobalPromiseId(0)
                   , m_isolateMap(16)
-                  , m_channelMap(32)
                   , m_nextChannelGuid(1)
             {}
 
@@ -330,13 +321,10 @@ namespace avmplus
 
             Isolate* at(int32_t giid);
 
-            int64_t newChannelGuid();
-
             /**** data ****/
             vmbase::WaitNotifyMonitor m_lock; // protects m_globals and all Aggregate instances (curently).
             
             int32_t m_nextGlobalIsolateId;
-            int32_t m_nextGlobalPromiseId;
 
             class IsolateMap: public FixedHeapHashTable<int32_t, FixedHeapRef<Isolate> > 
             {
@@ -346,16 +334,6 @@ namespace avmplus
                 vmbase::WaitNotifyMonitor m_lock;
             };
             IsolateMap m_isolateMap;
-
-            class PromiseChannelMap: public FixedHeapHashTable<int64_t, PromiseChannel* > 
-            {
-            public:
-                PromiseChannelMap(int initialSize);
-                virtual void DestroyItem(int64_t guid, PromiseChannel* channel);
-                virtual ~PromiseChannelMap();
-                vmbase::WaitNotifyMonitor m_lock;
-            };
-            PromiseChannelMap m_channelMap;
 
             int64_t m_nextChannelGuid;
 
@@ -388,18 +366,13 @@ namespace avmplus
         void requestAggregateExit();
         void waitUntilNoIsolates();
         static void destroyIsolate(Isolate* isolate);
-        static void destroyPromiseChannel(PromiseChannel* channel);
 
 
         static void initializeGlobals();
         static void reclaimGlobals();
         static void dumpGlobals(); // debugging
 
-        FixedHeapRef<PromiseChannel> allocatePromiseChannel(int32_t senderGiid, int32_t receiverGiid);
-        void closePromiseChannel(PromiseChannel* channel, int32_t endpoint_giid);
         void closeChannelsWithEndpoint(Isolate* endpoint);
-        bool beginChannelOp(PromiseChannel* channel, bool item_sent);
-        void endChannelOp(PromiseChannel* channel, bool item_received);
 
         virtual void selfExit(Toplevel* toplevel);
 
@@ -412,7 +385,6 @@ namespace avmplus
         Isolate::State queryState(Isolate* isolate);
         static bool isGlobalsLocked();
         void stateTransition(Isolate* isolate, enum Isolate::State to);
-        IsolateEventListener* newEventListener(int32_t sourceGiid, Isolate* destination);
         vmbase::SafepointManager* safepointManager()
         {
             return &m_safepointMgr;
@@ -448,14 +420,6 @@ namespace avmplus
     private:
         vmbase::SafepointManager* m_safepointMgr;
         vmbase::SafepointRecord m_spRecord;
-    };
-
-
-    class IsolateEventListener
-    {
-    public:
-        FixedHeapRef< PromiseChannel > channel;
-        IsolateEventListener(Aggregate* aggregate, int32_t sourceGid, int32_t consumerGid);
     };
 
     template <class T>
@@ -496,16 +460,14 @@ namespace avmplus
         bool isParentOf(WorkerObjectBase* worker);
         bool isPrimordial();
 
-        bool startWithChannels(ArrayObject* channels);
-        bool internalStartWithChannels(ArrayObject* channels);
+        bool startWithChannels( );
+        bool internalStartWithChannels( );
         // obviously candidate for further refactoring
         bool startVeryInternal();
 
         void setSharedProperty(String* key, Atom value);
         Atom getSharedProperty(String* key);
 
-        
-        PromiseChannelObject* newEventChannel();
         
         static void throwError(const char* msgz);        
     	static void throwIllegalOperationError(int errorID);

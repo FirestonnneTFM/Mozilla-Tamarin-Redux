@@ -379,6 +379,32 @@ namespace avmplus
 
     }
 
+    class ByteArrayTask: public vmbase::SafepointTask
+    {
+    public:
+        ByteArrayTask(ByteArray* ba)
+            : m_byteArray(ba)
+        {}
+
+        void exec() 
+        {
+            if (m_byteArray->isWorkerLocal()) {
+                run();
+            } 
+            else {
+                Isolate* isolate = m_byteArray->toplevel()->core()->getIsolate();
+                if (isolate) {
+                    isolate->getAggregate()->runHoldingIsolateMapLock(this);
+                }
+                else {
+                    run();
+                }
+            }
+        }
+
+        ByteArray* m_byteArray;
+    };
+
     /*
         Why the "Grower" class?
         
@@ -412,44 +438,29 @@ namespace avmplus
         }
     }
 
-    // FIXME add common base class for SafepointTasks in ByteArray
-    class ByteArrayGetWritableBufferTask: public vmbase::SafepointTask
+    class ByteArrayGetWritableBufferTask: public ByteArrayTask
     {
-
-        ByteArray* m_byteArray;
-        uint8_t* m_result;
-
     public:
         ByteArrayGetWritableBufferTask(ByteArray* byteArray)
-            : m_byteArray(byteArray)
+            : ByteArrayTask(byteArray)
+            , result(NULL)
         {}
-        void run()  //inherited
+
+        void run() 
         {
             ByteArray::Grower grower(m_byteArray, m_byteArray->getUnderlyingBuffer()->capacity);
             grower.EnsureWritableCapacity();
-            m_result = m_byteArray->getUnderlyingBuffer()->array;
-        }
-        
-        uint8_t* exec(bool isLocal)
-        {
-            if (isLocal) {
-                run();
-            } else {
-                Isolate* isolate = m_byteArray->toplevel()->core()->getIsolate();
-                if (isolate) 
-                    isolate->getAggregate()->runHoldingIsolateMapLock(this);
-                else 
-                    run();
-            }
-            return m_result;
+            result = m_byteArray->getUnderlyingBuffer()->array;
         }
 
+        uint8_t* result;
     };
 
     uint8_t* FASTCALL ByteArray::GetWritableBuffer()
     {
         ByteArrayGetWritableBufferTask task(this);
-        return task.exec(m_workerLocal);
+        task.exec();
+        return task.result;
     }
 
     uint8_t& ByteArray::operator[](uint32_t index)
@@ -488,46 +499,30 @@ namespace avmplus
     static const uint32_t kHugeGrowthThreshold = 24*1024*1024;
     static const uint32_t kHugeGrowthIncr = 24*1024*1024;
 
-    class ByteArraySetLengthTask: public vmbase::SafepointTask
+    class ByteArraySetLengthTask: public ByteArrayTask
     {
-        uint32_t m_result;
-        ByteArray* m_byteArray;
-        uint32_t m_newLength;
-        bool m_onlyIfExpected;
-        bool m_calledFromLengthSetter;
-        uint32_t m_expectedLength;
-        
-
     public:
         ByteArraySetLengthTask(ByteArray* ba, uint32_t newLength, bool calledFromLengthSetter, bool onlyIfExpected, uint32_t expectedLength)
-            : m_byteArray(ba)
+            : ByteArrayTask(ba)
             , m_newLength(newLength)
             , m_onlyIfExpected(onlyIfExpected)
             , m_calledFromLengthSetter(calledFromLengthSetter)
             , m_expectedLength(expectedLength)
         {}
+
         void run()  //inherited
         {
             ByteArray::Grower grower(m_byteArray, m_newLength, m_onlyIfExpected, m_expectedLength);
-            m_result = grower.SetLengthCommon(m_newLength, m_calledFromLengthSetter);
+            result = grower.SetLengthCommon(m_newLength, m_calledFromLengthSetter);
         }
         
-        uint32_t exec(bool isLocal)
-        {
-            if (isLocal) {
-                run();
-            } else {
-                Isolate* isolate = m_byteArray->toplevel()->core()->getIsolate();
-                if (isolate) { 
-                    isolate->getAggregate()->runHoldingIsolateMapLock(this);
-                }
-                else { 
-                    run();
-                }
-            }
-            return m_result;
-        }
+        uint32_t result;
 
+    private:
+        uint32_t m_newLength;
+        bool m_onlyIfExpected;
+        bool m_calledFromLengthSetter;
+        uint32_t m_expectedLength;
     };
 
     uint32_t ByteArray::SetLengthCommon(uint32_t newLength, bool calledFromLengthSetter, bool onlyIfExpected, uint32_t expectedLength)
@@ -536,7 +531,8 @@ namespace avmplus
             m_toplevel->throwRangeError(kInvalidRangeError);
         
         ByteArraySetLengthTask task(this, newLength, calledFromLengthSetter, onlyIfExpected, expectedLength);
-        return task.exec(m_workerLocal);
+        task.exec();
+        return task.result;
     }
 
 
@@ -639,64 +635,101 @@ namespace avmplus
         m_position += count;
     }
 
-
-    class ByteArrayWriteTask: public vmbase::SafepointTask
+    class ByteArrayWriteTask: public ByteArrayTask
     {
-        ByteArray* m_byteArray;
-        const void* m_buffer;
-        uint32_t m_count;
-        uint32_t m_writeEnd;
-
     public:
         ByteArrayWriteTask(ByteArray* ba, const void* buffer, uint32_t count, uint32_t writeEnd)
-            : m_byteArray(ba)
+            : ByteArrayTask(ba)
             , m_buffer(buffer)
             , m_count(count)
             , m_writeEnd(writeEnd)
         {}
 
-        void run();  //inherited
-        
-        void exec(bool isLocal)
-        {
-            if (isLocal) {
-                run();
-            } else {
-                Isolate* isolate = m_byteArray->toplevel()->core()->getIsolate();
-                if (isolate) 
-                    isolate->getAggregate()->runHoldingIsolateMapLock(this);
-                else 
-                    run();
+        void run() {
+            ByteArray::Grower grower(m_byteArray, m_writeEnd);
+            grower.EnsureWritableCapacity();
+            
+            ByteArray::Buffer* buffer = m_byteArray->getUnderlyingBuffer();
+            uint8_t* dest = buffer->array + m_byteArray->GetPosition();
+            if (dest) {
+                move_or_copy(dest, m_buffer, m_count);
+                m_byteArray->SetPosition(m_byteArray->GetPosition() + m_count);
+                if (buffer->length < m_byteArray->GetPosition()) {
+                    buffer->length = m_byteArray->GetPosition();
+                }
             }
         }
+    private:
+        const void* m_buffer;
+        uint32_t m_count;
+        uint32_t m_writeEnd;
+
     };
 
+    class ByteArrayWriteBytesTask: public ByteArrayTask
+    {
+    public:
+        ByteArrayWriteBytesTask(ByteArray* dest, ByteArray* source, uint32_t offset, uint32_t count)
+            : ByteArrayTask(dest)
+            , rangeError(false)
+            , m_bytes(source)
+            , m_count(count)
+            , m_offset(offset)
+        {
+        }
+
+        void run()
+        {
+            if (m_offset > m_bytes->GetLength())
+                m_offset = m_bytes->GetLength();
+
+            if (m_count == 0) {
+                m_count = m_bytes->GetLength()-m_offset;
+            }
+
+            if (m_count > m_bytes->GetLength()-m_offset) {
+                rangeError = true;
+                return;
+            }
+
+            if (m_count > 0) {
+                uint32_t writeEnd = m_byteArray->GetPosition()+m_count;
+                ByteArray::Grower grower(m_byteArray, writeEnd);
+                grower.EnsureWritableCapacity();
+                
+                ByteArray::Buffer* buffer = m_byteArray->getUnderlyingBuffer();
+                uint8_t* dest = buffer->array + m_byteArray->GetPosition();
+                if (dest) {
+                    const void* source = m_bytes->GetReadableBuffer()+m_offset;
+                    move_or_copy(dest, source, m_count);
+                    m_byteArray->SetPosition(m_byteArray->GetPosition()+m_count);
+                    if (buffer->length < m_byteArray->GetPosition()) {
+                        buffer->length = m_byteArray->GetPosition();
+                    }
+                }
+            }
+        }
+
+        bool rangeError;
+
+    private:
+        ByteArray* m_bytes;
+        uint32_t m_count;
+        uint32_t m_offset;
+    };
 
     void ByteArray::Write(const void* buffer, uint32_t count)
     {
         uint32_t writeEnd = m_position + count;
         ByteArrayWriteTask task(this, buffer, count, writeEnd);
-        return task.exec(m_workerLocal);
+        task.exec();
     }
     
-    void ByteArrayWriteTask::run() {
-        ByteArray::Grower grower(m_byteArray, m_writeEnd);
-        grower.EnsureWritableCapacity();
-        
-        move_or_copy(m_byteArray->getUnderlyingBuffer()->array + m_byteArray->GetPosition(), m_buffer, m_count);
-        m_byteArray->SetPosition(m_byteArray->GetPosition() + m_count);
-        if (m_byteArray->getUnderlyingBuffer()->length < m_byteArray->GetPosition())
-            m_byteArray->getUnderlyingBuffer()->length = m_byteArray->GetPosition();
-    }
-
-
-    class ByteArrayEnsureCapacityTask: public vmbase::SafepointTask
+    class ByteArrayEnsureCapacityTask: public ByteArrayTask
     {
-        ByteArray* m_byteArray;
-        uint32_t m_capacity;
     public:
         ByteArrayEnsureCapacityTask(ByteArray* byteArray, uint32_t capacity)
-            : m_byteArray(byteArray)
+            : ByteArrayTask(byteArray)
             , m_capacity(capacity)
         {}
 
@@ -705,25 +738,16 @@ namespace avmplus
             ByteArray::Grower grower(m_byteArray, m_capacity);
             grower.EnsureWritableCapacity();
         }
-        
-        void exec(bool isLocal)
-        {
-            if (isLocal) {
-                run();
-            } else {
-                Isolate* isolate = m_byteArray->toplevel()->core()->getIsolate();
-                if (isolate) 
-                    isolate->getAggregate()->runHoldingIsolateMapLock(this);
-                else 
-                    run();
-            }
-        }
+
+    private:
+        uint32_t m_capacity;
+
     };
 
     void ByteArray::EnsureCapacity(uint32_t capacity)
     {
         ByteArrayEnsureCapacityTask task(this, capacity);
-        task.exec(m_workerLocal);
+        task.exec();
     }
 
     NO_INLINE void ByteArray::EnsureCapacityNoInline(uint32_t capacity)
@@ -869,193 +893,240 @@ namespace avmplus
 
     REALLY_INLINE uint32_t umax(uint32_t a, uint32_t b) { return a > b ? a : b; }
 
-    void ByteArray::CompressViaLzma()
+    //
+    // executes the CompressViaLzma logic within a safepoint
+    //
+    class ByteArrayCompressViaLzmaTask: public ByteArrayTask
     {
-        // Snarf the data and give ourself some empty data
-        // (remember, existing data might be copy-on-write so don't dance on it)
-        uint8_t* origData                       = m_buffer->array;
-        uint32_t origLen                        = m_buffer->length;
-        uint32_t origCap                        = m_buffer->capacity;
-        uint32_t origPos                        = m_position;
-        MMgc::GCObject* origCopyOnWriteOwner    = m_copyOnWriteOwner;
-        if (!origLen) // empty buffer should give empty result
-            return;
-
-        m_buffer->array             = NULL;
-        m_buffer->length            = 0;
-        m_buffer->capacity          = 0;
-        m_position          = 0;
-        m_copyOnWriteOwner  = NULL;
-
-        // Unlike zlib, lzma does not provide a method for computing
-        // any upper bound on "compressed" size.  So we guess, and
-        // retry if the guess was too aggressive.  The retry is only
-        // needed if the data was incompressible; we compress anyhow
-        // for compatibility with the lzma v1 format (the v1 headers
-        // do not have a way to flag an uncompressed payload).
-
-        uint32_t newCap = umax(origCap, lzmaHeaderSize);
-        size_t lzmaPropsSize = LZMA_PROPS_SIZE;
-        int retcode;
-        struct lzma_compressed *destOverlay;
-        size_t destLen;
-
-    retry_compress:
-        Exception *exn;
-        bool ensured = EnsureCapacityOrFail(newCap, kCatchAction_Rethrow, &exn);
-        if (!ensured)
+    public:
+        ByteArrayCompressViaLzmaTask(ByteArray* ba)
+            : ByteArrayTask(ba)
         {
-            // clean up when the EnsureCapacity call fails.
-            m_buffer->array = origData;
-            m_buffer->length = origLen;
-            m_buffer->capacity = origCap;
-            m_position = origPos;
-            SetCopyOnWriteOwner(origCopyOnWriteOwner);
-
-            m_toplevel->core()->throwException(exn);
         }
 
-        destOverlay = (struct lzma_compressed*) m_buffer->array;
-        destLen = m_buffer->capacity - lzmaHeaderSize;
+        void run()
+        {
+            ByteArray::Buffer* buffer = m_byteArray->getUnderlyingBuffer();
+            // Snarf the data and give ourself some empty data
+            // (remember, existing data might be copy-on-write so don't dance on it)
+            uint8_t* origData                       = buffer->array;
+            uint32_t origLen                        = buffer->length;
+            uint32_t origCap                        = buffer->capacity;
+            uint32_t origPos                        = m_byteArray->GetPosition();
+            MMgc::GCObject* origCopyOnWriteOwner    = m_byteArray->m_copyOnWriteOwner;
+            if (!origLen) // empty buffer should give empty result
+                return;
 
-        retcode = LzmaCompress(destOverlay->compressedPayload, &destLen,
-                               origData, origLen,
-                               destOverlay->lzmaProps, &lzmaPropsSize,
-                               9, // -1 would yield default level (5),
-                               1<<20, // 0 would yield default dictSize (1<<24)
-                               -1,  // default lc (3),
-                               -1,  // default lp (0),
-                               -1,  // default pb (2),
-                               -1,  // default fb (32),
-                               1); // -1 would yield default numThreads (2)
+            buffer->array             = NULL;
+            buffer->length            = 0;
+            buffer->capacity          = 0;
+            m_byteArray->SetPosition(0);
+            m_byteArray->m_copyOnWriteOwner = NULL;
 
-        switch (retcode) {
-        case SZ_OK:
-            if (destLen > (m_buffer->capacity - lzmaHeaderSize)) {
-                AvmAssertMsg(false, "LZMA broke its contract.");
+            // Unlike zlib, lzma does not provide a method for computing
+            // any upper bound on "compressed" size.  So we guess, and
+            // retry if the guess was too aggressive.  The retry is only
+            // needed if the data was incompressible; we compress anyhow
+            // for compatibility with the lzma v1 format (the v1 headers
+            // do not have a way to flag an uncompressed payload).
 
-                // Belt-and-suspenders: If control gets here,
-                // something is terribly wrong, and LZMA is lying to
-                // us.  Rather than risk establishing a bogus structure,
-                // fail as if lzma returned an error code.
-                goto error_cases;
+            uint32_t newCap = umax(origCap, lzmaHeaderSize);
+            size_t lzmaPropsSize = LZMA_PROPS_SIZE;
+            int retcode;
+            struct lzma_compressed *destOverlay;
+            size_t destLen;
+
+        retry_compress:
+            TRY(m_byteArray->m_toplevel->core(), kCatchAction_Rethrow)
+            {
+                ByteArray::Grower grower(m_byteArray, newCap);
+                grower.EnsureWritableCapacity();
+            }
+            CATCH(Exception *exn)
+            {
+                // clean up when the EnsureCapacity call fails.
+                buffer->array = origData;
+                buffer->length = origLen;
+                buffer->capacity = origCap;
+                m_byteArray->SetPosition(origPos);
+                m_byteArray->SetCopyOnWriteOwner(origCopyOnWriteOwner);
+                m_byteArray->m_toplevel->core()->throwException(exn);
+            }
+            END_CATCH
+            END_TRY
+
+            destOverlay = (struct lzma_compressed*) buffer->array;
+            destLen = buffer->capacity - lzmaHeaderSize;
+
+            retcode = LzmaCompress(destOverlay->compressedPayload, &destLen,
+                                   origData, origLen,
+                                   destOverlay->lzmaProps, &lzmaPropsSize,
+                                   9, // -1 would yield default level (5),
+                                   1<<20, // 0 would yield default dictSize (1<<24)
+                                   -1,  // default lc (3),
+                                   -1,  // default lp (0),
+                                   -1,  // default pb (2),
+                                   -1,  // default fb (32),
+                                   1); // -1 would yield default numThreads (2)
+
+            switch (retcode) {
+            case SZ_OK:
+                if (destLen > (buffer->capacity - lzmaHeaderSize)) {
+                    AvmAssertMsg(false, "LZMA broke its contract.");
+
+                    // Belt-and-suspenders: If control gets here,
+                    // something is terribly wrong, and LZMA is lying to
+                    // us.  Rather than risk establishing a bogus structure,
+                    // fail as if lzma returned an error code.
+                    goto error_cases;
+                }
+
+                destOverlay->unpackedSize[0] = (uint8_t)((origLen)       & 0xFF);
+                destOverlay->unpackedSize[1] = (uint8_t)((origLen >> 8)  & 0xFF);
+                destOverlay->unpackedSize[2] = (uint8_t)((origLen >> 16) & 0xFF);
+                destOverlay->unpackedSize[3] = (uint8_t)((origLen >> 24) & 0xFF);
+
+                AvmAssert(destOverlay->unpackedSizeHighBits[0] == 0
+                          && destOverlay->unpackedSizeHighBits[1] == 0
+                          && destOverlay->unpackedSizeHighBits[2] == 0
+                          && destOverlay->unpackedSizeHighBits[3] == 0);
+
+                buffer->length = uint32_t(lzmaHeaderSize + destLen);
+                break;
+            case SZ_ERROR_OUTPUT_EOF:
+                // Our guessed target length was not conservative enough.
+                // Since this is a compression algorithm, go with linear
+                // growth on failure (rather than e.g. exponential).
+                newCap += origCap;
+
+                goto retry_compress;
+            case SZ_ERROR_MEM:
+            case SZ_ERROR_PARAM:
+            case SZ_ERROR_THREAD:
+            default:
+            error_cases:
+                // On other failures, just give up.
+
+                // Even though we set length to 0 (effectively clearing
+                // the state), we set array back to origData so that its
+                // memory will be properly managed.
+                buffer->array = origData;
+                buffer->length = 0;
+                buffer->capacity = origCap;
+                break;
             }
 
-            destOverlay->unpackedSize[0] = (uint8_t)((origLen)       & 0xFF);
-            destOverlay->unpackedSize[1] = (uint8_t)((origLen >> 8)  & 0xFF);
-            destOverlay->unpackedSize[2] = (uint8_t)((origLen >> 16) & 0xFF);
-            destOverlay->unpackedSize[3] = (uint8_t)((origLen >> 24) & 0xFF);
+            // Analogous to zlib, maintain policy that Compress() sets
+            // position == length (while Uncompress() sets position == 0).
+            m_byteArray->SetPosition(buffer->length);
 
-            AvmAssert(destOverlay->unpackedSizeHighBits[0] == 0
-                      && destOverlay->unpackedSizeHighBits[1] == 0
-                      && destOverlay->unpackedSizeHighBits[2] == 0
-                      && destOverlay->unpackedSizeHighBits[3] == 0);
-
-            m_buffer->length = uint32_t(lzmaHeaderSize + destLen);
-            break;
-        case SZ_ERROR_OUTPUT_EOF:
-            // Our guessed target length was not conservative enough.
-            // Since this is a compression algorithm, go with linear
-            // growth on failure (rather than e.g. exponential).
-            newCap += origCap;
-
-            goto retry_compress;
-        case SZ_ERROR_MEM:
-        case SZ_ERROR_PARAM:
-        case SZ_ERROR_THREAD:
-        default:
-        error_cases:
-            // On other failures, just give up.
-
-            // Even though we set length to 0 (effectively clearing
-            // the state), we set array back to origData so that its
-            // memory will be properly managed.
-            m_buffer->array = origData;
-            m_buffer->length = 0;
-            m_buffer->capacity = origCap;
-            break;
+            if (origData && origData != buffer->array && origCopyOnWriteOwner == NULL)
+            {
+                // Note that TellGcXXX always expects capacity, not (logical) length.
+                m_byteArray->TellGcDeleteBufferMemory(origData, origCap);
+                mmfx_delete_array(origData);
+            }
         }
+    };
 
-        // Analogous to zlib, maintain policy that Compress() sets
-        // position == length (while Uncompress() sets position == 0).
-        m_position = m_buffer->length;
-
-        if (origData && origData != m_buffer->array && origCopyOnWriteOwner == NULL)
-        {
-            // Note that TellGcXXX always expects capacity, not (logical) length.
-            TellGcDeleteBufferMemory(origData, origCap);
-            mmfx_delete_array(origData);
-        }
-
+    void ByteArray::CompressViaLzma()
+    {
+        ByteArrayCompressViaLzmaTask task(this);
+        task.exec();
     }
+
+
+    //
+    // executes the CompressViaZlibVariant logic within a safepoint
+    //
+    class ByteArrayCompressViaZlibVariantTask: public ByteArrayTask
+    {
+    public:
+        ByteArrayCompressViaZlibVariantTask(ByteArray* ba, ByteArray::CompressionAlgorithm algorithm)
+            : ByteArrayTask(ba)
+            , m_algorithm(algorithm)
+        {}
+
+        void run()
+        {
+            ByteArray::Buffer* buffer = m_byteArray->getUnderlyingBuffer();
+            // Snarf the data and give ourself some empty data
+            // (remember, existing data might be copy-on-write so don't dance on it)
+            uint8_t* origData                       = buffer->array;
+            uint32_t origLen                        = buffer->length;
+            uint32_t origCap                        = buffer->capacity;
+            MMgc::GCObject* origCopyOnWriteOwner    = m_byteArray->m_copyOnWriteOwner;
+            if (!origLen) // empty buffer should give empty result
+                return;
+
+            buffer->array             = NULL;
+            buffer->length            = 0;
+            buffer->capacity          = 0;
+            m_byteArray->SetPosition(0);
+            m_byteArray->m_copyOnWriteOwner  = NULL;
+
+            int error = Z_OK;
+            
+            // Use zlib to compress the data. This next block is essentially the
+            // implementation of the compress2() method, but modified to pass a
+            // negative window value (-15) to deflateInit2() for k_deflate mode
+            // in order to obtain deflate-only compression (no ZLib headers).
+
+            const int MAX_WINDOW_RAW_DEFLATE = -15;
+            const int DEFAULT_MEMORY_USE = 8;
+
+            z_stream stream;
+            VMPI_memset(&stream, 0, sizeof(stream));
+            error = deflateInit2(&stream,
+                                    Z_BEST_COMPRESSION,
+                                    Z_DEFLATED,
+                                    m_algorithm == ByteArray::k_zlib ? MAX_WBITS : MAX_WINDOW_RAW_DEFLATE,
+                                    DEFAULT_MEMORY_USE,
+                                    Z_DEFAULT_STRATEGY);
+            AvmAssert(error == Z_OK);
+
+            uint32_t newCap = deflateBound(&stream, origLen);
+
+            ByteArray::Grower grower(m_byteArray, newCap);
+            grower.EnsureWritableCapacity();
+
+            stream.next_in = origData;
+            stream.avail_in = origLen;
+            stream.next_out = buffer->array;
+            stream.avail_out = buffer->capacity;
+
+            error = deflate(&stream, Z_FINISH);
+            AvmAssert(error == Z_STREAM_END);
+
+            buffer->length = stream.total_out;
+            AvmAssert(buffer->length <= buffer->capacity);
+
+            // Note that Compress() has always ended with position == length,
+            // but Uncompress() has always ended with position == 0.
+            // Weird, but we must maintain it.
+            m_byteArray->SetPosition(buffer->length);
+
+            deflateEnd(&stream);
+
+            // Note: the Compress() method has never reported an error for corrupted data,
+            // so we won't start now. (Doing so would probably require a version check,
+            // to avoid breaking content that relies on misbehavior.)
+            if (origData && origData != buffer->array && origCopyOnWriteOwner == NULL)
+            {
+                // Note that TellGcXXX always expects capacity, not (logical) length.
+                m_byteArray->TellGcDeleteBufferMemory(origData, origCap);
+                mmfx_delete_array(origData);
+            }
+        }
+
+    private:
+        ByteArray::CompressionAlgorithm m_algorithm;
+    };
 
     void ByteArray::CompressViaZlibVariant(CompressionAlgorithm algorithm)
     {
-        // Snarf the data and give ourself some empty data
-        // (remember, existing data might be copy-on-write so don't dance on it)
-        uint8_t* origData                       = m_buffer->array;
-        uint32_t origLen                        = m_buffer->length;
-        uint32_t origCap                        = m_buffer->capacity;
-        MMgc::GCObject* origCopyOnWriteOwner    = m_copyOnWriteOwner;
-        if (!origLen) // empty buffer should give empty result
-            return;
-
-        m_buffer->array             = NULL;
-        m_buffer->length            = 0;
-        m_buffer->capacity          = 0;
-        m_position          = 0;
-        m_copyOnWriteOwner  = NULL;
-
-        int error = Z_OK;
-        
-        // Use zlib to compress the data. This next block is essentially the
-        // implementation of the compress2() method, but modified to pass a
-        // negative window value (-15) to deflateInit2() for k_deflate mode
-        // in order to obtain deflate-only compression (no ZLib headers).
-
-        const int MAX_WINDOW_RAW_DEFLATE = -15;
-        const int DEFAULT_MEMORY_USE = 8;
-
-        z_stream stream;
-        VMPI_memset(&stream, 0, sizeof(stream));
-        error = deflateInit2(&stream,
-                                Z_BEST_COMPRESSION,
-                                Z_DEFLATED,
-                                algorithm == k_zlib ? MAX_WBITS : MAX_WINDOW_RAW_DEFLATE,
-                                DEFAULT_MEMORY_USE,
-                                Z_DEFAULT_STRATEGY);
-        AvmAssert(error == Z_OK);
-
-        uint32_t newCap = deflateBound(&stream, origLen);
-        EnsureCapacity(newCap);
-
-        stream.next_in = origData;
-        stream.avail_in = origLen;
-        stream.next_out = m_buffer->array;
-        stream.avail_out = m_buffer->capacity;
-
-        error = deflate(&stream, Z_FINISH);
-        AvmAssert(error == Z_STREAM_END);
-
-        m_buffer->length = stream.total_out;
-        AvmAssert(m_buffer->length <= m_buffer->capacity);
-
-        // Note that Compress() has always ended with position == length,
-        // but Uncompress() has always ended with position == 0.
-        // Weird, but we must maintain it.
-        m_position = m_buffer->length;
-
-        deflateEnd(&stream);
-
-        // Note: the Compress() method has never reported an error for corrupted data,
-        // so we won't start now. (Doing so would probably require a version check,
-        // to avoid breaking content that relies on misbehavior.)
-        if (origData && origData != m_buffer->array && origCopyOnWriteOwner == NULL)
-        {
-            // Note that TellGcXXX always expects capacity, not (logical) length.
-            TellGcDeleteBufferMemory(origData, origCap);
-            mmfx_delete_array(origData);
-        }
+        ByteArrayCompressViaZlibVariantTask task(this, algorithm);
+        task.exec();
     }
 
     void ByteArray::Uncompress(CompressionAlgorithm algorithm)
@@ -1071,205 +1142,258 @@ namespace avmplus
         }
     }
 
+    //
+    // executes the UncompressViaLzma logic within a safepoint
+    //
+    class ByteArrayUncompressViaLzmaTask: public ByteArrayTask
+    {
+    public:
+        ByteArrayUncompressViaLzmaTask(ByteArray* ba)
+            : ByteArrayTask(ba)
+        {}
+
+        void run()
+        {
+            ByteArray::Buffer* buffer = m_byteArray->getUnderlyingBuffer();
+            // Snarf the data and give ourself some empty data
+            // (remember, existing data might be copy-on-write so don't dance on it)
+            uint8_t* origData                       = buffer->array;
+            uint32_t origCap                        = buffer->capacity;
+            uint32_t origLen                        = buffer->length;
+            uint32_t origPos                        = m_byteArray->GetPosition();
+            MMgc::GCObject* origCopyOnWriteOwner    = m_byteArray->m_copyOnWriteOwner;
+
+            if (!origLen) // empty buffer should give empty result
+                return;
+
+            if (!buffer->array || buffer->length < lzmaHeaderSize)
+                return;
+
+            struct lzma_compressed *srcOverlay;
+            srcOverlay = (struct lzma_compressed*)origData;
+
+            uint32_t unpackedLen;
+            unpackedLen  =  (uint32_t)srcOverlay->unpackedSize[0];
+            unpackedLen +=  (uint32_t)srcOverlay->unpackedSize[1] << 8;
+            unpackedLen +=  (uint32_t)srcOverlay->unpackedSize[2] << 16;
+            unpackedLen +=  (uint32_t)srcOverlay->unpackedSize[3] << 24;
+
+            // check that size is reasonable before modifying internal structure.
+            if (srcOverlay->unpackedSizeHighBits[0] != 0 ||
+                srcOverlay->unpackedSizeHighBits[1] != 0 ||
+                srcOverlay->unpackedSizeHighBits[2] != 0 ||
+                srcOverlay->unpackedSizeHighBits[3] != 0)
+            {
+                // We can't allocate a byte array of such large size.
+                m_byteArray->m_toplevel->throwMemoryError(kOutOfMemoryError);
+            }
+
+            size_t srcLen = (origLen - lzmaHeaderSize);
+
+            buffer->array             = NULL;
+            buffer->length            = 0;
+            buffer->capacity          = 0;
+            m_byteArray->SetPosition(0);
+            m_byteArray->m_copyOnWriteOwner  = NULL;
+
+            // Since we rely on unpackedLen being correct, we do not need
+            // to loop with different trial lengths; either it works on
+            // first try, or it will always fail.
+            TRY(m_byteArray->m_toplevel->core(), kCatchAction_Rethrow)
+            {
+                ByteArray::Grower grower(m_byteArray, unpackedLen);
+                grower.EnsureWritableCapacity();
+            }
+            CATCH(Exception *exn)
+            {
+                // clean up when the EnsureCapacity call fails.
+                // (keep in sync with state restoration in error_cases: labelled below)
+                buffer->array = origData;
+                buffer->length = origLen;
+                buffer->capacity = origCap;
+                m_byteArray->SetPosition(origPos);
+                m_byteArray->SetCopyOnWriteOwner(origCopyOnWriteOwner);
+                m_byteArray->m_toplevel->core()->throwException(exn);
+            }
+            END_CATCH
+            END_TRY
+
+            int retcode;
+            size_t destLen = unpackedLen;
+
+            retcode = LzmaUncompress(buffer->array, &destLen,
+                                     srcOverlay->compressedPayload, &srcLen,
+                                     srcOverlay->lzmaProps, LZMA_PROPS_SIZE);
+            switch (retcode) {
+            case SZ_OK:                // - OK
+                if (destLen != unpackedLen) {
+                    // Belt-and-suspenders: If control gets here,
+                    // something is terribly wrong, and either LZMA is
+                    // lying, or the lzma header in source byte array got
+                    // garbled.  Rather than risk establishing a bogus
+                    // structure, fail as if lzma returned an error code.
+                    goto error_cases;
+                }
+
+                buffer->length = uint32_t(destLen);
+
+                // Analogous to zlib, maintain policy that Uncompress() sets
+                // position == 0 (while Compress() sets position == length).
+                // (it was set above)
+
+
+                if (origData && origData != buffer->array && origCopyOnWriteOwner == NULL)
+                {
+                    // Note that TellGcXXX always expects capacity, not (logical) length.
+                    m_byteArray->TellGcDeleteBufferMemory(origData, origCap);
+                    mmfx_delete_array(origData);
+                }
+
+                break;
+
+            case SZ_ERROR_DATA:        // - Data error
+            case SZ_ERROR_MEM:         // - Memory allocation arror
+            case SZ_ERROR_UNSUPPORTED: // - Unsupported properties
+            case SZ_ERROR_INPUT_EOF:   // - it needs more bytes in input buffer (src)
+            default:
+            error_cases:
+                // In error cases:
+
+                // 1) free the new buffer
+                m_byteArray->TellGcDeleteBufferMemory(buffer->array, buffer->capacity);
+                mmfx_delete_array(buffer->array);
+
+                // 2) put the original data back.
+                // (keep in sync with state restoration above)
+                buffer->array = origData;
+                buffer->length = origLen;
+                buffer->capacity = origCap;
+                m_byteArray->SetPosition(origPos);
+                m_byteArray->SetCopyOnWriteOwner(origCopyOnWriteOwner);
+                m_byteArray->m_toplevel->throwIOError(kCompressedDataError);
+
+                break;
+            }
+
+        }
+    };
+
     void ByteArray::UncompressViaLzma()
     {
-        // Snarf the data and give ourself some empty data
-        // (remember, existing data might be copy-on-write so don't dance on it)
-        uint8_t* origData                       = m_buffer->array;
-        uint32_t origCap                        = m_buffer->capacity;
-        uint32_t origLen                        = m_buffer->length;
-        uint32_t origPos                        = m_position;
-        MMgc::GCObject* origCopyOnWriteOwner    = m_copyOnWriteOwner;
-
-        if (!origLen) // empty buffer should give empty result
-            return;
-
-        if (!m_buffer->array || m_buffer->length < lzmaHeaderSize)
-            return;
-
-        struct lzma_compressed *srcOverlay;
-        srcOverlay = (struct lzma_compressed*)origData;
-
-        uint32_t unpackedLen;
-        unpackedLen  =  (uint32_t)srcOverlay->unpackedSize[0];
-        unpackedLen +=  (uint32_t)srcOverlay->unpackedSize[1] << 8;
-        unpackedLen +=  (uint32_t)srcOverlay->unpackedSize[2] << 16;
-        unpackedLen +=  (uint32_t)srcOverlay->unpackedSize[3] << 24;
-
-        // check that size is reasonable before modifying internal structure.
-        if (srcOverlay->unpackedSizeHighBits[0] != 0 ||
-            srcOverlay->unpackedSizeHighBits[1] != 0 ||
-            srcOverlay->unpackedSizeHighBits[2] != 0 ||
-            srcOverlay->unpackedSizeHighBits[3] != 0)
-        {
-            // We can't allocate a byte array of such large size.
-            ThrowMemoryError();
-        }
-
-        size_t srcLen = (origLen - lzmaHeaderSize);
-
-        m_buffer->array             = NULL;
-        m_buffer->length            = 0;
-        m_buffer->capacity          = 0;
-        m_position          = 0;
-        m_copyOnWriteOwner  = NULL;
-
-        // Since we rely on unpackedLen being correct, we do not need
-        // to loop with different trial lengths; either it works on
-        // first try, or it will always fail.
-        Exception *exn;
-        bool ensured =
-            EnsureCapacityOrFail(unpackedLen, kCatchAction_Rethrow, &exn);
-        if (!ensured)
-        {
-            // clean up when the EnsureCapacity call fails.
-
-            // (keep in sync with state restoration in error_cases: labelled below)
-            m_buffer->array = origData;
-            m_buffer->length = origLen;
-            m_buffer->capacity = origCap;
-            m_position = origPos;
-            SetCopyOnWriteOwner(origCopyOnWriteOwner);
-
-            m_toplevel->core()->throwException(exn);
-        }
-
-        int retcode;
-        size_t destLen = unpackedLen;
-
-        retcode = LzmaUncompress(m_buffer->array, &destLen,
-                                 srcOverlay->compressedPayload, &srcLen,
-                                 srcOverlay->lzmaProps, LZMA_PROPS_SIZE);
-        switch (retcode) {
-        case SZ_OK:                // - OK
-            if (destLen != unpackedLen) {
-                // Belt-and-suspenders: If control gets here,
-                // something is terribly wrong, and either LZMA is
-                // lying, or the lzma header in source byte array got
-                // garbled.  Rather than risk establishing a bogus
-                // structure, fail as if lzma returned an error code.
-                goto error_cases;
-            }
-
-            m_buffer->length = uint32_t(destLen);
-
-            // Analogous to zlib, maintain policy that Uncompress() sets
-            // position == 0 (while Compress() sets position == length).
-            // (it was set above)
-
-
-            if (origData && origData != m_buffer->array && origCopyOnWriteOwner == NULL)
-            {
-                // Note that TellGcXXX always expects capacity, not (logical) length.
-                TellGcDeleteBufferMemory(origData, origCap);
-                mmfx_delete_array(origData);
-            }
-
-            break;
-
-        case SZ_ERROR_DATA:        // - Data error
-        case SZ_ERROR_MEM:         // - Memory allocation arror
-        case SZ_ERROR_UNSUPPORTED: // - Unsupported properties
-        case SZ_ERROR_INPUT_EOF:   // - it needs more bytes in input buffer (src)
-        default:
-        error_cases:
-            // In error cases:
-
-            // 1) free the new buffer
-            TellGcDeleteBufferMemory(m_buffer->array, m_buffer->capacity);
-            mmfx_delete_array(m_buffer->array);
-
-            // 2) put the original data back.
-            // (keep in sync with state restoration above)
-            m_buffer->array = origData;
-            m_buffer->length = origLen;
-            m_buffer->capacity = origCap;
-            m_position = origPos;
-            SetCopyOnWriteOwner(origCopyOnWriteOwner);
-            toplevel()->throwIOError(kCompressedDataError);
-
-            break;
-        }
-
+        ByteArrayUncompressViaLzmaTask task(this);
+        task.exec();
     }
+
+    class ByteArrayUncompressViaZlibVariantTask: public  ByteArrayTask
+    {
+    public:
+        ByteArrayUncompressViaZlibVariantTask(ByteArray* ba, ByteArray::CompressionAlgorithm algorithm)
+            : ByteArrayTask(ba)
+            , m_algorithm(algorithm)
+        {}
+
+        void run()
+        {
+            ByteArray::Buffer* buffer = m_byteArray->getUnderlyingBuffer();
+            // Snarf the data and give ourself some empty data
+            // (remember, existing data might be copy-on-write so don't dance on it)
+            uint8_t* origData                       = buffer->array;
+            uint32_t origCap                        = buffer->capacity;
+            uint32_t origLen                        = buffer->length;
+            uint32_t origPos                        = m_byteArray->GetPosition();
+            MMgc::GCObject* origCopyOnWriteOwner    = m_byteArray->m_copyOnWriteOwner;
+            if (!origLen) // empty buffer should give empty result
+                return;
+
+            buffer->array             = NULL;
+            buffer->length            = 0;
+            buffer->capacity          = 0;
+            m_byteArray->SetPosition(0);
+            m_byteArray->m_copyOnWriteOwner  = NULL;
+            // we know that the uncompressed data will be at least as
+            // large as the compressed data, so let's start there,
+            // rather than at zero.
+            {
+                ByteArray::Grower grower(m_byteArray, origCap);
+                grower.EnsureWritableCapacity();
+                // be sure the grower's dtor is called before moving on...
+            }
+            const uint32_t kScratchSize = 8192;
+            uint8_t* scratch = mmfx_new_array(uint8_t, kScratchSize);
+
+            int error = Z_OK;
+            
+            z_stream stream;
+            VMPI_memset(&stream, 0, sizeof(stream));
+            error = inflateInit2(&stream, m_algorithm == ByteArray::k_zlib ? 15 : -15);
+            AvmAssert(error == Z_OK);
+
+            stream.next_in = origData;
+            stream.avail_in = origLen;
+            while (error == Z_OK)
+            {
+                stream.next_out = scratch;
+                stream.avail_out = kScratchSize;
+                error = inflate(&stream, Z_NO_FLUSH);
+                uint32_t count = kScratchSize - stream.avail_out;
+                uint32_t pos = m_byteArray->GetPosition();
+                ByteArray::Grower grower(m_byteArray, count+pos);
+                grower.EnsureWritableCapacity();
+                uint8_t* dest = buffer->array + pos;
+                if (dest) {
+                    move_or_copy(dest, scratch, count);
+                    m_byteArray->SetPosition(pos + count);
+                    if (buffer->length < m_byteArray->GetPosition()) {
+                        buffer->length = m_byteArray->GetPosition();
+                    }
+                }
+            }
+
+            inflateEnd(&stream);
+
+            mmfx_delete_array(scratch);
+
+            if (error == Z_STREAM_END)
+            {
+                // everything is cool
+                if (origData && origData != buffer->array && origCopyOnWriteOwner == NULL)
+                {
+                    // Note that TellGcXXX always expects capacity, not (logical) length.
+                    m_byteArray->TellGcDeleteBufferMemory(origData, origCap);
+                    mmfx_delete_array(origData);
+                }
+
+                // Note that Compress() has always ended with position == length,
+                // but Uncompress() has always ended with position == 0.
+                // Weird, but we must maintain it.
+                m_byteArray->SetPosition(0);
+            }
+            else
+            {
+                // When we error:
+
+                // 1) free the new buffer
+                m_byteArray->TellGcDeleteBufferMemory(buffer->array, buffer->capacity);
+                mmfx_delete_array(buffer->array);
+
+                // 2) put the original data back.
+                buffer->array = origData;
+                buffer->length = origLen;
+                buffer->capacity = origCap;
+                m_byteArray->SetPosition(origPos);
+                m_byteArray->SetCopyOnWriteOwner(origCopyOnWriteOwner);
+                m_byteArray->m_toplevel->throwIOError(kCompressedDataError);
+            }
+        }
+
+    private:
+        ByteArray::CompressionAlgorithm m_algorithm;
+    };
 
     void ByteArray::UncompressViaZlibVariant(CompressionAlgorithm algorithm)
     {
-        // Snarf the data and give ourself some empty data
-        // (remember, existing data might be copy-on-write so don't dance on it)
-        uint8_t* origData                       = m_buffer->array;
-        uint32_t origCap                        = m_buffer->capacity;
-        uint32_t origLen                        = m_buffer->length;
-        uint32_t origPos                        = m_position;
-        MMgc::GCObject* origCopyOnWriteOwner    = m_copyOnWriteOwner;
-        if (!origLen) // empty buffer should give empty result
-            return;
-
-        m_buffer->array             = NULL;
-        m_buffer->length            = 0;
-        m_buffer->capacity          = 0;
-        m_position          = 0;
-        m_copyOnWriteOwner  = NULL;
-        // we know that the uncompressed data will be at least as
-        // large as the compressed data, so let's start there,
-        // rather than at zero.
-        EnsureCapacity(origCap);
-
-        const uint32_t kScratchSize = 8192;
-        uint8_t* scratch = mmfx_new_array(uint8_t, kScratchSize);
-
-        int error = Z_OK;
-        
-        z_stream stream;
-        VMPI_memset(&stream, 0, sizeof(stream));
-        error = inflateInit2(&stream, algorithm == k_zlib ? 15 : -15);
-        AvmAssert(error == Z_OK);
-
-        stream.next_in = origData;
-        stream.avail_in = origLen;
-        while (error == Z_OK)
-        {
-            stream.next_out = scratch;
-            stream.avail_out = kScratchSize;
-            error = inflate(&stream, Z_NO_FLUSH);
-            Write(scratch, kScratchSize - stream.avail_out);
-        }
-
-        inflateEnd(&stream);
-
-        mmfx_delete_array(scratch);
-
-        if (error == Z_STREAM_END)
-        {
-            // everything is cool
-            if (origData && origData != m_buffer->array && origCopyOnWriteOwner == NULL)
-            {
-                // Note that TellGcXXX always expects capacity, not (logical) length.
-                TellGcDeleteBufferMemory(origData, origCap);
-                mmfx_delete_array(origData);
-            }
-
-            // Note that Compress() has always ended with position == length,
-            // but Uncompress() has always ended with position == 0.
-            // Weird, but we must maintain it.
-            m_position = 0;
-        }
-        else
-        {
-            // When we error:
-
-            // 1) free the new buffer
-            TellGcDeleteBufferMemory(m_buffer->array, m_buffer->capacity);
-            mmfx_delete_array(m_buffer->array);
-
-            // 2) put the original data back.
-            m_buffer->array = origData;
-            m_buffer->length = origLen;
-            m_buffer->capacity = origCap;
-            m_position = origPos;
-            SetCopyOnWriteOwner(origCopyOnWriteOwner);
-            toplevel()->throwIOError(kCompressedDataError);
-        }
+        ByteArrayUncompressViaZlibVariantTask task(this, algorithm);
+        task.exec();
     }
 
     // For requestBytesForShortRead() there is no limit on m_position, but m_length 
@@ -2028,9 +2152,11 @@ namespace avmplus
             length = bytes->get_length() - offset;
         }
 
-        m_byteArray.WriteByteArray(bytes->GetByteArray(),
-                                   offset,
-                                   length);
+        ByteArrayWriteBytesTask task(&m_byteArray, &bytes->GetByteArray(), offset, length);
+        task.exec();
+        if (task.rangeError) {
+            toplevel()->throwRangeError(kParamRangeError);
+        }
     }
 
     void ByteArrayObject::readBytes(ByteArrayObject *bytes,

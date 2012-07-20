@@ -69,27 +69,10 @@ namespace avmshell {
         return this->giid;
     }
     
-    avmplus::PromiseChannelObject* ShellWorkerObject::newEventChannel()
-    {
-        return avmplus::WorkerObjectBase<ShellWorkerObject>::newEventChannel();
-    }
-
     bool ShellWorkerObject::startInternal()
     {
-
         using namespace avmplus;
-        Aggregate* aggregate = m_isolate->getAggregate();
-        int32_t desc = m_isolate->desc;
-        int32_t parentDesc = m_isolate->parentDesc;
         
-        FixedHeapArray<FixedHeapRef<PromiseChannel> >&  channels = m_isolate->m_initialChannels;
-        channels.allocate(2);
-        FixedHeapRef<PromiseChannel> outChannel(aggregate->allocatePromiseChannel(parentDesc, desc));
-        FixedHeapRef<PromiseChannel> incChannel(aggregate->allocatePromiseChannel(desc, parentDesc));
-        AvmAssert(outChannel->gc() != NULL);
-        AvmAssert(incChannel->gc() == NULL);
-        channels.values[0] = outChannel;
-        channels.values[1] = incChannel;
         return startVeryInternal();
     }
 
