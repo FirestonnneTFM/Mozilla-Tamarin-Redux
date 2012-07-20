@@ -148,6 +148,7 @@ regress/bug_515935 , arm-android.*,, skip, https://bugzilla.mozilla.org/show_bug
 regress/security/bug567284 , (mips-lnx.*|sh4-lnx.*|arm-android.*),, skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=631347
 regress/bug_515935 , (arm|mips|sh4)-lnx.* ,, skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=547282
 spidermonkey/js1_5/Array/regress-157652, arm-lnx.*deep,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=586397
+as3/ByteArray/ByteArray_bug763519, arm-win.* ,, expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=763519
 
 ####################
 # Windows Mobile Emulator
