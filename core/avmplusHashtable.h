@@ -259,7 +259,7 @@ namespace avmplus
     
         bool hasDeletedItems() const;
         void setCapacity(uint32_t cap);
-        void put(Atom name, Atom value, Toplevel* toplevel);
+        bool put(Atom name, Atom value);
         int rehash(const Atom *oldAtoms, int oldlen, Atom *newAtoms, int newlen) const;
         void throwFailureToGrow(AvmCore* core);
         void setAtoms(AtomContainer* atoms);

@@ -89,7 +89,12 @@ namespace avmplus
         WB(gc, gc->FindBeginningFast(this), &m_atomsAndFlags, (void*)newVal);
     }
 
-    void InlineHashtable::put(Atom name, Atom value, Toplevel* toplevel)
+    // Return true if the table slot was previously empty, i.e., we have added a
+    // new entry.  Return false if we've simply updated the value of an existing entry.
+    // If a new entry is added, the caller is responsible expanding the table to
+    // maintain at least one free slot, and to prune any weak entries that are dead.
+
+    bool InlineHashtable::put(Atom name, Atom value)
     {
         AvmAssert(name != EMPTY && value != EMPTY);
         AtomContainer* atomContainer = getAtomContainer();
@@ -104,11 +109,12 @@ namespace avmplus
             m_size++;
             //atoms[i+1] = value;
             WBATOM(gc, atomContainer, &atoms[i+1], value);
-            if (isFull()) grow(toplevel);
+            return true;
         } else {
             // Update existing entry.
             //atoms[i+1] = value;
             WBATOM(gc, atomContainer, &atoms[i+1], value);
+            return false;
         }
     }
 
@@ -243,7 +249,11 @@ namespace avmplus
 
     void InlineHashtable::add(Atom name, Atom value, Toplevel* toplevel)
     {
-        put(name, value, toplevel);
+        if (put(name, value)) {
+            if (isFull()) {
+                grow(toplevel);
+            }
+        }
     }
 
     void InlineHashtable::grow(Toplevel* toplevel)
@@ -656,12 +666,12 @@ namespace avmplus
 
     /*virtual*/ void WeakKeyHashtable::add(Atom key, Atom value, Toplevel* toplevel)
     {
-        if (ht.isFull()) {
-            // Prune dead weak entries, but don't grow yet.
-            // If we're actually adding a new entry, put() will take care of that.
-            prune();
+        if (ht.put(getKey(key), value)) {
+            if (ht.isFull()) {
+                prune();
+                ht.grow(toplevel);
+            }
         }
-        ht.put(getKey(key), value, toplevel);
     }
 
     void WeakKeyHashtable::prune()
@@ -728,18 +738,18 @@ namespace avmplus
 
     /*virtual*/ void WeakValueHashtable::add(Atom key, Atom value, Toplevel* toplevel)
     {
-        if (ht.isFull()) {
-            // Prune dead weak entries, but don't grow yet.
-            // If we're actually adding a new entry, put() will take care of that.
-            prune();
-        }
         if(AvmCore::isPointer(value)) {
             // Don't know if value is GCObject or GCFinalizedObject so can't go via the
             // GetWeakRef methods on those classes; go directly to GC
             GCWeakRef *wf = GC::GetWeakRef(atomPtr(value));
             value = AvmCore::genericObjectToAtom(wf);
         }
-        ht.put(key, value, toplevel);
+        if (ht.put(key, value)) {
+            if (ht.isFull()) {
+                prune();
+                ht.grow(toplevel);
+            }
+        }
     }
 
     /*virtual*/ Atom WeakValueHashtable::get(Atom key)
