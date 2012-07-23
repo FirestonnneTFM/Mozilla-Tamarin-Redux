@@ -46,6 +46,15 @@ AddTestCase ("myRest( ... rest) called with one Arg", 1, myRest(1) );
 AddTestCase ("myRest( ... rest) called with multiple Args", 4, myRest(1,2,3,4) );
 AddTestCase ("myRest( ... rest) called with multiple different Args", 4, myRest(1,"2",false,Number.NaN) );
 
+anon_myRest = function ( ... rest):int {
+    return rest.length;
+}
+
+AddTestCase ("anon_myRest( ... rest) called with zero Args", 0, anon_myRest() );
+AddTestCase ("anon_myRest( ... rest) called with one Arg", 1, anon_myRest(1) );
+AddTestCase ("anon_myRest( ... rest) called with multiple Args", 4, anon_myRest(1,2,3,4) );
+AddTestCase ("anon_myRest( ... rest) called with multiple different Args", 4, anon_myRest(1,"2",false,Number.NaN) );
+
 function foo(){}
 var resArray:Array = [foo, new Array().toString(),-1,2,"3",true,undefined,null,Number.NaN];
 function myRest2( a:Array, ... cust):Boolean {
@@ -65,6 +74,3 @@ if( !myRest2( new Array(),foo, new Array().toString(),-1,2,"3",true,undefined,nu
 
 
 test();
-
-
-

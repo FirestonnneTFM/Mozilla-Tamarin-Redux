@@ -124,7 +124,7 @@ function getTestCases() {
     array[item++] = new TestCase(    "SECTION",
                                     "variable assigned with value when the variable statement is executed",23,v);
 
-    var d:Number=100,b:Array=new Array(1,2,3),k:Boolean=true,g:String="string";
+    var d:Number=100,b:Array=new Array(1,2,3),k:Boolean=true,gg:String="string";
 
     array[item++] = new TestCase(    "SECTION",
                                     "variable assigned with value when the variable statement is executed",100,d);
@@ -136,6 +136,6 @@ function getTestCases() {
                                     "variable assigned with value when the variable statement is executed",true,k);
    
     array[item++] = new TestCase(    "SECTION",
-                                    "variable assigned with value when the variable statement is executed","string",g);
+                                    "variable assigned with value when the variable statement is executed","string",gg);
     return array;
 }

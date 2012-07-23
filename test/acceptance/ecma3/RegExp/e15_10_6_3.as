@@ -49,7 +49,7 @@ function getTestCases() {
     var string = "mystring"
 
     array[item++] = new TestCase( SECTION,
-                                "( RegExp.prototype.test(string) )",
+                                "01 ( RegExp.prototype.test(" + string + "))",
                                 true ,
                                 RegExp.prototype.test(string) );
 
@@ -57,7 +57,7 @@ function getTestCases() {
     var string = 'abc'
 
     array[item++] = new TestCase( SECTION,
-                                "( RegExp.prototype.test(string) )",
+                                "02 ( RegExp.prototype.test(" + string + "))",
                                 true ,
                                 (regexp.test(string)) );
 
@@ -65,7 +65,7 @@ function getTestCases() {
     var string = 'abc'
 
     array[item++] = new TestCase( SECTION,
-                                "( RegExp.prototype.test(string) )",
+                                "03 ( RegExp.prototype.test(" + string + "))",
                                 false ,
                                 (regexp.test(string)) );
 
@@ -74,7 +74,7 @@ function getTestCases() {
     var string = 'abc';
 
     array[item++] = new TestCase( SECTION,
-                                "( RegExp.prototype.test(string) )",
+                                "04 ( RegExp.prototype.test(" + string + "))",
                                 true ,
                                 (pattern.test(string)) );
 
@@ -82,7 +82,7 @@ function getTestCases() {
     var string = 'abcdefghi';
 
     array[item++] = new TestCase( SECTION,
-                                "( RegExp.prototype.test(string) )",
+                                "05 ( RegExp.prototype.test(" + string + "))",
                                 true ,
                                 (pattern.test(string)) );
 
@@ -90,7 +90,7 @@ function getTestCases() {
     var string = 'abcdefghi';
 
     array[item++] = new TestCase( SECTION,
-                                "( RegExp.prototype.test(string) )",
+                                "06 ( RegExp.prototype.test(" + string + "))",
                                 true ,
                                 (pattern.test(string)) );
 
@@ -98,7 +98,7 @@ function getTestCases() {
     var string = 'aabaac';
 
     array[item++] = new TestCase( SECTION,
-                                "( RegExp.prototype.test(string) )",
+                                "07 ( RegExp.prototype.test(" + string + "))",
                                 true ,
                                 (pattern.test(string)) );
 
@@ -106,7 +106,7 @@ function getTestCases() {
     var string = 'aaaaaaaaaa,aaaaaaaaaaaaaaa';
 
     array[item++] = new TestCase( SECTION,
-                                "( RegExp.prototype.test(string) )",
+                                "08 ( RegExp.prototype.test(" + string + "))",
                                 true ,
                                 (pattern.test(string)) );
 
@@ -114,7 +114,7 @@ function getTestCases() {
     var string = 'zaacbbbcac';
 
     array[item++] = new TestCase( SECTION,
-                                "( RegExp.prototype.test(string) )",
+                                "09 ( RegExp.prototype.test(" + string + "))",
                                 true ,
                                 (pattern.test(string)) );
 
@@ -122,7 +122,7 @@ function getTestCases() {
     var string = 'b';
 
     array[item++] = new TestCase( SECTION,
-                                "( RegExp.prototype.test(string) )",
+                                "10 ( RegExp.prototype.test(" + string + "))",
                                 true ,
                                 (pattern.test(string)) );
 
@@ -130,7 +130,7 @@ function getTestCases() {
     var string = 'baaaac';
 
     array[item++] = new TestCase( SECTION,
-                                "( RegExp.prototype.test(string) )",
+                                "11 ( RegExp.prototype.test(" + string + "))",
                                 true ,
                                 (pattern.test(string)) );
 
@@ -138,7 +138,7 @@ function getTestCases() {
     var string = 'baaabac';
 
     array[item++] = new TestCase( SECTION,
-                                "( RegExp.prototype.test(string) )",
+                                "12 ( RegExp.prototype.test(" + string + "))",
                                 true ,
                                 (pattern.test(string)) );
 
@@ -146,7 +146,7 @@ function getTestCases() {
     var string = 'baaabac';
 
     array[item++] = new TestCase( SECTION,
-                                "( RegExp.prototype.test(string) )",
+                                "13 ( RegExp.prototype.test(" + string + "))",
                                 true ,
                                 (pattern.test(string)) );
 
@@ -158,7 +158,7 @@ function getTestCases() {
     var string = 'baaabac';
 
     array[item++] = new TestCase( SECTION,
-                                "( RegExp.prototype.test(string) )",
+                                "14 ( RegExp.prototype.test(" + string + "))",
                                 true ,
                                 (pattern.test(string)) );
 

@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is [Open Source Virtual Machine].
+ * The Original Code is [Open Source Virtual Machine.].
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
@@ -19,6 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *   Adobe AS3 Team
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -32,28 +33,44 @@
  * the provisions above, a recipient may use your version of this file under
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
- * ***** END LICENSE BLOCK *****
-*
-*
-* See http://bugzilla.mozilla.org/show_bug.cgi?id=555544
-*
-*/
-//-----------------------------------------------------------------------------
+ * ***** END LICENSE BLOCK ***** */
 
-class A {};
+import flash.utils.Dictionary;
 
-startTest();
-err = "no error";
-// looking for ReferenceError: Error #1056: Cannot create property 10 on bug_555544.as$1.A.
-try {
-    var a = new A();
-    a[10] = 0;
+var SECTION = "Expressions";       // provide a document reference (ie, Actionscript section)
+var VERSION = "AS3";        // Version of ECMAScript or ActionScript
+var TITLE   = "Logical Assignment";       // Provide ECMA section title or a description
 
-} catch (e) {
-    err = grabError(e, e.toString());
-} finally {
-    AddTestCase("bug555544", "Error #1056", err );
+
+startTest();                // leave this alone
+
+
+
+var counter : uint = 0;
+dynamic class C extends Dictionary
+{
+    function C(p : uint)
+    {
+        counter += p;
+    }
 }
 
+// This tests that the constructor for C(1) is called twice, as it's
+// a shortcut for (new C(1))[0] = (new C(1))[0] || new C(3);
+var v0:C = (new C(1))[0] ||= new C(3);
+AddTestCase('(new C(1))[0] ||= new C(3)', 5, counter);
 
-test();
+// This tests that the constructor for C(1) is called twice, as it's
+// a shortcut for (new C(1))[0] = (new C(1))[0] && new C(3);
+var v1:C = (new C(1))[0] &&= new C(3);
+AddTestCase('(new C(1))[0] &&= new C(3)', 7, counter);
+
+var v:C;
+(v ||= new C(1))[0] ||= new C(3);
+AddTestCase('v ||= new C(1))[0] ||= new C(3)', 11, counter);
+
+(v &&= new C(1))[0] &&= new C(3);
+AddTestCase('v &&= new C(1))[0] &&= new C(3)', 13, counter);
+
+test();       // leave this alone.  this executes the test cases and
+              // displays results.

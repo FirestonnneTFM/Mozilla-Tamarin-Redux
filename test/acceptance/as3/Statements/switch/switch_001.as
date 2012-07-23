@@ -11,14 +11,15 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is [Open Source Virtual Machine].
+ * The Original Code is [Open Source Virtual Machine.].
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2010
+ * Portions created by the Initial Developer are Copyright (C) 2005-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *   Adobe AS3 Team
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -32,28 +33,50 @@
  * the provisions above, a recipient may use your version of this file under
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
- * ***** END LICENSE BLOCK *****
-*
-*
-* See http://bugzilla.mozilla.org/show_bug.cgi?id=555544
-*
-*/
-//-----------------------------------------------------------------------------
+ * ***** END LICENSE BLOCK ***** */
+    var SECTION = "switch";
+    var VERSION = "ECMA_2";
+    var TITLE   = "The switch statement";
 
-class A {};
+    startTest();
+    writeHeaderToLog( SECTION + " "+ TITLE);
 
-startTest();
-err = "no error";
-// looking for ReferenceError: Error #1056: Cannot create property 10 on bug_555544.as$1.A.
-try {
-    var a = new A();
-    a[10] = 0;
+    var testcases = getTestCases();
+    
+    test();
+    
+function getTestCases() {
+    var array = new Array();
+    var item = 0;
 
-} catch (e) {
-    err = grabError(e, e.toString());
-} finally {
-    AddTestCase("bug555544", "Error #1056", err );
+    SwitchTest( -2, 4 );
+    SwitchTest( -1, 4 );
+    SwitchTest( 0, 4 );
+    SwitchTest( 1, 2 );
+    SwitchTest( 2, 4 );
+    SwitchTest( 4294967295, 4)
+
+    function SwitchTest( input:uint, expect:uint ) {
+        var result = 0;
+
+        switch ( input ) {
+            case -1:
+                // not possible to reach this block with a uint
+                result += 1;
+                break;
+            case 1:
+                result += 2;
+                break;
+            default:
+                result += 4;
+                break;
+        }
+
+        array[item++] = new TestCase(
+            SECTION,
+            "switch with negative value cases: input is " + input,
+            expect,
+            result );
+    }
+    return array;
 }
-
-
-test();

@@ -34,31 +34,67 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package SuperImplicitlyCalledPackage {
-    public class SuperImplicitlyCalled {
-        private static var x : Number = 0
-        function SuperImplicitlyCalled() {
-            x = x + 1
-        }
-        public static function howManyObjects() : Number {
-            return x
-        }
+
+var SECTION = "Definitions\const";                  // provide a document reference (ie, ECMA section)
+var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
+var TITLE   = "Initialize a local const in function which contains an activation";       // Provide ECMA section title or a description
+var BUGNUMBER = "";
+
+startTest();
+
+function constTypedFormal(arg0 : uint) : uint
+{
+    const c0 : uint = g(arg0);
+
+    function g(x:uint) : uint
+    {
+        return x;
     }
-    public class SuperImplicitlyCalled1 extends SuperImplicitlyCalled {
-        function SuperImplicitlyCalled1() {
-            var x : Number = 0
-            // this also tests that super() can occur after other code
-            x = 42
-            super() // explicit call
-        }
-    }
-    public class SuperImplicitlyCalled2 extends SuperImplicitlyCalled {
-        function SuperImplicitlyCalled2() {
-            // implicit call
-        }
-    }
-    
-    public class SuperImplicitlyCalled3 extends SuperImplicitlyCalled {
-        // super is still implicitly called even if there is no constructor defined
-    }
+
+    return c0;
 }
+
+function constUnTypedFormal(arg0)
+{
+    const c0 = g(arg0);
+
+    function g(x)
+    {
+        return x;
+    }
+
+    return c0;
+}
+
+function constTypedConst()
+{
+    const c0 : uint = 13;
+
+    // keep this function here so an activation is generated
+    function g(x:uint) : uint
+    {
+        return x;
+    }
+
+    return c0;
+}
+
+function constUnTypedConst()
+{
+    const c0 = 14;
+
+    // keep this function here so an activation is generated
+    function g(x)
+    {
+        return x;
+    }
+
+    return c0;
+}
+
+AddTestCase("Initialize global typed function local const with formal", 11, constTypedFormal(11));
+AddTestCase("Initialize global untyped function local const with formal", 12, constUnTypedFormal(12));
+AddTestCase("Initialize global typed function local const with a const", 13, constTypedConst());
+AddTestCase("Initialize global untyped function local const with a const", 14, constUnTypedConst());
+
+test();

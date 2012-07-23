@@ -34,9 +34,11 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-
-import avmplus.* ;      // System class in the avmshell
-import flash.system.* ; // System class in the flash player
+try {
+    import avmplus.* ;      // System class in the avmshell
+} catch (e) {
+    import flash.system.* ; // System class in the flash player
+}
 
 var SECTION = "System::pauseForGCIfCollectionImminent";
 var VERSION = "";
