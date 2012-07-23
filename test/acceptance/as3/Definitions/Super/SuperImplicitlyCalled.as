@@ -56,6 +56,9 @@ AddTestCase( "explicit counter", 1, SuperImplicitlyCalled.howManyObjects() );
 var implicitCase = new SuperImplicitlyCalled2();
 AddTestCase( "implicit counter", 2, SuperImplicitlyCalled.howManyObjects() );
 
+var implicitCase = new SuperImplicitlyCalled2();
+AddTestCase( "implicit counter with no constructor defined", 3, SuperImplicitlyCalled.howManyObjects() );
+
 //
 ////////////////////////////////////////////////////////////////
 

@@ -1,3 +1,4 @@
+/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -11,11 +12,12 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is [Open Source Virtual Machine].
+ * The Original Code is Mozilla Communicator client code, released
+ * March 31, 1998.
  *
  * The Initial Developer of the Original Code is
- * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2010
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -32,28 +34,43 @@
  * the provisions above, a recipient may use your version of this file under
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
- * ***** END LICENSE BLOCK *****
-*
-*
-* See http://bugzilla.mozilla.org/show_bug.cgi?id=555544
-*
-*/
-//-----------------------------------------------------------------------------
+ * ***** END LICENSE BLOCK ***** */
 
-class A {};
+package
+{
+    public class Test
+    {
+        public static const vSelfConst:Vector.<Test> = new Vector.<Test>();
+        public static var vSelfVar:Vector.<Test> = new Vector.<Test>();
+        public static var vSelfLiteral:Vector.<Test> = new Vector.<Test>([undefined]);
+        public static var vInitStatic:Vector.<Test>;
 
-startTest();
-err = "no error";
-// looking for ReferenceError: Error #1056: Cannot create property 10 on bug_555544.as$1.A.
-try {
-    var a = new A();
-    a[10] = 0;
+        {
+            vInitStatic = new Vector.<Test>();
+        }
 
-} catch (e) {
-    err = grabError(e, e.toString());
-} finally {
-    AddTestCase("bug555544", "Error #1056", err );
+        public function Test()
+        {
+            vSelfConst.push(this);
+            vSelfVar.push(this);
+            vInitStatic.push(this);
+            vSelfLiteral[0] = this;
+        }
+    }
 }
 
+var SECTION = "";
+var VERSION = "ECMA_1";
+startTest();
+var TITLE   = "staticInitializer";
+
+writeHeaderToLog( SECTION + " "+ TITLE);
+
+var t:Test = new Test();
+
+AddTestCase("const vSelfConst:Vector.<Test>", "[object Test]", Test.vSelfConst[0].toString() );
+AddTestCase("var vSelfVar:Vector.<Test>", "[object Test]", Test.vSelfVar[0].toString() );
+AddTestCase("var vSelfLiteral:Vector.<Test>", "[object Test]", Test.vSelfLiteral[0].toString() );
+AddTestCase("var vInitStatic:Vector.<Test>", "[object Test]", Test.vInitStatic[0].toString() );
 
 test();
