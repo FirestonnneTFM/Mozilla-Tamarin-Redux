@@ -3739,6 +3739,7 @@ return the result of the comparison ToPrimitive(x) == y.
                 {
                     rehashFlag = true;
                     namespaces[i] = NULL;
+                    nsCount--;
                 }
             }
 
