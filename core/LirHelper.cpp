@@ -62,7 +62,7 @@ bool neverReturns(const CallInfo* call)
 CodeMgr* initCodeMgr(PoolObject *pool)
 {
     if (!pool->codeMgr) {
-        CodeMgr *mgr = mmfx_new( CodeMgr() );
+        CodeMgr *mgr = mmfx_new( CodeMgr(&(pool->core->config.njconfig)) );
         pool->codeMgr = mgr;
 #ifdef NJ_VERBOSE
         mgr->log.core = pool->core;
@@ -536,7 +536,7 @@ namespace nanojit
             NanoAssert(b);
 #elif defined(__MACH30__) && !defined(VMCFG_SHARK)
             /* mach / osx */
-            vm_address_t vmaddr = (vm_address_t)addr;
+            vm_address_t vmaddr = (vm_address_t)n;
             vm_size_t vmsize = psize;
             vm_region_basic_info_data_64_t inf;
             mach_msg_type_number_t infoCnt = sizeof(vm_region_basic_info_data_64_t);

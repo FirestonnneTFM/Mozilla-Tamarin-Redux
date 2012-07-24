@@ -8359,7 +8359,7 @@ FLOAT_ONLY(           !(v.sst_mask == (1 << SST_float)  && v.traits == FLOAT_TYP
         }
     }
 
-    CodeMgr::CodeMgr() : codeAlloc(), bindingCaches(NULL), jit_mgr(NULL)
+    CodeMgr::CodeMgr(nanojit::Config* config) : codeAlloc(config), bindingCaches(NULL), jit_mgr(NULL)
     {
         verbose_only( log.lcbits = 0; )
     }

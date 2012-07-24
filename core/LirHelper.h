@@ -93,7 +93,7 @@ namespace avmplus
         Allocator   allocator;  // data with same lifetime of this CodeMgr
         BindingCache* bindingCaches;    // head of linked list of all BindingCaches allocated by this codeMgr
                                         // (only for flushing... lifetime is still managed by codeAlloc)
-        CodeMgr();
+        CodeMgr(nanojit::Config* conf);
         void flushBindingCaches();      // invalidate all binding caches for this codemgr... needed when AbcEnv is unloaded
 
         // DEOPT & PROFILER todo: provide some way to free code memory
