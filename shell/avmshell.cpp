@@ -942,6 +942,9 @@ namespace avmshell
                     else if (!VMPI_strcmp(arg+2, "nocse")) {
                         settings.njconfig.cseopt = false;
                     }
+                    else if (!VMPI_strcmp(arg+2, "checkjitpageflags")) {
+                        settings.njconfig.check_page_flags = true;
+                    }
                     else if (!VMPI_strcmp(arg+2, "noinline")) {
                         settings.jitconfig.opt_inline = false;
                     }
@@ -1314,6 +1317,7 @@ namespace avmshell
 #ifdef VMCFG_NANOJIT
         avmplus::AvmLog("          [-Dinterp]    do not generate machine code, interpret instead\n");
         avmplus::AvmLog("          [-Ojit]       use jit always, never interp (except when the jit fails)\n");
+        avmplus::AvmLog("          [-Dcheckjitpageflags] check page protection flags on JIT memory allocation (sometimes expensive)\n");
 #ifdef VMCFG_HALFMOON
         avmplus::AvmLog("          [-Dhalfmoon   use experimental 'halfmoon' jit (development only)\n");
 #endif
