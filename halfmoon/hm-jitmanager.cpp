@@ -54,6 +54,7 @@ JitManager::JitManager(Allocator& mgr_alloc, PoolObject* pool)
   , mgr_alloc0_(mgr_alloc)
   , lattice_(pool->core, mgr_alloc)
   , infos_(mgr_alloc)
+  , meta_alloc_(&(pool->core->config.njconfig))
   , method_count_(pool->methodCount())
   , methods_(new (mgr_alloc0_) MethodData*[pool->methodCount()])
   , profile_mgr_(new (mgr_alloc) MethodProfileMgr(mgr_alloc)) {
