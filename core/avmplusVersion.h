@@ -43,13 +43,7 @@
 
 // The visible build code: d(evelopment) or r(elease candidate), followed by an identifying string.
 //
-// This string is used by QE, the build system replaces the string in this header file
-// with the correct value before compilation.  Do not change this.
-#ifdef HGVERSION
-#define AVMPLUS_BUILD_CODE          avmplus_stringify(HGVERSION)
-#else
 #define AVMPLUS_BUILD_CODE          "cyclone"
-#endif
 
 #ifdef AVMPLUS_DESC
 #define AVMPLUS_DESC_STRING         avmplus_stringify(AVMPLUS_DESC)
