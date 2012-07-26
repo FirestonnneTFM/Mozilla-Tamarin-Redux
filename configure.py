@@ -232,15 +232,6 @@ if 'DISABLE_RTMPE' in os.environ:
 if o.getBoolArg('valgrind', False, False):
     OPT_CXXFLAGS = "-O1 -g "
 
-# check that there is a valid hg repo here
-hg_returncode = subprocess.call(['hg', 'id', '-n'],
-                     stdout=subprocess.PIPE,
-                     stderr=subprocess.PIPE)
-if hg_returncode == 0: # success
-    # HGVERSION is to be set at "make" time
-    HGVERSION = "$(shell hg parents --template '{rev}:{node|short}')"
-    APP_CPPFLAGS += '-DHGVERSION="${HGVERSION}" '
-    config.subst("HGVERSION", HGVERSION, recursive=False)
 
 valinc = '$(topsrcdir)/other-licenses'
 if 'VALGRIND_HOME' in os.environ:
