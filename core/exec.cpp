@@ -485,13 +485,21 @@ template<typename T, typename CALLT> T debugEnterExitWrapper(MethodEnv* env, Gpr
 /*static*/
 uintptr_t BaseExecMgr::debugEnterExitWrapper32(MethodEnv* env, int32_t argc, uint32_t* argv)
 {
+#if defined(VMCFG_TELEMETRY_SAMPLER) && !defined(VMCFG_AOT)
+    return debugEnterExitWrapper<uintptr_t,GprMethodProc>(env,env->core()->samplerEnabled ? env->method->_native.samplerThunker : env->method->_native.thunker,argc,argv);
+#else
     return debugEnterExitWrapper<uintptr_t,GprMethodProc>(env,env->method->_native.thunker,argc,argv);
+#endif
 }
 
 /*static*/
 double BaseExecMgr::debugEnterExitWrapperN(MethodEnv* env, int32_t argc, uint32_t* argv)
 {
+#if defined(VMCFG_TELEMETRY_SAMPLER) && !defined(VMCFG_AOT)
+    return debugEnterExitWrapper<double,FprMethodProc>(env,env->core()->samplerEnabled ? env->method->_native.samplerThunker : env->method->_native.thunker, argc,argv);
+#else
     return debugEnterExitWrapper<double,FprMethodProc>(env,env->method->_native.thunker, argc,argv);
+#endif
 }
 #ifdef VMCFG_FLOAT
 /*static*/
@@ -499,7 +507,11 @@ float4_t BaseExecMgr::debugEnterExitWrapperV(MethodEnv* env, int32_t argc, uint3
 {
     CallStackNode csn(CallStackNode::kEmpty);
     env->debugEnter(/*frame_sst*/NULL, &csn, /*framep*/NULL, /*eip*/NULL);
+#if defined(VMCFG_TELEMETRY_SAMPLER) && !defined(VMCFG_AOT)
+    const float4_t result = thunkEnterVECR_adapter((void*) env->core()->samplerEnabled ? env->method->_native.samplerThunker : env->method->_native.thunker, env, argc, argv);
+#else
     const float4_t result = thunkEnterVECR_adapter((void*) env->method->_native.thunker, env, argc, argv);
+#endif
     env->debugExit(&csn);
     return result;
 }
