@@ -50,6 +50,7 @@ include "api-versions.as"
  * @see flash.utils.ByteArray#compress()
  * @see flash.utils.ByteArray#uncompress()
  *
+ * @playerversion Flash 10
  * @playerversion AIR 1.0
  * @langversion 3.0
  *
@@ -59,6 +60,7 @@ public final class CompressionAlgorithm
     /**
      * Defines the string to use for the zlib compression algorithm.
      *
+     * @playerversion Flash 10
      * @playerversion AIR 1.0
      * @langversion 3.0
      *
@@ -67,6 +69,7 @@ public final class CompressionAlgorithm
     /**
      * Defines the string to use for the deflate compression algorithm.
      *
+     * @playerversion Flash 10
      * @playerversion AIR 1.0
      * @langversion 3.0
      *
@@ -75,7 +78,8 @@ public final class CompressionAlgorithm
     /**
      * Defines the string to use for the lzma compression algorithm.
      *
-     * @playerversion AIR 3.3
+     * @playerversion Flash 11.4
+     * @playerversion AIR 3.4
      * @langversion 3.0
      *
      */
@@ -113,7 +117,7 @@ internal interface IDataOutput2 extends IDataOutput {
  * It also can be read and written to as an in-memory file, using
  * methods similar to those in the URLStream and Socket classes.</p>
  *
- * <p>In addition, zlib compression and decompression are supported, as
+ * <p>In addition, zlib and lzma compression and decompression are supported, as
  * well as Action Message Format (AMF) object serialization.</p>
  *
  * <p>Possible uses of the ByteArray class include the following:
@@ -737,6 +741,9 @@ public class ByteArray implements IDataInput2, IDataOutput2
      *
      * <p>The deflate compression algorithm is described at
      * <a target="mm_external" href="http://www.ietf.org/rfc/rfc1951.txt">http://www.ietf.org/rfc/rfc1951.txt</a>.</p>
+     *
+     * <p>The lzma compression algorithm is described at
+     * <a target="mm_external" href="http://www.7-zip.org/7z.html">http://www.7-zip.org/7z.html</a>.</p>
      *
      * <p>The deflate compression algorithm is used in several compression
      * formats, such as zlib, gzip, some zip implementations, and others. When data is
