@@ -1758,6 +1758,7 @@ package abcdump
             data.position = 8
             data.readBytes(udata,0,data.length-data.position)
             var csize:int = udata.length
+            infoPrint("header CWS (deflate compressed) version "+data[3])
             udata.uncompress()
             infoPrint("decompressed swf "+csize+" -> "+udata.length)
             if (doDecompressOnly) {
@@ -1770,8 +1771,51 @@ package abcdump
         case 70|87<<8|83<<16: // SWF
             if (doDecompressOnly)
                System.exit(0)
+            infoPrint("header FWS version "+data[3])
             data.position = 8 // skip header and length
             /*var swf:Swf =*/ new Swf(data)
+            break
+        case 90|87<<8|83<<16: // SWZ
+            if (doDecompressOnly)
+               System.exit(0)
+            infoPrint("header ZWS (lzma compressed) version "+data[3])
+            udata=new ByteArray
+            udata.endian = "littleEndian"
+            var ptr;
+            // for swfs encoded in lzma: uncompressed length = bytes 4-7, lzma properties = bytes 8-12
+            // also the swf-lzma length includes the ZWS+version (4 bytes) and the length(4 bytes) so we subtract 8
+            // for 7z lzma files: lzma properties: bytes 0-4, uncompressed length: bytes 5-12
+            // to correctly decompress the swf-lzma we have to change the headers
+
+            // udata is a copy of the bytearray
+            // put lzma properties in udata[0-4]
+            for (ptr=0;ptr<5;ptr++) {
+                udata[ptr]=data[12+ptr]
+            }
+            // calculate uncompressed length, subtract 8 (4 for ZWS+version, 4 for this length field)
+            var scriptlen:uint=data[4]+(data[5]<<8)+(data[6]<<16)+(data[7]<<24)-8;
+
+            // write uncompressed length in udata[5-8] then write 0s into udata[9-12] since 7z lzma expects length of 8 bytes
+            udata[5]=scriptlen&0xFF;
+            udata[6]=(scriptlen>>8) & 0xFF;
+            udata[7]=(scriptlen>>16) & 0xFF;
+            udata[8]=(scriptlen>>24) & 0xFF;
+
+            for (ptr=0;ptr<4;ptr++) {
+                udata[9+ptr]=0
+            }
+
+            // copy the compressed data from original data: 17 to copy: 13
+            data.position = 17
+            data.readBytes(udata,13,data.length-data.position)
+
+            udata.position=0
+            csize = udata.length
+
+            // uncompress should work now, Error #2038 or Error #1000 will occur if the lzma format is incorrect
+            udata.uncompress("lzma")
+            infoPrint("decompressed swf "+csize+" -> "+udata.length)
+            /*var swf:Swf =*/ new Swf(udata)
             break
         default:
             print('unknown format 0x'+version.toString(16))
