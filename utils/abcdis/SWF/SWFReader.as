@@ -274,6 +274,40 @@ package SWF
                 data = originalData;
                 data.position = 8;
                 break;
+            case 90|87<<8|83<<16: // SWZ
+                data = new ByteArray;
+                data.endian = "littleEndian"
+                var ptr;
+                // for swfs encoded in lzma: uncompressed length = bytes 4-7, lzma properties = bytes 8-12
+                // also the swf-lzma length includes the ZWS+version (4 bytes) and the length(4 bytes) so we subtract 8
+                // for 7z lzma files: lzma properties: bytes 0-4, uncompressed length: bytes 5-12
+                // to correctly decompress the swf-lzma we have to change the headers
+
+                // copy lzma properties into data[0-4]
+                for (ptr=0;ptr<5;ptr++) {
+                    data[ptr]=originalData[12+ptr]
+                }
+                // calculate uncompressed length, subtract 8 (4 for ZWS+version, 4 for this length field)
+                var scriptlen:uint=originalData[4]+(originalData[5]<<8)+(originalData[6]<<16)+(originalData[7]<<24)-8;
+
+                // copy uncompressed length in data[5-8] then write 0s into data[9-12] since 7z lzma expects length of 8 bytes
+                data[5]=scriptlen&0xFF;
+                data[6]=(scriptlen>>8) & 0xFF;
+                data[7]=(scriptlen>>16) & 0xFF;
+                data[8]=(scriptlen>>24) & 0xFF;
+
+                for (ptr=0;ptr<4;ptr++) {
+                    data[9+ptr]=0
+                }
+
+                // copy the compressed data into data[13] from originalData[17] after the header info
+                originalData.position=17
+                originalData.readBytes(data,13,originalData.length-17)
+                data.position=0
+
+                // uncompress should work now, Error #2038 or Error #1000 will occur if the lzma format is incorrect
+                data.uncompress("lzma")
+                break;
             default:
                 data = null;
             }
@@ -286,6 +320,7 @@ package SWF
             switch (version&0xffffff) {
             case 67|87<<8|83<<16: // SWC
             case 70|87<<8|83<<16: // SWF
+            case 90|87<<8|83<<16: // SWZ
                 return true;
             }
             return false;
