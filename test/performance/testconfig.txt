@@ -87,6 +87,7 @@ sunspider.*/.*              , sunspider-mobile.* ,, include , sunspider testsuit
 
 jsbench/Search    , .*,,       skip    ,       skip test runs too long and times out buildbot
 .*util.*             , .*,,       skip    ,       skip internal files
+scimark/scimarkutil/.*  , .*,,       skip    , shouldn't need this but https://bugzilla.mozilla.org/show_bug.cgi?id=766670
 
 sunspider/(as3/|)regexp-dna  ,.*       ,,skip, large string.match(regexp) verifier error:1068 https://bugzilla.mozilla.org/show_bug.cgi?id=409206
 #sunspider/(as3/|)date-format-tofte  ,.*       ,,skip, contains eval
