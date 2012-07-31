@@ -797,12 +797,8 @@ class RuntestBase(object):
             match = False
             if k == root:
                 match = True
-            elif k.endswith('.*'):
-                # only need to match start of string, faster to use startswith
-                if root.startswith(k[:-2]):
-                    match = True
             elif any(regex_char in k for regex_char in self.REGEX_CHARS):
-                # do a regex search if there are regex chars in the key
+                # Do a regex search if there are regex chars in the key
                 if re.search('^'+k+'$', root):
                     match = True
                 
