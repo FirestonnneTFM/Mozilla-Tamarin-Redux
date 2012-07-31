@@ -693,6 +693,9 @@ fi
 unset AVM
 unset vmargs
 cd $WS/build/buildbot/slaves/scripts
+# The ESC script makes a hard assumption that the shell will be called
+# "avmshell", but on 64bit platform it is avmshell_64, so simply make a copy
+cp $WS/objdir/shell/avmshell_64 $WS/objdir/shell/avmshell
 ../all/run-release-esc.sh "$rev_id"
 if [ "$?" != "0" ]; then
     echo "ESC recompilation failure."
