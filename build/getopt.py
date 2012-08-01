@@ -57,13 +57,15 @@ class Options:
         self.ignore_unknown_flags = False
         self.help = False
         self._allargs = {}
-        self.mac_sdk_version = None
-        self.mac_xcode_version = None
+        self.mac_sdk = None
+        self.mac_xcode = None
         self.arm_arch = "armv7-a"
 
         # These arguments don't go in _allargs, and they aren't standard
         # --enable/--disable switches. The getHelp method needs a list of these
         # special arguments.
+        # The argument names must correspond exactly to the property initializations
+        # above or "--help" will not work.
         self._specialargs = (               \
                 "target",                   \
                 "host",                     \
@@ -87,12 +89,12 @@ class Options:
 
             m = _sdk.search(arg)
             if m:
-                self.mac_sdk_version = m.group(1)
+                self.mac_sdk = m.group(1)
                 continue
 
             m = _xcode.search(arg)
             if m:
-                self.mac_xcode_version = m.group(1)
+                self.mac_xcode = m.group(1)
                 continue
 
             m = _arm_arch.search(arg)

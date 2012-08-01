@@ -467,7 +467,7 @@ if the_os == "darwin":
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks "
 
     # If an sdk is selected align OS and gcc/g++ versions to it
-    os_ver,sdk_path = _setSDKParams(o.mac_sdk_version, os_ver, o.mac_xcode_version)
+    os_ver,sdk_path = _setSDKParams(o.mac_sdk, os_ver, o.mac_xcode)
     APP_CXXFLAGS += "-mmacosx-version-min=%s -isysroot %s " % (os_ver,sdk_path)
     config.subst("MACOSX_DEPLOYMENT_TARGET",os_ver)
 
