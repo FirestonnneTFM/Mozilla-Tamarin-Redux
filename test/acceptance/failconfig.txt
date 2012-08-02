@@ -430,3 +430,4 @@ as3/ShellClasses/toplevel:exitcode, .*,, expectedfail, https://bugzilla.mozilla.
 as3/Workers/(WorkerDomain|Worker|WorkerErrors|regress/bug774294|regress/bug774302), (android|arm-) ,, skip, ARM platforms not supported https://bugzilla.mozilla.org/show_bug.cgi?id=755345
 as3/Workers/(ByteArrayWorkers|RemoteCall|WorkerCreateMax), .*, ,skip, https://bugzilla.mozilla.org/show_bug.cgi?id=774332
 as3/Workers/(Worker|WorkerDomain|WorkerCreateMax|WorkerErrors|regress/bug774294|regress/bug774302), -debug ,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=774294
+as3/Workers/ByteArrayWorkersLzma, -debug ,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=778727
