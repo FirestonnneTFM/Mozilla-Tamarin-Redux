@@ -45,6 +45,14 @@
 namespace avmplus
 {
 
+#define DEBUG_INTERRUPTABLE_STATE
+#if defined(DEBUG) && defined(DEBUG_INTERRUPTABLE_STATE)
+    #define DEBUG_STATE(_x_) do { AvmLog _x_; } while(0)
+#else
+    #define DEBUG_STATE(_x_) do { } while(0)
+#endif
+
+
     Isolate* Aggregate::Globals::at(int32_t giid)
     {
         AvmAssert(m_lock.isLockedByCurrentThread());
@@ -149,7 +157,7 @@ namespace avmplus
         scope_end: // unlock before throwing
             ;
         }
-        this->selfExit(currentToplevel);
+        this->throwWorkerTerminatedException(currentToplevel);
         return false;
     }
 
@@ -234,7 +242,7 @@ namespace avmplus
     }
 
     /* virtual */
-    void Aggregate::selfExit(Toplevel* currentToplevel)
+    void Aggregate::throwWorkerTerminatedException(Toplevel* currentToplevel)
     {
         AvmCore* core = currentToplevel->core();
         AvmAssert(core->getIsolate()->getAggregate() == this);
@@ -250,6 +258,7 @@ namespace avmplus
         : desc(desc)
         , parentDesc(parentDesc)
         , m_core(NULL)
+        , m_waitRecordValid(false)
         , m_activeWaitRecord(NULL)
         , m_aggregate(aggregate)
         , m_thread(NULL)
@@ -257,30 +266,6 @@ namespace avmplus
         , m_failed(false)
         , m_interrupted(false)
     {
-    }
-
-    Isolate::WaitRecord::WaitRecord()
-    {
-        isValid = VMPI_condVarInit(&condVar) && VMPI_recursiveMutexInit(&privateMutex);
-        notified = false;
-#ifdef DEBUG
-        threadID = VMPI_currentThread();
-#endif // DEBUG
-        next = NULL;
-    }
-
-    Isolate::WaitRecord::~WaitRecord()
-    {
-        if (isValid) {
-            VMPI_condVarDestroy(&condVar);
-            VMPI_recursiveMutexDestroy(&privateMutex);
-        }
-#ifdef DEBUG
-        threadID = VMPI_nullThread();
-#endif // DEBUG
-        next = NULL;
-        notified = false;
-        isValid = false;
     }
 
     void Aggregate::stateTransition(Isolate* isolate, Isolate::State to)
@@ -530,12 +515,39 @@ namespace avmplus
         }
         return item;
     }
-
-    void Isolate::setActiveWaitRecord(WaitRecord* record)
+    
+    void Isolate::removeWaitRecord(vmbase::WaitNotifyMonitor* record)
     {
+        AvmAssert(record != NULL);
+        // this will only be called outside of any lock on the 
+        // specified monitor
         SCOPE_LOCK(m_activeRecordLock) {
-            m_activeWaitRecord = record;
+            if (m_activeWaitRecord == record) {
+                m_activeWaitRecord = NULL;
+            }
         }
+    }
+    
+    void Isolate::setActiveWaitRecord(vmbase::WaitNotifyMonitor* record)
+    {
+        if (!isInterrupted()) {
+            // any calls to this must already hold the monitor lock
+            AvmAssert(record->isLockedByCurrentThread());
+            AvmAssert(m_waitRecordValid == false);
+            SCOPE_LOCK(m_activeRecordLock) {
+                m_activeWaitRecord = record;
+            }
+            // protected by the condition (record)
+            m_waitRecordValid = true;
+        }
+    }
+    
+    void Isolate::invalidateActiveWaitRecord(vmbase::WaitNotifyMonitor* record)
+    {
+        AvmAssert(record->isLockedByCurrentThread());
+        (void)record;
+        // protected by the condition (record)
+        m_waitRecordValid = false;
     }
 
     // this method is used to determine if a currently active
@@ -551,24 +563,26 @@ namespace avmplus
     {
         SCOPE_LOCK(m_activeRecordLock) {
             if (m_activeWaitRecord) {
-                VMPI_condVarSignal(&m_activeWaitRecord->condVar);
+                SCOPE_LOCK_NAMED(cond, *m_activeWaitRecord) {
+                    // only notify the current condition if 
+                    // it is still considered valid
+                    // when the current waiting condition is
+                    // notified outside of this method we don't
+                    // it needs to "unset" the active wait record
+                    // but going through the setActiveWaitRecord
+                    // requires the m_activeRecordLock be held
+                    // and that will create a dead lock.
+                    // access to this value is protected by the condition
+                    // itself.
+                    if (m_waitRecordValid) {
+                        cond.notifyAll();
+                    }
+                }
+                m_activeWaitRecord = NULL;
                 return true;
             }
         }
         return false;
-    }
-
-    // this method should be used when interrupting a blocked
-    // isolate that will throw on the next execution of 
-    // ActionScript byte code.
-    void Isolate::abortActiveWaitRecord()
-    {
-        SCOPE_LOCK(m_activeRecordLock) {
-            if (m_activeWaitRecord) {
-                targetCore()->raiseInterrupt(AvmCore::ExternalInterrupt);
-                signalActiveWaitRecord();
-            }
-        }
     }
 
     void Isolate::initialize(AvmCore* core) 
@@ -683,6 +697,63 @@ namespace avmplus
         }
         mmfx_delete(this);
     }
+
+    //
+    // InterruptableState 
+    //
+#ifdef DEBUG
+    int InterruptableState::globalId = 0;
+#endif // DEBUG
+
+
+    InterruptableState::EnterWait::EnterWait(Isolate* isolate, vmbase::MonitorLocker<vmbase::IMPLICIT_SAFEPOINT>& cond, int32_t timeout)
+        : interrupted(false)
+    {
+        if (isolate) {
+            isolate->setActiveWaitRecord(cond.getMonitor());
+        }
+        DEBUG_STATE(("thread %d is sleeping\n", VMPI_currentThread()));
+        if (timeout == -1) {
+            cond.wait();
+        }
+        else {
+            result = cond.wait(timeout);
+        }
+        DEBUG_STATE(("thread %d is awake\n", VMPI_currentThread()));
+
+        if (isolate) {
+            isolate->invalidateActiveWaitRecord(cond.getMonitor());
+        }
+        
+        interrupted = isolate ? isolate->isInterrupted() : false;
+    }
+
+    InterruptableState::InterruptableState()
+    {
+#ifdef DEBUG
+        gid = ++globalId;
+#endif // DEBUG
+    }
+
+    void InterruptableState::notify()
+    {
+        SCOPE_LOCK_NAMED(cond, m_condition) {
+            DEBUG_STATE(("thread %d is calling notify on (%d)\n", VMPI_currentThread(), gid));
+            cond.notify();
+        }
+    }
+
+    void InterruptableState::notifyAll()
+    {
+        SCOPE_LOCK_NAMED(cond, m_condition) {
+            DEBUG_STATE(("thread %d is calling notifyAll on (%d)\n", VMPI_currentThread(), gid));
+            cond.notifyAll();
+        }
+    }
+
+    //
+    // Aggregate
+    //
 
     void Aggregate::destroyIsolate(Isolate* isolate) {
         if (isolate->m_thread != NULL) {
@@ -839,10 +910,17 @@ namespace avmplus
 
     EnterSafepointManager::EnterSafepointManager(AvmCore* core)
     {
-        m_safepointMgr = core->getSafepointManager();
-        m_spRecord.setLocationAndDesc( (int32_t*)&core->interrupted, core->getIsolateDesc() ); 
+        Isolate* isolate = core->getIsolate();
+        // we only need to perform this operation on platforms that
+        // support workers, otherwise we can skip it
+        if (isolate) {
+		    m_aggregate = isolate->getAggregate();
+            m_safepointMgr = m_aggregate->safepointManager();
 
-        m_safepointMgr->enter(&m_spRecord);
+            m_spRecord.setLocationAndDesc( (int32_t*)&core->interrupted, core->getIsolateDesc() ); 
+
+            m_safepointMgr->enter(&m_spRecord);
+        }
     }
     
     EnterSafepointManager::~EnterSafepointManager()
@@ -852,15 +930,14 @@ namespace avmplus
 
     void EnterSafepointManager::cleanup() 
     {
-        m_safepointMgr->leave(&m_spRecord);
-        m_spRecord.setLocationAndDesc( NULL, -1 );
+        if (m_aggregate != NULL) {
+            m_safepointMgr->leave(&m_spRecord);
+            m_spRecord.setLocationAndDesc( NULL, -1 );
+        }
     }
 
     void Aggregate::runIsolate(Isolate* isolate) 
     {
-        // FIXME try-finally?
-        //EnterSafepointManager enterSafepointManager(this);
-        
         stateTransition(isolate, Isolate::STARTING);
         // Make sure the isolate survives for the duration of the following call.
         {
@@ -956,7 +1033,7 @@ namespace avmplus
     }
 
 
-    void Aggregate::runHoldingIsolateMapLock(vmbase::SafepointTask* task)
+    void Aggregate::runSafepointTaskHoldingIsolateMapLock(vmbase::SafepointTask* task)
     {
         SCOPE_LOCK(m_globals->m_isolateMap.m_lock) {
             safepointManager()->requestSafepointTask(*task);

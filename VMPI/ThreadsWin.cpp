@@ -233,8 +233,11 @@ void VMPI_condVarSignal(vmpi_condvar_t* condvar)
             condvar->tail = NULL;
         }
         HANDLE threadHandle = OpenThread(STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0x3FF, false, waiter->threadID);
+        assert(threadHandle != NULL);
         // Signal the thread by queuing a dummy APC.
-        QueueUserAPC(dummyAPC, threadHandle, NULL);
+        DWORD result = QueueUserAPC(dummyAPC, threadHandle, NULL);
+        (void)result;
+        assert(result > 0);
         CloseHandle(threadHandle);
     }
 }

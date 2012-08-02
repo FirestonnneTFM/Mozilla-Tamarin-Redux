@@ -126,19 +126,42 @@ namespace avmplus {
     //
     class MutexObject::State: public InterruptableState
     {
-        friend class MutexObject;
-        friend class ConditionObject;
-        friend class ConditionObject::State;
-        vmpi_mutex_t m_mutex;
-        int64_t m_recursion_count; // generous to avoid wraparound.
-        vmpi_thread_t volatile m_ownerThreadID;
-        bool m_isValid;
-
     public:
         State();
         virtual void destroy();
         bool tryLock();
+        void lock(AvmCore* core);
         bool unlock();
+
+    private:
+        friend class MutexObject;
+        friend class ConditionObject;
+        friend class ConditionObject::State;
+        // manages list of threads waiting for 
+        // the lock, this is a FIFO list for acquisition
+        // first one waiting on the lock gets it when it
+        // is unlocked.
+        struct LockWaitRecord
+        {
+            LockWaitRecord() 
+                : next(NULL)
+#ifdef DEBUG
+                , threadID(VMPI_currentThread())
+#endif // DEBUG
+            {}
+
+            LockWaitRecord* next;
+#ifdef DEBUG
+            vmpi_thread_t threadID;
+#endif // DEBUG
+        };
+
+        vmpi_mutex_t m_mutex;
+        int64_t m_recursion_count; // generous to avoid wraparound.
+        vmpi_thread_t volatile m_ownerThreadID;
+        LockWaitRecord* m_lockWaitListHead;
+        LockWaitRecord* m_lockWaitListTail;
+        bool m_isValid;
     };
     
     //

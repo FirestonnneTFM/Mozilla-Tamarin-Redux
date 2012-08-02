@@ -173,28 +173,6 @@ namespace avmplus
         FixedHeapArray< FixedHeapArray<uint8_t> > m_code;
         vmbase::RecursiveMutex m_sharedPropertyLock; 
         
-    public: 
-        // 
-        // this structure is used to block threads
-        // that call wait on the AS condition object
-        // we keep this data here to allow us to 
-        // interrupt any thread waiting on a condition
-        // 
-        struct WaitRecord
-        {
-            WaitRecord();
-            virtual ~WaitRecord();
-            vmpi_condvar_t condVar;
-            vmpi_mutex_t privateMutex;
-            bool notified;
-#ifdef DEBUG
-            vmpi_thread_t threadID;
-#endif // DEBUG
-            bool isValid;
-            WaitRecord* next;
-        };
-
-
     private:
         virtual void releaseActiveResources();
         SharedPropertyMap m_properties;
@@ -203,12 +181,13 @@ namespace avmplus
         void setSharedProperty(const char* utf8String, int32_t len, ChannelItem* item);
         bool getSharedProperty(const char* utf8String, int32_t len, ChannelItem** outItem);
         virtual ChannelItem* makeChannelItem(Toplevel* toplevel, Atom atom);
-        void setActiveWaitRecord(WaitRecord* record);
+        void invalidateActiveWaitRecord(vmbase::WaitNotifyMonitor* record);
+        void removeWaitRecord(vmbase::WaitNotifyMonitor* record);
+        void setActiveWaitRecord(vmbase::WaitNotifyMonitor* record);
         bool signalActiveWaitRecord();
         virtual bool retryActiveWaitRecord();
 
     protected:
-        void abortActiveWaitRecord();
         AvmCore* m_core;
 
     private:
@@ -216,7 +195,14 @@ namespace avmplus
         // condition.wait or a mutex.lock this holds the active wait record
         // from that call. 
         vmbase::RecursiveMutex m_activeRecordLock;
-        WaitRecord* m_activeWaitRecord;
+        // when an active wait record wakes without being notified
+        // by signalActiveWaitRecord() it needs to invalidate
+        // the record without getting the m_activeRecordLock
+        // the condition will always be held when updating this
+        // value so no explicit lock is required (see signalActiveWaitRecord)
+        // for more info.
+        bool m_waitRecordValid;
+        vmbase::WaitNotifyMonitor* m_activeWaitRecord;
 
         FixedHeapRef<Aggregate> m_aggregate;
         // VMThread objects have to be reclaimed after the threads
@@ -244,12 +230,8 @@ namespace avmplus
     {
     public:
         InterruptableState();
-        REALLY_INLINE void addWaitRecord(Isolate::WaitRecord& record, Isolate* isolate, bool ignoreAnyPendingNotify);
-        REALLY_INLINE void removeWaitRecord(Isolate::WaitRecord& record, Isolate* isolate);
-        virtual void destroy();
         void notify();
         void notifyAll();
-        REALLY_INLINE bool wait(int32_t timeout, Isolate::WaitRecord& record, Isolate* isolate);
 
         //
         // this is intended as a stack based helper for waiting
@@ -258,8 +240,7 @@ namespace avmplus
         class EnterWait
         {
         public:
-            EnterWait(Isolate* isolate, InterruptableState* state, int32_t timeout=-1, bool ignoreAnyPendingNotify=false);
-            bool failed;
+            EnterWait(Isolate* isolate, vmbase::MonitorLocker<vmbase::IMPLICIT_SAFEPOINT>& cond, int32_t timeout=-1);
             bool interrupted;
             bool result;
         };
@@ -268,28 +249,13 @@ namespace avmplus
         int32_t gid;
 #endif // DEBUG
 
+    protected:
+        vmbase::WaitNotifyMonitor m_condition;
+
     private:
-        // locks access to the wait list
-        vmbase::RecursiveMutex m_lock;
-        // 
-        // there is a race condition between notifyXXX() calls
-        // and when a wait record gets into the wait list
-        // if the wait list is empty and a notifyXXX() call is
-        // made this value will be set to the calling thread. 
-        // when there are no records in the wait list and a record is added it's 
-        // notified property will be updated to reflect this value
-        // if the thread id for the record is not the same as the
-        // notified value, this avoids a thread notifying itself. 
-        // this value is protected by the lock for the
-        // wait list.
-        // 
-        vmpi_thread_t notified;
 #ifdef DEBUG
         static int32_t globalId; // global id counter
 #endif // DEBUG
-        // list of all isolate threads currently waiting on this state
-        Isolate::WaitRecord* m_waitListHead;
-        Isolate::WaitRecord* m_waitListTail;
     };
 
 
@@ -374,11 +340,11 @@ namespace avmplus
 
         void closeChannelsWithEndpoint(Isolate* endpoint);
 
-        virtual void selfExit(Toplevel* toplevel);
+        virtual void throwWorkerTerminatedException(Toplevel* toplevel);
 
 
         GCRef<ObjectVectorObject> listWorkers(Toplevel* toplevel);
-        void runHoldingIsolateMapLock(vmbase::SafepointTask* task);
+        void runSafepointTaskHoldingIsolateMapLock(vmbase::SafepointTask* task);
         void reloadGlobalMemories();
 
         Isolate* getIsolate(int32_t desc);
@@ -418,6 +384,7 @@ namespace avmplus
         void cleanup(); // If manual cleanup needed b/c of longjmp.
         ~EnterSafepointManager();
     private:
+		FixedHeapRef<Aggregate> m_aggregate;					// to keep the safepoint mgr alive during shutdown, etc.
         vmbase::SafepointManager* m_safepointMgr;
         vmbase::SafepointRecord m_spRecord;
     };

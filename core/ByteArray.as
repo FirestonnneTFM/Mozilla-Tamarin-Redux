@@ -1025,18 +1025,23 @@ public class ByteArray implements IDataInput2, IDataOutput2
      *
      * Compares an expected value with the actual value in the byte array location
      * addressed by a start index measured in bytes.
-     * Iff these two values are same,
-     * 'newValue' is placed into the location
-     * and the 'expectedValue' is returned.
+     *
+     * If the specified values at the given location are the same, the value given
+     * by the newValue parameter is writen at the location specified by the byteIndex 
+     * parameter and the previous value of that location is returned.
+     *
      * Otherwise, the actual value is returned.
      * All of the above is performed in one atomic hardware transaction.
      * byteIndex must be a multiple of 4.
      *
-     * @param byteIndex the (low) index at which the actual value in the byte array begins
-     * @param expectedValue if this value is currently in the addressed location, perform the swap
-     * @param newValue the new value to put into the addressed location
+     * @param byteIndex int containing the desired index at which the expectedValue 
+     *        parameter should be compared.
+     * @param expectedValue int containing the expected value of the integter to be
+     *        replaced by the newValue parameter.
+     * @param newValue int containint the new value to put into the location specified 
+     *         by the byteIndex parameter.
      * @throws ArgumentError if byteIndex is not a multiple of 4 or negative
-     * @return either 'expectedValue' or the actual value
+     * @return int containing the previous value at the specified location
      */
     [API(CONFIG::SWF_17)]
     public native function atomicCompareAndSwapIntAt(byteIndex :int, expectedValue: int, newValue :int) :int;
@@ -1045,20 +1050,18 @@ public class ByteArray implements IDataInput2, IDataOutput2
      * Atomic compare and change the length of this byte array.
      *
      * Compares an expected length with the actual length of this the byte array.
-     * Iff these two values are same,
-     * the array length is changed to 'newLength',
-     * allocating a new underlying data buffer
-     * and copying existing data into it if necessary.
-     * In this case 'true' is returned.
-     * Otherwise, 'false' is returned.
+     * If the expected length argument and current ByteArray.length property are equal,
+     * the length is changed to the value specified in the newLength parameter.
      *
-     * Changing the array's data buffer as needed and assigning the new length to the array and
-     * determining the return value of this call is all done in one atomic action
-     * wrt. all competing calls that may affect the byte array's length.
+     * The compare of the parameter and the update of the length all occur in a single atomic 
+     * transaction.
      *
-     * @param expectedLength if this value is currently the byte array's length, perform the length change
-     * @param newLength the intended new length of this byte array
-     * @return whether the array length has been changed
+     * @param expectedLength int containint the expected value of the ByteArray's length. if this value is 
+     *        equal to the ByteArray.length property, the length will be changed to the value
+     *        specified by the newLength argument.
+     * @param newLength int containing the the length the ByteArray should be after the
+     *        operation succeeds.
+     * @return int containint the previous value of ByteArray.length
      */
     [API(CONFIG::SWF_17)]
     public native function atomicCompareAndSwapLength(expectedLength: int, newLength :int) :int;    
@@ -1088,6 +1091,10 @@ public class ByteArray implements IDataInput2, IDataOutput2
 	 *
 	 * @returns whether this byte array is backed by storage only accessible
 	 * in this worker and whether passing it on to another worker is done by copying
+     *
+     * @langversion 3.0
+     * @playerversion Flash 11.4	
+     * @playerversion AIR 3.4
 	 */
 	[API(CONFIG::SWF_17)]
 	public native function get shareable() :Boolean;
@@ -1107,6 +1114,10 @@ public class ByteArray implements IDataInput2, IDataOutput2
 	 * Thus the sharing of contents with other workers is terminated and
 	 * subsequent uses of this byte array as MessageChannel call argument lead
 	 * to backing storage buffer copying.
+     *
+     * @langversion 3.0
+     * @playerversion Flash 11.4	
+     * @playerversion AIR 3.4
 	 */
 	[API(CONFIG::SWF_17)]
 	public native function set shareable(newValue :Boolean) :void;
