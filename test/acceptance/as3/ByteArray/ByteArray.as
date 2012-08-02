@@ -961,7 +961,8 @@ function testCompressAndUncompress() {
                   }));
 }
 
-testCompressAndUncompress();
+// https://bugzilla.mozilla.org/show_bug.cgi?id=778727
+//testCompressAndUncompress();
 
 function testEndian() {
     var bytearray:ByteArray = makeByteArray();
