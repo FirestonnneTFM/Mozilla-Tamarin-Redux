@@ -196,7 +196,7 @@ namespace avmplus
     {
         Aggregate* aggregate = m_isolate->getAggregate();
         if (aggregate->isPrimordial(giid))  {
-            aggregate->selfExit(self()->toplevel());
+            aggregate->throwWorkerTerminatedException(self()->toplevel());
             return true; // not reached
         } else {
             return aggregate->requestExit(shouldWait, descriptor(), self()->toplevel());

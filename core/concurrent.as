@@ -72,6 +72,10 @@ include "api-versions.as"
  * Otherwise it stays locked.
  *
  * Any attempt to unlock a mutex that is not owned by the caller throws an error.
+ *
+ * @langversion 3.0
+ * @playerversion Flash 11.4	
+ * @playerversion AIR 3.4
  */
 [API(CONFIG::SWF_17)]
 [native(cls="MutexClass",instance="MutexObject",gc="exact")]
@@ -81,6 +85,10 @@ final public class Mutex
      * The constructor for mutexes.
      *
      * The initial internal lock count of every new mutex is zero.
+     *
+     * @langversion 3.0
+     * @playerversion Flash 11.4	
+     * @playerversion AIR 3.4
      */
     public function Mutex()
     {
@@ -95,7 +103,9 @@ final public class Mutex
      * If a thread already owns a mutex when this call is made to lock it,
      * then its internal lock count is increased and no other action occurs.
      *
-     *
+     * @langversion 3.0
+     * @playerversion Flash 11.4	
+     * @playerversion AIR 3.4
      */
     public native function lock() :void
 
@@ -111,6 +121,10 @@ final public class Mutex
      * the lock count is increased and no other action occurs.
      *
      * @return true if the lock was acquired, false otherwise.
+     *
+     * @langversion 3.0
+     * @playerversion Flash 11.4	
+     * @playerversion AIR 3.4
      */
     public native function tryLock() :Boolean;
 
@@ -122,6 +136,10 @@ final public class Mutex
      * Otherwise an error is thrown.
      *
      * @throws IllegalOperationException when the current thread doesn't own the mutex.
+     *
+     * @langversion 3.0
+     * @playerversion Flash 11.4	
+     * @playerversion AIR 3.4
      */
     native public function unlock():void;
 
@@ -135,6 +153,10 @@ final public class Mutex
  * A condition is always associated with a mutex.
  * It can only be manipulated in conjunction with that mutex.
  * This ensures atomic state transitions for all involved threads of execution.
+ *
+ * @langversion 3.0
+ * @playerversion Flash 11.4	
+ * @playerversion AIR 3.4
  */
 [API(CONFIG::SWF_17)]
 [native(cls="ConditionClass",instance="ConditionObject",gc="exact")]
@@ -144,6 +166,10 @@ final public class Condition
      * The constructor for condition variables.
      *
      * @param mutex the mutex associated with the condition
+     *
+     * @langversion 3.0
+     * @playerversion Flash 11.4	
+     * @playerversion AIR 3.4
      */
     public function Condition(mutex:Mutex)
     {
@@ -154,6 +180,10 @@ final public class Condition
 
     /**
      * Provides readonly access to mutex associated with this condition
+     *
+     * @langversion 3.0
+     * @playerversion Flash 11.4	
+     * @playerversion AIR 3.4
      */
      public native function get mutex():Mutex;
 
@@ -168,6 +198,10 @@ final public class Condition
      * @throws IllegalOperationException when the mutex is not owned by the current thread.
      * @param timeout timeout in milliseconds, -1 if no timeout, fractional values will be rounded up to the nearest millisecond.
      * @return false if wait() returned due to timeout, otherwise true.
+     *
+     * @langversion 3.0
+     * @playerversion Flash 11.4	
+     * @playerversion AIR 3.4
      */
     public function wait(timeout:Number = -1) :Boolean
     {
@@ -186,6 +220,10 @@ final public class Condition
      * The current thread/worker must "own" the condition's mutex when making this call.
      * Otherwise an exception is thrown and the mutex and the condition remain unaffected.
      * @throws IllegalOperationError if the condition's mutex is not owned by the current thread.
+     *
+     * @langversion 3.0
+     * @playerversion Flash 11.4	
+     * @playerversion AIR 3.4
      */
     public function notify() :void
     {
@@ -207,6 +245,10 @@ final public class Condition
      * The current thread/worker must "own" the condition's mutex when making this call.
      * Otherwise an exception is thrown and the mutex and the condition remain unaffected.
      * @throws IllegalOperationError if the condition's mutex is not owned by the current thread.
+     *
+     * @langversion 3.0
+     * @playerversion Flash 11.4	
+     * @playerversion AIR 3.4
      */
     public function notifyAll() :void
     {
@@ -229,9 +271,24 @@ final public class Condition
 
 package avm2.intrinsics.memory
 {
+    /**
+     * A complete memory barrier for domainMemory (for both load and store instructions).
+     *
+     * @langversion 3.0
+     * @playerversion Flash 11.4	
+     * @playerversion AIR 3.4
+     */
 	[API(CONFIG::SWF_17)]
 	[native("ConcurrentMemory::mfence")]
 	public native function mfence():void;
+    /**
+     * A compare and swap for domainMemory.
+     * Behaves like ByteArray.atomicCompareAndSwapIntAt but operates on the current domainMemory.
+     *
+     * @langversion 3.0
+     * @playerversion Flash 11.4	
+     * @playerversion AIR 3.4
+     */
 	[API(CONFIG::SWF_17)]
 	[native("ConcurrentMemory::casi32")]
 	public native function casi32(addr:int, expectedVal:int, newVal:int):int;

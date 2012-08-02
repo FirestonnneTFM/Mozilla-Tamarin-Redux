@@ -48,11 +48,12 @@ namespace avmplus
     {
         
     public:
-        friend class ByteArrayCompressViaLzmaTask;
-        friend class ByteArrayCompressViaZlibVariantTask;
-        friend class ByteArrayUncompressViaLzmaTask;
-        friend class ByteArrayUncompressViaZlibVariantTask;
+
+        friend class ByteArrayTask;
         friend class ByteArrayObject;
+        friend class ByteArraySetLengthTask;
+        friend class ByteArraySwapBufferTask;
+        friend class ByteArrayCompareAndSwapLengthTask;
         class Buffer : public FixedHeapRCObject
         {
         public:
@@ -76,6 +77,7 @@ namespace avmplus
         uint8_t& operator[](uint32_t index);
 
         REALLY_INLINE uint32_t GetLength() const { return m_buffer->length; }
+        REALLY_INLINE bool IsShared() const { return (m_workerLocal == false) && (m_buffer->RefCount() > 1); }
 
         // Ensure that the capacity of the ByteArray is at least 'newLength',
         // and set length = max(GetLength(), newLength),
@@ -95,7 +97,9 @@ namespace avmplus
         // uses; it serves as a hint from client that newLength is
         // expected maximum length for immediate future.
         void FASTCALL SetLengthFromAS3(uint32_t newLength);
-        uint32_t SetLengthCommon(uint32_t newLength, bool calledFromSetter, bool onlyIfExpected = false, uint32_t expectedLength = 0);
+        void SetLengthCommon(uint32_t newLength, bool calledFromSetter);
+        void UnprotectedSetLengthCommon(uint32_t newLength, bool calledFromSetter);
+        int32_t UnprotectedAtomicCompareAndSwapLength(int32_t expectedLength, int32_t newLength);
 
     public:
         // Set the length to x+y, with overflow check.  If x+y overflows a uint32_t then
@@ -219,20 +223,19 @@ namespace avmplus
         {
             friend class ByteArray;
         public:
-            Grower(ByteArray* owner, uint32_t minimumCapacity, bool onlyIfExpected = false, uint32_t expectedLength = 0)
+            Grower(ByteArray* owner, uint32_t minimumCapacity)
                 : m_owner(owner)
                 , m_oldArray(owner->m_buffer->array)
                 , m_oldLength(owner->m_buffer->length)
                 , m_oldCapacity(owner->m_buffer->capacity)
                 , m_minimumCapacity(minimumCapacity)
-                , m_expectedLength(expectedLength)
-                , m_onlyIfExpected(onlyIfExpected)
-                , m_succeeded(true)
             {
             }
             void FASTCALL ReallocBackingStore(uint32_t newCapacity);
             void FASTCALL EnsureWritableCapacity();
-            uint32_t SetLengthCommon(uint32_t newLength, bool calledFromLengthSetter);
+            REALLY_INLINE bool RequestWillReallocBackingStore() const;
+            REALLY_INLINE bool RequestExceedsMemoryAvailable() const;
+            void SetLengthCommon(uint32_t newLength, bool calledFromLengthSetter);
 
             void run(); // from SafepointTask
             virtual ~Grower();
@@ -242,9 +245,6 @@ namespace avmplus
             uint32_t    m_oldLength;
             uint32_t    m_oldCapacity;
             uint32_t    m_minimumCapacity;
-            uint32_t    m_expectedLength;
-            bool        m_onlyIfExpected;
-            bool        m_succeeded;
         };
     public:
         
