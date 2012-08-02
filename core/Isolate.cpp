@@ -911,16 +911,13 @@ namespace avmplus
     EnterSafepointManager::EnterSafepointManager(AvmCore* core)
     {
         Isolate* isolate = core->getIsolate();
-        // we only need to perform this operation on platforms that
-        // support workers, otherwise we can skip it
         if (isolate) {
 		    m_aggregate = isolate->getAggregate();
-            m_safepointMgr = m_aggregate->safepointManager();
+		}
+        m_safepointMgr = core->getSafepointManager();
+        m_spRecord.setLocationAndDesc( (int32_t*)&core->interrupted, core->getIsolateDesc() ); 
 
-            m_spRecord.setLocationAndDesc( (int32_t*)&core->interrupted, core->getIsolateDesc() ); 
-
-            m_safepointMgr->enter(&m_spRecord);
-        }
+        m_safepointMgr->enter(&m_spRecord);
     }
     
     EnterSafepointManager::~EnterSafepointManager()
@@ -930,10 +927,8 @@ namespace avmplus
 
     void EnterSafepointManager::cleanup() 
     {
-        if (m_aggregate != NULL) {
-            m_safepointMgr->leave(&m_spRecord);
-            m_spRecord.setLocationAndDesc( NULL, -1 );
-        }
+        m_safepointMgr->leave(&m_spRecord);
+        m_spRecord.setLocationAndDesc( NULL, -1 );
     }
 
     void Aggregate::runIsolate(Isolate* isolate) 
