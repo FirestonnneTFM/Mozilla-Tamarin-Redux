@@ -193,41 +193,45 @@ for i in ${avmfeatures}; do
 done
 echo ""
 failbuild=0
-for i in ${features}; do
-    feature_ok=0
-    if [[ $i == +* ]]; then
-        echo "Make sure that ${i:1} is enabled"
-        for feat in ${avmfeatures}; do
-            if [ "$feat" == "${i:1}" ]; then
-                feature_ok=1
-                break
+# bz: 779944, only run feature validation if shell can be executed natively
+if [[ "$avmfeatures" != "" ]]; then
+    for i in ${features}; do
+        feature_ok=0
+        if [[ $i == +* ]]; then
+            echo "Make sure that ${i:1} is enabled"
+            for feat in ${avmfeatures}; do
+                if [ "$feat" == "${i:1}" ]; then
+                    feature_ok=1
+                    break
+                fi
+            done
+            if [ $feature_ok != 1 ]; then
+                echo "---> FAIL"
+                failbuild=1
+            else
+                echo "---> PASS"
             fi
-        done
-        if [ $feature_ok != 1 ]; then
-            echo "---> FAIL"
-            failbuild=1
-        else
-            echo "---> PASS"
         fi
-    fi
-    if [[ $i == -* ]]; then
-        feature_ok=1
-        echo "Make sure that ${i:1} is NOT enabled"
-        for feat in ${avmfeatures}; do
-            if [ "$feat" == "${i:1}" ]; then
-                feature_ok=0
-                break
+        if [[ $i == -* ]]; then
+            feature_ok=1
+            echo "Make sure that ${i:1} is NOT enabled"
+            for feat in ${avmfeatures}; do
+                if [ "$feat" == "${i:1}" ]; then
+                    feature_ok=0
+                    break
+                fi
+            done
+            if [ $feature_ok == 0 ]; then
+                echo "---> FAIL"
+                failbuild=1
+            else
+                echo "---> PASS"
             fi
-        done
-        if [ $feature_ok == 0 ]; then
-            echo "---> FAIL"
-            failbuild=1
-        else
-            echo "---> PASS"
         fi
-    fi
-    echo ""
-done
+        echo ""
+    done
+fi
+
 if [ $failbuild == 1 ]; then
     echo "message: feature check FAILED"
     cd $basedir/core
