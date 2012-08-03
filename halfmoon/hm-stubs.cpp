@@ -1236,6 +1236,32 @@ void Stubs::do_si32(MethodFrame* f, int32_t value, int32_t addr) {
   *((int32_t*)rangeCheck(f, addr, 4)) = value;
 }
 
+#else
+
+int32_t Stubs::do_li8(MethodFrame* f, int32_t addr) {
+  return avmplus::mop_liz8(rangeCheck(f, addr, 1));
+}
+
+int32_t Stubs::do_li16(MethodFrame* f, int32_t addr) {
+  return avmplus::mop_liz16(rangeCheck(f, addr, 2));
+}
+
+int32_t Stubs::do_li32(MethodFrame* f, int32_t addr) {
+  return avmplus::mop_li32(rangeCheck(f, addr, 4));
+}
+
+void Stubs::do_si8(MethodFrame* f, int32_t value, int32_t addr) {
+  avmplus::mop_si8(rangeCheck(f, addr, 1), value);
+}
+
+void Stubs::do_si16(MethodFrame* f, int32_t value, int32_t addr) {
+  avmplus::mop_si16(rangeCheck(f, addr, 2), value);
+}
+
+void Stubs::do_si32(MethodFrame* f, int32_t value, int32_t addr) {
+  avmplus::mop_si32(rangeCheck(f, addr, 4), value);
+}
+
 #endif
 
 #if defined(VMCFG_UNALIGNED_FP_ACCESS) && defined(VMCFG_LITTLE_ENDIAN)
@@ -1254,6 +1280,24 @@ void Stubs::do_sf32(MethodFrame* f, double value, int32_t addr) {
 
 void Stubs::do_sf64(MethodFrame* f, double value, int32_t addr) {
   *((double*) rangeCheck(f, addr, 8)) = value;
+}
+
+#else
+
+double Stubs::do_lf32(MethodFrame* f, int32_t addr) {
+  return avmplus::mop_lf32(rangeCheck(f, addr, 4));
+}
+
+double Stubs::do_lf64(MethodFrame* f, int32_t addr) {
+  return avmplus::mop_lf64(rangeCheck(f, addr, 8));
+}
+
+void Stubs::do_sf32(MethodFrame* f, double value, int32_t addr) {
+  avmplus::mop_sf32(rangeCheck(f, addr, 4), value);
+}
+
+void Stubs::do_sf64(MethodFrame* f, double value, int32_t addr) {
+  avmplus::mop_sf64(rangeCheck(f, addr, 8), value);
 }
 
 #endif

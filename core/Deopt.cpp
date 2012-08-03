@@ -56,9 +56,16 @@ namespace framelib {
     uint8_t* getPointerArgument0(uint8_t* frame);
     void resumeFrameAtLocation(uint8_t* state, uint8_t* address);
     void saveActivationState(uint8_t* state);
-    uint8_t* getTrampForInt32();
-    uint8_t* getTrampForInt64();
-    uint8_t* getTrampForDouble();
+    // FIXME
+    // FrameLib is intended to be generic, and to depend only on nanojit.
+    // It was formerly located in the nanojit tree, which is where it belongs.
+    // These functions have knowledge of the deoptimization scheme, and don't
+    // belong here.  Also, moving them here messed up the resolution of the
+    // calls to the the stubs in the trampolines (asm code), which need to
+    // be in the same namespace.
+    //uint8_t* getTrampForInt32();
+    //uint8_t* getTrampForInt64();
+    //uint8_t* getTrampForDouble();
 #ifdef AVMPLUS_64BIT
     REALLY_INLINE void returnFromFrameWithPtr(uint8_t* frame, uintptr_t value) {
         framelib::returnFromFrameWithInt64(frame, value);
@@ -111,6 +118,14 @@ void Deoptimizer::returnFromFrameWithUnboxedValue(uint8_t* frame, Atom value,
     }
 }
 
+#ifdef linux
+// GCC on Linux apparently do not mangle C-linkage names.
+// Add a leading underscore here so references from assembler code will resolve.
+#define deoptFrameUponReturnWithInt32   _deoptFrameUponReturnWithInt32
+#define deoptFrameUponReturnWithInt64   _deoptFrameUponReturnWithInt64
+#define deoptFrameUponReturnWithDouble  _deoptFrameUponReturnWithDouble
+#endif
+
 // Static bridges from the assembly-language trampolines.
 // The asm trampoline has captured the victim's fp.
 // We use that to retrieve its first argument, the MethodEnv.
@@ -136,6 +151,121 @@ void deoptFrameUponReturnWithDouble(uint8_t* fp, double result)
     MethodEnv* env = (MethodEnv*)framelib::getPointerArgument0(fp);
     env->method->_armed_deoptimizers->deoptFrameUponReturnWithResult(fp, env, (void*)&result);
 }
+
+#ifdef VMCFG_IA32
+
+// TODO: These would be better off in a separate .asm file, but I don't think we
+// have one for the i386 builds, and I'm not ready to get into that yet.
+
+// Return a trampoline to capture the frame pointer and return value from a returning
+// function and transfer into the appropriate static bridge above.  We overwrite the
+// return address of the frame we wish to "hook" in order to take control when it returns.
+// We maintain 16-byte stack alignment, which is required on some platforms.
+
+// GCC will attempt to inline these functions, but emit an out-of-line version
+// as well.  This results in duplicate symbol definitions due to the inline
+// assembler code.  We could avoid this by using numeric local labels, but there
+// is no need to waste the code space, and it's good to have a symbol for the
+// trampoline.
+
+NO_INLINE
+uint8_t* getTrampForInt32()
+{
+    //using namespace framelib;
+#if _MSC_VER
+    _asm {
+        jmp     done
+      deopt_tramp_I32:
+        sub     esp, 8
+        push    eax
+        push    ebp
+        call    deoptFrameUponReturnWithInt32
+        /* NOTREACHED */
+        int     3
+      done:
+        lea     eax, deopt_tramp_I32
+    }
+#else
+    uint8_t* result;
+    asm volatile (
+        "    jmp   0f                                 ;\
+             .align 4                                 ;\
+             .globl deopt_tramp_I32                   ;\
+         deopt_tramp_I32:                             ;\
+             subl  $8, %%esp                          ;\
+             pushl %%eax                              ;\
+             pushl %%ebp                              ;\
+             call  _deoptFrameUponReturnWithInt32     ;\
+             int3                                     ;\
+         0:                                           ;\
+             movl $deopt_tramp_I32, %[result]         "
+         : : [result] "m"(result)
+    );
+    return result;
+#endif
+}
+
+NO_INLINE
+uint8_t* getTrampForInt64()
+{
+    return NULL;  //nyi
+}
+
+NO_INLINE
+uint8_t* getTrampForDouble()
+{
+    //using namespace framelib;
+#if _MSC_VER
+    _asm {
+        jmp     done
+      deopt_tramp_double:
+        sub     esp, 12
+        fstp    qword ptr [esp]
+        push    ebp
+        call    deoptFrameUponReturnWithDouble
+        /* NOTREACHED */
+        int     3
+      done:
+        lea     eax, deopt_tramp_double
+    }
+#else
+    uint8_t* result;
+    asm volatile (
+        "    jmp   0f                                 ;\
+             .align 4                                 ;\
+             .globl deopt_tramp_double                ;\
+         deopt_tramp_double:                          ;\
+             subl  $12, %%esp                         ;\
+             fstpl (%%esp)                            ;\
+             pushl %%ebp                              ;\
+             call  _deoptFrameUponReturnWithDouble    ;\
+             int3                                     ;\
+         0:                                           ;\
+             movl $deopt_tramp_double, %[result]      "
+         : : [result] "m"(result)
+    );
+    return result;
+#endif
+}
+
+#else
+
+uint8_t* getTrampForInt32() {
+    AvmAssert(false && "not implemented");
+    return 0;
+}
+
+uint8_t* getTrampForInt64() {
+   AvmAssert(false && "not implemented");
+   return 0;
+}
+
+uint8_t* getTrampForDouble() {
+    AvmAssert(false && "not implemented");
+    return 0;
+}
+
+#endif // ifdef VMCFG_IA32
 
 // Deoptimize the method associated with this Deoptimizer.
 // We arrange for activations of the method to be deoptimized as the stack unwinds.
@@ -195,16 +325,16 @@ void Deoptimizer::armForLazyDeoptimization(DeoptContext* ctx, MethodFrame* victi
     case SST_int32:
     case SST_uint32:
     case SST_bool32:
-        trampoline = framelib::getTrampForInt32();
+        trampoline = getTrampForInt32();
         break;
     case SST_double:
-        trampoline = framelib::getTrampForDouble();
+        trampoline = getTrampForDouble();
         break;
     default:
       #ifdef AVMPLUS_64BIT
-        trampoline = framelib::getTrampForInt64();
+        trampoline = getTrampForInt64();
       #else
-        trampoline = framelib::getTrampForInt32();
+        trampoline = getTrampForInt32();
       #endif
         break;
     }
@@ -517,7 +647,7 @@ void Deoptimizer::showArmed(AvmCore* core)
     core->console << "\n";
 }
 
-#endif
+#endif // ifdef DEOPT_TRACE
 
 // Debugging scaffolding.
 
@@ -540,7 +670,8 @@ bool Deoptimizer::deoptAncestor(AvmCore* core, uint32_t k)
     return false;
 }
 
-} // namespace avmplus {
+} // namespace avmplus
+
 
 namespace framelib {
 #ifdef VMCFG_IA32
@@ -758,99 +889,6 @@ void resumeFrameAtLocation(uint8_t* state, uint8_t* address)
 #pragma warning( pop )
 #endif
 
-// TODO: These would be better off in a separate .asm file, but I don't think we
-// have one for the i386 builds, and I'm not ready to get into that yet.
-
-// Return a trampoline to capture the frame pointer and return value from a returning
-// function and transfer into the appropriate static bridge above.  We overwrite the
-// return address of the frame we wish to "hook" in order to take control when it returns.
-// We maintain 16-byte stack alignment, which is required on some platforms.
-
-// GCC will attempt to inline these functions, but emit an out-of-line version
-// as well.  This results in duplicate symbol definitions due to the inline
-// assembler code.  We could avoid this by using numeric local labels, but there
-// is no need to waste the code space, and it's good to have a symbol for the
-// trampoline.
-
-NO_INLINE
-uint8_t* getTrampForInt32()
-{
-    using namespace framelib;
-#if _MSC_VER
-    _asm {
-        jmp     done
-      deopt_tramp_I32:
-        sub     esp, 8
-        push    eax
-        push    ebp
-        call    deoptFrameUponReturnWithInt32
-        /* NOTREACHED */
-        int     3
-      done:
-        lea     eax, deopt_tramp_I32
-    }
-#else
-    uint8_t* result;
-    asm volatile (
-        "    jmp   0f                                 ;\
-             .align 4                                 ;\
-             .globl deopt_tramp_I32                   ;\
-         deopt_tramp_I32:                             ;\
-             subl  $8, %%esp                          ;\
-             pushl %%eax                              ;\
-             pushl %%ebp                              ;\
-             call  _deoptFrameUponReturnWithInt32     ;\
-             int3                                     ;\
-         0:                                           ;\
-             movl $deopt_tramp_I32, %[result]         "
-         : : [result] "m"(result)
-    );
-    return result;
-#endif
-}
-
-NO_INLINE
-uint8_t* getTrampForInt64()
-{
-    return NULL;  //nyi
-}
-
-NO_INLINE
-uint8_t* getTrampForDouble()
-{
-    using namespace framelib;
-#if _MSC_VER
-    _asm {
-        jmp     done
-      deopt_tramp_double:
-        sub     esp, 12
-        fstp    qword ptr [esp]
-        push    ebp
-        call    deoptFrameUponReturnWithDouble
-        /* NOTREACHED */
-        int     3
-      done:
-        lea     eax, deopt_tramp_double
-    }
-#else
-    uint8_t* result;
-    asm volatile (
-        "    jmp   0f                                 ;\
-             .align 4                                 ;\
-             .globl deopt_tramp_double                ;\
-         deopt_tramp_double:                          ;\
-             subl  $12, %%esp                         ;\
-             fstpl (%%esp)                            ;\
-             pushl %%ebp                              ;\
-             call  _deoptFrameUponReturnWithDouble    ;\
-             int3                                     ;\
-         0:                                           ;\
-             movl $deopt_tramp_double, %[result]      "
-         : : [result] "m"(result)
-    );
-    return result;
-#endif
-}
 #else
 
 void returnFromFrame(uint8_t* /*frame*/) {
@@ -889,21 +927,6 @@ void resumeFrameAtLocation(uint8_t* /*state*/, uint8_t* /*address*/) {
 
 void saveActivationState(uint8_t* /*state*/) {
     AvmAssert(false && "not implemented");
-}
-
-uint8_t* getTrampForInt32() {
-    AvmAssert(false && "not implemented");
-    return 0;
-}
-
-uint8_t* getTrampForInt64() {
-   AvmAssert(false && "not implemented");
-   return 0;
-}
-
-uint8_t* getTrampForDouble() {
-    AvmAssert(false && "not implemented");
-    return 0;
 }
 
 #endif // ifdef VMCFG_IA32, etc

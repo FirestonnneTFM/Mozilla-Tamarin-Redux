@@ -242,7 +242,7 @@ bool TypeChecker::do_default(Instr* instr) {
   // All inputs must have a type and not UN.
   for (ArrayRange<Use> u = useRange(instr); !u.empty(); u.popFront()) {
     const Use& use = u.front();
-    assert(use && "input was null");
+    assert(&use != NULL && "input was null");
     assert(type(use) /*&& !isBottom(type(use))*/);
   }
   if (hasInputSignature(instr)) {
