@@ -519,7 +519,7 @@ HMDeoptContext::~HMDeoptContext()
 
 uint8_t HMDeoptContext::readUInt8()
 {
-  return *(mdins_++);
+  return uint8_t(*(mdins_++));
 }
 
 uint32_t HMDeoptContext::readUInt32()

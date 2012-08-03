@@ -40,6 +40,8 @@
 #ifndef __avmplus_Deopt_CL__
 #define __avmplus_Deopt_CL__
 
+// TODO: As far as I know, this code is obsolete and should be removed.
+
 namespace avmplus
 {
     // Safepoints for CodegenLIR deoptimization metadata.  We represent them as a linked

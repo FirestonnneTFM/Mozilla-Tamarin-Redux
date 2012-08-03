@@ -624,7 +624,7 @@ bool isCastCall(Lattice* l, const Type* object_type, uint32_t slot,
   if (slot_traits && slot_traits->base == builtin.class_itraits &&
       slot_traits->getCreateClassClosureProc() == NULL) {
     // if this class C is user-defined then C(1+ args) means coerce<C>
-    assert(slot_traits->itraits && "Class with unknown instance traits");
+    assert(slot_traits->itraits != NULL && "Class with unknown instance traits");
     return (*t = l->makeType(slot_traits->itraits)), true;
   }
   return false;

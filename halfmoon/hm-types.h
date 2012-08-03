@@ -1626,6 +1626,10 @@ public:
     return k.type_->hashCode();
   }
 
+  // Allow creation of dummy instance for compatibility with 'alignof'.
+  // MSVC++ does not provide this by default.
+  TypeKey() : type_(0) {}
+
 private:
   const Type* type_;
 };

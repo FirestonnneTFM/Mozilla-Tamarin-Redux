@@ -39,7 +39,9 @@
 
 #include "avmplus.h"
 
-#ifdef VMCFG_HALFMOON
+// TODO: I believe this code is now obsolete and should be removed.
+//#ifdef VMCFG_HALFMOON
+#if 0
 
 #include "CodegenLIR.h"
 #include "Deopt.h"
