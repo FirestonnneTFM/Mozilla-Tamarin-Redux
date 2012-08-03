@@ -431,3 +431,4 @@ as3/Workers/(ByteArrayWorkersLzma|WorkerDomain|Worker|WorkerErrors|regress/bug77
 as3/Workers/(ByteArrayWorkers|RemoteCall|WorkerCreateMax), .*, ,skip, https://bugzilla.mozilla.org/show_bug.cgi?id=774332
 as3/Workers/(Worker|WorkerDomain|WorkerCreateMax|WorkerErrors|regress/bug774294|regress/bug774302), -debug ,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=774294
 as3/Workers/ByteArrayWorkersLzma, -debug ,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=778727
+as3/Workers/ByteArrayWorkersLzma, x64-win-tvm ,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=780127
