@@ -2780,8 +2780,10 @@ class AbcThunkGen:
         out.println("{");
         out.indent += 1;
         
+        out.println("Namespace* dxns = env->core()->dxns();");
         out.println("MethodFrame frame;")
         out.println("frame.enter(env->core(), env);")
+        out.println("frame.setDxns(dxns);");
         rettype_str = "float4_ret_t" if CTYPE_FLOAT4 == ret_ctype else TYPEMAP_RETTYPE[thunk_ret_ctype]
         out.println("%s retVal = %s_thunk(env, argc, argv);" % (rettype_str, m.native_id_name))
         out.println("frame.exit(env->core());")
