@@ -393,12 +393,6 @@ namespace avmplus
             // Set this to NULL so we don't attempt to delete it in our dtor.
             m_oldArray = NULL;
         }
-
-        if (vmbase::SafepointRecord::hasCurrent()) {
-            if (vmbase::SafepointRecord::current()->manager()->inSafepointTask()) {
-                AvmCore::getActiveCore()->getIsolate()->getAggregate()->reloadGlobalMemories();
-            }
-        }
     }
 
     /*
@@ -714,6 +708,14 @@ namespace avmplus
         if (m_owner->m_position > newLength) {
             m_owner->m_position = newLength;
         }
+
+        // anytime the length of the bytearray is updated we have to notify all isolates
+        // regardless of if the backing store is reallocated or not.
+        if (vmbase::SafepointRecord::hasCurrent()) {
+            if (vmbase::SafepointRecord::current()->manager()->inSafepointTask()) {
+                AvmCore::getActiveCore()->getIsolate()->getAggregate()->reloadGlobalMemories();
+            }
+        }
     }
 
 
@@ -960,8 +962,17 @@ namespace avmplus
         destOverlay = (struct lzma_compressed*) m_buffer->array;
         destLen = m_buffer->capacity - lzmaHeaderSize;
 
+        // if this bytearray's data is being shared then we have to
+        // snap shot it before we run any compression algorithm otherwise
+        // the data could be changed in a way that may cause an exploit
+        uint8_t* dataSnapshot = origData;
+        if (shared) {
+            dataSnapshot = mmfx_new_array(uint8_t, origLen);
+            VMPI_memcpy(dataSnapshot, origData, origLen);
+        }
+
         retcode = LzmaCompress(destOverlay->compressedPayload, &destLen,
-                               origData, origLen,
+                               dataSnapshot, origLen,
                                destOverlay->lzmaProps, &lzmaPropsSize,
                                9, // -1 would yield default level (5),
                                1<<20, // 0 would yield default dictSize (1<<24)
@@ -970,6 +981,10 @@ namespace avmplus
                                -1,  // default pb (2),
                                -1,  // default fb (32),
                                1); // -1 would yield default numThreads (2)
+
+        if (shared) {
+            mmfx_delete_array(dataSnapshot);
+        }
 
         switch (retcode) {
         case SZ_OK:
@@ -1050,8 +1065,14 @@ namespace avmplus
             return;
 
         bool shared = IsShared();
+        // if this bytearray's data is being shared then we have to
+        // snap shot it before we run any compression algorithm otherwise
+        // the data could be changed in a way that may cause an exploit
+        uint8_t* dataSnapshot = origData;
         FixedHeapRef<Buffer> origBuffer = m_buffer;
         if (shared) {
+            dataSnapshot = mmfx_new_array(uint8_t, origLen);
+            VMPI_memcpy(dataSnapshot, origData, origLen);
             m_buffer = mmfx_new(Buffer());
         }
 
@@ -1084,7 +1105,7 @@ namespace avmplus
         uint32_t newCap = deflateBound(&stream, origLen);
         EnsureCapacity(newCap);
 
-        stream.next_in = origData;
+        stream.next_in = dataSnapshot;
         stream.avail_in = origLen;
         stream.next_out = m_buffer->array;
         stream.avail_out = m_buffer->capacity;
@@ -1104,6 +1125,7 @@ namespace avmplus
 
         if (shared)
         {
+            mmfx_delete_array(dataSnapshot);
             ByteArraySwapBufferTask task(this, origBuffer);
             task.exec();
         }
@@ -1147,8 +1169,18 @@ namespace avmplus
         if (!m_buffer->array || m_buffer->length < lzmaHeaderSize)
             return;
 
+        // if this bytearray's data is being shared then we have to
+        // snap shot it before we run any compression algorithm otherwise
+        // the data could be changed in a way that may cause an exploit
+        uint8_t* dataSnapshot = origData;
+        bool shared = IsShared();
+        if (shared) {
+            dataSnapshot = mmfx_new_array(uint8_t, origLen);
+            VMPI_memcpy(dataSnapshot, origData, origLen);
+        }
+
         struct lzma_compressed *srcOverlay;
-        srcOverlay = (struct lzma_compressed*)origData;
+        srcOverlay = (struct lzma_compressed*)dataSnapshot;
 
         uint32_t unpackedLen;
         unpackedLen  =  (uint32_t)srcOverlay->unpackedSize[0];
@@ -1162,13 +1194,15 @@ namespace avmplus
             srcOverlay->unpackedSizeHighBits[2] != 0 ||
             srcOverlay->unpackedSizeHighBits[3] != 0)
         {
+            if (shared) {
+                mmfx_delete_array(dataSnapshot);
+            }
             // We can't allocate a byte array of such large size.
             ThrowMemoryError();
         }
 
         size_t srcLen = (origLen - lzmaHeaderSize);
 
-        bool shared = IsShared();
         FixedHeapRef<Buffer> origBuffer = m_buffer;
         if (shared) {
             m_buffer = mmfx_new(Buffer());
@@ -1209,6 +1243,11 @@ namespace avmplus
         retcode = LzmaUncompress(m_buffer->array, &destLen,
                                  srcOverlay->compressedPayload, &srcLen,
                                  srcOverlay->lzmaProps, LZMA_PROPS_SIZE);
+
+        if (shared) {
+            mmfx_delete_array(dataSnapshot);
+        }
+
         switch (retcode) {
         case SZ_OK:                // - OK
             if (destLen != unpackedLen) {
@@ -1282,8 +1321,14 @@ namespace avmplus
 
         bool shared = IsShared();
         FixedHeapRef<Buffer> origBuffer = m_buffer;
+        // if this bytearray's data is being shared then we have to
+        // snap shot it before we run any compression algorithm otherwise
+        // the data could be changed in a way that may cause an exploit
+        uint8_t* dataSnapshot = origData;
         if (shared) {
             m_buffer = mmfx_new(Buffer());
+            dataSnapshot = mmfx_new_array(uint8_t, origLen);
+            VMPI_memcpy(dataSnapshot, origData, origLen);
         }
 
         m_buffer->array    = NULL;
@@ -1306,7 +1351,7 @@ namespace avmplus
         error = inflateInit2(&stream, algorithm == k_zlib ? 15 : -15);
         AvmAssert(error == Z_OK);
 
-        stream.next_in = origData;
+        stream.next_in = dataSnapshot;
         stream.avail_in = origLen;
         while (error == Z_OK)
         {
@@ -1319,6 +1364,10 @@ namespace avmplus
         inflateEnd(&stream);
 
         mmfx_delete_array(scratch);
+
+        if (shared) {
+            mmfx_delete_array(dataSnapshot);
+        }
 
         if (error == Z_STREAM_END)
         {
@@ -2276,11 +2325,7 @@ namespace avmplus
         if (expectedLength == result) {
             const bool CalledFromAS3Setter = true;
             Grower grower(this, newLength);
-            bool reloadGlobals = !grower.RequestWillReallocBackingStore();
             grower.SetLengthCommon(newLength, CalledFromAS3Setter);
-            if (reloadGlobals  && IsShared()) {
-                AvmCore::getActiveCore()->getIsolate()->getAggregate()->reloadGlobalMemories();
-            }
         }
         return result;
     }

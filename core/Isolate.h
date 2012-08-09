@@ -365,10 +365,6 @@ namespace avmplus
         static Globals* m_globals;
         int32_t m_primordialGiid;
         int m_activeIsolateCount;
-        vmbase::WaitNotifyMonitor m_commlock; // protects all communication (ouch)
-        int32_t m_commInProgress;
-        int32_t m_msgInTransit; // sent but not received messages
-        int32_t m_blockedChannels; // channels waiting for resolution in waitForAnySend()
         vmbase::SafepointManager m_safepointMgr; // Currently for shared byte array only.
         bool m_inShutdown;
         

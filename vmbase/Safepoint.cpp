@@ -64,9 +64,6 @@ namespace vmbase {
     SafepointManager::~SafepointManager()
     {
         assert(m_records == NULL);
-		// If a SafepointRecord is left on the list due to OOM not calling the leave() method, NULL it out
-        if(m_records != NULL)
-	        SafepointRecord::setCurrent(NULL);
     }
 
     void SafepointManager::requestSafepointTask(SafepointTask& task)
