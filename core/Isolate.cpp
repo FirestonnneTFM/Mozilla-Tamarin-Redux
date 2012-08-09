@@ -84,9 +84,6 @@ namespace avmplus
     Aggregate::Aggregate()
         : m_primordialGiid(1) // eventually there will be many of those
         , m_activeIsolateCount(0)
-        , m_commInProgress(0)
-        , m_msgInTransit(0)
-        , m_blockedChannels(0)
         , m_inShutdown(false)
     {}
 
@@ -119,12 +116,6 @@ namespace avmplus
 
             if (isolate->m_state == Isolate::RUNNING || isolate->m_state == Isolate::STARTING) {
                 isolate->interrupt();
-            }
-            // Ensure that the write to AvmCore::interrupted is visible to the other thread.
-            // First set interrupted status, then notify 
-            // there may be some isolates waiting for the call requests
-            SCOPE_LOCK_NAMED(lk, m_commlock) {
-                lk.notifyAll();
             }
             result = true;
 
@@ -166,11 +157,6 @@ namespace avmplus
     {
         SCOPE_LOCK(m_globals->m_lock) {
             m_inShutdown = true;
-            SCOPE_LOCK_NAMED(lk, m_commlock) {
-                // there may be some isolates waiting for the call requests
-                lk.notifyAll();
-            }
-
             // this iterator intterupts every isolate's core
             class IsolateCoreInterrupt: public Globals::IsolateMap::Iterator
             {
@@ -232,12 +218,6 @@ namespace avmplus
                 m_globals->m_isolateMap.ForEach(iInterrupt);
                 m_globals->m_isolateMap.ForEach(iRelease);
             }
-            SCOPE_LOCK_NAMED(lk, m_commlock) {
-                // Wake up isolates in waitForAnySend()
-                // Note: waitForAnySend() removed, remove notification?
-                lk.notifyAll();
-            }
-
         }
     }
 
@@ -270,7 +250,6 @@ namespace avmplus
 
     void Aggregate::stateTransition(Isolate* isolate, Isolate::State to)
     {
-        AvmAssert(!m_commlock.isLockedByCurrentThread());
         SCOPE_LOCK(m_globals->m_lock) {
             enum Isolate::State from = isolate->m_state;
             bool verbose = false;
@@ -721,11 +700,13 @@ namespace avmplus
         }
         DEBUG_STATE(("thread %d is awake\n", VMPI_currentThread()));
 
-        if (isolate) {
+        if (isolate) 
+		{
             isolate->invalidateActiveWaitRecord(cond.getMonitor());
+            // we want to interrupt if the isolate was interrupted OR if a script timeout has fired (only happens in the primordial)
+			interrupted = isolate->isInterrupted() || isolate->targetCore()->interruptCheckReason(AvmCore::ScriptTimeout);
+
         }
-        
-        interrupted = isolate ? isolate->isInterrupted() : false;
     }
 
     InterruptableState::InterruptableState()
@@ -1007,7 +988,7 @@ namespace avmplus
             virtual void each(int32_t, FixedHeapRef<Isolate> isolate) 
             {
                 //  Only list workers that are in the RUNNING state
-                if (isolate->m_state == Isolate::RUNNING)
+                if (isolate->m_aggregate->queryState(isolate) == Isolate::RUNNING)
                 {
                     GCRef<ScriptObject> interned = m_toplevel->getInternedObject(isolate);
                     if (interned == NULL) {
