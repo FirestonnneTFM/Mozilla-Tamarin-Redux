@@ -485,6 +485,13 @@ namespace vmbase {
 
 		void setLocationAndDesc (int32_t* location, int desc);
 
+    public:
+        /**
+         * Sets the calling thread's topmost
+         * SafepointRecord to NULL after OOM.
+         */
+		static void cleanupAfterOOM(){SafepointRecord::setCurrent(NULL);}
+
     private:
         /**
          * Sets the calling thread's topmost
