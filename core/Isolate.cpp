@@ -691,7 +691,7 @@ namespace avmplus
 
 
     InterruptableState::EnterWait::EnterWait(Isolate* isolate, vmbase::MonitorLocker<vmbase::IMPLICIT_SAFEPOINT>& cond, int32_t timeout)
-        : interrupted(false)
+        : interrupted(false), result(false)
     {
         if (isolate) {
             isolate->setActiveWaitRecord(cond.getMonitor());
