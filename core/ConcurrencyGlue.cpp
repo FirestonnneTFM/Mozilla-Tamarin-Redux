@@ -481,6 +481,7 @@ namespace avmplus {
         // reference to the associated mutex will also be given
         // up.
         m_state = NULL;
+        m_mutex = NULL;
     }
 
 
