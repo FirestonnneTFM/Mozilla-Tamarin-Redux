@@ -372,7 +372,6 @@ final public class Condition
 package avm2.intrinsics.memory
 {
     /**
-     * @private
      * A complete memory barrier for domainMemory (for both load and store instructions).
      *
      * @langversion 3.0
@@ -383,7 +382,6 @@ package avm2.intrinsics.memory
 	[native("ConcurrentMemory::mfence")]
 	public native function mfence():void;
     /**
-     * @private
      * A compare and swap for domainMemory.
      * Behaves like ByteArray.atomicCompareAndSwapIntAt but operates on the current domainMemory.
      *
