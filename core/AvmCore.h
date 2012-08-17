@@ -635,6 +635,10 @@ const int kBufferPadding = 16;
         // This function can be called from the host at any time, not only from inside takeSample().
         avmplus::Stringp functionHandleToString(telemetry::FunctionHandle item);
 
+        // Dumps the current MethodFrame stack to the given string buffer.
+        // This stack trace works on Release player builds as well.
+        void GetStackTrace(StringBuffer &buffer);
+
         /*
           Functions and data that support sampling.
         */

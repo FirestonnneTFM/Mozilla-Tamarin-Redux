@@ -1628,6 +1628,28 @@ return the result of the comparison ToPrimitive(x) == y.
         }
         #endif
 
+#ifdef VMCFG_TELEMETRY_SAMPLER
+        // Send the exception info along with the stack trace over telemetry
+        if (!(exception->flags & Exception::SUPPRESS_ERROR_REPORT) && getTelemetry() && getTelemetry()->IsActive()) {
+            StringBuffer exceptionStringBuffer(this);
+            ScriptObject *so = atomToScriptObject(exception->atom);
+            if (so) {
+                // get the full class name including the namespace
+                so->traits()->print(exceptionStringBuffer, true);
+            } else {
+                // backup, just convert atom to a string, it will say "Error"
+                exceptionStringBuffer << StUTF8String(string(exception->atom)).c_str();
+            }
+            exceptionStringBuffer << '\n';
+
+            // Get the stack trace
+            GetStackTrace(exceptionStringBuffer);
+
+            // Send the metric as a string
+            TELEMETRY_STRING(getTelemetry(), ".as.exception", exceptionStringBuffer.c_str());
+        }
+#endif
+
         // exceptionFrame should not be NULL; if it is,
         // you are missing a TRY/CATCH block around
         // a call to an AVM+ method that throws an
@@ -5474,6 +5496,20 @@ return the result of the comparison ToPrimitive(x) == y.
     avmplus::Stringp AvmCore::functionHandleToString(telemetry::FunctionHandle handle)
     {
         return ((MethodInfo*)handle)->getMethodName();
+    }
+
+    void AvmCore::GetStackTrace(StringBuffer &buffer)
+    {
+        for (MethodFrame* curFrame = currentMethodFrame;
+             curFrame != NULL;
+             curFrame = curFrame->next) {
+            MethodEnv* env = curFrame->env();
+            if (env && env->method) {
+                avmplus::Stringp pStrFunc = functionHandleToString(env->method);
+                avmplus::StUTF8String methodNameUtf8(pStrFunc);
+                buffer << methodNameUtf8.c_str() << '\n';
+            }
+        }
     }
 #endif
 
