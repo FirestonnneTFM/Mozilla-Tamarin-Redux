@@ -5862,6 +5862,10 @@ return the result of the comparison ToPrimitive(x) == y.
         if (v >= kSWF17)    /* Dolores */
         {
         }
+
+        if (v >= kSWF18)    /* Ellis */
+        {
+        }
         
     }
 
@@ -5875,6 +5879,7 @@ return the result of the comparison ToPrimitive(x) == y.
         14,
         15,
         16,
-        17
+        17,
+		18
     };
 }

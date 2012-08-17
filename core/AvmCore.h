@@ -343,12 +343,13 @@ const int kBufferPadding = 16;
             kSWF9,              // SWF9  (Flash Player 9.x)
             kSWF10,             // SWF10 (Flash Player 10.0 & 10.1)
             kSWF11,             // SWF11 (Flash Player 10.2 Spicy)
-            kSWF12,             // SWF12 (Flash Player TBD Wasabi)
-            kSWF13,             // SWF13 (Flash Player TBD Serrano)
-            kSWF14,             // SWF14 (Flash Player TBD Anza)
-            kSWF15,             // SWF15 (Flash Player TBD Brannan)
-            kSWF16,             // SWF16 (Flash Player TBD Cyril)
-            kSWF17,             // SWF17 (Flash Player TBD Dolores)
+            kSWF12,             // SWF12 (Flash Player 10.3 Wasabi)
+            kSWF13,             // SWF13 (Flash Player 11.0 Serrano)
+            kSWF14,             // SWF14 (Flash Player 11.1 Anza)
+            kSWF15,             // SWF15 (Flash Player 11.2 Brannan)
+            kSWF16,             // SWF16 (Flash Player 11.3 Cyril)
+            kSWF17,             // SWF17 (Flash Player 11.4 Dolores)
+            kSWF18,             // SWF18 (Flash Player 11.5 Ellis)
 
             VersionCount,
 
