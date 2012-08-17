@@ -546,7 +546,7 @@ package apivergen
         out += "};\n";
         out += "\n";
 
-        out += "public static final int kApiVersionSeriesMembership[kApiVersion_count] = {\n";
+        out += "public static final int kApiVersionSeriesMembership[] = {\n";
         var c = frag.ordered_versions;
         for (var i=0 ; i < c.length; i++)
         {
@@ -568,7 +568,7 @@ package apivergen
         out += "};\n";
         out += "\n";
 
-        out += "public static final int kApiVersionSeriesTransfer[kApiVersion_count][kApiVersionSeries_count] = {\n";
+        out += "public static final int kApiVersionSeriesTransfer[][] = {\n";
         var c = frag.ordered_versions;
         for (var i=0 ; i < c.length; i++)
         {
@@ -601,7 +601,7 @@ package apivergen
         out += "};\n";
         out += "\n";
 
-        out += "public static final int kApiVersionFirst[kApiVersionSeries_count] = {\n";
+        out += "public static final int kApiVersionFirst[] = {\n";
         var c = frag.series_first;
         for (var i=0 ; i < c.length; i++)
         {
@@ -613,7 +613,7 @@ package apivergen
         out += "};\n";
         out += "\n";
 
-        out += "public static final int kApiVersionLatest[kApiVersionSeries_count] = {\n";
+        out += "public static final int kApiVersionLatest[] = {\n";
         var c = frag.series_latest;
         for (var i=0 ; i < c.length; i++)
         {
