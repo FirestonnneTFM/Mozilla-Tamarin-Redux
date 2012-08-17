@@ -1483,13 +1483,13 @@ namespace avmplus
         return m_workerLocal;
     }
 
-    bool ByteArray::setWorkerLocal(bool flag)
+    bool ByteArray::setWorkerLocal(bool value)
     {
-        if (m_workerLocal == flag)
+        if (m_workerLocal == value)
             return false; // no change.
-        if (m_workerLocal == false && flag == true)
+        if (m_workerLocal == false && value == true)
             return false; // FIXME can't 'localize' yet. No change
-        m_workerLocal = flag;
+        m_workerLocal = value;
         return true;  // changed.
     }
     

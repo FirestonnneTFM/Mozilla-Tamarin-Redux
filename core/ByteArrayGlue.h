@@ -164,7 +164,7 @@ namespace avmplus
         /*virtual*/ void Write(const void* buffer, uint32_t count);
 
         bool isWorkerLocal();
-        bool setWorkerLocal(bool flag);
+        bool setWorkerLocal(bool value);
         
              
         bool addSubscriber(DomainEnv* subscriber);
