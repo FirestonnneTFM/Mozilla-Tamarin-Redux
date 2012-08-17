@@ -75,7 +75,7 @@ namespace vmbase {
         // Serialize dispatch of safepoint tasks.
         SCOPE_LOCK_SP_NAMED(locker, m_requestMutex) {
             bool restart = false;
-            const volatile SafepointRecord* safepointRecord = m_records;
+            const volatile SafepointRecord* safepointRecord = NULL;
             do {
                 SafepointRecord::current()->m_status = SafepointRecord::SP_SAFE;
                 // Threads polling this SafepointManager will pass through a

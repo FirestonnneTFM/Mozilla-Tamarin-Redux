@@ -90,6 +90,8 @@ namespace avmplus
     Aggregate::~Aggregate()
     {
         m_threadCleanUps.deallocate();
+		if(MMgc::GCHeap::GetGCHeap()->GetStatus() == MMgc::kMemAbort)
+			vmbase::SafepointRecord::cleanupAfterOOM();
     }
 
     void Aggregate::destroy()
@@ -285,10 +287,13 @@ namespace avmplus
                 AvmAssert(from == Isolate::NEW);
                 isolate->m_failed = true;
             } else if (to == Isolate::FINISHING) {
-                AvmAssert(from == Isolate::RUNNING || from == Isolate::STARTING);
+                AvmAssert(from == Isolate::RUNNING || from == Isolate::STARTING || from == Isolate::FINISHING);
                 AvmAssert(isolate->m_thread != NULL || m_primordialGiid == isolate->desc);
-                isolate->m_interrupted = true;
-                isolate->stopRunLoop();
+				if (from != Isolate::FINISHING)
+				{
+		            isolate->m_interrupted = true;
+					isolate->stopRunLoop();
+				}
             } else if (to == Isolate::TERMINATED) {
                 AvmAssert(from == Isolate::RUNNING || from == Isolate::STARTING || from == Isolate::FINISHING || from == Isolate::NEW);
 				isolate->m_interrupted = true;
@@ -987,8 +992,10 @@ namespace avmplus
             {}
             virtual void each(int32_t, FixedHeapRef<Isolate> isolate) 
             {
-                //  Only list workers that are in the RUNNING state
-                if (isolate->m_aggregate->queryState(isolate) == Isolate::RUNNING)
+                // Only list workers that are in the RUNNING state
+                // fix for watson bug#3304797 intermittent hangs with avm2_mutex alchemy tests
+                // holding the global lock to query the isolate state is causing the issue see Aggregate::queryState()
+                if (isolate->m_state == Isolate::RUNNING)
                 {
                     GCRef<ScriptObject> interned = m_toplevel->getInternedObject(isolate);
                     if (interned == NULL) {
