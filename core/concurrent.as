@@ -44,34 +44,40 @@ import flash.errors.IllegalOperationError;
 include "api-versions.as"
 
 /**
- * A Mutex is an object that facilitates "mutual exclusion"
- * of competing threads of execution in critical sections.
+ * The Mutex (short for "mutual exclusion") class provides a way to make sure 
+ * that only one set of code operates on a particular block of memory or other 
+ * shared resource at a time. The primary use for a Mutex is to manage code in 
+ * different workers accessing a shareable byte array (a ByteArray object whose 
+ * <code>shareable</code> property is <code>true</code>). However, a Mutex can be 
+ * used to manage workers' access to any shareable resource, such as an AIR native 
+ * extension or a filesystem file. No matter what the resource, the purpose of 
+ * the mutex is to ensure that only one set of code accesses the resource at a time.
  *
- * At any given time there can be at most one thread of execution
- * which has ownership of a given mutex.
- * Transitions between who owns a mutex and who does not are always atomic.
- * The methods of this class are such that a critical section can be guarded
- * by acquiring and then releasing a mutex at its boundaries.
+ * <p>A mutex manages access using the concept of resource ownership. At any 
+ time a single mutex is "owned" by at most one worker. When ownership of a 
+ mutex switches from one worker to another the transision is atomic. This 
+ guarantees that it will never be possible for more than one worker to take 
+ ownership of the mutex. As long as code in a worker only operates on a shared 
+ resource when that worker owns the mutex, you can be certain that there will 
+ never be a conflict from multiple workers.</p>
+ * 
+ * <p>Use the <code>tryLock()</code> method to take ownership of the mutex if 
+ * it is available. Use the <code>lock()</code> method to pause the current 
+ * worker's execution until the mutex is available, then take ownership of the 
+ * mutex. Once the current worker has ownership of the mutex, it can safely 
+ * operate on the shared resource. When those operations are complete, call the 
+ * <code>unlock()</code> method to release the mutex. At that point the current 
+ * worker should no longer access the shared resource.</p>
  *
- * Every new running worker contains at least one new thread of execution.
- * Mutexes treat all threads the same, irrespective of the workers they are in.
- * Thus mutexes can be used to control concurrency between workers as a whole
- * as well as threads within and across them.
+ * <p>The Mutex class is one of the special object types that are shared 
+ * between workers rather than copied between them. When you pass a mutex from 
+ * one worker to another worker either by calling the Worker object's 
+ * <code>setSharedProperty()</code> method or by using a MessageChannel object, 
+ * both workers have a reference to the same Mutex object in the runtime's memory.</p>
  *
- * When a mutex is transported to another worker via an argument of a 
- * MessageChannel call or via Worker.setSharedProperty()
- * then the remote copy of the mutex will continue to use
- * the identical underlying lock handling data structures.
- * This makes the original mutex effectively shared between workers,
- * which can thus create critical sections that exclude each other.
- *
- * Note that locking and unlocking are not lexically paired.
- * Also note that these mutexes are recursive,
- * i.e. repeated locking increases an internal lock count
- * and only an equal amount of unlock calls finally releases a mutex.
- * Otherwise it stays locked.
- *
- * Any attempt to unlock a mutex that is not owned by the caller throws an error.
+ * @see flash.system.Worker Worker class
+ * @see flash.utils.ByteArray#shareable ByteArray.shareable property
+ * @see flash.concurrent.Condition Condition class
  *
  * @langversion 3.0
  * @playerversion Flash 11.4	
@@ -82,9 +88,7 @@ include "api-versions.as"
 final public class Mutex
 {
     /**
-     * The constructor for mutexes.
-     *
-     * The initial internal lock count of every new mutex is zero.
+     * Creates a new Mutex instance.
      *
      * @langversion 3.0
      * @playerversion Flash 11.4	
@@ -96,13 +100,27 @@ final public class Mutex
     }
 
     /**
-     * Wait until this mutex is available and then take exclusive ownership,
-     * increase the mutex's lock count by one, and proceed.
-     * This is also known as "acquiring" this mutex.
+     * Pauses execution of the current worker until this mutex is available and 
+     * then takes ownership of the mutex. If another worker currently owns the 
+     * mutex, the calling worker's execution thread pauses at the 
+     * <code>lock()</code> call and the worker is added to the queue of ownership 
+     * requests. Once it is this worker's turn to own the mutex, the worker's 
+     * execution continues with the line of code following the 
+     * <code>lock()</code> call.
      *
-     * If a thread already owns a mutex when this call is made to lock it,
-     * then its internal lock count is increased and no other action occurs.
+     * <p>Once the current worker has ownership of the mutex, it can safely 
+     * operate on the shared resource. When those operations are complete, call 
+     * the <code>unlock()</code> method to release the mutex. At that point the 
+     * current worker should no longer access the shared resource.</p>
      *
+     * <p>Internally, a mutex keeps a count of the number of lock requests it 
+     * has received. The mutex must receive the same number of unlock requests 
+     * before it is completely released. If code in the worker that owns the 
+     * mutex locks it again (by calling the <code>lock()</code> method) the 
+     * internal lock count increases by one. You must call the 
+     * <code>unlock()</code> method as many times as the number of lock requests 
+     * to release ownership of the mutex.</p>
+     * 
      * @langversion 3.0
      * @playerversion Flash 11.4	
      * @playerversion AIR 3.4
@@ -110,17 +128,18 @@ final public class Mutex
     public native function lock() :void
 
     /**
-     * Attempt to acquire ownership of this mutex.
+     * Acquires ownership of the mutex if it is available. Otherwise, calling 
+     * this method returns <code>false</code> and code execution continues 
+     * immediately.
      *
-     * If and only if the mutex is available, acquire it,
-     * increase its lock count, and immediately return true.
-     * Otherwise, do not acquire the mutex and immediately return false.
-     * Do all of the above atomically.
+     * <p>Once the current worker has ownership of the mutex, it can safely 
+     * operate on the shared resource. When those operations are complete, call 
+     * the <code>unlock()</code> method to release the mutex. At that point the 
+     * current worker should no longer access the shared resource.</p>
      *
-     * If the mutex is already owned by the current thread/worker,
-     * the lock count is increased and no other action occurs.
-     *
-     * @return true if the lock was acquired, false otherwise.
+     * @return <code>true</code> if the mutex was available (and is now owned 
+     * by the current worker), or <code>false</code> if the current worker did 
+     * not acquire ownership of the mutex
      *
      * @langversion 3.0
      * @playerversion Flash 11.4	
@@ -129,13 +148,16 @@ final public class Mutex
     public native function tryLock() :Boolean;
 
     /**
-     * Release ownership of this mutex,
-     * allowing any thread/worker to acquire it and proceed.
+     * Releases ownership of this mutex, allowing any worker to acquire it and 
+     * perform work on the associated resource.
      *
-     * This mutex must be locked and owned by the current thread/worker.
-     * Otherwise an error is thrown.
-     *
-     * @throws IllegalOperationException when the current thread doesn't own the mutex.
+     * <p>Internally, a mutex keeps a count of the number of lock requests it 
+     * has received. Code in a worker must call the <code>unlock()</code> 
+     * method as many times as the number of lock requests in order to release 
+     * ownership of the mutex.</p>
+     * 
+     * @throws flash.errors.IllegalOperationError when the current worker 
+     *         doesn't own the mutex.
      *
      * @langversion 3.0
      * @playerversion Flash 11.4	
@@ -147,13 +169,55 @@ final public class Mutex
 }
     
 /**
- * A Condition (aka condition variable) is a synchronization primitive that facilitates
- * making threads of execution wait until a particular condition occurs.
+ * A Condition object is a tool for sharing a resource between workers with the 
+ * additional capability of pausing execution until a particular condition is 
+ * satisfied. A Condition object is used in conjunction with a Mutex object, and 
+ * adds additional functionality to the mutex's behavior. By working in 
+ * combination with a mutex, the runtime ensures that each transition of 
+ * ownership between workers is atomic.
+ * 
+ * <p>The following is one possible workflow for using a Condition object:</p>
+ * <ol>
+ *   <li>Before using a Condition object, the first worker must take ownership 
+ *       of the condition's associated mutex by calling the Mutex object's 
+ *       <code>lock()</code> or <code>tryLock()</code> methods.</li>
+ *   <li>The worker's code operates on the shared resource until some condition 
+ *       becomes false, preventing the worker from doing more work with the 
+ *       shared resource. For example, if the shared resource is a set of data 
+ *       to process, when there is no more data to process the worker can't 
+ *       do any more work.</li>
+ *   <li>At that point, call the Condition object's <code>wait()</code> method 
+ *       to pause the worker's execution and release ownership of the mutex.</li>
+ *   <li>At some point, a second worker takes ownership of the mutex. Because 
+ *       the mutex is available, it is safe for the second worker's code to 
+ *       operate on the shared resource. The second worker does whatever is 
+ *       necessary to satisfy the condition so that the first worker can do its 
+ *       work again. For example, if the first worker has no data to process, 
+ *       the second worker could pass more data to process into the shared resource.</li>
+ *   <li>At that point, the condition related to the first worker's work is now 
+ *       true, so the first worker needs to be notified that the condition is 
+ *       fulfilled. To notify the first worker, the second worker's code calls 
+ *       the Condition object's <code>notify()</code> method or its 
+ *       <code>notifyAll()</code> method.</li>
+ *   <li>In addition to calling <code>notify()</code>, the second worker needs 
+ *       to release ownership of the mutex. It does this either by calling the 
+ *       Mutex object's <code>unlock()</code> method or the Condition object's 
+ *       <code>wait()</code> method. Since the first worker called the 
+ *       <code>wait()</code> method, ownership of the mutex returns to the 
+ *       first worker. Code execution in the first worker then continues again 
+ *       with the next line of code following the <code>wait()</code> call.</li>
+ * </ol>
+ * 
+ * <p>The Condition class is one of the special object types that are shared 
+ * between workers rather than copied between them. When you pass a condition 
+ * from one worker to another worker either by calling the Worker object's 
+ * <code>setSharedProperty()</code> method or by using a MessageChannel object, 
+ * both workers have a reference to the same Condition object in the runtime's 
+ * memory.</p>
  *
- * A condition is always associated with a mutex.
- * It can only be manipulated in conjunction with that mutex.
- * This ensures atomic state transitions for all involved threads of execution.
- *
+ * @see flash.concurrent.Mutex Mutex class
+ * @see flash.system.Worker Worker class
+ * 
  * @langversion 3.0
  * @playerversion Flash 11.4	
  * @playerversion AIR 3.4
@@ -163,9 +227,10 @@ final public class Mutex
 final public class Condition 
 {
     /**
-     * The constructor for condition variables.
+     * Creates a new Condition instance.
      *
-     * @param mutex the mutex associated with the condition
+     * @param mutex the mutex that the condition uses to control transitions 
+    *               between workers
      *
      * @langversion 3.0
      * @playerversion Flash 11.4	
@@ -179,7 +244,7 @@ final public class Condition
     }
 
     /**
-     * Provides readonly access to mutex associated with this condition
+     * The mutex associated with this condition.
      *
      * @langversion 3.0
      * @playerversion Flash 11.4	
@@ -189,15 +254,31 @@ final public class Condition
 
 
     /**
-     * Releases the condition's mutex and then suspends the current thread/worker
-     * until it is awoken by 'notify()' or 'notifyAll()'. If the mutex is owned recursively,
-     * the recursion count will be restored upon return from wait.
+     * Specifies that the condition that this Condition object represents isn't 
+     * satisfied, and the current worker needs to wait until it is satisfied 
+     * before executing more code. Calling this method pauses the current 
+     * worker's execution thread and releases ownership of the condition's mutex. 
+     * These steps are performed as a single atomic operation. The worker remains 
+     * paused until another worker calls this Condition object's 
+     * <code>notify()</code> or <code>notifyAll()</code> methods.
      *
-     * The current thread/worker must "own" the condition's mutex when making this call.
-     * Otherwise an exception is thrown and the mutex and the condition remain unaffected.
-     * @throws IllegalOperationException when the mutex is not owned by the current thread.
-     * @param timeout timeout in milliseconds, -1 if no timeout, fractional values will be rounded up to the nearest millisecond.
-     * @return false if wait() returned due to timeout, otherwise true.
+     * @param timeout the maximum amount of time, in milliseconds, that the 
+     *                worker should pause execution before continuing. If this 
+     *                value is -1 (the default) there is no no timeout and 
+     *                execution pauses indefinitely.
+     *
+     * @return <code>false</code> if the method returned because the timeout 
+     *         time elapsed. Otherwise the method returns <code>true</code>.
+     *
+     * @throws flash.errors.IllegalOperationError if the current worker doesn't 
+     *         own this condition's mutex
+     *
+     * @throws ArgumentError if the <code>timeout</code> argument is less than 
+     *         0 and not -1
+     * 
+     * @throws flash.errors.ScriptTimeoutError if the method is called from 
+     *         code in the primordial worker in Flash Player and worker pauses 
+     *         longer than the script timeout limit (15 seconds by default)
      *
      * @langversion 3.0
      * @playerversion Flash 11.4	
@@ -212,14 +293,23 @@ final public class Condition
     }
 
     /**
-     * Wakes up one of the threads/workers waiting on this condition, if any, 
-     * and releases its mutex.
-     * The awoken thread/worker acquires the mutex and then starts executing.
-     * All of the above happens atomically.
+     * Specifes that the condition that this Condition object represents has 
+     been satisfied and that ownership of the mutex will be returned to the 
+     next worker (if any) that's waiting on this condition.
      *
-     * The current thread/worker must "own" the condition's mutex when making this call.
-     * Otherwise an exception is thrown and the mutex and the condition remain unaffected.
-     * @throws IllegalOperationError if the condition's mutex is not owned by the current thread.
+     * <p>Calling this method doesn't automatically release ownership of the 
+     * mutex. After calling <code>notify()</code>, you should explicitly 
+     * release ownership of the mutex in one of two ways: call the 
+     * <code>Mutex.unlock()</code> method if the current worker doesn't need the 
+     * mutex again, or call <code>wait()</code> if the worker should get 
+     * ownership of the mutex again after other workers have completed their work.</p>
+     *
+     * <p>One the mutex's lock is released, the next worker in the queue of 
+     * workers that have called the <code>wait()</code> method acquires the 
+     * mutex and resumes code execution.</p>
+     *
+     * @throws flash.errors.IllegalOperationError if the current worker doesn't 
+     *         own this condition's mutex
      *
      * @langversion 3.0
      * @playerversion Flash 11.4	
@@ -233,18 +323,28 @@ final public class Condition
     }
 
     /**
-     * Wakes up all threads/workers waiting on this condition, and releases its mutex.
-     * If any threads have been waiting, then one of them acquires the mutex and then 
-     * starts executing.
-     * All of the above happens atomically.
+     * Specifies that the condition that this Condition object represents has 
+     * been satisfied and that ownership of the mutex will be returned to all 
+     * workers that are waiting on this condition.
+     * 
+     * <p>Calling this method doesn't automatically release ownership of the 
+     * mutex. After calling <code>notify()</code>, you should explicitly release 
+     * ownership of the mutex in one of two ways: call the 
+     * <code>Mutex.unlock()</code> method if the current worker doesn't need the 
+     * mutex again, or call <code>wait()</code> if the worker should get 
+     * ownership of the mutex again after other workers have completed their work.</p>
      *
-     * The awoken threads acquire the mutex and proceed one by one, in wait order.
-     * Each thread continues to wait until its predecessor releases the mutex
-     * (by calling Mutex.unlock or Condition.wait().
+     * <p>Once the mutex's lock is released, the waiting workers receive 
+     * ownership one at a time in the order they called the <code>wait()</code> 
+     * method. Each worker that has called the <code>wait()</code> method 
+     * acquires the mutex in turn and resumes code execution. When that worker 
+     * calls the <code>Mutex.unlock()</code> method or the <code>wait()</code> 
+     * method, mutex ownership then switches to the next waiting worker. Each 
+     * time mutex ownership switches between workers, the transition is performed 
+     * as a single atomic operation.</p>
      *
-     * The current thread/worker must "own" the condition's mutex when making this call.
-     * Otherwise an exception is thrown and the mutex and the condition remain unaffected.
-     * @throws IllegalOperationError if the condition's mutex is not owned by the current thread.
+     * @throws flash.errors.IllegalOperationError if the current worker doesn't 
+     *         own this condition's mutex
      *
      * @langversion 3.0
      * @playerversion Flash 11.4	
@@ -272,6 +372,7 @@ final public class Condition
 package avm2.intrinsics.memory
 {
     /**
+     * @private
      * A complete memory barrier for domainMemory (for both load and store instructions).
      *
      * @langversion 3.0
@@ -282,6 +383,7 @@ package avm2.intrinsics.memory
 	[native("ConcurrentMemory::mfence")]
 	public native function mfence():void;
     /**
+     * @private
      * A compare and swap for domainMemory.
      * Behaves like ByteArray.atomicCompareAndSwapIntAt but operates on the current domainMemory.
      *
