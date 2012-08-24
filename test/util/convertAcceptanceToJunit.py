@@ -494,7 +494,7 @@ def convertAcceptanceToJunit(infile,outfile,toplevel):
             tests=tokens[1]
             if len(tokens)>5:
                properties['shell']=tokens[5]
-        if finishedTests==False and len(tokens)>2 and re.search('^[0-9.]+',line):
+        if finishedTests==False and len(tokens)>2 and re.search('^[0-9.]+',line) and tokens[1]!="error":
             totalfiles+=1
             if lastout!='' and len(testresults)>0:
                 testresults[len(testresults)-1]['out']+=lastout

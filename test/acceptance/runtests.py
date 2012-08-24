@@ -302,6 +302,7 @@ class AcceptanceRuntest(RuntestBase):
                     return outputCalls
                 else:
                     self.allfails += 1
+                    outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
                     outputCalls.append((self.js_print, ('%s' % '\n'.join(compileOutput),)))
                     outputCalls.append((self.fail,(testName, 'FAILED! file did not compile: %s' %
                                                    testName, self.failmsgs)))
