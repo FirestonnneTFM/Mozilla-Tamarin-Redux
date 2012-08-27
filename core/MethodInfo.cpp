@@ -528,14 +528,12 @@ namespace avmplus
 
 #endif //DEBUGGER
 
-#ifdef AVMPLUS_VERBOSE
     PrintWriter& MethodInfo::print(PrintWriter& prw) const
     {
         String* n = getMethodName();
         return n ? prw << n << "()"
                  : prw << "?()";
     }
-#endif // AVMPLUS_VERBOSE
 
     bool MethodInfo::makeMethodOf(Traits* traits)
     {

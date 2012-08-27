@@ -433,7 +433,7 @@ const int kBufferPadding = 16;
         unsigned bugzilla654807:1;      // sealed subclasses of Array act sort-of-dynamic
         unsigned bugzilla661330:1;      // Array.length behavior doesn't follow ECMA262 near 2^32-1
         unsigned bugzilla678952:1;      // Operations on Vector.<C> do not make use of or provide information about C
-
+        unsigned bugzilla619148:1;      // Stack traces in release builds
     protected:
         friend class AvmCore;
 
@@ -1858,17 +1858,17 @@ const int kBufferPadding = 16;
          */
         virtual int determineLanguage();
 
-        /**
-         * Creates a StackTrace from the current executing call stack
-         */
-        StackTrace* newStackTrace();
-
 #ifdef _DEBUG
         void dumpStackTrace();
 #endif
 
 #endif /* DEBUGGER */
 
+        /**
+         * Creates a StackTrace from the current executing call stack
+         */
+        StackTrace* newStackTrace();
+        
         CodeContext* codeContext() const;
         Namespace* dxns() const;
 

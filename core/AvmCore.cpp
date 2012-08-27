@@ -4846,21 +4846,48 @@ return the result of the comparison ToPrimitive(x) == y.
     }
 #endif
     
-    #ifdef DEBUGGER
     StackTrace* AvmCore::newStackTrace()
     {
-        int depth = callStack ? callStack->depth() : 0;
+        if (callStack)
+        {
+            int depth = callStack->depth();
         StackTrace* stackTrace = StackTrace::create(GetGC(), depth);
         CallStackNode *curr = callStack;
         StackTrace::Element *element = stackTrace->elements;
-        while (curr) {
+            while (curr)
+            {
             element->set(*curr);
             element++;
             curr = curr->next();
         }
         return stackTrace;
     }
+        else if (currentBugCompatibility()->bugzilla619148) // Stack traces in release builds
+        {
+            int depth = 0;
+            MethodFrame* methodFrame = currentMethodFrame;
+            while (methodFrame != NULL) {
+                if (methodFrame->env() != NULL)
+                    depth++;
+                methodFrame = methodFrame->next;
+            }
+            StackTrace* stackTrace = StackTrace::create(GetGC(), depth);
+            StackTrace::Element *element = stackTrace->elements;
+            methodFrame = currentMethodFrame;
+            while (methodFrame != NULL && depth > 0) {
+                if (methodFrame->env() != NULL) {
+                    element->set(methodFrame->env()->method);
+                    element++;
+                    depth--;
+                }
+                methodFrame = methodFrame->next;
+            }
+            return stackTrace;
+        }
+        return NULL;
+    }
 
+    #ifdef DEBUGGER
     #ifdef _DEBUG
     void AvmCore::dumpStackTrace()
     {
@@ -5865,6 +5892,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
         if (v >= kSWF18)    /* Ellis */
         {
+            bugzilla619148 = 1;     // Stack traces in release builds
         }
         
     }

@@ -233,7 +233,7 @@ namespace avmplus
         Stringp FASTCALL getMethodNameWithTraits(Traits* declaringTraits, bool includeAllNamespaces = false) const;
         Stringp FASTCALL getMethodName(bool includeAllNamespaces = false) const;
 
-        verbose_only( PrintWriter& print(PrintWriter& prw) const; )
+        PrintWriter& print(PrintWriter& prw) const;
 #ifdef DEBUGGER
         /**
          * Basically the same as AvmPlusScriptableObject::bytesUsed().
