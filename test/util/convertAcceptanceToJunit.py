@@ -338,6 +338,9 @@ def convertAotToJunit(infile,outfile,toplevel):
         if line.startswith('ERROR:'):
             error=line
             errors+=1
+        if line.startswith('java.io.FileNotFoundException'):
+            error=''
+            errors-=1
         if line.startswith('compiling') or line.startswith('Excluding'):
             continue
         if line.startswith('AOT compiling'):
