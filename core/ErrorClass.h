@@ -103,17 +103,13 @@ namespace avmplus
 #endif
 
         Stringp getStackTrace() const;
-#ifdef DEBUGGER
         StackTrace* getStackTraceObject() const { return stackTrace; }
-#endif
         
     // ------------------------ DATA SECTION BEGIN
         GC_DATA_BEGIN(ErrorObject)
 
     private:
-#ifdef DEBUGGER
         StackTrace* GC_POINTER(stackTrace);
-#endif /* DEBUGGER */
 
         GC_DATA_END(ErrorObject)
 

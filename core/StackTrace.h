@@ -42,7 +42,6 @@
 
 namespace avmplus
 {
-#ifdef DEBUGGER
     /**
      * The CallStackNode class tracks the call stack of executing
      * ActionScript code.  It is used for debugger stack dumps
@@ -125,12 +124,14 @@ namespace avmplus
 
         void init(AvmCore* core, uint64_t functionId, int32_t lineno);
 
+#ifdef DEBUGGER
         // ctor used only for Sampling (no MethodEnv)
         inline explicit CallStackNode(AvmCore* core, const char* name)
         {
             Sampler* sampler = core ? core->get_sampler() : NULL;
             init(core, sampler ? sampler->getFakeFunctionName(name) : NULL);
         }
+#endif
 
         // ctor used only for MethodInfo::verify (no MethodEnv, but has MethodInfo)
         inline explicit CallStackNode(MethodInfo* info)
@@ -155,7 +156,9 @@ namespace avmplus
         // Does exactly what the destructor does, but on an arbitrary object.
         void FASTCALL reset();
 
+#ifdef DEBUGGER
         inline void sampleCheck() { if (m_core) m_core->sampleCheck(); }
+#endif
 
         inline void setNext(CallStackNode* next) { m_next = next; }
         inline CallStackNode* next() const { return m_next; }
@@ -267,6 +270,18 @@ namespace avmplus
 #endif
             }
             
+            inline void set(MethodInfo* methodInfo)
+            {
+
+                m_info = methodInfo;       // will be NULL if the element is from a fake CallStackNode
+                u.m_fakename = NULL;
+                u.m_filename = NULL;
+                m_linenum = 0;
+#ifdef VMCFG_64BIT
+                m_pad       = 0;    // let's keep the stack nice and clean
+#endif
+            }
+            
             inline void gcTrace(MMgc::GC* gc)
             {
                 gc->TraceLocation(&m_info);
@@ -313,7 +328,6 @@ namespace avmplus
         // ------------------------ DATA SECTION END
     };
 
-#endif
 }
 
 #endif /* __avmplus_CallStackNode__ */

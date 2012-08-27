@@ -203,6 +203,8 @@ namespace avmplus
         }
     }
 
+#endif
+    
     // Dump a filename.  The incoming filename is of the form
     // "C:\path\to\package\root;package/package;filename".  The path format
     // will depend on the platform on which the movie was originally
@@ -293,17 +295,18 @@ namespace avmplus
                     s = core->concatStrings(s, core->intToString(e->linenum()));
                     s = s->appendLatin1("]");
                 }
+#ifdef DEBUGGER
                 if(e->info()->file() && e->info()->file()->getName())
                 {
                     s = s->appendLatin1(" <");
                     s = core->concatStrings(s, e->info()->file()->getName());
                     s = s->appendLatin1(">");
                 }
+#endif
             }
             stringRep = s;
         }
         return stringRep;
     }
 
-#endif
 }

@@ -65,21 +65,32 @@ namespace avmplus
     {
         AvmAssert(traits()->getSizeOfInstance() >= sizeof(ErrorObject));
 
-        #ifdef DEBUGGER
         AvmCore *core = this->core();
-        if (!core->debugger())
+        const BugCompatibility *bugCompatibility = core->currentBugCompatibility();
+        if (!bugCompatibility->bugzilla619148) { // Stack traces in release builds
+#ifdef DEBUGGER
+            if (!core->debugger())
+                return;
+#else
             return;
+#endif
+        }
         // Copy the stack trace
         stackTrace = core->newStackTrace();
-        #endif
     }
 
     Stringp ErrorObject::getStackTrace() const
     {
-        #ifdef DEBUGGER
         AvmCore* core = this->core();
-        if (!core->debugger())
+        const BugCompatibility *bugCompatibility = core->currentBugCompatibility();
+        if (!bugCompatibility->bugzilla619148) {  // Stack traces in release builds
+#ifdef DEBUGGER
+            if (!core->debugger())
+                return NULL;
+#else
             return NULL;
+#endif
+        }
 
         // getStackTrace returns the concatenation of the
         // error message and the stack trace
@@ -91,9 +102,6 @@ namespace avmplus
         }
 
         return buffer;
-        #else
-        return NULL;
-        #endif
     }
 
     Stringp ErrorClass::getErrorMessage(int errorID) const

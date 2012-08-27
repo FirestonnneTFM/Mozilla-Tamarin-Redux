@@ -641,9 +641,7 @@ bool ErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 
 #ifdef DEBUG
 const uint32_t ErrorObject::gcTracePointerOffsets[] = {
-#if defined(DEBUGGER)
     offsetof(ErrorObject, stackTrace),
-#endif
     0};
 
 MMgc::GCTracerCheckResult ErrorObject::gcTraceOffsetIsTraced(uint32_t off) const
@@ -666,9 +664,7 @@ bool ErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 #endif
     ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
-#if defined(DEBUGGER)
     gc->TraceLocation(&stackTrace);
-#endif
     return false;
 }
 
@@ -3602,7 +3598,6 @@ bool SourceInfo::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 
 #endif // defined(DEBUGGER)
 
-#if defined(DEBUGGER)
 
 #ifdef DEBUG
 const uint32_t StackTrace::gcTracePointerOffsets[] = {
@@ -3639,7 +3634,6 @@ bool StackTrace::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     return _xact_more;
 }
 
-#endif // defined(DEBUGGER)
 
 
 #ifdef DEBUG
