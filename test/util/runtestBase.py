@@ -49,7 +49,7 @@
 # %MOZ_SRC/mozilla/js/tamarin/platform/,
 #
 
-import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, shutil
+import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, shutil,zipfile
 import subprocess, random
 from os.path import abspath, basename, dirname, exists, isdir, isfile, split, splitext, getmtime
 from os import getcwd,environ
@@ -1247,7 +1247,21 @@ class RuntestBase(object):
                     self.compile_aot(testdir+".abc")
 
         else:  #pexpect available
-            child = pexpect.spawn('"%s" %s -classpath %s macromedia.asc.embedding.Shell' % (self.java, self.javaargs, self.asc))
+            # check asc.jar to look for an entry point into ash, we support either of the following classes:
+            entry1='macromedia.asc.embedding.Shell'
+            entry2='com.adobe.flash.compiler.clients.ASCShell'
+            f=zipfile.ZipFile(self.asc,"r")
+            if any(eachfile.startswith(entry1.replace('.','/')) for eachfile in f.namelist()):
+                entrypoint=entry1
+            elif any(eachfile.startswith(entry2.replace('.','/')) for eachfile in f.namelist()):
+                entrypoint=entry2
+            else:
+                print("ERROR: could not find ash class in %s" % self.asc)
+                self.ashErrors.append("error could not find ash entry point in %s" % self.asc)
+                return
+                
+
+            child = pexpect.spawn('"%s" %s -classpath %s %s' % (self.java, self.javaargs, self.asc,entrypoint))
             child.logfile = None
             child.expect("\(ash\)")
             child.expect("\(ash\)")
