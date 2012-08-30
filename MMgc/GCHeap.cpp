@@ -2496,6 +2496,7 @@ namespace MMgc
 
     void GCHeap::SystemOOMEvent(size_t size, int attempt)
     {
+        MMGC_LOCK(m_spinlock);
         if (attempt == 0 && !statusNotificationBeingSent())
             SendFreeMemorySignal(size/kBlockSize + 1);
         else
