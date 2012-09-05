@@ -195,6 +195,8 @@ namespace avmplus
                                         // numbers and strings)
     };
 
+    // The purpose of ReturnCondition is to signal what end-result
+    // we have ended up in from the stringify call.
     enum ReturnCondition {
         kSomeOutput,      // normal case; emitted > 0 characters
         kNoOutput,        // emitted *zero* characters
@@ -346,6 +348,25 @@ namespace avmplus
         // unmarks value (ie not parent of any object in current traversal)
         void valueNotActive(ScriptObject* value);
 
+        // The purpose of AutoDestructingAtomArray is to build up a
+        // worklist of property names to traverse during stringify.
+        // (A hypothetical direct traversal that recursively processes
+        //  the properties easily hits stack overflow problems.)
+        //
+        // Note that it allocates the worklist via the given FixedMalloc
+        // allocator and automatically frees the worklist during destruction;
+        // thus the stringify kernel must be careful to catch any AS3
+        // exception from a callback and unroll our stack properly
+        // before rethrowing the exception.
+        //
+        // Note also that it is an anti-pattern to be storing Atoms in
+        // the worklist (a FixedMalloc-allocated array) in this
+        // fashion, because the worklist will not be traced by the
+        // garbage collector.  The argument justifying it in this case
+        // is that all of these atoms are property names that are kept
+        // alive by the object we are stringifying, but that is not
+        // a great argument.  Also this code would completely break
+        // in the presence of a copying garbage collector.
         struct AutoDestructingAtomArray {
             AutoDestructingAtomArray(MMgc::FixedMalloc* fm, int32_t atomCount)
                 : m_atoms(NULL)
@@ -366,6 +387,19 @@ namespace avmplus
             MMgc::FixedMalloc* m_fixedmalloc;
         };
 
+        // The purpose of Rope is to allow the stringify code to emit
+        // its output incrementally.  Since we do not know a priori
+        // how much output may be associated with a particular input,
+        // we cannot preallocate the output buffer.  So we avoid the
+        // O(n lg n) time blowup (where n is output size) associated
+        // with automatically resizing (and recopying) the target
+        // buffer every time the emission hits the string's capacity
+        // threshold.  Instead we emit to a sequence of fixed length
+        // buffers, and then after emission is complete, we assemble
+        // the final output string in one pass, thus maintaining a
+        // O(n) time bound.  (Unlike some other rope structures, this
+        // uses a list rather than a tree; this works because the
+        // use-case is quite specialized here.)
         struct Rope
         {
             struct Chunk
