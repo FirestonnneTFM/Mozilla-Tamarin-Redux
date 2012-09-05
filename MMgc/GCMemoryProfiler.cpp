@@ -158,8 +158,12 @@ namespace MMgc
             }
             // keep going until we hit mutator code
             if(VMPI_strstr(name, "::Alloc") != NULL ||
+                VMPI_strstr(name, "::OutOfLineAlloc") != NULL ||
+                VMPI_strstr(name, "::InlineAlloc") != NULL ||
                 VMPI_strstr(name, "::LargeAlloc") != NULL ||
                 VMPI_strstr(name, "::Calloc") != NULL ||
+                VMPI_strstr(name, "MMgc::TaggedAlloc") != NULL ||
+                VMPI_strstr(name, "MMgc::NewTagged") != NULL ||
                 VMPI_strstr(name, "operator new") != NULL)
             {
                 trace->skip++;
