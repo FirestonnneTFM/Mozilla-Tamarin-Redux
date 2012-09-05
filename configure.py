@@ -387,6 +387,7 @@ if config.getCompiler() == 'GCC':
     else:
         APP_CXXFLAGS += "-Wuninitialized "
     DEBUG_CXXFLAGS += "-g "
+    DEBUG_LDFLAGS += "-g "
 elif config.getCompiler() == 'VS':
     if cpu == "arm":
         APP_CXXFLAGS = "-W4 -WX -wd4291 -wd4201 -wd4189 -wd4740 -wd4127 -fp:fast -GF -GS- -Zc:wchar_t- "
