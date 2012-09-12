@@ -1,26 +1,9 @@
 /* -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 /* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 
-// Origin of this code:
-//   http://opensource.adobe.com/svn/opensource/flex/sdk/branches/4.x/frameworks/projects/framework/src/mx/utils/SHA256.as
-//
-// The license for the code is here:
-//   http://opensource.adobe.com/wiki/display/flexsdk/Legal+Stuff
-//
-// This code is distributed by Adobe Systems under the Mozilla MPL.
-//
-// The code has been modified to incorporate a simple benchmark driver.
-
-////////////////////////////////////////////////////////////////////////////////
-//
-//  ADOBE SYSTEMS INCORPORATED
-//  Copyright 2007 Adobe Systems Incorporated
-//  All Rights Reserved.
-//
-//  NOTICE: Adobe permits you to use, modify, and distribute this file
-//  in accordance with the terms of the license agreement accompanying it.
-//
-////////////////////////////////////////////////////////////////////////////////
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 package mx.utils
 {

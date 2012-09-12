@@ -1,3 +1,7 @@
+; This Source Code Form is subject to the terms of the Mozilla Public
+; License, v. 2.0. If a copy of the MPL was not distributed with this
+; file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 ; It's very difficult to test that the 'lo' part is actually doing anything
 ; because it tends to get lost when lirasm dumps the result to the console.
 ; By far the easiest way to check this is to use dlo2i and dhi2i to see if we
