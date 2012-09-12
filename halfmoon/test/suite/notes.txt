@@ -5,4 +5,3 @@ The tests in the function directory are the same as those in the global script d
 Known bugs with sunspider tests:
 s3d-raytrace - Implement double NaN
 untyped/string-fasta - Implement hasnext2 opcode. Array iteration
-
