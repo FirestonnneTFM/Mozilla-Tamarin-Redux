@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /* Generate some text files called exactgc-shouldpass-n.txt and
  * exactgc-shouldfail-n.txt.  These have various mixed line endings.
  * All the shouldpass files should be run through exactgc.abc without

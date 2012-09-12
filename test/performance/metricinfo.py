@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 # This file contains information about the different performance metrics
 # It is a python file that is imported into runtests.py
 # Only one variable, metric_info is to be defined in this file.  

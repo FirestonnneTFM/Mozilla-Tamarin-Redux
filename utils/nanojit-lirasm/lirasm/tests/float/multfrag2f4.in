@@ -1,3 +1,7 @@
+; This Source Code Form is subject to the terms of the Mozilla Public
+; License, v. 2.0. If a copy of the MPL was not distributed with this
+; file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 .begin sinpibytwo
 pi = immf 3.1415926535897932384626433832795
 pi4 = f2f4 pi

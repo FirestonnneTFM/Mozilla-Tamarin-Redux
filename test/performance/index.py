@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 # The testindex file contains a list of test results that are used to normalize
 # all current results using these provided values.  This enables us to equally
 # weight the results of each test irrespective of the actual test runtime.
