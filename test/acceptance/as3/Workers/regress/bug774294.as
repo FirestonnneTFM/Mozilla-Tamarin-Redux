@@ -53,6 +53,11 @@ package {
         // after terminiate() call: 
         // Assertion failed: "((from == Isolate::RUNNING || from == Isolate::STARTING || from == Isolate::FINISHING || from == Isolate::NEW))" ("../core/Isolate.cpp":380)
         w.terminate();
+        var start:uint=getTimer();
+        while (w.state!="terminated") {
+            System.sleep(10);
+            if (getTimer()-start>2000) break;
+        }
         AddTestCase("assert state is terminated","terminated",w.state);
         test();
     } else {
