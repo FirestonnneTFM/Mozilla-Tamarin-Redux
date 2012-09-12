@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 # Place all timezones that this file applies to.
 # These values correspond to the value returned by time.tzname tuple.
 # e.g.: Eastern Standard Time/Eastern Daylight Time = ('EST','EDT')
