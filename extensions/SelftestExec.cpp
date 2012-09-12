@@ -1,44 +1,10 @@
-// Generated from ST_avmplus_basics.st, ST_avmplus_builtins.st, ST_avmplus_peephole.st, ST_avmplus_vector_accessors.st, ST_mmgc_543560.st, ST_mmgc_575631.st, ST_mmgc_580603.st, ST_mmgc_603411.st, ST_mmgc_637993.st, ST_mmgc_basics.st, ST_mmgc_dependent.st, ST_mmgc_exact.st, ST_mmgc_externalalloc.st, ST_mmgc_finalize_uninit.st, ST_mmgc_fixedmalloc_findbeginning.st, ST_mmgc_gcheap.st, ST_mmgc_gcoption.st, ST_mmgc_mmfx_array.st, ST_mmgc_threads.st, ST_mmgc_weakref.st, ST_nanojit_codealloc.st, ST_vmbase_concurrency.st, ST_vmbase_safepoints.st, ST_vmpi_threads.st, ST_workers_Buffer.st, ST_workers_NoSyncSingleItemBuffer.st, ST_workers_Promise.st
 // Generated from ST_avmplus_basics.st
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -178,43 +144,9 @@ void create_avmplus_basics(AvmCore* core) { new ST_avmplus_basics(core); }
 // Generated from ST_avmplus_builtins.st
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
-//
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -272,42 +204,9 @@ void create_avmplus_builtins(AvmCore* core) { new ST_avmplus_builtins(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -396,42 +295,9 @@ void create_avmplus_peephole(AvmCore* core) { new ST_avmplus_peephole(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // Bugzilla 609145 - VectorObject needs fast inline getter/setters
 // Make sure the APIs, which are used by the Flash Player and AIR only, do not disappear.
@@ -635,42 +501,9 @@ void create_avmplus_vector_accessors(AvmCore* core) { new ST_avmplus_vector_acce
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // Bugzilla 543560 - here we risk deleting an object that is still on the mark stack because
 // of how we perform large-object splitting.  The setup is that user code that deletes the object
@@ -836,42 +669,9 @@ void create_mmgc_bugzilla_543560(AvmCore* core) { new ST_mmgc_bugzilla_543560(co
 // -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5)
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // Bugzilla 565631 - We occasionally interleave invoking finalizers
 // and clearing mark bits in GCAlloc::Finalize; so a finalizer can
@@ -1011,42 +811,9 @@ void create_mmgc_bugzilla_575631(AvmCore* core) { new ST_mmgc_bugzilla_575631(co
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // Bugzilla 580603 - adversarial mmgc: dispersive w.r.t. address space
 // Bugzilla 445780 - Page map needs to be sparse
@@ -1334,44 +1101,9 @@ void create_mmgc_bugzilla_580603(AvmCore* core) { new ST_mmgc_bugzilla_580603(co
 // Generated from ST_mmgc_603411.st
 // -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2011
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
-
-// Bug 603411 - SECURITY: AvmCore dtor needs to clear CallStackNode chain
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -1508,42 +1240,9 @@ void create_mmgc_bugzilla_603411(AvmCore* core) { new ST_mmgc_bugzilla_603411(co
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // Bugzilla 637993: rehashing a GCHashtable in the midst of iteration
 // is unsound; here we check that we are guarding against it.
@@ -1694,42 +1393,9 @@ void create_mmgc_bugzilla_637993(AvmCore* core) { new ST_mmgc_bugzilla_637993(co
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -2272,42 +1938,9 @@ void create_mmgc_basics(AvmCore* core) { new ST_mmgc_basics(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // Bugzilla 543560 - here we risk deleting an object that is still on the mark stack because
 // of how we perform large-object splitting.  The setup is that user code that deletes the object
@@ -2485,42 +2118,9 @@ void create_mmgc_dependent(AvmCore* core) { new ST_mmgc_dependent(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -2588,42 +2188,9 @@ void create_mmgc_exact(AvmCore* core) { new ST_mmgc_exact(core); }
 // Generated from ST_mmgc_externalalloc.st
 // -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2011
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -2929,42 +2496,9 @@ void create_mmgc_finalize_uninit(AvmCore* core) { new ST_mmgc_finalize_uninit(co
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // Bugzilla 663508: Add FixedMalloc::FindBeginning
 
@@ -3243,42 +2777,9 @@ void create_mmgc_fixedmalloc_findbeginning(AvmCore* core) { new ST_mmgc_fixedmal
 // Generated from ST_mmgc_gcheap.st
 // -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -3341,42 +2842,9 @@ void create_mmgc_gcheap(AvmCore* core) { new ST_mmgc_gcheap(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -3757,42 +3225,9 @@ void create_mmgc_gcoption(AvmCore* core) { new ST_mmgc_gcoption(core); }
 // Generated from ST_mmgc_mmfx_array.st
 // -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2011
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -3870,42 +3305,9 @@ void create_mmgc_mmfx_array(AvmCore* core) { new ST_mmgc_mmfx_array(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -4070,42 +3472,9 @@ void create_mmgc_threads(AvmCore* core) { new ST_mmgc_threads(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -4283,42 +3652,9 @@ void create_mmgc_weakref(AvmCore* core) { new ST_mmgc_weakref(core); }
 // -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5)
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2011
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -4538,42 +3874,9 @@ void create_nanojit_codealloc(AvmCore* core) { new ST_nanojit_codealloc(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -5057,42 +4360,9 @@ void create_vmbase_concurrency(AvmCore* core) { new ST_vmbase_concurrency(core);
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -5642,42 +4912,9 @@ void create_vmbase_safepoints(AvmCore* core) { new ST_vmbase_safepoints(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2004-2006
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // Bugzilla 543560 - here we risk deleting an object that is still on the mark stack because
 // of how we perform large-object splitting.  The setup is that user code that deletes the object
@@ -6213,42 +5450,9 @@ void create_vmpi_threads(AvmCore* core) { new ST_vmpi_threads(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2012
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -6464,42 +5668,9 @@ void create_workers_Buffers(AvmCore* core) { new ST_workers_Buffers(core); }
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2012
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
@@ -6595,42 +5766,9 @@ void create_workers_NoSyncSingleItemBuffer(AvmCore* core) { new ST_workers_NoSyn
 // -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
 // vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
-// ***** BEGIN LICENSE BLOCK *****
-// Version: MPL 1.1/GPL 2.0/LGPL 2.1
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.1 (the "License"); you may not use this file except in compliance with
-// the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-// for the specific language governing rights and limitations under the
-// License.
-//
-// The Original Code is [Open Source Virtual Machine.].
-//
-// The Initial Developer of the Original Code is
-// Adobe System Incorporated.
-// Portions created by the Initial Developer are Copyright (C) 2012
-// the Initial Developer. All Rights Reserved.
-//
-// Contributor(s):
-//   Adobe AS3 Team
-//
-// Alternatively, the contents of this file may be used under the terms of
-// either the GNU General Public License Version 2 or later (the "GPL"), or
-// the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-// in which case the provisions of the GPL or the LGPL are applicable instead
-// of those above. If you wish to allow use of your version of this file only
-// under the terms of either the GPL or the LGPL, and not to allow others to
-// use your version of this file under the terms of the MPL, indicate your
-// decision by deleting the provisions above and replace them with the notice
-// and other provisions required by the GPL or the LGPL. If you do not delete
-// the provisions above, a recipient may use your version of this file under
-// the terms of any one of the MPL, the GPL or the LGPL.
-//
-// ***** END LICENSE BLOCK ***** */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST

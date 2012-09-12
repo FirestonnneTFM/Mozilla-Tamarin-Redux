@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 function foo(){
    var copy = new Array(5);
    copy[0] = 17;    copy[1] = 18;    copy[2] = 19;    copy[3] = 20;
