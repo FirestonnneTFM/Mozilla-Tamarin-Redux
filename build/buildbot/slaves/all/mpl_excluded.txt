@@ -1,39 +1,6 @@
-#  ***** BEGIN LICENSE BLOCK *****
-#  Version: MPL 1.1/GPL 2.0/LGPL 2.1
-# 
-#  The contents of this file are subject to the Mozilla Public License Version
-#  1.1 (the "License"); you may not use this file except in compliance with
-#  the License. You may obtain a copy of the License at
-#  http://www.mozilla.org/MPL/
-# 
-#  Software distributed under the License is distributed on an "AS IS" basis,
-#  WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-#  for the specific language governing rights and limitations under the
-#  License.
-# 
-#  The Original Code is [Open Source Virtual Machine.].
-# 
-#  The Initial Developer of the Original Code is
-#  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
-#  the Initial Developer. All Rights Reserved.
-# 
-#  Contributor(s):
-#    Adobe AS3 Team
-# 
-#  Alternatively, the contents of this file may be used under the terms of
-#  either the GNU General Public License Version 2 or later (the "GPL"), or
-#  the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-#  in which case the provisions of the GPL or the LGPL are applicable instead
-#  of those above. If you wish to allow use of your version of this file only
-#  under the terms of either the GPL or the LGPL, and not to allow others to
-#  use your version of this file under the terms of the MPL, indicate your
-#  decision by deleting the provisions above and replace them with the notice
-#  and other provisions required by the GPL or the LGPL. If you do not delete
-#  the provisions above, a recipient may use your version of this file under
-#  the terms of any one of the MPL, the GPL or the LGPL.
-# 
-#  ***** END LICENSE BLOCK ****
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #############################
 # Directories to exclude
 .*/.hg/.*
@@ -42,18 +9,32 @@
 .*/build/buildbot/master/custom/.*
 .*/doc/mmgc/audit-2009/.*
 .*/esc/.*
-.*/objdir/.*
+.*/objdir.*
 .*/other-licenses/.*
 .*/pcre/.*
 .*/performance/jsbench/.*
 .*/performance/scimark/.*
 .*/performance/sunspider/.*
+.*/performance/sunspider-0.9.1/.*
 .*/platform/win32/obj/.*
 .*/platform/win32/Windows.*/.*
 .*/test/performance/v8.*/.*
-
-
-
+.*/objdir-release/.*
+.*/gtest/.*
+.*/utils/nanojit-lirasm/autom4te.cache/.*
+.*/utils/nanojit-lirasm/autom4te.cache/.*
+.*/utils/nanojit-lirasm/autom4te.cache/.*
+.*/halfmoon/test/suite/sunspider.*/.*
+.*/halfmoon/test/suite/v8.*/.*
+.*/halfmoon/test/suite/interpreterSuite/sunspider/.*
+.*/halfmoon/test/suite/interpreterSuite/v8.*/.*
+.*/halfmoon/test/sanity/sunspider/.*
+.*/halfmoon/test/sanity/v8suite/.*
+.*/halfmoon/test/benchmarks/sunspider-long/.*
+.*/halfmoon/test/benchmarks/v8-long/.*
+.*/halfmoon/generated/.*
+# this needs some review
+.*/halfmoon/attic/.*
 
 #############################
 # File extensions to exclude
@@ -80,20 +61,45 @@
 .*\.sln
 .*\.txt
 .*\.vcproj
+.*\.vcxproj
+.*\.vcxproj.filters
+.*\.vsprops
 .*\.pdf
-
-
+.*\.err
+.*\.launch
+.*\.o
+.*\.gypi
+.*\.pickle
+.*\.cproject
+.*\.project
+.*\.java_args
+.*\.DS_Store
+.*\.log
+.*\.status
 
 #############################
 # Files to exclude
 .*/Doxyfile
 .*/\.hgignore
 .*/\.hgtags
+.*/\.hgeol
+.*/LICENSE
 .*/build/cygwin-wrapper\.sh
+.*/build/buildbot/slaves/all/codecoverage-compile.csv
+.*/build/buildbot/slaves/all/codecoverage-test.csv
+.*/build/buildbot/slaves/linux-deep/scripts/env32
+.*/build/buildbot/slaves/linux-deep/scripts/env64
+.*/build/buildbot/slaves/mac-deep/scripts/env32
+.*/build/buildbot/slaves/mac-deep/scripts/env64
+.*/build/buildbot/slaves/windows64-deep/scripts/env32
+.*/build/buildbot/slaves/windows64-deep/scripts/env64
+.*/platform/android/killableprocess.py
 .*/platform/mac/shell/exports\.exp
 .*/platform/win32/armasm\.rules
 .*/\.buildbot-sourcedata
 .*/test/acceptance/test\.ba
+.*/test/acceptance/test\.bin
+.*/test/acceptance/test2\.ba
 .*/test/acceptance/misc/md5_t\.as
 .*/test/performance/canaries/simpleflexapputil/avmglue_abc
 .*/test/performance/canaries/simpleflexapputil/hello_frame1_abc
@@ -107,6 +113,35 @@
 .*/test/util/threadpool\.py
 .*/test/util/which\.py
 .*/test/util/winprocess\.py
+.*/test/acceptance/regress/bug_606478\.as\.tz
+.*/test/acceptance/spidermonkey/js1_5/Array/regress-107138
+.*/test/acceptance/spidermonkey/js1_5/Regress/regress-10278\.as
+.*/test/acceptance/spidermonkey/js1_5/Regress/regress-162392\.as
+.*/test/acceptance/spidermonkey/js1_5/Regress/regress-169559\.as
+.*/test/acceptance/spidermonkey/js1_5/Regress/regress-240317\.as
+.*/test/acceptance/spidermonkey/js1_5/Regress/regress-306794\.as
+.*/test/acceptance/spidermonkey/js1_5/Regress/regress-325925\.as
+.*/test/acceptance/spidermonkey/js1_5/Regress/regress-326453\.as
+.*/test/acceptance/spidermonkey/js1_5/Regress/regress-449627\.as
+.*/test/acceptance/spidermonkey/js1_5/Regress/regress-449666\.as
+.*/test/acceptance/spidermonkey/js1_5/Regress/regress-459085\.as
+.*/test/acceptance/spidermonkey/js1_5/Regress/regress-470758-01\.as
+.*/test/acceptance/spidermonkey/js1_5/Regress/regress-470758-02\.as
+.*/test/acceptance/spidermonkey/js1_5/Regress/regress-58116\.as
+.*/test/acceptance/spidermonkey/js1_6/append\.sh
+.*/test/acceptance/spidermonkey/js1_6/Array/regress-386030\.as
 .*/utils/nanojit-import/nanojit-import-filemap
 .*/utils/nanojit-import/nanojit-import-rev
-
+.*/utils/nanojit-lirasm/autoconf/config\.guess
+.*/utils/nanojit-lirasm/autoconf/config\.sub
+.*/utils/sharkprof/jit.s
+.*/utils/nanojit-lirasm/configure
+.*/utils/nanojit-lirasm/bin/lirasm
+.*/halfmoon/templates/README
+.*/halfmoon/templates/sexp.py
+.*/halfmoon/utils/google-code-style.xml
+.*/halfmoon/test/sanity/functionScripts/typed/classes/booleanNullObject\.as
+.*/halfmoon/test/sanity/functionScripts/untyped/strings/stringValidateShort\.as
+.*/halfmoon/test/sanity/profiler/speculateArray\.as
+.*/halfmoon/test/suite/functionScripts/untyped/strings/stringValidateShort\.as
+.*/halfmoon/test/suite/profiler/speculateArray\.as
