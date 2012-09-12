@@ -131,8 +131,6 @@ namespace avmshell
         {
             MMGC_ENTER_RETURN(OUT_OF_MEMORY);
 
-            Aggregate::initializeGlobals();
-
             {
               // code coverage/cheap test
               MMGC_ENTER_SUSPEND;
@@ -146,17 +144,15 @@ namespace avmshell
 
 #ifdef VMCFG_WORKERTHREADS
             if (instance->settings.numworkers == 1 && instance->settings.numthreads == 1 && instance->settings.repeats == 1)
-                instance->runIsolate(instance->newIsolate(NULL));
+                instance->newIsolate(NULL)->run();
             else
                 instance->multiWorker(instance->settings);
 #else
-            instance->runIsolate(instance->newIsolate(NULL));
+			instance->newIsolate(NULL)->run();
 #endif
             instance->waitUntilNoIsolates();
             // Shell is refcounted now
             //mmfx_delete(instance);
-            
-            Aggregate::reclaimGlobals();
         }
 
         MMgc::GCHeap::Destroy();
@@ -169,32 +165,32 @@ namespace avmshell
     {}
 
 
-    bool ShellIsolate::copyByteCode(avmplus::ByteArrayObject* ba)
+    void ShellIsolate::copyByteCode(avmplus::ByteArrayObject* ba)
     {
         if (ba != NULL) {
-            return Isolate::copyByteCode(ba);
+			Isolate::copyByteCode(ba);
         }
-        Shell* shell = static_cast<Shell*> (getAggregate());
-        int numfiles = shell->settings.numfiles;
-        char** filenames = shell->settings.filenames;
-
-        m_code.allocate(numfiles);
-        for (int i = 0; i < numfiles; i++) {
-            char* filename = filenames[i];
-            FileInputStream f(filename);
-            bool isValid = f.valid() && ((uint64_t)f.length() < UINT32_T_MAX); //currently we cannot read files > 4GB
-            if (!isValid) {
-                return false;
-            }
-            
-            // parse new bytecode
-            //avmplus::ScriptBuffer code = targetCore()->newScriptBuffer((size_t)f.available());
-            //(f.read(buf), (size_t)f.available();
-            size_t avail = (size_t)f.available();
-            m_code.values[i].allocate((int)avail);
-            f.read(m_code.values[i].values, avail);
-        }
-        return true;
+		else 
+		{
+			Shell* shell = static_cast<Shell*> (getAggregate());
+			int numfiles = shell->settings.numfiles;
+			char** filenames = shell->settings.filenames;
+			
+			m_code.allocate(numfiles);
+			for (int i = 0; i < numfiles; i++) {
+				char* filename = filenames[i];
+				FileInputStream f(filename);
+				const bool isValid = f.valid() && ((uint64_t)f.length() < UINT32_T_MAX); //currently we cannot read files > 4GB
+				if (isValid) {
+					// parse new bytecode
+					//avmplus::ScriptBuffer code = targetCore()->newScriptBuffer((size_t)f.available());
+					//(f.read(buf), (size_t)f.available();
+					size_t avail = (size_t)f.available();
+					m_code.values[i].allocate((int)avail);
+					f.read(m_code.values[i].values, avail);
+				}
+			}
+		}
     }
 
     /*virtual*/ void ShellIsolate::doRun()
@@ -213,7 +209,7 @@ namespace avmshell
             
             ShellCoreImpl* core = new ShellCoreImpl(gc, settings, false);
 
-            aggregate->initializeAndNotify(core, this);
+            aggregate->initialize(core, this);
 
             avmplus::EnterSafepointManager enterSafepointManager(core);
             
@@ -222,12 +218,9 @@ namespace avmshell
                 avmplus::Isolate::State state = aggregate->queryState(this);
                 if (state == avmplus::Isolate::RUNNING) { 
                     this->evalCodeBlobs(settings.enter_debugger_on_launch);
-                } else {
-                    // FIXME: this happened probably because we got interrupted, but maybe it's a resource situation?
-                    // so maybe aborted?
-                    aggregate->stateTransition(this, avmplus::Isolate::TERMINATED);
-                }
-            } 
+                } 
+            }
+			
             aggregate->beforeCoreDeletion(this);
             gc->Collect();            
             
@@ -248,12 +241,35 @@ namespace avmshell
     }
 
 
-    avmplus::ScriptObject* ShellIsolate::workerObject(avmplus::Toplevel* toplevel)
+    avmplus::ScriptObject* ShellIsolate::newWorkerObject(avmplus::Toplevel* toplevel)
     {
         GCRef<ShellWorkerObject> workerObject 
             = toplevel->workerClass().staticCast<ShellWorkerClass>()->constructObject().staticCast<ShellWorkerObject>();
         return workerObject->setIsolate(this);
     }
+	
+	void ShellIsolate::evalCodeBlobs(bool enter_debugger_on_launch)
+    {
+        // The isolate is now live and operating independently.
+        AvmAssert(avmplus::AvmCore::getActiveCore()->getIsolate() == this);
+        AvmAssert(getAggregate()->queryState(this) == RUNNING);
+        
+        avmplus::AvmCore* core = getAvmCore();
+        for (int i = 0; i < m_code.length; i++ ) {
+            // execute event loop at the end of the last script
+            if (i == (m_code.length - 1) && !isPrimordial())
+                core->enterEventLoop = true;
+            // parse new bytecode
+			avmplus::ReadOnlyScriptBufferImpl* codeimpl = 
+			new (core->gc) avmplus::ReadOnlyScriptBufferImpl(m_code.values[i].values, m_code.values[i].length);
+			avmplus::ScriptBuffer code(codeimpl);
+            core->evaluateScriptBuffer(code, enter_debugger_on_launch);
+            // release bytes regardless of success/failure
+            m_code.values[i].deallocate(); 
+        }
+        m_code.deallocate();
+    }
+	
 
     class PrimordialShellIsolate : public ShellIsolate
     {
@@ -284,10 +300,12 @@ namespace avmshell
             this->initialize(shell);
 
             avmplus::EnterSafepointManager enterSafepointManager(shell);
+            aggregate->stateTransition(this, avmplus::Isolate::STARTING);
+
             ShellToplevel* toplevel = shell->setup(settings);
             // inlined singleWorkerHelper
             if (toplevel == NULL) // FIXME abort?
-            Platform::GetInstance()->exit(1);
+				Platform::GetInstance()->exit(1);
 
 #ifdef VMCFG_SELFTEST
         if (settings.do_selftest) {
@@ -336,6 +354,7 @@ namespace avmshell
         if (settings.do_repl)
                 Shell::repl(shell);
 #endif
+		aggregate->requestAggregateExit();
         aggregate->beforeCoreDeletion(this);
         delete shell;
         mmfx_delete( gc );
@@ -1394,7 +1413,7 @@ namespace avmplus
 {
     Isolate* Isolate::newIsolate(int32_t desc, int32_t parentDesc, Aggregate* aggregate)
     {
-        if (aggregate->isPrimordial(desc)) {
+        if (parentDesc == Isolate::INVALID_DESC) {
             return mmfx_new(avmshell::PrimordialShellIsolate(desc, parentDesc, aggregate));
         } else {
             return mmfx_new(avmshell::ShellIsolate(desc, parentDesc, aggregate));

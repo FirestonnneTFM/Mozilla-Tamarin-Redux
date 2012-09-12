@@ -6673,7 +6673,7 @@ verifyPass(main!=NULL, "main!=NULL", __FILE__, __LINE__);
 verifyPass(state==3, "state==3", __FILE__, __LINE__);
 
 // line 58 "ST_workers_Promise.st"
-verifyPass(main->targetCore() == core, "main->targetCore() == core", __FILE__, __LINE__);
+// verifyPass(main->targetCore() == core, "main->targetCore() == core", __FILE__, __LINE__);
 // line 59 "ST_workers_Promise.st"
 verifyPass(main->isParentOf(main) == false, "main->isParentOf(main) == false", __FILE__, __LINE__);
 

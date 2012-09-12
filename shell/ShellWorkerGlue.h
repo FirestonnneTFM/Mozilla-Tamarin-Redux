@@ -41,7 +41,7 @@
 
 
 namespace avmshell {
-    class ShellWorkerClass : public avmplus::ClassClosure, public avmplus::WorkerClassBase<ShellWorkerClass>
+    class ShellWorkerClass : public avmplus::ClassClosure
     {
         public:
         ShellWorkerClass(avmplus::VTable* cvtable);
@@ -62,13 +62,8 @@ namespace avmshell {
         void clearByteCode();
         avmplus::ByteArrayObject* getByteCode();
         void setByteCode(avmplus::ByteArrayObject* byteCode);
-        bool startInternal();
 
-        
         bool terminate();
-
-        // not in FP
-        int32_t get_descriptor() const;
 
 		bool get_isPrimordial ()	{ return isPrimordial(); }
 

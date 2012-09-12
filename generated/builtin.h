@@ -804,104 +804,103 @@ const uint32_t flash_net_ObjectEncoding_dynamicPropertyWriter_get = 968; // nati
 const uint32_t flash_net_ObjectEncoding_dynamicPropertyWriter_set = 969; // native
 const uint32_t native_script_function_avm2_intrinsics_memory_casi32 = 972; // native
 const uint32_t native_script_function_avm2_intrinsics_memory_mfence = 973; // native
-const uint32_t flash_concurrent_Mutex_lock = 976; // native
-const uint32_t flash_concurrent_Mutex_tryLock = 977; // native
-const uint32_t flash_concurrent_Mutex_unlock = 978; // native
-const uint32_t flash_concurrent_Mutex_private_ctor = 979; // native
-const uint32_t flash_concurrent_Condition_mutex_get = 982; // native
-const uint32_t flash_concurrent_Condition_wait = 983; // abc
-const uint32_t flash_concurrent_Condition_notify = 984; // abc
-const uint32_t flash_concurrent_Condition_notifyAll = 985; // abc
-const uint32_t flash_concurrent_Condition_private_ctor = 986; // native
-const uint32_t flash_concurrent_Condition_private_notifyImpl = 987; // native
-const uint32_t flash_concurrent_Condition_private_notifyAllImpl = 988; // native
-const uint32_t flash_concurrent_Condition_private_waitImpl = 989; // native
-const uint32_t flash_utils_ObjectInput_readBytes = 992; // native
-const uint32_t flash_utils_ObjectInput_readBoolean = 993; // native
-const uint32_t flash_utils_ObjectInput_readByte = 994; // native
-const uint32_t flash_utils_ObjectInput_readUnsignedByte = 995; // native
-const uint32_t flash_utils_ObjectInput_readShort = 996; // native
-const uint32_t flash_utils_ObjectInput_readUnsignedShort = 997; // native
-const uint32_t flash_utils_ObjectInput_readInt = 998; // native
-const uint32_t flash_utils_ObjectInput_readUnsignedInt = 999; // native
-const uint32_t flash_utils_ObjectInput_readFloat = 1000; // native
-const uint32_t flash_utils_ObjectInput_readDouble = 1001; // native
-const uint32_t flash_utils_ObjectInput_readMultiByte = 1002; // native
-const uint32_t flash_utils_ObjectInput_readUTF = 1003; // native
-const uint32_t flash_utils_ObjectInput_readUTFBytes = 1004; // native
-const uint32_t flash_utils_ObjectInput_bytesAvailable_get = 1005; // native
-const uint32_t flash_utils_ObjectInput_readObject = 1006; // native
-const uint32_t flash_utils_ObjectInput_objectEncoding_get = 1007; // native
-const uint32_t flash_utils_ObjectInput_objectEncoding_set = 1008; // native
-const uint32_t flash_utils_ObjectInput_endian_get = 1009; // native
-const uint32_t flash_utils_ObjectInput_endian_set = 1010; // native
-const uint32_t flash_utils_ByteArray_defaultObjectEncoding_get = 1021; // native
-const uint32_t flash_utils_ByteArray_defaultObjectEncoding_set = 1022; // native
-const uint32_t flash_utils_ByteArray_readBytes = 1024; // native
-const uint32_t flash_utils_ByteArray_writeBytes = 1025; // native
-const uint32_t flash_utils_ByteArray_writeBoolean = 1026; // native
-const uint32_t flash_utils_ByteArray_writeByte = 1027; // native
-const uint32_t flash_utils_ByteArray_writeShort = 1028; // native
-const uint32_t flash_utils_ByteArray_writeInt = 1029; // native
-const uint32_t flash_utils_ByteArray_writeUnsignedInt = 1030; // native
-const uint32_t flash_utils_ByteArray_writeFloat = 1031; // native
-const uint32_t flash_utils_ByteArray_writeDouble = 1032; // native
-const uint32_t flash_utils_ByteArray_writeMultiByte = 1033; // native
-const uint32_t flash_utils_ByteArray_writeUTF = 1034; // native
-const uint32_t flash_utils_ByteArray_writeUTFBytes = 1035; // native
-const uint32_t flash_utils_ByteArray_readBoolean = 1036; // native
-const uint32_t flash_utils_ByteArray_readByte = 1037; // native
-const uint32_t flash_utils_ByteArray_readUnsignedByte = 1038; // native
-const uint32_t flash_utils_ByteArray_readShort = 1039; // native
-const uint32_t flash_utils_ByteArray_readUnsignedShort = 1040; // native
-const uint32_t flash_utils_ByteArray_readInt = 1041; // native
-const uint32_t flash_utils_ByteArray_readUnsignedInt = 1042; // native
-const uint32_t flash_utils_ByteArray_readFloat = 1043; // native
-const uint32_t flash_utils_ByteArray_readDouble = 1044; // native
-const uint32_t flash_utils_ByteArray_readMultiByte = 1045; // native
-const uint32_t flash_utils_ByteArray_readUTF = 1046; // native
-const uint32_t flash_utils_ByteArray_readUTFBytes = 1047; // native
-const uint32_t flash_utils_ByteArray_length_get = 1048; // native
-const uint32_t flash_utils_ByteArray_length_set = 1049; // native
-const uint32_t flash_utils_ByteArray_writeObject = 1050; // native
-const uint32_t flash_utils_ByteArray_readObject = 1051; // native
-const uint32_t flash_utils_ByteArray_deflate = 1052; // abc
-const uint32_t flash_utils_ByteArray_private__compress = 1053; // native
-const uint32_t flash_utils_ByteArray_compress = 1054; // abc
-const uint32_t flash_utils_ByteArray_inflate = 1055; // abc
-const uint32_t flash_utils_ByteArray_private__uncompress = 1056; // native
-const uint32_t flash_utils_ByteArray_uncompress = 1057; // abc
-const uint32_t flash_utils_ByteArray_toString = 1058; // abc
-const uint32_t flash_utils_ByteArray_private__toString = 1059; // native
-const uint32_t flash_utils_ByteArray_bytesAvailable_get = 1060; // native
-const uint32_t flash_utils_ByteArray_position_get = 1061; // native
-const uint32_t flash_utils_ByteArray_position_set = 1062; // native
-const uint32_t flash_utils_ByteArray_objectEncoding_get = 1063; // native
-const uint32_t flash_utils_ByteArray_objectEncoding_set = 1064; // native
-const uint32_t flash_utils_ByteArray_endian_get = 1065; // native
-const uint32_t flash_utils_ByteArray_endian_set = 1066; // native
-const uint32_t flash_utils_ByteArray_clear = 1067; // native
-const uint32_t flash_utils_ByteArray_atomicCompareAndSwapIntAt = 1068; // native
-const uint32_t flash_utils_ByteArray_atomicCompareAndSwapLength = 1069; // native
-const uint32_t flash_utils_ByteArray_shareable_get = 1070; // native
-const uint32_t flash_utils_ByteArray_shareable_set = 1071; // native
-const uint32_t flash_utils_ObjectOutput_writeBytes = 1074; // native
-const uint32_t flash_utils_ObjectOutput_writeBoolean = 1075; // native
-const uint32_t flash_utils_ObjectOutput_writeByte = 1076; // native
-const uint32_t flash_utils_ObjectOutput_writeShort = 1077; // native
-const uint32_t flash_utils_ObjectOutput_writeInt = 1078; // native
-const uint32_t flash_utils_ObjectOutput_writeUnsignedInt = 1079; // native
-const uint32_t flash_utils_ObjectOutput_writeFloat = 1080; // native
-const uint32_t flash_utils_ObjectOutput_writeDouble = 1081; // native
-const uint32_t flash_utils_ObjectOutput_writeMultiByte = 1082; // native
-const uint32_t flash_utils_ObjectOutput_writeUTF = 1083; // native
-const uint32_t flash_utils_ObjectOutput_writeUTFBytes = 1084; // native
-const uint32_t flash_utils_ObjectOutput_writeObject = 1085; // native
-const uint32_t flash_utils_ObjectOutput_objectEncoding_get = 1086; // native
-const uint32_t flash_utils_ObjectOutput_objectEncoding_set = 1087; // native
-const uint32_t flash_utils_ObjectOutput_endian_get = 1088; // native
-const uint32_t flash_utils_ObjectOutput_endian_set = 1089; // native
-const uint32_t flash_net_DynamicPropertyOutput_writeDynamicProperty = 1093; // native
+const uint32_t flash_concurrent_Mutex_isSupported = 975; // native
+const uint32_t flash_concurrent_Mutex_lock = 977; // native
+const uint32_t flash_concurrent_Mutex_tryLock = 978; // native
+const uint32_t flash_concurrent_Mutex_unlock = 979; // native
+const uint32_t flash_concurrent_Mutex_private_ctor = 980; // native
+const uint32_t flash_concurrent_Condition_isSupported = 982; // native
+const uint32_t flash_concurrent_Condition_mutex_get = 984; // native
+const uint32_t flash_concurrent_Condition_wait = 985; // native
+const uint32_t flash_concurrent_Condition_notify = 986; // native
+const uint32_t flash_concurrent_Condition_notifyAll = 987; // native
+const uint32_t flash_concurrent_Condition_private_ctor = 988; // native
+const uint32_t flash_utils_ObjectInput_readBytes = 991; // native
+const uint32_t flash_utils_ObjectInput_readBoolean = 992; // native
+const uint32_t flash_utils_ObjectInput_readByte = 993; // native
+const uint32_t flash_utils_ObjectInput_readUnsignedByte = 994; // native
+const uint32_t flash_utils_ObjectInput_readShort = 995; // native
+const uint32_t flash_utils_ObjectInput_readUnsignedShort = 996; // native
+const uint32_t flash_utils_ObjectInput_readInt = 997; // native
+const uint32_t flash_utils_ObjectInput_readUnsignedInt = 998; // native
+const uint32_t flash_utils_ObjectInput_readFloat = 999; // native
+const uint32_t flash_utils_ObjectInput_readDouble = 1000; // native
+const uint32_t flash_utils_ObjectInput_readMultiByte = 1001; // native
+const uint32_t flash_utils_ObjectInput_readUTF = 1002; // native
+const uint32_t flash_utils_ObjectInput_readUTFBytes = 1003; // native
+const uint32_t flash_utils_ObjectInput_bytesAvailable_get = 1004; // native
+const uint32_t flash_utils_ObjectInput_readObject = 1005; // native
+const uint32_t flash_utils_ObjectInput_objectEncoding_get = 1006; // native
+const uint32_t flash_utils_ObjectInput_objectEncoding_set = 1007; // native
+const uint32_t flash_utils_ObjectInput_endian_get = 1008; // native
+const uint32_t flash_utils_ObjectInput_endian_set = 1009; // native
+const uint32_t flash_utils_ByteArray_defaultObjectEncoding_get = 1020; // native
+const uint32_t flash_utils_ByteArray_defaultObjectEncoding_set = 1021; // native
+const uint32_t flash_utils_ByteArray_readBytes = 1023; // native
+const uint32_t flash_utils_ByteArray_writeBytes = 1024; // native
+const uint32_t flash_utils_ByteArray_writeBoolean = 1025; // native
+const uint32_t flash_utils_ByteArray_writeByte = 1026; // native
+const uint32_t flash_utils_ByteArray_writeShort = 1027; // native
+const uint32_t flash_utils_ByteArray_writeInt = 1028; // native
+const uint32_t flash_utils_ByteArray_writeUnsignedInt = 1029; // native
+const uint32_t flash_utils_ByteArray_writeFloat = 1030; // native
+const uint32_t flash_utils_ByteArray_writeDouble = 1031; // native
+const uint32_t flash_utils_ByteArray_writeMultiByte = 1032; // native
+const uint32_t flash_utils_ByteArray_writeUTF = 1033; // native
+const uint32_t flash_utils_ByteArray_writeUTFBytes = 1034; // native
+const uint32_t flash_utils_ByteArray_readBoolean = 1035; // native
+const uint32_t flash_utils_ByteArray_readByte = 1036; // native
+const uint32_t flash_utils_ByteArray_readUnsignedByte = 1037; // native
+const uint32_t flash_utils_ByteArray_readShort = 1038; // native
+const uint32_t flash_utils_ByteArray_readUnsignedShort = 1039; // native
+const uint32_t flash_utils_ByteArray_readInt = 1040; // native
+const uint32_t flash_utils_ByteArray_readUnsignedInt = 1041; // native
+const uint32_t flash_utils_ByteArray_readFloat = 1042; // native
+const uint32_t flash_utils_ByteArray_readDouble = 1043; // native
+const uint32_t flash_utils_ByteArray_readMultiByte = 1044; // native
+const uint32_t flash_utils_ByteArray_readUTF = 1045; // native
+const uint32_t flash_utils_ByteArray_readUTFBytes = 1046; // native
+const uint32_t flash_utils_ByteArray_length_get = 1047; // native
+const uint32_t flash_utils_ByteArray_length_set = 1048; // native
+const uint32_t flash_utils_ByteArray_writeObject = 1049; // native
+const uint32_t flash_utils_ByteArray_readObject = 1050; // native
+const uint32_t flash_utils_ByteArray_deflate = 1051; // abc
+const uint32_t flash_utils_ByteArray_private__compress = 1052; // native
+const uint32_t flash_utils_ByteArray_compress = 1053; // abc
+const uint32_t flash_utils_ByteArray_inflate = 1054; // abc
+const uint32_t flash_utils_ByteArray_private__uncompress = 1055; // native
+const uint32_t flash_utils_ByteArray_uncompress = 1056; // abc
+const uint32_t flash_utils_ByteArray_toString = 1057; // abc
+const uint32_t flash_utils_ByteArray_private__toString = 1058; // native
+const uint32_t flash_utils_ByteArray_bytesAvailable_get = 1059; // native
+const uint32_t flash_utils_ByteArray_position_get = 1060; // native
+const uint32_t flash_utils_ByteArray_position_set = 1061; // native
+const uint32_t flash_utils_ByteArray_objectEncoding_get = 1062; // native
+const uint32_t flash_utils_ByteArray_objectEncoding_set = 1063; // native
+const uint32_t flash_utils_ByteArray_endian_get = 1064; // native
+const uint32_t flash_utils_ByteArray_endian_set = 1065; // native
+const uint32_t flash_utils_ByteArray_clear = 1066; // native
+const uint32_t flash_utils_ByteArray_atomicCompareAndSwapIntAt = 1067; // native
+const uint32_t flash_utils_ByteArray_atomicCompareAndSwapLength = 1068; // native
+const uint32_t flash_utils_ByteArray_shareable_get = 1069; // native
+const uint32_t flash_utils_ByteArray_shareable_set = 1070; // native
+const uint32_t flash_utils_ObjectOutput_writeBytes = 1073; // native
+const uint32_t flash_utils_ObjectOutput_writeBoolean = 1074; // native
+const uint32_t flash_utils_ObjectOutput_writeByte = 1075; // native
+const uint32_t flash_utils_ObjectOutput_writeShort = 1076; // native
+const uint32_t flash_utils_ObjectOutput_writeInt = 1077; // native
+const uint32_t flash_utils_ObjectOutput_writeUnsignedInt = 1078; // native
+const uint32_t flash_utils_ObjectOutput_writeFloat = 1079; // native
+const uint32_t flash_utils_ObjectOutput_writeDouble = 1080; // native
+const uint32_t flash_utils_ObjectOutput_writeMultiByte = 1081; // native
+const uint32_t flash_utils_ObjectOutput_writeUTF = 1082; // native
+const uint32_t flash_utils_ObjectOutput_writeUTFBytes = 1083; // native
+const uint32_t flash_utils_ObjectOutput_writeObject = 1084; // native
+const uint32_t flash_utils_ObjectOutput_objectEncoding_get = 1085; // native
+const uint32_t flash_utils_ObjectOutput_objectEncoding_set = 1086; // native
+const uint32_t flash_utils_ObjectOutput_endian_get = 1087; // native
+const uint32_t flash_utils_ObjectOutput_endian_set = 1088; // native
+const uint32_t flash_net_DynamicPropertyOutput_writeDynamicProperty = 1092; // native
 
 extern avmplus::Atom native_script_function_flash_net_registerClassAlias_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom native_script_function_flash_net_registerClassAlias_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -1235,6 +1234,8 @@ extern avmplus::Atom flash_net_ObjectEncoding_dynamicPropertyWriter_get_thunk(Me
 extern avmplus::Atom flash_net_ObjectEncoding_dynamicPropertyWriter_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_net_ObjectEncoding_dynamicPropertyWriter_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_net_ObjectEncoding_dynamicPropertyWriter_set_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_concurrent_Mutex_isSupported_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_concurrent_Mutex_isSupported_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Mutex_lock_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Mutex_lock_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Mutex_tryLock_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -1243,16 +1244,18 @@ extern avmplus::Atom flash_concurrent_Mutex_unlock_thunk(MethodEnv* env, uint32_
 extern avmplus::Atom flash_concurrent_Mutex_unlock_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Mutex_private_ctor_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Mutex_private_ctor_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_concurrent_Condition_isSupported_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_concurrent_Condition_isSupported_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Condition_mutex_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Condition_mutex_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_concurrent_Condition_wait_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_concurrent_Condition_wait_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_concurrent_Condition_notify_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_concurrent_Condition_notify_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_concurrent_Condition_notifyAll_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_concurrent_Condition_notifyAll_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Condition_private_ctor_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Condition_private_ctor_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_concurrent_Condition_private_notifyImpl_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_concurrent_Condition_private_notifyImpl_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_concurrent_Condition_private_notifyAllImpl_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_concurrent_Condition_private_notifyAllImpl_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_concurrent_Condition_private_waitImpl_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_concurrent_Condition_private_waitImpl_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom native_script_function_avm2_intrinsics_memory_mfence_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom native_script_function_avm2_intrinsics_memory_mfence_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom native_script_function_avm2_intrinsics_memory_casi32_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -5313,11 +5316,6 @@ class avmplus_ConditionClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::ConditionClass;
-private:
-    uint32_t m_private_kNullPointerError;
-    uint32_t m_private_kConditionInvalidTimeoutError;
-    uint32_t m_private_kConditionCannotNotifyError;
-    uint32_t m_private_kConditionCannotNotifyAllError;
 #define GC_TRIVIAL_TRACER_ConditionClass
 };
 #define DECLARE_SLOTS_ConditionClass \
@@ -5367,20 +5365,6 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
-        REALLY_INLINE uint32_t get_kNullPointerError() const { return m_slots_ConditionClass.m_private_kNullPointerError; } \
-        REALLY_INLINE void setconst_kNullPointerError(uint32_t newVal) { m_slots_ConditionClass.m_private_kNullPointerError = newVal; } \
-    protected: \
-        REALLY_INLINE uint32_t get_kConditionInvalidTimeoutError() const { return m_slots_ConditionClass.m_private_kConditionInvalidTimeoutError; } \
-        REALLY_INLINE void setconst_kConditionInvalidTimeoutError(uint32_t newVal) { m_slots_ConditionClass.m_private_kConditionInvalidTimeoutError = newVal; } \
-    protected: \
-        REALLY_INLINE uint32_t get_kConditionCannotNotifyError() const { return m_slots_ConditionClass.m_private_kConditionCannotNotifyError; } \
-        REALLY_INLINE void setconst_kConditionCannotNotifyError(uint32_t newVal) { m_slots_ConditionClass.m_private_kConditionCannotNotifyError = newVal; } \
-    protected: \
-        REALLY_INLINE uint32_t get_kConditionCannotNotifyAllError() const { return m_slots_ConditionClass.m_private_kConditionCannotNotifyAllError; } \
-        REALLY_INLINE void setconst_kConditionCannotNotifyAllError(uint32_t newVal) { m_slots_ConditionClass.m_private_kConditionCannotNotifyAllError = newVal; } \
-    private: \
-        avmplus::NativeID::avmplus_ConditionClassSlots m_slots_ConditionClass \
 
 //-----------------------------------------------------------
 

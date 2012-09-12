@@ -156,7 +156,7 @@ namespace avmplus
         , m_copyOnWriteOwner(NULL)
         , m_position(0)
         , m_buffer(mmfx_new(Buffer()))
-        , m_workerLocal(true)
+        , m_isShareable(false)
         , m_isLinkWrapper(false)
     {
         static_assert(uint64_t(MAX_BYTEARRAY_STORE_LENGTH) < 0x100000000ULL, "Constraint on MAX_BYTEARRAY_STORE_LENGTH");
@@ -179,28 +179,33 @@ namespace avmplus
         , m_subscribers(m_gc, 0)
         , m_copyOnWriteOwner(NULL)
         , m_position(0)
-        , m_buffer(other.m_workerLocal ? mmfx_new(Buffer) : other.m_buffer)
-        , m_workerLocal(other.m_workerLocal)
+		, m_buffer(other.m_isShareable ? other.m_buffer : mmfx_new(Buffer) )
+        , m_isShareable(other.m_isShareable)
         , m_isLinkWrapper(false)
     {
         AvmAssert(m_gc != NULL);
-        if (!m_workerLocal) {
+        if (m_isShareable) {
             return;
         }
         m_buffer->capacity = other.m_buffer->capacity;
         m_buffer->length = other.m_buffer->length;
-        m_buffer->array = mmfx_new_array_opt(uint8_t, m_buffer->capacity, MMgc::kCanFailAndZero);
+        // only allocate a new array if the other bytearray has data in it
+        if (other.m_buffer->array) {
+            m_buffer->array = mmfx_new_array_opt(uint8_t, m_buffer->capacity, MMgc::kCanFailAndZero);
 
-        if (!m_buffer->array)
-           ThrowMemoryError();
-        
-        TellGcNewBufferMemory(m_buffer->array, m_buffer->capacity);
-        if (other.m_buffer->array)
+            if (!m_buffer->array)
+               ThrowMemoryError();
+            
+            TellGcNewBufferMemory(m_buffer->array, m_buffer->capacity);
             VMPI_memcpy(m_buffer->array, other.m_buffer->array, m_buffer->length);
+        }
+        else {
+            m_buffer->array = NULL;
+        }
     }
 
 
-    ByteArray::ByteArray(Toplevel* toplevel, ByteArray::Buffer* source, bool workerLocal)
+    ByteArray::ByteArray(Toplevel* toplevel, ByteArray::Buffer* source, bool shareable)
         : DataIOBase()
         , DataInput()
         , DataOutput()
@@ -210,7 +215,7 @@ namespace avmplus
         , m_copyOnWriteOwner(NULL)
         , m_position(0)
         , m_buffer(source)
-        , m_workerLocal(workerLocal) 
+        , m_isShareable(shareable) 
         , m_isLinkWrapper(false)
     {
     }
@@ -236,7 +241,7 @@ namespace avmplus
 
     ByteArray::~ByteArray()
     {
-        if (m_workerLocal) {
+        if (!m_isShareable) {
             // no: this can reallocate memory, which is bad to do in a dtor
             // m_subscribers.clear();
             _Clear();
@@ -581,7 +586,6 @@ namespace avmplus
             ByteArray::Buffer* src = m_byteArray->getUnderlyingBuffer();
 
             AvmAssert((src != NULL) && (m_destination != NULL));
-
             m_destination->array = src->array;
             m_destination->capacity = src->capacity;
             m_destination->length = src->length;
@@ -916,9 +920,9 @@ namespace avmplus
         // that are referencing this one.
         // This is done to avoid a long safepoint task as all other
         // workers must be halted during a safepoint.
-        bool shared = IsShared();
-        FixedHeapRef<Buffer> origBuffer = m_buffer;
-        if (shared) {
+        const bool cShared = IsShared();		// ByteArray's sharedness is immutable implicitly for the duration of this op since this worker is doing this op and cannot share it and it is not already shared (e.g. placed in a MessaegChannel).        
+		FixedHeapRef<Buffer> origBuffer = m_buffer;
+        if (cShared) {
             m_buffer = mmfx_new(Buffer());
         }
 
@@ -946,10 +950,11 @@ namespace avmplus
         bool ensured = EnsureCapacityOrFail(newCap, kCatchAction_Rethrow, &exn);
         if (!ensured)
         {
-            if (shared) {
+			// clean up when the EnsureCapacity call fails.
+            if (cShared) {
                 m_buffer = origBuffer;
             }
-            // clean up when the EnsureCapacity call fails.
+
             m_buffer->array    = origData;
             m_buffer->length   = origLen;
             m_buffer->capacity = origCap;
@@ -966,7 +971,7 @@ namespace avmplus
         // snap shot it before we run any compression algorithm otherwise
         // the data could be changed in a way that may cause an exploit
         uint8_t* dataSnapshot = origData;
-        if (shared) {
+        if (cShared) {
             dataSnapshot = mmfx_new_array(uint8_t, origLen);
             VMPI_memcpy(dataSnapshot, origData, origLen);
         }
@@ -982,7 +987,7 @@ namespace avmplus
                                -1,  // default fb (32),
                                1); // -1 would yield default numThreads (2)
 
-        if (shared) {
+        if (cShared) {
             mmfx_delete_array(dataSnapshot);
         }
 
@@ -1022,7 +1027,7 @@ namespace avmplus
         case SZ_ERROR_THREAD:
         default:
         error_cases:
-            if (shared) {
+            if (cShared) {
                 m_buffer = origBuffer;
             }
             // On other failures, just give up.
@@ -1040,7 +1045,7 @@ namespace avmplus
         // position == length (while Uncompress() sets position == 0).
         m_position = m_buffer->length;
 
-        if (shared) {
+        if (cShared) {
             ByteArraySwapBufferTask task(this, origBuffer);
             task.exec();
         }
@@ -1060,17 +1065,18 @@ namespace avmplus
         uint8_t* origData                       = m_buffer->array;
         uint32_t origLen                        = m_buffer->length;
         uint32_t origCap                        = m_buffer->capacity;
+		uint32_t origPos						= m_position;
         MMgc::GCObject* origCopyOnWriteOwner    = m_copyOnWriteOwner;
         if (!origLen) // empty buffer should give empty result
             return;
 
-        bool shared = IsShared();
+        const bool cShared = IsShared();		// ByteArray's sharedness is immutable implicitly for the duration of this op since this worker is doing this op and cannot share it and it is not already shared (e.g. placed in a MessaegChannel).
         // if this bytearray's data is being shared then we have to
         // snap shot it before we run any compression algorithm otherwise
         // the data could be changed in a way that may cause an exploit
         uint8_t* dataSnapshot = origData;
         FixedHeapRef<Buffer> origBuffer = m_buffer;
-        if (shared) {
+        if (cShared) {
             dataSnapshot = mmfx_new_array(uint8_t, origLen);
             VMPI_memcpy(dataSnapshot, origData, origLen);
             m_buffer = mmfx_new(Buffer());
@@ -1103,8 +1109,28 @@ namespace avmplus
         AvmAssert(error == Z_OK);
 
         uint32_t newCap = deflateBound(&stream, origLen);
-        EnsureCapacity(newCap);
-
+		Exception *exn;
+        bool ensured =
+			EnsureCapacityOrFail(newCap, kCatchAction_Rethrow, &exn);
+        if (!ensured)
+        {
+			// clean up when the EnsureCapacity call fails.
+            if (cShared) {
+                m_buffer = origBuffer;
+				mmfx_delete_array(dataSnapshot);
+            }
+			else 
+			{
+				m_buffer->array    = origData;
+				m_buffer->length   = origLen;
+				m_buffer->capacity = origCap;
+				m_position         = origPos;
+				SetCopyOnWriteOwner(origCopyOnWriteOwner);
+			}
+			
+            m_toplevel->core()->throwException(exn);
+        }
+		
         stream.next_in = dataSnapshot;
         stream.avail_in = origLen;
         stream.next_out = m_buffer->array;
@@ -1123,7 +1149,7 @@ namespace avmplus
 
         deflateEnd(&stream);
 
-        if (shared)
+        if (cShared)
         {
             mmfx_delete_array(dataSnapshot);
             ByteArraySwapBufferTask task(this, origBuffer);
@@ -1173,8 +1199,8 @@ namespace avmplus
         // snap shot it before we run any compression algorithm otherwise
         // the data could be changed in a way that may cause an exploit
         uint8_t* dataSnapshot = origData;
-        bool shared = IsShared();
-        if (shared) {
+        const bool cShared = IsShared();		// ByteArray's sharedness is immutable implicitly for the duration of this op since this worker is doing this op and cannot share it and it is not already shared (e.g. placed in a MessaegChannel).
+        if (cShared) {
             dataSnapshot = mmfx_new_array(uint8_t, origLen);
             VMPI_memcpy(dataSnapshot, origData, origLen);
         }
@@ -1194,7 +1220,7 @@ namespace avmplus
             srcOverlay->unpackedSizeHighBits[2] != 0 ||
             srcOverlay->unpackedSizeHighBits[3] != 0)
         {
-            if (shared) {
+            if (cShared) {
                 mmfx_delete_array(dataSnapshot);
             }
             // We can't allocate a byte array of such large size.
@@ -1204,7 +1230,7 @@ namespace avmplus
         size_t srcLen = (origLen - lzmaHeaderSize);
 
         FixedHeapRef<Buffer> origBuffer = m_buffer;
-        if (shared) {
+        if (cShared) {
             m_buffer = mmfx_new(Buffer());
         }
 
@@ -1222,10 +1248,11 @@ namespace avmplus
             EnsureCapacityOrFail(unpackedLen, kCatchAction_Rethrow, &exn);
         if (!ensured)
         {
-            if (shared) {
+			// clean up when the EnsureCapacity call fails.
+            if (cShared) {
                 m_buffer = origBuffer;
+				mmfx_delete_array(dataSnapshot);
             }
-            // clean up when the EnsureCapacity call fails.
 
             // (keep in sync with state restoration in error_cases: labelled below)
             m_buffer->array    = origData;
@@ -1244,7 +1271,7 @@ namespace avmplus
                                  srcOverlay->compressedPayload, &srcLen,
                                  srcOverlay->lzmaProps, LZMA_PROPS_SIZE);
 
-        if (shared) {
+        if (cShared) {
             mmfx_delete_array(dataSnapshot);
         }
 
@@ -1264,7 +1291,7 @@ namespace avmplus
             // Analogous to zlib, maintain policy that Uncompress() sets
             // position == 0 (while Compress() sets position == length).
             // (it was set above)
-            if (shared) {
+            if (cShared) {
                 ByteArraySwapBufferTask task(this, origBuffer);
                 task.exec();
             }
@@ -1285,7 +1312,7 @@ namespace avmplus
         default:
         error_cases:
             // In error cases:
-            if (shared) {
+            if (cShared) {
                 m_buffer = origBuffer;
             }
 
@@ -1319,59 +1346,78 @@ namespace avmplus
         if (!origLen) // empty buffer should give empty result
             return;
 
-        bool shared = IsShared();
+        const bool cShared = IsShared();		// ByteArray's sharedness is immutable implicitly for the duration of this op since this worker is doing this op and cannot share it and it is not already shared (e.g. placed in a MessaegChannel).
         FixedHeapRef<Buffer> origBuffer = m_buffer;
-        // if this bytearray's data is being shared then we have to
-        // snap shot it before we run any compression algorithm otherwise
-        // the data could be changed in a way that may cause an exploit
-        uint8_t* dataSnapshot = origData;
-        if (shared) {
-            m_buffer = mmfx_new(Buffer());
-            dataSnapshot = mmfx_new_array(uint8_t, origLen);
-            VMPI_memcpy(dataSnapshot, origData, origLen);
-        }
-
         m_buffer->array    = NULL;
         m_buffer->length   = 0;
         m_buffer->capacity = 0;
         m_position         = 0;
         m_copyOnWriteOwner = NULL;
-        // we know that the uncompressed data will be at least as
-        // large as the compressed data, so let's start there,
-        // rather than at zero.
-        EnsureCapacity(origCap);
-
-        const uint32_t kScratchSize = 8192;
-        uint8_t* scratch = mmfx_new_array(uint8_t, kScratchSize);
-
-        int error = Z_OK;
+		
+		int error = Z_OK;
+		uint8_t* scratch = NULL;
+        uint8_t* dataSnapshot = NULL;
         
-        z_stream stream;
-        VMPI_memset(&stream, 0, sizeof(stream));
-        error = inflateInit2(&stream, algorithm == k_zlib ? 15 : -15);
-        AvmAssert(error == Z_OK);
+		TRY(m_toplevel->core(), kCatchAction_Rethrow)
+		{
+            // if this bytearray's data is being shared then we have to
+            // snap shot it before we run any compression algorithm otherwise
+            // the data could be changed in a way that may cause an exploit
+            dataSnapshot = origData;
+            if (cShared) {
+                m_buffer = mmfx_new(Buffer());
+                dataSnapshot = mmfx_new_array(uint8_t, origLen);
+                VMPI_memcpy(dataSnapshot, origData, origLen);
+            }
+            
+			// we know that the uncompressed data will be at least as
+			// large as the compressed data, so let's start there,
+			// rather than at zero.
+			EnsureCapacity(origCap);
 
-        stream.next_in = dataSnapshot;
-        stream.avail_in = origLen;
-        while (error == Z_OK)
-        {
-            stream.next_out = scratch;
-            stream.avail_out = kScratchSize;
-            error = inflate(&stream, Z_NO_FLUSH);
-            Write(scratch, kScratchSize - stream.avail_out);
-        }
+			const uint32_t kScratchSize = 8192;
+			scratch = mmfx_new_array(uint8_t, kScratchSize);
+			
+			z_stream stream;
+			VMPI_memset(&stream, 0, sizeof(stream));
+			error = inflateInit2(&stream, algorithm == k_zlib ? 15 : -15);
+			AvmAssert(error == Z_OK);
 
-        inflateEnd(&stream);
+			stream.next_in = dataSnapshot;
+			stream.avail_in = origLen;
+			while (error == Z_OK)
+			{
+				stream.next_out = scratch;
+				stream.avail_out = kScratchSize;
+				error = inflate(&stream, Z_NO_FLUSH);
+				Write(scratch, kScratchSize - stream.avail_out);
+			}
 
-        mmfx_delete_array(scratch);
+			inflateEnd(&stream);
+            
+            mmfx_delete_array(scratch);
+            
+            if (cShared) {
+                mmfx_delete_array(dataSnapshot);
+            }
+  		}
+		CATCH(Exception* e)
+		{
+			mmfx_delete_array(scratch);
+			
+			if (cShared) {
+				mmfx_delete_array(dataSnapshot);
+			}
 
-        if (shared) {
-            mmfx_delete_array(dataSnapshot);
-        }
+			m_toplevel->core()->throwException(e);
+		}
+		END_CATCH;
+		END_TRY;
+		
 
         if (error == Z_STREAM_END)
         {
-            if (shared) {
+            if (cShared) {
                 ByteArraySwapBufferTask task(this, origBuffer);
                 task.exec();
             }
@@ -1396,7 +1442,7 @@ namespace avmplus
             TellGcDeleteBufferMemory(m_buffer->array, m_buffer->capacity);
             mmfx_delete_array(m_buffer->array);
 
-            if (shared) {
+            if (cShared) {
                 m_buffer = origBuffer;
             }
 
@@ -1478,18 +1524,19 @@ namespace avmplus
         return vmbase::AtomicOps::compareAndSwap32WithBarrierPrev(expected, next, (int32_t*)wordptr);
     }
 
-    bool ByteArray::isWorkerLocal()
+    bool ByteArray::isShareable () const
     {
-        return m_workerLocal;
+        return m_isShareable;
     }
 
-    bool ByteArray::setWorkerLocal(bool value)
+    bool ByteArray::setShareable (bool value)
     {
-        if (m_workerLocal == value)
+        if (m_isShareable == value)
             return false; // no change.
-        if (m_workerLocal == false && value == true)
-            return false; // FIXME can't 'localize' yet. No change
-        m_workerLocal = value;
+        if (m_isShareable == true && value == false)
+            return false; // FIXME can't 'un-share' yet. No change
+
+        m_isShareable = value;
         return true;  // changed.
     }
     
@@ -2332,12 +2379,12 @@ namespace avmplus
 
     void ByteArrayObject::set_shareable(bool val)
     {
-        m_byteArray.setWorkerLocal(!val);
+        m_byteArray.setShareable(val);
     }
     
     bool ByteArrayObject::get_shareable()
     {
-        return !(m_byteArray.isWorkerLocal());
+        return m_byteArray.isShareable();
     }
 
 	ChannelItem* ByteArrayObject::makeChannelItem()
@@ -2345,9 +2392,10 @@ namespace avmplus
         class ByteArrayChannelItem: public ChannelItem
         {
         public:
-            ByteArrayChannelItem(ByteArray::Buffer* value)
+            ByteArrayChannelItem(ByteArray::Buffer* value, bool shareable)
             {
                 m_value = value;
+                m_isShareable = shareable;
             }
 
             void intern(ByteArrayObject* ba) const
@@ -2362,19 +2410,23 @@ namespace avmplus
 		        if (baObject == NULL) 
 		        {
 			        ByteArrayClass* baClass = toplevel->byteArrayClass();
-			        baObject = new (toplevel->gc(), MMgc::kExact) ByteArrayObject(baClass->ivtable(), baClass->prototypePtr(), m_value);
+                    ByteArray ba(toplevel, m_value, m_isShareable);
+			        baObject = new (toplevel->gc(), MMgc::kExact) ByteArrayObject(baClass->ivtable(), baClass->prototypePtr(), ba);
 			        toplevel->internObject(m_value, baObject);
 		        }
 		        return baObject->toAtom();
             }
 
         private:
+            bool m_isShareable;
             FixedHeapRef<ByteArray::Buffer> m_value;
         };
 
         ByteArrayChannelItem* item = NULL;
 		ByteArray::Buffer* buffer = GetByteArray().getUnderlyingBuffer();
-		if (GetByteArray().isWorkerLocal()) {
+        const bool cIsShareable = GetByteArray().isShareable();
+		if (!cIsShareable)
+		{
 			ByteArray::Buffer* copy = mmfx_new(ByteArray::Buffer);
 			copy->capacity = buffer->capacity;
 			copy->length = buffer->length;
@@ -2386,9 +2438,9 @@ namespace avmplus
 			} else {
 				copy->array = NULL;
 			}
-            item = mmfx_new(ByteArrayChannelItem(copy));
+            item = mmfx_new(ByteArrayChannelItem(copy, cIsShareable));
 		} else {
-            item = mmfx_new(ByteArrayChannelItem(buffer));
+            item = mmfx_new(ByteArrayChannelItem(buffer, cIsShareable));
 		}
         item->intern(this);
         return item;

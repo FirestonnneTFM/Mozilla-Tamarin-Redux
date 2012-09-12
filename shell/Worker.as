@@ -137,22 +137,15 @@ package flash.system
         public native function get state():String;
 
         /**
-        * Run the code blobs passed into the constructor in order.
-        * @deprecated
-        * @return whether starting has been successful.
-        */
-        public native function startWithChannels( ) :Boolean;
-
-        /**
         * Run the code blobs passed into the constructor in order and enter the event loop.
         * @return proxy to the remote worker.
         */
         public function start() :void
         {
-            startInternal();
+            startVeryInternal();
         }
 
-        private native function startInternal() :void;
+        private native function startVeryInternal() :void;
 
         public native function isParentOf(other: Worker): Boolean;
 
@@ -180,12 +173,6 @@ package flash.system
         {
             return m_current;
         }
-
-
-        /* 
-        * shell only, use for debugging
-        */
-        public native function get descriptor():int;
 
         /**
         * Temporary - debugging only

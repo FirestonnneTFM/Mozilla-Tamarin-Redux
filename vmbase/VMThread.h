@@ -462,8 +462,6 @@ namespace vmbase {
         bool wait(int32_t timeout_millis);
         void notify();
         void notifyAll();
-        WaitNotifyMonitor* getMonitor() const { return &m_monitor; }
-
         operator bool () const {return false;} // For the SCOPE_LOCK* macros
 
     private:
