@@ -42,23 +42,14 @@
 #include "FixedHeapUtils.h"
 #include "Channels.h"
 
+#ifdef DEBUG
+#define DEBUG_INTERRUPTIBLE_STATE
+#endif // DEBUG 
+
+
 namespace avmplus
 {
-
-    template <class T>
-    class IsolateEvent
-    {
-    public:
-        uint32_t get_previousState();
-        uint32_t get_currentState();
-        int32_t source;
-        IsolateEvent<T>* next;
-        IsolateEvent(int32_t source, uint32_t previous, uint32_t current);
-    private:
-        uint32_t m_previousState;
-        uint32_t m_currentState;
-
-    };
+    class InterruptibleState;
 
     /*
      * Represents an isolate in various stages of its lifecycle. There's only one Isolate
@@ -70,27 +61,26 @@ namespace avmplus
         friend class WorkerObject;
         
     public:
+		typedef int32_t descriptor_t;
 
-        static const int32_t INVALID_DESC = 0;
-        static const int32_t POISON_DESC = 0x7FFFFFFF; // Max int32
+        static const descriptor_t INVALID_DESC	= 0;
+        static const descriptor_t POISON_DESC	= 0x7FFFFFFF; // Max int32
         // Isolate objects are created by client code (e.g., the shell), before their AvmCores are instantiated.
         // If the isolate is successfully started, the Isolate object will delete itself upon isolate termination. 
         // Otherwise, the AS glue object (IsolateObject) destructor will delete Isolate objects that have not been
         // started or have failed.
-        Isolate(int32_t desc, int32_t parentDesc, Aggregate* aggregate);
+        Isolate(descriptor_t desc, descriptor_t parentDesc, Aggregate* aggregate);
 
-        static Isolate* newIsolate(int32_t desc, int32_t parentDesc, Aggregate* aggregate); 
+        static Isolate* newIsolate(descriptor_t desc, descriptor_t parentDesc, Aggregate* aggregate); 
 
         void initialize(AvmCore* core);
 
         virtual void run(); // Inherited from Runnable.
 
-        void evalCodeBlobs(bool enter_debugger_on_launch);
-
         virtual void destroy();
         virtual ~Isolate();
 
-        AvmCore* targetCore()
+        AvmCore* getAvmCore () const
         {
             return m_core;
         }
@@ -100,32 +90,26 @@ namespace avmplus
             return m_aggregate;
         }
 
-        bool isParentOf(Isolate* other)
+        bool isParentOf(const Isolate* other) const
         {
             AvmAssert(other != NULL);
-            return other->parentDesc == desc;
+            return other->m_parentDesc == m_desc;
         }
 
-        void copyArguments(ArrayObject* array);
-
-        // Returns false if array contains elements of unhandled type (i.e., not ByteArrayObjects)
-        // If ba is null, copy from primordial.
-        virtual bool copyByteCode(ByteArrayObject* array);
+        virtual void copyByteCode(ByteArrayObject* array);
         
-        bool failed();
+        // WorkerObject type depends on the overiding class.
+        virtual ScriptObject* newWorkerObject(Toplevel* toplevel) =  0;
 
-        // the type of workerObject is not available here, overwrite.
-        virtual ScriptObject* workerObject(Toplevel* toplevel) =  0;
+        bool interrupt();				// false if already interrupted
+        bool isInterrupted() const;
+        bool hasFailed() const;
 
-
-        bool interrupt(); // false if already interrupted
-        bool isInterrupted();
         // Last phase of termination.
-        virtual bool isMemoryManagementShutDown(); 
+        virtual bool isMemoryManagementShutDown() const; 
 
-        bool isPrimordial();
+        bool isPrimordial() const;
         
-        // keep in sync with constants in Worker
         enum State {
             NONE = 0, // sentinel
             NEW = 1, 
@@ -138,9 +122,28 @@ namespace avmplus
             EXCEPTION = 8
         };
 
+    protected:
+        FixedHeapArray<uint8_t> getByteCode() const
+        { 
+            return m_code.values[0]; 
+        }
+		
+        virtual void stopRunLoop() 
+        {
+			// This is the default impl for AvmShellIsolate and any other Isolate derived classes that
+			// do not have a run loop.
+        }
 
+        virtual void doRun() = 0;
+
+    public:
+		descriptor_t getDesc() const { return m_desc; }
+		descriptor_t getParentDesc() const { return m_parentDesc; }
+		void resetParent() { m_parentDesc = INVALID_DESC; }
+		
+    protected:
         typedef FixedHeapArray<char>* SharedPropertyNamep;
-
+		
         class SharedPropertyMap: public FixedHeapHashTable<SharedPropertyNamep, ChannelItem*>
         {
         public:
@@ -151,67 +154,39 @@ namespace avmplus
             virtual bool KeysEqual(SharedPropertyNamep key1, const SharedPropertyNamep key2) const;
             virtual void DestroyItem(SharedPropertyNamep key, ChannelItem* value);
         };
-
-
-    protected:
-        FixedHeapArray<uint8_t> getByteCode() const
-        { 
-            return m_code.values[0]; 
-        }
-        virtual void stopRunLoop() 
-        {
-        }
-
-        virtual void doRun() = 0;
-
-        // *** data ***
-    public:
-        int32_t desc;
-        int32_t parentDesc;
-
-    protected:
+		
         FixedHeapArray< FixedHeapArray<uint8_t> > m_code;
-        vmbase::RecursiveMutex m_sharedPropertyLock; 
         
     private:
+		descriptor_t m_desc;
+        descriptor_t m_parentDesc;
+
         virtual void releaseActiveResources();
-        SharedPropertyMap m_properties;
+ 		vmbase::RecursiveMutex m_sharedPropertyLock; 
+		SharedPropertyMap m_sharedProperties;
 
     public:
-        void setSharedProperty(const char* utf8String, int32_t len, ChannelItem* item);
-        bool getSharedProperty(const char* utf8String, int32_t len, ChannelItem** outItem);
+        void clearThread();
+        void setSharedProperty(const StUTF8String& key, ChannelItem* item);
+        bool getSharedProperty(const StUTF8String& key, ChannelItem** outItem);
         virtual ChannelItem* makeChannelItem(Toplevel* toplevel, Atom atom);
-        void invalidateActiveWaitRecord(vmbase::WaitNotifyMonitor* record);
-        void removeWaitRecord(vmbase::WaitNotifyMonitor* record);
-        void setActiveWaitRecord(vmbase::WaitNotifyMonitor* record);
-        bool signalActiveWaitRecord();
-        virtual bool retryActiveWaitRecord();
-
-    protected:
-        AvmCore* m_core;
+        void setInterruptibleState(InterruptibleState* value);
+        void signalInterruptibleState();
+        virtual bool retryInterruptibleState();
 
     private:
-        // when an isolate is blocked from ActionScript either due to a 
-        // condition.wait or a mutex.lock this holds the active wait record
-        // from that call. 
-        vmbase::RecursiveMutex m_activeRecordLock;
-        // when an active wait record wakes without being notified
-        // by signalActiveWaitRecord() it needs to invalidate
-        // the record without getting the m_activeRecordLock
-        // the condition will always be held when updating this
-        // value so no explicit lock is required (see signalActiveWaitRecord)
-        // for more info.
-        bool m_waitRecordValid;
-        vmbase::WaitNotifyMonitor* m_activeWaitRecord;
+		AvmCore* m_core;
+
+		// when an isolate is blocked from ActionScript either due to a 
+        // Condition.wait or a Mutex.lock or other blocking operation
+        // the activeWaitRecord is used. The activeWaitRecord provides
+        // a simple way for the runtime to "wake" a blocked thread so that
+        // operations like Worker.terminate, shutdown, and script timeout can
+        // occur.
+        vmbase::RecursiveMutex m_interruptibleStateLock;
+        InterruptibleState* m_interruptibleState;
 
         FixedHeapRef<Aggregate> m_aggregate;
-        // VMThread objects have to be reclaimed after the threads
-        // represented by them have terminated, but there's generally
-        // no other thread trying to join() on the owner thread, so
-        // there's no good point to delete the VMThread. As a result,
-        // VMThread objects are retained and deleted
-        // opportunistically.
-        vmbase::VMThread* m_thread; 
         Isolate::State m_state;
         bool m_failed; // only accessed by the parent isolate.
         bool m_interrupted; 
@@ -220,42 +195,103 @@ namespace avmplus
     };
 
     /*
-     * InterruptableState provides basic management 
+     * InterruptibleState provides basic management 
      * for any objects running within an isolate that 
      * need to enter a blocking state and be 
      * interruptable to support termination, debugging, 
      * and script-timeouts
      */ 
-    class InterruptableState: public FixedHeapRCObject 
+    class InterruptibleState
     {
     public:
-        InterruptableState();
+        InterruptibleState();
+        bool hasWaiters();
         void notify();
         void notifyAll();
+        // signal is a specialized case of notifyAll.
+        // it is used to wake up all threads and have
+        // them check if they should exit their waiting
+        // state or return to a blocked state. this
+        // is needed to support script timeout, terminate
+        // and call stack acquisition for fdb.
+        void signal();
 
         //
-        // this is intended as a stack based helper for waiting
-        // on an interruptable state object
+        // This is intended as a stack based RAII helper for 
+        // locking and waiting on an InterruptibleState, as 
+        // well as associating that waiting state with a
         //
-        class EnterWait
+        class Enter
         {
         public:
-            EnterWait(Isolate* isolate, vmbase::MonitorLocker<vmbase::IMPLICIT_SAFEPOINT>& cond, int32_t timeout=-1);
+            Enter(InterruptibleState* state, Isolate* isolate);
+            void wait(int32_t timeout=-1);
+            void notify();
             bool interrupted;
             bool result;
+
+            // Force stack allocation
+            void* operator new(size_t);
+
+        private:
+            // RAII for setting and removing the active intteruptible
+            // state object for the associated isolate
+            class ActiveStateSetter
+            {
+            public:
+                ActiveStateSetter(Isolate* isolate, InterruptibleState* state)
+                    : m_isolate(isolate)
+                {
+                    AvmAssert(m_isolate != NULL);
+                    m_isolate->setInterruptibleState(state);
+#ifdef DEBUG_INTERRUPTIBLE_STATE
+                    gid = state->gid;
+#endif // DEBUG_INTERRUPTIBLE_STATE
+                }
+
+                ~ActiveStateSetter()
+                {
+                    m_isolate->setInterruptibleState(NULL);
+                }
+
+                Isolate* getIsolate() const
+                {
+                    return m_isolate;
+                }
+
+
+#ifdef DEBUG_INTERRUPTIBLE_STATE
+				Isolate::descriptor_t gid;
+#endif // DEBUG_INTERRUPTIBLE_STATE
+            private:
+                Isolate* m_isolate;
+            };
+
+            // we must always set the isolate's active state
+            // before getting a lock on the monitor
+            // *and* release them in the opposite order
+            // we are relying on the initialization and 
+            // destruction order for this.
+            ActiveStateSetter m_stateSetter;
+            vmbase::MonitorLocker< vmbase::IMPLICIT_SAFEPOINT > m_monitor;
+            InterruptibleState* m_state;
         };
 
-#ifdef DEBUG
-        int32_t gid;
-#endif // DEBUG
+        vmbase::WaitNotifyMonitor& getMonitor() { return m_condition; }
 
-    protected:
-        vmbase::WaitNotifyMonitor m_condition;
+#ifdef DEBUG_INTERRUPTIBLE_STATE
+         int32_t gid;
+#endif // DEBUG_INTERRUPTIBLE_STATE
 
     private:
-#ifdef DEBUG
-        static int32_t globalId; // global id counter
-#endif // DEBUG
+        friend class Enter;
+        vmbase::WaitNotifyMonitor m_condition;
+        uint32_t m_waiterCount;
+        uint32_t m_signaledWaiters;
+
+#ifdef DEBUG_INTERRUPTIBLE_STATE
+        static  int32_t globalId; // global id counter
+#endif // DEBUG_INTERRUPTIBLE_STATE
     };
 
 
@@ -267,109 +303,148 @@ namespace avmplus
     class Aggregate : public FixedHeapRCObject
     { 
     private:
-        // singleton
         class Globals 
         {
             friend class Aggregate;
         public:
             Globals()
                   : m_nextGlobalIsolateId(1) 
+ 				  , m_idsWrapped(false)
                   , m_isolateMap(16)
-                  , m_nextChannelGuid(1)
             {}
-
-            ~Globals()
-            {
-            }
-
+			
+			Isolate::descriptor_t getNewID()
+			{
+				Isolate::descriptor_t newID = m_nextGlobalIsolateId;
+				bool hadWrap = (newID == Isolate::POISON_DESC);
+				m_idsWrapped = m_idsWrapped || hadWrap;
+				
+				if (m_idsWrapped)
+				{
+					if (hadWrap)
+						m_nextGlobalIsolateId = 1;
+					
+					FixedHeapRef<Isolate> isolateRef(NULL);
+					while (m_isolateMap.LookupItem(m_nextGlobalIsolateId, &isolateRef)) 
+					{
+						m_nextGlobalIsolateId++;
+					}
+					newID = m_nextGlobalIsolateId;
+				}
+				
+				m_nextGlobalIsolateId++;
+				return newID;
+			}
+			
+			void orphanFor(Isolate::descriptor_t giid)
+			{
+				class Orphanize: public Globals::IsolateMap::Iterator
+				{
+				private:
+					const Isolate::descriptor_t m_TargetID;
+					
+				public:
+					Orphanize(Isolate::descriptor_t target)
+					: m_TargetID(target)
+					{}
+					
+					virtual void each(Isolate::descriptor_t, FixedHeapRef<Isolate> isolate) 
+					{
+						if (isolate->getParentDesc() == m_TargetID)
+						{
+							isolate->resetParent();
+						}
+					}
+				};
+				
+				Orphanize makeOrphansFor(giid);
+				SCOPE_LOCK(m_isolateMap.m_lock) {
+					m_isolateMap.ForEach(makeOrphansFor);
+				}
+			}
 
         private:
 
-            Isolate* at(int32_t giid);
+            Isolate* getIsolateForID(Isolate::descriptor_t giid);  // cannot be const because m_isolateMap is ill defined;
 
-            /**** data ****/
             vmbase::WaitNotifyMonitor m_lock; // protects m_globals and all Aggregate instances (curently).
             
-            int32_t m_nextGlobalIsolateId;
+            Isolate::descriptor_t m_nextGlobalIsolateId;
+			bool m_idsWrapped;
 
-            class IsolateMap: public FixedHeapHashTable<int32_t, FixedHeapRef<Isolate> > 
+            class IsolateMap: public FixedHeapHashTable<Isolate::descriptor_t, FixedHeapRef<Isolate> > 
             {
             public:
                 IsolateMap(int initialSize);
                 virtual ~IsolateMap();
                 vmbase::WaitNotifyMonitor m_lock;
             };
+			
             IsolateMap m_isolateMap;
-
-            int64_t m_nextChannelGuid;
-
-            /**** end data ****/
         }; // Globals
 
+        //
+        // Provides a container for all threads that are still
+        // executing code and will need to be waited on before
+        // shutting down the associated Aggregate.
+        //
+        class ActiveIsolateThreadMap: public FixedHeapHashTable<Isolate::descriptor_t, vmbase::VMThread*>
+		{
+		public:
+			ActiveIsolateThreadMap(int initialSize);
+			void cleanup();
+		};
+		
     public:
         Aggregate();
         virtual ~Aggregate();
         virtual void destroy();
 
-        bool isPrimordial(int32_t giid);
+        bool isPrimordial(Isolate::descriptor_t giid) const;
 
         // If parent == NULL, the primordial isolate will be created.
         Isolate* newIsolate(Isolate* parent);
 
-        void addThreadCleanup(vmbase::VMThread* thread);
-        bool spawnAndWaitForInitialization(AvmCore* spawningCore, Isolate* isolate);
-        void recordSpawnFailure(Isolate* isolate);
+        bool spawnIsolateThread(Isolate* isolate);
 
-        void initializeAndNotify(AvmCore* targetCore, Isolate* isolate);
-
-        virtual void runIsolate(Isolate* isolate);
+        void initialize(AvmCore* targetCore, Isolate* isolate);
 
         void beforeCoreDeletion(Isolate* current);
         void afterGCDeletion(Isolate* current);
 
         /* True if request caused exit */
-        bool requestExit(bool shouldWait, int32_t desc, Toplevel* currentToplevel);
+        bool requestIsolateExit(Isolate::descriptor_t desc, Toplevel* currentToplevel);
         void requestAggregateExit();
         void waitUntilNoIsolates();
-        static void destroyIsolate(Isolate* isolate);
-
-
-        static void initializeGlobals();
-        static void reclaimGlobals();
-        static void dumpGlobals(); // debugging
-
-        void closeChannelsWithEndpoint(Isolate* endpoint);
 
         virtual void throwWorkerTerminatedException(Toplevel* toplevel);
-
 
         GCRef<ObjectVectorObject> listWorkers(Toplevel* toplevel);
         void runSafepointTaskHoldingIsolateMapLock(vmbase::SafepointTask* task);
         void reloadGlobalMemories();
+        void cleanupIsolate(Isolate* isolate);
 
-        Isolate* getIsolate(int32_t desc);
+        Isolate* getIsolate(Isolate::descriptor_t desc);
         Isolate::State queryState(Isolate* isolate);
-        static bool isGlobalsLocked();
+
         void stateTransition(Isolate* isolate, enum Isolate::State to);
         vmbase::SafepointManager* safepointManager()
         {
             return &m_safepointMgr;
         }
         
-        bool inShutdown()
+        bool inShutdown() const
         {
             return m_inShutdown;
         }
-
+		
     private:
-        static Globals* m_globals;
-        int32_t m_primordialGiid;
+        Globals m_globals;
+		Isolate::descriptor_t m_primordialGiid;
         int m_activeIsolateCount;
         vmbase::SafepointManager m_safepointMgr; // Currently for shared byte array only.
         bool m_inShutdown;
-        
-        FixedHeapArray<vmbase::VMThread*> m_threadCleanUps;
-
+  		ActiveIsolateThreadMap m_activeIsolateThreadMap;
     };
 
     // Stack allocated, RAII pattern.
@@ -377,7 +452,7 @@ namespace avmplus
     {
     public:
         EnterSafepointManager(AvmCore* core);
-        void cleanup(); // If manual cleanup needed b/c of longjmp.
+        void leaveSafepoint();					// If manual exit/cleanup needed b/c of longjmp.
         ~EnterSafepointManager();
     private:
 		FixedHeapRef<Aggregate> m_aggregate;					// to keep the safepoint mgr alive during shutdown, etc.
@@ -395,51 +470,42 @@ namespace avmplus
 
 
     template <class T>
-    class WorkerClassBase
-    {
-        MethodEnv* m_handleLifecycleEventsMethod;
-
-    public:
-        WorkerClassBase(): m_handleLifecycleEventsMethod(NULL) {}
-        void handleLifecycleEvents();
-    };
-
-    template <class T>
     class WorkerObjectBase
     {
         T* self();
     public:
         WorkerObjectBase();
         //  If "thisIsolate == NULL" then create a new isolate.  Otherwise, use thisIsolate to construct the worker
-        void initialize(Isolate *thisIsolate = NULL);
+        void initialize(Isolate *isolate = NULL);
 
         GCRef<ScriptObject> setIsolate(Isolate* isolate);
 
         ~WorkerObjectBase();
-        int32_t descriptor();
+		Isolate::descriptor_t descriptor() const;
         Stringp get_state();
-        bool stopInternal(bool shouldWait);
 
         bool isParentOf(WorkerObjectBase* worker);
-        bool isPrimordial();
+        bool isPrimordial() const;
 
-        bool startWithChannels( );
-        bool internalStartWithChannels( );
+        bool start( );
+        bool startInternal( );
         // obviously candidate for further refactoring
         bool startVeryInternal();
+        bool stopInternal();
 
         void setSharedProperty(String* key, Atom value);
         Atom getSharedProperty(String* key);
-
         
-        static void throwError(const char* msgz);        
     	static void throwIllegalOperationError(int errorID);
 
-        int32_t giid; // const
     protected:
+		Isolate* getIsolate() const 		{ return m_isolate; }
+		
+	private:
         FixedHeapRef<Isolate> m_isolate;
         
     };
     
 }
 #endif
+

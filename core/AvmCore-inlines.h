@@ -757,7 +757,7 @@ REALLY_INLINE vmbase::SafepointManager* AvmCore::getSafepointManager ()
 
 REALLY_INLINE int AvmCore::getIsolateDesc () const
 {
-	return getIsolate()->desc;
+	return getIsolate()->getDesc();
 }
 
 template<class CLASSMANIFEST>

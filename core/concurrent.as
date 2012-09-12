@@ -83,13 +83,14 @@ include "api-versions.as"
  * @playerversion Flash 11.4	
  * @playerversion AIR 3.4
  */
-[API(CONFIG::SWF_17)]
+[API(CONFIG::SWF_18)]
 [native(cls="MutexClass",instance="MutexObject",gc="exact")]
 final public class Mutex
 {
     /**
      * Creates a new Mutex instance.
      *
+     * @throws Error if the mutex could not be initialized.
      * @langversion 3.0
      * @playerversion Flash 11.4	
      * @playerversion AIR 3.4
@@ -121,6 +122,11 @@ final public class Mutex
      * <code>unlock()</code> method as many times as the number of lock requests 
      * to release ownership of the mutex.</p>
      * 
+     * <p>Under contention, locks favor granting access to the longest-waiting worker
+     * and guarantee lack of starvation. Otherwise there is no guarantee in any 
+     * particular access order. Note however, that fairness of lock ordering does 
+     * not guarantee fairness of worker scheduling. </p>
+     *
      * @langversion 3.0
      * @playerversion Flash 11.4	
      * @playerversion AIR 3.4
@@ -137,9 +143,19 @@ final public class Mutex
      * the <code>unlock()</code> method to release the mutex. At that point the 
      * current worker should no longer access the shared resource.</p>
      *
+     * <p>Under contention, locks favor granting access to the longest-waiting worker
+     * and guarantee lack of starvation. Otherwise there is no guarantee in any 
+     * particular access order. Note however, that fairness of lock ordering does 
+     * not guarantee fairness of worker scheduling. </p>
+     *
+     * <p>This method will never return <code>true</code>
+     * while there are workers already waiting on the lock, even if the lock is
+     * available at the time of the call.</p>
+     *
      * @return <code>true</code> if the mutex was available (and is now owned 
      * by the current worker), or <code>false</code> if the current worker did 
-     * not acquire ownership of the mutex
+     * not acquire ownership of the mutex or there are workers waiting on acquisition
+     * of this mutex.
      *
      * @langversion 3.0
      * @playerversion Flash 11.4	
@@ -164,6 +180,18 @@ final public class Mutex
      * @playerversion AIR 3.4
      */
     native public function unlock():void;
+    
+    /**
+     * Indicates if a <code>Mutex</code> is supported for the current platform.
+     *
+     * @return <code>true</code> if the current platform supports <code>Mutex</code>
+     * <code>false</code> otherwise.
+     *
+     * @langversion 3.0
+     * @playerversion Flash 11.4	
+     * @playerversion AIR 3.4
+     */
+    native static public function isSupported():Boolean;
 
     private native function ctor() :void;
 }
@@ -222,7 +250,7 @@ final public class Mutex
  * @playerversion Flash 11.4	
  * @playerversion AIR 3.4
  */
-[API(CONFIG::SWF_17)]
+[API(CONFIG::SWF_18)]
 [native(cls="ConditionClass",instance="ConditionObject",gc="exact")]
 final public class Condition 
 {
@@ -238,8 +266,6 @@ final public class Condition
      */
     public function Condition(mutex:Mutex)
     {
-        if (mutex == null)
-        	Error.throwError(ArgumentError, kNullPointerError, "mutex");
         ctor(mutex);
     }
 
@@ -267,8 +293,8 @@ final public class Condition
      *                value is -1 (the default) there is no no timeout and 
      *                execution pauses indefinitely.
      *
-     * @return <code>false</code> if the method returned because the timeout 
-     *         time elapsed. Otherwise the method returns <code>true</code>.
+     * @return <code>true</code> if the method returned because the timeout 
+     *         time elapsed. Otherwise the method returns <code>false</code>.
      *
      * @throws flash.errors.IllegalOperationError if the current worker doesn't 
      *         own this condition's mutex
@@ -280,17 +306,15 @@ final public class Condition
      *         code in the primordial worker in Flash Player and worker pauses 
      *         longer than the script timeout limit (15 seconds by default)
      *
+     * @throws flash.errors.WorkerTerminatedError if the method is called and
+     *         the associated worker is terminated while the calling worker
+     *         is waiting.
+     *
      * @langversion 3.0
      * @playerversion Flash 11.4	
      * @playerversion AIR 3.4
      */
-    public function wait(timeout:Number = -1) :Boolean
-    {
-        if (timeout < 0 && timeout != -1) {
-            Error.throwError(ArgumentError, kConditionInvalidTimeoutError);
-        }
-        return waitImpl(Math.ceil(timeout));
-    }
+    public native function wait(timeout:Number = -1) :Boolean;
 
     /**
      * Specifes that the condition that this Condition object represents has 
@@ -315,12 +339,7 @@ final public class Condition
      * @playerversion Flash 11.4	
      * @playerversion AIR 3.4
      */
-    public function notify() :void
-    {
-        if (!notifyImpl()) {
-        	Error.throwError(IllegalOperationError, kConditionCannotNotifyError);
-        }
-    }
+    public native function notify() :void;
 
     /**
      * Specifies that the condition that this Condition object represents has 
@@ -350,23 +369,25 @@ final public class Condition
      * @playerversion Flash 11.4	
      * @playerversion AIR 3.4
      */
-    public function notifyAll() :void
-    {
-        if (!notifyAllImpl()) {
-        	Error.throwError(IllegalOperationError, kConditionCannotNotifyAllError);
-        }
-    }
+    public native function notifyAll() :void;
 
+    /**
+     * Indicates if a <code>Condition</code> is supported for the current platform.
+     * NOTE: if <code>Mutex</code> is not supported creation of a <code>Condition</code>
+     * is not possible.
+     *
+     * @return <code>true</code> if the current platform supports <code>Condition</code>
+     * <code>false</code> otherwise.
+     *
+     * @langversion 3.0
+     * @playerversion Flash 11.4	
+     * @playerversion AIR 3.4
+     */
+    native static public function isSupported():Boolean;
+    
     private native function ctor(mutex:Mutex) :void;
-    private native function notifyImpl() :Boolean;
-    private native function notifyAllImpl() :Boolean;
-    private native function waitImpl(timeout:Number) :int;
-
-	private static const kNullPointerError:uint = 2007;
-	private static const kConditionInvalidTimeoutError:uint = 1415;
-	private static const kConditionCannotNotifyError:uint = 1516;
-	private static const kConditionCannotNotifyAllError:uint = 1517;
 }
+
 }
 
 package avm2.intrinsics.memory
@@ -378,7 +399,7 @@ package avm2.intrinsics.memory
      * @playerversion Flash 11.4	
      * @playerversion AIR 3.4
      */
-	[API(CONFIG::SWF_17)]
+	[API(CONFIG::SWF_18)]
 	[native("ConcurrentMemory::mfence")]
 	public native function mfence():void;
     /**
@@ -389,7 +410,7 @@ package avm2.intrinsics.memory
      * @playerversion Flash 11.4	
      * @playerversion AIR 3.4
      */
-	[API(CONFIG::SWF_17)]
+	[API(CONFIG::SWF_18)]
 	[native("ConcurrentMemory::casi32")]
 	public native function casi32(addr:int, expectedVal:int, newVal:int):int;
 }

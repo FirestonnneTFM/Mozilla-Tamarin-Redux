@@ -61,21 +61,8 @@ namespace avmshell {
 
     bool ShellWorkerObject::terminate()
     {
-        return stopInternal(true);
+        return stopInternal();
     }
-
-    int32_t ShellWorkerObject::get_descriptor() const
-    {
-        return this->giid;
-    }
-    
-    bool ShellWorkerObject::startInternal()
-    {
-        using namespace avmplus;
-        
-        return startVeryInternal();
-    }
-
 
     ShellWorkerClass::ShellWorkerClass(avmplus::VTable *cvtable)
         : avmplus::ClassClosure(cvtable)

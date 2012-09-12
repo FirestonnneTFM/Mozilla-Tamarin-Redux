@@ -190,8 +190,10 @@ namespace avmshell
     public:
         ShellIsolate(int32_t desc, int32_t parentDesc, avmplus::Aggregate* aggregate);
         virtual void doRun();
-        virtual bool copyByteCode(avmplus::ByteArrayObject* ba);
-        virtual avmplus::ScriptObject* workerObject(avmplus::Toplevel* toplevel);
+        virtual void copyByteCode(avmplus::ByteArrayObject* ba);
+        virtual avmplus::ScriptObject* newWorkerObject(avmplus::Toplevel* toplevel);
+		
+		void evalCodeBlobs(bool enter_debugger_on_launch);
     };
 
     /**

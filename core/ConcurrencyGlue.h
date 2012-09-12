@@ -41,7 +41,19 @@
 #ifndef CONCURRENCYGLUE_INCLUDED
 #define CONCURRENCYGLUE_INCLUDED
 
+#if defined(DEBUG)
+#define DEBUG_CONDITION_MUTEX
+#endif // DEBUG
+
+
 namespace avmplus {
+
+
+#if defined(DEBUG_CONDITION_MUTEX)
+    #define DEBUG_STATE(_x_) do { AvmLog _x_; } while(0)
+#else
+    #define DEBUG_STATE(_x_) do { } while(0)
+#endif
 
     //
     // Mutexes in ActionScript are composed of a OS level
@@ -55,9 +67,6 @@ namespace avmplus {
     // 
     class GC_AS3_EXACT(MutexObject, ScriptObject)
     {
-        friend class ConditionObject;
-        friend class Isolate;
-
     public:
         MutexObject(VTable* vtbl, ScriptObject* delegate);
         virtual ~MutexObject();
@@ -70,6 +79,8 @@ namespace avmplus {
         class State;
 		
     private:
+        friend class ConditionObject;
+
         GC_NO_DATA(MutexObject)
         DECLARE_SLOTS_MutexObject;
         FixedHeapRef<State> m_state;
@@ -87,7 +98,6 @@ namespace avmplus {
     // 
     class GC_AS3_EXACT(ConditionObject, ScriptObject)
     {
-        friend class MutexObject;
     public:
         ConditionObject(VTable* vtbl, ScriptObject* delegate);
         virtual ~ConditionObject();
@@ -95,16 +105,17 @@ namespace avmplus {
         GCRef<MutexObject> get_mutex();
         
         void ctor(GCRef<MutexObject> mutex);
-        bool waitImpl(double timeout);
-        bool notifyImpl();
-        bool notifyAllImpl();
+        bool wait(double timeout);
+        void notify();
+        void notifyAll();
 
 		ChannelItem* makeChannelItem();
         
         class State;
 
-		
     private:
+        friend class MutexObject;
+
         GC_DATA_BEGIN(ConditionObject)
         GCMember<MutexObject> m_mutex;
         GC_DATA_END(ConditionObject)
@@ -120,11 +131,11 @@ namespace avmplus {
     // isolates allowing multiple isolates to use the same
     // OS level Mutex for coordination.
     // 
-    // InterruptableState manages the list of WaitRecords
+    // InterruptibleState manages the list of WaitRecords
     // for this Mutex allowing blocking operations like lock()
     // to be interrupted for termination, debugging, or script timeout
     //
-    class MutexObject::State: public InterruptableState
+    class MutexObject::State: public FixedHeapRCObject
     {
     public:
         State();
@@ -137,6 +148,7 @@ namespace avmplus {
         friend class MutexObject;
         friend class ConditionObject;
         friend class ConditionObject::State;
+        bool internalTryLock();
         // manages list of threads waiting for 
         // the lock, this is a FIFO list for acquisition
         // first one waiting on the lock gets it when it
@@ -145,23 +157,62 @@ namespace avmplus {
         {
             LockWaitRecord() 
                 : next(NULL)
-#ifdef DEBUG
+#ifdef DEBUG_CONDITION_MUTEX
                 , threadID(VMPI_currentThread())
-#endif // DEBUG
+#endif // DEBUG_CONDITION_MUTEX
             {}
 
             LockWaitRecord* next;
-#ifdef DEBUG
+#ifdef DEBUG_CONDITION_MUTEX
             vmpi_thread_t threadID;
-#endif // DEBUG
+#endif // DEBUG_CONDITION_MUTEX
         };
 
+        REALLY_INLINE void lockAquired()
+        {
+            DEBUG_STATE(("thread %d acquired Mutex(%d)\n", VMPI_currentThread(), m_interruptibleState.gid));
+            if (m_recursionCount == 0) {
+                AvmAssert(m_ownerThreadID == VMPI_nullThread());
+                m_ownerThreadID = VMPI_currentThread(); 
+            } else {
+                AvmAssert(m_ownerThreadID == VMPI_currentThread());
+            }
+            m_recursionCount++;
+        }
+
         vmpi_mutex_t m_mutex;
-        int64_t m_recursion_count; // generous to avoid wraparound.
+
+        // recursionCount keeps track of the number of times that
+        // Mutex.lock was called. Mutex.unlock needs to be called
+        // that same number of times. large storage is used here
+        // to try and avoid wrap around.
+        int64_t m_recursionCount; 
+
+        // keeps track of the thread that currently holds the lock
+        // and is used to report programming errors back to 
+        // actionscript developers.
         vmpi_thread_t volatile m_ownerThreadID;
+
+        // when a thread attempts to acquire this mutex and fails
+        // it will be placed into a FIFO wait list. the following 
+        // two members help to manage that list.
         LockWaitRecord* m_lockWaitListHead;
         LockWaitRecord* m_lockWaitListTail;
+
+        // keeps track of the success of initializing the vmpi_mutex_t
+        // this value is then used to throw an Error in actionscript
+        // indicating that the mutex could not be initialized.
+        // additionally, if the platform does not support workers
+        // this will be set to invalid during initialization, again causing
+        // actionscript to throw an Error. 
         bool m_isValid;
+
+        // any primitive like Mutex and Condition that have blocking
+        // behavior need to be interruptible to allow for script timeout,
+        // termination, and debugging call stack acquisition. 
+        // Mutex uses an InterruptibleState when a blocking operation,
+        // like waiting on Mutex.lock aquisition, needs to be performed.
+        InterruptibleState m_interruptibleState;
     };
     
     //
@@ -175,22 +226,25 @@ namespace avmplus {
     // for this Condition allowing blocking operations like wait()
     // to be interrupted for termination, debugging, or script timeout
     //
-    class ConditionObject::State: public InterruptableState
+    class ConditionObject::State: public FixedHeapRCObject
     {
-        friend class ConditionObject;
-        FixedHeapRef<MutexObject::State> m_mutexState;
-
-        
     public:
         State(MutexObject::State* mutexState);
         bool wait(int32_t millis, Isolate* isolate, Toplevel* toplevel);
         virtual void destroy();
+
+    private:
+        friend class ConditionObject;
+
+        FixedHeapRef<MutexObject::State> m_mutexState;
+        InterruptibleState m_interruptibleState;
     };
     
     class GC_AS3_EXACT(MutexClass, ClassClosure)
     {
     public:
         MutexClass(VTable* cvtable);
+        bool isSupported();
     private:
         GC_NO_DATA(MutexClass)
         DECLARE_SLOTS_MutexClass;
@@ -201,11 +255,17 @@ namespace avmplus {
     {
     public:
         ConditionClass(VTable* cvtable);
+        bool isSupported();
     private:
         GC_NO_DATA(ConditionClass)
         DECLARE_SLOTS_ConditionClass;
     };
 
+    //
+    // This class provides a place to hang the memory fence and 
+    // compare and swap functions so they can be called from 
+    // ActionScript.
+    // 
     class ConcurrentMemory
     {
     private:

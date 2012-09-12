@@ -99,13 +99,13 @@
     AddTestCase("Condition notify and notifyAll returns immediately on same worker",true,notifyRes==null && notifyAllRes==null);
     var waitRes:Boolean;
     waitRes=condition.wait(1);
-    AddTestCase("Condition wait times out when notify and notifyAll were called previously",false,waitRes);
+    AddTestCase("Condition wait times out when notify and notifyAll were called previously",true,waitRes);
 
     mutex=new Mutex();
     condition=new Condition(mutex);
     mutex.lock();
     waitRes=condition.wait(1);
-    AddTestCase("Condition wait times out with no notify",false,waitRes);
+    AddTestCase("Condition wait times out with no notify",true,waitRes);
 
     exception="";
     mutex=new Mutex();

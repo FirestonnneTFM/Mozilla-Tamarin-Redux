@@ -77,7 +77,7 @@ namespace avmplus
         uint8_t& operator[](uint32_t index);
 
         REALLY_INLINE uint32_t GetLength() const { return m_buffer->length; }
-        REALLY_INLINE bool IsShared() const { return (m_workerLocal == false) && (m_buffer->RefCount() > 1); }
+        REALLY_INLINE bool IsShared() const { return m_isShareable && (m_buffer->RefCount() > 1); }
 
         // Ensure that the capacity of the ByteArray is at least 'newLength',
         // and set length = max(GetLength(), newLength),
@@ -163,8 +163,8 @@ namespace avmplus
         // overrides from DataOutput
         /*virtual*/ void Write(const void* buffer, uint32_t count);
 
-        bool isWorkerLocal();
-        bool setWorkerLocal(bool value);
+        bool isShareable () const;
+        bool setShareable (bool value);
         
              
         bool addSubscriber(DomainEnv* subscriber);
@@ -317,7 +317,7 @@ namespace avmplus
         MMgc::GCObject*         m_copyOnWriteOwner;
         uint32_t                m_position;
         FixedHeapRef<Buffer>    m_buffer;
-        bool                    m_workerLocal;
+        bool                    m_isShareable;
     public: // FIXME permissions
         bool                    m_isLinkWrapper;
     };
