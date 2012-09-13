@@ -2,7 +2,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
 # acts as a proxy to remotely run abc files via a winrs call to the remote machine
 # usage: ./winrs_shell.sh <vmargs> file.abc
 # assumes the shell is deployed to $WINRS_SHELL_REMOTE_DIR/avmshell
