@@ -220,8 +220,8 @@ class Configuration:
                 'CFLAGS'       : '',
                 'DLL_CFLAGS'   : '-fPIC',
                 'LDFLAGS'      : '-framework CoreServices',
-                'AR'           : 'ar',
-                'MKSTATICLIB'  : '$(AR) cr $(1)',
+                'AR'           : 'libtool',
+                'MKSTATICLIB'  : '$(AR) -static -o $(1)',
                 'MKDLL'        : '$(CXX) -dynamiclib -single_module -install_name @executable_path/$(1) -o $(1)',
                 'MKPROGRAM'    : '$(CXX) -o $(1)',
                 'POSTMKPROGRAM': 'dsymutil $(1)'
