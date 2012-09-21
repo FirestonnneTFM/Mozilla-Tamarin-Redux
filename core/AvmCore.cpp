@@ -5608,8 +5608,15 @@ return the result of the comparison ToPrimitive(x) == y.
     {
         AvmAssert(reason != NotInterrupted);
         AvmAssert(reason != SafepointPoll); // Don't use this for safepoints
-        interrupted = reason;
-    }
+		// If this core is already suppose to be in a safepoint poll state, then pend the reason for
+		// examination after the safepoint.
+		if (interrupted == SafepointPoll) {
+			pending_interrupt = reason;
+		}
+		else {
+			interrupted = reason;
+		}
+	}
 
     /* static */
     void AvmCore::handleInterruptMethodEnv(MethodEnv *env)

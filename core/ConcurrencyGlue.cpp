@@ -96,14 +96,14 @@ namespace avmplus {
         mmfx_delete(this);
     }
 
-    void MutexObject::State::lock(AvmCore* core) {
-        Isolate* isolate = core->getIsolate();
+    void MutexObject::State::lock(Toplevel* toplevel) {
+        Isolate* isolate = toplevel->core()->getIsolate();
         if (isolate) {
-            // this InterruptibleState is RAII and does acquire a lock during initialization
-            InterruptibleState::Enter state(&m_interruptibleState, isolate);
-            while(internalTryLock() == false) {
-                // put us at the end of the list of waiting threads
+            Isolate::InterruptibleState::Enter state(&m_interruptibleState, isolate);
+            AvmAssert(m_interruptibleState.getMonitor().isLockedByCurrentThread() == true);
+            if ((m_lockWaitListHead != NULL) || (VMPI_recursiveMutexTryLock(&m_mutex) == false)) {
                 LockWaitRecord record;
+                // put the record at the end of the list of lock wait records
                 if (m_lockWaitListHead == NULL) {
                     m_lockWaitListHead = &record;
                 }
@@ -134,46 +134,44 @@ namespace avmplus {
                                 if (cur->next == NULL) {
                                     m_lockWaitListTail = prev;
                                 }
-
-                                return;
+                                
+                                goto throw_terminated_exception;
                             } 
                             prev = cur;
                             cur = cur->next;
                         } while(cur);
                         
                         AvmAssert(0); // we should be found in the list!
-                        return;
+                        goto throw_terminated_exception;
                     }
-                } while(m_lockWaitListHead != &record);
-                
+                    // must wait again if wait record is not at the head of
+                    // the list or the mutex is still owned by another worker.
+                } while(m_lockWaitListHead != &record || VMPI_recursiveMutexTryLock(&m_mutex) == false);
+                // current waiter now has the lock, remove it from the wait list
                 m_lockWaitListHead = record.next;
                 if (m_lockWaitListHead == NULL) {
                     m_lockWaitListTail = NULL;
                 }
             }
+            lockAcquired();
         }
-    }
+        return;
 
-    bool MutexObject::State::internalTryLock()
-    {
-        bool result = VMPI_recursiveMutexTryLock(&m_mutex);
-        if (result) {
-            lockAquired();
-        }
-        return result;
+throw_terminated_exception:
+        // because we should not long jump with a InterruptibleState::Enter on the stack
+        // we need to destroy the RAII object before throwing
+        isolate->getAggregate()->throwWorkerTerminatedException(toplevel);
     }
 
     bool MutexObject::State::tryLock()
     {
         bool result = false;
-        // if there are workers waiting on the lock we must
-        // unlock and return false before doing any further housekeeping.
-        // to avoid blocking (the reason for tryLock) the non-blocking 
-        // hasWaiters method is called.
-        if (!m_interruptibleState.hasWaiters()) {
+        if (m_interruptibleState.hasWaiters() == false) 
+        {
+            DEBUG_STATE(("thread %d calling Mutex(%d).tryLock()\n", VMPI_currentThread(), m_interruptibleState.gid));
             result = VMPI_recursiveMutexTryLock(&m_mutex);
             if (result) {
-                lockAquired();
+                lockAcquired();
             }
         }
         return result;
@@ -260,7 +258,7 @@ namespace avmplus {
         DEBUG_STATE(("thread %d calling Mutex(%d).lock()\n", VMPI_currentThread(), m_state->m_interruptibleState.gid));
         // we continue to try and get the lock until
         // we are terminated or acquire it
-        m_state->lock(core());
+        m_state->lock(toplevel());
     	TELEMETRY_METHOD_NO_THRESHOLD(core()->getTelemetry(),".player.mutex.lock");
     }
     
@@ -320,7 +318,7 @@ namespace avmplus {
         createVanillaPrototype();
     }
 
-    bool MutexClass::isSupported()
+    bool MutexClass::get_isSupported()
     {
         return core()->getIsolate() != NULL;
     }
@@ -350,53 +348,55 @@ namespace avmplus {
 
     bool ConditionObject::State::wait(int32_t millis, Isolate* isolate, Toplevel* toplevel)
     {
-        bool result = false;
+        volatile bool result = false;
         if (isolate) {
+            AvmAssert(m_mutexState->m_ownerThreadID != VMPI_nullThread());
             // protected by mutex
             m_mutexState->m_ownerThreadID = VMPI_nullThread();
             int64_t saved_recursionCount = m_mutexState->m_recursionCount;
             m_mutexState->m_recursionCount = 0;
             {
-                InterruptibleState::Enter state(&m_interruptibleState, isolate);
-                
+                Isolate::InterruptibleState::Enter state(&m_interruptibleState, isolate);
+                AvmAssert(m_interruptibleState.getMonitor().isLockedByCurrentThread() == true);
                 DEBUG_STATE(("thread %d releasing Mutex(%d)\n", VMPI_currentThread(), m_mutexState->m_interruptibleState.gid));
                 // unlock the mutex before we notify any other threads otherwise
                 // they will immediately go back into a waiting state.
                 VMPI_recursiveMutexUnlock(&m_mutexState->m_mutex);
                 m_mutexState->m_interruptibleState.notifyAll();
                 
-                // we could already be interrupted so before we block return
-                if ((isolate && isolate->isInterrupted()) || 
-                    toplevel->core()->interruptCheckReason(AvmCore::ExternalInterrupt)) {
-                    DEBUG_STATE(("thread %d Condition(%d).wait was interrupted!\n", VMPI_currentThread(), m_interruptibleState.gid));
-                    return false;
-                }
-
                 state.wait(millis);
 
                 result = state.result;
                 // if we have been interrupted do not re-acquire the public lock, just bail
-                if (state.interrupted)
-                {
+                if (state.interrupted) {
                     DEBUG_STATE(("thread %d Condition(%d).wait was interrupted!\n", VMPI_currentThread(), m_interruptibleState.gid));
-                    return false;
+                    goto throw_terminated_exception;
                 }
             }
-            // re-acquire the public mutex in a safepoint
-            SafepointHelper_VMPIMutex::lock(&m_mutexState->m_mutex);
-            DEBUG_STATE(("thread %d Condition(%d) re-acquired Mutex(%d)\n", VMPI_currentThread(), m_interruptibleState.gid, m_mutexState->m_interruptibleState.gid));
-            m_mutexState->m_ownerThreadID = VMPI_currentThread();
-            m_mutexState->m_recursionCount = saved_recursionCount;
 
-            // if we are terminating then we should release the public mutex
-            if (isolate->getAvmCore()->interruptCheckReason(AvmCore::ExternalInterrupt) || 
-                isolate->getAggregate()->queryState(isolate) == Isolate::TERMINATED) 
+            TRY(toplevel->core(), kCatchAction_Rethrow)
             {
-                VMPI_recursiveMutexUnlock(&m_mutexState->m_mutex);
-                DEBUG_STATE(("thread %d Condition(%2).wait was terminated!\n", VMPI_currentThread(), m_interruptibleState.gid));
+                // re-acquire the public mutex 
+                m_mutexState->lock(toplevel);
+                DEBUG_STATE(("thread %d Condition(%d) re-acquired Mutex(%d)\n", VMPI_currentThread(), m_interruptibleState.gid, m_mutexState->m_interruptibleState.gid));
+                m_mutexState->m_recursionCount = saved_recursionCount;
             }
+            CATCH(Exception* e)
+            {
+                m_mutexState->m_recursionCount = saved_recursionCount;
+                toplevel->core()->throwException(e);
+            }
+            END_TRY;
+            END_CATCH;
         }
         return result;
+
+throw_terminated_exception:
+        // because we should not long jump with a InterruptibleState::Enter on the stack
+        // we need to destroy the RAII object before throwing
+        isolate->getAggregate()->throwWorkerTerminatedException(toplevel);
+        AvmAssert(false);
+        return false;
     }
 
     // There are two ways that a ConditionObject can be created 
@@ -555,7 +555,7 @@ namespace avmplus {
         createVanillaPrototype();
     }
 
-    bool ConditionClass::isSupported()
+    bool ConditionClass::get_isSupported()
     {
         return core()->getIsolate() != NULL;
     }

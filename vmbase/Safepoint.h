@@ -441,6 +441,11 @@ namespace vmbase {
         const void* safeRegionEnd() const;
 
         /**
+         * Returns if this SafepointRecord is safe
+         */
+        bool isSafe() const;
+
+        /**
          * Returns the SafepointManager with which
          * this SafepointRecord is registered.
          */

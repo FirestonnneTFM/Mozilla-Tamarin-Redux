@@ -1,9 +1,8 @@
 /* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
+ 
 #ifndef __avmplus_Isolate__
 #define __avmplus_Isolate__
 
@@ -17,8 +16,6 @@
 
 namespace avmplus
 {
-    class InterruptibleState;
-
     /*
      * Represents an isolate in various stages of its lifecycle. There's only one Isolate
      * object per isolate.
@@ -138,11 +135,105 @@ namespace avmplus
         void setSharedProperty(const StUTF8String& key, ChannelItem* item);
         bool getSharedProperty(const StUTF8String& key, ChannelItem** outItem);
         virtual ChannelItem* makeChannelItem(Toplevel* toplevel, Atom atom);
-        void setInterruptibleState(InterruptibleState* value);
         void signalInterruptibleState();
         virtual bool retryInterruptibleState();
 
+
+        /*
+         * InterruptibleState provides basic management 
+         * for any objects running within an isolate that 
+         * need to enter a blocking state and be 
+         * interruptable to support termination, debugging, 
+         * and script-timeouts
+         */ 
+        class InterruptibleState
+        {
+        public:
+            InterruptibleState();
+            bool hasWaiters();
+            void notify();
+            void notifyAll();
+            // signal is a specialized case of notifyAll.
+            // it is used to wake up all threads and have
+            // them check if they should exit their waiting
+            // state or return to a blocked state. this
+            // is needed to support script timeout, terminate
+            // and call stack acquisition for fdb.
+            void signal();
+
+            //
+            // This is intended as a stack based RAII helper for 
+            // locking and waiting on an InterruptibleState, as 
+            // well as associating that waiting state with a
+            //
+            class Enter
+            {
+            public:
+                Enter(InterruptibleState* state, Isolate* isolate);
+                void wait(int32_t timeout=-1);
+                void notify();
+                bool interrupted;
+                bool result;
+
+                // Force stack allocation
+                void* operator new(size_t);
+
+            private:
+                friend class Isolate;
+                // RAII for setting and removing the active intteruptible
+                // state object for the associated isolate
+                class ActiveInterruptibleStateHelper
+                {
+                public:
+                    ActiveInterruptibleStateHelper(Isolate* isolate, InterruptibleState* state);
+                    ~ActiveInterruptibleStateHelper();
+                    void unlock() const;
+                    Isolate* getIsolate() const;
+
+
+        #ifdef DEBUG_INTERRUPTIBLE_STATE
+			        Isolate::descriptor_t gid;
+        #endif // DEBUG_INTERRUPTIBLE_STATE
+                private:
+
+                    Isolate* m_isolate;
+                    // reference to the mutex that is used to 
+                    // protect the active state on isolate
+                    vmpi_mutex_t* m_mutex;
+                };
+                // we must always set the isolate's active state
+                // before getting a lock on the monitor
+                // *and* release them in the opposite order
+                // we are relying on the initialization and 
+                // destruction order for this.
+                ActiveInterruptibleStateHelper m_stateSetter;
+                vmbase::MonitorLocker< vmbase::IMPLICIT_SAFEPOINT > m_monitor;
+                InterruptibleState* m_state;
+            };
+
+            vmbase::WaitNotifyMonitor& getMonitor() { return m_condition; }
+
+#ifdef DEBUG_INTERRUPTIBLE_STATE
+             int32_t gid;
+#endif // DEBUG_INTERRUPTIBLE_STATE
+
+        private:
+            friend class Enter;
+            vmbase::WaitNotifyMonitor m_condition;
+            volatile int32_t m_waiterCount;
+            int32_t m_signaledWaiters;
+
+#ifdef DEBUG_INTERRUPTIBLE_STATE
+            static  int32_t globalId; // global id counter
+#endif // DEBUG_INTERRUPTIBLE_STATE
+        };
+
     private:
+        friend class InterruptibleState::Enter::ActiveInterruptibleStateHelper;
+
+        void lockInSafepoint(vmpi_mutex_t* mutex) const;
+        static void lockInSafepointGate(void* stackPointer, void* mutex);
+
 		AvmCore* m_core;
 
 		// when an isolate is blocked from ActionScript either due to a 
@@ -151,8 +242,8 @@ namespace avmplus
         // a simple way for the runtime to "wake" a blocked thread so that
         // operations like Worker.terminate, shutdown, and script timeout can
         // occur.
-        vmbase::RecursiveMutex m_interruptibleStateLock;
         InterruptibleState* m_interruptibleState;
+        vmpi_mutex_t m_interruptibleStateMutex;
 
         FixedHeapRef<Aggregate> m_aggregate;
         Isolate::State m_state;
@@ -160,106 +251,6 @@ namespace avmplus
         bool m_interrupted; 
 
         // *** end data ***
-    };
-
-    /*
-     * InterruptibleState provides basic management 
-     * for any objects running within an isolate that 
-     * need to enter a blocking state and be 
-     * interruptable to support termination, debugging, 
-     * and script-timeouts
-     */ 
-    class InterruptibleState
-    {
-    public:
-        InterruptibleState();
-        bool hasWaiters();
-        void notify();
-        void notifyAll();
-        // signal is a specialized case of notifyAll.
-        // it is used to wake up all threads and have
-        // them check if they should exit their waiting
-        // state or return to a blocked state. this
-        // is needed to support script timeout, terminate
-        // and call stack acquisition for fdb.
-        void signal();
-
-        //
-        // This is intended as a stack based RAII helper for 
-        // locking and waiting on an InterruptibleState, as 
-        // well as associating that waiting state with a
-        //
-        class Enter
-        {
-        public:
-            Enter(InterruptibleState* state, Isolate* isolate);
-            void wait(int32_t timeout=-1);
-            void notify();
-            bool interrupted;
-            bool result;
-
-            // Force stack allocation
-            void* operator new(size_t);
-
-        private:
-            // RAII for setting and removing the active intteruptible
-            // state object for the associated isolate
-            class ActiveStateSetter
-            {
-            public:
-                ActiveStateSetter(Isolate* isolate, InterruptibleState* state)
-                    : m_isolate(isolate)
-                {
-                    AvmAssert(m_isolate != NULL);
-                    m_isolate->setInterruptibleState(state);
-#ifdef DEBUG_INTERRUPTIBLE_STATE
-                    gid = state->gid;
-#endif // DEBUG_INTERRUPTIBLE_STATE
-                }
-
-                ~ActiveStateSetter()
-                {
-                    m_isolate->setInterruptibleState(NULL);
-                }
-
-                Isolate* getIsolate() const
-                {
-                    return m_isolate;
-                }
-
-
-#ifdef DEBUG_INTERRUPTIBLE_STATE
-				Isolate::descriptor_t gid;
-#endif // DEBUG_INTERRUPTIBLE_STATE
-            private:
-                Isolate* m_isolate;
-            };
-
-            // we must always set the isolate's active state
-            // before getting a lock on the monitor
-            // *and* release them in the opposite order
-            // we are relying on the initialization and 
-            // destruction order for this.
-            ActiveStateSetter m_stateSetter;
-            vmbase::MonitorLocker< vmbase::IMPLICIT_SAFEPOINT > m_monitor;
-            InterruptibleState* m_state;
-        };
-
-        vmbase::WaitNotifyMonitor& getMonitor() { return m_condition; }
-
-#ifdef DEBUG_INTERRUPTIBLE_STATE
-         int32_t gid;
-#endif // DEBUG_INTERRUPTIBLE_STATE
-
-    private:
-        friend class Enter;
-        vmbase::WaitNotifyMonitor m_condition;
-        uint32_t m_waiterCount;
-        uint32_t m_signaledWaiters;
-
-#ifdef DEBUG_INTERRUPTIBLE_STATE
-        static  int32_t globalId; // global id counter
-#endif // DEBUG_INTERRUPTIBLE_STATE
     };
 
 

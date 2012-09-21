@@ -44,7 +44,9 @@ namespace vmbase {
             bool restart = false;
             const volatile SafepointRecord* safepointRecord = NULL;
             do {
-                SafepointRecord::current()->m_status = SafepointRecord::SP_SAFE;
+				SafepointRecord* myRecord = SafepointRecord::current();
+
+				myRecord->m_status = SafepointRecord::SP_SAFE;
                 // Threads polling this SafepointManager will pass through a
                 // SafepointGate when they see m_requester as non-null.
                 
@@ -55,7 +57,12 @@ namespace vmbase {
                 const int SafepointPoll = 3;
                 
                 while (safepointRecord) {
-                    if (safepointRecord->m_interruptLocation) {
+                    // We do not want to check our own record's interrupt reason
+					const bool cIsMyOwnRecord = (safepointRecord->m_isolateDesc == myRecord->m_isolateDesc);
+					
+                    if (!cIsMyOwnRecord && safepointRecord->m_status == SafepointRecord::SP_UNSAFE && 
+						safepointRecord->m_interruptLocation) 
+					{
                         int32_t previous = AtomicOps::compareAndSwap32WithBarrierPrev(0, SafepointPoll, safepointRecord->m_interruptLocation);
                         if (previous != 0 && previous != SafepointPoll) {
                             // We noticed an unwinding operation request. 
@@ -70,8 +77,9 @@ namespace vmbase {
                             // because the linked list might have changed.
                             
                             // Undo state changes.
-                            SafepointRecord::current()->m_status = SafepointRecord::SP_UNSAFE;
+                            myRecord->m_status = SafepointRecord::SP_UNSAFE;
                             m_requester = (vmpi_thread_t) 0;
+							locker.wait();
                             restart = true;
                             break;
                         } else {
@@ -183,9 +191,10 @@ namespace vmbase {
         if (stackPrev) {
             // We're unwinding into the previous SafepointRecord, so
             // we have to block until no safepoint task is ongoing.
-            SCOPE_LOCK_NO_SP(stackPrev->m_manager->m_requestMutex) {
+            SCOPE_LOCK_NO_SP_NAMED(locker, stackPrev->m_manager->m_requestMutex) {
                 stackPrev->m_status = SafepointRecord::SP_UNSAFE;
-            }
+                locker.notifyAll();
+          }
         }
     }
 }

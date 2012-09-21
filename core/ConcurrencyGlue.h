@@ -107,14 +107,13 @@ namespace avmplus {
         State();
         virtual void destroy();
         bool tryLock();
-        void lock(AvmCore* core);
+        void lock(Toplevel* toplevel);
         bool unlock();
 
     private:
         friend class MutexObject;
         friend class ConditionObject;
         friend class ConditionObject::State;
-        bool internalTryLock();
         // manages list of threads waiting for 
         // the lock, this is a FIFO list for acquisition
         // first one waiting on the lock gets it when it
@@ -134,7 +133,7 @@ namespace avmplus {
 #endif // DEBUG_CONDITION_MUTEX
         };
 
-        REALLY_INLINE void lockAquired()
+        REALLY_INLINE void lockAcquired()
         {
             DEBUG_STATE(("thread %d acquired Mutex(%d)\n", VMPI_currentThread(), m_interruptibleState.gid));
             if (m_recursionCount == 0) {
@@ -178,7 +177,7 @@ namespace avmplus {
         // termination, and debugging call stack acquisition. 
         // Mutex uses an InterruptibleState when a blocking operation,
         // like waiting on Mutex.lock aquisition, needs to be performed.
-        InterruptibleState m_interruptibleState;
+        Isolate::InterruptibleState m_interruptibleState;
     };
     
     //
@@ -203,14 +202,14 @@ namespace avmplus {
         friend class ConditionObject;
 
         FixedHeapRef<MutexObject::State> m_mutexState;
-        InterruptibleState m_interruptibleState;
+        Isolate::InterruptibleState m_interruptibleState;
     };
     
     class GC_AS3_EXACT(MutexClass, ClassClosure)
     {
     public:
         MutexClass(VTable* cvtable);
-        bool isSupported();
+        bool get_isSupported();
     private:
         GC_NO_DATA(MutexClass)
         DECLARE_SLOTS_MutexClass;
@@ -221,7 +220,7 @@ namespace avmplus {
     {
     public:
         ConditionClass(VTable* cvtable);
-        bool isSupported();
+        bool get_isSupported();
     private:
         GC_NO_DATA(ConditionClass)
         DECLARE_SLOTS_ConditionClass;
