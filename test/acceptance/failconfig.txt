@@ -345,7 +345,7 @@ regress/security/bug_555059b,                   AOT,, skip, http://watsonexp.cor
 as3/ByteArray/ByteArray:ByteArray readFloat_2 #1, AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3153294
 as3/ByteArray/ByteArrayLzma:ByteArray readFloat_2 #1, AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3153294
 as3/ShellClasses/toplevel:queue a gc collection,      AOT,, skip, http://watsonexp.corp.adobe.com/#bug=3156533
-regress/bug_515935,                             arm-mac-AOT,, skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=547282
+regress/bug_515935,                             arm-AOT,, skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=547282
 
 ####################
 # Float
