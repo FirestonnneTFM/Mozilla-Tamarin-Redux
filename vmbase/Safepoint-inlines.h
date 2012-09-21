@@ -182,8 +182,9 @@ namespace vmbase {
         // critical section we are assured that no task is running
         // and that no new task will be started until this thread is next
         // safepointed.
-        SCOPE_LOCK_NO_SP(m_safepointRecord->m_manager->m_requestMutex) {
+        SCOPE_LOCK_NO_SP_NAMED(locker, m_safepointRecord->m_manager->m_requestMutex) {
             m_safepointRecord->m_status = SafepointRecord::SP_UNSAFE;
+			locker.notifyAll();
         }
     }
 
@@ -205,7 +206,7 @@ namespace vmbase {
         , m_managerNext(NULL)
         , m_manager(NULL)
         , m_interruptLocation(NULL)
-        , m_isolateDesc(-1)
+        , m_isolateDesc(0)
     {
     }
 
@@ -233,6 +234,11 @@ namespace vmbase {
     REALLY_INLINE /*static*/void SafepointRecord::setCurrent(SafepointRecord* record)
     {
         m_current.set(record);
+    }
+
+    REALLY_INLINE bool SafepointRecord::isSafe() const
+    {
+        return m_status == SP_SAFE;
     }
 
 	REALLY_INLINE void SafepointRecord::setLocationAndDesc (int32_t* location, int desc)

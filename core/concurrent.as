@@ -151,14 +151,13 @@ final public class Mutex
     /**
      * Indicates if a <code>Mutex</code> is supported for the current platform.
      *
-     * @return <code>true</code> if the current platform supports <code>Mutex</code>
-     * <code>false</code> otherwise.
-     *
+	 * <p>If the current platform supports <code>Mutex</code>, this property's value is <code>true</code>.
+	 *
      * @langversion 3.0
      * @playerversion Flash 11.4	
      * @playerversion AIR 3.4
      */
-    native static public function isSupported():Boolean;
+    public native static function get isSupported(): Boolean;
 
     private native function ctor() :void;
 }
@@ -343,14 +342,13 @@ final public class Condition
      * NOTE: if <code>Mutex</code> is not supported creation of a <code>Condition</code>
      * is not possible.
      *
-     * @return <code>true</code> if the current platform supports <code>Condition</code>
-     * <code>false</code> otherwise.
+	 * <p>If the current platform supports <code>Condition</code>, this property's value is <code>true</code>.
      *
      * @langversion 3.0
      * @playerversion Flash 11.4	
      * @playerversion AIR 3.4
      */
-    native static public function isSupported():Boolean;
+    public native static function get isSupported(): Boolean;
     
     private native function ctor(mutex:Mutex) :void;
 }

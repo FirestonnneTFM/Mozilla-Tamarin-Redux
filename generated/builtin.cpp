@@ -3937,7 +3937,7 @@ avmplus::Atom flash_net_ObjectEncoding_dynamicPropertyWriter_set_sampler_thunk(M
     frame.exit(env->core());
     return retVal;
 }
-avmplus::Atom flash_concurrent_Mutex_isSupported_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom flash_concurrent_Mutex_isSupported_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
@@ -3945,16 +3945,16 @@ avmplus::Atom flash_concurrent_Mutex_isSupported_thunk(MethodEnv* env, uint32_t 
     (void)argc;
     (void)env;
     avmplus::MutexClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MutexClass*, argv[argoff0]);
-    bool const ret = obj->isSupported();
+    bool const ret = obj->get_isSupported();
     return avmplus::Atom(ret);
 }
-avmplus::Atom flash_concurrent_Mutex_isSupported_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom flash_concurrent_Mutex_isSupported_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     Namespace* dxns = env->core()->dxns();
     MethodFrame frame;
     frame.enter(env->core(), env);
     frame.setDxns(dxns);
-    avmplus::Atom retVal = flash_concurrent_Mutex_isSupported_thunk(env, argc, argv);
+    avmplus::Atom retVal = flash_concurrent_Mutex_isSupported_get_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -4042,7 +4042,7 @@ avmplus::Atom flash_concurrent_Mutex_private_ctor_sampler_thunk(MethodEnv* env, 
     frame.exit(env->core());
     return retVal;
 }
-avmplus::Atom flash_concurrent_Condition_isSupported_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom flash_concurrent_Condition_isSupported_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
@@ -4050,16 +4050,16 @@ avmplus::Atom flash_concurrent_Condition_isSupported_thunk(MethodEnv* env, uint3
     (void)argc;
     (void)env;
     avmplus::ConditionClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ConditionClass*, argv[argoff0]);
-    bool const ret = obj->isSupported();
+    bool const ret = obj->get_isSupported();
     return avmplus::Atom(ret);
 }
-avmplus::Atom flash_concurrent_Condition_isSupported_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
+avmplus::Atom flash_concurrent_Condition_isSupported_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     Namespace* dxns = env->core()->dxns();
     MethodFrame frame;
     frame.enter(env->core(), env);
     frame.setDxns(dxns);
-    avmplus::Atom retVal = flash_concurrent_Condition_isSupported_thunk(env, argc, argv);
+    avmplus::Atom retVal = flash_concurrent_Condition_isSupported_get_thunk(env, argc, argv);
     frame.exit(env->core());
     return retVal;
 }
@@ -11241,12 +11241,12 @@ AVMTHUNK_BEGIN_NATIVE_TABLES(builtin)
         AVMTHUNK_NATIVE_METHOD(flash_net_ObjectEncoding_dynamicPropertyWriter_set, avmplus::ObjectEncodingClass::set_dynamicPropertyWriter)
         AVMTHUNK_NATIVE_FUNCTION(native_script_function_avm2_intrinsics_memory_casi32, ConcurrentMemory::casi32)
         AVMTHUNK_NATIVE_FUNCTION(native_script_function_avm2_intrinsics_memory_mfence, ConcurrentMemory::mfence)
-        AVMTHUNK_NATIVE_METHOD(flash_concurrent_Mutex_isSupported, avmplus::MutexClass::isSupported)
+        AVMTHUNK_NATIVE_METHOD(flash_concurrent_Mutex_isSupported_get, avmplus::MutexClass::get_isSupported)
         AVMTHUNK_NATIVE_METHOD(flash_concurrent_Mutex_lock, avmplus::MutexObject::lock)
         AVMTHUNK_NATIVE_METHOD(flash_concurrent_Mutex_tryLock, avmplus::MutexObject::tryLock)
         AVMTHUNK_NATIVE_METHOD(flash_concurrent_Mutex_unlock, avmplus::MutexObject::unlock)
         AVMTHUNK_NATIVE_METHOD(flash_concurrent_Mutex_private_ctor, avmplus::MutexObject::ctor)
-        AVMTHUNK_NATIVE_METHOD(flash_concurrent_Condition_isSupported, avmplus::ConditionClass::isSupported)
+        AVMTHUNK_NATIVE_METHOD(flash_concurrent_Condition_isSupported_get, avmplus::ConditionClass::get_isSupported)
         AVMTHUNK_NATIVE_METHOD(flash_concurrent_Condition_mutex_get, avmplus::ConditionObject::get_mutex)
         AVMTHUNK_NATIVE_METHOD(flash_concurrent_Condition_wait, avmplus::ConditionObject::wait)
         AVMTHUNK_NATIVE_METHOD(flash_concurrent_Condition_notify, avmplus::ConditionObject::notify)
@@ -13161,8 +13161,8 @@ const uint8_t builtin_abc_data[55803] = {
  168,   7,   0, 181,   7,   0, 186,   7,   0, 190,   7,   0, 194,   7,   0, 199,
    7,   5, 193,  11,   6,   1,  25,   1,   3, 194,  11,   6,   2,  25,   5,   3,
  195,  11,   6,   3,  25,   5,   3, 196,  11,  18,   3, 200,   7, 196,  11,  19,
-   4, 201,   7, 206,   7,   1, 201,  11,  17,   3, 207,   7, 213,   7,   1, 201,
-  11,  17,   3, 214,   7, 222,   7,   0, 244,   7,   3, 243,  11,   6,   1,   1,
+   4, 201,   7, 206,   7,   1, 201,  11,  18,   3, 207,   7, 213,   7,   1, 201,
+  11,  18,   3, 214,   7, 222,   7,   0, 244,   7,   3, 243,  11,   6,   1,   1,
  156,   5,   1, 244,  11,   6,   2,   1, 158,   5,   1, 245,  11,   6,   3,   1,
  160,   5,   1, 246,   7,   0, 248,   7,   0, 250,   7,   3, 129,  12,  18,   3,
  252,   7, 129,  12,  19,   4, 253,   7, 130,  12,   0,   1,  25,   0, 176,   8,

@@ -38,9 +38,12 @@ namespace avmshell
 
     void SystemClass::exit(int status)
     {
-        (void)status;
-        GCRef<avmplus::ClassClosure> workerClass = toplevel()->workerClass();
-        static_cast<ShellWorkerClass*>((avmplus::ClassClosure*)workerClass)->getCurrentWorker()->terminate();
+        if (core()->getIsolate()->getAggregate()->isPrimordial(core()->getIsolate()->getDesc())) {
+            Platform::GetInstance()->exit(status);
+        } else {
+            GCRef<avmplus::ClassClosure> workerClass = toplevel()->workerClass();
+            static_cast<ShellWorkerClass*>((avmplus::ClassClosure*)workerClass)->getCurrentWorker()->terminate();
+        }
     }
 
     void SystemClass::sleep(int32_t ms)

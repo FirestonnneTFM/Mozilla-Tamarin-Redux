@@ -771,12 +771,12 @@ const uint32_t flash_net_ObjectEncoding_dynamicPropertyWriter_get = 968; // nati
 const uint32_t flash_net_ObjectEncoding_dynamicPropertyWriter_set = 969; // native
 const uint32_t native_script_function_avm2_intrinsics_memory_casi32 = 972; // native
 const uint32_t native_script_function_avm2_intrinsics_memory_mfence = 973; // native
-const uint32_t flash_concurrent_Mutex_isSupported = 975; // native
+const uint32_t flash_concurrent_Mutex_isSupported_get = 975; // native
 const uint32_t flash_concurrent_Mutex_lock = 977; // native
 const uint32_t flash_concurrent_Mutex_tryLock = 978; // native
 const uint32_t flash_concurrent_Mutex_unlock = 979; // native
 const uint32_t flash_concurrent_Mutex_private_ctor = 980; // native
-const uint32_t flash_concurrent_Condition_isSupported = 982; // native
+const uint32_t flash_concurrent_Condition_isSupported_get = 982; // native
 const uint32_t flash_concurrent_Condition_mutex_get = 984; // native
 const uint32_t flash_concurrent_Condition_wait = 985; // native
 const uint32_t flash_concurrent_Condition_notify = 986; // native
@@ -1201,8 +1201,8 @@ extern avmplus::Atom flash_net_ObjectEncoding_dynamicPropertyWriter_get_thunk(Me
 extern avmplus::Atom flash_net_ObjectEncoding_dynamicPropertyWriter_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_net_ObjectEncoding_dynamicPropertyWriter_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_net_ObjectEncoding_dynamicPropertyWriter_set_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_concurrent_Mutex_isSupported_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_concurrent_Mutex_isSupported_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_concurrent_Mutex_isSupported_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_concurrent_Mutex_isSupported_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Mutex_lock_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Mutex_lock_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Mutex_tryLock_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -1211,8 +1211,8 @@ extern avmplus::Atom flash_concurrent_Mutex_unlock_thunk(MethodEnv* env, uint32_
 extern avmplus::Atom flash_concurrent_Mutex_unlock_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Mutex_private_ctor_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Mutex_private_ctor_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_concurrent_Condition_isSupported_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom flash_concurrent_Condition_isSupported_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_concurrent_Condition_isSupported_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_concurrent_Condition_isSupported_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Condition_mutex_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Condition_mutex_get_sampler_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom flash_concurrent_Condition_wait_thunk(MethodEnv* env, uint32_t argc, Atom* argv);

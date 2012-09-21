@@ -74,21 +74,25 @@ namespace MMgc
             VMPI_free(items);
             items = newItems;
         }
-        uint32_t numHoles = 0;
+
+		uint32_t targetOffset = 0;
         if (holes)
         {
-            uint32_t numFound = 0;
-            for (uint32_t j = 0; numFound < count && j < capacity; j++)
+            for (uint32_t j = 0; j < capacity && !targetOffset; j++)
             {
+            	// find the first hole to insert item:
                 if (items[j] == NULL)
                 {
-                    numHoles++;
-                } else {
-                    numFound++;
+					targetOffset = j;
                 }
             }
         }
-        items[count+numHoles] = item;
+		else
+		{
+			targetOffset = count;
+		}
+
+        items[targetOffset] = item;
         count++;
         return true;
     }
