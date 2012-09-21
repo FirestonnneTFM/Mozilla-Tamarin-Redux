@@ -21,12 +21,12 @@ include "api-versions.as"
  * the mutex is to ensure that only one set of code accesses the resource at a time.
  *
  * <p>A mutex manages access using the concept of resource ownership. At any 
- time a single mutex is "owned" by at most one worker. When ownership of a 
- mutex switches from one worker to another the transision is atomic. This 
- guarantees that it will never be possible for more than one worker to take 
- ownership of the mutex. As long as code in a worker only operates on a shared 
- resource when that worker owns the mutex, you can be certain that there will 
- never be a conflict from multiple workers.</p>
+ * time a single mutex is "owned" by at most one worker. When ownership of a 
+ * mutex switches from one worker to another the transision is atomic. This 
+ * guarantees that it will never be possible for more than one worker to take 
+ * ownership of the mutex. As long as code in a worker only operates on a shared 
+ * resource when that worker owns the mutex, you can be certain that there will 
+ * never be a conflict from multiple workers.</p>
  * 
  * <p>Use the <code>tryLock()</code> method to take ownership of the mutex if 
  * it is available. Use the <code>lock()</code> method to pause the current 
@@ -47,8 +47,8 @@ include "api-versions.as"
  * @see flash.concurrent.Condition Condition class
  *
  * @langversion 3.0
- * @playerversion Flash 11.4	
- * @playerversion AIR 3.4
+ * @playerversion Flash 11.5	
+ * @playerversion AIR 3.5
  */
 [API(CONFIG::SWF_18)]
 [native(cls="MutexClass",instance="MutexObject",gc="exact")]
@@ -58,9 +58,10 @@ final public class Mutex
      * Creates a new Mutex instance.
      *
      * @throws Error if the mutex could not be initialized.
+     * 
      * @langversion 3.0
-     * @playerversion Flash 11.4	
-     * @playerversion AIR 3.4
+     * @playerversion Flash 11.5	
+     * @playerversion AIR 3.5
      */
     public function Mutex()
     {
@@ -69,10 +70,10 @@ final public class Mutex
 
     /**
      * Pauses execution of the current worker until this mutex is available and 
-     * then takes ownership of the mutex. If another worker currently owns the 
-     * mutex, the calling worker's execution thread pauses at the 
+     * then takes ownership of the mutex. If another worker owns the 
+     * mutex when <code>lock()</code> is called, the calling worker's execution thread pauses at the 
      * <code>lock()</code> call and the worker is added to the queue of ownership 
-     * requests. Once it is this worker's turn to own the mutex, the worker's 
+     * requests. Once the calling worker acquires the mutex, the worker's 
      * execution continues with the line of code following the 
      * <code>lock()</code> call.
      *
@@ -89,44 +90,41 @@ final public class Mutex
      * <code>unlock()</code> method as many times as the number of lock requests 
      * to release ownership of the mutex.</p>
      * 
-     * <p>Under contention, locks favor granting access to the longest-waiting worker
-     * and guarantee lack of starvation. Otherwise there is no guarantee in any 
-     * particular access order. Note however, that fairness of lock ordering does 
-     * not guarantee fairness of worker scheduling. </p>
+     * <p>When multiple workers are waiting for a mutex, the mutex gives priority
+     * to assigning ownership to the longest-waiting worker. However, scheduling 
+     * of worker threads is managed by the host operating system so there is no 
+     * guarantee of a particular code execution order across workers.</p>
      *
      * @langversion 3.0
-     * @playerversion Flash 11.4	
-     * @playerversion AIR 3.4
+     * @playerversion Flash 11.5	
+     * @playerversion AIR 3.5
      */
     public native function lock() :void
 
     /**
-     * Acquires ownership of the mutex if it is available. Otherwise, calling 
-     * this method returns <code>false</code> and code execution continues 
-     * immediately.
+     * Acquires ownership of the mutex if it is available. If another worker 
+     * already owns the mutex or another worker has called the <code>lock()</code> 
+     * method and is waiting to acquire the mutex, the mutex is not available. 
+     * In that case, calling this method returns <code>false</code> and code 
+     * execution continues immediately.
      *
      * <p>Once the current worker has ownership of the mutex, it can safely 
      * operate on the shared resource. When those operations are complete, call 
      * the <code>unlock()</code> method to release the mutex. At that point the 
      * current worker should no longer access the shared resource.</p>
      *
-     * <p>Under contention, locks favor granting access to the longest-waiting worker
-     * and guarantee lack of starvation. Otherwise there is no guarantee in any 
-     * particular access order. Note however, that fairness of lock ordering does 
-     * not guarantee fairness of worker scheduling. </p>
-     *
-     * <p>This method will never return <code>true</code>
-     * while there are workers already waiting on the lock, even if the lock is
-     * available at the time of the call.</p>
+     * <p>When multiple workers are waiting for a mutex, the mutex gives priority
+     * to assigning ownership to the longest-waiting worker. However, scheduling 
+     * of worker threads is managed by the host operating system so there is no 
+     * guarantee of a particular code execution order across workers.</p>
      *
      * @return <code>true</code> if the mutex was available (and is now owned 
      * by the current worker), or <code>false</code> if the current worker did 
-     * not acquire ownership of the mutex or there are workers waiting on acquisition
-     * of this mutex.
+     * not acquire ownership of the mutex.
      *
      * @langversion 3.0
-     * @playerversion Flash 11.4	
-     * @playerversion AIR 3.4
+     * @playerversion Flash 11.5	
+     * @playerversion AIR 3.5
      */
     public native function tryLock() :Boolean;
 
@@ -143,19 +141,20 @@ final public class Mutex
      *         doesn't own the mutex.
      *
      * @langversion 3.0
-     * @playerversion Flash 11.4	
-     * @playerversion AIR 3.4
+     * @playerversion Flash 11.5	
+     * @playerversion AIR 3.5
      */
     native public function unlock():void;
     
     /**
-     * Indicates if a <code>Mutex</code> is supported for the current platform.
+     * Indicates whether the use of the Mutex class is supported for the current platform.
      *
-	 * <p>If the current platform supports <code>Mutex</code>, this property's value is <code>true</code>.
-	 *
+     * <p>This property is <code>true</code> if the current platform supports mutexes; otherwise
+     * <code>false</code>.</p>
+     *
      * @langversion 3.0
-     * @playerversion Flash 11.4	
-     * @playerversion AIR 3.4
+     * @playerversion Flash 11.5	
+     * @playerversion AIR 3.5
      */
     public native static function get isSupported(): Boolean;
 
@@ -213,8 +212,8 @@ final public class Mutex
  * @see flash.system.Worker Worker class
  * 
  * @langversion 3.0
- * @playerversion Flash 11.4	
- * @playerversion AIR 3.4
+ * @playerversion Flash 11.5	
+ * @playerversion AIR 3.5
  */
 [API(CONFIG::SWF_18)]
 [native(cls="ConditionClass",instance="ConditionObject",gc="exact")]
@@ -227,8 +226,8 @@ final public class Condition
     *               between workers
      *
      * @langversion 3.0
-     * @playerversion Flash 11.4	
-     * @playerversion AIR 3.4
+     * @playerversion Flash 11.5	
+     * @playerversion AIR 3.5
      */
     public function Condition(mutex:Mutex)
     {
@@ -239,8 +238,8 @@ final public class Condition
      * The mutex associated with this condition.
      *
      * @langversion 3.0
-     * @playerversion Flash 11.4	
-     * @playerversion AIR 3.4
+     * @playerversion Flash 11.5	
+     * @playerversion AIR 3.5
      */
      public native function get mutex():Mutex;
 
@@ -272,13 +271,12 @@ final public class Condition
      *         code in the primordial worker in Flash Player and worker pauses 
      *         longer than the script timeout limit (15 seconds by default)
      *
-     * @throws flash.errors.WorkerTerminatedError if the method is called and
-     *         the associated worker is terminated while the calling worker
-     *         is waiting.
+     * @throws flash.errors.Error if the method is called and, while the calling 
+     *         worker's execution is paused, the waiting worker is terminated.
      *
      * @langversion 3.0
-     * @playerversion Flash 11.4	
-     * @playerversion AIR 3.4
+     * @playerversion Flash 11.5	
+     * @playerversion AIR 3.5
      */
     public native function wait(timeout:Number = -1) :Boolean;
 
@@ -302,8 +300,8 @@ final public class Condition
      *         own this condition's mutex
      *
      * @langversion 3.0
-     * @playerversion Flash 11.4	
-     * @playerversion AIR 3.4
+     * @playerversion Flash 11.5	
+     * @playerversion AIR 3.5
      */
     public native function notify() :void;
 
@@ -332,21 +330,20 @@ final public class Condition
      *         own this condition's mutex
      *
      * @langversion 3.0
-     * @playerversion Flash 11.4	
-     * @playerversion AIR 3.4
+     * @playerversion Flash 11.5	
+     * @playerversion AIR 3.5
      */
     public native function notifyAll() :void;
 
     /**
-     * Indicates if a <code>Condition</code> is supported for the current platform.
-     * NOTE: if <code>Mutex</code> is not supported creation of a <code>Condition</code>
-     * is not possible.
+     * Indicates whether the Condition class is supported for the current platform.
      *
-	 * <p>If the current platform supports <code>Condition</code>, this property's value is <code>true</code>.
+     * <p><strong>Note</strong>: if the Mutex class is not supported, creation 
+     * of a Condition instance is not possible and this property is <code>false</code>.</p>
      *
      * @langversion 3.0
-     * @playerversion Flash 11.4	
-     * @playerversion AIR 3.4
+     * @playerversion Flash 11.5	
+     * @playerversion AIR 3.5
      */
     public native static function get isSupported(): Boolean;
     
@@ -358,22 +355,24 @@ final public class Condition
 package avm2.intrinsics.memory
 {
     /**
+     * @private
      * A complete memory barrier for domainMemory (for both load and store instructions).
      *
      * @langversion 3.0
-     * @playerversion Flash 11.4	
-     * @playerversion AIR 3.4
+     * @playerversion Flash 11.5	
+     * @playerversion AIR 3.5
      */
 	[API(CONFIG::SWF_18)]
 	[native("ConcurrentMemory::mfence")]
 	public native function mfence():void;
     /**
+     * @private
      * A compare and swap for domainMemory.
      * Behaves like ByteArray.atomicCompareAndSwapIntAt but operates on the current domainMemory.
      *
      * @langversion 3.0
-     * @playerversion Flash 11.4	
-     * @playerversion AIR 3.4
+     * @playerversion Flash 11.5	
+     * @playerversion AIR 3.5
      */
 	[API(CONFIG::SWF_18)]
 	[native("ConcurrentMemory::casi32")]
