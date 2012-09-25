@@ -120,6 +120,7 @@ ecma3/TypeConversion/e9_3_1_1, arm-winmobile.*-debug,, expectedfail, bug https:/
 # Android
 ####################
 regress/bug_515935 , arm-android.*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=547282
+regress/bug_606478 , arm-android.*,, skip, linaro android date does not support DST changes pre 2007
 
 ####################
 # ARM
