@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'new-001.js';
 
@@ -15,13 +16,11 @@ gTestfile = 'new-001.js';
    Author:             christine@netscape.com
    Date:               12 november 1997
 */
-var SECTION = "new-001";
-var VERSION = "JS1_3";
-var TITLE   = "new-001";
+// var SECTION = "new-001";
+// var VERSION = "JS1_3";
+// var TITLE   = "new-001";
 var BUGNUMBER="31567";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function Test_One (x) {
   this.v = x+1;
@@ -33,40 +32,39 @@ function Test_Two( x, y ) {
   return y;
 }
 
-testcases[index++] = new TestCase(
-  SECTION,
+Assert.expectEq(
+    
   "Test_One(18)",
   36,
   Test_One(18) );
 
-testcases[index++] = new TestCase(
-  SECTION,
+Assert.expectEq(
+    
   "new Test_One(18)",
   "[object Object]",
   new Test_One(18) +"" );
 
-testcases[index++] = new TestCase(
-  SECTION,
+Assert.expectEq(
+    
   "new Test_One(18).v",
   19,
   new Test_One(18).v );
 
-testcases[index++] = new TestCase(
-  SECTION,
+Assert.expectEq(
+    
   "Test_Two(2,7)",
   7,
   Test_Two(2,7) );
 
-testcases[index++] = new TestCase(
-  SECTION,
+Assert.expectEq(
+    
   "new Test_Two(2,7)",
   "[object Object]",
   new Test_Two(2,7) +"" );
 
-testcases[index++] = new TestCase(
-  SECTION,
+Assert.expectEq(
+    
   "new Test_Two(2,7).v",
   2,
   new Test_Two(2,7).v );
 
-test();

@@ -1,25 +1,24 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "15.1.2.7";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "isFinite( x )";
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "15.1.2.7";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "isFinite( x )";
 
     var BUGNUMBER= "77391";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
 
-    test();
 
 function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    array[item++] = new TestCase( SECTION, "isFinite.length",      1,                  isFinite.length );
-    //array[item++] = new TestCase( SECTION, "isFinite.length = null; isFinite.length",   1,      eval("isFinite.length=null; isFinite.length") );
+    array[item++] = Assert.expectEq(  "isFinite.length",      1,                  isFinite.length );
+    //array[item++] = Assert.expectEq(  "isFinite.length = null; isFinite.length",   1,      eval("isFinite.length=null; isFinite.length") );
 
     var thisError:String = "no error";
     try
@@ -32,12 +31,12 @@ function getTestCases() {
     }
     finally
     {
-        array[item++] = new TestCase(SECTION, "isFinite.length = null", "ReferenceError: Error #1074", referenceError(thisError));
+        array[item++] = Assert.expectEq( "isFinite.length = null", "ReferenceError: Error #1074", Utils.referenceError(thisError));
     }
-    array[item++] = new TestCase( SECTION, "delete isFinite.length",                    false,  delete isFinite.length );
-    //array[item++] = new TestCase( SECTION, "delete isFinite.length; isFinite.length",   1,      eval("delete isFinite.length; isFinite.length") );
+    array[item++] = Assert.expectEq(  "delete isFinite.length",                    false,  delete isFinite.length );
+    //array[item++] = Assert.expectEq(  "delete isFinite.length; isFinite.length",   1,      eval("delete isFinite.length; isFinite.length") );
     delete isFinite.length;
-    array[item++] = new TestCase( SECTION, "delete isFinite.length; isFinite.length",   1, isFinite.length);
+    array[item++] = Assert.expectEq(  "delete isFinite.length; isFinite.length",   1, isFinite.length);
 
     var MYPROPS='';
     for ( var p in isFinite ) {
@@ -45,69 +44,69 @@ function getTestCases() {
     }
 
 
-    array[item++] = new TestCase( SECTION, "var MYPROPS='', for ( var p in isFinite ) { MYPROPS+= p }, MYPROPS",    "", MYPROPS );
+    array[item++] = Assert.expectEq(  "var MYPROPS='', for ( var p in isFinite ) { MYPROPS+= p }, MYPROPS",    "", MYPROPS );
 
-    array[item++] = new TestCase( SECTION,  "isFinite()",           false,              isFinite() );
-    array[item++] = new TestCase( SECTION, "isFinite( null )",      true,              isFinite(null) );
-    array[item++] = new TestCase( SECTION, "isFinite( void 0 )",    false,             isFinite(void 0) );
-    array[item++] = new TestCase( SECTION, "isFinite( false )",     true,              isFinite(false) );
-    array[item++] = new TestCase( SECTION, "isFinite( true)",       true,              isFinite(true) );
-    array[item++] = new TestCase( SECTION, "isFinite( ' ' )",       true,              isFinite( " " ) );
+    array[item++] = Assert.expectEq(   "isFinite()",           false,              isFinite() );
+    array[item++] = Assert.expectEq(  "isFinite( null )",      true,              isFinite(null) );
+    array[item++] = Assert.expectEq(  "isFinite( void 0 )",    false,             isFinite(void 0) );
+    array[item++] = Assert.expectEq(  "isFinite( false )",     true,              isFinite(false) );
+    array[item++] = Assert.expectEq(  "isFinite( true)",       true,              isFinite(true) );
+    array[item++] = Assert.expectEq(  "isFinite( ' ' )",       true,              isFinite( " " ) );
 
-    array[item++] = new TestCase( SECTION, "isFinite( new Boolean(true) )",     true,   isFinite(new Boolean(true)) );
-    array[item++] = new TestCase( SECTION, "isFinite( new Boolean(false) )",    true,   isFinite(new Boolean(false)) );
+    array[item++] = Assert.expectEq(  "isFinite( new Boolean(true) )",     true,   isFinite(new Boolean(true)) );
+    array[item++] = Assert.expectEq(  "isFinite( new Boolean(false) )",    true,   isFinite(new Boolean(false)) );
 
-    array[item++] = new TestCase( SECTION, "isFinite( 0 )",        true,              isFinite(0) );
-    array[item++] = new TestCase( SECTION, "isFinite( 1 )",        true,              isFinite(1) );
-    array[item++] = new TestCase( SECTION, "isFinite( 2 )",        true,              isFinite(2) );
-    array[item++] = new TestCase( SECTION, "isFinite( 3 )",        true,              isFinite(3) );
-    array[item++] = new TestCase( SECTION, "isFinite( 4 )",        true,              isFinite(4) );
-    array[item++] = new TestCase( SECTION, "isFinite( 5 )",        true,              isFinite(5) );
-    array[item++] = new TestCase( SECTION, "isFinite( 6 )",        true,              isFinite(6) );
-    array[item++] = new TestCase( SECTION, "isFinite( 7 )",        true,              isFinite(7) );
-    array[item++] = new TestCase( SECTION, "isFinite( 8 )",        true,              isFinite(8) );
-    array[item++] = new TestCase( SECTION, "isFinite( 9 )",        true,              isFinite(9) );
+    array[item++] = Assert.expectEq(  "isFinite( 0 )",        true,              isFinite(0) );
+    array[item++] = Assert.expectEq(  "isFinite( 1 )",        true,              isFinite(1) );
+    array[item++] = Assert.expectEq(  "isFinite( 2 )",        true,              isFinite(2) );
+    array[item++] = Assert.expectEq(  "isFinite( 3 )",        true,              isFinite(3) );
+    array[item++] = Assert.expectEq(  "isFinite( 4 )",        true,              isFinite(4) );
+    array[item++] = Assert.expectEq(  "isFinite( 5 )",        true,              isFinite(5) );
+    array[item++] = Assert.expectEq(  "isFinite( 6 )",        true,              isFinite(6) );
+    array[item++] = Assert.expectEq(  "isFinite( 7 )",        true,              isFinite(7) );
+    array[item++] = Assert.expectEq(  "isFinite( 8 )",        true,              isFinite(8) );
+    array[item++] = Assert.expectEq(  "isFinite( 9 )",        true,              isFinite(9) );
 
-    array[item++] = new TestCase( SECTION, "isFinite( '0' )",        true,              isFinite('0') );
-    array[item++] = new TestCase( SECTION, "isFinite( '1' )",        true,              isFinite('1') );
-    array[item++] = new TestCase( SECTION, "isFinite( '2' )",        true,              isFinite('2') );
-    array[item++] = new TestCase( SECTION, "isFinite( '3' )",        true,              isFinite('3') );
-    array[item++] = new TestCase( SECTION, "isFinite( '4' )",        true,              isFinite('4') );
-    array[item++] = new TestCase( SECTION, "isFinite( '5' )",        true,              isFinite('5') );
-    array[item++] = new TestCase( SECTION, "isFinite( '6' )",        true,              isFinite('6') );
-    array[item++] = new TestCase( SECTION, "isFinite( '7' )",        true,              isFinite('7') );
-    array[item++] = new TestCase( SECTION, "isFinite( '8' )",        true,              isFinite('8') );
-    array[item++] = new TestCase( SECTION, "isFinite( '9' )",        true,              isFinite('9') );
+    array[item++] = Assert.expectEq(  "isFinite( '0' )",        true,              isFinite('0') );
+    array[item++] = Assert.expectEq(  "isFinite( '1' )",        true,              isFinite('1') );
+    array[item++] = Assert.expectEq(  "isFinite( '2' )",        true,              isFinite('2') );
+    array[item++] = Assert.expectEq(  "isFinite( '3' )",        true,              isFinite('3') );
+    array[item++] = Assert.expectEq(  "isFinite( '4' )",        true,              isFinite('4') );
+    array[item++] = Assert.expectEq(  "isFinite( '5' )",        true,              isFinite('5') );
+    array[item++] = Assert.expectEq(  "isFinite( '6' )",        true,              isFinite('6') );
+    array[item++] = Assert.expectEq(  "isFinite( '7' )",        true,              isFinite('7') );
+    array[item++] = Assert.expectEq(  "isFinite( '8' )",        true,              isFinite('8') );
+    array[item++] = Assert.expectEq(  "isFinite( '9' )",        true,              isFinite('9') );
 
-    array[item++] = new TestCase( SECTION, "isFinite( 0x0a )",    true,                 isFinite( 0x0a ) );
-    array[item++] = new TestCase( SECTION, "isFinite( 0xaa )",    true,                 isFinite( 0xaa ) );
-    array[item++] = new TestCase( SECTION, "isFinite( 0x0A )",    true,                 isFinite( 0x0A ) );
-    array[item++] = new TestCase( SECTION, "isFinite( 0xAA )",    true,                 isFinite( 0xAA ) );
+    array[item++] = Assert.expectEq(  "isFinite( 0x0a )",    true,                 isFinite( 0x0a ) );
+    array[item++] = Assert.expectEq(  "isFinite( 0xaa )",    true,                 isFinite( 0xaa ) );
+    array[item++] = Assert.expectEq(  "isFinite( 0x0A )",    true,                 isFinite( 0x0A ) );
+    array[item++] = Assert.expectEq(  "isFinite( 0xAA )",    true,                 isFinite( 0xAA ) );
 
-    array[item++] = new TestCase( SECTION, "isFinite( '0x0a' )",    true,               isFinite( "0x0a" ) );
-    array[item++] = new TestCase( SECTION, "isFinite( '0xaa' )",    true,               isFinite( "0xaa" ) );
-    array[item++] = new TestCase( SECTION, "isFinite( '0x0A' )",    true,               isFinite( "0x0A" ) );
-    array[item++] = new TestCase( SECTION, "isFinite( '0xAA' )",    true,               isFinite( "0xAA" ) );
+    array[item++] = Assert.expectEq(  "isFinite( '0x0a' )",    true,               isFinite( "0x0a" ) );
+    array[item++] = Assert.expectEq(  "isFinite( '0xaa' )",    true,               isFinite( "0xaa" ) );
+    array[item++] = Assert.expectEq(  "isFinite( '0x0A' )",    true,               isFinite( "0x0A" ) );
+    array[item++] = Assert.expectEq(  "isFinite( '0xAA' )",    true,               isFinite( "0xAA" ) );
 
-    array[item++] = new TestCase( SECTION, "isFinite( 077 )",       true,               isFinite( 077 ) );
-    array[item++] = new TestCase( SECTION, "isFinite( '077' )",     true,               isFinite( "077" ) );
+    array[item++] = Assert.expectEq(  "isFinite( 077 )",       true,               isFinite( 077 ) );
+    array[item++] = Assert.expectEq(  "isFinite( '077' )",     true,               isFinite( "077" ) );
 
-    array[item++] = new TestCase( SECTION, "isFinite( new String('Infinity') )",        false,      isFinite(new String("Infinity")) );
-    array[item++] = new TestCase( SECTION, "isFinite( new String('-Infinity') )",       false,      isFinite(new String("-Infinity")) );
+    array[item++] = Assert.expectEq(  "isFinite( new String('Infinity') )",        false,      isFinite(new String("Infinity")) );
+    array[item++] = Assert.expectEq(  "isFinite( new String('-Infinity') )",       false,      isFinite(new String("-Infinity")) );
 
-    array[item++] = new TestCase( SECTION, "isFinite( 'Infinity' )",        false,      isFinite("Infinity") );
-    array[item++] = new TestCase( SECTION, "isFinite( '-Infinity' )",       false,      isFinite("-Infinity") );
-    array[item++] = new TestCase( SECTION, "isFinite( Number.POSITIVE_INFINITY )",  false,  isFinite(Number.POSITIVE_INFINITY) );
-    array[item++] = new TestCase( SECTION, "isFinite( Number.NEGATIVE_INFINITY )",  false,  isFinite(Number.NEGATIVE_INFINITY) );
-    array[item++] = new TestCase( SECTION, "isFinite( Number.NaN )",                false,  isFinite(Number.NaN) );
+    array[item++] = Assert.expectEq(  "isFinite( 'Infinity' )",        false,      isFinite("Infinity") );
+    array[item++] = Assert.expectEq(  "isFinite( '-Infinity' )",       false,      isFinite("-Infinity") );
+    array[item++] = Assert.expectEq(  "isFinite( Number.POSITIVE_INFINITY )",  false,  isFinite(Number.POSITIVE_INFINITY) );
+    array[item++] = Assert.expectEq(  "isFinite( Number.NEGATIVE_INFINITY )",  false,  isFinite(Number.NEGATIVE_INFINITY) );
+    array[item++] = Assert.expectEq(  "isFinite( Number.NaN )",                false,  isFinite(Number.NaN) );
 
-    array[item++] = new TestCase( SECTION, "isFinite( Infinity )",  false,  isFinite(Infinity) );
-    array[item++] = new TestCase( SECTION, "isFinite( -Infinity )",  false,  isFinite(-Infinity) );
-    array[item++] = new TestCase( SECTION, "isFinite( NaN )",                false,  isFinite(NaN) );
+    array[item++] = Assert.expectEq(  "isFinite( Infinity )",  false,  isFinite(Infinity) );
+    array[item++] = Assert.expectEq(  "isFinite( -Infinity )",  false,  isFinite(-Infinity) );
+    array[item++] = Assert.expectEq(  "isFinite( NaN )",                false,  isFinite(NaN) );
 
 
-    array[item++] = new TestCase( SECTION, "isFinite( Number.MAX_VALUE )",          true,  isFinite(Number.MAX_VALUE) );
-    array[item++] = new TestCase( SECTION, "isFinite( Number.MIN_VALUE )",          true,  isFinite(Number.MIN_VALUE) );
+    array[item++] = Assert.expectEq(  "isFinite( Number.MAX_VALUE )",          true,  isFinite(Number.MAX_VALUE) );
+    array[item++] = Assert.expectEq(  "isFinite( Number.MIN_VALUE )",          true,  isFinite(Number.MIN_VALUE) );
 
     return ( array );
 }

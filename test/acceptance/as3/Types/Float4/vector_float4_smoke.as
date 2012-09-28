@@ -3,13 +3,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "5.5.2";
-var VERSION = "AS3";
-var TITLE   = "Vector.<float4> smoketest";
+// var SECTION = "5.5.2";
+// var VERSION = "AS3";
+// var TITLE   = "Vector.<float4> smoketest";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 // Vector.<float4> smoketest.  Tests that vectors are initialized to
 // zero, that reading and writing works, that the data written can be
@@ -26,13 +25,13 @@ writeHeaderToLog( SECTION + " "+ TITLE);
 
 for ( var i=0 ; i < 100 ; i++ ) {
     var w = new Vector.<float4>(i);
-    AddTestCase("Global: length", i, w.length);
+    Assert.expectEq("Global: length", i, w.length);
     for ( var j=0 ; j < i ; j++ )
-        AddTestCase("Global: zero", float4(0,0,0,0), w[j]);
+        Assert.expectEq("Global: zero", float4(0,0,0,0), w[j]);
     for ( var j=0 ; j < i ; j++ )
         w[j] = float4(1000+i, 2000+i, 3000+i, 4000+i);
     for ( var j=0 ; j < i ; j++ )
-        AddTestCase("Global: read", float4(1000+i, 2000+i, 3000+i, 4000+i), w[j]);
+        Assert.expectEq("Global: read", float4(1000+i, 2000+i, 3000+i, 4000+i), w[j]);
 }
 
 // Function code, full annotations
@@ -42,16 +41,15 @@ function f(): void
     for ( var i:int=0 ; i < 100 ; i++ ) {
         var w:Vector.<float4> = new Vector.<float4>(i);
         var j:int;
-        AddTestCase("Local: length", i, w.length);
+        Assert.expectEq("Local: length", i, w.length);
         for ( j=0 ; j < i ; j++ )
-            AddTestCase("Local: zero", float4(0,0,0,0), w[j]);
+            Assert.expectEq("Local: zero", float4(0,0,0,0), w[j]);
         for ( j=0 ; j < i ; j++ )
             w[j] = float4(1000+i, 2000+i, 3000+i, 4000+i);
         for ( j=0 ; j < i ; j++ )
-            AddTestCase("Local: read", float4(1000+i, 2000+i, 3000+i, 4000+i), w[j]);
+            Assert.expectEq("Local: read", float4(1000+i, 2000+i, 3000+i, 4000+i), w[j]);
     }
 }
 
 f();
 
-test();

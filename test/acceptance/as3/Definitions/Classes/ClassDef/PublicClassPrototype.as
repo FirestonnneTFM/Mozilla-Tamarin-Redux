@@ -6,72 +6,73 @@ package Prototyping {
 
 
 import PublicClassPrototype.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = "Class Prototype";           // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";                   // Version of JavaScript or ECMA
-var TITLE   = "Testing prototype for public classes";  // Provide ECMA section title or a description
+// var SECTION = "Class Prototype";           // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";                   // Version of JavaScript or ECMA
+// var TITLE   = "Testing prototype for public classes";  // Provide ECMA section title or a description
 //var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var publicObj = new PublicClass();
 
 
 PublicClass.prototype.array = new Array('a', 'b', 'c');
-AddTestCase( "Try overriding default property through a public class' prototype object", "1,2,3", publicObj.accessDefaultProperty().toString() );
+Assert.expectEq( "Try overriding default property through a public class' prototype object", "1,2,3", publicObj.accessDefaultProperty().toString() );
 
 PublicClass.prototype.intNumber = 500;
-AddTestCase( "Try overriding internal property through a public class' prototype object", "100", publicObj.intNumber.toString() );
+Assert.expectEq( "Try overriding internal property through a public class' prototype object", "100", publicObj.intNumber.toString() );
 
 PublicClass.prototype.protInt = 0;  // Note: this override works because the protected property is not visible!
-AddTestCase( "Try overriding protected property through a public class' prototype object", "0", publicObj.protInt.toString() );
+Assert.expectEq( "Try overriding protected property through a public class' prototype object", "0", publicObj.protInt.toString() );
 
 PublicClass.prototype.pubUint = 0;
-AddTestCase( "Try overriding public property through a public class' prototype object", "1", publicObj.pubUint.toString() );
+Assert.expectEq( "Try overriding public property through a public class' prototype object", "1", publicObj.pubUint.toString() );
 
 PublicClass.prototype.privVar = false;
-AddTestCase( "Try overriding private property through a public class' prototype object", "true", publicObj.accPrivProp().toString() );
+Assert.expectEq( "Try overriding private property through a public class' prototype object", "true", publicObj.accPrivProp().toString() );
 
 PublicClass.prototype.pubStat = 200;
-AddTestCase( "Try overriding public static property through a public class' prototype object", "100", PublicClass.pubStat.toString() );
+Assert.expectEq( "Try overriding public static property through a public class' prototype object", "100", PublicClass.pubStat.toString() );
 
 PublicClass.prototype.nsProp = "fakeNS";
-AddTestCase( "Try overriding namespace property through a public class' prototype object", "nsProp", publicObj.accNS().toString() );
+Assert.expectEq( "Try overriding namespace property through a public class' prototype object", "nsProp", publicObj.accNS().toString() );
 
 PublicClass.prototype.defaultMethod = false;
-AddTestCase( "Try overriding default methodsthrough a public class' prototype object", true, publicObj.defaultMethod() );
+Assert.expectEq( "Try overriding default methodsthrough a public class' prototype object", true, publicObj.defaultMethod() );
 
 PublicClass.prototype.internalMethod = -1;
-AddTestCase( "Try overriding internal method through a public class' prototype object", 1, publicObj.internalMethod() );
+Assert.expectEq( "Try overriding internal method through a public class' prototype object", 1, publicObj.internalMethod() );
 
 //PublicClass.prototype.protectedMethod = -1;
-//AddTestCase( "Try overriding protected method through a public class' prototype object", 1, publicObj.protectedMethod() );
+//Assert.expectEq( "Try overriding protected method through a public class' prototype object", 1, publicObj.protectedMethod() );
 
 PublicClass.prototype.publicMethod = false;
-AddTestCase( "Try overriding public method through a public class' prototype object", true, publicObj.publicMethod() );
+Assert.expectEq( "Try overriding public method through a public class' prototype object", true, publicObj.publicMethod() );
 
 PublicClass.prototype.privateMethod = false;
-AddTestCase( "Try overriding private method through a public class' prototype object", true, publicObj.accPrivMethod() );
+Assert.expectEq( "Try overriding private method through a public class' prototype object", true, publicObj.accPrivMethod() );
 
 PublicClass.prototype.nsMethod = -1;
-AddTestCase( "Try overriding namespace method through a public class' prototype object", 1, publicObj.accNSMethod() );
+Assert.expectEq( "Try overriding namespace method through a public class' prototype object", 1, publicObj.accNSMethod() );
 
 PublicClass.prototype.publicFinalMethod = -1;
-AddTestCase( "Try overriding public final method through a public class' prototype object", 1, publicObj.publicFinalMethod() );
+Assert.expectEq( "Try overriding public final method through a public class' prototype object", 1, publicObj.publicFinalMethod() );
 
 PublicClass.prototype.publicStaticMethod = -1;
-AddTestCase( "Try overriding public static method through a public class' prototype object", 42, PublicClass.publicStaticMethod() );
+Assert.expectEq( "Try overriding public static method through a public class' prototype object", 42, PublicClass.publicStaticMethod() );
 
 
 PublicClass.prototype.newArray = new Array('a', 'b', 'c');
-AddTestCase( "Try adding new property through a public class' prototype object", "a,b,c", publicObj.newArray.toString() );
+Assert.expectEq( "Try adding new property through a public class' prototype object", "a,b,c", publicObj.newArray.toString() );
 
 PublicClass.prototype.testFunction = function () {return true};
-AddTestCase("Try adding new method through a public class' prototype object", true, publicObj.testFunction());
+Assert.expectEq("Try adding new method through a public class' prototype object", true, publicObj.testFunction());
 
 var equivalent:Boolean = (PublicClass.prototype.constructor == PublicClass);
-AddTestCase("Verify prototype constructor is equivalent to class object", true, equivalent);
+Assert.expectEq("Verify prototype constructor is equivalent to class object", true, equivalent);
 
 
 var thisError10 = "no error thrown";
@@ -81,11 +82,10 @@ try{
 } catch (e:ReferenceError) {
     thisError10 = e.toString();
 } finally {
-    AddTestCase( "Try to write to PublicClass' prototype object", "ReferenceError: Error #1074",
-                referenceError( thisError10 ) );
+    Assert.expectEq( "Try to write to PublicClass' prototype object", "ReferenceError: Error #1074",
+                Utils.referenceError( thisError10 ) );
 }
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.
 
 }

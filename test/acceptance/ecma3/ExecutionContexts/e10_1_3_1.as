@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/*
 *
 * Date:    11 Feb 2002
 * SUMMARY: Testing functions having duplicate formal parameter names
@@ -12,15 +12,15 @@
 * Also see http://bugzilla.mozilla.org/show_bug.cgi?id=124900
 */
 //-----------------------------------------------------------------------------
-    var SECTION = "e10_1_3_1";
-    var VERSION = "";
-    var TITLE   = "Testing functions having duplicate formal parameter names";
-    var bug     = "124900";
+//     var SECTION = "e10_1_3_1";
+//     var VERSION = "";
+//     var TITLE   = "Testing functions having duplicate formal parameter names";
+//     var bug     = "124900";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
+
+import com.adobe.test.Assert;
+
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -35,30 +35,30 @@ function getTestCases() {
     {
       return x;
     }
-    status = inSection(1);
+   // status = inSection(1);
     actual = f1(1,2);
     expect = 2;
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
     function f2(x,x,x)
     {
       return x*x*x;
     }
-    status = inSection(2);
+    // status = inSection(2);
     actual = f2(1,2,3);
     expect = 27;
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
     function f3(x,x,x,x)
     {
       return 'a' + x + 'b' + x + 'c' + x ;
     }
-    status = inSection(3);
+    // status = inSection(3);
     actual = f3(1,2,3,4);
     expect = 'a4b4c4';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
     /*
@@ -69,10 +69,10 @@ function getTestCases() {
     {
       return x;
     }
-    status = inSection(4);
+    // status = inSection(4);
     actual = f4(1,2);
     expect = undefined;
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
     /*
@@ -81,10 +81,10 @@ function getTestCases() {
     function f5(x,x,x,x)
     {
     }
-    status = inSection(5);
+    // status = inSection(5);
     actual = f5.toString();
     expect = 'function Function() {}';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
     function f6(x,x,x,x)
@@ -96,10 +96,10 @@ function getTestCases() {
 
       return ret.toString();
     }
-    status = inSection(6);
+    // status = inSection(6);
     actual = f6(1,2,3,4);
     expect = '1,2,3,4';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
     /*
@@ -116,10 +116,10 @@ function getTestCases() {
 
       return ret.toString();
     }
-    status = inSection(7);
+   // status = inSection(7);
     actual = f7(1,2,3,4);
     expect = '1,2,3,4';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
     /*
@@ -135,10 +135,10 @@ function getTestCases() {
 
       return ret.toString();
     }
-    status = inSection(8);
+    // status = inSection(8);
     actual = f8(1,2,3,4);
     expect = '1,2,3,4';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     return ( array );
 }

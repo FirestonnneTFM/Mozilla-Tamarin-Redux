@@ -4,25 +4,24 @@
 
     import avmplus.File
     import flash.utils.ByteArray
+import com.adobe.test.Assert;
 
-    var SECTION = "File";
-    var VERSION = "as3";
-    startTest();
-    var TITLE   = "test File class";
+//     var SECTION = "File";
+//     var VERSION = "as3";
+//     var TITLE   = "test File class";
 
-    writeHeaderToLog( SECTION + " "+ TITLE );
 
-    AddTestCase("File does not exist",
+    Assert.expectEq("File does not exist",
     false,
     File.exists("nothing"));
 
     File.write("test.txt","test file");
 
-    AddTestCase("File exists just written file",
+    Assert.expectEq("File exists just written file",
       true,
       File.exists("test.txt"));
 
-    AddTestCase("File read test file",
+    Assert.expectEq("File read test file",
       "test file",
       File.read("test.txt"));
 
@@ -32,13 +31,13 @@
     } catch (e) {
         err=e.toString();
     }
-    AddTestCase("File read on unknown file should throw exception",
+    Assert.expectEq("File read on unknown file should throw exception",
       "Error: Error #1500",
       err.substring(0,18));
 
     File.write("test2.ba","sample test data");
     var ba:ByteArray=File.readByteArray("test2.ba");
-    AddTestCase("File.readByteArray length",true,ba.length=="sample test data".length);
+    Assert.expectEq("File.readByteArray length",true,ba.length=="sample test data".length);
 
     // Regression for https://bugzilla.mozilla.org/show_bug.cgi?id=473863
     //      File.read fail for binary files
@@ -54,10 +53,9 @@
     bytearray_bad[6]=0x80;
     
     File.write("test.bin", bytearray_bad);
-    AddTestCase("File read binary test file",
+    Assert.expectEq("File read binary test file",
                 "\u4e00\u00E4\u4e00",
                 File.read("test.bin")
                );
 
 
-    test();

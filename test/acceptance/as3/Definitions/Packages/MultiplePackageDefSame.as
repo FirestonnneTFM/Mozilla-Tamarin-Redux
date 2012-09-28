@@ -62,13 +62,13 @@ package foo{
 }
 
 import foo.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var classA = new ClassA();
@@ -76,23 +76,22 @@ var classB = new ClassB();
 var classD = new ClassD();
 var classN = new ClassN();
  
-AddTestCase( "variable a in first definition of foo", "This is var a", a );
-AddTestCase( "variable b in second definition of foo", "This is var b", b );
-AddTestCase( "function func1 in first definition of foo", "This is func1", func1() );
-AddTestCase( "function func2 in second definition of foo", "This is func2", func2() );
-AddTestCase( "ClassA in first definition of foo", "This is test in ClassA", classA.test() );
-AddTestCase( "ClassB in second definition of foo", "This is test in ClassB", classB.test() );
-AddTestCase( "IntA in first definition of foo", "This is testInt in ClassA", classA.testInt() );
-AddTestCase( "IntB in second definition of foo", "This is testInt in ClassB", classB.testInt() );
-AddTestCase( "namespace v1 in first definition of foo", "This is namespace v1", classA.testNS() );
-AddTestCase( "namespace v2 in second definition of foo", "This is namespace v2", classA.testNS2() );
+Assert.expectEq( "variable a in first definition of foo", "This is var a", a );
+Assert.expectEq( "variable b in second definition of foo", "This is var b", b );
+Assert.expectEq( "function func1 in first definition of foo", "This is func1", func1() );
+Assert.expectEq( "function func2 in second definition of foo", "This is func2", func2() );
+Assert.expectEq( "ClassA in first definition of foo", "This is test in ClassA", classA.test() );
+Assert.expectEq( "ClassB in second definition of foo", "This is test in ClassB", classB.test() );
+Assert.expectEq( "IntA in first definition of foo", "This is testInt in ClassA", classA.testInt() );
+Assert.expectEq( "IntB in second definition of foo", "This is testInt in ClassB", classB.testInt() );
+Assert.expectEq( "namespace v1 in first definition of foo", "This is namespace v1", classA.testNS() );
+Assert.expectEq( "namespace v2 in second definition of foo", "This is namespace v2", classA.testNS2() );
 
 // second foo package uses first foo package
-AddTestCase( "access variable a from first package in second", "This is var a", c );
-AddTestCase( "access function a from first package in second", "This is func1", func3() );
-AddTestCase( "access classA from first package in second", "This is test in ClassA", classC.test() );
-AddTestCase( "access IntA from first package in second", "This is testInt from ClassD", classD.testInt() );
-AddTestCase( "access namespace from first package in second", "This is namespace v1", classN.getNSVar() );
+Assert.expectEq( "access variable a from first package in second", "This is var a", c );
+Assert.expectEq( "access function a from first package in second", "This is func1", func3() );
+Assert.expectEq( "access classA from first package in second", "This is test in ClassA", classC.test() );
+Assert.expectEq( "access IntA from first package in second", "This is testInt from ClassD", classD.testInt() );
+Assert.expectEq( "access namespace from first package in second", "This is namespace v1", classN.getNSVar() );
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

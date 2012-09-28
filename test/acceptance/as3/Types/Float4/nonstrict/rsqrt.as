@@ -3,15 +3,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Utils;
 
-var SECTION = "4.4.16.17";
-var VERSION = "AS3";
-var TITLE   = "Math and geometric methods public function rsqrt(arg:float4):float4";
+// var SECTION = "4.4.16.17";
+// var VERSION = "AS3";
+// var TITLE   = "Math and geometric methods public function rsqrt(arg:float4):float4";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
-AddErrorTest("float4.rsqrt() with no args", ARGUMENTERROR+1063,  function(){ float4.rsqrt(); });
+Assert.expectError("float4.rsqrt() with no args", Utils.ARGUMENTERROR+1063,  function(){ float4.rsqrt(); });
 
-test();
 

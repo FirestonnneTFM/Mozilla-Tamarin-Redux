@@ -3,17 +3,16 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 // These test the vector optimizations introduced in bugzilla 599099.
 // The tests assume that the optimizations kick in, they don't test
 // that - we have benchmarks to test that elsewhere, hopefully.
 
-var SECTION="Vector";
-var VERSION = "AS3";
+// var SECTION="Vector";
+// var VERSION = "AS3";
 
-startTest();
 
-writeHeaderToLog( " Vector.filter()");
 
 // Bugzilla 599099 will in-line reads from Vector.<int>,
 // Vector.<uint>, Vector.<Number>, and Vector.<C> for some object
@@ -83,16 +82,16 @@ function verify_intvec_errors(v:Vector.<int>, negone:int):Boolean
     return (failed == 4);
 }
 
-AddTestCase("Vector in-lining optimization: read from Vector.<int>",
+Assert.expectEq("Vector in-lining optimization: read from Vector.<int>",
             true,
             verify_intvec_read(new <int>[0,1,0,0,2,3,4,0], 4, 2));
-AddTestCase("Vector in-lining optimization: write to Vector.<int>",
+Assert.expectEq("Vector in-lining optimization: write to Vector.<int>",
             true,
             verify_intvec_read(verify_intvec_write(new <int>[-1, -2, -3, -4, -5, -6, -7, -8]), 5, 3));
-AddTestCase("Vector in-lining optimization: extend extensible Vector.<int>",
+Assert.expectEq("Vector in-lining optimization: extend extensible Vector.<int>",
             true,
             verify_intvec_extend(new <int>[0]));
-AddTestCase("Vector in-lining optimization: error cases on Vector.<int>",
+Assert.expectEq("Vector in-lining optimization: error cases on Vector.<int>",
             true,
             verify_intvec_errors(new Vector.<int>(1,true), -1));
 
@@ -147,16 +146,16 @@ function verify_dblvec_errors(v:Vector.<Number>, negone:int):Boolean
     return (failed == 4);
 }
 
-AddTestCase("Vector in-lining optimization: read from Vector.<Number>",
+Assert.expectEq("Vector in-lining optimization: read from Vector.<Number>",
             true,
             verify_dblvec_read(new <Number>[0.1, 1.1, 0.1, 0.1, 2.1, 3.1, 4.1, 0.1], 4, 2.1));
-AddTestCase("Vector in-lining optimization: write to Vector.<Number>",
+Assert.expectEq("Vector in-lining optimization: write to Vector.<Number>",
             true,
             verify_dblvec_read(verify_dblvec_write(new <Number>[-1, -2, -3, -4, -5, -6, -7, -8]), 5, 3.1));
-AddTestCase("Vector in-lining optimization: extend extensible Vector.<Number>",
+Assert.expectEq("Vector in-lining optimization: extend extensible Vector.<Number>",
             true,
             verify_dblvec_extend(new <Number>[0]));
-AddTestCase("Vector in-lining optimization: error cases on Vector.<Number>",
+Assert.expectEq("Vector in-lining optimization: error cases on Vector.<Number>",
             true,
             verify_dblvec_errors(new Vector.<Number>(1,true), -1));
 
@@ -211,16 +210,16 @@ function verify_uintvec_errors(v:Vector.<uint>, negone:int):Boolean
     return (failed == 4);
 }
 
-AddTestCase("Vector in-lining optimization: read from Vector.<uint>",
+Assert.expectEq("Vector in-lining optimization: read from Vector.<uint>",
             true,
             verify_uintvec_read(new <uint>[0,1,0,0,2,3,4,0], 4, 2));
-AddTestCase("Vector in-lining optimization: write to Vector.<uint>",
+Assert.expectEq("Vector in-lining optimization: write to Vector.<uint>",
             true,
             verify_uintvec_read(verify_uintvec_write(new <uint>[-1, -2, -3, -4, -5, -6, -7, -8]), 5, 3)); // well, conversion works...
-AddTestCase("Vector in-lining optimization: extend extensible Vector.<uint>",
+Assert.expectEq("Vector in-lining optimization: extend extensible Vector.<uint>",
             true,
             verify_uintvec_extend(new <uint>[0]));
-AddTestCase("Vector in-lining optimization: error cases on Vector.<int>",
+Assert.expectEq("Vector in-lining optimization: error cases on Vector.<int>",
             true,
             verify_uintvec_errors(new Vector.<uint>(1,true), -1));
 
@@ -254,11 +253,10 @@ function verify_objvec_errors(v:Vector.<Object>, negone:int):Boolean
     return (failed == 2);
 }
 
-AddTestCase("Vector in-lining optimization: read from Vector.<Object>",
+Assert.expectEq("Vector in-lining optimization: read from Vector.<Object>",
             true,
             verify_objvec_read(new <Object>[o0, o1, o2, o3], 2, o2));
-AddTestCase("Vector in-lining optimization: error cases on Vector.<Object>",
+Assert.expectEq("Vector in-lining optimization: error cases on Vector.<Object>",
             true,
             verify_objvec_errors(new <Object>[o0], -1));
 
-test();

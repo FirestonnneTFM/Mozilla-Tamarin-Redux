@@ -8,12 +8,10 @@
 Returns an implementation-dependent approximation to the natural logarithm of x.
 */
 
-var SECTION = "4.5.24";
-var VERSION = "AS3";
-var TITLE   = "public function log(x:float):float";
+// var SECTION = "4.5.24";
+// var VERSION = "AS3";
+// var TITLE   = "public function log(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param:float):float { return float.log(param); }
 
@@ -60,5 +58,4 @@ AddStrictTestCase("float.log(-1f) FloatLiteral", float.NaN, float.log(-1f));
 AddStrictTestCase("float.log(1f) FloatLiteral", 0f, float.log(1f));
 
 
-test();
 

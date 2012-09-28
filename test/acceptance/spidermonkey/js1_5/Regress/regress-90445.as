@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  * Date: 2001-07-12
@@ -18,8 +18,8 @@ var gTestfile = 'regress-90445.js';
 var BUGNUMBER = 90445;
 var summary = 'Testing this script will compile without crashing';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 
 // The big function -
@@ -295,6 +295,5 @@ function compte() {
   }
 }
 
-AddTestCase('', 'No Crash', 'No Crash');
+Assert.expectEq('', 'No Crash', 'No Crash');
 
-test();

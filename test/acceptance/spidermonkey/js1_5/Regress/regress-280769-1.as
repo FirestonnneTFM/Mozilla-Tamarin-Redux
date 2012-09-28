@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-280769-1.js';
 //-----------------------------------------------------------------------------
@@ -12,10 +12,10 @@ var summary = 'Do not crash on overflow of 64K boundary of [] offset in regexp s
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
-
-status = summary + ' ' + inSection(1) + ' (new RegExp("zzz...[AB]").exec("zzz...A") ';
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
+  
+//status = summary + ' ' + inSection(1) + ' (new RegExp("zzz...[AB]").exec("zzz...A") ';
 
 var N = 100 * 1000; // N should be more then 64K
 var a = new Array(N + 1);
@@ -24,6 +24,5 @@ var str = prefix+"[AB]"; // str is zzz...zzz[AB]
 var re = new RegExp(str);
 re.exec(prefix+"A");
 
-AddTestCase(status, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

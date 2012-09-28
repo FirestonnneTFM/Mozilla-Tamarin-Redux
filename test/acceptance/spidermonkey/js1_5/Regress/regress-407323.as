@@ -2,8 +2,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-startTest();
 
 var gTestfile = 'regress-407323.js';
 //-----------------------------------------------------------------------------
@@ -20,8 +21,8 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
  
   var obj           = {};
   var saveQName     = QName;
@@ -30,13 +31,12 @@ function addtestcases()
   var saveNamespace = Namespace;
 
   
-  AddErrorTest('Attempt to assign to QName', 'ReferenceError: Error #1074', function () {QName = {}});
-  AddErrorTest('Attempt to assign to XML', 'ReferenceError: Error #1074', function () {XML = {}});
-  AddErrorTest('Attempt to assign to XMLList', 'ReferenceError: Error #1074', function () {XMLList = {}});
-  AddErrorTest('Attempt to assign to Namespace', 'ReferenceError: Error #1074', function () {Namespace = {}});
+  Assert.expectError('Attempt to assign to QName', 'ReferenceError: Error #1074', function () {QName = {}});
+  Assert.expectError('Attempt to assign to XML', 'ReferenceError: Error #1074', function () {XML = {}});
+  Assert.expectError('Attempt to assign to XMLList', 'ReferenceError: Error #1074', function () {XMLList = {}});
+  Assert.expectError('Attempt to assign to Namespace', 'ReferenceError: Error #1074', function () {Namespace = {}});
 
 
 
 }
 
-test();

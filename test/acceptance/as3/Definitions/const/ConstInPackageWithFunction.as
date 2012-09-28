@@ -13,15 +13,14 @@ package TestPackage
     }
 }
 
-var SECTION = "Definitions\const";                  // provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
-var TITLE   = "using const in package in a function";       // Provide ECMA section title or a description
+// var SECTION = "Definitions\const";                  // provide a document reference (ie, ECMA section)
+// var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
+// var TITLE   = "using const in package in a function";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();
 
 import TestPackage.*;
 
-AddTestCase("const in package with function", 3, getNumber());
+import com.adobe.test.Assert;
+Assert.expectEq("const in package with function", 3, getNumber());
 
-test();

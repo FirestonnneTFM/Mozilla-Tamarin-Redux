@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'proto_1.js';
 
@@ -22,12 +23,10 @@ gTestfile = 'proto_1.js';
    Date:               12 november 1997
 */
 
-var SECTION = "proto_1";
-var VERSION = "JS1_3";
-var TITLE   = "new PrototypeObject";
+// var SECTION = "proto_1";
+// var VERSION = "JS1_3";
+// var TITLE   = "new PrototypeObject";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function Employee () {
   this.name = "";
@@ -57,81 +56,80 @@ Engineer.prototype = new WorkerBee();
 
 var jim = new Employee();
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "jim = new Employee(); jim.name",
           "",
           jim.name );
 
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "jim = new Employee(); jim.dept",
           "general",
           jim.dept );
 
 var sally = new Manager();
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "sally = new Manager(); sally.name",
           "",
           sally.name );
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "sally = new Manager(); sally.dept",
           "general",
           sally.dept );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "sally = new Manager(); sally.reports.length",
           0,
           sally.reports.length );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "sally = new Manager(); typeof sally.reports",
           "object",
           typeof sally.reports );
 
 var fred = new SalesPerson();
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "fred = new SalesPerson(); fred.name",
           "",
           fred.name );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "fred = new SalesPerson(); fred.dept",
           "sales",
           fred.dept );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "fred = new SalesPerson(); fred.quota",
           100,
           fred.quota );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "fred = new SalesPerson(); fred.projects.length",
           0,
           fred.projects.length );
 
 var jane = new Engineer();
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "jane = new Engineer(); jane.name",
           "",
           jane.name );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "jane = new Engineer(); jane.dept",
           "engineering",
           jane.dept );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "jane = new Engineer(); jane.projects.length",
           0,
           jane.projects.length );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "jane = new Engineer(); jane.machine",
           "",
           jane.machine );
 
 
-test();

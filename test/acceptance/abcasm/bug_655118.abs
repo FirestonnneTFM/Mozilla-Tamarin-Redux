@@ -2,6 +2,25 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//method_info { name: test_restarg flags: NEED_REST } //not implemented in ABCAsm prototype
+method_info { name: test_restarg flags: NEED_ACTIVATION }
+method_body_info {
+    method: test_restarg
+    code:
+    {
+        // cram a bad value into the "arguments" slot...
+        // Verifier bug wasn't catching this if done
+        // via OP_setlocal0,OP_setlocal1,OP_setlocal2,OP_setlocal3
+        pushint 69
+        setlocal1
+
+        getlocal1
+        getproperty length
+        returnvalue
+    }
+}
+
+
 function main()
 {
     getlocal0
@@ -10,7 +29,7 @@ function main()
     pushstring "Bug 655118 : RestArgAnalyzer doesn't verify correctly"
     callpropvoid START 1
 
-    newfunction .function_id(test_restarg)
+    newfunction test_restarg
     setlocal1
 
     findproperty COMPARE_STRICTEQ
@@ -31,20 +50,4 @@ function main()
     returnvoid
 }
 
-.method_info { name: test_restarg flags: NEED_REST }
-
-.method_body_info {
-    method: .function_id(test_restarg)
-    code:
-    {
-        // cram a bad value into the "arguments" slot...
-        // Verifier bug wasn't catching this if done
-        // via OP_setlocal0,OP_setlocal1,OP_setlocal2,OP_setlocal3
-        pushint 69
-        setlocal1
-
-        getlocal1
-        getproperty length
-        returnvalue
-    }
-}
+script_info{init:main}

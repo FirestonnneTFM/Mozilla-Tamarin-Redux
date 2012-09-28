@@ -2,8 +2,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-startTest();
 
 /*
  *
@@ -35,74 +36,74 @@ var expectedvalues = [];
 str = 'ABC abc';
 var re = /z/ig;
 
-status = inSection(1);
+//status = inSection(1);
 actual = str.match(re);
 expect = null;
 print(actual.length)
-AddTestCase(status, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-status = inSection(2);
+//status = inSection(2);
 actual = function () {str.match(re, 'i')};
 expect = 'ArgumentError: Error #1063';
-AddErrorTest(status, expect, actual);
+Assert.expectError(status, expect, actual);
 
-status = inSection(3);
+//status = inSection(3);
 actual = function () {str.match(re, 'g', '')};
 expect = 'ArgumentError: Error #1063';
-AddErrorTest(status, expect, actual);
+Assert.expectError(status, expect, actual);
 
-status = inSection(4);
+//status = inSection(4);
 actual = function () {str.match(re, 'z', new Object(), new Date())};
 expect = 'ArgumentError: Error #1063';
-AddErrorTest(status, expect, actual);
+Assert.expectError(status, expect, actual);
 
 
 /*
  * Now try the same thing with str.search()
  */
-status = inSection(5);
+//status = inSection(5);
 actual = str.search(re);
 expect = -1;
 addThis();
 
-status = inSection(6);
+//status = inSection(6);
 actual = function () {str.search(re, 'i')};
 expect = 'ArgumentError: Error #1063';
-AddErrorTest(status, expect, actual);
+Assert.expectError(status, expect, actual);
 
-status = inSection(7);
+//status = inSection(7);
 actual = function () {str.search(re, 'g', '')};
 expect = 'ArgumentError: Error #1063';
-AddErrorTest(status, expect, actual);
+Assert.expectError(status, expect, actual);
 
-status = inSection(8);
+//status = inSection(8);
 actual = function () {str.search(re, 'z', new Object(), new Date())};
 expect = 'ArgumentError: Error #1063';
-AddErrorTest(status, expect, actual);
+Assert.expectError(status, expect, actual);
 
 
 /*
  * Now try the same thing with str.replace()
  */
-status = inSection(9);
+//status = inSection(9);
 actual = str.replace(re, 'Z');
 expect = str;
 addThis();
 
-status = inSection(10);
+//status = inSection(10);
 actual = function () {str.replace(re, 'Z', 'i')};
 expect = 'ArgumentError: Error #1063';
-AddErrorTest(status, expect, actual);
+Assert.expectError(status, expect, actual);
 
-status = inSection(11);
+//status = inSection(11);
 actual = function () {str.replace(re, 'Z', 'g', '')};
 expect = 'ArgumentError: Error #1063';
-AddErrorTest(status, expect, actual);
+Assert.expectError(status, expect, actual);
 
-status = inSection(12);
+//status = inSection(12);
 actual = function () {str.replace(re, 'Z', 'z', new Object(), new Date())};
 expect = 'ArgumentError: Error #1063';
-AddErrorTest(status, expect, actual);
+Assert.expectError(status, expect, actual);
 
 
 
@@ -114,22 +115,22 @@ AddErrorTest(status, expect, actual);
  *
  * Reference: http://bugzilla.mozilla.org/show_bug.cgi?id=179524#c10
  */
-status = inSection(13);
+//status = inSection(13);
 actual = str.match('a').toString();
 expect = str.match(/a/).toString();
 addThis();
 
-status = inSection(14);
+//status = inSection(14);
 actual = str.match(new RegExp('a', 'i')).toString();
 expect = str.match(/a/i).toString();
 addThis();
 
-status = inSection(15);
+//status = inSection(15);
 actual = str.match(new RegExp('a', 'ig')).toString();
 expect = str.match(/a/ig).toString();
 addThis();
 
-status = inSection(16);
+//status = inSection(16);
 actual = str.match(new RegExp('\\s', 'm')).toString();
 expect = str.match(/\s/m).toString();
 addThis();
@@ -138,26 +139,26 @@ addThis();
 /*
  * Now try the previous three cases with extraneous parameters
  */
-status = inSection(17);
+//status = inSection(17);
 actual = function () {str.match(new RegExp('a', 'i'), 'g').toString()};
 expect = 'ArgumentError: Error #1063';
-AddErrorTest(status, expect, actual);
+Assert.expectError(status, expect, actual);
 
-status = inSection(18);
+//status = inSection(18);
 actual = function () {str.match(new RegExp('a', 'ig'), new Object()).toString()};
 expect = 'ArgumentError: Error #1063';
-AddErrorTest(status, expect, actual);
+Assert.expectError(status, expect, actual);
 
-status = inSection(19);
+//status = inSection(19);
 actual = function () {str.match(new RegExp('\\s', 'm'), 999).toString()};
 expect = 'ArgumentError: Error #1063';
-AddErrorTest(status, expect, actual);
+Assert.expectError(status, expect, actual);
 
 
 /*
  * Try an invalid second parameter (i.e. an invalid regexp flag)
  */
-status = inSection(20);
+//status = inSection(20);
 try
 {
   actual = str.match(new RegExp('a', 'z')).toString();
@@ -179,22 +180,22 @@ catch (e)
  *
  * Reference: http://bugzilla.mozilla.org/show_bug.cgi?id=179524#c16
  */
-status = inSection(21);
+//status = inSection(21);
 actual = str.search('a');
 expect = str.search(/a/);
 addThis();
 
-status = inSection(22);
+//status = inSection(22);
 actual = str.search(new RegExp('a', 'i'));
 expect = str.search(/a/i);
 addThis();
 
-status = inSection(23);
+//status = inSection(23);
 actual = str.search(new RegExp('a', 'ig'));
 expect = str.search(/a/ig);
 addThis();
 
-status = inSection(24);
+//status = inSection(24);
 actual = str.search(new RegExp('\\s', 'm'));
 expect = str.search(/\s/m);
 addThis();
@@ -203,26 +204,26 @@ addThis();
 /*
  * Now try the previous three cases with extraneous parameters
  */
-status = inSection(25);
+//status = inSection(25);
 actual = function () {str.search(new RegExp('a', 'i'), 'g')};
 expect = 'ArgumentError: Error #1063';
-AddErrorTest(status, expect, actual);
+Assert.expectError(status, expect, actual);
 
-status = inSection(26);
+//status = inSection(26);
 actual = function () {str.search(new RegExp('a', 'ig'), new Object())};
 expect = 'ArgumentError: Error #1063';
-AddErrorTest(status, expect, actual);
+Assert.expectError(status, expect, actual);
 
-status = inSection(27);
+//status = inSection(27);
 actual = function () {str.search(new RegExp('\\s', 'm'), 999)};
 expect = 'ArgumentError: Error #1063';
-AddErrorTest(status, expect, actual);
+Assert.expectError(status, expect, actual);
 
 
 /*
  * Try an invalid second parameter (i.e. an invalid regexp flag)
  */
-status = inSection(28);
+//status = inSection(28);
 try
 {
   actual = str.search(new RegExp('a', 'z'));
@@ -246,23 +247,23 @@ catch (e)
  * http://bugzilla.mozilla.org/show_bug.cgi?id=179524#c16
  * http://bugzilla.mozilla.org/show_bug.cgi?id=83293#c21
  */
-status = inSection(29);
+//status = inSection(29);
 actual = str.replace('a', 'Z');
 expect = str.replace(/a/, 'Z');
 addThis();
 
 /*
-status = inSection(30);
+//status = inSection(30);
 actual = str.replace('a', 'Z', 'i');
 expect = str.replace(/a/i, 'Z');
 addThis();
 
-status = inSection(31);
+//status = inSection(31);
 actual = str.replace('a', 'Z', 'ig');
 expect = str.replace(/a/ig, 'Z');
 addThis();
 
-status = inSection(32);
+//status = inSection(32);
 actual = str.replace('\\s', 'Z', 'm'); //<--- NO!!! No meta-characters 1st arg!
 actual = str.replace(' ', 'Z', 'm');   //<--- Have to do this instead
 expect = str.replace(/\s/m, 'Z');
@@ -273,17 +274,17 @@ addThis();
  * Now try the previous three cases with extraneous parameters
  */
 /*
-status = inSection(33);
+//status = inSection(33);
 actual = str.replace('a', 'Z', 'i', 'g');
 expect = str.replace(/a/i, 'Z');
 addThis();
 
-status = inSection(34);
+//status = inSection(34);
 actual = str.replace('a', 'Z', 'ig', new Object());
 expect = str.replace(/a/ig, 'Z');
 addThis();
 
-status = inSection(35);
+//status = inSection(35);
 actual = str.replace('\\s', 'Z', 'm', 999); //<--- NO meta-characters 1st arg!
 actual = str.replace(' ', 'Z', 'm', 999);   //<--- Have to do this instead
 expect = str.replace(/\s/m, 'Z');
@@ -293,7 +294,7 @@ addThis();
 /*
  * Try an invalid third parameter (i.e. an invalid regexp flag)
  */
-status = inSection(36);
+//status = inSection(36);
 try
 {
   actual = str.replace(new RegExp('a', 'Z'), 'z');
@@ -328,15 +329,14 @@ function addThis()
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus(summary);
+  //printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

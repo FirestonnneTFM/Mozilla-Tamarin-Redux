@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -17,8 +17,8 @@ var gTestfile = 'regress-111557.js';
 var BUGNUMBER = 111557;
 var summary = "Just seeing that we don't crash on this code -";
 
-printBugNumber(BUGNUMBER);
-printStatus(summary);
+//printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
 
 /*
@@ -10931,6 +10931,5 @@ MTMIconList = new IconList();
 
                                                                                                                                 if (currentLevel > 1) currentLevel--
 
-                                                                                                                                AddTestCase('', 'No Crash', 'No Crash');
+                                                                                                                                Assert.expectEq('', 'No Crash', 'No Crash');
 
-test();

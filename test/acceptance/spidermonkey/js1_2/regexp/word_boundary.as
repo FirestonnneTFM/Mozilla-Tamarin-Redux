@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'word_boundary.js';
 
@@ -13,17 +14,14 @@ gTestfile = 'word_boundary.js';
    Date:         March 10, 1998
 */
 
-var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-var VERSION = 'no version';
-startTest();  var testscases=[]; var index=0;
-var TITLE   = 'RegExp: \\b and \\B';
+// var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+// var VERSION = 'no version';
+// var TITLE   = 'RegExp: \\b and \\B';
 
-writeHeaderToLog('Executing script: word_boundary.js');
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 
 // 'cowboy boyish boy'.match(new RegExp('\bboy\b'))
-testcases[index++] = new TestCase ( SECTION, "'cowboy boyish boy'.match(new RegExp('\\bboy\\b'))",
+Assert.expectEq (  "'cowboy boyish boy'.match(new RegExp('\\bboy\\b'))",
            String(["boy"]), String('cowboy boyish boy'.match(new RegExp('\\bboy\\b'))));
 
 var boundary_characters = "\f\n\r\t\v~`!@#$%^&*()-+={[}]|\\:;'<,>./? " + '"';
@@ -36,7 +34,7 @@ for (i = 0; i < boundary_characters.length; ++i)
 {
   s = '123ab' + boundary_characters.charAt(i) + '123c' + boundary_characters.charAt(i);
 
-  testcases[index++] = new TestCase ( SECTION,
+  Assert.expectEq ( 
          "'" + s + "'.match(new RegExp('\\b123[a-z]\\b'))",
          String(["123c"]), String(s.match(new RegExp('\\b123[a-z]\\b'))));
 }
@@ -46,7 +44,7 @@ for (i = 0; i < non_boundary_characters.length; ++i)
 {
   s = '123ab' + non_boundary_characters.charAt(i) + '123c' + non_boundary_characters.charAt(i);
 
-  testcases[index++] = new TestCase ( SECTION,
+  Assert.expectEq ( 
          "'" + s + "'.match(new RegExp('\\B123[a-z]\\B'))",
          String(["123c"]), String(s.match(new RegExp('\\B123[a-z]\\B'))));
 }
@@ -60,11 +58,11 @@ for (i = 0; i < boundary_characters.length; ++i)
 }
 s += "xa1111bx";
 
-testcases[index++] = new TestCase ( SECTION,
+Assert.expectEq ( 
            "'" + s + "'.match(new RegExp('\\Ba\\d+b\\B'))",
            String(["a1111b"]), String(s.match(new RegExp('\\Ba\\d+b\\B'))));
 
-testcases[index++] = new TestCase ( SECTION,
+Assert.expectEq ( 
            "'" + s + "'.match(/\\Ba\\d+b\\B/)",
            String(["a1111b"]), String(s.match(/\Ba\d+b\B/)));
 
@@ -77,12 +75,11 @@ for (i = 0; i < non_boundary_characters.length; ++i)
 }
 s += "(a1111b)";
 
-testcases[index++] = new TestCase ( SECTION,
+Assert.expectEq ( 
            "'" + s + "'.match(new RegExp('\\ba\\d+b\\b'))",
            String(["a1111b"]), String(s.match(new RegExp('\\ba\\d+b\\b'))));
 
-testcases[index++] = new TestCase ( SECTION,
+Assert.expectEq ( 
            "'" + s + "'.match(/\\ba\\d+b\\b/)",
            String(["a1111b"]), String(s.match(/\ba\d+b\b/)));
 
-test();

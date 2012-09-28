@@ -62,25 +62,25 @@ package Discontinuous.Pack {
 }
 
 import Discontinuous.Pack.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var a = new A();
 var b = new B();
 var c = new C();
 
-AddTestCase("Function defined in [Package.Name]/A.as", "A", a.whoAmI());
-AddTestCase("Interface defined in [Package.Name]/B.as", "B", b.whoAmI());
-AddTestCase("Variable defined in [Package.Name]/vars.as", "hello", s);
-AddTestCase("Function defined in [Package.Name]/vars.as", "You passed 5", publicFunc(5));
-AddTestCase("Namespace variable defined in [Package.Name]/C.as", true, c.returnNSVar());
-AddTestCase("Namespace function defined in [Package.Name]/C.as", "1,2,3", c.callNSFunc().toString());
+Assert.expectEq("Function defined in [Package.Name]/A.as", "A", a.whoAmI());
+Assert.expectEq("Interface defined in [Package.Name]/B.as", "B", b.whoAmI());
+Assert.expectEq("Variable defined in [Package.Name]/vars.as", "hello", s);
+Assert.expectEq("Function defined in [Package.Name]/vars.as", "You passed 5", publicFunc(5));
+Assert.expectEq("Namespace variable defined in [Package.Name]/C.as", true, c.returnNSVar());
+Assert.expectEq("Namespace function defined in [Package.Name]/C.as", "1,2,3", c.callNSFunc().toString());
 
 class X{
 Kitty var num:Number = 5;
@@ -90,8 +90,7 @@ Kitty function kittyFunc(s:String):String {
 }
 
 var obj = new X();
-AddTestCase("Variable, namespace defined in [Package.Name]/vars.as", 5, obj.Kitty::num);
-AddTestCase("Function, namespace defined in [Package.Name]/vars.as", "You said hi", obj.Kitty::kittyFunc("hi"));
+Assert.expectEq("Variable, namespace defined in [Package.Name]/vars.as", 5, obj.Kitty::num);
+Assert.expectEq("Function, namespace defined in [Package.Name]/vars.as", "You said hi", obj.Kitty::kittyFunc("hi"));
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

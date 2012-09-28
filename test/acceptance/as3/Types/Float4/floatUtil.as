@@ -5,13 +5,14 @@
 
 import flash.utils.ByteArray;
 import avmplus.*;
+import com.adobe.test.Assert;
 
 function AddStrictTestCase(desc, expected, actual)
 {
     if (typeof(expected)==typeof(actual))
-        AddTestCase(desc, expected, actual);
+        Assert.expectEq(desc, expected, actual);
     else
-        AddTestCase(desc, typeof(expected)+"["+expected+"]","(STRICT EQ); "+typeof(actual)+"["+actual+"]");
+        Assert.expectEq(desc, typeof(expected)+"["+expected+"]","(STRICT EQ); "+typeof(actual)+"["+actual+"]");
 }
 
 var dummy_number = NaN;

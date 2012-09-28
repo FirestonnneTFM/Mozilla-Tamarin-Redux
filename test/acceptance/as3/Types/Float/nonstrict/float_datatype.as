@@ -3,6 +3,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Utils;
 
 /*
  4.1 The type float
@@ -47,19 +48,16 @@ Note(5): The rest of this specification will use the term "float value" synonymo
 */
 
 
-var SECTION = "4.1";
-var VERSION = "AS3";
-var TITLE   = "The type float";
+// var SECTION = "4.1";
+// var VERSION = "AS3";
+// var TITLE   = "The type float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 /* check that float instance is immutable - at the very least, we can't write new properties to it */
 var expectedError = 1056;
 if (as3Enabled)
     expectedError = 1037;
 
-AddErrorTest("float instance is immutable", REFERENCEERROR+expectedError, function(){   (new float(1)).valueOf = function(){return 0;};  } );
+Assert.expectError("float instance is immutable", Utils.REFERENCEERROR+expectedError, function(){   (new float(1)).valueOf = function(){return 0;};  } );
 
-test();
 

@@ -3,14 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import UintVarAsClassProp.*;
+import com.adobe.test.Assert;
 
-startTest();                // leave this alone
 
 
 var obj = new testuint();
 
-AddTestCase( "Uint public property", 1, obj.num1 );
+Assert.expectEq( "Uint public property", 1, obj.num1 );
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

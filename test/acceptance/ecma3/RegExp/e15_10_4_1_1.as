@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 26 November 2000
  *
@@ -33,15 +34,12 @@
  */
 //-------------------------------------------------------------------------------------------------
 
-var SECTION = "e15_10_4_1_1";
-var VERSION = "";
-var TITLE   = "Passing a RegExp object to a RegExp() constructor";
-var bug = "61266";
+// var SECTION = "e15_10_4_1_1";
+// var VERSION = "";
+// var TITLE   = "Passing a RegExp object to a RegExp() constructor";
+// var bug = "61266";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -75,32 +73,32 @@ function getTestCases() {
       msg  = status + quote("dotall");
       actual = obj2.dotall;
       expect = obj1.dotall;
-      array[item++] = new TestCase(SECTION, msg, expect, actual);
+      array[item++] = Assert.expectEq( msg, expect, actual);
 
       msg  = status + quote("extended");
       actual = obj2.extended;
       expect = obj1.extended;
-      array[item++] = new TestCase(SECTION, msg, expect, actual);
+      array[item++] = Assert.expectEq( msg, expect, actual);
 
       msg  = status + quote("ignoreCase");
       actual = obj2.ignoreCase;
       expect = obj1.ignoreCase;
-      array[item++] = new TestCase(SECTION, msg, expect, actual);
+      array[item++] = Assert.expectEq( msg, expect, actual);
 
       msg  = status + quote("lastIndex");
       actual = obj2.lastIndex;
       expect = obj1.lastIndex;
-      array[item++] = new TestCase(SECTION, msg, expect, actual);
+      array[item++] = Assert.expectEq( msg, expect, actual);
 
       msg  = status + quote("multiline");
       actual = obj2.multiline;
       expect = obj1.multiline;
-      array[item++] = new TestCase(SECTION, msg, expect, actual);
+      array[item++] = Assert.expectEq( msg, expect, actual);
 
       msg  = status + quote("source");
       actual = obj2.source;
       expect = obj1.source;
-      array[item++] = new TestCase(SECTION, msg, expect, actual);
+      array[item++] = Assert.expectEq( msg, expect, actual);
     }
 
 

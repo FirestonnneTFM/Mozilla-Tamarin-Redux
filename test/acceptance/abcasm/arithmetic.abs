@@ -5,18 +5,8 @@
 /*
  *  Tests arithmetic with the constant pools.
  */
-function main()
-{
-    debugfile "arithmetic.abs"
-	debugline 44
-    getlocal0
-	pushscope
-    newfunction .function_id(doTest)
-	getlocal0
-	call 0
-	returnvoid
-}
-
+ 
+ 
 function doTest():*
 {
     debugfile "arithmetic.abs"
@@ -71,3 +61,17 @@ function doTest():*
 
 	returnvoid
 }
+ 
+function main()
+{
+    debugfile "arithmetic.abs"
+	debugline 44
+    getlocal0
+	pushscope
+    newfunction doTest
+	getlocal0
+	call 0
+	returnvoid
+}
+
+script_info{init: main}

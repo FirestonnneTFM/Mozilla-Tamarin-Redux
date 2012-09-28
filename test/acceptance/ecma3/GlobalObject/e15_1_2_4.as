@@ -1,22 +1,21 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "15.1.2.4";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "escape(string)";
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "15.1.2.4";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "escape(string)";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
 
-    test();
 
 function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    array[item++] = new TestCase( SECTION, "escape.length",         1,          escape.length );
+    array[item++] = Assert.expectEq(  "escape.length",         1,          escape.length );
 
     var thisError:String = "no error";
     try
@@ -29,63 +28,63 @@ function getTestCases() {
     }
     finally
     {
-        array[item++] = new TestCase(SECTION, "escape.length = null", "ReferenceError: Error #1074", referenceError(thisError));
+        array[item++] = Assert.expectEq( "escape.length = null", "ReferenceError: Error #1074", Utils.referenceError(thisError));
     }
 
-    array[item++] = new TestCase( SECTION, "delete escape.length",                  false,  delete escape.length );
+    array[item++] = Assert.expectEq(  "delete escape.length",                  false,  delete escape.length );
     delete escape.length;
-    array[item++] = new TestCase( SECTION, "delete escape.length; escape.length",   1, escape.length);
+    array[item++] = Assert.expectEq(  "delete escape.length; escape.length",   1, escape.length);
 
     var MYPROPS='';
     for ( var p in escape ) {
         MYPROPS+= p;
     }
 
-    array[item++] = new TestCase( SECTION, "var MYPROPS='', for ( var p in escape ) { MYPROPS+= p}, MYPROPS",    "",    MYPROPS );
+    array[item++] = Assert.expectEq(  "var MYPROPS='', for ( var p in escape ) { MYPROPS+= p}, MYPROPS",    "",    MYPROPS );
 
-    array[item++] = new TestCase( SECTION, "escape()",              "undefined",    escape() );
-    array[item++] = new TestCase( SECTION, "escape('')",            "",             escape('') );
-    array[item++] = new TestCase( SECTION, "escape( null )",        "null",         escape(null) );
-    array[item++] = new TestCase( SECTION, "escape( void 0 )",      "null",    escape(void 0) );
-    array[item++] = new TestCase( SECTION, "escape( true )",        "true",         escape( true ) );
-    array[item++] = new TestCase( SECTION, "escape( false )",       "false",        escape( false ) );
+    array[item++] = Assert.expectEq(  "escape()",              "undefined",    escape() );
+    array[item++] = Assert.expectEq(  "escape('')",            "",             escape('') );
+    array[item++] = Assert.expectEq(  "escape( null )",        "null",         escape(null) );
+    array[item++] = Assert.expectEq(  "escape( void 0 )",      "null",    escape(void 0) );
+    array[item++] = Assert.expectEq(  "escape( true )",        "true",         escape( true ) );
+    array[item++] = Assert.expectEq(  "escape( false )",       "false",        escape( false ) );
 
-    array[item++] = new TestCase( SECTION, "escape( new Boolean(true) )",   "true", escape(new Boolean(true)) );
-    array[item++] = new TestCase( SECTION, "escape( new Boolean(false) )",  "false",    escape(new Boolean(false)) );
+    array[item++] = Assert.expectEq(  "escape( new Boolean(true) )",   "true", escape(new Boolean(true)) );
+    array[item++] = Assert.expectEq(  "escape( new Boolean(false) )",  "false",    escape(new Boolean(false)) );
 
-    array[item++] = new TestCase( SECTION, "escape( Number.NaN  )",                 "NaN",      escape(Number.NaN) );
-    array[item++] = new TestCase( SECTION, "escape( -0 )",                          "0",        escape( -0 ) );
-    array[item++] = new TestCase( SECTION, "escape( 'Infinity' )",                  "Infinity", escape( "Infinity" ) );
-    array[item++] = new TestCase( SECTION, "escape( Number.POSITIVE_INFINITY )",    "Infinity", escape( Number.POSITIVE_INFINITY ) );
-    array[item++] = new TestCase( SECTION, "escape( Number.NEGATIVE_INFINITY )",    "-Infinity", escape( Number.NEGATIVE_INFINITY ) );
+    array[item++] = Assert.expectEq(  "escape( Number.NaN  )",                 "NaN",      escape(Number.NaN) );
+    array[item++] = Assert.expectEq(  "escape( -0 )",                          "0",        escape( -0 ) );
+    array[item++] = Assert.expectEq(  "escape( 'Infinity' )",                  "Infinity", escape( "Infinity" ) );
+    array[item++] = Assert.expectEq(  "escape( Number.POSITIVE_INFINITY )",    "Infinity", escape( Number.POSITIVE_INFINITY ) );
+    array[item++] = Assert.expectEq(  "escape( Number.NEGATIVE_INFINITY )",    "-Infinity", escape( Number.NEGATIVE_INFINITY ) );
 
     var ASCII_TEST_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@*_+-./";
 
-    array[item++] = new TestCase( SECTION, "escape( " +ASCII_TEST_STRING+" )",    ASCII_TEST_STRING,  escape( ASCII_TEST_STRING ) );
+    array[item++] = Assert.expectEq(  "escape( " +ASCII_TEST_STRING+" )",    ASCII_TEST_STRING,  escape( ASCII_TEST_STRING ) );
 
     // ASCII value less than
 
     for ( var CHARCODE = 0; CHARCODE < 32; CHARCODE++ ) {
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
                             "escape(String.fromCharCode("+CHARCODE+"))",
                             "%"+ToHexString(CHARCODE),
                             escape(String.fromCharCode(CHARCODE))  );
     }
     for ( var CHARCODE = 128; CHARCODE < 256; CHARCODE++ ) {
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
                             "escape(String.fromCharCode("+CHARCODE+"))",
                             "%"+ToHexString(CHARCODE),
                             escape(String.fromCharCode(CHARCODE))  );
     }
 
     for ( var CHARCODE = 256; CHARCODE < 1024; CHARCODE++ ) {
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
                             "escape(String.fromCharCode("+CHARCODE+"))",
                             "%u"+ ToUnicodeString(CHARCODE),
                             escape(String.fromCharCode(CHARCODE))  );
     }
     for ( var CHARCODE = 65500; CHARCODE < 65536; CHARCODE++ ) {
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
                             "escape(String.fromCharCode("+CHARCODE+"))",
                             "%u"+ ToUnicodeString(CHARCODE),
                             escape(String.fromCharCode(CHARCODE))  );

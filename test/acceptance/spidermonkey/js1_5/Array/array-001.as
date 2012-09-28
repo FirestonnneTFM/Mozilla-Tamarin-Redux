@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 /*
  * Date: 24 September 2001
@@ -44,7 +45,7 @@ for (var i in arr)
  * Note 'c' is included: for..in includes ALL enumerable properties,
  * not just array-index properties. The bug was: Rhino gave s == ''.
  */
-status = inSection(1);
+//status = inSection(1);
 actual = sortThis(s);
 expect = 'bc';
 
@@ -57,10 +58,8 @@ function sortThis(str)
 }
 
 
-startTest();
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

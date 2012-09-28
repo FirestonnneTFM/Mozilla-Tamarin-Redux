@@ -1,12 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "String/replace-001.as";
-    var VERSION = "ECMA_2";
-    var TITLE   = "String.prototype.replace( regexp, replaceValue )";
+//     var SECTION = "String/replace-001.as";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "String.prototype.replace( regexp, replaceValue )";
 
-    startTest();
 
     /*
      * If regexp is not an object of type RegExp, it is replaced with the
@@ -55,16 +55,17 @@
 
 //-----------------------------------------------------------------------------
 
-    var SECTION = "eregress_104375";
-    var VERSION = "";
+//     var SECTION = "eregress_104375";
+//     var VERSION = "";
 
-    startTest();
-    var TITLE   = "Testing String.prototype.replace( regexp, replaceValue )";
+//     var TITLE   = "Testing String.prototype.replace( regexp, replaceValue )";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
+
+function inSection(x) {
+   return "Section "+x+" of test -";
+}
 
 function getTestCases() {
     var array = new Array();
@@ -93,29 +94,29 @@ function getTestCases() {
     status = inSection(1);
     actual  = str.replace (re,'sch');
     expect = 'She sells seaschells by the seaschore.';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
     status = inSection(2);
     actual  = str.replace (re, "$$" + 'sch');
     expect = 'She sells sea$schells by the sea$schore.';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
     status = inSection(3);
     actual  = str.replace (re, "$&" + 'sch');
     expect = 'She sells seashschells by the seashschore.';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = inSection(4);
     actual  = str.replace (re, "$`" + 'sch');
     expect = 'She sells seaShe sells seaschells by the seaShe sells seashells by the seaschore.';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = inSection(5);
     actual  = str.replace (re, "$'" + 'sch');
     expect = 'She sells seaells by the seashore.schells by the seaore.schore.';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     var str2 = 'She sells seashells by the seashore.';
     var re = /sh/;
@@ -124,29 +125,29 @@ function getTestCases() {
     status = inSection(6);
     actual  = str2.replace (re,'sch');
     expect = 'She sells seaschells by the seashore.';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
     status = inSection(7);
     actual  = str2.replace (re, "$$" + 'sch');
     expect = 'She sells sea$schells by the seashore.';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
     status = inSection(8);
     actual  = str2.replace (re, "$&" + 'sch');
     expect = 'She sells seashschells by the seashore.';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = inSection(9);
     actual  = str2.replace (re, "$`" + 'sch');
     expect = 'She sells seaShe sells seaschells by the seashore.';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = inSection(10);
     actual  = str2.replace (re, "$'" + 'sch');
     expect = 'She sells seaells by the seashore.schells by the seashore.';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     var str1 = 'uid=31';
     var re1 = /(uid=)(\d+)/;
@@ -154,17 +155,17 @@ function getTestCases() {
     status = inSection(11);
     actual  = str1.replace (re1, "$11" + 15);
     expect = 'uid=115';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = inSection(12);
     actual  = str1.replace (re1, "$11" + '15');
     expect = 'uid=115';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = inSection(13);
     actual  = str1.replace (re1, "$11" + 'A15');
     expect = 'uid=1A15';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     var str1:String = "abc12 def34";
     var pattern:RegExp = /([a-z]+)([0-9]+)/;
@@ -177,7 +178,7 @@ function getTestCases() {
     status = inSection(14);
     actual  = str2
     expect = '12abc def34';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     var str1:String = "abc12 def34";
     var pattern:RegExp = /([a-z]+)([0-9]+)/g;
@@ -190,7 +191,7 @@ function getTestCases() {
     status = inSection(14);
     actual  = str2
     expect = '12abc 34def';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     return array;
 }

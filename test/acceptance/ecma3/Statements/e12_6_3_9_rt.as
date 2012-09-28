@@ -1,17 +1,16 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "12.6.3-9-n";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "The for..in statment";
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "12.6.3-9-n";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "The for..in statment";
     //var error = err;
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
     
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -31,10 +30,10 @@ function getTestCases() {
     } catch (e) {
         thisError = e.toString();
     } finally {
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
             "object is not defined",
             "ReferenceError: Error #1065",
-            referenceError( thisError) );
+            Utils.referenceError( thisError) );
     }
     return array;
 }

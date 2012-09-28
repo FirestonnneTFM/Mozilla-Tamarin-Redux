@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-127243.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Do not crash on watch';
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 if (typeof window != 'undefined' && typeof document != 'undefined')
 {
@@ -23,8 +23,8 @@ if (typeof window != 'undefined' && typeof document != 'undefined')
 }
 else
 {
-  printStatus('This test must be run in the browser');
-  AddTestCase(summary, expect, actual);
+   //printStatus('This test must be run in the browser');
+  Assert.expectEq(summary, expect, actual);
 
 }
 
@@ -69,11 +69,10 @@ function setScrollTop()
 {
   div.scrollTop = 42;
 
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
   gDelayTestDriverEnd = false;
   jsTestDriverEnd();
 
 }
 
-test();

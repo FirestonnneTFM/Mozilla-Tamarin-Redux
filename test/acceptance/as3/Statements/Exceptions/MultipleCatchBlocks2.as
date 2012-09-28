@@ -5,13 +5,13 @@
  
 
 import MultipleCatchBlocks2.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";                   // Version of JavaScript or ECMA
-var TITLE   = "Testing try block with multiple catch blocks";  // Provide ECMA section title or a description
+// var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";                   // Version of JavaScript or ECMA
+// var TITLE   = "Testing try block with multiple catch blocks";  // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var z = new MyErrors2();
@@ -42,14 +42,13 @@ try {
     }catch(e7:Error){
           thisError7=(e7.toString()).substr(0,26);//print(thisError7);
     }finally{
-AddTestCase( "Testing catch block with Reference Error", "no error" ,thisError);
-AddTestCase( "Testing catch block with Type Error", "no error" ,thisError1);
-AddTestCase( "Testing catch block with Argument Error", "ArgumentError: Error #1063",thisError2);
-AddTestCase( "Testing catch block with URIError", "no error" ,thisError3);
-AddTestCase( "Testing catch block with Eval Error", "no error" ,thisError5);
-AddTestCase( "Testing catch block with Range Error", "no error" ,thisError6);
-AddTestCase( "Testing catch block with Error", "no error" ,thisError7);
+Assert.expectEq( "Testing catch block with Reference Error", "no error" ,thisError);
+Assert.expectEq( "Testing catch block with Type Error", "no error" ,thisError1);
+Assert.expectEq( "Testing catch block with Argument Error", "ArgumentError: Error #1063",thisError2);
+Assert.expectEq( "Testing catch block with URIError", "no error" ,thisError3);
+Assert.expectEq( "Testing catch block with Eval Error", "no error" ,thisError5);
+Assert.expectEq( "Testing catch block with Range Error", "no error" ,thisError6);
+Assert.expectEq( "Testing catch block with Error", "no error" ,thisError7);
             }
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

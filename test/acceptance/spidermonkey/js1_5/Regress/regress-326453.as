@@ -4,7 +4,7 @@
  * http://creativecommons.org/licenses/publicdomain/
  * Contributor: Blake Kaplan
  */
-startTest();
+import com.adobe.test.Assert;
 
 var gTestfile = 'regress-326453.js';
 //-----------------------------------------------------------------------------
@@ -13,13 +13,12 @@ var summary = 'Do not assert: while decompiling';
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 function f() { with({})function g() { }; printStatus(); }
 
-printStatus(f.toString());
+//printStatus(f.toString());
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

@@ -1,17 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "10.2.3-1";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "Eval Code";
+//     var SECTION = "10.2.3-1";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "Eval Code";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
 
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -19,14 +17,14 @@ function getTestCases() {
 
     var o = new MyObject("hello")
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                     "var o = new MyObject('hello'); o.THIS == x",
                                     true,
                                     o.THIS == o );
 
     var o = MyFunction();
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                     "var o = MyFunction(); o == this",
                                     true,
                                     o == this );

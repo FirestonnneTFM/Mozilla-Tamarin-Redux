@@ -9,12 +9,10 @@ Returns an implementation-dependent approximation to the exponential function
 of x (e raised to the power of x, where e is the base of the natural logarithms).
 */
 
-var SECTION = "4.5.22";
-var VERSION = "AS3";
-var TITLE   = "public function exp(x:float):float";
+// var SECTION = "4.5.22";
+// var VERSION = "AS3";
+// var TITLE   = "public function exp(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param:float):float { return float.exp(param); }
 
@@ -55,5 +53,4 @@ AddStrictTestCase("float.exp(float.MAX_VALUE)", float.POSITIVE_INFINITY, float.e
 AddStrictTestCase("float.exp(1.0e+3)", float.POSITIVE_INFINITY, float.exp(1.0e+3));
 AddStrictTestCase("float.exp(-1.0e+3)", float(0), float.exp(-1.0e+3));
 
-test();
 

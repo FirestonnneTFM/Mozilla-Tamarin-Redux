@@ -1,6 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 /**
    File Name:    map.as
    Description:  map(object,mapper,thisobj)
@@ -11,12 +13,10 @@
      returns a new vector object where the vector element at index i is the value returned from the call
      to mapper on object[i].
    */
-var SECTION="";
-var VERSION = "ECMA_1";
+// var SECTION="";
+// var VERSION = "ECMA_1";
 
-startTest();
 
-writeHeaderToLog( " Vector.map()-initializers");
 
 function mapper1(value,index,obj) {
    return "("+value+":"+index+")";
@@ -35,10 +35,10 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(
+Assert.expectEq(
         "map mapper is undefined",
         "ArgumentError: Error #1063",
-        parseError(errormsg,"ArgumentError: Error #1063".length));
+        Utils.parseError(errormsg,"ArgumentError: Error #1063".length));
 
 var errormsg="";
 try {
@@ -46,35 +46,34 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(
+Assert.expectEq(
         "map mapper is not a function",
         "TypeError: Error #1034",
-        parseError(errormsg,"TypeError: Error #1034".length));
+        Utils.parseError(errormsg,"TypeError: Error #1034".length));
 
-AddTestCase(
+Assert.expectEq(
         "map empty vector",
         "",
         new <int>[].map(mapper1).toString());
 
-AddTestCase(
+Assert.expectEq(
         "map small vector",
         "(a:0),(b:1),(c:2)",
         new<String>['a','b','c'].map(mapper1).toString());
 
 
-AddTestCase(
+Assert.expectEq(
         "map fixed size small vector",
         "(a:0),(b:1),(c:2)",
         new<String>['a','b','c'].map(mapper1).toString());
 
 testobj=new Object();
 testobj.message="testobj";
-AddTestCase(   "map vector passing new object",
+Assert.expectEq(   "map vector passing new object",
                "(testobj),(testobj)",
                new<String>['a','b'].map(mapper3,testobj).toString());
 
-AddTestCase(   "map vector of int",
+Assert.expectEq(   "map vector of int",
                "1,4,9,16",
                new<int>[1,2,3,4].map(mapper4).toString());
 
-test();

@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 /**
    File Name:          reverse.as
@@ -13,10 +14,9 @@
    Author:             tharwood@adobe.com
    Date:               27 March 2009
 */
-var SECTION="";
-var VERSION="";
+// var SECTION="";
+// var VERSION="";
 
-startTest();
 
 var v1 = new<int> [
 1,2,3,4,5,6,7,8,9,10,
@@ -25021,6 +25021,5 @@ var v1 = new<int> [
 1,2,3,4,5,6,7,8,9,10,
 ];
 
-AddTestCase("Length of large Vector initializer", 250000, v1.length);
+Assert.expectEq("Length of large Vector initializer", 250000, v1.length);
 
-test();

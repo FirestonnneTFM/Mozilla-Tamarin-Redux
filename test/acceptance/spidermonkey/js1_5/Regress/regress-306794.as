@@ -4,7 +4,7 @@
  * http://creativecommons.org/licenses/publicdomain/
  * Contributor: Blake Kaplan
  */
-startTest();
+import com.adobe.test.Assert;
 
 var gTestfile = 'regress-306794.js';
 //-----------------------------------------------------------------------------
@@ -13,8 +13,8 @@ var summary = 'Do not assert: parsing foo getter';
 var actual = 'No Assertion';
 var expect = 'No Assertion';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
  
 try
 {
@@ -24,6 +24,5 @@ catch(e)
 {
 }
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

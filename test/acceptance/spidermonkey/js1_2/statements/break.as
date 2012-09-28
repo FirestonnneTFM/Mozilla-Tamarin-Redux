@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'break.js';
 
@@ -13,13 +14,10 @@ gTestfile = 'break.js';
    Date:         March 18, 1998
 */
 
-var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-var VERSION = 'no version';
-startTest();  var testscases=[]; var index=0;
-var TITLE   = 'statements: break';
+// var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+// var VERSION = 'no version';
+// var TITLE   = 'statements: break';
 
-writeHeaderToLog("Executing script: break.js");
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var i,j;
 
@@ -29,7 +27,7 @@ for (i = 0; i < 1000; i++)
 }
 
 // 'breaking out of "for" loop'
-testcases[index++] = new TestCase ( SECTION, 'breaking out of "for" loop',
+Assert.expectEq (  'breaking out of "for" loop',
            100, i);
 
 j = 2000;
@@ -50,7 +48,7 @@ for (i = 0; i < 1000; i++)
 }
 
 // 'breaking out of a "for" loop with a "label"'
-testcases[index++] = new TestCase ( SECTION, 'breaking out of a "for" loop with a "label"',
+Assert.expectEq (  'breaking out of a "for" loop with a "label"',
            500, j);
 
 i = 0;
@@ -62,7 +60,7 @@ while (i < 1000)
 }
 
 // 'breaking out of a "while" loop'
-testcases[index++] = new TestCase ( SECTION, 'breaking out of a "while" loop',
+Assert.expectEq (  'breaking out of a "while" loop',
            100, i );
 
 
@@ -88,7 +86,7 @@ while (i < 1000)
 }
 
 // 'breaking out of a "while" loop with a "label"'
-testcases[index++] = new TestCase ( SECTION, 'breaking out of a "while" loop with a "label"',
+Assert.expectEq (  'breaking out of a "while" loop with a "label"',
            500, j);
 
 i = 0;
@@ -100,7 +98,7 @@ do
 } while (i < 1000);
 
 // 'breaking out of a "do" loop'
-testcases[index++] = new TestCase ( SECTION, 'breaking out of a "do" loop',
+Assert.expectEq (  'breaking out of a "do" loop',
            100, i );
 
 j = 2000;
@@ -125,7 +123,6 @@ do
 }while (i < 1000);
 
 // 'breaking out of a "do" loop with a "label"'
-testcases[index++] = new TestCase ( SECTION, 'breaking out of a "do" loop with a "label"',
+Assert.expectEq (  'breaking out of a "do" loop with a "label"',
            500, j);
 
-test();

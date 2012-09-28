@@ -7,6 +7,8 @@
 
 package
 {
+    import com.adobe.test.Utils;
+
     var PASSED = " PASSED!";
     var FAILED = " FAILED! expected: ";
     var summary = "";

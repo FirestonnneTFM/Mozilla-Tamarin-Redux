@@ -3,26 +3,26 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import GetSetExtendedOverride.*;
+import com.adobe.test.Assert;
 
-var SECTION = "FunctionAccessors";
-var VERSION = "AS3";
-var TITLE   = "Function Accessors";
+// var SECTION = "FunctionAccessors";
+// var VERSION = "AS3";
+// var TITLE   = "Function Accessors";
 var BUGNUMBER = "";
 
-startTest();
 
 var OBJ = new GetSetPrivate();
 
-AddTestCase("Get private var:int", -10, OBJ.y);
-AddTestCase("Set private var:int", -99, (OBJ.y = 23334, OBJ.y));
-AddTestCase("Get private var:Array", "7,8,9", OBJ.x.toString());
-AddTestCase("Set private var:Array", "7,8,9", (OBJ.x = new Array(4,5,6), OBJ.x.toString()));
-AddTestCase("Get private var:Boolean", true, OBJ.boolean);
-AddTestCase("Set private var:Boolean", false, (OBJ.boolean = false, OBJ.boolean));
-AddTestCase("Get private var:uint", 1, OBJ.u);
-AddTestCase("Set private var:uint", 42, (OBJ.u = 42, OBJ.u));
-AddTestCase("Get private var:String", "myString", OBJ.string);
-AddTestCase("Set private var:String", "new string", (OBJ.string = "new string", OBJ.string));
+Assert.expectEq("Get private var:int", -10, OBJ.y);
+Assert.expectEq("Set private var:int", -99, (OBJ.y = 23334, OBJ.y));
+Assert.expectEq("Get private var:Array", "7,8,9", OBJ.x.toString());
+Assert.expectEq("Set private var:Array", "7,8,9", (OBJ.x = new Array(4,5,6), OBJ.x.toString()));
+Assert.expectEq("Get private var:Boolean", true, OBJ.boolean);
+Assert.expectEq("Set private var:Boolean", false, (OBJ.boolean = false, OBJ.boolean));
+Assert.expectEq("Get private var:uint", 1, OBJ.u);
+Assert.expectEq("Set private var:uint", 42, (OBJ.u = 42, OBJ.u));
+Assert.expectEq("Get private var:String", "myString", OBJ.string);
+Assert.expectEq("Set private var:String", "new string", (OBJ.string = "new string", OBJ.string));
 
 // Attempt to access the private vars directly
 try{
@@ -32,7 +32,7 @@ try{
 } catch (e1) {
     res = "exception";
 } finally {
-    AddTestCase("Access private var:Array", "exception", res);
+    Assert.expectEq("Access private var:Array", "exception", res);
 }
 
 try{
@@ -42,7 +42,7 @@ try{
 } catch (e2) {
     res = "exception";
 } finally {
-    AddTestCase("Access private var:int", "exception", res);
+    Assert.expectEq("Access private var:int", "exception", res);
 }
 
 try{
@@ -52,7 +52,7 @@ try{
 } catch (e3) {
     res = "exception";
 } finally {
-    AddTestCase("Access private var:Boolean", "exception", res);
+    Assert.expectEq("Access private var:Boolean", "exception", res);
 }
 
 try{
@@ -62,7 +62,7 @@ try{
 } catch (e4) {
     res = "exception";
 } finally {
-    AddTestCase("Access private var:uint", "exception", res);
+    Assert.expectEq("Access private var:uint", "exception", res);
 }
 
 try{
@@ -72,27 +72,27 @@ try{
 } catch (e5) {
     res = "exception";
 } finally {
-    AddTestCase("Access private var:String", "exception", res);
+    Assert.expectEq("Access private var:String", "exception", res);
 }
 
 // call setter from setter
 OBJ.sfs2 = 55;
-AddTestCase("Call setter from setter", 55, OBJ.sfs1);
-AddTestCase("Call setter from setter", 55, OBJ.sfs2);
+Assert.expectEq("Call setter from setter", 55, OBJ.sfs1);
+Assert.expectEq("Call setter from setter", 55, OBJ.sfs2);
 
 // call setter from getter
-AddTestCase("Call setter from getter", 0, OBJ.sfg2);
-AddTestCase("Call setter from getter", "PASSED", OBJ.sfg1);
+Assert.expectEq("Call setter from getter", 0, OBJ.sfg2);
+Assert.expectEq("Call setter from getter", "PASSED", OBJ.sfg1);
 
 // call getter from setter
 OBJ.gfs1 = "FAILED";// setter for gfs1 should make the string 'PASSED'
-AddTestCase("Call getter from setter", "PASSED", OBJ.gfs1);
-AddTestCase("Call getter from setter", "PASSED", OBJ.gfs2);
+Assert.expectEq("Call getter from setter", "PASSED", OBJ.gfs1);
+Assert.expectEq("Call getter from setter", "PASSED", OBJ.gfs2);
 
 // call getter from getter
 
-AddTestCase("Call getter from getter", "PASSED", OBJ.gfg1);
-AddTestCase("Call getter from getter", "PASSED", OBJ.gfg2);
+Assert.expectEq("Call getter from getter", "PASSED", OBJ.gfg1);
+Assert.expectEq("Call getter from getter", "PASSED", OBJ.gfg2);
 
 //define a getter for a property and call the undefined setter
 try{
@@ -102,7 +102,7 @@ try{
 } catch (e6) {
     res = "exception";
 } finally {
-    AddTestCase("call undefined setter", "exception", res);
+    Assert.expectEq("call undefined setter", "exception", res);
 }
 
 //define a setter for a property and call the undefined getter
@@ -113,23 +113,22 @@ try{
 } catch (e7) {
     res = "exception";
 } finally {
-    AddTestCase("call undefined getter", "exception", res);
+    Assert.expectEq("call undefined getter", "exception", res);
 }
 
 // call a parent getter from a child getter
-AddTestCase("Call a parent getter from a child getter with super", "4,5,6", OBJ.childX.toString());
+Assert.expectEq("Call a parent getter from a child getter with super", "4,5,6", OBJ.childX.toString());
 
 // call a parent setter from a child getter
-AddTestCase("Call a parent setter from a child getter with super", 1976, OBJ.childY);
+Assert.expectEq("Call a parent setter from a child getter with super", 1976, OBJ.childY);
 
 // call a parent getter from a child setter
 OBJ.childZ = "FAILED";
-AddTestCase("Call a parent getter from a child setter", "new string", OBJ.childZ);
+Assert.expectEq("Call a parent getter from a child setter", "new string", OBJ.childZ);
 
 // call a parent setter from a child setter
 OBJ.childW = "PASSED";
-AddTestCase("Call a parent getter from a child getter", "PASSED", OBJ.childW);
+Assert.expectEq("Call a parent getter from a child getter", "PASSED", OBJ.childW);
 
 
-test();
 

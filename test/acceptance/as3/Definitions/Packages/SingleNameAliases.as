@@ -3,13 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import SingleNameAliases.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var classA = SingleNameAliases.A;
@@ -18,8 +18,7 @@ var classB = SingleNameAliases.B;
 a = new classA();
 b = new classB();
 
-AddTestCase("Calling function on single name alias instance", "A", a.whoAmI());
-AddTestCase("Calling function on single name alias instance", "B", b.whoAmI());
+Assert.expectEq("Calling function on single name alias instance", "A", a.whoAmI());
+Assert.expectEq("Calling function on single name alias instance", "B", b.whoAmI());
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

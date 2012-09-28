@@ -9,12 +9,10 @@ Returns reciprocal square root of scalars.
 Testmedia based on edge points in float.sqrt().
 */
 
-var SECTION = "4.5.31";
-var VERSION = "AS3";
-var TITLE   = "public function rsqrt(x:float):float";
+// var SECTION = "4.5.31";
+// var VERSION = "AS3";
+// var TITLE   = "public function rsqrt(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param:float):float { return float.rsqrt(param); }
 
@@ -57,5 +55,4 @@ AddStrictTestCase("x=3.124f float.rsqrt(x) == 1f/float.sqrt(x)", 1f/float.sqrt(x
 
 AddStrictTestCase("float.rsqrt(64)", float(0.125), float.rsqrt(64));
 
-test();
 

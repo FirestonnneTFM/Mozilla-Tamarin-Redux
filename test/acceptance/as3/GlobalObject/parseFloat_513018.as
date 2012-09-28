@@ -3,22 +3,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import avmplus.System;
+import com.adobe.test.Assert;
 
-var SECTION = "GlobalObject";
-var VERSION = "as3";
-startTest();
-var TITLE   = "bug 513018";
+// var SECTION = "GlobalObject";
+// var VERSION = "as3";
+// var TITLE   = "bug 513018";
 
-writeHeaderToLog( SECTION + " "+ TITLE );
 
 if (System.swfVersion < 11) {
-    AddTestCase('SWF9: 12..34..56',
+    Assert.expectEq('SWF9: 12..34..56',
         parseFloat("12..34..56"),
         1234.56);
 } else {
-    AddTestCase('SWF11+: 12..34..56',
+    Assert.expectEq('SWF11+: 12..34..56',
         parseFloat("12..34..56"),
         12);
 }
 
-test();

@@ -1,7 +1,8 @@
+/*
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
+ 
 package {
 
     import avmplus.System
@@ -9,6 +10,7 @@ package {
     import flash.system.WorkerDomain
     import flash.utils.ByteArray
     import flash.concurrent.Mutex
+import com.adobe.test.Assert;
 
     var mutex:Mutex;
     var nworkers:uint=5;
@@ -82,16 +84,16 @@ package {
             workerctr+=1;
         }
         trace("done "+getTimer());
-        AddTestCase("Workers messages were correct, no failures","",testfailures);
-        AddTestCase("Workers state is terminated","terminated",workers[0].state);
-        AddTestCase("mutex is not locked after test",true,mutex.tryLock());
+        Assert.expectEq("Workers messages were correct, no failures","",testfailures);
+        Assert.expectEq("Workers state is terminated","terminated",workers[0].state);
+        Assert.expectEq("mutex is not locked after test",true,mutex.tryLock());
         for (var i:uint=0;i<nworkers;i++) {
             bytearray.position=nworkers*4+i*200;
             var s1:String=bytearray.readUTF();
             trace("s1="+s1);
             bytearray.position=nworkers*4+i*200+100;
             var s2:String=bytearray.readUTF();
-            AddTestCase("For worker "+i+" test string was doubled "+s1.length+" * 2 = "+s2.length,s1.length*2==s2.length,true)
+            Assert.expectEq("For worker "+i+" test string was doubled "+s1.length+" * 2 = "+s2.length,s1.length*2==s2.length,true)
         }
         mutex.unlock();
     }
@@ -166,13 +168,10 @@ package {
         return b[index*4];
     }
     if (Worker.current.isPrimordial) {
-        var SECTION = "workers";
-        var VERSION = "AS3";
-        var TITLE   = "Test Workers passes data through shared byte array";
-        startTest();
-        writeHeaderToLog(SECTION+" "+TITLE);    
+//         var SECTION = "workers";
+//         var VERSION = "AS3";
+//         var TITLE   = "Test Workers passes data through shared byte array";
         main();
-        test();
     } else {
         background();
     }

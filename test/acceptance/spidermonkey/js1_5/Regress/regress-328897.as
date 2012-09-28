@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-328897.js';
 //-----------------------------------------------------------------------------
@@ -13,12 +13,12 @@ var summary = 'JS_ReportPendingException should';
 var actual = 'No Error';
 var expect = 'No Error';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
  
 if (typeof window == 'undefined')
 {
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 }
 else
 {
@@ -44,8 +44,7 @@ function onload()
   {
     gDelayTestDriverEnd = false;
     jsTestDriverEnd();
-    AddTestCase(summary, expect, actual);
+    Assert.expectEq(summary, expect, actual);
   }
 }
 
-test();

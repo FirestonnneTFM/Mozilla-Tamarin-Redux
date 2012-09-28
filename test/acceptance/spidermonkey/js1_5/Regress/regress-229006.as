@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-229006.js';
 //-----------------------------------------------------------------------------
@@ -16,8 +16,8 @@ var summary = 'JS parser should not fail when line number &gt 2^16';
 var actual = 'FAIL';
 var expect = 'PASS';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
  
 
 
@@ -65563,6 +65563,5 @@ for (var i=0; i<2; i++) {
 
 actual = 'PASS';
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

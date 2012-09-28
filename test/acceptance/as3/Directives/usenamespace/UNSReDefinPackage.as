@@ -15,26 +15,25 @@ package P {
  
 
 
-var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "namespace inside package";       // Provide ECMA section title or a description
+// var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "namespace inside package";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 
 
 import P.*;
 var game = new Game();
+import com.adobe.test.Assert;
 
-AddTestCase( "Baseball var teamName = 'Giants'", "Giants", game.Baseball::teamName );
+Assert.expectEq( "Baseball var teamName = 'Giants'", "Giants", game.Baseball::teamName );
 
 var teamName = "Test"
 
-AddTestCase( "Baseball var teamName = 'Test'", "Test", teamName );
+Assert.expectEq( "Baseball var teamName = 'Test'", "Test", teamName );
 
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

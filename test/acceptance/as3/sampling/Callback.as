@@ -6,15 +6,15 @@ package {
 
 import flash.sampler.*;
 import avmplus.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = "Sampling";
-var VERSION = "AS3";
-var TITLE   = "test the callback functionality when sampler memory is too high";
+// var SECTION = "Sampling";
+// var VERSION = "AS3";
+// var TITLE   = "test the callback functionality when sampler memory is too high";
 
 var isdebugger=System.isDebugger();
 
-startTest();
-writeHeaderToLog("Sampling api: callback");
 
 var objs:Array=new Array();
 class simpleobject {
@@ -75,7 +75,7 @@ pauseSampling();
 print("memory summary: allocs="+allocs+" deallocs="+deallocs);
 
 if (isdebugger)
-AddTestCase(
+Assert.expectEq(
   "Callback: callback called at least once callback#="+callback1_num,
   true,
   callback1_num>0
@@ -87,7 +87,7 @@ simpleLoop(80000);
 pauseSampling();
 
 if (isdebugger)
-AddTestCase(
+Assert.expectEq(
   "Callback: callback with return type called at least once callback#="+callback2_num,
   true,
   callback2_num>0
@@ -103,11 +103,10 @@ try {
     errstr2=e.toString();
 }
 pauseSampling();
-AddTestCase(
+Assert.expectEq(
   "Callback: function is not defined",
   "ReferenceError: Error #1065",
-  parseError(errstr2,"ReferenceError: Error #1065".length)
+  Utils.parseError(errstr2,"ReferenceError: Error #1065".length)
 );
 
-test();
 }

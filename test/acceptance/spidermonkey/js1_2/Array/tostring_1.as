@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'tostring_1.js';
 
@@ -16,50 +17,48 @@ gTestfile = 'tostring_1.js';
    Date:               12 november 1997
 */
 
-var SECTION = "JS1_2";
-var VERSION = "JS1_2";
-startTest();  var testscases=[]; var index=0;
-var TITLE   = "Array.toString()";
+// var SECTION = "JS1_2";
+// var VERSION = "JS1_2";
+// var TITLE   = "Array.toString()";
 
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var a = new Array();
 
-testcases[index++] = new TestCase ( SECTION,
+Assert.expectEq ( 
            "var a = new Array(); a.toString()",
             "",
            a.toString() );
 
 a[0] = void 0;
 
-testcases[index++] = new TestCase ( SECTION,
+Assert.expectEq ( 
            "a[0] = void 0; a.toString()",
            "",
            a.toString() );
 
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "a.length",
           1,
           a.length );
 
 a[1] = void 0;
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "a[1] = void 0; a.toString()",
           ",",
           a.toString() );
 
 a[1] = "hi";
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "a[1] = \"hi\"; a.toString()",
           ",hi",
           a.toString() );
 
 a[2] = void 0;
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "a[2] = void 0; a.toString()",
           ",hi,",
           a.toString() );
@@ -71,15 +70,14 @@ for ( blen=0; blen<999; blen++) {
 }
 
 
-testcases[index++] = new TestCase ( SECTION,
+Assert.expectEq ( 
            "var b = new Array(1000); b.toString()",
            bstring,
            b.toString() );
 
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "b.length",
           1000,
           b.length );
 
-test();

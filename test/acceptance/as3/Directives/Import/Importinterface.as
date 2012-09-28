@@ -10,12 +10,11 @@ package Importinterface  {
 
 
 
-var SECTION = "Directives";                     // provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";               // Version of JavaScript or ECMA
-var TITLE   = "Import only a public interface ";        // Provide ECMA section title or a description
+// var SECTION = "Directives";                     // provide a document reference (ie, ECMA section)
+// var VERSION = "ActionScript 3.0";               // Version of JavaScript or ECMA
+// var TITLE   = "Import only a public interface ";        // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                                    // leave this alone
 
 
 
@@ -34,12 +33,12 @@ class PublicClass implements Publicinterface{
 
 import mypackage.*;
 
+import com.adobe.test.Assert;
 var obj = new PublicClass();
 
-AddTestCase( "Import only a public interface", arr, (obj.setPubArray(arr), obj.pubArray) );
+Assert.expectEq( "Import only a public interface", arr, (obj.setPubArray(arr), obj.pubArray) );
 
 /*===========================================================================*/
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

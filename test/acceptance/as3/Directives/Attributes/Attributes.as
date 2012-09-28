@@ -3,107 +3,106 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package Attrs {
 
-var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
-var VERSION = "Clean AS2";  // Version of JavaScript or ECMA
-var TITLE   = "Extend Default Class";       // Provide ECMA section title or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
+// var VERSION = "Clean AS2";  // Version of JavaScript or ECMA
+// var TITLE   = "Extend Default Class";       // Provide ECMA section title or a description
 //var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 /*===========================================================================*/
 
 var ATTRS = new Attrs();
+import com.adobe.test.Assert;
 // Variables
-AddTestCase("var, empty         :", "var, empty         ", ATTRS.emptyVar);
-AddTestCase("var, public        :", "var, public        ", ATTRS.pubVar);
+Assert.expectEq("var, empty         :", "var, empty         ", ATTRS.emptyVar);
+Assert.expectEq("var, public        :", "var, public        ", ATTRS.pubVar);
 var privateVarErr="no error"; try { ATTRS.privVar } catch (e) { privateVarErr=e.toString(); }
-AddTestCase("var, private       :", "ReferenceError: Error #1069", privateVarErr.substr(0,27));
-//AddTestCase("var, private       :", "var, private       ", ATTRS.privVar);
-AddTestCase("var, static        :", "var, static        ", ATTRS.getStatVar());
-AddTestCase("var, public static :", "var, public static ", ATTRS.getPubStatVar());
-AddTestCase("var, private static:", "var, private static", ATTRS.getPrivStatVar());
-AddTestCase("var, static public :", "var, static public ", ATTRS.getStatPubVar());
-AddTestCase("var, static private:", "var, static private", ATTRS.getStatPrivVar());
+Assert.expectEq("var, private       :", "ReferenceError: Error #1069", privateVarErr.substr(0,27));
+//Assert.expectEq("var, private       :", "var, private       ", ATTRS.privVar);
+Assert.expectEq("var, static        :", "var, static        ", ATTRS.getStatVar());
+Assert.expectEq("var, public static :", "var, public static ", ATTRS.getPubStatVar());
+Assert.expectEq("var, private static:", "var, private static", ATTRS.getPrivStatVar());
+Assert.expectEq("var, static public :", "var, static public ", ATTRS.getStatPubVar());
+Assert.expectEq("var, static private:", "var, static private", ATTRS.getStatPrivVar());
 
 // Functions
-AddTestCase("func, empty         :", "func, empty         ", ATTRS.emptyFunc());
-AddTestCase("func, public        :", "func, public        ", ATTRS.pubFunc());
+Assert.expectEq("func, empty         :", "func, empty         ", ATTRS.emptyFunc());
+Assert.expectEq("func, public        :", "func, public        ", ATTRS.pubFunc());
 var privFunc="no error"; try { ATTRS.privFunc(); } catch (e) { privFunc=e.toString(); }
-AddTestCase("func, private       :", "ReferenceError: Error #1069", privateVarErr.substr(0,27));
-//AddTestCase("func, private       :", "func, private       ", ATTRS.privFunc());
-AddTestCase("func, static        :", "func, static        ", ATTRS.getStatFunc());
-AddTestCase("func, public static :", "func, public static ", ATTRS.getPubStatFunc());
-AddTestCase("func, private static:", "func, private static", ATTRS.getPrivStatFunc());
-AddTestCase("func, static public :", "func, static public ", ATTRS.getStatPubFunc());
-AddTestCase("func, static private:", "func, static private", ATTRS.getStatPrivFunc());
+Assert.expectEq("func, private       :", "ReferenceError: Error #1069", privateVarErr.substr(0,27));
+//Assert.expectEq("func, private       :", "func, private       ", ATTRS.privFunc());
+Assert.expectEq("func, static        :", "func, static        ", ATTRS.getStatFunc());
+Assert.expectEq("func, public static :", "func, public static ", ATTRS.getPubStatFunc());
+Assert.expectEq("func, private static:", "func, private static", ATTRS.getPrivStatFunc());
+Assert.expectEq("func, static public :", "func, static public ", ATTRS.getStatPubFunc());
+Assert.expectEq("func, static private:", "func, static private", ATTRS.getStatPrivFunc());
 
 // Classes
 //var c = new ClassEmpty();
-//AddTestCase("class, empty         :", "class, empty         ", c.fn());
+//Assert.expectEq("class, empty         :", "class, empty         ", c.fn());
 
 //var cpub = new ClassPub();
-//AddTestCase("class, public        :", "class, public        ", cpub.fn());
+//Assert.expectEq("class, public        :", "class, public        ", cpub.fn());
 
 /* The class with 'private' access specifiers are commented */
 /*
 var cpriv = new ClassPriv();
-AddTestCase("class, private       :", "class, private       ", cpriv.fn());
+Assert.expectEq("class, private       :", "class, private       ", cpriv.fn());
 */
 
 //var cstat = new ClassStat();
-//AddTestCase("class, static        :", "class, static        ", cstat.fn());
+//Assert.expectEq("class, static        :", "class, static        ", cstat.fn());
 
 //var cpubstat = new ClassPubStat();
-//AddTestCase("class, public static :", "class, public static ", cpubsat.fn());
+//Assert.expectEq("class, public static :", "class, public static ", cpubsat.fn());
 
 /*
 var cprivstat = new ClassPrivStat();
-AddTestCase("class, private static:", "class, private static", cpriv.fn());
+Assert.expectEq("class, private static:", "class, private static", cpriv.fn());
 */
 
 //var cstatpub = new ClassStatPub();
-//AddTestCase("class, static public :", "class, static public ", cstatpub.fn());
+//Assert.expectEq("class, static public :", "class, static public ", cstatpub.fn());
 
 /*
 var cstatpriv = new ClassStatPriv();
-AddTestCase("class, static private:", "class, static private", cstatpriv.fn());
+Assert.expectEq("class, static private:", "class, static private", cstatpriv.fn());
 */
 
 // Interfaces
 //var i = new IfEmpty_();
-//AddTestCase("interface, empty         :", "interface, empty         ", i.fn());
+//Assert.expectEq("interface, empty         :", "interface, empty         ", i.fn());
 
 //var ipub = new IfPub_();
-//AddTestCase("interface, public        :", "interface, public        ", ipub.fn());
+//Assert.expectEq("interface, public        :", "interface, public        ", ipub.fn());
 
 /*
 var ipriv = new IfPriv_();
-AddTestCase("interface, private       :", "interface, private       ", ipriv.fn());
+Assert.expectEq("interface, private       :", "interface, private       ", ipriv.fn());
 */
 
 //var istat = new IfStat_();
-//AddTestCase("interface, static        :", "interface, static        ", istat.fn());
+//Assert.expectEq("interface, static        :", "interface, static        ", istat.fn());
 
 //var ipubstat = new IfPubStat_();
-//AddTestCase("interface, public static :", "interface, public static ", ipubstat.fn());
+//Assert.expectEq("interface, public static :", "interface, public static ", ipubstat.fn());
 
 /*
 var iprivstat = new IfPrivStat_();
-AddTestCase("interface, private static:", "interface, private static", iprivstat.fn());
+Assert.expectEq("interface, private static:", "interface, private static", iprivstat.fn());
 */
 
 //import Directives.Attributes.IfStatPub_;
 //var istatpub = new IfStatPub_();
-//AddTestCase("interface, static public :", "interface, static public ", istatpub.fn());
+//Assert.expectEq("interface, static public :", "interface, static public ", istatpub.fn());
 
 /*
 var istatpriv = new IfStatPriv_();
-AddTestCase("interface, static private:", "interface, static private", istatpriv.fn());
+Assert.expectEq("interface, static private:", "interface, static private", istatpriv.fn());
 */
 
 /*===========================================================================*/
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.
 }

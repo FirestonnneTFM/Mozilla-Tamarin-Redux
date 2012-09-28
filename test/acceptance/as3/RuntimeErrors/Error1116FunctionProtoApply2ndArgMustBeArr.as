@@ -1,10 +1,11 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 var CODE = 1116; // second argument to Function.prototype.apply must be an array.
 
 //-----------------------------------------------------------
-startTest();
 //-----------------------------------------------------------
 
 try {
@@ -13,9 +14,8 @@ try {
 } catch (err) {
     result = err.toString();
 } finally {
-    AddTestCase("Runtime Error", TYPEERROR + CODE, typeError(result));
+    Assert.expectEq("Runtime Error", Utils.TYPEERROR + CODE, Utils.typeError(result));
 }
 
 //-----------------------------------------------------------
-test();
 //-----------------------------------------------------------

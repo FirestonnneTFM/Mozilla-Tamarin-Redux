@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  * Date: 03 December 2000
@@ -44,8 +44,8 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
 
   for (j in index) {testProperty(index[j]);}
 
@@ -63,12 +63,12 @@ function testProperty(i)
   // try to read the property back via the index (as number) -
   expect = value;
   actual = obj[i];
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
   // try to read the property back via the index as string -
   expect = value;
   actual = obj[String(i)];
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 }
 
 
@@ -77,4 +77,3 @@ function getStatus(i)
   return (statprefix  +  i  +  statsuffix);
 }
 
-test();

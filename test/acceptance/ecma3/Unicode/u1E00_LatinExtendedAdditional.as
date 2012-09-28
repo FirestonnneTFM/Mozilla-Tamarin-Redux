@@ -4,19 +4,16 @@
 include "unicodeUtil.as";
 include "unicodeNegativeUtil.as";
 
-var SECTION = "Latin Extended Additional";
-var VERSION = "ECMA_3";
-startTest();
-var TITLE = "Test String functions (search, match, split, replace) on all unicode characters";
+// var SECTION = "Latin Extended Additional";
+// var VERSION = "ECMA_3";
+// var TITLE = "Test String functions (search, match, split, replace) on all unicode characters";
 
-writeHeaderToLog(SECTION + " "+ TITLE);
 
 var array = new Array();
 var item = 0;
 getTestCases();
 
 var testcases = array;
-test();
 
 function getTestCases():void {
   // Latin Extended Additional

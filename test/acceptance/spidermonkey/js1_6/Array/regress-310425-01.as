@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 var gTestfile = 'regress-310425-01.js';
 //-----------------------------------------------------------------------------
 var BUGNUMBER = 310425;
@@ -11,20 +11,22 @@ var summary = 'Array.indexOf/lastIndexOf edge cases';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
  
 expect = -1;
 actual = [].lastIndexOf(undefined, -1);
-reportCompare(expect, actual, summary);
+//reportCompare(expect, actual, summary);
+Assert.expectEq(summary, expect, actual);
 
 expect = -1;
 actual = [].indexOf(undefined, -1);
-reportCompare(expect, actual, summary);
+//reportCompare(expect, actual, summary);
+Assert.expectEq(summary, expect, actual);
 
 var x = [];
 x[1 << 30] = 1;
 expect = (1 << 30);
 actual = x.lastIndexOf(1);
-reportCompare(expect, actual, summary);
-test();
+//reportCompare(expect, actual, summary);
+Assert.expectEq(summary, expect, actual);

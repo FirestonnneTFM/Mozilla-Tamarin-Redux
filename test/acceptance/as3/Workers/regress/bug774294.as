@@ -1,18 +1,16 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-  * License, v. 2.0. If a copy of the MPL was not distributed with this
-  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
  
 package {
     import flash.system.Worker
     import flash.system.WorkerDomain
     import avmplus.System
+    import com.adobe.test.Assert
 
-        var SECTION = "Workers";
-        var VERSION = "as3";
-        var TITLE   = "regression test 774294";
-        startTest();
-        writeHeaderToLog(SECTION+" "+TITLE);
-        test();
+//         var SECTION = "Workers";
+//         var VERSION = "as3";
+//         var TITLE   = "regression test 774294";
 
     if (Worker.current.isPrimordial) {
         var w:Worker=WorkerDomain.current.createWorkerFromPrimordial();
@@ -25,8 +23,7 @@ package {
             System.sleep(10);
             if (getTimer()-start>2000) break;
         }
-        AddTestCase("assert state is terminated","terminated",w.state);
-        test();
+        Assert.expectEq("assert state is terminated","terminated",w.state);
     } else {
         trace("started background worker");
     }

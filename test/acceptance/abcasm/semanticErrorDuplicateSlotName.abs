@@ -2,21 +2,23 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.script_info {
-	init: .function_id(main)
 
-	traits : {
-		.trait { kind: Trait_Slot name: foo slot_id:1 type_name:* }
-		.trait { kind: Trait_Slot name: foo slot_id:2 type_name:int }
-	}
-}
-
-.method_info {
+method_info {
 	name: main
 }
 
-.method_body_info {
-	method: .function_id(main)
+method_body_info {
+	method: main
 
 	code: { returnvoid }
+}
+
+
+script_info {
+	init: main
+
+	traits : {
+		trait { kind: Trait_Slot name: foo slot_id:1 type_name:* }
+		trait { kind: Trait_Slot name: foo slot_id:2 type_name:int }
+	}
 }

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -48,7 +48,7 @@ function f()
 
 i=0;
 f();
-status = inSection(1);
+//status = inSection(1);
 actual = (i>0);
 expect = true;
 addThis();
@@ -63,7 +63,7 @@ function g()
 
 i=0;
 g();
-status = inSection(2);
+//status = inSection(2);
 actual = (i>0);
 expect = true;
 addThis();
@@ -73,7 +73,7 @@ addThis();
 // Now try in eval scope -
 var sEval = 'function h(){++i; try{h();} catch(e){}}; i=0; h();';
 eval(sEval);
-status = inSection(3);
+//status = inSection(3);
 actual = (i>0);
 expect = true;
 addThis();
@@ -83,7 +83,7 @@ addThis();
 // Try in eval scope and mix functions up -
 sEval = 'function a(){++i; try{h();} catch(e){}}; i=0; a();';
 eval(sEval);
-status = inSection(4);
+//status = inSection(4);
 actual = (i>0);
 expect = true;
 addThis();
@@ -115,15 +115,14 @@ function formatThis(bool)
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus(msg);
+  //printBugNumber(BUGNUMBER);
+//printStatus(msg);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

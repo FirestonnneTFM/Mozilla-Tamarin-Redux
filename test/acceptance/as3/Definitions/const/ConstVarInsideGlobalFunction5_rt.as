@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions\const";                  // provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
-var TITLE   = "Initialize a local const inside a function after its initializer";       // Provide ECMA section title or a description
+// var SECTION = "Definitions\const";                  // provide a document reference (ie, ECMA section)
+// var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
+// var TITLE   = "Initialize a local const inside a function after its initializer";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();
 
 function myConstArgs( arg1 ) {
 
@@ -29,7 +29,6 @@ catch(err)
 }
 finally
 {
-    AddTestCase("Initialize a local const inside a function after its initializer", "Illegal write to local const n2", thisError);
+    Assert.expectEq("Initialize a local const inside a function after its initializer", "Illegal write to local const n2", thisError);
 }
 
-test();

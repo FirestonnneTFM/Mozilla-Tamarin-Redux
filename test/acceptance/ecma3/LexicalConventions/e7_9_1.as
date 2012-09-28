@@ -1,14 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION="7.8.2";
-    var VERSION="ECMA_1"
-    startTest();
-    writeHeaderToLog(SECTION+" "+"Examples of Semicolon Insertion");
+//     var SECTION="7.8.2";
+//     var VERSION="ECMA_1"
 
     testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -18,7 +16,7 @@ function getTestCases() {
         //will throw compiler error
 
     
-    array[item++] = new TestCase( "7.8.2",  "Semicolon is inserted automatically",      "passed","passed" );
+    array[item++] = Assert.expectEq( "7.8.2 Semicolon is inserted automatically",      "passed","passed" );
 
 var a:Number = 10;
 var b:Number = 20;
@@ -33,11 +31,11 @@ function MyAnotherNumber():Number{
 return a+b
 }
 
-   array[item++] = new TestCase( "7.8.2",  "Semicolon is inserted automatically",      true,MyNumber()!=MyAnotherNumber() );
+   array[item++] = Assert.expectEq( "7.8.2 Semicolon is inserted automatically",      true,MyNumber()!=MyAnotherNumber() );
 
 a=b
 ++c
-   array[item++] = new TestCase( "7.8.2",  "Semicolon is inserted automatically",20,a );
+   array[item++] = Assert.expectEq( "7.8.2 Semicolon is inserted automatically",20,a );
 
 
        

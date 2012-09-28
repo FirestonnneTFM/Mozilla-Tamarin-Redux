@@ -1,17 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 
-    var SECTION = "15.7.3.3-1";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "Number.MIN_VALUE";
+//     var SECTION = "15.7.3.3-1";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "Number.MIN_VALUE";
 
-    writeHeaderToLog( SECTION + " "+ TITLE );
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -19,6 +17,6 @@ function getTestCases() {
 
     var MIN_VAL = 5e-324;
 
-    array[item++] = new TestCase(  SECTION, "Number.MIN_VALUE",     MIN_VAL,    Number.MIN_VALUE );
+    array[item++] = Assert.expectEq(   "Number.MIN_VALUE",     MIN_VAL,    Number.MIN_VALUE );
     return ( array );
 }

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-246964.js';
 //-----------------------------------------------------------------------------
@@ -13,13 +13,13 @@ var summary = 'undetectable document.all';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 if (typeof document == 'undefined')
 {
   expect = actual = 'Test requires browser: skipped';
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 }
 else
 {
@@ -30,7 +30,7 @@ else
   {
     actual = true;
   }
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
   status = summary + ' ' + inSection(2) + 'if (isIE) ';
   expect = false;
@@ -40,7 +40,7 @@ else
   {
     actual = true;
   }
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
   status = summary + ' ' + inSection(3) + ' if (document.all != undefined) ';
   expect = false;
@@ -49,7 +49,7 @@ else
   {
     actual = true;
   }
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
 
   status = summary + ' ' + inSection(4) + ' if (document.all !== undefined) ';
@@ -59,7 +59,7 @@ else
   {
     actual = true;
   }
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
   status = summary + ' ' + inSection(5) + ' if (document.all != null) ' ;
   expect = false;
@@ -68,7 +68,7 @@ else
   {
     actual = true;
   }
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
   status = summary + ' ' + inSection(6) + ' if (document.all !== null) ' ;
   expect = true;
@@ -77,7 +77,7 @@ else
   {
     actual = true;
   }
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
   status = summary + ' ' + inSection(7) + ' if (document.all == null) ';
   expect = true;
@@ -86,7 +86,7 @@ else
   {
     actual = true;
   }
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
   status = summary + ' ' + inSection(8) + ' if (document.all === null) ';
   expect = false;
@@ -95,7 +95,7 @@ else
   {
     actual = true;
   }
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
   status = summary + ' ' + inSection(9) + ' if (document.all == undefined) ';
   expect = true;
@@ -104,7 +104,7 @@ else
   {
     actual = true;
   }
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
   status = summary + ' ' + inSection(10) + ' if (document.all === undefined) ';
   expect = true;
@@ -113,7 +113,7 @@ else
   {
     actual = true;
   }
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
   status = summary + ' ' + inSection(11) +
     ' if (typeof document.all == "undefined") ';
@@ -123,7 +123,7 @@ else
   {
     actual = true;
   }
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
   status = summary + ' ' + inSection(12) +
     ' if (typeof document.all != "undefined") ';
@@ -133,7 +133,7 @@ else
   {
     actual = true;
   }
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
   status = summary + ' ' + inSection(13) + ' if ("all" in document) ';
   expect = (document.compatMode == 'CSS1Compat') ? false : true;
@@ -142,7 +142,7 @@ else
   {
     actual = true;
   }
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
   status = summary + ' ' + inSection(14) + ' if (f.ie) ';
   var f = new foo();
@@ -153,7 +153,7 @@ else
   {
     actual = true;
   }
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
 }
 
@@ -162,4 +162,3 @@ function foo()
   this.ie = document.all;
 }
 
-test();

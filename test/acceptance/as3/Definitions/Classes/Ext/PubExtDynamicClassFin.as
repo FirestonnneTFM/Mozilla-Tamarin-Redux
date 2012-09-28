@@ -4,16 +4,16 @@
 
 
 import DynamicClass.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";  // Version of JavaScript or ECMA
-var TITLE   = "public class extend <empty> class";       // Provide ECMA section title or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
+// var VERSION = "AS 3.0";  // Version of JavaScript or ECMA
+// var TITLE   = "public class extend <empty> class";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 /**
- * Calls to AddTestCase here. AddTestCase is a function that is defined
+ * Calls to Assert.expectEq here. Assert.expectEq is a function that is defined
  * in shell.js and takes three arguments:
  * - a string representation of what is being tested
  * - the expected result
@@ -23,7 +23,7 @@ startTest();                // leave this alone
  *
  * var helloWorld = "Hello World";
  *
- * AddTestCase(
+ * Assert.expectEq(
  * "var helloWorld = 'Hello World'",   // description of the test
  *  "Hello World",                     // expected result
  *  helloWorld );                      // actual result
@@ -39,8 +39,8 @@ startTest();                // leave this alone
 var EXTDCLASS = new PubExtDynamicClassFin();
 var arr = new Array(1, 2, 3);
 
-AddTestCase( "*** access final method from outside of class ***", 1, 1 );
-//AddTestCase( "EXTDCLASS.finSetArray(arr), EXTDCLASS.finSetArray()", arr, (EXTDCLASS.finSetArray(arr), EXTDCLASS.finGetArray()) );
+Assert.expectEq( "*** access final method from outside of class ***", 1, 1 );
+//Assert.expectEq( "EXTDCLASS.finSetArray(arr), EXTDCLASS.finSetArray()", arr, (EXTDCLASS.finSetArray(arr), EXTDCLASS.finGetArray()) );
 
 
 // ********************************************
@@ -50,8 +50,8 @@ AddTestCase( "*** access final method from outside of class ***", 1, 1 );
 // ********************************************
 
 EXTDCLASS = new PubExtDynamicClassFin();
-AddTestCase( "*** Access final method from default method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testSubGetSetArray(arr)", arr, EXTDCLASS.testSubGetSetArray(arr) );
+Assert.expectEq( "*** Access final method from default method of sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.testSubGetSetArray(arr)", arr, EXTDCLASS.testSubGetSetArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -63,8 +63,8 @@ AddTestCase( "EXTDCLASS.testSubGetSetArray(arr)", arr, EXTDCLASS.testSubGetSetAr
 // ********************************************
 
 EXTDCLASS = new PubExtDynamicClassFin();
-AddTestCase( "*** Access final method from public method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()) );
+Assert.expectEq( "*** Access final method from public method of sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -75,8 +75,8 @@ AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (
 // ********************************************
 
 EXTDCLASS = new PubExtDynamicClassFin();
-AddTestCase( "*** Access final method from private method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(arr) );
+Assert.expectEq( "*** Access final method from private method of sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -87,8 +87,8 @@ AddTestCase( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(
 // ********************************************
 
 EXTDCLASS = new PubExtDynamicClassFin();
-AddTestCase( "*** Access final method from final method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testFinSubArray(arr)", arr, EXTDCLASS.testFinSubArray(arr) );
+Assert.expectEq( "*** Access final method from final method of sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.testFinSubArray(arr)", arr, EXTDCLASS.testFinSubArray(arr) );
 
 // ********************************************
 // access final property from outside
@@ -96,8 +96,8 @@ AddTestCase( "EXTDCLASS.testFinSubArray(arr)", arr, EXTDCLASS.testFinSubArray(ar
 // ********************************************
 
 EXTDCLASS = new PubExtDynamicClassFin();
-AddTestCase( "*** Access final from outside the class ***", 1, 1 );
-//AddTestCase( "EXTDCLASS.finArray = arr", arr, (EXTDCLASS.finArray = arr, EXTDCLASS.finArray) );
+Assert.expectEq( "*** Access final from outside the class ***", 1, 1 );
+//Assert.expectEq( "EXTDCLASS.finArray = arr", arr, (EXTDCLASS.finArray = arr, EXTDCLASS.finArray) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -107,8 +107,8 @@ AddTestCase( "*** Access final from outside the class ***", 1, 1 );
 // ********************************************
 
 EXTDCLASS = new PubExtDynamicClassFin();
-AddTestCase( "*** Access final property from method in sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testSubGetSetDPArray(arr)", arr, EXTDCLASS.testSubGetSetDPArray(arr) );
+Assert.expectEq( "*** Access final property from method in sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.testSubGetSetDPArray(arr)", arr, EXTDCLASS.testSubGetSetDPArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -118,8 +118,8 @@ AddTestCase( "EXTDCLASS.testSubGetSetDPArray(arr)", arr, EXTDCLASS.testSubGetSet
 // ********************************************
 
 EXTDCLASS = new PubExtDynamicClassFin();
-AddTestCase( "*** Access final property from public method in sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", arr, (EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()) );
+Assert.expectEq( "*** Access final property from public method in sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", arr, (EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -129,8 +129,8 @@ AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", ar
 // ********************************************
 
 EXTDCLASS = new PubExtDynamicClassFin();
-AddTestCase( "*** Access final property from private method in sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testPrivSubDPArray(arr)", arr, EXTDCLASS.testPrivSubDPArray(arr) );
+Assert.expectEq( "*** Access final property from private method in sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.testPrivSubDPArray(arr)", arr, EXTDCLASS.testPrivSubDPArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -141,9 +141,8 @@ AddTestCase( "EXTDCLASS.testPrivSubDPArray(arr)", arr, EXTDCLASS.testPrivSubDPAr
 // ********************************************
 
 EXTDCLASS = new PubExtDynamicClassFin();
-AddTestCase( "*** Access final property from final method in sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.finSubSetDPArray(arr), EXTDCLASS.finSubGetDPArray()", arr, EXTDCLASS.testFinSubDPArray(arr) );
+Assert.expectEq( "*** Access final property from final method in sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.finSubSetDPArray(arr), EXTDCLASS.finSubGetDPArray()", arr, EXTDCLASS.testFinSubDPArray(arr) );
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

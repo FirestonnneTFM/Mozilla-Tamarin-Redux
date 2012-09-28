@@ -1,14 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "e11_10_1";
-    var VERSION = "ECMA_1";
-    startTest();
+import com.adobe.test.Assert;
+//     var SECTION = "e11_10_1";
+//     var VERSION = "ECMA_1";
 
     var testcases = getTestCases();
 
-    writeHeaderToLog( SECTION + " Binary Bitwise Operators:  &");
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -27,7 +25,7 @@ function getTestCases() {
         for ( addpow = 0; addpow < 31; addpow++ ) {
             addexp += Math.pow(2, addpow);
 
-            array[item++] = new TestCase( SECTION,
+            array[item++] = Assert.expectEq( 
                                     shiftexp + " & " + addexp,
                                     And( shiftexp, addexp ),
                                     shiftexp & addexp );

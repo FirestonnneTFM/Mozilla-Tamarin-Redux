@@ -3,26 +3,25 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import DynamicClassPackage.*;
+import com.adobe.test.Assert;
 
 
-var SECTION = "Definitions";                                // provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";                                 // Version of JavaScript or ECMA
-var TITLE   = "Override public function in internal class extending dynamic class";     // Provide ECMA section title or a description
+// var SECTION = "Definitions";                                // provide a document reference (ie, ECMA section)
+// var VERSION = "AS 3.0";                                 // Version of JavaScript or ECMA
+// var TITLE   = "Override public function in internal class extending dynamic class";     // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                                            // leave this alone
 
 
 var CLASSDEFN = new IntExtDynamicOverRidePublic();
 var d:Date = new Date(0);
 
-AddTestCase( "CLASSDEFN.orSet", false, CLASSDEFN.orSet );
-AddTestCase( "CLASSDEFN.orGet", false, CLASSDEFN.orGet );
-AddTestCase( "CLASSDEFN.setGetDate(d).getFullYear()", d.getFullYear(), CLASSDEFN.setGetDate(d).getFullYear());
-AddTestCase( "CLASSDEFN.orSet", true, CLASSDEFN.orSet );
-AddTestCase( "CLASSDEFN.orGet", true, CLASSDEFN.orGet );
+Assert.expectEq( "CLASSDEFN.orSet", false, CLASSDEFN.orSet );
+Assert.expectEq( "CLASSDEFN.orGet", false, CLASSDEFN.orGet );
+Assert.expectEq( "CLASSDEFN.setGetDate(d).getFullYear()", d.getFullYear(), CLASSDEFN.setGetDate(d).getFullYear());
+Assert.expectEq( "CLASSDEFN.orSet", true, CLASSDEFN.orSet );
+Assert.expectEq( "CLASSDEFN.orGet", true, CLASSDEFN.orGet );
 
 
-test();             // Leave this function alone.
             // This function is for executing the test case and then
             // displaying the result on to the console or the LOG file.

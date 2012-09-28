@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 14 Mar 2001
  *
@@ -13,15 +14,42 @@
  * The getJSClass() function we use is in a utility file, e.g. "shell.js"
  */
 //-------------------------------------------------------------------------------------------------
-var SECTION = "class_005";
-var VERSION = "";
-var TITLE   = "Testing the internal [[Class]] property of user-defined types";
-var bug = "(none)";
+// var SECTION = "class_005";
+// var VERSION = "";
+// var TITLE   = "Testing the internal [[Class]] property of user-defined types";
+// var bug = "(none)";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
+
+   // TODO: REVIEW AS4 CONVERSION ISSUE 
+ // Adding this function getJSClass directly to file rather than in Utils
+
+ function getJSClass(obj)
+{
+  if (isObject(obj))
+    return findClass(findType(obj));
+  return cnNoObject;
+}
+function isObject(obj)
+{
+  return obj instanceof Object;
+}
+
+function findType(obj)
+{
+  var cnObjectToString = Object.prototype.toString;
+  return cnObjectToString.apply(obj);
+}
+// given '[object Number]',  return 'Number'
+function findClass(sType)
+{
+  var re =  /^\[.*\s+(\w+)\s*\]$/;
+  var a = sType.match(re);
+
+  if (a && a[1])
+    return a[1];
+  return cnNoClass;
+}
 
 function getTestCases() {
     var array = new Array();
@@ -40,12 +68,12 @@ function getTestCases() {
     status = 'new Cow()';
     actual = getJSClass(new Cow());
     expect = 'Object';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = 'new Calf()';
     actual = getJSClass(new Calf());
     expect = 'Object';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
     function Cow(name)

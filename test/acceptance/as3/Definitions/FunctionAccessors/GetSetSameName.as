@@ -4,19 +4,19 @@
  
  
 import GetSetSameName.*;
+import com.adobe.test.Assert;
 
   
- var SECTION = "FunctionAccessors";
- var VERSION = "AS3";
- var TITLE   = "Function Accessors";
+//  var SECTION = "FunctionAccessors";
+//  var VERSION = "AS3";
+//  var TITLE   = "Function Accessors";
  var BUGNUMBER = "133108, 133828";
  
 
-startTest();
 
 var g = new GetSetSameNameArg();
-AddTestCase("Calling getter of same name as argument", 4, g.e);
-AddTestCase("Calling setter of same name as argument", 5, (g.e = 5, g.e));
+Assert.expectEq("Calling getter of same name as argument", 4, g.e);
+Assert.expectEq("Calling setter of same name as argument", 5, (g.e = 5, g.e));
 
 
 var h = new GetSetSame();
@@ -29,7 +29,7 @@ try {
     
 }
 // This will have to be changed when bug 133824 is fixed
-AddTestCase("Calling getter of same name as package", "1,2,3", result);
+Assert.expectEq("Calling getter of same name as package", "1,2,3", result);
 
 
 
@@ -43,7 +43,7 @@ try {
     
 }
 // This will have to be changed when bug 133824 is fixed
-AddTestCase("Calling setter of same name as package", "7,8,9", result);
+Assert.expectEq("Calling setter of same name as package", "7,8,9", result);
 
 
 
@@ -54,7 +54,7 @@ try {
     ff = "exception";
 }
 
-AddTestCase("Calling static getter in matching package/class", "1,2,3", GetSetSameName.GetSetSameName.x.toString());
+Assert.expectEq("Calling static getter in matching package/class", "1,2,3", GetSetSameName.GetSetSameName.x.toString());
 
 
 try {
@@ -64,6 +64,5 @@ try {
     ff = "exception";
 }
 
-AddTestCase("Calling static setter in matching package/class", "4,5,6", ff);
+Assert.expectEq("Calling static setter in matching package/class", "4,5,6", ff);
 
-test();

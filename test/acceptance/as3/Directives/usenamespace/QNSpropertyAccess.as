@@ -3,12 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package{
 
-var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "QNS Property Access";       // Provide ECMA section title or a description
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+// var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "QNS Property Access";       // Provide ECMA section title or a description
 //var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 public namespace T1;
@@ -38,7 +39,7 @@ try {
 } catch (e) {
     testResult = e;
 } finally {
-    AddTestCase( ". Lookup", "public ns", testResult);
+    Assert.expectEq( ". Lookup", "public ns", testResult);
 }
 
 try {
@@ -46,7 +47,7 @@ try {
 } catch (e) {
     testResult = e;
 } finally {
-    AddTestCase( "[] Lookup", "public ns", testResult);
+    Assert.expectEq( "[] Lookup", "public ns", testResult);
 }
 
 try {
@@ -54,11 +55,11 @@ try {
 } catch (e) {
     testResult = e;
 } finally {
-    AddTestCase( "explicit public ns Lookup", "public ns", testResult);
+    Assert.expectEq( "explicit public ns Lookup", "public ns", testResult);
 }
 
 // bug 151552
-//Added referenceError() so that the regress folder will not be different for release avmplus
+//Added Utils.referenceError() so that the regress folder will not be different for release avmplus
 //and release debugger avmplus should be modified after bug 151552 is fixed
 try {
     testResult = myTest.public::['x'];
@@ -66,7 +67,7 @@ try {
 
     testResult = e;
 } finally {
-    AddTestCase( ".explicit public ns [] Lookup", "public ns", referenceError(testResult));
+    Assert.expectEq( ".explicit public ns [] Lookup", "public ns", Utils.referenceError(testResult));
 }
 
 try {
@@ -74,7 +75,7 @@ try {
 } catch (e) {
     testResult = e;
 } finally {
-    AddTestCase( ". ns lookup", "T1 ns", testResult);
+    Assert.expectEq( ". ns lookup", "T1 ns", testResult);
 }
 
 try {
@@ -82,7 +83,7 @@ try {
 } catch (e) {
     testResult = e;
 } finally {
-    AddTestCase( "[] ns lookup", "T1 ns", testResult);
+    Assert.expectEq( "[] ns lookup", "T1 ns", testResult);
 }
 
 try {
@@ -90,7 +91,7 @@ try {
 } catch (e) {
     testResult = e;
 } finally {
-    AddTestCase( "subobject lookup using .", "hello y", testResult);
+    Assert.expectEq( "subobject lookup using .", "hello y", testResult);
 }
 
 try {
@@ -98,7 +99,7 @@ try {
 } catch (e) {
     testResult = e;
 } finally {
-    AddTestCase( "subobject lookup using []", "hello y", testResult);
+    Assert.expectEq( "subobject lookup using []", "hello y", testResult);
 }
 
 try {
@@ -106,7 +107,7 @@ try {
 } catch (e) {
     testResult = e;
 } finally {
-    AddTestCase( "subobject lookup using []. combo", "hello y", testResult);
+    Assert.expectEq( "subobject lookup using []. combo", "hello y", testResult);
 }
 
 try {
@@ -114,9 +115,8 @@ try {
 } catch (e) {
     testResult = e;
 } finally {
-    AddTestCase( "subobject lookup using obj[] combo", "hello y", testResult);
+    Assert.expectEq( "subobject lookup using obj[] combo", "hello y", testResult);
 }
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.
 }

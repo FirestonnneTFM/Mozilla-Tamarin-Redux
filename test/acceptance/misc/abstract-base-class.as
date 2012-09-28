@@ -1,14 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import avmplus.*;
 import avmshell.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-startTest();
 
-// standard AddErrorTest function doesn't handle no-error well.
-function MyAddErrorTest(desc:String, expectedErr:String, testFunc:Function)
+// standard Assert.expectError function doesn't handle no-error well.
+function ErrorTesting(desc:String, expectedErr:String, testFunc:Function)
 {
     actualErr = "no error";
     try {
@@ -16,8 +17,8 @@ function MyAddErrorTest(desc:String, expectedErr:String, testFunc:Function)
     } catch (e) {
         actualErr = e;
     }
-    grabError(actualErr, expectedErr);
-    AddTestCase(desc, expectedErr, String(actualErr).substr(0, expectedErr.length));
+    Utils.grabError(actualErr, expectedErr);
+    Assert.expectEq(desc, expectedErr, String(actualErr).substr(0, expectedErr.length));
 }
 
 
@@ -26,12 +27,12 @@ const FAILURE:String = "ArgumentError: Error #2012";
 
 function expectSuccess(msg:String, cls:Class)
 {
-    MyAddErrorTest(msg, SUCCESS, function() { new cls; });
+    ErrorTesting(msg, SUCCESS, function() { new cls; });
 }
 
 function expectFailure(msg:String, cls:Class)
 {
-    MyAddErrorTest(msg, FAILURE, function() { new cls; });
+    ErrorTesting(msg, FAILURE, function() { new cls; });
 }
 
 
@@ -81,10 +82,9 @@ expectSuccess("instantiate for child of construct=abstract-restricted", Subclass
 expectFailure("instantiate for external child of construct=abstract-restricted", MySubclassOfAbstractRestrictedBase);
 expectFailure("instantiate for external grandchild of construct=abstract-restricted", MySubclassOfAbstractRestrictedBase2);
 
-MyAddErrorTest("instantiate for construct=check", "ArgumentError: Error #1001", function() { new CheckBase; });
+ErrorTesting("instantiate for construct=check", "ArgumentError: Error #1001", function() { new CheckBase; });
 
 expectFailure("instantiate for construct=native", avmshell.NativeBase);
 expectFailure("instantiate for construct=native (pure AS3)", avmshell.NativeBaseAS3);
 
-test();
 

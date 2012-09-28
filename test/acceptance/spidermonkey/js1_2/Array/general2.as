@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'general2.js';
 
@@ -13,13 +14,10 @@ gTestfile = 'general2.js';
    Date:         Fri Feb 13 09:58:28 PST 1998
 */
 
-var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-var VERSION = 'no version';
-startTest();  var testscases=[]; var index=0;
-var TITLE = 'String:push,splice,concat,unshift,sort';
+// var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+// var VERSION = 'no version';
+// var TITLE = 'String:push,splice,concat,unshift,sort';
 
-writeHeaderToLog('Executing script: general2.js');
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 array1 = new Array();
 array2 = [];
@@ -51,10 +49,9 @@ for (i = 0; i < size; i++)
   array2.unshift(array2.pop());
 }
 
-testcases[index++] = new TestCase( SECTION, "Array.push,pop,shift,unshift,slice,splice", true,String(array1) == String(array2));
+Assert.expectEq(  "Array.push,pop,shift,unshift,slice,splice", true,String(array1) == String(array2));
 array1.sort();
 array2.sort();
-testcases[index++] = new TestCase( SECTION, "Array.sort", true,String(array1) == String(array2));
+Assert.expectEq(  "Array.sort", true,String(array1) == String(array2));
 
-test();
 

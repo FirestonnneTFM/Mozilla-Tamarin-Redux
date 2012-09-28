@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-232182.js';
 //-----------------------------------------------------------------------------
@@ -13,8 +13,8 @@ var summary = 'Display non-ascii characters in JS exceptions';
 var actual = '';
 var expect = 'no error';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 /*
  * This test accesses an undefined Unicode symbol. If the code has not been
@@ -34,11 +34,11 @@ catch (e)
 
 // Run the tests only if UTF-8 is enabled
 
-printStatus('UTF-8 is ' + (utf8Enabled?'':'not ') + 'enabled');
+//printStatus('UTF-8 is ' + (utf8Enabled?'':'not ') + 'enabled');
 
 if (!utf8Enabled)
 {
-  AddTestCase('utf8 is not enabled', 'Not run', 'Not run');
+  Assert.expectEq('utf8 is not enabled', 'Not run', 'Not run');
 }
 else
 {
@@ -52,7 +52,7 @@ else
   {
     actual = e.message;
   }
-  AddTestCase(status, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
   var inShell = (typeof stringsAreUTF8 == "function");
   if (!inShell)
@@ -78,7 +78,7 @@ else
     {
       actual = 'Error';
     }
-    AddTestCase(status, expect, actual);
+    Assert.expectEq(summary, expect, actual);
 
     status = summary + ': UTF-8 character too big to fit into Unicode surrogate pairs';
     expect = 'Error';
@@ -91,7 +91,7 @@ else
     {
       actual = 'Error';
     }
-    AddTestCase(status, expect, actual);
+    Assert.expectEq(summary, expect, actual);
 
     status = summary + ': bad Unicode surrogate character';
     expect = 'Error';
@@ -104,7 +104,7 @@ else
     {
       actual = 'Error';
     }
-    AddTestCase(status, expect, actual);
+    Assert.expectEq(summary, expect, actual);
   }
 
   if (inShell)
@@ -120,8 +120,7 @@ else
     {
       actual = 'Error';
     }
-    AddTestCase(status, expect, actual);
+    Assert.expectEq(summary, expect, actual);
   }
 }
 
-test();

@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package UserDefinedErrorsPackage2
 {
+    import com.adobe.test.Assert;
     class BoxDimensionException extends Error
     {
         public function BoxDimensionException(boxErrMsg:String)
@@ -78,8 +79,9 @@ package UserDefinedErrorsPackage2
                     thisError=e3.message;
                     //trace("An error occurred:"+e3.toString());
                 }finally{
-                    AddTestCase( "Testing try block and multiple catch blocks with custom error classes", "Box dimensions should be greater than 0",thisError );
+                    Assert.expectEq( "Testing try block and multiple catch blocks with custom error classes", "Box dimensions should be greater than 0",thisError );
                  }
          }
       }
 }
+

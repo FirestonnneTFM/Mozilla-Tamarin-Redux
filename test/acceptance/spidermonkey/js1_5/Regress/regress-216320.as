@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -17,8 +17,8 @@ var gTestfile = 'regress-216320.js';
 var BUGNUMBER = 216320;
 var summary = "Just seeing we don't crash on this code";
 
-printBugNumber(BUGNUMBER);
-printStatus(summary);
+//printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
 
 /* TESTCASE BEGINS HERE */
@@ -907,8 +907,8 @@ function testForCookie(){
     }
 
 
-function prn(form,l_status,l_ism,l_scf,l_locale){
-status = l_status;
+function prn(form,l_status,l_ism,l_scf,l_locale){  
+//status = l_status;
 ism = l_ism;
 scf = l_scf;
 pwin=window.open("printvw.jsp?nls="+l_locale + "ISNEWWIN=TRUE","pwin","resizable=yes,width=560,height=400,scrollbars=yes,toolbar,screenX=5,screenY=5");
@@ -1006,6 +1006,5 @@ function setValuesFromCookie()
 {
 }
 
-AddTestCase('', 'No Crash', 'No Crash');
+Assert.expectEq('', 'No Crash', 'No Crash');
 
-test();

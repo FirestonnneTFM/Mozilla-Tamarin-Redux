@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 01 June 2001
  *
@@ -9,16 +10,14 @@
  *
  */
 //-------------------------------------------------------------------------------------------------
-var bug = 83532;
+// var bug = 83532;
 var summary = "Testing that we don't crash on switch case -1";
 
-startTest();
 
 
 var testcases = getTestCases();
 
 //-------------------------------------------------------------------------------------------------
-test();
 //-------------------------------------------------------------------------------------------------
 
 function getTestCases()
@@ -28,16 +27,18 @@ function getTestCases()
     
     doTest();
     
-    array[item++] = new TestCase("", "Make sure we don't crash", true, true);
+    array[item++] = Assert.expectEq("Make sure we don't crash", true, true);
     
     return array;
 }
 
 function doTest()
 {
+ /* TO-DO: Commenting out the printBugNumber() and printStatus
   printBugNumber (bug);
+  
   printStatus (summary);
-
+*/
   // Just testing that we don't crash on these -
   function f () {switch(1) {case -1:}}
   function g(){switch(1){case (-1):}}

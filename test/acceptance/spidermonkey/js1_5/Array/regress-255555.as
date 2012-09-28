@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-255555.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Array.prototype.sort(comparefn) never passes undefined to compare
 var actual = 'not undefined';
 var expect = 'not undefined';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
  
 function comparefn(a,b)
 {
@@ -32,6 +32,5 @@ function comparefn(a,b)
 
 var arry = [ 1, 2, undefined ].sort(comparefn)
 
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
-test();

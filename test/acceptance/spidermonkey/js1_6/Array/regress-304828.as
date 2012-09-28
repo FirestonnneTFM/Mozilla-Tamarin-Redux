@@ -2,16 +2,16 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 var gTestfile = 'regress-304828.js';
 //-----------------------------------------------------------------------------
 var BUGNUMBER = 304828;
 var summary = 'Array Generic Methods';
 var actual = '';
 var expect = '';
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 var value;
 
@@ -27,7 +27,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': join');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': join');
 
 // reverse
 value  = '123';
@@ -40,7 +43,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': reverse');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': reverse');
 
 // sort
 value  = 'cba';
@@ -53,7 +59,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': sort');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': sort');
 
 // push
 value  = 'abc';
@@ -66,7 +75,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': push');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': push');
 reportCompare('abc', value, summary + ': push');
 
 // pop
@@ -80,7 +92,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': pop');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': pop');
 reportCompare('abc', value, summary + ': pop');
 
 // unshift
@@ -94,7 +109,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': unshift');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': unshift');
 reportCompare('def', value, summary + ': unshift');
 
 // shift
@@ -108,7 +126,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': shift');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': shift');
 reportCompare('abc', value, summary + ': shift');
 
 // splice
@@ -122,7 +143,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': splice');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': splice');
 
 // concat
 value  = 'abc';
@@ -135,7 +159,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': concat');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': concat');
 
 // slice
 value  = 'abc';
@@ -148,7 +175,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': slice');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': slice');
 
 // indexOf
 value  = 'abc';
@@ -161,7 +191,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': indexOf');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': indexOf');
 
 // lastIndexOf
 value  = 'abcabc';
@@ -174,7 +207,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': lastIndexOf');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': lastIndexOf');
 
 // forEach
 value  = 'abc';
@@ -190,7 +226,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': forEach');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': forEach');
 
 // map
 value  = 'abc';
@@ -205,7 +244,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': map');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': map');
 
 // filter
 value  = '1234567890';
@@ -220,7 +262,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': filter');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': filter');
 
 // every
 value  = '1234567890';
@@ -235,8 +280,10 @@ catch(e)
 {
   actual = e + '';
 }
-reportCompare(expect, actual, summary + ': every');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': every');
 
 
 
-test();

@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'switch-001.js';
 
@@ -20,13 +21,11 @@ gTestfile = 'switch-001.js';
    Author:             christine@netscape.com
    Date:               12 november 1997
 */
-var SECTION = "switch-001";
-var VERSION = "JS1_3";
-var TITLE   = "switch-001";
+// var SECTION = "switch-001";
+// var VERSION = "JS1_3";
+// var TITLE   = "switch-001";
 var BUGNUMBER="315767";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 result = "fail:  did not enter switch";
 
@@ -41,11 +40,10 @@ default:
   result = "fail: evaluated default statement";
 }
 
-testcases[index++] = new TestCase(
-  SECTION,
+Assert.expectEq(
+    
   "switch / case should use strict equality in version of JS < 1.4",
   "pass",
   result );
 
-test();
 

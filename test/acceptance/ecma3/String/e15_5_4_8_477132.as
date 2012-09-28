@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 /**
  *  This template is a modified version of the test case
@@ -15,17 +16,15 @@
 
  */
 
-var SECTION = "15.5.4.8";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript
-var TITLE   = "lastindexof(null)";       // Provide ECMA section title or a description
+// var SECTION = "15.5.4.8";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS3";        // Version of ECMAScript or ActionScript
+// var TITLE   = "lastindexof(null)";       // Provide ECMA section title or a description
 var BUGNUMBER = "477132";
 
-startTest();                // leave this alone
 
 // add your tests here
 
-AddTestCase( "''.lastIndexOf(null)", -1, "".lastIndexOf(null) );
+Assert.expectEq( "''.lastIndexOf(null)", -1, "".lastIndexOf(null) );
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "15.4.2.1-2";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "The Array Constructor:  new Array( item0, item1, ...)";
+import com.adobe.test.Assert;
+//     var SECTION = "15.4.2.1-2";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "The Array Constructor:  new Array( item0, item1, ...)";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     testcases = getTestCases();
 
-    test();
 
 function getTestCases()
 {
@@ -33,10 +31,10 @@ function getTestCases()
 
     for ( var item = 0; item < TEST_LENGTH; item++ )
     {
-        array[item] = new TestCase( SECTION, "["+item+"]", item+"", TEST_ARRAY[item] );
+        array[item] = Assert.expectEq(  "["+item+"]", item+"", TEST_ARRAY[item] );
     }
 
-    array[item++ ] = new TestCase( SECTION, "new Array( ["+TEST_LENGTH+" arguments] ) +''",    ARGUMENTS, TEST_ARRAY +"" );
+    array[item++ ] = Assert.expectEq(  "new Array( ["+TEST_LENGTH+" arguments] ) +''",    ARGUMENTS, TEST_ARRAY +"" );
 
     return ( array );
 }

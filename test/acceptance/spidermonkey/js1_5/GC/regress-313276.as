@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-313276.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Root strings';
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
  
 var obj = {
   toString: function() {
@@ -37,9 +37,8 @@ var likeZero = {
   expect = "TEST";
 actual = String.prototype.substr.call(obj, likeZero);
 
-printStatus("Substring length: "+actual.length);
-printStatus((expect === actual).toString());
+//printStatus("Substring length: "+actual.length);
+//printStatus((expect === actual).toString());
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

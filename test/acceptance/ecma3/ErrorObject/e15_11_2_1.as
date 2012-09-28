@@ -1,18 +1,17 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "ErrorObjects";       // provide a document reference (ie, Actionscript section)
-var VERSION = "ES3";        // Version of ECMAScript or ActionScript
-var TITLE   = "new Error(message)";       // Provide ECMA section title or a description
+// var SECTION = "ErrorObjects";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "ES3";        // Version of ECMAScript or ActionScript
+// var TITLE   = "new Error(message)";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 var testcases = getTestCases();
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.
               
 function getTestCases() {
@@ -24,11 +23,11 @@ function getTestCases() {
     var re = new ReferenceError();
     var ra = new RangeError();
 
-    array[item++] = new TestCase(SECTION, "var error = new Error()", "Error", error.toString() );
-    array[item++] = new TestCase(SECTION, "var ee = new EvalError()", "EvalError", ee.toString() );
-    array[item++] = new TestCase(SECTION, "var te = new TypeError()", "TypeError", te.toString() );
-    array[item++] = new TestCase(SECTION, "var re = new ReferenceError()", "ReferenceError", re.toString() );
-    array[item++] = new TestCase(SECTION, "var ra = new RangeError()", "RangeError", ra.toString() );
+    array[item++] = Assert.expectEq( "var error = new Error()", "Error", error.toString() );
+    array[item++] = Assert.expectEq( "var ee = new EvalError()", "EvalError", ee.toString() );
+    array[item++] = Assert.expectEq( "var te = new TypeError()", "TypeError", te.toString() );
+    array[item++] = Assert.expectEq( "var re = new ReferenceError()", "ReferenceError", re.toString() );
+    array[item++] = Assert.expectEq( "var ra = new RangeError()", "RangeError", ra.toString() );
 
     error = new Error("test");
     ee = new EvalError("eval error");
@@ -36,53 +35,53 @@ function getTestCases() {
     re = new ReferenceError("reference error");
     ra = new RangeError("range error");
 
-    array[item++] = new TestCase(SECTION, "var error = new Error('test')", "Error: test", error.toString() );
-    array[item++] = new TestCase(SECTION, "var ee = new EvalError('eval error')", "EvalError: eval error", ee.toString() );
-    array[item++] = new TestCase(SECTION, "var te = new TypeError('type error')", "TypeError: type error", te.toString() );
-    array[item++] = new TestCase(SECTION, "var re = new ReferenceError('reference error')", "ReferenceError: reference error", re.toString() );
-    array[item++] = new TestCase(SECTION, "var ra = new RangeError('range error')", "RangeError: range error", ra.toString() );
+    array[item++] = Assert.expectEq( "var error = new Error('test')", "Error: test", error.toString() );
+    array[item++] = Assert.expectEq( "var ee = new EvalError('eval error')", "EvalError: eval error", ee.toString() );
+    array[item++] = Assert.expectEq( "var te = new TypeError('type error')", "TypeError: type error", te.toString() );
+    array[item++] = Assert.expectEq( "var re = new ReferenceError('reference error')", "ReferenceError: reference error", re.toString() );
+    array[item++] = Assert.expectEq( "var ra = new RangeError('range error')", "RangeError: range error", ra.toString() );
 
-    array[item++] = new TestCase(SECTION, "typeof new Error()", "object", typeof new Error() );
-    array[item++] = new TestCase(SECTION, "typeof new EvalError()", "object", typeof new EvalError() );
-    array[item++] = new TestCase(SECTION, "typeof new TypeError()", "object", typeof new TypeError() );
-    array[item++] = new TestCase(SECTION, "typeof new ReferenceError()", "object", typeof new ReferenceError() );
-    array[item++] = new TestCase(SECTION, "typeof new RangeError()", "object", typeof new RangeError() );
+    array[item++] = Assert.expectEq( "typeof new Error()", "object", typeof new Error() );
+    array[item++] = Assert.expectEq( "typeof new EvalError()", "object", typeof new EvalError() );
+    array[item++] = Assert.expectEq( "typeof new TypeError()", "object", typeof new TypeError() );
+    array[item++] = Assert.expectEq( "typeof new ReferenceError()", "object", typeof new ReferenceError() );
+    array[item++] = Assert.expectEq( "typeof new RangeError()", "object", typeof new RangeError() );
 
-    array[item++] = new TestCase(SECTION, "typeof new Error('test')", "object", typeof new Error('test') );
-    array[item++] = new TestCase(SECTION, "typeof new EvalError('test')", "object", typeof new EvalError('test') );
-    array[item++] = new TestCase(SECTION, "typeof new TypeError('test')", "object", typeof new TypeError('test') );
-    array[item++] = new TestCase(SECTION, "typeof new ReferenceError('test')", "object", typeof new ReferenceError('test') );
-    array[item++] = new TestCase(SECTION, "typeof new RangeError('test')", "object", typeof new RangeError('test') );
+    array[item++] = Assert.expectEq( "typeof new Error('test')", "object", typeof new Error('test') );
+    array[item++] = Assert.expectEq( "typeof new EvalError('test')", "object", typeof new EvalError('test') );
+    array[item++] = Assert.expectEq( "typeof new TypeError('test')", "object", typeof new TypeError('test') );
+    array[item++] = Assert.expectEq( "typeof new ReferenceError('test')", "object", typeof new ReferenceError('test') );
+    array[item++] = Assert.expectEq( "typeof new RangeError('test')", "object", typeof new RangeError('test') );
 
-    array[item++] = new TestCase(SECTION, "(err = new Error(), err.getClass = Object.prototype.toString, err.getClass() )",
+    array[item++] = Assert.expectEq( "(err = new Error(), err.getClass = Object.prototype.toString, err.getClass() )",
                  "[object Error]",
                  (err = new Error(), err.getClass = Object.prototype.toString, err.getClass() ) );
-    array[item++] = new TestCase(SECTION, "(err = new EvalError(), err.getClass = Object.prototype.toString, err.getClass() )",
+    array[item++] = Assert.expectEq( "(err = new EvalError(), err.getClass = Object.prototype.toString, err.getClass() )",
                  "[object EvalError]",
                  (err = new EvalError(), err.getClass = Object.prototype.toString, err.getClass() ) );
-    array[item++] = new TestCase(SECTION, "(err = new TypeError(), err.getClass = Object.prototype.toString, err.getClass() )",
+    array[item++] = Assert.expectEq( "(err = new TypeError(), err.getClass = Object.prototype.toString, err.getClass() )",
                  "[object TypeError]",
                  (err = new TypeError(), err.getClass = Object.prototype.toString, err.getClass() ) );
-    array[item++] = new TestCase(SECTION, "(err = new ReferenceError(), err.getClass = Object.prototype.toString, err.getClass() )",
+    array[item++] = Assert.expectEq( "(err = new ReferenceError(), err.getClass = Object.prototype.toString, err.getClass() )",
                  "[object ReferenceError]",
                  (err = new ReferenceError(), err.getClass = Object.prototype.toString, err.getClass() ) );
-    array[item++] = new TestCase(SECTION, "(err = new RangeError(), err.getClass = Object.prototype.toString, err.getClass() )",
+    array[item++] = Assert.expectEq( "(err = new RangeError(), err.getClass = Object.prototype.toString, err.getClass() )",
                  "[object RangeError]",
                  (err = new RangeError(), err.getClass = Object.prototype.toString, err.getClass() ) );
 
-    array[item++] = new TestCase(SECTION, "(err = new Error('test'), err.getClass = Object.prototype.toString, err.getClass() )",
+    array[item++] = Assert.expectEq( "(err = new Error('test'), err.getClass = Object.prototype.toString, err.getClass() )",
                  "[object Error]",
                  (err = new Error('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
-    array[item++] = new TestCase(SECTION, "(err = new EvalError('test'), err.getClass = Object.prototype.toString, err.getClass() )",
+    array[item++] = Assert.expectEq( "(err = new EvalError('test'), err.getClass = Object.prototype.toString, err.getClass() )",
                  "[object EvalError]",
                  (err = new EvalError('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
-    array[item++] = new TestCase(SECTION, "(err = new TypeError('test'), err.getClass = Object.prototype.toString, err.getClass() )",
+    array[item++] = Assert.expectEq( "(err = new TypeError('test'), err.getClass = Object.prototype.toString, err.getClass() )",
                  "[object TypeError]",
                  (err = new TypeError('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
-    array[item++] = new TestCase(SECTION, "(err = new ReferenceError('test'), err.getClass = Object.prototype.toString, err.getClass() )",
+    array[item++] = Assert.expectEq( "(err = new ReferenceError('test'), err.getClass = Object.prototype.toString, err.getClass() )",
                  "[object ReferenceError]",
                  (err = new ReferenceError('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
-    array[item++] = new TestCase(SECTION, "(err = new RangeError('test'), err.getClass = Object.prototype.toString, err.getClass() )",
+    array[item++] = Assert.expectEq( "(err = new RangeError('test'), err.getClass = Object.prototype.toString, err.getClass() )",
                  "[object RangeError]",
                  (err = new RangeError('test'), err.getClass = Object.prototype.toString, err.getClass() ) );
 

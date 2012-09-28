@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 22 October 2001
  *
@@ -11,15 +12,12 @@
  */
 //-----------------------------------------------------------------------------
 
-var SECTION = "eregress_105972";
-var VERSION = "";
-var TITLE   = "Regression test for Bugzilla bug 105972";
-var bug = "105972";
+// var SECTION = "eregress_105972";
+// var VERSION = "";
+// var TITLE   = "Regression test for Bugzilla bug 105972";
+// var bug = "105972";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -42,12 +40,12 @@ function getTestCases() {
      * to match till the end of the string. So the simplest match must
      * go all the way out to the end, and *? has no choice but to do it.
      */
-    status = inSection(1);
+ //    status = inSection(1);
     pattern = /^.*?$/;
     string = 'Hello World';
     actualmatch = string.match(pattern);
     expectedmatch = Array(string);
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
 
     /*
@@ -55,12 +53,12 @@ function getTestCases() {
      * Unlike the above pattern, we don't have to match till the end of
      * the string, so the non-greedy operator *? doesn't try to...
      */
-    status = inSection(2);
+ //    status = inSection(2);
     pattern = /^.*?/;
     string = 'Hello World';
     actualmatch = string.match(pattern);
     expectedmatch = Array(cnEmptyString);
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
 
     /*
@@ -72,12 +70,12 @@ function getTestCases() {
      *
      * The submatch $1 = (:|$) will contain the ':'
      */
-    status = inSection(3);
+ //    status = inSection(3);
     pattern = /^.*?(:|$)/;
     string = 'Hello: World';
     actualmatch = string.match(pattern);
     expectedmatch = Array('Hello:', ':');
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
 
     /*
@@ -91,12 +89,12 @@ function getTestCases() {
      * The submatch $1 = (:|$) will contain the empty string
      * conceived to exist at the end-of-string boundary.
      */
-    status = inSection(4);
+ //    status = inSection(4);
     pattern = /^.*(:|$)/;
     string = 'Hello: World';
     actualmatch = string.match(pattern);
     expectedmatch = Array(string, cnEmptyString);
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
     return array;
 }

@@ -1,8 +1,7 @@
-﻿/*
- *  This Source Code Form is subject to the terms of the Mozilla Public
- *  License, v. 2.0. If a copy of the MPL was not distributed with this
- *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  *
  *
@@ -34,20 +33,17 @@
  *
  */
 //-----------------------------------------------------------------------------
-    var SECTION = "";
-    var VERSION = "";
+//     var SECTION = "";
+//     var VERSION = "";
 
-    startTest();
 
     var ERR = 'UNEXPECTED ERROR! \n';
     var ERR_MALFORMED_NAME = ERR + 'Could not find function name in: \n\n';
-    var TITLE   = "Testing functions with double-byte names";
-    var bug = 58274;
+//     var TITLE   = "Testing functions with double-byte names";
+//     var bug = 58274;
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -84,25 +80,32 @@ function getTestCases() {
 
 
     // Test function call -
-    status = inSection(1);
+   //TO-DO: replacing inSection(1) with "function string1"
+    //status = inSection(1);
+    status = "function string1";
+
     actual = f\u02B2();
     expect = 42;
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     //Expected results should be changed after bug 164523 is fixed
     // Test both characters of function name -
-    status = inSection(2);
+    //TO-DO: Removing inSection() with "function string 1"
+    //status = inSection(1);
+    status = "function string 2";
     actual = sName.charAt(0);
     expect = 'F';
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
-    status = inSection(3);
+  //TO-DO: Removing inSection() with "function string 1"
+    //status = inSection(1);
+    status = "function string 3";
     actual = sName.charAt(1);
     expect = 'u';
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
 
@@ -112,30 +115,38 @@ function getTestCases() {
 
 
     // Test function call -
-    status = inSection(4);
+   //TO-DO: Removing inSection() with "function string 1"
+    //status = inSection(1);
+    status = "function string 4";
     actual = f\u02B2\u0AAA();
     expect = 84;
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     // Test all three characters of function name -
-    status = inSection(5);
+    //TO-DO: Removing inSection() with "function string 1"
+    //status = inSection(1);
+    status = "function string 5";
     actual = sName.charAt(0);
     expect = 'F';
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
-    status = inSection(6);
+    //TO-DO: Removing inSection() with "function string 1"
+    //status = inSection(1);
+    status = "function string 6";
     actual = sName.charAt(1);
     expect = 'u';
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
-    status = inSection(7);
+    //TO-DO: Removing inSection() with "function string 1"
+    //status = inSection(1);
+    status = "function string 7";
     actual = sName.charAt(2);
     expect = 'n';
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     return array;
 }

@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 09 May 2001
  *
@@ -11,24 +12,21 @@
  * See ECMA3  Section 12.11,  "The switch Statement"
  */
 //-------------------------------------------------------------------------------------------------
-    var SECTION = "eregress_74474_001";
-    var VERSION = "";
-    var TITLE   = "Testing switch statements with duplicate labels";
-    var bug = 74474;
+//     var SECTION = "eregress_74474_001";
+//     var VERSION = "";
+//     var TITLE   = "Testing switch statements with duplicate labels";
+//     var bug = 74474;
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
     
-    test();
     
 function getTestCases() {
     var array = new Array();
     var item = 0;
         
     var UBound = 0;
-    var bug = 74474;
+//     var bug = 74474;
     var summary = 'Test of switch statement that overflows the stack-allocated bitmap';
     var status = '(One duplicated label [8998])';
     var statusitems = [ ];
@@ -9047,7 +9045,7 @@ switch (x)
 }
 expect = 'ab';
 //addThis();
-array[item++] = new TestCase(SECTION, status, expect, actual);
+array[item++] = Assert.expectEq( status, expect, actual);
 
     return array;
 }

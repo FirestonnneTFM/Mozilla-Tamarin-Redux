@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/*
 *
 * Date:    25 Mar 2002
 * SUMMARY: Array.prototype.sort() should not (re-)define .length
@@ -24,15 +24,19 @@
 *
 */
 //-----------------------------------------------------------------------------
-    var SECTION = "eregress_130451";
-    var VERSION = "ECMA";
-    var TITLE   = "Array.prototype.sort() should not (re-)define .length";
-    var bug     = "130451";
+//     var SECTION = "eregress_130451";
+//     var VERSION = "ECMA";
+//     var TITLE   = "Array.prototype.sort() should not (re-)define .length";
+//     
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
+
+   // TODO: REVIEW AS4 CONVERSION ISSUE 
+   // Commented out calls to insection
+
+import com.adobe.test.Assert;
+var bug     = "130451";
+
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -47,27 +51,27 @@ function getTestCases() {
     /*
      * First: test Array.prototype.sort() on Array objects
      */
-    status = inSection(1);
+    // status = inSection(1);
     arr = [0,1,2,3];
     cmp = function(x,y) {return x-y;};
     actual = arr.sort(cmp).length;
     expect = 4;
-    array[item++] = new TestCase(SECTION, "section 1", expect, actual );
+    array[item++] = Assert.expectEq( "section 1", expect, actual );
 
-    status = inSection(2);
+    // status = inSection(2);
     arr = [0,1,2,3];
     cmp = function(x,y) {return y-x;};
     actual = arr.sort(cmp).length;
     expect = 4;
-    array[item++] = new TestCase(SECTION, "section 2", expect, actual );
+    array[item++] = Assert.expectEq( "section 2", expect, actual );
 
-    status = inSection(3);
+    // status = inSection(3);
     arr = [0,1,2,3];
     cmp = function(x,y) {return x-y;};
     arr.length = 1;
     actual = arr.sort(cmp).length;
     expect = 1;
-    array[item++] = new TestCase(SECTION, "section 3", expect, actual );
+    array[item++] = Assert.expectEq( "section 3", expect, actual );
 
     /*
      * This test is by Brendan. Setting arr.length to
@@ -77,93 +81,30 @@ function getTestCases() {
     cmp = function(x,y) {return x-y;};
     arr.sort(cmp);
 
-    status = inSection(4);
+    // status = inSection(4);
     actual = arr.join();
     expect = '0,1,2,3';
-    array[item++] = new TestCase(SECTION, "section 4", expect, actual );
+    array[item++] = Assert.expectEq( "section 4", expect, actual );
 
-    status = inSection(5);
+    // status = inSection(5);
     actual = arr.length;
     expect = 4;
-    array[item++] = new TestCase(SECTION, "section 5", expect, actual );
+    array[item++] = Assert.expectEq( "section 5", expect, actual );
 
-    status = inSection(6);
+    // status = inSection(6);
     arr.length = 2;
     actual = arr.join();
     expect = '0,1';
-    array[item++] = new TestCase(SECTION, "section 6", expect, actual );
+    array[item++] = Assert.expectEq( "section 6", expect, actual );
 
-    status = inSection(7);
+    // status = inSection(7);
     arr.length = 4;
     actual = arr.join();
     expect = '0,1,,';  //<---- see how 2,3 have been lost
-    array[item++] = new TestCase(SECTION, "section 7", expect, actual );
+    array[item++] = Assert.expectEq( "section 7", expect, actual );
 
-
-    if (!as3Enabled) {
-        /*
-         * Now test Array.prototype.sort() on non-Array objects
-         */
-    
-    
-        status = inSection(8);
-        var obj = new Object();
-        obj.sort = Array.prototype.sort;
-        obj.length = 4;
-        obj[0] = 0;
-        obj[1] = 1;
-        obj[2] = 2;
-        obj[3] = 3;
-        cmp = function(x,y) {return x-y;};
-        actual = obj.sort(cmp).length;
-        expect = 4;
-        array[item++] = new TestCase(SECTION, "section 8", expect, actual );
-    
-    
-        /*
-         * Here again is Brendan's test. Unlike the array case
-         * above, the setting of obj.length to 2 and then 4
-         * should NOT cause elements to be deleted
-         */
-        obj = new Object();
-        obj.sort = Array.prototype.sort;
-        obj.length = 4;
-        obj[0] = 3;
-        obj[1] = 2;
-        obj[2] = 1;
-        obj[3] = 0;
-        cmp = function(x,y) {return x-y;};
-        obj.sort(cmp);  //<---- this is what triggered the buggy behavior below
-        obj.join = Array.prototype.join;
-    
-        status = inSection(9);
-        actual = obj.join();
-        expect = '0,1,2,3';
-        array[item++] = new TestCase(SECTION, "section 9", expect, actual );
-    
-        status = inSection(10);
-        actual = obj.length;
-        expect = 4;
-        array[item++] = new TestCase(SECTION, "section 10", expect, actual );
-    
-        status = inSection(11);
-        obj.length = 2;
-        actual = obj.join();
-        expect = '0,1';
-        array[item++] = new TestCase(SECTION, "section 11", expect, actual );
-    
-        /*
-         * Before this bug was fixed, |actual| held the value '0,1,,'
-         * as in the Array-object case at top. This bug only occurred
-         * if Array.prototype.sort() had been applied to |obj|,
-         * as we have done higher up.
-         */
-        status = inSection(12);
-        obj.length = 4;
-        actual = obj.join();
-        expect = '0,1,2,3';
-        array[item++] = new TestCase(SECTION, "section 12", expect, actual );
-    }
+   // TODO: REVIEW AS4 CONVERSION ISSUE 
+    // REMOVED OUT WHOLE as3Enabled BLOCK SINCE IT SHOULD ONLY RUN IF NOT as3Enabled (i.e. pre AS3)
     
     return ( array );
 }

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-230216-2.js';
 //-----------------------------------------------------------------------------
@@ -16,10 +16,10 @@ var status = '';
 DESCRIPTION = summary;
 EXPECTED = 'error';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
-status = inSection(1) + ' check for overflow in quantifier';
+//status = inSection(1) + ' check for overflow in quantifier';
 
 actual = 'undefined';
 expect = 'error';
@@ -35,7 +35,6 @@ catch(e)
   actual = 'error';
 }
 
-AddTestCase(status, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
 
-test();

@@ -3,13 +3,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "6.4.3";
-var VERSION = "AS3";
-var TITLE   = "The % operation agumented by float values";
+// var SECTION = "6.4.3";
+// var VERSION = "AS3";
+// var TITLE   = "The % operation agumented by float values";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 
 var f1:float = 1.2345678e9;
@@ -28,7 +27,6 @@ var f2:float = 6.543210987;
    */
 
 // ABC Extension spec states that Float modulo can happen in double precision
-AddTestCase("modulo on float & number should yield different results", true, (Number(f1)%Number(f2)) == (f1%f2) );
+Assert.expectEq("modulo on float & number should yield different results", true, (Number(f1)%Number(f2)) == (f1%f2) );
 
-test();
 

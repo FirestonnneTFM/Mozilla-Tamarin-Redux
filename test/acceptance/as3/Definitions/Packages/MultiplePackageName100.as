@@ -3,21 +3,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package a.b.c.d.e.f.g.h.i.f.a.b.c.d.e.f.g.h.i.f.a.b.c.d.e.f.g.h.i.f.a.b.c.d.e.f.g.h.i.f.a.b.c.d.e.f.g.h.i.f.a.b.c.d.e.f.g.h.i.f.a.b.c.d.e.f.g.h.i.f.a.b.c.d.e.f.g.h.i.f.a.b.c.d.e.f.g.h.i.f.a.b.c.d.e.f.g.h.i.f{}
 
-var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
+import com.adobe.test.Assert;
+// var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 ///////////////////////////////////////////////////////////////
 // add your tests here
   
-AddTestCase( "multiple package names separated by dots(100)", 1, 1 );
+Assert.expectEq( "multiple package names separated by dots(100)", 1, 1 );
 
 //
 ////////////////////////////////////////////////////////////////
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

@@ -3,15 +3,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 include "../floatUtil.as";
 
 
-var SECTION = "";
-var VERSION = "AS3";
-var TITLE   = "Vector.sort(comparefn) with float";
+// var SECTION = "";
+// var VERSION = "AS3";
+// var TITLE   = "Vector.sort(comparefn) with float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 class TestClass {
     private var myVal:Object;
@@ -42,9 +41,8 @@ var myFloatSortFunction:Function = function (x,y):float {
     return float.NaN;
 }
 
-AddTestCase("Custom vector sort using sort function with non-standard (float) values",
+Assert.expectEq("Custom vector sort using sort function with non-standard (float) values",
             "0,1,2,3,4,5,6,7,8,9,10,11,12,12,13,14,15,16,17,18,19",
             testClassVector.sort(myFloatSortFunction).toString()
             );
 
-test();

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -56,7 +56,7 @@ function addValues(obj)
   }
 }
 
-status = inSection(1);
+//status = inSection(1);
 var obj = new Object();
 obj.arg1 = 1;
 obj.arg2 = 2;
@@ -86,7 +86,7 @@ function tryThis()
   return i;
 }
 
-status = inSection(2);
+//status = inSection(2);
 actual = tryThis();
 expect = 6;
 captureThis();
@@ -116,7 +116,7 @@ function myTest(x)
   return 1;
 }
 
-status = inSection(3);
+//status = inSection(3);
 actual = myTest(null);
 expect = 1;
 captureThis();
@@ -155,7 +155,7 @@ function addValues_2(obj)
   }
 }
 
-status = inSection(4);
+//status = inSection(4);
 obj = new Object();
 obj.arg1 = 1;
 obj.arg2 = 2;
@@ -168,7 +168,7 @@ captureThis();
 
 
 
-status = inSection(5);
+//status = inSection(5);
 try
 {
   throw new A();
@@ -241,12 +241,12 @@ function testfunc(mode)
   }
 }
 
-status = inSection(6);
+//status = inSection(6);
 actual = testfunc(0);
 expect = 100;
 captureThis();
 
-status = inSection(7);
+//status = inSection(7);
 actual = testfunc();
 expect = 100;
 captureThis();
@@ -278,7 +278,7 @@ function entry_menu()
   }
 }
 
-status = inSection(8);
+//status = inSection(8);
 actual = entry_menu();
 expect = 100;
 captureThis();
@@ -335,7 +335,7 @@ function addValues_5(obj)
   }
 }
 
-status = inSection(11);
+//status = inSection(11);
 obj = new Object();
 obj.arg1 = 1;
 obj.arg2 = 2;
@@ -369,7 +369,7 @@ function testObj(obj)
   }
 }
 
-status = inSection(12);
+//status = inSection(12);
 obj = {p:43};
 actual = testObj(obj);
 expect = 999;
@@ -398,7 +398,7 @@ function a120571()
 print(a120571);
 
 // Now test that we have a non-null value for a120571.toString()
-status = inSection(13);
+//status = inSection(13);
 try
 {
   actual = a120571.toString().match(/continue/)[0];
@@ -431,7 +431,7 @@ function b()
 print(b);
 
 // Now test that we have a non-null value for b.toString()
-status = inSection(14);
+//status = inSection(14);
 try
 {
   actual = b.toString().match(/continue/)[0];
@@ -465,15 +465,14 @@ function captureThis()
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

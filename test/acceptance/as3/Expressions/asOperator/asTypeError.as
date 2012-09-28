@@ -1,13 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = "as operator";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript
-var TITLE   = "test";       // Provide ECMA section title or a description
+// var SECTION = "as operator";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS3";        // Version of ECMAScript or ActionScript
+// var TITLE   = "test";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 ///////////////////////////////////////////////////////////////
 // add your tests here
@@ -20,7 +21,7 @@ try {
 } catch(e) {
     y = e;
 } finally {
-    AddTestCase( "as Type Error: (x as notAValidType)", "ReferenceError: Error #1065", referenceError(y) );
+    Assert.expectEq( "as Type Error: (x as notAValidType)", "ReferenceError: Error #1065", Utils.referenceError(y) );
 }
 
 try {
@@ -32,7 +33,7 @@ try {
 } catch(e:TypeError) {
     y = e;
 } finally {
-    AddTestCase( "as Type Error: temp='hello'; (x as temp)", "TypeError: Error #1009", typeError(y) );
+    Assert.expectEq( "as Type Error: temp='hello'; (x as temp)", "TypeError: Error #1009", Utils.typeError(y) );
 }
 
 try {
@@ -43,7 +44,7 @@ try {
 } catch(e:TypeError) {
     y = e;
 } finally {
-    AddTestCase( "as Type Error: (x as undefined)", "TypeError: Error #1010", typeError(y) );
+    Assert.expectEq( "as Type Error: (x as undefined)", "TypeError: Error #1010", Utils.typeError(y) );
 }
 
 try {
@@ -54,7 +55,7 @@ try {
 } catch(e:TypeError) {
     y = e;
 } finally {
-    AddTestCase( "as Type Error: (x as 3333)", "TypeError: Error #1009", typeError(y) );
+    Assert.expectEq( "as Type Error: (x as 3333)", "TypeError: Error #1009", Utils.typeError(y) );
 }
 
 try {
@@ -65,13 +66,12 @@ try {
 } catch(e:TypeError) {
     y = e;
 } finally {
-    AddTestCase( "as Type Error: (x as 'string')", "TypeError: Error #1009", typeError(y) );
+    Assert.expectEq( "as Type Error: (x as 'string')", "TypeError: Error #1009", Utils.typeError(y) );
 }
 
 
 //
 ////////////////////////////////////////////////////////////////
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.
 

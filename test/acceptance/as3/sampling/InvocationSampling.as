@@ -6,15 +6,14 @@ package {
 
 import flash.sampler.*
 import avmplus.*
+import com.adobe.test.Assert;
 
-var SECTION = "Sampling";
-var VERSION = "AS3";
-var TITLE   = "Test the Invocation methods of Sampling api";
+// var SECTION = "Sampling";
+// var VERSION = "AS3";
+// var TITLE   = "Test the Invocation methods of Sampling api";
 
 var isdebugger = System.isDebugger();
 
-startTest();
-writeHeaderToLog("Sampling api "+TITLE);
 
 var objs:Array=new Array();
 public class testclass {
@@ -76,23 +75,23 @@ for (var i=0;i<items1.length;i++) {
 
 
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
         "getMemberNamesWithInstancesLength: returns member names, instanceNames=true",
         15,
         items1.length
     );
-    AddTestCase(
+    Assert.expectEq(
         'getMemberNamesWithInstancesLength: returns member names, instanceNames=true',
         'bool_instance,func,getonly,getset,http://adobe.com/AS3/2006/builtin::hasOwnProperty,http://adobe.com/AS3/2006/builtin::isPrototypeOf,http://adobe.com/AS3/2006/builtin::propertyIsEnumerable,int_instance,public_str,publicfunction,setonly,string_instance,testclass::_getset,testclass::private_str,testclass::privatefunction',
         items1.toString()
     );
 } else {
-    AddTestCase(
+    Assert.expectEq(
         "getMemberNamesWithInstancesLength: returns member names, instanceNames=true",
         0,
         items1.length
     );
-    AddTestCase(
+    Assert.expectEq(
         'getMemberNamesWithInstancesLength: returns member names, instanceNames=true',
         '',
         items1.toString()
@@ -107,23 +106,23 @@ for each (var item2 in names2) {
 }
 items2.sort();
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
         "getMemberNamesWithInstancesLength: returns member names, instanceNames=true",
         7,
         items2.length
     );
-    AddTestCase(
+    Assert.expectEq(
         'getMemberNamesWithInstancesLength: returns member names, instanceNames=true',
         'http://adobe.com/AS3/2006/builtin::hasOwnProperty,http://adobe.com/AS3/2006/builtin::isPrototypeOf,http://adobe.com/AS3/2006/builtin::propertyIsEnumerable,prototype,public_static_string,static_string,testclass::private_static_string',
         items2.toString()
     );
 
-    AddTestCase(
+    Assert.expectEq(
         "getInvocationCountConstructor",
         1,
         getInvocationCount(testclass,null)
     );
-    AddTestCase(
+    Assert.expectEq(
         "getInvocationCountFunc0: function not called invocation is 0",
         0,
         getInvocationCount(testclass,namestable['func'])
@@ -135,38 +134,38 @@ objs[0].func();
 objs[1].func();
 objs[2].func();
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
         "getInvocationCountFunc4: call function 4 times",
         4,
         getInvocationCount(testclass,namestable['func'])
     );
-    AddTestCase(
+    Assert.expectEq(
         "getInvocationCountVar: instance variable returns -1 on invocation count",
         -1,
         getInvocationCount(testclass,namestable['public_str'])
     );
     
-    AddTestCase(
+    Assert.expectEq(
         "isGetterSetterForBoth: isGetterSetter for function with get and set",
         true,
         isGetterSetter(testclass,namestable['getset'])
     );
-    AddTestCase(
+    Assert.expectEq(
         "isGetterSetterSetOnly: isGetterSetter for function with set only",
         true,
         isGetterSetter(testclass,namestable['setonly'])
     );
-    AddTestCase(
+    Assert.expectEq(
         "isGetterSetterGetOnly: isGetterSetter for function with get only",
         true,
         isGetterSetter(testclass,namestable['getonly'])
     );
-    AddTestCase(
+    Assert.expectEq(
         "isGetterSetterInstanceVar: isGetterSetter for instance variable",
         false,
         isGetterSetter(testclass,namestable['public_str'])
     );
-    AddTestCase(
+    Assert.expectEq(
         "isGetterSetterFunction: isGetterSetter for a standard function",
          false,
          isGetterSetter(testclass,namestable['func'])
@@ -183,57 +182,56 @@ objs[0].setonly=5;
 value=objs[0].getonly;
 
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
         "getGetterInvocationCount: function getter and setter",
         2,
         getGetterInvocationCount(testclass,namestable['getset'])
     );
-    AddTestCase(
+    Assert.expectEq(
         "getGetterInvocationCount: function setonly",
         -1,
         getGetterInvocationCount(testclass,namestable['setonly'])
     );
-    AddTestCase(
+    Assert.expectEq(
         "getGetterInvocationCount: function getonly",
         2,
         getGetterInvocationCount(testclass,namestable['getonly'])
     );
-    AddTestCase(
+    Assert.expectEq(
         "getSetterInvocationCount: function getter and setter",
         2,
         getSetterInvocationCount(testclass,namestable['getset'])
     );
-    AddTestCase(
+    Assert.expectEq(
         "getSetterInvocationCount: function setonly",
         2,
         getSetterInvocationCount(testclass,namestable['setonly'])
     );
-    AddTestCase(
+    Assert.expectEq(
         "getSetterInvocationCount: function getonly",
         -1,
         getSetterInvocationCount(testclass,namestable['getonly'])
     );
-    AddTestCase(
+    Assert.expectEq(
         "getGetterInvocationCount: function",
         4, // ??
         getGetterInvocationCount(testclass,namestable['func'])
     );
-    AddTestCase(
+    Assert.expectEq(
         "getSetterInvocationCount: function",
         4,  // ??
         getSetterInvocationCount(testclass,namestable['func'])
     );
-    AddTestCase(
+    Assert.expectEq(
         "getSize: get size on getter/setter function",
         true,
         getSize(namestable['getset'])>0
     );
-    AddTestCase(
+    Assert.expectEq(
         "getSize: get size on private instance variable",
         true,
         getSize(namestable['testclass::_getset'])>0
     );
 }
-test();
 
 }

@@ -4,15 +4,14 @@
 
 import flash.sampler.*;
 import avmplus.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Sampling";
-var VERSION = "AS3";
-var TITLE   = "Sampling Basic Usage";
+// var SECTION = "Sampling";
+// var VERSION = "AS3";
+// var TITLE   = "Sampling Basic Usage";
 
 var isdebugger=System.isDebugger();
 
-startTest();
-writeHeaderToLog("Sampling api");
 
 var objs:Array=new Array();
 class simpleobject {
@@ -25,12 +24,12 @@ class simpleobject {
 
 stopSampling();
 if (isdebugger) {
-    AddTestCase("StopBeforeStarted: call stopSampling() before startSampling is called",
+    Assert.expectEq("StopBeforeStarted: call stopSampling() before startSampling is called",
     0,
     getSampleCount()
     );
 } else {
-    AddTestCase("StopBeforeStarted: call stopSampling() before startSampling is called",
+    Assert.expectEq("StopBeforeStarted: call stopSampling() before startSampling is called",
     -1,
     getSampleCount()
     );
@@ -38,7 +37,7 @@ if (isdebugger) {
 
 pauseSampling();
 if (isdebugger) {
-    AddTestCase("PauseBeforeStarted: call pauseSampling() before startSampling is called",
+    Assert.expectEq("PauseBeforeStarted: call pauseSampling() before startSampling is called",
     0,
     getSampleCount()
     );
@@ -52,7 +51,7 @@ simpleLoop();
 pauseSampling();
 
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
       "StartSamplingMult:  call startSampling() multiple times in a row",
       true,
       getSampleCount()>50
@@ -62,7 +61,7 @@ clearSamples();
 clearSamples();
 
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
       "ClearSamplingTwice: call clearSampling() twice in a row",
       0,
       getSampleCount()
@@ -75,13 +74,12 @@ pauseSampling();
 pauseSampling();
 
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
       "PauseSamplingTwice: call pauseSamples() twice in a row",
       true,
       getSampleCount()>50
     );
 }
-test();
 
 function simpleLoop() {
     for (var i:int=0;i<100;i++) {

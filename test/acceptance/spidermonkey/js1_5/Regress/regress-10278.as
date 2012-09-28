@@ -5,6 +5,7 @@
  * Contributor: Bob Clary
  */
 
+import com.adobe.test.Assert;
 var gTestfile = 'regress-10278.js';
 /**
  *  File Name:          regress-10278.js
@@ -19,7 +20,6 @@ var summary = 'Function declarations do not need to be separated by semi-colon';
 var actual;
 var expect;
 
-startTest();
 
 //-----------------------------------------------------------------------------
 addtestcases();
@@ -28,25 +28,24 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
 
   expect = 'pass';
   try
   {
     function f(){}function g(){};
     actual = "pass";
-    printStatus('no exception thrown');
+//printStatus('no exception thrown');
   }
   catch ( e )
   {
     actual = "fail";
-    printStatus('exception ' + e.toString() + ' thrown');
+//printStatus('exception ' + e.toString() + ' thrown');
   }
 
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
 
 }
 
-test();

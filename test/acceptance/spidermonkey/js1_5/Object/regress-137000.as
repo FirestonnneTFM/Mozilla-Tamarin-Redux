@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -37,7 +37,7 @@ function f(x)
 {
 }
 
-status = inSection(1);
+//status = inSection(1);
 f.x = 12;
 actual = f.x;
 expect = 12;
@@ -63,13 +63,13 @@ function childObject()
 }
 childObject.prototype = parentObject;
 
-status = inSection(2);
+//status = inSection(2);
 var objParent = new parentObject();
 actual = objParent.p;
 expect = 1;
 addThis();
 
-status = inSection(3);
+//status = inSection(3);
 var objChild = new childObject();
 actual = objChild.p;
 expect = 1;
@@ -91,7 +91,7 @@ function Child(id)
 }
 Child.prototype=Base;
 
-status = inSection(4);
+//status = inSection(4);
 var c1 = new Child('child1');
 actual = c1.prop;
 expect = 'child1';
@@ -112,7 +112,7 @@ function ChildX(id)
 }
 ChildX.prototype=BaseX;
 
-status = inSection(5);
+//status = inSection(5);
 c1 = new ChildX('child1');
 actual = c1.id;
 expect = 'child1';
@@ -139,12 +139,12 @@ g.propB = 'B';
 g.propC = 'C';
 var obj = new g();
 
-status = inSection(6);
+//status = inSection(6);
 actual = obj.getVarA(); // this one was returning 'undefined'
 expect = 'A';
 addThis();
 
-status = inSection(7);
+//status = inSection(7);
 actual = obj.getVarB(); // this one is easy; it never failed
 expect = 'C';
 addThis();
@@ -170,7 +170,7 @@ function F()
   var propA = 'Local variable in F';
 }
 
-status = inSection(8);
+//status = inSection(8);
 setFProperty('Hello');
 actual = F.propA; // this was returning 'undefined'
 expect = 'Hello';
@@ -197,15 +197,14 @@ function addThis()
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus(summary);
+  //printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

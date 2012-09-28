@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 /* Acceptance test for rest array optimization.  We measure two
    programs, one where the analysis must definitely succeed and one
@@ -20,12 +21,11 @@
    is disabled if the debugger is present.
 */
 
-var SECTION = "Function";           // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";                // Version of ECMAScript or ActionScript
-var TITLE   = "rest optimiztation"; // Provide ECMA section title or a description
+// var SECTION = "Function";           // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS3";                // Version of ECMAScript or ActionScript
+// var TITLE   = "rest optimiztation"; // Provide ECMA section title or a description
 var BUGNUMBER = "569321";           // bugzilla.mozilla.org
 
-startTest();
 
 class C {
     function push(...v):void {
@@ -101,6 +101,5 @@ function TEST(run:Function): Number {
 var m1 = TEST(pushloopC);
 var m2 = TEST(pushloopD);
 
-AddTestCase( "Rest array optimization (not enabled with the debugger!)", true, (m1/m2 > 5.0));
+Assert.expectEq( "Rest array optimization (not enabled with the debugger!)", true, (m1/m2 > 5.0));
 
-test();

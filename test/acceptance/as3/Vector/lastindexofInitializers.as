@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /**
    File Name:    lastindexof.es
    Description:  lastindexOf(object,value,from=...)
@@ -11,41 +12,38 @@
    *
    */
 
-var SECTION = ""
-var VERSION = "ECMA_1";
-
-startTest();
-
-writeHeaderToLog( SECTION + " Vector.lastIndexOf()-initializers");
+// var SECTION = ""
+// var VERSION = "ECMA_1";
 
 
-AddTestCase(    "lastIndexOf empty vector",
+
+
+Assert.expectEq(    "lastIndexOf empty vector",
         -1,
         new <int>[].lastIndexOf(0));
 
-AddTestCase(    "lastIndexOf object not found",
+Assert.expectEq(    "lastIndexOf object not found",
         -1,
         new <int>[1,2,3,4,5].lastIndexOf(10));
 
-AddTestCase(    "lastIndexOf single match found",
+Assert.expectEq(    "lastIndexOf single match found",
         4,
         new<int>[0,1,2,3,4,5,6,7,8,9].lastIndexOf(4));
 
-AddTestCase(    "lastIndexOf first match found",
+Assert.expectEq(    "lastIndexOf first match found",
         24,
         new<int>[0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].lastIndexOf(4));
 
-AddTestCase(    "lastIndexOf first match found setting start parameter",
+Assert.expectEq(    "lastIndexOf first match found setting start parameter",
         14,
         [0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].lastIndexOf(4,20));
 
-AddTestCase(    "lastIndexOf start parameter greater than vector length",
+Assert.expectEq(    "lastIndexOf start parameter greater than vector length",
         24,
         [0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].lastIndexOf(4,100));
 
-AddTestCase(    "lastIndexOf start parameter negative",
+Assert.expectEq(    "lastIndexOf start parameter negative",
         14,
         [0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].lastIndexOf(4,-10));
 
-test();
 

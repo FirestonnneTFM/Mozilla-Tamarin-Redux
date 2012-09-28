@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 /*
  * Since regular expressions have been part of JavaScript since 1.2, there
@@ -19,14 +20,12 @@
  *
  */
 
-    var SECTION = "ecma_2/String/split-001.js";
-    var VERSION = "ECMA_2";
-    var TITLE   = "String.prototype.split( regexp, [,limit] )";
+//     var SECTION = "ecma_2/String/split-001.js";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "String.prototype.split( regexp, [,limit] )";
 
-    startTest();
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -54,13 +53,13 @@ function getTestCases() {
     function AddSplitCases( string, separator, str_sep, split_array ) {
     
         // verify that the result of split is an object of type Array
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             "( " + string  + " ).split(" + str_sep +").constructor == Array",
             true,
             string.split(separator).constructor == Array );
     
         // check the number of items in the array
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             "( " + string  + " ).split(" + str_sep +").length",
             split_array.length,
             string.split(separator).length );
@@ -70,7 +69,7 @@ function getTestCases() {
             ? split_array.length : string.split(separator).length;
     
         for ( var matches = 0; matches < split_array.length; matches++ ) {
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                 "( " + string + " ).split(" + str_sep +")[" + matches +"]",
                 split_array[matches],
                 string.split( separator )[matches] );
@@ -82,7 +81,7 @@ function getTestCases() {
     
         // verify that the result of split is an object of type Array
     
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             "( " + string  + " ).split(" + str_sep +", " + str_limit +
                 " ).constructor == Array",
             true,
@@ -90,7 +89,7 @@ function getTestCases() {
     
         // check the length of the array
     
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             "( " + string + " ).split(" + str_sep  +", " + str_limit + " ).length",
             length,
             string.split(separator).length );
@@ -98,7 +97,7 @@ function getTestCases() {
         // check the value of each array item
     
         for ( var matches = 0; matches < split_array.length; matches++ ) {
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                 "( " + string + " ).split(" + str_sep +", " + str_limit + " )[" + matches +"]",
                 split_array[matches],
                 string.split( separator )[matches] );

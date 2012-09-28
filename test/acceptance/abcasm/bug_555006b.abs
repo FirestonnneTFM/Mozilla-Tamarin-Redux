@@ -12,17 +12,10 @@
  
 // See bug https://bugzilla.mozilla.org/show_bug.cgi?id=555006 for details
 
-function main()       
-{
-    newfunction .function_id(C)
-    getlocal0
-    call 0
-    returnvoid
-}
 
-.method_info { name: C return_type: * }
-.method_body_info {
-    method: 1
+method_info { name: C return_type: * }
+method_body_info {
+    method: C
     local_count: 1
     max_stack: 1
     max_scope_depth: 1
@@ -34,3 +27,13 @@ function main()
         returnvoid
     }
 }
+
+function main()       
+{
+    newfunction C
+    getlocal0
+    call 0
+    returnvoid
+}
+
+script_info{init: main}

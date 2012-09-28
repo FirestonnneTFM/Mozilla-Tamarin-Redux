@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-425360.js';
 //-----------------------------------------------------------------------------
@@ -15,7 +15,7 @@ var expect = 'No Crash';
 function finishaddtestcases()
 {
   gDelayTestDriverEnd = false;
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
   jsTestDriverEnd();
 }
 
@@ -24,13 +24,13 @@ function throwBlah()
   throw 'blah';
 }
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
  
 if (typeof window == 'undefined')
 {
   expect = actual = 'Not tested. Requires browser.';
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 }
 else
 {
@@ -43,4 +43,3 @@ else
 
 
 
-test();

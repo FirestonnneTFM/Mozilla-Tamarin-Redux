@@ -4,19 +4,18 @@
 
 package
 {
-    public function A()
+   public function A()
     {
         return 3;
     }
 }
 
-var SECTION = "Definitions\Packages";                   // provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
-var TITLE   = "access default package function globally";       // Provide ECMA section title or a description
+import com.adobe.test.Assert;
+// var SECTION = "Definitions\Packages";                   // provide a document reference (ie, ECMA section)
+// var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
+// var TITLE   = "access default package function globally";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();
 
-AddTestCase("Using default package function globally", 3, A());
+Assert.expectEq("Using default package function globally", 3, A());
 
-test();

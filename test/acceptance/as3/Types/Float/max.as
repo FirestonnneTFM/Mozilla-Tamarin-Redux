@@ -3,18 +3,17 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 /*
 Given zero or more arguments, calls ToFloat on each of the arguments and
 returns the largest of the resulting values.
 */
 
-var SECTION = "4.5.25";
-var VERSION = "AS3";
-var TITLE   = "public function max(...xs):float";
+// var SECTION = "4.5.25";
+// var VERSION = "AS3";
+// var TITLE   = "public function max(...xs):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function checkEmpty():float { return float.max(); }
 
@@ -88,7 +87,7 @@ AddStrictTestCase("float.max(float.MIN_VALUE, 1.401298464324818e-45f)", float.MI
 AddStrictTestCase("float.max(Number.MAX_VALUE, float.MAX_VALUE)", float.POSITIVE_INFINITY, float.max(Number.MAX_VALUE, float.MAX_VALUE));
 AddStrictTestCase("float.max(Number.MIN_VALUE, float.MIN_VALUE)", float.MIN_VALUE, float.max(Number.MIN_VALUE, float.MIN_VALUE));
 
-AddTestCase("float.max(float.POSITIVE_INFINITY, float.MAX_VALUE)", float.POSITIVE_INFINITY, float.max(float.POSITIVE_INFINITY, float.MAX_VALUE));
+Assert.expectEq("float.max(float.POSITIVE_INFINITY, float.MAX_VALUE)", float.POSITIVE_INFINITY, float.max(float.POSITIVE_INFINITY, float.MAX_VALUE));
 
 var myfloat:float = 3.124f;
 var myBool:Boolean = true;
@@ -99,5 +98,4 @@ AddStrictTestCase("float.max('2', true, 3.1, 3.124f) literals", myfloat, float.m
 AddStrictTestCase("float.max('2', true, 3.1, 3.124f, '24')", 24f, float.max(myString, myBool, myNum, myfloat, String('24')));
 AddStrictTestCase("float.max('2', true, 3.1, 3.124f, '24') literals", 24f, float.max('2', true, 3.1, 3.124f, '24'));
 
-test();
 

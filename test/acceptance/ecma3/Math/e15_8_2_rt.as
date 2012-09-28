@@ -1,16 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-    var SECTION = "15.8-2-n";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "The Math Object";
+//     var SECTION = "15.8-2-n";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "The Math Object";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 
 function getTestCases() {
@@ -25,10 +24,10 @@ function getTestCases() {
         thisError=e.toString();
     }
     finally{
-        array[item++] = new TestCase( SECTION,
+        array[item++] = Assert.expectEq( 
                                  "MYMATH = new Math()",
                                  "TypeError: Error #1076",
-                                 typeError(thisError) );
+                                 Utils.typeError(thisError) );
     }
     return ( array );
 }

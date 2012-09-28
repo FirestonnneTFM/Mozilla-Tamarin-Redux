@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  * Date: 23 May 2001
@@ -29,8 +29,8 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
 
   URI += '<?xml version="1.0"?>';
   URI += '<zcti application="xxxx_demo">';
@@ -45,9 +45,8 @@ function addtestcases()
   // Just testing that we don't crash on this
   encodeURI(URI);
 
-  AddTestCase('', 'No Crash', 'No Crash');
+  Assert.expectEq('', 'No Crash', 'No Crash');
 
 
 }
 
-test();

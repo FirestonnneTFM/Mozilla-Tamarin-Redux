@@ -1,7 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+/*
 *
 * Date:    31 August 2002
 * SUMMARY: RegExp conformance test
@@ -10,15 +11,12 @@
 */
 //-----------------------------------------------------------------------------
 
-var SECTION = "eregress_165353";
-var VERSION = "";
-var TITLE   = "RegExp conformance test";
-var bug = "165353";
+// var SECTION = "eregress_165353";
+// var VERSION = "";
+// var TITLE   = "RegExp conformance test";
+// var bug = "165353";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -32,38 +30,38 @@ function getTestCases() {
     var expectedmatches = new Array();
 
     pattern = /^([a-z]+)*[a-z]$/;
-      status = inSection(1);
+   //    status = inSection(1);
       string = 'a';
       actualmatch = string.match(pattern);
       expectedmatch = Array('a', undefined);
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-      status = inSection(2);
+   //    status = inSection(2);
       string = 'ab';
       actualmatch = string.match(pattern);
       expectedmatch = Array('ab', 'a');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-      status = inSection(3);
+   //    status = inSection(3);
       string = 'abc';
       actualmatch = string.match(pattern);
       expectedmatch = Array('abc', 'ab');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
 
     string = 'www.netscape.com';
-      status = inSection(4);
+   //    status = inSection(4);
       pattern = /^(([a-z]+)*[a-z]\.)+[a-z]{2,}$/;
       actualmatch = string.match(pattern);
       expectedmatch = Array('www.netscape.com', 'netscape.', 'netscap');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
       // add one more capturing parens to the previous regexp -
-      status = inSection(5);
+   //    status = inSection(5);
       pattern = /^(([a-z]+)*([a-z])\.)+[a-z]{2,}$/;
       actualmatch = string.match(pattern);
       expectedmatch = Array('www.netscape.com', 'netscape.', 'netscap', 'e');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
     return array;
 }

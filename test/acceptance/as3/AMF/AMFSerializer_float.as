@@ -9,13 +9,12 @@ import flash.utils.Dictionary;
 import flash.net.*;
 import flash.utils.ObjectEncoding;
 import avmplus.File;
+import com.adobe.test.Assert;
 
-var SECTION = "AMFSerialization";
-var VERSION = "as3";
-startTest();
-var TITLE   = "test AMF Serialization of float and float4";
+// var SECTION = "AMFSerialization";
+// var VERSION = "as3";
+// var TITLE   = "test AMF Serialization of float and float4";
 
-writeHeaderToLog( SECTION + " "+ TITLE );
 
 class UserDefClassAllTypes {
     //float
@@ -159,9 +158,9 @@ function buildBAnCallAddTC(strTitle:String, input:*)
     var ba_test_Obj:ByteArray = new ByteArray();
     ba_test_Obj.writeObject(input);
     ba_test_Obj.position = 0;
-    AddTestCase(strTitle, input, ba_test_Obj.readObject());
+    Assert.expectEq(strTitle, input, ba_test_Obj.readObject());
     ba_test_Obj.position = 0;
-    AddTestCase("Type check" + strTitle, typeof input, typeof ba_test_Obj.readObject());
+    Assert.expectEq("Type check" + strTitle, typeof input, typeof ba_test_Obj.readObject());
 }
 
 function testNaN(strTitle:String, input:Number)
@@ -170,9 +169,9 @@ function testNaN(strTitle:String, input:Number)
     ba_test_Obj.writeObject(input);
     ba_test_Obj.position = 0;
 
-    AddTestCase(strTitle, isNaN(input), isNaN(ba_test_Obj.readObject()));
+    Assert.expectEq(strTitle, isNaN(input), isNaN(ba_test_Obj.readObject()));
     ba_test_Obj.position = 0;
-    AddTestCase("Type check" + strTitle, typeof input, typeof ba_test_Obj.readObject());
+    Assert.expectEq("Type check" + strTitle, typeof input, typeof ba_test_Obj.readObject());
 }
 
 function testArrayTypes(strTitle:String, input:Array)
@@ -208,7 +207,7 @@ function compareArrays(strTitle:String, input:Array, actual:Array)
         }
         else
         {
-            AddTestCase(strTitle + " value check EXP vs ACT: " + prop, input[prop], actual[prop]);
+            Assert.expectEq(strTitle + " value check EXP vs ACT: " + prop, input[prop], actual[prop]);
         }
     }
     for each (var prop1:* in propActual)
@@ -219,7 +218,7 @@ function compareArrays(strTitle:String, input:Array, actual:Array)
         }
         else
         {
-            AddTestCase(strTitle + " value check ACT vs EXP: " + prop1, actual[prop1], input[prop1]);
+            Assert.expectEq(strTitle + " value check ACT vs EXP: " + prop1, actual[prop1], input[prop1]);
         }
     }
 }
@@ -236,12 +235,12 @@ function compareVectorsFloat(strTitle:String, input:Vector.<float>, actual:Vecto
 {
     var inputlen:int = input.length;
     var actuallen:int = actual.length;
-    AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
+    Assert.expectEq(strTitle + " Vector Len ", inputlen, actuallen);
     if(inputlen == actuallen)
     {
         for (var i:int; i < inputlen; i++)
         {
-            AddTestCase(strTitle, input[i], actual[i]);
+            Assert.expectEq(strTitle, input[i], actual[i]);
         }
     }
 }
@@ -260,12 +259,12 @@ function compareVectorsFloat4(strTitle:String, input:Vector.<float4>, actual:Vec
     var inputlen:int = input.length;
     var actuallen:int = actual.length;
 
-    AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
+    Assert.expectEq(strTitle + " Vector Len ", inputlen, actuallen);
     if(inputlen == actuallen)
     {
         for (var i:int; i < inputlen; i++)
         {
-            AddTestCase(strTitle, input[i], actual[i]);
+            Assert.expectEq(strTitle, input[i], actual[i]);
         }
     }
 }
@@ -294,11 +293,11 @@ function compareDictionary(strTitle:String, input:Dictionary, actual:Dictionary)
     {
         if (input[prop] is float)
         {
-            AddTestCase(strTitle + " float ", input[prop], actual[prop]);
+            Assert.expectEq(strTitle + " float ", input[prop], actual[prop]);
         }
         else if (input[prop] is float4)
         {
-            AddTestCase(strTitle + " float4 ", input[prop], actual[prop]);
+            Assert.expectEq(strTitle + " float4 ", input[prop], actual[prop]);
         }
     }
 }
@@ -314,8 +313,7 @@ function testUserDefTypes(strTitle:String, input:UserDefClassAllTypes)
 
 function compareUserDefTypes(strTitle:String, input:UserDefClassAllTypes, actual:UserDefClassAllTypes)
 {
-    AddTestCase(strTitle  + " User Defined Float " , input.flt_Float, actual.flt_Float);
-    AddTestCase(strTitle  + " User Defined Float4 " , input.flt_Float4, actual.flt_Float4);
+    Assert.expectEq(strTitle  + " User Defined Float " , input.flt_Float, actual.flt_Float);
+    Assert.expectEq(strTitle  + " User Defined Float4 " , input.flt_Float4, actual.flt_Float4);
 }
 
-test();

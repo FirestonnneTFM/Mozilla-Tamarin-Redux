@@ -2,16 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var SECTION = "Function";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript
-var TITLE   = "ReturnTypes";       // Provide ECMA section title or a description
+// var SECTION = "Function";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS3";        // Version of ECMAScript or ActionScript
+// var TITLE   = "ReturnTypes";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 //vars, functions and classes to be used by the test
 import functionReturnTypes.*;
 
+import com.adobe.test.Assert;
 var myClassA:TestClassA = new TestClassA(); // class TestClassA {}
 var myClassB:TestClassB = new TestClassB(); // class TestClassB extends TestClassA {}
 var myClassC:TestClassC = new TestClassC(); // class TestClassC extends TestClassB implements TestInterface {}
@@ -66,7 +66,7 @@ for (var i=0; i<funcArr.length; i++) {  //loop through each function
     } catch (e) {
         result = e;
     } finally {
-       AddTestCase("return type: "+ typeDescArr[i] + " arg: "+valueDescArr[j], String(resultArr[resultCounter++]), String(result).substr(0,22));
+       Assert.expectEq("return type: "+ typeDescArr[i] + " arg: "+valueDescArr[j], String(resultArr[resultCounter++]), String(result).substr(0,22));
        //trace("resultArr[x++] = "+result+"; // funcArr["+i+"]("+valueDescArr[j]+") - return type: "+typeDescArr[i]  );
     }
     }
@@ -76,7 +76,6 @@ for (var i=0; i<funcArr.length; i++) {  //loop through each function
 
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.
 
 function populateResults() {

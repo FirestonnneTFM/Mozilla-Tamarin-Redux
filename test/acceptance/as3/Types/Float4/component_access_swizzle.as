@@ -3,13 +3,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "4.6.3";
-var VERSION = "AS3";
-var TITLE   = "Component accesses";
+// var SECTION = "4.6.3";
+// var VERSION = "AS3";
+// var TITLE   = "Component accesses";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var flt4:float4 = new float4(0f, 1f, 2f, 3f);
 
@@ -28,7 +27,7 @@ for (var levelA in component)
                 output = "new float4(" +levelA + "f, " + levelB + "f, " + levelC + "f, " + levelD + "f)";
                 input = component[levelA] + "" + component[levelB] + "" + component[levelC] + "" + component[levelD];
                 AddStrictTestCase("float4['"+input+"'] as a getter", new float4(float(levelA), float(levelB), float(levelC), float(levelD)), flt4[input]);
-                // Use this code to regenerate all of the AddTestCase() calls below if necessary
+                // Use this code to regenerate all of the Assert.expectEq() calls below if necessary
                 //print('AddStrictTestCase("float4.'+input+' as a getter", '+output+', flt4.'+input+');')
             }
         }
@@ -292,4 +291,3 @@ AddStrictTestCase("float4.wwwy as a getter", new float4(3f, 3f, 3f, 1f), flt4.ww
 AddStrictTestCase("float4.wwwz as a getter", new float4(3f, 3f, 3f, 2f), flt4.wwwz);
 AddStrictTestCase("float4.wwww as a getter", new float4(3f, 3f, 3f, 3f), flt4.wwww);
 
-test();

@@ -62,6 +62,7 @@ package UserDefinedErrorsPackageWithoutMatchingCatch2
 package UserDefinedErrorsPackageWithoutMatchingCatch{
 
      import UserDefinedErrorsPackageWithoutMatchingCatch2.*;
+import com.adobe.test.Assert;
      public class TryAndCatchBlockWithUserDefinedErrorsWithoutMatchingcatch
      {
          var b:Box = new Box();
@@ -87,7 +88,7 @@ package UserDefinedErrorsPackageWithoutMatchingCatch{
                      //print(e3.toString());
                      //trace("An error occurred:"+e3.toString());
                  }finally{
-                      AddTestCase( "Testing try block and multiple catch blocks with custom error classes", "Box dimensions should be greater than 0",thisError );
+                      Assert.expectEq( "Testing try block and multiple catch blocks with custom error classes", "Box dimensions should be greater than 0",thisError );
                   }
           }
       }

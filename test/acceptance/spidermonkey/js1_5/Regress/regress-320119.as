@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-320119.js';
 //-----------------------------------------------------------------------------
@@ -12,10 +12,10 @@ var summary = 'delegating objects and arguments, arity, caller, name';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
-printStatus('original test');
+//printStatus('original test');
 
 function origtest(name, bar)
 {
@@ -51,16 +51,16 @@ var foo = new Monty(1, 'my name', 'sna!');
 
 var manchu = new Python(1, 'my name', 'sna!');
 
-printStatus('foo.name: ' + foo.name);
-printStatus('manchu.name: ' + manchu.name);
+//printStatus('foo.name: ' + foo.name);
+//printStatus('manchu.name: ' + manchu.name);
 
 expect = 'my name:my name';
 actual = foo.name + ':' + manchu.name;
-AddTestCase(summary + ': override function..name', expect, actual);
+Assert.expectEq(summary + ': override function..name', expect, actual);
 
 // end original test
 
-printStatus('test shared properties');
+//printStatus('test shared properties');
 
 function testshared()
 {
@@ -68,25 +68,25 @@ function testshared()
 
 expect = false;
 actual = testshared.hasOwnProperty('arguments');
-AddTestCase(summary + ': arguments no longer shared', expect, actual);
+Assert.expectEq(summary + ': arguments no longer shared', expect, actual);
 
 expect = false;
 actual = testshared.hasOwnProperty('caller');
-AddTestCase(summary + ': caller no longer shared', expect, actual);
+Assert.expectEq(summary + ': caller no longer shared', expect, actual);
 
 expect = false;
 actual = testshared.hasOwnProperty('arity');
-AddTestCase(summary + ': arity no longer shared', expect, actual);
+Assert.expectEq(summary + ': arity no longer shared', expect, actual);
 
 expect = false;
 actual = testshared.hasOwnProperty('name');
-AddTestCase(summary + ': name no longer shared', expect, actual);
+Assert.expectEq(summary + ': name no longer shared', expect, actual);
 
 expect = true;
 actual = testshared.hasOwnProperty('length');
-AddTestCase(summary + ': length still shared', expect, actual);
+Assert.expectEq(summary + ': length still shared', expect, actual);
 
-printStatus('test overrides');
+//printStatus('test overrides');
 
 function Parent()
 {
@@ -115,6 +115,5 @@ var child = new Child();
 
 expect = 'oarguments,ocaller,oarity,olength,oname';
 actual = child.value();
-AddTestCase(summary + ': overrides', expect, actual);
+Assert.expectEq(summary + ': overrides', expect, actual);
 
-test();

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -24,8 +24,8 @@ var summary = "Shouldn't crash trying to add an array as an element of itself";
 var self = this;
 var temp = '';
 
-printBugNumber(BUGNUMBER);
-printStatus(summary);
+//printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
 /*
  * Explicit test:
@@ -76,6 +76,5 @@ catch(e)
 {
 }
 
-AddTestCase('', 'No Crash', 'No Crash');
+Assert.expectEq('', 'No Crash', 'No Crash');
 
-test();

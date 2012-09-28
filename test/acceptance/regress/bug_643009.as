@@ -1,8 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
     var a:Array = new Array;
     a[258] = "foo";
@@ -21,12 +21,11 @@ startTest();
         results.push(v);
     }
 
-    AddTestCase(0, "258", String(results[0]));
-    AddTestCase(1, "foo", results[1]);
-    AddTestCase(2, "259", String(results[2]));
-    AddTestCase(3, "bar", results[3]);
-    AddTestCase(4, "foo", results[4]);
-    AddTestCase(5, "bar", results[5]);
+    Assert.expectEq(0, "258", String(results[0]));
+    Assert.expectEq(1, "foo", results[1]);
+    Assert.expectEq(2, "259", String(results[2]));
+    Assert.expectEq(3, "bar", results[3]);
+    Assert.expectEq(4, "foo", results[4]);
+    Assert.expectEq(5, "bar", results[5]);
 
-test();
 

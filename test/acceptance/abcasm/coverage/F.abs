@@ -2,30 +2,48 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function main() {
-	getlocal0
-	pushscope
-	findproperty START 
-	pushstring "Instructions that start with the letter F" 
-	callpropvoid START 1
-	newfunction .function_id(runTest)
-	getlocal0
-	call 0
-	findproperty END
-	callpropvoid END 0
-	returnvoid
-}
+method_info { name:findpropstrictErrorCase1 }
+method_body_info {
+	method: findpropstrictErrorCase1
+	exception: {
+			exception {
+			from: beginTry 
+			to:endTry 
+			target:catchRefError 
+			type:ReferenceError 
+		}
+	}
+	code:
+	{
+		getlocal0
+		pushscope
+	beginTry:
+		findproperty COMPARE_STRICTEQ
+	pushstring "findpropstrict zuul"
+		getscopeobject 0 // expected
+		findpropstrict zuul
+		findproperty FAIL
+	swap
+	callpropvoid FAIL 1
+	endTry:
+		returnvoid
 
-.method_info { 
+	catchRefError:
+		getlocal0
+		pushscope
+		findproperty PASS
+	swap
+	callpropvoid PASS 1
+		returnvoid
+	}
+}
+method_info { 
 	name: runTest 
 }
-.method_body_info {
+method_body_info {
 
-	method: .function_id(runTest)
+	method: runTest
 
-	traits: {
-		.trait { kind: Trait_Slot name: var1 }
-	}
 	code:
 	{
 		getlocal0
@@ -67,7 +85,7 @@ function main() {
 		findpropstrict toLocaleString
 		callpropvoid COMPARE_STRICTEQ 3
 
-		newfunction .function_id(findpropstrictErrorCase1)
+		newfunction findpropstrictErrorCase1
 		getlocal0
 		call 0
 
@@ -75,38 +93,25 @@ function main() {
 	}
 }
 
-.method_info { name:findpropstrictErrorCase1 }
-.method_body_info {
-	method: .function_id(findpropstrictErrorCase1)
-	exception: {
-			.exception {
-			from: beginTry 
-			to:endTry 
-			target:catchRefError 
-			type:ReferenceError 
-		}
-	}
-	code:
-	{
-		getlocal0
-		pushscope
-	beginTry:
-		findproperty COMPARE_STRICTEQ
-	pushstring "findpropstrict zuul"
-		getscopeobject 0 // expected
-		findpropstrict zuul
-		findproperty FAIL
-	swap
-	callpropvoid FAIL 1
-	endTry:
-		returnvoid
 
-	catchRefError:
-		getlocal0
-		pushscope
-		findproperty PASS
-	swap
-	callpropvoid PASS 1
-		returnvoid
+
+function main() {
+	getlocal0
+	pushscope
+	findproperty START 
+	pushstring "Instructions that start with the letter F" 
+	callpropvoid START 1
+	newfunction runTest
+	getlocal0
+	call 0
+	findproperty END
+	callpropvoid END 0
+	returnvoid
+}
+
+script_info{
+	init: main
+		traits: {
+		trait { kind: Trait_Slot name: var1 }
 	}
 }

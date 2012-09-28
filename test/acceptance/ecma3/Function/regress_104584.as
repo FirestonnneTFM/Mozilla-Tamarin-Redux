@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 14 October 2001
  *
@@ -12,15 +13,13 @@
  * on the second call to obj.toString() or print(obj) below -
  */
 //-----------------------------------------------------------------------------
-var SECTION = "regress_104584";       // provide a document reference (ie, ECMA section)
-var VERSION = "";  // Version of JavaScript or ECMA
-var TITLE   = "Testing that we don't crash on this code -";       // Provide ECMA section title or a description
+// var SECTION = "regress_104584";       // provide a document reference (ie, ECMA section)
+// var VERSION = "";  // Version of JavaScript or ECMA
+// var TITLE   = "Testing that we don't crash on this code -";       // Provide ECMA section title or a description
 var BUGNUMBER = "104584";
 
-startTest();
 
 var testcases = getTestCases()
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -48,7 +47,7 @@ function getTestCases() {
       trace(obj);
     }
     
-    array[item++] = new TestCase(SECTION, "Make sure we don't crash", true, true);
+    array[item++] = Assert.expectEq( "Make sure we don't crash", true, true);
     
     return array;
 }

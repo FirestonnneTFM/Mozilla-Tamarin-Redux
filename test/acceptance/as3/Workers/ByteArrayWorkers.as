@@ -9,6 +9,7 @@ package {
     import flash.system.WorkerDomain
     import flash.utils.ByteArray
     import flash.concurrent.Mutex
+import com.adobe.test.Assert;
 
     var mutex:Mutex;
     var nworkers:uint=5;
@@ -133,7 +134,7 @@ package {
             trace(""+i+" = "+results[i]);
             count+=results[i];
         }
-        AddTestCase(msg,100,count);
+        Assert.expectEq(msg,100,count);
     }
     public function background() {
         var worker:Worker=Worker.current;
@@ -226,13 +227,10 @@ package {
         return b[index*4];
     }
     if (Worker.current.isPrimordial) {
-        var SECTION = "workers";
-        var VERSION = "AS3";
-        var TITLE   = "Test ByteArray with multiple workers";
-        startTest();
-        writeHeaderToLog(SECTION+" "+TITLE);    
+//         var SECTION = "workers";
+//         var VERSION = "AS3";
+//         var TITLE   = "Test ByteArray with multiple workers";
         main();
-        test();
     } else {
         background();
     }

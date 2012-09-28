@@ -1,35 +1,35 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "10.1.4-1";
-    var VERSION = "ECMA_1";
-    startTest();
+import com.adobe.test.Assert;
+//     var SECTION = "10.1.4-1";
+//     var VERSION = "ECMA_1";
 
-    writeHeaderToLog( SECTION + " Scope Chain and Identifier Resolution");
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
     var item = 0;
+    var myObject2 = new Object();
 
-    array[item++] = new TestCase( "SECTION", "with MyObject, eval should cube INPUT: ", "", "" );
-
-    for ( tc=0; tc < array.length; tc++ ) {
+ 
 
         var MYOBJECT = new MyObject();
         var INPUT = 2;
-        array[tc].description += ( INPUT +"" );
+        myObject2.description += ( INPUT +"" );
+ 
 
         with ( MYOBJECT ) {
             eval = function(x){ return(Math.pow(Number(x),3)); }
-
-            array[tc].actual = eval( INPUT );
-            array[tc].expect = Math.pow(INPUT,3);
+            // as4 test conversion hack
+            myResult = new Object();
+            myResult.actual = eval( INPUT );
+            myResult.expect = Math.pow(INPUT,3);
+            Assert.expectEq( "with MyObject, eval should cube INPUT: ", myResult.expect, myResult.actual );
         }
 
-    }
+ 
 
     return ( array );
 }

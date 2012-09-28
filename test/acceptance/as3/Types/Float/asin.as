@@ -9,12 +9,10 @@ Returns an implementation-dependent approximation to the arc sine of x.
 The result is expressed in radians and ranges from -PI/2 to +PI/2.
 */
 
-var SECTION = "4.5.17";
-var VERSION = "AS3";
-var TITLE   = "public function asin(x:float):float";
+// var SECTION = "4.5.17";
+// var VERSION = "AS3";
+// var TITLE   = "public function asin(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param:float):float { return float.asin(param); }
 
@@ -67,5 +65,4 @@ AddStrictTestCase("float.asin(float.SQRT1_2)", 0.7853981256484985f, float.asin(f
 AddStrictTestCase("float.asin(-float.SQRT1_2)", -0.7853981256484985f, float.asin(-float.SQRT1_2));
 
 
-test();
 

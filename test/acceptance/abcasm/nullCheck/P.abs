@@ -2,19 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function main() {
-    getlocal0
-    pushscope
-    findproperty START 
-    pushstring "Instructions that start with the letter P" 
-    callpropvoid START 1
-    newfunction .function_id(runTest)
-    getlocal0
-    call 0
-    findproperty END
-    callpropvoid END 0
-    returnvoid
-}
 
 function runTest()
 {
@@ -36,7 +23,7 @@ function runTest()
     */
     
     /*
-    .try {
+    try {
         pushnull
         pushwith
         
@@ -48,7 +35,7 @@ function runTest()
         
         jump finished_pushwith_null
     }
-    .catch {
+    catch {
         getlocal0
         pushscope
         setlocal3   // save typeError
@@ -65,3 +52,18 @@ function runTest()
     
     returnvoid
 }
+function main() {
+    getlocal0
+    pushscope
+    findproperty START 
+    pushstring "Instructions that start with the letter P" 
+    callpropvoid START 1
+    newfunction runTest
+    getlocal0
+    call 0
+    findproperty END
+    callpropvoid END 0
+    returnvoid
+}
+
+script_info{init: main}

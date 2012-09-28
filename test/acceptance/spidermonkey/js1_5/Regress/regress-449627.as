@@ -5,7 +5,7 @@
  * Contributor: Robert Sayre
  */
 
-startTest();
+import com.adobe.test.Assert;
 
 var gTestfile = 'regress-449627.js';
 //-----------------------------------------------------------------------------
@@ -14,8 +14,8 @@ var summary = 'Crash with JIT in js_FillPropertyCache';
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 /************************ BROWSER DETECT (http://www.quirksmode.org/js/detect.html) ************************/
 
@@ -112,6 +112,5 @@ var BrowserDetect = {
 
 BrowserDetect.init();
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

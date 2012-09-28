@@ -6,72 +6,73 @@ package Prototyping {
 
 
 import InternalClassPrototype.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = "Class Prototype";           // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";                   // Version of JavaScript or ECMA
-var TITLE   = "Prototype testing for internal classes";  // Provide ECMA section title or a description
+// var SECTION = "Class Prototype";           // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";                   // Version of JavaScript or ECMA
+// var TITLE   = "Prototype testing for internal classes";  // Provide ECMA section title or a description
 //var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var internalObj = new InternalClass();
 
 
 InternalClass.prototype.array = new Array('a', 'b', 'c');
-AddTestCase( "Try overriding default property through an Internal Class' prototype object", "1,2,3", internalObj.accessDefaultProperty().toString() );
+Assert.expectEq( "Try overriding default property through an Internal Class' prototype object", "1,2,3", internalObj.accessDefaultProperty().toString() );
 
 InternalClass.prototype.intNumber = 500;
-AddTestCase( "Try overriding internal property through an Internal Class' prototype object", "100", internalObj.intNumber.toString() );
+Assert.expectEq( "Try overriding internal property through an Internal Class' prototype object", "100", internalObj.intNumber.toString() );
 
 InternalClass.prototype.protInt = 0;    // Note: this override works because the protected property is not visible!
-AddTestCase( "Try overriding protected property through an Internal Class' prototype object", "0", internalObj.protInt.toString() );
+Assert.expectEq( "Try overriding protected property through an Internal Class' prototype object", "0", internalObj.protInt.toString() );
 
 InternalClass.prototype.pubUint = 0;
-AddTestCase( "Try overriding public property through an Internal Class' prototype object", "1", internalObj.pubUint.toString() );
+Assert.expectEq( "Try overriding public property through an Internal Class' prototype object", "1", internalObj.pubUint.toString() );
 
 InternalClass.prototype.privVar = false;
-AddTestCase( "Try overriding private property through an Internal Class' prototype object", "true", internalObj.accPrivProp().toString() );
+Assert.expectEq( "Try overriding private property through an Internal Class' prototype object", "true", internalObj.accPrivProp().toString() );
 
 InternalClass.prototype.pubStat = 200;
-AddTestCase( "Try overriding public static property through an Internal Class' prototype object", "100", InternalClass.pubStat.toString() );
+Assert.expectEq( "Try overriding public static property through an Internal Class' prototype object", "100", InternalClass.pubStat.toString() );
 
 InternalClass.prototype.nsProp = "fakeNS";
-AddTestCase( "Try overriding namespace property through an Internal Class' prototype object", "nsProp", internalObj.accNS().toString() );
+Assert.expectEq( "Try overriding namespace property through an Internal Class' prototype object", "nsProp", internalObj.accNS().toString() );
 
 InternalClass.prototype.defaultMethod = false;
-AddTestCase( "Try overriding default methodsthrough an Internal Class' prototype object", true, internalObj.defaultMethod() );
+Assert.expectEq( "Try overriding default methodsthrough an Internal Class' prototype object", true, internalObj.defaultMethod() );
 
 InternalClass.prototype.internalMethod = -1;
-AddTestCase( "Try overriding internal method through an Internal Class' prototype object", 1, internalObj.internalMethod() );
+Assert.expectEq( "Try overriding internal method through an Internal Class' prototype object", 1, internalObj.internalMethod() );
 
 //InternalClass.prototype.protectedMethod = -1;
-//AddTestCase( "Try overriding protected method through an Internal Class' prototype object", 1, internalObj.protectedMethod() );
+//Assert.expectEq( "Try overriding protected method through an Internal Class' prototype object", 1, internalObj.protectedMethod() );
 
 InternalClass.prototype.publicMethod = false;
-AddTestCase( "Try overriding public method through an Internal Class' prototype object", true, internalObj.publicMethod() );
+Assert.expectEq( "Try overriding public method through an Internal Class' prototype object", true, internalObj.publicMethod() );
 
 InternalClass.prototype.privateMethod = false;
-AddTestCase( "Try overriding private method through an Internal Class' prototype object", true, internalObj.accPrivMethod() );
+Assert.expectEq( "Try overriding private method through an Internal Class' prototype object", true, internalObj.accPrivMethod() );
 
 InternalClass.prototype.nsMethod = -1;
-AddTestCase( "Try overriding namespace method through an Internal Class' prototype object", 1, internalObj.accNSMethod() );
+Assert.expectEq( "Try overriding namespace method through an Internal Class' prototype object", 1, internalObj.accNSMethod() );
 
 InternalClass.prototype.publicFinalMethod = -1;
-AddTestCase( "Try overriding public final method through an Internal Class' prototype object", 1, internalObj.publicFinalMethod() );
+Assert.expectEq( "Try overriding public final method through an Internal Class' prototype object", 1, internalObj.publicFinalMethod() );
 
 InternalClass.prototype.publicStaticMethod = -1;
-AddTestCase( "Try overriding public static method through an Internal Class' prototype object", 42, InternalClass.publicStaticMethod() );
+Assert.expectEq( "Try overriding public static method through an Internal Class' prototype object", 42, InternalClass.publicStaticMethod() );
 
 
 InternalClass.prototype.newArray = new Array('a', 'b', 'c');
-AddTestCase( "Try adding new property through an internal class' prototype object", "a,b,c", internalObj.newArray.toString() );
+Assert.expectEq( "Try adding new property through an internal class' prototype object", "a,b,c", internalObj.newArray.toString() );
 
 InternalClass.prototype.testFunction = function () {return true};
-AddTestCase("Try adding new method through an internal class' prototype object", true, internalObj.testFunction());
+Assert.expectEq("Try adding new method through an internal class' prototype object", true, internalObj.testFunction());
 
 var equivalent:Boolean = (InternalClass.prototype.constructor == InternalClass);
-AddTestCase("Verify prototype constructor is equivalent to class object", true, equivalent);
+Assert.expectEq("Verify prototype constructor is equivalent to class object", true, equivalent);
 
 
 var thisError10 = "no error thrown";
@@ -81,11 +82,10 @@ try{
 } catch (e) {
     thisError10 = e.toString();
 } finally {
-    AddTestCase( "Try to write to InternalClass' prototype object", "ReferenceError: Error #1074",
-                referenceError( thisError10 ) );
+    Assert.expectEq( "Try to write to InternalClass' prototype object", "ReferenceError: Error #1074",
+                Utils.referenceError( thisError10 ) );
 }
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.
 
 }

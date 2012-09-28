@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/*
 *
 * Date:    22 Jan 2002
 * SUMMARY: Testing Error.prototype.toString()
@@ -34,9 +34,12 @@
 * See also ECMA 15.11.4.2, 15.11.4.3
 */
 //-----------------------------------------------------------------------------
-var SECTION = "e15_11_4_4_1";
+
+import com.adobe.test.Assert;
+
+// var SECTION = "e15_11_4_4_1";
 var UBound = 0;
-var bug = '(none)';
+// var bug = '(none)';
 var summary = 'Testing Error.prototype.toString()';
 var status = '';
 var statusitems = [];
@@ -47,9 +50,7 @@ var expectedvalues = [];
 var EMPTY_STRING = '';
 var EXPECTED_FORMAT = 0;
 
-startTest();
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -59,29 +60,29 @@ function getTestCases() {
     var err1 = new Error('msg1');
     actual = examineThis(err1);
     expect = EXPECTED_FORMAT;
-    array[item++] = new TestCase(SECTION, status, expect, actual);
-    array[item++] = new TestCase(SECTION, "new Error('msg1')", "Error: msg1", (new Error('msg1')).toString() );
+    array[item++] = Assert.expectEq( status, expect, actual);
+    array[item++] = Assert.expectEq( "new Error('msg1')", "Error: msg1", (new Error('msg1')).toString() );
 
     status = "new Error(err1)";
     var err2 = new Error(err1);
     actual = examineThis(err2);
     expect = EXPECTED_FORMAT;
-    array[item++] = new TestCase(SECTION, status, expect, actual);
-    array[item++] = new TestCase(SECTION, "new Error(err1)", "Error: Error: msg1", (new Error(err1)).toString() );
+    array[item++] = Assert.expectEq( status, expect, actual);
+    array[item++] = Assert.expectEq( "new Error(err1)", "Error: Error: msg1", (new Error(err1)).toString() );
 
     status = "new Error()";
     var err3 = new Error();
     actual = examineThis(err3);
     expect = EXPECTED_FORMAT;
-    array[item++] = new TestCase(SECTION, status, expect, actual);
-    array[item++] = new TestCase(SECTION,  "new Error()", "Error", (new Error()).toString() );
+    array[item++] = Assert.expectEq( status, expect, actual);
+    array[item++] = Assert.expectEq(  "new Error()", "Error", (new Error()).toString() );
 
     status = "new Error('')";
     var err4 = new Error(EMPTY_STRING);
     actual = examineThis(err4);
     expect = EXPECTED_FORMAT;
-    array[item++] = new TestCase(SECTION, status, expect, actual);
-    array[item++] = new TestCase(SECTION, "new Error('')", "Error", (new Error('')).toString() );
+    array[item++] = Assert.expectEq( status, expect, actual);
+    array[item++] = Assert.expectEq( "new Error('')", "Error", (new Error('')).toString() );
 
     // now generate a run-time error -
     status = "run-time error";
@@ -94,7 +95,7 @@ function getTestCases() {
      actual = examineThis(err5);
     }
     expect = EXPECTED_FORMAT;
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     return array;
 }

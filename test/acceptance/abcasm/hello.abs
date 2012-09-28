@@ -7,7 +7,7 @@ function hello()
 	pushscope
 
 	pushstring "Hello, world"
-	.print
+	//.print
 
 	findpropstrict START
 	pushstring ".print demo"
@@ -22,3 +22,4 @@ function hello()
 
 	returnvoid
 }
+script_info{init:hello}

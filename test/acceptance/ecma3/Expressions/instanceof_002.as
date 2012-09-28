@@ -1,15 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "instanceof-002";
-    var VERSION = "ECMA_2";
-    var TITLE   = "Determining Instance Relationships";
+import com.adobe.test.Assert;
+//     var SECTION = "instanceof-002";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "Determining Instance Relationships";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
         var array = new Array();
@@ -48,32 +46,32 @@ function getTestCases() {
     var pat = new Engineer()
 
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                     "pat.constructor.prototype == Engineer.prototype",
                                     false,
                                     pat.constructor.prototype == Engineer.prototype );
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                     "pat instanceof Engineer",
                                     true,
                                     pat instanceof Engineer );
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                     "pat instanceof WorkerBee )",
                                     true,
                                      pat instanceof WorkerBee );
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                     "pat instanceof Employee )",
                                     true,
                                      pat instanceof Employee );
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                     "pat instanceof Object )",
                                     true,
                                      pat instanceof Object );
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                     "pat instanceof SalesPerson )",
                                     false,
                                      pat instanceof SalesPerson );

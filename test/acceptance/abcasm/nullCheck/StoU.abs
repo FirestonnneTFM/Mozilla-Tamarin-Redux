@@ -2,37 +2,49 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.script_info {
-    traits: {
-        .trait { kind: Trait_Slot name:setpropertyTestVar }
-        .trait { kind: Trait_Slot name:setSlotTestSlot }
+
+
+method_info { name: testThrow flags: NEED_ACTIVATION }
+
+method_body_info {
+    method: testThrow
+    exception: {
+        exception { from: startTry to: endTry target:catchit type:String }
+    }
+    code: 
+    {
+        getlocal0
+        pushscope
+
+        startTry:
+            pushstring "throw test"
+            throw 
+
+        endTry:
+        pushstring "FAILED"
+       
+        returnvoid
+
+        catchit:
+            getlocal0
+            pushscope
+            pushstring "caught:"
+            swap
+            add
+            findproperty PASS
+            swap
+            callproperty PASS 1
+
+        endit:
+        returnvoid
     }
 }
 
-
-function main() {
-    getlocal0
-    pushscope
-    findproperty START 
-    pushstring "Instructions that start with the letter S through U" 
-    callpropvoid START 1
-    
-    newfunction .function_id(runTest)
-    getlocal0
-    call 0
-    
-    newfunction .function_id(runTest1)
-    getlocal0
-    call 0
-    
-    newfunction .function_id(runTest2)
-    getlocal0
-    call 0
-    
-    findproperty END
-    callpropvoid END 0
+function typeofTestFunction()
+{
     returnvoid
 }
+
 
 function runTest()
 {
@@ -42,7 +54,7 @@ function runTest()
     pushstring "setglobalslot"
     pushnull // expected
     pushnull
-    setglobalslot .slot_id(setSlotTestSlot)
+    setglobalslot 2
     findproperty setSlotTestSlot
     getproperty setSlotTestSlot
     callpropvoid COMPARE_STRICTEQ 3
@@ -55,7 +67,7 @@ function runTest()
     setproperty setpropertyTestVar
 
     findproperty setpropertyTestVar
-    getslot .slot_id(setpropertyTestVar)
+    getslot 1
     callpropvoid COMPARE_STRICTEQ 3
 
     findproperty COMPARE_STRICTEQ
@@ -63,7 +75,7 @@ function runTest()
     pushnull // expected
     findproperty setSlotTestSlot
     pushnull
-    setslot .slot_id(setSlotTestSlot)
+    setslot 2
     findproperty setSlotTestSlot
     getproperty setSlotTestSlot
     callpropvoid COMPARE_STRICTEQ 3
@@ -172,7 +184,7 @@ function runTest2()
     callpropvoid COMPARE_STRICTEQ 3
     */
 
-    newfunction .function_id(testThrow)
+    newfunction testThrow
     getlocal0
     call 0
 
@@ -203,43 +215,36 @@ function runTest2()
     returnvoid
 }
 
-.method_info { name: testThrow flags: NEED_ACTIVATION }
 
-.method_body_info {
-    method: .function_id(testThrow)
-    exception: {
-        .exception { from: startTry to: endTry target:catch type:String }
-    }
-    code: 
-    {
-        getlocal0
-        pushscope
 
-        startTry:
-            pushstring "throw test"
-            throw 
 
-        endTry:
-        pushstring "FAILED"
-        .print
-        returnvoid
-
-        catch:
-            getlocal0
-            pushscope
-            pushstring "caught:"
-            swap
-            add
-            findproperty PASS
-            swap
-            callproperty PASS 1
-
-        endit:
-        returnvoid
-    }
-}
-
-function typeofTestFunction()
-{
+function main() {
+    getlocal0
+    pushscope
+    findproperty START 
+    pushstring "Instructions that start with the letter S through U" 
+    callpropvoid START 1
+    
+    newfunction runTest
+    getlocal0
+    call 0
+    
+    newfunction runTest1
+    getlocal0
+    call 0
+    
+    newfunction runTest2
+    getlocal0
+    call 0
+    
+    findproperty END
+    callpropvoid END 0
     returnvoid
+}
+script_info {
+init: main
+    traits: {
+        trait { kind: Trait_Slot name:setpropertyTestVar slot_id:1 }
+        trait { kind: Trait_Slot name:setSlotTestSlot slot_id:2 }
+    }
 }

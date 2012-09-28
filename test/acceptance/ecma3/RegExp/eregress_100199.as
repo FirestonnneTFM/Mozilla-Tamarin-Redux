@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 17 September 2001
  *
@@ -16,15 +17,12 @@
  */
 //-----------------------------------------------------------------------------
 
-var SECTION = "eregress_100199";
-var VERSION = "";
-var TITLE   = "[], [^] are valid RegExp conditions. Should not cause errors -";
-var bug = "100199";
+// var SECTION = "eregress_100199";
+// var VERSION = "";
+// var TITLE   = "[], [^] are valid RegExp conditions. Should not cause errors -";
+// var bug = "100199";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -39,214 +37,214 @@ function getTestCases() {
 
       /*pattern = /[]/;
       string = 'abc';
-      status = inSection(1);
+   //    status = inSection(1);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = '';
-      status = inSection(2);
+   //    status = inSection(2);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = '[';
-      status = inSection(3);
+   //    status = inSection(3);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = '/';
-      status = inSection(4);
+   //    status = inSection(4);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = '[';
-      status = inSection(5);
+   //    status = inSection(5);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = ']';
-      status = inSection(6);
+   //    status = inSection(6);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = '[]';
-      status = inSection(7);
+   //    status = inSection(7);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = '[ ]';
-      status = inSection(8);
+   //    status = inSection(8);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = '][';
-      status = inSection(9);
+   //    status = inSection(9);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
 
     pattern = /a[]/;
       string = 'abc';
-      status = inSection(10);
+   //    status = inSection(10);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = '';
-      status = inSection(11);
+   //    status = inSection(11);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = 'a[';
-      status = inSection(12);
+   //    status = inSection(12);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = 'a[]';
-      status = inSection(13);
+   //    status = inSection(13);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = '[';
-      status = inSection(14);
+   //    status = inSection(14);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = ']';
-      status = inSection(15);
+   //    status = inSection(15);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = '[]';
-      status = inSection(16);
+   //    status = inSection(16);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = '[ ]';
-      status = inSection(17);
+   //    status = inSection(17);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = '][';
-      status = inSection(18);
+   //    status = inSection(18);
       actualmatch = string.match(pattern);
       expectedmatch = null;
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
 
     pattern = /[^]/;
       string = 'abc';
-      status = inSection(19);
+   //    status = inSection(19);
       actualmatch = string.match(pattern);
       expectedmatch = Array('a');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
       string = '';
-      status = inSection(20);
+   //    status = inSection(20);
       actualmatch = string.match(pattern);
       expectedmatch = null; //there are no characters to test against the condition
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = '\/';
-      status = inSection(21);
+   //    status = inSection(21);
       actualmatch = string.match(pattern);
       expectedmatch = Array('/');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
       string = '\[';
-      status = inSection(22);
+   //    status = inSection(22);
       actualmatch = string.match(pattern);
       expectedmatch = Array('[');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
       string = '[';
-      status = inSection(23);
+   //    status = inSection(23);
       actualmatch = string.match(pattern);
       expectedmatch = Array('[');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
       string = ']';
-      status = inSection(24);
+   //    status = inSection(24);
       actualmatch = string.match(pattern);
       expectedmatch = Array(']');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
       string = '[]';
-      status = inSection(25);
+   //    status = inSection(25);
       actualmatch = string.match(pattern);
       expectedmatch = Array('[');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
       string = '[ ]';
-      status = inSection(26);
+   //    status = inSection(26);
       actualmatch = string.match(pattern);
       expectedmatch = Array('[');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
       string = '][';
-      status = inSection(27);
+   //    status = inSection(27);
       actualmatch = string.match(pattern);
       expectedmatch = Array(']');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());*/
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());*/
 
 
     pattern = /a[^]/;
       string = 'abc';
-      status = inSection(28);
+   //    status = inSection(28);
       actualmatch = string.match(pattern);
       expectedmatch = Array('ab');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
       string = '';
-      status = inSection(29);
+   //    status = inSection(29);
       actualmatch = string.match(pattern);
       expectedmatch = null; //there are no characters to test against the condition
-      array[item++] = new TestCase(SECTION, status, expectedmatch, actualmatch);
+      array[item++] = Assert.expectEq( status, expectedmatch, actualmatch);
 
       string = 'a[';
-      status = inSection(30);
+   //    status = inSection(30);
       actualmatch = string.match(pattern);
       expectedmatch = Array('a[');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
       string = 'a]';
-      status = inSection(31);
+   //    status = inSection(31);
       actualmatch = string.match(pattern);
       expectedmatch = Array('a]');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
       string = 'a[]';
-      status = inSection(32);
+   //    status = inSection(32);
       actualmatch = string.match(pattern);
       expectedmatch = Array('a[');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
       string = 'a[ ]';
-      status = inSection(33);
+   //    status = inSection(33);
       actualmatch = string.match(pattern);
       expectedmatch = Array('a[');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
       string = 'a][';
-      status = inSection(34);
+   //    status = inSection(34);
       actualmatch = string.match(pattern);
       expectedmatch = Array('a]');
-      array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+      array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
     return array;
 }

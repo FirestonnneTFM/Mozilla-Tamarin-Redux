@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -43,7 +43,7 @@ function f()
 /*
  * Call f as a constructor from global scope
  */
-status = inSection(1);
+//status = inSection(1);
 new f(); // sets |actual|
 expect = true;
 addThis();
@@ -51,7 +51,7 @@ addThis();
 /*
  * Now, not as a constructor
  */
-status = inSection(2);
+//status = inSection(2);
 f(); // sets |actual|
 expect = false;
 addThis();
@@ -64,7 +64,7 @@ function F()
 {
   new f();
 }
-status = inSection(3);
+//status = inSection(3);
 F(); // sets |actual|
 expect = true;
 addThis();
@@ -76,7 +76,7 @@ function G()
 {
   f();
 }
-status = inSection(4);
+//status = inSection(4);
 G(); // sets |actual|
 expect = false;
 addThis();
@@ -86,12 +86,12 @@ addThis();
  * Now make F() and G() methods of an object
  */
 var obj = {F:F, G:G};
-status = inSection(5);
+//status = inSection(5);
 obj.F(); // sets |actual|
 expect = true;
 addThis();
 
-status = inSection(6);
+//status = inSection(6);
 obj.G(); // sets |actual|
 expect = false;
 addThis();
@@ -120,15 +120,14 @@ function addThis()
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus(summary);
+  //printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

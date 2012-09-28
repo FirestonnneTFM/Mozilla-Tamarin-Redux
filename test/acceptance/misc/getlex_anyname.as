@@ -1,9 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package
 {
+    import com.adobe.test.Assert;
     result = "";
     function run_test()
     {
@@ -22,8 +22,6 @@ package
         }
     }
     run_test();
-    startTest();
-    AddTestCase("String(public::*) should throw an exception", "PASSED", result);
-    test();
+    Assert.expectEq("String(public::*) should throw an exception", "PASSED", result);
     
 }

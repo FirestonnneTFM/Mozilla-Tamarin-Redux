@@ -1,8 +1,99 @@
 /* -*- Mode: java; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
+ * ***** BEGIN LICENSE BLOCK *****
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+
+function START(summary)
+{
+      // print out bugnumber
+
+     /*if ( BUGNUMBER ) {
+              writeLineToLog ("BUGNUMBER: " + BUGNUMBER );
+      }*/
+    XML.setSettings (null);
+    testcases = new Array();
+
+    // text field for results
+    tc = 0;
+    /*this.addChild ( tf );
+    tf.x = 30;
+    tf.y = 50;
+    tf.width = 200;
+    tf.height = 400;*/
+
+    //_print(summary);
+    var summaryParts = summary.split(" ");
+    //_print("section: " + summaryParts[0] + "!");
+    //fileName = summaryParts[0];
+
+}
+
+function TEST(section, expected, actual)
+{
+    AddTestCase(section, expected, actual);
+}
+ 
+
+function TEST_XML(section, expected, actual)
+{
+  var actual_t = typeof actual;
+  var expected_t = typeof expected;
+
+  if (actual_t != "xml") {
+    // force error on type mismatch
+    TEST(section, new XML(), actual);
+    return;
+  }
+
+  if (expected_t == "string") {
+
+    TEST(section, expected, actual.toXMLString());
+  } else if (expected_t == "number") {
+
+    TEST(section, String(expected), actual.toXMLString());
+  } else {
+    reportFailure ("", 'Bad TEST_XML usage: type of expected is "+expected_t+", should be number or string');
+  }
+}
+
+function reportFailure (section, msg)
+{
+  trace("~FAILURE: " + section + " | " + msg);
+}
+
+function AddTestCase( description, expect, actual ) {
+   testcases[tc++] = Assert.expectEq(description, "|"+expect+"|", "|"+actual+"|" );
+}
+
+function myGetNamespace (obj, ns) {
+    if (ns != undefined) {
+        return obj.namespace(ns);
+    } else {
+        return obj.namespace();
+    }
+}
+
+
+
+
+function NL()
+{
+  //return java.lang.System.getProperty("line.separator");
+  return "\n";
+}
+
+
+function BUG(arg){
+  // nothing here
+}
+
+function END()
+{
+    //test();
+}
 
 START("11.1.2 - Qualified Identifiers");
 
@@ -105,48 +196,48 @@ var body = msg1.ns1::Body;
 body.ns2::GetLastTradePrice.symbol = "MACR";
 
 
-AddTestCase("body.ns2::GetLastTradePrice.symbol = \"MACR\"", "MACR",
+Assert.expectEq("body.ns2::GetLastTradePrice.symbol = \"MACR\"", "MACR",
            ( body.ns2::GetLastTradePrice.symbol.toString()));
 
 
 bodyQ = msg1[QName(ns1, "Body")];
 
-AddTestCase("ms1.ns1::Body == msg1[QName(ns1, \"Body\")]", true, (bodyQ == body));
+Assert.expectEq("ms1.ns1::Body == msg1[QName(ns1, \"Body\")]", true, (bodyQ == body));
 
-AddTestCase("msg1 == msg2", true,
+Assert.expectEq("msg1 == msg2", true,
            ( msg1 == msg2));
            
-AddTestCase("msg1.@ns1::encodingStyle", "http://schemas.xmlsoap.org/soap/encoding/",
+Assert.expectEq("msg1.@ns1::encodingStyle", "http://schemas.xmlsoap.org/soap/encoding/",
            ( msg1.@ns1::encodingStyle.toString()));
 
-AddTestCase("msg3.ns1::Body.ns2::GetLastTradePrice.@ns2", "http://www.hooping.org",
+Assert.expectEq("msg3.ns1::Body.ns2::GetLastTradePrice.@ns2", "http://www.hooping.org",
            ( msg3.ns1::Body.ns2::GetLastTradePrice.@ns2::blah.toString()));
 
 
 // Rhino behaves differently:
 
-AddTestCase("msg4.bakery.ns3::g.@*", msg5,
+Assert.expectEq("msg4.bakery.ns3::g.@*", msg5,
            ( msg4.bakery.ns3::g.@*.toString()));
            
 var x1 = <x xmlns:ns="foo" ns:v='55'><ns:a>10</ns:a><b/><ns:c/></x>;
 var ns = new Namespace("foo");
 
-AddTestCase("x1.ns::*", new XMLList("<ns:a xmlns:ns=\"foo\">10</ns:a><ns:c xmlns:ns=\"foo\"/>").toString(), x1.ns::*.toString());
+Assert.expectEq("x1.ns::*", new XMLList("<ns:a xmlns:ns=\"foo\">10</ns:a><ns:c xmlns:ns=\"foo\"/>").toString(), x1.ns::*.toString());
 
-AddTestCase("x1.ns::a", "10", x1.ns::a.toString())
+Assert.expectEq("x1.ns::a", "10", x1.ns::a.toString())
 
-AddTestCase("x1.*::a", "10", x1.*::a.toString()); // issue: assert
+Assert.expectEq("x1.*::a", "10", x1.*::a.toString()); // issue: assert
 
-AddTestCase("x1.ns::a", "20", (x1.ns::a = 20, x1.ns::a.toString()));
+Assert.expectEq("x1.ns::a", "20", (x1.ns::a = 20, x1.ns::a.toString()));
 
-AddTestCase("x1.@ns::['v']", "55", x1.@ns::['v'].toString());
+Assert.expectEq("x1.@ns::['v']", "55", x1.@ns::['v'].toString());
 
-AddTestCase("x1.@ns::['v']", "555", (x1.@ns::['v'] = '555', x1.@ns::['v'].toString()));
+Assert.expectEq("x1.@ns::['v']", "555", (x1.@ns::['v'] = '555', x1.@ns::['v'].toString()));
 
 var y1 = <y xmlns:ns="foo" a="10" b="20" ns:c="30" ns:d="40"/>
-AddTestCase("y1.@ns::*.length()", 2, y1.@ns::*.length());
+Assert.expectEq("y1.@ns::*.length()", 2, y1.@ns::*.length());
 
 var z = new XMLList("<b xmlns:ns=\"foo\"/><ns:c xmlns:ns=\"foo\"/>");
-AddTestCase("x1.*", z.toString(), (delete x1.ns::a, x1.*.toString()));
+Assert.expectEq("x1.*", z.toString(), (delete x1.ns::a, x1.*.toString()));
 
 END();

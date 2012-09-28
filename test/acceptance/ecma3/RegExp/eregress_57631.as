@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 26 November 2000
  *
@@ -13,15 +14,12 @@
  *
  */
 //-------------------------------------------------------------------------------------------------
-var SECTION = "eregress_57631";
-var VERSION = "";
-var TITLE   = "Testing new RegExp(pattern,flag) with illegal pattern or flag";
-var bug = "57631";
+// var SECTION = "eregress_57631";
+// var VERSION = "";
+// var TITLE   = "Testing new RegExp(pattern,flag) with illegal pattern or flag";
+// var bug = "57631";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -69,7 +67,7 @@ function getTestCases() {
     testIllegalRegExps(legalpatterns, illegalflags);
     testIllegalRegExps(illegalpatterns, legalflags);
     testIllegalRegExps(illegalpatterns, illegalflags);
-    Array[item++] = new TestCase(SECTION, "Test completion status", cnSUCCESS, thisError);
+    Array[item++] = Assert.expectEq( "Test completion status", cnSUCCESS, thisError);
     //-------------------------------------------------------------------------------------------------
 
 
@@ -99,7 +97,7 @@ function getTestCases() {
           }
           finally
           {
-            array[item++] = new TestCase(SECTION, status, expect, actual);
+            array[item++] = Assert.expectEq( status, expect, actual);
           }
         }
       }

@@ -5,7 +5,7 @@
  * Contributor: Bob Clary
  */
 
-startTest();
+import com.adobe.test.Assert;
 
 var gTestfile = 'regress-162392.js';
 
@@ -30,12 +30,11 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
  
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
 
 }
 
-test();

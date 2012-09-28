@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -39,94 +39,94 @@ var x;
  * To save writing try...catch over and over, we hide all the
  * errors inside eval strings, and let testThis() catch them.
  */
-status = inSection(1);
+//status = inSection(1);
 
 testThis(function () {x = 'abc'; x()});
 
-status = inSection(2);
+//status = inSection(2);
 testThis(function () {"abc"()});
 
-status = inSection(3);
+//status = inSection(3);
 testThis(function () {x = new Date(); x()});
 
-status = inSection(4);
+//status = inSection(4);
 testThis(function () {Date(12345)()});
 
-status = inSection(5);
+//status = inSection(5);
 testThis(function () {x = Number(1); x()});
 
-status = inSection(6);
+//status = inSection(6);
 testThis(function () {1()});
 
-status = inSection(7);
+//status = inSection(7);
 testThis(function () {x = void(0); x()});
 
-status = inSection(8);
+//status = inSection(8);
 testThis(function () {void(0)()});
 
-status = inSection(9);
+//status = inSection(9);
 testThis(function () {x = Math; x()});
 
-status = inSection(10);
+//status = inSection(10);
 testThis(function () {Math()});
 
-status = inSection(11);
+//status = inSection(11);
 testThis(function () {x = Array(5); x()});
 
-status = inSection(12);
+//status = inSection(12);
 testThis(function () {x=[1,2,3,4,5]; x()});
 
-status = inSection(13);
+//status = inSection(13);
 testThis(function () {x = [1,2,3].splice(1,2); x()});
 
 
 /*
  * Same as above, but with non-empty call parentheses
  */
-status = inSection(14);
+//status = inSection(14);
 testThis(function () {x = 'abc'; x(1)});
 
-status = inSection(15);
+//status = inSection(15);
 testThis(function () {"abc"(1)});
 
-status = inSection(16);
+//status = inSection(16);
 testThis(function () {x = new Date(); x(1)});
 
-status = inSection(17);
+//status = inSection(17);
 testThis(function () {Date(12345)(1)});
 
-status = inSection(18);
+//status = inSection(18);
 testThis(function () {x = Number(1); x(1)});
 
-status = inSection(19);
+//status = inSection(19);
 testThis(function () {1(1)});
 
-status = inSection(20);
+//status = inSection(20);
 testThis(function () {x = void(0); x(1)});
 
-status = inSection(21);
+//status = inSection(21);
 testThis(function () {void(0)(1)});
 
-status = inSection(22);
+//status = inSection(22);
 testThis(function () {x = Math; x(1)});
 
-status = inSection(23);
+//status = inSection(23);
 testThis(function () {Math(1)});
 
-status = inSection(24);
+//status = inSection(24);
 testThis(function () {x = Array(5); x(1)});
 
-status = inSection(25);
+//status = inSection(25);
 testThis(function () {x=[1,2,3,4,5]; x(1)});
 
-status = inSection(26);
+//status = inSection(26);
 testThis(function () {x = [1,2,3].splice(1,2); x(1)});
 
 
 /*
  * Expression from website in original bug report above -
  */
-status = inSection(27);
+//status = inSection(27);
 var A = 1, C=2, Y=3, T=4, I=5;
 testThis(function () {(((C/A-0.3)/0.2)+((Y/A-3)/4)+((T/A)/0.05)+((0.095-I/A)/0.4))(100/6)});
 
@@ -140,27 +140,27 @@ testThis(function () {(((C/A-0.3)/0.2)+((Y/A-3)/4)+((T/A)/0.05)+((0.095-I/A)/0.4
  * Note we use checkThis() instead of testThis()
  *
  */
-status = inSection(28);
+//status = inSection(28);
 checkThis(function () {x = function (y) {return y+1;}; x("abc")});
 
-status = inSection(29);
+//status = inSection(29);
 checkThis(function () {(function (y) {return y+1;})("abc")});
 
-status = inSection(30);
+//status = inSection(30);
 
 checkThis(function () {function f(y) { function g() {return y;}; return g();}; f("abc")});
 
-status = inSection(31);
+//status = inSection(31);
 
 checkThis(function () {x = /a()/; x("abc")});
 
-status = inSection(32);
+//status = inSection(32);
 checkThis(function () {x = /a()/gi; x("abc")});
 
-status = inSection(33);
+//status = inSection(33);
 checkThis(function () {x = RegExp('a()'); x("abc")});
 
-status = inSection(34);
+//status = inSection(34);
 checkThis(function () {x = new RegExp('a()', 'gi'); x("")});
 
 
@@ -227,15 +227,14 @@ function checkThis(testFunc)
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus(summary);
+  //printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

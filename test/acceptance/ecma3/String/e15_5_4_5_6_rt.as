@@ -1,15 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "15.5.4.5-6";
-    var VERSION = "ECMA_2";
-    startTest();
-    var TITLE   = "String.prototype.charCodeAt";
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "15.5.4.5-6";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "String.prototype.charCodeAt";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -29,7 +28,7 @@ function getTestCases() {
     }catch(eP0:ReferenceError){
         thisError=eP0.toString();
     }
-    array[item++] = new TestCase( SECTION,"var obj = true; obj.__proto__.charCodeAt = String.prototype.charCodeAt; var s = ''; for ( var i = 0; i < 4; i++ ) s+= String.fromCharCode( obj.charCodeAt(i) ); s","ReferenceError: Error #1069", referenceError(thisError));
+    array[item++] = Assert.expectEq( "var obj = true; obj.__proto__.charCodeAt = String.prototype.charCodeAt; var s = ''; for ( var i = 0; i < 4; i++ ) s+= String.fromCharCode( obj.charCodeAt(i) ); s","ReferenceError: Error #1069", Utils.referenceError(thisError));
      
 
     /*var obj = true;
@@ -38,7 +37,7 @@ function getTestCases() {
     for ( var i = 0; i < 4; i++ )
         s+= String.fromCharCode( obj.charCodeAt(i) );
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                   "var obj = true; obj.__proto__.charCodeAt = String.prototype.charCodeAt; var s = ''; for ( var i = 0; i < 4; i++ ) s+= String.fromCharCode( obj.charCodeAt(i) ); s",
                                   "true",
                                   s);*/
@@ -54,7 +53,7 @@ function getTestCases() {
     }catch(eP1:Error){
         thisError=eP1.toString();
     }
-    array[item++] = new TestCase( SECTION,"var obj = 1234; obj.__proto__.charCodeAt = String.prototype.charCodeAt; var s = ''; for ( var i = 0; i < 4; i++ ) s+= String.fromCharCode( obj.charCodeAt(i) ); s", "ReferenceError: Error #1069",referenceError(thisError));
+    array[item++] = Assert.expectEq( "var obj = 1234; obj.__proto__.charCodeAt = String.prototype.charCodeAt; var s = ''; for ( var i = 0; i < 4; i++ ) s+= String.fromCharCode( obj.charCodeAt(i) ); s", "ReferenceError: Error #1069",Utils.referenceError(thisError));
      
 
     /*obj = 1234;
@@ -63,7 +62,7 @@ function getTestCases() {
     for ( var i = 0; i < 4; i++ )
         s+= String.fromCharCode( obj.charCodeAt(i) );
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                   "var obj = 1234; obj.__proto__.charCodeAt = String.prototype.charCodeAt; var s = ''; for ( var i = 0; i < 4; i++ ) s+= String.fromCharCode( obj.charCodeAt(i) ); s",
                                   "1234",
                                    s);*/
@@ -78,7 +77,7 @@ function getTestCases() {
     }catch(eP2:Error){
         thisError=eP2.toString();
     }
-    array[item++] = new TestCase( SECTION,"var obj = 1234; obj.__proto__.charCodeAt = String.prototype.charCodeAt; var s = ''; for ( var i = 0; i < 4; i++ ) s+= String.fromCharCode( obj.charCodeAt(i) ); s", "ReferenceError: Error #1069",referenceError(thisError));
+    array[item++] = Assert.expectEq( "var obj = 1234; obj.__proto__.charCodeAt = String.prototype.charCodeAt; var s = ''; for ( var i = 0; i < 4; i++ ) s+= String.fromCharCode( obj.charCodeAt(i) ); s", "ReferenceError: Error #1069",Utils.referenceError(thisError));
      
 
    /* obj = 'hello';
@@ -87,7 +86,7 @@ function getTestCases() {
     for ( var i = 0; i < 5; i++ )
         s+= String.fromCharCode( obj.charCodeAt(i) );
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                   "var obj = 'hello'; obj.__proto__.charCodeAt = String.prototype.charCodeAt; var s = ''; for ( var i = 0; i < 5; i++ ) s+= String.fromCharCode( obj.charCodeAt(i) ); s",
                                   "hello",
                                   s );*/
@@ -97,7 +96,7 @@ function getTestCases() {
     for ( var i = 0; i < 4; i++ )
         s+= String.fromCharCode( myvar.charCodeAt(i))
     
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                   "var myvar = new String(true); var s = ''; for ( var i = 0; i < 4; i++ ) s+= String.fromCharCode( myvar.charCodeAt(i) ); s",
                                   "true",
                                   s);
@@ -107,7 +106,7 @@ function getTestCases() {
     for ( var i = 0; i < 4; i++ )
         s+= String.fromCharCode( myvar.charCodeAt(i))
     
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                   "var myvar = new String(1234); var s = ''; for ( var i = 0; i < 4; i++ ) s+= String.fromCharCode( myvar.charCodeAt(i) ); s",
                                   "1234",
                                   s);
@@ -117,7 +116,7 @@ function getTestCases() {
     for ( var i = 0; i < myvar.length; i++ )
         s+= String.fromCharCode( myvar.charCodeAt(i))
     
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                   "var myvar = new String('hello'); var s = ''; for ( var i = 0; i < 4; i++ ) s+= String.fromCharCode( myvar.charCodeAt(i) ); s",
                                   "hello",
                                   s);
@@ -126,28 +125,28 @@ function getTestCases() {
     var s = '';
     s = myvar.charCodeAt(-1);
     
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                   "var myvar = new String('hello'); var s = myvar.charCodeAt(-1)",NaN,s);
 
     var myvar = new String(1234);
     var s = '';
     s = myvar.charCodeAt(0);
     
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                   "var myvar = new String(1234); var s = myvar.charCodeAt(0)",49,s);
 
     var myvar = new String(1234);
     var s = '';
     s = String.fromCharCode(myvar.charCodeAt());
     
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                   "var myvar = new String(1234); var s = String.fromCharCode(myvar.charCodeAt())","1",s);
 
     var myvar = new String(1234);
     var s = '';
     s = myvar.charCodeAt(5);
     
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                   "var myvar = new String(1234); var s = myvar.charCodeAt(5)",NaN,s);
 
     var myobj = new Object();
@@ -158,7 +157,7 @@ function getTestCases() {
     myobj[2]='l';
     myobj[3]='l';
     myobj[4]='o';
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                   "var myobj = new Object();myobj.charCodeAt = String.prototype.charCodeAt;  myobj.charCodeAt(4)",101,myobj.charCodeAt(4));
 
 

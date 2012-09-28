@@ -2,26 +2,51 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function main() {
-	getlocal0
-	pushscope
-	findproperty START 
-	pushstring "Instructions that start with the letter G" 
-	callpropvoid START 1
-	newfunction .function_id(runTest)
-	getlocal0
-	call 0
-	findproperty END
-	callpropvoid END 0
-	returnvoid
-}
 
-.script_info {
-	traits: {
-		.trait { kind: Trait_Slot  name: globalSlot1 }
+	
+
+
+method_info { name: getsuper_test }
+method_body_info {
+	method: getsuper_test
+	exception: {
+		exception { from: beginTry to: endTry target:catchNoProp }
+	}
+	code:
+	{
+		getlocal0
+		pushscope
+
+		findproperty COMPARE_STRICTEQ
+	pushstring "getsuper"
+		pushundefined // expected
+
+		findproperty Array
+		constructprop Array 0
+
+	beginTry:
+		getsuper length
+		pop
+	endTry:
+		pushstring "getsuper length"
+		findproperty PASS
+	swap
+	callpropvoid PASS 1
+		returnvoid
+	//  TODO: bad testcase?
+	catchNoProp:
+		getlocal0
+		pushscope
+		pushstring "getsuper FIXME FAIL "
+		swap
+		add
+		findproperty PASS
+	swap
+	callpropvoid PASS 1
+		returnvoid
 	}
 }
-
+	
 function runTest()
 {
 	getlocal0
@@ -47,44 +72,6 @@ function runTest()
 	constructprop Array 1
 	getproperty length
 	callpropvoid COMPARE_STRICTEQ 3
-
-	/*  TODO: assembler limitations? 
-	 *  getdescendents doesn't find what's expected.
-	 */
-	findproperty XML
-	constructprop XML 0
-	setlocal1
-
-	findproperty COMPARE_STRICTEQ
-	pushstring "getdescendents"
-	//getlocal0 // expected
-	findproperty XML
-	pushstring "<foo><bar/><baz/></foo>"
-	constructprop XML 1
-	getdescendants bar
-	getlocal1
-	ifne failgetdesc
-	pushstring "getdescendents"
-	findproperty PASS
-	swap
-	callpropvoid PASS 1
-	jump endgetdesc
-	failgetdesc:
-	pushstring "getdescendents"
-	findproperty FAIL
-	swap
-	callpropvoid FAIL 1
-	endgetdesc:
-
-
-	newfunction .function_id(getglobalslot_test)
-	getlocal0
-	call 0
-
-	newfunction .function_id(getlex_test)
-	getlocal0
-	call 0
-
 
 	pushint 392
 	setlocal 3
@@ -143,7 +130,7 @@ function runTest()
 	getslot 1
 	callpropvoid COMPARE_STRICTEQ 3
 
-	newfunction .function_id(getsuper_test)
+	newfunction getsuper_test
 	getlocal 0
 	call 0
 
@@ -201,113 +188,25 @@ function runTest()
 	returnvoid
 }
 
-.method_info { name: getglobalslot_test }
-.method_body_info {
-	method: .function_id(getglobalslot_test)
-	exception: {
-		.exception { from: beginTry to: endTry target:catchNoSlot }
-	}
-	code:
-	{
-		getlocal0
-		pushscope
 
-	beginTry:
-		findproperty COMPARE_STRICTEQ
-	pushstring "getglobalslot"
-		pushint 77 // expected
-		getglobalslot 1
-		callpropvoid COMPARE_STRICTEQ 3
-	endTry:
-		returnvoid
 
-	catchNoSlot:
-		findproperty PASS
-	swap
-	callpropvoid PASS 1
-		returnvoid
-	}
+function main() {
+	getlocal0
+	pushscope
+	findproperty START 
+	pushstring "Instructions that start with the letter G" 
+	callpropvoid START 1
+	newfunction runTest
+	getlocal0
+	call 0
+	findproperty END
+	callpropvoid END 0
+	returnvoid
 }
 
-.method_info { name: getlex_test }
-.method_body_info {
-	method: .function_id(getlex_test)
-	exception: {
-		.exception { from: beginTry to: endTry target:catchNoProp }
-	}
-	code:
-	{
-		getlocal0
-		pushscope
-
-		findproperty COMPARE_STRICTEQ
-	pushstring "getlex"
-		pushint 77 // expected
-		getlex globalSlot1
-		callpropvoid COMPARE_STRICTEQ 3
-
-	beginTry:
-		getlex noSuchProperty
-	endTry:
-		pushstring "getlex noSuchProperty: succeeded?"
-		findproperty FAIL
-	swap
-	callpropvoid FAIL 1
-		returnvoid
-	catchNoProp:
-		getlocal0
-		pushscope
-		pushstring "getlex negative case:"
-		swap
-		add
-		findproperty PASS
-	swap
-	callpropvoid PASS 1
-		returnvoid
+script_info {
+	init: main
+	traits: {
+		trait { kind: Trait_Slot  name: globalSlot1 }
 	}
 }
-	
-
-
-.method_info { name: getsuper_test }
-.method_body_info {
-	method: .function_id(getsuper_test)
-	exception: {
-		.exception { from: beginTry to: endTry target:catchNoProp }
-	}
-	code:
-	{
-		getlocal0
-		pushscope
-
-		findproperty COMPARE_STRICTEQ
-	pushstring "getsuper"
-		pushundefined // expected
-
-		findproperty Array
-		constructprop Array 0
-
-	beginTry:
-		getsuper length
-		pop
-	endTry:
-		pushstring "getsuper length"
-		findproperty PASS
-	swap
-	callpropvoid PASS 1
-		returnvoid
-	//  TODO: bad testcase?
-	catchNoProp:
-		getlocal0
-		pushscope
-		pushstring "getsuper FIXME FAIL "
-		swap
-		add
-		findproperty PASS
-	swap
-	callpropvoid PASS 1
-		returnvoid
-	}
-}
-	
-

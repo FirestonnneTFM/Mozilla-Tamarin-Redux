@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-3649-n.js';
 //-----------------------------------------------------------------------------
@@ -16,8 +16,8 @@ var expect = 'error';
 DESCRIPTION = summary;
 EXPECTED = expect;
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
  
 
 var s = "";
@@ -29,6 +29,5 @@ for (i = 0; i < 100000; i++)  {
 expect = 'No Crash';
 actual = 'No Crash';
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

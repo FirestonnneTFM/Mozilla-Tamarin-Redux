@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'nesting-1.js';
 
@@ -14,19 +15,16 @@ gTestfile = 'nesting-1.js';
    Date:               15 June 1998
 */
 
-var SECTION = "function/nesting-1.js";
-var VERSION = "JS_12";
-startTest();  var testscases=[]; var index=0;
-var TITLE   = "Regression test for 122040";
+// var SECTION = "function/nesting-1.js";
+// var VERSION = "JS_12";
+// var TITLE   = "Regression test for 122040";
 
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function f(a) {function g(b) {return a+b;}; return g;}; f(7);
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           'function f(a) {function g(b) {return a+b;}; return g;}; typeof f(7)',
           "function",
           typeof f(7) );
 
-test();
 

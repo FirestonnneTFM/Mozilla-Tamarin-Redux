@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
- 
-var SECTION = "Definitions\const";                  // provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
-var TITLE   = "Initialize a local const in function which contains an activation";       // Provide ECMA section title or a description
+import com.adobe.test.Assert;
+
+// var SECTION = "Definitions\const";                  // provide a document reference (ie, ECMA section)
+// var VERSION = "ActionScript 3.0";           // Version of JavaScript or ECMA
+// var TITLE   = "Initialize a local const in function which contains an activation";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();
 
 function constTypedFormal(arg0 : uint) : uint
 {
@@ -59,9 +59,8 @@ function constUnTypedConst()
     return c0;
 }
 
-AddTestCase("Initialize global typed function local const with formal", 11, constTypedFormal(11));
-AddTestCase("Initialize global untyped function local const with formal", 12, constUnTypedFormal(12));
-AddTestCase("Initialize global typed function local const with a const", 13, constTypedConst());
-AddTestCase("Initialize global untyped function local const with a const", 14, constUnTypedConst());
+Assert.expectEq("Initialize global typed function local const with formal", 11, constTypedFormal(11));
+Assert.expectEq("Initialize global untyped function local const with formal", 12, constUnTypedFormal(12));
+Assert.expectEq("Initialize global typed function local const with a const", 13, constTypedConst());
+Assert.expectEq("Initialize global untyped function local const with a const", 14, constUnTypedConst());
 
-test();

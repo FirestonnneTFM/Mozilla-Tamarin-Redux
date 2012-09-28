@@ -3,11 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import avmplus.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = "Vector";
-var VERSION = "AS3";
-startTest();
-writeHeaderToLog( SECTION + " bug 683507");
+// var SECTION = "Vector";
+// var VERSION = "AS3";
 
 expected = "TypeError: Error #1128";
 err = "exception not thrown";
@@ -17,9 +17,8 @@ try {
 catch (e:Error){
     err = e.toString();
 }
-AddTestCase("TypeError: Error #1128: Incorrect number of type parameters",
+Assert.expectEq("TypeError: Error #1128: Incorrect number of type parameters",
                expected,
-               parseError(err, expected.length));
+               Utils.parseError(err, expected.length));
 
 
-test();

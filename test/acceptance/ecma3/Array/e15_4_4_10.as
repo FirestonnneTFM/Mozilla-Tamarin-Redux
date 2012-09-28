@@ -1,14 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-    var VERSION = 'no version';
-    startTest();
-    var TITLE = 'String:slice';
+//     var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+//     var VERSION = 'no version';
+//     var TITLE = 'String:slice';
 
-    writeHeaderToLog('Executing script: e15_4_4_10.as');
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var count = 0;
     var testcases = new Array();
@@ -63,12 +61,11 @@
                         "               a: " + String(a) + "\n" +
                         "   actual result: " + String(b) + "\n" +
                         " expected result: " + String(c) + "\n";
-                    writeHeaderToLog(errorMessage);
                     reason = reason + errorMessage;
                     passed = false;
                 }
             }
-        var testCase = new TestCase(SECTION, testname, true, passed);
+        var testCase = Assert.expectEq( testname, true, passed);
         if (passed == false)
             testCase.reason = reason;
         return testCase;
@@ -78,9 +75,9 @@
     var b = [1,2,3,4,5,6,7,8,9,0];
 
     testcases[count++] = exhaustiveSliceTest("exhaustive slice test 1", a);
-    testcases[count++] = exhaustiveSliceTest("exhaustive slice test 2", b);                testcases[count++] = new TestCase(SECTION, "slice with end parameter undefined", "9.34,string object,,h,i,j,k", a.slice(3)+"");
-    testcases[count++] = new TestCase(SECTION, "slice with both parameters undefined", "1,2,3,4,5,6,7,8,9,0", b.slice()+"");
-    testcases[count++] = new TestCase(SECTION, "slice with start parameter undefined", "1,2,3,4,5", b.slice(undefined,5)+"");
+    testcases[count++] = exhaustiveSliceTest("exhaustive slice test 2", b);                testcases[count++] = Assert.expectEq( "slice with end parameter undefined", "9.34,string object,,h,i,j,k", a.slice(3)+"");
+    testcases[count++] = Assert.expectEq( "slice with both parameters undefined", "1,2,3,4,5,6,7,8,9,0", b.slice()+"");
+    testcases[count++] = Assert.expectEq( "slice with start parameter undefined", "1,2,3,4,5", b.slice(undefined,5)+"");
 
     //slice method can be transferred to other objects for use as method
 
@@ -95,6 +92,9 @@
     obj[5] = [];
     obj[6] = ['h','i','j','k']
 
+   // TODO: REVIEW AS4 CONVERSION ISSUE 
+    // COMMENT OUT WHOLE BLOCK SINCE IT SHOULD ONLY RUN IF NOT as3Enabled (i.e. pre AS3)
+    /* 
     if (!as3Enabled) {
         testcases[count++] = exhaustiveSliceTest("exhaustive slice test 3", obj);
     
@@ -114,12 +114,11 @@
     
         testcases[count++] = exhaustiveSliceTest("exhaustive slice test 4", obj2);
     
-        testcases[count++] = new TestCase(SECTION, "slice with end parameter undefined", "9.34,string object,,h,i,j,k", obj.slice(3)+"");
-        testcases[count++] = new TestCase(SECTION, "slice with both parameters undefined", "0,1,2,3,4,5,6,7,8,9", obj2.slice()+"");
-        testcases[count++] = new TestCase(SECTION, "slice with start parameter undefined", "0,1,2,3,4", obj2.slice(undefined,5)+"");
+        testcases[count++] = Assert.expectEq( "slice with end parameter undefined", "9.34,string object,,h,i,j,k", obj.slice(3)+"");
+        testcases[count++] = Assert.expectEq( "slice with both parameters undefined", "0,1,2,3,4,5,6,7,8,9", obj2.slice()+"");
+        testcases[count++] = Assert.expectEq( "slice with start parameter undefined", "0,1,2,3,4", obj2.slice(undefined,5)+"");
     }
-    
-    testcases[count++] = new TestCase(SECTION, "Length property of slice method", 2, Array.prototype.slice.length);
+    */
+    testcases[count++] = Assert.expectEq( "Length property of slice method", 2, Array.prototype.slice.length);
 
-    test();
 

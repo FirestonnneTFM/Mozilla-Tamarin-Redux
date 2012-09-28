@@ -38,12 +38,11 @@ package P {
  }
 
  
-var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "Public_Private_Internal_Protected_Namespace as variable attribute";       // Provide ECMA section title or a description
+// var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "Public_Private_Internal_Protected_Namespace as variable attribute";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 
@@ -51,18 +50,18 @@ startTest();                // leave this alone
 
 import P.*;
 
+import com.adobe.test.Assert;
 var game = new Game();
 
 
 
-AddTestCase( "Public Namespace as variable attribute x = 10", 10, game.nsPublic1::x);
-AddTestCase( "Public Namespace as variable attribute x = 'team1'", "team1", game.nsPublic2::x);
-AddTestCase( "Internal Namespace as variable attribute y = 10", 10, game.accintvar1());
-AddTestCase( "Internal Namespace as variable attribute y = 'team1'", "team1", game.accintvar2());
-AddTestCase( "Private Namespace as variable attribute z = 10", 10, game.accprivvar1());
-AddTestCase( "Private Namespace as variable attribute z = 'team1'", "team1", game.accprivvar2());
-AddTestCase( "Protected Namespace as variable attribute a = 10", 10, game.accprotvar1());
-AddTestCase( "Protected Namespace as variable attribute a = 'team1'", "team1", game.accprotvar2());
+Assert.expectEq( "Public Namespace as variable attribute x = 10", 10, game.nsPublic1::x);
+Assert.expectEq( "Public Namespace as variable attribute x = 'team1'", "team1", game.nsPublic2::x);
+Assert.expectEq( "Internal Namespace as variable attribute y = 10", 10, game.accintvar1());
+Assert.expectEq( "Internal Namespace as variable attribute y = 'team1'", "team1", game.accintvar2());
+Assert.expectEq( "Private Namespace as variable attribute z = 10", 10, game.accprivvar1());
+Assert.expectEq( "Private Namespace as variable attribute z = 'team1'", "team1", game.accprivvar2());
+Assert.expectEq( "Protected Namespace as variable attribute a = 10", 10, game.accprotvar1());
+Assert.expectEq( "Protected Namespace as variable attribute a = 'team1'", "team1", game.accprotvar2());
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

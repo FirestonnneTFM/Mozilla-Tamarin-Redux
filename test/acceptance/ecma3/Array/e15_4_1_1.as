@@ -1,15 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "15.4.1.1";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "Array Constructor Called as a Function";
+import com.adobe.test.Assert;
+//     var SECTION = "15.4.1.1";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "Array Constructor Called as a Function";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function ToUint32( n ) {
     n = Number( n );
@@ -26,20 +24,20 @@ function getTestCases() {
     var array:Array = new Array();
     var item:Number = 0;
 
-    array[item++] = new TestCase( SECTION,  "typeof Array(1,2)",        "object",           typeof Array(1,2) );
-    array[item++] = new TestCase( SECTION,  "(Array(1,2)).toString",    "function Function() {}",    ((Array(1,2)).toString).toString() );
+    array[item++] = Assert.expectEq(   "typeof Array(1,2)",        "object",           typeof Array(1,2) );
+    array[item++] = Assert.expectEq(   "(Array(1,2)).toString",    "function Function() {}",    ((Array(1,2)).toString).toString() );
 
 
     var thisErr:String = "no error";
     var arr:Array = Array(1,2,3);
     arr.toString = Object.prototype.toString;
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                     "var arr = Array(1,2,3); arr.toString = Object.prototype.toString; arr.toString()","[object Array]",arr.toString());
 
-    array[item++] = new TestCase( SECTION,  "(Array(1,2)).length",      2,                  (Array(1,2)).length );
-    array[item++] = new TestCase( SECTION,  "var arr = (Array(1,2)), arr[0]",  1,           (arr = (Array(1,2)), arr[0] ) );
-    array[item++] = new TestCase( SECTION,  "var arr = (Array(1,2)), arr[1]",  2,           (arr = (Array(1,2)), arr[1] ) );
-    array[item++] = new TestCase( SECTION,  "var arr = (Array(1,2)), String(arr)",  "1,2",  (arr = (Array(1,2)), String(arr) ) );
+    array[item++] = Assert.expectEq(   "(Array(1,2)).length",      2,                  (Array(1,2)).length );
+    array[item++] = Assert.expectEq(   "var arr = (Array(1,2)), arr[0]",  1,           (arr = (Array(1,2)), arr[0] ) );
+    array[item++] = Assert.expectEq(   "var arr = (Array(1,2)), arr[1]",  2,           (arr = (Array(1,2)), arr[1] ) );
+    array[item++] = Assert.expectEq(   "var arr = (Array(1,2)), String(arr)",  "1,2",  (arr = (Array(1,2)), String(arr) ) );
 
     return ( array );
 }

@@ -17,16 +17,14 @@
 //-------------------------------------------------------------------------------------------------
 
 import flash.system.Capabilities;
+import com.adobe.test.Assert;
 
-var SECTION = "class_006";
-var VERSION = "";
-var TITLE   = "Testing the internal [[Class]] property of objects";
-var bug = "(none)";
+// var SECTION = "class_006";
+// var VERSION = "";
+// var TITLE   = "Testing the internal [[Class]] property of objects";
+// var bug = "(none)";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -45,7 +43,7 @@ function getTestCases() {
     status = 'new Function()';
     actual = getJSClass(new Function());
     expect = 'Function';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     
     
@@ -75,7 +73,8 @@ function getJSClass(obj)
 
 
 function findType(obj)
-{
+{    // TODO: REVIEW AS4 CONVERSION ISSUE 
+  var cnObjectToString = Object.prototype.toString;
   return ((cnObjectToString.apply(obj)).substring(0,16)+"]");
 }
 

@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'regexparg-2-n.js';
 
@@ -17,21 +18,18 @@ gTestfile = 'regexparg-2-n.js';
    Date:               15 June 1998
 */
 
-var SECTION = "JS_1.2";
-var VERSION = "JS_1.2";
-startTest();  var testscases=[]; var index=0;
-var TITLE   = "The variable statement";
+// var SECTION = "JS_1.2";
+// var VERSION = "JS_1.2";
+// var TITLE   = "The variable statement";
 
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function f(x) {return x;}
 
 x = f(/abc/);
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "function f(x) {return x;}; x = f(/abc/); x",
           /abc/.toString(),
           x.toString() );
 
-test();
 

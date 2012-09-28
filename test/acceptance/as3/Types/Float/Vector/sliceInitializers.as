@@ -3,19 +3,17 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 include "../floatUtil.as";
 
 
-var SECTION = "";
-var VERSION = "AS3";
-var TITLE   = "Vector.slice with float";
+// var SECTION = "";
+// var VERSION = "AS3";
+// var TITLE   = "Vector.slice with float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
-AddTestCase(
+Assert.expectEq(
     "verify Vector<float> return type",
     true,
     new<float>[3.14,2.73,9999,.0001,1e13].slice(3,-1) is Vector.<float>)
 
-test();

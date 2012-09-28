@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'toString-001.js';
 
@@ -18,23 +19,21 @@ gTestfile = 'toString-001.js';
    Date:               12 november 1997
 */
 
-var SECTION = "JS1_2";
-var VERSION = "JS1_2";
-startTest();  var testscases=[]; var index=0;
-var TITLE   = "Object.toString()";
+// var SECTION = "JS1_2";
+// var VERSION = "JS1_2";
+// var TITLE   = "Object.toString()";
 
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var o = new Object();
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "var o = new Object(); o.toString()",
           "[object Object]",
           o.toString() );
 
 o = {};
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "o = {}; o.toString()",
           "[object Object]",
           o.toString() );
@@ -43,7 +42,7 @@ testcases[index++] = new TestCase( SECTION,
 o = { name:"object", length:0, value:"hello",
       toString:function (){return this.value+''} }
 
-  testcases[index++] = new TestCase( SECTION,
+  Assert.expectEq( 
         "o = { name:\"object\", length:0, value:\"hello\", "+
         "toString:new Function( \"return this.value+''\" ) }; o.toString()",
         "hello",
@@ -51,7 +50,6 @@ o = { name:"object", length:0, value:"hello",
 
 
 
-test();
 
 
 

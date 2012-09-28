@@ -2,19 +2,31 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/*
- *  Test trait definitions, function lookup by name,
- *  explicit function-level metadata
- */
-.script_info
+
+
+method_info
 {
-	init : .function_id(main)
-	//  trait_count accumulated and set by the assembler, 
-	//  can also be specified
-	traits: {
-	.trait{ kind:Trait_Slot name:x slot_id:1 type_name:String}
-	.trait{ kind:Trait_Slot name:foo slot_id:3 type_name:*}
+name:foo
+	return_type:int
+	//param_count:2
+	//param_type:{int, int}
+	
+}
+
+method_body_info {
+	method: foo
+	max_stack:3 local_count:3 init_scope_depth:1 max_scope_depth:2 
+	code:
+	{
+		getlocal0
+		pushscope
+//		findpropstrict      {package,private}::print
+		getglobalscope
+		getslot             1  //  NOTE: lexical scoping!
+//		callpropvoid        {package,private}::print 1
+		returnvoid
 	}
+
 }
 
 /*
@@ -30,12 +42,12 @@ function main():*
 	pushscope
 	getglobalscope
 	debugfile "zuul"
-	newfunction         .function_id(foo)
-	setslot             .slot_id(foo)
+	newfunction         foo
+	setslot             3
 	pushstring          "hello, x-land"
 	getglobalscope
 	swap
-	setslot             .slot_id(x)
+	setslot             1
 	debugline 9
 	findpropstrict      foo
 	getlocal0
@@ -45,29 +57,19 @@ function main():*
 }
 
 
-.method_info
+/*
+ *  Test trait definitions, function lookup by name,
+ *  explicit function-level metadata
+ */
+script_info
 {
-	return_type:int
-	//param_count:2
-	//param_type:{int, int}
-	name:foo
-}
-
-.method_body_info {
-	max_stack:3 local_count:3 init_scope_depth:1 max_scope_depth:2 
-	method: .function_id(foo)
-	code:
-	{
-		getlocal0
-		pushscope
-		findpropstrict      {package,private}::print
-		getglobalscope
-		getslot             .slot_id(x)  //  NOTE: lexical scoping!
-		callpropvoid        {package,private}::print 1
-		returnvoid
-	}
-	traits : {
-		.trait { kind:Trait_Slot name:poot type_name:String slot_id:1}
+	init : main
+	//  trait_count accumulated and set by the assembler, 
+	//  can also be specified
+	traits: {
+	trait{ kind:Trait_Slot name:x slot_id:1 type_name:String}
+	trait { kind:Trait_Slot name:poot type_name:String slot_id:1}
+	trait{ kind:Trait_Slot name:foo slot_id:3 type_name:*}
 	}
 }
 

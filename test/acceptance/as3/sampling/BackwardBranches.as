@@ -10,15 +10,16 @@ package {
 
     import flash.sampler.*
     import avmplus.*
+    import com.adobe.test.Assert;
 
-    var SECTION = "Sampling";
-    var VERSION = "AS3";
-    var TITLE   = "backward branches";
+    /*Skipped test*/
+
+//     var SECTION = "Sampling";
+//     var VERSION = "AS3";
+//     var TITLE   = "backward branches";
 
     var isdebugger=System.isDebugger();
 
-    startTest();
-    writeHeaderToLog("Sampling backward branches tests");
 
     var callcount:uint=0;
     var samplescount:uint=0;
@@ -55,8 +56,7 @@ package {
     pauseSampling();
     totaltime=getTimer()-totaltime-stoppagetime;
     samplescount+=getSampleCount();
-    AddTestCase("assert the number of samples is greater than 20, actual is "+samplescount,
+    Assert.expectEq("assert the number of samples is greater than 20, actual is "+samplescount,
         true,
         samplescount>20);
-    test();
 }

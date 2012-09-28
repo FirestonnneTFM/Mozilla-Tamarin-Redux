@@ -18,13 +18,12 @@
     import flash.errors.EOFError
     import flash.errors.IOError
     import avmplus.File
+import com.adobe.test.Assert;
 
-    var SECTION = "ByteArray";
-    var VERSION = "as3";
-    startTest();
-    var TITLE   = "test ByteArray class";
+//     var SECTION = "ByteArray";
+//     var VERSION = "as3";
+//     var TITLE   = "test ByteArray class";
 
-    writeHeaderToLog( SECTION + " "+ TITLE );
 
 // Utility to make and pad a ByteArray
 function makeByteArray(padding=0) : ByteArray
@@ -42,7 +41,7 @@ function expectRangeError(tag, thunk)
     try                   { thunk(); }
     catch (e: RangeError) { exn_ok = "OK"; }
     catch (e)             { exn_ok = "Wrong type"; }
-    AddTestCase(tag, "OK", exn_ok);
+    Assert.expectEq(tag, "OK", exn_ok);
 }
 
 // Utility to test for EOFError
@@ -52,7 +51,7 @@ function expectEOF(tag, thunk)
     try                 { thunk(); }
     catch (e: EOFError) { exn_ok = "OK"; }
     catch (e)           { exn_ok = "Wrong type"; }
-    AddTestCase(tag, "OK", exn_ok);
+    Assert.expectEq(tag, "OK", exn_ok);
 }
 
 // Utility to test for IOError
@@ -62,13 +61,13 @@ function expectIOError(tag, thunk)
     try                { thunk(); }
     catch (e: IOError) { exn_ok = "OK"; }
     catch (e)          { exn_ok = "Wrong type"; }
-    AddTestCase(tag, "OK", exn_ok);
+    Assert.expectEq(tag, "OK", exn_ok);
 }
 
 function testBasicProperties() {
     var bytearray:ByteArray=new ByteArray();
 
-    AddTestCase(
+    Assert.expectEq(
       "ByteArray constructor no args",
       true,
       bytearray!=null
@@ -76,26 +75,26 @@ function testBasicProperties() {
 
     // operations on empty bytearray
 
-    AddTestCase(
+    Assert.expectEq(
       "ByteArray length of empty",
       0,
       bytearray.length);
 
-    AddTestCase(
+    Assert.expectEq(
       "ByteArray toString empty",
       "",
       bytearray.toString())
 
-    AddTestCase(
+    Assert.expectEq(
       "ByteArray available on empty",
       0,
       bytearray.bytesAvailable);
 
-    AddTestCase("ByteArray position on empty",
+    Assert.expectEq("ByteArray position on empty",
         0,
         bytearray.position);
 
-    AddTestCase("ByteArray endianness on empty",
+    Assert.expectEq("ByteArray endianness on empty",
         "bigEndian",
         bytearray.endian);
 }
@@ -109,14 +108,14 @@ function testSetLengthAndPosition() {
 
     bytearray.writeByte(1);
     bytearray.writeByte(2);
-    AddTestCase("ByteArray trivial length",
+    Assert.expectEq("ByteArray trivial length",
         2,
         bytearray.length);
-    AddTestCase("ByteArray trivial position",
+    Assert.expectEq("ByteArray trivial position",
         2,
         bytearray.position);
     bytearray.length = 0;
-    AddTestCase("ByteArray position after clearing",
+    Assert.expectEq("ByteArray position after clearing",
         0,
         bytearray.position);
 
@@ -124,10 +123,10 @@ function testSetLengthAndPosition() {
 
     bytearray.length = 0;
     bytearray.position = 47;
-    AddTestCase("ByteArray position can exceed length, #1",
+    Assert.expectEq("ByteArray position can exceed length, #1",
         47,
         bytearray.position);
-    AddTestCase("ByteArray position can exceed length, #2",
+    Assert.expectEq("ByteArray position can exceed length, #2",
         0,
         bytearray.length);
 
@@ -136,16 +135,16 @@ function testSetLengthAndPosition() {
 
     bytearray.writeByte(12);
 
-    AddTestCase("ByteArray position can exceed length, #3",
+    Assert.expectEq("ByteArray position can exceed length, #3",
         48,
         bytearray.position);
-    AddTestCase("ByteArray position can exceed length, #4",
+    Assert.expectEq("ByteArray position can exceed length, #4",
         48,
         bytearray.length);
-    AddTestCase("ByteArray position can exceed length, #5",
+    Assert.expectEq("ByteArray position can exceed length, #5",
         0,
         bytearray[11]);
-    AddTestCase("ByteArray position can exceed length, #6",
+    Assert.expectEq("ByteArray position can exceed length, #6",
         12,
         bytearray[47]);
 }
@@ -157,22 +156,22 @@ function testBoolean()
     var bytearray:ByteArray=makeByteArray();
     bytearray.writeBoolean(true);
     bytearray.writeBoolean(false);
-    AddTestCase("ByteArray position after writing Booleans",
+    Assert.expectEq("ByteArray position after writing Booleans",
         2,
         bytearray.position);
 
     bytearray.position=0;
-    AddTestCase(
+    Assert.expectEq(
       "ByteArray move position to 0",
       0,
       bytearray.position);
 
-    AddTestCase(
+    Assert.expectEq(
       "ByteArray write/read boolean true",
       true,
       bytearray.readBoolean());
 
-    AddTestCase(
+    Assert.expectEq(
       "ByteArray write/read boolean false",
       false,
       bytearray.readBoolean());
@@ -191,13 +190,13 @@ function testShort()
         bytearray.writeShort(100);
         bytearray.writeShort(-200);
         bytearray.position=offset;
-        AddTestCase("ByteArray readShort_1 #1 " + endian,
+        Assert.expectEq("ByteArray readShort_1 #1 " + endian,
                     100,
                     bytearray.readShort());
-        AddTestCase( "ByteArray readShort_1 #2 " + endian,
+        Assert.expectEq( "ByteArray readShort_1 #2 " + endian,
                      -200,
                      bytearray.readShort());
-        AddTestCase("ByteArray readShort_1 #3" + endian,
+        Assert.expectEq("ByteArray readShort_1 #3" + endian,
                     4+offset,
                     bytearray.position);
     }
@@ -212,13 +211,13 @@ function testShort()
         bytearray.writeShort(int(0xFEDC));
         bytearray.position=offset;
         bytearray.endian = "littleEndian";
-        AddTestCase("ByteArray readShort_2 #1",
+        Assert.expectEq("ByteArray readShort_2 #1",
                     int(0x3412),
                     bytearray.readShort());
-        AddTestCase("ByteArray readShort_2 #2",
+        Assert.expectEq("ByteArray readShort_2 #2",
                     int(0xFFFFDCFE),   // Sign extended
                     bytearray.readShort());
-        AddTestCase("ByteArray readShort_2 #3",
+        Assert.expectEq("ByteArray readShort_2 #3",
                     4+offset,
                     bytearray.position);
     }
@@ -260,13 +259,13 @@ function testUnsignedShort()
         bytearray.writeShort(100);
         bytearray.writeShort(uint(-200) & 65535);
         bytearray.position=offset;
-        AddTestCase("ByteArray readUShort_1 #1 " + endian,
+        Assert.expectEq("ByteArray readUShort_1 #1 " + endian,
                     uint(100),
                     bytearray.readUnsignedShort());
-        AddTestCase("ByteArray readUShort_1 #2 " + endian,
+        Assert.expectEq("ByteArray readUShort_1 #2 " + endian,
                     uint(-200) & 65535,
                     bytearray.readUnsignedShort());
-        AddTestCase("ByteArray readUShort_1 #3" + endian,
+        Assert.expectEq("ByteArray readUShort_1 #3" + endian,
                     4+offset,
                     bytearray.position);
     }
@@ -281,13 +280,13 @@ function testUnsignedShort()
         bytearray.writeShort(uint(0xFEDC) & 65535);
         bytearray.position=offset;
         bytearray.endian = "littleEndian";
-        AddTestCase("ByteArray readUShort_2 #1",
+        Assert.expectEq("ByteArray readUShort_2 #1",
                     uint(0x3412),
                     bytearray.readUnsignedShort());
-        AddTestCase("ByteArray readUShort_2 #2",
+        Assert.expectEq("ByteArray readUShort_2 #2",
                     uint(0xDCFE),
                     bytearray.readUnsignedShort());
-        AddTestCase("ByteArray readUShort_2 #3",
+        Assert.expectEq("ByteArray readUShort_2 #3",
                     4+offset,
                     bytearray.position);
     }
@@ -329,13 +328,13 @@ function testInt()
         bytearray.writeInt(100);
         bytearray.writeInt(-200);
         bytearray.position=offset;
-        AddTestCase("ByteArray readInt_1 #1 " + endian,
+        Assert.expectEq("ByteArray readInt_1 #1 " + endian,
                     100,
                     bytearray.readInt());
-        AddTestCase( "ByteArray readInt_1 #2 " + endian,
+        Assert.expectEq( "ByteArray readInt_1 #2 " + endian,
                      -200,
                      bytearray.readInt());
-        AddTestCase("ByteArray readInt_1 #3" + endian,
+        Assert.expectEq("ByteArray readInt_1 #3" + endian,
                     8+offset,
                     bytearray.position);
     }
@@ -350,13 +349,13 @@ function testInt()
         bytearray.writeInt(int(0xFEDCBA98));
         bytearray.position=offset;
         bytearray.endian = "littleEndian";
-        AddTestCase("ByteArray readInt_2 #1",
+        Assert.expectEq("ByteArray readInt_2 #1",
                     int(0x78563412),
                     bytearray.readInt());
-        AddTestCase("ByteArray readInt_2 #2",
+        Assert.expectEq("ByteArray readInt_2 #2",
                     int(0x98BADCFE),
                     bytearray.readInt());
-        AddTestCase("ByteArray readInt_2 #3",
+        Assert.expectEq("ByteArray readInt_2 #3",
                     8+offset,
                     bytearray.position);
     }
@@ -413,13 +412,13 @@ function testUnsignedInt()
         bytearray.writeUnsignedInt(100);
         bytearray.writeUnsignedInt(uint(-200));
         bytearray.position=offset;
-        AddTestCase("ByteArray readUnsignedInt_1 #1 " + endian,
+        Assert.expectEq("ByteArray readUnsignedInt_1 #1 " + endian,
                     100,
                     bytearray.readUnsignedInt());
-        AddTestCase("ByteArray readUnsignedInt_1 #2 " + endian,
+        Assert.expectEq("ByteArray readUnsignedInt_1 #2 " + endian,
                     uint(-200),
                     bytearray.readUnsignedInt());
-        AddTestCase("ByteArray readUnsignedInt_1 #3" + endian,
+        Assert.expectEq("ByteArray readUnsignedInt_1 #3" + endian,
                     8+offset,
                     bytearray.position);
     }
@@ -434,13 +433,13 @@ function testUnsignedInt()
         bytearray.writeUnsignedInt(uint(0xFEDCBA98));
         bytearray.position=offset;
         bytearray.endian = "littleEndian";
-        AddTestCase("ByteArray readUnsignedInt_2 #1",
+        Assert.expectEq("ByteArray readUnsignedInt_2 #1",
                     uint(0x78563412),
                     bytearray.readUnsignedInt());
-        AddTestCase("ByteArray readUnsignedInt_2 #2",
+        Assert.expectEq("ByteArray readUnsignedInt_2 #2",
                     uint(0x98BADCFE),
                     bytearray.readUnsignedInt());
-        AddTestCase("ByteArray readUnsignedInt_2 #3",
+        Assert.expectEq("ByteArray readUnsignedInt_2 #3",
                     8+offset,
                     bytearray.position);
     }
@@ -481,17 +480,17 @@ function testFloat()
         bytearray.position=offset;
         bytearray.writeFloat(1.25);
         bytearray.writeFloat(12345.5);
-        AddTestCase("ByteArray writeFloat_1 #1 " + endian,
+        Assert.expectEq("ByteArray writeFloat_1 #1 " + endian,
                     8+offset,
                     bytearray.position);
         bytearray.position=offset;
-        AddTestCase("ByteArray readFloat_1 #1 " + endian,
+        Assert.expectEq("ByteArray readFloat_1 #1 " + endian,
                     1.25,
                     bytearray.readFloat());
-        AddTestCase("ByteArray readFloat_1 #2 " + endian,
+        Assert.expectEq("ByteArray readFloat_1 #2 " + endian,
                     12345.5,
                     bytearray.readFloat());
-        AddTestCase("ByteArray readFloat_1 #3" + endian,
+        Assert.expectEq("ByteArray readFloat_1 #3" + endian,
                     8+offset,
                     bytearray.position);
     }
@@ -518,10 +517,10 @@ function testFloat()
 
         temp.position = 0;
         temp.endian = "bigEndian";
-        AddTestCase("ByteArray readFloat_2 #1",
+        Assert.expectEq("ByteArray readFloat_2 #1",
                     1.25,
                     temp.readFloat());           // read big endian
-        AddTestCase("ByteArray readFloat_2 #2",
+        Assert.expectEq("ByteArray readFloat_2 #2",
                     12345.5,
                     temp.readFloat());
     }
@@ -562,17 +561,17 @@ function testDouble()
         bytearray.position=offset;
         bytearray.writeDouble(1.25);
         bytearray.writeDouble(12345.5);
-        AddTestCase("ByteArray writeDouble_1 #1 " + endian,
+        Assert.expectEq("ByteArray writeDouble_1 #1 " + endian,
                     16+offset,
                     bytearray.position);
         bytearray.position=offset;
-        AddTestCase("ByteArray readDouble_1 #1 " + endian,
+        Assert.expectEq("ByteArray readDouble_1 #1 " + endian,
                     1.25,
                     bytearray.readDouble());
-        AddTestCase("ByteArray readDouble_1 #2 " + endian,
+        Assert.expectEq("ByteArray readDouble_1 #2 " + endian,
                     12345.5,
                     bytearray.readDouble());
-        AddTestCase("ByteArray readDouble_1 #3" + endian,
+        Assert.expectEq("ByteArray readDouble_1 #3" + endian,
                     16+offset,
                     bytearray.position);
     }
@@ -599,10 +598,10 @@ function testDouble()
 
         temp.position = 0;
         temp.endian = "bigEndian";
-        AddTestCase("ByteArray readDouble_2 #1",
+        Assert.expectEq("ByteArray readDouble_2 #1",
                     1.25,
                     temp.readDouble());           // read big endian
-        AddTestCase("ByteArray readDouble_2 #2",
+        Assert.expectEq("ByteArray readDouble_2 #2",
                     12345.5,
                     temp.readDouble());
     }
@@ -639,17 +638,17 @@ function testByte()
     bytearray.position=0;
     bytearray.writeByte(-257);
     bytearray.writeByte(37);
-    AddTestCase("testByte: ByteArray position",
+    Assert.expectEq("testByte: ByteArray position",
                 2,
                 bytearray.position);
-    AddTestCase("testByte: ByteArray length",
+    Assert.expectEq("testByte: ByteArray length",
                 2,
                 bytearray.length);
     bytearray.position=0;
-    AddTestCase( "ByteArray readByte",
+    Assert.expectEq( "ByteArray readByte",
                  -1,
                  bytearray.readByte());
-    AddTestCase( "ByteArray readByte",
+    Assert.expectEq( "ByteArray readByte",
                  37,
                  bytearray.readByte());
 
@@ -669,17 +668,17 @@ function testUnsignedByte()
     bytearray.position=0;
     bytearray.writeByte(-259);
     bytearray.writeByte(37);
-    AddTestCase("testUnsignedByte: ByteArray position",
+    Assert.expectEq("testUnsignedByte: ByteArray position",
                 2,
                 bytearray.position);
-    AddTestCase("testUnsignedByte: ByteArray length",
+    Assert.expectEq("testUnsignedByte: ByteArray length",
                 2,
                 bytearray.length);
     bytearray.position=0;
-    AddTestCase( "ByteArray readUnsignedByte",
+    Assert.expectEq( "ByteArray readUnsignedByte",
                  253,
                  bytearray.readUnsignedByte());
-    AddTestCase( "ByteArray readUnsignedByte",
+    Assert.expectEq( "ByteArray readUnsignedByte",
                  37,
                  bytearray.readUnsignedByte());
 
@@ -698,16 +697,16 @@ function testUtf()
     var bytearray:ByteArray = makeByteArray();
     bytearray.position=0;
     bytearray.writeUTF("string");
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray position of utf string",
         8,
         bytearray.position);
     bytearray.position=0;
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray length of utf string",
         8,
         bytearray.length);
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray readUTF",
         "string",
         bytearray.readUTF());
@@ -728,10 +727,10 @@ function testUtf()
     bytearray.writeByte(115);
 
     bytearray.position = 0;
-    AddTestCase("ByteArray readUTF on contents containing NUL: contents",
+    Assert.expectEq("ByteArray readUTF on contents containing NUL: contents",
                 "la",
                 bytearray.readUTF());
-    AddTestCase("ByteArray readUTF on contents containing NUL: position",
+    Assert.expectEq("ByteArray readUTF on contents containing NUL: position",
                 6,
                 bytearray.position);
 
@@ -783,7 +782,7 @@ function testUtf()
     bytearray.writeByte(0xBF);
     bytearray.writeUTFBytes("string");
     bytearray.position = 0;
-    AddTestCase("ByteArray readUTF skips UTF8 BOM after length bytes but includes it in the length",
+    Assert.expectEq("ByteArray readUTF skips UTF8 BOM after length bytes but includes it in the length",
                 "str",
                 bytearray.readUTF());
 
@@ -798,11 +797,11 @@ function testUtfBytes()
     bytearray.position=0;
     bytearray.writeUTFBytes("string");
     bytearray.position=0;
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray length of utf bytes string",
         6,
         bytearray.length);
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray readUTFBytes",
         "string",
         bytearray.readUTFBytes(6));
@@ -821,10 +820,10 @@ function testUtfBytes()
     bytearray.writeByte(115);
 
     bytearray.position = 0;
-    AddTestCase("ByteArray readUTFBytes on contents containing NUL: contents",
+    Assert.expectEq("ByteArray readUTFBytes on contents containing NUL: contents",
                 "la",
                 bytearray.readUTFBytes(4));
-    AddTestCase("ByteArray readUTFBytes on contents containing NUL: position",
+    Assert.expectEq("ByteArray readUTFBytes on contents containing NUL: position",
                 4,
                 bytearray.position);
 
@@ -849,7 +848,7 @@ function testUtfBytes()
     bytearray.writeByte(0xBF);
     bytearray.writeUTFBytes("string");
     bytearray.position = 0;
-    AddTestCase("ByteArray readUTFBytes skips UTF8 BOM but includes it in the length",
+    Assert.expectEq("ByteArray readUTFBytes skips UTF8 BOM but includes it in the length",
                 "str",
                 bytearray.readUTFBytes(6));
 
@@ -862,13 +861,13 @@ function testCompressAndUncompress() {
     var bytearray:ByteArray = makeByteArray();
     bytearray.writeUTFBytes("string");
     bytearray.compress();
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray length after compress",
         14,
         bytearray.length);
 
     bytearray.uncompress();
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray length after uncompress",
         6,
         bytearray.length);
@@ -877,26 +876,26 @@ function testCompressAndUncompress() {
     bytearray.position = 0;
     bytearray.writeUTFBytes("string");
     bytearray.deflate();
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray length after deflate",
         8,  // This is what the inflate algorithm produces on 2011-09-22, so we accept it as Truth.
         bytearray.length);
 
     bytearray.inflate();
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray length after inflate",
         6,
         bytearray.length);
 
     bytearray.length=0;
     bytearray.compress();
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray length after empty compress",
         0,
         bytearray.length);
 
     bytearray.uncompress();
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray length after empty uncompress",
         0,
         bytearray.length);
@@ -933,19 +932,19 @@ function testCompressAndUncompress() {
 
 function testEndian() {
     var bytearray:ByteArray = makeByteArray();
-    AddTestCase(
+    Assert.expectEq(
         "get default endian",
         "bigEndian",
         bytearray.endian);
 
     bytearray.endian="littleEndian";
-    AddTestCase(
+    Assert.expectEq(
         "set endian littleEndian",
         "littleEndian",
         bytearray.endian);
 
     bytearray.endian="bigEndian";
-    AddTestCase(
+    Assert.expectEq(
         "set endian bigEndian",
         "bigEndian",
         bytearray.endian);
@@ -956,11 +955,11 @@ function testEndian() {
     } catch (e) {
         err=e.toString();
     }
-    AddTestCase(
+    Assert.expectEq(
         "exception thrown when endian is to littleEndian or bigEndian",
         "ArgumentError: Error #2008",
         err.substring(0,26));
-    AddTestCase(
+    Assert.expectEq(
         "endian value is uchanged after invalid set",
         "bigEndian",
         bytearray.endian);
@@ -976,20 +975,20 @@ function testBracketSyntax() {
     bytearray.writeByte(12);
     bytearray.position = 0;
 
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray get [] syntax",
         12,
         bytearray[2]);
    
     bytearray[2]=13;
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray set [] syntax",
         13,
         bytearray[2]);
 
     // We can write negative values but should read positive values
     bytearray[2] = -13;
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray set [] / get [] syntax",
         243,
         bytearray[2]);
@@ -997,27 +996,27 @@ function testBracketSyntax() {
     // This is sad, but it is the traditional behavior: reading
     // outside the range returns undefined, it does not throw or
     // return 0.  Ergo bytearray "byte" reads are not monotyped.
-    AddTestCase("Bytearray get[] out of range",
+    Assert.expectEq("Bytearray get[] out of range",
                 undefined,
                 bytearray[3]);
 
     // When writing out of range, extend the bytearray and zero-fill
     bytearray[4] = 37;
 
-    AddTestCase("ByteArray set[] out of range: changed element",
+    Assert.expectEq("ByteArray set[] out of range: changed element",
                 37,
                 bytearray[4]);
 
-    AddTestCase("ByteArray set[] out of range: length",
+    Assert.expectEq("ByteArray set[] out of range: length",
                 5,
                 bytearray.length);
 
-    AddTestCase("ByteArray set[] out of range: zero-fill",
+    Assert.expectEq("ByteArray set[] out of range: zero-fill",
                 0,
                 bytearray[3]);
 
     // Sanity: all this reading and writing has not changed the position
-    AddTestCase("ByteArray get[] and set[]: position",
+    Assert.expectEq("ByteArray get[] and set[]: position",
                 0,
                 bytearray.position);
 
@@ -1026,12 +1025,12 @@ function testBracketSyntax() {
     v[String.prototype.toLowerCase.call("X")] = 2;  // Defeat most reasonable optimizations
     
     bytearray[v.x] = 42;
-    AddTestCase("ByteArray set[] with Atom index",
+    Assert.expectEq("ByteArray set[] with Atom index",
                 42,
                 bytearray[2]);
 
     bytearray[2] = 112;
-    AddTestCase("ByteArray get[] with Atom index",
+    Assert.expectEq("ByteArray get[] with Atom index",
                 112,
                 bytearray[v.x]);
 }
@@ -1041,7 +1040,7 @@ testBracketSyntax();
 function testLengthManipulation() {
     var bytearray:ByteArray = new ByteArray;
     bytearray.length=10;
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray empty slots filled with 0",
         0,
         bytearray[9]);
@@ -1049,7 +1048,7 @@ function testLengthManipulation() {
     var bytearray_shrink=new ByteArray;
     bytearray_shrink.length=10;
     bytearray_shrink.length=5;
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray shrink length",
         5,
         bytearray_shrink.length);
@@ -1066,18 +1065,18 @@ function testReadBytes() {
     bytearray.readBytes(bytearray2,0,0);
 
     for ( var i="a".charCodeAt(0), k=0 ; i <= "k".charCodeAt(0) ; i++, k++ )
-        AddTestCase("readBytes correct content",
+        Assert.expectEq("readBytes correct content",
                     i,
                     bytearray2[k+2]);
 
     var bytearray3:ByteArray=new ByteArray;
     var pos = bytearray.position;
     bytearray.readBytes(bytearray3,8);
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray readBytes 8 length copies values, check size",
         8,
         bytearray3.length);
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray readBytes 8 length copies values, check position",
         pos, // Position *is not* updated by readBytes()
         bytearray.position);
@@ -1107,18 +1106,18 @@ function testWriteBytes() {
 
     var bytearray4=new ByteArray;
     bytearray4.writeBytes(bytearray);
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray writeBytes: length",
         10,
         bytearray4.length);
 
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray writeBytes: position",
         10, // Position *is* updated by writeBytes()
         bytearray4.position);
 
     for ( var i=0 ; i < 10 ; i++ ) {
-        AddTestCase(
+        Assert.expectEq(
             "ByteArray writeBytes: content",
             i,
             bytearray4[i]);
@@ -1126,7 +1125,7 @@ function testWriteBytes() {
 
     var bytearray5=new ByteArray;
     bytearray5.writeBytes(bytearray,1,5);
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray writeBytes",
         5,
         bytearray5.length);
@@ -1141,11 +1140,11 @@ function testHasAtomProperty() {
     bytearray_atom.writeByte(1);
     bytearray_atom.writeByte(2);
     bytearray_atom.writeByte(3);
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray hasAtomProperty true",
         true,
         1 in bytearray_atom);
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray hasAtomProperty false",
         false,
         5 in bytearray_atom);
@@ -1161,7 +1160,7 @@ function testFileIO() {
 
     File.writeByteArray('test.ba', bytearray_atom);
     var bytearray_read:ByteArray=File.readByteArray('test.ba');
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray read/writeFile",
         3,
         bytearray_read.length);
@@ -1172,7 +1171,7 @@ function testFileIO() {
     } catch (e) {
         err2=e.toString();
     }
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray read/writeFile exception",
         "Error: Error #1500",
         err2.substring(0,18));
@@ -1191,7 +1190,7 @@ function testBOM() {
     bytearray_bom[4]=97;
     bytearray_bom[5]=110;
     bytearray_bom[6]=33;
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray with bom toString",
         "dan!",
         bytearray_bom.toString());
@@ -1201,7 +1200,7 @@ function testBOM() {
     bytearray_str[1]=97;
     bytearray_str[2]=110;
     bytearray_str[3]=33;
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray with no bom toString",
         "dan!",
         bytearray_str.toString());
@@ -1215,7 +1214,7 @@ function testBOM() {
     bytearray_bad[4]=0xE4; // 19968
     bytearray_bad[5]=0xB8;
     bytearray_bad[6]=0x80;
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray with partial bad utf-8 sequence",
         "\u4e00\u00E4\u4e00",
         bytearray_bad.toString());
@@ -1224,7 +1223,7 @@ function testBOM() {
     bytearray_bad = new ByteArray();
     bytearray_bad[0]=0xE4; // truncated sequence
     bytearray_bad[1]=0xB8;
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray with truncated utf-8 sequence",
         "\u00E4\u00B8",
         bytearray_bad.toString());
@@ -1239,7 +1238,7 @@ function testBOM() {
     bytearray_bad[5]=0xE4; // 19968
     bytearray_bad[6]=0xB8;
     bytearray_bad[7]=0x80;
-    AddTestCase(
+    Assert.expectEq(
         "ByteArray with out-of-range utf-8 sequence",
         "\udbbf\udfff\u00BF\u4e00",
         bytearray_bad.toString());
@@ -1275,16 +1274,15 @@ function testBOM() {
                       bytearray_compress[5]==110 &&
                       bytearray_compress[6]==33
         );
-    AddTestCase("ByteArray.compress bytearray length is different",
+    Assert.expectEq("ByteArray.compress bytearray length is different",
                 origlength==compresslength,false);
-    AddTestCase("ByteArray.compress bytearray contents differ",
+    Assert.expectEq("ByteArray.compress bytearray contents differ",
                 compressstate,false);
-    AddTestCase("ByteArray.uncompress bytearray length matches before compress",
+    Assert.expectEq("ByteArray.uncompress bytearray length matches before compress",
                 origlength,restoredlength);
-    AddTestCase("ByteArray.uncompress uncompressing compressed string matches original",
+    Assert.expectEq("ByteArray.uncompress uncompressing compressed string matches original",
                 restorestate,true);
 }
 
 testBOM();
  
-test();

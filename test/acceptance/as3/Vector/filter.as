@@ -1,6 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 /**
    File Name:    filter.es
    Description:  filter(object,checker,thisobj)
@@ -11,12 +13,10 @@
      returns a new vector object containing the elements that were collected in the order
      they were collected.
    */
-var SECTION="";
-var VERSION = "ECMA_1";
+// var SECTION="";
+// var VERSION = "ECMA_1";
 
-startTest();
 
-writeHeaderToLog( " Vector.filter()");
 
 function EvenChecker(value,index,obj) {
   if (value%2==0)
@@ -36,9 +36,9 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(    "filter checker is undefined",
+Assert.expectEq(    "filter checker is undefined",
         "ArgumentError: Error #1063",
-    parseError(errormsg,"ArgumentError: Error #1063".length));
+    Utils.parseError(errormsg,"ArgumentError: Error #1063".length));
 
 var v1:Vector.<int>=new Vector.<int>(10);
 for (var i=0;i<10;i++) v1[i]=i;
@@ -48,34 +48,34 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(    "filter checker is not a function",
+Assert.expectEq(    "filter checker is not a function",
         "TypeError: Error #1034",
-              parseError(errormsg,"TypeError: Error #1034".length));
+              Utils.parseError(errormsg,"TypeError: Error #1034".length));
 
 var v1:Vector.<int>=new Vector.<int>();
 var result=v1.filter(EvenChecker);
-AddTestCase(    "filter empty vector",
+Assert.expectEq(    "filter empty vector",
         "",
         result.toString());
 
 var v1:Vector.<int>=new Vector.<int>();
 for (var i=0;i<10;i++) v1[i]=i;
 var result=v1.filter(EvenChecker);
-AddTestCase(    "filter small vector",
+Assert.expectEq(    "filter small vector",
         "0,2,4,6,8",
         result.toString());
 
 var vn:Vector.<Number>=new Vector.<Number>();
 for (var i=0;i<10;i++) vn[i]=i;
 var result=vn.filter(EvenChecker);
-AddTestCase("filter small Number vector",
+Assert.expectEq("filter small Number vector",
         "0,2,4,6,8",
         result.toString());
 
 var vu:Vector.<uint>=new Vector.<uint>();
 for (var i=0;i<10;i++) vu[i]=i;
 var result=vu.filter(EvenChecker);
-AddTestCase(    "filter small vector",
+Assert.expectEq(    "filter small vector",
         "0,2,4,6,8",
         result.toString());
 
@@ -85,7 +85,7 @@ var myobject=new Object();
 myobject.message="message";
 var msg="";
 var result=v1.filter(ThisChecker,myobject);
-AddTestCase(    "filter use thisobj",
+Assert.expectEq(    "filter use thisobj",
         "messagemessagemessage",
         msg);
 
@@ -100,7 +100,7 @@ var filtered:Vector.<String> = items.filter(function(item:String, index:int,
                                             {
                                                 return item == "two";
                                             });
-AddTestCase("Bug 513095: Type-check filter function",
+Assert.expectEq("Bug 513095: Type-check filter function",
             "two",
             filtered.toString()
             );
@@ -128,10 +128,9 @@ class TestClass {
 var v2 = new <TestClass> [new TestClass(150), new TestClass(40), new TestClass(-200), new TestClass(400)];
 var v2filtered = v2.filter(TestClass.over100);
 
-AddTestCase("Filtered custom class",
+Assert.expectEq("Filtered custom class",
             "150,400",
             v2filtered.toString()
             );
 
 
-test();

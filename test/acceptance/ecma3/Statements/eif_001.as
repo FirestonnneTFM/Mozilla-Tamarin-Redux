@@ -1,17 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "for-001";
-    var VERSION = "ECMA_2";
-    var TITLE   = "The if  statement";
+import com.adobe.test.Assert;
+//     var SECTION = "for-001";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "The if  statement";
     var BUGNUMBER="148822";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
     
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -25,8 +23,8 @@ function getTestCases() {
         result = "failed:  a = b should return 0";
     }
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+        
         "if ( a = b ), where a and b are both equal to 0",
         "passed",
         result );

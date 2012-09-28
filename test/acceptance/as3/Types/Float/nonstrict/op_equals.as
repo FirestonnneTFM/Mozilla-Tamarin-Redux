@@ -3,15 +3,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 include "floatUtil.as";
 
 
-var SECTION = "6.8.1";
-var VERSION = "AS3";
-var TITLE   = "The == operator";
+// var SECTION = "6.8.1";
+// var VERSION = "AS3";
+// var TITLE   = "The == operator";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var zerof:float = 0.0;
 var onef:float = 1.0;
@@ -40,148 +39,147 @@ function equals(val1, val2)
 */
 
 // i.   If x is float.NaN, return false.
-AddTestCase("float.NaN == 1f", false, (float.NaN == onef));
-AddTestCase("float.NaN == float.NaN", false, (float.NaN == float.NaN));
-AddTestCase("float.NaN == float.POSITIVE_INFINITY+float.NEGATIVE_INFINITY", false, (float.NaN==float.POSITIVE_INFINITY+float.NEGATIVE_INFINITY));
-AddTestCase("float.NaN == zerof", false, (float.NaN == zerof));
+Assert.expectEq("float.NaN == 1f", false, (float.NaN == onef));
+Assert.expectEq("float.NaN == float.NaN", false, (float.NaN == float.NaN));
+Assert.expectEq("float.NaN == float.POSITIVE_INFINITY+float.NEGATIVE_INFINITY", false, (float.NaN==float.POSITIVE_INFINITY+float.NEGATIVE_INFINITY));
+Assert.expectEq("float.NaN == zerof", false, (float.NaN == zerof));
 
 // ii.  If y is float.NaN, return false.
-AddTestCase("1f == float.NaN", false, (1f == float.NaN));
-AddTestCase("float.MIN_VALUE == float.NaN", false, (float.MIN_VALUE == float.NaN));
-AddTestCase("float.POSITIVE_INFINITY+float.NEGATIVE_INFINITY==float.NaN", false, (float.POSITIVE_INFINITY+float.NEGATIVE_INFINITY==float.NaN));
-AddTestCase("zerof == float.NaN", false, (zerof == float.NaN));
+Assert.expectEq("1f == float.NaN", false, (1f == float.NaN));
+Assert.expectEq("float.MIN_VALUE == float.NaN", false, (float.MIN_VALUE == float.NaN));
+Assert.expectEq("float.POSITIVE_INFINITY+float.NEGATIVE_INFINITY==float.NaN", false, (float.POSITIVE_INFINITY+float.NEGATIVE_INFINITY==float.NaN));
+Assert.expectEq("zerof == float.NaN", false, (zerof == float.NaN));
 
 // iii. If x is the same float value as y, return true.
-AddTestCase("float.POSITIVE_INFINITY == float.POSITIVE_INFINITY", true, (float.POSITIVE_INFINITY == float.POSITIVE_INFINITY));
-AddTestCase("float.POSITIVE_INFINITY == -float.NEGATIVE_INFINITY", true, (float.POSITIVE_INFINITY == -float.NEGATIVE_INFINITY));
-AddTestCase("float.POSITIVE_INFINITY == float.POSITIVE_INFINITY-float.MAX_VALUE ", true, (float.POSITIVE_INFINITY == float.POSITIVE_INFINITY-float.MAX_VALUE ));
-AddTestCase("float.NEGATIVE_INFINITY == float.NEGATIVE_INFINITY", true, (float.NEGATIVE_INFINITY == float.NEGATIVE_INFINITY));
-AddTestCase("-float.POSITIVE_INFINITY == float.NEGATIVE_INFINITY", true, (-float.POSITIVE_INFINITY == float.NEGATIVE_INFINITY));
-AddTestCase("float.NEGATIVE_INFINITY == float.NEGATIVE_INFINITY+float.MAX_VALUE ", true, (float.NEGATIVE_INFINITY == float.NEGATIVE_INFINITY+float.MAX_VALUE ));
-AddTestCase("zerof == zerof", true, (zerof == zerof));
-AddTestCase("-zerof == -zerof", true, (-zerof == -zerof));
-AddTestCase("1f == onef", true, (1f == onef));
+Assert.expectEq("float.POSITIVE_INFINITY == float.POSITIVE_INFINITY", true, (float.POSITIVE_INFINITY == float.POSITIVE_INFINITY));
+Assert.expectEq("float.POSITIVE_INFINITY == -float.NEGATIVE_INFINITY", true, (float.POSITIVE_INFINITY == -float.NEGATIVE_INFINITY));
+Assert.expectEq("float.POSITIVE_INFINITY == float.POSITIVE_INFINITY-float.MAX_VALUE ", true, (float.POSITIVE_INFINITY == float.POSITIVE_INFINITY-float.MAX_VALUE ));
+Assert.expectEq("float.NEGATIVE_INFINITY == float.NEGATIVE_INFINITY", true, (float.NEGATIVE_INFINITY == float.NEGATIVE_INFINITY));
+Assert.expectEq("-float.POSITIVE_INFINITY == float.NEGATIVE_INFINITY", true, (-float.POSITIVE_INFINITY == float.NEGATIVE_INFINITY));
+Assert.expectEq("float.NEGATIVE_INFINITY == float.NEGATIVE_INFINITY+float.MAX_VALUE ", true, (float.NEGATIVE_INFINITY == float.NEGATIVE_INFINITY+float.MAX_VALUE ));
+Assert.expectEq("zerof == zerof", true, (zerof == zerof));
+Assert.expectEq("-zerof == -zerof", true, (-zerof == -zerof));
+Assert.expectEq("1f == onef", true, (1f == onef));
 
 // iv.  If x is +0f and y is -0f, return true.
-AddTestCase("zerof == -zerof", true, (zerof == -zerof));
-AddTestCase("0f == -0f", true, (0f == -0f));
-AddTestCase("equals() 0f == -0f", true, equals(0f, -0f));
+Assert.expectEq("zerof == -zerof", true, (zerof == -zerof));
+Assert.expectEq("0f == -0f", true, (0f == -0f));
+Assert.expectEq("equals() 0f == -0f", true, equals(0f, -0f));
 
 // v.   If x is -0f and y is +0f, return true.
-AddTestCase("-zerof == zerof", true, (-zerof == zerof));
-AddTestCase("-0f == 0f", true, (-0f == 0f));
-AddTestCase("equals() -0f == 0f", true, equals(-0f, 0f));
+Assert.expectEq("-zerof == zerof", true, (-zerof == zerof));
+Assert.expectEq("-0f == 0f", true, (-0f == 0f));
+Assert.expectEq("equals() -0f == 0f", true, equals(-0f, 0f));
 
 // vi.  Return false
-AddTestCase("zerof == float.MIN_VALUE", false, (zerof == float.MIN_VALUE));
-AddTestCase("-float.MIN_VALUE == zerof", false, ( -float.MIN_VALUE == zerof));
-AddTestCase("float.POSITIVE_INFINITY == float.MAX_VALUE ", false, (float.POSITIVE_INFINITY == float.MAX_VALUE ));
-AddTestCase("float.NEGATIVE_INFINITY == -float.MAX_VALUE ", false, (float.NEGATIVE_INFINITY == -float.MAX_VALUE ));
-AddTestCase("nf == float.MIN_VALUE", false, (nf == float.MIN_VALUE));
-AddTestCase("-float.MIN_VALUE == float.MIN_VALUE ", false, (-float.MIN_VALUE == float.MIN_VALUE ));
+Assert.expectEq("zerof == float.MIN_VALUE", false, (zerof == float.MIN_VALUE));
+Assert.expectEq("-float.MIN_VALUE == zerof", false, ( -float.MIN_VALUE == zerof));
+Assert.expectEq("float.POSITIVE_INFINITY == float.MAX_VALUE ", false, (float.POSITIVE_INFINITY == float.MAX_VALUE ));
+Assert.expectEq("float.NEGATIVE_INFINITY == -float.MAX_VALUE ", false, (float.NEGATIVE_INFINITY == -float.MAX_VALUE ));
+Assert.expectEq("nf == float.MIN_VALUE", false, (nf == float.MIN_VALUE));
+Assert.expectEq("-float.MIN_VALUE == float.MIN_VALUE ", false, (-float.MIN_VALUE == float.MIN_VALUE ));
 
 
 
 // 5. If type1 is Number and type2 is String or float, return the result of the comparison val1 == ToNumber (val2).
 //"Number == Number(float), i.e. '==' calls ToNumber on float; round_up test";
-AddTestCase("nd == nf", false, (nd == nf));
-AddTestCase("nf == Number(nf)", true, (Number(nf) == nf));
+Assert.expectEq("nd == nf", false, (nd == nf));
+Assert.expectEq("nf == Number(nf)", true, (Number(nf) == nf));
 //"Number == Number(float), i.e. '==' calls ToNumber on float; round_down test";
-AddTestCase("nd_down == ndfdown", false, (nd_down == nf_down));
-AddTestCase("Number(nf_down) == nf_down ", true, (Number(nf_down) == nf_down ));
+Assert.expectEq("nd_down == ndfdown", false, (nd_down == nf_down));
+Assert.expectEq("Number(nf_down) == nf_down ", true, (Number(nf_down) == nf_down ));
 // If this comparision is true, then the largeNumber was converted to float
 var largeNumber:Number = 3.40282346638529e+38;
-AddTestCase("largeNumber == float.POSITIVE_INFINITY", false, (largeNumber == float.POSITIVE_INFINITY));
+Assert.expectEq("largeNumber == float.POSITIVE_INFINITY", false, (largeNumber == float.POSITIVE_INFINITY));
 // If this comparision is true, then Number.MIN_VALUE was converted to float
-AddTestCase("Number.MIN_VALUE == 0f", false, (Number.MIN_VALUE == 0f));
-AddTestCase("float(Number.MIN_VALUE) == 0f", true, (float(Number.MIN_VALUE) == 0f));
+Assert.expectEq("Number.MIN_VALUE == 0f", false, (Number.MIN_VALUE == 0f));
+Assert.expectEq("float(Number.MIN_VALUE) == 0f", true, (float(Number.MIN_VALUE) == 0f));
 
 
 
 // 6. If type1 is String or a float and type2 is Number, return the result of the comparison ToNumber (val1) == val2.
 //"Number(float) == Number, i.e. '==' calls ToNumber on float; round_up test";
-AddTestCase("nf == nd", false, (nf == nd));
-AddTestCase("Number(nf) == nf", true, ( nf == Number(nf)));
+Assert.expectEq("nf == nd", false, (nf == nd));
+Assert.expectEq("Number(nf) == nf", true, ( nf == Number(nf)));
 //"Number(float) == Number, i.e. '==' calls ToNumber on float; round_down test";
-AddTestCase("nf_down == nd_down", false, (nf_down == nd_down));
-AddTestCase("Number(nf_down) == nf_down ", true, (nf_down == Number(nf_down) ));
+Assert.expectEq("nf_down == nd_down", false, (nf_down == nd_down));
+Assert.expectEq("Number(nf_down) == nf_down ", true, (nf_down == Number(nf_down) ));
 // If this comparision is true, then the largeNumber was converted to float
 var largeNumber:Number = 3.40282346638529e+38;
-AddTestCase("float.POSITIVE_INFINITY == largeNumber", false, (float.POSITIVE_INFINITY == largeNumber));
+Assert.expectEq("float.POSITIVE_INFINITY == largeNumber", false, (float.POSITIVE_INFINITY == largeNumber));
 // If this comparision is true, then Number.MIN_VALUE was converted to float
-AddTestCase("0f == Number.MIN_VALUE", false, (0f == Number.MIN_VALUE));
-AddTestCase("0f == float(Number.MIN_VALUE)", true, (0f == float(Number.MIN_VALUE)));
+Assert.expectEq("0f == Number.MIN_VALUE", false, (0f == Number.MIN_VALUE));
+Assert.expectEq("0f == float(Number.MIN_VALUE)", true, (0f == float(Number.MIN_VALUE)));
 
 
 // 13. If type1 is either String, Number or float and type2 is Object, return the result of the comparison val1 == ToPrimitive(val2).
-AddTestCase("ns == no", false, (ns == no));
+Assert.expectEq("ns == no", false, (ns == no));
 //"float == Object; ToPrimitive should return float, which in turn should compare via ToFloat - hence, equality";
-AddTestCase("nf == no", true, (nf == no));
+Assert.expectEq("nf == no", true, (nf == no));
 //"float == Object; ToPrimitive should return Number - hence, inequality first, equality next";
-AddTestCase("nf == new MyObject(nd)", false, (nf == new MyObject(nd)));
-AddTestCase("nf == new MyObject(Number(nf))", true, (nf == new MyObject(Number(nf))));
+Assert.expectEq("nf == new MyObject(nd)", false, (nf == new MyObject(nd)));
+Assert.expectEq("nf == new MyObject(Number(nf))", true, (nf == new MyObject(Number(nf))));
 
 // If this comparision is true, then the largeNumber was converted to float
 var largeNumber:Number = 3.40282346638529e+38;
-AddTestCase("float.POSITIVE_INFINITY == new MyObject(largeNumber)", false, (float.POSITIVE_INFINITY == new MyObject(largeNumber)));
+Assert.expectEq("float.POSITIVE_INFINITY == new MyObject(largeNumber)", false, (float.POSITIVE_INFINITY == new MyObject(largeNumber)));
 // If this comparision is true, then Number.MIN_VALUE was converted to float
-AddTestCase("0f == new MyObject(Number.MIN_VALUE)", false, (0f == new MyObject(Number.MIN_VALUE)));
+Assert.expectEq("0f == new MyObject(Number.MIN_VALUE)", false, (0f == new MyObject(Number.MIN_VALUE)));
 
 //"Number == Object; but the float.ToString rendering is precise, so the equality should fail.";
-AddTestCase("nd == no", false, (nd == no));
+Assert.expectEq("nd == no", false, (nd == no));
 
 
 
 // 14. If type1 is Object and type2 is either String, Number or float, return the result of the comparison ToPrimitive(val1) == val2.
-AddTestCase("no == ns", false, (no == ns));
+Assert.expectEq("no == ns", false, (no == ns));
 //"Object == float; ToPrimitive should return float, which in turn should compare via ToFloat - hence, equality";
-AddTestCase("no == nf", true, (no == nf));
+Assert.expectEq("no == nf", true, (no == nf));
 //"Object == float; ToPrimitive should return Number - hence, inequality first, equality next";
-AddTestCase("new MyObject(nd) == nf", false, (new MyObject(nd) == nf));
-AddTestCase("new MyObject(Number(nf)) == nf", true, (new MyObject(Number(nf)) == nf));
+Assert.expectEq("new MyObject(nd) == nf", false, (new MyObject(nd) == nf));
+Assert.expectEq("new MyObject(Number(nf)) == nf", true, (new MyObject(Number(nf)) == nf));
 
 // If this comparision is true, then the largeNumber was converted to float
 var largeNumber:Number = 3.40282346638529e+38;
-AddTestCase("new MyObject(largeNumber) == float.POSITIVE_INFINITY", false, (new MyObject(largeNumber) == float.POSITIVE_INFINITY));
+Assert.expectEq("new MyObject(largeNumber) == float.POSITIVE_INFINITY", false, (new MyObject(largeNumber) == float.POSITIVE_INFINITY));
 // If this comparision is true, then Number.MIN_VALUE was converted to float
-AddTestCase("new MyObject(Number.MIN_VALUE) == 0f", false, (new MyObject(Number.MIN_VALUE) == 0f));
+Assert.expectEq("new MyObject(Number.MIN_VALUE) == 0f", false, (new MyObject(Number.MIN_VALUE) == 0f));
 
 //"Object == Number; but the float.ToString rendering is precise, so the equality should fail.";
-AddTestCase("no == nd", false, (no == nd));
+Assert.expectEq("no == nd", false, (no == nd));
 
 //"float == String; ToFloat called on String (round_up test)";
 // nf == ToNumeric(ns) (8.a) -> nf = ToNumber(ns)
-AddTestCase("nf == ns", false, (nf == ns));
+Assert.expectEq("nf == ns", false, (nf == ns));
 //"float == String; ToFloat called on String (round_down test)";
-AddTestCase(" ns_down == nf_down", false, ( ns_down == nf_down));
-AddTestCase(" ns_down == nf_down", true, ( nf_down == nf_down));
+Assert.expectEq(" ns_down == nf_down", false, ( ns_down == nf_down));
+Assert.expectEq(" ns_down == nf_down", true, ( nf_down == nf_down));
 
 
 /// some last extra tests
-AddTestCase("zerof == null", false, (zerof == null));
-AddTestCase("null == zerof", false, (null == zerof));
-AddTestCase("undefined == zerof", false, (undefined == zerof));
-AddTestCase("zerof == undefined", false, (zerof == undefined));
+Assert.expectEq("zerof == null", false, (zerof == null));
+Assert.expectEq("null == zerof", false, (null == zerof));
+Assert.expectEq("undefined == zerof", false, (undefined == zerof));
+Assert.expectEq("zerof == undefined", false, (zerof == undefined));
 
 
 // Section 6.8.1 - 6.8.2:  evaluation order (first operand evaluated first):
 var nvo = new MyValueAlteringObject(nf);
-AddTestCase(" '==' , evaluation order", true, (0+nvo)==(nvo-1)); // (0+1)==(2-1)
+Assert.expectEq(" '==' , evaluation order", true, (0+nvo)==(nvo-1)); // (0+1)==(2-1)
 
 
-AddTestCase("new MyObject(float(0xFFFFFF00)) == 0xFFFFFF01)", false, (new MyObject(float(0xFFFFFF00)) == 0xFFFFFF01));
+Assert.expectEq("new MyObject(float(0xFFFFFF00)) == 0xFFFFFF01)", false, (new MyObject(float(0xFFFFFF00)) == 0xFFFFFF01));
 
 // Weirdo case for Step 14
 var v3 = new MyObject(float(0xFFFFFF00));
 var v4 = "4294967041"; // i.e. 0xFFFFFF01
 // typeof v3.valueOf() -> float
 // but v4 is a string so it will be a Number
-AddTestCase("Weirdo spec behaviour: Object==String, when ToPrimitive(Object)=float", false, v3==v4);
+Assert.expectEq("Weirdo spec behaviour: Object==String, when ToPrimitive(Object)=float", false, v3==v4);
 v3++;
 v4++;
 // After post-increment, these should become Nubmer, and no longer equal
-AddTestCase("Weirdo spec behaviour: after post-increment", true, v3!=v4);
+Assert.expectEq("Weirdo spec behaviour: after post-increment", true, v3!=v4);
 
 
-test();
 

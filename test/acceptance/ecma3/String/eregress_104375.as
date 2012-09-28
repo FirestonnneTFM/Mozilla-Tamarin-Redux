@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 12 October 2001
  *
@@ -8,17 +9,18 @@
  * See http://bugzilla.mozilla.org/show_bug.cgi?id=104375
  */
 //-----------------------------------------------------------------------------
-    var SECTION = "eregress_104375";
-    var VERSION = "";
-    var bug = 104375;
+//     var SECTION = "eregress_104375";
+//     var VERSION = "";
+//     var bug = 104375;
 
-    startTest();
-    var TITLE   = "Testing string.replace() with backreferences";
+//     var TITLE   = "Testing string.replace() with backreferences";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
+
+function inSection(x) {
+   return "Section "+x+" of test -";
+}
 
 function getTestCases() {
     var array = new Array();
@@ -47,19 +49,19 @@ function getTestCases() {
     status = inSection(1);
     actual  = str.replace (re, "$1" + 15);
     expect = 'uid=15';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     // try the string literal '15'
     status = inSection(2);
     actual  = str.replace (re, "$1" + '15');
     expect = 'uid=15';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     // try a letter before the '15'
     status = inSection(3);
     actual  = str.replace (re, "$1" + 'A15');
     expect = 'uid=A15';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     return array;
 }

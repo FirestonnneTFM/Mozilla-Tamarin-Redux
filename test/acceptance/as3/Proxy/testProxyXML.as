@@ -1,12 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "Proxy";
-var VERSION = "AS3";
-var TITLE   = "Proxy smoke tests ported from ATS: ATS9AS3 Automated/Proxy/testProxyXML";
+// var SECTION = "Proxy";
+// var VERSION = "AS3";
+// var TITLE   = "Proxy smoke tests ported from ATS: ATS9AS3 Automated/Proxy/testProxyXML";
 
-startTest();
 
 var correct0:XMLList = new XMLList();
 correct0 += new XML("value1");
@@ -39,25 +39,25 @@ var x2:XML =
 
 var esmith:XMLProxy = new XMLProxy(x2);
 
-AddTestCase("Test calling isAttribute from getProperty with valid attribute",
+Assert.expectEq("Test calling isAttribute from getProperty with valid attribute",
             "isAttribute=true -- " + correct0, esmith.@attr1);
-AddTestCase("Test calling isAttribute from getProperty with non-existing attribute",
+Assert.expectEq("Test calling isAttribute from getProperty with non-existing attribute",
             "isAttribute=true -- noExist does not exist", esmith.@noExist);
 
-AddTestCase("Test calling isAttribute from getDescendants with valid attribute",
-            correct0, esmith..@attr1);
-AddTestCase("Test calling isAttribute from getDescendants with non-existing attribute",
+Assert.expectEq("Test calling isAttribute from getDescendants with valid attribute",
+            correct0.toString(), esmith..@attr1.toString());
+Assert.expectEq("Test calling isAttribute from getDescendants with non-existing attribute",
             "descendants is undefined for noExist", esmith..@noExist);
 
-AddTestCase("Test calling getDescendants for existing element",
-            correct4, esmith..bravo);
-AddTestCase("Test calling getDescendants for non-existing element",
+Assert.expectEq("Test calling getDescendants for existing element",
+            correct4.toString(), esmith..bravo.toString());
+Assert.expectEq("Test calling getDescendants for non-existing element",
             "descendants is undefined for noExist", esmith..noExist);
 
-AddTestCase("Test calling callProperty with descendants", correct4,
-            esmith.descendants('bravo'));
-AddTestCase("Test calling callProperty with attributes", correct0,
-            esmith.attributes('attr1'));
+Assert.expectEq("Test calling callProperty with descendants", correct4.toString(),
+            esmith.descendants('bravo').toString());
+Assert.expectEq("Test calling callProperty with attributes", correct0.toString(),
+            esmith.attributes('attr1').toString());
 
 var qqq:XML =
 <yoyo>
@@ -82,14 +82,14 @@ var correct10:XML =
 <def fff="567" ggg="888"/>
 </yoyo>
 
-AddTestCase("Test deleteProperty with descendants with existing element",
+Assert.expectEq("Test deleteProperty with descendants with existing element",
             true, proxyDeleteStatus);
-AddTestCase("Test deleteProperty with descendants with non-existing element",
+Assert.expectEq("Test deleteProperty with descendants with non-existing element",
             true, proxyDeleteStatus2);
 
-AddTestCase("Test getProperty on Proxy after deleting descendant on Proxy",
+Assert.expectEq("Test getProperty on Proxy after deleting descendant on Proxy",
             correct10.toXMLString(), qqqProxy.toXMLString());
-AddTestCase("Test getProperty on original XML after deleting descendant on Proxy",
+Assert.expectEq("Test getProperty on original XML after deleting descendant on Proxy",
             correct10.toXMLString(), qqq.toXMLString());
 
 // delete and access was asynchronous, so I had to create a new xml for the second delete
@@ -112,9 +112,9 @@ var correct12:XML =
 <dodo lll="10" ttt="555"/>
 </yoyo>
 
-AddTestCase("Test getProperty on Proxy after deleting descendant on original XML",
+Assert.expectEq("Test getProperty on Proxy after deleting descendant on original XML",
             correct12.toXMLString(), qqqProxy2.toXMLString());
-AddTestCase("Test getProperty on original XML after deleting descendant on original XML",
+Assert.expectEq("Test getProperty on original XML after deleting descendant on original XML",
             correct12.toXMLString(), qqq2.toXMLString());
 
 var ppp:XML =
@@ -128,17 +128,17 @@ var proxyDeleteAttrStatus:Boolean = delete pppProxy.@b;
 // delete non-existing attribute on proxy
 var proxyDeleteAttrStatus2:Boolean = delete pppProxy.@nonExist;
 
-AddTestCase("Test deleteProperty with attributes with existing element",
+Assert.expectEq("Test deleteProperty with attributes with existing element",
             true, proxyDeleteAttrStatus);
-AddTestCase("Test deleteProperty with attributes with non-existing element",
+Assert.expectEq("Test deleteProperty with attributes with non-existing element",
             true, proxyDeleteAttrStatus2);
 
 var correct16:XML =
 <abc a="10" c="30" d="40"/>
 
-AddTestCase("Test getProperty on Proxy after deleting attribute on Proxy",
+Assert.expectEq("Test getProperty on Proxy after deleting attribute on Proxy",
             correct16.toXMLString(), pppProxy.toXMLString());
-AddTestCase("Test getProperty on original XML after deleting attribute on Proxy",
+Assert.expectEq("Test getProperty on original XML after deleting attribute on Proxy",
             correct16.toXMLString(), ppp.toXMLString());
 
 // delete attribute on original xml
@@ -153,9 +153,9 @@ var origDeleteAttribStatus:Boolean = delete ppp2.@c;
 var correct18:XML =
 <abc a="10" b="20" d="40"/>
 
-AddTestCase("Test getProperty on Proxy after deleting attribute on original XML",
+Assert.expectEq("Test getProperty on Proxy after deleting attribute on original XML",
             correct18.toXMLString(), pppProxy2.toXMLString());
-AddTestCase("Test getProperty on original XML after deleting attribute on original XML",
+Assert.expectEq("Test getProperty on original XML after deleting attribute on original XML",
             correct18.toXMLString(), ppp2.toXMLString());
 
 // basic test case for QName with attributes and descendants
@@ -188,12 +188,11 @@ var correct21:XML =
   <ns:cd artist="Wilco" title="YankeeHotelFoxtrot"/>
 </ns:album>
 
-AddTestCase("Test calling getProperty for attribute with QName",
+Assert.expectEq("Test calling getProperty for attribute with QName",
             "isAttribute=true -- " + correct20,
             x2Proxy.@[qXML2ProxyAttr]);
-AddTestCase("Test calling getProperty for descendant with QName",
+Assert.expectEq("Test calling getProperty for descendant with QName",
             "isAttribute=false -- "+correct21,
             x2Proxy[qXML2ProxyDesc]);
 
 
-test();

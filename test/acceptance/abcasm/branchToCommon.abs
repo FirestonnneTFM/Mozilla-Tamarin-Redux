@@ -2,20 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/*
- *  Tests function calling and branching in JIT'd code.
- */
-function main()
-{
-    debugfile "branchToCommon.abs"
-	debugline 1
-    getlocal0
-	pushscope
-    newfunction .function_id(doTest)
-	getlocal0
-	call 0
-	returnvoid
-}
+
 
 function doTest()
 {
@@ -50,3 +37,20 @@ poot:
 
 	returnvoid
 }
+
+/*
+ *  Tests function calling and branching in JIT'd code.
+ */
+function main()
+{
+    debugfile "branchToCommon.abs"
+	debugline 1
+    getlocal0
+	pushscope
+    newfunction doTest
+	getlocal0
+	call 0
+	returnvoid
+}
+
+script_info{init: main}

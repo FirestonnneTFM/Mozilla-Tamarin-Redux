@@ -10,3 +10,4 @@ function main()
 	pushstring "\u0982"
 	returnvoid
 }
+script_info{init:main}

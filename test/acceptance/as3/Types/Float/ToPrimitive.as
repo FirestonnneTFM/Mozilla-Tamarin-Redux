@@ -3,13 +3,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "9.9";
-var VERSION = "AS3";
-var TITLE   = "The operation ToPrimitive";
+// var SECTION = "9.9";
+// var VERSION = "AS3";
+// var TITLE   = "The operation ToPrimitive";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 /* According to spec, toPrimitive is called (with float argument) only for the binary '+' , and in no other case
    I guess all that we can test is that the result of adding two floats is a float */
@@ -19,7 +18,6 @@ var v2:float = 67.89;
    this test is still a fair approximation for a ToPrimitive test */
 var result = v1+v2;
 
-AddTestCase("ToPrimitive() tested through addition; type(float+float)", "float", getQualifiedClassName(result));
+Assert.expectEq("ToPrimitive() tested through addition; type(float+float)", "float", getQualifiedClassName(result));
 
-test();
 

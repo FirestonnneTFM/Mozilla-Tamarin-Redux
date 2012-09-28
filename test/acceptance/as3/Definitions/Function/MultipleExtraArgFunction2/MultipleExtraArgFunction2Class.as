@@ -1,9 +1,11 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-class MultipleExtraArgFunction2{
+package MultipleExtraArgFunction2{
+
+public class MultipleExtraArgFunction2Class{
             
-    function returnRest(obj:Object,arr:Array,... rest):Number {
+   public function returnRest(obj:Object,arr:Array,... rest):Number {
          
         var count = rest.length;
         var a:int = 0;
@@ -17,6 +19,7 @@ class MultipleExtraArgFunction2{
         return count;
     }
          
+}
 }
             
 

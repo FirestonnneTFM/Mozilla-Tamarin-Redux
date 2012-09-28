@@ -1,18 +1,16 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
   
 
-    var SECTION = "12.5";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "The if statment";
+//     var SECTION = "12.5";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "The if statment";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -23,7 +21,7 @@ function getTestCases() {
         MYVAR='PASSED';
     else if(false)
         MYVAR= 'FAILED';
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var MYVAR; if ( true ) MYVAR='PASSED'; else if (false) MYVAR= 'FAILED';",
                                     "PASSED",
                                      MYVAR);
@@ -32,7 +30,7 @@ function getTestCases() {
         MYVAR='FAILED';
     else if (true)
         MYVAR= 'PASSED';
-    array[item++] = new TestCase(  SECTION,
+    array[item++] = Assert.expectEq(  
                                     "var MYVAR; if ( false ) MYVAR='FAILED'; else if (true) MYVAR= 'PASSED';",
                                     "PASSED",
                                      MYVAR);
@@ -41,7 +39,7 @@ function getTestCases() {
         MYVAR='PASSED';
     else if (new Boolean(false))
         MYVAR= 'FAILED';
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var MYVAR; if ( new Boolean(true) )  MYVAR='PASSED'; else if (new Boolean(false))MYVAR= 'FAILED';",
                                     "PASSED",
                                      MYVAR);
@@ -50,7 +48,7 @@ function getTestCases() {
         MYVAR='PASSED';
     else if (new Boolean(true))
         MYVAR= 'FAILED';
-    array[item++] = new TestCase(  SECTION,
+    array[item++] = Assert.expectEq(  
                                     "var MYVAR; if ( new Boolean(false) ) MYVAR='PASSED'; else if (new Boolean(true)) MYVAR= 'FAILED';",
                                     "FAILED",
                                     MYVAR);
@@ -59,7 +57,7 @@ function getTestCases() {
         MYVAR='PASSED';
     else if (0)
         MYVAR= 'FAILED';
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var MYVAR; if ( 1 ) MYVAR='PASSED'; else if (0) MYVAR= 'FAILED';",
                                     "PASSED",
                                     MYVAR);
@@ -68,7 +66,7 @@ function getTestCases() {
         MYVAR='FAILED';
     else if (1)
         MYVAR= 'PASSED';
-    array[item++] = new TestCase(  SECTION,
+    array[item++] = Assert.expectEq(  
                                     "var MYVAR; if ( 0 ) MYVAR='FAILED'; else if (1) MYVAR= 'PASSED';","PASSED",MYVAR);
 
     var MyVar1 = 50;
@@ -81,7 +79,7 @@ function getTestCases() {
     else
         result="MyVar2 greater than MyVar1";
 
-    array[item++] = new TestCase(  SECTION,"Testing if elseif else","MyVar2 greater than MyVar1",result);
+    array[item++] = Assert.expectEq(  "Testing if elseif else","MyVar2 greater than MyVar1",result);
 
     var MyVar1 = 100;
     var MyVar2 = 50;
@@ -93,7 +91,7 @@ function getTestCases() {
     else
         result="MyVar2 greater than MyVar1";
 
-    array[item++] = new TestCase(  SECTION,"Testing if elseif else","MyVar1 is greater than MyVar2",result);
+    array[item++] = Assert.expectEq(  "Testing if elseif else","MyVar1 is greater than MyVar2",result);
 
     var MyVar1 = 50;
     var MyVar2 = 50;
@@ -105,7 +103,7 @@ function getTestCases() {
     else
         result="MyVar2 greater than MyVar1";
 
-    array[item++] = new TestCase(  SECTION,"Testing if elseif else","MyVar2 equals MyVar1",result);
+    array[item++] = Assert.expectEq(  "Testing if elseif else","MyVar2 equals MyVar1",result);
 
 
     var MyStringVar1 = "string"
@@ -118,7 +116,7 @@ function getTestCases() {
     else
         result="MyStringVar2 greater than MyStringVar1";
 
-    array[item++] = new TestCase(  SECTION,"Testing if elseif else","MyStringVar2 equals MyStringVar1",result);
+    array[item++] = Assert.expectEq(  "Testing if elseif else","MyStringVar2 equals MyStringVar1",result);
 
     var MyStringVar1 = "String";
     var MyStringVar2 = "string";
@@ -130,7 +128,7 @@ function getTestCases() {
     else
         result="MyStringVar2 greater than MyStringVar1";
 
-    array[item++] = new TestCase(  SECTION,"Testing if elseif else","MyStringVar2 greater than MyStringVar1",result);
+    array[item++] = Assert.expectEq(  "Testing if elseif else","MyStringVar2 greater than MyStringVar1",result);
 
 
     var MyStringVar1 = "strings";
@@ -143,7 +141,7 @@ function getTestCases() {
     else
         result="MyStringVar2 greater than MyStringVar1";
 
-    array[item++] = new TestCase(  SECTION,"Testing if elseif else","MyStringVar1 is greater than MyStringVar2",result);
+    array[item++] = Assert.expectEq(  "Testing if elseif else","MyStringVar1 is greater than MyStringVar2",result);
 
     return array;
 }

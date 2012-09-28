@@ -12,18 +12,15 @@ class MyClass {
 }
 
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var obj:MyClass = new MyClass();
 obj.runner();
 
-test();
 
 } // package
 
-var SECTION = "";
-var VERSION = "AS3";
-var TITLE   = "Class level functions";
+// var SECTION = "";
+// var VERSION = "AS3";
+// var TITLE   = "Class level functions";
 var DESC = "Include all of the includes/* float functions at the class level";
 

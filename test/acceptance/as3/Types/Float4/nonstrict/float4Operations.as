@@ -3,9 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import avmplus.*;
+import com.adobe.test.Assert;
 
-var TITLE =  "FLOAT4 TEST";
-var VERSION = "AS3";
+// var TITLE =  "FLOAT4 TEST";
+// var VERSION = "AS3";
 
 var STEP = "initial";
 var float4Test:Array = [];
@@ -13,9 +14,9 @@ var ft_count:int = 0;
 
 function   EQ(expected:float4,actual:float4):void{
    if(expected!=actual)
-       AddTestCase(   STEP+ " !FAILED! ", expected, actual);
+       Assert.expectEq(   STEP+ " !FAILED! ", expected, actual);
    else
-       AddTestCase(   STEP, "", "");// just print it
+       Assert.expectEq(   STEP, "", "");// just print it
 
    STEP=">> "+STEP;
 }
@@ -24,12 +25,12 @@ function APPROX_EQ(expected:float4,actual:float4):void{
     var epsilon = float4(0.0001f);
    var result:float = float4.max(expected,actual) - expected;
    if(result==0)
-       AddTestCase(   STEP, "", "");
+       Assert.expectEq(   STEP, "", "");
    else
    if( !float4.isGreater(result,epsilon) )
-       AddTestCase(   STEP, "~", "~");
+       Assert.expectEq(   STEP, "~", "~");
    else
-       AddTestCase(   STEP+ " !FAILED! ", expected, actual);
+       Assert.expectEq(   STEP+ " !FAILED! ", expected, actual);
    STEP=">> "+STEP;
 }
 
@@ -38,10 +39,7 @@ function TestSection(section , initTests ){
 
    this.RUN = function(){
        SECTION = section;
-       startTest();
-       writeHeaderToLog( TITLE + ": " + SECTION );
        initTests();
-       test();
    }
 }
 

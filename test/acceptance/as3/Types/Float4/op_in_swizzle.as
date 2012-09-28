@@ -4,12 +4,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var SECTION = "4.6.3";
-var VERSION = "AS3";
-var TITLE   = "Component accesses";
+// var SECTION = "4.6.3";
+// var VERSION = "AS3";
+// var TITLE   = "Component accesses";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var flt4:float4 = new float4(0f, 1f, 2f, 3f);
 
@@ -32,4 +30,3 @@ for (var levelA in component)
     }
 }
 
-test();

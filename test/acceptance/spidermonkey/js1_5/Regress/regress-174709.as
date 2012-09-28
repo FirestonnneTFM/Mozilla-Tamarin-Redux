@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-174709.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Don\'t Crash';
 var actual = 'FAIL';
 var expect = 'PASS';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 /* code removed until replacement can be created. */
 
@@ -72,6 +72,5 @@ for (Qp3[5][kh1] in this)
                
 actual = 'PASS';
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-280769-3.js';
 //-----------------------------------------------------------------------------
@@ -12,12 +12,12 @@ var summary = 'Do not crash on overflow of 64K boundary in number of classes in 
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 var N = 100 * 1000;
-
-status = summary + ' ' + inSection(3) + ' (new RegExp("[0][1]...[99999]").exec("") ';
+  
+//status = summary + ' ' + inSection(3) + ' (new RegExp("[0][1]...[99999]").exec("") ';
 
 var a = new Array(N);
 
@@ -33,7 +33,7 @@ try
 }
 catch(e)
 {
-  printStatus('Exception creating RegExp: ' + e);
+   //printStatus('Exception creating RegExp: ' + e);
 }
 
 try
@@ -42,9 +42,8 @@ try
 }
 catch(e)
 {
-  printStatus('Exception executing RegExp: ' + e);
+   //printStatus('Exception executing RegExp: ' + e);
 }
 
-AddTestCase(status, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

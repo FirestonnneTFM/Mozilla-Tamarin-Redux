@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'proto_8.js';
 
@@ -22,12 +23,10 @@ gTestfile = 'proto_8.js';
    Date:               12 november 1997
 */
 
-var SECTION = "proto_8";
-var VERSION = "JS1_3";
-var TITLE   = "Adding Properties to the Prototype Object";
+// var SECTION = "proto_8";
+// var VERSION = "JS1_3";
+// var TITLE   = "Adding Properties to the Prototype Object";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function Employee ( name, dept ) {
   this.name = name || "";
@@ -56,39 +55,38 @@ Employee.prototype.specialty = "none";
 
 // Pat, the Engineer
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "pat.name",
           "Toonces, Pat",
           pat.name );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "pat.dept",
           "engineering",
           pat.dept );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "pat.projects.length",
           2,
           pat.projects.length );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "pat.projects[0]",
           "SpiderMonkey",
           pat.projects[0] );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "pat.projects[1]",
           "Rhino",
           pat.projects[1] );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "pat.machine",
           "indy",
           pat.machine );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "pat.specialty",
           "none",
           pat.specialty );
 
-test();

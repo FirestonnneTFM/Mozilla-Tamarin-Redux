@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -15,8 +15,8 @@ startTest();
  */
 //-----------------------------------------------------------------------------
 var gTestfile = 'regress-96526-003.js';
-printBugNumber(96526);
-printStatus("Just seeing that we don't crash when compiling this script -");
+//printBugNumber(96526);
+//printStatus("Just seeing that we don't crash when compiling this script -");
 
 
 /*
@@ -4404,6 +4404,5 @@ function validId(IDtext)
 
 }
 
-AddTestCase('', 'No Crash', 'No Crash');
+Assert.expectEq('', 'No Crash', 'No Crash');
 
-test();

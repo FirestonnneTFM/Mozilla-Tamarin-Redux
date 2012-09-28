@@ -1,17 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "15.5.4.17";
-    var VERSION = "ECMA_1";
+//     var SECTION = "15.5.4.17";
+//     var VERSION = "ECMA_1";
 
-    startTest();
-    var TITLE   = "String.prototype.toLocaleLowerCase()";
+//     var TITLE   = "String.prototype.toLocaleLowerCase()";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -23,12 +21,12 @@ function getTestCases() {
 
         var U = new Unicode( i );
 /*
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                         "var s = new String( String.fromCharCode("+i+") ); s.toLocaleLowerCase()",
                                         String.fromCharCode(U.lower),
                                         (s = new String( String.fromCharCode("+i+ ) ), s.toLocaleLowerCase()") );
 */
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                         "var s = new String( String.fromCharCode("+i+") ); s.toLocaleLowerCase().charCodeAt(0)",
                                         U.lower,
                                         (s = new String( String.fromCharCode(i) ), s.toLocaleLowerCase().charCodeAt(0) ) );

@@ -1,13 +1,11 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "e11_6_1_3";
-    var VERSION = "ECMA_1";
-    startTest();
+import com.adobe.test.Assert;
+//     var SECTION = "e11_6_1_3";
+//     var VERSION = "ECMA_1";
     var testcases = getTestCases();
 
-    writeHeaderToLog( SECTION + " The Addition operator ( + )");
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -18,32 +16,32 @@ function getTestCases() {
 
     var DATE1 = new Date(0);
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var DATE1 = new Date(); DATE1 + DATE1",
                                     DATE1.toString() + DATE1.toString(),
                                     DATE1 + DATE1 );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var DATE1 = new Date(); DATE1 + 0",
                                     DATE1.toString() + 0,
                                     DATE1 + 0 );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var DATE1 = new Date(); DATE1 + new Number(0)",
                                     DATE1.toString() + 0,
                                     DATE1 + new Number(0) );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var DATE1 = new Date(); DATE1 + true",
                                     DATE1.toString() + "true",
                                     DATE1 + true );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var DATE1 = new Date(); DATE1 + new Boolean(true)",
                                     DATE1.toString() + "true",
                                     DATE1 + new Boolean(true) );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var DATE1 = new Date(); DATE1 + new Boolean(true)",
                                     DATE1.toString() + "true",
                                     DATE1 + new Boolean(true) );
@@ -53,32 +51,32 @@ function getTestCases() {
     //var MYOB3 = new MyProtolessObject( DATE1 );
     //var MYOB4 = new MyProtoValuelessObject( DATE1 );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "MYOB1 = new MyObject(DATE1); MYOB1 + new Number(1)",
                                     "[object Object]1",
                                     MYOB1 + new Number(1) );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "MYOB1 = new MyObject(DATE1); MYOB1 + 1",
                                     "[object Object]1",
                                     MYOB1 + 1 );
 
-/*    array[item++] = new TestCase(   SECTION,
+/*    array[item++] = Assert.expectEq(   
                                     "MYOB2 = new MyValuelessObject(DATE1); MYOB3 + 'string'",
                                     DATE1.toString() + "string",
                                     MYOB2 + 'string' );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "MYOB2 = new MyValuelessObject(DATE1); MYOB3 + new String('string')",
                                     DATE1.toString() + "string",
                                     MYOB2 + new String('string') );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "MYOB3 = new MyProtolessObject(DATE1); MYOB3 + new Boolean(true)",
                                     DATE1.toString() + "true",
                                     MYOB3 + new Boolean(true) );
 */
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "MYOB1 = new MyObject(DATE1); MYOB1 + true",
                                     "[object Object]true",
                                     MYOB1 + true );

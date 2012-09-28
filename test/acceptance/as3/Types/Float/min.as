@@ -9,12 +9,10 @@ Given zero or more arguments, calls ToFloat on each of the arguments and
 returns the smallest of the resulting values.
 */
 
-var SECTION = "4.5.26";
-var VERSION = "AS3";
-var TITLE   = "public function min(...xs):float";
+// var SECTION = "4.5.26";
+// var VERSION = "AS3";
+// var TITLE   = "public function min(...xs):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function checkEmpty():float { return float.min(); }
 
@@ -99,5 +97,4 @@ AddStrictTestCase("float.min('2', true, 3.1, -3.124f) literals", myfloat, float.
 AddStrictTestCase("float.min('2', true, 3.1, -3.124f, '-24')", -24f, float.min(myString, myBool, myNum, myfloat, String('-24')));
 AddStrictTestCase("float.min('2', true, 3.1, -3.124f, '24') literals", myfloat, float.min('2', true, 3.1, -3.124f, '24'));
 
-test();
 

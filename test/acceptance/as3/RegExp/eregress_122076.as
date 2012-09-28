@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/*
 *
 * Date:    12 Feb 2002
 * SUMMARY: Don't crash on invalid regexp literals /  \\/  /
@@ -18,15 +18,13 @@
 */
 //-----------------------------------------------------------------------------
 
-var SECTION = "eregress_122076";
-var VERSION = "";
-var TITLE   = "Don't crash on invalid regexp literals /  \\/  /";
-var bug = "122076";
+// var SECTION = "eregress_122076";
+// var VERSION = "";
+// var TITLE   = "Don't crash on invalid regexp literals /  \\/  /";
+// var bug = "122076";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
+import com.adobe.test.Assert;
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -54,7 +52,7 @@ function getTestCases() {
         }
     }
 
-    array[item++] = new TestCase(SECTION, "Test completion status", "no exceptions", thisError);
+    array[item++] = Assert.expectEq( "Test completion status", "no exceptions", thisError);
 
     return array;
 }

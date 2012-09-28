@@ -1,13 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "while-004";
-    var VERSION = "ECMA_2";
-    var TITLE   = "while statement";
+import com.adobe.test.Assert;
+//     var SECTION = "while-004";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "while statement";
     var BUGNUMBER="316725";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var tc = 0;
     var testcases = new Array();
@@ -18,7 +17,6 @@
     DoWhile_4();
     DoWhile_5();
 
-     test();
 
      function dowhile() {
         result = "pass";
@@ -35,8 +33,8 @@
 
         result = dowhile();
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            
             "DoWhile_1" + description,
             "pass",
             result );
@@ -57,20 +55,20 @@
             }
         result2 = "pass";
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            
             "DoWhile_2:  " +description + " - code inside the loop, before the continue should be executed ("+j+")",
             true,
             j == 10 );
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            
             "DoWhile_2:  " +description +" - code after labeled continue should not be executed",
             "pass",
             result1 );
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            
             "DoWhile_2:  " +description +" - code after loop but inside label should be executed",
             "pass",
             result2 );
@@ -92,21 +90,21 @@
 
         result3 = "pass";
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            
             "DoWhile_3: " +description +" - verify break out of loop",
             "pass",
             result1 );
 
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            
             "DoWhile_3: " +description +" - verify break out of label",
             "pass",
             result2 );
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            
             "DoWhile_3: " +description + " - verify correct exit from label",
             "pass",
             result3 );
@@ -128,20 +126,20 @@
         }
         result3 = "pass";
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            
             "DoWhile_4: " +description +" - verify break out of while loop",
             "pass",
             result1 );
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            
             "DoWhile_4: " +description + " - verify break out of label",
             "pass",
             result2 );
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            
             "DoWhile_4: " +description +" - verify that statements after label are evaluated",
             "pass",
             result3 );
@@ -163,20 +161,20 @@
             result2 = "pass";
         }
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            
             "DoWhile_5: " +description + " - continue should not execute statements above the loop",
             true,
             ( j == 1 ) );
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            
             "DoWhile_5: " +description +" - code after labeled continue should not be executed",
             "pass",
             result1 );
 
-        testcases[tc++] = new TestCase(
-            SECTION,
+        testcases[tc++] = Assert.expectEq(
+            
             "DoWhile_5: " +description +" - code after loop but inside label should be executed",
             "pass",
             result2 );

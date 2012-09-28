@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'regress-9141.js';
 
@@ -30,15 +31,14 @@ gTestfile = 'regress-9141.js';
  * </BODY>
  */
 
-var SECTION = "js1_2";       // provide a document reference (ie, ECMA section)
-var VERSION = "ECMA_2"; // Version of JavaScript or ECMA
-var TITLE   = "Regression test for bugzilla # 9141";       // Provide ECMA section title or a description
+// var SECTION = "js1_2";       // provide a document reference (ie, ECMA section)
+// var VERSION = "ECMA_2"; // Version of JavaScript or ECMA
+// var TITLE   = "Regression test for bugzilla # 9141";       // Provide ECMA section title or a description
 var BUGNUMBER = "http://bugzilla.mozilla.org/show_bug.cgi?id=9141";     // Provide URL to bugsplat or bugzilla report
 
-startTest();  var testscases=[]; var index=0;               // leave this alone
 
 /*
- * Calls to AddTestCase here. AddTestCase is a function that is defined
+ * Calls to Assert.expectEq here. Assert.expectEq is a function that is defined
  * in shell.js and takes three arguments:
  * - a string representation of what is being tested
  * - the expected result
@@ -48,7 +48,7 @@ startTest();  var testscases=[]; var index=0;               // leave this alone
  *
  * var zip = /[\d]{5}$/;
  *
- * AddTestCase(
+ * Assert.expectEq(
  * "zip = /[\d]{5}$/; \"PO Box 12345 Boston, MA 02134\".match(zip)",   // description of the test
  *  "02134",                                                           // expected result
  *  "PO Box 12345 Boston, MA 02134".match(zip) );                      // actual result
@@ -60,14 +60,13 @@ for (var i = 0; i != 13; i++) s += s;
 var a = /(?:xx|x)*/(s);
 var b = /(xx|x)*/(s);
 
-AddTestCase( "var s = 'x'; for (var i = 0; i != 13; i++) s += s; " +
+Assert.expectEq( "var s = 'x'; for (var i = 0; i != 13; i++) s += s; " +
          "a = /(?:xx|x)*/(s); a.length",
          1,
          a.length );
 
-AddTestCase( "var b = /(xx|x)*/(s); b.length",
+Assert.expectEq( "var b = /(xx|x)*/(s); b.length",
          2,
          b.length );
 
-test();       // leave this alone.  this executes the test cases and
 // displays results.

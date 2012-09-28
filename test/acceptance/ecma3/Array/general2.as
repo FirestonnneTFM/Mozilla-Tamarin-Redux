@@ -1,17 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-    var VERSION = 'no version';
-    startTest();
-    var TITLE = 'String:push,splice,concat,unshift,sort';
+//     var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+//     var VERSION = 'no version';
+//     var TITLE = 'String:push,splice,concat,unshift,sort';
 
-    writeHeaderToLog('Executing script: general2.js');
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -48,10 +45,10 @@ function getTestCases() {
         array2.unshift(array2.pop());
     }
 
-    array[item++] = new TestCase( SECTION, "Array.push,pop,shift,unshift,slice,splice", true,String(array1) == String(array2));
+    array[item++] = Assert.expectEq(  "Array.push,pop,shift,unshift,slice,splice", true,String(array1) == String(array2));
     array1.sort();
     array2.sort();
-    array[item++] = new TestCase( SECTION, "Array.sort", true,String(array1) == String(array2));
+    array[item++] = Assert.expectEq(  "Array.sort", true,String(array1) == String(array2));
 
     return ( array );
 }

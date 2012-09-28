@@ -3,6 +3,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 /*
 Returns an implementation-dependent approximation to the arc tangent of the
@@ -13,12 +14,10 @@ the argument named x be second. The result is expressed in radians and ranges
 from -PI to +PI.
 */
 
-var SECTION = "4.5.19";
-var VERSION = "AS3";
-var TITLE   = "public function atan2(y:float,x:float):float";
+// var SECTION = "4.5.19";
+// var VERSION = "AS3";
+// var TITLE   = "public function atan2(y:float,x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param1:float, param2:float):float { return float.atan2(param1, param2); }
 
@@ -40,10 +39,10 @@ AddStrictTestCase("float.atan2(1f, -0f)", float.PI/2f, float.atan2(1f, -0f));
 AddStrictTestCase("float.atan2(1f, -0f) check", float.PI/2f, check(1f, -0f));
 
 // If y is +0 and x>0, the result is +0.
-AddTestCase("float.atan2(0f, 1f)", 0f, float.atan2(0f, 1f));
-AddTestCase("float.atan2(0f, 1f) check via Infinity", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.atan2(0f, 1f));
-AddTestCase("float.atan2(0f, 1f) check()", 0f, check(0f, 1f));
-AddTestCase("float.atan2(0f, 1f) check() check via Infinity", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/check(0f, 1f));
+Assert.expectEq("float.atan2(0f, 1f)", 0f, float.atan2(0f, 1f));
+Assert.expectEq("float.atan2(0f, 1f) check via Infinity", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/float.atan2(0f, 1f));
+Assert.expectEq("float.atan2(0f, 1f) check()", 0f, check(0f, 1f));
+Assert.expectEq("float.atan2(0f, 1f) check() check via Infinity", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY/check(0f, 1f));
 
 // If y is +0 and x is +0, the result is +0.
 AddStrictTestCase("float.atan2(0f, 0f)", 0f, float.atan2(0f, 0f));
@@ -140,5 +139,4 @@ AddStrictTestCase("float.atan2(float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY)
 AddStrictTestCase("float.atan2(float.NEGATIVE_INFINITY, float.NEGATIVE_INFINITY)", -3f*float.PI/4f, float.atan2(float.NEGATIVE_INFINITY, float.NEGATIVE_INFINITY));
 AddStrictTestCase("float.atan2(float.NEGATIVE_INFINITY, float.NEGATIVE_INFINITY) check()", -3f*float.PI/4f, check(float.NEGATIVE_INFINITY, float.NEGATIVE_INFINITY));
 
-test();
 

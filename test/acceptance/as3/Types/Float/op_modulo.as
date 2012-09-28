@@ -3,19 +3,18 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "6.4.3";
-var VERSION = "AS3";
-var TITLE   = "The % operation agumented by float values";
+// var SECTION = "6.4.3";
+// var VERSION = "AS3";
+// var TITLE   = "The % operation agumented by float values";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 
 var f1:float = 1.2345678e9;
 var f2:float = 6.543210987;
-AddTestCase("float modulo result", float(7.874126434326171875e-01), f1%f2);
-AddTestCase("FloatLiteral modulo result", float(7.874126434326171875e-01), 1.2345678e9f%6.543210987f);
+Assert.expectEq("float modulo result", float(7.874126434326171875e-01), f1%f2);
+Assert.expectEq("FloatLiteral modulo result", float(7.874126434326171875e-01), 1.2345678e9f%6.543210987f);
  /*
     virgilp: 09/23/2011
     modulo on float & number should THEORETICALLY yield different results
@@ -30,7 +29,7 @@ AddTestCase("FloatLiteral modulo result", float(7.874126434326171875e-01), 1.234
    */
 
 // ABC Extension spec states that Float modulo can happen in double precision
-AddTestCase("modulo of 2 floats returns a float", "float", getQualifiedClassName(f1%f2));
+Assert.expectEq("modulo of 2 floats returns a float", "float", getQualifiedClassName(f1%f2));
 
 var onef:float = 1f;
 var neg_onef:float = -1f;
@@ -51,23 +50,23 @@ AddStrictTestCase("String % float", 0, check("1", onef));
 
 // the left operand is the dividend and the right operand is the divisor.
 // If either operand is NaN, the result is NaN.
-AddTestCase("float.NaN % float", float.NaN, float.NaN % onef);
-AddTestCase("isNaN float.NaN % float", true, isNaN(float.NaN % onef));
-AddTestCase("float % float.NaN", float.NaN, onef % float.NaN);
-AddTestCase("isNaN float % float.NaN", true, isNaN(onef % float.NaN));
-AddTestCase("check(float.NaN, float)", float.NaN, check(float.NaN, onef));
-AddTestCase("isNaN check(float.NaN, float)", true, isNaN(check(float.NaN, onef)));
-AddTestCase("check(float, float.NaN)", float.NaN, check(onef, float.NaN));
-AddTestCase("isNaN check(float, float.NaN)", true, isNaN(check(onef, float.NaN)));
+Assert.expectEq("float.NaN % float", float.NaN, float.NaN % onef);
+Assert.expectEq("isNaN float.NaN % float", true, isNaN(float.NaN % onef));
+Assert.expectEq("float % float.NaN", float.NaN, onef % float.NaN);
+Assert.expectEq("isNaN float % float.NaN", true, isNaN(onef % float.NaN));
+Assert.expectEq("check(float.NaN, float)", float.NaN, check(float.NaN, onef));
+Assert.expectEq("isNaN check(float.NaN, float)", true, isNaN(check(float.NaN, onef)));
+Assert.expectEq("check(float, float.NaN)", float.NaN, check(onef, float.NaN));
+Assert.expectEq("isNaN check(float, float.NaN)", true, isNaN(check(onef, float.NaN)));
 
-AddTestCase("float.NaN % FloatLiteral", float.NaN, float.NaN % 1f);
-AddTestCase("isNaN float.NaN % FloatLiteral", true, isNaN(float.NaN % 1f));
-AddTestCase("FloatLiteral % float.NaN", float.NaN, 1f % float.NaN);
-AddTestCase("isNaN FloatLiteral % float.NaN", true, isNaN(1f % float.NaN));
-AddTestCase("check(float.NaN, FloatLiteral)", float.NaN, check(float.NaN, 1f));
-AddTestCase("isNaN check(float.NaN, FloatLiteral)", true, isNaN(check(float.NaN, 1f)));
-AddTestCase("check(FloatLiteral, float.NaN)", float.NaN, check(1f, float.NaN));
-AddTestCase("isNaN check(FloatLiteral, float.NaN)", true, isNaN(check(1f, float.NaN)));
+Assert.expectEq("float.NaN % FloatLiteral", float.NaN, float.NaN % 1f);
+Assert.expectEq("isNaN float.NaN % FloatLiteral", true, isNaN(float.NaN % 1f));
+Assert.expectEq("FloatLiteral % float.NaN", float.NaN, 1f % float.NaN);
+Assert.expectEq("isNaN FloatLiteral % float.NaN", true, isNaN(1f % float.NaN));
+Assert.expectEq("check(float.NaN, FloatLiteral)", float.NaN, check(float.NaN, 1f));
+Assert.expectEq("isNaN check(float.NaN, FloatLiteral)", true, isNaN(check(float.NaN, 1f)));
+Assert.expectEq("check(FloatLiteral, float.NaN)", float.NaN, check(1f, float.NaN));
+Assert.expectEq("isNaN check(FloatLiteral, float.NaN)", true, isNaN(check(1f, float.NaN)));
 
 // The sign of the result equals the sign of the dividend.
 AddStrictTestCase("float % float", 1f, 3f % 2f);
@@ -81,18 +80,18 @@ AddStrictTestCase("check(float, -float)", 1f, check(3f, -2f));
 AddStrictTestCase("check(-float, -float)", -1f, check(-3f, -2f));
 
 // If the dividend is an infinity, or the divisor is a zero, or both, the result is NaN.
-AddTestCase("float.POSITIVE_INFINITY % float", float.NaN, float.POSITIVE_INFINITY % onef);
-AddTestCase("isNaN float.POSITIVE_INFINITY % float", true, isNaN(float.POSITIVE_INFINITY % onef));
-AddTestCase("float.NEGATIVE_INFINITY % float", float.NaN, float.NEGATIVE_INFINITY % onef);
-AddTestCase("isNaN float.NEGATIVE_INFINITY % float", true, isNaN(float.NEGATIVE_INFINITY % onef));
-AddTestCase("float % 0f", float.NaN, onef % zerof);
+Assert.expectEq("float.POSITIVE_INFINITY % float", float.NaN, float.POSITIVE_INFINITY % onef);
+Assert.expectEq("isNaN float.POSITIVE_INFINITY % float", true, isNaN(float.POSITIVE_INFINITY % onef));
+Assert.expectEq("float.NEGATIVE_INFINITY % float", float.NaN, float.NEGATIVE_INFINITY % onef);
+Assert.expectEq("isNaN float.NEGATIVE_INFINITY % float", true, isNaN(float.NEGATIVE_INFINITY % onef));
+Assert.expectEq("float % 0f", float.NaN, onef % zerof);
 AddStrictTestCase("is NaN float % 0f", true, isNaN(onef % zerof));
-AddTestCase("float % -0f", float.NaN, onef % neg_zerof);
+Assert.expectEq("float % -0f", float.NaN, onef % neg_zerof);
 AddStrictTestCase("is NaN float % -0f", true, isNaN(onef % neg_zerof));
-AddTestCase("float.POSITIVE_INFINITY % 0f", float.NaN, float.POSITIVE_INFINITY % zerof);
-AddTestCase("isNaN float.POSITIVE_INFINITY % 0f", true, isNaN(float.POSITIVE_INFINITY % zerof));
-AddTestCase("float.POSITIVE_INFINITY % -0f", float.NaN, float.POSITIVE_INFINITY % neg_zerof);
-AddTestCase("isNaN float.POSITIVE_INFINITY % -0f", true, isNaN(float.POSITIVE_INFINITY % neg_zerof));
+Assert.expectEq("float.POSITIVE_INFINITY % 0f", float.NaN, float.POSITIVE_INFINITY % zerof);
+Assert.expectEq("isNaN float.POSITIVE_INFINITY % 0f", true, isNaN(float.POSITIVE_INFINITY % zerof));
+Assert.expectEq("float.POSITIVE_INFINITY % -0f", float.NaN, float.POSITIVE_INFINITY % neg_zerof);
+Assert.expectEq("isNaN float.POSITIVE_INFINITY % -0f", true, isNaN(float.POSITIVE_INFINITY % neg_zerof));
 
 // If the dividend is finite and the divisor is an infinity, the result equals the dividend.
 AddStrictTestCase("float % float.POSITIVE_INFINITY", onef, onef % float.POSITIVE_INFINITY);
@@ -109,5 +108,4 @@ AddStrictTestCase("check(-0f, float)", neg_zerof, check(neg_zerof, onef));
 AddStrictTestCase("check(-0f, float) sign check ", float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY / check(neg_zerof, onef));
 
 
-test();
 

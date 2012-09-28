@@ -3,13 +3,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "5.9";
-var VERSION = "AS3";
-var TITLE   = "The conditional operator augmented by float4 values";
+// var SECTION = "5.9";
+// var VERSION = "AS3";
+// var TITLE   = "The conditional operator augmented by float4 values";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var neg_onef:* = float4(-1f);
 var neg_zerof:* = float4(-0f);
@@ -21,20 +20,19 @@ function check(val:*, t:*, f:*):* { return val ? t : f; }
 
 // Float4 converts to false always in a boolean context
 
-AddTestCase("float4(1f) ? 'FAILED':'PASSED'", "PASSED", float4(1f) ? 'FAILED':'PASSED');
-AddTestCase("float4(-1f) ? 'FAILED':'PASSED'", "PASSED", float4(-1f) ? 'FAILED':'PASSED');
-AddTestCase("float4(0f) ? 'FAILED':'PASSED'", "PASSED", float4(0f) ? 'FAILED':'PASSED');
-AddTestCase("float4(-0f) ? 'FAILED':'PASSED'", "PASSED", float4(-0f) ? 'FAILED':'PASSED');
-AddTestCase("float4(float.NaN) ? 'FAILED':'PASSED'", "PASSED", float4(float.NaN) ? 'FAILED':'PASSED');
-AddTestCase("float4(float.NaN, 0f, -0f, 1f) ? 'FAILED':'PASSED'", "PASSED", float4(float.NaN, 0f, -0f, 1f) ? 'FAILED':'PASSED');
-AddTestCase("float4(float.NaN, 0f, -0f, 0f) ? 'FAILED':'PASSED'", "PASSED", float4(float.NaN, 0f, -0f, 0f) ? 'FAILED':'PASSED');
+Assert.expectEq("float4(1f) ? 'FAILED':'PASSED'", "PASSED", float4(1f) ? 'FAILED':'PASSED');
+Assert.expectEq("float4(-1f) ? 'FAILED':'PASSED'", "PASSED", float4(-1f) ? 'FAILED':'PASSED');
+Assert.expectEq("float4(0f) ? 'FAILED':'PASSED'", "PASSED", float4(0f) ? 'FAILED':'PASSED');
+Assert.expectEq("float4(-0f) ? 'FAILED':'PASSED'", "PASSED", float4(-0f) ? 'FAILED':'PASSED');
+Assert.expectEq("float4(float.NaN) ? 'FAILED':'PASSED'", "PASSED", float4(float.NaN) ? 'FAILED':'PASSED');
+Assert.expectEq("float4(float.NaN, 0f, -0f, 1f) ? 'FAILED':'PASSED'", "PASSED", float4(float.NaN, 0f, -0f, 1f) ? 'FAILED':'PASSED');
+Assert.expectEq("float4(float.NaN, 0f, -0f, 0f) ? 'FAILED':'PASSED'", "PASSED", float4(float.NaN, 0f, -0f, 0f) ? 'FAILED':'PASSED');
 
-AddTestCase("check(float4(1f), 'FAILED', 'PASSED')", "PASSED", check(float4(1f), 'FAILED', 'PASSED'));
-AddTestCase("check(float4(-1f), 'FAILED', 'PASSED')", "PASSED", check(float4(-1f), 'FAILED', 'PASSED'));
-AddTestCase("check(float4(0f), 'FAILED', 'PASSED')", "PASSED", check(float4(0f), 'FAILED', 'PASSED'));
-AddTestCase("check(float4(-0f), 'FAILED', 'PASSED')", "PASSED", check(float4(-0f), 'FAILED', 'PASSED'));
-AddTestCase("check(float4(float.NaN), 'PASSED', 'FAILED')", "PASSED", check(float4(float.NaN), 'FAILED', 'PASSED'));
-AddTestCase("check(float4(float.NaN, 0f, -0f, 1f), 'FAILED', 'PASSED')", "PASSED", check( float4(float.NaN, 0f, -0f, 1f), 'FAILED', 'PASSED'));
-AddTestCase("check(float4(float.NaN, 0f, -0f, 0f), 'FAILED', 'PASSED')", "PASSED", check(float4(float.NaN, 0f, -0f, 0f), 'FAILED', 'PASSED'));
+Assert.expectEq("check(float4(1f), 'FAILED', 'PASSED')", "PASSED", check(float4(1f), 'FAILED', 'PASSED'));
+Assert.expectEq("check(float4(-1f), 'FAILED', 'PASSED')", "PASSED", check(float4(-1f), 'FAILED', 'PASSED'));
+Assert.expectEq("check(float4(0f), 'FAILED', 'PASSED')", "PASSED", check(float4(0f), 'FAILED', 'PASSED'));
+Assert.expectEq("check(float4(-0f), 'FAILED', 'PASSED')", "PASSED", check(float4(-0f), 'FAILED', 'PASSED'));
+Assert.expectEq("check(float4(float.NaN), 'PASSED', 'FAILED')", "PASSED", check(float4(float.NaN), 'FAILED', 'PASSED'));
+Assert.expectEq("check(float4(float.NaN, 0f, -0f, 1f), 'FAILED', 'PASSED')", "PASSED", check( float4(float.NaN, 0f, -0f, 1f), 'FAILED', 'PASSED'));
+Assert.expectEq("check(float4(float.NaN, 0f, -0f, 0f), 'FAILED', 'PASSED')", "PASSED", check(float4(float.NaN, 0f, -0f, 0f), 'FAILED', 'PASSED'));
 
-test();

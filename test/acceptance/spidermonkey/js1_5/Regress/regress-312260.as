@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-312260.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Switch discriminant detecting case should not warn';
 var actual = 'No warning';
 var expect = 'No warning';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 //options('strict');
 //options('werror');
@@ -27,6 +27,5 @@ catch(e)
   actual = e + '';
 }
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

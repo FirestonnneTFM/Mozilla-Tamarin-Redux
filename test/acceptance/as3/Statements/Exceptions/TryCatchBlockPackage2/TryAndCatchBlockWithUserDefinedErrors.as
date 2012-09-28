@@ -64,6 +64,7 @@ package UserDefinedErrorsPackageTryBlockOutside
 package TryCatchBlockPackage2
 {
     import UserDefinedErrorsPackageTryBlockOutside.*;
+import com.adobe.test.Assert;
     public class TryAndCatchBlockWithUserDefinedErrors
     {
         var b:Box = new Box();
@@ -87,7 +88,7 @@ package TryCatchBlockPackage2
                     thisError=e3.message;
                     //trace("An error occurred:"+e3.toString());
                 }finally{
-                    AddTestCase( "Testing try block and multiple catch blocks with custom error classes", "Box dimensions should be greater than 0",thisError );
+                    Assert.expectEq( "Testing try block and multiple catch blocks with custom error classes", "Box dimensions should be greater than 0",thisError );
                  }
          }
      }

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -37,25 +37,25 @@ var x = 'Home'.charAt(0);
 var y = ('Home'.split('H'))[1];
 
 
-status = inSection(1);
+//status = inSection(1);
 var arr = Array('a', 'b');
 actual = arr.join('H');
 expect = 'aHb';
 addThis();
 
-status = inSection(2);
+//status = inSection(2);
 arr = Array('a', 'b');
 actual = arr.join(x);
 expect = 'aHb';
 addThis();
 
-status = inSection(3);
+//status = inSection(3);
 arr = Array('a', 'b');
 actual = arr.join('ome');
 expect = 'aomeb';
 addThis();
 
-status = inSection(4);
+//status = inSection(4);
 arr = Array('a', 'b');
 actual = arr.join(y);
 expect = 'aomeb';
@@ -81,15 +81,14 @@ function addThis()
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus(summary);
+  //printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

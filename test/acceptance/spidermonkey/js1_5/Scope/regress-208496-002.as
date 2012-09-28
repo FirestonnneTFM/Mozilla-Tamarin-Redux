@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -42,24 +42,24 @@ function f(par)
 f.par = STATIC_VALUE;
 
 
-status = inSection(1);
+//status = inSection(1);
 f('abc'); // this sets |actual| inside |f|
 expect = STATIC_VALUE;
 addThis();
 
 // test the return: should be the dynamic value
-status = inSection(2);
+//status = inSection(2);
 actual = f('abc');
 expect = 'abc';
 addThis();
 
-status = inSection(3);
+//status = inSection(3);
 f(111 + 222); // sets |actual| inside |f|
 expect = STATIC_VALUE;
 addThis();
 
 // test the return: should be the dynamic value
-status = inSection(4);
+//status = inSection(4);
 actual = f(111 + 222);
 expect = 333;
 addThis();
@@ -81,24 +81,24 @@ function g(par)
 g.par = STATIC_VALUE;
 
 
-status = inSection(5);
+//status = inSection(5);
 g('abc'); // this sets |actual| inside |g|
 expect = STATIC_VALUE;
 addThis();
 
 // test the return: should be the dynamic value
-status = inSection(6);
+//status = inSection(6);
 actual = g('abc');
 expect = 'abc';
 addThis();
 
-status = inSection(7);
+//status = inSection(7);
 g(111 + 222); // sets |actual| inside |g|
 expect = STATIC_VALUE;
 addThis();
 
 // test the return: should be the dynamic value
-status = inSection(8);
+//status = inSection(8);
 actual = g(111 + 222);
 expect = 333;
 addThis();
@@ -123,15 +123,14 @@ function addThis()
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus(summary);
+  //printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

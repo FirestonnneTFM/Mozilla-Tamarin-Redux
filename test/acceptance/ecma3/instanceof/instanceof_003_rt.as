@@ -1,17 +1,16 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "instanceof-003";
-    var VERSION = "ECMA_2";
-    startTest();
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "instanceof-003";
+//     var VERSION = "ECMA_2";
         
-    var TITLE   = "instanceof operator";
+//     var TITLE   = "instanceof operator";
     var BUGNUMBER ="http://bugzilla.mozilla.org/show_bug.cgi?id=7635";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
     
     var testcases = getTestCases();
-    test();
     
 function Foo() {};
 function getTestCases() {
@@ -21,7 +20,7 @@ function getTestCases() {
     var theproto = {};
     Foo.prototype = theproto;
 
-    array[item++] = new TestCase(SECTION,
+    array[item++] = Assert.expectEq(
         "function Foo() = {}; theproto = {}; Foo.prototype = theproto; " +
             "theproto instanceof Foo",
         false,
@@ -30,7 +29,7 @@ function getTestCases() {
 
     var o = {};
 
-   /* AddTestCase(
+   /* Assert.expectEq(
         "o = {}; o instanceof o",
         false,
         o instanceof o );*/
@@ -40,7 +39,7 @@ function getTestCases() {
     }catch(e:Error){
        thisError = e.toString();
     }finally{
-        array[item++] = new TestCase( SECTION, "o = {}; o instanceof o","TypeError: Error #1040",typeError(thisError));
+        array[item++] = Assert.expectEq(  "o = {}; o instanceof o","TypeError: Error #1040",Utils.typeError(thisError));
     }
     
     return (array);

@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";                   // Version of JavaScript or ECMA
-var TITLE   = "Testing try block with multiple catch blocks, the  catch block with parameter of type EvalError catching the Eval error ";  // Provide ECMA section title or a description
+// var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";                   // Version of JavaScript or ECMA
+// var TITLE   = "Testing try block with multiple catch blocks, the  catch block with parameter of type EvalError catching the Eval error ";  // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 thisError = "no error";
@@ -39,9 +39,8 @@ try {
     }catch(e10:Error){
       thisError = e10.toString();
     }finally{
-    AddTestCase( "Testing try block with throw statement", "This is Eval Error"        ,thisError );
+    Assert.expectEq( "Testing try block with throw statement", "This is Eval Error"        ,thisError );
      }
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

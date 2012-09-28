@@ -4,16 +4,17 @@
 
 
 import StaticPropertyPackage.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";  // Version of JavaScript or ECMA
-var TITLE   = "Access static method of base class";       // Provide ECMA section title or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";  // Version of JavaScript or ECMA
+// var TITLE   = "Access static method of base class";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 /**
- * Calls to AddTestCase here. AddTestCase is a function that is defined
+ * Calls to Assert.expectEq here. Assert.expectEq is a function that is defined
  * in shell.js and takes three arguments:
  * - a string representation of what is being tested
  * - the expected result
@@ -23,7 +24,7 @@ startTest();                // leave this alone
  *
  * var helloWorld = "Hello World";
  *
- * AddTestCase(
+ * Assert.expectEq(
  * "var helloWorld = 'Hello World'",   // description of the test
  *  "Hello World",                     // expected result
  *  helloWorld );                      // actual result
@@ -42,9 +43,9 @@ try{
 } catch (e1) {
     thisError = e1.toString();
 } finally {
-    AddTestCase( "access static property in namespace of base class using subclass",
-                REFERENCEERROR+1069,
-                referenceError( thisError) );
+    Assert.expectEq( "access static property in namespace of base class using subclass",
+                Utils.REFERENCEERROR+1069,
+                Utils.referenceError( thisError) );
 }
 
 // ********************************************
@@ -57,9 +58,9 @@ try{
 } catch (e2) {
     thisError = e2.toString();
 } finally {
-    AddTestCase( "access static property of base class using subclass",
-                REFERENCEERROR+1069,
-                referenceError( thisError) );
+    Assert.expectEq( "access static property of base class using subclass",
+                Utils.REFERENCEERROR+1069,
+                Utils.referenceError( thisError) );
 }
 
 // ********************************************
@@ -73,10 +74,9 @@ try{
 } catch (e3) {
     thisError = e3.toString();
 } finally {
-    AddTestCase( "access static property of base class in subclass with this.foo",
-                REFERENCEERROR+1069,
-                referenceError( thisError) );
+    Assert.expectEq( "access static property of base class in subclass with this.foo",
+                Utils.REFERENCEERROR+1069,
+                Utils.referenceError( thisError) );
 }
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

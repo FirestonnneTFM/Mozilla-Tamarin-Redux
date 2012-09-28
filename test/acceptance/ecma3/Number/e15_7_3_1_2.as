@@ -1,18 +1,17 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 
-    var SECTION = "15.7.3.1-2";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "Number.prototype";
+//     var SECTION = "15.7.3.1-2";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "Number.prototype";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
 
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -24,10 +23,10 @@ function getTestCases() {
     }catch(e:ReferenceError){
        thisError=e.toString();
     }finally{
-       array[item++]= new TestCase(SECTION,"Trying to verify the ReadOnly attribute of Number.prototype","ReferenceError: Error #1074",referenceError(thisError));
+       array[item++]= Assert.expectEq("Trying to verify the ReadOnly attribute of Number.prototype","ReferenceError: Error #1074",Utils.referenceError(thisError));
     }
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var NUM_PROT = Number.prototype; Number.prototype = null; Number.prototype == NUM_PROT",
                                     true,
                                     (Number.prototype == NUM_PROT ) );
@@ -38,9 +37,9 @@ function getTestCases() {
     }catch(e:ReferenceError){
         thisError=e.toString();
     }finally{
-        array[item++]= new TestCase(SECTION,"Trying to verify the ReadOnly property of Number.prototype","ReferenceError: Error #1074",referenceError(thisError));
+        array[item++]= Assert.expectEq("Trying to verify the ReadOnly property of Number.prototype","ReferenceError: Error #1074",Utils.referenceError(thisError));
     }
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "Number.prototype=0; Number.prototype",
                                     Number.prototype,
                                     Number.prototype );

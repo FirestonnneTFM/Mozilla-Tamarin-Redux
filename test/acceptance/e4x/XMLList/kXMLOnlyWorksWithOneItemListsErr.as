@@ -1,8 +1,101 @@
 /* -*- Mode: java; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
+ * ***** BEGIN LICENSE BLOCK *****
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+
+function START(summary)
+{
+      // print out bugnumber
+
+     /*if ( BUGNUMBER ) {
+              writeLineToLog ("BUGNUMBER: " + BUGNUMBER );
+      }*/
+    XML.setSettings (null);
+    testcases = new Array();
+
+    // text field for results
+    tc = 0;
+    /*this.addChild ( tf );
+    tf.x = 30;
+    tf.y = 50;
+    tf.width = 200;
+    tf.height = 400;*/
+
+    //_print(summary);
+    var summaryParts = summary.split(" ");
+    //_print("section: " + summaryParts[0] + "!");
+    //fileName = summaryParts[0];
+
+}
+
+function TEST(section, expected, actual)
+{
+    AddTestCase(section, expected, actual);
+}
+ 
+
+function TEST_XML(section, expected, actual)
+{
+  var actual_t = typeof actual;
+  var expected_t = typeof expected;
+
+  if (actual_t != "xml") {
+    // force error on type mismatch
+    TEST(section, new XML(), actual);
+    return;
+  }
+
+  if (expected_t == "string") {
+
+    TEST(section, expected, actual.toXMLString());
+  } else if (expected_t == "number") {
+
+    TEST(section, String(expected), actual.toXMLString());
+  } else {
+    reportFailure ("", 'Bad TEST_XML usage: type of expected is "+expected_t+", should be number or string');
+  }
+}
+
+function reportFailure (section, msg)
+{
+  trace("~FAILURE: " + section + " | " + msg);
+}
+
+function AddTestCase( description, expect, actual ) {
+   testcases[tc++] = Assert.expectEq(description, "|"+expect+"|", "|"+actual+"|" );
+}
+
+function myGetNamespace (obj, ns) {
+    if (ns != undefined) {
+        return obj.namespace(ns);
+    } else {
+        return obj.namespace();
+    }
+}
+
+
+
+
+function NL()
+{
+  //return java.lang.System.getProperty("line.separator");
+  return "\n";
+}
+
+
+function BUG(arg){
+  // nothing here
+}
+
+function END()
+{
+    //test();
+}
+ 
 
 START("13.5 XMLList Objects - XML only works with one item lists error");
 
@@ -21,11 +114,11 @@ throw new Error("kXMLOnlyWorksWithOneItemLists error not thrown");
 
 } catch( e1 ){
 
-result = grabError(e1, e1.toString());
+result = Utils.grabError(e1, e1.toString());
 
 }
 
-AddTestCase( "xmllist.addNamespace('uri')", expected, result );
+Assert.expectEq( "xmllist.addNamespace('uri')", expected, result );
 
 
 
@@ -41,11 +134,11 @@ throw new Error("kXMLOnlyWorksWithOneItemLists error not thrown");
 
 } catch( e2 ){
 
-result = grabError(e2, e2.toString());
+result = Utils.grabError(e2, e2.toString());
 
 }
 
-AddTestCase( "xmllist.appendChild('<e>f</e>')", expected, result );
+Assert.expectEq( "xmllist.appendChild('<e>f</e>')", expected, result );
 
 
 
@@ -61,11 +154,11 @@ throw new Error("kXMLOnlyWorksWithOneItemLists error not thrown");
 
 } catch( e3 ){
 
-result = grabError(e3, e3.toString());
+result = Utils.grabError(e3, e3.toString());
 
 }
 
-AddTestCase( "xmllist.inScopeNamespaces()", expected, result );
+Assert.expectEq( "xmllist.inScopeNamespaces()", expected, result );
 
 
 
@@ -81,11 +174,11 @@ throw new Error("kXMLOnlyWorksWithOneItemLists error not thrown");
 
 } catch( e4 ){
 
-result = grabError(e4, e4.toString());
+result = Utils.grabError(e4, e4.toString());
 
 }
 
-AddTestCase( "xmllist.insertChildAfter(null, \"<s>t</s>\")", expected, result );
+Assert.expectEq( "xmllist.insertChildAfter(null, \"<s>t</s>\")", expected, result );
 
 
 
@@ -101,11 +194,11 @@ throw new Error("kXMLOnlyWorksWithOneItemLists error not thrown");
 
 } catch( e5 ){
 
-result = grabError(e5, e5.toString());
+result = Utils.grabError(e5, e5.toString());
 
 }
 
-AddTestCase( "xmllist.insertChildBefore(null, \"<s>t</s>\")", expected, result );
+Assert.expectEq( "xmllist.insertChildBefore(null, \"<s>t</s>\")", expected, result );
 
 
 
@@ -121,11 +214,11 @@ throw new Error("kXMLOnlyWorksWithOneItemLists error not thrown");
 
 } catch( e6 ){
 
-result = grabError(e6, e6.toString());
+result = Utils.grabError(e6, e6.toString());
 
 }
 
-AddTestCase( "xmllist.name()", expected, result );
+Assert.expectEq( "xmllist.name()", expected, result );
 
 
 
@@ -142,11 +235,11 @@ throw new Error("kXMLOnlyWorksWithOneItemLists error not thrown");
 
 } catch( e7 ){
 
-result = grabError(e7, e7.toString());
+result = Utils.grabError(e7, e7.toString());
 
 }
 
-AddTestCase( "xmllist.getNamespace(\"blah\")", expected, result );
+Assert.expectEq( "xmllist.getNamespace(\"blah\")", expected, result );
 
 
 
@@ -162,11 +255,11 @@ throw new Error("kXMLOnlyWorksWithOneItemLists error not thrown");
 
 } catch( e8 ){
 
-result = grabError(e8, e8.toString());
+result = Utils.grabError(e8, e8.toString());
 
 }
 
-AddTestCase( "xmllist.namespaceDeclarations()", expected, result );
+Assert.expectEq( "xmllist.namespaceDeclarations()", expected, result );
 
 
 
@@ -182,11 +275,11 @@ throw new Error("kXMLOnlyWorksWithOneItemLists error not thrown");
 
 } catch( e9 ){
 
-result = grabError(e9, e9.toString());
+result = Utils.grabError(e9, e9.toString());
 
 }
 
-AddTestCase( "xmllist.nodeKind()", expected, result );
+Assert.expectEq( "xmllist.nodeKind()", expected, result );
 
 
 
@@ -202,11 +295,11 @@ throw new Error("kXMLOnlyWorksWithOneItemLists error not thrown");
 
 } catch( e10 ){
 
-result = grabError(e10, e10.toString());
+result = Utils.grabError(e10, e10.toString());
 
 }
 
-AddTestCase( "xmllist.removeNamespace('pfx')", expected, result );
+Assert.expectEq( "xmllist.removeNamespace('pfx')", expected, result );
 
 
 
@@ -222,11 +315,11 @@ throw new Error("kXMLOnlyWorksWithOneItemLists error not thrown");
 
 } catch( e11 ){
 
-result = grabError(e11, e11.toString());
+result = Utils.grabError(e11, e11.toString());
 
 }
 
-AddTestCase( "xmllist.setChildren(\"<c>4</c><c>5</c>\")", expected, result );
+Assert.expectEq( "xmllist.setChildren(\"<c>4</c><c>5</c>\")", expected, result );
 
 
 
@@ -242,11 +335,11 @@ throw new Error("kXMLOnlyWorksWithOneItemLists error not thrown");
 
 } catch( e12 ){
 
-result = grabError(e12, e12.toString());
+result = Utils.grabError(e12, e12.toString());
 
 }
 
-AddTestCase( "xmllist.setLocalName(\"new local name\")", expected, result );
+Assert.expectEq( "xmllist.setLocalName(\"new local name\")", expected, result );
 
 
 
@@ -262,11 +355,11 @@ throw new Error("kXMLOnlyWorksWithOneItemLists error not thrown");
 
 } catch( e13 ){
 
-result = grabError(e13, e13.toString());
+result = Utils.grabError(e13, e13.toString());
 
 }
 
-AddTestCase( "xmllist.setName(\"myName\")", expected, result );
+Assert.expectEq( "xmllist.setName(\"myName\")", expected, result );
 
 
 
@@ -282,11 +375,11 @@ throw new Error("kXMLOnlyWorksWithOneItemLists error not thrown");
 
 } catch( e14 ){
 
-result = grabError(e14, e14.toString());
+result = Utils.grabError(e14, e14.toString());
 
 }
 
-AddTestCase( "xmllist.setNamespace(\"pfx\")", expected, result );
+Assert.expectEq( "xmllist.setNamespace(\"pfx\")", expected, result );
 
 
 END();

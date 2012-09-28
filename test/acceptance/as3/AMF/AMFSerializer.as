@@ -12,13 +12,12 @@ import flash.utils.Dictionary;
 import flash.net.*;
 import flash.utils.ObjectEncoding;
 import avmplus.File
+import com.adobe.test.Assert;
 
-var SECTION = "AMFSerialization";
-var VERSION = "as3";
-startTest();
-var TITLE   = "test AMF Serialization";
+// var SECTION = "AMFSerialization";
+// var VERSION = "as3";
+// var TITLE   = "test AMF Serialization";
 
-writeHeaderToLog( SECTION + " "+ TITLE );
 
 class CustomDynamicPropertyWriter implements IDynamicPropertyWriter {
 
@@ -327,10 +326,10 @@ ba_TestObject = new ByteArray();
 ba_TestObject.writeObject(udfc_Obj);
 ba_TestObject.position = 0;
 var udfc_Read_Obj:UserDefinedFinalClass = ba_TestObject.readObject();
-AddTestCase("User Defined Final Class - Const ", udfc_Obj.strPubConstString, udfc_Read_Obj.strPubConstString);
-AddTestCase("User Defined Final Class - Public String ", udfc_Obj.strPubString, udfc_Read_Obj.strPubString);
-AddTestCase("User Defined Final Class - Private String", "User Defined Final Class Private Variable", udfc_Read_Obj.getPrivString());
-AddTestCase("User Defined Final Class - Protected String", "User Defined Final Class Protected Variable", udfc_Read_Obj.getProtString());
+Assert.expectEq("User Defined Final Class - Const ", udfc_Obj.strPubConstString, udfc_Read_Obj.strPubConstString);
+Assert.expectEq("User Defined Final Class - Public String ", udfc_Obj.strPubString, udfc_Read_Obj.strPubString);
+Assert.expectEq("User Defined Final Class - Private String", "User Defined Final Class Private Variable", udfc_Read_Obj.getPrivString());
+Assert.expectEq("User Defined Final Class - Protected String", "User Defined Final Class Protected Variable", udfc_Read_Obj.getProtString());
 //Testing User Defined Final Class - Ends
 
 //User Defined Dynamic Class
@@ -342,10 +341,10 @@ ba_TestObject = new ByteArray();
 ba_TestObject.writeObject(uddc_Obj);
 ba_TestObject.position = 0;
 var uddc_Read_Obj:UserDefinedDynamicClass = ba_TestObject.readObject();
-AddTestCase("User Defined Dynamic Class - Const ", uddc_Obj.strPubConstString, uddc_Read_Obj.strPubConstString);
-AddTestCase("User Defined Dynamic Class - Public String ", uddc_Obj.strPubString, uddc_Read_Obj.strPubString);
-AddTestCase("User Defined Dynamic Class - Private String ", "User Defined Dynamic Class Private Variable", uddc_Read_Obj.getPrivString());
-AddTestCase("User Defined Dynamic Class - Protected String ", "User Defined Dynamic Class Protected Variable", uddc_Read_Obj.getProtString());
+Assert.expectEq("User Defined Dynamic Class - Const ", uddc_Obj.strPubConstString, uddc_Read_Obj.strPubConstString);
+Assert.expectEq("User Defined Dynamic Class - Public String ", uddc_Obj.strPubString, uddc_Read_Obj.strPubString);
+Assert.expectEq("User Defined Dynamic Class - Private String ", "User Defined Dynamic Class Private Variable", uddc_Read_Obj.getPrivString());
+Assert.expectEq("User Defined Dynamic Class - Protected String ", "User Defined Dynamic Class Protected Variable", uddc_Read_Obj.getProtString());
 //Testing User Defined Dynamic Class - Ends
 
 //User Defined Dynamic Class with Dynamic Member
@@ -355,7 +354,7 @@ ba_TestObject = new ByteArray();
 ba_TestObject.writeObject(uddc_Obj);
 ba_TestObject.position = 0;
 uddc_Read_Obj = ba_TestObject.readObject();
-AddTestCase("User Defined Dynamic Class With Dynamic Member - Dynamic Member", uddc_Obj.testvalue, uddc_Read_Obj.testvalue);
+Assert.expectEq("User Defined Dynamic Class With Dynamic Member - Dynamic Member", uddc_Obj.testvalue, uddc_Read_Obj.testvalue);
 
 //User Defined Dynamic Class with Dynamic Members having Dynamic Members
 var uddcwd_Obj:UDefDynClassWithDynamicAttrs = new UDefDynClassWithDynamicAttrs();
@@ -365,7 +364,7 @@ ba_TestObject = new ByteArray();
 ba_TestObject.writeObject(uddcwd_Obj);
 ba_TestObject.position = 0;
 var uddcwd_Read_Obj:UDefDynClassWithDynamicAttrs = ba_TestObject.readObject();
-AddTestCase("User Defined Dynamic Class with Dynamic Members having Dynamic Members", uddcwd_Obj.obj_DynamicVar.testvalue, uddcwd_Read_Obj.obj_DynamicVar.testvalue);
+Assert.expectEq("User Defined Dynamic Class with Dynamic Members having Dynamic Members", uddcwd_Obj.obj_DynamicVar.testvalue, uddcwd_Read_Obj.obj_DynamicVar.testvalue);
 //Testing User Defined Dynamic Class with Dynamic Members having Dynamic Members - Ends
 
 //Objects with Circular Reference
@@ -382,8 +381,8 @@ ba_TestObject.writeObject(obj_drcheck1_Obj);
 ba_TestObject.position = 0;
 var obj_drcheck_Read_Obj:Object = ba_TestObject.readObject();
 var obj_drcheck1_Read_Obj:Object = ba_TestObject.readObject();
-AddTestCase("Object with Circular Reference A to B", obj_drcheck_Obj.refobject.othervalue, obj_drcheck_Read_Obj.refobject.othervalue);
-AddTestCase("Object with Circular Reference B to A", obj_drcheck1_Obj.refobject.othervalue, obj_drcheck1_Read_Obj.refobject.othervalue);
+Assert.expectEq("Object with Circular Reference A to B", obj_drcheck_Obj.refobject.othervalue, obj_drcheck_Read_Obj.refobject.othervalue);
+Assert.expectEq("Object with Circular Reference B to A", obj_drcheck1_Obj.refobject.othervalue, obj_drcheck1_Read_Obj.refobject.othervalue);
 //Testing Objects with Circular Reference - Ends
 
 //Object with dynamic properties
@@ -399,10 +398,10 @@ ba_TestObject = new ByteArray();
 ba_TestObject.writeObject(obj_dyn_Obj);
 ba_TestObject.position = 0;
 var obj_Read_dyn_Obj:Object = ba_TestObject.readObject();
-AddTestCase("Object with Dynamic Properties: Prop 1", obj_dyn_Obj.testvalue1, obj_Read_dyn_Obj.testvalue1);
-AddTestCase("Object with Dynamic Properties : Prop 2", obj_dyn_Obj.testvalue2, obj_Read_dyn_Obj.testvalue2);
-AddTestCase("Object with Dynamic Properties : Prop 3", obj_dyn_Obj.testvalue4, obj_Read_dyn_Obj.testvalue4);
-AddTestCase("Object with Dynamic Properties : Prop 3 (1)", obj_dyn_Obj.testvalue3.testvalue, obj_Read_dyn_Obj.testvalue3.testvalue);
+Assert.expectEq("Object with Dynamic Properties: Prop 1", obj_dyn_Obj.testvalue1, obj_Read_dyn_Obj.testvalue1);
+Assert.expectEq("Object with Dynamic Properties : Prop 2", obj_dyn_Obj.testvalue2, obj_Read_dyn_Obj.testvalue2);
+Assert.expectEq("Object with Dynamic Properties : Prop 3", obj_dyn_Obj.testvalue4, obj_Read_dyn_Obj.testvalue4);
+Assert.expectEq("Object with Dynamic Properties : Prop 3 (1)", obj_dyn_Obj.testvalue3.testvalue, obj_Read_dyn_Obj.testvalue3.testvalue);
 //Testing Objects with Dynamic Properties- Ends
 
 //Undefined Value
@@ -411,7 +410,7 @@ var obj_Undefined = undefined;
 ba_TestObject = new ByteArray();
 ba_TestObject.writeObject(obj_Undefined);
 ba_TestObject.position = 0;
-AddTestCase("Undefined", obj_Undefined, ba_TestObject.readObject());
+Assert.expectEq("Undefined", obj_Undefined, ba_TestObject.readObject());
 //Testing Undefined - Ends
 
 //Custom Dynamic Property Writer
@@ -424,8 +423,8 @@ var ba_TestObject3:ByteArray = new ByteArray();
 ba_TestObject3.writeObject(obj_dyn_Custom_Obj);
 ba_TestObject3.position = 0;
 var obj_Read_dyn_Custom_Obj:Object= ba_TestObject3.readObject();
-AddTestCase("Custom Encoding: Prop notforserialzing", undefined, obj_Read_dyn_Custom_Obj.notforserializing);
-AddTestCase("Custom Encoding: Prop testvalue", obj_dyn_Custom_Obj.testvalue, obj_Read_dyn_Custom_Obj.testvalue);
+Assert.expectEq("Custom Encoding: Prop notforserialzing", undefined, obj_Read_dyn_Custom_Obj.notforserializing);
+Assert.expectEq("Custom Encoding: Prop testvalue", obj_dyn_Custom_Obj.testvalue, obj_Read_dyn_Custom_Obj.testvalue);
 ObjectEncoding.dynamicPropertyWriter=null;
 //Testing Custom Dynamic Property Writer - Ends
 
@@ -436,7 +435,7 @@ ba_TestObject = new ByteArray();
 ba_TestObject.writeObject(obj_sie);
 ba_TestObject.position = 0;
 var obj_sie1:SimpleIExternalizable = ba_TestObject.readObject();
-AddTestCase("IExternalizable", "IExternalizable String", obj_sie1.stringtest);
+Assert.expectEq("IExternalizable", "IExternalizable String", obj_sie1.stringtest);
 //Testing IExternalizable - Ends
 
 //Testing String Reference Tables
@@ -479,7 +478,7 @@ function buildBAnCallAddTC(strTitle:String, input:*)
     var ba_test_Obj:ByteArray = new ByteArray();
     ba_test_Obj.writeObject(input);
     ba_test_Obj.position = 0;
-    AddTestCase(strTitle, input, ba_test_Obj.readObject());
+    Assert.expectEq(strTitle, input, ba_test_Obj.readObject());
 }
 
 function testNaN(strTitle:String, input:Number)
@@ -488,7 +487,7 @@ function testNaN(strTitle:String, input:Number)
     ba_test_Obj.writeObject(input);
     ba_test_Obj.position = 0;
     
-    AddTestCase(strTitle, isNaN(input), isNaN(ba_test_Obj.readObject()));
+    Assert.expectEq(strTitle, isNaN(input), isNaN(ba_test_Obj.readObject()));
 }
 
 function testDate(strTitle:String, input:Date)
@@ -501,7 +500,7 @@ function testDate(strTitle:String, input:Date)
 
 function compareDates(strTitle:String, input:Date, actual:Date)
 {
-    AddTestCase(strTitle, input.getTime(), actual.getTime());
+    Assert.expectEq(strTitle, input.getTime(), actual.getTime());
 }
 
 function testArrayTypes(strTitle:String, input:Array)
@@ -537,7 +536,7 @@ function compareArrays(strTitle:String, input:Array, actual:Array)
         }
         else
         {
-            AddTestCase(strTitle + " value check EXP vs ACT: " + prop, input[prop], actual[prop]);
+            Assert.expectEq(strTitle + " value check EXP vs ACT: " + prop, input[prop], actual[prop]);
         }
     }
     for each (var prop1:* in propActual)
@@ -548,7 +547,7 @@ function compareArrays(strTitle:String, input:Array, actual:Array)
         }
         else
         {
-            AddTestCase(strTitle + " value check ACT vs EXP: " + prop1, actual[prop1], input[prop1]);
+            Assert.expectEq(strTitle + " value check ACT vs EXP: " + prop1, actual[prop1], input[prop1]);
         }
     }
 }
@@ -563,7 +562,7 @@ function testXMLTypes(strTitle:String, input:XML)
 
 function compareXMLS(strTitle:String, input:XML, actual:XML)
 {
-    AddTestCase(strTitle, input.toString(), actual.toString());
+    Assert.expectEq(strTitle, input.toString(), actual.toString());
 }
 
 function compareObjects(strTitle:String, input:Object, actual:Object)
@@ -586,11 +585,11 @@ function compareObjects(strTitle:String, input:Object, actual:Object)
 
     for each (var prop:* in propInput)
     {
-        AddTestCase(strTitle, input[prop], actual[prop]);
+        Assert.expectEq(strTitle, input[prop], actual[prop]);
     }
     for each (var prop1:* in propActual)
     {
-        AddTestCase(strTitle, actual[prop1], input[prop1]);
+        Assert.expectEq(strTitle, actual[prop1], input[prop1]);
     }
     
 }
@@ -608,12 +607,12 @@ function compareVectorsInt(strTitle:String, input:Vector.<int>, actual:Vector.<i
     var inputlen:int = input.length;
     var actuallen:int = actual.length;
     
-    AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
+    Assert.expectEq(strTitle + " Vector Len ", inputlen, actuallen);
     if(inputlen == actuallen)
     {
         for (var i:int; i < inputlen; i++)
         {
-            AddTestCase(strTitle, input[i], actual[i]);
+            Assert.expectEq(strTitle, input[i], actual[i]);
         }
     }
 }
@@ -631,12 +630,12 @@ function compareVectorsUInt(strTitle:String, input:Vector.<uint>, actual:Vector.
     var inputlen:int = input.length;
     var actuallen:int = actual.length;
     
-    AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
+    Assert.expectEq(strTitle + " Vector Len ", inputlen, actuallen);
     if(inputlen == actuallen)
     {
         for (var i:int; i < inputlen; i++)
         {
-            AddTestCase(strTitle, input[i], actual[i]);
+            Assert.expectEq(strTitle, input[i], actual[i]);
             
         }
     }
@@ -655,12 +654,12 @@ function compareVectorsNumber(strTitle:String, input:Vector.<Number>, actual:Vec
     var inputlen:int = input.length;
     var actuallen:int = actual.length;
     
-    AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
+    Assert.expectEq(strTitle + " Vector Len ", inputlen, actuallen);
     if(inputlen == actuallen)
     {
         for (var i:int; i < inputlen; i++)
         {
-            AddTestCase(strTitle, input[i], actual[i]);
+            Assert.expectEq(strTitle, input[i], actual[i]);
         }
     }
 }
@@ -678,18 +677,18 @@ function compareVectorsObject(strTitle:String, input:Vector.<Object>, actual:Vec
     var inputlen:int = input.length;
     var actuallen:int = actual.length;
     
-    AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
+    Assert.expectEq(strTitle + " Vector Len ", inputlen, actuallen);
     if(inputlen == actuallen)
     {
         for (var i:int; i < inputlen; i++)
         {
             if (input[i] is String && actual[i] is String)
             {
-                AddTestCase(strTitle, input[i], actual[i]);
+                Assert.expectEq(strTitle, input[i], actual[i]);
             }
             else if (input[i] is int && actual[i] is int)
             {
-                AddTestCase(strTitle, input[i], actual[i]);
+                Assert.expectEq(strTitle, input[i], actual[i]);
             }
             else
             {
@@ -712,7 +711,7 @@ function compareVectorsUDef(strTitle:String, input:Vector.<UserDefClassAllTypes>
 {
     var inputlen:int = input.length;
     var actuallen:int = actual.length;
-    AddTestCase(strTitle + " Vector Len ", inputlen, actuallen);
+    Assert.expectEq(strTitle + " Vector Len ", inputlen, actuallen);
     if(inputlen == actuallen)
     {
         for (var i:int; i < inputlen; i++)
@@ -735,7 +734,7 @@ function compareByteArray(strTitle:String, input:ByteArray, actual:ByteArray)
 {
     input.position = 0;
     actual.position = 0;
-    AddTestCase(strTitle, input.readObject(), actual.readObject());
+    Assert.expectEq(strTitle, input.readObject(), actual.readObject());
 }
 
 function testDictionaryTypes(strTitle:String, input:Dictionary)
@@ -781,23 +780,23 @@ function compareDictionary(strTitle:String, input:Dictionary, actual:Dictionary)
         }
         else if (input[prop] is Boolean)
         {
-            AddTestCase(strTitle + " Boolean ", input[prop], actual[prop]);
+            Assert.expectEq(strTitle + " Boolean ", input[prop], actual[prop]);
         }
         else if (input[prop] is  String)
         {
-            AddTestCase(strTitle + " String ", input[prop], actual[prop]);
+            Assert.expectEq(strTitle + " String ", input[prop], actual[prop]);
         }
         else if (input[prop] is int)
         {
-            AddTestCase(strTitle + " int ", input[prop], actual[prop]);
+            Assert.expectEq(strTitle + " int ", input[prop], actual[prop]);
         }
         else if (input[prop] is uint)
         {
-            AddTestCase(strTitle + " uint ", input[prop], actual[prop]);
+            Assert.expectEq(strTitle + " uint ", input[prop], actual[prop]);
         }
         else if (input[prop] is Number)
         {
-            AddTestCase(strTitle + " Number ", input[prop], actual[prop]);
+            Assert.expectEq(strTitle + " Number ", input[prop], actual[prop]);
         }
         else if (input[prop] is ByteArray)
         {
@@ -805,7 +804,7 @@ function compareDictionary(strTitle:String, input:Dictionary, actual:Dictionary)
         }
         else
         {
-            AddTestCase(strTitle + " Object ", input[prop], actual[prop]);
+            Assert.expectEq(strTitle + " Object ", input[prop], actual[prop]);
         }
     }
 }
@@ -821,15 +820,15 @@ function testUserDefTypes(strTitle:String, input:UserDefClassAllTypes)
 
 function compareUserDefTypes(strTitle:String, input:UserDefClassAllTypes, actual:UserDefClassAllTypes)
 {
-    AddTestCase(strTitle  + " User Defined null ", input.null_Obj, actual.null_Obj);
-    AddTestCase(strTitle  + " User Defined boolean True ", input.bool_True_Obj, actual.bool_True_Obj);
-    AddTestCase(strTitle  + " User Defined boolean False " , input.bool_False_Obj, actual.bool_False_Obj);
-    AddTestCase(strTitle  + " User Defined int" , input.int_Positive_type, actual.int_Positive_type);
-    AddTestCase(strTitle  + " User Defined uint" , input.uint_Value_type, actual.uint_Value_type);
-    AddTestCase(strTitle  + " User Defined  Number min" , input.num_Min_Obj, actual.num_Min_Obj);
-    AddTestCase(strTitle  + " User Defined  Number Positive" , input.num_Positive_Obj, actual.num_Positive_Obj);
-    AddTestCase(strTitle  + " User Defined  Number Positive" , input.num_Positive_Obj, actual.num_Positive_Obj);
-    AddTestCase(strTitle  + " User Defined String " , input.str_Title_Obj, actual.str_Title_Obj);
+    Assert.expectEq(strTitle  + " User Defined null ", input.null_Obj, actual.null_Obj);
+    Assert.expectEq(strTitle  + " User Defined boolean True ", input.bool_True_Obj, actual.bool_True_Obj);
+    Assert.expectEq(strTitle  + " User Defined boolean False " , input.bool_False_Obj, actual.bool_False_Obj);
+    Assert.expectEq(strTitle  + " User Defined int" , input.int_Positive_type, actual.int_Positive_type);
+    Assert.expectEq(strTitle  + " User Defined uint" , input.uint_Value_type, actual.uint_Value_type);
+    Assert.expectEq(strTitle  + " User Defined  Number min" , input.num_Min_Obj, actual.num_Min_Obj);
+    Assert.expectEq(strTitle  + " User Defined  Number Positive" , input.num_Positive_Obj, actual.num_Positive_Obj);
+    Assert.expectEq(strTitle  + " User Defined  Number Positive" , input.num_Positive_Obj, actual.num_Positive_Obj);
+    Assert.expectEq(strTitle  + " User Defined String " , input.str_Title_Obj, actual.str_Title_Obj);
     compareDates(strTitle  + " User Defined Date " , input.dt_Fixed_Obj, actual.dt_Fixed_Obj);
     compareArrays(strTitle  + " User Defined Array Index:Int Value:String", input.arr_IntStr_Obj, actual.arr_IntStr_Obj);
     compareArrays(strTitle  + " User Defined Array Index:Mixed Value:Mixed", input.arr_MixMix_Obj, actual.arr_MixMix_Obj);
@@ -840,5 +839,4 @@ function compareUserDefTypes(strTitle:String, input:UserDefClassAllTypes, actual
     compareByteArray(strTitle + " User Defined ByteArray (String)", input.ba_Str_Obj, actual.ba_Str_Obj);
 }
 
-test();
 

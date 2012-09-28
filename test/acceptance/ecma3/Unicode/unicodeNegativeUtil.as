@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 function negativeTestUnicodeRange(hexFrom, hexTo, array, item) {
     // split the range into smaller more manageable set
     var range = 250;
@@ -46,7 +47,7 @@ function negativeTestSearch(hexFrom, hexTo, array, item, testStr)
         }
     }
 
-        this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = Assert.expectEq(
                 "Negative String.search", '', stringSearchResult);
     
     var hexFromStr = decimalToHexString(hexFrom);
@@ -55,14 +56,14 @@ function negativeTestSearch(hexFrom, hexTo, array, item, testStr)
     //test matching undefined
     var searchResult:int = testStr.search(undefined);
     var searchExpect = -1;
-    this.array[this.item++] = new TestCase(SECTION,
+    this.array[this.item++] = Assert.expectEq(
         hexFromStr + " to " + hexToStr +
         " String.search(undefined)", searchExpect, searchResult);
 
     //test matching with no parameter
     var searchResult2:int = testStr.search();
     var searchExpect2 = -1;
-    this.array[this.item++] = new TestCase(SECTION,
+    this.array[this.item++] = Assert.expectEq(
         hexFromStr + " to " + hexToStr +
         " String.search()", searchExpect2, searchResult2);
 }
@@ -85,7 +86,7 @@ function negativeTestMatch(hexFrom, hexTo, array, item, testStr)
         }
     }
         
-        this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = Assert.expectEq(
                 "Negative String.match", '', stringSearchResult);
 
     var hexFromStr = decimalToHexString(hexFrom);
@@ -93,13 +94,13 @@ function negativeTestMatch(hexFrom, hexTo, array, item, testStr)
 
     //test matching undefined
     var matchResult2:Array = testStr.match(undefined);
-    this.array[this.item++] = new TestCase(SECTION,
+    this.array[this.item++] = Assert.expectEq(
         hexFromStr + " to " + hexToStr +
         " String.match(undefined)", null, matchResult2);
 
     //test matching with no parameter
     var matchResult3:Array = testStr.match();
-    this.array[this.item++] = new TestCase(SECTION,
+    this.array[this.item++] = Assert.expectEq(
         hexFromStr + " to " + hexToStr +
         " String.match()", null, matchResult3);
 }
@@ -124,7 +125,7 @@ function negativeTestSplit(hexFrom, hexTo, array, item, testStr, splitExpected)
     else {
         stringSplitResult += 'result array null! ';
     }
-        this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = Assert.expectEq(
             "String.split('')", '', stringSplitResult);
 
 
@@ -145,7 +146,7 @@ function negativeTestSplit(hexFrom, hexTo, array, item, testStr, splitExpected)
     else {
         stringSplitResult += 'result array null! ';
     }
-        this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = Assert.expectEq(
             "String.split(new RegExp())", '', stringSplitResult);
 
     //split on empty regular expression
@@ -165,18 +166,18 @@ function negativeTestSplit(hexFrom, hexTo, array, item, testStr, splitExpected)
     else {
         stringSplitResult += 'result array null! ';
     }
-        this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = Assert.expectEq(
             "String.split(new RegExp(''))", '', stringSplitResult);
 
 
     //split on undefined
     var splitResult4:Array = testStr.split(undefined);
     if (splitResult4 != null) {
-        this.array[this.item++] = new TestCase(SECTION,
+        this.array[this.item++] = Assert.expectEq(
             "String.split(undefined) result length", 1, splitResult4.length);
             
         if (splitResult4.length == 1) {
-            this.array[this.item++] = new TestCase(SECTION,
+            this.array[this.item++] = Assert.expectEq(
                 "String.split(undefined)[0]", testStr, splitResult4[0]);
         }
     }
@@ -185,7 +186,7 @@ function negativeTestSplit(hexFrom, hexTo, array, item, testStr, splitExpected)
 function negativeTestReplace(hexFrom, hexTo, array, item, testStr)
 {
     var replaceResult = testStr.replace(String.fromCharCode(hexFrom)+String.fromCharCode(hexTo));
-    this.array[this.item++] = new TestCase(SECTION,
+    this.array[this.item++] = Assert.expectEq(
         "String.replace(" + decimalToHexString(hexFrom) + decimalToHexString(hexTo) + ")", testStr, replaceResult);
 }
 

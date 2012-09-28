@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-301738-01.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Date parse compatibilty with MSIE';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 /*
     Case 1. The input string contains an English month name.
@@ -34,24 +34,24 @@ f = l = 0;
 expect = true;
 
 actual = isNaN(new Date(month + ' ' + f + ' ' + l));
-AddTestCase('January 0 0 is invalid', expect, actual);
+Assert.expectEq('January 0 0 is invalid', expect, actual);
 
 actual = isNaN(new Date(f + ' ' + l + ' ' + month));
-AddTestCase('0 0 January is invalid', expect, actual);
+Assert.expectEq('0 0 January is invalid', expect, actual);
 
 actual = isNaN(new Date(f + ' ' + month + ' ' + l));
-AddTestCase('0 January 0 is invalid', expect, actual);
+Assert.expectEq('0 January 0 is invalid', expect, actual);
 
 f = l = 70;
 
 actual = isNaN(new Date(month + ' ' + f + ' ' + l));
-AddTestCase('January 70 70 is invalid', expect, actual);
+Assert.expectEq('January 70 70 is invalid', expect, actual);
 
 actual = isNaN(new Date(f + ' ' + l + ' ' + month));
-AddTestCase('70 70 January is invalid', expect, actual);
+Assert.expectEq('70 70 January is invalid', expect, actual);
 
 actual = isNaN(new Date(f + ' ' + month + ' ' + l));
-AddTestCase('70 January 70 is invalid', expect, actual);
+Assert.expectEq('70 January 70 is invalid', expect, actual);
 
 f = 100;
 l = 15;
@@ -60,13 +60,13 @@ l = 15;
 expect = new Date(f, 0, l).toString();
 
 actual = new Date(month + ' ' + f + ' ' + l).toString();
-AddTestCase('month f l', expect, actual);
+Assert.expectEq('month f l', expect, actual);
 
 actual = new Date(f + ' ' + l + ' ' + month).toString();
-AddTestCase('f l month', expect, actual);
+Assert.expectEq('f l month', expect, actual);
 
 actual = new Date(f + ' ' + month + ' ' + l).toString();
-AddTestCase('f month l', expect, actual);
+Assert.expectEq('f month l', expect, actual);
 
 f = 80;
 l = 15;
@@ -75,13 +75,13 @@ l = 15;
 expect = (new Date(f, 0, l)).toString();
 
 actual = (new Date(month + ' ' + f + ' ' + l)).toString();
-AddTestCase('month f l', expect, actual);
+Assert.expectEq('month f l', expect, actual);
 
 actual = (new Date(f + ' ' + l + ' ' + month)).toString();
-AddTestCase('f l month', expect, actual);
+Assert.expectEq('f l month', expect, actual);
 
 actual = (new Date(f + ' ' + month + ' ' + l)).toString();
-AddTestCase('f month l', expect, actual);
+Assert.expectEq('f month l', expect, actual);
 
 f = 2040;
 l = 15;
@@ -90,13 +90,12 @@ l = 15;
 expect = (new Date(f, 0, l)).toString();
 
 actual = (new Date(month + ' ' + f + ' ' + l)).toString();
-AddTestCase('month f l', expect, actual);
+Assert.expectEq('month f l', expect, actual);
 
 actual = (new Date(f + ' ' + l + ' ' + month)).toString();
-AddTestCase('f l month', expect, actual);
+Assert.expectEq('f l month', expect, actual);
 
 actual = (new Date(f + ' ' + month + ' ' + l)).toString();
-AddTestCase('f month l', expect, actual);
+Assert.expectEq('f month l', expect, actual);
 
 
-test();

@@ -55,21 +55,21 @@ import D.*;
 import E.*;
 import F.*;
 import IG.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var a = new A();
 var b = new B();
 var g = new G();
 
-AddTestCase("Class A in package A", "A.A", a.whoAmI());
-AddTestCase("Class B in package A", "A.B", b.whoAmI());
+Assert.expectEq("Class A in package A", "A.A", a.whoAmI());
+Assert.expectEq("Class B in package A", "A.B", b.whoAmI());
 
 result = "";
 try {
@@ -81,7 +81,7 @@ try {
 
 // !!! This will have to be changed when bug 139002 is fixed.
 
-AddTestCase("Access A in A as new A()", "no exception", result);
+Assert.expectEq("Access A in A as new A()", "no exception", result);
 
 result = "";
 try {
@@ -94,9 +94,9 @@ try {
 // !!! This will have to be changed when bug 138845 is fixed.
 //bug 138845 is fixed so changing "exception" to "no exception"
 
-AddTestCase("Access A in A as new A.A()", "no exception", result);
+Assert.expectEq("Access A in A as new A.A()", "no exception", result);
     
-AddTestCase("Variable D in package D", "hello", D);
+Assert.expectEq("Variable D in package D", "hello", D);
 
 try {
     e=E.E;
@@ -104,11 +104,10 @@ try {
 } catch(e) {
     result = "exception";
 }
-AddTestCase("Public variable E inside package E", "no exception", result);
-AddTestCase("Public variable E inside package E", "E", E.E);
-AddTestCase("Function F inside package F", "You passed 5", F(5));
+Assert.expectEq("Public variable E inside package E", "no exception", result);
+Assert.expectEq("Public variable E inside package E", "E", E.E);
+Assert.expectEq("Function F inside package F", "You passed 5", F(5));
 
-AddTestCase("Interface IG defined in package IG", "G", g.whoAmI());
+Assert.expectEq("Interface IG defined in package IG", "G", g.whoAmI());
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

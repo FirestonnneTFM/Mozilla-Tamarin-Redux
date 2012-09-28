@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'general1.js';
 
@@ -13,13 +14,10 @@ gTestfile = 'general1.js';
    Date:         Fri Feb 13 09:58:28 PST 1998
 */
 
-var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-var VERSION = 'no version';
-startTest();  var testscases=[]; var index=0;
-var TITLE = 'String:push,unshift,shift';
+// var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+// var VERSION = 'no version';
+// var TITLE = 'String:push,unshift,shift';
 
-writeHeaderToLog('Executing script: general1.js');
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var array1 = [];
 
@@ -30,19 +28,18 @@ array1.push(123);            //array1 = [123]
 array1.push("dog");          //array1 = [123,dog]
 array1.push(-99);            //array1 = [123,dog,-99]
 array1.push("cat");          //array1 = [123,dog,-99,cat]
-testcases[index++] = new TestCase( SECTION, "array1.pop()", array1.pop(),'cat');
+Assert.expectEq(  "array1.pop()", array1.pop(),'cat');
 //array1 = [123,dog,-99]
 array1.push("mouse");        //array1 = [123,dog,-99,mouse]
-testcases[index++] = new TestCase( SECTION, "array1.shift()", array1.shift(),123);
+Assert.expectEq(  "array1.shift()", array1.shift(),123);
 //array1 = [dog,-99,mouse]
 array1.unshift(96);          //array1 = [96,dog,-99,mouse]
-testcases[index++] = new TestCase( SECTION, "state of array", String([96,"dog",-99,"mouse"]), String(array1));
-testcases[index++] = new TestCase( SECTION, "array1.length", array1.length,4);
+Assert.expectEq(  "state of array", String([96,"dog",-99,"mouse"]), String(array1));
+Assert.expectEq(  "array1.length", array1.length,4);
 array1.shift();              //array1 = [dog,-99,mouse]
 array1.shift();              //array1 = [-99,mouse]
 array1.shift();              //array1 = [mouse]
-testcases[index++] = new TestCase( SECTION, "array1.shift()", array1.shift(),"mouse");
-testcases[index++] = new TestCase( SECTION, "array1.shift()", "undefined", String(array1.shift()));
+Assert.expectEq(  "array1.shift()", array1.shift(),"mouse");
+Assert.expectEq(  "array1.shift()", "undefined", String(array1.shift()));
 
-test();
 

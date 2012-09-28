@@ -4,13 +4,12 @@
 
 import avmplus.*;
 import avmshell.*;
+import com.adobe.test.Assert;
 
-var SECTION = 'API Versioning - globals';
-var VERSION = 'AS3';
+// var SECTION = 'API Versioning - globals';
+// var VERSION = 'AS3';
 
-startTest();
 
-writeHeaderToLog( SECTION );
 
 var re:String;
 var re1065:String = 'ReferenceError: Error #1065';
@@ -44,7 +43,7 @@ var ea_set:Array = apiExpectedSetAns[apiVersion]
 
 if (ea == null)
 {
-   AddTestCase("unknown apiVersion", 0, apiVersion);
+   Assert.expectEq("unknown apiVersion", 0, apiVersion);
 }
 else
 {
@@ -103,4 +102,15 @@ else
     versionTest(function() { avmshell.public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2 = true; return true; }, 'public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2', ea_set[11]);
     versionTest(function() { avmshell.public_getset_FP_10_0_32_AIR_1_0_FP_10_0 = true; return true; }, 'public_getset_FP_10_0_32_AIR_1_0_FP_10_0', ea_set[12]);
 }
-test();
+
+// helper function for api versioning tests
+function versionTest(testFunc, desc, expected) {
+   var result;
+   try {
+       result = testFunc();
+   } catch (e) {
+       // Get the error type and code, but not desc if its a debug build
+       result = e.toString().substring(0,e.toString().indexOf(':')+13);
+   }
+   Assert.expectEq(desc, expected, result);
+}

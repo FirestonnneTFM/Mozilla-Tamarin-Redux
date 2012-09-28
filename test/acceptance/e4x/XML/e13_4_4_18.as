@@ -1,8 +1,101 @@
 /* -*- Mode: java; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
+ * ***** BEGIN LICENSE BLOCK *****
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+
+function START(summary)
+{
+      // print out bugnumber
+
+     /*if ( BUGNUMBER ) {
+              writeLineToLog ("BUGNUMBER: " + BUGNUMBER );
+      }*/
+    XML.setSettings (null);
+    testcases = new Array();
+
+    // text field for results
+    tc = 0;
+    /*this.addChild ( tf );
+    tf.x = 30;
+    tf.y = 50;
+    tf.width = 200;
+    tf.height = 400;*/
+
+    //_print(summary);
+    var summaryParts = summary.split(" ");
+    //_print("section: " + summaryParts[0] + "!");
+    //fileName = summaryParts[0];
+
+}
+
+function TEST(section, expected, actual)
+{
+    AddTestCase(section, expected, actual);
+}
+ 
+
+function TEST_XML(section, expected, actual)
+{
+  var actual_t = typeof actual;
+  var expected_t = typeof expected;
+
+  if (actual_t != "xml") {
+    // force error on type mismatch
+    TEST(section, new XML(), actual);
+    return;
+  }
+
+  if (expected_t == "string") {
+
+    TEST(section, expected, actual.toXMLString());
+  } else if (expected_t == "number") {
+
+    TEST(section, String(expected), actual.toXMLString());
+  } else {
+    reportFailure ("", 'Bad TEST_XML usage: type of expected is "+expected_t+", should be number or string');
+  }
+}
+
+function reportFailure (section, msg)
+{
+  trace("~FAILURE: " + section + " | " + msg);
+}
+
+function AddTestCase( description, expect, actual ) {
+   testcases[tc++] = Assert.expectEq(description, "|"+expect+"|", "|"+actual+"|" );
+}
+
+function myGetNamespace (obj, ns) {
+    if (ns != undefined) {
+        return obj.namespace(ns);
+    } else {
+        return obj.namespace();
+    }
+}
+
+
+
+
+function NL()
+{
+  //return java.lang.System.getProperty("line.separator");
+  return "\n";
+}
+
+
+function BUG(arg){
+  // nothing here
+}
+
+function END()
+{
+    //test();
+}
+ 
 
 START("13.4.4.18 - XML insertChildAfter()");
 
@@ -59,21 +152,21 @@ var twoChildren = new XMLList("<employee id='2'><name>Sue</name></employee><empl
 
 var wholeString = "<company><employee id='1'><name>John</name></employee><employee id='2'><name>Sue</name></employee><employee id='3'><name>Bob</name></employee></company>";
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.insertChildAfter(null, child1), MYXML.toString()",
+Assert.expectEq( "MYXML = new XML(xmlDoc), MYXML.insertChildAfter(null, child1), MYXML.toString()",
     "<company><employee id=\"1\"><name>John</name></employee></company>",
     (MYXML = new XML(xmlDoc), MYXML.insertChildAfter(null, child1), MYXML.toString()));
 
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.insertChildAfter(null, child1), MYXML.children()[0].parent() == MYXML",
+Assert.expectEq( "MYXML = new XML(xmlDoc), MYXML.insertChildAfter(null, child1), MYXML.children()[0].parent() == MYXML",
     true,
     (MYXML = new XML(xmlDoc), MYXML.insertChildAfter(null, child1), MYXML.children()[0].parent() == MYXML));
 
 // The child is equal to child1 (but not the same object)
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.insertChildAfter(null, child1), MYXML.children()[0] == child1",
+Assert.expectEq( "MYXML = new XML(xmlDoc), MYXML.insertChildAfter(null, child1), MYXML.children()[0] == child1",
     true,
     (MYXML = new XML(xmlDoc), MYXML.insertChildAfter(null, child1), MYXML.children()[0] == child1));
 
 // The child is a duplicate of child1
-AddTestCase( "MYXML = new XML(xmlDoc), MYXML.insertChildAfter(null, child1), MYXML.children()[0] === child1",
+Assert.expectEq( "MYXML = new XML(xmlDoc), MYXML.insertChildAfter(null, child1), MYXML.children()[0] === child1",
     true,
     (MYXML = new XML(xmlDoc), MYXML.insertChildAfter(null, child1), MYXML.children()[0] === child1));
 
@@ -81,14 +174,14 @@ var MYXML = new XML(xmlDoc);
 MYXML.insertChildAfter(null, child1);
 
 // !!@ this crashes Rhino's implementation
-AddTestCase( "MYXML.insertChildAfter(child1, child2), MYXML.toString()",
+Assert.expectEq( "MYXML.insertChildAfter(child1, child2), MYXML.toString()",
     "<company><employee id=\"1\"><name>John</name></employee><employee id=\"2\"><name>Sue</name></employee></company>",
     (MYXML.insertChildAfter(child1, child2), MYXML.toString()));
 
 MYXML = new XML(xmlDoc);
 MYXML.insertChildAfter(null, child1);
 
-AddTestCase( "MYXML.insertChildAfter(MYXML.children()[0], child2), MYXML.toString()",
+Assert.expectEq( "MYXML.insertChildAfter(MYXML.children()[0], child2), MYXML.toString()",
     "<company><employee id=\"1\"><name>John</name></employee><employee id=\"2\"><name>Sue</name></employee></company>",
     (MYXML.insertChildAfter(MYXML.children()[0], child2), MYXML.toString()));
 
@@ -97,7 +190,7 @@ MYXML.insertChildAfter(null, child1);
 MYXML.insertChildAfter(MYXML.children()[0], child2);
 
 // !!@ this crashes Rhino's implementation
-AddTestCase( "MYXML.insertChildAfter(child2, child3), MYXML.toString()",
+Assert.expectEq( "MYXML.insertChildAfter(child2, child3), MYXML.toString()",
     "<company><employee id=\"1\"><name>John</name></employee><employee id=\"2\"><name>Sue</name></employee><employee id=\"3\"><name>Bob</name></employee></company>",
     (MYXML.insertChildAfter(child2, child3), MYXML.toString()));
 
@@ -105,28 +198,28 @@ MYXML = new XML(xmlDoc);
 MYXML.insertChildAfter(null, child1);
 MYXML.insertChildAfter(MYXML.children()[0], child2);
 
-AddTestCase( "MYXML.insertChildAfter(MYXML.children()[1], child3), MYXML.toString()",
+Assert.expectEq( "MYXML.insertChildAfter(MYXML.children()[1], child3), MYXML.toString()",
     "<company><employee id=\"1\"><name>John</name></employee><employee id=\"2\"><name>Sue</name></employee><employee id=\"3\"><name>Bob</name></employee></company>",
     (MYXML.insertChildAfter(MYXML.children()[1], child3), MYXML.toString()));
     
 
 MYXML = new XML(xmlDoc);
 
-AddTestCase("MYXML.insertChildAfter(null, XMLList), MYXML.toString()",
+Assert.expectEq("MYXML.insertChildAfter(null, XMLList), MYXML.toString()",
              new XML(wholeString).toString(),
              (MYXML.insertChildAfter(null, allChildren), MYXML.toString()));
              
 MYXML = new XML(xmlDoc);
 MYXML.insertChildAfter(null, child1);
 
-AddTestCase("MYXML.insertChildAfter(child1, XMLList), MYXML.toString()",
+Assert.expectEq("MYXML.insertChildAfter(child1, XMLList), MYXML.toString()",
              new XML(wholeString).toString(),
              (MYXML.insertChildAfter(MYXML.children()[0], twoChildren), MYXML.toString()));
              
 MYXML = new XML(xmlDoc);
 MYXML.insertChildAfter(null, child1);
 
-AddTestCase("MYXML.insertChildAfter(child1, \"string\"), MYXML.toString()",
+Assert.expectEq("MYXML.insertChildAfter(child1, \"string\"), MYXML.toString()",
          new XML("<company><employee id='1'><name>John</name></employee>string</company>").toString(),
          (MYXML.insertChildAfter(MYXML.children()[0], "string"), MYXML.toString()));
              
@@ -137,9 +230,9 @@ try {
     a.b.c.insertChildAfter (null, a);
     result = a;
 } catch (e1) {
-    result = typeError(e1.toString());
+    result = Utils.typeError(e1.toString());
 }
-AddTestCase("a = <a><b><c/></b></a>, a.b.c.insertChildAfter(null, a)", "TypeError: Error #1118", result);
+Assert.expectEq("a = <a><b><c/></b></a>, a.b.c.insertChildAfter(null, a)", "TypeError: Error #1118", result);
     
 
 END();

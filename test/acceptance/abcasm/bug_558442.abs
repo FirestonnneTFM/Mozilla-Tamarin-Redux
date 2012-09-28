@@ -26,11 +26,15 @@ Loop:
     pushbyte 2
     ifeq passed
     pushstring "Loop value != 2 FAILED!"
-    .print
+    //.print
     jump end
 passed:
+    findpropstrict PASS
     pushstring "Loop value == 2 PASSED!"
-    .print
+    callproperty PASS 1
+    //.print
 end:
 	returnvoid
 }
+
+script_info{init: hello}

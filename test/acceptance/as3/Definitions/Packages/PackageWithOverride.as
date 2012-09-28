@@ -21,17 +21,16 @@ override public function f() { return "override f"}
 
 
 import P.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 b = new B();
-AddTestCase("Overriding function within the same package", "override f", b.f());
+Assert.expectEq("Overriding function within the same package", "override f", b.f());
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

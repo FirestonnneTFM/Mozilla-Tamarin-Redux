@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-356250.js';
 //-----------------------------------------------------------------------------
@@ -13,7 +13,7 @@ var actual = 'No Crash';
 var expect = 'No Crash';
 
 (function() { a=function() { } })();
-AddTestCase(summary + ': nested 0', expect, actual);
+Assert.expectEq(summary + ': nested 0', expect, actual);
 
 //-----------------------------------------------------------------------------
 test1();
@@ -23,12 +23,12 @@ test2();
 function test1()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
  
   (function() { a=function() { } })();
 
-  AddTestCase(summary + ': nested 1', expect, actual);
+  Assert.expectEq(summary + ': nested 1', expect, actual);
 
 
 }
@@ -36,14 +36,13 @@ function test1()
 function test2()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
  
   (function () {(a=function() { b=function() { } })();})();
 
-  AddTestCase(summary + ': nested 2', expect, actual);
+  Assert.expectEq(summary + ': nested 2', expect, actual);
 
 
 }
 
-test();

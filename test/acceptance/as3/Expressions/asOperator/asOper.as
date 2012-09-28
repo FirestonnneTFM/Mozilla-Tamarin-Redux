@@ -2,18 +2,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var SECTION = "Expressions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript
-var TITLE   = "as Operator";       // Provide ECMA section title or a description
+// var SECTION = "Expressions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS3";        // Version of ECMAScript or ActionScript
+// var TITLE   = "as Operator";       // Provide ECMA section title or a description
 
 
-startTest();                // leave this alone
 
 //Note that this uses the same value and type arrays as expressions/isOperator/isOper.as
 
 //vars, functions and classes to be used by the test
 import asOper.*;
 
+import com.adobe.test.Assert;
 var myClassA:TestClassA = new TestClassA(); // class TestClassA {}
 var myClassB:TestClassB = new TestClassB(); // class TestClassB extends TestClassA {}
 var myClassC:TestClassC = new TestClassC(); // class TestClassC extends TestClassB implements TestInterface {}
@@ -91,7 +91,7 @@ for (var i:int = 0; i < valueArr.length; i++) {
         result = e;
         } finally {
         if (valueArr[i]!=myDate || (typeArr[j]!=Date && typeArr[j]!=Object))
-          AddTestCase("("+valueDescArr[i]+" as "+ typeDescArr[j]+") Expected: "+String(resultArr[i][j]),true,result);
+          Assert.expectEq("("+valueDescArr[i]+" as "+ typeDescArr[j]+") Expected: "+String(resultArr[i][j]),true,result);
         }
         
     }
@@ -99,5 +99,4 @@ for (var i:int = 0; i < valueArr.length; i++) {
 
 ////////////////////////////////////////////////////////////////
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

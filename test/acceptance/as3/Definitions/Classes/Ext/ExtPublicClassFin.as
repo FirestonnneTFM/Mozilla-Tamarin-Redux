@@ -4,16 +4,17 @@
 
 
 import PublicClass.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";  // Version of JavaScript or ECMA
-var TITLE   = "Extend Public Class";       // Provide ECMA section title or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
+// var VERSION = "AS 3.0";  // Version of JavaScript or ECMA
+// var TITLE   = "Extend Public Class";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 /**
- * Calls to AddTestCase here. AddTestCase is a function that is defined
+ * Calls to Assert.expectEq here. Assert.expectEq is a function that is defined
  * in shell.js and takes three arguments:
  * - a string representation of what is being tested
  * - the expected result
@@ -23,7 +24,7 @@ startTest();                // leave this alone
  *
  * var helloWorld = "Hello World";
  *
- * AddTestCase(
+ * Assert.expectEq(
  * "var helloWorld = 'Hello World'",   // description of the test
  *  "Hello World",                     // expected result
  *  helloWorld );                      // actual result
@@ -45,9 +46,9 @@ try{
 } catch (e) {
     thisError = e.toString();
 } finally {
-    AddTestCase( "Access final method from outside of class",
-                REFERENCEERROR+1069,
-                referenceError(thisError) );
+    Assert.expectEq( "Access final method from outside of class",
+                Utils.REFERENCEERROR+1069,
+                Utils.referenceError(thisError) );
 }
 // ********************************************
 // access final method from a default
@@ -55,7 +56,7 @@ try{
 // ********************************************
 
 EXTDCLASS = new ExtPublicClassFin();
-AddTestCase( "Access final method from default method of sub class",
+Assert.expectEq( "Access final method from default method of sub class",
              "1,2,3",
              EXTDCLASS.testSubGetArray(new Array(1,2,3)).toString() );
 
@@ -65,7 +66,7 @@ AddTestCase( "Access final method from default method of sub class",
 // ********************************************
 
 EXTDCLASS = new ExtPublicClassFin();
-AddTestCase( "Access final method from public method of sub class", arr, (EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()) );
+Assert.expectEq( "Access final method from public method of sub class", arr, (EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()) );
 
 // ********************************************
 // access final method from a private
@@ -73,7 +74,7 @@ AddTestCase( "Access final method from public method of sub class", arr, (EXTDCL
 // ********************************************
 
 EXTDCLASS = new ExtPublicClassFin();
-AddTestCase( "Access final method from private method of sub class", arr, EXTDCLASS.testPrivSubArray(arr) );
+Assert.expectEq( "Access final method from private method of sub class", arr, EXTDCLASS.testPrivSubArray(arr) );
 
 // ********************************************
 // access final method from a final
@@ -81,7 +82,7 @@ AddTestCase( "Access final method from private method of sub class", arr, EXTDCL
 // ********************************************
 
 EXTDCLASS = new ExtPublicClassFin();
-AddTestCase( "Access final method from final method of sub class", arr, EXTDCLASS.testFinSubArray(arr) );
+Assert.expectEq( "Access final method from final method of sub class", arr, EXTDCLASS.testFinSubArray(arr) );
 
 // ********************************************
 // access final method from public static
@@ -92,9 +93,9 @@ try{
 } catch (e2) {
     thisError = e2.toString();
 } finally {
-    AddTestCase( "Access final property from outside of class",
-            TYPEERROR+1006,
-            typeError( thisError ) );
+    Assert.expectEq( "Access final property from outside of class",
+            Utils.TYPEERROR+1006,
+            Utils.typeError( thisError ) );
 }
 
 // ********************************************
@@ -109,9 +110,9 @@ try{
 } catch (e3) {
     thisError = e3.toString();
 } finally {
-    AddTestCase( "Access final property from outside of class",
-        REFERENCEERROR+1069,
-        referenceError( thisError ) );
+    Assert.expectEq( "Access final property from outside of class",
+        Utils.REFERENCEERROR+1069,
+        Utils.referenceError( thisError ) );
 }
 
 // ********************************************
@@ -120,7 +121,7 @@ try{
 // ********************************************
 
 EXTDCLASS = new ExtPublicClassFin();
-AddTestCase( "Access final property from default method in sub class", arr, EXTDCLASS.testSubDPArray(arr));
+Assert.expectEq( "Access final property from default method in sub class", arr, EXTDCLASS.testSubDPArray(arr));
 
 // ********************************************
 // access final property from
@@ -128,7 +129,7 @@ AddTestCase( "Access final property from default method in sub class", arr, EXTD
 // ********************************************
 
 EXTDCLASS = new ExtPublicClassFin();
-AddTestCase( "Access final property from public method in sub class", arr, (EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()) );
+Assert.expectEq( "Access final property from public method in sub class", arr, (EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()) );
 
 
 // ********************************************
@@ -137,8 +138,7 @@ AddTestCase( "Access final property from public method in sub class", arr, (EXTD
 // ********************************************
 
 EXTDCLASS = new ExtPublicClassFin();
-AddTestCase( "Access final property from final method in sub class, EXTDCLASS.finSubGetDPArray()", arr, (EXTDCLASS.finSubSetDPArray(arr), EXTDCLASS.finSubGetDPArray()) );
+Assert.expectEq( "Access final property from final method in sub class, EXTDCLASS.finSubGetDPArray()", arr, (EXTDCLASS.finSubSetDPArray(arr), EXTDCLASS.finSubGetDPArray()) );
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

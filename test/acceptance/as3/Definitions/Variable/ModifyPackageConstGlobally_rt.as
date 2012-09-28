@@ -8,8 +8,9 @@ package Package1
 }
 
 import Package1.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-startTest();
 
 var thisError = "no error";
 try
@@ -22,7 +23,6 @@ catch(err)
 }
 finally
 {
-    AddTestCase("Attempt to modify package const globally", "ReferenceError: Error #1074", referenceError(thisError));
+    Assert.expectEq("Attempt to modify package const globally", "ReferenceError: Error #1074", Utils.referenceError(thisError));
 }
 
-test();

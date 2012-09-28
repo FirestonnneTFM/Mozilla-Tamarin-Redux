@@ -2,19 +2,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import ImplTwoInterfacesSameMethod.*;
+import com.adobe.test.Assert;
 
-startTest();
 
 var OBJ = new C();
 
-AddTestCase( "Interface name does not disambiguate method definitions",
+Assert.expectEq( "Interface name does not disambiguate method definitions",
              "{A,B} function sameName",
              OBJ.A::sameName() );
-AddTestCase( "Interface name does not disambiguate method definitions",
+Assert.expectEq( "Interface name does not disambiguate method definitions",
              "{A,B} function sameName",
              OBJ.B::sameName() );
 
 
-test();
 
 

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-311497.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Root pivots in js_HeapSort';
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 
 function force_gc()
@@ -61,6 +61,5 @@ for (var i = 0; i != array.length; ++i) {
 var expect = array.length;
 var actual = null_count + original_string_count;
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

@@ -4,8 +4,7 @@
  * http://creativecommons.org/licenses/publicdomain/
  * Contributor: Blake Kaplan
  */
-startTest();
-
+import com.adobe.test.Assert
 var gTestfile = 'regress-470758-01.js';
 //-----------------------------------------------------------------------------
 var BUGNUMBER = 470758;
@@ -21,14 +20,13 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
  
   (function() { var k; for (var k in {}); })()
 
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
 
 }
 
-test();

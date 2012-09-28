@@ -2,16 +2,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 //-----------------------------------------------------------------------------
 
-var SECTION = "pcre_find_fixedlength";
-var VERSION = "";
-var TITLE   = "Shouldn't crash on regexps with many nested parentheses embedded in look-behind assertions";
+// var SECTION = "pcre_find_fixedlength";
+// var VERSION = "";
+// var TITLE   = "Shouldn't crash on regexps with many nested parentheses embedded in look-behind assertions";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases()
 {
@@ -84,29 +82,29 @@ function getTestCases()
     
         if (doBackRefs) {
         var res = strOriginal.search(re);
-        array[item++] = new TestCase(SECTION, "strOriginal.search(re)", -1, res);
+        array[item++] = Assert.expectEq( "strOriginal.search(re)", -1, res);
 
         res = strOriginal.match(re);
-        array[item++] = new TestCase(SECTION, "strOriginal.match(re)", null, res);
+        array[item++] = Assert.expectEq( "strOriginal.match(re)", null, res);
 
         res = strOriginal.replace(re, strReplace);
-        array[item++] = new TestCase(SECTION, "strOriginal.replace(re, strReplace)", "blahhello", res);
+        array[item++] = Assert.expectEq( "strOriginal.replace(re, strReplace)", "blahhello", res);
         } else {
         var res = strOriginal.search(re);
-        array[item++] = new TestCase(SECTION, "strOriginal.search(re)", 4, res);
+        array[item++] = Assert.expectEq( "strOriginal.search(re)", 4, res);
 
         res = strOriginal.match(re);
         //Get the first element to compare
         res = res[0];
-        array[item++] = new TestCase(SECTION, "strOriginal.match(re)", 'hello', res);
+        array[item++] = Assert.expectEq( "strOriginal.match(re)", 'hello', res);
 
         res = strOriginal.replace(re, strReplace);
-        array[item++] = new TestCase(SECTION, "strOriginal.replace(re, strReplace)", "blahgoodbye", res);
+        array[item++] = Assert.expectEq( "strOriginal.replace(re, strReplace)", "blahgoodbye", res);
         }
     }
     catch (e: Error) {
         if (e.message.match("#1023"))
-        array[item++] = new TestCase(SECTION, "strOriginal.search/match/replace(re)", 0, 0);
+        array[item++] = Assert.expectEq( "strOriginal.search/match/replace(re)", 0, 0);
         else
         throw(e);
     }
@@ -122,7 +120,7 @@ function getTestCases()
     var regex = new RegExp(strPattern);
     var result = strSubject.search(regex);
 
-    array[item++] = new TestCase(SECTION, "\"" + strSubject + "\".search(new RegExp(" + strPattern + "))", expected, result);
+    array[item++] = Assert.expectEq( "\"" + strSubject + "\".search(new RegExp(" + strPattern + "))", expected, result);
     }
 
     return array;

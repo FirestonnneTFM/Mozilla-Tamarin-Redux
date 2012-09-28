@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/*
 *
 * Date:    19 September 2002
 * SUMMARY: Testing Array.prototype.concat()
@@ -9,15 +9,17 @@
 *
 */
 //-----------------------------------------------------------------------------
-    var SECTION = "15.4.4.4";
-    var VERSION = "ECMA_1";
-    var TITLE   = "Testing Array.prototype.concat()";
-    var bug     = "169795";
+//     var SECTION = "15.4.4.4";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "Testing Array.prototype.concat()";
+//     var bug     = "169795";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
+import com.adobe.test.Assert;
+
+   // TODO: REVIEW AS4 CONVERSION ISSUE 
+   // commented out all inSection(x) calls
+
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -28,29 +30,29 @@ function getTestCases() {
     var expect= '';
     var x;
 
-    status = inSection(1);
+    //status = inSection(1);
     x = "Hello";
     actual = [].concat(x).toString();
     expect = x.toString();
-    array[item++] = new TestCase(SECTION, "concat(x).toString()", expect, actual );
+    array[item++] = Assert.expectEq( "concat(x).toString()", expect, actual );
 
-    status = inSection(2);
+    //status = inSection(2);
     x = 999;
     actual = [].concat(x).toString();
     expect = x.toString();
-    array[item++] = new TestCase(SECTION, "[].concat(999).toString()", expect, actual );
+    array[item++] = Assert.expectEq( "[].concat(999).toString()", expect, actual );
 
-    status = inSection(3);
+    // status = inSection(3);
     x = /Hello/g;
     actual = [].concat(x).toString();
     expect = x.toString();
-    array[item++] = new TestCase(SECTION, "[].concat(/Hello/g).toString()", expect, actual );
+    array[item++] = Assert.expectEq( "[].concat(/Hello/g).toString()", expect, actual );
 
-    status = inSection(4);
+    // status = inSection(4);
     x = new Error("Hello");
     actual = [].concat(x).toString();
     expect = x.toString();
-    array[item++] = new TestCase(SECTION, "[].concat(new Error('hello')).toString()", expect, actual );
+    array[item++] = Assert.expectEq( "[].concat(new Error('hello')).toString()", expect, actual );
 
 
     /*
@@ -61,39 +63,39 @@ function getTestCases() {
     addThis();
     */
 
-    status = inSection(6);
+    // status = inSection(6);
     x = [function() {return "Hello";}];
     actual = [].concat(x).toString();
     expect = x.toString();
-    array[item++] = new TestCase(SECTION, "[].concat([function() {return 'Hello';}).toString()", expect, actual );
+    array[item++] = Assert.expectEq( "[].concat([function() {return 'Hello';}).toString()", expect, actual );
 
-    status = inSection(7);
+    // status = inSection(7);
     x = [1,2,3].concat([4,5,6]);
     actual = [].concat(x).toString();
     expect = x.toString();
-    array[item++] = new TestCase(SECTION, "[].concat([1,2,3].concat([4,5,6]).toString()", expect, actual );
+    array[item++] = Assert.expectEq( "[].concat([1,2,3].concat([4,5,6]).toString()", expect, actual );
 
-    status = inSection(8);
+    // status = inSection(8);
     x = this;
     actual = [].concat(x).toString();
     expect = x.toString();
-    array[item++] = new TestCase(SECTION, "[].concat(this).toString()", expect, actual );
+    array[item++] = Assert.expectEq( "[].concat(this).toString()", expect, actual );
 
     /*
      * The next two sections are by igor@icesoft.no; see
      * http://bugzilla.mozilla.org/show_bug.cgi?id=169795#c3
      */
-    status = inSection(9);
+    // status = inSection(9);
     x={length:0};
     actual = [].concat(x).toString();
     expect = x.toString();
-    array[item++] = new TestCase(SECTION, "[].concat({length:0}).toString()", expect, actual );
+    array[item++] = Assert.expectEq( "[].concat({length:0}).toString()", expect, actual );
 
-    status = inSection(10);
+    // status = inSection(10);
     x={length:2, 0:0, 1:1};
     actual = [].concat(x).toString();
     expect = x.toString();
-    array[item++] = new TestCase(SECTION, "[].concat({length:2, 0:0, 1:1}).toString()", expect, actual );
+    array[item++] = Assert.expectEq( "[].concat({length:2, 0:0, 1:1}).toString()", expect, actual );
 
     return ( array );
 }

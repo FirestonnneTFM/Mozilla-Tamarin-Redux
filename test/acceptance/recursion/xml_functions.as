@@ -2,16 +2,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 //-----------------------------------------------------------------------------
 
-var SECTION = "E4XNode__deepCopy";
-var VERSION = "";
-var TITLE   = "Shouldn't crash on high XML trees upon invoking E4XNode::_deepCopy and E4X::_equals";
+// var SECTION = "E4XNode__deepCopy";
+// var VERSION = "";
+// var TITLE   = "Shouldn't crash on high XML trees upon invoking E4XNode::_deepCopy and E4X::_equals";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function createXML(depth)
 {
@@ -60,11 +58,11 @@ function getTestCases()
     try {
     var copied = xml.copy();
     var res = xml == copied;
-    array[item++] = new TestCase(SECTION, "new XML(...).copy()", true, res);
+    array[item++] = Assert.expectEq( "new XML(...).copy()", true, res);
     }
     catch (e: Error) {
     if (e.message.match("#1023"))
-        array[item++] = new TestCase(SECTION, "new XML(...).copy()", 0, 0);
+        array[item++] = Assert.expectEq( "new XML(...).copy()", 0, 0);
     else
         throw(e);
     }
@@ -73,11 +71,11 @@ function getTestCases()
     //dummy test, execution of toXMLString is the goal here
     res = xml.toXMLString().indexOf("sample") > 0;
 
-    array[item++] = new TestCase(SECTION, "new XML(...).toXMLString()", true, res);
+    array[item++] = Assert.expectEq( "new XML(...).toXMLString()", true, res);
     }
     catch (e: Error) {
     if (e.message.match("#1023"))
-        array[item++] = new TestCase(SECTION, "new XML(...).toXMLString()", 0, 0);
+        array[item++] = Assert.expectEq( "new XML(...).toXMLString()", 0, 0);
     else
         throw(e);
     }
@@ -86,11 +84,11 @@ function getTestCases()
     //dummy test, execution of descendants is the goal here
     res = xml.descendants().length() > 0;
 
-    array[item++] = new TestCase(SECTION, "new XML(...).descendants()", true, res);
+    array[item++] = Assert.expectEq( "new XML(...).descendants()", true, res);
     }
     catch (e: Error) {
     if (e.message.match("#1023"))
-        array[item++] = new TestCase(SECTION, "new XML(...).descendants()", 0, 0);
+        array[item++] = Assert.expectEq( "new XML(...).descendants()", 0, 0);
     else
         throw(e);
     }

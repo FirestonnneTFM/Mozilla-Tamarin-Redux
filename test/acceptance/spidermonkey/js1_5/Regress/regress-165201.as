@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-165201.js';
 //-----------------------------------------------------------------------------
@@ -15,8 +15,8 @@ var expect = '';
 
 summary = 'RegExp.prototype.toSource should not affect RegExp.prototype.toString';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 /*
  * Define function returning a regular expression literal
@@ -33,15 +33,15 @@ RegExp.prototype.toSource = function() { return 'Hi there'; };
 expect = -1;
 actual = f.toString().indexOf('Hi there');
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
 /*
  * Define function returning an array literal
  * and override RegExp.prototype.toSource
  */
 summary = 'Array.prototype.toSource should not affect Array.prototype.toString';
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 function g()
 {
@@ -53,9 +53,8 @@ Array.prototype.toSource = function() { return 'Hi there'; }
   expect = -1;
 actual = g.toString().indexOf('Hi there');
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
 
 delete(Array.prototype.toSource);
 
-test();

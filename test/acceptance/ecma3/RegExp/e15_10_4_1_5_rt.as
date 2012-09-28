@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 /*
 * Date: 26 November 2000
@@ -30,15 +31,12 @@
 */
 //-------------------------------------------------------------------------------------------------
 
-var SECTION = "e15_10_4_1_5_rt";
-var VERSION = "";
-var TITLE   = "Negative test: Passing (RegExp object, flag) to RegExp() constructor";
-var bug = "61266";
+// var SECTION = "e15_10_4_1_5_rt";
+// var VERSION = "";
+// var TITLE   = "Negative test: Passing (RegExp object, flag) to RegExp() constructor";
+// var bug = "61266";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -86,7 +84,7 @@ function getTestCases() {
         }catch(e:Error){
             actual = cnSUCCESS;
         }finally{
-            array[item++] = new TestCase(SECTION, msg, expect, actual);
+            array[item++] = Assert.expectEq( msg, expect, actual);
         }
       }
     }

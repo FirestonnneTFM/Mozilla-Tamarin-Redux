@@ -3,13 +3,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "6.3.7";
-var VERSION = "AS3";
-var TITLE   = "The logical not ! operator";
+// var SECTION = "6.3.7";
+// var VERSION = "AS3";
+// var TITLE   = "The logical not ! operator";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var flt:float = new float(3.1413119f);
 AddStrictTestCase("logical not on float", !3, !flt);
@@ -18,30 +17,29 @@ flt = float(+0.0);
 AddStrictTestCase("!float(+0.0)", Boolean(true), !flt);
 
 flt = +0.0f;
-AddTestCase("!(+0.0f) FloatLiteral", true, !flt);
+Assert.expectEq("!(+0.0f) FloatLiteral", true, !flt);
 
 flt = float(-0.0);
-AddTestCase("!float(-0.0)", true, !flt);
+Assert.expectEq("!float(-0.0)", true, !flt);
 
 flt = -0.0f;
-AddTestCase("!(-0.0f) FloatLiteral", true, !flt);
+Assert.expectEq("!(-0.0f) FloatLiteral", true, !flt);
 
 flt = float.NaN;
-AddTestCase("!float.NaN", true, !flt);
+Assert.expectEq("!float.NaN", true, !flt);
 
 flt = float.MIN_VALUE;
-AddTestCase("!float.MIN_VALUE", false, !flt);
+Assert.expectEq("!float.MIN_VALUE", false, !flt);
 
 flt = -float.MIN_VALUE;
-AddTestCase("!-float.MIN_VALUE", false, !flt);
+Assert.expectEq("!-float.MIN_VALUE", false, !flt);
 
 flt = float(-0.23);
-AddTestCase("!float(-0.23)", false, !flt);
+Assert.expectEq("!float(-0.23)", false, !flt);
 
 flt = -0.23f;
-AddTestCase("!(-0.23f) FloatLiteral", false, !flt);
+Assert.expectEq("!(-0.23f) FloatLiteral", false, !flt);
 
 
 
-test();
 

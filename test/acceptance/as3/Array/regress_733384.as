@@ -1,16 +1,13 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "regress_723461";
-var VERSION = "AS3";
-var TITLE   = "associative Array defined with [] does not show non-index elements as propertyIsEnumerable";
-var bug = "723461";
+// var SECTION = "regress_723461";
+// var VERSION = "AS3";
+// var TITLE   = "associative Array defined with [] does not show non-index elements as propertyIsEnumerable";
+// var bug = "723461";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 
 var emptyA = [];
 var denseZ = [];
@@ -37,7 +34,7 @@ for each (x in all) {
 }
 
 function AddCleanCase(name, object, key, expect) {
-    AddTestCase(name, expect, object.propertyIsEnumerable(key));
+    Assert.expectEq(name, expect, object.propertyIsEnumerable(key));
 }
 
 AddCleanCase("emptyA pIE on present nonindex",   emptyA, "nonindex", true);
@@ -55,7 +52,7 @@ AddCleanCase("object pIE on absent nonindex",    object, "absent",  false);
 
 function AddToggleCase(name, object, key, expect) {
     object.setPropertyIsEnumerable(key, false);
-    AddTestCase(name, expect, object.propertyIsEnumerable(key));
+    Assert.expectEq(name, expect, object.propertyIsEnumerable(key));
 }
 
 AddToggleCase("emptyA tog pIE present nonindex", emptyA, "nonindex", false);
@@ -72,4 +69,3 @@ AddToggleCase("sparse tog pIE absent nonindex",  sparse, "absent",   false);
 AddToggleCase("object tog pIE present nonindex", object, "nonindex", false);
 AddToggleCase("object tog pIE absent nonindex",  object, "absent",   false);
 
-test();

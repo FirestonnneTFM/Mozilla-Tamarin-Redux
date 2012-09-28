@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-394673.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Parsing long chains of "&&" or "||"';
 var actual = 'No Error';
 var expect = 'No Error';
 
-printBugNumber(BUGNUMBER);
-printStatus(summary);
+//printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
 var N = 70 * 1000;
 var counter;
@@ -48,6 +48,5 @@ function f() {
     return true;
 }
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

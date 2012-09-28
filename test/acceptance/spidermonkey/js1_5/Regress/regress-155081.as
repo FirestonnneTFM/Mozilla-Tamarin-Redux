@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-155081.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Limit of 64k literals';
 var actual = 'No Crash';
 var expect = 'No Crash, No Error';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
  
 function f(A,B,C,D) {}
 
@@ -17523,10 +17523,9 @@ try
 }
 catch(e)
 {
-  printStatus('caught ' + e);
+   //printStatus('caught ' + e);
   actual = e + '';
 }
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

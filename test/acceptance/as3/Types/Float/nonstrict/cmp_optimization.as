@@ -5,18 +5,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import avmplus.*;
+import com.adobe.test.Assert;
 
-var SECTION = "8.4";
-var VERSION = "AS3";
-var TITLE   = "Verify type-specialized implementations of relational operators involving float";
+// var SECTION = "8.4";
+// var VERSION = "AS3";
+// var TITLE   = "Verify type-specialized implementations of relational operators involving float";
 
 // Code coverage test for type-specialized comparisions, e.g., cmpOptimization() in CodegenLIR.
 // Verify that specialized comparisons produce the same result as untyped comparisons.  We're
 // not looking to verify the underlying mathematics of the comparisions, but rather that the
 // case analysis for the type specialization is correct and the correct coercions are performed.
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function Cmp_Float_Float(op:String, x:float, y:float):Boolean
 {
@@ -185,7 +184,7 @@ function AddTest(lht:String, op:String, rht:String, fun, x, y)
     var testname:String =  x + ":" + lht + " " + op + " " + y + ":" + rht;
     //var result:String = (actual === expected) ? "PASSED" : ("FAILED, expected " + expected);
     //trace(testname + " => " + result);
-    AddTestCase(testname, expected, actual);
+    Assert.expectEq(testname, expected, actual);
 }
 
 function TestComparisons(xt, yt, fun, x, y)
@@ -286,4 +285,3 @@ function TestValues()
 
 TestValues();
 
-test();

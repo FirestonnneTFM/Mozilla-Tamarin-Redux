@@ -21,12 +21,11 @@ public class PublicClass implements Publicinterface{
 }
 
 
-var SECTION = "Directives";                     // provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";               // Version of JavaScript or ECMA
-var TITLE   = "Import an interface into a package that has a class and then import the class";          // Provide ECMA section title or a description
+// var SECTION = "Directives";                     // provide a document reference (ie, ECMA section)
+// var VERSION = "ActionScript 3.0";               // Version of JavaScript or ECMA
+// var TITLE   = "Import an interface into a package that has a class and then import the class";          // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                                    // leave this alone
 
 
 
@@ -34,12 +33,12 @@ var arr = new Array(1, 2, 3);
 
 import Packagclass.PublicClass
 
+import com.adobe.test.Assert;
 var obj = new PublicClass();
 
-AddTestCase( "Import a public interface to a class and them import the class", arr, (obj.setPubArray(arr), obj.pubArray) );
+Assert.expectEq( "Import a public interface to a class and them import the class", arr, (obj.setPubArray(arr), obj.pubArray) );
 
 /*===========================================================================*/
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

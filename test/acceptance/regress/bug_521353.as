@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 function f() {
     // d starts life as a kIntegerType atom
@@ -29,8 +30,6 @@ function f() {
     }
 }
 
-startTest();
 
-AddTestCase('Bug 521353 - optimized fast path for OP_add in Interpreter preserves too much precision on 64bit cpu', 'pass', f());
+Assert.expectEq('Bug 521353 - optimized fast path for OP_add in Interpreter preserves too much precision on 64bit cpu', 'pass', f());
 
-test();

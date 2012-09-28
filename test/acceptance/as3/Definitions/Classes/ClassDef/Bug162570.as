@@ -23,37 +23,36 @@ package test {
 
 
 //--------------------------------------------------
-startTest();
 //--------------------------------------------------
 
 import same.*;
 import test.*;
 
+import com.adobe.test.Assert;
 // same package and class name
 var s:same = new same();
-AddTestCase("s is same", true, (s is same));
+Assert.expectEq("s is same", true, (s is same));
 
 // static method and parameter with the same name
-AddTestCase("More.foo(1)", 1, (More.foo(1), More.a));
+Assert.expectEq("More.foo(1)", 1, (More.foo(1), More.a));
 
 // instance method and parameter with the same name
 var m:More = new More();
-AddTestCase("m.bar(true)", true, (m.bar(true), m.b));
+Assert.expectEq("m.bar(true)", true, (m.bar(true), m.b));
 
 // instance class and method with the same name
 var bar:More = new More();
-AddTestCase("bar.bar(true)", true, (bar.bar(true), bar.b));
+Assert.expectEq("bar.bar(true)", true, (bar.bar(true), bar.b));
 
 // instance class and property with the same name
 var b:More = new More();
-AddTestCase("b.bar(true)", true, (b.bar(true), b.b));
+Assert.expectEq("b.bar(true)", true, (b.bar(true), b.b));
 
 // dynamic method and parameter with the same name
 dynamic class C {}
 var c:C = new C();
 c.a = false;
 c.b = function (b:Boolean):void { c.a = b; }
-AddTestCase("c.b(true)", true, (c.b(true), c.a));
+Assert.expectEq("c.b(true)", true, (c.b(true), c.a));
 
 //--------------------------------------------------
-test();

@@ -3,15 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 
-var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
-var VERSION = "Clean AS2";  // Version of JavaScript or ECMA
-var TITLE   = "Extend Dynamic Class";       // Provide ECMA section title or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
+// var VERSION = "Clean AS2";  // Version of JavaScript or ECMA
+// var TITLE   = "Extend Dynamic Class";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 /**
- * Calls to AddTestCase here. AddTestCase is a function that is defined
+ * Calls to Assert.expectEq here. Assert.expectEq is a function that is defined
  * in shell.js and takes three arguments:
  * - a string representation of what is being tested
  * - the expected result
@@ -21,7 +20,7 @@ startTest();                // leave this alone
  *
  * var helloWorld = "Hello World";
  *
- * AddTestCase(
+ * Assert.expectEq(
  * "var helloWorld = 'Hello World'",   // description of the test
  *  "Hello World",                     // expected result
  *  helloWorld );                      // actual result
@@ -30,6 +29,7 @@ startTest();                // leave this alone
 
 import DynamicClass.*;
 
+import com.adobe.test.Assert;
 arr = new Array(1, 2, 3);
 
 //*******************************************
@@ -40,10 +40,10 @@ arr = new Array(1, 2, 3);
 // inherited it from it's parent class
 //*******************************************
 
-AddTestCase( "*** Public Static Methods and Public Static properites ***", 1, 1 );
+Assert.expectEq( "*** Public Static Methods and Public Static properites ***", 1, 1 );
 
 // needed for workaround in Flash MX 2004
-AddTestCase( "ExtDynamicClassPubStat.setPubStatArray(arr), ExtDynamicClassPubStat.getPubStatArray()", arr,
+Assert.expectEq( "ExtDynamicClassPubStat.setPubStatArray(arr), ExtDynamicClassPubStat.getPubStatArray()", arr,
              (ExtDynamicClassPubStat.setPubStatArray(arr), ExtDynamicClassPubStat.getPubStatArray()) );
 
 
@@ -54,8 +54,8 @@ AddTestCase( "ExtDynamicClassPubStat.setPubStatArray(arr), ExtDynamicClassPubSta
 // ********************************************
 
 EXTDCLASS = new ExtDynamicClassPubStat();
-AddTestCase( "*** Access public static method from default method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testSubSetArray(arr)", arr, EXTDCLASS.testSubSetArray(arr) );
+Assert.expectEq( "*** Access public static method from default method of sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.testSubSetArray(arr)", arr, EXTDCLASS.testSubSetArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -66,8 +66,8 @@ AddTestCase( "EXTDCLASS.testSubSetArray(arr)", arr, EXTDCLASS.testSubSetArray(ar
 // ********************************************
 
 EXTDCLASS = new ExtDynamicClassPubStat();
-AddTestCase( "*** Access public static method from public method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()) );
+Assert.expectEq( "*** Access public static method from public method of sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -78,8 +78,8 @@ AddTestCase( "EXTDCLASS.pubSubSetArray(arr), EXTDCLASS.pubSubGetArray()", arr, (
 // ********************************************
 
 EXTDCLASS = new ExtDynamicClassPubStat();
-AddTestCase( "*** Access public static method from private method of sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(arr) );
+Assert.expectEq( "*** Access public static method from private method of sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -89,8 +89,8 @@ AddTestCase( "EXTDCLASS.testPrivSubArray(arr)", arr, EXTDCLASS.testPrivSubArray(
 //
 // ********************************************
 
-AddTestCase( "*** Access public static method from static method of sub class ***", 1, 1 );
-AddTestCase( "ExtDynamicClassPubStat.testStatSubSetArray(arr)", arr, ExtDynamicClassPubStat.testStatSubSetArray(arr) );
+Assert.expectEq( "*** Access public static method from static method of sub class ***", 1, 1 );
+Assert.expectEq( "ExtDynamicClassPubStat.testStatSubSetArray(arr)", arr, ExtDynamicClassPubStat.testStatSubSetArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -100,8 +100,8 @@ AddTestCase( "ExtDynamicClassPubStat.testStatSubSetArray(arr)", arr, ExtDynamicC
 //
 // ********************************************
 
-AddTestCase( "*** Access public static method from public static method of sub class ***", 1, 1 );
-AddTestCase( "ExtDynamicClassPubStat.pubStatSubSetArray(arr), ExtDynamicClassPubStat.pubStatSubGetArray()", arr,
+Assert.expectEq( "*** Access public static method from public static method of sub class ***", 1, 1 );
+Assert.expectEq( "ExtDynamicClassPubStat.pubStatSubSetArray(arr), ExtDynamicClassPubStat.pubStatSubGetArray()", arr,
              (ExtDynamicClassPubStat.pubStatSubSetArray(arr), ExtDynamicClassPubStat.pubStatSubGetArray()) );
 
 // <TODO>  fill in the rest of the cases here
@@ -113,8 +113,8 @@ AddTestCase( "ExtDynamicClassPubStat.pubStatSubSetArray(arr), ExtDynamicClassPub
 // ********************************************
 
 var EXTDEFAULTCLASS = new ExtDynamicClassPubStat();
-AddTestCase( "*** Access public static method from private static method of sub class ***", 1, 1 );
-AddTestCase( "EXTDEFAULTCLASS.testPrivStatSubArray(arr)", arr, EXTDEFAULTCLASS.testPrivStatSubArray(arr) );
+Assert.expectEq( "*** Access public static method from private static method of sub class ***", 1, 1 );
+Assert.expectEq( "EXTDEFAULTCLASS.testPrivStatSubArray(arr)", arr, EXTDEFAULTCLASS.testPrivStatSubArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -124,8 +124,8 @@ AddTestCase( "EXTDEFAULTCLASS.testPrivStatSubArray(arr)", arr, EXTDEFAULTCLASS.t
 // ********************************************
 
 EXTDCLASS = new ExtDynamicClassPubStat();
-AddTestCase( "*** Access public static property from default method in sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testSubSetDPArray(arr)", arr, EXTDCLASS.testSubSetDPArray(arr) );
+Assert.expectEq( "*** Access public static property from default method in sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.testSubSetDPArray(arr)", arr, EXTDCLASS.testSubSetDPArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -136,8 +136,8 @@ AddTestCase( "EXTDCLASS.testSubSetDPArray(arr)", arr, EXTDCLASS.testSubSetDPArra
 // ********************************************
 
 EXTDCLASS = new ExtDynamicClassPubStat();
-AddTestCase( "*** Access public static property from public method in sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", arr, (EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()) );
+Assert.expectEq( "*** Access public static property from public method in sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", arr, (EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -147,8 +147,8 @@ AddTestCase( "EXTDCLASS.pubSubSetDPArray(arr), EXTDCLASS.pubSubGetDPArray()", ar
 // ********************************************
 
 EXTDCLASS = new ExtDynamicClassPubStat();
-AddTestCase( "*** Access public static property from private method in sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testPrivSubSetDPArray(arr)", arr, EXTDCLASS.testPrivSubSetDPArray(arr) );
+Assert.expectEq( "*** Access public static property from private method in sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.testPrivSubSetDPArray(arr)", arr, EXTDCLASS.testPrivSubSetDPArray(arr) );
 
 // <TODO>  fill in the rest of the cases here
 
@@ -157,16 +157,16 @@ AddTestCase( "EXTDCLASS.testPrivSubSetDPArray(arr)", arr, EXTDCLASS.testPrivSubS
 // static method in sub class
 // ********************************************
 
-AddTestCase( "*** Access public static property from static method in sub class ***", 1, 1 );
-AddTestCase( "ExtDynamicClassPubStat.testStatSubSetDPArray(arr)", arr, ExtDynamicClassPubStat.testStatSubSetDPArray(arr) );
+Assert.expectEq( "*** Access public static property from static method in sub class ***", 1, 1 );
+Assert.expectEq( "ExtDynamicClassPubStat.testStatSubSetDPArray(arr)", arr, ExtDynamicClassPubStat.testStatSubSetDPArray(arr) );
 
 // ********************************************
 // access public static property from
 // public static method in sub class
 // ********************************************
 
-AddTestCase( "*** Access public static property from public static method in sub class ***", 1, 1 );
-AddTestCase( "ExtDynamicClassPubStat.pubStatSubSetSPArray(arr), ExtDynamicClassPubStat.pubStatSubGetSPArray()", arr,
+Assert.expectEq( "*** Access public static property from public static method in sub class ***", 1, 1 );
+Assert.expectEq( "ExtDynamicClassPubStat.pubStatSubSetSPArray(arr), ExtDynamicClassPubStat.pubStatSubGetSPArray()", arr,
              (ExtDynamicClassPubStat.pubStatSubSetSPArray(arr), ExtDynamicClassPubStat.pubStatSubGetSPArray()) );
 
 // ********************************************
@@ -175,10 +175,9 @@ AddTestCase( "ExtDynamicClassPubStat.pubStatSubSetSPArray(arr), ExtDynamicClassP
 // ********************************************
 
 EXTDCLASS = new ExtDynamicClassPubStat();
-AddTestCase( "*** Access public static property from private static method in sub class ***", 1, 1 );
-AddTestCase( "EXTDCLASS.testPrivStatSubPArray(arr)", arr, EXTDCLASS.testPrivStatSubPArray(arr));
+Assert.expectEq( "*** Access public static property from private static method in sub class ***", 1, 1 );
+Assert.expectEq( "EXTDCLASS.testPrivStatSubPArray(arr)", arr, EXTDCLASS.testPrivStatSubPArray(arr));
 
 // <TODO>  fill in the rest of the cases here
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

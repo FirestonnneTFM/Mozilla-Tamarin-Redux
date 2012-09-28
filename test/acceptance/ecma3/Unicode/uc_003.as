@@ -1,20 +1,21 @@
 /* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
+ * ***** BEGIN LICENSE BLOCK *****
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "uc_003";
-    var VERSION = "";
-    var TITLE = "Escapes in identifiers test.";
-    printBugNumber (23608);
-    printBugNumber (23607);
+import com.adobe.test.Assert;
+//     var SECTION = "uc_003";
+//     var VERSION = "";
+//     var TITLE = "Escapes in identifiers test.";
 
-    startTest();
+// TO-DO: commenting the function reference in shell.as
+    //printBugNumber (23608);
+    //printBugNumber (23607);
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
+
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases()
 {
@@ -27,20 +28,20 @@ function getTestCases()
 
 
 /*
-    array[item++] = new TestCase(SECTION, "Escaped ASCII Identifier test.", 5, ("\u0041"));
-    array[item++] = new TestCase(SECTION, "Escaped ASCII Identifier test", 6, ("++\u0041"));
-    array[item++] = new TestCase(SECTION, "Escaped non-ASCII Identifier test", 15, ("A\u03B2"));
-    array[item++] = new TestCase(SECTION, "Escaped non-ASCII Identifier test", 16, ("++A\u03B2"));
-    array[item++] = new TestCase(SECTION, "Escaped keyword Identifier test", 25, ("c\\u00" + "61se"));
-    array[item++] = new TestCase(SECTION, "Escaped keyword Identifier test", 26, ("++c\\u00" + "61se"));
+    array[item++] = Assert.expectEq( "Escaped ASCII Identifier test.", 5, ("\u0041"));
+    array[item++] = Assert.expectEq( "Escaped ASCII Identifier test", 6, ("++\u0041"));
+    array[item++] = Assert.expectEq( "Escaped non-ASCII Identifier test", 15, ("A\u03B2"));
+    array[item++] = Assert.expectEq( "Escaped non-ASCII Identifier test", 16, ("++A\u03B2"));
+    array[item++] = Assert.expectEq( "Escaped keyword Identifier test", 25, ("c\\u00" + "61se"));
+    array[item++] = Assert.expectEq( "Escaped keyword Identifier test", 26, ("++c\\u00" + "61se"));
  */
                    
-    array[item++] = new TestCase(SECTION, "Escaped ASCII Identifier test.", 5, (\u0041));
-    array[item++] = new TestCase(SECTION, "Escaped ASCII Identifier test", 6, (++\u0041));
-    array[item++] = new TestCase(SECTION, "Escaped non-ASCII Identifier test", 15, (A\u03B2));
-    array[item++] = new TestCase(SECTION, "Escaped non-ASCII Identifier test", 16, (++A\u03B2));
-    array[item++] = new TestCase(SECTION, "Escaped keyword Identifier test", 25, (c\u0061se));
-    array[item++] = new TestCase(SECTION, "Escaped keyword Identifier test", 26, (++c\u0061se));
+    array[item++] = Assert.expectEq( "Escaped ASCII Identifier test.", 5, (\u0041));
+    array[item++] = Assert.expectEq( "Escaped ASCII Identifier test", 6, (++\u0041));
+    array[item++] = Assert.expectEq( "Escaped non-ASCII Identifier test", 15, (A\u03B2));
+    array[item++] = Assert.expectEq( "Escaped non-ASCII Identifier test", 16, (++A\u03B2));
+    array[item++] = Assert.expectEq( "Escaped keyword Identifier test", 25, (c\u0061se));
+    array[item++] = Assert.expectEq( "Escaped keyword Identifier test", 26, (++c\u0061se));
     
     return array;
 }

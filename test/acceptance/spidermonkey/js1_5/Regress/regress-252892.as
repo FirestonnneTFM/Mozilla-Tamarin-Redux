@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-252892.js';
 //-----------------------------------------------------------------------------
@@ -12,23 +12,23 @@ var summary = 'for (var i in o) in heavyweight function f should define i in f\'
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 var status;
 
 var dodis;
 
-function f1(o){for(var x in o)printStatus(o[x]); return x}
-function f2(o){with(this)for(var x in o)printStatus(o[x]); return x}
-function f2novar(o){with(this)for(x in o)printStatus(o[x]); return x}
-function f3(i,o){for(var x=i in o)printStatus(o[x]); return x}
-function f4(i,o){with(this)for(var x=i in o)printStatus(o[x]); return x}
+function f1(o){for(var x in o); return x}
+function f2(o){with(this)for(var x in o); return x}
+function f2novar(o){with(this)for(x in o); return x}
+function f3(i,o){for(var x=i in o); return x}
+function f4(i,o){with(this)for(var x=i in o); return x}
 
 const f1src =
   "function f1(o) {\n" +
   "    for (var x in o) {\n" +
-  "        printStatus(o[x]);\n" +
+  "    //printStatus(o[x]);\n" +
   "    }\n" +
   "    return x;\n" +
   "}";
@@ -37,7 +37,7 @@ const f2src =
   "function f2(o) {\n" +
   "    with (this) {\n" +
   "        for (var x in o) {\n" +
-  "            printStatus(o[x]);\n" +
+  "        //printStatus(o[x]);\n" +
   "        }\n" +
   "    }\n" +
   "    return x;\n" +
@@ -47,7 +47,7 @@ const f2novarsrc =
   "function f2novar(o) {\n" +
   "    with (this) {\n" +
   "        for (x in o) {\n" +
-  "            printStatus(o[x]);\n" +
+  "        //printStatus(o[x]);\n" +
   "        }\n" +
   "    }\n" +
   "    return x;\n" +
@@ -57,7 +57,7 @@ const f3src =
   "function f3(i, o) {\n" +
   "    var x = i;\n" +
   "    for (x in o) {\n" +
-  "        printStatus(o[x]);\n" +
+  "    //printStatus(o[x]);\n" +
   "    }\n" +
   "    return x;\n" +
   "}";
@@ -67,7 +67,7 @@ const f4src =
   "    with (this) {\n" +
   "        var x = i;\n" +
   "        for (x in o) {\n" +
-  "            printStatus(o[x]);\n" +
+  "        //printStatus(o[x]);\n" +
   "        }\n" +
   "    }\n" +
   "    return x;\n" +
@@ -78,11 +78,11 @@ function assert(c)
 {
   ++t;
 
-  status = summary + ' ' + inSection(t);
+  status = summary; //TODO: Review AS4 Conversion  + ' ' + inSection(t);
   expect = true;
   actual = c;
 
-  AddTestCase('Section '+t+' : '+summary, expect, actual);
+  Assert.expectEq('Section '+t+' : '+summary, expect, actual);
 }
 
 /*
@@ -128,4 +128,3 @@ assert(f2novar([]) == 41);
 
 //assert(f2novar(['first']) == 0);
 
-test();

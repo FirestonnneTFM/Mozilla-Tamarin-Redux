@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  *  File Name:          e15_4_4_13.as
  *  ECMA Section:       15.4.4.13 Array.unshift()
@@ -18,31 +19,28 @@
  *                      transferred to other objects for use as method
  */
 
-var SECTION = "15.4.4.13";
-var TITLE   = "Array.unshift";
+// var SECTION = "15.4.4.13";
+// var TITLE   = "Array.unshift";
 
-var VERSION = "ECMA_3";
+// var VERSION = "ECMA_3";
 
-startTest();
 
-writeHeaderToLog( SECTION + " " + TITLE);
 
 
 var testcases = getTestCases();
 
-test();
 
 function getTestCases() {
     var array = new Array();
         var myobj = new Object();
     var item = 0;
 
-       array[item++] = new TestCase( SECTION, "Array.prototype.unshift.length;",0, Array.prototype.unshift.length);
+       array[item++] = Assert.expectEq(  "Array.prototype.unshift.length;",0, Array.prototype.unshift.length);
 
         var MYEMPTYARR = new Array();
 
-        array[item++] = new TestCase( SECTION, "MYEMPTYARR = new Array();MYEMPTYARR.unshift();", 0, MYEMPTYARR.unshift() );
-        array[item++] = new TestCase( SECTION, "MYEMPTYARR = new Array();MYEMPTYARR.unshift(0);", 1, MYEMPTYARR.unshift(0) );
+        array[item++] = Assert.expectEq(  "MYEMPTYARR = new Array();MYEMPTYARR.unshift();", 0, MYEMPTYARR.unshift() );
+        array[item++] = Assert.expectEq(  "MYEMPTYARR = new Array();MYEMPTYARR.unshift(0);", 1, MYEMPTYARR.unshift(0) );
 
 
         var MYARR = new Array();
@@ -51,11 +49,11 @@ function getTestCases() {
 
        var MYVAR:Number = 3
 
-    array[item++] = new TestCase( SECTION, "MYARR = new Array(); MYARR.push(1, 2); MYARR.unshift(0);", MYVAR, MYARR.unshift(0) );
+    array[item++] = Assert.expectEq(  "MYARR = new Array(); MYARR.push(1, 2); MYARR.unshift(0);", MYVAR, MYARR.unshift(0) );
 
         for (var i = 0;i<MYARR.length; i++){
 
-        array[item++] = new TestCase( SECTION, "MYARR = new Array(); MYARR.push(1, 2); MYARR.unshift(0);MYARR", i, MYARR[i] );
+        array[item++] = Assert.expectEq(  "MYARR = new Array(); MYARR.push(1, 2); MYARR.unshift(0);MYARR", i, MYARR[i] );
 
         }
         //unshift method can be transferred to other objects for use as method
@@ -66,13 +64,17 @@ function getTestCases() {
         myobj[1] = 4;
         myobj[2] = 5;
 
+   // TODO: REVIEW AS4 CONVERSION ISSUE 
+    // COMMENT OUT WHOLE BLOCK SINCE IT SHOULD ONLY RUN IF NOT as3Enabled (i.e. pre AS3)
+    /* 
         if (!as3Enabled) {
-            array[item++] = new TestCase( SECTION, "myobj = new Object(); myobj.unshift= Array.prototype.unshift;myobj.unshift(0,1,2);", 6, myobj.unshift(0,1,2) );
+            array[item++] = Assert.expectEq(  "myobj = new Object(); myobj.unshift= Array.prototype.unshift;myobj.unshift(0,1,2);", 6, myobj.unshift(0,1,2) );
 
             for (var i=0; i<6; i++){
-                array[item++] = new TestCase( SECTION, "myobj = new Object(); myobj.unshift= Array.prototype.unshift; myobj.unshift(0,1,2);",i, myobj[i] );
+                array[item++] = Assert.expectEq(  "myobj = new Object(); myobj.unshift= Array.prototype.unshift; myobj.unshift(0,1,2);",i, myobj[i] );
             }
         }
+        */
         
     return ( array );
 

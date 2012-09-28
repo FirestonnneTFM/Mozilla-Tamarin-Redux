@@ -1,15 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "RegExp/exec-001";
-var VERSION = "ECMA_2";
-var TITLE   = "RegExp.prototype.exec(string)";
+// var SECTION = "RegExp/exec-001";
+// var VERSION = "ECMA_2";
+// var TITLE   = "RegExp.prototype.exec(string)";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -31,7 +29,7 @@ function getTestCases() {
     // global property is false
     // test cases in which the exec returns null
 
-    array[item++] = new TestCase(SECTION, "NO TESTS EXIST", "PASSED", "PASSED");
+    array[item++] = Assert.expectEq( "NO TESTS EXIST", "PASSED", "PASSED");
 
     return array;
 }

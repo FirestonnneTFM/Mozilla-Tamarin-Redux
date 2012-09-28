@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "";
-    var VERSION = "ECMA_2";
-    var TITLE   = "The try statement";
+import com.adobe.test.Assert;
+//     var SECTION = "";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "The try statement";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
     
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -47,14 +45,14 @@ function getTestCases() {
         } finally {
             finalTest = true;
         }
-            array[item++] = new TestCase(
-                SECTION,
+            array[item++] = Assert.expectEq(
+                
                 "newJavaValue( " + value +" )",
                 expect,
                 result);
 
-            array[item++] = new TestCase(
-                SECTION,
+            array[item++] = Assert.expectEq(
+                
                 "newJavaValue( " + value +" ) hit finally block",
                 true,
                 finalTest);

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -50,25 +50,25 @@ var arr4 = [1];
 arr4.pop();
 
 
-status = inSection(1);
+//status = inSection(1);
 arr = arr1.sort();
 actual = arr instanceof Array && arr.length === 0 && arr === arr1;
 expect = true;
 addThis();
 
-status = inSection(2);
+//status = inSection(2);
 arr = arr2.sort();
 actual = arr instanceof Array && arr.length === 0 && arr === arr2;
 expect = true;
 addThis();
 
-status = inSection(3);
+//status = inSection(3);
 arr = arr3.sort();
 actual = arr instanceof Array && arr.length === 0 && arr === arr3;
 expect = true;
 addThis();
 
-status = inSection(4);
+//status = inSection(4);
 arr = arr4.sort();
 actual = arr instanceof Array && arr.length === 0 && arr === arr4;
 expect = true;
@@ -77,25 +77,25 @@ addThis();
 // now do the same thing, with non-default sorting:
 function g() {return 1;}
 
-status = inSection('1a');
+//status = inSection('1a');
 arr = arr1.sort(g);
 actual = arr instanceof Array && arr.length === 0 && arr === arr1;
 expect = true;
 addThis();
 
-status = inSection('2a');
+//status = inSection('2a');
 arr = arr2.sort(g);
 actual = arr instanceof Array && arr.length === 0 && arr === arr2;
 expect = true;
 addThis();
 
-status = inSection('3a');
+//status = inSection('3a');
 arr = arr3.sort(g);
 actual = arr instanceof Array && arr.length === 0 && arr === arr3;
 expect = true;
 addThis();
 
-status = inSection('4a');
+//status = inSection('4a');
 arr = arr4.sort(g);
 actual = arr instanceof Array && arr.length === 0 && arr === arr4;
 expect = true;
@@ -121,15 +121,14 @@ function addThis()
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus(summary);
+  //printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

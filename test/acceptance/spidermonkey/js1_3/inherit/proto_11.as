@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'proto_11.js';
 
@@ -22,12 +23,10 @@ gTestfile = 'proto_11.js';
    Date:               12 november 1997
 */
 
-var SECTION = "proto_11";
-var VERSION = "JS1_3";
-var TITLE   = "Global Information in Constructors";
+// var SECTION = "proto_11";
+// var VERSION = "JS1_3";
+// var TITLE   = "Global Information in Constructors";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var idCounter = 1;
 
@@ -67,21 +66,20 @@ var pat = new Employee( "Toonces, Pat", "Tech Pubs" )
 
 var les = new Engineer( "Morris, Les",  new Array("JavaScript"), "indy" );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "pat.id",
           5,
           pat.id );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "terry.id",
           6,
           terry.id );
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "les.id",
           7,
           les.id );
 
 
-test();
 

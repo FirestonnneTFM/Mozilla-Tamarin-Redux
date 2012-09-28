@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-328012.js';
 //-----------------------------------------------------------------------------
@@ -13,8 +13,8 @@ var actual = 'No Error';
 var expect = 'No Error';
 
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 if (typeof focus != 'undefined')
 {
@@ -25,10 +25,9 @@ if (typeof focus != 'undefined')
   }
   catch(ex)
   {
-    printStatus(ex + '');
+//printStatus(ex + '');
     actual = ex + '';
   }
 }
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

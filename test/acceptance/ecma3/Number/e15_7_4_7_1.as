@@ -1,6 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 /*
  * Date: 2001-07-15
  *
@@ -9,15 +11,12 @@
  *
  */
 //-----------------------------------------------------------------------------
-    var SECTION = "15.7.4.6-1";
-    var VERSION = "";
-    var TITLE = "Testing Number.prototype.toPrecision(precision)";
-    var bug = '(none)';
-    startTest();
+//     var SECTION = "15.7.4.6-1";
+//     var VERSION = "";
+//     var TITLE = "Testing Number.prototype.toPrecision(precision)";
+//     var bug = '(none)';
     var testcases = getTestCases();
 
-    writeHeaderToLog( SECTION + " " + TITLE);
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -44,14 +43,14 @@ function getTestCases() {
     actual = testNum.toPrecision(4);
     expect = '5.123';
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
     status = 'Section B of test: no error intended!';
     actual = testNum.toPrecision(undefined);
     expect = testNum.toString();
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
 
@@ -60,19 +59,19 @@ function getTestCases() {
     actual = Number.prototype.toPrecision.length
     expect = 1
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = 'Section D of test: no error intended!';
     actual = testNum2.toPrecision(6);
     expect = "NaN"
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = 'Section E of test: no error intended!';
     actual = testNum3.toPrecision(6);
     expect = "Infinity"
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     var thisError:String="no error";
     try{
@@ -82,17 +81,17 @@ function getTestCases() {
     }
 
     status = 'Section F of test: error intended!';
-    actual = rangeError(thisError);
+    actual = Utils.rangeError(thisError);
     expect = "RangeError: Error #1002"
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
     status = 'Section G of test: no error intended!';
     actual = testNum.toPrecision(21);
     expect = "5.12345600000000001017"
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     var thisError:String="no error";
     try{
@@ -102,10 +101,10 @@ function getTestCases() {
     }
 
     status = 'Section H of test: error intended!';
-    actual = rangeError(thisError);
+    actual = Utils.rangeError(thisError);
     expect = "RangeError: Error #1002"
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     var thisError:String="no error";
     try{
@@ -115,22 +114,22 @@ function getTestCases() {
     }
 
     status = 'Section I of test: error intended!';
-    actual = rangeError(thisError);
+    actual = Utils.rangeError(thisError);
     expect = "RangeError: Error #1002"
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = 'Section J of test: no error intended!';
     actual = testNum4.toPrecision(4);
     expect = '0.0000';
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = 'Section K of test: no error intended!';
     actual = testNum5.toPrecision(3);
     expect = '4.00e+3';
     //captureThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     // Regression tests
 
@@ -139,7 +138,7 @@ function getTestCases() {
     status = 'Section R-1 of test: no error intended!';
     actual = Number.MIN_VALUE.toPrecision(21);
     expect = '4.94065645841246544177e-324';
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
 ///////////////////////////    OOPS....    ///////////////////////////////

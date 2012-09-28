@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = '10.1.6.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Local variables can cause predefined function object properties t
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 function f()
 {
@@ -23,6 +23,5 @@ function f()
 expect = '[class Function]';
 actual = f.constructor.toString();
  
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-319384.js';
 //-----------------------------------------------------------------------------
@@ -12,10 +12,10 @@ var summary = 'Do not crash converting string to number';
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
-printStatus('This test only runs in the browser');
+//printStatus('This test only runs in the browser');
 
 if (typeof clearTimeout === 'function')
 {
@@ -28,6 +28,5 @@ if (typeof clearTimeout === 'function')
   }
 }
  
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

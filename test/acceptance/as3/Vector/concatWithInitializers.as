@@ -1,6 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 /**
    File Name:    concat.es
    Description:  The static concat method collects the vector elements from object followed by the vector
@@ -8,19 +10,17 @@
     returns a new vector object
    */
 
-var SECTION = " ";
-var VERSION = "AS3";
-startTest();
+// var SECTION = " ";
+// var VERSION = "AS3";
 
-writeHeaderToLog( SECTION + " Vector.concat()-using-initializers");
 
 var v1=new <uint>[0,1,2];
 var v2=new <uint>[3,4,5];
 var v3=v1.concat(v2)
-AddTestCase(    "concat uint vector, original vector is unchanged",
+Assert.expectEq(    "concat uint vector, original vector is unchanged",
         "0,1,2",
         v1.toString());
-AddTestCase(    "concat uint vector, new vector concat worked",
+Assert.expectEq(    "concat uint vector, new vector concat worked",
         "0,1,2,3,4,5",
         v3.toString());
 
@@ -32,9 +32,9 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(    "concat two differently typed vectors",
+Assert.expectEq(    "concat two differently typed vectors",
                 "TypeError: Error #1034",
-                parseError(errormsg,"TypeError: Error #1034".length));
+                Utils.parseError(errormsg,"TypeError: Error #1034".length));
                 
 
 var v1=new <uint>[5,6,7,8,9];
@@ -45,10 +45,9 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(    "concat two differently typed vectors - uint and int",
+Assert.expectEq(    "concat two differently typed vectors - uint and int",
                 "TypeError: Error #1034",
-                parseError(errormsg,"TypeError: Error #1034".length));
+                Utils.parseError(errormsg,"TypeError: Error #1034".length));
 
 
-test();
 

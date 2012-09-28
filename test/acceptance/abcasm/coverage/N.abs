@@ -1,19 +1,54 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+method_info { name: test_newactivation flags: NEED_ACTIVATION }
 
-function main() {
-	getlocal0
-	pushscope
-	findproperty START 
-	pushstring "Instructions that start with the letter N" 
-	callpropvoid START 1
-	newfunction .function_id(runTest)
-	getlocal0
-	call 0
-	findproperty END
-	callpropvoid END 0
-	returnvoid
+method_body_info {
+	method: test_newactivation
+	code: 
+	{
+		newactivation
+		dup
+		setlocal1
+		pushscope
+
+		returnvoid
+	}
+}
+
+method_info{ name: test_newcatch flags: NEED_ACTIVATION }
+method_body_info {
+	method: test_newcatch
+	exception: {
+		exception { from: startTry to:endTry target:catchEx }
+	}
+	code:
+	{
+			getlocal0
+			pushscope
+
+		startTry:
+			pushnull
+			getproperty zibble
+		endTry:
+			pushstring "newcatch"
+			findproperty FAIL
+	swap
+	pushstring "..."
+	dup
+	callpropvoid FAIL 3
+			returnvoid
+		catchEx:
+			getlocal0
+			pushscope
+			pushstring "newcatch: "
+			newcatch 0
+			add
+			findproperty PASS
+	swap
+	callpropvoid PASS 1
+			returnvoid
+	}
 }
 
 function runTest()
@@ -88,7 +123,7 @@ function runTest()
 	negate_i
 	callpropvoid COMPARE_STRICTEQ 3
 
-	newfunction .function_id(test_newactivation)
+	newfunction test_newactivation
 	getlocal 0
 	call 0
 	pushstring "newfunction and newactivation"
@@ -98,7 +133,7 @@ function runTest()
 
 	/*
 	 *  TODO: work around the verify error.
-	newfunction .function_id(test_newactivation_negative)
+	newfunction test_newactivation_negative
 	getlocal 0
 	call 0
 	*/
@@ -121,7 +156,7 @@ function runTest()
 	
 	//  Newfunction tested lots
 
-	newfunction .function_id(test_newcatch)
+	newfunction test_newcatch
 	getlocal 0
 	call 0
 
@@ -145,54 +180,20 @@ function runTest()
 	returnvoid
 }
 
-.method_info { name: test_newactivation flags: NEED_ACTIVATION }
 
-.method_body_info {
-	method: .function_id(test_newactivation)
-	code: 
-	{
-		newactivation
-		dup
-		setlocal1
-		pushscope
 
-		returnvoid
-	}
+
+function main() {
+	getlocal0
+	pushscope
+	findproperty START 
+	pushstring "Instructions that start with the letter N" 
+	callpropvoid START 1
+	newfunction runTest
+	getlocal0
+	call 0
+	findproperty END
+	callpropvoid END 0
+	returnvoid
 }
-
-.method_info{ name: test_newcatch flags: NEED_ACTIVATION }
-.method_body_info {
-	method: .function_id(test_newcatch)
-	exception: {
-		.exception { from: startTry to:endTry target:catchEx }
-	}
-	code:
-	{
-			getlocal0
-			pushscope
-
-		startTry:
-			pushnull
-			getproperty zibble
-		endTry:
-			pushstring "newcatch"
-			findproperty FAIL
-	swap
-	pushstring "..."
-	dup
-	callpropvoid FAIL 3
-			returnvoid
-		catchEx:
-			getlocal0
-			pushscope
-			pushstring "newcatch: "
-			newcatch 0
-			add
-			findproperty PASS
-	swap
-	callpropvoid PASS 1
-			returnvoid
-	}
-}
-
-
+script_info{init: main}

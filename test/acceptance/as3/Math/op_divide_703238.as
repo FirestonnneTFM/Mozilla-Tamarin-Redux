@@ -3,12 +3,11 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-var SECTION = "Bug 703238";
-var VERSION = "AS3";
-var TITLE   = "64bit jit mishandling untyped variable";
+import com.adobe.test.Assert;
+// var SECTION = "Bug 703238";
+// var VERSION = "AS3";
+// var TITLE   = "64bit jit mishandling untyped variable";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function f()
 {
@@ -21,9 +20,8 @@ function f()
         range that we start working in the Number range, test this
         by marking sure that the results here stay positive.
         */
-        AddTestCase("Result should always stay positive", true, t/86400000 >= 0);
+        Assert.expectEq("Result should always stay positive", true, t/86400000 >= 0);
     }
 }
 f();
 
-test();

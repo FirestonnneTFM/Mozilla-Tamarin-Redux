@@ -1,14 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "boolean-001.as";
-    var VERSION = "ECMA_4";
-    var TITLE   = "Boolean.prototype.toString()";
-    startTest();
-    writeHeaderToLog( SECTION +" "+ TITLE );
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "boolean-001.as";
+//     var VERSION = "ECMA_4";
+//     var TITLE   = "Boolean.prototype.toString()";
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -19,7 +18,7 @@ function getTestCases() {
     var TO_STRING = Boolean.prototype.toString;
 
     var expectedError = 1056;
-    if (as3Enabled) {
+    if (true) {       // TODO: REVIEW AS4 CONVERSION ISSUE   
         expectedError = 1037;
     }
 
@@ -31,11 +30,11 @@ function getTestCases() {
         exception = e.toString();
     }finally{
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+      //    SECTION,
         "Assigning Boolean.prototype.toString to a String object ",
-        REFERENCEERROR+expectedError,
-        referenceError( exception ) );
+        Utils.REFERENCEERROR+expectedError,
+        Utils.referenceError( exception ) );
     }
     // new Boolean()
     try {
@@ -46,11 +45,11 @@ function getTestCases() {
         exception = e1.toString();
     }finally{
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+      //    SECTION,
         "Assigning Boolean.prototype.toString to an instance of new Boolean()",
-        REFERENCEERROR+expectedError,
-        referenceError( exception ) );
+        Utils.REFERENCEERROR+expectedError,
+        Utils.referenceError( exception ) );
 
     }
     // new Boolean(true)
@@ -62,11 +61,11 @@ function getTestCases() {
         exception = e2.toString();
     }finally{
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+      //    SECTION,
         "Assigning Boolean.prototype.toString to an instance of new Boolean(true)",
-        REFERENCEERROR+expectedError,
-        referenceError( exception ) );
+        Utils.REFERENCEERROR+expectedError,
+        Utils.referenceError( exception ) );
 
     }
     // new Boolean(false)
@@ -78,11 +77,11 @@ function getTestCases() {
         exception = e3.toString();
     }finally{
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+      //    SECTION,
         "Assigning Boolean.prototype.toString to an instance of new Boolean(false)",
-        REFERENCEERROR+expectedError,
-        referenceError( exception ) );
+        Utils.REFERENCEERROR+expectedError,
+        Utils.referenceError( exception ) );
     }
 
     // true
@@ -94,11 +93,11 @@ function getTestCases() {
         exception = e4.toString();
     }finally{
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+      //    SECTION,
         "Assigning Boolean.prototype.toString to an instance of 'true'",
-        REFERENCEERROR+expectedError,
-        referenceError( exception ) );
+        Utils.REFERENCEERROR+expectedError,
+        Utils.referenceError( exception ) );
     }
 
     // false
@@ -110,11 +109,11 @@ function getTestCases() {
         exception = e5.toString();
     }finally{
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+      //    SECTION,
         "Assigning Boolean.prototype.toString to an instance of 'false'",
-        REFERENCEERROR+expectedError,
-        referenceError( exception ) );
+        Utils.REFERENCEERROR+expectedError,
+        Utils.referenceError( exception ) );
     }
     return array;
 }

@@ -1,15 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "12.6.3-10";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "The for..in statment";
+import com.adobe.test.Assert;
+//     var SECTION = "12.6.3-10";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "The for..in statment";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -30,7 +28,7 @@ function getTestCases() {
     var result = "";
     for ( p in f() ) { result += f()[p] };
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
         "count = 0; result = \"\"; "+
         "function f() { count++; return new Array(\"h\",\"e\",\"l\",\"o\"); }"+
         "for ( p in f() ) { result += f()[p] }; count",
@@ -47,7 +45,7 @@ function getTestCases() {
         }
     }
 
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
         "Verify all letters of hello are found in result",
         "PASSED",
         result2 );

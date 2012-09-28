@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import MultiOptArgFunction.*
+import com.adobe.test.Assert;
 
 class MultiOptArgFunctionClass {
     function returnArguments(s:String = "Str3", b:Boolean = true, n:Number = 30) {
@@ -19,12 +20,11 @@ function returnArgumentsNoPackage(s:String = "Str4", b:Boolean = false, n:Number
 }
 
 
-var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";  // Version of JavaScript or ECMA
-var TITLE   = "Function Body Parameter/Result Type";       // Provide ECMA section title or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";  // Version of JavaScript or ECMA
+// var TITLE   = "Function Body Parameter/Result Type";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var TESTOBJ = new TestObj();
@@ -38,7 +38,7 @@ if(str == "String1" && bool == true && num == 10)
 else
 { success = false;}
 
-AddTestCase( "TESTOBJ.returnArguments('String1');", true, success );
+Assert.expectEq( "TESTOBJ.returnArguments('String1');", true, success );
 
 
 success = false;
@@ -49,7 +49,7 @@ if(str == "String1" && bool == false && num == 10)
 else
 { success = false;}
 
-AddTestCase( "TESTOBJ.returnArguments('String1',false)", true, success );
+Assert.expectEq( "TESTOBJ.returnArguments('String1',false)", true, success );
 
 
 success = false;
@@ -60,7 +60,7 @@ if(str == "String1" && bool == false && num == 100)
 else
 {success = false;}
 
-AddTestCase( "TESTOBJ.returnArguments('String1',false,100);", true, success );
+Assert.expectEq( "TESTOBJ.returnArguments('String1',false,100);", true, success );
 
 
 success = false;
@@ -71,7 +71,7 @@ if(str == "String2" && bool == false && num == 20)
 else
 {success = false;}
 
-AddTestCase( "returnArguments('String2')", true, success );
+Assert.expectEq( "returnArguments('String2')", true, success );
 
 
 success = false;
@@ -82,7 +82,7 @@ if(str == "String2" && bool == true && num == 20)
 else
 {success = false;}
 
-AddTestCase( "returnArguments('String2',true)", true, success );
+Assert.expectEq( "returnArguments('String2',true)", true, success );
 
 success = false;
 returnArguments("String2",true,100);
@@ -92,7 +92,7 @@ if(str == "String2" && bool == true && num == 100)
 else
 {success = false;}
 
-AddTestCase( "returnArguments('String2',true,100)", true, success );
+Assert.expectEq( "returnArguments('String2',true,100)", true, success );
 
 success = false;
 TESTOBJ1.returnArguments("String3");
@@ -102,7 +102,7 @@ if(str == "String3" && bool == true && num == 30)
 else
 {success = false;}
 
-AddTestCase( "TESTOBJ1.returnArguments('String3')", true, success );
+Assert.expectEq( "TESTOBJ1.returnArguments('String3')", true, success );
 
 
 success = false;
@@ -113,7 +113,7 @@ if(str == "String3" && bool == false && num == 30)
 else
 {success = false;}
 
-AddTestCase( "TESTOBJ1.returnArguments('String3',false)", true, success );
+Assert.expectEq( "TESTOBJ1.returnArguments('String3',false)", true, success );
 
 success = false;
 TESTOBJ1.returnArguments("String3",false,300);
@@ -123,7 +123,7 @@ if(str == "String3" && bool == false && num == 300)
 else
 {success = false;}
 
-AddTestCase( "TESTOBJ1.returnArguments('String3',false,300)", true, success );
+Assert.expectEq( "TESTOBJ1.returnArguments('String3',false,300)", true, success );
 
 
 success = false;
@@ -134,7 +134,7 @@ if(str == "String4" && bool == false && num == 40)
 else
 {success = false;}
 
-AddTestCase( "returnArgumentsNoPackage('String4')", true, success );
+Assert.expectEq( "returnArgumentsNoPackage('String4')", true, success );
 
 
 success = false;
@@ -145,7 +145,7 @@ if(str == "String4" && bool == true && num == 40)
 else
 {success = false;}
 
-AddTestCase( "returnArgumentsNoPackage('String4',true)", true, success );
+Assert.expectEq( "returnArgumentsNoPackage('String4',true)", true, success );
 
 
 success = false;
@@ -156,8 +156,7 @@ if(str == "String4" && bool == true && num == 400)
 else
 {success = false;}
 
-AddTestCase( "returnArgumentsNoPackage('String4',true,400)", true, success );
+Assert.expectEq( "returnArgumentsNoPackage('String4',true,400)", true, success );
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

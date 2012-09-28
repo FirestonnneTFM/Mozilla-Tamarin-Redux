@@ -1,16 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-    var SECTION = "15.4.5.1-1";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "Array [[Put]] (P, V)";
+//     var SECTION = "15.4.5.1-1";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "Array [[Put]] (P, V)";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -19,18 +18,18 @@ function getTestCases() {
 
     // P is "length"
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var A = new Array(); A.length = 1000; A.length",
                                     1000,
                                     (A = new Array(), A.length = 1000, A.length ) );
 
     // A has Property P, and P is not length or an array index
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var A = new Array(1000); A.name = 'name of this array'; A.name",
                                     'name of this array',
                                     (A = new Array(1000), A.name = 'name of this array', A.name ) );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var A = new Array(1000); A.name = 'name of this array'; A.length",
                                     1000,
                                     (A = new Array(1000), A.name = 'name of this array', A.length ) );
@@ -39,12 +38,12 @@ function getTestCases() {
     // A has Property P, P is not length, P is an array index, and ToUint32(p) is less than the
     // value of length
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var A = new Array(1000); A[123] = 'hola'; A[123]",
                                     'hola',
                                     (A = new Array(1000), A[123] = 'hola', A[123] ) );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var A = new Array(1000); A[123] = 'hola'; A.length",
                                     1000,
                                     (A = new Array(1000), A[123] = 'hola', A.length ) );
@@ -68,12 +67,12 @@ function getTestCases() {
         A[index++] = String.fromCharCode( i );
     }
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     TEST_STRING +" A[150] = 'hello'; A[150]",
                                     'hello',
                                     (A[150] = 'hello', A[150]) );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     TEST_STRING +" A[150] = 'hello', A.length",
                                     LENGTH,
                                     (A[150] = 'hello', A.length) );
@@ -81,12 +80,12 @@ function getTestCases() {
     // A has Property P, P is not length, P is an array index, and ToUint32(p) is not less than the
     // value of length
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var A = new Array(); A[123] = true; A.length",
                                     124,
                                     (A = new Array(), A[123] = true, A.length ) );
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "var A = new Array(0,1,2,3,4,5,6,7,8,9,10); A[15] ='15'; A.length",
                                     16,
                                     (A = new Array(0,1,2,3,4,5,6,7,8,9,10), A[15] ='15', A.length ) );
@@ -101,7 +100,7 @@ function getTestCases() {
         else
             temp = void 0;
 
-        array[item] = new TestCase( SECTION,
+        array[item] = Assert.expectEq( 
                                     "var A = new Array(0,1,2,3,4,5,6,7,8,9,10); A[15] ='15'; A[" +i +"]",
                                     temp, //(i <= 10) ? i : ( i == 15 ? '15' : void 0 ),
                                     A[i] );
@@ -114,10 +113,10 @@ function getTestCases() {
     }catch(e:ReferenceError){
         thisErr = e.toString();
     } finally{
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                                     "var A = new Array(); A.join.length = 4; A.join.length",
                                     "ReferenceError: Error #1074",
-                                    referenceError(thisErr));
+                                    Utils.referenceError(thisErr));
     }
 
     try{
@@ -126,10 +125,10 @@ function getTestCases() {
     }catch(e:ReferenceError){
         thisErr = e.toString();
     } finally{
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                                     "var A = new Array(); A.join.length = 4; A.length",
                                     "ReferenceError: Error #1074",
-                                    referenceError(thisErr));
+                                    Utils.referenceError(thisErr));
     }
 
     return array;

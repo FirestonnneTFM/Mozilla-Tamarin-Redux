@@ -11,17 +11,17 @@ package {
     import flash.utils.ByteArray;
     import flash.utils.Endian;
     import avmplus.Domain;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 
-    var SECTION = "mops";
-    var VERSION = "AS3";
-    var TITLE   = "si16";
+//     var SECTION = "mops";
+//     var VERSION = "AS3";
+//     var TITLE   = "si16";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
-    AddErrorTest("si16(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
-                 RANGEERROR+1506,
+    Assert.expectError("si16(Domain.MIN_DOMAIN_MEMORY_LENGTH) prior to initMemory()",
+                 Utils.RANGEERROR+1506,
                  function(){ SI16(0x0111, Domain.MIN_DOMAIN_MEMORY_LENGTH); });
 
     initMemory();
@@ -34,16 +34,16 @@ package {
     clearMemory();
     SI16(0x7F5A32, 0); // should only store 0x5A32
     // li16(1) should load 0x005A since memory is zereod
-    AddTestCase("si16() only stores the least significant 16 bits", 0x005A, LI16(1));
+    Assert.expectEq("si16() only stores the least significant 16 bits", 0x005A, LI16(1));
 
     // Test the memory boundaries
     clearMemory();
-    AddErrorTest("si16(0x0101, -1)", RANGEERROR+1506, function(){ SI16(0x0101, -1); });
-    AddErrorTest("si16(0x0101, mem.length)", RANGEERROR+1506, function(){ SI16(0x0101, mem.length); });
-    AddErrorTest("si16(0x0101, mem.length-1)", RANGEERROR+1506, function(){ SI16(0x0101, mem.length-1); });
-    AddTestCase("si16(0x0101, mem.length-2)", undefined, SI16(0x0101, mem.length-2));
-    AddTestCase("si16(0x0101FE, mem.length-2), should only store 16 bits so no overrun", undefined, SI16(0x0101FE, mem.length-2));
-    AddTestCase("si16(0x0101FE, mem.length-2), should only store 16 bits so no overrun confirm", 0x01FE, LI16(mem.length-2));
+    Assert.expectError("si16(0x0101, -1)", Utils.RANGEERROR+1506, function(){ SI16(0x0101, -1); });
+    Assert.expectError("si16(0x0101, mem.length)", Utils.RANGEERROR+1506, function(){ SI16(0x0101, mem.length); });
+    Assert.expectError("si16(0x0101, mem.length-1)", Utils.RANGEERROR+1506, function(){ SI16(0x0101, mem.length-1); });
+    Assert.expectEq("si16(0x0101, mem.length-2)", undefined, SI16(0x0101, mem.length-2));
+    Assert.expectEq("si16(0x0101FE, mem.length-2), should only store 16 bits so no overrun", undefined, SI16(0x0101FE, mem.length-2));
+    Assert.expectEq("si16(0x0101FE, mem.length-2), should only store 16 bits so no overrun confirm", 0x01FE, LI16(mem.length-2));
 
     testli8();
     testli16();
@@ -58,7 +58,6 @@ package {
     testreadFloat();
     testreadDouble();
 
-    test();
 
     function initMemory(bytes:int = 0):void
     {
@@ -82,15 +81,15 @@ package {
     {
         clearMemory();
         SI16(0x807F, 0);
-        AddTestCase("li8 load 1st byte written by si16(0x807F)", 0x7F, LI8(0));
-        AddTestCase("li8 load 2nd byte written by si16(0x807F)", uint(0x80), LI8(1));
+        Assert.expectEq("li8 load 1st byte written by si16(0x807F)", 0x7F, LI8(0));
+        Assert.expectEq("li8 load 2nd byte written by si16(0x807F)", uint(0x80), LI8(1));
     }
 
     function testli16():void
     {
         clearMemory();
         SI16(0x80DE, 0);
-        AddTestCase("li16 load bytes written by si16()", 0x80DE, LI16(0));
+        Assert.expectEq("li16 load bytes written by si16()", 0x80DE, LI16(0));
     }
 
     function testli32():void
@@ -98,7 +97,7 @@ package {
         clearMemory();
         SI16(0x80DE, 2);
         SI16(0x32F1, 0);
-        AddTestCase("li32 load bytes written by si16()", int(0x80DE32F1), LI32(0));
+        Assert.expectEq("li32 load bytes written by si16()", int(0x80DE32F1), LI32(0));
     }
 
     function testlf32():void
@@ -119,7 +118,7 @@ package {
         clearMemory();
         SI16(0x4146, 2);
         SI16(0x0000, 0);
-        AddTestCase("lf32 load bytes written by si16()", 12.375, LF32(0));
+        Assert.expectEq("lf32 load bytes written by si16()", 12.375, LF32(0));
 
     }
 
@@ -140,7 +139,7 @@ package {
         SI16(0xC3ED, 4);
         SI16(0xA52E, 2);
         SI16(0x0C09, 0);
-        AddTestCase("lf64 load bytes written by si16()", 1.0241024102410242048E19, LF64(0));
+        Assert.expectEq("lf64 load bytes written by si16()", 1.0241024102410242048E19, LF64(0));
     }
 
     function testreadByte():void
@@ -150,10 +149,10 @@ package {
         SI16(0x80FF, 2);
 
         mem.position = 0;
-        AddTestCase("readByte() load bytes written by si16(0x007F)", 0x7F, mem.readByte());
-        AddTestCase("readByte() load bytes written by si16(0x007F)", 0, mem.readByte());
-        AddTestCase("readByte() load bytes written by si16(0x80FF)", -1, mem.readByte());
-        AddTestCase("readByte() load bytes written by si16(0x80FF)", -128, mem.readByte());
+        Assert.expectEq("readByte() load bytes written by si16(0x007F)", 0x7F, mem.readByte());
+        Assert.expectEq("readByte() load bytes written by si16(0x007F)", 0, mem.readByte());
+        Assert.expectEq("readByte() load bytes written by si16(0x80FF)", -1, mem.readByte());
+        Assert.expectEq("readByte() load bytes written by si16(0x80FF)", -128, mem.readByte());
     }
 
     function testreadUnsignedByte():void
@@ -163,10 +162,10 @@ package {
         SI16(0x80FF, 2);
 
         mem.position = 0;
-        AddTestCase("readUnsignedByte() load bytes written by si16(0x007F)", 127, mem.readUnsignedByte());
-        AddTestCase("readUnsignedByte() load bytes written by si16(0x007F)", 0, mem.readUnsignedByte());
-        AddTestCase("readUnsignedByte() load bytes written by si16(0x80FF)", 255, mem.readUnsignedByte());
-        AddTestCase("readUnsignedByte() load bytes written by si16(0x80FF)", 128, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load bytes written by si16(0x007F)", 127, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load bytes written by si16(0x007F)", 0, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load bytes written by si16(0x80FF)", 255, mem.readUnsignedByte());
+        Assert.expectEq("readUnsignedByte() load bytes written by si16(0x80FF)", 128, mem.readUnsignedByte());
     }
 
 
@@ -175,8 +174,8 @@ package {
         clearMemory();
         SI16(0x0100, 0);
         mem.position = 0;
-        AddTestCase("readBoolean() load bytes written by si16(0x0100)", false, mem.readBoolean());
-        AddTestCase("readBoolean() load bytes written by si16(0x0100)", true, mem.readBoolean());
+        Assert.expectEq("readBoolean() load bytes written by si16(0x0100)", false, mem.readBoolean());
+        Assert.expectEq("readBoolean() load bytes written by si16(0x0100)", true, mem.readBoolean());
     }
 
     function testreadInt():void
@@ -186,7 +185,7 @@ package {
         SI16(0x32F1, 0);
 
         mem.position = 0;
-        AddTestCase("readInt() load bytes written by si16()", int(0x80DE32F1), mem.readInt());
+        Assert.expectEq("readInt() load bytes written by si16()", int(0x80DE32F1), mem.readInt());
     }
 
     function testreadUnsignedInt():void
@@ -196,7 +195,7 @@ package {
         SI16(0x32F1, 0);
 
         mem.position = 0;
-        AddTestCase("readUnsignedInt() load bytes written by si16()", uint(0x80DE32F1), mem.readUnsignedInt());
+        Assert.expectEq("readUnsignedInt() load bytes written by si16()", uint(0x80DE32F1), mem.readUnsignedInt());
     }
 
     function testreadFloat():void
@@ -219,7 +218,7 @@ package {
         SI16(0x0000, 0);
 
         mem.position = 0;
-        AddTestCase("readFloat() load bytes written by si16()", 12.375, mem.readFloat());
+        Assert.expectEq("readFloat() load bytes written by si16()", 12.375, mem.readFloat());
     }
 
     function testreadDouble():void
@@ -241,6 +240,6 @@ package {
         SI16(0x0C09, 0);
 
         mem.position = 0;
-        AddTestCase("readDouble() load bytes written by si16()", 1.0241024102410242048E19, mem.readDouble());
+        Assert.expectEq("readDouble() load bytes written by si16()", 1.0241024102410242048E19, mem.readDouble());
     }
 }

@@ -1,7 +1,9 @@
 ﻿/*
- * This Source Code Form is subject to the terms of the Mozilla Public
+ * ***** BEGIN LICENSE BLOCK *****
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 28 May 2001
  *
@@ -17,18 +19,15 @@
  *  of the running execution context when the function was declared)
  */
 //-------------------------------------------------------------------------------------------------
-    var SECTION = "";
-    var VERSION = "";
-    var TITLE = "Testing that functions are scoped statically, not dynamically";
+//     var SECTION = "";
+//     var VERSION = "";
+//     var TITLE = "Testing that functions are scoped statically, not dynamically";
 
-    startTest();
 
-    var bug = '(none)';
+//     var bug = '(none)';
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -64,7 +63,7 @@ function getTestCases() {
     }
     expect = 1;
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     /*
      * In this section the expected value is 2, not 1. That is because here
@@ -84,7 +83,7 @@ function getTestCases() {
     actual = f();
     expect = 2;
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     
     /*
@@ -104,7 +103,7 @@ function getTestCases() {
     actual = f();
     expect = 2;
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     
     /*
@@ -126,7 +125,7 @@ function getTestCases() {
     actual = f();
     expect = 3;
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     
     /*
@@ -147,7 +146,7 @@ function getTestCases() {
     actual = f();
     expect = 2;
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     
     /*
@@ -172,7 +171,7 @@ function getTestCases() {
     }
     expect = 2;  // NOT 3 !!!
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     
     /*
@@ -193,7 +192,7 @@ function getTestCases() {
     actual = String([obj.hasOwnProperty('f'), self.hasOwnProperty('f')]);
     expect = String([false, false]);
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     
     /*
@@ -214,7 +213,7 @@ function getTestCases() {
     actual = String(['f' in obj, 'f' in self]);
     expect = String([false, false]);
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     return array;
 }

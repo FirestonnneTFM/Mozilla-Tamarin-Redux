@@ -1,6 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 /**
    Description:  The elements of this object are converted to strings and
    these strings are then concatenated, separated by comma
@@ -8,11 +10,9 @@
    method were invoiked for this object with no argument.
    */
 
-var SECTION = "";
-var VERSION = "AS3";
-startTest();
+// var SECTION = "";
+// var VERSION = "AS3";
 
-writeHeaderToLog( SECTION + " Vector.some()-initializers");
 
 function greaterThanTen(item, index, vec):Boolean {
     if (item > 10) {
@@ -28,10 +28,10 @@ try {
   errormsg=e.toString();
 }
 
-AddTestCase(
+Assert.expectEq(
         "some no checker",
         "ArgumentError: Error #1063",
-        parseError(errormsg,"ArgumentError: Error #1063".length));
+        Utils.parseError(errormsg,"ArgumentError: Error #1063".length));
 
 var checker2="a string";
 var errormsg="";
@@ -40,22 +40,22 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(
+Assert.expectEq(
         "some checker not a function",
         "TypeError: Error #1034",
-        parseError(errormsg,"TypeError: Error #1034".length));
+        Utils.parseError(errormsg,"TypeError: Error #1034".length));
 
-AddTestCase(
+Assert.expectEq(
     "some empty vector result",
     false,
     new<int>[].some(greaterThanTen));
     
-AddTestCase(
+Assert.expectEq(
     "some vector with no match",
     false,
     new<int>[-3000,2,3,4,5,-1,9, 10].some(greaterThanTen));
     
-AddTestCase(
+Assert.expectEq(
     "some vector with match",
     true,
     new<int>[-3000,2,3,22,4,5,-1,9, 10, 3].some(greaterThanTen));
@@ -64,9 +64,8 @@ function noReturnValue(item, index, vec) {
     // do nothing
 }
 
-AddTestCase(
+Assert.expectEq(
     "some function with no return value",
     false,
     new<String>['asdf','hello','out','there'].some(noReturnValue));
 
-test();

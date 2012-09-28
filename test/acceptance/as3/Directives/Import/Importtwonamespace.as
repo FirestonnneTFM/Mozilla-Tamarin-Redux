@@ -14,17 +14,17 @@ package Packagnamespace {
 }
 
 
-var SECTION = "Definitions";                    // provide a document reference (ie, ECMA section)
-var VERSION = "ActionScript 3.0";               // Version of JavaScript or ECMA
-var TITLE   = "Import two namespaces from two different packages";          // Provide ECMA section title or a description
+// var SECTION = "Definitions";                    // provide a document reference (ie, ECMA section)
+// var VERSION = "ActionScript 3.0";               // Version of JavaScript or ECMA
+// var TITLE   = "Import two namespaces from two different packages";          // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                                    // leave this alone
 
 
 import Importtwonamespace.N1
 import Packagnamespace.N2
 
+import com.adobe.test.Assert;
 class PublicClass{
     N1 var x:Number = 4;
     N2 var x:Number = 6;
@@ -32,12 +32,11 @@ class PublicClass{
 
 obj = new PublicClass();
 
-AddTestCase("Namespace imported from package 1", 4, obj.N1::x);
-AddTestCase("Namespace imported from package 2", 6, obj.N2::x);
+Assert.expectEq("Namespace imported from package 1", 4, obj.N1::x);
+Assert.expectEq("Namespace imported from package 2", 6, obj.N2::x);
 
 
 /*===========================================================================*/
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

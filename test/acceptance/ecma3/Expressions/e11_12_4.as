@@ -1,14 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "11_12_4";
-    var VERSION = "ECMA_1";
-    startTest();
-    writeHeaderToLog( SECTION + " Conditional operator ( ? : )");
+//     var SECTION = "11_12_4";
+//     var VERSION = "ECMA_1";
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -16,7 +14,7 @@ function getTestCases() {
 
     // the following expression should NOT be an error in JS.
     true ? MYVAR1 = 'PASSED' : MYVAR1 = 'FAILED'
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
                                     "true ? MYVAR1 = 'PASSED' : MYVAR1 = 'FAILED'; MYVAR1",
                                     "PASSED",
                                     MYVAR1);

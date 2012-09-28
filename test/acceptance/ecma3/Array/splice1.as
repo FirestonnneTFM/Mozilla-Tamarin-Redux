@@ -1,18 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-    var VERSION = 'no version';
-    startTest();
-    var TITLE = 'String:splice 1';
+//     var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+//     var VERSION = 'no version';
+//     var TITLE = 'String:splice 1';
     var BUGNUMBER="123795";
 
-    writeHeaderToLog('Executing script: splice1.js');
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -94,13 +91,12 @@ function getTestCases() {
                         " expected spliced: " + String(expectedSpliced) + "\n" +
                         "   actual removed: " + String(actualRemoved) + "\n" +
                         " expected removed: " + String(expectedRemoved) + "\n";
-                    writeHeaderToLog(errorMessage);
                     reason = reason + errorMessage;
                     passed = false;
                 }
             }
         }
-        var testcase = new TestCase( SECTION, testname, true, passed);
+        var testcase = Assert.expectEq(  testname, true, passed);
         if (!passed)
             testcase.reason = reason;
         return testcase;

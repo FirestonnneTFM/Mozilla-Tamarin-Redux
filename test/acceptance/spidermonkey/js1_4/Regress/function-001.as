@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'function-001.js';
 
@@ -18,29 +19,26 @@ gTestfile = 'function-001.js';
  *  Author:             christine@netscape.com
  *  Date:               11 August 1998
  */
-var SECTION = "function-001.js";
-var VERSION = "JS1_4";
-var TITLE   = "Regression test case for 325843";
+// var SECTION = "function-001.js";
+// var VERSION = "JS1_4";
+// var TITLE   = "Regression test case for 325843";
 var BUGNUMBER="3258435";
-startTest();  var testscases=[]; var index=0;
 
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function f2( a ) { var a, b; };
 
-testcases[index++] = new TestCase(
-  SECTION,
+Assert.expectEq(
+    
   "typeof f2",
   "function",
   typeof f2 );
 
 // force a function decompilation
 
-testcases[index++] = new TestCase(
-  SECTION,
+Assert.expectEq(
+    
   "typeof f2.toString()",
   "string",
   typeof f2.toString() );
 
-test();
 

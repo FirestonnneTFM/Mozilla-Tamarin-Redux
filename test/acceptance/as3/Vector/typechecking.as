@@ -1,18 +1,18 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 /**
    File Name:    typechecking.as
    Description:
    verify runtime error when set or add mismatched types.
    *
    */
-var SECTION="";
-var VERSION = "ECMA_4";
+// var SECTION="";
+// var VERSION = "ECMA_4";
 
-startTest();
 
-writeHeaderToLog( " Vector.typechecking");
 
 // untyped
 var vs1=new Vector.<String>();
@@ -27,10 +27,10 @@ try {
   err1=e.toString();
 }
 
-AddTestCase(
+Assert.expectEq(
         "assign vector variable to mismatched builtin type, throws runtime error",
         "TypeError: Error #1034",
-        parseError(err1,"TypeError: Error #1034".length));
+        Utils.parseError(err1,"TypeError: Error #1034".length));
 
 class A { }
 class B extends A { }
@@ -43,13 +43,13 @@ try {
 } catch (e) {
   err3=e.toString();
 }
-AddTestCase(
+Assert.expectEq(
         "assign vector variable to mismatched types, throws runtime error",
         "TypeError: Error #1034",
-        parseError(err3,"TypeError: Error #1034".length));
+        Utils.parseError(err3,"TypeError: Error #1034".length));
 
 
-AddTestCase(
+Assert.expectEq(
         "push inherited type into Vector is allowed",
         2,
         v2.push(new A(),new B()));
@@ -60,19 +60,19 @@ try {
 } catch (e) {
   err4=e.toString();
 }
-AddTestCase(
+Assert.expectEq(
         "push wrong type into Vector, throws runtime error",
         "TypeError: Error #1034",
-        parseError(err4,"TypeError: Error #1034".length));
+        Utils.parseError(err4,"TypeError: Error #1034".length));
 
 var v4:Vector.<A>=new Vector.<A>();
 
-AddTestCase(
+Assert.expectEq(
         "unshift inherited types is allowed",
         2,
         v4.unshift(new A(),new B()));
 
-AddTestCase(
+Assert.expectEq(
         "unshift inherited types is allowed, verify toString",
         "[object A],[object B]",
         v4.toString());
@@ -84,16 +84,16 @@ try {
 } catch (e) {
  err5=e.toString();
 }
-AddTestCase(
+Assert.expectEq(
         "unshift wrong type into Vector, throws runtime error",
         "TypeError: Error #1034",
-        parseError(err5,"TypeError: Error #1034".length));
+        Utils.parseError(err5,"TypeError: Error #1034".length));
 
 var v6:Vector.<A>=new Vector.<A>();
 v6.push(new A(),new A());
 var v6a:Vector.<B>=new Vector.<B>();
 v6a.push(new B(),new B());
-AddTestCase(
+Assert.expectEq(
         "concat inherited types returns correct vector",
         "[object A],[object A],[object B],[object B]",
         v6.concat(v6a).toString());
@@ -106,10 +106,10 @@ try {
 } catch (e) {
   err7=e.toString();
 }
-AddTestCase(
+Assert.expectEq(
         "vector concat throws runtime error",
         "TypeError: Error #1034",
-        parseError(err7,"TypeError: Error #1034".length));
+        Utils.parseError(err7,"TypeError: Error #1034".length));
 
 var v8:Vector.<A>=new Vector.<A>();
 var err8="no error";
@@ -118,9 +118,8 @@ try {
 } catch(e) {
   err8=e.toString();
 }
-AddTestCase(
+Assert.expectEq(
         "vector assignment on incorrect type throws runtime error",
         "TypeError: Error #1034",
-        parseError(err8,"TypeError: Error #1034".length));
+        Utils.parseError(err8,"TypeError: Error #1034".length));
 
-test();

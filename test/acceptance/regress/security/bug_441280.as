@@ -4,12 +4,11 @@
 
 import avmplus.Domain
 import flash.utils.ByteArray
+import com.adobe.test.Assert;
 
 var section = "RuntimeErrors"
-var VERSION = "as3"
-startTest()
-var TITLE = "test for exception Final methods cannot be overwritten"
-writeHeaderToLog( SECTION + " "+ TITLE )
+// var VERSION = "as3"
+// var TITLE = "test for exception Final methods cannot be overwritten"
 
 /* asc will detect the error as a compiler error, so the testcase was generated
  *  with esc, here is the source:
@@ -39,10 +38,9 @@ if (err.length>21 && err.substring(0,24)=="VerifyError: Error #1053") {
     err=err.substring(0,24);
 }
 
-AddTestCase(
+Assert.expectEq(
     "Final methods should throw a Verifier error if they are overriden",
     "VerifyError: Error #1053",
     err
 );
 
-test();

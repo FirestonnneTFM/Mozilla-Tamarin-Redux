@@ -4,12 +4,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var SECTION = "6.3.4";
-var VERSION = "AS3";
-var TITLE   = "The numeric identity operator +";
+// var SECTION = "6.3.4";
+// var VERSION = "AS3";
+// var TITLE   = "The numeric identity operator +";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 // https://bugzilla.mozilla.org/show_bug.cgi?id=698367
 // Unary operators do not handle valueOf conversion returning non-Number on
@@ -24,4 +22,3 @@ D.prototype.valueOf = function () { return float(-3); };
 var d:D = new D;  // It's important that the :D is here
 AddStrictTestCase("unary plus via valueOf negative float", float(-3), +d);
 
-test();

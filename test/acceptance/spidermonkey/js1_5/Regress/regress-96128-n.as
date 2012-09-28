@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  * Date: 29 Aug 2001
@@ -44,8 +44,8 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
 
   // we expect this to fail (exit code 3), but NOT crash. -
   try {
@@ -53,10 +53,9 @@ function addtestcases()
   } catch (e) {
     expect = 'Error: Error #1023'; //: Stack overflow occurred.'
     actual = e.toString().substr(0,18);
-    AddTestCase(summary, expect, actual)
+    Assert.expectEq(summary, expect, actual)
   }
 
 
 }
 
-test();

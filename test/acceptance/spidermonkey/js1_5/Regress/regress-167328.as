@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-167328.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Normal error reporting code should fill Error object properties';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus(summary);
+//printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
 expect = 'TypeError: Error #1050'; // TypeError: Error #1050: Cannot convert Object to primitive.
 try {
@@ -27,6 +27,5 @@ try {
 } catch(e) {
     actual = e.toString().substr(0, 22);
 }
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
  
- var SECTION = "FunctionAccessors";
- var VERSION = "AS3";
- var TITLE   = "Function Accessors";
+//  var SECTION = "FunctionAccessors";
+//  var VERSION = "AS3";
+//  var TITLE   = "Function Accessors";
  var BUGNUMBER = "106381";
  
-startTest();
 
 class A
 {
@@ -41,18 +41,17 @@ try{
 } catch (e) {
     res = "exception";
 } finally {
-    AddTestCase("Getter calling super", "no exception", res);
+    Assert.expectEq("Getter calling super", "no exception", res);
 }
 
 try{
     var res = "not run";
     b.v = 1;
     res = "no exception";
-    AddTestCase("Setting value whose getter calls super", 2, b.v);
+    Assert.expectEq("Setting value whose getter calls super", 2, b.v);
 } catch (e) {
     res = "exception";
 } finally {
-    AddTestCase("Infinite recursion getter calling super", "no exception", res);
+    Assert.expectEq("Infinite recursion getter calling super", "no exception", res);
 }
 
-test();

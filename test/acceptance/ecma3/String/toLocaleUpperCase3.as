@@ -1,17 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "15.5.4.19";
-    var VERSION = "ECMA_1";
+//     var SECTION = "15.5.4.19";
+//     var VERSION = "ECMA_1";
 
-    startTest();
-    var TITLE   = "String.prototype.toLocaleUpperCase()";
+//     var TITLE   = "String.prototype.toLocaleUpperCase()";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -22,13 +20,13 @@ function getTestCases() {
     for ( var i = 0x10A0; i <= 0x10FF; i++ ) {
         var U = new Unicode( i );
 /*
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                         "var s = new String( String.fromCharCode("+i+") ); s.toLocaleUpperCase()",
                                         String.fromCharCode(U.upper),
                                         (s = new String( String.fromCharCode("+i+ ) ), s.toLocaleUpperCase()") );
 */
     s = new String( String.fromCharCode(i) );
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                         "var s = new String( String.fromCharCode("+i+") ); s.toLocaleUpperCase().charCodeAt(0)",
                                         U.upper,
                                         s.toLocaleUpperCase().charCodeAt(0));
@@ -39,12 +37,12 @@ function getTestCases() {
     // Range: U+FF00 to U+FFEF
     for ( var i = 0xFF00; i <= 0xFFEF; i++ ) {
     s = new String( String.fromCharCode(i));
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                         "var s = new String( String.fromCharCode('+i+') ); s.toLocaleUpperCase()",
                                         (u = new Unicode( i ), String.fromCharCode(u.upper) ),
                                         (s.toLocaleUpperCase()) );
     s = new String( String.fromCharCode(i) );
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                         "var s = new String( String.fromCharCode('+i+') ); s.toLocaleUpperCase().charCodeAt(0)",
                                         (u = new Unicode( i ), u.upper ),
                                         (s.toLocaleUpperCase().charCodeAt(0)) );
@@ -55,12 +53,12 @@ function getTestCases() {
 
     for ( var i = 0x3040; i <= 0x309F; i++ ) {
     s = new String( String.fromCharCode(i) );
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                         "var s = new String( String.fromCharCode("+i+") ); s.toLocaleUpperCase()",
                                         (u = new Unicode( i ), String.fromCharCode(u.upper) ),
                                         (s.toLocaleUpperCase()) );
     s = new String( String.fromCharCode(i) );
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                         "var s = new String( String.fromCharCode("+i+") ); s.toLocaleUpperCase().charCodeAt(0)",
                                         (u = new Unicode( i ), u.upper ),
                                         (s.toLocaleUpperCase().charCodeAt(0)) );

@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 04 October 2001
  *
@@ -15,15 +16,12 @@
  */
 //-----------------------------------------------------------------------------
 
-var SECTION = "eregress_103087.as";
-var VERSION = "";
-var TITLE   = "Testing that we don't crash on any of these regexps -";
-var bug = "103087";
+// var SECTION = "eregress_103087.as";
+// var VERSION = "";
+// var TITLE   = "Testing that we don't crash on any of these regexps -";
+// var bug = "103087";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -111,7 +109,7 @@ function getTestCases() {
     for (var i=0; i<rePatterns.length; i++)
     {
         var thisError = "no error";
-        status = inSection(i);
+     //    status = inSection(i);
         re = new RegExp(rePatterns[i]);
 
         try {
@@ -121,7 +119,7 @@ function getTestCases() {
             printStatus("Crash on regexp " + rePatterns[i]);
             thisError = "error";
         } finally {
-            array[item++] = new TestCase(SECTION, status, "no error", thisError);
+            array[item++] = Assert.expectEq( "Error", "no error", thisError);
         }
     }
 

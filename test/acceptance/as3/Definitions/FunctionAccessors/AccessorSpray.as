@@ -2474,10 +2474,11 @@ import AccessorSpray.UntypedGetterSpray
 import AccessorSpray.UintGetterSpray
 import AccessorSpray.UntypedSetterSpray
 import AccessorSpray.UintSetterSpray
+import com.adobe.test.Assert;
 
-var SECTION = "FunctionAccessors";
-var VERSION = "AS3";
-var TITLE   = "AccessorSpray version";
+// var SECTION = "FunctionAccessors";
+// var VERSION = "AS3";
+// var TITLE   = "AccessorSpray version";
 var BUGNUMBER = "682280";
 
 function AllUntypedGettersMatch() {
@@ -6802,11 +6803,9 @@ function AllUintSettersMatch() {
     return allMatch;
 }
 
-startTest();
 
-AddTestCase("untyped getter spray", true, AllUntypedGettersMatch());
-AddTestCase("uint getter spray", true, AllUintGettersMatch());
-AddTestCase("untyped setter spray", true, AllUntypedSettersMatch());
-AddTestCase("uint setter spray", true, AllUintSettersMatch());
+Assert.expectEq("untyped getter spray", true, AllUntypedGettersMatch());
+Assert.expectEq("uint getter spray", true, AllUintGettersMatch());
+Assert.expectEq("untyped setter spray", true, AllUntypedSettersMatch());
+Assert.expectEq("uint setter spray", true, AllUintSettersMatch());
 
-test();

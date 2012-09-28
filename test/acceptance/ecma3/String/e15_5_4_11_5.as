@@ -1,36 +1,34 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "15.5.4.11-5";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "String.prototype.toLowerCase()";
+//     var SECTION = "15.5.4.11-5";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "String.prototype.toLowerCase()";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
     var item = 0;
 
-    array[item++] = new TestCase( SECTION,  "String.prototype.toLowerCase.length",        0,          String.prototype.toLowerCase.length );
-    array[item++] = new TestCase( SECTION,  "delete String.prototype.toLowerCase.length", false,      delete String.prototype.toLowerCase.length );
-    array[item++] = new TestCase( SECTION,  "delete String.prototype.toLowerCase.length; String.prototype.toLowerCase.length", 0,      (delete String.prototype.toLowerCase.length, String.prototype.toLowerCase.length) );
+    array[item++] = Assert.expectEq(   "String.prototype.toLowerCase.length",        0,          String.prototype.toLowerCase.length );
+    array[item++] = Assert.expectEq(   "delete String.prototype.toLowerCase.length", false,      delete String.prototype.toLowerCase.length );
+    array[item++] = Assert.expectEq(   "delete String.prototype.toLowerCase.length; String.prototype.toLowerCase.length", 0,      (delete String.prototype.toLowerCase.length, String.prototype.toLowerCase.length) );
 
     // Cyrillic (part)
     // Range: U+0400 to U+04FF
     for ( var i = 0x0400; i <= 0x047F; i++ ) {
         var U = new Unicode( i );
 /*
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                         "var s = new String( String.fromCharCode("+i+") ); s.toLowerCase()",
                                         String.fromCharCode(U.lower),
                                         (s = new String( String.fromCharCode("+i+ ) ), s.toLowerCase()") );
 */
-        array[item++] = new TestCase(   SECTION,
+        array[item++] = Assert.expectEq(   
                                         "var s = new String( String.fromCharCode("+i+") ); s.toLowerCase().charCodeAt(0)",
                                         U.lower,
                                         (s = new String( String.fromCharCode(i) ), s.toLowerCase().charCodeAt(0) ) );

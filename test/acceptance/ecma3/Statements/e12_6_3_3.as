@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "12.6.3-3";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "The for..in statment";
+//     var SECTION = "12.6.3-3";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "The for..in statment";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -32,7 +30,7 @@ function getTestCases() {
             break;
         }
     }
-    array[item++] = new TestCase( SECTION,
+    array[item++] = Assert.expectEq( 
         "for ( o.a in [1,2,3] ) { result += String( [1,2,3][o.a] ); } result",
         "PASSED",
         result2 );

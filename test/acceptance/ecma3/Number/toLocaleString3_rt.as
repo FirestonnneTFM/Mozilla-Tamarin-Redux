@@ -1,13 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "15.7.4.3";
-    var VERSION = "ECMA_1";
-    startTest();
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "15.7.4.3";
+//     var VERSION = "ECMA_1";
     var testcases = getTestCases();
 
-    writeHeaderToLog( SECTION + " Number.prototype.toLocaleString()");
-    test();
 
 function getTestCases() {
     var array:Array = new Array();
@@ -20,13 +19,14 @@ function getTestCases() {
     } catch(e:ReferenceError) {
         thisError = e.toString();
     } finally {
-        var expectedError = 1056;
+        var expectedError=1037;
+        /*var expectedError = 1056;
         if (as3Enabled) {
             expectedError = 1037;
-        }
-        array[item++] = new TestCase(SECTION,  "o = new String(); o.toString = Number.prototype.toString; o.toLocaleString()",
-                                            REFERENCEERROR+expectedError,
-                                            referenceError(thisError) );
+        }*/
+        array[item++] = Assert.expectEq(  "o = new String(); o.toString = Number.prototype.toString; o.toLocaleString()",
+                                            Utils.REFERENCEERROR+expectedError,
+                                            Utils.referenceError(thisError) );
     }
     return ( array );
 }

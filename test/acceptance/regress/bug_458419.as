@@ -3,12 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package
 {
-    var SECTION="";
-    var VERSION = "";
+
+import com.adobe.test.Assert;
+//     var SECTION="";
+//     var VERSION = "";
     
-    startTest();
     
-    writeHeaderToLog("Bug 458419");
 
 
     function f():String
@@ -24,11 +24,10 @@ package
         return ans
     }
     
-    AddTestCase("hasAtomProperty for Vector should not throw an exception",
+    Assert.expectEq("hasAtomProperty for Vector should not throw an exception",
                 "5.5 not in v",
                 f()
                 );
     
-    test();
     
 }

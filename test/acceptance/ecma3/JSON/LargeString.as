@@ -4,17 +4,15 @@
 
 package {
     import flash.utils.*;
+import com.adobe.test.Assert;
 
-    var SECTION = "15.2";
-    var VERSION = "ECMA_5";
-    startTest();
-    var TITLE   = "JSON AS3 large String";
+//     var SECTION = "15.2";
+//     var VERSION = "ECMA_5";
+//     var TITLE   = "JSON AS3 large String";
 
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
     
 
-    startTest();
 
     var string100:String='0123456790abcdefghijklmnopqstuABCDEFGHIJKLMNOPQRSTU01234567890123456789abcdefghijklmnopqrstuvwxyzAB';
     var largeString='';
@@ -22,8 +20,7 @@ package {
     for (i=0;i<200;i++) {
         largeString+=string100;
     }
-    AddTestCase("stringify a largeString",true,'"'+largeString+'"'==JSON.stringify(largeString));
+    Assert.expectEq("stringify a largeString",true,'"'+largeString+'"'==JSON.stringify(largeString));
 
-    test();
 
 }

@@ -3,6 +3,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 // Bugzilla 706402
 // -- begin test
@@ -15,14 +16,11 @@ package
 }
 // -- end test
 
-var SECTION = "ASC";
-var VERSION = "AS3";
-var TITLE   = "ASC rejects null as a default value for a namespace parameter.";
+// var SECTION = "ASC";
+// var VERSION = "AS3";
+// var TITLE   = "ASC rejects null as a default value for a namespace parameter.";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
-AddTestCase("Trivially true", true, true);
+Assert.expectEq("Trivially true", true, true);
 
-test();
 

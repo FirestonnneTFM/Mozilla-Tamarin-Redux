@@ -26,12 +26,10 @@ package
     }
 }
 
-var SECTION = "6.12";
-var VERSION = "AS3";
-var TITLE   = "The assignment operators augmented by float values";
+// var SECTION = "6.12";
+// var VERSION = "AS3";
+// var TITLE   = "The assignment operators augmented by float values";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 AddStrictTestCase("static class float 1", 1f, MyFloatClass.pubclassvar1);
 AddStrictTestCase("static class float 1f", 1f, MyFloatClass.pubclassvar2);
@@ -70,4 +68,3 @@ AddStrictTestCase("float var set as another float var", 1f, var9);
 
 
 
-test();

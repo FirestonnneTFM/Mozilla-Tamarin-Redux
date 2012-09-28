@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-281487.js';
 //-----------------------------------------------------------------------------
@@ -12,13 +12,13 @@ var summary = 'JSOP_ARGDEC assertion when tracing';
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
-printStatus('This test requires a DEBUG build and will cause a false ' +
-            'failure to be reported by jsDriver.pl since the tracing output ' +
-            'will contain the string FAILED.');
-printStatus('This test only fails if it causes a crash.');
+//printStatus('This test requires a DEBUG build and will cause a false ' +
+            //'failure to be reported by jsDriver.pl since the tracing output ' +
+            //'will contain the string FAILED.');
+//printStatus('This test only fails if it causes a crash.');
 
 if (typeof tracing == 'function')
 {
@@ -36,6 +36,5 @@ if (typeof tracing == 'function')
 {
   tracing(false);
 }
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

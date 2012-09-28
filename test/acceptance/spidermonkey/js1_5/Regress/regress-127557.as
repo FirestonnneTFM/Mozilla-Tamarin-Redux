@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -47,7 +47,7 @@ function f(x,y)
 
 if (typeof clone == 'function')
 {
-  status = inSection(1);
+  //status = inSection(1);
   var g = clone(f);
   g.prototype = new Object;
   var h = g(5,6);
@@ -57,7 +57,7 @@ if (typeof clone == 'function')
 }
 else
 {
-  AddTestCase('shell only test requires clone()', 'Test not run', 'Test not run');
+  Assert.expectEq('shell only test requires clone()', 'Test not run', 'Test not run');
 }
 
 
@@ -80,16 +80,15 @@ function addThis()
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus(summary);
+  //printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
 
-test();

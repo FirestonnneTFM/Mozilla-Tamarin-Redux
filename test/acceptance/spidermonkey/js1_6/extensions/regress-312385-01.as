@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 var gTestfile = 'regress-312385-01.js';
 //-----------------------------------------------------------------------------
 var BUGNUMBER = 312385;
@@ -52,8 +52,8 @@ var generics = {
     ]
 };
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 for (var c in generics)
 {
@@ -122,4 +122,3 @@ function comparelr(lhs, rhs)
 function noop()
 {
 }
-test();

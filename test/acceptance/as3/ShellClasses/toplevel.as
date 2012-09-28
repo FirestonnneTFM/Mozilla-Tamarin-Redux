@@ -4,55 +4,54 @@
 
     import avmplus.File
 
-    var SECTION = "toplevel";
-    var VERSION = "as3";
-    startTest();
-    var TITLE   = "test toplevel classes";
+//     var SECTION = "toplevel";
+//     var VERSION = "as3";
+//     var TITLE   = "test toplevel classes";
 
     import avmplus.System
     import flash.system.Capabilities
 
-    writeHeaderToLog( SECTION + " "+ TITLE );
+import com.adobe.test.Assert;
 
 
-    AddTestCase("queue a gc collection",
+    Assert.expectEq("queue a gc collection",
       void,
       System.queueCollection());
 
-    AddTestCase("playerType is AVMPlus",
+    Assert.expectEq("playerType is AVMPlus",
       "AVMPlus",
       Capabilities.playerType);
 
-    AddTestCase("isDebugger is true/false",
+    Assert.expectEq("isDebugger is true/false",
       true,
       Capabilities.isDebugger==true || Capabilities.isDebugger==false
     );
 
-    AddTestCase("System getAvmplusVersion",
+    Assert.expectEq("System getAvmplusVersion",
       true,
       System.getAvmplusVersion().length>0);
 
-    AddTestCase("System argv",
+    Assert.expectEq("System argv",
       0,
       System.argv.length);
 
-    AddTestCase("System.isDebugger",
+    Assert.expectEq("System.isDebugger",
       true,
       System.isDebugger()==true || System.isDebugger()==false);
 
-    AddTestCase("System.freeMemory >=0",
+    Assert.expectEq("System.freeMemory >=0",
       true,
       System.freeMemory>=0);
 
-    AddTestCase("System.freeMemory <= System.totalMemory",
+    Assert.expectEq("System.freeMemory <= System.totalMemory",
       true,
       System.freeMemory<=System.totalMemory);
 
-    AddTestCase("System.totalMemory >0",
+    Assert.expectEq("System.totalMemory >0",
       true,
       System.totalMemory>0);
 
-    AddTestCase("System.privateMemory >0",
+    Assert.expectEq("System.privateMemory >0",
       true,
       System.privateMemory>0);
 
@@ -67,7 +66,7 @@
     } catch (e) {
         err=e.toString();
     }
-    AddTestCase("System.exec no params throws exception",
+    Assert.expectEq("System.exec no params throws exception",
       "ArgumentError: Error #1063",
       err.substring(0,26));
 
@@ -77,7 +76,7 @@
       if (ct==1000000) break;
     }
     var time=getTimer();
-    AddTestCase("System getTimer>0",
+    Assert.expectEq("System getTimer>0",
       true,
       time>0);
     print("metric System.getTimer "+getTimer());
@@ -112,12 +111,11 @@
             return true;
     }
     
-    AddTestCase("System getTimer bug 407894",
+    Assert.expectEq("System getTimer bug 407894",
       true,
       notPower2());
 
 
-    test();
 
     
     System.trace(["trace message ln cr \n\r"]);

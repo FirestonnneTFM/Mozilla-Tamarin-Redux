@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'do_while.js';
 
@@ -13,13 +14,10 @@ gTestfile = 'do_while.js';
    Date:         Fri Feb 13 09:58:28 PST 1998
 */
 
-var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
-var VERSION = 'no version';
-startTest();  var testscases=[]; var index=0;
-var TITLE = 'statements: do_while';
+// var SECTION = 'As described in Netscape doc "Whats new in JavaScript 1.2"';
+// var VERSION = 'no version';
+// var TITLE = 'statements: do_while';
 
-writeHeaderToLog('Executing script: do_while.js');
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var done = false;
 var x = 0;
@@ -28,9 +26,8 @@ do
   if (x++ == 3) done = true;
 } while (!done);
 
-testcases[index++] = new TestCase( SECTION, "do_while ",
+Assert.expectEq(  "do_while ",
           4, x);
 
 //load('d:/javascript/tests/output/statements/do_while.js')
-test();
 

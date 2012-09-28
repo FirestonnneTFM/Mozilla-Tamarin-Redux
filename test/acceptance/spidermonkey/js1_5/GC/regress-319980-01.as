@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-319980-01.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'GC not called during non-fatal out of memory';
 var actual = '';
 var expect = 'Normal Exit';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 print ('This test should never fail explicitly. ' +
        'You must view the memory usage during the test. ' +
        'This test fails if memory usage for each subtest grows');
@@ -30,7 +30,7 @@ if (typeof setTimeout == 'undefined')
   setTimeout = function() {};
   clearTimeout = function() {};
   actual = 'Normal Exit';
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 }
 else
 {
@@ -52,7 +52,7 @@ function testFuncWatcher()
   if (currTest >= maxTests)
   {
     actual = 'Normal Exit';
-    AddTestCase(summary, expect, actual);
+    Assert.expectEq(summary, expect, actual);
     printStatus('Test Completed');
     gDelayTestDriverEnd = false;
     jsTestDriverEnd();
@@ -128,4 +128,3 @@ function testFunc()
 
 
 
-test();

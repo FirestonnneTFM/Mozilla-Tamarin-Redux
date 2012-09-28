@@ -20,13 +20,12 @@ import flash.utils.ByteArray;
 import flash.utils.CompressionAlgorithm;
 
 import avmplus.File;
+import com.adobe.test.Assert;
 
-var SECTION = "ByteArrayWithLzmaThirdParty";
-var VERSION = "as3";
-startTest();
-var TITLE   = "test ByteArray class with lzma inputs generated via LZMA.jar";
+// var SECTION = "ByteArrayWithLzmaThirdParty";
+// var VERSION = "as3";
+// var TITLE   = "test ByteArray class with lzma inputs generated via LZMA.jar";
 
-writeHeaderToLog( SECTION + " "+ TITLE );
 
 // Bugzilla 733051: ByteArrayLzma callCompress tests are doing
 // round-trips through compress and uncompress; this test is checking
@@ -45,13 +44,12 @@ function testThirdPartyLzmaInputs()
 
     compressedHello.uncompress(CompressionAlgorithm.LZMA);
     var helloString2:String = compressedHello.readUTFBytes(compressedHello.length);
-    AddTestCase("Correct lzma uncompression on hello", helloString, helloString2);
+    Assert.expectEq("Correct lzma uncompression on hello", helloString, helloString2);
 
     compressedSmall.uncompress(CompressionAlgorithm.LZMA);
     var smallString2:String = compressedSmall.readUTFBytes(compressedSmall.length);
-    AddTestCase("Correct lzma uncompression on small", smallString, smallString2);
+    Assert.expectEq("Correct lzma uncompression on small", smallString, smallString2);
 }
 
 testThirdPartyLzmaInputs();
 
-test();

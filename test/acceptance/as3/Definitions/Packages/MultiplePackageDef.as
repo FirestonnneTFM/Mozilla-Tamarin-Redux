@@ -64,25 +64,24 @@ import testclassdefinition.*;
 import testnamespacedefinition.*;
 import foo.*;
 import bar.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var abc = new testclass();
 var def = new testinterface();
 var c = new myClass();
-AddTestCase( "multiple package definitions import", "PASSED", testimport );
-AddTestCase( "multiple package definitions function", "this is a function in the package", testfunction() );
-AddTestCase( "multiple package definitions interface", "this is an interface definition", def.testinterfacefunc() );
-AddTestCase( "multiple package definitions class", "this is a class definition", abc.testclassfunc());
-AddTestCase( "multiple package definitions variable 1", "PASSED", a );
-AddTestCase( "multiple package definitions variable 2", "PASSED", b );
-AddTestCase( "multiple package definitions ns variable", "cheese", c.getCheese());
+Assert.expectEq( "multiple package definitions import", "PASSED", testimport );
+Assert.expectEq( "multiple package definitions function", "this is a function in the package", testfunction() );
+Assert.expectEq( "multiple package definitions interface", "this is an interface definition", def.testinterfacefunc() );
+Assert.expectEq( "multiple package definitions class", "this is a class definition", abc.testclassfunc());
+Assert.expectEq( "multiple package definitions variable 1", "PASSED", a );
+Assert.expectEq( "multiple package definitions variable 2", "PASSED", b );
+Assert.expectEq( "multiple package definitions ns variable", "cheese", c.getCheese());
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

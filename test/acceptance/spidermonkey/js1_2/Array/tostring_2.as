@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'tostring_2.js';
 
@@ -15,29 +16,26 @@ gTestfile = 'tostring_2.js';
    Date:               15 June 1998
 */
 
-var SECTION = "Array/tostring_2.js";
-var VERSION = "JS_12";
-startTest();  var testscases=[]; var index=0;
-var TITLE   = "Array.toString";
+// var SECTION = "Array/tostring_2.js";
+// var VERSION = "JS_12";
+// var TITLE   = "Array.toString";
 
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var a = [];
 
 
-testcases[index++] = new TestCase ( SECTION,
+Assert.expectEq ( 
 	       "a.toString()",
 	       "",
 	       a.toString() );
 
-testcases[index++] = new TestCase ( SECTION,
+Assert.expectEq ( 
 	       "String( a )",
 	       "",
 	       String( a ) );
 
-testcases[index++] = new TestCase ( SECTION,
+Assert.expectEq ( 
 	       "a +''",
 	       "",
 	       a+"" );
 
-test();

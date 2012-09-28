@@ -1,18 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = '12.13';
-    var VERSION = 'no version';
-    startTest();
-    var TITLE = 'Statement:throw';
+//     var SECTION = '12.13';
+//     var VERSION = 'no version';
+//     var TITLE = 'Statement:throw';
 
-    writeHeaderToLog('Executing script: throw.as');
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -36,7 +33,7 @@ function getTestCases() {
 }
             
     
-    array[item++] = new TestCase( SECTION, "throw t", "Error 1", t);
+    array[item++] = Assert.expectEq(  "throw t", "Error 1", t);
 
        var z = 2;
        var Exception_Value = "no error";
@@ -59,7 +56,7 @@ function getTestCases() {
        }catch(e){
            thisError=e.toString();
        }finally{
-      array[item++] = new TestCase( SECTION, "throw t", "Error!z is equal to 2", thisError);
+      array[item++] = Assert.expectEq(  "throw t", "Error!z is equal to 2", thisError);
        }
 
     return array;

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-280769-2.js';
 //-----------------------------------------------------------------------------
@@ -14,10 +14,10 @@ var expect = 'No Crash';
 var status;
 var result;
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
-
-status = summary + ' ' + inSection(1) + ' (new RegExp("0|...|99999") ';
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
+  
+//status = summary + ' ' + inSection(1) + ' (new RegExp("0|...|99999") ';
 
 try
 {
@@ -37,9 +37,8 @@ catch(ex)
 
 print('Done: ' + actual);
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
 
 
 
-test();

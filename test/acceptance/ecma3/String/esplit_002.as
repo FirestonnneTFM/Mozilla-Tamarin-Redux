@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 /*
  * Since regular expressions have been part of JavaScript since 1.2, there
@@ -19,11 +20,10 @@
  *
  */
 
-    var SECTION = "ecma_2/String/split-002.js";
-    var VERSION = "ECMA_2";
-    var TITLE   = "String.prototype.split( regexp, [,limit] )";
+//     var SECTION = "ecma_2/String/split-002.js";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "String.prototype.split( regexp, [,limit] )";
 
-    startTest();
 
     // the separator is not supplied
     // separator is undefined
@@ -93,13 +93,12 @@
 
     Number.prototype.split = origNumberSplit;
 
-    test();
 
 function CompareSplit( string, separator ) {
     split_1 = string.split( separator );
     split_2 = string_split( string, separator );
 
-    AddTestCase(
+    Assert.expectEq(
         "( " + string +".split(" + separator + ") ).length" ,
         split_2.length,
         split_1.length );
@@ -108,7 +107,7 @@ function CompareSplit( string, separator ) {
                     split_1.length : split_2.length;
 
     for ( var split_item = 0; split_item < limit; split_item++ ) {
-        AddTestCase(
+        Assert.expectEq(
             string + ".split(" + separator + ")["+split_item+"]",
             split_2[split_item],
             split_1[split_item] );
@@ -119,7 +118,7 @@ function CompareSplitWithLimit( string, separator, splitlimit ) {
     split_1 = string.split( separator, splitlimit );
     split_2 = string_split( string, separator, splitlimit );
 
-    AddTestCase(
+    Assert.expectEq(
         "( " + string +".split(" + separator + ", " + splitlimit+") ).length" ,
         split_2.length,
         split_1.length );
@@ -128,7 +127,7 @@ function CompareSplitWithLimit( string, separator, splitlimit ) {
                     split_1.length : split_2.length;
 
     for ( var split_item = 0; split_item < limit; split_item++ ) {
-        AddTestCase(
+        Assert.expectEq(
             string + ".split(" + separator  + ", " + splitlimit+")["+split_item+"]",
             split_2[split_item],
             split_1[split_item] );

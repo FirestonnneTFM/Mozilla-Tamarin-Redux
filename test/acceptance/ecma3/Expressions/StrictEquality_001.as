@@ -1,15 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "StrictEquality_001 - 11.9.6";
-    var VERSION = "ECMA_2";
-    var TITLE   =  "The strict equality operator ( === )";
+import com.adobe.test.Assert;
+//     var SECTION = "StrictEquality_001 - 11.9.6";
+//     var VERSION = "ECMA_2";
+//     var TITLE   =  "The strict equality operator ( === )";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
     
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -60,8 +58,8 @@ function getTestCases() {
 function StrictEquality( x, y, expect, array, item ) {
     result = ( x === y );
 
-    array[item] = new TestCase(
-        SECTION,
+    array[item] = Assert.expectEq(
+
         x +" === " + y,
         expect,
         result );

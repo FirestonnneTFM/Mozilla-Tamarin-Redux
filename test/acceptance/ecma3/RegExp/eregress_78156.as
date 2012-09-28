@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 06 February 2001
  *
@@ -13,15 +14,12 @@
  * across multiple lines, i.e. across '\n', '\r'.
  */
 //-------------------------------------------------------------------------------------------------
-var SECTION = "eregress_78156";
-var VERSION = "";
-var TITLE   = "Testing regular expressions with  ^, $, and the m flag -";
-var bug = "78156";
+// var SECTION = "eregress_78156";
+// var VERSION = "";
+// var TITLE   = "Testing regular expressions with  ^, $, and the m flag -";
+// var bug = "78156";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -39,30 +37,30 @@ var expectedmatch = '';
  */
 
 string = 'aaa\n789\r\nccc\r\n345';
-    status = inSection(1);
+ //    status = inSection(1);
     pattern = /^\d/gm;
     actualmatch = string.match(pattern);
     expectedmatch = ['7', '3'];
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-    status = inSection(2);
+ //    status = inSection(2);
     pattern = /\d$/gm;
     actualmatch = string.match(pattern);
     expectedmatch = ['9','5'];
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
 string = 'aaa\n789\r\nccc\r\nddd';
-    status = inSection(3);
+ //    status = inSection(3);
     pattern = /^\d/gm;
     actualmatch = string.match(pattern);
     expectedmatch = ['7'];
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
-    status = inSection(4);
+ //    status = inSection(4);
     pattern = /\d$/gm;
     actualmatch = string.match(pattern);
     expectedmatch = ['9'];
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
     return array;
 }

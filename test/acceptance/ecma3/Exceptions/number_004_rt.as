@@ -1,15 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "number-003";
-    var VERSION = "ECMA_4";
-    var TITLE   = "Exceptions for Number.toString()";
+    // TODO: REVIEW AS4 CONVERSION ISSUE 
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "number-003";
+//     var VERSION = "ECMA_4";
+//     var TITLE   = "Exceptions for Number.toString()";
 
-    startTest();
-    writeHeaderToLog( SECTION + " Number.prototype.toString()");
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -30,10 +30,10 @@ function getTestCases() {
         exception = e.toString();
     }
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+        // SECTION,
         "Assigning Number.prototype.toString as the toString of a String object " +
-        " (threw " + referenceError(exception) +")",
+        " (threw " + Utils.referenceError(exception) +")",
         expect,
         result );
 
@@ -48,10 +48,10 @@ function getTestCases() {
         exception = e1.toString();
     }
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+        //SECTION,
         "Assigning Number.prototype.toString as the toString of new Number() " +
-        " (threw " + referenceError(exception) +")",
+        " (threw " + Utils.referenceError(exception) +")",
         expect,
         result );
 
@@ -66,10 +66,10 @@ function getTestCases() {
         exception = e2.toString();
     }
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+        // SECTION,
         "Assigning Number.prototype.toString as the toString of new Number(4) " +
-        " (threw " + referenceError(exception) +")",
+        " (threw " + Utils.referenceError(exception) +")",
         expect,
         result );
 
@@ -84,10 +84,10 @@ function getTestCases() {
         exception = e3.toString();
     }
 
-    array[item++] = new TestCase(
-        SECTION,
+    array[item++] = Assert.expectEq(
+        // SECTION,
         "Assigning Number.prototype.toString as the toString of '4' " +
-        " (threw " + referenceError(exception) +")",
+        " (threw " + Utils.referenceError(exception) +")",
         expect,
         result );
 

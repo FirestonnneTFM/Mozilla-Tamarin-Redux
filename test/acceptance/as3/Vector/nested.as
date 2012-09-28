@@ -1,17 +1,16 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /**
    File Name:    nested.as
    Description:  tests nested Vectors: Vector.<Vector.<int>>
    *
    */
-var SECTION="";
-var VERSION = "ECMA_1";
+// var SECTION="";
+// var VERSION = "ECMA_1";
 
-startTest();
 
-writeHeaderToLog( " nested Vector");
 
 var v1:Vector.<Vector.<int>>=new Vector.<Vector.<int>>();
 var v2:Vector.<int>;
@@ -21,7 +20,7 @@ v2=new Vector.<int>;v2[0]=2;v2[1]=3;
 v1.push(v2);
 v2=new Vector.<int>;v2[0]=4;v2[1]=5;
 v1.push(v2);
-AddTestCase("push nested vector.<int>",
+Assert.expectEq("push nested vector.<int>",
             "0,1,2,3,4,5",
             v1.toString());
 
@@ -33,7 +32,7 @@ v4=new Vector.<String>;v4[0]='three';v4[1]='four';
 v3.push(v4);
 v4=new Vector.<String>;v4[0]='five';v4[1]='six';
 v3.push(v4);
-AddTestCase("push nested vector.<String>",
+Assert.expectEq("push nested vector.<String>",
             "one,two,three,four,five,six",
             v3.toString());
 
@@ -51,7 +50,7 @@ v7=new Vector.<int>();v7[0]=4;v7[1]=5;
 v6.push(v7);
 v5.push(v6);
 
-AddTestCase("push nested vector.<vector.<int>>",
+Assert.expectEq("push nested vector.<vector.<int>>",
             "0,1,2,3,4,5",
             v5.toString());
 
@@ -96,7 +95,7 @@ var five=new tree("five",six,seven);
 var four=new tree("four",five,undefined);
 var root=new tree("root",one,four);
 
-AddTestCase("test vector of custom classes",
+Assert.expectEq("test vector of custom classes",
            tree.printlist(tree.collect(root)).toString(),
            "root,one,two,three,four,five,six,seven");
 
@@ -121,12 +120,12 @@ for (var i=0; i<500; i++) {
     expectedStr += ">";
 }
 
-AddTestCase("Nested vector typecheck",
+Assert.expectEq("Nested vector typecheck",
             true,
             tempNestedVector is nestedVectorType
             );
 
-AddTestCase("Nested vector length",
+Assert.expectEq("Nested vector length",
             1,
             tempNestedVector.length
             );
@@ -135,16 +134,15 @@ AddTestCase("Nested vector length",
 expectedStr += "]";
 
 // Compare the end of the nestedVectorType.toString
-AddTestCase("500 Nested vectors",
+Assert.expectEq("500 Nested vectors",
             true,
             expectedStr == nestedVectorType.toString().substr(-501)
            );
 
 var deeplyNestedVector = new nestedVectorType();
 
-AddTestCase("Instantiate deeply nested vector",
+Assert.expectEq("Instantiate deeply nested vector",
             0,
             deeplyNestedVector.length
             );
 
-test();

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-303213.js';
 //-----------------------------------------------------------------------------
@@ -12,9 +12,9 @@ var summary = 'integer overflow in js';
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
-printStatus('This bug passes if no crash occurs');
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
+//printStatus('This bug passes if no crash occurs');
 
 
 try
@@ -43,8 +43,8 @@ try
 
   printStatus("done generating");
   var eov = escape(ov);
-  printStatus("done escape");
-  printStatus(eov);
+//printStatus("done escape");
+//printStatus(eov);
 }
 catch(ex)
 {
@@ -53,6 +53,5 @@ catch(ex)
   actual = ex + '';
 }
  
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

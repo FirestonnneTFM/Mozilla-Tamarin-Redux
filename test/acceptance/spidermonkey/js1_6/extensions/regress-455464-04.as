@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 var gTestfile = 'regress-455464-04.js';
 //-----------------------------------------------------------------------------
 var BUGNUMBER = 455464;
@@ -11,8 +11,8 @@ var summary = 'Do not assert with JIT, gczeal 2: !TRACE_RECORDER(cx) ^ (jumpTabl
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 if (typeof gczeal == 'undefined')
 {
@@ -29,5 +29,5 @@ else
   jit(false);
 }
 
-reportCompare(expect, actual, summary);
-test();
+//reportCompare(expect, actual, summary);
+Assert.expectEq(summary, expect, actual);

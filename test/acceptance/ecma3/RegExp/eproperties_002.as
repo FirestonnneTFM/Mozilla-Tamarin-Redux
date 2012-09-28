@@ -1,17 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
  //-----------------------------------------------------------------------------
-var SECTION = "RegExp/properties-002.js";
-var VERSION = "ECMA_2";
-var TITLE   = "Properties of RegExp Instances";
+// var SECTION = "RegExp/properties-002.js";
+// var VERSION = "ECMA_2";
+// var TITLE   = "Properties of RegExp Instances";
 var BUGNUMBER ="http://scopus/bugsplat/show_bug.cgi?id=346032";
 // ALSO SEE http://bugzilla.mozilla.org/show_bug.cgi?id=124339
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -67,60 +65,60 @@ function getTestCases() {
 
     function AddRegExpCases( re, s, g, i, m, l ){
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".toString == RegExp.prototype.toString",
                      true,
                      re.toString == RegExp.prototype.toString );
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".constructor == RegExp.prototype.constructor",
                      true,
                      re.constructor == RegExp.prototype.constructor );
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".compile == RegExp.prototype.compile",
                      true,
                      re.compile == RegExp.prototype.compile );
 
-        if (!as3Enabled) {
-            array[item++] = new TestCase(SECTION,
+        if (false) {
+            array[item++] = Assert.expectEq(
                          re + ".test == RegExp.prototype.test",
                          true,
                          re.test == RegExp.prototype.test );
     
-            array[item++] = new TestCase(SECTION,
+            array[item++] = Assert.expectEq(
                          re + ".exec == RegExp.prototype.exec",
                          true,
                          re.exec == RegExp.prototype.exec );
         }
         // properties
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".source",
                      s,
                      re.source );
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".toString()",
                      "/" + s +"/" + (g?"g":"") + (i?"i":"") +(m?"m":""),
                      re.toString() );
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".global",
                      g,
                      re.global );
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".ignoreCase",
                      i,
                      re.ignoreCase );
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".multiline",
                      m,
                      re.multiline);
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
                      re + ".lastIndex",
                      l,
                      re.lastIndex  );

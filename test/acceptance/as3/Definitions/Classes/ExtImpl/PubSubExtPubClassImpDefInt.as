@@ -3,15 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import PublicClassImpDefInt.*;
-var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript
-var TITLE   = "Public class implements default interface";       // Provide ECMA section title or a description
+import com.adobe.test.Assert;
+// var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS3";        // Version of ECMAScript or ActionScript
+// var TITLE   = "Public class implements default interface";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 /**
- * Calls to AddTestCase here. AddTestCase is a function that is defined
+ * Calls to Assert.expectEq here. Assert.expectEq is a function that is defined
  * in shell.js and takes three arguments:
  * - a string representation of what is being tested
  * - the expected result
@@ -21,7 +21,7 @@ startTest();                // leave this alone
  *
  * var helloWorld = "Hello World";
  *
- * AddTestCase(
+ * Assert.expectEq(
  * "var helloWorld = 'Hello World'",   // description of the test
  *  "Hello World",                     // expected result
  *  helloWorld );                      // actual result
@@ -35,15 +35,14 @@ var obj = new PublicsubClass();
 //use namespace ns;
 
 //Public class extends Public class implements a default interface with a default method
-//AddTestCase("Public class implements a default interface with a default method", "PASSED", //obj.getdeffunc());
+//Assert.expectEq("Public class implements a default interface with a default method", "PASSED", //obj.getdeffunc());
 
 //Public sub class extends Public class implements a default interface with a public method
-AddTestCase("Public sub class extends Public class implements a default interface with a public method", false, obj.pubFunc());
+Assert.expectEq("Public sub class extends Public class implements a default interface with a public method", false, obj.pubFunc());
 
 //Public class extends Public class implements a default interface with a namespace method
-AddTestCase("Public class implements a default interface with a namespace method", 4, obj.getnsFunc());
+Assert.expectEq("Public class implements a default interface with a namespace method", 4, obj.getnsFunc());
 
 ////////////////////////////////////////////////////////////////
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

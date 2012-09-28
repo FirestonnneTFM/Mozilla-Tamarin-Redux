@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 /*
  *
@@ -32,7 +32,7 @@ var expectedvalues = [];
  * To get a feel for this, suppose N were 3. Then the eval string is
  * 'actual = (((0)));' The expected value for this after eval() is 0.
  */
-status = inSection(1);
+//status = inSection(1);
 
 var sLeft = '((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((';
 sLeft += sLeft;
@@ -84,15 +84,14 @@ function addThis()
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus(summary);
+  //printBugNumber(BUGNUMBER);
+//printStatus(summary);
 
   for (var i=0; i<UBound; i++)
   {
-    AddTestCase(statusitems[i], expectedvalues[i], actualvalues[i]);
+    Assert.expectEq(statusitems[i], expectedvalues[i], actualvalues[i]);
   }
 
 
 }
 
-test();

@@ -1,15 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "test";       // provide a document reference (ie, ECMA section)
-var VERSION = "Clean AS2";  // Version of JavaScript or ECMA
-var TITLE   = "test";       // Provide ECMA section title or a description
+// var SECTION = "test";       // provide a document reference (ie, ECMA section)
+// var VERSION = "Clean AS2";  // Version of JavaScript or ECMA
+// var TITLE   = "test";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 var testcases = getTestCases();
-test();       // leave this alone.  this executes the test cases and
               // displays results.
 
 // ******************************************************
@@ -23,7 +22,7 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
     var MYVAR = "FAILED";
-    array[item++] = new TestCase(SECTION, "function(){ MYVAR='PASSED';})()", "PASSED", ((function() { MYVAR = "PASSED";})(), MYVAR) );
-    array[item++] = new TestCase(SECTION, "function(){ MYVAR='PASSED';})()", "PASSED", ((function(param1) { MYVAR = param1;})("PASSED"), MYVAR) );
+    array[item++] = Assert.expectEq( "function(){ MYVAR='PASSED';})()", "PASSED", ((function() { MYVAR = "PASSED";})(), MYVAR) );
+    array[item++] = Assert.expectEq( "function(){ MYVAR='PASSED';})()", "PASSED", ((function(param1) { MYVAR = param1;})("PASSED"), MYVAR) );
     return array;
 }

@@ -3,17 +3,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "apply_001";
-var VERSION = "";
-startTest();
+// var SECTION = "apply_001";
+// var VERSION = "";
 
-var TITLE = "Function.prototype.apply with very long argument lists";
+// var TITLE = "Function.prototype.apply with very long argument lists";
 
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var testcases = getTestCases();
-test();
 
 function getTestCases()
 {
@@ -40,7 +38,7 @@ function getTestCases()
         status = 'Test apply(bigarray) #' + i;
         actual = sum.apply(null, makeArray(i));
         expect = (i*(i+1))/2;
-        array.push(new TestCase(SECTION, status, expect, actual));
+        array.push(Assert.expectEq( status, expect, actual));
     }
 
     return array;

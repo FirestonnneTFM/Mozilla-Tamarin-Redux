@@ -3,15 +3,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 include "floatUtil.as";
 
 
-var SECTION = "6.3.9";
-var VERSION = "AS3";
-var TITLE   = "The prefix -- operator";
+// var SECTION = "6.3.9";
+// var VERSION = "AS3";
+// var TITLE   = "The prefix -- operator";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 
 var flt:float = new float(3.1413119f);
@@ -19,7 +18,7 @@ var flt_minus_1 = flt - 1.0f;
 AddStrictTestCase("prefix -- on float", flt_minus_1, --flt);
 AddStrictTestCase("prefix -- on float", flt_minus_1, flt);
 var u = flt;
-AddTestCase("prefix -- on float value should produce float value", "float", getQualifiedClassName(--u));
+Assert.expectEq("prefix -- on float value should produce float value", "float", getQualifiedClassName(--u));
 
 /*
 --12.375f
@@ -59,8 +58,8 @@ fraction = 011011
 flt = new float(12.375f);
 var flt_as_int = 1095106560;
 var flt_minus_1_as_int = 1094057984;
-AddTestCase("verify float bits", flt_as_int, FloatRawBits(flt));
-AddTestCase("verify --float is correct int representation", flt_minus_1_as_int, FloatRawBits(--flt));
+Assert.expectEq("verify float bits", flt_as_int, FloatRawBits(flt));
+Assert.expectEq("verify --float is correct int representation", flt_minus_1_as_int, FloatRawBits(--flt));
 
 
 flt = float.MAX_VALUE;
@@ -73,5 +72,4 @@ flt = float.NEGATIVE_INFINITY;
 AddStrictTestCase("--float.NEGATIVE_INFINITY", float.NEGATIVE_INFINITY, --flt);
 
 
-test();
 

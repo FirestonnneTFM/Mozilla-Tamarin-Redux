@@ -1,15 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "RegExp/exec-002";
-var VERSION = "ECMA_2";
-var TITLE   = "RegExp.prototype.exec(string)";
+// var SECTION = "RegExp/exec-002";
+// var VERSION = "ECMA_2";
+// var TITLE   = "RegExp.prototype.exec(string)";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -141,29 +139,29 @@ function getTestCases() {
         // prevent a runtime error
 
         if ( regexp.exec(pattern) == null || matches_array == null ) {
-            array[item++] = new TestCase(SECTION,
+            array[item++] = Assert.expectEq(
                 regexp + ".exec(" + pattern +")",
                 matches_array,
                 regexp.exec(pattern) );
 
             return;
         }
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             regexp + ".exec(" + pattern +").length",
             matches_array.length,
             regexp.exec(pattern).length );
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             regexp + ".exec(" + pattern +").index",
             index,
             regexp.exec(pattern).index );
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             regexp + ".exec(" + pattern +").input",
             pattern,
             regexp.exec(pattern).input );
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             regexp + ".exec(" + pattern +").toString()",
             matches_array.toString(),
             regexp.exec(pattern).toString() );
@@ -173,7 +171,7 @@ function getTestCases() {
                     : regexp.exec(pattern).length;
 
         for ( var matches = 0; matches < limit; matches++ ) {
-            array[item++] = new TestCase(SECTION,
+            array[item++] = Assert.expectEq(
                 regexp + ".exec(" + pattern +")[" + matches +"]",
                 matches_array[matches],
                 regexp.exec(pattern)[matches] );

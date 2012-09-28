@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 /*
  * Date: 07 May 2001
@@ -10,26 +11,23 @@
  * See ECMA3  Section 12.11,  "The switch Statement"
  */
 //-------------------------------------------------------------------------------------------------
-    var SECTION = "eswitch_001";
-    var VERSION = "";
-    var TITLE   = "Testing the switch statement";
-    var bug = 74474;
+//     var SECTION = "eswitch_001";
+//     var VERSION = "";
+//     var TITLE   = "Testing the switch statement";
+//     var bug = 74474;
 var cnMatch = 'Match';
 var cnNoMatch = 'NoMatch';
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
     
-    test();
     
 function getTestCases() {
     var array = new Array();
     var item = 0;
         
 var UBound = 0;
-var bug = '(none)';
+// var bug = '(none)';
 var summary = 'Testing the switch statement';
 var status = '';
 var statusitems = [ ];
@@ -43,31 +41,31 @@ status = 'Section A of test';
 actual = match(17, f(fInverse(17)), f, fInverse);
 expect = cnMatch;
 //addThis();
-array[item++] = new TestCase(SECTION, status, expect, actual);
+array[item++] = Assert.expectEq( status, expect, actual);
 
 status = 'Section B of test';
 actual = match(17, 18, f, fInverse);
 expect = cnNoMatch;
 //addThis();
-array[item++] = new TestCase(SECTION, status, expect, actual);
+array[item++] = Assert.expectEq( status, expect, actual);
 
 status = 'Section C of test';
 actual = match(1, 1, Math.exp, Math.log);
 expect = cnMatch;
 //addThis();
-array[item++] = new TestCase(SECTION, status, expect, actual);
+array[item++] = Assert.expectEq( status, expect, actual);
 
 status = 'Section D of test';
 actual = match(1, 2, Math.exp, Math.log);
 expect = cnNoMatch;
 //addThis();
-array[item++] = new TestCase(SECTION, status, expect, actual);
+array[item++] = Assert.expectEq( status, expect, actual);
 
 status = 'Section E of test';
 actual = match(1, 1, Math.sin, Math.cos);
 expect = cnNoMatch;
 //addThis();
-array[item++] = new TestCase(SECTION, status, expect, actual);
+array[item++] = Assert.expectEq( status, expect, actual);
 
     return array;
 }

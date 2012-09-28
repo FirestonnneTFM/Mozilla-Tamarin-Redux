@@ -1,24 +1,23 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "date-003";
-    var VERSION = "JS1_4";
-    var TITLE   = "Date.prototype.valueOf";
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "date-003";
+//     var VERSION = "JS1_4";
+//     var TITLE   = "Date.prototype.valueOf";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array;
     var item = 0;
 
-    if (as3Enabled) {
+    if (true) {       // TODO: REVIEW AS4 CONVERSION ISSUE   
         var OBJ = new MyObject( new Date(0) );
-        array[item++] = new TestCase(
-        SECTION,
+        array[item++] = Assert.expectEq(
+      //    SECTION,
         "OBJ = new MyObject( new Date(0)); OBJ.valueOf()",
         NaN,
         OBJ.valueOf());
@@ -35,11 +34,11 @@ function getTestCases() {
             exception = e.toString();
         }finally{
     
-        array[item++] = new TestCase(
-            SECTION,
+        array[item++] = Assert.expectEq(
+          //    SECTION,
             "OBJ = new MyObject( new Date(0)); OBJ.valueOf()",
-            TYPEERROR+1034,
-            typeError(exception) );
+            Utils.TYPEERROR+1034,
+            Utils.typeError(exception) );
         }
     }
     return array;

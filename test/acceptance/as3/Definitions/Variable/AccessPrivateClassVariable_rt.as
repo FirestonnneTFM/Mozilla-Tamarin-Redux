@@ -19,10 +19,11 @@ package Package1
 }
 
 import Package1.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 var c2:Class2 = new Class2();
 
-startTest();
 
 var thisError = "no error";
 try
@@ -35,6 +36,5 @@ catch(err)
 }
 finally
 {
-    AddTestCase("attempt to access private variable of Class1 in Class2", "ReferenceError: Error #1069", referenceError(thisError));
+    Assert.expectEq("attempt to access private variable of Class1 in Class2", "ReferenceError: Error #1069", Utils.referenceError(thisError));
 }
-test();

@@ -1,15 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "RegExp/hex-001.js";
-    var VERSION = "ECMA_2";
-    var TITLE   = "JS regexp anchoring on empty match bug";
+import com.adobe.test.Assert;
+//     var SECTION = "RegExp/hex-001.js";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "JS regexp anchoring on empty match bug";
     var BUGNUMBER = "http://bugzilla.mozilla.org/show_bug.cgi?id=2157";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -23,14 +21,14 @@ function getTestCases() {
 
     function AddRegExpCases( regexp, str_regexp, length, matches_array ) {
 
-        array[item++] = new TestCase(SECTION,
+        array[item++] = Assert.expectEq(
             "( " + str_regexp + " ).length",
             regexp.length,
             regexp.length );
 
 
         for ( var matches = 0; matches < matches_array.length; matches++ ) {
-            array[item++] = new TestCase(SECTION,
+            array[item++] = Assert.expectEq(
                 "( " + str_regexp + " )[" + matches +"]",
                 matches_array[matches],
                 regexp[matches] );

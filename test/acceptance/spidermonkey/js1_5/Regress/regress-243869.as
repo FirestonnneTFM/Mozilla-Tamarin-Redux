@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-243869.js';
 //-----------------------------------------------------------------------------
@@ -12,7 +12,7 @@ var BUGNUMBER = 243869;
 var actual = '';
 
 
-printBugNumber(BUGNUMBER);
+//printBugNumber(BUGNUMBER);
 
 function bar()
 {
@@ -36,7 +36,6 @@ catch(eb)
   actual = eb;
 }
 
-AddTestCase('Rethrown custom Errors should retain message', "Test Error", actual.message);
-AddTestCase('Rethrown custom Errors should retain id', 123, actual.errorID)
+Assert.expectEq('Rethrown custom Errors should retain message', "Test Error", actual.message);
+Assert.expectEq('Rethrown custom Errors should retain id', 123, actual.errorID)
 
-test();

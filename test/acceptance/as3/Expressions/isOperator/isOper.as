@@ -2,16 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var SECTION = "Expressions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript
-var TITLE   = "is Operator";       // Provide ECMA section title or a description
+// var SECTION = "Expressions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS3";        // Version of ECMAScript or ActionScript
+// var TITLE   = "is Operator";       // Provide ECMA section title or a description
 
 
-startTest();                // leave this alone
 
 //vars, functions and classes to be used by the test
 import isOper.*;
 
+import com.adobe.test.Assert;
 var myClassA:TestClassA = new TestClassA(); // class TestClassA {}
 var myClassB:TestClassB = new TestClassB(); // class TestClassB extends TestClassA {}
 var myClassC:TestClassC = new TestClassC(); // class TestClassC extends TestClassB implements TestInterface {}
@@ -83,11 +83,10 @@ var typeArrLength = typeArr.length;
 
 for (var i:int = 0; i < valueArr.length; i++) {
     for (var j:int = 0; j < typeArrLength; j++) {
-        AddTestCase(valueDescArr[i]+" is "+ typeDescArr[j],resultArr[i][j],(valueArr[i] is typeArr[j]));
+        Assert.expectEq(valueDescArr[i]+" is "+ typeDescArr[j],resultArr[i][j],(valueArr[i] is typeArr[j]));
     }
 }
 
 ////////////////////////////////////////////////////////////////
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

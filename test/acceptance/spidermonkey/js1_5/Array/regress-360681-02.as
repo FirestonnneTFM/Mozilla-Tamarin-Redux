@@ -4,8 +4,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import avmplus.*;
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-360681-02.js';
 //-----------------------------------------------------------------------------
@@ -22,8 +22,8 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
  
   expect = actual = 'No Crash';
 
@@ -57,9 +57,8 @@ function addtestcases()
        return a - b;
      });
 
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 
 
 }
 
-test();

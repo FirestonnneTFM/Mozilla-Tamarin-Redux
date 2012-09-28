@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/*
  *
  * See http://bugzilla.mozilla.org/show_bug.cgi?id=561249
  *
@@ -9,14 +9,13 @@
 //-----------------------------------------------------------------------------
 
 import avmplus.System;
+import com.adobe.test.Assert;
 
-var SECTION = "561249";
-var VERSION = "";
-var TITLE   = "Specialized/Inlined Addition Overflow and Representation Change Boundaries";
-var bug = "561249";
+// var SECTION = "561249";
+// var VERSION = "";
+// var TITLE   = "Specialized/Inlined Addition Overflow and Representation Change Boundaries";
+// var bug = "561249";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 
 var array:Array = new Array();
 var item:int = 0;
@@ -24,7 +23,7 @@ var item:int = 0;
 function VerifyEquals(actual, expect, a, b, ctx)
 {
     var status = ctx + " " + a + " + " + b;
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 }
 
 function canon(a)
@@ -229,4 +228,3 @@ function getTestCases()
 }
 
 var testcases = getTestCases();
-test();

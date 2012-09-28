@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-336100.js';
 //-----------------------------------------------------------------------------
@@ -12,15 +12,14 @@ var summary = 'bug 336100 - arguments regressed';
 var actual = '';
 var expect;
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 actual = (function(){return (arguments);})();
-AddTestCase(summary, true, actual is Array);
+Assert.expectEq(summary, true, actual is Array);
 
 // see bug 336100 comment 29
 expect = typeof window == 'undefined' ? '' : '[object Object]';
 actual = (function(){with (this) return(arguments + '');})();
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

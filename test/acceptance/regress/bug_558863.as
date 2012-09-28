@@ -1,22 +1,20 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/*
  *
  * See http://bugzilla.mozilla.org/show_bug.cgi?id=558863
  *
  */
 //-----------------------------------------------------------------------------
 
-var SECTION = "regress_558863";
-var VERSION = "AS3";
-var TITLE   = "bytearray in operator throws exception for non-natural number";
-var bug = "558863";
+// var SECTION = "regress_558863";
+// var VERSION = "AS3";
+// var TITLE   = "bytearray in operator throws exception for non-natural number";
+// var bug = "558863";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
+import com.adobe.test.Assert;
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
 
@@ -79,12 +77,12 @@ function getTestCases() {
         var status = "Verify byte-array in does not throw";
         var actual = btest_post_bugfix();
         var expect = true;
-        array[0] = new TestCase(SECTION, status, expect, actual)
+        array[0] = Assert.expectEq( status, expect, actual)
     } else {
         var status = "Verify byte-array in throws when expected";
         var actual = btest_pre_bugfix();
         var expect = true;
-        array[0] = new TestCase(SECTION, status, expect, actual)
+        array[0] = Assert.expectEq( status, expect, actual)
     }
     return array;
 }

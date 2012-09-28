@@ -28,12 +28,11 @@ package P {
  }
 
  
-var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "Public_Private_Internal_Protected_Namespace as function attribute";       // Provide ECMA section title or a description
+// var SECTION = "Directives";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "Public_Private_Internal_Protected_Namespace as function attribute";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 
@@ -41,13 +40,13 @@ startTest();                // leave this alone
 
 import P.*;
 
+import com.adobe.test.Assert;
 var game = new Game();
 
-AddTestCase( "(Public Namespace function) Who is going to play = 'Steve'", "Steve", game.nsPublic::whoplay());
-AddTestCase( "(Private Namespace function) Who is going to play = 'Joe'", "Joe", game.accprivwhoplay());
-AddTestCase( "(Internal Namespace function) Who is going to play = 'Luis'", "Luis", game.accintwhoplay());
-AddTestCase( "(Protected Namespace function) Who is going to play = 'Peter'", "Peter", game.accprotwhoplay());
+Assert.expectEq( "(Public Namespace function) Who is going to play = 'Steve'", "Steve", game.nsPublic::whoplay());
+Assert.expectEq( "(Private Namespace function) Who is going to play = 'Joe'", "Joe", game.accprivwhoplay());
+Assert.expectEq( "(Internal Namespace function) Who is going to play = 'Luis'", "Luis", game.accintwhoplay());
+Assert.expectEq( "(Protected Namespace function) Who is going to play = 'Peter'", "Peter", game.accprotwhoplay());
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

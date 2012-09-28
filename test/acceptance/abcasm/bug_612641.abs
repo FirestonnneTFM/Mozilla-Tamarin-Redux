@@ -2,51 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function main()
-{
-    getlocal0
-    pushscope
-    findproperty START
-    pushstring "Bug 612641 : bad String/NS+NULL merge"
-    callpropvoid START 1
 
-    newfunction .function_id(check_result)
-    setlocal1
-
-    newfunction .function_id(test_string)
-    getlocal0
-    call 0
-    setlocal2
-
-    getlocal1
-    getlocal0
-    getlocal2
-    call 1
-
-    newfunction .function_id(test_ns)
-    getlocal0
-    call 0
-    setlocal2
-
-    getlocal1
-    getlocal0
-    getlocal2
-    call 1
-
-    newfunction .function_id(test_atom)
-    getlocal0
-    call 0
-    setlocal2
-
-    getlocal1
-    getlocal0
-    getlocal2
-    call 1
-
-    findproperty END
-    callpropvoid END 0
-    returnvoid
-}
 
 function check_result(String) {
     getlocal0
@@ -57,12 +13,12 @@ function check_result(String) {
     ifeq PASS
 
     pushstring "test FAILED!"
-    .print
+    //.print
     returnvoid
 
 PASS:
     pushstring "test PASSED!"
-    .print
+    //.print
     returnvoid
 }
 
@@ -111,3 +67,49 @@ label1:
     returnvalue
 }
 
+function main()
+{
+    getlocal0
+    pushscope
+    findproperty START
+    pushstring "Bug 612641 : bad String/NS+NULL merge"
+    callpropvoid START 1
+
+    newfunction .function_id(check_result)
+    setlocal1
+
+    newfunction .function_id(test_string)
+    getlocal0
+    call 0
+    setlocal2
+
+    getlocal1
+    getlocal0
+    getlocal2
+    call 1
+
+    newfunction .function_id(test_ns)
+    getlocal0
+    call 0
+    setlocal2
+
+    getlocal1
+    getlocal0
+    getlocal2
+    call 1
+
+    newfunction .function_id(test_atom)
+    getlocal0
+    call 0
+    setlocal2
+
+    getlocal1
+    getlocal0
+    getlocal2
+    call 1
+
+    findproperty END
+    callpropvoid END 0
+    returnvoid
+}
+script_info{init: main}

@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 01 May 2001
  *
@@ -11,15 +12,12 @@
  */
 //-------------------------------------------------------------------------------------------------
 
-var SECTION = "eregress_31316";
-var VERSION = "";
-var TITLE   = "Regression test for Bugzilla bug 31316";
-var bug = "31316";
+// var SECTION = "eregress_31316";
+// var VERSION = "";
+// var TITLE   = "Regression test for Bugzilla bug 31316";
+// var bug = "31316";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -33,12 +31,12 @@ function getTestCases() {
     var expectedmatch = '';
 
 
-    status = inSection(1);
+ //    status = inSection(1);
     pattern = /<([^\/<>][^<>]*[^\/])>|<([^\/<>])>/;
     string = '<p>Some<br />test</p>';
     actualmatch = string.match(pattern);
     expectedmatch = Array('<p>', undefined, 'p');
-    array[item++] = new TestCase(SECTION, status, expectedmatch.toString(), actualmatch.toString());
+    array[item++] = Assert.expectEq( status, expectedmatch.toString(), actualmatch.toString());
 
     return array;
 }

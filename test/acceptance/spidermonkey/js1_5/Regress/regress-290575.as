@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-290575.js';
 //-----------------------------------------------------------------------------
@@ -11,8 +11,8 @@ var BUGNUMBER = 290575;
 var summary = 'Do not crash calling function with more than 32768 arguments';
 var actual = 'No Crash';
 var expect = 'No Crash';
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 function crashMe(n) {
   var nasty, fn;
@@ -25,11 +25,11 @@ function crashMe(n) {
   fn.toString();
 }
 
-printStatus('crashMe(0x8001)');
+//printStatus('crashMe(0x8001)');
 
 crashMe(0x8001);
  
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
 function crashMe2(n) {
   var nasty = [], fn
@@ -39,7 +39,7 @@ function crashMe2(n) {
       fn.toString()
       }
 
-printStatus('crashMe2(0x10000)');
+//printStatus('crashMe2(0x10000)');
 
 summary = 'Syntax Error Function to string when more than 65536 arguments';
 expect = 'Error';
@@ -47,16 +47,15 @@ try
 {
   crashMe2(0x10000);
   actual = 'No Error';
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 }
 catch(e)
 {
   actual = 'Error';
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
   expect = 'SyntaxError';
   actual = e.name;
-  AddTestCase(summary, expect, actual);
+  Assert.expectEq(summary, expect, actual);
 }
 
 
-test();

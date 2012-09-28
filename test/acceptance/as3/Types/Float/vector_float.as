@@ -3,13 +3,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "13";
-var VERSION = "AS3";
-var TITLE   = "Vector.<float>";
+// var SECTION = "13";
+// var VERSION = "AS3";
+// var TITLE   = "Vector.<float>";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var f1:float = 3.1415f;
 var f2:float = float.MAX_VALUE;
@@ -22,14 +21,14 @@ vecFlt.push(f2);
 vecFlt.push(f3);
 vecFlt.push(f4);
 
-AddTestCase("vecflt[0] value", f1, vecFlt[0]);
-AddTestCase("vecflt[0] typeof", "float", typeof vecFlt[0]);
-AddTestCase("vecflt[1] value", f2, vecFlt[1]);
-AddTestCase("vecflt[1] typeof", "float", typeof vecFlt[1]);
-AddTestCase("vecflt[2] value", f3, vecFlt[2]);
-AddTestCase("vecflt[2] typeof", "float", typeof vecFlt[2]);
-AddTestCase("vecflt[3] value", f4, vecFlt[3]);
-AddTestCase("vecflt[3] typeof", "float", typeof vecFlt[3]);
+Assert.expectEq("vecflt[0] value", f1, vecFlt[0]);
+Assert.expectEq("vecflt[0] typeof", "float", typeof vecFlt[0]);
+Assert.expectEq("vecflt[1] value", f2, vecFlt[1]);
+Assert.expectEq("vecflt[1] typeof", "float", typeof vecFlt[1]);
+Assert.expectEq("vecflt[2] value", f3, vecFlt[2]);
+Assert.expectEq("vecflt[2] typeof", "float", typeof vecFlt[2]);
+Assert.expectEq("vecflt[3] value", f4, vecFlt[3]);
+Assert.expectEq("vecflt[3] typeof", "float", typeof vecFlt[3]);
 
 
 // Bug 697741 - Vector optimizations for float are miss using type information
@@ -38,5 +37,4 @@ AddStrictTestCase("v[0] value", 1f, v[0]);
 foo(v);
 function foo(vec:Vector.<float>){ AddStrictTestCase("v[0] value", 1f, vec[0]); }
 
-test();
 

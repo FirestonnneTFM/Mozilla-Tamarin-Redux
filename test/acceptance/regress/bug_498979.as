@@ -1,12 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "Regression Tests";
-var VERSION = "";
-var TITLE = " Bug 498979 -  jit mangles value when calling a setter with * type";
+// var SECTION = "Regression Tests";
+// var VERSION = "";
+// var TITLE = " Bug 498979 -  jit mangles value when calling a setter with * type";
 
-startTest();
 
 var _any:*;
 
@@ -20,7 +20,7 @@ function get any():* {
 
 any = 'hello world';
 
-AddTestCase("Verify value when calling setter with * type", 'hello world', any);
+Assert.expectEq("Verify value when calling setter with * type", 'hello world', any);
 
 /*
  The rest of this test file does not work due to this asc bug:
@@ -38,15 +38,14 @@ var testValues = ['hello there', 2.0000000005547, 7.314e24, new Object(), -98274
                   <myXml><testing>hello</testing></myXml>, [4,7,2], false, true, new Date()];
 
 any = testValues[-1];
-AddTestCase("Verify value when calling setter with * type", testValues[-1], any);
+Assert.expectEq("Verify value when calling setter with * type", testValues[-1], any);
 
 
 for (var i=0; i<testValues.length; i++) {
     any = testValues[i];
-    //AddTestCase("Verify value when calling setter with * type", testValues[i], any);
+    //Assert.expectEq("Verify value when calling setter with * type", testValues[i], any);
     //obj = testValues[i];
-    //AddTestCase("Verify value when calling setter with Object type", testValues[i], obj);
+    //Assert.expectEq("Verify value when calling setter with Object type", testValues[i], obj);
 }
  */
 
-test();

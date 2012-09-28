@@ -4,13 +4,12 @@
 
 import flash.sampler.*;
 import avmplus.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Sampling";
-var VERSION = "AS3";
-var TITLE   = "Sampling Basic Usage";
+// var SECTION = "Sampling";
+// var VERSION = "AS3";
+// var TITLE   = "Sampling Basic Usage";
 
-startTest();
-writeHeaderToLog("Sampling api");
 
 var isdebugger=System.isDebugger();
 
@@ -28,13 +27,13 @@ simpleLoop();
 pauseSampling();
 
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
       "test getSampleCount on simple loop internalAllocs=false",
       true,
       getSampleCount()>20
     );
 } else {
-    AddTestCase(
+    Assert.expectEq(
       "test getSampleCount on simple loop internalAllocs=false",
       false,
       getSampleCount()>20
@@ -45,7 +44,7 @@ for each (var sample in getSamples()) {
   len++;
 }
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
       "test getSamples length on simple loop internalAllocs=false",
       true,
       len>20
@@ -53,7 +52,7 @@ if (isdebugger) {
 
     clearSamples();
 
-    AddTestCase(
+    Assert.expectEq(
       "after clearSamples() sample count is 0, internalAllocs=false",
       0,
       getSampleCount()
@@ -64,7 +63,7 @@ for each (var sample in getSamples()) {
     len++;
 }
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
       "after clearSamples() getSamples() returns no samples, internalAllocs=false",
       0,
       len
@@ -76,7 +75,7 @@ simpleLoop();
 pauseSampling();
 
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
       "test getSampleCount on simple loop internalAllocs=true",
       true,
       getSampleCount()>50
@@ -88,7 +87,7 @@ for each (var sample in getSamples()) {
 }
 
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
       "test getSamples length on simple loop internalAllocs=true",
       true,
       len>20
@@ -104,7 +103,7 @@ clearSamples();
     }
 
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
       "after clearSamples() sample count is 0, internalAllocs=true",
       0,
       len
@@ -118,14 +117,13 @@ for each (var sample in getSamples()) {
     }
 }
 if (isdebugger) {
-    AddTestCase(
+    Assert.expectEq(
       "after clearSamples() getSamples() returns no samples, internalAllocs=true",
       0,
       len
     );
 }
 
-test();
 
 function simpleLoop() {
     for (var i:int=0;i<100;i++) {

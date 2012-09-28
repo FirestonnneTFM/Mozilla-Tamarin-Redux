@@ -3,16 +3,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "15.11.1 ErrorObject getStackTrace()";
-var VERSION = "";
-startTest();
-var TITLE = "Tests based on code coverage";
+// var SECTION = "15.11.1 ErrorObject getStackTrace()";
+// var VERSION = "";
+// var TITLE = "Tests based on code coverage";
 
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array = new Array();
@@ -43,7 +41,7 @@ function getTestCases() {
         }
 
     } finally {
-        array[item++] = new TestCase(SECTION, "getStackTrace result!='error'", true, result!='error' );
+        array[item++] = Assert.expectEq( "getStackTrace result!='error'", true, result!='error' );
     }
 
     return ( array );

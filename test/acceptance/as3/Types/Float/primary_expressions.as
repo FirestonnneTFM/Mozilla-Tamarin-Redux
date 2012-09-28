@@ -3,30 +3,28 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "6.1.2";
-var VERSION = "AS3";
-var TITLE   = "Other primitive expressions";
+// var SECTION = "6.1.2";
+// var VERSION = "AS3";
+// var TITLE   = "Other primitive expressions";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 var o: Object = {1:"foo"};
-AddTestCase("Member access using float literal", "foo", o[1.0f]);
+Assert.expectEq("Member access using float literal", "foo", o[1.0f]);
 
 var o2: Object = {1f:"bar"};
-AddTestCase("Member access using float literal to a float property index", "bar", o2[1.0f]);
-AddTestCase("Member access using Number literal to a float property index", "bar", o2[1]);
+Assert.expectEq("Member access using float literal to a float property index", "bar", o2[1.0f]);
+Assert.expectEq("Member access using Number literal to a float property index", "bar", o2[1]);
 
 o[float.MIN_VALUE] = "floatmin";
-AddTestCase("Member access using float to a float property index", "floatmin", o[float.MIN_VALUE]);
+Assert.expectEq("Member access using float to a float property index", "floatmin", o[float.MIN_VALUE]);
 
 var index:float = 27182818.284e-2;
 o[Number(index)] = "bar";
-AddTestCase("internFloat and internDouble should produce the same result on the same float value", "bar", o[index]);
+Assert.expectEq("internFloat and internDouble should produce the same result on the same float value", "bar", o[index]);
 
 o.NaN = 'Non est numerus';
-AddTestCase("o.NaN same thing as o[float.NaN]", 'Non est numerus', o[float.NaN]);
+Assert.expectEq("o.NaN same thing as o[float.NaN]", 'Non est numerus', o[float.NaN]);
 
-test();
 

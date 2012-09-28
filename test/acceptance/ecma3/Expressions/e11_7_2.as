@@ -1,13 +1,11 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "e11_7_2";
-    var VERSION = "ECMA_1";
-    startTest();
+import com.adobe.test.Assert;
+//     var SECTION = "e11_7_2";
+//     var VERSION = "ECMA_1";
     var testcases = getTestCases();
 
-    writeHeaderToLog( SECTION + "  The signed right shift operator ( >> )");
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -19,7 +17,7 @@ function getTestCases() {
         shiftexp = Math.pow( 2, power );
 
         for ( addexp = 0; addexp <= 32; addexp++ ) {
-            array[item++] = new TestCase( SECTION,
+            array[item++] = Assert.expectEq( 
                                     shiftexp + " >> " + addexp,
                                     SignedRightShift( shiftexp, addexp ),
                                     shiftexp >> addexp );
@@ -30,7 +28,7 @@ function getTestCases() {
         shiftexp = -Math.pow( 2, power );
 
         for ( addexp = 0; addexp <= 32; addexp++ ) {
-            array[item++] = new TestCase( SECTION,
+            array[item++] = Assert.expectEq( 
                                     shiftexp + " >> " + addexp,
                                     SignedRightShift( shiftexp, addexp ),
                                     shiftexp >> addexp );

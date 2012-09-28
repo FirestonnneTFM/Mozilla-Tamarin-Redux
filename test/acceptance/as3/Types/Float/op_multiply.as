@@ -3,13 +3,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "6.4.1";
-var VERSION = "AS3";
-var TITLE   = "The * operation agumented by float values";
+// var SECTION = "6.4.1";
+// var VERSION = "AS3";
+// var TITLE   = "The * operation agumented by float values";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 
 var f1:float = 1.2345678e9;
@@ -17,7 +16,7 @@ var f2:float = 6.543210987;
 
 AddStrictTestCase("float multiplication result", float(8.078037504e+09), f1*f2);
 AddStrictTestCase("FloatLiteral multiplication result", float(8.078037504e+09), 1.2345678e9f*6.543210987f);
-AddTestCase("multiplication of 2 floats returns a float", "float", getQualifiedClassName(f1*f2));
+Assert.expectEq("multiplication of 2 floats returns a float", "float", getQualifiedClassName(f1*f2));
 
 
 /*
@@ -50,23 +49,23 @@ AddStrictTestCase("String * float", 1, check("1", onef));
 
 
 // If either is NaN then NaN
-AddTestCase("float.NaN * float", float.NaN, float.NaN * onef);
-AddTestCase("isNaN float.NaN * float", true, isNaN(float.NaN * onef));
-AddTestCase("float * float.NaN", float.NaN, onef * float.NaN);
-AddTestCase("isNaN float * float.NaN", true, isNaN(onef * float.NaN));
-AddTestCase("check(float.NaN, float)", float.NaN, check(float.NaN, onef));
-AddTestCase("isNaN check(float.NaN, float)", true, isNaN(check(float.NaN, onef)));
-AddTestCase("check(float, float.NaN)", float.NaN, check(onef, float.NaN));
-AddTestCase("isNaN check(float, float.NaN)", true, isNaN(check(onef, float.NaN)));
+Assert.expectEq("float.NaN * float", float.NaN, float.NaN * onef);
+Assert.expectEq("isNaN float.NaN * float", true, isNaN(float.NaN * onef));
+Assert.expectEq("float * float.NaN", float.NaN, onef * float.NaN);
+Assert.expectEq("isNaN float * float.NaN", true, isNaN(onef * float.NaN));
+Assert.expectEq("check(float.NaN, float)", float.NaN, check(float.NaN, onef));
+Assert.expectEq("isNaN check(float.NaN, float)", true, isNaN(check(float.NaN, onef)));
+Assert.expectEq("check(float, float.NaN)", float.NaN, check(onef, float.NaN));
+Assert.expectEq("isNaN check(float, float.NaN)", true, isNaN(check(onef, float.NaN)));
 
-AddTestCase("float.NaN * FloatLiteral", float.NaN, float.NaN * 1f);
-AddTestCase("isNaN float.NaN * FloatLiteral", true, isNaN(float.NaN * 1f));
-AddTestCase("FloatLiteral * float.NaN", float.NaN, 1f * float.NaN);
-AddTestCase("isNaN FloatLiteral * float.NaN", true, isNaN(1f * float.NaN));
-AddTestCase("check(float.NaN, FloatLiteral)", float.NaN, check(float.NaN, 1f));
-AddTestCase("isNaN check(float.NaN, FloatLiteral)", true, isNaN(check(float.NaN, 1f)));
-AddTestCase("check(FloatLiteral, float.NaN)", float.NaN, check(1f, float.NaN));
-AddTestCase("isNaN check(FloatLiteral, float.NaN)", true, isNaN(check(1f, float.NaN)));
+Assert.expectEq("float.NaN * FloatLiteral", float.NaN, float.NaN * 1f);
+Assert.expectEq("isNaN float.NaN * FloatLiteral", true, isNaN(float.NaN * 1f));
+Assert.expectEq("FloatLiteral * float.NaN", float.NaN, 1f * float.NaN);
+Assert.expectEq("isNaN FloatLiteral * float.NaN", true, isNaN(1f * float.NaN));
+Assert.expectEq("check(float.NaN, FloatLiteral)", float.NaN, check(float.NaN, 1f));
+Assert.expectEq("isNaN check(float.NaN, FloatLiteral)", true, isNaN(check(float.NaN, 1f)));
+Assert.expectEq("check(FloatLiteral, float.NaN)", float.NaN, check(1f, float.NaN));
+Assert.expectEq("isNaN check(FloatLiteral, float.NaN)", true, isNaN(check(1f, float.NaN)));
 
 // result is positive if both have same sign, negative if they differ
 AddStrictTestCase("float * float", 1f, 1f * 1f);
@@ -82,31 +81,31 @@ AddStrictTestCase("check(-float, -float)", 1f, check(-1f, -1f));
 // infinity * zero is NaN (what about -0)
 var zerof:float = 0f;
 var neg_zerof:float = -0f;
-AddTestCase("float.POSITIVE_INFINITY * zerof", float.NaN, float.POSITIVE_INFINITY * zerof);
-AddTestCase("isNaN float.POSITIVE_INFINITY * zerof", true, isNaN(float.POSITIVE_INFINITY * zerof));
-AddTestCase("isNaN check(float.POSITIVE_INFINITY, zerof)", true, isNaN(check(float.POSITIVE_INFINITY, zerof)));
-AddTestCase("zerof * float.POSITIVE_INFINITY", float.NaN, zerof * float.POSITIVE_INFINITY);
-AddTestCase("isNaN zerof * float.POSITIVE_INFINITY", true, isNaN(zerof * float.POSITIVE_INFINITY));
-AddTestCase("isNaN check(zerof, float.POSITIVE_INFINITY)", true, isNaN(check(zerof, float.POSITIVE_INFINITY)));
-AddTestCase("float.POSITIVE_INFINITY * neg_zerof", float.NaN, float.POSITIVE_INFINITY * neg_zerof);
-AddTestCase("isNaN float.POSITIVE_INFINITY * neg_zerof", true, isNaN(float.POSITIVE_INFINITY * neg_zerof));
-AddTestCase("isNaN check(float.POSITIVE_INFINITY, neg_zerof)", true, isNaN(check(float.POSITIVE_INFINITY, neg_zerof)));
-AddTestCase("neg_zerof * float.POSITIVE_INFINITY", float.NaN, neg_zerof * float.POSITIVE_INFINITY);
-AddTestCase("isNaN neg_zerof * float.POSITIVE_INFINITY", true, isNaN(neg_zerof * float.POSITIVE_INFINITY));
-AddTestCase("isNaN check(neg_zerof, float.POSITIVE_INFINITY)", true, isNaN(check(neg_zerof, float.POSITIVE_INFINITY)));
+Assert.expectEq("float.POSITIVE_INFINITY * zerof", float.NaN, float.POSITIVE_INFINITY * zerof);
+Assert.expectEq("isNaN float.POSITIVE_INFINITY * zerof", true, isNaN(float.POSITIVE_INFINITY * zerof));
+Assert.expectEq("isNaN check(float.POSITIVE_INFINITY, zerof)", true, isNaN(check(float.POSITIVE_INFINITY, zerof)));
+Assert.expectEq("zerof * float.POSITIVE_INFINITY", float.NaN, zerof * float.POSITIVE_INFINITY);
+Assert.expectEq("isNaN zerof * float.POSITIVE_INFINITY", true, isNaN(zerof * float.POSITIVE_INFINITY));
+Assert.expectEq("isNaN check(zerof, float.POSITIVE_INFINITY)", true, isNaN(check(zerof, float.POSITIVE_INFINITY)));
+Assert.expectEq("float.POSITIVE_INFINITY * neg_zerof", float.NaN, float.POSITIVE_INFINITY * neg_zerof);
+Assert.expectEq("isNaN float.POSITIVE_INFINITY * neg_zerof", true, isNaN(float.POSITIVE_INFINITY * neg_zerof));
+Assert.expectEq("isNaN check(float.POSITIVE_INFINITY, neg_zerof)", true, isNaN(check(float.POSITIVE_INFINITY, neg_zerof)));
+Assert.expectEq("neg_zerof * float.POSITIVE_INFINITY", float.NaN, neg_zerof * float.POSITIVE_INFINITY);
+Assert.expectEq("isNaN neg_zerof * float.POSITIVE_INFINITY", true, isNaN(neg_zerof * float.POSITIVE_INFINITY));
+Assert.expectEq("isNaN check(neg_zerof, float.POSITIVE_INFINITY)", true, isNaN(check(neg_zerof, float.POSITIVE_INFINITY)));
 
-AddTestCase("float.NEGATIVE_INFINITY * zerof", float.NaN, float.NEGATIVE_INFINITY * zerof);
-AddTestCase("isNaN float.NEGATIVE_INFINITY * zerof", true, isNaN(float.NEGATIVE_INFINITY * zerof));
-AddTestCase("isNaN check(float.NEGATIVE_INFINITY, zerof)", true, isNaN(check(float.NEGATIVE_INFINITY, zerof)));
-AddTestCase("zerof * float.NEGATIVE_INFINITY", float.NaN, zerof * float.NEGATIVE_INFINITY);
-AddTestCase("isNaN zerof * float.NEGATIVE_INFINITY", true, isNaN(zerof * float.NEGATIVE_INFINITY));
-AddTestCase("isNaN check(zerof, float.NEGATIVE_INFINITY)", true, isNaN(check(zerof, float.NEGATIVE_INFINITY)));
-AddTestCase("float.NEGATIVE_INFINITY * neg_zerof", float.NaN, float.NEGATIVE_INFINITY * neg_zerof);
-AddTestCase("isNaN float.NEGATIVE_INFINITY * neg_zerof", true, isNaN(float.NEGATIVE_INFINITY * neg_zerof));
-AddTestCase("isNaN check(float.NEGATIVE_INFINITY, neg_zerof)", true, isNaN(check(float.NEGATIVE_INFINITY, neg_zerof)));
-AddTestCase("neg_zerof * float.NEGATIVE_INFINITY", float.NaN, neg_zerof * float.NEGATIVE_INFINITY);
-AddTestCase("isNaN neg_zerof * float.NEGATIVE_INFINITY", true, isNaN(neg_zerof * float.NEGATIVE_INFINITY));
-AddTestCase("isNaN check(neg_zerof, float.NEGATIVE_INFINITY)", true, isNaN(check(neg_zerof, float.NEGATIVE_INFINITY)));
+Assert.expectEq("float.NEGATIVE_INFINITY * zerof", float.NaN, float.NEGATIVE_INFINITY * zerof);
+Assert.expectEq("isNaN float.NEGATIVE_INFINITY * zerof", true, isNaN(float.NEGATIVE_INFINITY * zerof));
+Assert.expectEq("isNaN check(float.NEGATIVE_INFINITY, zerof)", true, isNaN(check(float.NEGATIVE_INFINITY, zerof)));
+Assert.expectEq("zerof * float.NEGATIVE_INFINITY", float.NaN, zerof * float.NEGATIVE_INFINITY);
+Assert.expectEq("isNaN zerof * float.NEGATIVE_INFINITY", true, isNaN(zerof * float.NEGATIVE_INFINITY));
+Assert.expectEq("isNaN check(zerof, float.NEGATIVE_INFINITY)", true, isNaN(check(zerof, float.NEGATIVE_INFINITY)));
+Assert.expectEq("float.NEGATIVE_INFINITY * neg_zerof", float.NaN, float.NEGATIVE_INFINITY * neg_zerof);
+Assert.expectEq("isNaN float.NEGATIVE_INFINITY * neg_zerof", true, isNaN(float.NEGATIVE_INFINITY * neg_zerof));
+Assert.expectEq("isNaN check(float.NEGATIVE_INFINITY, neg_zerof)", true, isNaN(check(float.NEGATIVE_INFINITY, neg_zerof)));
+Assert.expectEq("neg_zerof * float.NEGATIVE_INFINITY", float.NaN, neg_zerof * float.NEGATIVE_INFINITY);
+Assert.expectEq("isNaN neg_zerof * float.NEGATIVE_INFINITY", true, isNaN(neg_zerof * float.NEGATIVE_INFINITY));
+Assert.expectEq("isNaN check(neg_zerof, float.NEGATIVE_INFINITY)", true, isNaN(check(neg_zerof, float.NEGATIVE_INFINITY)));
 
 // infinity * infinity = infinity, sign determined by above rule
 AddStrictTestCase("float.POSITIVE_INFINITY * float.POSITIVE_INFINITY", float.POSITIVE_INFINITY, float.POSITIVE_INFINITY * float.POSITIVE_INFINITY);
@@ -159,5 +158,4 @@ AddStrictTestCase("check(-FloatLiteral, float.NEGATIVE_INFINITY)", float.POSITIV
 
 
 
-test();
 

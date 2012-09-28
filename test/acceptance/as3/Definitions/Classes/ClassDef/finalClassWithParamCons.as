@@ -5,13 +5,13 @@
  
 
 import testfinalClassWithParamCons.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";                   // Version of JavaScript or ECMA
-var TITLE   = "Constructors with parameters of a final class";  // Provide ECMA section                                                                 // title or a                                                                 // description
+// var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";                   // Version of JavaScript or ECMA
+// var TITLE   = "Constructors with parameters of a final class";  // Provide ECMA section                                                                 // title or a                                                                 // description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 //print("test");
                      
@@ -19,11 +19,10 @@ var finalWithParamCons = new finalClassWithParamCons(20,40);
 //print (finalWithParamCons.Add());
 
 
-AddTestCase("calling public Instance method",60,finalWithParamCons.Add());
+Assert.expectEq("calling public Instance method",60,finalWithParamCons.Add());
 
 
 
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

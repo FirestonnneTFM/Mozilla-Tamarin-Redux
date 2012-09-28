@@ -2,30 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function main() {
-    getlocal0
-    pushscope
-    findproperty START 
-    pushstring "nullcheck - Instructions that start with the letter b" 
-    callpropvoid START 1
-    
-    newfunction .function_id(runTest)
-    getlocal0
-    call 0
-    
-    newfunction .function_id(runTest1)
-    getlocal0
-    call 0
-
-    newfunction .function_id(runTest2)
-    getlocal0
-    call 0
-    
-    findproperty END
-    callpropvoid END 0
-    returnvoid
-}
-
 function runTest()
 {
     getlocal0
@@ -155,3 +131,29 @@ function runTest2()
 
     returnvoid
 }
+
+
+function main() {
+    getlocal0
+    pushscope
+    findproperty START 
+    pushstring "nullcheck - Instructions that start with the letter b" 
+    callpropvoid START 1
+    
+    newfunction runTest
+    getlocal0
+    call 0
+    
+    newfunction runTest1
+    getlocal0
+    call 0
+
+    newfunction runTest2
+    getlocal0
+    call 0
+    
+    findproperty END
+    callpropvoid END 0
+    returnvoid
+}
+script_info{init: main}

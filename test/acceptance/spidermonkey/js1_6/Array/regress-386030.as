@@ -4,8 +4,8 @@
  * http://creativecommons.org/licenses/publicdomain/
  * Contributor: Blake Kaplan
  */
+import com.adobe.test.Assert;
 
-startTest();
 var gTestfile = 'regress-386030.js';
 //-----------------------------------------------------------------------------
 var BUGNUMBER = 386030;
@@ -13,8 +13,8 @@ var summary = 'Array.reduce should ignore holes';
 var actual = '';
 var expect = '';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 function add(a, b) { return a + b; }
 function testreduce(v) { return v == 3 ? "PASS" : "FAIL"; }
@@ -28,7 +28,10 @@ try {
 } catch (e) {
   actual = "FAIL, reduce";
 }
-reportCompare(expect, actual, summary + ': 1');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': 1');
 
 try {
   a = new Array(2);
@@ -37,7 +40,10 @@ try {
 } catch (e) {
   actual = "FAIL, reduceRight";
 }
-reportCompare(expect, actual, summary + ': 2');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': 2');
 
 try {
   a = new Array(2);
@@ -46,7 +52,10 @@ try {
 } catch (e) {
   actual = "PASS";
 }
-reportCompare(expect, actual, summary + ': 3');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': 3');
 
 try {
   a = new Array(2);
@@ -55,7 +64,9 @@ try {
 } catch (e) {
   actual = "PASS";
 }
-reportCompare(expect, actual, summary + ': 4');
+
+Assert.expectEq(summary, expect, actual);
+//reportCompare(expect, actual, summary +
+// ': 4');
 
 
-test();

@@ -69,25 +69,25 @@ import ImportIndividualClasses.C;
 import kitty.Kitty;
 import ImportIndividualClasses.s;
 import ImportIndividualClasses.publicFunc;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
-var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS 3.0";        // Version of ECMAScript or ActionScript
+// var TITLE   = "PackageDefinition" //Proved ECMA section titile or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var a = new A();
 var b = new B();
 var c = new C();
 
-AddTestCase("Class A imported individually", "A", a.whoAmI());
-AddTestCase("Interface imported individually", "B", b.whoAmI());
-AddTestCase("Variable s imported individually", "hello", s);
-AddTestCase("Function publicFunc imported individually", "You passed 5", publicFunc(5));
-AddTestCase("Namespace imported individually, function", true, c.returnNSVar());
-AddTestCase("Namespace in class, imported individually,", "1,2,3", c.callNSFunc().toString());
+Assert.expectEq("Class A imported individually", "A", a.whoAmI());
+Assert.expectEq("Interface imported individually", "B", b.whoAmI());
+Assert.expectEq("Variable s imported individually", "hello", s);
+Assert.expectEq("Function publicFunc imported individually", "You passed 5", publicFunc(5));
+Assert.expectEq("Namespace imported individually, function", true, c.returnNSVar());
+Assert.expectEq("Namespace in class, imported individually,", "1,2,3", c.callNSFunc().toString());
 
 class X{
 Kitty var num:Number = 5;
@@ -97,8 +97,7 @@ Kitty function kittyFunc(s:String):String {
 }
 
 var obj:X = new X()
-AddTestCase("Variable, namespace imported individually", 5, obj.Kitty::num);
-AddTestCase("Function, namespace imported individually", "You said hi", obj.Kitty::kittyFunc("hi"));
+Assert.expectEq("Variable, namespace imported individually", 5, obj.Kitty::num);
+Assert.expectEq("Function, namespace imported individually", "You said hi", obj.Kitty::kittyFunc("hi"));
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

@@ -1,16 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "try-006";
-    var VERSION = "ECMA_2";
-    var TITLE   = "The try statement";
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+//     var SECTION = "try-006";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "The try statement";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
 
     var testcases = getTestCases();
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -47,8 +46,8 @@ function getTestCases() {
         } catch ( e ) {
             result = e;
         }
-        array[item++] = new TestCase(
-            SECTION,
+        array[item++] = Assert.expectEq(
+            
             "TryWith( " + object.value +" )",
             (object.exception ? EXCEPTION_STRING +": " + object.valueOf() : object.valueOf()),
             result );
@@ -61,11 +60,11 @@ function getTestCases() {
              }
            }
            
-        array[item++] = new TestCase(
-            SECTION,
+        array[item++] = Assert.expectEq(
+            
             "TryWith( " + object.value +" )",
             "ReferenceError: Error #1065",
-            referenceError(result) );
+            Utils.referenceError(result) );
 
         
     }

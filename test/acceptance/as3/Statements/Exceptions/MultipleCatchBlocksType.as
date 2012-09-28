@@ -4,13 +4,13 @@
 
 
 import MultipleCatchBlocksType.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
-var VERSION = "AS3";                   // Version of JavaScript or ECMA
-var TITLE   = "Testing try block with multiple catch blocks and using a catch block with parameter of type TypeError to catch the type error";  // Provide ECMA section title or a description
+// var SECTION = "Definitions";           // provide a document reference (ie, ECMA section)
+// var VERSION = "AS3";                   // Version of JavaScript or ECMA
+// var TITLE   = "Testing try block with multiple catch blocks and using a catch block with parameter of type TypeError to catch the type error";  // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 
 var z = new TypeErrors();
@@ -43,11 +43,10 @@ try{
    }catch(e10:Error){//print(e10.toString());
          thisError=e10.toString();
    }finally{
-         AddTestCase( "Testing catch block with Type Error", "TypeError" ,thisError);
+         Assert.expectEq( "Testing catch block with Type Error", "TypeError" ,thisError);
     }
 
 
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

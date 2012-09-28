@@ -1,14 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-var SECTION = "regress_707133";
-var VERSION = "AS3";
-var TITLE   = "adjusting arrays length should not introduce phantom elements";
-var bug = "707133";
+// var SECTION = "regress_707133";
+// var VERSION = "AS3";
+// var TITLE   = "adjusting arrays length should not introduce phantom elements";
+// var bug = "707133";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 
 function reducedTestCase()
 {
@@ -58,12 +57,11 @@ function originalTestCase()
     return output;
 }
 
-AddTestCase("reduced test case", "", reducedTestCase());
-AddTestCase("original test case",
+Assert.expectEq("reduced test case", "", reducedTestCase());
+Assert.expectEq("original test case",
             ("<keyname_0, [object Object]>; "+
              "<keyname_1, [object Object]>; "+
              "<keyname_2, [object Object]>; "+
              "<keyname_3, [object Object]>; "),
             originalTestCase());
 
-test();

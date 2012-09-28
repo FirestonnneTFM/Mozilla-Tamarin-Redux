@@ -1,17 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-    var SECTION = "dowhile-005";
-    var VERSION = "ECMA_2";
-    var TITLE   = "do...while with a labeled continue statement";
+import com.adobe.test.Assert;
+//     var SECTION = "dowhile-005";
+//     var VERSION = "ECMA_2";
+//     var TITLE   = "do...while with a labeled continue statement";
     var BUGNUMBER = "316293";
 
-    startTest();
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
     
-    test();
     
 function getTestCases() {
     var array = new Array();
@@ -42,20 +40,20 @@ function getTestCases() {
 
         result3 = "fail: did not break out of outer label";
 
-        array[item++] = new TestCase(
-            SECTION,
+        array[item++] = Assert.expectEq(
+            
             "number of loop iterations",
             0,
             i );
 
-        array[item++] = new TestCase(
-            SECTION,
+        array[item++] = Assert.expectEq(
+            
             "break out of inner loop",
             "pass",
             result1 );
 
-        array[item++] = new TestCase(
-            SECTION,
+        array[item++] = Assert.expectEq(
+            
             "break out of outer loop",
             "pass",
             result2 );

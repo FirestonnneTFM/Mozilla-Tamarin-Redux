@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-465980-02.js';
 //-----------------------------------------------------------------------------
@@ -20,8 +20,8 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
 
   function describe(name, startLength, pushArgs, expectThrow, expectLength)
   {
@@ -142,35 +142,35 @@ try {
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayPush(4294967294, [foo, bar], false, 4294967295)', 4294967295, actual);
+ Assert.expectEq('testArrayPush(4294967294, [foo, bar], false, 4294967295)', 4294967295, actual);
 
 try {
      actual = testArrayPush(4294967294, [foo, bar, baz], false, 4294967295);
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayPush(4294967294, [foo, bar, baz], false, 4294967295)', 4294967295, actual);
+ Assert.expectEq('testArrayPush(4294967294, [foo, bar, baz], false, 4294967295)', 4294967295, actual);
 
 try {
      actual = testArrayPush(4294967295, [foo], false, 4294967295);
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayPush(4294967295, [foo], false, 4294967295)', 4294967295, actual);
+ Assert.expectEq('testArrayPush(4294967295, [foo], false, 4294967295)', 4294967295, actual);
 
 try {
      actual = testArrayPush(4294967295, [foo, bar], false, 4294967295);
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayPush(4294967295, [foo, bar], false, 4294967295)', 4294967295, actual);
+ Assert.expectEq('testArrayPush(4294967295, [foo, bar], false, 4294967295)', 4294967295, actual);
 
 try {
      actual = testArrayPush(4294967295, [foo, bar, baz], false, 4294967295);
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayPush(4294967295, [foo, bar, baz], false, 4294967295)', 4294967295, actual);
+ Assert.expectEq('testArrayPush(4294967295, [foo, bar, baz], false, 4294967295)', 4294967295, actual);
 
 
 /* unshift is very slow for large arrays
@@ -182,7 +182,7 @@ try {
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayUnshift(4294967294, [foo], false, 4294967295)', expect, actual);
+ Assert.expectEq('testArrayUnshift(4294967294, [foo], false, 4294967295)', expect, actual);
 
 
 actual = ''
@@ -192,7 +192,7 @@ try {
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayUnshift(4294967294, [foo, bar], true, 4294967294)', expect, actual);
+ Assert.expectEq('testArrayUnshift(4294967294, [foo, bar], true, 4294967294)', expect, actual);
 
 
 actual = ''
@@ -202,7 +202,7 @@ try {
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayUnshift(4294967294, [foo, bar, baz], true, 4294967294)', expect, actual);
+ Assert.expectEq('testArrayUnshift(4294967294, [foo, bar, baz], true, 4294967294)', expect, actual);
 
 
 actual = ''
@@ -212,7 +212,7 @@ try {
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayUnshift(4294967295, [foo], true, 4294967295)', expect, actual);
+ Assert.expectEq('testArrayUnshift(4294967295, [foo], true, 4294967295)', expect, actual);
 
 
 actual = ''
@@ -222,7 +222,7 @@ try {
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayUnshift(4294967295, [foo, bar], true, 4294967295)', expect, actual);
+ Assert.expectEq('testArrayUnshift(4294967295, [foo, bar], true, 4294967295)', expect, actual);
 
 
 actual = ''
@@ -232,9 +232,8 @@ try {
  } catch (e) {
      actual = e + '';
  }
- AddTestCase('testArrayUnshift(4294967295, [foo, bar, baz], true, 4294967295)', expect, actual);
+ Assert.expectEq('testArrayUnshift(4294967295, [foo, bar, baz], true, 4294967295)', expect, actual);
 */
 
 } // addtestcases
 
-test();

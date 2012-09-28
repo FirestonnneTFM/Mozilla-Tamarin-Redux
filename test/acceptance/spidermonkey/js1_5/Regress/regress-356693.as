@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-356693.js';
 //-----------------------------------------------------------------------------
@@ -20,8 +20,8 @@ addtestcases();
 function addtestcases()
 {
 
-  printBugNumber(BUGNUMBER);
-  printStatus (summary);
+  //printBugNumber(BUGNUMBER);
+  //printStatus (summary);
  
   expect = 'ReferenceError: Error #1065';   // Variable x is not defined.
   try
@@ -33,9 +33,8 @@ function addtestcases()
     actual = ex + '';
   }
 
-  AddTestCase(summary, expect, actual.substr(0,expect.length));
+  Assert.expectEq(summary, expect, actual.substr(0,expect.length));
 
 
 }
 
-test();

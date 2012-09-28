@@ -6,12 +6,12 @@ function main() {
     getlocal0
     pushscope
 
-    .try {
+    try {
 loop:
         label
         jump aftercatch
     }
-    .catch {
+    catch {
         getlocal0
         pushscope
         setlocal2   // save Error
@@ -40,3 +40,5 @@ passed:
     end:
     returnvoid
 }
+
+script_info{init: main}

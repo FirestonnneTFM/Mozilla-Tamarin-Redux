@@ -1,8 +1,106 @@
 /* -*- Mode: java; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
+ * ***** BEGIN LICENSE BLOCK *****
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
+
+function START(summary)
+{
+      // print out bugnumber
+
+     /*if ( BUGNUMBER ) {
+              writeLineToLog ("BUGNUMBER: " + BUGNUMBER );
+      }*/
+    XML.setSettings (null);
+    testcases = new Array();
+
+    // text field for results
+    tc = 0;
+    /*this.addChild ( tf );
+    tf.x = 30;
+    tf.y = 50;
+    tf.width = 200;
+    tf.height = 400;*/
+
+    //_print(summary);
+    var summaryParts = summary.split(" ");
+    //_print("section: " + summaryParts[0] + "!");
+    //fileName = summaryParts[0];
+
+}
+
+function TEST(section, expected, actual)
+{
+    AddTestCase(section, expected, actual);
+}
+ 
+
+function TEST_XML(section, expected, actual)
+{
+  var actual_t = typeof actual;
+  var expected_t = typeof expected;
+
+  if (actual_t != "xml") {
+    // force error on type mismatch
+    TEST(section, new XML(), actual);
+    return;
+  }
+
+  if (expected_t == "string") {
+
+    TEST(section, expected, actual.toXMLString());
+  } else if (expected_t == "number") {
+
+    TEST(section, String(expected), actual.toXMLString());
+  } else {
+    reportFailure ("", 'Bad TEST_XML usage: type of expected is "+expected_t+", should be number or string');
+  }
+}
+
+function reportFailure (section, msg)
+{
+  trace("~FAILURE: " + section + " | " + msg);
+}
+
+function AddTestCase( description, expect, actual ) {
+   testcases[tc++] = Assert.expectEq(description, "|"+expect+"|", "|"+actual+"|" );
+}
+
+function myGetNamespace (obj, ns) {
+    if (ns != undefined) {
+        return obj.namespace(ns);
+    } else {
+        return obj.namespace();
+    }
+}
+
+
+
+
+function NL()
+{
+  //return java.lang.System.getProperty("line.separator");
+  return "\n";
+}
+
+
+function BUG(arg){
+  // nothing here
+}
+
+function END()
+{
+    //test();
+}
+
+
+function grabError(arg1, arg2){
+  return arg2;
+}
+ 
 
 START("13.4 XML Object - Miscellaneous errors");
 
@@ -10,7 +108,7 @@ function grabError(err, str) {
     var typeIndex = str.indexOf("Error:");
     var type = str.substr(0, typeIndex + 5);
     if (type == "TypeError") {
-        AddTestCase("Asserting for TypeError", true, (err is TypeError));
+        Assert.expectEq("Asserting for TypeError", true, (err is TypeError));
     }
     var numIndex = str.indexOf("Error #");
     var num = str.substr(numIndex, 11);
@@ -35,7 +133,7 @@ result = grabError(e1, e1.toString());
 
 }
  
-AddTestCase( "missing \" after attribute", expected, result );
+Assert.expectEq( "missing \" after attribute", expected, result );
 
 
 // missing quotes around third
@@ -54,7 +152,7 @@ result = grabError(e2, e2.toString());
 
 }
  
-AddTestCase( "missing quotes around attribute", expected, result );
+Assert.expectEq( "missing quotes around attribute", expected, result );
 
 
 // missing starting quote around third
@@ -73,7 +171,7 @@ result = grabError(e3, e3.toString());
 
 }
  
-AddTestCase( "missing starting quote for attribute", expected, result );
+Assert.expectEq( "missing starting quote for attribute", expected, result );
 
 
 
@@ -93,7 +191,7 @@ result = grabError(e4, e4.toString());
 
 }
  
-AddTestCase( "missing ! at start of CDATA section", expected, result );
+Assert.expectEq( "missing ! at start of CDATA section", expected, result );
 
 
 // unterminated CDATA
@@ -112,7 +210,7 @@ result = grabError(e5, e5.toString());
 
 }
  
-AddTestCase( "unterminated CDATA section", expected, result );
+Assert.expectEq( "unterminated CDATA section", expected, result );
 
 
 // unterminated comment
@@ -131,7 +229,7 @@ result = grabError(e6, e6.toString());
 
 }
  
-AddTestCase( "unterminated comment", expected, result );
+Assert.expectEq( "unterminated comment", expected, result );
 
 
 // unterminated doctype
@@ -150,7 +248,7 @@ result = grabError(e7, e7.toString());
 
 }
  
-AddTestCase( "unterminated doctype", expected, result );
+Assert.expectEq( "unterminated doctype", expected, result );
 
 
 // bad attribute (E4X returns malformed element)
@@ -169,7 +267,7 @@ result = grabError(e8, e8.toString());
 
 }
  
-AddTestCase( "bad attribute", expected, result );
+Assert.expectEq( "bad attribute", expected, result );
 
 
 // "cd" must be terminated by "/cd"
@@ -188,7 +286,7 @@ result = grabError(e9, e9.toString());
 
 }
  
-AddTestCase( "unterminated tag", expected, result );
+Assert.expectEq( "unterminated tag", expected, result );
 
 
 // "song" must be terminated by "/song"
@@ -207,7 +305,7 @@ result = grabError(e10, e10.toString());
 
 }
  
-AddTestCase( "mismatched end tag", expected, result );
+Assert.expectEq( "mismatched end tag", expected, result );
 
 
 // "song" must be terminated by "/song"
@@ -226,7 +324,7 @@ result = grabError(e11, e11.toString());
 
 }
  
-AddTestCase( "wrong case in root end tag", expected, result );
+Assert.expectEq( "wrong case in root end tag", expected, result );
 
 
 // "cd" must be terminated by "/cd"
@@ -245,7 +343,7 @@ result = grabError(e12, e12.toString());
 
 }
  
-AddTestCase( "wrong case end tag", expected, result );
+Assert.expectEq( "wrong case end tag", expected, result );
 
 
 // Rhino: Attribute name "name" associated with an element type "cd" must be followed by the "=" character
@@ -266,7 +364,7 @@ result = grabError(e13, e13.toString());
 
 }
  
-AddTestCase( "missing attribute value", expected, result );
+Assert.expectEq( "missing attribute value", expected, result );
 
 
 
@@ -286,7 +384,7 @@ result = grabError(e14, e14.toString());
 
 }
  
-AddTestCase( "unterminated XML decl", expected, result );
+Assert.expectEq( "unterminated XML decl", expected, result );
 
 
 // Rhino: XML document structures must start and end within the same entity:
@@ -307,7 +405,7 @@ result = grabError(e15, e15.toString());
 
 }
  
-AddTestCase( "XML must start and end with same entity", expected, result );
+Assert.expectEq( "XML must start and end with same entity", expected, result );
 
 
 
@@ -331,7 +429,7 @@ result = grabError(e16, e16.toString());
 
 }
  
-AddTestCase( "XML must start and end with same entity", expected, result );
+Assert.expectEq( "XML must start and end with same entity", expected, result );
 
 
 END();

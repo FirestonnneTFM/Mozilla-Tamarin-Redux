@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'in-001.js';
 
@@ -16,21 +17,18 @@ gTestfile = 'in-001.js';
    Author:             christine@netscape.com
    Date:               12 november 1997
 */
-var SECTION = "in-001";
-var VERSION = "JS1_3";
-var TITLE   = "Regression test for 196109";
+// var SECTION = "in-001";
+// var VERSION = "JS1_3";
+// var TITLE   = "Regression test for 196109";
 var BUGNUMBER="196109";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 o = {};
 o.foo = 'sil';
 
-testcases[index++] = new TestCase(
-  SECTION,
+Assert.expectEq(
+    
   "\"foo\" in o",
   true,
   "foo" in o );
 
-test();

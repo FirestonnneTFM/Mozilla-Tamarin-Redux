@@ -4,16 +4,16 @@
 
 
 import PublicClass.*;
+import com.adobe.test.Assert;
 
-var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";  // Version of JavaScript or ECMA
-var TITLE   = "extend public class";       // Provide ECMA section title or a description
+// var SECTION = "Definitions";       // provide a document reference (ie, ECMA section)
+// var VERSION = "AS 3.0";  // Version of JavaScript or ECMA
+// var TITLE   = "extend public class";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 /**
- * Calls to AddTestCase here. AddTestCase is a function that is defined
+ * Calls to Assert.expectEq here. Assert.expectEq is a function that is defined
  * in shell.js and takes three arguments:
  * - a string representation of what is being tested
  * - the expected result
@@ -23,7 +23,7 @@ startTest();                // leave this alone
  *
  * var helloWorld = "Hello World";
  *
- * AddTestCase(
+ * Assert.expectEq(
  * "var helloWorld = 'Hello World'",   // description of the test
  *  "Hello World",                     // expected result
  *  helloWorld );                      // actual result
@@ -48,7 +48,7 @@ var arr = new Array(1, 2, 3);
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClass();
-AddTestCase( "Access default method from default method of sub class", arr, (DYNEXTDCLASS.testSubArray(arr)) );
+Assert.expectEq( "Access default method from default method of sub class", arr, (DYNEXTDCLASS.testSubArray(arr)) );
 
 
 // ********************************************
@@ -58,7 +58,7 @@ AddTestCase( "Access default method from default method of sub class", arr, (DYN
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClass();
-AddTestCase( "Access default method from public method of sub class", arr, (DYNEXTDCLASS.pubSubSetArray(arr),DYNEXTDCLASS.pubSubGetArray()) );
+Assert.expectEq( "Access default method from public method of sub class", arr, (DYNEXTDCLASS.pubSubSetArray(arr),DYNEXTDCLASS.pubSubGetArray()) );
 
 // ********************************************
 // access default method from a private
@@ -67,7 +67,7 @@ AddTestCase( "Access default method from public method of sub class", arr, (DYNE
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClass();
-AddTestCase( "Access default method from private method of sub class", arr, DYNEXTDCLASS.testPrivSubArray(arr) );
+Assert.expectEq( "Access default method from private method of sub class", arr, DYNEXTDCLASS.testPrivSubArray(arr) );
 
 // ********************************************
 // access default method from a final
@@ -76,7 +76,7 @@ AddTestCase( "Access default method from private method of sub class", arr, DYNE
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClass();
-AddTestCase( "Access default method from public method of sub class", arr, (DYNEXTDCLASS.testFinSubArray(arr)) );
+Assert.expectEq( "Access default method from public method of sub class", arr, (DYNEXTDCLASS.testFinSubArray(arr)) );
 
 
 
@@ -86,7 +86,7 @@ AddTestCase( "Access default method from public method of sub class", arr, (DYNE
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClass();
-AddTestCase( "Access default prooperty from method in sub class", arr, (DYNEXTDCLASS.testSubDPArray(arr)) );
+Assert.expectEq( "Access default prooperty from method in sub class", arr, (DYNEXTDCLASS.testSubDPArray(arr)) );
 
 
 // ********************************************
@@ -95,7 +95,7 @@ AddTestCase( "Access default prooperty from method in sub class", arr, (DYNEXTDC
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClass();
-AddTestCase( "Access default property from public method in sub class", arr, (DYNEXTDCLASS.pubSubSetDPArray(arr), DYNEXTDCLASS.pubSubGetDPArray()) );
+Assert.expectEq( "Access default property from public method in sub class", arr, (DYNEXTDCLASS.pubSubSetDPArray(arr), DYNEXTDCLASS.pubSubGetDPArray()) );
 
 // ********************************************
 // access default property from
@@ -103,7 +103,7 @@ AddTestCase( "Access default property from public method in sub class", arr, (DY
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClass();
-AddTestCase( "Access default property from private method in sub class", arr, (DYNEXTDCLASS.testPrivSubDPArray(arr)) );
+Assert.expectEq( "Access default property from private method in sub class", arr, (DYNEXTDCLASS.testPrivSubDPArray(arr)) );
 
 // ********************************************
 // access default property from
@@ -111,8 +111,7 @@ AddTestCase( "Access default property from private method in sub class", arr, (D
 // ********************************************
 
 DYNEXTDCLASS = new DynExtPublicClass();
-AddTestCase( "Access default property from private method in sub class", arr, (DYNEXTDCLASS.testFinSubDPArray(arr)) );
+Assert.expectEq( "Access default property from private method in sub class", arr, (DYNEXTDCLASS.testFinSubDPArray(arr)) );
 
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

@@ -2,8 +2,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-startTest();
 
 var gTestfile = 'regress-203278-2.js';
 //-----------------------------------------------------------------------------
@@ -12,8 +12,8 @@ var summary = 'Don\'t crash in recursive js_MarkGCThing';
 var actual = 'FAIL';
 var expect = 'PASS';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 // Prepare  array to test DeutschSchorrWaite implementation
 // and its reverse pointer scanning performance
@@ -59,7 +59,7 @@ while (i-- != 0) {
   }
 }
 
-printStatus("DSF is prepared");
+//printStatus("DSF is prepared");
 
 // Prepare linked list that causes recursion during GC with
 // depth O(list size)
@@ -72,13 +72,12 @@ for (i = 0; i != 50*1000; ++i) {
 
 }
 
-printStatus("Linked list is prepared");
+//printStatus("Linked list is prepared");
 
 System.forceFullCollection();
 
 actual = 'PASS';
 
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
 
-test();

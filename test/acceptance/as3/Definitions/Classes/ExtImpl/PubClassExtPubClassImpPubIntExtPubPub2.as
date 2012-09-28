@@ -3,15 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import PubClassExtPubClassImpPubIntExtPubPub2.*;
-var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
-var VERSION = "AS3";        // Version of ECMAScript or ActionScript
-var TITLE   = "Public class implements public interface";       // Provide ECMA section title or a description
+import com.adobe.test.Assert;
+// var SECTION = "Definitions";       // provide a document reference (ie, Actionscript section)
+// var VERSION = "AS3";        // Version of ECMAScript or ActionScript
+// var TITLE   = "Public class implements public interface";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                // leave this alone
 
 /**
- * Calls to AddTestCase here. AddTestCase is a function that is defined
+ * Calls to Assert.expectEq here. Assert.expectEq is a function that is defined
  * in shell.js and takes three arguments:
  * - a string representation of what is being tested
  * - the expected result
@@ -21,7 +21,7 @@ startTest();                // leave this alone
  *
  * var helloWorld = "Hello World";
  *
- * AddTestCase(
+ * Assert.expectEq(
  * "var helloWorld = 'Hello World'",   // description of the test
  *  "Hello World",                     // expected result
  *  helloWorld );                      // actual result
@@ -66,20 +66,19 @@ print(obj2.PublicInt3::MyNegativeInteger());*/
 //print(obj.MySuperBoolean());
 //Public Class extends Public class implements a public interface which extends two //interfaces
 
-AddTestCase("Calling a method in public namespace in the public interface implemented  by the subclass through the subclass","Hi!", PubInt.MyString());
-AddTestCase("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",-100, PubInt2.MyNegInteger());
-AddTestCase("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",-100, PubInt3.MyNegInteger());
-AddTestCase("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",100, PubInt3.MyUnsignedInteger());
-AddTestCase("Calling a method in public namespace in the public interface implemented  by the subclass through the subclass","Hi!", obj.MyString());
-AddTestCase("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",100, obj.MyUnsignedInteger());
-AddTestCase("Calling a method in public namespace in the public interface implemented  by the subclass through the subclass","Hi!", obj.PublicInt2::MyString());
-AddTestCase("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",-100000, PubInt3.MyNegativeInteger());
-AddTestCase("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",-100000, obj.PublicInt3::MyNegativeInteger());
-AddTestCase("Calling a public method in superclass extended  by the subclass through the subclass",true, obj.MySuperBoolean());
-AddTestCase("Calling an internal  method in superclass extended  by the subclass through the subclass",10, obj.RetMySuperNumber());
-AddTestCase("Calling a public static method in superclass extended bythe subclass through the subclass",dateObj.toString(), PublicSuperClass.MySuperStaticDate()+"");
+Assert.expectEq("Calling a method in public namespace in the public interface implemented  by the subclass through the subclass","Hi!", PubInt.MyString());
+Assert.expectEq("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",-100, PubInt2.MyNegInteger());
+Assert.expectEq("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",-100, PubInt3.MyNegInteger());
+Assert.expectEq("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",100, PubInt3.MyUnsignedInteger());
+Assert.expectEq("Calling a method in public namespace in the public interface implemented  by the subclass through the subclass","Hi!", obj.MyString());
+Assert.expectEq("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",100, obj.MyUnsignedInteger());
+Assert.expectEq("Calling a method in public namespace in the public interface implemented  by the subclass through the subclass","Hi!", obj.PublicInt2::MyString());
+Assert.expectEq("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",-100000, PubInt3.MyNegativeInteger());
+Assert.expectEq("Calling a method in interface namespace in the public interface implemented  by the subclass through the subclass",-100000, obj.PublicInt3::MyNegativeInteger());
+Assert.expectEq("Calling a public method in superclass extended  by the subclass through the subclass",true, obj.MySuperBoolean());
+Assert.expectEq("Calling an internal  method in superclass extended  by the subclass through the subclass",10, obj.RetMySuperNumber());
+Assert.expectEq("Calling a public static method in superclass extended bythe subclass through the subclass",dateObj.toString(), PublicSuperClass.MySuperStaticDate()+"");
 
 ////////////////////////////////////////////////////////////////
 
-test();       // leave this alone.  this executes the test cases and
               // displays results.

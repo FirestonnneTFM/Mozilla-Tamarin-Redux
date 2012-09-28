@@ -1,22 +1,20 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/*
 *
 * See http://bugzilla.mozilla.org/show_bug.cgi?id=550958
 *
 */
 //-----------------------------------------------------------------------------
 
-var SECTION = "550958";
-var VERSION = "";
-var TITLE   = "XML parse !DOCTYPE case insensitive";
-var bug = "550958";
+import com.adobe.test.Assert;
+// var SECTION = "550958";
+// var VERSION = "";
+// var TITLE   = "XML parse !DOCTYPE case insensitive";
+// var bug = "550958";
 
-startTest();
-writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
-test();
 
 function getTestCases() {
     var array:Array = new Array();
@@ -32,19 +30,19 @@ function getTestCases() {
     var upper:XML = new XML("<!DOCTYPE HTML>");
     expect = upper;
     actual = "";
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
     status = 'lowercase';
     var lower:XML = new XML("<!doctype html>");
     expect = lower;
     actual = "";
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     status = 'mixedcase';
     var mixed:XML = new XML("<!DocType html>");
     expect = mixed;
     actual = "";
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
 
 
     return array;

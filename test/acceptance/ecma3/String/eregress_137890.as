@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
-    var SECTION = "15.5.5.1";
-    var VERSION = "ECMA_1";
-    startTest();
-    var TITLE   = "Using + operator to concatenate a string and a value";
+//     var SECTION = "15.5.5.1";
+//     var VERSION = "ECMA_1";
+//     var TITLE   = "Using + operator to concatenate a string and a value";
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -18,7 +16,7 @@ function getTestCases() {
    
    
 
-    array[item++] = new TestCase(   SECTION,
+    array[item++] = Assert.expectEq(   
                                     "'string'+0x4455",
                                     "string17493",
                                     "string"+0x4455 );

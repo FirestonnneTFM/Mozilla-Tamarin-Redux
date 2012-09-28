@@ -2,6 +2,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 
 gTestfile = 'proto_3.js';
 
@@ -22,12 +23,10 @@ gTestfile = 'proto_3.js';
    Date:               12 november 1997
 */
 
-var SECTION = "proto_3";
-var VERSION = "JS1_3";
-var TITLE   = "Adding properties to an Instance";
+// var SECTION = "proto_3";
+// var VERSION = "JS1_3";
+// var TITLE   = "Adding properties to an Instance";
 
-startTest();  var testscases=[]; var index=0;
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function Employee () {
   this.name = "";
@@ -61,14 +60,13 @@ var pat = new Employee();
 
 jim.bonus = 300;
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "jim = new Employee(); jim.bonus = 300; jim.bonus",
           300,
           jim.bonus );
 
 
-testcases[index++] = new TestCase( SECTION,
+Assert.expectEq( 
           "pat = new Employee(); pat.bonus",
           void 0,
           pat.bonus );
-test();

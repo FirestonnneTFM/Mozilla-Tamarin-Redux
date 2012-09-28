@@ -8,12 +8,10 @@
 Returns an implementation-dependent approximation to the result of raising x to the power y.
 */
 
-var SECTION = "4.5.27";
-var VERSION = "AS3";
-var TITLE   = "public function pow(x:float,y:float):float";
+// var SECTION = "4.5.27";
+// var VERSION = "AS3";
+// var TITLE   = "public function pow(x:float,y:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
 function check(param1:float, param2:float):float { return float.pow(param1, param2); }
 
@@ -165,5 +163,4 @@ AddStrictTestCase("float.pow(3.14159265f, 0.000001f)", 1.0000011920928955f, floa
 AddStrictTestCase("float.pow(3.14159265f, 0.000001f) FloatLiteral", 1.0000011920928955f, float.pow(3.14159265f, 0.000001f));
 
 
-test();
 

@@ -3,14 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import errors.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
 
-var SECTION = "Definitions";                                // provide a document reference (ie, ECMA section)
-var VERSION = "AS 3.0";                                 // Version of JavaScript or ECMA
-var TITLE   = "Call a super method without specifying namespace";       // Provide ECMA section title or a description
+// var SECTION = "Definitions";                                // provide a document reference (ie, ECMA section)
+// var VERSION = "AS 3.0";                                 // Version of JavaScript or ECMA
+// var TITLE   = "Call a super method without specifying namespace";       // Provide ECMA section title or a description
 var BUGNUMBER = "";
 
-startTest();                                            // leave this alone
 
 
 
@@ -23,9 +24,9 @@ try{
 } catch (e1) {
     thisError = e1.toString();
 } finally {
-    AddTestCase( "Call a super method without specifying namespace",
-                REFERENCEERROR+1070,
-                referenceError( thisError) );
+    Assert.expectEq( "Call a super method without specifying namespace",
+                Utils.REFERENCEERROR+1070,
+                Utils.referenceError( thisError) );
 }
 
 
@@ -33,6 +34,5 @@ try{
 
 
 
-test();             // Leave this function alone.
             // This function is for executing the test case and then
             // displaying the result on to the console or the LOG file.

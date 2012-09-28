@@ -3,20 +3,19 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Utils;
 
 /*
 Returns the smallest (closest to -Infinity) float value that is not less than x
 and is equal to a mathematical integer. If x is already an integer, the result is x.
 */
 
-var SECTION = "4.5.20";
-var VERSION = "AS3";
-var TITLE   = "public function ceil(x:float):float";
+// var SECTION = "4.5.20";
+// var VERSION = "AS3";
+// var TITLE   = "public function ceil(x:float):float";
 
-startTest();
-writeHeaderToLog( SECTION + " "+ TITLE);
 
-AddErrorTest("float.ceil() with no args", ARGUMENTERROR+1063,  function(){ float.ceil(); });
+Assert.expectError("float.ceil() with no args", Utils.ARGUMENTERROR+1063,  function(){ float.ceil(); });
 
 // If x is NaN, the result is NaN.
 AddStrictTestCase("float.ceil(string)", float.NaN, float.ceil("string"));
@@ -30,5 +29,4 @@ AddStrictTestCase("float.ceil('1')", 1f, float.ceil('1'));
 AddStrictTestCase("float.ceil('0')", 0f, float.ceil('0'));
 
 
-test();
 

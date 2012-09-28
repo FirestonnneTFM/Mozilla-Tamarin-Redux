@@ -15,11 +15,11 @@ The only condition that is not being covered is the false branch of:
  */
 
 import avmplus.*;
+import com.adobe.test.Assert;
+import com.adobe.test.Utils;
 
-var SECTION = " ";
-var VERSION = "AS3";
-startTest();
-writeHeaderToLog( SECTION + " Vector code coverage around Verifier changes made in bug 678952");
+// var SECTION = " ";
+// var VERSION = "AS3";
 
 class C
 {
@@ -39,9 +39,9 @@ catch (e:Error){
     err = e.toString();
 }
 // http://hg.mozilla.org/tamarin-redux/diff/6f72616eadd7/core/Verifier.cpp#l1.26
-AddTestCase("ReferenceError for multiname.isRtname() failing",
+Assert.expectEq("ReferenceError for multiname.isRtname() failing",
                expected,
-               parseError(err, expected.length));
+               Utils.parseError(err, expected.length));
 
 expected = "ReferenceError: Error #1081";
 err = "exception not thrown";
@@ -53,10 +53,9 @@ catch (e:Error){
     err = e.toString();
 }
 // http://hg.mozilla.org/tamarin-redux/diff/6f72616eadd7/core/Verifier.cpp#l1.26
-AddTestCase("ReferenceError for !attr failing",
+Assert.expectEq("ReferenceError for !attr failing",
                expected,
-               parseError(err, expected.length));
+               Utils.parseError(err, expected.length));
 
 
 
-test();

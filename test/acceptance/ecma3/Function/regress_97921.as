@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import com.adobe.test.Assert;
 /*
  * Date: 10 September 2001
  *
@@ -12,18 +13,15 @@
  * of formal parameters."
  */
 //-----------------------------------------------------------------------------
-    var SECTION = "";
-    var VERSION = "";
-    var TITLE = "Testing with() statement with nested functions";
+//     var SECTION = "";
+//     var VERSION = "";
+//     var TITLE = "Testing with() statement with nested functions";
 
-    startTest();
 
-    var bug = 97921;
+//     var bug = 97921;
 
-    writeHeaderToLog( SECTION + " "+ TITLE);
 
     var testcases = getTestCases();
-    test();
 
 function getTestCases() {
     var array = new Array();
@@ -55,15 +53,20 @@ function getTestCases() {
       F1();
     }
     
-    status = inSection(1);
+    //TO-DO: replacing inSection(1) with "function string1"
+    //status = inSection(1);
+    status = "function string1";
+
     useWith=false;
     F(); // call F without supplying the argument
     actual = innerValue == outerValue;
     expect = true;
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
-    status = inSection(2);
+    //TO-DO: replacing inSection(1) with "function string1"
+    //status = inSection(1);
+    status = "function string2";
     useWith=true;
     F(); // call F without supplying the argument
     actual = innerValue == outerValue;
@@ -71,7 +74,7 @@ function getTestCases() {
     expect = true;
     
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     
     function G(i)
@@ -87,19 +90,23 @@ function getTestCases() {
     }
     
     
-    status = inSection(3);
+    //TO-DO: replacing inSection(1) with "function string1"
+    //status = inSection(1);
+    status = "function string3";
     G(); // call G without supplying the argument
     actual = innerValue == 101;
     expect = true;
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
-    status = inSection(4);
+    //TO-DO: Removing inSection() with "function string 1"
+    //status = inSection(1);
+    status = "function string 4";
     G(); // call G without supplying the argument
     actual = innerValue == outerValue;
     expect = true;
     //addThis();
-    array[item++] = new TestCase(SECTION, status, expect, actual);
+    array[item++] = Assert.expectEq( status, expect, actual);
     
     return array;
 }

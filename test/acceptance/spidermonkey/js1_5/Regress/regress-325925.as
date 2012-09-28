@@ -5,7 +5,7 @@
  * Contributor: Blake Kaplan
  */
 
-startTest();
+import com.adobe.test.Assert;
 
 var gTestfile = 'regress-325925.js';
 //-----------------------------------------------------------------------------
@@ -14,11 +14,10 @@ var summary = 'Do not Assert: c <= cs->length in AddCharacterToCharSet';
 var actual = 'No Crash';
 var expect = 'No Crash';
 
-printBugNumber(BUGNUMBER);
-printStatus (summary);
+//printBugNumber(BUGNUMBER);
+//printStatus (summary);
 
 /[\cA]/('\x01');
  
-AddTestCase(summary, expect, actual);
+Assert.expectEq(summary, expect, actual);
 
-test();

@@ -4,19 +4,16 @@
 include "unicodeUtil.as";
 include "unicodeNegativeUtil.as";
 
-var SECTION = "Bopomofo Extended";
-var VERSION = "ECMA_3";
-startTest();
-var TITLE = "Test String functions (search, match, split, replace) on all unicode characters";
+// var SECTION = "Bopomofo Extended";
+// var VERSION = "ECMA_3";
+// var TITLE = "Test String functions (search, match, split, replace) on all unicode characters";
 
-writeHeaderToLog(SECTION + " "+ TITLE);
 
 var array = new Array();
 var item = 0;
 getTestCases();
 
 var testcases = array;
-test();
 
 function getTestCases():void {
   // Bopomofo Extended

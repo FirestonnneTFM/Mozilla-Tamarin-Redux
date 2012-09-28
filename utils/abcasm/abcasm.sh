@@ -8,7 +8,7 @@
 
 ABCASM_HOME=`dirname $0`
 ANTLR_HOME=$ABCASM_HOME/../../other-licenses/ANTLR
-ANTLR_RUNTIME=$ANTLR_HOME/antlr-runtime-3.0.1.jar
+ANTLR_RUNTIME=$ANTLR_HOME/antlr-runtime-3.3.jar
 JAVA=java
 
 # enable setting asc.jar using -a switch
@@ -25,11 +25,11 @@ echo "$*"
 case `uname -s` in
 	CYGWIN*)
 		# Classpath set for Cygwin systems
-		"$JAVA" $JAVAARGS -ea -classpath $ABCASM_HOME/classes\;$ABCASM_HOME/lib/abcasm.jar\;$ANTLR_RUNTIME abcasm.Main $*
+		"$JAVA" $JAVAARGS -ea -classpath $ABCASM_HOME/classes\;$ABCASM_HOME/lib/aet.jar\;$ABCASM_HOME/lib/abcasm.jar\;$ANTLR_RUNTIME com.adobe.flash.abcasm.ABCasm $*
 		;;
 	*)
 		# 'NIX systems use this classpath
-		"$JAVA" $JAVAARGS -ea -classpath $ABCASM_HOME/classes:$ABCASM_HOME/lib/abcasm.jar:$ANTLR_RUNTIME abcasm.Main $*
+		"$JAVA" $JAVAARGS -ea -classpath $ABCASM_HOME/classes:$ABCASM_HOME/lib/aet.jar:$ABCASM_HOME/lib/abcasm.jar:$ANTLR_RUNTIME com.adobe.flash.abcasm.ABCasm $*
 		;;
 esac
 
